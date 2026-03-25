@@ -40,6 +40,8 @@ These concerns are owned by `@hbc/auth`.
 - Startup diagnostics: startup phase, budget, and snapshot contracts.
 - Landing resolver: `resolveLandingDecision`, `LandingDecision`, `LandingDecisionInput`, `LandingMode`, `TeamMode`.
 - Cohort gate: `isMyWorkCohortEnabled`.
+- Project routing and switching: `resolveProjectRouteContext`, `resolveProjectSwitch`, `ProjectPicker`, `BackToProjectHub`.
+- Project Hub portfolio-root continuity: `saveProjectHubPortfolioState`, `loadProjectHubPortfolioState`, `clearProjectHubPortfolioState`.
 
 ## Landing Resolver (Phase 2)
 
@@ -99,6 +101,26 @@ Do NOT create a second landing resolver or duplicate role/cohort branching in ro
 
 Do NOT read `hasFeatureFlag('my-work-hub')` directly from `usePermissionStore` in app code.
 Always use `isMyWorkCohortEnabled()` so the gate can be replaced in one place.
+
+## Project Hub Route Context And Switching (Phase 3)
+
+`@hbc/shell` exposes the shared routing and continuity seams used by the live Project Hub route contract in PWA.
+
+### Exports
+
+| Export | Kind | Purpose |
+|--------|------|---------|
+| `resolveProjectRouteContext` | Function | Normalize inbound project identity and validate route-entry context before rendering project-scoped routes |
+| `resolveProjectSwitch` | Function | Compute smart project-switch targets using same-section resolution with target-project Control Center fallback |
+| `ProjectPicker` | Component | Selection surface that delegates project changes to caller-owned navigation |
+| `BackToProjectHub` | Component | Project Hub return control that integrates with router-owned Back to Portfolio behavior |
+| `saveProjectHubPortfolioState` / `loadProjectHubPortfolioState` / `clearProjectHubPortfolioState` | Functions | Persist and restore Project Hub portfolio-root filters, search, sort, and scroll |
+
+### Route Contract Notes
+
+- `resolveLandingDecision()` still lands standard users on `/project-hub`; the distinction between the unscoped portfolio root and the canonical project-scoped route is enforced in the consuming app route layer.
+- `resolveProjectSwitch()` does not use target-project return-memory as a fallback. The fallback is always the target project's Control Center.
+- Portfolio-root continuity is separate from project-scoped return-memory. Restored portfolio state must never override explicit route intent.
 
 ## Component Export Tiers
 

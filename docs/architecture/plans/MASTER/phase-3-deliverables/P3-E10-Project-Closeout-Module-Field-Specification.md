@@ -9,7 +9,7 @@
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-24 |
 | **Status** | Specification — locked architecture; T-files govern |
-| **Related contracts** | P3-E1 §3.9, P3-E2 §14, P3-H1 §18.5, P3-E9 (Reports), P3-D1 (Activity), P3-D2 (Health), P3-D3 (Work Queue), P3-D4 (Related Items) |
+| **Related contracts** | P3-E1 §3.9, P3-E2 §14, P3-H1 §18.5, P3-E9 (Reports), P3-E15 (QC continuity seam), P3-D1 (Activity), P3-D2 (Health), P3-D3 (Work Queue), P3-D4 (Related Items) |
 
 ---
 
@@ -108,6 +108,7 @@ The following 14 decisions are binding. All T-files conform to these decisions. 
 | Shared package integration | T10 §3 |
 | Role and visibility governance | T09 |
 | Startup Baseline read API (upstream dependency) | P3-E11-T10 §4; P3-E11-T02 §7.2 — Closeout consumes `GET /api/startup/{projectId}/baseline` as read-only input; no Closeout record is written to the Startup module |
+| QC turnover-quality continuity seam (upstream dependency) | P3-E15-T09 + P3-E15-T10 — Closeout may read QC turnover-quality readiness, unresolved issue posture, approved deviations, and evidence lineage as read-only continuity context; Closeout never mutates QC records |
 
 ---
 

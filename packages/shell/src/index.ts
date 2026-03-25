@@ -179,6 +179,12 @@ export {
   pruneExpiredReturnMemory,
 } from './stores/projectReturnMemory.js';
 export type { IProjectReturnMemory } from './stores/projectReturnMemory.js';
+export {
+  getProjectHubPortfolioState,
+  saveProjectHubPortfolioState,
+  clearProjectHubPortfolioState,
+} from './stores/projectHubPortfolioState.js';
+export type { ProjectHubPortfolioState } from './stores/projectHubPortfolioState.js';
 
 // SPFx project context resolution (Phase 3 Stage 4.2)
 export { resolveSpfxProjectContext } from './spfxProjectContext.js';

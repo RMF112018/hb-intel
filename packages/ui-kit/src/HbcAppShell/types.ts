@@ -101,6 +101,7 @@ export interface HbcAppShellProps {
   activeItemId?: string;
   onSignOut?: () => void;
   onNavigate?: (href: string) => void;
+  onProjectSelect?: (projectId: string) => void;
   /** Extra content rendered inside the user menu dropdown, above Sign Out. Dev tooling slot. */
   userMenuExtra?: ReactNode;
   /**

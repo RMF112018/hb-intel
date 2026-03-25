@@ -269,9 +269,11 @@ All three files are replaced by the Project Closeout module in Phase 3. The modu
 
 The Reports module assembles SubScorecard and Lessons Learned entries into release artifacts when the project reaches `PE_APPROVED` publication status (P3-E2 §14.4, P3-E10-T11 §2).
 
-### 8.3 Quality Control / Warranty Notes (unchanged)
+### 8.3 Quality Control / Warranty Notes
 
-Quality Control and Warranty are **baseline-visible lifecycle modules** with deeper field-first definition deferred (P3-E1 §3.7, §3.8). No QC or Warranty files from the reference examples are in Phase 3 replacement scope beyond baseline lifecycle placement.
+Quality Control is now a **first-class internal Phase 3 Project Hub control surface** governed by [P3-E15](P3-E15-QC-Module-Field-Specification.md). Phase 3 QC replacement scope is no longer limited to lifecycle placement: it includes governed quality plans, reviews, review findings, QC issues and corrective actions, deviations, evidence references, external approval dependencies, submittal-completeness advisory, quality health/readiness projections, and downstream lifecycle handoffs. Only deeper field/mobile execution depth remains deferred.
+
+Warranty remains a **first-class lifecycle module** governed by [P3-E14](P3-E14-Project-Warranty-Module-Field-Specification.md). Phase 3 includes the internal Layer 1 operating surface; only external collaborative workspace and deeper field-first execution remain deferred.
 
 ### 8.4 Project Startup Notes
 
@@ -419,7 +421,7 @@ Complete mapping of `docs/reference/example/` files to modules and replacement w
 |---|---|---|---|
 | **Procore API direct integration** | Financial | Deferred — future replaces CSV upload | Phase 3 uses CSV import as interim; API integration planned |
 | **Smart toolbox-talk topic generation** | Safety | Deferred — future enhancement | Linked to high-risk schedule activities ~1 week before start |
-| **Deeper QC field-first tools** | Quality Control | Deferred — lifecycle-visible in Phase 3 | Subcontractor scorecard, lessons learned replacement |
+| **Deeper QC field/mobile execution** | Quality Control | Deferred — internal control surface is Phase 3 scope | Future Site Controls depth: field/mobile execution, offline capture, and deeper execution routing beyond the P3-E15 Project Hub QC surface |
 | **Deeper Warranty field-first tools** | Warranty | Deferred — lifecycle-visible in Phase 3 | Warranty tracking and resolution workflows |
 | **Full platform-scale workflow expansion** | All modules | Future phases | Broader workflow automation and integration |
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { resolveProjectSwitch } from './projectSwitching.js';
-import { getReturnMemory, saveReturnMemory } from './stores/projectReturnMemory.js';
+import { getReturnMemory } from './stores/projectReturnMemory.js';
 
 // Mock localStorage
 const storage = new Map<string, string>();
@@ -23,7 +23,7 @@ describe('resolveProjectSwitch', () => {
   const noneAccessible = () => false;
   const onlyFinancial = (path: string) => path === '/financial';
 
-  it('resolves same-page when target module is accessible', () => {
+  it('resolves same-section when target module is accessible', () => {
     const result = resolveProjectSwitch({
       currentProjectId: 'proj-a',
       currentPath: '/financial',
@@ -31,24 +31,21 @@ describe('resolveProjectSwitch', () => {
       targetModuleAccessible: allAccessible,
     });
 
-    expect(result.resolution).toBe('same-page');
+    expect(result.resolution).toBe('same-section');
     expect(result.targetPath).toBe('/financial');
     expect(result.targetProjectId).toBe('proj-b');
   });
 
-  it('falls back to return-memory when same-page inaccessible', () => {
-    // Pre-populate return memory for target project
-    saveReturnMemory('proj-b', '/schedule');
-
+  it('falls back to project home when same-section is inaccessible', () => {
     const result = resolveProjectSwitch({
       currentProjectId: 'proj-a',
       currentPath: '/constraints', // not accessible
       targetProjectId: 'proj-b',
-      targetModuleAccessible: (path) => path === '/schedule',
+      targetModuleAccessible: () => false,
     });
 
-    expect(result.resolution).toBe('return-memory');
-    expect(result.targetPath).toBe('/schedule');
+    expect(result.resolution).toBe('project-home');
+    expect(result.targetPath).toBe('/');
   });
 
   it('falls back to project home when no return-memory', () => {
@@ -63,18 +60,15 @@ describe('resolveProjectSwitch', () => {
     expect(result.targetPath).toBe('/');
   });
 
-  it('falls back to project home when return-memory page is inaccessible', () => {
-    saveReturnMemory('proj-b', '/safety');
-
+  it('still prefers same-section over any stored target return memory', () => {
     const result = resolveProjectSwitch({
       currentProjectId: 'proj-a',
       currentPath: '/financial',
       targetProjectId: 'proj-b',
-      targetModuleAccessible: onlyFinancial, // only /financial accessible, not /safety
+      targetModuleAccessible: onlyFinancial,
     });
 
-    // Same-page /financial IS accessible
-    expect(result.resolution).toBe('same-page');
+    expect(result.resolution).toBe('same-section');
     expect(result.targetPath).toBe('/financial');
   });
 
@@ -99,7 +93,7 @@ describe('resolveProjectSwitch', () => {
       targetModuleAccessible: allAccessible,
     });
 
-    // '/' has no module path → skip same-page → check return memory → home
+    // '/' has no module path -> skip same-section -> home
     expect(result.resolution).toBe('project-home');
     expect(result.targetPath).toBe('/');
   });
@@ -112,7 +106,7 @@ describe('resolveProjectSwitch', () => {
       targetModuleAccessible: (path) => path === '/schedule',
     });
 
-    expect(result.resolution).toBe('same-page');
+    expect(result.resolution).toBe('same-section');
     expect(result.targetPath).toBe('/schedule');
   });
 
@@ -127,5 +121,17 @@ describe('resolveProjectSwitch', () => {
 
     const saved = getReturnMemory('proj-a');
     expect(saved?.lastQueryParams).toEqual({ view: 'forecast' });
+  });
+
+  it('does not use target-project return memory as a fallback outcome', () => {
+    const result = resolveProjectSwitch({
+      currentProjectId: 'proj-a',
+      currentPath: '/constraints',
+      targetProjectId: 'proj-b',
+      targetModuleAccessible: () => false,
+    });
+
+    expect(result.resolution).toBe('project-home');
+    expect(result.targetPath).toBe('/');
   });
 });

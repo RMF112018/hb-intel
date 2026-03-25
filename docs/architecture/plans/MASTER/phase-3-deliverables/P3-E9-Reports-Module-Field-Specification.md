@@ -71,6 +71,7 @@ Files that reference P3-E9 and should be read alongside the T-file family:
 |------|--------------|
 | P3-F1 | **Governing contract** — locks report-definition registry, draft/snapshot model, generation pipeline, run-ledger, approval model, release/distribution, PER permissions, central project-governance policy record, PM↔PE review chain |
 | P3-E10 *(master index + T01–T11)* | Source-of-truth for sub-scorecard, lessons-learned, and autopsy operational data; E9 consumes sub-scorecard and lessons-learned via governed artifact ingestion. Snapshot precondition: `publicationStatus ≥ PE_APPROVED`; PE role required on snapshot API call. See P3-E10-T11 §4 for API contract paths; see P3-E10-T06 and T05 for scoring and lessons field contracts. |
+| P3-E15 *(master index + T01–T10)* | QC remains the source-of-truth for quality plans, issues, deviations, advisory, and health/readiness records. Reports may consume only governed QC snapshots or publication outputs where a report family explicitly binds to them; Reports does not own or mutate QC source data. |
 | P3-E1 §9 | Module classification and review-capable surface designation |
 | P3-E2 §14 | Source-of-truth and action boundary for Project Closeout (primary source) and PER annotation layer |
 | P3-G1 §4.6, §4.9 | Lane capability matrix for Reports and executive review posture (§4.9 after addition of lifecycle module section §4.8) |

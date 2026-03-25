@@ -776,9 +776,58 @@ Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive 
 
 ---
 
-## 16. Subcontract Execution Readiness Source-of-Truth
+## 16. Quality Control Source-of-Truth
 
 ### 16.1 Project Hub operational authority
+
+| Data domain | Authority | Notes |
+|---|---|---|
+| `WorkPackageQualityPlan` records | Project Hub | First-class project QC plan truth; governed mandatory coverage plus bounded project additions |
+| `PreconstructionReviewPackage` records | Project Hub | First-class review package truth by package/phase/discipline |
+| `ReviewFinding` records | Project Hub | First-class finding truth; preserves lineage into downstream issues where applicable |
+| `QcIssue` records | Project Hub | Authoritative QC issue ledger; source for downstream work publication |
+| `CorrectiveAction` records | Project Hub | Authoritative corrective-action ledger linked to issue or gate origin |
+| `DeviationOrWaiverRecord` records | Project Hub | First-class exception truth with approvals, conditions, and expiry/review rules |
+| `EvidenceReference` records | Project Hub | Metadata/reference truth only; QC does not own package files |
+| `ExternalApprovalDependency` records | Project Hub | Internal tracking truth for AOR / consultant / third-party approvals |
+| `SubmittalItemRecord` records | Project Hub | Persistent advisory item truth for product/material/system completeness and currentness advisory |
+| `DocumentInventoryEntry` records | Project Hub | Confirmed document inventory truth per advisory item; metadata/reference only |
+| `AdvisoryVerdict` records | Project Hub | Governed multi-axis advisory result truth |
+| `QualityHealthSnapshot` / `ProjectQcSnapshot` | Project Hub derives and owns | Derived, immutable QC read models; not editable ledgers |
+| `GovernedUpdateNotice` | Project Hub / MOE governed | Update-notice truth for governed QC changes and adoption expectations |
+| `ResponsibleOrgPerformanceRollupInput` | Project Hub derives and owns | Frozen per-snapshot rollup input; not directly editable by project users |
+
+### 16.2 External references
+
+| External source | Relationship |
+|---|---|
+| Schedule module (P3-E5) | QC reads schedule context, activities, milestones, and look-ahead windows for readiness signaling only; QC does not own schedule logic |
+| Document / submittal system | QC stores package links, inventory metadata, and references only; package files remain in the governed document/submittal system |
+| Official manufacturer / publisher sources | Currentness checks use official-source references only; QC does not become an external content repository |
+| Future Procore integration | Canonical Procore submittal link/reference is a future seam; QC retains advisory identity and governed verdict logic |
+| Closeout / Startup / Warranty / future Site Controls | These modules consume QC continuity snapshots, readiness posture, or accepted basis context read-only; QC does not write downstream records |
+
+### 16.3 Boundary rules
+
+- QC owns the operational truth for quality plans, reviews, findings, issues, corrective actions, deviations, evidence references, external approval dependencies, and advisory records.
+- My Work / Project Work Queue receives normalized published work items only. Work Queue is not the QC ledger and may not mutate QC source records.
+- Reports and leadership surfaces consume derived QC snapshots, scorecards, and readiness projections only. They do not own or edit QC source data.
+- QC stores metadata and inventory references only. It MUST NOT store package files, become the document repository, or replace the governed document/submittal system.
+- Official-source currentness checks MUST rely on manufacturer or official publisher sources only. Any `unable-to-verify` currentness result requires manual review.
+- QC is internal-only in Phase 3. It does not create owner/subcontractor external collaboration surfaces, and it does not become a field/mobile execution engine.
+- Schedule-awareness, Closeout continuity, Startup continuity, Warranty continuity, and future Site Controls handoff are read-only seam relationships; no downstream module may directly mutate QC records.
+
+### 16.4 Executive review annotation boundary
+
+Quality Control is a review-capable internal surface. Authorized reviewers may annotate QC content through `@hbc/field-annotations`, but annotations are non-mutating and MUST NOT alter plans, reviews, findings, issues, corrective actions, deviations, evidence references, external approval dependencies, advisory records, or derived health/readiness snapshots.
+
+**Field-level specification:** [P3-E15 — Project Hub QC Module Field Specification](P3-E15-QC-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
+
+---
+
+## 17. Subcontract Execution Readiness Source-of-Truth
+
+### 17.1 Project Hub operational authority
 
 | Data domain | Authority | Notes |
 |---|---|---|
@@ -792,14 +841,14 @@ Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive 
 | Approval-slot and delegation audit | Project Hub | Preserves slot identity and reassignment history |
 | `GlobalPrecedentReference` | Project Hub | Reference-only publication; never automatic approval carry-forward |
 
-### 16.2 External references
+### 17.2 External references
 
 | External system | Relationship |
 |---|---|
-| Buyout Log (P3-E4 §6) | The readiness gate projection is the execution gate for `ContractExecuted`. Financial enforces the gate; this module sources the readiness truth. See §16.3. |
+| Buyout Log (P3-E4 §6) | The readiness gate projection is the execution gate for `ContractExecuted`. Financial enforces the gate; this module sources the readiness truth. See §17.3. |
 | Compass / SDI Prequalification | Compass is one reference input to the SDI / prequalification requirement family. Readiness logic evaluates governed outcomes; Compass is not the whole rule. |
 
-### 16.3 Boundary rules
+### 17.3 Boundary rules
 
 **Buyout gate rule:** The Financial module's Buyout Log entry for a subcontract MUST NOT transition to `ContractExecuted` unless the active `ReadinessGateProjection.executionReadinessOutcome` allows execution for the current identity and current award path, based on the active issued `ExecutionReadinessDecision`. This gate is enforced in the Financial module's Buyout status update API. The readiness module surfaces the source-of-truth state; it does not perform the Financial transition itself.
 
@@ -811,7 +860,7 @@ Project Startup is a **review-capable surface** in Phase 3. Portfolio Executive 
 
 **Material award-path change rule:** If award-path facts change in a way that affects profile selection or gate posture, the active case must be `SUPERSEDED` or `VOID`, and a successor case must be created where appropriate.
 
-### 16.4 Executive review annotation boundary
+### 17.4 Executive review annotation boundary
 
 Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Portfolio Executive Reviewers may place annotations on case, requirement-item, exception-packet, and readiness-decision content.
 
@@ -824,21 +873,9 @@ Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Port
 
 ---
 
-## 17. Acceptance Gate Reference
+## 18. Warranty Source-of-Truth
 
-**Gate:** Core module gates (Phase 3 plan §18.5)
-
-| Field | Value |
-|---|---|
-| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.4–§8.4, §14.4, §15.4, §16.4, and §17.4; Safety exclusion applies to Safety module surfaces only (§8.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.3) respected; Startup Permits and Safety non-interference rules (§15.3) respected; Subcontract Execution Readiness buyout gate rule (§16.3) enforced at the Financial module API layer; Warranty Financial boundary (§17.3) enforced — back-charge advisory only |
-| **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked, executive review annotation artifacts isolated from module source-of-truth records |
-| **Primary owner** | Architecture + Project Hub platform owner |
-
----
-
-## 17. Warranty Source-of-Truth
-
-### 17.1 Project Hub operational authority
+### 18.1 Project Hub operational authority
 
 | Data concern | Source-of-truth owner | Warranty relationship | Notes |
 |---|---|---|---|
@@ -853,7 +890,7 @@ Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Port
 | Communication events (owner/sub correspondence log) | Warranty module | **Owns — exclusive write** | `IWarrantyCommunicationEvent` — PM-proxy entries |
 | Visits (scheduled, completed, missed) | Warranty module | **Owns — exclusive write** | `IWarrantyVisit` with typed status |
 
-### 17.2 External references
+### 18.2 External references
 
 | External source | What Warranty reads | Warranty write behavior |
 |---|---|---|
@@ -863,7 +900,7 @@ Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Port
 | Reports (P3-E9) | Report assembly consumes Warranty publication events | Reports never owns Warranty data |
 | Future owner/sub workspace (Layer 2) | External intake, acknowledgments, evidence | Layer 2 writes to Phase 3 record model via seam fields; no data fork |
 
-### 17.3 Boundary rules
+### 18.3 Boundary rules
 
 - Warranty owns all coverage, case, assignment, acknowledgment, evidence, resolution, intake, and communication records.
 - Financial consumes back-charge advisory only — Warranty never writes Financial records.
@@ -876,23 +913,23 @@ Subcontract Execution Readiness is a **review-capable surface** in Phase 3. Port
 - No owner-facing routes, views, or authentication flows exist in Phase 3.
 - No subcontractor direct-access surfaces exist in Phase 3.
 
-### 17.4 Executive review annotation boundary
+### 18.4 Executive review annotation boundary
 
 PER and authorized review actors may annotate supported Warranty surfaces through `@hbc/field-annotations`. Annotations are review-only and non-mutating. Annotation write paths must not alter coverage items, case state, assignments, acknowledgments, evidence, decisions, or resolution records.
 
 ---
 
-## 17A. Acceptance Gate — Warranty
+## 19. Acceptance Gate Reference
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, Subcontract Execution Readiness, and Warranty meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced; Warranty Financial boundary (back-charge advisory only) respected; Warranty Closeout/Startup seam boundaries respected; Layer 2 seam fields present as optional discriminators; resolution record immutability enforced |
-| **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices per T10 AC-WAR-01 through AC-WAR-46 |
+| **Pass condition** | Financial, Schedule, Constraints, Permits, Safety, Work Queue, Reports, Project Closeout, Project Startup, Quality Control, Subcontract Execution Readiness, and Warranty meet their locked source-of-truth and action-boundary rules; executive review annotation boundary rules enforced per §3.5, §4.4, §5.4, §6.4, §7.4, §8.4, §14.5, §15.4, §16.4, §17.4, and §18.4; Safety exclusion applies to Safety module surfaces only (§7.4); annotation isolation mutation prohibitions verified; Closeout hybrid publication rule (§14.4) respected; Startup Permits and Safety non-interference rules (§15.3) respected; QC work-queue publication and no-file-storage boundaries (§16.3) respected; Subcontract Execution Readiness buyout gate rule (§17.3) enforced at the Financial module API layer; Warranty Financial boundary (§18.3) enforced — back-charge advisory only |
+| **Evidence required** | P3-E2 (this document), module implementations respecting authority matrices, spine publication flowing through governed boundaries, mutation rules enforced, override provenance tracked, executive review annotation artifacts isolated from module source-of-truth records |
 | **Primary owner** | Architecture + Project Hub platform owner |
 
 ---
 
-## 18. Policy Precedence
+## 20. Policy Precedence
 
 This specification establishes the **source-of-truth and action-boundary rules** that module implementations must satisfy:
 
@@ -911,5 +948,5 @@ If a downstream deliverable conflicts with this specification, this specificatio
 
 ---
 
-**Last Updated:** 2026-03-24 (v5) — §17 Warranty Source-of-Truth added per P3-E14 readiness review. Coverage items, cases, decisions, assignments, acknowledgments, evidence, resolutions, intake, and communications declared as Warranty-owned. Financial boundary (back-charge advisory only), Closeout/Startup seam references, Layer 2 seam field doctrine, resolution record immutability, and annotation boundary added. Acceptance gate updated to include Warranty. Prior: 2026-03-24 (v4) — §16 rewritten to replace the old P3-E12 Subcontract Compliance checklist-and-waiver boundary with the P3-E13 Subcontract Execution Readiness case / profile / exception / decision model, including the revised Financial gate contract and review annotation boundary. Prior: 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
+**Last Updated:** 2026-03-24 (v6) — §16 Quality Control Source-of-Truth added per P3-E15 reconciliation. QC operational ownership now covers plans, reviews, findings, issues, corrective actions, deviations, evidence references, external approval dependencies, advisory records, and derived quality-health/readiness snapshots; document-system, official-source, downstream handoff, and no-file-storage boundaries added. Tail sections renumbered so Subcontract Execution Readiness is §17, Warranty is §18, Acceptance Gate is §19, and Policy Precedence is §20. Prior: 2026-03-24 (v5) — §17 Warranty Source-of-Truth added per P3-E14 readiness review. Coverage items, cases, decisions, assignments, acknowledgments, evidence, resolutions, intake, and communications declared as Warranty-owned. Financial boundary (back-charge advisory only), Closeout/Startup seam references, Layer 2 seam field doctrine, resolution record immutability, and annotation boundary added. Acceptance gate updated to include Warranty. Prior: 2026-03-24 (v4) — §16 rewritten to replace the old P3-E12 Subcontract Compliance checklist-and-waiver boundary with the P3-E13 Subcontract Execution Readiness case / profile / exception / decision model, including the revised Financial gate contract and review annotation boundary. Prior: 2026-03-24 (v3) — §14 Project Closeout rewritten to reflect derived intelligence model, correct publication trigger (PE_APPROVED + ARCHIVED, not Section 6 completion), Autopsy sub-surface, LessonsIntelligenceIndex/SubIntelligenceIndex/LearningLegacyFeed as derived read models, PE annotation vs. PE approval formal distinction, and updated field-level specification link. Prior: 2026-03-23 (v2)
 **Governing Authority:** [Phase 3 Plan §6, §12](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)

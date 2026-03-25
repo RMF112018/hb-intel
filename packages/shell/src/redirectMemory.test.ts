@@ -12,7 +12,7 @@ describe('redirect memory', () => {
   it('restores remembered redirect when safe and unexpired', () => {
     clearRedirectMemory();
     rememberRedirectTarget({
-      pathname: '/project-hub/portfolio',
+      pathname: '/project-hub',
       runtimeMode: 'pwa',
       now: new Date('2026-03-06T10:00:00.000Z'),
       ttlMs: 60_000,
@@ -22,7 +22,7 @@ describe('redirect memory', () => {
       runtimeMode: 'pwa',
       now: new Date('2026-03-06T10:00:30.000Z'),
     });
-    expect(restored?.pathname).toBe('/project-hub/portfolio');
+    expect(restored?.pathname).toBe('/project-hub');
   });
 
   it('blocks restore when runtime mode does not match', () => {

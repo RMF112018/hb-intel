@@ -34,7 +34,7 @@ when mounted outside of it.
 |-----------|----------------------|
 | `HeaderBar` | Reads shell status snapshot and auth state from ShellCore-managed context |
 | `AppLauncher` | Requires feature registration context to render workspace list |
-| `ProjectPicker` | Reads project store state managed by ShellCore's lifecycle |
+| `ProjectPicker` | Selection surface whose behavior is route-owned by ShellCore/app integration; should not be mounted as a standalone state-switcher |
 | `BackToProjectHub` | Navigation semantics tied to ShellCore's router integration |
 | `ContextualSidebar` | Receives sidebar groups from ShellCore's nav composition |
 | `ShellLayout` | Pure layout wrapper for ShellCore's render tree |

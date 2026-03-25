@@ -409,10 +409,16 @@ A user is eligible to access a project in Project Hub if ANY of the following ar
 
 ### 6.2 Who may NOT access a project
 
-A user who satisfies NONE of the eligibility paths in §6.1 MUST NOT be granted access to any project-scoped surface. The system MUST redirect non-members to the project selector or an appropriate access-denied state.
+A user who satisfies NONE of the eligibility paths in §6.1 MUST NOT be granted access to any project-scoped surface.
+
+Route-scope rules:
+
+- `/project-hub` is the unscoped Project Hub portfolio root. Users with valid Project Hub access may land there according to the route doctrine in P3-B1, even though that does not imply access to every project-scoped route.
+- `/project-hub/{projectId}` requires project-specific eligibility for the addressed project.
+- When neither unscoped portfolio access nor project-scoped access is valid for the requested context, the system MUST render an in-shell Project Hub no-access / not-available state using `@hbc/smart-empty-state`.
 
 This rule applies in both lanes:
-- **PWA:** Route-level membership check before rendering project-scoped pages.
+- **PWA:** Route-level membership check before rendering project-scoped pages; no silent redirect to another project.
 - **SPFx:** Site context resolution must confirm the user is a member of the project's Entra groups, has explicit membership, or holds a valid Portfolio Executive Reviewer posture.
 
 ### 6.3 Administrator bypass

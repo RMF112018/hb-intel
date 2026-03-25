@@ -3,6 +3,8 @@
  * 14 workspace routes via createWorkspaceRoute() helper + index redirect.
  * Each route: syncs navStore in beforeLoad, lazy-loads page component.
  */
+import { createElement } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { createRoute, redirect, lazyRouteComponent } from '@tanstack/react-router';
 import type { WorkspaceId } from '@hbc/shell';
 import { useNavStore, resolveLandingDecision, isMyWorkCohortEnabled } from '@hbc/shell';
@@ -11,10 +13,20 @@ import { rootRoute } from './root-route.js';
 import { requireAuth, requireAdminAccessControl } from './route-guards.js';
 import { WORKSPACE_TOOL_PICKERS, WORKSPACE_SIDEBARS } from './workspace-config.js';
 import { triggerOnLeaveCapture } from '../pages/my-work/useHubReturnMemory.js';
+import {
+  ProjectHubControlCenterPage,
+  ProjectHubNoAccessPage,
+  ProjectHubPortfolioPage,
+} from '../pages/ProjectHubPage.js';
+import {
+  resolveProjectHubProjectEntry,
+  resolveProjectHubRootEntry,
+  validateProjectHubSearch,
+} from './projectHubRouting.js';
 
 function createWorkspaceRoute(
   workspaceId: WorkspaceId,
-  importFn: () => Promise<{ default: React.ComponentType }>,
+  importFn: () => Promise<{ default: ComponentType }>,
 ) {
   return createRoute({
     getParentRoute: () => rootRoute,
@@ -40,6 +52,21 @@ function createWorkspaceRoute(
   });
 }
 
+function activateWorkspace(workspaceId: WorkspaceId): void {
+  const nav = useNavStore.getState();
+  nav.setActiveWorkspace(workspaceId);
+
+  const toolPickerFactory = WORKSPACE_TOOL_PICKERS[workspaceId];
+  if (toolPickerFactory) {
+    nav.setToolPickerItems(toolPickerFactory(() => {}));
+  }
+
+  const sidebarFactory = WORKSPACE_SIDEBARS[workspaceId];
+  if (sidebarFactory) {
+    nav.setSidebarItems(sidebarFactory(() => {}));
+  }
+}
+
 // Index route: / → cohort-aware landing (P2-B1 §11.3)
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -55,11 +82,142 @@ export const indexRoute = createRoute({
   },
 });
 
+function ProjectHubRootRouteComponent(): ReactNode {
+  const data = projectHubRoute.useLoaderData();
+  const navigate = projectHubRoute.useNavigate();
+
+  if (!data) {
+    return createElement(ProjectHubNoAccessPage, {
+      projects: [],
+      reason: 'zero-projects',
+    });
+  }
+
+  if (data.mode === 'portfolio') {
+    return createElement(ProjectHubPortfolioPage, {
+      projects: data.projects,
+      onProjectSelect: (projectId: string) => {
+        void navigate({ to: `/project-hub/${projectId}` });
+      },
+    });
+  }
+
+  return createElement(ProjectHubNoAccessPage, {
+    projects: data.projects,
+    reason: data.reason,
+  });
+}
+
+function ProjectHubProjectRouteComponent(): ReactNode {
+  const data = projectHubProjectRoute.useLoaderData();
+  const navigate = projectHubProjectRoute.useNavigate();
+
+  if (!data) {
+    return createElement(ProjectHubNoAccessPage, {
+      projects: [],
+      reason: 'project-unavailable',
+    });
+  }
+
+  if (data.mode === 'project') {
+    return createElement(ProjectHubControlCenterPage, {
+      project: data.project,
+      projects: data.projects,
+      section: data.section,
+      onBackToPortfolio: () => {
+        void navigate({ to: '/project-hub' });
+      },
+    });
+  }
+
+  return createElement(ProjectHubNoAccessPage, {
+    projects: data.projects,
+    reason: data.reason,
+  });
+}
+
+function ProjectHubSectionRouteComponent(): ReactNode {
+  const data = projectHubSectionRoute.useLoaderData();
+  const navigate = projectHubSectionRoute.useNavigate();
+
+  if (!data) {
+    return createElement(ProjectHubNoAccessPage, {
+      projects: [],
+      reason: 'project-unavailable',
+    });
+  }
+
+  if (data.mode === 'project') {
+    return createElement(ProjectHubControlCenterPage, {
+      project: data.project,
+      projects: data.projects,
+      section: data.section,
+      onBackToPortfolio: () => {
+        void navigate({ to: '/project-hub' });
+      },
+    });
+  }
+
+  return createElement(ProjectHubNoAccessPage, {
+    projects: data.projects,
+    reason: data.reason,
+  });
+}
+
 // MVP workspace routes (Priority: Accounting → Estimating → Project Hub → Leadership → Business Development)
-export const projectHubRoute = createWorkspaceRoute(
-  'project-hub',
-  () => import('../pages/ProjectHubPage.js').then((m) => ({ default: m.ProjectHubPage })),
-);
+export const projectHubRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'project-hub',
+  validateSearch: validateProjectHubSearch,
+  beforeLoad: () => {
+    requireAuth();
+    activateWorkspace('project-hub');
+  },
+  loader: async () => {
+    const result = await resolveProjectHubRootEntry();
+    if (result.mode === 'redirect') {
+      throw redirect({ to: result.redirectTo, replace: true });
+    }
+    return result;
+  },
+  component: ProjectHubRootRouteComponent,
+});
+
+export const projectHubProjectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'project-hub/$projectId',
+  validateSearch: validateProjectHubSearch,
+  beforeLoad: () => {
+    requireAuth();
+    activateWorkspace('project-hub');
+  },
+  loader: async ({ params }) => {
+    const result = await resolveProjectHubProjectEntry(params.projectId, null);
+    if (result.mode === 'redirect') {
+      throw redirect({ to: result.redirectTo, replace: true });
+    }
+    return result;
+  },
+  component: ProjectHubProjectRouteComponent,
+});
+
+export const projectHubSectionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'project-hub/$projectId/$section',
+  validateSearch: validateProjectHubSearch,
+  beforeLoad: () => {
+    requireAuth();
+    activateWorkspace('project-hub');
+  },
+  loader: async ({ params }) => {
+    const result = await resolveProjectHubProjectEntry(params.projectId, params.section);
+    if (result.mode === 'redirect') {
+      throw redirect({ to: result.redirectTo, replace: true });
+    }
+    return result;
+  },
+  component: ProjectHubSectionRouteComponent,
+});
 
 export const accountingRoute = createWorkspaceRoute(
   'accounting',
@@ -269,6 +427,8 @@ export const notFoundRoute = createRoute({
 export const allRoutes = [
   indexRoute,
   projectHubRoute,
+  projectHubProjectRoute,
+  projectHubSectionRoute,
   accountingRoute,
   estimatingRoute,
   leadershipRoute,

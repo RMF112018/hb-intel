@@ -9,7 +9,7 @@ export interface BackToProjectHubProps {
 }
 
 /**
- * "Back to the Project Hub {name}" emphasized link — Blueprint §2c, D-PH7-BW-6.
+ * "Back to Portfolio" link — Project Hub project-scoped return control.
  * Rendered when mode === 'full' && activeWorkspace !== 'project-hub' && activeProject !== null,
  * or when simplified shell has showBackToProjectHub === true.
  */
@@ -18,9 +18,7 @@ export function BackToProjectHub({ projectHubUrl, onNavigate }: BackToProjectHub
 
   if (!activeProject) return null;
 
-  const href = projectHubUrl
-    ? `${projectHubUrl}?projectId=${activeProject.id}`
-    : '#';
+  const href = projectHubUrl ?? '/project-hub';
 
   return (
     <a
@@ -34,7 +32,7 @@ export function BackToProjectHub({ projectHubUrl, onNavigate }: BackToProjectHub
         }
       }}
     >
-      Back to the Project Hub <strong>{activeProject.name}</strong>
+      Back to Portfolio
     </a>
   );
 }

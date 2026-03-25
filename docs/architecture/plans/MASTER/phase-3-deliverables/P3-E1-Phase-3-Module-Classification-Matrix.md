@@ -100,11 +100,11 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | Safety | PH7-6 | Reference examples; no production module | **Controlled evolution** |
 | Reports | PH7-14 | Reference examples; no production module | **Controlled evolution** |
 
-### 1.4 Lifecycle modules (baseline-visible, deeper depth deferred)
+### 1.4 Lifecycle modules (baseline-visible or governed lifecycle modules)
 
 | Module | PH7 Plan | Current repo state | Status |
 |---|---|---|---|
-| Quality Control | PH7-7 | No production implementation | **Controlled evolution** |
+| Quality Control | P3-E15 (supersedes PH7-7 as Phase 3 authority) | Authored implementation-guiding Phase 3 QC module family; application implementation still pending | **Controlled evolution** |
 | Warranty | PH7-8 | No production implementation | **Controlled evolution** |
 
 ### 1.5 PH7 plan inventory
@@ -133,7 +133,7 @@ PH7 feature plans (16 files, ADR-0091 locked, classified as Deferred Scope pendi
 | 12 | Project Closeout | Always-on lifecycle | Hybrid — owns all operational closeout data; publishes PE-approved snapshots to Reports; derives org intelligence indexes on archive | Closeout Checklist, Subcontractor Scorecard, Lessons Learned, Project Autopsy & Learning Legacy | Publishes to all 4 spines |
 | 13 | Project Startup | Always-on lifecycle | First-class working surface — active from project creation | Task Library, Safety Readiness, Contract Obligations Register, Responsibility Matrix, Project Execution Baseline (PM Plan), Permit Posting Verification | Publishes to all 4 spines |
 | 14 | Subcontract Execution Readiness | Always-on core | First-class working surface — multi-record readiness case (one active case per project + subcontractor legal entity + governed award / buyout intent) | Subcontract Readiness Case, Requirement Profiles, Exception Packets, Readiness Decision | Publishes to all 4 spines; gates Buyout Log ContractExecuted (P3-E4 §6) |
-| 15 | Quality Control | Baseline-visible lifecycle | Lifecycle-visible | PH7-7 | Deferred |
+| 15 | Quality Control | Baseline-visible lifecycle | First-class internal control surface — plans, reviews, issues, advisory, health, and turnover-quality readiness; deep field/mobile depth deferred | P3-E15 | Publishes to all 4 spines through governed projections |
 | 16 | Warranty | Always-on lifecycle | First-class working surface — two-layer operating model (Layer 1 Phase 3, Layer 2 deferred) | PH7-8 | Publishes to all 4 spines |
 
 ---
@@ -216,7 +216,13 @@ Each module operates as a **hybrid spine** — upstream/source systems remain au
 
 ### 3.7 Quality Control
 
-**Boundary:** Baseline-visible lifecycle module. Architectural placement and lifecycle continuity retained. Deeper field-first tool definition intentionally deferred (Phase 3 Plan §11.2, Repo-Truth Reconciliation Note 3, §22).
+**Boundary:** Baseline-visible lifecycle/control surface governed by P3-E15. Project Hub owns the internal QC operating model for work-package quality plans, preconstruction/design-package reviews, review findings, QC issues and corrective actions, deviations, evidence references, external approval dependencies, submittal-completeness advisory, health/readiness projections, and lifecycle continuity through pre-punch and turnover-quality readiness. Deep field/mobile execution remains intentionally deferred to Phase 6.
+
+**Must support:** Governed enterprise QC core with controlled project extensions; work-package quality plans and mandatory/high-risk coverage; review-package administration and review findings with preserved lineage into downstream `QcIssue` records; soft-gated hold points, mockups, tests, witness points, and preinstallation meetings; authoritative QC issue/corrective-action publication into My Work; first-class deviations, evidence references, and external approval dependency tracking; submittal-completeness advisory for package completeness and official-source currentness; governed quality health and responsible-organization rollups; schedule-aware readiness and downstream handoffs to Closeout, Startup, Warranty, and future Site Controls.
+
+**Internal-only boundary:** QC remains internal-only in Phase 3. It is not a submittal routing engine, punch tool, startup/commissioning tool, warranty workspace, or field/mobile execution engine. Package files remain in the governed document or submittal system.
+
+**Field-level specification:** [P3-E15 — Project Hub QC Module Field Specification](P3-E15-QC-Module-Field-Specification.md) *(master index + T01–T10 detail files)*
 
 ### 3.8 Warranty
 
@@ -280,7 +286,7 @@ Buyout is NOT a separate top-level baseline module. Financial owns the budget im
 
 ### 4.2 QC is baseline-visible; Warranty is promoted to always-on lifecycle
 
-Quality Control remains a baseline-visible lifecycle module, not an equal-intensity always-on core module at day-one depth (Phase 3 Plan §11.2). QC retains lifecycle placement and architectural continuity but does not absorb full later-phase field-first depth in Phase 3.
+Quality Control remains baseline-visible rather than field-first in Phase 3, but it is no longer a placeholder-only lifecycle marker. P3-E15 defines a first-class internal Project Hub QC control surface with governed record families, readiness signals, and downstream handoff seams. Only deep field/mobile execution depth is deferred.
 
 Warranty has been promoted to an always-on lifecycle module with a full Layer 1 Phase 3 operating surface governed by P3-E14 T01–T10. Warranty delivers coverage tracking, case management with SLA, subcontractor coordination, owner intake logging, and resolution records with back-charge advisory. Layer 2 external collaborative workspace is deferred. Deeper field-first Warranty execution beyond Layer 1 is not Phase 3 scope.
 
@@ -304,7 +310,7 @@ PH7-1 (Foundation/Data Models), PH7-2 (Routes/Shell), PH7-5 (Project Management)
 | PH7-4 Preconstruction | `PH7-ProjectHub-4-Preconstruction.md` | Financial (partial) | **Reconciled** — preconstruction scoping within Financial domain |
 | PH7-5 Project Management | `PH7-ProjectHub-5-ProjectManagement.md` | Cross-cutting | **Reconciled** — P3-A1 (registry), P3-A2 (membership) govern |
 | PH7-6 Safety | `PH7-ProjectHub-6-Safety.md` | Safety | **Implementation-ready** — PH7 plan locked; deferred scope |
-| PH7-7 Quality Control | `PH7-ProjectHub-7-QualityControl.md` | Quality Control | **Deferred** — baseline-visible lifecycle; deeper depth later |
+| PH7-7 Quality Control | `PH7-ProjectHub-7-QualityControl.md` | Quality Control | **Superseded for Phase 3 authority** — historical input only; P3-E15 now governs the Phase 3 QC module family while deeper field/mobile execution remains deferred |
 | PH7-8 Warranty | `PH7-ProjectHub-8-Warranty.md` | Warranty | **Deferred** — baseline-visible lifecycle; deeper depth later |
 | PH7-9 Financial Forecasting | `PH7-ProjectHub-9-FinancialForecasting.md` | Financial | **Implementation-ready** — PH7 plan locked; deferred scope |
 | PH7-10 Schedule | `PH7-ProjectHub-10-Schedule.md` | Schedule | **Implementation-ready** — PH7 plan locked; deferred scope |

@@ -8,7 +8,7 @@
 | **Document Type** | Module Field Specification |
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-23 |
-| **Related Contracts** | P3-E1 §3.11, P3-E2 §16, P3-E4 §6 (Buyout gate), P3-H1 |
+| **Related Contracts** | P3-E1 §3.11, P3-E2 §17 (current successor SoT seam for the active P3-E13 replacement), P3-E4 §6 (Buyout gate), P3-H1 |
 | **Source Examples** | docs/reference/example/ |
 
 ---
@@ -405,7 +405,7 @@ Items appear in the Work Queue when:
 | Document | Relationship |
 |----------|-------------|
 | P3-E1 §3.11 | Module classification matrix entry for Subcontract Compliance |
-| P3-E2 §16 | Source-of-truth and action-boundary matrix for Subcontract Compliance |
+| P3-E2 §17 | Current source-of-truth and action-boundary seam for the active P3-E13 successor module; P3-E12 remains historical only |
 | P3-E3 §9.9 | Replacement notes — `SUBCONTRACT CHECKLIST.xlsx` |
 | P3-E4 §6.1 | Buyout Line Item — `subcontractChecklistId` field and `ContractExecuted` gate rule |
 | P3-E11 §1 (item 2.24) | Job Startup Checklist item for writing subcontracts cross-references this module |

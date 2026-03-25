@@ -137,8 +137,8 @@ The following MUST be identical across both lanes. No lane may deviate from thes
 | **Permits module** | Same authority boundaries | **Full** — first-class working surface | **Broad** — operational surface | SPFx supports full CRUD |
 | **Safety module** | Same authority boundaries | **Full** — first-class working surface | **Broad** — operational surface | SPFx supports full CRUD |
 | **Reports module** | Same report definitions/runs/release | **Full** — richer history/continuity/recovery | **Broad** — report interaction + launch | SPFx supports view/generate; PWA richer for draft management |
-| **QC module** | Baseline-visible lifecycle | **Baseline-visible** | **Baseline-visible** | Deeper depth deferred to Phase 6 |
-| **Warranty module** | Baseline-visible lifecycle | **Baseline-visible** | **Baseline-visible** | Deeper depth deferred to Phase 6 |
+| **QC module** | Baseline-visible internal control surface | **Baseline-visible** | **Baseline-visible** | Plans, reviews, issues, advisory, and readiness projections are visible in both lanes; deep field/mobile execution deferred to Phase 6 |
+| **Warranty module** | First-class lifecycle with Layer 1 operational depth | **Full** — first-class working surface | **Broad** — read-only with Launch-to-PWA for mutations | Layer 2 external collaboration and deeper field-first depth deferred to Phase 6 |
 | **Cross-project continuity** | Shared identity rules | **Richest** | **Limited** — host-constrained | PWA supports multi-project navigation; SPFx scoped to site |
 | **Personal/workspace continuity** | N/A | **Full** | **Not applicable** | SPFx does not provide cross-workspace switching |
 | **Advanced workflow depth** | Shared baseline contracts | **Richest** | **Broad** — not canonical owner of deepest flows | Multi-step wizards, complex imports, and advanced configuration route to PWA |
@@ -283,16 +283,18 @@ Note: Safety is excluded from PER annotation layer (P3-E1 §9.3). PER sees read-
 | Approval (PX Review) | **Required** | **Required** |
 | Release / distribution state | **Required** | **Broad** — view status; release action supported |
 
-### 4.7 QC and Warranty
+### 4.7 Quality Control
 
 | Capability | PWA | SPFx |
 |---|---|---|
-| Baseline-visible lifecycle placement | **Required** | **Required** |
-| Deeper field-first depth | Deferred to Phase 6 | Deferred to Phase 6 |
+| Baseline-visible internal control placement | **Required** | **Required** |
+| Quality-plan, review, issue, advisory, and readiness visibility | **Required** | **Required** |
+| Package-file storage or submittal workflow ownership | Not permitted | Not permitted |
+| Deep operational field/mobile execution | Deferred to Phase 6 | Deferred to Phase 6 |
 
 ### 4.8 Lifecycle Modules — Project Closeout, Project Startup, Subcontract Execution Readiness, Warranty
 
-Per P3-E1 §8, all three lifecycle modules require **Full parity** across PWA and SPFx. The per-module capability tables below define depth expectations within that parity requirement.
+Per P3-E1 §8, these four lifecycle modules require the governed lane depths defined below. The per-module capability tables define where parity is required and where SPFx intentionally launches to PWA.
 
 #### 4.8.1 Project Closeout
 

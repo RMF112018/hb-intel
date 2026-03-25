@@ -102,6 +102,7 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
   mode = 'pwa',
   onSignOut,
   onNavigate,
+  onProjectSelect,
   userMenuExtra,
   showProjectSelector = true,
 }) => {
@@ -161,7 +162,14 @@ export const HbcAppShell: React.FC<HbcAppShellProps> = ({
       {/* Sidebar a11y: Skip-to-content link — first focusable element in the shell. */}
       <a href="#hbc-main-content" className={styles.skipLink}>Skip to main content</a>
       <HbcConnectivityBar />
-      <HbcHeader user={user} onSignOut={onSignOut} userMenuExtra={userMenuExtra} showProjectSelector={showProjectSelector} mode={mode} />
+      <HbcHeader
+        user={user}
+        onSignOut={onSignOut}
+        onProjectSelect={onProjectSelect}
+        userMenuExtra={userMenuExtra}
+        showProjectSelector={showProjectSelector}
+        mode={mode}
+      />
       {showSidebar && (
         <HbcSidebar groups={sidebarGroups} activeItemId={resolvedActiveItemId} onNavigate={onNavigate} />
       )}

@@ -82,14 +82,14 @@ describe('navStore router synchronization', () => {
   });
 
   it('syncs back/forward transitions and cleans up unsubscribe on stop', () => {
-    const history = new MockHistory('/project-hub/portfolio');
+    const history = new MockHistory('/project-hub');
     useNavStore.getState().startNavSync(history);
 
     history.navigate('/accounting/invoices');
     expect(useNavStore.getState().activeItemId).toBe('invoices');
 
     // Simulate browser back/forward by replaying pathname transitions.
-    history.navigate('/project-hub/portfolio');
+    history.navigate('/project-hub');
     expect(useNavStore.getState().activeItemId).toBe('portfolio');
 
     useNavStore.getState().stopNavSync();

@@ -15,9 +15,9 @@
 
 ## Specification Statement
 
-This specification defines the **per-lane home/canvas capability expectations** for Phase 3 Project Hub — what each application lane (PWA and SPFx) supports for canvas composition, tile availability, personalization depth, persistence, shell behavior, and interaction patterns.
+This specification defines the **per-lane home/canvas capability expectations** for the canonical project-scoped Project Hub Control Center in Phase 3 — what each application lane (PWA and SPFx) supports for canvas composition, tile availability, personalization depth, persistence, shell behavior, and interaction patterns.
 
-P3-C1 establishes the canvas governance model (mandatory locked, role-default, user-managed tiers). P3-C2 defines the mandatory operational core tile family. P3-G1 §6 establishes the system-level lane doctrine for canvas. This specification zooms in to define the **complete capability matrix** for home/canvas behavior across both lanes.
+P3-C1 establishes the canvas governance model (mandatory locked, role-default, user-managed tiers). P3-C2 defines the mandatory operational core tile family. P3-G1 §6 establishes the system-level lane doctrine for canvas. This specification zooms in to define the **complete capability matrix** for project-scoped home/canvas behavior across both lanes. The unscoped `/project-hub` portfolio root is a separate operating surface and is outside the home/canvas matrix except where it hands off into the project-scoped Control Center.
 
 Phase 3 uses **governed adaptive composition** in both lanes (P3-G1 §6.1):
 
@@ -28,7 +28,7 @@ Phase 3 uses **governed adaptive composition** in both lanes (P3-G1 §6.1):
 
 This is distinct from Phase 2 Personal Work Hub lane doctrine, where P2-B0 restricts SPFx to curated composition. Phase 3 Project Hub defines its own lane doctrine where both lanes support governed adaptive composition (P3-G1 §6.2).
 
-**Repo-truth audit — 2026-03-21.** `@hbc/project-canvas` (v0.0.1, SF13, ADR-0102 locked) is mature with `TileRegistry`, 12 reference tile definitions, 3 complexity tiers, `ROLE_DEFAULT_TILES` mapping, `useCanvasEditor`, `useCanvasMandatoryTiles`, `CanvasApi`, and Storybook coverage. The PWA `ProjectHubPage` is an MVP scaffold (portfolio dashboard with summary cards). SPFx project-hub has 1 of 11+ planned pages implemented (`DashboardPage`). Canvas governance (P3-C1), mandatory tiles (P3-C2), and system-level lane rules (P3-G1 §6) are locked. See §1 for full reconciliation.
+**Repo-truth audit — 2026-03-24.** `@hbc/project-canvas` (v0.0.1, SF13, ADR-0102 locked) is mature with `TileRegistry`, 12 reference tile definitions, 3 complexity tiers, `ROLE_DEFAULT_TILES` mapping, `useCanvasEditor`, `useCanvasMandatoryTiles`, `CanvasApi`, and Storybook coverage. The PWA `ProjectHubPage` now implements the Project Hub route split with a meaningful unscoped portfolio root, a project-scoped Control Center surface, and in-shell no-access handling. SPFx project-hub still has 1 of 11+ planned pages implemented (`DashboardPage`). Canvas governance (P3-C1), mandatory tiles (P3-C2), and system-level lane rules (P3-G1 §6) are locked. See §1 for full reconciliation.
 
 ---
 
@@ -85,11 +85,11 @@ This is distinct from Phase 2 Personal Work Hub lane doctrine, where P2-B0 restr
 | P3-C1 Canvas Governance | Phase 3 deliverables | **Locked** (note) | 3-tier governance model (mandatory locked, role-default, user-managed) |
 | P3-C2 Mandatory Tiles | Phase 3 deliverables | **Locked** (spec) | 5 mandatory operational core surfaces; role-based visibility matrix |
 | P3-G1 §6 Lane Canvas Rules | Phase 3 deliverables | **Locked** (spec) | Both lanes use governed adaptive composition; same foundation, governance, mandatory core |
-| PWA `ProjectHubPage` | `apps/pwa/src/pages/project-hub/` | **Live** — MVP scaffold | Portfolio dashboard with summary cards; not yet the canvas-first home |
+| PWA `ProjectHubPage` | `apps/pwa/src/pages/ProjectHubPage.tsx` | **Live** — split route implementation | Current Project Hub surface now covers the meaningful unscoped portfolio root, the project-scoped Control Center route, and in-shell no-access / not-available rendering; canvas-first adoption for the Control Center remains separate |
 | SPFx project-hub `DashboardPage` | `apps/spfx/src/apps/project-hub/` | **Live** — partial | 1 of 11+ planned pages implemented; 3 empty-state placeholders |
 | `@hbc/features-project-hub` | `packages/features/project-hub/` | **Live** — partial | SF21 health-pulse fully implemented; consumed by both lanes |
 
-**Classification:** Canvas infrastructure (`@hbc/project-canvas`) is mature. Both lane applications have MVP-level project hub pages that must be upgraded to canvas-first home surfaces. This is **controlled evolution** — the canvas package is ready, the lane applications must adopt it.
+**Classification:** Canvas infrastructure (`@hbc/project-canvas`) is mature. The Project Hub route split is now live in PWA, with the unscoped portfolio root and the project-scoped Control Center treated as distinct surfaces. Both lane applications still require explicit project-scoped Control Center canvas adoption. This remains **controlled evolution** for canvas application, not for the routing split itself.
 
 ---
 
@@ -259,7 +259,7 @@ This is the primary area where lanes diverge. Canvas tile content is identical, 
 | **Work Queue feed** | Full feed page with filtering, search, team feed, reason drawer | Tile and panel; launch-to-PWA for full feed | SPFx provides tile + panel; full feed is PWA-depth |
 | **Activity timeline** | Full activity page with filtering and export | Tile with recent activity; launch-to-PWA for full timeline | SPFx provides tile; full timeline is PWA-depth |
 | **Canvas admin** | Full admin panel access (tile governance, role defaults, advanced config) | Reduced admin — launch-to-PWA for advanced canvas configuration | SPFx supports basic edit mode; advanced admin escalates |
-| **Cross-project navigation** | In-app project switching (P3-B1 §2) | Launch-to-PWA with project selector deep link | SPFx context is per-project-site |
+| **Cross-project navigation** | In-app project switching and Back to Portfolio / re-entry governed by P3-B1 | Launch-to-PWA with portfolio-root deep link | SPFx context is per-project-site |
 | **Report launch from tile** | In-app report workspace navigation | Launch-to-PWA with report deep link or SPFx report view | Governed by P3-F1 and P3-G1 §4.7 |
 
 ### 8.1 Launch-to-PWA mechanism
@@ -307,8 +307,8 @@ SPFx surfaces that need deeper interaction construct a PWA deep link with:
 1. **`@hbc/project-canvas` — compliant**
    Mature canvas package (v0.0.1, SF13, ADR-0102 locked) with `TileRegistry`, `useCanvasEditor`, `useCanvasMandatoryTiles`, `CanvasApi`, 12 reference tiles, 3 complexity tiers, `ROLE_DEFAULT_TILES`, and Storybook coverage. Package is ready for both-lane consumption. Classified as **compliant**.
 
-2. **PWA `ProjectHubPage` — controlled evolution**
-   Current MVP scaffold (portfolio dashboard with summary cards) must be upgraded to the canvas-first home using `@hbc/project-canvas`. The canvas package is ready; the page must adopt it. Classified as **controlled evolution**.
+2. **PWA `ProjectHubPage` route split — compliant; canvas adoption remains controlled evolution**
+   The PWA now implements the Project Hub route split with a meaningful unscoped portfolio root, a project-scoped Control Center surface, and in-shell no-access rendering. The remaining controlled-evolution gap is adopting `@hbc/project-canvas` as the live project-scoped Control Center home. Classified as **compliant for routing, controlled evolution for canvas adoption**.
 
 3. **SPFx project-hub `DashboardPage` — controlled evolution**
    Only 1 of 11+ planned pages implemented. Must be upgraded to a canvas-first project home using `@hbc/project-canvas` with governed adaptive composition. Classified as **controlled evolution**.
@@ -330,7 +330,7 @@ SPFx surfaces that need deeper interaction construct a PWA deep link with:
 
 | Field | Value |
 |---|---|
-| **Pass condition** | Both PWA and SPFx render canvas-first project home with governed adaptive composition; mandatory operational core is present in both lanes; personalization, persistence, and edit mode work per this matrix |
+| **Pass condition** | Both PWA and SPFx render the project-scoped Control Center as a canvas-first home with governed adaptive composition; mandatory operational core is present in both lanes; personalization, persistence, and edit mode work per this matrix; the unscoped portfolio root remains a separate continuity surface |
 | **Evidence required** | P3-C3 (this document), canvas rendering in both lanes, mandatory tile presence, edit-mode governance enforcement, persistence/recovery working per §6, complexity-tier rendering, role-based visibility working per P3-C2 §8 |
 | **Primary owner** | Experience / Shell Team + Project Hub platform owner |
 

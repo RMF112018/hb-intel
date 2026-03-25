@@ -8,7 +8,7 @@
 | **Document Type** | Specification |
 | **Owner** | Architecture + Experience / Shell Team |
 | **Update Authority** | Architecture lead; changes require review by Experience lead and Project Hub platform owner |
-| **Last Reviewed Against Repo Truth** | 2026-03-21 |
+| **Last Reviewed Against Repo Truth** | 2026-03-24 |
 | **References** | [Phase 3 Plan §18](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-G1](P3-G1-Lane-Capability-Matrix.md); [P3-G2](P3-G2-Cross-Lane-Navigation-and-Handoff-Map.md); [P3-C3](P3-C3-Lane-Aware-Home-Canvas-Capability-Matrix.md); [P3-E1](P3-E1-Phase-3-Module-Classification-Matrix.md) |
 
 ---
@@ -91,9 +91,9 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 |---|---|---|---|---|
 | 1 | Same canonical project identity | Resolves `projectId` from URL route params | Resolves `projectId` from `siteUrl` (P3-B1 §2.3) | Identity resolution test: same project yields same `projectId`, `projectNumber`, `projectName` |
 | 2 | Same membership validation | P3-A2 §6 access eligibility enforced | P3-A2 §6 access eligibility enforced | Access test: same user + project yields same module access in both lanes |
-| 3 | Smart project switching | Full in-app switching (P3-B1 §2) | Host-aware fallbacks (P3-B1 §8.4) | Switching scenario: context header switch in PWA, launch-to-project in SPFx |
+| 3 | Root entry and smart project switching | Explicit `/project-hub` entry honors the portfolio-root doctrine; in-project switching uses same-section resolution with target-project Control Center fallback | Host-aware fallbacks remain project-site scoped; cross-project transitions launch to the PWA portfolio root | Switching scenario with recorded URL transitions, preserved `projectId`, Back to Portfolio state restoration, and SPFx launch-to-portfolio proof |
 | 4 | Cross-lane handoff identity | Receives `projectId` from SPFx deep link | Sends `projectId` in deep-link URL | Handoff round-trip: SPFx→PWA→SPFx preserves project identity |
-| 5 | No context loss during handoff | Deep-link handler (P3-B1 §6.1) processes arrival | `BackToProjectHub` pattern sends correct params | Post-handoff verification: correct project, module, and access after arrival |
+| 5 | No context loss during handoff | Deep-link handler (P3-B1 §6.1) processes arrival; invalid or unauthorized targets render in-shell `@hbc/smart-empty-state` instead of redirecting elsewhere | `BackToProjectHub` pattern sends correct params | Post-handoff verification: correct project, module, and access after arrival; no silent fallback to another project; unauthorized deep links keep their browser location and render in-shell no-access state |
 | 6 | PER scope validation in both lanes | PER posture resolves correct department scope; out-of-scope projects are inaccessible without `AccessControlOverrideRecord` | Same PER scope validation applied | Scope test: PER in-scope projects accessible; out-of-scope projects inaccessible (P3-A2 §2.3, §6.1) |
 | 7 | PER vs. project membership distinction | PER posture does not grant project membership; operational writes blocked | Same distinction enforced | Boundary test: PER cannot perform membership-gated actions (P3-A2 §6.4) |
 | 8 | projectId normalization in handoff | All outbound deep links use `projectId`; incoming `projectNumber` is normalized before processing | Same normalization | Normalization test: `projectNumber` in inbound URL resolves to canonical `projectId` deep link (P3-A1 §3.4, P3-G2 §2.3) |
@@ -119,7 +119,7 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 
 | # | Criterion | PWA pass condition | SPFx pass condition | Evidence |
 |---|---|---|---|---|
-| 1 | Canvas-first home | `@hbc/project-canvas` renders project home | `@hbc/project-canvas` renders project home | Canvas rendering: both lanes show canvas, not fixed dashboard |
+| 1 | Canvas-first home | `@hbc/project-canvas` renders the project-scoped Control Center route | `@hbc/project-canvas` renders the project-scoped Control Center route | Canvas rendering: both lanes show canvas on `/project-hub/{projectId}`, not on the unscoped portfolio root |
 | 2 | Mandatory operational core | Identity header + Health + Work Queue + Related Items + Activity tiles present | Same 5 mandatory surfaces present | Tile verification: all mandatory tiles registered and rendering |
 | 3 | Governance tiers | Mandatory locked tiles cannot be removed/moved; role-default present; optional available | Same governance enforcement | Edit-mode test: locked tiles resist manipulation |
 | 4 | Personalization | Full governed adaptive composition | Full governed adaptive composition | Canvas edit test: add/remove/reorder/resize non-mandatory tiles |
@@ -247,7 +247,7 @@ Phase 3 is complete only when all gates in §18.1–§18.7 pass with evidence. T
 | # | Scenario | PWA pass condition | SPFx pass condition | Evidence |
 |---|---|---|---|---|
 | 1 | Activation flow | Full activation produces valid project with routeable context | Same | End-to-end activation test |
-| 2 | Project switching | In-app switching preserves context (P3-B1 §2) | Host-aware fallback (P3-B1 §8.4) | Multi-project switching test |
+| 2 | Project Hub root entry and project switching | Multi-project `/project-hub` lands on portfolio root; single-project `/project-hub` auto-routes to `/project-hub/{projectId}`; in-project switching uses same-section resolution with Control Center fallback | Host-aware fallback (P3-B1 §8.4) | Multi-project root-entry and switching test with URL capture, preserved `projectId`, and restored portfolio state after Back to Portfolio |
 | 3 | Stale draft handling | Staleness warning shown; refresh available; export gated | Staleness warning shown | Stale draft scenario test |
 | 4 | Cross-lane launch SPFx→PWA | Deep-link arrival resolves project and module | Launch-to-PWA constructs correct deep link | Round-trip test (P3-G2 §3) |
 | 5 | Cross-lane launch PWA→SPFx | Opens SPFx site in new tab via `siteUrl` | Site opens with correct project | Navigation test (P3-G2 §4) |
@@ -287,8 +287,10 @@ Summary of all evidence artifacts organized by lane:
 |---|---|---|
 | Full feed/timeline pages | Work Queue feed, Activity timeline, Report history | P3-G1 §4 |
 | Canvas persistence depth | IndexedDB + server sync with session recovery | P3-C3 §6.1 |
-| In-app project switching | Full context-preserving switching | P3-B1 §2 |
-| Return-memory | Per-project return-memory maintained | P3-B1 §8.5 |
+| In-app project switching | Same-section switching with target-project Control Center fallback | P3-B1 §5 |
+| Project Hub root entry semantics | Multi-project direct entry stays on the portfolio root; single-project direct entry canonicalizes to `/project-hub/{projectId}`; evidence includes captured URLs for both cases | P3-B1 §2 |
+| Return-memory | Per-project return-memory maintained for project-scoped routes; explicit `/project-hub` entry is never overridden by prior-project memory; evidence includes re-entry URL and restored scoped context | P3-B1 §4, §6 |
+| Portfolio-root continuity | Filters, search, sort, and scroll restore when returning via Back to Portfolio; evidence includes restored portfolio-root UI state rather than only the root URL | P3-B1 §4.6, §5.5 |
 | Deep-link handler | Processes SPFx-to-PWA arrivals | P3-B1 §6.1, P3-G2 §7 |
 | Advanced canvas admin | Full admin panel access | P3-C3 §8 |
 | Schedule file ingestion | XER/XML/CSV upload + parsing | P3-G1 §4.2 |
@@ -299,7 +301,7 @@ Summary of all evidence artifacts organized by lane:
 
 | Evidence category | Description | Governing deliverable |
 |---|---|---|
-| Launch-to-PWA escalation | Correct deep links for 13 escalation scenarios (incl. 3 executive review) | P3-G2 §3 |
+| Launch-to-PWA escalation | Correct deep links for 13 escalation scenarios (incl. 3 executive review); cross-project launches land on the PWA portfolio root rather than a project-scoped fallback | P3-G2 §3 |
 | Canvas persistence | localStorage + SharePoint list | P3-C3 §6.2 |
 | Host-aware switching | Project switching with site-scoped fallbacks | P3-B1 §8.4 |
 | Broad module pages | Substantial direct working capability | P3-G1 §4, §5.1 |

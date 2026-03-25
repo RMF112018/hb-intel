@@ -44,7 +44,7 @@ const routeSyncGroups: SidebarNavGroup[] = [
     id: 'project-hub',
     label: 'Project Hub',
     items: [
-      { id: 'portfolio', label: 'Portfolio', icon: <Home size="md" />, href: '/project-hub/portfolio' },
+      { id: 'portfolio', label: 'Portfolio', icon: <Home size="md" />, href: '/project-hub' },
       { id: 'recent', label: 'Recent', icon: <DrawingSheet size="md" />, href: '/project-hub/recent' },
     ],
   },
@@ -81,8 +81,8 @@ class StoryNavHistory implements RouterHistoryLike {
   }
 }
 
-const navDemoHistory = new StoryNavHistory('/project-hub/portfolio');
-const navDemoStack = ['/project-hub/portfolio', '/accounting/overview', '/accounting/invoices'];
+const navDemoHistory = new StoryNavHistory('/project-hub');
+const navDemoStack = ['/project-hub', '/accounting/overview', '/accounting/invoices'];
 
 function RouteSyncDemo(): React.ReactNode {
   const [index, setIndex] = React.useState(0);

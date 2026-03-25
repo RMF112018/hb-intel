@@ -10,6 +10,7 @@ import type { ComponentType } from 'react';
 import { createRootRoute, Outlet, useRouter, useRouterState } from '@tanstack/react-router';
 import {
   useNavStore,
+  useProjectStore,
   resolveShellStatusSnapshot,
   captureIntendedDestination,
   restoreRedirectTarget,
@@ -25,6 +26,10 @@ import { useCurrentUser, useAuthStore } from '@hbc/auth';
 import { useConnectivity, HbcSyncStatusBadge } from '@hbc/session-state';
 import { buildSidebarGroupsFromRegistry, mapCurrentUserToShellUser } from '../utils/shell-bridge.js';
 import { performPwaSignOut } from '../auth/signOut.js';
+import {
+  buildProjectHubPath,
+  resolveProjectHubSwitchTarget,
+} from './projectHubRouting.js';
 
 // UIF-012: DevToolbarMenuEntry replaces the fixed bottom bar — lives in user avatar menu.
 // Same lazy-guard pattern as DevToolbar in App.tsx (D-PH5C-06/D-PH5C-02).
@@ -41,6 +46,7 @@ function RootComponent(): React.ReactNode {
   const stopNavSync = useNavStore((s) => s.stopNavSync);
   const currentUser = useCurrentUser();
   const activeWorkspace = useNavStore((s) => s.activeWorkspace);
+  const availableProjects = useProjectStore((s) => s.availableProjects);
   const lifecyclePhase = useAuthStore((s) => s.lifecyclePhase);
   const structuredError = useAuthStore((s) => s.structuredError);
 
@@ -108,7 +114,33 @@ function RootComponent(): React.ReactNode {
 
   // Hide project selector on pages that are not project-scoped (My Work).
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const showProjectSelector = !pathname.startsWith('/my-work');
+  const showProjectSelector =
+    pathname.startsWith('/project-hub') && availableProjects.length > 1;
+
+  const handleProjectSelect = React.useCallback(
+    (projectId: string) => {
+      const parts = pathname.split('/').filter(Boolean);
+      if (parts[0] !== 'project-hub') {
+        void router.navigate({ to: buildProjectHubPath(projectId) });
+        return;
+      }
+
+      if (parts.length < 2 || !parts[1]) {
+        void router.navigate({ to: buildProjectHubPath(projectId) });
+        return;
+      }
+
+      const targetPath = resolveProjectHubSwitchTarget({
+        currentProjectId: parts[1],
+        currentSection: parts[2] ?? null,
+        targetProjectId: projectId,
+      });
+
+      if (targetPath === pathname) return;
+      void router.navigate({ to: targetPath });
+    },
+    [pathname, router],
+  );
 
   const shellUser = mapCurrentUserToShellUser(currentUser);
   const sidebarGroups = React.useMemo(
@@ -138,6 +170,7 @@ function RootComponent(): React.ReactNode {
         onNavigate={(href: string) => {
           void router.navigate({ to: href });
         }}
+        onProjectSelect={handleProjectSelect}
         onSignOut={() => {
           void performPwaSignOut().then(() => {
             void router.navigate({ to: '/' });

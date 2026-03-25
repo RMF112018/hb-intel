@@ -110,11 +110,11 @@ export function createBdStrategicIntelligenceQueryFn(): (userId: string) => Prom
 export function createHealthPulseQueryFn(): (userId: string) => Promise<IBicRegisteredItem[]> {
   return async (_userId) => [
     {
-      itemKey: 'project-hub-pmp::proj-001',
+      itemKey: 'project-hub-pmp::proj-uuid-001',
       moduleKey: 'project-hub-pmp',
       moduleLabel: 'Project Health Pulse',
-      title: 'Harbor View Medical Center — Health Pulse',
-      href: '/project-hub?projectId=proj-001&view=health',
+      title: 'City Center Tower — Health Pulse',
+      href: '/project-hub/proj-uuid-001?view=health',
       state: buildState({
         expectedAction: 'Review critical cost dimension and compound risk',
         urgencyTier: 'immediate',
@@ -123,25 +123,14 @@ export function createHealthPulseQueryFn(): (userId: string) => Promise<IBicRegi
       }),
     },
     {
-      itemKey: 'project-hub-pmp::proj-002',
+      itemKey: 'project-hub-pmp::proj-uuid-002',
       moduleKey: 'project-hub-pmp',
       moduleLabel: 'Project Health Pulse',
-      title: 'Riverside Office Complex — Health Pulse',
-      href: '/project-hub?projectId=proj-002&view=health',
+      title: 'Harbor Bridge Renovation — Health Pulse',
+      href: '/project-hub/proj-uuid-002?view=health',
       state: buildState({
         expectedAction: 'Monitor field dimension trend',
         urgencyTier: 'watch',
-      }),
-    },
-    {
-      itemKey: 'project-hub-pmp::proj-003',
-      moduleKey: 'project-hub-pmp',
-      moduleLabel: 'Project Health Pulse',
-      title: 'Downtown Transit Hub — Health Pulse',
-      href: '/project-hub?projectId=proj-003&view=health',
-      state: buildState({
-        expectedAction: 'No action needed — all dimensions healthy',
-        urgencyTier: 'upcoming',
       }),
     },
   ];

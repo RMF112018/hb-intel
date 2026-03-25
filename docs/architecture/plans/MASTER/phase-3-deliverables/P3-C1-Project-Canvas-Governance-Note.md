@@ -15,7 +15,7 @@
 
 ## Governance Statement
 
-The Project Hub home is **canvas-first** (Phase 3 plan §9.1). `@hbc/project-canvas` is a required foundation — the project home surface is not a fixed dashboard with optional personalization bolted on later. Canvas governance is part of the product definition.
+The Project Hub project-scoped home is **canvas-first** (Phase 3 plan §9.1). `@hbc/project-canvas` is a required foundation for the canonical project-scoped Control Center route at `/project-hub/{projectId}` — that surface is not a fixed dashboard with optional personalization bolted on later. Canvas governance is part of the product definition. The unscoped `/project-hub` portfolio root is a separate operating surface and is not governed by this note.
 
 Phase 3 uses **governed flexibility**:
 
@@ -24,7 +24,7 @@ Phase 3 uses **governed flexibility**:
 - Some tiles are **role-default but adjustable** — present on first load, but users may reorder or resize them.
 - Some tiles are **optional/user-managed** — added from the tile catalog at the user's discretion.
 
-This note formalizes the tile registration rules, mandatory tile policy, role-default assignments, complexity-tier rendering, edit-mode constraints, data-source transparency, persistence model, and cross-lane consistency rules that govern the canvas-first project home.
+This note formalizes the tile registration rules, mandatory tile policy, role-default assignments, complexity-tier rendering, edit-mode constraints, data-source transparency, persistence model, and cross-lane consistency rules that govern the canvas-first project-scoped home / Control Center.
 
 **Repo-truth audit — 2026-03-21.** `@hbc/project-canvas` (v0.0.1, SF13, ADR-0102 locked) is mature with a complete `TileRegistry`, 12 reference tile definitions, 3 complexity tiers (essential/standard/expert), `ROLE_DEFAULT_TILES` mapping for 6 roles, `useCanvasEditor` with governance enforcement, `useCanvasMandatoryTiles` hook, `CanvasApi` for persistence/reset/recommendations, and health-pulse canvas integration adapter. See §1 for full reconciliation.
 
@@ -405,8 +405,8 @@ Lane differences are limited to **depth and continuity** (PWA richer per P3-G1),
 5. **Health-pulse canvas adapter — compliant**
    `projectHealthPulseToCanvasTile()` in `packages/features/project-hub/src/health-pulse/integrations/projectCanvasAdapter.ts` correctly projects health-pulse data into a canvas tile with `DataSourceBadge: 'Hybrid'`. Classified as **compliant**.
 
-6. **Canvas not yet rendered on project home — controlled evolution**
-   Neither the PWA `ProjectHubPage` nor the SPFx `DashboardPage` currently renders `HbcProjectCanvas`. Both show a portfolio-level data table. Phase 3 must replace the portfolio dashboard with the canvas-first per-project home. Classified as **controlled evolution**.
+6. **Route split is live; canvas adoption on the project-scoped Control Center remains controlled evolution**
+   Repo truth now explicitly separates the meaningful unscoped portfolio root (`/project-hub`) from the project-scoped Control Center at `/project-hub/{projectId}`. The remaining controlled-evolution gap is canvas adoption on that project-scoped Control Center route and the matching SPFx home surface. The portfolio root is not replaced by canvas; the project-scoped Control Center is the route that must render `HbcProjectCanvas`. Classified as **controlled evolution**.
 
 7. **Tile catalog uses `@dnd-kit/core` for drag-and-drop — compliant**
    The `HbcCanvasEditor` component uses `@dnd-kit/core` for tile drag-and-drop during edit mode, which is declared as a dependency. Classified as **compliant**.
@@ -420,7 +420,7 @@ Lane differences are limited to **depth and continuity** (PWA richer per P3-G1),
 | Field | Value |
 |---|---|
 | **Pass condition** | Project home is canvas-first; mandatory operational core surfaces exist on every home canvas; canvas governance supports locked, role-default, and optional tile classes |
-| **Evidence required** | P3-C1 (this document), `HbcProjectCanvas` rendered on project home in both lanes, mandatory tile presence verification, edit-mode constraint tests, role-default layout tests |
+| **Evidence required** | P3-C1 (this document), `HbcProjectCanvas` rendered on the project-scoped Control Center in both lanes, mandatory tile presence verification, edit-mode constraint tests, role-default layout tests |
 | **Primary owner** | Experience / Shell + Project Hub platform owner |
 
 ---

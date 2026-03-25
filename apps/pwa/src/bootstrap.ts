@@ -16,28 +16,20 @@ import { useProjectStore, useNavStore } from '@hbc/shell';
 
 const MOCK_PROJECTS: IActiveProject[] = [
   {
-    id: 'PRJ-001',
-    name: 'Harbor View Medical Center',
-    number: 'HV-2025-001',
+    id: 'proj-uuid-001',
+    name: 'City Center Tower',
+    number: 'PRJ-001',
     status: 'Active',
-    startDate: '2025-01-15',
-    endDate: '2027-06-30',
+    startDate: '2026-01-01',
+    endDate: '2028-06-30',
   },
   {
-    id: 'PRJ-002',
-    name: 'Riverside Office Complex',
-    number: 'RC-2025-002',
+    id: 'proj-uuid-002',
+    name: 'Harbor Bridge Renovation',
+    number: 'PRJ-002',
     status: 'Active',
-    startDate: '2025-03-01',
-    endDate: '2026-12-15',
-  },
-  {
-    id: 'PRJ-003',
-    name: 'Downtown Transit Hub',
-    number: 'DT-2025-003',
-    status: 'Planning',
-    startDate: '2025-06-01',
-    endDate: '2028-02-28',
+    startDate: '2026-03-01',
+    endDate: '2027-12-31',
   },
 ];
 
@@ -58,7 +50,7 @@ export function bootstrapMockEnvironment(): void {
   usePermissionStore.getState().setPermissions(resolveBootstrapPermissions(persona));
   usePermissionStore.getState().setFeatureFlags(DEFAULT_FEATURE_FLAGS);
   useProjectStore.getState().setAvailableProjects(MOCK_PROJECTS);
-  useProjectStore.getState().setActiveProject(MOCK_PROJECTS[0]);
+  useProjectStore.getState().setActiveProject(null);
   useNavStore.getState().setActiveWorkspace('project-hub');
 
   console.log(

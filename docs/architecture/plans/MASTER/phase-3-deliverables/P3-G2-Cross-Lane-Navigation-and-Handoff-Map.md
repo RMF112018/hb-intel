@@ -54,6 +54,8 @@ Both lanes consume the same canonical shared contracts. Lane differences are abo
 | **Cross-lane navigation** | Any user navigation that transitions between the PWA and SPFx lanes |
 | **Launch-to-PWA** | SPFx navigation pattern that opens the PWA for deeper interaction via a constructed deep link |
 | **Deep link** | A URL that targets a specific project and optionally a specific module/page within the PWA |
+| **Portfolio root** | The permission-aware unscoped Project Hub route at `/project-hub`; meaningful oversight + launch surface, not a thin selector |
+| **Control Center** | The canonical project-scoped Project Hub route at `/project-hub/{projectId}` |
 | **Handoff** | A cross-lane navigation that carries project identity and context from the source lane to the target lane |
 | **returnTo parameter** | A URL-encoded return path included in a deep link for back-navigation to the source |
 | **Site-URL resolution** | The process of resolving a SharePoint site URL to a project identity (P3-B1 §2.3) |
@@ -90,11 +92,11 @@ Both lanes consume the same canonical shared contracts. Lane differences are abo
 
 | Component | Format | Example |
 |---|---|---|
-| Project home | `/project-hub/{projectId}` | `/project-hub/abc-123` |
+| Project Control Center | `/project-hub/{projectId}` | `/project-hub/abc-123` |
 | Module page | `/project-hub/{projectId}/{module}` | `/project-hub/abc-123/financial` |
 | Module with filter | `/project-hub/{projectId}/{module}?{params}` | `/project-hub/abc-123/permits?status=active` |
 | Personal Work Hub | `/my-work` | `/my-work` |
-| Project selector | `/project-hub` | `/project-hub` |
+| Portfolio root | `/project-hub` | `/project-hub` |
 
 ### 2.2 SPFx URL format
 
@@ -124,7 +126,7 @@ Every scenario where SPFx navigates to PWA:
 
 | # | Scenario | Trigger surface | Deep-link target | Context params | Return behavior |
 |---|---|---|---|---|---|
-| 1 | **Cross-project navigation** | Any SPFx surface needing another project | `/project-hub` (project selector) | None | No return (new project context) |
+| 1 | **Cross-project navigation** | Any SPFx surface needing another project | `/project-hub` (portfolio root) | None | No return (new project context) |
 | 2 | **Schedule file ingestion** | Schedule module "Import Schedule" action | `/project-hub/{projectId}/schedule?action=import` | `projectId`, `returnTo` | Return to SPFx schedule view |
 | 3 | **Schedule upload history/restore** | Schedule module "View History" action | `/project-hub/{projectId}/schedule?view=history` | `projectId`, `returnTo` | Return to SPFx schedule view |
 | 4 | **Report run-ledger history** | Reports module "View Full History" action | `/project-hub/{projectId}/reports?view=history` | `projectId`, `returnTo` | Return to SPFx reports view |
@@ -223,7 +225,7 @@ All cross-lane navigation MUST preserve project identity. All generated deep lin
 ### 6.3 Fallback behavior
 
 When no `returnTo` is available and return-memory does not apply:
-- PWA: navigate to the project home canvas
+- PWA: navigate to the target project's Control Center
 - SPFx: navigate to the project site home page
 
 ---
@@ -254,9 +256,9 @@ When no `returnTo` is available and return-memory does not apply:
 
 | Error | Behavior |
 |---|---|
-| Project not found | Redirect to project selector with "Project not found" feedback |
-| Access denied | Redirect to project selector with "Access denied" feedback |
-| Invalid module path | Redirect to project home for the given project |
+| Project not found | Render dedicated in-shell Project Hub not-available state using `@hbc/smart-empty-state`; no silent redirect to another project or workspace |
+| Access denied | Render dedicated in-shell Project Hub no-access state using `@hbc/smart-empty-state`; no silent redirect to another project or workspace |
+| Invalid module path | Fall back only to the authorized target project's Control Center |
 | Network error | Show standard offline/error state |
 
 ---

@@ -11,11 +11,23 @@ The PWA is the full-capability HB Intel surface for desktop and tablet users. It
 | Route | Type | Component |
 |-------|------|-----------|
 | `/my-work` | Workspace | Personal Work Hub (Phase 2) |
-| `/project-hub` | Workspace | Project portfolio overview |
+| `/project-hub` | Workspace | Project Hub portfolio root (permission-aware unscoped root) |
+| `/project-hub/$projectId` | Workspace | Project-scoped Control Center |
+| `/project-hub/$projectId/$section` | Workspace | Project-scoped compatibility / same-section route envelope |
 | `/admin` | Workspace | System administration (Administrator only) |
 | `/project-setup` | Non-workspace | Project setup wizard |
 | `/projects` | Non-workspace | Request status list |
 | `/provisioning/$projectId` | Non-workspace | Provisioning detail |
+
+## Project Hub Routing
+
+The PWA now treats Project Hub as two related but distinct routing surfaces:
+
+- `/project-hub` is the meaningful unscoped portfolio root. Multi-project direct entry lands here first.
+- `/project-hub/$projectId` is the canonical project-scoped Control Center route. Single-project direct entry to `/project-hub` canonicalizes here immediately.
+- `/project-hub/$projectId/$section` is a compatibility and future same-section route seam. Unsupported sections fall back only within the same authorized project to its Control Center.
+
+Project selection from the portfolio root is route-driven and navigates to `/project-hub/$projectId`. In-project switching is also route-driven and uses same-section switching with Control Center fallback. Zero-access, unauthorized, and invalid-context Project Hub states render in-shell using `@hbc/smart-empty-state`; the app does not silently reroute to another project or another workspace.
 
 ## Personal Work Hub Architecture
 

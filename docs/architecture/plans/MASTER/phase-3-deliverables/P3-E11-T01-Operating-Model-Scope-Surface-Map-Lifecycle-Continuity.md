@@ -391,7 +391,7 @@ The relationship between Startup and Closeout is one of the most consequential b
 | Contract | Relationship |
 |---|---|
 | P3-E1 §3.10 | Module classification — always-on lifecycle module; readiness program |
-| P3-E2 §13 | SoT and action-authority matrix — Startup's SoT scope must be consistent with §13 entries |
+| P3-E2 §15 | SoT and action-authority matrix — Startup's SoT scope must be consistent with §15 entries |
 | P3-D1 Activity Spine | Startup publishes lifecycle events; event catalog in T08 §1 |
 | P3-D2 Health Spine | Startup publishes readiness state and surface metrics; metric catalog in T08 §2 |
 | P3-D3 Work Queue | Startup raises and clears Work Queue items; item catalog in T08 §3 |

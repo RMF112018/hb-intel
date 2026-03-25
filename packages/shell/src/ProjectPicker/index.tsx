@@ -15,7 +15,6 @@ export interface ProjectPickerProps {
 export function ProjectPicker({ onProjectSelect }: ProjectPickerProps): ReactNode {
   const activeProject = useProjectStore((s) => s.activeProject);
   const availableProjects = useProjectStore((s) => s.availableProjects);
-  const setActiveProject = useProjectStore((s) => s.setActiveProject);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -37,7 +36,6 @@ export function ProjectPicker({ onProjectSelect }: ProjectPickerProps): ReactNod
               role="option"
               aria-selected={project.id === activeProject?.id}
               onClick={() => {
-                setActiveProject(project);
                 onProjectSelect?.(project);
                 setIsOpen(false);
               }}

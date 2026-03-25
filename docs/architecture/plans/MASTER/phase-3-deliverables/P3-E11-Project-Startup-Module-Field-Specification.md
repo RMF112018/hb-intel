@@ -9,7 +9,7 @@
 | **Owner** | Project Hub Leadership |
 | **Last Updated** | 2026-03-24 |
 | **Status** | Specification — locked architecture; T-files govern; **T10 implementation complete (all 8 stages, 31/31 acceptance criteria verified, 630 tests, v0.1.72)** |
-| **Related contracts** | P3-E1 §3.10, P3-E2 §13, P3-E3 §9.7, P3-H1 §18.6, P3-D1 (Activity), P3-D2 (Health), P3-D3 (Work Queue), P3-D4 (Related Items) |
+| **Related contracts** | P3-E1 §3.10, P3-E2 §15, P3-E3 §9.7, P3-H1 §18.6, P3-E15 (QC downstream continuity seam), P3-D1 (Activity), P3-D2 (Health), P3-D3 (Work Queue), P3-D4 (Related Items) |
 
 ---
 
@@ -141,13 +141,14 @@ The following 10 decisions are binding. All T-files conform to these decisions. 
 | Concern | Governing source |
 |---|---|
 | Module classification | P3-E1 §3.10 |
-| SoT and action boundary | P3-E2 §13 |
+| SoT and action boundary | P3-E2 §15 |
 | Activity Spine publication contract | P3-D1 + T08 §1 |
 | Health Spine publication contract | P3-D2 + T08 §2 |
 | Work Queue items | P3-D3 + T08 §3 |
 | Related-items relationship pairs | P3-D4 + T08 §4 |
 | Reports integration | P3-E9 (Reports) + T08 §5 |
 | Lane capability (PWA / SPFx) | P3-G1 §4.10 + T09 §2 |
+| QC downstream continuity seam | P3-E15-T09 — QC may consume Startup baseline context and later publish turnover-quality readiness lineage without mutating any Startup record |
 | Acceptance criteria | P3-H1 §18.6 + T10 §5 |
 | Shared package integration | T09 §3 |
 | Role and visibility governance | T09 §1 |

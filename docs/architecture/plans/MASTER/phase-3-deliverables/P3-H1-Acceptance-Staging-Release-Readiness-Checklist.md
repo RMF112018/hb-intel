@@ -8,7 +8,7 @@
 | **Document Type** | Active Reference |
 | **Owner** | Architecture + Project Hub platform owner |
 | **Update Authority** | Architecture lead; updated as implementation progresses and evidence is collected |
-| **Last Reviewed Against Repo Truth** | 2026-03-21 |
+| **Last Reviewed Against Repo Truth** | 2026-03-24 |
 | **References** | [Phase 3 Plan §18, §22](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-G3](P3-G3-Lane-Specific-Acceptance-Matrix.md); all Phase 3 deliverables (P3-A1 through P3-G3) |
 
 ---
@@ -62,9 +62,9 @@ Phase 3 is complete only when all §18 gates pass with evidence (Phase 3 plan §
 |---|---|---|---|---|
 | 2.1 | Same canonical project identity — PWA resolves from route, SPFx from siteUrl | Not Started | | P3-B1 §2, P3-G3 §3.1 |
 | 2.2 | Same membership validation — P3-A2 rules enforced in both lanes | Not Started | | P3-A2 §6, P3-G3 §3.2 |
-| 2.3 | Smart project switching — PWA in-app, SPFx host-aware fallbacks | Not Started | | P3-B1 §2, P3-G3 §3.3 |
+| 2.3 | Project Hub root entry and smart project switching — multi-project `/project-hub` lands on portfolio root first, single-project `/project-hub` auto-routes to `/project-hub/{projectId}`, PWA switching uses same-section resolution with Control Center fallback, SPFx remains host-aware | Not Started | | Evidence must capture actual URL transitions, preserved `projectId`, and restored portfolio-root state after Back to Portfolio. P3-B1 §2, §5; P3-G3 §3.3 |
 | 2.4 | Cross-lane handoff identity — projectId preserved during SPFx↔PWA | Not Started | | P3-G2 §5, P3-G3 §3.4 |
-| 2.5 | No context loss during handoff — deep-link handler processes arrival | Not Started | | P3-B1 §6.1, P3-G3 §3.5 |
+| 2.5 | No context loss during handoff — deep-link handler processes arrival | Not Started | | Evidence must show unauthorized or invalid deep links render in-shell `@hbc/smart-empty-state` and do not reroute to another project or workspace. P3-B1 §6.1, P3-G3 §3.5 |
 | 2.6 | PER scope validation enforced — PER non-membership scoping applied in both lanes | Not Started | | P3-A2 §3.2, P3-G3 §3.6 |
 | 2.7 | PER vs. membership distinction — review-layer access does not imply project membership in either lane | Not Started | | P3-A2 §6.4, P3-G3 §3.7 |
 | 2.8 | projectId normalization in handoff — all outbound deep links use projectId; projectNumber inbound normalized via registry before any cross-lane handoff | Not Started | | P3-A1 §3.4, P3-G2 §5.1, P3-G3 §3.8 |
@@ -238,48 +238,63 @@ Full acceptance gate: P3-E11-T10 §5 (31 acceptance criteria, AC items 1–31). 
 | 6.6.11 | All Activity Spine events, Health metrics, Work Queue item types, and Related Items registrations fire on their governed T08 trigger conditions and relationship contracts | Not Started | | P3-E11-T10 §5 items 24–26; T08 §1–§4 |
 | 6.6.12 | `@hbc/field-annotations` writes isolated from operational records; post-lock annotation continues; Startup publishes to shared spines/canvas only and does not publish to Reports or org-intelligence indexes | Not Started | | P3-E11-T10 §5 items 27–28; T08 §5, T09 §6 |
 | 6.6.13 | Canvas tile registered (`StartupCanvasTileAdapter`); pre-lock and post-lock tile states correct | Not Started | | P3-E11-T10 §5 items 29–30; T09 §10 |
-| 6.6.14 | All Startup surfaces use `WorkspacePageShell`; all components sourced from `@hbc/ui-kit`; all empty sub-surface states use `HbcSmartEmptyState` | Not Started | | P3-E11-T10 §5 item 31; §6.8.9 |
+| 6.6.14 | All Startup surfaces use `WorkspacePageShell`; all components sourced from `@hbc/ui-kit`; all empty sub-surface states use `HbcSmartEmptyState` | Not Started | | P3-E11-T10 §5 item 31; §6.10.9 |
 
-### 6.7 Warranty
+### 6.7 Project Quality Control
+
+Full acceptance gate: P3-E15-T10 §7 (QC family acceptance by T-file area). Items below are the high-level module gates required for Phase 3 release readiness.
+
+| # | Criterion | Status | Evidence | Notes |
+|---|---|---|---|---|
+| 6.7.1 | Governance/versioning rules enforced: MOE/Admin publish governed core, project extensions remain bounded, verifier designation and project snapshot/update-notice rules match P3-E15-T02 | Not Started | | P3-E15-T10 §7.1 |
+| 6.7.2 | Record-family contracts implemented with authoritative identity, lineage, and metadata for plans, reviews, issues, deviations, evidence, approvals, advisory, health, and handoff snapshots | Not Started | | P3-E15-T10 §7.2; P3-E15-T03 |
+| 6.7.3 | Work-package quality plans, review packages, review findings, and soft-gated control gates behave per T04; actionable findings can spawn QC issues with preserved lineage | Not Started | | P3-E15-T10 §7.3; P3-E15-T04 |
+| 6.7.4 | `QcIssue` and `CorrectiveAction` lifecycle, assignment, ready-for-review, verification closure, root-cause hook, and My Work publication behavior match T05 without exposing QC-only fields outward | Not Started | | P3-E15-T10 §7.4; P3-E15-T05 |
+| 6.7.5 | Deviation, evidence, and external approval dependency records enforce governed minimum requirements, approval auditability, and readiness effects without becoming external collaboration workspaces | Not Started | | P3-E15-T10 §7.5; P3-E15-T06 |
+| 6.7.6 | Submittal-completeness advisory stays advisory-only, stores metadata/reference records only, uses official-source currentness rules, and gates downstream activation per T07 | Not Started | | P3-E15-T10 §7.6; P3-E15-T07 |
+| 6.7.7 | Quality health snapshots, responsible-organization rollups, and root-cause learning outputs remain derived, drill back to QC source records, and do not create alternate operational ledgers | Not Started | | P3-E15-T10 §7.7; P3-E15-T08 |
+| 6.7.8 | Schedule-awareness, turnover-quality readiness, and downstream handoff seams to Closeout, Startup, Warranty, and future Site Controls preserve lineage and do not transfer QC ownership | Not Started | | P3-E15-T10 §7.8; P3-E15-T09 |
+
+### 6.8 Warranty
 
 For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (AC-WAR-01 through AC-WAR-46). The criteria below are the high-level module-level gates required for Phase 3 release readiness.
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.7.1 | All TypeScript interfaces (T02, T05, T06) compile; enums match canonical definitions; authority matrix gates correctly; Layer 2 seam fields present and optional | Not Started | | P3-E14-T10 AC-WAR-01 through AC-WAR-06 |
-| 6.7.2 | 16-state case machine fully implemented; invalid transitions return 409; SLA computation correct for Standard/Expedited; SLA pauses at AwaitingOwner; daily expiration sweep works; `businessDaysBetween` in shared package | Not Started | | P3-E14-T10 AC-WAR-07 through AC-WAR-14 |
-| 6.7.3 | All 24 Activity events, 20 Work Queue rules, Health metrics, and system views registered with shared packages; no local substitutes | Not Started | | P3-E14-T10 AC-WAR-15 through AC-WAR-20 |
-| 6.7.4 | PWA surfaces: Coverage Registry, Case Workspace (5 tabs), Next Move card, complexity dial, smart empty states, owner status summary, communications tab | Not Started | | P3-E14-T10 AC-WAR-21 through AC-WAR-30 |
-| 6.7.5 | SPFx surfaces: read-only coverage/case lists, Launch-to-PWA for mutations, canvas tile, deep-links | Not Started | | P3-E14-T10 AC-WAR-31 through AC-WAR-34 |
-| 6.7.6 | Reports assembly, telemetry (no PII), back-charge advisory to Financial (no Financial record writes) | Not Started | | P3-E14-T10 AC-WAR-35 through AC-WAR-38 |
-| 6.7.7 | No owner-facing routes/views/auth; no subcontractor direct-access; EXT_OWNER/EXT_SUB roles absent | Not Started | | P3-E14-T10 AC-WAR-39 through AC-WAR-41 |
-| 6.7.8 | Mold-breaker UX: PM can close case without leaving workspace; Next Move visible without scrolling; owner intake + SLA + responsible party in single view | Not Started | | P3-E14-T10 AC-WAR-42 through AC-WAR-46 |
+| 6.8.1 | All TypeScript interfaces (T02, T05, T06) compile; enums match canonical definitions; authority matrix gates correctly; Layer 2 seam fields present and optional | Not Started | | P3-E14-T10 AC-WAR-01 through AC-WAR-06 |
+| 6.8.2 | 16-state case machine fully implemented; invalid transitions return 409; SLA computation correct for Standard/Expedited; SLA pauses at AwaitingOwner; daily expiration sweep works; `businessDaysBetween` in shared package | Not Started | | P3-E14-T10 AC-WAR-07 through AC-WAR-14 |
+| 6.8.3 | All 24 Activity events, 20 Work Queue rules, Health metrics, and system views registered with shared packages; no local substitutes | Not Started | | P3-E14-T10 AC-WAR-15 through AC-WAR-20 |
+| 6.8.4 | PWA surfaces: Coverage Registry, Case Workspace (5 tabs), Next Move card, complexity dial, smart empty states, owner status summary, communications tab | Not Started | | P3-E14-T10 AC-WAR-21 through AC-WAR-30 |
+| 6.8.5 | SPFx surfaces: read-only coverage/case lists, Launch-to-PWA for mutations, canvas tile, deep-links | Not Started | | P3-E14-T10 AC-WAR-31 through AC-WAR-34 |
+| 6.8.6 | Reports assembly, telemetry (no PII), back-charge advisory to Financial (no Financial record writes) | Not Started | | P3-E14-T10 AC-WAR-35 through AC-WAR-38 |
+| 6.8.7 | No owner-facing routes/views/auth; no subcontractor direct-access; EXT_OWNER/EXT_SUB roles absent | Not Started | | P3-E14-T10 AC-WAR-39 through AC-WAR-41 |
+| 6.8.8 | Mold-breaker UX: PM can close case without leaving workspace; Next Move visible without scrolling; owner intake + SLA + responsible party in single view | Not Started | | P3-E14-T10 AC-WAR-42 through AC-WAR-46 |
 
-### 6.8 Source-of-Truth Compliance (renumbered from §6.7)
-
-| # | Criterion | Status | Evidence | Notes |
-|---|---|---|---|---|
-| 6.7.1 | Modules respect P3-E2 authority boundaries | Not Started | | P3-E2 |
-| 6.7.2 | All modules publish to all 4 spines per P3-A3 §7 | Not Started | | P3-A3 §7 |
-| 6.7.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | Not Started | | P3-E2 §11.2, P3-G3 §7.6 |
-| 6.7.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Not Started | | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7.6 |
-
-### 6.8 UI Conformance (cross-cutting — all Phase 3 surfaces)
+### 6.9 Source-of-Truth Compliance
 
 | # | Criterion | Status | Evidence | Notes |
 |---|---|---|---|---|
-| 6.8.1 | `WorkspacePageShell` used on every Project Hub page surface — canvas, all modules, all spines, reports, executive review views | Not Started | | P3-C1 §14.2, UI-Kit-Wave1-Page-Patterns.md |
-| 6.8.2 | No hardcoded hex, rgb, or pixel values — `enforce-hbc-tokens` ESLint rule passes clean on all Phase 3 feature packages | Not Started | | P3-C1 §14.2, UI-Kit-Visual-Language-Guide.md |
-| 6.8.3 | All Fluent UI primitives imported through `@hbc/ui-kit` — no direct `@fluentui/react-components` imports (D-10) | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
-| 6.8.4 | Data surface type selected per T06 decision guide for each module list surface — selection documented per surface | Not Started | | P3-C1 §14.2, UI-Kit-Adaptive-Data-Surface-Patterns.md |
-| 6.8.5 | Density system implemented via `useDensity()` — all Project Hub surfaces verified in compact, comfortable, and touch tiers | Not Started | | P3-C1 §14.2, UI-Kit-Field-Readability-Standards.md |
-| 6.8.6 | Touch targets meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` on all interactive elements in all three density tiers | Not Started | | P3-C1 §14.3 MB-07, UI-Kit-Field-Readability-Standards.md |
-| 6.8.7 | Horizontal scroll prohibited — all module data tables operate without horizontal scroll at ≥1024px via adaptive column hiding and card fallback | Not Started | | P3-C1 §14.3 MB-04, UI-Kit-Adaptive-Data-Surface-Patterns.md |
-| 6.8.8 | Card weight differentiation enforced — no equal-weight card grids on canvas tiles or module surfaces; `primary`/`standard`/`supporting` weights used per T04 | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
-| 6.8.9 | Every data-dependent zone uses `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas | Not Started | | P3-C1 §14.2 MB-01, UI-Kit-Usage-and-Composition-Guide.md |
-| 6.8.10 | No feature-local duplicate reusable visual primitives — all new reusable components contributed to `@hbc/ui-kit` with stories, ARIA review, and token-only styling | Not Started | | P3-C1 §14.2, Application Standards Conformance Report |
-| 6.8.11 | Phase 2 UI precedents applied — `DashboardLayout` + `HbcKpiCard` for all KPI surfaces; two-column persistent layout for primary content + context panel surfaces; context-sensitive CTA labels | Not Started | | P3-C1 §14.4, P2-F1 |
-| 6.8.12 | `hb-ui-ux-conformance-reviewer` conformance review passed on all Phase 3 surfaces — evidence recorded in §13 | Not Started | | P3-C1 §14.5 |
+| 6.9.1 | Modules respect P3-E2 authority boundaries | Not Started | | P3-E2 |
+| 6.9.2 | All modules publish to all 4 spines per P3-A3 §7 | Not Started | | P3-A3 §7 |
+| 6.9.3 | Executive review annotation isolation — PER review artifacts stored separately from module source-of-truth; annotations do not mutate PM-owned module records | Not Started | | P3-E2 §11.2, P3-G3 §7.6 |
+| 6.9.4 | Safety executive review exclusion boundary — no review annotation layer on Safety in Phase 3; exclusion enforced in auth and UI | Not Started | | P3-E1 §9.3, P3-E2 §7.4, P3-G3 §7.6 |
+
+### 6.10 UI Conformance (cross-cutting — all Phase 3 surfaces)
+
+| # | Criterion | Status | Evidence | Notes |
+|---|---|---|---|---|
+| 6.10.1 | `WorkspacePageShell` used on every Project Hub page surface — canvas, all modules, all spines, reports, executive review views | Not Started | | P3-C1 §14.2, UI-Kit-Wave1-Page-Patterns.md |
+| 6.10.2 | No hardcoded hex, rgb, or pixel values — `enforce-hbc-tokens` ESLint rule passes clean on all Phase 3 feature packages | Not Started | | P3-C1 §14.2, UI-Kit-Visual-Language-Guide.md |
+| 6.10.3 | All Fluent UI primitives imported through `@hbc/ui-kit` — no direct `@fluentui/react-components` imports (D-10) | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.10.4 | Data surface type selected per T06 decision guide for each module list surface — selection documented per surface | Not Started | | P3-C1 §14.2, UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| 6.10.5 | Density system implemented via `useDensity()` — all Project Hub surfaces verified in compact, comfortable, and touch tiers | Not Started | | P3-C1 §14.2, UI-Kit-Field-Readability-Standards.md |
+| 6.10.6 | Touch targets meet `HBC_DENSITY_TOKENS[tier].touchTargetMin` on all interactive elements in all three density tiers | Not Started | | P3-C1 §14.3 MB-07, UI-Kit-Field-Readability-Standards.md |
+| 6.10.7 | Horizontal scroll prohibited — all module data tables operate without horizontal scroll at ≥1024px via adaptive column hiding and card fallback | Not Started | | P3-C1 §14.3 MB-04, UI-Kit-Adaptive-Data-Surface-Patterns.md |
+| 6.10.8 | Card weight differentiation enforced — no equal-weight card grids on canvas tiles or module surfaces; `primary`/`standard`/`supporting` weights used per T04 | Not Started | | P3-C1 §14.2, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.10.9 | Every data-dependent zone uses `HbcSmartEmptyState` or `HbcEmptyState` — no blank areas | Not Started | | P3-C1 §14.2 MB-01, UI-Kit-Usage-and-Composition-Guide.md |
+| 6.10.10 | No feature-local duplicate reusable visual primitives — all new reusable components contributed to `@hbc/ui-kit` with stories, ARIA review, and token-only styling | Not Started | | P3-C1 §14.2, Application Standards Conformance Report |
+| 6.10.11 | Phase 2 UI precedents applied — `DashboardLayout` + `HbcKpiCard` for all KPI surfaces; two-column persistent layout for primary content + context panel surfaces; context-sensitive CTA labels | Not Started | | P3-C1 §14.4, P2-F1 |
+| 6.10.12 | `hb-ui-ux-conformance-reviewer` conformance review passed on all Phase 3 surfaces — evidence recorded in §13 | Not Started | | P3-C1 §14.5 |
 
 ---
 
@@ -317,10 +332,10 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | # | Scenario | Status | Evidence | Notes |
 |---|---|---|---|---|
 | 8.1 | Activation flow — full end-to-end in both lanes | Not Started | | §9.1 staging scenario |
-| 8.2 | Project switching — PWA in-app, SPFx host-aware | Not Started | | §9.2 staging scenario |
+| 8.2 | Project Hub root entry, Back to Portfolio, and project switching — PWA owns portfolio/root continuity and same-section switching with Control Center fallback; SPFx remains host-aware | Not Started | | §9.2 staging scenario; evidence must include route captures, preserved `projectId`, and restored portfolio state |
 | 8.3 | Stale draft handling — warning + refresh flow | Not Started | | §9.3 staging scenario |
-| 8.4 | Cross-lane launch SPFx→PWA — deep link round-trip | Not Started | | §9.4 staging scenario |
-| 8.5 | Cross-lane launch PWA→SPFx — siteUrl navigation | Not Started | | §9.5 staging scenario |
+| 8.4 | Cross-lane launch SPFx→PWA — deep link round-trip | Not Started | | §9.4 staging scenario; evidence must show canonical project route and preserved `projectId` |
+| 8.5 | Cross-lane launch PWA→SPFx — siteUrl navigation | Not Started | | §9.5 staging scenario; evidence must show no project-identity drift across the handoff |
 | 8.6 | Module spine publication — all modules contributing | Not Started | | §9.6 staging scenario |
 | 8.7 | Canvas governance — edit-mode enforcement | Not Started | | §9.7 staging scenario |
 | 8.8 | Report lifecycle — PX Review and Owner Report full cycle | Not Started | | §9.8 staging scenario |
@@ -343,14 +358,23 @@ For the comprehensive 46-item Warranty acceptance gate, see **P3-E14-T10 §4** (
 | **Expected outcome** | Valid project record with `projectId`, `siteUrl`, status `active`; routeable in both lanes |
 | **Pass criteria** | Both lanes resolve the project; membership rules applied; no partial activation artifacts |
 
-### 9.2 Project switching
+### 9.2 Project Hub root entry and project switching
 
 | Aspect | Definition |
 |---|---|
 | **Preconditions** | Two or more activated projects accessible to the user |
-| **Steps** | 1. Open Project A in PWA. 2. Switch to Project B via context header. 3. Verify context updates. 4. In SPFx, navigate to Project B site. |
-| **Expected outcome** | PWA switches cleanly; return-memory preserved; SPFx resolves correct project |
-| **Pass criteria** | No stale context; correct projectId after switch; module state reflects new project |
+| **Steps** | 1. Navigate directly to `/project-hub` as a multi-project user and verify the portfolio root loads first. 2. Select Project A and land in `/project-hub/{projectId}`. 3. Switch to Project B from an in-project module section and verify same-section switching or Control Center fallback. 4. Use Back to Portfolio and verify portfolio filters/search/sort/scroll restore. 5. Repeat direct navigation to `/project-hub` as a single-project user and verify immediate canonicalization to `/project-hub/{projectId}`. 6. In SPFx, initiate cross-project navigation and verify launch to the PWA portfolio root. |
+| **Expected outcome** | PWA honors the locked portfolio-root versus Control Center doctrine; switching is clean; portfolio state restores on Back to Portfolio; SPFx resolves the correct host-aware launch target |
+| **Pass criteria** | No stale context; multi-project `/project-hub` never silently reopens the last active project; single-project `/project-hub` canonicalizes correctly; correct `projectId` after switch; invalid same-section targets fall back to the target project's Control Center; staging evidence includes the actual URL after each step plus proof that filters/search/sort/scroll were restored on Back to Portfolio |
+
+### 9.2a Unauthorized or invalid deep link
+
+| Aspect | Definition |
+|---|---|
+| **Preconditions** | A project-scoped deep link exists for a project the user cannot access, or for a nonexistent/invalid project context |
+| **Steps** | 1. Open `/project-hub/{projectId}` for an unauthorized project. 2. Open `/project-hub/{projectId}` for a nonexistent project. 3. Open `/project-hub/{projectId}/{badModule}` for an authorized project. |
+| **Expected outcome** | Unauthorized and nonexistent contexts render in-shell Project Hub no-access / not-available states using `@hbc/smart-empty-state`; invalid module paths fall back only to the target project's Control Center |
+| **Pass criteria** | No redirect to another authorized project; no redirect to another workspace; no silent reopening of prior project context; captured evidence shows the in-shell empty-state surface and the unchanged browser location for unauthorized / nonexistent project contexts |
 
 ### 9.3 Stale draft handling
 
@@ -457,9 +481,9 @@ The following items are **explicitly deferred** from Phase 3 and MUST NOT be sil
 | 11.4 | Full ERP/accounting behavior inside Project Hub | Project Hub is an operational financial surface, not an ERP | Out of scope |
 | 11.5 | Full claims/legal/contract-admin behavior inside Constraints | Exceeds operational constraints ledger scope | Future phase |
 | 11.6 | Full jurisdiction-facing permitting package/submission management | Exceeds operational permit ledger scope | Future phase |
-| 11.7 | Deeper field-first execution depth for Quality Control | QC is baseline-visible lifecycle in Phase 3 (P3-E1 §3.7) | Phase 6 |
+| 11.7 | Deeper field/mobile execution depth for Quality Control | P3-E15 delivers the internal Project Hub QC control surface in Phase 3; only deeper field/mobile execution is deferred | Phase 6 |
 | 11.8 | Deeper field-first execution depth for Warranty beyond Layer 1 | Warranty Layer 1 is Phase 3 scope; Layer 2 (external workspace) and deeper field-first depth are deferred per P3-E14 T08 §2 | Phase 6 |
-| 11.9 | Any field-first expansion exceeding baseline-visible lifecycle for QC | Must not leak into Phase 3 acceptance | Future phase |
+| 11.9 | Any field/mobile expansion exceeding the governed P3-E15 QC boundary | Must not leak into Phase 3 acceptance | Future phase |
 | 11.10 | Owner-facing warranty portal, subcontractor direct-access surfaces, or Layer 2 external collaboration | Explicitly deferred per P3-E14 T08 §4 and T10 AC-WAR-39 through AC-WAR-41 | Future phase |
 
 ---
