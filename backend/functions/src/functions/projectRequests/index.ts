@@ -1,5 +1,5 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
+import type { IProjectSetupRequest, IProvisionSiteRequest, ProjectSetupRequestState } from '@hbc/models';
 import { randomUUID } from 'crypto';
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
@@ -13,6 +13,7 @@ import {
   notFoundResponse,
 } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
+import { SagaOrchestrator } from '../provisioningSaga/saga-orchestrator.js';
 
 const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
 
@@ -144,6 +145,45 @@ app.http('advanceRequestState', {
       to: body.newState,
       by: auth.claims.upn,
     });
+
+    // D-PH6-08 automatic provisioning handoff: fire-and-forget saga on approval.
+    if (body.newState === 'ReadyToProvision') {
+      const existingStatus = await services.tableStorage.getProvisioningStatus(existing.projectId);
+      if (!existingStatus || existingStatus.overallStatus === 'Failed') {
+        const provisionRequest: IProvisionSiteRequest = {
+          projectId: existing.projectId,
+          projectNumber: existing.projectNumber!,
+          projectName: existing.projectName,
+          triggeredBy: auth.claims.upn,
+          correlationId: randomUUID(),
+          groupMembers: existing.groupMembers,
+          submittedBy: existing.submittedBy,
+          groupLeaders: existing.groupLeaders,
+          department: existing.department,
+        };
+
+        const orchestrator = new SagaOrchestrator(services, logger);
+        orchestrator.execute(provisionRequest).catch((err) => {
+          logger.error('Auto-provisioning saga failed', {
+            projectId: existing.projectId,
+            correlationId: provisionRequest.correlationId,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        });
+
+        logger.info('Provisioning saga auto-triggered from approval', {
+          requestId,
+          projectId: existing.projectId,
+          correlationId: provisionRequest.correlationId,
+        });
+      } else {
+        logger.info('Provisioning already exists — skipping auto-trigger', {
+          requestId,
+          projectId: existing.projectId,
+          existingStatus: existingStatus.overallStatus,
+        });
+      }
+    }
 
     return successResponse(existing);
   }, { domain: 'projectRequests', operation: 'advanceRequestState' })),
