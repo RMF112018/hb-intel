@@ -83,6 +83,8 @@ export function FinancialControlCenter({
     return (
       <ForecastSummaryPage
         projectId={projectId}
+        viewerRole={viewerRole}
+        complexityTier={complexityTier}
         onBack={handleBackToControlCenter}
       />
     );
