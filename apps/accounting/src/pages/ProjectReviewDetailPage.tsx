@@ -22,6 +22,7 @@ import {
   HbcCard,
   HbcTypography,
   HbcModal,
+  HbcTextField,
   HbcTextArea,
   HbcConfirmDialog,
   HbcStatusTimeline,
@@ -64,7 +65,11 @@ export function ProjectReviewDetailPage(): ReactNode {
   const [holdOpen, setHoldOpen] = useState(false);
   const [clarifyOpen, setClarifyOpen] = useState(false);
   const [clarificationNote, setClarificationNote] = useState('');
+  const [projectNumber, setProjectNumber] = useState('');
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
+  const isProjectNumberValid = PROJECT_NUMBER_PATTERN.test(projectNumber);
   const adminUrl = useMemo(() => getAdminAppUrl(), []);
 
   // ── Data loading ────────────────────────────────────────────────────────
@@ -85,7 +90,7 @@ export function ProjectReviewDetailPage(): ReactNode {
   const performAction = useCallback(
     async (
       newState: IProjectSetupRequest['state'],
-      extras?: { clarificationNote?: string },
+      extras?: { projectNumber?: string; clarificationNote?: string },
       successMessage?: string,
     ) => {
       setActionError(null);
@@ -106,9 +111,11 @@ export function ProjectReviewDetailPage(): ReactNode {
   );
 
   const handleApprove = useCallback(() => {
+    if (!isProjectNumberValid) return;
     setApproveOpen(false);
-    performAction('ReadyToProvision', undefined, 'Request approved.');
-  }, [performAction]);
+    performAction('ReadyToProvision', { projectNumber: projectNumber.trim() }, 'Request approved.');
+    setProjectNumber('');
+  }, [performAction, projectNumber, isProjectNumberValid]);
 
   const handleHold = useCallback(() => {
     setHoldOpen(false);
@@ -344,17 +351,40 @@ export function ProjectReviewDetailPage(): ReactNode {
         </HbcCard>
       )}
 
-      {/* ── Approve Confirmation ─────────────────────────────────────── */}
-      <HbcConfirmDialog
+      {/* ── Approve Modal with Project Number ─────────────────────────── */}
+      <HbcModal
         open={approveOpen}
-        onClose={() => setApproveOpen(false)}
-        onConfirm={handleApprove}
+        onClose={() => { setApproveOpen(false); setProjectNumber(''); }}
         title="Approve Request"
-        description="Approve this project setup request? It will be queued for provisioning."
-        confirmLabel="Approve"
-        variant="warning"
-        loading={actionLoading}
-      />
+        footer={
+          <div className={styles.modalFooter}>
+            <HbcButton variant="secondary" onClick={() => { setApproveOpen(false); setProjectNumber(''); }}>
+              Cancel
+            </HbcButton>
+            <HbcButton
+              variant="primary"
+              onClick={handleApprove}
+              disabled={!isProjectNumberValid || actionLoading}
+            >
+              Approve
+            </HbcButton>
+          </div>
+        }
+      >
+        <p>Approve this project setup request? It will be queued for provisioning.</p>
+        <HbcTextField
+          label="Project Number"
+          value={projectNumber}
+          onChange={setProjectNumber}
+          placeholder="##-###-##"
+          required
+          validationMessage={
+            projectNumber.length > 0 && !isProjectNumberValid
+              ? 'Project number must match format ##-###-## (e.g. 24-001-01)'
+              : undefined
+          }
+        />
+      </HbcModal>
 
       {/* ── Hold Confirmation ────────────────────────────────────────── */}
       <HbcConfirmDialog
