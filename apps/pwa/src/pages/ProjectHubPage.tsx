@@ -304,7 +304,16 @@ export function ProjectHubControlCenterPage({
       {financialSection ? (
         <FinancialControlCenter
           projectId={project.id}
-          onOpenSurface={(toolId) => onModuleOpen?.(`financial/${toolId}`)}
+          onOpenSurface={(toolId) => {
+            // Sub-page routes will be added in a follow-on prompt.
+            // For now, tool selection drives in-page preview behavior.
+            // Once sub-routes exist: onModuleOpen?.(`financial/${toolId}`)
+          }}
+          onSecondaryAction={(action) => {
+            if (action === 'open-history') {
+              // Will route to financial/history when sub-page exists
+            }
+          }}
         />
       ) : reportsSection ? (
         <>

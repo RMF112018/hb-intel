@@ -147,6 +147,19 @@ export function FinancialControlCenterCore({
                 {selectedToolPreview.topIssue}
               </Text>
             )}
+            {/* Contextual actions from the selected tool */}
+            {selectedToolPreview.contextualActions.length > 0 && (
+              <div style={{ marginTop: `${HBC_SPACE_SM}px` }}>
+                <Text size={200} weight="semibold" style={{ color: 'var(--colorNeutralForeground3)' }}>
+                  Actions for this surface:
+                </Text>
+                {selectedToolPreview.contextualActions.map((action) => (
+                  <Text key={action.id} size={200} style={{ display: 'block', marginTop: '2px' }}>
+                    • {action.label} — {action.description}
+                  </Text>
+                ))}
+              </div>
+            )}
             <div className={styles.actionsRow}>
               <HbcButton variant="primary" onClick={() => onOpenSurface?.(selectedToolPreview.toolId)}>
                 Open {selectedToolPreview.label}
@@ -215,6 +228,18 @@ export function FinancialControlCenterCore({
           <div className={styles.driverList}>
             {narrative.blockers.map((blocker, i) => (
               <Text key={i} size={200}>• {blocker}</Text>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Changed Since Prior Version */}
+      {narrative.changeSincePrior.length > 0 && (
+        <Card size="small">
+          <CardHeader header={<Text weight="semibold" size={200}>Changed Since Prior Version</Text>} />
+          <div className={styles.driverList}>
+            {narrative.changeSincePrior.map((change, i) => (
+              <Text key={i} size={200}>• {change}</Text>
             ))}
           </div>
         </Card>
