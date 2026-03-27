@@ -4,6 +4,18 @@ import type {
   ProjectSetupRequestState,
 } from '@hbc/models';
 
+/** Structured error carrying HTTP status and backend error code. */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 export interface IProvisioningApiClient {
   submitRequest(data: Partial<IProjectSetupRequest>): Promise<IProjectSetupRequest>;
   listRequests(state?: ProjectSetupRequestState): Promise<IProjectSetupRequest[]>;
@@ -56,47 +68,67 @@ export function createProvisioningApiClient(
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: response.statusText }));
-      throw new Error((error as { error: string }).error ?? `HTTP ${response.status}`);
+      const body = await response.json().catch(() => ({}));
+      const msg =
+        (body as Record<string, unknown>).message ??
+        (body as Record<string, unknown>).error ??
+        response.statusText;
+      throw new ApiError(
+        String(msg),
+        response.status,
+        (body as Record<string, unknown>).code as string | undefined,
+      );
     }
 
     return response;
   }
 
+  /** Fetch a single-item endpoint and unwrap the `{ data: T }` envelope. */
+  async function fetchItem<T>(path: string, init?: RequestInit): Promise<T> {
+    const res = await authFetch(path, init);
+    const json = await res.json();
+    return (json as { data: T }).data;
+  }
+
+  /** Fetch a list endpoint and unwrap the `{ items: T[], pagination }` envelope. */
+  async function fetchList<T>(path: string): Promise<T[]> {
+    const res = await authFetch(path);
+    const json = await res.json();
+    return (json as { items: T[] }).items;
+  }
+
   return {
     async submitRequest(data) {
-      const res = await authFetch('/project-setup-requests', {
+      return fetchItem<IProjectSetupRequest>('/project-setup-requests', {
         method: 'POST',
         body: JSON.stringify(data),
       });
-      return res.json();
     },
     async listRequests(state) {
       const qs = state ? `?state=${state}` : '';
-      const res = await authFetch(`/project-setup-requests${qs}`);
-      return res.json();
+      return fetchList<IProjectSetupRequest>(`/project-setup-requests${qs}`);
     },
     async listMyRequests(submitterId, state) {
       const params = new URLSearchParams({ submitterId });
       if (state) params.set('state', state);
-      const res = await authFetch(`/project-setup-requests?${params.toString()}`);
-      return res.json();
+      return fetchList<IProjectSetupRequest>(`/project-setup-requests?${params.toString()}`);
     },
     async advanceState(requestId, newState, extras = {}) {
-      const res = await authFetch(`/project-setup-requests/${requestId}/state`, {
+      return fetchItem<IProjectSetupRequest>(`/project-setup-requests/${requestId}/state`, {
         method: 'PATCH',
         body: JSON.stringify({ newState, ...extras }),
       });
-      return res.json();
     },
     async getProvisioningStatus(projectId) {
-      const res = await authFetch(`/provisioning-status/${projectId}`);
-      if (res.status === 404) return null;
-      return res.json();
+      try {
+        return await fetchItem<IProvisioningStatus>(`/provisioning-status/${projectId}`);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
+      }
     },
     async listFailedRuns() {
-      const res = await authFetch('/provisioning-failures');
-      return res.json();
+      return fetchList<IProvisioningStatus>('/provisioning-failures');
     },
     async retryProvisioning(projectId) {
       await authFetch(`/provisioning-retry/${projectId}`, { method: 'POST' });
@@ -109,8 +141,7 @@ export function createProvisioningApiClient(
     },
     async listProvisioningRuns(status) {
       const qs = status ? `?status=${status}` : '';
-      const res = await authFetch(`/provisioning-runs${qs}`);
-      return res.json();
+      return fetchList<IProvisioningStatus>(`/provisioning-runs${qs}`);
     },
     async archiveFailure(projectId) {
       await authFetch(`/provisioning-archive/${projectId}`, { method: 'POST' });
