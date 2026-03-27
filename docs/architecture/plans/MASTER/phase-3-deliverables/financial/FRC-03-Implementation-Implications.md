@@ -247,4 +247,13 @@ Based on crosswalk dependency analysis and gap severity:
 
 ---
 
-*Navigation: [← FRC-02 Detailed Crosswalk](FRC-02-Detailed-Crosswalk.md) | [FRC-00 Master Index](FRC-00-Financial-Replacement-Crosswalk.md)*
+## 9. Related Implementation-Grade References
+
+For deeper implementation detail beyond the scope of this gap/sequencing analysis:
+
+- **Runtime record family, mutability matrix, backend ties, workflow states, cutover readiness:** [FRC-04](FRC-04-Runtime-Record-Family.md)
+- **Field-level mappings, edit/recompute workflows, three-way gap analysis (15 gaps):** [FRC-05](FRC-05-Field-Level-Mapping.md)
+
+---
+
+*Navigation: [← FRC-02 Detailed Crosswalk](FRC-02-Detailed-Crosswalk.md) | [FRC-00 Master Index](FRC-00-Financial-Replacement-Crosswalk.md) | [FRC-04 Runtime Record Family →](FRC-04-Runtime-Record-Family.md)*

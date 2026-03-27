@@ -151,6 +151,8 @@ Per [P3-G1 §4.1](../P3-G1-Lane-Capability-Matrix.md): PWA = Full depth; SPFx = 
 | **[FRC-01-Source-Inventory.md](FRC-01-Source-Inventory.md)** | Source Inventory | Per-file inventory of all 9 current-state operating files with structure, roles, data flow, and pain points; composite monthly review workflow |
 | **[FRC-02-Detailed-Crosswalk.md](FRC-02-Detailed-Crosswalk.md)** | Detailed Crosswalk | 14-column mapping table organized by current artifact (~41 rows across 7 sections) |
 | **[FRC-03-Implementation-Implications.md](FRC-03-Implementation-Implications.md)** | Implementation Implications | Gap analysis, role transition, data lineage, backend seams, open decisions, recommended sequencing |
+| **[FRC-04-Runtime-Record-Family.md](FRC-04-Runtime-Record-Family.md)** | Runtime Record Family | 34-record runtime model, mutability/ownership matrix (5 tiers), backend ties by domain (7 seam tables), workflow state machine (forecast lifecycle + buyout lifecycle + savings disposition), cutover readiness criteria and retirement sequencing |
+| **[FRC-05-Field-Level-Mapping.md](FRC-05-Field-Level-Mapping.md)** | Field-Level Mapping | Field-by-field mapping for Forecast Summary (24 fields), Checklist (19 template items), GC/GR (17 fields), Cash Flow (actual/forecast/summary/AR-aging), Buyout (19 fields + savings disposition); workflow diagrams per domain; three-way gap analysis (15 gaps: workbook↔plan↔repo) |
 
 ---
 
@@ -159,9 +161,11 @@ Per [P3-G1 §4.1](../P3-G1-Lane-Capability-Matrix.md): PWA = Full depth; SPFx = 
 - **For current-state artifact details:** [FRC-01](FRC-01-Source-Inventory.md) — deep inventory of each operating file
 - **For the complete replacement mapping:** [FRC-02](FRC-02-Detailed-Crosswalk.md) — every current artifact/tab/section mapped to its future runtime equivalent
 - **For gaps, open decisions, and next steps:** [FRC-03](FRC-03-Implementation-Implications.md) — what is built, what is missing, and recommended sequencing
+- **For the runtime record family and ownership:** [FRC-04](FRC-04-Runtime-Record-Family.md) — 34 records, mutability matrix, backend ties, workflow states, cutover readiness
+- **For field-level detail and workflow diagrams:** [FRC-05](FRC-05-Field-Level-Mapping.md) — exact field mappings per workbook section, edit/recompute workflows, three-way gap analysis
 - **For field definitions and data model:** [P3-E4 T01–T09](../P3-E4-Financial-Module-Field-Specification.md) — the governing specification
 - **For acceptance criteria:** [P3-E4-T09 §20](../P3-E4-T09-Implementation-and-Acceptance.md) — 48 acceptance gate items
 
 ---
 
-*Navigation: [FRC-01 Source Inventory →](FRC-01-Source-Inventory.md) | [FRC-02 Detailed Crosswalk →](FRC-02-Detailed-Crosswalk.md) | [FRC-03 Implementation Implications →](FRC-03-Implementation-Implications.md)*
+*Navigation: [FRC-01 Source Inventory →](FRC-01-Source-Inventory.md) | [FRC-02 Detailed Crosswalk →](FRC-02-Detailed-Crosswalk.md) | [FRC-03 Implementation Implications →](FRC-03-Implementation-Implications.md) | [FRC-04 Runtime Record Family →](FRC-04-Runtime-Record-Family.md) | [FRC-05 Field-Level Mapping →](FRC-05-Field-Level-Mapping.md)*
