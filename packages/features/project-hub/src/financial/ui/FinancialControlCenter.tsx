@@ -85,6 +85,7 @@ export function FinancialControlCenter({
         centerSlot={
           <FinancialControlCenterCore
             narrative={data.narrative}
+            tools={data.tools}
             selectedToolPreview={data.selectedToolPreview}
             onOpenSurface={onOpenSurface}
           />
