@@ -107,6 +107,33 @@ export interface HbcActivityStripProps {
   readonly testId?: string;
 }
 
+// ── Context Rail ────────────────────────────────────────────────────
+
+/** A single item within a context rail section. */
+export interface ContextRailItem {
+  readonly id: string;
+  readonly title: string;
+  readonly subtitle?: string;
+  readonly status?: string;
+  readonly statusColor?: string;
+  readonly source?: string;
+}
+
+/** A section within the context rail (e.g., "Next Moves", "Blockers"). */
+export interface ContextRailSection {
+  readonly id: string;
+  readonly title: string;
+  readonly items: readonly ContextRailItem[];
+  readonly emptyMessage?: string;
+  readonly maxItems?: number;
+}
+
+/** Props for the generic HbcContextRail component. */
+export interface HbcContextRailProps {
+  readonly sections: readonly ContextRailSection[];
+  readonly testId?: string;
+}
+
 // ── Quick Action Bar ────────────────────────────────────────────────
 
 /** A single action in a persistent touch-safe toolbar. */

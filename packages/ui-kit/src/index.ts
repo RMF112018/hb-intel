@@ -463,6 +463,9 @@ export type {
   HbcNavRailProps,
   ActivityStripEntry,
   HbcActivityStripProps,
+  ContextRailItem,
+  ContextRailSection,
+  HbcContextRailProps,
   QuickAction,
   HbcQuickActionBarProps,
   SyncState,
@@ -471,6 +474,7 @@ export type {
 
 // Multi-Column Composition Primitives
 export { HbcNavRail } from './HbcNavRail/index.js';
+export { HbcContextRail } from './HbcContextRail/index.js';
 export { HbcActivityStrip } from './HbcActivityStrip/index.js';
 export { HbcQuickActionBar } from './HbcQuickActionBar/index.js';
 export { HbcSyncStatusBar } from './HbcSyncStatusBar/index.js';
