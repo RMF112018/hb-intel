@@ -17,21 +17,30 @@ export async function executeStep2(
     status: 'InProgress',
     startedAt: new Date().toISOString(),
   };
+  if (!status.siteUrl) {
+    result.status = 'Failed';
+    result.errorMessage = 'siteUrl not set — Step 1 must complete before Step 2';
+    return result;
+  }
+
   try {
     let allSkipped = true;
+    let createdCount = 0;
     for (const lib of CORE_LIBRARIES) {
       const alreadyExists = await services.sharePoint.documentLibraryExists(
-        status.siteUrl!,
+        status.siteUrl,
         lib.name
       );
       if (!alreadyExists) {
-        await services.sharePoint.createDocumentLibrary(status.siteUrl!, lib.name);
+        await services.sharePoint.createDocumentLibrary(status.siteUrl, lib.name);
         allSkipped = false;
+        createdCount += 1;
       }
     }
     result.status = 'Completed';
     result.idempotentSkip = allSkipped;
     result.completedAt = new Date().toISOString();
+    result.metadata = { libraryCount: CORE_LIBRARIES.length, createdCount };
   } catch (err) {
     result.status = 'Failed';
     result.errorMessage = err instanceof Error ? err.message : String(err);

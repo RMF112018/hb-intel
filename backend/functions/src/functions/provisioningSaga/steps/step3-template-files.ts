@@ -22,13 +22,21 @@ export async function executeStep3(
     status: 'InProgress',
     startedAt: new Date().toISOString(),
   };
+  if (!status.siteUrl) {
+    result.status = 'Failed';
+    result.errorMessage = 'siteUrl not set — Step 1 must complete before Step 3';
+    return result;
+  }
+
   try {
     // T08: Collect missing-asset information for structured reporting.
     const missingAssets: string[] = [];
+    const unknownAddOns: string[] = [];
+    const folderErrors: string[] = [];
 
     // W0-G2-T07: Core template files — manifest-driven per-file upload.
     for (const entry of TEMPLATE_FILE_MANIFEST) {
-      const uploaded = await services.sharePoint.uploadTemplateFile(status.siteUrl!, entry);
+      const uploaded = await services.sharePoint.uploadTemplateFile(status.siteUrl, entry);
       if (!uploaded) {
         missingAssets.push(entry.fileName);
       }
@@ -39,9 +47,12 @@ export async function executeStep3(
     if (addOns && Array.isArray(addOns)) {
       for (const addOnKey of addOns) {
         const definition = ADD_ON_DEFINITIONS[addOnKey];
-        if (!definition) continue;
+        if (!definition) {
+          unknownAddOns.push(addOnKey);
+          continue;
+        }
         for (const fileEntry of definition.templateFiles) {
-          const uploaded = await services.sharePoint.uploadTemplateFile(status.siteUrl!, fileEntry);
+          const uploaded = await services.sharePoint.uploadTemplateFile(status.siteUrl, fileEntry);
           if (!uploaded) {
             missingAssets.push(fileEntry.fileName);
           }
@@ -54,24 +65,39 @@ export async function executeStep3(
       const deptLibs = DEPARTMENT_LIBRARIES[status.department];
       if (deptLibs) {
         for (const lib of deptLibs) {
-          const exists = await services.sharePoint.documentLibraryExists(status.siteUrl!, lib.name);
+          const exists = await services.sharePoint.documentLibraryExists(status.siteUrl, lib.name);
           if (!exists) {
-            await services.sharePoint.createDocumentLibrary(status.siteUrl!, lib.name);
+            await services.sharePoint.createDocumentLibrary(status.siteUrl, lib.name);
           }
         }
       }
       const folderTree = DEPARTMENT_FOLDER_TREES[status.department];
       if (folderTree) {
         for (const folderPath of folderTree.folders) {
-          await services.sharePoint.createFolderIfNotExists(status.siteUrl!, folderTree.libraryName, folderPath);
+          try {
+            await services.sharePoint.createFolderIfNotExists(status.siteUrl, folderTree.libraryName, folderPath);
+          } catch (folderErr) {
+            folderErrors.push(`${folderTree.libraryName}/${folderPath}: ${folderErr instanceof Error ? folderErr.message : String(folderErr)}`);
+          }
         }
       }
     }
 
-    // T08: Surface missing-asset information in step metadata for T09 assertions and operational visibility.
+    // T08: Surface diagnostic metadata for operational visibility.
+    const metadata: Record<string, unknown> = {
+      coreTemplateCount: TEMPLATE_FILE_MANIFEST.length,
+    };
     if (missingAssets.length > 0) {
-      result.metadata = { missingAssets, missingAssetCount: missingAssets.length };
+      metadata.missingAssets = missingAssets;
+      metadata.missingAssetCount = missingAssets.length;
     }
+    if (unknownAddOns.length > 0) {
+      metadata.unknownAddOns = unknownAddOns;
+    }
+    if (folderErrors.length > 0) {
+      metadata.folderErrors = folderErrors;
+    }
+    result.metadata = metadata;
 
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();

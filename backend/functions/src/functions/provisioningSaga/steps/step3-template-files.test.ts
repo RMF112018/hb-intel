@@ -171,25 +171,24 @@ describe('W0-G2-T09: Step 3 — Upload Template Files', () => {
     expect(services.sharePoint.createFolderIfNotExists).not.toHaveBeenCalled();
   });
 
-  it('TC-FAIL-06 / TC-IDEM-04: folder creation failure fails step, retry succeeds', async () => {
+  it('TC-FAIL-06 / TC-IDEM-04: folder creation errors are non-fatal and surfaced in metadata', async () => {
     const services = createMockServices();
     const status = makeStatus({ department: 'commercial' } as Partial<IProvisioningStatus>);
 
-    // First run: createFolderIfNotExists throws mid-way
+    // createFolderIfNotExists throws on the 5th call
     let folderCallCount = 0;
     services.sharePoint.createFolderIfNotExists.mockImplementation(async () => {
       folderCallCount++;
       if (folderCallCount === 5) throw new Error('folder creation network error');
     });
 
-    const failResult = await executeStep3(services, status);
-    expect(failResult.status).toBe('Failed');
-    expect(failResult.errorMessage).toContain('folder creation network error');
+    const result = await executeStep3(services, status);
 
-    // Retry: reset mock to succeed
-    services.sharePoint.createFolderIfNotExists.mockResolvedValue(undefined);
-    const retryResult = await executeStep3(services, status);
-    expect(retryResult.status).toBe('Completed');
+    // Step completes — folder errors are non-fatal, tracked in metadata.
+    expect(result.status).toBe('Completed');
+    expect((result.metadata as Record<string, unknown>)?.folderErrors).toBeDefined();
+    expect(((result.metadata as Record<string, unknown>).folderErrors as string[]).length).toBeGreaterThan(0);
+    expect(((result.metadata as Record<string, unknown>).folderErrors as string[])[0]).toContain('folder creation network error');
   });
 
   it('add-on template files are uploaded when addOns is set', async () => {

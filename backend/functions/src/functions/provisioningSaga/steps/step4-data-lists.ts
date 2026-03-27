@@ -19,20 +19,36 @@ export async function executeStep4(
     status: 'InProgress',
     startedAt: new Date().toISOString(),
   };
+  if (!status.siteUrl) {
+    result.status = 'Failed';
+    result.errorMessage = 'siteUrl not set — Step 1 must complete before Step 4';
+    return result;
+  }
+
+  if (!status.projectNumber) {
+    result.status = 'Failed';
+    result.errorMessage = 'projectNumber not set — required for workflow list pid default values';
+    return result;
+  }
+
   try {
     // Core G1 lists (8 lists).
-    await services.sharePoint.createDataLists(status.siteUrl!, HB_INTEL_LIST_DEFINITIONS);
+    await services.sharePoint.createDataLists(status.siteUrl, HB_INTEL_LIST_DEFINITIONS);
 
     // W0-G2-T07: Workflow-family lists (26 lists across 5 families).
     // context.projectNumber resolves {{projectNumber}} in pid defaultValue.
     await services.sharePoint.createDataLists(
-      status.siteUrl!,
+      status.siteUrl,
       HB_INTEL_WORKFLOW_LIST_DEFINITIONS,
       { projectNumber: status.projectNumber }
     );
 
     result.status = 'Completed';
     result.completedAt = new Date().toISOString();
+    result.metadata = {
+      coreListCount: HB_INTEL_LIST_DEFINITIONS.length,
+      workflowListCount: HB_INTEL_WORKFLOW_LIST_DEFINITIONS.length,
+    };
   } catch (err) {
     result.status = 'Failed';
     result.errorMessage = err instanceof Error ? err.message : String(err);
