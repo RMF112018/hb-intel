@@ -84,3 +84,12 @@ export type {
   CashFlowSurfaceData,
   UseCashFlowSurfaceOptions,
 } from './hooks/useCashFlowSurface.js';
+export { useBuyoutSurface } from './hooks/useBuyoutSurface.js';
+export type {
+  BuyoutSurfaceState,
+  BuyoutLineRow,
+  BuyoutLineDetail,
+  BuyoutExposureKpi,
+  BuyoutSurfaceData,
+  UseBuyoutSurfaceOptions,
+} from './hooks/useBuyoutSurface.js';

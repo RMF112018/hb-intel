@@ -25,15 +25,17 @@ import { FinancialActionRail } from './FinancialActionRail.js';
 import { ForecastSummaryPage } from './ForecastSummaryPage.js';
 import { BudgetPage } from './BudgetPage.js';
 import { CashFlowPage } from './CashFlowPage.js';
+import { BuyoutPage } from './BuyoutPage.js';
 
 // ── Surface mode ────────────────────────────────────────────────────
 
-type FinancialSurfaceMode = 'control-center' | 'forecast-summary' | 'budget' | 'cash-flow';
+type FinancialSurfaceMode = 'control-center' | 'forecast-summary' | 'budget' | 'cash-flow' | 'buyout';
 
 const TOOL_TO_SURFACE: Record<string, FinancialSurfaceMode> = {
   'forecast-summary': 'forecast-summary',
   'budget': 'budget',
   'cash-flow': 'cash-flow',
+  'buyout': 'buyout',
 };
 
 const ACTIVITY_TYPE_LABELS: Record<string, string> = {
@@ -108,6 +110,17 @@ export function FinancialControlCenter({
   if (surfaceMode === 'cash-flow') {
     return (
       <CashFlowPage
+        projectId={projectId}
+        viewerRole={viewerRole}
+        complexityTier={complexityTier}
+        onBack={handleBackToControlCenter}
+      />
+    );
+  }
+
+  if (surfaceMode === 'buyout') {
+    return (
+      <BuyoutPage
         projectId={projectId}
         viewerRole={viewerRole}
         complexityTier={complexityTier}
