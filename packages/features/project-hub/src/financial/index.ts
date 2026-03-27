@@ -59,3 +59,12 @@ export type {
   ForecastSummaryData,
   UseForecastSummaryOptions,
 } from './hooks/useForecastSummary.js';
+export { useBudgetSurface } from './hooks/useBudgetSurface.js';
+export type {
+  BudgetSnapshotInfo,
+  BudgetFreshnessState,
+  BudgetLineRow,
+  BudgetLineDetail,
+  BudgetImportEvent,
+  BudgetSurfaceData,
+} from './hooks/useBudgetSurface.js';

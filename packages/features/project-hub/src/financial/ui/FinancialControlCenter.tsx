@@ -23,13 +23,15 @@ import { FinancialToolPostureRail } from './FinancialToolPostureRail.js';
 import { FinancialControlCenterCore } from './FinancialControlCenterCore.js';
 import { FinancialActionRail } from './FinancialActionRail.js';
 import { ForecastSummaryPage } from './ForecastSummaryPage.js';
+import { BudgetPage } from './BudgetPage.js';
 
 // ── Surface mode ────────────────────────────────────────────────────
 
-type FinancialSurfaceMode = 'control-center' | 'forecast-summary';
+type FinancialSurfaceMode = 'control-center' | 'forecast-summary' | 'budget';
 
 const TOOL_TO_SURFACE: Record<string, FinancialSurfaceMode> = {
   'forecast-summary': 'forecast-summary',
+  'budget': 'budget',
 };
 
 const ACTIVITY_TYPE_LABELS: Record<string, string> = {
@@ -85,6 +87,15 @@ export function FinancialControlCenter({
         projectId={projectId}
         viewerRole={viewerRole}
         complexityTier={complexityTier}
+        onBack={handleBackToControlCenter}
+      />
+    );
+  }
+
+  if (surfaceMode === 'budget') {
+    return (
+      <BudgetPage
+        projectId={projectId}
         onBack={handleBackToControlCenter}
       />
     );
