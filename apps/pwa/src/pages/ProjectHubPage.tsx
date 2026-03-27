@@ -12,6 +12,7 @@ import {
   ProjectOperatingSurface,
   ExecutiveCockpitSurface,
   FieldTabletSurface,
+  FinancialControlCenter,
   resolveProjectHubLayoutFamily,
 } from '@hbc/features-project-hub';
 import type { IProjectHubReportModuleAuditRow, ProjectHubLayoutFamily } from '@hbc/features-project-hub';
@@ -263,8 +264,9 @@ export function ProjectHubControlCenterPage({
   );
 
   const reportsSection = section === 'reports';
+  const financialSection = section === 'financial';
 
-  // Resolve layout family for non-reports view.
+  // Resolve layout family for non-section view.
   // Default to project-operating; executive roles get executive cockpit.
   const layoutFamily: ProjectHubLayoutFamily = useMemo(() => {
     const result = resolveProjectHubLayoutFamily({
@@ -284,7 +286,7 @@ export function ProjectHubControlCenterPage({
   return (
     <WorkspacePageShell
       layout="dashboard"
-      title={reportsSection ? 'Project Hub Reports' : familyTitle}
+      title={financialSection ? 'Financial Control Center' : reportsSection ? 'Project Hub Reports' : familyTitle}
       stickyHeader
       headerSlot={
         <div style={{ padding: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -299,7 +301,12 @@ export function ProjectHubControlCenterPage({
         </div>
       }
     >
-      {reportsSection ? (
+      {financialSection ? (
+        <FinancialControlCenter
+          projectId={project.id}
+          onOpenSurface={(toolId) => onModuleOpen?.(`financial/${toolId}`)}
+        />
+      ) : reportsSection ? (
         <>
           <Text size={400}>
             This baseline Reports surface shows what Project Hub can actually support today. It does

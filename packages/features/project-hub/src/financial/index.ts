@@ -23,3 +23,21 @@ export * from './buyout/index.js';
 export * from './business-rules/index.js';
 export * from './spine-events/index.js';
 export * from './annotations/index.js';
+
+// UI surfaces
+export * from './ui/index.js';
+export { useFinancialControlCenter } from './hooks/useFinancialControlCenter.js';
+export type {
+  FinancialControlCenterData,
+  FinancialPeriodInfo,
+  FinancialCustodyInfo,
+  FinancialFreshnessInfo,
+  FinancialPrimaryAction,
+  FinancialToolPosture,
+  FinancialToolPostureState,
+  FinancialToolPreview,
+  FinancialNarrative,
+  FinancialNextAction,
+  FinancialException,
+  FinancialActivityEntry,
+} from './hooks/useFinancialControlCenter.js';
