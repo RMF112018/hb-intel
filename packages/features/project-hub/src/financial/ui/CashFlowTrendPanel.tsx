@@ -17,6 +17,8 @@ const useStyles = makeStyles({
   valueLabel: { fontSize: '11px', fontFamily: 'monospace', minWidth: '70px', textAlign: 'right' as const, color: 'var(--colorNeutralForeground1)' },
   deficitValue: { color: HBC_STATUS_COLORS.critical, fontWeight: 600 },
   typeIndicator: { width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0 },
+  peakLabel: { color: 'var(--colorNeutralForeground3)' },
+  barContainer: { flex: 1 },
 });
 
 function formatCurrency(val: number): string {
@@ -39,7 +41,7 @@ export function CashFlowTrendPanel({ trendPoints, peakCashRequirement }: CashFlo
     <Card size="small">
       <CardHeader
         header={<Text weight="semibold" size={200}>Cumulative Cash Flow Trend</Text>}
-        description={<Text size={100} style={{ color: 'var(--colorNeutralForeground3)' }}>Peak requirement: {formatCurrency(peakCashRequirement)}</Text>}
+        description={<Text size={100} className={styles.peakLabel}>Peak requirement: {formatCurrency(peakCashRequirement)}</Text>}
       />
       <div className={styles.root}>
         {trendPoints.map((point) => {
@@ -48,7 +50,7 @@ export function CashFlowTrendPanel({ trendPoints, peakCashRequirement }: CashFlo
             <div key={point.month} className={styles.trendRow}>
               <span className={styles.monthLabel}>{point.month}</span>
               <span className={styles.typeIndicator} style={{ backgroundColor: point.actual != null ? HBC_STATUS_COLORS.success : HBC_STATUS_COLORS.info }} />
-              <div style={{ flex: 1 }}>
+              <div className={styles.barContainer}>
                 <div className={mergeClasses(styles.bar, point.cumulative >= 0 ? styles.barPositive : styles.barNegative)} style={{ width: `${barWidth}%` }} />
               </div>
               <span className={mergeClasses(styles.valueLabel, point.isDeficit && styles.deficitValue)}>{formatCurrency(point.cumulative)}</span>
