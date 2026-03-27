@@ -138,3 +138,172 @@ export const computeMonthlyRetention = (
   retainageRate: number,
   priorReleases: number,
 ): number => (invoiceTotal * retainageRate) - priorReleases;
+
+// ── Variance and Watch Period Services ──────────────────────────────
+
+/**
+ * Variance of current cumulative vs prior version cumulative at each month.
+ * Returns array of { month, variance, direction } entries.
+ */
+export interface CashFlowVarianceEntry {
+  readonly month: string;
+  readonly currentCumulative: number;
+  readonly priorCumulative: number;
+  readonly variance: number;
+  readonly direction: 'better' | 'worse' | 'unchanged';
+}
+
+export const computeVarianceVsPrior = (
+  currentCumulatives: readonly { month: string; cumulative: number }[],
+  priorCumulatives: readonly { month: string; cumulative: number }[],
+): CashFlowVarianceEntry[] => {
+  const priorMap = new Map(priorCumulatives.map((p) => [p.month, p.cumulative]));
+  return currentCumulatives.map((c) => {
+    const prior = priorMap.get(c.month) ?? 0;
+    const variance = c.cumulative - prior;
+    return {
+      month: c.month,
+      currentCumulative: c.cumulative,
+      priorCumulative: prior,
+      variance,
+      direction: variance > 0 ? 'better' as const : variance < 0 ? 'worse' as const : 'unchanged' as const,
+    };
+  });
+};
+
+/**
+ * Watch period identification — months where cumulative goes negative
+ * or where net cash flow indicates timing risk.
+ */
+export interface CashFlowWatchPeriod {
+  readonly month: string;
+  readonly reason: 'deficit' | 'near-deficit' | 'large-outflow' | 'low-confidence';
+  readonly severity: 'critical' | 'high' | 'standard';
+  readonly explanation: string;
+}
+
+export const identifyWatchPeriods = (
+  months: readonly { month: string; netCashFlow: number; cumulativeCashFlow: number; confidenceScore: number | null }[],
+): CashFlowWatchPeriod[] => {
+  const result: CashFlowWatchPeriod[] = [];
+
+  for (const m of months) {
+    if (m.cumulativeCashFlow < 0) {
+      result.push({
+        month: m.month,
+        reason: 'deficit',
+        severity: 'critical',
+        explanation: `Cumulative cash flow is negative ($${Math.abs(m.cumulativeCashFlow).toLocaleString()}) — project requires cash injection or timing adjustment`,
+      });
+    } else if (m.cumulativeCashFlow < 50000 && m.cumulativeCashFlow >= 0) {
+      result.push({
+        month: m.month,
+        reason: 'near-deficit',
+        severity: 'high',
+        explanation: `Cumulative cash flow near zero ($${m.cumulativeCashFlow.toLocaleString()}) — limited margin before deficit`,
+      });
+    }
+
+    if (m.netCashFlow < -200000) {
+      result.push({
+        month: m.month,
+        reason: 'large-outflow',
+        severity: 'high',
+        explanation: `Large net outflow ($${Math.abs(m.netCashFlow).toLocaleString()}) — verify subcontractor payment timing`,
+      });
+    }
+
+    if (m.confidenceScore !== null && m.confidenceScore < 60) {
+      result.push({
+        month: m.month,
+        reason: 'low-confidence',
+        severity: 'standard',
+        explanation: `Forecast confidence below 60% (${m.confidenceScore}%) — projection may not be reliable`,
+      });
+    }
+  }
+
+  return result;
+};
+
+/**
+ * Explanation payload for cash flow warning states.
+ * Produces a human-readable explanation of why cash flow health metrics
+ * are in a given state.
+ */
+export interface CashFlowWarningExplanation {
+  readonly metric: string;
+  readonly value: number;
+  readonly severity: 'healthy' | 'watch' | 'at-risk' | 'critical';
+  readonly explanation: string;
+  readonly recommendation: string;
+}
+
+export const explainCashFlowWarnings = (
+  summary: ICashFlowSummary,
+): CashFlowWarningExplanation[] => {
+  const warnings: CashFlowWarningExplanation[] = [];
+
+  // Peak cash requirement
+  if (summary.peakCashRequirement < 0) {
+    warnings.push({
+      metric: 'peakCashRequirement',
+      value: summary.peakCashRequirement,
+      severity: 'critical',
+      explanation: `Project reaches a cash deficit of $${Math.abs(summary.peakCashRequirement).toLocaleString()} — working capital or financing required`,
+      recommendation: 'Review payment timing and consider draw schedule acceleration',
+    });
+  } else if (summary.peakCashRequirement < 100000) {
+    warnings.push({
+      metric: 'peakCashRequirement',
+      value: summary.peakCashRequirement,
+      severity: 'watch',
+      explanation: `Peak cash requirement is near break-even ($${summary.peakCashRequirement.toLocaleString()})`,
+      recommendation: 'Monitor closely and prepare contingency cash plan',
+    });
+  }
+
+  // Cash flow at risk
+  if (summary.cashFlowAtRisk < -100000) {
+    warnings.push({
+      metric: 'cashFlowAtRisk',
+      value: summary.cashFlowAtRisk,
+      severity: 'at-risk',
+      explanation: `Projected deficit months total $${Math.abs(summary.cashFlowAtRisk).toLocaleString()} in negative cash flow`,
+      recommendation: 'Review outflow timing in deficit months',
+    });
+  } else if (summary.cashFlowAtRisk < 0) {
+    warnings.push({
+      metric: 'cashFlowAtRisk',
+      value: summary.cashFlowAtRisk,
+      severity: 'watch',
+      explanation: `Some projected months show negative net cash flow totaling $${Math.abs(summary.cashFlowAtRisk).toLocaleString()}`,
+      recommendation: 'Verify forecast assumptions for negative months',
+    });
+  }
+
+  return warnings;
+};
+
+/**
+ * Manual correction record type.
+ * Tracks explicit governed corrections to cash flow values with
+ * full audit trail. Corrections never overwrite evidence records —
+ * they layer on top with explicit provenance.
+ */
+export interface ICashFlowManualCorrection {
+  readonly correctionId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly targetMonthId: string;
+  readonly targetMonth: string;
+  readonly field: 'inflows' | 'outflows' | 'retentionHeld' | 'workingCapital';
+  readonly originalValue: number;
+  readonly correctedValue: number;
+  readonly reason: string;
+  readonly correctedBy: string;
+  readonly correctedAt: string;
+  readonly approvedBy: string | null;
+  readonly approvedAt: string | null;
+  readonly isActive: boolean;
+}
