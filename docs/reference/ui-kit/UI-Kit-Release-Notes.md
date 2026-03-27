@@ -70,7 +70,30 @@
 - `HbcRadiusKey`, `ContentLevel`, `ContentLevelSpec`, `PageZone`, `ZoneSpec`, `CardWeight`, `CardWeightSpec`, `ThreeSecondStandard`
 - `DensityTokenSet`, `DensityModeLabel`, `FieldReadabilityCategory`, `FieldReadabilityConstraint`, `FieldInteractionAssumption`, `DensityApplicationModel`
 
+### Composition & Layout Primitives (v2.2.84–v2.2.85)
+- `MultiColumnLayout` — Responsive CSS grid with configurable left/center/right columns and bottom region. Collapsible rails, breakpoint-driven region hiding.
+- `HbcNavRail` — Generic collapsible vertical navigation rail with status indicators (8 states), labels, count badges, and icon-only collapse mode.
+- `HbcContextRail` — Right-side context panel rail with titled card sections, item count badges, density-aware spacing, maxItems truncation, and empty-section messages.
+- `HbcActivityStrip` — Collapsible horizontal timeline strip with typed entries, configurable type labels/colors, and collapsed-by-default summary badge.
+- `HbcQuickActionBar` — Persistent touch-safe action toolbar with availability states and unavailable labels.
+- `HbcSyncStatusBar` — Sync state indicator bar with state dot, pending/failed counts, and last-sync timestamp.
+
+### New Multi-Column Types
+- `MultiColumnRegionId`, `MultiColumnRegionConfig`, `MultiColumnLayoutConfig`, `MultiColumnLayoutProps`
+- `NavRailItem`, `NavRailItemStatus`, `HbcNavRailProps`
+- `ContextRailItem`, `ContextRailSection`, `HbcContextRailProps`
+- `ActivityStripEntry`, `HbcActivityStripProps`
+- `QuickAction`, `HbcQuickActionBarProps`
+- `SyncState`, `HbcSyncStatusBarProps`
+
 ### New Files
+- `packages/ui-kit/src/layouts/multi-column-types.ts` — generic multi-column type contracts
+- `packages/ui-kit/src/layouts/MultiColumnLayout.tsx` — responsive multi-column grid
+- `packages/ui-kit/src/HbcNavRail/` — nav rail component + stories + tests
+- `packages/ui-kit/src/HbcContextRail/` — context rail component + stories + tests
+- `packages/ui-kit/src/HbcActivityStrip/` — activity strip component + stories + tests
+- `packages/ui-kit/src/HbcQuickActionBar/` — quick action bar component + stories + tests
+- `packages/ui-kit/src/HbcSyncStatusBar/` — sync status bar component + stories + tests
 - `packages/ui-kit/src/theme/radii.ts` — border-radius token scale
 - `packages/ui-kit/src/theme/hierarchy.ts` — visual hierarchy constants
 - `packages/ui-kit/vitest.config.ts` — test configuration

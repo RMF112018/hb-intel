@@ -9,15 +9,17 @@ import {
   HbcButton,
   Text,
   useDensity,
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
 } from '@hbc/ui-kit';
 
 import type { RiskExposureSummary } from '../hooks/useRiskExposureSummary.js';
 
 const STATUS_COLORS: Record<string, string> = {
-  healthy: '#107C10',
-  watch: '#CA5010',
-  'at-risk': '#D83B01',
-  critical: '#A4262C',
+  healthy: HBC_STATUS_COLORS.success,
+  watch: HBC_STATUS_COLORS.warning,
+  'at-risk': HBC_STATUS_COLORS.atRisk,
+  critical: HBC_STATUS_COLORS.critical,
 };
 
 const useStyles = makeStyles({
@@ -61,7 +63,7 @@ const useStyles = makeStyles({
   },
   metricLabel: {
     fontSize: '12px',
-    color: '#605e5c',
+    color: HBC_SURFACE_LIGHT['text-muted'],
   },
   driverList: {
     display: 'flex',
@@ -71,9 +73,9 @@ const useStyles = makeStyles({
   },
   correlationBox: {
     padding: `${HBC_SPACE_SM}px`,
-    backgroundColor: '#FFF4CE',
+    backgroundColor: HBC_STATUS_COLORS.warning + '33',
     borderRadius: '4px',
-    borderLeft: '3px solid #835C00',
+    borderLeft: `3px solid ${HBC_STATUS_COLORS.warning}`,
   },
   actionsRow: {
     display: 'flex',
@@ -118,7 +120,7 @@ export function RiskExposureCanvas({
               <Text weight="semibold" size={400} style={{ textTransform: 'capitalize' }}>
                 {healthPosture.overallStatus.replace('-', ' ')}
               </Text>
-              <Text size={200} style={{ color: '#605e5c' }}>
+              <Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>
                 {healthPosture.trend} · {healthPosture.freshnessLabel}
               </Text>
             </div>
@@ -171,7 +173,7 @@ export function RiskExposureCanvas({
               {scheduleRisk.nearTermRiskCount} near-term risk · {scheduleRisk.downstreamImpacts} downstream impacts
             </Text>
             {scheduleRisk.staleUpdateWarning && (
-              <Text size={200} style={{ color: '#D83B01' }}>Stale update warning</Text>
+              <Text size={200} style={{ color: HBC_STATUS_COLORS.atRisk }}>Stale update warning</Text>
             )}
             <div className={styles.actionsRow}>
               <HbcButton variant="secondary" onClick={() => onOpenModule('schedule')}>
@@ -221,7 +223,7 @@ export function RiskExposureCanvas({
         <Text size={200} style={{ display: 'block', marginTop: '4px' }}>
           {crossDriver.correlationSummary}
         </Text>
-        <Text size={100} style={{ color: '#605e5c', display: 'block', marginTop: '4px' }}>
+        <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'], display: 'block', marginTop: '4px' }}>
           {crossDriver.linkedRecordCount} linked records
         </Text>
       </div>

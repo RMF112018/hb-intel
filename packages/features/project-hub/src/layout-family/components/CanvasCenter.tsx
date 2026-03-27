@@ -5,6 +5,8 @@ import {
   CardHeader,
   HBC_SPACE_MD,
   HBC_SPACE_SM,
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
   HbcButton,
   Text,
   useDensity,
@@ -13,15 +15,15 @@ import {
 
 import type { ProjectHubModulePostureSummary } from '../types.js';
 
-// ── Posture color mapping ───────────────────────────────────────────
+// ── Posture color mapping using HBC tokens ──────────────────────────
 
 const POSTURE_COLORS: Record<ProjectHubModulePostureSummary['posture'], string> = {
-  healthy: '#107C10',
-  watch: '#CA5010',
-  'at-risk': '#D83B01',
-  critical: '#A4262C',
-  'no-data': '#8A8886',
-  'read-only': '#0078D4',
+  healthy: HBC_STATUS_COLORS.success,
+  watch: HBC_STATUS_COLORS.warning,
+  'at-risk': HBC_STATUS_COLORS.atRisk,
+  critical: HBC_STATUS_COLORS.critical,
+  'no-data': HBC_STATUS_COLORS.neutral,
+  'read-only': HBC_STATUS_COLORS.info,
 };
 
 // ── Styles ──────────────────────────────────────────────────────────
@@ -63,7 +65,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     padding: `${HBC_SPACE_SM}px`,
-    backgroundColor: '#faf9f8',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
     borderRadius: '4px',
     minWidth: '120px',
   },
@@ -140,7 +142,7 @@ export function CanvasCenter({
                 style={{ backgroundColor: POSTURE_COLORS[selectedModule.posture] }}
               />
               <Text weight="semibold">{selectedModule.label}</Text>
-              <Text size={200} style={{ color: '#605e5c', textTransform: 'capitalize' }}>
+              <Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'], textTransform: 'capitalize' }}>
                 {selectedModule.posture.replace('-', ' ')}
               </Text>
             </div>
@@ -149,22 +151,22 @@ export function CanvasCenter({
         <div className={styles.previewCard}>
           <div className={styles.metricsRow}>
             <div className={styles.metricCard}>
-              <Text size={100} style={{ color: '#605e5c' }}>Issues</Text>
+              <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>Issues</Text>
               <Text weight="semibold" size={500}>{selectedModule.issueCount}</Text>
             </div>
             <div className={styles.metricCard}>
-              <Text size={100} style={{ color: '#605e5c' }}>Actions</Text>
+              <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>Actions</Text>
               <Text weight="semibold" size={500}>{selectedModule.actionCount}</Text>
             </div>
             {selectedModule.owner && (
               <div className={styles.metricCard}>
-                <Text size={100} style={{ color: '#605e5c' }}>Owner</Text>
+                <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>Owner</Text>
                 <Text size={200}>{selectedModule.owner}</Text>
               </div>
             )}
             {selectedModule.lastUpdated && (
               <div className={styles.metricCard}>
-                <Text size={100} style={{ color: '#605e5c' }}>Last Updated</Text>
+                <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>Last Updated</Text>
                 <Text size={200}>{new Date(selectedModule.lastUpdated).toLocaleDateString()}</Text>
               </div>
             )}

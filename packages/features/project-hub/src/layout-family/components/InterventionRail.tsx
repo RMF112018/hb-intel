@@ -9,14 +9,16 @@ import {
   HbcButton,
   Text,
   useDensity,
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
 } from '@hbc/ui-kit';
 
 import type { InterventionItem, InterventionQueue } from '../hooks/useInterventionQueue.js';
 
 const URGENCY_COLORS: Record<InterventionItem['urgency'], string> = {
-  critical: '#A4262C',
-  high: '#D83B01',
-  standard: '#0078D4',
+  critical: HBC_STATUS_COLORS.critical,
+  high: HBC_STATUS_COLORS.atRisk,
+  standard: HBC_STATUS_COLORS.info,
 };
 
 const useStyles = makeStyles({
@@ -26,8 +28,8 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     overflowY: 'auto',
     overflowX: 'hidden',
-    borderLeft: '1px solid #edebe9',
-    backgroundColor: '#faf9f8',
+    borderLeft: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
     padding: `${HBC_SPACE_SM}px`,
   },
   rootComfortable: {
@@ -50,8 +52,8 @@ const useStyles = makeStyles({
     minWidth: '20px',
     height: '18px',
     borderRadius: '9px',
-    backgroundColor: '#FDE7E9',
-    color: '#A4262C',
+    backgroundColor: HBC_SURFACE_LIGHT['destructive-bg'],
+    color: HBC_SURFACE_LIGHT['destructive-text'],
     fontSize: '11px',
     fontWeight: 600,
     padding: '0 4px',
@@ -113,7 +115,7 @@ export function InterventionRail({
         <Card key={item.id} size="small" data-testid={`intervention-item-${item.id}`}>
           <CardHeader
             header={<Text weight="semibold" size={200}>{item.title}</Text>}
-            description={<Text size={200} style={{ color: '#605e5c' }}>{item.affectedProject}</Text>}
+            description={<Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>{item.affectedProject}</Text>}
           />
           <div className={styles.cardBody}>
             <span
@@ -144,7 +146,7 @@ export function InterventionRail({
       ))}
 
       {queue.items.length === 0 && (
-        <Text size={200} style={{ color: '#8A8886' }}>No intervention items</Text>
+        <Text size={200} style={{ color: HBC_STATUS_COLORS.neutral }}>No intervention items</Text>
       )}
     </aside>
   );

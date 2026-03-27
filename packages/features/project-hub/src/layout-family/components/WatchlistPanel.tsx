@@ -8,15 +8,17 @@ import {
   HBC_SPACE_XS,
   Text,
   useDensity,
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
 } from '@hbc/ui-kit';
 
 import type { WatchlistItem, WatchlistSummary } from '../hooks/useWatchlistSummary.js';
 import { WATCHLIST_SIGNAL_TYPE_LABELS } from '../hooks/useWatchlistSummary.js';
 
 const SEVERITY_COLORS: Record<WatchlistItem['severity'], string> = {
-  critical: '#A4262C',
-  high: '#D83B01',
-  medium: '#CA5010',
+  critical: HBC_STATUS_COLORS.critical,
+  high: HBC_STATUS_COLORS.atRisk,
+  medium: HBC_STATUS_COLORS.warning,
 };
 
 const TREND_ICONS: Record<WatchlistItem['trend'], string> = {
@@ -30,12 +32,12 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    borderRight: '1px solid #edebe9',
-    backgroundColor: '#faf9f8',
+    borderRight: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
   },
   header: {
     padding: `${HBC_SPACE_SM}px`,
-    borderBottom: '1px solid #edebe9',
+    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
   },
   headerCounts: {
     display: 'flex',
@@ -52,12 +54,12 @@ const useStyles = makeStyles({
     borderRadius: '4px',
   },
   criticalBadge: {
-    backgroundColor: '#FDE7E9',
-    color: '#A4262C',
+    backgroundColor: HBC_SURFACE_LIGHT['destructive-bg'],
+    color: HBC_SURFACE_LIGHT['destructive-text'],
   },
   highBadge: {
-    backgroundColor: '#FFF4CE',
-    color: '#835C00',
+    backgroundColor: HBC_STATUS_COLORS.warning + '33',
+    color: HBC_STATUS_COLORS.warning,
   },
   itemList: {
     flex: 1,
@@ -69,19 +71,19 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: `${HBC_SPACE_XS}px`,
     padding: `${HBC_SPACE_SM}px`,
-    borderBottom: '1px solid #f3f2f1',
+    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['surface-2']}`,
     cursor: 'pointer',
     transitionProperty: 'background-color',
     transitionDuration: '150ms',
     ':hover': {
-      backgroundColor: '#f3f2f1',
+      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
     },
   },
   itemSelected: {
-    backgroundColor: '#EFF6FC',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-active'],
     borderLeftWidth: '3px',
     borderLeftStyle: 'solid',
-    borderLeftColor: '#0078D4',
+    borderLeftColor: HBC_STATUS_COLORS.info,
   },
   itemComfortable: {
     padding: `${HBC_DENSITY_TOKENS.comfortable.tapSpacingMin}px ${HBC_SPACE_SM}px`,
@@ -106,9 +108,9 @@ const useStyles = makeStyles({
     fontSize: '12px',
     fontWeight: 600,
   },
-  trendWorsening: { color: '#A4262C' },
-  trendStable: { color: '#8A8886' },
-  trendImproving: { color: '#107C10' },
+  trendWorsening: { color: HBC_STATUS_COLORS.critical },
+  trendStable: { color: HBC_STATUS_COLORS.neutral },
+  trendImproving: { color: HBC_STATUS_COLORS.success },
 });
 
 export interface WatchlistPanelProps {
@@ -183,7 +185,7 @@ export function WatchlistPanel({
                 </span>
               </div>
               <Text size={200}>{WATCHLIST_SIGNAL_TYPE_LABELS[item.signalType]}</Text>
-              <Text size={100} style={{ color: '#605e5c' }}>
+              <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>
                 {item.owner} · {item.ageDays}d · {item.trend}
               </Text>
             </button>

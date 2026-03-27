@@ -133,8 +133,20 @@ Tier A is reserved for components that genuinely meet the full production standa
 | DashboardLayout | A | pwa, project-hub, leadership | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
 | ListLayout | A | pwa, project-hub, accounting, estimating | High | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
 
+### Multi-Column Composition Primitives
+
+| Component | Tier | Consumers | W1 Crit | Visual | Hierarchy | Field | A11y | Theme | Tests | Docs | Comp |
+|-----------|------|-----------|---------|--------|-----------|-------|------|-------|-------|------|------|
+| MultiColumnLayout | A | project-hub (via features pkg) | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcNavRail | A | project-hub (via features pkg) | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcContextRail | A | project-hub (via features pkg) | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcActivityStrip | A | project-hub (via features pkg) | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcQuickActionBar | A | project-hub (via features pkg) | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+| HbcSyncStatusBar | A | project-hub (via features pkg) | Medium | Acceptable | Strong | Ready | Pass | Yes | Yes | Yes | Elevates |
+
 **Assessment notes:**
 - **Page Shell & Layouts (A/B, upgraded from B/C):** 30 tests across 6 files. WorkspacePageShell (5: render, title, children, data-hbc-ui, data-layout). ToolLandingLayout (5: render, data-hbc-layout, title, children, actions — upgraded C→B, inline KPI duplication remains as residual debt). DetailLayout (5: render, data-hbc-layout, title, content, sidebar). CreateUpdateLayout (5: render, data-hbc-layout, create/edit titles, Save/Cancel). DashboardLayout (5: render, data-hbc-layout, KPI cards, chart, data zone). ListLayout (5: render, data-hbc-layout, search, children, filter pills).
+- **Multi-Column Composition Primitives (A):** 32 tests across 6 files. MultiColumnLayout (6: center slot, left slot, right slot, bottom slot, testid, custom testid). HbcNavRail (7: render items, testid, select, deselect, count badges, collapsed hides labels, toggle collapse). HbcContextRail (6: sections, items, empty message, count badges, testid, maxItems). HbcActivityStrip (5: collapsed default, expand on click, expanded on prop, testid, empty state). HbcQuickActionBar (4: render actions, fire onAction, unavailable label, toolbar role). HbcSyncStatusBar (4: synced state, failed with counts, testid, data-sync-state). All components use HBC_* tokens exclusively — zero hardcoded hex colors. Storybook stories for all 6 components.
 
 ### App Shell Components
 

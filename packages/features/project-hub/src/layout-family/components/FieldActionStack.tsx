@@ -8,14 +8,16 @@ import {
   HBC_SPACE_SM,
   HbcButton,
   Text,
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
 } from '@hbc/ui-kit';
 
 import type { FieldActionItem } from '../hooks/useFieldFocusSummary.js';
 
 const SEVERITY_COLORS: Record<FieldActionItem['severity'], string> = {
-  critical: '#A4262C',
-  high: '#D83B01',
-  standard: '#0078D4',
+  critical: HBC_STATUS_COLORS.critical,
+  high: HBC_STATUS_COLORS.atRisk,
+  standard: HBC_STATUS_COLORS.info,
 };
 
 const CATEGORY_LABELS: Record<FieldActionItem['category'], string> = {
@@ -51,8 +53,8 @@ const useStyles = makeStyles({
     fontSize: '12px',
     fontWeight: 600,
     padding: '0 6px',
-    backgroundColor: '#edebe9',
-    color: '#323130',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+    color: HBC_SURFACE_LIGHT['text-primary'],
   },
   card: {
     // Touch-first: generous card sizing
@@ -87,8 +89,8 @@ const useStyles = makeStyles({
     fontWeight: 600,
     padding: '2px 8px',
     borderRadius: '4px',
-    backgroundColor: '#EFF6FC',
-    color: '#0078D4',
+    backgroundColor: HBC_SURFACE_LIGHT['responsibility-bg'],
+    color: HBC_STATUS_COLORS.info,
   },
   actionsRow: {
     display: 'flex',
@@ -103,7 +105,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '120px',
-    color: '#8A8886',
+    color: HBC_STATUS_COLORS.neutral,
   },
 });
 
@@ -151,14 +153,14 @@ export function FieldActionStack({
                   <div className={styles.cardContent}>
                     <div className={styles.meta}>
                       <span className={styles.categoryTag}>{CATEGORY_LABELS[item.category]}</span>
-                      <Text size={200} style={{ color: '#605e5c' }}>{item.areaLabel}</Text>
-                      <Text size={200} style={{ color: '#605e5c' }}>{item.owner}</Text>
+                      <Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>{item.areaLabel}</Text>
+                      <Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>{item.owner}</Text>
                     </div>
                     {item.dueLabel && (
                       <Text
                         size={200}
                         weight="semibold"
-                        style={{ color: item.ageDays != null && item.ageDays > 0 ? '#A4262C' : '#323130' }}
+                        style={{ color: item.ageDays != null && item.ageDays > 0 ? HBC_STATUS_COLORS.critical : HBC_SURFACE_LIGHT['text-primary'] }}
                       >
                         {item.dueLabel}
                       </Text>

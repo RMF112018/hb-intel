@@ -5,6 +5,8 @@ import {
   HBC_SPACE_SM,
   HBC_SPACE_XS,
   Text,
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
 } from '@hbc/ui-kit';
 
 import type { FieldFocusArea } from '../hooks/useFieldFocusSummary.js';
@@ -14,12 +16,12 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    borderRight: '1px solid #edebe9',
-    backgroundColor: '#faf9f8',
+    borderRight: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
   },
   header: {
     padding: `${HBC_SPACE_SM}px`,
-    borderBottom: '1px solid #edebe9',
+    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
   },
   areaList: {
     flex: 1,
@@ -36,16 +38,16 @@ const useStyles = makeStyles({
     padding: `${HBC_DENSITY_TOKENS.touch.tapSpacingMin}px ${HBC_SPACE_SM}px`,
     cursor: 'pointer',
     borderLeft: '4px solid transparent',
-    borderBottom: '1px solid #f3f2f1',
+    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['surface-2']}`,
     transitionProperty: 'background-color, border-color',
     transitionDuration: '150ms',
     ':hover': {
-      backgroundColor: '#f3f2f1',
+      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
     },
   },
   areaItemSelected: {
-    borderLeftColor: '#0078D4',
-    backgroundColor: '#EFF6FC',
+    borderLeftColor: HBC_STATUS_COLORS.info,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-active'],
   },
   areaLabel: {
     flex: 1,
@@ -68,12 +70,12 @@ const useStyles = makeStyles({
     padding: '0 6px',
   },
   countOpen: {
-    backgroundColor: '#edebe9',
-    color: '#323130',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+    color: HBC_SURFACE_LIGHT['text-primary'],
   },
   countUrgent: {
-    backgroundColor: '#FDE7E9',
-    color: '#A4262C',
+    backgroundColor: HBC_SURFACE_LIGHT['destructive-bg'],
+    color: HBC_SURFACE_LIGHT['destructive-text'],
   },
   allAreasButton: {
     display: 'flex',
@@ -81,13 +83,13 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     minHeight: `${HBC_DENSITY_TOKENS.touch.touchTargetMin}px`,
     padding: `${HBC_SPACE_SM}px`,
-    borderTop: '1px solid #edebe9',
+    borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     cursor: 'pointer',
     backgroundColor: 'transparent',
     border: 'none',
     width: '100%',
     ':hover': {
-      backgroundColor: '#f3f2f1',
+      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
     },
   },
 });
@@ -128,7 +130,7 @@ export function FieldFocusRail({
               <div className={styles.areaLabel}>
                 <Text size={300} weight="semibold">{area.label}</Text>
                 <br />
-                <Text size={200} style={{ color: '#605e5c' }}>{area.description}</Text>
+                <Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>{area.description}</Text>
               </div>
               <div className={styles.countGroup}>
                 {area.urgentItemCount > 0 && (
@@ -150,7 +152,7 @@ export function FieldFocusRail({
           className={styles.allAreasButton}
           onClick={() => onSelectArea(null)}
         >
-          <Text size={200} style={{ color: '#0078D4' }}>Show all areas</Text>
+          <Text size={200} style={{ color: HBC_STATUS_COLORS.info }}>Show all areas</Text>
         </button>
       )}
     </nav>
