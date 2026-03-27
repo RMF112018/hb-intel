@@ -209,6 +209,26 @@ pnpm exec tsx scripts/create-projects-list.ts
 
 Administrator guide: `docs/how-to/administrator/create-projects-list.md`.
 
+### Provisioning Staging Gates
+
+The saga orchestrator validates all provisioning prerequisites at execution time via `validateProvisioningPrerequisites()`. The saga will fail fast with a clear aggregated error if any gate is unsatisfied. In mock/test mode, validation is skipped.
+
+| Gate | Env Var | Status | Owner |
+|---|---|---|---|
+| Entra Group.ReadWrite.All | `GRAPH_GROUP_PERMISSION_CONFIRMED=true` | **Required** — Step 6 group creation, membership | IT Admin |
+| Tenant ID | `AZURE_TENANT_ID` | **Required** — group-to-site permission claim identity | DevOps |
+| SharePoint Tenant URL | `SHAREPOINT_TENANT_URL` | **Required** — all SharePoint operations | DevOps |
+| Hub Site ID | `SHAREPOINT_HUB_SITE_ID` | **Required** — Step 7 hub association | DevOps |
+| App Catalog URL | `SHAREPOINT_APP_CATALOG_URL` | **Required** — Step 5 SPFx install | DevOps |
+| SPFx App Package ID | `HB_INTEL_SPFX_APP_ID` | **Required** — Step 5 SPFx install | DevOps |
+| OpEx Manager UPN | `OPEX_MANAGER_UPN` | **Required** — Step 6 Leaders group membership | Business |
+
+**Staging workflow:**
+1. Deploy the function app with `HBC_ADAPTER_MODE=proxy`.
+2. Confirm IT has granted `Group.ReadWrite.All` to the Managed Identity (see IT-Department-Setup-Guide.md §8.4).
+3. Set `GRAPH_GROUP_PERMISSION_CONFIRMED=true` in the Function App configuration.
+4. Verify all other staging gates via a test provisioning run.
+
 ### Phase 6.13 Timer Trigger Configuration (D-PH6-13)
 
 - Set `WEBSITE_TIME_ZONE=Eastern Standard Time` in Azure Function App settings.

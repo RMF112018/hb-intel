@@ -121,6 +121,17 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     requiredInProd: true,
   },
 
+  // --- Permission Confirmation Gates (Bucket A) ---
+  {
+    name: 'GRAPH_GROUP_PERMISSION_CONFIRMED',
+    bucket: 'infrastructure',
+    description:
+      'Must be "true" after IT grants Group.ReadWrite.All to the Managed Identity. ' +
+      'Provisioning Step 6 (Entra group creation and membership) is blocked until confirmed. ' +
+      'See IT-Department-Setup-Guide.md §8.4.',
+    requiredInProd: true,
+  },
+
   // --- Business-Operational (Bucket B) ---
   {
     name: 'OPEX_MANAGER_UPN',
@@ -202,13 +213,4 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
     requiredInProd: false,
   },
 
-  // --- Permission Confirmation Gates (Bucket A) ---
-  {
-    name: 'GRAPH_GROUP_PERMISSION_CONFIRMED',
-    bucket: 'infrastructure',
-    description:
-      'Set to "true" after IT grants Group.ReadWrite.All application permission to the Managed Identity. ' +
-      'GraphService operations are blocked until this is confirmed. See IT-Department-Setup-Guide.md §8.4.',
-    requiredInProd: false,
-  },
 ] as const;

@@ -8,6 +8,7 @@ import type {
   ProjectSetupRequestState,
 } from '@hbc/models';
 import { withRetry } from '../../utils/retry.js';
+import { validateProvisioningPrerequisites } from '../../utils/validate-config.js';
 import { executeStep1, compensateStep1 } from './steps/step1-create-site.js';
 import { executeStep2, compensateStep2 } from './steps/step2-document-library.js';
 import { executeStep3, compensateStep3 } from './steps/step3-template-files.js';
@@ -39,6 +40,9 @@ export class SagaOrchestrator {
   ) {}
 
   async execute(request: IProvisionSiteRequest): Promise<void> {
+    // Fail fast if provisioning prerequisites are not satisfied.
+    validateProvisioningPrerequisites();
+
     const sagaStartMs = Date.now();
     const { projectId, projectNumber, projectName, correlationId, triggeredBy,
             submittedBy, groupMembers, groupLeaders, department } = request;

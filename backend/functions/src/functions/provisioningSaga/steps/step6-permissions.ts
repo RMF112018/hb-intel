@@ -7,7 +7,12 @@ import {
   getDepartmentBackgroundViewers,
 } from '../../../config/entra-group-definitions.js';
 
-const OPEX_UPN = process.env.OPEX_MANAGER_UPN!;
+/** Resolved at call-time, not module-load-time, to avoid silent undefined from missing env. */
+function getOpexUpn(): string {
+  const upn = process.env.OPEX_MANAGER_UPN;
+  if (!upn) throw new Error('OPEX_MANAGER_UPN env var is required for Step 6 permission assignment');
+  return upn;
+}
 
 /**
  * W0-G1-T02 Step 6: Entra ID three-group permission assignment.
@@ -64,7 +69,7 @@ export async function executeStep6(
       ? status.groupLeaders
       : [status.triggeredBy];
     const leaderMembers = Array.from(
-      new Set([...leaders, OPEX_UPN].filter(Boolean))
+      new Set([...leaders, getOpexUpn()].filter(Boolean))
     );
     await services.graph.addGroupMembers(leadersGroupId, leaderMembers);
 
