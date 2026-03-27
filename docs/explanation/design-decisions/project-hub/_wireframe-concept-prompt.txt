@@ -1,0 +1,309 @@
+You are acting as a senior architecture, product-definition, UX strategy, information architecture, design-systems, construction-workflow, and repo-truth reviewer for HB Intel.
+
+You have deep expertise in:
+- enterprise SaaS UX strategy
+- construction technology product design
+- role-based workspace design
+- dashboard and project-hub information architecture
+- progressive disclosure
+- design-system-constrained wireframing
+- responsive / tablet-first / field-first interface design
+- project-scoped module surfacing
+- analytics and actionability design
+- runtime-state-aware product architecture
+- repo-truth validation
+- technical documentation governance
+
+Critical requirement
+You must conduct a repo-truth-grounded design audit and then create multiple enhanced Project Hub wireframe layout concepts that align with the mold-breaker principles defined in the attached studies that I will also share in this chat.
+
+This is not a generic “give me some dashboard ideas” exercise.
+This is not a superficial Dribbble-style design exercise.
+This is not a visual-only exercise divorced from architecture.
+
+The goal is to define multiple materially different Project Hub layout concepts that:
+- are grounded in the repo truth,
+- respect the current architecture and module reality,
+- surface modules in a mold-breaking way,
+- improve discoverability, context continuity, analytics usefulness, and actionability,
+- and help define the future Project Hub operating model.
+
+Important instruction
+Do not re-read files that are already in your active context or memory unless you need to verify something specific.
+
+Primary objective
+Conduct a comprehensive review of:
+- the attached mold-breaker / construction UX / construction UI studies,
+- the repo truth for the PWA shell, Project Hub, and `@hbc/ui-kit`,
+- the unique Project Hub modules already developed,
+- and the current Project Hub layout / routing / surfacing behavior,
+
+then create multiple enhanced Project Hub wireframe layout concepts that provide inspiration for:
+- overall hub layout,
+- project context and control-center structure,
+- module access patterns,
+- analytics inclusion,
+- work / risk / health / timeline surfacing,
+- and module-launch / module-runtime entry models.
+
+Critical context
+The studies should be treated as design doctrine inputs, not as loose inspiration.
+You must use them to pressure-test the hub concepts against the category’s recurring UX failures and the intended mold-breaker principles.
+
+The studies identify recurring category failures such as:
+- steep learning curve,
+- dense cluttered multi-layer navigation,
+- too many clicks,
+- no unified lifecycle view across modules,
+- mobile/web mismatch,
+- offline and sync fragility,
+- notification overload,
+- permission opacity,
+- and workflow / implementation trust failures.
+
+They also point toward a stronger product thesis centered on:
+- task-first rather than module-first entry,
+- responsibility-first visibility,
+- context continuity,
+- progressive disclosure,
+- lower cognitive load,
+- field confidence,
+- device-intelligent interaction,
+- offline-safe workflow handling,
+- and implementation transparency.
+
+You must use those ideas as evaluation criteria for the wireframe concepts.
+
+Important scope clarification
+This is not an implementation prompt.
+Do not write production code.
+Do not jump directly into React component generation.
+Do not produce only vague design commentary.
+
+Instead, you must:
+1. inspect repo truth,
+2. inspect the attached studies,
+3. inspect `@hbc/ui-kit`,
+4. inspect the current Project Hub implementation,
+5. inspect the unique Project Hub modules already developed,
+6. identify the current hub surfacing model and its weaknesses,
+7. define the key mold-breaker design principles that should govern Project Hub,
+8. and then generate multiple wireframe layout concepts grounded in that analysis.
+
+Repo-truth inspection requirements
+You must inspect repo truth and relevant live files directly from the repo, especially:
+- docs/architecture/blueprint/current-state-map.md
+- the target architecture file serving as repo truth
+- docs/architecture/blueprint/package-relationship-map.md
+- docs/architecture/plans/MASTER/04_Phase-3_Project-Hub-and-Project-Context-Plan.md
+- docs/architecture/plans/MASTER/phase-3-deliverables/README.md
+- P3-B1 — Project Context Continuity and Switching Contract
+- P3-C1 — Project Canvas Governance Note
+- P3-C2 — Mandatory Core Tile Family Definition
+- P3-C3 — Lane-Aware Home/Canvas Capability Matrix
+- P3-D1 through P3-D4 — Activity / Health / Work Queue / Related Items contracts
+- P3-E1 — Module Classification Matrix
+- P3-E2 — Module Source-of-Truth / Action-Boundary Matrix
+- P3-G1 — Lane Capability Matrix
+- P3-G2 — Cross-Lane Navigation and Handoff Map
+- P3-G3 — Lane-Specific Acceptance Matrix
+- P3-H1 — Acceptance / staging / readiness checklist
+
+You must also inspect implementation truth for:
+- `@hbc/ui-kit`
+- Project Hub shell / routing / pages
+- Project Hub control center / project context entry surfaces
+- current module launch patterns
+- current module working surfaces
+- unique modules already developed
+- any tile registries, canvas surfaces, deep-link helpers, related-items surfaces, work queue surfaces, activity timeline surfaces, and health/risk surfaces already present
+
+You should inspect at least:
+- packages/ui-kit
+- packages/project-canvas
+- packages/related-items
+- packages/my-work-feed
+- packages/activity-timeline
+- packages/features-project-hub
+- apps/pwa
+- any Project Hub route files
+- any shell/header/navigation components
+- any current Project Hub landing / module-surfacing pages
+- any current module-specific working surfaces
+
+Attached studies instruction
+I will share the attached studies in this chat.
+You must review them directly and use them as explicit evaluation criteria for the wireframe work.
+
+Treat those studies as sources for:
+- category UI patterns worth respecting
+- category UX failures worth breaking
+- mold-breaker operating principles
+- field vs office interaction implications
+- accountability / next-move visibility expectations
+- progressive disclosure and lower-cognitive-load guidance
+- density, tablet, and card/table transformation ideas
+- module continuity, related-items, and unified work-entry ideas
+
+Your review objective
+Determine:
+1. how Project Hub is currently surfaced today,
+2. whether it currently behaves as a mold-breaking operating layer or merely as a shell / launcher,
+3. how module discoverability and launch patterns currently work,
+4. where the current layout and module-access model are weak, cluttered, generic, or not operationally useful,
+5. what UI-kit constraints and opportunities exist,
+6. what already-built Project Hub module surfaces suggest about future hub design,
+7. and what multiple superior wireframe directions should look like.
+
+Wireframe concept requirements
+You must generate multiple materially different layout concepts.
+Do not produce minor variations of the same concept.
+
+Generate between 5 and 8 concepts.
+
+Each concept must include:
+- a clear concept name
+- core design thesis
+- intended primary user(s)
+- information architecture summary
+- primary layout regions
+- module access pattern
+- analytics / KPI / health / work-queue / timeline inclusion strategy
+- how project context is established and preserved
+- how module switching works
+- how the concept reduces cognitive load
+- how it surfaces responsibility / next move
+- how it handles field vs office use
+- strengths
+- weaknesses / tradeoffs
+- where it best aligns with repo truth
+- what would be hardest to implement
+
+For each concept, also include:
+1. A concise text wireframe / layout sketch using structured ASCII or block notation
+2. A “why this is mold-breaking” explanation
+3. A “where this borrows from category best practices” explanation
+4. A “where this deliberately breaks category conventions” explanation
+
+Design expectations
+The concepts should explore different possible approaches such as:
+- project canvas first
+- control-center plus module rail
+- work-first / next-move-first
+- health/risk-led executive hub
+- spatial / timeline / lifecycle-oriented hub
+- role-adaptive hub
+- field-mode / tablet-mode differentiated hub
+- analytics-light vs analytics-heavy variants
+But do not force these exact patterns if repo truth suggests stronger alternatives.
+
+Important design rules
+- Do not simply replicate Procore, ACC, Oracle, CMiC, InEight, or Bluebeam patterns.
+- Do not just create prettier versions of module grids.
+- Do not bury the user in module taxonomy.
+- Do not overemphasize architecture diagrams instead of user-facing utility.
+- Do not create concepts that ignore repo truth or existing package boundaries.
+- Do not assume all modules are equally mature or equally actionable.
+- Do not treat analytics as decoration; they must support actionability.
+- Do not ignore `@hbc/ui-kit` reality.
+- Do not ignore field vs office differences.
+
+Specific things to pressure-test in the concepts
+- role-based project canvas
+- action-first vs module-first entry
+- next-move / responsibility visibility
+- related-item traversal
+- activity / health / work-queue surfacing
+- analytics placement and usefulness
+- module-launch entry friction
+- tablet ergonomics and density
+- saved views / personalization potential
+- progressive disclosure
+- continuity across modules
+- how a module should be “entered” from the hub
+- whether the hub should surface runtime module posture before entering the module
+
+Expected output structure
+Your first and main response should include:
+
+1. Objective
+- concise restatement of the goal
+
+2. Process Overview
+- how you reviewed repo truth and the studies
+
+3. Repo-Truth / Design Doctrine Summary
+- what current-state-map and target architecture imply
+- what `@hbc/ui-kit` implies
+- what current Project Hub implementation implies
+- what current module implementation implies
+- what the attached studies imply for mold-breaking hub design
+
+4. Current Project Hub Layout Audit
+- current strengths
+- current weaknesses
+- current anti-patterns
+- what is missing from the current module-access model
+
+5. Design Principles for the Future Project Hub
+- the principles that should govern all concepts
+- grounded in both repo truth and the attached studies
+
+6. Multiple Wireframe Concepts
+For each concept include:
+- concept name
+- design thesis
+- target user(s)
+- IA summary
+- text wireframe / layout sketch
+- module access model
+- analytics / work / health / timeline placement
+- mold-breaker rationale
+- best-fit use case
+- implementation difficulty
+- tradeoffs
+
+7. Comparative Evaluation Matrix
+Compare all concepts against criteria such as:
+- mold-breaker strength
+- repo-truth alignment
+- cognitive load reduction
+- module discoverability
+- actionability
+- field usability
+- executive visibility
+- implementation realism
+
+8. Recommended Direction
+- best overall concept
+- best near-term concept
+- best long-term concept
+- best concept for incremental rollout
+
+9. Recommended Next Actions
+- what to prototype first
+- what files/components/surfaces to inspect or update first if we move toward implementation later
+
+Important behavior rules
+- This is not an interview process.
+- Do not ask me one question at a time.
+- Do not stop at generic commentary.
+- Do not produce only high-level design language.
+- Do not produce image-generation prompts.
+- Do not produce code unless absolutely necessary for explanation.
+- Stay grounded in the repo and the attached studies.
+
+Quality bar
+The result should be strong enough that I can use it to:
+- choose one or two wireframe directions,
+- pressure-test them against repo truth,
+- and later turn them into implementation guidance for a local code agent.
+
+Begin now by:
+1. inspecting repo truth,
+2. inspecting the attached studies,
+3. inspecting `@hbc/ui-kit`,
+4. inspecting the current Project Hub and unique modules,
+5. identifying the current hub/module-access anti-patterns,
+6. defining the governing design principles,
+7. and then generating the multiple enhanced wireframe concepts in the format above.
