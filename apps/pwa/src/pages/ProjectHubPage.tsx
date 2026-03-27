@@ -10,8 +10,10 @@ import {
   PROJECT_HUB_REPORT_MODULE_AUDIT,
   getProjectHubReportsSummary,
   ProjectOperatingSurface,
+  ExecutiveCockpitSurface,
+  resolveProjectHubLayoutFamily,
 } from '@hbc/features-project-hub';
-import type { IProjectHubReportModuleAuditRow } from '@hbc/features-project-hub';
+import type { IProjectHubReportModuleAuditRow, ProjectHubLayoutFamily } from '@hbc/features-project-hub';
 import {
   getProjectHubPortfolioState,
   reconcileProjectContext,
@@ -261,10 +263,25 @@ export function ProjectHubControlCenterPage({
 
   const reportsSection = section === 'reports';
 
+  // Resolve layout family for non-reports view.
+  // Default to project-operating; executive roles get executive cockpit.
+  const layoutFamily: ProjectHubLayoutFamily = useMemo(() => {
+    const result = resolveProjectHubLayoutFamily({
+      role: 'project-manager', // TODO: resolve from auth context
+      devicePosture: 'desktop',
+      userOverride: null,
+    });
+    return result.family;
+  }, []);
+
+  const familyTitle = layoutFamily === 'executive'
+    ? 'Project Hub — Executive Cockpit'
+    : 'Project Hub Control Center';
+
   return (
     <WorkspacePageShell
       layout="dashboard"
-      title={reportsSection ? 'Project Hub Reports' : 'Project Hub Control Center'}
+      title={reportsSection ? 'Project Hub Reports' : familyTitle}
       stickyHeader
       headerSlot={
         <div style={{ padding: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -368,6 +385,11 @@ export function ProjectHubControlCenterPage({
             </div>
           </div>
         </>
+      ) : layoutFamily === 'executive' ? (
+        <ExecutiveCockpitSurface
+          projectId={project.id}
+          onOpenModule={onModuleOpen ?? (() => {})}
+        />
       ) : (
         <ProjectOperatingSurface
           canvasSlot={

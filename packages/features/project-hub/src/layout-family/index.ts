@@ -56,6 +56,10 @@ export {
   ContextRail,
   CanvasCenter,
   ActivityStrip,
+  ExecutiveCockpitSurface,
+  WatchlistPanel,
+  RiskExposureCanvas,
+  InterventionRail,
 } from './components/index.js';
 export type {
   ProjectOperatingSurfaceProps,
@@ -63,6 +67,10 @@ export type {
   ContextRailProps,
   CanvasCenterProps,
   ActivityStripProps,
+  ExecutiveCockpitSurfaceProps,
+  WatchlistPanelProps,
+  RiskExposureCanvasProps,
+  InterventionRailProps,
 } from './components/index.js';
 
 // ── Hooks ───────────────────────────────────────────────────────────
@@ -73,4 +81,20 @@ export {
   useWorkQueueSummary,
   useNextMoveSummary,
   useActivitySummary,
+  useWatchlistSummary,
+  WATCHLIST_SIGNAL_TYPE_LABELS,
+  useRiskExposureSummary,
+  useInterventionQueue,
+} from './hooks/index.js';
+export type {
+  WatchlistItem,
+  WatchlistSummary,
+  HealthPostureZone,
+  CostExposureZone,
+  ScheduleRiskZone,
+  QualitySafetyZone,
+  CrossDriverZone,
+  RiskExposureSummary,
+  InterventionItem,
+  InterventionQueue,
 } from './hooks/index.js';
