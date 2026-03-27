@@ -1,13 +1,15 @@
 /**
  * FinancialControlCenter — page orchestrator for the Financial module root.
  *
- * Role-aware and complexity-aware. Composes the 5-region Financial
- * Control Center using @hbc/ui-kit layout primitives.
+ * Manages surface-mode state: renders either the control center overview
+ * or a deeper tool surface (e.g., Forecast Summary) based on the user's
+ * navigation within the financial section.
  *
  * Route: /project-hub/$projectId/financial
  */
 
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import {
   MultiColumnLayout,
   HbcActivityStrip,
@@ -20,6 +22,15 @@ import { FinancialPeriodHeader } from './FinancialPeriodHeader.js';
 import { FinancialToolPostureRail } from './FinancialToolPostureRail.js';
 import { FinancialControlCenterCore } from './FinancialControlCenterCore.js';
 import { FinancialActionRail } from './FinancialActionRail.js';
+import { ForecastSummaryPage } from './ForecastSummaryPage.js';
+
+// ── Surface mode ────────────────────────────────────────────────────
+
+type FinancialSurfaceMode = 'control-center' | 'forecast-summary';
+
+const TOOL_TO_SURFACE: Record<string, FinancialSurfaceMode> = {
+  'forecast-summary': 'forecast-summary',
+};
 
 const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   'version-transition': 'Version',
@@ -30,6 +41,8 @@ const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   refresh: 'Refresh',
   override: 'Override',
 };
+
+// ── Component ───────────────────────────────────────────────────────
 
 export interface FinancialControlCenterProps {
   readonly projectId: string;
@@ -46,7 +59,36 @@ export function FinancialControlCenter({
   onOpenSurface,
   onSecondaryAction,
 }: FinancialControlCenterProps): ReactNode {
+  const [surfaceMode, setSurfaceMode] = useState<FinancialSurfaceMode>('control-center');
+
   const data = useFinancialControlCenter({ viewerRole, complexityTier });
+
+  const handleOpenSurface = (toolId: string): void => {
+    const targetSurface = TOOL_TO_SURFACE[toolId];
+    if (targetSurface) {
+      setSurfaceMode(targetSurface);
+    } else {
+      // Tool surfaces not yet built — delegate to external handler
+      onOpenSurface?.(toolId);
+    }
+  };
+
+  const handleBackToControlCenter = (): void => {
+    setSurfaceMode('control-center');
+  };
+
+  // ── Deeper surface rendering ──────────────────────────────────────
+
+  if (surfaceMode === 'forecast-summary') {
+    return (
+      <ForecastSummaryPage
+        projectId={projectId}
+        onBack={handleBackToControlCenter}
+      />
+    );
+  }
+
+  // ── Control center rendering ──────────────────────────────────────
 
   const activityEntries: ActivityStripEntry[] = data.recentActivity.map((e) => ({
     id: e.id,
@@ -59,7 +101,6 @@ export function FinancialControlCenter({
 
   return (
     <>
-      {/* R1 — Period Header */}
       <FinancialPeriodHeader
         period={data.period}
         custody={data.custody}
@@ -68,7 +109,6 @@ export function FinancialControlCenter({
         onSecondaryAction={onSecondaryAction}
       />
 
-      {/* R2–R5 — Multi-column composition */}
       <MultiColumnLayout
         testId="financial-control-center"
         config={{
@@ -87,7 +127,7 @@ export function FinancialControlCenter({
             narrative={data.narrative}
             tools={data.tools}
             selectedToolPreview={data.selectedToolPreview}
-            onOpenSurface={onOpenSurface}
+            onOpenSurface={handleOpenSurface}
           />
         }
         rightSlot={

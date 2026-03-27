@@ -45,3 +45,14 @@ export type {
   FinancialAnnotation,
   FinancialActivityEntry,
 } from './hooks/useFinancialControlCenter.js';
+export { useForecastSummary } from './hooks/useForecastSummary.js';
+export type {
+  ForecastVersionContext,
+  ForecastKpiMetric,
+  ForecastFormField,
+  ForecastFormSection,
+  ForecastDeltaEntry,
+  ForecastCommentaryEntry,
+  ForecastExposureItem,
+  ForecastSummaryData,
+} from './hooks/useForecastSummary.js';
