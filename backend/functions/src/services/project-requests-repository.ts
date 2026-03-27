@@ -106,7 +106,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       ClarificationNote: request.clarificationNote ?? '',
       CompletedBy: request.completedBy ?? '',
       CompletedAt: request.completedAt ?? '',
-      SiteUrl: '',
+      SiteUrl: request.siteUrl ?? '',
     };
   }
 
@@ -127,6 +127,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       clarificationNote: (item.ClarificationNote as string) || undefined,
       completedBy: (item.CompletedBy as string) || undefined,
       completedAt: (item.CompletedAt as string) || undefined,
+      siteUrl: (item.SiteUrl as string) || undefined,
       retryCount: typeof item.RetryCount === 'number' ? item.RetryCount : 0,
     };
   }

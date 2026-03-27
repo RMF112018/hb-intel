@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
 import { executeStep5 } from '../provisioningSaga/steps/step5-web-parts.js';
-import type { IProvisioningStatus } from '@hbc/models';
+import type { IProvisioningStatus, ProjectSetupRequestState } from '@hbc/models';
 
 interface ITimerExecutionInput {
   isPastDue?: boolean;
@@ -204,6 +204,28 @@ export async function runTimerFullSpec(
     failed: failedCount,
   });
 
+  async function reconcileRequestState(
+    projectId: string,
+    state: ProjectSetupRequestState,
+    extras?: { siteUrl?: string; completedBy?: string; completedAt?: string },
+  ): Promise<void> {
+    try {
+      const request = await services.projectRequests.getRequest(projectId);
+      if (!request) return;
+      request.state = state;
+      if (extras?.siteUrl) request.siteUrl = extras.siteUrl;
+      if (extras?.completedBy) request.completedBy = extras.completedBy;
+      if (extras?.completedAt) request.completedAt = extras.completedAt;
+      await services.projectRequests.upsertRequest(request);
+    } catch (err) {
+      logger.warn('Non-critical: timer request reconciliation failed', {
+        projectId,
+        targetState: state,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
   async function markTimerSuccess(status: IProvisioningStatus, correlationId: string): Promise<void> {
     status.step5DeferredToTimer = false;
     status.step5TimerRetryCount = 0;
@@ -247,6 +269,13 @@ export async function runTimerFullSpec(
       .catch(() => {
         // D-PH6-13 SharePoint audit write is intentionally fire-and-forget.
       });
+
+    // Reconcile request record to Completed on timer-driven Step 5 success.
+    await reconcileRequestState(status.projectId, 'Completed', {
+      siteUrl: status.siteUrl,
+      completedBy: 'timer',
+      completedAt: status.completedAt,
+    });
   }
 
   async function markTimerFailure(
@@ -272,5 +301,8 @@ export async function runTimerFullSpec(
     }).catch(() => {
       // D-PH6-13 failure push should not block timer completion.
     });
+
+    // Reconcile request record to Failed on timer-driven Step 5 terminal failure.
+    await reconcileRequestState(status.projectId, 'Failed');
   }
 }

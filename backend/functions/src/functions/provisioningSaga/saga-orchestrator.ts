@@ -5,6 +5,7 @@ import type {
   IProvisionSiteRequest,
   IProvisioningStatus,
   ISagaStepResult,
+  ProjectSetupRequestState,
 } from '@hbc/models';
 import { withRetry } from '../../utils/retry.js';
 import { executeStep1, compensateStep1 } from './steps/step1-create-site.js';
@@ -76,6 +77,9 @@ export class SagaOrchestrator {
     });
 
     await this.services.tableStorage.upsertProvisioningStatus(status);
+
+    // Reconcile request record to Provisioning state.
+    await this.reconcileRequestState(projectId, 'Provisioning');
 
     await this.services.sharePoint.writeAuditRecord({
       projectId, projectNumber, projectName, correlationId,
@@ -241,6 +245,15 @@ export class SagaOrchestrator {
     status.overallStatus = finalStatus;
     status.completedAt = new Date().toISOString();
     await this.services.tableStorage.upsertProvisioningStatus(status);
+
+    // Reconcile request record on non-deferred completion.
+    if (finalStatus === 'Completed') {
+      await this.reconcileRequestState(projectId, 'Completed', {
+        siteUrl: status.siteUrl,
+        completedBy: triggeredBy,
+        completedAt: status.completedAt,
+      });
+    }
 
     const totalDurationMs = Date.now() - sagaStartMs;
     this.logger.trackEvent('ProvisioningSagaCompleted', {
@@ -425,6 +438,9 @@ export class SagaOrchestrator {
 
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
+    // Reconcile request record to Failed state.
+    await this.reconcileRequestState(projectId, 'Failed');
+
     this.logger.trackEvent('ProvisioningSagaFailed', {
       correlationId,
       projectId,
@@ -492,6 +508,32 @@ export class SagaOrchestrator {
   private isStepAlreadyCompleted(status: IProvisioningStatus, stepNumber: number): boolean {
     const existing = status.steps.find((s) => s.stepNumber === stepNumber);
     return existing?.status === 'Completed';
+  }
+
+  /**
+   * Reconcile the project setup request record to reflect the current saga lifecycle state.
+   * Non-blocking: reconciliation failure must not break the saga.
+   */
+  private async reconcileRequestState(
+    projectId: string,
+    state: ProjectSetupRequestState,
+    extras?: { siteUrl?: string; completedBy?: string; completedAt?: string },
+  ): Promise<void> {
+    try {
+      const request = await this.services.projectRequests.getRequest(projectId);
+      if (!request) return;
+      request.state = state;
+      if (extras?.siteUrl) request.siteUrl = extras.siteUrl;
+      if (extras?.completedBy) request.completedBy = extras.completedBy;
+      if (extras?.completedAt) request.completedAt = extras.completedAt;
+      await this.services.projectRequests.upsertRequest(request);
+    } catch (err) {
+      this.logger.warn('Non-critical: request state reconciliation failed', {
+        projectId,
+        targetState: state,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   private async pushProgress(
