@@ -56,3 +56,5 @@ export * from './document-readiness-spikes/index.js';
 export * from './reports/index.js';
 
 export * from './spfx-lane/index.js';
+
+export * from './layout-family/index.js';
