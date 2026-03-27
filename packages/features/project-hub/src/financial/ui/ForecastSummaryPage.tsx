@@ -26,6 +26,9 @@ const useStyles = makeStyles({
     backgroundColor: HBC_STATUS_COLORS.warning + '22',
     borderBottom: `2px solid ${HBC_STATUS_COLORS.warning}`,
   },
+  staleBannerText: {
+    color: HBC_STATUS_COLORS.warning,
+  },
   unsavedBanner: {
     display: 'flex',
     alignItems: 'center',
@@ -77,7 +80,7 @@ export function ForecastSummaryPage({
       {/* State banners */}
       {data.staleBanner.visible && (
         <div className={styles.staleBanner} data-testid="stale-banner">
-          <Text size={200} weight="semibold" style={{ color: HBC_STATUS_COLORS.warning }}>
+          <Text size={200} weight="semibold" className={styles.staleBannerText}>
             Stale: {data.staleBanner.message}
           </Text>
           {data.staleBanner.sources.length > 0 && (

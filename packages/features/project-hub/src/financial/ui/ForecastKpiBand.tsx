@@ -55,6 +55,9 @@ const useStyles = makeStyles({
     borderRadius: '50%',
     flexShrink: 0,
   },
+  cardBody: {
+    padding: `0 ${HBC_SPACE_SM}px ${HBC_SPACE_SM}px`,
+  },
 });
 
 export interface ForecastKpiBandProps {
@@ -69,7 +72,7 @@ export function ForecastKpiBand({ kpis }: ForecastKpiBandProps): ReactNode {
       {kpis.map((kpi) => (
         <Card key={kpi.id} size="small">
           <CardHeader header={<Text weight="semibold" size={200}>{kpi.label}</Text>} />
-          <div style={{ padding: `0 ${HBC_SPACE_SM}px ${HBC_SPACE_SM}px` }}>
+          <div className={styles.cardBody}>
             <span className={styles.metricValue}>{kpi.value}</span>
             <div className={styles.trendRow}>
               <span
