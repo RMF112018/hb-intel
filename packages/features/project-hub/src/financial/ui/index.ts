@@ -35,3 +35,12 @@ export { BudgetFreshnessBanner } from './BudgetFreshnessBanner.js';
 export { BudgetLinesGrid } from './BudgetLinesGrid.js';
 export { BudgetLineImpactPanel } from './BudgetLineImpactPanel.js';
 export { BudgetImportPanel } from './BudgetImportPanel.js';
+
+// Cash Flow
+export { CashFlowPage } from './CashFlowPage.js';
+export type { CashFlowPageProps } from './CashFlowPage.js';
+export { CashFlowHeader } from './CashFlowHeader.js';
+export { CashFlowKpiBand } from './CashFlowKpiBand.js';
+export { CashFlowMonthlyGrid } from './CashFlowMonthlyGrid.js';
+export { CashFlowTrendPanel } from './CashFlowTrendPanel.js';
+export { CashFlowEvidenceRail } from './CashFlowEvidenceRail.js';

@@ -71,3 +71,15 @@ export type {
   BudgetSurfaceData,
   UseBudgetSurfaceOptions,
 } from './hooks/useBudgetSurface.js';
+export { useCashFlowSurface } from './hooks/useCashFlowSurface.js';
+export type {
+  CashFlowSurfaceState,
+  CashFlowMonthRow,
+  CashFlowKpi,
+  CashFlowARSummary,
+  CashFlowARBucket,
+  CashFlowTrendPoint,
+  CashFlowManualCorrection,
+  CashFlowSurfaceData,
+  UseCashFlowSurfaceOptions,
+} from './hooks/useCashFlowSurface.js';
