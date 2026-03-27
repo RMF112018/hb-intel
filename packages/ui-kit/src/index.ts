@@ -434,6 +434,7 @@ export {
   CreateUpdateLayout,
   DashboardLayout,
   ListLayout,
+  MultiColumnLayout,
   useFocusMode,
 } from './layouts/index.js';
 export type {
@@ -453,7 +454,26 @@ export type {
   ListBulkAction,
   ListSavedViewEntry,
   UseFocusModeReturn,
+  MultiColumnRegionId,
+  MultiColumnRegionConfig,
+  MultiColumnLayoutConfig,
+  MultiColumnLayoutProps,
+  NavRailItem,
+  NavRailItemStatus,
+  HbcNavRailProps,
+  ActivityStripEntry,
+  HbcActivityStripProps,
+  QuickAction,
+  HbcQuickActionBarProps,
+  SyncState,
+  HbcSyncStatusBarProps,
 } from './layouts/index.js';
+
+// Multi-Column Composition Primitives
+export { HbcNavRail } from './HbcNavRail/index.js';
+export { HbcActivityStrip } from './HbcActivityStrip/index.js';
+export { HbcQuickActionBar } from './HbcQuickActionBar/index.js';
+export { HbcSyncStatusBar } from './HbcSyncStatusBar/index.js';
 
 // ---------------------------------------------------------------------------
 // PH4.13 Module-Specific UI Patterns
