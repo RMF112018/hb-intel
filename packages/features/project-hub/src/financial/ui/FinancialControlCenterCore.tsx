@@ -2,8 +2,8 @@
  * FinancialControlCenterCore — R3 region.
  *
  * Default: narrative + readiness panel + change summary + blockers.
- * Selected tool: preview card with headline, metric, top issue, "Open Surface" CTA.
- * Theme-aware.
+ * Selected tool: preview card with headline, metric, contextual actions, "Open Surface" CTA.
+ * Theme-aware: uses Fluent CSS custom properties and HBC_STATUS_COLORS.
  */
 
 import type { ReactNode } from 'react';
@@ -15,6 +15,7 @@ import {
   HbcButton,
   HBC_SPACE_MD,
   HBC_SPACE_SM,
+  HBC_SPACE_XS,
   HBC_STATUS_COLORS,
 } from '@hbc/ui-kit';
 
@@ -49,15 +50,21 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
     gap: `${HBC_SPACE_SM}px`,
+    padding: `0 ${HBC_SPACE_SM}px ${HBC_SPACE_SM}px`,
   },
   readinessItem: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: `${HBC_SPACE_XS}px`,
     padding: `${HBC_SPACE_SM}px`,
     borderRadius: '4px',
     backgroundColor: 'var(--colorNeutralBackground2)',
     border: '1px solid var(--colorNeutralStroke2)',
+  },
+  readinessRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM}px`,
   },
   readinessLabel: {
     fontSize: '11px',
@@ -69,22 +76,21 @@ const useStyles = makeStyles({
     borderRadius: '50%',
     flexShrink: 0,
   },
-  readinessRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: `${HBC_SPACE_SM}px`,
-  },
   driverList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: `${HBC_SPACE_XS}px`,
     paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
   },
   blockerCard: {
     borderLeft: `3px solid ${HBC_STATUS_COLORS.critical}`,
   },
   previewCard: {
-    borderLeft: `3px solid var(--colorBrandStroke1)`,
+    borderLeft: '3px solid var(--colorBrandStroke1)',
+  },
+  previewBody: {
+    padding: `0 ${HBC_SPACE_SM}px ${HBC_SPACE_SM}px`,
   },
   previewMetric: {
     display: 'flex',
@@ -101,14 +107,24 @@ const useStyles = makeStyles({
     fontSize: '12px',
     color: 'var(--colorNeutralForeground3)',
   },
-  actionsRow: {
-    display: 'flex',
-    gap: `${HBC_SPACE_SM}px`,
-    marginTop: `${HBC_SPACE_SM}px`,
-  },
   topIssue: {
     color: HBC_STATUS_COLORS.warning,
     display: 'block',
+    marginTop: `${HBC_SPACE_SM}px`,
+  },
+  contextualActionsBlock: {
+    marginTop: `${HBC_SPACE_SM}px`,
+  },
+  contextualActionsLabel: {
+    color: 'var(--colorNeutralForeground3)',
+  },
+  contextualActionItem: {
+    display: 'block',
+    marginTop: `${HBC_SPACE_XS}px`,
+  },
+  actionsRow: {
+    display: 'flex',
+    gap: `${HBC_SPACE_SM}px`,
     marginTop: `${HBC_SPACE_SM}px`,
   },
 });
@@ -137,7 +153,7 @@ export function FinancialControlCenterCore({
             header={<Text weight="semibold" size={400}>{selectedToolPreview.label}</Text>}
             description={<Text size={200}>{selectedToolPreview.headline}</Text>}
           />
-          <div style={{ padding: `0 ${HBC_SPACE_SM}px ${HBC_SPACE_SM}px` }}>
+          <div className={styles.previewBody}>
             <div className={styles.previewMetric}>
               <span className={styles.metricValue}>{selectedToolPreview.metricValue}</span>
               <span className={styles.metricLabel}>{selectedToolPreview.metricLabel}</span>
@@ -147,14 +163,13 @@ export function FinancialControlCenterCore({
                 {selectedToolPreview.topIssue}
               </Text>
             )}
-            {/* Contextual actions from the selected tool */}
             {selectedToolPreview.contextualActions.length > 0 && (
-              <div style={{ marginTop: `${HBC_SPACE_SM}px` }}>
-                <Text size={200} weight="semibold" style={{ color: 'var(--colorNeutralForeground3)' }}>
+              <div className={styles.contextualActionsBlock}>
+                <Text size={200} weight="semibold" className={styles.contextualActionsLabel}>
                   Actions for this surface:
                 </Text>
                 {selectedToolPreview.contextualActions.map((action) => (
-                  <Text key={action.id} size={200} style={{ display: 'block', marginTop: '2px' }}>
+                  <Text key={action.id} size={200} className={styles.contextualActionItem}>
                     • {action.label} — {action.description}
                   </Text>
                 ))}
@@ -171,10 +186,9 @@ export function FinancialControlCenterCore({
     );
   }
 
-  // Default: narrative + readiness + drivers + blockers
+  // Default: narrative + readiness + drivers + blockers + changes + milestone
   return (
     <div data-testid="financial-center-narrative" className={styles.root}>
-      {/* Financial Narrative */}
       <Card size="small" className={styles.narrativeCard}>
         <CardHeader
           header={<Text weight="semibold" size={300}>Financial Narrative</Text>}
@@ -182,36 +196,32 @@ export function FinancialControlCenterCore({
         />
       </Card>
 
-      {/* Period Readiness — posture grid from tool rail data */}
       <Card size="small">
         <CardHeader header={<Text weight="semibold" size={200}>Period Readiness</Text>} />
-        <div style={{ padding: `0 ${HBC_SPACE_SM}px ${HBC_SPACE_SM}px` }}>
-          <div className={styles.readinessGrid}>
-            {tools.filter((t) => t.id !== 'history').map((tool) => (
-              <div key={tool.id} className={styles.readinessItem}>
-                <div className={styles.readinessRow}>
-                  <span
-                    className={styles.readinessDot}
-                    style={{ backgroundColor: POSTURE_COLORS[tool.posture] ?? HBC_STATUS_COLORS.neutral }}
-                  />
-                  <Text size={200} weight="semibold">{tool.label}</Text>
-                </div>
-                <span className={styles.readinessLabel}>
-                  {tool.blocked
-                    ? tool.blockReason ?? 'Blocked'
-                    : tool.issueCount > 0
-                      ? `${tool.issueCount} issue${tool.issueCount > 1 ? 's' : ''}`
-                      : tool.posture === 'healthy'
-                        ? 'On track'
-                        : tool.posture}
-                </span>
+        <div className={styles.readinessGrid}>
+          {tools.filter((t) => t.id !== 'history').map((tool) => (
+            <div key={tool.id} className={styles.readinessItem}>
+              <div className={styles.readinessRow}>
+                <span
+                  className={styles.readinessDot}
+                  style={{ backgroundColor: POSTURE_COLORS[tool.posture] ?? HBC_STATUS_COLORS.neutral }}
+                />
+                <Text size={200} weight="semibold">{tool.label}</Text>
               </div>
-            ))}
-          </div>
+              <span className={styles.readinessLabel}>
+                {tool.blocked
+                  ? tool.blockReason ?? 'Blocked'
+                  : tool.issueCount > 0
+                    ? `${tool.issueCount} issue${tool.issueCount > 1 ? 's' : ''}`
+                    : tool.posture === 'healthy'
+                      ? 'On track'
+                      : tool.posture}
+              </span>
+            </div>
+          ))}
         </div>
       </Card>
 
-      {/* Top Drivers */}
       <Card size="small">
         <CardHeader header={<Text weight="semibold" size={200}>Top Drivers</Text>} />
         <div className={styles.driverList}>
@@ -221,7 +231,6 @@ export function FinancialControlCenterCore({
         </div>
       </Card>
 
-      {/* Blockers */}
       {narrative.blockers.length > 0 && (
         <Card size="small" className={styles.blockerCard}>
           <CardHeader header={<Text weight="semibold" size={200}>Blockers</Text>} />
@@ -233,7 +242,6 @@ export function FinancialControlCenterCore({
         </Card>
       )}
 
-      {/* Changed Since Prior Version */}
       {narrative.changeSincePrior.length > 0 && (
         <Card size="small">
           <CardHeader header={<Text weight="semibold" size={200}>Changed Since Prior Version</Text>} />
@@ -245,7 +253,6 @@ export function FinancialControlCenterCore({
         </Card>
       )}
 
-      {/* Next Milestone */}
       <Card size="small">
         <CardHeader
           header={<Text weight="semibold" size={200}>Next Milestone</Text>}
