@@ -1,10 +1,23 @@
+/**
+ * ProjectOperatingSurface — Project Hub operating family orchestrator.
+ *
+ * Thin wrapper that wires Project Hub domain hooks to generic @hbc/ui-kit
+ * layout primitives (MultiColumnLayout, HbcNavRail, HbcContextRail,
+ * HbcActivityStrip). No layout CSS of its own — delegates to ui-kit.
+ */
+
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { makeStyles, mergeClasses } from '@griffel/react';
 import {
-  HBC_BREAKPOINT_DESKTOP,
-  HBC_BREAKPOINT_SIDEBAR,
-  HBC_SPACE_MD,
+  MultiColumnLayout,
+  HbcNavRail,
+  HbcContextRail,
+  HbcActivityStrip,
+} from '@hbc/ui-kit';
+import type {
+  NavRailItem,
+  ContextRailSection,
+  ActivityStripEntry,
 } from '@hbc/ui-kit';
 
 import {
@@ -14,170 +27,143 @@ import {
   useActivitySummary,
   useSelectedModule,
 } from '../hooks/index.js';
-import { CommandRail } from './CommandRail.js';
+import type { ProjectHubModulePostureSummary } from '../types.js';
 import { CanvasCenter } from './CanvasCenter.js';
-import { ContextRail } from './ContextRail.js';
-import { ActivityStrip } from './ActivityStrip.js';
 
-// ── Styles ──────────────────────────────────────────────────────────
+// ── Adapters: PH domain → ui-kit generic contracts ─────────────────
 
-const RAIL_WIDTH_EXPANDED = 260;
-const RAIL_WIDTH_COLLAPSED = 48;
-const CONTEXT_RAIL_WIDTH = 300;
+function adaptModulesToNavRailItems(modules: readonly ProjectHubModulePostureSummary[]): NavRailItem[] {
+  return modules.map((m) => ({
+    id: m.moduleSlug,
+    label: m.label,
+    status: m.posture === 'read-only' ? 'read-only' as const : m.posture,
+    issueCount: m.issueCount,
+    actionCount: m.actionCount,
+  }));
+}
 
-const useStyles = makeStyles({
-  root: {
-    display: 'grid',
-    flex: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-    gridTemplateAreas: '"left center right" "bottom bottom bottom"',
-    gridTemplateRows: '1fr auto',
-  },
-  rootDesktop: {
-    gridTemplateColumns: `${RAIL_WIDTH_EXPANDED}px 1fr ${CONTEXT_RAIL_WIDTH}px`,
-  },
-  rootDesktopLeftCollapsed: {
-    gridTemplateColumns: `${RAIL_WIDTH_COLLAPSED}px 1fr ${CONTEXT_RAIL_WIDTH}px`,
-  },
-  rootTablet: {
-    gridTemplateColumns: `${RAIL_WIDTH_COLLAPSED}px 1fr`,
-    gridTemplateAreas: '"left center" "bottom bottom"',
-  },
-  rootMobile: {
-    gridTemplateColumns: '1fr',
-    gridTemplateAreas: '"center" "bottom"',
-  },
-  left: {
-    gridArea: 'left',
-    minHeight: 0,
-    overflow: 'hidden',
-  },
-  center: {
-    gridArea: 'center',
-    minHeight: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  right: {
-    gridArea: 'right',
-    minHeight: 0,
-    overflow: 'hidden',
-  },
-  bottom: {
-    gridArea: 'bottom',
-  },
-});
+function adaptToContextRailSections(
+  nextMoves: ReturnType<typeof useNextMoveSummary>,
+  workQueue: ReturnType<typeof useWorkQueueSummary>,
+  selectedSlug: string | null,
+): ContextRailSection[] {
+  const filteredMoves = selectedSlug
+    ? nextMoves.items.filter((i) => i.sourceModule === selectedSlug)
+    : nextMoves.items;
+  const filteredQueue = selectedSlug
+    ? workQueue.items.filter((i) => i.sourceModule === selectedSlug)
+    : workQueue.items;
+  const blockers = filteredQueue.filter((i) => i.urgency === 'urgent');
 
-// ── Viewport detection ──────────────────────────────────────────────
+  return [
+    {
+      id: 'next-moves',
+      title: 'My Next Moves',
+      items: filteredMoves.map((i) => ({ id: i.id, title: i.title, subtitle: `${i.action} · ${i.owner}` })),
+      emptyMessage: 'No next moves',
+    },
+    ...(blockers.length > 0
+      ? [{
+          id: 'blockers',
+          title: 'Blockers',
+          items: blockers.map((i) => ({
+            id: i.id,
+            title: i.title,
+            subtitle: `${i.owner}${i.aging != null ? ` · ${i.aging}d overdue` : ''}`,
+          })),
+        }]
+      : []),
+    {
+      id: 'team-queue',
+      title: 'Team Queue',
+      items: filteredQueue.slice(0, 5).map((i) => ({
+        id: i.id,
+        title: i.title,
+        subtitle: `${i.owner} · ${i.sourceModule}`,
+      })),
+      emptyMessage: 'No items in queue',
+      maxItems: 5,
+    },
+  ];
+}
 
-type ViewportTier = 'desktop' | 'tablet' | 'mobile';
-
-function useViewportTier(): ViewportTier {
-  // Use matchMedia for responsive behavior.
-  // In SSR or test environments, default to desktop.
-  if (typeof window === 'undefined') return 'desktop';
-
-  const width = window.innerWidth;
-  if (width >= HBC_BREAKPOINT_DESKTOP) return 'desktop';
-  if (width >= HBC_BREAKPOINT_SIDEBAR) return 'tablet';
-  return 'mobile';
+function adaptToActivityEntries(
+  activity: ReturnType<typeof useActivitySummary>,
+): ActivityStripEntry[] {
+  return activity.entries.map((e) => ({
+    id: e.id,
+    timestamp: e.timestamp,
+    type: e.type,
+    title: e.title,
+    source: e.sourceModule,
+    actor: e.actor,
+  }));
 }
 
 // ── Component ───────────────────────────────────────────────────────
 
 export interface ProjectOperatingSurfaceProps {
-  /** Injected canvas content (HbcProjectCanvas or project metadata cards). */
   readonly canvasSlot: ReactNode;
-  /** Called when the user opens a full module surface. */
   readonly onModuleOpen: (slug: string) => void;
 }
 
-/**
- * Project Operating Surface — the three-column operating layout.
- *
- * Orchestrates: CommandRail (left), CanvasCenter (center),
- * ContextRail (right), ActivityStrip (bottom).
- *
- * Composes inside WorkspacePageShell as children of the DashboardLayout
- * data zone. No new shell or route required.
- */
 export function ProjectOperatingSurface({
   canvasSlot,
   onModuleOpen,
 }: ProjectOperatingSurfaceProps): ReactNode {
-  const styles = useStyles();
-  const viewportTier = useViewportTier();
-
-  // Data hooks
   const modules = useModulePostureSummaries();
   const workQueue = useWorkQueueSummary();
   const nextMoves = useNextMoveSummary();
   const activity = useActivitySummary();
   const { selectedSlug, setSelectedSlug } = useSelectedModule();
 
-  // Rail collapse state
-  const [leftCollapsed, setLeftCollapsed] = useState(viewportTier !== 'desktop');
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
 
-  // Resolve selected module posture data
   const selectedModule = selectedSlug
     ? modules.find((m) => m.moduleSlug === selectedSlug) ?? null
     : null;
 
-  // Responsive grid class
-  const gridClass =
-    viewportTier === 'mobile'
-      ? styles.rootMobile
-      : viewportTier === 'tablet'
-        ? styles.rootTablet
-        : leftCollapsed
-          ? styles.rootDesktopLeftCollapsed
-          : styles.rootDesktop;
+  const navItems = adaptModulesToNavRailItems(modules);
+  const contextSections = adaptToContextRailSections(nextMoves, workQueue, selectedSlug);
+  const activityEntries = adaptToActivityEntries(activity);
 
   return (
-    <div
-      data-testid="project-operating-surface"
-      data-viewport={viewportTier}
-      className={mergeClasses(styles.root, gridClass)}
-    >
-      {/* Left: Command Rail (hidden on mobile) */}
-      {viewportTier !== 'mobile' && (
-        <div className={styles.left}>
-          <CommandRail
-            modules={modules}
-            selectedModuleSlug={selectedSlug}
-            onModuleSelect={setSelectedSlug}
-            collapsed={leftCollapsed || viewportTier === 'tablet'}
-            onToggleCollapse={() => setLeftCollapsed(!leftCollapsed)}
-          />
-        </div>
-      )}
-
-      {/* Center: Canvas or Module Preview */}
-      <div className={styles.center}>
+    <MultiColumnLayout
+      testId="project-operating-surface"
+      config={{
+        left: { width: 260, collapsible: true, collapsedWidth: 48, defaultCollapsed: leftCollapsed },
+        right: { width: 300, hideOnTablet: true, hideOnMobile: true },
+      }}
+      leftSlot={
+        <HbcNavRail
+          items={navItems}
+          selectedItemId={selectedSlug}
+          onSelectItem={setSelectedSlug}
+          collapsed={leftCollapsed}
+          onToggleCollapse={() => setLeftCollapsed(!leftCollapsed)}
+          title="Modules"
+          testId="command-rail"
+        />
+      }
+      centerSlot={
         <CanvasCenter
           canvasSlot={canvasSlot}
           selectedModule={selectedModule}
           onModuleOpen={onModuleOpen}
         />
-      </div>
-
-      {/* Right: Context Rail (desktop only) */}
-      {viewportTier === 'desktop' && (
-        <div className={styles.right}>
-          <ContextRail
-            nextMoves={nextMoves}
-            workQueue={workQueue}
-            selectedModuleSlug={selectedSlug}
-          />
-        </div>
-      )}
-
-      {/* Bottom: Activity Strip */}
-      <div className={styles.bottom}>
-        <ActivityStrip activity={activity} />
-      </div>
-    </div>
+      }
+      rightSlot={
+        <HbcContextRail
+          sections={contextSections}
+          testId="context-rail"
+        />
+      }
+      bottomSlot={
+        <HbcActivityStrip
+          entries={activityEntries}
+          testId="activity-strip"
+        />
+      }
+    />
   );
 }

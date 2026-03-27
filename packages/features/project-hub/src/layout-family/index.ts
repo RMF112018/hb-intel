@@ -1,8 +1,12 @@
 /**
  * Project Hub Layout Family — public API.
  *
- * Provides layout family type system, definitions, and resolution logic
- * for the three governed families: project-operating, executive, field-tablet.
+ * Domain-owned: family definitions, role/device resolver, data hooks,
+ * orchestrator surfaces, and PH-specific sub-components.
+ *
+ * Generic layout/composition primitives are owned by @hbc/ui-kit:
+ * MultiColumnLayout, HbcNavRail, HbcContextRail, HbcActivityStrip,
+ * HbcQuickActionBar, HbcSyncStatusBar.
  */
 
 // ── Types ───────────────────────────────────────────────────────────
@@ -48,39 +52,29 @@ export {
   getAllowedLayoutFamiliesForRole,
 } from './resolver.js';
 
-// ── Components ──────────────────────────────────────────────────────
+// ── Components (orchestrators + PH-domain) ──────────────────────────
 
 export {
   ProjectOperatingSurface,
-  CommandRail,
-  ContextRail,
-  CanvasCenter,
-  ActivityStrip,
   ExecutiveCockpitSurface,
+  FieldTabletSurface,
+  CanvasCenter,
   WatchlistPanel,
   RiskExposureCanvas,
   InterventionRail,
-  FieldTabletSurface,
   FieldFocusRail,
   FieldActionStack,
-  FieldQuickActionBar,
-  FieldSyncStatusBar,
 } from './components/index.js';
 export type {
   ProjectOperatingSurfaceProps,
-  CommandRailProps,
-  ContextRailProps,
-  CanvasCenterProps,
-  ActivityStripProps,
   ExecutiveCockpitSurfaceProps,
+  FieldTabletSurfaceProps,
+  CanvasCenterProps,
   WatchlistPanelProps,
   RiskExposureCanvasProps,
   InterventionRailProps,
-  FieldTabletSurfaceProps,
   FieldFocusRailProps,
   FieldActionStackProps,
-  FieldQuickActionBarProps,
-  FieldSyncStatusBarProps,
 } from './components/index.js';
 
 // ── Hooks ───────────────────────────────────────────────────────────
