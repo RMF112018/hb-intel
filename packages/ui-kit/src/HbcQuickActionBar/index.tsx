@@ -1,8 +1,7 @@
 /**
  * HbcQuickActionBar — generic persistent touch-safe action toolbar.
  *
- * Renders a horizontal bar of large-target action buttons.
- * Always visible, designed for field/touch use. Uses HBC_* tokens.
+ * Theme-aware: uses Fluent CSS custom properties that resolve per theme.
  */
 
 import type { ReactNode } from 'react';
@@ -10,12 +9,9 @@ import { makeStyles } from '@griffel/react';
 
 import { HBC_DENSITY_TOKENS } from '../theme/density.js';
 import { HBC_SPACE_SM } from '../theme/grid.js';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { HbcButton } from '../HbcButton/index.js';
 import { Text } from '@fluentui/react-components';
 import type { HbcQuickActionBarProps } from '../layouts/multi-column-types.js';
-
-// ── Styles ──────────────────────────────────────────────────────────
 
 const useStyles = makeStyles({
   root: {
@@ -24,8 +20,8 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     gap: `${HBC_DENSITY_TOKENS.touch.tapSpacingMin}px`,
     padding: `${HBC_SPACE_SM}px`,
-    borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    borderTop: '1px solid var(--colorNeutralStroke1)',
+    backgroundColor: 'var(--colorNeutralBackground1)',
     flexWrap: 'wrap',
     minHeight: `${HBC_DENSITY_TOKENS.touch.touchTargetMin + HBC_SPACE_SM * 2}px`,
   },
@@ -37,9 +33,10 @@ const useStyles = makeStyles({
     minWidth: `${HBC_DENSITY_TOKENS.touch.touchTargetMin}px`,
     minHeight: `${HBC_DENSITY_TOKENS.touch.touchTargetMin}px`,
   },
+  unavailableLabel: {
+    color: 'var(--colorNeutralForeground3)',
+  },
 });
-
-// ── Component ───────────────────────────────────────────────────────
 
 export function HbcQuickActionBar({
   actions,
@@ -65,7 +62,7 @@ export function HbcQuickActionBar({
             {action.label}
           </HbcButton>
           {!action.available && action.unavailableLabel && (
-            <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>
+            <Text size={100} className={styles.unavailableLabel}>
               {action.unavailableLabel}
             </Text>
           )}

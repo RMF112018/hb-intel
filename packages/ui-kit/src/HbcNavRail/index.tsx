@@ -1,9 +1,8 @@
 /**
  * HbcNavRail — generic collapsible navigation rail.
  *
- * Renders a vertical list of items with status indicators, labels,
- * and count badges. Supports collapse to icon-only mode.
- * All styling uses HBC_* tokens. No domain logic.
+ * Theme-aware: uses Fluent CSS custom properties (var(--colorNeutral*))
+ * that resolve per theme context. No hardcoded light-mode values.
  */
 
 import type { ReactNode } from 'react';
@@ -11,11 +10,9 @@ import { makeStyles, mergeClasses } from '@griffel/react';
 
 import { HBC_DENSITY_TOKENS } from '../theme/density.js';
 import { HBC_SPACE_SM, HBC_SPACE_XS } from '../theme/grid.js';
-import { HBC_SURFACE_LIGHT, HBC_STATUS_COLORS } from '../theme/tokens.js';
+import { HBC_STATUS_COLORS } from '../theme/tokens.js';
 import { Text } from '@fluentui/react-components';
 import type { HbcNavRailProps, NavRailItemStatus } from '../layouts/multi-column-types.js';
-
-// ── Status color mapping using tokens ───────────────────────────────
 
 const STATUS_COLOR_MAP: Record<NavRailItemStatus, string> = {
   healthy: HBC_STATUS_COLORS.success,
@@ -28,15 +25,13 @@ const STATUS_COLOR_MAP: Record<NavRailItemStatus, string> = {
   escalates: HBC_STATUS_COLORS.pending,
 };
 
-// ── Styles ──────────────────────────────────────────────────────────
-
 const useStyles = makeStyles({
   root: {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    borderRight: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    borderRight: '1px solid var(--colorNeutralStroke1)',
+    backgroundColor: 'var(--colorNeutralBackground2)',
     height: '100%',
   },
   header: {
@@ -44,7 +39,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: `${HBC_SPACE_SM}px`,
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    borderBottom: '1px solid var(--colorNeutralStroke1)',
   },
   collapseButton: {
     background: 'none',
@@ -52,12 +47,16 @@ const useStyles = makeStyles({
     cursor: 'pointer',
     padding: `${HBC_SPACE_XS}px`,
     fontSize: '14px',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--colorNeutralForeground3)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '24px',
     minHeight: '24px',
+    borderRadius: '4px',
+    ':hover': {
+      backgroundColor: 'var(--colorNeutralBackground3)',
+    },
   },
   itemList: {
     flex: 1,
@@ -70,7 +69,6 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     padding: `${HBC_SPACE_SM}px`,
     cursor: 'pointer',
-    borderLeft: '3px solid transparent',
     transitionProperty: 'background-color, border-color',
     transitionDuration: '150ms',
     backgroundColor: 'transparent',
@@ -80,8 +78,16 @@ const useStyles = makeStyles({
     borderLeftColor: 'transparent',
     width: '100%',
     textAlign: 'left',
+    color: 'var(--colorNeutralForeground1)',
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: 'var(--colorNeutralBackground3)',
+    },
+    ':focus-visible': {
+      outlineWidth: '2px',
+      outlineStyle: 'solid',
+      outlineColor: 'var(--colorBrandStroke1)',
+      outlineOffset: '-2px',
+      borderRadius: '2px',
     },
   },
   itemComfortable: {
@@ -93,8 +99,8 @@ const useStyles = makeStyles({
     padding: `${HBC_DENSITY_TOKENS.touch.tapSpacingMin}px ${HBC_SPACE_SM}px`,
   },
   itemSelected: {
-    borderLeftColor: HBC_STATUS_COLORS.info,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    borderLeftColor: 'var(--colorBrandStroke1)',
+    backgroundColor: 'var(--colorNeutralBackground3)',
   },
   statusDot: {
     width: '10px',
@@ -119,24 +125,22 @@ const useStyles = makeStyles({
     minWidth: '20px',
     height: '20px',
     borderRadius: '10px',
-    backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+    backgroundColor: 'var(--colorNeutralBackground4)',
     fontSize: '11px',
     fontWeight: 600,
-    color: HBC_SURFACE_LIGHT['text-primary'],
+    color: 'var(--colorNeutralForeground1)',
     padding: '0 4px',
     flexShrink: 0,
   },
   countBadgeUrgent: {
     backgroundColor: HBC_STATUS_COLORS.error,
-    color: HBC_SURFACE_LIGHT['surface-0'],
+    color: '#FFFFFF',
   },
   collapsedItem: {
     justifyContent: 'center',
     padding: `${HBC_SPACE_SM}px ${HBC_SPACE_XS}px`,
   },
 });
-
-// ── Component ───────────────────────────────────────────────────────
 
 export function HbcNavRail({
   items,

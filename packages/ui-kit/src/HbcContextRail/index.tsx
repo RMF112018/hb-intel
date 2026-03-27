@@ -1,8 +1,7 @@
 /**
  * HbcContextRail — generic right-rail card stack with sections.
  *
- * Renders vertically stacked card sections, each with a title, item count
- * badge, and a list of items. Density-aware spacing. Uses HBC_* tokens.
+ * Theme-aware: uses Fluent CSS custom properties that resolve per theme.
  */
 
 import type { ReactNode } from 'react';
@@ -11,11 +10,8 @@ import { Text } from '@fluentui/react-components';
 
 import { HBC_DENSITY_TOKENS } from '../theme/density.js';
 import { HBC_SPACE_SM, HBC_SPACE_XS } from '../theme/grid.js';
-import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { useDensity } from '../theme/useDensity.js';
 import type { HbcContextRailProps } from '../layouts/multi-column-types.js';
-
-// ── Styles ──────────────────────────────────────────────────────────
 
 const useStyles = makeStyles({
   root: {
@@ -24,8 +20,8 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     overflowY: 'auto',
     overflowX: 'hidden',
-    borderLeft: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    borderLeft: '1px solid var(--colorNeutralStroke1)',
+    backgroundColor: 'var(--colorNeutralBackground2)',
     padding: `${HBC_SPACE_SM}px`,
     height: '100%',
   },
@@ -50,10 +46,11 @@ const useStyles = makeStyles({
     minWidth: '20px',
     height: '18px',
     borderRadius: '9px',
-    backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+    backgroundColor: 'var(--colorNeutralBackground4)',
     fontSize: '11px',
     fontWeight: 600,
     padding: '0 4px',
+    color: 'var(--colorNeutralForeground1)',
   },
   itemList: {
     display: 'flex',
@@ -65,29 +62,29 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: '2px',
     padding: `${HBC_SPACE_XS}px 0`,
-    borderBottom: `1px solid ${HBC_SURFACE_LIGHT['surface-2']}`,
+    borderBottom: '1px solid var(--colorNeutralStroke2)',
   },
   itemRowComfortable: {
     minHeight: `${HBC_DENSITY_TOKENS.comfortable.touchTargetMin}px`,
-    padding: `${HBC_SPACE_XS}px 0`,
   },
   itemRowTouch: {
     minHeight: `${HBC_DENSITY_TOKENS.touch.touchTargetMin}px`,
     padding: `${HBC_SPACE_SM}px 0`,
   },
   emptyText: {
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--colorNeutralForeground3)',
     padding: `${HBC_SPACE_XS}px 0`,
   },
   section: {
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    backgroundColor: 'var(--colorNeutralBackground1)',
     borderRadius: '4px',
-    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    border: '1px solid var(--colorNeutralStroke1)',
     padding: `${HBC_SPACE_SM}px`,
   },
+  subtitle: {
+    color: 'var(--colorNeutralForeground3)',
+  },
 });
-
-// ── Component ───────────────────────────────────────────────────────
 
 export function HbcContextRail({
   sections,
@@ -129,9 +126,7 @@ export function HbcContextRail({
                 >
                   <Text size={200}>{item.title}</Text>
                   {item.subtitle && (
-                    <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>
-                      {item.subtitle}
-                    </Text>
+                    <Text size={100} className={styles.subtitle}>{item.subtitle}</Text>
                   )}
                 </div>
               ))}

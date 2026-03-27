@@ -1,9 +1,7 @@
 /**
  * HbcActivityStrip — generic collapsible timeline strip.
  *
- * Renders a horizontal scrolling timeline of typed entries.
- * Collapsed by default, showing only a count badge.
- * All styling uses HBC_* tokens. No domain logic.
+ * Theme-aware: uses Fluent CSS custom properties that resolve per theme.
  */
 
 import type { ReactNode } from 'react';
@@ -11,11 +9,9 @@ import { useState } from 'react';
 import { makeStyles } from '@griffel/react';
 
 import { HBC_SPACE_SM, HBC_SPACE_XS } from '../theme/grid.js';
-import { HBC_SURFACE_LIGHT, HBC_STATUS_COLORS } from '../theme/tokens.js';
+import { HBC_STATUS_COLORS } from '../theme/tokens.js';
 import { Text } from '@fluentui/react-components';
 import type { HbcActivityStripProps, ActivityStripEntry } from '../layouts/multi-column-types.js';
-
-// ── Default type display ────────────────────────────────────────────
 
 const DEFAULT_TYPE_COLORS: Readonly<Record<string, string>> = {
   decision: HBC_STATUS_COLORS.info,
@@ -27,12 +23,10 @@ const DEFAULT_TYPE_COLORS: Readonly<Record<string, string>> = {
   'state-change': HBC_STATUS_COLORS.neutral,
 };
 
-// ── Styles ──────────────────────────────────────────────────────────
-
 const useStyles = makeStyles({
   root: {
-    borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    borderTop: '1px solid var(--colorNeutralStroke1)',
+    backgroundColor: 'var(--colorNeutralBackground2)',
   },
   header: {
     display: 'flex',
@@ -41,13 +35,16 @@ const useStyles = makeStyles({
     padding: `${HBC_SPACE_XS}px ${HBC_SPACE_SM}px`,
     cursor: 'pointer',
     ':hover': {
-      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+      backgroundColor: 'var(--colorNeutralBackground3)',
     },
   },
   summaryBadge: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: `${HBC_SPACE_XS}px`,
+  },
+  summaryCount: {
+    color: 'var(--colorNeutralForeground3)',
   },
   timeline: {
     display: 'flex',
@@ -65,8 +62,8 @@ const useStyles = makeStyles({
     maxWidth: '280px',
     padding: `${HBC_SPACE_XS}px`,
     borderRadius: '4px',
-    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
+    backgroundColor: 'var(--colorNeutralBackground1)',
+    border: '1px solid var(--colorNeutralStroke1)',
   },
   typeDot: {
     width: '8px',
@@ -79,13 +76,14 @@ const useStyles = makeStyles({
     flex: 1,
     minWidth: 0,
   },
+  entryMeta: {
+    color: 'var(--colorNeutralForeground3)',
+  },
   chevron: {
     fontSize: '12px',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: 'var(--colorNeutralForeground3)',
   },
 });
-
-// ── Component ───────────────────────────────────────────────────────
 
 export function HbcActivityStrip({
   entries,
@@ -114,7 +112,7 @@ export function HbcActivityStrip({
       >
         <div className={styles.summaryBadge}>
           <Text weight="semibold" size={200}>Activity</Text>
-          <Text size={200} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>
+          <Text size={200} className={styles.summaryCount}>
             {entries.length} recent events
           </Text>
         </div>
@@ -135,7 +133,7 @@ export function HbcActivityStrip({
                 <br />
                 <Text size={200}>{entry.title}</Text>
                 <br />
-                <Text size={100} style={{ color: HBC_SURFACE_LIGHT['text-muted'] }}>
+                <Text size={100} className={styles.entryMeta}>
                   {entry.actor ?? entry.source} · {new Date(entry.timestamp).toLocaleDateString()}
                 </Text>
               </div>
