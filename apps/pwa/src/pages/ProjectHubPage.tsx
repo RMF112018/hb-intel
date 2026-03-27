@@ -11,6 +11,7 @@ import {
   getProjectHubReportsSummary,
   ProjectOperatingSurface,
   ExecutiveCockpitSurface,
+  FieldTabletSurface,
   resolveProjectHubLayoutFamily,
 } from '@hbc/features-project-hub';
 import type { IProjectHubReportModuleAuditRow, ProjectHubLayoutFamily } from '@hbc/features-project-hub';
@@ -276,7 +277,9 @@ export function ProjectHubControlCenterPage({
 
   const familyTitle = layoutFamily === 'executive'
     ? 'Project Hub — Executive Cockpit'
-    : 'Project Hub Control Center';
+    : layoutFamily === 'field-tablet'
+      ? 'Project Hub — Field Mode'
+      : 'Project Hub Control Center';
 
   return (
     <WorkspacePageShell
@@ -388,6 +391,10 @@ export function ProjectHubControlCenterPage({
       ) : layoutFamily === 'executive' ? (
         <ExecutiveCockpitSurface
           projectId={project.id}
+          onOpenModule={onModuleOpen ?? (() => {})}
+        />
+      ) : layoutFamily === 'field-tablet' ? (
+        <FieldTabletSurface
           onOpenModule={onModuleOpen ?? (() => {})}
         />
       ) : (

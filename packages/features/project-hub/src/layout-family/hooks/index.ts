@@ -9,3 +9,5 @@ export { useRiskExposureSummary } from './useRiskExposureSummary.js';
 export type { HealthPostureZone, CostExposureZone, ScheduleRiskZone, QualitySafetyZone, CrossDriverZone, RiskExposureSummary } from './useRiskExposureSummary.js';
 export { useInterventionQueue } from './useInterventionQueue.js';
 export type { InterventionItem, InterventionQueue } from './useInterventionQueue.js';
+export { useFieldFocusAreas, useFieldActionStack, useFieldSyncStatus } from './useFieldFocusSummary.js';
+export type { FieldFocusArea, FieldFocusSummary, FieldActionItem, FieldActionStack as FieldActionStackData, FieldSyncStatus } from './useFieldFocusSummary.js';

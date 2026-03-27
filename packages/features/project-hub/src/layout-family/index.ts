@@ -60,6 +60,11 @@ export {
   WatchlistPanel,
   RiskExposureCanvas,
   InterventionRail,
+  FieldTabletSurface,
+  FieldFocusRail,
+  FieldActionStack,
+  FieldQuickActionBar,
+  FieldSyncStatusBar,
 } from './components/index.js';
 export type {
   ProjectOperatingSurfaceProps,
@@ -71,6 +76,11 @@ export type {
   WatchlistPanelProps,
   RiskExposureCanvasProps,
   InterventionRailProps,
+  FieldTabletSurfaceProps,
+  FieldFocusRailProps,
+  FieldActionStackProps,
+  FieldQuickActionBarProps,
+  FieldSyncStatusBarProps,
 } from './components/index.js';
 
 // ── Hooks ───────────────────────────────────────────────────────────
@@ -85,6 +95,9 @@ export {
   WATCHLIST_SIGNAL_TYPE_LABELS,
   useRiskExposureSummary,
   useInterventionQueue,
+  useFieldFocusAreas,
+  useFieldActionStack,
+  useFieldSyncStatus,
 } from './hooks/index.js';
 export type {
   WatchlistItem,
@@ -97,4 +110,9 @@ export type {
   RiskExposureSummary,
   InterventionItem,
   InterventionQueue,
+  FieldFocusArea,
+  FieldFocusSummary,
+  FieldActionItem,
+  FieldActionStackData,
+  FieldSyncStatus,
 } from './hooks/index.js';
