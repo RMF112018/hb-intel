@@ -1,30 +1,65 @@
 /**
  * ForecastSummaryPage — working financial summary surface.
  *
- * Composes the 5-region Forecast Summary using @hbc/ui-kit primitives.
- * Route: in-page navigation from Financial Control Center (surfaceMode).
+ * Role-aware and state-aware. Composes 5 regions with surface-state-
+ * driven behavior (editing/comparing/reviewing/read-only).
  */
 
 import type { ReactNode } from 'react';
-import { MultiColumnLayout } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { MultiColumnLayout, Text, HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
 
 import { useForecastSummary } from '../hooks/useForecastSummary.js';
+import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 import { ForecastVersionHeader } from './ForecastVersionHeader.js';
 import { ForecastKpiBand } from './ForecastKpiBand.js';
 import { ForecastSummaryForm } from './ForecastSummaryForm.js';
 import { ForecastDeltaPanel } from './ForecastDeltaPanel.js';
 import { ForecastCommentaryRail } from './ForecastCommentaryRail.js';
 
+const useStyles = makeStyles({
+  staleBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM}px`,
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
+    backgroundColor: HBC_STATUS_COLORS.warning + '22',
+    borderBottom: `2px solid ${HBC_STATUS_COLORS.warning}`,
+  },
+  unsavedBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: `${HBC_SPACE_SM}px`,
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
+    backgroundColor: 'var(--colorBrandBackground2)',
+    borderBottom: '1px solid var(--colorBrandStroke1)',
+  },
+  compareBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM}px`,
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
+    backgroundColor: 'var(--colorNeutralBackground3)',
+    borderBottom: '1px solid var(--colorNeutralStroke1)',
+  },
+});
+
 export interface ForecastSummaryPageProps {
   readonly projectId: string;
+  readonly viewerRole?: FinancialViewerRole;
+  readonly complexityTier?: FinancialComplexityTier;
   readonly onBack: () => void;
 }
 
 export function ForecastSummaryPage({
   projectId,
+  viewerRole,
+  complexityTier,
   onBack,
 }: ForecastSummaryPageProps): ReactNode {
-  const data = useForecastSummary();
+  const styles = useStyles();
+  const data = useForecastSummary({ viewerRole, complexityTier });
 
   return (
     <>
@@ -32,12 +67,45 @@ export function ForecastSummaryPage({
       <ForecastVersionHeader
         version={data.version}
         onBack={onBack}
+        onSave={data.hasUnsavedChanges ? data.saveChanges : undefined}
+        onSubmitForReview={data.version.isEditable && !data.hasUnsavedChanges ? () => {} : undefined}
+        onToggleCompare={data.toggleCompareMode}
+        isCompareMode={data.isCompareMode}
+        isSaving={data.isSaving}
       />
+
+      {/* State banners */}
+      {data.staleBanner.visible && (
+        <div className={styles.staleBanner} data-testid="stale-banner">
+          <Text size={200} weight="semibold" style={{ color: HBC_STATUS_COLORS.warning }}>
+            Stale: {data.staleBanner.message}
+          </Text>
+          {data.staleBanner.sources.length > 0 && (
+            <Text size={200}> — Sources: {data.staleBanner.sources.join(', ')}</Text>
+          )}
+        </div>
+      )}
+
+      {data.hasUnsavedChanges && (
+        <div className={styles.unsavedBanner} data-testid="unsaved-banner">
+          <Text size={200} weight="semibold">
+            {data.dirtyFields.size} unsaved change{data.dirtyFields.size > 1 ? 's' : ''}
+          </Text>
+        </div>
+      )}
+
+      {data.isCompareMode && (
+        <div className={styles.compareBanner} data-testid="compare-banner">
+          <Text size={200}>
+            Comparing to: {data.version.compareTarget ?? 'prior version'}
+          </Text>
+        </div>
+      )}
 
       {/* R2 — KPI Band */}
       <ForecastKpiBand kpis={data.kpis} />
 
-      {/* R3–R5 — Multi-column: form + delta panel + commentary rail */}
+      {/* R3–R5 — Multi-column: form + delta/commentary */}
       <MultiColumnLayout
         testId="forecast-summary-layout"
         config={{
@@ -47,6 +115,10 @@ export function ForecastSummaryPage({
           <ForecastSummaryForm
             sections={data.sections}
             isEditable={data.version.isEditable}
+            dirtyFields={data.dirtyFields}
+            isCompareMode={data.isCompareMode}
+            surfaceState={data.version.surfaceState}
+            onEditField={data.editField}
           />
         }
         rightSlot={

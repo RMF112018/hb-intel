@@ -1,15 +1,20 @@
 /**
  * useForecastSummary — view-ready data hook for the Forecast Summary surface.
  *
- * Returns mock data initially. Will wire to IFinancialRepository when
- * the data-access factory registration is complete.
+ * Role-aware: shapes behavior based on viewer role (PM edits, PE reviews).
+ * State-aware: respects version lifecycle (Working/ConfirmedInternal/Published/Stale).
+ * Complexity-aware: supports Essential/Standard/Expert progressive disclosure.
+ * Mock data initially. Will wire to IFinancialRepository.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 import type { FinancialVersionState } from '../types/index.js';
+import type { FinancialViewerRole, FinancialComplexityTier } from './useFinancialControlCenter.js';
 
 // ── View-Ready Types ────────────────────────────────────────────────
+
+export type ForecastSurfaceState = 'editing' | 'comparing' | 'reviewing' | 'read-only';
 
 export interface ForecastVersionContext {
   readonly reportingMonth: string;
@@ -18,7 +23,10 @@ export interface ForecastVersionContext {
   readonly custodyOwner: string;
   readonly custodyRole: string;
   readonly isEditable: boolean;
+  readonly isStale: boolean;
+  readonly staleReason?: string;
   readonly compareTarget: string | null;
+  readonly surfaceState: ForecastSurfaceState;
 }
 
 export interface ForecastKpiMetric {
@@ -39,6 +47,8 @@ export interface ForecastFormField {
   readonly changedFromPrior: boolean;
   readonly priorValue?: string;
   readonly validationMessage?: string;
+  readonly provenance?: string;
+  readonly complexity: 'essential' | 'standard' | 'expert';
 }
 
 export interface ForecastFormSection {
@@ -74,6 +84,12 @@ export interface ForecastExposureItem {
   readonly severity: 'critical' | 'high' | 'standard';
 }
 
+export interface ForecastStaleBanner {
+  readonly visible: boolean;
+  readonly message: string;
+  readonly sources: readonly string[];
+}
+
 export interface ForecastSummaryData {
   readonly version: ForecastVersionContext;
   readonly kpis: readonly ForecastKpiMetric[];
@@ -81,9 +97,96 @@ export interface ForecastSummaryData {
   readonly priorComparison: readonly ForecastDeltaEntry[];
   readonly commentary: readonly ForecastCommentaryEntry[];
   readonly exposureItems: readonly ForecastExposureItem[];
+  readonly staleBanner: ForecastStaleBanner;
+  readonly dirtyFields: ReadonlySet<string>;
+  readonly editField: (fieldId: string, value: string) => void;
+  readonly saveChanges: () => void;
+  readonly toggleCompareMode: () => void;
+  readonly isCompareMode: boolean;
+  readonly isSaving: boolean;
+  readonly hasUnsavedChanges: boolean;
 }
 
 // ── Mock Data ───────────────────────────────────────────────────────
+
+function buildSections(
+  isEditable: boolean,
+  complexity: FinancialComplexityTier,
+): ForecastFormSection[] {
+  const allSections: ForecastFormSection[] = [
+    {
+      id: 'contract-revenue',
+      title: 'Contract / Revenue',
+      fields: [
+        { id: 'original-contract', label: 'Original Contract Value', value: '$8,100,000', editable: false, type: 'currency', changedFromPrior: false, complexity: 'essential' },
+        { id: 'approved-cos', label: 'Approved Change Orders', value: '$147,500', editable: false, type: 'currency', changedFromPrior: false, complexity: 'standard' },
+        { id: 'current-contract', label: 'Current Contract Value', value: '$8,247,500', editable: isEditable, type: 'currency', changedFromPrior: false, complexity: 'essential' },
+        { id: 'contract-type', label: 'Contract Type', value: 'GMP', editable: isEditable, type: 'text', changedFromPrior: false, complexity: 'standard' },
+      ],
+    },
+    {
+      id: 'cost-margin',
+      title: 'Cost / Margin',
+      fields: [
+        { id: 'estimated-cost', label: 'Estimated Cost at Completion', value: '$8,105,000', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$8,086,800', complexity: 'essential', provenance: 'Derived from budget line EACs + GC EAC' },
+        { id: 'current-profit', label: 'Current Profit', value: '$142,500', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$160,700', complexity: 'essential' },
+        { id: 'profit-margin', label: 'Profit Margin', value: '1.7%', editable: false, type: 'percentage', changedFromPrior: true, priorValue: '1.9%', validationMessage: 'Below 5% warning threshold', complexity: 'essential' },
+        { id: 'gc-eac', label: 'GC Estimate at Completion', value: '$1,245,000', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$1,232,600', complexity: 'standard', provenance: 'Aggregated from GC/GR lines' },
+      ],
+    },
+    {
+      id: 'exposure-risk',
+      title: 'Exposure / Risk',
+      fields: [
+        { id: 'total-exposure', label: 'Total Cost Exposure', value: '$87,500', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$75,100', complexity: 'essential' },
+        { id: 'pending-cos', label: 'Pending Change Orders', value: '$32,000', editable: false, type: 'currency', changedFromPrior: false, complexity: 'standard' },
+        { id: 'unresolved-reconciliation', label: 'Unresolved Reconciliation Items', value: '2', editable: false, type: 'number', changedFromPrior: false, complexity: 'expert' },
+      ],
+    },
+    {
+      id: 'receivables-cash',
+      title: 'Receivables / Cash',
+      fields: [
+        { id: 'total-ar', label: 'Total A/R', value: '$114,144', editable: false, type: 'currency', changedFromPrior: false, complexity: 'standard' },
+        { id: 'ar-aging-60plus', label: 'A/R 60+ Days', value: '$20,000', editable: false, type: 'currency', changedFromPrior: false, complexity: 'standard' },
+        { id: 'retention-held', label: 'Retention Held', value: '$22,470', editable: false, type: 'currency', changedFromPrior: false, complexity: 'expert' },
+        { id: 'peak-cash-req', label: 'Peak Cash Requirement', value: '-$132,675', editable: false, type: 'currency', changedFromPrior: false, complexity: 'expert' },
+      ],
+    },
+    {
+      id: 'contingency-savings',
+      title: 'Contingency / Savings',
+      fields: [
+        { id: 'original-contingency', label: 'Original Contingency', value: '$200,000', editable: false, type: 'currency', changedFromPrior: false, complexity: 'standard' },
+        { id: 'current-contingency', label: 'Current Contingency', value: '$165,000', editable: isEditable, type: 'currency', changedFromPrior: true, priorValue: '$188,400', complexity: 'essential' },
+        { id: 'expected-at-completion', label: 'Expected at Completion', value: '$140,000', editable: isEditable, type: 'currency', changedFromPrior: false, complexity: 'standard' },
+        { id: 'buyout-savings', label: 'Realized Buyout Savings', value: '$23,400', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$0', complexity: 'standard', provenance: 'From buyout ContractExecuted events' },
+      ],
+    },
+    {
+      id: 'executive-summary',
+      title: 'Executive Summary / Outlook',
+      fields: [
+        { id: 'damage-clause', label: 'Damage Clause / LDs', value: 'N/A — no LD clause in current contract', editable: isEditable, type: 'text', changedFromPrior: false, complexity: 'standard' },
+        { id: 'schedule-completion', label: 'Revised Contract Completion', value: '2026-11-15', editable: isEditable, type: 'date', changedFromPrior: false, complexity: 'essential' },
+        { id: 'approved-extensions', label: 'Approved Days Extensions', value: '14', editable: isEditable, type: 'number', changedFromPrior: false, complexity: 'standard' },
+      ],
+    },
+  ];
+
+  // Filter fields by complexity tier
+  if (complexity === 'essential') {
+    return allSections
+      .map((s) => ({ ...s, fields: s.fields.filter((f) => f.complexity === 'essential') }))
+      .filter((s) => s.fields.length > 0);
+  }
+  if (complexity === 'standard') {
+    return allSections
+      .map((s) => ({ ...s, fields: s.fields.filter((f) => f.complexity !== 'expert') }))
+      .filter((s) => s.fields.length > 0);
+  }
+  return allSections; // expert: all fields
+}
 
 const MOCK_KPIS: ForecastKpiMetric[] = [
   { id: 'contract-value', label: 'Contract Value', value: '$8,247,500', trend: 'flat', trendLabel: 'No change', severity: 'neutral' },
@@ -92,67 +195,6 @@ const MOCK_KPIS: ForecastKpiMetric[] = [
   { id: 'cost-exposure', label: 'Cost Exposure', value: '$87,500', trend: 'up', trendLabel: '+$12,400 from V3', severity: 'watch' },
   { id: 'collection-risk', label: 'Collection Risk', value: '$114,144', trend: 'flat', trendLabel: 'A/R aging stable', severity: 'healthy' },
   { id: 'contingency', label: 'Contingency', value: '$165,000', trend: 'down', trendLabel: '-$23,400 pending disposition', severity: 'watch' },
-];
-
-const MOCK_SECTIONS: ForecastFormSection[] = [
-  {
-    id: 'contract-revenue',
-    title: 'Contract / Revenue',
-    fields: [
-      { id: 'original-contract', label: 'Original Contract Value', value: '$8,100,000', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'approved-cos', label: 'Approved Change Orders', value: '$147,500', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'current-contract', label: 'Current Contract Value', value: '$8,247,500', editable: true, type: 'currency', changedFromPrior: false },
-      { id: 'contract-type', label: 'Contract Type', value: 'GMP', editable: true, type: 'text', changedFromPrior: false },
-    ],
-  },
-  {
-    id: 'cost-margin',
-    title: 'Cost / Margin',
-    fields: [
-      { id: 'estimated-cost', label: 'Estimated Cost at Completion', value: '$8,105,000', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$8,086,800' },
-      { id: 'current-profit', label: 'Current Profit', value: '$142,500', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$160,700' },
-      { id: 'profit-margin', label: 'Profit Margin', value: '1.7%', editable: false, type: 'percentage', changedFromPrior: true, priorValue: '1.9%', validationMessage: 'Below 5% warning threshold' },
-      { id: 'gc-eac', label: 'GC Estimate at Completion', value: '$1,245,000', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$1,232,600' },
-    ],
-  },
-  {
-    id: 'exposure-risk',
-    title: 'Exposure / Risk',
-    fields: [
-      { id: 'total-exposure', label: 'Total Cost Exposure', value: '$87,500', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$75,100' },
-      { id: 'pending-cos', label: 'Pending Change Orders', value: '$32,000', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'unresolved-reconciliation', label: 'Unresolved Reconciliation Items', value: '2', editable: false, type: 'number', changedFromPrior: false },
-    ],
-  },
-  {
-    id: 'receivables-cash',
-    title: 'Receivables / Cash',
-    fields: [
-      { id: 'total-ar', label: 'Total A/R', value: '$114,144', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'ar-aging-60plus', label: 'A/R 60+ Days', value: '$20,000', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'retention-held', label: 'Retention Held', value: '$22,470', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'peak-cash-req', label: 'Peak Cash Requirement', value: '-$132,675', editable: false, type: 'currency', changedFromPrior: false },
-    ],
-  },
-  {
-    id: 'contingency-savings',
-    title: 'Contingency / Savings',
-    fields: [
-      { id: 'original-contingency', label: 'Original Contingency', value: '$200,000', editable: false, type: 'currency', changedFromPrior: false },
-      { id: 'current-contingency', label: 'Current Contingency', value: '$165,000', editable: true, type: 'currency', changedFromPrior: true, priorValue: '$188,400' },
-      { id: 'expected-at-completion', label: 'Expected at Completion', value: '$140,000', editable: true, type: 'currency', changedFromPrior: false },
-      { id: 'buyout-savings', label: 'Realized Buyout Savings', value: '$23,400', editable: false, type: 'currency', changedFromPrior: true, priorValue: '$0' },
-    ],
-  },
-  {
-    id: 'executive-summary',
-    title: 'Executive Summary / Outlook',
-    fields: [
-      { id: 'damage-clause', label: 'Damage Clause / LDs', value: 'N/A — no LD clause in current contract', editable: true, type: 'text', changedFromPrior: false },
-      { id: 'schedule-completion', label: 'Revised Contract Completion', value: '2026-11-15', editable: true, type: 'date', changedFromPrior: false },
-      { id: 'approved-extensions', label: 'Approved Days Extensions', value: '14', editable: true, type: 'number', changedFromPrior: false },
-    ],
-  },
 ];
 
 const MOCK_DELTAS: ForecastDeltaEntry[] = [
@@ -175,26 +217,123 @@ const MOCK_EXPOSURE: ForecastExposureItem[] = [
   { id: 'e-3', title: 'Undispositioned buyout savings', source: 'Buyout', amount: '$23,400', severity: 'standard' },
 ];
 
+// ── State-Model Resolution ──────────────────────────────────────────
+
+function resolveSurfaceState(
+  versionState: FinancialVersionState,
+  viewerRole: FinancialViewerRole,
+  isCompareMode: boolean,
+): ForecastSurfaceState {
+  if (versionState === 'PublishedMonthly' || versionState === 'Superseded') return 'read-only';
+  if (versionState === 'ConfirmedInternal') {
+    return viewerRole === 'pe' || viewerRole === 'leadership' ? 'reviewing' : 'read-only';
+  }
+  // Working
+  if (viewerRole === 'pm') return isCompareMode ? 'comparing' : 'editing';
+  return 'comparing'; // non-PM roles see compare mode on working versions
+}
+
+function resolveEditability(
+  versionState: FinancialVersionState,
+  viewerRole: FinancialViewerRole,
+): boolean {
+  return versionState === 'Working' && viewerRole === 'pm';
+}
+
 // ── Hook ─────────────────────────────────────────────────────────────
 
-export function useForecastSummary(): ForecastSummaryData {
+export interface UseForecastSummaryOptions {
+  readonly viewerRole?: FinancialViewerRole;
+  readonly complexityTier?: FinancialComplexityTier;
+}
+
+export function useForecastSummary(
+  options?: UseForecastSummaryOptions,
+): ForecastSummaryData {
+  const viewerRole = options?.viewerRole ?? 'pm';
+  const complexity = options?.complexityTier ?? 'standard';
+
+  const [isCompareMode, setIsCompareMode] = useState(viewerRole !== 'pm');
+  const [dirtyFieldMap, setDirtyFieldMap] = useState<Map<string, string>>(new Map());
+  const [isSaving, setIsSaving] = useState(false);
+
+  const versionState: FinancialVersionState = 'Working';
+  const isEditable = resolveEditability(versionState, viewerRole);
+  const surfaceState = resolveSurfaceState(versionState, viewerRole, isCompareMode);
+
+  const editField = useCallback((fieldId: string, value: string) => {
+    if (!isEditable) return;
+    setDirtyFieldMap((prev) => {
+      const next = new Map(prev);
+      next.set(fieldId, value);
+      return next;
+    });
+  }, [isEditable]);
+
+  const saveChanges = useCallback(() => {
+    if (dirtyFieldMap.size === 0) return;
+    setIsSaving(true);
+    // Mock save — in real impl, calls IFinancialRepository.updateForecastSummary
+    setTimeout(() => {
+      setDirtyFieldMap(new Map());
+      setIsSaving(false);
+    }, 500);
+  }, [dirtyFieldMap]);
+
+  const toggleCompareMode = useCallback(() => {
+    if (viewerRole === 'pm') {
+      setIsCompareMode((prev) => !prev);
+    }
+  }, [viewerRole]);
+
+  const sections = useMemo(
+    () => buildSections(isEditable, complexity),
+    [isEditable, complexity],
+  );
+
+  const dirtyFields = useMemo(
+    () => new Set(dirtyFieldMap.keys()),
+    [dirtyFieldMap],
+  );
+
+  // Filter KPIs by complexity
+  const filteredKpis = complexity === 'essential'
+    ? MOCK_KPIS.slice(0, 3) // contract, profit, margin only
+    : MOCK_KPIS;
+
   return useMemo(
     () => ({
       version: {
         reportingMonth: 'February 2026',
-        versionState: 'Working' as const,
+        versionState,
         versionNumber: 4,
         custodyOwner: 'Alex Rivera',
         custodyRole: 'PM',
-        isEditable: true,
+        isEditable,
+        isStale: false,
         compareTarget: 'V3 — Confirmed Internal',
+        surfaceState,
       },
-      kpis: MOCK_KPIS,
-      sections: MOCK_SECTIONS,
+      kpis: filteredKpis,
+      sections,
       priorComparison: MOCK_DELTAS,
-      commentary: MOCK_COMMENTARY,
+      commentary: viewerRole === 'pe' || viewerRole === 'leadership'
+        ? MOCK_COMMENTARY
+        : MOCK_COMMENTARY.filter((c) => c.role === 'PM'),
       exposureItems: MOCK_EXPOSURE,
+      staleBanner: {
+        visible: false,
+        message: '',
+        sources: [],
+      },
+      dirtyFields,
+      editField,
+      saveChanges,
+      toggleCompareMode,
+      isCompareMode,
+      isSaving,
+      hasUnsavedChanges: dirtyFieldMap.size > 0,
     }),
-    [],
+    [viewerRole, versionState, isEditable, surfaceState, filteredKpis, sections, dirtyFields, editField, saveChanges, toggleCompareMode, isCompareMode, isSaving, dirtyFieldMap.size],
   );
 }

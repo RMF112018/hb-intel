@@ -1,6 +1,7 @@
 /**
  * ForecastVersionHeader — R1 region for Forecast Summary.
- * Shows version state, custody, compare target, and command actions.
+ * Shows version state, custody, compare toggle, and command actions.
+ * State-aware: action set changes based on surface state.
  */
 
 import type { ReactNode } from 'react';
@@ -22,7 +23,7 @@ const useStyles = makeStyles({
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: `${HBC_SPACE_SM}px`,
-    padding: `${HBC_SPACE_MD}px`,
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`,
     borderBottom: '1px solid var(--colorNeutralStroke1)',
     backgroundColor: 'var(--colorNeutralBackground1)',
   },
@@ -32,6 +33,7 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     flex: 1,
     minWidth: '200px',
+    flexWrap: 'wrap',
   },
   versionBadge: {
     display: 'inline-flex',
@@ -44,6 +46,15 @@ const useStyles = makeStyles({
   custodyLabel: {
     color: 'var(--colorNeutralForeground3)',
   },
+  surfaceStateBadge: {
+    display: 'inline-flex',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: 600,
+    backgroundColor: 'var(--colorNeutralBackground3)',
+    color: 'var(--colorNeutralForeground2)',
+  },
   actionsGroup: {
     display: 'flex',
     alignItems: 'center',
@@ -52,11 +63,21 @@ const useStyles = makeStyles({
   },
 });
 
+const SURFACE_STATE_LABELS: Record<string, string> = {
+  editing: 'Editing',
+  comparing: 'Compare Mode',
+  reviewing: 'In Review',
+  'read-only': 'Read Only',
+};
+
 export interface ForecastVersionHeaderProps {
   readonly version: ForecastVersionContext;
   readonly onBack: () => void;
   readonly onSave?: () => void;
   readonly onSubmitForReview?: () => void;
+  readonly onToggleCompare?: () => void;
+  readonly isCompareMode?: boolean;
+  readonly isSaving?: boolean;
 }
 
 export function ForecastVersionHeader({
@@ -64,6 +85,9 @@ export function ForecastVersionHeader({
   onBack,
   onSave,
   onSubmitForReview,
+  onToggleCompare,
+  isCompareMode,
+  isSaving,
 }: ForecastVersionHeaderProps): ReactNode {
   const styles = useStyles();
   const stateColor = STATE_COLORS[version.versionState] ?? HBC_STATUS_COLORS.neutral;
@@ -72,7 +96,7 @@ export function ForecastVersionHeader({
     <div data-testid="forecast-version-header" className={styles.root}>
       <div className={styles.infoGroup}>
         <HbcButton variant="secondary" onClick={onBack}>
-          Back to Control Center
+          Back
         </HbcButton>
         <Text weight="semibold" size={400}>Forecast Summary</Text>
         <Text size={200}>{version.reportingMonth}</Text>
@@ -82,18 +106,28 @@ export function ForecastVersionHeader({
         <Text size={200} className={styles.custodyLabel}>
           {version.custodyRole}: {version.custodyOwner}
         </Text>
-        {version.compareTarget && (
-          <Text size={200} className={styles.custodyLabel}>
-            Comparing to: {version.compareTarget}
-          </Text>
-        )}
+        <span className={styles.surfaceStateBadge}>
+          {SURFACE_STATE_LABELS[version.surfaceState] ?? version.surfaceState}
+        </span>
       </div>
       <div className={styles.actionsGroup}>
-        {version.isEditable && onSave && (
-          <HbcButton variant="primary" onClick={onSave}>Save Working Changes</HbcButton>
+        {onToggleCompare && (
+          <HbcButton
+            variant={isCompareMode ? 'primary' : 'secondary'}
+            onClick={onToggleCompare}
+          >
+            {isCompareMode ? 'Exit Compare' : 'Compare to Prior'}
+          </HbcButton>
         )}
-        {version.isEditable && onSubmitForReview && (
-          <HbcButton variant="secondary" onClick={onSubmitForReview}>Submit for Review</HbcButton>
+        {onSave && (
+          <HbcButton variant="primary" onClick={onSave} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </HbcButton>
+        )}
+        {onSubmitForReview && (
+          <HbcButton variant="secondary" onClick={onSubmitForReview}>
+            Submit for Review
+          </HbcButton>
         )}
       </div>
     </div>

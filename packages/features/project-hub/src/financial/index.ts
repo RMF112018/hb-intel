@@ -47,6 +47,7 @@ export type {
 } from './hooks/useFinancialControlCenter.js';
 export { useForecastSummary } from './hooks/useForecastSummary.js';
 export type {
+  ForecastSurfaceState,
   ForecastVersionContext,
   ForecastKpiMetric,
   ForecastFormField,
@@ -54,5 +55,7 @@ export type {
   ForecastDeltaEntry,
   ForecastCommentaryEntry,
   ForecastExposureItem,
+  ForecastStaleBanner,
   ForecastSummaryData,
+  UseForecastSummaryOptions,
 } from './hooks/useForecastSummary.js';
