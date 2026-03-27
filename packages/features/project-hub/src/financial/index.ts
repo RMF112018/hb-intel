@@ -80,6 +80,7 @@ export type {
   CashFlowARBucket,
   CashFlowTrendPoint,
   CashFlowManualCorrection,
+  CashFlowExportReadiness,
   CashFlowSurfaceData,
   UseCashFlowSurfaceOptions,
 } from './hooks/useCashFlowSurface.js';

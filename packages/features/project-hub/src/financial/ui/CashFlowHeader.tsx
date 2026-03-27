@@ -1,10 +1,11 @@
 /**
  * CashFlowHeader — R1: period, version, evidence status, commands.
+ * Export readiness and manual correction governance.
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { Text, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
-import type { CashFlowSurfaceState } from '../hooks/useCashFlowSurface.js';
+import type { CashFlowSurfaceState, CashFlowExportReadiness } from '../hooks/useCashFlowSurface.js';
 
 const STATE_LABELS: Record<CashFlowSurfaceState, string> = { working: 'Working', review: 'In Review', approved: 'Approved' };
 const STATE_COLORS: Record<CashFlowSurfaceState, string> = { working: HBC_STATUS_COLORS.info, review: HBC_STATUS_COLORS.success, approved: HBC_STATUS_COLORS.completed };
@@ -21,11 +22,13 @@ export interface CashFlowHeaderProps {
   readonly surfaceState: CashFlowSurfaceState;
   readonly canEdit: boolean;
   readonly hasUnsavedChanges: boolean;
+  readonly exportReadiness?: CashFlowExportReadiness;
   readonly onBack: () => void;
   readonly onSave?: () => void;
+  readonly onExport?: () => void;
 }
 
-export function CashFlowHeader({ surfaceState, canEdit, hasUnsavedChanges, onBack, onSave }: CashFlowHeaderProps): ReactNode {
+export function CashFlowHeader({ surfaceState, canEdit, hasUnsavedChanges, exportReadiness, onBack, onSave, onExport }: CashFlowHeaderProps): ReactNode {
   const styles = useStyles();
   return (
     <div data-testid="cash-flow-header" className={styles.root}>
@@ -41,6 +44,12 @@ export function CashFlowHeader({ surfaceState, canEdit, hasUnsavedChanges, onBac
         )}
         {canEdit && (
           <HbcButton variant="secondary" onClick={() => {}}>Add Manual Correction</HbcButton>
+        )}
+        {exportReadiness?.isExportable && onExport && (
+          <HbcButton variant="secondary" onClick={onExport}>Export</HbcButton>
+        )}
+        {surfaceState === 'review' && (
+          <HbcButton variant="secondary" onClick={() => {}}>Compare to Prior</HbcButton>
         )}
       </div>
     </div>
