@@ -47,3 +47,30 @@ export {
   isLayoutFamilyAllowedForRole,
   getAllowedLayoutFamiliesForRole,
 } from './resolver.js';
+
+// ── Components ──────────────────────────────────────────────────────
+
+export {
+  ProjectOperatingSurface,
+  CommandRail,
+  ContextRail,
+  CanvasCenter,
+  ActivityStrip,
+} from './components/index.js';
+export type {
+  ProjectOperatingSurfaceProps,
+  CommandRailProps,
+  ContextRailProps,
+  CanvasCenterProps,
+  ActivityStripProps,
+} from './components/index.js';
+
+// ── Hooks ───────────────────────────────────────────────────────────
+
+export {
+  useSelectedModule,
+  useModulePostureSummaries,
+  useWorkQueueSummary,
+  useNextMoveSummary,
+  useActivitySummary,
+} from './hooks/index.js';

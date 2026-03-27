@@ -130,6 +130,9 @@ function ProjectHubProjectRouteComponent(): ReactNode {
       onOpenReports: () => {
         void navigate({ to: `/project-hub/${data.project.id}/reports` });
       },
+      onModuleOpen: (slug: string) => {
+        void navigate({ to: `/project-hub/${data.project.id}/${slug}` });
+      },
     });
   }
 
@@ -160,6 +163,9 @@ function ProjectHubSectionRouteComponent(): ReactNode {
       },
       onOpenReports: () => {
         void navigate({ to: `/project-hub/${data.project.id}/reports` });
+      },
+      onModuleOpen: (slug: string) => {
+        void navigate({ to: `/project-hub/${data.project.id}/${slug}` });
       },
     });
   }

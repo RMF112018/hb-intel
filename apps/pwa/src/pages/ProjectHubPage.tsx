@@ -9,6 +9,7 @@ import {
   PROJECT_HUB_BASELINE_REPORT_FAMILIES,
   PROJECT_HUB_REPORT_MODULE_AUDIT,
   getProjectHubReportsSummary,
+  ProjectOperatingSurface,
 } from '@hbc/features-project-hub';
 import type { IProjectHubReportModuleAuditRow } from '@hbc/features-project-hub';
 import {
@@ -224,6 +225,7 @@ export interface ProjectHubControlCenterPageProps {
   section?: string | null;
   onBackToPortfolio: () => void;
   onOpenReports?: () => void;
+  onModuleOpen?: (slug: string) => void;
 }
 
 export function ProjectHubControlCenterPage({
@@ -232,6 +234,7 @@ export function ProjectHubControlCenterPage({
   section,
   onBackToPortfolio,
   onOpenReports,
+  onModuleOpen,
 }: ProjectHubControlCenterPageProps): ReactNode {
   useEffect(() => {
     syncProjectStore(projects, project);
@@ -366,38 +369,34 @@ export function ProjectHubControlCenterPage({
           </div>
         </>
       ) : (
-        <>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: 16,
-            }}
-          >
-            {cards.map((card) => (
-              <Card key={card.label} size="small">
-                <CardHeader
-                  header={<Text weight="semibold">{card.label}</Text>}
-                  description={<Text size={700} weight="bold">{card.value}</Text>}
-                />
-              </Card>
-            ))}
-          </div>
-          <div style={{ marginTop: 24 }}>
-            <Text size={500} weight="semibold">
-              Project-scoped entry is now route-canonical.
-            </Text>
-            <Text size={300} style={{ display: 'block', marginTop: 8 }}>
-              Refresh, deep links, and in-shell project switching all keep this Control Center scoped to{' '}
-              {project.name}.
-            </Text>
-            {onOpenReports ? (
-              <div style={{ marginTop: 16 }}>
-                <HbcButton onClick={onOpenReports}>Open Reports Baseline</HbcButton>
+        <ProjectOperatingSurface
+          canvasSlot={
+            <>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: 16,
+                }}
+              >
+                {cards.map((card) => (
+                  <Card key={card.label} size="small">
+                    <CardHeader
+                      header={<Text weight="semibold">{card.label}</Text>}
+                      description={<Text size={700} weight="bold">{card.value}</Text>}
+                    />
+                  </Card>
+                ))}
               </div>
-            ) : null}
-          </div>
-        </>
+              {onOpenReports ? (
+                <div style={{ marginTop: 16 }}>
+                  <HbcButton onClick={onOpenReports}>Open Reports Baseline</HbcButton>
+                </div>
+              ) : null}
+            </>
+          }
+          onModuleOpen={onModuleOpen ?? (() => {})}
+        />
       )}
     </WorkspacePageShell>
   );
