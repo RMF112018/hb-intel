@@ -96,6 +96,8 @@ export function FinancialControlCenter({
     return (
       <BudgetPage
         projectId={projectId}
+        viewerRole={viewerRole}
+        complexityTier={complexityTier}
         onBack={handleBackToControlCenter}
       />
     );
