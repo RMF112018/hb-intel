@@ -9,6 +9,8 @@ import '@pnp/sp/folders/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/site-groups/index.js';
 import '@pnp/sp/site-users/index.js';
+import '@pnp/sp/role-assignments/index.js';
+import '@pnp/sp/role-definitions/index.js';
 import '@pnp/sp/sites/index.js';
 import '@pnp/sp/webs/index.js';
 import type { IProvisioningAuditRecord } from '@hbc/models';
@@ -393,17 +395,42 @@ export class SharePointService implements ISharePointService {
   }
 
   /**
-   * W0-G1-T02: Assigns an Entra ID group to a SharePoint permission level.
-   * G2 scaffold — real implementation pending T05 Group.ReadWrite.All confirmation.
+   * W0-G1-T02: Assigns an Entra ID security group to a SharePoint permission level.
+   * Uses PnPjs to break role inheritance, resolve the group as a site principal,
+   * and assign the named role definition. Idempotent on retries.
    */
   async assignGroupToPermissionLevel(
-    _siteUrl: string,
-    _entraGroupId: string,
-    _permissionLevel: string
+    siteUrl: string,
+    entraGroupId: string,
+    permissionLevel: string
   ): Promise<void> {
-    throw new Error(
-      'SharePointService.assignGroupToPermissionLevel is a G2 scaffold — pending T05'
-    );
+    const sp: any = await this.getSP(siteUrl);
+
+    // Break role inheritance (idempotent — copyRoleAssignments preserves existing grants).
+    await sp.web.breakRoleInheritance(false, true);
+
+    // Resolve the Entra ID security group as a SharePoint site principal.
+    const tenantId = process.env.AZURE_TENANT_ID;
+    if (!tenantId) throw new Error('AZURE_TENANT_ID env var is required for group permission assignment');
+    const claimIdentity = `c:0t.c|tenant|${entraGroupId}`;
+    const userInfo = await sp.web.ensureUser(claimIdentity);
+    const principalId: number = userInfo.data?.Id ?? userInfo.Id;
+
+    // Resolve the role definition by name (e.g. "Full Control", "Contribute", "Read").
+    const roleDef = await sp.web.roleDefinitions.getByName(permissionLevel).select('Id')();
+    const roleDefId: number = roleDef.Id;
+
+    // Add role assignment — catch duplicate assignment for idempotency.
+    try {
+      await sp.web.roleAssignments.add(principalId, roleDefId);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // SharePoint returns a specific error when the assignment already exists.
+      if (msg.includes('already exists') || msg.includes('duplicate')) {
+        return;
+      }
+      throw err;
+    }
   }
 
   /** Compatibility wrapper for older Step 5 callsites. */
