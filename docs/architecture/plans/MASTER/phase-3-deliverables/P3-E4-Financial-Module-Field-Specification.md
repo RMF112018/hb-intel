@@ -37,17 +37,21 @@ The upstream source boundary is now explicitly governed by the native integratio
 
 ## Source Files
 
+The operating files below are the real current-state operational baseline for the Financial module. They are not generic examples. The Financial module is designed to replace the workbook-driven process that these files support.
+
 | File | Purpose |
 |------|---------|
-| `docs/reference/example/Procore_Budget.csv` | Budget line item model (21 columns) |
-| `docs/reference/example/Financial Forecast Summary & Checklist.xlsx` | Forecast summary and checklist |
-| `docs/reference/example/GC-GR Forecast.xlsm` | GC/GR working model |
-| `docs/reference/example/HB Draw Schedule -Cash Flow.xlsx` | Cash flow projection |
-| `docs/reference/example/cash-flow.json` | JSON cash flow model |
-| `docs/reference/example/ar-aging.json` | A/R aging display model |
-| `docs/reference/example/Buyout Log_Template 2025.xlsx` | Buyout tracking |
+| `docs/reference/example/financial/Procore_Budget.csv` | Budget line item model (21 columns) |
+| `docs/reference/example/financial/Financial Forecast Summary & Checklist.xlsx` | Forecast summary and checklist |
+| `docs/reference/example/financial/GC-GR Forecast.xlsm` | GC/GR working model |
+| `docs/reference/example/financial/HB Draw Schedule -Cash Flow.xlsx` | Cash flow projection |
+| `docs/reference/example/financial/cash-flow.json` | JSON cash flow model |
+| `docs/reference/example/financial/ar-aging.json` | A/R aging display model |
+| `docs/reference/example/financial/Buyout Log_Template 2025.xlsx` | Buyout tracking |
 | `docs/reference/example/cost-code-dictionary.csv` | 7,566 CSI cost codes |
 | `docs/reference/example/csi-code-dictionary.csv` | CSI code reference |
+
+> **Replacement crosswalk.** The [`financial/FRC-00-Financial-Replacement-Crosswalk.md`](financial/FRC-00-Financial-Replacement-Crosswalk.md) package maps every operating file, tab, field, and workflow step to its Project Hub Financial runtime equivalent. It governs the mapping from workbook process to runtime records, actions, gates, and outputs — including imported/read-only vs. native runtime vs. derived-output boundaries. The replacement target is the project-scoped Financial module under Project Hub at `/project-hub/$projectId/financial/`.
 
 ---
 

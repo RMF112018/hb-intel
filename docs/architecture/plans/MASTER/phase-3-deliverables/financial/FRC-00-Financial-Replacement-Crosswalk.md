@@ -156,7 +156,24 @@ Per [P3-G1 §4.1](../P3-G1-Lane-Capability-Matrix.md): PWA = Full depth; SPFx = 
 
 ---
 
-## 6. Reading Guide
+## 6. How to Use This Package
+
+This crosswalk package is the implementation-grade bridge between the company's current workbook-driven financial process and the future Project Hub Financial runtime model. It serves multiple audiences:
+
+| Use Case | Start Here | Then Read |
+|----------|-----------|-----------|
+| **Runtime modeling** — defining records, fields, and computation rules | [FRC-04](FRC-04-Runtime-Record-Family.md) §1 (34-record family) | [FRC-05](FRC-05-Field-Level-Mapping.md) §1–§5 (field-level detail per domain) |
+| **UI surface planning** — designing PWA/SPFx Financial pages | [FRC-00](FRC-00-Financial-Replacement-Crosswalk.md) §4.7 (surfacing model) | [FRC-02](FRC-02-Detailed-Crosswalk.md) §2–§8 (what each surface must do, per current artifact) |
+| **Backend / service design** — repository seams, mutation methods, event hooks | [FRC-04](FRC-04-Runtime-Record-Family.md) §3 (backend ties by domain) | [FRC-03](FRC-03-Implementation-Implications.md) §5 (repository seam analysis) |
+| **Migration / backfill** — populating Financial module from workbook data | [FRC-01](FRC-01-Source-Inventory.md) (what each file contains) | [FRC-05](FRC-05-Field-Level-Mapping.md) §4.1, §4.3 (field-by-field import mapping for cash flow and A/R aging) |
+| **Cutover / parallel-run** — retiring workbooks safely | [FRC-04](FRC-04-Runtime-Record-Family.md) §5 (cutover readiness criteria + retirement sequencing) | [FRC-05](FRC-05-Field-Level-Mapping.md) §6 (three-way gap inventory to close before cutover) |
+| **Acceptance / readiness review** — verifying completeness | [FRC-03](FRC-03-Implementation-Implications.md) §7 (acceptance crosswalk AC-FIN → FRC-02 sections) | [FRC-04](FRC-04-Runtime-Record-Family.md) §2 (mutability/ownership matrix for data lineage verification) |
+
+The crosswalk is evidence-based: every claim references a specific file path, TypeScript interface, repository method, or governing plan section. If a claim cannot be verified against repo truth, it is flagged as an open gap in [FRC-05 §6](FRC-05-Field-Level-Mapping.md) or [FRC-03 §6](FRC-03-Implementation-Implications.md).
+
+---
+
+## 7. Reading Guide
 
 - **For current-state artifact details:** [FRC-01](FRC-01-Source-Inventory.md) — deep inventory of each operating file
 - **For the complete replacement mapping:** [FRC-02](FRC-02-Detailed-Crosswalk.md) — every current artifact/tab/section mapped to its future runtime equivalent

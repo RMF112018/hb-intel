@@ -62,6 +62,8 @@ Each replacement note identifies:
 
 ## 2. Financial Replacement Notes
 
+> **Implementation-grade crosswalk available.** The high-level replacement notes in this section have been expanded into a full implementation-grade crosswalk package at [`financial/FRC-00-Financial-Replacement-Crosswalk.md`](financial/FRC-00-Financial-Replacement-Crosswalk.md). The crosswalk treats the operating files in `docs/reference/example/financial/` as the real current-state operational baseline (not generic examples) and maps each workbook artifact, tab, field, and workflow step to its specific Project Hub Financial runtime equivalent — including TypeScript interfaces, repository seams, version lifecycle states, review gates, and cutover readiness criteria. For implementation, acceptance, and migration work, use the crosswalk package; these notes remain as the governing intent summary.
+
 ### 2.1 What is being replaced
 
 The current financial workflow relies on spreadsheets for budget tracking, forecasting, GC/GR modeling, and cash flow management. Project teams manually maintain these files, share via email or SharePoint, and reconcile against Procore budget exports.

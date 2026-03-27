@@ -141,7 +141,7 @@ For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The crit
 | 6.1.9 | Report-candidate designation — at most one `isReportCandidate = true` per project; P3-F1 publication handoff handler implemented | In Progress | | P3-E4-T03 §3.6; P3-E4-T09 §16. T09 notes stub-ready via `promoteToPublished()` — B-FIN-03 |
 | 6.1.10 | PER annotation on confirmed versions — working version not visible to PER; `canonicalBudgetLineId`-anchored; carry-forward on derivation | Complete | README Stage 7.1 T08 (`IFinancialAnnotationAnchor` — version-aware field/section/block anchors, `ICarriedForwardAnnotation` with value-change flag and PM disposition, `@hbc/features-project-hub` v0.1.7) | P3-E4-T08 §15; P3-E2 §3.5 |
 | 6.1.11 | All Activity Spine events, Health Spine metrics, and Work Queue items implemented per P3-E4-T08 §14 | Complete | README Stage 7.1 T08 (10 activity spine event types, 10 health spine metric definitions, 8 work queue item types, v0.1.7) | P3-E4-T08 §14 |
-| 6.1.12 | Spreadsheet replacement notes verified | Not Started | | P3-E3 §2 |
+| 6.1.12 | Spreadsheet replacement notes verified | In Progress | Financial Replacement Crosswalk package (FRC-00 through FRC-05) maps all 9 operating files to runtime equivalents with 14-column crosswalk, 34-record runtime model, field-level mappings, mutability matrix, backend ties, workflow states, cutover readiness, and three-way gap analysis. P3-E3 §2 and P3-E4 updated with crosswalk references. Pending: runtime UI surfaces and parallel-run validation. | P3-E3 §2; [`financial/FRC-00`](financial/FRC-00-Financial-Replacement-Crosswalk.md) |
 
 ### 6.2 Schedule
 
@@ -536,7 +536,7 @@ Phase 3 is release-ready when:
 | 10.5 | Documentation current — all 32 primary Phase 3 deliverables reflect current implementation or governance state as applicable | In Progress | 31 of 32 deliverables current; P3-J1 status corrected to Complete this sweep |
 | 10.6 | Cross-lane evidence complete — shared, PWA-specific, and SPFx-specific (P3-G3 §10) | In Progress | Stage 10.1–10.4 Status lines added; SPFx lane evidence recorded in §6.12; formal staging scenario execution pending |
 | 10.7 | Module source-of-truth boundaries respected (P3-E2) | In Progress | 10 of 11 modules verified at contract level (§6.11.1); QC pending |
-| 10.8 | Spreadsheet/document replacement notes aligned with implementation (P3-E3) | In Progress | Financial (6.1.12) and Constraints (6.3.14) replacement notes not yet started |
+| 10.8 | Spreadsheet/document replacement notes aligned with implementation (P3-E3) | In Progress | Financial (6.1.12) replacement crosswalk package complete (FRC-00 through FRC-05); Constraints (6.3.14) replacement notes not yet started |
 | 10.9 | Central project-governance policy record deployed and enforced — approval/release policy drives report lifecycle; Reports enforces without owning the policy | Not Started | Policy record verification |
 | 10.10 | UI conformance evidence complete — all Phase 3 surfaces pass mold-breaker conformance check per P3-C1 §14; `enforce-hbc-tokens` ESLint clean across all Phase 3 feature packages | In Progress | SPFx Project Hub surfaces complete (§6.12 all 12 criteria Complete); broader Phase 3 feature package ESLint sweep pending |
 
@@ -680,8 +680,10 @@ _Evidence entries below were collected during the 2026-03-25 acceptance sweep. E
 | 2026-03-25 | Source-of-Truth | 6.11.4 | README Stage 2.3, Stage 7.5 T01 (`isExcludedFromAnnotation` always true) | Architecture sweep |
 | 2026-03-25 | UI Conformance | 6.12.1–6.12.12 | Stages 11.1–11.9 completion evidence per §6.12 evidence columns; commit 2d8b0e0e | Architecture sweep |
 | 2026-03-25 | Validation | 8.16 | §6.12 all 12 criteria Complete; Stage 11.9 sign-off (commit 2d8b0e0e) | Architecture sweep |
+| 2026-03-27 | Financial | 6.1.12 | Financial Replacement Crosswalk package (FRC-00 through FRC-05): 6 files, 34-record runtime model, 14-column crosswalk, field-level mappings, mutability matrix, backend ties, workflow states, cutover readiness, 15-item gap analysis | Crosswalk package creation |
+| 2026-03-27 | Validation | 10.8 | Financial replacement crosswalk complete; P3-E3 §2 and P3-E4 updated with crosswalk references | Crosswalk package creation |
 
 ---
 
-**Last Updated:** 2026-03-25 — **Final acceptance sweep.** Promoted 3 gates to Complete (Cross-lane contracts §18.1, Project activation §18.2, Home/canvas §18.3). Promoted ~80 individual items from Evidence Pending/In Progress to Complete with specific evidence references. Populated §13 Evidence Collection Log (~70 entries). Fixed P3-J1 status in §12 (was "Not Started", now "Complete"). Updated §10 release-readiness criteria with sweep findings. Updated §1 summary table with detailed status counts. Genuine remaining gaps documented: QC mostly In Progress (added 2026-03-24), Reporting 15 of 20 items Not Started, several Safety/Schedule/Financial items pending runtime integration, 9 validation staging scenarios Not Started.
+**Last Updated:** 2026-03-27 — **Financial Replacement Crosswalk.** Created FRC-00 through FRC-05 crosswalk package. Updated P3-E3 §2 and P3-E4 with crosswalk references. Promoted 6.1.12 from Not Started to In Progress (crosswalk complete; pending runtime UI and parallel-run). Updated 10.8 evidence for Financial completion.
 **Governing Authority:** [Phase 3 Plan §18, §22](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md)
