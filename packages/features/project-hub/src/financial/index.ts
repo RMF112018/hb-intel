@@ -28,6 +28,9 @@ export * from './annotations/index.js';
 export * from './ui/index.js';
 export { useFinancialControlCenter } from './hooks/useFinancialControlCenter.js';
 export type {
+  FinancialViewerRole,
+  FinancialComplexityTier,
+  UseFinancialControlCenterOptions,
   FinancialControlCenterData,
   FinancialPeriodInfo,
   FinancialCustodyInfo,
@@ -39,5 +42,6 @@ export type {
   FinancialNarrative,
   FinancialNextAction,
   FinancialException,
+  FinancialAnnotation,
   FinancialActivityEntry,
 } from './hooks/useFinancialControlCenter.js';

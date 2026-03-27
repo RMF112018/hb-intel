@@ -1,12 +1,8 @@
 /**
  * FinancialControlCenter — page orchestrator for the Financial module root.
  *
- * Composes the 5-region Financial Control Center using:
- * - R1: FinancialPeriodHeader (in WorkspacePageShell headerSlot)
- * - R2: FinancialToolPostureRail (left, via MultiColumnLayout)
- * - R3: FinancialControlCenterCore (center)
- * - R4: FinancialActionRail (right)
- * - R5: HbcActivityStrip (bottom, generic from @hbc/ui-kit)
+ * Role-aware and complexity-aware. Composes the 5-region Financial
+ * Control Center using @hbc/ui-kit layout primitives.
  *
  * Route: /project-hub/$projectId/financial
  */
@@ -19,12 +15,11 @@ import {
 import type { ActivityStripEntry } from '@hbc/ui-kit';
 
 import { useFinancialControlCenter } from '../hooks/useFinancialControlCenter.js';
+import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 import { FinancialPeriodHeader } from './FinancialPeriodHeader.js';
 import { FinancialToolPostureRail } from './FinancialToolPostureRail.js';
 import { FinancialControlCenterCore } from './FinancialControlCenterCore.js';
 import { FinancialActionRail } from './FinancialActionRail.js';
-
-// ── Activity type labels ────────────────────────────────────────────
 
 const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   'version-transition': 'Version',
@@ -36,18 +31,22 @@ const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   override: 'Override',
 };
 
-// ── Component ───────────────────────────────────────────────────────
-
 export interface FinancialControlCenterProps {
   readonly projectId: string;
+  readonly viewerRole?: FinancialViewerRole;
+  readonly complexityTier?: FinancialComplexityTier;
   readonly onOpenSurface?: (toolId: string) => void;
+  readonly onSecondaryAction?: (action: string) => void;
 }
 
 export function FinancialControlCenter({
   projectId,
+  viewerRole,
+  complexityTier,
   onOpenSurface,
+  onSecondaryAction,
 }: FinancialControlCenterProps): ReactNode {
-  const data = useFinancialControlCenter();
+  const data = useFinancialControlCenter({ viewerRole, complexityTier });
 
   const activityEntries: ActivityStripEntry[] = data.recentActivity.map((e) => ({
     id: e.id,
@@ -60,12 +59,13 @@ export function FinancialControlCenter({
 
   return (
     <>
-      {/* R1 — Period Header (renders above the multi-column grid) */}
+      {/* R1 — Period Header */}
       <FinancialPeriodHeader
         period={data.period}
         custody={data.custody}
         freshness={data.freshness}
         primaryAction={data.primaryAction}
+        onSecondaryAction={onSecondaryAction}
       />
 
       {/* R2–R5 — Multi-column composition */}
@@ -94,6 +94,7 @@ export function FinancialControlCenter({
           <FinancialActionRail
             nextActions={data.nextActions}
             exceptions={data.exceptions}
+            annotations={data.annotations}
           />
         }
         bottomSlot={
