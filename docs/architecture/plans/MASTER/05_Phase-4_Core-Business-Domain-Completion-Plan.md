@@ -43,7 +43,7 @@ At the end of Phase 4:
 - Admin domain production completion and oversight flows
 - Estimating workflow completion and project setup/handoff linkage
 - Business Development workflow completion and continuity into estimating/setup
-- Accounting scaffolding uplift into real production-track capability
+- Accounting production-track completion (provisioning API contract, project-number capture, lifecycle feedback, and backend parity are code-complete; remaining scope is accounting-specific domain workflows and ERP connector integration)
 - Shared workflow, notification, acknowledgment, and related-item patterns across these domains
 - Readiness planning for later lifecycle domains
 
@@ -95,7 +95,7 @@ At the end of Phase 4:
 - Dependency refinement actions
 
 ### 7.4 Workstream D — Accounting Uplift
-**Goal:** move accounting from scaffold trajectory to production-track domain.
+**Goal:** complete accounting as a production-track domain. Phase 3 deliverables brought the provisioning review surface to code-complete: normalized API client, project-number capture on approval, auto-provisioning handoff, post-approval lifecycle banners, structured error display, and backend route parity. Remaining Phase 4 scope is accounting-specific domain workflows and ERP/connector integration.
 
 **Activities**
 - Define accounting’s minimum production-relevant workflow set.
@@ -133,7 +133,7 @@ Estimating connects cleanly into work and project context.
 BD can hand off into downstream work without losing context.
 
 ### M4.4 — Accounting uplift baseline live
-Accounting is no longer just a scaffold trajectory.
+Accounting provisioning review surface is code-complete. Remaining scope is domain-specific workflow completion and ERP integration.
 
 ### M4.5 — Cross-domain standard published
 The platform has a repeatable domain integration pattern.

@@ -100,6 +100,23 @@ Planning and implementation established the original A-E workstreams, and the pl
 
 For the full three-tier implementation-entry gate, see [`phase-1-deliverables/README.md`](phase-1-deliverables/README.md) §Phase 1 Implementation-Entry Gate.
 
+**Phase 3 Deliverables — Provisioning Workflow Completion (2026-03-27)**
+
+Phase 3 deliverables brought the provisioning workflow from scaffolded to code-complete across all four surfaces (Estimating, Accounting, Admin, PWA) and the backend function app. Key outcomes:
+
+| Area | Status | Detail |
+|------|--------|--------|
+| API client contract | **Code-complete** | Response envelope unwrapping, error handling, 404→null |
+| Approval → provisioning handoff | **Code-complete** | Auto-triggered saga with idempotency guard |
+| Saga → request reconciliation | **Code-complete** | Start→Provisioning, success→Completed+siteUrl, failure→Failed; timer path covered |
+| Step 6 real permissions | **Code-complete** | PnPjs-based Entra group → SharePoint permission assignment |
+| Prerequisite validation | **Code-complete** | 7-gate fail-fast at saga start; staging gate checklist documented |
+| Steps 2–4 hardening | **Code-complete** | Precondition guards, diagnostic metadata, non-fatal folder errors |
+| Surface stabilization (4 apps) | **Code-complete** | Normalized contracts, lifecycle feedback, progress views |
+| Admin backend parity | **Code-complete** | 4 missing routes implemented (listRuns, archive, ack, forceState) |
+| Integration tests | **Code-complete** | 4 approval→provisioning tests + 4 store synchronization tests |
+| Remaining staging blockers | **IT-dependent** | Graph Group.ReadWrite.All grant, function app deployment, auth registration, env configuration |
+
 ### Forward-planning documents
 
 **Phases 2–7** are draft plans with structure and intent established. They define scope and sequencing for the remaining program lifecycle but have not undergone the detailed planning process that Phases 0 and 1 completed. Detailed planning for each phase will occur as its predecessor reaches material completion.
