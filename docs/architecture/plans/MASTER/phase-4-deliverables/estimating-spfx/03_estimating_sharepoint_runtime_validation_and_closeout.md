@@ -98,4 +98,3 @@ Return:
 4. `Validation evidence`
 5. `Deployment checklist`
 6. `Remaining caveats`
-

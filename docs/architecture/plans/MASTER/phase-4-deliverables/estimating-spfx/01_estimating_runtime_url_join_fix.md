@@ -108,4 +108,3 @@ Return:
 4. `Patch summary`
 5. `Acceptance evidence`
 6. `Risks / follow-on work`
-

@@ -1,6 +1,5 @@
 # Prompt 03 — SPFx Surface Remediation (Estimating / Accounting / Admin)
 
-```text
 You are acting as a senior SPFx workflow-surface, user-command, review-flow, and release-readiness engineer for HB Intel.
 
 ## Objective
@@ -93,4 +92,3 @@ Provide:
 - Do not change surface behavior that Prompt 01 did not validate as deficient.
 - Preserve existing architecture and repo conventions.
 - Keep the user-command flows explicit, testable, and low-risk.
-```

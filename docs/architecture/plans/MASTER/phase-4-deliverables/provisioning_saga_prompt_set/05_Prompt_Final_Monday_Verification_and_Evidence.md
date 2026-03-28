@@ -1,6 +1,5 @@
 # Prompt 05 — Final Monday Verification and Evidence Package
 
-```text
 You are acting as a senior release-readiness, validation, and repo-truth sign-off reviewer for HB Intel.
 
 ## Objective
@@ -88,4 +87,3 @@ Split into:
 - Do not ignore partially fixed defects.
 - Do not treat untested behavior as proven.
 - Keep the verdict tied to the Monday-critical delivery path only.
-```

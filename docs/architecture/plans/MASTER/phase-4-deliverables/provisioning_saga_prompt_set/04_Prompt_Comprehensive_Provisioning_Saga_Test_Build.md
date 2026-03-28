@@ -1,6 +1,5 @@
 # Prompt 04 — Comprehensive Provisioning Saga Test Build
 
-```text
 You are acting as a senior test-architecture, user-workflow, backend-continuity, and release-validation engineer for HB Intel.
 
 ## Objective
@@ -127,4 +126,3 @@ Provide:
 - Do not stop at backend unit tests only.
 - Build the user-command and backend-continuity coverage together.
 - Ensure the tests explicitly protect against the validated deficiencies from Prompt 01.
-```
