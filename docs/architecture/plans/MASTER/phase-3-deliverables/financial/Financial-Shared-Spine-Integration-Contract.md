@@ -191,12 +191,108 @@ Financial records link to:
 
 ---
 
-## 6. Remaining Risks
+## 7. Tool × Spine Integration Matrix
+
+This matrix defines, for each Financial tool and each spine, whether publication is **mandatory** (M), **conditional** (C — only when the specified condition is met), or **none** (—). Where a tool consumes a spine, it is marked **consume** (R).
+
+### 7.1 Activity Spine Publication
+
+| Tool | Publishes | Event Type | Trigger | Condition |
+|------|-----------|-----------|---------|-----------|
+| Budget Import | **M** | `BudgetImported` | Import batch completes | Always on successful import |
+| Budget Import | **C** | `ReconciliationConditionResolved` | PM resolves condition | Only when conditions exist |
+| Forecast Summary | — | — | — | Edits are routine; no activity event |
+| Forecast Versioning | **M** | `ForecastVersionConfirmed` | Working → Confirmed (T3) | Always on confirmation |
+| Forecast Versioning | **M** | `ForecastVersionDerived` | New Working derived (T2) | Always on derivation |
+| Forecast Versioning | **M** | `ReportCandidateDesignated` | PM designates candidate (T4) | Always on designation |
+| Forecast Versioning | **M** | `ForecastVersionPublished` | Confirmed → Published (T5) | Always on publication |
+| GC/GR | **C** | `GCGRUpdated` | GC/GR line edit on Working | Only when material change (threshold TBD) |
+| Cash Flow | **C** | `CashFlowProjectionUpdated` | Forecast month edited | Only when material change (threshold TBD) |
+| Buyout | **M** | `BuyoutLineExecuted` | Status advances to ContractExecuted | Always on gate passage |
+| Buyout | **C** | `BuyoutSavingsDispositioned` | Savings allocated | Only when disposition created |
+| Review / PER | — | — | — | Review events use Handoff spine, not Activity |
+| Publication / Export | — | — | — | Publication covered by `ForecastVersionPublished` |
+| History / Audit | — | — | — | History is a consumer, not a publisher |
+
+**Entity linkage required:** Every activity event must include `projectId`, `sourceRecordId`, `sourceRecordType`, and `href` (deep-link to the source Financial tool route).
+
+### 7.2 Health Pulse Metric Publication
+
+| Tool | Publishes | Metric Keys | Trigger | Condition |
+|------|-----------|------------|---------|-----------|
+| Forecast Summary | **M** | `projectedOverUnder`, `profitMargin`, `estimatedCostAtCompletion` | Version confirmed or published | Snapshot on immutable version |
+| Budget Lines | **M** | `totalCostExposureToDate` | Version confirmed | Aggregated from confirmed budget lines |
+| Buyout | **M** | `percentBuyoutCompleteDollarWeighted`, `totalRealizedBuyoutSavings`, `totalUndispositionedSavings`, `buyoutToCommittedCostsReconciliation` | Buyout line status change or disposition | Recomputed on significant change |
+| Cash Flow | **M** | `peakCashRequirement`, `cashFlowAtRisk` | Version confirmed | Snapshot from confirmed cash flow |
+| GC/GR | — | — | — | GC/GR metrics feed into forecast summary; no direct health publication |
+| Checklist | — | — | — | Checklist state is a readiness indicator, not a health metric |
+
+**Publication rule:** Health metrics are published on **version confirmation** (T3) and **version publication** (T5), not on every Working-state edit. This prevents noisy metric churn.
+
+**Prohibited:** Publishing health metrics from Working version data. Health Pulse must reflect confirmed/published state only.
+
+### 7.3 Work Queue Item Publication
+
+| Tool | Publishes | Item Type | Trigger | Priority | Auto-Resolve |
+|------|-----------|----------|---------|----------|-------------|
+| Budget Import | **M** | `BudgetReconciliationRequired` | Ambiguous import match | `now` | Yes — resolves when PM resolves condition |
+| Forecast Checklist | **C** | `ForecastChecklistIncomplete` | Required items incomplete near period end | `soon` | Yes — resolves when all 15 required items complete |
+| Budget Lines | **C** | `BudgetLineOverbudget` | FTC exceeds 10% threshold (T07) | `soon` | Yes — resolves when FTC adjusted |
+| Forecast Summary | **C** | `NegativeProfitForecast` | Profit falls below 0% | `now` | Yes — resolves when profit ≥ 0% |
+| Cash Flow | **C** | `CashFlowDeficit` | Cumulative cash flow turns negative | `soon` | Yes — resolves when deficit cleared |
+| Buyout | **C** | `BuyoutOverbudget` | contractAmount exceeds budgetAmount | `soon` | Yes — resolves when amounts reconciled |
+| Buyout | **C** | `UndispositionedBuyoutSavings` | Savings exist without disposition | `watch` | Yes — resolves when fully dispositioned |
+| Buyout | **M** | `BuyoutComplianceGateBlocked` | ContractExecuted gate fails | `now` | Yes — resolves when gate passes |
+
+**Work queue lifecycle:** All Financial work queue items are self-resolving — they are automatically superseded when the triggering condition is cleared. Items must include `context.projectId`, `context.moduleKey: 'financial'`, `context.recordId`, and `context.versionId` (where applicable) for correct routing.
+
+**Prohibited:** Creating work queue items from Working-version edits that are immediately superseded by the next edit. Items should be generated from **state evaluation** (e.g., confirmation gate check, threshold evaluation), not from **every mutation**.
+
+### 7.4 Related Items Publication
+
+| Tool | Publishes | Relationship | Direction | When Registered |
+|------|-----------|-------------|-----------|-----------------|
+| Budget Import | **M** | Budget line ↔ Procore commitment reference | Outbound | On import with identity match |
+| Budget Import | **M** | Import session ↔ Budget line lineage | Outbound | On batch execution |
+| Buyout | **M** | Buyout line ↔ Subcontract execution readiness record | Outbound | On ContractExecuted gate passage |
+| Forecast Versioning | **M** | Version ↔ Publication record | Outbound | On publication (T5) |
+| Forecast Versioning | **C** | Version ↔ Review custody record | Outbound | When review custody is implemented |
+| Review / PER | **C** | Annotation ↔ Source budget line (via `canonicalBudgetLineId`) | Outbound | On annotation creation |
+
+**Entity linkage required:** Every relationship must include both `sourceItemId` and `targetItemId` with navigable `href` links where applicable.
+
+### 7.5 Workflow Handoff Publication
+
+| Tool | Publishes | Handoff Type | From → To | Trigger |
+|------|-----------|-------------|-----------|---------|
+| Forecast Versioning | **M** | `ForecastConfirmationHandoff` | PM → System/Review | Version confirmed (T3) |
+| Review / PER | **C** | `ReviewSubmissionHandoff` | PM → PER | Version submitted for review (when implemented) |
+| Publication / Export | **M** | `PublicationHandoff` | System → Reports (P3-F1) | Version promoted to Published (T5) |
+| Period lifecycle | **M** | `PeriodCloseHandoff` | System → PM | Period closed; new period begins |
+| Buyout | **M** | `BuyoutComplianceHandoff` | PM → Compliance | ContractExecuted gate passed |
+
+**Handoff lifecycle:** Handoffs are one-directional ownership transfers. The receiving party's acknowledgment (when applicable) closes the handoff. Handoffs must include `projectId`, `sourceRecordId`, and the canonical Financial tool route as `targetHref`.
+
+### 7.6 Consumption (Financial Reads from Spines)
+
+| Spine | Consumed By | Purpose |
+|-------|-----------|---------|
+| Activity | History / Audit tool | Displays project-wide activity timeline including Financial events |
+| Health Pulse | Financial Control Center | Displays project health posture alongside Financial tool posture |
+| Work Queue | Financial Control Center | Displays PM's pending Financial actions |
+| Related Items | All Financial tools | Navigable links to related records across modules |
+| Workflow Handoff | Review / PER tool | Pending handoffs affecting review custody |
+
+---
+
+## 8. Remaining Risks
 
 | # | Risk | Impact | Mitigation |
 |---|------|--------|------------|
 | 1 | No runtime spine adapters exist | Canvas tiles show no Financial data; spines have no Financial events | Implement adapters after `IFinancialRepository` exists (Stage 4) |
 | 2 | Related Items relationship types not yet registered | Financial records cannot link to other modules' records | Register types when implementing Financial adapter |
 | 3 | Workflow Handoff types not yet registered | Ownership transitions not visible in handoff inbox | Register types when implementing Financial adapter |
-| 4 | Health Pulse integration model unclear — push vs. pull | Financial may need to push snapshots or Health Pulse may query | Follow Health Pulse's existing integration pattern (adapter-based push) |
+| 4 | Health Pulse publication model is adapter-based push; Financial adapter not yet created | Health Pulse cannot incorporate Financial cost/procurement/liquidity metrics | Implement Financial health adapter following `healthPulseActivityAdapter` pattern |
 | 5 | Canvas tile display of Financial spine data depends on mock-to-real data migration | Tiles currently render mock data from hooks | Migrate hooks to `IFinancialRepository` first |
+| 6 | GC/GR and Cash Flow "material change" thresholds for Activity events not defined | Too many or too few activity events generated | Define thresholds during adapter implementation; start with "any save" and refine |
+| 7 | Work queue item generation timing not defined (per-save vs. per-evaluation) | Risk of noisy self-superseding items | Generate on state evaluation (gate check, threshold evaluation), not per-mutation |
