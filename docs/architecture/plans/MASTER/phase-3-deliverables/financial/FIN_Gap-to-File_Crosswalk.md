@@ -1,5 +1,7 @@
 # FIN Gap-to-File Crosswalk
 
+> **Note:** For the broader Financial doctrine package entry point — including the full file map, capability crosswalk, and prompt set roadmap — see the [Financial Doctrine Control Index](Financial-Doctrine-Control-Index.md). This crosswalk remains focused on FIN-01 through FIN-04 absorb/reference guidance.
+
 ## Purpose
 
 This crosswalk shows which existing Financial planning files should **reference** or **absorb** the new FIN-01 through FIN-04 governance files.
