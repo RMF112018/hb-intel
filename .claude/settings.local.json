@@ -149,7 +149,13 @@
       "Bash(2)",
       "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.md -o -name *.txt -o -name FAILURES -o -name KNOWN* \\\\\\))",
       "Bash(npm test:*)",
-      "Bash(__NEW_LINE_70abf083f57d8520__ bash:*)"
+      "Bash(__NEW_LINE_70abf083f57d8520__ bash:*)",
+      "Bash(for d:*)",
+      "Bash(unzip -l dist/sppkg/hb-intel-estimating.sppkg)",
+      "Bash(unzip -p dist/sppkg/hb-intel-estimating.sppkg \"_rels/.rels\")",
+      "Bash(unzip -p dist/sppkg/hb-intel-estimating.sppkg \"AppManifest.xml\")",
+      "Bash(unzip -p dist/sppkg/hb-intel-estimating.sppkg \"[Content_Types].xml\")",
+      "Bash(unzip:*)"
     ]
   },
   "enabledPlugins": {
