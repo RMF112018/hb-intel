@@ -25,6 +25,13 @@ Implement support for these profile IDs:
 - `executive-cockpit`
 - `field-tablet-split-pane`
 
+## Spec Files
+- `hybrid-operating-layer` → `docs/architecture/plans/MASTER/phase-3-deliverables/project-hub-ui/01_Project_Hub_Hybrid_Operating_Layer_Wireframe_Spec.md`
+- `canvas-first-operating-layer` → `docs/architecture/plans/MASTER/phase-3-deliverables/project-hub-ui/02_Project_Hub_Canvas_First_Operating_Layer_Wireframe_Spec.md`
+- `next-move-hub` → `docs/architecture/plans/MASTER/phase-3-deliverables/project-hub-ui/04_Project_Hub_Next_Move_Hub_Wireframe_Spec.md`
+- `executive-cockpit` → `docs/architecture/plans/MASTER/phase-3-deliverables/project-hub-ui/05_Project_Hub_Health_Risk_Executive_Cockpit_Wireframe_Spec.md`
+- `field-tablet-split-pane` → `docs/architecture/plans/MASTER/phase-3-deliverables/project-hub-ui/07_Project_Hub_Field_Tablet_Split_Pane_Hub_Wireframe_Spec.md`
+
 ## Default Policy To Implement
 Use this as the default policy unless repo truth requires a small refinement:
 

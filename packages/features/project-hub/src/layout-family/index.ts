@@ -77,6 +77,36 @@ export type {
   FieldActionStackProps,
 } from './components/index.js';
 
+// ── Profiles (governed default-view selection layer) ────────────────
+
+export type {
+  ProjectHubProfileId,
+  ProjectHubDeviceClass,
+  ProjectHubProfileRole,
+  ProfileRegionCollapse,
+  ProjectHubProfileDefinition,
+  ProjectHubProfileResolutionInput,
+  ProjectHubProfileResolutionResult,
+  ProjectHubProfilePreference,
+} from './profiles/index.js';
+
+export {
+  HYBRID_OPERATING_LAYER,
+  CANVAS_FIRST_OPERATING_LAYER,
+  NEXT_MOVE_HUB,
+  EXECUTIVE_COCKPIT,
+  FIELD_TABLET_SPLIT_PANE,
+  PROJECT_HUB_PROFILE_REGISTRY,
+  PROJECT_HUB_PROFILE_IDS,
+  resolveProjectHubProfile,
+  isProfileAllowed,
+  getAllowedProfiles,
+  getDefaultProfileId,
+  saveProfilePreference,
+  loadProfilePreference,
+  clearProfilePreference,
+} from './profiles/index.js';
+
 // ── Hooks ───────────────────────────────────────────────────────────
 
 export {
