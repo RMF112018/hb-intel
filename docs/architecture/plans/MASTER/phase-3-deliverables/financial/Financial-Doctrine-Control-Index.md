@@ -39,7 +39,8 @@ For a developer new to the Financial module, read in this order:
 | 7 | [Financial-LMG — Lifecycle and Mutation Governance](Financial-Lifecycle-and-Mutation-Governance.md) | Lifecycle states, transition rules, confirmation gate, access control, staleness, service enforcement |
 | 8 | [Financial-SOTEC — Source-of-Truth and Entity Control](Financial-Source-of-Truth-and-Entity-Control.md) | Entity ownership tiers, per-domain authority, write boundaries |
 | 9 | [Financial-ABMC — Action Boundary and Mutation Control](Financial-Action-Boundary-and-Mutation-Control.md) | Role×state permissions, mutation categories, cross-tool rules, blocking conditions |
-| 10 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
+| 10 | [Financial-SSIC — Shared Spine Integration Contract](Financial-Shared-Spine-Integration-Contract.md) | Spine publish/consume obligations, tool×spine matrix, entity linkage |
+| 11 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
 
 ---
 

@@ -191,7 +191,7 @@ Financial records link to:
 
 ---
 
-## 7. Tool × Spine Integration Matrix
+## 6. Tool × Spine Integration Matrix
 
 This matrix defines, for each Financial tool and each spine, whether publication is **mandatory** (M), **conditional** (C — only when the specified condition is met), or **none** (—). Where a tool consumes a spine, it is marked **consume** (R).
 
@@ -210,6 +210,7 @@ This matrix defines, for each Financial tool and each spine, whether publication
 | Cash Flow | **C** | `CashFlowProjectionUpdated` | Forecast month edited | Only when material change (threshold TBD) |
 | Buyout | **M** | `BuyoutLineExecuted` | Status advances to ContractExecuted | Always on gate passage |
 | Buyout | **C** | `BuyoutSavingsDispositioned` | Savings allocated | Only when disposition created |
+| Forecast Checklist | — | — | — | Checklist completion is captured implicitly via `ForecastVersionConfirmed` (T3), not a discrete checklist event |
 | Review / PER | — | — | — | Review events use Handoff spine, not Activity |
 | Publication / Export | — | — | — | Publication covered by `ForecastVersionPublished` |
 | History / Audit | — | — | — | History is a consumer, not a publisher |
@@ -222,7 +223,7 @@ This matrix defines, for each Financial tool and each spine, whether publication
 |------|-----------|------------|---------|-----------|
 | Forecast Summary | **M** | `projectedOverUnder`, `profitMargin`, `estimatedCostAtCompletion` | Version confirmed or published | Snapshot on immutable version |
 | Budget Lines | **M** | `totalCostExposureToDate` | Version confirmed | Aggregated from confirmed budget lines |
-| Buyout | **M** | `percentBuyoutCompleteDollarWeighted`, `totalRealizedBuyoutSavings`, `totalUndispositionedSavings`, `buyoutToCommittedCostsReconciliation` | Buyout line status change or disposition | Recomputed on significant change |
+| Buyout | **M** | `percentBuyoutCompleteDollarWeighted`, `totalRealizedBuyoutSavings`, `totalUndispositionedSavings`, `buyoutToCommittedCostsReconciliation` | `ContractExecuted` gate passage or `BuyoutSavingsDispositioned` event | Publish on each ContractExecuted and each savings disposition — not version-scoped |
 | Cash Flow | **M** | `peakCashRequirement`, `cashFlowAtRisk` | Version confirmed | Snapshot from confirmed cash flow |
 | GC/GR | — | — | — | GC/GR metrics feed into forecast summary; no direct health publication |
 | Checklist | — | — | — | Checklist state is a readiness indicator, not a health metric |
@@ -236,7 +237,7 @@ This matrix defines, for each Financial tool and each spine, whether publication
 | Tool | Publishes | Item Type | Trigger | Priority | Auto-Resolve |
 |------|-----------|----------|---------|----------|-------------|
 | Budget Import | **M** | `BudgetReconciliationRequired` | Ambiguous import match | `now` | Yes — resolves when PM resolves condition |
-| Forecast Checklist | **C** | `ForecastChecklistIncomplete` | Required items incomplete near period end | `soon` | Yes — resolves when all 15 required items complete |
+| Forecast Checklist | **C** | `ForecastChecklistIncomplete` | Required items incomplete when confirmation gate is evaluated (G2 check; not time-gated) | `soon` | Yes — resolves when all 15 of 19 required items complete |
 | Budget Lines | **C** | `BudgetLineOverbudget` | FTC exceeds 10% threshold (T07) | `soon` | Yes — resolves when FTC adjusted |
 | Forecast Summary | **C** | `NegativeProfitForecast` | Profit falls below 0% | `now` | Yes — resolves when profit ≥ 0% |
 | Cash Flow | **C** | `CashFlowDeficit` | Cumulative cash flow turns negative | `soon` | Yes — resolves when deficit cleared |
@@ -268,7 +269,7 @@ This matrix defines, for each Financial tool and each spine, whether publication
 | Forecast Versioning | **M** | `ForecastConfirmationHandoff` | PM → System/Review | Version confirmed (T3) |
 | Review / PER | **C** | `ReviewSubmissionHandoff` | PM → PER | Version submitted for review (when implemented) |
 | Publication / Export | **M** | `PublicationHandoff` | System → Reports (P3-F1) | Version promoted to Published (T5) |
-| Period lifecycle | **M** | `PeriodCloseHandoff` | System → PM | Period closed; new period begins |
+| Period lifecycle (System — `IFinancialPeriodRepository`) | **M** | `PeriodCloseHandoff` | System → PM | Period closed; new period begins. System-initiated handoff, not tool-initiated. |
 | Buyout | **M** | `BuyoutComplianceHandoff` | PM → Compliance | ContractExecuted gate passed |
 
 **Handoff lifecycle:** Handoffs are one-directional ownership transfers. The receiving party's acknowledgment (when applicable) closes the handoff. Handoffs must include `projectId`, `sourceRecordId`, and the canonical Financial tool route as `targetHref`.
@@ -278,14 +279,14 @@ This matrix defines, for each Financial tool and each spine, whether publication
 | Spine | Consumed By | Purpose |
 |-------|-----------|---------|
 | Activity | History / Audit tool | Displays project-wide activity timeline including Financial events |
-| Health Pulse | Financial Control Center | Displays project health posture alongside Financial tool posture |
-| Work Queue | Financial Control Center | Displays PM's pending Financial actions |
+| Health Pulse | Financial Control Center ([ui/01_Financial_Control_Center_UI_Spec](ui/01_Financial_Control_Center_UI_Spec.md)) | Displays project health posture alongside Financial tool posture |
+| Work Queue | Financial Control Center ([ui/01_Financial_Control_Center_UI_Spec](ui/01_Financial_Control_Center_UI_Spec.md)) | Displays PM's pending Financial actions |
 | Related Items | All Financial tools | Navigable links to related records across modules |
 | Workflow Handoff | Review / PER tool | Pending handoffs affecting review custody |
 
 ---
 
-## 8. Remaining Risks
+## 7. Remaining Risks
 
 | # | Risk | Impact | Mitigation |
 |---|------|--------|------------|

@@ -36,9 +36,9 @@ This document locks the authoritative lifecycle states, transition rules, mutati
 |---|-----------|------|-----|-----|---------------|-------------|
 | T1 | `createInitialVersion` | None | Working | System | No existing versions for project | Creates version with `isCurrentWorking: true` |
 | T2 | `deriveWorkingVersion` | ConfirmedInternal or PublishedMonthly | Working | PM | Source version exists and is immutable | Copies budget lines, GC/GR, checklist, cash flow to new Working; carries forward annotations (§6); marks prior Working as Superseded if exists |
-| T3 | `confirmVersion` | Working | ConfirmedInternal | PM | **Confirmation gate must pass** (§3) | Sets `confirmedAt`, `confirmedBy`; snapshot becomes immutable; triggers Activity Spine event |
+| T3 | `confirmVersion` | Working | ConfirmedInternal | PM | **Confirmation gate must pass** (§3) | Sets `confirmedAt`, `confirmedBy`; snapshot becomes immutable; triggers Activity Spine `ForecastVersionConfirmed` event; publishes Health Pulse metric snapshot (per Financial-SSIC §7.1/§7.2) |
 | T4 | `designateReportCandidate` | ConfirmedInternal | ConfirmedInternal | PM | Version is ConfirmedInternal | Sets `isReportCandidate: true`; clears flag on any other version in same project |
-| T5 | `promoteToPublished` | ConfirmedInternal | PublishedMonthly | System (P3-F1) | Version is `isReportCandidate` and ConfirmedInternal | Sets `publishedAt`; immutable; triggers publication handoff |
+| T5 | `promoteToPublished` | ConfirmedInternal | PublishedMonthly | System (P3-F1) | Version is `isReportCandidate` and ConfirmedInternal | Sets `publishedAt`; immutable; triggers publication handoff; triggers Activity Spine `ForecastVersionPublished` event; publishes Health Pulse metric snapshot (per Financial-SSIC §7.1/§7.2) |
 | T6 | `transitionToSuperseded` | Any | Superseded | System | New version derived or period closed | Sets `supersededAt`; historical retention |
 
 ### 2.3 Derivation Reasons

@@ -99,6 +99,7 @@ Actions in one Financial tool can affect the state, readiness, or validity of an
 |-------------|-------------------|-------------|
 | New import creates ambiguous matches | `staleBudgetLineCount` increments on Working version | **Blocks confirmation gate** (G3) until PM resolves all conditions |
 | Import changes budget baseline values | Derived forecast summary fields become stale | Auto-recompute on next read |
+| Import batch completes successfully | **Spine publication required:** Activity Spine `BudgetImported` event (mandatory per Financial-SSIC §7.1) | Adapter must publish after batch execution |
 | Import on confirmed version | Forces derivation of new Working version (reason: `BudgetReImport`) | Cannot import directly into Confirmed/Published |
 
 ### 4.2 Forecast Changes → Cash Flow / Publication
@@ -107,7 +108,7 @@ Actions in one Financial tool can affect the state, readiness, or validity of an
 |---------------|--------|-------------|
 | FTC edit on budget line | Forecast summary `estimatedCostAtCompletion`, `currentProfit`, `profitMargin` stale | `IForecastSummaryRepository` recomputes on read |
 | Checklist item unchecked | Confirmation gate G2 fails | Blocks `confirmVersion()` |
-| Version confirmed | Cash flow projections may reference confirmed data | Publication eligibility evaluates confirmed version |
+| Version confirmed | Cash flow projections may reference confirmed data; **spine publication required:** Activity Spine `ForecastVersionConfirmed` + Health Pulse metric snapshot (mandatory per Financial-SSIC §7.1/§7.2) | Publication eligibility evaluates confirmed version |
 | Version designated as candidate | Prior candidate loses flag | One-candidate-per-project rule enforced by `designateReportCandidate()` |
 
 ### 4.3 GC/GR → Forecast Summary
@@ -121,7 +122,7 @@ Actions in one Financial tool can affect the state, readiness, or validity of an
 
 | Buyout Event | Effect | Enforcement |
 |-------------|--------|-------------|
-| Buyout status advance | Dollar-weighted completion metric changes | `IBuyoutRepository` recomputes; may affect forecast exposure assessment |
+| Buyout status advance | Dollar-weighted completion metric changes; **spine publication required on ContractExecuted:** Activity Spine `BuyoutLineExecuted` + Health Pulse buyout metrics (mandatory per Financial-SSIC §7.1/§7.2) | `IBuyoutRepository` recomputes; may affect forecast exposure assessment |
 | Savings disposition created | Affects contingency / forecast treatment | Three-destination allocation per Financial-LMG §5.3 |
 | ContractExecuted gate failure | Buyout cannot advance | P3-E13 compliance blocks status transition |
 
