@@ -53,3 +53,19 @@ export { BuyoutExposureBand } from './BuyoutExposureBand.js';
 export { BuyoutLinesGrid } from './BuyoutLinesGrid.js';
 export { BuyoutRiskPanel } from './BuyoutRiskPanel.js';
 export { BuyoutWorkflowRail } from './BuyoutWorkflowRail.js';
+
+// Workspace Shell
+export { FinancialWorkspaceShell } from './FinancialWorkspaceShell.js';
+export type { FinancialWorkspaceShellProps, FinancialWorkspaceState } from './FinancialWorkspaceShell.js';
+
+// Tool Pages — Checklist, GC/GR, Review, Publication, History
+export { ChecklistPage } from './ChecklistPage.js';
+export type { ChecklistPageProps } from './ChecklistPage.js';
+export { GCGRPage } from './GCGRPage.js';
+export type { GCGRPageProps } from './GCGRPage.js';
+export { ReviewPage } from './ReviewPage.js';
+export type { ReviewPageProps } from './ReviewPage.js';
+export { PublicationPage } from './PublicationPage.js';
+export type { PublicationPageProps } from './PublicationPage.js';
+export { HistoryPage } from './HistoryPage.js';
+export type { HistoryPageProps } from './HistoryPage.js';

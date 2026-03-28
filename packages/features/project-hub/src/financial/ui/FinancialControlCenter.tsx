@@ -17,6 +17,8 @@ import type { ActivityStripEntry } from '@hbc/ui-kit';
 
 import { useFinancialControlCenter } from '../hooks/useFinancialControlCenter.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
+import { FinancialWorkspaceShell } from './FinancialWorkspaceShell.js';
+import type { FinancialWorkspaceState } from './FinancialWorkspaceShell.js';
 import { FinancialPeriodHeader } from './FinancialPeriodHeader.js';
 import { FinancialToolPostureRail } from './FinancialToolPostureRail.js';
 import { FinancialControlCenterCore } from './FinancialControlCenterCore.js';
@@ -25,6 +27,11 @@ import { ForecastSummaryPage } from './ForecastSummaryPage.js';
 import { BudgetPage } from './BudgetPage.js';
 import { CashFlowPage } from './CashFlowPage.js';
 import { BuyoutPage } from './BuyoutPage.js';
+import { ChecklistPage } from './ChecklistPage.js';
+import { GCGRPage } from './GCGRPage.js';
+import { ReviewPage } from './ReviewPage.js';
+import { PublicationPage } from './PublicationPage.js';
+import { HistoryPage } from './HistoryPage.js';
 
 // ── Surface mode ────────────────────────────────────────────────────
 
@@ -56,6 +63,25 @@ const TOOL_TO_SURFACE: Record<string, FinancialSurfaceMode> = {
   'review': 'review',
   'publication': 'publication',
   'history': 'history',
+};
+
+const TOOL_LABELS: Record<string, string> = {
+  'budget': 'Budget Import',
+  'forecast': 'Forecast Summary',
+  'checklist': 'Forecast Checklist',
+  'gcgr': 'GC/GR Forecast',
+  'cash-flow': 'Cash Flow',
+  'buyout': 'Buyout',
+  'review': 'Review & Annotation',
+  'publication': 'Publication & Export',
+  'history': 'History & Audit',
+};
+
+const VERSION_STATE_TO_WORKSPACE: Record<string, FinancialWorkspaceState> = {
+  Working: 'working',
+  ConfirmedInternal: 'confirmed',
+  PublishedMonthly: 'published',
+  Superseded: 'working',
 };
 
 const ACTIVITY_TYPE_LABELS: Record<string, string> = {
@@ -109,53 +135,91 @@ export function FinancialControlCenter({
     onBackToControlCenter?.();
   };
 
+  // ── Workspace state ────────────────────────────────────────────────
+
+  const workspaceState: FinancialWorkspaceState =
+    !data.freshness?.budgetFresh ? 'stale' :
+    VERSION_STATE_TO_WORKSPACE[data.period?.versionState ?? ''] ?? 'working';
+
+  const toolTitle = activeTool ? (TOOL_LABELS[activeTool] ?? 'Financial') : 'Financial';
+
   // ── Deeper surface rendering ──────────────────────────────────────
+
+  const toolPageProps = { projectId, viewerRole, complexityTier, onBack: handleBackToControlCenter };
 
   if (surfaceMode === 'forecast') {
     return (
-      <ForecastSummaryPage
-        projectId={projectId}
-        viewerRole={viewerRole}
-        complexityTier={complexityTier}
-        onBack={handleBackToControlCenter}
-      />
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <ForecastSummaryPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
     );
   }
 
   if (surfaceMode === 'budget') {
     return (
-      <BudgetPage
-        projectId={projectId}
-        viewerRole={viewerRole}
-        complexityTier={complexityTier}
-        onBack={handleBackToControlCenter}
-      />
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <BudgetPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
     );
   }
 
   if (surfaceMode === 'cash-flow') {
     return (
-      <CashFlowPage
-        projectId={projectId}
-        viewerRole={viewerRole}
-        complexityTier={complexityTier}
-        onBack={handleBackToControlCenter}
-      />
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <CashFlowPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
     );
   }
 
   if (surfaceMode === 'buyout') {
     return (
-      <BuyoutPage
-        projectId={projectId}
-        viewerRole={viewerRole}
-        complexityTier={complexityTier}
-        onBack={handleBackToControlCenter}
-      />
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <BuyoutPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
     );
   }
 
-  // ── Control center rendering ──────────────────────────────────────
+  if (surfaceMode === 'checklist') {
+    return (
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <ChecklistPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
+    );
+  }
+
+  if (surfaceMode === 'gcgr') {
+    return (
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <GCGRPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
+    );
+  }
+
+  if (surfaceMode === 'review') {
+    return (
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <ReviewPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
+    );
+  }
+
+  if (surfaceMode === 'publication') {
+    return (
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <PublicationPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
+    );
+  }
+
+  if (surfaceMode === 'history') {
+    return (
+      <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        <HistoryPage {...toolPageProps} />
+      </FinancialWorkspaceShell>
+    );
+  }
+
+  // ── Control center rendering (Financial home) ─────────────────────
 
   const activityEntries: ActivityStripEntry[] = data.recentActivity.map((e) => ({
     id: e.id,
@@ -167,7 +231,14 @@ export function FinancialControlCenter({
   }));
 
   return (
-    <>
+    <FinancialWorkspaceShell
+      title="Financial"
+      projectId={projectId}
+      versionState={workspaceState}
+      reportingPeriod={data.period?.reportingMonth}
+      blockerCount={data.exceptions?.length}
+      isStale={!data.freshness?.budgetFresh}
+    >
       <FinancialPeriodHeader
         period={data.period}
         custody={data.custody}
@@ -212,6 +283,6 @@ export function FinancialControlCenter({
           />
         }
       />
-    </>
+    </FinancialWorkspaceShell>
   );
 }
