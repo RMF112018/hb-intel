@@ -12,6 +12,7 @@ import {
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import type { IActiveProject } from '@hbc/models';
+import { HbcProjectCanvas, registerReferenceTiles } from '@hbc/project-canvas';
 import {
   PROJECT_HUB_BASELINE_REPORT_FAMILIES,
   PROJECT_HUB_REPORT_MODULE_AUDIT,
@@ -20,14 +21,25 @@ import {
   ExecutiveCockpitSurface,
   FieldTabletSurface,
   FinancialControlCenter,
-  resolveProjectHubLayoutFamily,
+  resolveProjectHubProfile,
 } from '@hbc/features-project-hub';
-import type { IProjectHubReportModuleAuditRow, ProjectHubLayoutFamily } from '@hbc/features-project-hub';
+import type {
+  IProjectHubReportModuleAuditRow,
+  ProjectHubProfileRole,
+  ProjectHubDeviceClass,
+} from '@hbc/features-project-hub';
 import {
   getProjectHubPortfolioState,
   saveProjectHubPortfolioState,
 } from '@hbc/shell';
+import { useAuthStore } from '@hbc/auth';
 import { useProjectHubContext } from '../hooks/useProjectHubContext.js';
+
+// Register all reference tiles (idempotent — safe to call multiple times).
+registerReferenceTiles();
+
+// Stable empty array reference to prevent zustand selector re-render loops.
+const EMPTY_ROLES: readonly string[] = [];
 
 // ── Griffel styles governed by @hbc/ui-kit tokens ──────────────────────────
 const usePortfolioStyles = makeStyles({
@@ -92,15 +104,38 @@ const useControlCenterStyles = makeStyles({
   auditTable: {
     marginTop: `${HBC_SPACE_MD}px`,
   },
-  canvasCardGrid: {
-    display: 'grid',
-    gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_MD * 13 + HBC_SPACE_SM + HBC_SPACE_XS}px, 1fr))`,
-    gap: `${HBC_SPACE_MD}px`,
-  },
-  reportsButton: {
-    marginTop: `${HBC_SPACE_MD}px`,
-  },
 });
+
+// ── Profile resolution helpers ──────────────────────────────────────────────
+
+/**
+ * Map auth-level resolved roles to the Project Hub profile role taxonomy.
+ * Priority-ordered: the first matching role wins.
+ */
+function resolveProfileRole(resolvedRoles: readonly string[]): ProjectHubProfileRole {
+  for (const r of resolvedRoles) {
+    const lower = r.toLowerCase();
+    if (/portfolio.*exec|executive.*review/.test(lower)) return 'portfolio-executive';
+    if (/leadership/.test(lower)) return 'leadership';
+    if (/safety.*lead/.test(lower)) return 'safety-leadership';
+    if (/qa|qc|quality/.test(lower)) return 'qa-qc';
+    if (/field.*eng/.test(lower)) return 'field-engineer';
+    if (/superintendent/.test(lower)) return 'superintendent';
+    if (/project.*exec/.test(lower)) return 'project-executive';
+  }
+  return 'project-manager';
+}
+
+/**
+ * Detect device class from viewport width for profile resolution.
+ */
+function resolveDeviceClass(): ProjectHubDeviceClass {
+  if (typeof window === 'undefined') return 'desktop';
+  const width = window.innerWidth;
+  if (width < 768) return 'narrow';
+  if (width < 1024) return 'tablet';
+  return 'desktop';
+}
 
 const columns: ColumnDef<IActiveProject, unknown>[] = [
   { accessorKey: 'name', header: 'Project Name' },
@@ -286,17 +321,23 @@ export function ProjectHubControlCenterPage({
   projects,
   section,
   onBackToPortfolio,
-  onOpenReports,
+  onOpenReports: _onOpenReports,
   onModuleOpen,
 }: ProjectHubControlCenterPageProps): ReactNode {
   useProjectHubContext(projects, project, section);
 
-  const cards = [
-    { label: 'Project Status', value: project.status },
-    { label: 'Project Number', value: project.number },
-    { label: 'Start Date', value: project.startDate },
-    { label: 'End Date', value: project.endDate },
-  ];
+  // ── Auth context for profile resolution ──────────────────────────
+  const userId = useAuthStore((state) => state.currentUser?.id ?? 'anonymous');
+  const resolvedRoles = useAuthStore((state) => state.session?.resolvedRoles) ?? EMPTY_ROLES;
+
+  // ── Profile-governed resolution ──────────────────────────────────
+  const profileRole = useMemo(() => resolveProfileRole(resolvedRoles), [resolvedRoles]);
+  const deviceClass = useMemo(() => resolveDeviceClass(), []);
+  const profileResult = useMemo(
+    () => resolveProjectHubProfile({ role: profileRole, deviceClass }),
+    [profileRole, deviceClass],
+  );
+  const { profileId, layoutFamily } = profileResult;
 
   const reportsSummary = useMemo(() => getProjectHubReportsSummary(), []);
   const reportAuditRows = useMemo<ReportAuditTableRow[]>(
@@ -313,29 +354,23 @@ export function ProjectHubControlCenterPage({
   const reportsSection = section === 'reports';
   const financialSection = section === 'financial';
 
-  // Resolve layout family for non-section view.
-  // Default to project-operating; executive roles get executive cockpit.
-  const layoutFamily: ProjectHubLayoutFamily = useMemo(() => {
-    const result = resolveProjectHubLayoutFamily({
-      role: 'project-manager', // TODO: resolve from auth context
-      devicePosture: 'desktop',
-      userOverride: null,
-    });
-    return result.family;
-  }, []);
-
   const ccStyles = useControlCenterStyles();
 
-  const familyTitle = layoutFamily === 'executive'
-    ? 'Project Hub — Executive Cockpit'
-    : layoutFamily === 'field-tablet'
-      ? 'Project Hub — Field Mode'
-      : 'Project Hub Control Center';
+  const profileTitle =
+    profileId === 'executive-cockpit'
+      ? 'Project Hub — Executive Cockpit'
+      : profileId === 'field-tablet-split-pane'
+        ? 'Project Hub — Field Mode'
+        : profileId === 'next-move-hub'
+          ? 'Project Hub — Next Move Hub'
+          : profileId === 'canvas-first-operating-layer'
+            ? 'Project Hub — Canvas'
+            : 'Project Hub Control Center';
 
   return (
     <WorkspacePageShell
       layout="dashboard"
-      title={financialSection ? 'Financial Control Center' : reportsSection ? 'Project Hub Reports' : familyTitle}
+      title={financialSection ? 'Financial Control Center' : reportsSection ? 'Project Hub Reports' : profileTitle}
       stickyHeader
       headerSlot={
         <div className={ccStyles.headerSlot}>
@@ -447,23 +482,13 @@ export function ProjectHubControlCenterPage({
       ) : (
         <ProjectOperatingSurface
           canvasSlot={
-            <>
-              <div className={ccStyles.canvasCardGrid}>
-                {cards.map((card) => (
-                  <Card key={card.label} size="small">
-                    <CardHeader
-                      header={<Text weight="semibold">{card.label}</Text>}
-                      description={<Text size={700} weight="bold">{card.value}</Text>}
-                    />
-                  </Card>
-                ))}
-              </div>
-              {onOpenReports ? (
-                <div className={ccStyles.reportsButton}>
-                  <HbcButton onClick={onOpenReports}>Open Reports Baseline</HbcButton>
-                </div>
-              ) : null}
-            </>
+            <HbcProjectCanvas
+              projectId={project.id}
+              userId={userId}
+              role={profileRole}
+              editable
+              title=""
+            />
           }
           onModuleOpen={onModuleOpen ?? (() => {})}
         />

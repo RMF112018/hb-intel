@@ -71,18 +71,21 @@ describe('ProjectHubPage', () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 240, behavior: 'auto' });
   });
 
-  it('renders the explicit back-to-portfolio control in the project control center', () => {
+  it('renders the back-to-portfolio control and governed canvas in the project control center', () => {
     renderWithTheme(
       <ProjectHubControlCenterPage
         project={{ ...PROJECTS[0] }}
         projects={[...PROJECTS]}
         onBackToPortfolio={() => undefined}
-        onOpenReports={() => undefined}
       />,
     );
 
+    // Back to Portfolio is always present in the header slot
     expect(screen.getByRole('button', { name: /back to portfolio/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /open reports baseline/i })).toBeTruthy();
+
+    // The control center now renders HbcProjectCanvas (via ProjectOperatingSurface)
+    // instead of static summary cards. Verify canvas is present via test ID.
+    expect(screen.getByTestId('hbc-project-canvas')).toBeTruthy();
   });
 
   it('renders the baseline reports section when requested', () => {

@@ -46,3 +46,8 @@ export function unmount(): void {
 // `lib.name` IIFE global assignment.
 const api = { mount, unmount };
 (globalThis as any).__hbIntel_estimating = api;
+// Defensive: also assign to window explicitly, as SPFx contexts may have
+// globalThis !== window, and SPComponentLoader may look at window instead.
+if (typeof window !== 'undefined' && globalThis !== window) {
+  (window as any).__hbIntel_estimating = api;
+}
