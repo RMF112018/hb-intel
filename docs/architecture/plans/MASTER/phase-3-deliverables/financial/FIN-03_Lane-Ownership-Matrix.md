@@ -15,6 +15,8 @@ This document should be read with:
 
 ---
 
+> **Reconciliation note (2026-03-28).** This document is the **authoritative locked lane doctrine** for Financial. Where P3-G1 §4.1 marks SPFx capabilities as "Required", that means required at governed SPFx depth (view, summary, posture, Launch-to-PWA) — not at PWA-equivalent editing depth. FIN-03 §1.3's locked rule determines whether an interaction requires PWA ownership. See [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) §3 (L1–L3) for detailed per-tool resolution. Current implementation: PWA lane is at FIN-PR1 Stage 3 (Implementation Scaffold with mock data); SPFx lane is at Stage 2 (Architecturally Defined — infrastructure stubs only).
+
 ## 1. Locked Lane Doctrine for Financial
 
 ### 1.1 PWA Lane

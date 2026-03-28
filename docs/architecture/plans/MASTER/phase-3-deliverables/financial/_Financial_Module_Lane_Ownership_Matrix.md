@@ -1,5 +1,7 @@
 # Financial Module — Lane Ownership Matrix
 
+> **Reconciliation note (2026-03-28).** This matrix elaborates [FIN-03](FIN-03_Lane-Ownership-Matrix.md). Where this matrix marks SPFx as "Required" or implies SPFx editing depth for capabilities that FIN-03 §1.3 locks to PWA (multi-step workflows, complex reconciliation, dense editing, review custody), FIN-03 governs. SPFx "Required" means required at governed SPFx depth (view, summary, posture, Launch-to-PWA), not PWA-equivalent depth. See [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) §3 (L1–L2) for the per-tool resolution table.
+
 ## Purpose
 This matrix maps core Financial module capabilities to the appropriate runtime lane. It is intentionally capability-based rather than file-based. Tool-specific doctrine already locked elsewhere should remain authoritative where more detailed than this matrix.
 

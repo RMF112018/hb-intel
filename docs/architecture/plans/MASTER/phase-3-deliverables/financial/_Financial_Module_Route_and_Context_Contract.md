@@ -1,12 +1,14 @@
 # Financial Module — Route and Context Contract
 
+> **Reconciliation note (2026-03-28).** This document elaborates [FIN-04](FIN-04_Route-and-Context-Contract.md) with detailed context preservation rules. Where route paths or sub-tool slugs differ from FIN-04, **FIN-04's locked paths govern**. Specifically: the canonical parent path is `/project-hub/:projectId/financial` (not `/projects/:projectId/financial`), and sub-tool slugs follow FIN-04 (e.g., `/budget` not `/budget-import`, `/forecast` not `/forecast-summary`, `/gcgr` not `/gc-gr`). This document's period, version, artifact context, deep-link durability, return behavior, and re-entry rules remain valid target-state doctrine where FIN-04 is silent. See [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) §2 and §4.1.
+
 ## Purpose
 This document defines the canonical route family and context rules for the Financial module. The goal is durable project-scoped navigation, deep-link safety, predictable re-entry, and honest failure modes.
 
 ## 1. Canonical route family
 The Financial module should use a project-scoped route family under the Project Hub / Project Context lane.
 
-### Recommended family
+### Recommended family (superseded — see reconciliation note above)
 `/projects/:projectId/financial`
 
 ### Tool sub-routes

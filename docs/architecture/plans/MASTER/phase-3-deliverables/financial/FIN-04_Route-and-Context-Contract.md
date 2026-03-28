@@ -15,6 +15,8 @@ This document should be read with:
 
 ---
 
+> **Repo-truth and reconciliation note (2026-03-28).** This document's route family is **locked target-state doctrine** — the required implementation target. Current implementation status: only `/project-hub/:projectId/financial` is registered and renders `FinancialControlCenter`. Sub-tool routes do not exist; navigation is state-based (`surfaceMode` via `useState`). Per [FIN-PR1 §3.3](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md): sub-tool URL routing is at Stage 1 (Doctrine-Defined). The `$projectId` notation below is a documentation convention; implementations must use `:projectId` (React Router syntax). Route path and slug decisions are confirmed in [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) §2 (R1–R6). Where `_Financial_Module_Route_and_Context_Contract.md` uses different slugs or parent paths, this document's locked slugs govern.
+
 ## 1. Locked Route Doctrine
 
 ### 1.1 Canonical Financial Route Family

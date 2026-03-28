@@ -67,6 +67,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | [FIN-03](FIN-03_Lane-Ownership-Matrix.md) | FIN-03 | Lane ownership — PWA full-depth vs. SPFx limited entry | Locked |
 | [FIN-04](FIN-04_Route-and-Context-Contract.md) | FIN-04 | Route family and project-context durability | Locked |
 | [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md) | PH3-FIN-SOTL | Source-of-truth authority, custody, governance | Locked |
+| [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) | Financial-RLR | Route and lane contradiction resolution — governs where FIN-03/04 conflict with P3-G1/G2 | Active |
 | [PH3-FIN-SOTL-A1](PH3-FIN-SOTL-A1-Default-Registries-and-Role-Boundaries.md) | PH3-FIN-SOTL-A1 | Default registries, role boundaries, override rules | Locked |
 
 ### 4.2 Maturity and Readiness
@@ -270,8 +271,9 @@ Where two files govern the same subject, the following resolution applies:
 
 | Subject | Overlapping Files | Resolution |
 |---------|------------------|------------|
-| **Lane ownership** | FIN-03 vs. `_Financial_Module_Lane_Ownership_Matrix.md` | **FIN-03 is authoritative** (locked). The lane ownership matrix elaborates FIN-03 with capability-level detail. If they disagree, FIN-03 governs. |
-| **Route/context** | FIN-04 vs. `_Financial_Module_Route_and_Context_Contract.md` | **FIN-04 is authoritative** (locked). The route/context contract elaborates FIN-04 with detailed route family and context rules. If they disagree, FIN-04 governs. |
+| **Lane ownership** | FIN-03 vs. `_Financial_Module_Lane_Ownership_Matrix.md` vs. P3-G1 §4.1 | **FIN-03 is authoritative** (locked). The lane ownership matrix and P3-G1 elaborate depth. SPFx "Required" means governed SPFx depth, not PWA-equivalent. See [Financial-RLR §3](Financial-Route-and-Lane-Reconciliation.md) for per-tool resolution. |
+| **Route/context** | FIN-04 vs. `_Financial_Module_Route_and_Context_Contract.md` | **FIN-04 is authoritative** (locked) for route paths and slugs. The elaborated contract governs context preservation detail where FIN-04 is silent. See [Financial-RLR §2 and §4.1](Financial-Route-and-Lane-Reconciliation.md). |
+| **Route naming** | FIN-04 (`/budget`, `/gcgr`) vs. elaborated contract (`/budget-import`, `/gc-gr`) vs. FRC-00 (`/budget`, `/gcgr`) | **FIN-04's locked slugs govern.** See [Financial-RLR §2 R3](Financial-Route-and-Lane-Reconciliation.md). |
 | **Implementation stages** | FRC-03 (implementation stages) vs. FIN-PR1 (maturity model) | **FIN-PR1 is authoritative** for maturity classification (created 2026-03-28, post-reconciliation). FRC-03 stage summary is historical context; FIN-PR1 stage classifications are canonical. |
 | **Gap/readiness analysis** | FRM-05, BIP-05, FVC-05 | Each governs its own workstream. **FRM-05** covers the Financial module holistically; **BIP-05** covers budget import; **FVC-05** covers versioning/checklist. No single file supersedes the others. |
 | **FIN-01–04 integration** | FIN_Gap-to-File_Crosswalk.md vs. this index | The crosswalk remains the canonical absorb/reference guide for FIN-01–04 specifically. This index is the broader entry point. |
