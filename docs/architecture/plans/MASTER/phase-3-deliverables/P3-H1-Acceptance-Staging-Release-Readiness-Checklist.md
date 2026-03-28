@@ -8,7 +8,7 @@
 | **Document Type** | Active Reference |
 | **Owner** | Architecture + Project Hub platform owner |
 | **Update Authority** | Architecture lead; updated as implementation progresses and evidence is collected |
-| **Last Reviewed Against Repo Truth** | 2026-03-25 |
+| **Last Reviewed Against Repo Truth** | 2026-03-28 |
 | **References** | [Phase 3 Plan §18, §22](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-G3](P3-G3-Lane-Specific-Acceptance-Matrix.md); [Phase 3 Deliverables README](README.md); [current-state-map](../../../blueprint/current-state-map.md); all active Phase 3 deliverables and governing T-files (P3-A1 through P3-J1; P3-E12 retained only as a superseded historical reference) |
 
 ---
@@ -147,7 +147,7 @@ For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The crit
 
 ### Financial Governance and Operating-Surface Verification
 
-> **Maturity context (2026-03-28).** Per [FIN-PR1](financial/FIN-PR1-Financial-Production-Readiness-Maturity-Model.md), the Financial module is at **Stage 2–3** (Architecturally Defined to Implementation Scaffold). It has 29 UI components rendering at `/project-hub/:projectId/financial` via `FinancialControlCenter` with 5 sub-surfaces, 12+ business logic subdomains, and 1,979 test lines. All view hooks return hardcoded mock data, no `IFinancialRepository` exists, sub-tool navigation is state-based (not URL-routed), and SPFx Financial lane is infrastructure stubs only. The verification items below require **Stage 5+ (Operational in Current Lane)** evidence — rendered UI and contract-level tests are insufficient.
+> **Maturity context (2026-03-28).** Per [FIN-PR1](financial/FIN-PR1-Financial-Production-Readiness-Maturity-Model.md), the Financial module is at **Stage 2 — Architecturally Defined** (constrained by Forecast Summary and GC/GR pending T04; majority of tools at Stage 3). It has 29 UI components rendering at `/project-hub/:projectId/financial` via `FinancialControlCenter` with 5 sub-surfaces, 12+ business logic subdomains, and 1,979 test lines. All view hooks return hardcoded mock data, no `IFinancialRepository` exists, sub-tool navigation is state-based (not URL-routed), and SPFx Financial lane is infrastructure stubs only. The verification items below require **Stage 5+ (Operational in Current Lane)** evidence — rendered UI and contract-level tests are insufficient.
 
 - [ ] `FIN-01` posture has been incorporated into the Financial master specification and viewer-first implementation language has been removed. *(Requires Stage 5)*
 - [ ] `FIN-02` action posture has been reflected in the executable Financial workflow files. *(Requires Stage 5)*

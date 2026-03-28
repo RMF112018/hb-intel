@@ -130,6 +130,8 @@ There is no version immutability, no enforced checklist gate, no annotation audi
 
 ### 4.7 Required surfacing model
 
+> **Target-state (2026-03-28).** The sub-tool URL routes below are target-state requirements, not current implementation. Sub-tool navigation is currently state-based (`surfaceMode` via `useState`), not URL-routed. Deep links to `/financial/budget` etc. do not exist. See [FIN-PR1 §3.3](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md) and [FRM-05 §3.3](FRM-05-Repo-Truth-Gaps-and-Implementation-Readiness.md).
+
 The Financial module surfaces under Project Hub at `/project-hub/$projectId/financial/` with sub-sections:
 
 | Sub-Section | Route | PWA Depth | SPFx Depth |
