@@ -28,13 +28,34 @@ import { BuyoutPage } from './BuyoutPage.js';
 
 // ── Surface mode ────────────────────────────────────────────────────
 
-type FinancialSurfaceMode = 'control-center' | 'forecast-summary' | 'budget' | 'cash-flow' | 'buyout';
+/**
+ * Surface modes — maps canonical FIN-04 route slugs to internal rendering modes.
+ * Modes with dedicated page components render them directly;
+ * modes without a dedicated component yet render the control-center overview
+ * with the tool slug preserved in the route for deep-link safety.
+ */
+type FinancialSurfaceMode =
+  | 'control-center'
+  | 'budget'
+  | 'forecast'
+  | 'checklist'
+  | 'gcgr'
+  | 'cash-flow'
+  | 'buyout'
+  | 'review'
+  | 'publication'
+  | 'history';
 
 const TOOL_TO_SURFACE: Record<string, FinancialSurfaceMode> = {
-  'forecast-summary': 'forecast-summary',
   'budget': 'budget',
+  'forecast': 'forecast',
+  'checklist': 'checklist',
+  'gcgr': 'gcgr',
   'cash-flow': 'cash-flow',
   'buyout': 'buyout',
+  'review': 'review',
+  'publication': 'publication',
+  'history': 'history',
 };
 
 const ACTIVITY_TYPE_LABELS: Record<string, string> = {
@@ -90,7 +111,7 @@ export function FinancialControlCenter({
 
   // ── Deeper surface rendering ──────────────────────────────────────
 
-  if (surfaceMode === 'forecast-summary') {
+  if (surfaceMode === 'forecast') {
     return (
       <ForecastSummaryPage
         projectId={projectId}
