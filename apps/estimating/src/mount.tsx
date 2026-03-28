@@ -39,3 +39,10 @@ export function unmount(): void {
   root?.unmount();
   root = undefined;
 }
+
+// Explicitly publish the app API to the global object so the SPFx shell
+// can always resolve it, regardless of how the IIFE wrapper assigns the
+// return value.  This is the belt-and-suspenders complement to the Vite
+// `lib.name` IIFE global assignment.
+const api = { mount, unmount };
+(globalThis as any).__hbIntel_estimating = api;

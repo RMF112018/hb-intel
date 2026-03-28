@@ -18,10 +18,9 @@ import {
 import type { IProjectHubReportModuleAuditRow, ProjectHubLayoutFamily } from '@hbc/features-project-hub';
 import {
   getProjectHubPortfolioState,
-  reconcileProjectContext,
   saveProjectHubPortfolioState,
-  useProjectStore,
 } from '@hbc/shell';
+import { useProjectHubContext } from '../hooks/useProjectHubContext.js';
 
 const columns: ColumnDef<IActiveProject, unknown>[] = [
   { accessorKey: 'name', header: 'Project Name' },
@@ -63,27 +62,6 @@ const PROJECT_HUB_NO_ACCESS_CONFIG: ISmartEmptyStateConfig = {
   }),
 };
 
-function syncProjectStore(projects: IActiveProject[], activeProject: IActiveProject | null): void {
-  const store = useProjectStore.getState();
-  store.setAvailableProjects(projects);
-
-  if (!activeProject) {
-    if (store.activeProject !== null) {
-      store.setActiveProject(null);
-    }
-    return;
-  }
-
-  const reconciliation = reconcileProjectContext({
-    routeProjectId: activeProject.id,
-    storeProjectId: store.activeProject?.id ?? null,
-  });
-
-  if (reconciliation.storeNeedsSync) {
-    store.setActiveProject(activeProject);
-  }
-}
-
 function sortProjects(
   projects: IActiveProject[],
   sortBy: 'name' | 'status',
@@ -105,14 +83,12 @@ export function ProjectHubPortfolioPage({
   projects,
   onProjectSelect,
 }: ProjectHubPortfolioPageProps): ReactNode {
+  useProjectHubContext(projects, null);
+
   const initialState = useMemo(() => getProjectHubPortfolioState(), []);
   const [search, setSearch] = useState(initialState.search);
   const [statusFilter, setStatusFilter] = useState(initialState.statusFilter);
   const [sortBy, setSortBy] = useState<'name' | 'status'>(initialState.sortBy);
-
-  useEffect(() => {
-    syncProjectStore(projects, null);
-  }, [projects]);
 
   useEffect(() => {
     saveProjectHubPortfolioState({ search, statusFilter, sortBy });
@@ -240,9 +216,7 @@ export function ProjectHubControlCenterPage({
   onOpenReports,
   onModuleOpen,
 }: ProjectHubControlCenterPageProps): ReactNode {
-  useEffect(() => {
-    syncProjectStore(projects, project);
-  }, [project, projects]);
+  useProjectHubContext(projects, project, section);
 
   const cards = [
     { label: 'Project Status', value: project.status },
@@ -456,9 +430,7 @@ export function ProjectHubNoAccessPage({
   projects,
   reason,
 }: ProjectHubNoAccessPageProps): ReactNode {
-  useEffect(() => {
-    syncProjectStore(projects, null);
-  }, [projects]);
+  useProjectHubContext(projects, null);
 
   const context: IEmptyStateContext = {
     module: 'project-hub',

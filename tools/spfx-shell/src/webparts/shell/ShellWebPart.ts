@@ -50,36 +50,54 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     const normalizedBase = rawBaseUrl.endsWith('/') ? rawBaseUrl : rawBaseUrl + '/';
     const bundleUrl = normalizedBase + __APP_BUNDLE_NAME__;
 
-    // Diagnostic: log the URL resolution chain for staging/debug validation.
-    // These are non-noisy console.debug calls — invisible unless DevTools is
-    // open with verbose logging enabled.
     console.debug('[HB-Intel ShellWebPart] rawBaseUrl:', rawBaseUrl);
     console.debug('[HB-Intel ShellWebPart] bundleUrl:', bundleUrl);
 
-    const scriptResult = await SPComponentLoader.loadScript(bundleUrl, {
+    // Load the IIFE app bundle. Resolution order:
+    //   1. loadScript return value (SPComponentLoader reads globalExportsName)
+    //   2. globalThis[globalName]  (explicit publication from mount.tsx)
+    //   3. window[globalName]      (legacy / IIFE var fallback)
+    const loadScriptResult = await SPComponentLoader.loadScript<IAppModule>(bundleUrl, {
       globalExportsName: __APP_GLOBAL_NAME__,
-    }) as IAppModule | undefined;
-    const windowModule = (window as any)[__APP_GLOBAL_NAME__] as IAppModule | undefined;
-    this._appModule = scriptResult || windowModule;
+    });
 
-    console.debug('[HB-Intel ShellWebPart] loadScript result type:', typeof scriptResult);
-    console.debug('[HB-Intel ShellWebPart] loadScript result keys:', scriptResult ? Object.keys(scriptResult as object) : 'null/undefined');
-    console.debug('[HB-Intel ShellWebPart] window global type:', typeof windowModule);
-    console.debug('[HB-Intel ShellWebPart] window global keys:', windowModule ? Object.keys(windowModule as object) : 'null/undefined');
+    const explicitGlobal =
+      (globalThis as any)[__APP_GLOBAL_NAME__] ??
+      (window as any)[__APP_GLOBAL_NAME__];
+
+    this._appModule = loadScriptResult ?? explicitGlobal;
+
+    // Hard-fail with actionable diagnostics if the module didn't resolve.
+    if (!this._appModule?.mount || !this._appModule?.unmount) {
+      console.error('[HB-Intel ShellWebPart] Module resolution failed.', {
+        bundleUrl,
+        globalName: __APP_GLOBAL_NAME__,
+        loadScriptResult: typeof loadScriptResult,
+        loadScriptKeys: loadScriptResult ? Object.keys(loadScriptResult as object) : null,
+        explicitGlobalType: typeof explicitGlobal,
+        explicitGlobalKeys: explicitGlobal ? Object.keys(explicitGlobal as object) : null,
+        resolvedModule: typeof this._appModule,
+        hasMount: typeof this._appModule?.mount,
+        hasUnmount: typeof this._appModule?.unmount,
+      });
+      throw new Error(
+        `[HB-Intel] App module did not resolve correctly from ${bundleUrl}. ` +
+        `Expected mount/unmount on ${__APP_GLOBAL_NAME__}.`
+      );
+    }
+
+    console.debug('[HB-Intel ShellWebPart] Module resolved.', {
+      source: loadScriptResult ? 'loadScript' : 'globalThis',
+      keys: Object.keys(this._appModule as object),
+    });
   }
 
   public render(): void {
     if (this._appModule?.mount) {
       this._appModule.mount(this.domElement, this.context);
     } else {
-      console.error('[HB-Intel ShellWebPart] Mount failed.', {
-        bundleName: __APP_BUNDLE_NAME__,
-        globalName: __APP_GLOBAL_NAME__,
-        moduleExists: !!this._appModule,
-        hasMountFn: typeof this._appModule?.mount,
-        hasUnmountFn: typeof this._appModule?.unmount,
-        windowGlobalExists: !!(window as any)[__APP_GLOBAL_NAME__],
-      });
+      // This path should be unreachable because onInit throws on missing module,
+      // but defend against framework edge cases that skip onInit.
       this.domElement.innerHTML = '<div style="padding:1rem;color:#a4262c;">App bundle failed to load.</div>';
     }
   }

@@ -25,6 +25,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import { Script, createContext } from 'node:vm';
 
 // ── Domain registry ────────────────────────────────────────────────────────
 
@@ -246,6 +247,70 @@ for (const domain of domains) {
   }
   console.log(`  ✓ Vite IIFE bundle verified: ${bundleName}`);
 
+  // ── Step 1b: Runtime smoke test — verify globalThis contract ────────
+  // Evaluate the built IIFE in a minimal VM and assert the global API.
+  const globalName = `__hbIntel_${domain.camel}`;
+  {
+    // node:vm imported at top of file
+    const bundleSrc = fs.readFileSync(bundlePath, 'utf8');
+    // Provide a minimal browser-like global environment so the IIFE can
+    // evaluate without throwing on missing globals (e.g. `global`, `window`,
+    // `document`, `navigator`).  We only need the bundle to finish
+    // evaluating — we do not need real DOM behavior.
+    const fakeGlobal: Record<string, unknown> = {};
+    const sandbox: Record<string, unknown> = {
+      globalThis: fakeGlobal,
+      global: fakeGlobal,
+      window: fakeGlobal,
+      self: fakeGlobal,
+      document: { createElement: () => ({}), head: {}, body: {}, addEventListener: () => {} },
+      navigator: { userAgent: 'node-vm', onLine: true },
+      location: { href: '', protocol: 'https:', hostname: 'localhost' },
+      console,
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval,
+      queueMicrotask,
+      Object, Array, Map, Set, WeakMap, WeakSet, Promise, Symbol, Error,
+      TypeError, RangeError, JSON, Math, Date, RegExp, parseInt, parseFloat,
+      isNaN, isFinite, undefined, NaN, Infinity, encodeURIComponent,
+      decodeURIComponent, encodeURI, decodeURI, btoa: (s: string) => Buffer.from(s).toString('base64'),
+      atob: (s: string) => Buffer.from(s, 'base64').toString(),
+      URL, URLSearchParams, TextEncoder, TextDecoder,
+      ArrayBuffer, Uint8Array, Int8Array, Float64Array, DataView,
+      Proxy, Reflect, WeakRef, FinalizationRegistry,
+    };
+    const ctx = createContext(sandbox);
+    try {
+      new Script(bundleSrc, { filename: bundleName }).runInContext(ctx);
+    } catch (e) {
+      console.error(`  ❌ ${domain.dir}: bundle threw during evaluation — ${(e as Error).message}`);
+      allPassed = false;
+      continue;
+    }
+
+    // The explicit globalThis publication from mount.tsx writes to
+    // sandbox.globalThis (the object we injected).  The IIFE `var` assignment
+    // writes to the VM context's own global scope.  Check both.
+    const fromGlobalThis = (sandbox.globalThis as Record<string, any>)[globalName];
+    const fromVarScope = (sandbox as Record<string, any>)[globalName];
+    const resolved = fromGlobalThis ?? fromVarScope;
+
+    if (
+      !resolved ||
+      typeof resolved.mount !== 'function' ||
+      typeof resolved.unmount !== 'function'
+    ) {
+      console.error(`  ❌ ${domain.dir}: runtime smoke test failed — ${globalName} does not expose mount/unmount`);
+      console.error(`     fromGlobalThis:`, typeof fromGlobalThis, fromGlobalThis ? Object.keys(fromGlobalThis) : 'n/a');
+      console.error(`     fromVarScope:`, typeof fromVarScope, fromVarScope ? Object.keys(fromVarScope) : 'n/a');
+      allPassed = false;
+      continue;
+    }
+    console.log(`  ✓ Runtime smoke test passed: ${globalName}.mount() and .unmount() present`);
+  }
+
   // ── Step 2: Prepare SPFx shell project ───────────────────────────────
   cleanShellTemp();
 
@@ -286,7 +351,6 @@ for (const domain of domains) {
   );
 
   // ── Step 3: Run SPFx gulp build ─────────────────────────────────────
-  const globalName = `__hbIntel_${domain.camel}`;
   const shellEnv = {
     APP_BUNDLE_NAME: bundleName,
     APP_GLOBAL_NAME: globalName,

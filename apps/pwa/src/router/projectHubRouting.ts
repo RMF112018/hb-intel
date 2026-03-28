@@ -53,7 +53,29 @@ export type ProjectHubProjectResolution =
       reason: ProjectHubDeniedReason;
     };
 
-const PROJECT_HUB_SUPPORTED_SECTIONS = new Set(['health', 'reports', 'financial']);
+/**
+ * Project Hub section registry.
+ *
+ * Each entry defines a routable section under `/project-hub/:projectId/:section`.
+ * New Phase 3 modules are added here — the route tree, section validation, and
+ * switch-target resolution all read from this single registry.
+ */
+export interface ProjectHubSectionEntry {
+  /** URL slug used as the `:section` route param. */
+  slug: string;
+  /** Human-readable label for nav, breadcrumbs, and headers. */
+  label: string;
+}
+
+export const PROJECT_HUB_SECTION_REGISTRY: readonly ProjectHubSectionEntry[] = [
+  { slug: 'health', label: 'Health' },
+  { slug: 'reports', label: 'Reports' },
+  { slug: 'financial', label: 'Financial' },
+] as const;
+
+const PROJECT_HUB_SUPPORTED_SECTIONS = new Set(
+  PROJECT_HUB_SECTION_REGISTRY.map((entry) => entry.slug),
+);
 
 export function validateProjectHubSearch(search: Record<string, unknown>): ProjectHubSearch {
   return {
