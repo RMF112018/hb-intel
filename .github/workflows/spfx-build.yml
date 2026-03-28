@@ -66,10 +66,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup Node.js 18 for SPFx shell
+        # SPFx 1.18 requires Node 18. Install it alongside Node 20 via nvm.
+        run: |
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          nvm install 18
+          nvm use 20
+
       - name: Install SPFx shell dependencies
         # Isolated SPFx 1.18 project with TS 4.x — NOT in pnpm workspace.
         working-directory: tools/spfx-shell
-        run: npm ci
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          nvm use 18
+          npm ci
 
       - name: Restore Turborepo cache
         # D-PH7-BW-9: Turborepo remote cache key for incremental builds.

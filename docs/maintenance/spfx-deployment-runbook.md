@@ -42,9 +42,11 @@ Build (Vite IIFE)  →  Package (SPFx gulp)  →  Staging (auto)  →  Productio
 
 ### Prerequisites
 
-- Node.js 18+ or 20+
+- Node.js 20+ (workspace builds)
+- Node.js 18 (SPFx shell — SPFx 1.18 requires Node 18; install via `nvm install 18`)
 - pnpm (workspace package manager)
 - npm (for the isolated SPFx shell project)
+- `zip` command (for Vite bundle injection into .sppkg)
 
 ### Full Pipeline
 
@@ -52,25 +54,28 @@ Build (Vite IIFE)  →  Package (SPFx gulp)  →  Staging (auto)  →  Productio
 # 1. Install workspace dependencies
 pnpm install
 
-# 2. Install SPFx shell dependencies (isolated project, uses npm)
-cd tools/spfx-shell && npm install && cd ../..
+# 2. Install Node 18 for SPFx shell (if not already installed)
+nvm install 18 && nvm use default
 
-# 3. Build shared packages
+# 3. Install SPFx shell dependencies (isolated project, uses npm + Node 18)
+cd tools/spfx-shell && nvm use 18 && npm install && nvm use default && cd ../..
+
+# 4. Build shared packages
 pnpm turbo run build --filter="./packages/*"
 
-# 4. Build a single domain (Estimating)
+# 5. Build a single domain (Estimating)
 pnpm turbo run build --filter="./apps/estimating"
 
-# 5. Validate manifests
+# 6. Validate manifests
 npx tsx tools/validate-manifests.ts
 
-# 6. Check bundle sizes
+# 7. Check bundle sizes
 npx tsx tools/spfx-bundle-check.ts
 
-# 7. Package a single domain
+# 8. Package a single domain (uses nvm to switch to Node 18 for gulp)
 npx tsx tools/build-spfx-package.ts --domain estimating
 
-# 8. Package all 11 domains
+# 9. Package all 11 domains
 npx tsx tools/build-spfx-package.ts
 ```
 

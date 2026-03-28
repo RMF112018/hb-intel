@@ -136,7 +136,53 @@ Test Files  7 passed (7)
 
 ### 3.7 Bundle Size
 
-Estimating: 1,100 KB (under 1,500 KB budget for IIFE single-file format)
+Estimating: 1,126 KB (under 1,500 KB budget for IIFE single-file format)
+
+### 3.8 End-to-End Packaging (Validated Locally)
+
+```
+npx tsx tools/build-spfx-package.ts --domain estimating
+
+✓ Vite IIFE bundle verified: estimating-app.js
+  gulp bundle --ship  → ShellWebPart compiled (TS 4.7, Node 18)
+  gulp package-solution --ship → .sppkg created with official tooling
+✓ Vite bundle injected into .sppkg
+✓ .sppkg structure verified
+✅ hb-intel-estimating.sppkg (319.9 KB)
+```
+
+### 3.9 .sppkg Archive Contents (Verified)
+
+```
+Archive: dist/sppkg/hb-intel-estimating.sppkg (16 files)
+  AppManifest.xml                                              939 bytes
+  [Content_Types].xml                                          961 bytes
+  _rels/.rels, _rels/AppManifest.xml.rels                      772 bytes
+  feature_cb3b1520-1665-4412-83ab-344c2182a2fd.xml + rels    1,036 bytes
+  WebPart_3c4dbd5c-5bec-4014-8b77-737ac725a5cc.xml          1,828 bytes
+  ClientSideAssets/shell-web-part_864e985ac3e71d142ae5.js    1,957 bytes
+  ClientSideAssets/estimating-app.js                     1,126,373 bytes
+```
+
+### 3.10 Runtime Manifest (Extracted from .sppkg)
+
+```json
+{
+  "id": "3c4dbd5c-5bec-4014-8b77-737ac725a5cc",
+  "componentType": "WebPart",
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp"],
+  "preconfiguredEntries": [{ "title": {"default": "HB Intel Estimating"}, "group": {"default": "HB Intel"} }],
+  "loaderConfig": {
+    "internalModuleBaseUrls": ["HTTPS://SPCLIENTSIDEASSETLIBRARY/"],
+    "entryModuleId": "shell-web-part",
+    "scriptResources": {
+      "shell-web-part": { "type": "path", "path": "shell-web-part_864e985ac3e71d142ae5.js" },
+      "@microsoft/sp-loader": { "type": "component", "id": "1c6c9123-...", "version": "1.18.0" },
+      "@microsoft/sp-webpart-base": { "type": "component", "id": "974a7777-...", "version": "1.18.0" }
+    }
+  }
+}
+```
 
 ## 4. What Was Validated vs What Requires Live SharePoint
 
@@ -153,8 +199,13 @@ Estimating: 1,100 KB (under 1,500 KB budget for IIFE single-file format)
 | TypeScript compilation | `tsc --noEmit` | ✅ Verified |
 | ESLint rules | `eslint` | ✅ Verified |
 | Unit tests | `vitest run` | ✅ 55/55 passed |
-| .sppkg OPC structure | `verifySppkg()` in orchestrator | ✅ Verified (when run) |
-| .sppkg contains Vite bundle | `verifySppkg()` in orchestrator | ✅ Verified (when run) |
+| .sppkg OPC structure | `verifySppkg()` in orchestrator | ✅ Verified |
+| .sppkg contains Vite bundle (estimating-app.js) | `verifySppkg()` + `unzip -l` | ✅ Verified |
+| .sppkg contains shell webpart JS | `unzip -l` archive inspection | ✅ Verified |
+| Runtime manifest has loaderConfig | Extracted from .sppkg | ✅ Verified |
+| Runtime manifest has correct component ID | Extracted from .sppkg | ✅ Verified |
+| Runtime manifest has internalModuleBaseUrls placeholder | Extracted from .sppkg | ✅ Verified |
+| Official gulp toolchain used for .sppkg generation | Build log shows gulp 3.18.0 | ✅ Verified |
 | .sppkg contains correct webpart ID | `verifySppkg()` in orchestrator | ✅ Verified (when run) |
 | App Catalog upload succeeds | Requires SharePoint tenant | ⏳ Manual |
 | Solution publishes correctly | Requires SharePoint tenant | ⏳ Manual |
@@ -194,7 +245,7 @@ The following steps must be performed by a developer or admin with access to a S
 | supportedHosts | `["SharePointWebPart", "TeamsPersonalApp"]` |
 | IIFE Global | `__hbIntel_estimating` |
 | Bundle Filename | `estimating-app.js` |
-| App Version | `0.1.2` |
+| App Version | `0.1.3` |
 
 ## 7. Files Changed Across Remediation Sequence
 

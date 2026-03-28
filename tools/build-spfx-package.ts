@@ -73,9 +73,14 @@ const OUTPUT_DIR = path.join(ROOT, 'dist', 'sppkg');
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function run(cmd: string, opts?: { cwd?: string; env?: Record<string, string> }): void {
+function run(cmd: string, opts?: { cwd?: string; env?: Record<string, string>; useNode18?: boolean }): void {
   console.log(`  → ${cmd}`);
-  execSync(cmd, {
+  // SPFx 1.18 requires Node 18. When useNode18 is true, wrap the command
+  // in a bash shell that activates nvm and switches to Node 18.
+  const finalCmd = opts?.useNode18
+    ? `bash -c 'source "$NVM_DIR/nvm.sh" && nvm use 18 --silent && ${cmd.replace(/'/g, "'\\''")}'`
+    : cmd;
+  execSync(finalCmd, {
     cwd: opts?.cwd ?? ROOT,
     stdio: 'inherit',
     env: { ...process.env, ...opts?.env },
@@ -289,7 +294,7 @@ for (const domain of domains) {
   };
 
   console.log('  Running gulp bundle --ship...');
-  run('npx gulp bundle --ship', { cwd: SHELL_DIR, env: shellEnv });
+  run('npx gulp bundle --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
 
   // ── Step 4: Inject Vite assets into temp/deploy/ ────────────────────
   const deployDir = path.join(SHELL_DIR, 'temp', 'deploy');
@@ -306,9 +311,12 @@ for (const domain of domains) {
 
   // ── Step 5: Run gulp package-solution ───────────────────────────────
   console.log('  Running gulp package-solution --ship...');
-  run('npx gulp package-solution --ship', { cwd: SHELL_DIR, env: shellEnv });
+  run('npx gulp package-solution --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
 
-  // ── Step 6: Collect and verify .sppkg output ────────────────────────
+  // ── Step 6: Inject Vite bundle into .sppkg ─────────────────────────
+  // gulp package-solution only includes files it built (the shell webpart JS).
+  // The Vite IIFE bundle must be added to the .sppkg as a ClientSideAsset
+  // so SharePoint can serve it from the CDN alongside the shell webpart.
   const sppkgSource = path.join(SHELL_DIR, 'sharepoint', 'solution', sppkgName);
   if (!fs.existsSync(sppkgSource)) {
     console.error(`  ❌ ${domain.dir}: .sppkg not found at ${sppkgSource}`);
@@ -316,6 +324,18 @@ for (const domain of domains) {
     continue;
   }
 
+  // Add Vite assets to the .sppkg archive (ZIP format) under ClientSideAssets/.
+  // Create a temp staging dir with the correct path structure, then zip from there.
+  const injectDir = path.join(SHELL_DIR, 'temp', '_inject');
+  const injectAssets = path.join(injectDir, 'ClientSideAssets');
+  fs.mkdirSync(injectAssets, { recursive: true });
+  for (const file of fs.readdirSync(path.join(SHELL_DIR, 'assets'))) {
+    fs.copyFileSync(path.join(SHELL_DIR, 'assets', file), path.join(injectAssets, file));
+  }
+  run(`zip -r "${sppkgSource}" ClientSideAssets/`, { cwd: injectDir });
+  console.log(`  ✓ Vite bundle injected into .sppkg`);
+
+  // ── Step 7: Collect and verify .sppkg output ────────────────────────
   const sppkgDest = path.join(OUTPUT_DIR, sppkgName);
   fs.copyFileSync(sppkgSource, sppkgDest);
 

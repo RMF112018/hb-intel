@@ -167,7 +167,12 @@
       "Bash(for elem:*)",
       "Bash(grep -c \"<$elem\")",
       "WebFetch(domain:www.voitanos.io)",
-      "Bash(find /Users/bobbyfetting/hb-intel/.github/workflows -type f \\\\\\(-name *.yml -o -name *.yaml \\\\\\))"
+      "Bash(find /Users/bobbyfetting/hb-intel/.github/workflows -type f \\\\\\(-name *.yml -o -name *.yaml \\\\\\))",
+      "Bash(npm install:*)",
+      "Bash(source ~/.nvm/nvm.sh)",
+      "Bash(nvm ls:*)",
+      "Bash(nvm install:*)",
+      "Bash(nvm use:*)"
     ]
   },
   "enabledPlugins": {

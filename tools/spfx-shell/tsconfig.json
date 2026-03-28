@@ -1,4 +1,5 @@
 {
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-4.7/includes/tsconfig-web.json",
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
@@ -7,7 +8,6 @@
     "outDir": "lib",
     "rootDir": "src",
     "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
     "strict": false,
     "noImplicitAny": true,

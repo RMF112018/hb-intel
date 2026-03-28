@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-shell-template",
-    "id": "00000000-0000-0000-0000-000000000000",
+    "name": "hb-intel-estimating",
+    "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
     "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
@@ -12,25 +12,29 @@
       "websiteUrl": "https://hbcaldwell.com",
       "privacyUrl": "",
       "termsOfUseUrl": "",
-      "mpnId": "Undefined-1.18.0"
+      "mpnId": ""
     },
     "metadata": {
-      "shortDescription": { "default": "HB Intel workspace" },
-      "longDescription": { "default": "HB Intel workspace for construction project management." },
+      "shortDescription": {
+        "default": "HB Intel Estimating workspace"
+      },
+      "longDescription": {
+        "default": "HB Intel Estimating workspace for construction project management."
+      },
       "screenshotPaths": [],
       "videoUrl": "",
       "categories": []
     },
     "features": [
       {
-        "title": "hb-intel Feature",
-        "description": "Deploys HB Intel webpart assets.",
-        "id": "00000000-0000-0000-0000-000000000001",
+        "title": "hb-intel-estimating Feature",
+        "description": "Deploys HB Intel Estimating webpart assets.",
+        "id": "cb3b1520-1665-4412-83ab-344c2182a2fd",
         "version": "1.0.0.0"
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-shell.sppkg"
+    "zippedPackage": "solution/hb-intel-estimating.sppkg"
   }
 }

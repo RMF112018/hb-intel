@@ -35,7 +35,10 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     // Resolve the CDN base URL from the SPFx manifest loaderConfig.
     // When includeClientSideAssets is true, SharePoint rewrites the
     // placeholder to the actual CDN path at deployment time.
-    const baseUrls = this.manifest.loaderConfig?.internalModuleBaseUrls;
+    // Note: loaderConfig exists on the runtime manifest but is not in the
+    // TS type definition, so we access it via any cast.
+    const manifest = this.manifest as any;
+    const baseUrls = manifest.loaderConfig?.internalModuleBaseUrls;
     const baseUrl = baseUrls && baseUrls.length > 0 ? baseUrls[0] : '';
     const bundleUrl = baseUrl + __APP_BUNDLE_NAME__;
 
