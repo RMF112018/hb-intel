@@ -74,6 +74,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | [Financial-RGC](Financial-Runtime-Governance-Control.md) | Financial-RGC | Runtime persistence families, repository seams, domain ownership, mutation boundaries | Active |
 | [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md) | Financial-LMG | Lifecycle states, transition rules, mutation guards, staleness/invalidation, service enforcement | Active |
 | [Financial-LODM](Financial-Lane-Ownership-Decision-Matrix.md) | Financial-LODM | Per-capability lane ownership — PWA depth, SPFx depth, launch behavior, acceptance evidence | Active |
+| [Financial-CLHLC](Financial-Cross-Lane-Handoff-and-Launch-Contract.md) | Financial-CLHLC | Cross-lane launch rules, context durability, return/resume, acceptance posture by lane behavior | Active |
 
 ### 4.2 Maturity and Readiness
 

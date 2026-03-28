@@ -279,15 +279,24 @@ For each always-on core module, the following defines cross-lane navigation patt
 
 ### 8.1 Financial
 
-> **Repo-truth note (2026-03-28).** The cross-lane navigation patterns below are **target-state requirements**. Current implementation: the PWA Financial surface renders at `/project-hub/:projectId/financial` with mock data via `FinancialControlCenter`. SPFx Financial lane routes exist as infrastructure stubs but all data surfaces use mock data. Deep-link navigation to Financial sub-sections (e.g., `/financial/budget`) is not yet functional in either lane — sub-tool navigation uses `useState`-based state, not URL parameters. Cross-lane handoff for Financial is architecturally defined but not yet operational.
+> **Repo-truth note (2026-03-28, updated).** Cross-lane navigation patterns are **target-state requirements**. Current PWA implementation: 9 canonical sub-tool routes are URL-routed at `/project-hub/:projectId/financial/:tool` with per-project context and return-memory (FIN-PR1 Stage 3 — mock data). SPFx Financial lane routes exist as infrastructure stubs (Stage 2) with no data-connected surfaces or launch-to-PWA actions. Per [Financial-LODM](financial/Financial-Lane-Ownership-Decision-Matrix.md): all deep editing is PWA-native; SPFx provides summary/status/Launch-to-PWA only. Per [Financial-CLHLC](financial/Financial-Cross-Lane-Handoff-and-Launch-Contract.md): SPFx launch constructs canonical PWA deep-link; no SPFx editing.
 
 | Interaction | In-lane (SPFx) | Escalates to PWA | Deep-link format |
 |---|---|---|---|
-| View/edit Financial Summary | Yes | No | — |
-| Budget import (CSV) | Broad | No (SPFx supports) | — |
-| GC/GR model | Yes | No | — |
-| Cash Flow model | Yes | No | — |
-| Exposure tracking | Yes | No | — |
+| View Financial Summary (confirmed/published) | Yes (read-only) | No | — |
+| Edit Financial Summary (Working) | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/forecast` |
+| Budget import workflow | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/budget` |
+| Budget import status | Yes (status view) | No | — |
+| GC/GR editing | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/gcgr` |
+| Cash Flow editing | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/cash-flow` |
+| Buyout management | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/buyout` |
+| Buyout status view | Yes (summary) | No | — |
+| Review / PER annotation | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/review` |
+| Publication management | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/publication` |
+| Publication status / download | Yes (status + links) | No | — |
+| History / audit investigation | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/history` |
+| Checklist resolution | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/checklist` |
+| Checklist posture view | Yes (badge) | No | — |
 
 ### 8.2 Schedule
 
