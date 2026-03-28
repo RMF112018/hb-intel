@@ -11,3 +11,10 @@ export {
   clearProjectHubPortfolioState,
 } from './projectHubPortfolioState.js';
 export type { ProjectHubPortfolioState } from './projectHubPortfolioState.js';
+export {
+  getFinancialContext,
+  saveFinancialContext,
+  clearFinancialContext,
+  getFinancialReturnTool,
+} from './financialContextState.js';
+export type { FinancialContextState } from './financialContextState.js';

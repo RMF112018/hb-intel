@@ -185,6 +185,13 @@ export {
   clearProjectHubPortfolioState,
 } from './stores/projectHubPortfolioState.js';
 export type { ProjectHubPortfolioState } from './stores/projectHubPortfolioState.js';
+export {
+  getFinancialContext,
+  saveFinancialContext,
+  clearFinancialContext,
+  getFinancialReturnTool,
+} from './stores/financialContextState.js';
+export type { FinancialContextState } from './stores/financialContextState.js';
 
 // SPFx project context resolution (Phase 3 Stage 4.2)
 export { resolveSpfxProjectContext } from './spfxProjectContext.js';

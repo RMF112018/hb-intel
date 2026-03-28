@@ -7,7 +7,14 @@ import { createElement } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 import { createRoute, redirect, lazyRouteComponent } from '@tanstack/react-router';
 import type { WorkspaceId } from '@hbc/shell';
-import { useNavStore, resolveLandingDecision, isMyWorkCohortEnabled } from '@hbc/shell';
+import {
+  useNavStore,
+  resolveLandingDecision,
+  isMyWorkCohortEnabled,
+  saveFinancialContext,
+  getFinancialReturnTool,
+  saveReturnMemory,
+} from '@hbc/shell';
 import { useAuthStore } from '@hbc/auth';
 import { rootRoute } from './root-route.js';
 import { requireAuth, requireAdminAccessControl } from './route-guards.js';
@@ -235,6 +242,22 @@ export const projectHubSectionRoute = createRoute({
     if (result.mode === 'redirect') {
       throw redirect({ to: result.redirectTo, replace: true });
     }
+
+    // Financial return-memory: when entering /financial without a tool,
+    // redirect to the user's last-visited tool for this project if available.
+    if (
+      result.mode === 'project' &&
+      result.section === 'financial'
+    ) {
+      const returnTool = getFinancialReturnTool(result.project.id);
+      if (returnTool) {
+        throw redirect({
+          to: buildFinancialToolPath(result.project.id, returnTool),
+          replace: true,
+        });
+      }
+    }
+
     return result;
   },
   component: ProjectHubSectionRouteComponent,
@@ -278,6 +301,10 @@ function FinancialToolRouteComponent(): ReactNode {
   }
 
   if (data.mode === 'tool') {
+    // Save Financial context and return memory on tool entry
+    saveFinancialContext(data.project.id, { lastTool: data.tool });
+    saveReturnMemory(data.project.id, `/financial/${data.tool}`);
+
     return createElement(ProjectHubControlCenterPage, {
       project: data.project,
       projects: data.projects,
@@ -293,6 +320,7 @@ function FinancialToolRouteComponent(): ReactNode {
         void navigate({ to: `/project-hub/${data.project.id}/${slug}` });
       },
       onNavigateToFinancialTool: (toolSlug: string) => {
+        saveFinancialContext(data.project.id, { lastTool: toolSlug });
         void navigate({ to: buildFinancialToolPath(data.project.id, toolSlug) });
       },
       onNavigateToFinancialHome: () => {
