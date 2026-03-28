@@ -71,6 +71,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) | Financial-RLR | Route and lane contradiction resolution — governs where FIN-03/04 conflict with P3-G1/G2 | Active |
 | [PH3-FIN-SOTL-A1](PH3-FIN-SOTL-A1-Default-Registries-and-Role-Boundaries.md) | PH3-FIN-SOTL-A1 | Default registries, role boundaries, override rules | Locked |
 | [Financial-RGC](Financial-Runtime-Governance-Control.md) | Financial-RGC | Runtime persistence families, repository seams, domain ownership, mutation boundaries | Active |
+| [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md) | Financial-LMG | Lifecycle states, transition rules, mutation guards, staleness/invalidation, service enforcement | Active |
 
 ### 4.2 Maturity and Readiness
 

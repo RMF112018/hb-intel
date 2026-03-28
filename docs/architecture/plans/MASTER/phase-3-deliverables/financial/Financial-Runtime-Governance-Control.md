@@ -7,7 +7,7 @@
 | **Owner** | Architecture lead |
 | **Created** | 2026-03-28 |
 | **Status** | Active — governs persistence, repository, and mutation implementation |
-| **References** | [FRM-04](FRM-04-Repository-and-Provider-Seam-Model.md); [BIP-04](BIP-04-Repository-Provider-and-Persistence-Seams.md); [FVC-04](FVC-04-Repository-Provider-and-Persistence-Seams.md); [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Control Index](Financial-Doctrine-Control-Index.md) |
+| **References** | [FRM-04](FRM-04-Repository-and-Provider-Seam-Model.md); [BIP-04](BIP-04-Repository-Provider-and-Persistence-Seams.md); [FVC-04](FVC-04-Repository-Provider-and-Persistence-Seams.md); [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md); [Control Index](Financial-Doctrine-Control-Index.md) |
 
 ---
 
