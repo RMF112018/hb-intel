@@ -2,12 +2,33 @@
  * HistoryPage — History / Audit investigation workspace.
  *
  * Route: /project-hub/:projectId/financial/history
- * Governance: FIN-PR1 Stage 2 — investigation workspace governance defined; no audit event persistence.
+ * Governance: Version timeline, audit event trace, investigation navigation.
  */
 
 import type { ReactNode } from 'react';
-import { HbcEmptyState, HbcButton } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { Text, HbcStatusBadge, HbcCard, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { useHistorySurface } from '../hooks/useHistorySurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
+
+const useStyles = makeStyles({
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke1)' },
+  section: { padding: `${HBC_SPACE_MD}px` },
+  versionRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_SM}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)' },
+  eventRow: { display: 'flex', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_SM}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)', alignItems: 'flex-start' },
+  eventTime: { minWidth: '80px', fontSize: '11px', opacity: 0.6 },
+  significanceIndicator: { minWidth: '8px', minHeight: '8px', borderRadius: '50%', marginTop: '4px' },
+  routine: { backgroundColor: HBC_STATUS_COLORS.info },
+  notable: { backgroundColor: HBC_STATUS_COLORS.warning },
+  critical: { backgroundColor: HBC_STATUS_COLORS.error },
+});
+
+const VERSION_STATE_VARIANT: Record<string, 'success' | 'info' | 'completed' | 'neutral'> = {
+  Working: 'info',
+  ConfirmedInternal: 'success',
+  PublishedMonthly: 'completed',
+  Superseded: 'neutral',
+};
 
 export interface HistoryPageProps {
   readonly projectId: string;
@@ -16,12 +37,53 @@ export interface HistoryPageProps {
   readonly onBack?: () => void;
 }
 
-export function HistoryPage({ onBack }: HistoryPageProps): ReactNode {
+export function HistoryPage({ viewerRole, complexityTier, onBack }: HistoryPageProps): ReactNode {
+  const styles = useStyles();
+  const data = useHistorySurface({ viewerRole, complexityTier });
+
   return (
-    <HbcEmptyState
-      title="History & Audit"
-      description="The history and audit investigation workspace will be implemented here. Version history navigation, audit event timeline, and remediation tracking require IFinancialAuditRepository implementation."
-      primaryAction={onBack ? <HbcButton onClick={onBack}>Back to Financial</HbcButton> : undefined}
-    />
+    <>
+      <div className={styles.header} data-testid="history-header">
+        <Text size={400} weight="semibold">History & Audit</Text>
+        {onBack && <HbcButton variant="secondary" onClick={onBack}>Back</HbcButton>}
+      </div>
+
+      <div className={styles.section}>
+        <Text size={300} weight="semibold" style={{ marginBottom: `${HBC_SPACE_SM}px` }}>
+          Version Timeline ({data.versions.length} versions)
+        </Text>
+        {data.versions.map((ver) => (
+          <div key={ver.id} className={styles.versionRow} data-testid={`history-version-${ver.id}`}>
+            <div>
+              <Text size={200} weight="semibold">Version {ver.versionNumber} — {ver.reportingMonth}</Text>
+              <Text size={100} style={{ opacity: 0.6 }}>
+                Created {new Date(ver.createdAt).toLocaleDateString()}
+                {ver.confirmedAt && ` · Confirmed ${new Date(ver.confirmedAt).toLocaleDateString()}`}
+                {ver.publishedAt && ` · Published ${new Date(ver.publishedAt).toLocaleDateString()}`}
+                {ver.derivationReason && ` · Reason: ${ver.derivationReason}`}
+              </Text>
+            </div>
+            <HbcStatusBadge variant={VERSION_STATE_VARIANT[ver.state] ?? 'neutral'} label={ver.state} size="small" />
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.section}>
+        <Text size={300} weight="semibold" style={{ marginBottom: `${HBC_SPACE_SM}px` }}>
+          Audit Trail ({data.auditEvents.length} events)
+        </Text>
+        {data.auditEvents.map((evt) => (
+          <div key={evt.id} className={styles.eventRow} data-testid={`history-event-${evt.id}`}>
+            <div className={`${styles.significanceIndicator} ${styles[evt.significance]}`} />
+            <div className={styles.eventTime}>{new Date(evt.occurredAt).toLocaleDateString()}</div>
+            <div>
+              <Text size={200} weight="semibold">{evt.eventType}</Text>
+              <Text size={200}>{evt.summary}</Text>
+              <Text size={100} style={{ opacity: 0.6 }}>{evt.actor}</Text>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
