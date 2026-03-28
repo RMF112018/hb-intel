@@ -73,6 +73,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | [PH3-FIN-SOTL-A1](PH3-FIN-SOTL-A1-Default-Registries-and-Role-Boundaries.md) | PH3-FIN-SOTL-A1 | Default registries, role boundaries, override rules | Locked |
 | [Financial-RGC](Financial-Runtime-Governance-Control.md) | Financial-RGC | Runtime persistence families, repository seams, domain ownership, mutation boundaries | Active |
 | [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md) | Financial-LMG | Lifecycle states, transition rules, mutation guards, staleness/invalidation, service enforcement | Active |
+| [Financial-LODM](Financial-Lane-Ownership-Decision-Matrix.md) | Financial-LODM | Per-capability lane ownership — PWA depth, SPFx depth, launch behavior, acceptance evidence | Active |
 
 ### 4.2 Maturity and Readiness
 
