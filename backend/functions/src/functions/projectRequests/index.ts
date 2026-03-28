@@ -50,6 +50,15 @@ app.http('submitProjectSetupRequest', {
       submittedAt: new Date().toISOString(),
       state: 'Submitted',
       groupMembers: body.groupMembers,
+      groupLeaders: body.groupLeaders,
+      department: body.department,
+      estimatedValue: body.estimatedValue,
+      clientName: body.clientName,
+      startDate: body.startDate,
+      contractType: body.contractType,
+      projectLeadId: body.projectLeadId,
+      viewerUPNs: body.viewerUPNs,
+      addOns: body.addOns,
       retryCount: 0,
     };
 

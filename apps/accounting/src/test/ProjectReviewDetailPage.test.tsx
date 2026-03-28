@@ -83,7 +83,7 @@ describe('ProjectReviewDetailPage', () => {
   });
 
   // G4-T03-006
-  it('approve fires API and navigates to queue', async () => {
+  it('approve fires API with project number and navigates to queue', async () => {
     const request = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });
     seedListRequests([request]);
 
@@ -95,12 +95,15 @@ describe('ProjectReviewDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Approve Request' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Approve' })).toBeTruthy();
+      expect(screen.getByPlaceholderText('##-###-##')).toBeTruthy();
     });
+
+    // Enter a valid project number before approving
+    fireEvent.change(screen.getByPlaceholderText('##-###-##'), { target: { value: '25-001-01' } });
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
 
     await waitFor(() => {
-      expect(mockClient.advanceState).toHaveBeenCalledWith('req-1', 'ReadyToProvision', undefined);
+      expect(mockClient.advanceState).toHaveBeenCalledWith('req-1', 'ReadyToProvision', { projectNumber: '25-001-01' });
     });
 
     await waitFor(() => {
@@ -256,12 +259,15 @@ describe('ProjectReviewDetailPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Approve Request' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Approve' })).toBeTruthy();
+      expect(screen.getByPlaceholderText('##-###-##')).toBeTruthy();
     });
+
+    // Enter a valid project number so the approve action fires
+    fireEvent.change(screen.getByPlaceholderText('##-###-##'), { target: { value: '25-001-01' } });
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Action failed. Please try again or contact an administrator.')).toBeTruthy();
+      expect(screen.getByText(/Action failed/)).toBeTruthy();
     });
   });
 

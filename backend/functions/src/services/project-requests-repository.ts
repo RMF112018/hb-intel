@@ -69,6 +69,15 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       'SubmittedAt',
       'RequestState',
       'GroupMembersJson',
+      'GroupLeadersJson',
+      'Department',
+      'EstimatedValue',
+      'ClientName',
+      'StartDate',
+      'ContractType',
+      'ProjectLeadId',
+      'ViewerUPNsJson',
+      'AddOnsJson',
       'ClarificationNote',
       'CompletedBy',
       'CompletedAt',
@@ -103,6 +112,15 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       SubmittedAt: request.submittedAt,
       RequestState: request.state,
       GroupMembersJson: JSON.stringify(request.groupMembers),
+      GroupLeadersJson: JSON.stringify(request.groupLeaders ?? []),
+      Department: request.department ?? '',
+      EstimatedValue: request.estimatedValue ?? null,
+      ClientName: request.clientName ?? '',
+      StartDate: request.startDate ?? '',
+      ContractType: request.contractType ?? '',
+      ProjectLeadId: request.projectLeadId ?? '',
+      ViewerUPNsJson: JSON.stringify(request.viewerUPNs ?? []),
+      AddOnsJson: JSON.stringify(request.addOns ?? []),
       ClarificationNote: request.clarificationNote ?? '',
       CompletedBy: request.completedBy ?? '',
       CompletedAt: request.completedAt ?? '',
@@ -123,7 +141,16 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       submittedAt: (item.SubmittedAt as string) ?? new Date().toISOString(),
       state: ((item.RequestState as string) || 'Submitted') as ProjectSetupRequestState,
       projectNumber: (item.ProjectNumber as string) || undefined,
-      groupMembers: this.safeParseGroupMembers(item.GroupMembersJson as string),
+      groupMembers: this.safeParseJsonArray(item.GroupMembersJson as string),
+      groupLeaders: this.safeParseJsonArray(item.GroupLeadersJson as string) as string[] | undefined,
+      department: ((item.Department as string) || undefined) as IProjectSetupRequest['department'],
+      estimatedValue: typeof item.EstimatedValue === 'number' ? item.EstimatedValue : undefined,
+      clientName: (item.ClientName as string) || undefined,
+      startDate: (item.StartDate as string) || undefined,
+      contractType: (item.ContractType as string) || undefined,
+      projectLeadId: (item.ProjectLeadId as string) || undefined,
+      viewerUPNs: this.safeParseJsonArray(item.ViewerUPNsJson as string) as string[] | undefined,
+      addOns: this.safeParseJsonArray(item.AddOnsJson as string) as string[] | undefined,
       clarificationNote: (item.ClarificationNote as string) || undefined,
       completedBy: (item.CompletedBy as string) || undefined,
       completedAt: (item.CompletedAt as string) || undefined,
@@ -132,9 +159,9 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     };
   }
 
-  private safeParseGroupMembers(groupMembersJson: string): string[] {
+  private safeParseJsonArray(json: string): string[] {
     try {
-      const parsed = JSON.parse(groupMembersJson ?? '[]');
+      const parsed = JSON.parse(json ?? '[]');
       return Array.isArray(parsed) ? parsed.filter((value) => typeof value === 'string') : [];
     } catch {
       return [];
