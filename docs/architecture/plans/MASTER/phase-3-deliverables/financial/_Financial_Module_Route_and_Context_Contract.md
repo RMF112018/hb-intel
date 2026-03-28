@@ -8,26 +8,26 @@ This document defines the canonical route family and context rules for the Finan
 ## 1. Canonical route family
 The Financial module should use a project-scoped route family under the Project Hub / Project Context lane.
 
-### Recommended family (superseded — see reconciliation note above)
-`/projects/:projectId/financial`
+### Canonical family (per FIN-04 and Financial-RLR R2/R3)
+`/project-hub/:projectId/financial`
 
-### Tool sub-routes
-- `/projects/:projectId/financial/budget-import`
-- `/projects/:projectId/financial/forecast-summary`
-- `/projects/:projectId/financial/forecast-checklist`
-- `/projects/:projectId/financial/gc-gr`
-- `/projects/:projectId/financial/cash-flow`
-- `/projects/:projectId/financial/buyout`
-- `/projects/:projectId/financial/review`
-- `/projects/:projectId/financial/publication`
-- `/projects/:projectId/financial/history`
+### Canonical tool sub-routes (per FIN-04 §1.1)
+- `/project-hub/:projectId/financial/budget`
+- `/project-hub/:projectId/financial/forecast`
+- `/project-hub/:projectId/financial/checklist`
+- `/project-hub/:projectId/financial/gcgr`
+- `/project-hub/:projectId/financial/cash-flow`
+- `/project-hub/:projectId/financial/buyout`
+- `/project-hub/:projectId/financial/review`
+- `/project-hub/:projectId/financial/publication`
+- `/project-hub/:projectId/financial/history`
 
-### Contextual deep sub-routes
+### Contextual deep sub-routes (canonical paths per FIN-04 and Financial-RLR R2/R3)
 Examples:
-- `/projects/:projectId/financial/forecast-summary/:versionId`
-- `/projects/:projectId/financial/review/:reviewId`
-- `/projects/:projectId/financial/publication/:publicationId`
-- `/projects/:projectId/financial/history/cases/:caseId`
+- `/project-hub/:projectId/financial/forecast/:versionId`
+- `/project-hub/:projectId/financial/review/:reviewId`
+- `/project-hub/:projectId/financial/publication/:publicationId`
+- `/project-hub/:projectId/financial/history/:caseId`
 
 Implementation may refine naming, but the contract must preserve the pattern: **project first, tool second, artifact third**.
 

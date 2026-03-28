@@ -200,7 +200,7 @@ For each Financial capability, the canonical doctrine, supporting detail, runtim
 
 | Layer | File |
 |-------|------|
-| Doctrine | FVC-01 through FVC-05 (versioning/checklist context) |
+| Doctrine | No dedicated series; [_Forecast-Summary_Governance-Spec](_Forecast-Summary_Governance-Spec.md) is the primary doctrine home. FVC-01–FVC-05 govern the versioning/checklist lifecycle that the summary surface depends on. P3-E4-T04 (pending) will be the field-level specification. |
 | Runtime governance | [_Forecast-Summary_Governance-Spec](_Forecast-Summary_Governance-Spec.md) |
 | Entity model | FRM-01 (forecast summary entities), FRM-03 (version lifecycle) |
 | Source-of-truth | PH3-FIN-SOTL §4 (native Financial working state) |
@@ -289,7 +289,7 @@ Doctrine-completion and implementation prompt sets, organized by workstream. Eac
 | Set | Directory | Status |
 |-----|-----------|--------|
 | Repo-truth reconciliation | [repo-truth-reconciliation/](repo-truth-reconciliation/) | **Complete** (Prompts 01–03 executed 2026-03-28) |
-| Doctrine control index | [doctrine-completion-tasks/](doctrine-completion-tasks/) | **Prompt 01 executing** (this prompt) |
+| Doctrine control index | [doctrine-completion-tasks/](doctrine-completion-tasks/) | **Complete** (Prompts 01–03 executed 2026-03-28) |
 
 ### Ready for Execution
 
