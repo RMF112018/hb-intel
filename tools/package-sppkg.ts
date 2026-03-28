@@ -104,31 +104,26 @@ function generateRootRels(): string {
 
 /**
  * Generates AppManifest.xml from package-solution.json and the webpart manifest.
- * This is the solution manifest that SharePoint reads to register the app.
+ *
+ * For SPFx client-side solutions (IsClientSideSolution="true"), the manifest
+ * must contain ONLY: Properties/Title, Properties/StartPage, and AppPrincipal.
+ *
+ * Settings like skipFeatureDeployment and isDomainIsolated belong exclusively
+ * in config/package-solution.json — they are NOT AppManifest elements.
+ * WebTemplate and InstalledEventEndpoint are SharePoint Add-in elements
+ * and must NOT appear in SPFx packages.
  */
 function generateAppManifest(
   solution: {
     name: string;
     id: string;
     version: string;
-    skipFeatureDeployment?: boolean;
-    isDomainIsolated?: boolean;
-    developer: { name: string; websiteUrl: string };
-    metadata: {
-      shortDescription: { default: string };
-      longDescription: { default: string };
-    };
-    features: Array<{ title: string; description: string; id: string; version: string }>;
   },
   webpartManifest: {
-    id: string;
-    alias: string;
-    componentType: string;
-    preconfiguredEntries: Array<{ title: { default: string }; description: { default: string } }>;
+    preconfiguredEntries: Array<{ title: { default: string } }>;
   },
 ): string {
-  const feature = solution.features[0];
-  const entry = webpartManifest.preconfiguredEntries[0];
+  const title = webpartManifest.preconfiguredEntries[0]?.title?.default ?? solution.name;
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <App xmlns="http://schemas.microsoft.com/sharepoint/2012/app/manifest"
@@ -138,16 +133,12 @@ function generateAppManifest(
      SharePointMinVersion="16.0.0.0"
      IsClientSideSolution="true">
   <Properties>
-    <Title>${escapeXml(entry?.title?.default ?? solution.name)}</Title>
+    <Title>${escapeXml(title)}</Title>
     <StartPage>~appWebUrl</StartPage>
-    <SkipFeatureDeployment>${solution.skipFeatureDeployment ?? false}</SkipFeatureDeployment>
-    <IsDomainIsolated>${solution.isDomainIsolated ?? false}</IsDomainIsolated>
   </Properties>
   <AppPrincipal>
     <Internal />
   </AppPrincipal>
-  <WebTemplate Id="0" FeatureId="${feature?.id ?? '00000000-0000-0000-0000-000000000000'}" />
-  <InstalledEventEndpoint>~remoteAppUrl/InstalledEventEndpoint.svc</InstalledEventEndpoint>
 </App>`;
 }
 
