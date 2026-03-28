@@ -15,6 +15,7 @@ import {
 } from '@hbc/features-estimating';
 import type { IProjectSetupRequest } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
+import { useCurrentUser } from '@hbc/auth';
 import type { IStepWizardConfig } from '@hbc/step-wizard';
 import { HbcStepWizard } from '@hbc/step-wizard';
 import { useSessionState } from '@hbc/session-state';
@@ -43,6 +44,11 @@ export function ProjectSetupPage(): ReactNode {
   };
   const session = useCurrentSession();
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  const currentUser = useCurrentUser();
+  const client = useMemo(
+    () => createProvisioningApiClient(import.meta.env.VITE_API_BASE_URL ?? '', async () => authToken),
+    [authToken],
+  );
 
   const mode = (rawMode ?? 'new-request') as ProjectSetupWizardMode;
   const { draft, saveDraft, clearDraft, resumeContext, isSavePending } =
@@ -63,29 +69,28 @@ export function ProjectSetupPage(): ReactNode {
   // Clarification-return: load existing request data when mode requires it
   useEffect(() => {
     if (mode !== 'clarification-return' || !requestId) return;
+    const submitterId = currentUser?.email ?? '';
+    if (!submitterId) return;
     let mounted = true;
 
-    const client = createProvisioningApiClient(
-      import.meta.env.VITE_API_BASE_URL ?? '',
-      async () => authToken,
-    );
-
     (async () => {
-      const listed = await client.listRequests();
+      const listed = await client.listMyRequests(submitterId);
       if (!mounted) return;
       const existing = listed.find((r) => r.requestId === requestId);
       if (existing) {
         setRequest(existing);
         buildClarificationReturnState(existing.clarificationItems ?? []);
+      } else {
+        setError('Could not find your request for clarification. It may have been updated.');
       }
     })().catch(() => {
-      // Preserve fallback rendering on API failure.
+      if (mounted) setError('Unable to load your request. Check your connection and try again.');
     });
 
     return () => {
       mounted = false;
     };
-  }, [mode, requestId, authToken]);
+  }, [mode, requestId, client, currentUser]);
 
   const handleChange = useCallback(
     (updates: Partial<IProjectSetupRequest>) => {
@@ -149,11 +154,6 @@ export function ProjectSetupPage(): ReactNode {
     setQueuedMessage(null);
 
     try {
-      const client = createProvisioningApiClient(
-        import.meta.env.VITE_API_BASE_URL ?? '',
-        async () => authToken,
-      );
-
       await client.submitRequest(submitPayload);
 
       // IR-01: Clear draft only on API success
@@ -164,7 +164,7 @@ export function ProjectSetupPage(): ReactNode {
     } finally {
       setSubmitting(false);
     }
-  }, [authToken, request, clearDraft, router, connectivity, queueOperation]);
+  }, [client, request, clearDraft, router, connectivity, queueOperation]);
 
   const wizardConfig: IStepWizardConfig<IProjectSetupRequest> = useMemo(
     () => ({

@@ -15,7 +15,7 @@ import {
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import { PROJECT_SETUP_DRAFT_KEY } from '@hbc/features-estimating';
 import { clearDraft } from '@hbc/session-state';
-import { HbcBanner, WorkspacePageShell, HbcFormSection, HbcFormLayout, useIsMobile } from '@hbc/ui-kit';
+import { HbcBanner, WorkspacePageShell, HbcFormSection, HbcFormLayout, HbcStatusBadge, useIsMobile } from '@hbc/ui-kit';
 import { useMyProjectRequests, useProvisioningStatus } from '../../hooks/provisioning/index.js';
 
 /** Requester-facing state context messages. */
@@ -117,6 +117,48 @@ function FailureSummary({ request }: { request: IProjectSetupRequest }): ReactEl
   );
 }
 
+function ProvisioningSummary({ request }: { request: IProjectSetupRequest }): ReactElement {
+  const isActive = request.state === 'Provisioning' || request.state === 'ReadyToProvision';
+  const { data: provisioningStatus } = useProvisioningStatus(
+    request.projectId,
+    isActive,
+  );
+
+  const completedSteps = provisioningStatus?.steps.filter((s) => s.status === 'Completed').length ?? 0;
+  const totalSteps = provisioningStatus?.steps.length ?? 7;
+
+  return (
+    <>
+      <HbcBanner variant="info">
+        Your project site is being provisioned. This typically takes a few minutes.
+      </HbcBanner>
+
+      {provisioningStatus && (
+        <HbcFormSection title="Provisioning Progress">
+          <p><strong>Status:</strong> {provisioningStatus.overallStatus}</p>
+          <p><strong>Progress:</strong> {completedSteps} of {totalSteps} steps completed</p>
+          <ul>
+            {provisioningStatus.steps.map((step) => (
+              <li key={step.stepNumber}>
+                <HbcStatusBadge
+                  variant={step.status === 'Completed' ? 'completed' : step.status === 'Failed' ? 'error' : step.status === 'InProgress' ? 'info' : 'neutral'}
+                  label={step.status}
+                  size="small"
+                />{' '}
+                Step {step.stepNumber}: {step.stepName}
+              </li>
+            ))}
+          </ul>
+        </HbcFormSection>
+      )}
+
+      {!provisioningStatus && (
+        <p>Connecting to provisioning status...</p>
+      )}
+    </>
+  );
+}
+
 export function RequestDetailPage(): ReactNode {
   const router = useRouter();
   const { requestId } = useParams({ strict: false }) as { requestId: string };
@@ -175,6 +217,11 @@ export function RequestDetailPage(): ReactNode {
       <p className="hbc-request-detail__context">
         {STATE_CONTEXT_TEXT[request.state]}
       </p>
+
+      {/* Active provisioning progress */}
+      {(request.state === 'Provisioning' || request.state === 'ReadyToProvision') && (
+        <ProvisioningSummary request={request} />
+      )}
 
       {/* Terminal state content */}
       {request.state === 'Completed' && <CompletionSummary request={request} />}
