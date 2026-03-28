@@ -283,6 +283,8 @@ For each always-on core module, the following defines cross-lane navigation patt
 
 | Interaction | In-lane (SPFx) | Escalates to PWA | Deep-link format |
 |---|---|---|---|
+| Financial Home (summary tiles) | Yes (KPI band) | No | — |
+| Open Financial (deep access) | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial` |
 | View Financial Summary (confirmed/published) | Yes (read-only) | No | — |
 | Edit Financial Summary (Working) | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/forecast` |
 | Budget import workflow | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/budget` |
@@ -291,9 +293,11 @@ For each always-on core module, the following defines cross-lane navigation patt
 | Cash Flow editing | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/cash-flow` |
 | Buyout management | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/buyout` |
 | Buyout status view | Yes (summary) | No | — |
+| Review / PER status view | Yes (status indicator) | No | — |
 | Review / PER annotation | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/review` |
 | Publication management | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/publication` |
 | Publication status / download | Yes (status + links) | No | — |
+| History / audit summary view | Yes (recent activity) | No | — |
 | History / audit investigation | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/history` |
 | Checklist resolution | No | **Yes** — Launch-to-PWA | `/project-hub/{projectId}/financial/checklist` |
 | Checklist posture view | Yes (badge) | No | — |

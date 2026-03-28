@@ -33,6 +33,8 @@ https://{pwa-host}/project-hub/{projectId}/financial/{tool}
 
 Where `{tool}` is one of the 9 canonical FIN-04 slugs: `budget`, `forecast`, `checklist`, `gcgr`, `cash-flow`, `buyout`, `review`, `publication`, `history`.
 
+**Implementation note:** Use the `buildFinancialToolPath(projectId, tool)` utility from `apps/pwa/src/router/projectHubRouting.ts` (or its equivalent in SPFx) to construct canonical URLs. For Financial Home (no tool slug), use `buildProjectHubPath(projectId, 'financial')`.
+
 **Context that must survive the launch:**
 
 | Context | Source | How Preserved |
@@ -84,7 +86,7 @@ There is no PWA-to-SPFx navigation pattern for Financial. PWA is the authoritati
 
 | Capability | SPFx In-Lane View | Launch-to-PWA Trigger | PWA Target Route | Context Passed |
 |-----------|-------------------|----------------------|-----------------|----------------|
-| Financial Home | Summary tiles / KPI band | "Open Financial" action | `/financial` | projectId |
+| Financial Home | Summary tiles / KPI band | "Open Financial" action | `/project-hub/{projectId}/financial` (section root, no tool slug) | projectId |
 | Budget Import | Import status badge | "Start Import" / "Resume Import" action | `/financial/budget` | projectId |
 | Forecast Summary | Read-only confirmed/published summary | "Edit Forecast" action | `/financial/forecast` | projectId, period (optional) |
 | Forecast Checklist | Posture badge (X of 19 complete) | "Resolve Checklist" action | `/financial/checklist` | projectId |

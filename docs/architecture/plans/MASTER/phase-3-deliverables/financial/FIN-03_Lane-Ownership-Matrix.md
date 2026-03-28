@@ -85,8 +85,8 @@ Lane choice does not alter source-of-truth or write-boundary ownership. The same
 | Candidate designation / derivation | yes | no | PWA only |
 | Checklist visibility | yes | yes | both |
 | Checklist resolution | yes | limited only if simple and supported | PWA primary |
-| GC/GR editing | yes | optional shallow access if proven simple | PWA primary |
-| Cash Flow editing | yes | optional shallow access if proven simple | PWA primary |
+| GC/GR editing | yes | optional shallow access if proven simple | PWA primary — **Closed by [LODM §2.5](Financial-Lane-Ownership-Decision-Matrix.md): no narrow shallow case defined; SPFx is view-only + Launch-to-PWA** |
+| Cash Flow editing | yes | optional shallow access if proven simple | PWA primary — **Closed by [LODM §2.6](Financial-Lane-Ownership-Decision-Matrix.md): no narrow shallow case defined; SPFx is view-only + Launch-to-PWA** |
 | Buyout status summary | yes | yes | both |
 | Buyout deeper workflow | yes | launch only | PWA primary |
 | Review / PER custody | yes | no except status visibility | PWA only |

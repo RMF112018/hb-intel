@@ -156,9 +156,9 @@ For each always-on core module, the following defines what each lane MUST suppor
 
 ### 4.1 Financial
 
-> **Repo-truth note (2026-03-28).** The capabilities listed below are **target-state requirements**, not descriptions of current operational state. Current PWA implementation: `FinancialControlCenter` renders at `/project-hub/:projectId/financial` with 5 sub-surfaces (Budget, Forecast Summary, Cash Flow, Buyout, and a control-center overview) all consuming hardcoded mock data from `useState`-based hooks. None of the listed capabilities are data-connected. Sub-tool navigation is state-based, not URL-routed. SPFx Financial lane routes exist in the module lane registry but are infrastructure stubs without data-connected surfaces. Neither lane has operational Financial CRUD. Classification: **partially implemented — UI scaffold with mock data; no data access layer**.
+> **Repo-truth note (2026-03-28, updated).** The capabilities listed below are **target-state requirements**, not descriptions of current operational state. PWA has 9 URL-routed sub-tool routes with per-project context and return-memory (FIN-PR1 Stage 3 — mock data). SPFx Financial lane routes exist as infrastructure stubs (Stage 2). Per [Financial-LODM](financial/Financial-Lane-Ownership-Decision-Matrix.md): all deep editing is PWA-native; SPFx provides governed-depth visibility only. **SPFx "Required" in this table means required at governed SPFx depth (view, summary, posture, Launch-to-PWA) — not PWA-equivalent editing depth.** See Financial-LODM for per-capability SPFx depth.
 
-| Capability | PWA | SPFx |
+| Capability | PWA | SPFx (at governed depth — see LODM) |
 |---|---|---|
 | View Financial Summary (confirmed/published versions) | **Required** | **Required** |
 | Edit Financial Summary working state (PM-editable fields) | **Required** | **Required** |

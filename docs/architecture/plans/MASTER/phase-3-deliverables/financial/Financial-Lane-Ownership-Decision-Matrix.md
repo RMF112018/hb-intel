@@ -116,7 +116,7 @@ This matrix locks the canonical lane ownership posture for every Financial modul
 
 | Aspect | PWA | SPFx |
 |--------|-----|------|
-| **Classification** | **PWA-native** | **Launch-to-PWA** |
+| **Classification** | **PWA-native** | **SPFx-summary** (status) + **Launch-to-PWA** for actions |
 | Surface | Full review workflow: annotation on Confirmed/Published versions, carry-forward, PM disposition, review custody transitions | Review status visibility; Launch-to-PWA for annotation |
 | Editing | Full — PER annotates; PM dispositions carried-forward annotations | None — status only |
 | Launch behavior | Direct entry at `/project-hub/:projectId/financial/review` | Launch-to-PWA for review actions |
@@ -179,7 +179,7 @@ SPFx provides **governed-depth visibility and contextual launch**. No deep Finan
 | GC/GR Forecast | Read-only variance summary | **SPFx-summary** |
 | Cash Flow Forecast | Read-only cash position summary | **SPFx-summary** |
 | Buyout Log | Status count + completion % | **SPFx-broad** |
-| Review / PER | Review status | **Launch-to-PWA** |
+| Review / PER | Review status indicator | **SPFx-summary** + Launch-to-PWA |
 | Publication / Export | Publication status + download links | **SPFx-summary** |
 | History / Audit | Recent activity summary | **SPFx-summary** |
 
