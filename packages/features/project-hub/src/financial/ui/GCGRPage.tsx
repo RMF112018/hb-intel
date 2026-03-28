@@ -13,11 +13,11 @@ import { useGCGRSurface } from '../hooks/useGCGRSurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 
 const useStyles = makeStyles({
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke1)' },
-  kpiBand: { display: 'flex', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke2)' },
-  grid: { padding: `${HBC_SPACE_MD}px` },
-  lineRow: { display: 'grid', gridTemplateColumns: '60px 1fr 120px 120px 120px 80px', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_SM}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)', alignItems: 'center' },
-  headerRow: { fontWeight: 600, borderBottom: '2px solid var(--colorNeutralStroke1)' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke1)' },
+  kpiBand: { display: 'flex', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke2)' },
+  grid: { paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
+  lineRow: { display: 'grid', gridTemplateColumns: '60px 1fr 120px 120px 120px 80px', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke2)', alignItems: 'center' },
+  headerRow: { fontWeight: 600, borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke1)' },
   overBudget: { color: HBC_STATUS_COLORS.error },
   underBudget: { color: HBC_STATUS_COLORS.success },
 });
@@ -33,7 +33,7 @@ function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 }
 
-export function GCGRPage({ viewerRole, complexityTier, onBack }: GCGRPageProps): ReactNode {
+export function GCGRPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: GCGRPageProps): ReactNode {
   const styles = useStyles();
   const data = useGCGRSurface({ viewerRole, complexityTier });
 

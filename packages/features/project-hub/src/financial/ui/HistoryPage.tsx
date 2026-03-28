@@ -12,10 +12,10 @@ import { useHistorySurface } from '../hooks/useHistorySurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 
 const useStyles = makeStyles({
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke1)' },
-  section: { padding: `${HBC_SPACE_MD}px` },
-  versionRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_SM}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)' },
-  eventRow: { display: 'flex', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_SM}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)', alignItems: 'flex-start' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke1)' },
+  section: { paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
+  versionRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke2)' },
+  eventRow: { display: 'flex', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke2)', alignItems: 'flex-start' },
   eventTime: { minWidth: '80px', fontSize: '11px', opacity: 0.6 },
   significanceIndicator: { minWidth: '8px', minHeight: '8px', borderRadius: '50%', marginTop: '4px' },
   routine: { backgroundColor: HBC_STATUS_COLORS.info },
@@ -37,7 +37,7 @@ export interface HistoryPageProps {
   readonly onBack?: () => void;
 }
 
-export function HistoryPage({ viewerRole, complexityTier, onBack }: HistoryPageProps): ReactNode {
+export function HistoryPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: HistoryPageProps): ReactNode {
   const styles = useStyles();
   const data = useHistorySurface({ viewerRole, complexityTier });
 

@@ -12,13 +12,13 @@ import { useReviewSurface } from '../hooks/useReviewSurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 
 const useStyles = makeStyles({
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke1)' },
-  custodyBanner: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px`, backgroundColor: 'var(--colorBrandBackground2)', borderBottom: '1px solid var(--colorBrandStroke1)' },
-  annotationList: { padding: `${HBC_SPACE_MD}px` },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke1)' },
+  custodyBanner: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, backgroundColor: 'var(--colorBrandBackground2)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorBrandStroke1)' },
+  annotationList: { paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
   annotationCard: { marginBottom: `${HBC_SPACE_SM}px` },
   anchorLabel: { fontWeight: 600, fontSize: '12px', color: 'var(--colorBrandForeground1)' },
-  inheritedBadge: { backgroundColor: HBC_STATUS_COLORS.info + '22', padding: `${HBC_SPACE_XS}px ${HBC_SPACE_SM}px`, borderRadius: '4px', fontSize: '11px' },
-  pendingBadge: { backgroundColor: HBC_STATUS_COLORS.warning + '22', padding: `${HBC_SPACE_XS}px ${HBC_SPACE_SM}px`, borderRadius: '4px', fontSize: '11px', color: HBC_STATUS_COLORS.warning },
+  inheritedBadge: { backgroundColor: HBC_STATUS_COLORS.info + '22', paddingTop: `${HBC_SPACE_XS}px`, paddingBottom: `${HBC_SPACE_XS}px`, paddingLeft: `${HBC_SPACE_SM}px`, paddingRight: `${HBC_SPACE_SM}px`, borderRadius: '4px', fontSize: '11px' },
+  pendingBadge: { backgroundColor: HBC_STATUS_COLORS.warning + '22', paddingTop: `${HBC_SPACE_XS}px`, paddingBottom: `${HBC_SPACE_XS}px`, paddingLeft: `${HBC_SPACE_SM}px`, paddingRight: `${HBC_SPACE_SM}px`, borderRadius: '4px', fontSize: '11px', color: HBC_STATUS_COLORS.warning },
 });
 
 export interface ReviewPageProps {
@@ -28,7 +28,7 @@ export interface ReviewPageProps {
   readonly onBack?: () => void;
 }
 
-export function ReviewPage({ viewerRole, complexityTier, onBack }: ReviewPageProps): ReactNode {
+export function ReviewPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: ReviewPageProps): ReactNode {
   const styles = useStyles();
   const data = useReviewSurface({ viewerRole, complexityTier });
 

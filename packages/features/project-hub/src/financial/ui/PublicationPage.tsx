@@ -12,12 +12,12 @@ import { usePublicationSurface } from '../hooks/usePublicationSurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 
 const useStyles = makeStyles({
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke1)' },
-  eligibilityBanner: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px` },
-  eligible: { backgroundColor: HBC_STATUS_COLORS.success + '18', borderBottom: `2px solid ${HBC_STATUS_COLORS.success}` },
-  blocked: { backgroundColor: HBC_STATUS_COLORS.warning + '18', borderBottom: `2px solid ${HBC_STATUS_COLORS.warning}` },
-  section: { padding: `${HBC_SPACE_MD}px` },
-  recordRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_SM}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke1)' },
+  eligibilityBanner: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
+  eligible: { backgroundColor: HBC_STATUS_COLORS.success + '18', borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: HBC_STATUS_COLORS.success },
+  blocked: { backgroundColor: HBC_STATUS_COLORS.warning + '18', borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: HBC_STATUS_COLORS.warning },
+  section: { paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
+  recordRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke2)' },
 });
 
 export interface PublicationPageProps {
@@ -27,7 +27,7 @@ export interface PublicationPageProps {
   readonly onBack?: () => void;
 }
 
-export function PublicationPage({ viewerRole, complexityTier, onBack }: PublicationPageProps): ReactNode {
+export function PublicationPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: PublicationPageProps): ReactNode {
   const styles = useStyles();
   const data = usePublicationSurface({ viewerRole, complexityTier });
 

@@ -13,12 +13,12 @@ import { useChecklistSurface } from '../hooks/useChecklistSurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 
 const useStyles = makeStyles({
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: `${HBC_SPACE_MD}px`, borderBottom: '1px solid var(--colorNeutralStroke1)' },
-  gateBanner: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_SM}px ${HBC_SPACE_MD}px` },
-  gatePass: { backgroundColor: HBC_STATUS_COLORS.success + '18', borderBottom: `2px solid ${HBC_STATUS_COLORS.success}` },
-  gateFail: { backgroundColor: HBC_STATUS_COLORS.warning + '18', borderBottom: `2px solid ${HBC_STATUS_COLORS.warning}` },
-  groupSection: { padding: `${HBC_SPACE_MD}px` },
-  itemRow: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, padding: `${HBC_SPACE_XS}px 0`, borderBottom: '1px solid var(--colorNeutralStroke2)' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke1)' },
+  gateBanner: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_SM}px`, paddingBottom: `${HBC_SPACE_SM}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
+  gatePass: { backgroundColor: HBC_STATUS_COLORS.success + '18', borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: HBC_STATUS_COLORS.success },
+  gateFail: { backgroundColor: HBC_STATUS_COLORS.warning + '18', borderBottomWidth: '2px', borderBottomStyle: 'solid', borderBottomColor: HBC_STATUS_COLORS.warning },
+  groupSection: { paddingTop: `${HBC_SPACE_MD}px`, paddingBottom: `${HBC_SPACE_MD}px`, paddingLeft: `${HBC_SPACE_MD}px`, paddingRight: `${HBC_SPACE_MD}px` },
+  itemRow: { display: 'flex', alignItems: 'center', gap: `${HBC_SPACE_SM}px`, paddingTop: `${HBC_SPACE_XS}px`, paddingBottom: `${HBC_SPACE_XS}px`, borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--colorNeutralStroke2)' },
   completedIcon: { color: HBC_STATUS_COLORS.success, minWidth: '20px' },
   pendingIcon: { color: HBC_STATUS_COLORS.warning, minWidth: '20px' },
   requiredBadge: { fontSize: '10px', color: HBC_STATUS_COLORS.warning },
@@ -31,7 +31,7 @@ export interface ChecklistPageProps {
   readonly onBack?: () => void;
 }
 
-export function ChecklistPage({ viewerRole, complexityTier, onBack }: ChecklistPageProps): ReactNode {
+export function ChecklistPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: ChecklistPageProps): ReactNode {
   const styles = useStyles();
   const data = useChecklistSurface({ viewerRole, complexityTier });
 
