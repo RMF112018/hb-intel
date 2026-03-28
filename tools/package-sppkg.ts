@@ -103,42 +103,26 @@ function generateRootRels(): string {
 }
 
 /**
- * Generates AppManifest.xml from package-solution.json and the webpart manifest.
+ * Generates AppManifest.xml for an SPFx client-side solution package.
  *
- * For SPFx client-side solutions (IsClientSideSolution="true"), the manifest
- * must contain ONLY: Properties/Title, Properties/StartPage, and AppPrincipal.
+ * For SPFx client-side solutions (IsClientSideSolution="true"), the <App>
+ * element must contain NO child elements — no <Properties>, no <StartPage>,
+ * no <AppPrincipal>, no <WebTemplate>. Those are SharePoint Add-in manifest
+ * concepts and cause upload validation failures in the app catalog.
  *
- * Settings like skipFeatureDeployment and isDomainIsolated belong exclusively
- * in config/package-solution.json — they are NOT AppManifest elements.
- * WebTemplate and InstalledEventEndpoint are SharePoint Add-in elements
- * and must NOT appear in SPFx packages.
+ * SharePoint discovers the solution metadata from:
+ *   - Attributes on <App>: Name, ProductID, Version, SharePointMinVersion
+ *   - Component .manifest.json files inside ClientSideAssets/
+ *   - config/package-solution.json settings (skipFeatureDeployment, etc.)
  */
-function generateAppManifest(
-  solution: {
-    name: string;
-    id: string;
-    version: string;
-  },
-  webpartManifest: {
-    preconfiguredEntries: Array<{ title: { default: string } }>;
-  },
-): string {
-  const title = webpartManifest.preconfiguredEntries[0]?.title?.default ?? solution.name;
-
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+function generateAppManifest(solution: { name: string; id: string; version: string }): string {
+  return `<?xml version="1.0" encoding="utf-8"?>
 <App xmlns="http://schemas.microsoft.com/sharepoint/2012/app/manifest"
      Name="${escapeXml(solution.name)}"
      ProductID="{${solution.id}}"
      Version="${solution.version}"
      SharePointMinVersion="16.0.0.0"
      IsClientSideSolution="true">
-  <Properties>
-    <Title>${escapeXml(title)}</Title>
-    <StartPage>~appWebUrl</StartPage>
-  </Properties>
-  <AppPrincipal>
-    <Internal />
-  </AppPrincipal>
 </App>`;
 }
 
@@ -171,7 +155,6 @@ for (const domain of domains) {
   }
 
   const solutionPkg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  const webpartManifest = JSON.parse(fs.readFileSync(manifestFiles[0], 'utf8'));
   const sppkgName = solutionPkg.paths.zippedPackage.replace('solution/', '');
   const outputPath = path.join('dist', 'sppkg', sppkgName);
 
@@ -193,7 +176,7 @@ for (const domain of domains) {
   archive.append(generateContentTypes(assetFiles), { name: '[Content_Types].xml' });
   archive.append(generateRootRels(), { name: '_rels/.rels' });
   archive.append(
-    generateAppManifest(solutionPkg.solution, webpartManifest),
+    generateAppManifest(solutionPkg.solution),
     { name: 'AppManifest.xml' },
   );
 
