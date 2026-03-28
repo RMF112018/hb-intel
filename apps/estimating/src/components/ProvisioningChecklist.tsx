@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import { HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '@hbc/ui-kit/theme';
+import {
+  HBC_STATUS_COLORS,
+  HBC_SURFACE_LIGHT,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_RADIUS_LG,
+  HBC_RADIUS_XL,
+} from '@hbc/ui-kit/theme';
 
 const STEP_LABELS: Record<number, string> = {
   1: 'Create SharePoint Site',
@@ -42,52 +50,52 @@ function formatDuration(startedAt?: string, completedAt?: string): string | null
 const useStyles = makeStyles({
   root: {
     display: 'grid',
-    gap: '12px',
-    padding: '16px',
-    borderRadius: '8px',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    padding: `${HBC_SPACE_MD}px`,
+    borderRadius: HBC_RADIUS_XL,
     border: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
   },
   title: { margin: 0 },
   list: {
     display: 'grid',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     margin: 0,
-    paddingLeft: '20px',
+    paddingLeft: `${HBC_SPACE_MD + HBC_SPACE_XS}px`,
   },
   listItem: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '10px',
+    gap: `${HBC_SPACE_SM + 2}px`,
   },
   statusIcon: { fontWeight: 700 },
   inProgressText: { fontWeight: 700 },
-  note: { margin: '4px 0 0 0', fontSize: '12px', color: HBC_STATUS_COLORS.warning },
-  errorText: { margin: '4px 0 0 0', fontSize: '12px', color: HBC_STATUS_COLORS.error },
-  timeText: { margin: '4px 0 0 0', fontSize: '12px', color: HBC_SURFACE_LIGHT['text-muted'] },
-  metadataText: { margin: '4px 0 0 0', fontSize: '11px', fontFamily: 'monospace', color: HBC_SURFACE_LIGHT['text-muted'] },
+  note: { margin: `${HBC_SPACE_XS}px 0 0 0`, fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`, color: HBC_STATUS_COLORS.warning },
+  errorText: { margin: `${HBC_SPACE_XS}px 0 0 0`, fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`, color: HBC_STATUS_COLORS.error },
+  timeText: { margin: `${HBC_SPACE_XS}px 0 0 0`, fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`, color: HBC_SURFACE_LIGHT['text-muted'] },
+  metadataText: { margin: `${HBC_SPACE_XS}px 0 0 0`, fontSize: `${HBC_SPACE_SM + 3}px`, fontFamily: 'monospace', color: HBC_SURFACE_LIGHT['text-muted'] },
   link: {
     textAlign: 'center',
     color: HBC_SURFACE_LIGHT['surface-0'],
-    padding: '8px 12px',
-    borderRadius: '6px',
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    borderRadius: HBC_RADIUS_LG,
     textDecoration: 'none',
     backgroundColor: HBC_STATUS_COLORS.success,
   },
   pendingContainer: {
     display: 'grid',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
   },
   pendingText: {
     margin: 0,
-    fontSize: '13px',
+    fontSize: `${HBC_SPACE_SM + 5}px`,
     color: HBC_STATUS_COLORS.warning,
   },
   pendingLink: {
     textAlign: 'center',
     color: HBC_SURFACE_LIGHT['surface-0'],
-    padding: '8px 12px',
-    borderRadius: '6px',
+    padding: `${HBC_SPACE_SM}px ${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    borderRadius: HBC_RADIUS_LG,
     textDecoration: 'none',
     backgroundColor: HBC_STATUS_COLORS.warning,
   },

@@ -16,13 +16,14 @@ import {
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import { HbcBanner, HbcButton, HbcDataTable, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
+import { HBC_SPACE_MD } from '@hbc/ui-kit/theme';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getStateBadgeVariant } from '../components/project-setup/stateDisplayHelpers.js';
 import { canCoordinatorRetry } from '../utils/failureClassification.js';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 const useStyles = makeStyles({
-  actionRow: { marginBottom: '16px' },
+  actionRow: { marginBottom: `${HBC_SPACE_MD}px` },
 });
 
 const SETUP_EMPTY_CONFIG: ISmartEmptyStateConfig = {

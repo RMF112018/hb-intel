@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus } from '@hbc/models';
 import { HbcCard, HbcStatusBadge, HbcTypography } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_XS } from '@hbc/ui-kit/theme';
 import {
   FAILURE_CLASS_BADGE_VARIANT,
   FAILURE_CLASS_LABELS,
@@ -62,7 +63,7 @@ export function FailureDetailCard({ status }: { status: IProvisioningStatus }): 
           {failedStep?.metadata && (
             <div>
               <HbcTypography intent="label">Raw Step Metadata</HbcTypography>
-              <pre style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap' }}>
+              <pre style={{ fontFamily: 'monospace', fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`, whiteSpace: 'pre-wrap' }}>
                 {JSON.stringify(failedStep.metadata, null, 2)}
               </pre>
             </div>

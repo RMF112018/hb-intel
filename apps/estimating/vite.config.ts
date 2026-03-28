@@ -60,7 +60,10 @@ export default defineConfig(({ command, mode }) => {
         : {}),
       rollupOptions: {
         external: [
-          /^@microsoft\//,
+          '@microsoft/sp-webpart-base',
+          '@microsoft/sp-property-pane',
+          '@microsoft/sp-core-library',
+          '@microsoft/sp-loader',
           /^@msinternal\//,
         ],
         ...(isProduction
@@ -73,7 +76,6 @@ export default defineConfig(({ command, mode }) => {
                   '@microsoft/sp-property-pane': 'window.__spPropertyPane',
                   '@microsoft/sp-core-library': 'window.__spCoreLibrary',
                   '@microsoft/sp-loader': 'window.__spLoader',
-                  '@microsoft/signalr': 'signalR',
                 },
                 inlineDynamicImports: true,
               },

@@ -56,14 +56,30 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     console.debug('[HB-Intel ShellWebPart] rawBaseUrl:', rawBaseUrl);
     console.debug('[HB-Intel ShellWebPart] bundleUrl:', bundleUrl);
 
-    await SPComponentLoader.loadScript(bundleUrl, { globalExportsName: __APP_GLOBAL_NAME__ });
-    this._appModule = (window as any)[__APP_GLOBAL_NAME__] as IAppModule | undefined;
+    const scriptResult = await SPComponentLoader.loadScript(bundleUrl, {
+      globalExportsName: __APP_GLOBAL_NAME__,
+    }) as IAppModule | undefined;
+    const windowModule = (window as any)[__APP_GLOBAL_NAME__] as IAppModule | undefined;
+    this._appModule = scriptResult || windowModule;
+
+    console.debug('[HB-Intel ShellWebPart] loadScript result type:', typeof scriptResult);
+    console.debug('[HB-Intel ShellWebPart] loadScript result keys:', scriptResult ? Object.keys(scriptResult as object) : 'null/undefined');
+    console.debug('[HB-Intel ShellWebPart] window global type:', typeof windowModule);
+    console.debug('[HB-Intel ShellWebPart] window global keys:', windowModule ? Object.keys(windowModule as object) : 'null/undefined');
   }
 
   public render(): void {
     if (this._appModule?.mount) {
       this._appModule.mount(this.domElement, this.context);
     } else {
+      console.error('[HB-Intel ShellWebPart] Mount failed.', {
+        bundleName: __APP_BUNDLE_NAME__,
+        globalName: __APP_GLOBAL_NAME__,
+        moduleExists: !!this._appModule,
+        hasMountFn: typeof this._appModule?.mount,
+        hasUnmountFn: typeof this._appModule?.unmount,
+        windowGlobalExists: !!(window as any)[__APP_GLOBAL_NAME__],
+      });
       this.domElement.innerHTML = '<div style="padding:1rem;color:#a4262c;">App bundle failed to load.</div>';
     }
   }

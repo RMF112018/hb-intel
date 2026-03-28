@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text, Card, CardHeader, WorkspacePageShell, HbcDataTable, HbcStatusBadge } from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
+import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '@hbc/ui-kit/theme';
 
 interface BidItem { name: string; bidder: string; amount: string; dueDate: string; status: string; }
 
@@ -29,15 +30,15 @@ export function BidsPage(): ReactNode {
 
   return (
     <WorkspacePageShell layout="list" title="Estimating — Bids">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_MD * 11 + HBC_SPACE_XS}px, 1fr))`, gap: HBC_SPACE_MD }}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">
             <CardHeader header={<Text weight="semibold">{card.label}</Text>} description={<Text size={700} weight="bold">{card.value}</Text>} />
           </Card>
         ))}
       </div>
-      <div style={{ marginTop: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+      <div style={{ marginTop: HBC_SPACE_LG }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: HBC_SPACE_SM, marginBottom: HBC_SPACE_SM + HBC_SPACE_XS }}>
           <Text size={500} weight="semibold">Active Bids</Text>
           <HbcStatusBadge label="4 pending" variant="warning" />
         </div>
