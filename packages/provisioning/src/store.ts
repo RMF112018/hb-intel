@@ -73,14 +73,49 @@ export const useProvisioningStore = create<IProvisioningStore>()(
         s.latestEventByProjectId[event.projectId] = event;
 
         // Keep statusByProjectId synchronized so consumers can render merged step state.
-        const existing = s.statusByProjectId[event.projectId];
-        if (existing) {
-          existing.overallStatus = event.overallStatus;
-          const stepIdx = existing.steps.findIndex((step) => step.stepNumber === event.stepNumber);
-          if (stepIdx >= 0) {
-            existing.steps[stepIdx].status = event.status;
-            if (event.status === 'Completed') existing.steps[stepIdx].completedAt = event.timestamp;
-            if (event.status === 'Failed') existing.steps[stepIdx].errorMessage = event.errorMessage;
+        let existing = s.statusByProjectId[event.projectId];
+        if (!existing) {
+          // Create a skeleton status so early SignalR events aren't lost
+          // when the API-fetched status hasn't arrived yet.
+          existing = {
+            projectId: event.projectId,
+            projectNumber: event.projectNumber,
+            projectName: event.projectName,
+            correlationId: event.correlationId,
+            overallStatus: event.overallStatus,
+            currentStep: event.stepNumber,
+            steps: Array.from({ length: 7 }, (_, i) => ({
+              stepNumber: i + 1,
+              stepName: `Step ${i + 1}`,
+              status: 'NotStarted' as const,
+            })),
+            triggeredBy: '',
+            submittedBy: '',
+            groupMembers: [],
+            startedAt: event.timestamp,
+            step5DeferredToTimer: false,
+            step5TimerRetryCount: 0,
+            retryCount: 0,
+          };
+          s.statusByProjectId[event.projectId] = existing;
+        }
+
+        existing.overallStatus = event.overallStatus;
+        existing.currentStep = event.stepNumber;
+        const stepIdx = existing.steps.findIndex((step) => step.stepNumber === event.stepNumber);
+        if (stepIdx >= 0) {
+          existing.steps[stepIdx].status = event.status;
+          if (event.status === 'Completed') existing.steps[stepIdx].completedAt = event.timestamp;
+          if (event.status === 'Failed') existing.steps[stepIdx].errorMessage = event.errorMessage;
+        }
+
+        // Propagate terminal provisioning events to the request list so
+        // request-level UI updates without requiring a full API refetch.
+        if (event.overallStatus === 'Completed' || event.overallStatus === 'Failed') {
+          const requestState = event.overallStatus === 'Completed' ? 'Completed' : 'Failed';
+          const reqIdx = s.requests.findIndex((r) => r.projectId === event.projectId);
+          if (reqIdx >= 0) {
+            s.requests[reqIdx].state = requestState;
           }
         }
       }),

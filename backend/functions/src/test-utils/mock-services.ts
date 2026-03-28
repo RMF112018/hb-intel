@@ -43,6 +43,7 @@ export interface IMockServices extends IServiceContainer {
     listPendingStep5Jobs: Mock;
     getAllPendingFullSpec: Mock;
     escalateProvisioning: Mock;
+    listAllRuns: Mock;
   };
   redisCache: {
     get: Mock;
@@ -68,6 +69,7 @@ export interface IMockServices extends IServiceContainer {
     createSecurityGroup: Mock;
     addGroupMembers: Mock;
     getGroupByDisplayName: Mock;
+    grantSiteAccess: Mock;
   };
   notifications: {
     send: Mock;
@@ -110,6 +112,7 @@ export function createMockServices(): IMockServices {
       createSecurityGroup: vi.fn(async (_displayName: string, _description: string) => 'mock-group-id'),
       addGroupMembers: vi.fn(async (_groupId: string, _memberUpns: string[]) => {}),
       getGroupByDisplayName: vi.fn(async (_displayName: string) => null),
+      grantSiteAccess: vi.fn(async () => {}),
     },
     notifications: {
       send: vi.fn(async () => {}),
@@ -122,6 +125,7 @@ export function createMockServices(): IMockServices {
       listPendingStep5Jobs: vi.fn(async () => []),
       getAllPendingFullSpec: vi.fn(async () => []),
       escalateProvisioning: vi.fn(async (_projectId: string, _escalatedBy: string) => {}),
+      listAllRuns: vi.fn(async (_status?: string) => []),
     },
     redisCache: {
       get: vi.fn(async (_key: string) => null),
