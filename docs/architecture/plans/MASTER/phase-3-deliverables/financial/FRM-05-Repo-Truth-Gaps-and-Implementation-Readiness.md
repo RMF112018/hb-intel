@@ -8,7 +8,8 @@
 | **Workstream** | E (Module Implementation) |
 | **Part** | Repo-Truth Gaps and Implementation Readiness |
 | **Owner** | Project Hub Leadership |
-| **Last Updated** | 2026-03-27 |
+| **Last Updated** | 2026-03-28 |
+| **Maturity Model** | [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md) — canonical stage classifications for all Financial tools and dimensions |
 
 ---
 
