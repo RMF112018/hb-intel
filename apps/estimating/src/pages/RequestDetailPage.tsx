@@ -45,12 +45,14 @@ export function RequestDetailPage(): ReactNode {
   const provisioningStatus = projectId ? statusByProjectId[projectId] : undefined;
   const visibility = getProvisioningVisibility(session, request?.submittedBy ?? '');
 
-  // D-PH6-10 SignalR should only connect while provisioning is active.
+  // Connect SignalR during Provisioning and ReadyToProvision (saga may be running
+  // before the reconciliation from Provisioning state has propagated to the request).
+  const isProvisioningActive = request?.state === 'Provisioning' || request?.state === 'ReadyToProvision';
   const { isConnected } = useProvisioningSignalR({
     negotiateUrl: `${import.meta.env.VITE_FUNCTION_APP_URL}/api/provisioning-negotiate`,
     projectId: projectId ?? '',
     getToken: async () => authToken,
-    enabled: Boolean(projectId && request?.state === 'Provisioning'),
+    enabled: Boolean(projectId && isProvisioningActive),
   });
 
   const refreshData = useCallback(async () => {
@@ -89,14 +91,14 @@ export function RequestDetailPage(): ReactNode {
     };
   }, [client, requestId, session, setProvisioningStatus, setRequests]);
 
-  // W0-G4-T07: SignalR polling fallback
+  // W0-G4-T07: SignalR polling fallback (covers Provisioning and ReadyToProvision)
   useEffect(() => {
-    if (isConnected || request?.state !== 'Provisioning') return;
+    if (isConnected || !isProvisioningActive) return;
     const interval = setInterval(() => {
       refreshData().catch(() => {});
     }, 30_000);
     return () => clearInterval(interval);
-  }, [isConnected, request?.state, refreshData]);
+  }, [isConnected, isProvisioningActive, refreshData]);
 
   // W0-G4-T07: Session loading guard
   if (!session) {
@@ -173,7 +175,7 @@ export function RequestDetailPage(): ReactNode {
       )}
 
       {/* W0-G4-T07: SignalR disconnect indicator */}
-      {request.state === 'Provisioning' && !isConnected && (
+      {isProvisioningActive && !isConnected && (
         <HbcBanner variant="warning">
           Real-time connection lost. Status updates are refreshing every 30 seconds.
         </HbcBanner>
@@ -204,23 +206,23 @@ export function RequestDetailPage(): ReactNode {
         </HbcComplexityGate>
       )}
 
-      {visibility === 'full' && !provisioningStatus && request.state === 'Provisioning' && (
+      {visibility === 'full' && !provisioningStatus && isProvisioningActive && (
         <HbcBanner variant="info">Connecting to live progress…</HbcBanner>
       )}
 
-      {visibility !== 'full' && request.state === 'Provisioning' && (
+      {visibility !== 'full' && isProvisioningActive && (
         <HbcBanner variant="info">
           Site provisioning is in progress. You will be notified when it is ready.
         </HbcBanner>
       )}
 
       {/* W0-G4-T02: Failed state — failure detail card + retry/escalation section */}
-      {request.state === 'Failed' && provisioningStatus && (
+      {request.state === 'Failed' && provisioningStatus && projectId && (
         <>
           <FailureDetailCard status={provisioningStatus} />
           <RetrySection
             status={provisioningStatus}
-            projectId={projectId!}
+            projectId={projectId}
             onRetryComplete={refreshData}
           />
         </>

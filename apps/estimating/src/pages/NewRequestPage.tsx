@@ -47,6 +47,11 @@ export function NewRequestPage(): ReactNode {
   const session = useCurrentSession();
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
 
+  const client = useMemo(
+    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
+    [authToken],
+  );
+
   const wizardMode = mode as ProjectSetupWizardMode;
   const { draft, saveDraft, clearDraft, resumeContext, isSavePending } =
     useProjectSetupDraft(wizardMode, requestId);
@@ -66,11 +71,6 @@ export function NewRequestPage(): ReactNode {
     if (mode !== 'clarification-return' || !requestId) return;
     let mounted = true;
 
-    const client = createProvisioningApiClient(
-      import.meta.env.VITE_FUNCTION_APP_URL,
-      async () => authToken,
-    );
-
     (async () => {
       const listed = await client.listRequests();
       if (!mounted) return;
@@ -87,7 +87,7 @@ export function NewRequestPage(): ReactNode {
     return () => {
       mounted = false;
     };
-  }, [mode, requestId, authToken]);
+  }, [mode, requestId, client]);
 
   const handleChange = useCallback(
     (updates: Partial<IProjectSetupRequest>) => {
@@ -120,11 +120,6 @@ export function NewRequestPage(): ReactNode {
     setError(null);
 
     try {
-      const client = createProvisioningApiClient(
-        import.meta.env.VITE_FUNCTION_APP_URL,
-        async () => authToken,
-      );
-
       const opexManagerUpn = (import.meta.env.VITE_OPEX_MANAGER_UPN as string) ?? '';
       const members = Array.from(
         new Set([...(request.groupMembers ?? []), opexManagerUpn].filter(Boolean)),
@@ -153,7 +148,7 @@ export function NewRequestPage(): ReactNode {
     } finally {
       setSubmitting(false);
     }
-  }, [authToken, request, clearDraft, navigate]);
+  }, [client, request, clearDraft, navigate]);
 
   const wizardConfig: IStepWizardConfig<IProjectSetupRequest> = useMemo(
     () => ({
