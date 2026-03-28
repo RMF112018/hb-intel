@@ -74,7 +74,7 @@ Phase 3 uses a **shared-canonical cross-lane model** (Phase 3 plan §4.1):
 |---|---|---|
 | Route | `project-hub` (non-parameterized) | MVP scaffold; PH7 plans define `$projectId` parameterized routes |
 | Page | `ProjectHubPage` | Portfolio dashboard with 3 summary cards + `HbcDataTable` |
-| Module pages | None | No Financial, Schedule, Constraints, Permits, Safety, or Reports pages |
+| Module pages | Financial only | Financial route registered (`/project-hub/:projectId/financial`); renders `FinancialControlCenter` with 5 sub-surfaces (Budget, Forecast Summary, Cash Flow, Buyout, overview) via state-based navigation; all data is mock. No Schedule, Constraints, Permits, Safety, or Reports pages in PWA. |
 | Cross-project navigation | Full | All 24 workspace routes accessible; landing resolver active |
 | Project setup/provisioning | Live | `/project-setup`, `/projects`, `/projects/$requestId`, `/provisioning/$projectId` |
 | Shared feature package | Consumes `@hbc/features-project-hub` | Health-pulse integration available |
@@ -132,7 +132,7 @@ The following MUST be identical across both lanes. No lane may deviate from thes
 | **Activity spine** | Same normalized semantics | **Full** | **Full** | Same `IProjectActivityEvent` rendering |
 | **Work queue spine** | Same normalized semantics | **Full** | **Full** | Same project-scoped `IMyWorkItem` rendering |
 | **Related-items spine** | Same normalized semantics | **Full** | **Full** | Same relationship rendering |
-| **Financial module** | Same authority boundaries | **Full** — first-class working surface | **Broad** — operational surface | SPFx supports CRUD; PWA richer for forecasting workflows |
+| **Financial module** | Same authority boundaries | **Partially implemented** — UI scaffold renders with mock data; no real data access; sub-tool navigation is state-based, not URL-routed | **Architecturally defined** — SPFx lane definitions exist as infrastructure stubs; no data-connected Financial surfaces | Target: PWA Full first-class working surface, SPFx Broad operational surface. Current: both lanes use mock data only. |
 | **Schedule module** | Same authority boundaries | **Full** — first-class working surface | **Broad** — operational surface | SPFx supports view + milestone management; PWA richer for file ingestion |
 | **Constraints module** | Same authority boundaries | **Full** — first-class working surface | **Broad** — operational surface | SPFx supports full CRUD |
 | **Permits module** | Same authority boundaries | **Full** — first-class working surface | **Broad** — operational surface | SPFx supports full CRUD |
@@ -155,6 +155,8 @@ The following MUST be identical across both lanes. No lane may deviate from thes
 For each always-on core module, the following defines what each lane MUST support:
 
 ### 4.1 Financial
+
+> **Repo-truth note (2026-03-28).** The capabilities listed below are **target-state requirements**, not descriptions of current operational state. Current PWA implementation: `FinancialControlCenter` renders at `/project-hub/:projectId/financial` with 5 sub-surfaces (Budget, Forecast Summary, Cash Flow, Buyout, and a control-center overview) all consuming hardcoded mock data from `useState`-based hooks. None of the listed capabilities are data-connected. Sub-tool navigation is state-based, not URL-routed. SPFx Financial lane routes exist in the module lane registry but are infrastructure stubs without data-connected surfaces. Neither lane has operational Financial CRUD. Classification: **partially implemented — UI scaffold with mock data; no data access layer**.
 
 | Capability | PWA | SPFx |
 |---|---|---|

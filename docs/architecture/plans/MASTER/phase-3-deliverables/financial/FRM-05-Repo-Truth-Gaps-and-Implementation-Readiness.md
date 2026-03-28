@@ -37,7 +37,7 @@
 |------|--------|
 | T04 source contracts | Blocking |
 | Repository factory registration | Blocking |
-| PWA Financial route/page family | Blocking |
+| PWA Financial route/page family | **Partially resolved** — route registered, `FinancialControlCenter` renders with 5 sub-surfaces via state-based navigation, but all data is mock; sub-tool navigation is not URL-routed; deep links to sub-tools do not work |
 | P3-F1 publication handoff | Partial |
 | Runtime review/publication custody records | Missing as first-class runtime records |
 | Full reference model for commitments / pay-app actuals | Incomplete |
@@ -125,25 +125,24 @@ Critical
 
 ### 3.3 PWA Financial route and page family
 
-**Gap**
+**Gap (revised 2026-03-28)**
 
-No dedicated Financial module surfaces exist yet for:
+Financial sub-surfaces for Budget, Forecast Summary, Cash Flow, and Buyout exist as UI components rendered within `FinancialControlCenter` via state-based `surfaceMode` navigation. GC/GR is not yet surfaced as a distinct UI component. However:
 
-- budget
-- forecast
-- gcgr
-- cash-flow
-- buyout
+- All surfaces consume hardcoded mock data from hooks, not real repository data
+- Sub-tool navigation is `useState`-based, not URL-routed — browser refresh loses position
+- No deep-link routes to `/financial/budget`, `/financial/forecast-summary`, etc. exist
+- The surfaces are not yet operational working tools — no data persistence, no multi-user state
 
 **Why it matters**
 
-The Financial module is still not a real operating surface even though the domain model is mostly defined.
+The Financial module UI scaffold exists but cannot support real operating workflows until data access is wired and sub-tool navigation is URL-routed.
 
-**Impact**
+**Revised impact**
 
-- workbook replacement cannot start
-- no runtime proof of budget/forecast workflows
-- no cross-lane operational validation
+- workbook replacement cannot start until data access is wired and URL-routed sub-tools exist
+- no runtime proof of budget/forecast workflows (mock data only)
+- no cross-lane operational validation (SPFx lane is infrastructure stubs)
 
 **Priority**
 

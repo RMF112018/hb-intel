@@ -121,8 +121,8 @@ There is no version immutability, no enforced checklist gate, no annotation audi
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| `IFinancialRepository` port (8 methods) | Implemented, **NOT registered in factory** | `packages/data-access/src/ports/IFinancialRepository.ts` |
-| `MockFinancialRepository` (332 lines) | Complete | `packages/data-access/src/adapters/mock/MockFinancialRepository.ts` |
+| `IFinancialRepository` port | **Does not exist as a file** (2026-03-28 verification) — referenced in hook docstrings as a target integration point but no port interface file exists at the previously claimed path or elsewhere in the repo | Target: `packages/data-access/src/ports/IFinancialRepository.ts` |
+| `MockFinancialRepository` | **Does not exist** (2026-03-28 verification) — no file at the previously claimed path; view-ready hooks in `@hbc/features-project-hub` use inline hardcoded mock data instead | Target: `packages/data-access/src/adapters/mock/MockFinancialRepository.ts` |
 | Financial domain types (628 lines) | Complete (T04 types pending) | `packages/features/project-hub/src/financial/types/index.ts` |
 | Financial computors, validation, governance | Complete | `packages/features/project-hub/src/financial/` |
 | P1-F5 Procore connector | Planned (future) | CSV import is interim path |

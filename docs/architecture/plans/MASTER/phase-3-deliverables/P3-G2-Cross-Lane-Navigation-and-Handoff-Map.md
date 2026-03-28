@@ -8,7 +8,7 @@
 | **Document Type** | Specification |
 | **Owner** | Experience / Shell Team + Architecture |
 | **Update Authority** | Architecture lead; changes require review by Experience lead and Project Hub platform owner |
-| **Last Reviewed Against Repo Truth** | 2026-03-25 |
+| **Last Reviewed Against Repo Truth** | 2026-03-28 |
 | **References** | [Phase 3 Plan §10](../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [P3-G1 §5, §7](P3-G1-Lane-Capability-Matrix.md); [P3-B1 §6, §8](P3-B1-Project-Context-Continuity-and-Switching-Contract.md); [P3-C3 §8](P3-C3-Lane-Aware-Home-Canvas-Capability-Matrix.md); [P3-A1](P3-A1-Project-Registry-and-Activation-Contract.md) |
 
 ---
@@ -278,6 +278,8 @@ When no `returnTo` is available and return-memory does not apply:
 For each always-on core module, the following defines cross-lane navigation patterns:
 
 ### 8.1 Financial
+
+> **Repo-truth note (2026-03-28).** The cross-lane navigation patterns below are **target-state requirements**. Current implementation: the PWA Financial surface renders at `/project-hub/:projectId/financial` with mock data via `FinancialControlCenter`. SPFx Financial lane routes exist as infrastructure stubs but all data surfaces use mock data. Deep-link navigation to Financial sub-sections (e.g., `/financial/budget`) is not yet functional in either lane — sub-tool navigation uses `useState`-based state, not URL parameters. Cross-lane handoff for Financial is architecturally defined but not yet operational.
 
 | Interaction | In-lane (SPFx) | Escalates to PWA | Deep-link format |
 |---|---|---|---|

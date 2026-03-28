@@ -636,7 +636,7 @@ Overrides MUST always carry provenance metadata. No override may be applied sile
    Per-module source-of-truth definitions in §3–§8 expand the high-level boundary rules in P3-E1 §3. No conflicts. Classified as **compliant**.
 
 4. **Operational module implementations — controlled evolution**
-   Financial, Schedule, Constraints, Permits, Safety, and Reports have no production implementations beyond reference examples. Source-of-truth and action-boundary rules in this specification govern the implementation when it proceeds. Classified as **controlled evolution**.
+   Financial has contract-level type/logic implementations (29 UI components, 12+ business logic subdomains, 1,979 test lines across 19 test files) plus a rendering PWA route at `/project-hub/:projectId/financial`, but all data access remains mock — no repository registration, no real data fetching, no persistence. Sub-tool navigation is state-based (`surfaceMode` via `useState`), not URL-routed. Schedule, Constraints, Permits, Safety, and Reports have contract-level implementations at varying maturity. Source-of-truth and action-boundary rules in this specification govern implementation as it proceeds toward operational completion. Classified as **controlled evolution (Financial: partially implemented — UI scaffold with mock data; others: contract-level defined)**.
 
 5. **Health manual override governance — compliant**
    `IManualOverrideMetadata`, `IHealthPulseAdminConfig`, and `validateHealthPulseAdminConfig()` implement the governed override rules in §12.1. Classified as **compliant**.
