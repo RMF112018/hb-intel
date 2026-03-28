@@ -189,8 +189,8 @@ describe('Estimating — complexity gate tests', () => {
       tier: 'standard',
       requests: [request],
     });
-    // HbcComplexityDial renders with wrapper class
-    expect(document.querySelector('.hbc-complexity-dial-wrapper')).toBeTruthy();
+    // HbcComplexityDial renders tier segment buttons
+    expect(screen.getByRole('button', { name: /essential/i })).toBeTruthy();
   });
 
   // G4-T07-010: HbcErrorBoundary in App.tsx root (static assertion)
