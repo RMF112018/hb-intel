@@ -9,7 +9,7 @@ import {
   HBC_RADIUS_FULL,
   HBC_RADIUS_XL,
   TRANSITION_FAST,
-} from '@hbc/ui-kit/theme';
+} from '../tokens.js';
 import { useComplexity } from '../hooks/useComplexity';
 import type { ComplexityTier } from '../types/IComplexity';
 import { TIER_ORDER } from '../types/IComplexity';

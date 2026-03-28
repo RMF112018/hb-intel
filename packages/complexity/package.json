@@ -1,6 +1,6 @@
 {
   "name": "@hbc/complexity",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Three-tier Complexity Dial — platform-wide UI density context",
   "type": "module",
@@ -32,7 +32,6 @@
   },
   "dependencies": {
     "@griffel/react": "^1.5.0",
-    "@hbc/ui-kit": "workspace:*",
     "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {

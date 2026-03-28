@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { makeStyles } from '@griffel/react';
-import { TRANSITION_FAST } from '@hbc/ui-kit/theme';
+import { TRANSITION_FAST } from '../tokens.js';
 import { useComplexityGate } from '../hooks/useComplexityGate';
 import type { IComplexityGateCondition } from '../types/IComplexity';
 
