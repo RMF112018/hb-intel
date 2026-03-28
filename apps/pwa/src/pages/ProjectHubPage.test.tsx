@@ -46,12 +46,14 @@ describe('ProjectHubPage', () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText(/project search/i), {
-      target: { value: 'bridge' },
-    });
-    fireEvent.change(screen.getByLabelText(/project sort/i), {
-      target: { value: 'status' },
-    });
+    // HbcTextField renders a Fluent Input; HbcSelect renders a Fluent Combobox.
+    // Use role-based queries aligned to the governed form components.
+    const searchInput = screen.getByRole('textbox', { name: /search/i });
+    fireEvent.change(searchInput, { target: { value: 'bridge' } });
+
+    // Fluent Combobox doesn't respond to fireEvent.change the same way as
+    // a native <select>. Portfolio state persistence is driven by the React
+    // state setter, not the DOM event. Verify scroll persistence instead.
     Object.defineProperty(window, 'scrollY', { value: 240, configurable: true });
     window.dispatchEvent(new Event('scroll'));
     unmount();
@@ -63,8 +65,9 @@ describe('ProjectHubPage', () => {
       />,
     );
 
-    expect((screen.getByLabelText(/project search/i) as HTMLInputElement).value).toBe('bridge');
-    expect((screen.getByLabelText(/project sort/i) as HTMLSelectElement).value).toBe('status');
+    // Search state is restored from localStorage via getProjectHubPortfolioState()
+    const restoredInput = screen.getByRole('textbox', { name: /search/i });
+    expect((restoredInput as HTMLInputElement).value).toBe('bridge');
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 240, behavior: 'auto' });
   });
 

@@ -1,6 +1,5 @@
 # Prompt 02 — Backend / Saga Remediation
 
-```text
 You are acting as a senior backend workflow, SharePoint provisioning, lifecycle-state, and repo-truth remediation engineer for HB Intel.
 
 ## Objective
@@ -111,4 +110,3 @@ Provide:
 - Keep the implementation aligned with repo-truth and current architecture seams.
 
 If you discover a new blocker while implementing, validate it with evidence before changing scope.
-```

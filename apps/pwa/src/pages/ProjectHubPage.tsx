@@ -1,7 +1,14 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { HbcButton, Text, Card, CardHeader, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
-import type { ColumnDef } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { HbcButton, HbcTextField, HbcSelect, Text, Card, CardHeader, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
+import type { ColumnDef, HbcSelectOption } from '@hbc/ui-kit';
+import {
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+} from '@hbc/ui-kit/theme';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import type { IActiveProject } from '@hbc/models';
@@ -21,6 +28,79 @@ import {
   saveProjectHubPortfolioState,
 } from '@hbc/shell';
 import { useProjectHubContext } from '../hooks/useProjectHubContext.js';
+
+// ── Griffel styles governed by @hbc/ui-kit tokens ──────────────────────────
+const usePortfolioStyles = makeStyles({
+  filterBar: {
+    display: 'flex',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    flexWrap: 'wrap',
+    marginBottom: `${HBC_SPACE_MD}px`,
+  },
+  filterLabel: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${HBC_SPACE_XS}px`,
+  },
+  cardGrid: {
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_MD * 12 + HBC_SPACE_SM}px, 1fr))`,
+    gap: `${HBC_SPACE_MD}px`,
+  },
+  tableSection: {
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+});
+
+const useControlCenterStyles = makeStyles({
+  headerSlot: {
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    display: 'flex',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    alignItems: 'center',
+  },
+  summaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_MD * 13 + HBC_SPACE_SM + HBC_SPACE_XS}px, 1fr))`,
+    gap: `${HBC_SPACE_MD}px`,
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  reportCardGrid: {
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_MD * 16 + HBC_SPACE_XS}px, 1fr))`,
+    gap: `${HBC_SPACE_MD}px`,
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  sectionSpacing: {
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  cardBody: {
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+  },
+  blockText: {
+    display: 'block',
+    marginTop: `${HBC_SPACE_SM}px`,
+  },
+  auditIntro: {
+    display: 'block',
+    marginTop: `${HBC_SPACE_SM}px`,
+  },
+  auditTable: {
+    marginTop: `${HBC_SPACE_MD}px`,
+  },
+  canvasCardGrid: {
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_MD * 13 + HBC_SPACE_SM + HBC_SPACE_XS}px, 1fr))`,
+    gap: `${HBC_SPACE_MD}px`,
+  },
+  reportsButton: {
+    marginTop: `${HBC_SPACE_MD}px`,
+  },
+});
 
 const columns: ColumnDef<IActiveProject, unknown>[] = [
   { accessorKey: 'name', header: 'Project Name' },
@@ -73,6 +153,17 @@ function sortProjects(
     return left.name.localeCompare(right.name);
   });
 }
+
+const STATUS_FILTER_OPTIONS: HbcSelectOption[] = [
+  { value: 'all', label: 'All' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Planning', label: 'Planning' },
+];
+
+const SORT_OPTIONS: HbcSelectOption[] = [
+  { value: 'name', label: 'Name' },
+  { value: 'status', label: 'Status' },
+];
 
 export interface ProjectHubPortfolioPageProps {
   projects: IActiveProject[];
@@ -133,50 +224,32 @@ export function ProjectHubPortfolioPage({
     },
   ];
 
+  const portfolioStyles = usePortfolioStyles();
+
   return (
     <WorkspacePageShell layout="dashboard" title="Project Hub" suppressProjectContext>
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <Text size={200}>Search</Text>
-          <input
-            aria-label="Project search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name or number"
-          />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <Text size={200}>Status</Text>
-          <select
-            aria-label="Project status filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="Active">Active</option>
-            <option value="Planning">Planning</option>
-          </select>
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <Text size={200}>Sort</Text>
-          <select
-            aria-label="Project sort"
-            value={sortBy}
-            onChange={(event) => setSortBy(event.target.value === 'status' ? 'status' : 'name')}
-          >
-            <option value="name">Name</option>
-            <option value="status">Status</option>
-          </select>
-        </label>
+      <div className={portfolioStyles.filterBar}>
+        <HbcTextField
+          label="Search"
+          value={search}
+          onChange={(value) => setSearch(value)}
+          placeholder="Search by name or number"
+        />
+        <HbcSelect
+          label="Status"
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value)}
+          options={STATUS_FILTER_OPTIONS}
+        />
+        <HbcSelect
+          label="Sort"
+          value={sortBy}
+          onChange={(value) => setSortBy(value === 'status' ? 'status' : 'name')}
+          options={SORT_OPTIONS}
+        />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 16,
-        }}
-      >
+      <div className={portfolioStyles.cardGrid}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">
             <CardHeader
@@ -187,7 +260,7 @@ export function ProjectHubPortfolioPage({
         ))}
       </div>
 
-      <div style={{ marginTop: 24 }}>
+      <div className={portfolioStyles.tableSection}>
         <HbcDataTable<IActiveProject>
           data={visibleProjects}
           columns={columns}
@@ -251,6 +324,8 @@ export function ProjectHubControlCenterPage({
     return result.family;
   }, []);
 
+  const ccStyles = useControlCenterStyles();
+
   const familyTitle = layoutFamily === 'executive'
     ? 'Project Hub — Executive Cockpit'
     : layoutFamily === 'field-tablet'
@@ -263,7 +338,7 @@ export function ProjectHubControlCenterPage({
       title={financialSection ? 'Financial Control Center' : reportsSection ? 'Project Hub Reports' : familyTitle}
       stickyHeader
       headerSlot={
-        <div style={{ padding: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className={ccStyles.headerSlot}>
           <HbcButton variant="secondary" onClick={onBackToPortfolio}>
             Back to Portfolio
           </HbcButton>
@@ -278,15 +353,11 @@ export function ProjectHubControlCenterPage({
       {financialSection ? (
         <FinancialControlCenter
           projectId={project.id}
-          onOpenSurface={(toolId) => {
+          onOpenSurface={() => {
             // Sub-page routes will be added in a follow-on prompt.
-            // For now, tool selection drives in-page preview behavior.
-            // Once sub-routes exist: onModuleOpen?.(`financial/${toolId}`)
           }}
-          onSecondaryAction={(action) => {
-            if (action === 'open-history') {
-              // Will route to financial/history when sub-page exists
-            }
+          onSecondaryAction={() => {
+            // Will route to financial/history when sub-page exists
           }}
         />
       ) : reportsSection ? (
@@ -297,14 +368,7 @@ export function ProjectHubControlCenterPage({
             lifecycle.
           </Text>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: 16,
-              marginTop: 24,
-            }}
-          >
+          <div className={ccStyles.summaryGrid}>
             <Card size="small">
               <CardHeader
                 header={<Text weight="semibold">Baseline Families</Text>}
@@ -331,29 +395,22 @@ export function ProjectHubControlCenterPage({
             </Card>
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: 16,
-              marginTop: 24,
-            }}
-          >
+          <div className={ccStyles.reportCardGrid}>
             {PROJECT_HUB_BASELINE_REPORT_FAMILIES.map((family) => (
               <Card key={family.key} size="small">
                 <CardHeader
                   header={<Text weight="semibold">{family.label}</Text>}
                   description={<Text size={200}>{family.currentStatus}</Text>}
                 />
-                <div style={{ padding: '0 16px 16px' }}>
+                <div className={ccStyles.cardBody}>
                   <Text size={200}>{family.purpose}</Text>
-                  <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+                  <Text size={200} className={ccStyles.blockText}>
                     Source modules: {family.sourceModules.join(', ')}
                   </Text>
-                  <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+                  <Text size={200} className={ccStyles.blockText}>
                     Recommended usage: {family.recommendedUsage}
                   </Text>
-                  <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+                  <Text size={200} className={ccStyles.blockText}>
                     Current blocker: {family.blocker}
                   </Text>
                 </div>
@@ -361,15 +418,15 @@ export function ProjectHubControlCenterPage({
             ))}
           </div>
 
-          <div style={{ marginTop: 24 }}>
+          <div className={ccStyles.sectionSpacing}>
             <Text size={500} weight="semibold">
               Module readiness audit
             </Text>
-            <Text size={200} style={{ display: 'block', marginTop: 8 }}>
+            <Text size={200} className={ccStyles.auditIntro}>
               This matrix stays strict about repo truth: module-local report definitions do not
               count as a central Reports source until a normalized adapter exists.
             </Text>
-            <div style={{ marginTop: 16 }}>
+            <div className={ccStyles.auditTable}>
               <HbcDataTable<ReportAuditTableRow>
                 data={reportAuditRows}
                 columns={reportColumns}
@@ -391,13 +448,7 @@ export function ProjectHubControlCenterPage({
         <ProjectOperatingSurface
           canvasSlot={
             <>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: 16,
-                }}
-              >
+              <div className={ccStyles.canvasCardGrid}>
                 {cards.map((card) => (
                   <Card key={card.label} size="small">
                     <CardHeader
@@ -408,7 +459,7 @@ export function ProjectHubControlCenterPage({
                 ))}
               </div>
               {onOpenReports ? (
-                <div style={{ marginTop: 16 }}>
+                <div className={ccStyles.reportsButton}>
                   <HbcButton onClick={onOpenReports}>Open Reports Baseline</HbcButton>
                 </div>
               ) : null}
