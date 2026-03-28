@@ -8,7 +8,7 @@
 | **Created** | 2026-03-28 |
 | **Status** | Active — governs entity ownership, write boundaries, and action-boundary enforcement |
 | **Governing Authority** | [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md) (locked source-of-truth) |
-| **References** | [Financial-RGC](Financial-Runtime-Governance-Control.md); [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md); [FRM-01](FRM-01-Entity-Catalog.md); [FRM-03](FRM-03-State-Mutability-and-Lifecycle.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Control Index](Financial-Doctrine-Control-Index.md) |
+| **References** | [Financial-RGC](Financial-Runtime-Governance-Control.md); [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md); [Financial-ABMC](Financial-Action-Boundary-and-Mutation-Control.md); [FRM-01](FRM-01-Entity-Catalog.md); [FRM-03](FRM-03-State-Mutability-and-Lifecycle.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Control Index](Financial-Doctrine-Control-Index.md) |
 
 ---
 

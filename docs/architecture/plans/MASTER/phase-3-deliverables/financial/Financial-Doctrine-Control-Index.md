@@ -76,6 +76,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | [Financial-LODM](Financial-Lane-Ownership-Decision-Matrix.md) | Financial-LODM | Per-capability lane ownership — PWA depth, SPFx depth, launch behavior, acceptance evidence | Active |
 | [Financial-CLHLC](Financial-Cross-Lane-Handoff-and-Launch-Contract.md) | Financial-CLHLC | Cross-lane launch rules, context durability, return/resume, acceptance posture by lane behavior | Active |
 | [Financial-SOTEC](Financial-Source-of-Truth-and-Entity-Control.md) | Financial-SOTEC | Source-of-truth ownership, entity classification, action boundaries, stale-state rules | Active |
+| [Financial-ABMC](Financial-Action-Boundary-and-Mutation-Control.md) | Financial-ABMC | Role×state permissions, mutation categories, cross-tool action rules, invalidation chains, blocking conditions | Active |
 
 ### 4.2 Maturity and Readiness
 
