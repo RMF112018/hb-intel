@@ -11,7 +11,17 @@ export { projectHubProjectsEmptyStateConfig } from './empty-state/index.js';
 
 export * from './health-pulse/index.js';
 
-export { ProjectActivityRegistry, aggregateActivityFeed } from './activity/index.js';
+export {
+  ProjectActivityRegistry,
+  aggregateActivityFeed,
+  useProjectActivity,
+  registerActivityAdapters,
+  _resetRegistrationForTesting,
+  ALL_ACTIVITY_ADAPTERS,
+  HEALTH_PULSE_ACTIVITY_REGISTRATION,
+  healthPulseActivityAdapter,
+} from './activity/index.js';
+export type { UseProjectActivityInput, UseProjectActivityResult } from './activity/index.js';
 
 export * from './financial/index.js';
 

@@ -1,27 +1,57 @@
 import { useMemo } from 'react';
 
-import type { ProjectHubActivitySummary } from '../types.js';
+import type { ProjectHubActivitySummary, ProjectHubActivityEntry } from '../types.js';
+import { useProjectActivity } from '../../activity/useProjectActivity.js';
+import { registerActivityAdapters } from '../../activity/registerActivityAdapters.js';
+
+// Ensure adapters are registered before any hook call.
+registerActivityAdapters();
 
 /**
- * Returns a mock activity summary for the project operating surface.
- * Will be replaced by real activity-spine aggregation in a follow-on.
+ * Maps IProjectActivityEvent category → ProjectHubActivityEntry type.
  */
-export function useActivitySummary(): ProjectHubActivitySummary {
-  return useMemo(
-    () => ({
-      entries: [
-        { id: 'act-1', timestamp: '2026-03-27T14:30:00Z', type: 'decision' as const, title: 'Forecast version confirmed for March', sourceModule: 'financial', actor: 'PM' },
-        { id: 'act-2', timestamp: '2026-03-27T11:00:00Z', type: 'milestone' as const, title: 'Foundation Complete milestone approaching', sourceModule: 'schedule', actor: null },
-        { id: 'act-3', timestamp: '2026-03-26T16:45:00Z', type: 'escalation' as const, title: 'Constraint Permit 14-B escalated to PE', sourceModule: 'constraints', actor: 'PM' },
-        { id: 'act-4', timestamp: '2026-03-26T09:15:00Z', type: 'blocker' as const, title: 'New critical blocker — Electrical subcontract gate', sourceModule: 'subcontract-readiness', actor: null },
-        { id: 'act-5', timestamp: '2026-03-25T15:20:00Z', type: 'publication' as const, title: 'February financial report published', sourceModule: 'reports', actor: 'PM' },
-        { id: 'act-6', timestamp: '2026-03-25T10:00:00Z', type: 'state-change' as const, title: 'Safety inspection passed — Zone B', sourceModule: 'safety', actor: 'Safety Lead' },
-        { id: 'act-7', timestamp: '2026-03-24T14:00:00Z', type: 'handoff' as const, title: 'Buyout savings disposition requested', sourceModule: 'financial', actor: 'PM' },
-        { id: 'act-8', timestamp: '2026-03-24T09:30:00Z', type: 'decision' as const, title: 'Schedule baseline updated with PE approval', sourceModule: 'schedule', actor: 'PE' },
-        { id: 'act-9', timestamp: '2026-03-23T16:00:00Z', type: 'milestone' as const, title: 'Startup checklist — 3 items remaining', sourceModule: 'startup', actor: null },
-        { id: 'act-10', timestamp: '2026-03-23T11:30:00Z', type: 'state-change' as const, title: 'Permit 12-A approved', sourceModule: 'permits', actor: 'Permitting Authority' },
-      ],
-    }),
-    [],
-  );
+function mapCategoryToEntryType(category: string): ProjectHubActivityEntry['type'] {
+  switch (category) {
+    case 'status-change': return 'state-change';
+    case 'milestone': return 'milestone';
+    case 'approval': return 'decision';
+    case 'handoff': return 'handoff';
+    case 'alert': return 'escalation';
+    case 'record-change': return 'publication';
+    case 'system': return 'state-change';
+    default: return 'state-change';
+  }
+}
+
+/**
+ * Returns the activity summary for the project operating surface,
+ * powered by the canonical Activity spine via aggregateActivityFeed().
+ *
+ * Falls back to an empty feed when no adapters are registered or data
+ * is unavailable — honoring the runtime-honesty doctrine.
+ */
+export function useActivitySummary(projectId?: string): ProjectHubActivitySummary {
+  const effectiveProjectId = projectId ?? 'unknown';
+
+  const { feed } = useProjectActivity({
+    projectId: effectiveProjectId,
+    limit: 10,
+  });
+
+  return useMemo(() => {
+    if (!feed || feed.events.length === 0) {
+      return { entries: [] };
+    }
+
+    const entries: ProjectHubActivityEntry[] = feed.events.map((event) => ({
+      id: event.eventId,
+      timestamp: event.occurredAt,
+      type: mapCategoryToEntryType(event.category),
+      title: event.summary,
+      sourceModule: event.sourceModule,
+      actor: event.changedByName !== 'system' ? event.changedByName : null,
+    }));
+
+    return { entries };
+  }, [feed]);
 }

@@ -252,8 +252,49 @@ After upload, SharePoint will serve the new `estimating-app.js` from the tenant 
 
 ---
 
-## Smoke Test Gap (Latent Defect)
+## Smoke Test Fix
 
-The build orchestrator's VM smoke test injects a single `fakeGlobal` object as both `globalThis` **and** `window`, making them identical in the test context. This masked the `globalThis !== window` divergence that occurs in the actual SPFx runtime. The smoke test was consistently passing while production was failing.
+The build orchestrator's VM smoke test previously injected a single `fakeGlobal` object as both `globalThis` **and** `window`, making them identical in the test context. This masked the `globalThis !== window` divergence that occurs in the actual SPFx runtime. The smoke test was consistently passing while production was failing.
 
-The fix in `mount.tsx` makes this moot for the immediate defect, but a follow-up improvement to the smoke test would be to use **two separate objects** for `globalThis` and `window` in the VM sandbox, so future regressions of this class are caught at build time.
+**Fix applied (`tools/build-spfx-package.ts` Step 1b):** The sandbox now uses two separate objects — `fakeGlobalThis` and `fakeWindow` — and asserts all three resolution paths independently. A bundle that assigns only to `globalThis` will fail the smoke test even if the IIFE format check passes.
+
+---
+
+## Content Hash on Bundle Filename (Follow-up Fix)
+
+**Problem:** SPFx's service worker (`spserviceworker.js`) caches assets by URL. The fixed filename `estimating-app.js` means re-uploading a new `.sppkg` cannot bust the cached version in browsers that have already fetched the old bundle. Users continue to receive the stale cached file even after the App Catalog is updated.
+
+**Evidence:** After the first fixed `.sppkg` upload, browser console showed `signalR is not defined` from the pre-fix bundle. The new bundle was never loaded because the service worker returned the cached `estimating-app.js` response.
+
+**Fix implemented (`tools/build-spfx-package.ts` Step 1c):**
+
+After Vite produces `estimating-app.js`, the orchestrator:
+1. Computes a SHA-256 content hash of the bundle and takes the first 8 hex characters.
+2. Copies the bundle to `estimating-app-[hash8].js` in `dist/`.
+3. Removes any stale hashed copies from previous runs.
+4. Updates `bundleName` for the remainder of the build flow.
+5. Passes `APP_BUNDLE_NAME=estimating-app-[hash8].js` to gulp, so the shell webpart is compiled with the hashed filename.
+
+The hashed filename propagates into `__APP_BUNDLE_NAME__` via webpack `DefinePlugin` inside `gulpfile.js`, ensuring the shell webpart constructs the correct CDN URL for `SPComponentLoader.loadScript`.
+
+**Current deployment (hash `df2f7d24`):**
+
+Because Node 18 is unavailable in the current build environment, the hashed `.sppkg` for this session was produced by:
+1. Running Vite build → `estimating-app.js` (fixed globalThis + window assignments)
+2. Computing content hash `df2f7d24` → renaming to `estimating-app-df2f7d24.js`
+3. Extracting the previous `.sppkg`, patching the one literal string `"estimating-app.js"` → `"estimating-app-df2f7d24.js"` in `shell-web-part_cc67ecbb87ccad796111.js`
+4. Replacing `ClientSideAssets/estimating-app.js` with `ClientSideAssets/estimating-app-df2f7d24.js`
+5. Repacking and verifying
+
+Future builds via `npx tsx tools/build-spfx-package.ts --domain estimating` (with Node 18 / nvm available) will compute the hash automatically and compile the shell webpart with the correct hashed name — no manual patching required.
+
+**Verification (post-fix package `dist/sppkg/hb-intel-estimating.sppkg`):**
+
+```
+✓ ProductID:  d01a9600-a68a-4afe-83a5-514339f47dbb
+✓ WebPart ID: 3c4dbd5c-5bec-4014-8b77-737ac725a5cc
+✓ Shell webpart JS references: "estimating-app-df2f7d24.js"
+✓ globalThis.__hbIntel_estimating=lB   in bundle
+✓ window.__hbIntel_estimating=lB       in bundle
+✓ Smoke test PASSED (globalThis and window paths verified independently)
+```

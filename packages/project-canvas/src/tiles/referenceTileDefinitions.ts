@@ -15,6 +15,12 @@ const workQueueExpert = React.lazy(() => import('./ProjectWorkQueueTile.js').the
 const activityEssential = React.lazy(() => import('./ProjectActivityTile.js').then(m => ({ default: m.ProjectActivityTileEssential as unknown as React.ComponentType<ICanvasTileProps> })));
 const activityStandard = React.lazy(() => import('./ProjectActivityTile.js').then(m => ({ default: m.ProjectActivityTileStandard as unknown as React.ComponentType<ICanvasTileProps> })));
 const activityExpert = React.lazy(() => import('./ProjectActivityTile.js').then(m => ({ default: m.ProjectActivityTileExpert as unknown as React.ComponentType<ICanvasTileProps> })));
+const relatedItemsEssential = React.lazy(() => import('./RelatedItemsTileAdapter.js').then(m => ({ default: m.RelatedItemsTileEssential as unknown as React.ComponentType<ICanvasTileProps> })));
+const relatedItemsStandard = React.lazy(() => import('./RelatedItemsTileAdapter.js').then(m => ({ default: m.RelatedItemsTileStandard as unknown as React.ComponentType<ICanvasTileProps> })));
+const relatedItemsExpert = React.lazy(() => import('./RelatedItemsTileAdapter.js').then(m => ({ default: m.RelatedItemsTileExpert as unknown as React.ComponentType<ICanvasTileProps> })));
+const healthPulseEssential = React.lazy(() => import('./HealthPulseTileAdapter.js').then(m => ({ default: m.HealthPulseTileEssential as unknown as React.ComponentType<ICanvasTileProps> })));
+const healthPulseStandard = React.lazy(() => import('./HealthPulseTileAdapter.js').then(m => ({ default: m.HealthPulseTileStandard as unknown as React.ComponentType<ICanvasTileProps> })));
+const healthPulseExpert = React.lazy(() => import('./HealthPulseTileAdapter.js').then(m => ({ default: m.HealthPulseTileExpert as unknown as React.ComponentType<ICanvasTileProps> })));
 
 // --- ai-insight uses existing AIInsightTile placeholder ---
 const aiLazy = React.lazy(
@@ -57,7 +63,7 @@ export const projectHealthPulseDef: ICanvasTileDefinition = {
   description: 'Real-time project health indicators and trend summary.',
   defaultForRoles: ['Superintendent', 'Project Manager', 'VP of Operations'],
   mandatory: true,
-  component: createReferenceTileComponents('project-health-pulse', 'Project Health Pulse'),
+  component: { essential: healthPulseEssential, standard: healthPulseStandard, expert: healthPulseExpert },
   defaultColSpan: 6,
   defaultRowSpan: 1,
   lockable: true,
@@ -161,7 +167,7 @@ export const relatedItemsDef: ICanvasTileDefinition = {
   description: 'Cross-references related items across modules.',
   defaultForRoles: ['project-administrator', 'project-executive', 'project-manager', 'superintendent', 'project-team-member'],
   mandatory: true,
-  component: createReferenceTileComponents('related-items', 'Related Items'),
+  component: { essential: relatedItemsEssential, standard: relatedItemsStandard, expert: relatedItemsExpert },
   defaultColSpan: 4,
   defaultRowSpan: 1,
   lockable: true,

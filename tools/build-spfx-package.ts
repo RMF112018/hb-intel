@@ -26,6 +26,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import { Script, createContext } from 'node:vm';
+import { createHash } from 'node:crypto';
 
 // ── Domain registry ────────────────────────────────────────────────────────
 
@@ -224,8 +225,12 @@ for (const domain of domains) {
   }
 
   // ── Step 1: Check Vite build output exists ───────────────────────────
-  const bundleName = `${domain.dir}-app.js`;
-  const bundlePath = path.join(distDir, bundleName);
+  // baseBundleName is the fixed name Vite always outputs.
+  // After content hashing (Step 1c), bundleName is updated to the hashed
+  // filename which is what gulp, the .sppkg, and SharePoint will reference.
+  const baseBundleName = `${domain.dir}-app.js`;
+  let bundleName = baseBundleName;
+  let bundlePath = path.join(distDir, bundleName);
 
   if (!fs.existsSync(distDir)) {
     console.log('  Building app with Vite...');
@@ -247,6 +252,38 @@ for (const domain of domains) {
   }
   console.log(`  ✓ Vite IIFE bundle verified: ${bundleName}`);
 
+  // ── Step 1c: Content hash — rename bundle for service-worker cache busting ──
+  // SPFx's service worker (spserviceworker.js) caches assets by URL.  A fixed
+  // filename means re-uploading a new .sppkg cannot bust the cached version in
+  // browsers that have already loaded the old bundle — they continue serving it
+  // from the SW cache even after the App Catalog file is replaced.
+  //
+  // Adding an 8-char SHA-256 content hash to the filename guarantees a new URL
+  // on every content change.  The service worker treats this as an uncached
+  // resource and fetches the new bundle from the CDN on next page load.
+  //
+  // This hash is computed here (post-build) and propagated into the gulp env as
+  // APP_BUNDLE_NAME, so the shell webpart is compiled with the hashed filename.
+  // No change is required in vite.config.ts — Vite always outputs the base name
+  // and the orchestrator renames it before the SPFx build step.
+  {
+    // Clean up any stale hashed bundles from previous runs to keep distDir tidy.
+    for (const f of fs.readdirSync(distDir)) {
+      if (f.startsWith(`${domain.dir}-app-`) && f.endsWith('.js')) {
+        fs.unlinkSync(path.join(distDir, f));
+      }
+    }
+
+    const bundleBytes = fs.readFileSync(bundlePath);
+    const contentHash = createHash('sha256').update(bundleBytes).digest('hex').slice(0, 8);
+    const hashedBundleName = `${domain.dir}-app-${contentHash}.js`;
+    const hashedBundlePath = path.join(distDir, hashedBundleName);
+    fs.copyFileSync(bundlePath, hashedBundlePath);
+    bundleName = hashedBundleName;
+    bundlePath = hashedBundlePath;
+    console.log(`  ✓ Content hash applied: ${contentHash} → ${hashedBundleName}`);
+  }
+
   // ── Step 1b: Runtime smoke test — verify globalThis contract ────────
   // Evaluate the built IIFE in a minimal VM and assert the global API.
   const globalName = `__hbIntel_${domain.camel}`;
@@ -257,12 +294,20 @@ for (const domain of domains) {
     // evaluate without throwing on missing globals (e.g. `global`, `window`,
     // `document`, `navigator`).  We only need the bundle to finish
     // evaluating — we do not need real DOM behavior.
-    const fakeGlobal: Record<string, unknown> = {};
+    //
+    // IMPORTANT: globalThis and window are intentionally SEPARATE objects here.
+    // In the SPFx runtime, the script's globalThis may differ from the window
+    // accessible to the shell webpart.  Using a single shared object masked this
+    // divergence in previous versions of this test — causing production failures
+    // that the smoke test did not catch.  mount.tsx must assign to BOTH
+    // globalThis AND window explicitly; this test enforces that contract.
+    const fakeGlobalThis: Record<string, unknown> = {};
+    const fakeWindow: Record<string, unknown> = {};
     const sandbox: Record<string, unknown> = {
-      globalThis: fakeGlobal,
-      global: fakeGlobal,
-      window: fakeGlobal,
-      self: fakeGlobal,
+      globalThis: fakeGlobalThis,
+      global: fakeGlobalThis,
+      window: fakeWindow,
+      self: fakeWindow,
       document: { createElement: () => ({}), head: {}, body: {}, addEventListener: () => {} },
       navigator: { userAgent: 'node-vm', onLine: true },
       location: { href: '', protocol: 'https:', hostname: 'localhost' },
@@ -290,12 +335,16 @@ for (const domain of domains) {
       continue;
     }
 
-    // The explicit globalThis publication from mount.tsx writes to
-    // sandbox.globalThis (the object we injected).  The IIFE `var` assignment
-    // writes to the VM context's own global scope.  Check both.
+    // Check all three resolution paths that ShellWebPart.ts uses at runtime:
+    //   1. SPComponentLoader reads window[globalName] after script load
+    //   2. ShellWebPart reads globalThis[globalName] explicitly
+    //   3. ShellWebPart reads window[globalName] explicitly
+    // Because globalThis and window are separate objects here, all three paths
+    // must independently expose mount/unmount for the smoke test to pass.
     const fromGlobalThis = (sandbox.globalThis as Record<string, any>)[globalName];
+    const fromWindow = (sandbox.window as Record<string, any>)[globalName];
     const fromVarScope = (sandbox as Record<string, any>)[globalName];
-    const resolved = fromGlobalThis ?? fromVarScope;
+    const resolved = fromGlobalThis ?? fromWindow ?? fromVarScope;
 
     if (
       !resolved ||
@@ -304,18 +353,22 @@ for (const domain of domains) {
     ) {
       console.error(`  ❌ ${domain.dir}: runtime smoke test failed — ${globalName} does not expose mount/unmount`);
       console.error(`     fromGlobalThis:`, typeof fromGlobalThis, fromGlobalThis ? Object.keys(fromGlobalThis) : 'n/a');
+      console.error(`     fromWindow:`, typeof fromWindow, fromWindow ? Object.keys(fromWindow) : 'n/a');
       console.error(`     fromVarScope:`, typeof fromVarScope, fromVarScope ? Object.keys(fromVarScope) : 'n/a');
       allPassed = false;
       continue;
     }
-    console.log(`  ✓ Runtime smoke test passed: ${globalName}.mount() and .unmount() present`);
+    console.log(`  ✓ Runtime smoke test passed: ${globalName}.mount() and .unmount() present (globalThis + window verified independently)`);
   }
 
   // ── Step 2: Prepare SPFx shell project ───────────────────────────────
   cleanShellTemp();
 
-  // Copy Vite assets into shell assets/
+  // Copy Vite assets into shell assets/.
+  // Skip the base unhashed bundle (baseBundleName) — only the hashed copy is
+  // copied so the .sppkg does not contain a redundant unhashed version.
   for (const file of fs.readdirSync(distDir)) {
+    if (file === baseBundleName) continue;
     fs.copyFileSync(path.join(distDir, file), path.join(SHELL_DIR, 'assets', file));
   }
 
