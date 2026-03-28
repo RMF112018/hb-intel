@@ -9,10 +9,9 @@
  *   1. Vite build → IIFE bundle in apps/{domain}/dist/
  *   2. Copy Vite output into tools/spfx-shell/assets/
  *   3. Write domain-specific manifest + package-solution config into spfx-shell/
- *   4. gulp bundle --ship  (compiles the thin shell webpart)
- *   5. Copy Vite bundle into temp/deploy/ (so package-solution includes it)
- *   6. gulp package-solution --ship  (produces .sppkg via official tooling)
- *   7. Collect .sppkg into dist/sppkg/
+ *   4. gulp bundle --ship  (compiles shell webpart + CopyWebpackPlugin copies Vite bundle)
+ *   5. gulp package-solution --ship  (produces .sppkg with all assets declared)
+ *   6. Collect .sppkg into dist/sppkg/
  *
  * Usage:
  *   npx tsx tools/build-spfx-package.ts                  # all domains
@@ -310,13 +309,12 @@ for (const domain of domains) {
   console.log(`  ✓ Vite assets copied to temp/deploy/`);
 
   // ── Step 5: Run gulp package-solution ───────────────────────────────
+  // CopyWebpackPlugin in gulpfile.js copies assets/ into the webpack output
+  // during gulp bundle, so gulp package-solution now includes the Vite bundle
+  // as a first-class client-side asset — no post-hoc zip injection required.
   console.log('  Running gulp package-solution --ship...');
   run('npx gulp package-solution --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
 
-  // ── Step 6: Inject Vite bundle into .sppkg ─────────────────────────
-  // gulp package-solution only includes files it built (the shell webpart JS).
-  // The Vite IIFE bundle must be added to the .sppkg as a ClientSideAsset
-  // so SharePoint can serve it from the CDN alongside the shell webpart.
   const sppkgSource = path.join(SHELL_DIR, 'sharepoint', 'solution', sppkgName);
   if (!fs.existsSync(sppkgSource)) {
     console.error(`  ❌ ${domain.dir}: .sppkg not found at ${sppkgSource}`);
@@ -324,18 +322,18 @@ for (const domain of domains) {
     continue;
   }
 
-  // Add Vite assets to the .sppkg archive (ZIP format) under ClientSideAssets/.
-  // Create a temp staging dir with the correct path structure, then zip from there.
-  const injectDir = path.join(SHELL_DIR, 'temp', '_inject');
-  const injectAssets = path.join(injectDir, 'ClientSideAssets');
-  fs.mkdirSync(injectAssets, { recursive: true });
-  for (const file of fs.readdirSync(path.join(SHELL_DIR, 'assets'))) {
-    fs.copyFileSync(path.join(SHELL_DIR, 'assets', file), path.join(injectAssets, file));
+  // Safety net: if CopyWebpackPlugin didn't propagate the Vite bundle into the
+  // .sppkg (e.g., version mismatch), inject it from the debug directory and re-zip.
+  const debugDir = path.join(SHELL_DIR, 'sharepoint', 'solution', 'debug');
+  const debugAssets = path.join(debugDir, 'ClientSideAssets');
+  if (fs.existsSync(debugAssets) && !fs.existsSync(path.join(debugAssets, bundleName))) {
+    console.log(`  ⚠ Vite bundle not in debug/ClientSideAssets — re-zipping from debug dir`);
+    fs.copyFileSync(path.join(SHELL_DIR, 'assets', bundleName), path.join(debugAssets, bundleName));
+    fs.unlinkSync(sppkgSource);
+    run(`zip -r "${sppkgSource}" .`, { cwd: debugDir });
   }
-  run(`zip -r "${sppkgSource}" ClientSideAssets/`, { cwd: injectDir });
-  console.log(`  ✓ Vite bundle injected into .sppkg`);
 
-  // ── Step 7: Collect and verify .sppkg output ────────────────────────
+  // ── Step 6: Collect and verify .sppkg output ────────────────────────
   const sppkgDest = path.join(OUTPUT_DIR, sppkgName);
   fs.copyFileSync(sppkgSource, sppkgDest);
 

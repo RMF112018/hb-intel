@@ -39,8 +39,22 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     // TS type definition, so we access it via any cast.
     const manifest = this.manifest as any;
     const baseUrls = manifest.loaderConfig?.internalModuleBaseUrls;
-    const baseUrl = baseUrls && baseUrls.length > 0 ? baseUrls[0] : '';
-    const bundleUrl = baseUrl + __APP_BUNDLE_NAME__;
+    const rawBaseUrl: string = baseUrls && baseUrls.length > 0 ? baseUrls[0] : '';
+
+    // Normalize: ensure exactly one trailing slash between base path and filename.
+    // SharePoint may return the base URL with or without a trailing slash depending
+    // on the tenant and CDN configuration. Plain concatenation caused the production
+    // defect where the solution GUID ran directly into the filename:
+    //   ...d01a9600-a68a-4afe-83a5-514339f47dbbestimating-app.js  (broken)
+    //   ...d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js (correct)
+    const normalizedBase = rawBaseUrl.endsWith('/') ? rawBaseUrl : rawBaseUrl + '/';
+    const bundleUrl = normalizedBase + __APP_BUNDLE_NAME__;
+
+    // Diagnostic: log the URL resolution chain for staging/debug validation.
+    // These are non-noisy console.debug calls — invisible unless DevTools is
+    // open with verbose logging enabled.
+    console.debug('[HB-Intel ShellWebPart] rawBaseUrl:', rawBaseUrl);
+    console.debug('[HB-Intel ShellWebPart] bundleUrl:', bundleUrl);
 
     await SPComponentLoader.loadScript(bundleUrl, { globalExportsName: __APP_GLOBAL_NAME__ });
     this._appModule = (window as any)[__APP_GLOBAL_NAME__] as IAppModule | undefined;

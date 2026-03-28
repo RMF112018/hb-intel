@@ -1,9 +1,9 @@
 # SPFx Deployment Runbook
 
-**Version:** 2.0
+**Version:** 2.1
 **Date:** 2026-03-28
 **Audience:** DevOps, Administrators, Developers
-**References:** [Packaging remediation](../architecture/reviews/estimating-spfx-packaging-remediation.md), [Runtime remediation](../architecture/reviews/estimating-spfx-runtime-and-registration-remediation.md), [Deployment closeout](../architecture/reviews/estimating-spfx-deployment-validation-closeout.md)
+**References:** [Packaging remediation](../architecture/reviews/estimating-spfx-packaging-remediation.md), [Runtime remediation](../architecture/reviews/estimating-spfx-runtime-and-registration-remediation.md), [Deployment closeout](../architecture/reviews/estimating-spfx-deployment-validation-closeout.md), [URL/asset fix closeout](../architecture/reviews/estimating-spfx-url-and-asset-fix-closeout.md)
 
 ---
 
@@ -99,6 +99,57 @@ For each domain, `tools/build-spfx-package.ts`:
 6. Runs `gulp package-solution --ship` (official Microsoft .sppkg generation)
 7. Verifies .sppkg contents (OPC structure, bundle presence, manifest ID)
 8. Copies .sppkg to `dist/sppkg/`
+
+---
+
+## Fresh Deployment After Fix (One-Time)
+
+Use this checklist when deploying a fixed `.sppkg` that replaces a previously broken version.
+
+### Pre-upload
+
+- [ ] Rebuild the package: `npx tsx tools/build-spfx-package.ts --domain estimating`
+- [ ] Confirm output: `dist/sppkg/hb-intel-estimating.sppkg` exists
+- [ ] Confirm `estimating-app.js` is in the .sppkg: `unzip -l dist/sppkg/hb-intel-estimating.sppkg | grep estimating-app`
+
+### App Catalog
+
+- [ ] Open the SharePoint App Catalog (`https://{tenant}-admin.sharepoint.com`)
+- [ ] If a previous version of `hb-intel-estimating` exists, note its version
+- [ ] Upload `hb-intel-estimating.sppkg` — select **Replace** if prompted
+- [ ] Check **"Make this solution available to all sites"** (tenant-wide)
+- [ ] Click **Deploy**
+- [ ] Confirm status shows "Deployed" in the App Catalog list
+
+### Verify asset URL
+
+- [ ] In the App Catalog, note the solution ID: `d01a9600-a68a-4afe-83a5-514339f47dbb`
+- [ ] In a browser, navigate directly to:
+  `https://{tenant}.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js`
+- [ ] Confirm the response is JavaScript (not a 404 or HTML error page)
+- [ ] Confirm the response starts with `var __hbIntel_estimating=`
+
+### Web part test
+
+- [ ] Navigate to any SharePoint site page → Edit
+- [ ] Open the web part picker → search "Estimating" or browse "HB Intel" group
+- [ ] Confirm "HB Intel Estimating" appears with BuildDefinition icon
+- [ ] Add the web part to the page
+- [ ] Open browser DevTools → Console (verbose) → look for:
+  - `[HB-Intel ShellWebPart] rawBaseUrl:` — should end with the solution GUID
+  - `[HB-Intel ShellWebPart] bundleUrl:` — should include `/{guid}/estimating-app.js`
+- [ ] Open DevTools → Network → filter `estimating-app.js`
+  - Confirm the request returns 200 (not 404)
+  - Confirm the URL contains `/{guid}/estimating-app.js` (slash present)
+- [ ] Confirm the web part renders the React application (not "App bundle failed to load")
+- [ ] Save the page → reload → confirm the web part persists
+
+### If any step fails
+
+- Note the exact error, URL, and HTTP status code
+- Check if the URL contains the trailing-slash fix (`/{guid}/estimating-app.js`)
+- Check if DevTools console shows any CSP violations
+- Capture the Network tab screenshot and escalate
 
 ---
 
