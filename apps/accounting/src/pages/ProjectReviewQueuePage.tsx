@@ -125,6 +125,12 @@ export function ProjectReviewQueuePage(): ReactNode {
         ),
       },
       {
+        id: 'projectNumber',
+        header: 'Project #',
+        accessorKey: 'projectNumber',
+        cell: ({ row }) => row.original.projectNumber ?? '—',
+      },
+      {
         id: 'department',
         header: 'Department',
         accessorKey: 'department',

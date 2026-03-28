@@ -8,6 +8,7 @@ import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import type { IStatusEntry } from '@hbc/ui-kit';
 import {
+  ApiError,
   createProvisioningApiClient,
   useProvisioningStore,
   PROJECT_SETUP_STATUS_LABELS,
@@ -101,8 +102,9 @@ export function ProjectReviewDetailPage(): ReactNode {
         setRequests(listed);
         toast.success(successMessage ?? 'Action completed.');
         navigate({ to: '/project-review' });
-      } catch {
-        setActionError('Action failed. Please try again or contact an administrator.');
+      } catch (err) {
+        const detail = err instanceof ApiError ? err.message : 'Unknown error';
+        setActionError(`Action failed: ${detail}. Please try again or contact an administrator.`);
       } finally {
         setActionLoading(false);
       }
@@ -113,7 +115,7 @@ export function ProjectReviewDetailPage(): ReactNode {
   const handleApprove = useCallback(() => {
     if (!isProjectNumberValid) return;
     setApproveOpen(false);
-    performAction('ReadyToProvision', { projectNumber: projectNumber.trim() }, 'Request approved.');
+    performAction('ReadyToProvision', { projectNumber: projectNumber.trim() }, 'Request approved — provisioning started.');
     setProjectNumber('');
   }, [performAction, projectNumber, isProjectNumberValid]);
 
@@ -328,6 +330,28 @@ export function ProjectReviewDetailPage(): ReactNode {
             </HbcButton>
           </div>
         </HbcCard>
+      )}
+
+      {/* ── Post-approval lifecycle status ─────────────────────────── */}
+      {request.state === 'ReadyToProvision' && (
+        <HbcBanner variant="info">
+          Approved with project number {request.projectNumber ?? '—'}. Provisioning is starting automatically.
+        </HbcBanner>
+      )}
+
+      {request.state === 'Provisioning' && (
+        <HbcBanner variant="info">
+          Project site provisioning is in progress for {request.projectNumber ?? request.projectName}.
+        </HbcBanner>
+      )}
+
+      {request.state === 'Completed' && (
+        <HbcBanner variant="success">
+          Project site provisioned successfully.
+          {request.siteUrl && (
+            <> Site: <a href={request.siteUrl} target="_blank" rel="noopener noreferrer">{request.siteUrl}</a></>
+          )}
+        </HbcBanner>
       )}
 
       {isFailed && (
