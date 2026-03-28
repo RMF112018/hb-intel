@@ -35,7 +35,8 @@ For a developer new to the Financial module, read in this order:
 | 3 | [PH3-FIN-SOTL — Source-of-Truth Lock](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md) | Defines what data Financial owns vs. imports vs. derives |
 | 4 | [FRC-00 — Financial Replacement Crosswalk](FRC-00-Financial-Replacement-Crosswalk.md) | Maps current workbook workflows to runtime equivalents |
 | 5 | [FRM-00 — Financial Runtime Entity Model](FRM-00-Financial-Runtime-Entity-Model.md) | Formal runtime record model translating workbook concepts into code-level entities |
-| 6 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
+| 6 | [Financial-RGC — Runtime Governance Control](Financial-Runtime-Governance-Control.md) | Persistence families, repository seams, domain ownership, mutation boundaries, implementation sequence |
+| 7 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
 
 ---
 
@@ -69,6 +70,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md) | PH3-FIN-SOTL | Source-of-truth authority, custody, governance | Locked |
 | [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md) | Financial-RLR | Route and lane contradiction resolution — governs where FIN-03/04 conflict with P3-G1/G2 | Active |
 | [PH3-FIN-SOTL-A1](PH3-FIN-SOTL-A1-Default-Registries-and-Role-Boundaries.md) | PH3-FIN-SOTL-A1 | Default registries, role boundaries, override rules | Locked |
+| [Financial-RGC](Financial-Runtime-Governance-Control.md) | Financial-RGC | Runtime persistence families, repository seams, domain ownership, mutation boundaries | Active |
 
 ### 4.2 Maturity and Readiness
 
