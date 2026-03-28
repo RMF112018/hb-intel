@@ -23,7 +23,9 @@ This document defines the explicit action permissions, mutation categories, cros
 
 ### 2.1 Forecast Version–Scoped Actions
 
-Per Financial-LMG §4 and `resolveFinancialVersionAccess`:
+Per Financial-LMG §4 and `resolveFinancialVersionAccess`.
+
+**System-initiated actions** (not in the role×state matrix below): `createInitialVersion` (T1 — when no versions exist), `promoteToPublished` (T5 — P3-F1 handoff), `transitionToSuperseded` (T6 — on derive or period close). These are system operations that bypass the role check — they are triggered programmatically, not by user action.
 
 | Action | PM + Working | PM + Confirmed | PM + Published | PM + Superseded | PER + Working | PER + Confirmed | PER + Published | PER + Superseded | Leadership (all states) |
 |--------|-------------|---------------|---------------|----------------|--------------|----------------|----------------|-----------------|----------------------|
@@ -148,7 +150,7 @@ Actions are blocked by specific states. This table is the authoritative blocking
 | Blocked Action | Blocking Condition | Why |
 |---------------|-------------------|-----|
 | Edit any version-scoped field | Version is not Working | Derivation-first lifecycle; no unlock-in-place |
-| Confirm version | Checklist incomplete (G2) | Required items not done |
+| Confirm version | Checklist incomplete (G2) — 15 of 19 required items not `completed: true` | Required items not done (4 of 19 are optional per LMG §3.2) |
 | Confirm version | Stale budget lines (G3) | Unresolved reconciliation conditions |
 | Confirm version | GC/GR posture invalid (G4) | Summary cannot compute (when implemented) |
 | Derive from Superseded | Version is Superseded | Can only derive from Confirmed or Published |
@@ -158,6 +160,7 @@ Actions are blocked by specific states. This table is the authoritative blocking
 | Import into Confirmed/Published | Version is not Working | Import creates/modifies budget lines; requires mutable version |
 | Edit closed cash flow month | Month is in closed period | Period-close immutability |
 | Delete audit event | Always blocked | Audit events are permanent |
+| Edit Working version after period close | Period is Closed | Period-close governance forces auto-confirm (if gate passes) or supersede (if gate fails) per LMG §11; `IFinancialPeriodRepository.closePeriod()` enforces |
 
 ---
 

@@ -37,7 +37,7 @@ Per PH3-FIN-SOTL §4 and Financial-RGC §4.1:
 | **Buyout working state** | **Hybrid** (Financial + Procore) | Owns internal orchestration/enrichment layer | **Full write** on internal buyout lifecycle | Financial owns status progression; Procore owns formal contract data |
 | **Contingency / savings** | **Hybrid** (Financial with governance gates) | Authoritative for working-period treatment | **PE approval required** for material contingency decisions | Three-destination savings disposition per LMG §5.3 |
 | **Receivables** | Hybrid (ERP facts + Financial interpretation) | Facts from ERP; own interpretation/collection-risk | **Interpretation writes only** — fact fields read-only | ERP = facts; Financial = exposure narrative |
-| **Forecast checklist** | **Financial module** (native) | Owns checklist items per version | **PM-only write** | 19-item template; confirmation gate enforced per LMG §3 |
+| **Forecast checklist** | **Financial module** (native) | Owns checklist items per version | **PM-only write** | 19-item template (15 required, 4 optional); confirmation gate requires all 15 required items per LMG §3.1 G2 |
 | **Review / annotation** | **Financial module** (native) | Owns custody, annotations, carry-forward | **PER annotate** on Confirmed/Published; **PM disposition** | Append-only custody records; version-aware anchors |
 | **Publication** | **Financial module** (native) | Owns report-candidate designation and handoff | **System** promotes via P3-F1 | One candidate per project; immutable after publication |
 | **Audit / history** | **Financial module** (native) | Owns immutable event history | **System append-only** — never edited or deleted | FinancialAuditEvent is permanent record |
@@ -217,7 +217,7 @@ Per FIN-PR1 §3.2:
 | # | Risk | Impact | Mitigation |
 |---|------|--------|------------|
 | 1 | T04 source contracts unwritten (`IFinancialForecastSummary`, `IGCGRLine`) | Forecast Summary and GC/GR entities incomplete | Author T04 before implementing repositories |
-| 2 | No runtime write-boundary enforcement | Domain ownership rules exist only in doctrine | Repository implementations must validate per §4 action boundaries |
+| 2 | No runtime write-boundary enforcement | Domain ownership rules exist only in doctrine | Repository implementations must validate per §4 action boundaries; see also Financial-RGC §8 Risk #3 and Financial-LMG §9 for enforcement posture |
 | 3 | Commitment reference linkage model not finalized | Buyout-to-Procore reconciliation may be fragile | Define stable linkage fields when Procore connector is implemented |
-| 4 | Period lifecycle not implemented | Cannot enforce period-close invalidation | Implement `IFinancialPeriodRepository` per Financial-RGC §7 |
-| 5 | Review custody state machine not implemented | Cannot enforce review workflow boundaries | Implement `FinancialReviewCustodyRecord` per Financial-LMG §10 |
+| 4 | Period lifecycle not implemented | Cannot enforce period-close invalidation | Implement `IFinancialPeriodRepository` per Financial-RGC §7; see also Financial-ABMC §8 Risk #5 and Financial-LMG §12 Risk #2 |
+| 5 | Review custody state machine not implemented | Cannot enforce review workflow boundaries | Implement `FinancialReviewCustodyRecord` per Financial-LMG §10; see also Financial-ABMC §8 Risk #3 and Financial-LMG §12 Risk #1 |

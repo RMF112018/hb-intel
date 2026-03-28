@@ -37,7 +37,9 @@ For a developer new to the Financial module, read in this order:
 | 5 | [FRM-00 — Financial Runtime Entity Model](FRM-00-Financial-Runtime-Entity-Model.md) | Formal runtime record model translating workbook concepts into code-level entities |
 | 6 | [Financial-RGC — Runtime Governance Control](Financial-Runtime-Governance-Control.md) | Persistence families, repository seams, domain ownership, mutation boundaries, implementation sequence |
 | 7 | [Financial-LMG — Lifecycle and Mutation Governance](Financial-Lifecycle-and-Mutation-Governance.md) | Lifecycle states, transition rules, confirmation gate, access control, staleness, service enforcement |
-| 8 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
+| 8 | [Financial-SOTEC — Source-of-Truth and Entity Control](Financial-Source-of-Truth-and-Entity-Control.md) | Entity ownership tiers, per-domain authority, write boundaries |
+| 9 | [Financial-ABMC — Action Boundary and Mutation Control](Financial-Action-Boundary-and-Mutation-Control.md) | Role×state permissions, mutation categories, cross-tool rules, blocking conditions |
+| 10 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
 
 ---
 

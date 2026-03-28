@@ -7,7 +7,7 @@
 | **Owner** | Architecture lead |
 | **Created** | 2026-03-28 |
 | **Status** | Active — governs persistence, repository, and mutation implementation |
-| **References** | [FRM-04](FRM-04-Repository-and-Provider-Seam-Model.md); [BIP-04](BIP-04-Repository-Provider-and-Persistence-Seams.md); [FVC-04](FVC-04-Repository-Provider-and-Persistence-Seams.md); [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md); [Control Index](Financial-Doctrine-Control-Index.md) |
+| **References** | [FRM-04](FRM-04-Repository-and-Provider-Seam-Model.md); [BIP-04](BIP-04-Repository-Provider-and-Persistence-Seams.md); [FVC-04](FVC-04-Repository-Provider-and-Persistence-Seams.md); [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md); [Financial-SOTEC](Financial-Source-of-Truth-and-Entity-Control.md); [Financial-ABMC](Financial-Action-Boundary-and-Mutation-Control.md); [Control Index](Financial-Doctrine-Control-Index.md) |
 
 ---
 
@@ -143,7 +143,7 @@ Every persistence family has a single write owner. Repository implementations mu
 | Commitment refs (10) | **Import-only** (enrichment writes for internal fields) | Core Procore fields are read-only |
 | Buyout lines (11) | `IBuyoutRepository` | Status lifecycle per FRM-03; `ContractExecuted` gate enforced via P3-E13 |
 | Disposition items (12) | `IBuyoutRepository` | Three-destination workflow; requires explicit disposition action |
-| Review custody (13) | `IFinancialReviewRepository` | Append-only state transitions |
+| Review custody (13) | `IFinancialReviewRepository` | State transitions permitted (PM/PER per LMG §10); each transition appends an immutable custody record — no in-place edits to prior records |
 | Publication records (14) | `IFinancialPublicationRepository` | One report-candidate per project; immutable after publication |
 | Export runs (15) | `IFinancialPublicationRepository` | Append-only evidence records |
 | Audit events (16) | `IFinancialAuditRepository` | **Immutable** — append-only, never edited or deleted |

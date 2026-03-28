@@ -7,7 +7,7 @@
 | **Owner** | Architecture lead |
 | **Created** | 2026-03-28 |
 | **Status** | Active — governs lifecycle transitions, mutation guards, staleness, and service enforcement |
-| **References** | [Financial-RGC](Financial-Runtime-Governance-Control.md); [FRM-03](FRM-03-State-Mutability-and-Lifecycle.md); [FVC-03](FVC-03-Checklist-Confirmation-Gate-and-Access-Model.md); [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Control Index](Financial-Doctrine-Control-Index.md) |
+| **References** | [Financial-RGC](Financial-Runtime-Governance-Control.md); [Financial-SOTEC](Financial-Source-of-Truth-and-Entity-Control.md); [Financial-ABMC](Financial-Action-Boundary-and-Mutation-Control.md); [FRM-03](FRM-03-State-Mutability-and-Lifecycle.md); [FVC-03](FVC-03-Checklist-Confirmation-Gate-and-Access-Model.md); [PH3-FIN-SOTL](PH3-FIN-SOTL-Financial-Source-of-Truth-Lock.md); [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md); [Control Index](Financial-Doctrine-Control-Index.md) |
 
 ---
 
