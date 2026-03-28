@@ -13,6 +13,8 @@ export interface ITableStorageService {
   // Backward-compatible alias retained for existing timer callsites.
   getAllPendingFullSpec(): Promise<IProvisioningStatus[]>;
   escalateProvisioning(projectId: string, escalatedBy: string): Promise<void>;
+  /** W0-G4-T04: List all provisioning runs, optionally filtered by overallStatus. */
+  listAllRuns(status?: string): Promise<IProvisioningStatus[]>;
 }
 
 /**
@@ -119,6 +121,21 @@ export class RealTableStorageService implements ITableStorageService {
     await this.upsertProvisioningStatus(status);
   }
 
+  async listAllRuns(status?: string): Promise<IProvisioningStatus[]> {
+    await this.ensureTable();
+
+    const filter = status ? odata`overallStatus eq ${status}` : undefined;
+    const entities = this.client.listEntities<Record<string, unknown>>({
+      queryOptions: filter ? { filter } : undefined,
+    });
+
+    const results: IProvisioningStatus[] = [];
+    for await (const entity of entities) {
+      results.push(this.deserialize(entity as Record<string, unknown>));
+    }
+    return results;
+  }
+
   /** D-PH6-06 deserialization boundary for Azure Table primitive storage model. */
   private deserialize(entity: Record<string, unknown>): IProvisioningStatus {
     return {
@@ -199,5 +216,10 @@ export class MockTableStorageService implements ITableStorageService {
     }
     latest.escalatedBy = escalatedBy;
     await this.upsertProvisioningStatus(latest);
+  }
+
+  async listAllRuns(status?: string): Promise<IProvisioningStatus[]> {
+    const all = [...this.store.values()].map((s) => ({ ...s }));
+    return status ? all.filter((s) => s.overallStatus === status) : all;
   }
 }

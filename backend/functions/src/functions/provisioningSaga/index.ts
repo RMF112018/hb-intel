@@ -1,5 +1,5 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
-import type { IProvisionSiteRequest } from '@hbc/models';
+import type { IProvisionSiteRequest, IProvisioningStatus } from '@hbc/models';
 import { randomUUID } from 'crypto';
 import { createServiceFactory } from '../../services/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
@@ -214,4 +214,137 @@ app.http('escalateProvisioning', {
       return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
     }
   }, { domain: 'provisioningSaga', operation: 'escalateProvisioning' })),
+});
+
+/**
+ * W0-G4-T04 GET /api/provisioning-runs
+ * Lists all provisioning runs, optionally filtered by overallStatus. Admin-only.
+ */
+app.http('listProvisioningRuns', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'provisioning-runs',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
+
+    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return forbiddenResponse('Admin role required', requestId);
+    }
+
+    const statusFilter = request.query.get('status') ?? undefined;
+    const services = createServiceFactory();
+    const runs = await services.tableStorage.listAllRuns(statusFilter);
+    return listResponse(runs, runs.length, 1, runs.length, requestId);
+  }, { domain: 'provisioningSaga', operation: 'listProvisioningRuns' })),
+});
+
+/**
+ * W0-G4-T04 POST /api/provisioning-archive/{projectId}
+ * Archives a failed run by marking it Completed (removes from failures view). Admin-only.
+ */
+app.http('archiveFailure', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'provisioning-archive/{projectId}',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const logger = createLogger(context);
+    const requestId = extractOrGenerateRequestId(request);
+    const projectId = request.params.projectId;
+
+    if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return forbiddenResponse('Admin role required', requestId);
+    }
+
+    const services = createServiceFactory();
+    const status = await services.tableStorage.getProvisioningStatus(projectId);
+    if (!status) return notFoundResponse('ProvisioningStatus', projectId, requestId);
+
+    status.overallStatus = 'Completed';
+    status.completedAt = new Date().toISOString();
+    await services.tableStorage.upsertProvisioningStatus(status);
+
+    logger.info('Failure archived', { projectId, archivedBy: auth.claims.upn });
+    return successResponse({ message: 'Failure archived', projectId });
+  }, { domain: 'provisioningSaga', operation: 'archiveFailure' })),
+});
+
+/**
+ * W0-G4-T04 POST /api/provisioning-escalation-ack/{projectId}
+ * Acknowledges an escalation by clearing the escalation markers. Admin-only.
+ */
+app.http('acknowledgeEscalation', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'provisioning-escalation-ack/{projectId}',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const logger = createLogger(context);
+    const requestId = extractOrGenerateRequestId(request);
+    const projectId = request.params.projectId;
+
+    if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return forbiddenResponse('Admin role required', requestId);
+    }
+
+    const services = createServiceFactory();
+    const status = await services.tableStorage.getProvisioningStatus(projectId);
+    if (!status) return notFoundResponse('ProvisioningStatus', projectId, requestId);
+
+    status.escalatedBy = undefined;
+    status.escalatedAt = undefined;
+    await services.tableStorage.upsertProvisioningStatus(status);
+
+    logger.info('Escalation acknowledged', { projectId, acknowledgedBy: auth.claims.upn });
+    return successResponse({ message: 'Escalation acknowledged', projectId });
+  }, { domain: 'provisioningSaga', operation: 'acknowledgeEscalation' })),
+});
+
+const VALID_PROVISIONING_STATES = new Set([
+  'NotStarted', 'InProgress', 'BaseComplete', 'Completed', 'Failed', 'WebPartsPending',
+]);
+
+/**
+ * W0-G4-T04 POST /api/provisioning-force-state/{projectId}
+ * Forces a provisioning run into a specific state. Admin expert-tier only.
+ */
+app.http('forceStateTransition', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: 'provisioning-force-state/{projectId}',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const logger = createLogger(context);
+    const requestId = extractOrGenerateRequestId(request);
+    const projectId = request.params.projectId;
+
+    if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
+      return forbiddenResponse('Admin role required', requestId);
+    }
+
+    const body = (await request.json()) as { targetState?: string };
+    if (!body.targetState || !VALID_PROVISIONING_STATES.has(body.targetState)) {
+      return errorResponse(400, 'VALIDATION_ERROR', `targetState must be one of: ${[...VALID_PROVISIONING_STATES].join(', ')}`, requestId);
+    }
+
+    const services = createServiceFactory();
+    const status = await services.tableStorage.getProvisioningStatus(projectId);
+    if (!status) return notFoundResponse('ProvisioningStatus', projectId, requestId);
+
+    const fromState = status.overallStatus;
+    status.overallStatus = body.targetState as IProvisioningStatus['overallStatus'];
+
+    if (body.targetState === 'Completed') status.completedAt = new Date().toISOString();
+    if (body.targetState === 'Failed') status.failedAt = new Date().toISOString();
+
+    await services.tableStorage.upsertProvisioningStatus(status);
+
+    logger.warn('Manual state override applied', {
+      projectId,
+      from: fromState,
+      to: body.targetState,
+      overriddenBy: auth.claims.upn,
+    });
+    return successResponse({ message: `State overridden: ${fromState} → ${body.targetState}`, projectId });
+  }, { domain: 'provisioningSaga', operation: 'forceStateTransition' })),
 });
