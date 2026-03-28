@@ -1,11 +1,13 @@
 // tools/spfx-bundle-check.ts
-// Enforces < 1 MB total JS bundle size per SPFx webpart domain
+// Enforces total JS bundle size per SPFx webpart domain.
+// Budget raised from 1 MB to 1.5 MB to accommodate IIFE single-file format
+// (vendor code inlined instead of split into separate chunks).
 // Reference: PH7-BW-4-Vite-Bundle-Config.md §Bundle Size Check Script
 
 import fs from 'fs';
 import path from 'path';
 
-const MAX_BUNDLE_SIZE_BYTES = 1_000_000; // 1 MB hard limit
+const MAX_BUNDLE_SIZE_BYTES = 1_500_000; // 1.5 MB hard limit (IIFE single-file)
 
 const domains = [
   'accounting', 'estimating', 'project-hub', 'leadership',

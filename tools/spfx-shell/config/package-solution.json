@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-shell-template",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.0"
+    },
+    "metadata": {
+      "shortDescription": { "default": "HB Intel workspace" },
+      "longDescription": { "default": "HB Intel workspace for construction project management." },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel Feature",
+        "description": "Deploys HB Intel webpart assets.",
+        "id": "00000000-0000-0000-0000-000000000001",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-shell.sppkg"
+  }
+}

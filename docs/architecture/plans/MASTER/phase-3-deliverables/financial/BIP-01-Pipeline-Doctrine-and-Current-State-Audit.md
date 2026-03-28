@@ -58,6 +58,51 @@ If this pipeline is weak, the rest of the Financial module becomes unreliable.
 
 ---
 
+## Budget Import Operating Posture
+
+Budget Import is a governed operational workflow, not a generic upload utility. The working surface must make clear who owns the import session, what can be corrected in-surface, what is authoritative from the source import, and what requires escalation or deeper reconciliation.
+
+### Action Posture
+**Primary actor**
+- Project financial owner / designated project operations role
+
+**Actionable here**
+- initiate import
+- review parsed source contents
+- inspect mapping and normalization results
+- review reconciliation status
+- accept or reject import outcomes where permitted
+- advance to deeper reconciliation workflow where required
+
+**Escalate / deeper workflow**
+- complex mismatch resolution
+- authority conflicts
+- cross-period correction
+- source-system inconsistency resolution
+- final approval where internal governance requires elevated custody
+
+**View-only state**
+- historical imports
+- published or locked import snapshots
+- imports under review by another actor where local mutation is not permitted
+
+**Blocked / waiting conditions**
+- unresolved source conflicts
+- missing required mappings
+- invalid project context
+- stale reference data
+- pending internal review or confirmation
+
+### Lane and Route Rule
+Budget import may be entered from both lanes where appropriate, but multi-step reconciliation, recovery, and conflict resolution are governed as PWA-rich workflow behavior. Canonical project-scoped routes and recovery semantics are controlled by `FIN-03` and `FIN-04`.
+
+### Governing Reference
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
+---
+
 ## 3. Governing Repo Documents
 
 ### 3.1 Primary governing files

@@ -259,6 +259,29 @@ Cutover, compliance, and reviewability all improve if Financial has one auditabl
 
 ---
 
+## Consumer and Context Requirements
+
+The repository and provider seams defined in this file must support action-capable Financial surfaces, not only data retrieval and persistence.
+
+### Required consumer support
+The seam model must support:
+- project-scoped route-safe reads and writes
+- lane-aware consumption across PWA and SPFx
+- user-visible action posture and mutability state
+- blocked / stale / waiting state disclosure
+- workflow escalation into deeper Financial surfaces
+- durable recovery for working financial state where applicable
+
+### Governing Reference
+Operational posture, lane ownership, and route behavior are governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
+This file remains the technical seam authority and does not replace those governing docs.
+
+---
+
 ## 3. Provider Boundary Model
 
 ### 3.1 External providers

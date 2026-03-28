@@ -50,6 +50,27 @@ The model is intended to answer five questions clearly:
 
 ---
 
+## Operating-Surface Dependencies
+
+This runtime model is governed by an operating-surface doctrine in addition to domain architecture.
+
+Financial is an always-on operational module, not a passive reporting shell. The runtime architecture must support direct ownership visibility, next-action visibility, blocked-state disclosure, and explicit escalation to deeper workflow where required.
+
+This file does not replace the governing posture, action, lane, or route contracts. Those concerns are controlled by:
+- `FIN-01_Operating-Posture-and-Surface-Classification.md`
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
+### Architectural Consequence
+Repository, provider, and façade design must support:
+- action-capable surfaces rather than read-only projections
+- lane-aware consumption across PWA and SPFx
+- canonical project-context propagation
+- route-safe recovery and deep-link durability
+
+---
+
 ## 3. Current-State Reconciliation
 
 ### 3.1 What is already true in repo/runtime doctrine

@@ -1,0 +1,8 @@
+node_modules/
+lib/
+dist/
+temp/
+sharepoint/
+assets/*.js
+assets/*.css
+package-lock.json

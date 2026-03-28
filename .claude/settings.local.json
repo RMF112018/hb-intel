@@ -155,7 +155,19 @@
       "Bash(unzip -p dist/sppkg/hb-intel-estimating.sppkg \"_rels/.rels\")",
       "Bash(unzip -p dist/sppkg/hb-intel-estimating.sppkg \"AppManifest.xml\")",
       "Bash(unzip -p dist/sppkg/hb-intel-estimating.sppkg \"[Content_Types].xml\")",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "WebSearch",
+      "WebFetch(domain:www.codeproject.com)",
+      "WebFetch(domain:pnp.github.io)",
+      "WebFetch(domain:techcommunity.microsoft.com)",
+      "WebFetch(domain:rasper87.blog)",
+      "WebFetch(domain:sadomovalex.blogspot.com)",
+      "WebFetch(domain:xblogs.kompas-xnet.si)",
+      "WebFetch(domain:beyond-sharepoint.github.io)",
+      "Bash(for elem:*)",
+      "Bash(grep -c \"<$elem\")",
+      "WebFetch(domain:www.voitanos.io)",
+      "Bash(find /Users/bobbyfetting/hb-intel/.github/workflows -type f \\\\\\(-name *.yml -o -name *.yaml \\\\\\))"
     ]
   },
   "enabledPlugins": {

@@ -1,0 +1,13 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.18.0",
+    "libraryName": "hb-intel-spfx-shell",
+    "libraryId": "00000000-0000-0000-0000-000000000000",
+    "environment": "spo",
+    "packageManager": "npm",
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

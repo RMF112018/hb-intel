@@ -41,6 +41,31 @@ Without a ledger, immutability and auditability break down.
 | `PublishedMonthly` | Official monthly published version | Immutable |
 | `Superseded` | Historical version replaced by later activity | Immutable |
 
+### Runtime Action Consequences
+
+**Editable by**
+- [Insert owning role(s) permitted to mutate records in this state]
+
+**Read-only for**
+- [Insert roles who may view but not mutate]
+
+**Escalation required for**
+- [Insert actions that require review custody, publication authority, or deeper routed workflow]
+
+**Blocked conditions**
+- [Insert the conditions under which advancement or mutation is blocked]
+
+**Route / context requirement**
+- This state must remain bound to canonical project-scoped routing and durable financial context. State changes must not break deep-linkability, version continuity, or project-safe recovery behavior.
+
+**Surface expectation**
+- The user must be able to identify from the working surface whether the version is actionable here, read-only, awaiting confirmation, awaiting publication, or superseded.
+
+### Governing Reference
+This state behavior is governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
 ### 2.2 States that should NOT become version enums
 
 These should remain workflow or runtime conditions, not new version types:

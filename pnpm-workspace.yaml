@@ -4,6 +4,7 @@ packages:
   - "packages/features/*"
   - "backend/*"
   - "tools/*"
+  - "!tools/spfx-shell"
 
 # Phase 5.1 workspace dependency governance:
 # - @hbc/shell consumes @hbc/auth through workspace exports.

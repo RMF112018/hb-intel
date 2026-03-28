@@ -18,6 +18,41 @@ This specification defines the complete data model, field definitions, status en
 
 Every field defined in the T-files **MUST** be implemented. A developer reading this specification must have no ambiguity about what to build.
 
+## Financial Module Operating Posture
+
+The Financial module is an **always-on core operating module** within Project Hub. It is not a viewer-first reporting surface, spreadsheet mirror, or passive dashboard. Implementation is not complete unless a user can identify current financial posture, ownership, next action, blocked state, and escalation path without hunting.
+
+The Financial module also acts as a **spine-publishing contributor** to Project Hub, publishing state and signals into shared cross-module operating surfaces including Health, Activity, Work Queue, and Related Items where applicable.
+
+---
+
+The Financial domain includes, at minimum, the following governed operating surfaces:
+- Budget import and reconciliation
+- Forecast Summary and forecast versioning
+- Forecast checklist and internal confirmation
+- GC/GR
+- Cash Flow
+- Buyout
+- Financial review / PER / publication support
+- History, audit, and derivative financial state
+
+Buyout is governed as a Financial sub-domain and does not establish a separate module posture.
+
+### Governing Dependencies
+This section is summarized here for implementation clarity. The deeper governing authority is:
+- `FIN-01_Operating-Posture-and-Surface-Classification.md`
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
+### Acceptance Implications
+A Financial implementation is not acceptable if it only renders data. The working surface must expose:
+- who owns the current step
+- what can be acted on here
+- what is view-only
+- what is blocked, stale, or waiting
+- what must be escalated or opened in a deeper workflow
+
 ---
 
 ## Operating Model

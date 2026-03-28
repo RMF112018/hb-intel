@@ -143,6 +143,20 @@ For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The crit
 | 6.1.11 | All Activity Spine events, Health Spine metrics, and Work Queue items implemented per P3-E4-T08 §14 | Complete | README Stage 7.1 T08 (10 activity spine event types, 10 health spine metric definitions, 8 work queue item types, v0.1.7) | P3-E4-T08 §14 |
 | 6.1.12 | Spreadsheet replacement notes verified | In Progress | Financial Replacement Crosswalk package (FRC-00 through FRC-05) maps all 9 operating files to runtime equivalents with 14-column crosswalk, 34-record runtime model, field-level mappings, mutability matrix, backend ties, workflow states, cutover readiness, and three-way gap analysis. P3-E3 §2 and P3-E4 updated with crosswalk references. Pending: runtime UI surfaces and parallel-run validation. | P3-E3 §2; [`financial/FRC-00`](financial/FRC-00-Financial-Replacement-Crosswalk.md) |
 
+### Financial Governance and Operating-Surface Verification
+
+- [ ] `FIN-01` posture has been incorporated into the Financial master specification and viewer-first implementation language has been removed.
+- [ ] `FIN-02` action posture has been reflected in the executable Financial workflow files.
+- [ ] `FIN-03` lane ownership has been applied to Financial capability routing and surface design.
+- [ ] `FIN-04` route and context contract has been applied to the Financial route family and project-switch behavior.
+- [ ] Financial surfaces expose actionable-here vs view-only vs escalate vs blocked / stale / waiting posture without hunting.
+- [ ] Canonical project-scoped routing exists for Financial home and all required sub-surfaces.
+- [ ] PWA and SPFx behavior is aligned to the Financial lane matrix.
+- [ ] Acceptance evidence demonstrates that Financial is operational, not merely visible.
+
+### Evidence Expectation
+Financial readiness cannot be marked complete based only on rendered UI or placeholder routes. Evidence must show direct user action, correct route ownership, visible posture, and correct lane behavior.
+
 ### 6.2 Schedule
 
 For the comprehensive 50-item Schedule acceptance gate, see **P3-E5-T11 §25**. The criteria below are the high-level module-level gates required for Phase 3 release readiness; all must pass before the P3-E5-T11 detailed gate is evaluated.

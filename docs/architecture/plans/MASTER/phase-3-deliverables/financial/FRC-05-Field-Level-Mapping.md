@@ -16,6 +16,20 @@
 
 ---
 
+## Workflow Translation Rule
+
+Every translated Financial workflow must preserve operating posture, not just data movement. Each workflow in this file must identify:
+- the owning actor
+- the in-surface user actions
+- the escalation path
+- the blocked / stale / waiting states
+- the canonical route owner
+- the lane owner
+
+If a workflow cannot express those items clearly, it is not ready for implementation as an operational Financial surface.
+
+---
+
 ## 1. Forecast Summary — Field-Level Mapping
 
 Source: `Financial Forecast Summary & Checklist.xlsx` → Summary tab
@@ -83,6 +97,38 @@ Target: `IFinancialForecastSummary` (P3-E4-T04 §5)
 6. Updated summary persisted via IFinancialRepository.updateForecastSummary()
 ```
 
+### Operational Posture
+
+**Primary actor**
+- [Insert primary owning role for this workflow]
+
+**Actionable here**
+- [Insert the direct user-owned actions available in this surface]
+- [Insert additional in-surface edits / confirmations / derivations / updates]
+
+**Escalate / deeper workflow**
+- [Insert actions that must open a deeper Financial workflow or routed workspace]
+- [Insert actions requiring review custody, publication authority, or non-local confirmation]
+
+**View-only state**
+- [Insert the conditions under which this workflow is visible but not directly editable]
+
+**Blocked / stale / waiting conditions**
+- [Insert dependency, reconciliation, review, or timing conditions that prevent action]
+- [Insert stale-state or mismatched-state indicators that must be surfaced]
+
+**Route owner**
+- [Insert canonical route or owning Financial surface from `FIN-04`]
+
+**Lane owner**
+- [Insert PWA / SPFx ownership from `FIN-03`]
+
+### Governing Reference
+This workflow posture is governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
 ---
 
 ## 2. Forecast Checklist — Field-Level Mapping
@@ -127,6 +173,38 @@ Target: `IForecastChecklistItem` (P3-E4-T03 §4)
 5. On version derivation: new Working version starts with EMPTY checklist
    (checklist is version-scoped; prior completion does not carry forward)
 ```
+
+### Operational Posture
+
+**Primary actor**
+- [Insert primary owning role for this workflow]
+
+**Actionable here**
+- [Insert the direct user-owned actions available in this surface]
+- [Insert additional in-surface edits / confirmations / derivations / updates]
+
+**Escalate / deeper workflow**
+- [Insert actions that must open a deeper Financial workflow or routed workspace]
+- [Insert actions requiring review custody, publication authority, or non-local confirmation]
+
+**View-only state**
+- [Insert the conditions under which this workflow is visible but not directly editable]
+
+**Blocked / stale / waiting conditions**
+- [Insert dependency, reconciliation, review, or timing conditions that prevent action]
+- [Insert stale-state or mismatched-state indicators that must be surfaced]
+
+**Route owner**
+- [Insert canonical route or owning Financial surface from `FIN-04`]
+
+**Lane owner**
+- [Insert PWA / SPFx ownership from `FIN-03`]
+
+### Governing Reference
+This workflow posture is governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
 
 **Gap vs. current process:** Today the checklist is honor-system — PM self-certifies without enforcement. The future model enforces gate-blocking on required items. This is a behavioral change that requires PM training.
 
@@ -175,6 +253,38 @@ Target: `IGCGRLine` (P3-E4-T04 §6)
 8. On version derivation: GC/GR lines copied via copyGCGRLinesForDerivation()
    - New UUIDs generated; field values preserved as starting state
 ```
+
+### Operational Posture
+
+**Primary actor**
+- [Insert primary owning role for this workflow]
+
+**Actionable here**
+- [Insert the direct user-owned actions available in this surface]
+- [Insert additional in-surface edits / confirmations / derivations / updates]
+
+**Escalate / deeper workflow**
+- [Insert actions that must open a deeper Financial workflow or routed workspace]
+- [Insert actions requiring review custody, publication authority, or non-local confirmation]
+
+**View-only state**
+- [Insert the conditions under which this workflow is visible but not directly editable]
+
+**Blocked / stale / waiting conditions**
+- [Insert dependency, reconciliation, review, or timing conditions that prevent action]
+- [Insert stale-state or mismatched-state indicators that must be surfaced]
+
+**Route owner**
+- [Insert canonical route or owning Financial surface from `FIN-04`]
+
+**Lane owner**
+- [Insert PWA / SPFx ownership from `FIN-03`]
+
+### Governing Reference
+This workflow posture is governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
 
 **Gap vs. current process:** Today, GC/GR variance is computed by VBA macros, and GC totals are manually transcribed to the Forecast Summary. The future model eliminates both — variances are pure functions, and GC aggregation auto-feeds the summary.
 
@@ -274,6 +384,38 @@ Source from `ar-aging.json`:
 8. Health spine metrics updated: peakCashRequirement, cashFlowAtRisk
 ```
 
+### Operational Posture
+
+**Primary actor**
+- [Insert primary owning role for this workflow]
+
+**Actionable here**
+- [Insert the direct user-owned actions available in this surface]
+- [Insert additional in-surface edits / confirmations / derivations / updates]
+
+**Escalate / deeper workflow**
+- [Insert actions that must open a deeper Financial workflow or routed workspace]
+- [Insert actions requiring review custody, publication authority, or non-local confirmation]
+
+**View-only state**
+- [Insert the conditions under which this workflow is visible but not directly editable]
+
+**Blocked / stale / waiting conditions**
+- [Insert dependency, reconciliation, review, or timing conditions that prevent action]
+- [Insert stale-state or mismatched-state indicators that must be surfaced]
+
+**Route owner**
+- [Insert canonical route or owning Financial surface from `FIN-04`]
+
+**Lane owner**
+- [Insert PWA / SPFx ownership from `FIN-03`]
+
+### Governing Reference
+This workflow posture is governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
+
 **Gap vs. current process:** Today, the workbook has no forecast accuracy tracking, no confidence scoring, no automated actual-vs-forecast comparison, and no deficit alerting. The future model adds all of these.
 
 ---
@@ -366,6 +508,38 @@ Per disposition item:
    - BuyoutSavingsDispositioned spine event published per disposition action
 7. PM marks line Complete → status: Complete
 ```
+
+### Operational Posture
+
+**Primary actor**
+- [Insert primary owning role for this workflow]
+
+**Actionable here**
+- [Insert the direct user-owned actions available in this surface]
+- [Insert additional in-surface edits / confirmations / derivations / updates]
+
+**Escalate / deeper workflow**
+- [Insert actions that must open a deeper Financial workflow or routed workspace]
+- [Insert actions requiring review custody, publication authority, or non-local confirmation]
+
+**View-only state**
+- [Insert the conditions under which this workflow is visible but not directly editable]
+
+**Blocked / stale / waiting conditions**
+- [Insert dependency, reconciliation, review, or timing conditions that prevent action]
+- [Insert stale-state or mismatched-state indicators that must be surfaced]
+
+**Route owner**
+- [Insert canonical route or owning Financial surface from `FIN-04`]
+
+**Lane owner**
+- [Insert PWA / SPFx ownership from `FIN-03`]
+
+### Governing Reference
+This workflow posture is governed by:
+- `FIN-02_Action-Posture-and-User-Owned-Work-Matrix.md`
+- `FIN-03_Lane-Ownership-Matrix.md`
+- `FIN-04_Route-and-Context-Contract.md`
 
 **Gap vs. current process:** The current buyout log has no compliance gate, no savings recognition, no savings disposition workflow, no dollar-weighted completion metric, and no structured lifecycle states. All of these are new capabilities.
 

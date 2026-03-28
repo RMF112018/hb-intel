@@ -66,6 +66,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install SPFx shell dependencies
+        # Isolated SPFx 1.18 project with TS 4.x — NOT in pnpm workspace.
+        working-directory: tools/spfx-shell
+        run: npm ci
+
       - name: Restore Turborepo cache
         # D-PH7-BW-9: Turborepo remote cache key for incremental builds.
         uses: actions/cache@v4
@@ -123,9 +128,10 @@ jobs:
         # D-PH7-BW-9: ensure no GUID/port collisions across 11 apps.
         run: npx tsx tools/validate-manifests.ts
 
-      - name: Package .sppkg files
-        # D-PH7-BW-9: create ZIP archives for App Catalog upload.
-        run: npx tsx tools/package-sppkg.ts
+      - name: Package .sppkg files (official SPFx tooling)
+        # Replaces custom OPC assembly with official gulp package-solution.
+        # See docs/architecture/reviews/estimating-spfx-packaging-remediation.md
+        run: npx tsx tools/build-spfx-package.ts
 
       - name: Upload .sppkg artifacts
         # D-PH7-BW-9: retain packaged .sppkg files for deploy workflow.

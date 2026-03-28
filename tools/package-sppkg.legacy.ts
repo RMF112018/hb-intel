@@ -1,9 +1,13 @@
-// tools/package-sppkg.ts
+// RETIRED: tools/package-sppkg.legacy.ts
+// Replaced by tools/build-spfx-package.ts + tools/spfx-shell/ (official SPFx gulp tooling).
+// See docs/architecture/reviews/estimating-spfx-packaging-remediation.md
+//
+// Original description:
 // Packages each SPFx webpart domain into a valid .sppkg OPC archive for App Catalog deployment.
 // A .sppkg is an Open Packaging Conventions (OPC) archive, not a plain ZIP.
-// It MUST contain: [Content_Types].xml, _rels/.rels, AppManifest.xml, and client-side assets.
+// It MUST contain: [Content_Types].xml, _rels/.rels, AppManifest.xml, and runtime component manifests.
 // Reference: PH7-BW-9-CI-CD-Pipeline.md §.sppkg Packaging Script
-// @decision D-PH7-BW-9
+// @decision D-PH7-BW-9 (superseded by SPFx shell approach)
 
 import fs from 'fs';
 import path from 'path';
@@ -48,8 +52,6 @@ function escapeXml(str: string): string {
 
 /**
  * Generates [Content_Types].xml for the OPC package.
- * Maps file extensions to MIME types and declares explicit overrides
- * for the root relationship and AppManifest.
  */
 function generateContentTypes(assetFiles: string[]): string {
   const extSet = new Set<string>();
@@ -92,8 +94,6 @@ ${defaults}
 
 /**
  * Generates _rels/.rels — the root OPC relationship file.
- * Must contain exactly one relationship pointing to AppManifest.xml
- * with the SharePoint package-manifest relationship type.
  */
 function generateRootRels(): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -104,26 +104,108 @@ function generateRootRels(): string {
 
 /**
  * Generates AppManifest.xml for an SPFx client-side solution package.
- *
- * For SPFx client-side solutions (IsClientSideSolution="true"), the <App>
- * element must contain NO child elements — no <Properties>, no <StartPage>,
- * no <AppPrincipal>, no <WebTemplate>. Those are SharePoint Add-in manifest
- * concepts and cause upload validation failures in the app catalog.
- *
- * SharePoint discovers the solution metadata from:
- *   - Attributes on <App>: Name, ProductID, Version, SharePointMinVersion
- *   - Component .manifest.json files inside ClientSideAssets/
- *   - config/package-solution.json settings (skipFeatureDeployment, etc.)
+ * Matches the output of the official SPFx `gulp package-solution` toolchain.
  */
-function generateAppManifest(solution: { name: string; id: string; version: string }): string {
+function generateAppManifest(
+  solution: {
+    name: string;
+    id: string;
+    version: string;
+    skipFeatureDeployment?: boolean;
+    isDomainIsolated?: boolean;
+    developer?: { name: string; websiteUrl: string; privacyUrl: string; termsOfUseUrl: string; mpnId: string };
+    metadata?: {
+      shortDescription?: { default: string };
+      longDescription?: { default: string };
+    };
+  },
+  title: string,
+): string {
+  const devProps = solution.developer;
+  const devJson = devProps
+    ? JSON.stringify({
+        name: devProps.name ?? '',
+        websiteUrl: devProps.websiteUrl ?? '',
+        privacyUrl: devProps.privacyUrl ?? '',
+        termsOfUseUrl: devProps.termsOfUseUrl ?? '',
+        mpnId: devProps.mpnId || 'Undefined-1.18.0',
+      })
+    : null;
+
+  const shortDesc = solution.metadata?.shortDescription?.default;
+  const longDesc = solution.metadata?.longDescription?.default;
+
+  let propsContent = `    <Title>${escapeXml(title)}</Title>`;
+  if (devJson) {
+    propsContent += `\n    <DeveloperProperties>${escapeXml(devJson)}</DeveloperProperties>`;
+  }
+  if (shortDesc) {
+    propsContent += `\n    <ShortDescription>\n      <LocalizedString CultureName="default">${escapeXml(shortDesc)}</LocalizedString>\n    </ShortDescription>`;
+  }
+  if (longDesc) {
+    propsContent += `\n    <LongDescription>\n      <LocalizedString CultureName="default">${escapeXml(longDesc)}</LocalizedString>\n    </LongDescription>`;
+  }
+
   return `<?xml version="1.0" encoding="utf-8"?>
 <App xmlns="http://schemas.microsoft.com/sharepoint/2012/app/manifest"
      Name="${escapeXml(solution.name)}"
      ProductID="{${solution.id}}"
      Version="${solution.version}"
      SharePointMinVersion="16.0.0.0"
-     IsClientSideSolution="true">
+     IsClientSideSolution="true"
+     SkipFeatureDeployment="${solution.skipFeatureDeployment ?? true}"
+     IsDomainIsolated="${solution.isDomainIsolated ?? false}">
+  <Properties>
+${propsContent}
+  </Properties>
 </App>`;
+}
+
+// ── Runtime manifest generator ─────────────────────────────────────────────
+
+/**
+ * Transforms a source component manifest into a runtime manifest with loaderConfig.
+ *
+ * The source manifest (e.g., EstimatingWebPart.manifest.json) is a development-time
+ * artifact that declares component metadata. SharePoint's runtime loader requires a
+ * RUNTIME manifest that additionally includes:
+ *
+ *   loaderConfig.internalModuleBaseUrls — base URL for asset resolution
+ *   loaderConfig.entryModuleId          — which JS module is the entry point
+ *   loaderConfig.scriptResources        — map of ALL JS modules in the bundle
+ *
+ * Without loaderConfig, SharePoint registers the web part but cannot load its code.
+ * This is the exact transformation that `gulp bundle && gulp package-solution` performs.
+ */
+function generateRuntimeManifest(
+  sourceManifest: Record<string, unknown>,
+  solutionVersion: string,
+  jsFiles: string[],
+  entryFile: string,
+): Record<string, unknown> {
+  // Build the scriptResources map from actual Vite output files
+  const scriptResources: Record<string, { type: string; path: string }> = {};
+  const entryModuleId = path.basename(entryFile, '.js');
+
+  for (const jsFile of jsFiles) {
+    const moduleId = path.basename(jsFile, '.js');
+    scriptResources[moduleId] = {
+      type: 'path',
+      path: jsFile,
+    };
+  }
+
+  return {
+    ...sourceManifest,
+    version: solutionVersion,
+    loaderConfig: {
+      internalModuleBaseUrls: [
+        'https://spclientsideassetlibrary/',
+      ],
+      entryModuleId,
+      scriptResources,
+    },
+  };
 }
 
 // ── Main packaging loop ────────────────────────────────────────────────────
@@ -155,11 +237,28 @@ for (const domain of domains) {
   }
 
   const solutionPkg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const sourceManifest = JSON.parse(fs.readFileSync(manifestFiles[0], 'utf8'));
   const sppkgName = solutionPkg.paths.zippedPackage.replace('solution/', '');
   const outputPath = path.join('dist', 'sppkg', sppkgName);
 
-  // Collect asset files for [Content_Types].xml
-  const assetFiles = walkDir(distPath).map((f) => path.relative(distPath, f));
+  // Derive the package title from the webpart manifest
+  const title = sourceManifest.preconfiguredEntries?.[0]?.title?.default ?? solutionPkg.solution.name;
+
+  // Collect JS files from the dist directory for loaderConfig
+  const allDistFiles = walkDir(distPath).map((f) => path.relative(distPath, f));
+  const jsFiles = allDistFiles.filter((f) => f.endsWith('.js'));
+
+  // Determine entry file — Vite entry name is always {domain}-webpart.js
+  const expectedEntry = `${domain}-webpart.js`;
+  const entryFile = jsFiles.find((f) => f === expectedEntry) ?? jsFiles[0];
+
+  // Generate the runtime manifest with loaderConfig
+  const runtimeManifest = generateRuntimeManifest(
+    sourceManifest,
+    solutionPkg.solution.version,
+    jsFiles,
+    entryFile,
+  );
 
   const output = createWriteStream(outputPath);
   const archive = archiver('zip', { zlib: { level: 9 } });
@@ -173,28 +272,34 @@ for (const domain of domains) {
   archive.pipe(output);
 
   // OPC root structure
-  archive.append(generateContentTypes(assetFiles), { name: '[Content_Types].xml' });
+  archive.append(generateContentTypes(allDistFiles), { name: '[Content_Types].xml' });
   archive.append(generateRootRels(), { name: '_rels/.rels' });
   archive.append(
-    generateAppManifest(solutionPkg.solution),
+    generateAppManifest(solutionPkg.solution, title),
     { name: 'AppManifest.xml' },
   );
 
-  // Client-side assets from Vite build
-  archive.directory(distPath + '/', 'ClientSideAssets');
+  // Runtime component manifest (with loaderConfig) replaces the raw source manifest
+  const manifestFileName = path.basename(manifestFiles[0]);
+  archive.append(
+    JSON.stringify(runtimeManifest, null, 2),
+    { name: `ClientSideAssets/${manifestFileName}` },
+  );
 
-  // Include the webpart manifest in the package
-  archive.file(manifestFiles[0], {
-    name: `ClientSideAssets/${path.basename(manifestFiles[0])}`,
-  });
+  // Client-side assets from Vite build (excluding any .manifest.json already in dist)
+  for (const file of allDistFiles) {
+    archive.file(path.join(distPath, file), { name: `ClientSideAssets/${file}` });
+  }
 
   await archive.finalize();
   await closePromise;
 
   // Post-build validation
   const stats = fs.statSync(outputPath);
+  const hasLoader = !!runtimeManifest.loaderConfig;
   console.log(`✅ Packaged: ${outputPath} (${(stats.size / 1024).toFixed(1)} KB)`);
   console.log(`   OPC: [Content_Types].xml ✓  _rels/.rels ✓  AppManifest.xml ✓`);
+  console.log(`   Runtime manifest: loaderConfig ${hasLoader ? '✓' : '✗'}  entry: ${entryFile}  modules: ${jsFiles.length}`);
 }
 
 if (!allPassed) {
