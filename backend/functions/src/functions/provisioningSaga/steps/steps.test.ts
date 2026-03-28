@@ -67,7 +67,13 @@ describe('D-PH6-15 step executors (1-7)', () => {
     const services = createMockServices();
     const status = makeStatus();
 
-    services.sharePoint.documentLibraryExists.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    services.sharePoint.documentLibraryExists
+      .mockResolvedValueOnce(false)   // 1st pass: Project Documents
+      .mockResolvedValueOnce(false)   // 1st pass: Drawings
+      .mockResolvedValueOnce(false)   // 1st pass: Specifications
+      .mockResolvedValueOnce(true)    // 2nd pass: Project Documents
+      .mockResolvedValueOnce(true)    // 2nd pass: Drawings
+      .mockResolvedValueOnce(true);   // 2nd pass: Specifications
 
     const created = await executeStep2(services, status);
     const skipped = await executeStep2(services, status);
@@ -141,13 +147,9 @@ describe('D-PH6-15 step executors (1-7)', () => {
     const ok = await executeStep6(services, status);
 
     expect(ok.status).toBe('Completed');
-    // OpEx should be included exactly once through deduplication.
-    // Step module reads OPEX_MANAGER_UPN at import time; assert current invocation contract.
-    expect(services.sharePoint.setGroupPermissions).toHaveBeenCalledWith(
-      status.siteUrl,
-      ['member1@hb.com', 'opex@hb.com'],
-      undefined
-    );
+    // Step 6 uses Entra ID 3-group model: create groups + assign SP permission levels.
+    expect(services.graph.createSecurityGroup).toHaveBeenCalledTimes(3);
+    expect(services.sharePoint.assignGroupToPermissionLevel).toHaveBeenCalledTimes(3);
   });
 
   it('step 7 uses idempotent hub association and compensation path', async () => {

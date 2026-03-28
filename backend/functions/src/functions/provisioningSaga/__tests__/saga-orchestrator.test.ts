@@ -55,7 +55,7 @@ describe('D-PH6-15 SagaOrchestrator', () => {
   it('runs compensation and marks failed when a step errors', async () => {
     const services = createMockServices();
     const logger = makeLogger();
-    services.sharePoint.uploadTemplateFiles.mockRejectedValueOnce(new Error('upload failed'));
+    services.sharePoint.uploadTemplateFile.mockRejectedValueOnce(new Error('upload failed'));
 
     const orchestrator = new SagaOrchestrator(services, logger);
     await orchestrator.execute(request);

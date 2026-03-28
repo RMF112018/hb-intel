@@ -146,13 +146,16 @@
       "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
       "Bash(find /Users/bobbyfetting/hb-intel/packages /Users/bobbyfetting/hb-intel/apps -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
       "Bash(grep -rn '#[0-9A-Fa-f]\\\\{3,8\\\\}' /Users/bobbyfetting/hb-intel/packages/features/project-hub/src/layout-family/components/*.tsx)",
-      "Bash(2)"
+      "Bash(2)",
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.md -o -name *.txt -o -name FAILURES -o -name KNOWN* \\\\\\))",
+      "Bash(npm test:*)",
+      "Bash(__NEW_LINE_70abf083f57d8520__ bash:*)"
     ]
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": false,
     "context-mode@context-mode": false,
     "superpowers@claude-plugins-official": true
   }
