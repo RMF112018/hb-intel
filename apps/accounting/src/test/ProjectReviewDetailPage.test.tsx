@@ -271,6 +271,35 @@ describe('ProjectReviewDetailPage', () => {
     });
   });
 
+  // D-REGR-F5: Approve button disabled without valid project number (deficiency regression)
+  it('approve button is disabled until valid project number is entered', async () => {
+    const request = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Approve Request' }));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('##-###-##')).toBeTruthy();
+    });
+
+    // Approve button should be disabled when project number is empty
+    const approveBtn = screen.getByRole('button', { name: 'Approve' });
+    expect(approveBtn).toHaveProperty('disabled', true);
+
+    // Enter invalid format — still disabled
+    fireEvent.change(screen.getByPlaceholderText('##-###-##'), { target: { value: '123' } });
+    expect(approveBtn).toHaveProperty('disabled', true);
+
+    // Enter valid format — now enabled
+    fireEvent.change(screen.getByPlaceholderText('##-###-##'), { target: { value: '25-001-01' } });
+    expect(approveBtn).toHaveProperty('disabled', false);
+  });
+
   // G4-T03-014
   it('no retry/recovery actions in review surface', () => {
     const request = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });

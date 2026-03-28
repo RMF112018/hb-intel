@@ -51,6 +51,7 @@ export default defineConfig({
           testTimeout: 20000,
           hookTimeout: 20000,
           include: [
+            'src/functions/projectRequests/**/*.test.ts',
             'src/functions/provisioningSaga/**/*.test.ts',
             'src/functions/provisioningSaga/steps/**/*.test.ts',
             'src/middleware/validateToken.test.ts',
