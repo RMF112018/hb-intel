@@ -254,6 +254,7 @@ A budget re-import creates staleness by:
 | Import-only for external records | `IBudgetImportRepository`, `ICashFlowRepository` (actuals), `ICommitmentReferenceRepository` | UI bypass would allow direct authoring of imported data |
 | Annotation state-gate | `IFinancialReviewRepository` | UI bypass would allow annotations on Working versions |
 | Derivation-first (no unlock) | All version-scoped repositories | UI bypass would allow mutations to frozen versions |
+| Period close triggers T6 for Working versions | `IFinancialPeriodRepository.closePeriod()` | System must supersede or force-confirm Working versions when a period closes; UI cannot be trusted to initiate this |
 
 ### 9.2 What May Be Evaluated in UI (Informational)
 
@@ -315,7 +316,7 @@ Per FRM-03 §5.2, the following period states are required:
 | State | Meaning |
 |-------|---------|
 | `Open` | Active reporting period; Working version editable |
-| `Closed` | Period finalized; Working version transitions to Superseded or must be confirmed |
+| `Closed` | Period finalized; `IFinancialPeriodRepository.closePeriod()` evaluates the current Working version: if confirmation gate passes, auto-confirm to ConfirmedInternal (T3); if gate fails, transition to Superseded (T6) with `derivationReason: 'PeriodClosedUnconfirmed'` |
 | `Reopened` | Governed exception; requires explicit authority |
 
 **Reopen governance:** Per PH3-FIN-SOTL §13, period reopen is a governed action requiring explicit authority. The `IFinancialPeriodRepository` must enforce close/reopen transitions.
@@ -328,7 +329,7 @@ Per FRM-03 §5.2, the following period states are required:
 |---|------|--------|----------------|
 | 1 | Review custody states not implemented | Cannot enforce review workflow; approval is informal | Implement `FinancialReviewCustodyRecord` and state machine |
 | 2 | Period lifecycle not implemented | Cannot enforce period close/reopen governance | Implement `FinancialReportingPeriod` with state transitions |
-| 3 | Summary validation (G4) not implemented | Confirmation gate incomplete — can confirm with invalid GC/GR posture | Implement G4 validator in domain service |
+| 3 | Summary validation (G4) not implemented | Confirmation gate incomplete — can confirm with invalid GC/GR posture | Implement G4 validator in domain service; blocked upstream by T04 source contracts (see [Financial-RGC §8 Risk #1](Financial-Runtime-Governance-Control.md)) |
 | 4 | Cross-tool readiness aggregation undefined | No module-level readiness flag combining checklist + reconciliation + review + publication | Define aggregation service after per-tool readiness is implemented |
 | 5 | Contingency hold/release model not defined | Savings disposed to `HeldInContingency` but no release workflow exists | Define contingency lifecycle when buyout implementation advances |
 | 6 | Audit event schema not finalized | `FinancialAuditEvent` structure needs field-level specification | Define envelope schema when audit repository is implemented |

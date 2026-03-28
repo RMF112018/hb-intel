@@ -36,7 +36,8 @@ For a developer new to the Financial module, read in this order:
 | 4 | [FRC-00 — Financial Replacement Crosswalk](FRC-00-Financial-Replacement-Crosswalk.md) | Maps current workbook workflows to runtime equivalents |
 | 5 | [FRM-00 — Financial Runtime Entity Model](FRM-00-Financial-Runtime-Entity-Model.md) | Formal runtime record model translating workbook concepts into code-level entities |
 | 6 | [Financial-RGC — Runtime Governance Control](Financial-Runtime-Governance-Control.md) | Persistence families, repository seams, domain ownership, mutation boundaries, implementation sequence |
-| 7 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
+| 7 | [Financial-LMG — Lifecycle and Mutation Governance](Financial-Lifecycle-and-Mutation-Governance.md) | Lifecycle states, transition rules, confirmation gate, access control, staleness, service enforcement |
+| 8 | This index — §5 Capability Crosswalk | Then drill into the specific capability you're working on |
 
 ---
 

@@ -8,7 +8,7 @@
 | **Owner** | Architecture lead |
 | **Update Authority** | Architecture lead; updated as maturity evidence accumulates |
 | **Created** | 2026-03-28 |
-| **References** | [P3-H1](../P3-H1-Acceptance-Staging-Release-Readiness-Checklist.md); [P3-E4-T09](../../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [FRM-05](FRM-05-Repo-Truth-Gaps-and-Implementation-Readiness.md); [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md); [Reconciliation Summary](_reconciliation/financial-repo-truth-reconciliation-summary.md); [Normalization Summary](_reconciliation/financial-maturity-model-normalization-summary.md); [Closure Note](_reconciliation/financial-repo-truth-reconciliation-closure.md) |
+| **References** | [P3-H1](../P3-H1-Acceptance-Staging-Release-Readiness-Checklist.md); [P3-E4-T09](../../04_Phase-3_Project-Hub-and-Project-Context-Plan.md); [FRM-05](FRM-05-Repo-Truth-Gaps-and-Implementation-Readiness.md); [Financial-RLR](Financial-Route-and-Lane-Reconciliation.md); [Financial-RGC](Financial-Runtime-Governance-Control.md); [Financial-LMG](Financial-Lifecycle-and-Mutation-Governance.md); [Reconciliation Summary](_reconciliation/financial-repo-truth-reconciliation-summary.md); [Normalization Summary](_reconciliation/financial-maturity-model-normalization-summary.md); [Closure Note](_reconciliation/financial-repo-truth-reconciliation-closure.md) |
 
 ---
 

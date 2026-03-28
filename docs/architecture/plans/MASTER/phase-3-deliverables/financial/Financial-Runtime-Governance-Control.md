@@ -118,7 +118,7 @@ Per FIN-PR1 §3.2: Financial data access is at **Stage 1 (Doctrine-Defined)**. A
 |-------------|-----------------|----------------------|------------|
 | Budget baseline | Procore import | Store copies, history, mappings | **No direct authoring** — import-only |
 | Actual cost | ERP/external system | Sync and use for comparisons | **Read-only** — no Financial writes |
-| Monthly forecast | **Financial module** | Owns working versions, review, approval, archival | **Full write authority** on working state |
+| Monthly forecast | **Financial module** | Owns working versions, review, approval, archival | **PM-only write authority** on Working state (see [Financial-LMG §4](Financial-Lifecycle-and-Mutation-Governance.md) for role-differentiated access matrix) |
 | Buyout working state | **Hybrid** | Owns internal orchestration/enrichment | Financial owns internal layer; Procore owns formal commitments |
 | Cash flow forecast | **Financial module** | Owns working and confirmed versions | **Full write authority** |
 | Commitments | Hybrid (Procore primary) | Core fields from Procore; enrichment fields internal | **Enrichment writes only** — no core field mutation |
@@ -147,6 +147,12 @@ Every persistence family has a single write owner. Repository implementations mu
 | Publication records (14) | `IFinancialPublicationRepository` | One report-candidate per project; immutable after publication |
 | Export runs (15) | `IFinancialPublicationRepository` | Append-only evidence records |
 | Audit events (16) | `IFinancialAuditRepository` | **Immutable** — append-only, never edited or deleted |
+| Import sessions (17) | `IBudgetImportRepository` | Append-only session records; session is immutable after completion |
+| Import row lineage (18) | `IBudgetImportRepository` | Raw and normalized rows are immutable post-import; retained for audit |
+| Import validation ledger (19) | `IBudgetImportRepository` | Validation reports are immutable post-import |
+| Identity/reconciliation ledger (20) | `IBudgetImportRepository` | Reconciliation conditions are PM-resolvable (Pending → Resolved/Dismissed); resolution is final |
+| Import execution ledger (21) | `IBudgetImportRepository` | Execution records are immutable post-import |
+| Import audit ledger (22) | `IBudgetImportRepository` | **Immutable** — append-only import event history |
 
 ---
 
@@ -223,6 +229,6 @@ For an implementer advancing Financial from Stage 1 (Doctrine-Defined) to Stage 
 |---|------|--------|------------|
 | 1 | T04 source contracts unwritten | Forecast Summary and GC/GR blocked at Stage 2 | Author T04 before implementing these repositories |
 | 2 | SharePoint list migration strategy not yet determined | Transitional lists may constrain early implementation | Start with MockFinancialRepository; defer real persistence decisions |
-| 3 | No authority enforcement in code | Domain ownership rules exist only in doctrine | Repository implementations must validate ownership tier before writes |
+| 3 | No authority enforcement in code | Domain ownership rules exist only in doctrine | Repository implementations must validate ownership tier before writes; enforcement posture defined in [Financial-LMG §9](Financial-Lifecycle-and-Mutation-Governance.md) |
 | 4 | Audit event schema not finalized | FinancialAuditEvent structure needs field-level specification | Audit repository can start with generic event envelope |
 | 5 | P3-F1 publication handoff interface not defined | Publication repository needs handoff contract | Stub-ready via `promoteToPublished()` — needs runtime wiring |
