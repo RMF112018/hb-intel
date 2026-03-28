@@ -9,7 +9,6 @@
  */
 
 import type { ReactNode } from 'react';
-import { useState } from 'react';
 import {
   MultiColumnLayout,
   HbcActivityStrip,
@@ -52,35 +51,41 @@ const ACTIVITY_TYPE_LABELS: Record<string, string> = {
 
 export interface FinancialControlCenterProps {
   readonly projectId: string;
+  /** Route-driven active tool slug (per FIN-04 §1.1). Undefined = control center overview. */
+  readonly activeTool?: string;
   readonly viewerRole?: FinancialViewerRole;
   readonly complexityTier?: FinancialComplexityTier;
+  /** Navigate to a Financial tool via route (e.g., 'budget', 'forecast'). */
   readonly onOpenSurface?: (toolId: string) => void;
   readonly onSecondaryAction?: (action: string) => void;
+  /** Navigate back to Financial home (control center). */
+  readonly onBackToControlCenter?: () => void;
 }
 
 export function FinancialControlCenter({
   projectId,
+  activeTool,
   viewerRole,
   complexityTier,
   onOpenSurface,
   onSecondaryAction,
+  onBackToControlCenter,
 }: FinancialControlCenterProps): ReactNode {
-  const [surfaceMode, setSurfaceMode] = useState<FinancialSurfaceMode>('control-center');
+  // Resolve surface mode from route-driven activeTool prop.
+  // Falls back to control-center when no tool is specified.
+  const surfaceMode: FinancialSurfaceMode = activeTool
+    ? (TOOL_TO_SURFACE[activeTool] ?? 'control-center')
+    : 'control-center';
 
   const data = useFinancialControlCenter({ viewerRole, complexityTier });
 
   const handleOpenSurface = (toolId: string): void => {
-    const targetSurface = TOOL_TO_SURFACE[toolId];
-    if (targetSurface) {
-      setSurfaceMode(targetSurface);
-    } else {
-      // Tool surfaces not yet built — delegate to external handler
-      onOpenSurface?.(toolId);
-    }
+    // All navigation is now route-driven via the parent callback
+    onOpenSurface?.(toolId);
   };
 
   const handleBackToControlCenter = (): void => {
-    setSurfaceMode('control-center');
+    onBackToControlCenter?.();
   };
 
   // ── Deeper surface rendering ──────────────────────────────────────

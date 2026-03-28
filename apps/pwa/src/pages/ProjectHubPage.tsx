@@ -311,18 +311,24 @@ export interface ProjectHubControlCenterPageProps {
   project: IActiveProject;
   projects: IActiveProject[];
   section?: string | null;
+  tool?: string | null;
   onBackToPortfolio: () => void;
   onOpenReports?: () => void;
   onModuleOpen?: (slug: string) => void;
+  onNavigateToFinancialTool?: (toolSlug: string) => void;
+  onNavigateToFinancialHome?: () => void;
 }
 
 export function ProjectHubControlCenterPage({
   project,
   projects,
   section,
+  tool,
   onBackToPortfolio,
   onOpenReports: _onOpenReports,
   onModuleOpen,
+  onNavigateToFinancialTool,
+  onNavigateToFinancialHome,
 }: ProjectHubControlCenterPageProps): ReactNode {
   useProjectHubContext(projects, project, section);
 
@@ -388,11 +394,17 @@ export function ProjectHubControlCenterPage({
       {financialSection ? (
         <FinancialControlCenter
           projectId={project.id}
-          onOpenSurface={() => {
-            // Sub-page routes will be added in a follow-on prompt.
+          activeTool={tool ?? undefined}
+          onOpenSurface={(toolId: string) => {
+            onNavigateToFinancialTool?.(toolId);
           }}
-          onSecondaryAction={() => {
-            // Will route to financial/history when sub-page exists
+          onSecondaryAction={(action: string) => {
+            if (action === 'history') {
+              onNavigateToFinancialTool?.('history');
+            }
+          }}
+          onBackToControlCenter={() => {
+            onNavigateToFinancialHome?.();
           }}
         />
       ) : reportsSection ? (

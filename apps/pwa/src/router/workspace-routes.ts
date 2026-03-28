@@ -21,7 +21,10 @@ import {
 import {
   resolveProjectHubProjectEntry,
   resolveProjectHubRootEntry,
+  resolveFinancialToolEntry,
   validateProjectHubSearch,
+  buildProjectHubPath,
+  buildFinancialToolPath,
 } from './projectHubRouting.js';
 
 function createWorkspaceRoute(
@@ -167,6 +170,12 @@ function ProjectHubSectionRouteComponent(): ReactNode {
       onModuleOpen: (slug: string) => {
         void navigate({ to: `/project-hub/${data.project.id}/${slug}` });
       },
+      onNavigateToFinancialTool: (toolSlug: string) => {
+        void navigate({ to: buildFinancialToolPath(data.project.id, toolSlug) });
+      },
+      onNavigateToFinancialHome: () => {
+        void navigate({ to: buildProjectHubPath(data.project.id, 'financial') });
+      },
     });
   }
 
@@ -230,6 +239,73 @@ export const projectHubSectionRoute = createRoute({
   },
   component: ProjectHubSectionRouteComponent,
 });
+
+/**
+ * Financial tool sub-route: /project-hub/$projectId/financial/$tool
+ *
+ * Canonical project-scoped Financial tool routes per FIN-04 §1.1.
+ * Each tool slug (budget, forecast, checklist, gcgr, cash-flow, buyout,
+ * review, publication, history) renders within FinancialControlCenter
+ * via the activeTool prop instead of internal state.
+ */
+export const financialToolRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'project-hub/$projectId/financial/$tool',
+  validateSearch: validateProjectHubSearch,
+  beforeLoad: () => {
+    requireAuth();
+    activateWorkspace('project-hub');
+  },
+  loader: async ({ params }) => {
+    const result = await resolveFinancialToolEntry(params.projectId, params.tool);
+    if (result.mode === 'redirect') {
+      throw redirect({ to: result.redirectTo, replace: true });
+    }
+    return result;
+  },
+  component: FinancialToolRouteComponent,
+});
+
+function FinancialToolRouteComponent(): ReactNode {
+  const data = financialToolRoute.useLoaderData();
+  const navigate = financialToolRoute.useNavigate();
+
+  if (!data) {
+    return createElement(ProjectHubNoAccessPage, {
+      projects: [],
+      reason: 'project-unavailable',
+    });
+  }
+
+  if (data.mode === 'tool') {
+    return createElement(ProjectHubControlCenterPage, {
+      project: data.project,
+      projects: data.projects,
+      section: 'financial',
+      tool: data.tool,
+      onBackToPortfolio: () => {
+        void navigate({ to: '/project-hub' });
+      },
+      onOpenReports: () => {
+        void navigate({ to: `/project-hub/${data.project.id}/reports` });
+      },
+      onModuleOpen: (slug: string) => {
+        void navigate({ to: `/project-hub/${data.project.id}/${slug}` });
+      },
+      onNavigateToFinancialTool: (toolSlug: string) => {
+        void navigate({ to: buildFinancialToolPath(data.project.id, toolSlug) });
+      },
+      onNavigateToFinancialHome: () => {
+        void navigate({ to: buildProjectHubPath(data.project.id, 'financial') });
+      },
+    });
+  }
+
+  return createElement(ProjectHubNoAccessPage, {
+    projects: data.projects,
+    reason: data.reason,
+  });
+}
 
 export const accountingRoute = createWorkspaceRoute(
   'accounting',
@@ -441,6 +517,7 @@ export const allRoutes = [
   projectHubRoute,
   projectHubProjectRoute,
   projectHubSectionRoute,
+  financialToolRoute,
   accountingRoute,
   estimatingRoute,
   leadershipRoute,
