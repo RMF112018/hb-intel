@@ -865,6 +865,236 @@ export interface IPublicationRecoveryPosture {
   readonly requiresNewDesignation: boolean;
 }
 
+// ── Lifecycle and Mutation Contracts (Wave 1C closure) ─────────────────
+
+// ── Review Custody ───────────────────────────────────────────────────
+
+/**
+ * Review custody states (Financial-LMG §10.1).
+ *
+ * Tracks who owns the forecast version during the review cycle.
+ */
+export type ReviewCustodyStatus =
+  | 'PmCourt'
+  | 'SubmittedForReview'
+  | 'InReview'
+  | 'ReturnedForRevision'
+  | 'Approved';
+
+/**
+ * Review custody record — append-only state transitions.
+ * Each transition appends an immutable record; prior records are never edited.
+ *
+ * Persistence family #13 in Financial-RGC §2.1.
+ */
+export interface IFinancialReviewCustodyRecord {
+  readonly custodyRecordId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly fromStatus: ReviewCustodyStatus | null;
+  readonly toStatus: ReviewCustodyStatus;
+  readonly transitionedAt: string;
+  readonly transitionedBy: string;
+  readonly transitionedByRole: FinancialAuthorityRole;
+  readonly reason: string | null;
+  readonly comments: string | null;
+}
+
+/**
+ * Review custody transition request — input for state machine evaluation.
+ */
+export interface IReviewCustodyTransitionRequest {
+  readonly forecastVersionId: string;
+  readonly currentStatus: ReviewCustodyStatus;
+  readonly targetStatus: ReviewCustodyStatus;
+  readonly requestedBy: string;
+  readonly requestedByRole: FinancialAuthorityRole;
+  readonly reason?: string;
+  readonly comments?: string;
+}
+
+/**
+ * Review custody transition result.
+ */
+export interface IReviewCustodyTransitionResult {
+  readonly allowed: boolean;
+  readonly fromStatus: ReviewCustodyStatus;
+  readonly toStatus: ReviewCustodyStatus;
+  readonly blockers: readonly string[];
+  readonly record: IFinancialReviewCustodyRecord | null;
+}
+
+/**
+ * Valid review custody transitions.
+ * Transition table per Financial-LMG §10.1.
+ */
+export const REVIEW_CUSTODY_TRANSITIONS: ReadonlyArray<{
+  from: ReviewCustodyStatus;
+  to: ReviewCustodyStatus;
+  allowedRoles: readonly FinancialAuthorityRole[];
+}> = [
+  { from: 'PmCourt', to: 'SubmittedForReview', allowedRoles: ['PM'] },
+  { from: 'SubmittedForReview', to: 'InReview', allowedRoles: ['PER'] },
+  { from: 'InReview', to: 'ReturnedForRevision', allowedRoles: ['PER'] },
+  { from: 'InReview', to: 'Approved', allowedRoles: ['PER'] },
+  { from: 'ReturnedForRevision', to: 'PmCourt', allowedRoles: ['PM'] },
+] as const;
+
+// ── Reporting Period ────────────────────────────────────────────────
+
+/**
+ * Reporting period states (Financial-LMG §11).
+ */
+export type ReportingPeriodStatus = 'Open' | 'Closed' | 'Reopened';
+
+/**
+ * Financial reporting period record.
+ * Persistence family #1 in Financial-RGC §2.1.
+ */
+export interface IFinancialReportingPeriod {
+  readonly periodId: string;
+  readonly projectId: string;
+  readonly reportingMonth: string;
+  readonly status: ReportingPeriodStatus;
+  readonly openedAt: string;
+  readonly closedAt: string | null;
+  readonly closedBy: string | null;
+  readonly reopenedAt: string | null;
+  readonly reopenedBy: string | null;
+  readonly reopenReason: string | null;
+  readonly activeVersionId: string | null;
+  readonly publishedVersionId: string | null;
+}
+
+/**
+ * Period close transition result.
+ * Per Financial-LMG §11: if confirmation gate passes, auto-confirm Working
+ * to ConfirmedInternal (T3); if gate fails, transition to Superseded (T6).
+ */
+export interface IPeriodCloseResult {
+  readonly periodId: string;
+  readonly closedAt: string;
+  readonly closedBy: string;
+  readonly workingVersionDisposition: 'auto-confirmed' | 'superseded-unconfirmed';
+  readonly resultVersionState: FinancialVersionState;
+  readonly gateResult: IConfirmationGateResult;
+}
+
+/**
+ * Period reopen transition request.
+ * Governed exception — requires explicit authority per PH3-FIN-SOTL §13.
+ */
+export interface IPeriodReopenRequest {
+  readonly periodId: string;
+  readonly requestedBy: string;
+  readonly requestedByRole: FinancialAuthorityRole;
+  readonly reason: string;
+}
+
+export interface IPeriodReopenResult {
+  readonly allowed: boolean;
+  readonly periodId: string;
+  readonly blockers: readonly string[];
+  readonly reopenedAt: string | null;
+}
+
+// ── G4 Summary Validation ──────────────────────────────────────────
+
+/**
+ * G4 summary validation result (Financial-LMG §3.1 G4).
+ *
+ * Validates that Forecast Summary and GC/GR posture are computable
+ * and consistent. Required for confirmation gate passage.
+ */
+export interface IG4SummaryValidationResult {
+  readonly isValid: boolean;
+  readonly errors: readonly G4ValidationError[];
+}
+
+export interface G4ValidationError {
+  readonly code: G4ValidationErrorCode;
+  readonly field: string;
+  readonly message: string;
+}
+
+export type G4ValidationErrorCode =
+  | 'gcgr-posture-not-computable'
+  | 'summary-required-field-missing'
+  | 'derived-field-inconsistent'
+  | 'negative-profit-unacknowledged'
+  | 'contingency-exceeded';
+
+// ── Audit Event Envelope ───────────────────────────────────────────
+
+/**
+ * Financial audit event envelope.
+ * Persistence family #16 in Financial-RGC §2.1.
+ *
+ * Immutable — append-only, never edited or deleted.
+ * Every significant Financial action generates one event.
+ */
+export interface IFinancialAuditEvent {
+  readonly eventId: string;
+  readonly projectId: string;
+  readonly forecastVersionId: string | null;
+  readonly eventType: FinancialAuditEventType;
+  readonly category: FinancialAuditCategory;
+  readonly actor: string;
+  readonly actorRole: FinancialAuthorityRole | 'System';
+  readonly occurredAt: string;
+  readonly summary: string;
+  readonly detail: Readonly<Record<string, unknown>>;
+  readonly sourceRecordType: string;
+  readonly sourceRecordId: string;
+  readonly previousState: string | null;
+  readonly newState: string | null;
+}
+
+export type FinancialAuditEventType =
+  | 'BudgetImported'
+  | 'BudgetReconciliationResolved'
+  | 'ForecastVersionCreated'
+  | 'ForecastVersionConfirmed'
+  | 'ForecastVersionDerived'
+  | 'ForecastVersionSuperseded'
+  | 'ReportCandidateDesignated'
+  | 'ForecastVersionPublished'
+  | 'GCGRLineEdited'
+  | 'CashFlowMonthEdited'
+  | 'BuyoutStatusAdvanced'
+  | 'BuyoutSavingsDispositioned'
+  | 'ChecklistItemCompleted'
+  | 'ReviewCustodyTransitioned'
+  | 'PeriodClosed'
+  | 'PeriodReopened'
+  | 'ExportRunCreated'
+  | 'AnnotationCreated'
+  | 'AnnotationDispositioned';
+
+export type FinancialAuditCategory =
+  | 'import'
+  | 'lifecycle'
+  | 'edit'
+  | 'review'
+  | 'publication'
+  | 'period'
+  | 'export'
+  | 'annotation';
+
+// ── Lifecycle Transition Result ────────────────────────────────────
+
+/**
+ * Generic lifecycle transition result shape.
+ * Used for version, period, custody, and buyout transitions.
+ */
+export interface ILifecycleTransitionResult<TState extends string> {
+  readonly allowed: boolean;
+  readonly fromState: TState;
+  readonly toState: TState;
+  readonly blockers: readonly string[];
+  readonly auditEvent: IFinancialAuditEvent | null;
+}
+
 // ── T08: Platform Integration and Annotation Scope ────────────────────
 
 /** Activity spine event types for the Financial module (T08 §14.1). */
