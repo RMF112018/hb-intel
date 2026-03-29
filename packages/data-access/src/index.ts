@@ -120,6 +120,7 @@ export {
   createPmpRepository,
   createProjectRepository,
   createAuthRepository,
+  createFinancialRepository,
   createProjectRegistryService,
   resolveAdapterMode,
   setProxyContext,

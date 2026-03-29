@@ -23,6 +23,7 @@ export { MockScorecardRepository } from './MockScorecardRepository.js';
 export { MockPmpRepository } from './MockPmpRepository.js';
 export { MockProjectRepository } from './MockProjectRepository.js';
 export { MockAuthRepository } from './MockAuthRepository.js';
+export { MockFinancialRepository } from './MockFinancialRepository.js';
 
 // Seed data (for test setup / inspection)
 export {

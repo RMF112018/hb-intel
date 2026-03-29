@@ -9,6 +9,7 @@ import type { IScorecardRepository } from './ports/IScorecardRepository.js';
 import type { IPmpRepository } from './ports/IPmpRepository.js';
 import type { IProjectRepository } from './ports/IProjectRepository.js';
 import type { IAuthRepository } from './ports/IAuthRepository.js';
+import type { IFinancialRepository } from './ports/IFinancialRepository.js';
 import type { IProjectRegistryService } from './services/IProjectRegistryService.js';
 import { MockProjectRegistryService } from './services/MockProjectRegistryService.js';
 import {
@@ -23,6 +24,7 @@ import {
   MockPmpRepository,
   MockProjectRepository,
   MockAuthRepository,
+  MockFinancialRepository,
 } from './adapters/mock/index.js';
 import { AdapterNotImplementedError } from './errors/index.js';
 import { ProxyHttpClient } from './adapters/proxy/ProxyHttpClient.js';
@@ -248,6 +250,18 @@ export function createAuthRepository(mode?: AdapterMode): IAuthRepository {
     case 'sharepoint':
     case 'api':
       throw new AdapterNotImplementedError(resolved, 'AuthRepository');
+  }
+}
+
+export function createFinancialRepository(mode?: AdapterMode): IFinancialRepository {
+  const resolved = mode ?? resolveAdapterMode();
+  switch (resolved) {
+    case 'mock':
+      return new MockFinancialRepository();
+    case 'proxy':
+    case 'sharepoint':
+    case 'api':
+      throw new AdapterNotImplementedError(resolved, 'FinancialRepository');
   }
 }
 
