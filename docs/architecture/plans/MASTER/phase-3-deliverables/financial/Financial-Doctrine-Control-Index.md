@@ -87,6 +87,7 @@ When documents disagree, resolve using this order (per CLAUDE.md authority hiera
 | File | Doc ID | Subject | Status |
 |------|--------|---------|--------|
 | [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md) | FIN-PR1 | 9-stage maturity model; per-tool classifications; anti-overclaiming | Canonical |
+| [Financial-ARRM](Financial-Acceptance-and-Release-Readiness-Model.md) | Financial-ARRM | 7-stage acceptance/release model; evidence classes; per-capability assessment; go/no-go gates | Active |
 
 ### 4.3 Replacement Crosswalk Series (FRC)
 

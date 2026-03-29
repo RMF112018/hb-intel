@@ -147,19 +147,19 @@ For the full 48-item Financial acceptance gate, see **P3-E4-T09 §20**. The crit
 
 ### Financial Governance and Operating-Surface Verification
 
-> **Maturity context (2026-03-28).** Per [FIN-PR1](financial/FIN-PR1-Financial-Production-Readiness-Maturity-Model.md), the Financial module is at **Stage 2 — Architecturally Defined** (constrained by Forecast Summary and GC/GR pending T04; majority of tools at Stage 3). It has 29 UI components rendering at `/project-hub/:projectId/financial` via `FinancialControlCenter` with 5 sub-surfaces, 12+ business logic subdomains, and 1,979 test lines. All view hooks return hardcoded mock data, no `IFinancialRepository` exists, sub-tool navigation is state-based (not URL-routed), and SPFx Financial lane is infrastructure stubs only. The verification items below require **Stage 5+ (Operational in Current Lane)** evidence — rendered UI and contract-level tests are insufficient.
+> **Readiness context (2026-03-29).** Per [Financial-ARRM](financial/Financial-Acceptance-and-Release-Readiness-Model.md), the Financial module is at **R3 (Route/Lane Complete)** for all 9 capabilities and **R2 (Contract Complete)** for 6 of 9 (Forecast Summary, GC/GR, and Publication are partial at R2). The module has 34 UI components across 9 URL-routed tool workspaces at `/project-hub/:projectId/financial/:tool`, 12+ business logic subdomains, 1,979+ contract test lines, 41 route tests, 13 context tests, and 25 operational workflow tests. Per-project Financial context with return-memory, operational-state disclosure banner (runtime honesty), and session history with recovery paths are implemented. All view hooks return mock data — no `IFinancialRepository` exists. SPFx Financial lane is infrastructure stubs only. The verification items below require **R5 (Operationally Proven)** evidence — rendered UI, contract tests, and route tests are insufficient. See Financial-ARRM §3 for the complete evidence class requirements per stage.
 
-- [ ] `FIN-01` posture has been incorporated into the Financial master specification and viewer-first implementation language has been removed. *(Requires Stage 5)*
-- [ ] `FIN-02` action posture has been reflected in the executable Financial workflow files. *(Requires Stage 5)*
-- [ ] `FIN-03` lane ownership has been applied to Financial capability routing and surface design. *(Requires Stage 6)*
-- [ ] `FIN-04` route and context contract has been applied to the Financial route family and project-switch behavior. *(Requires Stage 4)*
-- [ ] Financial surfaces expose actionable-here vs view-only vs escalate vs blocked / stale / waiting posture without hunting. *(Requires Stage 5)*
-- [ ] Canonical project-scoped routing exists for Financial home and all required sub-surfaces. *(Requires Stage 4)*
-- [ ] PWA and SPFx behavior is aligned to the Financial lane matrix. *(Requires Stage 6)*
-- [ ] Acceptance evidence demonstrates that Financial is operational, not merely visible. *(Requires Stage 7)*
+- [ ] `FIN-01` posture has been incorporated into the Financial master specification and viewer-first implementation language has been removed. *(Requires R5 — Operationally Proven)*
+- [ ] `FIN-02` action posture has been reflected in the executable Financial workflow files. *(Requires R5)*
+- [ ] `FIN-03` lane ownership has been applied to Financial capability routing and surface design. *(Requires R5 for PWA; R6 for SPFx)*
+- [x] `FIN-04` route and context contract has been applied to the Financial route family and project-switch behavior. *(R3 achieved — 9 URL-routed tool slugs, deep-link entry, project-switch preservation, return-memory)*
+- [x] Financial surfaces expose actionable-here vs view-only vs escalate vs blocked / stale / waiting posture without hunting. *(R3 achieved — `FinancialOperationalBanner` shows editability, readiness, blockers, next action, data source on all 10 surfaces)*
+- [x] Canonical project-scoped routing exists for Financial home and all required sub-surfaces. *(R3 achieved — `FINANCIAL_TOOL_REGISTRY` with 9 canonical slugs; `financialToolRoute` in `allRoutes`)*
+- [ ] PWA and SPFx behavior is aligned to the Financial lane matrix. *(Requires R5 for PWA operational; R6 for SPFx operational)*
+- [ ] Acceptance evidence demonstrates that Financial is operational, not merely visible. *(Requires R5 — Operationally Proven per Financial-ARRM §3)*
 
 ### Evidence Expectation
-Financial readiness cannot be marked complete based only on rendered UI or placeholder routes. Evidence must show direct user action, correct route ownership, visible posture, and correct lane behavior. See [FIN-PR1 §4](financial/FIN-PR1-Financial-Production-Readiness-Maturity-Model.md) for the complete anti-overclaiming framework.
+Financial readiness cannot be marked complete based only on rendered UI or placeholder routes. Evidence must show direct user action, correct route ownership, visible posture, and correct lane behavior. See [Financial-ARRM §3](financial/Financial-Acceptance-and-Release-Readiness-Model.md) for the complete evidence class requirements per readiness stage, and [FIN-PR1 §4](financial/FIN-PR1-Financial-Production-Readiness-Maturity-Model.md) for the anti-overclaiming framework.
 
 ### 6.2 Schedule
 
