@@ -4,12 +4,18 @@
  * Role-aware: shapes behavior based on viewer role (PM edits, PE reviews).
  * State-aware: respects version lifecycle (Working/ConfirmedInternal/Published/Stale).
  * Complexity-aware: supports Essential/Standard/Expert progressive disclosure.
- * Mock data initially. Will wire to IFinancialRepository.
+ *
+ * Wave 3A.1: facade-aware — sources summary data from ForecastSummaryService
+ * via IFinancialRepository. Falls back to inline mock for view-model fields
+ * not yet exposed through the service.
  */
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 
 import type { FinancialVersionState } from '../types/index.js';
+import { useFinancialRepository } from './useFinancialRepository.js';
+import { ForecastSummaryService } from '../services/ForecastSummaryService.js';
+import type { ForecastSummaryLoadResult } from '../services/ForecastSummaryService.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from './useFinancialControlCenter.js';
 
 // ── View-Ready Types ────────────────────────────────────────────────
@@ -253,12 +259,22 @@ export function useForecastSummary(
   const viewerRole = options?.viewerRole ?? 'pm';
   const complexity = options?.complexityTier ?? 'standard';
 
+  // ── Facade consumption (Wave 3A.1) ─────────────────────────────────
+  const repo = useFinancialRepository();
+  const [facadeResult, setFacadeResult] = useState<ForecastSummaryLoadResult | null>(null);
+
+  useEffect(() => {
+    const service = new ForecastSummaryService(repo);
+    service.load('proj-uuid-001', '2026-03').then(setFacadeResult).catch(() => {});
+  }, [repo]);
+
   const [isCompareMode, setIsCompareMode] = useState(viewerRole !== 'pm');
   const [dirtyFieldMap, setDirtyFieldMap] = useState<Map<string, string>>(new Map());
   const [isSaving, setIsSaving] = useState(false);
 
-  const versionState: FinancialVersionState = 'Working';
-  const isEditable = resolveEditability(versionState, viewerRole);
+  // Use facade posture when available, fall back to inline defaults
+  const versionState: FinancialVersionState = (facadeResult?.posture.currentVersionState as FinancialVersionState | undefined) ?? 'Working';
+  const isEditable = facadeResult ? facadeResult.isEditable : resolveEditability(versionState, viewerRole);
   const surfaceState = resolveSurfaceState(versionState, viewerRole, isCompareMode);
 
   const editField = useCallback((fieldId: string, value: string) => {
