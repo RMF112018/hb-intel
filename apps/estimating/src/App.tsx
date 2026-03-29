@@ -13,8 +13,12 @@ interface AppProps {
 }
 
 export function App({ spfxContext }: AppProps): React.ReactNode {
+  // SPFx-hosted surfaces run inside SharePoint's always-light chrome.
+  // Force light theme to prevent OS dark-mode from creating visual incoherence.
+  const forceTheme = spfxContext ? 'light' as const : undefined;
+
   return (
-    <HbcThemeProvider>
+    <HbcThemeProvider forceTheme={forceTheme}>
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <ComplexityProvider spfxContext={spfxContext}>

@@ -1,4 +1,14 @@
-:root { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5; color: #242424; background-color: #ffffff; }
+/*
+ * Estimating SPFx webpart — structural layout only.
+ *
+ * Color and typography are governed by HbcThemeProvider / FluentProvider
+ * via Fluent v9 design tokens. Do NOT add hardcoded color values here —
+ * they fight the theme tokens and cause visual incoherence in SharePoint
+ * hosted runtime (dark/light conflict).
+ *
+ * See: docs/architecture/reviews/estimating-spfx-light-theme-ui-remediation.md
+ */
+:root { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5; }
 #root { min-height: 100vh; }
 [data-hbc-shell="shell-layout"] { min-height: 100vh; display: flex; flex-direction: column; }
 [data-hbc-shell="shell-body"] { display: flex; flex: 1; }
