@@ -62,6 +62,10 @@ export type { FinancialWorkspaceShellProps, FinancialWorkspaceState } from './Fi
 export { FinancialOperationalBanner } from './FinancialOperationalBanner.js';
 export type { FinancialOperationalBannerProps } from './FinancialOperationalBanner.js';
 
+// Session Timeline
+export { FinancialSessionTimeline } from './FinancialSessionTimeline.js';
+export type { FinancialSessionTimelineProps } from './FinancialSessionTimeline.js';
+
 // Tool Pages — Checklist, GC/GR, Review, Publication, History
 export { ChecklistPage } from './ChecklistPage.js';
 export type { ChecklistPageProps } from './ChecklistPage.js';

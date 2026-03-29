@@ -9,6 +9,8 @@ import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { Text, HbcStatusBadge, HbcCard, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
 import { useHistorySurface } from '../hooks/useHistorySurface.js';
+import { useFinancialSessionHistory } from '../hooks/useFinancialSessionHistory.js';
+import { FinancialSessionTimeline } from './FinancialSessionTimeline.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 
 const useStyles = makeStyles({
@@ -40,6 +42,7 @@ export interface HistoryPageProps {
 export function HistoryPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: HistoryPageProps): ReactNode {
   const styles = useStyles();
   const data = useHistorySurface({ viewerRole, complexityTier });
+  const sessionHistory = useFinancialSessionHistory();
 
   return (
     <>
@@ -66,6 +69,22 @@ export function HistoryPage({ projectId: _projectId, viewerRole, complexityTier,
             <HbcStatusBadge variant={VERSION_STATE_VARIANT[ver.state] ?? 'neutral'} label={ver.state} size="small" />
           </div>
         ))}
+      </div>
+
+      <div className={styles.section}>
+        <Text size={300} weight="semibold" style={{ marginBottom: `${HBC_SPACE_SM}px` }}>
+          Operational Sessions ({sessionHistory.sessions.length})
+        </Text>
+        {sessionHistory.hasFailedSessions && (
+          <HbcStatusBadge variant="error" label="Failed sessions require attention" size="small" />
+        )}
+        {sessionHistory.hasPartialSessions && (
+          <HbcStatusBadge variant="warning" label="Partial sessions have unresolved items" size="small" />
+        )}
+        <FinancialSessionTimeline
+          sessions={sessionHistory.sessions}
+          onNavigateToTool={onBack ? undefined : undefined}
+        />
       </div>
 
       <div className={styles.section}>
