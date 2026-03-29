@@ -1,13 +1,15 @@
 /**
  * useBudgetSurface — view-ready data hook for the Budget surface.
  *
- * State-aware: respects version lifecycle (Working/Review/Approved).
- * Role-aware: PM gets editing + refresh; PE gets diff-emphasized review.
- * Complexity-aware: Essential/Standard/Expert progressive disclosure.
- * Three-layer distinction (source / snapshot / working) is the core principle.
+ * Wave 3C.1: facade-aware — sources budget lines, reconciliation
+ * conditions, and import posture from BudgetImportService via
+ * IFinancialRepository.
  */
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useFinancialRepository } from './useFinancialRepository.js';
+import { BudgetImportService } from '../services/BudgetImportService.js';
+import type { BudgetImportLoadResult } from '../services/BudgetImportService.js';
 
 import type { FinancialViewerRole, FinancialComplexityTier } from './useFinancialControlCenter.js';
 
@@ -171,6 +173,15 @@ export interface UseBudgetSurfaceOptions {
 export function useBudgetSurface(options?: UseBudgetSurfaceOptions): BudgetSurfaceData {
   const viewerRole = options?.viewerRole ?? 'pm';
   const complexity = options?.complexityTier ?? 'standard';
+
+  // ── Facade consumption (Wave 3C.1) ─────────────────────────────────
+  const repo = useFinancialRepository();
+  const [facadeResult, setFacadeResult] = useState<BudgetImportLoadResult | null>(null);
+
+  useEffect(() => {
+    const service = new BudgetImportService(repo);
+    service.load('proj-uuid-001', '2026-03').then(setFacadeResult).catch(() => {});
+  }, [repo]);
 
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
   const [dirtyLineMap, setDirtyLineMap] = useState<Map<string, number>>(new Map());

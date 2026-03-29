@@ -61,6 +61,10 @@ export type {
   IFinancialPublicationRecordPort,
   IFinancialExportRunPort,
   IFinancialConfirmationGateResultPort,
+  IFinancialReconciliationConditionPort,
+  IFinancialCustodyRecordPort,
+  IFinancialPublicationEligibilityPort,
+  IFinancialReportingPeriodPort,
 } from './ports/IFinancialRepository.js';
 
 // ---------------------------------------------------------------------------
