@@ -201,6 +201,22 @@ export function useFinancialOperationalState(
         ownerRole: 'System',
         isBlocked: false,
       };
+    } else if (versionState === 'PublishedMonthly') {
+      nextAction = {
+        label: 'Derive new working version for next reporting period',
+        owner: 'Project Manager',
+        ownerRole: 'PM',
+        toolSlug: 'forecast',
+        isBlocked: false,
+      };
+    } else if (versionState === 'Superseded') {
+      nextAction = {
+        label: 'Navigate to the current version',
+        owner: 'Project Manager',
+        ownerRole: 'PM',
+        toolSlug: 'forecast',
+        isBlocked: false,
+      };
     }
 
     return {

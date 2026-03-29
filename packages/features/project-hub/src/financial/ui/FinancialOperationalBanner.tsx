@@ -101,9 +101,11 @@ export function FinancialOperationalBanner({
     >
       {/* Row 1: Data source + editability + readiness */}
       <div className={styles.row}>
-        {state.isMockData && (
-          <HbcStatusBadge variant="warning" label={state.dataSourceLabel} size="small" />
-        )}
+        <HbcStatusBadge
+          variant={state.isMockData ? 'warning' : state.dataSource === 'stale' ? 'warning' : state.dataSource === 'failed' ? 'error' : 'neutral'}
+          label={state.dataSourceLabel}
+          size="small"
+        />
         <HbcStatusBadge
           variant={EDITABILITY_VARIANT[state.editability] ?? 'neutral'}
           label={state.editabilityLabel}

@@ -242,7 +242,7 @@ export function FinancialControlCenter({
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
         {operationalBanner}
-        <HistoryPage {...toolPageProps} />
+        <HistoryPage {...toolPageProps} onNavigateToTool={handleOpenSurface} />
       </FinancialWorkspaceShell>
     );
   }

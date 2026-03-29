@@ -37,9 +37,10 @@ export interface HistoryPageProps {
   readonly viewerRole?: FinancialViewerRole;
   readonly complexityTier?: FinancialComplexityTier;
   readonly onBack?: () => void;
+  readonly onNavigateToTool?: (toolSlug: string) => void;
 }
 
-export function HistoryPage({ projectId: _projectId, viewerRole, complexityTier, onBack }: HistoryPageProps): ReactNode {
+export function HistoryPage({ projectId: _projectId, viewerRole, complexityTier, onBack, onNavigateToTool }: HistoryPageProps): ReactNode {
   const styles = useStyles();
   const data = useHistorySurface({ viewerRole, complexityTier });
   const sessionHistory = useFinancialSessionHistory();
@@ -83,7 +84,7 @@ export function HistoryPage({ projectId: _projectId, viewerRole, complexityTier,
         )}
         <FinancialSessionTimeline
           sessions={sessionHistory.sessions}
-          onNavigateToTool={onBack ? undefined : undefined}
+          onNavigateToTool={onNavigateToTool}
         />
       </div>
 
