@@ -303,36 +303,26 @@ Doctrine-completion and implementation prompt sets, organized by workstream. Eac
 |-----|-----------|--------|
 | Repo-truth reconciliation | [repo-truth-reconciliation/](repo-truth-reconciliation/) | **Complete** (Prompts 01–03 executed 2026-03-28) |
 | Doctrine control index | [doctrine-completion-tasks/](doctrine-completion-tasks/) | **Complete** (Prompts 01–03 executed 2026-03-28) |
-
-### Ready for Execution
-
-| Set | Directory | Prompts | Subject |
-|-----|-----------|---------|---------|
-| Doctrine completion | [doctrine-completion-tasks/](doctrine-completion-tasks/) | 02–03 | Normalize route/lane; validate coherence |
-| Source-of-truth / entity / action boundary | [sot-entity-action-boundary/](sot-entity-action-boundary/) | 01–03 | Lock SoR model, define action boundaries, validate |
-| Route/context contract | [route-context-contract-tasks/](route-context-contract-tasks/) | 01–03 | Implement canonical route family, context, validate |
-| Lane / cross-lane contracts | [lane-owner-cross-lane-contracts/](lane-owner-cross-lane-contracts/) | 01–03 | Lock lane ownership, normalize handoffs, validate |
-| Runtime governance | [runtime-governance-tasks/](runtime-governance-tasks/) | 01–03 | Lock runtime seams, lifecycle mutation, validate |
-| Shared spine integration | [shared-spine-integration/](shared-spine-integration/) | 01–03 | Lock spine contract, integration rules, validate |
-| UI / shell / workspace | [ui-shell-workspace/](ui-shell-workspace/) | 01–03 | Shell foundation, tool workspaces, validate |
-
-### Not Yet Populated
-
-| Set | Directory | Status |
-|-----|-----------|--------|
-| Acceptance / staging / release | [acceptance-staging-release/](acceptance-staging-release/) | [Financial-ARRM](Financial-Acceptance-and-Release-Readiness-Model.md) authored (2026-03-29); staging/pilot/cutover prompts not yet authored |
-| Operational workflow | [operational-workflow/](operational-workflow/) | Empty — prompts not yet authored |
+| Route/context contract | [route-context-contract-tasks/](route-context-contract-tasks/) | **Complete** (Prompts 01–03 executed 2026-03-28) — 9 canonical sub-tool routes, deep-link entry, project-switch, return-memory |
+| Lane / cross-lane contracts | [lane-owner-cross-lane-contracts/](lane-owner-cross-lane-contracts/) | **Complete** (Prompts 01–03 executed 2026-03-28) — Financial-LODM, Financial-CLHLC |
+| Runtime governance | [runtime-governance-tasks/](runtime-governance-tasks/) | **Complete** (Prompts 01–03 executed 2026-03-28) — Financial-RGC, Financial-LMG |
+| Source-of-truth / entity / action boundary | [sot-entity-action-boundary/](sot-entity-action-boundary/) | **Complete** (Prompts 01–03 executed 2026-03-28) — Financial-SOTEC, Financial-ABMC |
+| Shared spine integration | [shared-spine-integration/](shared-spine-integration/) | **Complete** (Prompts 01–03 executed 2026-03-28) — Financial-SSIC with tool×spine matrix |
+| UI / shell / workspace | [ui-shell-workspace/](ui-shell-workspace/) | **Complete** (Prompts 01–03 executed 2026-03-28/29) — FinancialWorkspaceShell, 9 tool pages, operational banner |
+| Operational workflow | [operational-workflow/](operational-workflow/) | **Complete** (Prompts 01–03 executed 2026-03-28/29) — runtime honesty, session history, recovery paths |
+| Acceptance / staging / release | [acceptance-staging-release/](acceptance-staging-release/) | **Complete** (Prompts 01–03 executed 2026-03-29) — [Financial-ARRM](Financial-Acceptance-and-Release-Readiness-Model.md); staging/pilot/cutover prompts pending |
 
 ---
 
 ## 8. Implementation Safety Notes
 
-1. **Use FIN-PR1** to classify any maturity claim. Do not use bare "Complete" without specifying the maturity stage.
-2. **Module-level maturity is Stage 2** (constrained by Forecast Summary and GC/GR pending T04). Most tools are at Stage 3.
-3. **No `IFinancialRepository` exists** in the repo. All view hooks use hardcoded mock data.
-4. **Sub-tool navigation is state-based** (`surfaceMode` via `useState`), not URL-routed.
-5. **SPFx Financial lane is infrastructure stubs** only — no data-connected surfaces.
-6. The [reconciliation closure note](_reconciliation/financial-repo-truth-reconciliation-closure.md) confirms the repo-truth baseline is reliable for implementation work.
+1. **Use FIN-PR1** to classify any maturity claim. Do not use bare "Complete" without specifying the maturity stage. Use [Financial-ARRM](Financial-Acceptance-and-Release-Readiness-Model.md) for go/no-go readiness gates.
+2. **Module-level maturity is Stage 2** (constrained by Forecast Summary and GC/GR pending T04). Most tools are at Stage 3. **Readiness posture is R3 (Route/Lane Complete)** for all 9 capabilities per Financial-ARRM §4.
+3. **No `IFinancialRepository` exists** in the repo. All view hooks use hardcoded mock data. This blocks advancement to R4 / Stage 4.
+4. **9 canonical sub-tool routes are URL-routed** at `/project-hub/:projectId/financial/:tool` via `FINANCIAL_TOOL_REGISTRY` and `financialToolRoute` (implemented v0.13.22). Deep-link entry, project-switch tool preservation, and per-project return-memory are operational. 41 route tests + 13 context tests pass.
+5. **SPFx Financial lane is infrastructure stubs** only — no data-connected surfaces. SPFx lane posture is documented (Financial-LODM, Financial-CLHLC) but not implemented.
+6. **Runtime honesty disclosure** is implemented across all 10 Financial surfaces via `FinancialOperationalBanner` and `useFinancialOperationalState`. Session history with recovery paths is implemented via `FinancialSessionTimeline`. These prove R3 scaffold disclosure — not R5 operational truth (banner evaluates mock data, not real project state).
+7. The [reconciliation closure note](_reconciliation/financial-repo-truth-reconciliation-closure.md) confirms the repo-truth baseline is reliable for implementation work.
 
 ---
 
