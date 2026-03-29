@@ -886,6 +886,52 @@ importers:
         specifier: ^6.0.0
         version: 6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0)
 
+  apps/project-sites:
+    dependencies:
+      '@griffel/react':
+        specifier: ^1.5.0
+        version: 1.5.32(react@18.3.1)
+      '@hbc/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../packages/ui-kit
+      '@pnp/sp':
+        specifier: ^4.0.0
+        version: 4.18.0
+      '@tanstack/react-query':
+        specifier: ^5.0.0
+        version: 5.90.21(react@18.3.1)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@microsoft/sp-property-pane':
+        specifier: ^1.20.0
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@20.19.35)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+      '@microsoft/sp-webpart-base':
+        specifier: ^1.20.0
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@20.19.35)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.7(@types/react@18.3.28)
+      '@vitejs/plugin-react':
+        specifier: ^4.4.0
+        version: 4.7.0(vite@6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0))
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@20.19.35)(terser@5.46.0)(tsx@4.21.0)
+
   apps/pwa:
     dependencies:
       '@azure/msal-browser':

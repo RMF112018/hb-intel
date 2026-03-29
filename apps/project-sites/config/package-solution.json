@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-project-sites",
+    "id": "a4c17e93-5b28-4d0f-9e61-7f2a8d3c6b15",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel Project Sites"
+      },
+      "longDescription": {
+        "default": "Displays project-site link cards filtered by the hosting page Year property."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-project-sites Feature",
+        "description": "Deploys HB Intel Project Sites webpart assets.",
+        "id": "d8f24a6c-91e3-4b57-a0c2-3e5f7d1b9a84",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-project-sites.sppkg"
+  }
+}

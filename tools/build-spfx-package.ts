@@ -48,6 +48,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'risk-management', camel: 'riskManagement', pascal: 'RiskManagement' },
   { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
+  { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
 ];
 
 // ── CLI argument parsing ───────────────────────────────────────────────────
