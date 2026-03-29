@@ -6,11 +6,13 @@
  *   2. Hosting page's Year column fetched from Site Pages via PnPjs REST call.
  *   3. Missing — triggers "Year Not Configured" empty state.
  *
+ * Page item identification strategy (for step 2):
+ *   a. pageContext.listItem.id — standard SPFx API (may be undefined in shell context)
+ *   b. legacyPageContext.pageItemId — legacy fallback (widely available)
+ *   c. Query by page filename from URL — last resort when no item ID is available
+ *
  * Invalid values (present but not a plausible 4-digit year) produce an
  * 'invalid' result so the UI can show actionable guidance.
- *
- * Contract: each unique year has its own Site Pages page in HBCentral/SitePages,
- * tagged with the appropriate page-level Year property.
  *
  * @see .claude/plans/project-sites-webpart-validation-and-architecture-report.md §3
  */
@@ -57,11 +59,54 @@ function validateYear(rawYear: unknown, source: 'property-pane' | 'page-metadata
 const SITE_PAGES_LIST_TITLE = 'Site Pages';
 
 /**
+ * Extract the current page filename from the browser URL.
+ * E.g. "https://tenant.sharepoint.com/sites/HBCentral/SitePages/2025-Projects.aspx"
+ * returns "2025-Projects.aspx".
+ */
+function getPageFileName(): string | null {
+  try {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    // Site Pages URLs end with /SitePages/PageName.aspx
+    const match = pathname.match(/\/([^/]+\.aspx)$/i);
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve the page item ID from the SPFx context using multiple strategies.
+ *
+ * The ShellWebPart (generic IIFE loader) may not have pageContext.listItem
+ * populated — it only appears for web parts that SharePoint recognizes as
+ * native page components. The legacyPageContext and URL-based fallbacks
+ * handle this gap.
+ */
+function resolvePageItemId(context: WebPartContext): number | null {
+  // Strategy A: Standard SPFx API
+  const standardId = context.pageContext.listItem?.id;
+  if (typeof standardId === 'number' && standardId > 0) {
+    return standardId;
+  }
+
+  // Strategy B: Legacy page context (widely available, includes pageItemId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const legacy = (context.pageContext as any).legacyPageContext;
+  if (legacy) {
+    const legacyId = legacy.pageItemId;
+    if (typeof legacyId === 'number' && legacyId > 0) {
+      return legacyId;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Resolve the active year for the Project Sites query.
  *
  * This is async because reading custom columns from the hosting page
- * requires a PnPjs REST call to the Site Pages library. SPFx's
- * pageContext.listItem only exposes the item ID, not custom field values.
+ * requires a PnPjs REST call to the Site Pages library.
  *
  * @param context      - SPFx WebPartContext (provides page context + SP REST access)
  * @param yearOverride - Value from the property pane (0 = use page metadata)
@@ -76,28 +121,42 @@ export async function resolvePageYear(
     return validateYear(yearOverride, 'property-pane');
   }
 
-  // 2. Fetch the hosting page's Year column from Site Pages via PnPjs.
-  //    pageContext.listItem.id gives us the current page's list item ID
-  //    in the Site Pages library.
-  const pageItemId = context.pageContext.listItem?.id;
-  if (typeof pageItemId !== 'number' || pageItemId <= 0) {
-    return { kind: 'missing' };
-  }
-
   try {
     const sp = spfi().using(SPFx(context));
-    const item = await sp.web.lists
-      .getByTitle(SITE_PAGES_LIST_TITLE)
-      .items.getById(pageItemId)
-      .select(SP_PROJECTS_FIELDS.YEAR)();
 
-    const rawYear = item?.[SP_PROJECTS_FIELDS.YEAR];
-    return validateYear(rawYear, 'page-metadata');
+    // 2a. Try to resolve by page item ID (standard or legacy)
+    const pageItemId = resolvePageItemId(context);
+    if (pageItemId !== null) {
+      const item = await sp.web.lists
+        .getByTitle(SITE_PAGES_LIST_TITLE)
+        .items.getById(pageItemId)
+        .select(SP_PROJECTS_FIELDS.YEAR)();
+
+      const rawYear = item?.[SP_PROJECTS_FIELDS.YEAR];
+      return validateYear(rawYear, 'page-metadata');
+    }
+
+    // 2b. Fallback: resolve by page filename from URL
+    const pageFileName = getPageFileName();
+    if (pageFileName) {
+      const items = await sp.web.lists
+        .getByTitle(SITE_PAGES_LIST_TITLE)
+        .items.filter(`FileLeafRef eq '${pageFileName}'`)
+        .select(SP_PROJECTS_FIELDS.YEAR)
+        .top(1)();
+
+      if (items.length > 0) {
+        const rawYear = items[0][SP_PROJECTS_FIELDS.YEAR];
+        return validateYear(rawYear, 'page-metadata');
+      }
+    }
+
+    // 3. No page identity available
+    console.warn('[ProjectSites] Could not identify hosting page — no listItem.id, no legacyPageContext.pageItemId, no page filename from URL.');
+    return { kind: 'missing' };
   } catch (err) {
-    // If the REST call fails (e.g., field doesn't exist, permissions),
-    // fall through to missing rather than crashing.
     console.warn(
-      '[ProjectSites] Failed to read Year from Site Pages item:',
+      '[ProjectSites] Failed to read Year from Site Pages:',
       err instanceof Error ? err.message : err,
     );
     return { kind: 'missing' };
