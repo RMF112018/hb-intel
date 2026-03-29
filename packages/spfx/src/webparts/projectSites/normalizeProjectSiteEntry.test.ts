@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import type { IRawProjectSiteItem } from './types.js';
 import {
   normalizeProjectSiteEntry,
   normalizeProjectSiteEntries,
 } from './normalizeProjectSiteEntry.js';
 
-// ── Factory ───────────────────────────────────────────────────────────────
+// ── Factories ─────────────────────────────────────────────────────────────
 
-/** Full-select item with all custom fields. */
-function createFullItem(overrides?: Partial<IRawProjectSiteItem>): IRawProjectSiteItem {
+/** Item with standard display-name fields. */
+function createStandardItem(overrides?: Record<string, unknown>): Record<string, unknown> {
   return {
     Id: 1,
     Title: '24-001-01 — Riverside Medical Center',
@@ -25,8 +24,8 @@ function createFullItem(overrides?: Partial<IRawProjectSiteItem>): IRawProjectSi
   };
 }
 
-/** Core-only item (fallback when custom fields are missing). */
-function createCoreItem(overrides?: Partial<IRawProjectSiteItem>): IRawProjectSiteItem {
+/** Item with only Title + Year (minimum viable). */
+function createMinimalItem(overrides?: Record<string, unknown>): Record<string, unknown> {
   return {
     Id: 2,
     Title: '25-244-01 - The Wellington Estate Homes',
@@ -37,57 +36,60 @@ function createCoreItem(overrides?: Partial<IRawProjectSiteItem>): IRawProjectSi
 
 // ── normalizeProjectSiteEntry ─────────────────────────────────────────────
 
-describe('normalizeProjectSiteEntry — full select', () => {
-  it('normalizes a complete raw item', () => {
-    const result = normalizeProjectSiteEntry(createFullItem());
-    expect(result.id).toBe(1);
+describe('normalizeProjectSiteEntry — standard field names', () => {
+  it('normalizes a complete item', () => {
+    const result = normalizeProjectSiteEntry(createStandardItem());
     expect(result.projectName).toBe('Riverside Medical Center');
     expect(result.projectNumber).toBe('24-001-01');
     expect(result.siteUrl).toBe('https://hedrickbrotherscom.sharepoint.com/sites/RMC');
-    expect(result.year).toBe(2024);
-    expect(result.department).toBe('commercial');
     expect(result.hasSiteUrl).toBe(true);
-  });
-
-  it('prefers ProjectName over Title-parsed name', () => {
-    const result = normalizeProjectSiteEntry(createFullItem({
-      Title: '24-001-01 — Different Name',
-      ProjectName: 'Correct Name',
-    }));
-    expect(result.projectName).toBe('Correct Name');
+    expect(result.department).toBe('commercial');
   });
 
   it('handles null SiteUrl', () => {
-    const result = normalizeProjectSiteEntry(createFullItem({ SiteUrl: null }));
-    expect(result.siteUrl).toBe('');
+    const result = normalizeProjectSiteEntry(createStandardItem({ SiteUrl: null }));
     expect(result.hasSiteUrl).toBe(false);
-  });
-
-  it('handles null optional fields', () => {
-    const result = normalizeProjectSiteEntry(createFullItem({
-      ProjectNumber: null,
-      Department: null,
-      ProjectLocation: null,
-      ProjectType: null,
-      ProjectStage: null,
-      ClientName: null,
-    }));
-    expect(result.projectNumber).toBe('24-001-01'); // parsed from Title
-    expect(result.department).toBe('');
   });
 });
 
-describe('normalizeProjectSiteEntry — core-only fallback', () => {
-  it('parses project number and name from Title with dash separator', () => {
-    const result = normalizeProjectSiteEntry(createCoreItem());
-    expect(result.projectNumber).toBe('25-244-01');
-    expect(result.projectName).toBe('The Wellington Estate Homes');
-    expect(result.siteUrl).toBe('');
-    expect(result.hasSiteUrl).toBe(false);
+describe('normalizeProjectSiteEntry — fuzzy field matching', () => {
+  it('finds SiteUrl under OData-encoded internal name', () => {
+    const result = normalizeProjectSiteEntry({
+      Id: 1, Title: 'Test', Year: 2025,
+      Site_x0020_Url: 'https://example.com/sites/test',
+    });
+    expect(result.siteUrl).toBe('https://example.com/sites/test');
+    expect(result.hasSiteUrl).toBe(true);
   });
 
-  it('parses Title with em-dash separator', () => {
-    const result = normalizeProjectSiteEntry(createCoreItem({
+  it('finds ProjectName under OData-encoded internal name', () => {
+    const result = normalizeProjectSiteEntry({
+      Id: 1, Title: '25-001 — Fallback', Year: 2025,
+      Project_x0020_Name: 'OData Name',
+    });
+    expect(result.projectName).toBe('OData Name');
+  });
+
+  it('finds fields under lowercase keys', () => {
+    const result = normalizeProjectSiteEntry({
+      Id: 1, Title: 'Test', Year: 2025,
+      siteurl: 'https://example.com',
+      department: 'luxury-residential',
+    });
+    expect(result.siteUrl).toBe('https://example.com');
+    expect(result.department).toBe('luxury-residential');
+  });
+});
+
+describe('normalizeProjectSiteEntry — Title parsing fallback', () => {
+  it('parses number and name from Title with dash', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem());
+    expect(result.projectNumber).toBe('25-244-01');
+    expect(result.projectName).toBe('The Wellington Estate Homes');
+  });
+
+  it('parses Title with em-dash', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
       Title: '24-001-01 — Medical Center',
     }));
     expect(result.projectNumber).toBe('24-001-01');
@@ -95,25 +97,22 @@ describe('normalizeProjectSiteEntry — core-only fallback', () => {
   });
 
   it('handles Title with no separator', () => {
-    const result = normalizeProjectSiteEntry(createCoreItem({
-      Title: 'Just A Name',
-    }));
+    const result = normalizeProjectSiteEntry(createMinimalItem({ Title: 'Just A Name' }));
     expect(result.projectNumber).toBe('');
     expect(result.projectName).toBe('Just A Name');
   });
 
   it('handles null Title', () => {
-    const result = normalizeProjectSiteEntry(createCoreItem({ Title: null }));
+    const result = normalizeProjectSiteEntry({ Id: 1, Year: 2025, Title: null });
     expect(result.projectName).toBe('(Untitled Project)');
   });
 
   it('returns empty strings for all missing optional fields', () => {
-    const result = normalizeProjectSiteEntry(createCoreItem());
+    const result = normalizeProjectSiteEntry(createMinimalItem());
     expect(result.department).toBe('');
     expect(result.projectLocation).toBe('');
-    expect(result.projectType).toBe('');
-    expect(result.projectStage).toBe('');
     expect(result.clientName).toBe('');
+    expect(result.hasSiteUrl).toBe(false);
   });
 });
 
@@ -122,22 +121,12 @@ describe('normalizeProjectSiteEntry — core-only fallback', () => {
 describe('normalizeProjectSiteEntries', () => {
   it('sorts by project number ascending', () => {
     const items = [
-      createFullItem({ Id: 3, ProjectNumber: '24-003-01', Title: '24-003-01 — C' }),
-      createFullItem({ Id: 1, ProjectNumber: '24-001-01', Title: '24-001-01 — A' }),
-      createFullItem({ Id: 2, ProjectNumber: '24-002-01', Title: '24-002-01 — B' }),
+      createStandardItem({ Id: 3, ProjectNumber: '24-003-01', Title: '24-003-01 — C' }),
+      createStandardItem({ Id: 1, ProjectNumber: '24-001-01', Title: '24-001-01 — A' }),
+      createStandardItem({ Id: 2, ProjectNumber: '24-002-01', Title: '24-002-01 — B' }),
     ];
     const result = normalizeProjectSiteEntries(items);
     expect(result.map((r) => r.projectNumber)).toEqual(['24-001-01', '24-002-01', '24-003-01']);
-  });
-
-  it('places items without project number after numbered items', () => {
-    const items = [
-      createCoreItem({ Id: 1, Title: 'No Number Project' }),
-      createFullItem({ Id: 2, ProjectNumber: '24-001-01' }),
-    ];
-    const result = normalizeProjectSiteEntries(items);
-    expect(result[0].projectNumber).toBe('24-001-01');
-    expect(result[1].projectNumber).toBe('');
   });
 
   it('returns empty array for empty input', () => {

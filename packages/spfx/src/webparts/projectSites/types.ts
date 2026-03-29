@@ -52,23 +52,12 @@ export const SP_PROJECTS_FIELDS = {
 // ── Raw SharePoint list item shape ─────────────────────────────────────────
 
 /**
- * Raw item shape returned by PnPjs from the Projects list.
- * Extended fields are optional — absent when using core-only fallback.
+ * Raw item from PnPjs — typed as Record<string, unknown> because
+ * SharePoint internal field names differ from display names on this list.
+ * The normalizer uses fuzzy key matching to extract values regardless
+ * of the actual internal names.
  */
-export interface IRawProjectSiteItem {
-  Id: number;
-  Title: string | null;
-  Year: number | null;
-  // Extended fields — present only when full select succeeds
-  ProjectName?: string | null;
-  ProjectNumber?: string | null;
-  SiteUrl?: string | null;
-  Department?: string | null;
-  ProjectLocation?: string | null;
-  ProjectType?: string | null;
-  ProjectStage?: string | null;
-  ClientName?: string | null;
-}
+export type IRawProjectSiteItem = Record<string, unknown>;
 
 // ── Normalized UI-ready record ─────────────────────────────────────────────
 

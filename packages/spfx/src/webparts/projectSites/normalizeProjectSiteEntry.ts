@@ -1,21 +1,50 @@
 /**
  * Normalizes a raw SharePoint Projects list item into a UI-ready IProjectSiteEntry.
  *
- * Handles missing, null, and malformed field values defensively. Every field
- * resolves to a safe default so downstream UI code never encounters undefined.
+ * SharePoint internal field names often differ from display names.
+ * This normalizer searches each raw item's keys using case-insensitive
+ * matching with known name variants, making it resilient to whatever
+ * internal names SharePoint assigned during column creation.
  *
- * The Title field (standard SP column) contains "{number} — {name}" format.
- * When ProjectName is available (full select), it takes precedence.
- * When only core fields are available (fallback), Title is parsed.
+ * The Title field (standard SP column) contains "{number} — {name}" format
+ * and is used as the primary fallback for project name and number.
  */
-import type { IRawProjectSiteItem, IProjectSiteEntry } from './types.js';
+import type { IProjectSiteEntry } from './types.js';
 
 /**
- * Safely coerce a SharePoint field value to a trimmed string.
- * Returns the fallback when the value is null, undefined, or not a string.
+ * Safely coerce a value to a trimmed string.
  */
 function safeString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value.trim() : fallback;
+}
+
+/**
+ * Find a field value from a raw SP item by trying multiple possible key names.
+ * SharePoint internal names can be: exact match, with OData prefix, with
+ * _x00XX_ encoding, or with numeric suffix (e.g., SiteUrl0, SiteUrl1).
+ *
+ * @param item - Raw SharePoint list item (Record<string, unknown>)
+ * @param candidates - Possible field name substrings to match (case-insensitive)
+ * @returns The first matching value found, or undefined
+ */
+function findField(item: Record<string, unknown>, candidates: string[]): unknown {
+  // First pass: try exact key matches (fastest)
+  for (const key of candidates) {
+    if (key in item) return item[key];
+  }
+
+  // Second pass: case-insensitive substring match against all item keys
+  const lowerCandidates = candidates.map((c) => c.toLowerCase());
+  for (const key of Object.keys(item)) {
+    const lowerKey = key.toLowerCase();
+    for (const candidate of lowerCandidates) {
+      if (lowerKey === candidate || lowerKey.endsWith(candidate.toLowerCase())) {
+        return item[key];
+      }
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -23,7 +52,6 @@ function safeString(value: unknown, fallback = ''): string {
  * Returns [projectNumber, projectName] or ['', title] if no separator found.
  */
 function parseTitle(title: string): [string, string] {
-  // Try both em-dash (—) and en-dash (–) and hyphen (-)
   const separators = [' — ', ' – ', ' - '];
   for (const sep of separators) {
     const idx = title.indexOf(sep);
@@ -36,55 +64,61 @@ function parseTitle(title: string): [string, string] {
 
 /**
  * Normalize a single raw SharePoint list item into a UI-ready record.
- *
- * @param raw - Raw PnPjs list item from the Projects list
- * @returns Normalized IProjectSiteEntry
  */
-export function normalizeProjectSiteEntry(raw: IRawProjectSiteItem): IProjectSiteEntry {
-  const title = safeString(raw.Title);
+export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjectSiteEntry {
+  const item = raw as Record<string, unknown>;
+
+  // Standard fields (always use these exact names)
+  const id = typeof item.Id === 'number' ? item.Id : (typeof item.ID === 'number' ? item.ID : 0);
+  const title = safeString(item.Title);
+  const year = typeof item.Year === 'number' ? item.Year : 0;
+
+  // Parse Title for fallback name/number
   const [parsedNumber, parsedName] = title ? parseTitle(title) : ['', ''];
 
-  // Prefer explicit ProjectName/ProjectNumber if available (full select),
-  // otherwise fall back to parsed Title components (core-only select).
-  const projectName = safeString(raw.ProjectName) || parsedName || '(Untitled Project)';
-  const projectNumber = safeString(raw.ProjectNumber) || parsedNumber;
-  const siteUrl = safeString(raw.SiteUrl);
+  // Custom fields — search by multiple possible internal names
+  const siteUrlRaw = findField(item, ['SiteUrl', 'Site_x0020_Url', 'siteurl', 'Site Url']);
+  const projectNameRaw = findField(item, ['ProjectName', 'Project_x0020_Name', 'projectname']);
+  const projectNumberRaw = findField(item, ['ProjectNumber', 'Project_x0020_Number', 'projectnumber']);
+  const departmentRaw = findField(item, ['Department', 'department']);
+  const locationRaw = findField(item, ['ProjectLocation', 'Project_x0020_Location', 'projectlocation']);
+  const typeRaw = findField(item, ['ProjectType', 'Project_x0020_Type', 'projecttype']);
+  const stageRaw = findField(item, ['ProjectStage', 'Project_x0020_Stage', 'projectstage']);
+  const clientRaw = findField(item, ['ClientName', 'Client_x0020_Name', 'clientname']);
+
+  const projectName = safeString(projectNameRaw) || parsedName || '(Untitled Project)';
+  const projectNumber = safeString(projectNumberRaw) || parsedNumber;
+  const siteUrl = safeString(siteUrlRaw);
 
   return {
-    id: typeof raw.Id === 'number' ? raw.Id : 0,
+    id,
     projectName,
     projectNumber,
     siteUrl,
-    year: typeof raw.Year === 'number' ? raw.Year : 0,
-    department: safeString(raw.Department),
-    projectLocation: safeString(raw.ProjectLocation),
-    projectType: safeString(raw.ProjectType),
-    projectStage: safeString(raw.ProjectStage),
-    clientName: safeString(raw.ClientName),
+    year,
+    department: safeString(departmentRaw),
+    projectLocation: safeString(locationRaw),
+    projectType: safeString(typeRaw),
+    projectStage: safeString(stageRaw),
+    clientName: safeString(clientRaw),
     hasSiteUrl: siteUrl.length > 0,
   };
 }
 
 /**
  * Normalize and sort an array of raw list items.
- *
- * Sort order: ProjectNumber ascending (deterministic, human-readable).
- * Items without a project number sort after numbered items.
  */
 export function normalizeProjectSiteEntries(
-  rawItems: IRawProjectSiteItem[],
+  rawItems: Record<string, unknown>[],
 ): IProjectSiteEntry[] {
   return rawItems
     .map(normalizeProjectSiteEntry)
     .sort((a, b) => {
-      // Items with project numbers come first
       if (a.projectNumber && !b.projectNumber) return -1;
       if (!a.projectNumber && b.projectNumber) return 1;
-      // Lexicographic sort by project number
       if (a.projectNumber !== b.projectNumber) {
         return a.projectNumber.localeCompare(b.projectNumber);
       }
-      // Fallback: alphabetical by project name
       return a.projectName.localeCompare(b.projectName);
     });
 }
