@@ -42,41 +42,12 @@ export const SP_PROJECTS_FIELDS = {
 } as const;
 
 /**
- * Core fields that are confirmed to exist on the HBCentral Projects list.
- * Used as fallback if the extended select fails with a 400.
- *
- * SiteUrl is included here because it's the primary action target for
- * card links — without it, cards render as non-clickable.
+ * No $select arrays — the projects query omits $select entirely so
+ * SharePoint returns all fields. This avoids internal-name mismatches
+ * (display names like "ProjectName" and "SiteUrl" don't match their
+ * SP internal names on this list). The normalizer reads whichever
+ * fields are present and gracefully defaults missing ones.
  */
-export const SP_PROJECTS_CORE_SELECT = [
-  SP_PROJECTS_FIELDS.ID,
-  SP_PROJECTS_FIELDS.TITLE,
-  SP_PROJECTS_FIELDS.YEAR,
-  SP_PROJECTS_FIELDS.SITE_URL,
-] as const;
-
-/**
- * Extended select clause with additional metadata fields.
- * If this fails (e.g., an internal name differs), the query
- * automatically retries with SP_PROJECTS_CORE_SELECT.
- *
- * NOTE: ProjectName is intentionally excluded — SharePoint returns 400
- * because the internal name doesn't match the display name on this list.
- * The project name is extracted from the Title field ("{number} — {name}")
- * by the normalizer instead.
- */
-export const SP_PROJECTS_FULL_SELECT = [
-  SP_PROJECTS_FIELDS.ID,
-  SP_PROJECTS_FIELDS.TITLE,
-  SP_PROJECTS_FIELDS.YEAR,
-  SP_PROJECTS_FIELDS.SITE_URL,
-  SP_PROJECTS_FIELDS.PROJECT_NUMBER,
-  SP_PROJECTS_FIELDS.DEPARTMENT,
-  SP_PROJECTS_FIELDS.PROJECT_LOCATION,
-  SP_PROJECTS_FIELDS.PROJECT_TYPE,
-  SP_PROJECTS_FIELDS.PROJECT_STAGE,
-  SP_PROJECTS_FIELDS.CLIENT_NAME,
-] as const;
 
 // ── Raw SharePoint list item shape ─────────────────────────────────────────
 
