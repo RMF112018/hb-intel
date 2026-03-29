@@ -42,6 +42,7 @@ export type { IScorecardRepository } from './ports/IScorecardRepository.js';
 export type { IPmpRepository } from './ports/IPmpRepository.js';
 export type { IProjectRepository } from './ports/IProjectRepository.js';
 export type { IAuthRepository } from './ports/IAuthRepository.js';
+export type { IFinancialRepository, IFinancialModulePosture, FinancialOperationResult, FinancialPagedResult } from './ports/IFinancialRepository.js';
 
 // ---------------------------------------------------------------------------
 // Errors

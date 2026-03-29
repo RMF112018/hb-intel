@@ -20,3 +20,13 @@ export type { IScorecardRepository } from './IScorecardRepository.js';
 export type { IPmpRepository } from './IPmpRepository.js';
 export type { IProjectRepository } from './IProjectRepository.js';
 export type { IAuthRepository } from './IAuthRepository.js';
+export type {
+  IFinancialRepository,
+  IFinancialModulePosture,
+  FinancialOperationResult,
+  FinancialPagedResult,
+  FinancialVersionStatePort,
+  FinancialAuthorityRolePort,
+  ReviewCustodyStatusPort,
+  ReportingPeriodStatusPort,
+} from './IFinancialRepository.js';
