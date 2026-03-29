@@ -1,15 +1,15 @@
 /**
- * Normalizes a raw SharePoint Projects list item into a UI-ready IProjectSiteEntry.
+ * Normalizes raw SharePoint Projects list items into UI-ready IProjectSiteEntry records.
  *
- * SharePoint internal field names often differ from display names.
- * This normalizer searches each raw item's keys using case-insensitive
- * matching with known name variants, making it resilient to whatever
- * internal names SharePoint assigned during column creation.
+ * Uses the confirmed internal field name mapping (field_1 through field_23)
+ * from the HBCentral Projects list schema. No fuzzy matching — direct key access
+ * using the known internal names.
  *
- * The Title field (standard SP column) contains "{number} — {name}" format
- * and is used as the primary fallback for project name and number.
+ * The Title field ("{number} — {name}") is used as a fallback when the dedicated
+ * ProjectName (field_3) or ProjectNumber (field_2) fields are empty.
  */
 import type { IProjectSiteEntry } from './types.js';
+import { SP_PROJECTS_FIELDS } from './types.js';
 
 /**
  * Safely coerce a value to a trimmed string.
@@ -24,10 +24,7 @@ function safeString(value: unknown, fallback = ''): string {
  * SharePoint URL/Hyperlink columns can return:
  *   - Plain string: "https://..."
  *   - Hyperlink object: { Url: "https://...", Description: "..." }
- *   - SP REST expanded: { __metadata: {...}, Url: "...", Description: "..." }
  *   - null / undefined
- *
- * This function handles all cases and returns a trimmed URL or ''.
  */
 function extractUrl(value: unknown): string {
   if (typeof value === 'string') {
@@ -35,47 +32,15 @@ function extractUrl(value: unknown): string {
   }
   if (value !== null && typeof value === 'object') {
     const obj = value as Record<string, unknown>;
-    // SharePoint Hyperlink field: { Url: "...", Description: "..." }
     if (typeof obj.Url === 'string') return obj.Url.trim();
     if (typeof obj.url === 'string') return obj.url.trim();
-    // SP REST sometimes nests: { __deferred: { uri: "..." } }
     if (typeof obj.uri === 'string') return obj.uri.trim();
   }
   return '';
 }
 
 /**
- * Find a field value from a raw SP item by trying multiple possible key names.
- * SharePoint internal names can be: exact match, with OData prefix, with
- * _x00XX_ encoding, or with numeric suffix (e.g., SiteUrl0, SiteUrl1).
- *
- * @param item - Raw SharePoint list item (Record<string, unknown>)
- * @param candidates - Possible field name substrings to match (case-insensitive)
- * @returns The first matching value found, or undefined
- */
-function findField(item: Record<string, unknown>, candidates: string[]): unknown {
-  // First pass: try exact key matches (fastest)
-  for (const key of candidates) {
-    if (key in item) return item[key];
-  }
-
-  // Second pass: case-insensitive substring match against all item keys
-  const lowerCandidates = candidates.map((c) => c.toLowerCase());
-  for (const key of Object.keys(item)) {
-    const lowerKey = key.toLowerCase();
-    for (const candidate of lowerCandidates) {
-      if (lowerKey === candidate || lowerKey.endsWith(candidate.toLowerCase())) {
-        return item[key];
-      }
-    }
-  }
-
-  return undefined;
-}
-
-/**
- * Parse the Title field which uses "{number} — {name}" format.
- * Returns [projectNumber, projectName] or ['', title] if no separator found.
+ * Parse the Title field which uses "{number} — {name}" or "{number} - {name}" format.
  */
 function parseTitle(title: string): [string, string] {
   const separators = [' — ', ' – ', ' - '];
@@ -90,27 +55,30 @@ function parseTitle(title: string): [string, string] {
 
 /**
  * Normalize a single raw SharePoint list item into a UI-ready record.
+ *
+ * Reads fields by their confirmed internal names (field_N) with display-name
+ * fallbacks for forward compatibility if the list is ever re-provisioned.
  */
 export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjectSiteEntry {
-  const item = raw as Record<string, unknown>;
-
-  // Standard fields (always use these exact names)
-  const id = typeof item.Id === 'number' ? item.Id : (typeof item.ID === 'number' ? item.ID : 0);
-  const title = safeString(item.Title);
-  const year = typeof item.Year === 'number' ? item.Year : 0;
+  // Standard fields
+  const id = typeof raw.Id === 'number' ? raw.Id : (typeof raw.ID === 'number' ? raw.ID : 0);
+  const title = safeString(raw[SP_PROJECTS_FIELDS.TITLE]);
+  const year = typeof raw[SP_PROJECTS_FIELDS.YEAR] === 'number'
+    ? (raw[SP_PROJECTS_FIELDS.YEAR] as number)
+    : 0;
 
   // Parse Title for fallback name/number
   const [parsedNumber, parsedName] = title ? parseTitle(title) : ['', ''];
 
-  // Custom fields — search by multiple possible internal names
-  const siteUrlRaw = findField(item, ['SiteUrl', 'Site_x0020_Url', 'siteurl', 'Site Url']);
-  const projectNameRaw = findField(item, ['ProjectName', 'Project_x0020_Name', 'projectname']);
-  const projectNumberRaw = findField(item, ['ProjectNumber', 'Project_x0020_Number', 'projectnumber']);
-  const departmentRaw = findField(item, ['Department', 'department']);
-  const locationRaw = findField(item, ['ProjectLocation', 'Project_x0020_Location', 'projectlocation']);
-  const typeRaw = findField(item, ['ProjectType', 'Project_x0020_Type', 'projecttype']);
-  const stageRaw = findField(item, ['ProjectStage', 'Project_x0020_Stage', 'projectstage']);
-  const clientRaw = findField(item, ['ClientName', 'Client_x0020_Name', 'clientname']);
+  // Custom fields — read by confirmed internal name, fallback to display name
+  const projectNameRaw = raw[SP_PROJECTS_FIELDS.PROJECT_NAME] ?? raw['ProjectName'];
+  const projectNumberRaw = raw[SP_PROJECTS_FIELDS.PROJECT_NUMBER] ?? raw['ProjectNumber'];
+  const siteUrlRaw = raw[SP_PROJECTS_FIELDS.SITE_URL] ?? raw['SiteUrl'];
+  const departmentRaw = raw[SP_PROJECTS_FIELDS.DEPARTMENT] ?? raw['Department'];
+  const locationRaw = raw[SP_PROJECTS_FIELDS.PROJECT_LOCATION] ?? raw['ProjectLocation'];
+  const typeRaw = raw[SP_PROJECTS_FIELDS.PROJECT_TYPE] ?? raw['ProjectType'];
+  const stageRaw = raw[SP_PROJECTS_FIELDS.PROJECT_STAGE] ?? raw['ProjectStage'];
+  const clientRaw = raw[SP_PROJECTS_FIELDS.CLIENT_NAME] ?? raw['ClientName'];
 
   const projectName = safeString(projectNameRaw) || parsedName || '(Untitled Project)';
   const projectNumber = safeString(projectNumberRaw) || parsedNumber;

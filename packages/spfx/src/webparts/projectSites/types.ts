@@ -6,56 +6,45 @@
  *
  * Year selection is driven by a dynamic selector UI, not by page metadata.
  *
- * Field naming: the HBCentral Projects list has custom columns created by
- * the provisioning backend (ProjectName, ProjectNumber, SiteUrl, etc.) but
- * SharePoint internal names may differ from display names. The query uses
- * a resilient two-pass strategy: try full select first, fall back to
- * core-only select (Id, Title, Year) if any field doesn't resolve.
+ * IMPORTANT — Field name mapping:
+ * The HBCentral Projects list was created from an import. Most custom columns
+ * have generic internal names (field_1, field_2, etc.) that differ from their
+ * display names. The mapping below was confirmed from the actual list schema.
  */
 
-// ── SharePoint field constants ─────────────────────────────────────────────
+// ── SharePoint field name mapping ──────────────────────────────────────────
 
 /**
- * Internal field names on the HBCentral Projects list.
+ * Confirmed internal-to-display field mapping for the HBCentral Projects list.
  *
- * Title is the standard SP field used as "{number} — {name}".
- * Year is a confirmed Number column.
- * Other fields are custom columns that may have different internal names
- * depending on how they were provisioned.
+ * Source: list schema export (2026-03-29).
+ * Standard SP fields (Id, Title, Year) use their display name as internal name.
+ * Custom fields use generic field_N internal names from the CSV import origin.
  */
 export const SP_PROJECTS_FIELDS = {
-  /** SharePoint list item ID — always exists. */
+  // Standard fields — internal name matches display name
   ID: 'Id',
-  /** SharePoint standard Title column — "{number} — {name}" format. */
   TITLE: 'Title',
-  /** Year column — confirmed Number type on HBCentral Projects list. */
   YEAR: 'Year',
-  /** Custom fields — may not resolve by these names on all list instances. */
-  PROJECT_NAME: 'ProjectName',
-  PROJECT_NUMBER: 'ProjectNumber',
-  SITE_URL: 'SiteUrl',
-  DEPARTMENT: 'Department',
-  PROJECT_LOCATION: 'ProjectLocation',
-  PROJECT_TYPE: 'ProjectType',
-  PROJECT_STAGE: 'ProjectStage',
-  CLIENT_NAME: 'ClientName',
-} as const;
 
-/**
- * No $select arrays — the projects query omits $select entirely so
- * SharePoint returns all fields. This avoids internal-name mismatches
- * (display names like "ProjectName" and "SiteUrl" don't match their
- * SP internal names on this list). The normalizer reads whichever
- * fields are present and gracefully defaults missing ones.
- */
+  // Custom fields — internal name is field_N (from import)
+  // Display name         -> Internal name
+  PROJECT_ID: 'field_1',     // ProjectId
+  PROJECT_NUMBER: 'field_2', // ProjectNumber
+  PROJECT_NAME: 'field_3',   // ProjectName
+  PROJECT_LOCATION: 'field_4', // ProjectLocation
+  PROJECT_TYPE: 'field_5',   // ProjectType
+  PROJECT_STAGE: 'field_6',  // ProjectStage
+  DEPARTMENT: 'field_12',    // Department
+  CLIENT_NAME: 'field_14',   // ClientName
+  SITE_URL: 'field_23',      // SiteUrl
+} as const;
 
 // ── Raw SharePoint list item shape ─────────────────────────────────────────
 
 /**
  * Raw item from PnPjs — typed as Record<string, unknown> because
- * SharePoint internal field names differ from display names on this list.
- * The normalizer uses fuzzy key matching to extract values regardless
- * of the actual internal names.
+ * the list uses generic field_N internal names.
  */
 export type IRawProjectSiteItem = Record<string, unknown>;
 
@@ -63,38 +52,24 @@ export type IRawProjectSiteItem = Record<string, unknown>;
 
 /** Normalized, UI-ready record for a single project site card. */
 export interface IProjectSiteEntry {
-  /** SharePoint list item ID. */
   id: number;
-  /** Display name of the project. */
   projectName: string;
-  /** Human-assigned project number (format: ##-###-##). Empty string if absent. */
   projectNumber: string;
-  /** SharePoint site URL for the project. Empty string if not yet provisioned. */
   siteUrl: string;
-  /** The fiscal/calendar year this project belongs to. */
   year: number;
-  /** Department classification (e.g. "commercial", "luxury-residential"). */
   department: string;
-  /** Geographic location of the project. */
   projectLocation: string;
-  /** Project classification type. */
   projectType: string;
-  /** Lifecycle stage ("Pursuit" | "Active" or empty). */
   projectStage: string;
-  /** Client or owner name. */
   clientName: string;
-  /** Whether the project has a usable site URL. */
   hasSiteUrl: boolean;
 }
 
 // ── Year validation ────────────────────────────────────────────────────────
 
-/** Minimum plausible project year. */
 export const MIN_VALID_YEAR = 1900;
-/** Maximum plausible project year. */
 export const MAX_VALID_YEAR = 2100;
 
-/** Returns true if the value is a plausible 4-digit year. */
 export function isValidYear(value: number): boolean {
   return Number.isInteger(value) && value >= MIN_VALID_YEAR && value <= MAX_VALID_YEAR;
 }
@@ -105,9 +80,7 @@ export type AvailableYearsStatus = 'loading' | 'error' | 'empty' | 'success';
 
 export interface IAvailableYearsResult {
   status: AvailableYearsStatus;
-  /** Distinct years sorted descending (newest first). Empty when not 'success'. */
   years: number[];
-  /** Error message when status is 'error'. */
   errorMessage: string | null;
 }
 
@@ -117,21 +90,13 @@ export type ProjectSitesStatus = 'loading' | 'error' | 'empty' | 'success';
 
 export interface IProjectSitesResult {
   status: ProjectSitesStatus;
-  /** The year being queried. */
   selectedYear: number;
-  /** Normalized project site entries. Empty array when not in 'success' status. */
   entries: IProjectSiteEntry[];
-  /** Error message when status is 'error'. */
   errorMessage: string | null;
 }
 
 // ── Default year resolution ────────────────────────────────────────────────
 
-/**
- * Resolve the default selected year from the available years list.
- * Prefers the current calendar year if present; otherwise the most recent year.
- * Returns null if the list is empty.
- */
 export function resolveDefaultYear(availableYears: number[]): number | null {
   if (availableYears.length === 0) return null;
   const currentYear = new Date().getFullYear();
