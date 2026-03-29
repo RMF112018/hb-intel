@@ -14,6 +14,7 @@ import {
   useProvisioningStore,
 } from '@hbc/provisioning';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
+import { ConfigError, getFunctionAppUrl } from '../config/runtimeConfig.js';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import { HbcBanner, HbcButton, HbcDataTable, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
 import { HBC_SPACE_MD } from '@hbc/ui-kit/theme';
@@ -62,7 +63,7 @@ export function ProjectSetupPage(): ReactNode {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
+    () => createProvisioningApiClient(getFunctionAppUrl(), async () => authToken),
     [authToken],
   );
 
@@ -72,8 +73,12 @@ export function ProjectSetupPage(): ReactNode {
     client
       .listRequests()
       .then((listed: IProjectSetupRequest[]) => setRequests(listed))
-      .catch(() => {
-        setLoadError('Unable to load project setup requests. Check your connection and try again.');
+      .catch((err) => {
+        if (err instanceof ConfigError) {
+          setLoadError(`Configuration error: ${err.message}`);
+        } else {
+          setLoadError('Unable to load project setup requests. Check your connection and try again.');
+        }
       });
   }, [client, session, setRequests]);
 

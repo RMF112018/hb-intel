@@ -20,9 +20,10 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 
 declare const __APP_BUNDLE_NAME__: string;
 declare const __APP_GLOBAL_NAME__: string;
+declare const __FUNCTION_APP_URL__: string;
 
 interface IAppModule {
-  mount(el: HTMLElement, spfxContext?: unknown): Promise<void>;
+  mount(el: HTMLElement, spfxContext?: unknown, config?: Record<string, unknown>): Promise<void>;
   unmount(): void;
 }
 
@@ -94,7 +95,18 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
 
   public render(): void {
     if (this._appModule?.mount) {
-      this._appModule.mount(this.domElement, this.context);
+      // Inject runtime configuration into the loaded app.
+      // __FUNCTION_APP_URL__ is provided at build time via webpack DefinePlugin
+      // (set by build-spfx-package.ts from the FUNCTION_APP_URL env var).
+      const runtimeConfig: Record<string, unknown> = {};
+      try {
+        if (typeof __FUNCTION_APP_URL__ === 'string' && __FUNCTION_APP_URL__) {
+          runtimeConfig.functionAppUrl = __FUNCTION_APP_URL__;
+        }
+      } catch {
+        // __FUNCTION_APP_URL__ not defined — app will fall back to Vite env or throw ConfigError
+      }
+      this._appModule.mount(this.domElement, this.context, runtimeConfig);
     } else {
       // This path should be unreachable because onInit throws on missing module,
       // but defend against framework edge cases that skip onInit.

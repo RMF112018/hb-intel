@@ -2,17 +2,24 @@
  * Production entry point for the Estimating app.
  *
  * Vite compiles this into an IIFE bundle that exposes mount/unmount on a global.
- * The SPFx shell webpart loads this bundle and calls mount(domElement, spfxContext).
+ * The SPFx shell webpart loads this bundle and calls mount(domElement, spfxContext, config).
  *
  * This file is NOT used during local Vite dev — main.tsx handles that path.
  *
  * @see tools/spfx-shell/src/webparts/shell/ShellWebPart.ts
- * @see docs/architecture/reviews/estimating-spfx-packaging-remediation.md
+ * @see docs/architecture/reviews/estimating-spfx-runtime-api-config-remediation.md
  */
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { App } from './App.js';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
+import { setRuntimeConfig } from './config/runtimeConfig.js';
+
+/** Shell-injected runtime configuration. */
+export interface IMountConfig {
+  /** Azure Function App base URL (e.g. https://hb-intel-functions.azurewebsites.net) */
+  functionAppUrl?: string;
+}
 
 let root: Root | undefined;
 
@@ -22,8 +29,14 @@ let root: Root | undefined;
  *
  * @param el - DOM element provided by SharePoint (webpart.domElement)
  * @param spfxContext - SharePoint page context from BaseClientSideWebPart.context
+ * @param config - Runtime configuration injected by the shell webpart
  */
-export async function mount(el: HTMLElement, spfxContext?: WebPartContext): Promise<void> {
+export async function mount(el: HTMLElement, spfxContext?: WebPartContext, config?: IMountConfig): Promise<void> {
+  // Store runtime config before rendering so all components can resolve it.
+  if (config) {
+    setRuntimeConfig(config);
+  }
+
   if (spfxContext) {
     const permissionKeys = await resolveSpfxPermissions(spfxContext);
     await bootstrapSpfxAuth(spfxContext, permissionKeys);

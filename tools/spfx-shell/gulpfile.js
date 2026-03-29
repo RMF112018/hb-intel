@@ -15,6 +15,7 @@ build.configureWebpack.mergeConfig({
       new webpack.DefinePlugin({
         __APP_BUNDLE_NAME__: JSON.stringify(process.env.APP_BUNDLE_NAME || 'app.js'),
         __APP_GLOBAL_NAME__: JSON.stringify(process.env.APP_GLOBAL_NAME || '__hbIntel_app'),
+        __FUNCTION_APP_URL__: JSON.stringify(process.env.FUNCTION_APP_URL || ''),
       })
     );
 

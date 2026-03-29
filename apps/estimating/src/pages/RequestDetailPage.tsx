@@ -10,6 +10,7 @@ import {
   useProvisioningSignalR,
   useProvisioningStore,
 } from '@hbc/provisioning';
+import { getFunctionAppUrl } from '../config/runtimeConfig.js';
 import { HbcBanner, HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
 import { ClarificationBanner } from '../components/project-setup/ClarificationBanner.js';
 import { CompletionConfirmationCard } from '../components/project-setup/CompletionConfirmationCard.js';
@@ -35,9 +36,10 @@ export function RequestDetailPage(): ReactNode {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  const functionAppUrl = useMemo(() => getFunctionAppUrl(), []);
   const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
-    [authToken],
+    () => createProvisioningApiClient(functionAppUrl, async () => authToken),
+    [functionAppUrl, authToken],
   );
 
   const request: IProjectSetupRequest | undefined = requests.find((r) => r.requestId === requestId);
@@ -49,7 +51,7 @@ export function RequestDetailPage(): ReactNode {
   // before the reconciliation from Provisioning state has propagated to the request).
   const isProvisioningActive = request?.state === 'Provisioning' || request?.state === 'ReadyToProvision';
   const { isConnected } = useProvisioningSignalR({
-    negotiateUrl: `${import.meta.env.VITE_FUNCTION_APP_URL}/api/provisioning-negotiate`,
+    negotiateUrl: `${functionAppUrl}/api/provisioning-negotiate`,
     projectId: projectId ?? '',
     getToken: async () => authToken,
     enabled: Boolean(projectId && isProvisioningActive),

@@ -73,7 +73,13 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'SHAREPOINT_TENANT_URL',
     bucket: 'infrastructure',
-    description: 'Root SharePoint tenant URL',
+    description: 'Root SharePoint tenant URL (e.g. https://hedrickbrotherscom.sharepoint.com)',
+    requiredInProd: true,
+  },
+  {
+    name: 'SHAREPOINT_PROJECTS_SITE_URL',
+    bucket: 'infrastructure',
+    description: 'SharePoint site URL hosting the Projects list (e.g. https://hedrickbrotherscom.sharepoint.com/sites/HBCentral). Falls back to SHAREPOINT_TENANT_URL if not set.',
     requiredInProd: true,
   },
   {

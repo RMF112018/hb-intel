@@ -1,9 +1,14 @@
 // D-PH7-BW-10: Vitest setup for estimating webpart tests
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import { setRuntimeConfig, _resetConfig } from '../config/runtimeConfig.js';
 
 beforeEach(() => {
   vi.resetAllMocks();
+  // Provide a valid Function App URL so component tests that resolve
+  // getFunctionAppUrl() don't throw ConfigError.
+  _resetConfig();
+  setRuntimeConfig({ functionAppUrl: 'https://test-functions.azurewebsites.net' });
 });
 
 // Mock window._spPageContextInfo so resolveAuthMode() returns 'mock' in tests

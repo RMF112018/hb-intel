@@ -17,14 +17,35 @@ export interface IProjectRequestsRepository {
 /**
  * D-PH6-08 real adapter for Project Setup Request lifecycle persistence.
  * Uses SharePoint Projects list as the central request record store.
+ *
+ * SharePoint target resolution:
+ *   SHAREPOINT_PROJECTS_SITE_URL  — preferred; points directly to the site
+ *     that hosts the Projects list (e.g. .../sites/HBCentral)
+ *   SHAREPOINT_TENANT_URL         — legacy fallback; tenant root URL
+ *
+ * Production target: https://hedrickbrotherscom.sharepoint.com/sites/HBCentral
+ * List title: Projects
+ *
+ * NOTE: The HBCentral Projects list was created via CSV import; custom columns
+ * have generic internal names (field_1..field_23). The Year column was added
+ * after import and uses internal name 'Year'. Future field-name reconciliation
+ * may be required if this adapter and the project-sites webpart share the same list.
  */
 export class SharePointProjectRequestsAdapter implements IProjectRequestsRepository {
+  private readonly siteUrl: string;
   private readonly tenantUrl: string;
   private readonly credential = new DefaultAzureCredential();
 
   constructor() {
-    this.tenantUrl = process.env.SHAREPOINT_TENANT_URL!;
-    if (!this.tenantUrl) throw new Error('SHAREPOINT_TENANT_URL env var is required');
+    // Prefer the site-scoped URL when available; fall back to tenant root.
+    this.siteUrl = process.env.SHAREPOINT_PROJECTS_SITE_URL ?? process.env.SHAREPOINT_TENANT_URL ?? '';
+    this.tenantUrl = process.env.SHAREPOINT_TENANT_URL ?? '';
+    if (!this.siteUrl) {
+      throw new Error(
+        'SHAREPOINT_PROJECTS_SITE_URL or SHAREPOINT_TENANT_URL env var is required. ' +
+        'Expected: https://hedrickbrotherscom.sharepoint.com/sites/HBCentral'
+      );
+    }
   }
 
   async upsertRequest(request: IProjectSetupRequest): Promise<void> {
@@ -173,8 +194,10 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
   }
 
   private async getSP(): Promise<any> {
-    const token = await this.credential.getToken(`${new URL(this.tenantUrl).origin}/.default`);
-    return (spfi(this.tenantUrl) as any).using({
+    // Token scope uses tenant origin; PnPjs connects to the site-scoped URL.
+    const origin = new URL(this.siteUrl).origin;
+    const token = await this.credential.getToken(`${origin}/.default`);
+    return (spfi(this.siteUrl) as any).using({
       // D-PH6-08 Managed Identity binding for Projects-list request lifecycle operations.
       bind(instance: any) {
         instance.on.auth.replace(async (_: unknown, req: Request, done: (request: Request) => void) => {

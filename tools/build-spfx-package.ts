@@ -408,6 +408,10 @@ for (const domain of domains) {
   const shellEnv = {
     APP_BUNDLE_NAME: bundleName,
     APP_GLOBAL_NAME: globalName,
+    // Pass Function App URL through to webpack DefinePlugin so the shell
+    // webpart can inject it into the loaded app at runtime.
+    // Read from FUNCTION_APP_URL env var (set by CI or .env).
+    FUNCTION_APP_URL: process.env.FUNCTION_APP_URL ?? '',
   };
 
   console.log('  Running gulp bundle --ship...');

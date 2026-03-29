@@ -13,6 +13,7 @@ import {
 } from '@hbc/features-estimating';
 import type { IProjectSetupRequest } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
+import { getFunctionAppUrl } from '../config/runtimeConfig.js';
 import { HbcConnectivityBar, HbcSyncStatusBadge } from '@hbc/session-state';
 import type { IStepWizardConfig } from '@hbc/step-wizard';
 import { HbcStepWizard } from '@hbc/step-wizard';
@@ -48,7 +49,7 @@ export function NewRequestPage(): ReactNode {
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
 
   const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
+    () => createProvisioningApiClient(getFunctionAppUrl(), async () => authToken),
     [authToken],
   );
 
