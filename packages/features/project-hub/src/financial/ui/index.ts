@@ -58,6 +58,10 @@ export { BuyoutWorkflowRail } from './BuyoutWorkflowRail.js';
 export { FinancialWorkspaceShell } from './FinancialWorkspaceShell.js';
 export type { FinancialWorkspaceShellProps, FinancialWorkspaceState } from './FinancialWorkspaceShell.js';
 
+// Operational Banner
+export { FinancialOperationalBanner } from './FinancialOperationalBanner.js';
+export type { FinancialOperationalBannerProps } from './FinancialOperationalBanner.js';
+
 // Tool Pages — Checklist, GC/GR, Review, Publication, History
 export { ChecklistPage } from './ChecklistPage.js';
 export type { ChecklistPageProps } from './ChecklistPage.js';

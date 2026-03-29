@@ -17,7 +17,9 @@ import type { ActivityStripEntry } from '@hbc/ui-kit';
 
 import { useFinancialControlCenter } from '../hooks/useFinancialControlCenter.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
+import { useFinancialOperationalState } from '../hooks/useFinancialOperationalState.js';
 import { FinancialWorkspaceShell } from './FinancialWorkspaceShell.js';
+import { FinancialOperationalBanner } from './FinancialOperationalBanner.js';
 import type { FinancialWorkspaceState } from './FinancialWorkspaceShell.js';
 import { FinancialPeriodHeader } from './FinancialPeriodHeader.js';
 import { FinancialToolPostureRail } from './FinancialToolPostureRail.js';
@@ -143,6 +145,23 @@ export function FinancialControlCenter({
 
   const toolTitle = activeTool ? (TOOL_LABELS[activeTool] ?? 'Financial') : 'Financial';
 
+  // ── Operational state (runtime honesty) ───────────────────────────
+
+  const operationalState = useFinancialOperationalState({
+    toolSlug: activeTool,
+    versionState: data.period?.versionState,
+    staleBudgetLineCount: 0, // Will wire to real data via IFinancialRepository
+    checklistComplete: false, // Will wire to real data via IFinancialRepository
+    isReportCandidate: data.period?.isReportCandidate ?? false,
+  });
+
+  const operationalBanner = (
+    <FinancialOperationalBanner
+      state={operationalState}
+      onNavigateToTool={handleOpenSurface}
+    />
+  );
+
   // ── Deeper surface rendering ──────────────────────────────────────
 
   const toolPageProps = { projectId, viewerRole, complexityTier, onBack: handleBackToControlCenter };
@@ -150,6 +169,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'forecast') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <ForecastSummaryPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -158,6 +178,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'budget') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <BudgetPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -166,6 +187,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'cash-flow') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <CashFlowPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -174,6 +196,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'buyout') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <BuyoutPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -182,6 +205,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'checklist') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <ChecklistPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -190,6 +214,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'gcgr') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <GCGRPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -198,6 +223,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'review') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <ReviewPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -206,6 +232,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'publication') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <PublicationPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -214,6 +241,7 @@ export function FinancialControlCenter({
   if (surfaceMode === 'history') {
     return (
       <FinancialWorkspaceShell title={toolTitle} projectId={projectId} activeTool={activeTool} activeToolLabel={TOOL_LABELS[activeTool ?? '']} versionState={workspaceState} reportingPeriod={data.period?.reportingMonth}>
+        {operationalBanner}
         <HistoryPage {...toolPageProps} />
       </FinancialWorkspaceShell>
     );
@@ -239,6 +267,8 @@ export function FinancialControlCenter({
       blockerCount={data.exceptions?.length}
       isStale={!data.freshness?.budgetFresh}
     >
+      {operationalBanner}
+
       <FinancialPeriodHeader
         period={data.period}
         custody={data.custody}
