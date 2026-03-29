@@ -240,7 +240,7 @@ The Function App must have a system-assigned managed identity enabled, and that 
 
 ### PREREQUISITE: CORS
 
-The Function App must allow CORS from `https://hedrickbrotherscom.sharepoint.com`.
+The Function App must allow CORS from `https://hedrickbrotherscom.sharepoint.com`. **COMPLETE**
 
 ### PREREQUISITE: Entra ID App Registration
 
