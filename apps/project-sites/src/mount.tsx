@@ -12,7 +12,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-import { resolvePageYear } from '@hbc/spfx/project-sites/resolvePageYear.js';
 import { ProjectSitesRoot } from '@hbc/spfx/project-sites/ProjectSitesRoot.js';
 
 let root: Root | undefined;
@@ -37,19 +36,12 @@ export async function mount(el: HTMLElement, spfxContext?: WebPartContext): Prom
     },
   });
 
-  // Resolve the page year — reads the Year column from the Site Pages
-  // library item via PnPjs REST call. yearOverride is always 0 in the
-  // IIFE/shell pattern (shell webpart does not forward property pane values).
-  const yearResolution = spfxContext
-    ? await resolvePageYear(spfxContext, 0)
-    : { kind: 'missing' as const };
-
   root = createRoot(el);
   root.render(
     createElement(
       QueryClientProvider,
       { client: queryClient },
-      createElement(ProjectSitesRoot, { yearResolution }),
+      createElement(ProjectSitesRoot),
     ),
   );
 }

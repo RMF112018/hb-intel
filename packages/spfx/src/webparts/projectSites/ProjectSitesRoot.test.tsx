@@ -1,181 +1,103 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import type {
-  PageYearResolution,
-  IProjectSitesResult,
-  IProjectSiteEntry,
-} from './types.js';
-import { ProjectSitesRoot } from './ProjectSitesRoot.js';
+import type { IAvailableYearsResult, IProjectSitesResult } from './types.js';
 
-// ── Mock useProjectSites ──────────────────────────────────────────────────
+// ── Mock hooks ────────────────────────────────────────────────────────────
 
-const mockUseProjectSites = vi.fn<(resolution: PageYearResolution) => IProjectSitesResult>();
+const mockUseAvailableYears = vi.fn<() => IAvailableYearsResult>();
+const mockUseProjectSites = vi.fn<(year: number | null) => IProjectSitesResult | null>();
 
-vi.mock('./hooks/useProjectSites.js', () => ({
-  useProjectSites: (resolution: PageYearResolution) => mockUseProjectSites(resolution),
+vi.mock('./hooks/useAvailableYears.js', () => ({
+  useAvailableYears: () => mockUseAvailableYears(),
 }));
 
-// ── Factories ─────────────────────────────────────────────────────────────
+vi.mock('./hooks/useProjectSites.js', () => ({
+  useProjectSites: (year: number | null) => mockUseProjectSites(year),
+}));
 
-function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
-  return {
-    id: 1,
-    projectName: 'Test Project',
-    projectNumber: '24-001-01',
-    siteUrl: 'https://example.com/sites/test',
-    year: 2024,
-    department: 'commercial',
-    projectLocation: 'Austin, TX',
-    projectType: 'Healthcare',
-    projectStage: 'Active',
-    clientName: 'Test Client',
-    hasSiteUrl: true,
-    ...overrides,
-  };
-}
-
-const resolvedYear2024: PageYearResolution = { kind: 'resolved', year: 2024, source: 'page-metadata' };
-const missingYear: PageYearResolution = { kind: 'missing' };
-const invalidYear: PageYearResolution = { kind: 'invalid', rawValue: 99999, source: 'property-pane' };
+import { ProjectSitesRoot } from './ProjectSitesRoot.js';
 
 // ── Tests ─────────────────────────────────────────────────────────────────
 
 describe('ProjectSitesRoot', () => {
   beforeEach(() => {
+    mockUseAvailableYears.mockReset();
     mockUseProjectSites.mockReset();
   });
 
-  // ── No year ─────────────────────────────────────────────────────────
+  it('renders spinner when years are loading', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'loading', years: [], errorMessage: null });
+    mockUseProjectSites.mockReturnValue(null);
 
-  it('renders "Year Not Configured" when no year is resolved', () => {
-    mockUseProjectSites.mockReturnValue({
-      status: 'no-year',
-      resolvedYear: null,
-      yearResolution: missingYear,
-      entries: [],
-      errorMessage: null,
-    });
-
-    render(<ProjectSitesRoot yearResolution={missingYear} />);
-    expect(screen.getByText('Year Not Configured')).toBeInTheDocument();
-    expect(screen.getByText(/Set the Year property/)).toBeInTheDocument();
-  });
-
-  // ── Invalid year ────────────────────────────────────────────────────
-
-  it('renders "Invalid Year Value" with raw value detail', () => {
-    mockUseProjectSites.mockReturnValue({
-      status: 'invalid-year',
-      resolvedYear: null,
-      yearResolution: invalidYear,
-      entries: [],
-      errorMessage: null,
-    });
-
-    render(<ProjectSitesRoot yearResolution={invalidYear} />);
-    expect(screen.getByText('Invalid Year Value')).toBeInTheDocument();
-    expect(screen.getByText(/property pane override/)).toBeInTheDocument();
-    expect(screen.getByText(/99999/)).toBeInTheDocument();
-  });
-
-  // ── Loading ─────────────────────────────────────────────────────────
-
-  it('renders spinner and year badge during loading', () => {
-    mockUseProjectSites.mockReturnValue({
-      status: 'loading',
-      resolvedYear: { kind: 'resolved', year: 2024, source: 'page-metadata' },
-      yearResolution: resolvedYear2024,
-      entries: [],
-      errorMessage: null,
-    });
-
-    render(<ProjectSitesRoot yearResolution={resolvedYear2024} />);
+    render(<ProjectSitesRoot />);
     expect(screen.getByText('Project Sites')).toBeInTheDocument();
-    expect(screen.getByText('2024')).toBeInTheDocument();
   });
 
-  // ── Error ───────────────────────────────────────────────────────────
+  it('renders error when years fail to load', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'error', years: [], errorMessage: 'Network error' });
+    mockUseProjectSites.mockReturnValue(null);
 
-  it('renders error state with message', () => {
-    mockUseProjectSites.mockReturnValue({
-      status: 'error',
-      resolvedYear: { kind: 'resolved', year: 2024, source: 'page-metadata' },
-      yearResolution: resolvedYear2024,
-      entries: [],
-      errorMessage: 'Network failure',
-    });
-
-    render(<ProjectSitesRoot yearResolution={resolvedYear2024} />);
+    render(<ProjectSitesRoot />);
     expect(screen.getByText('Unable to Load Project Sites')).toBeInTheDocument();
-    expect(screen.getByText('Network failure')).toBeInTheDocument();
-    expect(screen.getByText('2024')).toBeInTheDocument();
+    expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
-  // ── Empty ───────────────────────────────────────────────────────────
+  it('renders empty state when no years exist', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'empty', years: [], errorMessage: null });
+    mockUseProjectSites.mockReturnValue(null);
 
-  it('renders empty state with year context', () => {
-    mockUseProjectSites.mockReturnValue({
-      status: 'empty',
-      resolvedYear: { kind: 'resolved', year: 2024, source: 'page-metadata' },
-      yearResolution: resolvedYear2024,
-      entries: [],
-      errorMessage: null,
-    });
-
-    render(<ProjectSitesRoot yearResolution={resolvedYear2024} />);
+    render(<ProjectSitesRoot />);
     expect(screen.getByText('No Project Sites')).toBeInTheDocument();
-    expect(screen.getByText(/No projects were found for 2024/)).toBeInTheDocument();
-    expect(screen.getByText('2024')).toBeInTheDocument();
   });
 
-  // ── Success ─────────────────────────────────────────────────────────
-
-  it('renders card grid with year badge and count', () => {
-    const entries = [
-      createEntry({ id: 1, projectName: 'Alpha Project' }),
-      createEntry({ id: 2, projectName: 'Beta Project', projectNumber: '24-002-01' }),
-    ];
-
+  it('renders year selector buttons when years load', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'success',
-      resolvedYear: { kind: 'resolved', year: 2024, source: 'page-metadata' },
-      yearResolution: resolvedYear2024,
-      entries,
+      status: 'success', selectedYear: 2026,
+      entries: [{ id: 1, projectName: 'Test', projectNumber: '', siteUrl: 'https://x.com', year: 2026, department: '', projectLocation: '', projectType: '', projectStage: '', clientName: '', hasSiteUrl: true }],
       errorMessage: null,
     });
 
-    render(<ProjectSitesRoot yearResolution={resolvedYear2024} />);
-    expect(screen.getByText('Project Sites')).toBeInTheDocument();
-    expect(screen.getByText('2024')).toBeInTheDocument();
-    expect(screen.getByText('2 projects')).toBeInTheDocument();
+    render(<ProjectSitesRoot />);
+    expect(screen.getByText('2026')).toBeInTheDocument();
+    expect(screen.getByText('2025')).toBeInTheDocument();
+  });
+
+  it('renders project cards on success', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success', selectedYear: 2025,
+      entries: [
+        { id: 1, projectName: 'Alpha Project', projectNumber: '25-001-01', siteUrl: 'https://x.com', year: 2025, department: 'commercial', projectLocation: '', projectType: '', projectStage: 'Active', clientName: '', hasSiteUrl: true },
+        { id: 2, projectName: 'Beta Project', projectNumber: '25-002-01', siteUrl: 'https://y.com', year: 2025, department: '', projectLocation: '', projectType: '', projectStage: '', clientName: '', hasSiteUrl: true },
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
     expect(screen.getByText('Alpha Project')).toBeInTheDocument();
     expect(screen.getByText('Beta Project')).toBeInTheDocument();
+    expect(screen.getByText('2 projects')).toBeInTheDocument();
   });
 
-  it('renders singular count for 1 project', () => {
+  it('renders empty state for a year with no projects', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'success',
-      resolvedYear: { kind: 'resolved', year: 2024, source: 'page-metadata' },
-      yearResolution: resolvedYear2024,
-      entries: [createEntry()],
-      errorMessage: null,
+      status: 'empty', selectedYear: 2025, entries: [], errorMessage: null,
     });
 
-    render(<ProjectSitesRoot yearResolution={resolvedYear2024} />);
-    expect(screen.getByText('1 project')).toBeInTheDocument();
+    render(<ProjectSitesRoot />);
+    expect(screen.getByText('No Project Sites')).toBeInTheDocument();
+    expect(screen.getByText(/No projects were found for 2025/)).toBeInTheDocument();
   });
 
-  it('renders accessible list with aria-label', () => {
+  it('renders error when project query fails', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'success',
-      resolvedYear: { kind: 'resolved', year: 2024, source: 'page-metadata' },
-      yearResolution: resolvedYear2024,
-      entries: [createEntry(), createEntry({ id: 2 })],
-      errorMessage: null,
+      status: 'error', selectedYear: 2025, entries: [], errorMessage: 'SP error',
     });
 
-    render(<ProjectSitesRoot yearResolution={resolvedYear2024} />);
-    const list = screen.getByRole('list');
-    expect(list).toHaveAttribute('aria-label', '2 project sites for 2024');
+    render(<ProjectSitesRoot />);
+    expect(screen.getByText('Unable to Load Project Sites')).toBeInTheDocument();
   });
 });

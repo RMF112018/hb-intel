@@ -3,8 +3,6 @@ export { default as HbcDocumentManagerWebPart } from './webparts/hbcDocumentMana
 export { default as ProjectSitesWebPart } from './webparts/projectSites/ProjectSitesWebPart.js';
 export type {
   IProjectSiteEntry,
-  IProjectSitesWebPartProps,
-  IResolvedPageYear,
   IProjectSitesResult,
-  PageYearResolution,
+  IAvailableYearsResult,
 } from './webparts/projectSites/types.js';

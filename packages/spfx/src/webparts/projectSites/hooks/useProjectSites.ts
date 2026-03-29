@@ -1,12 +1,9 @@
 /**
  * React hook that queries the HBCentral Projects list for project sites
- * matching the resolved page year.
+ * matching the selected year.
  *
  * Uses PnPjs v4 with SPFx context from @hbc/auth/spfx and @tanstack/react-query
  * for caching, loading, and error state management.
- *
- * @see resolvePageYear.ts — page-year resolution seam
- * @see normalizeProjectSiteEntry.ts — raw-to-UI normalization
  */
 import { useQuery } from '@tanstack/react-query';
 import { spfi, SPFx } from '@pnp/sp';
@@ -15,7 +12,6 @@ import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import { getSpfxContext } from '@hbc/auth/spfx';
 import type {
-  PageYearResolution,
   IRawProjectSiteItem,
   IProjectSitesResult,
 } from '../types.js';
@@ -34,7 +30,7 @@ const STALE_TIME_MS = 5 * 60 * 1000;
 /**
  * Fetch project site entries from the HBCentral Projects list.
  *
- * @param year - The resolved page year to filter by
+ * @param year - The selected year to filter by
  * @returns Raw SharePoint list items
  */
 async function fetchProjectSites(year: number): Promise<IRawProjectSiteItem[]> {
@@ -50,59 +46,36 @@ async function fetchProjectSites(year: number): Promise<IRawProjectSiteItem[]> {
 }
 
 /**
- * Hook: query project sites for the resolved page year.
+ * Hook: query project sites for the selected year.
  *
- * @param yearResolution - Output of resolvePageYear()
+ * @param selectedYear - The year selected in the UI, or null if none selected yet
  * @returns IProjectSitesResult with status, entries, and error info
  */
 export function useProjectSites(
-  yearResolution: PageYearResolution,
-): IProjectSitesResult {
-  const resolved = yearResolution.kind === 'resolved' ? yearResolution : null;
-  const year = resolved?.year ?? null;
-
+  selectedYear: number | null,
+): IProjectSitesResult | null {
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['project-sites', year],
-    queryFn: () => fetchProjectSites(year!),
-    enabled: year !== null && year > 0,
+    queryKey: ['project-sites', selectedYear],
+    queryFn: () => fetchProjectSites(selectedYear!),
+    enabled: selectedYear !== null && selectedYear > 0,
     staleTime: STALE_TIME_MS,
     retry: 1,
   });
 
-  // No year found at all
-  if (yearResolution.kind === 'missing') {
-    return {
-      status: 'no-year',
-      resolvedYear: null,
-      yearResolution,
-      entries: [],
-      errorMessage: null,
-    };
+  // No year selected yet — don't return a result
+  if (selectedYear === null) {
+    return null;
   }
 
-  // Year value present but invalid
-  if (yearResolution.kind === 'invalid') {
-    return {
-      status: 'invalid-year',
-      resolvedYear: null,
-      yearResolution,
-      entries: [],
-      errorMessage: null,
-    };
-  }
-
-  // Loading
   if (isLoading) {
     return {
       status: 'loading',
-      resolvedYear: resolved,
-      yearResolution,
+      selectedYear,
       entries: [],
       errorMessage: null,
     };
   }
 
-  // Error
   if (isError) {
     const message =
       error instanceof Error
@@ -110,21 +83,18 @@ export function useProjectSites(
         : 'Failed to load project sites from the Projects list.';
     return {
       status: 'error',
-      resolvedYear: resolved,
-      yearResolution,
+      selectedYear,
       entries: [],
       errorMessage: message,
     };
   }
 
-  // Normalize and return
   const entries = normalizeProjectSiteEntries(data ?? []);
 
   if (entries.length === 0) {
     return {
       status: 'empty',
-      resolvedYear: resolved,
-      yearResolution,
+      selectedYear,
       entries: [],
       errorMessage: null,
     };
@@ -132,8 +102,7 @@ export function useProjectSites(
 
   return {
     status: 'success',
-    resolvedYear: resolved,
-    yearResolution,
+    selectedYear,
     entries,
     errorMessage: null,
   };

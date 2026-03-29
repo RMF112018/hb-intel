@@ -2,12 +2,9 @@
  * Data contract for the Project Sites web part.
  *
  * Defines the normalized shape returned to the UI after querying the
- * HBCentral Projects list filtered by page-level Year.
+ * HBCentral Projects list filtered by a user-selected Year value.
  *
- * Kept local to the web part — the Year field is a SharePoint list filter
- * column, not a core domain property of the provisioning model.
- *
- * @see .claude/plans/project-sites-webpart-validation-and-architecture-report.md
+ * Year selection is driven by a dynamic selector UI, not by page metadata.
  */
 
 // ── SharePoint field constants ─────────────────────────────────────────────
@@ -90,18 +87,6 @@ export interface IProjectSiteEntry {
   hasSiteUrl: boolean;
 }
 
-// ── Web part property contract ─────────────────────────────────────────────
-
-/** SPFx property pane configuration for the Project Sites web part. */
-export interface IProjectSitesWebPartProps {
-  /**
-   * Manual year override.
-   *   - When > 0, takes priority over page metadata.
-   *   - When 0 or absent, the web part reads the hosting page's Year column.
-   */
-  yearOverride: number;
-}
-
 // ── Year validation ────────────────────────────────────────────────────────
 
 /** Minimum plausible project year. */
@@ -114,50 +99,41 @@ export function isValidYear(value: number): boolean {
   return Number.isInteger(value) && value >= MIN_VALID_YEAR && value <= MAX_VALID_YEAR;
 }
 
-// ── Page-year resolution result ────────────────────────────────────────────
+// ── Available years result ─────────────────────────────────────────────────
 
-export type PageYearSource = 'property-pane' | 'page-metadata';
+export type AvailableYearsStatus = 'loading' | 'error' | 'empty' | 'success';
 
-/** Successfully resolved a valid year. */
-export interface IResolvedPageYear {
-  kind: 'resolved';
-  year: number;
-  source: PageYearSource;
+export interface IAvailableYearsResult {
+  status: AvailableYearsStatus;
+  /** Distinct years sorted descending (newest first). Empty when not 'success'. */
+  years: number[];
+  /** Error message when status is 'error'. */
+  errorMessage: string | null;
 }
 
-/** No year value was found at all (page metadata absent, override at 0). */
-export interface IMissingPageYear {
-  kind: 'missing';
-}
+// ── Project sites query result ─────────────────────────────────────────────
 
-/** A value was found but is not a valid 4-digit year. */
-export interface IInvalidPageYear {
-  kind: 'invalid';
-  rawValue: unknown;
-  source: PageYearSource;
-}
-
-/** Discriminated union returned by resolvePageYear(). */
-export type PageYearResolution = IResolvedPageYear | IMissingPageYear | IInvalidPageYear;
-
-// ── Query result wrapper ───────────────────────────────────────────────────
-
-export type ProjectSitesStatus =
-  | 'no-year'
-  | 'invalid-year'
-  | 'loading'
-  | 'error'
-  | 'empty'
-  | 'success';
+export type ProjectSitesStatus = 'loading' | 'error' | 'empty' | 'success';
 
 export interface IProjectSitesResult {
   status: ProjectSitesStatus;
-  /** Resolved page year, or null if not available / invalid. */
-  resolvedYear: IResolvedPageYear | null;
-  /** The full resolution result for rendering context-specific messaging. */
-  yearResolution: PageYearResolution;
+  /** The year being queried. */
+  selectedYear: number;
   /** Normalized project site entries. Empty array when not in 'success' status. */
   entries: IProjectSiteEntry[];
   /** Error message when status is 'error'. */
   errorMessage: string | null;
+}
+
+// ── Default year resolution ────────────────────────────────────────────────
+
+/**
+ * Resolve the default selected year from the available years list.
+ * Prefers the current calendar year if present; otherwise the most recent year.
+ * Returns null if the list is empty.
+ */
+export function resolveDefaultYear(availableYears: number[]): number | null {
+  if (availableYears.length === 0) return null;
+  const currentYear = new Date().getFullYear();
+  return availableYears.includes(currentYear) ? currentYear : availableYears[0];
 }
