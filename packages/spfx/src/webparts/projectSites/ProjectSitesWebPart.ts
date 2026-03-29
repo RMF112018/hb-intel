@@ -44,7 +44,7 @@ export default class ProjectSitesWebPart extends BaseClientSideWebPart<IProjectS
       this._root = createRoot(this.domElement);
     }
 
-    const resolvedYear = resolvePageYear(
+    const yearResolution = resolvePageYear(
       this.context,
       this.properties.yearOverride,
     );
@@ -53,7 +53,7 @@ export default class ProjectSitesWebPart extends BaseClientSideWebPart<IProjectS
       createElement(
         QueryClientProvider,
         { client: this._queryClient! },
-        createElement(ProjectSitesRoot, { resolvedYear }),
+        createElement(ProjectSitesRoot, { yearResolution }),
       ),
     );
   }

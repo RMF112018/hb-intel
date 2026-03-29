@@ -12,9 +12,9 @@ import { HbcCard } from '@hbc/ui-kit';
 import {
   HBC_PRIMARY_BLUE,
   HBC_BRAND_ACTION,
-  HBC_BRAND_ACTION_HOVER,
   HBC_SURFACE_LIGHT,
   HBC_RADIUS_SM,
+  HBC_RADIUS_XL,
   elevationLevel1,
   elevationLevel2,
   TRANSITION_FAST,
@@ -24,15 +24,17 @@ import type { IProjectSiteEntry } from '../types.js';
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const useStyles = makeStyles({
+  // ── Wrapper ─────────────────────────────────────────────────────────
   cardWrapper: {
     textDecorationLine: 'none',
     color: 'inherit',
     display: 'block',
-    borderRadius: '8px',
+    borderRadius: HBC_RADIUS_XL,
     transitionProperty: 'box-shadow, transform',
     transitionDuration: TRANSITION_FAST,
     transitionTimingFunction: 'ease-in-out',
     boxShadow: elevationLevel1,
+    height: '100%',
     ':hover': {
       boxShadow: elevationLevel2,
       transform: 'translateY(-2px)',
@@ -50,17 +52,20 @@ const useStyles = makeStyles({
   },
   disabledWrapper: {
     cursor: 'default',
-    opacity: 0.65,
+    opacity: 0.6,
     ':hover': {
       boxShadow: elevationLevel1,
       transform: 'none',
     },
   },
+
+  // ── Header ──────────────────────────────────────────────────────────
   header: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: '8px',
+    minHeight: '24px',
   },
   projectNumber: {
     fontSize: '0.75rem',
@@ -68,24 +73,27 @@ const useStyles = makeStyles({
     letterSpacing: '0.025em',
     color: HBC_PRIMARY_BLUE,
     backgroundColor: '#E8F1F8',
-    paddingTop: '2px',
-    paddingBottom: '2px',
+    paddingTop: '3px',
+    paddingBottom: '3px',
     paddingLeft: '8px',
     paddingRight: '8px',
     borderRadius: HBC_RADIUS_SM,
     whiteSpace: 'nowrap',
+    lineHeight: '1.3',
   },
   stageBadge: {
     fontSize: '0.6875rem',
     fontWeight: 600,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.05em',
-    paddingTop: '2px',
-    paddingBottom: '2px',
-    paddingLeft: '6px',
-    paddingRight: '6px',
+    paddingTop: '3px',
+    paddingBottom: '3px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
     borderRadius: HBC_RADIUS_SM,
     whiteSpace: 'nowrap',
+    lineHeight: '1.3',
+    marginLeft: 'auto',
   },
   stageActive: {
     color: '#065F46',
@@ -99,27 +107,33 @@ const useStyles = makeStyles({
     color: HBC_SURFACE_LIGHT['text-muted'],
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
   },
+
+  // ── Body ────────────────────────────────────────────────────────────
   body: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '10px',
   },
   projectName: {
     fontSize: '1rem',
     fontWeight: 600,
     lineHeight: '1.4',
     color: HBC_SURFACE_LIGHT['text-primary'],
-    margin: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     display: '-webkit-box',
     WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical' as const,
+    wordBreak: 'break-word' as const,
   },
   metaGrid: {
     display: 'grid',
     gridTemplateColumns: 'auto 1fr',
-    columnGap: '8px',
+    columnGap: '10px',
     rowGap: '4px',
     alignItems: 'baseline',
   },
@@ -136,11 +150,14 @@ const useStyles = makeStyles({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
+
+  // ── Footer ──────────────────────────────────────────────────────────
   footer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: '8px',
+    minHeight: '20px',
   },
   department: {
     fontSize: '0.6875rem',
@@ -151,8 +168,10 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    flexShrink: 1,
+    minWidth: 0,
   },
-  openSiteLink: {
+  openSiteAction: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
@@ -161,35 +180,22 @@ const useStyles = makeStyles({
     color: HBC_BRAND_ACTION,
     textDecorationLine: 'none',
     whiteSpace: 'nowrap',
-    ':hover': {
-      color: HBC_BRAND_ACTION_HOVER,
-      textDecorationLine: 'underline',
-    },
+    flexShrink: 0,
+    transitionProperty: 'color',
+    transitionDuration: TRANSITION_FAST,
+    transitionTimingFunction: 'ease-in-out',
+  },
+  openSiteActionHover: {
+    // Applied to the action span when the CARD wrapper is hovered.
+    // This is achieved via CSS descendant selector on the wrapper :hover.
+    // Since Griffel doesn't support descendant selectors, we apply via
+    // conditional className in the component instead.
   },
   provisioningLabel: {
     fontSize: '0.8125rem',
     fontStyle: 'italic',
     color: HBC_SURFACE_LIGHT['text-muted'],
-  },
-  srOnly: {
-    position: 'absolute',
-    width: '1px',
-    height: '1px',
-    paddingTop: 0,
-    paddingBottom: 0,
-    paddingLeft: 0,
-    paddingRight: 0,
-    marginTop: '-1px',
-    marginBottom: 0,
-    marginLeft: 0,
-    marginRight: 0,
-    overflow: 'hidden',
-    clipPath: 'inset(50%)',
-    whiteSpace: 'nowrap',
-    borderTopWidth: 0,
-    borderBottomWidth: 0,
-    borderLeftWidth: 0,
-    borderRightWidth: 0,
+    flexShrink: 0,
   },
 });
 
@@ -243,14 +249,13 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const classes = useStyles();
 
   const hasMetadata = entry.clientName || entry.projectLocation || entry.projectType;
+  const deptLabel = formatDepartment(entry.department);
 
   // ── Header ──────────────────────────────────────────────────────────
   const headerContent = (
     <div className={classes.header}>
-      {entry.projectNumber ? (
+      {entry.projectNumber && (
         <span className={classes.projectNumber}>{entry.projectNumber}</span>
-      ) : (
-        <span />
       )}
       {entry.projectStage && (
         <span className={getStageStyle(classes, entry.projectStage)}>
@@ -263,11 +268,9 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   // ── Footer ──────────────────────────────────────────────────────────
   const footerContent = (
     <div className={classes.footer}>
-      <span className={classes.department}>
-        {formatDepartment(entry.department)}
-      </span>
+      <span className={classes.department}>{deptLabel}</span>
       {entry.hasSiteUrl ? (
-        <span className={classes.openSiteLink} aria-hidden="true">
+        <span className={classes.openSiteAction} aria-hidden="true">
           Open Site <ArrowIcon />
         </span>
       ) : (
@@ -305,7 +308,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     </div>
   );
 
-  // ── Render ──────────────────────────────────────────────────────────
+  // ── Render: linked card ─────────────────────────────────────────────
   if (entry.hasSiteUrl) {
     return (
       <a
@@ -322,9 +325,11 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     );
   }
 
+  // ── Render: disabled card (not focusable) ───────────────────────────
   return (
     <div
       className={mergeClasses(classes.cardWrapper, classes.disabledWrapper)}
+      role="group"
       aria-label={`${entry.projectName} — site provisioning in progress`}
     >
       <HbcCard weight="standard" header={headerContent} footer={footerContent}>

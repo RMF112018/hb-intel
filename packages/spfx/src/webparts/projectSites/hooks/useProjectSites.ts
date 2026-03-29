@@ -15,7 +15,7 @@ import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import { getSpfxContext } from '@hbc/auth/spfx';
 import type {
-  IResolvedPageYear,
+  PageYearResolution,
   IRawProjectSiteItem,
   IProjectSitesResult,
 } from '../types.js';
@@ -35,7 +35,7 @@ const STALE_TIME_MS = 5 * 60 * 1000;
  * Fetch project site entries from the HBCentral Projects list.
  *
  * @param year - The resolved page year to filter by
- * @returns Normalized, sorted project site entries
+ * @returns Raw SharePoint list items
  */
 async function fetchProjectSites(year: number): Promise<IRawProjectSiteItem[]> {
   const context = getSpfxContext();
@@ -52,13 +52,14 @@ async function fetchProjectSites(year: number): Promise<IRawProjectSiteItem[]> {
 /**
  * Hook: query project sites for the resolved page year.
  *
- * @param resolvedYear - Output of resolvePageYear(), or null if no year available
+ * @param yearResolution - Output of resolvePageYear()
  * @returns IProjectSitesResult with status, entries, and error info
  */
 export function useProjectSites(
-  resolvedYear: IResolvedPageYear | null,
+  yearResolution: PageYearResolution,
 ): IProjectSitesResult {
-  const year = resolvedYear?.year ?? null;
+  const resolved = yearResolution.kind === 'resolved' ? yearResolution : null;
+  const year = resolved?.year ?? null;
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['project-sites', year],
@@ -68,11 +69,23 @@ export function useProjectSites(
     retry: 1,
   });
 
-  // No year resolved — configuration needed
-  if (year === null) {
+  // No year found at all
+  if (yearResolution.kind === 'missing') {
     return {
       status: 'no-year',
       resolvedYear: null,
+      yearResolution,
+      entries: [],
+      errorMessage: null,
+    };
+  }
+
+  // Year value present but invalid
+  if (yearResolution.kind === 'invalid') {
+    return {
+      status: 'invalid-year',
+      resolvedYear: null,
+      yearResolution,
       entries: [],
       errorMessage: null,
     };
@@ -82,7 +95,8 @@ export function useProjectSites(
   if (isLoading) {
     return {
       status: 'loading',
-      resolvedYear,
+      resolvedYear: resolved,
+      yearResolution,
       entries: [],
       errorMessage: null,
     };
@@ -96,7 +110,8 @@ export function useProjectSites(
         : 'Failed to load project sites from the Projects list.';
     return {
       status: 'error',
-      resolvedYear,
+      resolvedYear: resolved,
+      yearResolution,
       entries: [],
       errorMessage: message,
     };
@@ -108,7 +123,8 @@ export function useProjectSites(
   if (entries.length === 0) {
     return {
       status: 'empty',
-      resolvedYear,
+      resolvedYear: resolved,
+      yearResolution,
       entries: [],
       errorMessage: null,
     };
@@ -116,7 +132,8 @@ export function useProjectSites(
 
   return {
     status: 'success',
-    resolvedYear,
+    resolvedYear: resolved,
+    yearResolution,
     entries,
     errorMessage: null,
   };

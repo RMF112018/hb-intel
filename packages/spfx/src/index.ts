@@ -6,4 +6,5 @@ export type {
   IProjectSitesWebPartProps,
   IResolvedPageYear,
   IProjectSitesResult,
+  PageYearResolution,
 } from './webparts/projectSites/types.js';

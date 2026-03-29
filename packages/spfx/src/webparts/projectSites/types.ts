@@ -102,19 +102,49 @@ export interface IProjectSitesWebPartProps {
   yearOverride: number;
 }
 
+// ── Year validation ────────────────────────────────────────────────────────
+
+/** Minimum plausible project year. */
+export const MIN_VALID_YEAR = 1900;
+/** Maximum plausible project year. */
+export const MAX_VALID_YEAR = 2100;
+
+/** Returns true if the value is a plausible 4-digit year. */
+export function isValidYear(value: number): boolean {
+  return Number.isInteger(value) && value >= MIN_VALID_YEAR && value <= MAX_VALID_YEAR;
+}
+
 // ── Page-year resolution result ────────────────────────────────────────────
 
 export type PageYearSource = 'property-pane' | 'page-metadata';
 
+/** Successfully resolved a valid year. */
 export interface IResolvedPageYear {
+  kind: 'resolved';
   year: number;
   source: PageYearSource;
 }
+
+/** No year value was found at all (page metadata absent, override at 0). */
+export interface IMissingPageYear {
+  kind: 'missing';
+}
+
+/** A value was found but is not a valid 4-digit year. */
+export interface IInvalidPageYear {
+  kind: 'invalid';
+  rawValue: unknown;
+  source: PageYearSource;
+}
+
+/** Discriminated union returned by resolvePageYear(). */
+export type PageYearResolution = IResolvedPageYear | IMissingPageYear | IInvalidPageYear;
 
 // ── Query result wrapper ───────────────────────────────────────────────────
 
 export type ProjectSitesStatus =
   | 'no-year'
+  | 'invalid-year'
   | 'loading'
   | 'error'
   | 'empty'
@@ -122,8 +152,10 @@ export type ProjectSitesStatus =
 
 export interface IProjectSitesResult {
   status: ProjectSitesStatus;
-  /** Resolved page year, or null if not available. */
+  /** Resolved page year, or null if not available / invalid. */
   resolvedYear: IResolvedPageYear | null;
+  /** The full resolution result for rendering context-specific messaging. */
+  yearResolution: PageYearResolution;
   /** Normalized project site entries. Empty array when not in 'success' status. */
   entries: IProjectSiteEntry[];
   /** Error message when status is 'error'. */
