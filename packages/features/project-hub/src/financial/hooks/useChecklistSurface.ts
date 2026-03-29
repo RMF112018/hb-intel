@@ -45,7 +45,11 @@ export interface ChecklistSurfaceData {
   readonly groups: readonly ChecklistGroupSummary[];
   readonly gate: ChecklistGatePosture;
   readonly versionState: string;
+  readonly versionNumber: number | null;
   readonly reportingMonth: string;
+  readonly isEditable: boolean;
+  readonly canConfirm: boolean;
+  readonly canDerive: boolean;
 }
 
 export function useChecklistSurface(_options?: {
@@ -104,18 +108,22 @@ export function useChecklistSurface(_options?: {
       blockers.push(`${requiredItems.length - requiredCompleted} required items incomplete`);
     }
 
+    // Source gate and version from versioning service when available
+    const gateResult = versioningResult?.gateResult;
+    const gate: ChecklistGatePosture = gateResult
+      ? { canConfirm: gateResult.canConfirm, requiredCompleted, requiredTotal: requiredItems.length, staleBudgetLineCount: versioningResult?.posture.staleBudgetLineCount ?? 0, blockers: gateResult.blockers }
+      : { canConfirm: blockers.length === 0, requiredCompleted, requiredTotal: requiredItems.length, staleBudgetLineCount: 0, blockers };
+
     return {
       items,
       groups,
-      gate: {
-        canConfirm: blockers.length === 0,
-        requiredCompleted,
-        requiredTotal: requiredItems.length,
-        staleBudgetLineCount: 0,
-        blockers,
-      },
-      versionState: 'Working',
-      reportingMonth: 'March 2026',
+      gate,
+      versionState: (versioningResult?.posture.currentVersionState as string) ?? 'Working',
+      versionNumber: versioningResult?.posture.currentVersionNumber ?? null,
+      reportingMonth: versioningResult?.posture.reportingPeriod ?? 'March 2026',
+      isEditable: versioningResult?.isEditable ?? true,
+      canConfirm: versioningResult?.canConfirm ?? false,
+      canDerive: versioningResult?.canDerive ?? false,
     };
-  }, [facadeItems]);
+  }, [facadeItems, versioningResult]);
 }
