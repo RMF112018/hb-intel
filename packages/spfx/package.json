@@ -1,6 +1,6 @@
 {
   "name": "@hbc/spfx",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -15,6 +15,9 @@
     "build": "tsc --project tsconfig.json",
     "check-types": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts,.tsx",
+    "test": "pnpm --dir ../.. exec vitest run --workspace vitest.workspace.ts packages/spfx/src",
+    "test:watch": "pnpm --dir ../.. exec vitest watch --workspace vitest.workspace.ts packages/spfx/src",
+    "test:coverage": "pnpm --dir ../.. exec vitest run --coverage --workspace vitest.workspace.ts packages/spfx/src",
     "bundle:size": "node ./scripts/report-bundle-size.mjs"
   },
   "dependencies": {
@@ -29,6 +32,8 @@
     "@microsoft/sp-core-library": "^1.20.0",
     "@microsoft/sp-property-pane": "^1.20.0",
     "@microsoft/sp-webpart-base": "^1.20.0",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^15.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0"
   },

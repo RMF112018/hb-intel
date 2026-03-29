@@ -181,4 +181,42 @@ export default defineWorkspace([
       },
     },
   },
+  {
+    name: '@hbc/spfx',
+    root: path.resolve(__dirname, 'packages/spfx'),
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+      exclude: ['dist/**', 'node_modules/**'],
+      setupFiles: ['./src/__tests__/setup.ts'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        include: ['src/webparts/projectSites/**/*.ts', 'src/webparts/projectSites/**/*.tsx'],
+        exclude: [
+          'src/**/*.test.ts',
+          'src/**/*.test.tsx',
+          'src/__tests__/**',
+          'src/**/index.ts',
+          'src/**/types.ts',
+        ],
+        all: true,
+        lines: 90,
+        functions: 90,
+        branches: 85,
+        statements: 90,
+      },
+      testTimeout: 10000,
+      hookTimeout: 10000,
+    },
+    resolve: {
+      alias: {
+        '@hbc/auth/spfx': resolve(__dirname, './packages/auth/src/spfx/index.ts'),
+        '@hbc/auth': resolve(__dirname, './packages/auth/src/index.ts'),
+        '@hbc/ui-kit': resolve(__dirname, './packages/ui-kit/src/index.ts'),
+        '@hbc/sharepoint-docs': resolve(__dirname, './packages/sharepoint-docs/src/index.ts'),
+      },
+    },
+  },
 ]);
