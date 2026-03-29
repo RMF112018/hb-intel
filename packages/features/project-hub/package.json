@@ -1,6 +1,6 @@
 {
   "name": "@hbc/features-project-hub",
-  "version": "0.2.85",
+  "version": "0.2.86",
   "private": true,
   "description": "Project Hub feature package with Project Health Pulse and Phase 3 core module contracts",
   "type": "module",
@@ -48,6 +48,7 @@
     "@hbc/versioned-record": "workspace:*",
     "@hbc/complexity": "workspace:*",
     "@hbc/auth": "workspace:*",
+    "@hbc/data-access": "workspace:*",
     "@hbc/shell": "workspace:*",
     "@hbc/smart-empty-state": "workspace:*",
     "@tanstack/react-query": "^5.75.0"

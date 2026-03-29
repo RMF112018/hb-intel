@@ -1,12 +1,14 @@
 /**
  * useChecklistSurface — view-ready data hook for the Forecast Checklist surface.
  *
- * Mock data initially. Will wire to IFinancialRepository.
- * Provides the 19-item checklist state, group summaries, and gate posture.
+ * Wave 2C: facade-aware — sources checklist items and gate posture from
+ * IFinancialRepository via useFinancialRepository().
+ * Falls back to template-derived mock data when facade data is loading.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { FORECAST_CHECKLIST_TEMPLATE } from '../constants/index.js';
+import { useFinancialRepository } from './useFinancialRepository.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from './useFinancialControlCenter.js';
 
 export interface ChecklistItemRow {
@@ -48,13 +50,32 @@ export function useChecklistSurface(_options?: {
   viewerRole?: FinancialViewerRole;
   complexityTier?: FinancialComplexityTier;
 }): ChecklistSurfaceData {
+  const repo = useFinancialRepository();
+  const [facadeItems, setFacadeItems] = useState<readonly { itemId: string; label: string; group: string; required: boolean; completed: boolean; completedBy: string | null }[] | null>(null);
+
+  useEffect(() => {
+    repo.getChecklist('ver-003').then(setFacadeItems).catch(() => {});
+  }, [repo]);
+
   return useMemo(() => {
-    const items: ChecklistItemRow[] = FORECAST_CHECKLIST_TEMPLATE.map((t: { label: string; group: string; required: boolean }, i: number) => ({
+    // Use facade data when available, otherwise fall back to template-derived mock
+    const items: ChecklistItemRow[] = facadeItems
+      ? facadeItems.map((fi) => ({
+          id: fi.itemId,
+          label: fi.label,
+          group: fi.group,
+          required: fi.required,
+          completed: fi.completed,
+          completedBy: fi.completedBy,
+          completedAt: fi.completed ? '2026-03-15T10:00:00Z' : null,
+          notes: null,
+        }))
+      : FORECAST_CHECKLIST_TEMPLATE.map((t: { label: string; group: string; required: boolean }, i: number) => ({
       id: `chk-${i}`,
       label: t.label,
       group: t.group,
       required: t.required,
-      completed: i < 12, // Mock: first 12 of 19 completed
+      completed: i < 12, // Fallback mock: first 12 of 19 completed
       completedBy: i < 12 ? 'John Smith' : null,
       completedAt: i < 12 ? '2026-03-15T10:00:00Z' : null,
       notes: null,
@@ -92,5 +113,5 @@ export function useChecklistSurface(_options?: {
       versionState: 'Working',
       reportingMonth: 'March 2026',
     };
-  }, []);
+  }, [facadeItems]);
 }

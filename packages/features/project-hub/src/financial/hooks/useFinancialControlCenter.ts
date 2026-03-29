@@ -3,12 +3,17 @@
  *
  * Role-aware: shapes data differently based on the viewer's authority role.
  * Complexity-aware: supports Essential / Standard / Expert progressive disclosure.
- * Mock data initially. Will be replaced with real IFinancialRepository queries.
+ *
+ * Wave 2C: facade-aware — sources module posture from IFinancialRepository
+ * via useFinancialRepository(). Inline mock constants remain as fallback data
+ * for view-model fields not yet exposed through the facade.
  */
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 
 import type { FinancialVersionState, FinancialAuthorityRole } from '../types/index.js';
+import { useFinancialRepository } from './useFinancialRepository.js';
+import type { IFinancialModulePosture } from '@hbc/data-access';
 
 // ── Authority Role for View Shaping ─────────────────────────────────
 
@@ -255,6 +260,16 @@ export function useFinancialControlCenter(
   const viewerRole = options?.viewerRole ?? 'pm';
   const complexityTier = options?.complexityTier ?? 'standard';
 
+  // ── Facade consumption (Wave 2C) ─────────────────────────────────
+  const repo = useFinancialRepository();
+  const [facadePosture, setFacadePosture] = useState<IFinancialModulePosture | null>(null);
+
+  useEffect(() => {
+    repo.getModulePosture('proj-uuid-001', '2026-03').then(setFacadePosture).catch(() => {
+      // Facade call failed — fall back to inline mock data (no-op, facadePosture stays null)
+    });
+  }, [repo]);
+
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
 
   const selectTool = useCallback((toolId: string | null) => {
@@ -290,10 +305,10 @@ export function useFinancialControlCenter(
       viewerRole,
       complexityTier,
       period: {
-        reportingMonth: 'February 2026',
-        versionState,
-        versionNumber: 4,
-        isReportCandidate: false,
+        reportingMonth: facadePosture?.reportingPeriod ?? 'February 2026',
+        versionState: (facadePosture?.currentVersionState as FinancialVersionState | undefined) ?? versionState,
+        versionNumber: facadePosture?.currentVersionNumber ?? 4,
+        isReportCandidate: facadePosture?.isReportCandidate ?? false,
         priorVersionNumber: 3,
       },
       custody: {
@@ -327,6 +342,6 @@ export function useFinancialControlCenter(
       recentActivity: filteredActivity,
       selectTool,
     }),
-    [viewerRole, complexityTier, versionState, custodyPerms, primaryAction, selectedToolId, selectedToolPreview, contextFilteredActions, contextFilteredExceptions, filteredActivity, changeSincePrior, selectTool],
+    [viewerRole, complexityTier, versionState, custodyPerms, primaryAction, selectedToolId, selectedToolPreview, contextFilteredActions, contextFilteredExceptions, filteredActivity, changeSincePrior, selectTool, facadePosture],
   );
 }
