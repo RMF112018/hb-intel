@@ -289,12 +289,18 @@ export function useForecastSummary(
   const saveChanges = useCallback(() => {
     if (dirtyFieldMap.size === 0) return;
     setIsSaving(true);
-    // Mock save — in real impl, calls IFinancialRepository.updateForecastSummary
-    setTimeout(() => {
+    // Wave 3A.2: persist edits through ForecastSummaryService facade
+    const service = new ForecastSummaryService(repo);
+    const savePromises = Array.from(dirtyFieldMap.entries()).map(([fieldId, value]) =>
+      service.editField('ver-003', fieldId as any, value, 'current-user'),
+    );
+    Promise.all(savePromises).then(() => {
       setDirtyFieldMap(new Map());
       setIsSaving(false);
-    }, 500);
-  }, [dirtyFieldMap]);
+    }).catch(() => {
+      setIsSaving(false);
+    });
+  }, [dirtyFieldMap, repo]);
 
   const toggleCompareMode = useCallback(() => {
     if (viewerRole === 'pm') {
@@ -302,31 +308,77 @@ export function useForecastSummary(
     }
   }, [viewerRole]);
 
-  const sections = useMemo(
-    () => buildSections(isEditable, complexity),
-    [isEditable, complexity],
-  );
+  // Wave 3A.2: build sections from facade summary when available
+  const sections = useMemo(() => {
+    if (facadeResult?.summary) {
+      const service = new ForecastSummaryService(repo);
+      const fieldsWithValues = service.getFieldsWithValues(facadeResult.summary);
+      // Group by worksheet-aligned field groups → map to ForecastFormSection shape
+      const groupOrder: string[] = ['project-info', 'schedule', 'contract', 'cost', 'profit', 'contingency', 'gcgr', 'narrative'];
+      const groupLabels: Record<string, string> = {
+        'project-info': 'Project Information',
+        'schedule': 'Schedule',
+        'contract': 'Contract / Revenue',
+        'cost': 'Cost / Margin',
+        'profit': 'Profit & Projections',
+        'contingency': 'Contingency / Savings',
+        'gcgr': 'GC/GR',
+        'narrative': 'Executive Summary / Outlook',
+      };
+      return groupOrder
+        .map((group) => {
+          const groupFields = fieldsWithValues.filter((f) => f.group === group);
+          return {
+            id: group,
+            title: groupLabels[group] ?? group,
+            fields: groupFields.map((f) => ({
+              id: f.field,
+              label: f.label,
+              value: f.value != null ? String(f.value) : '',
+              editable: f.editable && isEditable,
+              type: f.type,
+              changedFromPrior: false,
+              complexity: 'essential' as const,
+            })),
+          };
+        })
+        .filter((s) => s.fields.length > 0);
+    }
+    // Fallback to inline mock sections
+    return buildSections(isEditable, complexity);
+  }, [isEditable, complexity, facadeResult, repo]);
 
   const dirtyFields = useMemo(
     () => new Set(dirtyFieldMap.keys()),
     [dirtyFieldMap],
   );
 
-  // Filter KPIs by complexity
-  const filteredKpis = complexity === 'essential'
-    ? MOCK_KPIS.slice(0, 3) // contract, profit, margin only
-    : MOCK_KPIS;
+  // Wave 3A.2: build KPIs from facade summary when available
+  const filteredKpis = useMemo(() => {
+    if (facadeResult?.summary) {
+      const s = facadeResult.summary;
+      const kpis: ForecastKpiMetric[] = [
+        { id: 'contract-value', label: 'Contract Value', value: `$${(s.revisedContractAmount / 1_000_000).toFixed(1)}M`, trend: 'flat', trendLabel: 'Revised', severity: 'neutral' },
+        { id: 'current-profit', label: 'Current Profit', value: `$${(s.currentProfit / 1_000).toFixed(0)}K`, trend: s.currentProfit > 0 ? 'up' : 'down', trendLabel: s.currentProfit > 0 ? 'Positive' : 'Loss', severity: s.profitMargin >= 5 ? 'healthy' : s.profitMargin >= 0 ? 'watch' : 'critical' },
+        { id: 'profit-margin', label: 'Profit Margin', value: `${s.profitMargin.toFixed(1)}%`, trend: s.profitMargin >= 5 ? 'flat' : 'down', trendLabel: s.profitMargin >= 5 ? 'On target' : 'Below threshold', severity: s.profitMargin >= 5 ? 'healthy' : 'at-risk' },
+        { id: 'contingency', label: 'Contingency', value: `$${(s.contingencyRemaining / 1_000).toFixed(0)}K`, trend: 'flat', trendLabel: 'Remaining', severity: 'neutral' },
+      ];
+      return complexity === 'essential' ? kpis.slice(0, 3) : kpis;
+    }
+    return complexity === 'essential' ? MOCK_KPIS.slice(0, 3) : MOCK_KPIS;
+  }, [facadeResult, complexity]);
 
   return useMemo(
     () => ({
       version: {
-        reportingMonth: 'February 2026',
+        reportingMonth: facadeResult?.posture.reportingPeriod ?? 'February 2026',
         versionState,
-        versionNumber: 4,
+        versionNumber: facadeResult?.posture.currentVersionNumber ?? 4,
         custodyOwner: 'Alex Rivera',
         custodyRole: 'PM',
         isEditable,
-        isStale: false,
+        isStale: facadeResult?.isStale ?? false,
+        staleReason: facadeResult?.blockers[0],
         compareTarget: 'V3 — Confirmed Internal',
         surfaceState,
       },
@@ -338,9 +390,9 @@ export function useForecastSummary(
         : MOCK_COMMENTARY.filter((c) => c.role === 'PM'),
       exposureItems: MOCK_EXPOSURE,
       staleBanner: {
-        visible: false,
-        message: '',
-        sources: [],
+        visible: facadeResult?.isStale ?? false,
+        message: facadeResult?.blockers[0] ?? '',
+        sources: facadeResult?.blockers ?? [],
       },
       dirtyFields,
       editField,
