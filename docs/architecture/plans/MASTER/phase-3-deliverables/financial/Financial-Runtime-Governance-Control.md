@@ -98,15 +98,29 @@ The UI facade is the **only interface that view hooks consume**. It composes sub
 
 ### 3.3 Implementation Status
 
+**Route/UI posture (R3 / Stage 3 — complete):**
+
+| Component | Status | Evidence |
+|-----------|--------|----------|
+| Canonical sub-tool routes | **Implemented** | 9 URL-routed tools via `FINANCIAL_TOOL_REGISTRY` + `financialToolRoute` (v0.13.22) |
+| Deep-link entry | **Implemented** | `resolveFinancialToolEntry()` resolves valid/invalid/unknown; 28 route tests |
+| Project-switch tool preservation | **Implemented** | `resolveProjectHubSwitchTarget()` preserves Financial tool slug |
+| Per-project context + return-memory | **Implemented** | `financialContextState` with 13 context tests |
+| Workspace shell | **Implemented** | `FinancialWorkspaceShell` wraps all 10 surfaces with breadcrumbs, state ribbon, density |
+| Runtime honesty banner | **Implemented** | `FinancialOperationalBanner` on all 10 surfaces; 15 operational state tests |
+| Tool workspace pages | **Implemented** | 9 tool pages + control center home; 10 view-ready hooks (mock data) |
+
+**Data-access posture (Stage 1 — not started):**
+
 | Component | Status | Evidence |
 |-----------|--------|----------|
 | `IFinancialRepository` facade | **Does not exist** | Glob search returns 0 code files |
 | 12 sub-domain repositories | **Does not exist** | No interface/type definitions in code |
 | Factory registration | **Not registered** | `data-access/factory.ts` lists 11 repos; Financial absent |
 | Mock adapters | **Do not exist** | No `MockFinancialRepository` file found |
-| View hooks | **Mock data only** | 5 hooks return hardcoded mock objects |
+| View hooks | **Mock data only** | 10 hooks return hardcoded mock objects |
 
-Per FIN-PR1 §3.2: Financial data access is at **Stage 1 (Doctrine-Defined)**. Advancing to Stage 4 (Partially Operational) requires creating the facade, registering it, and wiring at least one real data path.
+Per FIN-PR1 §3.2: Financial data access is at **Stage 1 (Doctrine-Defined)**. Per [Financial-ARRM §4](Financial-Acceptance-and-Release-Readiness-Model.md): all capabilities are at **R3 (Route/Lane Complete)** but blocked before **R4 (Implementation Complete)** by the missing `IFinancialRepository`. Route/UI completion does not make Financial operational — advancing to R4 / Stage 4 requires creating the facade, registering it, and wiring at least one real data path.
 
 ---
 
@@ -208,18 +222,31 @@ Per FRM-03, the Financial module uses a **derivation-first lifecycle** with no u
 
 ## 7. Implementation Sequence
 
-For an implementer advancing Financial from Stage 1 (Doctrine-Defined) to Stage 4 (Partially Operational), the recommended implementation sequence is:
+### Already Complete (R3 / Stage 3)
+
+The following control-plane work is done and does not need to be repeated:
+
+- Canonical sub-tool routes (9 URL-routed tools via `financialToolRoute`)
+- Deep-link entry, project-switch tool preservation, per-project return-memory
+- Workspace shell with breadcrumbs, state ribbon, density control
+- Runtime honesty banner across all 10 surfaces
+- 9 tool workspace pages with view-ready hooks (mock data)
+- Session history with recovery paths
+- 41 route tests + 13 context tests + 25 operational tests
+
+### Next Steps (R4 / Stage 4 — data-access layer)
+
+For an implementer advancing Financial from R3 to R4 (Implementation Complete), the recommended sequence is:
 
 | Step | What | Unblocks |
 |------|------|----------|
 | 1 | Create `IFinancialRepository` facade interface in `packages/data-access/src/ports/` | Standard consumption pattern for view hooks |
 | 2 | Create `MockFinancialRepository` adapter returning current mock data | Factory registration; hook migration from inline mocks |
 | 3 | Register `createFinancialRepository()` in `packages/data-access/src/factory.ts` | Standard repository instantiation |
-| 4 | Migrate 5 view hooks from inline mock data to facade consumption | Consistent data access path |
-| 5 | Complete T04 source contracts (`IFinancialForecastSummary`, `IGCGRLine`) | Forecast Summary and GC/GR advance to Stage 3 |
-| 6 | Implement first real sub-domain repository (Budget or Buyout — closest to existing SharePoint lists) | Stage 4 for first capability |
-| 7 | Implement URL-routed sub-tool navigation | Deep-link durability, project-switch preservation |
-| 8 | Implement remaining sub-domain repositories | Full Stage 4 across capabilities |
+| 4 | Migrate 10 view hooks from inline mock data to facade consumption | Consistent data access path; operational banner reflects real state |
+| 5 | Complete T04 source contracts (`IFinancialForecastSummary`, `IGCGRLine`) | Forecast Summary and GC/GR advance to R2 Contract Complete |
+| 6 | Implement first real sub-domain repository (Budget or Buyout — closest to existing SharePoint lists) | R4 for first capability |
+| 7 | Implement remaining sub-domain repositories | Full R4 across capabilities |
 
 ---
 
