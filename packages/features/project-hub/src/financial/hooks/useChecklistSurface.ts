@@ -1,14 +1,16 @@
 /**
  * useChecklistSurface — view-ready data hook for the Forecast Checklist surface.
  *
- * Wave 2C: facade-aware — sources checklist items and gate posture from
- * IFinancialRepository via useFinancialRepository().
+ * Wave 3D.1: facade-aware — sources checklist items, gate posture, and
+ * version ledger from ForecastVersioningService via IFinancialRepository.
  * Falls back to template-derived mock data when facade data is loading.
  */
 
 import { useMemo, useState, useEffect } from 'react';
 import { FORECAST_CHECKLIST_TEMPLATE } from '../constants/index.js';
 import { useFinancialRepository } from './useFinancialRepository.js';
+import { ForecastVersioningService } from '../services/ForecastVersioningService.js';
+import type { VersionLedgerLoadResult } from '../services/ForecastVersioningService.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from './useFinancialControlCenter.js';
 
 export interface ChecklistItemRow {
@@ -51,10 +53,12 @@ export function useChecklistSurface(_options?: {
   complexityTier?: FinancialComplexityTier;
 }): ChecklistSurfaceData {
   const repo = useFinancialRepository();
-  const [facadeItems, setFacadeItems] = useState<readonly { itemId: string; label: string; group: string; required: boolean; completed: boolean; completedBy: string | null }[] | null>(null);
+  const [versioningResult, setVersioningResult] = useState<VersionLedgerLoadResult | null>(null);
+  const facadeItems = versioningResult?.checklist ?? null;
 
   useEffect(() => {
-    repo.getChecklist('ver-003').then(setFacadeItems).catch(() => {});
+    const service = new ForecastVersioningService(repo);
+    service.load('proj-uuid-001', '2026-03').then(setVersioningResult).catch(() => {});
   }, [repo]);
 
   return useMemo(() => {
