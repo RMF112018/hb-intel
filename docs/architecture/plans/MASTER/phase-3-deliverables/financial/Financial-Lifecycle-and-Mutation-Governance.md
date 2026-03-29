@@ -327,9 +327,9 @@ Per FRM-03 §5.2, the following period states are required:
 
 | # | Risk | Impact | Required Action |
 |---|------|--------|----------------|
-| 1 | Review custody states not implemented | Cannot enforce review workflow; approval is informal | Implement `FinancialReviewCustodyRecord` and state machine |
-| 2 | Period lifecycle not implemented | Cannot enforce period close/reopen governance | Implement `FinancialReportingPeriod` with state transitions |
-| 3 | Summary validation (G4) not implemented | Confirmation gate incomplete — can confirm with invalid GC/GR posture | Implement G4 validator in domain service; blocked upstream by T04 source contracts (see [Financial-RGC §8 Risk #1](Financial-Runtime-Governance-Control.md)) |
+| 1 | Review custody runtime not implemented | Contracts defined (Wave 1C: `IFinancialReviewCustodyRecord`, `ReviewCustodyStatus`, 5-transition table, transition results); runtime state machine and `IFinancialReviewRepository` needed | Implement in Wave 2 |
+| 2 | Period lifecycle runtime not implemented | Contracts defined (Wave 1C: `IFinancialReportingPeriod`, `IPeriodCloseResult`, `IPeriodReopenResult`); runtime `IFinancialPeriodRepository` needed | Implement in Wave 2 |
+| 3 | G4 summary validation runtime not implemented | Contracts defined (Wave 1C: `IG4SummaryValidationResult`, 5 error codes); T04 source contracts now complete; runtime validator in domain service needed | Implement in Wave 2 |
 | 4 | Cross-tool readiness aggregation undefined | No module-level readiness flag combining checklist + reconciliation + review + publication | Define aggregation service after per-tool readiness is implemented |
 | 5 | Contingency hold/release model not defined | Savings disposed to `HeldInContingency` but no release workflow exists | Define contingency lifecycle when buyout implementation advances |
-| 6 | Audit event schema not finalized | `FinancialAuditEvent` structure needs field-level specification | Define envelope schema when audit repository is implemented |
+| 6 | Audit event envelope defined, runtime not implemented | Contracts defined (Wave 1C: `IFinancialAuditEvent`, 19 event types, 8 categories); runtime `IFinancialAuditRepository` needed | Implement in Wave 2 |
