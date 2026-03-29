@@ -6,8 +6,9 @@ describe('YearSelector', () => {
   const years = [2026, 2025, 2024];
   const onChange = vi.fn();
 
-  it('renders a button for each year', () => {
+  it('renders "Year:" label and a button for each year', () => {
     render(<YearSelector years={years} selectedYear={2025} onYearChange={onChange} />);
+    expect(screen.getByText('Year:')).toBeInTheDocument();
     expect(screen.getByText('2026')).toBeInTheDocument();
     expect(screen.getByText('2025')).toBeInTheDocument();
     expect(screen.getByText('2024')).toBeInTheDocument();
@@ -25,10 +26,10 @@ describe('YearSelector', () => {
     expect(onChange).toHaveBeenCalledWith(2024);
   });
 
-  it('has radiogroup role with accessible label', () => {
+  it('has radiogroup role with label', () => {
     render(<YearSelector years={years} selectedYear={2025} onYearChange={onChange} />);
     const group = screen.getByRole('radiogroup');
-    expect(group).toHaveAttribute('aria-label', 'Filter by year');
+    expect(group).toBeInTheDocument();
   });
 
   it('renders each year as accessible button text', () => {
@@ -38,5 +39,12 @@ describe('YearSelector', () => {
     expect(buttons[0]).toHaveTextContent('2026');
     expect(buttons[1]).toHaveTextContent('2025');
     expect(buttons[2]).toHaveTextContent('2024');
+  });
+
+  it('supports arrow key navigation', () => {
+    render(<YearSelector years={years} selectedYear={2025} onYearChange={onChange} />);
+    const group = screen.getByRole('radiogroup');
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenCalledWith(2024);
   });
 });

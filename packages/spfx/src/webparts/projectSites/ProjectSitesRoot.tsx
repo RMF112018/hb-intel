@@ -2,7 +2,7 @@
  * Root React component for the Project Sites web part.
  *
  * Self-contained: loads available years, presents a year selector,
- * and renders the filtered card grid. No external year-resolution props.
+ * and renders the filtered card grid. No external props needed.
  *
  * Light-theme only. Designed for SharePoint modern page zones.
  */
@@ -39,7 +39,11 @@ const useStyles = makeStyles({
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '12px',
-    marginBottom: '24px',
+    paddingBottom: '16px',
+    marginBottom: '20px',
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
   },
   title: {
     fontSize: '1.25rem',
@@ -183,7 +187,7 @@ export const ProjectSitesRoot: FC = () => {
           <h2 className={classes.title}>Project Sites</h2>
         </div>
         <div className={classes.spinnerContainer} role="status">
-          <HbcSpinner size="lg" label="Loading available years" />
+          <HbcSpinner size="lg" label="Loading project sites" />
         </div>
       </div>
     );
@@ -232,18 +236,16 @@ export const ProjectSitesRoot: FC = () => {
     <div className={classes.root}>
       <div className={classes.header}>
         <h2 className={classes.title}>Project Sites</h2>
+        <div className={classes.headerSpacer} />
         <YearSelector
           years={yearsResult.years}
           selectedYear={year}
           onYearChange={setSelectedYear}
         />
         {projectsResult?.status === 'success' && (
-          <>
-            <div className={classes.headerSpacer} />
-            <span className={classes.count} aria-live="polite">
-              {projectsResult.entries.length} project{projectsResult.entries.length !== 1 ? 's' : ''}
-            </span>
-          </>
+          <span className={classes.count} aria-live="polite">
+            {projectsResult.entries.length} project{projectsResult.entries.length !== 1 ? 's' : ''}
+          </span>
         )}
       </div>
 
@@ -279,9 +281,10 @@ export const ProjectSitesRoot: FC = () => {
         </div>
       )}
 
-      {/* Success */}
+      {/* Success — key on year for fresh fade-in animation */}
       {projectsResult?.status === 'success' && (
         <div
+          key={year}
           className={classes.grid}
           role="list"
           aria-label={`${projectsResult.entries.length} project site${projectsResult.entries.length !== 1 ? 's' : ''} for ${year}`}
