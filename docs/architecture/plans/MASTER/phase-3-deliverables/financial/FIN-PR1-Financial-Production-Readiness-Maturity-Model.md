@@ -174,10 +174,10 @@ Each Financial tool is classified independently:
 | **Buyout** | Procurement tracking, savings disposition | Stage 3 — Implementation Scaffold | T06 logic + tests; `BuyoutPage` UI with mock data |
 | **Business Rules** | Sign conventions, thresholds, calculations | Stage 3 — Implementation Scaffold | T07 logic + tests; consumed by UI components |
 | **Platform Integration** | Spine events, health metrics, work queue items | Stage 3 — Implementation Scaffold | T08 contracts + tests; spine adapters not data-connected |
-| **Report Publication** | Report-candidate designation, P3-F1 handoff | Stage 2 — Architecturally Defined | Stub-ready via `promoteToPublished()`; B-FIN-03 |
+| **Report Publication** | Report-candidate designation, P3-F1 handoff | Stage 3 — Implementation Scaffold | B-FIN-03 contract closure complete: `IPublicationEligibilityResult`, `IFinancialPublicationRecord`, `IFinancialExportRun`, `IPublicationHandoffResult`, `IPublicationRecoveryPosture`; `promoteToPublished()` + `designateReportCandidate()` functions; 10 contract tests |
 | **PER Annotation** | Executive review on confirmed versions | Stage 3 — Implementation Scaffold | T08 annotation contracts; `@hbc/field-annotations` v0.2.0 |
 
-**Module-level classification: Stage 2 — Architecturally Defined** (constrained by Report Publication pending B-FIN-03). 8 of 10 tools at Stage 3.
+**Module-level classification: Stage 3 — Implementation Scaffold** (all 10 tools at Stage 3). Advancement to Stage 4 blocked by missing `IFinancialRepository`.
 
 ### 3.3 Route and Context Readiness
 

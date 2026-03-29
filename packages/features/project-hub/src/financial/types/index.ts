@@ -726,6 +726,145 @@ export interface IForecastSummaryCalculations {
   readonly expectedContingencyUse: number;
 }
 
+// ── Publication / Export Contracts (B-FIN-03 closure) ─────────────────
+
+/**
+ * Publication eligibility evaluation result.
+ *
+ * Determines whether a version can be promoted to PublishedMonthly.
+ * Must be evaluated at the service layer, not UI-only.
+ */
+export interface IPublicationEligibilityResult {
+  readonly isEligible: boolean;
+  readonly forecastVersionId: string;
+  readonly versionNumber: number;
+  readonly versionState: FinancialVersionState;
+  readonly isReportCandidate: boolean;
+  readonly blockers: readonly PublicationBlocker[];
+}
+
+export interface PublicationBlocker {
+  readonly code: PublicationBlockerCode;
+  readonly message: string;
+}
+
+export type PublicationBlockerCode =
+  | 'not-confirmed'
+  | 'not-report-candidate'
+  | 'period-closed'
+  | 'already-published'
+  | 'review-not-approved';
+
+/**
+ * Publication record — immutable artifact created when a version is
+ * promoted to PublishedMonthly via P3-F1 handoff.
+ *
+ * At most one PublishedMonthly per project per reporting period.
+ * Prior PublishedMonthly for the same period becomes Superseded.
+ */
+export interface IFinancialPublicationRecord {
+  readonly publicationId: string;
+  readonly projectId: string;
+  readonly forecastVersionId: string;
+  readonly versionNumber: number;
+  readonly reportingPeriod: string;
+  readonly publishedAt: string;
+  readonly publishedBy: string;
+  readonly status: PublicationRecordStatus;
+  readonly supersededAt: string | null;
+  readonly supersededByPublicationId: string | null;
+  readonly handoffResult: IPublicationHandoffResult | null;
+}
+
+export type PublicationRecordStatus = 'Published' | 'Superseded';
+
+/**
+ * P3-F1 publication handoff result.
+ *
+ * Records the outcome of the downstream handoff to the Reports module.
+ */
+export interface IPublicationHandoffResult {
+  readonly handoffId: string;
+  readonly triggeredAt: string;
+  readonly targetSystem: string;
+  readonly status: PublicationHandoffStatus;
+  readonly errorMessage: string | null;
+  readonly completedAt: string | null;
+}
+
+export type PublicationHandoffStatus = 'Pending' | 'InProgress' | 'Complete' | 'Failed';
+
+/**
+ * Export run record — append-only artifact for cutover/retirement evidence.
+ *
+ * Each export run produces one or more artifacts (CSV, PDF, snapshot).
+ */
+export interface IFinancialExportRun {
+  readonly exportRunId: string;
+  readonly projectId: string;
+  readonly forecastVersionId: string;
+  readonly versionNumber: number;
+  readonly reportingPeriod: string;
+  readonly exportType: FinancialExportType;
+  readonly createdAt: string;
+  readonly createdBy: string;
+  readonly status: ExportRunStatus;
+  readonly artifactCount: number;
+  readonly artifacts: readonly IExportArtifact[];
+  readonly errorMessage: string | null;
+  readonly completedAt: string | null;
+}
+
+export type FinancialExportType =
+  | 'BudgetCSV'
+  | 'GCGRCsv'
+  | 'CashFlowCSV'
+  | 'BuyoutCSV'
+  | 'ForecastSummaryPDF'
+  | 'ForecastSummarySnapshot';
+
+export type ExportRunStatus = 'InProgress' | 'Complete' | 'Failed';
+
+/**
+ * Export artifact metadata.
+ */
+export interface IExportArtifact {
+  readonly artifactId: string;
+  readonly exportRunId: string;
+  readonly fileName: string;
+  readonly mimeType: string;
+  readonly sizeBytes: number;
+  readonly createdAt: string;
+  readonly downloadUrl: string | null;
+}
+
+/**
+ * Publication history query result — for the publication/history surface.
+ */
+export interface IPublicationHistoryEntry {
+  readonly publicationId: string;
+  readonly versionNumber: number;
+  readonly reportingPeriod: string;
+  readonly publishedAt: string;
+  readonly publishedBy: string;
+  readonly status: PublicationRecordStatus;
+  readonly exportRuns: readonly IFinancialExportRun[];
+}
+
+/**
+ * Publication failure/recovery posture.
+ *
+ * When a publication or export fails, this contract describes the
+ * sanctioned recovery path.
+ */
+export interface IPublicationRecoveryPosture {
+  readonly failedOperation: 'publication-handoff' | 'export-run';
+  readonly failureReason: string;
+  readonly canRetry: boolean;
+  readonly retryDescription: string;
+  readonly requiresNewDesignation: boolean;
+}
+
 // ── T08: Platform Integration and Annotation Scope ────────────────────
 
 /** Activity spine event types for the Financial module (T08 §14.1). */

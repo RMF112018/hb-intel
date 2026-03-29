@@ -120,7 +120,7 @@ Each readiness stage requires specific evidence types. These are not optional �
 | Cash Flow | **Done** | **Done** | **Done** | Not started | — | — | — |
 | Buyout | **Done** | **Done** | **Done** | Not started | — | — | — |
 | Review / PER | **Done** | **Done** | **Done** | Not started | — | — | — |
-| Publication / Export | **Done** | Partial (B-FIN-03) | **Done** | Not started | — | — | — |
+| Publication / Export | **Done** | **Done** (B-FIN-03 complete) | **Done** | Not started | — | — | — |
 | History / Audit | **Done** | **Done** | **Done** | Not started | — | — | — |
 
 ### Summary
