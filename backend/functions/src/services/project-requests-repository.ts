@@ -53,7 +53,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const list = sp.web.lists.getByTitle(PROJECTS_LIST_NAME);
     const key = this.escapeODataValue(request.requestId);
 
-    const existing = await list.items.filter(`ProjectId eq '${key}'`).top(1).select('Id')();
+    const existing = await list.items.filter(`field_1 eq '${key}'`).top(1).select('Id')();
     const payload = this.toListItem(request);
 
     if (existing.length > 0) {
@@ -68,7 +68,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const sp: any = await this.getSP();
     const list = sp.web.lists.getByTitle(PROJECTS_LIST_NAME);
     const key = this.escapeODataValue(requestId);
-    const items = await list.items.filter(`ProjectId eq '${key}'`).top(1)();
+    const items = await list.items.filter(`field_1 eq '${key}'`).top(1)();
 
     if (!items.length) return null;
     return this.fromListItem(items[0] as Record<string, unknown>);
@@ -80,34 +80,17 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
 
     let query = list.items.select(
       'Title',
-      'ProjectId',
-      'ProjectNumber',
-      'ProjectName',
-      'ProjectLocation',
-      'ProjectType',
-      'ProjectStage',
-      'SubmittedBy',
-      'SubmittedAt',
-      'RequestState',
-      'GroupMembersJson',
-      'GroupLeadersJson',
-      'Department',
-      'EstimatedValue',
-      'ClientName',
-      'StartDate',
-      'ContractType',
-      'ProjectLeadId',
-      'ViewerUPNsJson',
-      'AddOnsJson',
-      'ClarificationNote',
-      'CompletedBy',
-      'CompletedAt',
-      'SiteUrl'
+      'field_1', 'field_2', 'field_3', 'field_4', 'field_5',
+      'field_6', 'field_7', 'field_8', 'field_9', 'field_10',
+      'field_11', 'field_12', 'field_13', 'field_14', 'field_15',
+      'field_16', 'field_17', 'field_18', 'field_19', 'field_20',
+      'field_21', 'field_22', 'field_23', 'field_24',
+      'Year'
     );
 
     if (state) {
       const key = this.escapeODataValue(state);
-      query = query.filter(`RequestState eq '${key}'`);
+      query = query.filter(`field_9 eq '${key}'`);
     }
 
     const items = await query.getAll(5000);
@@ -115,68 +98,101 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
   }
 
   /**
-   * D-PH6-08 list schema mapping:
-   * - requestId/projectId are stored in ProjectId to keep an immutable key aligned with schema.
-   * - Title follows "projectNumber — projectName"; fallback uses TBD during early states.
+   * SharePoint field_N mapping — confirmed from HBCentral Projects list schema.
+   *
+   * The list was created via CSV import so custom columns have generic internal
+   * names (field_1..field_24). Standard SP columns (Title, Year, Id) retain
+   * their display names as internal names.
+   *
+   * Mapping (display name → internal name):
+   *   Title          → Title       (standard SP column)
+   *   ProjectId      → field_1
+   *   ProjectNumber  → field_2
+   *   ProjectName    → field_3
+   *   ProjectLocation→ field_4
+   *   ProjectType    → field_5
+   *   ProjectStage   → field_6
+   *   SubmittedBy    → field_7
+   *   SubmittedAt    → field_8    (Number in SP)
+   *   RequestState   → field_9
+   *   GroupMembersJson→ field_10
+   *   GroupLeadersJson→ field_11
+   *   Department     → field_12
+   *   EstimatedValue → field_13   (Number in SP)
+   *   ClientName     → field_14
+   *   StartDate      → field_15   (Number in SP)
+   *   ContractType   → field_16
+   *   ProjectLeadId  → field_17
+   *   ViewerUPNsJson → field_18
+   *   AddOnsJson     → field_19
+   *   ClarificationNote→ field_20 (Number in SP — stores epoch or 0)
+   *   CompletedBy    → field_21   (Number in SP — stores epoch or 0)
+   *   CompletedAt    → field_22   (Number in SP — stores epoch or 0)
+   *   SiteUrl        → field_23
+   *   RetryCount     → field_24   (Number in SP)
+   *   Year           → Year       (Number, added post-import)
    */
   private toListItem(request: IProjectSetupRequest): Record<string, unknown> {
     const projectNumberForTitle = request.projectNumber ?? 'TBD';
     return {
       Title: `${projectNumberForTitle} — ${request.projectName}`,
-      ProjectId: request.requestId,
-      ProjectNumber: request.projectNumber ?? '',
-      ProjectName: request.projectName,
-      ProjectLocation: request.projectLocation,
-      ProjectType: request.projectType,
-      ProjectStage: request.projectStage,
-      SubmittedBy: request.submittedBy,
-      SubmittedAt: request.submittedAt,
-      RequestState: request.state,
-      GroupMembersJson: JSON.stringify(request.groupMembers),
-      GroupLeadersJson: JSON.stringify(request.groupLeaders ?? []),
-      Department: request.department ?? '',
-      EstimatedValue: request.estimatedValue ?? null,
-      ClientName: request.clientName ?? '',
-      StartDate: request.startDate ?? '',
-      ContractType: request.contractType ?? '',
-      ProjectLeadId: request.projectLeadId ?? '',
-      ViewerUPNsJson: JSON.stringify(request.viewerUPNs ?? []),
-      AddOnsJson: JSON.stringify(request.addOns ?? []),
-      ClarificationNote: request.clarificationNote ?? '',
-      CompletedBy: request.completedBy ?? '',
-      CompletedAt: request.completedAt ?? '',
-      SiteUrl: request.siteUrl ?? '',
+      field_1: request.requestId,
+      field_2: request.projectNumber ?? '',
+      field_3: request.projectName,
+      field_4: request.projectLocation,
+      field_5: request.projectType,
+      field_6: request.projectStage,
+      field_7: request.submittedBy,
+      field_8: request.submittedAt,
+      field_9: request.state,
+      field_10: JSON.stringify(request.groupMembers),
+      field_11: JSON.stringify(request.groupLeaders ?? []),
+      field_12: request.department ?? '',
+      field_13: request.estimatedValue ?? null,
+      field_14: request.clientName ?? '',
+      field_15: request.startDate ?? '',
+      field_16: request.contractType ?? '',
+      field_17: request.projectLeadId ?? '',
+      field_18: JSON.stringify(request.viewerUPNs ?? []),
+      field_19: JSON.stringify(request.addOns ?? []),
+      field_20: request.clarificationNote ?? '',
+      field_21: request.completedBy ?? '',
+      field_22: request.completedAt ?? '',
+      field_23: request.siteUrl ?? '',
+      field_24: request.retryCount,
+      Year: request.year ?? null,
     };
   }
 
   private fromListItem(item: Record<string, unknown>): IProjectSetupRequest {
-    const projectId = (item.ProjectId as string) ?? '';
+    const projectId = (item.field_1 as string) ?? '';
     return {
       requestId: projectId,
       projectId,
-      projectName: (item.ProjectName as string) ?? '',
-      projectLocation: (item.ProjectLocation as string) ?? '',
-      projectType: (item.ProjectType as string) ?? '',
-      projectStage: ((item.ProjectStage as string) || 'Pursuit') as IProjectSetupRequest['projectStage'],
-      submittedBy: (item.SubmittedBy as string) ?? '',
-      submittedAt: (item.SubmittedAt as string) ?? new Date().toISOString(),
-      state: ((item.RequestState as string) || 'Submitted') as ProjectSetupRequestState,
-      projectNumber: (item.ProjectNumber as string) || undefined,
-      groupMembers: this.safeParseJsonArray(item.GroupMembersJson as string),
-      groupLeaders: this.safeParseJsonArray(item.GroupLeadersJson as string) as string[] | undefined,
-      department: ((item.Department as string) || undefined) as IProjectSetupRequest['department'],
-      estimatedValue: typeof item.EstimatedValue === 'number' ? item.EstimatedValue : undefined,
-      clientName: (item.ClientName as string) || undefined,
-      startDate: (item.StartDate as string) || undefined,
-      contractType: (item.ContractType as string) || undefined,
-      projectLeadId: (item.ProjectLeadId as string) || undefined,
-      viewerUPNs: this.safeParseJsonArray(item.ViewerUPNsJson as string) as string[] | undefined,
-      addOns: this.safeParseJsonArray(item.AddOnsJson as string) as string[] | undefined,
-      clarificationNote: (item.ClarificationNote as string) || undefined,
-      completedBy: (item.CompletedBy as string) || undefined,
-      completedAt: (item.CompletedAt as string) || undefined,
-      siteUrl: (item.SiteUrl as string) || undefined,
-      retryCount: typeof item.RetryCount === 'number' ? item.RetryCount : 0,
+      projectName: (item.field_3 as string) ?? '',
+      projectLocation: (item.field_4 as string) ?? '',
+      projectType: (item.field_5 as string) ?? '',
+      projectStage: ((item.field_6 as string) || 'Pursuit') as IProjectSetupRequest['projectStage'],
+      submittedBy: (item.field_7 as string) ?? '',
+      submittedAt: String(item.field_8 ?? new Date().toISOString()),
+      state: ((item.field_9 as string) || 'Submitted') as ProjectSetupRequestState,
+      projectNumber: (item.field_2 as string) || undefined,
+      groupMembers: this.safeParseJsonArray(item.field_10 as string),
+      groupLeaders: this.safeParseJsonArray(item.field_11 as string) as string[] | undefined,
+      department: ((item.field_12 as string) || undefined) as IProjectSetupRequest['department'],
+      estimatedValue: typeof item.field_13 === 'number' ? item.field_13 : undefined,
+      clientName: (item.field_14 as string) || undefined,
+      startDate: String(item.field_15 ?? '') || undefined,
+      contractType: (item.field_16 as string) || undefined,
+      projectLeadId: (item.field_17 as string) || undefined,
+      viewerUPNs: this.safeParseJsonArray(item.field_18 as string) as string[] | undefined,
+      addOns: this.safeParseJsonArray(item.field_19 as string) as string[] | undefined,
+      clarificationNote: String(item.field_20 ?? '') || undefined,
+      completedBy: String(item.field_21 ?? '') || undefined,
+      completedAt: String(item.field_22 ?? '') || undefined,
+      siteUrl: (item.field_23 as string) || undefined,
+      retryCount: typeof item.field_24 === 'number' ? item.field_24 : 0,
+      year: typeof item.Year === 'number' ? item.Year : undefined,
     };
   }
 

@@ -159,6 +159,17 @@ export interface IProjectSetupRequest {
   siteUrl?: string;
   /** G6-T02: Count of provisioning retries for admin retry-eligibility gating. */
   retryCount: number;
+  /**
+   * Project year (four-digit, e.g. 2025). Stored in the SharePoint Projects list
+   * `Year` column (Number). Used by project-sites and filtered directory views.
+   *
+   * Data-source rule: derived from projectNumber prefix when available (##-###-##
+   * → first two digits + 2000), falling back to submission year. Explicitly
+   * settable by the wizard for override.
+   *
+   * SharePoint internal name: `Year` (added post-import, not a field_N name).
+   */
+  year?: number;
 }
 
 export type ProjectSetupRequestState =
