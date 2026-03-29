@@ -1,6 +1,6 @@
 {
   "name": "@hbc/features-project-hub",
-  "version": "0.2.81",
+  "version": "0.2.82",
   "private": true,
   "description": "Project Hub feature package with Project Health Pulse and Phase 3 core module contracts",
   "type": "module",

@@ -164,12 +164,12 @@ The Financial module as a whole is classified at the **lowest stage** among its 
 
 Each Financial tool is classified independently:
 
-| Tool | Description | Current Stage (2026-03-28) | Evidence |
+| Tool | Description | Current Stage (2026-03-29) | Evidence |
 |------|-------------|---------------------------|----------|
 | **Budget Import** | CSV upload, identity resolution, reconciliation | Stage 3 — Implementation Scaffold | T02 business logic + tests; `BudgetPage` UI with mock data; no `IFinancialRepository` |
-| **Forecast Summary** | PM-editable working state, derived fields | Stage 2 — Architecturally Defined | T04 pending; `ForecastSummaryPage` UI exists but types incomplete |
+| **Forecast Summary** | PM-editable working state, derived fields | Stage 3 — Implementation Scaffold | T04 contracts complete (`IFinancialForecastSummary`, editable/derived field distinction, validation, computors); `ForecastSummaryPage` UI with mock data |
 | **Forecast Versioning** | Version lifecycle, checklist gate, confirmation | Stage 3 — Implementation Scaffold | T03 logic + tests; no runtime version persistence |
-| **GC/GR Model** | Version-scoped division-level projections | Stage 2 — Architecturally Defined | T04 pending; no UI component |
+| **GC/GR Model** | Version-scoped division-level projections | Stage 3 — Implementation Scaffold | T04 contracts complete (`IGCGRLine`, `IGCGRSummaryRollup`, category/variance/rollup computors); `GCGRPage` UI with mock data |
 | **Cash Flow** | Actuals + forecast, A/R aging, cumulative chart | Stage 3 — Implementation Scaffold | T05 logic + tests; `CashFlowPage` UI with mock data |
 | **Buyout** | Procurement tracking, savings disposition | Stage 3 — Implementation Scaffold | T06 logic + tests; `BuyoutPage` UI with mock data |
 | **Business Rules** | Sign conventions, thresholds, calculations | Stage 3 — Implementation Scaffold | T07 logic + tests; consumed by UI components |
@@ -177,7 +177,7 @@ Each Financial tool is classified independently:
 | **Report Publication** | Report-candidate designation, P3-F1 handoff | Stage 2 — Architecturally Defined | Stub-ready via `promoteToPublished()`; B-FIN-03 |
 | **PER Annotation** | Executive review on confirmed versions | Stage 3 — Implementation Scaffold | T08 annotation contracts; `@hbc/field-annotations` v0.2.0 |
 
-**Module-level classification: Stage 2 — Architecturally Defined** (constrained by Forecast Summary and GC/GR pending T04).
+**Module-level classification: Stage 2 — Architecturally Defined** (constrained by Report Publication pending B-FIN-03). 8 of 10 tools at Stage 3.
 
 ### 3.3 Route and Context Readiness
 

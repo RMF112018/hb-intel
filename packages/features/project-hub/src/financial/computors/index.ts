@@ -82,3 +82,83 @@ export const computeAllDerivedFields = (line: {
   const projectedOverUnder = computeProjectedOverUnder(revisedBudget, estimatedCostAtCompletion);
   return { revisedBudget, projectedBudget, costExposureToDate, projectedCosts, estimatedCostAtCompletion, projectedOverUnder };
 };
+
+// ── T04: Forecast Summary computors ──────────────────────────────────
+
+/** revisedContractAmount = originalContractAmount + approvedChangeOrders (T04 §5). */
+export const computeRevisedContractAmount = (
+  originalContractAmount: number,
+  approvedChangeOrders: number,
+): number => originalContractAmount + approvedChangeOrders;
+
+/** totalContractWithPending = revisedContractAmount + pendingChangeOrders (T04 §5). */
+export const computeTotalContractWithPending = (
+  revisedContractAmount: number,
+  pendingChangeOrders: number,
+): number => revisedContractAmount + pendingChangeOrders;
+
+/** currentProfit = revisedContractAmount - estimatedCostAtCompletion (T04 §5, T07 §10.3). */
+export const computeForecastSummaryProfit = (
+  revisedContractAmount: number,
+  estimatedCostAtCompletion: number,
+): number => revisedContractAmount - estimatedCostAtCompletion;
+
+/** profitMargin = currentProfit / revisedContractAmount * 100 (T04 §5, T07 §10.3). */
+export const computeForecastSummaryProfitMargin = (
+  currentProfit: number,
+  revisedContractAmount: number,
+): number => revisedContractAmount === 0 ? 0 : (currentProfit / revisedContractAmount) * 100;
+
+/** contingencyRemaining = contingencyBudget - contingencyUsedToDate (T04 §5). */
+export const computeContingencyRemaining = (
+  contingencyBudget: number,
+  contingencyUsedToDate: number,
+): number => contingencyBudget - contingencyUsedToDate;
+
+// ── T04: GC/GR computors ────────────────────────────────────────────
+
+import type { IGCGRLine, IGCGRSummaryRollup } from '../types/index.js';
+
+/** GC/GR line variance = forecastAmount - budgetAmount (T04 §6). */
+export const computeGCGRLineVariance = (
+  forecastAmount: number,
+  budgetAmount: number,
+): number => forecastAmount - budgetAmount;
+
+/** GC/GR line variance percent = variance / budget * 100 (T04 §6). */
+export const computeGCGRLineVariancePercent = (
+  varianceAmount: number,
+  budgetAmount: number,
+): number => budgetAmount === 0 ? 0 : (varianceAmount / budgetAmount) * 100;
+
+/** GC/GR summary rollup from line items (T04 §6.3). */
+export const computeGCGRSummaryRollup = (
+  lines: readonly IGCGRLine[],
+): IGCGRSummaryRollup => {
+  let totalBudget = 0;
+  let totalForecast = 0;
+  let totalAdjustment = 0;
+  let overBudgetLineCount = 0;
+  let gcSubtotal = 0;
+  let grSubtotal = 0;
+
+  for (const line of lines) {
+    totalBudget += line.budgetAmount;
+    totalForecast += line.forecastAmount;
+    totalAdjustment += line.adjustmentAmount;
+    if (line.isOverBudget) overBudgetLineCount++;
+    if (line.category === 'GeneralConditions') gcSubtotal += line.varianceAmount;
+    else if (line.category === 'GeneralRequirements') grSubtotal += line.varianceAmount;
+  }
+
+  return {
+    totalBudget,
+    totalForecast,
+    totalVariance: totalForecast - totalBudget,
+    totalAdjustment,
+    lineCount: lines.length,
+    overBudgetLineCount,
+    gcSubtotal,
+    grSubtotal,
+  };
+};

@@ -276,6 +276,203 @@ export interface IReportCandidateDesignationResult {
   readonly cleared: IForecastVersion | null;
 }
 
+// ── T04: Forecast Summary and GC/GR Field-Level Specification ─────────
+
+/**
+ * Financial Forecast Summary record (T04 §5).
+ *
+ * The core PM working surface for each reporting period.
+ * Editable fields are PM-writable on Working version only.
+ * Derived fields are recomputed automatically and must never be edited directly.
+ */
+export interface IFinancialForecastSummary {
+  readonly summaryId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+  readonly reportingPeriod: string;
+
+  // ── Project metadata (PM-editable) ─────────────────────────────────
+  readonly projectName: string;
+  readonly projectNumber: string;
+  readonly projectManager: string;
+  readonly contractType: string;
+  readonly clientName: string;
+
+  // ── Schedule context (PM-editable) ─────────────────────────────────
+  readonly scheduledCompletionDate: string | null;
+  readonly revisedCompletionDate: string | null;
+  readonly percentComplete: number;
+  readonly monthsRemaining: number;
+
+  // ── Financial summary — editable fields (PM-writable on Working) ───
+  readonly originalContractAmount: number;
+  readonly approvedChangeOrders: number;
+  readonly pendingChangeOrders: number;
+  readonly contingencyBudget: number;
+  readonly contingencyUsedToDate: number;
+  readonly forecastToComplete: number;
+  readonly pmNarrative: string;
+
+  // ── Financial summary — derived fields (computed, never edited) ─────
+  readonly revisedContractAmount: number;         // original + approved COs
+  readonly totalContractWithPending: number;      // revised + pending COs
+  readonly estimatedCostAtCompletion: number;     // derived from budget lines
+  readonly jobToDateActualCost: number;           // synced from ERP/actuals
+  readonly committedCosts: number;                // synced from commitments
+  readonly costExposureToDate: number;            // actuals + committed
+  readonly currentProfit: number;                 // revisedContract - estimatedCostAtCompletion
+  readonly profitMargin: number;                  // currentProfit / revisedContract (%)
+  readonly projectedOverUnder: number;            // budget - estimatedCostAtCompletion
+  readonly contingencyRemaining: number;          // budget - usedToDate
+  readonly expectedContingencyUse: number;        // projected from current draw rate
+  readonly gcgrTotalVariance: number;             // rolled up from GC/GR lines
+
+  // ── Metadata ───────────────────────────────────────────────────────
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly lastEditedBy: string;
+}
+
+/**
+ * Forecast Summary field editability contract (T04 §5.1).
+ *
+ * Separates PM-editable fields from derived/computed fields.
+ * Repository implementations must enforce: editable fields writable only
+ * on Working version; derived fields recomputed on read, never written directly.
+ */
+export type ForecastSummaryEditableField =
+  | 'projectName'
+  | 'projectNumber'
+  | 'projectManager'
+  | 'contractType'
+  | 'clientName'
+  | 'scheduledCompletionDate'
+  | 'revisedCompletionDate'
+  | 'percentComplete'
+  | 'monthsRemaining'
+  | 'originalContractAmount'
+  | 'approvedChangeOrders'
+  | 'pendingChangeOrders'
+  | 'contingencyBudget'
+  | 'contingencyUsedToDate'
+  | 'forecastToComplete'
+  | 'pmNarrative';
+
+export type ForecastSummaryDerivedField =
+  | 'revisedContractAmount'
+  | 'totalContractWithPending'
+  | 'estimatedCostAtCompletion'
+  | 'jobToDateActualCost'
+  | 'committedCosts'
+  | 'costExposureToDate'
+  | 'currentProfit'
+  | 'profitMargin'
+  | 'projectedOverUnder'
+  | 'contingencyRemaining'
+  | 'expectedContingencyUse'
+  | 'gcgrTotalVariance';
+
+/**
+ * Forecast Summary validation result (T04 §5.2).
+ */
+export interface IForecastSummaryValidation {
+  readonly isValid: boolean;
+  readonly errors: readonly ForecastSummaryValidationError[];
+}
+
+export interface ForecastSummaryValidationError {
+  readonly field: string;
+  readonly message: string;
+  readonly severity: 'error' | 'warning';
+}
+
+/**
+ * GC/GR line item record (T04 §6).
+ *
+ * Version-scoped division-level cost projection.
+ * Editable on Working version only; immutable after confirmation.
+ */
+export interface IGCGRLine {
+  readonly lineId: string;
+  readonly forecastVersionId: string;
+  readonly projectId: string;
+
+  // ── Division identity ──────────────────────────────────────────────
+  readonly divisionCode: string;
+  readonly divisionDescription: string;
+  readonly category: GCGRCategory;
+
+  // ── Budget baseline (imported, not PM-editable) ────────────────────
+  readonly budgetAmount: number;
+
+  // ── Forecast values (PM-editable on Working) ───────────────────────
+  readonly forecastAmount: number;
+  readonly adjustmentAmount: number;
+  readonly adjustmentNotes: string;
+
+  // ── Derived / computed fields (never edited directly) ──────────────
+  readonly varianceAmount: number;          // forecastAmount - budgetAmount
+  readonly variancePercent: number;         // variance / budget (%)
+  readonly isOverBudget: boolean;           // varianceAmount > 0
+
+  // ── Metadata ───────────────────────────────────────────────────────
+  readonly sortOrder: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly lastEditedBy: string;
+}
+
+/**
+ * GC/GR division categories (T04 §6.1).
+ */
+export type GCGRCategory =
+  | 'GeneralConditions'
+  | 'GeneralRequirements'
+  | 'Other';
+
+/**
+ * GC/GR editable field contract (T04 §6.2).
+ */
+export type GCGREditableField =
+  | 'forecastAmount'
+  | 'adjustmentAmount'
+  | 'adjustmentNotes';
+
+export type GCGRDerivedField =
+  | 'varianceAmount'
+  | 'variancePercent'
+  | 'isOverBudget';
+
+/**
+ * GC/GR summary rollup (T04 §6.3).
+ * Aggregation output that feeds into IFinancialForecastSummary.gcgrTotalVariance.
+ */
+export interface IGCGRSummaryRollup {
+  readonly totalBudget: number;
+  readonly totalForecast: number;
+  readonly totalVariance: number;
+  readonly totalAdjustment: number;
+  readonly lineCount: number;
+  readonly overBudgetLineCount: number;
+  readonly gcSubtotal: number;
+  readonly grSubtotal: number;
+}
+
+/**
+ * GC/GR line validation result (T04 §6.4).
+ */
+export interface IGCGRLineValidation {
+  readonly isValid: boolean;
+  readonly errors: readonly GCGRLineValidationError[];
+}
+
+export interface GCGRLineValidationError {
+  readonly lineId: string;
+  readonly field: string;
+  readonly message: string;
+  readonly severity: 'error' | 'warning';
+}
+
 // ── T05: Cash Flow Working Model ──────────────────────────────────────
 
 /** Cash flow record discriminator (T05 §7.1–§7.2). */

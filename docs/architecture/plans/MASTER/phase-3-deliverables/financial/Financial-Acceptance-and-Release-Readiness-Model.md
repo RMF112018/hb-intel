@@ -114,9 +114,9 @@ Each readiness stage requires specific evidence types. These are not optional �
 | Capability | R1 Doctrine | R2 Contract | R3 Route/Lane | R4 Implementation | R5 Operational | R6 Pilot | R7 Release |
 |-----------|:-----------:|:-----------:|:-------------:|:------------------:|:--------------:|:--------:|:----------:|
 | Budget Import | **Done** | **Done** | **Done** | Not started | — | — | — |
-| Forecast Summary | **Done** | Partial (T04 pending) | **Done** | Not started | — | — | — |
+| Forecast Summary | **Done** | **Done** (T04 complete) | **Done** | Not started | — | — | — |
 | Forecast Checklist | **Done** | **Done** | **Done** | Not started | — | — | — |
-| GC/GR Forecast | **Done** | Partial (T04 pending) | **Done** | Not started | — | — | — |
+| GC/GR Forecast | **Done** | **Done** (T04 complete) | **Done** | Not started | — | — | — |
 | Cash Flow | **Done** | **Done** | **Done** | Not started | — | — | — |
 | Buyout | **Done** | **Done** | **Done** | Not started | — | — | — |
 | Review / PER | **Done** | **Done** | **Done** | Not started | — | — | — |
