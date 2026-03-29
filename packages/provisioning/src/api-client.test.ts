@@ -242,6 +242,35 @@ describe('void methods', () => {
 });
 
 /* ------------------------------------------------------------------ */
+/*  Undefined base URL guard                                          */
+/* ------------------------------------------------------------------ */
+
+describe('undefined base URL behavior', () => {
+  it('client created with undefined base URL produces invalid fetch URL', async () => {
+    const badClient = createProvisioningApiClient(undefined as any, getToken);
+    fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'Not Found' }, 404));
+
+    // The fetch URL will be "undefined/api/project-setup-requests"
+    await badClient.listRequests().catch(() => {});
+    if (fetchMock.mock.calls.length > 0) {
+      const calledUrl = fetchMock.mock.calls[0][0];
+      expect(calledUrl).toContain('undefined');
+    }
+  });
+
+  it('client with empty string base URL produces /api/... relative URL', async () => {
+    const badClient = createProvisioningApiClient('', getToken);
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ items: [], pagination: { total: 0, page: 1, pageSize: 25, totalPages: 0 } }),
+    );
+
+    await badClient.listRequests();
+    const calledUrl = fetchMock.mock.calls[0][0];
+    expect(calledUrl).toBe('/api/project-setup-requests');
+  });
+});
+
+/* ------------------------------------------------------------------ */
 /*  Auth header                                                       */
 /* ------------------------------------------------------------------ */
 
