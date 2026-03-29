@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b",
+  "alias": "ProjectSitesWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart"
+  ],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "Project Sites"
+      },
+      "description": {
+        "default": "Displays project-site link cards for all projects matching the hosting page's Year property."
+      },
+      "officeFabricIconFontName": "Globe",
+      "properties": {
+        "yearOverride": 0
+      }
+    }
+  ]
+}
