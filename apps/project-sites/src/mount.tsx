@@ -37,12 +37,11 @@ export async function mount(el: HTMLElement, spfxContext?: WebPartContext): Prom
     },
   });
 
-  // Resolve the page year — in the IIFE/shell pattern, the yearOverride
-  // comes from the manifest preconfiguredEntries.properties.yearOverride
-  // which defaults to 0 (use page metadata). The shell webpart does not
-  // forward property pane values, so we always pass 0 here.
+  // Resolve the page year — reads the Year column from the Site Pages
+  // library item via PnPjs REST call. yearOverride is always 0 in the
+  // IIFE/shell pattern (shell webpart does not forward property pane values).
   const yearResolution = spfxContext
-    ? resolvePageYear(spfxContext, 0)
+    ? await resolvePageYear(spfxContext, 0)
     : { kind: 'missing' as const };
 
   root = createRoot(el);

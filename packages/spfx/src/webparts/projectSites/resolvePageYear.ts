@@ -3,7 +3,7 @@
  *
  * Resolution order:
  *   1. Property pane override (yearOverride > 0) — for admin/testing use.
- *   2. Hosting page metadata via pageContext.listItem.fieldValues — production source.
+ *   2. Hosting page's Year column fetched from Site Pages via PnPjs REST call.
  *   3. Missing — triggers "Year Not Configured" empty state.
  *
  * Invalid values (present but not a plausible 4-digit year) produce an
@@ -15,6 +15,10 @@
  * @see .claude/plans/project-sites-webpart-validation-and-architecture-report.md §3
  */
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
+import { spfi, SPFx } from '@pnp/sp';
+import '@pnp/sp/webs';
+import '@pnp/sp/lists';
+import '@pnp/sp/items';
 import type { PageYearResolution } from './types.js';
 import { SP_PROJECTS_FIELDS, isValidYear } from './types.js';
 
@@ -32,53 +36,70 @@ function coerceToNumber(raw: unknown): number {
 }
 
 /**
+ * Validate a raw year value and return a PageYearResolution.
+ */
+function validateYear(rawYear: unknown, source: 'property-pane' | 'page-metadata'): PageYearResolution {
+  if (rawYear === null || rawYear === undefined) {
+    return { kind: 'missing' };
+  }
+  const num = coerceToNumber(rawYear);
+  if (!Number.isNaN(num)) {
+    const rounded = Math.round(num);
+    if (isValidYear(rounded)) {
+      return { kind: 'resolved', year: rounded, source };
+    }
+    return { kind: 'invalid', rawValue: rawYear, source };
+  }
+  return { kind: 'invalid', rawValue: rawYear, source };
+}
+
+/** Site Pages library title — standard for all SharePoint modern sites. */
+const SITE_PAGES_LIST_TITLE = 'Site Pages';
+
+/**
  * Resolve the active year for the Project Sites query.
  *
- * @param context      - SPFx WebPartContext (provides page metadata)
+ * This is async because reading custom columns from the hosting page
+ * requires a PnPjs REST call to the Site Pages library. SPFx's
+ * pageContext.listItem only exposes the item ID, not custom field values.
+ *
+ * @param context      - SPFx WebPartContext (provides page context + SP REST access)
  * @param yearOverride - Value from the property pane (0 = use page metadata)
  * @returns Discriminated union: resolved | missing | invalid
  */
-export function resolvePageYear(
+export async function resolvePageYear(
   context: WebPartContext,
   yearOverride: number,
-): PageYearResolution {
-  // 1. Property pane override
+): Promise<PageYearResolution> {
+  // 1. Property pane override (synchronous — no REST call needed)
   if (typeof yearOverride === 'number' && yearOverride > 0) {
-    const num = Math.round(yearOverride);
-    if (isValidYear(num)) {
-      return { kind: 'resolved', year: num, source: 'property-pane' };
-    }
-    return { kind: 'invalid', rawValue: yearOverride, source: 'property-pane' };
+    return validateYear(yearOverride, 'property-pane');
   }
 
-  // 2. Page metadata from Site Pages library
-  //    pageContext.listItem is available when the web part is placed on a
-  //    modern page in a Site Pages library. fieldValues exposes both standard
-  //    and custom columns as a Record<string, unknown>.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- listItem.fieldValues is untyped for custom columns
-  const fieldValues = (context.pageContext as any).listItem?.fieldValues as
-    | Record<string, unknown>
-    | undefined;
-
-  if (fieldValues) {
-    const rawYear = fieldValues[SP_PROJECTS_FIELDS.YEAR];
-
-    // Attempt coercion — SharePoint may return number or string
-    if (rawYear !== null && rawYear !== undefined) {
-      const num = coerceToNumber(rawYear);
-      if (!Number.isNaN(num)) {
-        const rounded = Math.round(num);
-        if (isValidYear(rounded)) {
-          return { kind: 'resolved', year: rounded, source: 'page-metadata' };
-        }
-        // Present but out of range
-        return { kind: 'invalid', rawValue: rawYear, source: 'page-metadata' };
-      }
-      // Present but not a number at all
-      return { kind: 'invalid', rawValue: rawYear, source: 'page-metadata' };
-    }
+  // 2. Fetch the hosting page's Year column from Site Pages via PnPjs.
+  //    pageContext.listItem.id gives us the current page's list item ID
+  //    in the Site Pages library.
+  const pageItemId = context.pageContext.listItem?.id;
+  if (typeof pageItemId !== 'number' || pageItemId <= 0) {
+    return { kind: 'missing' };
   }
 
-  // 3. No year available
-  return { kind: 'missing' };
+  try {
+    const sp = spfi().using(SPFx(context));
+    const item = await sp.web.lists
+      .getByTitle(SITE_PAGES_LIST_TITLE)
+      .items.getById(pageItemId)
+      .select(SP_PROJECTS_FIELDS.YEAR)();
+
+    const rawYear = item?.[SP_PROJECTS_FIELDS.YEAR];
+    return validateYear(rawYear, 'page-metadata');
+  } catch (err) {
+    // If the REST call fails (e.g., field doesn't exist, permissions),
+    // fall through to missing rather than crashing.
+    console.warn(
+      '[ProjectSites] Failed to read Year from Site Pages item:',
+      err instanceof Error ? err.message : err,
+    );
+    return { kind: 'missing' };
+  }
 }

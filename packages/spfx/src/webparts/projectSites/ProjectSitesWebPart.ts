@@ -20,13 +20,14 @@ import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-import type { IProjectSitesWebPartProps } from './types.js';
+import type { IProjectSitesWebPartProps, PageYearResolution } from './types.js';
 import { resolvePageYear } from './resolvePageYear.js';
 import { ProjectSitesRoot } from './ProjectSitesRoot.js';
 
 export default class ProjectSitesWebPart extends BaseClientSideWebPart<IProjectSitesWebPartProps> {
   private _root: Root | undefined;
   private _queryClient: QueryClient | undefined;
+  private _yearResolution: PageYearResolution = { kind: 'missing' };
 
   public async onInit(): Promise<void> {
     await super.onInit();
@@ -37,6 +38,12 @@ export default class ProjectSitesWebPart extends BaseClientSideWebPart<IProjectS
         queries: { refetchOnWindowFocus: false },
       },
     });
+    // Resolve the page year asynchronously — reads the Year column
+    // from the Site Pages library item via PnPjs REST call.
+    this._yearResolution = await resolvePageYear(
+      this.context,
+      this.properties.yearOverride,
+    );
   }
 
   public render(): void {
@@ -44,16 +51,11 @@ export default class ProjectSitesWebPart extends BaseClientSideWebPart<IProjectS
       this._root = createRoot(this.domElement);
     }
 
-    const yearResolution = resolvePageYear(
-      this.context,
-      this.properties.yearOverride,
-    );
-
     this._root.render(
       createElement(
         QueryClientProvider,
         { client: this._queryClient! },
-        createElement(ProjectSitesRoot, { yearResolution }),
+        createElement(ProjectSitesRoot, { yearResolution: this._yearResolution }),
       ),
     );
   }
