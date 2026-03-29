@@ -25,11 +25,13 @@ This document defines what "ready" means for the Financial module at each gate i
 |---|-------|---------------|------|
 | R1 | **Doctrine Complete** | Requirements, boundaries, and behavioral expectations are locked in governing plan documents | All governing doctrine files exist and are locked |
 | R2 | **Contract Complete** | Type system, interfaces, business logic, and domain rules are implemented and tested | Code artifacts pass unit tests; types compile |
-| R3 | **Route/Lane Complete** | Canonical routes, lane ownership, and cross-lane handoff are implemented | Routes render; deep-link entry works; lane posture is explicit |
+| R3 | **Route/Lane Complete** | Canonical PWA routes and workspace shell are implemented; SPFx lane posture is documented; cross-lane handoff contracts exist | PWA routes render with deep-link entry; workspace shell wraps all surfaces; lane doctrine locked |
 | R4 | **Implementation Complete** | Data access layer wired, repositories registered, real data flows through the capability | `IFinancialRepository` facade returns real project data; hooks consume facade |
 | R5 | **Operationally Proven** | End-to-end workflow completes with real data; runtime honesty, blockers, and posture are visible | A PM can complete a full monthly reporting cycle on a real project |
 | R6 | **Pilot Proven** | Real users have used the capability on real projects for at least one reporting cycle | Feedback collected; critical issues resolved; parallel-run with spreadsheets demonstrates parity |
 | R7 | **Release Ready** | Capability approved for general availability; spreadsheet workflow can be retired for adopting projects | Cutover criteria met; rollback plan documented; support/training available |
+
+**Stage mapping:** ARRM stages align with [FIN-PR1](FIN-PR1-Financial-Production-Readiness-Maturity-Model.md) stages as follows: R1 = Stage 1 (Doctrine-Defined), R2 = Stage 2–3 (Architecturally Defined to Implementation Scaffold), R3 = Stage 3 with route/lane completion, R4 = Stage 4 (Partially Operational), R5 = Stage 5 (Operational in Current Lane), R6 = Stage 8 (Pilot-Proven), R7 = Stage 9 (Production-Ready). FIN-PR1 governs per-tool maturity classification; ARRM governs go/no-go gates and evidence requirements.
 
 ---
 
@@ -62,7 +64,7 @@ Each readiness stage requires specific evidence types. These are not optional �
 | Deep-link entry | Direct URL navigation resolves correctly | `resolveFinancialToolEntry()` with 28 route tests |
 | Project-switch safety | Tool preserved on project switch; context isolated | `resolveProjectHubSwitchTarget()` with tool preservation |
 | Return-memory | Last-visited tool restored on re-entry | `financialContextState` with 13 context tests |
-| Lane posture | PWA depth and SPFx depth documented and implemented | Financial-LODM, Financial-CLHLC |
+| Lane posture | PWA depth documented and implemented; SPFx depth documented only — SPFx operational is R5 (PWA) / R6 (SPFx) scope | Financial-LODM, Financial-CLHLC |
 | Workspace shell | WorkspacePageShell wrapper with breadcrumbs, state ribbon, density | `FinancialWorkspaceShell` |
 
 ### R4 — Implementation Complete
@@ -151,6 +153,7 @@ The following claims are **explicitly prohibited** without the corresponding evi
 | "Release-ready" based on contract tests passing | Tests prove logic, not user experience | R7 requires pilot feedback and cutover plan |
 | "Lane-complete" based on PWA only | SPFx lane is part of lane acceptance | R3 requires both lane postures documented; R5 requires PWA operational; R6 requires SPFx operational |
 | "Spine-integrated" based on type contracts only | Type contracts prove scaffold | R5 requires runtime adapters publishing real events |
+| "Operationally honest" based on banner presence with mock data | Banner proves scaffold disclosure (R3); it does not prove runtime truth | R5 requires the banner to reflect real data conditions — real stale-budget counts, real checklist status, real confirmation state |
 
 ---
 

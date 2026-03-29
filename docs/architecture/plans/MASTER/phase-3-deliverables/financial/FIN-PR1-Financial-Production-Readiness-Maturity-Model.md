@@ -185,8 +185,8 @@ Each Financial tool is classified independently:
 |-----------|--------------|----------|
 | PWA route registered | Stage 3 | `/project-hub/:projectId/financial` renders `FinancialControlCenter` |
 | Project context durable | Stage 3 | Route-canonical `projectId`, store-reconciled; but context serves mock data |
-| Sub-tool URL routing | Stage 1 | Not implemented — state-based `surfaceMode` via `useState` |
-| Deep-link support | Stage 1 | No deep links to `/financial/budget` etc. |
+| Sub-tool URL routing | Stage 3 | 9 canonical tool routes implemented via `FINANCIAL_TOOL_REGISTRY` and `financialToolRoute` (v0.13.22); `FinancialControlCenter` accepts route-driven `activeTool` prop |
+| Deep-link support | Stage 3 | Direct entry to `/project-hub/:projectId/financial/:tool` resolves via `resolveFinancialToolEntry()`; invalid tools redirect to Financial home; 28 route tests pass |
 
 ### 3.4 Lane Readiness
 
@@ -210,7 +210,7 @@ Each Financial tool is classified independently:
 |------|--------------|----------|
 | P3-H1 §6.1 checklist | Stages 2–3 | 7 of 12 items Complete at contract level; 5 In Progress |
 | P3-E4-T09 §20 detailed gate | Stage 3 | 37 of 48 items at contract level; 4 pending T04; 7 runtime scope |
-| Financial Governance verification | Stage 1 | All 8 items unchecked — require operational evidence |
+| Financial Governance verification | Stage 3 (partial) | 3 of 8 items checked at R3 (FIN-04 route contract, operational posture banner, canonical routing); remaining 5 require R5 or R6 evidence |
 | Spreadsheet replacement readiness | Stage 3 | FRC-00 crosswalk complete; pending runtime surfaces and parallel-run |
 
 ---

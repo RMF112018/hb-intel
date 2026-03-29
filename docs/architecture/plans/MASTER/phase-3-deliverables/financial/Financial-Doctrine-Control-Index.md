@@ -320,7 +320,7 @@ Doctrine-completion and implementation prompt sets, organized by workstream. Eac
 
 | Set | Directory | Status |
 |-----|-----------|--------|
-| Acceptance / staging / release | [acceptance-staging-release/](acceptance-staging-release/) | Empty — prompts not yet authored |
+| Acceptance / staging / release | [acceptance-staging-release/](acceptance-staging-release/) | [Financial-ARRM](Financial-Acceptance-and-Release-Readiness-Model.md) authored (2026-03-29); staging/pilot/cutover prompts not yet authored |
 | Operational workflow | [operational-workflow/](operational-workflow/) | Empty — prompts not yet authored |
 
 ---
@@ -341,6 +341,6 @@ Doctrine-completion and implementation prompt sets, organized by workstream. Eac
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Governance specs (underscore files) are not formally linked to BIP/FRM/FVC series parents | A developer may miss the governance spec when working on a tool's data model | This index cross-references them in §5; future prompts should add governing-reference headers |
-| `acceptance-staging-release/` and `operational-workflow/` prompt directories are empty | No prompt guidance exists for acceptance staging or operational workflow definition | Author prompts when those workstreams activate |
+| `operational-workflow/` prompt directory is empty | No prompt guidance exists for operational workflow definition | Author prompts when workstream activates |
 | FIN_Gap-to-File_Crosswalk absorb actions have not been executed | FIN-01–04 governance is not yet reflected in BIP-01, FVC-02, FRC-05 etc. as specified | Execute doctrine-completion prompts 02–03 |
 | T04 source contracts remain unwritten | Forecast Summary and GC/GR cannot advance past Stage 2 | T04 authoring is a blocking implementation task |
