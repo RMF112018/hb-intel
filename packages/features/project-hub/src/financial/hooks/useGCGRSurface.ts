@@ -1,11 +1,15 @@
 /**
  * useGCGRSurface — view-ready data hook for the GC/GR Forecast surface.
  *
- * Mock data initially. Will wire to IFinancialRepository.
- * Stage 2 — Architecturally Defined (blocked on T04: IGCGRLine).
+ * Wave 3B.1: facade-aware — sources GC/GR lines and rollup from
+ * GCGRService via IFinancialRepository. Falls back to inline mock
+ * data when facade data is loading.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useFinancialRepository } from './useFinancialRepository.js';
+import { GCGRService } from '../services/GCGRService.js';
+import type { GCGRLoadResult } from '../services/GCGRService.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from './useFinancialControlCenter.js';
 
 export interface GCGRLineRow {
@@ -47,7 +51,42 @@ export function useGCGRSurface(_options?: {
   viewerRole?: FinancialViewerRole;
   complexityTier?: FinancialComplexityTier;
 }): GCGRSurfaceData {
+  const repo = useFinancialRepository();
+  const [facadeResult, setFacadeResult] = useState<GCGRLoadResult | null>(null);
+
+  useEffect(() => {
+    const service = new GCGRService(repo);
+    service.load('proj-uuid-001', '2026-03').then(setFacadeResult).catch(() => {});
+  }, [repo]);
+
   return useMemo(() => {
+    // Use facade data when available, fall back to inline mock
+    if (facadeResult) {
+      return {
+        lines: facadeResult.lines.map((l) => ({
+          id: l.lineId,
+          division: l.divisionCode,
+          description: l.divisionDescription,
+          budgetAmount: l.budgetAmount,
+          forecastAmount: l.forecastAmount,
+          varianceAmount: l.varianceAmount,
+          variancePercent: l.budgetAmount !== 0 ? (l.varianceAmount / l.budgetAmount) * 100 : 0,
+          isOverBudget: l.varianceAmount > 0,
+        })),
+        summary: {
+          totalBudget: facadeResult.rollup.totalBudget,
+          totalForecast: facadeResult.rollup.totalForecast,
+          totalVariance: facadeResult.rollup.totalVariance,
+          lineCount: facadeResult.rollup.lineCount,
+          overBudgetCount: facadeResult.rollup.overBudgetLineCount,
+        },
+        versionState: (facadeResult.posture.currentVersionState as string) ?? 'Working',
+        isEditable: facadeResult.isEditable,
+        reportingMonth: facadeResult.posture.reportingPeriod,
+      };
+    }
+
+    // Fallback to inline mock data
     const summary: GCGRSummary = {
       totalBudget: MOCK_LINES.reduce((s, l) => s + l.budgetAmount, 0),
       totalForecast: MOCK_LINES.reduce((s, l) => s + l.forecastAmount, 0),
@@ -63,5 +102,5 @@ export function useGCGRSurface(_options?: {
       isEditable: true,
       reportingMonth: 'March 2026',
     };
-  }, []);
+  }, [facadeResult]);
 }
