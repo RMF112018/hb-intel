@@ -5,6 +5,12 @@
  * HBCentral Projects list filtered by a user-selected Year value.
  *
  * Year selection is driven by a dynamic selector UI, not by page metadata.
+ *
+ * Field naming: the HBCentral Projects list has custom columns created by
+ * the provisioning backend (ProjectName, ProjectNumber, SiteUrl, etc.) but
+ * SharePoint internal names may differ from display names. The query uses
+ * a resilient two-pass strategy: try full select first, fall back to
+ * core-only select (Id, Title, Year) if any field doesn't resolve.
  */
 
 // ── SharePoint field constants ─────────────────────────────────────────────
@@ -12,16 +18,22 @@
 /**
  * Internal field names on the HBCentral Projects list.
  *
- * If the SharePoint internal name for `Year` differs from the display name
- * (e.g. `OData__x0059_ear`), update `YEAR` here — all queries and mappings
- * resolve through this constant.
+ * Title is the standard SP field used as "{number} — {name}".
+ * Year is a confirmed Number column.
+ * Other fields are custom columns that may have different internal names
+ * depending on how they were provisioned.
  */
 export const SP_PROJECTS_FIELDS = {
+  /** SharePoint list item ID — always exists. */
   ID: 'Id',
+  /** SharePoint standard Title column — "{number} — {name}" format. */
+  TITLE: 'Title',
+  /** Year column — confirmed Number type on HBCentral Projects list. */
+  YEAR: 'Year',
+  /** Custom fields — may not resolve by these names on all list instances. */
   PROJECT_NAME: 'ProjectName',
   PROJECT_NUMBER: 'ProjectNumber',
   SITE_URL: 'SiteUrl',
-  YEAR: 'Year',
   DEPARTMENT: 'Department',
   PROJECT_LOCATION: 'ProjectLocation',
   PROJECT_TYPE: 'ProjectType',
@@ -29,13 +41,28 @@ export const SP_PROJECTS_FIELDS = {
   CLIENT_NAME: 'ClientName',
 } as const;
 
-/** The select clause sent to SharePoint — derived from the field constants. */
-export const SP_PROJECTS_SELECT = [
+/**
+ * Core fields guaranteed to exist on any SharePoint list.
+ * Used as fallback if the full select fails with a 400.
+ */
+export const SP_PROJECTS_CORE_SELECT = [
   SP_PROJECTS_FIELDS.ID,
+  SP_PROJECTS_FIELDS.TITLE,
+  SP_PROJECTS_FIELDS.YEAR,
+] as const;
+
+/**
+ * Full select clause including all custom fields.
+ * If this fails (e.g., an internal name differs), the query
+ * automatically retries with SP_PROJECTS_CORE_SELECT.
+ */
+export const SP_PROJECTS_FULL_SELECT = [
+  SP_PROJECTS_FIELDS.ID,
+  SP_PROJECTS_FIELDS.TITLE,
+  SP_PROJECTS_FIELDS.YEAR,
   SP_PROJECTS_FIELDS.PROJECT_NAME,
   SP_PROJECTS_FIELDS.PROJECT_NUMBER,
   SP_PROJECTS_FIELDS.SITE_URL,
-  SP_PROJECTS_FIELDS.YEAR,
   SP_PROJECTS_FIELDS.DEPARTMENT,
   SP_PROJECTS_FIELDS.PROJECT_LOCATION,
   SP_PROJECTS_FIELDS.PROJECT_TYPE,
@@ -45,18 +72,23 @@ export const SP_PROJECTS_SELECT = [
 
 // ── Raw SharePoint list item shape ─────────────────────────────────────────
 
-/** Raw item shape returned by PnPjs from the Projects list. */
+/**
+ * Raw item shape returned by PnPjs from the Projects list.
+ * Extended fields are optional — absent when using core-only fallback.
+ */
 export interface IRawProjectSiteItem {
   Id: number;
-  ProjectName: string | null;
-  ProjectNumber: string | null;
-  SiteUrl: string | null;
+  Title: string | null;
   Year: number | null;
-  Department: string | null;
-  ProjectLocation: string | null;
-  ProjectType: string | null;
-  ProjectStage: string | null;
-  ClientName: string | null;
+  // Extended fields — present only when full select succeeds
+  ProjectName?: string | null;
+  ProjectNumber?: string | null;
+  SiteUrl?: string | null;
+  Department?: string | null;
+  ProjectLocation?: string | null;
+  ProjectType?: string | null;
+  ProjectStage?: string | null;
+  ClientName?: string | null;
 }
 
 // ── Normalized UI-ready record ─────────────────────────────────────────────

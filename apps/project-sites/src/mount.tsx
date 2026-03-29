@@ -12,7 +12,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-import { ProjectSitesRoot } from '@hbc/spfx/project-sites/ProjectSitesRoot.js';
+// Use relative path — Vite resolves via alias, tsc resolves via filesystem
+import { ProjectSitesRoot } from '../../../packages/spfx/src/webparts/projectSites/ProjectSitesRoot.js';
 
 let root: Root | undefined;
 let queryClient: QueryClient | undefined;

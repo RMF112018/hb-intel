@@ -1,6 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "noEmit": true, "types": ["vite/client"] },
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@hbc/spfx/project-sites/*": ["../../packages/spfx/src/webparts/projectSites/*"],
+      "@hbc/auth/spfx": ["../../packages/auth/src/spfx/index.ts"],
+      "@hbc/auth": ["../../packages/auth/src/index.ts"],
+      "@hbc/ui-kit": ["../../packages/ui-kit/src/index.ts"],
+      "@hbc/models": ["../../packages/models/src/index.ts"]
+    }
+  },
   "include": ["src"],
   "exclude": ["dist"]
 }

@@ -3,6 +3,10 @@
  *
  * Handles missing, null, and malformed field values defensively. Every field
  * resolves to a safe default so downstream UI code never encounters undefined.
+ *
+ * The Title field (standard SP column) contains "{number} — {name}" format.
+ * When ProjectName is available (full select), it takes precedence.
+ * When only core fields are available (fallback), Title is parsed.
  */
 import type { IRawProjectSiteItem, IProjectSiteEntry } from './types.js';
 
@@ -15,18 +19,41 @@ function safeString(value: unknown, fallback = ''): string {
 }
 
 /**
+ * Parse the Title field which uses "{number} — {name}" format.
+ * Returns [projectNumber, projectName] or ['', title] if no separator found.
+ */
+function parseTitle(title: string): [string, string] {
+  // Try both em-dash (—) and en-dash (–) and hyphen (-)
+  const separators = [' — ', ' – ', ' - '];
+  for (const sep of separators) {
+    const idx = title.indexOf(sep);
+    if (idx > 0) {
+      return [title.substring(0, idx).trim(), title.substring(idx + sep.length).trim()];
+    }
+  }
+  return ['', title];
+}
+
+/**
  * Normalize a single raw SharePoint list item into a UI-ready record.
  *
  * @param raw - Raw PnPjs list item from the Projects list
  * @returns Normalized IProjectSiteEntry
  */
 export function normalizeProjectSiteEntry(raw: IRawProjectSiteItem): IProjectSiteEntry {
+  const title = safeString(raw.Title);
+  const [parsedNumber, parsedName] = title ? parseTitle(title) : ['', ''];
+
+  // Prefer explicit ProjectName/ProjectNumber if available (full select),
+  // otherwise fall back to parsed Title components (core-only select).
+  const projectName = safeString(raw.ProjectName) || parsedName || '(Untitled Project)';
+  const projectNumber = safeString(raw.ProjectNumber) || parsedNumber;
   const siteUrl = safeString(raw.SiteUrl);
 
   return {
     id: typeof raw.Id === 'number' ? raw.Id : 0,
-    projectName: safeString(raw.ProjectName, '(Untitled Project)'),
-    projectNumber: safeString(raw.ProjectNumber),
+    projectName,
+    projectNumber,
     siteUrl,
     year: typeof raw.Year === 'number' ? raw.Year : 0,
     department: safeString(raw.Department),
