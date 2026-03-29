@@ -52,6 +52,66 @@ describe('normalizeProjectSiteEntry — standard field names', () => {
   });
 });
 
+describe('normalizeProjectSiteEntry — SiteUrl formats', () => {
+  it('extracts URL from plain string', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
+      SiteUrl: 'https://example.com/sites/test',
+    }));
+    expect(result.siteUrl).toBe('https://example.com/sites/test');
+    expect(result.hasSiteUrl).toBe(true);
+  });
+
+  it('extracts URL from SharePoint Hyperlink object { Url, Description }', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
+      SiteUrl: { Url: 'https://example.com/sites/test', Description: 'Test Site' },
+    }));
+    expect(result.siteUrl).toBe('https://example.com/sites/test');
+    expect(result.hasSiteUrl).toBe(true);
+  });
+
+  it('extracts URL from object with lowercase url property', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
+      SiteUrl: { url: 'https://example.com/sites/test' },
+    }));
+    expect(result.siteUrl).toBe('https://example.com/sites/test');
+    expect(result.hasSiteUrl).toBe(true);
+  });
+
+  it('extracts URL from SP REST deferred object { uri }', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
+      SiteUrl: { uri: 'https://example.com/sites/test' },
+    }));
+    expect(result.siteUrl).toBe('https://example.com/sites/test');
+    expect(result.hasSiteUrl).toBe(true);
+  });
+
+  it('returns empty for object with no Url/url/uri', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
+      SiteUrl: { Description: 'No URL here' },
+    }));
+    expect(result.siteUrl).toBe('');
+    expect(result.hasSiteUrl).toBe(false);
+  });
+
+  it('returns empty for null SiteUrl', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({ SiteUrl: null }));
+    expect(result.hasSiteUrl).toBe(false);
+  });
+
+  it('returns empty for undefined SiteUrl (field not in item)', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem());
+    expect(result.hasSiteUrl).toBe(false);
+  });
+
+  it('trims whitespace from URL strings', () => {
+    const result = normalizeProjectSiteEntry(createMinimalItem({
+      SiteUrl: '  https://example.com  ',
+    }));
+    expect(result.siteUrl).toBe('https://example.com');
+    expect(result.hasSiteUrl).toBe(true);
+  });
+});
+
 describe('normalizeProjectSiteEntry — fuzzy field matching', () => {
   it('finds SiteUrl under OData-encoded internal name', () => {
     const result = normalizeProjectSiteEntry({

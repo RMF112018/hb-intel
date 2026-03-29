@@ -19,6 +19,32 @@ function safeString(value: unknown, fallback = ''): string {
 }
 
 /**
+ * Extract a usable URL string from a SharePoint field value.
+ *
+ * SharePoint URL/Hyperlink columns can return:
+ *   - Plain string: "https://..."
+ *   - Hyperlink object: { Url: "https://...", Description: "..." }
+ *   - SP REST expanded: { __metadata: {...}, Url: "...", Description: "..." }
+ *   - null / undefined
+ *
+ * This function handles all cases and returns a trimmed URL or ''.
+ */
+function extractUrl(value: unknown): string {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+  if (value !== null && typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    // SharePoint Hyperlink field: { Url: "...", Description: "..." }
+    if (typeof obj.Url === 'string') return obj.Url.trim();
+    if (typeof obj.url === 'string') return obj.url.trim();
+    // SP REST sometimes nests: { __deferred: { uri: "..." } }
+    if (typeof obj.uri === 'string') return obj.uri.trim();
+  }
+  return '';
+}
+
+/**
  * Find a field value from a raw SP item by trying multiple possible key names.
  * SharePoint internal names can be: exact match, with OData prefix, with
  * _x00XX_ encoding, or with numeric suffix (e.g., SiteUrl0, SiteUrl1).
@@ -88,7 +114,7 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
 
   const projectName = safeString(projectNameRaw) || parsedName || '(Untitled Project)';
   const projectNumber = safeString(projectNumberRaw) || parsedNumber;
-  const siteUrl = safeString(siteUrlRaw);
+  const siteUrl = extractUrl(siteUrlRaw);
 
   return {
     id,
