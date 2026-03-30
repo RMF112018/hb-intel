@@ -40,10 +40,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-3_Capability-Boundary-Matrix.md`](Phase-3_Capability-Boundary-Matrix.md) — Delegated vs app-only classification for all routes, seams renamed, deployment permission requirements
 
-6. `Prompt-05_Backend-Auth-Hardening_CORS-Permissions-and-Tests.md`
+6. `Prompt-05_Backend-Auth-Hardening_CORS-Permissions-and-Tests.md` **[COMPLETE]**
    - Finalize backend auth enforcement
    - Lock down CORS and permission requirements
    - Add auth-focused contract, regression, and release-readiness tests
+   - **Deliverables:**
+     - [`Phase-3_Auth-Hardening-and-Release-Notes.md`](Phase-3_Auth-Hardening-and-Release-Notes.md) — Route auth enforcement summary, CORS posture, permission prerequisites, tests added, deployment dependencies
 
 7. `Prompt-06_Final-Verification_and-Handoff.md`
    - Run the final verification pass

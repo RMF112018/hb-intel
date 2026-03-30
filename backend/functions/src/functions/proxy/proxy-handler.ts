@@ -1,13 +1,13 @@
 /**
  * INTEGRATION PATH: STUB (Phase 1 deliverable)
  *
- * This handler validates auth and builds cache keys but returns hardcoded
- * mock responses ({ _mock: true }). It does NOT make real Graph API calls.
+ * This handler builds cache keys but returns hardcoded mock responses
+ * ({ _mock: true }). It does NOT make real Graph API calls.
  * Real Graph API forwarding via app-only token is a Phase 1 / P1-B1 deliverable.
  *
- * P3-04: Updated to use app-only Managed Identity semantics instead of
- * misleading OBO naming. The user's Bearer token is validated for access
- * control but is NOT forwarded to downstream services.
+ * P3-05: Auth is now enforced by withAuth() at route registration level.
+ * The custom Bearer header check has been removed. All backend-to-service
+ * calls use app-only Managed Identity.
  *
  * Do NOT rely on this handler for production data retrieval.
  */
@@ -29,15 +29,6 @@ export async function handleProxyRequest(
   const method = request.method;
   const graphBase = getEnv('GRAPH_API_BASE_URL', 'https://graph.microsoft.com/v1.0');
   const targetUrl = `${graphBase}/${path}${request.url.includes('?') ? '?' + request.url.split('?')[1] : ''}`;
-
-  // P3-04: Validate Bearer token for access control. The token is checked for
-  // presence but the actual JWT validation happens via withAuth() on the route
-  // registration (if wired). The user token is NOT forwarded to downstream
-  // services — all backend-to-service calls use app-only Managed Identity.
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return { status: 401, jsonBody: { error: 'Missing or invalid authorization header' } };
-  }
 
   try {
     // P3-04: Acquire app-only token via Managed Identity (not OBO).
