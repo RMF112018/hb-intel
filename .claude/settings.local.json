@@ -186,7 +186,12 @@
       "Bash(func --version)",
       "Bash(zip -r /Users/bobbyfetting/hb-intel/backend/functions/functions-artifact.zip . -x \"*.git*\" \"*.DS_Store\")",
       "Bash(while ps:*)",
-      "Bash(az resource:*)"
+      "Bash(az resource:*)",
+      "Bash(Templates\" is a saga step label, not navigation.:*)",
+      "Bash(find /Users/bobbyfetting/hb-intel/backend/functions/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(az rest:*)",
+      "Bash(az storage:*)",
+      "Bash(az ad:*)"
     ]
   },
   "enabledPlugins": {
