@@ -11,10 +11,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - Acceptance criteria
    - Execution sequence
 
-2. `Prompt-01_Repo-Truth-and-Release-Hardening-Baseline.md`
+2. `Prompt-01_Repo-Truth-and-Release-Hardening-Baseline.md` **[COMPLETE]**
    - Establish the exact current release-hardening posture
    - Inventory remaining blockers, existing tests, diagnostics, readiness checks, deployment notes, and handoff assets
    - Produce the canonical release-hardening baseline before closure work starts
+   - **Deliverables:**
+     - [`Phase-5_Release-Hardening-Baseline.md`](Phase-5_Release-Hardening-Baseline.md) — Launch surface (20 backend routes + 6 frontend surfaces), test inventory (1,254 tests across 126 files), 27 phase deliverable docs, 5 launch blockers (A1–A5), 4 significant gaps (B1–B4), 5 cleanup items (C1–C5), 0 unresolved contradictions
 
 3. `Prompt-02_Integration-Regression-and-End-to-End-Coverage.md`
    - Add or tighten the integration, regression, and end-to-end coverage required for production confidence
