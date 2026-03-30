@@ -65,6 +65,8 @@ export default defineConfig({
             'src/utils/*.test.ts',
             'src/state-machine.test.ts',
             'src/idempotency/*.test.ts',
+            'src/test/*.test.ts',
+            'src/functions/health/**/*.test.ts',
           ],
           exclude: [
             'src/functions/provisioningSaga/**/__tests__/smoke.test.ts',
