@@ -190,6 +190,10 @@ Source: `backend/functions/src/config/wave0-env-registry.ts`, `backend/functions
 | B-03 | `useProjectStore` bootstrap mock-project seeding | Bootstrap | **Removed (P1-02)** | Vestigial; no component consumed the seeded projects. `useProjectStore` import, `MOCK_PROJECTS` constant, and seeding calls removed from `bootstrap.ts`. |
 | B-04 | `setActiveWorkspace('estimating')` naming | Bootstrap/Route | **Keep (P1-02)** | `'estimating'` is the canonical workspace ID in `packages/shell/src/module-configs/nav-config.ts`. Renaming would break the shell package contract. Simplified shell ignores workspace identity. |
 | B-05 | `bid-tracking` feature flag in bootstrap | Bootstrap | **Removed (P1-02)** | Flag was set but never consumed by any component. Removed from `setFeatureFlags()` call. |
+| A-11 | `ComplexityProvider` → `GET /api/users/me/preferences` | API | **Gated — deferred (P1-03)** | Called by `@hbc/complexity` (shared package); endpoint not registered in backend; degrades silently to localStorage cache; provides complexity tier UX value |
+| B-06 | Notifications backend routes | Backend | **Out of scope (P1-03)** | 7+ routes exist in backend but never called by this frontend |
+| B-07 | Proxy backend routes | Backend | **Out of scope (P1-03)** | 2 routes exist in backend but never called by this frontend |
+| B-08 | User groups API | Backend | **No API call (P1-03)** | `groupMembers`/`groupLeaders` are data model fields on `IProjectSetupRequest`, not separate endpoint calls |
 
 ## Prompt 02 Decisions (Closed)
 
@@ -197,3 +201,11 @@ All Prompt 01 unresolved items are now closed:
 - **B-03:** Removed — dead code, no consumers.
 - **B-04:** Keep — correct workspace ID, no rename needed.
 - **B-05:** Removed — dead feature flag, out of scope for Project Setup.
+
+## Prompt 03 Decisions (Closed)
+
+Backend scope alignment complete:
+- **A-11:** Gated — `ComplexityProvider` preferences call degrades gracefully; endpoint deferred to later phase.
+- **B-06:** Out of scope — notifications not used by this frontend.
+- **B-07:** Out of scope — proxy not used by this frontend.
+- **B-08:** No API call — user groups are data model fields, not endpoint calls.
