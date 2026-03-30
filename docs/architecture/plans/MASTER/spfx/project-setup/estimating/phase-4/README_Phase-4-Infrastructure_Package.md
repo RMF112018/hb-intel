@@ -40,10 +40,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-4_CORS-Permissions-Connected-Services.md`](Phase-4_CORS-Permissions-Connected-Services.md) — CORS allowlist in host.json, least-privilege permission matrix (MI + app registration + SharePoint admin), connected-service classification (6 retained, 2 optional, 3 unsupported/stub), unresolved tenant dependencies
 
-6. `Prompt-05_Observability-Release-Readiness-and-Operational-Guards.md`
+6. `Prompt-05_Observability-Release-Readiness-and-Operational-Guards.md` **[COMPLETE]**
    - Add monitoring, diagnostics, readiness checks, and deployment safeguards
    - Build operator-facing failure visibility and release gates
    - Add infrastructure-focused regression and readiness checks
+   - **Deliverables:**
+     - [`Phase-4_Operational-Readiness-and-Handoff.md`](Phase-4_Operational-Readiness-and-Handoff.md) — Health endpoint interpretation, pre-deployment checklist, release go/no-go gates, failure triage runbook, telemetry event catalog, recommended alert rules, remaining blind spots
 
 7. `Prompt-06_Final-Verification_and-Handoff.md`
    - Run the final verification pass

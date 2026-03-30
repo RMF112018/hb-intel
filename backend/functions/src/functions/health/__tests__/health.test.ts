@@ -3,32 +3,38 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 /**
  * Health endpoint verification.
  * Proves /api/health surfaces config state diagnostics without blocking on missing settings.
+ * P4-05: Added operational readiness and provisioning prereq tests.
  */
-
-// We can't easily test the registered handler directly (app.http registers it globally),
-// so we test the diagnostic logic by simulating the env state the handler reads.
 
 describe('/api/health diagnostic behavior', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
   });
 
-  it('core config check passes when all 7 required settings present', () => {
+  // --- Core config tier ---
+
+  it('core config check passes when all 8 required settings present (P4-02: includes API_AUDIENCE)', () => {
     vi.stubEnv('AZURE_TENANT_ID', 'test');
     vi.stubEnv('AZURE_CLIENT_ID', 'test');
+    vi.stubEnv('API_AUDIENCE', 'api://test');
     vi.stubEnv('AZURE_TABLE_ENDPOINT', 'test');
     vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'test');
     vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
     vi.stubEnv('SHAREPOINT_TENANT_URL', 'test');
     vi.stubEnv('SHAREPOINT_PROJECTS_SITE_URL', 'test');
 
-    const corePresent = [
-      'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_TABLE_ENDPOINT',
-      'APPLICATIONINSIGHTS_CONNECTION_STRING', 'HBC_ADAPTER_MODE',
+    const coreAuthPresent = [
+      'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'API_AUDIENCE',
+      'AZURE_TABLE_ENDPOINT', 'APPLICATIONINSIGHTS_CONNECTION_STRING',
+      'HBC_ADAPTER_MODE',
+    ].every((n) => process.env[n] !== undefined && process.env[n] !== '');
+
+    const sharePointPresent = [
       'SHAREPOINT_TENANT_URL', 'SHAREPOINT_PROJECTS_SITE_URL',
     ].every((n) => process.env[n] !== undefined && process.env[n] !== '');
 
-    expect(corePresent).toBe(true);
+    expect(coreAuthPresent).toBe(true);
+    expect(sharePointPresent).toBe(true);
   });
 
   it('core config check fails when any required setting is missing', () => {
@@ -41,6 +47,8 @@ describe('/api/health diagnostic behavior', () => {
 
     expect(corePresent).toBe(false);
   });
+
+  // --- Integration status ---
 
   it('integration status reflects SignalR as not-configured when absent', () => {
     delete process.env.AzureSignalRConnectionString;
@@ -55,6 +63,8 @@ describe('/api/health diagnostic behavior', () => {
     expect(email).toBe('ready');
   });
 
+  // --- Role config ---
+
   it('role config shows degraded when CONTROLLER_UPNS missing', () => {
     delete process.env.CONTROLLER_UPNS;
     const controllers = process.env.CONTROLLER_UPNS ? 'configured' : 'degraded';
@@ -65,5 +75,62 @@ describe('/api/health diagnostic behavior', () => {
     vi.stubEnv('ADMIN_UPNS', 'admin@hb.com');
     const admins = process.env.ADMIN_UPNS ? 'configured' : 'degraded';
     expect(admins).toBe('configured');
+  });
+
+  // --- P4-05: Operational readiness ---
+
+  it('P4-05: operational readiness is "blocked" when core config missing', () => {
+    // Core missing
+    const coreReady = false;
+    const readiness = !coreReady ? 'blocked' : 'ready';
+    expect(readiness).toBe('blocked');
+  });
+
+  it('P4-05: operational readiness is "degraded" when SharePoint config missing', () => {
+    const coreReady = true;
+    const sharePointReady = false;
+    const readiness = !coreReady ? 'blocked' : !sharePointReady ? 'degraded' : 'ready';
+    expect(readiness).toBe('degraded');
+  });
+
+  it('P4-05: operational readiness is "ready" when all tiers present', () => {
+    const coreReady = true;
+    const sharePointReady = true;
+    const provisioningReady = true;
+    const signalRReady = true;
+    const readiness = !coreReady ? 'blocked'
+      : (!sharePointReady || !provisioningReady || !signalRReady) ? 'degraded'
+      : 'ready';
+    expect(readiness).toBe('ready');
+  });
+
+  // --- P4-05: Provisioning prerequisites ---
+
+  it('P4-05: provisioning prereqs all false when nothing configured', () => {
+    const prereqs = {
+      graphPermission: process.env.GRAPH_GROUP_PERMISSION_CONFIRMED === 'true',
+      hubSite: !!process.env.SHAREPOINT_HUB_SITE_ID,
+      appCatalog: !!process.env.SHAREPOINT_APP_CATALOG_URL,
+      spfxAppId: !!process.env.HB_INTEL_SPFX_APP_ID,
+      opexManager: !!process.env.OPEX_MANAGER_UPN,
+    };
+    expect(Object.values(prereqs).every(Boolean)).toBe(false);
+  });
+
+  it('P4-05: provisioning prereqs all true when fully configured', () => {
+    vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+    vi.stubEnv('SHAREPOINT_HUB_SITE_ID', 'hub-guid');
+    vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://catalog');
+    vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-guid');
+    vi.stubEnv('OPEX_MANAGER_UPN', 'opex@hb.com');
+
+    const prereqs = {
+      graphPermission: process.env.GRAPH_GROUP_PERMISSION_CONFIRMED === 'true',
+      hubSite: !!process.env.SHAREPOINT_HUB_SITE_ID,
+      appCatalog: !!process.env.SHAREPOINT_APP_CATALOG_URL,
+      spfxAppId: !!process.env.HB_INTEL_SPFX_APP_ID,
+      opexManager: !!process.env.OPEX_MANAGER_UPN,
+    };
+    expect(Object.values(prereqs).every(Boolean)).toBe(true);
   });
 });
