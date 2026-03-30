@@ -3,6 +3,7 @@ import type {
   IProvisioningStatus,
   ISagaStepResult,
 } from '@hbc/models';
+import { normalizeProjectSetupRequestFields } from '@hbc/features-estimating';
 import type { IProjectSetupClient } from './types.js';
 
 export const UI_REVIEW_REQUESTS_STORAGE_KEY =
@@ -55,12 +56,18 @@ function createBaseRequest(
   submittedBy: string,
   overrides: Partial<IProjectSetupRequest>,
 ): IProjectSetupRequest {
-  return {
+  return normalizeProjectSetupRequestFields({
     requestId: 'req-ui-review-base',
     projectId: 'proj-ui-review-base',
     projectName: 'HB Intel UI Review Project',
-    projectLocation: 'Charlotte, NC',
-    projectType: 'GC',
+    projectStreetAddress: '123 Tryon Street',
+    projectCity: 'Charlotte',
+    projectCounty: 'Mecklenburg',
+    projectState: 'NC',
+    projectZip: '28202',
+    projectLocation: '123 Tryon Street, Charlotte, Mecklenburg, NC, 28202',
+    officeDivision: 'HB HQ General Commercial (01-43)',
+    projectType: 'Corporate headquarters',
     projectStage: 'Pursuit',
     submittedBy,
     submittedAt: nowIso(),
@@ -75,10 +82,11 @@ function createBaseRequest(
     estimatedValue: 1250000,
     clientName: 'City of Charlotte',
     startDate: offsetIso(14),
-    contractType: 'CMAR',
+    procoreProject: 'Yes',
+    contractType: 'Construction Management at Risk (CMAR) Contract',
     year: new Date().getFullYear(),
     ...overrides,
-  };
+  }) as IProjectSetupRequest;
 }
 
 function createSeededState(submittedBy: string): IUiReviewState {
@@ -98,7 +106,7 @@ function createSeededState(submittedBy: string): IUiReviewState {
     state: 'NeedsClarification',
     clarificationNote: 'Clarify the project lead and target start date before review can continue.',
     clarificationRequestedAt: offsetIso(-2),
-    projectStage: 'Active',
+    projectStage: 'Construction',
   });
 
   const provisioning = createBaseRequest(submittedBy, {
@@ -108,7 +116,7 @@ function createSeededState(submittedBy: string): IUiReviewState {
     submittedAt: offsetIso(-3),
     state: 'Provisioning',
     projectNumber: '26-014-02',
-    projectStage: 'Active',
+    projectStage: 'Preconstruction',
   });
 
   const failed = createBaseRequest(submittedBy, {
@@ -120,7 +128,7 @@ function createSeededState(submittedBy: string): IUiReviewState {
     projectNumber: '26-011-07',
     retryCount: 1,
     requesterRetryUsed: true,
-    projectStage: 'Active',
+    projectStage: 'Construction',
   });
 
   const completed = createBaseRequest(submittedBy, {
@@ -132,7 +140,7 @@ function createSeededState(submittedBy: string): IUiReviewState {
     projectNumber: '26-006-03',
     completedAt: offsetIso(-1),
     siteUrl: 'https://hbintel.sharepoint.com/sites/GreensboroWarehouseExpansion',
-    projectStage: 'Active',
+    projectStage: 'Closeout',
   });
 
   const statuses: Record<string, IProvisioningStatus> = {
@@ -284,7 +292,9 @@ function readState(submittedBy: string): IUiReviewState {
       throw new Error('Invalid ui-review storage shape.');
     }
     return {
-      requests: requests as IProjectSetupRequest[],
+      requests: (requests as IProjectSetupRequest[]).map((request) =>
+        normalizeProjectSetupRequestFields(request),
+      ),
       statuses: statuses as Record<string, IProvisioningStatus>,
     };
   } catch {
@@ -331,9 +341,15 @@ export function createUiReviewProjectSetupClient(submittedBy: string): IProjectS
         requestId,
         projectId,
         projectName: data.projectName ?? 'Untitled UI Review Project',
+        projectStreetAddress: data.projectStreetAddress,
+        projectCity: data.projectCity,
+        projectCounty: data.projectCounty,
+        projectState: data.projectState,
+        projectZip: data.projectZip,
         projectLocation: data.projectLocation ?? '',
-        projectType: data.projectType ?? 'GC',
-        projectStage: (data.projectStage as IProjectSetupRequest['projectStage']) ?? 'Pursuit',
+        officeDivision: data.officeDivision,
+        projectType: data.projectType ?? '',
+        projectStage: data.projectStage ?? 'Lead',
         submittedBy,
         submittedAt,
         state: 'Submitted',
@@ -344,6 +360,7 @@ export function createUiReviewProjectSetupClient(submittedBy: string): IProjectS
         estimatedValue: data.estimatedValue,
         clientName: data.clientName,
         startDate: data.startDate,
+        procoreProject: data.procoreProject,
         contractType: data.contractType,
         projectLeadId: data.projectLeadId,
         viewerUPNs: data.viewerUPNs,
@@ -351,12 +368,13 @@ export function createUiReviewProjectSetupClient(submittedBy: string): IProjectS
         retryCount: 0,
         year: data.year ?? new Date(submittedAt).getFullYear(),
       };
+      const normalizedRequest = normalizeProjectSetupRequestFields(request);
 
-      state.requests = [request, ...state.requests];
+      state.requests = [normalizedRequest, ...state.requests];
       state.statuses[projectId] = {
         projectId,
         projectNumber: '',
-        projectName: request.projectName,
+        projectName: normalizedRequest.projectName,
         correlationId: createRequestId('corr-ui-review'),
         overallStatus: 'NotStarted',
         currentStep: 0,
@@ -371,15 +389,15 @@ export function createUiReviewProjectSetupClient(submittedBy: string): IProjectS
         ],
         triggeredBy: '',
         submittedBy,
-        groupMembers: request.groupMembers,
+        groupMembers: normalizedRequest.groupMembers,
         startedAt: submittedAt,
         step5DeferredToTimer: false,
         step5TimerRetryCount: 0,
         retryCount: 0,
-        department: request.department,
+        department: normalizedRequest.department,
       };
       writeState(state);
-      return clone(request);
+      return clone(normalizedRequest);
     },
 
     async getProvisioningStatus(projectId) {

@@ -8,13 +8,20 @@ import {
 describe('PROJECT_SETUP_FIELD_MAP', () => {
   it('maps all Step 1 fields to project-info', () => {
     expect(PROJECT_SETUP_FIELD_MAP['projectName']).toBe('project-info');
+    expect(PROJECT_SETUP_FIELD_MAP['projectStreetAddress']).toBe('project-info');
+    expect(PROJECT_SETUP_FIELD_MAP['projectCity']).toBe('project-info');
+    expect(PROJECT_SETUP_FIELD_MAP['projectCounty']).toBe('project-info');
+    expect(PROJECT_SETUP_FIELD_MAP['projectState']).toBe('project-info');
+    expect(PROJECT_SETUP_FIELD_MAP['projectZip']).toBe('project-info');
     expect(PROJECT_SETUP_FIELD_MAP['projectLocation']).toBe('project-info');
     expect(PROJECT_SETUP_FIELD_MAP['estimatedValue']).toBe('project-info');
     expect(PROJECT_SETUP_FIELD_MAP['clientName']).toBe('project-info');
     expect(PROJECT_SETUP_FIELD_MAP['startDate']).toBe('project-info');
+    expect(PROJECT_SETUP_FIELD_MAP['procoreProject']).toBe('project-info');
   });
 
   it('maps all Step 2 fields to department', () => {
+    expect(PROJECT_SETUP_FIELD_MAP['officeDivision']).toBe('department');
     expect(PROJECT_SETUP_FIELD_MAP['department']).toBe('department');
     expect(PROJECT_SETUP_FIELD_MAP['projectType']).toBe('department');
     expect(PROJECT_SETUP_FIELD_MAP['projectStage']).toBe('department');
@@ -31,8 +38,8 @@ describe('PROJECT_SETUP_FIELD_MAP', () => {
     expect(PROJECT_SETUP_FIELD_MAP['addOns']).toBe('template-addons');
   });
 
-  it('covers exactly 13 fields', () => {
-    expect(Object.keys(PROJECT_SETUP_FIELD_MAP)).toHaveLength(13);
+  it('covers exactly 20 fields', () => {
+    expect(Object.keys(PROJECT_SETUP_FIELD_MAP)).toHaveLength(20);
   });
 });
 
@@ -46,7 +53,7 @@ describe('resolveStepsForClarification', () => {
   });
 
   it('deduplicates fields in the same step', () => {
-    expect(resolveStepsForClarification(['projectName', 'projectLocation'])).toEqual([
+    expect(resolveStepsForClarification(['projectName', 'projectCity'])).toEqual([
       'project-info',
     ]);
   });

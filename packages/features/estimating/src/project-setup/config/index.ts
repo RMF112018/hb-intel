@@ -15,6 +15,22 @@ export {
 } from './projectSetupFieldMap.js';
 
 export {
+  buildProjectLocationSummary,
+  normalizeProjectSetupRequestFields,
+} from './projectLocationFields.js';
+
+export {
+  OFFICE_DIVISION_OPTIONS,
+  PROJECT_STAGE_OPTIONS,
+  CONTRACT_TYPE_OPTIONS,
+  PROJECT_TYPE_OPTIONS_BY_DEPARTMENT,
+  getProjectTypeOptionsForDepartment,
+  isSelectableProjectType,
+  isValidProjectTypeForDepartment,
+  isValidProjectStage,
+} from './departmentTypeOptions.js';
+
+export {
   ADD_ON_DEFINITIONS,
   getAddOnsForDepartment,
 } from './addOnDefinitions.js';

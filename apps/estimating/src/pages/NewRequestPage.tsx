@@ -9,6 +9,7 @@ import type {
 import {
   PROJECT_SETUP_WIZARD_CONFIG,
   buildClarificationReturnState,
+  normalizeProjectSetupRequestFields,
   useProjectSetupDraft,
 } from '@hbc/features-estimating';
 import type { IProjectSetupRequest } from '@hbc/models';
@@ -26,9 +27,17 @@ import { TemplateAddOnsStepBody } from '../components/project-setup/TemplateAddO
 
 const EMPTY_DEFAULTS: Partial<IProjectSetupRequest> = {
   projectName: '',
+  clientName: '',
+  projectStreetAddress: '',
+  projectCity: '',
+  projectCounty: '',
+  projectState: '',
+  projectZip: '',
   projectLocation: '',
-  projectType: 'GC',
-  projectStage: 'Pursuit',
+  officeDivision: undefined,
+  projectType: undefined,
+  projectStage: 'Lead',
+  procoreProject: undefined,
   groupMembers: [],
 };
 
@@ -52,9 +61,9 @@ export function NewRequestPage(): ReactNode {
 
   const [request, setRequest] = useState<Partial<IProjectSetupRequest>>(() => {
     if (resumeContext.decision === 'auto-continue' && draft && 'fields' in draft) {
-      return (draft as ISetupFormDraft).fields;
+      return normalizeProjectSetupRequestFields((draft as ISetupFormDraft).fields);
     }
-    return { ...EMPTY_DEFAULTS };
+    return normalizeProjectSetupRequestFields({ ...EMPTY_DEFAULTS });
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -70,7 +79,7 @@ export function NewRequestPage(): ReactNode {
       if (!mounted) return;
       const existing = listed.find((r) => r.requestId === requestId);
       if (existing) {
-        setRequest(existing);
+        setRequest(normalizeProjectSetupRequestFields(existing));
         // Resolve flagged steps (scaffolded — gracefully handles empty clarificationItems)
         buildClarificationReturnState(existing.clarificationItems ?? []);
       }
@@ -86,7 +95,7 @@ export function NewRequestPage(): ReactNode {
   const handleChange = useCallback(
     (updates: Partial<IProjectSetupRequest>) => {
       setRequest((prev) => {
-        const next = { ...prev, ...updates };
+        const next = normalizeProjectSetupRequestFields({ ...prev, ...updates });
         saveDraft({
           fields: next,
           stepStatuses: {},
@@ -100,13 +109,13 @@ export function NewRequestPage(): ReactNode {
 
   const handleResume = useCallback(() => {
     if (draft && 'fields' in draft) {
-      setRequest((draft as ISetupFormDraft).fields);
+      setRequest(normalizeProjectSetupRequestFields((draft as ISetupFormDraft).fields));
     }
   }, [draft]);
 
   const handleStartNew = useCallback(() => {
     clearDraft();
-    setRequest({ ...EMPTY_DEFAULTS });
+    setRequest(normalizeProjectSetupRequestFields({ ...EMPTY_DEFAULTS }));
   }, [clearDraft]);
 
   const handleSubmit = useCallback(async () => {
@@ -114,25 +123,33 @@ export function NewRequestPage(): ReactNode {
     setError(null);
 
     try {
+      const normalizedRequest = normalizeProjectSetupRequestFields(request);
       const opexManagerUpn = (import.meta.env.VITE_OPEX_MANAGER_UPN as string) ?? '';
       const members = Array.from(
-        new Set([...(request.groupMembers ?? []), opexManagerUpn].filter(Boolean)),
+        new Set([...(normalizedRequest.groupMembers ?? []), opexManagerUpn].filter(Boolean)),
       );
 
       const result = await client.submitRequest({
-        projectName: request.projectName ?? '',
-        projectLocation: request.projectLocation ?? '',
-        projectType: request.projectType ?? 'GC',
-        projectStage: (request.projectStage as 'Pursuit' | 'Active') ?? 'Pursuit',
+        projectName: normalizedRequest.projectName ?? '',
+        projectStreetAddress: normalizedRequest.projectStreetAddress,
+        projectCity: normalizedRequest.projectCity,
+        projectCounty: normalizedRequest.projectCounty,
+        projectState: normalizedRequest.projectState,
+        projectZip: normalizedRequest.projectZip,
+        projectLocation: normalizedRequest.projectLocation ?? '',
+        officeDivision: normalizedRequest.officeDivision,
+        projectType: normalizedRequest.projectType ?? '',
+        projectStage: normalizedRequest.projectStage ?? 'Lead',
         groupMembers: members,
-        department: request.department,
-        projectLeadId: request.projectLeadId,
-        viewerUPNs: request.viewerUPNs,
-        addOns: request.addOns,
-        estimatedValue: request.estimatedValue,
-        clientName: request.clientName,
-        startDate: request.startDate,
-        contractType: request.contractType,
+        department: normalizedRequest.department,
+        projectLeadId: normalizedRequest.projectLeadId,
+        viewerUPNs: normalizedRequest.viewerUPNs,
+        addOns: normalizedRequest.addOns,
+        estimatedValue: normalizedRequest.estimatedValue,
+        clientName: normalizedRequest.clientName,
+        startDate: normalizedRequest.startDate,
+        procoreProject: normalizedRequest.procoreProject,
+        contractType: normalizedRequest.contractType,
       });
 
       clearDraft();

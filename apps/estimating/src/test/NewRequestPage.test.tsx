@@ -175,6 +175,37 @@ describe('NewRequestPage', () => {
     expect(screen.getByTestId('resume-banner')).toBeInTheDocument();
   });
 
+  it('normalizes legacy draft projectLocation into structured fields on submit', async () => {
+    mockDraftReturn = {
+      ...mockDraftReturn,
+      draft: {
+        fields: {
+          projectName: 'Legacy Draft Project',
+          projectLocation: 'Legacy Location',
+          department: 'commercial',
+          projectType: 'GC',
+          projectLeadId: 'lead@hb.com',
+        },
+        stepStatuses: {},
+        lastSavedAt: '2026-01-10T00:00:00Z',
+      },
+      resumeContext: { decision: 'auto-continue', draftTimestamp: '2026-01-10T00:00:00Z' } as any,
+    };
+
+    renderPage();
+    fireEvent.click(screen.getByTestId('wizard-submit'));
+
+    await waitFor(() => {
+      expect(mockClient.submitRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          projectStreetAddress: 'Legacy Location',
+          projectLocation: 'Legacy Location',
+          projectType: 'GC',
+        }),
+      );
+    });
+  });
+
   // G4-T01-005
   it('wizard component renders without error', () => {
     renderPage();

@@ -15,8 +15,14 @@ function validRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupR
     requestId: 'req-1',
     projectId: 'proj-1',
     projectName: 'Test Project',
-    projectLocation: 'New York, NY',
-    projectType: 'Ground-Up',
+    projectStreetAddress: '100 Main Street',
+    projectCity: 'New York',
+    projectCounty: 'New York',
+    projectState: 'NY',
+    projectZip: '10001',
+    projectLocation: '100 Main Street, New York, New York, NY, 10001',
+    officeDivision: 'HB HQ General Commercial (01-43)',
+    projectType: 'Corporate headquarters',
     projectStage: 'Pursuit',
     submittedBy: 'user@example.com',
     submittedAt: '2026-03-14T00:00:00.000Z',
@@ -24,6 +30,7 @@ function validRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupR
     groupMembers: ['member@example.com'],
     department: 'commercial',
     projectLeadId: 'lead@example.com',
+    procoreProject: 'Yes',
     ...overrides,
   };
 }
@@ -77,10 +84,38 @@ describe('STEP_PROJECT_INFO validation', () => {
     );
   });
 
-  it('fails when projectLocation is empty', () => {
-    expect(STEP_PROJECT_INFO.validate!(validRequest({ projectLocation: '' }))).toBe(
-      'Project location is required.',
+  it('fails when street address is empty', () => {
+    expect(STEP_PROJECT_INFO.validate!(validRequest({ projectStreetAddress: '' }))).toBe(
+      'Street address is required.',
     );
+  });
+
+  it('fails when city is empty', () => {
+    expect(STEP_PROJECT_INFO.validate!(validRequest({ projectCity: '' }))).toBe(
+      'City is required.',
+    );
+  });
+
+  it('fails when county is empty', () => {
+    expect(STEP_PROJECT_INFO.validate!(validRequest({ projectCounty: '' }))).toBe(
+      'County is required.',
+    );
+  });
+
+  it('fails when state is empty', () => {
+    expect(STEP_PROJECT_INFO.validate!(validRequest({ projectState: '' }))).toBe(
+      'State is required.',
+    );
+  });
+
+  it('fails when zip is empty', () => {
+    expect(STEP_PROJECT_INFO.validate!(validRequest({ projectZip: '' }))).toBe(
+      'Zip is required.',
+    );
+  });
+
+  it('passes when procoreProject is unset', () => {
+    expect(STEP_PROJECT_INFO.validate!(validRequest({ procoreProject: undefined }))).toBeNull();
   });
 
   it('fails when estimatedValue is negative', () => {
@@ -116,13 +151,31 @@ describe('STEP_DEPARTMENT validation', () => {
   });
 
   it('passes for luxury-residential department', () => {
-    expect(STEP_DEPARTMENT.validate!(validRequest({ department: 'luxury-residential' }))).toBeNull();
+    expect(
+      STEP_DEPARTMENT.validate!(
+        validRequest({
+          department: 'luxury-residential',
+          projectType: 'Custom-built luxury residences',
+        }),
+      ),
+    ).toBeNull();
   });
 
   it('fails when projectType is empty', () => {
     expect(STEP_DEPARTMENT.validate!(validRequest({ projectType: '' }))).toBe(
       'Project type is required.',
     );
+  });
+
+  it('fails when projectType does not belong to the selected department', () => {
+    expect(
+      STEP_DEPARTMENT.validate!(
+        validRequest({
+          department: 'luxury-residential',
+          projectType: 'Corporate headquarters',
+        }),
+      ),
+    ).toBe('Select a valid project type for the selected department.');
   });
 });
 
@@ -161,8 +214,12 @@ describe('STEP_REVIEW validation (cross-step consistency gate)', () => {
     expect(STEP_REVIEW.validate!(validRequest({ projectName: '' }))).toContain('Step 1');
   });
 
-  it('catches missing projectLocation', () => {
-    expect(STEP_REVIEW.validate!(validRequest({ projectLocation: '' }))).toContain('Step 1');
+  it('catches missing street address', () => {
+    expect(STEP_REVIEW.validate!(validRequest({ projectStreetAddress: '' }))).toContain('Step 1');
+  });
+
+  it('catches missing city', () => {
+    expect(STEP_REVIEW.validate!(validRequest({ projectCity: '' }))).toContain('Step 1');
   });
 
   it('catches missing department', () => {
@@ -171,6 +228,17 @@ describe('STEP_REVIEW validation (cross-step consistency gate)', () => {
 
   it('catches missing projectType', () => {
     expect(STEP_REVIEW.validate!(validRequest({ projectType: '' }))).toContain('Step 2');
+  });
+
+  it('catches invalid projectType for the selected department', () => {
+    expect(
+      STEP_REVIEW.validate!(
+        validRequest({
+          department: 'luxury-residential',
+          projectType: 'Corporate headquarters',
+        }),
+      ),
+    ).toBe('Select a valid project type for the selected department (return to Step 2).');
   });
 
   it('catches missing projectLeadId', () => {
@@ -182,5 +250,12 @@ describe('STEP_REVIEW validation (cross-step consistency gate)', () => {
       validRequest({ projectName: '', department: undefined }),
     );
     expect(result).toBe('Project name is required (return to Step 1).');
+  });
+
+  it('reports structured location fields before later steps', () => {
+    const result = STEP_REVIEW.validate!(
+      validRequest({ projectCounty: '', department: undefined }),
+    );
+    expect(result).toBe('County is required (return to Step 1).');
   });
 });

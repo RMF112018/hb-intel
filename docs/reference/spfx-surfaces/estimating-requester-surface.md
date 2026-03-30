@@ -91,8 +91,8 @@ Consumed from `PROJECT_SETUP_WIZARD_CONFIG` in `@hbc/features-estimating`.
 
 | Step | stepId | Required | Fields |
 |---|---|---|---|
-| 1 | `project-info` | Yes | projectName, projectLocation, estimatedValue, clientName, startDate |
-| 2 | `department` | Yes | department, projectType, projectStage, contractType |
+| 1 | `project-info` | Yes | projectName, clientName, projectStreetAddress, projectCity, projectCounty, projectState, projectZip, estimatedValue, startDate, procoreProject |
+| 2 | `department` | Yes | projectStage, officeDivision, department, projectType, contractType |
 | 3 | `project-team` | Yes | projectLeadId, groupMembers, viewerUPNs |
 | 4 | `template-addons` | No | addOns (filtered by department) |
 | 5 | `review-submit` | Yes | Cross-step validation + submission |
@@ -101,6 +101,8 @@ Consumed from `PROJECT_SETUP_WIZARD_CONFIG` in `@hbc/features-estimating`.
 - **Allow reopen:** true (required for department→step-4 dependency)
 - **Draft key:** `project-setup-form-draft`
 - **Navigation rule:** the current step and previously reached steps are clickable; future steps remain disabled until they become current through normal progression
+- **Structured location rule:** the wizard stores individual address fields and derives the legacy `projectLocation` compatibility string for the current provisioning/live-client path
+- **Department & Type rule:** `department` remains the canonical two-value downstream field (`commercial` / `luxury-residential`), while `officeDivision` is a separate business selection and Project Type uses a searchable combobox with department-specific selectable values plus non-selectable category headers
 
 ## Draft Persistence
 

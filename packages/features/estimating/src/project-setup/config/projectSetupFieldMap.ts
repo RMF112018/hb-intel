@@ -12,12 +12,19 @@ import type { ProjectSetupStepId } from '../types/index.js';
 export const PROJECT_SETUP_FIELD_MAP: Readonly<Record<string, ProjectSetupStepId>> = {
   // Step 1 — Project Information
   projectName: 'project-info',
+  projectStreetAddress: 'project-info',
+  projectCity: 'project-info',
+  projectCounty: 'project-info',
+  projectState: 'project-info',
+  projectZip: 'project-info',
   projectLocation: 'project-info',
   estimatedValue: 'project-info',
   clientName: 'project-info',
   startDate: 'project-info',
+  procoreProject: 'project-info',
 
   // Step 2 — Department & Type
+  officeDivision: 'department',
   department: 'department',
   projectType: 'department',
   projectStage: 'department',
@@ -37,8 +44,7 @@ export const PROJECT_SETUP_FIELD_MAP: Readonly<Record<string, ProjectSetupStepId
  * returns the unique set of step IDs that contain those fields,
  * in wizard sequential order.
  *
- * Unknown field IDs are silently ignored — the consuming surface
- * should validate field IDs against the map before calling this.
+ * Unknown field IDs are silently ignored.
  */
 export function resolveStepsForClarification(
   fieldIds: readonly string[],

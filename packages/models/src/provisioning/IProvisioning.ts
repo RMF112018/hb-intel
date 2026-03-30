@@ -120,9 +120,25 @@ export interface IProjectSetupRequest {
   requestId: string;
   projectId: string;
   projectName: string;
+  /** W0-G4-T09: Step 1 — street address collected in the structured location group. */
+  projectStreetAddress?: string;
+  /** W0-G4-T09: Step 1 — city collected in the structured location group. */
+  projectCity?: string;
+  /** W0-G4-T09: Step 1 — county collected in the structured location group. */
+  projectCounty?: string;
+  /** W0-G4-T09: Step 1 — state collected in the structured location group. */
+  projectState?: string;
+  /** W0-G4-T09: Step 1 — zip/postal code collected in the structured location group. */
+  projectZip?: string;
+  /**
+   * W0-G4-T09: Legacy compatibility location summary used by the current live
+   * provisioning path. Derived from the structured location fields when present.
+   */
   projectLocation: string;
+  /** W0-G4-T10: Step 2 — office and division assignment label (optional). */
+  officeDivision?: string;
   projectType: string;
-  projectStage: 'Pursuit' | 'Active';
+  projectStage: 'Lead' | 'Pursuit' | 'Preconstruction' | 'Construction' | 'Closeout' | 'Warranty';
   submittedBy: string;
   submittedAt: string;
   state: ProjectSetupRequestState;
@@ -141,6 +157,8 @@ export interface IProjectSetupRequest {
   clientName?: string;
   /** W0-G3-T01: Step 1 — anticipated start date, ISO 8601 (optional). */
   startDate?: string;
+  /** W0-G4-T09: Step 1 — whether the project already exists in Procore. */
+  procoreProject?: 'Yes' | 'No';
   /** W0-G3-T01: Step 2 — contract type classification (optional). */
   contractType?: string;
   /** W0-G3-T01: Step 3 — UPN of the project lead (PM/Superintendent). Required for submission. */

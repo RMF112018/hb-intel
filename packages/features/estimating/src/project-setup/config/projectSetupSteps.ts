@@ -2,16 +2,17 @@
  * W0-G3-T01: Step definitions for the project setup wizard.
  *
  * Each step declares validation rules that the wizard enforces as hard gates
- * on Next/Complete. The spec references `location` but the model field is
- * `projectLocation` — validation uses the model field name.
+ * on Next/Complete.
  */
 import type { IStep } from '@hbc/step-wizard';
 import type { IProjectSetupRequest } from '@hbc/models';
+import { isValidProjectTypeForDepartment } from './departmentTypeOptions.js';
 
 /**
  * Step 1 — Project Information.
- * Fields: projectName (required), projectLocation (required),
- * estimatedValue (optional), clientName (optional), startDate (optional).
+ * Fields: projectName (required), clientName (optional), structured location
+ * fields (all required), estimatedValue (optional), startDate (optional),
+ * procoreProject (optional).
  */
 export const STEP_PROJECT_INFO: IStep<IProjectSetupRequest> = {
   stepId: 'project-info',
@@ -20,7 +21,11 @@ export const STEP_PROJECT_INFO: IStep<IProjectSetupRequest> = {
   order: 1,
   validate: (request: IProjectSetupRequest): string | null => {
     if (!request.projectName?.trim()) return 'Project name is required.';
-    if (!request.projectLocation?.trim()) return 'Project location is required.';
+    if (!request.projectStreetAddress?.trim()) return 'Street address is required.';
+    if (!request.projectCity?.trim()) return 'City is required.';
+    if (!request.projectCounty?.trim()) return 'County is required.';
+    if (!request.projectState?.trim()) return 'State is required.';
+    if (!request.projectZip?.trim()) return 'Zip is required.';
     if (request.estimatedValue !== undefined && request.estimatedValue < 0)
       return 'Estimated value must be a positive number.';
     return null;
@@ -43,6 +48,8 @@ export const STEP_DEPARTMENT: IStep<IProjectSetupRequest> = {
     if (!validDepartments.includes(request.department))
       return 'Select a valid department.';
     if (!request.projectType) return 'Project type is required.';
+    if (!isValidProjectTypeForDepartment(request.department, request.projectType))
+      return 'Select a valid project type for the selected department.';
     return null;
   },
 };
@@ -87,9 +94,16 @@ export const STEP_REVIEW: IStep<IProjectSetupRequest> = {
   order: 5,
   validate: (request: IProjectSetupRequest): string | null => {
     if (!request.projectName?.trim()) return 'Project name is required (return to Step 1).';
-    if (!request.projectLocation?.trim()) return 'Project location is required (return to Step 1).';
+    if (!request.projectStreetAddress?.trim())
+      return 'Street address is required (return to Step 1).';
+    if (!request.projectCity?.trim()) return 'City is required (return to Step 1).';
+    if (!request.projectCounty?.trim()) return 'County is required (return to Step 1).';
+    if (!request.projectState?.trim()) return 'State is required (return to Step 1).';
+    if (!request.projectZip?.trim()) return 'Zip is required (return to Step 1).';
     if (!request.department) return 'Department is required (return to Step 2).';
     if (!request.projectType) return 'Project type is required (return to Step 2).';
+    if (!isValidProjectTypeForDepartment(request.department, request.projectType))
+      return 'Select a valid project type for the selected department (return to Step 2).';
     if (!request.projectLeadId) return 'Project lead is required (return to Step 3).';
     return null;
   },

@@ -3,6 +3,10 @@ import { DEPARTMENT_DISPLAY_LABELS } from '@hbc/provisioning';
 import { HbcBanner, HbcButton, HbcCard, HbcFormSection, HbcTypography } from '@hbc/ui-kit';
 import type { StepBodyProps } from './StepBodyProps.js';
 
+function displayValue(value?: string): string {
+  return value?.trim() ? value : '—';
+}
+
 export interface ReviewStepBodyProps extends StepBodyProps {
   onSubmit: () => void;
   submitting: boolean;
@@ -22,23 +26,30 @@ export function ReviewStepBody({ request, mode, onSubmit, submitting }: ReviewSt
       <HbcCard>
         <HbcTypography intent="heading3">Project Information</HbcTypography>
         <p><strong>Name:</strong> {request.projectName || '—'}</p>
-        <p><strong>Location:</strong> {request.projectLocation || '—'}</p>
+        <p><strong>Client:</strong> {request.clientName || '—'}</p>
+        <p><strong>Street Address:</strong> {displayValue(request.projectStreetAddress)}</p>
+        <p><strong>City:</strong> {displayValue(request.projectCity)}</p>
+        <p><strong>County:</strong> {displayValue(request.projectCounty)}</p>
+        <p><strong>State:</strong> {displayValue(request.projectState)}</p>
+        <p><strong>Zip:</strong> {displayValue(request.projectZip)}</p>
         {request.estimatedValue != null && (
           <p><strong>Estimated Value:</strong> ${request.estimatedValue.toLocaleString()}</p>
         )}
-        {request.clientName && <p><strong>Client:</strong> {request.clientName}</p>}
-        {request.startDate && <p><strong>Start Date:</strong> {request.startDate}</p>}
+        {request.estimatedValue == null && <p><strong>Estimated Value:</strong> —</p>}
+        <p><strong>Expected Project Start Date:</strong> {displayValue(request.startDate)}</p>
+        <p><strong>Procore Project:</strong> {displayValue(request.procoreProject)}</p>
       </HbcCard>
 
       <HbcCard>
-        <HbcTypography intent="heading3">Department & Classification</HbcTypography>
+        <HbcTypography intent="heading3">Department & Type</HbcTypography>
+        <p><strong>Project Stage:</strong> {request.projectStage || '—'}</p>
+        <p><strong>Office & Division:</strong> {request.officeDivision || '—'}</p>
         <p>
           <strong>Department:</strong>{' '}
           {request.department ? (DEPARTMENT_DISPLAY_LABELS[request.department] ?? request.department) : '—'}
         </p>
         <p><strong>Project Type:</strong> {request.projectType || '—'}</p>
-        <p><strong>Project Stage:</strong> {request.projectStage || '—'}</p>
-        {request.contractType && <p><strong>Contract Type:</strong> {request.contractType}</p>}
+        <p><strong>Contract Type:</strong> {request.contractType || '—'}</p>
       </HbcCard>
 
       <HbcCard>
