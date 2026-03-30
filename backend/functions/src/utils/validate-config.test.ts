@@ -113,12 +113,7 @@ describe('validateRequiredConfig', () => {
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 
-  it('does NOT require AZURE_CLIENT_SECRET in managed-identity mode', () => {
-    // AZURE_CLIENT_SECRET is requiredInProd: false — managed identity path
-    // All other required vars are set in beforeEach
-    delete process.env.AZURE_CLIENT_SECRET;
-    expect(() => validateRequiredConfig()).not.toThrow();
-  });
+  // P4-03: AZURE_CLIENT_SECRET removed from registry — pure MI deployment.
 
   it('does NOT require deferred provisioning/notification/role settings for Project Setup boot', () => {
     // All of these are requiredInProd: false — deferred beyond Project Setup lifecycle

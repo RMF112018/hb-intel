@@ -96,15 +96,10 @@ describe('Boot behavior — Project Setup-only deployment posture', () => {
   });
 
   // === C. Auth mode behavior ===
+  // P4-03: AZURE_CLIENT_SECRET tests removed — entry no longer in registry (pure MI).
 
-  it('C1: managed-identity mode does NOT require AZURE_CLIENT_SECRET', () => {
-    delete process.env.AZURE_CLIENT_SECRET;
-    expect(() => validateRequiredConfig()).not.toThrow();
-  });
-
-  it('C2: missing AZURE_CLIENT_SECRET does not crash even if previously set', () => {
-    vi.stubEnv('AZURE_CLIENT_SECRET', 'old-secret');
-    delete process.env.AZURE_CLIENT_SECRET;
+  it('C1: managed-identity mode requires no app-reg secret', () => {
+    // With pure MI, only DefaultAzureCredential is used. No secret needed.
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 

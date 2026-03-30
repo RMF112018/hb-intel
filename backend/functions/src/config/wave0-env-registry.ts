@@ -54,16 +54,12 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'AZURE_CLIENT_ID',
     bucket: 'infrastructure',
-    description: 'Managed identity client ID (read by DefaultAzureCredential for outbound Azure resource auth). Also used as inbound API audience fallback when API_AUDIENCE is not set.',
+    description: 'Managed identity client ID (read by DefaultAzureCredential for outbound Azure resource auth). P4-03: API_AUDIENCE is now required separately; this setting is purely for MI outbound auth.',
     requiredInProd: true,
     configTier: 'core',
   },
-  {
-    name: 'AZURE_CLIENT_SECRET',
-    bucket: 'infrastructure',
-    description: 'App registration client secret (Key Vault in prod). Not required when using managed identity with DefaultAzureCredential.',
-    requiredInProd: false,
-  },
+  // P4-03: AZURE_CLIENT_SECRET removed — never consumed by any service.
+  // All Azure resource auth uses DefaultAzureCredential (Managed Identity).
   {
     name: 'AZURE_TABLE_ENDPOINT',
     bucket: 'infrastructure',
@@ -107,7 +103,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'EMAIL_DELIVERY_API_KEY',
     bucket: 'infrastructure',
-    description: 'SendGrid API key for transactional email (Key Vault in prod). Deferred: only needed for email notifications.',
+    description: 'P4-03 STUB: SendGrid API key. Email delivery is a Phase 1 stub (logs only, never sends). Not consumed by any service. Retained for future integration.',
     requiredInProd: false,
   },
   {
@@ -140,7 +136,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'EMAIL_FROM_ADDRESS',
     bucket: 'infrastructure',
-    description: 'Sender address for transactional emails. Deferred: only needed for email notifications, not for Project Setup request lifecycle.',
+    description: 'P4-03 STUB: Sender address for transactional emails. Email delivery is a Phase 1 stub. Not consumed by any service.',
     requiredInProd: false,
   },
 

@@ -25,8 +25,7 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
 
   it('deferred/optional entries have requiredInProd: false', () => {
     const deferred = [
-      // Auth mode
-      'AZURE_CLIENT_SECRET',
+      // P4-03: AZURE_CLIENT_SECRET removed from registry (never consumed — pure MI)
       // Provisioning saga
       'AzureSignalRConnectionString', 'SHAREPOINT_HUB_SITE_ID',
       'SHAREPOINT_APP_CATALOG_URL', 'HB_INTEL_SPFX_APP_ID',

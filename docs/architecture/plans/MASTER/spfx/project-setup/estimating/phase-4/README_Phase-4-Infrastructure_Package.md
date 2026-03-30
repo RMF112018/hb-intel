@@ -26,10 +26,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-4_Startup-Scope-Contract.md`](Phase-4_Startup-Scope-Contract.md) — Tiered config validation (core/sharepoint/provisioning), lazy domain service initialization, Redis removal, health endpoint tiered status
 
-4. `Prompt-03_Managed-Identity-Storage-and-Secrets-Hardening.md`
+4. `Prompt-03_Managed-Identity-Storage-and-Secrets-Hardening.md` **[COMPLETE]**
    - Harden managed identity usage, storage dependencies, and secret handling
    - Replace unsafe or unclear credential patterns
    - Align runtime services to production-safe identity boundaries
+   - **Deliverables:**
+     - [`Phase-4_Identity-Storage-Secrets.md`](Phase-4_Identity-Storage-Secrets.md) — MI usage matrix (6 services), removed AZURE_CLIENT_SECRET (pure MI), conditional SignalR init with NoOpSignalRPushService, storage/secret classification, stub status for email delivery
 
 5. `Prompt-04_CORS-Connected-Services-and-Permission-Model.md`
    - Finalize browser-origin rules, SharePoint / Graph access posture, and connected-service permissions

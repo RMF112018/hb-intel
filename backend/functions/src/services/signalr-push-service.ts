@@ -106,7 +106,30 @@ export class RealSignalRPushService implements ISignalRPushService {
 }
 
 /**
- * D-PH6-07 compatibility alias so existing service-factory wiring can instantiate
- * the production implementation without touching extra files in this phase.
+ * P4-03: No-op implementation used when AzureSignalRConnectionString is not configured.
+ * Logs push events for debugging but does not connect to any SignalR service.
+ * This prevents startup failures when SignalR is not yet provisioned.
  */
-export class MockSignalRPushService extends RealSignalRPushService {}
+export class NoOpSignalRPushService implements ISignalRPushService {
+  constructor() {
+    console.warn('[SignalR] AzureSignalRConnectionString not configured — real-time push is disabled. Provisioning progress events will be logged only.');
+  }
+
+  async pushProvisioningProgress(event: IProvisioningProgressEvent): Promise<void> {
+    console.log(`[SignalR:NoOp] pushProvisioningProgress for ${event.projectId} step ${event.stepNumber} → ${event.status}`);
+  }
+
+  async addConnectionToGroup(_connectionId: string, _projectId: string, _isAdmin: boolean): Promise<void> {
+    // No-op: no SignalR service to manage groups
+  }
+
+  async closeGroup(_projectId: string): Promise<void> {
+    // No-op: no SignalR service to close groups
+  }
+}
+
+/**
+ * D-PH6-07 compatibility alias retained for test utilities.
+ * @deprecated Use RealSignalRPushService or NoOpSignalRPushService directly.
+ */
+export class MockSignalRPushService extends NoOpSignalRPushService {}

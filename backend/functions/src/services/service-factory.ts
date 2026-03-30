@@ -19,7 +19,7 @@ import type { IPmpService } from './pmp-service.js';
 import type { IIdempotencyStorageService } from './idempotency-storage-service.js';
 import { MockSharePointService, SharePointService } from './sharepoint-service.js';
 import { MockTableStorageService, RealTableStorageService } from './table-storage-service.js';
-import { MockSignalRPushService } from './signalr-push-service.js';
+import { RealSignalRPushService, NoOpSignalRPushService, MockSignalRPushService } from './signalr-push-service.js';
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from './managed-identity-token-service.js';
 import { MockProjectRequestsRepository, SharePointProjectRequestsAdapter } from './project-requests-repository.js';
 import { MockAcknowledgmentService, RealAcknowledgmentService } from './acknowledgment-service.js';
@@ -141,7 +141,12 @@ export function createServiceFactory(): IServiceContainer {
     // --- Core Project Setup services (eagerly initialized) ---
     sharePoint: isMock ? new MockSharePointService() : new SharePointService(),
     tableStorage: isMock ? new MockTableStorageService() : new RealTableStorageService(),
-    signalR: new MockSignalRPushService(),
+    // P4-03: SignalR conditionally initialized — real when connection string present, no-op otherwise.
+    signalR: isMock
+      ? new MockSignalRPushService()
+      : process.env.AzureSignalRConnectionString
+        ? new RealSignalRPushService()
+        : new NoOpSignalRPushService(),
     managedIdentity,
     projectRequests: isMock ? new MockProjectRequestsRepository() : new SharePointProjectRequestsAdapter(),
     acknowledgments: isMock ? new MockAcknowledgmentService() : new RealAcknowledgmentService(),
