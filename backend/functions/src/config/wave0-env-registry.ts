@@ -14,6 +14,14 @@
 /** Governance bucket classification for environment settings. */
 export type ConfigBucket = 'infrastructure' | 'business';
 
+/**
+ * P4-02: Validation tier for startup scoping.
+ *   - `core` — required for ANY request (auth, table storage, adapter mode)
+ *   - `sharepoint` — required for SharePoint-dependent operations
+ *   - `provisioning` — required only at saga execution time (already validated by validateProvisioningPrerequisites)
+ */
+export type ConfigTier = 'core' | 'sharepoint' | 'provisioning';
+
 /** Metadata for a single environment configuration entry. */
 export interface IConfigEntry {
   /** Environment variable name (e.g., AZURE_TENANT_ID). */
@@ -26,6 +34,8 @@ export interface IConfigEntry {
   requiredInProd: boolean;
   /** If present, this setting is only required when the named setting has a specific value. */
   conditionalOn?: string;
+  /** P4-02: Validation tier — when this setting is checked during startup. */
+  configTier?: ConfigTier;
 }
 
 /**
@@ -39,12 +49,14 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     bucket: 'infrastructure',
     description: 'Entra ID tenant identifier',
     requiredInProd: true,
+    configTier: 'core',
   },
   {
     name: 'AZURE_CLIENT_ID',
     bucket: 'infrastructure',
     description: 'Managed identity client ID (read by DefaultAzureCredential for outbound Azure resource auth). Also used as inbound API audience fallback when API_AUDIENCE is not set.',
     requiredInProd: true,
+    configTier: 'core',
   },
   {
     name: 'AZURE_CLIENT_SECRET',
@@ -57,6 +69,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     bucket: 'infrastructure',
     description: 'App-data Table Storage endpoint URL (production) or connection string (local dev)',
     requiredInProd: true,
+    configTier: 'core',
   },
   {
     name: 'AzureSignalRConnectionString',
@@ -69,18 +82,21 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     bucket: 'infrastructure',
     description: 'Application Insights telemetry ingestion',
     requiredInProd: true,
+    configTier: 'core',
   },
   {
     name: 'SHAREPOINT_TENANT_URL',
     bucket: 'infrastructure',
     description: 'Root SharePoint tenant URL (e.g. https://hedrickbrotherscom.sharepoint.com)',
     requiredInProd: true,
+    configTier: 'sharepoint',
   },
   {
     name: 'SHAREPOINT_PROJECTS_SITE_URL',
     bucket: 'infrastructure',
     description: 'SharePoint site URL hosting the Projects list (e.g. https://hedrickbrotherscom.sharepoint.com/sites/HBCentral). Falls back to SHAREPOINT_TENANT_URL if not set.',
     requiredInProd: true,
+    configTier: 'sharepoint',
   },
   {
     name: 'SHAREPOINT_HUB_SITE_ID',
@@ -107,6 +123,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     bucket: 'infrastructure',
     description: 'Adapter mode: proxy (production) or mock (local dev/test). Legacy value "real" is accepted as alias for "proxy".',
     requiredInProd: true,
+    configTier: 'core',
   },
   {
     name: 'HB_INTEL_SPFX_APP_ID',
@@ -180,6 +197,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
       'Required in production — the previous fallback to api://${AZURE_CLIENT_ID} conflated MI and app-reg identities. ' +
       'See Phase-3_API-Token-Contract.md.',
     requiredInProd: true,
+    configTier: 'core',
   },
 ] as const;
 

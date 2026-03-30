@@ -45,12 +45,6 @@ export interface IMockServices extends IServiceContainer {
     escalateProvisioning: Mock;
     listAllRuns: Mock;
   };
-  redisCache: {
-    get: Mock;
-    set: Mock;
-    delete: Mock;
-    has: Mock;
-  };
   signalR: {
     pushProvisioningProgress: Mock;
     addConnectionToGroup: Mock;
@@ -127,12 +121,6 @@ export function createMockServices(): IMockServices {
       getAllPendingFullSpec: vi.fn(async () => []),
       escalateProvisioning: vi.fn(async (_projectId: string, _escalatedBy: string) => {}),
       listAllRuns: vi.fn(async (_status?: string) => []),
-    },
-    redisCache: {
-      get: vi.fn(async (_key: string) => null),
-      set: vi.fn(async (_key: string, _value: unknown, _ttlSeconds?: number) => {}),
-      delete: vi.fn(async (_key: string) => {}),
-      has: vi.fn(async (_key: string) => false),
     },
     signalR: {
       pushProvisioningProgress: vi.fn(async (_event: IProvisioningProgressEvent) => {}),

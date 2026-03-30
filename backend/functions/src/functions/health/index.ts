@@ -21,12 +21,16 @@ app.http('health', {
   handler: async (): Promise<HttpResponseInit> => {
     const adapterMode = process.env.HBC_ADAPTER_MODE ?? 'not-set';
 
-    // Core boot settings (7 required)
-    const corePresent = [
-      'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_TABLE_ENDPOINT',
-      'APPLICATIONINSIGHTS_CONNECTION_STRING', 'HBC_ADAPTER_MODE',
+    // P4-02: Core settings split into tiers matching validate-config.ts
+    const coreAuthPresent = [
+      'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'API_AUDIENCE',
+      'AZURE_TABLE_ENDPOINT', 'APPLICATIONINSIGHTS_CONNECTION_STRING',
+      'HBC_ADAPTER_MODE',
+    ].every(hasEnv);
+    const sharePointPresent = [
       'SHAREPOINT_TENANT_URL', 'SHAREPOINT_PROJECTS_SITE_URL',
     ].every(hasEnv);
+    const corePresent = coreAuthPresent && sharePointPresent;
 
     // Optional integrations
     const integrations: Record<string, 'ready' | 'not-configured'> = {
@@ -50,6 +54,10 @@ app.http('health', {
         environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT ?? 'unknown',
         adapterMode,
         coreConfigReady: corePresent,
+        configTiers: {
+          core: coreAuthPresent ? 'ready' : 'missing',
+          sharepoint: sharePointPresent ? 'ready' : 'missing',
+        },
         integrations,
         roleConfig,
         timestamp: new Date().toISOString(),

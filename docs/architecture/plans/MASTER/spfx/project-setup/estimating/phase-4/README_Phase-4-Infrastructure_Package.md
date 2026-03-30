@@ -19,10 +19,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
      - [`Phase-4_Infrastructure-Baseline-Matrix.md`](Phase-4_Infrastructure-Baseline-Matrix.md) — Complete dependency inventory: ~94 function registrations (~20 required), 14 service factory entries (9 required), 8 required env vars, 7 provisioning prerequisites, 6 connected Azure/M365 services, 3 timer jobs
      - [`Phase-4_Infrastructure-Gap-Summary.md`](Phase-4_Infrastructure-Gap-Summary.md) — 8 infrastructure gaps: over-broad function surface, eager service factory, mocked SignalR push, unscoped boot blockers, missing CORS in code, stub email delivery, no monitoring alerts
 
-3. `Prompt-02_Functions-Hosting-Startup-and-Configuration-Scope.md`
+3. `Prompt-02_Functions-Hosting-Startup-and-Configuration-Scope.md` **[COMPLETE]**
    - Scope Azure Functions startup to the actual Project Setup deployment
    - Reduce over-broad boot blockers
    - Lock required configuration, feature gating, and environment validation
+   - **Deliverables:**
+     - [`Phase-4_Startup-Scope-Contract.md`](Phase-4_Startup-Scope-Contract.md) — Tiered config validation (core/sharepoint/provisioning), lazy domain service initialization, Redis removal, health endpoint tiered status
 
 4. `Prompt-03_Managed-Identity-Storage-and-Secrets-Hardening.md`
    - Harden managed identity usage, storage dependencies, and secret handling

@@ -9,7 +9,7 @@
  * Reference: docs/reference/configuration/wave-0-config-registry.md
  */
 
-import { WAVE0_REQUIRED_CONFIG } from '../config/wave0-env-registry.js';
+import { WAVE0_REQUIRED_CONFIG, type ConfigTier } from '../config/wave0-env-registry.js';
 
 /**
  * Returns true if startup config validation should run.
@@ -72,6 +72,55 @@ export function validateProvisioningPrerequisites(): void {
       ].join('\n'),
     );
   }
+}
+
+/**
+ * P4-02: Validate only settings in the specified config tier.
+ * Core tier validates at startup; SharePoint tier validates on first SP operation.
+ *
+ * @param tier - The config tier to validate ('core', 'sharepoint', or 'provisioning')
+ * @throws {Error} Aggregated error listing all missing variables in the tier
+ */
+export function validateConfigTier(tier: ConfigTier): void {
+  if (!shouldValidateConfig()) return;
+
+  const missing: string[] = [];
+
+  for (const entry of WAVE0_REQUIRED_CONFIG) {
+    if (!entry.requiredInProd || entry.configTier !== tier) continue;
+
+    const value = process.env[entry.name];
+    if (value === undefined || value === '') {
+      missing.push(`  - ${entry.name} (${entry.bucket}): ${entry.description}`);
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      [
+        `[StartupValidation:${tier}] Missing ${missing.length} required ${tier}-tier variable(s):`,
+        ...missing,
+        '',
+        'See docs/reference/configuration/wave-0-config-registry.md for the full registry.',
+      ].join('\n'),
+    );
+  }
+}
+
+/**
+ * P4-02: Validate only core-tier settings (auth, table storage, adapter mode).
+ * These are required for ANY request — health probe excepted.
+ */
+export function validateCoreConfig(): void {
+  validateConfigTier('core');
+}
+
+/**
+ * P4-02: Validate SharePoint-tier settings.
+ * Required for SharePoint-dependent operations but not for health or auth-only routes.
+ */
+export function validateSharePointConfig(): void {
+  validateConfigTier('sharepoint');
 }
 
 /**

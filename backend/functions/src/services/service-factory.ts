@@ -1,6 +1,5 @@
 import type { ISharePointService } from './sharepoint-service.js';
 import type { ITableStorageService } from './table-storage-service.js';
-import type { IRedisCacheService } from './redis-cache-service.js';
 import type { ISignalRPushService } from './signalr-push-service.js';
 import type { IManagedIdentityTokenService } from './managed-identity-token-service.js';
 import type { IProjectRequestsRepository } from './project-requests-repository.js';
@@ -20,7 +19,6 @@ import type { IPmpService } from './pmp-service.js';
 import type { IIdempotencyStorageService } from './idempotency-storage-service.js';
 import { MockSharePointService, SharePointService } from './sharepoint-service.js';
 import { MockTableStorageService, RealTableStorageService } from './table-storage-service.js';
-import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from './managed-identity-token-service.js';
 import { MockProjectRequestsRepository, SharePointProjectRequestsAdapter } from './project-requests-repository.js';
@@ -38,13 +36,22 @@ import { MockRiskService, RealRiskService } from './risk-service.js';
 import { MockScorecardService, RealScorecardService } from './scorecard-service.js';
 import { MockPmpService, RealPmpService } from './pmp-service.js';
 import { MockIdempotencyStorageService, RealIdempotencyStorageService } from './idempotency-storage-service.js';
-import { validateRequiredConfig } from '../utils/validate-config.js';
+import { validateCoreConfig, validateSharePointConfig } from '../utils/validate-config.js';
 import { assertAdapterModeValid } from '../utils/adapter-mode-guard.js';
 
+/**
+ * P4-02: Service container interface.
+ *
+ * Core Project Setup services are eagerly initialized at startup.
+ * Domain CRUD services (Phase 1) are lazily initialized on first access
+ * to avoid unnecessary dependency coupling for the Project Setup deployment.
+ *
+ * Redis cache has been removed — it was always mocked and never used.
+ */
 export interface IServiceContainer {
+  // --- Core Project Setup services (eagerly initialized) ---
   sharePoint: ISharePointService;
   tableStorage: ITableStorageService;
-  redisCache: IRedisCacheService;
   signalR: ISignalRPushService;
   /** P3-04: App-only token acquisition via Managed Identity. */
   managedIdentity: IManagedIdentityTokenService;
@@ -52,7 +59,10 @@ export interface IServiceContainer {
   acknowledgments: IAcknowledgmentService;
   graph: IGraphService;
   notifications: INotificationService;
-  // Phase 1 domain services (P1-C1-a)
+  /** P1-D1: Write safety — idempotency record persistence. */
+  idempotency: IIdempotencyStorageService;
+
+  // --- Domain CRUD services (P4-02: lazily initialized on first access) ---
   leads: ILeadService;
   projects: IProjectService;
   estimating: IEstimatingService;
@@ -63,8 +73,6 @@ export interface IServiceContainer {
   risk: IRiskService;
   scorecards: IScorecardService;
   pmp: IPmpService;
-  // P1-D1: Write safety — idempotency record persistence.
-  idempotency: IIdempotencyStorageService;
 }
 
 let singletonContainer: IServiceContainer | null = null;
@@ -76,8 +84,6 @@ export function createServiceFactory(): IServiceContainer {
   const adapterMode = assertAdapterModeValid();
 
   // P1-C3 §2.1.6: startup.mode.resolved telemetry event (INTEGRATION_READY gate).
-  // Uses console.log with structured JSON because InvocationContext is not available
-  // at service factory initialization time. Azure Functions host forwards to App Insights.
   console.log(JSON.stringify({
     level: 'info',
     _telemetryType: 'customEvent',
@@ -90,8 +96,20 @@ export function createServiceFactory(): IServiceContainer {
 
   const isMock = adapterMode === 'mock' || process.env.NODE_ENV === 'test';
 
-  // G2.6: Fail fast if required config is missing (skips in mock/test mode)
-  validateRequiredConfig();
+  // P4-02: Tiered validation — core settings validate at startup.
+  // SharePoint settings validate on first SP-dependent operation (deferred).
+  validateCoreConfig();
+
+  // P4-02: SharePoint config validated here too for backward compatibility,
+  // but logged as warning instead of blocking if missing. Full validation
+  // still available via validateSharePointConfig() for explicit callers.
+  if (!isMock) {
+    try {
+      validateSharePointConfig();
+    } catch (err) {
+      console.warn(`[StartupWarning] SharePoint config incomplete — SharePoint-dependent operations may fail at runtime. ${err instanceof Error ? err.message : ''}`);
+    }
+  }
 
   // Degraded-mode warnings: settings that have safe fallbacks but reduce functionality
   if (!isMock) {
@@ -105,37 +123,46 @@ export function createServiceFactory(): IServiceContainer {
 
   const managedIdentity = isMock ? new MockManagedIdentityTokenService() : new ManagedIdentityTokenService();
 
-  singletonContainer = {
-    // D-PH6-05: real SharePoint adapter by default; mocks only in explicit mock/test mode.
+  // P4-02: Lazy initialization caches for domain CRUD services.
+  // These services are not needed for Project Setup core operations
+  // and should not block startup or cause coupling issues.
+  let _leads: ILeadService | null = null;
+  let _projects: IProjectService | null = null;
+  let _estimating: IEstimatingService | null = null;
+  let _schedule: IScheduleService | null = null;
+  let _buyout: IBuyoutService | null = null;
+  let _compliance: IComplianceService | null = null;
+  let _contracts: IContractService | null = null;
+  let _risk: IRiskService | null = null;
+  let _scorecards: IScorecardService | null = null;
+  let _pmp: IPmpService | null = null;
+
+  const container: IServiceContainer = {
+    // --- Core Project Setup services (eagerly initialized) ---
     sharePoint: isMock ? new MockSharePointService() : new SharePointService(),
-    // D-PH6-06: real table persistence in production, in-memory mock for test/mock mode.
     tableStorage: isMock ? new MockTableStorageService() : new RealTableStorageService(),
-    redisCache: new MockRedisCacheService(),
     signalR: new MockSignalRPushService(),
-    // P3-04: App-only Managed Identity token service (renamed from msalObo).
     managedIdentity,
-    // D-PH6-08: Project Setup Request lifecycle persistence adapter.
     projectRequests: isMock ? new MockProjectRequestsRepository() : new SharePointProjectRequestsAdapter(),
-    // SF04-T06: Acknowledgment event persistence adapter.
     acknowledgments: isMock ? new MockAcknowledgmentService() : new RealAcknowledgmentService(),
-    // W0-G1-T02: Entra ID group management via Microsoft Graph.
     graph: isMock ? new MockGraphService() : new GraphService(),
-    // W0-G1-T03: Notification delivery via internal SendNotification endpoint.
     notifications: isMock ? new MockNotificationService() : new NotificationService(),
-    // P1-C1-a: Domain CRUD services for all 10 Phase 1 domains.
-    leads: isMock ? new MockLeadService() : new RealLeadService(),
-    projects: isMock ? new MockProjectService() : new RealProjectService(),
-    estimating: isMock ? new MockEstimatingService() : new RealEstimatingService(),
-    schedule: isMock ? new MockScheduleService() : new RealScheduleService(),
-    buyout: isMock ? new MockBuyoutService() : new RealBuyoutService(),
-    compliance: isMock ? new MockComplianceService() : new RealComplianceService(),
-    contracts: isMock ? new MockContractService() : new RealContractService(),
-    risk: isMock ? new MockRiskService() : new RealRiskService(),
-    scorecards: isMock ? new MockScorecardService() : new RealScorecardService(),
-    pmp: isMock ? new MockPmpService() : new RealPmpService(),
-    // P1-D1: idempotency record storage (real Azure Table; in-memory mock for test/mock mode).
     idempotency: isMock ? new MockIdempotencyStorageService() : new RealIdempotencyStorageService(),
+
+    // --- Domain CRUD services (P4-02: lazy — created on first property access) ---
+    get leads() { return (_leads ??= isMock ? new MockLeadService() : new RealLeadService()); },
+    get projects() { return (_projects ??= isMock ? new MockProjectService() : new RealProjectService()); },
+    get estimating() { return (_estimating ??= isMock ? new MockEstimatingService() : new RealEstimatingService()); },
+    get schedule() { return (_schedule ??= isMock ? new MockScheduleService() : new RealScheduleService()); },
+    get buyout() { return (_buyout ??= isMock ? new MockBuyoutService() : new RealBuyoutService()); },
+    get compliance() { return (_compliance ??= isMock ? new MockComplianceService() : new RealComplianceService()); },
+    get contracts() { return (_contracts ??= isMock ? new MockContractService() : new RealContractService()); },
+    get risk() { return (_risk ??= isMock ? new MockRiskService() : new RealRiskService()); },
+    get scorecards() { return (_scorecards ??= isMock ? new MockScorecardService() : new RealScorecardService()); },
+    get pmp() { return (_pmp ??= isMock ? new MockPmpService() : new RealPmpService()); },
   };
+
+  singletonContainer = container;
 
   console.log(`[ServiceFactory] Initialized services in "${adapterMode}" mode`);
   return singletonContainer;
