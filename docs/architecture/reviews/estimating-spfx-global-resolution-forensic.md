@@ -51,7 +51,7 @@ feature_cb3b1520-1665-4412-83ab-344c2182a2fd.xml.config.xml
 
 OPC structure was valid. The solution GUID (`d01a9600-...`) and webpart ID (`3c4dbd5c-...`) were correctly declared and cross-referenced.
 
-The error URL in the runtime failure — `https://hedrickbrotherscom.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js` — correctly matched the `includeClientSideAssets: true` CDN path, confirming **the file was being fetched successfully** but failing to expose its API after evaluation.
+The error URL in the runtime failure — `<sharepoint-tenant-url>/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js` — correctly matched the `includeClientSideAssets: true` CDN path, confirming **the file was being fetched successfully** but failing to expose its API after evaluation.
 
 ---
 
@@ -243,7 +243,7 @@ Archive: dist/sppkg/hb-intel-estimating.sppkg
 The artifact at `dist/sppkg/hb-intel-estimating.sppkg` is verified and ready to upload to the SharePoint App Catalog.
 
 Upload steps:
-1. Navigate to `https://hedrickbrotherscom.sharepoint.com/sites/appcatalog/_layouts/15/tenantAppCatalog.aspx`
+1. Navigate to `<sharepoint-tenant-url>/sites/appcatalog/_layouts/15/tenantAppCatalog.aspx`
 2. Upload `hb-intel-estimating.sppkg` — replace the existing version
 3. Check "Make this solution available to all sites in the organization" if skipFeatureDeployment is desired
 4. Trust the solution when prompted

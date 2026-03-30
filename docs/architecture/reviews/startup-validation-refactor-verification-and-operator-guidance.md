@@ -85,13 +85,13 @@
 
 | Setting | Example |
 |---------|---------|
-| `AZURE_TENANT_ID` | `91e238a3-4af4-42c0-9cb8-eb37861d82f3` |
-| `AZURE_CLIENT_ID` | `77ad3593-5414-4122-a649-74916f8c0d7a` |
-| `AZURE_TABLE_ENDPOINT` | `https://hbintel-table-prod-01.table.cosmos.azure.com:443/` |
+| `AZURE_TENANT_ID` | `<tenant-id>` |
+| `AZURE_CLIENT_ID` | `<managed-identity-client-id>` |
+| `AZURE_TABLE_ENDPOINT` | `https://<cosmos-table-account>.table.cosmos.azure.com:443/` |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | `InstrumentationKey=...` |
 | `HBC_ADAPTER_MODE` | `proxy` |
-| `SHAREPOINT_TENANT_URL` | `https://hedrickbrotherscom.sharepoint.com` |
-| `SHAREPOINT_PROJECTS_SITE_URL` | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` |
+| `SHAREPOINT_TENANT_URL` | `<sharepoint-tenant-url>` |
+| `SHAREPOINT_PROJECTS_SITE_URL` | `https://<sharepoint-site-url>` |
 
 ### Project Setup Enhancement (recommended, degrades without)
 

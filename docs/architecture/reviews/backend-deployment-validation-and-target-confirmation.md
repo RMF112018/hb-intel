@@ -1,8 +1,8 @@
 # Backend Deployment Validation & Target Confirmation
 
 > **Date**: 2026-03-29
-> **Target**: Azure Function App `hb-intel-function-app`
-> **Host**: `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net`
+> **Target**: Azure Function App `<function-app-name>`
+> **Host**: `<function-app-url>`
 > **Resource Group**: `hb-intel`
 
 ---
@@ -91,7 +91,7 @@ cd .deploy && zip -r ../functions-artifact.zip . && cd ..
 
 ```bash
 cd backend/functions/.deploy
-func azure functionapp publish hb-intel-function-app --javascript
+func azure functionapp publish <function-app-name> --javascript
 ```
 
 ### Deploy via Azure CLI (zip deploy)
@@ -99,7 +99,7 @@ func azure functionapp publish hb-intel-function-app --javascript
 ```bash
 az functionapp deployment source config-zip \
   --resource-group hb-intel \
-  --name hb-intel-function-app \
+  --name <function-app-name> \
   --src functions-artifact.zip
 ```
 
@@ -164,8 +164,8 @@ These must be set before deployment or the startup validation gate will throw.
 | `HBC_ADAPTER_MODE` | `proxy` | Real services (NOT `mock`) |
 | `AZURE_TENANT_ID` | Entra ID tenant GUID | Token validation issuer |
 | `AZURE_CLIENT_ID` | App registration client ID | Token validation audience |
-| `SHAREPOINT_TENANT_URL` | `https://hedrickbrotherscom.sharepoint.com` | SP tenant root |
-| `SHAREPOINT_PROJECTS_SITE_URL` | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` | Projects list site |
+| `SHAREPOINT_TENANT_URL` | `<sharepoint-tenant-url>` | SP tenant root |
+| `SHAREPOINT_PROJECTS_SITE_URL` | `https://<sharepoint-site-url>` | Projects list site |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection string | Telemetry |
 
 ### Tier 2 — Required for Provisioning Saga
@@ -204,7 +204,7 @@ These must be set before deployment or the startup validation gate will throw.
 ### CORS Configuration
 
 The SPFx-hosted frontend calls the Function App from SharePoint pages. CORS must allow:
-- `https://hedrickbrotherscom.sharepoint.com`
+- `<sharepoint-tenant-url>`
 
 This is configured in Azure Portal → Function App → CORS, not via app settings.
 
@@ -240,7 +240,7 @@ The Function App must have a system-assigned managed identity enabled, and that 
 
 ### PREREQUISITE: CORS
 
-The Function App must allow CORS from `https://hedrickbrotherscom.sharepoint.com`. **COMPLETE**
+The Function App must allow CORS from `<sharepoint-tenant-url>`. **COMPLETE**
 
 ### PREREQUISITE: Entra ID App Registration
 
@@ -248,6 +248,9 @@ The Function App must allow CORS from `https://hedrickbrotherscom.sharepoint.com
 - Issue access tokens for the API
 - Have the SPFx app as an authorized client
 - Include `upn`, `oid`, `roles` claims
+
+- `AZURE_CLIENT_ID` = 5720372f-1caa-4d1b-a965-dd5ec2652963
+- 
 
 ---
 
@@ -257,7 +260,7 @@ The Function App must allow CORS from `https://hedrickbrotherscom.sharepoint.com
 
 1. Enable system-assigned managed identity on the Function App
 2. Grant managed identity SharePoint API permissions (`Sites.Selected` for HBCentral)
-3. Configure CORS: add `https://hedrickbrotherscom.sharepoint.com`
+3. Configure CORS: add `<sharepoint-tenant-url>`
 4. Confirm/create Entra ID app registration
 5. Set all Tier 1 app settings (see Section 6)
 6. Set Tier 3 app settings (CONTROLLER_UPNS, ADMIN_UPNS, etc.)

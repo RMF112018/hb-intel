@@ -87,7 +87,7 @@ Service code → DefaultAzureCredential() → token for SP/Graph/Table
 - Setting `AZURE_CLIENT_ID` to the MI client ID → inbound JWT validation fails (`audience` mismatch)
 - Setting `AZURE_CLIENT_ID` to the app registration client ID → `DefaultAzureCredential` fails to find the managed identity
 
-**Current Azure state**: `AZURE_CLIENT_ID=77ad3593-5414-4122-a649-74916f8c0d7a` (user-assigned MI). This means inbound JWT audience check will use `api://77ad3593-...`. If the SPFx app registration is different, all API calls will return 401.
+**Current Azure state**: `AZURE_CLIENT_ID=<managed-identity-client-id>` (user-assigned MI). This means inbound JWT audience check will use `api://77ad3593-...`. If the SPFx app registration is different, all API calls will return 401.
 
 ### Contradiction Classification
 
@@ -104,8 +104,8 @@ Service code → DefaultAzureCredential() → token for SP/Graph/Table
 
 | Setting | Purpose | Example Value |
 |---------|---------|---------------|
-| `API_AUDIENCE` | App registration client ID or App ID URI for inbound JWT audience validation | `api://77ad3593-5414-4122-a649-74916f8c0d7a` or `api://<app-reg-client-id>` |
-| `AZURE_CLIENT_ID` | **Retained** — user-assigned managed identity client ID (read by `DefaultAzureCredential`) | `77ad3593-5414-4122-a649-74916f8c0d7a` |
+| `API_AUDIENCE` | App registration client ID or App ID URI for inbound JWT audience validation | `api://<managed-identity-client-id>` or `api://<app-reg-client-id>` |
+| `AZURE_CLIENT_ID` | **Retained** — user-assigned managed identity client ID (read by `DefaultAzureCredential`) | `<managed-identity-client-id>` |
 
 ### Why This Split
 
@@ -242,7 +242,7 @@ No changes needed — current AZURE_CLIENT_ID works for both.
 If split-identity:
 ```bash
 az functionapp config appsettings set \
-  --name hb-intel-function-app \
+  --name <function-app-name> \
   --resource-group hb-intel \
   --settings API_AUDIENCE="api://<app-registration-client-id>"
 ```

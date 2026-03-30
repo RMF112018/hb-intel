@@ -55,7 +55,7 @@
 
 ### Deployment
 
-- [ ] Upload `.sppkg` to SharePoint App Catalog (`https://hedrickbrotherscom.sharepoint.com/sites/appcatalog`)
+- [ ] Upload `.sppkg` to SharePoint App Catalog (`<sharepoint-tenant-url>/sites/appcatalog`)
 - [ ] Deploy with "Make this solution available to all sites" enabled
 - [ ] Verify app appears in Site Contents on HBCentral
 
@@ -105,7 +105,7 @@
 
 ### Backend — SP Target Alignment
 
-- [ ] Verify the Function App env has `SHAREPOINT_PROJECTS_SITE_URL=https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`
+- [ ] Verify the Function App env has `SHAREPOINT_PROJECTS_SITE_URL=https://<sharepoint-site-url>`
 - [ ] Verify submitted requests appear in the HBCentral Projects list
 - [ ] Verify field_N columns contain correct data (field_1=ProjectId, field_3=ProjectName, etc.)
 - [ ] Verify Year column is populated (derived from project number prefix)
@@ -139,7 +139,7 @@
 | # | Risk | Severity | Mitigation |
 |---|------|----------|------------|
 | R1 | `FUNCTION_APP_URL` not set in CI/build env | **Blocking** | Must be configured before production deployment. Shell webpart reads `__FUNCTION_APP_URL__` from webpack DefinePlugin. |
-| R2 | `SHAREPOINT_PROJECTS_SITE_URL` not set in Function App | **Blocking** | Must point to `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`. Falls back to tenant root which is wrong site. |
+| R2 | `SHAREPOINT_PROJECTS_SITE_URL` not set in Function App | **Blocking** | Must point to `https://<sharepoint-site-url>`. Falls back to tenant root which is wrong site. |
 | R3 | SP field_N names change if list is recreated | **Low** | Schema is confirmed from live list. If list is recreated without CSV import, columns may get display-name internal names. |
 | R4 | SignalR negotiate also needs Function App URL | **Medium** | Fixed by same config path. Validate in staging. |
 | R5 | Clarification items not enforced before resubmit | **Low** | Deferred — requires UI changes. Clarification note is stored. |
@@ -152,7 +152,7 @@
 
 | Property | Expected | Verified In |
 |----------|----------|-------------|
-| Site URL | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` | `project-requests-repository.ts` constructor, `project-requests-repository.test.ts` |
+| Site URL | `https://<sharepoint-site-url>` | `project-requests-repository.ts` constructor, `project-requests-repository.test.ts` |
 | List title | `Projects` | `PROJECTS_LIST_NAME = 'Projects'` constant |
 | Field names | `field_1`..`field_24`, `Title`, `Year` | `sp-field-mapping.test.ts`, `toListItem()`/`fromListItem()`, select/filter queries |
 
@@ -177,7 +177,7 @@
 
 **Conditions for production deployment:**
 1. `FUNCTION_APP_URL` must be set in the CI/build environment before packaging the `.sppkg`
-2. `SHAREPOINT_PROJECTS_SITE_URL` must be set to `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` in the Function App configuration
+2. `SHAREPOINT_PROJECTS_SITE_URL` must be set to `https://<sharepoint-site-url>` in the Function App configuration
 3. Manual staging checklist (Section 2) must pass with no blocking failures
 
 **Confidence level:**

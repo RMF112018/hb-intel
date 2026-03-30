@@ -37,18 +37,18 @@ These must be set for the backend to boot in `proxy` mode:
 
 | Setting | Example Value |
 |---------|---------------|
-| `AZURE_TENANT_ID` | `91e238a3-4af4-42c0-9cb8-eb37861d82f3` |
-| `AZURE_CLIENT_ID` | `77ad3593-5414-4122-a649-74916f8c0d7a` (MI client ID) |
-| `AZURE_TABLE_ENDPOINT` | `https://hbintel-table-prod-01.table.cosmos.azure.com:443/` |
+| `AZURE_TENANT_ID` | `<tenant-id>` |
+| `AZURE_CLIENT_ID` | `<managed-identity-client-id>` (MI client ID) |
+| `AZURE_TABLE_ENDPOINT` | `https://<cosmos-table-account>.table.cosmos.azure.com:443/` |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | `InstrumentationKey=...` |
-| `SHAREPOINT_TENANT_URL` | `https://hedrickbrotherscom.sharepoint.com` |
-| `SHAREPOINT_PROJECTS_SITE_URL` | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` |
+| `SHAREPOINT_TENANT_URL` | `<sharepoint-tenant-url>` |
+| `SHAREPOINT_PROJECTS_SITE_URL` | `https://<sharepoint-site-url>` |
 | `HBC_ADAPTER_MODE` | `proxy` |
-| `NOTIFICATION_API_BASE_URL` | `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net` |
-| `EMAIL_FROM_ADDRESS` | `bfetting@hedrickbrothers.com` |
-| `OPEX_MANAGER_UPN` | `bfetting@hedrickbrothers.com` |
-| `CONTROLLER_UPNS` | `bfetting@hedrickbrothers.com` |
-| `ADMIN_UPNS` | `bfetting@hedrickbrothers.com` |
+| `NOTIFICATION_API_BASE_URL` | `<function-app-url>` |
+| `EMAIL_FROM_ADDRESS` | `<operator-upn>` |
+| `OPEX_MANAGER_UPN` | `<operator-upn>` |
+| `CONTROLLER_UPNS` | `<operator-upn>` |
+| `ADMIN_UPNS` | `<operator-upn>` |
 
 **Not required for boot**: `AZURE_CLIENT_SECRET`, `AzureSignalRConnectionString`, `SHAREPOINT_HUB_SITE_ID`, `EMAIL_DELIVERY_API_KEY`, `SHAREPOINT_APP_CATALOG_URL`, `HB_INTEL_SPFX_APP_ID`, `GRAPH_GROUP_PERMISSION_CONFIRMED`, `API_AUDIENCE`
 

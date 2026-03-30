@@ -1,6 +1,6 @@
 [
   {
-    "id": "/subscriptions/da99386a-88ef-4987-afc5-12e22690da20/resourceGroups/BFetting/providers/Microsoft.Resources/deployments/Microsoft.Azure.CosmosDB-20260320115857/operations/6E7A3329572A9DD0",
+    "id": "/subscriptions/<subscription-id>/resourceGroups/BFetting/providers/Microsoft.Resources/deployments/Microsoft.Azure.CosmosDB-20260320115857/operations/6E7A3329572A9DD0",
     "operationId": "6E7A3329572A9DD0",
     "properties": {
       "provisioningOperation": "Create",
@@ -10,7 +10,7 @@
       "trackingId": "f9a89a5c-3b1c-43ad-85a1-28b2b10da405",
       "statusCode": "OK",
       "targetResource": {
-        "id": "/subscriptions/da99386a-88ef-4987-afc5-12e22690da20/resourceGroups/BFetting/providers/Microsoft.DocumentDb/databaseAccounts/hbintel-table-prod-01",
+        "id": "/subscriptions/<subscription-id>/resourceGroups/BFetting/providers/Microsoft.DocumentDb/databaseAccounts/hbintel-table-prod-01",
         "resourceType": "Microsoft.DocumentDb/databaseAccounts",
         "resourceName": "hbintel-table-prod-01"
       }

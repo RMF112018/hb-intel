@@ -44,7 +44,7 @@ Implement the alert detection, routing, and escalation target wiring for Wave 0.
 1. At minimum `provisioningFailureMonitor` and `stuckWorkflowMonitor` produce real alerts when provisioning failures occur
 2. `AdminAlertsApi` persists and retrieves real alert records
 3. `routeAlert()` routing decisions are acted upon: immediate-route alerts are dispatched without delay; digest-route alerts are batched
-4. Escalation targets are wired: Teams channel for critical/high; `hbtech@hedrickbrothers.com` for medium/low digest (LD-05)
+4. Escalation targets are wired: Teams channel for critical/high; `<tech-team-email>` for medium/low digest (LD-05)
 5. The full alert lifecycle is implemented: detection → storage → routing → delivery (or delivery documented as deferred with a tracking task)
 
 ---
@@ -126,7 +126,7 @@ Implement at minimum the two highest-value monitors. Document the remaining 4 as
 - Wire `MonitorRegistry.runAll()` on a polling schedule (`ADMIN_ALERTS_POLL_MS = 30_000`)
 - After each `runAll()`, pass results through `deduplicateAlerts()` and then `routeAlert()` via `ReferenceNotificationDispatchAdapter`
 - For `immediate` route: dispatch the alert without delay (Teams webhook or equivalent); document the integration point
-- For `digest` route: accumulate and batch; send to `hbtech@hedrickbrothers.com` on a defined schedule (LD-05)
+- For `digest` route: accumulate and batch; send to `<tech-team-email>` on a defined schedule (LD-05)
 - If Teams webhook or email delivery is not available in Wave 0, surface the routing decision in the admin UI (show which alerts would have been dispatched immediately vs. queued for digest) and document as a known limitation
 
 ---
@@ -182,7 +182,7 @@ The following severity assignment rules govern how T04 monitor implementations m
 
 3. **Routing applied:** `routeAlert()` is called on each alert; immediate-route alerts are dispatched (or surfaced as "would dispatch immediately" if delivery is not wired); digest-route alerts are batched.
 
-4. **Escalation targets documented:** This task file records the confirmed Teams webhook target and email target (`hbtech@hedrickbrothers.com`). If delivery is not wired in Wave 0, a clear tracking note is added.
+4. **Escalation targets documented:** This task file records the confirmed Teams webhook target and email target (`<tech-team-email>`). If delivery is not wired in Wave 0, a clear tracking note is added.
 
 5. **Monitor registry wired:** `MonitorRegistry` runs on the `ADMIN_ALERTS_POLL_MS` schedule. Duplicate alerts are deduplicated before routing.
 
@@ -221,7 +221,7 @@ During active T04 work:
 
 - ✅ **AdminAlertsApi persistence:** In-memory `Map` store (Wave 0). SharePoint `HBC_AdminAlerts` list is the Wave 1 target.
 - ✅ **Teams webhook target:** Configurable via `VITE_TEAMS_WEBHOOK_URL` env var. `TeamsWebhookDispatchAdapter` sends Adaptive Card payloads. Wave 0: best-effort fire-and-forget; console-logs when no webhook configured.
-- ✅ **Email relay:** `hbtech@hedrickbrothers.com` configured in `useAlertPolling` hook. Wave 0: console-logged only (no SMTP).
+- ✅ **Email relay:** `<tech-team-email>` configured in `useAlertPolling` hook. Wave 0: console-logged only (no SMTP).
 - ✅ **Teams/email delivery status:** Wired via `TeamsWebhookDispatchAdapter`. Webhook delivery is fire-and-forget. Email relay is logged, not sent. Both are documented Wave 0 limitations.
 - ✅ **Monitors implemented:** `provisioningFailureMonitor` (detects Failed requests, severity high→critical at retry ceiling) and `stuckWorkflowMonitor` (detects InProgress >30 min, escalates to critical at 2h).
 - ✅ **Monitors deferred (P3):** `overdueProvisioningMonitor`, `staleRecordMonitor`, `permissionAnomalyMonitor`, `upcomingExpirationMonitor` — remain stubs, tracked as post-Wave-0 follow-on.

@@ -55,7 +55,7 @@ import { TeamsWebhookDispatchAdapter } from '@hbc/features-admin';
 
 const adapter = new TeamsWebhookDispatchAdapter({
   webhookUrl: process.env.TEAMS_WEBHOOK_URL,
-  emailRelay: 'hbtech@hedrickbrothers.com',
+  emailRelay: 'alert-relay@example.com',
 });
 const event = adapter.dispatch(alert);
 ```

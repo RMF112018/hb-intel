@@ -60,7 +60,7 @@
 
 | Property | Expected | Implementation |
 |----------|----------|---------------|
-| Site URL | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` | `SHAREPOINT_PROJECTS_SITE_URL` env var → `spfi(siteUrl)` |
+| Site URL | `https://<sharepoint-site-url>` | `SHAREPOINT_PROJECTS_SITE_URL` env var → `spfi(siteUrl)` |
 | List title | `Projects` | `PROJECTS_LIST_NAME = 'Projects'` |
 | Field names | `field_1`..`field_24`, `Title`, `Year` | Confirmed from SP schema; all select/filter/write use field_N |
 

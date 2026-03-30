@@ -12,7 +12,7 @@ import { routeAlert } from '../monitors/notificationRouter.js';
 export interface TeamsWebhookConfig {
   /** Teams Incoming Webhook URL. When absent, webhook delivery is skipped. */
   webhookUrl?: string;
-  /** Digest email relay address (e.g. hbtech@hedrickbrothers.com). Wave 0: logged only. */
+  /** Digest email relay address (e.g. alert-relay@example.com). Wave 0: logged only. */
   emailRelay?: string;
 }
 

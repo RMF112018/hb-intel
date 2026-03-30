@@ -9,9 +9,9 @@ Resolve the confirmed runtime failure in the Estimating SharePoint web part wher
 The current production symptom is:
 
 - SharePoint attempts to load:
-  - `https://hedrickbrotherscom.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbbestimating-app.js`
+  - `<sharepoint-tenant-url>/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbbestimating-app.js`
 - The correct URL shape should be:
-  - `https://hedrickbrotherscom.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js`
+  - `<sharepoint-tenant-url>/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js`
 
 This prompt is **not** exploratory. The malformed URL is already proven and must be fixed first.
 

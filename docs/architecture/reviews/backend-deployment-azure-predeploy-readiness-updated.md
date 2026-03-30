@@ -1,8 +1,8 @@
 # Backend Deployment — Azure Pre-Deploy Readiness (Updated)
 
 > **Date**: 2026-03-29
-> **Target**: `hb-intel-function-app` (`hb-intel` resource group)
-> **Host**: `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net`
+> **Target**: `<function-app-name>` (`<resource-group>`)
+> **Host**: `<function-app-default-hostname>`
 > **Predecessor**: `backend-deployment-validation-and-target-confirmation.md`
 
 ---
@@ -19,7 +19,7 @@ Three contradictions between the Prompt 01 report and the live Azure target have
 |---|------|-------------------|-----------------|------------|
 | 1 | **Node version** | Node 20 (`~20`) | Node 22 | **Keep Node 22.** Root `package.json` requires `"node": ">=20"`. `@azure/functions@4.11.2` requires `"node": ">=20.0"`. Node 22 satisfies both. The `~20` in `local.settings.example.json` and `'20'` in CI are conventions, not hard constraints. |
 | 2 | **Managed identity** | System-assigned required | User-assigned present | **Keep user-assigned.** `DefaultAzureCredential` supports user-assigned identity when `AZURE_CLIENT_ID` is set to the identity's client ID. No code path explicitly requires system-assigned. |
-| 3 | **CORS** | Setup step needed | Already configured for `https://hedrickbrotherscom.sharepoint.com` | **Verified sufficient.** User marked as COMPLETE in deployment doc. SPFx browser calls require this origin. |
+| 3 | **CORS** | Setup step needed | Already configured for `<sharepoint-tenant-url>` | **Verified sufficient.** User marked as COMPLETE in deployment doc. SPFx browser calls require this origin. |
 | 4 | **Public network access** | Not assessed | Needs validation | **Must be enabled.** SPFx browser calls come from user browsers, not Azure VNet. Function App must accept public HTTPS traffic. |
 
 ---
@@ -71,14 +71,14 @@ This must be validated during configuration. See blocked items in Section 7.
 
 **Status: Configured (user-confirmed COMPLETE)**
 
-The SharePoint origin `https://hedrickbrotherscom.sharepoint.com` is already present. This is required because the SPFx-hosted Estimating app makes direct browser fetch calls to the Function App from SharePoint pages.
+The SharePoint origin `<sharepoint-tenant-url>` is already present. This is required because the SPFx-hosted Estimating app makes direct browser fetch calls to the Function App from SharePoint pages.
 
 **Validate with:**
 ```bash
-az functionapp cors show --name hb-intel-function-app --resource-group hb-intel
+az functionapp cors show --name <function-app-name> --resource-group hb-intel
 ```
 
-Expect to see `https://hedrickbrotherscom.sharepoint.com` in the allowed origins list.
+Expect to see `<sharepoint-tenant-url>` in the allowed origins list.
 
 ### Public Network Access
 
@@ -88,13 +88,13 @@ The SPFx app runs in user browsers. API calls originate from the browser, not fr
 
 **Validate with:**
 ```bash
-az functionapp show --name hb-intel-function-app --resource-group hb-intel \
+az functionapp show --name <function-app-name> --resource-group hb-intel \
   --query "publicNetworkAccess" -o tsv
 ```
 
 Expected: `Enabled`. If `Disabled`, enable with:
 ```bash
-az functionapp update --name hb-intel-function-app --resource-group hb-intel \
+az functionapp update --name <function-app-name> --resource-group hb-intel \
   --set publicNetworkAccess=Enabled
 ```
 
@@ -105,7 +105,7 @@ az functionapp update --name hb-intel-function-app --resource-group hb-intel \
 ### Azure CLI Login Required First
 
 ```bash
-az login --tenant "91e238a3-4af4-42c0-9cb8-eb37861d82f3" \
+az login --tenant "<tenant-id>" \
   --scope "https://management.core.windows.net//.default"
 ```
 
@@ -113,7 +113,7 @@ az login --tenant "91e238a3-4af4-42c0-9cb8-eb37861d82f3" \
 
 ```bash
 az functionapp config appsettings list \
-  --name hb-intel-function-app \
+  --name <function-app-name> \
   --resource-group hb-intel \
   -o table
 ```
@@ -122,15 +122,15 @@ az functionapp config appsettings list \
 
 ```bash
 az functionapp config appsettings set \
-  --name hb-intel-function-app \
+  --name <function-app-name> \
   --resource-group hb-intel \
   --settings \
     FUNCTIONS_WORKER_RUNTIME=node \
     WEBSITE_NODE_DEFAULT_VERSION=~22 \
     HBC_ADAPTER_MODE=proxy \
-    SHAREPOINT_TENANT_URL=https://hedrickbrotherscom.sharepoint.com \
-    SHAREPOINT_PROJECTS_SITE_URL=https://hedrickbrotherscom.sharepoint.com/sites/HBCentral \
-    NOTIFICATION_API_BASE_URL=https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net \
+    SHAREPOINT_TENANT_URL=<sharepoint-tenant-url> \
+    SHAREPOINT_PROJECTS_SITE_URL=<sharepoint-projects-site-url> \
+    NOTIFICATION_API_BASE_URL=<function-app-url> \
     WEBSITE_TIME_ZONE="Eastern Standard Time"
 ```
 
@@ -141,7 +141,7 @@ These require exact values from the Azure environment. Query and set:
 ```bash
 # Get the user-assigned managed identity client ID
 az functionapp identity show \
-  --name hb-intel-function-app \
+  --name <function-app-name> \
   --resource-group hb-intel \
   --query "userAssignedIdentities" -o json
 
@@ -155,44 +155,44 @@ az storage account list --resource-group hb-intel \
   --query "[0].name" -o tsv
 # Then:
 az storage account show-connection-string \
-  --name hbintelb8f1 \
+  --name <storage-account-name> \
   --resource-group hb-intel \
   --query "connectionString" -o tsv
 
 # Apply discovered values
 az functionapp config appsettings set \
-  --name hb-intel-function-app \
-  --resource-group hb-intel \
+  --name <function-app-name> \
+  --resource-group <resource-group> \
   --settings \
-    AZURE_TENANT_ID=91e238a3-4af4-42c0-9cb8-eb37861d82f3 \
-    AZURE_CLIENT_ID=77ad3593-5414-4122-a649-74916f8c0d7a \
-    APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=1df9279b-3091-4ae7-8291-015a732def00;IngestionEndpoint=https://eastus2-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus2.livediagnostics.monitor.azure.com/;ApplicationId=d6612368-b380-409e-ae6f-2db7c5c8c309 \
-    AzureWebJobsStorage=https://hbintelb8f1.blob.core.windows.net \
-    AZURE_TABLE_ENDPOINT=DefaultEndpointsProtocol=https;AccountName=hbintel-table-prod-01;AccountKey=1TSbPWinavt6BAxspSFfFJgPf0js35k3ybzIHlKFFFFYphmBEgjS8wc85P0sU8A7EpoOQiOmZnBEACDbI5Atug==;TableEndpoint=https://hbintel-table-prod-01.table.cosmos.azure.com:443/;
+    AZURE_TENANT_ID=<tenant-id> \
+    AZURE_CLIENT_ID=<managed-identity-client-id> \
+    APPLICATIONINSIGHTS_CONNECTION_STRING=<app-insights-connection-string> \
+    AzureWebJobsStorage=<storage-blob-endpoint> \
+    AZURE_TABLE_ENDPOINT=<table-storage-connection-string>
 ```
 
 ### Step 4: Apply business/authorization settings
 
 ```bash
 az functionapp config appsettings set \
-  --name hb-intel-function-app \
-  --resource-group hb-intel \
+  --name <function-app-name> \
+  --resource-group <resource-group> \
   --settings \
-    CONTROLLER_UPNS="bfetting@hedrickbrothers.com" \
-    ADMIN_UPNS="bfetting@hedrickbrothers.com" \
-    OPEX_MANAGER_UPN="<opex-manager@hedrickbrothers.com>" \
-    EMAIL_FROM_ADDRESS="bfetting@hedrickbrothers.com"
+    CONTROLLER_UPNS="<controller-upn>" \
+    ADMIN_UPNS="<admin-upn>" \
+    OPEX_MANAGER_UPN="<opex-manager-upn>" \
+    EMAIL_FROM_ADDRESS="<sender-email>"
 ```
 
 ### Step 4: Cleanup
 
 ```bash
 az functionapp config appsettings set \
-  --name hb-intel-function-app \
-  --resource-group hb-intel \
+  --name <function-app-name> \
+  --resource-group <resource-group> \
   --settings \
-    APPLICATIONINSIGHTS_CONNECTION_STRING='InstrumentationKey=1df9279b-3091-4ae7-8291-015a732def00;IngestionEndpoint=https://eastus2-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus2.livediagnostics.monitor.azure.com/;ApplicationId=d6612368-b380-409e-ae6f-2db7c5c8c309' \
-    OPEX_MANAGER_UPN='bfetting@hedrickbrothers.com'
+    APPLICATIONINSIGHTS_CONNECTION_STRING='<app-insights-connection-string>' \
+    OPEX_MANAGER_UPN='<opex-manager-upn>'
 ```
 
 ---
@@ -273,7 +273,7 @@ Five blockers remain (see Section 8). The most impactful is B3 (startup validati
 
 Before the next prompt can publish:
 
-1. **User must re-authenticate Azure CLI**: `az login --tenant 91e238a3-4af4-42c0-9cb8-eb37861d82f3`
+1. **User must re-authenticate Azure CLI**: `az login --tenant <tenant-id>`
 2. **User must provide or confirm**:
    - `AZURE_CLIENT_ID` (app registration and/or managed identity)
    - `CONTROLLER_UPNS`, `ADMIN_UPNS`, `OPEX_MANAGER_UPN` values

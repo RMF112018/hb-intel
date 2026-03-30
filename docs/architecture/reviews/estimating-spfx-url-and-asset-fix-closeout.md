@@ -8,13 +8,13 @@
 After deploying `hb-intel-estimating.sppkg` to the SharePoint App Catalog, the web part failed at runtime with a RequireJS script-load error. SharePoint attempted to load:
 
 ```
-https://hedrickbrotherscom.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbbestimating-app.js
+<sharepoint-tenant-url>/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbbestimating-app.js
 ```
 
 The correct URL shape is:
 
 ```
-https://hedrickbrotherscom.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js
+<sharepoint-tenant-url>/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js
 ```
 
 ## 2. Confirmed Root Causes

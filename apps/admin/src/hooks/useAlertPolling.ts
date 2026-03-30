@@ -30,7 +30,7 @@ export function useAlertPolling(): AlertPollingService | null {
       },
       teamsWebhookUrl: (import.meta.env as Record<string, string | undefined>)
         .VITE_TEAMS_WEBHOOK_URL,
-      emailRelay: 'hbtech@hedrickbrothers.com',
+      emailRelay: (import.meta.env as Record<string, string | undefined>).VITE_ALERT_EMAIL_RELAY ?? '',
     });
 
     service.start();

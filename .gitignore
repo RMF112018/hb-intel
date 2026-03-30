@@ -56,5 +56,10 @@ storybook-static/
 *.swo
 playwright-report/
 test-results/
+# Claude Code local settings (may contain approved commands with env-specific values)
+.claude/settings.local.json
 .claude/plans/spicy-forging-knuth.md
 .worktrees/
+
+# Deployment artifacts with environment-specific values
+docs/architecture/plans/MASTER/phase-1-deliverables/Deployment-*

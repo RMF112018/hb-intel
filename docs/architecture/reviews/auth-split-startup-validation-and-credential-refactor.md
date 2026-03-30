@@ -92,9 +92,9 @@ The fallback preserves backward compatibility for single-identity deployments.
 
 ## 6. Deployment / Operator Implications
 
-### Current Azure Function App (`hb-intel-function-app`)
+### Current Azure Function App (`<function-app-name>`)
 
-`AZURE_CLIENT_ID=77ad3593-5414-4122-a649-74916f8c0d7a` (user-assigned MI)
+`AZURE_CLIENT_ID=<managed-identity-client-id>` (user-assigned MI)
 
 - If the SPFx app registration uses the same client ID → no action needed
 - If the SPFx app registration uses a different client ID → set `API_AUDIENCE=api://<spfx-app-reg-id>`
@@ -105,7 +105,7 @@ The fallback preserves backward compatibility for single-identity deployments.
 If 401 errors occur after deployment, the error message from `jose` will say `unexpected "aud" claim value`. Fix:
 ```bash
 az functionapp config appsettings set \
-  --name hb-intel-function-app --resource-group hb-intel \
+  --name <function-app-name> --resource-group hb-intel \
   --settings API_AUDIENCE="api://<correct-app-registration-client-id>"
 ```
 

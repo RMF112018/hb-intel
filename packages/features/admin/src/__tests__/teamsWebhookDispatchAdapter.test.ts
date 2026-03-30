@@ -84,11 +84,11 @@ describe('TeamsWebhookDispatchAdapter', () => {
 
   it('logs digest info with email relay target', () => {
     const adapter = new TeamsWebhookDispatchAdapter({
-      emailRelay: 'hbtech@hedrickbrothers.com',
+      emailRelay: 'alert-relay@example.com',
     });
     adapter.dispatch(makeAlert({ severity: 'medium' }));
     expect(console.info).toHaveBeenCalledWith(
-      expect.stringContaining('hbtech@hedrickbrothers.com'),
+      expect.stringContaining('alert-relay@example.com'),
       'a-1',
     );
   });

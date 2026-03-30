@@ -20,7 +20,7 @@ All eight prior audit findings were validated against the local repo. Seven are 
 ### Symptom
 
 ```
-GET https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/SitePages/undefined/api/project-setup-requests 404 (Not Found)
+GET https://<sharepoint-site-url>/SitePages/undefined/api/project-setup-requests 404 (Not Found)
 ```
 
 UI displays: "Something went wrong — Unable to load project setup requests."
@@ -64,9 +64,9 @@ Inject the Azure Function App URL via one of:
 
 | Property | Value |
 |----------|-------|
-| Site URL | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` |
+| Site URL | `https://<sharepoint-site-url>` |
 | List title | `Projects` |
-| List URL | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/Lists/Projects/AllItems.aspx` |
+| List URL | `https://<sharepoint-site-url>/Lists/Projects/AllItems.aspx` |
 
 ### Current Repo Alignment
 
@@ -85,7 +85,7 @@ Inject the Azure Function App URL via one of:
 
 ### Required Changes
 
-1. `SHAREPOINT_TENANT_URL` (or a new `SHAREPOINT_SITE_URL`) must point to `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`
+1. `SHAREPOINT_TENANT_URL` (or a new `SHAREPOINT_SITE_URL`) must point to `https://<sharepoint-site-url>`
 2. `project-requests-repository.ts` PnPjs connection must target the HBCentral site
 3. **Field-name reconciliation required**: If both consumers target the same list, the backend's display-name fields (`ProjectName`, `ProjectNumber`) will fail against the HBCentral list's `field_N` internal names from CSV import. The backend `toListItem()`/`fromListItem()` must be updated to use the confirmed `field_N` schema.
 

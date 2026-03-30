@@ -14,13 +14,13 @@ import { validateRequiredConfig } from '../utils/validate-config.js';
 
 // The 7 core + Project Setup required settings (pinned contract)
 const PROJECT_SETUP_BOOT_CONFIG: Record<string, string> = {
-  AZURE_TENANT_ID: '91e238a3-4af4-42c0-9cb8-eb37861d82f3',
-  AZURE_CLIENT_ID: '77ad3593-5414-4122-a649-74916f8c0d7a',
-  AZURE_TABLE_ENDPOINT: 'https://hbintel-table-prod-01.table.cosmos.azure.com:443/',
-  APPLICATIONINSIGHTS_CONNECTION_STRING: 'InstrumentationKey=test-key',
+  AZURE_TENANT_ID: '00000000-0000-0000-0000-000000000001',
+  AZURE_CLIENT_ID: '00000000-0000-0000-0000-000000000002',
+  AZURE_TABLE_ENDPOINT: 'https://test-table-account.table.cosmos.azure.com:443/',
+  APPLICATIONINSIGHTS_CONNECTION_STRING: 'InstrumentationKey=00000000-0000-0000-0000-000000000003',
   HBC_ADAPTER_MODE: 'proxy',
-  SHAREPOINT_TENANT_URL: 'https://hedrickbrotherscom.sharepoint.com',
-  SHAREPOINT_PROJECTS_SITE_URL: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+  SHAREPOINT_TENANT_URL: 'https://contoso.sharepoint.com',
+  SHAREPOINT_PROJECTS_SITE_URL: 'https://contoso.sharepoint.com/sites/TestSite',
 };
 
 describe('Boot behavior — Project Setup-only deployment posture', () => {
@@ -157,18 +157,16 @@ describe('Boot behavior — Project Setup-only deployment posture', () => {
 
   // === F. Realistic Azure target config ===
 
-  it('F1: exact live Azure Function App config boots successfully', () => {
-    // Matches the actual app settings from hb-intel-function-app
-    vi.stubEnv('AZURE_TENANT_ID', '91e238a3-4af4-42c0-9cb8-eb37861d82f3');
-    vi.stubEnv('AZURE_CLIENT_ID', '77ad3593-5414-4122-a649-74916f8c0d7a');
-    vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://hbintel-table-prod-01.table.cosmos.azure.com:443/');
-    vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'InstrumentationKey=1df9279b-3091-4ae7-8291-015a732def00');
+  it('F1: realistic production-like config boots successfully', () => {
+    vi.stubEnv('AZURE_TENANT_ID', '00000000-0000-0000-0000-000000000001');
+    vi.stubEnv('AZURE_CLIENT_ID', '00000000-0000-0000-0000-000000000002');
+    vi.stubEnv('AZURE_TABLE_ENDPOINT', 'https://test-table.table.cosmos.azure.com:443/');
+    vi.stubEnv('APPLICATIONINSIGHTS_CONNECTION_STRING', 'InstrumentationKey=00000000-0000-0000-0000-000000000003');
     vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
-    vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://hedrickbrotherscom.sharepoint.com');
-    vi.stubEnv('SHAREPOINT_PROJECTS_SITE_URL', 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral');
-    // Optional — present but not required
-    vi.stubEnv('CONTROLLER_UPNS', 'bfetting@hedrickbrothers.com');
-    vi.stubEnv('ADMIN_UPNS', 'bfetting@hedrickbrothers.com');
+    vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+    vi.stubEnv('SHAREPOINT_PROJECTS_SITE_URL', 'https://contoso.sharepoint.com/sites/TestSite');
+    vi.stubEnv('CONTROLLER_UPNS', 'controller@contoso.com');
+    vi.stubEnv('ADMIN_UPNS', 'admin@contoso.com');
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 });

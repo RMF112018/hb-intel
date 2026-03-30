@@ -1,5 +1,5 @@
 {
-  "id": "/subscriptions/da99386a-88ef-4987-afc5-12e22690da20/resourceGroups/BFetting/providers/Microsoft.Resources/deployments/Microsoft.Azure.CosmosDB-20260320115857",
+  "id": "/subscriptions/<subscription-id>/resourceGroups/BFetting/providers/Microsoft.Resources/deployments/Microsoft.Azure.CosmosDB-20260320115857",
   "name": "Microsoft.Azure.CosmosDB-20260320115857",
   "type": "Microsoft.Resources/deployments",
   "properties": {
@@ -51,7 +51,7 @@
     "validationLevel": "Template"
   },
   "tags": {
-    "primaryResourceId": "/subscriptions/da99386a-88ef-4987-afc5-12e22690da20/resourcegroups/BFetting/providers/Microsoft.DocumentDB/databaseAccounts/hbintel-table-prod-01",
+    "primaryResourceId": "/subscriptions/<subscription-id>/resourcegroups/BFetting/providers/Microsoft.DocumentDB/databaseAccounts/hbintel-table-prod-01",
     "marketplaceItemId": "Microsoft.DocumentDB"
   }
 }

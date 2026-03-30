@@ -11,7 +11,7 @@
 `import.meta.env.VITE_FUNCTION_APP_URL` was never defined — not at Vite build time (no `.env.production`, no `define` entry in `vite.config.ts`), not at SPFx runtime (shell webpart passed no config to `mount()`). Vite inlined the literal `"undefined"` into the IIFE bundle, causing every API call to resolve as a relative SharePoint page URL:
 
 ```
-https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/SitePages/undefined/api/project-setup-requests → 404
+https://<sharepoint-site-url>/SitePages/undefined/api/project-setup-requests → 404
 ```
 
 All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage) and SignalR negotiate were affected.
@@ -105,7 +105,7 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 
 ### Backend SP Target
 
-1. Set `SHAREPOINT_PROJECTS_SITE_URL=https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` in Function App configuration
+1. Set `SHAREPOINT_PROJECTS_SITE_URL=https://<sharepoint-site-url>` in Function App configuration
 2. Verify the backend connects to the HBCentral site's Projects list
 3. Run backend tests: `pnpm --filter @hbc/functions test`
 
@@ -115,9 +115,9 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 
 | Property | Expected | Repo Status |
 |----------|----------|-------------|
-| Site URL | `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral` | `SHAREPOINT_PROJECTS_SITE_URL` env var (preferred) → adapter `siteUrl` |
+| Site URL | `https://<sharepoint-site-url>` | `SHAREPOINT_PROJECTS_SITE_URL` env var (preferred) → adapter `siteUrl` |
 | List title | `Projects` | `PROJECTS_LIST_NAME = 'Projects'` (unchanged) |
-| Tenant URL | `https://hedrickbrotherscom.sharepoint.com` | `SHAREPOINT_TENANT_URL` (corrected in example) |
+| Tenant URL | `<sharepoint-tenant-url>` | `SHAREPOINT_TENANT_URL` (corrected in example) |
 
 The backend adapter now uses `SHAREPOINT_PROJECTS_SITE_URL` to connect PnPjs to the correct site. Token scope is derived from the URL origin.
 
