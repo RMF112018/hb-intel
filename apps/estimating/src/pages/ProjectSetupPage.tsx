@@ -14,16 +14,143 @@ import {
 } from '@hbc/provisioning';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
-import { HbcBanner, HbcButton, HbcDataTable, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
-import { HBC_SPACE_MD } from '@hbc/ui-kit/theme';
+import {
+  HbcBanner,
+  HbcButton,
+  HbcDataTable,
+  HbcStatusBadge,
+  WorkspacePageShell,
+  HBC_SURFACE_LIGHT,
+  HBC_PRIMARY_BLUE,
+  HBC_RADIUS_SM,
+  HBC_RADIUS_LG,
+} from '@hbc/ui-kit';
+import {
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+  heading2,
+  bodySmall,
+  label as labelType,
+} from '@hbc/ui-kit/theme';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getStateBadgeVariant } from '../components/project-setup/stateDisplayHelpers.js';
 import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 import { canCoordinatorRetry } from '../utils/failureClassification.js';
 
+// ── Styles ────────────────────────────────────────────────────────────────
+
 const useStyles = makeStyles({
-  actionRow: { marginBottom: `${HBC_SPACE_MD}px` },
+  // ── Page header zone ───────────────────────────────────────────────
+  headerZone: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px ${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    marginBottom: `${HBC_SPACE_LG}px`,
+    borderBottomWidth: '1px', // eslint-disable-line @hb-intel/hbc/enforce-hbc-tokens -- standard border, no token needed
+    borderBottomStyle: 'solid',
+    borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
+  },
+  pageTitle: {
+    fontSize: heading2.fontSize,
+    fontWeight: heading2.fontWeight,
+    lineHeight: heading2.lineHeight,
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    marginTop: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0,
+  },
+  headerTrailing: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    marginLeft: 'auto',
+  },
+  countBadge: {
+    fontSize: labelType.fontSize,
+    fontWeight: labelType.fontWeight,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    paddingTop: `${HBC_SPACE_XS / 2}px`,
+    paddingBottom: `${HBC_SPACE_XS / 2}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    borderRadius: HBC_RADIUS_SM,
+    whiteSpace: 'nowrap',
+  },
+
+  // ── Table zone ─────────────────────────────────────────────────────
+  tableContainer: {
+    marginTop: `${HBC_SPACE_SM}px`,
+  },
+  projectLink: {
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    fontWeight: '600',
+    textDecorationLine: 'none',
+    ':hover': {
+      textDecorationLine: 'underline',
+    },
+    ':focus-visible': {
+      outlineWidth: `${HBC_SPACE_XS / 2}px`,
+      outlineStyle: 'solid',
+      outlineColor: HBC_PRIMARY_BLUE,
+      outlineOffset: `${HBC_SPACE_XS / 2}px`,
+      borderRadius: HBC_RADIUS_SM,
+    },
+  },
+  dateCell: {
+    fontSize: bodySmall.fontSize,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  ownerCell: {
+    fontSize: bodySmall.fontSize,
+    color: HBC_SURFACE_LIGHT['text-primary'],
+  },
+  awaitingLabel: {
+    fontSize: bodySmall.fontSize,
+    fontWeight: labelType.fontWeight,
+    fontStyle: 'italic',
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
+  bannerContainer: {
+    marginBottom: `${HBC_SPACE_MD}px`,
+  },
+
+  // ── Essential tier list ────────────────────────────────────────────
+  essentialList: {
+    listStyleType: 'none',
+    paddingLeft: '0',
+    marginTop: '0',
+    marginBottom: '0',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${HBC_SPACE_SM}px`,
+  },
+  essentialItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    paddingTop: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    borderRadius: HBC_RADIUS_LG,
+  },
+  essentialLink: {
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    fontWeight: '600',
+    textDecorationLine: 'none',
+    flexGrow: 1,
+    ':hover': { textDecorationLine: 'underline' },
+  },
 });
+
+// ── Empty state config ────────────────────────────────────────────────────
 
 const SETUP_EMPTY_CONFIG: ISmartEmptyStateConfig = {
   resolve: (context) => ({
@@ -31,9 +158,9 @@ const SETUP_EMPTY_CONFIG: ISmartEmptyStateConfig = {
     view: context.view,
     classification: context.isFirstVisit ? 'first-use' : 'truly-empty',
     heading: 'No project setup requests yet',
-    description: 'Create a new request to get started.',
+    description: 'Submit a new request to begin project setup. Requests are reviewed before provisioning begins.',
     primaryAction: { label: 'New Project Setup Request', href: '/project-setup/new' },
-    coachingTip: 'Project setup requests go through review before provisioning begins.',
+    coachingTip: 'Once submitted, requests go through automated provisioning steps. You can track progress from this queue.',
   }),
 };
 
@@ -47,10 +174,12 @@ const SETUP_EMPTY_CONTEXT: IEmptyStateContext = {
   isLoadError: false,
 };
 
+// ── Component ─────────────────────────────────────────────────────────────
+
 /**
- * D-PH6-10 Project Setup request list page for Estimating coordinators.
- * W0-G4-T02: Standard+ tier renders HbcDataTable with columns, row actions, and BIC ownership.
- * W0-G4-T07: Session guard, load-error state, HbcSmartEmptyState for empty list.
+ * Project Setup Requests — operational queue page.
+ * Standard+ tier renders HbcDataTable with columns, row actions, and BIC ownership.
+ * Essential tier renders a simpler card list with status badges.
  */
 export function ProjectSetupPage(): ReactNode {
   const styles = useStyles();
@@ -60,6 +189,7 @@ export function ProjectSetupPage(): ReactNode {
     useProvisioningStore();
   const [actionError, setActionError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const isMountedRef = useRef(true);
   const loadGenerationRef = useRef(0);
 
@@ -74,9 +204,7 @@ export function ProjectSetupPage(): ReactNode {
       }
       setRequests(listed);
 
-      if (!isUiReview) {
-        return;
-      }
+      if (!isUiReview) return;
 
       const statuses = await Promise.all(
         listed.map(async (request) => {
@@ -102,17 +230,21 @@ export function ProjectSetupPage(): ReactNode {
     let active = true;
     const generation = ++loadGenerationRef.current;
     setLoadError(null);
+    setIsLoading(true);
     client
       .listRequests()
       .then(async (listed: IProjectSetupRequest[]) => {
-        if (!active || loadGenerationRef.current !== generation) {
-          return;
-        }
+        if (!active || loadGenerationRef.current !== generation) return;
         await syncRequests(listed, generation);
       })
       .catch(() => {
         if (active && loadGenerationRef.current === generation) {
           setLoadError('Unable to load project setup requests. Check your connection and try again.');
+        }
+      })
+      .finally(() => {
+        if (active && loadGenerationRef.current === generation) {
+          setIsLoading(false);
         }
       });
     return () => {
@@ -152,15 +284,19 @@ export function ProjectSetupPage(): ReactNode {
     [client, session, syncRequests],
   );
 
-  /** W0-G4-T02: Column definitions for coordinator queue table. */
   const columns = useMemo<ColumnDef<IProjectSetupRequest, unknown>[]>(
     () => [
       {
         id: 'projectName',
         header: 'Project Name',
         accessorKey: 'projectName',
+        size: 220,
         cell: ({ row }) => (
-          <Link to="/project-setup/$requestId" params={{ requestId: row.original.requestId }}>
+          <Link
+            to="/project-setup/$requestId"
+            params={{ requestId: row.original.requestId }}
+            className={styles.projectLink}
+          >
             {row.original.projectName}
           </Link>
         ),
@@ -168,11 +304,13 @@ export function ProjectSetupPage(): ReactNode {
       {
         id: 'department',
         header: 'Department',
+        size: 140,
         accessorFn: (row) => DEPARTMENT_DISPLAY_LABELS[row.department ?? ''] ?? row.department ?? '—',
       },
       {
         id: 'state',
-        header: 'State',
+        header: 'Status',
+        size: 130,
         accessorKey: 'state',
         cell: ({ row }) => (
           <HbcStatusBadge
@@ -185,23 +323,31 @@ export function ProjectSetupPage(): ReactNode {
       {
         id: 'currentOwner',
         header: 'Current Owner',
+        size: 160,
         accessorFn: (row) => {
           const bicState = resolveFullBicState(row, PROJECT_SETUP_BIC_CONFIG);
           return bicState.currentOwner?.displayName ?? 'System';
         },
+        cell: ({ getValue }) => (
+          <span className={styles.ownerCell}>{getValue() as string}</span>
+        ),
       },
       {
         id: 'submittedAt',
         header: 'Submitted',
+        size: 110,
         accessorKey: 'submittedAt',
-        cell: ({ row }) => {
-          const date = new Date(row.original.submittedAt);
-          return date.toLocaleDateString();
-        },
+        cell: ({ row }) => (
+          <span className={styles.dateCell}>
+            {new Date(row.original.submittedAt).toLocaleDateString()}
+          </span>
+        ),
       },
       {
         id: 'actions',
-        header: 'Actions',
+        header: '',
+        size: 100,
+        enableSorting: false,
         cell: ({ row }) => {
           const req = row.original;
           const provStatus = statusByProjectId[req.projectId];
@@ -221,25 +367,25 @@ export function ProjectSetupPage(): ReactNode {
             );
           }
           if (req.state === 'NeedsClarification') {
-            return <span>Awaiting Response</span>;
+            return <span className={styles.awaitingLabel}>Awaiting Response</span>;
           }
           return null;
         },
       },
     ],
-    [statusByProjectId, handleRetry, handleEscalate],
+    [styles, statusByProjectId, handleRetry, handleEscalate],
   );
 
-  // W0-G4-T07: Session loading guard (after all hooks)
+  // Session loading guard
   if (!session) {
     return (
-      <WorkspacePageShell layout="list" title="Loading..." isLoading>
+      <WorkspacePageShell layout="list" title="Project Setup Requests" isLoading>
         {null}
       </WorkspacePageShell>
     );
   }
 
-  // W0-G4-T07: Load error state
+  // Load error state
   if (loadError && requests.length === 0) {
     return (
       <WorkspacePageShell
@@ -256,33 +402,57 @@ export function ProjectSetupPage(): ReactNode {
 
   return (
     <WorkspacePageShell layout="list" title="Project Setup Requests">
-      <div className={styles.actionRow}>
-        <Link to="/project-setup/new" search={{ mode: 'new-request', requestId: undefined }}>
-          <HbcButton>New Project Setup Request</HbcButton>
-        </Link>
+      {/* ── Page header with action and count ────────────────── */}
+      <div className={styles.headerZone}>
+        <h2 className={styles.pageTitle}>Request Queue</h2>
+        <div className={styles.headerTrailing}>
+          {!isLoading && requests.length > 0 && (
+            <span className={styles.countBadge} aria-live="polite">
+              {requests.length} request{requests.length !== 1 ? 's' : ''}
+            </span>
+          )}
+          <Link to="/project-setup/new" search={{ mode: 'new-request', requestId: undefined }}>
+            <HbcButton>New Request</HbcButton>
+          </Link>
+        </div>
       </div>
 
+      {/* ── Action error banner ──────────────────────────────── */}
       {actionError && (
-        <HbcBanner variant="error" onDismiss={() => setActionError(null)}>
-          {actionError}
-        </HbcBanner>
+        <div className={styles.bannerContainer}>
+          <HbcBanner variant="error" onDismiss={() => setActionError(null)}>
+            {actionError}
+          </HbcBanner>
+        </div>
       )}
 
-      {requests.length === 0 ? (
-        <HbcSmartEmptyState config={SETUP_EMPTY_CONFIG} context={SETUP_EMPTY_CONTEXT} variant="inline" />
+      {/* ── Content: empty, loading, or table ────────────────── */}
+      {!isLoading && requests.length === 0 ? (
+        <HbcSmartEmptyState
+          config={SETUP_EMPTY_CONFIG}
+          context={SETUP_EMPTY_CONTEXT}
+          variant="full-page"
+        />
       ) : (
-        <>
-          {/* W0-G4-T02: Standard+ tier — coordinator queue table */}
+        <div className={styles.tableContainer}>
           <HbcComplexityGate
             minTier="standard"
             fallback={
-              /* Essential tier — requester simple list (existing behavior) */
-              <ul>
+              <ul className={styles.essentialList}>
                 {requests.map((request) => (
-                  <li key={request.requestId}>
-                    <Link to="/project-setup/$requestId" params={{ requestId: request.requestId }}>
-                      {request.projectName} — {request.state}
+                  <li key={request.requestId} className={styles.essentialItem}>
+                    <Link
+                      to="/project-setup/$requestId"
+                      params={{ requestId: request.requestId }}
+                      className={styles.essentialLink}
+                    >
+                      {request.projectName}
                     </Link>
+                    <HbcStatusBadge
+                      variant={getStateBadgeVariant(request.state)}
+                      label={PROJECT_SETUP_STATUS_LABELS[request.state] ?? request.state}
+                      size="small"
+                    />
                   </li>
                 ))}
               </ul>
@@ -294,10 +464,10 @@ export function ProjectSetupPage(): ReactNode {
               enableSorting
               enablePagination
               pageSize={25}
-              height="600px"
+              isLoading={isLoading}
             />
           </HbcComplexityGate>
-        </>
+        </div>
       )}
     </WorkspacePageShell>
   );

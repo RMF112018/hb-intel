@@ -32,22 +32,18 @@ const mockSearchPeople = createStaticPeopleSearch(MOCK_PEOPLE);
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-/** Convert a single UPN string to a PersonEntry[] for single-select value prop. */
 function upnToValue(upn: string | undefined): PersonEntry[] {
   return upn ? [{ upn, displayName: upn }] : [];
 }
 
-/** Convert PersonEntry[] from onChange to a single UPN string. */
 function valueToUpn(people: PersonEntry[]): string | undefined {
   return people[0]?.upn ?? undefined;
 }
 
-/** Convert string[] UPNs to PersonEntry[] for multi-select value prop. */
 function upnsToValue(upns: string[] | undefined): PersonEntry[] {
   return (upns ?? []).map((upn) => ({ upn, displayName: upn }));
 }
 
-/** Convert PersonEntry[] from onChange to UPN string[]. */
 function valueToUpns(people: PersonEntry[]): string[] {
   return people.map((p) => p.upn);
 }
@@ -56,13 +52,12 @@ function valueToUpns(people: PersonEntry[]): string[] {
 
 /**
  * Step 3 — Project team assignment fields.
- * Uses HbcPeoplePicker with Graph live lookup in production mode,
- * or mock static search in UI-review mode.
+ * Three logical groups: leadership, estimating team, and additional members.
+ * Uses Graph-backed people search in production, static mock in UI-review.
  */
 export function TeamStepBody({ request, onChange }: StepBodyProps): ReactNode {
   const { isUiReview } = useProjectSetupBackend();
 
-  // Graph token provider — only available in SPFx production context
   const getGraphToken = useMemo(() => {
     if (isUiReview) return undefined;
     const ctx = getSpfxContext();
@@ -78,62 +73,79 @@ export function TeamStepBody({ request, onChange }: StepBodyProps): ReactNode {
   }));
 
   return (
-    <HbcFormSection title="Project Team">
-      <HbcPeoplePicker
-        label="Project Executive"
-        value={upnToValue(request.projectExecutiveUpn)}
-        onChange={(people) => onChange({ projectExecutiveUpn: valueToUpn(people) })}
-        searchPeople={searchPeople}
-        mode="single"
-        required
-      />
-      <HbcPeoplePicker
-        label="Project Manager"
-        value={upnToValue(request.projectManagerUpn)}
-        onChange={(people) => onChange({ projectManagerUpn: valueToUpn(people) })}
-        searchPeople={searchPeople}
-        mode="single"
-      />
-      <HbcPeoplePicker
-        label="Lead Estimator"
-        value={upnToValue(request.leadEstimatorUpn)}
-        onChange={(people) => onChange({ leadEstimatorUpn: valueToUpn(people) })}
-        searchPeople={searchPeople}
-        mode="single"
-        required
-      />
-      <HbcPeoplePicker
-        label="Supporting Estimators"
-        value={upnsToValue(request.supportingEstimatorUpns)}
-        onChange={(people) => onChange({ supportingEstimatorUpns: valueToUpns(people) })}
-        searchPeople={searchPeople}
-        mode="multi"
-      />
-      <HbcPeoplePicker
-        label="Additional Team Members"
-        value={upnsToValue(request.additionalTeamMemberUpns)}
-        onChange={(people) => onChange({ additionalTeamMemberUpns: valueToUpns(people) })}
-        searchPeople={searchPeople}
-        mode="multi"
-      />
-      <HbcSelect
-        label="Timberscan Approver"
-        options={timberscanApproverOptions}
-        value={request.timberscanApproverUpn ?? ''}
-        onChange={(value) => onChange({ timberscanApproverUpn: value || undefined })}
-        placeholder={
-          timberscanApproverOptions.length > 0
-            ? 'Select an eligible approver'
-            : 'Add project team members first'
-        }
-        disabled={timberscanApproverOptions.length === 0}
-        required
-      />
-      {timberscanApproverOptions.length === 0 && (
-        <HbcTypography intent="body">
-          Timberscan Approver options appear after at least one upstream team member is added.
-        </HbcTypography>
-      )}
-    </HbcFormSection>
+    <>
+      <HbcFormSection
+        title="Project Leadership"
+        description="Key decision-makers responsible for the project."
+      >
+        <HbcPeoplePicker
+          label="Project Executive"
+          value={upnToValue(request.projectExecutiveUpn)}
+          onChange={(people) => onChange({ projectExecutiveUpn: valueToUpn(people) })}
+          searchPeople={searchPeople}
+          mode="single"
+          required
+        />
+        <HbcPeoplePicker
+          label="Project Manager"
+          value={upnToValue(request.projectManagerUpn)}
+          onChange={(people) => onChange({ projectManagerUpn: valueToUpn(people) })}
+          searchPeople={searchPeople}
+          mode="single"
+        />
+      </HbcFormSection>
+
+      <HbcFormSection
+        title="Estimating Team"
+        description="Estimators assigned to produce the project estimate."
+      >
+        <HbcPeoplePicker
+          label="Lead Estimator"
+          value={upnToValue(request.leadEstimatorUpn)}
+          onChange={(people) => onChange({ leadEstimatorUpn: valueToUpn(people) })}
+          searchPeople={searchPeople}
+          mode="single"
+          required
+        />
+        <HbcPeoplePicker
+          label="Supporting Estimators"
+          value={upnsToValue(request.supportingEstimatorUpns)}
+          onChange={(people) => onChange({ supportingEstimatorUpns: valueToUpns(people) })}
+          searchPeople={searchPeople}
+          mode="multi"
+        />
+      </HbcFormSection>
+
+      <HbcFormSection
+        title="Additional Members & Approvals"
+        description="Other team members and required approvals."
+      >
+        <HbcPeoplePicker
+          label="Additional Team Members"
+          value={upnsToValue(request.additionalTeamMemberUpns)}
+          onChange={(people) => onChange({ additionalTeamMemberUpns: valueToUpns(people) })}
+          searchPeople={searchPeople}
+          mode="multi"
+        />
+        <HbcSelect
+          label="Timberscan Approver"
+          options={timberscanApproverOptions}
+          value={request.timberscanApproverUpn ?? ''}
+          onChange={(value) => onChange({ timberscanApproverUpn: value || undefined })}
+          placeholder={
+            timberscanApproverOptions.length > 0
+              ? 'Select an eligible approver'
+              : 'Add team members above first'
+          }
+          disabled={timberscanApproverOptions.length === 0}
+          required
+        />
+        {timberscanApproverOptions.length === 0 && (
+          <HbcTypography intent="bodySmall" color="var(--colorNeutralForeground3)">
+            Eligible approvers are drawn from the team members assigned above.
+          </HbcTypography>
+        )}
+      </HbcFormSection>
+    </>
   );
 }

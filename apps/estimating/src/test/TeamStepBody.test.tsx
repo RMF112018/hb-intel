@@ -46,7 +46,7 @@ describe('TeamStepBody', () => {
     // The Timberscan Approver is an HbcSelect with combobox role
     // When no team members are added, it should be disabled
     expect(
-      screen.getByText(/Timberscan Approver options appear after at least one upstream team member is added/i),
+      screen.getByText(/Eligible approvers are drawn from the team members assigned above/i),
     ).toBeInTheDocument();
   });
 

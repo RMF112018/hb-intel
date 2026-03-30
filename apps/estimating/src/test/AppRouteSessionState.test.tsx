@@ -46,7 +46,7 @@ describe('Estimating App route session-state integration', () => {
       expect(screen.getByText('Project Setup Requests')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'New Project Setup Request' }));
+    fireEvent.click(screen.getByRole('button', { name: 'New Request' }));
 
     await waitFor(() => {
       expect(screen.getByText('New Project Setup Request')).toBeInTheDocument();

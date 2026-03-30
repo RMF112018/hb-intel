@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { HbcFormSection, HbcSelect, HbcTextField, HbcTypography } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { HbcFormSection, HbcSelect, HbcTextField } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_MD } from '@hbc/ui-kit/theme';
 import type { StepBodyProps } from './StepBodyProps.js';
 
 const STATE_OPTIONS = [
@@ -60,76 +62,103 @@ const PROCORE_OPTIONS = [
   { value: 'No', label: 'No' },
 ] as const;
 
+const useStyles = makeStyles({
+  row2col: {
+    display: 'grid',
+    gap: `${HBC_SPACE_SM}px`,
+    gridTemplateColumns: '1fr',
+    [`@media (min-width: 480px)`]: {
+      gridTemplateColumns: '1fr 1fr',
+      gap: `${HBC_SPACE_MD}px`,
+    },
+  },
+});
+
 /**
  * Step 1 — Project Information fields.
- * W0-G4-T01 step body for the `project-info` wizard step.
+ * Three logical groups: identity, location, and project details.
  */
 export function ProjectInfoStepBody({ request, onChange }: StepBodyProps): ReactNode {
+  const styles = useStyles();
+
   return (
-    <HbcFormSection title="Project Information">
-      <HbcTextField
-        label="Project Name"
-        value={request.projectName ?? ''}
-        onChange={(v) => onChange({ projectName: v })}
-        required
-      />
-      <HbcTextField
-        label="Client Name"
-        value={request.clientName ?? ''}
-        onChange={(v) => onChange({ clientName: v || undefined })}
-      />
-      <div>
-        <HbcTypography intent="heading3">Project Location</HbcTypography>
+    <>
+      <HbcFormSection title="Project Identity" description="Name and client for the project.">
+        <HbcTextField
+          label="Project Name"
+          value={request.projectName ?? ''}
+          onChange={(v) => onChange({ projectName: v })}
+          required
+        />
+        <HbcTextField
+          label="Client Name"
+          value={request.clientName ?? ''}
+          onChange={(v) => onChange({ clientName: v || undefined })}
+        />
+      </HbcFormSection>
+
+      <HbcFormSection title="Project Location" description="Physical address of the project site.">
         <HbcTextField
           label="Street Address"
           value={request.projectStreetAddress ?? ''}
           onChange={(v) => onChange({ projectStreetAddress: v || undefined })}
           required
         />
-        <HbcTextField
-          label="City"
-          value={request.projectCity ?? ''}
-          onChange={(v) => onChange({ projectCity: v || undefined })}
-          required
-        />
-        <HbcTextField
-          label="County"
-          value={request.projectCounty ?? ''}
-          onChange={(v) => onChange({ projectCounty: v || undefined })}
-          required
-        />
+        <div className={styles.row2col}>
+          <HbcTextField
+            label="City"
+            value={request.projectCity ?? ''}
+            onChange={(v) => onChange({ projectCity: v || undefined })}
+            required
+          />
+          <HbcSelect
+            label="State"
+            options={[...STATE_OPTIONS]}
+            value={request.projectState ?? ''}
+            onChange={(v) => onChange({ projectState: v || undefined })}
+            required
+          />
+        </div>
+        <div className={styles.row2col}>
+          <HbcTextField
+            label="County"
+            value={request.projectCounty ?? ''}
+            onChange={(v) => onChange({ projectCounty: v || undefined })}
+            required
+          />
+          <HbcTextField
+            label="Zip Code"
+            value={request.projectZip ?? ''}
+            onChange={(v) => onChange({ projectZip: v || undefined })}
+            required
+          />
+        </div>
+      </HbcFormSection>
+
+      <HbcFormSection title="Project Details" description="Financial and scheduling context.">
+        <div className={styles.row2col}>
+          <HbcTextField
+            label="Estimated Value"
+            value={request.estimatedValue != null ? String(request.estimatedValue) : ''}
+            onChange={(v) => onChange({ estimatedValue: v ? Number(v) : undefined })}
+            type="number"
+            placeholder="$0"
+          />
+          <HbcTextField
+            label="Expected Start Date"
+            value={request.startDate ?? ''}
+            onChange={(v) => onChange({ startDate: v || undefined })}
+            type="date"
+          />
+        </div>
         <HbcSelect
-          label="State"
-          options={[...STATE_OPTIONS]}
-          value={request.projectState ?? ''}
-          onChange={(v) => onChange({ projectState: v || undefined })}
-          required
+          label="Procore Project"
+          options={[...PROCORE_OPTIONS]}
+          value={request.procoreProject ?? ''}
+          onChange={(v) => onChange({ procoreProject: (v || undefined) as 'Yes' | 'No' | undefined })}
+          placeholder="Select if applicable"
         />
-        <HbcTextField
-          label="Zip"
-          value={request.projectZip ?? ''}
-          onChange={(v) => onChange({ projectZip: v || undefined })}
-          required
-        />
-      </div>
-      <HbcTextField
-        label="Estimated Value"
-        value={request.estimatedValue != null ? String(request.estimatedValue) : ''}
-        onChange={(v) => onChange({ estimatedValue: v ? Number(v) : undefined })}
-        type="number"
-      />
-      <HbcTextField
-        label="Expected Project Start Date"
-        value={request.startDate ?? ''}
-        onChange={(v) => onChange({ startDate: v || undefined })}
-        type="date"
-      />
-      <HbcSelect
-        label="Procore Project"
-        options={[...PROCORE_OPTIONS]}
-        value={request.procoreProject ?? ''}
-        onChange={(v) => onChange({ procoreProject: (v || undefined) as 'Yes' | 'No' | undefined })}
-      />
-    </HbcFormSection>
+      </HbcFormSection>
+    </>
   );
 }

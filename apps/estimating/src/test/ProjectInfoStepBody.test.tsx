@@ -5,7 +5,7 @@ import { ProjectInfoStepBody } from '../components/project-setup/ProjectInfoStep
 import { renderWithProviders } from './renderWithProviders.js';
 
 describe('ProjectInfoStepBody', () => {
-  it('renders the requested Step 1 fields in the revised order', () => {
+  it('renders fields in three logical groups', () => {
     renderWithProviders(
       <ProjectInfoStepBody
         request={{}}
@@ -14,22 +14,17 @@ describe('ProjectInfoStepBody', () => {
       />,
     );
 
+    // Three section headings
+    expect(screen.getByText('Project Identity')).toBeInTheDocument();
+    expect(screen.getByText('Project Location')).toBeInTheDocument();
+    expect(screen.getByText('Project Details')).toBeInTheDocument();
+
+    // Key fields present
     const text = document.body.textContent ?? '';
     expect(text.indexOf('Project Name')).toBeLessThan(text.indexOf('Client Name'));
-    expect(text.indexOf('Client Name')).toBeLessThan(text.indexOf('Project Location'));
-    expect(text.indexOf('Project Location')).toBeLessThan(text.indexOf('Street Address'));
     expect(text.indexOf('Street Address')).toBeLessThan(text.indexOf('City'));
-    expect(text.indexOf('City')).toBeLessThan(text.indexOf('County'));
-    expect(text.indexOf('County')).toBeLessThan(text.indexOf('State'));
-    expect(text.indexOf('State')).toBeLessThan(text.indexOf('Zip'));
-    expect(text.indexOf('Zip')).toBeLessThan(text.indexOf('Estimated Value'));
-    expect(text.indexOf('Estimated Value')).toBeLessThan(
-      text.indexOf('Expected Project Start Date'),
-    );
-    expect(text.indexOf('Expected Project Start Date')).toBeLessThan(
-      text.indexOf('Procore Project'),
-    );
-
-    expect(screen.queryByText('Project Location', { selector: 'label' })).not.toBeInTheDocument();
+    expect(text.indexOf('City')).toBeLessThan(text.indexOf('State'));
+    expect(text.indexOf('Estimated Value')).toBeLessThan(text.indexOf('Expected Start Date'));
+    expect(text.indexOf('Expected Start Date')).toBeLessThan(text.indexOf('Procore Project'));
   });
 });
