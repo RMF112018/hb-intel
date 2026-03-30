@@ -49,8 +49,8 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'AZURE_CLIENT_SECRET',
     bucket: 'infrastructure',
-    description: 'App registration client secret (Key Vault in prod)',
-    requiredInProd: true,
+    description: 'App registration client secret (Key Vault in prod). Not required when using managed identity with DefaultAzureCredential.',
+    requiredInProd: false,
   },
   {
     name: 'AZURE_TABLE_ENDPOINT',
@@ -61,8 +61,8 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'AzureSignalRConnectionString',
     bucket: 'infrastructure',
-    description: 'SignalR Service connection string for real-time push',
-    requiredInProd: true,
+    description: 'SignalR Service connection string for real-time push. Deferred: only needed for provisioning real-time updates.',
+    requiredInProd: false,
   },
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING',
@@ -85,20 +85,20 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'SHAREPOINT_HUB_SITE_ID',
     bucket: 'infrastructure',
-    description: 'Hub site GUID for site provisioning association',
-    requiredInProd: true,
+    description: 'Hub site GUID for site provisioning association. Deferred: only needed for provisioning saga Step 7.',
+    requiredInProd: false,
   },
   {
     name: 'EMAIL_DELIVERY_API_KEY',
     bucket: 'infrastructure',
-    description: 'SendGrid API key for transactional email (Key Vault in prod)',
-    requiredInProd: true,
+    description: 'SendGrid API key for transactional email (Key Vault in prod). Deferred: only needed for email notifications.',
+    requiredInProd: false,
   },
   {
     name: 'SHAREPOINT_APP_CATALOG_URL',
     bucket: 'infrastructure',
-    description: 'Tenant or site-collection app catalog URL for SPFx deployment',
-    requiredInProd: true,
+    description: 'Tenant or site-collection app catalog URL for SPFx deployment. Deferred: only needed for provisioning saga Step 5.',
+    requiredInProd: false,
   },
 
   // --- Infrastructure Behavioral (Bucket A) ---
@@ -111,8 +111,8 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'HB_INTEL_SPFX_APP_ID',
     bucket: 'infrastructure',
-    description: 'SPFx app package GUID for tenant-scoped deployment verification',
-    requiredInProd: true,
+    description: 'SPFx app package GUID for tenant-scoped deployment verification. Deferred: only needed for provisioning saga Step 5.',
+    requiredInProd: false,
   },
   {
     name: 'NOTIFICATION_API_BASE_URL',
@@ -134,8 +134,8 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     description:
       'Must be "true" after IT grants Group.ReadWrite.All to the Managed Identity. ' +
       'Provisioning Step 6 (Entra group creation and membership) is blocked until confirmed. ' +
-      'See IT-Department-Setup-Guide.md §8.4.',
-    requiredInProd: true,
+      'See IT-Department-Setup-Guide.md §8.4. Deferred: only needed for provisioning saga.',
+    requiredInProd: false,
   },
 
   // --- Business-Operational (Bucket B) ---
@@ -160,15 +160,15 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'DEPT_BACKGROUND_ACCESS_COMMERCIAL',
     bucket: 'business',
-    description: 'UPN(s) granted background read access to Commercial department sites',
-    requiredInProd: true,
+    description: 'UPN(s) granted background read access to Commercial department sites. Deferred: only needed for provisioning.',
+    requiredInProd: false,
     conditionalOn: 'department=commercial',
   },
   {
     name: 'DEPT_BACKGROUND_ACCESS_LUXURY_RESIDENTIAL',
     bucket: 'business',
-    description: 'UPN(s) granted background read access to Luxury Residential department sites',
-    requiredInProd: true,
+    description: 'UPN(s) granted background read access to Luxury Residential department sites. Deferred: only needed for provisioning.',
+    requiredInProd: false,
     conditionalOn: 'department=luxury-residential',
   },
 ] as const;

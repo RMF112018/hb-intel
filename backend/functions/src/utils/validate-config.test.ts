@@ -73,7 +73,6 @@ describe('validateRequiredConfig', () => {
   it('aggregates all missing vars in the error message', () => {
     delete process.env.AZURE_TENANT_ID;
     delete process.env.AZURE_CLIENT_ID;
-    delete process.env.AZURE_CLIENT_SECRET;
 
     try {
       validateRequiredConfig();
@@ -82,8 +81,7 @@ describe('validateRequiredConfig', () => {
       const message = (err as Error).message;
       expect(message).toContain('AZURE_TENANT_ID');
       expect(message).toContain('AZURE_CLIENT_ID');
-      expect(message).toContain('AZURE_CLIENT_SECRET');
-      expect(message).toContain('Missing 3 required');
+      expect(message).toContain('Missing 2 required');
     }
   });
 

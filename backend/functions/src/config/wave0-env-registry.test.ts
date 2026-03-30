@@ -10,9 +10,32 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
     expect(WAVE0_REQUIRED_CONFIG.length).toBeGreaterThanOrEqual(10);
   });
 
-  it('all entries have requiredInProd: true', () => {
-    for (const entry of WAVE0_REQUIRED_CONFIG) {
-      expect(entry.requiredInProd).toBe(true);
+  it('core request-lifecycle entries have requiredInProd: true', () => {
+    const coreRequired = [
+      'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_TABLE_ENDPOINT',
+      'APPLICATIONINSIGHTS_CONNECTION_STRING', 'SHAREPOINT_TENANT_URL',
+      'SHAREPOINT_PROJECTS_SITE_URL', 'HBC_ADAPTER_MODE',
+      'NOTIFICATION_API_BASE_URL', 'EMAIL_FROM_ADDRESS',
+      'OPEX_MANAGER_UPN', 'CONTROLLER_UPNS', 'ADMIN_UPNS',
+    ];
+    for (const name of coreRequired) {
+      const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === name);
+      expect(entry, `${name} should exist in registry`).toBeDefined();
+      expect(entry!.requiredInProd, `${name} should be requiredInProd`).toBe(true);
+    }
+  });
+
+  it('deferred provisioning/notification entries have requiredInProd: false', () => {
+    const deferred = [
+      'AZURE_CLIENT_SECRET', 'AzureSignalRConnectionString',
+      'SHAREPOINT_HUB_SITE_ID', 'EMAIL_DELIVERY_API_KEY',
+      'SHAREPOINT_APP_CATALOG_URL', 'HB_INTEL_SPFX_APP_ID',
+      'GRAPH_GROUP_PERMISSION_CONFIRMED',
+    ];
+    for (const name of deferred) {
+      const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === name);
+      expect(entry, `${name} should exist in registry`).toBeDefined();
+      expect(entry!.requiredInProd, `${name} should be deferred (not requiredInProd)`).toBe(false);
     }
   });
 
