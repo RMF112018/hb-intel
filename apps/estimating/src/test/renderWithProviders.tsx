@@ -2,12 +2,16 @@ import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
 import { ComplexityProvider } from '@hbc/complexity';
 import { HbcThemeProvider } from '@hbc/ui-kit';
+import { SessionStateProvider } from '@hbc/session-state';
+import type { OperationExecutor } from '@hbc/session-state';
 import { useAuthStore } from '@hbc/auth';
 import { useProvisioningStore } from '@hbc/provisioning';
 import type { NormalizedAuthSession } from '@hbc/auth';
 import type { IProjectSetupRequest, IProvisioningStatus } from '@hbc/models';
 import { ProjectSetupBackendProvider } from '../project-setup/backend/ProjectSetupBackendContext.js';
 import { _resetConfig, setRuntimeConfig } from '../config/runtimeConfig.js';
+
+const testSessionExecutor: OperationExecutor = async () => {};
 
 interface RenderOptions {
   tier?: 'essential' | 'standard' | 'expert';
@@ -76,7 +80,9 @@ export function renderWithProviders(
     return (
       <HbcThemeProvider>
         <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
-          <ProjectSetupBackendProvider>{children}</ProjectSetupBackendProvider>
+          <SessionStateProvider executor={testSessionExecutor}>
+            <ProjectSetupBackendProvider>{children}</ProjectSetupBackendProvider>
+          </SessionStateProvider>
         </ComplexityProvider>
       </HbcThemeProvider>
     );

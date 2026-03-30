@@ -27,6 +27,7 @@ The Estimating SPFx requester surface now supports two runtime-selected backend 
 - `ui-review` keeps the deployment posture limited to Project Setup only; Bids and Templates remain hidden.
 - A non-error informational banner is shown from the shared shell: `UI Review mode is active. Backend connections are disabled, and Project Setup is using local sample data saved in this browser.`
 - When the switch is enabled, the selected override is saved per browser and takes precedence over the injected default mode for that reviewer session.
+- All Project Setup routes share one app-level `SessionStateProvider`, so draft persistence plus connectivity/sync UI remain available across list, new-request, and detail navigation without page-local provider gaps.
 
 ### UI-Review Storage
 

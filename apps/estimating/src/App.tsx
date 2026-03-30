@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { HbcThemeProvider, HbcErrorBoundary } from '@hbc/ui-kit';
 import { ComplexityProvider } from '@hbc/complexity';
+import { SessionStateProvider } from '@hbc/session-state';
+import type { OperationExecutor } from '@hbc/session-state';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import { createWebpartRouter } from './router/index.js';
 import {
@@ -11,6 +13,15 @@ import {
 
 const queryClient = new QueryClient({ defaultOptions: { queries: defaultQueryOptions } });
 const router = createWebpartRouter();
+
+/**
+ * Estimating currently uses session-state for draft persistence and
+ * connectivity/sync UI on Project Setup routes only.
+ *
+ * The SPFx limited-release surface does not dispatch queued offline mutations,
+ * so the executor is intentionally a no-op until that workflow exists here.
+ */
+const estimatingSessionExecutor: OperationExecutor = async () => {};
 
 interface AppProps {
   spfxContext?: { pageContext: { user: { loginName: string } } };
@@ -32,9 +43,11 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <ComplexityProvider spfxContext={spfxContext}>
-            <ProjectSetupBackendProvider>
-              <AppRouter />
-            </ProjectSetupBackendProvider>
+            <SessionStateProvider executor={estimatingSessionExecutor}>
+              <ProjectSetupBackendProvider>
+                <AppRouter />
+              </ProjectSetupBackendProvider>
+            </SessionStateProvider>
           </ComplexityProvider>
         </HbcErrorBoundary>
       </QueryClientProvider>

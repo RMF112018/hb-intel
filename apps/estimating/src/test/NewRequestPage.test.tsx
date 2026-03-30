@@ -72,11 +72,6 @@ vi.mock('@hbc/step-wizard', () => ({
   ),
 }));
 
-vi.mock('@hbc/session-state', () => ({
-  HbcConnectivityBar: () => <div data-testid="connectivity-bar" />,
-  HbcSyncStatusBadge: () => <div data-testid="sync-badge" />,
-}));
-
 vi.mock('../components/project-setup/ResumeBanner.js', () => ({
   ResumeBanner: ({ resumeContext, onResume, onStartNew }: any) =>
     resumeContext.decision === 'prompt-user' ? (

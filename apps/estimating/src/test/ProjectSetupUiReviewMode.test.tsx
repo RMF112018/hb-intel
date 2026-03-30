@@ -67,10 +67,14 @@ vi.mock('@hbc/step-wizard', () => ({
   ),
 }));
 
-vi.mock('@hbc/session-state', () => ({
-  HbcConnectivityBar: () => <div data-testid="connectivity-bar" />,
-  HbcSyncStatusBadge: () => <div data-testid="sync-badge" />,
-}));
+vi.mock('@hbc/session-state', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@hbc/session-state')>();
+  return {
+    ...actual,
+    HbcConnectivityBar: () => <div data-testid="connectivity-bar" />,
+    HbcSyncStatusBadge: () => <div data-testid="sync-badge" />,
+  };
+});
 
 vi.mock('../components/project-setup/ResumeBanner.js', () => ({
   ResumeBanner: () => null,
