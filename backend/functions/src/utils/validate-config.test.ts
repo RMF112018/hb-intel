@@ -112,4 +112,35 @@ describe('validateRequiredConfig', () => {
     // All required vars are unset — would throw if validation ran
     expect(() => validateRequiredConfig()).not.toThrow();
   });
+
+  it('does NOT require AZURE_CLIENT_SECRET in managed-identity mode', () => {
+    // AZURE_CLIENT_SECRET is requiredInProd: false — managed identity path
+    // All other required vars are set in beforeEach
+    delete process.env.AZURE_CLIENT_SECRET;
+    expect(() => validateRequiredConfig()).not.toThrow();
+  });
+
+  it('does NOT require deferred provisioning settings for initial boot', () => {
+    // These are all requiredInProd: false — deferred to provisioning saga
+    delete process.env.AzureSignalRConnectionString;
+    delete process.env.SHAREPOINT_HUB_SITE_ID;
+    delete process.env.EMAIL_DELIVERY_API_KEY;
+    delete process.env.SHAREPOINT_APP_CATALOG_URL;
+    delete process.env.HB_INTEL_SPFX_APP_ID;
+    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
+    delete process.env.DEPT_BACKGROUND_ACCESS_COMMERCIAL;
+    delete process.env.DEPT_BACKGROUND_ACCESS_LUXURY_RESIDENTIAL;
+    expect(() => validateRequiredConfig()).not.toThrow();
+  });
+
+  it('error message references config docs for operator guidance', () => {
+    delete process.env.AZURE_TENANT_ID;
+    try {
+      validateRequiredConfig();
+      expect.fail('should have thrown');
+    } catch (err) {
+      const message = (err as Error).message;
+      expect(message).toContain('wave-0-config-registry');
+    }
+  });
 });

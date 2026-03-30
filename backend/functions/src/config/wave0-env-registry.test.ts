@@ -39,6 +39,35 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
     }
   });
 
+  it('AZURE_CLIENT_ID description reflects managed-identity role', () => {
+    const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === 'AZURE_CLIENT_ID');
+    expect(entry!.description).toContain('Managed identity client ID');
+    expect(entry!.description).toContain('DefaultAzureCredential');
+    expect(entry!.description).toContain('API_AUDIENCE');
+  });
+
+  it('exact requiredInProd=true set matches managed-identity boot contract', () => {
+    const required = WAVE0_REQUIRED_CONFIG
+      .filter((e) => e.requiredInProd)
+      .map((e) => e.name)
+      .sort();
+    // This is the pinned contract — if this changes, deployment docs must update
+    expect(required).toEqual([
+      'ADMIN_UPNS',
+      'APPLICATIONINSIGHTS_CONNECTION_STRING',
+      'AZURE_CLIENT_ID',
+      'AZURE_TABLE_ENDPOINT',
+      'AZURE_TENANT_ID',
+      'CONTROLLER_UPNS',
+      'EMAIL_FROM_ADDRESS',
+      'HBC_ADAPTER_MODE',
+      'NOTIFICATION_API_BASE_URL',
+      'OPEX_MANAGER_UPN',
+      'SHAREPOINT_PROJECTS_SITE_URL',
+      'SHAREPOINT_TENANT_URL',
+    ]);
+  });
+
   it('contains both infrastructure and business bucket entries', () => {
     const buckets = new Set(WAVE0_REQUIRED_CONFIG.map((e) => e.bucket));
     expect(buckets.has('infrastructure')).toBe(true);
