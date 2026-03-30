@@ -48,10 +48,10 @@
 
 ## Verification
 
-- [ ] `pnpm turbo run check-types --filter=@hbc/spfx-project-setup` passes
-- [ ] `pnpm turbo run lint --filter=@hbc/spfx-project-setup` passes (0 errors)
-- [ ] `pnpm turbo run build --filter=@hbc/spfx-project-setup` passes
-- [ ] `pnpm turbo run test --filter=@hbc/spfx-project-setup` passes (all scope guards green)
+- [x] `pnpm turbo run check-types --filter=@hbc/spfx-project-setup` passes
+- [x] `pnpm turbo run lint --filter=@hbc/spfx-project-setup` passes (0 errors)
+- [x] `pnpm turbo run build --filter=@hbc/spfx-project-setup` passes
+- [x] `pnpm turbo run test --filter=@hbc/spfx-project-setup` passes (18 files, 126 passed, 2 todo)
 
 ## Phase 1 Exit Criteria
 
@@ -60,4 +60,4 @@
 - [x] Backend callable surface explicit and intentionally scoped
 - [x] Contract document exists
 - [x] Regression guards prevent silent scope reintroduction
-- [ ] Final verification pass (Prompt 06)
+- [x] Final verification pass (Prompt 06) — completed 2026-03-30
