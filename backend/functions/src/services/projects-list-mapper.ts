@@ -10,6 +10,7 @@
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import type { IProjectsListItem } from './projects-list-contract.js';
 import { PROJECTS_LIST_FIELD_MAP } from './projects-list-contract.js';
+import type { ILogger } from '../utils/logger.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Field resolution — for filter/query strings
@@ -30,6 +31,47 @@ export function resolveSpField(domainProp: keyof typeof PROJECTS_LIST_FIELD_MAP)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Runtime validation — schema drift and type-mismatch diagnostics
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Fields that must be present for a valid Projects list item. */
+const CRITICAL_FIELDS: readonly string[] = ['field_1', 'field_3', 'field_9'];
+
+/**
+ * Validate a raw SP item and log structured warnings for schema issues.
+ * Never throws — returns a list of diagnostic messages for testability.
+ * Never logs PII — only field names, expected types, and actual types.
+ */
+export function validateSpItem(
+  item: Record<string, unknown>,
+  logger?: ILogger,
+): string[] {
+  const warnings: string[] = [];
+
+  // Critical missing fields
+  for (const field of CRITICAL_FIELDS) {
+    if (item[field] === undefined || item[field] === null || item[field] === '') {
+      const msg = `[field-contract] Critical field '${field}' is missing or empty`;
+      warnings.push(msg);
+      logger?.warn(msg, { domain: 'projects-list-mapper', field, issue: 'missing-critical-field' });
+    }
+  }
+
+  // Type mismatches for Number-typed columns that should contain numbers
+  const numberFields = ['field_13', 'field_24', 'Year'] as const;
+  for (const field of numberFields) {
+    const val = item[field];
+    if (val !== undefined && val !== null && typeof val !== 'number') {
+      const msg = `[field-contract] Field '${field}' expected number, got ${typeof val}`;
+      warnings.push(msg);
+      logger?.warn(msg, { domain: 'projects-list-mapper', field, expectedType: 'number', actualType: typeof val, issue: 'type-mismatch' });
+    }
+  }
+
+  return warnings;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SharePoint → Domain (read path)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -41,8 +83,12 @@ export function resolveSpField(domainProp: keyof typeof PROJECTS_LIST_FIELD_MAP)
  * - JSON array columns → parsed with `safeParseJsonArray`
  * - Missing optional fields → `undefined`
  * - Missing required fields → documented defaults
+ *
+ * Pass an `ILogger` to enable structured diagnostics for schema drift.
+ * Without a logger, validation still runs but warnings are discarded.
  */
-export function toDomain(item: Record<string, unknown>): IProjectSetupRequest {
+export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProjectSetupRequest {
+  validateSpItem(item, logger);
   const projectId = readString(item, 'field_1');
   return {
     requestId: projectId,
@@ -55,16 +101,16 @@ export function toDomain(item: Record<string, unknown>): IProjectSetupRequest {
     submittedAt: readStringFromNumber(item, 'field_8') || new Date().toISOString(),
     state: (readString(item, 'field_9') || 'Submitted') as ProjectSetupRequestState,
     projectNumber: readOptionalString(item, 'field_2'),
-    groupMembers: safeParseJsonArray(item.field_10),
-    groupLeaders: safeParseJsonArray(item.field_11) as string[] | undefined,
+    groupMembers: safeParseJsonArray(item.field_10, 'field_10', logger),
+    groupLeaders: safeParseJsonArray(item.field_11, 'field_11', logger) as string[] | undefined,
     department: readOptionalString(item, 'field_12') as IProjectSetupRequest['department'],
     estimatedValue: readOptionalNumber(item, 'field_13'),
     clientName: readOptionalString(item, 'field_14'),
     startDate: readOptionalStringFromNumber(item, 'field_15'),
     contractType: readOptionalString(item, 'field_16'),
     projectLeadId: readOptionalString(item, 'field_17'),
-    viewerUPNs: safeParseJsonArray(item.field_18) as string[] | undefined,
-    addOns: safeParseJsonArray(item.field_19) as string[] | undefined,
+    viewerUPNs: safeParseJsonArray(item.field_18, 'field_18', logger) as string[] | undefined,
+    addOns: safeParseJsonArray(item.field_19, 'field_19', logger) as string[] | undefined,
     clarificationNote: readOptionalStringFromNumber(item, 'field_20'),
     completedBy: readOptionalStringFromNumber(item, 'field_21'),
     completedAt: readOptionalStringFromNumber(item, 'field_22'),
@@ -162,12 +208,21 @@ function readOptionalNumber(item: Record<string, unknown>, field: string): numbe
 /**
  * Safely parse a JSON-serialized string array from a SharePoint MultiLineText field.
  * Returns `[]` on parse failure; filters out non-string elements.
+ * Pass `fieldName` and `logger` for structured diagnostics on parse failure.
  */
-export function safeParseJsonArray(json: unknown): string[] {
+export function safeParseJsonArray(json: unknown, fieldName?: string, logger?: ILogger): string[] {
   try {
     const parsed = JSON.parse((json as string) ?? '[]');
     return Array.isArray(parsed) ? parsed.filter((value) => typeof value === 'string') : [];
   } catch {
+    if (fieldName && logger) {
+      logger.warn(`[field-contract] Failed to parse JSON array from '${fieldName}'`, {
+        domain: 'projects-list-mapper',
+        field: fieldName,
+        valueType: typeof json,
+        issue: 'json-parse-failure',
+      });
+    }
     return [];
   }
 }

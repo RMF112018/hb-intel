@@ -59,6 +59,7 @@ export default defineConfig({
             'src/middleware/validate.test.ts',
             'src/middleware/request-id.test.ts',
             'src/services/*.test.ts',
+            'src/services/__tests__/*.test.ts',
             'src/config/*.test.ts',
             'src/validation/*.test.ts',
             'src/validation/schemas/**/*.test.ts',
