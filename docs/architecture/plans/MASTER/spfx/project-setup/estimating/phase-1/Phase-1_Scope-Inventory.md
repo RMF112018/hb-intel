@@ -209,3 +209,15 @@ Backend scope alignment complete:
 - **B-06:** Out of scope — notifications not used by this frontend.
 - **B-07:** Out of scope — proxy not used by this frontend.
 - **B-08:** No API call — user groups are data model fields, not endpoint calls.
+
+## Prompt 04 — Contract Freeze (Closed)
+
+Contract document created at `phase-1/Phase-1_Contract-Freeze.md`. Covers:
+- 4 frontend routes, all retained
+- 6 frontend-callable backend endpoints + 3 backend-only endpoints
+- Full type contract (`IProjectSetupRequest`, `IProvisioningStatus`, `ISagaStepResult`, `IProvisioningProgressEvent`)
+- Response envelope shapes (success, list, error)
+- Runtime mode rules (production vs ui-review)
+- Configuration contract with resolution order
+- Excluded scope enumeration
+- Known deferred items
