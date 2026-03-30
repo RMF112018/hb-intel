@@ -117,14 +117,14 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'NOTIFICATION_API_BASE_URL',
     bucket: 'infrastructure',
-    description: 'Base URL for notification dispatch endpoint',
-    requiredInProd: true,
+    description: 'Base URL for notification dispatch endpoint. Deferred: has localhost fallback; not consumed by Project Setup request lifecycle.',
+    requiredInProd: false,
   },
   {
     name: 'EMAIL_FROM_ADDRESS',
     bucket: 'infrastructure',
-    description: 'Sender address for transactional emails; must match verified sender',
-    requiredInProd: true,
+    description: 'Sender address for transactional emails. Deferred: only needed for email notifications, not for Project Setup request lifecycle.',
+    requiredInProd: false,
   },
 
   // --- Permission Confirmation Gates (Bucket A) ---
@@ -142,20 +142,20 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'OPEX_MANAGER_UPN',
     bucket: 'business',
-    description: 'UPN of the OpEx manager for provisioning completion notifications',
-    requiredInProd: true,
+    description: 'UPN of the OpEx manager for provisioning saga Step 6. Deferred: only needed for provisioning, not for Project Setup request lifecycle.',
+    requiredInProd: false,
   },
   {
     name: 'CONTROLLER_UPNS',
     bucket: 'business',
-    description: 'Comma-separated UPNs of controllers for financial oversight',
-    requiredInProd: true,
+    description: 'Comma-separated UPNs of controllers for financial oversight. Has safe empty fallback; missing value degrades role resolution to submitter-only.',
+    requiredInProd: false,
   },
   {
     name: 'ADMIN_UPNS',
     bucket: 'business',
-    description: 'Comma-separated UPNs of platform administrators',
-    requiredInProd: true,
+    description: 'Comma-separated UPNs of platform administrators. Has safe empty fallback; missing value degrades role resolution to submitter-only.',
+    requiredInProd: false,
   },
   {
     name: 'DEPT_BACKGROUND_ACCESS_COMMERCIAL',

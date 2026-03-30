@@ -91,6 +91,17 @@ export function createServiceFactory(): IServiceContainer {
 
   // G2.6: Fail fast if required config is missing (skips in mock/test mode)
   validateRequiredConfig();
+
+  // Degraded-mode warnings: settings that have safe fallbacks but reduce functionality
+  if (!isMock) {
+    if (!process.env.CONTROLLER_UPNS) {
+      console.warn('[StartupWarning] CONTROLLER_UPNS not set — role-based state transitions disabled for controllers. Only submitters and admins (if ADMIN_UPNS is set) can advance requests.');
+    }
+    if (!process.env.ADMIN_UPNS) {
+      console.warn('[StartupWarning] ADMIN_UPNS not set — admin role resolution disabled. State transitions limited to submitter resubmit only.');
+    }
+  }
+
   const msalObo = isMock ? new MockMsalOboService() : new ManagedIdentityOboService();
 
   singletonContainer = {

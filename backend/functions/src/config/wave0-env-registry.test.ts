@@ -10,13 +10,11 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
     expect(WAVE0_REQUIRED_CONFIG.length).toBeGreaterThanOrEqual(10);
   });
 
-  it('core request-lifecycle entries have requiredInProd: true', () => {
+  it('core boot + Project Setup entries have requiredInProd: true', () => {
     const coreRequired = [
       'AZURE_TENANT_ID', 'AZURE_CLIENT_ID', 'AZURE_TABLE_ENDPOINT',
       'APPLICATIONINSIGHTS_CONNECTION_STRING', 'SHAREPOINT_TENANT_URL',
       'SHAREPOINT_PROJECTS_SITE_URL', 'HBC_ADAPTER_MODE',
-      'NOTIFICATION_API_BASE_URL', 'EMAIL_FROM_ADDRESS',
-      'OPEX_MANAGER_UPN', 'CONTROLLER_UPNS', 'ADMIN_UPNS',
     ];
     for (const name of coreRequired) {
       const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === name);
@@ -25,12 +23,20 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
     }
   });
 
-  it('deferred provisioning/notification entries have requiredInProd: false', () => {
+  it('deferred/optional entries have requiredInProd: false', () => {
     const deferred = [
-      'AZURE_CLIENT_SECRET', 'AzureSignalRConnectionString',
-      'SHAREPOINT_HUB_SITE_ID', 'EMAIL_DELIVERY_API_KEY',
+      // Auth mode
+      'AZURE_CLIENT_SECRET',
+      // Provisioning saga
+      'AzureSignalRConnectionString', 'SHAREPOINT_HUB_SITE_ID',
       'SHAREPOINT_APP_CATALOG_URL', 'HB_INTEL_SPFX_APP_ID',
-      'GRAPH_GROUP_PERMISSION_CONFIRMED',
+      'GRAPH_GROUP_PERMISSION_CONFIRMED', 'OPEX_MANAGER_UPN',
+      // Notifications/email
+      'EMAIL_DELIVERY_API_KEY', 'NOTIFICATION_API_BASE_URL', 'EMAIL_FROM_ADDRESS',
+      // Role UPNs (safe fallback to empty)
+      'CONTROLLER_UPNS', 'ADMIN_UPNS',
+      // Department background access
+      'DEPT_BACKGROUND_ACCESS_COMMERCIAL', 'DEPT_BACKGROUND_ACCESS_LUXURY_RESIDENTIAL',
     ];
     for (const name of deferred) {
       const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === name);
@@ -46,23 +52,19 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
     expect(entry!.description).toContain('API_AUDIENCE');
   });
 
-  it('exact requiredInProd=true set matches managed-identity boot contract', () => {
+  it('exact requiredInProd=true set matches Project Setup boot contract (7 settings)', () => {
     const required = WAVE0_REQUIRED_CONFIG
       .filter((e) => e.requiredInProd)
       .map((e) => e.name)
       .sort();
-    // This is the pinned contract — if this changes, deployment docs must update
+    // Pinned contract for Project Setup-only deployment.
+    // Any change here must update deployment docs and operator guidance.
     expect(required).toEqual([
-      'ADMIN_UPNS',
       'APPLICATIONINSIGHTS_CONNECTION_STRING',
       'AZURE_CLIENT_ID',
       'AZURE_TABLE_ENDPOINT',
       'AZURE_TENANT_ID',
-      'CONTROLLER_UPNS',
-      'EMAIL_FROM_ADDRESS',
       'HBC_ADAPTER_MODE',
-      'NOTIFICATION_API_BASE_URL',
-      'OPEX_MANAGER_UPN',
       'SHAREPOINT_PROJECTS_SITE_URL',
       'SHAREPOINT_TENANT_URL',
     ]);

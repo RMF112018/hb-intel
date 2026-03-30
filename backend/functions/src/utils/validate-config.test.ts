@@ -120,16 +120,20 @@ describe('validateRequiredConfig', () => {
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 
-  it('does NOT require deferred provisioning settings for initial boot', () => {
-    // These are all requiredInProd: false — deferred to provisioning saga
-    delete process.env.AzureSignalRConnectionString;
-    delete process.env.SHAREPOINT_HUB_SITE_ID;
-    delete process.env.EMAIL_DELIVERY_API_KEY;
-    delete process.env.SHAREPOINT_APP_CATALOG_URL;
-    delete process.env.HB_INTEL_SPFX_APP_ID;
-    delete process.env.GRAPH_GROUP_PERMISSION_CONFIRMED;
-    delete process.env.DEPT_BACKGROUND_ACCESS_COMMERCIAL;
-    delete process.env.DEPT_BACKGROUND_ACCESS_LUXURY_RESIDENTIAL;
+  it('does NOT require deferred provisioning/notification/role settings for Project Setup boot', () => {
+    // All of these are requiredInProd: false — deferred beyond Project Setup lifecycle
+    const deferredSettings = [
+      'AzureSignalRConnectionString', 'SHAREPOINT_HUB_SITE_ID',
+      'EMAIL_DELIVERY_API_KEY', 'SHAREPOINT_APP_CATALOG_URL',
+      'HB_INTEL_SPFX_APP_ID', 'GRAPH_GROUP_PERMISSION_CONFIRMED',
+      'DEPT_BACKGROUND_ACCESS_COMMERCIAL', 'DEPT_BACKGROUND_ACCESS_LUXURY_RESIDENTIAL',
+      // Newly demoted for Project Setup-only deployment:
+      'NOTIFICATION_API_BASE_URL', 'EMAIL_FROM_ADDRESS', 'OPEX_MANAGER_UPN',
+      'CONTROLLER_UPNS', 'ADMIN_UPNS',
+    ];
+    for (const name of deferredSettings) {
+      delete process.env[name];
+    }
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 
