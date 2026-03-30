@@ -53,6 +53,9 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-3_Handoff.md`](Phase-3_Handoff.md) — Final verification results, success criteria assessment (all 7 met), remaining follow-on items, deployment prerequisites, next-phase recommendations
 
+8. **Comprehensive Evidence Record**
+   - [`Phase-3_Comprehensive-Evidence-Record.md`](Phase-3_Comprehensive-Evidence-Record.md) — §18.7 item 8.1 activation flow validation (13 integration tests), 6.10 warranty closure evidence (all 8 items), Provisioning Section A sweep, P3-J1 completeness verification, full verification results
+
 ## Recommended use
 
 - Run the prompts **in order**.
