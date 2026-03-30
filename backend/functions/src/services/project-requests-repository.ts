@@ -5,8 +5,8 @@ import '@pnp/nodejs-commonjs';
 import '@pnp/sp/items/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
-
-const PROJECTS_LIST_NAME = 'Projects';
+import { PROJECTS_LIST_NAME, PROJECTS_LIST_SELECT_FIELDS } from './projects-list-contract.js';
+import { toDomain, toListItem, resolveSpField } from './projects-list-mapper.js';
 
 export interface IProjectRequestsRepository {
   upsertRequest(request: IProjectSetupRequest): Promise<void>;
@@ -52,9 +52,10 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const sp: any = await this.getSP();
     const list = sp.web.lists.getByTitle(PROJECTS_LIST_NAME);
     const key = this.escapeODataValue(request.requestId);
+    const idField = resolveSpField('requestId');
 
-    const existing = await list.items.filter(`field_1 eq '${key}'`).top(1).select('Id')();
-    const payload = this.toListItem(request);
+    const existing = await list.items.filter(`${idField} eq '${key}'`).top(1).select('Id')();
+    const payload = toListItem(request);
 
     if (existing.length > 0) {
       await list.items.getById(existing[0].Id).update(payload);
@@ -68,141 +69,27 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const sp: any = await this.getSP();
     const list = sp.web.lists.getByTitle(PROJECTS_LIST_NAME);
     const key = this.escapeODataValue(requestId);
-    const items = await list.items.filter(`field_1 eq '${key}'`).top(1)();
+    const idField = resolveSpField('requestId');
+    const items = await list.items.filter(`${idField} eq '${key}'`).top(1)();
 
     if (!items.length) return null;
-    return this.fromListItem(items[0] as Record<string, unknown>);
+    return toDomain(items[0] as Record<string, unknown>);
   }
 
   async listRequests(state?: ProjectSetupRequestState): Promise<IProjectSetupRequest[]> {
     const sp: any = await this.getSP();
     const list = sp.web.lists.getByTitle(PROJECTS_LIST_NAME);
 
-    let query = list.items.select(
-      'Title',
-      'field_1', 'field_2', 'field_3', 'field_4', 'field_5',
-      'field_6', 'field_7', 'field_8', 'field_9', 'field_10',
-      'field_11', 'field_12', 'field_13', 'field_14', 'field_15',
-      'field_16', 'field_17', 'field_18', 'field_19', 'field_20',
-      'field_21', 'field_22', 'field_23', 'field_24',
-      'Year'
-    );
+    let query = list.items.select(...PROJECTS_LIST_SELECT_FIELDS);
 
     if (state) {
       const key = this.escapeODataValue(state);
-      query = query.filter(`field_9 eq '${key}'`);
+      const stateField = resolveSpField('state');
+      query = query.filter(`${stateField} eq '${key}'`);
     }
 
     const items = await query.getAll(5000);
-    return (items as Array<Record<string, unknown>>).map((item) => this.fromListItem(item));
-  }
-
-  /**
-   * SharePoint field_N mapping — confirmed from HBCentral Projects list schema.
-   *
-   * The list was created via CSV import so custom columns have generic internal
-   * names (field_1..field_24). Standard SP columns (Title, Year, Id) retain
-   * their display names as internal names.
-   *
-   * Mapping (display name → internal name):
-   *   Title          → Title       (standard SP column)
-   *   ProjectId      → field_1
-   *   ProjectNumber  → field_2
-   *   ProjectName    → field_3
-   *   ProjectLocation→ field_4
-   *   ProjectType    → field_5
-   *   ProjectStage   → field_6
-   *   SubmittedBy    → field_7
-   *   SubmittedAt    → field_8    (Number in SP)
-   *   RequestState   → field_9
-   *   GroupMembersJson→ field_10
-   *   GroupLeadersJson→ field_11
-   *   Department     → field_12
-   *   EstimatedValue → field_13   (Number in SP)
-   *   ClientName     → field_14
-   *   StartDate      → field_15   (Number in SP)
-   *   ContractType   → field_16
-   *   ProjectLeadId  → field_17
-   *   ViewerUPNsJson → field_18
-   *   AddOnsJson     → field_19
-   *   ClarificationNote→ field_20 (Number in SP — stores epoch or 0)
-   *   CompletedBy    → field_21   (Number in SP — stores epoch or 0)
-   *   CompletedAt    → field_22   (Number in SP — stores epoch or 0)
-   *   SiteUrl        → field_23
-   *   RetryCount     → field_24   (Number in SP)
-   *   Year           → Year       (Number, added post-import)
-   */
-  private toListItem(request: IProjectSetupRequest): Record<string, unknown> {
-    const projectNumberForTitle = request.projectNumber ?? 'TBD';
-    return {
-      Title: `${projectNumberForTitle} — ${request.projectName}`,
-      field_1: request.requestId,
-      field_2: request.projectNumber ?? '',
-      field_3: request.projectName,
-      field_4: request.projectLocation,
-      field_5: request.projectType,
-      field_6: request.projectStage,
-      field_7: request.submittedBy,
-      field_8: request.submittedAt,
-      field_9: request.state,
-      field_10: JSON.stringify(request.groupMembers),
-      field_11: JSON.stringify(request.groupLeaders ?? []),
-      field_12: request.department ?? '',
-      field_13: request.estimatedValue ?? null,
-      field_14: request.clientName ?? '',
-      field_15: request.startDate ?? '',
-      field_16: request.contractType ?? '',
-      field_17: request.projectLeadId ?? '',
-      field_18: JSON.stringify(request.viewerUPNs ?? []),
-      field_19: JSON.stringify(request.addOns ?? []),
-      field_20: request.clarificationNote ?? '',
-      field_21: request.completedBy ?? '',
-      field_22: request.completedAt ?? '',
-      field_23: request.siteUrl ?? '',
-      field_24: request.retryCount,
-      Year: request.year ?? null,
-    };
-  }
-
-  private fromListItem(item: Record<string, unknown>): IProjectSetupRequest {
-    const projectId = (item.field_1 as string) ?? '';
-    return {
-      requestId: projectId,
-      projectId,
-      projectName: (item.field_3 as string) ?? '',
-      projectLocation: (item.field_4 as string) ?? '',
-      projectType: (item.field_5 as string) ?? '',
-      projectStage: ((item.field_6 as string) || 'Pursuit') as IProjectSetupRequest['projectStage'],
-      submittedBy: (item.field_7 as string) ?? '',
-      submittedAt: String(item.field_8 ?? new Date().toISOString()),
-      state: ((item.field_9 as string) || 'Submitted') as ProjectSetupRequestState,
-      projectNumber: (item.field_2 as string) || undefined,
-      groupMembers: this.safeParseJsonArray(item.field_10 as string),
-      groupLeaders: this.safeParseJsonArray(item.field_11 as string) as string[] | undefined,
-      department: ((item.field_12 as string) || undefined) as IProjectSetupRequest['department'],
-      estimatedValue: typeof item.field_13 === 'number' ? item.field_13 : undefined,
-      clientName: (item.field_14 as string) || undefined,
-      startDate: String(item.field_15 ?? '') || undefined,
-      contractType: (item.field_16 as string) || undefined,
-      projectLeadId: (item.field_17 as string) || undefined,
-      viewerUPNs: this.safeParseJsonArray(item.field_18 as string) as string[] | undefined,
-      addOns: this.safeParseJsonArray(item.field_19 as string) as string[] | undefined,
-      clarificationNote: String(item.field_20 ?? '') || undefined,
-      completedBy: String(item.field_21 ?? '') || undefined,
-      completedAt: String(item.field_22 ?? '') || undefined,
-      siteUrl: (item.field_23 as string) || undefined,
-      retryCount: typeof item.field_24 === 'number' ? item.field_24 : 0,
-      year: typeof item.Year === 'number' ? item.Year : undefined,
-    };
-  }
-
-  private safeParseJsonArray(json: string): string[] {
-    try {
-      const parsed = JSON.parse(json ?? '[]');
-      return Array.isArray(parsed) ? parsed.filter((value) => typeof value === 'string') : [];
-    } catch {
-      return [];
-    }
+    return (items as Array<Record<string, unknown>>).map((item) => toDomain(item));
   }
 
   private escapeODataValue(value: string): string {

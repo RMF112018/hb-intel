@@ -12,7 +12,7 @@
  * SharePoint persistence logic should never assume domain property names match
  * storage column names.
  *
- * Prompt 03 will implement centralized mapping functions that use these types.
+ * Mapping functions are implemented in `projects-list-mapper.ts`.
  *
  * @see Phase-2_Field-Map-Baseline.md for the complete mapping matrix
  * @see Phase-2_Normalization-Rules.md for type conversion and null handling
