@@ -1,15 +1,15 @@
 /**
- * ProjectSiteCard — polished project-site link card.
+ * ProjectSiteCard — Governed project-site link card.
  *
- * Composes HbcCard (weight="standard") with structured metadata
- * and a primary action linking to the project's SharePoint site.
+ * Composes HbcCard (weight="standard") with HbcStatusBadge, HbcDescriptionList,
+ * and a clear navigational affordance linking to the project's SharePoint site.
  *
  * Light-theme only, governed by @hbc/ui-kit tokens.
  */
-import React, { type FC } from 'react';
+import React, { useMemo, type FC } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit';
-import type { StatusVariant } from '@hbc/ui-kit';
+import { HbcCard, HbcStatusBadge, HbcDescriptionList } from '@hbc/ui-kit';
+import type { StatusVariant, DescriptionListItem } from '@hbc/ui-kit';
 import {
   HBC_PRIMARY_BLUE,
   HBC_BRAND_ACTION,
@@ -21,8 +21,8 @@ import {
   elevationLevel2,
   TRANSITION_FAST,
   heading3,
+  bodySmall,
   label as labelType,
-  body as bodyType,
 } from '@hbc/ui-kit';
 import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
@@ -30,7 +30,7 @@ import type { IProjectSiteEntry } from '../types.js';
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const useStyles = makeStyles({
-  // ── Wrapper ─────────────────────────────────────────────────────────
+  // ── Card link wrapper ──────────────────────────────────────────────
   cardWrapper: {
     textDecorationLine: 'none',
     color: 'inherit',
@@ -58,14 +58,14 @@ const useStyles = makeStyles({
   },
   disabledWrapper: {
     cursor: 'default',
-    opacity: 0.6,
+    opacity: 0.55,
     ':hover': {
       boxShadow: elevationLevel1,
       transform: 'none',
     },
   },
 
-  // ── Header ──────────────────────────────────────────────────────────
+  // ── Header ─────────────────────────────────────────────────────────
   header: {
     display: 'flex',
     alignItems: 'center',
@@ -74,24 +74,25 @@ const useStyles = makeStyles({
     minHeight: '24px',
   },
   projectNumber: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    letterSpacing: '0.025em',
+    fontSize: bodySmall.fontSize,
+    fontWeight: '600',
+    letterSpacing: '0.03em',
+    fontVariantNumeric: 'tabular-nums',
     color: HBC_PRIMARY_BLUE,
     backgroundColor: hbcBrandRamp[150],
-    paddingTop: '3px',
-    paddingBottom: '3px',
+    paddingTop: '2px',
+    paddingBottom: '2px',
     paddingLeft: '8px',
     paddingRight: '8px',
     borderRadius: HBC_RADIUS_SM,
     whiteSpace: 'nowrap',
-    lineHeight: '1.3',
+    lineHeight: '1.4',
   },
   stageBadge: {
     marginLeft: 'auto',
   },
 
-  // ── Body ────────────────────────────────────────────────────────────
+  // ── Body ───────────────────────────────────────────────────────────
   body: {
     display: 'flex',
     flexDirection: 'column',
@@ -113,28 +114,8 @@ const useStyles = makeStyles({
     WebkitBoxOrient: 'vertical' as const,
     wordBreak: 'break-word' as const,
   },
-  metaGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
-    columnGap: '10px',
-    rowGap: '4px',
-    alignItems: 'baseline',
-  },
-  metaLabel: {
-    fontSize: labelType.fontSize,
-    fontWeight: labelType.fontWeight,
-    color: HBC_SURFACE_LIGHT['text-muted'],
-    whiteSpace: 'nowrap',
-  },
-  metaValue: {
-    fontSize: bodyType.fontSize,
-    color: HBC_SURFACE_LIGHT['text-primary'],
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
 
-  // ── Footer ──────────────────────────────────────────────────────────
+  // ── Footer ─────────────────────────────────────────────────────────
   footer: {
     display: 'flex',
     alignItems: 'center',
@@ -143,8 +124,8 @@ const useStyles = makeStyles({
     minHeight: '20px',
   },
   department: {
-    fontSize: '0.6875rem',
-    fontWeight: 500,
+    fontSize: bodySmall.fontSize,
+    fontWeight: labelType.fontWeight,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.05em',
     color: HBC_SURFACE_LIGHT['text-muted'],
@@ -158,8 +139,8 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    fontSize: '0.8125rem',
-    fontWeight: 600,
+    fontSize: bodySmall.fontSize,
+    fontWeight: '600',
     color: HBC_BRAND_ACTION,
     textDecorationLine: 'none',
     whiteSpace: 'nowrap',
@@ -168,17 +149,37 @@ const useStyles = makeStyles({
     transitionDuration: TRANSITION_FAST,
     transitionTimingFunction: 'ease-in-out',
   },
-  openSiteActionHover: {
-    // Applied to the action span when the CARD wrapper is hovered.
-    // This is achieved via CSS descendant selector on the wrapper :hover.
-    // Since Griffel doesn't support descendant selectors, we apply via
-    // conditional className in the component instead.
-  },
   provisioningLabel: {
-    fontSize: '0.8125rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: bodySmall.fontSize,
+    fontWeight: labelType.fontWeight,
     fontStyle: 'italic',
     color: HBC_SURFACE_LIGHT['text-muted'],
     flexShrink: 0,
+  },
+  provisioningDot: {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    borderRadius: '3px',
+    backgroundColor: HBC_SURFACE_LIGHT['text-muted'],
+    opacity: 0.6,
+    animationName: {
+      '0%': { opacity: 0.3 },
+      '50%': { opacity: 0.8 },
+      '100%': { opacity: 0.3 },
+    },
+    animationDuration: '1.5s',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'ease-in-out',
+    '@media (prefers-reduced-motion: reduce)': {
+      animationName: {
+        from: { opacity: 0.5 },
+        to: { opacity: 0.5 },
+      },
+    },
   },
 });
 
@@ -207,7 +208,15 @@ export interface ProjectSiteCardProps {
 export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const classes = useStyles();
 
-  const hasMetadata = entry.clientName || entry.projectLocation || entry.projectType;
+  // Build metadata items for HbcDescriptionList
+  const metadataItems = useMemo<DescriptionListItem[]>(() => {
+    const items: DescriptionListItem[] = [];
+    if (entry.clientName) items.push({ label: 'Client', value: entry.clientName });
+    if (entry.projectLocation) items.push({ label: 'Location', value: entry.projectLocation });
+    if (entry.projectType) items.push({ label: 'Type', value: entry.projectType });
+    return items;
+  }, [entry.clientName, entry.projectLocation, entry.projectType]);
+
   const deptLabel = formatDepartment(entry.department);
 
   // ── Header ──────────────────────────────────────────────────────────
@@ -237,7 +246,10 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
           Open Site <ExternalLink size="sm" />
         </span>
       ) : (
-        <span className={classes.provisioningLabel}>Provisioning&hellip;</span>
+        <span className={classes.provisioningLabel}>
+          <span className={classes.provisioningDot} aria-hidden="true" />
+          Provisioning
+        </span>
       )}
     </div>
   );
@@ -246,27 +258,8 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const bodyContent = (
     <div className={classes.body}>
       <h3 className={classes.projectName}>{entry.projectName}</h3>
-      {hasMetadata && (
-        <div className={classes.metaGrid}>
-          {entry.clientName && (
-            <>
-              <span className={classes.metaLabel}>Client</span>
-              <span className={classes.metaValue}>{entry.clientName}</span>
-            </>
-          )}
-          {entry.projectLocation && (
-            <>
-              <span className={classes.metaLabel}>Location</span>
-              <span className={classes.metaValue}>{entry.projectLocation}</span>
-            </>
-          )}
-          {entry.projectType && (
-            <>
-              <span className={classes.metaLabel}>Type</span>
-              <span className={classes.metaValue}>{entry.projectType}</span>
-            </>
-          )}
-        </div>
+      {metadataItems.length > 0 && (
+        <HbcDescriptionList items={metadataItems} dense />
       )}
     </div>
   );
@@ -288,7 +281,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     );
   }
 
-  // ── Render: disabled card (not focusable) ───────────────────────────
+  // ── Render: disabled card (provisioning) ────────────────────────────
   return (
     <div
       className={mergeClasses(classes.cardWrapper, classes.disabledWrapper)}

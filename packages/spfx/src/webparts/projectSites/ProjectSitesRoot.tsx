@@ -10,79 +10,94 @@
  * as defense-in-depth. SharePoint manifest has supportsThemeVariants=false
  * so the host does not inject section theme variants.
  */
-import React, { useState, useEffect, type FC } from 'react';
-import { makeStyles } from '@griffel/react';
+import React, { useState, useEffect, useMemo, type FC } from 'react';
+import { makeStyles, mergeClasses } from '@griffel/react';
 import {
   HbcEmptyState,
   HbcSpinner,
+  HbcSegmentedControl,
   HBC_SURFACE_LIGHT,
   HBC_STATUS_COLORS,
   HBC_RADIUS_XL,
+  HBC_RADIUS_SM,
   TRANSITION_NORMAL,
   elevationLevel1,
-  heading2,
-  bodySmall,
+  heading1,
+  label as labelType,
 } from '@hbc/ui-kit';
 import { Search, AlertTriangle } from '@hbc/ui-kit/icons';
 import { useAvailableYears } from './hooks/useAvailableYears.js';
 import { useProjectSites } from './hooks/useProjectSites.js';
 import { resolveDefaultYear } from './types.js';
-import { YearSelector } from './components/YearSelector.js';
 import { ProjectSiteCard } from './components/ProjectSiteCard.js';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const useStyles = makeStyles({
   root: {
-    // fontFamily cascades from FluentProvider via HbcThemeProvider
     color: HBC_SURFACE_LIGHT['text-primary'],
     paddingTop: '24px',
     paddingBottom: '32px',
     paddingLeft: '0px',
     paddingRight: '0px',
   },
+
+  // ── Header bar ──────────────────────────────────────────────────────
   header: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'baseline',
     flexWrap: 'wrap',
-    gap: '12px',
+    gap: `${'8px'} ${'16px'}`,
     paddingBottom: '16px',
-    marginBottom: '20px',
+    marginBottom: '24px',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
     borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
   },
   title: {
-    fontSize: heading2.fontSize,
-    fontWeight: '700',
-    lineHeight: heading2.lineHeight,
+    fontSize: heading1.fontSize,
+    fontWeight: heading1.fontWeight,
+    lineHeight: heading1.lineHeight,
+    letterSpacing: heading1.letterSpacing,
     color: HBC_SURFACE_LIGHT['text-primary'],
     marginTop: 0,
     marginBottom: 0,
     marginLeft: 0,
     marginRight: 0,
   },
-  headerSpacer: {
-    flexGrow: 1,
+  headerTrailing: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    marginLeft: 'auto',
+    flexWrap: 'wrap',
   },
   count: {
-    fontSize: bodySmall.fontSize,
-    fontWeight: bodySmall.fontWeight,
+    fontSize: labelType.fontSize,
+    fontWeight: labelType.fontWeight,
     color: HBC_SURFACE_LIGHT['text-muted'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    paddingTop: '2px',
+    paddingBottom: '2px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    borderRadius: HBC_RADIUS_SM,
     whiteSpace: 'nowrap',
   },
+
+  // ── Card grid ───────────────────────────────────────────────────────
   grid: {
     display: 'grid',
-    gap: '20px',
+    gap: '24px',
     gridTemplateColumns: '1fr',
     '@media (min-width: 480px)': {
       gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     },
     '@media (min-width: 1200px)': {
-      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
     },
     animationName: {
-      from: { opacity: 0, transform: 'translateY(8px)' },
+      from: { opacity: 0, transform: 'translateY(6px)' },
       to: { opacity: 1, transform: 'translateY(0)' },
     },
     animationDuration: TRANSITION_NORMAL,
@@ -92,9 +107,17 @@ const useStyles = makeStyles({
       animationDuration: '0.01ms',
     },
   },
+  // Sparse-results: cap card width so 1-2 cards don't stretch full-width
+  gridSparse: {
+    '@media (min-width: 768px)': {
+      gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 380px))',
+    },
+  },
   gridItem: {
     minWidth: 0,
   },
+
+  // ── Loading & empty states ──────────────────────────────────────────
   spinnerContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -105,14 +128,14 @@ const useStyles = makeStyles({
   },
   shimmerGrid: {
     display: 'grid',
-    gap: '20px',
+    gap: '24px',
     gridTemplateColumns: '1fr',
     '@media (min-width: 480px)': {
       gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     },
   },
   shimmerCard: {
-    height: '180px',
+    height: '200px',
     borderRadius: HBC_RADIUS_XL,
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
     boxShadow: elevationLevel1,
@@ -133,8 +156,8 @@ const useStyles = makeStyles({
   },
   emptyContainer: {
     marginTop: '8px',
-    paddingTop: '16px',
-    paddingBottom: '16px',
+    paddingTop: '32px',
+    paddingBottom: '32px',
     borderRadius: HBC_RADIUS_XL,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
   },
@@ -178,6 +201,18 @@ export const ProjectSitesRoot: FC = () => {
   }, [yearsResult.status, yearsResult.years, selectedYear]);
 
   const projectsResult = useProjectSites(selectedYear);
+
+  // Build year options for HbcSegmentedControl
+  const yearOptions = useMemo(
+    () =>
+      yearsResult.status === 'success'
+        ? yearsResult.years.map((y) => ({ value: y, label: String(y) }))
+        : [],
+    [yearsResult],
+  );
+
+  const entryCount = projectsResult?.status === 'success' ? projectsResult.entries.length : 0;
+  const isSparse = entryCount > 0 && entryCount <= 2;
 
   // ── Years loading ─────────────────────────────────────────────────
   if (yearsResult.status === 'loading') {
@@ -236,17 +271,20 @@ export const ProjectSitesRoot: FC = () => {
     <div className={classes.root}>
       <div className={classes.header}>
         <h2 className={classes.title}>Project Sites</h2>
-        <div className={classes.headerSpacer} />
-        <YearSelector
-          years={yearsResult.years}
-          selectedYear={year}
-          onYearChange={setSelectedYear}
-        />
-        {projectsResult?.status === 'success' && (
-          <span className={classes.count} aria-live="polite">
-            {projectsResult.entries.length} project{projectsResult.entries.length !== 1 ? 's' : ''}
-          </span>
-        )}
+        <div className={classes.headerTrailing}>
+          <HbcSegmentedControl
+            label="Year:"
+            options={yearOptions}
+            value={year}
+            onChange={setSelectedYear}
+            size="sm"
+          />
+          {projectsResult?.status === 'success' && (
+            <span className={classes.count} aria-live="polite">
+              {entryCount} project{entryCount !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Projects loading */}
@@ -285,9 +323,9 @@ export const ProjectSitesRoot: FC = () => {
       {projectsResult?.status === 'success' && (
         <div
           key={year}
-          className={classes.grid}
+          className={mergeClasses(classes.grid, isSparse && classes.gridSparse)}
           role="list"
-          aria-label={`${projectsResult.entries.length} project site${projectsResult.entries.length !== 1 ? 's' : ''} for ${year}`}
+          aria-label={`${entryCount} project site${entryCount !== 1 ? 's' : ''} for ${year}`}
         >
           {projectsResult.entries.map((entry) => (
             <div key={entry.id} role="listitem" className={classes.gridItem}>

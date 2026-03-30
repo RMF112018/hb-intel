@@ -182,6 +182,12 @@ export type {
 export { HbcEmptyState } from './HbcEmptyState/index.js';
 export type { HbcEmptyStateProps } from './HbcEmptyState/index.js';
 
+export { HbcSegmentedControl } from './HbcSegmentedControl/index.js';
+export type { HbcSegmentedControlProps, SegmentedOption } from './HbcSegmentedControl/index.js';
+
+export { HbcDescriptionList } from './HbcDescriptionList/index.js';
+export type { HbcDescriptionListProps, DescriptionListItem } from './HbcDescriptionList/index.js';
+
 export { HbcErrorBoundary } from './HbcErrorBoundary/index.js';
 export type { HbcErrorBoundaryProps, HbcErrorBoundaryState } from './HbcErrorBoundary/index.js';
 

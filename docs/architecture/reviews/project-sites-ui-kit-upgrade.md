@@ -1,7 +1,7 @@
 # Project Sites UI Kit Upgrade & Light-Mode Enforcement
 
 > **Date**: 2026-03-30
-> **Scope**: UI maturity upgrade — theme provider wiring, light-mode enforcement, component migration, typography token adoption
+> **Scope**: Full UI maturity upgrade — theme provider, light-mode enforcement, governed primitive migration, composition refinement
 > **Surface**: Project Sites SPFx webpart (`apps/project-sites`, `packages/spfx/src/webparts/projectSites/`)
 
 ---
@@ -95,41 +95,81 @@ Three-layer light-mode governance, each reinforcing the others:
 - HbcStatusBadge: dual-channel (color + shape icon) badges meet WCAG without relying on color alone
 - HbcButton (YearSelector): primary/secondary variants both pass 4.5:1 text contrast in light theme
 
-## 3. Deferred Items
+## 3. Governed Composition Migration (Prompt 4)
 
-These were reviewed and intentionally deferred as clean, single-consumer implementations:
-- **Segmented control elevation** — YearSelector uses HbcButton correctly with proper ARIA radiogroup pattern
-- **Shimmer/skeleton primitive** — 10-line pulse animation, self-contained
-- **Metadata grid primitive** — 2-column label/value layout, too specific for one consumer
-- **Card-as-link enhancement** — Current `<a>` wrapper with hover effects is straightforward
+### 3.1 YearSelector → HbcSegmentedControl
 
-## 4. Verification (Final — after Prompt 2)
+Deleted `YearSelector.tsx` (105 lines) and replaced with `HbcSegmentedControl` from `@hbc/ui-kit`. The year options are built from the API result using `useMemo` and passed directly to the control. This eliminates 60+ lines of manual keyboard navigation and ARIA radiogroup wiring that are now encapsulated in the shared primitive.
+
+### 3.2 Metadata Grid → HbcDescriptionList
+
+Replaced the manual `metaGrid` / `metaLabel` / `metaValue` Griffel styles in `ProjectSiteCard` with `HbcDescriptionList` (dense mode). Metadata items are built via `useMemo` from the entry fields. This gains semantic `<dl>`/`<dt>`/`<dd>` HTML structure (better screen reader associations) and removes 20+ lines of local grid styling.
+
+### 3.3 Header System Refinement
+
+Upgraded the header from a flat flexbox with spacer to a deliberate two-zone layout:
+- **Left zone**: Page title promoted to `heading1` typography (from heading2) for stronger hierarchy
+- **Right zone**: `headerTrailing` flex container groups year selector and result count as a unified control cluster
+
+Result count now renders as a subtle badge (surface-2 background with border-radius) rather than plain muted text, giving it visual weight proportional to its informational value.
+
+### 3.4 Sparse-Results Grid Behavior
+
+Added `gridSparse` class that activates when 1-2 results exist. On screens ≥768px it constrains card max-width to 380px via `repeat(auto-fill, minmax(320px, 380px))`, preventing cards from stretching the full page width and looking unfinished.
+
+### 3.5 Provisioning State Refinement
+
+Replaced the plain italic "Provisioning..." text with a more intentional treatment:
+- Animated pulse dot (6px circle with 1.5s breathing animation, respects `prefers-reduced-motion`)
+- "Provisioning" label with label-weight font alongside the dot
+- Reduced wrapper opacity from 0.6 → 0.55 for slightly clearer disabled contrast
+
+### 3.6 Card Composition Polish
+
+- Project number badge: tighter padding (2px vertical), tabular-nums for numeric alignment
+- Footer action: `bodySmall` sizing for proportional scaling with card density
+- Department label: `bodySmall` + label weight for consistent secondary text treatment
+- Gap values aligned to 8px grid throughout
+
+## 4. Deferred Items
+
+- **Shimmer/skeleton primitive** — 10-line pulse animation, self-contained, not worth elevating
+- **Card-as-link enhancement** — Current `<a>` wrapper with hover/focus effects is straightforward
+
+## 5. Verification (Final — after Prompt 4)
 
 | Check | Result |
 |-------|--------|
 | `@hbc/ui-kit check-types` | Pass |
 | `@hbc/ui-kit build` | Pass |
 | `@hbc/spfx check-types` | Pass |
-| `@hbc/spfx lint` | Pass |
-| `@hbc/spfx test (projectSites)` | 67/67 pass (7 files) |
-| `@hbc/spfx-project-sites build` | Pass (479.90 KB, gzip 141.01 KB) |
+| `@hbc/spfx lint` | Pass (0 errors, 0 warnings) |
+| `@hbc/spfx test (projectSites)` | 61/61 pass (6 files) |
+| `@hbc/spfx-project-sites build` | Pass (481.92 KB, gzip 141.61 KB) |
 
-## 5. Files Changed
+## 6. Files Changed (Cumulative)
 
 | File | Change |
 |------|--------|
-| `apps/project-sites/src/mount.tsx` | Added HbcThemeProvider wrapper with forceTheme='light' |
-| `apps/project-sites/vite.config.ts` | Added @hbc/ui-kit/icons and /theme subpath aliases |
-| `apps/project-sites/package.json` | Version bump 0.0.1 → 0.0.3 |
-| `packages/ui-kit/src/icons/index.tsx` | Added AlertTriangle, ExternalLink icons |
-| `packages/spfx/src/webparts/projectSites/ProjectSitesRoot.tsx` | ui-kit icons, typography tokens, HBC_STATUS_COLORS.error, light-mode docstring |
-| `packages/spfx/src/webparts/projectSites/components/ProjectSiteCard.tsx` | HbcStatusBadge, ExternalLink icon, typography tokens, hbcBrandRamp[150] |
-| `packages/spfx/src/webparts/projectSites/components/YearSelector.tsx` | Typography tokens |
+| `apps/project-sites/src/mount.tsx` | HbcThemeProvider with forceTheme='light' |
+| `apps/project-sites/vite.config.ts` | @hbc/ui-kit subpath aliases |
+| `apps/project-sites/package.json` | Version 0.0.1 → 0.0.4 |
+| `packages/ui-kit/src/icons/index.tsx` | AlertTriangle, ExternalLink icons |
+| `packages/ui-kit/src/HbcSegmentedControl/` | New governed pill-group selector |
+| `packages/ui-kit/src/HbcDescriptionList/` | New semantic key/value metadata list |
+| `packages/ui-kit/src/index.ts` | Barrel exports for new components |
+| `packages/ui-kit/package.json` | Version 2.2.87 → 2.2.88 |
+| `packages/spfx/src/webparts/projectSites/ProjectSitesRoot.tsx` | HbcSegmentedControl, refined header, sparse grid, token migration |
+| `packages/spfx/src/webparts/projectSites/components/ProjectSiteCard.tsx` | HbcDescriptionList, HbcStatusBadge, refined provisioning state |
+| `packages/spfx/src/webparts/projectSites/components/YearSelector.tsx` | **Deleted** (replaced by HbcSegmentedControl) |
+| `packages/spfx/src/webparts/projectSites/components/YearSelector.test.tsx` | **Deleted** (component removed) |
 | `packages/spfx/src/webparts/projectSites/ProjectSitesWebPart.manifest.json` | supportsThemeVariants: false |
 | `apps/project-sites/src/webparts/projectSites/ProjectSitesWebPart.manifest.json` | supportsThemeVariants: false |
-| `vitest.workspace.ts` | Added @hbc/ui-kit/icons and /theme aliases to @hbc/spfx entry |
+| `vitest.workspace.ts` | @hbc/ui-kit subpath aliases for @hbc/spfx |
+| `docs/reference/ui-kit/HbcSegmentedControl.md` | Component reference documentation |
+| `docs/reference/ui-kit/HbcDescriptionList.md` | Component reference documentation |
 
-## 6. Governance References
+## 7. Governance References
 
 - **ADR-0116**: UI Doctrine and Visual Governance — theme/token compliance
 - **ADR-0040**: Theme and Token Enforcement — enforced via `@hbc/ui-kit` imports
