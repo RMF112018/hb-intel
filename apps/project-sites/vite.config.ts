@@ -11,6 +11,8 @@ export default defineConfig(({ command }) => ({
       // Subpath alias MUST come before the parent alias
       '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
       '@hbc/auth': resolve(__dirname, '../../packages/auth/src/index.ts'),
+      '@hbc/ui-kit/icons': resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx'),
+      '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts'),
       '@hbc/models': resolve(__dirname, '../../packages/models/src/index.ts'),
       '@hbc/spfx/project-sites': resolve(__dirname, '../../packages/spfx/src/webparts/projectSites'),

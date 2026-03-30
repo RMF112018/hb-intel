@@ -11,6 +11,7 @@ import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HbcThemeProvider } from '@hbc/ui-kit';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
 // Use relative path — Vite resolves via alias, tsc resolves via filesystem
 import { ProjectSitesRoot } from '../../../packages/spfx/src/webparts/projectSites/ProjectSitesRoot.js';
@@ -38,11 +39,17 @@ export async function mount(el: HTMLElement, spfxContext?: WebPartContext): Prom
   });
 
   root = createRoot(el);
+  // SPFx-hosted surfaces run inside SharePoint's always-light chrome.
+  // Force light theme to prevent OS dark-mode from creating visual incoherence.
+  const appTree = createElement(
+    QueryClientProvider,
+    { client: queryClient },
+    createElement(ProjectSitesRoot),
+  );
   root.render(
     createElement(
-      QueryClientProvider,
-      { client: queryClient },
-      createElement(ProjectSitesRoot),
+      HbcThemeProvider,
+      { forceTheme: 'light' as const, children: appTree },
     ),
   );
 }

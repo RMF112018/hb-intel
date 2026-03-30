@@ -8,17 +8,23 @@
  */
 import React, { type FC } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { HbcCard } from '@hbc/ui-kit';
+import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit';
+import type { StatusVariant } from '@hbc/ui-kit';
 import {
   HBC_PRIMARY_BLUE,
   HBC_BRAND_ACTION,
   HBC_SURFACE_LIGHT,
   HBC_RADIUS_SM,
   HBC_RADIUS_XL,
+  hbcBrandRamp,
   elevationLevel1,
   elevationLevel2,
   TRANSITION_FAST,
+  heading3,
+  label as labelType,
+  body as bodyType,
 } from '@hbc/ui-kit';
+import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
 
 // ── Styles ────────────────────────────────────────────────────────────────
@@ -72,7 +78,7 @@ const useStyles = makeStyles({
     fontWeight: 600,
     letterSpacing: '0.025em',
     color: HBC_PRIMARY_BLUE,
-    backgroundColor: '#E8F1F8',
+    backgroundColor: hbcBrandRamp[150],
     paddingTop: '3px',
     paddingBottom: '3px',
     paddingLeft: '8px',
@@ -82,30 +88,7 @@ const useStyles = makeStyles({
     lineHeight: '1.3',
   },
   stageBadge: {
-    fontSize: '0.6875rem',
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.05em',
-    paddingTop: '3px',
-    paddingBottom: '3px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
-    borderRadius: HBC_RADIUS_SM,
-    whiteSpace: 'nowrap',
-    lineHeight: '1.3',
     marginLeft: 'auto',
-  },
-  stageActive: {
-    color: '#065F46',
-    backgroundColor: '#D1FAE5',
-  },
-  stagePursuit: {
-    color: '#92400E',
-    backgroundColor: '#FEF3C7',
-  },
-  stageDefault: {
-    color: HBC_SURFACE_LIGHT['text-muted'],
-    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
   },
 
   // ── Body ────────────────────────────────────────────────────────────
@@ -115,9 +98,9 @@ const useStyles = makeStyles({
     gap: '10px',
   },
   projectName: {
-    fontSize: '1rem',
-    fontWeight: 600,
-    lineHeight: '1.4',
+    fontSize: heading3.fontSize,
+    fontWeight: heading3.fontWeight,
+    lineHeight: heading3.lineHeight,
     color: HBC_SURFACE_LIGHT['text-primary'],
     marginTop: 0,
     marginBottom: 0,
@@ -138,13 +121,13 @@ const useStyles = makeStyles({
     alignItems: 'baseline',
   },
   metaLabel: {
-    fontSize: '0.75rem',
-    fontWeight: 500,
+    fontSize: labelType.fontSize,
+    fontWeight: labelType.fontWeight,
     color: HBC_SURFACE_LIGHT['text-muted'],
     whiteSpace: 'nowrap',
   },
   metaValue: {
-    fontSize: '0.8125rem',
+    fontSize: bodyType.fontSize,
     color: HBC_SURFACE_LIGHT['text-primary'],
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -208,36 +191,12 @@ function formatDepartment(raw: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function getStageStyle(
-  classes: ReturnType<typeof useStyles>,
-  stage: string,
-): string {
+function resolveStageVariant(stage: string): StatusVariant {
   const lower = stage.toLowerCase();
-  if (lower === 'active') return mergeClasses(classes.stageBadge, classes.stageActive);
-  if (lower === 'pursuit') return mergeClasses(classes.stageBadge, classes.stagePursuit);
-  return mergeClasses(classes.stageBadge, classes.stageDefault);
+  if (lower === 'active') return 'onTrack';
+  if (lower === 'pursuit') return 'warning';
+  return 'neutral';
 }
-
-// ── Arrow icon (inline SVG — no external dep) ────────────────────────────
-
-const ArrowIcon: FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M4 12L12 4M12 4H6M12 4V10"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 // ── Component ─────────────────────────────────────────────────────────────
 
@@ -258,8 +217,12 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
         <span className={classes.projectNumber}>{entry.projectNumber}</span>
       )}
       {entry.projectStage && (
-        <span className={getStageStyle(classes, entry.projectStage)}>
-          {entry.projectStage}
+        <span className={classes.stageBadge}>
+          <HbcStatusBadge
+            variant={resolveStageVariant(entry.projectStage)}
+            label={entry.projectStage}
+            size="small"
+          />
         </span>
       )}
     </div>
@@ -271,7 +234,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
       <span className={classes.department}>{deptLabel}</span>
       {entry.hasSiteUrl ? (
         <span className={classes.openSiteAction} aria-hidden="true">
-          Open Site <ArrowIcon />
+          Open Site <ExternalLink size="sm" />
         </span>
       ) : (
         <span className={classes.provisioningLabel}>Provisioning&hellip;</span>

@@ -4,7 +4,11 @@
  * Self-contained: loads available years, presents a year selector,
  * and renders the filtered card grid. No external props needed.
  *
- * Light-theme only. Designed for SharePoint modern page zones.
+ * **Light-mode only.** Governed by HbcThemeProvider(forceTheme='light')
+ * at the mount boundary (apps/project-sites/src/mount.tsx). Griffel
+ * styles additionally reference HBC_SURFACE_LIGHT compile-time tokens
+ * as defense-in-depth. SharePoint manifest has supportsThemeVariants=false
+ * so the host does not inject section theme variants.
  */
 import React, { useState, useEffect, type FC } from 'react';
 import { makeStyles } from '@griffel/react';
@@ -12,10 +16,14 @@ import {
   HbcEmptyState,
   HbcSpinner,
   HBC_SURFACE_LIGHT,
+  HBC_STATUS_COLORS,
   HBC_RADIUS_XL,
   TRANSITION_NORMAL,
   elevationLevel1,
+  heading2,
+  bodySmall,
 } from '@hbc/ui-kit';
+import { Search, AlertTriangle } from '@hbc/ui-kit/icons';
 import { useAvailableYears } from './hooks/useAvailableYears.js';
 import { useProjectSites } from './hooks/useProjectSites.js';
 import { resolveDefaultYear } from './types.js';
@@ -26,8 +34,7 @@ import { ProjectSiteCard } from './components/ProjectSiteCard.js';
 
 const useStyles = makeStyles({
   root: {
-    fontFamily:
-      "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif",
+    // fontFamily cascades from FluentProvider via HbcThemeProvider
     color: HBC_SURFACE_LIGHT['text-primary'],
     paddingTop: '24px',
     paddingBottom: '32px',
@@ -46,9 +53,9 @@ const useStyles = makeStyles({
     borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
   },
   title: {
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    lineHeight: '1.3',
+    fontSize: heading2.fontSize,
+    fontWeight: '700',
+    lineHeight: heading2.lineHeight,
     color: HBC_SURFACE_LIGHT['text-primary'],
     marginTop: 0,
     marginBottom: 0,
@@ -59,8 +66,8 @@ const useStyles = makeStyles({
     flexGrow: 1,
   },
   count: {
-    fontSize: '0.8125rem',
-    fontWeight: 400,
+    fontSize: bodySmall.fontSize,
+    fontWeight: bodySmall.fontWeight,
     color: HBC_SURFACE_LIGHT['text-muted'],
     whiteSpace: 'nowrap',
   },
@@ -133,21 +140,14 @@ const useStyles = makeStyles({
   },
 });
 
-// ── Icons ─────────────────────────────────────────────────────────────────
+// ── Icons (from @hbc/ui-kit/icons, sized for empty states) ──────────────
 
-const SearchIcon: FC = () => (
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-    <circle cx="22" cy="22" r="12" stroke={HBC_SURFACE_LIGHT['text-muted']} strokeWidth="2" fill="none" />
-    <path d="M31 31L40 40" stroke={HBC_SURFACE_LIGHT['text-muted']} strokeWidth="2" strokeLinecap="round" />
-  </svg>
+const EmptySearchIcon: FC = () => (
+  <Search size="lg" color={HBC_SURFACE_LIGHT['text-muted']} />
 );
 
-const AlertIcon: FC = () => (
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-    <path d="M24 8L4 40H44L24 8Z" stroke="#FF4D4D" strokeWidth="2" strokeLinejoin="round" fill="none" />
-    <path d="M24 20V30" stroke="#FF4D4D" strokeWidth="2" strokeLinecap="round" />
-    <circle cx="24" cy="35" r="1.5" fill="#FF4D4D" />
-  </svg>
+const EmptyAlertIcon: FC = () => (
+  <AlertTriangle size="lg" color={HBC_STATUS_COLORS.error} />
 );
 
 // ── Shimmer ───────────────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ export const ProjectSitesRoot: FC = () => {
           <HbcEmptyState
             title="Unable to Load Project Sites"
             description={yearsResult.errorMessage ?? 'Failed to load available years. Try refreshing the page.'}
-            icon={<AlertIcon />}
+            icon={<EmptyAlertIcon />}
           />
         </div>
       </div>
@@ -222,7 +222,7 @@ export const ProjectSitesRoot: FC = () => {
           <HbcEmptyState
             title="No Project Sites"
             description="No projects with Year values were found in the Projects list."
-            icon={<SearchIcon />}
+            icon={<EmptySearchIcon />}
           />
         </div>
       </div>
@@ -265,7 +265,7 @@ export const ProjectSitesRoot: FC = () => {
           <HbcEmptyState
             title="Unable to Load Project Sites"
             description={projectsResult.errorMessage ?? 'An unexpected error occurred. Try refreshing the page.'}
-            icon={<AlertIcon />}
+            icon={<EmptyAlertIcon />}
           />
         </div>
       )}
@@ -276,7 +276,7 @@ export const ProjectSitesRoot: FC = () => {
           <HbcEmptyState
             title="No Project Sites"
             description={`No projects were found for ${year}. Projects will appear here once they are added to the Projects list with Year set to ${year}.`}
-            icon={<SearchIcon />}
+            icon={<EmptySearchIcon />}
           />
         </div>
       )}

@@ -10,6 +10,7 @@ import { makeStyles } from '@griffel/react';
 import {
   HbcButton,
   HBC_SURFACE_LIGHT,
+  label as labelType,
 } from '@hbc/ui-kit';
 
 const useStyles = makeStyles({
@@ -19,8 +20,8 @@ const useStyles = makeStyles({
     gap: '10px',
   },
   label: {
-    fontSize: '0.8125rem',
-    fontWeight: 600,
+    fontSize: labelType.fontSize,
+    fontWeight: '600',
     color: HBC_SURFACE_LIGHT['text-muted'],
     whiteSpace: 'nowrap',
     userSelect: 'none',
