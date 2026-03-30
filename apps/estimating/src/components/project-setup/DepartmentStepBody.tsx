@@ -4,6 +4,7 @@ import {
   getProjectTypeOptionsForDepartment,
   OFFICE_DIVISION_OPTIONS,
   PROJECT_STAGE_OPTIONS,
+  PROJECT_SETUP_REQUIRED_FIELDS_ENABLED,
 } from '@hbc/features-estimating';
 import { HbcFormSection, HbcSelect } from '@hbc/ui-kit';
 import type { StepBodyProps } from './StepBodyProps.js';
@@ -62,7 +63,7 @@ export function DepartmentStepBody({ request, onChange }: StepBodyProps): ReactN
               projectType: currentProjectTypeIsValid ? request.projectType : undefined,
             });
           }}
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         <HbcSelect
           label="Project Type"
@@ -75,7 +76,7 @@ export function DepartmentStepBody({ request, onChange }: StepBodyProps): ReactN
               : 'Choose a department above to see project types'
           }
           disabled={!request.department}
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         <HbcSelect
           label="Contract Type"

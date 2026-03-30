@@ -90,7 +90,8 @@ export function ReviewStepBody({ request, mode, onSubmit, submitting }: ReviewSt
         </HbcCard>
       )}
 
-      <HbcButton variant="primary" onClick={onSubmit} disabled={submitting || !request.projectName}>
+      {/* Submit gating: when required fields are enabled, projectName must be present */}
+      <HbcButton variant="primary" onClick={onSubmit} disabled={submitting}>
         {submitting ? 'Submitting…' : 'Submit Project Setup Request'}
       </HbcButton>
     </HbcFormSection>

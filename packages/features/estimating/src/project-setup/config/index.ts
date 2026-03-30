@@ -5,6 +5,7 @@ export {
   STEP_TEMPLATE,
   STEP_REVIEW,
   PROJECT_SETUP_STEPS,
+  PROJECT_SETUP_REQUIRED_FIELDS_ENABLED,
 } from './projectSetupSteps.js';
 
 export { PROJECT_SETUP_WIZARD_CONFIG } from './projectSetupWizardConfig.js';

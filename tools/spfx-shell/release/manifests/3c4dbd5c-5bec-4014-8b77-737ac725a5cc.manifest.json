@@ -36,7 +36,7 @@
     "scriptResources": {
       "shell-web-part": {
         "type": "path",
-        "path": "shell-web-part_5c762b6075482907185e.js"
+        "path": "shell-web-part_f18b3400c4f5d204c454.js"
       },
       "@microsoft/sp-loader": {
         "type": "component",

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { getSpfxContext } from '@hbc/auth/spfx';
 import { createSpfxGraphTokenProvider } from '@hbc/auth/spfx';
-import { getEligibleTimberscanApprovers } from '@hbc/features-estimating';
+import { getEligibleTimberscanApprovers, PROJECT_SETUP_REQUIRED_FIELDS_ENABLED } from '@hbc/features-estimating';
 import {
   HbcFormSection,
   HbcPeoplePicker,
@@ -84,7 +84,7 @@ export function TeamStepBody({ request, onChange }: StepBodyProps): ReactNode {
           onChange={(people) => onChange({ projectExecutiveUpn: valueToUpn(people) })}
           searchPeople={searchPeople}
           mode="single"
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         <HbcPeoplePicker
           label="Project Manager"
@@ -105,7 +105,7 @@ export function TeamStepBody({ request, onChange }: StepBodyProps): ReactNode {
           onChange={(people) => onChange({ leadEstimatorUpn: valueToUpn(people) })}
           searchPeople={searchPeople}
           mode="single"
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         <HbcPeoplePicker
           label="Supporting Estimators"
@@ -138,7 +138,7 @@ export function TeamStepBody({ request, onChange }: StepBodyProps): ReactNode {
               : 'Add team members above first'
           }
           disabled={timberscanApproverOptions.length === 0}
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         {timberscanApproverOptions.length === 0 && (
           <HbcTypography intent="bodySmall" color="var(--colorNeutralForeground3)">

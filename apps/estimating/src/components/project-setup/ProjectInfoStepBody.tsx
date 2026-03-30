@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
+import { PROJECT_SETUP_REQUIRED_FIELDS_ENABLED } from '@hbc/features-estimating';
 import { HbcFormSection, HbcSelect, HbcTextField } from '@hbc/ui-kit';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '@hbc/ui-kit/theme';
 import type { StepBodyProps } from './StepBodyProps.js';
@@ -88,7 +89,7 @@ export function ProjectInfoStepBody({ request, onChange }: StepBodyProps): React
           label="Project Name"
           value={request.projectName ?? ''}
           onChange={(v) => onChange({ projectName: v })}
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         <HbcTextField
           label="Client Name"
@@ -102,21 +103,21 @@ export function ProjectInfoStepBody({ request, onChange }: StepBodyProps): React
           label="Street Address"
           value={request.projectStreetAddress ?? ''}
           onChange={(v) => onChange({ projectStreetAddress: v || undefined })}
-          required
+          required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
         />
         <div className={styles.row2col}>
           <HbcTextField
             label="City"
             value={request.projectCity ?? ''}
             onChange={(v) => onChange({ projectCity: v || undefined })}
-            required
+            required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
           />
           <HbcSelect
             label="State"
             options={[...STATE_OPTIONS]}
             value={request.projectState ?? ''}
             onChange={(v) => onChange({ projectState: v || undefined })}
-            required
+            required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
           />
         </div>
         <div className={styles.row2col}>
@@ -124,13 +125,13 @@ export function ProjectInfoStepBody({ request, onChange }: StepBodyProps): React
             label="County"
             value={request.projectCounty ?? ''}
             onChange={(v) => onChange({ projectCounty: v || undefined })}
-            required
+            required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
           />
           <HbcTextField
             label="Zip Code"
             value={request.projectZip ?? ''}
             onChange={(v) => onChange({ projectZip: v || undefined })}
-            required
+            required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
           />
         </div>
       </HbcFormSection>
