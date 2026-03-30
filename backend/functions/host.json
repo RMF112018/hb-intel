@@ -18,6 +18,16 @@
   "extensions": {
     "signalR": {
       "connectionStringSetting": "AzureSignalRConnectionString"
+    },
+    "http": {
+      "routePrefix": "api",
+      "cors": {
+        "allowedOrigins": [
+          "https://hedrickbrotherscom.sharepoint.com",
+          "https://*.sharepoint.com"
+        ],
+        "supportCredentials": true
+      }
     }
   }
 }

@@ -33,10 +33,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-4_Identity-Storage-Secrets.md`](Phase-4_Identity-Storage-Secrets.md) — MI usage matrix (6 services), removed AZURE_CLIENT_SECRET (pure MI), conditional SignalR init with NoOpSignalRPushService, storage/secret classification, stub status for email delivery
 
-5. `Prompt-04_CORS-Connected-Services-and-Permission-Model.md`
+5. `Prompt-04_CORS-Connected-Services-and-Permission-Model.md` **[COMPLETE]**
    - Finalize browser-origin rules, SharePoint / Graph access posture, and connected-service permissions
    - Remove or document unsupported service dependencies
    - Align platform permissions to least privilege and actual deployment scope
+   - **Deliverables:**
+     - [`Phase-4_CORS-Permissions-Connected-Services.md`](Phase-4_CORS-Permissions-Connected-Services.md) — CORS allowlist in host.json, least-privilege permission matrix (MI + app registration + SharePoint admin), connected-service classification (6 retained, 2 optional, 3 unsupported/stub), unresolved tenant dependencies
 
 6. `Prompt-05_Observability-Release-Readiness-and-Operational-Guards.md`
    - Add monitoring, diagnostics, readiness checks, and deployment safeguards
