@@ -9,6 +9,7 @@ import {
   applyStatusUpdate,
   applyVisit,
   applyCompletionFired,
+  applyActiveStep,
 } from '../state/stepStateMachine';
 import {
   mergeDraft,
@@ -28,6 +29,7 @@ const INITIAL_DRAFT = (stepIds: string[]): IStepWizardDraft => ({
   completedAts: Object.fromEntries(stepIds.map((id) => [id, null])),
   visitedStepIds: [],
   onAllCompleteFired: false,
+  activeStepId: stepIds[0] ?? null,
   savedAt: new Date().toISOString(),
 });
 
@@ -54,6 +56,7 @@ export function useStepWizard<T>(
       completedAts: merged.mergedCompletedAts,
       visitedStepIds: merged.mergedVisitedIds,
       onAllCompleteFired: merged.onAllCompleteFired,
+      activeStepId: merged.activeStepId ?? stepIds[0] ?? null,
       savedAt: stored.savedAt,
     };
   });
@@ -145,7 +148,10 @@ export function useStepWizard<T>(
     if (config.orderMode === 'sequential-with-jumps') {
       updated = applyVisit(updated, next.stepId); // unlock next step (D-01)
     }
-    updated = applyStatusUpdate(updated, next.stepId, 'in-progress');
+    if ((updated.stepStatuses[next.stepId] ?? 'not-started') === 'not-started') {
+      updated = applyStatusUpdate(updated, next.stepId, 'in-progress');
+    }
+    updated = applyActiveStep(updated, next.stepId);
     setDraft(updated);
   }, [config, item, draft, state.activeStepId]);
 
@@ -154,7 +160,8 @@ export function useStepWizard<T>(
     const unlockedStepIds = resolveUnlockedSteps(
       config.steps,
       draft.visitedStepIds,
-      config.orderMode
+      config.orderMode,
+      state.activeStepId,
     );
     const guard = guardGoTo(targetStepId, state.activeStepId, unlockedStepIds, config.orderMode);
     if (!guard.ok) {
@@ -176,7 +183,10 @@ export function useStepWizard<T>(
     if (config.orderMode === 'sequential-with-jumps') {
       updated = applyVisit(updated, targetStepId); // record visit (D-01)
     }
-    updated = applyStatusUpdate(updated, targetStepId, 'in-progress');
+    if ((updated.stepStatuses[targetStepId] ?? 'not-started') === 'not-started') {
+      updated = applyStatusUpdate(updated, targetStepId, 'in-progress');
+    }
+    updated = applyActiveStep(updated, targetStepId);
     setDraft(updated);
   }, [config, item, draft, state.activeStepId]);
 
@@ -193,11 +203,16 @@ export function useStepWizard<T>(
 
     // Clear validation error on success
     setValidationErrors((prev) => ({ ...prev, [stepId]: null }));
-    const updated = applyStatusUpdate(draft, stepId, 'complete');
+    let updated = applyStatusUpdate(draft, stepId, 'complete');
+    if (state.activeStepId === stepId) {
+      const currentIdx = config.steps.findIndex((s) => s.stepId === stepId);
+      const next = currentIdx >= 0 ? config.steps[currentIdx + 1] : undefined;
+      updated = applyActiveStep(updated, next?.stepId ?? null);
+    }
     setDraft(updated);
 
     await step.onComplete?.(item);
-  }, [config, item, draft]);
+  }, [config, item, draft, state.activeStepId]);
 
   // ── Mutation: markBlocked ─────────────────────────────────────────────
   const markBlocked = React.useCallback((stepId: string, reason?: string) => {
@@ -218,6 +233,7 @@ export function useStepWizard<T>(
     }
     let updated = applyStatusUpdate(draft, stepId, 'in-progress');
     updated = applyCompletionFired(updated, false); // reset D-07 guard
+    updated = applyActiveStep(updated, stepId);
     setDraft(updated);
   }, [config, draft]);
 

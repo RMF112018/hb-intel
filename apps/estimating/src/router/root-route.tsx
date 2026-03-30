@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { makeStyles } from '@griffel/react';
 import { ShellLayout, resolveProjectHubUrl } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
@@ -17,12 +17,10 @@ import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBac
  * @see docs/architecture/reviews/estimating-project-setup-only-deployment-remediation.md
  */
 const ESTIMATING_SHELL_CONFIG: SimplifiedShellConfig = {
-  workspaceName: 'Estimating',
+  workspaceName: '',
   showBackToProjectHub: true,
   projectHubUrl: resolveProjectHubUrl(),
-  toolPickerItems: [
-    { label: 'Project Setup', path: '/project-setup' },
-  ],
+  toolPickerItems: [],
 };
 
 const useStyles = makeStyles({
@@ -48,26 +46,14 @@ const useStyles = makeStyles({
 
 export function RootComponent(): React.ReactNode {
   const styles = useStyles();
-  const navigate = useNavigate();
   const { backendMode, isUiReview, canSwitchBackendMode, setBackendMode } = useProjectSetupBackend();
 
   return (
     <ShellLayout
       mode="simplified"
       simplifiedConfig={ESTIMATING_SHELL_CONFIG}
-      toolPickerSlot={
-        <nav data-hbc-shell="tool-picker-nav">
-          {ESTIMATING_SHELL_CONFIG.toolPickerItems.map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              onClick={() => navigate({ to: item.path })}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-      }
+      leftSlot={null}
+      toolPickerSlot={null}
       rightSlot={
         canSwitchBackendMode ? (
           <div className={styles.backendModeControl}>

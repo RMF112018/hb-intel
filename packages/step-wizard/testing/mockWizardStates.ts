@@ -38,6 +38,7 @@ const notStartedDraft: IStepWizardDraft = {
   },
   visitedStepIds: [],
   onAllCompleteFired: false,
+  activeStepId: 'step-1',
   savedAt: new Date().toISOString(),
 };
 
@@ -70,6 +71,7 @@ const inProgressDraft: IStepWizardDraft = {
   },
   visitedStepIds: ['step-1', 'step-2'],
   onAllCompleteFired: false,
+  activeStepId: 'step-2',
   savedAt: new Date().toISOString(),
 };
 
@@ -102,6 +104,7 @@ const completeDraft: IStepWizardDraft = {
   },
   visitedStepIds: ['step-1', 'step-2', 'step-3'],
   onAllCompleteFired: false,
+  activeStepId: null,
   savedAt: new Date().toISOString(),
 };
 
@@ -134,6 +137,7 @@ const withBlockedDraft: IStepWizardDraft = {
   },
   visitedStepIds: ['step-1', 'step-2'],
   onAllCompleteFired: false,
+  activeStepId: 'step-3',
   savedAt: new Date().toISOString(),
 };
 
@@ -166,6 +170,7 @@ const withSkippedDraft: IStepWizardDraft = {
   },
   visitedStepIds: ['step-1', 'step-2'],
   onAllCompleteFired: false,
+  activeStepId: 'step-3',
   savedAt: new Date().toISOString(),
 };
 
@@ -198,6 +203,7 @@ const partialParallelDraft: IStepWizardDraft = {
   },
   visitedStepIds: ['step-1', 'step-2', 'step-3'],
   onAllCompleteFired: false,
+  activeStepId: 'step-2',
   savedAt: new Date().toISOString(),
 };
 

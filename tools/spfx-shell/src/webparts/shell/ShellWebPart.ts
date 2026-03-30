@@ -102,11 +102,17 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
       // (set by build-spfx-package.ts from the FUNCTION_APP_URL env var).
       const runtimeConfig: Record<string, unknown> = {};
       try {
-        if (typeof __FUNCTION_APP_URL__ === 'string' && __FUNCTION_APP_URL__) {
+        const hasFunctionAppUrl = typeof __FUNCTION_APP_URL__ === 'string' && __FUNCTION_APP_URL__;
+        const injectedBackendMode =
+          typeof __BACKEND_MODE__ === 'string' && __BACKEND_MODE__
+            ? __BACKEND_MODE__
+            : (!hasFunctionAppUrl ? 'ui-review' : '');
+
+        if (hasFunctionAppUrl) {
           runtimeConfig.functionAppUrl = __FUNCTION_APP_URL__;
         }
-        if (typeof __BACKEND_MODE__ === 'string' && __BACKEND_MODE__) {
-          runtimeConfig.backendMode = __BACKEND_MODE__;
+        if (injectedBackendMode) {
+          runtimeConfig.backendMode = injectedBackendMode;
         }
         if (typeof __ALLOW_BACKEND_MODE_SWITCH__ === 'string' && __ALLOW_BACKEND_MODE_SWITCH__) {
           runtimeConfig.allowBackendModeSwitch = __ALLOW_BACKEND_MODE_SWITCH__ === 'true';

@@ -30,13 +30,10 @@ export function buildWizardState<T>(
   const { steps, orderMode } = config;
   const { stepStatuses, completedAts, visitedStepIds, onAllCompleteFired } = draft;
 
-  const unlockedStepIds = resolveUnlockedSteps(steps, visitedStepIds, orderMode);
-
-  const runtimeSteps: IStepRuntimeEntry[] = steps.map((step) => {
+  const baseRuntimeSteps: IStepRuntimeEntry[] = steps.map((step) => {
     const status = stepStatuses[step.stepId] ?? 'not-started';
     const assignee = step.resolveAssignee?.(item) ?? null;
     const isVisited = visitedStepIds.includes(step.stepId);
-    const isUnlocked = unlockedStepIds.has(step.stepId);
 
     return {
       stepId: step.stepId,
@@ -50,7 +47,7 @@ export function buildWizardState<T>(
       validationError: validationErrors[step.stepId] ?? null,
       isOverdue: overdueStepIds.has(step.stepId),
       isVisited,
-      isUnlocked,
+      isUnlocked: true,
     };
   });
 
@@ -65,9 +62,23 @@ export function buildWizardState<T>(
   // 1. First required step that is in-progress (user is mid-step)
   // 2. First required step that is not-started and unlocked
   // 3. First step overall if nothing else matches
+  const fallbackActiveStepId = isComplete
+    ? null
+    : deriveActiveStepId(baseRuntimeSteps, orderMode);
   const activeStepId = isComplete
     ? null
-    : deriveActiveStepId(runtimeSteps, orderMode);
+    : resolvePersistedActiveStepId(
+      steps,
+      draft.activeStepId,
+      fallbackActiveStepId,
+      visitedStepIds,
+      orderMode,
+    );
+  const unlockedStepIds = resolveUnlockedSteps(steps, visitedStepIds, orderMode, activeStepId);
+  const runtimeSteps = baseRuntimeSteps.map((step) => ({
+    ...step,
+    isUnlocked: unlockedStepIds.has(step.stepId),
+  }));
 
   return {
     steps: runtimeSteps,
@@ -96,6 +107,46 @@ function deriveActiveStepId(
 
   // Fall back to first unlocked step
   return steps.find((s) => s.isUnlocked)?.stepId ?? null;
+}
+
+function resolvePersistedActiveStepId(
+  steps: Array<{ stepId: string; order?: number }>,
+  persistedActiveStepId: string | null | undefined,
+  fallbackActiveStepId: string | null,
+  visitedStepIds: string[],
+  orderMode: StepOrderMode,
+): string | null {
+  if (!persistedActiveStepId) {
+    return fallbackActiveStepId;
+  }
+
+  const ordered = [...steps].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const persistedIndex = ordered.findIndex((step) => step.stepId === persistedActiveStepId);
+  if (persistedIndex === -1) {
+    return fallbackActiveStepId;
+  }
+
+  if (orderMode === 'parallel') {
+    return persistedActiveStepId;
+  }
+
+  const fallbackIndex = fallbackActiveStepId
+    ? ordered.findIndex((step) => step.stepId === fallbackActiveStepId)
+    : -1;
+
+  if (orderMode === 'sequential') {
+    if (fallbackIndex === -1) {
+      return persistedActiveStepId;
+    }
+    return persistedIndex <= fallbackIndex ? persistedActiveStepId : fallbackActiveStepId;
+  }
+
+  const visitedSet = new Set(visitedStepIds);
+  if (visitedSet.has(persistedActiveStepId) || persistedActiveStepId === fallbackActiveStepId) {
+    return persistedActiveStepId;
+  }
+
+  return fallbackActiveStepId;
 }
 
 // ─── Transition Guards ────────────────────────────────────────────────────────
@@ -161,14 +212,12 @@ export function guardMarkComplete<T>(
  */
 export function guardGoTo(
   targetStepId: string,
-  activeStepId: string | null,
+  _activeStepId: string | null,
   unlockedStepIds: Set<string>,
   orderMode: StepOrderMode
 ): TransitionResult {
-  if (orderMode === 'sequential') {
-    if (targetStepId !== activeStepId) {
-      return { ok: false, reason: 'Sequential mode does not allow jumping to non-active steps.' };
-    }
+  if (orderMode === 'sequential' && !unlockedStepIds.has(targetStepId)) {
+    return { ok: false, reason: 'Sequential mode allows only the current step and previously reached steps.' };
   }
 
   if (orderMode === 'sequential-with-jumps') {
@@ -241,4 +290,19 @@ export function applyCompletionFired(
   fired: boolean
 ): IStepWizardDraft {
   return { ...draft, onAllCompleteFired: fired, savedAt: new Date().toISOString() };
+}
+
+export function applyActiveStep(
+  draft: IStepWizardDraft,
+  activeStepId: string | null
+): IStepWizardDraft {
+  if (draft.activeStepId === activeStepId) {
+    return draft;
+  }
+
+  return {
+    ...draft,
+    activeStepId,
+    savedAt: new Date().toISOString(),
+  };
 }

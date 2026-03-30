@@ -11,6 +11,8 @@ export interface IStepWizardDraft {
   visitedStepIds: string[];
   /** Idempotency guard for onAllComplete callback. (D-07) */
   onAllCompleteFired: boolean;
+  /** Explicit active step used for backward navigation and revisiting completed steps. */
+  activeStepId: string | null;
   /** ISO timestamp of last draft save. */
   savedAt: string;
 }
@@ -74,6 +76,7 @@ export function mergeDraft(
   mergedCompletedAts: Record<string, string | null>;
   mergedVisitedIds: string[];
   onAllCompleteFired: boolean;
+  activeStepId: string | null;
 } {
   const mergedStatuses: Record<string, StepStatus> = { ...inMemoryStatuses };
   const mergedCompletedAts: Record<string, string | null> = {
@@ -97,6 +100,7 @@ export function mergeDraft(
     mergedVisitedIds: [...mergedVisitedSet],
     // D-07: true wins — if fired in stored draft, honour it
     onAllCompleteFired: storedDraft.onAllCompleteFired,
+    activeStepId: storedDraft.activeStepId ?? null,
   };
 }
 
@@ -187,10 +191,26 @@ export function getActionableStepIds(
 export function resolveUnlockedSteps(
   steps: Array<{ stepId: string; order?: number }>,
   visitedStepIds: string[],
-  orderMode: string
+  orderMode: string,
+  activeStepId?: string | null,
 ): Set<string> {
-  if (orderMode !== 'sequential-with-jumps') {
+  if (orderMode === 'parallel') {
     return new Set(steps.map((s) => s.stepId));
+  }
+
+  if (orderMode === 'sequential') {
+    const ordered = [...steps].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    if (ordered.length === 0) {
+      return new Set();
+    }
+
+    const activeIndex = activeStepId
+      ? ordered.findIndex((step) => step.stepId === activeStepId)
+      : 0;
+    const unlockedThroughIndex = activeIndex >= 0 ? activeIndex : 0;
+    return new Set(
+      ordered.slice(0, unlockedThroughIndex + 1).map((step) => step.stepId),
+    );
   }
 
   const visitedSet = new Set(visitedStepIds);

@@ -13,6 +13,11 @@
 | `/project-setup/new?mode=clarification-return&requestId={id}` | `NewRequestPage` | Wizard pre-populated for clarification re-entry |
 | `/project-setup/$requestId` | `RequestDetailPage` | Request detail with BIC ownership and provisioning status |
 
+## Limited-Release Shell
+
+- The Estimating limited-release SharePoint shell intentionally omits the workspace-name text and the single-item Project Setup tool-picker row.
+- The remaining simplified shell chrome is limited to Back to Project Hub plus the optional reviewer backend-mode control.
+
 ## Backend Modes
 
 The Estimating SPFx requester surface now supports two runtime-selected backend modes for the limited-release Project Setup deployment:
@@ -22,6 +27,7 @@ The Estimating SPFx requester surface now supports two runtime-selected backend 
 | `production` | Shell-injected `backendMode`, then `VITE_BACKEND_MODE`, default | Uses the live provisioning API client and normal Function App runtime config |
 | `ui-review` | Shell-injected `backendMode`, then `VITE_BACKEND_MODE` | Disables backend connections and uses localStorage-backed mock Project Setup data |
 
+- SharePoint limited-release packaging defaults the Estimating SPFx surface to `ui-review` when no live backend mode or Function App URL is intentionally provided by the shell.
 - `functionAppUrl` is only required in `production` mode.
 - `allowBackendModeSwitch` is a separate runtime flag. When enabled, Estimating renders a reviewer-only header control that can switch between `UI Review` and `Production`.
 - `ui-review` keeps the deployment posture limited to Project Setup only; Bids and Templates remain hidden.
@@ -94,6 +100,7 @@ Consumed from `PROJECT_SETUP_WIZARD_CONFIG` in `@hbc/features-estimating`.
 - **Order mode:** sequential (steps unlock linearly)
 - **Allow reopen:** true (required for department→step-4 dependency)
 - **Draft key:** `project-setup-form-draft`
+- **Navigation rule:** the current step and previously reached steps are clickable; future steps remain disabled until they become current through normal progression
 
 ## Draft Persistence
 

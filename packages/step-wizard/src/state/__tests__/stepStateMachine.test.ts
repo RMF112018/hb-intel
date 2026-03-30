@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   guardMarkComplete, guardGoTo, guardReopen,
-  applyStatusUpdate, applyVisit, applyCompletionFired,
+  applyStatusUpdate, applyVisit, applyCompletionFired, applyActiveStep,
   buildWizardState,
 } from '../stepStateMachine';
 import { mergeStepStatus } from '../draftPayload';
@@ -77,8 +77,13 @@ describe('guardGoTo — sequential-with-jumps', () => {
     expect(result.ok).toBe(false);
   });
 
-  it('blocks all jumps in sequential mode', () => {
-    const result = guardGoTo('step-2', 'step-1', new Set(['step-1', 'step-2']), 'sequential');
+  it('allows prior-step navigation in sequential mode when the step is unlocked', () => {
+    const result = guardGoTo('step-1', 'step-2', new Set(['step-1', 'step-2']), 'sequential');
+    expect(result.ok).toBe(true);
+  });
+
+  it('blocks future-step navigation in sequential mode', () => {
+    const result = guardGoTo('step-3', 'step-2', new Set(['step-1', 'step-2']), 'sequential');
     expect(result.ok).toBe(false);
   });
 
@@ -165,6 +170,16 @@ describe('applyVisit', () => {
   });
 });
 
+describe('applyActiveStep', () => {
+  it('updates the explicit active step without mutating step completion status', () => {
+    const draft = mockWizardStates.inProgress.draft;
+    const updated = applyActiveStep(draft, 'step-1');
+    expect(updated.activeStepId).toBe('step-1');
+    expect(updated.stepStatuses['step-1']).toBe('complete');
+    expect(updated.stepStatuses['step-2']).toBe('in-progress');
+  });
+});
+
 // ── buildWizardState ────────────────────────────────────────────────────────
 describe('buildWizardState', () => {
   it('derives correct state from config and draft', () => {
@@ -211,10 +226,33 @@ describe('buildWizardState', () => {
     const config = createMockWizardConfig({ orderMode: 'sequential' });
     const draft = {
       ...mockWizardStates.notStarted.draft,
+      activeStepId: null,
       stepStatuses: { 'step-1': 'not-started' as const, 'step-2': 'in-progress' as const, 'step-3': 'not-started' as const },
     };
     const state = buildWizardState(config, {}, draft, {}, new Set());
     expect(state.activeStepId).toBe('step-2');
+  });
+
+  it('honors an explicit persisted prior active step in sequential mode', () => {
+    const config = createMockWizardConfig({ orderMode: 'sequential' });
+    const draft = {
+      ...mockWizardStates.inProgress.draft,
+      activeStepId: 'step-1',
+    };
+    const state = buildWizardState(config, {}, draft, {}, new Set());
+    expect(state.activeStepId).toBe('step-1');
+    expect(state.steps.find((step) => step.stepId === 'step-3')?.isUnlocked).toBe(false);
+  });
+
+  it('rejects a persisted future active step in sequential mode', () => {
+    const config = createMockWizardConfig({ orderMode: 'sequential' });
+    const draft = {
+      ...mockWizardStates.inProgress.draft,
+      activeStepId: 'step-3',
+    };
+    const state = buildWizardState(config, {}, draft, {}, new Set());
+    expect(state.activeStepId).toBe('step-2');
+    expect(state.steps.find((step) => step.stepId === 'step-3')?.isUnlocked).toBe(false);
   });
 
   it('sequential order guard: blocks completion when prior required step not done', () => {
@@ -258,7 +296,7 @@ describe('buildWizardState', () => {
   });
 
   it('sequential mode: allows active step goTo', () => {
-    const result = guardGoTo('step-1', 'step-1', new Set(), 'sequential');
+    const result = guardGoTo('step-1', 'step-1', new Set(['step-1']), 'sequential');
     expect(result.ok).toBe(true);
   });
 });

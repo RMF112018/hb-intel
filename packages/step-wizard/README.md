@@ -4,6 +4,8 @@ Multi-step guided workflow primitive for HB Intel.
 
 Provides a configurable step-wizard engine with a declarative configuration pattern (`IStepWizardConfig<T>`), a state machine that derives runtime state from config + draft, and visual components composed from `@hbc/ui-kit`. Wizard progress is persisted via `@hbc/session-state` with monotonic draft merging — step statuses never regress and terminal states always win.
 
+Sequential-mode navigation preserves an explicit active step in the draft so Back and revisiting prior completed steps work without regressing completion state.
+
 ## Installation
 
 ```bash
@@ -101,6 +103,7 @@ The wizard persists progress as an `IStepWizardDraft` via `@hbc/session-state`:
 | `completedAts` | `Record<string, string \| null>` | ISO timestamps of step completion |
 | `visitedStepIds` | `string[]` | Steps visited at least once (sequential-with-jumps) |
 | `onAllCompleteFired` | `boolean` | Idempotency guard for `onAllComplete` callback |
+| `activeStepId` | `string \| null` | Explicit current step used for Back navigation and revisiting prior steps |
 | `savedAt` | `string` | ISO timestamp of last draft save |
 
 ### Mutation methods
@@ -108,7 +111,7 @@ The wizard persists progress as an `IStepWizardDraft` via `@hbc/session-state`:
 | Method | When to call |
 |--------|-------------|
 | `advance()` | Move from the current step to the next (sequential modes) |
-| `goTo(stepId)` | Navigate to a specific step (blocked for unvisited steps in sequential-with-jumps) |
+| `goTo(stepId)` | Navigate to a specific step; sequential mode allows the current step plus prior reached steps, while future steps remain blocked |
 | `markComplete(stepId, force?)` | Complete a step; runs validation first unless `force` is set |
 | `markBlocked(stepId, reason?)` | Mark a step as externally blocked |
 | `reopenStep(stepId)` | Reopen a completed step (requires `allowReopen: true`); resets `onAllCompleteFired` |
@@ -227,7 +230,7 @@ stateDiagram-v2
 
 | Mode | Behaviour |
 |------|-----------|
-| `sequential` | Steps must be completed in order. No jumping. |
+| `sequential` | Steps progress in order; current and prior reached steps can be revisited, but future steps remain disabled. |
 | `parallel` | All steps unlocked simultaneously. Any order. |
 | `sequential-with-jumps` | Steps unlock progressively. Visited steps can be revisited freely. |
 

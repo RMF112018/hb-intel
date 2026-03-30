@@ -135,6 +135,7 @@ describe('useStepWizard', () => {
       wrapper: createWizardWrapper(),
     });
     act(() => { result.current.goTo('step-3'); });
+    expect(result.current.state.activeStepId).toBe('step-3');
     expect(result.current.state.steps[2].status).toBe('in-progress');
   });
 
@@ -236,7 +237,45 @@ describe('useStepWizard', () => {
       wrapper: createWizardWrapper({ draft }),
     });
     act(() => { result.current.goTo('step-2'); });
+    expect(result.current.state.activeStepId).toBe('step-2');
     expect(result.current.state.steps[1].status).toBe('in-progress');
+  });
+
+  it('sequential mode allows navigating back to a completed prior step', async () => {
+    const config = createMockWizardConfig({ orderMode: 'sequential', draftKey: 'test-sequential-back' });
+    const { result } = renderHook(() => useStepWizard(config, {}), {
+      wrapper: createWizardWrapper(mockWizardStates.inProgress),
+    });
+
+    act(() => { result.current.goTo('step-1'); });
+
+    expect(result.current.state.activeStepId).toBe('step-1');
+    expect(result.current.state.steps[0].status).toBe('complete');
+    expect(result.current.state.steps[2].isUnlocked).toBe(false);
+  });
+
+  it('sequential mode keeps future steps blocked when clicking ahead', () => {
+    const config = createMockWizardConfig({ orderMode: 'sequential', draftKey: 'test-sequential-future' });
+    const { result } = renderHook(() => useStepWizard(config, {}), {
+      wrapper: createWizardWrapper(mockWizardStates.inProgress),
+    });
+
+    act(() => { result.current.goTo('step-3'); });
+
+    expect(result.current.state.activeStepId).toBe('step-2');
+    expect(result.current.state.steps[2].status).toBe('not-started');
+  });
+
+  it('markComplete advances the explicit active step without regressing completed steps', async () => {
+    const config = createMockWizardConfig({ orderMode: 'sequential', draftKey: 'test-mark-complete-next' });
+    const { result } = renderHook(() => useStepWizard(config, {}), {
+      wrapper: createWizardWrapper(),
+    });
+
+    await act(async () => { await result.current.markComplete('step-1'); });
+
+    expect(result.current.state.activeStepId).toBe('step-2');
+    expect(result.current.state.steps[0].status).toBe('complete');
   });
 
   it('getValidationError returns null for unvalidated step', () => {

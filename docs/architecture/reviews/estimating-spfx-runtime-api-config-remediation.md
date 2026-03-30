@@ -28,6 +28,12 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 2. **Vite build-time env** — `import.meta.env.VITE_FUNCTION_APP_URL` and `import.meta.env.VITE_BACKEND_MODE` (for Vite dev mode or CI-injected builds).
 3. **Defaults / ConfigError** — `backendMode` defaults to `production`. `ConfigError` is thrown only when `production` mode requires a missing Function App URL.
 
+### SharePoint Limited-Release Default
+
+- The shared SPFx shell now injects `backendMode: 'ui-review'` whenever no explicit backend mode and no Function App URL were intentionally provided.
+- The Estimating packaging orchestrator also defaults `BACKEND_MODE=ui-review` for SharePoint package builds unless a production backend mode is intentionally supplied.
+- This keeps SharePoint UI-review deployment on the mock/localStorage path before any live backend config assertion can occur.
+
 ### Why This Fits
 
 - **Consistent with existing architecture**: The shell already uses webpack DefinePlugin for `__APP_BUNDLE_NAME__` and `__APP_GLOBAL_NAME__`. Adding `__FUNCTION_APP_URL__` follows the same pattern.
@@ -115,7 +121,7 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 
 ### SharePoint UI Review Mode
 
-1. Set `BACKEND_MODE=ui-review` when packaging the Estimating SPFx surface, or inject `backendMode: 'ui-review'` from the shell runtime.
+1. By default, the Estimating SharePoint package now starts in `ui-review` when no live backend config is intentionally supplied.
 2. Set `ALLOW_BACKEND_MODE_SWITCH=true` only when testers should be able to switch modes inside SharePoint.
 3. Deploy the `.sppkg` and open the Estimating Project Setup surface in SharePoint.
 4. Verify the informational banner appears and Project Setup list/new/detail flows operate using local sample data.

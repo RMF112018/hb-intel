@@ -103,9 +103,9 @@ describe('resolveUnlockedSteps', () => {
     { stepId: 's3', order: 3 },
   ];
 
-  it('sequential: all steps are unlocked', () => {
-    const result = resolveUnlockedSteps(steps, [], 'sequential');
-    expect(result).toEqual(new Set(['s1', 's2', 's3']));
+  it('sequential: only current and prior steps are unlocked', () => {
+    const result = resolveUnlockedSteps(steps, [], 'sequential', 's2');
+    expect(result).toEqual(new Set(['s1', 's2']));
   });
 
   it('parallel: all steps are unlocked', () => {

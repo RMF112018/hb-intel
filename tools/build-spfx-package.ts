@@ -72,15 +72,18 @@ if (targetDomain && domains.length === 0) {
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SHELL_DIR = path.join(ROOT, 'tools', 'spfx-shell');
 const OUTPUT_DIR = path.join(ROOT, 'dist', 'sppkg');
+const NODE18_BIN = process.env.HB_INTEL_NODE18_BIN
+  ?? path.join(process.env.HOME ?? '', '.nvm', 'versions', 'node', 'v18.20.8', 'bin', 'node');
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function run(cmd: string, opts?: { cwd?: string; env?: Record<string, string>; useNode18?: boolean }): void {
   console.log(`  → ${cmd}`);
-  // SPFx 1.18 requires Node 18. When useNode18 is true, wrap the command
-  // in a bash shell that activates nvm and switches to Node 18.
+  // SPFx 1.18 requires Node 18. Invoke the Node 18 binary directly instead
+  // of relying on shell-local nvm state, which can silently fall back to the
+  // wrong Node version in CI or desktop-agent environments.
   const finalCmd = opts?.useNode18
-    ? `bash -c 'source "$NVM_DIR/nvm.sh" && nvm use 18 --silent && ${cmd.replace(/'/g, "'\\''")}'`
+    ? cmd.replace(/^node\b/, `"${NODE18_BIN}"`)
     : cmd;
   execSync(finalCmd, {
     cwd: opts?.cwd ?? ROOT,
@@ -102,6 +105,14 @@ function copyDir(src: string, dest: string): void {
   }
 }
 
+function resolveDefaultBackendMode(domainDir: string): string {
+  if (process.env.BACKEND_MODE) {
+    return process.env.BACKEND_MODE;
+  }
+
+  return domainDir === 'estimating' ? 'ui-review' : '';
+}
+
 function cleanShellTemp(): void {
   for (const dir of ['temp', 'dist', 'lib', 'sharepoint', 'assets']) {
     const target = path.join(SHELL_DIR, dir);
@@ -110,6 +121,104 @@ function cleanShellTemp(): void {
     }
   }
   fs.mkdirSync(path.join(SHELL_DIR, 'assets'), { recursive: true });
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function inspectCompiledShellAsset(
+  shellAssetPath: string,
+  bundleName: string,
+  globalName: string,
+  domainDir: string,
+  backendMode?: string,
+): boolean {
+  if (!fs.existsSync(shellAssetPath)) {
+    console.error(`  ❌ ${domainDir}: compiled shell asset missing at ${shellAssetPath}`);
+    return false;
+  }
+
+  const shellJs = fs.readFileSync(shellAssetPath, 'utf8');
+  const errors: string[] = [];
+
+  if (!shellJs.includes(bundleName)) {
+    errors.push(`missing bundle reference ${bundleName}`);
+  }
+  if (!shellJs.includes(globalName)) {
+    errors.push(`missing global reference ${globalName}`);
+  }
+  if (backendMode && !shellJs.includes(`"${backendMode}"`)) {
+    errors.push(`missing backend mode reference ${backendMode}`);
+  }
+  if (bundleName !== 'app.js' && shellJs.includes('"app.js"')) {
+    errors.push('still contains fallback bundle name app.js');
+  }
+  if (globalName !== '__hbIntel_app' && shellJs.includes('"__hbIntel_app"')) {
+    errors.push('still contains fallback global __hbIntel_app');
+  }
+
+  if (errors.length > 0) {
+    console.error(`  ❌ ${domainDir}: compiled shell asset inspection failed — ${errors.join('; ')}`);
+    return false;
+  }
+
+  console.log(`  ✓ Compiled shell asset references ${bundleName} and ${globalName}`);
+  return true;
+}
+
+function inspectPackagedShellAsset(
+  sppkgPath: string,
+  bundleName: string,
+  globalName: string,
+  domainDir: string,
+  backendMode?: string,
+): boolean {
+  try {
+    const listOutput = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' });
+    const shellAssetPath = listOutput
+      .split('\n')
+      .map((entry) => entry.trim())
+      .find((entry) => /^ClientSideAssets\/shell-web-part.*\.js$/.test(entry));
+
+    if (!shellAssetPath) {
+      console.error(`  ❌ ${domainDir}: .sppkg missing packaged shell webpart asset`);
+      return false;
+    }
+
+    const shellJs = execSync(
+      `unzip -p "${sppkgPath}" "${shellAssetPath}"`,
+      { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+    );
+    const errors: string[] = [];
+
+    if (!shellJs.includes(bundleName)) {
+      errors.push(`missing packaged bundle reference ${bundleName}`);
+    }
+    if (!shellJs.includes(globalName)) {
+      errors.push(`missing packaged global reference ${globalName}`);
+    }
+    if (backendMode && !shellJs.includes(`"${backendMode}"`)) {
+      errors.push(`missing packaged backend mode reference ${backendMode}`);
+    }
+    if (bundleName !== 'app.js' && shellJs.includes('"app.js"')) {
+      errors.push('still contains packaged fallback bundle name app.js');
+    }
+    if (globalName !== '__hbIntel_app' && shellJs.includes('"__hbIntel_app"')) {
+      errors.push('still contains packaged fallback global __hbIntel_app');
+    }
+
+    if (errors.length > 0) {
+      console.error(`  ❌ ${domainDir}: packaged shell asset inspection failed — ${errors.join('; ')}`);
+      return false;
+    }
+
+    console.log(`  ✓ Packaged shell asset references ${bundleName} and ${globalName}`);
+    return true;
+  } catch (err) {
+    console.error(`  ❌ ${domainDir}: failed to inspect packaged shell asset — ${(err as Error).message}`);
+    return false;
+  }
 }
 
 // ── Post-packaging .sppkg verification ─────────────────────────────────────
@@ -408,16 +517,37 @@ for (const domain of domains) {
   const shellEnv = {
     APP_BUNDLE_NAME: bundleName,
     APP_GLOBAL_NAME: globalName,
+    REQUIRE_DOMAIN_APP_CONFIG: 'true',
     // Pass Function App URL through to webpack DefinePlugin so the shell
     // webpart can inject it into the loaded app at runtime.
     // Read from FUNCTION_APP_URL env var (set by CI or .env).
     FUNCTION_APP_URL: process.env.FUNCTION_APP_URL ?? '',
-    BACKEND_MODE: process.env.BACKEND_MODE ?? '',
+    BACKEND_MODE: resolveDefaultBackendMode(domain.dir),
     ALLOW_BACKEND_MODE_SWITCH: process.env.ALLOW_BACKEND_MODE_SWITCH ?? '',
   };
 
   console.log('  Running gulp bundle --ship...');
-  run('npx gulp bundle --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
+  run('node node_modules/gulp-cli/bin/gulp.js bundle --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
+
+  const compiledShellAssetPath = path.join(SHELL_DIR, 'release', 'assets');
+  const compiledShellAsset = fs.existsSync(compiledShellAssetPath)
+    ? fs.readdirSync(compiledShellAssetPath).find((file) => /^shell-web-part.*\.js$/.test(file))
+    : undefined;
+  if (!compiledShellAsset) {
+    console.error(`  ❌ ${domain.dir}: compiled shell webpart asset not found after gulp bundle`);
+    allPassed = false;
+    continue;
+  }
+  if (!inspectCompiledShellAsset(
+    path.join(compiledShellAssetPath, compiledShellAsset),
+    bundleName,
+    globalName,
+    domain.dir,
+    shellEnv.BACKEND_MODE || undefined,
+  )) {
+    allPassed = false;
+    continue;
+  }
 
   // ── Step 4: Inject Vite assets into temp/deploy/ ────────────────────
   const deployDir = path.join(SHELL_DIR, 'temp', 'deploy');
@@ -437,7 +567,7 @@ for (const domain of domains) {
   // during gulp bundle, so gulp package-solution now includes the Vite bundle
   // as a first-class client-side asset — no post-hoc zip injection required.
   console.log('  Running gulp package-solution --ship...');
-  run('npx gulp package-solution --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
+  run('node node_modules/gulp-cli/bin/gulp.js package-solution --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
 
   const sppkgSource = path.join(SHELL_DIR, 'sharepoint', 'solution', sppkgName);
   if (!fs.existsSync(sppkgSource)) {
@@ -464,6 +594,16 @@ for (const domain of domains) {
   // Post-packaging verification: inspect .sppkg contents (OPC/ZIP archive)
   const verified = verifySppkg(sppkgDest, bundleName, sourceManifest.id, domain.dir);
   if (!verified) {
+    allPassed = false;
+    continue;
+  }
+  if (!inspectPackagedShellAsset(
+    sppkgDest,
+    bundleName,
+    globalName,
+    domain.dir,
+    shellEnv.BACKEND_MODE || undefined,
+  )) {
     allPassed = false;
     continue;
   }

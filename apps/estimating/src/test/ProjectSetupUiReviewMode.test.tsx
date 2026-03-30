@@ -162,6 +162,25 @@ describe('Estimating ui-review mode', () => {
     ).toBeInTheDocument();
   });
 
+  it('does not render the Estimating workspace label or Project Setup header button row', () => {
+    renderWithProviders(<RootComponent />, { backendMode: 'ui-review' });
+
+    expect(screen.queryByText('Estimating')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Project Setup' })).not.toBeInTheDocument();
+  });
+
+  it('renders ui-review routes without a functionAppUrl when backend mode is ui-review', async () => {
+    renderWithProviders(<ProjectSetupPage />, {
+      backendMode: 'ui-review',
+      functionAppUrl: undefined,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Raleigh Mixed-Use Tower/)).toBeInTheDocument();
+    });
+    expect(createProvisioningApiClient).not.toHaveBeenCalled();
+  });
+
   it('hides the backend mode toggle unless runtime config enables it', () => {
     renderWithProviders(<RootComponent />, { backendMode: 'ui-review' });
 

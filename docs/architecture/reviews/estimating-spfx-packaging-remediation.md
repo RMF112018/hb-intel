@@ -82,6 +82,13 @@ vite build (IIFE format, mount.tsx entry)
 - `ClientSideAssets.xml` remains an SPFx-generated internal feature manifest and is not the SharePoint App Catalog app-version field; it does not require manual synchronization for the uploaded package version.
 - The client-side web part manifest `version: "*"` remains unrelated to the SharePoint-uploaded app-package version in this packaging path.
 
+### Shell Loader Invariant
+
+- Domain packaging must supply `APP_BUNDLE_NAME` and `APP_GLOBAL_NAME` to the shared SPFx shell build.
+- Estimating SharePoint limited-release packaging now defaults `BACKEND_MODE=ui-review` when no live backend config is intentionally provided, so the shell mounts the app in UI Review mode instead of passing an empty config object.
+- A valid Estimating package must contain the same hashed Vite asset in `ClientSideAssets/` that the packaged shell web part requests at runtime.
+- A packaged shell asset that still references `app.js` or `__hbIntel_app` is invalid and must fail packaging rather than be uploaded.
+
 ## 6. Architecture Diagram
 
 ```
@@ -134,5 +141,6 @@ vite build (IIFE format, mount.tsx entry)
 The packaging path is now compliant and has been acceptance-audited for the Estimating limited-release package.
 
 - The packaged Estimating SharePoint app version was validated from the generated `.sppkg` as `0.0.0.1`.
+- The packaged SharePoint shell now defaults the Estimating surface to `ui-review` when no Function App URL or explicit backend mode is supplied, preventing startup-time Function App URL assertions during SharePoint UI review.
 - The final limited-release acceptance audit is recorded in [estimating-spfx-limited-release-acceptance-audit.md](estimating-spfx-limited-release-acceptance-audit.md).
 - Remaining follow-up is operational rather than architectural: SharePoint UI vetting in `ui-review` mode and later production-mode promotion when the live backend path is intentionally enabled for broader release.
