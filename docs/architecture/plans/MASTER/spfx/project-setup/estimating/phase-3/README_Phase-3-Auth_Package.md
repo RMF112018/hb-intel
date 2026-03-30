@@ -11,10 +11,13 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - Acceptance criteria
    - Execution sequence
 
-2. `Prompt-01_Repo-Truth-and-Auth-Surface-Baseline.md`
+2. `Prompt-01_Repo-Truth-and-Auth-Surface-Baseline.md` **[COMPLETE]**
    - Establish the exact current auth and runtime posture
    - Inventory token assumptions, route protections, and mode gating
    - Produce the canonical auth baseline before redesign work starts
+   - **Deliverables:**
+     - [`Phase-3_Auth-Baseline-Matrix.md`](Phase-3_Auth-Baseline-Matrix.md) — Route-by-route auth inventory with token sourcing, validation, mode gating, and delegated/app-only classification
+     - [`Phase-3_Auth-Gap-Summary.md`](Phase-3_Auth-Gap-Summary.md) — Categorized gap inventory (6 gaps) governing all later Phase 3 work
 
 3. `Prompt-02_Production-Mode-and-SPFx-Token-Acquisition.md`
    - Make production mode real
