@@ -3,7 +3,7 @@ import { makeStyles } from '@griffel/react';
 import { ShellLayout, resolveProjectHubUrl } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
 import { HbcBanner, HbcButton } from '@hbc/ui-kit';
-import { HBC_SPACE_SM, HBC_SPACE_XS } from '@hbc/ui-kit/theme';
+import { HBC_SPACE_SM, HBC_SPACE_XS, bodySmall, label as labelType } from '@hbc/ui-kit/theme';
 import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 
 /**
@@ -29,15 +29,15 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_XS}px`,
   },
   backendModeLabel: {
-    fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
-    fontWeight: 600,
+    fontSize: bodySmall.fontSize,
+    fontWeight: '600',
   },
   backendModeButtons: {
     display: 'flex',
     gap: `${HBC_SPACE_SM}px`,
   },
   backendModeHelper: {
-    fontSize: `${HBC_SPACE_SM}px`,
+    fontSize: labelType.fontSize,
     color: 'var(--colorNeutralForeground3)',
   },
 });
