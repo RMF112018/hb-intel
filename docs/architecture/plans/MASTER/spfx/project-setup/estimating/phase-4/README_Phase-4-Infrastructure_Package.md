@@ -11,10 +11,13 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - Acceptance criteria
    - Execution sequence
 
-2. `Prompt-01_Repo-Truth-and-Infrastructure-Surface-Baseline.md`
+2. `Prompt-01_Repo-Truth-and-Infrastructure-Surface-Baseline.md` **[COMPLETE]**
    - Establish the exact current infrastructure and connected-services posture
    - Inventory hosting, startup validation, runtime dependencies, and service identities
    - Produce the canonical infrastructure baseline before hardening work starts
+   - **Deliverables:**
+     - [`Phase-4_Infrastructure-Baseline-Matrix.md`](Phase-4_Infrastructure-Baseline-Matrix.md) — Complete dependency inventory: ~94 function registrations (~20 required), 14 service factory entries (9 required), 8 required env vars, 7 provisioning prerequisites, 6 connected Azure/M365 services, 3 timer jobs
+     - [`Phase-4_Infrastructure-Gap-Summary.md`](Phase-4_Infrastructure-Gap-Summary.md) — 8 infrastructure gaps: over-broad function surface, eager service factory, mocked SignalR push, unscoped boot blockers, missing CORS in code, stub email delivery, no monitoring alerts
 
 3. `Prompt-02_Functions-Hosting-Startup-and-Configuration-Scope.md`
    - Scope Azure Functions startup to the actual Project Setup deployment
