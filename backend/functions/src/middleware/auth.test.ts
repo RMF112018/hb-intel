@@ -3,8 +3,20 @@ import type { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 
 const validateTokenMock = vi.fn();
 
+// P3-03: vi.hoisted ensures the class is available when vi.mock is hoisted
+const { MockTokenValidationError } = vi.hoisted(() => {
+  class MockTokenValidationError extends Error {
+    constructor(message: string, public readonly reason: string) {
+      super(message);
+      this.name = 'TokenValidationError';
+    }
+  }
+  return { MockTokenValidationError };
+});
+
 vi.mock('./validateToken.js', () => ({
   validateToken: (...args: unknown[]) => validateTokenMock(...args),
+  TokenValidationError: MockTokenValidationError,
   unauthorizedResponse: (reason: string): HttpResponseInit => ({
     status: 401,
     jsonBody: { error: 'Unauthorized', reason },
@@ -158,7 +170,7 @@ describe('P1-C3 auth.bearer.* telemetry', () => {
     expect(event!.properties.correlationId).toBe('test-correlation-id');
   });
 
-  it('emits auth.bearer.error when token validation fails', async () => {
+  it('emits auth.bearer.error with generic reason for plain Error', async () => {
     validateTokenMock.mockRejectedValueOnce(new Error('JWTExpired'));
     const wrapped = withAuth(vi.fn());
     await wrapped(makeRequest('Bearer bad-token'), makeContext());
@@ -167,6 +179,16 @@ describe('P1-C3 auth.bearer.* telemetry', () => {
     expect(event).toBeDefined();
     expect(event!.properties.reason).toBe('invalid_token');
     expect(typeof event!.properties.durationMs).toBe('number');
+  });
+
+  it('P3-03: emits structured reason from TokenValidationError', async () => {
+    validateTokenMock.mockRejectedValueOnce(new MockTokenValidationError('Token is expired', 'expired'));
+    const wrapped = withAuth(vi.fn());
+    await wrapped(makeRequest('Bearer expired-token'), makeContext());
+
+    const event = trackedEvents.find((e) => e.name === 'auth.bearer.error');
+    expect(event).toBeDefined();
+    expect(event!.properties.reason).toBe('expired');
   });
 
   it('emits auth.bearer.success when token validates', async () => {

@@ -1,5 +1,5 @@
 import type { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { validateToken, unauthorizedResponse, type IValidatedClaims } from './validateToken.js';
+import { validateToken, unauthorizedResponse, TokenValidationError, type IValidatedClaims } from './validateToken.js';
 import { extractOrGenerateRequestId } from './request-id.js';
 import { createLogger } from '../utils/logger.js';
 
@@ -68,11 +68,12 @@ export function withAuth(
     let claims: IValidatedClaims;
     try {
       claims = await validateToken(request);
-    } catch {
-      // P1-C3 §2.1.3: auth.bearer.error — token validation failed
+    } catch (err) {
+      // P3-03: Structured reason codes for auth telemetry
+      const reason = err instanceof TokenValidationError ? err.reason : 'invalid_token';
       logger.trackEvent('auth.bearer.error', {
         correlationId,
-        reason: 'invalid_token',
+        reason,
         durationMs: Date.now() - startMs,
       });
       return unauthorizedResponse('Invalid token');

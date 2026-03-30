@@ -52,14 +52,16 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
     expect(entry!.description).toContain('API_AUDIENCE');
   });
 
-  it('exact requiredInProd=true set matches Project Setup boot contract (7 settings)', () => {
+  it('exact requiredInProd=true set matches Project Setup boot contract (8 settings)', () => {
     const required = WAVE0_REQUIRED_CONFIG
       .filter((e) => e.requiredInProd)
       .map((e) => e.name)
       .sort();
     // Pinned contract for Project Setup-only deployment.
     // Any change here must update deployment docs and operator guidance.
+    // P3-03: API_AUDIENCE promoted to required — 8 settings now.
     expect(required).toEqual([
+      'API_AUDIENCE',
       'APPLICATIONINSIGHTS_CONNECTION_STRING',
       'AZURE_CLIENT_ID',
       'AZURE_TABLE_ENDPOINT',
@@ -109,11 +111,16 @@ describe('WAVE0_OPTIONAL_CONFIG', () => {
     expect(names).toContain('SITES_PERMISSION_MODEL');
   });
 
-  it('includes API_AUDIENCE as optional', () => {
+  it('P3-03: API_AUDIENCE is no longer in optional config (promoted to required)', () => {
     const entry = WAVE0_OPTIONAL_CONFIG.find((e) => e.name === 'API_AUDIENCE');
+    expect(entry).toBeUndefined();
+  });
+
+  it('P3-03: API_AUDIENCE is in required config', () => {
+    const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === 'API_AUDIENCE');
     expect(entry).toBeDefined();
-    expect(entry!.requiredInProd).toBe(false);
-    expect(entry!.description).toContain('inbound API audience');
+    expect(entry!.requiredInProd).toBe(true);
+    expect(entry!.description).toContain('Inbound API audience');
   });
 
   it('every entry satisfies IConfigEntry shape', () => {

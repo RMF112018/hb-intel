@@ -12,7 +12,7 @@ import { validateRequiredConfig } from '../utils/validate-config.js';
  * target and verifies that validateRequiredConfig() does/doesn't throw.
  */
 
-// The 7 core + Project Setup required settings (pinned contract)
+// P3-03: 8 core + Project Setup required settings (API_AUDIENCE promoted to required)
 const PROJECT_SETUP_BOOT_CONFIG: Record<string, string> = {
   AZURE_TENANT_ID: '00000000-0000-0000-0000-000000000001',
   AZURE_CLIENT_ID: '00000000-0000-0000-0000-000000000002',
@@ -21,6 +21,7 @@ const PROJECT_SETUP_BOOT_CONFIG: Record<string, string> = {
   HBC_ADAPTER_MODE: 'proxy',
   SHAREPOINT_TENANT_URL: 'https://contoso.sharepoint.com',
   SHAREPOINT_PROJECTS_SITE_URL: 'https://contoso.sharepoint.com/sites/TestSite',
+  API_AUDIENCE: 'api://00000000-0000-0000-0000-000000000002',
 };
 
 describe('Boot behavior — Project Setup-only deployment posture', () => {
@@ -38,7 +39,7 @@ describe('Boot behavior — Project Setup-only deployment posture', () => {
 
   // === A. Core boot with minimal config ===
 
-  it('A1: boots with only 7 core settings (Project Setup deployment)', () => {
+  it('A1: boots with only 8 core settings (Project Setup deployment)', () => {
     expect(() => validateRequiredConfig()).not.toThrow();
   });
 
@@ -165,6 +166,8 @@ describe('Boot behavior — Project Setup-only deployment posture', () => {
     vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
     vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
     vi.stubEnv('SHAREPOINT_PROJECTS_SITE_URL', 'https://contoso.sharepoint.com/sites/TestSite');
+    // P3-03: API_AUDIENCE now required in production
+    vi.stubEnv('API_AUDIENCE', 'api://00000000-0000-0000-0000-000000000002');
     vi.stubEnv('CONTROLLER_UPNS', 'controller@contoso.com');
     vi.stubEnv('ADMIN_UPNS', 'admin@contoso.com');
     expect(() => validateRequiredConfig()).not.toThrow();
@@ -172,9 +175,10 @@ describe('Boot behavior — Project Setup-only deployment posture', () => {
 });
 
 describe('Boot behavior — registry contract stability', () => {
-  it('total requiredInProd: true count is exactly 7', () => {
+  // P3-03: API_AUDIENCE promoted to required — 8 settings now.
+  it('total requiredInProd: true count is exactly 8', () => {
     const requiredCount = WAVE0_REQUIRED_CONFIG.filter((e) => e.requiredInProd).length;
-    expect(requiredCount).toBe(7);
+    expect(requiredCount).toBe(8);
   });
 
   it('total registry entries (required + optional arrays) covers all known settings', () => {

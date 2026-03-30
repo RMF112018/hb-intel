@@ -171,6 +171,16 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
     requiredInProd: false,
     conditionalOn: 'department=luxury-residential',
   },
+  // --- Auth Contract (Bucket A) ---
+  {
+    name: 'API_AUDIENCE',
+    bucket: 'infrastructure',
+    description:
+      'P3-03: Inbound API audience URI for JWT validation (e.g. api://<app-registration-client-id>). ' +
+      'Required in production — the previous fallback to api://${AZURE_CLIENT_ID} conflated MI and app-reg identities. ' +
+      'See Phase-3_API-Token-Contract.md.',
+    requiredInProd: true,
+  },
 ] as const;
 
 /**
@@ -199,15 +209,7 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
   },
 
   // --- Auth Split (Bucket A) ---
-  {
-    name: 'API_AUDIENCE',
-    bucket: 'infrastructure',
-    description:
-      'Explicit inbound API audience for JWT validation (e.g. api://<app-registration-client-id>). ' +
-      'When set, overrides the default api://${AZURE_CLIENT_ID} audience. Required when the managed ' +
-      'identity client ID differs from the app registration client ID.',
-    requiredInProd: false,
-  },
+  // P3-03: API_AUDIENCE moved to WAVE0_REQUIRED_CONFIG — see below.
 
   // --- Infrastructure Behavioral Optional (Bucket A) ---
   {

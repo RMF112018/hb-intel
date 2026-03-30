@@ -26,10 +26,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-3_Production-Mode-Contract.md`](Phase-3_Production-Mode-Contract.md) — Production-mode activation rules, token-acquisition behavior, runtime config requirements, and compatibility notes
 
-4. `Prompt-03_API-Token-Version-and-Validator-Redesign.md`
+4. `Prompt-03_API-Token-Version-and-Validator-Redesign.md` **[COMPLETE]**
    - Determine the API token-version contract
    - Redesign token validation to match the chosen model
    - Remove narrow issuer/audience assumptions that are not production-safe
+   - **Deliverables:**
+     - [`Phase-3_API-Token-Contract.md`](Phase-3_API-Token-Contract.md) — Chosen token contract (v1+v2 dual-version), validator behavior, structured error classification, test coverage, deployment prerequisites
 
 5. `Prompt-04_Delegated-vs-App-Only-Boundaries_and-Managed-Identity-Cleanup.md`
    - Separate delegated-user behavior from app-only behavior
