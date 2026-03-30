@@ -25,6 +25,8 @@ const projectSetupSessionExecutor: OperationExecutor = async () => {};
 
 interface AppProps {
   spfxContext?: { pageContext: { user: { loginName: string } } };
+  /** P3-02: SPFx API token provider for production-mode auth. */
+  getApiToken?: () => Promise<string>;
 }
 
 function AppRouter(): React.ReactNode {
@@ -33,7 +35,7 @@ function AppRouter(): React.ReactNode {
   return <RouterProvider key={backendMode} router={router} />;
 }
 
-export function App({ spfxContext }: AppProps): React.ReactNode {
+export function App({ spfxContext, getApiToken }: AppProps): React.ReactNode {
   // SPFx-hosted surfaces run inside SharePoint's always-light chrome.
   // Force light theme to prevent OS dark-mode from creating visual incoherence.
   const forceTheme = spfxContext ? 'light' as const : undefined;
@@ -44,7 +46,7 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
         <HbcErrorBoundary>
           <ComplexityProvider spfxContext={spfxContext}>
             <SessionStateProvider executor={projectSetupSessionExecutor}>
-              <ProjectSetupBackendProvider>
+              <ProjectSetupBackendProvider getApiToken={getApiToken}>
                 <AppRouter />
               </ProjectSetupBackendProvider>
             </SessionStateProvider>

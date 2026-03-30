@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useCurrentSession } from '@hbc/auth';
@@ -18,7 +18,6 @@ import { RequestStateContext } from '../components/project-setup/RequestStateCon
 import { RetrySection } from '../components/project-setup/RetrySection.js';
 import { ProvisioningChecklist } from '../components/ProvisioningChecklist.js';
 import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 /**
  * W0-G4-T01 request detail page with BIC ownership, state context,
@@ -31,15 +30,11 @@ export function RequestDetailPage(): ReactNode {
   const { requestId } = useParams({ strict: false }) as { requestId: string };
   const navigate = useNavigate();
   const session = useCurrentSession();
-  const { client, isUiReview, functionAppUrl } = useProjectSetupBackend();
+  const { client, isUiReview, functionAppUrl, getToken } = useProjectSetupBackend();
   const { requests, setRequests, statusByProjectId, setProvisioningStatus } = useProvisioningStore();
   const [loadError, setLoadError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
   const loadGenerationRef = useRef(0);
-  const authToken = useMemo(
-    () => (isUiReview ? '' : resolveSessionToken(session)),
-    [isUiReview, session],
-  );
 
   useEffect(() => () => {
     isMountedRef.current = false;
@@ -56,7 +51,7 @@ export function RequestDetailPage(): ReactNode {
   const { isConnected } = useProvisioningSignalR({
     negotiateUrl: functionAppUrl ? `${functionAppUrl}/api/provisioning-negotiate` : '',
     projectId: projectId ?? '',
-    getToken: async () => authToken,
+    getToken,
     enabled: Boolean(!isUiReview && projectId && isProvisioningActive && functionAppUrl),
   });
 

@@ -15,6 +15,19 @@ export interface IRuntimeConfig {
   functionAppUrl?: string;
   backendMode?: BackendMode;
   allowBackendModeSwitch?: boolean;
+  /** API audience URI for the Project Setup Function App (e.g. `api://<client-id>`). */
+  apiAudience?: string;
+}
+
+/**
+ * P3-02: Production-mode readiness assessment.
+ * Lists the prerequisites that must be satisfied before production mode
+ * can safely activate. Used by the backend context provider to gate
+ * production-mode activation and by diagnostic UI to explain blockages.
+ */
+export interface IProductionModeReadiness {
+  ready: boolean;
+  issues: string[];
 }
 
 export type BackendMode = 'production' | 'ui-review';
@@ -133,6 +146,59 @@ export function getFunctionAppUrl(): string {
  */
 export function hasRuntimeConfig(): boolean {
   return _config !== null;
+}
+
+/**
+ * P3-02: Resolve the API audience URI for SPFx token acquisition.
+ *
+ * Resolution order:
+ *   1. Runtime injection (SPFx shell)
+ *   2. Vite build-time env (VITE_API_AUDIENCE)
+ *   3. undefined — caller must handle absence
+ */
+export function getApiAudience(): string | undefined {
+  if (_config?.apiAudience) {
+    return _config.apiAudience;
+  }
+
+  const envAudience =
+    typeof import.meta !== 'undefined' &&
+    import.meta.env?.VITE_API_AUDIENCE;
+  if (envAudience && envAudience !== 'undefined') {
+    return envAudience;
+  }
+
+  return undefined;
+}
+
+/**
+ * P3-02: Assess whether the runtime prerequisites for production mode are met.
+ *
+ * @param hasTokenProvider - Whether an API token provider was successfully created
+ */
+export function checkProductionReadiness(hasTokenProvider: boolean): IProductionModeReadiness {
+  const issues: string[] = [];
+
+  // 1. Function App URL must be configured
+  try {
+    const url = getFunctionAppUrl();
+    if (!url) {
+      issues.push('Function App URL is not configured.');
+    }
+  } catch {
+    issues.push('Function App URL is not configured.');
+  }
+
+  // 2. API token provider must be available
+  if (!hasTokenProvider) {
+    issues.push(
+      'API token provider is not available. ' +
+      'In SPFx runtime, ensure apiAudience is configured and the API permission is approved in SharePoint admin center. ' +
+      'In Vite dev mode, set VITE_API_AUDIENCE in .env.local.',
+    );
+  }
+
+  return { ready: issues.length === 0, issues };
 }
 
 /** Reset config — used only in tests. */

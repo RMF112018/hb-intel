@@ -19,10 +19,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
      - [`Phase-3_Auth-Baseline-Matrix.md`](Phase-3_Auth-Baseline-Matrix.md) — Route-by-route auth inventory with token sourcing, validation, mode gating, and delegated/app-only classification
      - [`Phase-3_Auth-Gap-Summary.md`](Phase-3_Auth-Gap-Summary.md) — Categorized gap inventory (6 gaps) governing all later Phase 3 work
 
-3. `Prompt-02_Production-Mode-and-SPFx-Token-Acquisition.md`
+3. `Prompt-02_Production-Mode-and-SPFx-Token-Acquisition.md` **[COMPLETE]**
    - Make production mode real
    - Replace opaque token injection assumptions with a deliberate SPFx API-auth flow
    - Lock runtime config and activation requirements
+   - **Deliverables:**
+     - [`Phase-3_Production-Mode-Contract.md`](Phase-3_Production-Mode-Contract.md) — Production-mode activation rules, token-acquisition behavior, runtime config requirements, and compatibility notes
 
 4. `Prompt-03_API-Token-Version-and-Validator-Redesign.md`
    - Determine the API token-version contract

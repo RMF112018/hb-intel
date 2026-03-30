@@ -11,8 +11,8 @@
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { App } from './App.js';
-import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-import { setRuntimeConfig } from './config/runtimeConfig.js';
+import { bootstrapSpfxAuth, resolveSpfxPermissions, createSpfxApiTokenProvider } from '@hbc/auth/spfx';
+import { setRuntimeConfig, getApiAudience } from './config/runtimeConfig.js';
 
 /** Shell-injected runtime configuration. */
 export interface IMountConfig {
@@ -22,6 +22,8 @@ export interface IMountConfig {
   backendMode?: 'production' | 'ui-review';
   /** Enables the reviewer-only backend mode switch in the Project Setup header. */
   allowBackendModeSwitch?: boolean;
+  /** P3-02: API audience URI for SPFx token acquisition (e.g. `api://<client-id>`). */
+  apiAudience?: string;
 }
 
 let root: Root | undefined;
@@ -40,12 +42,23 @@ export async function mount(el: HTMLElement, spfxContext?: WebPartContext, confi
     setRuntimeConfig(config);
   }
 
+  let getApiToken: (() => Promise<string>) | undefined;
+
   if (spfxContext) {
     const permissionKeys = await resolveSpfxPermissions(spfxContext);
     await bootstrapSpfxAuth(spfxContext, permissionKeys);
+
+    // P3-02: Create SPFx API token provider for production-mode auth.
+    // The audience is resolved from mount config or env — if absent, the
+    // provider is undefined and production readiness will report the gap.
+    const apiAudience = getApiAudience();
+    if (apiAudience) {
+      getApiToken = createSpfxApiTokenProvider(spfxContext, apiAudience);
+    }
   }
+
   root = createRoot(el);
-  root.render(<App spfxContext={spfxContext} />);
+  root.render(<App spfxContext={spfxContext} getApiToken={getApiToken} />);
 }
 
 /**

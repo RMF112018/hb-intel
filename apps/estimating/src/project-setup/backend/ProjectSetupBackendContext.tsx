@@ -6,9 +6,15 @@ import {
   getBackendMode,
   getAllowBackendModeSwitch,
   getFunctionAppUrl,
+  checkProductionReadiness,
   type BackendMode,
+  type IProductionModeReadiness,
 } from '../../config/runtimeConfig.js';
-import { resolveSessionToken } from '../../utils/resolveSessionToken.js';
+import {
+  createSpfxTokenFactory,
+  createSessionTokenFactory,
+  createDevTokenFactory,
+} from '../../utils/resolveSessionToken.js';
 import { createUiReviewProjectSetupClient } from './uiReviewProjectSetupClient.js';
 import type { IProjectSetupClient } from './types.js';
 
@@ -22,6 +28,32 @@ export interface IProjectSetupBackendContextValue {
   functionAppUrl?: string;
   canSwitchBackendMode: boolean;
   setBackendMode: (mode: BackendMode) => void;
+  /**
+   * P3-02: Production-mode readiness assessment.
+   * `null` when mode is ui-review (readiness not applicable).
+   */
+  productionReadiness: IProductionModeReadiness | null;
+  /**
+   * P3-02: True when production mode was requested but prerequisites
+   * blocked activation and the provider fell back to ui-review.
+   */
+  productionBlocked: boolean;
+  /**
+   * P3-02: Token factory for consumers that need direct token access
+   * (e.g., SignalR negotiate). Returns a fresh token on each call in
+   * production mode. Returns a dev placeholder in ui-review mode.
+   */
+  getToken: () => Promise<string>;
+}
+
+export interface ProjectSetupBackendProviderProps {
+  children: ReactNode;
+  /**
+   * P3-02: SPFx API token provider created via `createSpfxApiTokenProvider()`.
+   * When provided, production mode uses this for fresh, audience-scoped tokens.
+   * When absent, production readiness will report a missing token provider.
+   */
+  getApiToken?: () => Promise<string>;
 }
 
 const ProjectSetupBackendContext =
@@ -82,21 +114,47 @@ function createLiveProjectSetupClient(
   };
 }
 
+/**
+ * P3-02: Resolve the best available token factory for the current runtime.
+ *
+ * Priority:
+ *   1. SPFx API token provider (fresh, audience-scoped — preferred production path)
+ *   2. Session-based token extraction (PWA/MSAL fallback)
+ *   3. Dev placeholder (non-production only)
+ */
+function resolveTokenFactory(
+  getApiToken: (() => Promise<string>) | undefined,
+  getSession: () => ReturnType<typeof useCurrentSession>,
+  isProduction: boolean,
+): () => Promise<string> {
+  // Preferred: SPFx API token provider
+  if (getApiToken) {
+    return createSpfxTokenFactory(getApiToken);
+  }
+
+  // Fallback: session-based extraction (PWA/MSAL)
+  // This path is valid when running outside SPFx (e.g., Vite dev with MSAL)
+  if (isProduction) {
+    return createSessionTokenFactory(getSession);
+  }
+
+  // Non-production: dev placeholder
+  return createDevTokenFactory();
+}
+
 export function ProjectSetupBackendProvider({
   children,
-}: {
-  children: ReactNode;
-}): ReactNode {
+  getApiToken,
+}: ProjectSetupBackendProviderProps): ReactNode {
   const session = useCurrentSession();
   const configuredBackendMode = getBackendMode();
   const canSwitchBackendMode = getAllowBackendModeSwitch();
   const resolvedConfiguredMode = canSwitchBackendMode
     ? readStoredBackendModeOverride() ?? configuredBackendMode
     : configuredBackendMode;
-  const [backendMode, setBackendModeState] = useState<BackendMode>(() => (
+  const [requestedMode, setRequestedModeState] = useState<BackendMode>(() => (
     resolvedConfiguredMode
   ));
-  const isUiReview = backendMode === 'ui-review';
 
   const setBackendMode = useCallback((mode: BackendMode) => {
     if (!canSwitchBackendMode) {
@@ -105,39 +163,59 @@ export function ProjectSetupBackendProvider({
 
     writeStoredBackendModeOverride(mode === configuredBackendMode ? undefined : mode);
     resetProvisioningRuntimeState();
-    setBackendModeState(mode);
+    setRequestedModeState(mode);
   }, [canSwitchBackendMode, configuredBackendMode]);
 
   useEffect(() => {
-    setBackendModeState((currentMode) => (
+    setRequestedModeState((currentMode) => (
       currentMode === resolvedConfiguredMode ? currentMode : resolvedConfiguredMode
     ));
   }, [resolvedConfiguredMode]);
 
   const contextValue = useMemo<IProjectSetupBackendContextValue>(() => {
+    // P3-02: Check production readiness when production mode is requested.
+    const productionRequested = requestedMode === 'production';
+    const readiness = productionRequested
+      ? checkProductionReadiness(!!getApiToken)
+      : null;
+
+    // P3-02: If production prerequisites aren't met, fall back to ui-review
+    // with a diagnostic flag so the UI can explain the blockage.
+    const productionBlocked = productionRequested && readiness !== null && !readiness.ready;
+    const effectiveMode: BackendMode = productionBlocked ? 'ui-review' : requestedMode;
+    const isUiReview = effectiveMode === 'ui-review';
+
     if (isUiReview) {
       const submittedBy =
         session?.user?.email ?? session?.providerIdentityRef ?? 'ui-review@hbintel.local';
       return {
-        backendMode,
+        backendMode: effectiveMode,
         isUiReview: true,
         client: createUiReviewProjectSetupClient(submittedBy),
         canSwitchBackendMode,
         setBackendMode,
+        productionReadiness: readiness,
+        productionBlocked,
+        getToken: createDevTokenFactory(),
       };
     }
 
     const functionAppUrl = getFunctionAppUrl();
-    const authToken = resolveSessionToken(session);
+    const getSessionRef = (): ReturnType<typeof useCurrentSession> => session;
+    const tokenFactory = resolveTokenFactory(getApiToken, getSessionRef, true);
+
     return {
-      backendMode,
+      backendMode: effectiveMode,
       isUiReview: false,
       functionAppUrl,
-      client: createLiveProjectSetupClient(functionAppUrl, async () => authToken),
+      client: createLiveProjectSetupClient(functionAppUrl, tokenFactory),
       canSwitchBackendMode,
       setBackendMode,
+      productionReadiness: readiness,
+      productionBlocked: false,
+      getToken: tokenFactory,
     };
-  }, [backendMode, canSwitchBackendMode, isUiReview, session, setBackendMode]);
+  }, [requestedMode, canSwitchBackendMode, getApiToken, session, setBackendMode]);
 
   return (
     <ProjectSetupBackendContext.Provider value={contextValue}>

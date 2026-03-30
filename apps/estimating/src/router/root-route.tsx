@@ -44,7 +44,7 @@ const useStyles = makeStyles({
 
 export function RootComponent(): React.ReactNode {
   const styles = useStyles();
-  const { backendMode, isUiReview, canSwitchBackendMode, setBackendMode } = useProjectSetupBackend();
+  const { backendMode, isUiReview, canSwitchBackendMode, setBackendMode, productionBlocked, productionReadiness } = useProjectSetupBackend();
 
   return (
     <ShellLayout
@@ -81,7 +81,12 @@ export function RootComponent(): React.ReactNode {
         ) : undefined
       }
     >
-      {isUiReview && (
+      {productionBlocked && productionReadiness && (
+        <HbcBanner variant="warning">
+          Production mode is not available. {productionReadiness.issues.join(' ')} Falling back to UI Review mode with local sample data.
+        </HbcBanner>
+      )}
+      {isUiReview && !productionBlocked && (
         <HbcBanner variant="info">
           UI Review mode is active. Backend connections are disabled, and Project Setup is using local sample data saved in this browser.
         </HbcBanner>
