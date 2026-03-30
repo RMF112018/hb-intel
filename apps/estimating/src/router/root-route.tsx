@@ -7,16 +7,14 @@ import { HBC_SPACE_SM, HBC_SPACE_XS } from '@hbc/ui-kit/theme';
 import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 
 /**
- * D-PH7-BW-6: Estimating root route with simplified shell config.
+ * Project Setup Requests root route with simplified shell config.
  * Project-scoped domain — shows Back to Project Hub.
  *
- * Deployment posture: Project Setup only.
- * Bids and Templates are hidden from navigation in this deployment.
- * To re-enable, add their toolPickerItems back and register their routes.
- *
- * @see docs/architecture/reviews/estimating-project-setup-only-deployment-remediation.md
+ * This SPFx surface is scoped exclusively to Project Setup Requests.
+ * Bids and Templates are separate product surfaces (future Estimating SPFx
+ * and Admin SPFx respectively).
  */
-const ESTIMATING_SHELL_CONFIG: SimplifiedShellConfig = {
+const PROJECT_SETUP_SHELL_CONFIG: SimplifiedShellConfig = {
   workspaceName: '',
   showBackToProjectHub: true,
   projectHubUrl: resolveProjectHubUrl(),
@@ -51,7 +49,7 @@ export function RootComponent(): React.ReactNode {
   return (
     <ShellLayout
       mode="simplified"
-      simplifiedConfig={ESTIMATING_SHELL_CONFIG}
+      simplifiedConfig={PROJECT_SETUP_SHELL_CONFIG}
       leftSlot={null}
       toolPickerSlot={null}
       rightSlot={

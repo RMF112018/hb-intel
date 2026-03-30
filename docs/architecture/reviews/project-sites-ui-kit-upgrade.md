@@ -200,17 +200,37 @@ Replaced the plain italic "Provisioning..." text with a more intentional treatme
 
 ### 6.3 Bundle Validation
 
-- IIFE output: `dist/project-sites-app.js` (481,643 bytes)
+- IIFE output: `project-sites-app-25370c66.js` (481,643 bytes)
 - Global: `var __hbIntel_projectSites` — 2 references (IIFE + window fallback)
 - HbcThemeProvider/forceTheme present in bundle
 - `data-hbc-ui` markers present (governed component instrumentation)
 - Bundle mounts via SPFx shell `SPComponentLoader.loadScript()` → `mount(el, context)` contract
 
-### 6.4 Non-Blocking Follow-Up Opportunities
+### 6.4 SPFx Package Rebuild
 
-1. **Migrate Project Sites YearSelector tests to HbcSegmentedControl coverage** — the 6 deleted YearSelector tests are now covered by the 13 HbcSegmentedControl unit tests in ui-kit, but an integration test for year switching in ProjectSitesRoot could be added.
-2. **SPFx shell package build for Project Sites** — the shell's `package-solution.json` is currently configured for Estimating. A Project Sites-specific package build (env vars `APP_BUNDLE_NAME=project-sites-app.js APP_GLOBAL_NAME=__hbIntel_projectSites`) would produce a separate `.sppkg`.
-3. **HBC_SURFACE_LIGHT → Fluent CSS variable migration** — compile-time token access is correct but doesn't participate in the runtime theme system. Low priority since the surface is enforced light-only.
+Built via `npx tsx tools/build-spfx-package.ts --domain project-sites`:
+
+| Artifact | Details |
+|----------|---------|
+| Content hash | `25370c66` (SHA-256 first 8 chars) |
+| Runtime smoke test | `mount()` and `unmount()` present (globalThis + window) |
+| Shell compilation | Node 18.20.8, SPFx 1.18, build tools 3.18.0 |
+| Shell asset | `shell-web-part_75077a694a0b19846b35.js` (3.1 KB) |
+| Vite bundle | `project-sites-app-25370c66.js` (481 KB) |
+| .sppkg | `hb-intel-project-sites.sppkg` (143.9 KB) |
+| Post-package verification | OPC structure valid, both assets present, webpart ID confirmed |
+
+Output: `dist/sppkg/hb-intel-project-sites.sppkg`
+
+Release artifacts updated in `tools/spfx-shell/release/`:
+- `release/assets/project-sites-app-25370c66.js`
+- `release/assets/shell-web-part_75077a694a0b19846b35.js`
+- `release/manifests/e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b.manifest.json`
+
+### 6.5 Non-Blocking Follow-Up Opportunities
+
+1. **Integration test for year switching in ProjectSitesRoot** — the 6 deleted YearSelector tests are covered by the 13 HbcSegmentedControl unit tests in ui-kit, but an end-to-end year-change test could strengthen coverage.
+2. **HBC_SURFACE_LIGHT → Fluent CSS variable migration** — compile-time token access is correct but doesn't participate in the runtime theme system. Low priority since the surface is enforced light-only.
 
 ### 6.5 Release-Readiness Statement
 
@@ -222,7 +242,7 @@ Replaced the plain italic "Provisioning..." text with a more intentional treatme
 |------|--------|
 | `apps/project-sites/src/mount.tsx` | HbcThemeProvider with forceTheme='light' |
 | `apps/project-sites/vite.config.ts` | @hbc/ui-kit subpath aliases |
-| `apps/project-sites/package.json` | Version 0.0.1 → 0.0.6 |
+| `apps/project-sites/package.json` | Version 0.0.1 → 0.0.7 |
 | `packages/ui-kit/src/icons/index.tsx` | AlertTriangle, ExternalLink icons |
 | `packages/ui-kit/src/HbcSegmentedControl/` | New governed pill-group selector (types, component, tests, stories) |
 | `packages/ui-kit/src/HbcDescriptionList/` | New semantic key/value metadata list (types, component, tests, stories) |

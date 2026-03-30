@@ -3,16 +3,11 @@ import { useNavStore } from '@hbc/shell';
 import { rootRoute } from './root-route.js';
 
 /**
- * Deployment posture: Project Setup only.
+ * Project Setup Requests — route definitions.
  *
- * Bids and Templates routes are not registered in this deployment.
- * The index route redirects to /project-setup.
- * Any unmatched route falls through to the root catch-all which also redirects.
- *
- * To re-enable Bids/Templates, add their routes back to webpartRoutes and
- * update the toolPickerItems in root-route.tsx.
- *
- * @see docs/architecture/reviews/estimating-project-setup-only-deployment-remediation.md
+ * This SPFx surface is scoped exclusively to Project Setup Requests.
+ * Bids belong in a future Estimating SPFx surface; Templates belong
+ * in a future Admin SPFx surface.
  */
 
 const indexRoute = createRoute({

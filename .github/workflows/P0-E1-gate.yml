@@ -102,7 +102,7 @@ jobs:
         run: >-
           pnpm
           --filter @hbc/spfx-admin
-          --filter @hbc/spfx-estimating
+          --filter @hbc/spfx-project-setup
           --filter @hbc/spfx-accounting
           --filter @hbc/pwa
           --filter @hbc/spfx-project-hub

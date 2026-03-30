@@ -45,16 +45,14 @@ export default defineConfig(({ command, mode }) => {
       sourcemap: command === 'serve',
       chunkSizeWarningLimit: 1500,
       // Production: Vite lib mode produces an IIFE bundle with a global name.
-      // This is the correct way to get Vite/Rollup to wrap exports in a global
-      // variable assignment: `var __hbIntel_estimating = (function(externals){...})(deps);`
-      // The SPFx shell webpart loads this bundle and reads window.__hbIntel_estimating.mount().
+      // The SPFx shell webpart loads this bundle and reads window.__hbIntel_projectSetup.mount().
       ...(isProduction
         ? {
             lib: {
               entry: resolve(__dirname, 'src/mount.tsx'),
-              name: '__hbIntel_estimating',
+              name: '__hbIntel_projectSetup',
               formats: ['iife'],
-              fileName: () => 'estimating-app.js',
+              fileName: () => 'project-setup-app.js',
             },
           }
         : {}),

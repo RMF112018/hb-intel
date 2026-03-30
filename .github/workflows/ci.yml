@@ -177,8 +177,8 @@ jobs:
       - name: Admin app tests
         run: pnpm --filter @hbc/spfx-admin test
 
-      - name: Estimating app tests
-        run: pnpm --filter @hbc/spfx-estimating test
+      - name: Project Setup app tests
+        run: pnpm --filter @hbc/spfx-project-setup test
 
       - name: Accounting app tests
         run: pnpm --filter @hbc/spfx-accounting test

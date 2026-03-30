@@ -6,3 +6,4 @@
  */
 export { bootstrapSpfxAuth, getSpfxContext } from './SpfxContextAdapter.js';
 export { resolveSpfxPermissions, SP_GROUP_TO_PERMISSIONS } from './SpfxRbacAdapter.js';
+export { createSpfxGraphTokenProvider } from './graphTokenProvider.js';

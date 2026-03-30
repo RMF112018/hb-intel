@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-estimating",
-    "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
-    "version": "0.0.0.8",
+    "name": "hb-intel-project-sites",
+    "id": "a4c17e93-5b28-4d0f-9e61-7f2a8d3c6b15",
+    "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Estimating workspace"
+        "default": "HB Intel Project Sites"
       },
       "longDescription": {
-        "default": "HB Intel Estimating workspace for construction project management."
+        "default": "Displays project-site link cards filtered by the hosting page Year property."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,14 +27,14 @@
     },
     "features": [
       {
-        "title": "hb-intel-estimating Feature",
-        "description": "Deploys HB Intel Estimating webpart assets.",
-        "id": "cb3b1520-1665-4412-83ab-344c2182a2fd",
-        "version": "0.0.0.8"
+        "title": "hb-intel-project-sites Feature",
+        "description": "Deploys HB Intel Project Sites webpart assets.",
+        "id": "d8f24a6c-91e3-4b57-a0c2-3e5f7d1b9a84",
+        "version": "1.0.0.0"
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-estimating.sppkg"
+    "zippedPackage": "solution/hb-intel-project-sites.sppkg"
   }
 }

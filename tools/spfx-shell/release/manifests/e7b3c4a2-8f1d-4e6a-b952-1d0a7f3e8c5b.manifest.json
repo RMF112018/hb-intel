@@ -1,13 +1,12 @@
 {
-  "id": "3c4dbd5c-5bec-4014-8b77-737ac725a5cc",
+  "id": "e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart",
-    "TeamsPersonalApp"
+    "SharePointWebPart"
   ],
   "supportsThemeVariants": true,
   "preconfiguredEntries": [
@@ -17,14 +16,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Estimating"
+        "default": "Project Sites"
       },
       "description": {
-        "default": "HB Intel Estimating workspace."
+        "default": "Displays project-site link cards for all projects matching the hosting page's Year property."
       },
-      "officeFabricIconFontName": "BuildDefinition",
+      "officeFabricIconFontName": "Globe",
       "properties": {
-        "description": "Estimating"
+        "yearOverride": 0
       }
     }
   ],
@@ -36,7 +35,7 @@
     "scriptResources": {
       "shell-web-part": {
         "type": "path",
-        "path": "shell-web-part_963a7eda14734e0ecedb.js"
+        "path": "shell-web-part_75077a694a0b19846b35.js"
       },
       "@microsoft/sp-loader": {
         "type": "component",

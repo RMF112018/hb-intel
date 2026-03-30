@@ -38,7 +38,7 @@ interface DomainConfig {
 
 const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'accounting', camel: 'accounting', pascal: 'Accounting' },
-  { dir: 'estimating', camel: 'estimating', pascal: 'Estimating' },
+  { dir: 'estimating', camel: 'projectSetup', pascal: 'ProjectSetup' },
   { dir: 'project-hub', camel: 'projectHub', pascal: 'ProjectHub' },
   { dir: 'leadership', camel: 'leadership', pascal: 'Leadership' },
   { dir: 'business-development', camel: 'businessDevelopment', pascal: 'BusinessDevelopment' },

@@ -18,14 +18,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Estimating"
+        "default": "Project Setup Requests"
       },
       "description": {
-        "default": "HB Intel Estimating workspace."
+        "default": "Submit and track project setup requests. Supports SharePoint and Teams Personal App hosts."
       },
-      "officeFabricIconFontName": "BuildDefinition",
+      "officeFabricIconFontName": "ProjectCollection",
       "properties": {
-        "description": "Estimating"
+        "description": "Project Setup Requests"
       }
     }
   ]

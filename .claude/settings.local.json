@@ -202,7 +202,11 @@
       "Bash(az monitor:*)",
       "Bash(/tmp/hb-intel-deploy/dist/index.js:*)",
       "Bash(mkdir -p /Users/bobbyfetting/hb-intel/packages/ui-kit/src/HbcSegmentedControl/__tests__)",
-      "Bash(mkdir -p /Users/bobbyfetting/hb-intel/packages/ui-kit/src/HbcDescriptionList/__tests__)"
+      "Bash(mkdir -p /Users/bobbyfetting/hb-intel/packages/ui-kit/src/HbcDescriptionList/__tests__)",
+      "Read(//Users/bobbyfetting/hb-intel/packages/ui-kit/$HOME/.nvm/versions/node/v18.20.8/bin/**)",
+      "Read(//Users/bobbyfetting/hb-intel/packages/ui-kit/$HOME/.nvm/versions/node/v18*/bin/**)",
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
+      "Bash(find /Users/bobbyfetting/hb-intel/packages/models/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))"
     ]
   },
   "enabledPlugins": {

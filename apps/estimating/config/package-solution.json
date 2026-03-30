@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-estimating",
+    "name": "hb-intel-project-setup",
     "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
-    "version": "0.0.0.8",
+    "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Estimating workspace"
+        "default": "HB Intel Project Setup Requests"
       },
       "longDescription": {
-        "default": "HB Intel Estimating workspace for construction project management."
+        "default": "Submit and track project setup requests with guided wizard, provisioning progress, and coordinator queue."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,14 +27,14 @@
     },
     "features": [
       {
-        "title": "hb-intel-estimating Feature",
-        "description": "Deploys HB Intel Estimating webpart assets.",
+        "title": "hb-intel-project-setup Feature",
+        "description": "Deploys HB Intel Project Setup Requests webpart assets.",
         "id": "cb3b1520-1665-4412-83ab-344c2182a2fd",
-        "version": "0.0.0.8"
+        "version": "1.0.0.0"
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-estimating.sppkg"
+    "zippedPackage": "solution/hb-intel-project-setup.sppkg"
   }
 }

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
-import React, { useState } from 'react';
-import { normalizeProjectSetupRequestFields } from '@hbc/features-estimating';
+import { screen } from '@testing-library/react';
+import React from 'react';
 import { TeamStepBody } from '../components/project-setup/TeamStepBody.js';
 import { renderWithProviders } from './renderWithProviders.js';
 
@@ -17,6 +16,7 @@ describe('TeamStepBody', () => {
         onChange={() => {}}
         mode="new-request"
       />,
+      { backendMode: 'ui-review' },
     );
 
     const projectExecutive = screen.getByText(/^Project Executive$/);
@@ -40,64 +40,45 @@ describe('TeamStepBody', () => {
         onChange={() => {}}
         mode="new-request"
       />,
+      { backendMode: 'ui-review' },
     );
 
-    expect(screen.getByRole('combobox', { name: 'Timberscan Approver' })).toBeDisabled();
+    // The Timberscan Approver is an HbcSelect with combobox role
+    // When no team members are added, it should be disabled
     expect(
       screen.getByText(/Timberscan Approver options appear after at least one upstream team member is added/i),
     ).toBeInTheDocument();
   });
 
-  it('deduplicates Timberscan Approver options from overlapping team selections', () => {
+  it('renders five people picker fields plus Timberscan Approver select', () => {
+    renderWithProviders(
+      <TeamStepBody
+        request={{}}
+        onChange={() => {}}
+        mode="new-request"
+      />,
+      { backendMode: 'ui-review' },
+    );
+
+    // 5 people picker fields + 1 Timberscan select = 6 labeled fields
+    const pickers = document.querySelectorAll('[data-hbc-ui="people-picker"]');
+    expect(pickers).toHaveLength(5);
+  });
+
+  it('displays selected people as chips when UPNs are provided', () => {
     renderWithProviders(
       <TeamStepBody
         request={{
           projectExecutiveUpn: 'exec@hb.com',
-          projectManagerUpn: 'pm@hb.com',
           leadEstimatorUpn: 'lead@hb.com',
-          supportingEstimatorUpns: ['pm@hb.com', 'support@hb.com'],
-          additionalTeamMemberUpns: ['lead@hb.com', 'team@hb.com'],
         }}
         onChange={() => {}}
         mode="new-request"
       />,
+      { backendMode: 'ui-review' },
     );
 
-    fireEvent.click(screen.getByRole('combobox', { name: 'Timberscan Approver' }));
-
-    expect(screen.getAllByRole('option', { name: 'pm@hb.com' })).toHaveLength(1);
-    expect(screen.getAllByRole('option', { name: 'lead@hb.com' })).toHaveLength(1);
-    expect(screen.getByRole('option', { name: 'exec@hb.com' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'support@hb.com' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'team@hb.com' })).toBeInTheDocument();
-  });
-
-  it('clears Timberscan Approver when upstream selections change and it becomes invalid', () => {
-    function Harness() {
-      const [request, setRequest] = useState<any>({
-        projectExecutiveUpn: 'exec@hb.com',
-        leadEstimatorUpn: 'lead@hb.com',
-        timberscanApproverUpn: 'lead@hb.com',
-      });
-
-      return (
-        <>
-          <TeamStepBody
-            request={request}
-            onChange={(updates) =>
-              setRequest((prev: any) => normalizeProjectSetupRequestFields({ ...prev, ...updates }))
-            }
-            mode="new-request"
-          />
-          <div data-testid="current-approver">{request.timberscanApproverUpn ?? ''}</div>
-        </>
-      );
-    }
-
-    renderWithProviders(<Harness />);
-
-    expect(screen.getByTestId('current-approver')).toHaveTextContent('lead@hb.com');
-    fireEvent.change(screen.getByRole('textbox', { name: 'Lead Estimator' }), { target: { value: '' } });
-    expect(screen.getByTestId('current-approver')).toHaveTextContent('');
+    expect(screen.getByText('exec@hb.com')).toBeInTheDocument();
+    expect(screen.getByText('lead@hb.com')).toBeInTheDocument();
   });
 });

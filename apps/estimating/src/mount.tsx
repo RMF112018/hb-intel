@@ -62,9 +62,9 @@ export function unmount(): void {
 // return value.  This is the belt-and-suspenders complement to the Vite
 // `lib.name` IIFE global assignment.
 const api = { mount, unmount };
-(globalThis as any).__hbIntel_estimating = api;
+(globalThis as any).__hbIntel_projectSetup = api;
 // Defensive: also assign to window explicitly, as SPFx contexts may have
 // globalThis !== window, and SPComponentLoader may look at window instead.
 if (typeof window !== 'undefined' && globalThis !== window) {
-  (window as any).__hbIntel_estimating = api;
+  (window as any).__hbIntel_projectSetup = api;
 }
