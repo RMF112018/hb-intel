@@ -1,20 +1,27 @@
-import { createRoute, lazyRouteComponent } from '@tanstack/react-router';
+import { createRoute, lazyRouteComponent, redirect } from '@tanstack/react-router';
 import { useNavStore } from '@hbc/shell';
 import { rootRoute } from './root-route.js';
+
+/**
+ * Deployment posture: Project Setup only.
+ *
+ * Bids and Templates routes are not registered in this deployment.
+ * The index route redirects to /project-setup.
+ * Any unmatched route falls through to the root catch-all which also redirects.
+ *
+ * To re-enable Bids/Templates, add their routes back to webpartRoutes and
+ * update the toolPickerItems in root-route.tsx.
+ *
+ * @see docs/architecture/reviews/estimating-project-setup-only-deployment-remediation.md
+ */
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
     useNavStore.getState().setActiveWorkspace('estimating');
+    throw redirect({ to: '/project-setup' });
   },
-  component: lazyRouteComponent(() => import('../pages/BidsPage.js').then((m) => ({ default: m.BidsPage }))),
-});
-
-const templatesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/templates',
-  component: lazyRouteComponent(() => import('../pages/TemplatesPage.js').then((m) => ({ default: m.TemplatesPage }))),
 });
 
 const projectSetupRoute = createRoute({
@@ -41,7 +48,6 @@ const requestDetailRoute = createRoute({
 
 export const webpartRoutes = [
   indexRoute,
-  templatesRoute,
   projectSetupRoute,
   newProjectSetupRequestRoute,
   requestDetailRoute,

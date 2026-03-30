@@ -5,6 +5,6 @@ import { webpartRoutes } from './routes.js';
 const routeTree = rootRoute.addChildren(webpartRoutes);
 
 export function createWebpartRouter() {
-  return createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ['/'] }) });
+  return createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ['/project-setup'] }) });
 }
 export type WebpartRouter = ReturnType<typeof createWebpartRouter>;

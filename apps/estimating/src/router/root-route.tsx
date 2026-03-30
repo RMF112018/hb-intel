@@ -5,14 +5,18 @@ import type { SimplifiedShellConfig } from '@hbc/shell';
 /**
  * D-PH7-BW-6: Estimating root route with simplified shell config.
  * Project-scoped domain — shows Back to Project Hub.
+ *
+ * Deployment posture: Project Setup only.
+ * Bids and Templates are hidden from navigation in this deployment.
+ * To re-enable, add their toolPickerItems back and register their routes.
+ *
+ * @see docs/architecture/reviews/estimating-project-setup-only-deployment-remediation.md
  */
 const ESTIMATING_SHELL_CONFIG: SimplifiedShellConfig = {
   workspaceName: 'Estimating',
   showBackToProjectHub: true,
   projectHubUrl: resolveProjectHubUrl(),
   toolPickerItems: [
-    { label: 'Bids', path: '/' },
-    { label: 'Templates', path: '/templates' },
     { label: 'Project Setup', path: '/project-setup' },
   ],
 };
