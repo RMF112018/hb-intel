@@ -135,6 +135,7 @@ const useStyles = makeStyles({
   },
   gridItem: {
     minWidth: 0,
+    display: 'flex',
   },
 
   // ── Loading & empty states ──────────────────────────────────────────
@@ -171,7 +172,6 @@ const useStyles = makeStyles({
     paddingTop: '32px',
     paddingBottom: '32px',
     borderRadius: HBC_RADIUS_XL,
-    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
   },
 });
 

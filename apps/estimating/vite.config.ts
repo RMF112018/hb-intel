@@ -52,7 +52,9 @@ export default defineConfig(({ command, mode }) => {
               entry: resolve(__dirname, 'src/mount.tsx'),
               name: '__hbIntel_projectSetup',
               formats: ['iife'],
-              fileName: () => 'project-setup-app.js',
+              // Filename must match build-spfx-package.ts convention: {dir}-app.js
+              // The dir is 'estimating' until the directory is renamed to 'project-setup'.
+              fileName: () => 'estimating-app.js',
             },
           }
         : {}),

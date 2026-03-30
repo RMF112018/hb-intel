@@ -15,6 +15,8 @@ import type { HbcCardProps } from './types.js';
 
 const useStyles = makeStyles({
   root: {
+    display: 'flex',
+    flexDirection: 'column',
     backgroundColor: tokens.colorNeutralBackground1,
     color: tokens.colorNeutralForeground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
@@ -44,6 +46,7 @@ const useStyles = makeStyles({
     ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke1),
   },
   body: {
+    flexGrow: 1,
     paddingTop: `${HBC_SPACE_LG}px`,
     paddingRight: `${HBC_SPACE_LG}px`,
     paddingBottom: `${HBC_SPACE_LG}px`,

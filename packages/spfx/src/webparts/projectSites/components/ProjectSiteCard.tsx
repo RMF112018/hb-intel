@@ -1,8 +1,10 @@
 /**
- * ProjectSiteCard — Governed project-site link card.
+ * ProjectSiteCard — Governed project-site link card with state differentiation.
  *
- * Composes HbcCard (weight="standard") with HbcStatusBadge, HbcDescriptionList,
- * and a clear navigational affordance linking to the project's SharePoint site.
+ * Three visual states:
+ * - **Active** (hasSiteUrl + active/pursuit stage): HBC blue top accent, full elevation, hover lift
+ * - **Provisioning** (!hasSiteUrl): HBC orange top accent, dashed border, pulsing dot
+ * - **Archived/Other** (hasSiteUrl + non-active stage): muted top accent, reduced elevation
  *
  * Light-theme only, governed by @hbc/ui-kit tokens.
  */
@@ -12,6 +14,7 @@ import { HbcCard, HbcStatusBadge, HbcDescriptionList } from '@hbc/ui-kit';
 import type { StatusVariant, DescriptionListItem } from '@hbc/ui-kit';
 import {
   HBC_PRIMARY_BLUE,
+  HBC_ACCENT_ORANGE,
   HBC_BRAND_ACTION,
   HBC_SURFACE_LIGHT,
   HBC_RADIUS_SM,
@@ -19,6 +22,7 @@ import {
   hbcBrandRamp,
   elevationLevel1,
   elevationLevel2,
+  elevationLevel0,
   TRANSITION_FAST,
   heading3,
   bodySmall,
@@ -30,17 +34,27 @@ import type { IProjectSiteEntry } from '../types.js';
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const useStyles = makeStyles({
-  // ── Card link wrapper ──────────────────────────────────────────────
+  // ── Card link wrapper (shared base) ────────────────────────────────
   cardWrapper: {
     textDecorationLine: 'none',
     color: 'inherit',
-    display: 'block',
+    display: 'flex',
     borderRadius: HBC_RADIUS_XL,
     transitionProperty: 'box-shadow, transform',
     transitionDuration: TRANSITION_FAST,
     transitionTimingFunction: 'ease-in-out',
-    boxShadow: elevationLevel1,
     height: '100%',
+    '@media (prefers-reduced-motion: reduce)': {
+      transitionDuration: '0.01ms',
+    },
+  },
+  cardFull: {
+    width: '100%',
+  },
+
+  // ── Active state (live site, active/pursuit stage) ─────────────────
+  activeWrapper: {
+    boxShadow: elevationLevel1,
     ':hover': {
       boxShadow: elevationLevel2,
       transform: 'translateY(-2px)',
@@ -52,26 +66,52 @@ const useStyles = makeStyles({
       outlineOffset: '2px',
       boxShadow: elevationLevel2,
     },
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0.01ms',
+  },
+  activeAccent: {
+    borderTopWidth: '3px',
+    borderTopStyle: 'solid',
+    borderTopColor: HBC_PRIMARY_BLUE,
+  },
+
+  // ── Archived/other state (live site, non-active stage) ─────────────
+  archivedWrapper: {
+    boxShadow: elevationLevel0,
+    opacity: 0.8,
+    ':hover': {
+      boxShadow: elevationLevel1,
+      transform: 'translateY(-1px)',
+    },
+    ':focus-visible': {
+      outlineWidth: '2px',
+      outlineStyle: 'solid',
+      outlineColor: HBC_PRIMARY_BLUE,
+      outlineOffset: '2px',
+      boxShadow: elevationLevel1,
     },
   },
-  disabledWrapper: {
+  archivedAccent: {
+    borderTopWidth: '3px',
+    borderTopStyle: 'solid',
+    borderTopColor: HBC_SURFACE_LIGHT['surface-3'],
+  },
+
+  // ── Provisioning state (no site yet) ───────────────────────────────
+  provisioningWrapper: {
     cursor: 'default',
-    opacity: 0.55,
-    borderTopWidth: '1px',
+    opacity: 0.75,
+    boxShadow: 'none',
+    borderTopWidth: '3px',
     borderBottomWidth: '1px',
     borderLeftWidth: '1px',
     borderRightWidth: '1px',
-    borderTopStyle: 'dashed',
+    borderTopStyle: 'solid',
     borderBottomStyle: 'dashed',
     borderLeftStyle: 'dashed',
     borderRightStyle: 'dashed',
-    borderTopColor: HBC_SURFACE_LIGHT['surface-3'],
+    borderTopColor: HBC_ACCENT_ORANGE,
     borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
     borderLeftColor: HBC_SURFACE_LIGHT['surface-3'],
     borderRightColor: HBC_SURFACE_LIGHT['surface-3'],
-    boxShadow: 'none',
     ':hover': {
       boxShadow: 'none',
       transform: 'none',
@@ -169,7 +209,7 @@ const useStyles = makeStyles({
     fontSize: bodySmall.fontSize,
     fontWeight: labelType.fontWeight,
     fontStyle: 'italic',
-    color: HBC_SURFACE_LIGHT['text-muted'],
+    color: HBC_ACCENT_ORANGE,
     flexShrink: 0,
   },
   provisioningDot: {
@@ -177,11 +217,10 @@ const useStyles = makeStyles({
     width: '6px',
     height: '6px',
     borderRadius: '3px',
-    backgroundColor: HBC_SURFACE_LIGHT['text-muted'],
-    opacity: 0.6,
+    backgroundColor: HBC_ACCENT_ORANGE,
     animationName: {
       '0%': { opacity: 0.3 },
-      '50%': { opacity: 0.8 },
+      '50%': { opacity: 1 },
       '100%': { opacity: 0.3 },
     },
     animationDuration: '1.5s',
@@ -189,8 +228,8 @@ const useStyles = makeStyles({
     animationTimingFunction: 'ease-in-out',
     '@media (prefers-reduced-motion: reduce)': {
       animationName: {
-        from: { opacity: 0.5 },
-        to: { opacity: 0.5 },
+        from: { opacity: 0.6 },
+        to: { opacity: 0.6 },
       },
     },
   },
@@ -212,6 +251,13 @@ function resolveStageVariant(stage: string): StatusVariant {
   return 'neutral';
 }
 
+function resolveCardState(entry: IProjectSiteEntry): 'active' | 'provisioning' | 'archived' {
+  if (!entry.hasSiteUrl) return 'provisioning';
+  const lower = entry.projectStage?.toLowerCase() ?? '';
+  if (lower === 'active' || lower === 'pursuit') return 'active';
+  return 'archived';
+}
+
 // ── Component ─────────────────────────────────────────────────────────────
 
 export interface ProjectSiteCardProps {
@@ -220,8 +266,8 @@ export interface ProjectSiteCardProps {
 
 export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const classes = useStyles();
+  const cardState = resolveCardState(entry);
 
-  // Build metadata items for HbcDescriptionList
   const metadataItems = useMemo<DescriptionListItem[]>(() => {
     const items: DescriptionListItem[] = [];
     if (entry.clientName) items.push({ label: 'Client', value: entry.clientName });
@@ -232,7 +278,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
 
   const deptLabel = formatDepartment(entry.department);
 
-  // ── Header ──────────────────────────────────────────────────────────
   const headerContent = (
     <div className={classes.header}>
       {entry.projectNumber && (
@@ -250,7 +295,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     </div>
   );
 
-  // ── Footer ──────────────────────────────────────────────────────────
   const footerContent = (
     <div className={classes.footer}>
       <span className={classes.department}>{deptLabel}</span>
@@ -267,7 +311,6 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     </div>
   );
 
-  // ── Card body ───────────────────────────────────────────────────────
   const bodyContent = (
     <div className={classes.body}>
       <h3 className={classes.projectName}>{entry.projectName}</h3>
@@ -277,31 +320,39 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     </div>
   );
 
-  // ── Render: linked card ─────────────────────────────────────────────
+  const wrapperClass = mergeClasses(
+    classes.cardWrapper,
+    classes.cardFull,
+    cardState === 'active' && classes.activeWrapper,
+    cardState === 'active' && classes.activeAccent,
+    cardState === 'archived' && classes.archivedWrapper,
+    cardState === 'archived' && classes.archivedAccent,
+    cardState === 'provisioning' && classes.provisioningWrapper,
+  );
+
   if (entry.hasSiteUrl) {
     return (
       <a
         href={entry.siteUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className={classes.cardWrapper}
+        className={wrapperClass}
         aria-label={`Open ${entry.projectName} project site${entry.projectNumber ? ` (${entry.projectNumber})` : ''}`}
       >
-        <HbcCard weight="standard" header={headerContent} footer={footerContent}>
+        <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
           {bodyContent}
         </HbcCard>
       </a>
     );
   }
 
-  // ── Render: disabled card (provisioning) ────────────────────────────
   return (
     <div
-      className={mergeClasses(classes.cardWrapper, classes.disabledWrapper)}
+      className={wrapperClass}
       aria-disabled="true"
       aria-label={`${entry.projectName} — site provisioning in progress`}
     >
-      <HbcCard weight="standard" header={headerContent} footer={footerContent}>
+      <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
         {bodyContent}
       </HbcCard>
     </div>

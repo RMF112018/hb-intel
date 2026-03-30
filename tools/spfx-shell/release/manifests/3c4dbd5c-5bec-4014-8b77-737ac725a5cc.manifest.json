@@ -1,12 +1,13 @@
 {
-  "id": "e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b",
+  "id": "3c4dbd5c-5bec-4014-8b77-737ac725a5cc",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart"
+    "SharePointWebPart",
+    "TeamsPersonalApp"
   ],
   "supportsThemeVariants": true,
   "preconfiguredEntries": [
@@ -16,14 +17,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Project Sites"
+        "default": "Project Setup Requests"
       },
       "description": {
-        "default": "Displays project-site link cards for all projects matching the hosting page's Year property."
+        "default": "Submit and track project setup requests. Supports SharePoint and Teams Personal App hosts."
       },
-      "officeFabricIconFontName": "Globe",
+      "officeFabricIconFontName": "ProjectCollection",
       "properties": {
-        "yearOverride": 0
+        "description": "Project Setup Requests"
       }
     }
   ],
@@ -35,7 +36,7 @@
     "scriptResources": {
       "shell-web-part": {
         "type": "path",
-        "path": "shell-web-part_75077a694a0b19846b35.js"
+        "path": "shell-web-part_5c762b6075482907185e.js"
       },
       "@microsoft/sp-loader": {
         "type": "component",
