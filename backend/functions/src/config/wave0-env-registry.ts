@@ -43,7 +43,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'AZURE_CLIENT_ID',
     bucket: 'infrastructure',
-    description: 'App registration client ID for backend identity',
+    description: 'Managed identity client ID (read by DefaultAzureCredential for outbound Azure resource auth). Also used as inbound API audience fallback when API_AUDIENCE is not set.',
     requiredInProd: true,
   },
   {
@@ -195,6 +195,17 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
     name: 'WEBSITE_NODE_DEFAULT_VERSION',
     bucket: 'infrastructure',
     description: 'Node.js version hint; ~20',
+    requiredInProd: false,
+  },
+
+  // --- Auth Split (Bucket A) ---
+  {
+    name: 'API_AUDIENCE',
+    bucket: 'infrastructure',
+    description:
+      'Explicit inbound API audience for JWT validation (e.g. api://<app-registration-client-id>). ' +
+      'When set, overrides the default api://${AZURE_CLIENT_ID} audience. Required when the managed ' +
+      'identity client ID differs from the app registration client ID.',
     requiredInProd: false,
   },
 

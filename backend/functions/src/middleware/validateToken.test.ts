@@ -24,6 +24,7 @@ describe('D-PH6-15 validateToken middleware', () => {
     jwtVerifyMock.mockReset();
     process.env.AZURE_TENANT_ID = 'tenant-id';
     process.env.AZURE_CLIENT_ID = 'client-id';
+    delete process.env.API_AUDIENCE;
   });
 
   it('returns validated claims for a valid bearer token', async () => {
@@ -129,6 +130,39 @@ describe('D-PH6-15 validateToken middleware', () => {
 
     await expect(validateToken(makeRequest('Bearer missing-claims-token'))).rejects.toThrow(
       'Token missing required identity claims'
+    );
+  });
+
+  it('uses api://${AZURE_CLIENT_ID} as audience when API_AUDIENCE is not set', async () => {
+    jwtVerifyMock.mockResolvedValueOnce({
+      payload: { upn: 'user@hb.com', oid: 'oid-1', roles: [] },
+    });
+
+    const { validateToken } = await import('./validateToken.js');
+    await validateToken(makeRequest('Bearer fallback-token'));
+
+    expect(jwtVerifyMock).toHaveBeenCalledWith(
+      'fallback-token',
+      expect.anything(),
+      expect.objectContaining({ audience: 'api://client-id' }),
+    );
+  });
+
+  it('uses explicit API_AUDIENCE when set', async () => {
+    process.env.API_AUDIENCE = 'api://explicit-app-reg-id';
+    vi.resetModules();
+
+    jwtVerifyMock.mockResolvedValueOnce({
+      payload: { upn: 'user@hb.com', oid: 'oid-1', roles: [] },
+    });
+
+    const { validateToken } = await import('./validateToken.js');
+    await validateToken(makeRequest('Bearer explicit-audience-token'));
+
+    expect(jwtVerifyMock).toHaveBeenCalledWith(
+      'explicit-audience-token',
+      expect.anything(),
+      expect.objectContaining({ audience: 'api://explicit-app-reg-id' }),
     );
   });
 });

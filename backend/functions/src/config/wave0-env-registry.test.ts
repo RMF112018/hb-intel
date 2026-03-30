@@ -78,6 +78,13 @@ describe('WAVE0_OPTIONAL_CONFIG', () => {
     expect(names).toContain('SITES_PERMISSION_MODEL');
   });
 
+  it('includes API_AUDIENCE as optional', () => {
+    const entry = WAVE0_OPTIONAL_CONFIG.find((e) => e.name === 'API_AUDIENCE');
+    expect(entry).toBeDefined();
+    expect(entry!.requiredInProd).toBe(false);
+    expect(entry!.description).toContain('inbound API audience');
+  });
+
   it('every entry satisfies IConfigEntry shape', () => {
     for (const entry of WAVE0_OPTIONAL_CONFIG) {
       const typed: IConfigEntry = entry;
