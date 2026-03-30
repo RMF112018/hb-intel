@@ -1,6 +1,10 @@
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { makeStyles } from '@griffel/react';
 import { ShellLayout, resolveProjectHubUrl } from '@hbc/shell';
 import type { SimplifiedShellConfig } from '@hbc/shell';
+import { HbcBanner, HbcButton } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_XS } from '@hbc/ui-kit/theme';
+import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 
 /**
  * D-PH7-BW-6: Estimating root route with simplified shell config.
@@ -21,8 +25,32 @@ const ESTIMATING_SHELL_CONFIG: SimplifiedShellConfig = {
   ],
 };
 
-function RootComponent(): React.ReactNode {
+const useStyles = makeStyles({
+  backendModeControl: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: `${HBC_SPACE_XS}px`,
+  },
+  backendModeLabel: {
+    fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    fontWeight: 600,
+  },
+  backendModeButtons: {
+    display: 'flex',
+    gap: `${HBC_SPACE_SM}px`,
+  },
+  backendModeHelper: {
+    fontSize: `${HBC_SPACE_SM}px`,
+    color: 'var(--colorNeutralForeground3)',
+  },
+});
+
+export function RootComponent(): React.ReactNode {
+  const styles = useStyles();
   const navigate = useNavigate();
+  const { backendMode, isUiReview, canSwitchBackendMode, setBackendMode } = useProjectSetupBackend();
+
   return (
     <ShellLayout
       mode="simplified"
@@ -40,7 +68,40 @@ function RootComponent(): React.ReactNode {
           ))}
         </nav>
       }
+      rightSlot={
+        canSwitchBackendMode ? (
+          <div className={styles.backendModeControl}>
+            <span className={styles.backendModeLabel}>Backend Mode</span>
+            <div className={styles.backendModeButtons}>
+              <HbcButton
+                type="button"
+                size="sm"
+                variant={backendMode === 'ui-review' ? 'primary' : 'secondary'}
+                onClick={() => setBackendMode('ui-review')}
+              >
+                UI Review
+              </HbcButton>
+              <HbcButton
+                type="button"
+                size="sm"
+                variant={backendMode === 'production' ? 'primary' : 'secondary'}
+                onClick={() => setBackendMode('production')}
+              >
+                Production
+              </HbcButton>
+            </div>
+            <span className={styles.backendModeHelper}>
+              Mode: {backendMode === 'ui-review' ? 'UI Review' : 'Production'}. Saved in this browser.
+            </span>
+          </div>
+        ) : undefined
+      }
     >
+      {isUiReview && (
+        <HbcBanner variant="info">
+          UI Review mode is active. Backend connections are disabled, and Project Setup is using local sample data saved in this browser.
+        </HbcBanner>
+      )}
       <Outlet />
     </ShellLayout>
   );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
 import { makeStyles } from '@griffel/react';
@@ -7,21 +7,19 @@ import { resolveFullBicState } from '@hbc/bic-next-move';
 import { HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import {
-  createProvisioningApiClient,
   DEPARTMENT_DISPLAY_LABELS,
   PROJECT_SETUP_BIC_CONFIG,
   PROJECT_SETUP_STATUS_LABELS,
   useProvisioningStore,
 } from '@hbc/provisioning';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
-import { ConfigError, getFunctionAppUrl } from '../config/runtimeConfig.js';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import { HbcBanner, HbcButton, HbcDataTable, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
 import { HBC_SPACE_MD } from '@hbc/ui-kit/theme';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getStateBadgeVariant } from '../components/project-setup/stateDisplayHelpers.js';
+import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 import { canCoordinatorRetry } from '../utils/failureClassification.js';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 const useStyles = makeStyles({
   actionRow: { marginBottom: `${HBC_SPACE_MD}px` },
@@ -57,58 +55,101 @@ const SETUP_EMPTY_CONTEXT: IEmptyStateContext = {
 export function ProjectSetupPage(): ReactNode {
   const styles = useStyles();
   const session = useCurrentSession();
-  const { requests, setRequests, statusByProjectId } = useProvisioningStore();
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  const { client, isUiReview } = useProjectSetupBackend();
+  const { requests, setRequests, statusByProjectId, setProvisioningStatus } =
+    useProvisioningStore();
   const [actionError, setActionError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const loadGenerationRef = useRef(0);
 
-  const client = useMemo(
-    () => createProvisioningApiClient(getFunctionAppUrl(), async () => authToken),
-    [authToken],
+  useEffect(() => () => {
+    isMountedRef.current = false;
+  }, []);
+
+  const syncRequests = useCallback(
+    async (listed: IProjectSetupRequest[], generation?: number) => {
+      if (!isMountedRef.current || (generation !== undefined && loadGenerationRef.current !== generation)) {
+        return;
+      }
+      setRequests(listed);
+
+      if (!isUiReview) {
+        return;
+      }
+
+      const statuses = await Promise.all(
+        listed.map(async (request) => {
+          const status = await client.getProvisioningStatus(request.projectId);
+          return status;
+        }),
+      );
+      statuses.forEach((status) => {
+        if (
+          status &&
+          isMountedRef.current &&
+          (generation === undefined || loadGenerationRef.current === generation)
+        ) {
+          setProvisioningStatus(status);
+        }
+      });
+    },
+    [client, isUiReview, setProvisioningStatus, setRequests],
   );
 
   useEffect(() => {
     if (!session) return;
+    let active = true;
+    const generation = ++loadGenerationRef.current;
     setLoadError(null);
     client
       .listRequests()
-      .then((listed: IProjectSetupRequest[]) => setRequests(listed))
-      .catch((err) => {
-        if (err instanceof ConfigError) {
-          setLoadError(`Configuration error: ${err.message}`);
-        } else {
+      .then(async (listed: IProjectSetupRequest[]) => {
+        if (!active || loadGenerationRef.current !== generation) {
+          return;
+        }
+        await syncRequests(listed, generation);
+      })
+      .catch(() => {
+        if (active && loadGenerationRef.current === generation) {
           setLoadError('Unable to load project setup requests. Check your connection and try again.');
         }
       });
-  }, [client, session, setRequests]);
+    return () => {
+      active = false;
+      loadGenerationRef.current += 1;
+    };
+  }, [client, session, syncRequests]);
 
   const handleRetry = useCallback(
     async (projectId: string) => {
+      const generation = loadGenerationRef.current;
       setActionError(null);
       try {
         await client.retryProvisioning(projectId);
         const listed = await client.listRequests();
-        setRequests(listed);
+        await syncRequests(listed, generation);
       } catch {
         setActionError('Retry failed. If the issue persists, contact Admin.');
       }
     },
-    [client, setRequests],
+    [client, syncRequests],
   );
 
   const handleEscalate = useCallback(
     async (projectId: string) => {
+      const generation = loadGenerationRef.current;
       setActionError(null);
       try {
         const escalatedBy = session?.providerIdentityRef ?? 'unknown';
         await client.escalateProvisioning(projectId, escalatedBy);
         const listed = await client.listRequests();
-        setRequests(listed);
+        await syncRequests(listed, generation);
       } catch {
         setActionError('Escalation failed. Please contact Admin directly.');
       }
     },
-    [client, session, setRequests],
+    [client, session, syncRequests],
   );
 
   /** W0-G4-T02: Column definitions for coordinator queue table. */

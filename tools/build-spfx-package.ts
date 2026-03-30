@@ -412,6 +412,8 @@ for (const domain of domains) {
     // webpart can inject it into the loaded app at runtime.
     // Read from FUNCTION_APP_URL env var (set by CI or .env).
     FUNCTION_APP_URL: process.env.FUNCTION_APP_URL ?? '',
+    BACKEND_MODE: process.env.BACKEND_MODE ?? '',
+    ALLOW_BACKEND_MODE_SWITCH: process.env.ALLOW_BACKEND_MODE_SWITCH ?? '',
   };
 
   console.log('  Running gulp bundle --ship...');

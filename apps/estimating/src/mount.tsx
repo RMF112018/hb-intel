@@ -19,6 +19,10 @@ import { setRuntimeConfig } from './config/runtimeConfig.js';
 export interface IMountConfig {
   /** Azure Function App base URL (e.g. https://hb-intel-functions.azurewebsites.net) */
   functionAppUrl?: string;
+  /** Runtime-selected backend mode for the Project Setup surface. */
+  backendMode?: 'production' | 'ui-review';
+  /** Enables the reviewer-only backend mode switch in the Estimating header. */
+  allowBackendModeSwitch?: boolean;
 }
 
 let root: Root | undefined;

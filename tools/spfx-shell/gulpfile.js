@@ -16,6 +16,8 @@ build.configureWebpack.mergeConfig({
         __APP_BUNDLE_NAME__: JSON.stringify(process.env.APP_BUNDLE_NAME || 'app.js'),
         __APP_GLOBAL_NAME__: JSON.stringify(process.env.APP_GLOBAL_NAME || '__hbIntel_app'),
         __FUNCTION_APP_URL__: JSON.stringify(process.env.FUNCTION_APP_URL || ''),
+        __BACKEND_MODE__: JSON.stringify(process.env.BACKEND_MODE || ''),
+        __ALLOW_BACKEND_MODE_SWITCH__: JSON.stringify(process.env.ALLOW_BACKEND_MODE_SWITCH || ''),
       })
     );
 

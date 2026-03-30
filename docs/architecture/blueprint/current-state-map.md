@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-30
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -231,8 +231,9 @@
 | `packages/provisioning/src/failure-modes.ts` (T07 addition) | **Canonical Current-State** | Typed failure mode registry; FM-01 through FM-10 with scenarios and expected degradation; produced by W0-G3-T07 |
 | `packages/provisioning/src/t08-cross-contract-verification.test.ts` (T08 addition) | **Canonical Current-State** | Cross-contract verification suite; 14 TC-* IDs covering ownership/action alignment, notification body verification, draft key distinctness, BIC registration shape, complexity gate compliance; produced by W0-G3-T08 |
 | `packages/provisioning/src/t08-deferred-surface-tests.test.ts` (T08 addition) | **Canonical Current-State** | Deferred surface test scaffolds; 11 it.todo stubs for G4/G5 behavior tests + 1 env-gated integration scaffold (TC-CLAR-05); produced by W0-G3-T08 |
-| `docs/reference/spfx-surfaces/estimating-requester-surface.md` | **Living Reference (Diátaxis)** | Reference quadrant; Estimating requester surface route map, component hierarchy, step wizard config, draft persistence, clarification-return flow, BIC ownership display, complexity gating rules; produced by W0-G4-T01 |
-| `apps/estimating/src/components/project-setup/` | **Canonical Current-State** | Estimating requester guided setup surface components; step body renderers, resume banner, state display helpers, request detail compositions (core summary, state context, clarification banner); produced by W0-G4-T01; extended by W0-G4-T02 with FailureDetailCard and RetrySection |
+| `docs/reference/spfx-surfaces/estimating-requester-surface.md` | **Living Reference (Diátaxis)** | Reference quadrant; Estimating requester surface route map, component hierarchy, step wizard config, draft persistence, clarification-return flow, BIC ownership display, complexity gating rules, runtime backend-mode behavior (`production` vs `ui-review`), and the gated reviewer-only backend mode switch; produced by W0-G4-T01 and updated 2026-03-30 for SharePoint UI review mode |
+| `apps/estimating/src/components/project-setup/` | **Canonical Current-State** | Estimating requester guided setup surface components; step body renderers, resume banner, state display helpers, request detail compositions (core summary, state context, clarification banner), and limited-release header affordances for reviewer backend-mode switching; produced by W0-G4-T01; extended by W0-G4-T02 with FailureDetailCard and RetrySection; backed by an app-local Project Setup adapter with localStorage-based `ui-review` mode as of 2026-03-30 |
+| `apps/estimating/src/project-setup/backend/` | **Canonical Current-State** | App-local Project Setup backend boundary for the Estimating SPFx surface; runtime-selectable live provisioning adapter vs localStorage-backed `ui-review` adapter, seeded mock request/status records, browser-persisted reviewer mode override, and banner-safe SharePoint review mode with zero backend fetches; implemented 2026-03-30 |
 | `apps/estimating/src/utils/failureClassification.ts` | **Canonical Current-State** | Failure classification display constants, canCoordinatorRetry() 5-condition check, getFailedStep() helper; NO inference from error strings (spec §8.2); produced by W0-G4-T02 |
 | `apps/estimating/src/test/NewRequestPage.test.tsx` | **Canonical Current-State** | G4-T08 Estimating guided setup tests; draft auto-save, resume banner, clarification return, submission success/failure, complexity gating; produced by W0-G4-T08 |
 | `apps/estimating/src/test/RequestDetailPage.test.tsx` | **Canonical Current-State** | G4-T08 Estimating request detail tests; state badge, ownership display, complexity-gated fields, clarification banner; produced by W0-G4-T08 |

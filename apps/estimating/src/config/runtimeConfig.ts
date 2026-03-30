@@ -6,8 +6,8 @@
  *
  * Resolution order:
  *   1. Runtime injection (set by mount.tsx from shell webpart config)
- *   2. Vite build-time env (import.meta.env.VITE_FUNCTION_APP_URL)
- *   3. ConfigError thrown with actionable diagnostic
+ *   2. Vite build-time env
+ *   3. Defaults (`backendMode=production`) or ConfigError for required production config
  *
  * @see tools/spfx-shell/src/webparts/shell/ShellWebPart.ts
  * @see apps/estimating/src/mount.tsx
@@ -16,8 +16,12 @@
 
 /** Configuration shape passed from the shell webpart at mount time. */
 export interface IRuntimeConfig {
-  functionAppUrl: string;
+  functionAppUrl?: string;
+  backendMode?: BackendMode;
+  allowBackendModeSwitch?: boolean;
 }
+
+export type BackendMode = 'production' | 'ui-review';
 
 /**
  * Descriptive error thrown when required runtime configuration is missing.
@@ -32,15 +36,68 @@ export class ConfigError extends Error {
 
 let _config: IRuntimeConfig | null = null;
 
+function normalizeBackendMode(mode: string | undefined): BackendMode | undefined {
+  return mode === 'production' || mode === 'ui-review' ? mode : undefined;
+}
+
+function normalizeBoolean(value: boolean | string | undefined): boolean | undefined {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  return undefined;
+}
+
 /**
  * Store runtime config injected by the shell webpart.
  * Called once from mount.tsx before rendering the React tree.
  */
 export function setRuntimeConfig(config: Partial<IRuntimeConfig>): void {
   const functionAppUrl = config.functionAppUrl?.replace(/\/+$/, '') ?? '';
-  if (functionAppUrl) {
-    _config = { functionAppUrl };
+  const backendMode = normalizeBackendMode(config.backendMode);
+  const allowBackendModeSwitch = normalizeBoolean(config.allowBackendModeSwitch);
+  if (functionAppUrl || backendMode || allowBackendModeSwitch !== undefined) {
+    _config = {
+      ...(functionAppUrl ? { functionAppUrl } : {}),
+      ...(backendMode ? { backendMode } : {}),
+      ...(allowBackendModeSwitch !== undefined ? { allowBackendModeSwitch } : {}),
+    };
   }
+}
+
+export function getBackendMode(): BackendMode {
+  if (_config?.backendMode) {
+    return _config.backendMode;
+  }
+
+  const envMode =
+    typeof import.meta !== 'undefined' &&
+    normalizeBackendMode(import.meta.env?.VITE_BACKEND_MODE);
+  if (envMode) {
+    return envMode;
+  }
+
+  return 'production';
+}
+
+export function getAllowBackendModeSwitch(): boolean {
+  if (_config?.allowBackendModeSwitch !== undefined) {
+    return _config.allowBackendModeSwitch;
+  }
+
+  const envValue =
+    typeof import.meta !== 'undefined' &&
+    normalizeBoolean(import.meta.env?.VITE_ALLOW_BACKEND_MODE_SWITCH);
+  if (envValue !== undefined) {
+    return envValue;
+  }
+
+  return false;
 }
 
 /**
@@ -49,6 +106,10 @@ export function setRuntimeConfig(config: Partial<IRuntimeConfig>): void {
  * @throws {ConfigError} if no source provides the URL
  */
 export function getFunctionAppUrl(): string {
+  if (getBackendMode() === 'ui-review') {
+    return '';
+  }
+
   // 1. Runtime injection (SPFx shell)
   if (_config?.functionAppUrl) {
     return _config.functionAppUrl;

@@ -3,14 +3,13 @@ import type { ReactNode } from 'react';
 import { useCurrentSession } from '@hbc/auth';
 import { HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus } from '@hbc/models';
-import { createProvisioningApiClient } from '@hbc/provisioning';
 import { HbcBanner, HbcButton } from '@hbc/ui-kit';
+import { useProjectSetupBackend } from '../../project-setup/backend/ProjectSetupBackendContext.js';
 import { getAdminAppUrl } from '../../utils/crossAppUrls.js';
 import {
   FAILURE_CLASS_DESCRIPTIONS,
   canCoordinatorRetry,
 } from '../../utils/failureClassification.js';
-import { resolveSessionToken } from '../../utils/resolveSessionToken.js';
 
 export interface RetrySectionProps {
   status: IProvisioningStatus;
@@ -27,11 +26,7 @@ export interface RetrySectionProps {
  */
 export function RetrySection({ status, projectId, onRetryComplete }: RetrySectionProps): ReactNode {
   const session = useCurrentSession();
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
-  const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL, async () => authToken),
-    [authToken],
-  );
+  const { client } = useProjectSetupBackend();
 
   const [loading, setLoading] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);

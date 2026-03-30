@@ -73,6 +73,15 @@ vite build (IIFE format, mount.tsx entry)
 
 **CI integration:** `.github/workflows/spfx-build.yml` runs the orchestrator after building all apps. The `spfx-deploy.yml` workflow deploys the resulting `.sppkg` files unchanged.
 
+### SharePoint App Version Source Of Truth
+
+- The SharePoint App Catalog version displayed for the uploaded Estimating package comes from the `.sppkg`'s `AppManifest.xml` `Version` attribute.
+- For Estimating, that value is driven by `apps/estimating/config/package-solution.json` `solution.version`.
+- `tools/build-spfx-package.ts` copies the app-local `package-solution.json` into `tools/spfx-shell/config/package-solution.json` before `gulp package-solution --ship`, so the shell copy is derived build output, not the authoritative source of truth.
+- `solution.features[].version` drives the generated feature XML version inside the package and should stay aligned with `solution.version` to avoid package-internal version drift during upload and deployment.
+- `ClientSideAssets.xml` remains an SPFx-generated internal feature manifest and is not the SharePoint App Catalog app-version field; it does not require manual synchronization for the uploaded package version.
+- The client-side web part manifest `version: "*"` remains unrelated to the SharePoint-uploaded app-package version in this packaging path.
+
 ## 6. Architecture Diagram
 
 ```

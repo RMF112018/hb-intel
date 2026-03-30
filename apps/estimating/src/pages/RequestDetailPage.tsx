@@ -1,16 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useCurrentSession } from '@hbc/auth';
 import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import {
-  createProvisioningApiClient,
   getProvisioningVisibility,
   useProvisioningSignalR,
   useProvisioningStore,
 } from '@hbc/provisioning';
-import { getFunctionAppUrl } from '../config/runtimeConfig.js';
 import { HbcBanner, HbcCard, HbcTypography, WorkspacePageShell } from '@hbc/ui-kit';
 import { ClarificationBanner } from '../components/project-setup/ClarificationBanner.js';
 import { CompletionConfirmationCard } from '../components/project-setup/CompletionConfirmationCard.js';
@@ -19,6 +17,7 @@ import { RequestCoreSummary } from '../components/project-setup/RequestCoreSumma
 import { RequestStateContext } from '../components/project-setup/RequestStateContext.js';
 import { RetrySection } from '../components/project-setup/RetrySection.js';
 import { ProvisioningChecklist } from '../components/ProvisioningChecklist.js';
+import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 /**
@@ -32,15 +31,19 @@ export function RequestDetailPage(): ReactNode {
   const { requestId } = useParams({ strict: false }) as { requestId: string };
   const navigate = useNavigate();
   const session = useCurrentSession();
+  const { client, isUiReview, functionAppUrl } = useProjectSetupBackend();
   const { requests, setRequests, statusByProjectId, setProvisioningStatus } = useProvisioningStore();
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
-  const functionAppUrl = useMemo(() => getFunctionAppUrl(), []);
-  const client = useMemo(
-    () => createProvisioningApiClient(functionAppUrl, async () => authToken),
-    [functionAppUrl, authToken],
+  const isMountedRef = useRef(true);
+  const loadGenerationRef = useRef(0);
+  const authToken = useMemo(
+    () => (isUiReview ? '' : resolveSessionToken(session)),
+    [isUiReview, session],
   );
+
+  useEffect(() => () => {
+    isMountedRef.current = false;
+  }, []);
 
   const request: IProjectSetupRequest | undefined = requests.find((r) => r.requestId === requestId);
   const projectId = request?.projectId;
@@ -51,56 +54,66 @@ export function RequestDetailPage(): ReactNode {
   // before the reconciliation from Provisioning state has propagated to the request).
   const isProvisioningActive = request?.state === 'Provisioning' || request?.state === 'ReadyToProvision';
   const { isConnected } = useProvisioningSignalR({
-    negotiateUrl: `${functionAppUrl}/api/provisioning-negotiate`,
+    negotiateUrl: functionAppUrl ? `${functionAppUrl}/api/provisioning-negotiate` : '',
     projectId: projectId ?? '',
     getToken: async () => authToken,
-    enabled: Boolean(projectId && isProvisioningActive),
+    enabled: Boolean(!isUiReview && projectId && isProvisioningActive && functionAppUrl),
   });
 
   const refreshData = useCallback(async () => {
+    const generation = loadGenerationRef.current;
     const listed = await client.listRequests();
+    if (!isMountedRef.current || loadGenerationRef.current !== generation) {
+      return;
+    }
     setRequests(listed);
     const matched = listed.find((r) => r.requestId === requestId);
     if (matched?.projectId) {
       const status = await client.getProvisioningStatus(matched.projectId);
-      if (status) setProvisioningStatus(status);
+      if (status && isMountedRef.current && loadGenerationRef.current === generation) {
+        setProvisioningStatus(status);
+      }
     }
   }, [client, requestId, setProvisioningStatus, setRequests]);
 
   useEffect(() => {
     if (!requestId || !session) return;
     let mounted = true;
+    const generation = ++loadGenerationRef.current;
 
     setLoadError(null);
     (async () => {
       const listed = await client.listRequests();
-      if (!mounted) return;
+      if (!mounted || loadGenerationRef.current !== generation) return;
       setRequests(listed);
 
       const matched = listed.find((r) => r.requestId === requestId);
       if (!matched?.projectId) return;
 
       const status = await client.getProvisioningStatus(matched.projectId);
-      if (status && mounted) setProvisioningStatus(status);
+      if (status && mounted && loadGenerationRef.current === generation) {
+        setProvisioningStatus(status);
+      }
     })().catch(() => {
-      if (mounted) {
+      if (mounted && loadGenerationRef.current === generation) {
         setLoadError('Unable to load request data. Check your connection and try again.');
       }
     });
 
     return () => {
       mounted = false;
+      loadGenerationRef.current += 1;
     };
   }, [client, requestId, session, setProvisioningStatus, setRequests]);
 
   // W0-G4-T07: SignalR polling fallback (covers Provisioning and ReadyToProvision)
   useEffect(() => {
-    if (isConnected || !isProvisioningActive) return;
+    if (isUiReview || isConnected || !isProvisioningActive) return;
     const interval = setInterval(() => {
       refreshData().catch(() => {});
     }, 30_000);
     return () => clearInterval(interval);
-  }, [isConnected, isProvisioningActive, refreshData]);
+  }, [isConnected, isProvisioningActive, isUiReview, refreshData]);
 
   // W0-G4-T07: Session loading guard
   if (!session) {
@@ -163,7 +176,7 @@ export function RequestDetailPage(): ReactNode {
       <HbcComplexityDial variant="header" />
 
       {/* W0-G4-T07: Stale data warning when refresh failed but we have cached data */}
-      {loadError && (
+      {loadError && !isUiReview && (
         <HbcBanner variant="warning" onDismiss={() => setLoadError(null)}>
           Live status unavailable — showing last known state.
         </HbcBanner>
@@ -177,14 +190,14 @@ export function RequestDetailPage(): ReactNode {
       )}
 
       {/* W0-G4-T07: SignalR disconnect indicator */}
-      {isProvisioningActive && !isConnected && (
+      {!isUiReview && isProvisioningActive && !isConnected && (
         <HbcBanner variant="warning">
           Real-time connection lost. Status updates are refreshing every 30 seconds.
         </HbcBanner>
       )}
 
       {/* W0-G4-T07: Provisioning status missing after completion */}
-      {request.state === 'Completed' && !provisioningStatus && (
+      {!isUiReview && request.state === 'Completed' && !provisioningStatus && (
         <HbcBanner variant="warning">
           Provisioning details are not yet available. The site may still be accessible — check back shortly.
         </HbcBanner>
@@ -208,7 +221,7 @@ export function RequestDetailPage(): ReactNode {
         </HbcComplexityGate>
       )}
 
-      {visibility === 'full' && !provisioningStatus && isProvisioningActive && (
+      {!isUiReview && visibility === 'full' && !provisioningStatus && isProvisioningActive && (
         <HbcBanner variant="info">Connecting to live progress…</HbcBanner>
       )}
 

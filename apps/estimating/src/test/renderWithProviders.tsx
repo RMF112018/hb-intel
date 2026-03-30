@@ -6,12 +6,17 @@ import { useAuthStore } from '@hbc/auth';
 import { useProvisioningStore } from '@hbc/provisioning';
 import type { NormalizedAuthSession } from '@hbc/auth';
 import type { IProjectSetupRequest, IProvisioningStatus } from '@hbc/models';
+import { ProjectSetupBackendProvider } from '../project-setup/backend/ProjectSetupBackendContext.js';
+import { _resetConfig, setRuntimeConfig } from '../config/runtimeConfig.js';
 
 interface RenderOptions {
   tier?: 'essential' | 'standard' | 'expert';
   session?: NormalizedAuthSession | null;
   requests?: IProjectSetupRequest[];
   statusByProjectId?: Record<string, IProvisioningStatus>;
+  backendMode?: 'production' | 'ui-review';
+  allowBackendModeSwitch?: boolean;
+  functionAppUrl?: string;
 }
 
 /**
@@ -52,17 +57,26 @@ export function renderWithProviders(
     session = createTestSession(),
     requests = [],
     statusByProjectId = {},
+    backendMode = 'production',
+    allowBackendModeSwitch = false,
+    functionAppUrl = 'https://test-functions.azurewebsites.net',
   } = options;
 
   // Pre-seed Zustand stores before render
   useAuthStore.setState({ session });
   useProvisioningStore.setState({ requests, statusByProjectId });
+  _resetConfig();
+  setRuntimeConfig({
+    backendMode,
+    allowBackendModeSwitch,
+    functionAppUrl: backendMode === 'production' ? functionAppUrl : undefined,
+  });
 
   function TestWrapper({ children }: { children: React.ReactNode }): React.ReactElement {
     return (
       <HbcThemeProvider>
         <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
-          {children}
+          <ProjectSetupBackendProvider>{children}</ProjectSetupBackendProvider>
         </ComplexityProvider>
       </HbcThemeProvider>
     );

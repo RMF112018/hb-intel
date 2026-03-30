@@ -1,7 +1,7 @@
 # Estimating SPFx Runtime API Config Remediation
 
-> **Date**: 2026-03-29
-> **Scope**: Function App URL injection, SharePoint target alignment, diagnostic improvement
+> **Date**: 2026-03-30
+> **Scope**: Function App URL injection, backend-mode runtime selection, reviewer-only mode switching, SharePoint target alignment, diagnostic improvement
 > **Predecessor**: `estimating-spfx-validation-and-root-cause-report.md`
 
 ---
@@ -24,9 +24,9 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 
 ### Config Resolution Order
 
-1. **Runtime injection** — Shell webpart reads `__FUNCTION_APP_URL__` (webpack DefinePlugin) and passes it to `mount(el, context, { functionAppUrl })`. The app stores it in a module-level config before rendering.
-2. **Vite build-time env** — `import.meta.env.VITE_FUNCTION_APP_URL` (for Vite dev mode or CI-injected builds).
-3. **ConfigError** — Throws a descriptive `ConfigError` with actionable diagnostic instead of silently producing a relative URL.
+1. **Runtime injection** — Shell webpart reads `__FUNCTION_APP_URL__` and `__BACKEND_MODE__` (webpack DefinePlugin) and passes them to `mount(el, context, { functionAppUrl, backendMode })`. The app stores them in a module-level config before rendering.
+2. **Vite build-time env** — `import.meta.env.VITE_FUNCTION_APP_URL` and `import.meta.env.VITE_BACKEND_MODE` (for Vite dev mode or CI-injected builds).
+3. **Defaults / ConfigError** — `backendMode` defaults to `production`. `ConfigError` is thrown only when `production` mode requires a missing Function App URL.
 
 ### Why This Fits
 
@@ -35,6 +35,25 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 - **Production-safe**: The URL is baked into the SPFx webpack bundle at package build time, not dependent on Vite env at runtime.
 - **Dev-compatible**: Vite dev mode still works via `.env.local` with `VITE_FUNCTION_APP_URL`.
 - **Explicit failure**: Missing config throws `ConfigError` before any fetch, not after a confusing 404.
+- **Review-safe**: `ui-review` bypasses backend fetches, negotiate URLs, provisioning retry polling, and red error shells tied to missing backend config.
+
+### Added Backend Modes
+
+| Mode | Intended use | Runtime behavior |
+|------|---------------|------------------|
+| `production` | Real SharePoint + Functions deployment | Uses live provisioning API adapter and SignalR/polling behavior |
+| `ui-review` | SharePoint UI review with no backend dependency | Uses localStorage-backed Project Setup mock client; no backend fetches or negotiate calls |
+
+### Reviewer-Only Switch Flag
+
+| Flag | Intended use | Runtime behavior |
+|------|---------------|------------------|
+| `allowBackendModeSwitch` | Temporary tester control during limited release | Enables an estimating-local header switch that persists a browser-local backend-mode override |
+
+- The switch is intentionally local to the Estimating Project Setup shell header, not the shared shell package.
+- Persisted overrides use `hb-intel:estimating:project-setup:backend-mode-override`.
+- Effective mode precedence is: persisted override when switching is enabled, then injected/env/default backend mode.
+- Mode changes clear local provisioning UI state and remount the router subtree so routes stay stable while loaders restart safely.
 
 ---
 
@@ -46,23 +65,27 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 |------|--------|
 | `apps/estimating/src/config/runtimeConfig.ts` | **NEW** — Config store with `setRuntimeConfig()`, `getFunctionAppUrl()`, `ConfigError` |
 | `apps/estimating/src/mount.tsx` | Extended `mount()` to accept `config?: IMountConfig`; calls `setRuntimeConfig()` before render |
-| `apps/estimating/src/pages/ProjectSetupPage.tsx` | Uses `getFunctionAppUrl()` instead of `import.meta.env.VITE_FUNCTION_APP_URL`; catches `ConfigError` |
-| `apps/estimating/src/pages/NewRequestPage.tsx` | Same migration |
-| `apps/estimating/src/pages/RequestDetailPage.tsx` | Same migration; SignalR negotiate URL also uses resolved config |
+| `apps/estimating/src/project-setup/backend/*` | **NEW** — App-local Project Setup backend boundary with live adapter + localStorage-backed `ui-review` adapter |
+| `apps/estimating/src/App.tsx` | Router subtree remounts on backend mode changes so Project Setup routes restart safely without a full page refresh |
+| `apps/estimating/src/pages/ProjectSetupPage.tsx` | Uses the app-local backend hook; `ui-review` preloads stored status and avoids backend error-shell behavior |
+| `apps/estimating/src/pages/NewRequestPage.tsx` | Uses the app-local backend hook for create + clarification-return lookup |
+| `apps/estimating/src/pages/RequestDetailPage.tsx` | Uses the app-local backend hook; SignalR/polling are disabled in `ui-review` |
+| `apps/estimating/src/components/project-setup/RetrySection.tsx` | Uses the app-local backend hook instead of constructing a live client directly |
+| `apps/estimating/src/router/root-route.tsx` | Shows the non-error `ui-review` informational banner and the gated reviewer-only backend mode switch |
 | `apps/estimating/src/test/runtimeConfig.test.ts` | **NEW** — Unit tests for config resolution, guard, and ConfigError |
 
 ### SPFx Shell
 
 | File | Change |
 |------|--------|
-| `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts` | Reads `__FUNCTION_APP_URL__` and passes to `mount()` as `{ functionAppUrl }` |
-| `tools/spfx-shell/gulpfile.js` | Added `__FUNCTION_APP_URL__` to webpack DefinePlugin |
+| `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts` | Reads `__FUNCTION_APP_URL__`, `__BACKEND_MODE__`, and `__ALLOW_BACKEND_MODE_SWITCH__` and passes them to `mount()` |
+| `tools/spfx-shell/gulpfile.js` | Added `__FUNCTION_APP_URL__`, `__BACKEND_MODE__`, and `__ALLOW_BACKEND_MODE_SWITCH__` to webpack DefinePlugin |
 
 ### Build Pipeline
 
 | File | Change |
 |------|--------|
-| `tools/build-spfx-package.ts` | Passes `FUNCTION_APP_URL` env var to shell build env |
+| `tools/build-spfx-package.ts` | Passes `FUNCTION_APP_URL`, `BACKEND_MODE`, and `ALLOW_BACKEND_MODE_SWITCH` env vars to shell build env |
 
 ### Backend
 
@@ -86,8 +109,18 @@ All three Estimating pages (ProjectSetupPage, NewRequestPage, RequestDetailPage)
 ### Local Dev
 
 1. Add `VITE_FUNCTION_APP_URL=http://localhost:7071` to `apps/estimating/.env.local`
-2. Run `pnpm --filter @hbc/estimating dev`
+2. Optionally set `VITE_BACKEND_MODE=ui-review` for SharePoint-free UI review
+3. Run `pnpm --filter @hbc/estimating dev`
 3. Verify Project Setup page loads without "undefined" in network requests
+
+### SharePoint UI Review Mode
+
+1. Set `BACKEND_MODE=ui-review` when packaging the Estimating SPFx surface, or inject `backendMode: 'ui-review'` from the shell runtime.
+2. Set `ALLOW_BACKEND_MODE_SWITCH=true` only when testers should be able to switch modes inside SharePoint.
+3. Deploy the `.sppkg` and open the Estimating Project Setup surface in SharePoint.
+4. Verify the informational banner appears and Project Setup list/new/detail flows operate using local sample data.
+5. If the switch is enabled, verify the header control updates the active mode label and persists the reviewer choice in the current browser only.
+6. Verify there are no backend requests to `/api/project-setup-requests`, `/api/provisioning-status/*`, or `/api/provisioning-negotiate` while `UI Review` is active.
 
 ### SPFx Package Build
 

@@ -12,19 +12,17 @@ import {
   useProjectSetupDraft,
 } from '@hbc/features-estimating';
 import type { IProjectSetupRequest } from '@hbc/models';
-import { createProvisioningApiClient } from '@hbc/provisioning';
-import { getFunctionAppUrl } from '../config/runtimeConfig.js';
 import { HbcConnectivityBar, HbcSyncStatusBadge } from '@hbc/session-state';
 import type { IStepWizardConfig } from '@hbc/step-wizard';
 import { HbcStepWizard } from '@hbc/step-wizard';
 import { HbcBanner, WorkspacePageShell } from '@hbc/ui-kit';
 import { DepartmentStepBody } from '../components/project-setup/DepartmentStepBody.js';
+import { useProjectSetupBackend } from '../project-setup/backend/ProjectSetupBackendContext.js';
 import { ProjectInfoStepBody } from '../components/project-setup/ProjectInfoStepBody.js';
 import { ResumeBanner } from '../components/project-setup/ResumeBanner.js';
 import { ReviewStepBody } from '../components/project-setup/ReviewStepBody.js';
 import { TeamStepBody } from '../components/project-setup/TeamStepBody.js';
 import { TemplateAddOnsStepBody } from '../components/project-setup/TemplateAddOnsStepBody.js';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
 
 const EMPTY_DEFAULTS: Partial<IProjectSetupRequest> = {
   projectName: '',
@@ -46,12 +44,7 @@ export function NewRequestPage(): ReactNode {
     requestId: string | undefined;
   };
   const session = useCurrentSession();
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
-
-  const client = useMemo(
-    () => createProvisioningApiClient(getFunctionAppUrl(), async () => authToken),
-    [authToken],
-  );
+  const { client } = useProjectSetupBackend();
 
   const wizardMode = mode as ProjectSetupWizardMode;
   const { draft, saveDraft, clearDraft, resumeContext, isSavePending } =
@@ -88,7 +81,7 @@ export function NewRequestPage(): ReactNode {
     return () => {
       mounted = false;
     };
-  }, [mode, requestId, client]);
+  }, [client, mode, requestId]);
 
   const handleChange = useCallback(
     (updates: Partial<IProjectSetupRequest>) => {

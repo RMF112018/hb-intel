@@ -21,6 +21,8 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 declare const __APP_BUNDLE_NAME__: string;
 declare const __APP_GLOBAL_NAME__: string;
 declare const __FUNCTION_APP_URL__: string;
+declare const __BACKEND_MODE__: string;
+declare const __ALLOW_BACKEND_MODE_SWITCH__: string;
 
 interface IAppModule {
   mount(el: HTMLElement, spfxContext?: unknown, config?: Record<string, unknown>): Promise<void>;
@@ -103,8 +105,14 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
         if (typeof __FUNCTION_APP_URL__ === 'string' && __FUNCTION_APP_URL__) {
           runtimeConfig.functionAppUrl = __FUNCTION_APP_URL__;
         }
+        if (typeof __BACKEND_MODE__ === 'string' && __BACKEND_MODE__) {
+          runtimeConfig.backendMode = __BACKEND_MODE__;
+        }
+        if (typeof __ALLOW_BACKEND_MODE_SWITCH__ === 'string' && __ALLOW_BACKEND_MODE_SWITCH__) {
+          runtimeConfig.allowBackendModeSwitch = __ALLOW_BACKEND_MODE_SWITCH__ === 'true';
+        }
       } catch {
-        // __FUNCTION_APP_URL__ not defined — app will fall back to Vite env or throw ConfigError
+        // Runtime constants not defined — app will fall back to Vite env or defaults
       }
       this._appModule.mount(this.domElement, this.context, runtimeConfig);
     } else {

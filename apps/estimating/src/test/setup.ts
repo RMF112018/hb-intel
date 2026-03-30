@@ -5,6 +5,7 @@ import { setRuntimeConfig, _resetConfig } from '../config/runtimeConfig.js';
 
 beforeEach(() => {
   vi.resetAllMocks();
+  window.localStorage.clear();
   // Provide a valid Function App URL so component tests that resolve
   // getFunctionAppUrl() don't throw ConfigError.
   _resetConfig();
