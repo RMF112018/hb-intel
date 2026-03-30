@@ -7,9 +7,7 @@ import { App } from './App.js';
 import './webpart.css';
 
 // DEV MODE ONLY: This entry point is used by Vite dev server.
-// In SharePoint (production), the SPFx entry point is:
-//   src/webparts/estimating/EstimatingWebPart.tsx
-// That file calls bootstrapSpfxAuth() in onInit() (wired in BW-2).
+// In SharePoint (production), the SPFx shell loads the IIFE via mount.tsx.
 function start(): void {
   const authMode: AuthMode = resolveAuthMode();
   if (authMode === 'mock') bootstrapMockEnvironment();

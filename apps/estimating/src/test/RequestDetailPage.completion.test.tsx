@@ -126,17 +126,17 @@ describe('CompletionConfirmationCard', () => {
   });
 
   // G4-T05-006
-  it('"Stay in Estimating" hides handoff section but card remains', () => {
+  it('"Stay in Project Setup" hides handoff section but card remains', () => {
     renderCompletion({}, { siteUrl: 'https://hb.sharepoint.com/sites/proj' });
     // Handoff section visible before clicking stay
     expect(screen.getByText('Open Project Hub')).toBeInTheDocument();
-    expect(screen.getByText('Stay in Estimating')).toBeInTheDocument();
+    expect(screen.getByText('Stay in Project Setup')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Stay in Estimating'));
+    fireEvent.click(screen.getByText('Stay in Project Setup'));
 
     // Handoff section dismissed
     expect(screen.queryByText('Open Project Hub')).not.toBeInTheDocument();
-    expect(screen.queryByText('Stay in Estimating')).not.toBeInTheDocument();
+    expect(screen.queryByText('Stay in Project Setup')).not.toBeInTheDocument();
     // Card itself still present
     expect(screen.getByText('Provisioning Complete')).toBeInTheDocument();
   });

@@ -1,5 +1,5 @@
 /**
- * Runtime configuration for the Estimating app.
+ * Runtime configuration for the Project Setup Requests app.
  *
  * In SPFx-hosted runtime, the shell webpart injects config via mount().
  * In Vite dev mode, values fall back to import.meta.env.
@@ -8,10 +8,6 @@
  *   1. Runtime injection (set by mount.tsx from shell webpart config)
  *   2. Vite build-time env
  *   3. Defaults (`backendMode=production`) or ConfigError for required production config
- *
- * @see tools/spfx-shell/src/webparts/shell/ShellWebPart.ts
- * @see apps/estimating/src/mount.tsx
- * @see docs/architecture/reviews/estimating-spfx-runtime-api-config-remediation.md
  */
 
 /** Configuration shape passed from the shell webpart at mount time. */

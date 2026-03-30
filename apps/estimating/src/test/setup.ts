@@ -1,4 +1,4 @@
-// D-PH7-BW-10: Vitest setup for estimating webpart tests
+// Vitest setup for Project Setup Requests tests
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import { setRuntimeConfig, _resetConfig } from '../config/runtimeConfig.js';

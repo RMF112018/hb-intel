@@ -1,6 +1,6 @@
 /**
- * Synchronous mock environment bootstrap for Estimating webpart.
- * D-PH7-BW-5: Updated to use PERSONA_REGISTRY as source of truth for dev identity.
+ * Synchronous mock environment bootstrap for Project Setup Requests surface.
+ * Uses PERSONA_REGISTRY as source of truth for dev identity.
  * Checks localStorage for a persisted DevToolbar persona selection before falling back
  * to the default Administrator persona.
  */
@@ -31,6 +31,6 @@ export function bootstrapMockEnvironment(): void {
   useNavStore.getState().setActiveWorkspace('estimating');
 
   console.log(
-    `[HB-BOOTSTRAP] Estimating mock environment bootstrapped as: ${persona.name} (${persona.id})`,
+    `[HB-BOOTSTRAP] Project Setup mock environment bootstrapped as: ${persona.name} (${persona.id})`,
   );
 }

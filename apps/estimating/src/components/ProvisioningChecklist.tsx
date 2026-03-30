@@ -104,7 +104,7 @@ const useStyles = makeStyles({
 /**
  * D-PH6-10 submitter-facing 7-step provisioning checklist.
  * W0-G4-T02: Added `detailLevel` prop for coordinator-tier step detail (duration, timestamps, metadata).
- * Traceability: docs/architecture/plans/PH6.10-Estimating-App.md §6.10.4
+ * Traceability: Project Setup provisioning workflow.
  */
 export function ProvisioningChecklist({
   status,

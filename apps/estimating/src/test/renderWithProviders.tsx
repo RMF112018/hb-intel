@@ -49,7 +49,7 @@ export function createTestSession(
 }
 
 /**
- * Renders a component wrapped with the providers used by the Estimating app.
+ * Renders a component wrapped with the providers used by the Project Setup app.
  * Pre-seeds auth and provisioning Zustand stores for test isolation.
  */
 export function renderWithProviders(

@@ -147,7 +147,7 @@ export function CompletionConfirmationCard({
             variant="secondary"
             onClick={() => setHandoffDismissed(true)}
           >
-            Stay in Estimating
+            Stay in Project Setup
           </HbcButton>
         </div>
       )}

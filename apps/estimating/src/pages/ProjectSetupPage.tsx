@@ -165,7 +165,7 @@ const SETUP_EMPTY_CONFIG: ISmartEmptyStateConfig = {
 };
 
 const SETUP_EMPTY_CONTEXT: IEmptyStateContext = {
-  module: 'estimating',
+  module: 'project-setup',
   view: 'project-setup',
   hasActiveFilters: false,
   hasPermission: true,

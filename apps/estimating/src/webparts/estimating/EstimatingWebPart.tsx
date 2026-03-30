@@ -1,11 +1,14 @@
 /**
- * SPFx webpart entry point for Estimating.
+ * SPFx webpart entry point for Project Setup Requests.
  *
  * SharePoint calls onInit() → render() on this class.
  * This is the bridge between SharePoint page context and the React app.
  *
- * @see docs/architecture/plans/PH7-BW-1-SPFx-Entry-Points.md
- * @decision D-PH7-BW-7 — RBAC permission mapping wired
+ * Note: The file and class retain the "Estimating" naming because the SPFx
+ * manifest references the alias "EstimatingWebPart". Renaming the file/class
+ * would require a new webpart ID or manifest update. The package identity
+ * has already been updated to @hbc/spfx-project-setup; this is the only
+ * residual naming artifact and is safe to leave for backward compatibility.
  */
 import {
   type IPropertyPaneConfiguration,
@@ -21,32 +24,22 @@ export interface IEstimatingWebPartProps {
 }
 
 /**
- * Estimating SPFx webpart.
+ * Project Setup Requests SPFx webpart.
  *
  * Lifecycle:
- * - onInit(): async bootstrap (auth bridge wired in BW-2)
+ * - onInit(): async bootstrap (auth + RBAC permission mapping)
  * - render(): mounts <App /> into this.domElement via React 18 createRoot
  * - onDispose(): unmounts React tree to prevent memory leaks
  */
 export default class EstimatingWebPart extends BaseClientSideWebPart<IEstimatingWebPartProps> {
   private _root: Root | undefined;
 
-  /**
-   * Called by SharePoint before render(). Resolves SP group membership
-   * into HB Intel permission keys, then bootstraps the auth store.
-   *
-   * @decision D-PH7-BW-7 — RBAC permission mapping
-   */
   public async onInit(): Promise<void> {
     await super.onInit();
     const permissionKeys = await resolveSpfxPermissions(this.context);
     await bootstrapSpfxAuth(this.context, permissionKeys);
   }
 
-  /**
-   * Mounts the React application into the SharePoint-provided DOM element.
-   * Uses React 18 createRoot for concurrent mode support.
-   */
   public render(): void {
     if (!this._root) {
       this._root = createRoot(this.domElement);
@@ -54,10 +47,6 @@ export default class EstimatingWebPart extends BaseClientSideWebPart<IEstimating
     this._root.render(<App spfxContext={this.context} />);
   }
 
-  /**
-   * Cleans up the React root when SharePoint removes the webpart.
-   * Prevents memory leaks from orphaned React trees.
-   */
   protected onDispose(): void {
     this._root?.unmount();
     this._root = undefined;
@@ -68,7 +57,7 @@ export default class EstimatingWebPart extends BaseClientSideWebPart<IEstimating
     return {
       pages: [
         {
-          header: { description: 'Estimating Webpart Settings' },
+          header: { description: 'Project Setup Requests Settings' },
           groups: [
             {
               groupFields: [

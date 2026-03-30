@@ -15,13 +15,13 @@ const queryClient = new QueryClient({ defaultOptions: { queries: defaultQueryOpt
 const router = createWebpartRouter();
 
 /**
- * Estimating currently uses session-state for draft persistence and
- * connectivity/sync UI on Project Setup routes only.
+ * Project Setup uses session-state for draft persistence and
+ * connectivity/sync UI.
  *
- * The SPFx limited-release surface does not dispatch queued offline mutations,
- * so the executor is intentionally a no-op until that workflow exists here.
+ * The SPFx surface does not dispatch queued offline mutations,
+ * so the executor is intentionally a no-op until that workflow exists.
  */
-const estimatingSessionExecutor: OperationExecutor = async () => {};
+const projectSetupSessionExecutor: OperationExecutor = async () => {};
 
 interface AppProps {
   spfxContext?: { pageContext: { user: { loginName: string } } };
@@ -43,7 +43,7 @@ export function App({ spfxContext }: AppProps): React.ReactNode {
       <QueryClientProvider client={queryClient}>
         <HbcErrorBoundary>
           <ComplexityProvider spfxContext={spfxContext}>
-            <SessionStateProvider executor={estimatingSessionExecutor}>
+            <SessionStateProvider executor={projectSetupSessionExecutor}>
               <ProjectSetupBackendProvider>
                 <AppRouter />
               </ProjectSetupBackendProvider>

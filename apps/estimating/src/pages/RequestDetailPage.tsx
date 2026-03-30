@@ -25,7 +25,7 @@ import { resolveSessionToken } from '../utils/resolveSessionToken.js';
  * clarification banner, and provisioning visibility with real-time updates.
  * W0-G4-T02: Added coordinator-tier failure detail, retry/escalation, and detailed checklist.
  * W0-G4-T07: Breadcrumbs, session guard, load-error state, SignalR fallback, missing status banner.
- * Traceability: docs/architecture/plans/PH6.10-Estimating-App.md §6.10.3
+ * Traceability: Project Setup request detail workflow.
  */
 export function RequestDetailPage(): ReactNode {
   const { requestId } = useParams({ strict: false }) as { requestId: string };

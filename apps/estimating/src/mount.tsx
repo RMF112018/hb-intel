@@ -1,5 +1,5 @@
 /**
- * Production entry point for the Estimating app.
+ * Production entry point for the Project Setup Requests SPFx surface.
  *
  * Vite compiles this into an IIFE bundle that exposes mount/unmount on a global.
  * The SPFx shell webpart loads this bundle and calls mount(domElement, spfxContext, config).
@@ -7,7 +7,6 @@
  * This file is NOT used during local Vite dev — main.tsx handles that path.
  *
  * @see tools/spfx-shell/src/webparts/shell/ShellWebPart.ts
- * @see docs/architecture/reviews/estimating-spfx-runtime-api-config-remediation.md
  */
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
@@ -21,14 +20,14 @@ export interface IMountConfig {
   functionAppUrl?: string;
   /** Runtime-selected backend mode for the Project Setup surface. */
   backendMode?: 'production' | 'ui-review';
-  /** Enables the reviewer-only backend mode switch in the Estimating header. */
+  /** Enables the reviewer-only backend mode switch in the Project Setup header. */
   allowBackendModeSwitch?: boolean;
 }
 
 let root: Root | undefined;
 
 /**
- * Mount the Estimating React app into the given DOM element.
+ * Mount the Project Setup Requests app into the given DOM element.
  * Called by the SPFx shell webpart's render() method.
  *
  * @param el - DOM element provided by SharePoint (webpart.domElement)
