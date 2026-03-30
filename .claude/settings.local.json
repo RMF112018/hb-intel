@@ -191,7 +191,16 @@
       "Bash(find /Users/bobbyfetting/hb-intel/backend/functions/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
       "Bash(az rest:*)",
       "Bash(az storage:*)",
-      "Bash(az ad:*)"
+      "Bash(az ad:*)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/backend/functions/.deploy/dist)",
+      "Bash(cp -r /Users/bobbyfetting/hb-intel/backend/functions/dist /Users/bobbyfetting/hb-intel/backend/functions/.deploy/dist)",
+      "Bash(cp /Users/bobbyfetting/hb-intel/backend/functions/host.json /Users/bobbyfetting/hb-intel/backend/functions/.deploy/host.json)",
+      "Bash(cp /Users/bobbyfetting/hb-intel/backend/functions/package.json /Users/bobbyfetting/hb-intel/backend/functions/.deploy/package.json)",
+      "Bash(func azure:*)",
+      "Bash(rm -rf /tmp/hb-intel-deploy)",
+      "Bash(mkdir -p /tmp/hb-intel-deploy)",
+      "Bash(az monitor:*)",
+      "Bash(/tmp/hb-intel-deploy/dist/index.js:*)"
     ]
   },
   "enabledPlugins": {

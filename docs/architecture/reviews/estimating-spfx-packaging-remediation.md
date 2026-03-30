@@ -129,11 +129,10 @@ vite build (IIFE format, mount.tsx entry)
 | Auth bootstrap timing race | Low | `mount()` is async; shell's `onInit()` awaits script load before `render()` |
 | Runtime manifest loaderConfig may need adjustment | Medium | Prompt 03 scope — validate webpart registration and runtime loading |
 
-## 8. Next Steps (Prompt 03)
+## 8. Acceptance Status
 
-The packaging path is now compliant. Prompt 03 must validate:
-- Webpart appears in SharePoint toolbox with correct metadata
-- IIFE bundle loads successfully via SPComponentLoader
-- Auth context flows through `mount()` correctly
-- Runtime manifest and loaderConfig are properly handled by the official packaging
-- End-to-end deployment to staging App Catalog succeeds
+The packaging path is now compliant and has been acceptance-audited for the Estimating limited-release package.
+
+- The packaged Estimating SharePoint app version was validated from the generated `.sppkg` as `0.0.0.1`.
+- The final limited-release acceptance audit is recorded in [estimating-spfx-limited-release-acceptance-audit.md](estimating-spfx-limited-release-acceptance-audit.md).
+- Remaining follow-up is operational rather than architectural: SharePoint UI vetting in `ui-review` mode and later production-mode promotion when the live backend path is intentionally enabled for broader release.
