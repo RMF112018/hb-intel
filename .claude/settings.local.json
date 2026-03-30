@@ -172,7 +172,21 @@
       "Bash(source ~/.nvm/nvm.sh)",
       "Bash(nvm ls:*)",
       "Bash(nvm install:*)",
-      "Bash(nvm use:*)"
+      "Bash(nvm use:*)",
+      "Bash(rm:*)",
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.bicep -o -name *.json -o -name *.yml -o -name *.yaml \\\\\\) -path */deploy* -o -path */infrastructure*)",
+      "Bash(FUNCTION_APP_URL=https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net npx tsx tools/build-spfx-package.ts --domain estimating 2>&1)",
+      "Bash(az account:*)",
+      "Bash(az functionapp:*)",
+      "Bash(rm -rf .deploy)",
+      "Bash(mkdir -p .deploy)",
+      "Bash(cp -r dist/ .deploy/dist/)",
+      "Bash(cp host.json .deploy/)",
+      "Bash(cp package.json .deploy/)",
+      "Bash(func --version)",
+      "Bash(zip -r /Users/bobbyfetting/hb-intel/backend/functions/functions-artifact.zip . -x \"*.git*\" \"*.DS_Store\")",
+      "Bash(while ps:*)",
+      "Bash(az resource:*)"
     ]
   },
   "enabledPlugins": {

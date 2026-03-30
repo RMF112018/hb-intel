@@ -155,7 +155,7 @@ az storage account list --resource-group hb-intel \
   --query "[0].name" -o tsv
 # Then:
 az storage account show-connection-string \
-  --name <storage-account-name> \
+  --name hbintelb8f1 \
   --resource-group hb-intel \
   --query "connectionString" -o tsv
 
@@ -165,10 +165,10 @@ az functionapp config appsettings set \
   --resource-group hb-intel \
   --settings \
     AZURE_TENANT_ID=91e238a3-4af4-42c0-9cb8-eb37861d82f3 \
-    AZURE_CLIENT_ID=<user-assigned-identity-client-id-or-app-reg-client-id> \
-    APPLICATIONINSIGHTS_CONNECTION_STRING=<connection-string> \
-    AzureWebJobsStorage=<storage-connection-string> \
-    AZURE_TABLE_ENDPOINT=<table-storage-endpoint>
+    AZURE_CLIENT_ID=77ad3593-5414-4122-a649-74916f8c0d7a \
+    APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=1df9279b-3091-4ae7-8291-015a732def00;IngestionEndpoint=https://eastus2-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus2.livediagnostics.monitor.azure.com/;ApplicationId=d6612368-b380-409e-ae6f-2db7c5c8c309 \
+    AzureWebJobsStorage=https://hbintelb8f1.blob.core.windows.net \
+    AZURE_TABLE_ENDPOINT=DefaultEndpointsProtocol=https;AccountName=hbintel-table-prod-01;AccountKey=1TSbPWinavt6BAxspSFfFJgPf0js35k3ybzIHlKFFFFYphmBEgjS8wc85P0sU8A7EpoOQiOmZnBEACDbI5Atug==;TableEndpoint=https://hbintel-table-prod-01.table.cosmos.azure.com:443/;
 ```
 
 ### Step 4: Apply business/authorization settings
@@ -178,10 +178,21 @@ az functionapp config appsettings set \
   --name hb-intel-function-app \
   --resource-group hb-intel \
   --settings \
-    CONTROLLER_UPNS="<controller1@hedrickbrothers.com,controller2@hedrickbrothers.com>" \
-    ADMIN_UPNS="<admin1@hedrickbrothers.com>" \
+    CONTROLLER_UPNS="bfetting@hedrickbrothers.com" \
+    ADMIN_UPNS="bfetting@hedrickbrothers.com" \
     OPEX_MANAGER_UPN="<opex-manager@hedrickbrothers.com>" \
-    EMAIL_FROM_ADDRESS="hb-intel@hedrickbrothers.com"
+    EMAIL_FROM_ADDRESS="bfetting@hedrickbrothers.com"
+```
+
+### Step 4: Cleanup
+
+```bash
+az functionapp config appsettings set \
+  --name hb-intel-function-app \
+  --resource-group hb-intel \
+  --settings \
+    APPLICATIONINSIGHTS_CONNECTION_STRING='InstrumentationKey=1df9279b-3091-4ae7-8291-015a732def00;IngestionEndpoint=https://eastus2-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus2.livediagnostics.monitor.azure.com/;ApplicationId=d6612368-b380-409e-ae6f-2db7c5c8c309' \
+    OPEX_MANAGER_UPN='bfetting@hedrickbrothers.com'
 ```
 
 ---
