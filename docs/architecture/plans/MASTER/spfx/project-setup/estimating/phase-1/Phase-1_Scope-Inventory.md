@@ -221,3 +221,13 @@ Contract document created at `phase-1/Phase-1_Contract-Freeze.md`. Covers:
 - Configuration contract with resolution order
 - Excluded scope enumeration
 - Known deferred items
+
+## Prompt 05 — Acceptance Guards (Closed)
+
+Tests added at `apps/estimating/src/test/phase1ScopeGuards.test.ts`:
+- **Route scope guard** — asserts exactly 4 allowed routes, rejects 11 out-of-scope patterns
+- **API client scope guard** — asserts `IProjectSetupClient` exposes exactly 5 contracted methods
+- **Runtime mode guard** — asserts production defaults, ui-review zero-backend behavior, ConfigError on missing URL
+- **Static scope guard** — file-level scan ensuring no source imports `/api/notifications`, `/api/groups`, `/api/proxy`, or estimating tracker hooks
+
+Release checklist created at `phase-1/Phase-1_Release-Checklist.md`.
