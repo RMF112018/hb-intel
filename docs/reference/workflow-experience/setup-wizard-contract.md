@@ -12,11 +12,11 @@
 
 | Step | stepId | Label | Required | Order | Fields Collected | Validation Rule |
 |------|--------|-------|----------|-------|-----------------|-----------------|
-| 1 | `project-info` | Project Information | Yes | 1 | `projectName` (req), `projectLocation` (req), `estimatedValue`, `clientName`, `startDate` | Name and location must be non-empty; estimatedValue ≥ 0 if provided |
-| 2 | `department` | Department & Type | Yes | 2 | `department` (req), `projectType` (req), `projectStage`, `contractType` | Department must be `commercial` or `luxury-residential`; projectType non-empty |
-| 3 | `project-team` | Project Team | Yes | 3 | `projectLeadId` (req), `groupMembers`, `viewerUPNs` | projectLeadId must be set |
+| 1 | `project-info` | Project Information | Yes | 1 | `projectName` (req), `projectStreetAddress` (req), `projectCity` (req), `projectCounty` (req), `projectState` (req), `projectZip` (req), `estimatedValue`, `clientName`, `startDate`, `procoreProject` | Name and structured location must be complete; estimatedValue ≥ 0 if provided |
+| 2 | `department` | Department & Type | Yes | 2 | `projectStage`, `officeDivision`, `department` (req), `projectType` (req), `contractType` | Department must be `commercial` or `luxury-residential`; projectType must be valid for the selected department |
+| 3 | `project-team` | Project Team | Yes | 3 | `projectExecutiveUpn` (req), `projectManagerUpn`, `leadEstimatorUpn` (req), `supportingEstimatorUpns`, `additionalTeamMemberUpns`, `timberscanApproverUpn` (req) | Project Executive, Lead Estimator, and Timberscan Approver must be set; Timberscan Approver must be selected from the current upstream team set |
 | 4 | `template-addons` | Template & Add-Ons | No | 4 | `addOns` | No blocking validation — defaults acceptable |
-| 5 | `review-submit` | Review & Submit | Yes | 5 | (read-only summary) | Cross-step gate: re-validates projectName, projectLocation, department, projectType, projectLeadId |
+| 5 | `review-submit` | Review & Submit | Yes | 5 | (read-only summary) | Cross-step gate: re-validates Project Information, Department & Type, and required Step 3 fields |
 
 ---
 
@@ -40,17 +40,27 @@ Used by T03 clarification-return flow to identify which steps contain annotated 
 | Field | Step |
 |-------|------|
 | `projectName` | `project-info` |
+| `projectStreetAddress` | `project-info` |
+| `projectCity` | `project-info` |
+| `projectCounty` | `project-info` |
+| `projectState` | `project-info` |
+| `projectZip` | `project-info` |
 | `projectLocation` | `project-info` |
 | `estimatedValue` | `project-info` |
 | `clientName` | `project-info` |
 | `startDate` | `project-info` |
+| `procoreProject` | `project-info` |
+| `officeDivision` | `department` |
 | `department` | `department` |
 | `projectType` | `department` |
 | `projectStage` | `department` |
 | `contractType` | `department` |
-| `projectLeadId` | `project-team` |
-| `groupMembers` | `project-team` |
-| `viewerUPNs` | `project-team` |
+| `projectExecutiveUpn` | `project-team` |
+| `projectManagerUpn` | `project-team` |
+| `leadEstimatorUpn` | `project-team` |
+| `supportingEstimatorUpns` | `project-team` |
+| `additionalTeamMemberUpns` | `project-team` |
+| `timberscanApproverUpn` | `project-team` |
 | `addOns` | `template-addons` |
 
 `resolveStepsForClarification(fieldIds)` returns the unique set of owning steps in wizard sequential order.
@@ -117,7 +127,8 @@ When a request is in `NeedsClarification` state:
 
 ## Deviation Notes
 
-- **`location` vs. `projectLocation`:** The G3-T01 spec references `location` in Step 1 validation. The `IProjectSetupRequest` model uses `projectLocation`. Validation uses the model field name.
+- **Structured location compatibility:** Step 1 stores structured location fields and derives the legacy `projectLocation` summary string for the current live submission path.
+- **Step 3 compatibility boundary:** The wizard stores role-based Step 3 fields and derives the current backend-facing `projectLeadId`, `groupLeaders`, and `groupMembers` values at submit time. The live backend does not yet persist the new Step 3 role fields.
 - **`onAllComplete` not in static config:** The spec shows `onAllComplete` as a comment in the config. The implementation leaves it `undefined` in the static config — the consuming surface sets it at runtime to avoid coupling the config to API submission logic.
 
 ---

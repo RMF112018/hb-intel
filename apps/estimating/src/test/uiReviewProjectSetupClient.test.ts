@@ -35,6 +35,9 @@ describe('uiReviewProjectSetupClient', () => {
         projectCounty: expect.any(String),
         projectState: expect.any(String),
         projectZip: expect.any(String),
+        projectExecutiveUpn: expect.any(String),
+        leadEstimatorUpn: expect.any(String),
+        timberscanApproverUpn: expect.any(String),
       }),
     );
     expect(window.localStorage.getItem(UI_REVIEW_REQUESTS_STORAGE_KEY)).not.toBeNull();
@@ -66,7 +69,12 @@ describe('uiReviewProjectSetupClient', () => {
       projectType: 'Corporate headquarters',
       projectStage: 'Lead',
       contractType: 'Design-Build (DB) Contract',
-      groupMembers: ['pm@hb.com'],
+      projectExecutiveUpn: 'exec@hb.com',
+      projectManagerUpn: 'pm@hb.com',
+      leadEstimatorUpn: 'lead@hb.com',
+      supportingEstimatorUpns: ['support@hb.com'],
+      additionalTeamMemberUpns: ['team@hb.com'],
+      timberscanApproverUpn: 'lead@hb.com',
     });
 
     const requests = await client.listRequests();
@@ -78,6 +86,15 @@ describe('uiReviewProjectSetupClient', () => {
     expect(result.projectStreetAddress).toBe('100 Broadway');
     expect(result.officeDivision).toBe('South General Commercial (01-53)');
     expect(result.projectStage).toBe('Lead');
+    expect(result.projectExecutiveUpn).toBe('exec@hb.com');
+    expect(result.projectManagerUpn).toBe('pm@hb.com');
+    expect(result.leadEstimatorUpn).toBe('lead@hb.com');
+    expect(result.supportingEstimatorUpns).toEqual(['support@hb.com']);
+    expect(result.additionalTeamMemberUpns).toEqual(['team@hb.com']);
+    expect(result.timberscanApproverUpn).toBe('lead@hb.com');
+    expect(result.projectLeadId).toBe('pm@hb.com');
+    expect(result.groupLeaders).toEqual(['exec@hb.com']);
+    expect(result.groupMembers).toEqual(['pm@hb.com', 'lead@hb.com', 'support@hb.com', 'team@hb.com']);
     expect(storedStatus?.overallStatus).toBe('NotStarted');
     expect(storedStatus?.projectName).toBe('Created In Review Mode');
   });
@@ -112,6 +129,8 @@ describe('uiReviewProjectSetupClient', () => {
           projectStreetAddress: 'Legacy Location',
           projectStage: undefined,
           projectType: 'GC',
+          projectManagerUpn: undefined,
+          additionalTeamMemberUpns: undefined,
         }),
       );
   });

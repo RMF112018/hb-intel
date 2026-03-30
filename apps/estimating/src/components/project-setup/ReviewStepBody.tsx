@@ -7,6 +7,10 @@ function displayValue(value?: string): string {
   return value?.trim() ? value : '—';
 }
 
+function displayList(values?: readonly string[]): string {
+  return values && values.length > 0 ? values.join(', ') : '—';
+}
+
 export interface ReviewStepBodyProps extends StepBodyProps {
   onSubmit: () => void;
   submitting: boolean;
@@ -54,11 +58,12 @@ export function ReviewStepBody({ request, mode, onSubmit, submitting }: ReviewSt
 
       <HbcCard>
         <HbcTypography intent="heading3">Project Team</HbcTypography>
-        {request.projectLeadId && <p><strong>Project Lead:</strong> {request.projectLeadId}</p>}
-        <p><strong>Team Members:</strong> {request.groupMembers?.join(', ') || 'None'}</p>
-        {request.viewerUPNs && request.viewerUPNs.length > 0 && (
-          <p><strong>Viewers:</strong> {request.viewerUPNs.join(', ')}</p>
-        )}
+        <p><strong>Project Executive:</strong> {displayValue(request.projectExecutiveUpn)}</p>
+        <p><strong>Project Manager:</strong> {displayValue(request.projectManagerUpn)}</p>
+        <p><strong>Lead Estimator:</strong> {displayValue(request.leadEstimatorUpn)}</p>
+        <p><strong>Supporting Estimators:</strong> {displayList(request.supportingEstimatorUpns)}</p>
+        <p><strong>Additional Team Members:</strong> {displayList(request.additionalTeamMemberUpns)}</p>
+        <p><strong>Timberscan Approver:</strong> {displayValue(request.timberscanApproverUpn)}</p>
       </HbcCard>
 
       {request.addOns && request.addOns.length > 0 && (

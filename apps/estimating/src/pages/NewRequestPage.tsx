@@ -39,6 +39,8 @@ const EMPTY_DEFAULTS: Partial<IProjectSetupRequest> = {
   projectStage: 'Lead',
   procoreProject: undefined,
   groupMembers: [],
+  supportingEstimatorUpns: [],
+  additionalTeamMemberUpns: [],
 };
 
 /**
@@ -142,8 +144,14 @@ export function NewRequestPage(): ReactNode {
         projectStage: normalizedRequest.projectStage ?? 'Lead',
         groupMembers: members,
         department: normalizedRequest.department,
+        groupLeaders: normalizedRequest.groupLeaders,
         projectLeadId: normalizedRequest.projectLeadId,
-        viewerUPNs: normalizedRequest.viewerUPNs,
+        projectExecutiveUpn: normalizedRequest.projectExecutiveUpn,
+        projectManagerUpn: normalizedRequest.projectManagerUpn,
+        leadEstimatorUpn: normalizedRequest.leadEstimatorUpn,
+        supportingEstimatorUpns: normalizedRequest.supportingEstimatorUpns,
+        additionalTeamMemberUpns: normalizedRequest.additionalTeamMemberUpns,
+        timberscanApproverUpn: normalizedRequest.timberscanApproverUpn,
         addOns: normalizedRequest.addOns,
         estimatedValue: normalizedRequest.estimatedValue,
         clientName: normalizedRequest.clientName,

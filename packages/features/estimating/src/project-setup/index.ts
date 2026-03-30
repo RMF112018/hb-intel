@@ -47,6 +47,8 @@ export {
   resolveStepsForClarification,
   buildProjectLocationSummary,
   normalizeProjectSetupRequestFields,
+  getEligibleTimberscanApprovers,
+  normalizeProjectSetupTeamFields,
   OFFICE_DIVISION_OPTIONS,
   PROJECT_STAGE_OPTIONS,
   CONTRACT_TYPE_OPTIONS,

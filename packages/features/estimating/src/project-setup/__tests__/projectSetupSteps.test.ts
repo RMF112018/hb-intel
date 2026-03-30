@@ -27,9 +27,16 @@ function validRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupR
     submittedBy: 'user@example.com',
     submittedAt: '2026-03-14T00:00:00.000Z',
     state: 'Submitted',
-    groupMembers: ['member@example.com'],
+    groupMembers: ['pm@example.com', 'lead@example.com', 'member@example.com'],
+    groupLeaders: ['exec@example.com'],
     department: 'commercial',
-    projectLeadId: 'lead@example.com',
+    projectLeadId: 'pm@example.com',
+    projectExecutiveUpn: 'exec@example.com',
+    projectManagerUpn: 'pm@example.com',
+    leadEstimatorUpn: 'lead@example.com',
+    supportingEstimatorUpns: ['support@example.com'],
+    additionalTeamMemberUpns: ['member@example.com'],
+    timberscanApproverUpn: 'lead@example.com',
     procoreProject: 'Yes',
     ...overrides,
   };
@@ -180,20 +187,36 @@ describe('STEP_DEPARTMENT validation', () => {
 });
 
 describe('STEP_TEAM validation', () => {
-  it('passes when projectLeadId is set', () => {
+  it('passes when the required Step 3 role fields are set', () => {
     expect(STEP_TEAM.validate!(validRequest())).toBeNull();
   });
 
-  it('fails when projectLeadId is undefined', () => {
-    expect(STEP_TEAM.validate!(validRequest({ projectLeadId: undefined }))).toBe(
-      'A project lead (PM or Superintendent) is required.',
+  it('fails when projectExecutiveUpn is undefined', () => {
+    expect(STEP_TEAM.validate!(validRequest({ projectExecutiveUpn: undefined }))).toBe(
+      'Project Executive is required.',
     );
   });
 
-  it('fails when projectLeadId is empty string', () => {
-    expect(STEP_TEAM.validate!(validRequest({ projectLeadId: '' }))).toBe(
-      'A project lead (PM or Superintendent) is required.',
+  it('fails when leadEstimatorUpn is empty string', () => {
+    expect(STEP_TEAM.validate!(validRequest({ leadEstimatorUpn: '' }))).toBe(
+      'Lead Estimator is required.',
     );
+  });
+
+  it('fails when Timberscan Approver is missing', () => {
+    expect(STEP_TEAM.validate!(validRequest({ timberscanApproverUpn: undefined }))).toBe(
+      'Timberscan Approver is required.',
+    );
+  });
+
+  it('fails when Timberscan Approver is no longer eligible', () => {
+    expect(
+      STEP_TEAM.validate!(
+        validRequest({
+          timberscanApproverUpn: 'not-on-team@example.com',
+        }),
+      ),
+    ).toBe('Timberscan Approver must be selected from the current project team.');
   });
 });
 
@@ -241,8 +264,20 @@ describe('STEP_REVIEW validation (cross-step consistency gate)', () => {
     ).toBe('Select a valid project type for the selected department (return to Step 2).');
   });
 
-  it('catches missing projectLeadId', () => {
-    expect(STEP_REVIEW.validate!(validRequest({ projectLeadId: undefined }))).toContain('Step 3');
+  it('catches missing Project Executive', () => {
+    expect(STEP_REVIEW.validate!(validRequest({ projectExecutiveUpn: undefined }))).toContain('Step 3');
+  });
+
+  it('catches missing Lead Estimator', () => {
+    expect(STEP_REVIEW.validate!(validRequest({ leadEstimatorUpn: undefined }))).toContain('Step 3');
+  });
+
+  it('catches invalid Timberscan Approver', () => {
+    expect(
+      STEP_REVIEW.validate!(
+        validRequest({ timberscanApproverUpn: 'not-on-team@example.com' }),
+      ),
+    ).toBe('Timberscan Approver must be selected from the current project team (return to Step 3).');
   });
 
   it('reports the first missing field (projectName before department)', () => {

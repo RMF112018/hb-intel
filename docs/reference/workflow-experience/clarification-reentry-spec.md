@@ -15,17 +15,27 @@ All `IProjectSetupRequest` fields collected by the wizard are mapped to their ow
 | fieldId | stepId | Step Name |
 |---------|--------|-----------|
 | `projectName` | `project-info` | Project Information |
+| `projectStreetAddress` | `project-info` | Project Information |
+| `projectCity` | `project-info` | Project Information |
+| `projectCounty` | `project-info` | Project Information |
+| `projectState` | `project-info` | Project Information |
+| `projectZip` | `project-info` | Project Information |
 | `projectLocation` | `project-info` | Project Information |
 | `estimatedValue` | `project-info` | Project Information |
 | `clientName` | `project-info` | Project Information |
 | `startDate` | `project-info` | Project Information |
+| `procoreProject` | `project-info` | Project Information |
+| `officeDivision` | `department` | Department & Type |
 | `department` | `department` | Department & Type |
 | `projectType` | `department` | Department & Type |
 | `projectStage` | `department` | Department & Type |
 | `contractType` | `department` | Department & Type |
-| `projectLeadId` | `project-team` | Project Team |
-| `groupMembers` | `project-team` | Project Team |
-| `viewerUPNs` | `project-team` | Project Team |
+| `projectExecutiveUpn` | `project-team` | Project Team |
+| `projectManagerUpn` | `project-team` | Project Team |
+| `leadEstimatorUpn` | `project-team` | Project Team |
+| `supportingEstimatorUpns` | `project-team` | Project Team |
+| `additionalTeamMemberUpns` | `project-team` | Project Team |
+| `timberscanApproverUpn` | `project-team` | Project Team |
 | `addOns` | `template-addons` | Template & Add-Ons |
 
 ---

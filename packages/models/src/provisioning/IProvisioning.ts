@@ -163,6 +163,18 @@ export interface IProjectSetupRequest {
   contractType?: string;
   /** W0-G3-T01: Step 3 — UPN of the project lead (PM/Superintendent). Required for submission. */
   projectLeadId?: string;
+  /** W0-G4-T11: Step 3 — project executive assignment (single person). */
+  projectExecutiveUpn?: string;
+  /** W0-G4-T11: Step 3 — project manager assignment (single person). */
+  projectManagerUpn?: string;
+  /** W0-G4-T11: Step 3 — lead estimator assignment (single person). */
+  leadEstimatorUpn?: string;
+  /** W0-G4-T11: Step 3 — supporting estimator assignments (multi-person). */
+  supportingEstimatorUpns?: string[];
+  /** W0-G4-T11: Step 3 — additional team-member assignments (multi-person). */
+  additionalTeamMemberUpns?: string[];
+  /** W0-G4-T11: Step 3 — one eligible team member selected as Timberscan approver. */
+  timberscanApproverUpn?: string;
   /** W0-G3-T01: Step 3 — read-only viewer UPNs (optional). */
   viewerUPNs?: string[];
   /** W0-G3-T01: Step 4 — selected add-on pack slugs (optional). */

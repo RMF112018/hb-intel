@@ -25,9 +25,17 @@ export function createTestRequest(
     submittedBy: 'coordinator@hb.com',
     submittedAt: now,
     state: 'Submitted',
-    groupMembers: ['team@hb.com'],
+    groupMembers: ['pm@hb.com', 'lead@hb.com', 'team@hb.com'],
+    groupLeaders: ['exec@hb.com'],
     department: 'commercial',
     contractType: 'Construction Management at Risk (CMAR) Contract',
+    projectExecutiveUpn: 'exec@hb.com',
+    projectManagerUpn: 'pm@hb.com',
+    leadEstimatorUpn: 'lead@hb.com',
+    supportingEstimatorUpns: ['support@hb.com'],
+    additionalTeamMemberUpns: ['team@hb.com'],
+    timberscanApproverUpn: 'lead@hb.com',
+    projectLeadId: 'pm@hb.com',
     ...overrides,
   };
 }

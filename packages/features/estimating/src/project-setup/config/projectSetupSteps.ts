@@ -7,6 +7,7 @@
 import type { IStep } from '@hbc/step-wizard';
 import type { IProjectSetupRequest } from '@hbc/models';
 import { isValidProjectTypeForDepartment } from './departmentTypeOptions.js';
+import { getEligibleTimberscanApprovers } from './projectTeamFields.js';
 
 /**
  * Step 1 — Project Information.
@@ -56,7 +57,9 @@ export const STEP_DEPARTMENT: IStep<IProjectSetupRequest> = {
 
 /**
  * Step 3 — Project Team.
- * Fields: projectLeadId (required), groupMembers (optional), viewerUPNs (optional).
+ * Fields: projectExecutiveUpn (required), projectManagerUpn (optional),
+ * leadEstimatorUpn (required), supportingEstimatorUpns (optional),
+ * additionalTeamMemberUpns (optional), timberscanApproverUpn (required).
  */
 export const STEP_TEAM: IStep<IProjectSetupRequest> = {
   stepId: 'project-team',
@@ -64,7 +67,15 @@ export const STEP_TEAM: IStep<IProjectSetupRequest> = {
   required: true,
   order: 3,
   validate: (request: IProjectSetupRequest): string | null => {
-    if (!request.projectLeadId) return 'A project lead (PM or Superintendent) is required.';
+    if (!request.projectExecutiveUpn) return 'Project Executive is required.';
+    if (!request.leadEstimatorUpn) return 'Lead Estimator is required.';
+    if (!request.timberscanApproverUpn) return 'Timberscan Approver is required.';
+
+    const eligibleApprovers = getEligibleTimberscanApprovers(request);
+    if (!eligibleApprovers.includes(request.timberscanApproverUpn)) {
+      return 'Timberscan Approver must be selected from the current project team.';
+    }
+
     return null;
   },
 };
@@ -104,7 +115,14 @@ export const STEP_REVIEW: IStep<IProjectSetupRequest> = {
     if (!request.projectType) return 'Project type is required (return to Step 2).';
     if (!isValidProjectTypeForDepartment(request.department, request.projectType))
       return 'Select a valid project type for the selected department (return to Step 2).';
-    if (!request.projectLeadId) return 'Project lead is required (return to Step 3).';
+    if (!request.projectExecutiveUpn) return 'Project Executive is required (return to Step 3).';
+    if (!request.leadEstimatorUpn) return 'Lead Estimator is required (return to Step 3).';
+    if (!request.timberscanApproverUpn) {
+      return 'Timberscan Approver is required (return to Step 3).';
+    }
+    if (!getEligibleTimberscanApprovers(request).includes(request.timberscanApproverUpn)) {
+      return 'Timberscan Approver must be selected from the current project team (return to Step 3).';
+    }
     return null;
   },
 };

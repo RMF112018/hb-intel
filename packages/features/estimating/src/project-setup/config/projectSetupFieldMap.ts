@@ -31,9 +31,12 @@ export const PROJECT_SETUP_FIELD_MAP: Readonly<Record<string, ProjectSetupStepId
   contractType: 'department',
 
   // Step 3 — Project Team
-  projectLeadId: 'project-team',
-  groupMembers: 'project-team',
-  viewerUPNs: 'project-team',
+  projectExecutiveUpn: 'project-team',
+  projectManagerUpn: 'project-team',
+  leadEstimatorUpn: 'project-team',
+  supportingEstimatorUpns: 'project-team',
+  additionalTeamMemberUpns: 'project-team',
+  timberscanApproverUpn: 'project-team',
 
   // Step 4 — Template & Add-Ons
   addOns: 'template-addons',

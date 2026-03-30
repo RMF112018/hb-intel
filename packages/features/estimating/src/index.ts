@@ -219,6 +219,8 @@ export {
   STEP_TEMPLATE,
   STEP_REVIEW,
   PROJECT_SETUP_STEPS,
+  getEligibleTimberscanApprovers,
+  normalizeProjectSetupTeamFields,
   PROJECT_SETUP_WIZARD_CONFIG,
   PROJECT_SETUP_FIELD_MAP,
   resolveStepsForClarification,

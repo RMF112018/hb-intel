@@ -40,5 +40,16 @@ describe('ReviewStepBody', () => {
     expect(screen.getByText(/Construction/)).toBeInTheDocument();
     expect(screen.getByText(/Contract Type:/)).toBeInTheDocument();
     expect(screen.getByText(/Design-Build \(DB\) Contract/)).toBeInTheDocument();
+    expect(screen.getByText(/Project Executive:/)).toBeInTheDocument();
+    expect(screen.getByText(/exec@hb.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Project Manager:/)).toBeInTheDocument();
+    expect(screen.getByText(/pm@hb.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Lead Estimator:/)).toBeInTheDocument();
+    expect(screen.getAllByText(/lead@hb.com/)).toHaveLength(2);
+    expect(screen.getByText(/Supporting Estimators:/)).toBeInTheDocument();
+    expect(screen.getByText(/support@hb.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Additional Team Members:/)).toBeInTheDocument();
+    expect(screen.getByText(/team@hb.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Timberscan Approver:/)).toBeInTheDocument();
   });
 });

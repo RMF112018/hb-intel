@@ -29,17 +29,20 @@ describe('PROJECT_SETUP_FIELD_MAP', () => {
   });
 
   it('maps all Step 3 fields to project-team', () => {
-    expect(PROJECT_SETUP_FIELD_MAP['projectLeadId']).toBe('project-team');
-    expect(PROJECT_SETUP_FIELD_MAP['groupMembers']).toBe('project-team');
-    expect(PROJECT_SETUP_FIELD_MAP['viewerUPNs']).toBe('project-team');
+    expect(PROJECT_SETUP_FIELD_MAP['projectExecutiveUpn']).toBe('project-team');
+    expect(PROJECT_SETUP_FIELD_MAP['projectManagerUpn']).toBe('project-team');
+    expect(PROJECT_SETUP_FIELD_MAP['leadEstimatorUpn']).toBe('project-team');
+    expect(PROJECT_SETUP_FIELD_MAP['supportingEstimatorUpns']).toBe('project-team');
+    expect(PROJECT_SETUP_FIELD_MAP['additionalTeamMemberUpns']).toBe('project-team');
+    expect(PROJECT_SETUP_FIELD_MAP['timberscanApproverUpn']).toBe('project-team');
   });
 
   it('maps Step 4 fields to template-addons', () => {
     expect(PROJECT_SETUP_FIELD_MAP['addOns']).toBe('template-addons');
   });
 
-  it('covers exactly 20 fields', () => {
-    expect(Object.keys(PROJECT_SETUP_FIELD_MAP)).toHaveLength(20);
+  it('covers exactly 23 fields', () => {
+    expect(Object.keys(PROJECT_SETUP_FIELD_MAP)).toHaveLength(23);
   });
 });
 
@@ -60,7 +63,7 @@ describe('resolveStepsForClarification', () => {
 
   it('returns steps in wizard sequential order regardless of input order', () => {
     expect(
-      resolveStepsForClarification(['projectLeadId', 'department', 'projectName']),
+      resolveStepsForClarification(['projectExecutiveUpn', 'department', 'projectName']),
     ).toEqual(['project-info', 'department', 'project-team']);
   });
 
@@ -76,7 +79,7 @@ describe('resolveStepsForClarification', () => {
 
   it('resolves fields across all four mapped steps', () => {
     expect(
-      resolveStepsForClarification(['addOns', 'department', 'projectLeadId', 'clientName']),
+      resolveStepsForClarification(['addOns', 'department', 'timberscanApproverUpn', 'clientName']),
     ).toEqual(['project-info', 'department', 'project-team', 'template-addons']);
   });
 });

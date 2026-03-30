@@ -20,6 +20,11 @@ export {
 } from './projectLocationFields.js';
 
 export {
+  getEligibleTimberscanApprovers,
+  normalizeProjectSetupTeamFields,
+} from './projectTeamFields.js';
+
+export {
   OFFICE_DIVISION_OPTIONS,
   PROJECT_STAGE_OPTIONS,
   CONTRACT_TYPE_OPTIONS,

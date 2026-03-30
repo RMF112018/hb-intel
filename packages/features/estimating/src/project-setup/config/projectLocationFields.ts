@@ -1,5 +1,6 @@
 import type { IProjectSetupRequest } from '@hbc/models';
 import { PROJECT_STAGE_OPTIONS, isValidProjectStage } from './departmentTypeOptions.js';
+import { normalizeProjectSetupTeamFields } from './projectTeamFields.js';
 
 const LOCATION_FIELDS = [
   'projectStreetAddress',
@@ -54,6 +55,7 @@ export function normalizeProjectSetupRequestFields<T extends Partial<IProjectSet
     normalized.projectStage = PROJECT_STAGE_OPTIONS[0]?.value as IProjectSetupRequest['projectStage'];
   }
 
+  Object.assign(normalized, normalizeProjectSetupTeamFields(normalized));
   normalized.projectLocation = buildProjectLocationSummary(normalized);
   return normalized as T;
 }

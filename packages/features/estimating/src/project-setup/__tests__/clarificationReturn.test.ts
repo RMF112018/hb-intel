@@ -85,7 +85,7 @@ describe('buildClarificationReturnState', () => {
   });
 
   it('flags a single step when one field is clarified', () => {
-    const items = [makeClarification({ stepId: 'project-team', fieldId: 'projectLeadId' })];
+    const items = [makeClarification({ stepId: 'project-team', fieldId: 'projectExecutiveUpn' })];
     const result = buildClarificationReturnState(items);
     expect(result.flaggedStepIds).toEqual(['project-team']);
     expect(result.completedStepIds).toEqual([
@@ -113,7 +113,7 @@ describe('buildClarificationReturnState', () => {
     const items = [
       makeClarification({ clarificationId: 'c-1', fieldId: 'addOns', stepId: 'template-addons' }),
       makeClarification({ clarificationId: 'c-2', fieldId: 'projectName', stepId: 'project-info' }),
-      makeClarification({ clarificationId: 'c-3', fieldId: 'groupMembers', stepId: 'project-team' }),
+      makeClarification({ clarificationId: 'c-3', fieldId: 'timberscanApproverUpn', stepId: 'project-team' }),
     ];
     const result = buildClarificationReturnState(items);
     expect(result.flaggedStepIds).toEqual(['project-info', 'project-team', 'template-addons']);
