@@ -14,7 +14,6 @@ import React, { useState, useEffect, useMemo, type FC } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import {
   HbcEmptyState,
-  HbcSpinner,
   HbcSegmentedControl,
   HBC_SURFACE_LIGHT,
   HBC_STATUS_COLORS,
@@ -47,7 +46,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'baseline',
     flexWrap: 'wrap',
-    gap: `${'8px'} ${'16px'}`,
+    gap: '8px 16px',
     paddingBottom: '16px',
     marginBottom: '24px',
     borderBottomWidth: '1px',
@@ -72,7 +71,7 @@ const useStyles = makeStyles({
     marginLeft: 'auto',
     flexWrap: 'wrap',
   },
-  count: {
+  countBadge: {
     fontSize: labelType.fontSize,
     fontWeight: labelType.fontWeight,
     color: HBC_SURFACE_LIGHT['text-muted'],
@@ -83,6 +82,28 @@ const useStyles = makeStyles({
     paddingRight: '8px',
     borderRadius: HBC_RADIUS_SM,
     whiteSpace: 'nowrap',
+  },
+
+  // ── Live region (always mounted for reliable announcements) ─────────
+  liveRegion: {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    paddingTop: '0',
+    paddingBottom: '0',
+    paddingLeft: '0',
+    paddingRight: '0',
+    marginTop: '-1px',
+    marginBottom: '0',
+    marginLeft: '0',
+    marginRight: '0',
+    overflow: 'hidden',
+    clipPath: 'inset(50%)',
+    whiteSpace: 'nowrap',
+    borderTopWidth: '0',
+    borderBottomWidth: '0',
+    borderLeftWidth: '0',
+    borderRightWidth: '0',
   },
 
   // ── Card grid ───────────────────────────────────────────────────────
@@ -107,7 +128,6 @@ const useStyles = makeStyles({
       animationDuration: '0.01ms',
     },
   },
-  // Sparse-results: cap card width so 1-2 cards don't stretch full-width
   gridSparse: {
     '@media (min-width: 768px)': {
       gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 380px))',
@@ -118,14 +138,6 @@ const useStyles = makeStyles({
   },
 
   // ── Loading & empty states ──────────────────────────────────────────
-  spinnerContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '200px',
-    paddingTop: '24px',
-    paddingBottom: '24px',
-  },
   shimmerGrid: {
     display: 'grid',
     gap: '24px',
@@ -178,10 +190,10 @@ const EmptyAlertIcon: FC = () => (
 const LoadingShimmer: FC = () => {
   const classes = useStyles();
   return (
-    <div className={classes.shimmerGrid} aria-hidden="true">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className={classes.shimmerCard} />
-      ))}
+    <div className={classes.shimmerGrid} role="status" aria-label="Loading project sites">
+      <div className={classes.shimmerCard} />
+      <div className={classes.shimmerCard} />
+      <div className={classes.shimmerCard} />
     </div>
   );
 };
@@ -214,53 +226,63 @@ export const ProjectSitesRoot: FC = () => {
   const entryCount = projectsResult?.status === 'success' ? projectsResult.entries.length : 0;
   const isSparse = entryCount > 0 && entryCount <= 2;
 
+  // Build announcement text for the live region
+  const announcement = useMemo(() => {
+    if (!projectsResult) return '';
+    if (projectsResult.status === 'loading') return `Loading project sites for ${selectedYear}`;
+    if (projectsResult.status === 'error') return 'Failed to load project sites';
+    if (projectsResult.status === 'empty') return `No projects found for ${selectedYear}`;
+    if (projectsResult.status === 'success') {
+      return `${entryCount} project${entryCount !== 1 ? 's' : ''} for ${selectedYear}`;
+    }
+    return '';
+  }, [projectsResult, selectedYear, entryCount]);
+
   // ── Years loading ─────────────────────────────────────────────────
   if (yearsResult.status === 'loading') {
     return (
-      <div className={classes.root}>
+      <section className={classes.root} aria-label="Project Sites">
         <div className={classes.header}>
           <h2 className={classes.title}>Project Sites</h2>
         </div>
-        <div className={classes.spinnerContainer} role="status">
-          <HbcSpinner size="lg" label="Loading project sites" />
-        </div>
-      </div>
+        <LoadingShimmer />
+      </section>
     );
   }
 
   // ── Years error ───────────────────────────────────────────────────
   if (yearsResult.status === 'error') {
     return (
-      <div className={classes.root}>
+      <section className={classes.root} aria-label="Project Sites">
         <div className={classes.header}>
           <h2 className={classes.title}>Project Sites</h2>
         </div>
-        <div className={classes.emptyContainer}>
+        <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
             title="Unable to Load Project Sites"
             description={yearsResult.errorMessage ?? 'Failed to load available years. Try refreshing the page.'}
             icon={<EmptyAlertIcon />}
           />
         </div>
-      </div>
+      </section>
     );
   }
 
   // ── No years in list ──────────────────────────────────────────────
   if (yearsResult.status === 'empty') {
     return (
-      <div className={classes.root}>
+      <section className={classes.root} aria-label="Project Sites">
         <div className={classes.header}>
           <h2 className={classes.title}>Project Sites</h2>
         </div>
-        <div className={classes.emptyContainer}>
+        <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
             title="No Project Sites"
             description="No projects with Year values were found in the Projects list."
             icon={<EmptySearchIcon />}
           />
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -268,7 +290,12 @@ export const ProjectSitesRoot: FC = () => {
   const year = selectedYear!;
 
   return (
-    <div className={classes.root}>
+    <section className={classes.root} aria-label="Project Sites">
+      {/* Persistent live region for screen reader announcements */}
+      <div className={classes.liveRegion} aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
+
       <div className={classes.header}>
         <h2 className={classes.title}>Project Sites</h2>
         <div className={classes.headerTrailing}>
@@ -280,7 +307,7 @@ export const ProjectSitesRoot: FC = () => {
             size="sm"
           />
           {projectsResult?.status === 'success' && (
-            <span className={classes.count} aria-live="polite">
+            <span className={classes.countBadge}>
               {entryCount} project{entryCount !== 1 ? 's' : ''}
             </span>
           )}
@@ -288,18 +315,11 @@ export const ProjectSitesRoot: FC = () => {
       </div>
 
       {/* Projects loading */}
-      {projectsResult?.status === 'loading' && (
-        <>
-          <div className={classes.spinnerContainer} role="status" aria-label={`Loading project sites for ${year}`}>
-            <HbcSpinner size="lg" label={`Loading project sites for ${year}`} />
-          </div>
-          <LoadingShimmer />
-        </>
-      )}
+      {projectsResult?.status === 'loading' && <LoadingShimmer />}
 
       {/* Projects error */}
       {projectsResult?.status === 'error' && (
-        <div className={classes.emptyContainer}>
+        <div className={classes.emptyContainer} role="alert">
           <HbcEmptyState
             title="Unable to Load Project Sites"
             description={projectsResult.errorMessage ?? 'An unexpected error occurred. Try refreshing the page.'}
@@ -310,7 +330,7 @@ export const ProjectSitesRoot: FC = () => {
 
       {/* Empty results */}
       {projectsResult?.status === 'empty' && (
-        <div className={classes.emptyContainer}>
+        <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
             title="No Project Sites"
             description={`No projects were found for ${year}. Projects will appear here once they are added to the Projects list with Year set to ${year}.`}
@@ -334,6 +354,6 @@ export const ProjectSitesRoot: FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 };

@@ -25,12 +25,13 @@ describe('ProjectSitesRoot', () => {
     mockUseProjectSites.mockReset();
   });
 
-  it('renders spinner when years are loading', () => {
+  it('renders shimmer loading state when years are loading', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'loading', years: [], errorMessage: null });
     mockUseProjectSites.mockReturnValue(null);
 
     render(<ProjectSitesRoot />);
     expect(screen.getByText('Project Sites')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('renders error when years fail to load', () => {
@@ -91,7 +92,7 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText(/No projects were found for 2025/)).toBeInTheDocument();
   });
 
-  it('renders error when project query fails', () => {
+  it('renders error with role="alert" when project query fails', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
       status: 'error', selectedYear: 2025, entries: [], errorMessage: 'SP error',
@@ -99,5 +100,18 @@ describe('ProjectSitesRoot', () => {
 
     render(<ProjectSitesRoot />);
     expect(screen.getByText('Unable to Load Project Sites')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('renders section landmark with accessible label', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success', selectedYear: 2025,
+      entries: [{ id: 1, projectName: 'Test', projectNumber: '', siteUrl: 'https://x.com', year: 2025, department: '', projectLocation: '', projectType: '', projectStage: '', clientName: '', hasSiteUrl: true }],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    expect(screen.getByRole('region', { name: 'Project Sites' })).toBeInTheDocument();
   });
 });

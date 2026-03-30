@@ -58,11 +58,12 @@ describe('ProjectSiteCard', () => {
   });
 
   it('renders as disabled div when hasSiteUrl is false', () => {
-    render(
+    const { container } = render(
       <ProjectSiteCard entry={createEntry({ hasSiteUrl: false, siteUrl: '' })} />,
     );
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText(/provisioning/i)).toBeInTheDocument();
+    expect(container.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
   });
 
   it('renders stage badge for Active', () => {

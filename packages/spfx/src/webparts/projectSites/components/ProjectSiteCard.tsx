@@ -59,8 +59,21 @@ const useStyles = makeStyles({
   disabledWrapper: {
     cursor: 'default',
     opacity: 0.55,
+    borderTopWidth: '1px',
+    borderBottomWidth: '1px',
+    borderLeftWidth: '1px',
+    borderRightWidth: '1px',
+    borderTopStyle: 'dashed',
+    borderBottomStyle: 'dashed',
+    borderLeftStyle: 'dashed',
+    borderRightStyle: 'dashed',
+    borderTopColor: HBC_SURFACE_LIGHT['surface-3'],
+    borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
+    borderLeftColor: HBC_SURFACE_LIGHT['surface-3'],
+    borderRightColor: HBC_SURFACE_LIGHT['surface-3'],
+    boxShadow: 'none',
     ':hover': {
-      boxShadow: elevationLevel1,
+      boxShadow: 'none',
       transform: 'none',
     },
   },
@@ -285,7 +298,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   return (
     <div
       className={mergeClasses(classes.cardWrapper, classes.disabledWrapper)}
-      role="group"
+      aria-disabled="true"
       aria-label={`${entry.projectName} — site provisioning in progress`}
     >
       <HbcCard weight="standard" header={headerContent} footer={footerContent}>
