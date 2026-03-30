@@ -3,7 +3,11 @@
  *
  * This handler validates auth and builds cache keys but returns hardcoded
  * mock responses ({ _mock: true }). It does NOT make real Graph API calls.
- * Real Graph API forwarding via OBO token is a Phase 1 / P1-B1 deliverable.
+ * Real Graph API forwarding via app-only token is a Phase 1 / P1-B1 deliverable.
+ *
+ * P3-04: Updated to use app-only Managed Identity semantics instead of
+ * misleading OBO naming. The user's Bearer token is validated for access
+ * control but is NOT forwarded to downstream services.
  *
  * Do NOT rely on this handler for production data retrieval.
  */
@@ -26,17 +30,18 @@ export async function handleProxyRequest(
   const graphBase = getEnv('GRAPH_API_BASE_URL', 'https://graph.microsoft.com/v1.0');
   const targetUrl = `${graphBase}/${path}${request.url.includes('?') ? '?' + request.url.split('?')[1] : ''}`;
 
-  // Extract and validate bearer token
+  // P3-04: Validate Bearer token for access control. The token is checked for
+  // presence but the actual JWT validation happens via withAuth() on the route
+  // registration (if wired). The user token is NOT forwarded to downstream
+  // services — all backend-to-service calls use app-only Managed Identity.
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return { status: 401, jsonBody: { error: 'Missing or invalid authorization header' } };
   }
 
-  const userToken = authHeader.substring(7);
-
   try {
-    // Acquire OBO token
-    const oboToken = await services.msalObo.acquireTokenOnBehalfOf(userToken, [
+    // P3-04: Acquire app-only token via Managed Identity (not OBO).
+    const appToken = await services.managedIdentity.acquireAppToken([
       'https://graph.microsoft.com/.default',
     ]);
 
@@ -74,7 +79,7 @@ export async function handleProxyRequest(
       logger.info(`Invalidated cache for ${cacheKey}`);
     }
 
-    logger.info(`Proxy ${method} ${path} → ${targetUrl} (OBO token: ${oboToken.substring(0, 15)}...)`);
+    logger.info(`Proxy ${method} ${path} → ${targetUrl} (app token: ${appToken.substring(0, 15)}...)`);
     return { status: 200, jsonBody: responseBody };
   } catch (err) {
     logger.error('Proxy request failed', {

@@ -1,6 +1,6 @@
 /**
  * W0-G1-T03: Notification service adapter (ports/adapters pattern).
- * Interface + real + mock in one file — matches msal-obo-service.ts pattern.
+ * Interface + real + mock in one file — matches managed-identity-token-service.ts pattern.
  */
 import type { NotificationSendPayload } from '@hbc/notification-intelligence';
 

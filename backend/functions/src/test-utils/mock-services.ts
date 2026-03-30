@@ -56,9 +56,10 @@ export interface IMockServices extends IServiceContainer {
     addConnectionToGroup: Mock;
     closeGroup: Mock;
   };
-  msalObo: {
+  /** P3-04: Renamed from msalObo — app-only Managed Identity token service. */
+  managedIdentity: {
     getSharePointToken: Mock;
-    acquireTokenOnBehalfOf: Mock;
+    acquireAppToken: Mock;
   };
   projectRequests: {
     upsertRequest: Mock;
@@ -138,9 +139,9 @@ export function createMockServices(): IMockServices {
       addConnectionToGroup: vi.fn(async (_connectionId: string, _projectId: string, _isAdmin: boolean) => {}),
       closeGroup: vi.fn(async (_projectId: string) => {}),
     },
-    msalObo: {
+    managedIdentity: {
       getSharePointToken: vi.fn(async (_siteUrl: string) => 'mock-sp-token'),
-      acquireTokenOnBehalfOf: vi.fn(async (_userToken: string, _scopes: string[]) => 'mock-obo-token'),
+      acquireAppToken: vi.fn(async (_scopes: string[]) => 'mock-app-token'),
     },
     projectRequests: {
       upsertRequest: vi.fn(async (_request: IProjectSetupRequest) => {}),

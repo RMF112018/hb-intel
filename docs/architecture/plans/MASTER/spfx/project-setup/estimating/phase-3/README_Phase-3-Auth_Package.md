@@ -33,10 +33,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-3_API-Token-Contract.md`](Phase-3_API-Token-Contract.md) — Chosen token contract (v1+v2 dual-version), validator behavior, structured error classification, test coverage, deployment prerequisites
 
-5. `Prompt-04_Delegated-vs-App-Only-Boundaries_and-Managed-Identity-Cleanup.md`
+5. `Prompt-04_Delegated-vs-App-Only-Boundaries_and-Managed-Identity-Cleanup.md` **[COMPLETE]**
    - Separate delegated-user behavior from app-only behavior
    - Correct the current OBO / managed-identity boundary
    - Document and enforce least-privilege access paths
+   - **Deliverables:**
+     - [`Phase-3_Capability-Boundary-Matrix.md`](Phase-3_Capability-Boundary-Matrix.md) — Delegated vs app-only classification for all routes, seams renamed, deployment permission requirements
 
 6. `Prompt-05_Backend-Auth-Hardening_CORS-Permissions-and-Tests.md`
    - Finalize backend auth enforcement

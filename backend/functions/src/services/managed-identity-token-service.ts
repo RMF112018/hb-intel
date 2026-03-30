@@ -1,8 +1,18 @@
 import { DefaultAzureCredential } from '@azure/identity';
 
-export interface IMsalOboService {
+/**
+ * P3-04: Service interface for app-only token acquisition via Managed Identity.
+ *
+ * All methods acquire tokens as the **application identity** (system-assigned
+ * Managed Identity), not as a delegated user. No user token is involved.
+ */
+export interface IManagedIdentityTokenService {
   getSharePointToken(siteUrl: string): Promise<string>;
-  acquireTokenOnBehalfOf(userToken: string, scopes: string[]): Promise<string>;
+  /**
+   * P3-04: Acquire an app-only token for the given resource scopes.
+   * Uses system-assigned Managed Identity — no user delegation.
+   */
+  acquireAppToken(scopes: string[]): Promise<string>;
 }
 
 /**
@@ -21,11 +31,15 @@ function emitTelemetry(name: string, properties: Record<string, unknown>): void 
 }
 
 /**
- * D-PH6-04: Production implementation that acquires SharePoint tokens via
- * system-assigned Managed Identity through DefaultAzureCredential.
+ * P3-04: Production implementation that acquires tokens via system-assigned
+ * Managed Identity through DefaultAzureCredential.
+ *
+ * Renamed from `ManagedIdentityOboService` — this service performs **app-only**
+ * token acquisition, not On-Behalf-Of delegation.
+ *
  * Traceability: docs/architecture/plans/PH6.2-Security-ManagedIdentity.md §6.2.5
  */
-export class ManagedIdentityOboService implements IMsalOboService {
+export class ManagedIdentityTokenService implements IManagedIdentityTokenService {
   private readonly credential = new DefaultAzureCredential();
 
   async getSharePointToken(siteUrl: string): Promise<string> {
@@ -38,16 +52,14 @@ export class ManagedIdentityOboService implements IMsalOboService {
     return tokenResponse.token;
   }
 
-  async acquireTokenOnBehalfOf(_userToken: string, scopes: string[]): Promise<string> {
-    // D-PH6-04 compatibility bridge: proxy handler still uses OBO signature, but
-    // production acquisition is Managed Identity scoped to the target resource.
+  async acquireAppToken(scopes: string[]): Promise<string> {
     const scope = scopes[0];
     if (!scope) {
       throw new Error('At least one scope is required for token acquisition');
     }
 
-    // P1-C3 §2.1.3: auth.obo.start telemetry
-    emitTelemetry('auth.obo.start', { scope });
+    // P3-04: Telemetry renamed from auth.obo.* to auth.mi.* to reflect actual behavior
+    emitTelemetry('auth.mi.start', { scope });
 
     const startMs = Date.now();
     const siteUrl = scope.endsWith('/.default') ? scope.replace('/.default', '') : scope;
@@ -55,16 +67,14 @@ export class ManagedIdentityOboService implements IMsalOboService {
     try {
       const token = await this.getSharePointToken(siteUrl);
 
-      // P1-C3 §2.1.3: auth.obo.success telemetry
-      emitTelemetry('auth.obo.success', {
+      emitTelemetry('auth.mi.success', {
         scope,
         durationMs: Date.now() - startMs,
       });
 
       return token;
     } catch (err) {
-      // P1-C3 §2.1.3: auth.obo.error telemetry
-      emitTelemetry('auth.obo.error', {
+      emitTelemetry('auth.mi.error', {
         scope,
         durationMs: Date.now() - startMs,
         errorMessage: err instanceof Error ? err.message : String(err),
@@ -74,16 +84,16 @@ export class ManagedIdentityOboService implements IMsalOboService {
   }
 }
 
-export class MockMsalOboService implements IMsalOboService {
+export class MockManagedIdentityTokenService implements IManagedIdentityTokenService {
   async getSharePointToken(_siteUrl: string): Promise<string> {
     const fakeToken = `mock-mi-token-${Date.now()}`;
-    console.log(`[MockMSAL] Acquired Managed Identity token: ${fakeToken.substring(0, 20)}...`);
+    console.log(`[MockMI] Acquired Managed Identity token: ${fakeToken.substring(0, 20)}...`);
     return fakeToken;
   }
 
-  async acquireTokenOnBehalfOf(_userToken: string, _scopes: string[]): Promise<string> {
-    const fakeToken = `mock-obo-token-${Date.now()}`;
-    console.log(`[MockMSAL] Acquired OBO token: ${fakeToken.substring(0, 20)}...`);
+  async acquireAppToken(_scopes: string[]): Promise<string> {
+    const fakeToken = `mock-app-token-${Date.now()}`;
+    console.log(`[MockMI] Acquired app-only token: ${fakeToken.substring(0, 20)}...`);
     return fakeToken;
   }
 }

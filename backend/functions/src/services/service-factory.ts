@@ -2,7 +2,7 @@ import type { ISharePointService } from './sharepoint-service.js';
 import type { ITableStorageService } from './table-storage-service.js';
 import type { IRedisCacheService } from './redis-cache-service.js';
 import type { ISignalRPushService } from './signalr-push-service.js';
-import type { IMsalOboService } from './msal-obo-service.js';
+import type { IManagedIdentityTokenService } from './managed-identity-token-service.js';
 import type { IProjectRequestsRepository } from './project-requests-repository.js';
 import type { IAcknowledgmentService } from './acknowledgment-service.js';
 import type { IGraphService } from './graph-service.js';
@@ -22,7 +22,7 @@ import { MockSharePointService, SharePointService } from './sharepoint-service.j
 import { MockTableStorageService, RealTableStorageService } from './table-storage-service.js';
 import { MockRedisCacheService } from './redis-cache-service.js';
 import { MockSignalRPushService } from './signalr-push-service.js';
-import { ManagedIdentityOboService, MockMsalOboService } from './msal-obo-service.js';
+import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from './managed-identity-token-service.js';
 import { MockProjectRequestsRepository, SharePointProjectRequestsAdapter } from './project-requests-repository.js';
 import { MockAcknowledgmentService, RealAcknowledgmentService } from './acknowledgment-service.js';
 import { MockGraphService, GraphService } from './graph-service.js';
@@ -46,7 +46,8 @@ export interface IServiceContainer {
   tableStorage: ITableStorageService;
   redisCache: IRedisCacheService;
   signalR: ISignalRPushService;
-  msalObo: IMsalOboService;
+  /** P3-04: App-only token acquisition via Managed Identity. */
+  managedIdentity: IManagedIdentityTokenService;
   projectRequests: IProjectRequestsRepository;
   acknowledgments: IAcknowledgmentService;
   graph: IGraphService;
@@ -102,7 +103,7 @@ export function createServiceFactory(): IServiceContainer {
     }
   }
 
-  const msalObo = isMock ? new MockMsalOboService() : new ManagedIdentityOboService();
+  const managedIdentity = isMock ? new MockManagedIdentityTokenService() : new ManagedIdentityTokenService();
 
   singletonContainer = {
     // D-PH6-05: real SharePoint adapter by default; mocks only in explicit mock/test mode.
@@ -111,8 +112,8 @@ export function createServiceFactory(): IServiceContainer {
     tableStorage: isMock ? new MockTableStorageService() : new RealTableStorageService(),
     redisCache: new MockRedisCacheService(),
     signalR: new MockSignalRPushService(),
-    // D-PH6-04: Managed Identity in real mode, mock OBO in test/mock mode.
-    msalObo,
+    // P3-04: App-only Managed Identity token service (renamed from msalObo).
+    managedIdentity,
     // D-PH6-08: Project Setup Request lifecycle persistence adapter.
     projectRequests: isMock ? new MockProjectRequestsRepository() : new SharePointProjectRequestsAdapter(),
     // SF04-T06: Acknowledgment event persistence adapter.

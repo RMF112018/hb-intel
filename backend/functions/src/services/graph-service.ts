@@ -2,7 +2,7 @@ import { DefaultAzureCredential } from '@azure/identity';
 
 /**
  * W0-G1-T02: Microsoft Graph service interface for Entra ID group management.
- * Pattern: matches msal-obo-service.ts (interface + real + mock in one file).
+ * Pattern: matches managed-identity-token-service.ts (interface + real + mock in one file).
  * Traceability: docs/reference/provisioning/entra-id-group-model.md
  */
 export interface IGraphService {
