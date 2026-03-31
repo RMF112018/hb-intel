@@ -1791,6 +1791,42 @@ The baseline survived `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = true` (P6-01) bec
 
 Prompt-06 is closed. The retained Project Setup frontend baseline is green (19 files, 138 tests, 0 failures) and has been stable across all P6 changes (P6-01 through P6-05). The proof set is explicitly defined and categorized. No code changes required — P5-08 established the baseline and P6-01's required-field enforcement did not introduce regressions because page-level tests are orthogonal to wizard validation.
 
+### Phase 6 Smoke Execution, Release Evidence, and Signoff Completion (2026-03-31, Prompt P6-07)
+
+**Scope:** Make smoke/deployment evidence, release-gate evidence, and signoff posture truthful, explicit, and decision-ready. Reconcile overstated language in Phase 5 handoff and signoff documents.
+
+**Release evidence model (decision-ready summary):**
+
+| Evidence Layer | Status | What Exists | What Remains |
+|---------------|--------|-------------|-------------|
+| **Code-level tests** | **Repo-verified** | 659 backend + 138 frontend + 13 release gates + 63 boundary tests = 873 total | — |
+| **Pre-deploy gates** | **Repo-verified** | 13 gates in `release-gates.test.ts` (pass on every commit) | — |
+| **Deployment runbook** | **Repo-complete** | 5-phase runbook with rollback procedures, D0–D8 prerequisites | — |
+| **Smoke test definitions** | **Repo-complete** | 7 env-gated tests with P5-09 evidence classification | — |
+| **Decision-ready signoff package** | **Repo-complete** | Evidence summary, risk register, signoff form template | — |
+| **Staging smoke execution** | **Not yet proven** | — | Requires live staging deployment + runbook Phase C |
+| **Production smoke execution** | **Not yet proven** | — | Requires live production deployment |
+| **Deployment prerequisites (D0–D8)** | **Not yet proven** | — | Requires Azure/IT/SharePoint admin action |
+| **Leadership/IT/Support signoff** | **Not yet proven** | — | Requires business/operational decisions |
+
+**Documents reconciled (P6-07):**
+
+| Document | Change |
+|----------|--------|
+| `Phase-5_Handoff.md` | Status changed from "COMPLETE" to "Code-Level Complete — Environment-Gated Items Remain." Recommendation recast from "Ready for production release decision review" to "Ready for environment-level execution pending D0–D8, smoke, and signoff." Reconciliation history added. |
+| `Phase-5_Production-Readiness-Signoff.md` | Phase 5 status updated to "Code-Level Complete." Recommendation updated to reflect all code-level remediation complete (P6-01 through P6-06) with environment-gated execution remaining. |
+
+**Acceptance criteria met:**
+
+1. Release evidence is categorized truthfully — 5 layers repo-complete, 4 layers environment-gated.
+2. Signoff artifacts are decision-useful — handoff and signoff docs reconciled with current truth.
+3. External/manual requirements are explicit — D0–D8 prerequisites, staging smoke, and signoff approvals named.
+4. Review report reflects truthful Phase 5 readiness — deferred items updated with evidence tier tables.
+
+**Closure statement:**
+
+Prompt-07 is closed. The release evidence model is truthful and decision-ready. All repo-side evidence is complete: 873 tests across 4 suites, 13 pre-deploy gates, deployment runbook with rollback, 7 smoke test definitions, and a structured signoff package. The remaining launch prerequisites are purely environment-gated (deployment prerequisites D0–D8, live smoke execution) and operational (leadership/IT/support signoff). Phase 5 handoff and signoff documents have been reconciled to remove overstated language. No code changes required.
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -2060,41 +2096,64 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Smoke / deployment evidence execution proof
   **Category:** Deployment / release-readiness
-  **Status:** External / environment-gated, not repo-complete
-  **Why it is still deferred:** Prompt 09 explicitly warns not to treat smoke-test existence as completed deployment validation. Repo truth includes post-deploy smoke tests and runbooks, but there is no checked-in evidence of a successful staging or production smoke run.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Prompt-09_Phase-5-Smoke-Tests-Deployment-Runbook-and-Operational-Proof-Categorization.md`; `backend/functions/src/test/smoke/post-deploy-smoke.test.ts`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md`
-  **Affected files/surfaces:** post-deploy validation, rollback decision-making, release-gate evidence
-  **Blocker level:** Launch blocker
-  **Cross-phase impact:** Keeps Phase 5 in documentary readiness rather than executed readiness and leaves Phase 3/4 environment prerequisites unproven.
-  **Recommended next-step direction:** Run the smoke suite against the intended deployment target and capture the resulting release evidence outside the repo-doc fiction layer.
+  **Status:** Repo-side evidence package complete; live execution is environment-gated (P6-07)
+  **P6-07 evidence categorization:**
+
+  | Evidence Layer | Status | Repo Artifact |
+  |---------------|--------|---------------|
+  | Smoke test definitions (7 tests) | **Repo-complete** | `backend/functions/src/test/smoke/post-deploy-smoke.test.ts` with P5-09 evidence classification header |
+  | Deployment runbook (5 phases, rollback) | **Repo-complete** | `Phase-5_Deployment-Runbook.md` with D0 prerequisite (P6-01) |
+  | Release gates (13 pre-deploy gates) | **Repo-verified** | `release-gates.test.ts` — passes on every commit |
+  | Post-deploy health verification path | **Repo-defined** | Runbook Phase C: `GET /api/health` → `operationalReadiness` |
+  | Staged smoke execution log | **Not yet proven** | Requires live staging environment execution |
+  | Production smoke execution log | **Not yet proven** | Requires live production environment execution |
+
+  **Blocker level:** Environment-gated — the repo-side evidence package is complete; live execution is external
+  **Next step:** Execute Deployment Runbook Phase A–C against staging, record health endpoint output and smoke test results as external evidence.
 
 - **Item:** Final signoff completion and decision proof
   **Category:** Release-readiness / governance
-  **Status:** Documented as complete but not repo-evidenced complete
-  **Why it is still deferred:** Phase 5 handoff and signoff docs present a decision-ready package, but repo truth does not include actual completed leadership / IT / support approval evidence, nor does it include live release execution showing those signoff assumptions were satisfied.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Prompt-10_Phase-5-Signoff-Realism-and-Decision-Ready-Evidence.md`
-  **Affected files/surfaces:** signoff artifacts, release governance, leadership / IT / support decision-making
-  **Blocker level:** Launch blocker
-  **Cross-phase impact:** Depends on unresolved items from Phases 2-4 and cannot be closed honestly while those items remain open or unproven.
-  **Recommended next-step direction:** Recast signoff as pending until blockers and environment-gated evidence are actually closed.
+  **Status:** Decision-ready package complete; signoff execution is operational (P6-07)
+  **P6-07 evidence categorization:**
+
+  | Evidence Layer | Status | Repo Artifact |
+  |---------------|--------|---------------|
+  | Decision-ready evidence summary | **Repo-complete** | `Phase-5_Production-Readiness-Signoff.md` §9 (P5-10) |
+  | Technical readiness evidence | **Repo-verified** | 659 backend + 138 frontend tests green; 13 release gates; 63 boundary tests |
+  | Deployment prerequisite checklist | **Repo-complete** | `Phase-5_Deployment-Runbook.md` §1 (D0–D8) |
+  | Signoff form template | **Repo-complete** | `Phase-5_Production-Readiness-Signoff.md` §10 |
+  | Leadership approval signature | **Not yet proven** | Requires business decision outside repo |
+  | IT approval signature | **Not yet proven** | Requires IT department decision outside repo |
+  | Support team acceptance | **Not yet proven** | Requires operations decision outside repo |
+
+  **Blocker level:** Operational — the decision-ready package is complete; approval execution is external
+  **Next step:** Present the decision-ready evidence summary (signoff doc §9) to leadership/IT/support and record approval decisions.
 
 - **Item:** Accepted-risk items that remain live implementation or operational debt
   **Category:** Mixed follow-up hardening
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** Phase 5 documents accepted risks for no automated alerts, no frontend telemetry, no latency baseline, proxy stub, email stub, and dual RBAC. Repo truth still supports those risks as open items rather than closed work.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md`; `backend/functions/observability/README.md`
-  **Affected files/surfaces:** observability, client telemetry, performance monitoring, proxy scope, notification delivery, RBAC convergence
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Aggregates unresolved debt inherited from Phases 3 and 4 and should not be mistaken for already-remediated work.
-  **Recommended next-step direction:** Track these as live post-blocker hardening items rather than buried signoff footnotes.
+  **Status:** Truthfully categorized as accepted post-launch follow-on (P6-07)
+  **P6-07 risk posture update:**
+
+  | Risk | Original Status | P6 Status | PS Launch Impact |
+  |------|----------------|-----------|-----------------|
+  | R1: Email stub | Deferred | **Out of PS launch scope** (P6-05) | In-app notifications are supported transport |
+  | R2: Conditional SignalR | Accepted | **Accepted** — degrades gracefully | No impact if not configured |
+  | R3: Dual RBAC | Deferred | **Documented as intentional** (P6-03) | JWT auth + UPN env-list roles is the PS release model |
+  | R4: Proxy stub | Decided | **Excluded from PS scope** (P3-10) | Not in PS host; boundary test proves exclusion |
+  | R5: No automated alerts | Deferred | **DevOps follow-on** (P6-05) | Runtime observability (health, telemetry, logger) is operational |
+  | R6: Frontend test failures | Closed | **CLOSED** (P5-08, confirmed P6-06) | 138 tests green |
+  | R7: No frontend telemetry | Accepted | **Accepted** — post-launch follow-on | Does not block PS launch |
+  | R8: No SLA/latency baseline | Accepted | **Accepted** — post-launch follow-on | Does not block PS launch |
+
+  **Blocker level:** Non-blocking — all risks are either closed, explicitly out of scope, or accepted with documented alternatives
 
 ### C. Cross-phase deferred dependencies
 
 - **External live-list validation still affects release truth.** The Phase 2 repo-owned code path is repaired, but release decisions still depend on proving that the live SharePoint list matches the repo-owned contract.
-- **Environment prerequisites span Phases 3, 4, and 5.** Auth configuration, managed-identity grants, CORS, SharePoint / Graph approvals, and dedicated-host deployment posture are documented, but repo truth does not prove they are complete in a live environment.
-- **Operationalization is split between Phase 4 artifacts and Phase 5 signoff.** Observability, alerting, smoke execution, and runbook use are partially documented in-repo but still depend on actual deployment and operator execution evidence.
-- **Transitional surface cleanup crosses requester, controller, and admin.** Deprecated token helpers, RBAC divergence, and the proxy stub are not isolated Phase 3 leftovers; they continue to affect Phase 4 support posture and Phase 5 signoff realism.
-- **Phase 1 historical deferrals were not all truly closed by later phase closure language.** Preferences backend work and provisioning-maturity follow-on work remained open even after Phase 1 boundary remediation itself was honestly closed.
+- **Environment prerequisites span Phases 3, 4, and 5.** Auth configuration, managed-identity grants, CORS, SharePoint / Graph approvals, and dedicated-host deployment posture are documented and categorized by proof tier (P6-04), but repo truth does not prove they are complete in a live environment.
+- ~~**Operationalization is split between Phase 4 artifacts and Phase 5 signoff.**~~ **Resolved (P6-05, P6-07).** Observability posture explicitly categorized: 3 runtime assets operational, 9 DevOps-gated. Notification transport decided: in-app queue supported, email out of launch scope. Smoke/signoff evidence package repo-complete; execution is environment-gated.
+- ~~**Transitional surface cleanup crosses requester, controller, and admin.**~~ **Resolved (P6-03).** Deprecated token helpers removed from all retained surfaces (P3-09). RBAC split documented as intentional PS release model. Proxy excluded from PS scope (P3-10). Preferences mismatch retired (P6-03).
+- ~~**Phase 1 historical deferrals were not all truly closed by later phase closure language.**~~ **Resolved (P6-03, P6-05).** Preferences endpoint retired (P6-03). Provisioning maturity closed — all 7 saga steps implemented (P6-05). Remaining provisioning-maturity items reclassified as DevOps/operational follow-on.
 
 ### D. Closure-truth notes
 
@@ -2180,7 +2239,7 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Phase 6 Prompt-05 closed observability (runtime assets operational, alerting DevOps-gated), notification transport (in-app queue supported, email out of launch scope), and provisioning maturity (7 saga steps complete with compensation and fail-fast validation) (P6-05). Phase 6 Prompt-06 confirmed the retained frontend baseline is green (19 files, 138 tests, 0 failures) and stable across all P6 changes, with the proof set explicitly defined and categorized (P6-06). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff, DevOps alerting deployment).
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Phase 6 Prompt-05 closed observability (runtime assets operational, alerting DevOps-gated), notification transport (in-app queue supported, email out of launch scope), and provisioning maturity (7 saga steps complete with compensation and fail-fast validation) (P6-05). Phase 6 Prompt-06 confirmed the retained frontend baseline is green (19 files, 138 tests, 0 failures) and stable across all P6 changes, with the proof set explicitly defined and categorized (P6-06). Phase 6 Prompt-07 reconciled the Phase 5 handoff and signoff documents, categorized all release evidence by proof tier (5 layers repo-complete, 4 layers environment-gated), and updated deferred items with truthful evidence tables (P6-07). All code-level deferred work is complete. Remaining launch prerequisites are environment-gated (D0–D8 deployment prerequisites, staging smoke execution) and operational (leadership/IT/support signoff, DevOps alerting deployment).
 
 ## 10. Explicit Unresolved Questions
 

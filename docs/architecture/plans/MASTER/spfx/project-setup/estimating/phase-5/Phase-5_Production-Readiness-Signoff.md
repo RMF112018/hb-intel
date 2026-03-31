@@ -17,13 +17,13 @@ The **HB Intel Estimating / Project Setup SPFx package** has completed five phas
 | Phase 2 | Data contract (SharePoint field mapping) | **Substantially Closed** — repo-owned contract closed; external live-list proof remains outside repo |
 | Phase 3 | Auth model (JWT validation, token acquisition, capability boundaries) | **Closed** (P3-07–P3-11). RBAC convergence future follow-on. |
 | Phase 4 | Infrastructure (startup scoping, identity, CORS, connected services) | **Substantially Closed** (P4-07–P4-11). Architecture frozen. Environment-gated deployment proof deferred. |
-| Phase 5 | Release hardening (tests, diagnostics, deployment, signoff) | **Partial** — release scope frozen (P5-07), frontend baseline green (P5-08), smoke/deployment categorized (P5-09). Live deployment proof and executive signoff incomplete. |
+| Phase 5 | Release hardening (tests, diagnostics, deployment, signoff) | **Code-Level Complete** — release scope frozen (P5-07), frontend baseline green (P5-08, confirmed P6-06), smoke/deployment categorized (P5-09), signoff aligned (P5-10), docs reconciled (P5-11). Live deployment proof and executive signoff are environment-gated. |
 
 > **Reconciliation note (2026-03-31):** The original signoff table (2026-03-30) listed all phases as "Complete." The Phase 1-5 gap report (`docs/architecture/reviews/project-setup-phase-1-through-5-implementation-and-gap-report.md`) found that Phase 1 backend scope was incomplete and Phases 2-5 had material gaps. Phase 1 has since been fully remediated. Phases 2-5 status reflects the gap report's current assessment. The "ready for production deployment" recommendation is not supported by current repo truth for Phases 2-5.
 
 **Original recommendation:** ~~The package is ready for production deployment pending completion of the deployment prerequisites listed in Section 4.~~
 
-**Current recommendation:** Phase 1 is closed. Phases 2-5 require remediation before a production-ready assessment is supportable. See the gap report for remaining blockers.
+**Current recommendation (P6-07, 2026-03-31):** All code-level remediation is complete (P6-01 through P6-06). Phases 1 and 3 are closed. Phases 2, 4, and 5 are substantially closed in repo-owned terms. Production readiness depends on environment-level execution: deployment prerequisites (D0–D8), staging smoke validation, and leadership/IT/support signoff. See the gap report for the full evidence model.
 
 ---
 
