@@ -399,6 +399,41 @@ The production-path mapper/repository flow now preserves the canonical Project S
 - Lifecycle tests: `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` (A1b, A1c)
 - Full verification: 626 tests passed, 0 failed
 
+### Phase 2 Test Suite Truthfulness and Contract Coverage (2026-03-31, Prompt P2-09)
+
+**What was changed to make the test suite truthful:**
+
+The `sp-field-mapping.test.ts` file was the source of the audit's "misleading mock round-trip coverage" concern. It used `MockProjectRequestsRepository` (in-memory) but its naming and doc comments implied it proved "SP field mapping contract" — which it did not. Changes:
+
+| Test | Before | After |
+|------|--------|-------|
+| Mock round-trip test | Named "SP field mapping contract — full round-trip", used mock repo, implied SP proof | Renamed to "Mock repository round-trip (in-memory only — not SP proof)", explicit doc comment that this does NOT prove SharePoint persistence |
+| Schema documentation test | Covered only 26 legacy columns (field_1..field_24 + Title + Year) | Replaced with real field contract proof validating all 43 PROJECTS_LIST_FIELD_MAP entries, including 17 P2-07 gap fields |
+| P2-07 fields in mock test | Not covered | All 14 P2-07 fields now included in mock round-trip fixture |
+| Regression guards | None | 3 new guards: field map ≥43 entries, SELECT_FIELDS ≥43, valid serialization strategies |
+| P2-07 internal names | Not validated | New test proves all 17 P2-07 fields use domain-name SP internal names |
+
+**Test organization after P2-09:**
+
+| Category | File | What it proves |
+|----------|------|----------------|
+| Real mapper proof | `projects-list-mapper.test.ts` | toDomain/toListItem serialization for all 43 fields, normalization, backward compat, round-trip |
+| Real contract proof | `sp-field-mapping.test.ts` | PROJECTS_LIST_FIELD_MAP covers all 43 production columns, P2-07 naming convention, regression guards |
+| Mock fidelity | `sp-field-mapping.test.ts` | MockProjectRequestsRepository preserves all fields (explicitly labeled as mock-only) |
+| Production lifecycle | `request-lifecycle.test.ts` | P2-07 fields survive submit→read and state transitions via mock repo |
+
+**Closure statement:**
+
+Phase 2 test coverage now proves the real production persistence contract rather than implying completeness from mock-only round-trips. The earlier "misleading test" concern is **closed**: the mock test is explicitly labeled as mock-only proof, and real contract proof is provided by the field map validation and mapper tests.
+
+**Remaining blind spot:** The real `SharePointProjectRequestsAdapter` is not unit-testable without a live SharePoint environment. Production persistence proof relies on: (1) the mapper tests proving correct serialization for all 43 fields, (2) the repository using `toListItem()`/`toDomain()` exclusively, and (3) the adapter regression guard proving no inline `field_N` references.
+
+**Evidence:**
+
+- Restructured tests: `backend/functions/src/services/__tests__/sp-field-mapping.test.ts` (9 tests, 3 categories)
+- Mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts` (39 tests, 43 fields)
+- Lifecycle tests: `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` (51 tests)
+
 ### Phase 3
 
 **Intended objective**

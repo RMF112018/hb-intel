@@ -1,14 +1,23 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { IProjectSetupRequest } from '@hbc/models';
 import { MockProjectRequestsRepository } from '../project-requests-repository.js';
+import { PROJECTS_LIST_FIELD_MAP, PROJECTS_LIST_SELECT_FIELDS } from '../projects-list-contract.js';
 
 /**
- * SP field mapping contract tests.
- * Validates that the mock repository (used in all unit tests) preserves every
- * field through the round-trip, matching the contract the real adapter must honor.
+ * P2-09: SP field mapping contract tests — truthfulness audit.
  *
- * These tests serve as the contract specification for the field_N mapping in
- * SharePointProjectRequestsAdapter.toListItem/fromListItem.
+ * These tests are organized by what they actually prove:
+ *
+ * 1. Mock round-trip: proves the MockProjectRequestsRepository preserves
+ *    all IProjectSetupRequest fields in memory. This is useful for unit
+ *    test reliability but does NOT prove SharePoint persistence.
+ *
+ * 2. Real contract proof: validates PROJECTS_LIST_FIELD_MAP covers the
+ *    canonical domain field set and the production schema. The actual
+ *    mapper proof lives in projects-list-mapper.test.ts.
+ *
+ * 3. Regression guards: ensures future schema changes cannot silently
+ *    drop fields without failing tests.
  */
 
 function makeFullRequest(): IProjectSetupRequest {
@@ -52,17 +61,38 @@ function makeFullRequest(): IProjectSetupRequest {
     retryCount: 2,
     year: 2025,
     requesterRetryUsed: true,
+    // P2-07 gap fields
+    projectStreetAddress: '123 Main St',
+    projectCity: 'Wellington',
+    projectCounty: 'Palm Beach',
+    projectState: 'FL',
+    projectZip: '33401',
+    officeDivision: 'South Florida',
+    procoreProject: 'Yes',
+    projectExecutiveUpn: 'exec@hb.com',
+    projectManagerUpn: 'pm2@hb.com',
+    leadEstimatorUpn: 'est@hb.com',
+    supportingEstimatorUpns: ['est2@hb.com'],
+    additionalTeamMemberUpns: ['team1@hb.com'],
+    timberscanApproverUpn: 'ts@hb.com',
+    sageAccessUpns: ['sage@hb.com'],
   };
 }
 
-describe('SP field mapping contract — full round-trip', () => {
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. Mock round-trip — proves MockProjectRequestsRepository fidelity
+//    NOTE: This does NOT prove SharePoint persistence. Real persistence
+//    proof is in projects-list-mapper.test.ts (toDomain/toListItem tests).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Mock repository round-trip (in-memory only — not SP proof)', () => {
   let repo: MockProjectRequestsRepository;
 
   beforeEach(() => {
     repo = new MockProjectRequestsRepository();
   });
 
-  it('preserves all IProjectSetupRequest fields through upsert→get cycle', async () => {
+  it('preserves all IProjectSetupRequest fields through mock upsert→get', async () => {
     const original = makeFullRequest();
     await repo.upsertRequest(original);
     const retrieved = await repo.getRequest('req-full');
@@ -106,48 +136,21 @@ describe('SP field mapping contract — full round-trip', () => {
     expect(retrieved!.requesterRetryUsed).toBe(original.requesterRetryUsed);
     // Year
     expect(retrieved!.year).toBe(2025);
-  });
-
-  it('SP schema field_N mapping covers confirmed HBCentral Projects list columns', () => {
-    // This test documents the confirmed SP schema.
-    // If any mapping changes, this test must be updated.
-    const confirmedSchema: Record<string, string> = {
-      Title: 'Title',       // Standard SP column
-      field_1: 'ProjectId',
-      field_2: 'ProjectNumber',
-      field_3: 'ProjectName',
-      field_4: 'ProjectLocation',
-      field_5: 'ProjectType',
-      field_6: 'ProjectStage',
-      field_7: 'SubmittedBy',
-      field_8: 'SubmittedAt',
-      field_9: 'RequestState',
-      field_10: 'GroupMembersJson',
-      field_11: 'GroupLeadersJson',
-      field_12: 'Department',
-      field_13: 'EstimatedValue',
-      field_14: 'ClientName',
-      field_15: 'StartDate',
-      field_16: 'ContractType',
-      field_17: 'ProjectLeadId',
-      field_18: 'ViewerUPNsJson',
-      field_19: 'AddOnsJson',
-      field_20: 'ClarificationNote',
-      field_21: 'CompletedBy',
-      field_22: 'CompletedAt',
-      field_23: 'SiteUrl',
-      field_24: 'RetryCount',
-      Year: 'Year',         // Post-import column
-    };
-
-    // Verify all 26 field mappings (Title + 24 custom + Year)
-    expect(Object.keys(confirmedSchema)).toHaveLength(26);
-    // Year column must use 'Year' as internal name (not field_N)
-    expect(confirmedSchema.Year).toBe('Year');
-    // All custom columns must use field_N pattern
-    for (let i = 1; i <= 24; i++) {
-      expect(confirmedSchema[`field_${i}`]).toBeDefined();
-    }
+    // P2-07 gap fields
+    expect(retrieved!.projectStreetAddress).toBe(original.projectStreetAddress);
+    expect(retrieved!.projectCity).toBe(original.projectCity);
+    expect(retrieved!.projectCounty).toBe(original.projectCounty);
+    expect(retrieved!.projectState).toBe(original.projectState);
+    expect(retrieved!.projectZip).toBe(original.projectZip);
+    expect(retrieved!.officeDivision).toBe(original.officeDivision);
+    expect(retrieved!.procoreProject).toBe(original.procoreProject);
+    expect(retrieved!.projectExecutiveUpn).toBe(original.projectExecutiveUpn);
+    expect(retrieved!.projectManagerUpn).toBe(original.projectManagerUpn);
+    expect(retrieved!.leadEstimatorUpn).toBe(original.leadEstimatorUpn);
+    expect(retrieved!.supportingEstimatorUpns).toEqual(original.supportingEstimatorUpns);
+    expect(retrieved!.additionalTeamMemberUpns).toEqual(original.additionalTeamMemberUpns);
+    expect(retrieved!.timberscanApproverUpn).toBe(original.timberscanApproverUpn);
+    expect(retrieved!.sageAccessUpns).toEqual(original.sageAccessUpns);
   });
 
   it('Year field defaults to undefined when not provided', async () => {
@@ -156,5 +159,74 @@ describe('SP field mapping contract — full round-trip', () => {
     await repo.upsertRequest(request);
     const retrieved = await repo.getRequest('req-full');
     expect(retrieved!.year).toBeUndefined();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. Real contract proof — validates PROJECTS_LIST_FIELD_MAP completeness
+//    This proves the field map covers the production schema. The mapper
+//    tests in projects-list-mapper.test.ts prove serialization correctness.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Real field contract proof (PROJECTS_LIST_FIELD_MAP)', () => {
+  it('field map covers all 43 production schema columns', () => {
+    // 26 legacy (Title + field_1..field_24 + Year) + 17 P2-07 gap fields
+    expect(Object.keys(PROJECTS_LIST_FIELD_MAP)).toHaveLength(43);
+  });
+
+  it('SELECT_FIELDS includes all mapped SP internal names', () => {
+    const mapSpNames = Object.values(PROJECTS_LIST_FIELD_MAP).map((e) => e.spInternalName);
+    for (const name of mapSpNames) {
+      expect(PROJECTS_LIST_SELECT_FIELDS).toContain(name);
+    }
+  });
+
+  it('legacy CSV-import columns use field_N pattern', () => {
+    for (let i = 1; i <= 24; i++) {
+      const entry = Object.values(PROJECTS_LIST_FIELD_MAP).find(
+        (e) => e.spInternalName === `field_${i}`,
+      );
+      expect(entry, `field_${i} must exist in PROJECTS_LIST_FIELD_MAP`).toBeDefined();
+    }
+  });
+
+  it('P2-07 gap columns use domain-name internal names', () => {
+    const p207Fields = [
+      'projectStreetAddress', 'projectCity', 'projectCounty', 'projectState', 'projectZip',
+      'officeDivision', 'procoreProject',
+      'projectExecutiveUpn', 'projectManagerUpn', 'leadEstimatorUpn',
+      'supportingEstimatorUpns', 'additionalTeamMemberUpns', 'timberscanApproverUpn', 'sageAccessUpns',
+      'clarificationRequestedAt', 'requesterRetryUsed', 'clarificationItems',
+    ];
+    for (const field of p207Fields) {
+      const entry = PROJECTS_LIST_FIELD_MAP[field as keyof typeof PROJECTS_LIST_FIELD_MAP];
+      expect(entry, `${field} must exist in PROJECTS_LIST_FIELD_MAP`).toBeDefined();
+      // P2-07 columns use domain property name as SP internal name
+      expect(entry.spInternalName).toBe(field);
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. Regression guards — prevents silent field loss
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Regression guards — field contract cannot silently shrink', () => {
+  it('field map has at least 43 entries (cannot silently remove fields)', () => {
+    expect(Object.keys(PROJECTS_LIST_FIELD_MAP).length).toBeGreaterThanOrEqual(43);
+  });
+
+  it('SELECT_FIELDS has at least 43 entries', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS.length).toBeGreaterThanOrEqual(43);
+  });
+
+  it('every field map entry has a valid serialization strategy', () => {
+    const validStrategies = new Set(['direct', 'json-array', 'number', 'computed']);
+    for (const [key, entry] of Object.entries(PROJECTS_LIST_FIELD_MAP)) {
+      expect(
+        validStrategies.has(entry.serialization),
+        `${key} has invalid serialization: ${entry.serialization}`,
+      ).toBe(true);
+    }
   });
 });
