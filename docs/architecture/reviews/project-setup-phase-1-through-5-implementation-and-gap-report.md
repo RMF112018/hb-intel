@@ -149,6 +149,45 @@ Phase 1 backend scope can be marked closed when AC-1 through AC-10 from the boun
 - `docs/architecture/adr/ADR-0124-project-setup-backend-host-boundary.md`
 - `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Backend-Boundary-Freeze.md`
 
+### Phase 1 Host Implementation (2026-03-31, Prompt-08)
+
+**Host/composition-root change implemented:**
+
+- Created `backend/functions/src/hosts/project-setup/index.ts` — thin composition root importing only 8 in-scope route families (projectRequests, provisioningSaga, timerFullSpec, signalr, acknowledgments, notifications, health, cleanupIdempotency).
+- Created `backend/functions/src/hosts/project-setup/service-factory.ts` — scoped container with 9 eager Project Setup services, no domain CRUD getters.
+- Created `backend/functions/src/hosts/project-setup/host.json` — tenant-specific CORS (`https://hedrickbrotherscom.sharepoint.com` only), SignalR binding, 10-minute timeout.
+
+**Routes included:**
+
+projectRequests (4 HTTP), provisioningSaga (10 HTTP), timerFullSpec (1 timer), signalr (1 HTTP), acknowledgments (2 HTTP), notifications (7 HTTP + 1 timer + queue), health (1 HTTP), cleanupIdempotency (1 timer).
+
+**Routes excluded:**
+
+leads, projects, estimating, schedule, buyout, compliance, contracts, risk, scorecards, pmp, proxy.
+
+**Service/container changes:**
+
+- `IProjectSetupServiceContainer` interface exposes only: sharePoint, tableStorage, signalR, managedIdentity, projectRequests, acknowledgments, graph, notifications, idempotency.
+- No lazy domain CRUD service getters. No domain service type imports.
+- All shared middleware, adapters, and utils imported from centralized paths — no duplication.
+
+**Tests added and results:**
+
+- `backend/functions/src/test/project-setup-host-boundary.test.ts` — 37 tests proving AC-1 (8 in-scope imports, exactly 8 count), AC-2 (no domain CRUD service types, no lazy getters), AC-3 (11 out-of-scope routes excluded), AC-5 (tenant-specific CORS, no wildcards, credentials required), AC-7 (shared imports from services/, utils/, functions/ paths).
+- Full suite: 597 passed, 3 skipped, 0 failed. Zero regressions (AC-10).
+- check-types: clean. lint: 0 errors. build: clean.
+
+**Closure statement:**
+
+Backend scope freeze acceptance criteria AC-1, AC-2, AC-3, AC-5, AC-7, AC-8, AC-9, and AC-10 are now satisfied. AC-4 (positive route registration proof) is covered by the AC-1 tests that verify all 8 families are imported. AC-6 (config validation scoping) is deferred to Prompt-09. The backend boundary is **substantially closed** with one named residual: domain-specific config validation scoping (Prompt-09).
+
+**Evidence:**
+
+- `backend/functions/src/hosts/project-setup/index.ts`
+- `backend/functions/src/hosts/project-setup/service-factory.ts`
+- `backend/functions/src/hosts/project-setup/host.json`
+- `backend/functions/src/test/project-setup-host-boundary.test.ts`
+
 ### Phase 2
 
 **Intended objective**
@@ -357,7 +396,7 @@ The following items are genuinely implemented in the current repo:
   - This means the wizard does not enforce the full intended submission contract.
 - **Backend package is not truly isolated to Project Setup scope.**
   - Evidence: `backend/functions/src/index.ts`, `backend/functions/src/services/service-factory.ts`.
-  - **Remediation in progress:** ADR-0124 accepted (2026-03-31); boundary freeze plan committed; implementation planned for Prompt-08 through Prompt-10. Closure criteria: AC-1 through AC-10 in `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Backend-Boundary-Freeze.md`.
+  - **Remediation implemented (Prompt-08, 2026-03-31):** Dedicated Project Setup host created with scoped composition root, service factory, and host.json. Boundary regression tests added (37 tests). AC-1, AC-2, AC-3, AC-5, AC-7, AC-8, AC-9, AC-10 satisfied. Remaining: AC-6 (config validation scoping, Prompt-09).
 - **Frontend/package-level release evidence is not green.**
   - Current `@hbc/spfx-project-setup` package test invocation still exposes failing page-level tests, which undercuts the Phase 5 “complete” claim.
 - **No repo proof of live deployment validation.**
@@ -434,12 +473,12 @@ The most accurate maturity description is:
 
 > The Project Setup / Estimating SPFx implementation is substantially built and directionally sound, but current repo truth still shows real launch blockers and several phase-complete claims that are stronger than the code, tests, and infrastructure evidence support.
 
-**Phase 1 Backend Remediation Progress (2026-03-31):** The backend deployment boundary has been decided and documented (ADR-0124). The architecture freeze and implementation plan are committed to repo truth. Implementation (Prompts 08-11) will address the "Backend package is not truly isolated" launch blocker. Phase 1 status remains **Partial** until the implementation is complete and AC-1 through AC-10 are satisfied.
+**Phase 1 Backend Remediation Progress (2026-03-31):** The backend deployment boundary has been decided (ADR-0124) and implemented (Prompt-08). A dedicated Project Setup host exists with scoped composition root, service factory, and host.json. Boundary regression tests (37 tests) prove AC-1, AC-2, AC-3, AC-5, AC-7. Full verification suite passes (597 tests, 0 failures). Phase 1 backend boundary is **substantially closed**; remaining residual is AC-6 (config validation scoping, Prompt-09).
 
 ## 10. Explicit Unresolved Questions
 
 - Which currently unmapped `IProjectSetupRequest` fields are intentionally transient, and which are expected to survive real production persistence?
-- Is the intended release target a Project Setup-only backend deployment, or a broader shared Azure Functions host that happens to include Project Setup?
+- ~~Is the intended release target a Project Setup-only backend deployment, or a broader shared Azure Functions host that happens to include Project Setup?~~ **RESOLVED (ADR-0124, Prompt-08):** Per-domain Function App hosts. Project Setup host implemented at `backend/functions/src/hosts/project-setup/`.
 - Are the current failing `@hbc/spfx-project-setup` page-level tests known regressions, test drift, or accepted defects?
 - Has any live staging deployment successfully run the post-deploy smoke suite documented in `backend/functions/src/test/smoke/post-deploy-smoke.test.ts`?
 
@@ -457,6 +496,10 @@ The most accurate maturity description is:
 - Boundary decision: `docs/architecture/adr/ADR-0124-project-setup-backend-host-boundary.md`
 - Boundary freeze plan: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Backend-Boundary-Freeze.md`
 - ADR-0009 cross-reference addendum: `docs/architecture/adr/ADR-0009-backend-functions.md` (Consequences section)
+- Project Setup host composition root: `backend/functions/src/hosts/project-setup/index.ts`
+- Project Setup scoped service factory: `backend/functions/src/hosts/project-setup/service-factory.ts`
+- Project Setup domain host.json: `backend/functions/src/hosts/project-setup/host.json`
+- Host boundary regression tests: `backend/functions/src/test/project-setup-host-boundary.test.ts`
 
 ### Phase 2 evidence
 
