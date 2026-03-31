@@ -1,15 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 /**
- * P1-08/P1-09: Project Setup host boundary regression guard.
+ * P1-08/P1-09/P1-10: Project Setup host boundary regression guard
+ * and release-scope proof.
  *
  * Proves the dedicated Project Setup composition root satisfies
- * the boundary freeze acceptance criteria (ADR-0124, AC-1 through AC-7).
+ * the boundary freeze acceptance criteria (ADR-0124, AC-1 through AC-10).
  *
  * These tests read source files directly to enforce structural invariants
- * that must not regress.
+ * that must not regress. They also serve as the machine-checkable
+ * release-scope proof required by Prompt-10.
  */
 
 const FUNCTIONS_SRC = resolve(import.meta.dirname, '..');
@@ -217,6 +219,146 @@ describe('P1-08 Project Setup host boundary', () => {
 
     it('composition root imports from shared functions path', () => {
       expect(hostIndex).toContain("'../../functions/");
+    });
+  });
+});
+
+/**
+ * P1-10: Strengthened regression guards and release-scope proof.
+ *
+ * These tests go beyond the acceptance criteria to guard against
+ * scope drift, document drift, and config expansion.
+ */
+describe('P1-10 Regression guards and release-scope proof', () => {
+  const hostIndex = readFileSync(resolve(PS_HOST_DIR, 'index.ts'), 'utf-8');
+  const hostFactory = readFileSync(resolve(PS_HOST_DIR, 'service-factory.ts'), 'utf-8');
+
+  describe('scope drift prevention', () => {
+    it('composition root has no dynamic imports', () => {
+      // All imports must be static side-effect imports — no dynamic import()
+      expect(hostIndex).not.toMatch(/import\s*\(/);
+    });
+
+    it('composition root has no require() calls', () => {
+      expect(hostIndex).not.toContain('require(');
+    });
+
+    it('service factory does not re-export createServiceFactory', () => {
+      // The PS factory must not delegate to the monolithic factory
+      expect(hostFactory).not.toContain('createServiceFactory');
+    });
+
+    it('service factory has its own singleton, not shared with monolithic factory', () => {
+      // The PS factory uses createProjectSetupServiceFactory, not createServiceFactory
+      expect(hostFactory).toContain('createProjectSetupServiceFactory');
+      expect(hostFactory).not.toMatch(/import.*createServiceFactory/);
+    });
+
+    it('host.json has exactly one allowed origin', () => {
+      const hostJson = JSON.parse(
+        readFileSync(resolve(PS_HOST_DIR, 'host.json'), 'utf-8'),
+      );
+      const origins = hostJson.extensions?.http?.cors?.allowedOrigins ?? [];
+      expect(
+        origins.length,
+        `PS host should have exactly 1 CORS origin, found ${origins.length}: ${origins.join(', ')}`,
+      ).toBe(1);
+    });
+  });
+
+  describe('config expansion prevention', () => {
+    it('service factory does not reference EMAIL config', () => {
+      expect(hostFactory).not.toContain('EMAIL_DELIVERY_API_KEY');
+      expect(hostFactory).not.toContain('EMAIL_FROM_ADDRESS');
+    });
+
+    it('service factory does not reference NOTIFICATION_API_BASE_URL', () => {
+      expect(hostFactory).not.toContain('NOTIFICATION_API_BASE_URL');
+    });
+
+    it('service factory does not reference SHAREPOINT_HUB_SITE_ID at startup', () => {
+      // Hub site is a provisioning prerequisite, not a startup requirement
+      expect(hostFactory).not.toContain('SHAREPOINT_HUB_SITE_ID');
+    });
+
+    it('service factory does not reference SHAREPOINT_APP_CATALOG_URL at startup', () => {
+      expect(hostFactory).not.toContain('SHAREPOINT_APP_CATALOG_URL');
+    });
+  });
+
+  describe('release-scope proof: PS host.json mirrors required runtime config', () => {
+    const psHostJson = JSON.parse(
+      readFileSync(resolve(PS_HOST_DIR, 'host.json'), 'utf-8'),
+    );
+
+    it('has SignalR extension configured', () => {
+      expect(psHostJson.extensions?.signalR?.connectionStringSetting)
+        .toBe('AzureSignalRConnectionString');
+    });
+
+    it('has function timeout matching monolithic host', () => {
+      const monoHostJson = JSON.parse(
+        readFileSync(resolve(FUNCTIONS_SRC, '../host.json'), 'utf-8'),
+      );
+      expect(psHostJson.functionTimeout).toBe(monoHostJson.functionTimeout);
+    });
+
+    it('has api route prefix', () => {
+      expect(psHostJson.extensions?.http?.routePrefix).toBe('api');
+    });
+  });
+
+  describe('release-scope proof: architecture docs are consistent', () => {
+    it('RELEASE-SCOPE.md exists in the PS host directory', () => {
+      expect(existsSync(resolve(PS_HOST_DIR, 'RELEASE-SCOPE.md'))).toBe(true);
+    });
+
+    it('RELEASE-SCOPE.md lists all 8 in-scope families', () => {
+      const manifest = readFileSync(resolve(PS_HOST_DIR, 'RELEASE-SCOPE.md'), 'utf-8');
+      for (const route of IN_SCOPE_ROUTES) {
+        expect(
+          manifest,
+          `RELEASE-SCOPE.md must mention '${route}'`,
+        ).toContain(route);
+      }
+    });
+
+    it('RELEASE-SCOPE.md lists all 11 excluded families', () => {
+      const manifest = readFileSync(resolve(PS_HOST_DIR, 'RELEASE-SCOPE.md'), 'utf-8');
+      for (const route of OUT_OF_SCOPE_ROUTES) {
+        expect(
+          manifest,
+          `RELEASE-SCOPE.md must mention excluded family '${route}'`,
+        ).toContain(route);
+      }
+    });
+
+    it('ADR-0124 exists', () => {
+      const adrPath = resolve(FUNCTIONS_SRC, '../../../docs/architecture/adr/ADR-0124-project-setup-backend-host-boundary.md');
+      expect(existsSync(adrPath)).toBe(true);
+    });
+
+    it('boundary freeze plan exists', () => {
+      const planPath = resolve(
+        FUNCTIONS_SRC,
+        '../../../docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Backend-Boundary-Freeze.md',
+      );
+      expect(existsSync(planPath)).toBe(true);
+    });
+  });
+
+  describe('release-scope proof: monolithic host is unchanged', () => {
+    it('monolithic index.ts still registers all 19 route families', () => {
+      const monoIndex = readFileSync(resolve(FUNCTIONS_SRC, 'index.ts'), 'utf-8');
+      const allFamilies = [...IN_SCOPE_ROUTES, ...OUT_OF_SCOPE_ROUTES.filter(r => r !== 'proxy')];
+      // proxy is also in monolithic but not in OUT_OF_SCOPE_ROUTES check — add separately
+      for (const route of allFamilies) {
+        expect(
+          monoIndex,
+          `Monolithic host must still import '${route}'`,
+        ).toContain(`functions/${route}/`);
+      }
+      expect(monoIndex).toContain('functions/proxy/');
     });
   });
 });

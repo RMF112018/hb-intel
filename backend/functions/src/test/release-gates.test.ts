@@ -80,6 +80,11 @@ describe('P5-03 Release gates', () => {
     expect(typeof mod.validateProvisioningPrerequisites).toBe('function');
   });
 
+  it('validate-config exports domain-scoped Project Setup validation (P1-09)', async () => {
+    const mod = await import('../utils/validate-config.js');
+    expect(typeof mod.validateProjectSetupStartupConfig).toBe('function');
+  });
+
   // --- Gate 5: Health endpoint is diagnostic ---
 
   it('health endpoint source includes operationalReadiness', () => {

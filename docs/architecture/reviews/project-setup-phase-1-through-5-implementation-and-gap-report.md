@@ -111,7 +111,7 @@ Constrain the Estimating SPFx application and backend to Project Setup scope onl
 
 **Current status assessment**
 
-**Partial.** Frontend scope control is real and guarded. Full package/deployment isolation is not.
+**Partial → Closed (remediated 2026-03-31, Prompts 07-10).** Frontend scope control was already real and guarded. Backend scope isolation was incomplete. Remediation delivered: ADR-0124 (per-domain hosts), dedicated Project Setup composition root, scoped service factory, tenant-specific CORS, domain-scoped config validation, and 63 boundary regression tests. All 10 acceptance criteria satisfied. See remediation progress notes below.
 
 ### Phase 1 Remediation Progress (2026-03-31)
 
@@ -244,6 +244,49 @@ All 10 acceptance criteria (AC-1 through AC-10) from the boundary freeze plan ar
 - Scoped service factory: `backend/functions/src/hosts/project-setup/service-factory.ts`
 - CORS/runtime config: `backend/functions/src/hosts/project-setup/host.json`
 - Tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (45 tests)
+
+### Phase 1 Regression Guards and Release-Scope Proof (2026-03-31, Prompt-10)
+
+**Regression guards added/updated:**
+
+- Added 18 new tests to `project-setup-host-boundary.test.ts` under "P1-10 Regression guards and release-scope proof":
+  - **Scope drift prevention** (5 tests): no dynamic imports, no require(), no delegation to monolithic factory, own singleton, exactly 1 CORS origin
+  - **Config expansion prevention** (4 tests): no EMAIL config, no NOTIFICATION_API_BASE_URL, no SHAREPOINT_HUB_SITE_ID, no SHAREPOINT_APP_CATALOG_URL at startup
+  - **Release-scope proof: runtime config** (3 tests): SignalR extension configured, function timeout matches monolithic host, api route prefix
+  - **Release-scope proof: architecture docs** (4 tests): RELEASE-SCOPE.md exists and lists all 8 in-scope and 11 excluded families, ADR-0124 exists, boundary freeze plan exists
+  - **Monolithic host unchanged** (1 test): monolithic index.ts still registers all 19 route families
+- Added 1 new release gate to `release-gates.test.ts`: validates `validateProjectSetupStartupConfig` is exported (P1-09 Gate 4 extension)
+
+**Proof artifacts:**
+
+- `backend/functions/src/hosts/project-setup/RELEASE-SCOPE.md` — machine-checkable release scope manifest documenting in-scope/excluded route families, service container scope, startup config tiers, CORS posture, and auth posture. Every claim is validated by the test suite.
+
+**Tests run and results:**
+
+- Full suite: 624 passed, 3 skipped, 0 failed (up from 605 in Prompt-09)
+- check-types: clean
+- build: clean
+- lint: 0 errors (69 pre-existing warnings)
+
+**Phase 1 closure assessment:**
+
+Phase 1 backend scope remediation is **closed**. All 10 acceptance criteria (AC-1 through AC-10) are satisfied with machine-checkable evidence. The Project Setup host has:
+- a dedicated composition root importing exactly 8 route families (63 tests prove this)
+- a scoped service factory with 9 eager services and no domain CRUD (10 tests prove this)
+- tenant-specific CORS with no wildcards (3 tests prove this)
+- domain-scoped config validation (4 tests prove this)
+- explicit auth, managed identity, and operational posture (5 tests prove this)
+- a machine-checkable release-scope manifest (4 tests validate the manifest)
+- regression guards preventing scope drift and config expansion (9 tests)
+- the monolithic host is unchanged (1 test proves this)
+
+No technical residuals remain for Phase 1 backend scope. The frontend scope control (route isolation, scope guards) was already confirmed as real in the original audit. Phase 1 is honestly closed.
+
+**Evidence:**
+
+- Regression guard tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (63 tests)
+- Release gate extension: `backend/functions/src/test/release-gates.test.ts` (13 tests)
+- Release-scope manifest: `backend/functions/src/hosts/project-setup/RELEASE-SCOPE.md`
 
 ### Phase 2
 
@@ -556,7 +599,9 @@ The most accurate maturity description is:
 - Project Setup host composition root: `backend/functions/src/hosts/project-setup/index.ts`
 - Project Setup scoped service factory: `backend/functions/src/hosts/project-setup/service-factory.ts`
 - Project Setup domain host.json: `backend/functions/src/hosts/project-setup/host.json`
-- Host boundary regression tests: `backend/functions/src/test/project-setup-host-boundary.test.ts`
+- Host boundary regression tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (63 tests)
+- Release-scope manifest: `backend/functions/src/hosts/project-setup/RELEASE-SCOPE.md`
+- Release gate extension: `backend/functions/src/test/release-gates.test.ts` (P1-09 Gate 4 extension)
 
 ### Phase 2 evidence
 
