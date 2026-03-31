@@ -46,7 +46,7 @@ describe('WAVE0_REQUIRED_CONFIG', () => {
 
   it('AZURE_CLIENT_ID description reflects managed-identity role', () => {
     const entry = WAVE0_REQUIRED_CONFIG.find((e) => e.name === 'AZURE_CLIENT_ID');
-    expect(entry!.description).toContain('Managed identity client ID');
+    expect(entry!.description).toContain('Managed Identity client ID');
     expect(entry!.description).toContain('DefaultAzureCredential');
     expect(entry!.description).toContain('API_AUDIENCE');
   });
