@@ -24,31 +24,67 @@ const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
 
 // ── Validation helpers ──────────────────────────────────────────────────
 
-const VALID_PROJECT_STAGES = ['Pursuit', 'Active'] as const;
-const VALID_PROJECT_TYPES = ['GC', 'CM', 'DB', 'DBB', 'Residential', 'Commercial'] as const;
+export const VALID_PROJECT_STAGES = ['Lead', 'Pursuit', 'Preconstruction', 'Construction', 'Closeout', 'Warranty'] as const;
+export const VALID_DEPARTMENTS = ['commercial', 'luxury-residential'] as const;
 
-interface ValidationError {
+export interface ValidationError {
   field: string;
   message: string;
 }
 
-function validateSubmission(body: Partial<IProjectSetupRequest>): ValidationError[] {
+export function validateSubmission(body: Partial<IProjectSetupRequest>): ValidationError[] {
   const errors: ValidationError[] = [];
 
+  // ── Required fields (aligned with wizard enforcement — P6-01) ──────
   if (!body.projectName?.trim()) {
     errors.push({ field: 'projectName', message: 'Project name is required.' });
   }
   if (!body.projectLocation?.trim()) {
     errors.push({ field: 'projectLocation', message: 'Project location is required.' });
   }
+  if (!body.projectStreetAddress?.trim()) {
+    errors.push({ field: 'projectStreetAddress', message: 'Street address is required.' });
+  }
+  if (!body.projectCity?.trim()) {
+    errors.push({ field: 'projectCity', message: 'City is required.' });
+  }
+  if (!body.projectCounty?.trim()) {
+    errors.push({ field: 'projectCounty', message: 'County is required.' });
+  }
+  if (!body.projectState?.trim()) {
+    errors.push({ field: 'projectState', message: 'State is required.' });
+  }
+  if (!body.projectZip?.trim()) {
+    errors.push({ field: 'projectZip', message: 'Zip is required.' });
+  }
+  if (!body.department) {
+    errors.push({ field: 'department', message: 'Department is required.' });
+  }
+  if (!body.projectType?.trim()) {
+    errors.push({ field: 'projectType', message: 'Project type is required.' });
+  }
+  if (!body.projectExecutiveUpn?.trim()) {
+    errors.push({ field: 'projectExecutiveUpn', message: 'Project Executive is required.' });
+  }
+  if (!body.leadEstimatorUpn?.trim()) {
+    errors.push({ field: 'leadEstimatorUpn', message: 'Lead Estimator is required.' });
+  }
+  if (!body.timberscanApproverUpn?.trim()) {
+    errors.push({ field: 'timberscanApproverUpn', message: 'Timberscan Approver is required.' });
+  }
   if (!body.groupMembers?.length) {
     errors.push({ field: 'groupMembers', message: 'At least one group member is required.' });
   }
+
+  // ── Format validation ──────────────────────────────────────────────
   if (body.estimatedValue !== undefined && body.estimatedValue !== null && body.estimatedValue < 0) {
     errors.push({ field: 'estimatedValue', message: 'Estimated value must be a positive number.' });
   }
   if (body.projectStage && !VALID_PROJECT_STAGES.includes(body.projectStage as any)) {
     errors.push({ field: 'projectStage', message: `Project stage must be one of: ${VALID_PROJECT_STAGES.join(', ')}` });
+  }
+  if (body.department && !VALID_DEPARTMENTS.includes(body.department as any)) {
+    errors.push({ field: 'department', message: `Department must be one of: ${VALID_DEPARTMENTS.join(', ')}` });
   }
 
   return errors;

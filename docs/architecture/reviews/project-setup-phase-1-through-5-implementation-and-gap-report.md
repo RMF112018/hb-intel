@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P5-11 documentation reconciliation and audit closure)
+> **Last updated:** 2026-03-31 (P6-01 persistence contract, validation, and clarification storage closure)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -15,8 +15,8 @@ This report was originally authored as a gap analysis finding that Phases 1-5 we
 
 ### Remaining blockers
 
-- **Required-field enforcement is still intentionally disabled** via `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
-- **Several release-readiness items remain environment-gated** rather than proven against a live deployment (8 deployment prerequisites, staging smoke execution, leadership/IT/support signoff).
+- ~~**Required-field enforcement is still intentionally disabled.**~~ **CLOSED (P6-01, 2026-03-31).** `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED` set to `true`. Backend validation expanded to match the wizard's 11 required fields plus format checks. 43-field persistence contract confirmed aligned.
+- **Several release-readiness items remain environment-gated** rather than proven against a live deployment (8 deployment prerequisites + D0 SP column migration, staging smoke execution, leadership/IT/support signoff).
 - **External SharePoint list contract validation** remains outside repo evidence.
 
 ### Overall status
@@ -402,7 +402,7 @@ Phase 2 Prompt P2-07 documented an external production Projects list export that
 **Schema notes:**
 
 - `field_17` (projectLeadId), `field_18` (viewerUPNs), `field_19` (addOns) are absent from the 2026-03-31 schema export but retained in code for legacy row compatibility
-- `clarificationItems` uses SP Text (MaxLength=255) — may truncate for requests with many clarification records; a future migration to MultiLineText or Azure Table Storage may be needed for production scale
+- ~~`clarificationItems` uses SP Text (MaxLength=255) — may truncate for requests with many clarification records~~ **CLOSED (P6-01).** Migrated to MultiLineText along with 3 other json-array gap fields. D0 deployment prerequisite added to runbook.
 - `projectZip` is SP Number type — the mapper converts to/from string in the domain model
 
 **Intentionally transient fields:** None. All `IProjectSetupRequest` fields are now mapped to SharePoint columns.
@@ -548,9 +548,9 @@ The repo-owned Phase 2 persistence contract is now aligned across the canonical 
 **Remaining limitations (not blockers):**
 
 - The current live SharePoint `Projects` list state remains **external / not repo-evidenced**.
-- `clarificationItems` uses SP Text column (MaxLength=255). May need migration to MultiLineText or Azure Table Storage if production clarification records exceed this limit.
+- ~~`clarificationItems` uses SP Text column (MaxLength=255).~~ **CLOSED (P6-01).** Migrated to MultiLineText in the repo-owned contract. D0 deployment prerequisite documents the live list column migration.
 - `field_17`/`field_18`/`field_19` absent from latest schema export but retained in code for legacy row compatibility.
-- Required-field enforcement remains disabled (`PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false`). This is a cross-phase concern, not a Phase 2 blocker.
+- ~~Required-field enforcement remains disabled (`PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false`).~~ **CLOSED (P6-01).** Re-enabled with backend validation parity.
 
 **Documents reconciled:**
 
@@ -1553,6 +1553,33 @@ Phase 5 documentation is reconciled with current repo truth (P5-07 through P5-11
 - Handoff (P5-07): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`
 - All P5-07 through P5-10 progress notes in this section
 
+### Phase 6 Persistence Contract, Validation, and Clarification Storage Closure (2026-03-31, Prompt P6-01)
+
+**Scope:** Close the three remaining code-level blockers: clarificationItems storage ceiling, disabled required-field enforcement, and backend validation gap.
+
+**Changes made:**
+
+| Change | Files |
+|--------|-------|
+| Migrated 4 json-array SP columns from Text (255) to MultiLineText | `projects-list-contract.ts` |
+| Added write-path diagnostic guard for json-array field length | `projects-list-mapper.ts` |
+| Added multi-item round-trip tests (5 clarification items, 8 UPNs) | `projects-list-mapper.test.ts` |
+| Expanded backend validation to 13 required-field checks + format validation | `projectRequests/index.ts` |
+| Expanded VALID_PROJECT_STAGES to full domain set (6 stages) | `projectRequests/index.ts` |
+| Added 19 backend validation unit tests (F1–F19) | `request-lifecycle.test.ts` |
+| Re-enabled required-field enforcement (`true`) | `projectSetupSteps.ts` |
+| Added D0 deployment prerequisite for SP column migration | `Phase-5_Deployment-Runbook.md` |
+
+**Decisions:**
+
+1. **clarificationItems storage:** Migrate to MultiLineText (not keep-as-is). Rationale: the UI and state machine explicitly support multiple clarification items, and a single item already approaches the 255-char ceiling. Same migration applied to `supportingEstimatorUpns`, `additionalTeamMemberUpns`, `sageAccessUpns` — all use json-array serialization.
+2. **Required-field enforcement:** Re-enable (`true`). Precondition met: the 43-field persistence contract maps every wizard field to SharePoint and the storage ceiling is closed.
+3. **Backend validation parity:** Expand `validateSubmission()` to match wizard contract. Direct API submissions now receive the same enforcement as wizard-based submissions.
+
+**Closure statement:**
+
+The persistence contract, required-field enforcement, and clarification storage items are closed in repo-owned code and tests. The remaining deployment prerequisite (D0: SP column migration) is environment-gated and documented in the deployment runbook. No code-level persistence or validation blockers remain.
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1603,9 +1630,10 @@ The following items are genuinely implemented in the current repo:
 - **Live SharePoint list alignment is not repo-evidenced.**
   - Repo-owned code and tests now align to a 43-field contract, but the repo does not contain a checked-in schema export or live integration proof showing that the external SharePoint `Projects` list currently exposes that same contract.
   - Evidence: `backend/functions/src/services/projects-list-contract.ts`, `backend/functions/src/services/projects-list-mapper.ts`, `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Prompt-07_Phase-2-Canonical-Contract-and-Schema-Reconciliation.md`.
-- **Required-field enforcement is intentionally disabled.**
-  - `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
-  - This means the wizard does not enforce the full intended submission contract.
+- ~~**Required-field enforcement is intentionally disabled.**~~ **CLOSED (P6-01, 2026-03-31).**
+  - `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = true` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
+  - Backend `validateSubmission()` expanded to match the wizard's 11 required fields plus format checks for department and projectStage.
+  - `VALID_PROJECT_STAGES` expanded from `['Pursuit', 'Active']` to the full domain set: `['Lead', 'Pursuit', 'Preconstruction', 'Construction', 'Closeout', 'Warranty']`.
 - **~~Backend package is not truly isolated to Project Setup scope.~~ CLOSED (Prompts 07-10, 2026-03-31).**
   - Original evidence: `backend/functions/src/index.ts`, `backend/functions/src/services/service-factory.ts`.
   - Dedicated Project Setup host created at `backend/functions/src/hosts/project-setup/` with scoped composition root, service factory, domain-specific host.json, domain-scoped config validation, and release-scope manifest. All 10 acceptance criteria (AC-1 through AC-10) satisfied. 63 boundary regression tests. Architecture decision: ADR-0124.
@@ -1686,15 +1714,12 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Cross-phase impact:** Keeps end-to-end Phase 2 closure partly external even though the repo-owned code path is repaired.
   **Recommended next-step direction:** Capture and retain environment-level proof that the live list matches the repo-owned 43-field contract.
 
-- **Item:** `clarificationItems` storage ceiling
+- **Item:** ~~`clarificationItems` storage ceiling~~ **CLOSED (P6-01, 2026-03-31)**
   **Category:** Data contract / scale follow-up
-  **Status:** Implicitly deferred / partially implemented
-  **Why it is still deferred:** The field now persists through the repo-owned code path, but it is stored in an SP Text column with a 255-character limit, which may become insufficient for larger clarification histories.
-  **Repo-truth evidence:** `backend/functions/src/services/projects-list-contract.ts`; `backend/functions/src/services/projects-list-mapper.ts`; `docs/architecture/reviews/project-setup-phase-1-through-5-implementation-and-gap-report.md`
-  **Affected files/surfaces:** clarification lifecycle persistence, future production scale
-  **Blocker level:** Non-blocking follow-up
-  **Cross-phase impact:** Does not reopen the original Phase 2 code-path gap, but it remains a bounded operational/data-model caveat.
-  **Recommended next-step direction:** Move the field to MultiLineText or alternate storage if production usage demonstrates the current length ceiling is too small.
+  **Status:** Closed
+  **Resolution:** All four json-array Phase 2 gap fields (`supportingEstimatorUpns`, `additionalTeamMemberUpns`, `sageAccessUpns`, `clarificationItems`) migrated from SP Text (255-char limit) to MultiLineText (~63k chars) in the repo-owned field contract. This matches the established pattern used by the legacy CSV-import json-array fields (`groupMembers`, `groupLeaders`, `viewerUPNs`, `addOns`). Write-path diagnostic guard added to `toListItem()`. Round-trip tests added for multi-item arrays exceeding the former 255-char ceiling.
+  **Repo-truth evidence:** `backend/functions/src/services/projects-list-contract.ts` (spType changed to MultiLineText); `backend/functions/src/services/projects-list-mapper.ts` (diagnostic guard); `backend/functions/src/services/__tests__/projects-list-mapper.test.ts` (P6-01 overflow tests)
+  **Deployment prerequisite:** The four columns must also be migrated from Text to Note (MultiLineText) in the live HBCentral Projects list — documented as D0 in `Phase-5_Deployment-Runbook.md`.
 
 #### Phase 3 deferred implementations
 
@@ -1835,7 +1860,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 ### Technical risk
 
 - Low-to-medium risk that live environment persistence could diverge from the repo-owned 43-field contract because the external SharePoint list is not independently proven by a checked-in schema export or live integration evidence.
-- Medium-to-high risk of invalid or incomplete submissions entering the lifecycle because required-field enforcement is disabled.
+- ~~Medium-to-high risk of invalid or incomplete submissions entering the lifecycle because required-field enforcement is disabled.~~ **CLOSED (P6-01).** Required-field enforcement re-enabled; backend validation matches wizard contract.
 - Medium risk from residual differences between repo-owned proof and environment-level proof.
 
 ### Deployment risk
@@ -1858,8 +1883,8 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 1. **Obtain external proof that the live SharePoint `Projects` list matches the repo-owned 43-field contract.**
    - The repo-owned Phase 2 code path is repaired, but release decisions still need environment-level proof for the external list itself.
-2. **Re-enable and align required-field enforcement.**
-   - Remove the temporary disabled state in `projectSetupSteps.ts` and ensure backend validation matches the intended wizard contract.
+2. **~~Re-enable and align required-field enforcement.~~ CLOSED (P6-01, 2026-03-31).**
+   - `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED` set to `true`. Backend `validateSubmission()` expanded to 13 required-field checks plus format validation for department, projectStage, and estimatedValue. 19 new backend validation tests added. 39/39 frontend step tests pass.
 3. **~~Resolve current SPFx retained-surface test failures.~~ CLOSED (P5-08, 2026-03-31).**
    - All 10 failures fixed. Root cause: test harness gap (mock client injection). 19 files, 138 tests green.
 4. **~~Decide the real backend deployment boundary.~~ DECIDED (2026-03-31).**
@@ -1878,7 +1903,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P5-11 documentation reconciliation and audit closure)
+> **Last updated:** 2026-03-31 (P6-01 persistence contract, validation, and clarification storage closure)
 
 ### Phase-by-phase status
 
@@ -1895,12 +1920,12 @@ The strongest cross-phase dependencies are: external live-list validation for th
 **Code-level work complete; environment-gated deployment and operational signoff remain.** Phases 1-3 are closed. Phases 2 and 4 are substantially closed in repo-owned terms. Phase 5 is substantially closed: release scope frozen, frontend baseline green, evidence categorized, signoff aligned to repo truth (P5-07 through P5-11). Production readiness now depends on environment-level prerequisites and operational execution, not code gaps.
 
 The remaining blockers are:
-1. Disabled required-field enforcement (cross-phase)
+1. ~~Disabled required-field enforcement (cross-phase)~~ **CLOSED (P6-01, 2026-03-31).** Required-field enforcement re-enabled, backend validation aligned with wizard contract.
 2. ~~SPFx page-level test instability (Phase 5)~~ **CLOSED (P5-08, 2026-03-31).** 10 failures fixed, 138 tests green.
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (638 tests, 30 release-specific), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Remaining launch prerequisites are environment-gated (8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (638 tests, 30 release-specific), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract (P6-01). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
 
 ## 10. Explicit Unresolved Questions
 

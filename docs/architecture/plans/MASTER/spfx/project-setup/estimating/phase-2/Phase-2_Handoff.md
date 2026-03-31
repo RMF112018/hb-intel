@@ -6,7 +6,7 @@
 > Backend: `backend/functions/`
 > Version at handoff: 0.2.20
 >
-> **Reconciliation note (2026-03-31):** This handoff originally covered the 26 CSV-import columns only. The 16 unmapped domain properties listed in Section 2 as "intentionally deferred" have since been resolved: the production SharePoint schema was updated with 17 new columns (P2-07), the field contract and mapper were extended to 43 fields, a submit handler field-loss bug was fixed (P2-08), misleading mock tests were restructured (P2-09), and legacy-row compatibility was confirmed safe without backfill (P2-10). The gap document `Phase-2_Data-Contract-Gaps.md` is now historical context.
+> **Reconciliation note (2026-03-31):** This handoff originally covered the 26 CSV-import columns only. The 16 unmapped domain properties listed in Section 2 as "intentionally deferred" have since been resolved in repo-owned code and tests: the field contract and mapper were extended to 43 fields, a submit handler field-loss bug was fixed (P2-08), misleading mock tests were restructured (P2-09), and legacy-row compatibility was confirmed safe without backfill (P2-10). Phase 2 planning docs also refer to an external SharePoint schema export from P2-07, but that export is not checked into the repo, so live-list closure remains external / not repo-evidenced. The gap document `Phase-2_Data-Contract-Gaps.md` is now historical context.
 
 ## 1. What Phase 2 Accomplished
 
@@ -43,14 +43,14 @@
 | Backend tests | 468 | 514 | +46 |
 | Frontend tests | 126 | 126 | 0 (no frontend changes) |
 
-## 2. What Remains Intentionally Deferred
+## 2. Originally Deferred Items at Handoff Time
 
 | Item | Reason | Phase |
 |------|--------|-------|
-| 16 unmapped domain properties | No corresponding SP columns exist; requires SP list schema changes or alternative storage | Phase 3+ |
-| Structured location fields (5) | `projectStreetAddress`, `projectCity`, `projectCounty`, `projectState`, `projectZip` — newer wizard additions not in production SP list | Phase 3+ |
-| Team assignment fields (6) | `projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, etc. — role-specific metadata not persisted | Phase 3+ |
-| Clarification lifecycle (3) | `clarificationRequestedAt`, `requesterRetryUsed`, `clarificationItems` — complex nested data needing storage decision | Phase 3+ |
+| 16 unmapped domain properties | **Historical handoff state only.** Later repo-owned Phase 2 work extended the contract and mapper to cover these properties; current residual proof gap is the live external SharePoint list, not missing repo-owned mapping. | Historically Phase 3+, later reconciled in P2-07 through P2-11 |
+| Structured location fields (5) | **Historical handoff state only.** Later repo-owned Phase 2 work added coverage for `projectStreetAddress`, `projectCity`, `projectCounty`, `projectState`, `projectZip`; current residual proof gap is external-list validation. | Historically Phase 3+, later reconciled |
+| Team assignment fields (6) | **Historical handoff state only.** Later repo-owned Phase 2 work added coverage for `projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, etc.; current residual proof gap is external-list validation. | Historically Phase 3+, later reconciled |
+| Clarification lifecycle (3) | Repo-owned mapping now exists for `clarificationRequestedAt`, `requesterRetryUsed`, and `clarificationItems`, but `clarificationItems` still rides an SP Text column with a 255-character ceiling. | Partially deferred follow-up |
 | Setup script alignment | `scripts/create-projects-list.ts` cannot recreate production schema (15 of 26 fields) | Low priority |
 | Full auth-model redesign | Out of Phase 2 scope | Phase 3+ |
 | `GET /api/users/me/preferences` endpoint | Deferred from Phase 1; ComplexityProvider degrades gracefully | Phase 3+ |
@@ -71,22 +71,19 @@
 
 **Overall: Phase 2 verification PASSED.**
 
-## 4. Unresolved Data-Contract Risks
+## 4. Reconciled Data-Contract Risks
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| 16 unmapped domain properties lost on SP persist | **Medium** | UI Review mode (mock repo) preserves all fields; production mode loses them; documented in gap analysis |
+| Live external SharePoint list may not match the repo-owned 43-field contract | **Medium** | Repo-owned contract/mapper/tests are now aligned; closure of the live list still depends on external schema proof or live integration evidence |
 | SP Number columns storing strings | **Low** | `readOptionalStringFromNumber()` handles numeric `0` → `undefined` conversion; tested |
-| `clarificationItems` has no persist path | **Medium** | Complex nested array; may need Azure Table Storage instead of SP list column |
+| ~~`clarificationItems` storage ceiling~~ | ~~**Medium**~~ | **CLOSED (P6-01).** Migrated to MultiLineText in repo-owned contract along with 3 other json-array gap fields. D0 deployment prerequisite added to runbook for live list column migration. |
 
 ## 5. Recommended Next Phase Entry Point
 
-**First task for Phase 3:** Decide the persistence strategy for the 16 unmapped domain properties:
-- **Option A:** Add new columns to the SP Projects list and extend the field map
-- **Option B:** Serialize overflow properties into a single JSON column
-- **Option C:** Accept some properties as session-scoped (frontend-only, not persisted)
+**First task for Phase 3:** Obtain external proof that the live SharePoint `Projects` list still matches the repo-owned 43-field contract, and decide whether `clarificationItems` needs a larger storage target than the current SP Text column.
 
-The structured location fields and team assignment fields are the highest priority — they carry data collected during the wizard that cannot be recovered after the SP round-trip.
+The highest-value remaining follow-up is no longer missing repo-owned field mapping. It is end-to-end live-environment proof plus the bounded `clarificationItems` storage-scale caveat.
 
 ## Phase 2 Artifacts
 

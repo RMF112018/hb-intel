@@ -421,6 +421,41 @@ describe('Round-trip: toListItem → toDomain preserves mapped fields', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// P6-01: Multi-item json-array round-trip (MultiLineText ceiling removal)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('P6-01: Multi-item json-array fields survive round-trip without truncation', () => {
+  it('5 clarification items round-trip intact', () => {
+    const items = Array.from({ length: 5 }, (_, i) => ({
+      clarificationId: `clar-${i}`,
+      fieldId: `field-${i}`,
+      stepId: 'project-info',
+      message: `Clarification message ${i} with enough detail to be realistic`,
+      raisedBy: `controller-${i}@hedrickbrothers.com`,
+      raisedAt: `2026-03-${(20 + i).toString().padStart(2, '0')}T10:00:00.000Z`,
+      status: 'open' as const,
+    }));
+    const original = { ...makeFullDomainRequest(), clarificationItems: items as unknown as IProjectSetupRequest['clarificationItems'] };
+    const payload = toListItem(original);
+    // Serialized JSON exceeds 255 chars — would have been truncated in SP Text
+    expect((payload.clarificationItems as string).length).toBeGreaterThan(255);
+    const roundTripped = toDomain(payload as unknown as Record<string, unknown>);
+    expect(roundTripped.clarificationItems).toHaveLength(5);
+    expect(roundTripped.clarificationItems).toEqual(items);
+  });
+
+  it('8 supporting estimator UPNs round-trip intact', () => {
+    const upns = Array.from({ length: 8 }, (_, i) => `estimator-${i}@hedrickbrothers.com`);
+    const original = { ...makeFullDomainRequest(), supportingEstimatorUpns: upns };
+    const payload = toListItem(original);
+    // 8 UPNs in JSON array exceeds 255 chars
+    expect((payload.supportingEstimatorUpns as string).length).toBeGreaterThan(255);
+    const roundTripped = toDomain(payload as unknown as Record<string, unknown>);
+    expect(roundTripped.supportingEstimatorUpns).toEqual(upns);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // resolveSpField()
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -118,19 +118,19 @@ export interface IProjectsListItem {
   projectManagerUpn: string;
   /** Lead estimator UPN. */
   leadEstimatorUpn: string;
-  /** Supporting estimator UPNs — JSON-serialized `string[]` in SP Text (255). */
+  /** Supporting estimator UPNs — JSON-serialized `string[]` in SP MultiLineText. */
   supportingEstimatorUpns: string;
-  /** Additional team member UPNs — JSON-serialized `string[]` in SP Text (255). */
+  /** Additional team member UPNs — JSON-serialized `string[]` in SP MultiLineText. */
   additionalTeamMemberUpns: string;
   /** Timberscan approver UPN. */
   timberscanApproverUpn: string;
-  /** Sage 300 access UPNs — JSON-serialized `string[]` in SP Text (255). */
+  /** Sage 300 access UPNs — JSON-serialized `string[]` in SP MultiLineText. */
   sageAccessUpns: string;
   /** ISO 8601 timestamp when clarification was requested (SP DateTime). */
   clarificationRequestedAt: string;
   /** Whether requester used their retry opportunity (`'true'` | `'false'`). */
   requesterRetryUsed: string;
-  /** Structured clarification items — JSON-serialized array in SP Text (255). */
+  /** Structured clarification items — JSON-serialized array in SP MultiLineText. */
   clarificationItems: string;
 }
 
@@ -225,15 +225,15 @@ export const PROJECTS_LIST_FIELD_MAP = {
   projectExecutiveUpn:      { spInternalName: 'projectExecutiveUpn',      spType: 'Text',     serialization: 'direct' },
   projectManagerUpn:        { spInternalName: 'projectManagerUpn',        spType: 'Text',     serialization: 'direct' },
   leadEstimatorUpn:         { spInternalName: 'leadEstimatorUpn',         spType: 'Text',     serialization: 'direct' },
-  supportingEstimatorUpns:  { spInternalName: 'supportingEstimatorUpns',  spType: 'Text',     serialization: 'json-array' },
-  additionalTeamMemberUpns: { spInternalName: 'additionalTeamMemberUpns', spType: 'Text',     serialization: 'json-array' },
+  supportingEstimatorUpns:  { spInternalName: 'supportingEstimatorUpns',  spType: 'MultiLineText', serialization: 'json-array' },
+  additionalTeamMemberUpns: { spInternalName: 'additionalTeamMemberUpns', spType: 'MultiLineText', serialization: 'json-array' },
   timberscanApproverUpn:    { spInternalName: 'timberscanApproverUpn',    spType: 'Text',     serialization: 'direct' },
-  sageAccessUpns:           { spInternalName: 'sageAccessUpns',           spType: 'Text',     serialization: 'json-array' },
+  sageAccessUpns:           { spInternalName: 'sageAccessUpns',           spType: 'MultiLineText', serialization: 'json-array' },
 
   // Clarification lifecycle
   clarificationRequestedAt:  { spInternalName: 'clarificationRequestedAt',  spType: 'DateTime', serialization: 'direct' },
   requesterRetryUsed:        { spInternalName: 'requesterRetryUsed',        spType: 'Text',     serialization: 'direct' },
-  clarificationItems:        { spInternalName: 'clarificationItems',        spType: 'Text',     serialization: 'json-array' },
+  clarificationItems:        { spInternalName: 'clarificationItems',        spType: 'MultiLineText', serialization: 'json-array' },
 } as const satisfies Record<string, IFieldMapEntry>;
 
 /** Domain property names that have a corresponding SharePoint column. */

@@ -10,6 +10,20 @@
 
 Complete **all** items before starting the deployment sequence.
 
+### D0 — SharePoint Column Migration (P6-01, One-Time)
+
+Migrate four JSON-serialized array columns from `Text` (255-char limit) to `Note` (MultiLineText) in the HBCentral **Projects** list. Required before deploying P6-01 backend changes to prevent JSON truncation on write.
+
+| Column Internal Name | Current Type | Target Type |
+|----------------------|-------------|-------------|
+| `supportingEstimatorUpns` | Text | Note (MultiLineText) |
+| `additionalTeamMemberUpns` | Text | Note (MultiLineText) |
+| `sageAccessUpns` | Text | Note (MultiLineText) |
+| `clarificationItems` | Text | Note (MultiLineText) |
+
+- [ ] All four columns migrated in the HBCentral Projects list
+- [ ] Verified: existing rows still readable after migration (SP preserves data on Text → Note conversion)
+
 ### Infrastructure (One-Time Setup)
 
 - [ ] Azure Function App created with Node.js 20+ runtime

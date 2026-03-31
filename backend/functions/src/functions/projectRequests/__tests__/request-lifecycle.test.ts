@@ -454,3 +454,127 @@ describe('Year derivation — deriveProjectYear', () => {
     expect(deriveProjectYear('')).toBe(new Date().getFullYear());
   });
 });
+
+// ── F. Backend submission validation (P6-01) ──────────────────────────────
+
+import { validateSubmission, VALID_PROJECT_STAGES, VALID_DEPARTMENTS } from '../index.js';
+
+/** Minimal valid submission body matching wizard-enforced required fields. */
+function makeValidSubmission(): Partial<IProjectSetupRequest> {
+  return {
+    projectName: 'Summit Tower',
+    projectLocation: 'Denver, CO',
+    projectStreetAddress: '123 Main St',
+    projectCity: 'Denver',
+    projectCounty: 'Denver',
+    projectState: 'CO',
+    projectZip: '80202',
+    department: 'commercial',
+    projectType: 'Commercial',
+    projectExecutiveUpn: 'exec@hb.com',
+    leadEstimatorUpn: 'est@hb.com',
+    timberscanApproverUpn: 'ts@hb.com',
+    groupMembers: ['team@hb.com'],
+    projectStage: 'Pursuit',
+  };
+}
+
+describe('P6-01: Backend submission validation — wizard contract parity', () => {
+  it('F1: returns no errors for a fully valid submission', () => {
+    expect(validateSubmission(makeValidSubmission())).toEqual([]);
+  });
+
+  it('F2: rejects missing projectName', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectName: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectName' }));
+  });
+
+  it('F3: rejects missing projectStreetAddress', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectStreetAddress: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectStreetAddress' }));
+  });
+
+  it('F4: rejects missing projectCity', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectCity: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectCity' }));
+  });
+
+  it('F5: rejects missing projectCounty', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectCounty: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectCounty' }));
+  });
+
+  it('F6: rejects missing projectState', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectState: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectState' }));
+  });
+
+  it('F7: rejects missing projectZip', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectZip: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectZip' }));
+  });
+
+  it('F8: rejects missing department', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), department: undefined });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'department' }));
+  });
+
+  it('F9: rejects invalid department', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), department: 'invalid' as any });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'department', message: expect.stringContaining('must be one of') }));
+  });
+
+  it('F10: rejects missing projectType', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectType: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectType' }));
+  });
+
+  it('F11: rejects missing projectExecutiveUpn', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectExecutiveUpn: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectExecutiveUpn' }));
+  });
+
+  it('F12: rejects missing leadEstimatorUpn', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), leadEstimatorUpn: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'leadEstimatorUpn' }));
+  });
+
+  it('F13: rejects missing timberscanApproverUpn', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), timberscanApproverUpn: '' });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'timberscanApproverUpn' }));
+  });
+
+  it('F14: rejects missing groupMembers', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), groupMembers: [] });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'groupMembers' }));
+  });
+
+  it('F15: rejects negative estimatedValue', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), estimatedValue: -1 });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'estimatedValue' }));
+  });
+
+  it('F16: accepts all valid project stages', () => {
+    for (const stage of VALID_PROJECT_STAGES) {
+      const errors = validateSubmission({ ...makeValidSubmission(), projectStage: stage });
+      expect(errors.find((e) => e.field === 'projectStage')).toBeUndefined();
+    }
+  });
+
+  it('F17: rejects invalid project stage', () => {
+    const errors = validateSubmission({ ...makeValidSubmission(), projectStage: 'Invalid' as any });
+    expect(errors).toContainEqual(expect.objectContaining({ field: 'projectStage' }));
+  });
+
+  it('F18: accepts both valid departments', () => {
+    for (const dept of VALID_DEPARTMENTS) {
+      const errors = validateSubmission({ ...makeValidSubmission(), department: dept as any });
+      expect(errors.find((e) => e.field === 'department')).toBeUndefined();
+    }
+  });
+
+  it('F19: collects multiple errors for an empty submission', () => {
+    const errors = validateSubmission({});
+    expect(errors.length).toBeGreaterThanOrEqual(13);
+  });
+});

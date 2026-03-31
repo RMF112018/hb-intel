@@ -10,16 +10,11 @@ import { isValidProjectTypeForDepartment } from './departmentTypeOptions.js';
 import { getEligibleTimberscanApprovers } from './projectTeamFields.js';
 
 /**
- * TEMPORARY: Disables all required-field enforcement for the Project Setup flow.
- * When false, required asterisks are hidden, empty-field validation is skipped,
- * and step/submit gating does not block on empty required fields.
- *
- * Format validation (e.g. "estimated value must be positive", "project type must
- * be valid for department") is preserved even when this is false.
- *
- * To restore required-field enforcement, set this to `true`.
+ * P6-01: Required-field enforcement is active. The 43-field persistence contract
+ * (projects-list-contract.ts) supports the full wizard-enforced field set, and
+ * backend validation (projectRequests/index.ts) matches the wizard contract.
  */
-export const PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false;
+export const PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = true;
 
 /**
  * Step 1 — Project Information.

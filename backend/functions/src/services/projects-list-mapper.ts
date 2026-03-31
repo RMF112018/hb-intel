@@ -150,9 +150,9 @@ export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProj
  * All canonical domain properties are mapped. Phase 2 gap fields use domain
  * property names as SP internal names (P2-07).
  */
-export function toListItem(request: IProjectSetupRequest): IProjectsListItem {
+export function toListItem(request: IProjectSetupRequest, logger?: ILogger): IProjectsListItem {
   const projectNumberForTitle = request.projectNumber ?? 'TBD';
-  return {
+  const item: IProjectsListItem = {
     Title: `${projectNumberForTitle} — ${request.projectName}`,
     field_1: request.requestId,
     field_2: request.projectNumber ?? '',
@@ -199,6 +199,21 @@ export function toListItem(request: IProjectSetupRequest): IProjectsListItem {
     requesterRetryUsed: request.requesterRetryUsed ? 'true' : 'false',
     clarificationItems: JSON.stringify(request.clarificationItems ?? []),
   };
+
+  // P6-01: Diagnostic guard — warn if any json-array field approaches the SP MultiLineText ceiling
+  const JSON_ARRAY_CEILING = 50_000;
+  const jsonArrayFields: (keyof IProjectsListItem)[] = [
+    'field_10', 'field_11', 'field_18', 'field_19',
+    'supportingEstimatorUpns', 'additionalTeamMemberUpns', 'sageAccessUpns', 'clarificationItems',
+  ];
+  for (const field of jsonArrayFields) {
+    const val = item[field];
+    if (typeof val === 'string' && val.length > JSON_ARRAY_CEILING) {
+      logger?.warn(`[projects-list-mapper] JSON-array field '${field}' exceeds ${JSON_ARRAY_CEILING} chars (${val.length}). Risk of SP truncation.`);
+    }
+  }
+
+  return item;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

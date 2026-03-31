@@ -1,6 +1,6 @@
 {
   "name": "@hbc/features-estimating",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Estimating Bid Readiness feature package — domain adapter over @hbc/health-indicator for pursuit readiness scoring",
   "type": "module",
