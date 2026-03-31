@@ -434,6 +434,49 @@ Phase 2 test coverage now proves the real production persistence contract rather
 - Mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts` (39 tests, 43 fields)
 - Lifecycle tests: `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` (51 tests)
 
+### Phase 2 Legacy Row Compatibility Strategy (2026-03-31, Prompt P2-10)
+
+**Chosen strategy: Option A — read-compatible only, no historical backfill.**
+
+**Why this strategy was selected:**
+
+All operational read surfaces were reviewed and confirmed to handle missing P2-07 fields safely without code changes:
+
+| Surface | P2-07 Fields Used? | Handling |
+|---------|-------------------|----------|
+| Estimating request detail (ReviewStepBody) | Yes — all location + team fields | `dv()` helper shows '—' for undefined; `dl()` helper shows '—' for empty arrays |
+| Estimating wizard (ProjectInfoStepBody, TeamStepBody) | Yes — edit mode | `field ?? ''` conversion; undefined → empty input |
+| Accounting review queue (ProjectReviewQueuePage) | No | Only legacy fields (name, number, department, state) |
+| Accounting review detail (ProjectReviewDetailPage) | No (except clarificationItems) | Optional chaining: `request.clarificationItems?.length > 0` |
+| Admin oversight (ProvisioningOversightPage) | No | Provisioning status only, not request fields |
+| Team normalization (projectTeamFields.ts) | Yes | Fallback: derives team fields from legacy `projectLeadId` + `groupMembers` when P2-07 fields are undefined |
+| Auth role resolution (resolveProjectRole.ts) | Yes — team UPNs | Optional chaining: `projectRecord.projectExecutiveUpn?.toLowerCase()` |
+| BIC config (bic-config.ts) | Yes — clarificationRequestedAt | Guard: `request.clarificationRequestedAt && ...` |
+| Backend mapper (toDomain) | Yes — all 17 fields | Safe defaults: `readOptionalString()` → undefined, `safeParseJsonArray()` → [] |
+
+**Migration/backfill assessment:**
+
+- **Not required:** Legacy rows display safely across all surfaces. Undefined P2-07 location fields show as '—'. Undefined team role fields trigger normalization fallback to legacy `projectLeadId`/`groupMembers`.
+- **Not recommended:** Backfilling would risk data integrity issues (deriving structured fields from the legacy `projectLocation` summary is unreliable). Historical requests predating the wizard upgrade have no source data for the new fields.
+- **Optional future consideration:** If reporting or analytics later requires populated P2-07 fields on historical rows, a manual backfill script could be added as a one-time operational task. This is not a code blocker.
+
+**Operational implications:**
+
+- **New requests** (created after P2-07): all 43 fields are persisted by the production path.
+- **Legacy requests** (created before P2-07): P2-07 fields will be empty/undefined. All surfaces render this safely. No operator confusion expected — the fields simply show as blank or '—'.
+- **No manual follow-up required** outside code.
+
+**Closure statement:**
+
+Legacy Project Setup rows are handled by an explicit read-compatibility strategy. The backend mapper normalizes missing P2-07 fields to safe defaults, all UI surfaces render undefined fields defensively, and the forward production path persists the canonical field set without requiring hidden assumptions. No backfill is required.
+
+**Evidence:**
+
+- Backend mapper defaults: `backend/functions/src/services/projects-list-mapper.ts` (toDomain lines 120-141)
+- UI rendering helpers: `apps/estimating/src/project-setup/components/ReviewStepBody.tsx` (dv/dl helpers)
+- Team fallback normalization: `packages/features/estimating/src/project-setup/config/projectTeamFields.ts` (lines 84-91)
+- Controller/admin safety: `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`, `apps/admin/src/pages/ProvisioningOversightPage.tsx` (no P2-07 field dependencies)
+
 ### Phase 3
 
 **Intended objective**
