@@ -1646,6 +1646,56 @@ Prompt-02 is closed. No code changes required — the backward-compatibility str
 
 All four Prompt-03 items are closed. The auth posture for Project Setup is canonical: JWT authentication via Entra ID MSAL, role assignment via `ADMIN_UPNS`/`CONTROLLER_UPNS` env lists, `createSessionTokenFactory()` on all retained surfaces. The preferences mismatch is resolved by retiring the frontend API expectation (localStorage-only default). The proxy is excluded from PS release scope.
 
+### Phase 6 Deployment Target Cutover and Environment Proof (2026-03-31, Prompt P6-04)
+
+**Scope:** Close the deployment-truth gap by making the Project Setup deployment target explicit and categorizing all environment-gated prerequisites by proof tier.
+
+**Deployment-target truth statement:**
+
+The dedicated Project Setup host (`backend/functions/src/hosts/project-setup/`) is the canonical release target per ADR-0124. The repo-owned posture is complete: composition root (8 route families), service factory (9 scoped services), host.json (tenant-specific CORS), RELEASE-SCOPE.md (machine-checkable manifest), and 63 boundary regression tests. The monolithic host (`backend/functions/src/index.ts`) is explicitly transitional. Which host is actually deployed in the live environment remains external proof — the CI/CD pipeline targets generic Function App names.
+
+**Environment prerequisites evidence table:**
+
+| Prerequisite | Proof Tier | Repo Evidence | Post-Deploy Verification |
+|-------------|-----------|---------------|-------------------------|
+| Dedicated PS host exists as canonical target | **Repo-verified** | 63 boundary tests, ADR-0124, RELEASE-SCOPE.md | — |
+| Host.json CORS (tenant-specific, no wildcards) | **Repo-verified** | AC-5 tests, release gates 2a-2b | `GET /api/health` confirms host is running |
+| JWT validation against `API_AUDIENCE` | **Repo-verified** | `auth-contract.test.ts`, release gate 3 | `GET /api/project-setup-requests` returns 401 unauthenticated |
+| Config startup gate (6 core vars) | **Repo-verified** | `validateProjectSetupStartupConfig()`, release gate 4b | `operationalReadiness: blocked` if core missing |
+| Domain-scoped startup validation | **Repo-verified** | AC-6 boundary tests, provisioning validated at saga time only | `configTiers` section in health response |
+| Health endpoint with tiered diagnostics | **Repo-verified** | Release gate 5, 11 tests in health suite | `GET /api/health` → `operationalReadiness` + `configTiers` + `provisioningPrereqs` |
+| Entra ID app registration (`api://<client-id>`) | **Not yet proven** | — | Authenticated request succeeds (runbook Phase C step 3) |
+| SharePoint admin consent | **Not yet proven** | — | SPFx webpart acquires token and calls API |
+| MI → `Storage Table Data Contributor` | **Not yet proven** | — | Table Storage operations succeed |
+| MI → `Sites.FullControl.All` on SharePoint | **Not yet proven** | — | `provisioningPrereqs.graphPermission` in health |
+| MI → `Group.ReadWrite.All` on Graph | **Not yet proven** | — | Provisioning saga group creation succeeds |
+| D0: SP column migration (4 json-array cols) | **Not yet proven** | Runbook D0 prerequisite (P6-01) | `toDomain()` succeeds for multi-item arrays |
+| Live Function App runs dedicated host entry | **Not yet proven** | — | Health endpoint responds at expected URL |
+| Staging smoke test execution | **Not yet proven** | Smoke suite exists: `post-deploy-smoke.test.ts` | Runbook Phase C step 4 |
+
+**Repo-side verification package (machine-checkable, pre-deploy):**
+
+| Evidence | Test File | Count |
+|----------|-----------|-------|
+| Release gates | `release-gates.test.ts` | 13 gates |
+| Host boundary regression | `project-setup-host-boundary.test.ts` | 63 tests |
+| Auth release readiness | `auth-release-readiness.test.ts` | 5 tests |
+| Request lifecycle | `request-lifecycle.test.ts` | 70 tests |
+| Mapper contract | `projects-list-mapper.test.ts` | 41 tests |
+| Field mapping contract | `sp-field-mapping.test.ts` | 9 tests |
+| Frontend retained baseline | `apps/estimating/src/test/` | 138 tests |
+
+**Acceptance criteria met:**
+
+1. Deployment-target posture is explicit — dedicated PS host is canonical, monolithic is transitional, cutover is environment-gated.
+2. Dedicated-host cutover is truthfully classified — repo-verified architecture, environment-applied deployment.
+3. Environment-gated auth/infrastructure prerequisites are categorized by proof tier with post-deploy verification paths.
+4. The review report reflects repo truth — no ambiguous deployment assumptions remain.
+
+**Closure statement:**
+
+Prompt-04 is closed. The deployment-truth gap is resolved by explicit proof-tier categorization. Every environment prerequisite has a defined repo evidence level and a post-deploy verification path. The 14 environment prerequisites are split: 6 are repo-verified (architecture, CORS, JWT, config gates, health diagnostics), 8 require environment-level application (app registration, admin consent, MI grants, column migration, deployment target, smoke execution). No code changes required — the repo-owned deployment infrastructure (dedicated host, tiered validation, health diagnostics, release gates, boundary tests) was already complete.
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1747,13 +1797,19 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Dedicated host cutover and monolithic-host retirement proof
   **Category:** Infrastructure / deployment
-  **Status:** Implicitly deferred / partially implemented
-  **Why it is still deferred:** Prompt 07 framed the broad host as transitional, and `phase-1/Phase-1_Handoff.md` now says the legacy monolithic host is preserved during transition. Repo truth confirms the dedicated Project Setup host exists, but it also confirms the monolithic host still exists; there is no repo-evidenced proof that deployment/release flow has fully cut over to the scoped host.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Prompt-07_Phase-1-Architecture-Freeze-and-Boundary-Plan.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Handoff.md`; `backend/functions/src/hosts/project-setup/index.ts`; `backend/functions/src/hosts/project-setup/host.json`; `backend/functions/src/index.ts`
-  **Affected files/surfaces:** `backend/functions/src/hosts/project-setup/**`, `backend/functions/src/index.ts`, deployment/release documentation
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Affects Phase 4 deployment-scope truth and Phase 5 release-signoff realism because repo truth does not show which host is the actual release artifact.
-  **Recommended next-step direction:** Add repo-evidenced deployment wiring and release-target proof for the Project Setup host, or document that monolithic deployment remains the current operational target.
+  **Status:** Repo-configured and repo-verified; deployment-target application is environment-gated (P6-04)
+  **P6-04 proof-tier classification:**
+
+  | Aspect | Proof Tier | Evidence |
+  |--------|-----------|----------|
+  | Dedicated PS host exists as canonical target | **Repo-verified** | `backend/functions/src/hosts/project-setup/index.ts` (8 route families); ADR-0124; RELEASE-SCOPE.md; 63 boundary tests |
+  | Monolithic host classified as transitional | **Repo-verified** | `backend/functions/src/index.ts` (still registers all 19 families); ADR-0124 establishes per-domain host model |
+  | Host.json runtime contract (CORS, timeout, SignalR) | **Repo-configured** | `backend/functions/src/hosts/project-setup/host.json` (tenant-specific CORS, 10-min timeout, credentials required) |
+  | CI/CD pipeline targets dedicated host | **Not yet proven** | `.github/workflows/deploy-functions.yml` uses generic Function App names; deployment-target binding is external |
+  | Live Function App runs dedicated host entry point | **Not yet proven** | Requires Azure portal or IaC confirmation |
+
+  **Blocker level:** Environment-gated prerequisite (repo-owned posture is complete)
+  **Recommended next-step direction:** Record environment-level proof that the live Function App uses the Project Setup host entry point (`backend/functions/src/hosts/project-setup/index.ts`), or document that the monolithic host remains the operational target until cutover.
 
 - **Item:** Phase 1’s deferred provisioning-maturity work remains only partially closed
   **Category:** Infrastructure / operational hardening
@@ -1806,13 +1862,22 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Production auth deployment prerequisites
   **Category:** Auth / environment-gated deployment
-  **Status:** External / environment-gated, not repo-complete
-  **Why it is still deferred:** Phase 3 handoff says there are no must-fix code blockers, but it also lists required external prerequisites. Repo truth cannot prove `API_AUDIENCE`, Function App CORS, SharePoint admin consent, SPFx `apiAudience` configuration, and managed-identity role assignments are actually complete in a live environment.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Auth-Hardening-and-Release-Notes.md`; `apps/estimating/src/config/runtimeConfig.ts`; `apps/estimating/src/mount.tsx`; `backend/functions/src/middleware/validateToken.ts`
-  **Affected files/surfaces:** SPFx mount/runtime config, backend validator contract, tenant/app-registration setup
-  **Blocker level:** Launch blocker
-  **Cross-phase impact:** Blocks truthful production-mode claims in Phase 5 even though the code path itself is materially implemented.
-  **Recommended next-step direction:** Treat these prerequisites as release-gating evidence items and record actual completion outside of code before any launch approval.
+  **Status:** Repo-configured and repo-verified; environment application is external (P6-04)
+  **P6-04 proof-tier classification:**
+
+  | Prerequisite | Proof Tier | Repo Evidence |
+  |-------------|-----------|---------------|
+  | JWT validation against `API_AUDIENCE` | **Repo-verified** | `validateToken.ts` validates JWT; `auth-contract.test.ts` proves all routes protected; release gate 3 |
+  | SPFx Bearer token acquisition | **Repo-configured** | `apps/estimating/src/mount.tsx` acquires audience-scoped token via `aadTokenProviderFactory` |
+  | Config startup gate for 6 core vars | **Repo-verified** | `validateProjectSetupStartupConfig()` fails startup if missing; release gate 4b; health endpoint reports `blocked` |
+  | Entra ID app registration (`api://<client-id>`) | **Not yet proven** | Requires Azure AD admin action; no repo-owned verification possible |
+  | SharePoint admin consent for SPFx API access | **Not yet proven** | Requires SharePoint admin center action |
+  | MI role assignments (Graph, SharePoint, Table Storage) | **Not yet proven** | Requires Azure portal / IT; health endpoint reports `provisioningPrereqs` status |
+  | CORS settings applied in live Function App | **Not yet proven** | host.json is repo-configured; Azure portal application required |
+
+  **Blocker level:** Environment-gated prerequisite (all code paths implemented and tested; environment application is external)
+  **Health endpoint verification:** `GET /api/health` reports `operationalReadiness: blocked` if core config missing, `degraded` if SharePoint/provisioning incomplete, `ready` when all tiers satisfied. This provides a machine-readable post-deploy verification path.
+  **Recommended next-step direction:** Execute Phase-5_Deployment-Runbook.md Phase C (post-deploy validation) against the target environment and record the health endpoint output as deployment proof.
 
 #### Phase 4 deferred implementations
 
@@ -1840,15 +1905,23 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Deployment-scoped CORS / managed-identity / downstream-permission application
   **Category:** Infrastructure / environment-gated deployment
-  **Status:** External / environment-gated, not repo-complete
-  **Why it is still deferred:** Phase 4 docs document the required posture, but repo truth cannot prove the dedicated host’s tenant-scoped CORS, managed-identity grants, Graph permissions, and SharePoint-connected-service prerequisites are actually applied in the release environment.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Prompt-09_Phase-4-CORS-Managed-Identity-and-Downstream-Permission-Scoping.md`; `backend/functions/src/hosts/project-setup/host.json`; `backend/functions/src/hosts/project-setup/service-factory.ts`; `backend/functions/src/functions/health/index.ts`
-  **Affected files/surfaces:** dedicated host runtime config, downstream Graph/SharePoint access, deployment and release checklists
-  **Blocker level:** Launch blocker
-  **Cross-phase impact:** Directly gates Phase 5 release and support claims because those claims depend on live environment posture, not repo configuration alone.
-  **Recommended next-step direction:** Record environment-level proof that the Project Setup host settings and grants match the documented runtime contract.
-  **P4-07 update:** The repo-owned infrastructure model is now frozen and explicitly classified as canonical (PS host) vs transitional (monolithic host). The environment-gated nature of this item is documented rather than ambiguous.
-  **P4-11 reconciliation:** This item is no longer a repo-level infrastructure gap. The CORS, MI, and downstream permission model is frozen in code and tests (P4-09). What remains is strictly environment-gated: applying MI role assignments, verifying CORS in Azure portal, and obtaining SharePoint admin consent. Downgraded from "launch blocker" to "environment-gated prerequisite" — the repo-owned posture is complete.
+  **Status:** Repo-configured and repo-verified; environment application is external (P6-04)
+  **P6-04 proof-tier classification:**
+
+  | Aspect | Proof Tier | Repo Evidence |
+  |--------|-----------|---------------|
+  | CORS: tenant-specific, no wildcards, credentials required | **Repo-verified** | `host.json` hardcodes `https://hedrickbrotherscom.sharepoint.com`; AC-5 boundary tests; release gates 2a-2b |
+  | MI initialization in service factory | **Repo-verified** | `service-factory.ts` calls `DefaultAzureCredential`; AC-6 boundary test proves MI scoped |
+  | MI grant requirements documented | **Repo-configured** | RELEASE-SCOPE.md lists required grants; deployment runbook lists IT prerequisites |
+  | Graph `Group.ReadWrite.All` applied | **Not yet proven** | Requires IT approval + Azure portal; health reports `provisioningPrereqs.graphPermission` |
+  | SharePoint `Sites.FullControl.All` applied | **Not yet proven** | Requires IT approval + SharePoint admin |
+  | Table Storage `Data Contributor` applied | **Not yet proven** | Requires Azure portal role assignment |
+  | CORS settings applied in live Azure portal | **Not yet proven** | host.json defines the contract; portal must match |
+
+  **Blocker level:** Environment-gated prerequisite (repo-owned posture complete since P4-09)
+  **Post-deploy verification path:** `GET /api/health` returns `configTiers`, `provisioningPrereqs`, and `roleConfig` sections that expose whether environment prerequisites are satisfied. A `blocked` or `degraded` readiness state triggers the deployment runbook rollback decision.
+  **P4-07 update:** Repo-owned infrastructure model frozen and classified (canonical PS host vs transitional monolithic host).
+  **P4-11 reconciliation:** Downgraded from "launch blocker" to "environment-gated prerequisite" — repo-owned posture complete.
 
 #### Phase 5 deferred implementations
 
@@ -1986,7 +2059,7 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
 
 ## 10. Explicit Unresolved Questions
 
