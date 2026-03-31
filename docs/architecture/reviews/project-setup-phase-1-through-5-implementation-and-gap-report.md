@@ -2,24 +2,27 @@
 
 ## 1. Executive Summary
 
-Repo truth does not support a conclusion that Phases 1 through 5 were fully completed as documented. The implementation is materially advanced and several major workstreams are real in code, but the current repository still shows a mixed maturity state: core requester, controller, admin, lifecycle, auth, and infrastructure scaffolding all exist, yet there are still meaningful mismatches between plan claims and live implementation.
+> **Last updated:** 2026-03-31 (Prompt-11 documentation reconciliation)
 
-The strongest repo-truth conclusions are:
+This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
-- The Estimating SPFx requester surface is truly narrowed to Project Setup routes and UI concerns in `apps/estimating/src/router/routes.ts`, `apps/estimating/src/router/root-route.tsx`, and `apps/estimating/src/test/phase1ScopeGuards.test.ts`.
-- The data-contract work introduced a real centralized SharePoint field map in `backend/functions/src/services/projects-list-contract.ts` and `backend/functions/src/services/projects-list-mapper.ts`, with real mapper tests in `backend/functions/src/services/__tests__/projects-list-mapper.test.ts`.
-- The Project Setup auth model is substantially implemented: production-vs-`ui-review` mode, SPFx audience-scoped token acquisition, backend JWT validation, and route protection are real in `apps/estimating/src/config/runtimeConfig.ts`, `apps/estimating/src/mount.tsx`, `apps/estimating/src/project-setup/backend/ProjectSetupBackendContext.tsx`, `backend/functions/src/middleware/validateToken.ts`, and `backend/functions/src/middleware/auth.ts`.
-- Phase 4 infrastructure hardening is also materially real: tiered config validation, diagnostic health output, managed-identity service posture, and version-controlled observability assets exist in `backend/functions/src/utils/validate-config.ts`, `backend/functions/src/functions/health/index.ts`, `backend/functions/src/services/service-factory.ts`, `backend/functions/host.json`, and `backend/functions/observability/**`.
+### What is confirmed complete
 
-The main repo-truth blockers are:
+- **Phase 1 scope control is closed.** The frontend requester surface is isolated to Project Setup routes with regression guards (`apps/estimating/src/test/phase1ScopeGuards.test.ts`). The backend now has a dedicated Project Setup domain host (`backend/functions/src/hosts/project-setup/`) with scoped composition root, service factory, tenant-specific CORS, domain-scoped config validation, and 63 boundary regression tests. All 10 acceptance criteria (AC-1 through AC-10) from `Phase-1_Backend-Boundary-Freeze.md` are satisfied. Architecture decision recorded in ADR-0124.
+- The data-contract work introduced a real centralized SharePoint field map in `backend/functions/src/services/projects-list-contract.ts` and `backend/functions/src/services/projects-list-mapper.ts`, with real mapper tests.
+- The Project Setup auth model is substantially implemented: production-vs-`ui-review` mode, SPFx audience-scoped token acquisition, backend JWT validation, and route protection are real.
+- Phase 4 infrastructure hardening is materially real: tiered config validation, diagnostic health output, managed-identity service posture, and version-controlled observability assets exist.
 
-- The package is not truly isolated end-to-end. The frontend surface is isolated, but the backend still registers many unrelated domain routes and services in `backend/functions/src/index.ts` and `backend/functions/src/services/service-factory.ts`.
-- The Phase 2 persistence contract is still incomplete. `IProjectSetupRequest` contains fields that are not persisted by the real SharePoint adapter, including structured address fields, team-role assignments, clarification metadata, and retry metadata. Evidence: `packages/models/src/provisioning/IProvisioning.ts`, `backend/functions/src/services/projects-list-contract.ts`, `backend/functions/src/services/projects-list-mapper.ts`, and `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract-Gaps.md`.
-- Required-field enforcement is still intentionally disabled in the wizard config via `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`. That directly weakens production readiness.
-- Phase 5 release-hardening claims are overstated. The backend verification slice is strong, but the current `@hbc/spfx-project-setup` test run still fails across broader page-level tests, which undercuts the handoff’s “production-ready” posture.
-- Several key release-readiness items remain documentary or environment-gated rather than proven against a live deployment: smoke tests require external environment variables, observability dashboards/alerts are not deployed from repo, and deployment prerequisites remain external dependencies.
+### Remaining blockers (Phases 2-5)
 
-Overall status: **close but blocked**. The implementation is beyond prototype level, but repo truth does not support a “production ready” or “ready for final launch validation only” assessment.
+- **Phase 2 persistence contract is still incomplete.** `IProjectSetupRequest` contains fields not persisted by the real SharePoint adapter, including structured address fields, team-role assignments, clarification metadata, and retry metadata. Evidence: `packages/models/src/provisioning/IProvisioning.ts`, `backend/functions/src/services/projects-list-contract.ts`, `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract-Gaps.md`.
+- **Required-field enforcement is still intentionally disabled** via `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
+- **Phase 5 release-hardening claims remain overstated.** The backend verification slice is strong, but the current `@hbc/spfx-project-setup` test run still has broader page-level test issues.
+- **Several release-readiness items remain environment-gated** rather than proven against a live deployment.
+
+### Overall status
+
+**Phase 1: closed.** Phase 2-5: close but blocked on persistence contract completeness, field enforcement, and frontend test stability. The implementation is beyond prototype level, but remaining phases still require remediation before a production-ready assessment is supportable.
 
 ## 2. Audit Scope and Method
 
@@ -494,9 +497,9 @@ The following items are genuinely implemented in the current repo:
 - **Required-field enforcement is intentionally disabled.**
   - `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
   - This means the wizard does not enforce the full intended submission contract.
-- **Backend package is not truly isolated to Project Setup scope.**
-  - Evidence: `backend/functions/src/index.ts`, `backend/functions/src/services/service-factory.ts`.
-  - **Remediation complete (Prompts 07-09, 2026-03-31):** Dedicated Project Setup host created with scoped composition root, service factory, domain-specific host.json, and domain-scoped config validation. All 10 acceptance criteria (AC-1 through AC-10) satisfied. 45 boundary regression tests. Phase 1 backend scope freeze: **closed**.
+- **~~Backend package is not truly isolated to Project Setup scope.~~ CLOSED (Prompts 07-10, 2026-03-31).**
+  - Original evidence: `backend/functions/src/index.ts`, `backend/functions/src/services/service-factory.ts`.
+  - Dedicated Project Setup host created at `backend/functions/src/hosts/project-setup/` with scoped composition root, service factory, domain-specific host.json, domain-scoped config validation, and release-scope manifest. All 10 acceptance criteria (AC-1 through AC-10) satisfied. 63 boundary regression tests. Architecture decision: ADR-0124.
 - **Frontend/package-level release evidence is not green.**
   - Current `@hbc/spfx-project-setup` package test invocation still exposes failing page-level tests, which undercuts the Phase 5 “complete” claim.
 - **No repo proof of live deployment validation.**
@@ -561,19 +564,29 @@ The following items are genuinely implemented in the current repo:
 
 ## 9. Final Status Assessment
 
-Overall recommendation: **not production ready**.
+> **Last updated:** 2026-03-31 (Prompt-11 documentation reconciliation)
 
-More specifically:
+### Phase-by-phase status
 
-- The package is **not production ready** today.
-- It is **close but blocked**, not “production ready with caveats.”
-- It is **not yet ready for final launch validation only**, because foundational blockers remain in persistence, validation, test stability, and deployment-scope truthfulness.
+| Phase | Status | Summary |
+|-------|--------|---------|
+| Phase 1 | **Closed** | Frontend isolation + backend domain host + 63 regression tests. All AC-1-AC-10 satisfied. ADR-0124 accepted. |
+| Phase 2 | Partial | Correct architectural seam, but production persistence contract drops user-entered fields. |
+| Phase 3 | Implemented with gaps | Estimating requester auth path is strong; cross-surface convergence incomplete. |
+| Phase 4 | Partial to substantial | Real hardening work, but deployment scoping and observability operationalization incomplete. |
+| Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
 
-The most accurate maturity description is:
+### Overall recommendation
 
-> The Project Setup / Estimating SPFx implementation is substantially built and directionally sound, but current repo truth still shows real launch blockers and several phase-complete claims that are stronger than the code, tests, and infrastructure evidence support.
+**Not production ready** for Phases 2-5. Phase 1 is closed.
 
-**Phase 1 Backend Remediation Complete (2026-03-31):** The backend deployment boundary has been decided (ADR-0124, Prompt-07), implemented (Prompt-08), and operationally scoped (Prompt-09). All 10 acceptance criteria (AC-1 through AC-10) are satisfied. A dedicated Project Setup host exists with scoped composition root, service factory, domain-specific host.json, domain-scoped config validation, and 45 boundary regression tests. Full verification suite passes (605 tests, 0 failures). Phase 1 backend scope freeze is **closed**.
+The remaining blockers are:
+1. Incomplete production persistence contract (Phase 2)
+2. Disabled required-field enforcement (Phase 2)
+3. SPFx page-level test instability (Phase 5)
+4. Environment-gated release evidence without live deployment proof (Phase 5)
+
+> The Project Setup / Estimating SPFx implementation is substantially built and directionally sound. Phase 1 scope control is now honestly closed with machine-checkable evidence. Remaining phases still have real launch blockers in persistence, validation, and test stability.
 
 ## 10. Explicit Unresolved Questions
 

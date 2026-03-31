@@ -1,8 +1,11 @@
 # Phase 1 — Final Handoff: Scope Control Complete
 
-> Completed: 2026-03-30
+> **Original handoff:** 2026-03-30 (frontend scope control)
+> **Backend scope remediation:** 2026-03-31 (Prompts 07-10, ADR-0124)
 > Package: `@hbc/spfx-project-setup` (apps/estimating)
 > Version at handoff: 0.2.14
+>
+> **Reconciliation note (2026-03-31):** This handoff originally covered frontend scope control only. Backend scope isolation was incomplete at handoff — the backend still registered 80+ unrelated domain routes in a shared Function App. Backend isolation was completed via Prompts 07-10, which created a dedicated Project Setup domain host at `backend/functions/src/hosts/project-setup/` with 63 boundary regression tests. See `Phase-1_Backend-Boundary-Freeze.md` and ADR-0124.
 
 ## 1. What Phase 1 Accomplished
 
@@ -54,7 +57,7 @@
 | SharePoint list-field remapping | Field mapping deferred per action plan | Phase 2+ |
 | Full provisioning maturity (Steps 5/6/7 hardening) | Infrastructure work deferred | Phase 2+ |
 | Entra token-version redesign | Out of Phase 1 scope | Phase 2+ |
-| Non-Project-Setup backend routes | 80+ routes in shared Function App; not called by this frontend; no action needed | N/A |
+| Non-Project-Setup backend routes | 80+ routes in shared Function App; not called by this frontend. **Remediated 2026-03-31:** dedicated Project Setup domain host created (ADR-0124, Prompts 07-10). Legacy monolithic host preserved during transition. | Closed |
 
 ## 3. Verification Status
 

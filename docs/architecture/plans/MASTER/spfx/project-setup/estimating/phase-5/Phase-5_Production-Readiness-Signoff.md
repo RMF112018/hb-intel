@@ -13,13 +13,17 @@ The **HB Intel Estimating / Project Setup SPFx package** has completed five phas
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| Phase 1 | Scope isolation | Complete |
-| Phase 2 | Data contract (SharePoint field mapping) | Complete |
-| Phase 3 | Auth model (JWT validation, token acquisition, capability boundaries) | Complete |
-| Phase 4 | Infrastructure (startup scoping, identity, CORS, connected services) | Complete |
-| Phase 5 | Release hardening (tests, diagnostics, deployment, signoff) | Complete |
+| Phase 1 | Scope isolation | Complete (frontend 2026-03-30; backend 2026-03-31 via Prompts 07-10, ADR-0124) |
+| Phase 2 | Data contract (SharePoint field mapping) | Partial — persistence contract incomplete per gap report |
+| Phase 3 | Auth model (JWT validation, token acquisition, capability boundaries) | Implemented with residual gaps |
+| Phase 4 | Infrastructure (startup scoping, identity, CORS, connected services) | Partial to substantial |
+| Phase 5 | Release hardening (tests, diagnostics, deployment, signoff) | Partial — backend evidence strong, frontend test baseline incomplete |
 
-**Recommendation: The package is ready for production deployment** pending completion of the deployment prerequisites listed in Section 4.
+> **Reconciliation note (2026-03-31):** The original signoff table (2026-03-30) listed all phases as "Complete." The Phase 1-5 gap report (`docs/architecture/reviews/project-setup-phase-1-through-5-implementation-and-gap-report.md`) found that Phase 1 backend scope was incomplete and Phases 2-5 had material gaps. Phase 1 has since been fully remediated. Phases 2-5 status reflects the gap report's current assessment. The "ready for production deployment" recommendation is not supported by current repo truth for Phases 2-5.
+
+**Original recommendation:** ~~The package is ready for production deployment pending completion of the deployment prerequisites listed in Section 4.~~
+
+**Current recommendation:** Phase 1 is closed. Phases 2-5 require remediation before a production-ready assessment is supportable. See the gap report for remaining blockers.
 
 ---
 

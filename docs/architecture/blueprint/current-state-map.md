@@ -448,6 +448,8 @@ Repo-truth note: `apps/project-hub` now resolves the SharePoint `siteUrl` throug
 
 Key dependencies: `@azure/functions`, `@azure/data-tables`, `@azure/identity`, `@pnp/sp`, `@pnp/graph`, `jose`, `@hbc/models`.
 
+**Per-domain host architecture (ADR-0124, 2026-03-31):** The package contains two composition roots: the legacy monolithic host (`src/index.ts`, 19 route families) preserved during transition, and a dedicated Project Setup domain host (`src/hosts/project-setup/`, 8 route families) with scoped service factory, tenant-specific CORS, and domain-scoped config validation. See `src/hosts/project-setup/RELEASE-SCOPE.md` for the boundary manifest. Future domain hosts follow the same pattern under `src/hosts/`.
+
 ### Category G: Build Tooling (1)
 
 | Component | Name | Role |
