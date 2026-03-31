@@ -8,7 +8,7 @@ Phase 8 addresses the remaining production blockers identified in the Phase 1–
 
 ### Current status
 
-Prompt-03 (Resolve `/api/users/me/*` Routes and Identity Dependency Surface) — complete.
+Prompt-05 (User-Assigned Managed Identity and App-Access Model) — complete.
 Prompt-02 (SPFx Runtime Config and Token Contract Reconciliation) — complete.
 
 ## Prompt-by-Prompt Progress Log
@@ -331,6 +331,83 @@ The Project Setup release surface has no ambiguous identity or data-access depen
 |----|------|--------|
 | CF-03 | Teams Personal App auth readiness verification (OI-03, open risk retained) | Future |
 | CF-05 | Backend boundary reduction | Prompt-04 |
+| CF-06 | `supportsThemeVariants` cosmetic divergence | Low priority |
+
+### P8-05: User-Assigned Managed Identity and App-Access Model
+
+**Status:** Complete
+**Date:** 2026-03-31
+
+#### Work completed
+- Audited all managed identity assumptions across backend services, config, and docs
+- Updated backend service comments from system-assigned to user-assigned MI production posture
+- Clarified `AZURE_CLIENT_ID` dual-purpose in config registry and local settings example
+- Updated deployment runbook and connected-service posture doc for user-assigned MI
+- Updated ADR-0078 to reflect user-assigned MI decision
+- Documented exact external grant prerequisites for user-assigned MI
+- Verified `DefaultAzureCredential` patterns are user-assigned-compatible (no code logic changes needed)
+
+#### Identity posture findings
+
+**Current code assessment:**
+- All backend services use `DefaultAzureCredential()` for token acquisition (Graph, SharePoint, Table Storage)
+- `DefaultAzureCredential` is inherently compatible with both system-assigned and user-assigned MI
+- With user-assigned MI, `AZURE_CLIENT_ID` env var selects the correct identity — no code changes needed
+- The `ManagedIdentityTokenService`, `GraphService`, and `SharePointService` all acquire app-only tokens (no OBO flows)
+
+**Key identity distinction (P3-03):**
+- `AZURE_CLIENT_ID` = user-assigned Managed Identity client ID (for outbound Azure resource auth)
+- `API_AUDIENCE` = Entra ID app registration audience URI (for inbound JWT validation)
+- These are different identities and must not be conflated
+
+**What changed:**
+- Service comments updated from "system-assigned" to "user-assigned Managed Identity (production)"
+- Config registry `AZURE_CLIENT_ID` description clarified for production vs local dev
+- `local.settings.example.json` placeholder updated to `<user-assigned-mi-client-id-in-production OR app-reg-client-id-for-local-dev>`
+- Connected-service posture doc updated throughout
+- Phase 5 Deployment Runbook updated to require user-assigned MI
+- ADR-0078 updated to reflect user-assigned MI as the production decision
+
+#### External grant prerequisites (user-assigned MI)
+
+| Grant | Target | Permission | Purpose |
+|-------|--------|-----------|---------|
+| Azure RBAC | Storage Account | `Storage Table Data Contributor` | Table Storage read/write for request and provisioning status persistence |
+| SharePoint | Tenant or Site | `Sites.Selected` (preferred) or `Sites.FullControl.All` (fallback, requires ADR) | Site creation, list management, template upload, hub association |
+| Microsoft Graph | Application | `Group.ReadWrite.All` | Entra ID security group creation and membership management |
+| SharePoint Admin | SPFx API permission | `api://<client-id>` scope approved | SPFx app access to backend API |
+
+**Permission gates in code:**
+- `GRAPH_GROUP_PERMISSION_CONFIRMED` must be `'true'` before any Graph operations execute (saga-time gate)
+- `SITES_PERMISSION_MODEL` controls SharePoint access approach: `sites-selected` (default) or `fullcontrol` (fallback)
+
+#### Verification results
+
+- Type-check: clean (0 errors)
+- Lint: 0 errors, 65 pre-existing warnings
+- Tests: 22 files, 157 passed, 2 todo
+- No code logic changes — only comments, descriptions, and documentation updated
+
+#### Files changed
+- `backend/functions/src/services/managed-identity-token-service.ts` — comment updates (system→user-assigned MI)
+- `backend/functions/src/config/wave0-env-registry.ts` — AZURE_CLIENT_ID description clarified
+- `backend/functions/local.settings.example.json` — AZURE_CLIENT_ID placeholder updated
+- `docs/reference/developer/project-setup-connected-service-posture.md` — identity model updated throughout
+- `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md` — MI prerequisites updated
+- `docs/architecture/adr/ADR-0078-security-managed-identity.md` — decision updated to user-assigned MI
+- `apps/estimating/package.json` — version bump 0.2.34 → 0.2.35
+- `docs/architecture/reviews/project-setup-phase-8-remediation-report.md` — P8-05 section added
+
+#### Closure statement
+
+The backend production identity posture is now explicitly aligned to user-assigned Managed Identity. All service comments, config descriptions, deployment docs, and the security ADR consistently reference user-assigned MI as the required production model. `DefaultAzureCredential` patterns are confirmed compatible — `AZURE_CLIENT_ID` selects the user-assigned identity in Azure-hosted deployments. The dual-identity distinction (`AZURE_CLIENT_ID` for MI outbound auth ≠ `API_AUDIENCE` for inbound JWT validation) is documented and enforced. External grant prerequisites are explicitly documented. Ready for Prompt-06 operational gates.
+
+#### Carry-forward items for Prompt-06+
+
+| ID | Item | Target |
+|----|------|--------|
+| CF-03 | Teams Personal App auth readiness verification (OI-03, open risk retained) | Future |
+| CF-05 | Backend boundary reduction (OI-05, deferred) | Future |
 | CF-06 | `supportsThemeVariants` cosmetic divergence | Low priority |
 
 ## Open Items
