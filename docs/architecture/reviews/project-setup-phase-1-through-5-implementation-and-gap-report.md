@@ -2,27 +2,26 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (Prompt-11 documentation reconciliation)
+> **Last updated:** 2026-03-31 (P2-11 documentation reconciliation)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
 ### What is confirmed complete
 
 - **Phase 1 scope control is closed.** The frontend requester surface is isolated to Project Setup routes with regression guards (`apps/estimating/src/test/phase1ScopeGuards.test.ts`). The backend now has a dedicated Project Setup domain host (`backend/functions/src/hosts/project-setup/`) with scoped composition root, service factory, tenant-specific CORS, domain-scoped config validation, and 63 boundary regression tests. All 10 acceptance criteria (AC-1 through AC-10) from `Phase-1_Backend-Boundary-Freeze.md` are satisfied. Architecture decision recorded in ADR-0124.
-- The data-contract work introduced a real centralized SharePoint field map in `backend/functions/src/services/projects-list-contract.ts` and `backend/functions/src/services/projects-list-mapper.ts`, with real mapper tests.
+- **Phase 2 data contract is closed.** The production SharePoint schema was updated with 17 new columns (P2-07), the field contract and mapper now cover all 43 fields, the submit handler field-loss bug was fixed (P2-08), misleading mock tests were restructured for truthfulness (P2-09), and legacy-row backward compatibility is confirmed safe without backfill (P2-10). Evidence: `projects-list-contract.ts`, `projects-list-mapper.ts`, `sp-field-mapping.test.ts`.
 - The Project Setup auth model is substantially implemented: production-vs-`ui-review` mode, SPFx audience-scoped token acquisition, backend JWT validation, and route protection are real.
 - Phase 4 infrastructure hardening is materially real: tiered config validation, diagnostic health output, managed-identity service posture, and version-controlled observability assets exist.
 
-### Remaining blockers (Phases 2-5)
+### Remaining blockers (Phases 3-5)
 
-- **Phase 2 persistence contract is still incomplete.** `IProjectSetupRequest` contains fields not persisted by the real SharePoint adapter, including structured address fields, team-role assignments, clarification metadata, and retry metadata. Evidence: `packages/models/src/provisioning/IProvisioning.ts`, `backend/functions/src/services/projects-list-contract.ts`, `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract-Gaps.md`.
 - **Required-field enforcement is still intentionally disabled** via `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
 - **Phase 5 release-hardening claims remain overstated.** The backend verification slice is strong, but the current `@hbc/spfx-project-setup` test run still has broader page-level test issues.
 - **Several release-readiness items remain environment-gated** rather than proven against a live deployment.
 
 ### Overall status
 
-**Phase 1: closed.** Phase 2-5: close but blocked on persistence contract completeness, field enforcement, and frontend test stability. The implementation is beyond prototype level, but remaining phases still require remediation before a production-ready assessment is supportable.
+**Phase 1: closed. Phase 2: closed.** Phases 3-5: close but blocked on field enforcement, frontend test stability, and live deployment proof. The implementation is beyond prototype level, but remaining phases still require remediation before a production-ready assessment is supportable.
 
 ## 2. Audit Scope and Method
 
@@ -315,12 +314,11 @@ Establish a canonical Project Setup data contract, centralize SharePoint field m
 - Structured location fields are still not persisted by the real adapter: `projectStreetAddress`, `projectCity`, `projectCounty`, `projectState`, `projectZip`.
 - Team-role assignment fields are still not persisted: `projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, `supportingEstimatorUpns`, `additionalTeamMemberUpns`, `timberscanApproverUpn`.
 - Other live domain fields remain unmapped: `officeDivision`, `procoreProject`, `clarificationRequestedAt`, `requesterRetryUsed`, `clarificationItems`.
-- The phase gap document calling this out remains accurate in repo truth: `phase-2/Phase-2_Data-Contract-Gaps.md`.
+- The phase gap document (`phase-2/Phase-2_Data-Contract-Gaps.md`) originally identified 16 unmapped fields. **All 16 are now mapped** (plus `sageAccessUpns`, a new field discovered in the schema export). The gap document is now historical context, not current truth.
 
 **Divergence from plan**
 
-- `phase-2/Phase-2_Handoff.md` claims “Data Contract Complete,” but repo truth still shows known persistence loss on the production path.
-- The field-mapping effort improved the architecture, but it did not finish the persistence contract for the actual live wizard shape.
+- `phase-2/Phase-2_Handoff.md` originally claimed “Data Contract Complete” when 16 fields were unmapped. **Remediated (P2-07 through P2-10, 2026-03-31):** schema updated, all 43 fields mapped, submit handler fixed, tests truthful, handoff annotated.
 
 **Current status assessment**
 
@@ -477,6 +475,35 @@ Legacy Project Setup rows are handled by an explicit read-compatibility strategy
 - Team fallback normalization: `packages/features/estimating/src/project-setup/config/projectTeamFields.ts` (lines 84-91)
 - Controller/admin safety: `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`, `apps/admin/src/pages/ProvisioningOversightPage.tsx` (no P2-07 field dependencies)
 
+### Phase 2 Documentation Reconciliation and Closure (2026-03-31, Prompt P2-11)
+
+**Re-audit verification:**
+
+| Aspect | Status | Evidence |
+|--------|--------|----------|
+| Schema alignment | Verified | 43 fields in `PROJECTS_LIST_FIELD_MAP` match production SP export |
+| Canonical field contract | Verified | `IProjectsListItem` interface has all 43 SP columns |
+| Production mapper | Verified | `toDomain()` and `toListItem()` cover all 43 fields with normalization |
+| Submit handler | Verified | All P2-07 fields pass through from request body (P2-08 fix) |
+| Test truthfulness | Verified | Mock tests explicitly labeled; real contract proof via field map; 9 contract tests + 39 mapper tests |
+| Legacy-row handling | Verified | Option A (read-compatible, no backfill); all surfaces confirmed safe |
+
+**Phase 2 closure status: CLOSED.**
+
+The Phase 2 persistence contract is now aligned across the SharePoint schema, canonical request model, mapper, repository, and real-adapter tests. The prior persistence-loss finding is closed for the canonical persisted field set. Legacy-row compatibility remains bounded and explicitly documented.
+
+**Remaining limitations (not blockers):**
+
+- `clarificationItems` uses SP Text column (MaxLength=255). May need migration to MultiLineText or Azure Table Storage if production clarification records exceed this limit.
+- `field_17`/`field_18`/`field_19` absent from latest schema export but retained in code for legacy row compatibility.
+- Required-field enforcement remains disabled (`PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false`). This is a cross-phase concern, not a Phase 2 blocker.
+
+**Documents reconciled:**
+
+- `Phase-2_Handoff.md`: annotated with reconciliation note; deferred items table now references resolution
+- `Phase-2_Data-Contract-Gaps.md`: marked as HISTORICAL; all gaps closed
+- Audit report: executive summary, cross-phase findings, gap analysis, remediation list, final status, and evidence appendix all updated
+
 ### Phase 3
 
 **Intended objective**
@@ -600,7 +627,7 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 ### Dependencies spanning multiple phases
 
 - Phase 1 isolation and Phase 4 startup scoping are directly coupled. The backend boundary freeze (ADR-0124, 2026-03-31) did produce a dedicated Project Setup host under `backend/functions/src/hosts/project-setup/**`. The remaining cross-phase gap is not host creation; it is deployment truth. Repo evidence does not show that the scoped host, rather than the preserved monolithic host, is the artifact actually rehearsed or released.
-- Phase 2 persistence completeness is coupled to Phase 5 release readiness. The system still risks losing production-mode request data for live wizard fields, so release hardening cannot honestly be complete while the persistence contract is incomplete.
+- ~~Phase 2 persistence completeness is coupled to Phase 5 release readiness.~~ **CLOSED (P2-07 through P2-10, 2026-03-31).** The production persistence contract now covers all 43 canonical fields. The submit handler field-loss bug is fixed. Legacy rows are handled with safe defaults. This dependency no longer gates Phase 5.
 - Phase 3 production-mode safety depends on Phase 4 deployment/configuration truth. The code gates production mode correctly, but actual readiness still depends on external environment configuration, app registration approval, and tenant permissions.
 
 ### Recurring patterns of incompletion or drift
@@ -910,8 +937,8 @@ The strongest cross-phase dependencies are: Phase 2 persistence completeness gat
 
 ## 8. Prioritized Remediation List
 
-1. **Complete the production persistence contract for the live wizard shape.**
-   - Decide which `IProjectSetupRequest` fields are required to persist and extend the real storage contract accordingly.
+1. **~~Complete the production persistence contract for the live wizard shape.~~ CLOSED (P2-07 through P2-10, 2026-03-31).**
+   - SharePoint schema updated with 17 new columns. Field contract, mapper, and repository now persist all 43 canonical fields. Submit handler field-loss fixed. Legacy rows handled with safe defaults. Test suite restructured for truthfulness.
 2. **Re-enable and align required-field enforcement.**
    - Remove the temporary disabled state in `projectSetupSteps.ts` and ensure backend validation matches the intended wizard contract.
 3. **Resolve current SPFx retained-surface test failures.**
@@ -929,14 +956,14 @@ The strongest cross-phase dependencies are: Phase 2 persistence completeness gat
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (Prompt-11 documentation reconciliation)
+> **Last updated:** 2026-03-31 (P2-11 documentation reconciliation)
 
 ### Phase-by-phase status
 
 | Phase | Status | Summary |
 |-------|--------|---------|
 | Phase 1 | **Closed** | Frontend isolation + backend domain host + 63 regression tests. All AC-1-AC-10 satisfied. ADR-0124 accepted. |
-| Phase 2 | Partial | Correct architectural seam, but production persistence contract drops user-entered fields. |
+| Phase 2 | **Closed** | Schema updated (17 new columns), field contract covers 43 fields, submit handler fixed, tests truthful, legacy rows safe. P2-07 through P2-11. |
 | Phase 3 | Implemented with gaps | Estimating requester auth path is strong; cross-surface convergence incomplete. |
 | Phase 4 | Partial to substantial | Real hardening work, but deployment scoping and observability operationalization incomplete. |
 | Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
@@ -946,8 +973,8 @@ The strongest cross-phase dependencies are: Phase 2 persistence completeness gat
 **Not production ready** for Phases 2-5. Phase 1 is closed.
 
 The remaining blockers are:
-1. ~~Incomplete production persistence contract (Phase 2)~~ — substantially closed (P2-07)
-2. Disabled required-field enforcement (Phase 2)
+1. ~~Incomplete production persistence contract (Phase 2)~~ — **closed** (P2-07 through P2-10)
+2. Disabled required-field enforcement (cross-phase)
 3. SPFx page-level test instability (Phase 5)
 4. Environment-gated release evidence without live deployment proof (Phase 5)
 
@@ -984,13 +1011,15 @@ The remaining blockers are:
 ### Phase 2 evidence
 
 - Plan intent: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract_Action-Plan.md`
-- Claimed completion: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Handoff.md`
-- Gap summary still supported by repo: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract-Gaps.md`
-- Live request type: `packages/models/src/provisioning/IProvisioning.ts`
-- Central field map: `backend/functions/src/services/projects-list-contract.ts`
-- Central mapper: `backend/functions/src/services/projects-list-mapper.ts`
-- Real mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts`
-- Misleading mock round-trip coverage: `backend/functions/src/services/__tests__/sp-field-mapping.test.ts`
+- Original handoff: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Handoff.md` (annotated with P2-07-P2-11 reconciliation)
+- Gap document (historical): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract-Gaps.md` (gaps now closed)
+- Domain model (with sageAccessUpns): `packages/models/src/provisioning/IProvisioning.ts`
+- Field contract (43 fields): `backend/functions/src/services/projects-list-contract.ts`
+- Mapper (43 fields): `backend/functions/src/services/projects-list-mapper.ts`
+- Mapper tests (39 tests, 43 fields): `backend/functions/src/services/__tests__/projects-list-mapper.test.ts`
+- Contract proof + regression guards (9 tests): `backend/functions/src/services/__tests__/sp-field-mapping.test.ts` (restructured P2-09)
+- Submit handler fix: `backend/functions/src/functions/projectRequests/index.ts` (P2-08)
+- Lifecycle tests (51 tests): `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts`
 
 ### Phase 3 evidence
 

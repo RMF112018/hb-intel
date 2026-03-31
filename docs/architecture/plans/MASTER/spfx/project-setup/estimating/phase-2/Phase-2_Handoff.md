@@ -1,9 +1,12 @@
 # Phase 2 — Final Handoff: Data Contract Complete
 
-> Completed: 2026-03-30
+> **Original handoff:** 2026-03-30 (26-field contract for CSV-import columns)
+> **Schema reconciliation:** 2026-03-31 (P2-07 through P2-11 — 17 new columns, 43 total fields)
 > Package: `@hbc/spfx-project-setup` (apps/estimating)
 > Backend: `backend/functions/`
 > Version at handoff: 0.2.20
+>
+> **Reconciliation note (2026-03-31):** This handoff originally covered the 26 CSV-import columns only. The 16 unmapped domain properties listed in Section 2 as "intentionally deferred" have since been resolved: the production SharePoint schema was updated with 17 new columns (P2-07), the field contract and mapper were extended to 43 fields, a submit handler field-loss bug was fixed (P2-08), misleading mock tests were restructured (P2-09), and legacy-row compatibility was confirmed safe without backfill (P2-10). The gap document `Phase-2_Data-Contract-Gaps.md` is now historical context.
 
 ## 1. What Phase 2 Accomplished
 

@@ -2,8 +2,10 @@
 
 > Created: 2026-03-30
 > Companion to: `Phase-2_Field-Map-Baseline.md`
+>
+> **Status: HISTORICAL (2026-03-31).** All gaps documented below have been resolved by P2-07 through P2-10. The production SharePoint schema was updated with 17 new columns, the field contract was extended to 43 fields, and the submit handler field-loss bug was fixed. This document is retained as historical context for the audit trail.
 
-## Summary
+## Summary (original, superseded)
 
 The SharePoint adapter (`project-requests-repository.ts`) correctly uses `field_N` internal names for the 26 columns that exist in the production Projects list. However, 16 domain properties in `IProjectSetupRequest` have **no corresponding SharePoint column** and are silently dropped on real persistence.
 
