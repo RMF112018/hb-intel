@@ -23,6 +23,7 @@ declare const __APP_GLOBAL_NAME__: string;
 declare const __FUNCTION_APP_URL__: string;
 declare const __BACKEND_MODE__: string;
 declare const __ALLOW_BACKEND_MODE_SWITCH__: string;
+declare const __API_AUDIENCE__: string;
 
 interface IAppModule {
   mount(el: HTMLElement, spfxContext?: unknown, config?: Record<string, unknown>): Promise<void>;
@@ -120,6 +121,9 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
         }
         if (typeof __ALLOW_BACKEND_MODE_SWITCH__ === 'string' && __ALLOW_BACKEND_MODE_SWITCH__) {
           runtimeConfig.allowBackendModeSwitch = __ALLOW_BACKEND_MODE_SWITCH__ === 'true';
+        }
+        if (typeof __API_AUDIENCE__ === 'string' && __API_AUDIENCE__) {
+          runtimeConfig.apiAudience = __API_AUDIENCE__;
         }
       } catch {
         // Runtime constants not defined — app will fall back to Vite env or defaults

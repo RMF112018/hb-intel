@@ -29,6 +29,7 @@ build.configureWebpack.mergeConfig({
         __FUNCTION_APP_URL__: JSON.stringify(process.env.FUNCTION_APP_URL || ''),
         __BACKEND_MODE__: JSON.stringify(process.env.BACKEND_MODE || ''),
         __ALLOW_BACKEND_MODE_SWITCH__: JSON.stringify(process.env.ALLOW_BACKEND_MODE_SWITCH || ''),
+        __API_AUDIENCE__: JSON.stringify(process.env.API_AUDIENCE || ''),
       })
     );
 

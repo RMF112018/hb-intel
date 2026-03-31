@@ -145,6 +145,7 @@ function inspectCompiledShellAsset(
   globalName: string,
   domainDir: string,
   backendMode?: string,
+  apiAudience?: string,
 ): boolean {
   if (!fs.existsSync(shellAssetPath)) {
     console.error(`  ❌ ${domainDir}: compiled shell asset missing at ${shellAssetPath}`);
@@ -162,6 +163,9 @@ function inspectCompiledShellAsset(
   }
   if (backendMode && !shellJs.includes(`"${backendMode}"`)) {
     errors.push(`missing backend mode reference ${backendMode}`);
+  }
+  if (apiAudience && !shellJs.includes('apiAudience')) {
+    errors.push('missing apiAudience reference in compiled shell asset');
   }
   if (bundleName !== 'app.js' && shellJs.includes('"app.js"')) {
     errors.push('still contains fallback bundle name app.js');
@@ -185,6 +189,7 @@ function inspectPackagedShellAsset(
   globalName: string,
   domainDir: string,
   backendMode?: string,
+  apiAudience?: string,
 ): boolean {
   try {
     const listOutput = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' });
@@ -212,6 +217,9 @@ function inspectPackagedShellAsset(
     }
     if (backendMode && !shellJs.includes(`"${backendMode}"`)) {
       errors.push(`missing packaged backend mode reference ${backendMode}`);
+    }
+    if (apiAudience && !shellJs.includes('apiAudience')) {
+      errors.push('missing apiAudience reference in packaged shell asset');
     }
     if (bundleName !== 'app.js' && shellJs.includes('"app.js"')) {
       errors.push('still contains packaged fallback bundle name app.js');
@@ -536,6 +544,7 @@ for (const domain of domains) {
     FUNCTION_APP_URL: process.env.FUNCTION_APP_URL ?? '',
     BACKEND_MODE: resolveDefaultBackendMode(domain.dir),
     ALLOW_BACKEND_MODE_SWITCH: process.env.ALLOW_BACKEND_MODE_SWITCH ?? '',
+    API_AUDIENCE: process.env.API_AUDIENCE ?? '',
   };
 
   console.log('  Running gulp bundle --ship...');
@@ -556,6 +565,7 @@ for (const domain of domains) {
     globalName,
     domain.dir,
     shellEnv.BACKEND_MODE || undefined,
+    shellEnv.API_AUDIENCE || undefined,
   )) {
     allPassed = false;
     continue;
@@ -615,6 +625,7 @@ for (const domain of domains) {
     globalName,
     domain.dir,
     shellEnv.BACKEND_MODE || undefined,
+    shellEnv.API_AUDIENCE || undefined,
   )) {
     allPassed = false;
     continue;
