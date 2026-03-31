@@ -8,7 +8,7 @@ Phase 8 addresses the remaining production blockers identified in the Phase 1–
 
 ### Current status
 
-Prompt-01 (Build Artifact Audit and Scaffold) — complete.
+Prompt-03 (Resolve `/api/users/me/*` Routes and Identity Dependency Surface) — complete.
 Prompt-02 (SPFx Runtime Config and Token Contract Reconciliation) — complete.
 
 ## Prompt-by-Prompt Progress Log
@@ -257,6 +257,82 @@ The apiAudience shell injection gap (CF-01/OI-01) is closed. The runtime-config 
 | CF-05 | Backend boundary reduction | Prompt-04 |
 | CF-06 | `supportsThemeVariants` cosmetic divergence | Low priority |
 
+### P8-03: Resolve `/api/users/me/*` Routes and Identity Dependency Surface
+
+**Status:** Complete
+**Date:** 2026-03-31
+
+#### Work completed
+- Audited full `/api/users/me/*` dependency graph across frontend, backend, and shared packages
+- Verified Graph search dependency (`graph.microsoft.com/v1.0/users`) is intentional SPFx-authorized integration
+- Confirmed P6-03/P7-03 resolution still holds in current repo truth — no code changes needed
+- Closed OI-04 (route ownership resolution)
+
+#### `/api/users/me/*` findings
+
+**Dependency graph audit:**
+
+| Endpoint | Referenced in | Called by estimating app? | Backend implementation? | Status |
+|----------|--------------|--------------------------|------------------------|--------|
+| `/api/users/me/preferences` | `packages/complexity/src/storage/complexityApiClient.ts` (line 5) | NO — `enableApiSync` defaults to `false`; estimating app does not pass `enableApiSync={true}` | NO — no route in Project Setup domain host | Dead dependency for PS scope |
+| `/api/users/me/groups` | `packages/complexity/src/storage/complexityApiClient.ts` (line 6) | NO — same `enableApiSync` gate | NO — no route in Project Setup domain host | Dead dependency for PS scope |
+| `graph.microsoft.com/v1.0/users` | `packages/ui-kit/src/HbcPeoplePicker/useGraphPeopleSearch.ts` (line 14) | YES — `TeamStepBody.tsx` uses `useGraphPeopleSearch()` for people lookup | N/A — direct SPFx Graph call, not proxied | Intentional, authorized |
+
+**Resolution path: Path A — Dead dependency (confirmed)**
+
+The `/api/users/me/*` endpoints are not active dependencies for the Project Setup release surface:
+1. Both endpoints exist only in the shared complexity package (`complexityApiClient.ts`)
+2. The `ComplexityProvider` gates all API calls behind `enableApiSync` (default: `false`)
+3. The estimating app does not pass `enableApiSync={true}` to `ComplexityProvider`
+4. Both API functions gracefully degrade on 404 (return `null`/fallback to localStorage)
+5. No backend handler implements either route in the Project Setup domain host
+6. Test coverage confirms: `routeParityContract.test.ts` verifies API sync is disabled; `authTransportContract.test.ts` confirms credentials are behind the disabled flag
+
+This matches the P6-03 decision (Option B) and the P7-03 confirmation. No code changes are required — the architecture is correct and production-safe.
+
+**No code removal needed:** The complexity package's API client functions are shared infrastructure that may be enabled by other apps in the future. Removing them from the package would be scope-broadening. The estimating app's disabled `enableApiSync` flag is the correct production boundary.
+
+#### Graph search dependency resolution
+
+The `graph.microsoft.com/v1.0/users` reference is a direct SPFx-authorized Graph call from `useGraphPeopleSearch()` in `@hbc/ui-kit`:
+- Used by `TeamStepBody.tsx` for Project Team member assignment
+- Authorized via `createSpfxGraphTokenProvider()` from `@hbc/auth/spfx`
+- Falls back to mock static search in `ui-review` mode (no Graph call needed for testing)
+- This is the sanctioned SPFx Graph integration pattern — not a proxy dependency, not a missing backend route
+- The backend `GraphService` handles separate backend-initiated operations (group creation for provisioning) using Managed Identity
+
+**Decision:** The direct Graph call is correct and should remain. It uses the SPFx-sanctioned Graph path with proper token scoping. No proxy or backend mediation is needed.
+
+#### Boundary cleanup verification
+
+- No ambiguous code comments found in estimating app regarding `/api/users/me/*` ownership
+- Routing assumptions are clear: `IProjectSetupClient` (5 methods) maps 1:1 to backend routes
+- Data-source selection is explicit: production uses `createProvisioningApiClient`, ui-review uses `uiReviewProjectSetupClient`
+- Production-readiness docs (`project-setup-frontend-api-contract.md`) correctly state the resolution
+
+#### Verification results
+
+- Type-check: clean (0 errors)
+- Lint: 0 errors, 65 pre-existing warnings
+- Tests: 22 files, 157 passed, 2 todo
+- No code changes — verification confirms baseline is green
+
+#### Files changed
+- `docs/architecture/reviews/project-setup-phase-8-remediation-report.md` — P8-03 section added, OI-04 closed
+- `apps/estimating/package.json` — version bump 0.2.33 → 0.2.34
+
+#### Closure statement
+
+The Project Setup release surface has no ambiguous identity or data-access dependencies. The `/api/users/me/*` endpoints are confirmed dead for this scope (opt-in disabled, no backend implementation, graceful degradation). The Graph search dependency is intentional SPFx-authorized integration. Route ownership is clear: 5 requester methods map 1:1 to backend routes. Ready for Prompt-04 backend boundary reduction.
+
+#### Carry-forward items for Prompt-04+
+
+| ID | Item | Target |
+|----|------|--------|
+| CF-03 | Teams Personal App auth readiness verification (OI-03, open risk retained) | Future |
+| CF-05 | Backend boundary reduction | Prompt-04 |
+| CF-06 | `supportsThemeVariants` cosmetic divergence | Low priority |
+
 ## Open Items
 
 | ID | Description | Owner | Status |
@@ -264,7 +340,7 @@ The apiAudience shell injection gap (CF-01/OI-01) is closed. The runtime-config 
 | OI-01 | `apiAudience` not injected by shell — requires API audience app registration and DefinePlugin addition | P8-02 | **Closed** |
 | OI-02 | Runtime config/token contract reconciliation between shell and app | P8-02 | **Closed** |
 | OI-03 | Teams Personal App auth readiness — `aadTokenProviderFactory` resolution unverified in Teams context | P8-02 | Open |
-| OI-04 | Route ownership resolution — frontend route definitions vs backend route expectations | P8-03 | Open |
+| OI-04 | Route ownership resolution — frontend route definitions vs backend route expectations | P8-03 | **Closed** |
 | OI-05 | Backend boundary reduction — reduce direct backend coupling from frontend | P8-04 | Open |
 | OI-06 | `supportsThemeVariants` divergence between app manifest and shell manifest | Backlog | Open |
 
