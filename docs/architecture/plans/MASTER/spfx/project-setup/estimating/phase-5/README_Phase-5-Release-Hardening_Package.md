@@ -34,10 +34,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
      - `post-deploy-smoke.test.ts` — 7 env-gated smoke checks (health, auth rejection, authenticated paths)
      - `release-gates.test.ts` — 10 release prerequisite regression tests (config tiers, CORS, auth contract, MI enforcement)
 
-5. `Prompt-04_Deployment-Rehearsal_Rollback-and-Recovery.md`
+5. `Prompt-04_Deployment-Rehearsal_Rollback-and-Recovery.md` **[COMPLETE]**
    - Rehearse deployment and validation flow end to end
    - Document rollback, recovery, and degraded-mode handling
    - Make release execution safe, repeatable, and supportable
+   - **Deliverables:**
+     - [`Phase-5_Deployment-Runbook.md`](Phase-5_Deployment-Runbook.md) — Prerequisites checklist, 5-phase release sequence (pre-deploy → deploy → post-deploy → frontend → monitoring), rollback triggers and steps, 5 degraded-mode recovery procedures, operator decision/escalation matrix, printable release execution checklist
 
 6. `Prompt-05_Production-Readiness-Signoff-and-Handoff-Assets.md`
    - Build the final handoff artifacts, signoff notes, and operator documentation
