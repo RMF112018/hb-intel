@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P5-10 release gates, signoff realism, and decision-ready evidence)
+> **Last updated:** 2026-03-31 (P5-11 documentation reconciliation and audit closure)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -13,15 +13,15 @@ This report was originally authored as a gap analysis finding that Phases 1-5 we
 - **Phase 3 auth findings are closed for Project Setup.** Auth architecture frozen (P3-07), production token/audience path verified (P3-08), cross-surface auth converged to factory-based providers (P3-09), proxy explicitly excluded from PS release scope (P3-10). Deprecated `resolveSessionToken()` removed from all retained surfaces. RBAC convergence remains a future follow-on but is not a Phase 3 blocker.
 - **Phase 4 infrastructure architecture is frozen (P4-07).** Dedicated Project Setup host with domain-scoped config validation, tenant-specific CORS, pure managed identity, conditional SignalR, and diagnostic health output. Canonical vs transitional surfaces explicitly classified. Observability artifacts exist in repo but are not operationalized. Environment-gated deployment proof remains external.
 
-### Remaining blockers (Phases 4-5)
+### Remaining blockers
 
 - **Required-field enforcement is still intentionally disabled** via `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
-- **Phase 5 release-hardening claims remain overstated.** The backend verification slice is strong, but the current `@hbc/spfx-project-setup` test run still has broader page-level test issues.
-- **Several release-readiness items remain environment-gated** rather than proven against a live deployment.
+- **Several release-readiness items remain environment-gated** rather than proven against a live deployment (8 deployment prerequisites, staging smoke execution, leadership/IT/support signoff).
+- **External SharePoint list contract validation** remains outside repo evidence.
 
 ### Overall status
 
-**Phases 1-3: closed.** Phases 4-5 remain blocked on field enforcement, frontend test stability, and live deployment proof. The implementation is beyond prototype level, but remaining release decisions still depend on environment-level validation the repo cannot provide by itself.
+**Phases 1-4: closed or substantially closed. Phase 5: substantially closed — code-level work complete, environment-gated and operational items remain.** Phases 1 and 3 are fully closed. Phase 2 is substantially closed (repo-owned code path complete, external list proof external). Phase 4 is substantially closed (architecture frozen, operationalization deferred). Phase 5 is substantially closed in repo-owned terms: release scope frozen (P5-07), frontend baseline green (P5-08), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Remaining release decisions depend on environment-level deployment prerequisites and operational signoff the repo cannot provide by itself.
 
 ## 2. Audit Scope and Method
 
@@ -1503,6 +1503,56 @@ Project Setup release gates and signoff artifacts are now aligned to retained-su
 - Release gates doc (unchanged — accurate): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md`
 - Deployment runbook (unchanged — documentary): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md`
 
+### Phase 5 Documentation Reconciliation and Audit Closure (2026-03-31, Prompt P5-11)
+
+**Reconciliation scope:**
+
+Re-audited the Phase 5 section, executive summary, cross-phase findings, deferred implementation inventory, remediation list, closure-truth notes, unresolved questions, and final status table after P5-07 through P5-10 completed.
+
+**Documents reconciled:**
+
+| Section | Change |
+|---|---|
+| Executive summary "Remaining blockers" | Removed stale "Phase 5 claims overstated" and "page-level test issues" language. Updated to reflect P5-08 frontend fix and current environment-gated blockers. |
+| Executive summary "Overall status" | Updated from "Phases 4-5 remain blocked" to "Phases 1-4 closed/substantially closed, Phase 5 substantially closed — code-level work complete." |
+| Deferred work executive summary | Blocker count reduced from 4 to 3 (frontend test baseline closed by P5-08). Phase 5 docs no longer flagged as unreconciled. |
+| Closure-truth notes: Phase 5 | Updated — Handoff annotated (P5-07), signoff updated (P5-10), "Code-Level Blockers: NONE" now repo-supported. |
+| Unresolved questions | Frontend test question resolved (P5-08). |
+| Overall recommendation | Updated to "Code-level work complete; environment-gated deployment and operational signoff remain." |
+| Closing paragraph | Updated to reflect full P5-07 through P5-11 evidence model. |
+
+**What is now fully closed for Phase 5 in repo-owned terms:**
+
+1. Release scope frozen (P5-07): Canonical retained surfaces explicitly identified
+2. Frontend test baseline (P5-08): 10 failures fixed, 19 files / 138 tests green
+3. Smoke/deployment categorization (P5-09): Evidence classified, guardrail added
+4. Release gates/signoff realism (P5-10): Signoff doc updated, R6 closed, decision-ready evidence section added
+5. Documentation reconciliation (P5-11): Stale language corrected across executive summary, deferred inventory, closure notes, and final status
+
+**What remains outside Phase 5 repo closure:**
+
+1. **Environment-gated:** 8 deployment prerequisites (D1–D8), live staging smoke execution, CORS portal verification
+2. **Operational:** Leadership/IT/support signoff, on-call mechanism, alert deployment
+3. **External validation:** Live SharePoint list contract proof
+4. **Product decision:** Required-field enforcement (`PROJECT_SETUP_REQUIRED_FIELDS_ENABLED`)
+
+These are not repo gaps. They are deployment, operational, and product decision items.
+
+**Closure statement:**
+
+Phase 5 documentation is reconciled with current repo truth (P5-07 through P5-11). The retained Project Setup release evidence model is now explicit across repo-proven tests (776 total — 638 backend + 138 frontend), bounded environment-gated checks (7 smoke tests, 8 deployment prerequisites), and separately categorized operational signoff activities. Phase 5 no longer depends on overstated handoff/signoff language to describe retained Project Setup readiness. Release-decision artifacts are aligned to truthful retained-surface evidence. Phase 5 is **substantially closed** — all repo-owned code, test, and documentation work is complete. Remaining items are environment-gated, operational, or product decisions.
+
+**Evidence:**
+
+- Executive summary updated: this section of the audit report
+- Deferred work summary updated: section 7A
+- Closure-truth notes updated: section 7D (Phase 5)
+- Unresolved questions updated: section 10 (frontend test question resolved)
+- Overall recommendation updated: section 9
+- Signoff doc (P5-10): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`
+- Handoff (P5-07): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`
+- All P5-07 through P5-10 progress notes in this section
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1586,9 +1636,9 @@ Fifteen deferred or not-clearly-complete implementation items remain across all 
 
 **P4-11 reconciliation update:** Phase 4 infrastructure findings are now substantially closed (P4-07 through P4-10). The deployment-scoped CORS / MI / downstream-permission item is no longer ambiguous — the repo-owned model is frozen and classified, though environment-level application remains external. Observability operationalization is explicitly categorized rather than vaguely incomplete. The effective launch blocker count from Phase 4 is reduced: what remains is environment-gated deployment proof, not repo-level infrastructure gaps.
 
-Four deferred items remain launch blockers for true production readiness: unresolved production auth/deployment prerequisites (environment-gated, Phases 3-4), the failing retained-surface frontend test baseline (Phase 5), the absence of repo-evidenced live smoke / deployment execution (Phase 5), and the lack of completed real signoff evidence (Phase 5). The remaining items are non-blocking follow-up, hardening debt, or external validation items.
+**P5-11 reconciliation update:** The frontend test baseline blocker is closed (P5-08). Phase 5 documentation is reconciled (P5-07 through P5-11). Three deferred items remain launch blockers: unresolved production auth/deployment prerequisites (environment-gated, Phases 3-4), the absence of repo-evidenced live smoke / deployment execution (Phase 5), and the lack of completed real signoff evidence (Phase 5). The remaining items are non-blocking follow-up, hardening debt, or external validation items.
 
-The strongest cross-phase dependencies are: external live-list validation for the Phase 2 contract, Phase 3 and Phase 4 environment prerequisites gating production-mode claims, and Phase 5 documentation that has not yet been reconciled against the improved Phase 4 posture.
+The strongest cross-phase dependencies are: external live-list validation for the Phase 2 contract, and Phase 3/4 environment prerequisites gating production-mode claims. Phase 5 documentation is now reconciled against repo truth.
 
 ### B. Detailed deferred-implementation inventory
 
@@ -1772,7 +1822,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 - **Phase 2:** `Phase-2_Handoff.md` now aligns with the repaired repo-owned code path more than the older audit did, but its references to the external schema update should still be read cautiously because the repo does not contain a checked-in schema export artifact proving the current live list state.
 - **Phase 3:** `Phase-3_Handoff.md` says the auth model is complete and has no must-fix blockers, yet the same phase family documents acceptable follow-on for proxy removal, deprecated helper removal, RBAC convergence, and external deployment prerequisites. Repo truth still shows those items open.
 - **Phase 4:** `Phase-4_Handoff.md` says production-safe infrastructure posture is complete, but Prompt 10 and the observability README both preserve explicit evidence that operationalization and environment-level proof were not completed in repo truth.
-- **Phase 5:** `Phase-5_Handoff.md` and `Phase-5_Production-Readiness-Signoff.md` use the strongest closure language in the phase set. The later Prompt 07-11 docs explicitly instruct that “complete / production-ready / code blockers none” language must be corrected if repo evidence does not support it. Current repo truth still does not support it.
+- **Phase 5:** `Phase-5_Handoff.md` and `Phase-5_Production-Readiness-Signoff.md` originally used the strongest closure language in the phase set. **P5-07 through P5-11 reconciliation:** Handoff annotated with reconciliation note (P5-07). Signoff doc updated with corrected phase table, closed R6, and decision-ready evidence summary (P5-10). “Code-Level Blockers: NONE” is now repo-supported (P5-08 fixed frontend tests, P5-10 confirmed). Remaining gaps are environment-gated and operational, not code-level.
 
 ### E. Recommended interpretation for leadership / implementation planning
 
@@ -1828,7 +1878,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P5-10 release gates, signoff realism, and decision-ready evidence)
+> **Last updated:** 2026-03-31 (P5-11 documentation reconciliation and audit closure)
 
 ### Phase-by-phase status
 
@@ -1838,11 +1888,11 @@ The strongest cross-phase dependencies are: external live-list validation for th
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
 | Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
 | Phase 4 | **Substantially Closed** | Architecture frozen (P4-07), validation scoped (P4-08), CORS/MI/permissions explicit (P4-09), observability classified (P4-10), docs reconciled (P4-11). Environment-gated deployment proof deferred. |
-| Phase 5 | **Partial** | Release scope frozen (P5-07). Frontend baseline green (P5-08: 19 files, 138 tests, 0 failures). Backend strong (638 tests, 30 release-specific). Live deployment proof and signoff incomplete. |
+| Phase 5 | **Substantially Closed** | Release scope frozen (P5-07), frontend green (P5-08), smoke categorized (P5-09), signoff aligned (P5-10), docs reconciled (P5-11). 776 tests green (638 backend + 138 frontend). Environment-gated deployment and operational signoff remain. |
 
 ### Overall recommendation
 
-**Not production ready** for Phase 5. Phases 1-3 are closed. Phase 2 is substantially closed in repo-owned evidence. Phase 4 is substantially closed with architecture frozen (P4-07). Phase 5 remains partial.
+**Code-level work complete; environment-gated deployment and operational signoff remain.** Phases 1-3 are closed. Phases 2 and 4 are substantially closed in repo-owned terms. Phase 5 is substantially closed: release scope frozen, frontend baseline green, evidence categorized, signoff aligned to repo truth (P5-07 through P5-11). Production readiness now depends on environment-level prerequisites and operational execution, not code gaps.
 
 The remaining blockers are:
 1. Disabled required-field enforcement (cross-phase)
@@ -1850,13 +1900,13 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and directionally sound. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are materially closed, but end-to-end live-list proof remains external. Phase 4’s infrastructure architecture is frozen with explicit canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Remaining launch blockers are concentrated in Phase 5: frontend test stability, live deployment proof, and environment-gated prerequisite application.
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (638 tests, 30 release-specific), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Remaining launch prerequisites are environment-gated (8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
 
 ## 10. Explicit Unresolved Questions
 
 - Does the currently deployed SharePoint `Projects` list still match the repo-owned 43-field contract reflected in `projects-list-contract.ts`?
 - ~~Is the intended release target a Project Setup-only backend deployment, or a broader shared Azure Functions host that happens to include Project Setup?~~ **RESOLVED (ADR-0124, Prompt-08):** Per-domain Function App hosts. Project Setup host implemented at `backend/functions/src/hosts/project-setup/`.
-- Are the current failing `@hbc/spfx-project-setup` page-level tests known regressions, test drift, or accepted defects?
+- ~~Are the current failing `@hbc/spfx-project-setup` page-level tests known regressions, test drift, or accepted defects?~~ **RESOLVED (P5-08, 2026-03-31):** Test drift — mock client injection gap in test harness. All 10 failures fixed. 19 files, 138 tests green.
 - Has any live staging deployment successfully run the post-deploy smoke suite documented in `backend/functions/src/test/smoke/post-deploy-smoke.test.ts`?
 
 ## 11. Evidence Appendix
