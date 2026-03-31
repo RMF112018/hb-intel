@@ -208,7 +208,9 @@
       "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
       "Bash(find /Users/bobbyfetting/hb-intel/packages/models/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
       "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *projects*list* -o -name *list*schema* -o -name *field*map* -o -name *column*map* \\\\\\))",
-      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.csv -o -name *.json -o -name *.xlsx \\\\\\))"
+      "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.csv -o -name *.json -o -name *.xlsx \\\\\\))",
+      "Bash(find /Users/bobbyfetting/hb-intel/packages -type f \\\\\\(-name *graph* -o -name *sharepoint* -o -name *pnp* \\\\\\) -name *.ts)",
+      "Bash(sort -k3)"
     ]
   },
   "enabledPlugins": {
