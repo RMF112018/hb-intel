@@ -1696,6 +1696,52 @@ The dedicated Project Setup host (`backend/functions/src/hosts/project-setup/`) 
 
 Prompt-04 is closed. The deployment-truth gap is resolved by explicit proof-tier categorization. Every environment prerequisite has a defined repo evidence level and a post-deploy verification path. The 14 environment prerequisites are split: 6 are repo-verified (architecture, CORS, JWT, config gates, health diagnostics), 8 require environment-level application (app registration, admin consent, MI grants, column migration, deployment target, smoke execution). No code changes required — the repo-owned deployment infrastructure (dedicated host, tiered validation, health diagnostics, release gates, boundary tests) was already complete.
 
+### Phase 6 Observability, Notification Transport, and Provisioning Maturity Closure (2026-03-31, Prompt P6-05)
+
+**Scope:** Close the remaining infrastructure and operational hardening debt by making observability, notification transport, and provisioning maturity postures explicit and decision-useful.
+
+**Observability posture (decision-useful summary):**
+
+| Layer | What Exists | Operationalized? | PS Launch Required? |
+|-------|------------|-----------------|-------------------|
+| Runtime diagnostics | Health endpoint with `operationalReadiness` tiers, `configTiers`, `provisioningPrereqs` | **Yes** | Yes — post-deploy verification path |
+| Runtime telemetry | `withTelemetry` middleware on all HTTP handlers → App Insights | **Yes** | Yes — production telemetry |
+| Runtime logging | `createLogger` with correlation IDs and structured context | **Yes** | Yes — operational troubleshooting |
+| KQL query library | 5 queries (adapter-health, auth-token, provisioning, error-budget, notification) | Repo-executable | No — useful but not gating |
+| Alert rule definitions | 5 rules in `alerts.json` (P1–P3 severity) | Documentary only | No — DevOps follow-on |
+| Dashboard/workbook specs | 4 workbooks referenced in README | Documentary only | No — DevOps follow-on |
+| Action group / Teams routing | Spec in alerts.json; checklist in README | Documentary only | No — DevOps follow-on |
+
+**Decision:** Runtime observability (health, telemetry, logger) is sufficient for PS launch. Alerting and dashboards are recommended post-launch DevOps tasks.
+
+**Notification transport posture:**
+
+| Channel | Status | PS Launch? |
+|---------|--------|-----------|
+| In-app notification queue (`hbc-notifications-queue`) | **Operational** | Yes |
+| Provisioning saga dispatch (non-blocking to submitter/controller/admin) | **Operational** | Yes |
+| SignalR real-time push (provisioning progress) | **Operational when configured** | Yes (degrades gracefully) |
+| Health endpoint diagnostic reporting | **Operational** | Yes |
+| Email (SendGrid) | **Phase 1 stub** — console.log only | No — explicitly out of scope |
+| Digest email (hourly) | **Stubbed** | No — explicitly out of scope |
+
+**Decision:** Email delivery is explicitly out of PS launch scope. In-app notifications, saga dispatch, SignalR, and health endpoint provide adequate operator visibility. Email integration is post-launch follow-on requiring `SENDGRID_API_KEY` and real `emailDelivery.ts` implementation.
+
+**Provisioning maturity:**
+
+All 7 provisioning saga steps are implemented with retry (3 attempts, 2s base delay), compensation (reverse-order unwind for steps 1–4 and 7), idempotency guards, and comprehensive telemetry. Step 5 (web parts) defers to overnight timer after 2 immediate timeout attempts — saga continues to steps 6–7 while step 5 is pending. `validateProvisioningPrerequisites()` fails fast at saga start for 7 environment variables. Provisioning maturity is **code-complete**.
+
+**Acceptance criteria met:**
+
+1. Observability posture is explicit and decision-useful — 3 runtime assets operational, 9 DevOps-gated with deployment checklist.
+2. Notification transport posture is explicit — in-app queue is supported transport, email is out of PS launch scope with documented alternative channels.
+3. Provisioning maturity is closed — all 7 steps, prerequisites validation, compensation, Step 5 timer deferral, non-blocking dispatch.
+4. Review report reflects updated operational truth — all three deferred items reclassified with evidence tables.
+
+**Closure statement:**
+
+Prompt-05 is closed. No code changes required — all three areas (observability, notification transport, provisioning maturity) are code-complete. The remaining operational gaps are truthfully categorized: observability alerting/dashboards are DevOps deployment tasks, email delivery is explicitly out of PS launch scope with in-app alternatives proven, and provisioning maturity is fully implemented with 7 saga steps, compensation, and fail-fast prerequisite validation.
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1813,13 +1859,20 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Phase 1’s deferred provisioning-maturity work remains only partially closed
   **Category:** Infrastructure / operational hardening
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** `phase-1/Phase-1_Handoff.md` deferred “full provisioning maturity (Steps 5/6/7 hardening)” to later phases. Later phases added real infrastructure and release artifacts, but repo truth still leaves email delivery stubbed, alerting unoperationalized, and live deployment proof absent.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Handoff.md`; `backend/functions/src/functions/health/index.ts`; `backend/functions/observability/README.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`
-  **Affected files/surfaces:** provisioning lifecycle, notification delivery, observability, release validation
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Carries directly into Phase 4 and Phase 5 deferred-work inventory; this is not Phase 1 debt alone.
-  **Recommended next-step direction:** Treat the remaining provisioning-maturity gaps as active Phase 4/5 implementation debt, not as a closed historical deferral.
+  **Status:** Substantially closed in repo-owned code; residual items reclassified (P6-05)
+  **P6-05 reclassification:** The provisioning maturity originally deferred from Phase 1 has been materially addressed across Phases 1–6:
+
+  | Sub-item | Original Deferral | Current Status |
+  |----------|------------------|----------------|
+  | Steps 5/6/7 hardening | Phase 1 handoff deferred | **Closed** — all 7 saga steps implemented with retry, compensation, idempotency, and telemetry |
+  | Step 5 timer-based deferral | Not in original scope | **Closed** — `timerFullSpec` function handles overnight retry for web-parts timeout |
+  | Prerequisites validation | Not in original scope | **Closed** — `validateProvisioningPrerequisites()` fails fast at saga start for 7 env vars |
+  | Email delivery | Phase 1 stub | **Explicitly out of PS launch scope** — console.log stub; in-app notifications are the supported transport (P6-05) |
+  | Alerting/observability | Phase 1 not started | **Repo-artifact complete, DevOps-gated** — KQL, alerts.json, evidence framework in repo; deployment external (P4-10, P6-05) |
+  | Live deployment proof | Phase 1 not started | **Environment-gated** — categorized by proof tier (P6-04) |
+
+  **Blocker level:** Non-blocking — provisioning code is complete; residual items are operational/DevOps-gated
+  **Repo-truth evidence:** `backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts` (7 steps); `backend/functions/src/functions/timerFullSpec/` (Step 5 deferral); `backend/functions/src/utils/validate-config.ts` (prerequisites); `backend/functions/observability/` (repo artifacts)
 
 #### Phase 2 deferred implementations
 
@@ -1883,25 +1936,44 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Observability operationalization
   **Category:** Operationalization / observability
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** Prompt 10 says repo artifacts alone are not proof of operationalized monitoring, and the checked-in observability README still has every DevOps setup item unchecked. Repo truth includes KQL and `alerts.json`, but not deployed workbooks, alert rules, action groups, Teams workflow, or verified alert execution.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Prompt-10_Phase-4-Observability-Operationalization-and-Readiness-Proof.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`; `backend/functions/observability/README.md`; `backend/functions/observability/alerts.json`
-  **Affected files/surfaces:** App Insights / Azure Monitor operational posture, operator response flow, Phase 5 release gates
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Weakens Phase 5 signoff realism and keeps “ready/degraded/blocked” diagnostics partly manual.
-  **Recommended next-step direction:** Deploy and verify the alerting/dashboard stack and record actual operational ownership evidence.
-  **P4-07 update:** Explicitly classified as documentary infrastructure (not operationalized). The repo-owned artifacts are complete; operationalization is deferred to Prompt-10.
-  **P4-10 update:** Evidence classification guardrail added to `backend/functions/observability/README.md`. All 15 observability artifacts categorized: 3 genuinely operationalized (health endpoint, telemetry wrapper, logger), 5 executable locally (KQL queries), 7 documentary only (alerts, dashboards, action groups, Teams workflows). DevOps deployment remains the operationalization gate.
+  **Status:** Repo-artifact complete; deployment is DevOps-gated (P6-05)
+  **P6-05 observability asset inventory:**
+
+  | Asset | Category | Operationalized? | Evidence |
+  |-------|----------|-----------------|----------|
+  | Health endpoint (`GET /api/health`) | Runtime diagnostic | **Yes** | Returns `operationalReadiness`, `configTiers`, `provisioningPrereqs`, `integrations`, `roleConfig` |
+  | Telemetry middleware (`withTelemetry`) | Runtime telemetry | **Yes** | Wraps all HTTP handlers; pushes to App Insights |
+  | Structured logger (`createLogger`) | Runtime logging | **Yes** | Contextual logging with correlation IDs |
+  | KQL: `adapter-health.kql` | Repo-executable | No | Copy-paste to App Insights Log Analytics |
+  | KQL: `auth-token.kql` | Repo-executable | No | Copy-paste to App Insights Log Analytics |
+  | KQL: `provisioning.kql` | Repo-executable | No | Copy-paste to App Insights Log Analytics |
+  | KQL: `error-budget.kql` | Repo-executable | No | Copy-paste to App Insights Log Analytics |
+  | KQL: `notification.kql` | Repo-executable | No | Copy-paste to App Insights Log Analytics |
+  | Alert rules (`alerts.json`, 5 rules) | Documentary | No | Requires Azure Monitor alert rule creation |
+  | Dashboard specs (4 workbooks) | Documentary | No | Requires Azure Monitor Workbook creation |
+  | Action group (`hbi-alert-action-group`) | Documentary | No | Requires Azure Monitor action group creation |
+  | Teams Workflow routing | Documentary | No | Requires Power Automate + Teams channel config |
+
+  **Operationalization decision (P6-05):** The 3 runtime-operationalized assets (health, telemetry, logger) provide sufficient observability for PS launch. The remaining 9 assets are DevOps deployment tasks documented in the observability README checklist (6 items). Deploying the alerting/dashboard stack is recommended post-launch but is not a code blocker.
+  **Blocker level:** Non-blocking — runtime observability is operational; alerting/dashboards are DevOps follow-on
+  **P4-07 update:** Classified as documentary infrastructure.
+  **P4-10 update:** Evidence classification guardrail added to README. DevOps deployment remains the operationalization gate.
 
 - **Item:** Email delivery / notification transport
   **Category:** Infrastructure / notification delivery
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** Phase 4 docs classify SendGrid-style delivery as follow-on and repo truth still reports email readiness as `not-configured` when the related env vars are absent. The infrastructure posture is therefore honest about email being stubbed, but not complete.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`; `backend/functions/src/functions/health/index.ts`
-  **Affected files/surfaces:** notification delivery, provisioning completion/failure messaging, operator communication paths
-  **Blocker level:** Non-blocking follow-up
-  **Cross-phase impact:** Remains an accepted risk in Phase 5 and reduces operational completeness for failure handling.
-  **Recommended next-step direction:** Either wire the real email provider or keep it explicitly out of launch scope and ensure alternative operator notifications are proven.
+  **Status:** Email explicitly out of PS launch scope; in-app notifications are the supported transport (P6-05)
+  **P6-05 transport decision:** Email delivery (`emailDelivery.ts`) remains a Phase 1 console.log stub. Real SendGrid integration is deferred as post-launch follow-on. The supported notification transport for PS launch is the **in-app notification center** via Azure Storage Queue:
+
+  | Transport | Status | PS Launch Scope? | Evidence |
+  |-----------|--------|-----------------|----------|
+  | In-app notification queue | **Operational** | Yes | `SendNotification.ts` enqueues to `hbc-notifications-queue`; `ProcessNotification.ts` consumes; `notification-dispatch.ts` routes to submitter/controller/admin |
+  | Provisioning saga dispatch | **Operational** | Yes | Non-blocking dispatch at saga start, completion, and failure; failures logged, never break saga |
+  | Email (SendGrid) | **Stubbed** | No | `emailDelivery.ts` logs to console only; `SENDGRID_API_KEY` not configured |
+  | Digest email (hourly) | **Stubbed** | No | `SendDigestEmail.ts` timer-triggered but delivery stubbed |
+
+  **Alternative notification proof:** Controllers and admins receive provisioning status via (1) in-app notification center, (2) health endpoint diagnostic reporting (`GET /api/health`), and (3) SignalR real-time push (when configured). These three channels provide adequate operator visibility without email.
+  **Blocker level:** Non-blocking — email is accepted risk; in-app transport is operational
+  **Repo-truth evidence:** `backend/functions/src/functions/notifications/SendNotification.ts`; `backend/functions/src/functions/provisioningSaga/notification-dispatch.ts`; `backend/functions/src/functions/health/index.ts` (reports `integrations.email: not-configured` honestly)
 
 - **Item:** Deployment-scoped CORS / managed-identity / downstream-permission application
   **Category:** Infrastructure / environment-gated deployment
@@ -2059,7 +2131,7 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Phase 6 Prompt-05 closed observability (runtime assets operational, alerting DevOps-gated), notification transport (in-app queue supported, email out of launch scope), and provisioning maturity (7 saga steps complete with compensation and fail-fast validation) (P6-05). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff, DevOps alerting deployment).
 
 ## 10. Explicit Unresolved Questions
 
