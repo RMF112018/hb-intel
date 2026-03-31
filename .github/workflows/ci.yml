@@ -82,6 +82,7 @@ jobs:
         # D-PH6-16: Layer 1 gate for provisioning-safe releases.
         run: pnpm turbo run test --filter=@hbc/functions --filter=@hbc/provisioning
         env:
+          AZURITE_TEST: 'true'
           AZURE_TABLE_ENDPOINT: UseDevelopmentStorage=true
 
       - name: Upload coverage report

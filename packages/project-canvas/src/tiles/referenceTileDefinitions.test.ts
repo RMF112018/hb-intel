@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   referenceTiles,
   relatedItemsDef,
-  projectWorkQueueDef,
-  projectActivityDef,
 } from './referenceTileDefinitions.js';
 import { PROJECT_ROLE_DEFAULT_TILES } from '../constants/canvasDefaults.js';
 
@@ -18,20 +16,6 @@ describe('Phase 3 tile definitions', () => {
     expect(relatedItemsDef.defaultForRoles).toContain('project-manager');
   });
 
-  it('project-work-queue tile exists and is mandatory', () => {
-    expect(projectWorkQueueDef.tileKey).toBe('project-work-queue');
-    expect(projectWorkQueueDef.mandatory).toBe(true);
-    expect(projectWorkQueueDef.lockable).toBe(true);
-    expect(projectWorkQueueDef.defaultRowSpan).toBe(2);
-  });
-
-  it('project-activity tile exists and is mandatory', () => {
-    expect(projectActivityDef.tileKey).toBe('project-activity');
-    expect(projectActivityDef.mandatory).toBe(true);
-    expect(projectActivityDef.lockable).toBe(false);
-    expect(projectActivityDef.defaultRowSpan).toBe(2);
-  });
-
   it('all tiles have 3 complexity variants', () => {
     for (const tile of referenceTiles) {
       expect(tile.component).toHaveProperty('essential');
@@ -40,8 +24,10 @@ describe('Phase 3 tile definitions', () => {
     }
   });
 
-  it('referenceTiles includes 14 tiles', () => {
-    expect(referenceTiles).toHaveLength(14);
+  it('referenceTiles includes 12 canvas-owned tiles', () => {
+    expect(referenceTiles).toHaveLength(12);
+    expect(referenceTiles.map((tile) => tile.tileKey)).not.toContain('project-work-queue');
+    expect(referenceTiles.map((tile) => tile.tileKey)).not.toContain('project-activity');
   });
 
   it('all tiles have unique tileKeys', () => {

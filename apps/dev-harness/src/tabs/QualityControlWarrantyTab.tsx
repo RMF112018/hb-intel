@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as QualityControlWarrantyApp } from '../../../quality-control-warranty/src/App.js';
 import { bootstrapMockEnvironment } from '../../../quality-control-warranty/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function QualityControlWarrantyTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function QualityControlWarrantyTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <QualityControlWarrantyApp />
     </div>
   );

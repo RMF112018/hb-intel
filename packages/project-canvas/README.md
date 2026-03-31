@@ -42,6 +42,8 @@ Administrators can designate tiles as **mandatory** for specific roles, enforcin
 
 Tiles are registered via `TileRegistry.register()` with metadata including complexity-tier variants (Essential / Standard / Expert), grid sizing, and role defaults. The `HbcCanvasEditor` component provides add/remove/rearrange/resize controls, and the `HbcTileCatalog` presents available tiles with AI-driven dynamic recommendation ordering.
 
+Feature packages own domain-specific widgets and register them into the canvas through package-level integration seams. `@hbc/project-canvas` owns the registry, layout/runtime behavior, and canvas-generic tile definitions; it should not depend upward on feature packages to render domain tiles.
+
 ## Data-Source Badge Model
 
 Each tile displays a data-source badge indicating its data freshness:
@@ -79,6 +81,7 @@ The `AIInsightTile` component provides a standardized container for AI-driven in
 - **SPFx compatibility**: Components use inline styles only (D-07); no external CSS imports
 - **Bundle boundary**: `sideEffects: false` enables tree-shaking for consuming packages
 - **ESLint boundary rules**: Enforced via `@hbc/eslint-plugin-hbc`
+- **Feature ownership**: feature packages register domain widgets into the canvas; the canvas package must not import feature-owned hooks or views
 
 ## Related Documentation
 

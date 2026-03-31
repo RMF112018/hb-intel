@@ -14,6 +14,7 @@ import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empt
 import type { IActiveProject } from '@hbc/models';
 import { HbcProjectCanvas, registerReferenceTiles } from '@hbc/project-canvas';
 import {
+  registerProjectHubCanvasTiles,
   PROJECT_HUB_BASELINE_REPORT_FAMILIES,
   PROJECT_HUB_REPORT_MODULE_AUDIT,
   getProjectHubReportsSummary,
@@ -37,6 +38,7 @@ import { useProjectHubContext } from '../hooks/useProjectHubContext.js';
 
 // Register all reference tiles (idempotent — safe to call multiple times).
 registerReferenceTiles();
+registerProjectHubCanvasTiles();
 
 // Stable empty array reference to prevent zustand selector re-render loops.
 const EMPTY_ROLES: readonly string[] = [];

@@ -44,6 +44,8 @@ Portfolio triage includes canonical buckets (`attention-now`, `trending-down`, `
 | `@hbc/features-project-hub` | Runtime feature surface (contracts, computors, hooks, components, integrations) | App/runtime consumption |
 | `@hbc/features-project-hub/testing` | Stable SF21 test fixtures and helpers | Unit tests, Storybook, E2E, harnesses |
 
+The runtime surface also owns the Project Hub canvas-registration seam. Consumers that render Project Hub through `@hbc/project-canvas` should call `registerProjectHubCanvasTiles()` in addition to the canvas package’s generic `registerReferenceTiles()`.
+
 Testing exports include canonical fixture factories and state presets:
 
 - `createMockProjectHealthPulse(overrides?)`
@@ -55,6 +57,7 @@ Testing exports include canonical fixture factories and state presets:
 
 - Health-pulse computors, governance, and telemetry are explicit package boundaries.
 - Health-pulse integration adapters live under `src/health-pulse/integrations` and are deterministic projection helpers (no app-route coupling, no side-effect emission).
+- Project Hub-specific canvas tiles (`project-work-queue`, `project-activity`) are feature-owned integrations and must remain registered from this package rather than moving into `@hbc/project-canvas`.
 - App routes must not be imported into package runtime.
 - Consumers should use declared package exports (`.` and `./testing`) rather than internal file paths.
 - Telemetry payload mapping preserves reason code, confidence context, triage context, compound-risk escalation flag, and decision-quality KPI fields for downstream emitters; emission side effects remain in consuming layers.

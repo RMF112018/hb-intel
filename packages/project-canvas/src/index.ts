@@ -30,7 +30,13 @@ export {
 export type { RecommendationSignal } from './constants/index.js';
 
 // Registry
-export { register, registerMany, get, getAll } from './registry/index.js';
+export {
+  register,
+  registerMany,
+  get,
+  getAll,
+  _clearRegistryForTests,
+} from './registry/index.js';
 
 // API
 export { CanvasApi, createSpfxCanvasStorageAdapter } from './api/index.js';
@@ -60,4 +66,8 @@ export {
 } from './components/index.js';
 
 // Reference tile definitions — D-SF13-T07
-export { referenceTiles, registerReferenceTiles } from './tiles/index.js';
+export {
+  referenceTiles,
+  registerReferenceTiles,
+  _resetRegistrationFlagForTests,
+} from './tiles/index.js';

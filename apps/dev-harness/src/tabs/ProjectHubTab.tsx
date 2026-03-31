@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as ProjectHubApp } from '../../../project-hub/src/App.js';
 import { bootstrapMockEnvironment } from '../../../project-hub/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function ProjectHubTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function ProjectHubTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <ProjectHubApp />
     </div>
   );

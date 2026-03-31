@@ -17,6 +17,7 @@ import {
   WorkspacePageShell,
 } from '@hbc/ui-kit';
 import {
+  registerProjectHubCanvasTiles,
   PROJECT_HUB_SPFX_MODULES,
   ProjectOperatingSurface,
 } from '@hbc/features-project-hub';
@@ -24,6 +25,7 @@ import { createProjectHubSpfxCanvasPersistence } from '../spfx/createProjectHubS
 import { useProjectHubRuntimeContext } from '../spfx/ProjectHubRuntimeContext.js';
 
 registerReferenceTiles();
+registerProjectHubCanvasTiles();
 
 const CANVAS_ROLE_BY_AUTH_ROLE_ID: Record<string, string> = {
   'project-manager': 'Project Manager',

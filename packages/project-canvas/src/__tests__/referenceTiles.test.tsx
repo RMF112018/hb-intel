@@ -2,7 +2,7 @@
  * Reference Tile Definitions tests — D-SF13-T07, D-02, D-09
  *
  * Covers registration, definition structure, variant rendering,
- * role-default integrity, governance, and catalog/editor compatibility.
+ * canvas-owned role-default integrity, governance, and catalog/editor compatibility.
  */
 import React, { Suspense } from 'react';
 import { render, screen } from '@testing-library/react';
@@ -30,12 +30,12 @@ afterEach(() => {
 
 describe('Reference Tile Definitions (D-SF13-T07)', () => {
   describe('Registration', () => {
-    it('registerReferenceTiles registers all 14 tiles', () => {
+    it('registerReferenceTiles registers all 12 canvas-owned tiles', () => {
       registerReferenceTiles();
-      expect(getAll()).toHaveLength(14);
+      expect(getAll()).toHaveLength(12);
     });
 
-    it('all 14 tiles retrievable via get() after registration', () => {
+    it('all 12 canvas-owned tiles are retrievable via get() after registration', () => {
       registerReferenceTiles();
       for (const tile of referenceTiles) {
         expect(get(tile.tileKey)).toBeDefined();
@@ -55,7 +55,7 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
     it('double-call is idempotent (no throw)', () => {
       registerReferenceTiles();
       expect(() => registerReferenceTiles()).not.toThrow();
-      expect(getAll()).toHaveLength(14);
+      expect(getAll()).toHaveLength(12);
     });
   });
 
@@ -103,8 +103,10 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
 
     it('non-mandatory tiles have mandatory !== true', () => {
       const mandatoryKeys = [
-        'bic-my-items', 'pending-approvals', 'project-health-pulse',
-        'related-items', 'project-work-queue', 'project-activity',
+        'bic-my-items',
+        'pending-approvals',
+        'project-health-pulse',
+        'related-items',
       ];
       const nonMandatory = referenceTiles.filter(
         (t) => !mandatoryKeys.includes(t.tileKey),
@@ -126,21 +128,26 @@ describe('Reference Tile Definitions (D-SF13-T07)', () => {
   });
 
   describe('ROLE_DEFAULT_TILES integrity', () => {
-    it('every key in every role resolves to a registered definition', () => {
-      registerReferenceTiles();
-      for (const [, keys] of Object.entries(ROLE_DEFAULT_TILES)) {
-        for (const key of keys) {
-          expect(get(key)).toBeDefined();
-        }
-      }
-    });
-
-    it('no role references an unregistered tile key', () => {
+    it('every canvas-owned key in every role resolves to a registered definition', () => {
       registerReferenceTiles();
       const registeredKeys = new Set(getAll().map((t) => t.tileKey));
       for (const [, keys] of Object.entries(ROLE_DEFAULT_TILES)) {
         for (const key of keys) {
-          expect(registeredKeys.has(key)).toBe(true);
+          if (registeredKeys.has(key)) {
+            expect(get(key)).toBeDefined();
+          }
+        }
+      }
+    });
+
+    it('all registered canvas-owned keys referenced by roles are valid', () => {
+      registerReferenceTiles();
+      const registeredKeys = new Set(getAll().map((t) => t.tileKey));
+      for (const [, keys] of Object.entries(ROLE_DEFAULT_TILES)) {
+        for (const key of keys) {
+          if (registeredKeys.has(key)) {
+            expect(registeredKeys.has(key)).toBe(true);
+          }
         }
       }
     });

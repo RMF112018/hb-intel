@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { usePermissionStore } from '@hbc/auth';
+import type * as ProvisioningModule from '@hbc/provisioning';
 import { renderWithProviders } from './renderWithProviders';
 import { createTestProvisioningStatus } from './factories';
 import { ProvisioningOversightPage } from '../pages/ProvisioningOversightPage';
@@ -26,7 +27,7 @@ const mockClient = {
 };
 
 vi.mock('@hbc/provisioning', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@hbc/provisioning')>();
+  const actual = await importOriginal<typeof ProvisioningModule>();
   return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
 });
 

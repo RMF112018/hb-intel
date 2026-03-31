@@ -5,6 +5,7 @@ import {
   HBC_DENSITY_TOKENS,
   HBC_SPACE_MD,
   HBC_SPACE_SM,
+  HBC_SURFACE_LIGHT,
   Card,
   CardHeader,
   HbcButton,
@@ -12,6 +13,7 @@ import {
   Text,
   WorkspacePageShell,
   useDensity,
+  elevationLevel1,
 } from '@hbc/ui-kit';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { IEmptyStateContext, ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
@@ -54,11 +56,11 @@ const MODULE_EMPTY_CONTEXT: IEmptyStateContext = {
 const useStyles = makeStyles({
   /** Stage 11.6: card weight differentiation per P3-C1 §14.2 */
   cardWeightPrimary: {
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.14)',
+    boxShadow: elevationLevel1,
   },
   cardWeightSupporting: {
     boxShadow: 'none',
-    backgroundColor: '#fafafa',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
   },
   cardStack: {
     display: 'grid',

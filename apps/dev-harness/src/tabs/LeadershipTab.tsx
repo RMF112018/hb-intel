@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as LeadershipApp } from '../../../leadership/src/App.js';
 import { bootstrapMockEnvironment } from '../../../leadership/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function LeadershipTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function LeadershipTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <LeadershipApp />
     </div>
   );

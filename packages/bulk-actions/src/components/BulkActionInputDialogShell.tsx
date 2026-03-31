@@ -1,7 +1,7 @@
 /** SF27-T06 — BulkActionInputDialog shell. */
 import React, { useState, useCallback, useMemo } from 'react';
 import { BulkActionInputDialog, type BulkActionInputField } from '@hbc/ui-kit';
-import type { IBulkActionDefinition, IBulkConfiguredInputSchema } from '../types/index.js';
+import type { IBulkActionDefinition } from '../types/index.js';
 
 export interface BulkActionInputDialogShellProps { action: IBulkActionDefinition<unknown>; onConfirm: (values: Record<string, string>) => void; onCancel: () => void; }
 

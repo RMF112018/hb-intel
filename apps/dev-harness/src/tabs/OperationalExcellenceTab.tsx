@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as OperationalExcellenceApp } from '../../../operational-excellence/src/App.js';
 import { bootstrapMockEnvironment } from '../../../operational-excellence/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function OperationalExcellenceTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function OperationalExcellenceTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <OperationalExcellenceApp />
     </div>
   );

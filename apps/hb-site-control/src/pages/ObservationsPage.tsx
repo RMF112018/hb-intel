@@ -8,14 +8,21 @@ import { useState } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import type { ColumnDef } from '@tanstack/react-table';
 import { makeStyles } from '@griffel/react';
-import { HbcDataTable, HbcStatusBadge, HbcCommandBar, WorkspacePageShell } from '@hbc/ui-kit';
+import {
+  HbcDataTable,
+  HbcStatusBadge,
+  HbcCommandBar,
+  WorkspacePageShell,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+} from '@hbc/ui-kit';
 import type { StatusVariant } from '@hbc/ui-kit';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
   },
 });
 

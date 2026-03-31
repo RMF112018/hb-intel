@@ -25,7 +25,12 @@ import { HbcThemeProvider } from '@hbc/ui-kit';
 import type { IActiveProject } from '@hbc/models';
 import { useAuthStore } from '@hbc/auth';
 import { useProjectStore } from '@hbc/shell';
-import { registerReferenceTiles, referenceTiles } from '@hbc/project-canvas';
+import {
+  _clearRegistryForTests,
+  get,
+  registerReferenceTiles,
+  referenceTiles,
+} from '@hbc/project-canvas';
 import type { ICanvasTileDefinition } from '@hbc/project-canvas';
 import {
   resolveProjectHubProfile,
@@ -35,6 +40,9 @@ import {
   registerActivityAdapters,
   _resetRegistrationForTesting,
   ALL_ACTIVITY_ADAPTERS,
+  registerProjectHubCanvasTiles,
+  _resetProjectHubCanvasRegistrationForTests,
+  projectHubCanvasTiles,
 } from '@hbc/features-project-hub';
 import {
   ProjectHubControlCenterPage,
@@ -91,7 +99,10 @@ function renderHome(project = PROJECT) {
 // ── Tile definition lookups ────────────────────────────────────────────────
 
 function getTileDef(key: string): ICanvasTileDefinition {
-  const def = referenceTiles.find((t) => t.tileKey === key);
+  const def =
+    referenceTiles.find((t) => t.tileKey === key) ??
+    projectHubCanvasTiles.find((t) => t.tileKey === key) ??
+    get(key);
   if (!def) throw new Error(`Tile definition not found: ${key}`);
   return def;
 }
@@ -102,10 +113,13 @@ beforeEach(() => {
   localStorage.clear();
   useProjectStore.getState().clear();
   useAuthStore.setState({ currentUser: null, session: null, lifecyclePhase: 'idle' } as any);
+  _clearRegistryForTests();
   ProjectActivityRegistry._clearForTesting();
   _resetRegistrationForTesting();
+  _resetProjectHubCanvasRegistrationForTests();
   registerActivityAdapters();
   registerReferenceTiles();
+  registerProjectHubCanvasTiles();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -128,7 +142,7 @@ describe('A. Home runtime governance', () => {
   });
 
   it('all four mandatory spine tile definitions exist in the registry', () => {
-    const mandatoryKeys = referenceTiles
+    const mandatoryKeys = [...referenceTiles, ...projectHubCanvasTiles]
       .filter((t) => t.mandatory)
       .map((t) => t.tileKey);
     expect(mandatoryKeys).toContain('project-health-pulse');
@@ -264,7 +278,7 @@ describe('C. Work Queue', () => {
     expect(ALL_ACTIVITY_ADAPTERS.length).toBeGreaterThan(0);
     // The work-queue tile consumes useWorkQueueSummary, which is data-level
     // The registration ensures the tile is part of the mandatory set
-    const wqTile = referenceTiles.find((t) => t.tileKey === 'project-work-queue');
+    const wqTile = projectHubCanvasTiles.find((t) => t.tileKey === 'project-work-queue');
     expect(wqTile).toBeDefined();
     expect(wqTile!.mandatory).toBe(true);
   });
@@ -428,7 +442,7 @@ describe('G. UI-kit governance', () => {
 
 describe('H. Cross-spine integration', () => {
   it('all four spine tiles are in the same reference tile array', () => {
-    const keys = referenceTiles.map((t) => t.tileKey);
+    const keys = [...referenceTiles, ...projectHubCanvasTiles].map((t) => t.tileKey);
     expect(keys).toContain('project-health-pulse');
     expect(keys).toContain('project-work-queue');
     expect(keys).toContain('related-items');

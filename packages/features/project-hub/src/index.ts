@@ -10,6 +10,7 @@
 export { projectHubProjectsEmptyStateConfig } from './empty-state/index.js';
 
 export * from './health-pulse/index.js';
+export * from './canvas/index.js';
 
 export {
   ProjectActivityRegistry,

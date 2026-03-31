@@ -1,7 +1,41 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader, WorkspacePageShell, HbcChart } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import {
+  Text,
+  Card,
+  CardHeader,
+  WorkspacePageShell,
+  HbcChart,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+  HBC_SPACE_XXL,
+  HBC_SURFACE_LIGHT,
+} from '@hbc/ui-kit';
+
+const useStyles = makeStyles({
+  kpiGrid: {
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fit, minmax(${HBC_SPACE_XXL * 4 + HBC_SPACE_MD * 2}px, 1fr))`,
+    gap: `${HBC_SPACE_MD}px`,
+  },
+  trendText: {
+    display: 'block',
+    color: HBC_SURFACE_LIGHT['text-secondary'],
+    marginTop: `${HBC_SPACE_XS}px`,
+  },
+  chartSection: {
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  chartHeading: {
+    marginBottom: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    display: 'block',
+  },
+});
 
 export function KpiDashboardPage(): ReactNode {
+  const styles = useStyles();
   const kpis = [
     { label: 'Active Projects', value: '14', trend: '+2 this quarter' },
     { label: 'Total Contract Value', value: '$42.5M', trend: '+8.3% YoY' },
@@ -11,7 +45,7 @@ export function KpiDashboardPage(): ReactNode {
 
   return (
     <WorkspacePageShell layout="dashboard" title="KPI Dashboard">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+      <div className={styles.kpiGrid}>
         {kpis.map((kpi) => (
           <Card key={kpi.label} size="small">
             <CardHeader
@@ -19,15 +53,19 @@ export function KpiDashboardPage(): ReactNode {
               description={
                 <div>
                   <Text size={800} weight="bold">{kpi.value}</Text>
-                  <Text size={200} style={{ display: 'block', color: 'var(--colorNeutralForeground3)', marginTop: 4 }}>{kpi.trend}</Text>
+                  <Text size={200} className={styles.trendText}>
+                    {kpi.trend}
+                  </Text>
                 </div>
               }
             />
           </Card>
         ))}
       </div>
-      <div style={{ marginTop: 24 }}>
-        <Text size={500} weight="semibold" style={{ marginBottom: 12, display: 'block' }}>Project Performance Overview</Text>
+      <div className={styles.chartSection}>
+        <Text size={500} weight="semibold" className={styles.chartHeading}>
+          Project Performance Overview
+        </Text>
         <HbcChart
           option={{
             tooltip: { trigger: 'axis' },

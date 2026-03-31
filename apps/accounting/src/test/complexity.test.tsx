@@ -7,6 +7,8 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { renderWithProviders } from './renderWithProviders.js';
 import { createTestRequest } from './factories.js';
+import type * as ProvisioningModule from '@hbc/provisioning';
+import type * as RouterModule from '@tanstack/react-router';
 
 // ---------------------------------------------------------------------------
 // Shared mock state
@@ -19,21 +21,25 @@ const mockClient = {
   retryProvisioning: vi.fn().mockResolvedValue(undefined),
 };
 
+type MockLinkProps = React.PropsWithChildren<{
+  to: string;
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>>;
+
 // ---------------------------------------------------------------------------
 // Module-level mocks
 // ---------------------------------------------------------------------------
 vi.mock('@hbc/provisioning', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@hbc/provisioning')>();
+  const actual = await importOriginal<typeof ProvisioningModule>();
   return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
 });
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+  const actual = await importOriginal<typeof RouterModule>();
   return {
     ...actual,
     useParams: vi.fn(() => ({ requestId: 'req-1' })),
     useNavigate: vi.fn(() => vi.fn()),
-    Link: ({ children, to, ...props }: any) => (
+    Link: ({ children, to, ...props }: MockLinkProps) => (
       <a href={to} {...props}>
         {children}
       </a>
@@ -60,9 +66,9 @@ describe('Accounting — complexity gate tests', () => {
     mockClient.listRequests.mockResolvedValue([]);
     mockClient.getProvisioningStatus.mockResolvedValue(null);
     mockClient.advanceState.mockResolvedValue(undefined);
-    vi.mocked(createProvisioningApiClient).mockReturnValue(mockClient as any);
-    vi.mocked(useParams).mockReturnValue({ requestId: 'req-1' } as any);
-    vi.mocked(useNavigate).mockReturnValue(vi.fn() as any);
+    vi.mocked(createProvisioningApiClient).mockReturnValue(mockClient as never);
+    vi.mocked(useParams).mockReturnValue({ requestId: 'req-1' } as never);
+    vi.mocked(useNavigate).mockReturnValue(vi.fn() as never);
     vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue('https://admin.example.com');
   });
 

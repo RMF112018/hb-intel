@@ -29,14 +29,15 @@ import {
   HbcStatusTimeline,
   HbcAuditTrailPanel,
   useToast,
+  HBC_SPACE_SM,
 } from '@hbc/ui-kit';
 import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 import { getStateBadgeVariant, getStateContextText } from '../utils/stateDisplayHelpers.js';
 import { getAdminAppUrl } from '../utils/crossAppUrls.js';
 
 const useStyles = makeStyles({
-  actionRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
-  modalFooter: { display: 'flex', gap: '8px', justifyContent: 'flex-end' },
+  actionRow: { display: 'flex', gap: `${HBC_SPACE_SM}px`, flexWrap: 'wrap' },
+  modalFooter: { display: 'flex', gap: `${HBC_SPACE_SM}px`, justifyContent: 'flex-end' },
 });
 
 /**

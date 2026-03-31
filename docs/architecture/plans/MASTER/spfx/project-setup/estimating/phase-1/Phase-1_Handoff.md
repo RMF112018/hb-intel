@@ -74,11 +74,11 @@
 
 **Overall: Phase 1 verification PASSED.**
 
-No failures, no partial results, no unresolved items.
+No repo-owned code or test failures remained for the original scope-control findings at reconciliation time. The residual caveat is external: this handoff does not itself prove which backend host is deployed in any live environment.
 
 ## 4. Recommended Next Phase Entry Point
 
-**First task for Phase 2:** Build the `/api/users/me/preferences` backend endpoint so the `ComplexityProvider` preferences call has a real backend. This is the only identified gap where the frontend expects a backend capability that doesn't yet exist (currently degrades gracefully).
+**First task for Phase 2:** Build the `/api/users/me/preferences` backend endpoint so the `ComplexityProvider` preferences call has a real backend. This remained the only repo-owned gap where the frontend expected a backend capability that did not yet exist at the time of the original Phase 1 handoff (it still degrades gracefully).
 
 **Alternative entry point:** If preferences are deprioritized, the next highest-value work is SharePoint list-field remapping to align the backend data model with the live SharePoint schema.
 

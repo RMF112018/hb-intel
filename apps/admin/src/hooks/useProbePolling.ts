@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useCurrentSession } from '@hbc/auth';
-import { createProvisioningApiClient } from '@hbc/provisioning';
 import {
   createDefaultProbeScheduler,
   InfrastructureProbeApi,

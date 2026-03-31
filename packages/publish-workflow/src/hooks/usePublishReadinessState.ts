@@ -2,7 +2,7 @@
  * SF25-T04 — Readiness evaluation hook.
  */
 import { useMemo } from 'react';
-import type { IPublishRequest, IReadinessState, IReadinessRule, IPublicationRecord } from '../types/index.js';
+import type { IPublishRequest, IReadinessState, IReadinessRule } from '../types/index.js';
 import { evaluateReadiness } from '../model/lifecycle.js';
 
 export interface UsePublishReadinessStateOptions { request: IPublishRequest; rules: IReadinessRule[]; }

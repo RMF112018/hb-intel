@@ -37,8 +37,8 @@ jobs:
   deploy-production:
     # D-PH6-16 release gate: reusable deploy workflow executes only after successful E2E gate.
     # For v1.0.x releases, also requires P0-E1 gate pass.
-    needs: [e2e-gate]
-    if: ${{ !startsWith(github.ref_name, 'v1.0.') || needs.p0-e1-gate.result == 'success' }}
+    needs: [e2e-gate, p0-e1-gate]
+    if: ${{ always() && needs.e2e-gate.result == 'success' && ((startsWith(github.ref_name, 'v1.0.') && needs.p0-e1-gate.result == 'success') || (!startsWith(github.ref_name, 'v1.0.') && needs.p0-e1-gate.result == 'skipped')) }}
     uses: ./.github/workflows/deploy-functions.yml
     with:
       environment: production

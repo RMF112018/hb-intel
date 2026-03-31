@@ -46,8 +46,6 @@ export function reconcile(
 
   // Check if applying without removed items still yields a meaningful view
   const remainingColumns = (view.presentation.visibleColumnKeys ?? []).filter(k => validColumns.has(k));
-  const remainingFilters = view.filterClauses.filter(f => validFilters.has(f.field));
-
   const isIncompatible = remainingColumns.length === 0 && (view.presentation.visibleColumnKeys ?? []).length > 0;
 
   const status: SavedViewCompatibilityStatus = isIncompatible ? 'incompatible' : 'degraded-compatible';

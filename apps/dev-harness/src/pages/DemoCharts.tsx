@@ -2,7 +2,16 @@
  * DemoCharts — HbcChart with mock schedule metrics.
  * Foundation Plan Phase 3.
  */
-import { HbcChart, tokens } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { HbcChart, HBC_SPACE_MD, tokens } from '@hbc/ui-kit';
+
+const useStyles = makeStyles({
+  chartGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: `${HBC_SPACE_MD}px`,
+  },
+});
 
 const scheduleOption = {
   title: { text: 'Schedule Progress', left: 'center' as const },
@@ -53,10 +62,12 @@ const budgetOption = {
 };
 
 export function DemoCharts() {
+  const styles = useStyles();
+
   return (
     <div>
       <h3 className="harness-section-title">Charts — Schedule & Budget</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className={styles.chartGrid}>
         <HbcChart option={scheduleOption} height="320px" />
         <HbcChart option={budgetOption} height="320px" />
       </div>

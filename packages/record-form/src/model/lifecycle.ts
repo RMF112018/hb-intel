@@ -18,11 +18,7 @@ import type {
   IRecordFormTelemetryState,
   IRecordSyncStateInfo,
   IRecordStateConfidenceInfo,
-  IRecordReviewStepState,
-  IRecordNextRecommendedAction,
   IRecordBicStepConfig,
-  IRecordFormFailureState,
-  IRecordFormRetryState,
 } from '../types/index.js';
 
 import { computeRecordConfidence } from './confidence.js';

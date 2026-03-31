@@ -1,5 +1,15 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import {
+  Text,
+  Card,
+  CardHeader,
+  WorkspacePageShell,
+  HbcDataTable,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+  HBC_SPACE_SM,
+} from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface BudgetItem { category: string; budget: string; actual: string; variance: string; percent: string; }
@@ -19,7 +29,23 @@ const MOCK_DATA: BudgetItem[] = [
   { category: 'Equipment', budget: '$320,000', actual: '$310,000', variance: '$10,000', percent: '96.9%' },
 ];
 
+const useStyles = makeStyles({
+  summaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(11.25rem, 1fr))',
+    gap: `${HBC_SPACE_MD}px`,
+  },
+  section: {
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  sectionTitle: {
+    marginBottom: `${HBC_SPACE_SM}px`,
+    display: 'block',
+  },
+});
+
 export function OverviewPage(): ReactNode {
+  const styles = useStyles();
   const summaryCards = [
     { label: 'Total Budget', value: '$4,520,000' },
     { label: 'Spent to Date', value: '$4,330,000' },
@@ -29,15 +55,15 @@ export function OverviewPage(): ReactNode {
 
   return (
     <WorkspacePageShell layout="dashboard" title="Accounting Overview">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+      <div className={styles.summaryGrid}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">
             <CardHeader header={<Text weight="semibold">{card.label}</Text>} description={<Text size={700} weight="bold">{card.value}</Text>} />
           </Card>
         ))}
       </div>
-      <div style={{ marginTop: 24 }}>
-        <Text size={500} weight="semibold" style={{ marginBottom: 12, display: 'block' }}>Budget Summary</Text>
+      <div className={styles.section}>
+        <Text size={500} weight="semibold" className={styles.sectionTitle}>Budget Summary</Text>
         <HbcDataTable<BudgetItem> data={MOCK_DATA} columns={columns} height="300px" />
       </div>
     </WorkspacePageShell>

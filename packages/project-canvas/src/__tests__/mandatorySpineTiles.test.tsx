@@ -1,18 +1,15 @@
 /**
- * Mandatory Spine Tiles — integration tests.
+ * Canvas-owned mandatory tiles — integration tests.
  *
- * Validates that all four mandatory spine tiles (Health, Work Queue,
- * Related Items, Activity) are correctly registered, render real content
- * (not placeholder "Loading..." text), and enforce mandatory policy.
+ * Validates that the canvas-owned mandatory spine tiles remain correctly
+ * registered, render real content, and enforce mandatory policy.
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import {
   projectHealthPulseDef,
-  projectWorkQueueDef,
   relatedItemsDef,
-  projectActivityDef,
   referenceTiles,
 } from '../tiles/referenceTileDefinitions.js';
 import {
@@ -36,12 +33,12 @@ const TILE_PROPS = {
 // ═══════════════════════════════════════════════════════════════════
 
 describe('Mandatory tile registration', () => {
-  it('all four spine tiles are registered in referenceTiles', () => {
+  it('canvas-owned spine tiles are registered in referenceTiles', () => {
     const tileKeys = referenceTiles.map((t) => t.tileKey);
     expect(tileKeys).toContain('project-health-pulse');
-    expect(tileKeys).toContain('project-work-queue');
     expect(tileKeys).toContain('related-items');
-    expect(tileKeys).toContain('project-activity');
+    expect(tileKeys).not.toContain('project-work-queue');
+    expect(tileKeys).not.toContain('project-activity');
   });
 
   it('Health tile is mandatory and lockable', () => {
@@ -49,26 +46,16 @@ describe('Mandatory tile registration', () => {
     expect(projectHealthPulseDef.lockable).toBe(true);
   });
 
-  it('Work Queue tile is mandatory and lockable', () => {
-    expect(projectWorkQueueDef.mandatory).toBe(true);
-    expect(projectWorkQueueDef.lockable).toBe(true);
-  });
-
   it('Related Items tile is mandatory and lockable', () => {
     expect(relatedItemsDef.mandatory).toBe(true);
     expect(relatedItemsDef.lockable).toBe(true);
   });
 
-  it('Activity tile is mandatory', () => {
-    expect(projectActivityDef.mandatory).toBe(true);
-  });
-
-  it('all four tiles have three complexity variants (not placeholder factory)', () => {
-    for (const def of [projectHealthPulseDef, projectWorkQueueDef, relatedItemsDef, projectActivityDef]) {
+  it('canvas-owned mandatory tiles have three complexity variants', () => {
+    for (const def of [projectHealthPulseDef, relatedItemsDef]) {
       expect(def.component.essential).toBeDefined();
       expect(def.component.standard).toBeDefined();
       expect(def.component.expert).toBeDefined();
-      // Verify they're lazy components (have $$typeof or _payload), not placeholder factories
       expect(typeof def.component.essential).toBe('object');
     }
   });
@@ -154,13 +141,6 @@ describe('Tile role defaults', () => {
     expect(projectHealthPulseDef.defaultForRoles).toContain('VP of Operations');
   });
 
-  it('Work Queue is default for project-admin, PM, superintendent, team-member', () => {
-    expect(projectWorkQueueDef.defaultForRoles).toContain('project-administrator');
-    expect(projectWorkQueueDef.defaultForRoles).toContain('project-manager');
-    expect(projectWorkQueueDef.defaultForRoles).toContain('superintendent');
-    expect(projectWorkQueueDef.defaultForRoles).toContain('project-team-member');
-  });
-
   it('Related Items includes all operational project roles', () => {
     expect(relatedItemsDef.defaultForRoles).toContain('project-administrator');
     expect(relatedItemsDef.defaultForRoles).toContain('project-executive');
@@ -169,11 +149,6 @@ describe('Tile role defaults', () => {
     expect(relatedItemsDef.defaultForRoles).toContain('project-team-member');
   });
 
-  it('Activity is default for all project roles except external-contributor', () => {
-    expect(projectActivityDef.defaultForRoles).toContain('project-administrator');
-    expect(projectActivityDef.defaultForRoles).toContain('project-viewer');
-    expect(projectActivityDef.defaultForRoles).not.toContain('external-contributor');
-  });
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -183,14 +158,6 @@ describe('Tile role defaults', () => {
 describe('Tile grid placement', () => {
   it('Health has 6-col span for prominence', () => {
     expect(projectHealthPulseDef.defaultColSpan).toBe(6);
-  });
-
-  it('Work Queue has 2-row span for action depth', () => {
-    expect(projectWorkQueueDef.defaultRowSpan).toBe(2);
-  });
-
-  it('Activity has 2-row span for timeline depth', () => {
-    expect(projectActivityDef.defaultRowSpan).toBe(2);
   });
 
   it('Related Items has standard 4-col single-row', () => {

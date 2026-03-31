@@ -1,11 +1,12 @@
 // D-PH7-BW-10: Vitest setup for admin webpart tests
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import type * as TanstackReactVirtual from '@tanstack/react-virtual';
 
 // Mock @tanstack/react-virtual so HbcDataTable renders all rows in jsdom
 // (jsdom elements have 0 dimensions, causing the virtualizer to render 0 rows)
 vi.mock('@tanstack/react-virtual', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tanstack/react-virtual')>();
+  const actual = await importOriginal<typeof TanstackReactVirtual>();
   return {
     ...actual,
     useVirtualizer: (opts: { count: number }) => ({

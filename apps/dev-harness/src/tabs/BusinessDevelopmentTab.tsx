@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as BusinessDevelopmentApp } from '../../../business-development/src/App.js';
 import { bootstrapMockEnvironment } from '../../../business-development/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function BusinessDevelopmentTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function BusinessDevelopmentTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <BusinessDevelopmentApp />
     </div>
   );

@@ -4,7 +4,8 @@
  * Foundation Plan Phase 3.
  */
 import { useState } from 'react';
-import { Button, Switch } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { Button, HBC_SPACE_XS, HBC_SPACE_SM, tokens, Switch } from '@hbc/ui-kit';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
 import { useProjectStore, useNavStore } from '@hbc/shell';
 import { bootstrapMockEnvironment, DEFAULT_FEATURE_FLAGS } from './bootstrap.js';
@@ -14,7 +15,32 @@ interface DevControlsProps {
   onToggleTheme: () => void;
 }
 
+const useStyles = makeStyles({
+  collapsedContainer: {
+    padding: `${HBC_SPACE_SM}px`,
+    minWidth: 'auto',
+  },
+  featureFlagsSection: {
+    marginTop: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    borderTopColor: tokens.colorNeutralStroke2,
+    borderTopStyle: 'solid',
+    borderTopWidth: 'thin',
+  },
+  featureFlagsHeader: {
+    marginBottom: `${HBC_SPACE_XS}px`,
+  },
+  refreshRow: {
+    marginTop: `${HBC_SPACE_SM}px`,
+    display: 'grid',
+  },
+  stretchButton: {
+    width: '100%',
+  },
+});
+
 export function DevControls({ isDark, onToggleTheme }: DevControlsProps) {
+  const styles = useStyles();
   const [collapsed, setCollapsed] = useState(false);
 
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -33,7 +59,7 @@ export function DevControls({ isDark, onToggleTheme }: DevControlsProps) {
 
   if (collapsed) {
     return (
-      <div className="dev-controls" style={{ minWidth: 'auto', padding: '8px' }}>
+      <div className={`dev-controls ${styles.collapsedContainer}`}>
         <Button size="small" appearance="subtle" onClick={() => setCollapsed(false)}>
           Dev
         </Button>
@@ -74,8 +100,8 @@ export function DevControls({ isDark, onToggleTheme }: DevControlsProps) {
         <span className="dev-controls-value">{activeWorkspace ?? '—'}</span>
       </div>
 
-      <div style={{ marginTop: '8px', borderTop: '1px solid var(--colorNeutralStroke2)', paddingTop: '8px' }}>
-        <div className="dev-controls-header" style={{ marginBottom: '4px' }}>Feature Flags</div>
+      <div className={styles.featureFlagsSection}>
+        <div className={`dev-controls-header ${styles.featureFlagsHeader}`}>Feature Flags</div>
         {Object.keys(DEFAULT_FEATURE_FLAGS).map((key) => (
           <div key={key} className="dev-controls-row">
             <span className="dev-controls-label">{key}</span>
@@ -87,8 +113,13 @@ export function DevControls({ isDark, onToggleTheme }: DevControlsProps) {
         ))}
       </div>
 
-      <div style={{ marginTop: '8px' }}>
-        <Button size="small" appearance="secondary" onClick={handleRefreshMock} style={{ width: '100%' }}>
+      <div className={styles.refreshRow}>
+        <Button
+          size="small"
+          appearance="secondary"
+          onClick={handleRefreshMock}
+          className={styles.stretchButton}
+        >
           Reset Mock Data
         </Button>
       </div>

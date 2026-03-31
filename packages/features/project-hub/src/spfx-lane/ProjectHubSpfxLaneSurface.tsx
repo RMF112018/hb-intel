@@ -11,8 +11,10 @@ import {
   CardHeader,
   HbcButton,
   HbcStatusBadge,
+  HBC_SURFACE_LIGHT,
   Text,
   useDensity,
+  elevationLevel1,
 } from '@hbc/ui-kit';
 import type {
   ProjectHubSpfxDensityTier,
@@ -24,11 +26,11 @@ import type {
 const useStyles = makeStyles({
   /** Stage 11.6: card weight differentiation per P3-C1 §14.2 */
   cardWeightPrimary: {
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.14)',
+    boxShadow: elevationLevel1,
   },
   cardWeightSupporting: {
     boxShadow: 'none',
-    backgroundColor: '#fafafa',
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
   },
   root: {
     display: 'grid',

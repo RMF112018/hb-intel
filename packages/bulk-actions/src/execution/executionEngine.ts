@@ -1,7 +1,7 @@
 /**
  * SF27-T03 — Chunked execution engine.
  */
-import type { IBulkExecutionPlan, IBulkExecutionChunk, IBulkExecutionResult, IBulkItemExecutionResult, IBulkGroupedFailureReason, IBulkActionItemRef, BulkResultKind } from '../types/index.js';
+import type { IBulkExecutionPlan, IBulkExecutionChunk, IBulkExecutionResult, IBulkItemExecutionResult, IBulkGroupedFailureReason, IBulkActionItemRef } from '../types/index.js';
 import { BULK_ACTIONS_DEFAULT_CHUNK_SIZE } from '../types/index.js';
 
 export function planExecution(itemIds: string[], chunkSize: number = BULK_ACTIONS_DEFAULT_CHUNK_SIZE): IBulkExecutionPlan {

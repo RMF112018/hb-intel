@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as AdminApp } from '../../../admin/src/App.js';
 import { bootstrapMockEnvironment } from '../../../admin/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function AdminTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function AdminTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <AdminApp />
     </div>
   );

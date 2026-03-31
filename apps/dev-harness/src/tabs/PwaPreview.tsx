@@ -14,6 +14,7 @@ import { SessionStateProvider } from '@hbc/session-state';
 import type { OperationExecutor } from '@hbc/session-state';
 import { createAppRouter } from '../../../pwa/src/router/index.js';
 import { bootstrapMockEnvironment } from '../../../pwa/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 /**
  * Harness-only executor: no real API calls during dev preview.
@@ -24,6 +25,7 @@ const harnessExecutor: OperationExecutor = async () => {};
 let pwaBootstrapped = false;
 
 export function PwaPreview(): React.ReactNode {
+  const styles = usePreviewShellStyles();
   const router = useMemo(() => {
     const history = createMemoryHistory({ initialEntries: ['/project-hub'] });
     return createAppRouter(history);
@@ -37,9 +39,9 @@ export function PwaPreview(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className={styles.columnContainer}>
       <PwaQuickNav router={router} />
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      <div className={styles.fillContainer}>
         <SessionStateProvider executor={harnessExecutor}>
           <RouterProvider router={router} />
         </SessionStateProvider>

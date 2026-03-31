@@ -3,7 +3,8 @@
  * and conditional demo components.
  * Foundation Plan Phase 3.
  */
-import { HbcStatusBadge } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import { HbcStatusBadge, tokens } from '@hbc/ui-kit';
 import { useProjectStore } from '@hbc/shell';
 import { DemoDataGrid } from './DemoDataGrid.js';
 import { DemoCharts } from './DemoCharts.js';
@@ -47,11 +48,19 @@ const WORKSPACE_DEMOS: Record<string, Array<'grid' | 'charts' | 'forms' | 'shell
   'site-control': ['shell', 'layouts'],
 };
 
+const useStyles = makeStyles({
+  emptyState: {
+    fontStyle: 'italic',
+    color: tokens.colorNeutralForeground3,
+  },
+});
+
 interface WorkspacePlaceholderProps {
   workspaceId: string;
 }
 
 export function WorkspacePlaceholder({ workspaceId }: WorkspacePlaceholderProps) {
+  const styles = useStyles();
   const activeProject = useProjectStore((s) => s.activeProject);
   const label = WORKSPACE_LABELS[workspaceId] ?? workspaceId;
   const demos = WORKSPACE_DEMOS[workspaceId] ?? [];
@@ -74,7 +83,7 @@ export function WorkspacePlaceholder({ workspaceId }: WorkspacePlaceholderProps)
       </div>
 
       {demos.length === 0 && (
-        <p style={{ fontStyle: 'italic', color: 'var(--colorNeutralForeground3)' }}>
+        <p className={styles.emptyState}>
           No demo components configured for this workspace. Switch to Project Hub, Accounting, or
           Estimating to see data grids, charts, and forms.
         </p>

@@ -4,10 +4,16 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from './renderWithProviders';
 import { createTestRequest } from './factories';
 import { ProjectReviewDetailPage } from '../pages/ProjectReviewDetailPage';
+import type * as ProvisioningModule from '@hbc/provisioning';
+import type * as RouterModule from '@tanstack/react-router';
 
 // ── Module-level mocks ──────────────────────────────────────────────────────
 
 const mockNavigate = vi.fn();
+type MockLinkProps = React.PropsWithChildren<{
+  to: string;
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>>;
+
 const mockClient = {
   listRequests: vi.fn().mockResolvedValue([]),
   getProvisioningStatus: vi.fn().mockResolvedValue(null),
@@ -17,17 +23,17 @@ const mockClient = {
 };
 
 vi.mock('@hbc/provisioning', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@hbc/provisioning')>();
+  const actual = await importOriginal<typeof ProvisioningModule>();
   return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
 });
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+  const actual = await importOriginal<typeof RouterModule>();
   return {
     ...actual,
     useParams: vi.fn(() => ({ requestId: 'req-1' })),
     useNavigate: vi.fn(() => mockNavigate),
-    Link: ({ children, to, ...props }: any) => (
+    Link: ({ children, to, ...props }: MockLinkProps) => (
       <a href={to} {...props}>
         {children}
       </a>
@@ -319,7 +325,7 @@ describe('ProjectReviewDetailPage', () => {
     // G4-T07-009: Cross-app URL missing → warning banner
     it('shows warning banner and hides "Send to Admin" when admin URL is missing', async () => {
       const crossAppUrls = await import('../utils/crossAppUrls.js');
-      vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue(null as any);
+      vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue(null);
 
       const failedRequest = createTestRequest({ requestId: 'req-1', state: 'Failed' });
       seedListRequests([failedRequest]);

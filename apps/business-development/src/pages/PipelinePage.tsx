@@ -1,5 +1,16 @@
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader, WorkspacePageShell, HbcDataTable, HbcStatusBadge } from '@hbc/ui-kit';
+import { makeStyles } from '@griffel/react';
+import {
+  Text,
+  Card,
+  CardHeader,
+  WorkspacePageShell,
+  HbcDataTable,
+  HbcStatusBadge,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+} from '@hbc/ui-kit';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface LeadItem { name: string; client: string; value: string; stage: string; probability: string; }
@@ -19,7 +30,25 @@ const MOCK_LEADS: LeadItem[] = [
   { name: 'University Science Center', client: 'State University', value: '$15.8M', stage: 'Pursuit', probability: '55%' },
 ];
 
+const useStyles = makeStyles({
+  summaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(11.25rem, 1fr))',
+    gap: `${HBC_SPACE_MD}px`,
+  },
+  section: {
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  sectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_SM}px`,
+    marginBottom: `${HBC_SPACE_SM}px`,
+  },
+});
+
 export function PipelinePage(): ReactNode {
+  const styles = useStyles();
   const summaryCards = [
     { label: 'Pipeline Value', value: '$58.5M' },
     { label: 'Active Pursuits', value: '12' },
@@ -29,15 +58,15 @@ export function PipelinePage(): ReactNode {
 
   return (
     <WorkspacePageShell layout="list" title="Pipeline">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+      <div className={styles.summaryGrid}>
         {summaryCards.map((card) => (
           <Card key={card.label} size="small">
             <CardHeader header={<Text weight="semibold">{card.label}</Text>} description={<Text size={700} weight="bold">{card.value}</Text>} />
           </Card>
         ))}
       </div>
-      <div style={{ marginTop: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
           <Text size={500} weight="semibold">Lead Pipeline</Text>
           <HbcStatusBadge label="4 active" variant="info" />
         </div>

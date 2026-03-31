@@ -1,6 +1,7 @@
 name: Provisioning E2E
 
 on:
+  workflow_call:
   workflow_dispatch:
   push:
     tags:

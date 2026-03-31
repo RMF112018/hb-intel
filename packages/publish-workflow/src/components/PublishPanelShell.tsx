@@ -3,7 +3,6 @@
  */
 import React, { useMemo } from 'react';
 import { HbcPublishPanel, type PublishPanelStep, type PublishPanelTarget } from '@hbc/ui-kit';
-import type { IPublishRequest } from '../types/index.js';
 import type { IPublishStorageAdapter } from '../storage/IPublishStorageAdapter.js';
 import { usePublishWorkflowState } from '../hooks/usePublishWorkflowState.js';
 

@@ -2,6 +2,12 @@ name: Deploy Azure Functions
 # D-PH6-16: Environment-aware Functions deployment pipeline (staging on main, production on tags/manual gate).
 
 on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: string
   # D-PH6-16 trigger strategy: auto-deploy staging from main; allow manual environment override.
   push:
     branches: [main]
@@ -45,6 +51,7 @@ jobs:
       - name: Run unit tests (gate)
         run: pnpm turbo run test --filter=@hbc/functions --filter=@hbc/provisioning
         env:
+          AZURITE_TEST: 'true'
           AZURE_TABLE_ENDPOINT: UseDevelopmentStorage=true
 
       - name: Package Functions artifact
@@ -63,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     # D-PH6-16 environment strategy: staging deploy on main or explicit staging dispatch.
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') || (github.event_name == 'workflow_call' && inputs.environment == 'staging')
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -89,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     # D-PH6-16 release gate: production deploy allowed only for semantic version tags or explicit production dispatch.
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') || (github.event_name == 'workflow_call' && inputs.environment == 'production')
     steps:
       - uses: actions/download-artifact@v4
         with:

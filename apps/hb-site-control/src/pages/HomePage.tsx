@@ -6,49 +6,91 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { useRouter } from '@tanstack/react-router';
-import { Text, Card, CardHeader, Button, HbcStatusBadge, WorkspacePageShell } from '@hbc/ui-kit';
+import {
+  Text,
+  Card,
+  CardHeader,
+  Button,
+  HbcStatusBadge,
+  WorkspacePageShell,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
+  HBC_SPACE_MD,
+  HBC_SPACE_LG,
+  HBC_SPACE_XL,
+  tokens,
+} from '@hbc/ui-kit';
 
 const useStyles = makeStyles({
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
+    gap: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
   },
   card: {
     cursor: 'pointer',
-    minHeight: '120px',
+    minHeight: '7.5rem',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
+  },
+  cardBody: {
+    paddingTop: 0,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
   },
   cardCount: {
     fontSize: '2rem',
     fontWeight: '700',
     lineHeight: '1',
   },
+  criticalCount: {
+    color: tokens.colorPaletteRedForeground1,
+  },
+  warningCount: {
+    color: tokens.colorPaletteYellowForeground1,
+  },
+  successCount: {
+    color: tokens.colorPaletteGreenForeground1,
+  },
+  sectionHeading: {
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
   activityList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
-    marginTop: '8px',
+    gap: `${HBC_SPACE_SM}px`,
+    marginTop: `${HBC_SPACE_SM}px`,
   },
   activityItem: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: '12px',
-    paddingBottom: '12px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    borderRadius: '8px',
+    paddingTop: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    borderRadius: `${HBC_SPACE_SM}px`,
     backgroundColor: 'var(--colorNeutralBackground1)',
     boxShadow: 'var(--shadow2)',
+  },
+  activityContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: `${HBC_SPACE_XS}px`,
+  },
+  activityTime: {
+    color: 'var(--colorNeutralForeground3)',
   },
   navButtons: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
-    marginTop: '16px',
+    gap: `${HBC_SPACE_SM}px`,
+    marginTop: `${HBC_SPACE_MD}px`,
+  },
+  navButton: {
+    minHeight: `${HBC_SPACE_XL + HBC_SPACE_MD}px`,
   },
 });
 
@@ -86,8 +128,8 @@ export function HomePage(): ReactNode {
           onClick={() => void router.navigate({ to: '/observations' })}
         >
           <CardHeader header={<Text weight="semibold" size={200}>Open Observations</Text>} />
-          <div style={{ padding: '0 16px 16px' }}>
-            <Text className={styles.cardCount} style={{ color: 'var(--colorPaletteRedForeground1)' }}>
+          <div className={styles.cardBody}>
+            <Text className={`${styles.cardCount} ${styles.criticalCount}`}>
               7
             </Text>
           </div>
@@ -98,8 +140,8 @@ export function HomePage(): ReactNode {
           onClick={() => void router.navigate({ to: '/safety-monitoring' })}
         >
           <CardHeader header={<Text weight="semibold" size={200}>Safety Alerts</Text>} />
-          <div style={{ padding: '0 16px 16px' }}>
-            <Text className={styles.cardCount} style={{ color: 'var(--colorPaletteYellowForeground1)' }}>
+          <div className={styles.cardBody}>
+            <Text className={`${styles.cardCount} ${styles.warningCount}`}>
               3
             </Text>
           </div>
@@ -107,8 +149,8 @@ export function HomePage(): ReactNode {
 
         <Card className={styles.card}>
           <CardHeader header={<Text weight="semibold" size={200}>Inspections Today</Text>} />
-          <div style={{ padding: '0 16px 16px' }}>
-            <Text className={styles.cardCount} style={{ color: 'var(--colorPaletteGreenForeground1)' }}>
+          <div className={styles.cardBody}>
+            <Text className={`${styles.cardCount} ${styles.successCount}`}>
               5
             </Text>
           </div>
@@ -116,7 +158,7 @@ export function HomePage(): ReactNode {
 
         <Card className={styles.card}>
           <CardHeader header={<Text weight="semibold" size={200}>Crew On-Site</Text>} />
-          <div style={{ padding: '0 16px 16px' }}>
+          <div className={styles.cardBody}>
             <Text className={styles.cardCount}>
               24
             </Text>
@@ -124,15 +166,15 @@ export function HomePage(): ReactNode {
         </Card>
       </div>
 
-      <Text as="h2" size={500} weight="semibold" style={{ marginTop: 24 }}>
+      <Text as="h2" size={500} weight="semibold" className={styles.sectionHeading}>
         Recent Activity
       </Text>
       <div className={styles.activityList}>
         {MOCK_ACTIVITY.map((item) => (
           <div key={item.id} className={styles.activityItem}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div className={styles.activityContent}>
               <Text size={300} weight="medium">{item.description}</Text>
-              <Text size={200} style={{ color: 'var(--colorNeutralForeground3)' }}>{item.time}</Text>
+              <Text size={200} className={styles.activityTime}>{item.time}</Text>
             </div>
             <HbcStatusBadge
               variant={SEVERITY_VARIANT[item.severity]}
@@ -145,18 +187,18 @@ export function HomePage(): ReactNode {
 
       <div className={styles.navButtons}>
         <Button
+          className={styles.navButton}
           appearance="primary"
           size="large"
           onClick={() => void router.navigate({ to: '/observations' })}
-          style={{ minHeight: 48 }}
         >
           View All Observations
         </Button>
         <Button
+          className={styles.navButton}
           appearance="outline"
           size="large"
           onClick={() => void router.navigate({ to: '/safety-monitoring' })}
-          style={{ minHeight: 48 }}
         >
           Safety Monitoring
         </Button>

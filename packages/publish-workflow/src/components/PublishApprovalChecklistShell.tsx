@@ -2,7 +2,6 @@
 import React, { useMemo } from 'react';
 import { PublishApprovalChecklist, type PublishChecklistItem } from '@hbc/ui-kit';
 import type { IPublishRequest } from '../types/index.js';
-import { evaluateReadiness } from '../model/lifecycle.js';
 
 export interface PublishApprovalChecklistShellProps { request: IPublishRequest; onAcknowledge?: (ruleId: string) => void; }
 

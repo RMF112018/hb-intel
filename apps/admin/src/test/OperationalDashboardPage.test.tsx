@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ComplexityProvider } from '@hbc/complexity';
 import { HbcThemeProvider, HbcToastProvider } from '@hbc/ui-kit';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
+import type * as ProvisioningModule from '@hbc/provisioning';
 import { OperationalDashboardPage } from '../pages/OperationalDashboardPage';
 import { createTestSession } from './renderWithProviders';
 import { createTestRequest } from './factories';
@@ -18,7 +19,7 @@ const mockClient = {
 };
 
 vi.mock('@hbc/provisioning', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@hbc/provisioning')>();
+  const actual = await importOriginal<typeof ProvisioningModule>();
   return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
 });
 

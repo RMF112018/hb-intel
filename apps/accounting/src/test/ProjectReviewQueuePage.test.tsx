@@ -1,13 +1,19 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './renderWithProviders';
 import { createTestRequest } from './factories';
 import { ProjectReviewQueuePage } from '../pages/ProjectReviewQueuePage';
+import type * as ProvisioningModule from '@hbc/provisioning';
+import type * as RouterModule from '@tanstack/react-router';
 
 // ── Module-level mocks ──────────────────────────────────────────────────────
 
 const mockNavigate = vi.fn();
+type MockLinkProps = React.PropsWithChildren<{
+  to: string;
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>>;
+
 const mockClient = {
   listRequests: vi.fn().mockResolvedValue([]),
   getProvisioningStatus: vi.fn().mockResolvedValue(null),
@@ -17,16 +23,16 @@ const mockClient = {
 };
 
 vi.mock('@hbc/provisioning', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@hbc/provisioning')>();
+  const actual = await importOriginal<typeof ProvisioningModule>();
   return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
 });
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+  const actual = await importOriginal<typeof RouterModule>();
   return {
     ...actual,
     useNavigate: vi.fn(() => mockNavigate),
-    Link: ({ children, to, ...props }: any) => (
+    Link: ({ children, to, ...props }: MockLinkProps) => (
       <a href={to} {...props}>
         {children}
       </a>

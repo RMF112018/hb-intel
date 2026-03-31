@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as SafetyApp } from '../../../safety/src/App.js';
 import { bootstrapMockEnvironment } from '../../../safety/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function SafetyTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function SafetyTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <SafetyApp />
     </div>
   );

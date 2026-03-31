@@ -22,6 +22,8 @@ import { HbcThemeProvider } from '@hbc/ui-kit';
 import type { IActiveProject } from '@hbc/models';
 import { useAuthStore } from '@hbc/auth';
 import {
+  registerProjectHubCanvasTiles,
+  _resetProjectHubCanvasRegistrationForTests,
   resolveProjectHubProfile,
   PROJECT_HUB_PROFILE_REGISTRY,
   PROJECT_HUB_PROFILE_IDS,
@@ -31,6 +33,11 @@ import {
 } from '@hbc/features-project-hub';
 import type { ProjectHubProfileRole, ProjectHubDeviceClass } from '@hbc/features-project-hub';
 import { useProjectStore } from '@hbc/shell';
+import {
+  _clearRegistryForTests,
+  _resetRegistrationFlagForTests,
+  registerReferenceTiles,
+} from '@hbc/project-canvas';
 import {
   ProjectHubControlCenterPage,
   ProjectHubNoAccessPage,
@@ -109,6 +116,11 @@ beforeEach(() => {
     session: null,
     lifecyclePhase: 'idle',
   } as any);
+  _clearRegistryForTests();
+  _resetRegistrationFlagForTests();
+  _resetProjectHubCanvasRegistrationForTests();
+  registerReferenceTiles();
+  registerProjectHubCanvasTiles();
   // Default to desktop viewport
   setViewportWidth(1440);
 });

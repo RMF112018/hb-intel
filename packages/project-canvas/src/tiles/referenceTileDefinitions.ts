@@ -8,13 +8,6 @@ import React from 'react';
 import type { ICanvasTileDefinition, ICanvasTileProps } from '../types/index.js';
 import { createReferenceTileComponents } from './createReferenceTileComponent.js';
 
-// Lazy-loaded real tile components (Phase 3 Stage 5.2)
-const workQueueEssential = React.lazy(() => import('./ProjectWorkQueueTile.js').then(m => ({ default: m.ProjectWorkQueueTileEssential as unknown as React.ComponentType<ICanvasTileProps> })));
-const workQueueStandard = React.lazy(() => import('./ProjectWorkQueueTile.js').then(m => ({ default: m.ProjectWorkQueueTileStandard as unknown as React.ComponentType<ICanvasTileProps> })));
-const workQueueExpert = React.lazy(() => import('./ProjectWorkQueueTile.js').then(m => ({ default: m.ProjectWorkQueueTileExpert as unknown as React.ComponentType<ICanvasTileProps> })));
-const activityEssential = React.lazy(() => import('./ProjectActivityTile.js').then(m => ({ default: m.ProjectActivityTileEssential as unknown as React.ComponentType<ICanvasTileProps> })));
-const activityStandard = React.lazy(() => import('./ProjectActivityTile.js').then(m => ({ default: m.ProjectActivityTileStandard as unknown as React.ComponentType<ICanvasTileProps> })));
-const activityExpert = React.lazy(() => import('./ProjectActivityTile.js').then(m => ({ default: m.ProjectActivityTileExpert as unknown as React.ComponentType<ICanvasTileProps> })));
 const relatedItemsEssential = React.lazy(() => import('./RelatedItemsTileAdapter.js').then(m => ({ default: m.RelatedItemsTileEssential as unknown as React.ComponentType<ICanvasTileProps> })));
 const relatedItemsStandard = React.lazy(() => import('./RelatedItemsTileAdapter.js').then(m => ({ default: m.RelatedItemsTileStandard as unknown as React.ComponentType<ICanvasTileProps> })));
 const relatedItemsExpert = React.lazy(() => import('./RelatedItemsTileAdapter.js').then(m => ({ default: m.RelatedItemsTileExpert as unknown as React.ComponentType<ICanvasTileProps> })));
@@ -173,32 +166,6 @@ export const relatedItemsDef: ICanvasTileDefinition = {
   lockable: true,
 };
 
-/** Project Work Queue — mandatory (Phase 3 P3-C2 §4), @hbc/my-work-feed */
-export const projectWorkQueueDef: ICanvasTileDefinition = {
-  tileKey: 'project-work-queue',
-  title: 'Project Work Queue',
-  description: 'Actionable work items for this project filtered from the unified work feed.',
-  defaultForRoles: ['project-administrator', 'project-manager', 'superintendent', 'project-team-member'],
-  mandatory: true,
-  component: { essential: workQueueEssential, standard: workQueueStandard, expert: workQueueExpert },
-  defaultColSpan: 4,
-  defaultRowSpan: 2,
-  lockable: true,
-};
-
-/** Project Activity — mandatory (Phase 3 P3-C2 §6), Activity spine */
-export const projectActivityDef: ICanvasTileDefinition = {
-  tileKey: 'project-activity',
-  title: 'Project Activity',
-  description: 'Recent project activity timeline from all module sources.',
-  defaultForRoles: ['project-administrator', 'project-executive', 'project-manager', 'superintendent', 'project-team-member', 'project-viewer'],
-  mandatory: true,
-  component: { essential: activityEssential, standard: activityStandard, expert: activityExpert },
-  defaultColSpan: 4,
-  defaultRowSpan: 2,
-  lockable: false,
-};
-
 /** AI Insight — catalog-only, wraps AIInsightTile placeholder, sets aiComponent */
 export const aiInsightDef: ICanvasTileDefinition = {
   tileKey: 'ai-insight',
@@ -217,7 +184,7 @@ export const aiInsightDef: ICanvasTileDefinition = {
   lockable: false,
 };
 
-/** Aggregated array of all 14 reference tile definitions — D-SF13-T07 + Phase 3 */
+/** Aggregated array of canvas-owned reference tile definitions. */
 export const referenceTiles: ICanvasTileDefinition[] = [
   bicMyItemsDef,
   activeConstraintsDef,
@@ -230,7 +197,5 @@ export const referenceTiles: ICanvasTileDefinition[] = [
   estimatingPursuitDef,
   notificationSummaryDef,
   relatedItemsDef,
-  projectWorkQueueDef,
-  projectActivityDef,
   aiInsightDef,
 ];

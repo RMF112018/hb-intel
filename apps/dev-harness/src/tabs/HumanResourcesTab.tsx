@@ -5,10 +5,13 @@
 import { useEffect } from 'react';
 import { App as HumanResourcesApp } from '../../../human-resources/src/App.js';
 import { bootstrapMockEnvironment } from '../../../human-resources/src/bootstrap.js';
+import { usePreviewShellStyles } from './usePreviewShellStyles.js';
 
 let bootstrapped = false;
 
 export function HumanResourcesTab(): React.ReactNode {
+  const styles = usePreviewShellStyles();
+
   useEffect(() => {
     if (!bootstrapped) {
       bootstrapMockEnvironment();
@@ -17,7 +20,7 @@ export function HumanResourcesTab(): React.ReactNode {
   }, []);
 
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div className={styles.scrollContainer}>
       <HumanResourcesApp />
     </div>
   );

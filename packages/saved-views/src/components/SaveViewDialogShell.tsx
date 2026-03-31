@@ -1,7 +1,7 @@
 /**
  * SF26-T06 — SaveViewDialog composition shell.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { SaveViewDialog, type SaveViewDialogMode, type SaveViewDialogResult, type SaveViewDialogPermissions, type SaveViewDialogExistingView } from '@hbc/ui-kit';
 import type { ISavedViewDefinition, ISavedViewScopePermissions } from '../types/index.js';
 

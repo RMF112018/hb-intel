@@ -26,6 +26,9 @@ import {
   HbcStatusBadge,
   HbcTabs,
   HbcCoachingCallout,
+  HBC_SPACE_MD,
+  HBC_SPACE_SM,
+  HBC_SPACE_XS,
   HbcTypography,
   WorkspacePageShell,
   useToast,
@@ -57,12 +60,22 @@ const FILTER_TABS: LayoutTab[] = [
 ];
 
 const useStyles = makeStyles({
-  actionRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
-  modalFooter: { display: 'flex', gap: '8px', justifyContent: 'flex-end' },
-  badgeRow: { display: 'flex', gap: '4px', alignItems: 'center' },
-  stepTable: { marginTop: '12px' },
-  diagnosticBlock: { fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' },
-  overrideSection: { marginTop: '16px', display: 'flex', gap: '8px', alignItems: 'flex-end' },
+  actionRow: { display: 'flex', gap: `${HBC_SPACE_SM}px`, flexWrap: 'wrap' },
+  modalFooter: { display: 'flex', gap: `${HBC_SPACE_SM}px`, justifyContent: 'flex-end' },
+  badgeRow: { display: 'flex', gap: `${HBC_SPACE_XS}px`, alignItems: 'center' },
+  stepTable: { marginTop: `${HBC_SPACE_SM + HBC_SPACE_XS}px` },
+  diagnosticBlock: {
+    fontFamily: 'monospace',
+    fontSize: `${HBC_SPACE_SM + HBC_SPACE_XS}px`,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-all',
+  },
+  overrideSection: {
+    marginTop: `${HBC_SPACE_MD}px`,
+    display: 'flex',
+    gap: `${HBC_SPACE_SM}px`,
+    alignItems: 'flex-end',
+  },
 });
 
 const OVERSIGHT_EMPTY_CONFIG: ISmartEmptyStateConfig = {
