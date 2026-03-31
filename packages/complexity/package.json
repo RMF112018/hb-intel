@@ -1,6 +1,6 @@
 {
   "name": "@hbc/complexity",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "private": true,
   "description": "Three-tier Complexity Dial — platform-wide UI density context",
   "type": "module",

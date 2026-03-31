@@ -1615,6 +1615,37 @@ All three acceptance criteria were already satisfied by Phase 2 remediation (P2-
 
 Prompt-02 is closed. No code changes required — the backward-compatibility strategy, test truthfulness restructuring, and regression guards were completed during Phase 2 remediation and remain sound after P6-01's contract and validation changes. The test suite accurately distinguishes real mapper proof (43-field serialization) from mock-only proof (in-memory round-trip), and 5 regression guards prevent silent field loss.
 
+### Phase 6 Auth Convergence, Preferences Endpoint, and Proxy Scope Closure (2026-03-31, Prompt P6-03)
+
+**Scope:** Close the four Phase 1/3 auth-related deferred items: deprecated session-token helpers, RBAC convergence, complexity preferences mismatch, and proxy scope.
+
+**Item-by-item closure:**
+
+| Item | Prior Status | P6-03 Status | Action Taken |
+|------|-------------|-------------|-------------|
+| Deprecated session-token helpers | Closed (P3-09) | **Confirmed closed** | Re-verified: no retained PS surface uses deprecated `resolveSessionToken()`. Accounting (2 pages) and admin (4 files) on `createSessionTokenFactory()`. |
+| RBAC convergence | Explicitly deferred | **Documented as intentional posture** | JWT auth + UPN env-list role assignment is the intended PS release model. Future convergence to JWT app-roles is acceptable follow-on. |
+| Complexity preferences backend | Explicitly deferred | **Closed — frontend expectation retired** | `ComplexityProvider.enableApiSync` prop added (default `false`). All consumers now use localStorage-only by default. Zero failed HTTP requests to non-existent endpoint. |
+| Proxy scope | Decided (P3-10) | **Confirmed closed** | Re-verified: proxy excluded from PS host, handler annotated, boundary test proves exclusion. |
+
+**Code changes:**
+
+| File | Change |
+|------|--------|
+| `packages/complexity/src/context/ComplexityProvider.tsx` | Added `enableApiSync` prop (default `false`). API sync and `patchPreference()` fire-and-forget calls gated behind this prop. |
+| `packages/complexity/src/__tests__/ComplexityProvider.test.tsx` | Updated 4 API-dependent tests to pass `enableApiSync`. Added new test verifying no fetch calls when `enableApiSync` is false. |
+
+**Acceptance criteria met:**
+
+1. Retained surfaces converge on canonical auth posture — JWT + UPN env-list model documented as intentional.
+2. Deprecated session-token paths removed from retained surfaces — confirmed (P3-09, re-verified P6-03).
+3. Preferences backend contract mismatch closed — `enableApiSync` defaults to `false`, eliminating silent API failures.
+4. Proxy posture not ambiguous — excluded from PS host with boundary test proof (P3-10, re-verified P6-03).
+
+**Closure statement:**
+
+All four Prompt-03 items are closed. The auth posture for Project Setup is canonical: JWT authentication via Entra ID MSAL, role assignment via `ADMIN_UPNS`/`CONTROLLER_UPNS` env lists, `createSessionTokenFactory()` on all retained surfaces. The preferences mismatch is resolved by retiring the frontend API expectation (localStorage-only default). The proxy is excluded from PS release scope.
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1707,15 +1738,12 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 #### Phase 1 deferred implementations
 
-- **Item:** Complexity preferences backend contract
+- **Item:** ~~Complexity preferences backend contract~~ **CLOSED (P6-03, 2026-03-31)**
   **Category:** Code / integration
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** `phase-1/Phase-1_Handoff.md` still marks `GET /api/users/me/preferences` as deferred and recommends it as the first Phase 2 entry point. Repo truth still shows `ComplexityProvider` using `/api/users/me/preferences`, but the backend exposes notification preferences at `/api/notifications/preferences`, not the complexity endpoint the shared package expects.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Handoff.md`; `packages/complexity/src/storage/complexityApiClient.ts`; `apps/estimating/src/App.tsx`; `backend/functions/src/functions/notifications/GetPreferences.ts`; `backend/functions/src/functions/notifications/UpdatePreferences.ts`
-  **Affected files/surfaces:** `packages/complexity/src/**`, `apps/estimating/src/App.tsx`, backend user-preference route surface
-  **Blocker level:** Non-blocking follow-up
-  **Cross-phase impact:** Leaves shared complexity UX on local-storage fallback and means later phase docs should not imply the user-preferences backend contract was ever closed.
-  **Recommended next-step direction:** Implement the expected `/api/users/me/preferences` contract or formally retire that endpoint expectation and update the complexity package accordingly.
+  **Status:** Closed — frontend API expectation retired
+  **Resolution:** The `ComplexityProvider` API sync is now opt-in (`enableApiSync` prop, default `false`). When disabled (the default for all current consumers), the provider uses localStorage/sessionStorage only and makes zero network requests to `/api/users/me/preferences`. The API client code is retained for future use when a preferences backend is deployed. No consumer currently passes `enableApiSync={true}`.
+  **Repo-truth evidence:** `packages/complexity/src/context/ComplexityProvider.tsx` (P6-03: `enableApiSync` prop); `packages/complexity/src/__tests__/ComplexityProvider.test.tsx` (new test: "does not call fetch when enableApiSync is false")
+  **Cross-phase impact:** The mismatch between frontend expectation and backend reality is resolved. The complexity package no longer silently fails against a non-existent endpoint.
 
 - **Item:** Dedicated host cutover and monolithic-host retirement proof
   **Category:** Infrastructure / deployment
@@ -1765,13 +1793,11 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 - **Item:** Cross-surface auth convergence and RBAC unification
   **Category:** Auth / authorization
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** Phase 3 handoff labels dual RBAC convergence as acceptable follow-on, and Prompt 09 explicitly treats cross-surface auth convergence as incomplete. Repo truth still splits authorization between JWT roles and UPN env lists and retains separate auth conventions across requester, controller, and admin surfaces.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Auth-Hardening-and-Release-Notes.md`; `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`; `apps/admin/src/pages/ProvisioningOversightPage.tsx`; `backend/functions/src/middleware/auth.ts`
-  **Affected files/surfaces:** backend RBAC checks, requester/controller/admin UI surfaces, deployment-time role configuration
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Carries into Phase 4 operational support and Phase 5 accepted-risk posture.
-  **Recommended next-step direction:** Converge retained privileged flows on one documented authorization model and reduce UPN-list dependence where practical.
+  **Status:** Documented as intentional PS release posture (P6-03)
+  **P6-03 posture decision:** The dual-model RBAC split is the intended production posture for the Project Setup release. JWT (Entra ID MSAL) provides authentication for all retained surfaces. Role assignment uses `ADMIN_UPNS` and `CONTROLLER_UPNS` environment variables, resolved at runtime by `resolveRequestRole()` in `state-machine.ts`. This split is practical: JWT proves identity, env-list-based role resolution provides operator-configurable privilege without requiring Entra ID app-role provisioning. Full RBAC convergence to JWT app-roles is a future follow-on, not a PS release blocker.
+  **Repo-truth evidence:** `backend/functions/src/state-machine.ts` (resolveRequestRole, lines 36-48); `backend/functions/src/middleware/auth.ts` (withAuth JWT validation); `backend/functions/src/middleware/auth-contract.test.ts` (all routes protected); all retained surfaces migrated to `createSessionTokenFactory()` (P3-09)
+  **Blocker level:** Non-blocking — documented intentional posture
+  **Cross-phase impact:** No longer a gap. The current model is the PS release model. Future RBAC convergence to JWT app-roles is acceptable follow-on.
 
 - **Item:** ~~Proxy-route implement-or-remove decision~~ **DECIDED (P3-10, 2026-03-31)**
   **Category:** Code / scope cleanup

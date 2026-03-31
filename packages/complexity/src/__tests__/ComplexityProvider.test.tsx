@@ -133,7 +133,7 @@ describe('ComplexityProvider', () => {
     expect(result.current.showCoaching).toBe(false);
   });
 
-  it('syncs preference from API on mount', async () => {
+  it('syncs preference from API on mount when enableApiSync is true', async () => {
     const apiPref: IComplexityPreference = { tier: 'expert', showCoaching: false };
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -142,13 +142,25 @@ describe('ComplexityProvider', () => {
     } as Response);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <ComplexityProvider>{children}</ComplexityProvider>
+      <ComplexityProvider enableApiSync>{children}</ComplexityProvider>
     );
     const { result } = renderHook(() => useComplexity(), { wrapper });
 
     await waitFor(() => {
       expect(result.current.tier).toBe('expert');
     });
+  });
+
+  it('does not call fetch when enableApiSync is false (default)', () => {
+    const fetchSpy = vi.mocked(fetch);
+    fetchSpy.mockClear();
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ComplexityProvider>{children}</ComplexityProvider>
+    );
+    renderHook(() => useComplexity(), { wrapper });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('uses sessionStorage when spfxContext is provided', () => {
@@ -180,7 +192,7 @@ describe('ComplexityProvider', () => {
     } as Response);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <ComplexityProvider>{children}</ComplexityProvider>
+      <ComplexityProvider enableApiSync>{children}</ComplexityProvider>
     );
     const { result } = renderHook(() => useComplexity(), { wrapper });
 
@@ -306,7 +318,7 @@ describe('ComplexityProvider', () => {
       } as Response);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <ComplexityProvider>{children}</ComplexityProvider>
+      <ComplexityProvider enableApiSync>{children}</ComplexityProvider>
     );
     const { result } = renderHook(() => useComplexity(), { wrapper });
 
@@ -319,7 +331,7 @@ describe('ComplexityProvider', () => {
     vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'));
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <ComplexityProvider>{children}</ComplexityProvider>
+      <ComplexityProvider enableApiSync>{children}</ComplexityProvider>
     );
     const { result } = renderHook(() => useComplexity(), { wrapper });
 

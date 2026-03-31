@@ -29,6 +29,14 @@ export interface ComplexityProviderProps {
    */
   spfxContext?: { pageContext: { user: { loginName: string } } };
   /**
+   * P6-03: Opt-in for backend API sync via `/api/users/me/preferences`.
+   * When false (default), the provider uses localStorage/sessionStorage only.
+   * Set to true only when a backend preferences endpoint is deployed and reachable.
+   *
+   * @default false
+   */
+  enableApiSync?: boolean;
+  /**
    * Test override — skips API calls and StorageEvent entirely.
    * Used by ComplexityTestProvider (D-10). Never pass in production code.
    * @internal
@@ -43,6 +51,7 @@ export interface ComplexityProviderProps {
 export function ComplexityProvider({
   children,
   spfxContext,
+  enableApiSync = false,
   _testPreference,
 }: ComplexityProviderProps): React.ReactElement {
   const isSpfx = !!spfxContext;
@@ -56,8 +65,9 @@ export function ComplexityProvider({
   });
 
   // ── Step 2: Background API sync (D-01, D-02, D-03) ────────────────────
+  // P6-03: API sync is opt-in. Default is localStorage-only (no backend endpoint required).
   useEffect(() => {
-    if (_testPreference) return; // Test mode — skip all API calls
+    if (_testPreference || !enableApiSync) return; // Skip when test mode or API sync disabled
 
     let cancelled = false;
 
@@ -169,15 +179,15 @@ export function ComplexityProvider({
 
     writePreference(updated, isSpfx);
     setPreferenceState(updated);
-    void patchPreference(updated); // Fire-and-forget — storage is already updated
-  }, [preference, isSpfx]);
+    if (enableApiSync) void patchPreference(updated); // Fire-and-forget when API sync enabled
+  }, [preference, isSpfx, enableApiSync]);
 
   const setShowCoaching = useCallback((show: boolean) => {
     const updated: IComplexityPreference = { ...preference, showCoaching: show };
     writePreference(updated, isSpfx);
     setPreferenceState(updated);
-    void patchPreference(updated);
-  }, [preference, isSpfx]);
+    if (enableApiSync) void patchPreference(updated);
+  }, [preference, isSpfx, enableApiSync]);
 
   // ── Computed context value ─────────────────────────────────────────────
 
