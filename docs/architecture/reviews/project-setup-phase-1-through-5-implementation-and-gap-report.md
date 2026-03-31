@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P4-09 CORS, managed identity, and downstream permission scoping)
+> **Last updated:** 2026-03-31 (P4-10 observability operationalization and readiness proof)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -1064,6 +1064,86 @@ Project Setup CORS, managed identity, and downstream runtime assumptions are exp
 - ADR-0124: `docs/architecture/adr/ADR-0124-project-setup-backend-host-boundary.md`
 - Infra readiness tests: `backend/functions/src/test/infra-readiness.test.ts`
 
+### Phase 4 Observability Operationalization and Readiness Proof (2026-03-31, Prompt P4-10)
+
+**Audit of observability/readiness evidence for Project Setup:**
+
+All observability artifacts were classified into evidence categories:
+
+| Artifact | Location | Evidence Category | Operationalized? |
+|---|---|---|---|
+| KQL query: adapter health | `backend/functions/observability/kql/adapter-health.kql` | Repo artifact, executable locally | No — requires App Insights workspace |
+| KQL query: auth/token | `backend/functions/observability/kql/auth-token.kql` | Repo artifact, executable locally | No |
+| KQL query: provisioning | `backend/functions/observability/kql/provisioning.kql` | Repo artifact, executable locally | No |
+| KQL query: error budget | `backend/functions/observability/kql/error-budget.kql` | Repo artifact, executable locally | No |
+| KQL query: notifications | `backend/functions/observability/kql/notification.kql` | Repo artifact, executable locally | No |
+| Alert rules (5) | `backend/functions/observability/alerts.json` | Documentary specification | No — requires Azure Monitor deployment |
+| Dashboard specifications (4) | `backend/functions/observability/README.md` | Documentary | No — requires Workbook creation |
+| Action group config | `backend/functions/observability/alerts.json` | Documentary | No — requires Azure portal setup |
+| Teams workflow channels | `backend/functions/observability/README.md` | Documentary | No — requires Power Automate setup |
+| DevOps setup checklist | `backend/functions/observability/README.md` | Deployment guidance | All items unchecked |
+| Health endpoint | `backend/functions/src/functions/health/index.ts` | **Repo artifact + executable** | **Yes — returns live diagnostic payload** |
+| Telemetry wrapper | `backend/functions/src/utils/withTelemetry.ts` | **Repo artifact + executable** | **Yes — emits events on every handler invocation** |
+| Structured logger | `backend/functions/src/utils/logger.ts` | **Repo artifact + executable** | **Yes — JSON telemetry to App Insights traces table** |
+| Infrastructure readiness tests | `backend/functions/src/test/infra-readiness.test.ts` | **Repo artifact + executable** | **Yes — runs in CI** |
+| Health endpoint tests | `backend/functions/src/functions/health/__tests__/health.test.ts` | **Repo artifact + executable** | **Yes — runs in CI** |
+
+**Summary:** 3 observability surfaces are genuinely operationalized from repo alone (health endpoint, telemetry wrapper, structured logger). 5 KQL queries are repo artifacts executable via copy-paste. 5 alert rules, 4 dashboards, action groups, and Teams workflows are documentary specifications requiring DevOps deployment. The DevOps setup checklist has 6 items, all unchecked.
+
+**What is proven from repo:**
+
+1. **Health endpoint** returns tiered diagnostic payload (`operationalReadiness`, `configTiers`, `provisioningPrereqs`) on every `GET /api/health` call — no deployment required beyond the Function App itself
+2. **Telemetry events** are emitted by every authenticated handler via `withTelemetry()` wrapper — `handler.invoke`, `handler.success`, `handler.error` events flow to App Insights automatically
+3. **Auth telemetry** emits `auth.bearer.success` and `auth.bearer.error` events via middleware
+4. **Startup telemetry** emits `startup.mode.resolved` with adapter mode and surface name
+5. **Infrastructure tests** verify CORS config, SignalR extension, function timeout, tiered validation exports, and config registry structure — run in CI
+6. **KQL queries** are version-controlled and can be executed manually in App Insights
+
+**What remains deployment/environment-dependent:**
+
+1. Azure Monitor alert rules (5 definitions in `alerts.json`) — must be created in Azure portal or via Terraform
+2. Azure Monitor Workbooks / App Insights dashboards (4 specified) — must be created from KQL queries
+3. Action group `hbi-alert-action-group` — must be created in Azure portal
+4. Teams Workflow for alert delivery — must be configured in Power Automate
+5. On-call paging mechanism — open decision per observability README
+6. Staging alert verification — requires test trigger in staging environment
+
+**Guardrails added against overstated readiness:**
+
+Added an **Evidence Classification** section to `backend/functions/observability/README.md` (P4-10) that:
+- Defines four evidence categories: repo artifact, executable from repo, operationalized, documentary
+- Explicitly states that none of the alert/dashboard/workflow items are operationalized
+- Provides concrete examples of what each claim means ("alerts.json defines 5 rules" ≠ deployed alerting)
+- Ties operationalized status to completion of the DevOps Setup Checklist
+
+This makes it structurally harder for future documentation to treat artifact existence as operational proof.
+
+**Remaining operationalization gaps:**
+
+These are not code gaps — they are deployment/operational execution items:
+1. No deployed alert rules in Azure Monitor
+2. No deployed dashboards/workbooks
+3. No configured action group or Teams alert channel
+4. No verified staging alert trigger
+5. No documented on-call paging mechanism
+6. No repo-evidenced proof that any operator has used the health endpoint or triage runbook in a live scenario
+
+**Closure statement:**
+
+Project Setup observability and infrastructure readiness evidence are now categorized truthfully across repo proof, deployment prerequisites, and post-deploy operational verification. Three observability surfaces are genuinely operationalized from repo (health endpoint, telemetry events, structured logging). Documentary artifacts (KQL, alerts, dashboards) exist but are explicitly classified as not operationalized until DevOps deploys them. The observability README now includes an evidence classification guardrail (P4-10) that prevents future docs from treating artifact existence as operational proof. All four P4-10 acceptance criteria are satisfied.
+
+**Evidence:**
+
+- Evidence classification added: `backend/functions/observability/README.md` (P4-10 section)
+- KQL queries: `backend/functions/observability/kql/*.kql` (5 files)
+- Alert definitions: `backend/functions/observability/alerts.json` (5 rules)
+- Health endpoint: `backend/functions/src/functions/health/index.ts`
+- Telemetry wrapper: `backend/functions/src/utils/withTelemetry.ts`
+- Structured logger: `backend/functions/src/utils/logger.ts`
+- Infrastructure tests: `backend/functions/src/test/infra-readiness.test.ts`
+- Health tests: `backend/functions/src/functions/health/__tests__/health.test.ts`
+- Operational readiness doc: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`
+
 ### Phase 5
 
 **Intended objective**
@@ -1295,6 +1375,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Cross-phase impact:** Weakens Phase 5 signoff realism and keeps “ready/degraded/blocked” diagnostics partly manual.
   **Recommended next-step direction:** Deploy and verify the alerting/dashboard stack and record actual operational ownership evidence.
   **P4-07 update:** Explicitly classified as documentary infrastructure (not operationalized). The repo-owned artifacts are complete; operationalization is deferred to Prompt-10.
+  **P4-10 update:** Evidence classification guardrail added to `backend/functions/observability/README.md`. All 15 observability artifacts categorized: 3 genuinely operationalized (health endpoint, telemetry wrapper, logger), 5 executable locally (KQL queries), 7 documentary only (alerts, dashboards, action groups, Teams workflows). DevOps deployment remains the operationalization gate.
 
 - **Item:** Email delivery / notification transport
   **Category:** Infrastructure / notification delivery
@@ -1421,6 +1502,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 6. **Operationalize observability.**
    - Deploy alert rules, dashboards, and notification channels corresponding to the checked-in artifacts.
    - P4-07: Explicitly classified as documentary infrastructure. Repo-owned artifacts are complete; deployment and operationalization deferred to Prompt-10.
+   - P4-10: Evidence classification guardrail added to observability README. 3 of 15 artifacts genuinely operationalized (health, telemetry, logger). Remaining 12 require DevOps deployment.
 7. **~~Finish auth/rbac cleanup.~~ SUBSTANTIALLY CLOSED (P3-07 through P3-10, 2026-03-31).**
    - Deprecated token paths removed from all retained surfaces (P3-09). Auth architecture frozen (P3-07). Production token path verified (P3-08). RBAC convergence (JWT roles vs UPN lists) remains a future follow-on but is not a blocker.
 8. **~~Make a proxy-route decision.~~ DECIDED (P3-10, 2026-03-31).**
@@ -1428,7 +1510,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P4-09 CORS, managed identity, and downstream permission scoping)
+> **Last updated:** 2026-03-31 (P4-10 observability operationalization and readiness proof)
 
 ### Phase-by-phase status
 

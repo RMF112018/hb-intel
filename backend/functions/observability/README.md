@@ -2,6 +2,25 @@
 
 Version-controlled observability artifacts for the HB Intel backend Azure Functions.
 
+## Evidence Classification (P4-10)
+
+> **Important:** The presence of observability artifacts in this directory does NOT mean
+> monitoring is operationalized. Use the classification below to determine what is proven
+> and what requires external deployment/verification before claiming operational readiness.
+
+| Category | What It Means | Status |
+|----------|---------------|--------|
+| **Repo artifact** | Checked into version control, reviewable, version-tracked | All items below |
+| **Executable from repo** | Can be validated by running tests or queries locally | KQL queries (copy-paste to App Insights) |
+| **Operationalized** | Deployed, configured, alert-firing, and operator-verified in a live environment | **None — all items require DevOps deployment** |
+| **Documentary** | Describes intended operational posture but has no live proof | Alert rules, dashboards, action groups, Teams workflows |
+
+**What this means for readiness claims:**
+- "KQL queries exist" = repo artifact, not operational monitoring
+- "alerts.json defines 5 rules" = documentary specification, not deployed alerting
+- "README has a setup checklist" = deployment guidance, not deployment proof
+- Only after the DevOps Setup Checklist items below are checked can operationalized status be claimed
+
 ## KQL Query Library
 
 All queries target the Application Insights `traces` table with `_telemetryType` JSON parsing. The Functions host logger routes telemetry through `console.log` / `context.log` → `traces` table (not native `customEvents`). If the Application Insights SDK is adopted (C3 §4.1), queries would migrate to native `customEvents`/`customMetrics` tables.

@@ -75,6 +75,14 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
     - **Deliverables:**
       - Audit report progress note (P4-09): CORS posture table, MI permission matrix (6 services), downstream dependency classification (5 canonical, 1 optional, 3 excluded/deferred), transitional surface labeling, least-privilege follow-up items
 
+11. `Prompt-10_Phase-4-Observability-Operationalization-and-Readiness-Proof.md` **[COMPLETE]**
+    - Audit all observability/readiness artifacts and classify into evidence categories
+    - Add evidence classification guardrail to observability README
+    - Document what is repo-proven vs deployment-dependent vs documentary-only
+    - **Deliverables:**
+      - Evidence classification section in `backend/functions/observability/README.md` (P4-10)
+      - Audit report progress note (P4-10): 15-artifact evidence table, 6 repo-proven items, 6 deployment-dependent items, readiness guardrail description
+
 ## Recommended use
 
 - Run the prompts **in order**.
