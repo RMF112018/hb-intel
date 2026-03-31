@@ -72,6 +72,14 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
      - Audit report progress note (P5-08): root cause, fix table, retained proof set (19 files), verification results
      - Version bump: `@hbc/spfx-project-setup` 0.2.24 → 0.2.25
 
+10. `Prompt-09_Phase-5-Smoke-Tests-Deployment-Runbook-and-Operational-Proof-Categorization.md` **[COMPLETE]**
+    - Classify all smoke/deployment evidence into repo-proven / env-gated / documentary categories
+    - Add evidence classification guardrail to `post-deploy-smoke.test.ts`
+    - Document what repo can and cannot prove about deployment readiness
+    - **Deliverables:**
+      - Evidence classification annotation in `post-deploy-smoke.test.ts` (P5-09)
+      - Audit report progress note (P5-09): 8-artifact evidence table, repo vs env-gated categorization, guardrail description
+
 ## Recommended use
 
 - Run the prompts **in order**.

@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P5-08 frontend test baseline fix)
+> **Last updated:** 2026-03-31 (P5-09 smoke/deployment proof categorization)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -1414,6 +1414,50 @@ The retained Project Setup frontend release surface now has a truthful, stable t
 - Infrastructure: `apps/estimating/src/test/renderWithProviders.tsx` (added `getApiToken` option)
 - Version bump: `apps/estimating/package.json` (0.2.24 → 0.2.25)
 
+### Phase 5 Smoke Tests, Deployment Runbook, and Operational Proof Categorization (2026-03-31, Prompt P5-09)
+
+**Smoke/deployment evidence classification:**
+
+| Artifact | Category | Repo Status | Operationalized? |
+|---|---|---|---|
+| `post-deploy-smoke.test.ts` (7 tests) | Env-gated post-deploy verification | Present, version-controlled | No — requires live instance with `SMOKE_TEST_BASE_URL` |
+| Health probe smoke (3 tests) | Env-gated, unauthenticated | Present | No — requires deployed Function App |
+| Auth rejection smoke (2 tests) | Env-gated, unauthenticated | Present | No — requires deployed Function App |
+| Authenticated smoke (2 tests) | Env-gated, requires `AUTH_TOKEN` | Present | No — requires deployed Function App + valid token |
+| `Phase-5_Deployment-Runbook.md` | Documentary procedure | Present | No — not executed against any environment |
+| `Phase-5_Release-Gates-and-Diagnostics.md` | Pre/deploy/post-deploy gate definitions | Present | Pre-deploy gates executable from repo; deploy/post-deploy gates env-gated |
+| `release-gates.test.ts` (13 tests) | **Repo-proven** pre-deploy gate | Present, passing | **Yes — runs in CI** |
+| `Phase-5_Production-Readiness-Signoff.md` | Signoff artifact | Present, reconciled | No — unsigned, no leadership/IT/support approval |
+
+**What repo can prove:**
+1. Smoke test definitions are correct and executable (7 tests, skipped locally)
+2. Pre-deploy release gates pass (13 tests in `release-gates.test.ts`)
+3. Deployment runbook procedure is documented and version-controlled
+4. Release gate definitions are clear and testable
+
+**What repo cannot prove:**
+1. Any live staging or production deployment has succeeded
+2. Any smoke test has passed against a deployed environment
+3. The deployment runbook has been followed successfully
+4. Post-deploy gates have been validated against a live instance
+5. Leadership/IT/support have completed signoff
+
+**Guardrails added:**
+- Added Evidence Classification block to `post-deploy-smoke.test.ts` (P5-09) stating explicitly that file existence is NOT proof of successful smoke execution
+- Classification follows the same pattern established in `backend/functions/observability/README.md` (P4-10)
+
+**Closure statement:**
+
+Project Setup smoke tests and deployment artifacts are now categorized truthfully across repo-present checks, environment-gated execution, and operational post-deploy verification. The smoke test file explicitly states that its existence is not proof of live validation. Pre-deploy release gates are the only fully repo-proven Phase 5 verification — all other deployment proof requires environment execution and recorded evidence.
+
+**Evidence:**
+
+- Smoke test with evidence classification: `backend/functions/src/test/smoke/post-deploy-smoke.test.ts` (P5-09 annotation)
+- Pre-deploy release gates: `backend/functions/src/test/release-gates.test.ts` (13 tests, repo-proven)
+- Deployment runbook: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md` (documentary)
+- Release gates doc: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md` (mixed)
+- Signoff (reconciled): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md` (documentary)
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1739,7 +1783,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P5-08 frontend test baseline fix)
+> **Last updated:** 2026-03-31 (P5-09 smoke/deployment proof categorization)
 
 ### Phase-by-phase status
 

@@ -4,6 +4,15 @@
  * These tests run against a deployed staging/production instance.
  * They are env-gated: skip locally when SMOKE_TEST_BASE_URL is absent.
  *
+ * Evidence Classification (P5-09):
+ *   - Category: Environment-gated, post-deploy verification
+ *   - Repo status: Present and version-controlled
+ *   - Operationalized: NO — requires live staging/production instance
+ *   - What this proves: Test definitions are correct and ready to execute
+ *   - What this does NOT prove: That a live deployment has been validated
+ *   - The existence of this file is NOT proof that smoke checks have passed
+ *     against any environment. Proof requires a recorded execution log.
+ *
  * Usage:
  *   # Local (skips)
  *   pnpm --filter @hbc/functions test:contract-smoke
