@@ -30,7 +30,7 @@ import {
   HbcAuditTrailPanel,
   useToast,
 } from '@hbc/ui-kit';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
+import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 import { getStateBadgeVariant, getStateContextText } from '../utils/stateDisplayHelpers.js';
 import { getAdminAppUrl } from '../utils/crossAppUrls.js';
 
@@ -52,10 +52,12 @@ export function ProjectReviewDetailPage(): ReactNode {
   const { toast } = useToast();
   const { requests, setRequests } = useProvisioningStore();
 
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  // P3-09: Factory-based token provider
+  const sessionRef = useCallback(() => session, [session]);
+  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
   const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', async () => authToken),
-    [authToken],
+    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', getToken),
+    [getToken],
   );
 
   // ── Local UI state ──────────────────────────────────────────────────────

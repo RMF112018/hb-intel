@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useCurrentSession } from '@hbc/auth';
 import { createProvisioningApiClient } from '@hbc/provisioning';
 import {
@@ -6,7 +6,7 @@ import {
   InfrastructureProbeApi,
   PROBE_SCHEDULER_DEFAULT_MS,
 } from '@hbc/features-admin';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
+import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 
 /**
  * G6-T06: Initializes the probe polling service when the admin session is available.
@@ -21,7 +21,9 @@ export function useProbePolling(): void {
   const session = useCurrentSession();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  // P3-09: Factory-based token provider
+  const sessionRef = useCallback(() => session, [session]);
+  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
   const functionAppUrl =
     (import.meta.env as Record<string, string | undefined>).VITE_FUNCTION_APP_URL ?? '';
 
@@ -30,7 +32,7 @@ export function useProbePolling(): void {
 
     const scheduler = createDefaultProbeScheduler({
       baseUrl: functionAppUrl,
-      getToken: async () => authToken,
+      getToken,
     });
     const api = new InfrastructureProbeApi();
 
@@ -59,5 +61,5 @@ export function useProbePolling(): void {
         intervalRef.current = null;
       }
     };
-  }, [session, authToken, functionAppUrl]);
+  }, [session, getToken, functionAppUrl]);
 }

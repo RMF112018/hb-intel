@@ -32,7 +32,7 @@ import {
 } from '@hbc/ui-kit';
 import type { ColumnDef, LayoutTab } from '@hbc/ui-kit';
 import { RUNBOOK_LINKS } from '../constants/runbookLinks.js';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
+import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 import {
   FAILURE_CLASS_LABELS,
   FAILURE_CLASS_DESCRIPTIONS,
@@ -124,11 +124,13 @@ export function ProvisioningOversightPage(): ReactNode {
   const [overrideTarget, setOverrideTarget] = useState<string>('');
 
 
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  // P3-09: Factory-based token provider — extracts fresh token on each call
+  const sessionRef = useCallback(() => session, [session]);
+  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
   const functionAppUrl = (import.meta.env as Record<string, string | undefined>).VITE_FUNCTION_APP_URL ?? '';
   const client = useMemo(
-    () => createProvisioningApiClient(functionAppUrl, async () => authToken),
-    [authToken, functionAppUrl],
+    () => createProvisioningApiClient(functionAppUrl, getToken),
+    [getToken, functionAppUrl],
   );
 
   // ── Data loading ────────────────────────────────────────────────────────

@@ -22,7 +22,7 @@ import {
   HbcTabs,
 } from '@hbc/ui-kit';
 import type { LayoutTab, ColumnDef } from '@hbc/ui-kit';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
+import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 import { getStateBadgeVariant } from '../utils/stateDisplayHelpers.js';
 
 type FilterTabId = 'pending' | 'clarification' | 'external' | 'failed';
@@ -70,10 +70,12 @@ export function ProjectReviewQueuePage(): ReactNode {
   const { requests, setRequests } = useProvisioningStore();
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  // P3-09: Factory-based token provider — extracts fresh token on each call
+  const sessionRef = useCallback(() => session, [session]);
+  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
   const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', async () => authToken),
-    [authToken],
+    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', getToken),
+    [getToken],
   );
 
   useEffect(() => {

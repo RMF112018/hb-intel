@@ -19,7 +19,7 @@ import {
   HbcTypography,
   WorkspacePageShell,
 } from '@hbc/ui-kit';
-import { resolveSessionToken } from '../utils/resolveSessionToken.js';
+import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 import { RUNBOOK_LINKS } from '../constants/runbookLinks.js';
 import {
   computeStateCounts,
@@ -130,12 +130,14 @@ export function OperationalDashboardPage(): ReactNode {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const authToken = useMemo(() => resolveSessionToken(session), [session]);
+  // P3-09: Factory-based token provider
+  const sessionRef = useCallback(() => session, [session]);
+  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
   const functionAppUrl =
     (import.meta.env as Record<string, string | undefined>).VITE_FUNCTION_APP_URL ?? '';
   const client = useMemo(
-    () => createProvisioningApiClient(functionAppUrl, async () => authToken),
-    [authToken, functionAppUrl],
+    () => createProvisioningApiClient(functionAppUrl, getToken),
+    [getToken, functionAppUrl],
   );
 
   const loadData = useCallback(async (): Promise<void> => {

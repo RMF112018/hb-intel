@@ -1,16 +1,38 @@
 import type { useCurrentSession } from '@hbc/auth';
 
 /**
- * W0-G4-T04: Extracts a Bearer token from the current auth session.
- * Falls back to providerIdentityRef or a mock token for dev-harness use.
+ * P3-09: Session-based token factory for the Admin PWA surface.
+ *
+ * Creates a token factory that extracts the access token from the current
+ * auth session on each call. This replaces the deprecated single-capture
+ * `resolveSessionToken()` pattern and supports token refresh across
+ * long-lived sessions.
+ *
+ * @param getSession - Accessor returning the current session snapshot
  */
-export function resolveSessionToken(session: ReturnType<typeof useCurrentSession>): string {
-  const payload = session?.rawContext?.payload;
-  if (payload && typeof payload === 'object') {
-    const rawToken =
-      (payload as Record<string, unknown>).accessToken ??
-      (payload as Record<string, unknown>).token;
-    if (typeof rawToken === 'string' && rawToken.trim().length > 0) return rawToken;
-  }
-  return session?.providerIdentityRef ?? 'mock-token';
+export function createSessionTokenFactory(
+  getSession: () => ReturnType<typeof useCurrentSession>,
+): () => Promise<string> {
+  return async (): Promise<string> => {
+    const session = getSession();
+    const payload = session?.rawContext?.payload;
+    if (payload && typeof payload === 'object') {
+      const rawToken =
+        (payload as Record<string, unknown>).accessToken ??
+        (payload as Record<string, unknown>).token;
+      if (typeof rawToken === 'string' && rawToken.trim().length > 0) {
+        return rawToken;
+      }
+    }
+
+    const ref = session?.providerIdentityRef;
+    if (ref && ref.trim().length > 0) {
+      return ref;
+    }
+
+    throw new Error(
+      '[HB-Intel] No valid auth token available. ' +
+      'The session does not contain an access token or provider identity reference.',
+    );
+  };
 }
