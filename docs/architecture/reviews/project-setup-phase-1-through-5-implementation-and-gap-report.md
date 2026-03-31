@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P4-10 observability operationalization and readiness proof)
+> **Last updated:** 2026-03-31 (P4-11 documentation reconciliation and audit closure)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -803,21 +803,21 @@ Harden the infrastructure posture: startup scoping, configuration validation, ma
 - Version-controlled observability artifacts exist in `backend/functions/observability/README.md`, `backend/functions/observability/alerts.json`, and `backend/functions/observability/kql/*.kql`.
 - Infrastructure and release-gate tests exist and currently pass, including `backend/functions/src/test/release-gates.test.ts`, `backend/functions/src/test/infra-readiness.test.ts`, and health tests under `backend/functions/src/functions/health/__tests__/health.test.ts`.
 
-**Partially implemented items**
+**Partially implemented items** *(original audit findings — see P4-07 through P4-11 reconciliation below)*
 
-- Startup scoping is materially implemented for the dedicated Project Setup host in `backend/functions/src/hosts/project-setup/**`, but repo truth does not prove that host is the live deployment target. The monolithic host at `backend/functions/src/index.ts` still exists and still registers a broad multi-domain function app.
-- Observability artifacts are real in repo, but deployment and operationalization are incomplete. `backend/functions/observability/README.md` still shows the DevOps setup checklist unchecked.
-- CORS posture is split by host. The dedicated Project Setup host is tenant-specific in `backend/functions/src/hosts/project-setup/host.json`, while the monolithic `backend/functions/host.json` remains broader. That is a deployment-truth ambiguity, not proof that the scoped host is absent.
+- ~~Startup scoping is materially implemented for the dedicated Project Setup host in `backend/functions/src/hosts/project-setup/**`, but repo truth does not prove that host is the live deployment target.~~ **RESOLVED (P4-07, P4-08).** Architecture frozen. PS host exists with 63 regression tests. Monolithic host explicitly labeled transitional per ADR-0124. Deployment cutover remains environment-gated.
+- ~~Observability artifacts are real in repo, but deployment and operationalization are incomplete.~~ **CLASSIFIED (P4-10).** Evidence classification guardrail added to `backend/functions/observability/README.md`. 3 of 15 artifacts genuinely operationalized (health endpoint, telemetry wrapper, logger). Remaining 12 require DevOps deployment. DevOps setup checklist still unchecked — this is honest, not a gap.
+- ~~CORS posture is split by host.~~ **RESOLVED (P4-07, P4-09).** Split is intentional per ADR-0124. PS host: single tenant origin, no wildcards, test-enforced. Monolithic host: broader (transitional). No ambiguity remains.
 
-**Missing items**
+**Missing items** *(original audit findings — see reconciliation below)*
 
-- No repo evidence proves that the recommended alert rules, dashboards, or Teams delivery workflows have been deployed; the repo only contains the artifacts and instructions.
-- No repo evidence proves live infrastructure rehearsal or live staging validation.
+- ~~No repo evidence proves that the recommended alert rules, dashboards, or Teams delivery workflows have been deployed.~~ **CLASSIFIED (P4-10).** These are documentary specifications requiring DevOps deployment. The observability README now explicitly categorizes them as not operationalized. This is an environment-gated item, not a repo gap.
+- No repo evidence proves live infrastructure rehearsal or live staging validation. **Still accurate.** This remains an environment-gated prerequisite.
 
-**Divergence from plan**
+**Divergence from plan** *(original audit findings — see reconciliation below)*
 
-- `phase-4/Phase-4_Handoff.md` says the package has a “production-safe infrastructure posture” and that startup/runtime validation is scoped to actual deployment. Repo truth does not support that as strongly because the backend host still co-deploys unrelated domains.
-- Phase 4 documentation frames CORS as tenant-aligned, but current `host.json` is broader.
+- ~~`phase-4/Phase-4_Handoff.md` says the package has a “production-safe infrastructure posture.” Repo truth does not support that as strongly because the backend host still co-deploys unrelated domains.~~ **RECONCILED (P4-07).** Handoff annotated with reconciliation note distinguishing repo-proven infrastructure from environment-gated items. The dedicated PS host is now the canonical deployment target; the monolithic host is transitional.
+- ~~Phase 4 documentation frames CORS as tenant-aligned, but current `host.json` is broader.~~ **RESOLVED (P4-09).** The PS host `host.json` is tenant-aligned (single origin). The monolithic `host.json` is broader but transitional. Both are now explicitly classified.
 
 **Current status assessment**
 
@@ -1144,6 +1144,60 @@ Project Setup observability and infrastructure readiness evidence are now catego
 - Health tests: `backend/functions/src/functions/health/__tests__/health.test.ts`
 - Operational readiness doc: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`
 
+### Phase 4 Documentation Reconciliation and Audit Closure (2026-03-31, Prompt P4-11)
+
+**Reconciliation scope:**
+
+Re-audited the Phase 4 section, cross-phase findings, gap analysis, deferred implementation inventory, remediation list, and final status table after P4-07 through P4-10 completed. Updated stale language where findings were resolved, downgraded, or explicitly classified.
+
+**Documents reconciled:**
+
+| Section | Change |
+|---|---|
+| Phase 4 "Partially implemented items" | 3 items annotated: startup scoping resolved (P4-07/P4-08), observability classified (P4-10), CORS resolved (P4-07/P4-09) |
+| Phase 4 "Missing items" | Alert/dashboard item classified (P4-10). Live validation still accurate. |
+| Phase 4 "Divergence from plan" | Handoff overstatement reconciled (P4-07). CORS resolved (P4-09). |
+| Cross-phase findings: Phase 1/Phase 4 coupling | Updated to reflect frozen architecture, canonical/transitional classification |
+| Recurring patterns | Scope isolation and auth convergence marked closed. Observability marked classified. |
+| Gap analysis: non-blocking gaps | Observability and deployment-target ambiguity marked resolved |
+| Gap analysis: documentation debt | Phases 1-4 handoffs reconciled. Phase 5 still pending. |
+| Deferred work executive summary | Blocker count reduced from 5 to 4. CORS/MI/permissions downgraded from blocker to environment-gated prerequisite. |
+| Phase 4 CORS/MI deferred item | P4-11 annotation added: repo-owned posture complete, environment-gated remainder. |
+| Final status table | Phase 4 summary updated to reflect P4-07 through P4-11 |
+| Overall recommendation | Updated to reflect Phase 4 closure progress |
+
+**What is now fully closed for Phase 4 in repo-owned terms:**
+
+1. Infrastructure architecture (P4-07): Dedicated PS host frozen with canonical/transitional classification
+2. Deployment-scoped config validation (P4-08): Tiered validation with no over-broad boot blockers
+3. CORS/MI/downstream permissions (P4-09): Tenant-specific CORS, pure MI, classified dependencies
+4. Observability evidence (P4-10): 15 artifacts categorized, readiness guardrail added
+5. Documentation reconciliation (P4-11): Stale audit language corrected, cross-phase findings updated
+
+**What remains outside Phase 4 repo closure:**
+
+1. **Environment-gated:** MI role assignments, CORS portal verification, SharePoint admin consent, Graph permission grants, live deployment cutover to PS host
+2. **Operationalization:** DevOps deployment of alert rules, dashboards, action groups, Teams workflows (12 artifacts)
+3. **External validation:** Live infrastructure rehearsal, staging smoke run
+
+These are not repo gaps. They are operational execution items documented in the pre-deployment checklist (`Phase-4_Operational-Readiness-and-Handoff.md`).
+
+**Closure statement:**
+
+Phase 4 documentation is reconciled with current repo truth (P4-07 through P4-11). The retained Project Setup infrastructure posture is explicit across deployment-scoped validation, domain-scoped CORS/identity assumptions, and truthful readiness evidence. Observability/readiness claims are categorized across repo proof, deployment prerequisites, and post-deploy operational verification. Phase 4 no longer depends on implicit broader shared-host assumptions to describe retained Project Setup readiness. Unsupported "production-safe" language in the Phase 4 handoff has been annotated with reconciliation context. Phase 4 is **substantially closed** with all repo-owned work complete and environment-gated items explicitly documented.
+
+**Evidence:**
+
+- Phase 4 assessment reconciliation: this section of the audit report (lines 791-835)
+- Cross-phase findings updated: section 4 of the audit report
+- Gap analysis updated: section 6 of the audit report
+- Deferred implementation inventory: section 7B (Phase 4 items annotated)
+- Remediation list: section 8 (items #5 and #6 annotated)
+- Final status table: section 9 (Phase 4 row updated)
+- Phase 4 handoff reconciliation note: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Handoff.md` (P4-07)
+- Observability evidence classification: `backend/functions/observability/README.md` (P4-10)
+- All P4-07 through P4-10 progress notes in this section
+
 ### Phase 5
 
 **Intended objective**
@@ -1194,19 +1248,19 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 
 ### Dependencies spanning multiple phases
 
-- Phase 1 isolation and Phase 4 startup scoping are directly coupled. The backend boundary freeze (ADR-0124, 2026-03-31) did produce a dedicated Project Setup host under `backend/functions/src/hosts/project-setup/**`. The remaining cross-phase gap is not host creation; it is deployment truth. Repo evidence does not show that the scoped host, rather than the preserved monolithic host, is the artifact actually rehearsed or released.
+- Phase 1 isolation and Phase 4 startup scoping are directly coupled. The backend boundary freeze (ADR-0124, 2026-03-31) produced a dedicated Project Setup host under `backend/functions/src/hosts/project-setup/**`. **P4-07 through P4-11 reconciliation:** The dedicated host is now the canonical deployment target with frozen architecture, deployment-scoped validation, tenant-specific CORS, and pure MI. The monolithic host is explicitly transitional. The remaining cross-phase gap is deployment cutover truth — repo evidence does not show which host is actually exercised in live deployment.
 - Phase 2 no longer gates Phase 5 through missing repo-owned code or tests. The remaining cross-phase dependency is external validation: repo truth does not independently prove that the live SharePoint `Projects` list currently matches the repo-owned 43-field contract.
 - Phase 3 production-mode safety depends on Phase 4 deployment/configuration truth. **Code-level Phase 3 findings are closed (P3-07 through P3-11).** Actual production readiness still depends on external environment configuration (API_AUDIENCE, SharePoint admin consent, MI grants) — these are deployment prerequisites, not code gaps.
 
 ### Recurring patterns of incompletion or drift
 
-- Several phase handoffs declare `COMPLETE` even where the live repo still contains explicit transitional markers, accepted risks, or architectural incompletion.
+- Several phase handoffs declare `COMPLETE` even where the live repo still contains explicit transitional markers, accepted risks, or architectural incompletion. *(P4-11: Phase 4 handoff now annotated with reconciliation note. Phase 5 handoffs remain unreconciled.)*
 - A recurring pattern is “correct seam introduced, but not finished end-to-end.” This is true for:
-  - scope isolation
-  - field mapping
-  - auth convergence
-  - observability operationalization
-  - release evidence
+  - ~~scope isolation~~ **CLOSED (P1-07 through P1-10)**
+  - field mapping *(Phase 2: repo-owned closed, external list unproven)*
+  - ~~auth convergence~~ **CLOSED (P3-07 through P3-11)**
+  - ~~observability operationalization~~ **CLASSIFIED (P4-10)** — now explicitly categorized, no longer vaguely incomplete
+  - release evidence *(Phase 5: still incomplete)*
 - Mock-backed tests and local review pathways improve developer confidence but can overstate production readiness when the real production path remains incomplete.
 
 ### Places where later work invalidated earlier assumptions
@@ -1253,17 +1307,17 @@ The following items are genuinely implemented in the current repo:
 
 ### Important but non-blocking gaps
 
-- Deprecated or transitional auth code still exists in `apps/estimating/src/utils/resolveSessionToken.ts`.
-- Cross-surface RBAC/auth convergence remains incomplete across requester, controller, and admin surfaces.
-- Proxy integration remains a stub in `backend/functions/src/functions/proxy/proxy-handler.ts`.
-- Observability artifacts exist, but dashboards/alerts are not proven deployed; `backend/functions/observability/README.md` still shows setup tasks unchecked.
-- Deployment-target posture remains partly ambiguous because the dedicated Project Setup host is tenant-scoped, while the preserved monolithic host keeps broader runtime defaults.
+- Deprecated or transitional auth code still exists in `apps/estimating/src/utils/resolveSessionToken.ts`. *(P3-09: narrowed to dev-harness-only; not used by any retained surface.)*
+- Cross-surface RBAC/auth convergence remains incomplete across requester, controller, and admin surfaces. *(P3-09: future follow-on, not a blocker.)*
+- Proxy integration remains a stub in `backend/functions/src/functions/proxy/proxy-handler.ts`. *(P3-10: explicitly excluded from PS release scope.)*
+- ~~Observability artifacts exist, but dashboards/alerts are not proven deployed.~~ **CLASSIFIED (P4-10).** Evidence classification guardrail added. 3 of 15 artifacts operationalized from repo (health, telemetry, logger). DevOps deployment required for remaining 12.
+- ~~Deployment-target posture remains partly ambiguous.~~ **RESOLVED (P4-07, P4-09).** PS host is canonical (ADR-0124). Monolithic host is explicitly transitional. No ambiguity remains in repo classification.
 
 ### Cleanup / documentation debt
 
-- Phase handoff docs overstate completion and production readiness relative to current repo truth.
-- Some phase docs still speak as if external SharePoint schema proof lives inside the repo, but the repo currently contains code comments and handoff notes rather than a checked-in schema export artifact.
-- Release/readiness docs should be reconciled with current repo state before they are used as signoff artifacts.
+- ~~Phase handoff docs overstate completion and production readiness relative to current repo truth.~~ **RECONCILED for Phases 1-4.** Phase 1 handoff annotated (P1-10). Phase 3 handoff annotated (P3-11). Phase 4 handoff annotated (P4-07). Phase 5 handoff docs remain unreconciled.
+- Some phase docs still speak as if external SharePoint schema proof lives inside the repo, but the repo currently contains code comments and handoff notes rather than a checked-in schema export artifact. *(Phase 2 status unchanged.)*
+- ~~Release/readiness docs should be reconciled with current repo state before they are used as signoff artifacts.~~ **PARTIALLY ADDRESSED.** Phase 4 docs reconciled (P4-07 through P4-11). Phase 5 docs still require reconciliation.
 
 ## Deferred Implementations Across Phases 1–5
 
@@ -1271,9 +1325,11 @@ The following items are genuinely implemented in the current repo:
 
 Fifteen deferred or not-clearly-complete implementation items remain across all five phase families. Every phase still contains some deferred work when the updated phase docs are reconciled against live repo truth, even though Phase 1’s core scope boundary is materially closed and Phase 2’s repo-owned code/test findings are materially repaired.
 
-Five deferred items remain launch blockers for true production readiness: unresolved production auth prerequisites, unresolved deployment-scoped CORS / managed-identity / downstream-permission proof, the failing retained-surface frontend test baseline, the absence of repo-evidenced live smoke / deployment execution, and the lack of completed real signoff evidence. The remaining ten items are non-blocking follow-up or hardening debt, plus one external validation item for the live SharePoint list.
+**P4-11 reconciliation update:** Phase 4 infrastructure findings are now substantially closed (P4-07 through P4-10). The deployment-scoped CORS / MI / downstream-permission item is no longer ambiguous — the repo-owned model is frozen and classified, though environment-level application remains external. Observability operationalization is explicitly categorized rather than vaguely incomplete. The effective launch blocker count from Phase 4 is reduced: what remains is environment-gated deployment proof, not repo-level infrastructure gaps.
 
-The strongest cross-phase dependencies are: external live-list validation for the Phase 2 contract, Phase 3 and Phase 4 environment prerequisites gating production-mode claims, and Phase 4 operationalization gaps weakening Phase 5 signoff realism. The updated phase docs repeatedly use closure language that is only safe if those later dependencies were actually closed in repo truth; in multiple cases they were not.
+Four deferred items remain launch blockers for true production readiness: unresolved production auth/deployment prerequisites (environment-gated, Phases 3-4), the failing retained-surface frontend test baseline (Phase 5), the absence of repo-evidenced live smoke / deployment execution (Phase 5), and the lack of completed real signoff evidence (Phase 5). The remaining items are non-blocking follow-up, hardening debt, or external validation items.
+
+The strongest cross-phase dependencies are: external live-list validation for the Phase 2 contract, Phase 3 and Phase 4 environment prerequisites gating production-mode claims, and Phase 5 documentation that has not yet been reconciled against the improved Phase 4 posture.
 
 ### B. Detailed deferred-implementation inventory
 
@@ -1397,6 +1453,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Cross-phase impact:** Directly gates Phase 5 release and support claims because those claims depend on live environment posture, not repo configuration alone.
   **Recommended next-step direction:** Record environment-level proof that the Project Setup host settings and grants match the documented runtime contract.
   **P4-07 update:** The repo-owned infrastructure model is now frozen and explicitly classified as canonical (PS host) vs transitional (monolithic host). The environment-gated nature of this item is documented rather than ambiguous.
+  **P4-11 reconciliation:** This item is no longer a repo-level infrastructure gap. The CORS, MI, and downstream permission model is frozen in code and tests (P4-09). What remains is strictly environment-gated: applying MI role assignments, verifying CORS in Azure portal, and obtaining SharePoint admin consent. Downgraded from "launch blocker" to "environment-gated prerequisite" — the repo-owned posture is complete.
 
 #### Phase 5 deferred implementations
 
@@ -1510,7 +1567,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P4-10 observability operationalization and readiness proof)
+> **Last updated:** 2026-03-31 (P4-11 documentation reconciliation and audit closure)
 
 ### Phase-by-phase status
 
@@ -1519,7 +1576,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 | Phase 1 | **Closed** | Frontend isolation + backend domain host + 63 regression tests. All AC-1-AC-10 satisfied. ADR-0124 accepted. |
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
 | Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
-| Phase 4 | **Substantially Closed** | Architecture frozen (P4-07). Dedicated PS host with scoped validation, tenant CORS, pure MI. Observability operationalization and environment-gated deployment proof deferred. |
+| Phase 4 | **Substantially Closed** | Architecture frozen (P4-07), validation scoped (P4-08), CORS/MI/permissions explicit (P4-09), observability classified (P4-10), docs reconciled (P4-11). Environment-gated deployment proof deferred. |
 | Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
 
 ### Overall recommendation
@@ -1532,7 +1589,7 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and directionally sound. Phase 1 scope control is honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are materially closed, but end-to-end live-list proof remains external. Remaining phases still have real launch blockers in validation, deployment proof, and test stability.
+> The Project Setup / Estimating SPFx implementation is substantially built and directionally sound. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are materially closed, but end-to-end live-list proof remains external. Phase 4’s infrastructure architecture is frozen with explicit canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Remaining launch blockers are concentrated in Phase 5: frontend test stability, live deployment proof, and environment-gated prerequisite application.
 
 ## 10. Explicit Unresolved Questions
 

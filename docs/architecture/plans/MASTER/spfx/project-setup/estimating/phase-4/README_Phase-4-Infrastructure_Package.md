@@ -83,6 +83,13 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
       - Evidence classification section in `backend/functions/observability/README.md` (P4-10)
       - Audit report progress note (P4-10): 15-artifact evidence table, 6 repo-proven items, 6 deployment-dependent items, readiness guardrail description
 
+12. `Prompt-11_Phase-4-Documentation-Reconciliation-and-Audit-Closure.md` **[COMPLETE]**
+    - Reconcile Phase 4 assessment, cross-phase findings, gap analysis, and deferred inventory with P4-07–P4-10 results
+    - Annotate stale "partially implemented" and "missing items" findings with resolution status
+    - Downgrade CORS/MI/permissions from launch blocker to environment-gated prerequisite
+    - **Deliverables:**
+      - Audit report reconciliation (P4-11): 10 sections updated, Phase 4 substantially closed, blocker count reduced from 5 to 4
+
 ## Recommended use
 
 - Run the prompts **in order**.
