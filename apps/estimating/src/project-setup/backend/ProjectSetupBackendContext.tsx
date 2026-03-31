@@ -1,3 +1,37 @@
+/**
+ * P3-07: Project Setup Auth Architecture Freeze
+ *
+ * Canonical auth model for the Project Setup domain:
+ *
+ * 1. TOKEN ACQUISITION (frontend → backend):
+ *    - SPFx production: `createSpfxApiTokenProvider()` in mount.tsx acquires
+ *      audience-scoped tokens via SPFx `aadTokenProviderFactory`. The audience
+ *      is `API_AUDIENCE` (app registration client ID). Tokens refresh automatically.
+ *    - PWA/dev fallback: `createSessionTokenFactory()` extracts session token
+ *      from MSAL. Single-capture — safe for short sessions, not for production.
+ *    - ui-review mode: `createDevTokenFactory()` returns a placeholder. No real
+ *      backend calls are made; local mock client handles all requests.
+ *
+ * 2. TOKEN VALIDATION (backend):
+ *    - `validateToken()` in middleware/validateToken.ts verifies JWT against
+ *      Azure Entra ID JWKS. Accepts v1 and v2 issuers. Requires explicit
+ *      `API_AUDIENCE` env var in production (no implicit fallback).
+ *    - `withAuth()` in middleware/auth.ts wraps all HTTP routes (except health
+ *      and timer triggers, documented in AUTH_EXCEPTIONS).
+ *
+ * 3. MODE GATING:
+ *    - `getBackendMode()` in runtimeConfig.ts resolves production vs ui-review.
+ *    - `checkProductionReadiness()` verifies Function App URL + token provider.
+ *    - This context falls back to ui-review if production prerequisites fail.
+ *
+ * 4. TRANSITIONAL SURFACES (out of Project Setup domain scope):
+ *    - Accounting and Admin apps still use deprecated `resolveSessionToken()`
+ *      for PWA-based auth. These are separate app surfaces with their own
+ *      auth lifecycle and are not gated by Project Setup readiness.
+ *
+ * @see ADR-0053 (auth dual-mode foundation)
+ * @see Phase-3_Auth_Action-Plan.md
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useCurrentSession } from '@hbc/auth';

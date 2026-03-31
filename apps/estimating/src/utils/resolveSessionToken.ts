@@ -65,12 +65,17 @@ export function createDevTokenFactory(): () => Promise<string> {
 }
 
 /**
- * @deprecated Use `createSpfxTokenFactory`, `createSessionTokenFactory`, or
- * `createDevTokenFactory` instead. This function captures the token once at
+ * @deprecated P3-07: Use `createSpfxTokenFactory`, `createSessionTokenFactory`,
+ * or `createDevTokenFactory` instead. This function captures the token once at
  * call time and never refreshes it — unsafe for production use.
  *
- * Retained temporarily for non-production backward compatibility during
- * Phase 3. Will be removed after Prompt 03 completes validator alignment.
+ * Still consumed by:
+ * - `apps/accounting/src/pages/ProjectReviewQueuePage.tsx` (PWA surface)
+ * - `apps/admin/src/pages/ProvisioningOversightPage.tsx` (PWA surface)
+ *
+ * These are non-SPFx PWA surfaces outside the Project Setup domain boundary.
+ * Migrating them to factory-based token providers is a cross-surface auth
+ * convergence task, not a Project Setup Phase 3 deliverable.
  */
 export function resolveSessionToken(session: ReturnType<typeof useCurrentSession>): string {
   const payload = session?.rawContext?.payload;

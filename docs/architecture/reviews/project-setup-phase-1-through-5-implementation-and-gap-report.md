@@ -539,7 +539,50 @@ Implement a production-safe auth model for the Project Setup package: explicit p
 
 **Current status assessment**
 
-**Implemented with important residual gaps.** Stronger than Phase 1 and Phase 2, but not as cleanly complete as the handoff states.
+**Implemented with important residual gaps → Architecture frozen (P3-07, 2026-03-31).** The Project Setup domain auth posture is canonical and production-ready. Residual gaps are scoped to non-Project-Setup surfaces (accounting/admin PWA apps using deprecated token pattern). See Phase 3 revalidation below.
+
+### Phase 3 Auth Architecture Freeze and Revalidation (2026-03-31, Prompt P3-07)
+
+**Re-verification against current repo truth:**
+
+All 10 auth-relevant files were inspected. Results:
+
+| Original Audit Finding | Current Status |
+|------------------------|----------------|
+| Production-vs-ui-review mode exists | **Confirmed** — `getBackendMode()`, `checkProductionReadiness()` |
+| SPFx audience-scoped token acquisition | **Confirmed** — `createSpfxApiTokenProvider()` in mount.tsx |
+| Backend JWT validation and route protection | **Confirmed** — `validateToken()` + `withAuth()` + auth-contract tests |
+| Deprecated `resolveSessionToken()` still exists | **Still accurate** — function retained with updated deprecation annotation |
+| Controller/admin import session-token helpers | **Still accurate** — accounting and admin apps use deprecated single-capture pattern |
+| Cross-surface auth convergence incomplete | **Still accurate** — SPFx path is canonical; PWA surfaces remain transitional |
+| Proxy route is auth-protected stub | **Partially stale** — proxy IS now auth-protected (`withAuth()`); still a functional stub for Graph calls |
+
+**Canonical Project Setup auth posture (frozen):**
+
+1. **Token acquisition:** SPFx production path uses `createSpfxApiTokenProvider()` with `API_AUDIENCE` scoping. Tokens refresh automatically via SPFx `aadTokenProviderFactory`.
+2. **Token validation:** Backend `validateToken()` verifies JWT against Azure Entra ID JWKS. Accepts v1/v2 issuers. Requires explicit `API_AUDIENCE` env var.
+3. **Route protection:** All HTTP routes wrapped with `withAuth()`. Documented exceptions: health (unauthenticated), timer triggers (non-HTTP), notifications (internal delivery).
+4. **Mode gating:** `ProjectSetupBackendContext` checks production readiness (Function App URL + token provider). Falls back to ui-review if prerequisites fail. ui-review uses local mock client.
+
+**Transitional surfaces (out of Project Setup domain scope):**
+
+- `apps/accounting/src/pages/ProjectReviewQueuePage.tsx` — uses `resolveSessionToken()` (PWA surface)
+- `apps/admin/src/pages/ProvisioningOversightPage.tsx` — uses `resolveSessionToken()` (PWA surface)
+
+These are separate app surfaces with their own auth lifecycle. Migrating them to factory-based providers is a cross-surface convergence task, not a Phase 3 Project Setup deliverable.
+
+**Closure statement:**
+
+The Project Setup auth model is now explicitly frozen around a domain-scoped production path (SPFx token provider → backend JWT validation), a bounded ui-review fallback path, and documented transitional surfaces. The architecture/scoping portion of Phase 3 is **closed for Project Setup**. Cross-surface auth convergence for accounting/admin remains a future follow-on.
+
+**Evidence:**
+
+- Auth posture freeze comment: `apps/estimating/src/project-setup/backend/ProjectSetupBackendContext.tsx`
+- Deprecation annotation update: `apps/estimating/src/utils/resolveSessionToken.ts`
+- SPFx token provider: `apps/estimating/src/mount.tsx`
+- Backend JWT validation: `backend/functions/src/middleware/validateToken.ts`
+- Route protection: `backend/functions/src/middleware/auth.ts`
+- Auth contract enforcement: `backend/functions/src/middleware/auth-contract.test.ts`
 
 ### Phase 4
 
@@ -964,7 +1007,7 @@ The strongest cross-phase dependencies are: Phase 2 persistence completeness gat
 |-------|--------|---------|
 | Phase 1 | **Closed** | Frontend isolation + backend domain host + 63 regression tests. All AC-1-AC-10 satisfied. ADR-0124 accepted. |
 | Phase 2 | **Closed** | Schema updated (17 new columns), field contract covers 43 fields, submit handler fixed, tests truthful, legacy rows safe. P2-07 through P2-11. |
-| Phase 3 | Implemented with gaps | Estimating requester auth path is strong; cross-surface convergence incomplete. |
+| Phase 3 | **Architecture frozen** | Project Setup auth model frozen (P3-07). SPFx token path canonical, backend JWT validated, route protection enforced. Cross-surface PWA convergence is future scope. |
 | Phase 4 | Partial to substantial | Real hardening work, but deployment scoping and observability operationalization incomplete. |
 | Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
 
