@@ -482,8 +482,8 @@ Phase 2 test coverage now proves the real production persistence contract rather
 **Evidence:**
 
 - Restructured tests: `backend/functions/src/services/__tests__/sp-field-mapping.test.ts` (9 tests, 3 categories)
-- Mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts` (39 tests, 43 fields)
-- Lifecycle tests: `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` (51 tests)
+- Mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts` (41 tests, 43 fields — updated P6-01)
+- Lifecycle tests: `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` (70 tests — updated P6-01)
 
 ### Phase 2 Legacy Row Compatibility Strategy (2026-03-31, Prompt P2-10)
 
@@ -1480,7 +1480,7 @@ Project Setup smoke tests and deployment artifacts are now categorized truthfull
 
 **What signoff can be supported from repo truth today:**
 
-- **Technical readiness: YES.** Backend 638 tests green, frontend 138 tests green, release gates 13 tests green, lifecycle integration 5 tests green. Type-checks and builds clean.
+- **Technical readiness: YES.** Backend 659 tests green (updated P6-01), frontend 138 tests green, release gates 13 tests green, lifecycle integration 5 tests green. Type-checks and builds clean.
 - **Deployment readiness: NO.** 8 deployment prerequisites (D1–D8) all "Pending." Requires Azure/IT/SharePoint admin action.
 - **Operational readiness: PARTIAL.** Runbook documented, alert artifacts exist but not deployed, on-call mechanism undecided.
 - **Executive signoff: NO.** Signoff form unsigned. No recorded leadership/IT/support approval.
@@ -1579,6 +1579,41 @@ Phase 5 documentation is reconciled with current repo truth (P5-07 through P5-11
 **Closure statement:**
 
 The persistence contract, required-field enforcement, and clarification storage items are closed in repo-owned code and tests. The remaining deployment prerequisite (D0: SP column migration) is environment-gated and documented in the deployment runbook. No code-level persistence or validation blockers remain.
+
+### Phase 6 Backward Compatibility, Migration, and Test Truthfulness Closure (2026-03-31, Prompt P6-02)
+
+**Scope:** Confirm that legacy-row handling, test truthfulness, and regression guards satisfy Prompt-02's acceptance criteria.
+
+**Re-audit findings:**
+
+All three acceptance criteria were already satisfied by Phase 2 remediation (P2-07 through P2-11) and confirmed stable after P6-01:
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| Legacy rows have explicit handling strategy | **Met** | Option A: read-compatible only, no backfill (P2-10). `toDomain()` uses safe defaults for all 17 P2-07 fields. All UI surfaces render undefined fields defensively. |
+| Tests distinguish production-path proof from mock-only proof | **Met** | `sp-field-mapping.test.ts` header and test labels explicitly state "not SP proof" (P2-09). Real mapper tests in `projects-list-mapper.test.ts` prove serialization for all 43 fields. Integration test header says "without a live SharePoint backend." |
+| Review report reflects real compatibility and test posture | **Met** | Backward-compat finding "Closed" (line 358). Mock-vs-real finding "Closed" (line 365). Legacy row strategy documented with surface-by-surface evidence (P2-10). |
+
+**Regression guards confirmed (5 guards):**
+
+1. Field map size ≥43 (`sp-field-mapping.test.ts`)
+2. SELECT_FIELDS size ≥43 (`sp-field-mapping.test.ts`)
+3. Serialization strategy validation (`sp-field-mapping.test.ts`)
+4. No `field_N` in adapter executable code (`projects-list-mapper.test.ts`)
+5. Runtime schema drift detection via `validateSpItem()` (`projects-list-mapper.ts`)
+
+**Post-P6-01 test counts:**
+
+| Suite | Count | Delta from P2 baseline |
+|-------|-------|----------------------|
+| Backend tests total | 659 passed, 3 skipped (51 files) | +145 from Phase 2 baseline (514) |
+| Mapper tests | 41 (was 39, +2 P6-01 overflow tests) | +11 from Phase 2 |
+| Field mapping contract tests | 9 | Unchanged |
+| Request lifecycle tests | 70 (was 51, +19 P6-01 validation tests) | +19 from P5 baseline |
+
+**Closure statement:**
+
+Prompt-02 is closed. No code changes required — the backward-compatibility strategy, test truthfulness restructuring, and regression guards were completed during Phase 2 remediation and remain sound after P6-01's contract and validation changes. The test suite accurately distinguishes real mapper proof (43-field serialization) from mock-only proof (in-memory round-trip), and 5 regression guards prevent silent field loss.
 
 ## 4. Cross-Phase Findings
 
@@ -1913,7 +1948,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
 | Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
 | Phase 4 | **Substantially Closed** | Architecture frozen (P4-07), validation scoped (P4-08), CORS/MI/permissions explicit (P4-09), observability classified (P4-10), docs reconciled (P4-11). Environment-gated deployment proof deferred. |
-| Phase 5 | **Substantially Closed** | Release scope frozen (P5-07), frontend green (P5-08), smoke categorized (P5-09), signoff aligned (P5-10), docs reconciled (P5-11). 776 tests green (638 backend + 138 frontend). Environment-gated deployment and operational signoff remain. |
+| Phase 5 | **Substantially Closed** | Release scope frozen (P5-07), frontend green (P5-08), smoke categorized (P5-09), signoff aligned (P5-10), docs reconciled (P5-11). 797 tests green (659 backend + 138 frontend — updated P6-01). Environment-gated deployment and operational signoff remain. |
 
 ### Overall recommendation
 
@@ -1925,7 +1960,7 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (638 tests, 30 release-specific), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract (P6-01). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff).
 
 ## 10. Explicit Unresolved Questions
 
