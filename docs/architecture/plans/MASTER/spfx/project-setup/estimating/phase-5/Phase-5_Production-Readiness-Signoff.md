@@ -13,11 +13,11 @@ The **HB Intel Estimating / Project Setup SPFx package** has completed five phas
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| Phase 1 | Scope isolation | Complete (frontend 2026-03-30; backend 2026-03-31 via Prompts 07-10, ADR-0124) |
-| Phase 2 | Data contract (SharePoint field mapping) | Partial — persistence contract incomplete per gap report |
-| Phase 3 | Auth model (JWT validation, token acquisition, capability boundaries) | Implemented with residual gaps |
-| Phase 4 | Infrastructure (startup scoping, identity, CORS, connected services) | Partial to substantial |
-| Phase 5 | Release hardening (tests, diagnostics, deployment, signoff) | Partial — backend evidence strong, frontend test baseline incomplete |
+| Phase 1 | Scope isolation | **Closed** (frontend 2026-03-30; backend 2026-03-31 via P1-07–P1-10, ADR-0124) |
+| Phase 2 | Data contract (SharePoint field mapping) | **Substantially Closed** — repo-owned contract closed; external live-list proof remains outside repo |
+| Phase 3 | Auth model (JWT validation, token acquisition, capability boundaries) | **Closed** (P3-07–P3-11). RBAC convergence future follow-on. |
+| Phase 4 | Infrastructure (startup scoping, identity, CORS, connected services) | **Substantially Closed** (P4-07–P4-11). Architecture frozen. Environment-gated deployment proof deferred. |
+| Phase 5 | Release hardening (tests, diagnostics, deployment, signoff) | **Partial** — release scope frozen (P5-07), frontend baseline green (P5-08), smoke/deployment categorized (P5-09). Live deployment proof and executive signoff incomplete. |
 
 > **Reconciliation note (2026-03-31):** The original signoff table (2026-03-30) listed all phases as "Complete." The Phase 1-5 gap report (`docs/architecture/reviews/project-setup-phase-1-through-5-implementation-and-gap-report.md`) found that Phase 1 backend scope was incomplete and Phases 2-5 had material gaps. Phase 1 has since been fully remediated. Phases 2-5 status reflects the gap report's current assessment. The "ready for production deployment" recommendation is not supported by current repo truth for Phases 2-5.
 
@@ -30,6 +30,8 @@ The **HB Intel Estimating / Project Setup SPFx package** has completed five phas
 ## 2. Launch Blockers
 
 ### Code-Level Blockers: NONE
+
+> **P5-10 note:** This claim is now supported by repo truth. All 5 original P5-01 blockers are closed. The 10 frontend test failures (formerly R6) were fixed by P5-08. Remaining blockers are environment-gated (deployment prerequisites) or operational (signoff), not code-level.
 
 All 5 launch blockers identified in P5-01 have been closed:
 
@@ -69,7 +71,7 @@ These require tenant administrator action before production deployment:
 | R3 | Dual RBAC (UPN env vars vs JWT role claims) | Admin in one mechanism may not be admin in other | Both work independently; convergence in Phase 6+ |
 | R4 | Proxy routes return mock data | `/api/proxy/*` returns `{ _mock: true }` | Clearly marked stub; protected by withAuth |
 | R5 | No automated App Insights alert rules | Failures require manual dashboard check | Deploy alerts via Terraform in next infra pass |
-| R6 | 10 pre-existing frontend test failures | From P3-02 context changes; not production behavior | Frontend still builds and type-checks clean; fix in maintenance pass |
+| ~~R6~~ | ~~10 pre-existing frontend test failures~~ | **CLOSED (P5-08, 2026-03-31).** All 10 failures fixed — root cause was test harness gap (mock client injection). 19 files, 138 tests green. | N/A |
 | R7 | No frontend error telemetry to App Insights | Client-side failures invisible to operators | Add in Phase 6+ |
 | R8 | No SLA / latency baseline | Cannot detect performance degradation | Establish after first production traffic |
 
@@ -206,7 +208,27 @@ All production-readiness documentation is located under:
 
 ---
 
-## 9. Signoff
+## 9. Decision-Ready Evidence Summary (P5-10)
+
+> **For leadership/IT/operations:** This section separates what is proven from what is still gated so signoff decisions are based on evidence, not assumptions.
+
+| Readiness Layer | Status | Evidence |
+|---|---|---|
+| **Technical (code/tests)** | **GREEN** | Backend: 638 tests, 0 failures. Frontend: 138 tests, 0 failures (P5-08). Release gates: 13 regression tests. Lifecycle integration: 5 tests. Scope guards: 19 tests (P1-10). |
+| **Deployment prerequisites** | **PENDING** | 8 deployment-time prerequisites (D1–D8) all status "Pending." Requires Azure admin, IT, and SharePoint admin action. |
+| **Post-deploy validation** | **NOT STARTED** | 7 env-gated smoke tests defined but never executed against any environment. No recorded smoke execution log. |
+| **Operational readiness** | **PARTIALLY READY** | Runbook documented. Alert artifacts exist but not deployed (P4-10). On-call paging mechanism undecided. |
+| **Executive signoff** | **NOT STARTED** | Signoff form (§10) unsigned. No recorded leadership/IT/support approval. |
+
+**What this means for a release decision:**
+- Code-level readiness is strong and repo-proven.
+- Deployment cannot proceed until D1–D8 prerequisites are completed by DevOps/IT.
+- Post-deploy validation requires a live staging environment and recorded execution.
+- Signoff should be deferred until deployment prerequisites are met and post-deploy smoke passes.
+
+---
+
+## 10. Signoff
 
 | Role | Name | Date | Decision |
 |------|------|------|----------|

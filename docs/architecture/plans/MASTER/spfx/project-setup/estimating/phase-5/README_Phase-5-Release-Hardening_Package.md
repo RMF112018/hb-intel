@@ -80,6 +80,16 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
       - Evidence classification annotation in `post-deploy-smoke.test.ts` (P5-09)
       - Audit report progress note (P5-09): 8-artifact evidence table, repo vs env-gated categorization, guardrail description
 
+11. `Prompt-10_Phase-5-Release-Gates-Signoff-Realism-and-Decision-Ready-Evidence.md` **[COMPLETE]**
+    - Update Production-Readiness-Signoff.md: phase status table, close R6, add decision-ready evidence summary
+    - Align release-gate and signoff language to repo truth after P5-07–P5-09
+    - Separate technical / deployment / operational / executive readiness layers
+    - **Deliverables:**
+      - Updated signoff doc with §9 decision-ready evidence summary and 5-layer readiness table
+      - R6 closed (frontend test failures fixed by P5-08)
+      - Phase status table reflects current reconciled state
+      - Audit report progress note (P5-10): 6-artifact re-verification table, overstatement corrections, signoff support assessment
+
 ## Recommended use
 
 - Run the prompts **in order**.

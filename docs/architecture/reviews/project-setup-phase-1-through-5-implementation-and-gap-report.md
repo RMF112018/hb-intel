@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P5-09 smoke/deployment proof categorization)
+> **Last updated:** 2026-03-31 (P5-10 release gates, signoff realism, and decision-ready evidence)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -1458,6 +1458,51 @@ Project Setup smoke tests and deployment artifacts are now categorized truthfull
 - Release gates doc: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md` (mixed)
 - Signoff (reconciled): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md` (documentary)
 
+### Phase 5 Release Gates, Signoff Realism, and Decision-Ready Evidence (2026-03-31, Prompt P5-10)
+
+**Release-gate and signoff artifacts re-verified:**
+
+| Artifact | Original Claim | P5-10 Status |
+|---|---|---|
+| Phase status table in signoff doc | Mixed accuracy (Phases 2-5 statuses stale) | **Updated** — reflects P1-10, P2-11, P3-11, P4-11, P5-07–P5-09 reconciliation |
+| "Code-Level Blockers: NONE" | Undermined by 10 frontend test failures | **Now supported** — P5-08 fixed all 10 failures; P5-10 note confirms. |
+| Risk R6: "10 pre-existing frontend test failures" | Mischaracterized as pre-existing; actually repo-current failures | **CLOSED** — P5-08 fixed all 10 (root cause: test harness mock injection gap) |
+| Decision-ready evidence framing | Absent — no section separating technical/deployment/operational readiness | **Added** — §9 "Decision-Ready Evidence Summary" with 5-layer readiness table |
+| Release-Gates-and-Diagnostics.md | Accurate — gates are real, testable, well-scoped | **No change needed** — pre/deploy/post-deploy gates are honest |
+| Deployment-Runbook.md | Accurate procedure, not executed | **No change needed** — documentary status unchanged |
+
+**Overstatements removed or downgraded:**
+
+1. Phase status table updated from stale per-phase labels to current reconciled status (all 5 phases)
+2. R6 closed instead of accepting a mischaracterized risk
+3. "Code-Level Blockers: NONE" annotated with P5-10 note confirming it is now repo-supported
+4. Decision-ready evidence section added to separate technical, deployment, operational, and executive signoff layers
+
+**What signoff can be supported from repo truth today:**
+
+- **Technical readiness: YES.** Backend 638 tests green, frontend 138 tests green, release gates 13 tests green, lifecycle integration 5 tests green. Type-checks and builds clean.
+- **Deployment readiness: NO.** 8 deployment prerequisites (D1–D8) all "Pending." Requires Azure/IT/SharePoint admin action.
+- **Operational readiness: PARTIAL.** Runbook documented, alert artifacts exist but not deployed, on-call mechanism undecided.
+- **Executive signoff: NO.** Signoff form unsigned. No recorded leadership/IT/support approval.
+
+**Remaining external signoff dependencies:**
+
+1. D1–D8 deployment prerequisites completed by DevOps/IT
+2. Post-deploy smoke tests passed against live staging with recorded execution log
+3. Leadership/IT/support signoff completed on the §10 form
+4. Required-field enforcement decision (currently disabled)
+5. External SharePoint list contract validation
+
+**Closure statement:**
+
+Project Setup release gates and signoff artifacts are now aligned to retained-surface repo truth (P5-10). The phase status table, risk register, and blocker claims are updated to reflect P5-07 through P5-09 remediation. A decision-ready evidence summary separates technical, deployment, operational, and executive release decision evidence. Former overstatement concerns (stale status table, R6 mischaracterization, missing evidence framing) are closed. The "Code-Level Blockers: NONE" claim is now repo-supported. Remaining gaps are environment-gated (deployment prerequisites) and operational (signoff), not code-level.
+
+**Evidence:**
+
+- Signoff doc updated: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md` (phase table, R6 closure, Code-Level Blockers note, §9 decision-ready evidence)
+- Release gates doc (unchanged — accurate): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md`
+- Deployment runbook (unchanged — documentary): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md`
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1783,7 +1828,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P5-09 smoke/deployment proof categorization)
+> **Last updated:** 2026-03-31 (P5-10 release gates, signoff realism, and decision-ready evidence)
 
 ### Phase-by-phase status
 
