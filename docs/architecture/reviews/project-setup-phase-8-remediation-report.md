@@ -2,13 +2,14 @@
 
 ## Executive Summary
 
-> **Last updated:** 2026-03-31 (P8-01 build artifact audit and scaffold)
+> **Last updated:** 2026-03-31 (P8-02 runtime-config and token contract reconciliation)
 
 Phase 8 addresses the remaining production blockers identified in the Phase 1–5 audit and Phase 6–7 remediation: packaging pipeline reconciliation, runtime config contract verification, route ownership resolution, backend boundary reduction, managed identity alignment, and operational gate hardening.
 
 ### Current status
 
 Prompt-01 (Build Artifact Audit and Scaffold) — complete.
+Prompt-02 (SPFx Runtime Config and Token Contract Reconciliation) — complete.
 
 ## Prompt-by-Prompt Progress Log
 
@@ -162,12 +163,106 @@ The hb-intel-project-setup packaging pipeline is confirmed aligned between sourc
 | CF-05 | Backend boundary reduction | Prompt-04 |
 | CF-06 | `supportsThemeVariants` cosmetic divergence between app manifest (`false`) and shell manifest (`true`) | Low priority |
 
+### P8-02: SPFx Runtime Config and Token Contract Reconciliation
+
+**Status:** Complete
+**Date:** 2026-03-31
+
+#### Work completed
+- `apiAudience` shell injection implemented via DefinePlugin (closes CF-01/OI-01)
+- Orchestrator compiled-asset and packaged-asset inspection extended for `apiAudience` reference
+- Runtime-config chain verified end-to-end
+- Frontend/backend audience compatibility confirmed
+- Production-mode gating behavior verified
+
+#### Runtime-config chain summary
+
+Complete injection chain (verified in source and packaged artifact):
+
+```
+CI/deployment → API_AUDIENCE env var
+  → build-spfx-package.ts shellEnv.API_AUDIENCE
+    → gulpfile.js DefinePlugin __API_AUDIENCE__
+      → ShellWebPart.render() → runtimeConfig.apiAudience (if truthy)
+        → mount(el, spfxContext, runtimeConfig)
+          → setRuntimeConfig(config) stores apiAudience
+            → getApiAudience() returns: runtime config → VITE_API_AUDIENCE → undefined
+              → createSpfxApiTokenProvider(spfxContext, apiAudience)
+                → tokenProvider.getToken(audience) → audience-scoped JWT
+                  → Backend validateToken() validates JWT aud against API_AUDIENCE env
+```
+
+Updated constant injection chain:
+
+| Constant | Orchestrator env | gulpfile DefinePlugin | ShellWebPart declare | ShellWebPart usage | Status |
+|---|---|---|---|---|---|
+| `API_AUDIENCE` | `shellEnv.API_AUDIENCE` | `__API_AUDIENCE__` | `declare const __API_AUDIENCE__` | `runtimeConfig.apiAudience` (conditional) | PASS |
+
+#### Frontend/backend token contract summary
+
+- Frontend `getApiAudience()` and backend `resolveApiAudience()` must resolve to the same `api://<app-registration-client-id>` value
+- Backend throws `TokenValidationError` with `config_error` reason if `API_AUDIENCE` is missing in production
+- Frontend reports missing audience via `checkProductionReadiness()` → `productionBlocked` → diagnostic banner
+- JWT `aud` claim mismatch produces backend 401 with `invalid_audience` reason code
+- The Entra app registration Application ID URI is the single source of truth for both sides
+
+#### Production-mode behavior verification
+
+- Production mode is the first-class default (`getBackendMode()` returns `'production'`)
+- `checkProductionReadiness(!!getApiToken)` gates on both `functionAppUrl` AND token provider
+- Token provider requires `apiAudience` resolved AND SPFx `aadTokenProviderFactory` available
+- When prerequisites unmet: falls back to `ui-review` with `console.warn` and `productionBlocked = true`
+- Root route diagnostic banner displays readiness issues when `productionBlocked`
+- ui-review mode uses mock client — no real API calls, no misleading demo success
+- Empty `API_AUDIENCE` at build time is safe: `__API_AUDIENCE__` compiles to `''`, shell guard is falsy, no `apiAudience` injected, app falls back through `getApiAudience()` chain
+
+#### Packaged verification results
+
+**Verification suite (all pass):**
+- Type-check: clean (0 errors)
+- Lint: 0 errors, 65 pre-existing warnings
+- Tests: 22 files, 157 passed, 2 todo
+- Vite build: 1,187.25 KB (gzip 338.61 KB)
+
+**`.sppkg` build with `API_AUDIENCE=api://test-client-id`:**
+- Command: `API_AUDIENCE=api://test-client-id npx tsx tools/build-spfx-package.ts --domain estimating`
+- Package: `hb-intel-project-setup.sppkg` (336.0 KB, 16 files)
+- Vite IIFE bundle: `estimating-app-f72eb6c7.js` (1,187,248 bytes)
+- Compiled shell: `shell-web-part_f979940f30fb8bd05eaf.js` (3,109 bytes)
+- Shell hash changed from `ec744fd1fd7668c5e9db` (P8-01) to `f979940f30fb8bd05eaf` (P8-02) due to `apiAudience` injection code addition
+- `apiAudience` reference confirmed in compiled shell asset (release and packaged)
+- `api://test-client-id` literal confirmed baked into packaged shell asset
+- Orchestrator checks: `✓ Compiled shell asset references estimating-app-f72eb6c7.js and __hbIntel_projectSetup`, `✓ Packaged shell asset references estimating-app-f72eb6c7.js and __hbIntel_projectSetup`
+- Build used Node v18.20.8 for gulp steps
+
+#### Files changed
+- `tools/build-spfx-package.ts` — added `API_AUDIENCE` to shellEnv, extended `inspectCompiledShellAsset` and `inspectPackagedShellAsset` with apiAudience check
+- `tools/spfx-shell/gulpfile.js` — added `__API_AUDIENCE__` DefinePlugin constant
+- `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts` — added `declare const __API_AUDIENCE__`, added conditional `apiAudience` injection in `render()`
+- `apps/estimating/package.json` — version bump 0.2.32 → 0.2.33
+- `docs/architecture/reviews/project-setup-phase-8-remediation-report.md` — P8-02 section added
+- `docs/reference/developer/project-setup-frontend-api-contract.md` — apiAudience injection chain documented
+- `tools/spfx-shell/release/assets/` — rebuilt release assets with apiAudience support
+
+#### Closure statement
+
+The apiAudience shell injection gap (CF-01/OI-01) is closed. The runtime-config and token-acquisition contract is reconciled end-to-end: shell → mount → runtimeConfig → SPFx token provider → backend validation. Frontend and backend audience values must match the Entra app registration URI. Production mode activates only when all prerequisites are satisfied. Ready for Prompt-03 route ownership resolution.
+
+#### Carry-forward items for Prompt-03+
+
+| ID | Item | Target |
+|----|------|--------|
+| CF-03 | Teams Personal App auth readiness verification (OI-03, open risk retained) | Prompt-02+ |
+| CF-04 | Route ownership resolution | Prompt-03 |
+| CF-05 | Backend boundary reduction | Prompt-04 |
+| CF-06 | `supportsThemeVariants` cosmetic divergence | Low priority |
+
 ## Open Items
 
 | ID | Description | Owner | Status |
 |----|-------------|-------|--------|
-| OI-01 | `apiAudience` not injected by shell — requires API audience app registration and DefinePlugin addition | P8-02 | Open |
-| OI-02 | Runtime config/token contract reconciliation between shell and app | P8-02 | Open |
+| OI-01 | `apiAudience` not injected by shell — requires API audience app registration and DefinePlugin addition | P8-02 | **Closed** |
+| OI-02 | Runtime config/token contract reconciliation between shell and app | P8-02 | **Closed** |
 | OI-03 | Teams Personal App auth readiness — `aadTokenProviderFactory` resolution unverified in Teams context | P8-02 | Open |
 | OI-04 | Route ownership resolution — frontend route definitions vs backend route expectations | P8-03 | Open |
 | OI-05 | Backend boundary reduction — reduce direct backend coupling from frontend | P8-04 | Open |
