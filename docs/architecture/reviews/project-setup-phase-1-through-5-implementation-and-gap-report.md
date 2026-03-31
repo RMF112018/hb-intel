@@ -1742,6 +1742,55 @@ All 7 provisioning saga steps are implemented with retry (3 attempts, 2s base de
 
 Prompt-05 is closed. No code changes required — all three areas (observability, notification transport, provisioning maturity) are code-complete. The remaining operational gaps are truthfully categorized: observability alerting/dashboards are DevOps deployment tasks, email delivery is explicitly out of PS launch scope with in-app alternatives proven, and provisioning maturity is fully implemented with 7 saga steps, compensation, and fail-fast prerequisite validation.
 
+### Phase 6 Retained-Surface Frontend Regression Closure (2026-03-31, Prompt P6-06)
+
+**Scope:** Confirm the retained Project Setup frontend baseline is green, define the proof set explicitly, and verify stability after P6-01 through P6-05 changes.
+
+**Verification result (2026-03-31, post-P6-05):**
+
+```
+Test Files  19 passed (19)
+     Tests  138 passed | 2 todo (140)
+```
+
+All 19 files pass. The 3 files specifically named in Prompt-06 are confirmed stable:
+
+| File | Tests | Status | Notes |
+|------|-------|--------|-------|
+| `NewRequestPage.test.tsx` | 17 | **Pass** | Wizard render, submit, draft, clarification flows. Mocks `useProjectSetupBackend` (P5-08 pattern). |
+| `RequestDetailPage.test.tsx` | 8 | **Pass** | State display, clarification banner, provisioning checklist. Reads existing request state. |
+| `RequestDetailPage.coordinator.test.tsx` | 12 | **Pass** | Retry logic, escalation, BIC tier gating. Failure recovery flows. |
+
+**Retained release proof set definition (19 files by category):**
+
+| Category | Files | Tests | What It Proves |
+|----------|-------|-------|----------------|
+| **Page-level wizard** | NewRequestPage (17) | 17 | Wizard render, submit, draft persistence, clarification return |
+| **Page-level detail** | RequestDetailPage (8), completion (8), coordinator (12) | 28 | State display, provisioning checklist, failure recovery, escalation |
+| **Step body rendering** | ProjectInfoStepBody (1), DepartmentStepBody (4), TeamStepBody (4), ReviewStepBody (1) | 10 | Field grouping, department/type switching, approver eligibility |
+| **Phase 1 scope boundaries** | phase1ScopeGuards (14) | 14 | Route, API client, runtime mode, import boundaries |
+| **Backend mode switching** | mode-switching.integration (12), ProjectSetupUiReviewMode (13), uiReviewProjectSetupClient (6) | 31 | Production/ui-review switching, mock client contract |
+| **Configuration/runtime** | runtimeConfig (18), bootstrap (4), hostBehavior (5) | 27 | Config resolution, SPFx bootstrap, host environment |
+| **Cross-cutting** | complexity (5), themeEnforcement (2), router (3), AppRouteSessionState (1) | 11 | BIC tier context, theme compliance, routing, session state |
+
+**P6-01 required-field stability confirmation:**
+
+The baseline survived `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = true` (P6-01) because:
+- Page-level tests mock `HbcStepWizard` and `useProjectSetupBackend` — they test page concerns, not form validation
+- Detail/coordinator tests read existing request state, not form submission
+- Required-field validation is directly tested by 39 tests in `@hbc/features-estimating` (`projectSetupSteps.test.ts`)
+
+**Acceptance criteria met:**
+
+1. Retained proof set is explicit — 19 files, 138 tests, categorized by purpose in the table above.
+2. Retained baseline is green — 0 failures, verified post-P6-05.
+3. The 3 files from Prompt-06 are stable — all pass with the P5-08 mock pattern.
+4. Review report reflects retained frontend truth.
+
+**Closure statement:**
+
+Prompt-06 is closed. The retained Project Setup frontend baseline is green (19 files, 138 tests, 0 failures) and has been stable across all P6 changes (P6-01 through P6-05). The proof set is explicitly defined and categorized. No code changes required — P5-08 established the baseline and P6-01's required-field enforcement did not introduce regressions because page-level tests are orthogonal to wizard validation.
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -2131,7 +2180,7 @@ The remaining blockers are:
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 
-> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Phase 6 Prompt-05 closed observability (runtime assets operational, alerting DevOps-gated), notification transport (in-app queue supported, email out of launch scope), and provisioning maturity (7 saga steps complete with compensation and fail-fast validation) (P6-05). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff, DevOps alerting deployment).
+> The Project Setup / Estimating SPFx implementation is substantially built and code-level work is complete. Phases 1 and 3 are honestly closed with machine-checkable evidence. Phase 2’s repo-owned code/test findings are closed, with external live-list proof remaining. Phase 4’s infrastructure architecture is frozen with canonical/transitional classification and truthful observability categorization (P4-07 through P4-11). Phase 5’s release evidence model is explicit: frontend baseline green (P5-08, 138 tests), backend strong (659 tests, 30 release-specific — updated P6-01), smoke/deployment categorized (P5-09), signoff aligned to evidence (P5-10), docs reconciled (P5-11). Phase 6 Prompt-01 closed the persistence contract storage ceiling, re-enabled required-field enforcement, and aligned backend validation with the wizard contract. Phase 6 Prompt-02 confirmed backward compatibility, test truthfulness, and regression guards remain sound (P6-02). Phase 6 Prompt-03 retired the preferences API expectation and documented the RBAC split as intentional (P6-03). Phase 6 Prompt-04 categorized all 14 environment prerequisites by proof tier: 6 repo-verified, 8 environment-gated with post-deploy verification paths (P6-04). Phase 6 Prompt-05 closed observability (runtime assets operational, alerting DevOps-gated), notification transport (in-app queue supported, email out of launch scope), and provisioning maturity (7 saga steps complete with compensation and fail-fast validation) (P6-05). Phase 6 Prompt-06 confirmed the retained frontend baseline is green (19 files, 138 tests, 0 failures) and stable across all P6 changes, with the proof set explicitly defined and categorized (P6-06). Remaining launch prerequisites are environment-gated (D0 SP column migration + 8 deployment items, staging smoke execution) and operational (leadership/IT/support signoff, DevOps alerting deployment).
 
 ## 10. Explicit Unresolved Questions
 
