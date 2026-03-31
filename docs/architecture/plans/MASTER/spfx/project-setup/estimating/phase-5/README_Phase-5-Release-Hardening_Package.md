@@ -25,10 +25,14 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-5_Test-Coverage-Evidence.md`](Phase-5_Test-Coverage-Evidence.md) — 22 new tests (request lifecycle, unsupported scope guard, mode switching), apiAudience bug fix, updated totals (1,276 tests across 128 files), closes A1 partial + B1 + B3
 
-4. `Prompt-03_Operational-Diagnostics-and-Release-Gates.md`
+4. `Prompt-03_Operational-Diagnostics-and-Release-Gates.md` **[COMPLETE]**
    - Add clear operator-facing diagnostics, release gates, go/no-go checks, and health visibility
    - Ensure failures are actionable for deployment and support teams
    - Make production readiness measurable rather than subjective
+   - **Deliverables:**
+     - [`Phase-5_Release-Gates-and-Diagnostics.md`](Phase-5_Release-Gates-and-Diagnostics.md) — 7 pre-deploy gates, 4 deploy gates, 4 post-deploy gates, diagnostic interpretation guide, failure→resolution map
+     - `post-deploy-smoke.test.ts` — 7 env-gated smoke checks (health, auth rejection, authenticated paths)
+     - `release-gates.test.ts` — 10 release prerequisite regression tests (config tiers, CORS, auth contract, MI enforcement)
 
 5. `Prompt-04_Deployment-Rehearsal_Rollback-and-Recovery.md`
    - Rehearse deployment and validation flow end to end
