@@ -35,6 +35,29 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - Run the final verification pass
    - Produce handoff notes, unresolved items, and next-phase blockers
 
+8. `Prompt-07_Phase-1-Architecture-Freeze-and-Boundary-Plan.md`
+   - Freeze the backend boundary for Project Setup
+   - Produce ADR-0124 and the boundary freeze plan
+   - Update the audit report with remediation progress and closure criteria
+
+9. `Prompt-08_Phase-1-Project-Setup-Domain-Host-Implementation.md`
+   - Implement the dedicated Project Setup backend host / composition root
+   - Scoped service factory and domain-specific host.json
+
+10. `Prompt-09_Phase-1-Config-Auth-CORS-Identity-Scoping.md`
+    - Domain-specific config validation, auth, CORS, and identity scoping
+
+11. `Prompt-10_Phase-1-Regression-Guards-and-Release-Scope-Proof.md`
+    - Regression guards and release scope proof for the Project Setup host
+
+12. `Prompt-11_Phase-1-Documentation-Reconciliation-and-Audit-Closure.md`
+    - Documentation reconciliation and audit closure
+
+## Supporting documents
+
+- `Phase-1_Backend-Boundary-Freeze.md`
+  - Backend boundary plan with current/target state, shared-vs-host-specific split, acceptance criteria (AC-1 through AC-10), and Prompt-08 implementation checklist
+
 ## Recommended use
 
 - Run the prompts **in order**.

@@ -38,6 +38,7 @@ We chose vanilla Azure Functions because the saga logic is simple enough (7 step
 - Service factory pattern allows incremental swap to real Azure implementations
 - Timer function handles deferred web part provisioning without additional infrastructure
 - SignalR negotiate endpoint enables future real-time push to PWA/SPFx clients
+- **Multi-host topology:** See ADR-0124 for the per-domain Function App host model. This ADR covers the runtime and programming model; ADR-0124 covers deployment topology.
 
 ## Technical Details
 
