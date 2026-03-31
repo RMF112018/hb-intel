@@ -722,6 +722,45 @@ Retained Project Setup-related surfaces now converge on the canonical factory-ba
 - Admin migration: `apps/admin/src/utils/resolveSessionToken.ts`, `apps/admin/src/pages/ProvisioningOversightPage.tsx`, `apps/admin/src/pages/OperationalDashboardPage.tsx`, `apps/admin/src/hooks/useAlertPolling.ts`, `apps/admin/src/hooks/useProbePolling.ts`
 - Estimating deprecation narrowing: `apps/estimating/src/utils/resolveSessionToken.ts`
 
+### Phase 3 Protected Route Scope, Proxy Decision, and Auth Tests (2026-03-31, Prompt P3-10)
+
+**Retained protected route surface for Project Setup host:**
+
+| Route Family | Auth | Type | In PS Host? |
+|--------------|------|------|-------------|
+| projectRequests | withAuth() | 4 HTTP | Yes |
+| provisioningSaga | withAuth() | 10 HTTP | Yes |
+| signalr | withAuth() | 1 HTTP | Yes |
+| acknowledgments | withAuth() | 2 HTTP | Yes |
+| notifications | exception (internal delivery) | HTTP + queue + timer | Yes |
+| health | exception (unauthenticated probe) | 1 HTTP | Yes |
+| timerFullSpec | N/A (timer trigger) | 1 timer | Yes |
+| cleanupIdempotency | N/A (timer trigger) | 1 timer | Yes |
+
+**Proxy decision: EXCLUDED from Project Setup release scope.**
+
+The proxy route (`/api/proxy/*`) is a functional stub returning `{ _mock: true }`. It is auth-protected (withAuth) but does not make real Graph API calls. Decision:
+- Proxy is NOT in the Project Setup domain host (confirmed by boundary test)
+- Proxy handler explicitly marked "NOT IN PROJECT SETUP RELEASE SCOPE" (P3-10)
+- Proxy remains in the legacy monolithic host only
+- Future options: implement for real Graph forwarding, or retire from the monolithic host
+
+**Auth-readiness tests added:**
+
+- 4 tests proving PS HTTP route families (projectRequests, provisioningSaga, signalr, acknowledgments) use `withAuth()`
+- 1 test proving proxy is NOT in the PS host
+- 1 test proving proxy handler is explicitly marked as out of PS release scope
+
+**Closure statement:**
+
+The retained Project Setup protected route surface is now explicit (8 route families, 4 with withAuth, 4 with documented exceptions). The proxy posture is no longer ambiguous — explicitly excluded from PS release scope. Phase 3 auth readiness is supported by route-accurate tests (6 new P3-10 tests + existing auth contract enforcement). The protected-route/scope/testing portion of Phase 3 is **closed**.
+
+**Evidence:**
+
+- Proxy scope annotation: `backend/functions/src/functions/proxy/proxy-handler.ts`
+- PS auth readiness tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (P3-10 section)
+- Auth contract enforcement: `backend/functions/src/middleware/auth-contract.test.ts`
+
 ### Phase 4
 
 **Intended objective**

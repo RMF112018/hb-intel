@@ -1,14 +1,20 @@
 /**
- * INTEGRATION PATH: STUB (Phase 1 deliverable)
+ * INTEGRATION PATH: STUB — NOT IN PROJECT SETUP RELEASE SCOPE (P3-10)
  *
  * This handler returns hardcoded mock responses ({ _mock: true }).
  * It does NOT make real Graph API calls.
- * Real Graph API forwarding via app-only token is a Phase 1 / P1-B1 deliverable.
+ *
+ * P3-10 scope decision: The proxy route is explicitly EXCLUDED from the
+ * Project Setup domain host and retained release surface. It exists only
+ * in the legacy monolithic host for potential future domain use. It is
+ * auth-protected (P3-05 withAuth) but functionally inert.
+ *
+ * To implement: replace mock response with real Graph API forwarding
+ * using the app-only token from Managed Identity.
+ * To retire: remove proxy/ from the monolithic index.ts and delete this module.
  *
  * P3-05: Auth enforced by withAuth() at route registration.
  * P4-02: Redis cache removed (was always mocked/never used).
- *
- * Do NOT rely on this handler for production data retrieval.
  */
 import type { HttpRequest, HttpResponseInit } from '@azure/functions';
 import type { IServiceContainer } from '../../services/service-factory.js';

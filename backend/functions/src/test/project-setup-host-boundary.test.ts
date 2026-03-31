@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 
 /**
@@ -360,5 +360,56 @@ describe('P1-10 Regression guards and release-scope proof', () => {
       }
       expect(monoIndex).toContain('functions/proxy/');
     });
+  });
+});
+
+/**
+ * P3-10: Project Setup auth readiness — route protection proof.
+ *
+ * Verifies that every HTTP route family in the PS host is auth-protected
+ * (uses withAuth) or is a documented exception (health, timer triggers).
+ */
+describe('P3-10 Project Setup auth readiness', () => {
+  // PS host route families that register HTTP handlers
+  const PS_HTTP_ROUTES = [
+    'projectRequests',
+    'provisioningSaga',
+    'signalr',
+    'acknowledgments',
+  ];
+
+  // PS host route families that are intentionally unauthenticated or non-HTTP
+  const PS_AUTH_EXCEPTIONS = new Set([
+    'health',              // Unauthenticated health probe
+    'timerFullSpec',       // Timer trigger — not HTTP
+    'cleanupIdempotency',  // Timer trigger — not HTTP
+    'notifications',       // Internal delivery
+  ]);
+
+  it.each(PS_HTTP_ROUTES)(
+    'PS route family %s uses withAuth()',
+    (route) => {
+      const routeIndex = readFileSync(
+        resolve(FUNCTIONS_SRC, `functions/${route}/index.ts`),
+        'utf-8',
+      );
+      expect(
+        routeIndex,
+        `PS route family '${route}' must use withAuth() for JWT protection`,
+      ).toContain('withAuth');
+    },
+  );
+
+  it('proxy is NOT in the Project Setup host (P3-10 scope decision)', () => {
+    const hostIndex = readFileSync(resolve(PS_HOST_DIR, 'index.ts'), 'utf-8');
+    expect(hostIndex).not.toContain('functions/proxy/');
+  });
+
+  it('proxy handler is explicitly marked as out of PS release scope', () => {
+    const proxyHandler = readFileSync(
+      resolve(FUNCTIONS_SRC, 'functions/proxy/proxy-handler.ts'),
+      'utf-8',
+    );
+    expect(proxyHandler).toContain('NOT IN PROJECT SETUP RELEASE SCOPE');
   });
 });
