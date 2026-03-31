@@ -72,6 +72,68 @@ describe('Request lifecycle — user-command flows', () => {
     expect(retrieved!.year).toBe(2026);
   });
 
+  it('A1b: persists P2-07 gap fields through submit→read cycle', async () => {
+    const fullRequest = makeRequest({
+      projectStreetAddress: '123 Main St',
+      projectCity: 'Denver',
+      projectCounty: 'Denver',
+      projectState: 'CO',
+      projectZip: '80202',
+      officeDivision: 'Mountain West',
+      procoreProject: 'Yes',
+      projectExecutiveUpn: 'exec@hb.com',
+      projectManagerUpn: 'pm@hb.com',
+      leadEstimatorUpn: 'est@hb.com',
+      supportingEstimatorUpns: ['est2@hb.com'],
+      additionalTeamMemberUpns: ['team1@hb.com'],
+      timberscanApproverUpn: 'ts@hb.com',
+      sageAccessUpns: ['sage@hb.com'],
+    });
+
+    await repo.upsertRequest(fullRequest);
+    const retrieved = await repo.getRequest('req-1');
+
+    expect(retrieved).not.toBeNull();
+    expect(retrieved!.projectStreetAddress).toBe('123 Main St');
+    expect(retrieved!.projectCity).toBe('Denver');
+    expect(retrieved!.projectCounty).toBe('Denver');
+    expect(retrieved!.projectState).toBe('CO');
+    expect(retrieved!.projectZip).toBe('80202');
+    expect(retrieved!.officeDivision).toBe('Mountain West');
+    expect(retrieved!.procoreProject).toBe('Yes');
+    expect(retrieved!.projectExecutiveUpn).toBe('exec@hb.com');
+    expect(retrieved!.projectManagerUpn).toBe('pm@hb.com');
+    expect(retrieved!.leadEstimatorUpn).toBe('est@hb.com');
+    expect(retrieved!.supportingEstimatorUpns).toEqual(['est2@hb.com']);
+    expect(retrieved!.additionalTeamMemberUpns).toEqual(['team1@hb.com']);
+    expect(retrieved!.timberscanApproverUpn).toBe('ts@hb.com');
+    expect(retrieved!.sageAccessUpns).toEqual(['sage@hb.com']);
+  });
+
+  it('A1c: P2-07 fields survive state transition without loss', async () => {
+    const request = makeRequest({
+      state: 'UnderReview',
+      projectStreetAddress: '456 Oak Ave',
+      projectCity: 'Tampa',
+      officeDivision: 'South Florida',
+      projectExecutiveUpn: 'exec@hb.com',
+    });
+    await repo.upsertRequest(request);
+
+    // State transition preserves fields via read-modify-write
+    const existing = await repo.getRequest('req-1');
+    existing!.state = 'ReadyToProvision';
+    existing!.projectNumber = '25-100-01';
+    await repo.upsertRequest(existing!);
+
+    const updated = await repo.getRequest('req-1');
+    expect(updated!.state).toBe('ReadyToProvision');
+    expect(updated!.projectStreetAddress).toBe('456 Oak Ave');
+    expect(updated!.projectCity).toBe('Tampa');
+    expect(updated!.officeDivision).toBe('South Florida');
+    expect(updated!.projectExecutiveUpn).toBe('exec@hb.com');
+  });
+
   it('A2: state advance from UnderReview to ReadyToProvision stores project number', async () => {
     const request = makeRequest({ state: 'UnderReview' });
     await repo.upsertRequest(request);

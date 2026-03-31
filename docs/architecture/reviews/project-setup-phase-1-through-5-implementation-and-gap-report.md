@@ -367,6 +367,38 @@ The Phase 2 persistence gap was caused partly by list-schema absence and partly 
 - Mapper: `backend/functions/src/services/projects-list-mapper.ts`
 - Mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts`
 
+### Phase 2 Production-Path Mapping and Backward Compatibility (2026-03-31, Prompt P2-08)
+
+**Production-path verification performed:**
+
+End-to-end trace of all Project Setup persistence paths:
+
+| Path | Component | Field Loss Risk | Result |
+|------|-----------|-----------------|--------|
+| Submit (write) | `projectRequests/index.ts` submitHandler | **CRITICAL — fixed** | P2-07 fields were not mapped from request body to newRequest object. Fixed: all 14 P2-07 fields now pass through from the request body. |
+| State advance (update) | `projectRequests/index.ts` advanceRequestState | None | Uses read-modify-write pattern; full object preserved. |
+| Repository upsert | `project-requests-repository.ts` | None | Full object write via `toListItem(request)`. |
+| Mapper write | `projects-list-mapper.ts` toListItem | None | All 43 fields serialized correctly. |
+| Mapper read | `projects-list-mapper.ts` toDomain | None | All 43 fields deserialized with backward-compat defaults. |
+| Saga reconcile | `saga-orchestrator.ts` reconcileRequestState | None | Read-modify-write; only changes state + extras. |
+| Controller/admin readers | AccountingPage, AdminPage | None | Defensive readers; no field-specific assumptions. |
+
+**Backward-compatibility decisions:**
+
+- Legacy rows missing P2-07 columns: all new fields default to `undefined` (optional strings/numbers) or `[]` (arrays) or `false` (boolean). No exceptions thrown for missing columns.
+- `projectLocation` (legacy summary field) coexists with structured location fields. Both are persisted independently. No derivation or overwrite in either direction — this preserves existing row data while allowing new submissions to populate both.
+- `field_17`/`field_18`/`field_19` retained in contract despite absence from latest schema export — protects existing row data.
+
+**Closure statement:**
+
+The production-path mapper/repository flow now preserves the canonical Project Setup persisted field set, including backward-compatible handling for legacy list rows. The submit handler field-loss gap has been fixed. No silent data loss remains for the newly supported fields.
+
+**Evidence:**
+
+- Submit handler fix: `backend/functions/src/functions/projectRequests/index.ts` (lines 84-120)
+- Lifecycle tests: `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` (A1b, A1c)
+- Full verification: 626 tests passed, 0 failed
+
 ### Phase 3
 
 **Intended objective**

@@ -104,6 +104,26 @@ app.http('submitProjectSetupRequest', {
       retryCount: 0,
       // Year derived from project number if available, else submission year
       year: body.year ?? deriveProjectYear(body.projectNumber),
+
+      // P2-08: Structured location fields
+      projectStreetAddress: body.projectStreetAddress,
+      projectCity: body.projectCity,
+      projectCounty: body.projectCounty,
+      projectState: body.projectState,
+      projectZip: body.projectZip,
+
+      // P2-08: Classification fields
+      officeDivision: body.officeDivision,
+      procoreProject: body.procoreProject,
+
+      // P2-08: Team role assignments
+      projectExecutiveUpn: body.projectExecutiveUpn,
+      projectManagerUpn: body.projectManagerUpn,
+      leadEstimatorUpn: body.leadEstimatorUpn,
+      supportingEstimatorUpns: body.supportingEstimatorUpns,
+      additionalTeamMemberUpns: body.additionalTeamMemberUpns,
+      timberscanApproverUpn: body.timberscanApproverUpn,
+      sageAccessUpns: body.sageAccessUpns,
     };
 
     await services.projectRequests.upsertRequest(newRequest);
