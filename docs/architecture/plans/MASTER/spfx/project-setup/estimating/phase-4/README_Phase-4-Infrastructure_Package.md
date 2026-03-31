@@ -53,6 +53,14 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-4_Handoff.md`](Phase-4_Handoff.md) — Final verification results, success criteria assessment (all 6 met), 15 deliverables across prompts, 6 deferred items, 7 deployment prerequisites, 8 safe assumptions for later phases
 
+8. `Prompt-07_Phase-4-Infrastructure-Architecture-Freeze-and-Deployment-Scope-Revalidation.md` **[COMPLETE]**
+   - Re-verify Phase 4 audit findings against current repo truth
+   - Classify infrastructure surfaces as canonical vs transitional vs documentary-only
+   - Freeze the Project Setup infrastructure model in implementation terms
+   - Update audit report with architecture freeze progress note and closure language
+   - **Deliverables:**
+     - Audit report progress note (P4-07): re-verification table, canonical/transitional classification, frozen infrastructure posture, updated Phase 4 status from "Partial to substantial" to "Substantially Closed"
+
 ## Recommended use
 
 - Run the prompts **in order**.

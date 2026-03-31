@@ -7,6 +7,8 @@
 
 All 6 success criteria from the Phase 4 Action Plan are satisfied. The Project Setup package now has a production-safe infrastructure posture.
 
+> **Reconciliation note (P4-07, 2026-03-31):** The audit report reclassifies Phase 4 as "Substantially Closed — architecture frozen, operationalization deferred." The infrastructure model documented below is accurate for the dedicated Project Setup host. Two qualifications apply: (1) observability artifacts are checked in but not operationalized (DevOps setup checklist unchecked in `backend/functions/observability/README.md`), and (2) environment-gated deployment proof (live MI grants, CORS verification, admin consent, host cutover) remains external to repo evidence. See the audit report progress note P4-07 for the canonical/transitional surface classification.
+
 ## Verification Results
 
 ### Backend (`@hbc/functions` v0.0.80)

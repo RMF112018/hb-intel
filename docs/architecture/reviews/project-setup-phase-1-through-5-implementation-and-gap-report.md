@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P2-11 documentation reconciliation)
+> **Last updated:** 2026-03-31 (P4-07 infrastructure architecture freeze)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -11,7 +11,7 @@ This report was originally authored as a gap analysis finding that Phases 1-5 we
 - **Phase 1 scope-control findings are closed in repo-owned code and tests.** The frontend requester surface is isolated to Project Setup routes with regression guards (`apps/estimating/src/test/phase1ScopeGuards.test.ts`). The backend now has a dedicated Project Setup domain host (`backend/functions/src/hosts/project-setup/`) with scoped composition root, service factory, tenant-specific CORS, domain-scoped config validation, and 63 boundary regression tests. All 10 acceptance criteria (AC-1 through AC-10) from `Phase-1_Backend-Boundary-Freeze.md` are satisfied. Architecture decision recorded in ADR-0124.
 - **Phase 2 code-level contract findings are closed in repo-owned code and tests.** The canonical request model, field contract, mapper, repository path, backward-compat handling, and mock-vs-real test truthfulness now align across the repo. What the repo does not prove on its own is the current live SharePoint list state; there is no checked-in schema export or live integration evidence for the external list.
 - **Phase 3 auth findings are closed for Project Setup.** Auth architecture frozen (P3-07), production token/audience path verified (P3-08), cross-surface auth converged to factory-based providers (P3-09), proxy explicitly excluded from PS release scope (P3-10). Deprecated `resolveSessionToken()` removed from all retained surfaces. RBAC convergence remains a future follow-on but is not a Phase 3 blocker.
-- Phase 4 infrastructure hardening is materially real: tiered config validation, diagnostic health output, managed-identity service posture, and version-controlled observability assets exist.
+- **Phase 4 infrastructure architecture is frozen (P4-07).** Dedicated Project Setup host with domain-scoped config validation, tenant-specific CORS, pure managed identity, conditional SignalR, and diagnostic health output. Canonical vs transitional surfaces explicitly classified. Observability artifacts exist in repo but are not operationalized. Environment-gated deployment proof remains external.
 
 ### Remaining blockers (Phases 4-5)
 
@@ -821,7 +821,75 @@ Harden the infrastructure posture: startup scoping, configuration validation, ma
 
 **Current status assessment**
 
-**Partial to substantial.** The hardening work is real and valuable, but the handoff overstates the degree of deployment scoping and operational completeness.
+**Substantially closed — architecture frozen, operationalization deferred (P4-07, 2026-03-31).** The infrastructure model is frozen around a domain-scoped backend host with deployment-scoped validation, tenant-specific CORS, pure managed identity, and diagnostic health output. Environment-gated deployment proof and observability operationalization remain deferred.
+
+### Phase 4 Infrastructure Architecture Freeze and Deployment-Scope Revalidation (2026-03-31, Prompt P4-07)
+
+**Re-verification against current repo truth:**
+
+All Phase 4 infrastructure surfaces were inspected against the five original audit findings:
+
+| Original Audit Finding | Current Status |
+|------------------------|----------------|
+| Startup scoping only partial for PS host | **Partially stale** — dedicated PS host fully implemented at `backend/functions/src/hosts/project-setup/` with scoped composition root (8 families, 11 excluded), scoped service factory (9 eager services, no domain CRUD), tenant-specific CORS, and domain-scoped config validation. 63 regression tests (AC-1 through AC-10). ADR-0124 establishes per-domain hosts. Monolithic host preserved as transitional. |
+| Observability artifacts not operationalized | **Still accurate** — `backend/functions/observability/README.md` DevOps setup checklist items all unchecked. KQL queries and `alerts.json` exist but are not deployed. Deferred to Prompt-10. |
+| CORS posture split between hosts | **Architecturally resolved** — split is intentional per ADR-0124. PS host at `backend/functions/src/hosts/project-setup/host.json` has single tenant origin (`https://hedrickbrotherscom.sharepoint.com`). Monolithic host broader (transitional). |
+| No repo proof of live deployment validation | **Still accurate** — environment-gated, not repo-completable |
+| Handoff overstates deployment scoping | **Partially stale** — PS host now fully scoped with regression tests, but operationalization still overstated |
+
+**Canonical Project Setup infrastructure posture (frozen):**
+
+1. **Hosting:** Dedicated domain host at `backend/functions/src/hosts/project-setup/` with thin composition root importing exactly 8 route families (projectRequests, provisioningSaga, timerFullSpec, signalr, acknowledgments, notifications, health, cleanupIdempotency). 11 domain CRUD families explicitly excluded.
+2. **Service container:** `createProjectSetupServiceFactory()` with 9 eager services. No domain CRUD service types imported. Standalone singleton — does not share instance with monolithic factory.
+3. **Config validation:** Domain-scoped `validateProjectSetupStartupConfig()` validates core tier at startup (AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_TABLE_ENDPOINT, APPLICATIONINSIGHTS_CONNECTION_STRING, HBC_ADAPTER_MODE, API_AUDIENCE). SharePoint tier validated as warning. Provisioning prerequisites validated at saga execution time only.
+4. **CORS:** Tenant-specific single origin (`https://hedrickbrotherscom.sharepoint.com`), `supportCredentials: true`, no wildcards. Test-enforced exactly 1 CORS origin.
+5. **Managed identity:** Pure MI — `AZURE_CLIENT_SECRET` removed from config registry. 6 services use `DefaultAzureCredential`.
+6. **SignalR:** Conditional initialization — `RealSignalRPushService` when `AzureSignalRConnectionString` present, `NoOpSignalRPushService` when absent.
+7. **Health:** Non-blocking diagnostic endpoint with `operationalReadiness` (ready/degraded/blocked), `configTiers` (core/sharepoint/provisioning), and `provisioningPrereqs` detail. Always returns HTTP 200.
+8. **Observability:** Version-controlled KQL queries and alert definitions checked in. Telemetry wrapper (`withTelemetry`) on all authenticated handlers. Structured events for auth, handler lifecycle, and provisioning. This is documentary infrastructure, not operationalized monitoring.
+9. **Email:** Stubbed (logs only). Health endpoint reports `not-configured` when env vars absent. Explicitly deferred.
+
+**Transitional surfaces (not canonical for Project Setup):**
+
+- `backend/functions/src/index.ts` — monolithic host preserved during per-domain transition (ADR-0124)
+- `backend/functions/src/services/service-factory.ts` — shared service factory for monolithic host with lazy domain CRUD services
+- `backend/functions/host.json` — broader CORS (includes `https://*.sharepoint.com` wildcard) for monolithic host only
+
+These are expected to remain until other domain hosts are created and the monolithic host is retired.
+
+**Documentary-only surfaces (not operationalized):**
+
+- `backend/functions/observability/kql/*.kql` — KQL query library for dashboards
+- `backend/functions/observability/alerts.json` — 5 alert rule definitions
+- `backend/functions/observability/README.md` — DevOps setup checklist (all items unchecked)
+
+**Closure statement:**
+
+The Project Setup infrastructure posture is now explicitly frozen around a domain-scoped backend host with deployment-scoped validation, bounded CORS/identity/runtime assumptions, and a truthful distinction between repo artifacts and operationalized readiness. The architecture/scoping portion of Phase 4 is **closed for Project Setup in repo-owned terms**. Two categories of work remain outside this closure:
+
+1. **Environment-gated prerequisites:** Live deployment cutover to the dedicated PS host, MI grant application, CORS verification in Azure portal, SharePoint admin consent, Graph permission grants. These require external execution proof.
+2. **Operationalization:** Observability artifacts exist but are not deployed. DevOps setup checklist remains unchecked. Email delivery remains stubbed. These are explicitly deferred.
+
+**Evidence:**
+
+- PS host composition root: `backend/functions/src/hosts/project-setup/index.ts`
+- PS scoped service factory: `backend/functions/src/hosts/project-setup/service-factory.ts`
+- PS tenant-specific CORS: `backend/functions/src/hosts/project-setup/host.json`
+- Release-scope manifest: `backend/functions/src/hosts/project-setup/RELEASE-SCOPE.md`
+- Domain-scoped config validation: `backend/functions/src/utils/validate-config.ts` (`validateProjectSetupStartupConfig`)
+- Health endpoint: `backend/functions/src/functions/health/index.ts`
+- Boundary tests (63): `backend/functions/src/test/project-setup-host-boundary.test.ts`
+- Infrastructure readiness tests: `backend/functions/src/test/infra-readiness.test.ts`
+- Release-gate tests: `backend/functions/src/test/release-gates.test.ts`
+- Observability artifacts: `backend/functions/observability/README.md`, `backend/functions/observability/alerts.json`, `backend/functions/observability/kql/*.kql`
+- Monolithic host (transitional): `backend/functions/src/index.ts`
+- Architecture decision: `docs/architecture/adr/ADR-0124-project-setup-backend-host-boundary.md`
+
+**Remaining open infrastructure questions:**
+
+1. Which host posture is the actual live deployment target? Repo truth creates both; deployment wiring is external.
+2. When will the monolithic host be retired? Per ADR-0124, it is preserved during transition but has no explicit retirement timeline.
+3. Will observability be operationalized before or after the Phase 5 release decision?
 
 ### Phase 5
 
@@ -1053,6 +1121,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Blocker level:** Important but non-blocking
   **Cross-phase impact:** Weakens Phase 5 signoff realism and keeps “ready/degraded/blocked” diagnostics partly manual.
   **Recommended next-step direction:** Deploy and verify the alerting/dashboard stack and record actual operational ownership evidence.
+  **P4-07 update:** Explicitly classified as documentary infrastructure (not operationalized). The repo-owned artifacts are complete; operationalization is deferred to Prompt-10.
 
 - **Item:** Email delivery / notification transport
   **Category:** Infrastructure / notification delivery
@@ -1073,6 +1142,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Blocker level:** Launch blocker
   **Cross-phase impact:** Directly gates Phase 5 release and support claims because those claims depend on live environment posture, not repo configuration alone.
   **Recommended next-step direction:** Record environment-level proof that the Project Setup host settings and grants match the documented runtime contract.
+  **P4-07 update:** The repo-owned infrastructure model is now frozen and explicitly classified as canonical (PS host) vs transitional (monolithic host). The environment-gated nature of this item is documented rather than ambiguous.
 
 #### Phase 5 deferred implementations
 
@@ -1174,8 +1244,10 @@ The strongest cross-phase dependencies are: external live-list validation for th
    - ADR-0124 establishes per-domain Function App hosts. Project Setup host boundary frozen in `Phase-1_Backend-Boundary-Freeze.md`. Implementation: Prompt-08 (host creation), Prompt-09 (config/auth/CORS), Prompt-10 (regression guards). Closure: AC-1 through AC-10.
 5. **Reconcile Phase 5 signoff and handoff docs with repo truth.**
    - Remove unsupported “complete / production-ready” claims until the live blockers above are closed.
+   - P4-07: Phase 4 handoff annotated with reconciliation note distinguishing repo-proven infrastructure from environment-gated items.
 6. **Operationalize observability.**
    - Deploy alert rules, dashboards, and notification channels corresponding to the checked-in artifacts.
+   - P4-07: Explicitly classified as documentary infrastructure. Repo-owned artifacts are complete; deployment and operationalization deferred to Prompt-10.
 7. **~~Finish auth/rbac cleanup.~~ SUBSTANTIALLY CLOSED (P3-07 through P3-10, 2026-03-31).**
    - Deprecated token paths removed from all retained surfaces (P3-09). Auth architecture frozen (P3-07). Production token path verified (P3-08). RBAC convergence (JWT roles vs UPN lists) remains a future follow-on but is not a blocker.
 8. **~~Make a proxy-route decision.~~ DECIDED (P3-10, 2026-03-31).**
@@ -1183,7 +1255,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P2-11 documentation reconciliation)
+> **Last updated:** 2026-03-31 (P4-07 infrastructure architecture freeze)
 
 ### Phase-by-phase status
 
@@ -1192,12 +1264,12 @@ The strongest cross-phase dependencies are: external live-list validation for th
 | Phase 1 | **Closed** | Frontend isolation + backend domain host + 63 regression tests. All AC-1-AC-10 satisfied. ADR-0124 accepted. |
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
 | Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
-| Phase 4 | Partial to substantial | Real hardening work, but deployment scoping and observability operationalization incomplete. |
+| Phase 4 | **Substantially Closed** | Architecture frozen (P4-07). Dedicated PS host with scoped validation, tenant CORS, pure MI. Observability operationalization and environment-gated deployment proof deferred. |
 | Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
 
 ### Overall recommendation
 
-**Not production ready** for Phases 2-5. Phase 1 is closed, and Phase 2 is substantially closed in repo-owned evidence but not fully repo-evidenced end-to-end.
+**Not production ready** for Phase 5. Phases 1-3 are closed. Phase 2 is substantially closed in repo-owned evidence. Phase 4 is substantially closed with architecture frozen (P4-07). Phase 5 remains partial.
 
 The remaining blockers are:
 1. Disabled required-field enforcement (cross-phase)
