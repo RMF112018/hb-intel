@@ -16,7 +16,7 @@ import { MockAcknowledgmentService, RealAcknowledgmentService } from '../../serv
 import { MockGraphService, GraphService } from '../../services/graph-service.js';
 import { MockNotificationService, NotificationService } from '../../services/notification-service.js';
 import { MockIdempotencyStorageService, RealIdempotencyStorageService } from '../../services/idempotency-storage-service.js';
-import { validateCoreConfig, validateSharePointConfig } from '../../utils/validate-config.js';
+import { validateProjectSetupStartupConfig, validateSharePointConfig } from '../../utils/validate-config.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
 
 /**
@@ -59,7 +59,9 @@ export function createProjectSetupServiceFactory(): IProjectSetupServiceContaine
 
   const isMock = adapterMode === 'mock' || process.env.NODE_ENV === 'test';
 
-  validateCoreConfig();
+  // P1-09 (AC-6): Domain-scoped startup validation — only core tier required.
+  // Provisioning prerequisites are validated at saga execution time, not startup.
+  validateProjectSetupStartupConfig();
 
   if (!isMock) {
     try {

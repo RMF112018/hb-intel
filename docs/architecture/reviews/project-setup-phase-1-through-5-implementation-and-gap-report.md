@@ -188,6 +188,63 @@ Backend scope freeze acceptance criteria AC-1, AC-2, AC-3, AC-5, AC-7, AC-8, AC-
 - `backend/functions/src/hosts/project-setup/host.json`
 - `backend/functions/src/test/project-setup-host-boundary.test.ts`
 
+### Phase 1 Config/Auth/CORS/Identity Scoping (2026-03-31, Prompt-09)
+
+**Config validation scoping (AC-6):**
+
+- Added `validateProjectSetupStartupConfig()` to `backend/functions/src/utils/validate-config.ts` — validates only core tier at startup (auth, table storage, adapter mode). SharePoint config validated as warning, not blocking. Provisioning prerequisites are NOT validated at startup — they are validated at saga execution time.
+- Updated `backend/functions/src/hosts/project-setup/service-factory.ts` to call `validateProjectSetupStartupConfig()` instead of `validateCoreConfig()`.
+
+**Startup requirements now in scope:**
+
+- Core tier: AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_TABLE_ENDPOINT, APPLICATIONINSIGHTS_CONNECTION_STRING, HBC_ADAPTER_MODE, API_AUDIENCE
+- SharePoint tier (warning, not blocking): SHAREPOINT_TENANT_URL, SHAREPOINT_PROJECTS_SITE_URL
+- Role config (degraded-mode warnings): CONTROLLER_UPNS, ADMIN_UPNS
+
+**Startup requirements removed from scope:**
+
+- Provisioning prerequisites (GRAPH_GROUP_PERMISSION_CONFIRMED, SHAREPOINT_HUB_SITE_ID, SHAREPOINT_APP_CATALOG_URL, HB_INTEL_SPFX_APP_ID, OPEX_MANAGER_UPN) — validated at saga execution time only
+- Email delivery config (EMAIL_DELIVERY_API_KEY, EMAIL_FROM_ADDRESS) — stub, not consumed
+- Domain CRUD config — not part of this host
+- Department-specific MI grants (DEPT_BACKGROUND_ACCESS_*) — provisioning-only
+
+**Auth posture:**
+
+- Uses shared `withAuth()` middleware from `backend/functions/src/middleware/auth.ts` — no custom auth logic in the PS host
+- API audience validated via JWT `aud` claim against `API_AUDIENCE` env var
+- Auth exceptions are health (unauthenticated by design) and timer triggers (non-HTTP)
+- `ui-review` mode compatibility preserved via `ProjectSetupBackendContext.tsx` in the frontend
+
+**CORS posture:**
+
+- Tenant-specific: `https://hedrickbrotherscom.sharepoint.com` only (no wildcards)
+- `supportCredentials: true` (required for SPFx token passing)
+- Configured in `backend/functions/src/hosts/project-setup/host.json`
+
+**Managed identity / downstream grants:**
+
+- SharePoint: read/write to Projects list, site provisioning (via DefaultAzureCredential)
+- Graph API: group creation, membership management (via DefaultAzureCredential)
+- Table Storage: provisioning status, idempotency records (via DefaultAzureCredential)
+- SignalR: real-time push for provisioning progress (via connection string)
+- NOT needed: domain CRUD SharePoint lists, department background access grants
+
+**Tests added:**
+
+- 8 new tests in `project-setup-host-boundary.test.ts` covering AC-6: domain-scoped config validation, no provisioning prerequisites at startup, explicit auth posture, managed identity scope.
+- Full suite: 605 passed, 3 skipped, 0 failed. check-types clean. build clean.
+
+**Closure statement:**
+
+All 10 acceptance criteria (AC-1 through AC-10) from the boundary freeze plan are now satisfied. Phase 1 backend scope freeze is **closed**. The operational boundary is truthful and self-contained.
+
+**Evidence:**
+
+- Domain-scoped config validation: `backend/functions/src/utils/validate-config.ts` (`validateProjectSetupStartupConfig`)
+- Scoped service factory: `backend/functions/src/hosts/project-setup/service-factory.ts`
+- CORS/runtime config: `backend/functions/src/hosts/project-setup/host.json`
+- Tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (45 tests)
+
 ### Phase 2
 
 **Intended objective**
@@ -396,7 +453,7 @@ The following items are genuinely implemented in the current repo:
   - This means the wizard does not enforce the full intended submission contract.
 - **Backend package is not truly isolated to Project Setup scope.**
   - Evidence: `backend/functions/src/index.ts`, `backend/functions/src/services/service-factory.ts`.
-  - **Remediation implemented (Prompt-08, 2026-03-31):** Dedicated Project Setup host created with scoped composition root, service factory, and host.json. Boundary regression tests added (37 tests). AC-1, AC-2, AC-3, AC-5, AC-7, AC-8, AC-9, AC-10 satisfied. Remaining: AC-6 (config validation scoping, Prompt-09).
+  - **Remediation complete (Prompts 07-09, 2026-03-31):** Dedicated Project Setup host created with scoped composition root, service factory, domain-specific host.json, and domain-scoped config validation. All 10 acceptance criteria (AC-1 through AC-10) satisfied. 45 boundary regression tests. Phase 1 backend scope freeze: **closed**.
 - **Frontend/package-level release evidence is not green.**
   - Current `@hbc/spfx-project-setup` package test invocation still exposes failing page-level tests, which undercuts the Phase 5 “complete” claim.
 - **No repo proof of live deployment validation.**
@@ -473,7 +530,7 @@ The most accurate maturity description is:
 
 > The Project Setup / Estimating SPFx implementation is substantially built and directionally sound, but current repo truth still shows real launch blockers and several phase-complete claims that are stronger than the code, tests, and infrastructure evidence support.
 
-**Phase 1 Backend Remediation Progress (2026-03-31):** The backend deployment boundary has been decided (ADR-0124) and implemented (Prompt-08). A dedicated Project Setup host exists with scoped composition root, service factory, and host.json. Boundary regression tests (37 tests) prove AC-1, AC-2, AC-3, AC-5, AC-7. Full verification suite passes (597 tests, 0 failures). Phase 1 backend boundary is **substantially closed**; remaining residual is AC-6 (config validation scoping, Prompt-09).
+**Phase 1 Backend Remediation Complete (2026-03-31):** The backend deployment boundary has been decided (ADR-0124, Prompt-07), implemented (Prompt-08), and operationally scoped (Prompt-09). All 10 acceptance criteria (AC-1 through AC-10) are satisfied. A dedicated Project Setup host exists with scoped composition root, service factory, domain-specific host.json, domain-scoped config validation, and 45 boundary regression tests. Full verification suite passes (605 tests, 0 failures). Phase 1 backend scope freeze is **closed**.
 
 ## 10. Explicit Unresolved Questions
 

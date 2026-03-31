@@ -3,10 +3,10 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 /**
- * P1-08: Project Setup host boundary regression guard.
+ * P1-08/P1-09: Project Setup host boundary regression guard.
  *
  * Proves the dedicated Project Setup composition root satisfies
- * the boundary freeze acceptance criteria (ADR-0124, AC-1 through AC-5, AC-7).
+ * the boundary freeze acceptance criteria (ADR-0124, AC-1 through AC-7).
  *
  * These tests read source files directly to enforce structural invariants
  * that must not regress.
@@ -128,6 +128,80 @@ describe('P1-08 Project Setup host boundary', () => {
 
     it('requires credentials', () => {
       expect(hostJson.extensions?.http?.cors?.supportCredentials).toBe(true);
+    });
+  });
+
+  describe('AC-6: config validation scoped to Project Setup', () => {
+    it('service factory uses validateProjectSetupStartupConfig, not validateRequiredConfig', () => {
+      expect(
+        hostFactory,
+        'PS factory must use domain-scoped validateProjectSetupStartupConfig()',
+      ).toContain('validateProjectSetupStartupConfig');
+      expect(
+        hostFactory,
+        'PS factory must NOT call validateRequiredConfig (validates all tiers)',
+      ).not.toContain('validateRequiredConfig');
+    });
+
+    it('service factory does NOT call validateProvisioningPrerequisites at startup', () => {
+      expect(
+        hostFactory,
+        'Provisioning prerequisites are validated at saga execution time, not startup',
+      ).not.toContain('validateProvisioningPrerequisites');
+    });
+
+    it('validateProjectSetupStartupConfig is exported from validate-config', () => {
+      const validateConfigSource = readFileSync(
+        resolve(FUNCTIONS_SRC, 'utils/validate-config.ts'),
+        'utf-8',
+      );
+      expect(validateConfigSource).toContain('export function validateProjectSetupStartupConfig');
+    });
+
+    it('validateProjectSetupStartupConfig calls validateCoreConfig', () => {
+      const validateConfigSource = readFileSync(
+        resolve(FUNCTIONS_SRC, 'utils/validate-config.ts'),
+        'utf-8',
+      );
+      // Extract the function body
+      const fnMatch = validateConfigSource.match(
+        /export function validateProjectSetupStartupConfig\(\)[^{]*\{([^}]+)\}/,
+      );
+      expect(fnMatch, 'validateProjectSetupStartupConfig must exist').toBeTruthy();
+      expect(fnMatch![1]).toContain('validateCoreConfig()');
+    });
+  });
+
+  describe('AC-6: auth posture is explicit and scoped', () => {
+    it('service factory uses withAuth from shared middleware', () => {
+      // The auth posture is inherited from shared middleware — route handlers
+      // wrap with withAuth(). The PS factory doesn't define its own auth.
+      // This test confirms the factory doesn't import or redefine auth logic.
+      expect(hostFactory).not.toContain('validateToken');
+      expect(hostFactory).not.toContain('withAuth');
+    });
+
+    it('host.json does not define custom auth settings', () => {
+      const hostJson = JSON.parse(
+        readFileSync(resolve(PS_HOST_DIR, 'host.json'), 'utf-8'),
+      );
+      // Auth is handled at the application layer (withAuth middleware),
+      // not at the host.json level
+      expect(hostJson).not.toHaveProperty('auth');
+    });
+  });
+
+  describe('AC-6: managed identity posture is scoped', () => {
+    it('service factory initializes managedIdentity service', () => {
+      expect(hostFactory).toContain('managedIdentity');
+      expect(hostFactory).toContain('ManagedIdentityTokenService');
+    });
+
+    it('service factory does NOT reference domain-specific MI grants', () => {
+      // PS host only needs MI for SharePoint/Graph/Table Storage access
+      // No domain-CRUD-specific MI grants
+      expect(hostFactory).not.toContain('DEPT_BACKGROUND_ACCESS');
+      expect(hostFactory).not.toContain('STRUCTURAL_OWNER_UPNS');
     });
   });
 

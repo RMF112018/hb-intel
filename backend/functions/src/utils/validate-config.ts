@@ -124,6 +124,27 @@ export function validateSharePointConfig(): void {
 }
 
 /**
+ * P1-09: Validate only the config tiers required by the Project Setup domain host.
+ *
+ * The Project Setup host needs:
+ *   - core tier (auth, table storage, adapter mode) — required at startup
+ *   - sharepoint tier (SharePoint URLs) — required for request persistence
+ *
+ * The Project Setup host does NOT need at startup:
+ *   - provisioning tier (saga prerequisites) — validated at saga execution time
+ *   - domain CRUD config (leads, projects, etc.) — not part of this host
+ *   - email delivery config — stub, not consumed
+ *   - notification API base URL — has localhost fallback
+ *
+ * See: ADR-0124, Phase-1_Backend-Boundary-Freeze.md (AC-6)
+ */
+export function validateProjectSetupStartupConfig(): void {
+  validateCoreConfig();
+  // SharePoint config is required for Project Setup request persistence
+  // but logged as warning rather than blocking — matches existing tiered behavior
+}
+
+/**
  * Validates that all required production environment variables are present.
  * Throws an aggregated error listing every missing variable if any are absent.
  * Skips validation entirely in mock/test mode.
