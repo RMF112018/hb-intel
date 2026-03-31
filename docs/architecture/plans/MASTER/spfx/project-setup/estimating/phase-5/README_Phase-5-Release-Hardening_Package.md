@@ -18,10 +18,12 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-5_Release-Hardening-Baseline.md`](Phase-5_Release-Hardening-Baseline.md) — Launch surface (20 backend routes + 6 frontend surfaces), test inventory (1,254 tests across 126 files), 27 phase deliverable docs, 5 launch blockers (A1–A5), 4 significant gaps (B1–B4), 5 cleanup items (C1–C5), 0 unresolved contradictions
 
-3. `Prompt-02_Integration-Regression-and-End-to-End-Coverage.md`
+3. `Prompt-02_Integration-Regression-and-End-to-End-Coverage.md` **[COMPLETE]**
    - Add or tighten the integration, regression, and end-to-end coverage required for production confidence
    - Validate the isolated package against retained backend contracts and deployment modes
    - Turn critical launch assumptions into executable tests
+   - **Deliverables:**
+     - [`Phase-5_Test-Coverage-Evidence.md`](Phase-5_Test-Coverage-Evidence.md) — 22 new tests (request lifecycle, unsupported scope guard, mode switching), apiAudience bug fix, updated totals (1,276 tests across 128 files), closes A1 partial + B1 + B3
 
 4. `Prompt-03_Operational-Diagnostics-and-Release-Gates.md`
    - Add clear operator-facing diagnostics, release gates, go/no-go checks, and health visibility

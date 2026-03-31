@@ -70,11 +70,13 @@ export function setRuntimeConfig(config: Partial<IRuntimeConfig>): void {
   const functionAppUrl = config.functionAppUrl?.replace(/\/+$/, '') ?? '';
   const backendMode = normalizeBackendMode(config.backendMode);
   const allowBackendModeSwitch = normalizeBoolean(config.allowBackendModeSwitch);
-  if (functionAppUrl || backendMode || allowBackendModeSwitch !== undefined) {
+  const apiAudience = config.apiAudience ?? '';
+  if (functionAppUrl || backendMode || allowBackendModeSwitch !== undefined || apiAudience) {
     _config = {
       ...(functionAppUrl ? { functionAppUrl } : {}),
       ...(backendMode ? { backendMode } : {}),
       ...(allowBackendModeSwitch !== undefined ? { allowBackendModeSwitch } : {}),
+      ...(apiAudience ? { apiAudience } : {}),
     };
   }
 }
