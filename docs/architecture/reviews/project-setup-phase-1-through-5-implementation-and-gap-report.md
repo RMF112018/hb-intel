@@ -584,6 +584,59 @@ The Project Setup auth model is now explicitly frozen around a domain-scoped pro
 - Route protection: `backend/functions/src/middleware/auth.ts`
 - Auth contract enforcement: `backend/functions/src/middleware/auth-contract.test.ts`
 
+### Phase 3 Production Token and API Audience Consistency (2026-03-31, Prompt P3-08)
+
+**Production token-acquisition path (verified):**
+
+```
+SPFx Shell → mount.tsx → getApiAudience() → createSpfxApiTokenProvider(context, audience)
+                                                    ↓
+                                            SPFx aadTokenProviderFactory.getTokenProvider()
+                                                    ↓
+                                            Bearer token with aud = api://<client-id>
+                                                    ↓
+Backend → validateToken() → jose.jwtVerify(token, jwks, { audience: API_AUDIENCE })
+```
+
+**Frontend/backend audience contract:**
+
+| Side | Source | Variable | Format |
+|------|--------|----------|--------|
+| Frontend (SPFx) | Shell mount config or `VITE_API_AUDIENCE` | `apiAudience` | `api://<client-id>` |
+| Backend | Azure Function App setting | `API_AUDIENCE` | `api://<client-id>` |
+
+Both must resolve to the same app registration audience URI. The backend enforces this via `resolveApiAudience()` which throws a `ConfigError` in production if `API_AUDIENCE` is not set — there is no implicit fallback.
+
+**ui-review separation confirmed:**
+
+- ui-review mode never acquires a real API token. `createDevTokenFactory()` returns a placeholder.
+- ui-review mode uses `createUiReviewProjectSetupClient()` which operates on local mock data.
+- Production readiness gating in `ProjectSetupBackendContext` requires both Function App URL and token provider — ui-review activates automatically when either is absent.
+- No ui-review assumption contaminates production auth logic.
+
+**Ambiguity removed:**
+
+- Added explicit frontend/backend audience contract comment in `mount.tsx` (P3-08)
+- No alternate token paths remain for the SPFx production surface — `createSpfxApiTokenProvider` is the single canonical path
+- Deprecated `resolveSessionToken()` is isolated to non-SPFx PWA surfaces (documented in P3-07)
+
+**Closure statement:**
+
+The retained Project Setup release surface uses a single explicit production API token path (SPFx `aadTokenProviderFactory` → audience-scoped Bearer token → backend `validateToken` with explicit `API_AUDIENCE`). ui-review remains a bounded non-production mode with no token acquisition. The production token and audience consistency portion of Phase 3 is **closed**.
+
+**Remaining external dependencies:**
+
+- SharePoint admin must approve the API permission grant for the app registration
+- Azure Function App must have `API_AUDIENCE` configured to match the app registration
+- These are deployment prerequisites, not code gaps
+
+**Evidence:**
+
+- Audience contract comment: `apps/estimating/src/mount.tsx` (P3-08)
+- API audience resolution: `apps/estimating/src/config/runtimeConfig.ts` (`getApiAudience`)
+- Backend audience validation: `backend/functions/src/middleware/validateToken.ts` (`resolveApiAudience`)
+- Production readiness gating: `apps/estimating/src/project-setup/backend/ProjectSetupBackendContext.tsx`
+
 ### Phase 4
 
 **Intended objective**

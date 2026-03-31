@@ -48,9 +48,14 @@ export async function mount(el: HTMLElement, spfxContext?: WebPartContext, confi
     const permissionKeys = await resolveSpfxPermissions(spfxContext);
     await bootstrapSpfxAuth(spfxContext, permissionKeys);
 
-    // P3-02: Create SPFx API token provider for production-mode auth.
+    // P3-02/P3-08: Create SPFx API token provider for production-mode auth.
     // The audience is resolved from mount config or env — if absent, the
     // provider is undefined and production readiness will report the gap.
+    //
+    // Frontend/backend audience contract:
+    //   Frontend: apiAudience (from shell config or VITE_API_AUDIENCE)
+    //   Backend:  API_AUDIENCE env var (validated by middleware/validateToken.ts)
+    //   Both must resolve to the same app registration audience URI (api://<client-id>).
     const apiAudience = getApiAudience();
     if (apiAudience) {
       getApiToken = createSpfxApiTokenProvider(spfxContext, apiAudience);
