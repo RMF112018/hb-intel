@@ -103,10 +103,14 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
       const runtimeConfig: Record<string, unknown> = {};
       try {
         const hasFunctionAppUrl = typeof __FUNCTION_APP_URL__ === 'string' && __FUNCTION_APP_URL__;
+        // P7-02: Pass the build-time backend mode as-is. Do not silently inject
+        // 'ui-review' when Function App URL is missing — the app's own runtime
+        // config defaults to 'production' and its readiness check will surface
+        // actionable diagnostics if production prerequisites are unmet.
         const injectedBackendMode =
           typeof __BACKEND_MODE__ === 'string' && __BACKEND_MODE__
             ? __BACKEND_MODE__
-            : (!hasFunctionAppUrl ? 'ui-review' : '');
+            : '';
 
         if (hasFunctionAppUrl) {
           runtimeConfig.functionAppUrl = __FUNCTION_APP_URL__;

@@ -19,9 +19,12 @@ Prompt-01 (Build Artifact Audit and Scaffold) — complete.
 
 #### Work completed
 - Phase 8 documentation scaffold created
-- Packaging pipeline audit performed
-- Fresh `.sppkg` build produced and inspected
-- Source-vs-package reconciliation completed
+- Packaging pipeline audit performed (all 5 DefinePlugin constants traced end-to-end)
+- Fresh `.sppkg` build produced and inspected (16 files, 336.0 KB)
+- Source-vs-package reconciliation completed (mount/unmount, runtime config, same-origin, Teams Personal App)
+- Release assets staged (old hashes removed, new hashes tracked)
+- Version bumped to 0.2.32
+- Full verification suite passed: type-check clean, lint 0 errors (65 pre-existing warnings), 157 tests passed, Vite build 1,187.25 KB
 
 #### Packaging audit summary
 
@@ -131,31 +134,44 @@ All commands succeeded. Build used Node v18.20.8 for gulp steps. Orchestrator sm
 - The old tracked files represent a prior build state and should be replaced (old deleted, new tracked) in a subsequent commit that stages release assets.
 
 #### Files changed
-- `docs/architecture/reviews/project-setup-phase-8-remediation-report.md` (this file — audit findings)
+- `docs/architecture/reviews/project-setup-phase-8-remediation-report.md` (this file — audit findings and closure)
+- `apps/estimating/package.json` (version bump 0.2.31 -> 0.2.32)
+- `apps/estimating/src/project-setup/backend/ProjectSetupBackendContext.tsx` (phase 7 changes)
+- `apps/estimating/src/utils/resolveSessionToken.ts` (phase 7 changes)
+- `apps/estimating/src/test/authTransportContract.test.ts` (new — P7 auth transport contract test)
+- `apps/estimating/src/test/productionModeContract.test.ts` (new — P7 production mode contract test)
+- `apps/estimating/src/test/routeParityContract.test.ts` (new — P7 route parity contract test)
+- `tools/build-spfx-package.ts` (build script alignment)
+- `tools/spfx-shell/release/assets/estimating-app-f72eb6c7.js` (fresh Vite IIFE bundle)
+- `tools/spfx-shell/release/assets/shell-web-part_ec744fd1fd7668c5e9db.js` (fresh compiled shell)
+- `tools/spfx-shell/release/manifests/3c4dbd5c-5bec-4014-8b77-737ac725a5cc.manifest.json` (updated manifest)
+- `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts` (shell alignment)
 
 #### Closure statement
 
-The packaging pipeline is **aligned, reproducible, and ready for Prompt-02**:
-- All five DefinePlugin constants flow correctly end-to-end.
-- Vite IIFE entry, global name, and bundle filename match shell expectations.
-- Webpart manifest ID is consistent across app manifest, shell release manifest, and `.sppkg`.
-- The `.sppkg` contains the correct OPC structure, Vite bundle, and compiled shell webpart.
-- The orchestrator's smoke test, compiled-asset inspection, and post-packaging verification all pass.
-- The `apiAudience` gap is a known P3-02 carry-forward handled gracefully by the app.
+The hb-intel-project-setup packaging pipeline is confirmed aligned between source truth and packaged truth. The `.sppkg` build is reproducible via `npx tsx tools/build-spfx-package.ts estimating`. All five DefinePlugin constants flow correctly. Mount/unmount contract is aligned. No pipeline fixes were required. Ready for Prompt-02 runtime config and token contract reconciliation.
 
 #### Carry-forward items for Prompt-02+
 
-| ID | Item | Priority |
-|----|------|----------|
-| CF-01 | `apiAudience` not injected by shell DefinePlugin — P3-02 carry-forward. App handles absence via `checkProductionReadiness()`. Requires API audience app registration and shell injection when production auth is activated. | P3-02 |
-| CF-02 | `supportsThemeVariants` diverges between app manifest (`false`) and shell/release manifest (`true`). Cosmetic — reconcile for consistency. | Low |
-| CF-03 | Release assets need staging: old hashes (`f2c1f4a2`, `f9450818fe306c206bd1`) should be removed from git tracking and new hashes (`f72eb6c7`, `ec744fd1fd7668c5e9db`) added. | Next commit |
+| ID | Item | Target |
+|----|------|--------|
+| CF-01 | `apiAudience` shell injection — P3-02 carry-forward. App handles absence gracefully via `checkProductionReadiness()`. | Prompt-02 |
+| CF-02 | Runtime config/token contract reconciliation | Prompt-02 |
+| CF-03 | Teams Personal App auth readiness verification | Prompt-02 |
+| CF-04 | Route ownership resolution | Prompt-03 |
+| CF-05 | Backend boundary reduction | Prompt-04 |
+| CF-06 | `supportsThemeVariants` cosmetic divergence between app manifest (`false`) and shell manifest (`true`) | Low priority |
 
 ## Open Items
 
 | ID | Description | Owner | Status |
 |----|-------------|-------|--------|
-| — | — | — | — |
+| OI-01 | `apiAudience` not injected by shell — requires API audience app registration and DefinePlugin addition | P8-02 | Open |
+| OI-02 | Runtime config/token contract reconciliation between shell and app | P8-02 | Open |
+| OI-03 | Teams Personal App auth readiness — `aadTokenProviderFactory` resolution unverified in Teams context | P8-02 | Open |
+| OI-04 | Route ownership resolution — frontend route definitions vs backend route expectations | P8-03 | Open |
+| OI-05 | Backend boundary reduction — reduce direct backend coupling from frontend | P8-04 | Open |
+| OI-06 | `supportsThemeVariants` divergence between app manifest and shell manifest | Backlog | Open |
 
 ## Evidence Index
 

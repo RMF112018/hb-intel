@@ -110,7 +110,19 @@ function resolveDefaultBackendMode(domainDir: string): string {
     return process.env.BACKEND_MODE;
   }
 
-  return domainDir === 'estimating' ? 'ui-review' : '';
+  // P7-02: No domain-specific fallback. When BACKEND_MODE is unset, pass empty
+  // string so the app's own runtime default ('production') takes effect.
+  // Previously, estimating silently defaulted to 'ui-review' here, masking
+  // missing production configuration in shipped .sppkg artifacts.
+  if (domainDir) {
+    console.warn(
+      `[build-spfx-package] BACKEND_MODE is not set for domain "${domainDir}". ` +
+      'The packaged app will use its own runtime default (production). ' +
+      'Set BACKEND_MODE explicitly in CI/CD to avoid ambiguity.',
+    );
+  }
+
+  return '';
 }
 
 function cleanShellTemp(): void {

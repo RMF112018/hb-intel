@@ -64,20 +64,8 @@ export function createDevTokenFactory(): () => Promise<string> {
   return async (): Promise<string> => 'dev-placeholder-token';
 }
 
-/**
- * @deprecated P3-09: No longer consumed by any retained surface.
- * Accounting and admin apps migrated to `createSessionTokenFactory` (P3-09).
- * This function captures the token once and never refreshes — unsafe for
- * production use. Retained only for PWA dev-harness backward compatibility.
- * Safe to remove when all dev-harness consumers are migrated.
- */
-export function resolveSessionToken(session: ReturnType<typeof useCurrentSession>): string {
-  const payload = session?.rawContext?.payload;
-  if (payload && typeof payload === 'object') {
-    const rawToken =
-      (payload as Record<string, unknown>).accessToken ??
-      (payload as Record<string, unknown>).token;
-    if (typeof rawToken === 'string' && rawToken.trim().length > 0) return rawToken;
-  }
-  return session?.providerIdentityRef ?? 'mock-token';
-}
+// P7-05: The deprecated `resolveSessionToken()` function was removed.
+// It captured the token once, never refreshed, and returned 'mock-token' as
+// fallback — all of which are unsafe for production. No file in the estimating
+// app imported it. Other apps (accounting, admin, pwa) have their own copies
+// if they still need it for dev-harness compatibility.

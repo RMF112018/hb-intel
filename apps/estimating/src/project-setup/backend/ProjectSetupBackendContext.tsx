@@ -217,6 +217,16 @@ export function ProjectSetupBackendProvider({
     // with a diagnostic flag so the UI can explain the blockage.
     const productionBlocked = productionRequested && readiness !== null && !readiness.ready;
     const effectiveMode: BackendMode = productionBlocked ? 'ui-review' : requestedMode;
+
+    // P7-02: Warn when production mode is silently downgraded so deployment
+    // configuration issues are visible in browser console logs.
+    if (productionBlocked && readiness) {
+      console.warn(
+        '[HB-Intel] Production mode requested but prerequisites not met — ' +
+        'falling back to ui-review mode. Issues:',
+        readiness.issues,
+      );
+    }
     const isUiReview = effectiveMode === 'ui-review';
 
     if (isUiReview) {
