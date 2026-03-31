@@ -8,7 +8,7 @@ Phase 8 addresses the remaining production blockers identified in the Phase 1–
 
 ### Current status
 
-Prompt-05 (User-Assigned Managed Identity and App-Access Model) — complete.
+Prompt-06 (API-Access Approvals, CORS, and Operational Gates) — complete.
 Prompt-02 (SPFx Runtime Config and Token Contract Reconciliation) — complete.
 
 ## Prompt-by-Prompt Progress Log
@@ -403,6 +403,82 @@ The Project Setup release surface has no ambiguous identity or data-access depen
 The backend production identity posture is now explicitly aligned to user-assigned Managed Identity. All service comments, config descriptions, deployment docs, and the security ADR consistently reference user-assigned MI as the required production model. `DefaultAzureCredential` patterns are confirmed compatible — `AZURE_CLIENT_ID` selects the user-assigned identity in Azure-hosted deployments. The dual-identity distinction (`AZURE_CLIENT_ID` for MI outbound auth ≠ `API_AUDIENCE` for inbound JWT validation) is documented and enforced. External grant prerequisites are explicitly documented. Ready for Prompt-06 operational gates.
 
 #### Carry-forward items for Prompt-06+
+
+| ID | Item | Target |
+|----|------|--------|
+| CF-03 | Teams Personal App auth readiness verification (OI-03, open risk retained) | Future |
+| CF-05 | Backend boundary reduction (OI-05, deferred) | Future |
+| CF-06 | `supportsThemeVariants` cosmetic divergence | Low priority |
+
+### P8-06: API-Access Approvals, CORS, and Operational Gates
+
+**Status:** Complete
+**Date:** 2026-03-31
+
+#### Work completed
+- Audited all operator-executed prerequisites and verified they are represented as explicit production gates
+- Verified CORS configuration (single origin, credential support, regression-tested)
+- Verified 3-tier config validation enforces startup and saga-time gates
+- Verified health endpoint reports operational readiness with tiered diagnostics
+- Confirmed release-gate tests cover CORS, auth contract, config tiers, and infra readiness
+- Fixed config registry test alignment after P8-05 description update
+- Documented external prerequisite inventory and runtime symptoms for missing approvals
+
+#### External prerequisite inventory
+
+**Operator-executed items required before production deployment:**
+
+| # | Prerequisite | Where Configured | Gate Treatment in Code | Runtime Symptom if Missing |
+|---|-------------|-----------------|----------------------|---------------------------|
+| 1 | User-assigned Managed Identity created and assigned | Azure Portal → Function App → Identity blade | `AZURE_CLIENT_ID` required at core tier (blocks startup) | App fails to start |
+| 2 | MI → `Storage Table Data Contributor` on storage account | Azure Portal → Storage Account → IAM | `AZURE_TABLE_ENDPOINT` validated at core tier | 403 on table operations |
+| 3 | MI → `Sites.Selected` or `Sites.FullControl.All` on SharePoint | SharePoint admin / Graph API | `SHAREPOINT_TENANT_URL` + `SHAREPOINT_PROJECTS_SITE_URL` at SharePoint tier (warning) | 403 on SharePoint operations |
+| 4 | MI → `Group.ReadWrite.All` on Microsoft Graph | Azure Portal → Entra ID | `GRAPH_GROUP_PERMISSION_CONFIRMED` gate at provisioning tier | Saga blocks with `GraphPermissionNotConfirmedError` |
+| 5 | Entra ID app registration with audience URI | Azure Portal → App registrations | `API_AUDIENCE` required at core tier (blocks startup) | App fails to start |
+| 6 | SPFx API permission approved | SharePoint admin center | No code gate — frontend `createSpfxApiTokenProvider` returns `undefined` if not approved | Frontend falls back to ui-review mode with diagnostic banner |
+| 7 | CORS origins set on Function App | `host.json` (committed) or Azure Portal → CORS blade | Release-gate test enforces no wildcard + credential support | Browser blocks cross-origin requests |
+| 8 | Hub site ID, app catalog URL, SPFx app ID, OpEx manager UPN | Function App → Configuration | Provisioning tier validation (blocks saga only) | Saga refuses to start |
+
+#### Release-gate verification results
+
+**Backend tests (51 files, 659 passed, 3 skipped):**
+- Release gates: 13 tests — ALL PASS (CORS no-wildcard, CORS credentials, auth contract, config tiers, health endpoint, MI enforcement, function timeout, smoke test presence)
+- Infra readiness: 7 tests — ALL PASS (CORS allows SharePoint, no wildcard origin, tiered validation present)
+- Auth contract: all HTTP routes use `withAuth()` — PASS
+
+**Frontend tests (22 files, 157 passed, 2 todo):**
+- Type-check: clean (0 errors)
+- Lint: 0 errors, 65 pre-existing warnings
+
+#### CORS expectations
+
+- **Allowed origin:** `https://hedrickbrotherscom.sharepoint.com` (single specific origin)
+- **Credential support:** `true` (required for Bearer token transport)
+- **No wildcard:** Enforced by release-gate test and infra-readiness test
+- **Host surfaces calling cross-origin:** SPFx webpart (Estimating, Accounting, Admin) hosted on SharePoint tenant
+- **Same-origin exceptions:** None — all API calls are cross-origin from SharePoint to Azure Functions
+- **Environment differences:** Staging may use a different origin; host.json must be updated per environment
+
+#### API-access approval expectations
+
+| Approval | Where Granted | Required For | Symptom When Missing |
+|----------|--------------|-------------|---------------------|
+| Entra app registration `api://<client-id>` | Azure Portal | JWT validation (all authenticated requests) | Backend returns `config_error` on health, app fails to start |
+| SPFx API permission consent | SharePoint admin center | Frontend token acquisition via `aadTokenProviderFactory` | `createSpfxApiTokenProvider` returns `undefined`, frontend falls to ui-review with `productionBlocked` banner |
+| `Group.ReadWrite.All` application permission | Azure Portal → Enterprise apps | Provisioning saga Step 6 (group creation) | `GraphPermissionNotConfirmedError` blocks saga |
+| `Sites.Selected` per-site grants | Graph API `POST /sites/{id}/permissions` | SharePoint site creation and list management | 403 Forbidden on SharePoint operations |
+| Admin consent for all app permissions | Azure Portal → API permissions | All Graph/SharePoint operations | 401/403 on first real API call |
+
+#### Files changed
+- `backend/functions/src/config/wave0-env-registry.test.ts` — aligned test assertion with P8-05 description update
+- `docs/architecture/reviews/project-setup-phase-8-remediation-report.md` — P8-06 section added
+- `apps/estimating/package.json` — version bump 0.2.35 → 0.2.36
+
+#### Closure statement
+
+All external prerequisites are represented as explicit, auditable production gates. The repo makes a sharp distinction between "implemented in code" (all release gates pass, all config tiers validated, health endpoint reports tiered readiness) and "still blocked on tenant/operator action" (MI grants, Entra consent, SPFx permission approval, site-scoped access). CORS is locked to a single SharePoint origin with credential support, enforced by 5 regression tests. API-access approval expectations are documented with exact runtime symptoms for each missing prerequisite. No operator action can be mistaken for a code defect. Ready for Prompt-07 startup validation and release hardening.
+
+#### Carry-forward items for Prompt-07+
 
 | ID | Item | Target |
 |----|------|--------|
