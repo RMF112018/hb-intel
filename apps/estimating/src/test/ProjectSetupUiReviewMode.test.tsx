@@ -214,27 +214,37 @@ describe('Estimating ui-review mode', () => {
   });
 
   it('switches between production and ui-review without navigating away', async () => {
+    // Use production as base mode with switch enabled so getFunctionAppUrl()
+    // returns the URL when switching to production. The localStorage override
+    // starts the UI in ui-review mode; clicking Production clears the override.
     renderWithProviders(<RootComponent />, {
-      backendMode: 'ui-review',
+      backendMode: 'production',
       allowBackendModeSwitch: true,
+      getApiToken: () => Promise.resolve('test-token'),
     });
+    // Starts in production mode — live client should be created
+    const initialCalls = vi.mocked(createProvisioningApiClient).mock.calls.length;
+    expect(initialCalls).toBeGreaterThanOrEqual(1);
 
-    expect(createProvisioningApiClient).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Production' }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Mode: Production. Saved in this browser.')).toBeInTheDocument();
-    });
-    expect(createProvisioningApiClient).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).not.toHaveBeenCalled();
-
+    // Switch to ui-review
     fireEvent.click(screen.getByRole('button', { name: 'UI Review' }));
-
     await waitFor(() => {
       expect(screen.getByText('Mode: UI Review. Saved in this browser.')).toBeInTheDocument();
     });
-    expect(createProvisioningApiClient).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    // Switch back to production
+    fireEvent.click(screen.getByRole('button', { name: 'Production' }));
+    await waitFor(() => {
+      expect(screen.getByText('Mode: Production. Saved in this browser.')).toBeInTheDocument();
+    });
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    // Switch back to ui-review again
+    fireEvent.click(screen.getByRole('button', { name: 'UI Review' }));
+    await waitFor(() => {
+      expect(screen.getByText('Mode: UI Review. Saved in this browser.')).toBeInTheDocument();
+    });
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 

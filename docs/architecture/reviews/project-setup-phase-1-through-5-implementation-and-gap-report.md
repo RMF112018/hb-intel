@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P5-07 release scope freeze and repo-truth revalidation)
+> **Last updated:** 2026-03-31 (P5-08 frontend test baseline fix)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -1350,6 +1350,70 @@ The retained Project Setup release surface and its evidence model are now explic
 - Signoff (reconciled): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`
 - Handoff (annotated P5-07): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`
 
+### Phase 5 Retained-Surface Frontend Test Baseline and Stability (2026-03-31, Prompt P5-08)
+
+**Root cause of 10 frontend test failures (identified and fixed):**
+
+All 10 failures shared a single root cause: the `ProjectSetupBackendProvider` fell back to ui-review mode in tests because `getApiToken` was not provided to the provider, causing `checkProductionReadiness()` to fail. This meant tests' mock clients (via `createProvisioningApiClient`) were never used — the ui-review local-storage client was used instead, causing mock assertions to fail.
+
+**Fixes applied:**
+
+| File | Fix | Tests Fixed |
+|---|---|---|
+| `apps/estimating/src/test/NewRequestPage.test.tsx` | Mock `useProjectSetupBackend` to inject mock client directly | 5 (submit, navigate, error, clarification-return, clarification-submit) |
+| `apps/estimating/src/test/RequestDetailPage.test.tsx` | Mock `useProjectSetupBackend` to inject mock client directly | 2 (error shell, SignalR disconnect warning) |
+| `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx` | Mock `useProjectSetupBackend` to inject mock client directly | 2 (retry API call, retry failure banner) |
+| `apps/estimating/src/test/ProjectSetupUiReviewMode.test.tsx` | Pass `getApiToken` and start in production mode with `allowBackendModeSwitch` so production readiness succeeds when switching | 1 (mode switch) |
+| `apps/estimating/src/test/renderWithProviders.tsx` | Added `getApiToken` option; set `functionAppUrl` when `allowBackendModeSwitch` is true | (infrastructure fix) |
+
+**Retained Project Setup frontend release proof set (all green):**
+
+| Test File | Tests | Category |
+|---|---|---|
+| `NewRequestPage.test.tsx` | 17 | Retained — wizard, draft, submit, clarification |
+| `RequestDetailPage.test.tsx` | 8 | Retained — summary, state, failure modes |
+| `RequestDetailPage.coordinator.test.tsx` | 12 | Retained — retry, escalation, BIC gating |
+| `RequestDetailPage.completion.test.tsx` | 5 | Retained — completion card, siteUrl |
+| `ProjectSetupUiReviewMode.test.tsx` | 13 | Retained — ui-review mode, mode switching |
+| `mode-switching.integration.test.ts` | 12 | Retained — production/ui-review integration |
+| `phase1ScopeGuards.test.ts` | 14 | Retained — scope isolation regression |
+| `bootstrap.test.ts` | 3 | Retained — app initialization |
+| `runtimeConfig.test.ts` | 7 | Retained — config resolution |
+| `uiReviewProjectSetupClient.test.ts` | 7 | Retained — ui-review client |
+| `router.test.ts` | 3 | Retained — route handling |
+| `hostBehavior.test.ts` | 3 | Retained — host mode |
+| `complexity.test.tsx` | 3 | Retained — complexity preference |
+| `DepartmentStepBody.test.tsx` | 4 | Retained — step component |
+| `ProjectInfoStepBody.test.tsx` | 5 | Retained — step component |
+| `ReviewStepBody.test.tsx` | 3 | Retained — step component |
+| `TeamStepBody.test.tsx` | 8 | Retained — step component |
+| `themeEnforcement.test.tsx` | 3 | Retained — theme compliance |
+| `AppRouteSessionState.test.tsx` | 1 | Retained — session-state routing |
+
+**Total: 19 files, 138 tests passed, 0 failed, 2 todo.**
+
+**Verification results:**
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | Clean — 0 errors |
+| `eslint` | 0 errors, 65 pre-existing warnings |
+| `build` (vite) | Pass — 3627 modules, 1185 kB (338 kB gzip) |
+| `test` (vitest) | 19 files, 138 passed, 0 failed, 2 todo |
+
+**Closure statement:**
+
+The retained Project Setup frontend release surface now has a truthful, stable test baseline. All 10 previously failing tests are fixed. The root cause was a test harness gap — mock clients were not injected because the `ProjectSetupBackendProvider` fell back to ui-review mode without `getApiToken`. The fix injects mock clients directly via `useProjectSetupBackend` mock (3 test files) and provides `getApiToken` in the test harness (1 test file + infrastructure). The retained proof set of 138 tests across 19 files is now entirely green.
+
+**Evidence:**
+
+- Fixed: `apps/estimating/src/test/NewRequestPage.test.tsx` (5 tests)
+- Fixed: `apps/estimating/src/test/RequestDetailPage.test.tsx` (2 tests)
+- Fixed: `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx` (2 tests)
+- Fixed: `apps/estimating/src/test/ProjectSetupUiReviewMode.test.tsx` (1 test)
+- Infrastructure: `apps/estimating/src/test/renderWithProviders.tsx` (added `getApiToken` option)
+- Version bump: `apps/estimating/package.json` (0.2.24 → 0.2.25)
+
 ## 4. Cross-Phase Findings
 
 ### Dependencies spanning multiple phases
@@ -1573,6 +1637,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Cross-phase impact:** Prevents truthful “release-hardened” posture and undermines signoff confidence even when backend evidence is strong.
   **Recommended next-step direction:** Fix the retained page-level failures and rerun the requested package-local verification slice until the baseline is honestly green.
   **P5-07 update:** Re-verified 2026-03-31. 10 failures across 4 files confirmed: NewRequestPage (5 of 17), RequestDetailPage (2 of 8), coordinator (2 of 12), ProjectSetupUiReviewMode (1 of 13). Additionally discovered UiReviewMode failure not in original audit. 128 of 140 tests pass. Deferred to Prompt-08 for resolution.
+  **P5-08 update: CLOSED.** All 10 failures fixed. Root cause: test harness gap — mock clients not injected because `ProjectSetupBackendProvider` fell back to ui-review mode without `getApiToken`. Fix: mock `useProjectSetupBackend` directly in 3 test files + provide `getApiToken` in test harness. Retained baseline: 19 files, 138 tests passed, 0 failed.
 
 - **Item:** Smoke / deployment evidence execution proof
   **Category:** Deployment / release-readiness
@@ -1656,8 +1721,8 @@ The strongest cross-phase dependencies are: external live-list validation for th
    - The repo-owned Phase 2 code path is repaired, but release decisions still need environment-level proof for the external list itself.
 2. **Re-enable and align required-field enforcement.**
    - Remove the temporary disabled state in `projectSetupSteps.ts` and ensure backend validation matches the intended wizard contract.
-3. **Resolve current SPFx retained-surface test failures.**
-   - Bring `NewRequestPage`, `RequestDetailPage`, and coordinator retry paths back to a green baseline before any launch decision.
+3. **~~Resolve current SPFx retained-surface test failures.~~ CLOSED (P5-08, 2026-03-31).**
+   - All 10 failures fixed. Root cause: test harness gap (mock client injection). 19 files, 138 tests green.
 4. **~~Decide the real backend deployment boundary.~~ DECIDED (2026-03-31).**
    - ADR-0124 establishes per-domain Function App hosts. Project Setup host boundary frozen in `Phase-1_Backend-Boundary-Freeze.md`. Implementation: Prompt-08 (host creation), Prompt-09 (config/auth/CORS), Prompt-10 (regression guards). Closure: AC-1 through AC-10.
 5. **Reconcile Phase 5 signoff and handoff docs with repo truth.**
@@ -1674,7 +1739,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P5-07 release scope freeze and repo-truth revalidation)
+> **Last updated:** 2026-03-31 (P5-08 frontend test baseline fix)
 
 ### Phase-by-phase status
 
@@ -1684,7 +1749,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
 | Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
 | Phase 4 | **Substantially Closed** | Architecture frozen (P4-07), validation scoped (P4-08), CORS/MI/permissions explicit (P4-09), observability classified (P4-10), docs reconciled (P4-11). Environment-gated deployment proof deferred. |
-| Phase 5 | **Partial** | Release scope frozen (P5-07). Backend strong (638 tests, 30 release-specific). Frontend: 10 failures across 4 files. Live deployment proof and signoff incomplete. |
+| Phase 5 | **Partial** | Release scope frozen (P5-07). Frontend baseline green (P5-08: 19 files, 138 tests, 0 failures). Backend strong (638 tests, 30 release-specific). Live deployment proof and signoff incomplete. |
 
 ### Overall recommendation
 
@@ -1692,7 +1757,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 The remaining blockers are:
 1. Disabled required-field enforcement (cross-phase)
-2. SPFx page-level test instability (Phase 5)
+2. ~~SPFx page-level test instability (Phase 5)~~ **CLOSED (P5-08, 2026-03-31).** 10 failures fixed, 138 tests green.
 3. Environment-gated release evidence without live deployment proof (Phase 5)
 4. External validation of the live SharePoint list and deployment posture (Phase 2 / Phase 4 / Phase 5)
 

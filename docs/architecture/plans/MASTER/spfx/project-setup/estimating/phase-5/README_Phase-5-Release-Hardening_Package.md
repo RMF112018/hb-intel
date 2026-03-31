@@ -62,6 +62,16 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - Audit report progress note (P5-07): re-verification table, canonical release surface, evidence classification (16 items), frontend test detail (4 failing files), 4 remaining blockers, 4 release-readiness questions
 
+9. `Prompt-08_Phase-5-Retained-Surface-Frontend-Test-Baseline-and-Stability.md` **[COMPLETE]**
+   - Fix all 10 frontend test failures (root cause: mock client injection gap)
+   - Mock `useProjectSetupBackend` in 3 test files; add `getApiToken` to test harness
+   - Bring retained frontend test surface to green baseline: 19 files, 138 tests, 0 failures
+   - **Deliverables:**
+     - Fixed tests: `NewRequestPage.test.tsx` (5), `RequestDetailPage.test.tsx` (2), `RequestDetailPage.coordinator.test.tsx` (2), `ProjectSetupUiReviewMode.test.tsx` (1)
+     - Infrastructure fix: `renderWithProviders.tsx` (`getApiToken` option, `functionAppUrl` for mode switch)
+     - Audit report progress note (P5-08): root cause, fix table, retained proof set (19 files), verification results
+     - Version bump: `@hbc/spfx-project-setup` 0.2.24 → 0.2.25
+
 ## Recommended use
 
 - Run the prompts **in order**.

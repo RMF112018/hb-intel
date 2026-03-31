@@ -39,6 +39,24 @@ vi.mock('@hbc/provisioning', async (importOriginal) => {
   return { ...actual, createProvisioningApiClient: vi.fn(() => mockClient) };
 });
 
+vi.mock('../project-setup/backend/ProjectSetupBackendContext.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../project-setup/backend/ProjectSetupBackendContext.js')>();
+  return {
+    ...actual,
+    useProjectSetupBackend: vi.fn(() => ({
+      backendMode: 'production' as const,
+      isUiReview: false,
+      client: mockClient,
+      functionAppUrl: 'https://test-functions.azurewebsites.net',
+      canSwitchBackendMode: false,
+      setBackendMode: vi.fn(),
+      productionReadiness: null,
+      productionBlocked: false,
+      getToken: vi.fn().mockResolvedValue('test-token'),
+    })),
+  };
+});
+
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-router')>();
   return {

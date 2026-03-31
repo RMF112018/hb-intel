@@ -21,6 +21,8 @@ interface RenderOptions {
   backendMode?: 'production' | 'ui-review';
   allowBackendModeSwitch?: boolean;
   functionAppUrl?: string;
+  /** Provide a token factory to satisfy production readiness checks in tests. */
+  getApiToken?: () => Promise<string>;
 }
 
 /**
@@ -64,6 +66,7 @@ export function renderWithProviders(
     backendMode = 'production',
     allowBackendModeSwitch = false,
     functionAppUrl = 'https://test-functions.azurewebsites.net',
+    getApiToken,
   } = options;
 
   // Pre-seed Zustand stores before render
@@ -73,7 +76,7 @@ export function renderWithProviders(
   setRuntimeConfig({
     backendMode,
     allowBackendModeSwitch,
-    functionAppUrl: backendMode === 'production' ? functionAppUrl : undefined,
+    functionAppUrl: backendMode === 'production' || allowBackendModeSwitch ? functionAppUrl : undefined,
   });
 
   function TestWrapper({ children }: { children: React.ReactNode }): React.ReactElement {
@@ -81,7 +84,7 @@ export function renderWithProviders(
       <HbcThemeProvider>
         <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
           <SessionStateProvider executor={testSessionExecutor}>
-            <ProjectSetupBackendProvider>{children}</ProjectSetupBackendProvider>
+            <ProjectSetupBackendProvider getApiToken={getApiToken}>{children}</ProjectSetupBackendProvider>
           </SessionStateProvider>
         </ComplexityProvider>
       </HbcThemeProvider>
