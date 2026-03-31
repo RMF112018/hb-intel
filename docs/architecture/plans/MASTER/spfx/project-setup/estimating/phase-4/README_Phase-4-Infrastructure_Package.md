@@ -61,6 +61,13 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - Audit report progress note (P4-07): re-verification table, canonical/transitional classification, frozen infrastructure posture, updated Phase 4 status from "Partial to substantial" to "Substantially Closed"
 
+9. `Prompt-08_Phase-4-Deployment-Scoped-Config-Validation-and-Health-Readiness-Alignment.md` **[COMPLETE]**
+   - Re-verify config validation and health/readiness alignment against PS deployment boundary
+   - Confirm all acceptance criteria already satisfied by P1-09, P4-02, P4-05
+   - Document canonical validation scope, health mapping, and boot blocker absence
+   - **Deliverables:**
+     - Audit report progress note (P4-08): validation scope table, health/readiness mapping, over-broad boot blocker confirmation absent, environment-gated dependencies
+
 ## Recommended use
 
 - Run the prompts **in order**.

@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P4-07 infrastructure architecture freeze)
+> **Last updated:** 2026-03-31 (P4-08 deployment-scoped validation and health alignment)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -891,6 +891,84 @@ The Project Setup infrastructure posture is now explicitly frozen around a domai
 2. When will the monolithic host be retired? Per ADR-0124, it is preserved during transition but has no explicit retirement timeline.
 3. Will observability be operationalized before or after the Phase 5 release decision?
 
+### Phase 4 Deployment-Scoped Config Validation and Health/Readiness Alignment (2026-03-31, Prompt P4-08)
+
+**Re-verification against P4-08 acceptance criteria:**
+
+All four acceptance criteria were verified against current repo truth. The required deployment-scoped validation and health/readiness alignment work was already implemented by P1-09 (AC-6 config validation scoping), P4-02 (tiered config validation), and P4-05 (operationalReadiness health output). No additional code changes are required.
+
+| P4-08 Acceptance Criterion | Status | Implementing Work |
+|---|---|---|
+| Validation scoped to retained PS deployment posture | **Satisfied** | P1-09: `validateProjectSetupStartupConfig()` validates core tier only at startup. SharePoint as warning. Provisioning deferred to saga time. |
+| Health/readiness truthfully describes PS host | **Satisfied** | P4-05: `operationalReadiness` (ready/degraded/blocked), `configTiers` (core/sharepoint/provisioning), `provisioningPrereqs` detail. Non-blocking HTTP 200. |
+| Broad shared-host boot blockers removed/narrowed/isolated | **Satisfied** | P1-09: PS factory calls `validateProjectSetupStartupConfig()` not `validateRequiredConfig()`. Domain CRUD config, email config, notification API, department MI grants excluded from startup. |
+| Review doc updated with truthful progress notes | **Satisfied** | This progress note. |
+
+**Canonical Project Setup validation scope:**
+
+Startup (blocking):
+- Core tier: AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_TABLE_ENDPOINT, APPLICATIONINSIGHTS_CONNECTION_STRING, HBC_ADAPTER_MODE, API_AUDIENCE
+
+Startup (warning, not blocking):
+- SharePoint tier: SHAREPOINT_TENANT_URL, SHAREPOINT_PROJECTS_SITE_URL
+- Role config: CONTROLLER_UPNS, ADMIN_UPNS
+
+Deferred to saga execution time:
+- Provisioning prerequisites: GRAPH_GROUP_PERMISSION_CONFIRMED, SHAREPOINT_HUB_SITE_ID, SHAREPOINT_APP_CATALOG_URL, HB_INTEL_SPFX_APP_ID, OPEX_MANAGER_UPN
+
+Not validated by PS host (excluded):
+- Domain CRUD config (leads, projects, estimating, etc.)
+- Email delivery config (EMAIL_DELIVERY_API_KEY, EMAIL_FROM_ADDRESS) — stub
+- Notification API base URL (NOTIFICATION_API_BASE_URL) — localhost fallback
+- Department background access grants (DEPT_BACKGROUND_ACCESS_*)
+
+**Health/readiness mapping to PS deployment truth:**
+
+| Health Field | PS Deployment Meaning |
+|---|---|
+| `operationalReadiness: blocked` | Core auth config missing — no authenticated requests can succeed |
+| `operationalReadiness: degraded` | Core OK but SharePoint, provisioning, or SignalR incomplete |
+| `operationalReadiness: ready` | All tiers operational |
+| `configTiers.core` | Maps to `validateCoreConfig()` — 6 required vars |
+| `configTiers.sharepoint` | Maps to `validateSharePointConfig()` — 2 required vars |
+| `configTiers.provisioning` | Maps to `validateProvisioningPrerequisites()` — 5 saga-time gates |
+| `integrations.signalR` | Conditional: `RealSignalRPushService` or `NoOpSignalRPushService` |
+| `integrations.email` | Stub: always `not-configured` until real provider wired |
+| `integrations.notifications` | Informational: localhost fallback if not set |
+
+**Over-broad boot blockers confirmed absent in PS host:**
+
+- PS factory uses `validateProjectSetupStartupConfig()`, not `validateRequiredConfig()` (test-enforced: AC-6 in `project-setup-host-boundary.test.ts`)
+- No provisioning prerequisites validated at startup (test-enforced: AC-6 suite)
+- No email or notification config required at startup
+- No domain CRUD config required at startup
+- No department MI grants required at startup
+- Lazy domain CRUD service initialization does not exist in PS factory (only 9 eager services)
+
+**Remaining environment-gated dependencies:**
+
+These are external prerequisites — the PS host reports their status through the health endpoint but cannot validate them in repo code alone:
+1. Azure Function App exists with system-assigned Managed Identity
+2. MI role assignments applied (Storage Table Data Contributor, Sites.FullControl.All, Group.ReadWrite.All)
+3. All 8 core+sharepoint env vars configured in the deployment environment
+4. CORS verified in Azure portal against `host.json`
+5. SPFx API access approved in SharePoint admin center
+
+**Closure statement:**
+
+Project Setup startup/config validation and health/readiness reporting are explicitly scoped to the retained Project Setup deployment boundary rather than a broader shared-host posture. The validation model is tiered (core blocking → sharepoint warning → provisioning deferred), the health endpoint truthfully reports per-tier status, and no over-broad boot blockers exist. All four P4-08 acceptance criteria are satisfied by existing implementation (P1-09, P4-02, P4-05) with test enforcement.
+
+**Evidence:**
+
+- Domain-scoped validation: `backend/functions/src/utils/validate-config.ts` (`validateProjectSetupStartupConfig`)
+- PS service factory validation call: `backend/functions/src/hosts/project-setup/service-factory.ts` (line 64)
+- Health endpoint: `backend/functions/src/functions/health/index.ts`
+- Tiered readiness computation: `computeReadiness()` in health/index.ts
+- Config tier classification: `backend/functions/src/config/wave0-env-registry.ts` (`configTier` field)
+- AC-6 validation tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (8 tests)
+- Infrastructure readiness tests: `backend/functions/src/test/infra-readiness.test.ts` (7 tests)
+- Health endpoint tests: `backend/functions/src/functions/health/__tests__/health.test.ts`
+
 ### Phase 5
 
 **Intended objective**
@@ -1255,7 +1333,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P4-07 infrastructure architecture freeze)
+> **Last updated:** 2026-03-31 (P4-08 deployment-scoped validation and health alignment)
 
 ### Phase-by-phase status
 
