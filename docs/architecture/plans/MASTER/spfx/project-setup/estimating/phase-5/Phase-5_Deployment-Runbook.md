@@ -27,16 +27,16 @@ Migrate four JSON-serialized array columns from `Text` (255-char limit) to `Note
 ### Infrastructure (One-Time Setup)
 
 - [ ] Azure Function App created with Node.js 20+ runtime
-- [ ] System-assigned Managed Identity enabled on the Function App
+- [ ] User-assigned Managed Identity created and assigned to the Function App
 - [ ] Azure Storage Account created for Table Storage
 - [ ] Azure SignalR Service instance created (optional — degrades gracefully)
 - [ ] Application Insights instance created
 
 ### Identity Grants (One-Time, IT-Approved)
 
-- [ ] MI → `Storage Table Data Contributor` on the storage account
-- [ ] MI → `Sites.FullControl.All` (or `Sites.Selected` per project) on SharePoint tenant
-- [ ] MI → `Group.ReadWrite.All` (application permission) on Microsoft Graph
+- [ ] User-assigned MI → `Storage Table Data Contributor` on the storage account
+- [ ] User-assigned MI → `Sites.FullControl.All` (or `Sites.Selected` per project) on SharePoint tenant
+- [ ] User-assigned MI → `Group.ReadWrite.All` (application permission) on Microsoft Graph
 - [ ] Entra ID app registration created with Application ID URI (`api://<client-id>`)
 - [ ] SPFx API access request approved in SharePoint admin center
 
@@ -45,7 +45,7 @@ Migrate four JSON-serialized array columns from `Text` (255-char limit) to `Note
 | Variable | Example Value | Notes |
 |----------|---------------|-------|
 | `AZURE_TENANT_ID` | `00000000-...` | Entra ID tenant |
-| `AZURE_CLIENT_ID` | `00000000-...` | MI client ID |
+| `AZURE_CLIENT_ID` | `00000000-...` | User-assigned MI client ID (NOT the same as API_AUDIENCE) |
 | `API_AUDIENCE` | `api://00000000-...` | App registration audience URI |
 | `AZURE_TABLE_ENDPOINT` | `https://account.table.cosmos.azure.com:443/` | Table Storage endpoint |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | `InstrumentationKey=...` | App Insights |

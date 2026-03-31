@@ -12,8 +12,10 @@ All HTTP endpoints validate an Entra ID Bearer token via the `validateToken` mid
 (using the `jose` library). The `triggeredBy` / `submittedBy` fields are always overwritten
 with the identity from the validated token — never trusted from the request body.
 
-All SharePoint and Graph API calls use the Function App's system-assigned Managed Identity
-(`DefaultAzureCredential`). No client secrets are used for SharePoint access in production.
+All SharePoint and Graph API calls use the Function App's user-assigned Managed Identity
+(`DefaultAzureCredential` with `AZURE_CLIENT_ID` set to the MI's client ID). No client secrets
+are used for SharePoint access in production. User-assigned MI is preferred for portability
+across resource re-creation and explicit identity selection.
 
 The timer trigger uses Managed Identity only, with no user context.
 
