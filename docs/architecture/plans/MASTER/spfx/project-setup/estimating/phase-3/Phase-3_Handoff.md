@@ -1,11 +1,11 @@
 # Phase 3 — Final Verification and Handoff
 
-> Created: 2026-03-30
-> Prompt: P3-06 Final Verification and Handoff
+> **Original handoff:** 2026-03-30 (P3-06)
+> **Auth remediation:** 2026-03-31 (P3-07 through P3-11)
+>
+> **Reconciliation note (2026-03-31):** The original handoff overstated completion — the audit found deprecated token paths still live in retained surfaces, cross-surface auth convergence incomplete, and proxy stub ambiguous. Remediation (P3-07-P3-11) froze the auth architecture, verified production token/audience consistency, converged all retained surfaces to factory-based token providers, explicitly excluded proxy from PS release scope, and added auth readiness tests. Phase 3 is now honestly closed with RBAC convergence as a documented future follow-on.
 
 ## Phase 3 Status: COMPLETE
-
-All 7 success criteria from the Phase 3 Action Plan are satisfied. The Project Setup package now has a production-safe auth model.
 
 ## Verification Results
 

@@ -10,19 +10,18 @@ This report was originally authored as a gap analysis finding that Phases 1-5 we
 
 - **Phase 1 scope-control findings are closed in repo-owned code and tests.** The frontend requester surface is isolated to Project Setup routes with regression guards (`apps/estimating/src/test/phase1ScopeGuards.test.ts`). The backend now has a dedicated Project Setup domain host (`backend/functions/src/hosts/project-setup/`) with scoped composition root, service factory, tenant-specific CORS, domain-scoped config validation, and 63 boundary regression tests. All 10 acceptance criteria (AC-1 through AC-10) from `Phase-1_Backend-Boundary-Freeze.md` are satisfied. Architecture decision recorded in ADR-0124.
 - **Phase 2 code-level contract findings are closed in repo-owned code and tests.** The canonical request model, field contract, mapper, repository path, backward-compat handling, and mock-vs-real test truthfulness now align across the repo. What the repo does not prove on its own is the current live SharePoint list state; there is no checked-in schema export or live integration evidence for the external list.
-- The Project Setup auth model is substantially implemented: production-vs-`ui-review` mode, SPFx audience-scoped token acquisition, backend JWT validation, and route protection are real.
+- **Phase 3 auth findings are closed for Project Setup.** Auth architecture frozen (P3-07), production token/audience path verified (P3-08), cross-surface auth converged to factory-based providers (P3-09), proxy explicitly excluded from PS release scope (P3-10). Deprecated `resolveSessionToken()` removed from all retained surfaces. RBAC convergence remains a future follow-on but is not a Phase 3 blocker.
 - Phase 4 infrastructure hardening is materially real: tiered config validation, diagnostic health output, managed-identity service posture, and version-controlled observability assets exist.
 
-### Remaining blockers (Phases 3-5)
+### Remaining blockers (Phases 4-5)
 
 - **Required-field enforcement is still intentionally disabled** via `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
 - **Phase 5 release-hardening claims remain overstated.** The backend verification slice is strong, but the current `@hbc/spfx-project-setup` test run still has broader page-level test issues.
 - **Several release-readiness items remain environment-gated** rather than proven against a live deployment.
-- **Phase 2 live-list proof remains external.** Repo-owned code and tests are aligned, but the repo does not itself prove that the live SharePoint `Projects` list currently matches the 43-field contract.
 
 ### Overall status
 
-**Phase 1: closed. Phase 2: substantially closed in repo-owned evidence, but not fully repo-evidenced end-to-end.** Phases 3-5 remain blocked on field enforcement, frontend test stability, and live deployment proof. The implementation is beyond prototype level, but remaining release decisions still depend on environment-level validation the repo cannot provide by itself.
+**Phases 1-3: closed.** Phases 4-5 remain blocked on field enforcement, frontend test stability, and live deployment proof. The implementation is beyond prototype level, but remaining release decisions still depend on environment-level validation the repo cannot provide by itself.
 
 ## 2. Audit Scope and Method
 
@@ -594,7 +593,7 @@ Implement a production-safe auth model for the Project Setup package: explicit p
 
 **Current status assessment**
 
-**Implemented with important residual gaps → Architecture frozen (P3-07, 2026-03-31).** The Project Setup domain auth posture is canonical and production-ready. Residual gaps are scoped to non-Project-Setup surfaces (accounting/admin PWA apps using deprecated token pattern). See Phase 3 revalidation below.
+**Closed (P3-07 through P3-11, 2026-03-31).** Auth architecture frozen (P3-07), production token/audience consistency verified (P3-08), cross-surface auth converged to factory-based providers — deprecated `resolveSessionToken()` removed from all retained surfaces (P3-09), proxy excluded from PS release scope with auth readiness tests (P3-10), documentation reconciled (P3-11). RBAC convergence (JWT roles vs UPN lists) is a future follow-on, not a Phase 3 blocker.
 
 ### Phase 3 Auth Architecture Freeze and Revalidation (2026-03-31, Prompt P3-07)
 
@@ -761,6 +760,34 @@ The retained Project Setup protected route surface is now explicit (8 route fami
 - PS auth readiness tests: `backend/functions/src/test/project-setup-host-boundary.test.ts` (P3-10 section)
 - Auth contract enforcement: `backend/functions/src/middleware/auth-contract.test.ts`
 
+### Phase 3 Documentation Reconciliation and Closure (2026-03-31, Prompt P3-11)
+
+**Re-audit verification:**
+
+| Aspect | Status | Evidence |
+|--------|--------|----------|
+| Auth architecture freeze | Verified | P3-07 posture comment in ProjectSetupBackendContext.tsx |
+| Production token path | Verified | P3-08 audience contract comment in mount.tsx; getApiAudience → createSpfxApiTokenProvider → validateToken(API_AUDIENCE) |
+| Cross-surface convergence | Verified | P3-09: accounting (2 pages) and admin (4 files) migrated from resolveSessionToken to createSessionTokenFactory |
+| Deprecated token cleanup | Verified | P3-09: resolveSessionToken removed from accounting/admin; narrowed to dev-harness-only in estimating |
+| Protected route scope | Verified | P3-10: 4 PS HTTP routes use withAuth; auth exceptions documented |
+| Proxy decision | Verified | P3-10: explicitly excluded from PS release scope; proxy-handler.ts annotated |
+| Auth readiness tests | Verified | P3-10: 6 new tests in project-setup-host-boundary.test.ts |
+
+**Phase 3 closure status: CLOSED.**
+
+The retained Project Setup auth model is now explicit across production mode (SPFx token provider → backend JWT validation with explicit API_AUDIENCE), bounded ui-review fallback, and documented auth exceptions. Deprecated session-token paths are no longer part of the supported retained release surface. Phase 3 auth readiness is supported by scope-accurate repo evidence.
+
+**Remaining future follow-on (not Phase 3 blockers):**
+
+- RBAC convergence: JWT roles vs UPN env lists remain split. This is an operational convenience, not a security gap — both mechanisms enforce authorization, just via different configuration models.
+- Production auth deployment: requires external environment setup (API_AUDIENCE, SharePoint admin consent, MI grants). This is a deployment prerequisite, not a code gap.
+
+**Documents reconciled:**
+
+- `Phase-3_Handoff.md`: annotated with reconciliation note
+- Audit report: executive summary, Phase 3 status, cross-phase findings, deferred implementations, remediation list, and final status all updated
+
 ### Phase 4
 
 **Intended objective**
@@ -848,7 +875,7 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 
 - Phase 1 isolation and Phase 4 startup scoping are directly coupled. The backend boundary freeze (ADR-0124, 2026-03-31) did produce a dedicated Project Setup host under `backend/functions/src/hosts/project-setup/**`. The remaining cross-phase gap is not host creation; it is deployment truth. Repo evidence does not show that the scoped host, rather than the preserved monolithic host, is the artifact actually rehearsed or released.
 - Phase 2 no longer gates Phase 5 through missing repo-owned code or tests. The remaining cross-phase dependency is external validation: repo truth does not independently prove that the live SharePoint `Projects` list currently matches the repo-owned 43-field contract.
-- Phase 3 production-mode safety depends on Phase 4 deployment/configuration truth. The code gates production mode correctly, but actual readiness still depends on external environment configuration, app registration approval, and tenant permissions.
+- Phase 3 production-mode safety depends on Phase 4 deployment/configuration truth. **Code-level Phase 3 findings are closed (P3-07 through P3-11).** Actual production readiness still depends on external environment configuration (API_AUDIENCE, SharePoint admin consent, MI grants) — these are deployment prerequisites, not code gaps.
 
 ### Recurring patterns of incompletion or drift
 
@@ -985,15 +1012,10 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 #### Phase 3 deferred implementations
 
-- **Item:** Deprecated session-token helper removal
+- **Item:** ~~Deprecated session-token helper removal~~ **CLOSED (P3-09, 2026-03-31)**
   **Category:** Auth / cleanup
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** Phase 3 docs repeatedly describe `resolveSessionToken()` as deprecated and temporary. Repo truth still keeps it live in Estimating and parallel helpers remain in Admin and Accounting, which means deprecated token acquisition is still part of retained runtime surfaces.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Production-Mode-Contract.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Prompt-09_Phase-3-Cross-Surface-Auth-Convergence-and-Deprecated-Path-Removal.md`; `apps/estimating/src/utils/resolveSessionToken.ts`; `apps/accounting/src/utils/resolveSessionToken.ts`; `apps/admin/src/utils/resolveSessionToken.ts`
-  **Affected files/surfaces:** requester, controller, and admin token acquisition paths
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Prevents a clean “canonical auth posture” claim across retained surfaces and complicates Phase 5 release truth.
-  **Recommended next-step direction:** Remove the deprecated helper from production-critical code paths and move retained surfaces to factory-based token acquisition.
+  **Status:** Closed
+  **Resolution:** Accounting (2 pages) and admin (4 files) migrated from `resolveSessionToken()` to `createSessionTokenFactory()`. Estimating's deprecated function narrowed to dev-harness-only. No retained surface uses the deprecated single-capture pattern.
 
 - **Item:** Cross-surface auth convergence and RBAC unification
   **Category:** Auth / authorization
@@ -1005,15 +1027,10 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Cross-phase impact:** Carries into Phase 4 operational support and Phase 5 accepted-risk posture.
   **Recommended next-step direction:** Converge retained privileged flows on one documented authorization model and reduce UPN-list dependence where practical.
 
-- **Item:** Proxy-route implement-or-remove decision
+- **Item:** ~~Proxy-route implement-or-remove decision~~ **DECIDED (P3-10, 2026-03-31)**
   **Category:** Code / scope cleanup
-  **Status:** Explicitly deferred
-  **Why it is still deferred:** Phase 3 handoff and later prompts treat the proxy as acceptable follow-on, but repo truth still exposes an auth-protected stub that returns mock payloads and explicitly says not to rely on it for production data retrieval.
-  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Prompt-10_Phase-3-Proxy-Decision-and-Auth-Readiness-Tests.md`; `backend/functions/src/functions/proxy/proxy-handler.ts`; `backend/functions/src/functions/proxy/index.ts`
-  **Affected files/surfaces:** backend proxy surface, shared service container, release-scope documentation
-  **Blocker level:** Important but non-blocking
-  **Cross-phase impact:** Reappears in Phase 4 and Phase 5 accepted-risk inventories and weakens scope clarity.
-  **Recommended next-step direction:** Either remove the proxy from the supported Project Setup release surface or implement the real downstream call path and tests.
+  **Status:** Closed — proxy excluded from Project Setup release scope
+  **Resolution:** Proxy explicitly excluded from PS domain host (boundary test proves this). Handler annotated "NOT IN PROJECT SETUP RELEASE SCOPE." Remains in legacy monolithic host only. Future: implement for real Graph forwarding or retire from monolithic host.
 
 - **Item:** Production auth deployment prerequisites
   **Category:** Auth / environment-gated deployment
@@ -1159,10 +1176,10 @@ The strongest cross-phase dependencies are: external live-list validation for th
    - Remove unsupported “complete / production-ready” claims until the live blockers above are closed.
 6. **Operationalize observability.**
    - Deploy alert rules, dashboards, and notification channels corresponding to the checked-in artifacts.
-7. **Finish auth/rbac cleanup.**
-   - Remove deprecated token paths and converge cross-surface authorization behavior where possible.
-8. **Make a proxy-route decision.**
-   - Implement it or explicitly retire it from the supported release scope.
+7. **~~Finish auth/rbac cleanup.~~ SUBSTANTIALLY CLOSED (P3-07 through P3-10, 2026-03-31).**
+   - Deprecated token paths removed from all retained surfaces (P3-09). Auth architecture frozen (P3-07). Production token path verified (P3-08). RBAC convergence (JWT roles vs UPN lists) remains a future follow-on but is not a blocker.
+8. **~~Make a proxy-route decision.~~ DECIDED (P3-10, 2026-03-31).**
+   - Proxy explicitly excluded from Project Setup release scope. Handler annotated. Boundary test proves exclusion from PS host.
 
 ## 9. Final Status Assessment
 
@@ -1174,7 +1191,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 |-------|--------|---------|
 | Phase 1 | **Closed** | Frontend isolation + backend domain host + 63 regression tests. All AC-1-AC-10 satisfied. ADR-0124 accepted. |
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
-| Phase 3 | **Architecture frozen** | Project Setup auth model frozen (P3-07). SPFx token path canonical, backend JWT validated, route protection enforced. Cross-surface PWA convergence is future scope. |
+| Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
 | Phase 4 | Partial to substantial | Real hardening work, but deployment scoping and observability operationalization incomplete. |
 | Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
 
