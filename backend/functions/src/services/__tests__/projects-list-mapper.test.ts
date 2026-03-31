@@ -49,6 +49,24 @@ function makeFullSpItem(): Record<string, unknown> {
     field_23: 'https://hedrickbrotherscom.sharepoint.com/sites/25-244-01',
     field_24: 2,
     Year: 2025,
+    // Phase 2 gap fields (P2-07)
+    projectStreetAddress: '123 Main St',
+    projectCity: 'Wellington',
+    projectCounty: 'Palm Beach',
+    projectState: 'FL',
+    projectZip: 33401,
+    officeDivision: 'South Florida',
+    procoreProject: 'Yes',
+    projectExecutiveUpn: 'exec@hb.com',
+    projectManagerUpn: 'pm2@hb.com',
+    leadEstimatorUpn: 'est@hb.com',
+    supportingEstimatorUpns: '["est2@hb.com","est3@hb.com"]',
+    additionalTeamMemberUpns: '["team1@hb.com"]',
+    timberscanApproverUpn: 'ts@hb.com',
+    sageAccessUpns: '["sage1@hb.com"]',
+    clarificationRequestedAt: '2026-03-18T10:00:00.000Z',
+    requesterRetryUsed: 'true',
+    clarificationItems: '[{"field":"budget","note":"Need breakdown"}]',
   };
 }
 
@@ -80,6 +98,24 @@ function makeFullDomainRequest(): IProjectSetupRequest {
     siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/25-244-01',
     retryCount: 2,
     year: 2025,
+    // Phase 2 gap fields (P2-07)
+    projectStreetAddress: '123 Main St',
+    projectCity: 'Wellington',
+    projectCounty: 'Palm Beach',
+    projectState: 'FL',
+    projectZip: '33401',
+    officeDivision: 'South Florida',
+    procoreProject: 'Yes',
+    projectExecutiveUpn: 'exec@hb.com',
+    projectManagerUpn: 'pm2@hb.com',
+    leadEstimatorUpn: 'est@hb.com',
+    supportingEstimatorUpns: ['est2@hb.com', 'est3@hb.com'],
+    additionalTeamMemberUpns: ['team1@hb.com'],
+    timberscanApproverUpn: 'ts@hb.com',
+    sageAccessUpns: ['sage1@hb.com'],
+    clarificationRequestedAt: '2026-03-18T10:00:00.000Z',
+    requesterRetryUsed: true,
+    clarificationItems: [{ field: 'budget', note: 'Need breakdown' }] as unknown as IProjectSetupRequest['clarificationItems'],
   };
 }
 
@@ -88,7 +124,7 @@ function makeFullDomainRequest(): IProjectSetupRequest {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('toDomain() — SP item to domain object', () => {
-  it('maps all 26 fields from a complete SP item', () => {
+  it('maps all 43 fields from a complete SP item', () => {
     const domain = toDomain(makeFullSpItem());
 
     expect(domain.requestId).toBe('proj-full');
@@ -117,6 +153,25 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.siteUrl).toBe('https://hedrickbrotherscom.sharepoint.com/sites/25-244-01');
     expect(domain.retryCount).toBe(2);
     expect(domain.year).toBe(2025);
+
+    // Phase 2 gap fields (P2-07)
+    expect(domain.projectStreetAddress).toBe('123 Main St');
+    expect(domain.projectCity).toBe('Wellington');
+    expect(domain.projectCounty).toBe('Palm Beach');
+    expect(domain.projectState).toBe('FL');
+    expect(domain.projectZip).toBe('33401');
+    expect(domain.officeDivision).toBe('South Florida');
+    expect(domain.procoreProject).toBe('Yes');
+    expect(domain.projectExecutiveUpn).toBe('exec@hb.com');
+    expect(domain.projectManagerUpn).toBe('pm2@hb.com');
+    expect(domain.leadEstimatorUpn).toBe('est@hb.com');
+    expect(domain.supportingEstimatorUpns).toEqual(['est2@hb.com', 'est3@hb.com']);
+    expect(domain.additionalTeamMemberUpns).toEqual(['team1@hb.com']);
+    expect(domain.timberscanApproverUpn).toBe('ts@hb.com');
+    expect(domain.sageAccessUpns).toEqual(['sage1@hb.com']);
+    expect(domain.clarificationRequestedAt).toBe('2026-03-18T10:00:00.000Z');
+    expect(domain.requesterRetryUsed).toBe(true);
+    expect(domain.clarificationItems).toEqual([{ field: 'budget', note: 'Need breakdown' }]);
   });
 
   it('applies defaults for missing required fields', () => {
@@ -133,7 +188,7 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.retryCount).toBe(0); // default
   });
 
-  it('returns undefined for missing optional fields', () => {
+  it('returns undefined for missing optional fields (legacy row backward compat)', () => {
     const domain = toDomain({ field_1: 'id-1' });
 
     expect(domain.projectNumber).toBeUndefined();
@@ -148,6 +203,25 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.completedAt).toBeUndefined();
     expect(domain.siteUrl).toBeUndefined();
     expect(domain.year).toBeUndefined();
+
+    // Phase 2 gap fields — legacy rows missing these columns get safe defaults
+    expect(domain.projectStreetAddress).toBeUndefined();
+    expect(domain.projectCity).toBeUndefined();
+    expect(domain.projectCounty).toBeUndefined();
+    expect(domain.projectState).toBeUndefined();
+    expect(domain.projectZip).toBeUndefined();
+    expect(domain.officeDivision).toBeUndefined();
+    expect(domain.procoreProject).toBeUndefined();
+    expect(domain.projectExecutiveUpn).toBeUndefined();
+    expect(domain.projectManagerUpn).toBeUndefined();
+    expect(domain.leadEstimatorUpn).toBeUndefined();
+    expect(domain.supportingEstimatorUpns).toEqual([]);
+    expect(domain.additionalTeamMemberUpns).toEqual([]);
+    expect(domain.timberscanApproverUpn).toBeUndefined();
+    expect(domain.sageAccessUpns).toEqual([]);
+    expect(domain.clarificationRequestedAt).toBeUndefined();
+    expect(domain.requesterRetryUsed).toBe(false);
+    expect(domain.clarificationItems).toEqual([]);
   });
 
   it('normalizes numeric 0 in string-typed Number columns to undefined', () => {
@@ -208,6 +282,25 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.field_23).toBe('https://hedrickbrotherscom.sharepoint.com/sites/25-244-01');
     expect(payload.field_24).toBe(2);
     expect(payload.Year).toBe(2025);
+
+    // Phase 2 gap fields (P2-07)
+    expect(payload.projectStreetAddress).toBe('123 Main St');
+    expect(payload.projectCity).toBe('Wellington');
+    expect(payload.projectCounty).toBe('Palm Beach');
+    expect(payload.projectState).toBe('FL');
+    expect(payload.projectZip).toBe(33401);
+    expect(payload.officeDivision).toBe('South Florida');
+    expect(payload.procoreProject).toBe('Yes');
+    expect(payload.projectExecutiveUpn).toBe('exec@hb.com');
+    expect(payload.projectManagerUpn).toBe('pm2@hb.com');
+    expect(payload.leadEstimatorUpn).toBe('est@hb.com');
+    expect(payload.supportingEstimatorUpns).toBe('["est2@hb.com","est3@hb.com"]');
+    expect(payload.additionalTeamMemberUpns).toBe('["team1@hb.com"]');
+    expect(payload.timberscanApproverUpn).toBe('ts@hb.com');
+    expect(payload.sageAccessUpns).toBe('["sage1@hb.com"]');
+    expect(payload.clarificationRequestedAt).toBe('2026-03-18T10:00:00.000Z');
+    expect(payload.requesterRetryUsed).toBe('true');
+    expect(payload.clarificationItems).toBe('[{"field":"budget","note":"Need breakdown"}]');
   });
 
   it('serializes arrays as JSON strings', () => {
@@ -305,6 +398,25 @@ describe('Round-trip: toListItem → toDomain preserves mapped fields', () => {
     expect(roundTripped.siteUrl).toBe(original.siteUrl);
     expect(roundTripped.retryCount).toBe(original.retryCount);
     expect(roundTripped.year).toBe(original.year);
+
+    // Phase 2 gap fields (P2-07)
+    expect(roundTripped.projectStreetAddress).toBe(original.projectStreetAddress);
+    expect(roundTripped.projectCity).toBe(original.projectCity);
+    expect(roundTripped.projectCounty).toBe(original.projectCounty);
+    expect(roundTripped.projectState).toBe(original.projectState);
+    expect(roundTripped.projectZip).toBe(original.projectZip);
+    expect(roundTripped.officeDivision).toBe(original.officeDivision);
+    expect(roundTripped.procoreProject).toBe(original.procoreProject);
+    expect(roundTripped.projectExecutiveUpn).toBe(original.projectExecutiveUpn);
+    expect(roundTripped.projectManagerUpn).toBe(original.projectManagerUpn);
+    expect(roundTripped.leadEstimatorUpn).toBe(original.leadEstimatorUpn);
+    expect(roundTripped.supportingEstimatorUpns).toEqual(original.supportingEstimatorUpns);
+    expect(roundTripped.additionalTeamMemberUpns).toEqual(original.additionalTeamMemberUpns);
+    expect(roundTripped.timberscanApproverUpn).toBe(original.timberscanApproverUpn);
+    expect(roundTripped.sageAccessUpns).toEqual(original.sageAccessUpns);
+    expect(roundTripped.clarificationRequestedAt).toBe(original.clarificationRequestedAt);
+    expect(roundTripped.requesterRetryUsed).toBe(original.requesterRetryUsed);
+    expect(roundTripped.clarificationItems).toEqual(original.clarificationItems);
   });
 });
 
@@ -371,8 +483,8 @@ describe('safeParseJsonArray()', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('PROJECTS_LIST_SELECT_FIELDS', () => {
-  it('contains exactly 26 field names (Title + 24 custom + Year)', () => {
-    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(26);
+  it('contains exactly 43 field names (26 legacy + 17 P2-07 gap fields)', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(43);
   });
 
   it('includes Title and Year', () => {

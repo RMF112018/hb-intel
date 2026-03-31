@@ -74,11 +74,11 @@ export interface IProjectsListItem {
   field_15: string | number;
   /** ContractType — Choice column. */
   field_16: string;
-  /** ProjectLeadId — UPN. */
+  /** ProjectLeadId — UPN. Absent from 2026-03-31 schema export; retained for legacy row compatibility. */
   field_17: string;
-  /** ViewerUPNsJson — JSON-serialized `string[]`. */
+  /** ViewerUPNsJson — JSON-serialized `string[]`. Absent from 2026-03-31 schema export; retained for legacy row compatibility. */
   field_18: string;
-  /** AddOnsJson — JSON-serialized `string[]`. */
+  /** AddOnsJson — JSON-serialized `string[]`. Absent from 2026-03-31 schema export; retained for legacy row compatibility. */
   field_19: string;
   /** ClarificationNote (stored as SP Number — may return `0` for empty). */
   field_20: string | number;
@@ -92,6 +92,46 @@ export interface IProjectsListItem {
   field_24: number;
   /** Year — Number (post-import column, uses display name as internal name). */
   Year: number | null;
+
+  // ── Phase 2 gap fields (P2-07) ────────────────────────────────────────
+  // Added to production schema 2026-03-31. These columns use domain
+  // property names as SP internal names (unlike the CSV-import field_N
+  // columns above).
+
+  /** Structured location — street address. */
+  projectStreetAddress: string;
+  /** Structured location — city. */
+  projectCity: string;
+  /** Structured location — county. */
+  projectCounty: string;
+  /** Structured location — state. */
+  projectState: string;
+  /** Structured location — ZIP code (SP Number; domain stores as string). */
+  projectZip: number | null;
+  /** Office/division classification. */
+  officeDivision: string;
+  /** Procore project flag (`'Yes'` | `'No'` | `''`). */
+  procoreProject: string;
+  /** Project executive UPN. */
+  projectExecutiveUpn: string;
+  /** Project manager UPN. */
+  projectManagerUpn: string;
+  /** Lead estimator UPN. */
+  leadEstimatorUpn: string;
+  /** Supporting estimator UPNs — JSON-serialized `string[]` in SP Text (255). */
+  supportingEstimatorUpns: string;
+  /** Additional team member UPNs — JSON-serialized `string[]` in SP Text (255). */
+  additionalTeamMemberUpns: string;
+  /** Timberscan approver UPN. */
+  timberscanApproverUpn: string;
+  /** Sage 300 access UPNs — JSON-serialized `string[]` in SP Text (255). */
+  sageAccessUpns: string;
+  /** ISO 8601 timestamp when clarification was requested (SP DateTime). */
+  clarificationRequestedAt: string;
+  /** Whether requester used their retry opportunity (`'true'` | `'false'`). */
+  requesterRetryUsed: string;
+  /** Structured clarification items — JSON-serialized array in SP Text (255). */
+  clarificationItems: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,9 +157,9 @@ export interface IFieldMapEntry {
  * Keys are domain property names (matching `IProjectSetupRequest`).
  * Values describe the corresponding SharePoint column.
  *
- * Only mapped fields are persisted. Domain properties not listed here
- * (e.g. `projectStreetAddress`, `projectExecutiveUpn`) are intentionally
- * unmapped — see Phase-2_Data-Contract-Gaps.md.
+ * All canonical domain properties are mapped. Phase 2 gap fields were added
+ * to the production schema on 2026-03-31 (P2-07) and use domain property
+ * names as SP internal names.
  */
 export const PROJECTS_LIST_FIELD_MAP = {
   // ── Identity ───────────────────────────────────────────────────────────
@@ -165,6 +205,35 @@ export const PROJECTS_LIST_FIELD_MAP = {
   // ── Retry & Year ──────────────────────────────────────────────────────
   retryCount:      { spInternalName: 'field_24', spType: 'Number',        serialization: 'number' },
   year:            { spInternalName: 'Year',     spType: 'Number',        serialization: 'number' },
+
+  // ── Phase 2 gap fields (P2-07) ────────────────────────────────────────
+  // Added to production schema 2026-03-31. These columns use domain
+  // property names as SP internal names.
+
+  // Location (structured)
+  projectStreetAddress: { spInternalName: 'projectStreetAddress', spType: 'Text',     serialization: 'direct' },
+  projectCity:          { spInternalName: 'projectCity',          spType: 'Text',     serialization: 'direct' },
+  projectCounty:        { spInternalName: 'projectCounty',       spType: 'Text',     serialization: 'direct' },
+  projectState:         { spInternalName: 'projectState',        spType: 'Text',     serialization: 'direct' },
+  projectZip:           { spInternalName: 'projectZip',          spType: 'Number',   serialization: 'number' },
+
+  // Classification
+  officeDivision:       { spInternalName: 'officeDivision',      spType: 'Text',     serialization: 'direct' },
+  procoreProject:       { spInternalName: 'procoreProject',      spType: 'Text',     serialization: 'direct' },
+
+  // Team roles
+  projectExecutiveUpn:      { spInternalName: 'projectExecutiveUpn',      spType: 'Text',     serialization: 'direct' },
+  projectManagerUpn:        { spInternalName: 'projectManagerUpn',        spType: 'Text',     serialization: 'direct' },
+  leadEstimatorUpn:         { spInternalName: 'leadEstimatorUpn',         spType: 'Text',     serialization: 'direct' },
+  supportingEstimatorUpns:  { spInternalName: 'supportingEstimatorUpns',  spType: 'Text',     serialization: 'json-array' },
+  additionalTeamMemberUpns: { spInternalName: 'additionalTeamMemberUpns', spType: 'Text',     serialization: 'json-array' },
+  timberscanApproverUpn:    { spInternalName: 'timberscanApproverUpn',    spType: 'Text',     serialization: 'direct' },
+  sageAccessUpns:           { spInternalName: 'sageAccessUpns',           spType: 'Text',     serialization: 'json-array' },
+
+  // Clarification lifecycle
+  clarificationRequestedAt:  { spInternalName: 'clarificationRequestedAt',  spType: 'DateTime', serialization: 'direct' },
+  requesterRetryUsed:        { spInternalName: 'requesterRetryUsed',        spType: 'Text',     serialization: 'direct' },
+  clarificationItems:        { spInternalName: 'clarificationItems',        spType: 'Text',     serialization: 'json-array' },
 } as const satisfies Record<string, IFieldMapEntry>;
 
 /** Domain property names that have a corresponding SharePoint column. */

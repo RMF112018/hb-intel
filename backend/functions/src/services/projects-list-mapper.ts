@@ -117,6 +117,26 @@ export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProj
     siteUrl: readOptionalString(item, 'field_23'),
     retryCount: typeof item.field_24 === 'number' ? item.field_24 : 0,
     year: readOptionalNumber(item, 'Year'),
+
+    // ── Phase 2 gap fields (P2-07) ──────────────────────────────────────
+    // Safe defaults for legacy rows that predate these columns.
+    projectStreetAddress: readOptionalString(item, 'projectStreetAddress'),
+    projectCity: readOptionalString(item, 'projectCity'),
+    projectCounty: readOptionalString(item, 'projectCounty'),
+    projectState: readOptionalString(item, 'projectState'),
+    projectZip: readOptionalZipFromNumber(item, 'projectZip'),
+    officeDivision: readOptionalString(item, 'officeDivision'),
+    procoreProject: readOptionalString(item, 'procoreProject') as IProjectSetupRequest['procoreProject'],
+    projectExecutiveUpn: readOptionalString(item, 'projectExecutiveUpn'),
+    projectManagerUpn: readOptionalString(item, 'projectManagerUpn'),
+    leadEstimatorUpn: readOptionalString(item, 'leadEstimatorUpn'),
+    supportingEstimatorUpns: safeParseJsonArray(item.supportingEstimatorUpns, 'supportingEstimatorUpns', logger) as string[] | undefined,
+    additionalTeamMemberUpns: safeParseJsonArray(item.additionalTeamMemberUpns, 'additionalTeamMemberUpns', logger) as string[] | undefined,
+    timberscanApproverUpn: readOptionalString(item, 'timberscanApproverUpn'),
+    sageAccessUpns: safeParseJsonArray(item.sageAccessUpns, 'sageAccessUpns', logger) as string[] | undefined,
+    clarificationRequestedAt: readOptionalString(item, 'clarificationRequestedAt'),
+    requesterRetryUsed: item.requesterRetryUsed === 'true',
+    clarificationItems: safeParseJsonObjects(item.clarificationItems, 'clarificationItems', logger) as unknown as IProjectSetupRequest['clarificationItems'],
   };
 }
 
@@ -127,8 +147,8 @@ export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProj
 /**
  * Convert an `IProjectSetupRequest` domain object to a SharePoint list item payload.
  *
- * Only mapped fields are included. Unmapped domain properties (e.g.
- * `projectStreetAddress`, `projectExecutiveUpn`) are intentionally excluded.
+ * All canonical domain properties are mapped. Phase 2 gap fields use domain
+ * property names as SP internal names (P2-07).
  */
 export function toListItem(request: IProjectSetupRequest): IProjectsListItem {
   const projectNumberForTitle = request.projectNumber ?? 'TBD';
@@ -159,6 +179,25 @@ export function toListItem(request: IProjectSetupRequest): IProjectsListItem {
     field_23: request.siteUrl ?? '',
     field_24: request.retryCount,
     Year: request.year ?? null,
+
+    // ── Phase 2 gap fields (P2-07) ──────────────────────────────────────
+    projectStreetAddress: request.projectStreetAddress ?? '',
+    projectCity: request.projectCity ?? '',
+    projectCounty: request.projectCounty ?? '',
+    projectState: request.projectState ?? '',
+    projectZip: request.projectZip ? Number(request.projectZip) : null,
+    officeDivision: request.officeDivision ?? '',
+    procoreProject: request.procoreProject ?? '',
+    projectExecutiveUpn: request.projectExecutiveUpn ?? '',
+    projectManagerUpn: request.projectManagerUpn ?? '',
+    leadEstimatorUpn: request.leadEstimatorUpn ?? '',
+    supportingEstimatorUpns: JSON.stringify(request.supportingEstimatorUpns ?? []),
+    additionalTeamMemberUpns: JSON.stringify(request.additionalTeamMemberUpns ?? []),
+    timberscanApproverUpn: request.timberscanApproverUpn ?? '',
+    sageAccessUpns: JSON.stringify(request.sageAccessUpns ?? []),
+    clarificationRequestedAt: request.clarificationRequestedAt ?? '',
+    requesterRetryUsed: request.requesterRetryUsed ? 'true' : 'false',
+    clarificationItems: JSON.stringify(request.clarificationItems ?? []),
   };
 }
 
@@ -201,6 +240,19 @@ function readOptionalNumber(item: Record<string, unknown>, field: string): numbe
   return typeof item[field] === 'number' ? (item[field] as number) : undefined;
 }
 
+/**
+ * P2-07: Read a ZIP code from an SP Number column as a string.
+ * SP stores projectZip as Number; domain uses string (e.g. "33401").
+ * Filters `0`, `NaN`, and missing values to `undefined`.
+ */
+function readOptionalZipFromNumber(item: Record<string, unknown>, field: string): string | undefined {
+  const raw = item[field];
+  if (raw === null || raw === undefined || raw === 0) return undefined;
+  const num = typeof raw === 'number' ? raw : Number(raw);
+  if (isNaN(num) || num === 0) return undefined;
+  return String(num);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // JSON array helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -210,6 +262,28 @@ function readOptionalNumber(item: Record<string, unknown>, field: string): numbe
  * Returns `[]` on parse failure; filters out non-string elements.
  * Pass `fieldName` and `logger` for structured diagnostics on parse failure.
  */
+/**
+ * P2-07: Parse a JSON-serialized array of objects from a SharePoint Text field.
+ * Like safeParseJsonArray but preserves object elements (for clarificationItems).
+ * Returns `[]` on parse failure.
+ */
+export function safeParseJsonObjects(json: unknown, fieldName?: string, logger?: ILogger): Record<string, unknown>[] {
+  try {
+    const parsed = JSON.parse((json as string) ?? '[]');
+    return Array.isArray(parsed) ? parsed.filter((value) => typeof value === 'object' && value !== null) : [];
+  } catch {
+    if (fieldName && logger) {
+      logger.warn(`[field-contract] Failed to parse JSON objects from '${fieldName}'`, {
+        domain: 'projects-list-mapper',
+        field: fieldName,
+        valueType: typeof json,
+        issue: 'json-parse-failure',
+      });
+    }
+    return [];
+  }
+}
+
 export function safeParseJsonArray(json: unknown, fieldName?: string, logger?: ILogger): string[] {
   try {
     const parsed = JSON.parse((json as string) ?? '[]');

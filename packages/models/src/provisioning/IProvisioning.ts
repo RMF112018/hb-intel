@@ -175,6 +175,8 @@ export interface IProjectSetupRequest {
   additionalTeamMemberUpns?: string[];
   /** W0-G4-T11: Step 3 — one eligible team member selected as Timberscan approver. */
   timberscanApproverUpn?: string;
+  /** P2-07: Step 3 — UPNs requiring Sage 300 access for this project. */
+  sageAccessUpns?: string[];
   /** W0-G3-T01: Step 3 — read-only viewer UPNs (optional). */
   viewerUPNs?: string[];
   /** W0-G3-T01: Step 4 — selected add-on pack slugs (optional). */

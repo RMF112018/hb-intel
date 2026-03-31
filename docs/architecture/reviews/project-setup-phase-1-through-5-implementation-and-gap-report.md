@@ -324,7 +324,48 @@ Establish a canonical Project Setup data contract, centralize SharePoint field m
 
 **Current status assessment**
 
-**Partial.** Phase 2 produced the right architectural seam, but the real production persistence contract remains incomplete and can drop user-entered data.
+**Partial → Substantially closed (P2-07, 2026-03-31).** Phase 2 produced the right architectural seam. The production SharePoint schema was updated with 17 new columns, and the field contract, mapper, and repository now persist the full canonical field set. See Phase 2 remediation progress below.
+
+### Phase 2 Schema Reconciliation (2026-03-31, Prompt P2-07)
+
+**SharePoint schema verified:**
+
+The production Projects list export confirmed 17 new columns now exist, using domain property names as SP internal names:
+
+- **5 structured location fields:** projectStreetAddress, projectCity, projectCounty, projectState, projectZip (Number type)
+- **2 classification fields:** officeDivision, procoreProject
+- **6 team-role fields:** projectExecutiveUpn, projectManagerUpn, leadEstimatorUpn, supportingEstimatorUpns, additionalTeamMemberUpns, timberscanApproverUpn
+- **1 new field not previously in domain model:** sageAccessUpns (added to IProjectSetupRequest)
+- **3 clarification lifecycle fields:** clarificationRequestedAt (DateTime type), requesterRetryUsed (Text), clarificationItems (Text)
+
+**Code changes:**
+
+- Added `sageAccessUpns?: string[]` to `IProjectSetupRequest` in `packages/models/src/provisioning/IProvisioning.ts`
+- Added 17 new entries to `IProjectsListItem` interface and `PROJECTS_LIST_FIELD_MAP` in `projects-list-contract.ts`
+- Extended `toDomain()` and `toListItem()` in `projects-list-mapper.ts` to map all 17 new fields with backward-compatible defaults for legacy rows
+- Added `readOptionalZipFromNumber()` helper for SP Number → string ZIP code conversion
+- Added `safeParseJsonObjects()` helper for clarification items (object array, not string array)
+- Updated mapper tests to cover all 43 mapped fields (up from 26)
+- Updated `PROJECTS_LIST_SELECT_FIELDS` count from 26 to 43
+
+**Schema notes:**
+
+- `field_17` (projectLeadId), `field_18` (viewerUPNs), `field_19` (addOns) are absent from the 2026-03-31 schema export but retained in code for legacy row compatibility
+- `clarificationItems` uses SP Text (MaxLength=255) — may truncate for requests with many clarification records; a future migration to MultiLineText or Azure Table Storage may be needed for production scale
+- `projectZip` is SP Number type — the mapper converts to/from string in the domain model
+
+**Intentionally transient fields:** None. All `IProjectSetupRequest` fields are now mapped to SharePoint columns.
+
+**Closure statement draft:**
+
+The Phase 2 persistence gap was caused partly by list-schema absence and partly by code-path incompletion. The list schema now exposes the required fields, and the real mapper/repository path has been updated to persist the canonical Project Setup field set. The persistence contract gap is substantially closed. Remaining follow-on: the `clarificationItems` field uses a Text column with 255-character limit, which may need migration for production-scale clarification records.
+
+**Evidence:**
+
+- Domain model: `packages/models/src/provisioning/IProvisioning.ts`
+- Field contract: `backend/functions/src/services/projects-list-contract.ts`
+- Mapper: `backend/functions/src/services/projects-list-mapper.ts`
+- Mapper tests: `backend/functions/src/services/__tests__/projects-list-mapper.test.ts`
 
 ### Phase 3
 
@@ -380,9 +421,9 @@ Harden the infrastructure posture: startup scoping, configuration validation, ma
 
 **Partially implemented items**
 
-- Startup scoping is only partially aligned to “actual deployment.” The service factory moved many domain services to lazy getters, but `backend/functions/src/index.ts` still registers a broad multi-domain function app.
+- Startup scoping is materially implemented for the dedicated Project Setup host in `backend/functions/src/hosts/project-setup/**`, but repo truth does not prove that host is the live deployment target. The monolithic host at `backend/functions/src/index.ts` still exists and still registers a broad multi-domain function app.
 - Observability artifacts are real in repo, but deployment and operationalization are incomplete. `backend/functions/observability/README.md` still shows the DevOps setup checklist unchecked.
-- CORS is locked more tightly than `*`, but still broader than a single tenant origin because `backend/functions/host.json` allows `https://*.sharepoint.com` in addition to the tenant URL.
+- CORS posture is split by host. The dedicated Project Setup host is tenant-specific in `backend/functions/src/hosts/project-setup/host.json`, while the monolithic `backend/functions/host.json` remains broader. That is a deployment-truth ambiguity, not proof that the scoped host is absent.
 
 **Missing items**
 
@@ -438,7 +479,7 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 
 - `phase-5/Phase-5_Handoff.md` says “Phase 5 Status: COMPLETE” and recommends “Ready for production release decision review.”
 - `phase-5/Phase-5_Production-Readiness-Signoff.md` lists all five phases as complete and code-level blockers as none.
-- Current repo truth does not support those statements. The launch surface still includes meaningful unresolved gaps: disabled required-field enforcement, incomplete persistence of live request fields, broader-than-claimed backend deployment scope, and failing page-level SPFx tests.
+- Current repo truth does not support those statements. The launch surface still includes meaningful unresolved gaps: disabled required-field enforcement, incomplete persistence of live request fields, failing page-level SPFx tests, and no repo-evidenced live deployment / smoke-validation execution.
 
 **Current status assessment**
 
@@ -448,7 +489,7 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 
 ### Dependencies spanning multiple phases
 
-- Phase 1 isolation and Phase 4 startup scoping are directly coupled. The backend boundary freeze (ADR-0124, 2026-03-31) establishes the per-domain host model. Implementation is tracked in Prompts 08-11. Until the Project Setup composition root is complete (AC-1 through AC-10 in `Phase-1_Backend-Boundary-Freeze.md`), Phase 4’s “actual deployment scoping” claim remains partially overstated for the monolithic host.
+- Phase 1 isolation and Phase 4 startup scoping are directly coupled. The backend boundary freeze (ADR-0124, 2026-03-31) did produce a dedicated Project Setup host under `backend/functions/src/hosts/project-setup/**`. The remaining cross-phase gap is not host creation; it is deployment truth. Repo evidence does not show that the scoped host, rather than the preserved monolithic host, is the artifact actually rehearsed or released.
 - Phase 2 persistence completeness is coupled to Phase 5 release readiness. The system still risks losing production-mode request data for live wizard fields, so release hardening cannot honestly be complete while the persistence contract is incomplete.
 - Phase 3 production-mode safety depends on Phase 4 deployment/configuration truth. The code gates production mode correctly, but actual readiness still depends on external environment configuration, app registration approval, and tenant permissions.
 
@@ -465,7 +506,7 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 
 ### Places where later work invalidated earlier assumptions
 
-- The repository now behaves more like a shared multi-domain backend than a Project Setup-only backend deployment. That weakens some earlier phase assumptions around scope control and startup scoping.
+- The repository no longer fits a single-host reading. It now contains both a scoped Project Setup host and the preserved monolithic host. Earlier “shared host only” assumptions are stale, but they were not fully replaced by repo-evidenced deployment cutover.
 - `ui-review` mode became a major live workflow surface after the phase-doc baseline. This is an acceptable product divergence, but it also means some “production-safe” claims have to be interpreted in a two-mode system, not a single live-backend path.
 - The current-state map shows later W0-G3/W0-G4/W0-G5 work as the stronger source of truth for actual Project Setup implementation surfaces than the phase handoff docs alone.
 
@@ -491,9 +532,9 @@ The following items are genuinely implemented in the current repo:
 
 ### Launch blockers
 
-- **Incomplete production persistence contract.**
-  - Real production persistence still drops live `IProjectSetupRequest` fields.
-  - Evidence: `packages/models/src/provisioning/IProvisioning.ts`, `backend/functions/src/services/projects-list-contract.ts`, `backend/functions/src/services/projects-list-mapper.ts`, `phase-2/Phase-2_Data-Contract-Gaps.md`.
+- **~~Incomplete production persistence contract.~~ SUBSTANTIALLY CLOSED (P2-07, 2026-03-31).**
+  - Production SharePoint schema updated with 17 new columns. Field contract, mapper, and repository now persist all 43 canonical fields. Remaining minor risk: `clarificationItems` uses SP Text (255 char limit).
+  - Evidence: `projects-list-contract.ts`, `projects-list-mapper.ts`, `projects-list-mapper.test.ts`.
 - **Required-field enforcement is intentionally disabled.**
   - `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` in `packages/features/estimating/src/project-setup/config/projectSetupSteps.ts`.
   - This means the wizard does not enforce the full intended submission contract.
@@ -511,13 +552,227 @@ The following items are genuinely implemented in the current repo:
 - Cross-surface RBAC/auth convergence remains incomplete across requester, controller, and admin surfaces.
 - Proxy integration remains a stub in `backend/functions/src/functions/proxy/proxy-handler.ts`.
 - Observability artifacts exist, but dashboards/alerts are not proven deployed; `backend/functions/observability/README.md` still shows setup tasks unchecked.
-- `host.json` CORS posture is broader than a single tenant and therefore looser than some documentation implies.
+- Deployment-target posture remains partly ambiguous because the dedicated Project Setup host is tenant-scoped, while the preserved monolithic host keeps broader runtime defaults.
 
 ### Cleanup / documentation debt
 
 - Phase handoff docs overstate completion and production readiness relative to current repo truth.
 - Some tests give a stronger impression of full persistence coverage than the real adapter warrants, especially `backend/functions/src/services/__tests__/sp-field-mapping.test.ts`.
 - Release/readiness docs should be reconciled with current repo state before they are used as signoff artifacts.
+
+## Deferred Implementations Across Phases 1–5
+
+### A. Executive summary of deferred work
+
+Seventeen deferred or not-clearly-complete implementation items remain across all five phase families. Every phase still contains some deferred work when the updated phase docs are reconciled against live repo truth, even though Phase 1’s core scope boundary is now materially closed.
+
+Six deferred items remain launch blockers for true production readiness: the incomplete real persistence contract, unresolved production auth prerequisites, unresolved deployment-scoped CORS / managed-identity / downstream-permission proof, the failing retained-surface frontend test baseline, the absence of repo-evidenced live smoke / deployment execution, and the lack of completed real signoff evidence. The remaining eleven items are non-blocking follow-up or hardening debt, but several of them are cross-phase dependencies rather than phase-local cleanup.
+
+The strongest cross-phase dependencies are: Phase 2 persistence completeness gating Phase 5 release truth; Phase 3 and Phase 4 environment prerequisites gating production-mode claims; and Phase 4 operationalization gaps weakening Phase 5 signoff realism. The updated phase docs repeatedly use closure language that is only safe if those later dependencies were actually closed in repo truth; in multiple cases they were not.
+
+### B. Detailed deferred-implementation inventory
+
+#### Phase 1 deferred implementations
+
+- **Item:** Complexity preferences backend contract
+  **Category:** Code / integration
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** `phase-1/Phase-1_Handoff.md` still marks `GET /api/users/me/preferences` as deferred and recommends it as the first Phase 2 entry point. Repo truth still shows `ComplexityProvider` using `/api/users/me/preferences`, but the backend exposes notification preferences at `/api/notifications/preferences`, not the complexity endpoint the shared package expects.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Handoff.md`; `packages/complexity/src/storage/complexityApiClient.ts`; `apps/estimating/src/App.tsx`; `backend/functions/src/functions/notifications/GetPreferences.ts`; `backend/functions/src/functions/notifications/UpdatePreferences.ts`
+  **Affected files/surfaces:** `packages/complexity/src/**`, `apps/estimating/src/App.tsx`, backend user-preference route surface
+  **Blocker level:** Non-blocking follow-up
+  **Cross-phase impact:** Leaves shared complexity UX on local-storage fallback and means later phase docs should not imply the user-preferences backend contract was ever closed.
+  **Recommended next-step direction:** Implement the expected `/api/users/me/preferences` contract or formally retire that endpoint expectation and update the complexity package accordingly.
+
+- **Item:** Dedicated host cutover and monolithic-host retirement proof
+  **Category:** Infrastructure / deployment
+  **Status:** Implicitly deferred / partially implemented
+  **Why it is still deferred:** Prompt 07 framed the broad host as transitional, and `phase-1/Phase-1_Handoff.md` now says the legacy monolithic host is preserved during transition. Repo truth confirms the dedicated Project Setup host exists, but it also confirms the monolithic host still exists; there is no repo-evidenced proof that deployment/release flow has fully cut over to the scoped host.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Prompt-07_Phase-1-Architecture-Freeze-and-Boundary-Plan.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Handoff.md`; `backend/functions/src/hosts/project-setup/index.ts`; `backend/functions/src/hosts/project-setup/host.json`; `backend/functions/src/index.ts`
+  **Affected files/surfaces:** `backend/functions/src/hosts/project-setup/**`, `backend/functions/src/index.ts`, deployment/release documentation
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Affects Phase 4 deployment-scope truth and Phase 5 release-signoff realism because repo truth does not show which host is the actual release artifact.
+  **Recommended next-step direction:** Add repo-evidenced deployment wiring and release-target proof for the Project Setup host, or document that monolithic deployment remains the current operational target.
+
+- **Item:** Phase 1’s deferred provisioning-maturity work remains only partially closed
+  **Category:** Infrastructure / operational hardening
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** `phase-1/Phase-1_Handoff.md` deferred “full provisioning maturity (Steps 5/6/7 hardening)” to later phases. Later phases added real infrastructure and release artifacts, but repo truth still leaves email delivery stubbed, alerting unoperationalized, and live deployment proof absent.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-1/Phase-1_Handoff.md`; `backend/functions/src/functions/health/index.ts`; `backend/functions/observability/README.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`
+  **Affected files/surfaces:** provisioning lifecycle, notification delivery, observability, release validation
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Carries directly into Phase 4 and Phase 5 deferred-work inventory; this is not Phase 1 debt alone.
+  **Recommended next-step direction:** Treat the remaining provisioning-maturity gaps as active Phase 4/5 implementation debt, not as a closed historical deferral.
+
+#### Phase 2 deferred implementations
+
+- **Item:** Canonical persisted field coverage for the live wizard shape
+  **Category:** Code / data contract
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** The updated Phase 2 docs still describe unmapped live request fields and newer Prompt 07 assumes a later schema reconciliation that repo truth does not evidence as complete. The real SharePoint contract still persists only the legacy mapped subset, while the live request model and UI collect materially more data.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Phase-2_Data-Contract-Gaps.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Prompt-07_Phase-2-Canonical-Contract-and-Schema-Reconciliation.md`; `packages/models/src/provisioning/IProvisioning.ts`; `backend/functions/src/services/projects-list-contract.ts`; `backend/functions/src/services/projects-list-mapper.ts`; `apps/estimating/src/pages/NewRequestPage.tsx`
+  **Affected files/surfaces:** live requester wizard, SharePoint mapper/repository path, canonical request model
+  **Blocker level:** Launch blocker
+  **Cross-phase impact:** Blocks truthful Phase 5 release posture because production-mode submission can still lose user-entered fields.
+  **Recommended next-step direction:** Decide the real persisted field set, extend the production SharePoint contract or alternative storage, and update the mapper/repository/tests against the real path.
+
+- **Item:** Schema-reconciliation, backward-compatibility, and migration proof
+  **Category:** Data contract / migration handling
+  **Status:** Documented as complete path, but not repo-evidenced complete
+  **Why it is still deferred:** Prompt 07 assumes an updated exported SharePoint schema exists; Prompt 08 and Prompt 10 require backward-compatibility and operational handling; repo truth does not show the updated schema-driven contract, migration artifacts, or legacy-row handling beyond the old mapped fields.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Prompt-07_Phase-2-Canonical-Contract-and-Schema-Reconciliation.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Prompt-08_Phase-2-Production-Path-Mapping-and-Backward-Compatibility.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Prompt-10_Phase-2-Optional-Migration-Compatibility-and-Operational-Handling.md`; `backend/functions/src/services/projects-list-contract.ts`; `backend/functions/src/services/projects-list-mapper.ts`
+  **Affected files/surfaces:** SharePoint schema assumptions, real adapter read/write behavior, production data migration expectations
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Depends on the same persistence-contract closure as the main Phase 2 blocker and influences release safety for existing rows.
+  **Recommended next-step direction:** Reconcile the actual production list schema against the canonical model and document any legacy-row compatibility or migration steps explicitly.
+
+- **Item:** Test-suite truthfulness for the real persistence path
+  **Category:** Verification / regression coverage
+  **Status:** Implicitly deferred / partially implemented
+  **Why it is still deferred:** Prompt 09 required the Phase 2 tests to distinguish real-adapter proof from mock-only proof. Repo truth still contains a mock-repository round-trip test that preserves the full object and can be misread as proof that the real SharePoint adapter persists all live fields.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-2/Prompt-09_Phase-2-Test-Suite-Truthfulness-and-Contract-Coverage.md`; `backend/functions/src/services/__tests__/sp-field-mapping.test.ts`; `backend/functions/src/services/__tests__/projects-list-mapper.test.ts`
+  **Affected files/surfaces:** backend contract tests, release-readiness interpretation, audit documentation
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Weakens the credibility of Phase 5 release evidence because tests can imply production completeness the real adapter does not provide.
+  **Recommended next-step direction:** Narrow or relabel the mock contract test and add real-adapter coverage for the canonical persisted field set.
+
+#### Phase 3 deferred implementations
+
+- **Item:** Deprecated session-token helper removal
+  **Category:** Auth / cleanup
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** Phase 3 docs repeatedly describe `resolveSessionToken()` as deprecated and temporary. Repo truth still keeps it live in Estimating and parallel helpers remain in Admin and Accounting, which means deprecated token acquisition is still part of retained runtime surfaces.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Production-Mode-Contract.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Prompt-09_Phase-3-Cross-Surface-Auth-Convergence-and-Deprecated-Path-Removal.md`; `apps/estimating/src/utils/resolveSessionToken.ts`; `apps/accounting/src/utils/resolveSessionToken.ts`; `apps/admin/src/utils/resolveSessionToken.ts`
+  **Affected files/surfaces:** requester, controller, and admin token acquisition paths
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Prevents a clean “canonical auth posture” claim across retained surfaces and complicates Phase 5 release truth.
+  **Recommended next-step direction:** Remove the deprecated helper from production-critical code paths and move retained surfaces to factory-based token acquisition.
+
+- **Item:** Cross-surface auth convergence and RBAC unification
+  **Category:** Auth / authorization
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** Phase 3 handoff labels dual RBAC convergence as acceptable follow-on, and Prompt 09 explicitly treats cross-surface auth convergence as incomplete. Repo truth still splits authorization between JWT roles and UPN env lists and retains separate auth conventions across requester, controller, and admin surfaces.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Auth-Hardening-and-Release-Notes.md`; `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`; `apps/admin/src/pages/ProvisioningOversightPage.tsx`; `backend/functions/src/middleware/auth.ts`
+  **Affected files/surfaces:** backend RBAC checks, requester/controller/admin UI surfaces, deployment-time role configuration
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Carries into Phase 4 operational support and Phase 5 accepted-risk posture.
+  **Recommended next-step direction:** Converge retained privileged flows on one documented authorization model and reduce UPN-list dependence where practical.
+
+- **Item:** Proxy-route implement-or-remove decision
+  **Category:** Code / scope cleanup
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** Phase 3 handoff and later prompts treat the proxy as acceptable follow-on, but repo truth still exposes an auth-protected stub that returns mock payloads and explicitly says not to rely on it for production data retrieval.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Prompt-10_Phase-3-Proxy-Decision-and-Auth-Readiness-Tests.md`; `backend/functions/src/functions/proxy/proxy-handler.ts`; `backend/functions/src/functions/proxy/index.ts`
+  **Affected files/surfaces:** backend proxy surface, shared service container, release-scope documentation
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Reappears in Phase 4 and Phase 5 accepted-risk inventories and weakens scope clarity.
+  **Recommended next-step direction:** Either remove the proxy from the supported Project Setup release surface or implement the real downstream call path and tests.
+
+- **Item:** Production auth deployment prerequisites
+  **Category:** Auth / environment-gated deployment
+  **Status:** External / environment-gated, not repo-complete
+  **Why it is still deferred:** Phase 3 handoff says there are no must-fix code blockers, but it also lists required external prerequisites. Repo truth cannot prove `API_AUDIENCE`, Function App CORS, SharePoint admin consent, SPFx `apiAudience` configuration, and managed-identity role assignments are actually complete in a live environment.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_Auth-Hardening-and-Release-Notes.md`; `apps/estimating/src/config/runtimeConfig.ts`; `apps/estimating/src/mount.tsx`; `backend/functions/src/middleware/validateToken.ts`
+  **Affected files/surfaces:** SPFx mount/runtime config, backend validator contract, tenant/app-registration setup
+  **Blocker level:** Launch blocker
+  **Cross-phase impact:** Blocks truthful production-mode claims in Phase 5 even though the code path itself is materially implemented.
+  **Recommended next-step direction:** Treat these prerequisites as release-gating evidence items and record actual completion outside of code before any launch approval.
+
+#### Phase 4 deferred implementations
+
+- **Item:** Observability operationalization
+  **Category:** Operationalization / observability
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** Prompt 10 says repo artifacts alone are not proof of operationalized monitoring, and the checked-in observability README still has every DevOps setup item unchecked. Repo truth includes KQL and `alerts.json`, but not deployed workbooks, alert rules, action groups, Teams workflow, or verified alert execution.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Prompt-10_Phase-4-Observability-Operationalization-and-Readiness-Proof.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`; `backend/functions/observability/README.md`; `backend/functions/observability/alerts.json`
+  **Affected files/surfaces:** App Insights / Azure Monitor operational posture, operator response flow, Phase 5 release gates
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Weakens Phase 5 signoff realism and keeps “ready/degraded/blocked” diagnostics partly manual.
+  **Recommended next-step direction:** Deploy and verify the alerting/dashboard stack and record actual operational ownership evidence.
+
+- **Item:** Email delivery / notification transport
+  **Category:** Infrastructure / notification delivery
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** Phase 4 docs classify SendGrid-style delivery as follow-on and repo truth still reports email readiness as `not-configured` when the related env vars are absent. The infrastructure posture is therefore honest about email being stubbed, but not complete.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Operational-Readiness-and-Handoff.md`; `backend/functions/src/functions/health/index.ts`
+  **Affected files/surfaces:** notification delivery, provisioning completion/failure messaging, operator communication paths
+  **Blocker level:** Non-blocking follow-up
+  **Cross-phase impact:** Remains an accepted risk in Phase 5 and reduces operational completeness for failure handling.
+  **Recommended next-step direction:** Either wire the real email provider or keep it explicitly out of launch scope and ensure alternative operator notifications are proven.
+
+- **Item:** Deployment-scoped CORS / managed-identity / downstream-permission application
+  **Category:** Infrastructure / environment-gated deployment
+  **Status:** External / environment-gated, not repo-complete
+  **Why it is still deferred:** Phase 4 docs document the required posture, but repo truth cannot prove the dedicated host’s tenant-scoped CORS, managed-identity grants, Graph permissions, and SharePoint-connected-service prerequisites are actually applied in the release environment.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Phase-4_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-4/Prompt-09_Phase-4-CORS-Managed-Identity-and-Downstream-Permission-Scoping.md`; `backend/functions/src/hosts/project-setup/host.json`; `backend/functions/src/hosts/project-setup/service-factory.ts`; `backend/functions/src/functions/health/index.ts`
+  **Affected files/surfaces:** dedicated host runtime config, downstream Graph/SharePoint access, deployment and release checklists
+  **Blocker level:** Launch blocker
+  **Cross-phase impact:** Directly gates Phase 5 release and support claims because those claims depend on live environment posture, not repo configuration alone.
+  **Recommended next-step direction:** Record environment-level proof that the Project Setup host settings and grants match the documented runtime contract.
+
+#### Phase 5 deferred implementations
+
+- **Item:** Retained-surface frontend regression baseline
+  **Category:** Verification / regression coverage
+  **Status:** Implicitly deferred / partially implemented
+  **Why it is still deferred:** Prompt 08 requires a truthful retained frontend baseline. Repo truth still shows the requested `@hbc/spfx-project-setup` verification command surfacing failing page-level tests in the retained request lifecycle surface, even though some direct Phase 1 tests pass.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Prompt-08_Phase-5-Frontend-Test-Baseline-and-Stability.md`; `apps/estimating/src/test/NewRequestPage.test.tsx`; `apps/estimating/src/test/RequestDetailPage.test.tsx`; `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx`; current audit verification notes in this review
+  **Affected files/surfaces:** retained requester pages and page-level integration behavior
+  **Blocker level:** Launch blocker
+  **Cross-phase impact:** Prevents truthful “release-hardened” posture and undermines signoff confidence even when backend evidence is strong.
+  **Recommended next-step direction:** Fix the retained page-level failures and rerun the requested package-local verification slice until the baseline is honestly green.
+
+- **Item:** Smoke / deployment evidence execution proof
+  **Category:** Deployment / release-readiness
+  **Status:** External / environment-gated, not repo-complete
+  **Why it is still deferred:** Prompt 09 explicitly warns not to treat smoke-test existence as completed deployment validation. Repo truth includes post-deploy smoke tests and runbooks, but there is no checked-in evidence of a successful staging or production smoke run.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Prompt-09_Phase-5-Smoke-Tests-Deployment-Runbook-and-Operational-Proof-Categorization.md`; `backend/functions/src/test/smoke/post-deploy-smoke.test.ts`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md`
+  **Affected files/surfaces:** post-deploy validation, rollback decision-making, release-gate evidence
+  **Blocker level:** Launch blocker
+  **Cross-phase impact:** Keeps Phase 5 in documentary readiness rather than executed readiness and leaves Phase 3/4 environment prerequisites unproven.
+  **Recommended next-step direction:** Run the smoke suite against the intended deployment target and capture the resulting release evidence outside the repo-doc fiction layer.
+
+- **Item:** Final signoff completion and decision proof
+  **Category:** Release-readiness / governance
+  **Status:** Documented as complete but not repo-evidenced complete
+  **Why it is still deferred:** Phase 5 handoff and signoff docs present a decision-ready package, but repo truth does not include actual completed leadership / IT / support approval evidence, nor does it include live release execution showing those signoff assumptions were satisfied.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Prompt-10_Phase-5-Signoff-Realism-and-Decision-Ready-Evidence.md`
+  **Affected files/surfaces:** signoff artifacts, release governance, leadership / IT / support decision-making
+  **Blocker level:** Launch blocker
+  **Cross-phase impact:** Depends on unresolved items from Phases 2-4 and cannot be closed honestly while those items remain open or unproven.
+  **Recommended next-step direction:** Recast signoff as pending until blockers and environment-gated evidence are actually closed.
+
+- **Item:** Accepted-risk items that remain live implementation or operational debt
+  **Category:** Mixed follow-up hardening
+  **Status:** Explicitly deferred
+  **Why it is still deferred:** Phase 5 documents accepted risks for no automated alerts, no frontend telemetry, no latency baseline, proxy stub, email stub, and dual RBAC. Repo truth still supports those risks as open items rather than closed work.
+  **Repo-truth evidence:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`; `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md`; `backend/functions/observability/README.md`
+  **Affected files/surfaces:** observability, client telemetry, performance monitoring, proxy scope, notification delivery, RBAC convergence
+  **Blocker level:** Important but non-blocking
+  **Cross-phase impact:** Aggregates unresolved debt inherited from Phases 3 and 4 and should not be mistaken for already-remediated work.
+  **Recommended next-step direction:** Track these as live post-blocker hardening items rather than buried signoff footnotes.
+
+### C. Cross-phase deferred dependencies
+
+- **Persistence truth drives release truth.** The biggest cross-phase dependency is Phase 2: until the real persistence contract matches the live wizard shape, no Phase 5 release package can honestly claim hardened retained-surface readiness.
+- **Environment prerequisites span Phases 3, 4, and 5.** Auth configuration, managed-identity grants, CORS, SharePoint / Graph approvals, and dedicated-host deployment posture are documented, but repo truth does not prove they are complete in a live environment.
+- **Operationalization is split between Phase 4 artifacts and Phase 5 signoff.** Observability, alerting, smoke execution, and runbook use are partially documented in-repo but still depend on actual deployment and operator execution evidence.
+- **Transitional surface cleanup crosses requester, controller, and admin.** Deprecated token helpers, RBAC divergence, and the proxy stub are not isolated Phase 3 leftovers; they continue to affect Phase 4 support posture and Phase 5 signoff realism.
+- **Phase 1 historical deferrals were not all truly closed by later phase closure language.** Preferences backend work and provisioning-maturity follow-on work remained open even after Phase 1 boundary remediation itself was honestly closed.
+
+### D. Closure-truth notes
+
+- **Phase 1:** `Phase-1_Handoff.md` now truthfully closes the backend boundary remediation, but the same handoff still explicitly defers the complexity-preferences endpoint and earlier provisioning-maturity follow-on. “Phase 1 closed” should therefore be read as “scope boundary closed,” not “every Phase 1 deferred dependency closed.”
+- **Phase 2:** `Phase-2_Handoff.md` says “Data Contract Complete,” but the updated Prompt 07-11 family was created precisely because repo truth still left schema reconciliation, backward compatibility, and real-adapter proof unresolved. That handoff closure language is not supported by the current contract files.
+- **Phase 3:** `Phase-3_Handoff.md` says the auth model is complete and has no must-fix blockers, yet the same phase family documents acceptable follow-on for proxy removal, deprecated helper removal, RBAC convergence, and external deployment prerequisites. Repo truth still shows those items open.
+- **Phase 4:** `Phase-4_Handoff.md` says production-safe infrastructure posture is complete, but Prompt 10 and the observability README both preserve explicit evidence that operationalization and environment-level proof were not completed in repo truth.
+- **Phase 5:** `Phase-5_Handoff.md` and `Phase-5_Production-Readiness-Signoff.md` use the strongest closure language in the phase set. The later Prompt 07-11 docs explicitly instruct that “complete / production-ready / code blockers none” language must be corrected if repo evidence does not support it. Current repo truth still does not support it.
+
+### E. Recommended interpretation for leadership / implementation planning
+
+- Treat the launch blockers in this section as the real remaining production-readiness gates: persistence contract closure, environment-level auth/infrastructure proof, green retained-surface frontend tests, executed smoke validation, and actual signoff completion.
+- Treat the non-blocking deferred items as follow-up hardening debt, not as proof that the package is already production-ready. Several of these are acceptable for post-blocker sequencing, but they are still unresolved work.
+- Treat documentary closure claims conservatively. Where a phase handoff says `COMPLETE` but the deferred inventory still shows open implementation, test, or environment-gated work, leadership should rely on repo truth plus this deferred inventory rather than the handoff label alone.
 
 ## 7. Risk Analysis
 
@@ -530,7 +785,7 @@ The following items are genuinely implemented in the current repo:
 ### Deployment risk
 
 - Production activation depends on external configuration, SharePoint admin consent, managed-identity grants, and tenant setup; these are documented but not proven complete in repo truth.
-- The backend remains a shared host with broader route registration than the phase docs imply, raising blast-radius and deployment-scope concerns.
+- The repo contains both a dedicated Project Setup host and a preserved monolithic host, but it does not contain release evidence proving which host posture is actually exercised in live deployment.
 
 ### Operational / support risk
 
@@ -581,7 +836,7 @@ The following items are genuinely implemented in the current repo:
 **Not production ready** for Phases 2-5. Phase 1 is closed.
 
 The remaining blockers are:
-1. Incomplete production persistence contract (Phase 2)
+1. ~~Incomplete production persistence contract (Phase 2)~~ — substantially closed (P2-07)
 2. Disabled required-field enforcement (Phase 2)
 3. SPFx page-level test instability (Phase 5)
 4. Environment-gated release evidence without live deployment proof (Phase 5)
