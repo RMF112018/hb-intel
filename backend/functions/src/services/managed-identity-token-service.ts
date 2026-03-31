@@ -3,14 +3,18 @@ import { DefaultAzureCredential } from '@azure/identity';
 /**
  * P3-04: Service interface for app-only token acquisition via Managed Identity.
  *
- * All methods acquire tokens as the **application identity** (system-assigned
- * Managed Identity), not as a delegated user. No user token is involved.
+ * All methods acquire tokens as the **application identity** (user-assigned
+ * Managed Identity in production) via DefaultAzureCredential, not as a
+ * delegated user. No user token is involved.
+ *
+ * Production: AZURE_CLIENT_ID must be set to the user-assigned MI's client ID
+ * so that DefaultAzureCredential selects the correct identity.
  */
 export interface IManagedIdentityTokenService {
   getSharePointToken(siteUrl: string): Promise<string>;
   /**
    * P3-04: Acquire an app-only token for the given resource scopes.
-   * Uses system-assigned Managed Identity — no user delegation.
+   * Uses user-assigned Managed Identity (production) via DefaultAzureCredential — no user delegation.
    */
   acquireAppToken(scopes: string[]): Promise<string>;
 }
@@ -31,8 +35,12 @@ function emitTelemetry(name: string, properties: Record<string, unknown>): void 
 }
 
 /**
- * P3-04: Production implementation that acquires tokens via system-assigned
- * Managed Identity through DefaultAzureCredential.
+ * P3-04: Production implementation that acquires tokens via user-assigned
+ * Managed Identity (production) through DefaultAzureCredential.
+ *
+ * AZURE_CLIENT_ID must be set to the user-assigned MI's client ID in production
+ * so that DefaultAzureCredential resolves the correct identity. For local dev,
+ * set AZURE_CLIENT_ID to the app registration client ID (with AZURE_CLIENT_SECRET).
  *
  * Renamed from `ManagedIdentityOboService` — this service performs **app-only**
  * token acquisition, not On-Behalf-Of delegation.

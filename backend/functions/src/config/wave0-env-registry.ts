@@ -54,7 +54,7 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'AZURE_CLIENT_ID',
     bucket: 'infrastructure',
-    description: 'Managed identity client ID (read by DefaultAzureCredential for outbound Azure resource auth). P4-03: API_AUDIENCE is now required separately; this setting is purely for MI outbound auth.',
+    description: 'User-assigned Managed Identity client ID in production (read by DefaultAzureCredential for outbound Azure resource auth). For local dev, set to app registration client ID (with AZURE_CLIENT_SECRET). P4-03: API_AUDIENCE is now required separately — AZURE_CLIENT_ID is NOT the same as API_AUDIENCE.',
     requiredInProd: true,
     configTier: 'core',
   },
