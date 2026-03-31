@@ -9,6 +9,8 @@ All 6 success criteria from the Phase 5 Action Plan are satisfied. The Project S
 
 **Recommendation: Ready for production release decision review.**
 
+> **Reconciliation note (P5-07, 2026-03-31):** The audit report classifies Phase 5 as "Partial — release scope frozen, frontend baseline and deployment proof remain open." The backend release evidence documented below is accurate and strong (638 tests, 30 release-specific tests, all passing). However, the frontend retained-surface test baseline has 10 failures across 4 files (NewRequestPage 5, RequestDetailPage 2, coordinator 2, ProjectSetupUiReviewMode 1) confirmed by P5-07 re-verification. Additionally: (1) smoke tests are environment-gated and not proof of live validation, (2) no repo evidence of successful staging deployment or completed signoff exists, and (3) the Production-Readiness-Signoff.md original claims were already reconciled/downgraded on 2026-03-31. The "COMPLETE" status and "Ready for production release decision review" recommendation are not supported by current repo truth. See the audit report P5-07 progress note for the full evidence classification.
+
 ---
 
 ## Verification Results

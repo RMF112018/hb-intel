@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P4-11 documentation reconciliation and audit closure)
+> **Last updated:** 2026-03-31 (P5-07 release scope freeze and repo-truth revalidation)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -1218,31 +1218,137 @@ Add final release-hardening: meaningful integration/regression evidence, explici
   - `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`
   - `apps/admin/src/pages/ProvisioningOversightPage.tsx`
 
-**Partially implemented items**
+**Partially implemented items** *(re-verified P5-07, 2026-03-31)*
 
-- Backend release-hardening evidence is strong and current. The targeted backend verification slice passed during this audit.
-- Frontend/package-level release evidence is weaker than the handoff states. The requested `@hbc/spfx-project-setup` verification command surfaced failing broader app-package tests in current repo truth, including failures in:
-  - `apps/estimating/src/test/NewRequestPage.test.tsx`
-  - `apps/estimating/src/test/RequestDetailPage.test.tsx`
-  - `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx`
-- Smoke tests exist, but they are environment-gated and do not constitute proof that a live staging or production deployment has been validated. Evidence: `backend/functions/src/test/smoke/post-deploy-smoke.test.ts`.
-- Release docs are substantial, but they remain partly procedural rather than proven by live deployment evidence.
+- Backend release-hardening evidence is strong and current. Backend suite: 51 files passed, 638 tests, 22 skipped. **Still accurate.**
+- Frontend/package-level release evidence is weaker than the handoff states. **Re-verified P5-07:** 4 test files fail (10 of 140 tests), including:
+  - `apps/estimating/src/test/NewRequestPage.test.tsx` — 5 of 17 fail
+  - `apps/estimating/src/test/RequestDetailPage.test.tsx` — 2 of 8 fail
+  - `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx` — 2 of 12 fail
+  - `apps/estimating/src/test/ProjectSetupUiReviewMode.test.tsx` — 1 of 13 fail *(newly identified — not in original audit)*
+  - 15 files pass, 128 tests pass
+- Smoke tests exist but remain environment-gated. **Still accurate.**
+- Release docs remain procedural, not proven by live deployment. **Still accurate.**
 
-**Missing items**
+**Missing items** *(re-verified P5-07)*
 
-- No repo-truth evidence shows a successful live deployment rehearsal, successful smoke run against staging, or completed signoff by leadership / IT / operations.
-- No repo-truth evidence shows a resolved frontend test baseline across the retained launch surface.
-- No repo-truth evidence shows implemented frontend telemetry, and the phase handoff itself records that as an accepted risk.
+- No repo-truth evidence of live deployment rehearsal, staging smoke run, or completed signoff. **Still accurate.**
+- Frontend test baseline unresolved. **Still accurate — 10 failures across 4 files confirmed.**
+- No frontend telemetry. **Still accurate — accepted risk.**
 
-**Divergence from plan**
+**Divergence from plan** *(re-verified P5-07)*
 
-- `phase-5/Phase-5_Handoff.md` says “Phase 5 Status: COMPLETE” and recommends “Ready for production release decision review.”
-- `phase-5/Phase-5_Production-Readiness-Signoff.md` lists all five phases as complete and code-level blockers as none.
-- Current repo truth does not support those statements. The launch surface still includes meaningful unresolved gaps: disabled required-field enforcement, incomplete persistence of live request fields, failing page-level SPFx tests, and no repo-evidenced live deployment / smoke-validation execution.
+- `phase-5/Phase-5_Handoff.md` says “Phase 5 Status: COMPLETE.” **Still overstated. P5-07 reconciliation note added.**
+- `phase-5/Phase-5_Production-Readiness-Signoff.md` original claims reconciled 2026-03-31 with downgrade note. **No further change needed.**
+- Remaining unresolved gaps confirmed: disabled required-field enforcement, 10 failing frontend tests across 4 files, no live deployment/smoke evidence.
 
 **Current status assessment**
 
-**Partial.** Phase 5 created real release artifacts and backend evidence, but the current repo is not in a state that justifies the handoff’s “production-ready” posture.
+**Partial — release scope frozen, frontend baseline and deployment proof remain open (P5-07, 2026-03-31).** Backend release evidence is strong (638 tests, 30 release-specific tests across 4 suites). Frontend baseline has 10 failures across 4 files on the retained launch surface. Live deployment proof and signoff remain environment-gated/operational.
+
+### Phase 5 Release Scope Freeze and Repo-Truth Revalidation (2026-03-31, Prompt P5-07)
+
+**Re-verification against current repo truth:**
+
+All five original Phase 5 audit findings were re-verified:
+
+| Original Audit Finding | Current Status |
+|------------------------|----------------|
+| Frontend/package-level evidence weaker than docs claim | **Still accurate** — 4 files / 10 tests fail (NewRequestPage 5, RequestDetailPage 2, coordinator 2, UiReviewMode 1) |
+| Retained-surface page-level SPFx tests not green | **Still accurate** — additionally discovered ProjectSetupUiReviewMode.test.tsx (1 failure) not in original audit |
+| Smoke tests env-gated, not proof of live validation | **Still accurate** — `post-deploy-smoke.test.ts` skips without `SMOKE_TEST_BASE_URL` |
+| Signoff docs overstate closure | **Partially stale** — `Production-Readiness-Signoff.md` already reconciled 2026-03-31. `Phase-5_Handoff.md` still says COMPLETE — P5-07 reconciliation note added. |
+| Readiness dependencies external/deployment/operational | **Still accurate** — MI grants, CORS verification, admin consent, live staging all remain unproven |
+
+**Canonical retained Project Setup release surface (frozen):**
+
+Backend (20 HTTP routes + 3 timer/SignalR in 8 families):
+- `projectRequests` — submit, list, get, advance state (4 routes)
+- `provisioningSaga` — orchestrate 7-step provisioning (1 route)
+- `timerFullSpec` — deferred step execution (1 timer)
+- `signalr` — negotiate + connection info (2 routes)
+- `acknowledgments` — workflow handoff (routes)
+- `notifications` — dispatch, preferences (routes)
+- `health` — diagnostic probe (1 route, unauthenticated)
+- `cleanupIdempotency` — maintenance timer (1 timer)
+
+Frontend (6 surfaces):
+- New Request wizard page (`NewRequestPage`)
+- Request Detail page (`RequestDetailPage`)
+- Request List page
+- Provisioning status display
+- UI-review mode (local data, no backend)
+- Production mode (live backend API)
+
+**Phase 5 evidence classification:**
+
+| Evidence | Category | Status |
+|---|---|---|
+| Release-gate regression tests (13 tests) | Repo-proven | PASSING |
+| Request lifecycle integration tests (5 tests) | Repo-proven | PASSING |
+| Unsupported-scope guard tests (5 tests) | Repo-proven | PASSING |
+| Post-deploy smoke tests (7 tests) | Env-gated | Skipped locally (requires SMOKE_TEST_BASE_URL) |
+| Frontend scope guards (7 tests) | Repo-proven | PASSING |
+| Frontend mode-switching tests (12 tests) | Repo-proven | PASSING |
+| Frontend page-level tests (50 tests across 4 files) | Repo-proven | **10 FAILING** |
+| Frontend component/config tests (66 tests across 11 files) | Repo-proven | PASSING |
+| Release-Gates-and-Diagnostics.md | Repo-proven procedure | Accurate — gates testable |
+| Deployment-Runbook.md | Operational procedure | Accurate — not executed |
+| Production-Readiness-Signoff.md | Signoff artifact | Reconciled — original claims downgraded |
+| Phase-5_Handoff.md | Handoff artifact | **Overstated** — P5-07 reconciliation note added |
+| Live deployment rehearsal | Environment-gated | **Not proven** — no repo evidence |
+| Staging smoke run | Environment-gated | **Not proven** — no repo evidence |
+| Leadership/IT/operations signoff | Operational | **Not completed** |
+| Frontend telemetry | Deferred | Accepted risk (R7) |
+
+**Backend evidence summary (strong):**
+- 51 test files, 638 tests passed, 22 skipped, 0 failed
+- 30 release-specific tests across 4 dedicated suites (release-gates, lifecycle integration, scope guard, smoke)
+- check-types clean, lint 0 errors
+
+**Frontend evidence summary (weak — 10 failures):**
+- 19 test files, 128 tests passed, 10 failed, 2 todo
+- 4 failing files on retained launch surface:
+  - `NewRequestPage.test.tsx`: 5 fail (submit paths, clarification flow, legacy location normalization)
+  - `RequestDetailPage.test.tsx`: 2 fail (error shell, SignalR disconnection warning)
+  - `RequestDetailPage.coordinator.test.tsx`: 2 fail (retry API call, retry failure banner)
+  - `ProjectSetupUiReviewMode.test.tsx`: 1 fail (mode switching without navigation)
+- 15 passing files include: bootstrap, router, runtime config, host behavior, scope guards, mode-switching integration, component tests, theme enforcement
+
+**Prior Phase 5 blockers — current status:**
+
+| Blocker (from audit) | P5-07 Status |
+|---|---|
+| Disabled required-field enforcement | **Still open** — `PROJECT_SETUP_REQUIRED_FIELDS_ENABLED = false` |
+| Frontend test baseline unresolved | **Still open** — 10 failures across 4 files confirmed |
+| No live deployment proof | **Still open** — environment-gated |
+| External SharePoint list alignment unproven | **Still open** — Phase 2 external validation |
+
+**Remaining release-readiness questions:**
+
+1. Are the 10 frontend test failures regressions from recent code changes, test drift from UI component updates, or accepted defects?
+2. Should the frontend test baseline be fixed before or after release-scope freeze?
+3. Is phased rollout (backend first, frontend separately) an acceptable launch strategy?
+4. What is the timeline for live staging deployment and smoke validation?
+
+**Closure statement:**
+
+The retained Project Setup release surface and its evidence model are now explicitly frozen. Backend evidence is strong (638 tests, 30 release-specific, all passing). Frontend evidence has 10 failures across 4 files on the retained launch surface that must be resolved or explicitly accepted before release-scope closure. Release-scope architecture is **frozen** — the canonical surfaces, evidence categories, and remaining gaps are documented. Full Phase 5 closure is NOT supported by current repo truth.
+
+**Evidence:**
+
+- Backend release-gate tests: `backend/functions/src/test/release-gates.test.ts` (13 tests)
+- Backend lifecycle integration: `backend/functions/src/test/request-lifecycle.integration.test.ts` (5 tests)
+- Backend scope guard: `backend/functions/src/test/unsupported-scope-guard.test.ts` (5 tests)
+- Backend smoke: `backend/functions/src/test/smoke/post-deploy-smoke.test.ts` (7 tests, env-gated)
+- Frontend failing: `apps/estimating/src/test/NewRequestPage.test.tsx` (5 of 17 fail)
+- Frontend failing: `apps/estimating/src/test/RequestDetailPage.test.tsx` (2 of 8 fail)
+- Frontend failing: `apps/estimating/src/test/RequestDetailPage.coordinator.test.tsx` (2 of 12 fail)
+- Frontend failing: `apps/estimating/src/test/ProjectSetupUiReviewMode.test.tsx` (1 of 13 fail)
+- Release gates doc: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Release-Gates-and-Diagnostics.md`
+- Deployment runbook: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Deployment-Runbook.md`
+- Signoff (reconciled): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Production-Readiness-Signoff.md`
+- Handoff (annotated P5-07): `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-5/Phase-5_Handoff.md`
 
 ## 4. Cross-Phase Findings
 
@@ -1254,13 +1360,13 @@ Add final release-hardening: meaningful integration/regression evidence, explici
 
 ### Recurring patterns of incompletion or drift
 
-- Several phase handoffs declare `COMPLETE` even where the live repo still contains explicit transitional markers, accepted risks, or architectural incompletion. *(P4-11: Phase 4 handoff now annotated with reconciliation note. Phase 5 handoffs remain unreconciled.)*
+- Several phase handoffs declare `COMPLETE` even where the live repo still contains explicit transitional markers, accepted risks, or architectural incompletion. *(P4-11: Phase 4 handoff annotated. P5-07: Phase 5 handoff annotated with reconciliation note. Production-Readiness-Signoff.md previously reconciled 2026-03-31.)*
 - A recurring pattern is “correct seam introduced, but not finished end-to-end.” This is true for:
   - ~~scope isolation~~ **CLOSED (P1-07 through P1-10)**
   - field mapping *(Phase 2: repo-owned closed, external list unproven)*
   - ~~auth convergence~~ **CLOSED (P3-07 through P3-11)**
   - ~~observability operationalization~~ **CLASSIFIED (P4-10)** — now explicitly categorized, no longer vaguely incomplete
-  - release evidence *(Phase 5: still incomplete)*
+  - release evidence *(Phase 5: release scope frozen P5-07, but frontend baseline and deployment proof still incomplete)*
 - Mock-backed tests and local review pathways improve developer confidence but can overstate production readiness when the real production path remains incomplete.
 
 ### Places where later work invalidated earlier assumptions
@@ -1315,9 +1421,9 @@ The following items are genuinely implemented in the current repo:
 
 ### Cleanup / documentation debt
 
-- ~~Phase handoff docs overstate completion and production readiness relative to current repo truth.~~ **RECONCILED for Phases 1-4.** Phase 1 handoff annotated (P1-10). Phase 3 handoff annotated (P3-11). Phase 4 handoff annotated (P4-07). Phase 5 handoff docs remain unreconciled.
+- ~~Phase handoff docs overstate completion and production readiness relative to current repo truth.~~ **RECONCILED for Phases 1-5.** Phase 1 handoff annotated (P1-10). Phase 3 handoff annotated (P3-11). Phase 4 handoff annotated (P4-07). Phase 5 handoff annotated (P5-07). Production-Readiness-Signoff.md previously reconciled 2026-03-31.
 - Some phase docs still speak as if external SharePoint schema proof lives inside the repo, but the repo currently contains code comments and handoff notes rather than a checked-in schema export artifact. *(Phase 2 status unchanged.)*
-- ~~Release/readiness docs should be reconciled with current repo state before they are used as signoff artifacts.~~ **PARTIALLY ADDRESSED.** Phase 4 docs reconciled (P4-07 through P4-11). Phase 5 docs still require reconciliation.
+- ~~Release/readiness docs should be reconciled with current repo state before they are used as signoff artifacts.~~ **SUBSTANTIALLY ADDRESSED.** Phase 4 docs reconciled (P4-07 through P4-11). Phase 5 handoff annotated (P5-07). Production-Readiness-Signoff.md previously reconciled. Release-scope frozen with evidence classification.
 
 ## Deferred Implementations Across Phases 1–5
 
@@ -1466,6 +1572,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
   **Blocker level:** Launch blocker
   **Cross-phase impact:** Prevents truthful “release-hardened” posture and undermines signoff confidence even when backend evidence is strong.
   **Recommended next-step direction:** Fix the retained page-level failures and rerun the requested package-local verification slice until the baseline is honestly green.
+  **P5-07 update:** Re-verified 2026-03-31. 10 failures across 4 files confirmed: NewRequestPage (5 of 17), RequestDetailPage (2 of 8), coordinator (2 of 12), ProjectSetupUiReviewMode (1 of 13). Additionally discovered UiReviewMode failure not in original audit. 128 of 140 tests pass. Deferred to Prompt-08 for resolution.
 
 - **Item:** Smoke / deployment evidence execution proof
   **Category:** Deployment / release-readiness
@@ -1567,7 +1674,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P4-11 documentation reconciliation and audit closure)
+> **Last updated:** 2026-03-31 (P5-07 release scope freeze and repo-truth revalidation)
 
 ### Phase-by-phase status
 
@@ -1577,7 +1684,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 | Phase 2 | **Substantially Closed** | Repo-owned contract, mapper, repository path, backward compatibility, and test truthfulness are closed. Live external-list proof remains outside repo evidence. |
 | Phase 3 | **Closed** | Auth frozen (P3-07), token path verified (P3-08), cross-surface converged (P3-09), proxy excluded + tests (P3-10), docs reconciled (P3-11). RBAC convergence future follow-on. |
 | Phase 4 | **Substantially Closed** | Architecture frozen (P4-07), validation scoped (P4-08), CORS/MI/permissions explicit (P4-09), observability classified (P4-10), docs reconciled (P4-11). Environment-gated deployment proof deferred. |
-| Phase 5 | Partial | Backend release evidence strong; frontend test baseline and live deployment proof incomplete. |
+| Phase 5 | **Partial** | Release scope frozen (P5-07). Backend strong (638 tests, 30 release-specific). Frontend: 10 failures across 4 files. Live deployment proof and signoff incomplete. |
 
 ### Overall recommendation
 

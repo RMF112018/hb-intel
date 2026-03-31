@@ -54,6 +54,14 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - [`Phase-5_Handoff.md`](Phase-5_Handoff.md) — Final verification (130 test files, 1,288 tests, all green), all 6 success criteria met, 0 code-level blockers, 8 accepted risks, complete phase summary (24 prompts across Phases 2–5, 33 deliverables), recommendation: ready for production release decision review
 
+8. `Prompt-07_Phase-5-Release-Scope-Freeze-and-Repo-Truth-Revalidation.md` **[COMPLETE]**
+   - Re-verify Phase 5 audit findings against current repo truth
+   - Freeze the retained Project Setup release surface (backend: 8 families, frontend: 6 surfaces)
+   - Classify all Phase 5 evidence into repo-proven / env-gated / operational / overstated
+   - Document frontend test baseline: 10 failures across 4 files on retained launch surface
+   - **Deliverables:**
+     - Audit report progress note (P5-07): re-verification table, canonical release surface, evidence classification (16 items), frontend test detail (4 failing files), 4 remaining blockers, 4 release-readiness questions
+
 ## Recommended use
 
 - Run the prompts **in order**.
