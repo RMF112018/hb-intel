@@ -68,6 +68,13 @@ This package contains a sequenced implementation kit for bringing the **HB Intel
    - **Deliverables:**
      - Audit report progress note (P4-08): validation scope table, health/readiness mapping, over-broad boot blocker confirmation absent, environment-gated dependencies
 
+10. `Prompt-09_Phase-4-CORS-Managed-Identity-and-Downstream-Permission-Scoping.md` **[COMPLETE]**
+    - Re-verify CORS, managed identity, and downstream permission posture against PS deployment boundary
+    - Confirm all acceptance criteria already satisfied by P1-09, P1-10, P4-03, P4-04, P4-07
+    - Document CORS comparison (PS vs monolithic), MI service matrix, downstream dependency classification
+    - **Deliverables:**
+      - Audit report progress note (P4-09): CORS posture table, MI permission matrix (6 services), downstream dependency classification (5 canonical, 1 optional, 3 excluded/deferred), transitional surface labeling, least-privilege follow-up items
+
 ## Recommended use
 
 - Run the prompts **in order**.

@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-> **Last updated:** 2026-03-31 (P4-08 deployment-scoped validation and health alignment)
+> **Last updated:** 2026-03-31 (P4-09 CORS, managed identity, and downstream permission scoping)
 
 This report was originally authored as a gap analysis finding that Phases 1-5 were not fully completed as documented. Since then, Phase 1 backend scope has been fully remediated (Prompts 07-10, 2026-03-31). This executive summary reflects the post-remediation state.
 
@@ -969,6 +969,101 @@ Project Setup startup/config validation and health/readiness reporting are expli
 - Infrastructure readiness tests: `backend/functions/src/test/infra-readiness.test.ts` (7 tests)
 - Health endpoint tests: `backend/functions/src/functions/health/__tests__/health.test.ts`
 
+### Phase 4 CORS, Managed Identity, and Downstream Permission Scoping (2026-03-31, Prompt P4-09)
+
+**Re-verification against P4-09 acceptance criteria:**
+
+All four acceptance criteria were verified against current repo truth. The required CORS, managed identity, and downstream permission scoping was already implemented by P1-09 (AC-5 CORS, AC-6 identity scoping), P4-03 (MI hardening, AZURE_CLIENT_SECRET removal), P4-04 (CORS/permissions/connected-services), and P1-10 (regression guards). No additional code changes are required.
+
+| P4-09 Acceptance Criterion | Status | Implementing Work |
+|---|---|---|
+| PS CORS posture is explicit and truthful | **Satisfied** | P1-09 (AC-5): tenant-specific single origin, no wildcards, `supportCredentials: true`. P1-10: exactly 1 CORS origin test-enforced. |
+| PS managed-identity/downstream assumptions are explicit and domain-scoped | **Satisfied** | P4-03: pure MI (`AZURE_CLIENT_SECRET` removed), 6 services use `DefaultAzureCredential`. P1-09: PS factory has 9 scoped services only. |
+| Broad shared-host assumptions removed/narrowed/marked transitional | **Satisfied** | P4-07: monolithic host, shared factory, broader CORS explicitly classified as transitional per ADR-0124. |
+| Review doc updated with truthful progress notes | **Satisfied** | This progress note. |
+
+**Retained Project Setup CORS posture:**
+
+| Aspect | PS Host | Monolithic Host (transitional) |
+|---|---|---|
+| Config file | `backend/functions/src/hosts/project-setup/host.json` | `backend/functions/host.json` |
+| Allowed origins | `https://hedrickbrotherscom.sharepoint.com` (1 origin) | `https://hedrickbrotherscom.sharepoint.com`, `https://*.sharepoint.com` (2, includes wildcard) |
+| Wildcards | None | Yes (`*.sharepoint.com`) |
+| `supportCredentials` | `true` | `true` |
+| Test enforcement | AC-5 (3 tests: tenant origin present, no wildcards, credentials required) + P1-10 (exactly 1 origin) | Not PS-scoped |
+
+The CORS split is intentional, not ambiguous. The PS host uses tenant-specific CORS as the canonical posture. The monolithic host retains broader CORS for its transitional multi-domain role. ADR-0124 establishes the PS host as the canonical deployment target.
+
+**Retained Project Setup managed-identity posture:**
+
+All 6 downstream services used by the PS host authenticate via `DefaultAzureCredential` (system-assigned Managed Identity):
+
+| Service | File | Downstream Resource | MI Permission Required |
+|---|---|---|---|
+| `SharePointService` | `backend/functions/src/services/sharepoint-service.ts` | SharePoint Online | Sites.FullControl.All |
+| `GraphService` | `backend/functions/src/services/graph-service.ts` | Microsoft Graph | Group.ReadWrite.All |
+| `RealTableStorageService` | `backend/functions/src/utils/table-client-factory.ts` | Azure Table Storage | Storage Table Data Contributor |
+| `ManagedIdentityTokenService` | `backend/functions/src/services/managed-identity-token-service.ts` | Token acquisition | (uses MI credential) |
+| `SharePointProjectRequestsAdapter` | `backend/functions/src/services/project-requests-repository.ts` | SharePoint Projects list | Sites.FullControl.All (via SP service) |
+| `RealAcknowledgmentService` | `backend/functions/src/services/acknowledgment-service.ts` | SharePoint Projects list | Sites.FullControl.All (via SP service) |
+
+No app-registration secrets exist. `AZURE_CLIENT_SECRET` was removed from the config registry by P4-03.
+
+**Downstream dependencies classified by PS scope:**
+
+| Dependency | Required for PS | Category |
+|---|---|---|
+| Azure Table Storage (idempotency, provisioning status) | Yes | Canonical |
+| SharePoint Online (request persistence, site provisioning) | Yes | Canonical |
+| Microsoft Graph (group creation, membership) | Yes | Canonical |
+| Azure SignalR (real-time provisioning push) | Optional | Canonical (graceful degradation via `NoOpSignalRPushService`) |
+| Application Insights (telemetry) | Yes | Canonical |
+| Email delivery (SendGrid) | No | Stub — deferred |
+| Notification API | No | Informational — localhost fallback |
+| Domain CRUD SharePoint lists (leads, projects, etc.) | No | Excluded — not in PS host |
+| Department background MI grants | No | Excluded — provisioning-only |
+
+**Broad/shared-host assumptions explicitly labeled transitional:**
+
+The following infrastructure surfaces belong to the monolithic host and do not define PS retained release truth:
+
+1. `backend/functions/src/index.ts` — registers 19 route families including 11 domain CRUD families excluded from PS
+2. `backend/functions/src/services/service-factory.ts` — shared service factory with lazy domain CRUD services
+3. `backend/functions/host.json` — broader CORS with `*.sharepoint.com` wildcard
+4. `validateRequiredConfig()` — validates all tiers; PS host uses `validateProjectSetupStartupConfig()` instead
+
+These are preserved during the per-domain host transition (ADR-0124) and will remain until other domain hosts are created and the monolithic host is retired.
+
+**Remaining operational/environment dependencies:**
+
+1. MI role assignments must be applied in Azure portal (Storage Table Data Contributor, Sites.FullControl.All, Group.ReadWrite.All)
+2. Entra ID app registration must have correct API permissions approved
+3. SharePoint admin center must approve SPFx API access
+4. `GRAPH_GROUP_PERMISSION_CONFIRMED=true` must be set after IT grants Graph permission
+5. CORS in Azure portal must match or defer to `host.json` (portal overrides take precedence)
+
+**Intentionally deferred least-privilege follow-up:**
+
+- RBAC convergence from UPN env lists to JWT roles (Phase 5+ per P3-09)
+- Sites.FullControl.All is broader than ideal; narrowing to Sites.Selected requires per-site admin consent (operational complexity)
+- Group.ReadWrite.All could narrow to Group.Create + GroupMember.ReadWrite.All if Graph API supports the saga flow
+
+**Closure statement:**
+
+Project Setup CORS, managed identity, and downstream runtime assumptions are explicit and domain-scoped. The PS host uses tenant-specific CORS (single origin, no wildcards, test-enforced), pure managed identity (6 services, no secrets), and a bounded set of 9 services with classified downstream dependencies. Broad shared-host infrastructure posture no longer defines retained release truth — the monolithic host is explicitly labeled transitional per ADR-0124. All four P4-09 acceptance criteria are satisfied by existing implementation with test enforcement.
+
+**Evidence:**
+
+- PS tenant-specific CORS: `backend/functions/src/hosts/project-setup/host.json`
+- Monolithic broader CORS (transitional): `backend/functions/host.json`
+- CORS tests (AC-5): `backend/functions/src/test/project-setup-host-boundary.test.ts` (3 tests)
+- CORS drift prevention (P1-10): `backend/functions/src/test/project-setup-host-boundary.test.ts` (exactly 1 origin test)
+- MI services: `backend/functions/src/services/sharepoint-service.ts`, `graph-service.ts`, `managed-identity-token-service.ts`, `project-requests-repository.ts`, `acknowledgment-service.ts`, `backend/functions/src/utils/table-client-factory.ts`
+- AZURE_CLIENT_SECRET removal: `backend/functions/src/config/wave0-env-registry.ts` (P4-03)
+- PS scoped service factory: `backend/functions/src/hosts/project-setup/service-factory.ts`
+- ADR-0124: `docs/architecture/adr/ADR-0124-project-setup-backend-host-boundary.md`
+- Infra readiness tests: `backend/functions/src/test/infra-readiness.test.ts`
+
 ### Phase 5
 
 **Intended objective**
@@ -1333,7 +1428,7 @@ The strongest cross-phase dependencies are: external live-list validation for th
 
 ## 9. Final Status Assessment
 
-> **Last updated:** 2026-03-31 (P4-08 deployment-scoped validation and health alignment)
+> **Last updated:** 2026-03-31 (P4-09 CORS, managed identity, and downstream permission scoping)
 
 ### Phase-by-phase status
 
