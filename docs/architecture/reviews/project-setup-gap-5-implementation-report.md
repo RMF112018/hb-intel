@@ -1,0 +1,116 @@
+# Gap 5 Implementation Report — Project Setup Authorization Convergence
+
+> **Created:** 2026-04-01 (P9-G5-01)
+> **Status:** In Progress
+> **Scope:** Central tracking report for the 13-prompt Gap 5 authorization convergence package
+
+## Executive Summary
+
+Gap 5 addresses the dual authorization model in Project Setup: request-lifecycle routes use env-based UPN matching (`ADMIN_UPNS`/`CONTROLLER_UPNS`), while provisioning-admin routes use JWT app-role claims (`Admin`/`HBIntelAdmin`). The target is convergence onto a single Microsoft Entra claim-based authorization architecture with app-role-driven privileged access, `oid`-based resource ownership, and workload/app-only authorization for automation paths.
+
+This report tracks implementation progress across all 13 prompts.
+
+**Governing documents:**
+- Prompt package: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-9/gap-5/`
+- Baseline inventory: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Baseline-Inventory.md`
+- Target outcome: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Outcome-Summary.md`
+- Authorization audit: `docs/architecture/reviews/project-setup-authz-model-gap-validation.md`
+
+---
+
+## 1. Baseline (P9-G5-01)
+
+### 1.1 Current Authorization Surface
+
+Project Setup exposes 16 HTTP routes and 2 timer functions across two authorization families:
+
+| Family | Routes | Mechanism | Key Files |
+|--------|--------|-----------|-----------|
+| Request lifecycle | 4 | Env-based UPN matching | `projectRequests/index.ts`, `state-machine.ts` |
+| Provisioning admin | 10 (6 role-gated, 4 authn-only) | JWT app-role claims | `provisioningSaga/index.ts` |
+| Timer/internal | 2 | None (timer-triggered) | `timerFullSpec/index.ts`, `cleanupIdempotency/index.ts` |
+
+Additional non-route authorization surfaces: notification recipient resolution (env-based UPN), frontend provisioning visibility (JWT roles), ownership checks (UPN comparison).
+
+### 1.2 Identity Gap
+
+`oid` is extracted as a required claim in `validateToken.ts` and available in every handler via `auth.claims.oid`. However, no model interface includes an `oid` field. All identity persistence — `submittedBy`, `triggeredBy`, `escalatedBy`, person assignments — is UPN-based.
+
+### 1.3 Frozen Target
+
+Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.md` for the complete target posture, route-by-route matrix, identity migration plan, and env var deprecation path.
+
+### 1.4 Blockers and Prerequisites
+
+| # | Item | Type | Owner | Resolution |
+|---|------|------|-------|-----------|
+| 1 | No `oid` fields in data models | Repo-owned | Prompt 1-05 | Add `oid` fields, implement dual-write |
+| 2 | `resolveRequestRole()` reads env vars | Repo-owned | Prompt 1-06 | Rewrite to use JWT `roles` claims |
+| 3 | Inline env-var privilege check in list route | Repo-owned | Prompt 1-06 | Rewrite to use JWT `roles` claims |
+| 4 | Notification dispatch reads env vars for recipients | Repo-owned | Prompt 1-06/07 | Requires design decision (§9 of target outcome) |
+| 5 | No shared authorization policy engine | Repo-owned | Prompt 1-04 | Build shared policy module |
+| 6 | No workload/app-only auth for timers | Repo-owned | Prompt 1-08 | Formalize workload roles |
+| 7 | `Controller` app-role may not exist in Entra | External | Entra admin | Create app-role before Prompt 1-06 |
+| 8 | Users must be assigned to app-roles | External | Entra admin | Before production cutover |
+| 9 | Managed identity needs app-role assignment | External | Azure admin | Before Prompt 1-08 |
+
+---
+
+## 2. Implementation Progress
+
+| Prompt | Title | Status | Date | Notes |
+|--------|-------|--------|------|-------|
+| 1-01 | Contract Freeze and Baseline | **Complete** | 2026-04-01 | Baseline inventoried, target frozen |
+| 1-02 | Target Architecture and Policy Matrix | Not started | — | — |
+| 1-03 | Entra App Role and Scope Contract | Not started | — | — |
+| 1-04 | Shared Authorization Policy Engine | Not started | — | — |
+| 1-05 | Oid Migration and Data Contract | Not started | — | — |
+| 1-06 | Request Lifecycle Authorization Convergence | Not started | — | — |
+| 1-07 | Provisioning and Admin Authorization Convergence | Not started | — | — |
+| 1-08 | Workload and App-Only Authorization | Not started | — | — |
+| 1-09 | Frontend SPFx Contract and Diagnostics | Not started | — | — |
+| 1-10 | Telemetry, Break-Glass, and Auditability | Not started | — | — |
+| 1-11 | Tests, Release Gates, and Security Hardening | Not started | — | — |
+| 1-12 | Documentation, Cutover, and Rollback | Not started | — | — |
+| 1-13 | Final Reconciliation and Closure | Not started | — | — |
+
+---
+
+## 3. Files Changed
+
+### Prompt 1-01 (P9-G5-01)
+
+| Action | File |
+|--------|------|
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Baseline-Inventory.md` |
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Outcome-Summary.md` |
+| Created | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+---
+
+## 4. Verification Log
+
+### Prompt 1-01 (P9-G5-01)
+
+**Scope:** Documentation-only — no code changes, no build/lint/test verification required.
+
+**Structural verification:**
+- Baseline inventory covers all 16 routes across both route families
+- Baseline includes non-route surfaces (notification dispatch, frontend visibility, ownership checks)
+- Identity gap documented: `oid` available but never persisted
+- Target outcome specifies per-route authorization targets
+- Evidence classified as confirmed repo fact / inference / unresolved
+- Blockers classified as repo-owned vs external with resolution prompt assignments
+
+**Acceptance criteria status:**
+- [x] Baseline inventory covers every retained Project Setup route family and authorization path
+- [x] Report identifies all current UPN-based, role-based, and ownership-based decisions
+- [x] Target outcome is specific enough to guide all later prompts without re-deciding architecture
+
+---
+
+## Version History
+
+| Version | Date | Prompt | Summary |
+|---------|------|--------|---------|
+| 1.0 | 2026-04-01 | P9-G5-01 | Initial baseline and contract freeze — 3 documents created |
