@@ -65,6 +65,9 @@ function makeFullSpItem(): Record<string, unknown> {
     clarificationRequestedAt: '2026-03-18T10:00:00.000Z',
     requesterRetryUsed: 'true',
     clarificationItems: '[{"field":"budget","note":"Need breakdown"}]',
+    // P9-G5-05: Stable identity fields
+    submittedByOid: '00000000-0000-0000-0000-000000000001',
+    completedByOid: '00000000-0000-0000-0000-000000000002',
   };
 }
 
@@ -112,6 +115,9 @@ function makeFullDomainRequest(): IProjectSetupRequest {
     clarificationRequestedAt: '2026-03-18T10:00:00.000Z',
     requesterRetryUsed: true,
     clarificationItems: [{ field: 'budget', note: 'Need breakdown' }] as unknown as IProjectSetupRequest['clarificationItems'],
+    // P9-G5-05: Stable identity fields
+    submittedByOid: '00000000-0000-0000-0000-000000000001',
+    completedByOid: '00000000-0000-0000-0000-000000000002',
   };
 }
 
@@ -120,7 +126,7 @@ function makeFullDomainRequest(): IProjectSetupRequest {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('toDomain() — SP item to domain object', () => {
-  it('maps all 41 fields from a complete SP item', () => {
+  it('maps all 43 fields from a complete SP item', () => {
     const domain = toDomain(makeFullSpItem());
 
     expect(domain.requestId).toBe('proj-full');
@@ -166,6 +172,10 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.clarificationRequestedAt).toBe('2026-03-18T10:00:00.000Z');
     expect(domain.requesterRetryUsed).toBe(true);
     expect(domain.clarificationItems).toEqual([{ field: 'budget', note: 'Need breakdown' }]);
+
+    // P9-G5-05: Stable identity fields
+    expect(domain.submittedByOid).toBe('00000000-0000-0000-0000-000000000001');
+    expect(domain.completedByOid).toBe('00000000-0000-0000-0000-000000000002');
   });
 
   it('applies defaults for missing required fields', () => {
@@ -214,6 +224,10 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.clarificationRequestedAt).toBeUndefined();
     expect(domain.requesterRetryUsed).toBe(false);
     expect(domain.clarificationItems).toEqual([]);
+
+    // P9-G5-05: Stable identity fields — absent on pre-migration rows
+    expect(domain.submittedByOid).toBeUndefined();
+    expect(domain.completedByOid).toBeUndefined();
   });
 
   it('normalizes numeric 0 in string-typed Number columns to undefined', () => {
@@ -291,6 +305,10 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.clarificationRequestedAt).toBe('2026-03-18T10:00:00.000Z');
     expect(payload.requesterRetryUsed).toBe('true');
     expect(payload.clarificationItems).toBe('[{"field":"budget","note":"Need breakdown"}]');
+
+    // P9-G5-05: Stable identity fields
+    expect(payload.submittedByOid).toBe('00000000-0000-0000-0000-000000000001');
+    expect(payload.completedByOid).toBe('00000000-0000-0000-0000-000000000002');
   });
 
   it('serializes arrays as JSON strings', () => {
@@ -318,6 +336,8 @@ describe('toListItem() — domain object to SP payload', () => {
       completedBy: undefined,
       completedAt: undefined,
       siteUrl: undefined,
+      submittedByOid: undefined,
+      completedByOid: undefined,
     } as unknown as IProjectSetupRequest;
     const payload = toListItem(request);
 
@@ -328,6 +348,10 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.field_21).toBe('');
     expect(payload.field_22).toBe('');
     expect(payload.field_23).toBe('');
+
+    // P9-G5-05: OID fields write empty string when absent
+    expect(payload.submittedByOid).toBe('');
+    expect(payload.completedByOid).toBe('');
   });
 
   it('writes null for missing optional number fields', () => {
@@ -403,6 +427,10 @@ describe('Round-trip: toListItem → toDomain preserves mapped fields', () => {
     expect(roundTripped.clarificationRequestedAt).toBe(original.clarificationRequestedAt);
     expect(roundTripped.requesterRetryUsed).toBe(original.requesterRetryUsed);
     expect(roundTripped.clarificationItems).toEqual(original.clarificationItems);
+
+    // P9-G5-05: Stable identity fields
+    expect(roundTripped.submittedByOid).toBe(original.submittedByOid);
+    expect(roundTripped.completedByOid).toBe(original.completedByOid);
   });
 });
 
@@ -504,8 +532,8 @@ describe('safeParseJsonArray()', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('PROJECTS_LIST_SELECT_FIELDS', () => {
-  it('contains exactly 41 field names (24 legacy + 17 P2-07 gap fields)', () => {
-    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(41);
+  it('contains exactly 43 field names (24 legacy + 17 P2-07 gap fields + 2 P9-G5-05 oid fields)', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(43);
   });
 
   it('includes Title and Year', () => {
@@ -523,6 +551,11 @@ describe('PROJECTS_LIST_SELECT_FIELDS', () => {
   it('includes renamed viewerUPNs and addOns columns', () => {
     expect(PROJECTS_LIST_SELECT_FIELDS).toContain('viewerUPNs');
     expect(PROJECTS_LIST_SELECT_FIELDS).toContain('addOns');
+  });
+
+  it('includes P9-G5-05 stable identity oid columns', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS).toContain('submittedByOid');
+    expect(PROJECTS_LIST_SELECT_FIELDS).toContain('completedByOid');
   });
 });
 

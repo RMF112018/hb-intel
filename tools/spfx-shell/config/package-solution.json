@@ -3,13 +3,13 @@
   "solution": {
     "name": "hb-intel-project-setup",
     "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
-    "version": "001.000.007",
+    "version": "001.000.015",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
       {
-        "resource": "hb-intel-api-dev",
+        "resource": "hb-intel-api-staging",
         "scope": "access_as_user"
       }
     ],
@@ -36,7 +36,7 @@
         "title": "hb-intel-project-setup Feature",
         "description": "Deploys HB Intel Project Setup Requests webpart assets.",
         "id": "cb3b1520-1665-4412-83ab-344c2182a2fd",
-        "version": "001.000.007"
+        "version": "001.000.015"
       }
     ]
   },

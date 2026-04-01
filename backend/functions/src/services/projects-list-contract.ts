@@ -237,6 +237,12 @@ export const PROJECTS_LIST_FIELD_MAP = {
   clarificationRequestedAt:  { spInternalName: 'clarificationRequestedAt',  spType: 'DateTime', serialization: 'direct' },
   requesterRetryUsed:        { spInternalName: 'requesterRetryUsed',        spType: 'Text',     serialization: 'direct' },
   clarificationItems:        { spInternalName: 'clarificationItems',        spType: 'MultiLineText', serialization: 'json-array' },
+
+  // ── P9-G5-05: Stable identity fields ──────────────────────────────────
+  // Entra Object ID columns for oid-based ownership and actor attribution.
+  // Absent on pre-migration rows; columns require manual SP admin creation.
+  submittedByOid:            { spInternalName: 'submittedByOid',            spType: 'Text',          serialization: 'direct' },
+  completedByOid:            { spInternalName: 'completedByOid',            spType: 'Text',          serialization: 'direct' },
 } as const satisfies Record<string, IFieldMapEntry>;
 
 /** Domain property names that have a corresponding SharePoint column. */

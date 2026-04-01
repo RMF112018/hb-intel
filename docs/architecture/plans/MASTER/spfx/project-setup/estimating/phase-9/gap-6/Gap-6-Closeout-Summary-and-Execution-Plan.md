@@ -91,6 +91,18 @@ The remaining Gap 6 work is **repo-contract reconciliation**, not environment re
 4. ~~Reconcile all affected docs / reports / runbooks~~ **DONE** (P9-G6-04)
 5. Produce a final closure audit that states exactly what is closed and what, if anything, remains environment-gated
 
+## Schema contract reconciliation — `additionalTeamMemberUpns`, `submittedByOid`, `completedByOid` (P9-G6-05)
+
+Three fields required reconciliation between the live SharePoint schema and the repo contract:
+
+| Field | Decision | Rationale |
+|-------|----------|-----------|
+| `additionalTeamMemberUpns` | **Remove (confirmed)** | Already removed from code in P9-G6-02. Overlapped with `groupMembers`. Not in live schema. No stale code references. |
+| `submittedByOid` | **Keep** | Core to stable-identity ownership model (P9-G5-05). Active in authorization (`checkOwnership`), submission handler, provisioning handoff. Missing from `PROJECTS_LIST_FIELD_MAP` — now fixed. SP column creation required. |
+| `completedByOid` | **Keep** | Stable actor attribution for completion events. Consistent with OID identity posture. Missing from field map — now fixed. SP column creation required. |
+
+**See:** `Gap-6-Schema-Contract-Reconciliation-Audit.md` for full evidence and impacted files.
+
 ## Repo-contract mismatches to resolve (Prompts 2-5)
 
 | # | Mismatch | Type | Prompt |
@@ -108,15 +120,17 @@ The remaining Gap 6 work is **repo-contract reconciliation**, not environment re
 |---|---|---|
 | 1 | `projectViewerGroups` data not populated | SharePoint Admin / Business |
 | 2 | Choice columns remain Text in live schema | SharePoint Admin (cosmetic) |
+| 3 | `submittedByOid` Text column missing from Projects list | SharePoint Admin (P9-G5-05) |
+| 4 | `completedByOid` Text column missing from Projects list | SharePoint Admin (P9-G5-05) |
 
 ## Explicit questions this closeout must answer
 
 - ~~Which originally reported Gap 6 findings are now fully closed?~~ **Answered** — see re-baseline memo
 - ~~Which original fields must be removed from the repo contract because the target model changed?~~ **Answered** — `projectLeadId` and `additionalTeamMemberUpns`
-- Does the repo now align with the latest `Projects` list schema? — **Not yet** (Prompt 2)
-- Does the repo now align with the latest `projectViewerGroups` schema? — **Not yet** (Prompt 3)
-- Are any remaining environment actions still required? — **Yes** — `projectViewerGroups` data population
-- Can Gap 6 be honestly marked closed after repo reconciliation, or only substantially closed with specific residuals? — **TBD** (Prompt 5)
+- Does the repo now align with the latest `Projects` list schema? — **Yes** (P9-G6-02 reconciled fields; P9-G6-05 reconciled OID fields and added them to field map)
+- Does the repo now align with the latest `projectViewerGroups` schema? — **Yes** (P9-G6-03)
+- Are any remaining environment actions still required? — **Yes** — `projectViewerGroups` data population; `submittedByOid` and `completedByOid` SP column creation
+- Can Gap 6 be honestly marked closed after repo reconciliation, or only substantially closed with specific residuals? — **Substantially closed** with 4 environment residuals (see table above)
 
 ## Final output expectation
 

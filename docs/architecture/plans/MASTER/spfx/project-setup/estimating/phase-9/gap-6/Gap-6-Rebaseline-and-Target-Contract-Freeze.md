@@ -150,8 +150,8 @@ These are the frozen intended meanings for Gap 6 closure. Subsequent prompts mus
 
 | Live SP Internal Name | Notes |
 |---|---|
-| `submittedByOid` | Present in repo contract via P9-G5-05 — but absent from schema CSV. This is expected: the P9-G5-05 fields were added to the contract proactively and the environment column creation may still be pending. Not a Gap 6 concern. |
-| `completedByOid` | Same as above. |
+| `submittedByOid` | Present in repo contract via P9-G5-05. Absent from live schema CSV — SP column creation required (Text, 255). **Reconciled (P9-G6-05):** field retained, added to `PROJECTS_LIST_FIELD_MAP`. Graceful UPN fallback in `checkOwnership()` until column is provisioned. |
+| `completedByOid` | Same as `submittedByOid`. **Reconciled (P9-G6-05):** field retained, added to field map. |
 
 ### 4.2 projectViewerGroups list
 
@@ -238,7 +238,7 @@ These are the specific mismatches that Prompts 2-5 must resolve.
 | # | Finding | Severity |
 |---|---|---|
 | 11 | `projectViewerGroups` list exists but data is not populated (no viewer group IDs, names, or active flags) | **Environment residual** — does not block repo contract work but blocks production viewer-group functionality |
-| 12 | `submittedByOid` and `completedByOid` (P9-G5-05) are in the repo contract but not confirmed in the schema CSV | **Not a Gap 6 concern** — these are P9-G5 fields; their environment provisioning is tracked separately |
+| 12 | `submittedByOid` and `completedByOid` (P9-G5-05) are in the repo contract but absent from the live schema CSV | **Reconciled (P9-G6-05)** — fields retained, added to `PROJECTS_LIST_FIELD_MAP`. SP column creation required (environment residual). |
 
 ---
 
@@ -286,5 +286,5 @@ The following sequence must be executed in order (Prompts 2-5):
 | # | Residual | Owner | Impact |
 |---|---|---|---|
 | 1 | `projectViewerGroups` data not populated (no viewer group IDs or active flags) | SharePoint Admin / Business | Viewer-group policy will not function until populated |
-| 2 | `submittedByOid` / `completedByOid` columns may not exist in live schema | P9-G5 track | Not a Gap 6 concern; tracked separately |
+| 2 | `submittedByOid` / `completedByOid` Text columns absent from Projects list | SharePoint Admin (P9-G5-05) | OID fields read as `undefined`; authorization falls back to UPN comparison until columns are provisioned |
 | 3 | Choice columns remain Text in live schema | SharePoint Admin | Cosmetic only; no runtime impact |
