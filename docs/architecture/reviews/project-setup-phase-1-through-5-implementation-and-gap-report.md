@@ -404,7 +404,7 @@ Phase 2 Prompt P2-07 documented an external production Projects list export that
 
 **Schema notes:**
 
-- `field_17` (projectLeadId), `field_18` (viewerUPNs), `field_19` (addOns) are absent from the 2026-03-31 schema export but retained in code for legacy row compatibility
+- ~~`field_17` (projectLeadId), `field_18` (viewerUPNs), `field_19` (addOns) are absent from the 2026-03-31 schema export but retained in code for legacy row compatibility~~ **RECONCILED (P9-G6-02).** `projectLeadId` removed from contract — superseded by `leadEstimatorUpn`. `viewerUPNs` and `addOns` now exist as named SP columns; contract remapped. `additionalTeamMemberUpns` removed — overlapped with `groupMembers`. Repo contract is now 41 fields.
 - ~~`clarificationItems` uses SP Text (MaxLength=255) — may truncate for requests with many clarification records~~ **CLOSED (P6-01).** Migrated to MultiLineText along with 3 other json-array gap fields. D0 deployment prerequisite added to runbook.
 - `projectZip` is SP Number type — the mapper converts to/from string in the domain model
 

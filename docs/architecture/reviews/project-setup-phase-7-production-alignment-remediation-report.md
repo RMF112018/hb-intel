@@ -197,9 +197,9 @@ If prerequisites fail, the backend context falls back to `'ui-review'` mode with
 | `field_14` | `clientName` | Text | |
 | `field_15` | `startDate` | Number | Stores ISO 8601 string |
 | `field_16` | `contractType` | Choice | |
-| `field_17` | `projectLeadId` | Text | UPN |
-| `field_18` | `viewerUPNs` | MultiLineText | JSON array (P6-01 migration) |
-| `field_19` | `addOns` | MultiLineText | JSON array (P6-01 migration) |
+| ~~`field_17`~~ | ~~`projectLeadId`~~ | ~~Text~~ | ~~UPN~~ — **REMOVED (P9-G6-02):** superseded by `leadEstimatorUpn`; field absent from live schema |
+| ~~`field_18`~~ | `viewerUPNs` | MultiLineText | **REMAPPED (P9-G6-02):** now uses named column `viewerUPNs` |
+| ~~`field_19`~~ | `addOns` | MultiLineText | **REMAPPED (P9-G6-02):** now uses named column `addOns` |
 | `field_20` | `clarificationNote` | Number | Stores text |
 | `field_21` | `completedBy` | Number | Stores UPN |
 | `field_22` | `completedAt` | Number | Stores ISO 8601 string |
@@ -209,11 +209,11 @@ If prerequisites fail, the backend context falls back to `'ui-review'` mode with
 
 **Phase 2 gap fields** (domain property names as internal names, added P6-01):
 
-`projectStreetAddress`, `projectCity`, `projectCounty`, `projectState`, `projectZip`, `officeDivision`, `procoreProject`, `projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, `timberscanApproverUpn`, `supportingEstimatorUpns` (MultiLineText JSON), `additionalTeamMemberUpns` (MultiLineText JSON), `sageAccessUpns` (MultiLineText JSON), `clarificationRequestedAt` (DateTime), `requesterRetryUsed` (Text `'true'|'false'`), `clarificationItems` (MultiLineText JSON).
+`projectStreetAddress`, `projectCity`, `projectCounty`, `projectState`, `projectZip`, `officeDivision`, `procoreProject`, `projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, `timberscanApproverUpn`, `supportingEstimatorUpns` (MultiLineText JSON), ~~`additionalTeamMemberUpns` (MultiLineText JSON)~~ **(REMOVED P9-G6-02 — overlapped with groupMembers)**, `sageAccessUpns` (MultiLineText JSON), `clarificationRequestedAt` (DateTime), `requesterRetryUsed` (Text `'true'|'false'`), `clarificationItems` (MultiLineText JSON).
 
 ### Contract status
 
-- 43-field contract aligned across model, field map, mapper, and repository (P6-01)
+- ~~43-field~~ 41-field contract aligned across model, field map, mapper, and repository (P6-01, updated P9-G6-02: removed `projectLeadId` and `additionalTeamMemberUpns`)
 - Required-field enforcement active (P6-01)
 - Storage ceiling resolved — 4 json-array columns migrated from Text (255 chars) to MultiLineText (63k chars) (P6-01)
 - Backward compatibility confirmed (P6-02)

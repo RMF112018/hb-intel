@@ -10,19 +10,21 @@
 
 Complete **all** items before starting the deployment sequence.
 
-### D0 — SharePoint Column Migration (P6-01, One-Time)
+### D0 — SharePoint Column Migration (P6-01, One-Time) — COMPLETED
 
-Migrate four JSON-serialized array columns from `Text` (255-char limit) to `Note` (MultiLineText) in the HBCentral **Projects** list. Required before deploying P6-01 backend changes to prevent JSON truncation on write.
+~~Migrate four JSON-serialized array columns from `Text` (255-char limit) to `Note` (MultiLineText) in the HBCentral **Projects** list. Required before deploying P6-01 backend changes to prevent JSON truncation on write.~~
 
-| Column Internal Name | Current Type | Target Type |
-|----------------------|-------------|-------------|
-| `supportingEstimatorUpns` | Text | Note (MultiLineText) |
-| `additionalTeamMemberUpns` | Text | Note (MultiLineText) |
-| `sageAccessUpns` | Text | Note (MultiLineText) |
-| `clarificationItems` | Text | Note (MultiLineText) |
+| Column Internal Name | Current Type | Target Type | Status |
+|----------------------|-------------|-------------|--------|
+| `supportingEstimatorUpns` | Text | Note (MultiLineText) | **Done** |
+| ~~`additionalTeamMemberUpns`~~ | ~~Text~~ | ~~Note (MultiLineText)~~ | **Done then removed** — field removed from target model (P9-G6-02) |
+| `sageAccessUpns` | Text | Note (MultiLineText) | **Done** |
+| `clarificationItems` | Text | Note (MultiLineText) | **Done** |
 
-- [ ] All four columns migrated in the HBCentral Projects list
-- [ ] Verified: existing rows still readable after migration (SP preserves data on Text → Note conversion)
+- [x] All four columns migrated in the HBCentral Projects list (confirmed via schema export 2026-04-01)
+- [x] Verified: existing rows still readable after migration (SP preserves data on Text → Note conversion)
+
+> **P9-G6 note:** Additionally, `field_10` (GroupMembersJson) and `field_11` (GroupLeadersJson) were also migrated to Note, and `viewerUPNs` and `addOns` now exist as named columns (Note type). The `additionalTeamMemberUpns` column was subsequently removed from the live schema because it overlapped with `groupMembers`. See `Gap-6-Rebaseline-and-Target-Contract-Freeze.md` for the complete re-baseline evidence.
 
 ### Infrastructure (One-Time Setup)
 

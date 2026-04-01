@@ -1,6 +1,32 @@
 # SharePoint Schema / Environment Gap Validation — Project Setup
 
-## Executive Summary
+---
+
+## P9-G6 Reconciliation Notice (2026-04-01)
+
+> **This document was written against an older schema state.** The environment and the repo-owned contract have both changed materially since this validation was performed. The findings below are preserved as historical truth, but the current authoritative state is documented in the Gap 6 re-baseline and reconciliation artifacts:
+>
+> - **Re-baseline memo:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-9/gap-6/Gap-6-Rebaseline-and-Target-Contract-Freeze.md`
+> - **Contract reconciliation:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-9/gap-6/Gap-6-Projects-Contract-Reconciliation.md`
+> - **Viewer groups design:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-9/gap-6/Gap-6-projectViewerGroups-Design-and-Adapter-Alignment.md`
+> - **Final field semantics:** `docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-9/gap-6/Gap-6-Final-Field-Semantics.md`
+>
+> **Key changes since this validation:**
+>
+> | Original Finding | Current Status |
+> |---|---|
+> | D0 prerequisite not completed | **CLOSED** — all JSON-array fields migrated to Note |
+> | 6 JSON-array fields remain Text (255) | **CLOSED** — all now Note (MultiLineText) |
+> | field_17 (projectLeadId) absent | **SUPERSEDED** — `projectLeadId` removed from target model; `leadEstimatorUpn` is the authoritative replacement |
+> | field_18 (viewerUPNs) absent | **CLOSED** — `viewerUPNs` now exists as a named column; repo contract remapped |
+> | field_19 (addOns) absent | **CLOSED** — `addOns` now exists as a named column; repo contract remapped |
+> | additionalTeamMemberUpns truncation risk | **SUPERSEDED** — field removed from target model and live schema (overlapped with `groupMembers`) |
+> | Section 8.3 recommends creating field_17/18/19 | **SUPERSEDED** — field_17 intentionally absent; field_18/19 replaced by named columns |
+> | Repo-owned contract: 43 fields | **Updated** — now 41 fields after removing `projectLeadId` and `additionalTeamMemberUpns` |
+
+---
+
+## Executive Summary (Original — written against pre-migration schema)
 
 **Verdict: Confirmed gap — the live SharePoint `Projects` list schema does not match the repo-owned 43-field contract.**
 

@@ -88,7 +88,7 @@ The remaining Gap 6 work is **repo-contract reconciliation**, not environment re
 1. ~~Re-baseline the gap against the latest environment evidence~~ **DONE** (P9-G6-01)
 2. ~~Reconcile the repo-owned `Projects` contract, mapper, validation, tests, and docs to the new intended field model~~ **DONE** (P9-G6-02)
 3. ~~Add / align a repo-owned contract and adapter layer for `projectViewerGroups`~~ **DONE** (P9-G6-03)
-4. Reconcile all affected docs / reports / runbooks
+4. ~~Reconcile all affected docs / reports / runbooks~~ **DONE** (P9-G6-04)
 5. Produce a final closure audit that states exactly what is closed and what, if anything, remains environment-gated
 
 ## Repo-contract mismatches to resolve (Prompts 2-5)
@@ -100,7 +100,7 @@ The remaining Gap 6 work is **repo-contract reconciliation**, not environment re
 | 3 | ~~`projectLeadId` / `field_17` still in contract and domain model~~ | ~~Remove~~ | ~~2~~ **DONE** |
 | 4 | ~~`additionalTeamMemberUpns` still in contract and domain model~~ | ~~Remove~~ | ~~2~~ **DONE** |
 | 5 | ~~No repo-owned contract for `projectViewerGroups`~~ | ~~Add~~ | ~~3~~ **DONE** |
-| 6 | Original gap validation doc and related docs not updated | Docs | 4 |
+| 6 | ~~Original gap validation doc and related docs not updated~~ | ~~Docs~~ | ~~4~~ **DONE** |
 
 ## Environment residuals (not closable by repo work)
 
