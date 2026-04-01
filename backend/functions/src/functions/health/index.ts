@@ -72,10 +72,13 @@ app.http('health', {
       notifications: hasEnv('NOTIFICATION_API_BASE_URL') ? 'ready' : 'not-configured',
     };
 
-    // Role config (degraded without)
-    const roleConfig: Record<string, 'configured' | 'degraded'> = {
-      controllers: hasEnv('CONTROLLER_UPNS') ? 'configured' : 'degraded',
-      admins: hasEnv('ADMIN_UPNS') ? 'configured' : 'degraded',
+    // P9-G5: CONTROLLER_UPNS and ADMIN_UPNS are notification-targeting config
+    // only — they do NOT govern authorization (JWT app-role claims do).
+    // Missing values mean provisioning failure/escalation notifications will
+    // not reach those recipients, but authorization is unaffected.
+    const notificationRecipients: Record<string, 'configured' | 'not-configured'> = {
+      controllerNotifications: hasEnv('CONTROLLER_UPNS') ? 'configured' : 'not-configured',
+      adminNotifications: hasEnv('ADMIN_UPNS') ? 'configured' : 'not-configured',
     };
 
     // P4-05: Compute overall operational readiness
@@ -101,7 +104,7 @@ app.http('health', {
         },
         provisioningPrereqs,
         integrations,
-        roleConfig,
+        notificationRecipients,
         timestamp: new Date().toISOString(),
       },
     };

@@ -31,7 +31,7 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 ### Managed Identity vs Local Credentials
 
-- Production uses system-assigned Managed Identity with `DefaultAzureCredential`.
+- Production uses a user-assigned Managed Identity with `DefaultAzureCredential`. `AZURE_CLIENT_ID` must be set to the user-assigned MI client ID so `DefaultAzureCredential` selects the correct identity.
 - Local development uses a developer service principal (`AZURE_CLIENT_SECRET`) because IMDS is not available locally.
 - Keep `HBC_ADAPTER_MODE=mock` for normal local development. Use `HBC_ADAPTER_MODE=proxy` for production-like testing with real services.
 

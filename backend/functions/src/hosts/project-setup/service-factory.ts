@@ -71,12 +71,15 @@ export function createProjectSetupServiceFactory(): IProjectSetupServiceContaine
     }
   }
 
+  // P9-G5: CONTROLLER_UPNS and ADMIN_UPNS are used only for notification
+  // recipient targeting (provisioning failure/escalation emails). They do NOT
+  // govern authorization — all authz decisions use JWT app-role claims.
   if (!isMock) {
     if (!process.env.CONTROLLER_UPNS) {
-      console.warn('[StartupWarning] CONTROLLER_UPNS not set — role-based state transitions disabled for controllers.');
+      console.warn('[StartupWarning] CONTROLLER_UPNS not set — provisioning failure/escalation notifications will not reach controller recipients.');
     }
     if (!process.env.ADMIN_UPNS) {
-      console.warn('[StartupWarning] ADMIN_UPNS not set — admin role resolution disabled.');
+      console.warn('[StartupWarning] ADMIN_UPNS not set — provisioning escalation notifications will not reach admin recipients.');
     }
   }
 

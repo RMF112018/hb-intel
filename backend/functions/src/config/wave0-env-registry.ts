@@ -161,13 +161,19 @@ export const WAVE0_REQUIRED_CONFIG: readonly IConfigEntry[] = [
   {
     name: 'CONTROLLER_UPNS',
     bucket: 'business',
-    description: 'Comma-separated UPNs of controllers for financial oversight. Has safe empty fallback; missing value degrades role resolution to submitter-only.',
+    description:
+      'P9-G5: Comma-separated UPNs of controllers for provisioning notification targeting only. ' +
+      'Authorization uses JWT app-role claims (Controller/HBIntelController), not this env var. ' +
+      'Missing value means provisioning failure/escalation notifications will not reach controller recipients.',
     requiredInProd: false,
   },
   {
     name: 'ADMIN_UPNS',
     bucket: 'business',
-    description: 'Comma-separated UPNs of platform administrators. Has safe empty fallback; missing value degrades role resolution to submitter-only.',
+    description:
+      'P9-G5: Comma-separated UPNs of platform administrators for provisioning notification targeting only. ' +
+      'Authorization uses JWT app-role claims (Admin/HBIntelAdmin), not this env var. ' +
+      'Missing value means provisioning escalation notifications will not reach admin recipients.',
     requiredInProd: false,
   },
   {
