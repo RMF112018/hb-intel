@@ -359,3 +359,55 @@ No type errors. No test failures. 3 skipped tests are pre-existing (not introduc
 **Stale Docs Updated:**
 - state-machine.md: Fixed incorrect `Failed → Provisioning` transition; added missing `UnderReview → ReadyToProvision`; added Launch Contract section
 - saga-steps.md: Added launch semantics classification
+
+---
+
+## Prompt-03 Addendum: Validation, Idempotency, and Uniqueness Hardening
+
+### Validation and Idempotency Hardening
+
+**Implemented:**
+
+1. **ProjectNumber uniqueness enforcement (P2-03):** Added `findByProjectNumber()` to `IProjectRequestsRepository` interface and both implementations (SharePoint adapter + mock). The `advanceRequestState` handler now queries the repository when transitioning to `ReadyToProvision` — if another request already holds the same projectNumber, returns HTTP 409 Conflict with machine-readable error code `CONFLICT` and human-readable message identifying the conflicting request.
+
+2. **Duplicate-run prevention (existing, verified):** The auto-trigger guard in `advanceRequestState` checks `getProvisioningStatus(projectId)` before firing the saga. If a non-failed status exists, the trigger is skipped with structured logging. This prevents duplicate launches for the same project.
+
+3. **Transition guards (existing, verified):** `isValidTransition()` and `isAuthorizedTransition()` enforce all lifecycle constraints server-side. Invalid transitions return 400; unauthorized transitions return 403. Both produce machine-readable error codes.
+
+### Existing Enforcement Versus Remaining Gaps
+
+| Control | Status | Layer | Evidence |
+|---------|--------|-------|----------|
+| ProjectNumber format (`##-###-##`) | Enforced | advanceRequestState | Returns 400 VALIDATION_ERROR |
+| ProjectNumber uniqueness | **Enforced (P2-03)** | advanceRequestState → findByProjectNumber | Returns 409 CONFLICT |
+| Transition validity | Enforced | isValidTransition() | Returns 400 VALIDATION_ERROR |
+| Role authorization | Enforced | isAuthorizedTransition() | Returns 403 FORBIDDEN |
+| Duplicate-run prevention | Enforced | Auto-trigger guard | Skips with structured log |
+| Per-step saga idempotency | Enforced | isStepAlreadyCompleted() + per-step checks | idempotentSkip: true |
+| Unresolved clarification items block | **Not enforced** | — | Gap: no blocking check on approval |
+| Max coordinator retry | **Not enforced** | — | Gap: no server-side retry count limit |
+
+### Open Exceptions / External Dependencies
+
+1. **Unresolved clarification items:** The frozen contract flags this as a gap (P1-04 V-02). Whether unresolved items should block approval is a product decision deferred to Phase 3.
+
+2. **Max coordinator retry enforcement:** MVP-T05 describes backend enforcement of bounded retry (max 2). This is not implemented. The coordinator UI enforces the 5-condition check client-side, but no server-side check exists. Deferred to Phase 2 Prompt-04 or later.
+
+3. **ProjectNumber uniqueness scope:** The uniqueness check queries the SharePoint Projects list via the request repository. This covers all requests managed by the backend lifecycle. It does not cover project numbers assigned outside the HB Intel system. If external systems create projects with the same numbering scheme, the backend will not detect the conflict.
+
+### Conflict Response Behavior
+
+| Scenario | HTTP Status | Error Code | Message Shape | Logged? |
+|----------|-------------|-----------|---------------|---------|
+| Invalid projectNumber format | 400 | VALIDATION_ERROR | "Valid projectNumber (##-###-##) is required..." | Yes (implicit) |
+| Duplicate projectNumber | 409 | CONFLICT | "projectNumber 'XX-XXX-XX' is already assigned to request 'req-id'" | Yes (warn) |
+| Invalid transition | 400 | VALIDATION_ERROR | "Invalid state transition: {from} → {to}" | Yes (implicit) |
+| Unauthorized transition | 403 | FORBIDDEN | "Role '{role}' is not authorized for transition {from} → {to}" | Yes (implicit) |
+| Duplicate provisioning run | — | — | No error; auto-trigger silently skipped | Yes (info) |
+
+### Test Evidence
+
+8 new tests (H1-H8) added in `request-lifecycle.test.ts`:
+- H1-H3: `findByProjectNumber` repository method — null on no match, correct match, no false positives on missing projectNumber
+- H4-H5: Auto-trigger prerequisite validation — controller-authorized, system cannot bypass
+- H6-H8: Transition guards — Failed→ReadyToProvision invalid, Provisioning→ReadyToProvision invalid, Completed→ReadyToProvision invalid

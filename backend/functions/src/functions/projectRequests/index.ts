@@ -297,6 +297,20 @@ app.http('advanceRequestState', {
       if (!body.projectNumber || !PROJECT_NUMBER_PATTERN.test(body.projectNumber)) {
         return errorResponse(400, 'VALIDATION_ERROR', 'Valid projectNumber (##-###-##) is required to set ReadyToProvision', reqId);
       }
+
+      // P2-03: Project-number uniqueness enforcement at the request-lifecycle layer.
+      // Queries the authoritative repository for an existing request with the same projectNumber.
+      // Returns 409 Conflict if another request already holds this number.
+      const conflicting = await services.projectRequests.findByProjectNumber(body.projectNumber);
+      if (conflicting && conflicting.requestId !== requestId) {
+        logger.warn('Project number uniqueness conflict', {
+          requestId,
+          projectNumber: body.projectNumber,
+          conflictingRequestId: conflicting.requestId,
+        });
+        return errorResponse(409, 'CONFLICT', `projectNumber '${body.projectNumber}' is already assigned to request '${conflicting.requestId}'`, reqId);
+      }
+
       existing.projectNumber = body.projectNumber;
       // Derive year from the assigned project number
       existing.year = deriveProjectYear(body.projectNumber);

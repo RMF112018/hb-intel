@@ -12,6 +12,8 @@ export interface IProjectRequestsRepository {
   upsertRequest(request: IProjectSetupRequest): Promise<void>;
   getRequest(requestId: string): Promise<IProjectSetupRequest | null>;
   listRequests(state?: ProjectSetupRequestState): Promise<IProjectSetupRequest[]>;
+  /** P2-03: Find a request by projectNumber for uniqueness enforcement. Returns null if no match. */
+  findByProjectNumber(projectNumber: string): Promise<IProjectSetupRequest | null>;
 }
 
 /**
@@ -92,6 +94,17 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     return (items as Array<Record<string, unknown>>).map((item) => toDomain(item));
   }
 
+  async findByProjectNumber(projectNumber: string): Promise<IProjectSetupRequest | null> {
+    const sp: any = await this.getSP();
+    const list = sp.web.lists.getByTitle(PROJECTS_LIST_NAME);
+    const key = this.escapeODataValue(projectNumber);
+    const pnField = resolveSpField('projectNumber');
+    const items = await list.items.filter(`${pnField} eq '${key}'`).top(1)();
+
+    if (!items.length) return null;
+    return toDomain(items[0] as Record<string, unknown>);
+  }
+
   private escapeODataValue(value: string): string {
     return value.replace(/'/g, "''");
   }
@@ -133,5 +146,14 @@ export class MockProjectRequestsRepository implements IProjectRequestsRepository
     return values
       .filter((request) => (state ? request.state === state : true))
       .map((request) => ({ ...request, groupMembers: [...request.groupMembers] }));
+  }
+
+  async findByProjectNumber(projectNumber: string): Promise<IProjectSetupRequest | null> {
+    for (const request of this.requests.values()) {
+      if (request.projectNumber === projectNumber) {
+        return { ...request, groupMembers: [...request.groupMembers] };
+      }
+    }
+    return null;
   }
 }

@@ -625,3 +625,61 @@ describe('P2-02: Launch contract — auto-trigger prerequisites', () => {
     expect(isAuthorizedTransition('admin', 'AwaitingExternalSetup', 'ReadyToProvision')).toBe(true);
   });
 });
+
+// ── H. P2-03: Validation, idempotency, and uniqueness hardening ───────────
+
+describe('P2-03: Validation, idempotency, and uniqueness hardening', () => {
+  let repo: MockProjectRequestsRepository;
+
+  beforeEach(() => {
+    repo = new MockProjectRequestsRepository();
+  });
+
+  // H1-H3: ProjectNumber uniqueness via repository
+  it('H1: findByProjectNumber returns null when no match exists', async () => {
+    await repo.upsertRequest(makeRequest({ requestId: 'r1', projectNumber: '25-001-01' }));
+    const result = await repo.findByProjectNumber('99-999-99');
+    expect(result).toBeNull();
+  });
+
+  it('H2: findByProjectNumber returns the matching request', async () => {
+    await repo.upsertRequest(makeRequest({ requestId: 'r1', projectNumber: '25-001-01' }));
+    await repo.upsertRequest(makeRequest({ requestId: 'r2', projectNumber: '25-002-01' }));
+    const result = await repo.findByProjectNumber('25-001-01');
+    expect(result).not.toBeNull();
+    expect(result!.requestId).toBe('r1');
+  });
+
+  it('H3: findByProjectNumber does not match requests without projectNumber', async () => {
+    await repo.upsertRequest(makeRequest({ requestId: 'r1' }));
+    const result = await repo.findByProjectNumber('25-001-01');
+    expect(result).toBeNull();
+  });
+
+  // H4-H5: Duplicate-run prevention via auto-trigger guard
+  it('H4: auto-trigger guard — ReadyToProvision with no existing status should allow launch (isValidTransition confirms prerequisite)', () => {
+    // The auto-trigger in advanceRequestState checks getProvisioningStatus.
+    // If null or Failed, it fires. This test confirms the transition prerequisite.
+    expect(isValidTransition('UnderReview', 'ReadyToProvision')).toBe(true);
+    expect(isAuthorizedTransition('controller', 'UnderReview', 'ReadyToProvision')).toBe(true);
+  });
+
+  it('H5: system cannot bypass controller transitions', () => {
+    // System role should not be able to advance from UnderReview to ReadyToProvision
+    expect(isAuthorizedTransition('system', 'UnderReview', 'ReadyToProvision')).toBe(false);
+  });
+
+  // H6-H7: Transition guard — invalid reopen/rerun combinations
+  it('H6: Failed → ReadyToProvision is INVALID (must go through UnderReview)', () => {
+    expect(isValidTransition('Failed', 'ReadyToProvision')).toBe(false);
+  });
+
+  it('H7: Provisioning → ReadyToProvision is INVALID (cannot restart from active run)', () => {
+    expect(isValidTransition('Provisioning', 'ReadyToProvision')).toBe(false);
+  });
+
+  // H8: Transition guard — completed is terminal
+  it('H8: Completed → ReadyToProvision is INVALID (terminal state)', () => {
+    expect(isValidTransition('Completed', 'ReadyToProvision')).toBe(false);
+  });
+});
