@@ -74,7 +74,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-09 | Frontend SPFx Contract and Diagnostics | **Complete** | 2026-04-01 | Verified: frontend already aligned — no code changes needed |
 | 1-10 | Telemetry, Break-Glass, and Auditability | **Complete** | 2026-04-01 | emitAuthorizationTelemetry() + authz.break_glass event; 8 new tests |
 | 1-11 | Tests, Release Gates, and Security Hardening | **Complete** | 2026-04-01 | 6 release gates (19 assertions), regression-proof for all Gap 5 changes |
-| 1-12 | Documentation, Cutover, and Rollback | Not started | — | — |
+| 1-12 | Documentation, Cutover, and Rollback | **Complete** | 2026-04-01 | Cutover runbook with 4-phase sequence, rollback plan, coexistence guide |
 | 1-13 | Final Reconciliation and Closure | Not started | — | — |
 
 ---
@@ -193,6 +193,13 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 |--------|------|
 | Created | `backend/functions/src/test/authz-release-gates.test.ts` — 6 release gate suites with 19 static-analysis assertions |
 | Modified | `backend/functions/package.json` — version bump `0.0.107` → `0.0.108` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-12 (P9-G5-12)
+
+| Action | File |
+|--------|------|
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Cutover-and-Rollback-Runbook.md` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -437,6 +444,23 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Regression to env-based runtime authorization would fail Gate 1 and Gate 2
 - [x] Test evidence is specific enough to support architecture and release decisions
 
+### Prompt 1-12 (P9-G5-12)
+
+**Scope:** Documentation-only — cutover runbook and rollback plan.
+
+**Deliverable:** `Gap-5_Cutover-and-Rollback-Runbook.md` containing:
+- Pre-cutover checklist (9 repo-complete items, 10 environment prerequisites)
+- 4-phase cutover sequence (A: parallel deploy, B: Entra config, C: env-var reclassification, D: post-cutover verification)
+- Live data migration guidance (lazy oid backfill strategy, UPN fallback for legacy records)
+- Coexistence behavior matrix (what happens when code is deployed but Entra roles are partially assigned)
+- Rollback plan (code rollback only — env-var restoration not applicable since new code doesn't read them)
+- Post-cutover cleanup tasks (env-var reclassification, startup warning updates, optional oid backfill)
+
+**Acceptance criteria status:**
+- [x] Repo contains a usable cutover and rollback package for IT/operations
+- [x] Docs clearly distinguish repo-complete work from environment-executed tasks
+- [x] The old transitional authz posture is no longer represented as the intended steady state
+
 ---
 
 ## Version History
@@ -454,3 +478,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 3.3 | 2026-04-01 | P9-G5-09 | Frontend SPFx contract verification — all 7 frontend files confirmed aligned, no stale auth references, no code changes needed |
 | 4.0 | 2026-04-01 | P9-G5-10 | Telemetry and break-glass auditability — emitAuthorizationTelemetry() + authz.break_glass event, 8 new tests |
 | 4.1 | 2026-04-01 | P9-G5-11 | Release gates — 6 static-analysis gate suites with 19 assertions proving Gap 5 model enforced |
+| 4.2 | 2026-04-01 | P9-G5-12 | Cutover and rollback runbook — 4-phase cutover sequence, rollback plan, coexistence guide |
