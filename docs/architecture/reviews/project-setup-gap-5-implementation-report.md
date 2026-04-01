@@ -17,6 +17,7 @@ This report tracks implementation progress across all 13 prompts.
 - Authorization audit: `docs/architecture/reviews/project-setup-authz-model-gap-validation.md`
 - Target architecture: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Authorization-Architecture.md`
 - Route-policy matrix: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Route-Policy-Matrix.md`
+- Entra contract: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Entra-App-Role-and-Scope-Contract.md`
 
 ---
 
@@ -64,7 +65,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 |--------|-------|--------|------|-------|
 | 1-01 | Contract Freeze and Baseline | **Complete** | 2026-04-01 | Baseline inventoried, target frozen |
 | 1-02 | Target Architecture and Policy Matrix | **Complete** | 2026-04-01 | Architecture and route-policy matrix frozen |
-| 1-03 | Entra App Role and Scope Contract | Not started | — | — |
+| 1-03 | Entra App Role and Scope Contract | **Complete** | 2026-04-01 | Entra contract frozen: 6 app-roles, delegated scope, token differentiation |
 | 1-04 | Shared Authorization Policy Engine | Not started | — | — |
 | 1-05 | Oid Migration and Data Contract | Not started | — | — |
 | 1-06 | Request Lifecycle Authorization Convergence | Not started | — | — |
@@ -94,6 +95,13 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 |--------|------|
 | Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Authorization-Architecture.md` |
 | Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Route-Policy-Matrix.md` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-03 (P9-G5-03)
+
+| Action | File |
+|--------|------|
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Entra-App-Role-and-Scope-Contract.md` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -137,6 +145,25 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Architecture doc separates token validation, delegated scope, business-role, ownership, and workload authorization
 - [x] Docs are concrete enough that Prompts 03–11 can implement without reopening fundamental design questions
 
+### Prompt 1-03 (P9-G5-03)
+
+**Scope:** Documentation-only — no code changes, no build/lint/test verification required.
+
+**Structural verification:**
+- Entra contract specifies 6 app-roles: `Admin`, `HBIntelAdmin`, `Controller`, `HBIntelController`, `BreakGlass` (user), `Automation` (application)
+- Delegated scope contract: single `access_as_user` scope, already declared in `package-solution.json`
+- Token-type differentiation strategy defined: `idtyp` as primary signal, `scp`/`upn` absence as fallback
+- Validation pipeline changes identified: `validateToken.ts` must relax `upn` requirement for app-only tokens
+- Environment configuration matrix distinguishes repo-owned config from environment-executed setup steps
+- 9 environment-executed setup steps documented with owner and prerequisite prompt mapping
+- Frontend token acquisition chain confirmed: no changes needed (`package-solution.json`, `ShellWebPart.ts`, `mount.tsx`, `runtimeConfig.ts`)
+- Complete claim requirements for both delegated and app-only token types
+
+**Acceptance criteria status:**
+- [x] Entra contract doc specifies scopes, roles, assignment targets, and required claims
+- [x] Doc clearly distinguishes repo-owned implementation work from environment-executed setup steps
+- [x] Doc is specific enough that later prompts can implement validation, policies, and runbooks without re-interpreting the identity model
+
 ---
 
 ## Version History
@@ -145,3 +172,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 |---------|------|--------|---------|
 | 1.0 | 2026-04-01 | P9-G5-01 | Initial baseline and contract freeze — 3 documents created |
 | 1.1 | 2026-04-01 | P9-G5-02 | Target authorization architecture and route-policy matrix frozen — 2 documents created, 3 design decisions resolved |
+| 1.2 | 2026-04-01 | P9-G5-03 | Entra app-role and scope contract frozen — 6 app-roles, delegated scope, token differentiation, environment setup matrix |
