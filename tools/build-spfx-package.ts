@@ -146,6 +146,7 @@ function inspectCompiledShellAsset(
   domainDir: string,
   backendMode?: string,
   apiAudience?: string,
+  functionAppUrl?: string,
 ): boolean {
   if (!fs.existsSync(shellAssetPath)) {
     console.error(`  ❌ ${domainDir}: compiled shell asset missing at ${shellAssetPath}`);
@@ -166,6 +167,9 @@ function inspectCompiledShellAsset(
   }
   if (apiAudience && !shellJs.includes('apiAudience')) {
     errors.push('missing apiAudience reference in compiled shell asset');
+  }
+  if (functionAppUrl && !shellJs.includes(functionAppUrl)) {
+    errors.push(`missing Function App URL reference ${functionAppUrl}`);
   }
   if (bundleName !== 'app.js' && shellJs.includes('"app.js"')) {
     errors.push('still contains fallback bundle name app.js');
@@ -190,6 +194,7 @@ function inspectPackagedShellAsset(
   domainDir: string,
   backendMode?: string,
   apiAudience?: string,
+  functionAppUrl?: string,
 ): boolean {
   try {
     const listOutput = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' });
@@ -220,6 +225,9 @@ function inspectPackagedShellAsset(
     }
     if (apiAudience && !shellJs.includes('apiAudience')) {
       errors.push('missing apiAudience reference in packaged shell asset');
+    }
+    if (functionAppUrl && !shellJs.includes(functionAppUrl)) {
+      errors.push(`missing packaged Function App URL reference ${functionAppUrl}`);
     }
     if (bundleName !== 'app.js' && shellJs.includes('"app.js"')) {
       errors.push('still contains packaged fallback bundle name app.js');
@@ -577,6 +585,7 @@ for (const domain of domains) {
     domain.dir,
     shellEnv.BACKEND_MODE || undefined,
     shellEnv.API_AUDIENCE || undefined,
+    shellEnv.FUNCTION_APP_URL || undefined,
   )) {
     allPassed = false;
     continue;
@@ -637,6 +646,7 @@ for (const domain of domains) {
     domain.dir,
     shellEnv.BACKEND_MODE || undefined,
     shellEnv.API_AUDIENCE || undefined,
+    shellEnv.FUNCTION_APP_URL || undefined,
   )) {
     allPassed = false;
     continue;
