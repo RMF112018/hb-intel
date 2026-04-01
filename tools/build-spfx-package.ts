@@ -515,9 +515,9 @@ for (const domain of domains) {
   const sppkgName = domainPkgSolution.paths.zippedPackage.replace('solution/', '');
 
   // Parameterize webApiPermissionRequests resource at build time.
-  // SPFX_API_RESOURCE env var overrides the static default in the source config
-  // (e.g., "hb-intel-api-production" for a production build).
-  // If not set, the source config value is used as-is (default: "hb-intel-api-staging").
+  // SPFX_API_RESOURCE env var overrides the source config default.
+  // Source default is "hb-intel-api-production" (the production app registration).
+  // Set SPFX_API_RESOURCE=hb-intel-api-staging for staging builds.
   const spfxApiResource = process.env.SPFX_API_RESOURCE;
   if (spfxApiResource && domainPkgSolution.solution?.webApiPermissionRequests?.length) {
     domainPkgSolution.solution.webApiPermissionRequests[0].resource = spfxApiResource;
