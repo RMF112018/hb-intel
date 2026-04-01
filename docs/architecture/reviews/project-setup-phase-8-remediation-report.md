@@ -629,7 +629,7 @@ Startup validation is now scope-aware. Identity config (`AZURE_TENANT_ID`, `API_
 | P8-04 | Backend boundary reduction | **Deferred** | OI-05 — not blocking production release; broader-than-PS host scope is documented |
 | P8-05 | User-assigned managed identity | **Complete** | All services, docs, ADR, and config aligned to user-assigned MI; `DefaultAzureCredential` compatible |
 | P8-06 | Operational gates | **Complete** | 8 operator prerequisites documented with runtime symptoms; CORS locked; 15 release-gate tests |
-| P8-07 | Startup validation hardening | **Complete** | Lazy-init identity config; health endpoint guaranteed responsive; cross-layer coherence verified |
+| P8-07 | Startup validation hardening | **Complete** | Lazy-init identity config; health endpoint guaranteed responsive; cross-layer coherence verified. Independently validated: see `project-setup-startup-auth-boot-scope-gap-validation.md` and `project-setup-startup-auth-boot-scope-repo-truth-note.md`. |
 
 #### Documentation reconciliation
 

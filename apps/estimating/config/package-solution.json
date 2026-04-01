@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-project-setup",
     "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
-    "version": "001.000.013",
+    "version": "001.000.014",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -36,7 +36,7 @@
         "title": "hb-intel-project-setup Feature",
         "description": "Deploys HB Intel Project Setup Requests webpart assets.",
         "id": "cb3b1520-1665-4412-83ab-344c2182a2fd",
-        "version": "001.000.013"
+        "version": "001.000.014"
       }
     ]
   },

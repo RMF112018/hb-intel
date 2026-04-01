@@ -272,3 +272,11 @@ The health endpoint (`functions/health/index.ts`) does NOT import `auth.ts` or `
 ## 9. Unresolved Questions
 
 None. The hypothesis is cleanly disproven. Current repo truth, prior report claims, and release-gate tests are all aligned.
+
+---
+
+## 10. Cross-References
+
+- **Canonical repo-truth note:** `project-setup-startup-auth-boot-scope-repo-truth-note.md` — durable reference for future audits
+- **Phase 8 P8-07 section:** `project-setup-phase-8-remediation-report.md` lines 497–596 — implementation record of the lazy-init fix
+- **Release-gate tests:** `backend/functions/src/test/release-gates.test.ts` Gates 10–11 — machine-checkable enforcement
