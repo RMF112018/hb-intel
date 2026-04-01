@@ -11,11 +11,13 @@ import {
   readPreference,
   writePreference,
 } from '../storage';
-import {
-  fetchPreference,
-  patchPreference,
-  deriveInitialTierFromADGroups,
-} from '../storage/complexityApiClient';
+
+// P9: API client is dynamically imported only when enableApiSync is true.
+// This eliminates the static import chain to complexityApiClient.ts so the
+// /api/users/me/* endpoint strings are not pulled into bundles that never
+// use API sync (e.g. the Project Setup IIFE bundle).
+type ApiClientModule = typeof import('../storage/complexityApiClient');
+const loadApiClient = (): Promise<ApiClientModule> => import('../storage/complexityApiClient');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props
@@ -73,7 +75,8 @@ export function ComplexityProvider({
 
     async function syncFromApi(): Promise<void> {
       try {
-        const serverPref = await fetchPreference();
+        const api = await loadApiClient();
+        const serverPref = await api.fetchPreference();
 
         if (cancelled) return;
 
@@ -85,7 +88,7 @@ export function ComplexityProvider({
           setPreferenceState(resolvedPref);
         } else {
           // New user — derive tier from Azure AD groups (D-02)
-          const derivedTier = await deriveInitialTierFromADGroups();
+          const derivedTier = await api.deriveInitialTierFromADGroups();
           if (cancelled) return;
 
           const newPref: IComplexityPreference = {
@@ -100,7 +103,7 @@ export function ComplexityProvider({
           const derivedRank = tierRank(derivedTier);
           const resolvedPref = derivedRank >= currentRank ? newPref : preference;
 
-          await patchPreference(resolvedPref);
+          await api.patchPreference(resolvedPref);
           writePreference(resolvedPref, isSpfx);
           setPreferenceState(resolvedPref);
         }
@@ -179,14 +182,14 @@ export function ComplexityProvider({
 
     writePreference(updated, isSpfx);
     setPreferenceState(updated);
-    if (enableApiSync) void patchPreference(updated); // Fire-and-forget when API sync enabled
+    if (enableApiSync) void loadApiClient().then(api => api.patchPreference(updated));
   }, [preference, isSpfx, enableApiSync]);
 
   const setShowCoaching = useCallback((show: boolean) => {
     const updated: IComplexityPreference = { ...preference, showCoaching: show };
     writePreference(updated, isSpfx);
     setPreferenceState(updated);
-    if (enableApiSync) void patchPreference(updated);
+    if (enableApiSync) void loadApiClient().then(api => api.patchPreference(updated));
   }, [preference, isSpfx, enableApiSync]);
 
   // ── Computed context value ─────────────────────────────────────────────

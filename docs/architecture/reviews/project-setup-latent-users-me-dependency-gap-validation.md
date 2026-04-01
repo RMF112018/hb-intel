@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-**Verdict: Partially confirmed — the endpoint strings are present in source and shipped bundle, but they are NOT reachable under current Project Setup runtime wiring.**
+**Verdict: Confirmed isolated — the endpoint strings are present in the IIFE bundle due to format constraints, but the static import chain has been broken and the endpoints are NOT reachable under Project Setup runtime wiring.**
 
 The estimating app mounts `<ComplexityProvider spfxContext={spfxContext}>` without passing `enableApiSync={true}`. The `ComplexityProvider` defaults `enableApiSync` to `false`, and the entire API sync code path (which calls `/api/users/me/preferences` and `/api/users/me/groups`) is gated behind `if (_testPreference || !enableApiSync) return;`. Under current wiring, zero network requests to these endpoints occur at runtime.
 
-However, the endpoint strings `/api/users/me/preferences` and `/api/users/me/groups` ARE present in the shipped IIFE bundle (`estimating-app-f72eb6c7.js`) because the `complexityApiClient.ts` module is imported by `ComplexityProvider.tsx` regardless of whether API sync is enabled. This is a dead-code presence issue (bundle hygiene), not a runtime dependency issue.
+**P9 remediation (2026-04-01):** The static import of `complexityApiClient.ts` in `ComplexityProvider.tsx` has been converted to a dynamic import (`import()`) inside the gated code paths. The API client module is only loaded when `enableApiSync=true`. The endpoint strings remain in the IIFE bundle because `inlineDynamicImports: true` resolves all dynamic imports at build time — this is an accepted constraint of the SPFx single-file format. See `Frontend-Same-Origin-Dependency-Reconciliation.md` for the full audit.
 
 The prior remediation reports (Phase 7, Phase 8) are accurate: they correctly identify these endpoints as "dead dependencies for PS scope" with "zero network requests to `/api/users/me/*` in production Project Setup."
 

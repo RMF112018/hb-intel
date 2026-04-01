@@ -4,6 +4,7 @@
   "private": true,
   "description": "Three-tier Complexity Dial — platform-wide UI density context",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
