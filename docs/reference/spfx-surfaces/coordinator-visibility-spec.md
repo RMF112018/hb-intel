@@ -119,6 +119,8 @@ Essential tier receives `detailLevel="summary"` (existing behavior).
 
 ---
 
+> **Phase 1 Boundary Freeze Reference:** The Estimating coordinator boundary, bounded retry conditions (5-condition check), and escalation-to-Admin routing are frozen in `docs/architecture/reviews/phase-1-application-boundary-freeze.md`. Coordinator retry must remain bounded to transient failures with max 2 attempts.
+
 ## 7. Out-of-Bounds Failure Routing
 
 When a failure cannot be retried by the coordinator (structural, permissions, repeated, admin-class, or transient with exhausted retries), the UI shows:

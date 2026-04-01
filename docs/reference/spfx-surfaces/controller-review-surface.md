@@ -111,6 +111,8 @@ client.advanceState(requestId, newState, extras?)
 Success actions show `toast.success()` and navigate back to queue.
 Failures display `HbcBanner variant="error"`.
 
+> **Phase 1 Boundary Freeze Reference:** The Accounting surface boundary, prohibited actions, and interaction with Estimating/Admin surfaces are frozen in `docs/architecture/reviews/phase-1-application-boundary-freeze.md`. Accounting is a review gate and approval-to-handoff gate — not a retry, recovery, or archive surface.
+
 ## Boundary: T03 vs T04
 
 - **T03 (this surface):** Controller review, approve, clarify, hold, route-to-admin

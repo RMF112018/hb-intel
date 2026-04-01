@@ -81,6 +81,8 @@ Opened via row "Details" button or `?projectId=` query param.
 
 Admin users (`HBC-Admin`, `HBIntelAdmin`) resolve to `expert` tier in `@hbc/complexity` role mapping. This enables full diagnostic visibility.
 
+> **Phase 1 Boundary Freeze Reference:** The Admin recovery boundary, exclusive actions, and prohibited scope are frozen in `docs/architecture/reviews/phase-1-application-boundary-freeze.md`. Admin is the authoritative operational recovery surface — not an approval or review surface.
+
 ## Role Boundary
 
 | Excluded Behavior | Reason | Correct Surface |
