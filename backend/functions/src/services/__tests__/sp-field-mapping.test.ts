@@ -39,7 +39,6 @@ function makeFullRequest(): IProjectSetupRequest {
     clientName: 'Sample Client',
     startDate: '2026-06-01',
     contractType: 'GMP',
-    projectLeadId: 'pm@hedrickbrothers.com',
     viewerUPNs: ['viewer1@hedrickbrothers.com'],
     addOns: ['submittals', 'closeout'],
     clarificationNote: 'Budget needs detail',
@@ -73,7 +72,6 @@ function makeFullRequest(): IProjectSetupRequest {
     projectManagerUpn: 'pm2@hb.com',
     leadEstimatorUpn: 'est@hb.com',
     supportingEstimatorUpns: ['est2@hb.com'],
-    additionalTeamMemberUpns: ['team1@hb.com'],
     timberscanApproverUpn: 'ts@hb.com',
     sageAccessUpns: ['sage@hb.com'],
   };
@@ -120,7 +118,6 @@ describe('Mock repository round-trip (in-memory only — not SP proof)', () => {
     expect(retrieved!.clientName).toBe(original.clientName);
     expect(retrieved!.startDate).toBe(original.startDate);
     expect(retrieved!.contractType).toBe(original.contractType);
-    expect(retrieved!.projectLeadId).toBe(original.projectLeadId);
     expect(retrieved!.viewerUPNs).toEqual(original.viewerUPNs);
     expect(retrieved!.addOns).toEqual(original.addOns);
     // Clarification
@@ -148,7 +145,6 @@ describe('Mock repository round-trip (in-memory only — not SP proof)', () => {
     expect(retrieved!.projectManagerUpn).toBe(original.projectManagerUpn);
     expect(retrieved!.leadEstimatorUpn).toBe(original.leadEstimatorUpn);
     expect(retrieved!.supportingEstimatorUpns).toEqual(original.supportingEstimatorUpns);
-    expect(retrieved!.additionalTeamMemberUpns).toEqual(original.additionalTeamMemberUpns);
     expect(retrieved!.timberscanApproverUpn).toBe(original.timberscanApproverUpn);
     expect(retrieved!.sageAccessUpns).toEqual(original.sageAccessUpns);
   });
@@ -169,9 +165,9 @@ describe('Mock repository round-trip (in-memory only — not SP proof)', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Real field contract proof (PROJECTS_LIST_FIELD_MAP)', () => {
-  it('field map covers all 43 production schema columns', () => {
+  it('field map covers all 41 production schema columns', () => {
     // 26 legacy (Title + field_1..field_24 + Year) + 17 P2-07 gap fields
-    expect(Object.keys(PROJECTS_LIST_FIELD_MAP)).toHaveLength(43);
+    expect(Object.keys(PROJECTS_LIST_FIELD_MAP)).toHaveLength(41);
   });
 
   it('SELECT_FIELDS includes all mapped SP internal names', () => {
@@ -181,8 +177,9 @@ describe('Real field contract proof (PROJECTS_LIST_FIELD_MAP)', () => {
     }
   });
 
-  it('legacy CSV-import columns use field_N pattern', () => {
+  it('legacy CSV-import columns use field_N pattern (excluding removed field_17/18/19)', () => {
     for (let i = 1; i <= 24; i++) {
+      if (i === 17 || i === 18 || i === 19) continue; // removed or renamed in Gap 6
       const entry = Object.values(PROJECTS_LIST_FIELD_MAP).find(
         (e) => e.spInternalName === `field_${i}`,
       );
@@ -190,12 +187,23 @@ describe('Real field contract proof (PROJECTS_LIST_FIELD_MAP)', () => {
     }
   });
 
+  it('viewerUPNs and addOns use renamed SP column names', () => {
+    const viewerEntry = Object.values(PROJECTS_LIST_FIELD_MAP).find(
+      (e) => e.spInternalName === 'viewerUPNs',
+    );
+    expect(viewerEntry, 'viewerUPNs must exist in PROJECTS_LIST_FIELD_MAP').toBeDefined();
+    const addOnsEntry = Object.values(PROJECTS_LIST_FIELD_MAP).find(
+      (e) => e.spInternalName === 'addOns',
+    );
+    expect(addOnsEntry, 'addOns must exist in PROJECTS_LIST_FIELD_MAP').toBeDefined();
+  });
+
   it('P2-07 gap columns use domain-name internal names', () => {
     const p207Fields = [
       'projectStreetAddress', 'projectCity', 'projectCounty', 'projectState', 'projectZip',
       'officeDivision', 'procoreProject',
       'projectExecutiveUpn', 'projectManagerUpn', 'leadEstimatorUpn',
-      'supportingEstimatorUpns', 'additionalTeamMemberUpns', 'timberscanApproverUpn', 'sageAccessUpns',
+      'supportingEstimatorUpns', 'timberscanApproverUpn', 'sageAccessUpns',
       'clarificationRequestedAt', 'requesterRetryUsed', 'clarificationItems',
     ];
     for (const field of p207Fields) {
@@ -212,12 +220,12 @@ describe('Real field contract proof (PROJECTS_LIST_FIELD_MAP)', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Regression guards — field contract cannot silently shrink', () => {
-  it('field map has at least 43 entries (cannot silently remove fields)', () => {
-    expect(Object.keys(PROJECTS_LIST_FIELD_MAP).length).toBeGreaterThanOrEqual(43);
+  it('field map has at least 41 entries (cannot silently remove fields)', () => {
+    expect(Object.keys(PROJECTS_LIST_FIELD_MAP).length).toBeGreaterThanOrEqual(41);
   });
 
-  it('SELECT_FIELDS has at least 43 entries', () => {
-    expect(PROJECTS_LIST_SELECT_FIELDS.length).toBeGreaterThanOrEqual(43);
+  it('SELECT_FIELDS has at least 41 entries', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS.length).toBeGreaterThanOrEqual(41);
   });
 
   it('every field map entry has a valid serialization strategy', () => {

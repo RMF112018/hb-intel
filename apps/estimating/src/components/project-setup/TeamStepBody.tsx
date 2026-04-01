@@ -117,16 +117,9 @@ export function TeamStepBody({ request, onChange }: StepBodyProps): ReactNode {
       </HbcFormSection>
 
       <HbcFormSection
-        title="Additional Members & Approvals"
-        description="Other team members and required approvals."
+        title="Approvals"
+        description="Required approvals for the project."
       >
-        <HbcPeoplePicker
-          label="Additional Team Members"
-          value={upnsToValue(request.additionalTeamMemberUpns)}
-          onChange={(people) => onChange({ additionalTeamMemberUpns: valueToUpns(people) })}
-          searchPeople={searchPeople}
-          mode="multi"
-        />
         <HbcSelect
           label="Timberscan Approver"
           options={timberscanApproverOptions}

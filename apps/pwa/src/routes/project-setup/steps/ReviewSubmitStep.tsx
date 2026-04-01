@@ -55,7 +55,7 @@ export function ReviewSubmitStep({ request, onSubmit, submitting, mode }: Review
 
       <HbcFormSection title="Project Team">
         <HbcFormLayout columns={cols} gap="medium">
-          <SummaryField label="Project Lead" value={request.projectLeadId} />
+          <SummaryField label="Project Manager" value={request.projectManagerUpn} />
           <SummaryField label="Team Members" value={request.groupMembers?.join(', ')} />
           <SummaryField label="Viewers" value={request.viewerUPNs?.join(', ')} />
         </HbcFormLayout>

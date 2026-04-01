@@ -13,7 +13,7 @@ function createMockSeed(overrides?: Partial<IProjectHubSeedData>): IProjectHubSe
     projectNumber: '26-001-01',
     department: 'commercial',
     siteUrl: 'https://tenant.sharepoint.com/sites/project-26-001-01',
-    projectLeadId: 'pm@example.com',
+    projectManagerUpn: 'pm@example.com',
     groupMembers: ['member1@example.com'],
     startDate: '2026-04-01T00:00:00.000Z',
     estimatedValue: 12500000,
@@ -85,8 +85,8 @@ describe('validateActivationPreconditions', () => {
   });
 
   it('rejects when PM is not assigned', () => {
-    const input = createMockInput({ seed: createMockSeed({ projectLeadId: '' }) });
-    expect(validateActivationPreconditions(input, emptyExistingIds)).toContain('Project lead');
+    const input = createMockInput({ seed: createMockSeed({ projectManagerUpn: '' }) });
+    expect(validateActivationPreconditions(input, emptyExistingIds)).toContain('Project manager');
   });
 
   it('rejects when department is missing', () => {

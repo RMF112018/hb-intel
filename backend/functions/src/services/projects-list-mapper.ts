@@ -108,9 +108,8 @@ export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProj
     clientName: readOptionalString(item, 'field_14'),
     startDate: readOptionalStringFromNumber(item, 'field_15'),
     contractType: readOptionalString(item, 'field_16'),
-    projectLeadId: readOptionalString(item, 'field_17'),
-    viewerUPNs: safeParseJsonArray(item.field_18, 'field_18', logger) as string[] | undefined,
-    addOns: safeParseJsonArray(item.field_19, 'field_19', logger) as string[] | undefined,
+    viewerUPNs: safeParseJsonArray(item.viewerUPNs, 'viewerUPNs', logger) as string[] | undefined,
+    addOns: safeParseJsonArray(item.addOns, 'addOns', logger) as string[] | undefined,
     clarificationNote: readOptionalStringFromNumber(item, 'field_20'),
     completedBy: readOptionalStringFromNumber(item, 'field_21'),
     completedAt: readOptionalStringFromNumber(item, 'field_22'),
@@ -131,7 +130,6 @@ export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProj
     projectManagerUpn: readOptionalString(item, 'projectManagerUpn'),
     leadEstimatorUpn: readOptionalString(item, 'leadEstimatorUpn'),
     supportingEstimatorUpns: safeParseJsonArray(item.supportingEstimatorUpns, 'supportingEstimatorUpns', logger) as string[] | undefined,
-    additionalTeamMemberUpns: safeParseJsonArray(item.additionalTeamMemberUpns, 'additionalTeamMemberUpns', logger) as string[] | undefined,
     timberscanApproverUpn: readOptionalString(item, 'timberscanApproverUpn'),
     sageAccessUpns: safeParseJsonArray(item.sageAccessUpns, 'sageAccessUpns', logger) as string[] | undefined,
     clarificationRequestedAt: readOptionalString(item, 'clarificationRequestedAt'),
@@ -174,9 +172,8 @@ export function toListItem(request: IProjectSetupRequest, logger?: ILogger): IPr
     field_14: request.clientName ?? '',
     field_15: request.startDate ?? '',
     field_16: request.contractType ?? '',
-    field_17: request.projectLeadId ?? '',
-    field_18: JSON.stringify(request.viewerUPNs ?? []),
-    field_19: JSON.stringify(request.addOns ?? []),
+    viewerUPNs: JSON.stringify(request.viewerUPNs ?? []),
+    addOns: JSON.stringify(request.addOns ?? []),
     field_20: request.clarificationNote ?? '',
     field_21: request.completedBy ?? '',
     field_22: request.completedAt ?? '',
@@ -196,7 +193,6 @@ export function toListItem(request: IProjectSetupRequest, logger?: ILogger): IPr
     projectManagerUpn: request.projectManagerUpn ?? '',
     leadEstimatorUpn: request.leadEstimatorUpn ?? '',
     supportingEstimatorUpns: JSON.stringify(request.supportingEstimatorUpns ?? []),
-    additionalTeamMemberUpns: JSON.stringify(request.additionalTeamMemberUpns ?? []),
     timberscanApproverUpn: request.timberscanApproverUpn ?? '',
     sageAccessUpns: JSON.stringify(request.sageAccessUpns ?? []),
     clarificationRequestedAt: request.clarificationRequestedAt ?? '',
@@ -211,8 +207,8 @@ export function toListItem(request: IProjectSetupRequest, logger?: ILogger): IPr
   // P6-01: Diagnostic guard — warn if any json-array field approaches the SP MultiLineText ceiling
   const JSON_ARRAY_CEILING = 50_000;
   const jsonArrayFields: (keyof IProjectsListItem)[] = [
-    'field_10', 'field_11', 'field_18', 'field_19',
-    'supportingEstimatorUpns', 'additionalTeamMemberUpns', 'sageAccessUpns', 'clarificationItems',
+    'field_10', 'field_11', 'viewerUPNs', 'addOns',
+    'supportingEstimatorUpns', 'sageAccessUpns', 'clarificationItems',
   ];
   for (const field of jsonArrayFields) {
     const val = item[field];

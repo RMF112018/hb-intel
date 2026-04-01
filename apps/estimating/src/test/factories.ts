@@ -33,9 +33,7 @@ export function createTestRequest(
     projectManagerUpn: 'pm@hb.com',
     leadEstimatorUpn: 'lead@hb.com',
     supportingEstimatorUpns: ['support@hb.com'],
-    additionalTeamMemberUpns: ['team@hb.com'],
     timberscanApproverUpn: 'lead@hb.com',
-    projectLeadId: 'pm@hb.com',
     ...overrides,
   };
 }

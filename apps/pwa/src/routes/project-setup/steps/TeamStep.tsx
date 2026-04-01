@@ -1,6 +1,6 @@
 /**
  * W0-G5-T03: Step 3 — Project Team (stepId: 'project-team').
- * Fields: projectLeadId (req), groupMembers (opt), viewerUPNs (opt).
+ * Fields: projectManagerUpn (req), groupMembers (opt), viewerUPNs (opt).
  * UPN text inputs — people picker upgrade in later wave per T02 parity contract.
  */
 import type { ReactElement } from 'react';
@@ -24,9 +24,9 @@ export function TeamStep({ request, onChange }: TeamStepProps): ReactElement {
   return (
     <HbcFormLayout columns={1} gap="medium">
       <HbcTextField
-        label="Project Lead (UPN)"
-        value={request.projectLeadId ?? ''}
-        onChange={(v) => onChange({ projectLeadId: v })}
+        label="Project Manager (UPN)"
+        value={request.projectManagerUpn ?? ''}
+        onChange={(v) => onChange({ projectManagerUpn: v })}
         required
         placeholder="user@company.com"
       />

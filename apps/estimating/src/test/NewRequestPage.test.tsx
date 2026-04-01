@@ -202,7 +202,6 @@ describe('NewRequestPage', () => {
           projectLocation: 'Legacy Location',
           department: 'commercial',
           projectType: 'GC',
-          projectLeadId: 'lead@hb.com',
           groupMembers: ['lead@hb.com', 'team@hb.com'],
         },
         stepStatuses: {},
@@ -221,7 +220,6 @@ describe('NewRequestPage', () => {
           projectLocation: 'Legacy Location',
           projectType: 'GC',
           projectManagerUpn: 'lead@hb.com',
-          additionalTeamMemberUpns: ['team@hb.com'],
         }),
       );
     });

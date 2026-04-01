@@ -11,7 +11,6 @@ describe('projectTeamFields', () => {
       projectManagerUpn: 'pm@hb.com',
       leadEstimatorUpn: 'lead@hb.com',
       supportingEstimatorUpns: ['support@hb.com', 'pm@hb.com'],
-      additionalTeamMemberUpns: ['lead@hb.com', 'team@hb.com'],
     });
 
     expect(eligible).toEqual([
@@ -19,7 +18,6 @@ describe('projectTeamFields', () => {
       'pm@hb.com',
       'lead@hb.com',
       'support@hb.com',
-      'team@hb.com',
     ]);
   });
 
@@ -29,32 +27,29 @@ describe('projectTeamFields', () => {
       projectManagerUpn: 'pm@hb.com',
       leadEstimatorUpn: 'lead@hb.com',
       supportingEstimatorUpns: ['support@hb.com'],
-      additionalTeamMemberUpns: ['team@hb.com'],
       timberscanApproverUpn: 'removed@hb.com',
       viewerUPNs: ['viewer@hb.com'],
     });
 
     expect(normalized.timberscanApproverUpn).toBeUndefined();
-    expect(normalized.projectLeadId).toBe('pm@hb.com');
     expect(normalized.groupLeaders).toEqual(['exec@hb.com']);
     expect(normalized.groupMembers).toEqual([
       'pm@hb.com',
       'lead@hb.com',
       'support@hb.com',
-      'team@hb.com',
     ]);
     expect(normalized.viewerUPNs).toBeUndefined();
   });
 
-  it('hydrates legacy team fields into the new Step 3 model without inventing missing roles', () => {
+  it('derives groupMembers from upstream role fields and clears viewerUPNs', () => {
     const normalized = normalizeProjectSetupTeamFields({
-      projectLeadId: 'pm@hb.com',
+      projectManagerUpn: 'pm@hb.com',
       groupMembers: ['pm@hb.com', 'team1@hb.com', 'team2@hb.com'],
       viewerUPNs: ['viewer@hb.com'],
     });
 
     expect(normalized.projectManagerUpn).toBe('pm@hb.com');
-    expect(normalized.additionalTeamMemberUpns).toEqual(['team1@hb.com', 'team2@hb.com']);
+    expect(normalized.groupMembers).toEqual(['pm@hb.com']);
     expect(normalized.projectExecutiveUpn).toBeUndefined();
     expect(normalized.leadEstimatorUpn).toBeUndefined();
     expect(normalized.timberscanApproverUpn).toBeUndefined();

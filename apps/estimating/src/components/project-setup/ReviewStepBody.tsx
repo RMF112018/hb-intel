@@ -58,7 +58,6 @@ export function ReviewStepBody({ request, mode, onSubmit, submitting }: ReviewSt
     { label: 'Project Manager', value: dv(request.projectManagerUpn) },
     { label: 'Lead Estimator', value: dv(request.leadEstimatorUpn) },
     { label: 'Supporting Estimators', value: dl(request.supportingEstimatorUpns) },
-    { label: 'Additional Members', value: dl(request.additionalTeamMemberUpns) },
     { label: 'Timberscan Approver', value: dv(request.timberscanApproverUpn) },
   ];
 

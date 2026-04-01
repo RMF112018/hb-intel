@@ -25,7 +25,7 @@ function makeRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupRe
     state: 'Submitted',
     groupMembers: ['member@example.com'],
     department: 'commercial',
-    projectLeadId: 'lead@example.com',
+    projectManagerUpn: 'lead@example.com',
     retryCount: 0,
     ...overrides,
   };
@@ -73,9 +73,9 @@ describe('deriveCurrentOwner', () => {
     expect(owner!.userId).toBe('lead@example.com');
   });
 
-  it('falls back to submittedBy when projectLeadId is missing in Completed', () => {
+  it('falls back to submittedBy when projectManagerUpn is missing in Completed', () => {
     const owner = deriveCurrentOwner(
-      makeRequest({ state: 'Completed', projectLeadId: undefined }),
+      makeRequest({ state: 'Completed', projectManagerUpn: undefined }),
     );
     expect(owner!.userId).toBe('coordinator@example.com');
   });

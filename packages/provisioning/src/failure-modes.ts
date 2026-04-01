@@ -86,7 +86,7 @@ export const PROJECT_SETUP_FAILURE_MODES: readonly IFailureMode[] = [
   {
     fmId: 'FM-10',
     title: 'Handoff Recipient Cannot Be Resolved',
-    scenario: 'resolveRecipient(request) cannot resolve valid BIC owner because projectLeadId is null or user no longer exists in directory',
+    scenario: 'resolveRecipient(request) cannot resolve valid BIC owner because projectManagerUpn is null or user no longer exists in directory',
     expectedDegradation: 'usePrepareHandoff returns preflight.blockingReason with guidance; handoff blocked; no recipient ambiguity',
     affectedPackages: ['@hbc/workflow-handoff', '@hbc/bic-next-move'],
   },

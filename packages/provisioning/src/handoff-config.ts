@@ -26,7 +26,7 @@ export interface IProjectHubSeedData {
   projectNumber: string;
   department: ProjectDepartment;
   siteUrl: string;
-  projectLeadId: string;
+  projectManagerUpn: string;
   groupMembers: string[];
   startDate?: string;
   estimatedValue?: number;
@@ -51,8 +51,8 @@ export function validateSetupHandoffReadiness(request: IProjectSetupRequest): st
   if (!request.department) {
     return 'Department is not set on this request. Contact your administrator.';
   }
-  if (!request.projectLeadId) {
-    return 'Project lead is not assigned. Update the project team before handoff.';
+  if (!request.projectManagerUpn) {
+    return 'Project manager is not assigned. Update the project team before handoff.';
   }
   return null;
 }
@@ -90,7 +90,7 @@ export const SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG: IHandoffConfig<
     projectNumber: request.projectNumber ?? '',
     department: request.department!,
     siteUrl: request.siteUrl ?? '',
-    projectLeadId: request.projectLeadId ?? '',
+    projectManagerUpn: request.projectManagerUpn ?? '',
     groupMembers: request.groupMembers ?? [],
     startDate: request.startDate,
     estimatedValue: request.estimatedValue,
@@ -105,11 +105,11 @@ export const SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG: IHandoffConfig<
   },
 
   resolveRecipient: (request) => {
-    if (!request.projectLeadId) return null;
+    if (!request.projectManagerUpn) return null;
     return {
-      userId: request.projectLeadId,
-      displayName: 'Project Lead',
-      role: 'Project Lead',
+      userId: request.projectManagerUpn,
+      displayName: 'Project Manager',
+      role: 'Project Manager',
     };
   },
 

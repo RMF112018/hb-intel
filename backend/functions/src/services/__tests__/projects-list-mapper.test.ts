@@ -40,9 +40,8 @@ function makeFullSpItem(): Record<string, unknown> {
     field_14: 'Sample Client',
     field_15: '2026-06-01',
     field_16: 'GMP',
-    field_17: 'pm@hb.com',
-    field_18: '["viewer1@hb.com"]',
-    field_19: '["submittals","closeout"]',
+    viewerUPNs: '["viewer1@hb.com"]',
+    addOns: '["submittals","closeout"]',
     field_20: 'Budget needs detail',
     field_21: 'admin@hb.com',
     field_22: '2026-03-20T14:00:00.000Z',
@@ -61,7 +60,6 @@ function makeFullSpItem(): Record<string, unknown> {
     projectManagerUpn: 'pm2@hb.com',
     leadEstimatorUpn: 'est@hb.com',
     supportingEstimatorUpns: '["est2@hb.com","est3@hb.com"]',
-    additionalTeamMemberUpns: '["team1@hb.com"]',
     timberscanApproverUpn: 'ts@hb.com',
     sageAccessUpns: '["sage1@hb.com"]',
     clarificationRequestedAt: '2026-03-18T10:00:00.000Z',
@@ -89,7 +87,6 @@ function makeFullDomainRequest(): IProjectSetupRequest {
     clientName: 'Sample Client',
     startDate: '2026-06-01',
     contractType: 'GMP',
-    projectLeadId: 'pm@hb.com',
     viewerUPNs: ['viewer1@hb.com'],
     addOns: ['submittals', 'closeout'],
     clarificationNote: 'Budget needs detail',
@@ -110,7 +107,6 @@ function makeFullDomainRequest(): IProjectSetupRequest {
     projectManagerUpn: 'pm2@hb.com',
     leadEstimatorUpn: 'est@hb.com',
     supportingEstimatorUpns: ['est2@hb.com', 'est3@hb.com'],
-    additionalTeamMemberUpns: ['team1@hb.com'],
     timberscanApproverUpn: 'ts@hb.com',
     sageAccessUpns: ['sage1@hb.com'],
     clarificationRequestedAt: '2026-03-18T10:00:00.000Z',
@@ -124,7 +120,7 @@ function makeFullDomainRequest(): IProjectSetupRequest {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('toDomain() — SP item to domain object', () => {
-  it('maps all 43 fields from a complete SP item', () => {
+  it('maps all 41 fields from a complete SP item', () => {
     const domain = toDomain(makeFullSpItem());
 
     expect(domain.requestId).toBe('proj-full');
@@ -144,7 +140,6 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.clientName).toBe('Sample Client');
     expect(domain.startDate).toBe('2026-06-01');
     expect(domain.contractType).toBe('GMP');
-    expect(domain.projectLeadId).toBe('pm@hb.com');
     expect(domain.viewerUPNs).toEqual(['viewer1@hb.com']);
     expect(domain.addOns).toEqual(['submittals', 'closeout']);
     expect(domain.clarificationNote).toBe('Budget needs detail');
@@ -166,7 +161,6 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.projectManagerUpn).toBe('pm2@hb.com');
     expect(domain.leadEstimatorUpn).toBe('est@hb.com');
     expect(domain.supportingEstimatorUpns).toEqual(['est2@hb.com', 'est3@hb.com']);
-    expect(domain.additionalTeamMemberUpns).toEqual(['team1@hb.com']);
     expect(domain.timberscanApproverUpn).toBe('ts@hb.com');
     expect(domain.sageAccessUpns).toEqual(['sage1@hb.com']);
     expect(domain.clarificationRequestedAt).toBe('2026-03-18T10:00:00.000Z');
@@ -197,7 +191,6 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.clientName).toBeUndefined();
     expect(domain.startDate).toBeUndefined();
     expect(domain.contractType).toBeUndefined();
-    expect(domain.projectLeadId).toBeUndefined();
     expect(domain.clarificationNote).toBeUndefined();
     expect(domain.completedBy).toBeUndefined();
     expect(domain.completedAt).toBeUndefined();
@@ -216,7 +209,6 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.projectManagerUpn).toBeUndefined();
     expect(domain.leadEstimatorUpn).toBeUndefined();
     expect(domain.supportingEstimatorUpns).toEqual([]);
-    expect(domain.additionalTeamMemberUpns).toEqual([]);
     expect(domain.timberscanApproverUpn).toBeUndefined();
     expect(domain.sageAccessUpns).toEqual([]);
     expect(domain.clarificationRequestedAt).toBeUndefined();
@@ -275,7 +267,6 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.field_14).toBe('Sample Client');
     expect(payload.field_15).toBe('2026-06-01');
     expect(payload.field_16).toBe('GMP');
-    expect(payload.field_17).toBe('pm@hb.com');
     expect(payload.field_20).toBe('Budget needs detail');
     expect(payload.field_21).toBe('admin@hb.com');
     expect(payload.field_22).toBe('2026-03-20T14:00:00.000Z');
@@ -295,7 +286,6 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.projectManagerUpn).toBe('pm2@hb.com');
     expect(payload.leadEstimatorUpn).toBe('est@hb.com');
     expect(payload.supportingEstimatorUpns).toBe('["est2@hb.com","est3@hb.com"]');
-    expect(payload.additionalTeamMemberUpns).toBe('["team1@hb.com"]');
     expect(payload.timberscanApproverUpn).toBe('ts@hb.com');
     expect(payload.sageAccessUpns).toBe('["sage1@hb.com"]');
     expect(payload.clarificationRequestedAt).toBe('2026-03-18T10:00:00.000Z');
@@ -308,8 +298,8 @@ describe('toListItem() — domain object to SP payload', () => {
 
     expect(payload.field_10).toBe('["user1@hb.com","user2@hb.com"]');
     expect(payload.field_11).toBe('["leader1@hb.com"]');
-    expect(payload.field_18).toBe('["viewer1@hb.com"]');
-    expect(payload.field_19).toBe('["submittals","closeout"]');
+    expect(payload.viewerUPNs).toBe('["viewer1@hb.com"]');
+    expect(payload.addOns).toBe('["submittals","closeout"]');
   });
 
   it('computes Title with TBD when projectNumber is missing', () => {
@@ -324,7 +314,6 @@ describe('toListItem() — domain object to SP payload', () => {
       department: undefined,
       clientName: undefined,
       contractType: undefined,
-      projectLeadId: undefined,
       clarificationNote: undefined,
       completedBy: undefined,
       completedAt: undefined,
@@ -335,7 +324,6 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.field_12).toBe('');
     expect(payload.field_14).toBe('');
     expect(payload.field_16).toBe('');
-    expect(payload.field_17).toBe('');
     expect(payload.field_20).toBe('');
     expect(payload.field_21).toBe('');
     expect(payload.field_22).toBe('');
@@ -358,8 +346,8 @@ describe('toListItem() — domain object to SP payload', () => {
     };
     const payload = toListItem(request);
     expect(payload.field_11).toBe('[]');
-    expect(payload.field_18).toBe('[]');
-    expect(payload.field_19).toBe('[]');
+    expect(payload.viewerUPNs).toBe('[]');
+    expect(payload.addOns).toBe('[]');
   });
 });
 
@@ -389,7 +377,6 @@ describe('Round-trip: toListItem → toDomain preserves mapped fields', () => {
     expect(roundTripped.clientName).toBe(original.clientName);
     expect(roundTripped.startDate).toBe(original.startDate);
     expect(roundTripped.contractType).toBe(original.contractType);
-    expect(roundTripped.projectLeadId).toBe(original.projectLeadId);
     expect(roundTripped.viewerUPNs).toEqual(original.viewerUPNs);
     expect(roundTripped.addOns).toEqual(original.addOns);
     expect(roundTripped.clarificationNote).toBe(original.clarificationNote);
@@ -411,7 +398,6 @@ describe('Round-trip: toListItem → toDomain preserves mapped fields', () => {
     expect(roundTripped.projectManagerUpn).toBe(original.projectManagerUpn);
     expect(roundTripped.leadEstimatorUpn).toBe(original.leadEstimatorUpn);
     expect(roundTripped.supportingEstimatorUpns).toEqual(original.supportingEstimatorUpns);
-    expect(roundTripped.additionalTeamMemberUpns).toEqual(original.additionalTeamMemberUpns);
     expect(roundTripped.timberscanApproverUpn).toBe(original.timberscanApproverUpn);
     expect(roundTripped.sageAccessUpns).toEqual(original.sageAccessUpns);
     expect(roundTripped.clarificationRequestedAt).toBe(original.clarificationRequestedAt);
@@ -518,8 +504,8 @@ describe('safeParseJsonArray()', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('PROJECTS_LIST_SELECT_FIELDS', () => {
-  it('contains exactly 43 field names (26 legacy + 17 P2-07 gap fields)', () => {
-    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(43);
+  it('contains exactly 41 field names (24 legacy + 17 P2-07 gap fields)', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(41);
   });
 
   it('includes Title and Year', () => {
@@ -527,10 +513,16 @@ describe('PROJECTS_LIST_SELECT_FIELDS', () => {
     expect(PROJECTS_LIST_SELECT_FIELDS).toContain('Year');
   });
 
-  it('includes all field_1 through field_24', () => {
+  it('includes legacy field_N columns (excluding removed field_17/18/19)', () => {
     for (let i = 1; i <= 24; i++) {
+      if (i === 17 || i === 18 || i === 19) continue; // removed or renamed in Gap 6
       expect(PROJECTS_LIST_SELECT_FIELDS).toContain(`field_${i}`);
     }
+  });
+
+  it('includes renamed viewerUPNs and addOns columns', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS).toContain('viewerUPNs');
+    expect(PROJECTS_LIST_SELECT_FIELDS).toContain('addOns');
   });
 });
 

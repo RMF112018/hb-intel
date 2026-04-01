@@ -74,7 +74,7 @@ export const STEP_DEPARTMENT: IStep<IProjectSetupRequest> = {
  * Step 3 — Project Team.
  * Fields: projectExecutiveUpn (required), projectManagerUpn (optional),
  * leadEstimatorUpn (required), supportingEstimatorUpns (optional),
- * additionalTeamMemberUpns (optional), timberscanApproverUpn (required).
+ * timberscanApproverUpn (required).
  */
 export const STEP_TEAM: IStep<IProjectSetupRequest> = {
   stepId: 'project-team',

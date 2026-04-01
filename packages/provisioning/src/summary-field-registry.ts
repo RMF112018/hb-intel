@@ -92,7 +92,7 @@ export const PROJECT_SETUP_SUMMARY_FIELDS: readonly ISummaryFieldDescriptor[] = 
   // ── Standard tier ──
   { fieldId: 'bicDetail', label: 'BIC Detail Chain', source: 'bic', sourcePath: 'IBicNextMoveState (previous → current → next)', minTier: 'standard' },
   { fieldId: 'blockedReason', label: 'Blocked Reason', source: 'bic', sourcePath: 'IBicNextMoveState.blockedReason', minTier: 'standard' },
-  { fieldId: 'teamMembers', label: 'Team Members', source: 'request', sourcePath: 'IProjectSetupRequest.groupMembers + projectLeadId', minTier: 'standard' },
+  { fieldId: 'teamMembers', label: 'Team Members', source: 'request', sourcePath: 'IProjectSetupRequest.groupMembers + projectManagerUpn', minTier: 'standard' },
   { fieldId: 'addOns', label: 'Add-ons Selected', source: 'request', sourcePath: 'IProjectSetupRequest.addOns', minTier: 'standard' },
   { fieldId: 'projectNumber', label: 'Project Number', source: 'request', sourcePath: 'IProjectSetupRequest.projectNumber', minTier: 'standard' },
   { fieldId: 'estimatedValue', label: 'Estimated Value', source: 'request', sourcePath: 'IProjectSetupRequest.estimatedValue', minTier: 'standard' },

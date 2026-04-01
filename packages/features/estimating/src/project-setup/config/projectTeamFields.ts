@@ -5,7 +5,6 @@ const UPSTREAM_TEAM_FIELDS = [
   'projectManagerUpn',
   'leadEstimatorUpn',
   'supportingEstimatorUpns',
-  'additionalTeamMemberUpns',
 ] as const;
 
 export type ProjectTeamFieldId = (typeof UPSTREAM_TEAM_FIELDS)[number] | 'timberscanApproverUpn';
@@ -50,10 +49,6 @@ export function getEligibleTimberscanApprovers(
     addPerson(person);
   }
 
-  for (const person of request.additionalTeamMemberUpns ?? []) {
-    addPerson(person);
-  }
-
   return eligible;
 }
 
@@ -78,18 +73,6 @@ export function normalizeProjectSetupTeamFields<T extends Partial<IProjectSetupR
   normalized.projectManagerUpn = trimPerson(normalized.projectManagerUpn);
   normalized.leadEstimatorUpn = trimPerson(normalized.leadEstimatorUpn);
   normalized.supportingEstimatorUpns = normalizePeople(normalized.supportingEstimatorUpns);
-  normalized.additionalTeamMemberUpns = normalizePeople(normalized.additionalTeamMemberUpns);
-
-  if (!hasNewTeamFields) {
-    normalized.projectManagerUpn = normalized.projectManagerUpn ?? trimPerson(normalized.projectLeadId);
-
-    const legacyAdditionalMembers = normalizePeople(
-      (normalized.groupMembers ?? []).filter((person) => person !== normalized.projectLeadId),
-    );
-    if (!normalized.additionalTeamMemberUpns && legacyAdditionalMembers) {
-      normalized.additionalTeamMemberUpns = legacyAdditionalMembers;
-    }
-  }
 
   const eligibleApprovers = getEligibleTimberscanApprovers(normalized);
   const timberscanApprover = trimPerson(normalized.timberscanApproverUpn);
@@ -98,7 +81,6 @@ export function normalizeProjectSetupTeamFields<T extends Partial<IProjectSetupR
       ? timberscanApprover
       : undefined;
 
-  normalized.projectLeadId = normalized.projectManagerUpn;
   normalized.groupLeaders = normalized.projectExecutiveUpn
     ? [normalized.projectExecutiveUpn]
     : undefined;
@@ -108,7 +90,6 @@ export function normalizeProjectSetupTeamFields<T extends Partial<IProjectSetupR
         normalized.projectManagerUpn,
         normalized.leadEstimatorUpn,
         ...(normalized.supportingEstimatorUpns ?? []),
-        ...(normalized.additionalTeamMemberUpns ?? []),
       ].filter((value): value is string => Boolean(value)),
     ),
   );

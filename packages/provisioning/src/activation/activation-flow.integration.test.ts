@@ -58,7 +58,7 @@ function createSetupSeed(overrides?: Partial<IProjectHubSeedData>): IProjectHubS
     projectNumber: '26-001-01',
     department: 'commercial',
     siteUrl: 'https://contoso.sharepoint.com/sites/project-26-001-01',
-    projectLeadId: 'pm@contoso.com',
+    projectManagerUpn: 'pm@contoso.com',
     groupMembers: ['member1@contoso.com', 'member2@contoso.com'],
     startDate: '2026-04-01T00:00:00.000Z',
     estimatedValue: 12500000,

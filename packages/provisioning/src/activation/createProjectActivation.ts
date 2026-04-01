@@ -67,8 +67,8 @@ export function validateActivationPreconditions(
   }
 
   // PM must be assigned
-  if (!seed.projectLeadId) {
-    return 'Project lead (PM) is not assigned.';
+  if (!seed.projectManagerUpn) {
+    return 'Project manager is not assigned.';
   }
 
   // Department must be set
@@ -139,8 +139,8 @@ export function buildRegistryRecord(
     clientName: seed.clientName,
 
     // Team anchors
-    projectManagerUpn: seed.projectLeadId,
-    projectManagerName: seed.projectLeadId, // Display name resolution is Phase 3 runtime scope
+    projectManagerUpn: seed.projectManagerUpn,
+    projectManagerName: seed.projectManagerUpn, // Display name resolution is Phase 3 runtime scope
 
     // Governed-mutable
     department: seed.department,

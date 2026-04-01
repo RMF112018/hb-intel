@@ -99,9 +99,9 @@ export function deriveCurrentOwner(request: IProjectSetupRequest): IBicOwner | n
       return null;
 
     case 'Completed':
-      // Project Lead (PM/Superintendent) reviews the provisioned site
+      // Project Manager reviews the provisioned site
       return {
-        userId: request.projectLeadId ?? request.submittedBy,
+        userId: request.projectManagerUpn ?? request.submittedBy,
         displayName: BIC_ROLE_PROJECT_LEAD,
         role: BIC_ROLE_PROJECT_LEAD,
       };

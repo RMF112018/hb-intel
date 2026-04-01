@@ -20,7 +20,7 @@ function makeRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupRe
     projectNumber: '26-001-01',
     groupMembers: ['member@example.com'],
     department: 'commercial',
-    projectLeadId: 'lead@example.com',
+    projectManagerUpn: 'lead@example.com',
     siteUrl: 'https://hbc.sharepoint.com/sites/proj-1',
     retryCount: 0,
     ...overrides,
@@ -54,9 +54,9 @@ describe('validateSetupHandoffReadiness', () => {
     expect(result).toContain('Department');
   });
 
-  it('fails when projectLeadId is missing', () => {
-    const result = validateSetupHandoffReadiness(makeRequest({ projectLeadId: undefined }));
-    expect(result).toContain('Project lead');
+  it('fails when projectManagerUpn is missing', () => {
+    const result = validateSetupHandoffReadiness(makeRequest({ projectManagerUpn: undefined }));
+    expect(result).toContain('Project manager');
   });
 
   it('returns the first failing condition (state before siteUrl)', () => {
@@ -113,7 +113,7 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG', () => {
         projectNumber: '26-001-01',
         department: 'commercial',
         siteUrl: 'https://hbc.sharepoint.com/sites/proj-1',
-        projectLeadId: 'lead@example.com',
+        projectManagerUpn: 'lead@example.com',
         groupMembers: ['member@example.com'],
         startDate: undefined,
         estimatedValue: undefined,
@@ -139,16 +139,16 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG', () => {
   });
 
   describe('resolveRecipient', () => {
-    it('returns the project lead', () => {
+    it('returns the project manager', () => {
       const recipient = SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.resolveRecipient(makeRequest());
       expect(recipient).not.toBeNull();
       expect(recipient!.userId).toBe('lead@example.com');
-      expect(recipient!.role).toBe('Project Lead');
+      expect(recipient!.role).toBe('Project Manager');
     });
 
-    it('returns null when projectLeadId is missing', () => {
+    it('returns null when projectManagerUpn is missing', () => {
       const recipient = SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.resolveRecipient(
-        makeRequest({ projectLeadId: undefined }),
+        makeRequest({ projectManagerUpn: undefined }),
       );
       expect(recipient).toBeNull();
     });

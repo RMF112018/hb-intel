@@ -33,7 +33,6 @@ describe('PROJECT_SETUP_FIELD_MAP', () => {
     expect(PROJECT_SETUP_FIELD_MAP['projectManagerUpn']).toBe('project-team');
     expect(PROJECT_SETUP_FIELD_MAP['leadEstimatorUpn']).toBe('project-team');
     expect(PROJECT_SETUP_FIELD_MAP['supportingEstimatorUpns']).toBe('project-team');
-    expect(PROJECT_SETUP_FIELD_MAP['additionalTeamMemberUpns']).toBe('project-team');
     expect(PROJECT_SETUP_FIELD_MAP['timberscanApproverUpn']).toBe('project-team');
   });
 
@@ -42,7 +41,7 @@ describe('PROJECT_SETUP_FIELD_MAP', () => {
   });
 
   it('covers exactly 23 fields', () => {
-    expect(Object.keys(PROJECT_SETUP_FIELD_MAP)).toHaveLength(23);
+    expect(Object.keys(PROJECT_SETUP_FIELD_MAP)).toHaveLength(22);
   });
 });
 

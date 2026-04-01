@@ -73,7 +73,6 @@ describe('uiReviewProjectSetupClient', () => {
       projectManagerUpn: 'pm@hb.com',
       leadEstimatorUpn: 'lead@hb.com',
       supportingEstimatorUpns: ['support@hb.com'],
-      additionalTeamMemberUpns: ['team@hb.com'],
       timberscanApproverUpn: 'lead@hb.com',
     });
 
@@ -90,9 +89,7 @@ describe('uiReviewProjectSetupClient', () => {
     expect(result.projectManagerUpn).toBe('pm@hb.com');
     expect(result.leadEstimatorUpn).toBe('lead@hb.com');
     expect(result.supportingEstimatorUpns).toEqual(['support@hb.com']);
-    expect(result.additionalTeamMemberUpns).toEqual(['team@hb.com']);
     expect(result.timberscanApproverUpn).toBe('lead@hb.com');
-    expect(result.projectLeadId).toBe('pm@hb.com');
     expect(result.groupLeaders).toEqual(['exec@hb.com']);
     expect(result.groupMembers).toEqual(['pm@hb.com', 'lead@hb.com', 'support@hb.com', 'team@hb.com']);
     expect(storedStatus?.overallStatus).toBe('NotStarted');
@@ -130,7 +127,6 @@ describe('uiReviewProjectSetupClient', () => {
           projectStage: undefined,
           projectType: 'GC',
           projectManagerUpn: undefined,
-          additionalTeamMemberUpns: undefined,
         }),
       );
   });

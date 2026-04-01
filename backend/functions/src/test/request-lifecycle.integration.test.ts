@@ -33,7 +33,6 @@ function createRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetup
     clientName: 'Test Client',
     startDate: '2026-06-01',
     contractType: 'GMP',
-    projectLeadId: 'pm@hb.com',
     retryCount: 0,
     ...overrides,
   };

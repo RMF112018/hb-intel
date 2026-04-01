@@ -126,7 +126,7 @@ export function ProjectSetupPage(): ReactNode {
       projectStage: (request.projectStage as 'Pursuit' | 'Active') ?? 'Pursuit',
       groupMembers: request.groupMembers ?? [],
       department: request.department,
-      projectLeadId: request.projectLeadId,
+      projectManagerUpn: request.projectManagerUpn,
       viewerUPNs: request.viewerUPNs,
       addOns: request.addOns,
       estimatedValue: request.estimatedValue,

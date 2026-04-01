@@ -136,7 +136,6 @@ app.http('submitProjectSetupRequest', {
       clientName: body.clientName,
       startDate: body.startDate,
       contractType: body.contractType,
-      projectLeadId: body.projectLeadId,
       viewerUPNs: body.viewerUPNs,
       addOns: body.addOns,
       retryCount: 0,
@@ -159,7 +158,6 @@ app.http('submitProjectSetupRequest', {
       projectManagerUpn: body.projectManagerUpn,
       leadEstimatorUpn: body.leadEstimatorUpn,
       supportingEstimatorUpns: body.supportingEstimatorUpns,
-      additionalTeamMemberUpns: body.additionalTeamMemberUpns,
       timberscanApproverUpn: body.timberscanApproverUpn,
       sageAccessUpns: body.sageAccessUpns,
     };

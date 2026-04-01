@@ -74,12 +74,10 @@ export interface IProjectsListItem {
   field_15: string | number;
   /** ContractType — Choice column. */
   field_16: string;
-  /** ProjectLeadId — UPN. Absent from 2026-03-31 schema export; retained for legacy row compatibility. */
-  field_17: string;
-  /** ViewerUPNsJson — JSON-serialized `string[]`. Absent from 2026-03-31 schema export; retained for legacy row compatibility. */
-  field_18: string;
-  /** AddOnsJson — JSON-serialized `string[]`. Absent from 2026-03-31 schema export; retained for legacy row compatibility. */
-  field_19: string;
+  /** ViewerUPNs — JSON-serialized `string[]`. Named column added to live schema (replaces legacy field_18). */
+  viewerUPNs: string;
+  /** AddOns — JSON-serialized `string[]`. Named column added to live schema (replaces legacy field_19). */
+  addOns: string;
   /** ClarificationNote (stored as SP Number — may return `0` for empty). */
   field_20: string | number;
   /** CompletedBy (stored as SP Number — may return `0` for empty). */
@@ -120,8 +118,6 @@ export interface IProjectsListItem {
   leadEstimatorUpn: string;
   /** Supporting estimator UPNs — JSON-serialized `string[]` in SP MultiLineText. */
   supportingEstimatorUpns: string;
-  /** Additional team member UPNs — JSON-serialized `string[]` in SP MultiLineText. */
-  additionalTeamMemberUpns: string;
   /** Timberscan approver UPN. */
   timberscanApproverUpn: string;
   /** Sage 300 access UPNs — JSON-serialized `string[]` in SP MultiLineText. */
@@ -199,9 +195,8 @@ export const PROJECTS_LIST_FIELD_MAP = {
   clientName:      { spInternalName: 'field_14', spType: 'Text',          serialization: 'direct' },
   startDate:       { spInternalName: 'field_15', spType: 'Number',        serialization: 'direct' },
   contractType:    { spInternalName: 'field_16', spType: 'Choice',        serialization: 'direct' },
-  projectLeadId:   { spInternalName: 'field_17', spType: 'Text',          serialization: 'direct' },
-  viewerUPNs:      { spInternalName: 'field_18', spType: 'MultiLineText', serialization: 'json-array' },
-  addOns:          { spInternalName: 'field_19', spType: 'MultiLineText', serialization: 'json-array' },
+  viewerUPNs:      { spInternalName: 'viewerUPNs', spType: 'MultiLineText', serialization: 'json-array' },
+  addOns:          { spInternalName: 'addOns',     spType: 'MultiLineText', serialization: 'json-array' },
 
   // ── Clarification ─────────────────────────────────────────────────────
   clarificationNote: { spInternalName: 'field_20', spType: 'Number',      serialization: 'direct' },
@@ -235,7 +230,6 @@ export const PROJECTS_LIST_FIELD_MAP = {
   projectManagerUpn:        { spInternalName: 'projectManagerUpn',        spType: 'Text',     serialization: 'direct' },
   leadEstimatorUpn:         { spInternalName: 'leadEstimatorUpn',         spType: 'Text',     serialization: 'direct' },
   supportingEstimatorUpns:  { spInternalName: 'supportingEstimatorUpns',  spType: 'MultiLineText', serialization: 'json-array' },
-  additionalTeamMemberUpns: { spInternalName: 'additionalTeamMemberUpns', spType: 'MultiLineText', serialization: 'json-array' },
   timberscanApproverUpn:    { spInternalName: 'timberscanApproverUpn',    spType: 'Text',     serialization: 'direct' },
   sageAccessUpns:           { spInternalName: 'sageAccessUpns',           spType: 'MultiLineText', serialization: 'json-array' },
 

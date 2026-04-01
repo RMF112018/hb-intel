@@ -261,8 +261,8 @@ export function ProjectReviewDetailPage(): ReactNode {
           {request.groupLeaders && request.groupLeaders.length > 0 && (
             <p><strong>Group Leaders:</strong> {request.groupLeaders.join(', ')}</p>
           )}
-          {request.projectLeadId && (
-            <p><strong>Project Lead:</strong> {request.projectLeadId}</p>
+          {request.projectManagerUpn && (
+            <p><strong>Project Manager:</strong> {request.projectManagerUpn}</p>
           )}
           {request.contractType && (
             <p><strong>Contract Type:</strong> {request.contractType}</p>

@@ -173,8 +173,6 @@ export interface IProjectSetupRequest {
   procoreProject?: 'Yes' | 'No';
   /** W0-G3-T01: Step 2 — contract type classification (optional). */
   contractType?: string;
-  /** W0-G3-T01: Step 3 — UPN of the project lead (PM/Superintendent). Required for submission. */
-  projectLeadId?: string;
   /** W0-G4-T11: Step 3 — project executive assignment (single person). */
   projectExecutiveUpn?: string;
   /** W0-G4-T11: Step 3 — project manager assignment (single person). */
@@ -183,8 +181,6 @@ export interface IProjectSetupRequest {
   leadEstimatorUpn?: string;
   /** W0-G4-T11: Step 3 — supporting estimator assignments (multi-person). */
   supportingEstimatorUpns?: string[];
-  /** W0-G4-T11: Step 3 — additional team-member assignments (multi-person). */
-  additionalTeamMemberUpns?: string[];
   /** W0-G4-T11: Step 3 — one eligible team member selected as Timberscan approver. */
   timberscanApproverUpn?: string;
   /** P2-07: Step 3 — UPNs requiring Sage 300 access for this project. */

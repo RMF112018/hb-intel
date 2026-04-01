@@ -51,7 +51,6 @@ describe('Request lifecycle — user-command flows', () => {
       clientName: 'Acme Corp',
       startDate: '2026-06-01',
       contractType: 'GMP',
-      projectLeadId: 'plead@hb.com',
       viewerUPNs: ['viewer1@hb.com', 'viewer2@hb.com'],
       addOns: ['safety-plan', 'quality-plan'],
       year: 2026,
@@ -67,7 +66,6 @@ describe('Request lifecycle — user-command flows', () => {
     expect(retrieved!.clientName).toBe('Acme Corp');
     expect(retrieved!.startDate).toBe('2026-06-01');
     expect(retrieved!.contractType).toBe('GMP');
-    expect(retrieved!.projectLeadId).toBe('plead@hb.com');
     expect(retrieved!.viewerUPNs).toEqual(['viewer1@hb.com', 'viewer2@hb.com']);
     expect(retrieved!.addOns).toEqual(['safety-plan', 'quality-plan']);
     expect(retrieved!.year).toBe(2026);
@@ -86,7 +84,6 @@ describe('Request lifecycle — user-command flows', () => {
       projectManagerUpn: 'pm@hb.com',
       leadEstimatorUpn: 'est@hb.com',
       supportingEstimatorUpns: ['est2@hb.com'],
-      additionalTeamMemberUpns: ['team1@hb.com'],
       timberscanApproverUpn: 'ts@hb.com',
       sageAccessUpns: ['sage@hb.com'],
     });
@@ -106,7 +103,6 @@ describe('Request lifecycle — user-command flows', () => {
     expect(retrieved!.projectManagerUpn).toBe('pm@hb.com');
     expect(retrieved!.leadEstimatorUpn).toBe('est@hb.com');
     expect(retrieved!.supportingEstimatorUpns).toEqual(['est2@hb.com']);
-    expect(retrieved!.additionalTeamMemberUpns).toEqual(['team1@hb.com']);
     expect(retrieved!.timberscanApproverUpn).toBe('ts@hb.com');
     expect(retrieved!.sageAccessUpns).toEqual(['sage@hb.com']);
   });
@@ -409,13 +405,7 @@ describe('Deficiency regression — F1+F6 field persistence', () => {
     expect(result!.groupLeaders).toEqual(['lead1@hb.com']);
   });
 
-  it('D8: projectLeadId survives submit→read cycle', async () => {
-    await repo.upsertRequest(makeRequest({ projectLeadId: 'lead@hb.com' }));
-    const result = await repo.getRequest('req-1');
-    expect(result!.projectLeadId).toBe('lead@hb.com');
-  });
-
-  it('D9: startDate survives submit→read cycle', async () => {
+  it('D8: startDate survives submit→read cycle', async () => {
     await repo.upsertRequest(makeRequest({ startDate: '2026-06-01' }));
     const result = await repo.getRequest('req-1');
     expect(result!.startDate).toBe('2026-06-01');

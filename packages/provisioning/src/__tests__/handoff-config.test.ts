@@ -17,7 +17,7 @@ function createCompletedRequest(overrides: Partial<IProjectSetupRequest> = {}): 
     state: 'Completed',
     department: 'Healthcare',
     siteUrl: 'https://hbconstruction.sharepoint.com/sites/HV-2025-001',
-    projectLeadId: 'user-lead-001',
+    projectManagerUpn: 'user-lead-001',
     groupMembers: ['user-001', 'user-002'],
     requesterId: 'user-requester-001',
     startDate: '2025-01-15',
@@ -48,9 +48,9 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG (P2-C4 §8)', () => {
       expect(result).toContain('Department');
     });
 
-    it('returns error when projectLeadId is missing', () => {
-      const result = validateSetupHandoffReadiness(createCompletedRequest({ projectLeadId: '' }));
-      expect(result).toContain('Project lead');
+    it('returns error when projectManagerUpn is missing', () => {
+      const result = validateSetupHandoffReadiness(createCompletedRequest({ projectManagerUpn: '' }));
+      expect(result).toContain('Project manager');
     });
   });
 
@@ -62,7 +62,7 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG (P2-C4 §8)', () => {
       expect(seed.projectNumber).toBe('HV-2025-001');
       expect(seed.department).toBe('Healthcare');
       expect(seed.siteUrl).toBe('https://hbconstruction.sharepoint.com/sites/HV-2025-001');
-      expect(seed.projectLeadId).toBe('user-lead-001');
+      expect(seed.projectManagerUpn).toBe('user-lead-001');
       expect(seed.groupMembers).toEqual(['user-001', 'user-002']);
     });
   });
@@ -101,18 +101,18 @@ describe('SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG (P2-C4 §8)', () => {
   });
 
   describe('resolveRecipient', () => {
-    it('returns project lead identity when projectLeadId is set', () => {
-      const request = createCompletedRequest({ projectLeadId: 'lead-42' });
+    it('returns project manager identity when projectManagerUpn is set', () => {
+      const request = createCompletedRequest({ projectManagerUpn: 'lead-42' });
       const recipient = SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.resolveRecipient(request);
       expect(recipient).toEqual({
         userId: 'lead-42',
-        displayName: 'Project Lead',
-        role: 'Project Lead',
+        displayName: 'Project Manager',
+        role: 'Project Manager',
       });
     });
 
-    it('returns null when projectLeadId is missing', () => {
-      const request = createCompletedRequest({ projectLeadId: '' });
+    it('returns null when projectManagerUpn is missing', () => {
+      const request = createCompletedRequest({ projectManagerUpn: '' });
       const recipient = SETUP_TO_PROJECT_HUB_HANDOFF_CONFIG.resolveRecipient(request);
       expect(recipient).toBeNull();
     });

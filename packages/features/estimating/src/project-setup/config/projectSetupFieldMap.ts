@@ -35,7 +35,6 @@ export const PROJECT_SETUP_FIELD_MAP: Readonly<Record<string, ProjectSetupStepId
   projectManagerUpn: 'project-team',
   leadEstimatorUpn: 'project-team',
   supportingEstimatorUpns: 'project-team',
-  additionalTeamMemberUpns: 'project-team',
   timberscanApproverUpn: 'project-team',
 
   // Step 4 — Template & Add-Ons
