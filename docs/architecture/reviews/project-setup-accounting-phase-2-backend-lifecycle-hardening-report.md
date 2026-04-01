@@ -505,3 +505,80 @@ HTTP 202 Accepted. The correlationId is returned immediately because the caller 
 - I1: `approvedBy` and `approvedByOid` persist on the request model
 - I2: Approval identity fields survive state transitions without loss
 - I3: Correlation chain identifier structure is sound (requestId, projectId, projectNumber)
+
+---
+
+## Prompt-05 Addendum: Accounting Workflow Compatibility and Contract Verification
+
+### Accounting Workflow Compatibility Verification
+
+**Q1: Does the current Accounting UI still map cleanly to the hardened backend contract?**
+
+Yes. The Accounting detail page calls `client.advanceState(requestId, 'ReadyToProvision', { projectNumber })` on approval (line 121 of `ProjectReviewDetailPage.tsx`). This maps directly to the `PATCH /project-setup-requests/{requestId}/state` endpoint which:
+- validates the transition via `isValidTransition()` and `isAuthorizedTransition()`
+- validates projectNumber format (`##-###-##`) and uniqueness (P2-03)
+- persists `approvedBy`/`approvedByOid` (P2-04)
+- auto-triggers the saga fire-and-forget (P2-02 frozen contract)
+
+The API client interface (`IProvisioningApiClient.advanceState`) correctly returns `Promise<IProjectSetupRequest>`, which is the updated request record including the new `approvedBy` fields. No API contract change is needed.
+
+**Q2: Is the `AwaitingExternalSetup` path backend-safe?**
+
+Yes. The backend allows `AwaitingExternalSetup → ReadyToProvision` as a valid controller transition (`CONTROLLER_TRANSITIONS` line 78 of `backend/functions/src/state-machine.ts`). The transition includes the same projectNumber validation, uniqueness check, and auto-trigger behavior as `UnderReview → ReadyToProvision`. The gap is purely UI: the Accounting detail page does not render a forward action when `request.state === 'AwaitingExternalSetup'`. This is a documented Phase 3 item (Phase 1 G-01).
+
+**Q3: Does the UI require a new explicit final-launch action?**
+
+No. Under the frozen P2-02 contract, the approval action (`advanceState → ReadyToProvision`) IS the launch action. The backend auto-triggers the saga. No separate "Start Provisioning" button is needed or expected. The success toast "Request approved — provisioning started." already accurately describes the auto-trigger behavior.
+
+**Q4: Are the current status banners, toasts, labels, and action names semantically correct?**
+
+| UI Element | Current Text | Semantic Accuracy |
+|-----------|-------------|-------------------|
+| Approve button | "Approve Request" | Correct — approval is the controller-facing action |
+| Approve toast | "Request approved — provisioning started." | Correct — auto-trigger fires immediately on approval |
+| Clarify button | "Request Clarification" | Correct |
+| Hold button | "Place on Hold" | Correct |
+| Route-to-Admin button | "Send to Admin" | Correct — navigation only, no state change |
+| ProjectNumber validation | "Project number must match format ##-###-## (e.g. 24-001-01)" | Correct |
+
+No PH6-era "launch" or "trigger provisioning" wording exists in the current Accounting UI. No corrections needed.
+
+**Q5: Do the `/project-review` routes still represent the right controller workflow surface?**
+
+Yes. The current route structure is:
+
+| Route | Component | Purpose |
+|-------|-----------|---------|
+| `/project-review` | `ProjectReviewQueuePage` | Filtered queue with tabs: Pending Review, Awaiting Re-Submission, Awaiting External Setup, Failed/Needs Routing |
+| `/project-review/$requestId` | `ProjectReviewDetailPage` | Structured review with actions: Approve, Clarify, Hold, Route to Admin |
+
+These routes cover the full controller review-and-approve workflow. System-owned states (`ReadyToProvision`, `Provisioning`, `Completed`) are correctly excluded from queue tabs. The route structure does not need Phase 2 changes.
+
+**Q6: What exact Phase 3 frontend work is required?**
+
+See "Required Phase 3 Frontend Follow-Ups" below.
+
+### Required Phase 3 Frontend Follow-Ups
+
+| ID | Item | Priority | Rationale |
+|----|------|----------|-----------|
+| F-01 | Add approve-from-hold action in Accounting detail page for `AwaitingExternalSetup` state | High | Backend supports it (P2-02 contract); UI gap blocks controller workflow for held requests (Phase 1 G-01) |
+| F-02 | Add provisioning status visibility for controllers post-approval | Medium | After approval, request leaves Accounting queue (system-owned states); controller has no post-approval status visibility in Accounting |
+| F-03 | Handle 409 CONFLICT response from uniqueness check in UI | Medium | Backend now returns 409 for duplicate projectNumber (P2-03); UI should display user-friendly error |
+| F-04 | Consider displaying `approvedBy` in request detail view | Low | Field now persisted (P2-04); useful for audit trail visibility |
+| F-05 | Consider adding `AwaitingExternalSetup` detail section explaining hold reason | Low | Currently just a state badge; no contextual detail about why request is held |
+
+### No-Go Issues Remaining
+
+**None.** The current Accounting surface is fully compatible with the hardened Phase 2 backend contract. All controller actions (approve, clarify, hold, route-to-admin) use `advanceState` which maps directly to the hardened `advanceRequestState` endpoint with transition validation, role authorization, projectNumber format+uniqueness, and auto-trigger.
+
+The only behavioral change visible to the Accounting surface is that duplicate projectNumber assignments now return 409 instead of succeeding silently. The `ApiError` class in the API client already captures HTTP status and error code, and the detail page's error handler displays the backend error message in an `HbcBanner`. This means the 409 CONFLICT response will be shown to the user without any frontend code change, though the message could be made more user-friendly in Phase 3 (F-03).
+
+### Verification Results
+
+| Command | Result |
+|---------|--------|
+| `pnpm --filter @hbc/spfx-accounting build` | Pass |
+| `pnpm --filter @hbc/spfx-accounting lint` | Pass |
+| `pnpm --filter @hbc/spfx-accounting test` | 26 tests pass (5 test files) |
+| `pnpm --filter @hbc/provisioning check-types` | Pass |
