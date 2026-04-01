@@ -354,6 +354,84 @@ describe('ProjectReviewDetailPage', () => {
     });
   });
 
+  // P3-03-001: Resolve Hold button visible for AwaitingExternalSetup state
+  it('"Resolve Hold" visible only when state is AwaitingExternalSetup', () => {
+    const awaitingRequest = createTestRequest({ requestId: 'req-1', state: 'AwaitingExternalSetup' });
+    seedListRequests([awaitingRequest]);
+
+    const { unmount } = renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [awaitingRequest],
+    });
+
+    expect(screen.getByRole('button', { name: 'Resolve Hold' })).toBeTruthy();
+    // Approve should NOT be visible for AwaitingExternalSetup
+    expect(screen.queryByRole('button', { name: 'Approve Request' })).toBeNull();
+    unmount();
+
+    const underReviewRequest = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });
+    seedListRequests([underReviewRequest]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [underReviewRequest],
+    });
+
+    expect(screen.queryByRole('button', { name: 'Resolve Hold' })).toBeNull();
+  });
+
+  // P3-03-002: Resolve Hold opens modal with project number field
+  it('"Resolve Hold" opens modal requiring project number', async () => {
+    const request = createTestRequest({ requestId: 'req-1', state: 'AwaitingExternalSetup' });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Resolve Hold' }));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('##-###-##')).toBeTruthy();
+    });
+
+    // Modal is open with project number field
+    expect(screen.getByText('External setup is complete. Assign a project number to approve this request and begin provisioning.')).toBeTruthy();
+
+    // Approve button should be disabled when project number is empty
+    const approveBtn = screen.getByRole('button', { name: 'Approve' });
+    expect(approveBtn).toHaveProperty('disabled', true);
+  });
+
+  // P3-03-003: Resolve Hold fires advanceState with ReadyToProvision and project number
+  it('"Resolve Hold" calls advanceState with ReadyToProvision and project number', async () => {
+    const request = createTestRequest({ requestId: 'req-1', state: 'AwaitingExternalSetup' });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Resolve Hold' }));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('##-###-##')).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('##-###-##'), { target: { value: '26-010-01' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+
+    await waitFor(() => {
+      expect(mockClient.advanceState).toHaveBeenCalledWith('req-1', 'ReadyToProvision', { projectNumber: '26-010-01' });
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/project-review' }));
+    });
+  });
+
   // G4-T03-014
   it('no retry/recovery actions in review surface', () => {
     const request = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });

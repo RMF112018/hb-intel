@@ -287,31 +287,19 @@ The only Admin interaction is a navigation link for `Failed` state. Ownership bo
 
 ## 9. Dead-End States
 
-### 9.1 AwaitingExternalSetup (CRITICAL)
+### 9.1 AwaitingExternalSetup — RESOLVED (P3-03)
 
-**Current state:**
-- Queue tab "Awaiting External Setup" shows requests in this state (line 33)
-- Detail page renders summary, banners, and history for this state
-- **No action panel renders** — `isUnderReview` (line 209) is `false` for `AwaitingExternalSetup`
-- The controller has no way to advance or resolve this request from the UI
+**Previous state:** Dead-end — no action panel rendered for `AwaitingExternalSetup`. Controller had no way to advance.
 
-**Backend contract:**
-- `AwaitingExternalSetup -> ReadyToProvision` is a valid controller transition
-- Requires `projectNumber` in `##-###-##` format (same as approval from `UnderReview`)
-- Same `advanceState()` endpoint, same validation
-
-**BIC config:**
-- `AwaitingExternalSetup` is controller-owned (BIC_ROLE_CONTROLLER)
-- `resolveIsBlocked()` returns `true` for this state
-- `resolveBlockedReason()` returns blocking message
-- `resolveExpectedAction()` returns "Complete external IT setup prerequisites"
-
-**Required fix:** Add a forward action (e.g., "Resolve from Hold" with projectNumber capture) when `request.state === 'AwaitingExternalSetup'`. This is the same pattern as the existing approval modal.
-
-- **Gap type:** live UI gap
-- **Impact:** controller dead-end, blocks workflow completion
-- **Priority:** P1
-- **Target prompt:** Prompt-03
+**Resolution (2026-04-01):**
+- Added "Resolve Hold" action button visible when `request.state === 'AwaitingExternalSetup'`
+- "Resolve Hold" opens a modal with `projectNumber` capture (same `##-###-##` format and validation as approval)
+- Calls `advanceState('ReadyToProvision', { projectNumber })` — identical backend contract as approval from `UnderReview`
+- Toast confirms "External setup complete — provisioning started." — aligned with auto-trigger semantics
+- Post-action: data refresh via `listRequests()` and navigation to queue
+- Updated `AwaitingExternalSetup` context text to include next-step guidance: "Resolve the hold when prerequisites are complete."
+- 3 new tests (P3-03-001, P3-03-002, P3-03-003) covering visibility, modal behavior, and API call
+- **Classification:** confirmed repo fact (gap closed), implementation applied
 
 ---
 
@@ -386,13 +374,12 @@ PH6 and earlier MVP planning documents are drift evidence only. They should not 
 
 ## 13. Prioritized Implementation Inventory
 
-### Priority 1 — AwaitingExternalSetup Forward Action (Prompt-03)
+### Priority 1 — AwaitingExternalSetup Forward Action (Prompt-03) — COMPLETE
 
-- **Gap type:** live UI gap
-- **Description:** Add a forward action from `AwaitingExternalSetup` state, using the same `advanceState('ReadyToProvision', { projectNumber })` pattern as approval from `UnderReview`
-- **Impact:** Eliminates the only controller dead-end; completes the workflow
-- **Backend contract:** Already supports this transition with projectNumber requirement
-- **Complexity:** Low — mirrors existing approval modal pattern
+- **Status:** COMPLETE (2026-04-01)
+- **Implementation:** Added "Resolve Hold" action with projectNumber capture modal for `AwaitingExternalSetup` state. Calls `advanceState('ReadyToProvision', { projectNumber })`. Updated context text with next-step guidance. 3 new tests.
+- **Dead-end eliminated:** Controller can now advance from `AwaitingExternalSetup → ReadyToProvision` with projectNumber, triggering auto-provisioning.
+- **No boundary violations:** No Admin/coordinator responsibilities added. No separate launch model created.
 
 ### Priority 2 — Queue and Detail Workflow Completion (Prompt-02) — COMPLETE
 
@@ -459,7 +446,7 @@ No blocking dependencies prevent Prompt-02 from proceeding.
 - `apps/accounting/src/utils/stateDisplayHelpers.ts` — state display mapping (27 lines)
 - `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx` — queue tests
 - `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx` — detail tests
-- `apps/accounting/package.json` — app manifest (version 00.000.013)
+- `apps/accounting/package.json` — app manifest (version 00.000.014)
 
 ### Backend and Shared Lifecycle Files
 - `backend/functions/src/functions/projectRequests/index.ts` — request lifecycle handler

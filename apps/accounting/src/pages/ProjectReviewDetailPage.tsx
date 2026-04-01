@@ -66,6 +66,7 @@ export function ProjectReviewDetailPage(): ReactNode {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
+  const [resolveHoldOpen, setResolveHoldOpen] = useState(false);
   const [holdOpen, setHoldOpen] = useState(false);
   const [clarifyOpen, setClarifyOpen] = useState(false);
   const [clarificationNote, setClarificationNote] = useState('');
@@ -119,6 +120,13 @@ export function ProjectReviewDetailPage(): ReactNode {
     if (!isProjectNumberValid) return;
     setApproveOpen(false);
     performAction('ReadyToProvision', { projectNumber: projectNumber.trim() }, 'Request approved — provisioning started.');
+    setProjectNumber('');
+  }, [performAction, projectNumber, isProjectNumberValid]);
+
+  const handleResolveHold = useCallback(() => {
+    if (!isProjectNumberValid) return;
+    setResolveHoldOpen(false);
+    performAction('ReadyToProvision', { projectNumber: projectNumber.trim() }, 'External setup complete — provisioning started.');
     setProjectNumber('');
   }, [performAction, projectNumber, isProjectNumberValid]);
 
@@ -208,6 +216,7 @@ export function ProjectReviewDetailPage(): ReactNode {
 
   const isSubmitted = request.state === 'Submitted';
   const isUnderReview = request.state === 'UnderReview';
+  const isAwaitingExternalSetup = request.state === 'AwaitingExternalSetup';
   const isFailed = request.state === 'Failed';
 
   return (
@@ -352,6 +361,19 @@ export function ProjectReviewDetailPage(): ReactNode {
         </HbcCard>
       )}
 
+      {/* ── Resolve Hold (AwaitingExternalSetup → ReadyToProvision) ── */}
+      {isAwaitingExternalSetup && (
+        <HbcCard>
+          <HbcTypography intent="heading3">Actions</HbcTypography>
+          <p>External prerequisites are complete. Assign a project number to approve and begin provisioning.</p>
+          <div className={styles.actionRow}>
+            <HbcButton variant="primary" onClick={() => setResolveHoldOpen(true)} disabled={actionLoading}>
+              Resolve Hold
+            </HbcButton>
+          </div>
+        </HbcCard>
+      )}
+
       {/* ── Post-approval lifecycle status ─────────────────────────── */}
       {request.state === 'ReadyToProvision' && (
         <HbcBanner variant="info">
@@ -416,6 +438,41 @@ export function ProjectReviewDetailPage(): ReactNode {
         }
       >
         <p>Approve this project setup request? It will be queued for provisioning.</p>
+        <HbcTextField
+          label="Project Number"
+          value={projectNumber}
+          onChange={setProjectNumber}
+          placeholder="##-###-##"
+          required
+          validationMessage={
+            projectNumber.length > 0 && !isProjectNumberValid
+              ? 'Project number must match format ##-###-## (e.g. 24-001-01)'
+              : undefined
+          }
+        />
+      </HbcModal>
+
+      {/* ── Resolve Hold Modal with Project Number ─────────────────── */}
+      <HbcModal
+        open={resolveHoldOpen}
+        onClose={() => { setResolveHoldOpen(false); setProjectNumber(''); }}
+        title="Resolve Hold"
+        footer={
+          <div className={styles.modalFooter}>
+            <HbcButton variant="secondary" onClick={() => { setResolveHoldOpen(false); setProjectNumber(''); }}>
+              Cancel
+            </HbcButton>
+            <HbcButton
+              variant="primary"
+              onClick={handleResolveHold}
+              disabled={!isProjectNumberValid || actionLoading}
+            >
+              Approve
+            </HbcButton>
+          </div>
+        }
+      >
+        <p>External setup is complete. Assign a project number to approve this request and begin provisioning.</p>
         <HbcTextField
           label="Project Number"
           value={projectNumber}

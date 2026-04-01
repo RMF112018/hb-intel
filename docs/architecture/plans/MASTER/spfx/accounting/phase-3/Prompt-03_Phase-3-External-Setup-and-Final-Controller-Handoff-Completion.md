@@ -88,3 +88,20 @@ The report update must include:
 ## Completion Standard
 
 This prompt is complete only when the controller has a coherent, contract-safe way to get from `AwaitingExternalSetup` through the final handoff without inventing a stale launch model.
+
+---
+
+## Execution Record
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Changes:**
+  - Detail page: Added "Resolve Hold" action card and modal for `AwaitingExternalSetup` state with `projectNumber` capture (`##-###-##` format, client-validated)
+  - Calls `advanceState('ReadyToProvision', { projectNumber })` — same backend contract as approval
+  - Toast: "External setup complete — provisioning started." — aligned with auto-trigger semantics
+  - Updated `stateDisplayHelpers.ts` AwaitingExternalSetup context text with next-step guidance
+  - Tests: 3 new tests (P3-03-001, P3-03-002, P3-03-003)
+- **Dead-end resolved:** Controller can now advance `AwaitingExternalSetup → ReadyToProvision` from the UI
+- **No separate launch model created:** Uses identical `advanceState` pattern as approval
+- **Verification:** lint clean, build passed (tsc + vite), 32 tests passed (5 files)
+- **No blockers** for Prompt-04

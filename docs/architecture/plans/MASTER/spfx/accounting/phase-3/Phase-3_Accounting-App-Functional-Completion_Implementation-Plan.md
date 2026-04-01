@@ -240,3 +240,9 @@ Phase 3 is complete only when all of the following are true:
 - **Status:** COMPLETE
 - **Date:** 2026-04-01
 - **Summary:** Fixed `Submitted` state invisibility in queue (added to "Pending Review" tab filter) and added "Begin Review" action on detail page for `Submitted → UnderReview` transition. 3 new tests. No boundary violations. No blockers for Prompt-03.
+
+### Prompt-03 — External Setup and Final Controller Handoff Completion
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Summary:** Resolved critical `AwaitingExternalSetup` dead-end by adding "Resolve Hold" action with projectNumber capture modal. Uses identical `advanceState('ReadyToProvision', { projectNumber })` backend contract as approval. Updated context text with next-step guidance. 3 new tests. No separate launch model created. No blockers for Prompt-04.

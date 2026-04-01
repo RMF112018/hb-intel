@@ -14,7 +14,7 @@ export const STATE_CONTEXT_TEXT: Record<ProjectSetupRequestState, string> = {
   Submitted: 'This request has been submitted and is awaiting review.',
   UnderReview: 'This request is under review by the controller.',
   NeedsClarification: 'Clarification has been requested from the requester.',
-  AwaitingExternalSetup: 'This request is on hold pending external IT or security setup.',
+  AwaitingExternalSetup: 'This request is on hold pending external IT or security setup. Resolve the hold when prerequisites are complete.',
   ReadyToProvision: 'This request has been approved and is queued for site provisioning.',
   Provisioning: 'The project site is being provisioned.',
   Completed: 'The project site has been provisioned and is ready to use.',
