@@ -628,14 +628,19 @@ This returns a token with the correct audience. If the app registration is not s
 
 **How to verify the setup is correct:**
 1. Run the command above (you need Azure CLI installed and signed in to the correct tenant)
-2. Decode the returned token at https://jwt.ms
-3. Confirm the `aud` claim matches your Application ID URI
-4. Confirm the `iss` claim contains your tenant ID
-5. Confirm the `upn` claim shows your user principal name
+2. Decode the returned token using the repo's inspection tool: `./tools/inspect-token-claims.sh`
+   - Alternatively, decode at https://jwt.ms
+3. Confirm the `aud` claim matches your Application ID URI (e.g., `api://func-hb-intel-staging`)
+4. Confirm the `ver` claim is `1.0` (v1 token — expected when `accessTokenAcceptedVersion` is null or 1 in the app registration manifest)
+5. Confirm the `iss` claim contains your tenant ID
+6. Confirm the `upn` claim shows your user principal name
+
+> **Important:** The backend expects the `aud` claim to be an Application ID URI (`api://...`), not a bare client ID GUID. This is the standard format for v1 tokens. If the app registration's `accessTokenAcceptedVersion` manifest property is changed to `2`, Entra will issue v2 tokens with a bare GUID audience, and the backend will reject them. Do not change `accessTokenAcceptedVersion` without coordinating with the development team.
 
 **Common mistakes:**
 - Using an ARM-scoped token (audience `https://management.azure.com/`) instead of an API-scoped token — the backend will reject it with a 401 error
 - The Application ID URI not matching what the backend expects (e.g., `api://func-hb-intel-staging` vs. `api://func-hb-intel`)
+- Changing `accessTokenAcceptedVersion` to 2 in the app registration manifest — this changes the token `aud` format from Application ID URI to bare GUID, breaking validation
 
 ---
 

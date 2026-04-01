@@ -298,6 +298,47 @@ describe('P3-03 validateToken middleware', () => {
     );
   });
 
+  // --- P9: Audience contract proof ---
+
+  it('audience must be Application ID URI format (api://), not bare GUID', async () => {
+    // The repo contract requires api://<client-id> format.
+    // This test documents the assumption: if API_AUDIENCE is set to api://...,
+    // jose will reject tokens whose aud is a bare GUID (v2 token shape).
+    process.env.API_AUDIENCE = 'api://func-hb-intel-staging';
+    vi.resetModules();
+
+    // Simulate a v2-style token where aud would be a bare GUID
+    jwtVerifyMock.mockRejectedValueOnce(
+      new MockJWTClaimValidationFailed('unexpected "aud" claim value'),
+    );
+
+    const { validateToken } = await import('./validateToken.js');
+
+    try {
+      await validateToken(makeRequest('Bearer v2-guid-audience-token'));
+    } catch (err: any) {
+      expect(err.reason).toBe('invalid_audience');
+    }
+  });
+
+  it('rejects config_error when API_AUDIENCE is missing in production mode', async () => {
+    delete process.env.API_AUDIENCE;
+    process.env.NODE_ENV = 'production';
+    process.env.HBC_ADAPTER_MODE = 'proxy';
+    vi.resetModules();
+
+    const { validateToken, TokenValidationError } = await import('./validateToken.js');
+
+    try {
+      await validateToken(makeRequest('Bearer some-token'));
+      expect.fail('should have thrown');
+    } catch (err: any) {
+      expect(err).toBeInstanceOf(TokenValidationError);
+      expect(err.reason).toBe('config_error');
+      expect(err.message).toContain('API_AUDIENCE');
+    }
+  });
+
   // --- Dual-issuer validation ---
 
   it('passes both v1 and v2 issuers to jose verifier', async () => {

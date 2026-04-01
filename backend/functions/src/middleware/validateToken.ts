@@ -69,7 +69,26 @@ function resolveTenantId(): string {
  * client ID with the app-registration client ID, which breaks in
  * split-identity deployments.
  *
+ * **Audience contract (P9 proof):**
+ * The expected value is an Application ID URI (e.g., `api://<client-id>`),
+ * NOT a bare client ID GUID. This is correct because:
+ *
+ * 1. The IT setup guide configures the app registration with an `api://`
+ *    Application ID URI (IT-Department-Setup-Guide.md §8.2).
+ * 2. The SPFx frontend passes this URI to `getToken(audience)`.
+ * 3. Entra ID issues the token with `aud` matching the Application ID URI
+ *    when the app registration's `accessTokenAcceptedVersion` is null or 1
+ *    (the Entra default for portal-created registrations).
+ *
+ * If the app registration's `accessTokenAcceptedVersion` were changed to 2,
+ * Entra would issue v2 tokens with `aud` = bare client ID GUID, causing
+ * audience validation to fail. This is intentional — the validator enforces
+ * the documented deployment posture.
+ *
+ * Use `tools/inspect-token-claims.sh` to verify the live token `aud` shape.
+ *
  * @see docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-3/Phase-3_API-Token-Contract.md
+ * @see docs/architecture/plans/MASTER/spfx/project-setup/estimating/phase-9/SPFx-Token-Audience-Contract-Proof.md
  */
 function resolveApiAudience(): string {
   const explicit = process.env.API_AUDIENCE;
