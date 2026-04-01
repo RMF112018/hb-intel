@@ -581,3 +581,47 @@ describe('P6-01: Backend submission validation — wizard contract parity', () =
     expect(errors.length).toBeGreaterThanOrEqual(13);
   });
 });
+
+// ── G. P2-02: Launch contract — auto-trigger prerequisites ────────────────
+
+import { PROJECT_NUMBER_PATTERN } from '../index.js';
+
+describe('P2-02: Launch contract — auto-trigger prerequisites', () => {
+  it('G1: UnderReview → ReadyToProvision is a valid controller transition (auto-trigger prerequisite)', () => {
+    expect(isValidTransition('UnderReview', 'ReadyToProvision')).toBe(true);
+    expect(isAuthorizedTransition('controller', 'UnderReview', 'ReadyToProvision')).toBe(true);
+  });
+
+  it('G2: AwaitingExternalSetup → ReadyToProvision is a valid controller transition', () => {
+    expect(isValidTransition('AwaitingExternalSetup', 'ReadyToProvision')).toBe(true);
+    expect(isAuthorizedTransition('controller', 'AwaitingExternalSetup', 'ReadyToProvision')).toBe(true);
+  });
+
+  it('G3: submitter cannot advance to ReadyToProvision (launch is controller-only)', () => {
+    expect(isAuthorizedTransition('submitter', 'UnderReview', 'ReadyToProvision')).toBe(false);
+  });
+
+  it('G4: system role is authorized for ReadyToProvision → Provisioning (saga reconciliation)', () => {
+    expect(isAuthorizedTransition('system', 'ReadyToProvision', 'Provisioning')).toBe(true);
+  });
+
+  it('G5: PROJECT_NUMBER_PATTERN accepts valid ##-###-## format', () => {
+    expect(PROJECT_NUMBER_PATTERN.test('25-001-01')).toBe(true);
+    expect(PROJECT_NUMBER_PATTERN.test('24-244-99')).toBe(true);
+    expect(PROJECT_NUMBER_PATTERN.test('30-100-01')).toBe(true);
+  });
+
+  it('G6: PROJECT_NUMBER_PATTERN rejects invalid formats', () => {
+    expect(PROJECT_NUMBER_PATTERN.test('25-1-1')).toBe(false);
+    expect(PROJECT_NUMBER_PATTERN.test('2-001-01')).toBe(false);
+    expect(PROJECT_NUMBER_PATTERN.test('25-001-1')).toBe(false);
+    expect(PROJECT_NUMBER_PATTERN.test('abc-def-gh')).toBe(false);
+    expect(PROJECT_NUMBER_PATTERN.test('')).toBe(false);
+    expect(PROJECT_NUMBER_PATTERN.test('25001-01')).toBe(false);
+  });
+
+  it('G7: admin can perform any transition including ReadyToProvision', () => {
+    expect(isAuthorizedTransition('admin', 'UnderReview', 'ReadyToProvision')).toBe(true);
+    expect(isAuthorizedTransition('admin', 'AwaitingExternalSetup', 'ReadyToProvision')).toBe(true);
+  });
+});

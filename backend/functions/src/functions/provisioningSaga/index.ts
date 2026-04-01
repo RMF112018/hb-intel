@@ -17,6 +17,21 @@ import {
 import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
 import { runTimerFullSpec } from '../timerFullSpec/handler.js';
 
+/**
+ * P2-02 Launch Contract: Direct provisioning endpoint.
+ *
+ * This is a secondary/operational entry point for provisioning. The primary
+ * controller-facing launch path is:
+ *   1. Controller approves via advanceRequestState → ReadyToProvision
+ *   2. Backend auto-triggers SagaOrchestrator.execute() fire-and-forget
+ *
+ * This direct endpoint exists for:
+ *   - Admin recovery/re-provisioning outside the normal request lifecycle
+ *   - Service principal or automation-driven provisioning
+ *   - Operational scenarios where the request lifecycle is not applicable
+ *
+ * Requires admin role (P2-02). Does not validate request state.
+ */
 app.http('provisionProjectSite', {
   methods: ['POST'],
   authLevel: 'anonymous',
@@ -28,6 +43,11 @@ app.http('provisionProjectSite', {
     // P9-G5-07: Delegated scope enforcement (L2).
     const scopeDenied = requireDelegatedScope(auth.claims, requestId);
     if (scopeDenied) return scopeDenied;
+
+    // P2-02: Direct provisioning is an admin/operational entry point.
+    // Controller-facing provisioning is triggered via advanceRequestState → ReadyToProvision auto-trigger.
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     try {
       const body = (await request.json()) as IProvisionSiteRequest;

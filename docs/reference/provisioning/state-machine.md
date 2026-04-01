@@ -21,13 +21,14 @@
 |---|---|---|
 | `Submitted` | `UnderReview` | Controller |
 | `UnderReview` | `NeedsClarification` | Controller |
+| `UnderReview` | `ReadyToProvision` | Controller (requires valid projectNumber; auto-triggers saga) |
 | `UnderReview` | `AwaitingExternalSetup` | Controller |
 | `NeedsClarification` | `UnderReview` | Controller |
-| `AwaitingExternalSetup` | `ReadyToProvision` | Controller (requires valid projectNumber) |
-| `ReadyToProvision` | `Provisioning` | System |
-| `Provisioning` | `Completed` | System |
-| `Provisioning` | `Failed` | System |
-| `Failed` | `Provisioning` | Admin (via retry) |
+| `AwaitingExternalSetup` | `ReadyToProvision` | Controller (requires valid projectNumber; auto-triggers saga) |
+| `ReadyToProvision` | `Provisioning` | System (saga reconciliation) |
+| `Provisioning` | `Completed` | System (saga success) |
+| `Provisioning` | `Failed` | System (saga compensation) |
+| `Failed` | `UnderReview` | Admin/Controller (reopen for correction) |
 
 ## Provisioning Saga Overall Status Values
 
@@ -36,3 +37,17 @@
 ## Saga Step Status Values
 
 `NotStarted` | `InProgress` | `Completed` | `Failed` | `Skipped` | `DeferredToTimer`
+
+## Launch Contract (P2-02)
+
+The controller-facing provisioning launch contract is:
+
+1. Controller approves request via `advanceState(requestId, 'ReadyToProvision', { projectNumber })`
+2. Backend validates transition, role authorization, and projectNumber format
+3. Backend auto-triggers `SagaOrchestrator.execute()` fire-and-forget
+4. Saga reconciles request to `Provisioning` via `reconcileRequestState()`
+
+Other provisioning entry points:
+- **Direct API** (`POST provision-project-site`): Admin-only operational endpoint; does not validate request state
+- **Admin retry** (`POST provisioning-retry/{projectId}`): Re-executes saga from last successful step; does not transition request state
+- **Timer** (Step 5 deferred): Cron-triggered overnight retry for deferred web-part installations

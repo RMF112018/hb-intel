@@ -62,3 +62,15 @@ See: [Notification Event Matrix](./notification-event-matrix.md) for the complet
 
 ## Retry Policy
 Each step uses `withRetry` with up to 3 attempts and exponential backoff (2s, 4s, 8s). Transient errors (HTTP 429, throttle, network reset) are retried. Non-transient errors (400, 403, 404) fail immediately.
+
+## Launch Semantics (P2-02)
+
+The saga can be triggered through three entry points:
+
+| Entry Point | Trigger | Auth | Request State Validation |
+|------------|---------|------|------------------------|
+| Controller approval auto-trigger | `advanceRequestState` sets `ReadyToProvision` | Controller/Admin role | Yes — must be valid transition from current state |
+| Direct provisioning endpoint | `POST provision-project-site` | Admin role + delegated scope | No — caller provides metadata directly |
+| Admin retry | `POST provisioning-retry/{projectId}` | Admin role + delegated scope | No — re-executes from failed run |
+
+The controller approval auto-trigger is the primary controller-facing launch path. The direct endpoint and admin retry are secondary/operational paths.

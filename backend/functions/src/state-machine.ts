@@ -67,7 +67,16 @@ export function resolveRequestRole(
 }
 
 /**
- * Transitions that require controller or admin authority.
+ * P2-02 Launch Contract: Controller transitions.
+ *
+ * ReadyToProvision is the controller-facing launch trigger point.
+ * When a controller advances a request to ReadyToProvision (with projectNumber),
+ * the backend auto-triggers the provisioning saga. The saga then reconciles
+ * the request to Provisioning via reconcileRequestState().
+ *
+ * AwaitingExternalSetup → ReadyToProvision is a valid controller transition
+ * in this list but is NOT currently exposed in the Accounting UI (Phase 1 G-01).
+ *
  * Submitters may only perform NeedsClarification → UnderReview (resubmit).
  */
 const CONTROLLER_TRANSITIONS: Array<[ProjectSetupRequestState, ProjectSetupRequestState]> = [

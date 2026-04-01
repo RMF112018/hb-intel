@@ -324,3 +324,38 @@ See Q10 above. Summary:
 | `pnpm --filter @hbc/provisioning check-types` | Pass |
 
 No type errors. No test failures. 3 skipped tests are pre-existing (not introduced by this audit).
+
+---
+
+## Prompt-02 Addendum: Launch Contract Remediation
+
+**Chosen Contract:** Path A — Reconcile Around Current Repo Truth
+
+**Rationale:** The current auto-trigger from `ReadyToProvision` is the correct controller-facing launch contract. It is tested (860 tests pass), well-integrated with role authorization, and already the only controller-accessible path. Path B (lifecycle reversal) would require broad changes with no clear benefit.
+
+**Changes Made:**
+1. Added `requireAdmin` to `provisionProjectSite` endpoint — prevents non-admin users from triggering provisioning directly
+2. Added contract classification comments to auto-trigger, direct endpoint, and CONTROLLER_TRANSITIONS
+3. Fixed `state-machine.md`: corrected `Failed → Provisioning` to `Failed → UnderReview`; added missing `UnderReview → ReadyToProvision`; added Launch Contract section
+4. Added launch semantics to `saga-steps.md`
+5. Added tests: launch contract prerequisites (G1-G7) covering auto-trigger transition validity, role authorization, projectNumber format validation
+6. Exported `PROJECT_NUMBER_PATTERN` from `projectRequests/index.ts` for test access
+
+**Entry Point Classification:**
+
+| Entry Point | Classification | Auth | Intended Use |
+|------------|---------------|------|-------------|
+| Auto-trigger via advanceRequestState | Primary (controller-facing) | Controller/Admin role | Normal workflow approval |
+| POST provision-project-site | Secondary (operational) | Admin role (P2-02) | Admin recovery, automation |
+| POST provisioning-retry/{projectId} | Secondary (recovery) | Admin role | Failed run re-execution |
+| Timer (Step 5) | System (automated) | System | Deferred web-part retry |
+
+**Compatibility Consequences:**
+- Accounting: no change (already uses advanceState which triggers auto-launch)
+- Estimating: no change (does not call provisioning directly)
+- Admin: provisionProjectSite now requires admin role (already required for other admin endpoints)
+- Direct API callers: must now have admin role to call provisionProjectSite
+
+**Stale Docs Updated:**
+- state-machine.md: Fixed incorrect `Failed → Provisioning` transition; added missing `UnderReview → ReadyToProvision`; added Launch Contract section
+- saga-steps.md: Added launch semantics classification

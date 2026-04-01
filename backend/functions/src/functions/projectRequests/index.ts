@@ -21,7 +21,7 @@ import { withTelemetry } from '../../utils/withTelemetry.js';
 import { isPrivileged, checkOwnership } from '../../middleware/authorization.js';
 import { SagaOrchestrator } from '../provisioningSaga/saga-orchestrator.js';
 
-const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
+export const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
 
 // ── Validation helpers ──────────────────────────────────────────────────
 
@@ -348,7 +348,12 @@ app.http('advanceRequestState', {
       role,
     });
 
-    // D-PH6-08 automatic provisioning handoff: fire-and-forget saga on approval.
+    // D-PH6-08, P2-02: Controller-facing provisioning launch contract.
+    // When controller approval advances request to ReadyToProvision, the backend
+    // auto-triggers the provisioning saga fire-and-forget. This is the primary
+    // controller-facing launch path. The saga will reconcile the request state
+    // to Provisioning via reconcileRequestState(). No separate "launch" action
+    // is required or expected from the controller.
     if (body.newState === 'ReadyToProvision') {
       const existingStatus = await services.tableStorage.getProvisioningStatus(existing.projectId);
       if (!existingStatus || existingStatus.overallStatus === 'Failed') {
