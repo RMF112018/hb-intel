@@ -1,10 +1,11 @@
 # Accounting Phase 3 — Functional Completion Report
 
 **Phase:** Phase 3 — Accounting App Functional Completion  
-**Prompt:** Prompt-01 (Repo-Truth Accounting Surface Audit)  
+**Prompts:** Prompt-01 through Prompt-06  
 **Date:** 2026-04-01  
-**Classification:** Audit Report  
-**Depends on:** Phase 1 workflow/boundary freeze, Phase 2 backend lifecycle hardening
+**Classification:** Final Readiness Report  
+**Depends on:** Phase 1 workflow/boundary freeze, Phase 2 backend lifecycle hardening  
+**Status:** PHASE COMPLETE
 
 ---
 
@@ -420,32 +421,91 @@ PH6 and earlier MVP planning documents are drift evidence only. They should not 
 - **Out-of-scope note:** Estimating app (`apps/estimating/src/components/project-setup/RetrySection.tsx` line 88) has the same `/provisioning-oversight` bug — should be tracked for separate fix
 - **Classification:** confirmed repo fact (routing bug), implementation applied (fix + test)
 
-### Priority 5 — Documentation Reconciliation (Prompt-06)
+### Priority 5 — Documentation Reconciliation (Prompt-06) — COMPLETE
 
-- **Gap type:** doc drift
-- **Items:**
-  - Fix `controller-review-surface.md` line 49: `HbcEmptyState` -> `HbcSmartEmptyState`
-  - Update controller-review-surface.md to document `AwaitingExternalSetup` forward action (after Prompt-03 implements it)
-  - Reconcile any other drift discovered during Prompts 02-05
-  - Update `current-state-map.md` if Phase 3 changes affect its Accounting entries
-  - Produce final Phase 3 readiness report
+- **Status:** COMPLETE (2026-04-01)
+- **Reconciled in `controller-review-surface.md`:**
+  - Fixed `HbcEmptyState` → `HbcSmartEmptyState` with context-aware messaging description
+  - Added `Submitted` to "Pending Review" tab filter
+  - Added `Project #` column to queue columns table
+  - Added "Begin Review" action for `Submitted` state
+  - Added "Resolve Hold" action for `AwaitingExternalSetup` state with projectNumber capture
+  - Fixed "Route to Admin" to show correct path `/provisioning-failures?projectId=`
+  - Added `Begin Review` and `Resolve Hold` API method mapping
+  - Added Lifecycle Banners section (NeedsClarification, AwaitingExternalSetup, ReadyToProvision, Provisioning, Completed)
+  - Updated Operational Detail section (Approved By, Completed timestamp)
+  - Added `@hbc/smart-empty-state` to dependencies table
+  - Updated overview to include begin review and resolve holds
+- **Final readiness report produced** (this document)
+- **Classification:** confirmed doc drift (reconciled)
 
 ---
 
-## 14. Blockers and Unresolved Items
+## 14. Blockers and Unresolved Items — Final Status
 
-| Item | Status | Impact |
-|------|--------|--------|
-| AwaitingExternalSetup forward action | Gap — no blocker | Prompt-03 can implement using existing patterns |
-| Backend contract for AwaitingExternalSetup -> ReadyToProvision | Already implemented | No backend changes needed |
+| Item | Status | Resolution |
+|------|--------|-----------|
+| AwaitingExternalSetup forward action | RESOLVED (P3-03) | "Resolve Hold" action added with projectNumber capture |
+| Backend contract for AwaitingExternalSetup → ReadyToProvision | Already implemented | No backend changes needed |
 | projectNumber uniqueness enforcement | Already implemented (P2-03) | Backend returns 409 on duplicate |
-| Admin app provisioning-oversight route | Assumed present | Prompt-05 should verify |
+| Admin cross-app route path | FIXED (P3-05) | Changed `/provisioning-oversight` → `/provisioning-failures` |
+| Timeline mid-lifecycle timestamps | DATA MODEL CONSTRAINT (P3-04) | `IProjectSetupRequest` lacks `reviewStartedAt`/`approvedAt`; approval info shown in Operational Detail instead |
+| Estimating app same route bug | OUT OF SCOPE | `apps/estimating/src/components/project-setup/RetrySection.tsx` line 88 uses `/provisioning-oversight` — tracked for separate fix |
 
-No blocking dependencies prevent Prompt-02 from proceeding.
+No blocking items remain for Phase 3.
 
 ---
 
-## 15. Evidence Paths
+## 15. Phase 3 Scope Classification
+
+| Objective | Status | Evidence |
+|-----------|--------|---------|
+| Queue and detail flow complete for controller role | COMPLETE | Submitted visibility (P3-02), Begin Review (P3-02), full action matrix verified |
+| AwaitingExternalSetup is no longer a dead-end | COMPLETE | Resolve Hold action with projectNumber capture (P3-03) |
+| Controller wording aligned with backend handoff | COMPLETE | Auto-trigger messaging verified (P3-01), banners aligned (P3-04) |
+| Controller-facing status and audit context credible | COMPLETE | Lifecycle banners (P3-04), BIC detail, timeline, audit trail all present |
+| Failure cases route cleanly to Admin | COMPLETE | Route path fixed (P3-05), boundary verified, degradation tested |
+| Docs updated to match repo truth | COMPLETE | controller-review-surface.md fully reconciled (P3-06) |
+| Final readiness report exists | COMPLETE | This document |
+
+---
+
+## 16. Remaining Non-Phase-3 Items
+
+| Item | Classification | Owner |
+|------|---------------|-------|
+| Estimating app `/provisioning-oversight` route bug | Separate bug fix | Estimating surface |
+| Timeline enrichment with mid-lifecycle timestamps | Data model enhancement | Backend / models package |
+| Host, tenant, deployment configuration | Infrastructure | DevOps |
+| Admin recovery implementation hardening | Phase 4+ scope | Admin surface |
+| Broad workspace validation | Release gate | CI/CD |
+
+---
+
+## 17. Final Readiness Assessment
+
+**Is the controller workflow functionally complete end to end?** YES.
+
+The Accounting controller surface now supports the full Project Setup review lifecycle:
+
+1. **Submitted** → Controller sees the request in "Pending Review" tab and can "Begin Review"
+2. **UnderReview** → Controller can Approve (with projectNumber), Request Clarification, or Place on Hold
+3. **NeedsClarification** → Warning banner explains the requester must respond; controller waits
+4. **AwaitingExternalSetup** → Warning banner with guidance; controller can "Resolve Hold" (with projectNumber) when prerequisites are complete
+5. **ReadyToProvision** → Info banner confirms provisioning is starting automatically (backend auto-trigger)
+6. **Provisioning** → Info banner shows provisioning in progress
+7. **Completed** → Success banner with site URL link
+8. **Failed** → "Send to Admin" routes to `/provisioning-failures?projectId=` with graceful degradation when admin URL is not configured
+
+**Are there any remaining dead-end states?** NO. All controller-owned states have forward actions.
+
+**Is boundary discipline intact?** YES. No Admin recovery, coordinator retry, or requester response actions exist in Accounting.
+
+**Go-forward recommendation:** The Accounting controller surface is functionally ready for later hardening phases. No Phase 3 scope items remain open.
+
+---
+
+## 18. Evidence Paths
 
 ### Accounting Surface Files
 - `apps/accounting/src/router/routes.ts` — route definitions (5 routes)
@@ -462,7 +522,7 @@ No blocking dependencies prevent Prompt-02 from proceeding.
 - `packages/provisioning/src/bic-config.ts` — BIC ownership and action mapping
 
 ### Living Reference Docs
-- `docs/reference/spfx-surfaces/controller-review-surface.md` — controller queue/review spec (minor drift at line 49)
+- `docs/reference/spfx-surfaces/controller-review-surface.md` — controller queue/review spec (reconciled in P3-06)
 - `docs/reference/spfx-surfaces/admin-recovery-boundary.md` — Admin boundary spec
 - `docs/reference/spfx-surfaces/coordinator-visibility-spec.md` — coordinator visibility spec
 - `docs/reference/spfx-surfaces/responsive-failure-catalog.md` — failure mode catalog
