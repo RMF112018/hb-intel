@@ -73,7 +73,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-08 | Workload and App-Only Authorization | **Complete** | 2026-04-01 | Workload model documented, 21 tests, timer paths confirmed identity-free |
 | 1-09 | Frontend SPFx Contract and Diagnostics | **Complete** | 2026-04-01 | Verified: frontend already aligned — no code changes needed |
 | 1-10 | Telemetry, Break-Glass, and Auditability | **Complete** | 2026-04-01 | emitAuthorizationTelemetry() + authz.break_glass event; 8 new tests |
-| 1-11 | Tests, Release Gates, and Security Hardening | Not started | — | — |
+| 1-11 | Tests, Release Gates, and Security Hardening | **Complete** | 2026-04-01 | 6 release gates (19 assertions), regression-proof for all Gap 5 changes |
 | 1-12 | Documentation, Cutover, and Rollback | Not started | — | — |
 | 1-13 | Final Reconciliation and Closure | Not started | — | — |
 
@@ -185,6 +185,14 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Modified | `backend/functions/src/state-machine.test.ts` — 4 break-glass telemetry tests |
 | Updated | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Workload-and-Break-Glass-Model.md` — replaced deferred §3.4 with implemented telemetry contract |
 | Modified | `backend/functions/package.json` — version bump `0.0.106` → `0.0.107` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-11 (P9-G5-11)
+
+| Action | File |
+|--------|------|
+| Created | `backend/functions/src/test/authz-release-gates.test.ts` — 6 release gate suites with 19 static-analysis assertions |
+| Modified | `backend/functions/package.json` — version bump `0.0.107` → `0.0.108` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -403,6 +411,32 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Break-glass behavior is explicit, role-based, and distinguishable from ordinary admin access
 - [x] Telemetry contract documented in break-glass model doc with event properties and emission point
 
+### Prompt 1-11 (P9-G5-11)
+
+**Scope:** Release gates — static-analysis regression tests proving the Gap 5 authorization model is enforced.
+
+**Verification results:**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 78 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 55 files passed, 825 tests passed, 3 skipped (was 54 files / 806 tests — 19 new release gate assertions)
+
+**Release gates implemented (6 suites, 19 assertions):**
+
+| Gate | What It Proves | Assertions |
+|------|---------------|-----------|
+| G5-Gate-1 | Request lifecycle does not use env-var UPN authorization | 3 — state-machine.ts and projectRequests/index.ts free of ADMIN_UPNS/CONTROLLER_UPNS; resolveRequestRole accepts IValidatedClaims |
+| G5-Gate-2 | All provisioning routes enforce delegated scope | 4 — requireDelegatedScope imported and called in every app.http route; no inline admin role checks remain |
+| G5-Gate-3 | Shared policy engine is the single authorization source | 4 — canonical role constants, oid-first ownership, telemetry helper exported; signalr uses shared ADMIN_ROLES |
+| G5-Gate-4 | Stable identity (oid) fields present in handlers | 4 — submittedByOid, completedByOid, triggeredByOid captured; table storage persists oid fields |
+| G5-Gate-5 | Token validation supports app-only tokens | 2 — IValidatedClaims includes scp/idtyp; validateToken relaxes upn for app-only |
+| G5-Gate-6 | Break-glass telemetry wired in role resolution | 2 — isBreakGlass + emitAuthorizationTelemetry in state-machine; optional logger param |
+
+**Acceptance criteria status:**
+- [x] Repo truth has machine-checkable proof that the new authorization model is enforced
+- [x] Regression to env-based runtime authorization would fail Gate 1 and Gate 2
+- [x] Test evidence is specific enough to support architecture and release decisions
+
 ---
 
 ## Version History
@@ -419,3 +453,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 3.2 | 2026-04-01 | P9-G5-08 | Workload and break-glass model — timer identity independence confirmed, execution paths classified, 21 workload authorization tests |
 | 3.3 | 2026-04-01 | P9-G5-09 | Frontend SPFx contract verification — all 7 frontend files confirmed aligned, no stale auth references, no code changes needed |
 | 4.0 | 2026-04-01 | P9-G5-10 | Telemetry and break-glass auditability — emitAuthorizationTelemetry() + authz.break_glass event, 8 new tests |
+| 4.1 | 2026-04-01 | P9-G5-11 | Release gates — 6 static-analysis gate suites with 19 assertions proving Gap 5 model enforced |
