@@ -222,12 +222,14 @@ The saga orchestrator validates all provisioning prerequisites at execution time
 | App Catalog URL | `SHAREPOINT_APP_CATALOG_URL` | **Required** — Step 5 SPFx install | DevOps |
 | SPFx App Package ID | `HB_INTEL_SPFX_APP_ID` | **Required** — Step 5 SPFx install | DevOps |
 | OpEx Manager UPN | `OPEX_MANAGER_UPN` | **Required** — Step 6 Leaders group membership | Business |
+| Sites.Selected Grant Workflow | `SITES_SELECTED_GRANT_CONFIRMED=true` | **Required** (when Sites.Selected active) — per-site grant workflow (Option A2) confirmed | IT Admin |
 
 **Staging workflow:**
 1. Deploy the function app with `HBC_ADAPTER_MODE=proxy`.
 2. Confirm IT has granted `Group.ReadWrite.All` to the Managed Identity (see IT-Department-Setup-Guide.md §8.4).
 3. Set `GRAPH_GROUP_PERMISSION_CONFIRMED=true` in the Function App configuration.
-4. Verify all other staging gates via a test provisioning run.
+4. If using Sites.Selected (default), confirm the per-site grant workflow (Option A2) is operational and set `SITES_SELECTED_GRANT_CONFIRMED=true`.
+5. Verify all other staging gates via a test provisioning run.
 
 ### Phase 6.13 Timer Trigger Configuration (D-PH6-13)
 

@@ -73,6 +73,12 @@ This model is acceptable for Wave 0 pilot because:
 - Manual verification provides a learning period for IT/Security
 - No privileged automation identity is required
 
+### Operational Gate
+
+Set `SITES_SELECTED_GRANT_CONFIRMED=true` in the Function App environment after IT confirms the manual grant workflow is operational. The provisioning saga validates this gate at execution time and will fail fast with a clear error if the grant workflow has not been acknowledged. See `validate-config.ts` → `validateProvisioningPrerequisites()`.
+
+The saga also emits a `SiteCreated.GrantRequired` telemetry event in Application Insights after each new site is created under Sites.Selected mode, signaling operators that a per-site grant is needed.
+
 ---
 
 ## 4. Option A1 — Automated Site Bootstrap (Long-Term Target)
@@ -226,7 +232,9 @@ The following code references document the current authentication implementation
 |---|---|---|
 | `backend/functions/src/services/sharepoint-service.ts` | `DefaultAzureCredential` + `.default` scope | Primary SharePoint access path; uses `@pnp/sp` with custom auth |
 | `backend/functions/src/services/msal-obo-service.ts` | On-behalf-of flow scaffold | Delegated user context for frontend-initiated operations |
-| `backend/functions/src/services/graph-service.ts` | `IGraphService` interface + mock | G2 scaffold; real implementation throws "G2 pending" |
+| `backend/functions/src/services/graph-service.ts` | `IGraphService` interface + real + mock | Real implementation with `grantSiteAccess()` method. Called manually via Option A2 (`tools/grant-site-access.sh`); not yet wired into saga automation (Option A1 deferred). |
+| `backend/functions/src/utils/diagnose-permissions.ts` | `diagnosePermissionModel()` + `diagnoseSiteGrantReadiness()` | Production diagnostic — consumed by saga orchestrator and prerequisite validation. Reports active permission model and grant readiness. |
+| `backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts` | `ProvisioningPermissionModel` + `SiteCreated.GrantRequired` events | Saga emits permission model telemetry at start and site-grant-required signal after Step 1 under Sites.Selected. |
 
 The current `.default` scope pattern means the application receives whatever permissions are consented in Entra ID. T05 does not change this pattern — it documents which permissions should be consented and validates them in staging.
 

@@ -606,7 +606,7 @@ New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $managedIdentity.Id 
 
 > **Security note:** `Sites.Selected` is the least-privilege approach for SharePoint access. It grants access to **zero** sites by default — each site must be individually granted (see Section 9.6). This is significantly more secure than `Sites.FullControl.All`, which grants access to every site in the tenant.
 
-> **Architecture decision still pending:** The exact mechanism for granting per-site access to new project sites is still being finalized. Two options are under evaluation: (A) automated grant via a bootstrap service principal, or (B) manual grant by a tenant admin for each new project. **Do not finalize the grant workflow until the architecture team confirms the approach.** For pilot setup (2–3 projects), manual grants are acceptable.
+> **Architecture decision confirmed:** The per-site grant workflow uses **Option A2 (manual pilot bridge)** for Wave 0 pilot deployment (up to 3 projects). After each provisioning saga creates a new project site, an IT administrator must run the per-site grant script (`tools/grant-site-access.sh`) before the site is fully operational. Set `SITES_SELECTED_GRANT_CONFIRMED=true` in the Function App configuration after confirming this workflow is operational. The saga validates this gate at execution time and emits a `SiteCreated.GrantRequired` telemetry event in Application Insights after each site creation. Automated grants (Option A1) are planned for future implementation.
 
 **Common mistakes:**
 - Trying to assign application permissions via the portal's App registrations UI (this only works for app registrations, not Managed Identities)
@@ -870,7 +870,7 @@ New-MgSitePermission -SiteId $siteId -BodyParameter @{
 3. Shared/department site(s) (Section 9.4)
 
 **Sites that need grants during ongoing operation:**
-- Each new project site needs a grant after it is created by the provisioning workflow. This may be automated or manual depending on the architecture decision noted in Section 8.4.
+- Each new project site needs a grant after it is created by the provisioning workflow. Use `tools/grant-site-access.sh` (Option A2 manual workflow). The saga emits a `SiteCreated.GrantRequired` telemetry event in Application Insights when a new site is created under Sites.Selected mode — use this as your trigger to run the grant script.
 
 **How to verify:**
 ```

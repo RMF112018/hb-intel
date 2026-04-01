@@ -10,6 +10,7 @@
  */
 
 import { WAVE0_REQUIRED_CONFIG, type ConfigTier } from '../config/wave0-env-registry.js';
+import { diagnosePermissionModel } from './diagnose-permissions.js';
 
 /**
  * Returns true if startup config validation should run.
@@ -59,6 +60,18 @@ export function validateProvisioningPrerequisites(): void {
     } else if (!value) {
       issues.push(`  - ${prereq.name}: ${prereq.description}`);
     }
+  }
+
+  // Sites.Selected conditional gate: when the active permission model is
+  // sites-selected (default), IT must confirm the per-site grant workflow
+  // (Option A2) is operational before provisioning can proceed.
+  const { model } = diagnosePermissionModel();
+  if (model === 'sites-selected' && process.env.SITES_SELECTED_GRANT_CONFIRMED !== 'true') {
+    issues.push(
+      '  - SITES_SELECTED_GRANT_CONFIRMED must be "true" — ' +
+      'Sites.Selected (Path A) is active. IT must confirm the per-site grant workflow (Option A2) is operational. ' +
+      'See sites-selected-validation.md §3 and tools/grant-site-access.sh.',
+    );
   }
 
   if (issues.length > 0) {

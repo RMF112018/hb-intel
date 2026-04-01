@@ -9,6 +9,7 @@ import type {
 } from '@hbc/models';
 import { withRetry } from '../../utils/retry.js';
 import { validateProvisioningPrerequisites } from '../../utils/validate-config.js';
+import { diagnosePermissionModel, diagnoseSiteGrantReadiness } from '../../utils/diagnose-permissions.js';
 import { executeStep1, compensateStep1 } from './steps/step1-create-site.js';
 import { executeStep2, compensateStep2 } from './steps/step2-document-library.js';
 import { executeStep3, compensateStep3 } from './steps/step3-template-files.js';
@@ -42,6 +43,10 @@ export class SagaOrchestrator {
   async execute(request: IProvisionSiteRequest): Promise<void> {
     // Fail fast if provisioning prerequisites are not satisfied.
     validateProvisioningPrerequisites();
+
+    // Permission model diagnostic — makes the active posture visible in every saga run.
+    const permissionDiag = diagnosePermissionModel();
+    const grantReadiness = diagnoseSiteGrantReadiness();
 
     const sagaStartMs = Date.now();
     const { projectId, projectNumber, projectName, correlationId, triggeredBy,
@@ -78,6 +83,16 @@ export class SagaOrchestrator {
       projectNumber,
       triggeredBy,
       submittedBy,
+      permissionModel: permissionDiag.model,
+    });
+
+    this.logger.trackEvent('ProvisioningPermissionModel', {
+      correlationId,
+      projectId,
+      permissionModel: permissionDiag.model,
+      grantConfirmed: grantReadiness.grantConfirmed,
+      automatedGrantAvailable: grantReadiness.automatedGrantAvailable,
+      summary: permissionDiag.summary,
     });
 
     await this.services.tableStorage.upsertProvisioningStatus(status);
@@ -209,6 +224,24 @@ export class SagaOrchestrator {
       if (result.status === 'Failed') {
         await this.compensate(status);
         return;
+      }
+
+      // Sites.Selected: signal operators that a per-site grant is required for the new site.
+      if (stepDef.number === 1 && result.status === 'Completed' && permissionDiag.model === 'sites-selected') {
+        this.logger.trackEvent('SiteCreated.GrantRequired', {
+          correlationId,
+          projectId,
+          projectNumber,
+          siteUrl: status.siteUrl,
+          permissionModel: 'sites-selected',
+          grantMethod: 'manual-option-a2',
+          operatorAction: 'Admin must run tools/grant-site-access.sh for the new site.',
+        });
+        this.logger.info(
+          `Sites.Selected: per-site grant required for ${status.siteUrl ?? projectId}. ` +
+          'Using Option A2 (manual) — admin must grant access via tools/grant-site-access.sh.',
+          { correlationId, projectId },
+        );
       }
 
       if (stepDef.number === 5 && status.step5DeferredToTimer) {

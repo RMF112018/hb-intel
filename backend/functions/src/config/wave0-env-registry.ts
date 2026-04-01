@@ -245,5 +245,14 @@ export const WAVE0_OPTIONAL_CONFIG: readonly IConfigEntry[] = [
       'Permission model for SharePoint site access: sites-selected (default, Path A) or fullcontrol (Path B fallback, requires ADR)',
     requiredInProd: false,
   },
+  {
+    name: 'SITES_SELECTED_GRANT_CONFIRMED',
+    bucket: 'infrastructure',
+    description:
+      'Must be "true" after IT confirms the Sites.Selected per-site grant workflow (Option A2) is operational. ' +
+      'Only required when SITES_PERMISSION_MODEL is "sites-selected" (default). ' +
+      'See sites-selected-validation.md §3 and tools/grant-site-access.sh.',
+    requiredInProd: false,
+  },
 
 ] as const;

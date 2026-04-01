@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WAVE0_REQUIRED_CONFIG } from '../config/wave0-env-registry.js';
-import { validateRequiredConfig, shouldValidateConfig } from './validate-config.js';
+import { validateRequiredConfig, shouldValidateConfig, validateProvisioningPrerequisites } from './validate-config.js';
 
 vi.mock('../config/wave0-env-registry.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../config/wave0-env-registry.js')>();
@@ -140,6 +140,63 @@ describe('validateRequiredConfig', () => {
     } catch (err) {
       const message = (err as Error).message;
       expect(message).toContain('wave-0-config-registry');
+    }
+  });
+});
+
+describe('validateProvisioningPrerequisites — Sites.Selected gate', () => {
+  beforeEach(() => {
+    vi.stubEnv('HBC_ADAPTER_MODE', 'proxy');
+    vi.stubEnv('NODE_ENV', 'production');
+    // Set all existing prerequisites to valid values
+    vi.stubEnv('GRAPH_GROUP_PERMISSION_CONFIRMED', 'true');
+    vi.stubEnv('AZURE_TENANT_ID', 'tenant-id');
+    vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://example.sharepoint.com');
+    vi.stubEnv('SHAREPOINT_HUB_SITE_ID', 'hub-id');
+    vi.stubEnv('SHAREPOINT_APP_CATALOG_URL', 'https://example.sharepoint.com/sites/appcatalog');
+    vi.stubEnv('HB_INTEL_SPFX_APP_ID', 'spfx-id');
+    vi.stubEnv('OPEX_MANAGER_UPN', 'opex@hb.com');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('throws when sites-selected is active and SITES_SELECTED_GRANT_CONFIRMED is not set', () => {
+    delete process.env.SITES_PERMISSION_MODEL; // defaults to sites-selected
+    delete process.env.SITES_SELECTED_GRANT_CONFIRMED;
+    expect(() => validateProvisioningPrerequisites()).toThrow('SITES_SELECTED_GRANT_CONFIRMED');
+  });
+
+  it('does not throw when sites-selected is active and SITES_SELECTED_GRANT_CONFIRMED=true', () => {
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'sites-selected');
+    vi.stubEnv('SITES_SELECTED_GRANT_CONFIRMED', 'true');
+    expect(() => validateProvisioningPrerequisites()).not.toThrow();
+  });
+
+  it('does not throw when fullcontrol is active even without SITES_SELECTED_GRANT_CONFIRMED', () => {
+    vi.stubEnv('SITES_PERMISSION_MODEL', 'fullcontrol');
+    delete process.env.SITES_SELECTED_GRANT_CONFIRMED;
+    expect(() => validateProvisioningPrerequisites()).not.toThrow();
+  });
+
+  it('skips validation in mock mode', () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('HBC_ADAPTER_MODE', 'mock');
+    delete process.env.SITES_SELECTED_GRANT_CONFIRMED;
+    expect(() => validateProvisioningPrerequisites()).not.toThrow();
+  });
+
+  it('error message includes actionable operator guidance', () => {
+    delete process.env.SITES_PERMISSION_MODEL;
+    delete process.env.SITES_SELECTED_GRANT_CONFIRMED;
+    try {
+      validateProvisioningPrerequisites();
+      expect.fail('should have thrown');
+    } catch (err) {
+      const message = (err as Error).message;
+      expect(message).toContain('sites-selected-validation.md');
+      expect(message).toContain('grant-site-access.sh');
     }
   });
 });
