@@ -15,6 +15,8 @@ This report tracks implementation progress across all 13 prompts.
 - Baseline inventory: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Baseline-Inventory.md`
 - Target outcome: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Outcome-Summary.md`
 - Authorization audit: `docs/architecture/reviews/project-setup-authz-model-gap-validation.md`
+- Target architecture: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Authorization-Architecture.md`
+- Route-policy matrix: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Route-Policy-Matrix.md`
 
 ---
 
@@ -61,7 +63,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Prompt | Title | Status | Date | Notes |
 |--------|-------|--------|------|-------|
 | 1-01 | Contract Freeze and Baseline | **Complete** | 2026-04-01 | Baseline inventoried, target frozen |
-| 1-02 | Target Architecture and Policy Matrix | Not started | — | — |
+| 1-02 | Target Architecture and Policy Matrix | **Complete** | 2026-04-01 | Architecture and route-policy matrix frozen |
 | 1-03 | Entra App Role and Scope Contract | Not started | — | — |
 | 1-04 | Shared Authorization Policy Engine | Not started | — | — |
 | 1-05 | Oid Migration and Data Contract | Not started | — | — |
@@ -86,6 +88,14 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Outcome-Summary.md` |
 | Created | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
+### Prompt 1-02 (P9-G5-02)
+
+| Action | File |
+|--------|------|
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Authorization-Architecture.md` |
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Route-Policy-Matrix.md` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
 ---
 
 ## 4. Verification Log
@@ -107,6 +117,26 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Report identifies all current UPN-based, role-based, and ownership-based decisions
 - [x] Target outcome is specific enough to guide all later prompts without re-deciding architecture
 
+### Prompt 1-02 (P9-G5-02)
+
+**Scope:** Documentation-only — no code changes, no build/lint/test verification required.
+
+**Structural verification:**
+- Target architecture defines 5 authorization layers with clear separation of concerns
+- Route-policy matrix covers all 16 routes, 2 timers, and 8 non-route authorization surfaces
+- Each route assigned a surface type, policy stack, claims requirements, and explicit change impact
+- Three previously unresolved design questions from P9-G5-01 resolved and frozen:
+  - Notification recipient resolution: env vars retained as notification-only config (not auth input)
+  - Submitter ownership: migrates to `oid` with UPN fallback and lazy backfill
+  - Controller app-role naming: `Controller`/`HBIntelController` following existing pattern
+- Delegated scope enforcement (`scp:access_as_user`) identified as the only net-new authorization layer
+- Change impact mapped to specific prompts (1-03 through 1-11)
+
+**Acceptance criteria status:**
+- [x] Route-policy matrix covers every retained route and trigger
+- [x] Architecture doc separates token validation, delegated scope, business-role, ownership, and workload authorization
+- [x] Docs are concrete enough that Prompts 03–11 can implement without reopening fundamental design questions
+
 ---
 
 ## Version History
@@ -114,3 +144,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Version | Date | Prompt | Summary |
 |---------|------|--------|---------|
 | 1.0 | 2026-04-01 | P9-G5-01 | Initial baseline and contract freeze — 3 documents created |
+| 1.1 | 2026-04-01 | P9-G5-02 | Target authorization architecture and route-policy matrix frozen — 2 documents created, 3 design decisions resolved |
