@@ -5,6 +5,8 @@
 **Audience:** Implementation agent(s), technical reviewers.
 **Implementation Objective:** A complete, type-safe request lifecycle where the Estimating Coordinator can submit and update a Project Setup Request, the Controller can advance it through all states, the `projectNumber` is validated and required at `ReadyToProvision`, and the provisioning trigger fires exactly one time per approved request.
 
+> **Historical Context (Phase 1 Freeze — 2026-04-01):** This plan document remains accurate for state definitions, transition rules, and the `projectNumber` format requirement. However, its **provisioning trigger semantics** are superseded: the current backend auto-triggers the provisioning saga when a request transitions to `ReadyToProvision` — there is no distinct controller-side launch action. The service-factory and auth posture sections predate the current domain-host architecture. See `docs/architecture/reviews/phase-1-lifecycle-freeze-decision.md` for the frozen lifecycle contract.
+
 ---
 
 ## Prerequisites

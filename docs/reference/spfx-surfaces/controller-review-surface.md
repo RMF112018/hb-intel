@@ -87,7 +87,7 @@ All state transitions use `advanceState()` via provisioning API client.
 
 | Action | Button | Visible When | State Transition | Confirmation |
 |--------|--------|-------------|-----------------|-------------|
-| Approve | Primary "Approve Request" | `UnderReview` | → `ReadyToProvision` | `HbcConfirmDialog` |
+| Approve | Primary "Approve Request" | `UnderReview` | → `ReadyToProvision` | `HbcModal` with `HbcTextField` for `projectNumber` (format: `##-###-##`, validated client-side) |
 | Request Clarification | Secondary "Request Clarification" | `UnderReview` | → `NeedsClarification` | `HbcModal` with `HbcTextArea` |
 | Place on Hold | Secondary "Place on Hold" | `UnderReview` | → `AwaitingExternalSetup` | `HbcConfirmDialog` |
 | Route to Admin | Secondary "Send to Admin" | `Failed` | Navigation only | None |
@@ -100,9 +100,11 @@ No dedicated `approveRequest` / `requestClarification` / `holdRequest` methods. 
 client.advanceState(requestId, newState, extras?)
 ```
 
-- Approve: `advanceState(id, 'ReadyToProvision')`
+- Approve: `advanceState(id, 'ReadyToProvision', { projectNumber })` — requires valid `##-###-##` format
 - Clarification: `advanceState(id, 'NeedsClarification', { clarificationNote })`
 - Hold: `advanceState(id, 'AwaitingExternalSetup')`
+
+> **Phase 1 Freeze Reference:** The exact approval action contract, including `projectNumber` capture, auto-trigger behavior, and system ownership of `ReadyToProvision`, is frozen in `docs/architecture/reviews/phase-1-lifecycle-freeze-decision.md`.
 
 ### Toast Notifications
 

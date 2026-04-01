@@ -5,6 +5,8 @@
 
 This document defines the complete notification contract for the provisioning lifecycle. All 8 events are registered with `@hbc/notification-intelligence` via `PROVISIONING_NOTIFICATION_REGISTRATIONS` in `@hbc/provisioning`.
 
+> **Staleness Notice (Phase 1 Freeze — 2026-04-01):** The event types in this matrix remain accurate, but the **Recipient Resolution** section is stale. It describes env-var-based recipient resolution (`CONTROLLER_UPNS`, `ADMIN_UPNS`) which has been superseded by claims-based authorization in the current backend. See `docs/architecture/reviews/phase-1-lifecycle-freeze-decision.md` for the frozen lifecycle contract. For current notification registration detail, see `docs/reference/workflow-experience/setup-notification-registrations.md`.
+
 ---
 
 ## Event Matrix
