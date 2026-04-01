@@ -1,4 +1,4 @@
-# ADR-0062: API Security — Bearer Token Validation + Managed Identity
+# ADR-0078: API Security — Bearer Token Validation + Managed Identity
 
 **Status:** Accepted
 **Date:** 2026-03-07

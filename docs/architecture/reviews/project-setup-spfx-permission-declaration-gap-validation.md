@@ -2,89 +2,77 @@
 
 ## Executive Summary
 
-**Verdict: Confirmed gap — source-config omission with documentation mismatch.**
+**Verdict: Resolved (Phase 9, Gap 1) — source-config omission closed, documentation reconciled.**
 
-`apps/estimating/config/package-solution.json` does not declare `solution.webApiPermissionRequests`, even though the Project Setup frontend is designed to acquire audience-scoped tokens via SPFx's `aadTokenProviderFactory.getToken(audience)`. No build step, packaging transform, or shell-side config injects the declaration into the final `.sppkg`. Microsoft documentation confirms that `webApiPermissionRequests` is the only supported mechanism for requesting admin approval of API permissions for the "SharePoint Online Client Extensibility" service principal. Without the declaration, deploying the `.sppkg` to the app catalog will not surface a pending permission request in the SharePoint admin center.
+~~`apps/estimating/config/package-solution.json` does not declare `solution.webApiPermissionRequests`.~~ **Resolved:** The authoritative estimating `package-solution.json` now declares `webApiPermissionRequests` with `resource: "hb-intel-api-staging"` and `scope: "access_as_user"` (P9-G1-02). The declaration propagates faithfully through the full packaging path — source config → shell copy → `.sppkg` `AppManifest.xml` — verified in P9-G1-03. Deploying the `.sppkg` to the app catalog will now surface a pending API permission request in the SharePoint admin center for admin approval.
 
-The Phase 8 remediation report correctly identifies "SPFx API permission approved" as an operator prerequisite (#6), but does not identify that the manifest declaration needed to trigger that approval through the standard SPFx flow is missing from the solution config. The term `webApiPermissionRequests` does not appear anywhere in repo-owned source code or documentation.
+The Phase 8 remediation report prerequisite #6 has been updated to describe the complete approval flow: the `.sppkg` declares the permission request, the admin approves it in the SharePoint admin center "API access" page after deployment, and `getToken(audience)` then succeeds.
 
-The gap is mitigated by the app's graceful degradation: when the token provider is unavailable, the app falls back to `ui-review` mode with a diagnostic banner. However, the omission means that the standard Microsoft-documented deployment flow cannot activate production mode without manual, out-of-band admin intervention.
+The app's graceful degradation remains in place — if the permission is not yet approved, the frontend falls back to `ui-review` mode with a diagnostic banner. The difference is that the standard Microsoft-documented deployment flow now provides the admin with the supported path to approve the permission.
 
 ---
 
 ## 1. Repo Evidence
 
-### 1.1 `package-solution.json` — no `webApiPermissionRequests`
+### 1.1 `package-solution.json` — current state
 
 **File:** `apps/estimating/config/package-solution.json`
 
-The solution block declares `name`, `id`, `version`, `includeClientSideAssets`, `skipFeatureDeployment`, `isDomainIsolated`, `developer`, `metadata`, and `features`. There is no `webApiPermissionRequests` array.
+The solution block now includes a `webApiPermissionRequests` declaration (added in P9-G1-02):
 
 ```json
-{
-  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
-  "solution": {
-    "name": "hb-intel-project-setup",
-    "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
-    "version": "1.0.0.0",
-    "includeClientSideAssets": true,
-    "skipFeatureDeployment": true,
-    "isDomainIsolated": false,
-    "developer": { ... },
-    "metadata": { ... },
-    "features": [ ... ]
-  },
-  "paths": {
-    "zippedPackage": "solution/hb-intel-project-setup.sppkg"
+"webApiPermissionRequests": [
+  {
+    "resource": "hb-intel-api-staging",
+    "scope": "access_as_user"
   }
-}
+]
 ```
 
-**Fact type:** Confirmed repo fact.
+The `resource` follows the pattern `hb-intel-api-{environment}` per the IT-Department-Setup-Guide.md naming convention. The `scope` is the delegated permission exposed on the Entra app registration. Values were frozen in P9-G1-01 and implemented in P9-G1-02.
 
-### 1.2 Repo-wide search for `webApiPermissionRequests`
+**Fact type:** Confirmed repo fact (post-fix).
 
-A repo-wide grep for `webApiPermissionRequests` returns zero matches in application source, configuration, build scripts, or documentation. The term appears only in SPFx framework type definitions under `node_modules/`.
+> **Pre-fix baseline (historical):** Prior to P9-G1-02, the solution block did not contain a `webApiPermissionRequests` array. The version was `1.0.0.0`. A repo-wide grep for `webApiPermissionRequests` returned zero matches in application source, configuration, build scripts, or documentation.
 
-**Fact type:** Confirmed repo fact.
+### 1.2 Repo-wide presence of `webApiPermissionRequests`
+
+The `webApiPermissionRequests` declaration now appears in:
+- `apps/estimating/config/package-solution.json` (authoritative source)
+- `tools/spfx-shell/config/package-solution.json` (build-time copy)
+- Multiple Gap 1 review and closure documents
+
+**Fact type:** Confirmed repo fact (post-fix).
 
 ---
 
 ## 2. Packaging-Path Evidence
 
-### 2.1 Build orchestrator does not inject permissions
+### 2.1 Build orchestrator copies source config faithfully
 
 **File:** `tools/build-spfx-package.ts`
 
-The orchestrator copies the domain-specific `package-solution.json` into the shell's config directory as a straight file copy (lines 506–515). No transform adds, merges, or modifies `webApiPermissionRequests`.
+The orchestrator copies the domain-specific `package-solution.json` into the shell's config directory via shallow spread (lines 506–515). No transform adds, removes, or modifies `webApiPermissionRequests`. This means the source declaration propagates as-is to the shell and subsequently into the `.sppkg`.
 
 **Fact type:** Confirmed build-path fact.
 
-### 2.2 Shell `package-solution.json` has no permissions
+### 2.2 Shell `package-solution.json` receives the declaration
 
 **File:** `tools/spfx-shell/config/package-solution.json`
 
-This file is overwritten by the orchestrator during each build with the domain's `package-solution.json`. It contains no `webApiPermissionRequests` because the source does not.
+This file is overwritten by the orchestrator during each build with the domain's `package-solution.json`. It now contains the `webApiPermissionRequests` declaration because the source does. Verified in P9-G1-03.
+
+**Fact type:** Confirmed build-path fact (post-fix).
+
+### 2.3 Gulp and CI/CD pipelines do not modify permissions
+
+The gulpfile (`tools/spfx-shell/gulpfile.js`) injects compile-time constants via webpack DefinePlugin but does not modify `package-solution.json`. CI/CD pipelines (`.github/workflows/spfx-build.yml`, `.github/workflows/spfx-deploy.yml`) do not modify solution manifests. This is correct behavior — the declaration in the source config is the single source of truth.
 
 **Fact type:** Confirmed build-path fact.
 
-### 2.3 Gulp pipeline does not inject permissions
+### 2.4 Conclusion
 
-**File:** `tools/spfx-shell/gulpfile.js`
-
-The gulpfile injects compile-time constants via webpack DefinePlugin (line 32) but does not modify `package-solution.json` or inject permission declarations.
-
-**Fact type:** Confirmed build-path fact.
-
-### 2.4 CI/CD pipelines do not inject permissions
-
-`.github/workflows/spfx-build.yml` and `.github/workflows/spfx-deploy.yml` do not modify solution manifests or inject `webApiPermissionRequests`.
-
-**Fact type:** Confirmed build-path fact.
-
-### 2.5 Conclusion
-
-There is no mechanism in the packaging pipeline that adds `webApiPermissionRequests` to the final `.sppkg`. The omission in the source config propagates unchanged to the deployed package.
+The `webApiPermissionRequests` declaration in the authoritative source config (`apps/estimating/config/package-solution.json`) propagates unchanged through the packaging pipeline into the final `.sppkg`. The SPFx packaging pipeline translates the JSON declaration into a `<WebApiPermissionRequests>` XML element in `AppManifest.xml`. Verified end-to-end in P9-G1-03.
 
 ---
 
@@ -198,91 +186,93 @@ The `resource` must be the `displayName` of the Entra ID application (not `objec
 
 ## 5. Gap Verdict
 
-### Classification: Confirmed gap
+### Classification: ~~Confirmed gap~~ → Resolved (P9-G1)
 
-| Dimension | Assessment |
-|-----------|-----------|
-| Source-config omission | **Yes** — `package-solution.json` lacks `webApiPermissionRequests` |
-| Packaging-pipeline omission | **Yes** — no transform injects it; source omission propagates to `.sppkg` |
-| Architectural ambiguity | **Partial** — the code pipeline is complete and intentional, but the manifest declaration that completes the deployment flow was not included |
-| Documentation mismatch | **Yes** — Phase 8 prerequisite #6 says "SPFx API permission approved" but does not identify the missing manifest declaration as the mechanism to trigger that approval |
-| Intentional but non-standard design | **No** — there is no evidence of a deliberate decision to omit the declaration or use an alternate permission-granting mechanism |
+| Dimension | Pre-P9 Assessment | Post-P9 Status |
+|-----------|-----------|-----------|
+| Source-config omission | **Yes** — `package-solution.json` lacked `webApiPermissionRequests` | **Resolved** — declaration added (P9-G1-02) |
+| Packaging-pipeline omission | **Yes** — source omission propagated to `.sppkg` | **Resolved** — declaration propagates to `.sppkg` `AppManifest.xml` (P9-G1-03) |
+| Architectural ambiguity | **Partial** — code pipeline complete but manifest declaration missing | **Resolved** — full chain now complete: code + manifest + packaging |
+| Documentation mismatch | **Yes** — Phase 8 prerequisite #6 lacked manifest context | **Resolved** — prerequisite #6 updated with approval flow (P9-G1-04) |
+| Intentional but non-standard design | **No** — no evidence of deliberate omission | **Resolved** — standard SPFx pattern now implemented |
 
-### Is this a true production blocker?
+### Is this still a production blocker?
 
-**Yes, conditionally.** Without `webApiPermissionRequests` in the `.sppkg`:
+**No.** With `webApiPermissionRequests` in the `.sppkg`:
 
-1. Deploying the package to the app catalog will NOT surface a permission request in the SharePoint admin center.
-2. An admin cannot approve the API permission through the standard SPFx workflow.
-3. `aadTokenProviderFactory.getTokenProvider().getToken(audience)` will fail at runtime (unless the permission was previously granted by another solution or through unsupported direct manipulation).
-4. The frontend will detect the failure and fall back to `ui-review` mode, preventing silent breakage but blocking production use.
+1. Deploying the package to the app catalog WILL surface a permission request in the SharePoint admin center.
+2. An admin can approve the API permission through the standard SPFx workflow.
+3. After approval, `aadTokenProviderFactory.getTokenProvider().getToken(audience)` will succeed at runtime.
+4. Production mode will activate when the full prerequisite chain is satisfied.
 
-The gap is **mitigated** by the app's graceful degradation but **not resolved** by it — production mode cannot activate through the standard deployment path.
+The remaining dependency is an **operator-executed action** (admin approval in SharePoint admin center), not a code or manifest gap.
 
 ---
 
-## 6. Why the Verdict Is Correct
+## 6. Why the Original Verdict Was Correct and How It Was Resolved
 
-1. **The code expects SPFx token acquisition.** The full injection chain (`API_AUDIENCE` env → DefinePlugin → shell → mount → `createSpfxApiTokenProvider`) was explicitly built and verified in Phase 8 (P8-02). This is not dormant scaffolding.
+> This section preserves the reasoning behind the original "Confirmed gap" verdict for audit trail purposes. All items have been resolved in Phase 9.
 
-2. **The token acquisition mechanism requires admin-approved permissions.** `getToken(audience)` delegates to the "SharePoint Online Client Extensibility" service principal, which only has permissions that were granted through the `webApiPermissionRequests` approval flow or (unsupported) direct Entra ID manipulation.
+1. **The code expects SPFx token acquisition.** The full injection chain (`API_AUDIENCE` env → DefinePlugin → shell → mount → `createSpfxApiTokenProvider`) was explicitly built and verified in Phase 8 (P8-02). This is not dormant scaffolding. **Status: unchanged — the code pipeline remains correctly wired.**
 
-3. **The manifest does not declare the permission.** `package-solution.json` has no `webApiPermissionRequests` array. No build step injects one. The `.sppkg` will not contain a permission request.
+2. **The token acquisition mechanism requires admin-approved permissions.** `getToken(audience)` delegates to the "SharePoint Online Client Extensibility" service principal, which only has permissions that were granted through the `webApiPermissionRequests` approval flow or (unsupported) direct Entra ID manipulation. **Status: unchanged — this requirement is architectural.**
 
-4. **The documentation gap compounds the config gap.** The Phase 8 report correctly identifies that SPFx API permission approval is an operator prerequisite, but the operator has no standard path to fulfill it because the `.sppkg` does not request the permission. The documentation does not mention `webApiPermissionRequests` or identify the missing declaration.
+3. ~~**The manifest does not declare the permission.**~~ **Resolved (P9-G1-02).** `package-solution.json` now declares `webApiPermissionRequests` with `resource: "hb-intel-api-staging"` and `scope: "access_as_user"`. The `.sppkg` contains the declaration in `AppManifest.xml` (verified P9-G1-03).
 
-5. **There is no evidence of an intentional alternate design.** No ADR, plan, or code comment explains why `webApiPermissionRequests` was omitted or describes an alternate permission-granting strategy.
+4. ~~**The documentation gap compounds the config gap.**~~ **Resolved (P9-G1-04).** The Phase 8 report prerequisite #6 now references the `.sppkg` manifest declaration and describes the standard admin approval flow. The connected-service-posture doc has been updated with `webApiPermissionRequests` details.
+
+5. ~~**There is no evidence of an intentional alternate design.**~~ **Resolved (P9-G1-02).** The standard SPFx `webApiPermissionRequests` pattern is now implemented.
 
 ---
 
 ## 7. Remediation Targets
 
-The following changes would close the gap. **These are not implemented in this validation — they are identified for a follow-up implementation prompt.**
+The following remediation targets were identified during validation. All have been implemented in Phase 9, Gap 1.
 
-### 7.1 Add `webApiPermissionRequests` to `package-solution.json`
+### 7.1 Add `webApiPermissionRequests` to `package-solution.json` — **Done (P9-G1-02)**
 
 **File:** `apps/estimating/config/package-solution.json`
 
-Add to the `solution` block:
+Implemented:
 
 ```json
 "webApiPermissionRequests": [
   {
-    "resource": "<entra-app-registration-display-name>",
-    "scope": "<scope-name>"
+    "resource": "hb-intel-api-staging",
+    "scope": "access_as_user"
   }
 ]
 ```
 
-**Blocking question:** The exact `resource` (Entra ID app registration display name) and `scope` values depend on the target environment's app registration configuration. These must be determined by the operator or documented in a deployment-specific config guide.
+Values determined from IT-Department-Setup-Guide.md (app registration display name convention, exposed delegated scope) and frozen in `project-setup-gap-1-permission-input-freeze.md` (P9-G1-01).
 
-### 7.2 Update Phase 8 operator prerequisites
+### 7.2 Update Phase 8 operator prerequisites — **Done (P9-G1-04)**
 
 **File:** `docs/architecture/reviews/project-setup-phase-8-remediation-report.md`
 
-Prerequisite #6 should note that the `.sppkg` now declares the permission request and the admin must approve it in the SharePoint admin center "API access" page after deployment.
+Prerequisite #6 updated to describe the complete approval flow: `.sppkg` declares permission → deployed to app catalog → request surfaces in SharePoint admin center → admin approves → `getToken(audience)` succeeds.
 
-### 7.3 Update connected-service-posture
+### 7.3 Update connected-service-posture — **Done (P9-G1-04)**
 
 **File:** `docs/reference/developer/project-setup-connected-service-posture.md`
 
-Add a row or note documenting the `webApiPermissionRequests` declaration and its relationship to the SPFx API permission approval prerequisite.
+Row added documenting the `webApiPermissionRequests` declaration, its relationship to the SPFx API permission approval prerequisite, and the operator approval sequence.
 
-### 7.4 Consider build-time parameterization
+### 7.4 Build-time parameterization — **Deferred**
 
-The `resource` and `scope` values in `webApiPermissionRequests` may need to vary by deployment environment (dev, staging, production). If so, the build orchestrator (`tools/build-spfx-package.ts`) may need to template or inject these values, similar to how `API_AUDIENCE` is already injected via environment variables.
+The `resource` value (`hb-intel-api-staging`) is environment-specific. If multi-environment builds require different app registration display names, the build orchestrator can be enhanced to template this value via environment variables, similar to `API_AUDIENCE`. This is not currently blocking — the default staging value is correct for the primary deployment target.
 
 ---
 
 ## 8. Unresolved Questions
 
-| # | Question | Why It Matters |
-|---|----------|---------------|
-| 1 | What is the Entra ID app registration `displayName` for the Project Setup API? | Required as the `resource` value in `webApiPermissionRequests`. Using `objectId` or `clientId` will cause approval errors per Microsoft docs. |
-| 2 | What scope should be requested (e.g., `user_impersonation`, `.default`, custom)? | Determines the delegated permission grant on the service principal. Must match what the backend validates. |
-| 3 | Should `webApiPermissionRequests` values be environment-specific? | If the app registration differs between dev/staging/prod, the build pipeline may need to template the declaration, which is not a standard SPFx pattern. |
-| 4 | Has the tenant already granted the required permission through another mechanism? | If a previous SPFx solution or manual admin action already granted the permission tenant-wide, `getToken(audience)` may already work. This would make the gap non-blocking for that specific tenant but the `.sppkg` would still be non-standard. |
-| 5 | Does the tenant use isolated web parts? | Isolated web parts (deprecated, retiring April 2026) use per-solution service principals instead of the shared tenant-wide principal. If this deployment targets isolated mode, the permission model differs. Current config has `isDomainIsolated: false`, so this is unlikely. |
+| # | Question | Status | Resolution |
+|---|----------|--------|------------|
+| 1 | What is the Entra ID app registration `displayName` for the Project Setup API? | **Resolved (P9-G1-01)** | `hb-intel-api-{environment}` per IT-Department-Setup-Guide.md naming convention. Staging default: `hb-intel-api-staging`. |
+| 2 | What scope should be requested? | **Resolved (P9-G1-01)** | `access_as_user` — the delegated scope exposed on the app registration per IT-Department-Setup-Guide.md. |
+| 3 | Should `webApiPermissionRequests` values be environment-specific? | **Deferred** | Yes, the `resource` display name varies by environment. Build-time parameterization can be added if multi-environment builds are needed. Not currently blocking. |
+| 4 | Has the tenant already granted the required permission through another mechanism? | **Operator concern** | The `.sppkg` now declares the permission correctly. Whether a tenant has pre-existing grants is an operational matter, not a code gap. |
+| 5 | Does the tenant use isolated web parts? | **Closed — non-issue** | `isDomainIsolated: false` in config. Isolated web parts deprecated (retiring April 2026). |
 
 ---
 
@@ -290,7 +280,7 @@ The `resource` and `scope` values in `webApiPermissionRequests` may need to vary
 
 | Evidence | File | Lines | Type |
 |----------|------|-------|------|
-| No `webApiPermissionRequests` in solution config | `apps/estimating/config/package-solution.json` | 1–40 | Repo fact |
+| `webApiPermissionRequests` declaration present (post P9-G1-02; absent pre-fix) | `apps/estimating/config/package-solution.json` | 10–15 | Repo fact |
 | Token provider implementation | `packages/auth/src/spfx/apiTokenProvider.ts` | 30–40 | Repo fact |
 | Shell `__API_AUDIENCE__` declare and inject | `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts` | 25, 125–127 | Repo fact |
 | Orchestrator `API_AUDIENCE` passthrough | `tools/build-spfx-package.ts` | 547 | Repo fact |

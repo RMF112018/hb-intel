@@ -34,7 +34,32 @@ export class TokenValidationError extends Error {
 // Configuration
 // ---------------------------------------------------------------------------
 
-const TENANT_ID = process.env.AZURE_TENANT_ID!;
+/**
+ * P8-07: Inbound tenant ID for JWKS endpoint and issuer validation.
+ *
+ * AZURE_TENANT_ID is **required** in production deployments. Without it the
+ * JWKS URL resolves to `.../undefined/discovery/...` and JWT verification
+ * fails with an opaque JWKS fetch error instead of a clear config diagnostic.
+ */
+function resolveTenantId(): string {
+  const explicit = process.env.AZURE_TENANT_ID;
+  if (explicit) return explicit;
+
+  const isTestOrMock =
+    process.env.NODE_ENV === 'test' ||
+    process.env.HBC_ADAPTER_MODE === 'mock';
+
+  if (isTestOrMock) {
+    return process.env.AZURE_TENANT_ID ?? '00000000-0000-0000-0000-000000000000';
+  }
+
+  throw new TokenValidationError(
+    '[HB-Intel] AZURE_TENANT_ID environment variable is not configured. ' +
+    'Production deployments must set AZURE_TENANT_ID to the Entra ID tenant GUID. ' +
+    'Without it, JWKS key discovery and issuer validation cannot function.',
+    'config_error',
+  );
+}
 
 /**
  * P3-03: Inbound API audience for JWT validation.
@@ -68,25 +93,49 @@ function resolveApiAudience(): string {
   );
 }
 
-const API_AUDIENCE = resolveApiAudience();
+// ---------------------------------------------------------------------------
+// P8-07: Lazy-initialized identity config singleton
+//
+// Previously, TENANT_ID, API_AUDIENCE, JWKS, and ACCEPTED_ISSUERS were
+// computed at module-load time. This caused the entire Azure Functions worker
+// to crash on import when identity config was missing — including the
+// unauthenticated health endpoint that operators need to diagnose the problem.
+//
+// The lazy pattern defers resolution to the first validateToken() call,
+// preserving the same production hardening (missing config still throws
+// TokenValidationError) while allowing the worker to start and the health
+// endpoint to respond regardless of identity config state.
+// ---------------------------------------------------------------------------
 
-/**
- * P3-03: JWKS endpoint uses the v2 discovery path. The v2 key set is a
- * superset of v1 signing keys, so it correctly validates both v1 and v2 tokens.
- */
-const JWKS = createRemoteJWKSet(
-  new URL(`https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys`),
-);
+interface IdentityConfig {
+  tenantId: string;
+  apiAudience: string;
+  jwks: ReturnType<typeof createRemoteJWKSet>;
+  acceptedIssuers: string[];
+}
 
-/**
- * P3-03: Accepted issuer values. The validator accepts both v1 and v2 token
- * issuers for the configured tenant. This allows SPFx (v1 tokens) and
- * MSAL/PWA (potentially v2 tokens) to coexist without backend changes.
- */
-const ACCEPTED_ISSUERS = [
-  `https://sts.windows.net/${TENANT_ID}/`,
-  `https://login.microsoftonline.com/${TENANT_ID}/v2.0`,
-];
+let _identityConfig: IdentityConfig | null = null;
+
+function getIdentityConfig(): IdentityConfig {
+  if (_identityConfig) return _identityConfig;
+
+  const tenantId = resolveTenantId();
+  const apiAudience = resolveApiAudience();
+
+  _identityConfig = {
+    tenantId,
+    apiAudience,
+    jwks: createRemoteJWKSet(
+      new URL(`https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`),
+    ),
+    acceptedIssuers: [
+      `https://sts.windows.net/${tenantId}/`,
+      `https://login.microsoftonline.com/${tenantId}/v2.0`,
+    ],
+  };
+
+  return _identityConfig;
+}
 
 // ---------------------------------------------------------------------------
 // Validated claims interface
@@ -155,11 +204,13 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     );
   }
 
+  const { jwks, acceptedIssuers, apiAudience } = getIdentityConfig();
+
   let payload: JWTPayload;
   try {
-    const result = await jwtVerify(token, JWKS, {
-      issuer: ACCEPTED_ISSUERS,
-      audience: API_AUDIENCE,
+    const result = await jwtVerify(token, jwks, {
+      issuer: acceptedIssuers,
+      audience: apiAudience,
     });
     payload = result.payload;
   } catch (err) {

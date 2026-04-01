@@ -38,7 +38,7 @@ Migrate four JSON-serialized array columns from `Text` (255-char limit) to `Note
 - [ ] User-assigned MI → `Sites.FullControl.All` (or `Sites.Selected` per project) on SharePoint tenant
 - [ ] User-assigned MI → `Group.ReadWrite.All` (application permission) on Microsoft Graph
 - [ ] Entra ID app registration created with Application ID URI (`api://<client-id>`)
-- [ ] SPFx API access request approved in SharePoint admin center
+- [ ] SPFx API permission approved in SharePoint admin center → API access page (the `.sppkg` declares `webApiPermissionRequests`; the pending request surfaces automatically after app catalog deployment)
 
 ### Environment Variables (Required)
 

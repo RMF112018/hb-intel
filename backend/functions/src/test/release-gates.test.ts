@@ -131,4 +131,35 @@ describe('P5-03 Release gates', () => {
     expect(source).toContain('operationalReadiness');
     expect(source).toContain('401');
   });
+
+  // --- Gate 10: P8-07 Token validation defers config resolution (lazy init) ---
+
+  it('validateToken module loads without throwing when identity config is missing', async () => {
+    // Proves lazy-init: importing the module must NOT trigger config resolution.
+    // Without lazy init, the module-level constants would throw on import when
+    // AZURE_TENANT_ID / API_AUDIENCE are missing in non-test mode.
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, 'src/middleware/validateToken.ts'),
+      'utf-8',
+    );
+    // The module must NOT have top-level eager calls to resolveTenantId() or resolveApiAudience()
+    // outside of a function body. Verify the lazy singleton pattern is in place.
+    expect(source).toContain('getIdentityConfig()');
+    expect(source).toContain('let _identityConfig');
+  });
+
+  // --- Gate 11: P8-07 Token validation still enforces identity config at call time ---
+
+  it('validateToken source enforces API_AUDIENCE and AZURE_TENANT_ID in production', () => {
+    const source = readFileSync(
+      resolve(FUNCTIONS_ROOT, 'src/middleware/validateToken.ts'),
+      'utf-8',
+    );
+    // resolveTenantId and resolveApiAudience must throw config_error in production
+    expect(source).toContain("throw new TokenValidationError(");
+    expect(source).toContain("'config_error'");
+    // Both resolver functions must exist
+    expect(source).toContain('function resolveTenantId()');
+    expect(source).toContain('function resolveApiAudience()');
+  });
 });

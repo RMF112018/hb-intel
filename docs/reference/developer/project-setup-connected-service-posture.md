@@ -85,7 +85,7 @@ This is configured at the Azure resource level, not in repo code.
 | MI → SharePoint access | SharePoint admin center / Graph API grants | Request persistence + provisioning |
 | MI → Group.ReadWrite.All | Azure Portal → Entra ID → App permissions | Provisioning saga only |
 | Entra app registration + audience URI | Azure Portal → Entra ID → App registrations | JWT validation |
-| SPFx API permission approval | SharePoint admin center | Frontend token acquisition |
+| SPFx API permission approval — `.sppkg` declares `webApiPermissionRequests` (`resource: "hb-intel-api-staging"`, `scope: "access_as_user"`); admin approves in SharePoint admin center API access page after deployment | SharePoint admin center → API access page | Frontend token acquisition via `aadTokenProviderFactory.getToken(audience)` |
 | CORS origins | Azure Function App → CORS blade (or `host.json`) | Always |
 | SignalR connection string | Azure Portal → SignalR Service | Real-time provisioning events |
 

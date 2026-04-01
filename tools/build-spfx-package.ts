@@ -505,6 +505,17 @@ for (const domain of domains) {
   // Write domain-specific package-solution.json
   const domainPkgSolution = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   const sppkgName = domainPkgSolution.paths.zippedPackage.replace('solution/', '');
+
+  // Parameterize webApiPermissionRequests resource at build time.
+  // SPFX_API_RESOURCE env var overrides the static default in the source config
+  // (e.g., "hb-intel-api-production" for a production build).
+  // If not set, the source config value is used as-is (default: "hb-intel-api-staging").
+  const spfxApiResource = process.env.SPFX_API_RESOURCE;
+  if (spfxApiResource && domainPkgSolution.solution?.webApiPermissionRequests?.length) {
+    domainPkgSolution.solution.webApiPermissionRequests[0].resource = spfxApiResource;
+    console.log(`  ✓ webApiPermissionRequests resource overridden: ${spfxApiResource}`);
+  }
+
   const shellPkgSolution = {
     ...domainPkgSolution,
     paths: { zippedPackage: `solution/${sppkgName}` },

@@ -210,7 +210,16 @@
       "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *projects*list* -o -name *list*schema* -o -name *field*map* -o -name *column*map* \\\\\\))",
       "Bash(find /Users/bobbyfetting/hb-intel -type f \\\\\\(-name *.csv -o -name *.json -o -name *.xlsx \\\\\\))",
       "Bash(find /Users/bobbyfetting/hb-intel/packages -type f \\\\\\(-name *graph* -o -name *sharepoint* -o -name *pnp* \\\\\\) -name *.ts)",
-      "Bash(sort -k3)"
+      "Bash(sort -k3)",
+      "Bash(npx gulp:*)",
+      "Bash(export NVM_DIR=\"$HOME/.nvm\")",
+      "Bash(source \"$NVM_DIR/nvm.sh\")",
+      "Bash(API_AUDIENCE=api://test-client-id npx tsx tools/build-spfx-package.ts estimating 2>&1)",
+      "Bash(API_AUDIENCE=api://test-client-id npx tsx tools/build-spfx-package.ts --domain estimating 2>&1)",
+      "Bash(BACKEND_MODE= FUNCTION_APP_URL= API_AUDIENCE= ALLOW_BACKEND_MODE_SWITCH= npx tsx:*)",
+      "Bash(BACKEND_MODE=production FUNCTION_APP_URL=https://test.azurewebsites.net API_AUDIENCE=api://test-client-id ALLOW_BACKEND_MODE_SWITCH=true npx tsx:*)",
+      "Bash(SPFX_API_RESOURCE=hb-intel-api-production npx tsx tools/build-spfx-package.ts --domain estimating)",
+      "Bash(SPFX_API_RESOURCE=hb-intel-api-dev npx tsx tools/build-spfx-package.ts --domain estimating)"
     ]
   },
   "enabledPlugins": {

@@ -54,7 +54,7 @@ These require tenant administrator action before production deployment:
 | D3 | MI → Sites.FullControl.All on SharePoint | IT / SharePoint admin | Pending |
 | D4 | MI → Group.ReadWrite.All on Graph (application) | IT / Entra admin | Pending |
 | D5 | App registration with `api://<client-id>` audience | IT / Identity admin | Pending |
-| D6 | SPFx API access approved in SP admin center | IT / SharePoint admin | Pending |
+| D6 | SPFx API permission approved in SharePoint admin center → API access page (`.sppkg` declares `webApiPermissionRequests`; request surfaces after deployment) | IT / SharePoint admin | Pending |
 | D7 | All 8 required env vars set | DevOps | Pending |
 | D8 | CORS verified (host.json or portal match) | DevOps | Pending |
 
@@ -95,7 +95,7 @@ None — all code-level blockers are closed.
 | **Identity** | MI role: Sites.FullControl.All | Phase-4_CORS-Permissions-Connected-Services.md |
 | **Identity** | MI role: Group.ReadWrite.All (app) | Phase-4_CORS-Permissions-Connected-Services.md |
 | **Identity** | App registration: `api://<client-id>` | Phase-3_API-Token-Contract.md |
-| **Identity** | SPFx API access approved | Phase-4_CORS-Permissions-Connected-Services.md |
+| **Identity** | SPFx API permission approved (`.sppkg` declares `webApiPermissionRequests`; approve after deployment) | Phase-4_CORS-Permissions-Connected-Services.md |
 | **Config** | 8 required env vars set | Phase-4_Startup-Scope-Contract.md |
 | **Config** | CORS matches `host.json` | Phase-4_CORS-Permissions-Connected-Services.md |
 | **Verification** | `GET /api/health` → `operationalReadiness: ready` | Phase-5_Deployment-Runbook.md §2 Phase C |
