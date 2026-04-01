@@ -29,6 +29,7 @@ app.http('provisionProjectSite', {
       const body = (await request.json()) as IProvisionSiteRequest;
       // D-PH6-03 trust boundary: server overwrites identity from validated JWT claims.
       body.triggeredBy = auth.claims.upn;
+      body.triggeredByOid = auth.claims.oid;
       const correlationId = body.correlationId ?? randomUUID();
       body.correlationId = correlationId;
 

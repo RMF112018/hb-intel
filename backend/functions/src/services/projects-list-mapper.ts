@@ -137,6 +137,10 @@ export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProj
     clarificationRequestedAt: readOptionalString(item, 'clarificationRequestedAt'),
     requesterRetryUsed: item.requesterRetryUsed === 'true',
     clarificationItems: safeParseJsonObjects(item.clarificationItems, 'clarificationItems', logger) as unknown as IProjectSetupRequest['clarificationItems'],
+
+    // ── P9-G5-05: Stable identity fields ──────────────────────────────────
+    submittedByOid: readOptionalString(item, 'submittedByOid'),
+    completedByOid: readOptionalString(item, 'completedByOid'),
   };
 }
 
@@ -198,6 +202,10 @@ export function toListItem(request: IProjectSetupRequest, logger?: ILogger): IPr
     clarificationRequestedAt: request.clarificationRequestedAt ?? '',
     requesterRetryUsed: request.requesterRetryUsed ? 'true' : 'false',
     clarificationItems: JSON.stringify(request.clarificationItems ?? []),
+
+    // ── P9-G5-05: Stable identity fields ──────────────────────────────────
+    submittedByOid: request.submittedByOid ?? '',
+    completedByOid: request.completedByOid ?? '',
   };
 
   // P6-01: Diagnostic guard — warn if any json-array field approaches the SP MultiLineText ceiling

@@ -67,7 +67,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-02 | Target Architecture and Policy Matrix | **Complete** | 2026-04-01 | Architecture and route-policy matrix frozen |
 | 1-03 | Entra App Role and Scope Contract | **Complete** | 2026-04-01 | Entra contract frozen: 6 app-roles, delegated scope, token differentiation |
 | 1-04 | Shared Authorization Policy Engine | **Complete** | 2026-04-01 | Policy module created, 60 tests, 6 admin guards replaced |
-| 1-05 | Oid Migration and Data Contract | Not started | — | — |
+| 1-05 | Oid Migration and Data Contract | **Complete** | 2026-04-01 | oid fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
 | 1-06 | Request Lifecycle Authorization Convergence | Not started | — | — |
 | 1-07 | Provisioning and Admin Authorization Convergence | Not started | — | — |
 | 1-08 | Workload and App-Only Authorization | Not started | — | — |
@@ -115,6 +115,20 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Modified | `backend/functions/src/functions/signalr/index.ts` — replaced local `ADMIN_ROLES` constant and inline check with shared `isAdmin()` |
 | Modified | `backend/functions/vitest.config.ts` — added authorization test and coverage entries |
 | Modified | `backend/functions/package.json` — version bump `0.0.101` → `0.0.102` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-05 (P9-G5-05)
+
+| Action | File |
+|--------|------|
+| Modified | `packages/models/src/provisioning/IProvisioning.ts` — added `submittedByOid`, `triggeredByOid`, `completedByOid` to 3 interfaces |
+| Modified | `backend/functions/src/functions/projectRequests/index.ts` — dual-write `oid` at submission, completion, and auto-provisioning handoff |
+| Modified | `backend/functions/src/functions/provisioningSaga/index.ts` — dual-write `triggeredByOid` at trust boundary |
+| Modified | `backend/functions/src/services/table-storage-service.ts` — serialize/deserialize `triggeredByOid` and `submittedByOid` |
+| Modified | `backend/functions/src/services/projects-list-contract.ts` — added `submittedByOid`, `completedByOid` to `IProjectsListItem` |
+| Modified | `backend/functions/src/services/projects-list-mapper.ts` — added oid fields to read (`toDomain`) and write (`toListItem`) paths |
+| Modified | `backend/functions/package.json` — version bump `0.0.102` → `0.0.103` |
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Oid-Migration-and-Data-Contract.md` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -198,6 +212,34 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Shared policy layer can express delegated scope checks, role checks, workload checks, and ownership checks
 - [x] Tests prove policy layer behavior and cover negative cases (60 tests across 14 describe blocks)
 
+### Prompt 1-05 (P9-G5-05)
+
+**Scope:** Code changes — oid field additions across models, handlers, and persistence layers.
+
+**Verification results:**
+- `@hbc/models build`: pass
+- `@hbc/functions check-types`: pass (0 errors)
+- `@hbc/functions lint`: pass (0 errors, 75 pre-existing warnings)
+- `@hbc/functions build`: pass (clean compilation)
+- `@hbc/functions test`: 52 files passed, 745 tests passed, 3 skipped
+- Workspace `pnpm check-types`: all tasks pass except pre-existing `@hbc/spfx-leadership#build` failure (unrelated)
+
+**What changed:**
+- `IProjectSetupRequest`: added `submittedByOid?`, `completedByOid?`
+- `IProvisionSiteRequest`: added `triggeredByOid?`, `submittedByOid?`
+- `IProvisioningStatus`: added `triggeredByOid?`, `submittedByOid?`
+- `submitProjectSetupRequest`: captures `auth.claims.oid` as `submittedByOid`
+- `advanceRequestState`: captures `auth.claims.oid` as `completedByOid` on completion; propagates `submittedByOid` and `triggeredByOid` through auto-provisioning handoff
+- `provisionProjectSite`: captures `auth.claims.oid` as `triggeredByOid` at trust boundary
+- Table storage: serializes/deserializes `triggeredByOid` and `submittedByOid`
+- SharePoint mapper: reads/writes `submittedByOid` and `completedByOid`
+- `IProjectsListItem`: added `submittedByOid` and `completedByOid` fields
+
+**Acceptance criteria status:**
+- [x] Stable identity fields exist in repo-owned code where needed for ownership and actor attribution
+- [x] Authorization-critical logic can rely on stable IDs (via `checkOwnership()` from P9-G5-04) even while older records work via UPN fallback
+- [x] All oid fields are optional, preserving backward compatibility for pre-migration records
+
 ---
 
 ## Version History
@@ -208,3 +250,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1.1 | 2026-04-01 | P9-G5-02 | Target authorization architecture and route-policy matrix frozen — 2 documents created, 3 design decisions resolved |
 | 1.2 | 2026-04-01 | P9-G5-03 | Entra app-role and scope contract frozen — 6 app-roles, delegated scope, token differentiation, environment setup matrix |
 | 2.0 | 2026-04-01 | P9-G5-04 | Shared authorization policy engine — new module, 60 tests, 6 admin guards consolidated, validateToken extended for app-only tokens |
+| 2.1 | 2026-04-01 | P9-G5-05 | Oid migration — stable identity fields added to 3 model interfaces, 3 handlers, 2 persistence layers |

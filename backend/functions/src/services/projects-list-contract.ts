@@ -132,6 +132,15 @@ export interface IProjectsListItem {
   requesterRetryUsed: string;
   /** Structured clarification items — JSON-serialized array in SP MultiLineText. */
   clarificationItems: string;
+
+  // ── P9-G5-05: Stable identity fields ──────────────────────────────────
+  // Added for oid-based ownership and actor attribution. Optional: absent
+  // on pre-migration rows.
+
+  /** P9-G5-05: Entra Object ID of the submitter. */
+  submittedByOid: string;
+  /** P9-G5-05: Entra Object ID of the user who completed the request. */
+  completedByOid: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -125,6 +125,7 @@ app.http('submitProjectSetupRequest', {
       projectType: body.projectType ?? '',
       projectStage: body.projectStage ?? 'Pursuit',
       submittedBy: auth.claims.upn,
+      submittedByOid: auth.claims.oid,
       submittedAt: new Date().toISOString(),
       state: 'Submitted',
       groupMembers: body.groupMembers!,
@@ -327,6 +328,7 @@ app.http('advanceRequestState', {
     // Completion metadata: only set on actual completion states
     if (body.newState === 'Completed') {
       existing.completedBy = auth.claims.upn;
+      existing.completedByOid = auth.claims.oid;
       existing.completedAt = new Date().toISOString();
     }
 
@@ -349,9 +351,11 @@ app.http('advanceRequestState', {
           projectNumber: existing.projectNumber!,
           projectName: existing.projectName,
           triggeredBy: auth.claims.upn,
+          triggeredByOid: auth.claims.oid,
           correlationId: randomUUID(),
           groupMembers: existing.groupMembers,
           submittedBy: existing.submittedBy,
+          submittedByOid: existing.submittedByOid,
           groupLeaders: existing.groupLeaders,
           department: existing.department,
         };

@@ -32,12 +32,16 @@ export interface IProvisionSiteRequest {
   projectName: string;
   /** UPN of the user who triggered provisioning (from validated Bearer token). */
   triggeredBy: string;
+  /** P9-G5-05: Entra Object ID of the user who triggered provisioning. */
+  triggeredByOid?: string;
   /** Correlation ID for this provisioning run (UUID v4, generated at trigger time). */
   correlationId: string;
   /** Members to be added to the project Team group. Array of UPNs. */
   groupMembers: string[];
   /** UPN of the Estimating Coordinator who submitted the Project Setup Request. */
   submittedBy: string;
+  /** P9-G5-05: Entra Object ID of the Estimating Coordinator who submitted. */
+  submittedByOid?: string;
   /** W0-G1-T02: UPNs for the Leaders group (Full Control). */
   groupLeaders?: string[];
   /** W0-G1-T02: Department for background viewer access lookup. */
@@ -58,7 +62,11 @@ export interface IProvisioningStatus {
   steps: ISagaStepResult[];
   siteUrl?: string;
   triggeredBy: string;
+  /** P9-G5-05: Entra Object ID of the user who triggered provisioning. */
+  triggeredByOid?: string;
   submittedBy: string;
+  /** P9-G5-05: Entra Object ID of the Estimating Coordinator. */
+  submittedByOid?: string;
   groupMembers: string[];
   startedAt: string;
   completedAt?: string;
@@ -140,6 +148,8 @@ export interface IProjectSetupRequest {
   projectType: string;
   projectStage: 'Lead' | 'Pursuit' | 'Preconstruction' | 'Construction' | 'Closeout' | 'Warranty';
   submittedBy: string;
+  /** P9-G5-05: Entra Object ID of the Estimating Coordinator who submitted. */
+  submittedByOid?: string;
   submittedAt: string;
   state: ProjectSetupRequestState;
   projectNumber?: string;
@@ -150,6 +160,8 @@ export interface IProjectSetupRequest {
   department?: ProjectDepartment;
   clarificationNote?: string;
   completedBy?: string;
+  /** P9-G5-05: Entra Object ID of the user who completed the request. */
+  completedByOid?: string;
   completedAt?: string;
   /** W0-G3-T01: Step 1 — estimated contract value (optional). */
   estimatedValue?: number;
