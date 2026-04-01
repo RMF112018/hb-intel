@@ -53,6 +53,7 @@ Ensure the review report contains, at minimum:
 - Executive Summary
 - Phase 2 Scope Completed
 - Final Frozen Backend Contract
+- Request-State Model Versus Provisioning-Run Model
 - Implemented Validation / Idempotency Controls
 - Request / Run / Status Model
 - Accounting Compatibility Result
@@ -81,6 +82,12 @@ Also classify major docs touched by this phase as:
 - partially stale
 - superseded in this context
 
+At minimum, explicitly classify the final status of:
+
+- `docs/reference/provisioning/state-machine.md`
+- `docs/maintenance/provisioning-runbook.md`
+- `docs/architecture/plans/PH6.11-Accounting-App.md`
+
 ## Verification
 
 Run a final pass of the most relevant valid commands:
@@ -100,6 +107,7 @@ Capture outcomes in the final report.
 
 - the repo has a final Phase 2 evidence package
 - the backend lifecycle contract is documented consistently enough to support Phase 3
+- request-state and provisioning-run lifecycle distinctions remain explicit
 - required frontend follow-up is clearly separated from completed backend work
 - production blockers are explicitly identified instead of implied
 - historical PH6 and older MVP docs are not silently treated as current authority

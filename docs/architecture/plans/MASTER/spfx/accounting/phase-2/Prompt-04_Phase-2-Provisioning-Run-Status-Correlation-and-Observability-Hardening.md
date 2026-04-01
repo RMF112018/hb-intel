@@ -16,6 +16,10 @@ Audit and harden the backend’s durable run/status model so controller-launched
 - Do not re-read files already in active context unless needed to verify a contradiction or capture exact evidence.
 - Keep the changes bounded to Project Setup lifecycle supportability.
 - Start from the existing run/status/admin API surface before asking for net-new model work.
+- Explicitly distinguish:
+  - controller approval response contract
+  - direct provisioning endpoint response contract
+  - durable status lookup contract
 
 ## Required Hardening Areas
 
@@ -30,12 +34,19 @@ Ensure the backend can clearly answer:
 
 ### 2. Launch Response Contract
 
-Ensure the backend returns a stable and useful response when provisioning is launched, including where appropriate:
+Ensure the backend contract is stable and documented for both:
+
+- controller approval auto-launch path
+- direct provisioning endpoint path
+
+Where appropriate, document or return:
 
 - request identity
 - run reference
 - correlation identity
 - initial durable status reference
+
+Do not pretend the controller approval `PATCH /state` path already returns richer launch metadata if it does not. Either preserve and document the current pattern honestly or deliberately extend it.
 
 ### 3. Durable Status Consistency
 
@@ -48,6 +59,7 @@ Ensure the durable status record consistently reflects:
 - timestamps
 - correlation identifiers
 - escalation / retry state where applicable
+- whichever persisted fields the admin surfaces and runbooks now depend on
 
 ### 4. Operational Evidence And Diagnostics
 
@@ -88,6 +100,8 @@ Pay explicit attention to already-existing surfaces such as:
 - updated tests or verification coverage for status/run behavior
 - report updates describing:
   - request/run/status correlation model
+  - controller launch response contract
+  - direct provisioning endpoint response contract
   - current durable status authority
   - remaining observability gaps
   - any required downstream UI follow-up for Phase 3
@@ -107,6 +121,6 @@ Inspect whether the current runbook still accurately reflects live behavior and 
 ## Acceptance Criteria
 
 - request/run/status relationships are explicit and durable
-- launch response contract is clear enough for the Accounting app
+- launch-response semantics are clear enough for the Accounting app and admin surfaces
 - durable status remains the source of truth
 - the report documents both the resulting operational model and any remaining gaps honestly

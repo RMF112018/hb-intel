@@ -10,9 +10,17 @@ Canonical working copy:
 
 Package-copy check:
 
-- targeted repo lookup surfaced this Phase 2 package copy only under `/Users/bobbyfetting/hb-intel`
+- confirm the repo-relative package location above is the working copy being updated
+- explicitly state whether any duplicate package copies are found elsewhere in the repo before treating another copy as authoritative
 
 Phase 2 remains an **implementation-forward backend hardening phase**. It is not a Phase 1-style contract-only phase. Its job is to harden the backend lifecycle contract, validations, idempotency, run/status correlation, and Accounting compatibility against current repo truth.
+
+Phase 2 must keep two different state planes explicit:
+
+- the **project setup request-state lifecycle**
+- the **provisioning run / durable status lifecycle**
+
+The backend is authoritative across both, but the package must not let a local code agent flatten them into one model.
 
 ## Authority Order
 
@@ -35,6 +43,10 @@ The live repo currently shows all of the following:
 - Admin recovery routes and API methods already exist for retry, archive, escalation acknowledgment, state override, and run listing
 - `AwaitingExternalSetup` still exists in the lifecycle and Accounting queue model, but the live Accounting detail surface still lacks a forward action there
 - durable provisioning status, admin actions, and Project Setup host-boundary work are further along than some PH6-era wording implies
+- the current repo includes more than one provisioning launch entry point, so Phase 2 must distinguish:
+  - the controller-facing approval-triggered launch path
+  - direct provisioning endpoint launch
+  - admin retry / recovery launch
 - the Phase 2 implementation report path referenced by this package does not yet exist and should be treated as a deliverable to create, not an already-present artifact
 
 These facts are the starting point for Phase 2. Do not write prompts that ignore them.
@@ -52,7 +64,7 @@ These facts are the starting point for Phase 2. Do not write prompts that ignore
 ## Recommended Execution Order
 
 1. Prompt-01 — establish repo truth and a hardening gap baseline
-2. Prompt-02 — freeze and implement the lifecycle / launch contract
+2. Prompt-02 — freeze and implement the controller-facing lifecycle / launch contract
 3. Prompt-03 — harden validations, uniqueness, and idempotency controls
 4. Prompt-04 — harden provisioning run/status correlation and observability seams
 5. Prompt-05 — verify Accounting workflow compatibility with the hardened backend
@@ -77,6 +89,7 @@ Do not skip order. Prompt-02 depends on Prompt-01 findings. Prompt-03 through Pr
   - Admin = recovery / override / escalation
   - backend/functions = lifecycle and orchestration authority
   - `@hbc/provisioning` = shared lifecycle contract / client / store seam
+- Keep request-state lifecycle truth and provisioning-run truth separate unless a deliberate architecture change justifies merging or redefining them.
 
 ## Expected Review Artifact
 
@@ -91,7 +104,7 @@ This file is the expected Phase 2 evidence package output. If it does not yet ex
 Phase 2 is complete only when the final report shows that:
 
 - the backend lifecycle contract is coherent
-- the provisioning trigger behavior is explicit and documented
+- the controller-facing provisioning trigger behavior is explicit and documented
 - backend validations and idempotency controls are trustworthy
 - run/status relationships are durable enough to support operations
 - the Accounting workflow no longer depends on undefined backend behavior
@@ -99,3 +112,4 @@ Phase 2 is complete only when the final report shows that:
   - Phase 3 frontend follow-up
   - external dependency
   - intentionally deferred work
+- request-state and provisioning-run lifecycle distinctions remain explicit and accurate

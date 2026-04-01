@@ -2,42 +2,87 @@
 
 ## Objective
 
-Translate the Phase 7 security and connected-service findings into a production deployment package: explicit deployment gates, tenant prerequisites, operational dependencies, and readiness verification docs.
+Translate the Phase 7 auth, CORS, environment, and connected-service findings into a production deployment package: explicit deployment gates, tenant prerequisites, operational dependencies, readiness verification checklists, and blocker registers suitable for implementation planning and IT coordination.
 
-## Core instructions
+Use the outputs from:
 
-- Treat the live repo as authoritative implementation truth.
-- Do not re-read files that are still within your current context or memory unless needed to verify a contradiction or retrieve exact evidence.
-- Use official Microsoft documentation where platform/security behavior needs confirmation.
-- Distinguish clearly between:
-  - confirmed repo fact
-  - confirmed repo-doc intent
-  - confirmed Microsoft-documented requirement / best practice
-  - inferred recommendation
-  - unresolved dependency
-- Keep scope constrained to this prompt’s task.
+- `docs/architecture/reviews/project-setup-phase-7-security-and-connected-services-audit.md`
+- `docs/reference/configuration/project-setup-api-auth-contract.md`
+- `docs/reference/configuration/project-setup-environment-readiness.md`
+- `docs/reference/configuration/project-setup-connected-services-readiness.md`
 
-## Required work
+## Critical Working Rules
+
+- Treat live repo truth as authoritative for what is code-complete today.
+- Use official Microsoft docs where admin approval and tenant-readiness behavior needs confirmation.
+- Do not re-read files already in active context unless needed to verify contradiction, retrieve exact evidence, or confirm a change.
+- This is a rollout-readiness prompt, not a broad implementation prompt.
+- Keep the distinction explicit between:
+  - code-complete
+  - environment-ready
+  - tenant-ready
+  - production-approved
+
+## Required Work
 
 1. Create or reconcile the deployment-readiness checklist for the Project Setup / Accounting / provisioning solution.
-2. Identify every tenant-admin or platform-admin dependency required before production launch or pilot launch.
-3. Reconcile the runbook / support / operational documentation against the final security and connected-service posture.
-4. Document staging, pilot, and production go/no-go gates tied to real repo truth and platform dependencies.
-5. Produce an explicit blocker register for anything that remains unresolved after this prompt.
+2. Identify every tenant-admin or platform-admin dependency required before pilot or production rollout.
+3. Reconcile operational and runbook guidance against the final auth / CORS / config / connected-service posture.
+4. Define go/no-go gates for:
+   - staging
+   - pilot
+   - production
+5. Produce a blocker register with explicit owner types and resolution paths.
 
-## Required outputs
+## Required Source Review
 
-- A deployment-readiness checklist
-- A tenant prerequisite matrix
-- A blocker register and go/no-go gate definition for staging, pilot, and production
+At minimum, review and reconcile:
 
-## Documentation / report targets to update
+- the Phase 7 audit report
+- `docs/reference/configuration/project-setup-api-auth-contract.md`
+- `docs/reference/configuration/project-setup-environment-readiness.md`
+- `docs/reference/configuration/project-setup-connected-services-readiness.md`
+- `docs/reference/developer/project-setup-connected-service-posture.md`
+- `docs/reference/configuration/sites-selected-validation.md`
+- `backend/functions/README.md`
+- any current deployment or admin-runbook docs already in repo that directly affect Project Setup rollout
+
+## Required Deliverables
+
+Create or update:
 
 - `docs/maintenance/project-setup-deployment-readiness-checklist.md`
 - `docs/maintenance/project-setup-tenant-prerequisites.md`
 - `docs/architecture/reviews/project-setup-phase-7-security-and-connected-services-audit.md`
 
-## Additional requirements
+If either maintenance doc does not yet exist, create it and record that fact in the audit report.
 
-- Keep the distinction clear between code-complete, environment-ready, tenant-ready, and production-approved.
+## Required Contents For `project-setup-deployment-readiness-checklist.md`
 
+- Executive Summary
+- Code-Complete Criteria
+- Environment-Ready Criteria
+- Tenant-Ready Criteria
+- Staging Go/No-Go Gates
+- Pilot Go/No-Go Gates
+- Production Go/No-Go Gates
+- Verification Steps
+- Evidence Required Before Signoff
+- Blockers That Must Be Closed Before Each Gate
+
+## Required Contents For `project-setup-tenant-prerequisites.md`
+
+- Executive Summary
+- Entra App Registration / API Audience Prerequisites
+- SharePoint Admin API Access Approval Prerequisites
+- Managed Identity Assignment Prerequisites
+- Graph Permission Prerequisites
+- SharePoint / Sites.Selected Grant Prerequisites
+- Azure Resource Configuration Prerequisites
+- CORS / Origin Configuration Prerequisites
+- Operational Ownership Matrix
+- Explicit External Blocker Register
+
+## Completion Standard
+
+This prompt is complete only when the repo contains a rollout-ready package that makes it clear which remaining tasks belong to code owners versus tenant/platform administrators.

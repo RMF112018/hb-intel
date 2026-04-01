@@ -28,11 +28,13 @@ Implement or confirm server-side enforcement for:
 
 - required timing of project-number entry
 - format validation (`##-###-##`)
-- uniqueness validation where the backend lifecycle actually owns it
+- uniqueness validation **only where the backend lifecycle or authoritative repository layer actually owns it**
 - clear conflict response behavior for duplicates
 - clear machine-readable and human-readable error paths
 
-Do not overstate activation-layer duplicate detection as if request lifecycle code already enforces it.
+Do not overstate activation-layer duplicate detection or list-level assumptions as if request lifecycle code already enforces them.
+
+If true uniqueness enforcement is not fully implemented by the end of this prompt, document that honestly in the report instead of implying closure.
 
 ### 2. Transition Guard Hardening
 
@@ -42,6 +44,7 @@ Ensure server-side blocking exists for business-critical prerequisites, includin
 - external-setup completion gating
 - missing required fields for launch
 - invalid reopen / rerun combinations
+- request-state / run-state combinations that should not coexist
 
 ### 3. Idempotency And Duplicate-Run Prevention
 
@@ -53,7 +56,7 @@ Ensure the backend prevents:
 
 ### 4. Explicit Evidence
 
-Ensure that failed validations and blocked launch attempts produce useful operational evidence.
+Ensure that failed validations, blocked launches, and duplicate-run blocks produce useful operational evidence.
 
 ## Required Files To Audit And Update As Needed
 
@@ -69,17 +72,20 @@ packages/models/src/provisioning/*
 docs/architecture/reviews/project-setup-accounting-phase-2-backend-lifecycle-hardening-report.md
 ```
 
+If uniqueness enforcement touches repository-layer or list-mapper seams, review and update the necessary repository-contract files instead of faking the result at the controller boundary.
+
 ## Required Deliverables
 
 1. implemented backend validation hardening
 2. new or updated tests for:
-   - duplicate project-number rejection where Phase 2 actually enforces it
+   - duplicate project-number rejection **where Phase 2 actually enforces it**
    - invalid launch preconditions
    - duplicate provisioning-run prevention
 3. updated Phase 2 report section:
    - Validation And Idempotency Hardening
    - Existing Enforcement Versus Remaining Gaps
    - Open Exceptions / External Dependencies
+   - Conflict Response Behavior
 
 ## Verification
 
@@ -96,6 +102,7 @@ Add `pnpm --filter @hbc/provisioning check-types` if API/client contract changes
 
 - project-number format rules are enforced server-side to the degree claimed by the prompt
 - uniqueness claims are explicit, accurate, and not overstated
-- duplicate launches are blocked server-side
+- duplicate launches are blocked server-side or explicitly carried as a remaining gap
 - transition preconditions are enforced server-side
+- useful evidence is recorded for blocked launch / validation failures
 - test evidence is recorded in the report

@@ -2,7 +2,7 @@
 
 ## Objective
 
-Conduct a fresh repo-truth audit of the Accounting-side Project Setup workflow contract. The goal is to identify every discrepancy, stale assumption, ambiguity, or authority conflict that must be resolved before workflow semantics are frozen.
+Conduct a fresh repo-truth audit of the Accounting-side Project Setup workflow contract. The goal is to identify every discrepancy, stale assumption, ambiguity, authority conflict, and current-backend-posture dependency that must be resolved before workflow semantics are frozen.
 
 This is an audit prompt, not a broad implementation prompt.
 
@@ -14,29 +14,44 @@ This is an audit prompt, not a broad implementation prompt.
 - Do not re-read files already in active context unless needed to verify contradiction, capture exact evidence, or confirm a change.
 - Do not make broad code changes.
 - Only make narrowly scoped documentation updates if needed to record a strictly factual repo-truth observation.
+- Do not collapse “allowed transition,” “current UI action,” and “system-owned progression” into one concept.
 
 ## Canonical Copy Check
 
-Before concluding the audit memo, confirm which package copy is canonical.
+Before concluding the audit memo, confirm which package copy is canonical **in the current workspace**.
 
 Required result for this package:
 
-- record that the package under `docs/architecture/plans/MASTER/spfx/accounting/phase-1/` is the working copy that was audited
-- explicitly state whether any duplicate package copies were found
+- state whether the package exists under `docs/architecture/plans/MASTER/spfx/accounting/phase-1/`
+- explicitly state whether duplicate package copies were found in the current workspace
+- if the package being audited is only an attached artifact / local draft and not yet committed in the repo, say so directly
+- do not hard-code machine-specific absolute paths in the memo
 
 ## Required Audit Scope
 
 Audit the current repo truth across at least the following:
 
+### Accounting surface and tests
 - `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`
 - `apps/accounting/src/pages/ProjectReviewDetailPage.tsx`
+- `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx`
+- `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx`
+
+### Shared lifecycle / ownership package
 - `packages/provisioning/src/state-machine.ts`
 - `packages/provisioning/src/bic-config.ts`
 - `packages/provisioning/src/notification-registrations.ts`
+
+### Backend lifecycle / auth / host posture
 - `backend/functions/src/state-machine.ts`
 - `backend/functions/src/functions/projectRequests/index.ts`
 - `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts`
 - `backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts`
+- `backend/functions/src/hosts/project-setup/service-factory.ts`
+- `backend/functions/src/middleware/auth.ts`
+- `backend/functions/src/middleware/authorization.ts`
+
+### Current-state and living docs
 - `docs/architecture/blueprint/current-state-map.md`
 - `docs/reference/spfx-surfaces/controller-review-surface.md`
 - `docs/reference/spfx-surfaces/admin-recovery-boundary.md`
@@ -55,17 +70,22 @@ Also inspect the following as likely stale or partially stale comparison sources
 ## Questions You Must Answer
 
 1. What exact Accounting-side controller actions are implemented today?
-2. What request states and transitions are implemented today?
-3. What exact backend event currently starts the provisioning saga?
-4. How does the live repo distinguish:
+2. What exact queue filters and detail-page affordances are implemented today?
+3. What exact approval action is implemented today, including the project-number requirement and call shape?
+4. What request states and transitions are implemented today?
+5. What exact backend event currently starts the provisioning saga?
+6. How does the live repo distinguish:
    - controller approval and transition to `ReadyToProvision`
    - automatic provisioning start
    - system-owned `Provisioning`
-5. Is there a live Accounting UI gap between `AwaitingExternalSetup` and the next valid state?
-6. What responsibilities are already clearly separated across Accounting, Estimating, Admin, backend, and `@hbc/provisioning`?
-7. Which docs still describe a different workflow from current code?
-8. Which stale docs are merely historical, and which are still risky because they could mislead a later implementation agent?
-9. Which discrepancies are severe enough to block later implementation if left unresolved?
+7. Is `ReadyToProvision` still a real modeled state in current practice, and if so, what role does it actually serve?
+8. Is there a live Accounting UI gap between `AwaitingExternalSetup` and the next valid state?
+9. What responsibilities are already clearly separated across Accounting, Estimating, Admin, backend orchestration, and `@hbc/provisioning`?
+10. Which current docs still describe a different workflow from current code?
+11. Which stale docs are merely historical, and which are still risky because they could mislead a later implementation agent?
+12. Which discrepancies are severe enough to block later implementation if left unresolved?
+13. Which current backend-auth / domain-host posture files materially affect the workflow contract and therefore must be carried into later prompts?
+14. Does any current living surface doc remain authoritative in family but partially stale in detail?
 
 ## Required Output
 
@@ -79,10 +99,11 @@ The memo must include:
 - Canonical Copy Check
 - Confirmed Repo Facts
 - Confirmed Repo-Doc Intent
+- Current Backend/Auth/Host Posture Facts That Matter To Phase 1
 - Discrepancy Inventory
-- Stale Authority Paths And Why They Are Stale
+- Stale Authority Paths and Why They Are Stale
 - Severity Ranking
-- Recommended Freeze Decisions For Prompt-02
+- Recommended Freeze Decisions for Prompt-02
 - Explicit Open Questions
 - Exact Files Inspected
 
@@ -97,7 +118,7 @@ For every major finding, label it as one of:
 
 Do not mix these categories together without saying which category is doing the work.
 
-## Required Structure For Discrepancy Inventory
+## Required Structure for Discrepancy Inventory
 
 For each discrepancy, include:
 
@@ -110,6 +131,14 @@ For each discrepancy, include:
 - recommended resolution direction
 - downstream implementation risk if unresolved
 
+At minimum, expect discrepancy rows for:
+
+- lifecycle wording drift around `ReadyToProvision`
+- `AwaitingExternalSetup` contract vs live UI gap
+- controller-review doc drift if action mapping omits project-number capture
+- notification-doc drift where provisioning trigger language no longer matches current backend behavior
+- auth / notification recipient language that could be misread as current authorization guidance
+
 ## Verification
 
 At the end of your response and in the memo, include:
@@ -121,4 +150,4 @@ At the end of your response and in the memo, include:
 
 ## Completion Standard
 
-This prompt is complete only when the repo contains a clean discrepancy memo that future prompts can use as the decision basis for lifecycle, boundary, and documentation freeze work.
+This prompt is complete only when the repo contains a clean discrepancy memo that future prompts can use as the decision basis for lifecycle, boundary, documentation, and evidence freeze work.

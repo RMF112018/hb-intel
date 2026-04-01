@@ -2,7 +2,7 @@
 
 ## Objective
 
-Reconcile the authoritative documentation set so it reflects the frozen workflow contract, boundary model, and validation/evidence contract without leaving later implementation agents exposed to stale PH6 language.
+Reconcile the authoritative documentation set so it reflects the frozen workflow contract, boundary model, validation/evidence contract, and current auth/backend posture without leaving later implementation agents exposed to stale PH6 language.
 
 Use the outputs from:
 
@@ -27,11 +27,19 @@ Use the outputs from:
 
 Review and update the docs most relevant to the Accounting-side Project Setup workflow, including where appropriate:
 
+### Must-review current authority family
 - `docs/architecture/blueprint/current-state-map.md`
-- current living surface docs
-- current provisioning reference docs
-- Project Setup production-readiness reference docs
-- older PH6 or historical docs that still need explicit stale/superseded/limited-scope treatment
+- `docs/reference/spfx-surfaces/controller-review-surface.md`
+- `docs/reference/spfx-surfaces/admin-recovery-boundary.md`
+- `docs/reference/spfx-surfaces/coordinator-visibility-spec.md`
+- `docs/reference/developer/project-setup-connected-service-posture.md`
+- `docs/reference/provisioning/verification-matrix.md`
+
+### Must-review drift-risk docs
+- `docs/reference/provisioning/request-lifecycle.md`
+- `docs/reference/workflow-experience/setup-notification-registrations.md`
+- `docs/reference/provisioning/notification-event-matrix.md`
+- `docs/architecture/plans/PH6.8-RequestLifecycle-StateEngine.md`
 
 Do not treat PH6 planning docs and current living docs as peers.
 
@@ -44,14 +52,14 @@ Create a reconciliation summary at:
 The summary must include:
 
 - Documents Updated
-- Documents Reviewed But Left Unchanged
-- Current Authoritative Source List For Later Work
+- Documents Reviewed but Left Unchanged
+- Current Authoritative Source List for Later Work
 - Documents Classified As:
   - superseded
   - historical but still useful as evidence
   - partially stale
   - still authoritative in limited scope
-- Superseded Statements Removed Or Annotated
+- Superseded Statements Removed or Annotated
 - Remaining Documentation Risks
 
 ## Hard Requirement
@@ -60,10 +68,22 @@ At the end of this prompt, a later implementation agent should be able to tell e
 
 - lifecycle semantics
 - provisioning trigger semantics
+- the exact approval action contract
 - Accounting/Admin/Estimating boundary
 - validation rules
 - audit/evidence expectations
+- current auth / role / host posture that matters to Project Setup
 - Project Setup production-readiness posture
+
+## Additional Hard Requirement
+
+Explicitly reconcile and classify the following kinds of drift if they still exist:
+
+- wording that implies the controller later launches provisioning after `ReadyToProvision`
+- wording that omits the required project-number capture on approval
+- wording that treats env-var recipient configuration as current authorization authority
+- wording that implies every contract-valid transition is currently exposed in the live Accounting UI
+- older notification docs that remain useful only as historical evidence
 
 ## Completion Standard
 

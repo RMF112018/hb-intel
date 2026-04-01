@@ -1,8 +1,8 @@
-# Prompt-02 — Phase 1 Request Lifecycle And Provisioning Trigger Freeze
+# Prompt-02 — Phase 1 Request Lifecycle and Provisioning Trigger Freeze
 
 ## Objective
 
-Freeze the request lifecycle semantics and the authoritative provisioning trigger explanation for the Accounting-side Project Setup workflow.
+Freeze the request lifecycle semantics and the authoritative provisioning-trigger explanation for the Accounting-side Project Setup workflow.
 
 Use the audit output from:
 
@@ -18,23 +18,27 @@ This prompt must convert the discrepancy inventory into one coherent contract st
 - Do not re-read files already in active context unless needed to verify a contradiction, capture exact evidence, or confirm a change.
 - This is a workflow-contract freeze prompt, not a broad implementation prompt.
 - Do not introduce broad behavioral changes.
+- Prefer docs updates first. Only add or edit inline source comments if a small clarification is necessary to keep code-local semantics honest.
 
 ## Required Lifecycle Decisions
 
 You must explicitly resolve and document:
 
-1. the controller event that sets `ReadyToProvision`
-2. the backend event that auto-starts the provisioning saga from that transition
-3. the system event that reconciles the request into `Provisioning`
-4. what `AwaitingExternalSetup` means in current contract terms
-5. what `ReadyToProvision` means in current contract terms
-6. what `Provisioning` means in current contract terms
-7. whether any language such as “launch,” “finish setup,” or “complete project setup” remains valid, and if so, in what exact sense
-8. whether `ReadyToProvision` should be treated, in current practice, as:
+1. the exact controller event that sets `ReadyToProvision`
+2. the exact approve call shape, including `projectNumber`
+3. the backend event that auto-starts the provisioning saga from that transition
+4. the current guard conditions around auto-start (for example, when an existing provisioning status suppresses a new trigger)
+5. the system event or progression that reconciles the request into actual provisioning execution
+6. what `AwaitingExternalSetup` means in current contract terms
+7. what `ReadyToProvision` means in current contract terms
+8. what `Provisioning` means in current contract terms
+9. whether any language such as “launch,” “trigger,” “finish setup,” or “complete project setup” remains valid, and if so, in what exact sense
+10. whether `ReadyToProvision` should currently be described as:
    - a durable business state
    - a short-lived handoff state
    - both
-9. what exact transition path the Accounting controller surface must support end to end
+11. what exact transition path the Accounting controller surface currently supports end to end
+12. what valid backend-authorized transition exists that the current Accounting detail page does **not** expose live
 
 Do not assume a distinct controller-side launch button exists unless current repo truth proves it.
 
@@ -42,11 +46,13 @@ Do not assume a distinct controller-side launch button exists unless current rep
 
 At minimum, review and reconcile the most relevant current sources among:
 
+- `apps/accounting/src/pages/ProjectReviewDetailPage.tsx`
+- `packages/provisioning/src/state-machine.ts`
+- `packages/provisioning/src/bic-config.ts`
+- `backend/functions/src/state-machine.ts`
 - `backend/functions/src/functions/projectRequests/index.ts`
 - `backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts`
-- `backend/functions/src/state-machine.ts`
-- `packages/provisioning/src/state-machine.ts`
-- `apps/accounting/src/pages/ProjectReviewDetailPage.tsx`
+- `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts`
 - `docs/architecture/blueprint/current-state-map.md`
 - `docs/reference/spfx-surfaces/controller-review-surface.md`
 - `docs/reference/provisioning/verification-matrix.md`
@@ -63,7 +69,7 @@ Treat the following as likely drift sources to classify or annotate rather than 
 Update the authoritative doc set so the lifecycle contract is no longer contradictory. This may include:
 
 - current living/current-state docs
-- contract comments in state-machine files where a precise clarification is necessary
+- minimal clarifying comments in lifecycle source files if necessary
 - historical docs only when they must be explicitly marked as stale, superseded, or limited-scope
 
 Also create a freeze memo at:
@@ -76,9 +82,11 @@ Also create a freeze memo at:
 - Frozen State Definitions
 - Frozen Transition Model
 - Frozen Trigger Explanation
-- Controller Event Versus System Event Separation
-- Superseded Or Limited-Scope Semantics
-- Required Consequences For Later Implementation
+- Exact Approval Action Contract
+- Controller Event vs System Event Separation
+- Current UI-Supported Path vs Contract-Valid But Not Exposed Path
+- Superseded or Limited-Scope Semantics
+- Required Consequences for Later Implementation
 - Explicitly Deferred Items
 - Ambiguities Intentionally Preserved
 
@@ -86,9 +94,19 @@ Also create a freeze memo at:
 
 At the end of this prompt, there must be one unambiguous answer to:
 
-> What exact controller-side event sets `ReadyToProvision`, what exact backend event starts provisioning, and what exact system action reconciles the request into `Provisioning`?
+> What exact controller-side event sets `ReadyToProvision`, what exact backend event auto-starts provisioning from that approval, and what exact meaning does `Provisioning` retain in the current contract?
 
 If repo truth still leaves a narrower ambiguity, preserve it explicitly instead of inventing certainty.
+
+## Additional Hard Requirement
+
+Your final freeze language must make all of the following explicit:
+
+- approval requires a valid `projectNumber`
+- the backend auto-trigger is currently implemented in `advanceRequestState`
+- `ReadyToProvision` still exists in the modeled lifecycle
+- `ReadyToProvision` and `Provisioning` are not identical even though the handoff is now automatic
+- `ReadyToProvision` and `Provisioning` are currently treated as system-owned in the shared BIC model
 
 ## Verification
 

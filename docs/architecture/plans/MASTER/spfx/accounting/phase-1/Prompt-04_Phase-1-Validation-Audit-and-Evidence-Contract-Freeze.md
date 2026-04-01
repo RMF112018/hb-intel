@@ -1,4 +1,4 @@
-# Prompt-04 — Phase 1 Validation, Audit, And Evidence Contract Freeze
+# Prompt-04 — Phase 1 Validation, Audit, and Evidence Contract Freeze
 
 ## Objective
 
@@ -17,14 +17,18 @@ Use the outputs from:
 - Do not re-read files already in active context unless needed to verify contradiction, capture exact evidence, or confirm a change.
 - This is a contract-freeze prompt, not a broad implementation prompt.
 - Do not build full validation or audit infrastructure here unless a very small correction is strictly necessary to keep documentation accurate.
+- Distinguish “currently enforced,” “currently persisted,” and “required by frozen contract but not yet implemented.”
 
 ## Repo-Truth Gaps This Prompt Must Handle Honestly
 
-At minimum, address the current repo-truth gap that:
+At minimum, address the current repo-truth reality that:
 
-- project-number validation for `ReadyToProvision` is implemented
+- backend submission validation is now broader than the older PH6 minimum field set
+- `ReadyToProvision` currently requires a valid `projectNumber`
+- role-based authorization is claims-based and ownership-aware
 - saga audit behavior exists for provisioning start/completion/failure
-- comprehensive controller-action audit/evidence persistence is not fully represented as a frozen, end-to-end current implementation contract
+- comprehensive controller-action audit/evidence persistence is not yet fully represented as one complete end-to-end frozen implementation contract
+- some current docs still describe notification/env-var posture in ways that can be misread as authorization posture
 
 Do not blur “already persisted today” with “should later be required.”
 
@@ -36,8 +40,10 @@ Do not blur “already persisted today” with “should later be required.”
 4. whether unresolved clarification items block approval in current repo truth or only in later desired contract language
 5. whether project-number uniqueness is currently enforced, partially enforced, or still a required future contract item
 6. what evidence is currently persisted for controller approval, clarification, hold, failed routing, provisioning start, provisioning completion, and provisioning failure
-7. what evidence should be required later even though it is not fully persisted yet
-8. what identifiers and correlation values are currently available and which are still missing
+7. what role/auth context is currently available at action time
+8. what auth-related evidence should be frozen for later implementation even if not fully persisted yet
+9. what evidence should be required later even though it is not fully persisted yet
+10. what identifiers and correlation values are currently available and which are still missing
 
 ## Required Source Review
 
@@ -45,11 +51,14 @@ At minimum, review:
 
 - `apps/accounting/src/pages/ProjectReviewDetailPage.tsx`
 - `backend/functions/src/functions/projectRequests/index.ts`
-- `backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts`
 - `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts`
+- `backend/functions/src/functions/provisioningSaga/saga-orchestrator.ts`
+- `backend/functions/src/middleware/auth.ts`
+- `backend/functions/src/middleware/authorization.ts`
 - `docs/reference/provisioning/verification-matrix.md`
 - `docs/reference/spfx-surfaces/controller-review-surface.md`
 - `docs/reference/spfx-surfaces/admin-recovery-boundary.md`
+- `docs/reference/developer/project-setup-connected-service-posture.md`
 - any current runbook or production-readiness reference directly cited by the earlier prompts
 
 ## Required Deliverable
@@ -64,18 +73,20 @@ The memo must include:
 - Frozen Frontend Assistive Validation Rules
 - Frozen Backend Authoritative Validation Rules
 - Frozen Approval/Handoff Gate Checklist
+- Frozen Role/Auth Context Available at Action Time
 - Currently Persisted Evidence
-- Missing-But-Required Evidence For Later Implementation
+- Missing-but-Required Evidence for Later Implementation
 - Frozen Audit Trail Expectations
-- Frozen Identifier And Correlation Requirements
+- Frozen Identifier and Correlation Requirements
 - Known Repo Gaps
-- Required Consequences For Later Implementation Phases
+- Required Consequences for Later Implementation Phases
 
 ## Required Guidance
 
 For each major controller or system action, be explicit about:
 
 - actor identity
+- resolved role or ownership context
 - timestamp
 - source state
 - destination state
@@ -88,6 +99,13 @@ For each major controller or system action, be explicit about:
   - already persisted today
   - partially persisted today
   - not yet persisted but required by the frozen contract
+
+Also be explicit about whether each auth or notification-related variable is:
+
+- authorization-critical
+- notification-routing-only
+- provisioning-prerequisite-only
+- runtime-host-configuration-only
 
 ## Completion Standard
 

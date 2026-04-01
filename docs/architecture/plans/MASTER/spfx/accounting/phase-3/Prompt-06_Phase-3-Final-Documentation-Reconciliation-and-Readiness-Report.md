@@ -19,6 +19,12 @@ This prompt must reconcile against live repo truth first and classify documentat
    - partially stale
    - superseded
 7. Do not leave documentation stale when repo truth changed during Prompts 01 through 05.
+8. Explicitly classify any remaining gap as:
+   - completed in Phase 3
+   - partially completed in Phase 3
+   - deferred to later phase
+   - earlier-phase dependency
+   - backend/host/deployment item outside Phase 3
 
 ## Required Paths
 
@@ -26,9 +32,11 @@ This prompt must reconcile against live repo truth first and classify documentat
 - `docs/reference/spfx-surfaces/controller-review-surface.md`
 - `docs/reference/spfx-surfaces/admin-recovery-boundary.md`
 - `docs/reference/spfx-surfaces/coordinator-visibility-spec.md`
+- `docs/reference/spfx-surfaces/responsive-failure-catalog.md`
 - `docs/architecture/blueprint/current-state-map.md`
 - `apps/accounting/src/router/*`
 - `apps/accounting/src/pages/*`
+- `apps/accounting/src/utils/*`
 - `apps/accounting/src/test/*`
 
 ## Required Tasks
@@ -39,6 +47,7 @@ This prompt must reconcile against live repo truth first and classify documentat
 - Separate finished Phase 3 Accounting outcomes from still-open backend, host-boundary, or later-phase dependencies.
 - Produce a final readiness section stating whether the Accounting app is functionally ready to move into later hardening phases.
 - Call out any remaining non-Phase-3 gaps explicitly instead of leaving them ambiguous.
+- Explicitly answer whether the controller workflow is functionally complete end to end in the live UI after this phase.
 
 ## Deliverables
 
@@ -73,3 +82,7 @@ The report update must include:
 - remaining gaps and dependency classification
 - closure statements
 - evidence paths for every meaningful conclusion
+
+## Completion Standard
+
+This prompt is complete only when the repo contains a final readiness report that clearly states whether Phase 3 closed the controller-surface completion scope and what must happen next if anything remains.

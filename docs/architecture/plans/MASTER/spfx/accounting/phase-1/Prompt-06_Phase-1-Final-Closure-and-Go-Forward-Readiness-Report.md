@@ -1,4 +1,4 @@
-# Prompt-06 — Phase 1 Final Closure And Go-Forward Readiness Report
+# Prompt-06 — Phase 1 Final Closure and Go-Forward Readiness Report
 
 ## Objective
 
@@ -22,30 +22,32 @@ Create:
 ## Required Report Structure
 
 - Executive Summary
-- Phase 1 Objective-By-Objective Closure Status
+- Phase 1 Objective-by-Objective Closure Status
 - Lifecycle Freeze Status
 - Boundary Freeze Status
 - Validation / Audit / Evidence Freeze Status
 - Authoritative Documentation Reconciliation Status
-- Answers To The Core Audit Questions
+- Current Auth / Host Posture Anchoring Status
+- Answers to the Core Audit Questions
 - Ambiguities Intentionally Preserved
 - Remaining Unresolved Issues
 - Risks Carried Into Later Implementation
-- Explicit Start Conditions For Later Phases
-- Recommended Opening Work Order For The Next Phase
+- Explicit Start Conditions for Later Phases
+- Recommended Opening Work Order for the Next Phase
 
 ## Core Audit Questions You Must Answer Explicitly
 
 1. Does the package now correctly represent the actual repo-truth workflow problem set for Phase 1?
 2. Does it correctly frame the lifecycle ambiguity around `ReadyToProvision` versus `Provisioning`?
-3. Does it correctly frame the current Accounting/UI gap around `AwaitingExternalSetup` and its forward path?
-4. Does it correctly separate Accounting responsibilities from Admin and Estimating responsibilities?
-5. Does it keep Phase 1 focused on contract freeze and documentation reconciliation rather than broad implementation?
-6. Are the prompts ordered correctly for dependency flow?
-7. Do the prompts point at the right repo files and likely authoritative docs?
-8. Are any prompts still missing important deliverables, verification instructions, or closure criteria?
-9. Are any prompts still too weak, too vague, too broad, or too implementation-heavy?
-10. Is the README and overall plan now strong enough to prevent a local code agent from mis-executing the phase?
+3. Does it correctly frame the current approval action, including required `projectNumber` capture and backend auto-trigger behavior?
+4. Does it correctly frame the current Accounting/UI gap around `AwaitingExternalSetup` and its forward path?
+5. Does it correctly separate Accounting responsibilities from Admin and Estimating responsibilities?
+6. Does it keep Phase 1 focused on contract freeze and documentation reconciliation rather than broad implementation?
+7. Are the prompts ordered correctly for dependency flow?
+8. Do the prompts point at the right repo files and likely authoritative docs?
+9. Are any prompts still missing important deliverables, verification instructions, or closure criteria?
+10. Are any prompts still too weak, too vague, too broad, or too implementation-heavy?
+11. Is the package now strong enough to prevent a local code agent from re-introducing stale PH6 lifecycle semantics or older auth assumptions?
 
 ## Required Closure Table
 
@@ -75,6 +77,17 @@ Also provide:
 `Later Phases Must Not Start Until`
 
 if any true blockers remain.
+
+## Additional Hard Requirement
+
+The final closure report must explicitly state whether all of the following are now true:
+
+- the current approval action contract is frozen
+- the current auto-trigger lifecycle explanation is frozen
+- the `AwaitingExternalSetup` contract vs live UI gap is frozen
+- the current auth / role / host posture that materially affects Project Setup is anchored well enough
+- the highest-risk stale docs have been classified or reconciled
+- the package itself is now safe to use as the Phase 1 execution guide
 
 ## Completion Standard
 

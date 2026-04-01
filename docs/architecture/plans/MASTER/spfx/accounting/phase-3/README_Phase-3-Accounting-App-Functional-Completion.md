@@ -2,34 +2,25 @@
 
 ## Purpose
 
-This package drives **Phase 3 — Accounting App Functional Completion** for the HB Intel Project Setup workflow.
+This is the revised canonical Phase 3 prompt set for the Accounting-side Project Setup controller surface.
 
-Phase 3 is an **implementation-forward Accounting surface completion phase**, not a backend redesign phase and not a repeat of Phase 1 contract freeze. It should consume the workflow and ownership decisions already frozen in Phase 1 and any lifecycle hardening completed in Phase 2, while staying anchored to live repo truth when older plans or prompts drift.
+Phase 3 is an **implementation-forward Accounting surface completion phase**. It is not:
 
-The goal of this phase is to bring the **Accounting SPFx app** to a functionally complete controller surface for Project Setup by:
+- a backend lifecycle redesign phase
+- an Admin recovery implementation phase
+- a repeat of Phase 1 contract freeze
 
-- completing the queue and detail workflow where gaps still exist
-- closing the current `AwaitingExternalSetup` dead-end in a contract-safe way
-- hardening status, audit, and controller feedback behavior that already exists in partial form
-- preserving the Admin recovery boundary while ensuring failed-item routing works cleanly
+Its purpose is to complete the live Accounting controller surface against current repo truth, strengthen the controller UX that already exists, close the live `AwaitingExternalSetup` dead-end in a contract-safe way, preserve the Admin recovery boundary, and leave the repo with a clear readiness report for later hardening phases.
 
-## Canonical Working Copy
+## Canonical Working Copy Rule
 
-Use the in-repo package at:
+Treat the repo-relative package path as canonical **only if the package has been committed there in the current workspace**:
 
 - `docs/architecture/plans/MASTER/spfx/accounting/phase-3/`
 
-Targeted lookup surfaced this package as the canonical working copy for Phase 3.
-
-## Package Contents
-
-1. `Phase-3_Accounting-App-Functional-Completion_Implementation-Plan.md`
-2. `Prompt-01_Phase-3-Repo-Truth-Accounting-Surface-Audit.md`
-3. `Prompt-02_Phase-3-Queue-and-Detail-Workflow-Completion.md`
-4. `Prompt-03_Phase-3-External-Setup-and-Launch-Action-Completion.md`
-5. `Prompt-04_Phase-3-Status-Feedback-Audit-Trail-and-Controller-UX-Hardening.md`
-6. `Prompt-05_Phase-3-Admin-Routing-and-Cross-App-Boundary-Verification.md`
-7. `Prompt-06_Phase-3-Final-Documentation-Reconciliation-and-Readiness-Report.md`
+Do not hard-code workstation-specific paths in findings or final docs.  
+If duplicate package copies exist in the current workspace, record them explicitly and name which copy was audited.  
+If the package exists only as an attached artifact or local working draft, say so directly.
 
 ## Authority Order
 
@@ -37,66 +28,124 @@ When sources disagree, use this order:
 
 1. live repo code, tests, manifests, and current UI behavior
 2. `docs/architecture/blueprint/current-state-map.md`
-3. living reference docs for current SPFx surfaces, provisioning behavior, and Project Setup host posture
+3. living reference docs for current SPFx surfaces, provisioning behavior, degraded-path behavior, and Project Setup connected-service posture
 4. historical PH6, MVP, and earlier workflow-planning docs as drift evidence only
 
 Historical plans may still be useful for intent, but they are not peer authority with current-state code and living references.
 
-## Current Repo-Truth Baseline
+## Current Repo-Truth Baseline That Motivates Phase 3
 
-This package should start from the confirmed current-state baseline:
+The live repo currently shows all of the following:
 
-- Accounting queue already exposes `AwaitingExternalSetup` and `Failed` filtering.
+- Accounting queue already exposes `UnderReview`, `NeedsClarification`, `AwaitingExternalSetup`, and `Failed` filtering.
 - Accounting detail already supports controller approve, clarification, hold, and failed-item route-to-Admin behavior.
-- Current Accounting messaging already reflects that approval advances to `ReadyToProvision` and provisioning begins automatically under the live backend contract.
-- `AwaitingExternalSetup` is a real live-surface gap because the current detail page does not expose a forward action from that state.
-- Admin already owns retry, archive, escalation acknowledgment, and state override behavior.
-- Accounting already has partial status, banner, timeline, and expert-gated audit-trail behavior, so this phase should harden and complete the surface rather than behave like a blank-slate build.
+- Approval is not generic. The detail page captures and validates a `projectNumber` and advances the request to `ReadyToProvision` with that value.
+- The backend auto-starts provisioning when the controller advances a request to `ReadyToProvision`.
+- The live surface has no forward action from `AwaitingExternalSetup`, which makes that state a real controller-surface dead-end today.
+- The live detail page already contains real post-approval lifecycle banners, timeline rendering, action error banners, load/empty/error handling, and expert-gated audit visibility.
+- Admin recovery already owns retry, archive, escalation acknowledgment, and override behavior.
+- Current cross-app failure routing already uses `getAdminAppUrl()` and degrades safely when the Admin URL is not configured.
+- The current controller surface doc family remains authoritative in family, but at least one living doc is partially stale in detail and must be reconciled during this phase.
 
-## Required Execution Order
+These facts are the starting point for this package. Do not write prompts that assume a separate controller-side provisioning launch model still exists.
 
-Run the prompts in numeric order.
+## Files In This Package
 
-- **Prompt-01** establishes repo truth, authority routing, and the actual Phase 3 gap list.
-- **Prompt-02** completes queue/detail controller behavior that is missing or incomplete.
-- **Prompt-03** resolves the external-setup exit path and any controller-side handoff wording in a way that remains consistent with the frozen backend contract.
-- **Prompt-04** hardens status, audit visibility, and controller-facing UX using the existing surface as the starting point.
-- **Prompt-05** verifies Admin routing and cross-app boundary discipline.
-- **Prompt-06** reconciles documentation and produces the final readiness report.
+- `Accounting_Phase3_Prompt_Audit_Report.md`
+- `Phase-3_Accounting-App-Functional-Completion_Implementation-Plan.md`
+- `Prompt-01_Phase-3-Repo-Truth-Accounting-Surface-Audit.md`
+- `Prompt-02_Phase-3-Queue-and-Detail-Workflow-Completion.md`
+- `Prompt-03_Phase-3-External-Setup-and-Final-Controller-Handoff-Completion.md`
+- `Prompt-04_Phase-3-Status-Feedback-Audit-Trail-and-Controller-UX-Hardening.md`
+- `Prompt-05_Phase-3-Admin-Routing-and-Cross-App-Boundary-Verification.md`
+- `Prompt-06_Phase-3-Final-Documentation-Reconciliation-and-Readiness-Report.md`
+
+## Required Working Rules For Every Prompt
+
+- Treat the live repo as authoritative for implementation facts.
+- Do not assume the current package wording is correct just because it already exists.
+- Do not re-read files already in active context unless needed to verify contradiction, capture exact evidence, or confirm a change.
+- Prefer extension of existing routes, pages, helpers, and tests over parallel patterns.
+- Keep Phase 3 focused on Accounting controller-surface completion, controller-safe UX hardening, cross-app routing integrity, and documentation/readiness closure.
+- Do not redesign lifecycle semantics or Admin ownership in this phase unless a prompt explicitly confirms that a committed earlier-phase artifact in the current workspace changed the governing contract and that change remains consistent with current repo truth.
+- Do not move Admin-only recovery capabilities into Accounting.
+- Do not move requester or coordinator responsibilities into Accounting.
+- Do not invent a separate controller-side provisioning launch model unless current repo truth and committed earlier-phase artifacts in the current workspace explicitly require it.
+- Update documentation and report artifacts as part of the implementation rather than deferring them to the end.
+
+## Evidence Discipline
+
+Every prompt and every resulting artifact must clearly separate:
+
+1. confirmed repo fact
+2. confirmed repo-doc intent
+3. inferred implementation recommendation
+4. unresolved gap or ambiguity
+
+When a prompt identifies a gap, it must also distinguish:
+
+- live UI action
+- valid backend transition
+- system-owned progression
+- cross-surface boundary ownership
+
+## Current-State Files That Matter Most In Phase 3
+
+At minimum, this package expects the local code agent to ground itself in the following current-state sources as relevant per prompt:
+
+### Accounting surface and support files
+- `apps/accounting/src/router/routes.ts`
+- `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`
+- `apps/accounting/src/pages/ProjectReviewDetailPage.tsx`
+- `apps/accounting/src/utils/crossAppUrls.ts`
+- `apps/accounting/src/utils/stateDisplayHelpers.ts`
+- `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx`
+- `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx`
+
+### Backend and shared lifecycle files
+- `backend/functions/src/functions/projectRequests/index.ts`
+- `packages/provisioning/src/bic-config.ts`
+
+### Living references and current-state docs
+- `docs/architecture/blueprint/current-state-map.md`
+- `docs/reference/spfx-surfaces/controller-review-surface.md`
+- `docs/reference/spfx-surfaces/admin-recovery-boundary.md`
+- `docs/reference/spfx-surfaces/coordinator-visibility-spec.md`
+- `docs/reference/spfx-surfaces/responsive-failure-catalog.md`
+- `docs/reference/provisioning/state-machine.md`
+- `docs/reference/provisioning/saga-steps.md`
+- `docs/reference/developer/project-setup-connected-service-posture.md`
+
+## Known Drift To Handle Carefully
+
+The package must assume at least the following possible drift risks exist until Prompt-01 proves otherwise:
+
+- controller-surface docs that omit the approval-time `projectNumber` requirement
+- wording that implies the controller still performs a separate provisioning launch step
+- wording that blurs live UI affordances with valid backend transition rights
+- wording that understates existing controller-surface status/audit functionality
+
+## Phase 3 Success Standard
+
+Phase 3 is complete only when all of the following are true:
+
+- the Accounting queue and detail flow are complete for the controller role
+- `AwaitingExternalSetup` is no longer a controller dead-end unless a committed earlier-phase artifact in the current workspace explicitly preserves that limitation and current repo truth still supports that decision
+- controller-facing wording is aligned with the actual backend handoff behavior
+- the controller surface communicates clear status, next-step context, and read-only audit visibility
+- failed cases route cleanly to Admin without adding Admin recovery actions to Accounting
+- living docs are updated to match repo truth or explicitly classified when partially stale
+- the final readiness report clearly states what is complete, what remains, and whether the Accounting controller workflow is functionally ready for later hardening phases
+
+## Execution Order
+
+Execute the prompts in numeric order:
+
+1. Prompt-01
+2. Prompt-02
+3. Prompt-03
+4. Prompt-04
+5. Prompt-05
+6. Prompt-06
 
 Do not skip ahead unless a prior prompt explicitly records that its blocking dependency is resolved.
-
-## Package-Wide Rules
-
-Apply these instructions throughout the phase:
-
-1. Treat the live repo as the primary implementation authority.
-2. Do not re-read files already in active context unless needed to verify a contradiction, capture exact evidence, or confirm a change.
-3. Distinguish clearly between:
-   - confirmed repo fact
-   - confirmed repo-doc intent
-   - inferred implementation recommendation
-   - unresolved gap or ambiguity
-4. Do not redesign lifecycle semantics or Admin ownership in this phase unless a prompt explicitly confirms that Phase 2 changed the governing contract.
-5. Do not move Admin-only recovery capabilities into Accounting.
-6. Do not move requester or coordinator responsibilities into Accounting.
-7. Prefer extension of existing routes, pages, helpers, and tests over parallel patterns.
-8. Update documentation and report artifacts as part of the implementation instead of deferring documentation to the end.
-9. If a referenced report file does not yet exist, create it as part of the prompt instead of treating its absence as repo truth.
-
-## Recommended Working Outputs
-
-As the prompts execute, the code agent should update or create artifacts such as:
-
-- Accounting routes, pages, and workflow components
-- controller-facing status and audit helpers
-- cross-app routing helpers
-- Accounting tests
-- living reference doc updates when repo truth changes
-- the Phase 3 functional completion report
-
-## Expected End State of Phase 3
-
-By the end of this phase, the Accounting app should support a functionally complete controller workflow with no intentional dead-end states, no misleading handoff wording, clear status and audit context, and clean routing to Admin without absorbing Admin recovery responsibilities.
-
-Phase 3 is complete when the Accounting surface is functionally ready for later production-hardening work, even if broader host, deployment, or tenant-readiness work remains outside this phase.

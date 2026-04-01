@@ -1,43 +1,106 @@
-# Prompt-04 — Phase 7 Managed Identity and Connected Service Readiness
+# Prompt-04 — Phase 7 Managed Identity and Connected-Service Readiness
 
 ## Objective
 
-Validate and harden the backend’s managed identity and connected-service access model for production use across SharePoint, Graph, Storage, SignalR, telemetry, and other Project Setup dependencies.
+Validate and harden the backend’s downstream service-access posture for production use across SharePoint, Graph, Table Storage, SignalR, notifications, telemetry, and other Project Setup dependencies. Freeze the service-by-service identity model, minimum permission posture, and code-gap versus tenant-blocker split.
 
-## Core instructions
+Use the outputs from:
 
-- Treat the live repo as authoritative implementation truth.
-- Do not re-read files that are still within your current context or memory unless needed to verify a contradiction or retrieve exact evidence.
-- Use official Microsoft documentation where platform/security behavior needs confirmation.
-- Distinguish clearly between:
-  - confirmed repo fact
-  - confirmed repo-doc intent
-  - confirmed Microsoft-documented requirement / best practice
-  - inferred recommendation
-  - unresolved dependency
-- Keep scope constrained to this prompt’s task.
+- `docs/architecture/reviews/project-setup-phase-7-security-and-connected-services-audit.md`
+- `docs/reference/configuration/project-setup-api-auth-contract.md`
+- `docs/reference/configuration/project-setup-environment-readiness.md`
 
-## Required work
+## Critical Working Rules
 
-1. Audit the service factory and connected-service clients to establish the real service access model used by the Project Setup host.
-2. For each connected service, identify the expected authentication mechanism, minimum permission posture, and unresolved tenant/admin prerequisites.
-3. Harden code and docs where service access behavior is under-specified, over-broad, or inconsistent with the intended production model.
-4. Produce a least-privilege oriented service-readiness matrix covering all active Project Setup domain dependencies.
-5. Identify which dependencies are code-ready but tenant-blocked versus code-incomplete.
+- Treat live repo code and current living docs as authoritative for what is implemented.
+- Use official Microsoft documentation where managed identity, Graph, SharePoint, or Sites.Selected behavior needs confirmation.
+- Do not re-read files already in active context unless needed to verify contradiction, retrieve exact evidence, or confirm a change.
+- This is a service-readiness and least-privilege prompt, not a broad service redesign prompt.
+- Do not claim least privilege unless you show the actual dependency and permission rationale.
 
-## Required outputs
+## Required Source Review
 
-- A connected-service readiness matrix
-- A managed identity / service access posture that is explicit and documented
-- A blocker list separating code gaps from tenant/admin prerequisites
+At minimum, review and reconcile:
 
-## Documentation / report targets to update
+- `backend/functions/src/hosts/project-setup/service-factory.ts`
+- `backend/functions/src/services/managed-identity-token-service.ts`
+- `backend/functions/src/services/sharepoint-service.ts`
+- `backend/functions/src/services/graph-service.ts`
+- Project Setup storage / repository services actually used in this domain
+- SignalR push service currently used by Project Setup
+- notification services currently used by Project Setup
+- `docs/reference/developer/project-setup-connected-service-posture.md`
+- `docs/reference/configuration/sites-selected-validation.md`
+- `docs/reference/configuration/wave-0-config-registry.md`
+- `backend/functions/README.md`
+- the Phase 7 audit report
+
+Also use official Microsoft docs for:
+
+- DefaultAzureCredential with user-assigned managed identity
+- Microsoft Graph permissions
+- Sites.Selected / selected permissions
+- SharePoint / Graph permission considerations relevant to the repo’s actual model
+
+## Required Decisions To Freeze
+
+You must explicitly freeze and document, for each active Project Setup dependency:
+
+1. service name
+2. identity type used today
+3. token scope, credential type, or connection mechanism used today
+4. whether the service is active, optional, stubbed, or unresolved
+5. minimum permission posture intended for production
+6. whether the dependency is code-ready, tenant-blocked, or code-incomplete
+7. which exact tenant/admin action is required before production use
+8. whether the dependency is least-privilege aligned, broad, or governed-exception
+9. what evidence in repo supports the classification
+
+At minimum, do this for:
+
+- SharePoint request persistence
+- SharePoint provisioning operations
+- Microsoft Graph group operations
+- Microsoft Graph / SharePoint site-grant operations
+- Azure Table Storage
+- SignalR
+- notifications
+- telemetry, if it materially affects readiness
+
+## Hard Requirements
+
+Make all of the following explicit:
+
+- inbound user tokens are not used for downstream service calls in production
+- downstream SharePoint / Graph / storage operations are app-only
+- SignalR remains connection-string based unless repo truth proves otherwise
+- Sites.Selected is the preferred least-privilege path where the repo says so
+- broader access such as `Sites.FullControl.All` must be treated as governed fallback, not default
+- `GRAPH_GROUP_PERMISSION_CONFIRMED` and related env gates are operational readiness gates, not proof that permissions have been technically validated in repo
+
+## Required Deliverables
+
+Create or update:
 
 - `docs/reference/configuration/project-setup-connected-services-readiness.md`
 - `docs/architecture/reviews/project-setup-phase-7-security-and-connected-services-audit.md`
 
-## Additional requirements
+If `project-setup-connected-services-readiness.md` does not yet exist, create it and record that fact in the audit report.
 
-- Be explicit about any SharePoint vs Graph permission choices that materially affect rollout complexity.
-- Do not claim least privilege without showing the actual dependency and permission rationale.
+## Required Contents For `project-setup-connected-services-readiness.md`
 
+- Executive Summary
+- Identity Model Overview
+- Service-by-Service Readiness Matrix
+- Minimum Permission Posture by Service
+- Sites.Selected / Fallback Governance
+- Code-Ready Versus Tenant-Blocked Split
+- External Admin / Tenant Prerequisites
+- Least-Privilege Rationale
+- Known Broad or Exception Paths
+- Remaining Service-Access Blockers
+- Files and Docs This Readiness Model Depends On
+
+## Completion Standard
+
+This prompt is complete only when later rollout work can tell, for every active Project Setup dependency, what identity it uses, what permissions it needs, and whether the remaining blocker is code or tenant-side.

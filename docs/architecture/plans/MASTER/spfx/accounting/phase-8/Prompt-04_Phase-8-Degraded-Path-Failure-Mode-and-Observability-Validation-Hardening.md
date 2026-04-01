@@ -1,38 +1,83 @@
-# Prompt-04 — Phase 8: Degraded-Path, Failure-Mode, and Observability Validation Hardening
+# Prompt-04 — Phase 8 Degraded-Path, Failure-Mode, and Observability Validation Hardening
 
 ## Objective
 
-Validate that the Project Setup workflow behaves acceptably under degraded and failure conditions, and that telemetry / observability coverage is sufficient for support and troubleshooting.
+Validate that the Project Setup workflow behaves acceptably under degraded and failure conditions, and that telemetry / observability coverage is sufficient for support and troubleshooting based on actual repo seams rather than assumptions.
 
-## Required working approach
+Use the audit output from:
 
-1. Validate repo-truth behavior for degraded or failure modes including, where applicable:
-   - SignalR unavailable or disconnected
-   - polling fallback required
-   - backend/API request failure
-   - provisioning status missing / stale / partial
-   - SharePoint / Graph transient failure and retry paths
-   - connected-service partial configuration or absence
+`docs/architecture/reviews/project-setup-phase-8-reliability-testing-and-operational-readiness-audit.md`
 
-2. Verify observability and diagnostics coverage for:
-   - launch events
-   - state transitions
-   - provisioning status updates
-   - failure / escalation paths
-   - retry or reopen activity
+## Critical Working Rules
 
-3. Update tests, docs, and verification evidence as appropriate.
+- Treat live repo code and tests as authoritative for current degraded-path behavior.
+- Do not re-read files already in active context unless needed to verify contradiction, capture exact evidence, or confirm a change.
+- Do not assume degraded behavior is correct because a doc says so; verify against repo truth.
+- Distinguish between graceful degradation, hard failure, unimplemented handling, and externally configured observability.
 
-4. Update progress and evidence in:
-   - `docs/architecture/reviews/project-setup-phase-8-reliability-testing-and-operational-readiness-audit.md`
+## Required Validation Targets
 
-## Required outputs
+Validate repo-truth behavior for degraded or failure modes including, where applicable:
+
+- SignalR unavailable or disconnected
+- polling fallback required
+- backend/API request failure
+- provisioning status missing / stale / partial
+- SharePoint / Graph transient failure and retry paths
+- connected-service partial configuration or absence
+- stuck-run detection
+- alert synthesis for failed/stuck conditions
+- observability / logging continuity for key lifecycle and failure events
+
+## Required Source Review
+
+At minimum, review and use:
+
+- `docs/architecture/blueprint/current-state-map.md`
+- `docs/reference/provisioning/verification-matrix.md`
+- `docs/maintenance/provisioning-runbook.md`
+- `docs/maintenance/provisioning-observability-runbook.md`
+- `packages/provisioning/src/failure-modes.ts`
+- `packages/provisioning/src/integration-rules.ts`
+- `apps/admin/src/test/alertPollingService.test.ts`
+- `apps/admin/src/test/ProvisioningOversightPage.test.tsx`
+- `apps/admin/src/test/OperationalDashboardPage.test.tsx`
+- `packages/features/admin/src/monitors/provisioningFailureMonitor.ts`
+- `packages/features/admin/src/monitors/stuckWorkflowMonitor.ts`
+- `packages/features/admin/src/probes/azureFunctionsProbe.ts`
+- `packages/features/admin/src/probes/sharePointProbe.ts`
+- `apps/pwa/src/routes/provisioning/ProvisioningProgressView.tsx`
+- any current backend provisioning failure/compensation diagnostics identified by repo truth
+
+## Required Deliverable Updates
+
+Update progress and evidence in:
+
+`docs/architecture/reviews/project-setup-phase-8-reliability-testing-and-operational-readiness-audit.md`
+
+The update must include:
 
 - explicit degraded-path validation evidence
 - observability / telemetry validation notes
-- documented remaining high-risk blind spots, if any
+- what is repo-proven vs docs-only vs externally configured
+- remaining high-risk blind spots, if any
 
-## Rules
+## Hard Requirement
 
-- Do not assume degraded behavior is correct because a doc says so; verify against repo truth.
-- Distinguish between graceful degradation, hard failure, and unimplemented handling.
+Explicitly classify each major degraded-path claim as one of:
+
+- repo-proven
+- docs-supported but not repo-proven
+- environment-gated
+- out-of-repo Azure/tenant configured
+- intentionally deferred
+
+## Completion Standard
+
+This prompt is complete only when the repo and readiness docs can answer, with evidence:
+
+- what happens when real-time updates fail
+- what the fallback path is
+- how failures are surfaced to Admin/support
+- what observability exists in repo versus only in Azure/portal configuration
+- what degraded-path blind spots remain

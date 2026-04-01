@@ -4,7 +4,15 @@
 
 Audit the status, feedback, and audit visibility already present in the Accounting app and harden the remaining controller-facing UX gaps so users receive clear workflow context, action feedback, and read-only history visibility throughout review and handoff.
 
-This prompt should not behave as though status or audit UX is absent today. It should start from the existing banners, state-display helpers, timeline behavior, and `HbcAuditTrailPanel` support, then close the remaining gaps.
+This prompt should not behave as though status or audit UX is absent today. It should start from the existing:
+
+- banners
+- `stateDisplayHelpers`
+- `HbcSmartEmptyState`
+- timeline behavior
+- `HbcAuditTrailPanel` support
+
+and then close the remaining gaps.
 
 ## Working Rules
 
@@ -14,16 +22,16 @@ This prompt should not behave as though status or audit UX is absent today. It s
 4. Do not move Admin-only recovery capabilities into Accounting.
 5. Do not move requester or coordinator responsibilities into Accounting.
 6. Keep audit/history behavior controller-appropriate and read-only.
-7. Separate status visibility, audit evidence visibility, and controller UX polish in both implementation and reporting.
+7. Separate status visibility, audit evidence visibility, degraded-path handling, and controller UX polish in both implementation and reporting.
 
 ## Required Paths
 
 - `apps/accounting/src/pages/ProjectReviewQueuePage.tsx`
 - `apps/accounting/src/pages/ProjectReviewDetailPage.tsx`
-- `apps/accounting/src/components/*`
-- `apps/accounting/src/utils/*`
+- `apps/accounting/src/utils/stateDisplayHelpers.ts`
 - `apps/accounting/src/test/*`
 - `docs/reference/spfx-surfaces/controller-review-surface.md`
+- `docs/reference/spfx-surfaces/responsive-failure-catalog.md`
 
 ## Required Tasks
 
@@ -32,7 +40,8 @@ This prompt should not behave as though status or audit UX is absent today. It s
 - Strengthen timeline and audit rendering where appropriate without turning Accounting into a recovery console.
 - Ensure success, warning, and failure feedback are specific and workflow-aware.
 - Ensure post-handoff and post-failure messages are consistent with actual lifecycle semantics.
-- Update or add tests for status feedback, audit visibility, and controller-facing messaging behavior.
+- Update or add tests for status feedback, audit visibility, empty/error-state behavior, and controller-facing messaging behavior.
+- Reconcile any stale controller-surface doc text that no longer matches the live hardened UX.
 
 ## Deliverables
 
@@ -65,3 +74,7 @@ The report update must include:
 - blockers or unresolved items
 - closure statements for status, feedback, and audit scope
 - evidence paths for every meaningful conclusion
+
+## Completion Standard
+
+This prompt is complete only when the controller surface feels operationally credible without becoming a recovery console.

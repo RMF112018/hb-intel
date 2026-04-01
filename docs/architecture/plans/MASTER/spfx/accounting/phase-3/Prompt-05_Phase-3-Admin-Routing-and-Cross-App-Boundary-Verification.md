@@ -27,12 +27,15 @@ This prompt is about controller-visible handoff, not about re-implementing Admin
 - `docs/reference/spfx-surfaces/controller-review-surface.md`
 - `docs/reference/spfx-surfaces/admin-recovery-boundary.md`
 - `docs/reference/spfx-surfaces/coordinator-visibility-spec.md`
+- `docs/reference/spfx-surfaces/responsive-failure-catalog.md`
 
 ## Required Tasks
 
 - Verify the `Send to Admin` behavior in the Accounting app for failed requests.
-- Verify generated Admin URLs, parameters, and route targets are correct and resilient.
-- Verify cross-app navigation degrades safely when Admin URL configuration is absent.
+- Verify the generated Admin URL, parameter shape, and route target are correct and resilient.
+- Explicitly verify the current route target pattern:
+  - `/provisioning-oversight?projectId=...`
+- Verify cross-app navigation degrades safely when Admin URL configuration is absent or invalid.
 - Ensure Accounting does not expose retry, force-state, archive, escalation-acknowledgment, or override actions.
 - Ensure failure-state messaging directs the controller appropriately without taking on Admin responsibilities.
 - Add or update tests for cross-app routing and boundary behavior.
@@ -51,7 +54,7 @@ This prompt is about controller-visible handoff, not about re-implementing Admin
   - `pnpm --filter @hbc/spfx-accounting lint`
   - `pnpm --filter @hbc/spfx-accounting test`
 - Verify Admin routing only appears in the intended states.
-- Verify cross-app navigation degrades safely when Admin URL configuration is absent.
+- Verify cross-app navigation degrades safely when Admin URL configuration is absent or invalid.
 - Verify the Accounting surface remains free of Admin recovery controls.
 
 ## Required Report Update
@@ -69,3 +72,7 @@ The report update must include:
 - blockers or unresolved items
 - closure statements for boundary-verification scope
 - evidence paths for every meaningful conclusion
+
+## Completion Standard
+
+This prompt is complete only when failed-state controller handoff is clean, accurate, and boundary-safe.
