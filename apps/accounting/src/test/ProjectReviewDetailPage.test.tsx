@@ -511,6 +511,29 @@ describe('ProjectReviewDetailPage', () => {
     expect(screen.getByText(/26-001-01/)).toBeTruthy();
   });
 
+  // ── Admin routing and boundary verification (P3-05) ─────────────────────
+
+  // P3-05-001: Send to Admin constructs correct URL with /provisioning-failures
+  it('"Send to Admin" opens correct Admin URL with /provisioning-failures path', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const failedRequest = createTestRequest({ requestId: 'req-1', projectId: 'p-42', state: 'Failed' });
+    seedListRequests([failedRequest]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [failedRequest],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Send to Admin' }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://admin.example.com/provisioning-failures?projectId=p-42',
+      '_blank',
+    );
+
+    openSpy.mockRestore();
+  });
+
   // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
   describe('failure modes', () => {
     // G4-T07-009: Cross-app URL missing → warning banner

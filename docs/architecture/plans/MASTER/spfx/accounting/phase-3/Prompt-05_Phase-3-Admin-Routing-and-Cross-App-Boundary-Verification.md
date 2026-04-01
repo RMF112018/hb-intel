@@ -76,3 +76,17 @@ The report update must include:
 ## Completion Standard
 
 This prompt is complete only when failed-state controller handoff is clean, accurate, and boundary-safe.
+
+---
+
+## Execution Record
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Critical bug fixed:** Admin cross-app route path was `/provisioning-oversight` (incorrect) — changed to `/provisioning-failures` (matches Admin app's actual route at `apps/admin/src/router/routes.ts`)
+- **Boundary verification:** No Admin recovery controls found in Accounting. Failed state shows only "Send to Admin" navigation link. Missing admin URL degrades with warning banner.
+- **Admin route confirmed:** `/provisioning-failures` validates `projectId` via `validateSearch` and auto-selects the matching run in `ProvisioningOversightPage`
+- **Out-of-scope finding:** Estimating app has the same `/provisioning-oversight` bug at `RetrySection.tsx` line 88
+- **Tests:** 1 new test (P3-05-001) verifying correct URL construction
+- **Verification:** lint clean, build passed (tsc + vite), 37 tests passed (5 files)
+- **No blockers** for Prompt-06

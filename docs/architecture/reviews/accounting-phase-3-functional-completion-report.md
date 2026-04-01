@@ -407,13 +407,18 @@ PH6 and earlier MVP planning documents are drift evidence only. They should not 
   - 4 new tests (P3-04-001 through P3-04-004) covering NeedsClarification banner, AwaitingExternalSetup banner, Approved By in operational detail, and ReadyToProvision auto-trigger messaging.
 - **Classification:** confirmed repo fact (data model constraint on timeline), implementation applied (banners, labels, tests)
 
-### Priority 4 — Admin Routing Verification (Prompt-05)
+### Priority 4 — Admin Routing Verification (Prompt-05) — COMPLETE
 
-- **Gap type:** boundary verification
-- **Items:**
-  - Confirm `/provisioning-oversight` route exists in Admin app and accepts `?projectId=` parameter
-  - Verify parameter shape matches Admin's expected query parameter
-  - Test missing-admin-URL degradation path end-to-end
+- **Status:** COMPLETE (2026-04-01)
+- **Critical bug found and fixed:** Accounting was constructing the Admin URL with `/provisioning-oversight` but the Admin app's actual route is `/provisioning-failures`. Fixed to use correct path.
+- **Verification results:**
+  - Admin route at `/provisioning-failures` validates `projectId` query param via `validateSearch` and auto-selects the matching provisioning run
+  - `getAdminAppUrl()` properly degrades: returns null when env var missing/invalid, detail page shows warning banner
+  - No Admin recovery controls in Accounting: no retry, archive, escalation ack, or override actions
+  - "Send to Admin" correctly opens `${adminUrl}/provisioning-failures?projectId=${projectId}` in new tab
+  - 1 new test (P3-05-001) verifies correct URL construction with `window.open` spy
+- **Out-of-scope note:** Estimating app (`apps/estimating/src/components/project-setup/RetrySection.tsx` line 88) has the same `/provisioning-oversight` bug — should be tracked for separate fix
+- **Classification:** confirmed repo fact (routing bug), implementation applied (fix + test)
 
 ### Priority 5 — Documentation Reconciliation (Prompt-06)
 
@@ -450,7 +455,7 @@ No blocking dependencies prevent Prompt-02 from proceeding.
 - `apps/accounting/src/utils/stateDisplayHelpers.ts` — state display mapping (27 lines)
 - `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx` — queue tests
 - `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx` — detail tests
-- `apps/accounting/package.json` — app manifest (version 00.000.015)
+- `apps/accounting/package.json` — app manifest (version 00.000.016)
 
 ### Backend and Shared Lifecycle Files
 - `backend/functions/src/functions/projectRequests/index.ts` — request lifecycle handler

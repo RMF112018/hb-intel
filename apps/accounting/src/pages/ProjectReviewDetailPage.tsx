@@ -426,7 +426,7 @@ export function ProjectReviewDetailPage(): ReactNode {
             <HbcButton
               variant="secondary"
               onClick={() => window.open(
-                `${adminUrl}/provisioning-oversight?projectId=${request.projectId}`,
+                `${adminUrl}/provisioning-failures?projectId=${request.projectId}`,
                 '_blank',
               )}
             >

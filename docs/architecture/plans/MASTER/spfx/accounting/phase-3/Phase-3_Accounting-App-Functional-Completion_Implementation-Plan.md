@@ -252,3 +252,9 @@ Phase 3 is complete only when all of the following are true:
 - **Status:** COMPLETE
 - **Date:** 2026-04-01
 - **Summary:** Added NeedsClarification and AwaitingExternalSetup warning banners with controller-appropriate guidance. Fixed misleading "Last Updated" label to "Completed" in operational detail. Added "Approved By" field. Documented timeline data-model constraint. 4 new tests. No recovery console behavior added. No blockers for Prompt-05.
+
+### Prompt-05 — Admin Routing and Cross-App Boundary Verification
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Summary:** Fixed critical cross-app routing bug — Accounting was using `/provisioning-oversight` but Admin app's actual route is `/provisioning-failures`. Verified boundary compliance: no Admin recovery controls in Accounting. Confirmed Admin route validates `projectId` query param. 1 new test. Noted Estimating app has same bug (out of scope). No blockers for Prompt-06.
