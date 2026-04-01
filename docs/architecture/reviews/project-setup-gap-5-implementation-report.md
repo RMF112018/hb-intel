@@ -71,7 +71,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-06 | Request Lifecycle Authorization Convergence | **Complete** | 2026-04-01 | resolveRequestRole() rewritten to use JWT claims + oid ownership; env-var auth eliminated |
 | 1-07 | Provisioning and Admin Authorization Convergence | **Complete** | 2026-04-01 | Delegated scope enforcement added to all 10 provisioning routes |
 | 1-08 | Workload and App-Only Authorization | **Complete** | 2026-04-01 | Workload model documented, 21 tests, timer paths confirmed identity-free |
-| 1-09 | Frontend SPFx Contract and Diagnostics | Not started | — | — |
+| 1-09 | Frontend SPFx Contract and Diagnostics | **Complete** | 2026-04-01 | Verified: frontend already aligned — no code changes needed |
 | 1-10 | Telemetry, Break-Glass, and Auditability | Not started | — | — |
 | 1-11 | Tests, Release Gates, and Security Hardening | Not started | — | — |
 | 1-12 | Documentation, Cutover, and Rollback | Not started | — | — |
@@ -159,6 +159,19 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Created | `backend/functions/src/middleware/workload-authorization.test.ts` — 21 tests for workload/delegated token distinction |
 | Modified | `backend/functions/vitest.config.ts` — added workload test entry |
 | Modified | `backend/functions/package.json` — version bump `0.0.105` → `0.0.106` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-09 (P9-G5-09)
+
+| Action | File |
+|--------|------|
+| Verified | `apps/estimating/src/mount.tsx` — token acquisition chain and audience contract correct |
+| Verified | `apps/estimating/src/config/runtimeConfig.ts` — production readiness checks surface missing prerequisites |
+| Verified | `apps/estimating/src/project-setup/backend/ProjectSetupBackendContext.tsx` — P3-07 auth model documentation accurate |
+| Verified | `packages/provisioning/src/api-client.ts` — per-request Bearer token injection correct |
+| Verified | `packages/provisioning/src/visibility.ts` — JWT roles-based visibility (already target pattern) |
+| Verified | `apps/estimating/src/test/authTransportContract.test.ts` — transport contract tests current |
+| Verified | `apps/estimating/config/package-solution.json` — `access_as_user` scope declaration correct |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -334,6 +347,28 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Authorization for automation paths is expressed in code (`requireWorkloadRole()`) and docs
 - [x] Tests prove workload and delegated execution are distinguished correctly (21 tests)
 
+### Prompt 1-09 (P9-G5-09)
+
+**Scope:** Verification-only — no code changes required.
+
+**Verification method:** Exhaustive read of all 7 frontend/SPFx files referenced in the prompt.
+
+**Findings:**
+- `mount.tsx`: Token acquisition chain is correct — `createSpfxApiTokenProvider(spfxContext, apiAudience)` acquires audience-scoped delegated tokens per-call; frontend/backend audience contract is documented (lines 55-58)
+- `runtimeConfig.ts`: `checkProductionReadiness()` surfaces missing Function App URL and API token provider with actionable diagnostics; `getApiAudience()` has 3-tier resolution (runtime injection → Vite env → undefined)
+- `ProjectSetupBackendContext.tsx`: P3-07 architecture freeze comment is accurate — documents SPFx, PWA, and ui-review token paths; correctly references `validateToken()` backend contract
+- `api-client.ts`: Per-request `Authorization: Bearer ${token}` injection via `authFetch()` — no stale cookie-based patterns
+- `visibility.ts`: Uses `session.resolvedRoles` (JWT roles) for provisioning visibility — already target pattern
+- `authTransportContract.test.ts`: 6 tests validating per-call token acquisition, deprecated `resolveSessionToken` removal, Bearer injection, and complexity package API sync default
+- `package-solution.json`: `access_as_user` delegated scope declared for `hb-intel-api-staging` resource
+
+**Stale references found:** None. No references to old mixed auth model, env-var UPN authorization, or cookie-based auth in the Project Setup frontend surface.
+
+**Acceptance criteria status:**
+- [x] Frontend reflects the final delegated-caller auth contract accurately
+- [x] Production-readiness/auth diagnostics clearly identify missing runtime prerequisites
+- [x] Frontend contracts do not misrepresent or mask the backend authorization model
+
 ---
 
 ## Version History
@@ -348,3 +383,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 3.0 | 2026-04-01 | P9-G5-06 | Request lifecycle authorization convergence — resolveRequestRole() rewritten to JWT claims + oid ownership; env-var auth eliminated from all request lifecycle routes |
 | 3.1 | 2026-04-01 | P9-G5-07 | Provisioning and admin route convergence — delegated scope enforcement (L2) added to all 10 provisioning routes; 13 authorization tests |
 | 3.2 | 2026-04-01 | P9-G5-08 | Workload and break-glass model — timer identity independence confirmed, execution paths classified, 21 workload authorization tests |
+| 3.3 | 2026-04-01 | P9-G5-09 | Frontend SPFx contract verification — all 7 frontend files confirmed aligned, no stale auth references, no code changes needed |
