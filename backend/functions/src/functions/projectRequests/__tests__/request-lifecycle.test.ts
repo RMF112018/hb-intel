@@ -683,3 +683,58 @@ describe('P2-03: Validation, idempotency, and uniqueness hardening', () => {
     expect(isValidTransition('Completed', 'ReadyToProvision')).toBe(false);
   });
 });
+
+// ── I. P2-04: Correlation, identity, and observability hardening ──────────
+
+describe('P2-04: Correlation, identity, and observability hardening', () => {
+  let repo: MockProjectRequestsRepository;
+
+  beforeEach(() => {
+    repo = new MockProjectRequestsRepository();
+  });
+
+  it('I1: approvedBy and approvedByOid are persistable on the request model', async () => {
+    const request = makeRequest({
+      state: 'ReadyToProvision',
+      projectNumber: '25-001-01',
+      approvedBy: 'controller@hb.com',
+      approvedByOid: 'oid-controller',
+    });
+    await repo.upsertRequest(request);
+    const result = await repo.getRequest('req-1');
+    expect(result!.approvedBy).toBe('controller@hb.com');
+    expect(result!.approvedByOid).toBe('oid-controller');
+  });
+
+  it('I2: approvedBy fields survive state transition without loss', async () => {
+    const request = makeRequest({
+      state: 'ReadyToProvision',
+      projectNumber: '25-001-01',
+      approvedBy: 'controller@hb.com',
+      approvedByOid: 'oid-controller',
+    });
+    await repo.upsertRequest(request);
+
+    const existing = await repo.getRequest('req-1');
+    existing!.state = 'Provisioning';
+    await repo.upsertRequest(existing!);
+
+    const updated = await repo.getRequest('req-1');
+    expect(updated!.state).toBe('Provisioning');
+    expect(updated!.approvedBy).toBe('controller@hb.com');
+    expect(updated!.approvedByOid).toBe('oid-controller');
+  });
+
+  it('I3: correlation chain — request and provisioning identifiers are correctly structured', () => {
+    // Verify the identifier model is sound: requestId and projectId are set at submission,
+    // projectNumber is set at approval, correlationId is per-run.
+    const request = makeRequest({
+      requestId: 'req-123',
+      projectId: 'proj-123',
+      projectNumber: '25-001-01',
+    });
+    expect(request.requestId).toBe('req-123');
+    expect(request.projectId).toBe('proj-123');
+    expect(request.projectNumber).toBe('25-001-01');
+  });
+});

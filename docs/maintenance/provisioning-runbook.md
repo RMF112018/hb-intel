@@ -18,14 +18,14 @@
 
 ## How to Check Azure Table Storage State
 1. Open Azure Portal → Storage Accounts → the production storage account.
-2. Navigate to **Tables** → `ProvisioningJobs`.
+2. Navigate to **Tables** → `ProvisioningStatus`.
 3. Find the row with `PartitionKey = {projectId}` and `RowKey = {correlationId}`.
 4. The `stepsJson` column contains the full step history as a JSON string.
 
 ## How to Re-run Step 5 Manually
 If the timer trigger fails to install web parts:
 1. Confirm the App Catalog has the correct `.sppkg` deployed.
-2. Call `POST /api/provisioning-retry` with `{ "projectId": "..." }` using an Admin token.
+2. Call `POST /api/provisioning-retry/{projectId}` using an Admin token.
 3. The saga will resume from the last successful step (steps 1–4 and 6–7 already completed; only step 5 will run).
 
 ## Alert Thresholds

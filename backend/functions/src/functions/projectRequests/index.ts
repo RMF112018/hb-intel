@@ -314,6 +314,9 @@ app.http('advanceRequestState', {
       existing.projectNumber = body.projectNumber;
       // Derive year from the assigned project number
       existing.year = deriveProjectYear(body.projectNumber);
+      // P2-04: Persist controller approval identity for durable audit trail.
+      existing.approvedBy = auth.claims.upn;
+      existing.approvedByOid = auth.claims.oid;
     }
 
     const fromState = existing.state;

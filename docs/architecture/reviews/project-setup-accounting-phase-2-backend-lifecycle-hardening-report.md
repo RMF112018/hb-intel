@@ -411,3 +411,97 @@ No type errors. No test failures. 3 skipped tests are pre-existing (not introduc
 - H1-H3: `findByProjectNumber` repository method — null on no match, correct match, no false positives on missing projectNumber
 - H4-H5: Auto-trigger prerequisite validation — controller-authorized, system cannot bypass
 - H6-H8: Transition guards — Failed→ReadyToProvision invalid, Provisioning→ReadyToProvision invalid, Completed→ReadyToProvision invalid
+
+---
+
+## Prompt-04 Addendum: Provisioning Run, Status Correlation, and Observability Hardening
+
+### Request / Run / Status Correlation Model
+
+| Identifier | Scope | Set When | Storage | Propagation |
+|-----------|-------|----------|---------|-------------|
+| `requestId` / `projectId` | Request lifetime | Submission (equal at creation) | SharePoint Projects list | Request → auto-trigger → saga → audit |
+| `projectNumber` | Post-approval | Controller approval (ReadyToProvision) | Projects list + Table Storage | Request → saga → audit → notifications |
+| `correlationId` | Single provisioning run | Saga start or retry | Table Storage (row key) | Saga → steps → audit → SignalR |
+| `parentCorrelationId` | Retry chain (P2-04) | Retry initiation | IProvisionSiteRequest (passed to saga) | Logged at retry start; enables multi-run traceability |
+| `approvedBy` / `approvedByOid` | Request lifetime (P2-04) | Controller approval | Projects list | Durable audit identity for the approval action |
+
+### Controller Launch Response Contract
+
+The controller approval path (`PATCH /project-setup-requests/{requestId}/state` with `newState: ReadyToProvision`) returns:
+
+```json
+{
+  "requestId": "...",
+  "projectId": "...",
+  "state": "ReadyToProvision",
+  "projectNumber": "##-###-##",
+  "approvedBy": "controller@example.com",
+  "approvedByOid": "oid-...",
+  ...full IProjectSetupRequest
+}
+```
+
+The response does not include a `correlationId` for the auto-triggered saga run because the saga is fire-and-forget. The client must poll `GET /provisioning-status/{projectId}` to obtain the correlationId and run status.
+
+### Direct Provisioning Endpoint Response Contract
+
+The direct endpoint (`POST /provision-project-site`) returns:
+
+```json
+{
+  "message": "Provisioning started",
+  "projectId": "...",
+  "correlationId": "..."
+}
+```
+
+HTTP 202 Accepted. The correlationId is returned immediately because the caller provides it or one is generated.
+
+### Current Durable Status Authority
+
+`IProvisioningStatus` in Azure Table Storage is the source of truth for provisioning run state. Key fields:
+
+| Field | Purpose | Set By |
+|-------|---------|--------|
+| `projectId` | Partition key; links to request | Saga start |
+| `correlationId` | Row key; unique per run | Saga start / retry |
+| `overallStatus` | Run lifecycle state | Saga progression |
+| `currentStep` | Active step number | Saga step execution |
+| `steps[]` | Per-step status, timestamps, errors | Saga step execution |
+| `siteUrl` | Provisioned site URL | Saga completion |
+| `triggeredBy` / `submittedBy` | Actor identity | Saga start |
+| `retryCount` | Number of retry attempts | Retry |
+| `escalatedBy` | Admin who escalated | Escalation endpoint |
+| `startedAt` / `completedAt` / `failedAt` | Timestamps | Saga lifecycle events |
+| `step5DeferredToTimer` | Timer deferral flag | Step 5 timeout |
+
+### Changes Made
+
+1. **Approval identity persistence (P2-04):** `approvedBy` and `approvedByOid` are now set on the request record when a controller advances to `ReadyToProvision`. Added to `IProjectSetupRequest` model.
+
+2. **Retry correlation chain (P2-04):** `parentCorrelationId` added to `IProvisionSiteRequest` model. The `retry()` method in `SagaOrchestrator` now captures the prior run's correlationId as `parentCorrelationId` before generating a new one. Structured log emitted at retry initiation with both IDs.
+
+3. **Runbook corrections:** Fixed table name from `ProvisioningJobs` to `ProvisioningStatus`. Fixed retry endpoint path from `/api/provisioning-retry` to `/api/provisioning-retry/{projectId}`.
+
+### Remaining Observability Gaps
+
+| Gap | Severity | Path Forward |
+|-----|----------|-------------|
+| Controller approval audit record not in durable store | Medium | Approval identity now persisted on request (P2-04); full audit record deferred to later phase |
+| `parentCorrelationId` not persisted in Table Storage status | Low | Logged but not stored; add to status model if multi-run query support needed |
+| SignalR disconnect has no server-side detection | Low | Client handles reconnect; FM-09 documents fallback |
+| No server-side alert for prolonged `WebPartsPending` | Low | Timer retries indefinitely; consider max-deferral timeout |
+
+### Phase 3 UI Follow-Up Required
+
+- Accounting surface does not display provisioning status post-approval (request enters system-owned states not in queue tabs)
+- Admin surface already consumes durable status via `listProvisioningRuns` and detail modal
+- Estimating coordinator surface has SignalR progress tracking
+
+### Test Evidence
+
+3 new tests (I1-I3) added in `request-lifecycle.test.ts`:
+- I1: `approvedBy` and `approvedByOid` persist on the request model
+- I2: Approval identity fields survive state transitions without loss
+- I3: Correlation chain identifier structure is sound (requestId, projectId, projectNumber)

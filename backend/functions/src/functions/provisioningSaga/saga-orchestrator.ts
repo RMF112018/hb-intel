@@ -347,13 +347,23 @@ export class SagaOrchestrator {
   async retry(projectId: string): Promise<void> {
     const status = await this.services.tableStorage.getProvisioningStatus(projectId);
     if (!status) throw new Error(`No provisioning record found for projectId ${projectId}`);
+    // P2-04: Preserve correlation chain across retries for traceability.
+    const parentCorrelationId = status.correlationId;
     status.overallStatus = 'InProgress';
     status.retryCount = (status.retryCount ?? 0) + 1;
+    const newCorrelationId = randomUUID();
+    this.logger.info('Provisioning retry initiated', {
+      projectId,
+      parentCorrelationId,
+      newCorrelationId,
+      retryCount: status.retryCount,
+    });
     const request: IProvisionSiteRequest = {
       projectId: status.projectId,
       projectNumber: status.projectNumber,
       projectName: status.projectName,
-      correlationId: randomUUID(),
+      correlationId: newCorrelationId,
+      parentCorrelationId,
       triggeredBy: status.triggeredBy,
       submittedBy: status.submittedBy,
       groupMembers: status.groupMembers,

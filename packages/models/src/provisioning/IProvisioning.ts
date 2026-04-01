@@ -36,6 +36,8 @@ export interface IProvisionSiteRequest {
   triggeredByOid?: string;
   /** Correlation ID for this provisioning run (UUID v4, generated at trigger time). */
   correlationId: string;
+  /** P2-04: Correlation ID of the prior run when this is a retry. Preserves traceability chain. */
+  parentCorrelationId?: string;
   /** Members to be added to the project Team group. Array of UPNs. */
   groupMembers: string[];
   /** UPN of the Estimating Coordinator who submitted the Project Setup Request. */
@@ -159,6 +161,10 @@ export interface IProjectSetupRequest {
   /** W0-G1-T02: Department for background viewer access lookup. */
   department?: ProjectDepartment;
   clarificationNote?: string;
+  /** P2-04: UPN of the controller who approved the request (set on ReadyToProvision). */
+  approvedBy?: string;
+  /** P2-04: Entra Object ID of the controller who approved the request. */
+  approvedByOid?: string;
   completedBy?: string;
   /** P9-G5-05: Entra Object ID of the user who completed the request. */
   completedByOid?: string;
