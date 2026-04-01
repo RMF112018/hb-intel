@@ -58,6 +58,7 @@ export default defineConfig({
             'src/middleware/validateToken.test.ts',
             'src/middleware/auth.test.ts',
             'src/middleware/authorization.test.ts',
+            'src/middleware/workload-authorization.test.ts',
             'src/middleware/validate.test.ts',
             'src/middleware/request-id.test.ts',
             'src/services/*.test.ts',

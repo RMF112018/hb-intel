@@ -70,7 +70,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-05 | Oid Migration and Data Contract | **Complete** | 2026-04-01 | oid fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
 | 1-06 | Request Lifecycle Authorization Convergence | **Complete** | 2026-04-01 | resolveRequestRole() rewritten to use JWT claims + oid ownership; env-var auth eliminated |
 | 1-07 | Provisioning and Admin Authorization Convergence | **Complete** | 2026-04-01 | Delegated scope enforcement added to all 10 provisioning routes |
-| 1-08 | Workload and App-Only Authorization | Not started | — | — |
+| 1-08 | Workload and App-Only Authorization | **Complete** | 2026-04-01 | Workload model documented, 21 tests, timer paths confirmed identity-free |
 | 1-09 | Frontend SPFx Contract and Diagnostics | Not started | — | — |
 | 1-10 | Telemetry, Break-Glass, and Auditability | Not started | — | — |
 | 1-11 | Tests, Release Gates, and Security Hardening | Not started | — | — |
@@ -149,6 +149,16 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Modified | `backend/functions/src/functions/provisioningSaga/index.ts` — added `requireDelegatedScope()` (L2) to all 10 provisioning routes; added `auth` parameter to `getProvisioningStatus` and `retryProvisioning` handlers |
 | Created | `backend/functions/src/functions/provisioningSaga/__tests__/provisioning-authorization.test.ts` — 13 tests for L2 scope enforcement and L3 admin role enforcement on provisioning routes |
 | Modified | `backend/functions/package.json` — version bump `0.0.104` → `0.0.105` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-08 (P9-G5-08)
+
+| Action | File |
+|--------|------|
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Workload-and-Break-Glass-Model.md` |
+| Created | `backend/functions/src/middleware/workload-authorization.test.ts` — 21 tests for workload/delegated token distinction |
+| Modified | `backend/functions/vitest.config.ts` — added workload test entry |
+| Modified | `backend/functions/package.json` — version bump `0.0.105` → `0.0.106` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -304,6 +314,26 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Route access aligns with the policy matrix from Prompt 1-02
 - [x] Tests prove positive and negative authorization outcomes across provisioning/admin routes
 
+### Prompt 1-08 (P9-G5-08)
+
+**Scope:** Documentation + tests — workload authorization model formalized, timer identity independence confirmed.
+
+**Verification results:**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 78 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 54 files passed, 798 tests passed, 3 skipped (was 53 files / 777 tests — 21 new workload tests)
+
+**What was done:**
+- Created `Gap-5_Workload-and-Break-Glass-Model.md` documenting execution path classification (host-level trust for timers, delegated admin for manual trigger, future workload HTTP path via `requireWorkloadRole()`), app-only token support, break-glass model, and environment prerequisites
+- Confirmed `timerFullSpec` and `cleanupIdempotency` have zero user identity dependencies — no auth claims, no UPN, no env-var role checks
+- Created `workload-authorization.test.ts` with 21 tests covering: token-type detection (4), Delegated-Open route stack (3), Delegated-Privileged route stack (3), Workload route stack (4), break-glass role behavior (4), and cross-path isolation (3)
+
+**Acceptance criteria status:**
+- [x] Workload/app-only paths are explicit and documented — timer functions use host-level trust, manual trigger uses delegated admin
+- [x] Authorization for automation paths is expressed in code (`requireWorkloadRole()`) and docs
+- [x] Tests prove workload and delegated execution are distinguished correctly (21 tests)
+
 ---
 
 ## Version History
@@ -317,3 +347,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 2.1 | 2026-04-01 | P9-G5-05 | Oid migration — stable identity fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
 | 3.0 | 2026-04-01 | P9-G5-06 | Request lifecycle authorization convergence — resolveRequestRole() rewritten to JWT claims + oid ownership; env-var auth eliminated from all request lifecycle routes |
 | 3.1 | 2026-04-01 | P9-G5-07 | Provisioning and admin route convergence — delegated scope enforcement (L2) added to all 10 provisioning routes; 13 authorization tests |
+| 3.2 | 2026-04-01 | P9-G5-08 | Workload and break-glass model — timer identity independence confirmed, execution paths classified, 21 workload authorization tests |
