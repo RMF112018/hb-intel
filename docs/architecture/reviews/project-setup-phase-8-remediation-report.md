@@ -49,12 +49,12 @@ Prompt-04 (Backend Host Boundary and Scope Reduction) — deferred (OI-05).
 
 All five constants flow correctly from orchestrator environment through DefinePlugin injection to ShellWebPart runtime usage.
 
-**`apiAudience` gap (P3-02 carry-forward):**
+**`apiAudience` gap (P3-02 carry-forward) — as observed at P8-01 time (resolved by P8-02):**
 - `mount.tsx` defines `IMountConfig.apiAudience` (line 26) and resolves it via `getApiAudience()` (line 59).
 - `runtimeConfig.ts` supports `apiAudience` in `IRuntimeConfig` and `setRuntimeConfig()`.
-- The shell webpart does NOT inject `apiAudience` via DefinePlugin. There is no `__API_AUDIENCE__` constant.
-- The app falls back to `VITE_API_AUDIENCE` env or returns `undefined`. When absent, `createSpfxApiTokenProvider` is skipped and production readiness reports the gap.
-- **Verdict:** Known P3-02 carry-forward. The app handles absence gracefully via `checkProductionReadiness()`. Not a defect -- it is a deferred production prerequisite that will be addressed when the API audience registration is configured.
+- ~~The shell webpart does NOT inject `apiAudience` via DefinePlugin. There is no `__API_AUDIENCE__` constant.~~ **Resolved in P8-02** — `__API_AUDIENCE__` is now the 6th DefinePlugin constant. See P8-02 section and `project-setup-packaging-runtime-config-gap-validation.md` for full verification.
+- ~~The app falls back to `VITE_API_AUDIENCE` env or returns `undefined`.~~ **Post-P8-02:** Shell injection is the primary path; `VITE_API_AUDIENCE` remains as secondary fallback.
+- **Verdict (updated):** Closed by P8-02. The full `apiAudience` injection chain is wired end-to-end. Independently validated by fresh `.sppkg` build inspection — see `project-setup-packaging-runtime-config-gap-validation.md`.
 
 **Vite build entry and IIFE global name:**
 - `vite.config.ts`: `lib.entry` = `src/mount.tsx`, `lib.name` = `__hbIntel_projectSetup`, `lib.formats` = `['iife']`, `lib.fileName` returns `estimating-app.js`. PASS.
@@ -118,8 +118,8 @@ All commands succeeded. Build used Node v18.20.8 for gulp steps. Orchestrator sm
 **Runtime config contract alignment:**
 - Shell constructs `runtimeConfig` with: `functionAppUrl`, `backendMode`, `allowBackendModeSwitch`. (3 fields)
 - App's `IMountConfig` accepts: `functionAppUrl`, `backendMode`, `allowBackendModeSwitch`, `apiAudience`. (4 fields)
-- `apiAudience` is NOT injected by the shell. This is the documented P3-02 carry-forward. The app handles absence via `getApiAudience()` fallback to `VITE_API_AUDIENCE` env, and `checkProductionReadiness()` reports the gap when a token provider cannot be created.
-- **Verdict:** Known carry-forward, not a defect. No runtime failure — production readiness diagnostics surface the gap.
+- ~~`apiAudience` is NOT injected by the shell.~~ **Note: This described the pre-P8-02 state.** As of P8-02, `apiAudience` IS injected by the shell via `__API_AUDIENCE__` DefinePlugin constant. The carry-forward (CF-01/OI-01) is closed. See P8-02 section and `project-setup-packaging-runtime-config-gap-validation.md`.
+- **Verdict (updated):** Closed by P8-02. No longer a carry-forward.
 
 **Same-origin API assumptions:**
 - When `FUNCTION_APP_URL` env is empty at build time, `__FUNCTION_APP_URL__` is injected as an empty string. The shell's `render()` guards injection with `hasFunctionAppUrl = typeof __FUNCTION_APP_URL__ === 'string' && __FUNCTION_APP_URL__`, so an empty string is falsy — the shell passes no `functionAppUrl` field in `runtimeConfig`.
@@ -164,7 +164,7 @@ The hb-intel-project-setup packaging pipeline is confirmed aligned between sourc
 
 | ID | Item | Target |
 |----|------|--------|
-| CF-01 | `apiAudience` shell injection — P3-02 carry-forward. App handles absence gracefully via `checkProductionReadiness()`. | Prompt-02 |
+| CF-01 | ~~`apiAudience` shell injection — P3-02 carry-forward.~~ **Closed by P8-02.** `__API_AUDIENCE__` DefinePlugin constant added; full injection chain verified. See `project-setup-packaging-runtime-config-gap-validation.md`. | ~~Prompt-02~~ Closed |
 | CF-02 | Runtime config/token contract reconciliation | Prompt-02 |
 | CF-03 | Teams Personal App auth readiness verification | Prompt-02 |
 | CF-04 | Route ownership resolution | Prompt-03 |
