@@ -1,5 +1,6 @@
 import type { HttpResponseInit } from '@azure/functions';
 import type { IValidatedClaims } from './validateToken.js';
+import type { ILogger } from '../utils/logger.js';
 import { forbiddenResponse } from '../utils/response-helpers.js';
 
 // ── App-Role Constants ───────────────────────────────────────────────────
@@ -198,4 +199,52 @@ export function requireWorkloadRole(
   }
   if (hasAnyRole(claims, AUTOMATION_ROLES)) return null;
   return forbiddenResponse('Automation role required', requestId);
+}
+
+// ── Authorization Telemetry ──────────────────────────────────────────────
+
+/**
+ * P9-G5-10: Structured authorization telemetry event properties.
+ */
+export interface AuthzTelemetryEvent {
+  /** Authorization action type (e.g., 'role_check', 'scope_check', 'ownership_check'). */
+  action: string;
+  /** Authorization outcome. */
+  outcome: 'allowed' | 'denied';
+  /** Resolved or checked role (e.g., 'admin', 'controller', 'submitter'). */
+  role?: string;
+  /** Ownership detection method ('oid' | 'upn' | 'none'). */
+  method?: string;
+  /** True when the BreakGlass app-role was used for this decision. */
+  isBreakGlass?: boolean;
+  /** Request correlation ID. */
+  correlationId?: string;
+  /** Caller's Entra Object ID (stable identity). */
+  callerOid?: string;
+  /** Caller's UPN (for display/triage — not used for authorization). */
+  callerUpn?: string;
+}
+
+/**
+ * P9-G5-10: Emit a structured authorization telemetry event.
+ *
+ * Keeps policy functions pure (return null/response) while letting
+ * callers opt into observable authorization telemetry for production
+ * support, security audit, and break-glass accountability.
+ */
+export function emitAuthorizationTelemetry(
+  logger: ILogger,
+  event: AuthzTelemetryEvent,
+): void {
+  const eventName = event.isBreakGlass ? 'authz.break_glass' : 'authz.decision';
+  logger.trackEvent(eventName, {
+    action: event.action,
+    outcome: event.outcome,
+    ...(event.role !== undefined && { role: event.role }),
+    ...(event.method !== undefined && { method: event.method }),
+    ...(event.isBreakGlass !== undefined && { isBreakGlass: event.isBreakGlass }),
+    ...(event.correlationId !== undefined && { correlationId: event.correlationId }),
+    ...(event.callerOid !== undefined && { callerOid: event.callerOid }),
+    ...(event.callerUpn !== undefined && { callerUpn: event.callerUpn }),
+  });
 }

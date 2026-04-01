@@ -95,15 +95,26 @@ if (isAdmin(claims) || isBreakGlass(claims)) return 'admin';
 |------|------------------|-----------|
 | `BreakGlass` | Named users or dedicated break-glass Entra security group | Time-bounded via PIM or manual group membership; audited |
 
-### 3.4 Audit Requirements (Deferred to Prompt 1-10)
+### 3.4 Audit Telemetry (Implemented P9-G5-10)
 
-Every operation performed under the `BreakGlass` role must emit a distinct telemetry event including:
-- The fact that break-glass was used
-- The caller's `oid` and `upn`
-- The operation performed
-- Timestamp
+Every operation performed under the `BreakGlass` role emits a structured `authz.break_glass` telemetry event via `emitAuthorizationTelemetry()` in `middleware/authorization.ts`.
 
-This telemetry is implemented in Prompt 1-10 (Telemetry, Break-Glass, and Auditability).
+**Event:** `authz.break_glass`
+
+| Property | Value | Purpose |
+|----------|-------|---------|
+| `action` | `'role_resolution'` | Identifies the authorization decision point |
+| `outcome` | `'allowed'` | Break-glass always resolves to admin |
+| `role` | `'admin'` | The effective role granted |
+| `isBreakGlass` | `true` | Distinguishes from normal admin access |
+| `callerOid` | Caller's Entra Object ID | Stable identity for audit trail |
+| `callerUpn` | Caller's UPN | Human-readable identity for triage |
+
+**Emission point:** `resolveRequestRole()` in `state-machine.ts` — emitted when `isBreakGlass(claims)` returns true, before returning the `'admin'` role.
+
+**Normal admin access** does NOT emit `authz.break_glass` — only the BreakGlass app-role triggers this event. This enables security teams to query Application Insights for `authz.break_glass` events to audit all emergency override usage.
+
+**General authorization telemetry:** The `emitAuthorizationTelemetry()` helper also supports `authz.decision` events for non-break-glass authorization outcomes. Callers can opt into structured telemetry for any authorization decision by passing a logger and event properties.
 
 ---
 

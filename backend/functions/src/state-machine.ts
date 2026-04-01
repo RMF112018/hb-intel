@@ -1,6 +1,7 @@
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import type { IValidatedClaims } from './middleware/validateToken.js';
-import { isAdmin, isBreakGlass, isController, checkOwnership } from './middleware/authorization.js';
+import type { ILogger } from './utils/logger.js';
+import { isAdmin, isBreakGlass, isController, checkOwnership, emitAuthorizationTelemetry } from './middleware/authorization.js';
 
 /**
  * D-PH6-08 backend state-transition rules mirrored from package-level lifecycle engine.
@@ -36,12 +37,29 @@ export type RequestRole = 'submitter' | 'controller' | 'admin' | 'system';
  * No environment variables are consulted.
  *
  * Priority: admin > controller > submitter > system
+ *
+ * @param logger - Optional logger for authorization telemetry. When provided,
+ *   emits `authz.break_glass` for BreakGlass role usage (P9-G5-10).
  */
 export function resolveRequestRole(
   claims: IValidatedClaims,
   request: IProjectSetupRequest,
+  logger?: ILogger,
 ): RequestRole {
-  if (isAdmin(claims) || isBreakGlass(claims)) return 'admin';
+  if (isAdmin(claims)) return 'admin';
+  if (isBreakGlass(claims)) {
+    if (logger) {
+      emitAuthorizationTelemetry(logger, {
+        action: 'role_resolution',
+        outcome: 'allowed',
+        role: 'admin',
+        isBreakGlass: true,
+        callerOid: claims.oid,
+        callerUpn: claims.upn,
+      });
+    }
+    return 'admin';
+  }
   if (isController(claims)) return 'controller';
   const { isOwner } = checkOwnership(claims, request);
   if (isOwner) return 'submitter';

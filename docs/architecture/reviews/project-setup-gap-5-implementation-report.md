@@ -72,7 +72,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-07 | Provisioning and Admin Authorization Convergence | **Complete** | 2026-04-01 | Delegated scope enforcement added to all 10 provisioning routes |
 | 1-08 | Workload and App-Only Authorization | **Complete** | 2026-04-01 | Workload model documented, 21 tests, timer paths confirmed identity-free |
 | 1-09 | Frontend SPFx Contract and Diagnostics | **Complete** | 2026-04-01 | Verified: frontend already aligned — no code changes needed |
-| 1-10 | Telemetry, Break-Glass, and Auditability | Not started | — | — |
+| 1-10 | Telemetry, Break-Glass, and Auditability | **Complete** | 2026-04-01 | emitAuthorizationTelemetry() + authz.break_glass event; 8 new tests |
 | 1-11 | Tests, Release Gates, and Security Hardening | Not started | — | — |
 | 1-12 | Documentation, Cutover, and Rollback | Not started | — | — |
 | 1-13 | Final Reconciliation and Closure | Not started | — | — |
@@ -172,6 +172,19 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Verified | `packages/provisioning/src/visibility.ts` — JWT roles-based visibility (already target pattern) |
 | Verified | `apps/estimating/src/test/authTransportContract.test.ts` — transport contract tests current |
 | Verified | `apps/estimating/config/package-solution.json` — `access_as_user` scope declaration correct |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-10 (P9-G5-10)
+
+| Action | File |
+|--------|------|
+| Modified | `backend/functions/src/middleware/authorization.ts` — added `AuthzTelemetryEvent` interface and `emitAuthorizationTelemetry()` function |
+| Modified | `backend/functions/src/state-machine.ts` — added optional `logger` param to `resolveRequestRole()`, emits `authz.break_glass` for BreakGlass role |
+| Modified | `backend/functions/src/functions/projectRequests/index.ts` — pass logger to `resolveRequestRole()` calls; added logger to `getProjectSetupRequest` handler |
+| Modified | `backend/functions/src/middleware/authorization.test.ts` — 4 telemetry emission tests |
+| Modified | `backend/functions/src/state-machine.test.ts` — 4 break-glass telemetry tests |
+| Updated | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Workload-and-Break-Glass-Model.md` — replaced deferred §3.4 with implemented telemetry contract |
+| Modified | `backend/functions/package.json` — version bump `0.0.106` → `0.0.107` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -369,6 +382,27 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Production-readiness/auth diagnostics clearly identify missing runtime prerequisites
 - [x] Frontend contracts do not misrepresent or mask the backend authorization model
 
+### Prompt 1-10 (P9-G5-10)
+
+**Scope:** Code changes — authorization telemetry infrastructure and break-glass audit implementation.
+
+**Verification results:**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 78 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 54 files passed, 806 tests passed, 3 skipped (was 798 — 8 new tests)
+
+**What changed:**
+- `authorization.ts`: added `AuthzTelemetryEvent` interface and `emitAuthorizationTelemetry()` function — emits `authz.decision` for normal events and `authz.break_glass` for BreakGlass role usage; includes caller oid/upn, action, outcome, role, method, and correlationId
+- `state-machine.ts`: `resolveRequestRole()` now accepts optional `logger` param; emits `authz.break_glass` when BreakGlass role resolves to admin (with callerOid and callerUpn); normal admin/controller/submitter resolution does not emit telemetry
+- `projectRequests/index.ts`: passes `logger` to both `resolveRequestRole()` call sites; added `createLogger(context)` to `getProjectSetupRequest` handler
+- `Gap-5_Workload-and-Break-Glass-Model.md`: §3.4 updated from "Deferred to Prompt 1-10" to implemented telemetry contract with event schema
+
+**Acceptance criteria status:**
+- [x] Privileged authorization outcomes are observable via structured `authz.break_glass` events
+- [x] Break-glass behavior is explicit, role-based, and distinguishable from ordinary admin access
+- [x] Telemetry contract documented in break-glass model doc with event properties and emission point
+
 ---
 
 ## Version History
@@ -384,3 +418,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 3.1 | 2026-04-01 | P9-G5-07 | Provisioning and admin route convergence — delegated scope enforcement (L2) added to all 10 provisioning routes; 13 authorization tests |
 | 3.2 | 2026-04-01 | P9-G5-08 | Workload and break-glass model — timer identity independence confirmed, execution paths classified, 21 workload authorization tests |
 | 3.3 | 2026-04-01 | P9-G5-09 | Frontend SPFx contract verification — all 7 frontend files confirmed aligned, no stale auth references, no code changes needed |
+| 4.0 | 2026-04-01 | P9-G5-10 | Telemetry and break-glass auditability — emitAuthorizationTelemetry() + authz.break_glass event, 8 new tests |

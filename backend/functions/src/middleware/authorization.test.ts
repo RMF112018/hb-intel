@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { IValidatedClaims } from './validateToken.js';
+import type { ILogger } from '../utils/logger.js';
 import {
   ADMIN_ROLES,
   CONTROLLER_ROLES,
@@ -21,6 +22,7 @@ import {
   requireAdmin,
   requireDelegatedScope,
   requireWorkloadRole,
+  emitAuthorizationTelemetry,
 } from './authorization.js';
 
 // ── Test Helpers ─────────────────────────────────────────────────────────
@@ -372,5 +374,76 @@ describe('P9-G5-04 requireWorkloadRole', () => {
     const result = requireWorkloadRole(makeClaims({ roles: ['Automation'], scp: 'access_as_user' }));
     expect(result).not.toBeNull();
     expect(result!.status).toBe(403);
+  });
+});
+
+// ── emitAuthorizationTelemetry ───────────────────────────────────────────
+
+function createMockLogger(): ILogger & { events: Array<{ name: string; properties: Record<string, unknown> }> } {
+  const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+  return {
+    events,
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    trackEvent: (name: string, properties: Record<string, unknown>) => { events.push({ name, properties }); },
+    trackMetric: vi.fn(),
+  };
+}
+
+describe('P9-G5-10 emitAuthorizationTelemetry', () => {
+  it('emits authz.decision for normal authorization events', () => {
+    const logger = createMockLogger();
+    emitAuthorizationTelemetry(logger, {
+      action: 'role_check',
+      outcome: 'allowed',
+      role: 'admin',
+    });
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0].name).toBe('authz.decision');
+    expect(logger.events[0].properties.action).toBe('role_check');
+    expect(logger.events[0].properties.outcome).toBe('allowed');
+    expect(logger.events[0].properties.role).toBe('admin');
+  });
+
+  it('emits authz.break_glass when isBreakGlass is true', () => {
+    const logger = createMockLogger();
+    emitAuthorizationTelemetry(logger, {
+      action: 'role_resolution',
+      outcome: 'allowed',
+      role: 'admin',
+      isBreakGlass: true,
+      callerOid: 'oid-bg',
+      callerUpn: 'breakglass@hb.com',
+    });
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0].name).toBe('authz.break_glass');
+    expect(logger.events[0].properties.isBreakGlass).toBe(true);
+    expect(logger.events[0].properties.callerOid).toBe('oid-bg');
+    expect(logger.events[0].properties.callerUpn).toBe('breakglass@hb.com');
+  });
+
+  it('includes only defined properties (no undefined values)', () => {
+    const logger = createMockLogger();
+    emitAuthorizationTelemetry(logger, {
+      action: 'scope_check',
+      outcome: 'denied',
+    });
+    expect(logger.events[0].properties).toEqual({
+      action: 'scope_check',
+      outcome: 'denied',
+    });
+  });
+
+  it('includes correlationId when provided', () => {
+    const logger = createMockLogger();
+    emitAuthorizationTelemetry(logger, {
+      action: 'ownership_check',
+      outcome: 'allowed',
+      method: 'oid',
+      correlationId: 'corr-123',
+    });
+    expect(logger.events[0].properties.correlationId).toBe('corr-123');
+    expect(logger.events[0].properties.method).toBe('oid');
   });
 });

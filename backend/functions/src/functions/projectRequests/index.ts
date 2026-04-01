@@ -234,7 +234,8 @@ app.http('getProjectSetupRequest', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'project-setup-requests/{requestId}',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const logger = createLogger(context);
     const reqId = extractOrGenerateRequestId(request);
     const requestId = request.params.requestId;
     if (!requestId) return errorResponse(400, 'VALIDATION_ERROR', 'requestId is required', reqId);
@@ -243,7 +244,7 @@ app.http('getProjectSetupRequest', {
     const existing = await services.projectRequests.getRequest(requestId);
     if (!existing) return notFoundResponse('ProjectSetupRequest', requestId, reqId);
 
-    const role = resolveRequestRole(auth.claims, existing);
+    const role = resolveRequestRole(auth.claims, existing, logger);
     if (role === 'system') {
       return errorResponse(403, 'FORBIDDEN', 'You do not have access to this request', reqId);
     }
@@ -287,7 +288,7 @@ app.http('advanceRequestState', {
     }
 
     // P9-G5-06: Role-based authorization via shared policy engine (replaces env-var UPN lists).
-    const role = resolveRequestRole(auth.claims, existing);
+    const role = resolveRequestRole(auth.claims, existing, logger);
     if (!isAuthorizedTransition(role, existing.state, body.newState)) {
       return errorResponse(403, 'FORBIDDEN',
         `Role '${role}' is not authorized for transition ${existing.state} → ${body.newState}`, reqId);

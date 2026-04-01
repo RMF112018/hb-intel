@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   STATE_TRANSITIONS,
   STATE_NOTIFICATION_TARGETS,
@@ -8,6 +8,7 @@ import {
 } from './state-machine.js';
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
 import type { IValidatedClaims } from './middleware/validateToken.js';
+import type { ILogger } from './utils/logger.js';
 
 /**
  * D-PH6-15 Layer 1 backend state-machine verification.
@@ -104,6 +105,49 @@ describe('P9-G5-06 resolveRequestRole (claims-based)', () => {
 
   it('controller takes priority over submitter ownership', () => {
     expect(resolveRequestRole(makeClaims({ roles: ['Controller'], oid: 'oid-submitter' }), baseRequest)).toBe('controller');
+  });
+});
+
+describe('P9-G5-10 break-glass telemetry', () => {
+  function createMockLogger(): ILogger & { events: Array<{ name: string; properties: Record<string, unknown> }> } {
+    const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+    return {
+      events,
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      trackEvent: (name: string, properties: Record<string, unknown>) => { events.push({ name, properties }); },
+      trackMetric: vi.fn(),
+    };
+  }
+
+  it('emits authz.break_glass when BreakGlass role resolves to admin', () => {
+    const logger = createMockLogger();
+    const role = resolveRequestRole(makeClaims({ roles: ['BreakGlass'], oid: 'oid-bg', upn: 'bg@hb.com' }), baseRequest, logger);
+    expect(role).toBe('admin');
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0].name).toBe('authz.break_glass');
+    expect(logger.events[0].properties.isBreakGlass).toBe(true);
+    expect(logger.events[0].properties.callerOid).toBe('oid-bg');
+    expect(logger.events[0].properties.callerUpn).toBe('bg@hb.com');
+  });
+
+  it('does not emit telemetry for normal admin resolution', () => {
+    const logger = createMockLogger();
+    resolveRequestRole(makeClaims({ roles: ['Admin'] }), baseRequest, logger);
+    expect(logger.events).toHaveLength(0);
+  });
+
+  it('does not emit telemetry for controller resolution', () => {
+    const logger = createMockLogger();
+    resolveRequestRole(makeClaims({ roles: ['Controller'] }), baseRequest, logger);
+    expect(logger.events).toHaveLength(0);
+  });
+
+  it('does not emit telemetry when no logger provided', () => {
+    // Should not throw — logger is optional
+    const role = resolveRequestRole(makeClaims({ roles: ['BreakGlass'] }), baseRequest);
+    expect(role).toBe('admin');
   });
 });
 
