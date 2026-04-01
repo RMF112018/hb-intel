@@ -1,7 +1,7 @@
 # Gap 5 Implementation Report — Project Setup Authorization Convergence
 
 > **Created:** 2026-04-01 (P9-G5-01)
-> **Status:** In Progress
+> **Status:** Closed in repo-owned code
 > **Scope:** Central tracking report for the 13-prompt Gap 5 authorization convergence package
 
 ## Executive Summary
@@ -18,6 +18,7 @@ This report tracks implementation progress across all 13 prompts.
 - Target architecture: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Target-Authorization-Architecture.md`
 - Route-policy matrix: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Route-Policy-Matrix.md`
 - Entra contract: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Entra-App-Role-and-Scope-Contract.md`
+- Acceptance and closure: `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Acceptance-and-Closure.md`
 
 ---
 
@@ -75,7 +76,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-10 | Telemetry, Break-Glass, and Auditability | **Complete** | 2026-04-01 | emitAuthorizationTelemetry() + authz.break_glass event; 8 new tests |
 | 1-11 | Tests, Release Gates, and Security Hardening | **Complete** | 2026-04-01 | 6 release gates (19 assertions), regression-proof for all Gap 5 changes |
 | 1-12 | Documentation, Cutover, and Rollback | **Complete** | 2026-04-01 | Cutover runbook with 4-phase sequence, rollback plan, coexistence guide |
-| 1-13 | Final Reconciliation and Closure | Not started | — | — |
+| 1-13 | Final Reconciliation and Closure | **Complete** | 2026-04-01 | Gap 5 closed in repo-owned code — acceptance doc, final verification |
 
 ---
 
@@ -201,6 +202,13 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 |--------|------|
 | Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Cutover-and-Rollback-Runbook.md` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-13 (P9-G5-13)
+
+| Action | File |
+|--------|------|
+| Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Acceptance-and-Closure.md` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` — status changed to Closed; final verification evidence recorded |
 
 ---
 
@@ -461,6 +469,29 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Docs clearly distinguish repo-complete work from environment-executed tasks
 - [x] The old transitional authz posture is no longer represented as the intended steady state
 
+### Prompt 1-13 (P9-G5-13)
+
+**Scope:** Final reconciliation and closure — acceptance document, implementation report finalization.
+
+**Final verification results (full suite):**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 78 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 55 files passed, 825 tests passed, 3 skipped
+- Release gates (G5-Gate-1 through G5-Gate-6): all 19 assertions pass
+
+**Reconciliation:**
+- All 13 prompts complete
+- All 8 exit criteria from `Gap-5-Implementation-Summary.md` met (see `Gap-5_Acceptance-and-Closure.md` §1)
+- Prior audit report (`project-setup-authz-model-gap-validation.md`) findings resolved — the dual model no longer exists in repo-owned code
+- 12 commits, 140 tests added (685 → 825), `@hbc/functions` v0.0.101 → v0.0.108
+- 9 architecture/planning documents produced in `gap-5-authz/`
+
+**Acceptance criteria status:**
+- [x] Final report clearly states Gap 5 is closed in repo-owned code
+- [x] Closure package distinguishes repo-complete items from environment-gated items
+- [x] Repo no longer contains ambiguous documentation that the hybrid model is the permanent target state
+
 ---
 
 ## Version History
@@ -479,3 +510,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 4.0 | 2026-04-01 | P9-G5-10 | Telemetry and break-glass auditability — emitAuthorizationTelemetry() + authz.break_glass event, 8 new tests |
 | 4.1 | 2026-04-01 | P9-G5-11 | Release gates — 6 static-analysis gate suites with 19 assertions proving Gap 5 model enforced |
 | 4.2 | 2026-04-01 | P9-G5-12 | Cutover and rollback runbook — 4-phase cutover sequence, rollback plan, coexistence guide |
+| 5.0 | 2026-04-01 | P9-G5-13 | **Final closure** — Gap 5 closed in repo-owned code; all 13 prompts complete; 825 tests pass; acceptance doc produced |

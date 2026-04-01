@@ -1,5 +1,7 @@
 # Authorization-Model Gap Validation — Project Setup
 
+> **Resolution:** The dual authorization model identified in this report has been resolved by the Gap 5 authorization convergence package (Phase 9, Gap 5, Prompts 1-01 through 1-13). `resolveRequestRole()` no longer reads `ADMIN_UPNS`/`CONTROLLER_UPNS` env vars — it uses JWT app-role claims and oid-based ownership. See `Gap-5_Acceptance-and-Closure.md` for the final closure evidence.
+
 ## Executive Summary
 
 **Verdict: Partially confirmed — the mixed authorization model is real, but it is intentionally documented as a transitional release posture with full RBAC convergence explicitly deferred to post-launch.**
