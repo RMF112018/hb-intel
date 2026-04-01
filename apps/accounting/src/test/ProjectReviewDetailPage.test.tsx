@@ -306,6 +306,54 @@ describe('ProjectReviewDetailPage', () => {
     expect(approveBtn).toHaveProperty('disabled', false);
   });
 
+  // P3-02-002: Begin Review button visible for Submitted state
+  it('"Begin Review" visible only when state is Submitted', () => {
+    const submittedRequest = createTestRequest({ requestId: 'req-1', state: 'Submitted' });
+    seedListRequests([submittedRequest]);
+
+    const { unmount } = renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [submittedRequest],
+    });
+
+    expect(screen.getByRole('button', { name: 'Begin Review' })).toBeTruthy();
+    // Approve should NOT be visible for Submitted
+    expect(screen.queryByRole('button', { name: 'Approve Request' })).toBeNull();
+    unmount();
+
+    const underReviewRequest = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });
+    seedListRequests([underReviewRequest]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [underReviewRequest],
+    });
+
+    expect(screen.queryByRole('button', { name: 'Begin Review' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Approve Request' })).toBeTruthy();
+  });
+
+  // P3-02-003: Begin Review fires API and navigates to queue
+  it('"Begin Review" calls advanceState with UnderReview', async () => {
+    const request = createTestRequest({ requestId: 'req-1', state: 'Submitted' });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Begin Review' }));
+
+    await waitFor(() => {
+      expect(mockClient.advanceState).toHaveBeenCalledWith('req-1', 'UnderReview', undefined);
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/project-review' }));
+    });
+  });
+
   // G4-T03-014
   it('no retry/recovery actions in review surface', () => {
     const request = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });

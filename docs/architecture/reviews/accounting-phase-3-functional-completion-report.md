@@ -394,14 +394,18 @@ PH6 and earlier MVP planning documents are drift evidence only. They should not 
 - **Backend contract:** Already supports this transition with projectNumber requirement
 - **Complexity:** Low — mirrors existing approval modal pattern
 
-### Priority 2 — Queue and Detail Workflow Completion (Prompt-02)
+### Priority 2 — Queue and Detail Workflow Completion (Prompt-02) — COMPLETE
 
-- **Gap type:** implementation refinement
-- **Items:**
-  - Verify `Submitted -> UnderReview` transition handling (implicit vs explicit)
-  - Confirm queue navigation continuity after actions
-  - Review column completeness and sort behavior across all tabs
-  - Verify data refresh after state transitions
+- **Status:** COMPLETE (2026-04-01)
+- **Findings:**
+  - `Submitted` requests were invisible in the queue — the "Pending Review" tab only filtered for `UnderReview`, but newly submitted requests arrive as `Submitted`. BIC config confirms `Submitted` is controller-owned. **Fixed:** tab now includes both `Submitted` and `UnderReview`.
+  - Detail page had no action for `Submitted` state — controller could not begin review. Backend supports `Submitted → UnderReview` as a valid controller transition. **Fixed:** added "Begin Review" action button for `Submitted` state.
+  - Queue navigation continuity after actions: confirmed working — `performAction` refreshes via `listRequests()` and navigates to `/project-review`.
+  - Column completeness: confirmed — 8 columns covering project name, project #, department, state badge, submitted by, submitted date, current owner (BIC), and actions.
+  - Sort behavior: confirmed — oldest-first by `submittedAt` across all tabs.
+  - Data refresh after state transitions: confirmed — `performAction` calls `listRequests()` after `advanceState()`.
+- **Tests added:** 3 new tests (P3-02-001, P3-02-002, P3-02-003) covering Submitted visibility in queue and Begin Review action in detail page.
+- **Classification:** confirmed repo fact (gap), implementation recommendation (fix applied)
 
 ### Priority 3 — Status/Audit/UX Hardening (Prompt-04)
 
@@ -455,7 +459,7 @@ No blocking dependencies prevent Prompt-02 from proceeding.
 - `apps/accounting/src/utils/stateDisplayHelpers.ts` — state display mapping (27 lines)
 - `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx` — queue tests
 - `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx` — detail tests
-- `apps/accounting/package.json` — app manifest (version 00.000.012)
+- `apps/accounting/package.json` — app manifest (version 00.000.013)
 
 ### Backend and Shared Lifecycle Files
 - `backend/functions/src/functions/projectRequests/index.ts` — request lifecycle handler

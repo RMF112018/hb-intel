@@ -157,7 +157,7 @@ Do not skip ahead unless a prior prompt explicitly records that its blocking dep
 | Prompt | Description | Status | Date |
 |--------|-------------|--------|------|
 | 01 | Repo-Truth Accounting Surface Audit | COMPLETE | 2026-04-01 |
-| 02 | Queue and Detail Workflow Completion | NOT STARTED | — |
+| 02 | Queue and Detail Workflow Completion | COMPLETE | 2026-04-01 |
 | 03 | External Setup and Final Controller Handoff | NOT STARTED | — |
 | 04 | Status Feedback, Audit Trail, and UX Hardening | NOT STARTED | — |
 | 05 | Admin Routing and Cross-App Boundary Verification | NOT STARTED | — |

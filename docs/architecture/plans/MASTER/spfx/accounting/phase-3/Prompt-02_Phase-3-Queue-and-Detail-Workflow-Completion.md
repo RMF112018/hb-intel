@@ -75,3 +75,17 @@ The report update must include:
 ## Completion Standard
 
 This prompt is complete only when the controller can move through the queue/detail review experience without misleading state handling or unbounded ownership drift.
+
+---
+
+## Execution Record
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Changes:**
+  - Queue: "Pending Review" tab now includes both `Submitted` and `UnderReview` requests (previously `Submitted` was invisible)
+  - Detail: Added "Begin Review" action for `Submitted` state (`Submitted → UnderReview`)
+  - Tests: Added 3 tests (P3-02-001, P3-02-002, P3-02-003)
+- **Verification:** lint clean, build passed (tsc + vite), 29 tests passed (5 files)
+- **No boundary violations:** No Admin/coordinator responsibilities added
+- **No blockers** for Prompt-03

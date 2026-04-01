@@ -234,3 +234,9 @@ Phase 3 is complete only when all of the following are true:
 - **Date:** 2026-04-01
 - **Deliverable:** `docs/architecture/reviews/accounting-phase-3-functional-completion-report.md`
 - **Summary:** Surface is substantially mature. One critical dead-end (`AwaitingExternalSetup` lacks forward action), one minor doc drift (`HbcSmartEmptyState` naming), no boundary violations. Prioritized gap inventory produced for Prompts 02–06. No blockers for Prompt-02.
+
+### Prompt-02 — Queue and Detail Workflow Completion
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Summary:** Fixed `Submitted` state invisibility in queue (added to "Pending Review" tab filter) and added "Begin Review" action on detail page for `Submitted → UnderReview` transition. 3 new tests. No boundary violations. No blockers for Prompt-03.

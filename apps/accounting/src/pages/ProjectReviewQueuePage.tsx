@@ -34,11 +34,11 @@ const FILTER_TABS: LayoutTab[] = [
   { id: 'failed', label: 'Failed / Needs Routing' },
 ];
 
-const TAB_STATE_FILTER: Record<FilterTabId, string> = {
-  pending: 'UnderReview',
-  clarification: 'NeedsClarification',
-  external: 'AwaitingExternalSetup',
-  failed: 'Failed',
+const TAB_STATE_FILTER: Record<FilterTabId, string[]> = {
+  pending: ['Submitted', 'UnderReview'],
+  clarification: ['NeedsClarification'],
+  external: ['AwaitingExternalSetup'],
+  failed: ['Failed'],
 };
 
 const REVIEW_QUEUE_EMPTY_CONFIG: ISmartEmptyStateConfig = {
@@ -93,7 +93,7 @@ export function ProjectReviewQueuePage(): ReactNode {
     const stateFilter = TAB_STATE_FILTER[activeTab as FilterTabId];
     if (!stateFilter) return requests;
     return [...requests]
-      .filter((r) => r.state === stateFilter)
+      .filter((r) => stateFilter.includes(r.state))
       .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
   }, [requests, activeTab]);
 

@@ -206,6 +206,7 @@ export function ProjectReviewDetailPage(): ReactNode {
     );
   }
 
+  const isSubmitted = request.state === 'Submitted';
   const isUnderReview = request.state === 'UnderReview';
   const isFailed = request.state === 'Failed';
 
@@ -316,6 +317,22 @@ export function ProjectReviewDetailPage(): ReactNode {
       <HbcComplexityGate minTier="expert">
         <HbcAuditTrailPanel itemId={request.requestId} />
       </HbcComplexityGate>
+
+      {/* ── Begin Review (Submitted → UnderReview) ────────────────── */}
+      {isSubmitted && (
+        <HbcCard>
+          <HbcTypography intent="heading3">Actions</HbcTypography>
+          <div className={styles.actionRow}>
+            <HbcButton
+              variant="primary"
+              onClick={() => performAction('UnderReview', undefined, 'Review started.')}
+              disabled={actionLoading}
+            >
+              Begin Review
+            </HbcButton>
+          </div>
+        </HbcCard>
+      )}
 
       {/* ── Action Panel ─────────────────────────────────────────────── */}
       {isUnderReview && (

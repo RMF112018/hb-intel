@@ -141,6 +141,27 @@ describe('ProjectReviewQueuePage', () => {
     expect(link.closest('a')?.getAttribute('href')).toBe('/project-review/$requestId');
   });
 
+  // P3-02-001: Submitted requests appear in Pending Review tab alongside UnderReview
+  it('pending tab shows both Submitted and UnderReview requests', () => {
+    const requests = [
+      createTestRequest({ requestId: 'req-1', projectName: 'Alpha', state: 'Submitted' }),
+      createTestRequest({ requestId: 'req-2', projectName: 'Beta', state: 'UnderReview' }),
+      createTestRequest({ requestId: 'req-3', projectName: 'Gamma', state: 'NeedsClarification' }),
+    ];
+    mockClient.listRequests.mockResolvedValue(requests);
+
+    renderWithProviders(<ProjectReviewQueuePage />, {
+      tier: 'essential',
+      requests,
+    });
+
+    // Both Submitted and UnderReview visible in default pending tab
+    expect(screen.getByText(/Alpha/)).toBeTruthy();
+    expect(screen.getByText(/Beta/)).toBeTruthy();
+    // NeedsClarification hidden
+    expect(screen.queryByText(/Gamma/)).toBeNull();
+  });
+
   // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
   describe('failure modes', () => {
     // G4-T07-003: Queue table fits at 768px
