@@ -68,7 +68,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-03 | Entra App Role and Scope Contract | **Complete** | 2026-04-01 | Entra contract frozen: 6 app-roles, delegated scope, token differentiation |
 | 1-04 | Shared Authorization Policy Engine | **Complete** | 2026-04-01 | Policy module created, 60 tests, 6 admin guards replaced |
 | 1-05 | Oid Migration and Data Contract | **Complete** | 2026-04-01 | oid fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
-| 1-06 | Request Lifecycle Authorization Convergence | Not started | — | — |
+| 1-06 | Request Lifecycle Authorization Convergence | **Complete** | 2026-04-01 | resolveRequestRole() rewritten to use JWT claims + oid ownership; env-var auth eliminated |
 | 1-07 | Provisioning and Admin Authorization Convergence | Not started | — | — |
 | 1-08 | Workload and App-Only Authorization | Not started | — | — |
 | 1-09 | Frontend SPFx Contract and Diagnostics | Not started | — | — |
@@ -129,6 +129,17 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Modified | `backend/functions/src/services/projects-list-mapper.ts` — added oid fields to read (`toDomain`) and write (`toListItem`) paths |
 | Modified | `backend/functions/package.json` — version bump `0.0.102` → `0.0.103` |
 | Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Oid-Migration-and-Data-Contract.md` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-06 (P9-G5-06)
+
+| Action | File |
+|--------|------|
+| Modified | `backend/functions/src/state-machine.ts` — rewrote `resolveRequestRole()`: now takes `IValidatedClaims` instead of UPN string; uses `isAdmin()`, `isBreakGlass()`, `isController()`, `checkOwnership()` from shared policy engine; no env vars consulted |
+| Modified | `backend/functions/src/functions/projectRequests/index.ts` — replaced inline env-var privilege check in `listProjectSetupRequests` with `isPrivileged()` + `checkOwnership()`; updated `getProjectSetupRequest` and `advanceRequestState` call sites to pass `auth.claims` |
+| Modified | `backend/functions/src/state-machine.test.ts` — added 16 tests for claims-based `resolveRequestRole()` and `isAuthorizedTransition()` |
+| Modified | `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` — rewrote Section C tests: removed env-var setup, uses `IValidatedClaims` objects with app-roles and oid ownership |
+| Modified | `backend/functions/package.json` — version bump `0.0.103` → `0.0.104` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -240,6 +251,28 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Authorization-critical logic can rely on stable IDs (via `checkOwnership()` from P9-G5-04) even while older records work via UPN fallback
 - [x] All oid fields are optional, preserving backward compatibility for pre-migration records
 
+### Prompt 1-06 (P9-G5-06)
+
+**Scope:** Code changes — core authorization convergence: env-var UPN authorization replaced with JWT app-role + oid ownership.
+
+**Verification results:**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 76 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 52 files passed, 764 tests passed, 3 skipped (was 745 — 19 new tests)
+
+**What changed:**
+- `resolveRequestRole()` in `state-machine.ts`: signature changed from `(callerUpn: string, request)` to `(claims: IValidatedClaims, request)`; implementation uses `isAdmin()`, `isBreakGlass()`, `isController()` from shared policy engine and `checkOwnership()` for oid-first submitter detection; zero env-var references
+- `listProjectSetupRequests`: inline `ADMIN_UPNS`/`CONTROLLER_UPNS` env-var parsing removed; replaced with `isPrivileged(auth.claims)` and `checkOwnership()` for request scoping
+- `getProjectSetupRequest` and `advanceRequestState`: call sites updated to pass `auth.claims` instead of `auth.claims.upn`
+- Tests: Section C rewritten from env-var-based to claims-based; added oid ownership tests, HBIntel variant tests, BreakGlass resolution test, UPN fallback case-insensitivity test
+
+**Acceptance criteria status:**
+- [x] Request-lifecycle authorization no longer depends on env-based UPN lists
+- [x] Submitter access is ownership/resource-based (oid-first, UPN-fallback via `checkOwnership()`)
+- [x] Controller/admin access is role-based through the shared policy layer
+- [x] Tests prove all major request lifecycle cases (19 new tests across role resolution and transition authorization)
+
 ---
 
 ## Version History
@@ -251,3 +284,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1.2 | 2026-04-01 | P9-G5-03 | Entra app-role and scope contract frozen — 6 app-roles, delegated scope, token differentiation, environment setup matrix |
 | 2.0 | 2026-04-01 | P9-G5-04 | Shared authorization policy engine — new module, 60 tests, 6 admin guards consolidated, validateToken extended for app-only tokens |
 | 2.1 | 2026-04-01 | P9-G5-05 | Oid migration — stable identity fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
+| 3.0 | 2026-04-01 | P9-G5-06 | Request lifecycle authorization convergence — resolveRequestRole() rewritten to JWT claims + oid ownership; env-var auth eliminated from all request lifecycle routes |

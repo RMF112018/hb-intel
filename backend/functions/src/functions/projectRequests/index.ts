@@ -18,6 +18,7 @@ import {
   notFoundResponse,
 } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
+import { isPrivileged, checkOwnership } from '../../middleware/authorization.js';
 import { SagaOrchestrator } from '../provisioningSaga/saga-orchestrator.js';
 
 const PROJECT_NUMBER_PATTERN = /^\d{2}-\d{3}-\d{2}$/;
@@ -193,24 +194,30 @@ app.http('listProjectSetupRequests', {
 
     let requests = await services.projectRequests.listRequests(stateFilter ?? undefined);
 
-    // Role-based scoping: if a submitterId filter is provided, or if the caller
-    // is not a controller/admin, scope to the caller's own requests.
-    const adminUpns = (process.env.ADMIN_UPNS ?? '').split(',').map((u) => u.trim().toLowerCase()).filter(Boolean);
-    const controllerUpns = (process.env.CONTROLLER_UPNS ?? '').split(',').map((u) => u.trim().toLowerCase()).filter(Boolean);
-    const callerUpn = auth.claims.upn.toLowerCase();
-    const isPrivileged = adminUpns.includes(callerUpn) || controllerUpns.includes(callerUpn);
+    // P9-G5-06: Role-based scoping via shared policy engine (replaces env-var UPN lists).
+    const privileged = isPrivileged(auth.claims);
 
     if (submitterFilter) {
       // Explicit filter — only return if caller is requesting own data or is privileged
-      const filterUpn = submitterFilter.toLowerCase();
-      if (!isPrivileged && filterUpn !== callerUpn) {
-        requests = [];
+      if (!privileged) {
+        const filterMatch = checkOwnership(auth.claims, { submittedBy: submitterFilter });
+        if (!filterMatch.isOwner) {
+          requests = [];
+        } else {
+          requests = requests.filter((r) => {
+            const { isOwner } = checkOwnership(auth.claims, r);
+            return isOwner;
+          });
+        }
       } else {
-        requests = requests.filter((r) => r.submittedBy.toLowerCase() === filterUpn);
+        requests = requests.filter((r) => r.submittedBy.toLowerCase() === submitterFilter.toLowerCase());
       }
-    } else if (!isPrivileged) {
+    } else if (!privileged) {
       // Default scoping: non-privileged callers see only their own requests
-      requests = requests.filter((r) => r.submittedBy.toLowerCase() === callerUpn);
+      requests = requests.filter((r) => {
+        const { isOwner } = checkOwnership(auth.claims, r);
+        return isOwner;
+      });
     }
 
     const start = (page - 1) * pageSize;
@@ -236,7 +243,7 @@ app.http('getProjectSetupRequest', {
     const existing = await services.projectRequests.getRequest(requestId);
     if (!existing) return notFoundResponse('ProjectSetupRequest', requestId, reqId);
 
-    const role = resolveRequestRole(auth.claims.upn, existing);
+    const role = resolveRequestRole(auth.claims, existing);
     if (role === 'system') {
       return errorResponse(403, 'FORBIDDEN', 'You do not have access to this request', reqId);
     }
@@ -279,8 +286,8 @@ app.http('advanceRequestState', {
       return errorResponse(400, 'VALIDATION_ERROR', `Invalid state transition: ${existing.state} → ${body.newState}`, reqId);
     }
 
-    // Role-based authorization: verify the caller has authority for this transition.
-    const role = resolveRequestRole(auth.claims.upn, existing);
+    // P9-G5-06: Role-based authorization via shared policy engine (replaces env-var UPN lists).
+    const role = resolveRequestRole(auth.claims, existing);
     if (!isAuthorizedTransition(role, existing.state, body.newState)) {
       return errorResponse(403, 'FORBIDDEN',
         `Role '${role}' is not authorized for transition ${existing.state} → ${body.newState}`, reqId);

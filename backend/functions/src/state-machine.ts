@@ -1,4 +1,6 @@
 import type { IProjectSetupRequest, ProjectSetupRequestState } from '@hbc/models';
+import type { IValidatedClaims } from './middleware/validateToken.js';
+import { isAdmin, isBreakGlass, isController, checkOwnership } from './middleware/authorization.js';
 
 /**
  * D-PH6-08 backend state-transition rules mirrored from package-level lifecycle engine.
@@ -27,23 +29,22 @@ export function isValidTransition(from: ProjectSetupRequestState, to: ProjectSet
 export type RequestRole = 'submitter' | 'controller' | 'admin' | 'system';
 
 /**
- * Resolve the caller's role relative to a specific request.
- * - `admin` if the caller's UPN is in ADMIN_UPNS
- * - `controller` if the caller's UPN is in CONTROLLER_UPNS
- * - `submitter` if the caller submitted the request
- * - `system` fallback (no specific role)
+ * P9-G5-06: Resolve the caller's role relative to a specific request.
+ *
+ * Uses JWT app-role claims for privileged roles and oid-based ownership
+ * (with UPN fallback for pre-migration records) for submitter detection.
+ * No environment variables are consulted.
+ *
+ * Priority: admin > controller > submitter > system
  */
 export function resolveRequestRole(
-  callerUpn: string,
+  claims: IValidatedClaims,
   request: IProjectSetupRequest,
 ): RequestRole {
-  const adminUpns = (process.env.ADMIN_UPNS ?? '').split(',').map((u) => u.trim().toLowerCase()).filter(Boolean);
-  const controllerUpns = (process.env.CONTROLLER_UPNS ?? '').split(',').map((u) => u.trim().toLowerCase()).filter(Boolean);
-  const normalizedCaller = callerUpn.toLowerCase();
-
-  if (adminUpns.includes(normalizedCaller)) return 'admin';
-  if (controllerUpns.includes(normalizedCaller)) return 'controller';
-  if (request.submittedBy.toLowerCase() === normalizedCaller) return 'submitter';
+  if (isAdmin(claims) || isBreakGlass(claims)) return 'admin';
+  if (isController(claims)) return 'controller';
+  const { isOwner } = checkOwnership(claims, request);
+  if (isOwner) return 'submitter';
   return 'system';
 }
 

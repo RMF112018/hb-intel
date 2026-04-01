@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
 import type { IProjectSetupRequest } from '@hbc/models';
+import type { IValidatedClaims } from '../../../middleware/validateToken.js';
 import { MockProjectRequestsRepository } from '../../../services/project-requests-repository.js';
 import {
   isValidTransition,
@@ -271,73 +272,85 @@ describe('Request lifecycle — state-transition validation', () => {
   });
 });
 
-// ── C. Role-based authorization ─────────────────────────────────────────
+// ── C. Role-based authorization (P9-G5-06: claims-based) ──────────────
 
-describe('Role-based authorization', () => {
-  const originalEnv = process.env;
+function makeClaims(overrides: Partial<IValidatedClaims> = {}): IValidatedClaims {
+  return { upn: 'user@hb.com', oid: 'oid-user', roles: [], displayName: 'User', ...overrides };
+}
 
-  beforeEach(() => {
-    process.env = { ...originalEnv };
-    process.env.ADMIN_UPNS = 'admin@hb.com';
-    process.env.CONTROLLER_UPNS = 'controller@hb.com, ctrl2@hb.com';
-  });
-
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
+describe('Role-based authorization (claims-based)', () => {
   describe('resolveRequestRole', () => {
-    it('C1: identifies admin role', () => {
+    it('C1: identifies admin via Admin app-role', () => {
       const request = makeRequest({ submittedBy: 'other@hb.com' });
-      expect(resolveRequestRole('admin@hb.com', request)).toBe('admin');
+      expect(resolveRequestRole(makeClaims({ roles: ['Admin'] }), request)).toBe('admin');
     });
 
-    it('C2: identifies controller role', () => {
+    it('C2: identifies controller via Controller app-role', () => {
       const request = makeRequest({ submittedBy: 'other@hb.com' });
-      expect(resolveRequestRole('controller@hb.com', request)).toBe('controller');
+      expect(resolveRequestRole(makeClaims({ roles: ['Controller'] }), request)).toBe('controller');
     });
 
-    it('C3: identifies submitter role', () => {
-      const request = makeRequest({ submittedBy: 'coordinator@hb.com' });
-      expect(resolveRequestRole('coordinator@hb.com', request)).toBe('submitter');
+    it('C3: identifies submitter via oid ownership', () => {
+      const request = makeRequest({ submittedBy: 'coordinator@hb.com', submittedByOid: 'oid-coord' });
+      expect(resolveRequestRole(makeClaims({ oid: 'oid-coord' }), request)).toBe('submitter');
     });
 
     it('C4: returns system for unknown caller', () => {
-      const request = makeRequest({ submittedBy: 'other@hb.com' });
-      expect(resolveRequestRole('stranger@hb.com', request)).toBe('system');
+      const request = makeRequest({ submittedBy: 'other@hb.com', submittedByOid: 'oid-other' });
+      expect(resolveRequestRole(makeClaims({ upn: 'stranger@hb.com', oid: 'oid-stranger' }), request)).toBe('system');
     });
 
     it('C5: admin takes priority over submitter', () => {
-      const request = makeRequest({ submittedBy: 'admin@hb.com' });
-      expect(resolveRequestRole('admin@hb.com', request)).toBe('admin');
+      const request = makeRequest({ submittedBy: 'admin@hb.com', submittedByOid: 'oid-admin' });
+      expect(resolveRequestRole(makeClaims({ roles: ['Admin'], oid: 'oid-admin' }), request)).toBe('admin');
     });
 
-    it('C6: case-insensitive matching', () => {
+    it('C6: UPN fallback for legacy records without submittedByOid', () => {
+      const request = makeRequest({ submittedBy: 'coordinator@hb.com' });
+      expect(resolveRequestRole(makeClaims({ upn: 'coordinator@hb.com' }), request)).toBe('submitter');
+    });
+
+    it('C6b: UPN fallback is case-insensitive', () => {
+      const request = makeRequest({ submittedBy: 'coordinator@hb.com' });
+      expect(resolveRequestRole(makeClaims({ upn: 'Coordinator@HB.com' }), request)).toBe('submitter');
+    });
+
+    it('C7: HBIntelAdmin resolves to admin', () => {
       const request = makeRequest({ submittedBy: 'other@hb.com' });
-      expect(resolveRequestRole('Admin@HB.com', request)).toBe('admin');
+      expect(resolveRequestRole(makeClaims({ roles: ['HBIntelAdmin'] }), request)).toBe('admin');
+    });
+
+    it('C8: HBIntelController resolves to controller', () => {
+      const request = makeRequest({ submittedBy: 'other@hb.com' });
+      expect(resolveRequestRole(makeClaims({ roles: ['HBIntelController'] }), request)).toBe('controller');
+    });
+
+    it('C9: BreakGlass resolves to admin', () => {
+      const request = makeRequest({ submittedBy: 'other@hb.com' });
+      expect(resolveRequestRole(makeClaims({ roles: ['BreakGlass'] }), request)).toBe('admin');
     });
   });
 
   describe('isAuthorizedTransition', () => {
-    it('C7: admin can perform any transition', () => {
+    it('C10: admin can perform any transition', () => {
       expect(isAuthorizedTransition('admin', 'Submitted', 'UnderReview')).toBe(true);
       expect(isAuthorizedTransition('admin', 'NeedsClarification', 'UnderReview')).toBe(true);
       expect(isAuthorizedTransition('admin', 'UnderReview', 'ReadyToProvision')).toBe(true);
     });
 
-    it('C8: controller can advance review states', () => {
+    it('C11: controller can advance review states', () => {
       expect(isAuthorizedTransition('controller', 'Submitted', 'UnderReview')).toBe(true);
       expect(isAuthorizedTransition('controller', 'UnderReview', 'ReadyToProvision')).toBe(true);
       expect(isAuthorizedTransition('controller', 'UnderReview', 'NeedsClarification')).toBe(true);
     });
 
-    it('C9: submitter can only resubmit from NeedsClarification', () => {
+    it('C12: submitter can only resubmit from NeedsClarification', () => {
       expect(isAuthorizedTransition('submitter', 'NeedsClarification', 'UnderReview')).toBe(true);
       expect(isAuthorizedTransition('submitter', 'Submitted', 'UnderReview')).toBe(false);
       expect(isAuthorizedTransition('submitter', 'UnderReview', 'ReadyToProvision')).toBe(false);
     });
 
-    it('C10: system role for provisioning transitions', () => {
+    it('C13: system role for provisioning transitions', () => {
       expect(isAuthorizedTransition('system', 'ReadyToProvision', 'Provisioning')).toBe(true);
       expect(isAuthorizedTransition('system', 'Provisioning', 'Completed')).toBe(true);
       expect(isAuthorizedTransition('system', 'Submitted', 'UnderReview')).toBe(false);
