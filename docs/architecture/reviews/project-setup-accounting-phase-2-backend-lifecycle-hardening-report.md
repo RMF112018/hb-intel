@@ -582,3 +582,159 @@ The only behavioral change visible to the Accounting surface is that duplicate p
 | `pnpm --filter @hbc/spfx-accounting lint` | Pass |
 | `pnpm --filter @hbc/spfx-accounting test` | 26 tests pass (5 test files) |
 | `pnpm --filter @hbc/provisioning check-types` | Pass |
+
+---
+
+## Phase 2 Final Closure Report (Prompt-06)
+
+### Executive Summary
+
+Phase 2 Backend Lifecycle Hardening is complete. The backend is now the single trustworthy workflow engine for the Accounting-side Project Setup lifecycle. All 6 prompts have been executed: repo-truth audit (P2-01), launch contract freeze (P2-02), validation/idempotency/uniqueness hardening (P2-03), correlation/observability hardening (P2-04), Accounting compatibility verification (P2-05), and documentation reconciliation (P2-06 — this closure).
+
+The hardened backend maintains a clear separation between the request-state lifecycle and the provisioning-run lifecycle. 18 new tests were added across P2-02 through P2-04. The Accounting surface is fully compatible with the hardened contract — zero no-go issues, zero frontend code changes required for Phase 2.
+
+### Phase 2 Scope Completed
+
+| Prompt | Deliverable | Status |
+|--------|------------|--------|
+| P2-01 | Repo-truth audit with 12 questions answered | Complete |
+| P2-02 | Controller-facing launch contract frozen (Path A); admin gate on direct endpoint | Complete |
+| P2-03 | ProjectNumber uniqueness enforcement (409 CONFLICT); validation/idempotency inventory | Complete |
+| P2-04 | `approvedBy`/`approvedByOid` persisted; `parentCorrelationId` on retry; runbook fixes | Complete |
+| P2-05 | Accounting compatibility verified — 6 questions answered, zero no-go issues | Complete |
+| P2-06 | Final documentation reconciliation and readiness report (this document) | Complete |
+
+### Final Frozen Backend Contract
+
+1. **Controller-facing launch:** Approval via `advanceState(requestId, 'ReadyToProvision', { projectNumber })` auto-triggers saga fire-and-forget. No separate launch action.
+2. **Direct provisioning:** `POST provision-project-site` requires admin role (P2-02).
+3. **Admin retry:** `POST provisioning-retry/{projectId}` re-executes saga from last successful step.
+4. **ProjectNumber validation:** Format (`##-###-##`) + uniqueness (409 CONFLICT on duplicate) enforced server-side.
+5. **Transition guards:** `isValidTransition()` + `isAuthorizedTransition()` enforce all lifecycle constraints.
+6. **Duplicate-run prevention:** Auto-trigger skips if non-failed provisioning status exists.
+7. **Approval identity:** `approvedBy`/`approvedByOid` persisted on request record.
+8. **Retry traceability:** `parentCorrelationId` logged on retry initiation.
+
+### Request-State Model Versus Provisioning-Run Model
+
+These remain explicitly separated:
+
+- **Request-state** (8 states in SharePoint Projects list): `Submitted` → `UnderReview` → `NeedsClarification` / `AwaitingExternalSetup` / `ReadyToProvision` → `Provisioning` → `Completed` / `Failed`
+- **Provisioning-run** (6 statuses in Azure Table Storage): `NotStarted` → `InProgress` → `BaseComplete` / `WebPartsPending` → `Completed` / `Failed`
+
+Reconciliation points: saga start (→ `Provisioning`), saga success (→ `Completed`), saga failure (→ `Failed`).
+
+### Implemented Validation / Idempotency Controls
+
+| Control | Status | Prompt |
+|---------|--------|--------|
+| ProjectNumber format (`##-###-##`) | Enforced | Pre-existing |
+| ProjectNumber uniqueness (409 CONFLICT) | Enforced | P2-03 |
+| Transition validity | Enforced | Pre-existing |
+| Role authorization (claims-based) | Enforced | Pre-existing |
+| Duplicate-run prevention (auto-trigger guard) | Enforced | Pre-existing |
+| Per-step saga idempotency | Enforced | Pre-existing |
+| Direct provisioning admin gate | Enforced | P2-02 |
+| Approval identity persistence | Enforced | P2-04 |
+| Retry correlation chain | Logged (not persisted in status) | P2-04 |
+| Unresolved clarification items block approval | **Not enforced** | Deferred to Phase 3 |
+| Max coordinator retry (server-side) | **Not enforced** | Deferred |
+
+### Request / Run / Status Correlation Model
+
+| Identifier | Scope | Set When | Storage |
+|-----------|-------|----------|---------|
+| `requestId` / `projectId` | Request lifetime | Submission | SharePoint Projects list |
+| `projectNumber` | Post-approval | Approval | Projects list + Table Storage |
+| `correlationId` | Single run | Saga start / retry | Table Storage (row key) |
+| `parentCorrelationId` | Retry chain | Retry initiation | Logged (P2-04) |
+| `approvedBy` / `approvedByOid` | Request lifetime | Approval | Projects list (P2-04) |
+
+### Accounting Compatibility Result
+
+**Fully compatible.** All controller actions map to the hardened `advanceRequestState` endpoint. Zero frontend code changes required. The 409 CONFLICT response for duplicate projectNumbers is surfaced via the existing `ApiError` → `HbcBanner` error path.
+
+### Required Phase 3 Follow-Up Work
+
+| ID | Item | Priority |
+|----|------|----------|
+| F-01 | Approve-from-hold action for `AwaitingExternalSetup` in Accounting detail page | High |
+| F-02 | Post-approval provisioning status visibility for controllers | Medium |
+| F-03 | User-friendly 409 CONFLICT error message for duplicate projectNumber | Medium |
+| F-04 | Display `approvedBy` in request detail view | Low |
+| F-05 | Hold-reason contextual detail in `AwaitingExternalSetup` view | Low |
+| F-06 | Unresolved clarification items check before approval | Deferred product decision |
+| F-07 | Max coordinator retry server-side enforcement | Deferred |
+
+### Production External Dependencies
+
+| Dependency | Category |
+|-----------|----------|
+| User-assigned Managed Identity configured and assigned | Azure resource |
+| `AZURE_CLIENT_ID` set to MI client ID | Function App config |
+| MI → SharePoint access granted | Azure/SharePoint admin |
+| MI → Group.ReadWrite.All granted | Entra ID admin |
+| `GRAPH_GROUP_PERMISSION_CONFIRMED = 'true'` | Function App config |
+| Entra app registration + audience URI | Entra ID admin |
+| SPFx API permission approved | SharePoint admin |
+| CORS origin configured | Function App / host.json |
+| SignalR connection string | Azure SignalR Service |
+
+These are deployment prerequisites, not code issues. Documented in `project-setup-connected-service-posture.md`.
+
+### Explicit Unresolved Questions
+
+1. Should `AwaitingExternalSetup → ReadyToProvision` be added to Accounting UI? Deferred to Phase 3 (F-01).
+2. Should unresolved clarification items block approval? Product decision. Deferred (F-06).
+3. Should `parentCorrelationId` be persisted in Table Storage status? Currently logged only.
+4. Should `WebPartsPending` have a maximum deferral timeout? Currently defers indefinitely.
+5. Step 6 Entra group deletion compensation? Not implemented; orphaned groups may accumulate.
+
+### Prompt-01 Issue Closure Register
+
+| Issue | Resolution | Evidence |
+|-------|-----------|----------|
+| ProjectNumber uniqueness not enforced | **Resolved** (P2-03) | `findByProjectNumber()` + 409 CONFLICT |
+| Two launch paths with different auth | **Resolved** (P2-02) | `requireAdmin` on direct endpoint |
+| state-machine.md `Failed → Provisioning` incorrect | **Resolved** (P2-02) | Corrected to `Failed → UnderReview` |
+| Missing `UnderReview → ReadyToProvision` in docs | **Resolved** (P2-02) | Added to transition table |
+| Retry generates new correlationId | **Partially resolved** (P2-04) | `parentCorrelationId` logged; not persisted |
+| Controller approval identity not persisted | **Resolved** (P2-04) | `approvedBy`/`approvedByOid` on request |
+| Runbook table name wrong | **Resolved** (P2-04) | Fixed to `ProvisioningStatus` |
+| Runbook retry endpoint path wrong | **Resolved** (P2-04) | Fixed to include `{projectId}` |
+| Max coordinator retry not enforced | **Deferred** | No backend check |
+| `AwaitingExternalSetup` UI dead end | **Deferred to Phase 3** (F-01) | Backend supports; UI gap documented |
+| PH6.11 route/component names stale | **Historical evidence** | Not annotated (too large) |
+| MVP-T03 claims uniqueness implemented | **Resolved** (P2-03) | Now actually implemented |
+| MVP-T05 claims max-retry implemented | **Deferred** | Not implemented |
+
+### Final Go / No-Go Recommendation For Advancing To Phase 3
+
+**GO.** The backend lifecycle contract is hardened, documented, and verified. The Accounting surface is fully compatible. All critical validation gaps are resolved. Remaining items are Phase 3 frontend work and deferred product decisions. No production blockers in backend code.
+
+### Documentation Classification Notes
+
+| Document | Classification | Rationale |
+|----------|---------------|-----------|
+| `docs/reference/provisioning/state-machine.md` | **Current authority** | Updated P2-02: corrected transitions, Launch Contract section |
+| `docs/reference/provisioning/saga-steps.md` | **Current authority** | Updated P2-02: Launch Semantics section |
+| `docs/maintenance/provisioning-runbook.md` | **Current authority** | Updated P2-04: table name and endpoint fixes |
+| `docs/reference/spfx-surfaces/controller-review-surface.md` | **Current authority** | Updated P1-02/P1-03: call shape, freeze references |
+| `docs/reference/developer/project-setup-connected-service-posture.md` | **Current authority** | Reviewed P2-05: accurate, no changes needed |
+| `docs/architecture/plans/PH6.8-RequestLifecycle-StateEngine.md` | **Historical evidence** | Annotated P1-02: trigger semantics superseded |
+| `docs/architecture/plans/PH6.11-Accounting-App.md` | **Historical evidence** | Route structure and component names stale |
+| `MVP-Project-Setup-T03` | **Partially stale** | Uniqueness claim now true (P2-03); other claims aspirational |
+| `MVP-Project-Setup-T05` | **Partially stale** | Max-retry and Retry-After claims not coded |
+
+### Final Verification Results
+
+| Command | Result |
+|---------|--------|
+| `pnpm --filter @hbc/functions check-types` | Pass |
+| `pnpm --filter @hbc/provisioning check-types` | Pass |
+| `pnpm --filter @hbc/functions test` | 57 test files, 878 passed, 3 skipped |
+| `pnpm --filter @hbc/spfx-accounting build` | Pass |
+| `pnpm --filter @hbc/spfx-accounting lint` | Pass |
+| `pnpm --filter @hbc/spfx-accounting test` | 5 test files, 26 passed |
+
+**Total new tests added in Phase 2:** 18 (G1-G7 in P2-02, H1-H8 in P2-03, I1-I3 in P2-04)
