@@ -4,7 +4,9 @@ import {
   buildGroupDisplayName,
   buildGroupDescription,
   getDepartmentBackgroundViewers,
+  resolveDepartmentViewerGroupIds,
 } from './entra-group-definitions.js';
+import type { IDepartmentViewerPolicy } from '../services/viewer-groups-list-contract.js';
 
 describe('ENTRA_GROUP_DEFINITIONS', () => {
   it('has exactly 3 entries', () => {
@@ -113,5 +115,38 @@ describe('getDepartmentBackgroundViewers', () => {
   it('uppercases the department name for env key', () => {
     process.env.DEPT_BACKGROUND_ACCESS_ENGINEERING = 'eng@hb.com';
     expect(getDepartmentBackgroundViewers('engineering')).toEqual(['eng@hb.com']);
+  });
+});
+
+describe('resolveDepartmentViewerGroupIds', () => {
+  const activePolicy: IDepartmentViewerPolicy = {
+    department: 'Commercial',
+    defaultViewerGroupIds: ['group-id-1', 'group-id-2'],
+    defaultViewerGroupNames: 'Finance Viewers, Executive Viewers',
+    isActive: true,
+    lastReviewedAt: '2026-03-15T10:00:00Z',
+    notes: undefined,
+  };
+
+  it('returns group IDs for an active policy', () => {
+    expect(resolveDepartmentViewerGroupIds(activePolicy)).toEqual(['group-id-1', 'group-id-2']);
+  });
+
+  it('returns empty array for null policy', () => {
+    expect(resolveDepartmentViewerGroupIds(null)).toEqual([]);
+  });
+
+  it('returns empty array for undefined policy', () => {
+    expect(resolveDepartmentViewerGroupIds(undefined)).toEqual([]);
+  });
+
+  it('returns empty array for inactive policy', () => {
+    const inactive = { ...activePolicy, isActive: false };
+    expect(resolveDepartmentViewerGroupIds(inactive)).toEqual([]);
+  });
+
+  it('returns empty array for active policy with no group IDs', () => {
+    const noGroups = { ...activePolicy, defaultViewerGroupIds: [] };
+    expect(resolveDepartmentViewerGroupIds(noGroups)).toEqual([]);
   });
 });

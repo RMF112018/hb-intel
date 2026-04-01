@@ -2,6 +2,7 @@
  * W0-G1-T02: Entra ID security group definitions for the three-group permission model.
  * Traceability: docs/reference/provisioning/entra-id-group-model.md
  */
+import type { IDepartmentViewerPolicy } from '../services/viewer-groups-list-contract.js';
 
 export interface IEntraGroupDefinition {
   /** Suffix appended to the project number to form the group display name. */
@@ -64,6 +65,11 @@ export function buildGroupDescription(
  * The value is a comma-separated list of UPNs.
  *
  * Returns an empty array if the env var is not set or the department is not provided.
+ *
+ * NOTE: This is the current runtime path. The intended target is to read from
+ * the `projectViewerGroups` SharePoint list via `resolveDepartmentViewerGroupIds()`.
+ * The transition will happen once the list data is populated and the repository
+ * is wired into the provisioning saga service container.
  */
 export function getDepartmentBackgroundViewers(department?: string): string[] {
   if (!department) return [];
@@ -74,4 +80,20 @@ export function getDepartmentBackgroundViewers(department?: string): string[] {
     .split(',')
     .map((upn) => upn.trim())
     .filter(Boolean);
+}
+
+/**
+ * P9-G6-03: Resolves default viewer Entra group IDs from a department viewer policy.
+ *
+ * This is the intended replacement for `getDepartmentBackgroundViewers()` in the
+ * hybrid viewer model. Instead of reading individual UPNs from env vars, this
+ * returns Entra ID security group IDs that should receive read-only site access.
+ *
+ * Returns an empty array if the policy is null or inactive.
+ */
+export function resolveDepartmentViewerGroupIds(
+  policy: IDepartmentViewerPolicy | null | undefined,
+): string[] {
+  if (!policy || !policy.isActive) return [];
+  return policy.defaultViewerGroupIds;
 }
