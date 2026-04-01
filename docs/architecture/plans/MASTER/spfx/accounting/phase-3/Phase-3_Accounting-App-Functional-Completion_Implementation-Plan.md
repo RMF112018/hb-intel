@@ -223,3 +223,14 @@ Phase 3 is complete only when all of the following are true:
 - failure cases route cleanly to Admin without adding Admin actions to Accounting
 - docs are updated to match repo truth and stale authority paths are classified
 - a final readiness report exists stating what was completed, what remains, and whether the app is ready for later hardening phases
+
+---
+
+## Execution Progress
+
+### Prompt-01 — Repo-Truth Accounting Surface Audit
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Deliverable:** `docs/architecture/reviews/accounting-phase-3-functional-completion-report.md`
+- **Summary:** Surface is substantially mature. One critical dead-end (`AwaitingExternalSetup` lacks forward action), one minor doc drift (`HbcSmartEmptyState` naming), no boundary violations. Prioritized gap inventory produced for Prompts 02–06. No blockers for Prompt-02.
