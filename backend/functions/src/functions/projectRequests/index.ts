@@ -3,7 +3,7 @@ import type { IProjectSetupRequest, IProvisionSiteRequest, ProjectSetupRequestSt
 import { randomUUID } from 'crypto';
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
-import { createServiceFactory } from '../../services/service-factory.js';
+import { createProjectSetupServiceFactory } from '../../hosts/project-setup/service-factory.js';
 import {
   isValidTransition,
   resolveRequestRole,
@@ -113,7 +113,7 @@ app.http('submitProjectSetupRequest', {
       return errorResponse(400, 'VALIDATION_ERROR', validationErrors.map((e) => e.message).join('; '), reqId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const projectId = body.projectId ?? randomUUID();
     const requestId = projectId;
 
@@ -186,7 +186,7 @@ app.http('listProjectSetupRequests', {
     const requestId = extractOrGenerateRequestId(request);
     const page = Math.max(1, parseInt(request.query.get('page') ?? '1', 10));
     const pageSize = Math.min(100, Math.max(1, parseInt(request.query.get('pageSize') ?? '25', 10)));
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const stateFilter = request.query.get('state') as ProjectSetupRequestState | null;
     const submitterFilter = request.query.get('submitterId');
 
@@ -231,7 +231,7 @@ app.http('getProjectSetupRequest', {
     const requestId = request.params.requestId;
     if (!requestId) return errorResponse(400, 'VALIDATION_ERROR', 'requestId is required', reqId);
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const existing = await services.projectRequests.getRequest(requestId);
     if (!existing) return notFoundResponse('ProjectSetupRequest', requestId, reqId);
 
@@ -267,7 +267,7 @@ app.http('advanceRequestState', {
     if (!requestId) return errorResponse(400, 'VALIDATION_ERROR', 'requestId is required', reqId);
     if (!body.newState) return errorResponse(400, 'VALIDATION_ERROR', 'newState is required', reqId);
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const existing = await services.projectRequests.getRequest(requestId);
     if (!existing) {
       return notFoundResponse('ProjectSetupRequest', requestId, reqId);

@@ -684,7 +684,7 @@ Phase 8 executed 7 prompts (6 completed, 1 deferred by design) to reconcile the 
 |---|-----------------|-------------|------------|
 | 1 | Packaged shell/runtime-config contract may be stale | **Closed** | P8-01 verified all 6 DefinePlugin constants; P8-02 added `apiAudience` injection |
 | 2 | Same-origin `/api/users/me/*` dependencies not clearly owned | **Closed** | P8-03 confirmed dead for PS scope; Graph search confirmed intentional SPFx path |
-| 3 | Backend host surface broader than Project Setup release surface | **Open, deferred** | OI-05 — documented, not blocking production |
+| 3 | ~~Backend host surface broader than Project Setup release surface~~ | **Closed (P9-G3)** | ~~OI-05~~ — resolved; PS handlers use scoped factory with 24 regression tests |
 | 4 | Production prerequisites not fully hardened into release gates | **Closed** | P8-06 documented 8 prerequisites with gates; P8-07 fixed startup validation scope |
 | 5 | CORS origins not configured | **Closed** | P8-06 verified locked CORS; 5 regression tests enforce |
 | 6 | SharePoint API-access approvals not granted | **Closed pending external action** | P8-06 documented grants, symptoms, and code gates; operator execution required |
@@ -708,7 +708,7 @@ Phase 8 executed 7 prompts (6 completed, 1 deferred by design) to reconcile the 
 | ID | Risk | Severity | Mitigation |
 |----|------|----------|------------|
 | OI-03 | Teams Personal App auth — `aadTokenProviderFactory` unverified in Teams context | Low | Known risk; Teams host uses same SPFx `WebPartContext` shape; requires pre-consent verification before Teams activation |
-| OI-05 | Backend host surface broader than PS release scope | Low | Documented; unrelated routes are behind auth; lazy domain CRUD services not instantiated for PS operations |
+| OI-05 | ~~Backend host surface broader than PS release scope~~ | ~~Low~~ | **Closed (P9-G3).** All PS handlers now use `createProjectSetupServiceFactory()`. 24 regression tests enforce handler-level boundary. See `project-setup-backend-boundary-remediation-closure-report.md`. |
 | OI-06 | `supportsThemeVariants` cosmetic divergence | Negligible | App manifest says `false`, shell manifest says `true`; orchestrator copies `true` regardless; no runtime impact |
 
 ### Go/no-go assessment
@@ -739,7 +739,7 @@ Phase 8 executed 7 prompts (6 completed, 1 deferred by design) to reconcile the 
 | OI-02 | Runtime config/token contract reconciliation | P8-02 | **Closed** |
 | OI-03 | Teams Personal App auth readiness — `aadTokenProviderFactory` unverified in Teams context | Future | Open (low risk, retained) |
 | OI-04 | Route ownership resolution | P8-03 | **Closed** |
-| OI-05 | Backend boundary reduction — host scope broader than PS release surface | Future | Open (deferred, not blocking) |
+| OI-05 | ~~Backend boundary reduction — host scope broader than PS release surface~~ | ~~Future~~ | **Closed (P9-G3)** — handlers wired to scoped factory, 24 regression tests |
 | OI-06 | `supportsThemeVariants` cosmetic divergence | Backlog | Open (negligible impact) |
 
 ## Evidence Index

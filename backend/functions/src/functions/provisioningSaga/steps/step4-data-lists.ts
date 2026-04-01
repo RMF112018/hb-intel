@@ -1,7 +1,7 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import { HB_INTEL_LIST_DEFINITIONS } from '../../../config/list-definitions.js';
 import { HB_INTEL_WORKFLOW_LIST_DEFINITIONS } from '../../../config/workflow-list-definitions.js';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 
 /**
  * W0-G2-T07 Step 4: Creates standard HB Intel data lists (8 core + 26 workflow-family).
@@ -10,7 +10,7 @@ import type { IServiceContainer } from '../../../services/service-factory.js';
  * introduction if duration exceeds 6 minutes.
  */
 export async function executeStep4(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {

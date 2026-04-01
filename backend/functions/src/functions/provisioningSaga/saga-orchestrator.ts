@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import type { ILogger } from '../../utils/logger.js';
-import type { IServiceContainer } from '../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../hosts/project-setup/service-factory.js';
 import type {
   IProvisionSiteRequest,
   IProvisioningStatus,
@@ -35,7 +35,7 @@ const STEP_DEFINITIONS = [
  */
 export class SagaOrchestrator {
   constructor(
-    private readonly services: IServiceContainer,
+    private readonly services: IProjectSetupServiceContainer,
     private readonly logger: ILogger
   ) {}
 

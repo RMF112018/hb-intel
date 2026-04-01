@@ -1,7 +1,7 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from '@azure/functions';
 import type { IProvisionSiteRequest, IProvisioningStatus } from '@hbc/models';
 import { randomUUID } from 'crypto';
-import { createServiceFactory } from '../../services/service-factory.js';
+import { createProjectSetupServiceFactory } from '../../hosts/project-setup/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
 import { createLogger } from '../../utils/logger.js';
 import { withAuth } from '../../middleware/auth.js';
@@ -46,7 +46,7 @@ app.http('provisionProjectSite', {
         return errorResponse(400, 'VALIDATION_ERROR', 'projectNumber must match ##-###-## format', requestId);
       }
 
-      const services = createServiceFactory();
+      const services = createProjectSetupServiceFactory();
       const orchestrator = new SagaOrchestrator(services, logger);
 
       // Fire-and-forget: start saga asynchronously
@@ -88,7 +88,7 @@ app.http('getProvisioningStatus', {
     }
 
     try {
-      const services = createServiceFactory();
+      const services = createProjectSetupServiceFactory();
       const status = await services.tableStorage.getProvisioningStatus(projectId);
 
       if (!status) {
@@ -118,7 +118,7 @@ app.http('listFailedRuns', {
       return forbiddenResponse('Admin role required', requestId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const failedRuns = await services.tableStorage.listFailedRuns();
     return listResponse(failedRuns, failedRuns.length, 1, failedRuns.length, requestId);
   }, { domain: 'provisioningSaga', operation: 'listFailedRuns' })),
@@ -162,7 +162,7 @@ app.http('retryProvisioning', {
     }
 
     try {
-      const services = createServiceFactory();
+      const services = createProjectSetupServiceFactory();
       const orchestrator = new SagaOrchestrator(services, logger);
 
       orchestrator.retry(projectId).catch((err) => {
@@ -201,7 +201,7 @@ app.http('escalateProvisioning', {
 
     try {
       void (await request.json());
-      const services = createServiceFactory();
+      const services = createProjectSetupServiceFactory();
       await services.tableStorage.escalateProvisioning(projectId, auth.claims.upn);
 
       logger.info(`Provisioning escalated for ${projectId} by ${auth.claims.upn}`);
@@ -232,7 +232,7 @@ app.http('listProvisioningRuns', {
     }
 
     const statusFilter = request.query.get('status') ?? undefined;
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const runs = await services.tableStorage.listAllRuns(statusFilter);
     return listResponse(runs, runs.length, 1, runs.length, requestId);
   }, { domain: 'provisioningSaga', operation: 'listProvisioningRuns' })),
@@ -256,7 +256,7 @@ app.http('archiveFailure', {
       return forbiddenResponse('Admin role required', requestId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const status = await services.tableStorage.getProvisioningStatus(projectId);
     if (!status) return notFoundResponse('ProvisioningStatus', projectId, requestId);
 
@@ -287,7 +287,7 @@ app.http('acknowledgeEscalation', {
       return forbiddenResponse('Admin role required', requestId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const status = await services.tableStorage.getProvisioningStatus(projectId);
     if (!status) return notFoundResponse('ProvisioningStatus', projectId, requestId);
 
@@ -327,7 +327,7 @@ app.http('forceStateTransition', {
       return errorResponse(400, 'VALIDATION_ERROR', `targetState must be one of: ${[...VALID_PROVISIONING_STATES].join(', ')}`, requestId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const status = await services.tableStorage.getProvisioningStatus(projectId);
     if (!status) return notFoundResponse('ProvisioningStatus', projectId, requestId);
 

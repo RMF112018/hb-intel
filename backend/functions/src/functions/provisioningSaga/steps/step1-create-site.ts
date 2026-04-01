@@ -1,12 +1,12 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 
 /**
  * D-PH6-05 Step 1: Real site creation with audit-log idempotency guard.
  * If a prior run already created the site, this step returns a completed idempotent skip.
  */
 export async function executeStep1(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
@@ -45,7 +45,7 @@ export async function executeStep1(
  * SharePoint performs asynchronous deletion (site moves to recycle bin).
  */
 export async function compensateStep1(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<void> {
   if (status.siteUrl) {

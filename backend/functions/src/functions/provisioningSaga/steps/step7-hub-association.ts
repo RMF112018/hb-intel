@@ -1,12 +1,12 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 
 /**
  * D-PH6-05 Step 7 hub association.
  * Uses idempotency check to avoid duplicate join operations on saga retries.
  */
 export async function executeStep7(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {
@@ -44,7 +44,7 @@ export async function executeStep7(
 
 /** D-PH6-05 compensation: remove hub association if rollback executes after Step 7. */
 export async function compensateStep7(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<void> {
   if (status.siteUrl) {

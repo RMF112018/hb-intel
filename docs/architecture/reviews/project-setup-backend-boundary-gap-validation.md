@@ -2,13 +2,11 @@
 
 ## Executive Summary
 
-**Verdict: Partially confirmed — the dedicated host and scoped service factory exist, but the boundary is structurally enforced at route-registration level only, not at service-resolution level.**
+**Verdict: ~~Partially confirmed~~ → Resolved (Phase 9, Gap 3).**
 
-A dedicated Project Setup composition root (`hosts/project-setup/index.ts`) correctly limits route registration to 8 in-scope families. A scoped service factory (`hosts/project-setup/service-factory.ts`) correctly excludes domain CRUD services. Boundary regression tests validate both artifacts structurally.
+~~The boundary was structurally enforced at route-registration level only, not at service-resolution level.~~ **Resolved:** All 5 PS-host route handlers and 10 saga/step/notification-dispatch internal files now use `createProjectSetupServiceFactory()` and `IProjectSetupServiceContainer` (P9-G3-02). 24 handler-wiring regression tests enforce this at source level (P9-G3-03). Domain CRUD services are excluded at compile time via the scoped type boundary.
 
-However, **`createProjectSetupServiceFactory()` is never called by any route handler.** All 5 PS-host route modules that need services import and call the monolithic `createServiceFactory()`, which exposes all 10 domain CRUD services via lazy getters. The scoped factory exists as a tested architectural artifact, but route handlers bypass it entirely.
-
-This is already documented as OI-05 in the Phase 8 remediation report ("Backend host surface broader than PS release scope") and explicitly deferred. The practical risk is low because domain CRUD services are lazily initialized and never accessed by PS handlers. The gap is primarily architectural integrity and future-drift risk, not a runtime defect.
+The original gap (OI-05) is closed. See `project-setup-backend-boundary-remediation-closure-report.md` for the full remediation narrative.
 
 ---
 

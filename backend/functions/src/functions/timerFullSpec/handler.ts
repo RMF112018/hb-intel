@@ -1,6 +1,6 @@
 import type { InvocationContext } from '@azure/functions';
 import { randomUUID } from 'crypto';
-import { createServiceFactory } from '../../services/service-factory.js';
+import { createProjectSetupServiceFactory } from '../../hosts/project-setup/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
 import { executeStep5 } from '../provisioningSaga/steps/step5-web-parts.js';
 import type { IProvisioningStatus, ProjectSetupRequestState } from '@hbc/models';
@@ -20,7 +20,7 @@ export async function runTimerFullSpec(
   const timerStartMs = Date.now();
   const logger = createLogger(context);
   const timerCorrelationId = randomUUID();
-  const services = createServiceFactory();
+  const services = createProjectSetupServiceFactory();
   const pendingJobs = await services.tableStorage.listPendingStep5Jobs();
 
   logger.trackEvent('ProvisioningTimerStarted', {

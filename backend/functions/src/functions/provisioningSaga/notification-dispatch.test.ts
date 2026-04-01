@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { IProvisioningStatus } from '@hbc/models';
 import { resolveRecipients, dispatchProvisioningNotification } from './notification-dispatch.js';
-import type { IServiceContainer } from '../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../hosts/project-setup/service-factory.js';
 import type { ILogger } from '../../utils/logger.js';
 
 function makeStatus(overrides?: Partial<IProvisioningStatus>): IProvisioningStatus {
@@ -114,7 +114,7 @@ describe('dispatchProvisioningNotification', () => {
 
   it('dispatches to each recipient', () => {
     const sendMock = vi.fn().mockResolvedValue(undefined);
-    const services = { notifications: { send: sendMock } } as unknown as IServiceContainer;
+    const services = { notifications: { send: sendMock } } as unknown as IProjectSetupServiceContainer;
     const logger = makeLogger();
     const status = makeStatus({ submittedBy: 'a@hb.com', groupMembers: ['b@hb.com'] });
 
@@ -134,7 +134,7 @@ describe('dispatchProvisioningNotification', () => {
 
   it('is non-blocking on send failure — catches and logs warning', async () => {
     const sendMock = vi.fn().mockRejectedValue(new Error('network error'));
-    const services = { notifications: { send: sendMock } } as unknown as IServiceContainer;
+    const services = { notifications: { send: sendMock } } as unknown as IProjectSetupServiceContainer;
     const logger = makeLogger();
 
     dispatchProvisioningNotification(services, logger, {
@@ -158,7 +158,7 @@ describe('dispatchProvisioningNotification', () => {
 
   it('logs stringified error on non-Error rejection', async () => {
     const sendMock = vi.fn().mockRejectedValue('string-failure');
-    const services = { notifications: { send: sendMock } } as unknown as IServiceContainer;
+    const services = { notifications: { send: sendMock } } as unknown as IProjectSetupServiceContainer;
     const logger = makeLogger();
 
     dispatchProvisioningNotification(services, logger, {
@@ -181,7 +181,7 @@ describe('dispatchProvisioningNotification', () => {
 
   it('logs warning and returns when zero recipients', () => {
     const sendMock = vi.fn();
-    const services = { notifications: { send: sendMock } } as unknown as IServiceContainer;
+    const services = { notifications: { send: sendMock } } as unknown as IProjectSetupServiceContainer;
     const logger = makeLogger();
     const status = makeStatus({
       submittedBy: '',

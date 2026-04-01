@@ -4,7 +4,7 @@
  * Pattern: D-PH6-06 non-blocking `.catch()` — notifications must never fail the saga.
  */
 import type { ILogger } from '../../utils/logger.js';
-import type { IServiceContainer } from '../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../hosts/project-setup/service-factory.js';
 import type { IProvisioningStatus } from '@hbc/models';
 
 type RecipientGroup = 'submitter' | 'controller' | 'group' | 'admin';
@@ -60,7 +60,7 @@ export function resolveRecipients(
  * Non-blocking: each send is fire-and-forget with warning-level logging on failure.
  */
 export function dispatchProvisioningNotification(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   logger: ILogger,
   params: NotificationDispatchParams,
 ): void {

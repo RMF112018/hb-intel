@@ -1,5 +1,5 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 import {
   ENTRA_GROUP_DEFINITIONS,
   buildGroupDisplayName,
@@ -24,7 +24,7 @@ function getOpexUpn(): string {
  * Stores created group IDs in `status.entraGroups` for post-provisioning management.
  */
 export async function executeStep6(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {

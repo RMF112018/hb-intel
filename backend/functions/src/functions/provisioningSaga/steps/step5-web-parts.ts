@@ -1,5 +1,5 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 import type { ILogger } from '../../../utils/logger.js';
 
 const STEP5_TIMEOUT_MS = parseInt(process.env.PROVISIONING_STEP5_TIMEOUT_MS ?? '90000', 10);
@@ -10,7 +10,7 @@ const STEP5_MAX_ATTEMPTS = 2;
  * Attempts real SPFx installation twice, then marks the step DeferredToTimer for overnight retry.
  */
 export async function executeStep5(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus,
   logger: ILogger
 ): Promise<ISagaStepResult> {

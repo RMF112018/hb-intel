@@ -9,7 +9,7 @@
  */
 
 import { app, type InvocationContext, type Timer } from '@azure/functions';
-import { createServiceFactory } from '../../services/service-factory.js';
+import { createProjectSetupServiceFactory } from '../../hosts/project-setup/service-factory.js';
 import { createLogger } from '../../utils/logger.js';
 
 app.timer('cleanupIdempotency', {
@@ -17,7 +17,7 @@ app.timer('cleanupIdempotency', {
   runOnStartup: false,
   handler: async (_timer: Timer, context: InvocationContext): Promise<void> => {
     const logger = createLogger(context);
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const before = new Date();
 
     logger.trackEvent('idempotency.cleanup.start', {

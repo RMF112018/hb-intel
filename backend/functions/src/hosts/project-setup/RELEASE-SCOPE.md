@@ -36,9 +36,11 @@
 
 ## Service Container
 
+**Factory:** `createProjectSetupServiceFactory()` — all PS handlers and saga internals resolve services through this scoped factory, not the monolithic `createServiceFactory()`. Enforced by 24 handler-wiring regression tests (P9-G3-03).
+
 **Includes (9 eager):** sharePoint, tableStorage, signalR, managedIdentity, projectRequests, acknowledgments, graph, notifications, idempotency
 
-**Excludes (10 domain CRUD):** leads, projects, estimating, schedule, buyout, compliance, contracts, risk, scorecards, pmp
+**Excludes (10 domain CRUD):** leads, projects, estimating, schedule, buyout, compliance, contracts, risk, scorecards, pmp — excluded at compile time via `IProjectSetupServiceContainer` type boundary
 
 ## Startup Config Requirements
 

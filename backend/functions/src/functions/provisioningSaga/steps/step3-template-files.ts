@@ -1,5 +1,5 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 import { TEMPLATE_FILE_MANIFEST } from '../../../config/template-file-manifest.js';
 import { ADD_ON_DEFINITIONS } from '../../../config/add-on-definitions.js';
 import { DEPARTMENT_LIBRARIES, DEPARTMENT_FOLDER_TREES } from '../../../config/core-libraries.js';
@@ -13,7 +13,7 @@ import { DEPARTMENT_LIBRARIES, DEPARTMENT_FOLDER_TREES } from '../../../config/c
  * Compensation is intentionally omitted because Step 1 site deletion removes all artifacts.
  */
 export async function executeStep3(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {

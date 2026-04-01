@@ -266,6 +266,60 @@ describe('P1-10 Regression guards and release-scope proof', () => {
     });
   });
 
+  // P9-G3-03: Handler-level boundary enforcement — proves PS handlers use
+  // the scoped factory, not the monolithic one. Prevents silent regression.
+  describe('handler-level service factory wiring', () => {
+    // The 5 handler files that resolve services at runtime
+    const HANDLER_FILES: Array<{ family: string; file: string }> = [
+      { family: 'projectRequests', file: 'index.ts' },
+      { family: 'provisioningSaga', file: 'index.ts' },
+      { family: 'acknowledgments', file: 'index.ts' },
+      { family: 'cleanupIdempotency', file: 'index.ts' },
+      { family: 'timerFullSpec', file: 'handler.ts' },
+    ];
+
+    for (const { family, file } of HANDLER_FILES) {
+      const filePath = resolve(FUNCTIONS_SRC, 'functions', family, file);
+      const source = readFileSync(filePath, 'utf-8');
+
+      it(`${family}/${file} does not import the monolithic createServiceFactory`, () => {
+        expect(source).not.toContain('createServiceFactory');
+      });
+
+      it(`${family}/${file} uses createProjectSetupServiceFactory`, () => {
+        expect(source).toContain('createProjectSetupServiceFactory');
+      });
+
+      it(`${family}/${file} imports from the scoped factory path`, () => {
+        expect(source).toContain('hosts/project-setup/service-factory');
+      });
+    }
+
+    // Saga internals must also use the scoped type, not the monolithic one
+    const SAGA_INTERNAL_FILES = [
+      'provisioningSaga/saga-orchestrator.ts',
+      'provisioningSaga/notification-dispatch.ts',
+      'provisioningSaga/steps/step1-create-site.ts',
+      'provisioningSaga/steps/step2-document-library.ts',
+      'provisioningSaga/steps/step3-template-files.ts',
+      'provisioningSaga/steps/step4-data-lists.ts',
+      'provisioningSaga/steps/step5-web-parts.ts',
+      'provisioningSaga/steps/step6-permissions.ts',
+      'provisioningSaga/steps/step7-hub-association.ts',
+    ];
+
+    for (const relPath of SAGA_INTERNAL_FILES) {
+      const source = readFileSync(resolve(FUNCTIONS_SRC, 'functions', relPath), 'utf-8');
+
+      it(`${relPath} uses IProjectSetupServiceContainer, not IServiceContainer`, () => {
+        // Must not import the monolithic type
+        expect(source).not.toMatch(/import.*IServiceContainer.*from.*services\/service-factory/);
+        // Must import the scoped type
+        expect(source).toContain('IProjectSetupServiceContainer');
+      });
+    }
+  });
+
   describe('config expansion prevention', () => {
     it('service factory does not reference EMAIL config', () => {
       expect(hostFactory).not.toContain('EMAIL_DELIVERY_API_KEY');

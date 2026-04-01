@@ -1,5 +1,5 @@
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
-import type { IServiceContainer } from '../../../services/service-factory.js';
+import type { IProjectSetupServiceContainer } from '../../../hosts/project-setup/service-factory.js';
 import { CORE_LIBRARIES } from '../../../config/core-libraries.js';
 
 /**
@@ -8,7 +8,7 @@ import { CORE_LIBRARIES } from '../../../config/core-libraries.js';
  * (Project Documents, Drawings, Specifications) with versioning enabled.
  */
 export async function executeStep2(
-  services: IServiceContainer,
+  services: IProjectSetupServiceContainer,
   status: IProvisioningStatus
 ): Promise<ISagaStepResult> {
   const result: ISagaStepResult = {

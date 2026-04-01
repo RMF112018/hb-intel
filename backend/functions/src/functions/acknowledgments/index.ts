@@ -14,7 +14,7 @@ import {
 } from '@hbc/acknowledgment/server';
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
-import { createServiceFactory } from '../../services/service-factory.js';
+import { createProjectSetupServiceFactory } from '../../hosts/project-setup/service-factory.js';
 import type { IAcknowledgmentListItem } from '../../services/acknowledgment-service.js';
 import { createLogger } from '../../utils/logger.js';
 import {
@@ -95,7 +95,7 @@ app.http('postAcknowledgment', {
       return errorResponse(400, 'VALIDATION_ERROR', 'parties[] and mode are required', requestId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const existingItems = await services.acknowledgments.getEvents(body.contextType, body.contextId);
     const existingEvents = existingItems.map(toAcknowledgmentEvent);
 
@@ -204,7 +204,7 @@ app.http('getAcknowledgments', {
       return errorResponse(400, 'VALIDATION_ERROR', `Invalid contextType: ${contextType}`, requestId);
     }
 
-    const services = createServiceFactory();
+    const services = createProjectSetupServiceFactory();
     const items = await services.acknowledgments.getEvents(contextType, contextId);
     const events = items.map(toAcknowledgmentEvent);
 
