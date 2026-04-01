@@ -161,6 +161,18 @@ export interface IValidatedClaims {
    * but not enforced — both v1 ('1.0') and v2 ('2.0') are accepted.
    */
   tokenVersion?: string;
+  /**
+   * P9-G5-04: Delegated scope claim from Entra v2 tokens.
+   * Space-delimited string (e.g., "access_as_user"). Present in delegated
+   * tokens; absent in app-only tokens.
+   */
+  scp?: string;
+  /**
+   * P9-G5-04: Token identity type from Entra v2.
+   * Value is "app" for app-only tokens (managed identities, service principals).
+   * May be "user" or absent for delegated tokens.
+   */
+  idtyp?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -241,10 +253,25 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     name?: string;
     jobTitle?: string;
     ver?: string;
+    scp?: string;
+    idtyp?: string;
   };
 
+  // P9-G5-04: Detect app-only tokens (managed identities / service principals).
+  // App-only tokens have idtyp=app and no upn/preferred_username.
+  const isAppOnly = claims.idtyp === 'app' || (!claims.upn && !claims.preferred_username);
   const upn = (claims.upn ?? claims.preferred_username) ?? '';
-  if (!upn || !claims.oid) {
+
+  // oid is always required (user oid for delegated, service principal oid for app-only).
+  if (!claims.oid) {
+    throw new TokenValidationError(
+      'Token missing required identity claim (oid)',
+      'missing_claims',
+    );
+  }
+
+  // upn is required for delegated tokens only.
+  if (!isAppOnly && !upn) {
     throw new TokenValidationError(
       'Token missing required identity claims (upn/preferred_username and oid)',
       'missing_claims',
@@ -258,6 +285,8 @@ export async function validateToken(request: HttpRequest): Promise<IValidatedCla
     displayName: claims.name ?? upn,
     jobTitle: typeof claims.jobTitle === 'string' ? claims.jobTitle : undefined,
     tokenVersion: typeof claims.ver === 'string' ? claims.ver : undefined,
+    scp: typeof claims.scp === 'string' ? claims.scp : undefined,
+    idtyp: typeof claims.idtyp === 'string' ? claims.idtyp : undefined,
   };
 }
 

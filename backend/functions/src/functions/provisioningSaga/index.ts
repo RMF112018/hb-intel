@@ -14,6 +14,7 @@ import {
   notFoundResponse,
   forbiddenResponse,
 } from '../../utils/response-helpers.js';
+import { requireAdmin } from '../../middleware/authorization.js';
 import { runTimerFullSpec } from '../timerFullSpec/handler.js';
 
 app.http('provisionProjectSite', {
@@ -114,9 +115,8 @@ app.http('listFailedRuns', {
     const requestId = extractOrGenerateRequestId(request);
 
     // D-PH6-12 admin-only visibility: failures inbox is restricted to Admin/HBIntelAdmin.
-    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return forbiddenResponse('Admin role required', requestId);
-    }
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     const services = createProjectSetupServiceFactory();
     const failedRuns = await services.tableStorage.listFailedRuns();
@@ -132,9 +132,8 @@ app.http('triggerTimerManually', {
     const requestId = extractOrGenerateRequestId(request);
 
     // D-PH6-13 manual timer trigger is limited to explicit admin roles.
-    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return forbiddenResponse('Admin role required', requestId);
-    }
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     // D-PH6-13 safety guard: manual timer execution is forbidden in production.
     if (process.env.AZURE_FUNCTIONS_ENVIRONMENT === 'Production') {
@@ -227,9 +226,8 @@ app.http('listProvisioningRuns', {
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
-    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return forbiddenResponse('Admin role required', requestId);
-    }
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     const statusFilter = request.query.get('status') ?? undefined;
     const services = createProjectSetupServiceFactory();
@@ -252,9 +250,8 @@ app.http('archiveFailure', {
     const projectId = request.params.projectId;
 
     if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
-    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return forbiddenResponse('Admin role required', requestId);
-    }
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     const services = createProjectSetupServiceFactory();
     const status = await services.tableStorage.getProvisioningStatus(projectId);
@@ -283,9 +280,8 @@ app.http('acknowledgeEscalation', {
     const projectId = request.params.projectId;
 
     if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
-    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return forbiddenResponse('Admin role required', requestId);
-    }
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     const services = createProjectSetupServiceFactory();
     const status = await services.tableStorage.getProvisioningStatus(projectId);
@@ -318,9 +314,8 @@ app.http('forceStateTransition', {
     const projectId = request.params.projectId;
 
     if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
-    if (!auth.claims.roles.some((role) => role === 'Admin' || role === 'HBIntelAdmin')) {
-      return forbiddenResponse('Admin role required', requestId);
-    }
+    const adminDenied = requireAdmin(auth.claims, requestId);
+    if (adminDenied) return adminDenied;
 
     const body = (await request.json()) as { targetState?: string };
     if (!body.targetState || !VALID_PROVISIONING_STATES.has(body.targetState)) {

@@ -66,7 +66,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-01 | Contract Freeze and Baseline | **Complete** | 2026-04-01 | Baseline inventoried, target frozen |
 | 1-02 | Target Architecture and Policy Matrix | **Complete** | 2026-04-01 | Architecture and route-policy matrix frozen |
 | 1-03 | Entra App Role and Scope Contract | **Complete** | 2026-04-01 | Entra contract frozen: 6 app-roles, delegated scope, token differentiation |
-| 1-04 | Shared Authorization Policy Engine | Not started | — | — |
+| 1-04 | Shared Authorization Policy Engine | **Complete** | 2026-04-01 | Policy module created, 60 tests, 6 admin guards replaced |
 | 1-05 | Oid Migration and Data Contract | Not started | — | — |
 | 1-06 | Request Lifecycle Authorization Convergence | Not started | — | — |
 | 1-07 | Provisioning and Admin Authorization Convergence | Not started | — | — |
@@ -102,6 +102,19 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Action | File |
 |--------|------|
 | Created | `docs/architecture/plans/MASTER/spfx/project-setup/estimating/gap-5-authz/Gap-5_Entra-App-Role-and-Scope-Contract.md` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-04 (P9-G5-04)
+
+| Action | File |
+|--------|------|
+| Created | `backend/functions/src/middleware/authorization.ts` |
+| Created | `backend/functions/src/middleware/authorization.test.ts` |
+| Modified | `backend/functions/src/middleware/validateToken.ts` — extended `IValidatedClaims` with `scp` and `idtyp`; relaxed `upn` requirement for app-only tokens |
+| Modified | `backend/functions/src/functions/provisioningSaga/index.ts` — replaced 6 inline admin guards with `requireAdmin()` |
+| Modified | `backend/functions/src/functions/signalr/index.ts` — replaced local `ADMIN_ROLES` constant and inline check with shared `isAdmin()` |
+| Modified | `backend/functions/vitest.config.ts` — added authorization test and coverage entries |
+| Modified | `backend/functions/package.json` — version bump `0.0.101` → `0.0.102` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -164,6 +177,27 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Doc clearly distinguishes repo-owned implementation work from environment-executed setup steps
 - [x] Doc is specific enough that later prompts can implement validation, policies, and runbooks without re-interpreting the identity model
 
+### Prompt 1-04 (P9-G5-04)
+
+**Scope:** Code changes — new shared authorization policy module, `IValidatedClaims` extension, handler refactoring.
+
+**Verification results:**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 75 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 52 files passed, 745 tests passed, 3 skipped (was 51 files / 685 tests — 60 new authorization tests added)
+
+**What was built:**
+- `authorization.ts`: shared policy module with role constants (`ADMIN_ROLES`, `CONTROLLER_ROLES`, `PRIVILEGED_ROLES`, `BREAK_GLASS_ROLES`, `AUTOMATION_ROLES`), token-type detection (`isAppOnlyToken`), role checks (`isAdmin`, `isController`, `isPrivileged`, `isBreakGlass`, `isAutomation`), scope checks (`hasScope`, `hasDelegatedScope`), ownership checks (`checkOwnership` with oid-first/UPN-fallback), and policy enforcement helpers (`requireRoles`, `requireAdmin`, `requireDelegatedScope`, `requireWorkloadRole`)
+- `validateToken.ts`: extended `IValidatedClaims` with `scp` and `idtyp` fields; `validateToken()` now extracts both claims and supports app-only tokens (relaxed `upn` requirement when `idtyp=app`)
+- `provisioningSaga/index.ts`: all 6 inline admin guard patterns replaced with `requireAdmin()` from shared policy module
+- `signalr/index.ts`: local `ADMIN_ROLES` constant and inline `.some()` check replaced with shared `isAdmin()`
+
+**Acceptance criteria status:**
+- [x] Authorization decisions no longer primarily implemented as scattered route-local one-offs
+- [x] Shared policy layer can express delegated scope checks, role checks, workload checks, and ownership checks
+- [x] Tests prove policy layer behavior and cover negative cases (60 tests across 14 describe blocks)
+
 ---
 
 ## Version History
@@ -173,3 +207,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1.0 | 2026-04-01 | P9-G5-01 | Initial baseline and contract freeze — 3 documents created |
 | 1.1 | 2026-04-01 | P9-G5-02 | Target authorization architecture and route-policy matrix frozen — 2 documents created, 3 design decisions resolved |
 | 1.2 | 2026-04-01 | P9-G5-03 | Entra app-role and scope contract frozen — 6 app-roles, delegated scope, token differentiation, environment setup matrix |
+| 2.0 | 2026-04-01 | P9-G5-04 | Shared authorization policy engine — new module, 60 tests, 6 admin guards consolidated, validateToken extended for app-only tokens |

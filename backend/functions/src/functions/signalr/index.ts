@@ -9,8 +9,7 @@ import { withAuth } from '../../middleware/auth.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { errorResponse } from '../../utils/response-helpers.js';
-
-const ADMIN_ROLES = ['Admin', 'HBIntelAdmin'];
+import { ADMIN_ROLES, isAdmin } from '../../middleware/authorization.js';
 const ADMIN_GROUP = 'provisioning-admin';
 const connectionInfoOutput = output.generic({
   type: 'signalRConnectionInfo',
@@ -40,8 +39,8 @@ app.http('signalrNegotiate', {
 
     // Per-project group is always required; admin group is additive for global monitoring.
     const groups: string[] = [`provisioning-${projectId}`];
-    const isAdmin = auth.claims.roles.some((role) => ADMIN_ROLES.includes(role));
-    if (isAdmin) {
+    const hasAdminRole = isAdmin(auth.claims);
+    if (hasAdminRole) {
       groups.push(ADMIN_GROUP);
     }
 
