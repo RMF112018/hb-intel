@@ -246,3 +246,9 @@ Phase 3 is complete only when all of the following are true:
 - **Status:** COMPLETE
 - **Date:** 2026-04-01
 - **Summary:** Resolved critical `AwaitingExternalSetup` dead-end by adding "Resolve Hold" action with projectNumber capture modal. Uses identical `advanceState('ReadyToProvision', { projectNumber })` backend contract as approval. Updated context text with next-step guidance. 3 new tests. No separate launch model created. No blockers for Prompt-04.
+
+### Prompt-04 — Status Feedback, Audit Trail, and Controller UX Hardening
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Summary:** Added NeedsClarification and AwaitingExternalSetup warning banners with controller-appropriate guidance. Fixed misleading "Last Updated" label to "Completed" in operational detail. Added "Approved By" field. Documented timeline data-model constraint. 4 new tests. No recovery console behavior added. No blockers for Prompt-05.

@@ -446,6 +446,71 @@ describe('ProjectReviewDetailPage', () => {
     expect(screen.queryByRole('button', { name: /force retry/i })).toBeNull();
   });
 
+  // ── Status banners and UX hardening (P3-04) ────────────────────────────
+
+  // P3-04-001: NeedsClarification shows warning banner
+  it('shows clarification warning banner when state is NeedsClarification', () => {
+    const request = createTestRequest({ requestId: 'req-1', state: 'NeedsClarification' });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    expect(screen.getByText(/Waiting for the requester to respond before review can continue/)).toBeTruthy();
+  });
+
+  // P3-04-002: AwaitingExternalSetup shows warning banner with guidance
+  it('shows external setup warning banner when state is AwaitingExternalSetup', () => {
+    const request = createTestRequest({ requestId: 'req-1', state: 'AwaitingExternalSetup' });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    expect(screen.getByText(/on hold pending external prerequisites/)).toBeTruthy();
+  });
+
+  // P3-04-003: Operational detail shows "Approved By" for approved requests
+  it('shows approved-by in operational detail for approved requests', () => {
+    const request = createTestRequest({
+      requestId: 'req-1',
+      state: 'ReadyToProvision',
+      approvedBy: 'controller@hb.com',
+      projectNumber: '26-001-01',
+    });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    expect(screen.getByText('controller@hb.com')).toBeTruthy();
+    expect(screen.getByText('Approved By:')).toBeTruthy();
+  });
+
+  // P3-04-004: ReadyToProvision banner shows correct auto-trigger messaging
+  it('shows provisioning auto-start banner for ReadyToProvision state', () => {
+    const request = createTestRequest({
+      requestId: 'req-1',
+      state: 'ReadyToProvision',
+      projectNumber: '26-001-01',
+    });
+    seedListRequests([request]);
+
+    renderWithProviders(<ProjectReviewDetailPage />, {
+      tier: 'standard',
+      requests: [request],
+    });
+
+    expect(screen.getByText(/Provisioning is starting automatically/)).toBeTruthy();
+    expect(screen.getByText(/26-001-01/)).toBeTruthy();
+  });
+
   // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
   describe('failure modes', () => {
     // G4-T07-009: Cross-app URL missing → warning banner

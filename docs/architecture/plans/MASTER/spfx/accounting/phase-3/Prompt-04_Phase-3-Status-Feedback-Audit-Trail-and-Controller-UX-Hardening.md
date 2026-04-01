@@ -78,3 +78,20 @@ The report update must include:
 ## Completion Standard
 
 This prompt is complete only when the controller surface feels operationally credible without becoming a recovery console.
+
+---
+
+## Execution Record
+
+- **Status:** COMPLETE
+- **Date:** 2026-04-01
+- **Changes:**
+  - Added `NeedsClarification` warning banner with next-step guidance
+  - Added `AwaitingExternalSetup` warning banner with "Resolve Hold" reference
+  - Fixed operational detail: renamed "Last Updated" to "Completed", added "Approved By" field
+  - Timeline: documented `IProjectSetupRequest` data-model constraint (no mid-lifecycle timestamps); approval info surfaced in operational detail instead
+  - All existing banners (ReadyToProvision, Provisioning, Completed, Failed) verified aligned
+  - Tests: 4 new tests (P3-04-001 through P3-04-004)
+- **No recovery console behavior added:** All banners are informational/warning only, no Admin actions
+- **Verification:** lint clean, build passed (tsc + vite), 36 tests passed (5 files)
+- **No blockers** for Prompt-05

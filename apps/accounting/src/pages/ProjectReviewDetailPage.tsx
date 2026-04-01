@@ -143,6 +143,9 @@ export function ProjectReviewDetailPage(): ReactNode {
   }, [performAction, clarificationNote]);
 
   // ── Timeline entries ────────────────────────────────────────────────────
+  // Note: mid-lifecycle timestamps (reviewStartedAt, awaitingExternalSetupAt)
+  // are not tracked on IProjectSetupRequest, so the timeline shows events
+  // for which the data model provides timestamps.
   const timelineEntries = useMemo((): IStatusEntry[] => {
     if (!request) return [];
     const entries: IStatusEntry[] = [];
@@ -158,6 +161,10 @@ export function ProjectReviewDetailPage(): ReactNode {
         entries.push({ status: `Clarification: ${item.fieldId}`, timestamp: item.raisedAt, actor: item.raisedBy });
       }
     }
+
+    // Note: approval timestamp (approvedAt) is not tracked on IProjectSetupRequest.
+    // Approval info is shown in Operational Detail instead. If a future data model
+    // change adds approvedAt, a timeline entry can be added here.
 
     if (request.completedAt) {
       entries.push({ status: 'Completed', timestamp: request.completedAt, actor: request.completedBy });
@@ -311,8 +318,11 @@ export function ProjectReviewDetailPage(): ReactNode {
         <HbcCard>
           <HbcTypography intent="heading3">Operational Detail</HbcTypography>
           <p><strong>Request ID:</strong> {request.requestId}</p>
+          {request.approvedBy && (
+            <p><strong>Approved By:</strong> {request.approvedBy}</p>
+          )}
           {request.completedAt && (
-            <p><strong>Last Updated:</strong> {new Date(request.completedAt).toLocaleString()}</p>
+            <p><strong>Completed:</strong> {new Date(request.completedAt).toLocaleString()}</p>
           )}
         </HbcCard>
       </HbcComplexityGate>
@@ -372,6 +382,19 @@ export function ProjectReviewDetailPage(): ReactNode {
             </HbcButton>
           </div>
         </HbcCard>
+      )}
+
+      {/* ── Pre-approval lifecycle status ─────────────────────────── */}
+      {request.state === 'NeedsClarification' && (
+        <HbcBanner variant="warning">
+          Clarification has been requested. Waiting for the requester to respond before review can continue.
+        </HbcBanner>
+      )}
+
+      {isAwaitingExternalSetup && (
+        <HbcBanner variant="warning">
+          This request is on hold pending external prerequisites. Use &ldquo;Resolve Hold&rdquo; above when external setup is complete.
+        </HbcBanner>
       )}
 
       {/* ── Post-approval lifecycle status ─────────────────────────── */}

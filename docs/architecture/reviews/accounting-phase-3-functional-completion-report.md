@@ -394,14 +394,18 @@ PH6 and earlier MVP planning documents are drift evidence only. They should not 
 - **Tests added:** 3 new tests (P3-02-001, P3-02-002, P3-02-003) covering Submitted visibility in queue and Begin Review action in detail page.
 - **Classification:** confirmed repo fact (gap), implementation recommendation (fix applied)
 
-### Priority 3 — Status/Audit/UX Hardening (Prompt-04)
+### Priority 3 — Status/Audit/UX Hardening (Prompt-04) — COMPLETE
 
-- **Gap type:** UX completeness
-- **Items:**
-  - Timeline entries incomplete — missing `UnderReview`, `AwaitingExternalSetup`, `ReadyToProvision`, `Provisioning` state transitions
-  - Operational detail "Last Updated" uses `completedAt` which is misleading for non-completed requests
-  - AwaitingExternalSetup context text lacks next-step guidance
-  - Consider adding `AwaitingExternalSetup` banner with context (similar to post-approval banners)
+- **Status:** COMPLETE (2026-04-01)
+- **Findings and implementation:**
+  - Timeline: mid-lifecycle timestamps (`reviewStartedAt`, `awaitingExternalSetupAt`, `approvedAt`) are not tracked on `IProjectSetupRequest`. Timeline entries are constrained to events with timestamps. Documented this data-model limitation in code comments. Approval info surfaced in Operational Detail instead.
+  - Operational detail: Renamed misleading "Last Updated" label to "Completed" (since the field is `completedAt`). Added "Approved By" field showing `approvedBy` when present.
+  - Added `NeedsClarification` warning banner: "Clarification has been requested. Waiting for the requester to respond before review can continue."
+  - Added `AwaitingExternalSetup` warning banner: "This request is on hold pending external prerequisites. Use 'Resolve Hold' above when external setup is complete."
+  - `AwaitingExternalSetup` context text next-step guidance already added in P3-03.
+  - All existing banners (`ReadyToProvision`, `Provisioning`, `Completed`, `Failed`) verified aligned with lifecycle semantics.
+  - 4 new tests (P3-04-001 through P3-04-004) covering NeedsClarification banner, AwaitingExternalSetup banner, Approved By in operational detail, and ReadyToProvision auto-trigger messaging.
+- **Classification:** confirmed repo fact (data model constraint on timeline), implementation applied (banners, labels, tests)
 
 ### Priority 4 — Admin Routing Verification (Prompt-05)
 
@@ -446,7 +450,7 @@ No blocking dependencies prevent Prompt-02 from proceeding.
 - `apps/accounting/src/utils/stateDisplayHelpers.ts` — state display mapping (27 lines)
 - `apps/accounting/src/test/ProjectReviewQueuePage.test.tsx` — queue tests
 - `apps/accounting/src/test/ProjectReviewDetailPage.test.tsx` — detail tests
-- `apps/accounting/package.json` — app manifest (version 00.000.014)
+- `apps/accounting/package.json` — app manifest (version 00.000.015)
 
 ### Backend and Shared Lifecycle Files
 - `backend/functions/src/functions/projectRequests/index.ts` — request lifecycle handler
