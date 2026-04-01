@@ -14,7 +14,7 @@ import {
   notFoundResponse,
   forbiddenResponse,
 } from '../../utils/response-helpers.js';
-import { requireAdmin } from '../../middleware/authorization.js';
+import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
 import { runTimerFullSpec } from '../timerFullSpec/handler.js';
 
 app.http('provisionProjectSite', {
@@ -24,6 +24,10 @@ app.http('provisionProjectSite', {
   handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
 
     try {
       const body = (await request.json()) as IProvisionSiteRequest;
@@ -79,9 +83,13 @@ app.http('getProvisioningStatus', {
   authLevel: 'anonymous',
   // D-PH6-01: route key migrated to immutable {projectId}.
   route: 'provisioning-status/{projectId}',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
 
     const projectId = request.params.projectId;
 
@@ -115,6 +123,10 @@ app.http('listFailedRuns', {
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
     // D-PH6-12 admin-only visibility: failures inbox is restricted to Admin/HBIntelAdmin.
     const adminDenied = requireAdmin(auth.claims, requestId);
     if (adminDenied) return adminDenied;
@@ -131,6 +143,10 @@ app.http('triggerTimerManually', {
   route: 'admin/trigger-timer',
   handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
 
     // D-PH6-13 manual timer trigger is limited to explicit admin roles.
     const adminDenied = requireAdmin(auth.claims, requestId);
@@ -151,9 +167,13 @@ app.http('retryProvisioning', {
   authLevel: 'anonymous',
   // D-PH6-01: retry endpoint now addresses the system key projectId.
   route: 'provisioning-retry/{projectId}',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
 
     const projectId = request.params.projectId;
 
@@ -193,6 +213,10 @@ app.http('escalateProvisioning', {
     const logger = createLogger(context);
     const requestId = extractOrGenerateRequestId(request);
 
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
     const projectId = request.params.projectId;
 
     if (!projectId) {
@@ -227,6 +251,10 @@ app.http('listProvisioningRuns', {
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
 
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
     const adminDenied = requireAdmin(auth.claims, requestId);
     if (adminDenied) return adminDenied;
 
@@ -251,6 +279,11 @@ app.http('archiveFailure', {
     const projectId = request.params.projectId;
 
     if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
     const adminDenied = requireAdmin(auth.claims, requestId);
     if (adminDenied) return adminDenied;
 
@@ -281,6 +314,11 @@ app.http('acknowledgeEscalation', {
     const projectId = request.params.projectId;
 
     if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
     const adminDenied = requireAdmin(auth.claims, requestId);
     if (adminDenied) return adminDenied;
 
@@ -315,6 +353,11 @@ app.http('forceStateTransition', {
     const projectId = request.params.projectId;
 
     if (!projectId) return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+
+    // P9-G5-07: Delegated scope enforcement (L2).
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
     const adminDenied = requireAdmin(auth.claims, requestId);
     if (adminDenied) return adminDenied;
 

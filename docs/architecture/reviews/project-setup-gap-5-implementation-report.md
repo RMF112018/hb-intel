@@ -69,7 +69,7 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 1-04 | Shared Authorization Policy Engine | **Complete** | 2026-04-01 | Policy module created, 60 tests, 6 admin guards replaced |
 | 1-05 | Oid Migration and Data Contract | **Complete** | 2026-04-01 | oid fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
 | 1-06 | Request Lifecycle Authorization Convergence | **Complete** | 2026-04-01 | resolveRequestRole() rewritten to use JWT claims + oid ownership; env-var auth eliminated |
-| 1-07 | Provisioning and Admin Authorization Convergence | Not started | — | — |
+| 1-07 | Provisioning and Admin Authorization Convergence | **Complete** | 2026-04-01 | Delegated scope enforcement added to all 10 provisioning routes |
 | 1-08 | Workload and App-Only Authorization | Not started | — | — |
 | 1-09 | Frontend SPFx Contract and Diagnostics | Not started | — | — |
 | 1-10 | Telemetry, Break-Glass, and Auditability | Not started | — | — |
@@ -140,6 +140,15 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | Modified | `backend/functions/src/state-machine.test.ts` — added 16 tests for claims-based `resolveRequestRole()` and `isAuthorizedTransition()` |
 | Modified | `backend/functions/src/functions/projectRequests/__tests__/request-lifecycle.test.ts` — rewrote Section C tests: removed env-var setup, uses `IValidatedClaims` objects with app-roles and oid ownership |
 | Modified | `backend/functions/package.json` — version bump `0.0.103` → `0.0.104` |
+| Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
+
+### Prompt 1-07 (P9-G5-07)
+
+| Action | File |
+|--------|------|
+| Modified | `backend/functions/src/functions/provisioningSaga/index.ts` — added `requireDelegatedScope()` (L2) to all 10 provisioning routes; added `auth` parameter to `getProvisioningStatus` and `retryProvisioning` handlers |
+| Created | `backend/functions/src/functions/provisioningSaga/__tests__/provisioning-authorization.test.ts` — 13 tests for L2 scope enforcement and L3 admin role enforcement on provisioning routes |
+| Modified | `backend/functions/package.json` — version bump `0.0.104` → `0.0.105` |
 | Updated | `docs/architecture/reviews/project-setup-gap-5-implementation-report.md` |
 
 ---
@@ -273,6 +282,28 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 - [x] Controller/admin access is role-based through the shared policy layer
 - [x] Tests prove all major request lifecycle cases (19 new tests across role resolution and transition authorization)
 
+### Prompt 1-07 (P9-G5-07)
+
+**Scope:** Code changes — delegated scope enforcement (L2) added to all provisioning routes per route-policy matrix.
+
+**Verification results:**
+- `check-types`: pass (0 errors)
+- `lint`: pass (0 errors, 78 pre-existing warnings)
+- `build`: pass (clean compilation)
+- `test`: 53 files passed, 777 tests passed, 3 skipped (was 52 files / 764 tests — 13 new tests)
+
+**What changed:**
+- All 10 provisioning routes in `provisioningSaga/index.ts` now call `requireDelegatedScope(auth.claims, requestId)` as the first authorization check after request ID extraction
+- `getProvisioningStatus` and `retryProvisioning` handlers: added `auth` parameter (previously unused since they had no authorization check)
+- Delegated-Open routes (5, 6, 9, 10): gain L2 scope check only
+- Delegated-Privileged routes (7, 8, 11, 12, 13, 14): gain L2 scope check before existing L3 admin role check
+- New test file: `provisioning-authorization.test.ts` with 13 tests covering L2 scope enforcement (positive, negative, app-only bypass) and L3 admin role enforcement (positive, negative), plus route classification alignment
+
+**Acceptance criteria status:**
+- [x] Privileged delegated routes use one coherent authorization model (L2 scope + L3 role via shared policy engine)
+- [x] Route access aligns with the policy matrix from Prompt 1-02
+- [x] Tests prove positive and negative authorization outcomes across provisioning/admin routes
+
 ---
 
 ## Version History
@@ -285,3 +316,4 @@ Single Entra claim-based authorization model. See `Gap-5_Target-Outcome-Summary.
 | 2.0 | 2026-04-01 | P9-G5-04 | Shared authorization policy engine — new module, 60 tests, 6 admin guards consolidated, validateToken extended for app-only tokens |
 | 2.1 | 2026-04-01 | P9-G5-05 | Oid migration — stable identity fields added to 3 model interfaces, 3 handlers, 2 persistence layers |
 | 3.0 | 2026-04-01 | P9-G5-06 | Request lifecycle authorization convergence — resolveRequestRole() rewritten to JWT claims + oid ownership; env-var auth eliminated from all request lifecycle routes |
+| 3.1 | 2026-04-01 | P9-G5-07 | Provisioning and admin route convergence — delegated scope enforcement (L2) added to all 10 provisioning routes; 13 authorization tests |
