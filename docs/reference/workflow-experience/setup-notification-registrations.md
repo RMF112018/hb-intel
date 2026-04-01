@@ -18,7 +18,7 @@ This document is the authoritative specification for all 15 provisioning notific
 |---|-----------|-------------|-----------------|----------|-------------|-------------|
 | 1 | `provisioning.request-submitted` | immediate | false | push, email, in-app | action-required | Controller must review to advance workflow (reclassified by T04) |
 | 2 | `provisioning.clarification-requested` | immediate | false | in-app, email, push | action-required | Controller requires additional information |
-| 3 | `provisioning.ready-to-provision` | immediate | false | in-app, email, push | action-required | Request reviewed, ready for external setup and provisioning trigger |
+| 3 | `provisioning.ready-to-provision` | immediate | false | in-app, email, push | action-required | Request approved with `projectNumber`; backend auto-triggers provisioning saga |
 | 4 | `provisioning.started` | watch | true | in-app | awareness | SharePoint site provisioning has started |
 | 5 | `provisioning.first-failure` | immediate | false | in-app, email, push | action-required | Provisioning failed on first attempt |
 | 6 | `provisioning.second-failure-escalated` | immediate | false | in-app, email, push | action-required | Provisioning failed a second time, requires admin escalation |
@@ -72,7 +72,7 @@ Template body text reuses T02 canonical action strings from `PROJECT_SETUP_ACTIO
 | `clarification-requested` | Backend handler: controller requests clarification |
 | `clarification-responded` | Backend handler: requester submits clarification response |
 | `request-approved` | Backend handler: controller approves request |
-| `ready-to-provision` | Backend handler: external setup complete, provisioning queued |
+| `ready-to-provision` | Backend handler: controller approval advances request to `ReadyToProvision`; auto-trigger fires saga |
 | `started` | Backend handler: provisioning saga begins |
 | `step-completed` | Backend handler: provisioning saga step completion |
 | `first-failure` | Backend handler: provisioning saga first failure |
