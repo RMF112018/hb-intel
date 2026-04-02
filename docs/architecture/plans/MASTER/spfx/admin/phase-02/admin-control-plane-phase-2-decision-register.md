@@ -110,3 +110,21 @@ This register tracks architectural decisions made during Phase 2 contract work. 
 - Network retries, browser refreshes, and webhook replays can cause duplicate submissions.
 - Without idempotency, a duplicate "approve" could resume a run twice or a duplicate "reject" could conflict with an already-processed "approve."
 - Caller-generated keys (rather than server-generated) allow the client to safely retry without knowing whether the first attempt succeeded.
+
+### P2-D11 — Audit, evidence, and config are separate record types with normalized references
+
+**Decision**: Audit records, evidence payloads, and config snapshots are separate record types linked by references (IDs and storage locators), not embedded in each other. Audit records reference evidence and config by ID; evidence and config are stored in their own stores.
+
+**Rationale**:
+- Embedding large payloads (command inputs, step details, config values) in every audit record would bloat the audit store and make it slow to query.
+- Separate stores allow independent retention policies, query patterns, and storage implementations.
+- Normalized references support "what governed this run" queries without requiring full payload joins at audit query time.
+- Storage locators are intentionally opaque strings to avoid locking Phase 2 contracts to a specific Phase 4/10 storage implementation.
+
+### P2-D12 — Standards references track source (code-default, live-override, merged)
+
+**Decision**: `IAdminStandardsReference` includes a `source` field distinguishing `'code-default'`, `'live-override'`, and `'merged'` origins. This directly supports the hybrid source-of-truth model required by LD-08.
+
+**Rationale**:
+- LD-08 requires hybrid repo/live control. Without tracking the source, operators cannot determine whether a standard was immutable code or an admin-maintained override.
+- The `merged` source captures the effective state when both code defaults and live overrides contribute to the governing standard.

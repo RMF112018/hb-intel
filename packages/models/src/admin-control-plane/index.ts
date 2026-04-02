@@ -53,3 +53,16 @@ export type {
   IAdminCheckpointDecision,
   IAdminExternalEventCorrelation,
 } from './IAdminCheckpoint.js';
+
+export { AdminAuditEventType, AdminEvidenceType } from './IAdminAudit.js';
+
+export type {
+  IAdminAuditRecord,
+  IAdminEvidenceReference,
+  IAdminConfigSnapshotReference,
+  IAdminStandardsReference,
+  IAdminRationale,
+  IAdminPostRunValidationSummary,
+  IAdminPostRunValidationCheck,
+  IAdminRunConfigTrace,
+} from './IAdminAudit.js';
