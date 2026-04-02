@@ -128,3 +128,12 @@ This register tracks architectural decisions made during Phase 2 contract work. 
 **Rationale**:
 - LD-08 requires hybrid repo/live control. Without tracking the source, operators cannot determine whether a standard was immutable code or an admin-maintained override.
 - The `merged` source captures the effective state when both code defaults and live overrides contribute to the governing standard.
+
+### P2-D13 — Adapter results are normalized with platform-specific passthrough
+
+**Decision**: All adapters return a normalized `IAdminAdapterResult` with a fixed set of fields (outcome, summary, warnings, issues, remediation hints, evidence refs). Platform-specific data goes in an opaque `adapterSpecificData` field that the orchestrator passes through without interpreting.
+
+**Rationale**:
+- The orchestrator needs a consistent shape for run progression (outcome → step status), failure handling (issues → retry decision), and audit recording (evidence refs).
+- Forcing all platform details into normalized fields would either lose information or bloat the contract with per-platform unions.
+- The passthrough field preserves adapter-specific output for domain-specific display and evidence recording without coupling the orchestrator to every platform's output schema.

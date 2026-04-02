@@ -66,3 +66,14 @@ export type {
   IAdminPostRunValidationCheck,
   IAdminRunConfigTrace,
 } from './IAdminAudit.js';
+
+export { AdminAdapterCategory, AdminAdapterOutcome } from './IAdminAdapter.js';
+
+export type {
+  IAdminAdapterDescriptor,
+  IAdminAdapterInvocationContext,
+  IAdminAdapterResult,
+  IAdminAdapterWarning,
+  IAdminAdapterIssue,
+  IAdminRemediationHint,
+} from './IAdminAdapter.js';
