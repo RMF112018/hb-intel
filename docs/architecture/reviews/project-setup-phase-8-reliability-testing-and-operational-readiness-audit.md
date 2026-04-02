@@ -714,6 +714,62 @@ These must be validated during staging deployment as documented in the deploymen
 
 ---
 
+## P8-04 Addendum — Degraded-Path, Failure-Mode, and Observability Validation Hardening
+
+**Date:** 2026-04-02
+**Prompt:** `Prompt-04_Phase-8-Degraded-Path-Failure-Mode-and-Observability-Validation-Hardening.md`
+
+### What was added
+
+New test file: `packages/provisioning/src/p08-degraded-path-observability-hardening.test.ts`
+
+5 describe blocks, 20 tests:
+
+| Group | Tests | What It Proves | Classification |
+|-------|-------|---------------|----------------|
+| P8-04-DG-01: Failure mode degradation contracts | 5 | Every FM has documented graceful degradation; FM-09 documents polling fallback; FM-05 documents draft preservation; FM-08 documents essential-tier fallback; FM-02 cross-validated against null ownership for system states | repo-proven |
+| P8-04-DG-02: Failure mode → package traceability | 3 | Every FM references valid workspace packages; unique fmIds; at least one affected package per FM | repo-proven |
+| P8-04-DG-03: Integration rule contracts | 3 | Every IR has antiPattern/correctPattern; names two distinct packages; IR-01 aligns with FM-05 on draft preservation | repo-proven |
+| P8-04-DG-04: Alert severity escalation model | 4 | Failed state notifies controller+submitter; first-failure is immediate+push; second-failure-escalated is immediate+push; recovery-resolved is watch tier | repo-proven |
+| P8-04-DG-05: Observability coverage register | 5 | All registrations use immediate or watch tier; immediate includes push; watch includes in-app; failure events immediate / recovery watch; immediate non-overridable / watch overridable | repo-proven |
+
+### Verification results
+
+```
+pnpm --filter @hbc/provisioning run test
+  Test Files  23 passed | 1 skipped (24)
+       Tests  335 passed | 1 skipped | 10 todo (346)
+    Coverage  98.78% statements
+
+pnpm --filter @hbc/spfx-accounting run lint   → clean
+pnpm --filter @hbc/spfx-accounting run build  → success
+pnpm --filter @hbc/spfx-accounting run test   → 5 files, 37 tests passed
+```
+
+### Degraded-path validation evidence
+
+| Degraded Scenario | What Repo Proves | Classification |
+|-------------------|-----------------|----------------|
+| SignalR disconnected | FM-09 documents polling fallback + "Live updates paused" message; ProvisioningProgressView implements P4-03 precedence (API authoritative, polling on disconnect) | repo-proven (contract); environment-gated (real disconnect) |
+| Polling fallback required | FM-09 expectedDegradation references 30s polling interval; implementation in ProvisioningProgressView.tsx | repo-proven (implementation) |
+| Backend/API request failure | FM-05 documents draft NOT cleared on submission failure; IR-01 enforces draft-cleared-only-on-success rule | repo-proven |
+| Provisioning status missing/stale | FM-02 documents null BIC owner for system-owned states; deriveCurrentOwner returns null for ReadyToProvision/Provisioning | repo-proven |
+| Stuck-run detection | stuckWorkflowMonitor.ts implements 30-min threshold with 2-hour critical escalation; alertPollingService.test.ts verifies stuck-run alert synthesis | repo-proven (contract); environment-gated (real timing) |
+| Alert synthesis for failures | provisioningFailureMonitor.ts implements retry-ceiling-based severity; alertPollingService.test.ts verifies failure alert synthesis and severity escalation | repo-proven |
+| Notification tier enforcement | Immediate-tier events (failures) get push+email+in-app and are non-overridable; watch-tier events (recovery) are overridable | repo-proven |
+| KQL query templates | 5 templates documented in observability runbook referencing current telemetry event names | docs-supported but not repo-proven |
+| Azure alert rules (ProvisioningStuck, TimerFullSpecFailed) | Definitions documented in observability runbook with thresholds matching implementation constants | docs-supported; out-of-repo Azure configured |
+| Infrastructure probe responses | azureFunctionsProbe and sharePointProbe implement healthy/degraded/error tri-state with response time metrics | repo-proven (implementation); environment-gated (real endpoints) |
+
+### Remaining degraded-path blind spots
+
+1. **Real SignalR disconnect behavior** — implementation and FM-09 document the expected fallback, but actual disconnect/reconnect timing requires hosted environment testing. Classification: environment-gated.
+2. **Azure alert rule activation** — thresholds match between implementation and runbook, but alert rules are Azure portal configurations. Classification: out-of-repo Azure configured.
+3. **Probe health under real load** — probes implement tri-state (healthy/degraded/error) but response time thresholds and degradation criteria require live infrastructure. Classification: environment-gated.
+4. **Monitor persistence** — monitors use in-memory APIs (SF17 deferred). Production persistence requires Wave 1. Classification: intentionally deferred.
+
+---
+
 ## 12. Exact Files Inspected
 
 ### Authoritative readiness documents
@@ -799,6 +855,7 @@ These must be validated during staging deployment as documented in the deploymen
 - `packages/provisioning/src/__tests__/handoff-config.test.ts`
 - `packages/provisioning/src/p08-lifecycle-coverage-hardening.test.ts` (P8-02)
 - `packages/provisioning/src/p08-integration-validation-hardening.test.ts` (P8-03)
+- `packages/provisioning/src/p08-degraded-path-observability-hardening.test.ts` (P8-04)
 
 ### Phase 8 prompt package
 
