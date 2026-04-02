@@ -73,3 +73,21 @@ This register tracks architectural decisions made during Phase 2 contract work. 
 - **Replace provisioning types** — too risky; breaks working production code for no immediate benefit.
 - **Wrapper pattern** — adds indirection in the backend without clear value; projection at the display boundary is simpler.
 - **No crosswalk** — later phases would re-argue the mapping ad hoc, creating inconsistency.
+
+### P2-D07 — API contracts reuse existing backend patterns
+
+**Decision**: The admin API contract catalog aligns with existing backend patterns: `IAdminApiResponse<T>` mirrors `successResponse`, `IAdminApiListResponse<T>` mirrors `listResponse`, `IAdminApiError` mirrors `errorResponse`. Phase 3 implementation uses existing `withAuth()`, `parseBody()`/`parseQuery()`, and response helper infrastructure.
+
+**Rationale**:
+- The backend already has proven middleware and response helpers. Inventing parallel patterns would create inconsistency and maintenance burden.
+- Aligning DTOs with existing shapes means Phase 3 can adopt them without refactoring the helper layer.
+- `requestId` propagation via X-Request-Id is already implemented and matches the `requestId` field in all response DTOs.
+
+### P2-D08 — Preview/dry-run uses launch request with dryRun flag
+
+**Decision**: Preview and dry-run use the same `IAdminRunLaunchRequest` with `dryRun: true` rather than a separate endpoint contract. The response type differs (`IAdminPreviewResponse` instead of `IAdminRunLaunchResponse`).
+
+**Rationale**:
+- The input for a preview is identical to a real launch — same action, same command payload, same target entity.
+- A separate request type would duplicate fields and drift over time.
+- The response is intentionally different because a preview produces an impact summary, not a run ID.
