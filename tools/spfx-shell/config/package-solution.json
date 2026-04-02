@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-project-setup",
-    "id": "d01a9600-a68a-4afe-83a5-514339f47dbb",
-    "version": "001.000.021",
+    "name": "hb-intel-accounting",
+    "id": "7dca8e93-b2fb-4e06-9e4b-d14118f87990",
+    "version": "001.000.036",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -22,10 +22,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Project Setup Requests"
+        "default": "HB Intel Accounting workspace"
       },
       "longDescription": {
-        "default": "Submit and track project setup requests with guided wizard, provisioning progress, and coordinator queue."
+        "default": "HB Intel Accounting workspace for construction project management."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -33,14 +33,14 @@
     },
     "features": [
       {
-        "title": "hb-intel-project-setup Feature",
-        "description": "Deploys HB Intel Project Setup Requests webpart assets.",
-        "id": "cb3b1520-1665-4412-83ab-344c2182a2fd",
-        "version": "001.000.021"
+        "title": "hb-intel-accounting Feature",
+        "description": "Deploys HB Intel Accounting webpart assets.",
+        "id": "fbb5ac04-cf50-458b-91dd-3784de51a7af",
+        "version": "001.000.036"
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-project-setup.sppkg"
+    "zippedPackage": "solution/hb-intel-accounting.sppkg"
   }
 }

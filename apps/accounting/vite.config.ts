@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { resolve } from 'path';
 
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig(({ command, mode }) => {
+  const isProduction = command === 'build';
+
+  return {
   plugins: [react()],
   resolve: {
     alias: {
@@ -36,26 +39,55 @@ export default defineConfig(({ command, mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: command === 'serve',
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 1500,
+    // Production: Vite lib mode produces an IIFE bundle with a global name.
+    // The SPFx shell webpart loads this bundle and reads window.__hbIntel_accounting.mount().
+    ...(isProduction
+      ? {
+          lib: {
+            entry: resolve(__dirname, 'src/mount.tsx'),
+            name: '__hbIntel_accounting',
+            formats: ['iife'],
+            fileName: () => 'accounting-app.js',
+          },
+        }
+      : {}),
     rollupOptions: {
       external: [
-        /^@microsoft\//,
+        '@microsoft/sp-webpart-base',
+        '@microsoft/sp-property-pane',
+        '@microsoft/sp-core-library',
+        '@microsoft/sp-loader',
         /^@msinternal\//,
       ],
-      input: {
-        'accounting-webpart': resolve(__dirname, 'src/webparts/accounting/AccountingWebPart.tsx'),
-      },
-      output: {
-        entryFileNames: '[name].js',
-        chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]',
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-tanstack': ['@tanstack/react-router', '@tanstack/react-query'],
-          'vendor-fluent': ['@fluentui/react-components'],
-          'vendor-zustand': ['zustand'],
-        },
-      },
+      ...(isProduction
+        ? {
+            output: {
+              globals: {
+                '@microsoft/sp-webpart-base': 'window.__spWebpartBase',
+                '@microsoft/sp-property-pane': 'window.__spPropertyPane',
+                '@microsoft/sp-core-library': 'window.__spCoreLibrary',
+                '@microsoft/sp-loader': 'window.__spLoader',
+              },
+              inlineDynamicImports: true,
+            },
+          }
+        : {
+            input: {
+              'accounting-app': resolve(__dirname, 'src/webparts/accounting/AccountingWebPart.tsx'),
+            },
+            output: {
+              entryFileNames: '[name].js',
+              chunkFileNames: '[name].js',
+              assetFileNames: '[name].[ext]',
+              manualChunks: {
+                'vendor-react': ['react', 'react-dom'],
+                'vendor-tanstack': ['@tanstack/react-router', '@tanstack/react-query'],
+                'vendor-fluent': ['@fluentui/react-components'],
+                'vendor-zustand': ['zustand'],
+              },
+            },
+          }),
     },
   },
   server: {
@@ -69,4 +101,5 @@ export default defineConfig(({ command, mode }) => ({
     'process.env.HBC_AUTH_MODE': mode === 'development' ? '"mock"' : '"spfx"',
     'process.env.NODE_ENV': JSON.stringify(command === 'serve' ? 'development' : 'production'),
   },
-}));
+  };
+});

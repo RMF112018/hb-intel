@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "3c4dbd5c-5bec-4014-8b77-737ac725a5cc",
+  "id": "cf3c98bf-ff78-4f00-bd6d-c304433d959e",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
@@ -18,14 +18,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Project Setup Requests"
+        "default": "HB Intel Accounting"
       },
       "description": {
-        "default": "Submit and track project setup requests. Supports SharePoint and Teams Personal App hosts."
+        "default": "HB Intel Accounting workspace."
       },
-      "officeFabricIconFontName": "ProjectCollection",
+      "officeFabricIconFontName": "BuildDefinition",
       "properties": {
-        "description": "Project Setup Requests"
+        "description": "Accounting"
       }
     }
   ]
