@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-accounting",
     "id": "7dca8e93-b2fb-4e06-9e4b-d14118f87990",
-    "version": "001.000.012",
+    "version": "001.000.013",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "hb-intel-accounting Feature",
         "description": "Deploys HB Intel Accounting webpart assets.",
         "id": "fbb5ac04-cf50-458b-91dd-3784de51a7af",
-        "version": "001.000.012"
+        "version": "001.000.013"
       }
     ]
   },
