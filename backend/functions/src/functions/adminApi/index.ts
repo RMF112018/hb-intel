@@ -165,8 +165,14 @@ app.http('adminCancelRun', {
       displayName: auth.claims.displayName ?? auth.claims.upn,
     });
 
-    const result = await services.runService.cancelRun(runId, actor, reason);
-    return successResponse(result);
+    try {
+      const result = await services.runService.cancelRun(runId, actor, reason);
+      return successResponse(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Cancel failed';
+      if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
+      return errorResponse(409, 'INVALID_STATE', message, reqId);
+    }
   }, { domain: 'adminControlPlane', operation: 'cancelRun' })),
 });
 
@@ -197,8 +203,14 @@ app.http('adminRetryRun', {
       displayName: auth.claims.displayName ?? auth.claims.upn,
     });
 
-    const result = await services.runService.retryRun(runId, actor);
-    return successResponse(result, 202);
+    try {
+      const result = await services.runService.retryRun(runId, actor);
+      return successResponse(result, 202);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Retry failed';
+      if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
+      return errorResponse(409, 'INVALID_STATE', message, reqId);
+    }
   }, { domain: 'adminControlPlane', operation: 'retryRun' })),
 });
 

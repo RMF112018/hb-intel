@@ -13,7 +13,7 @@ import { MockTableStorageService, RealTableStorageService } from '../../services
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '../../services/managed-identity-token-service.js';
 import { MockGraphService, GraphService } from '../../services/graph-service.js';
 import {
-  StubAdminRunService,
+  InMemoryAdminRunService,
   StubAdminAdapterRegistry,
   StubAdminConfigService,
   StubAdminAuditService,
@@ -95,8 +95,8 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     managedIdentity: isMock ? new MockManagedIdentityTokenService() : new ManagedIdentityTokenService(),
     graph: isMock ? new MockGraphService() : new GraphService(),
 
-    // Admin domain services — stubs for now (replaced in P3-04 through P3-08)
-    runService: new StubAdminRunService(),
+    // Admin domain services
+    runService: new InMemoryAdminRunService(),  // P3-05: in-memory run lifecycle (Phase 4 → Table Storage)
     adapterRegistry: new StubAdminAdapterRegistry(),
     configService: new StubAdminConfigService(),
     auditService: new StubAdminAuditService(),

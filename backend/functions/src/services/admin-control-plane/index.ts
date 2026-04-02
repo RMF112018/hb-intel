@@ -21,7 +21,10 @@ export type {
   IAdminActorResolverInput,
 } from './types.js';
 
-// Stub implementations (mock/test mode)
+// In-memory implementations (Phase 3 — replaced by durable implementations in Phase 4)
+export { InMemoryAdminRunService } from './in-memory-run-service.js';
+
+// Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,
   StubAdminAdapterRegistry,

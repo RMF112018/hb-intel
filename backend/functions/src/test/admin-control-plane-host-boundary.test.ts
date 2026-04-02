@@ -352,9 +352,9 @@ describe('P3-03 Admin Control Plane service container foundation', () => {
     );
   });
 
-  describe('stub implementations are wired', () => {
+  describe('service implementations are wired', () => {
     const requiredStubs = [
-      'StubAdminRunService',
+      'InMemoryAdminRunService',  // P3-05: real in-memory run service
       'StubAdminAdapterRegistry',
       'StubAdminConfigService',
       'StubAdminAuditService',
