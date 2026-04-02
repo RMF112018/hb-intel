@@ -9,3 +9,12 @@
 export { AdminDomain, AdminRiskLevel, AdminExecutionMode } from './AdminEnums.js';
 
 export type { AdminActionKey, IAdminActionDescriptor } from './types.js';
+
+export { AdminRunStatus, AdminStepStatus } from './IAdminRun.js';
+
+export type {
+  IAdminActorContext,
+  IAdminStepResult,
+  IAdminFailureSummary,
+  IAdminRunEnvelope,
+} from './IAdminRun.js';

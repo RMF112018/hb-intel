@@ -58,3 +58,18 @@ This register tracks architectural decisions made during Phase 2 contract work. 
 - `@hbc/models` is consumed by all layers. Runtime dependencies would create coupling across the dependency graph.
 - Validation schemas (Zod) may be added later in `api-schemas/` following the existing pattern, but contract types remain pure.
 - This preserves tree-shaking and keeps the package lightweight.
+
+### P2-D06 — Generalized run model is a translation target, not a replacement
+
+**Decision**: The generalized `IAdminRunEnvelope` is a **translation target** for provisioning data, not a replacement for `IProvisioningStatus`. Provisioning retains its own types and persistence. New admin domains use the generalized model natively. Unified display projects provisioning into the generalized model via a read-only adapter (Phase 5).
+
+**Rationale**:
+- Replacing provisioning types would break a production-grade 7-step saga with proven retry, compensation, and audit behavior (violates LD-04).
+- New admin domains should not be forced into provisioning-specific vocabulary.
+- A projection adapter at the display boundary gives the operator console a unified view without disrupting backend persistence.
+- This approach defers the replacement-vs-coexistence decision to Phase 7 when more domain data informs the choice.
+
+**Alternatives rejected**:
+- **Replace provisioning types** — too risky; breaks working production code for no immediate benefit.
+- **Wrapper pattern** — adds indirection in the backend without clear value; projection at the display boundary is simpler.
+- **No crosswalk** — later phases would re-argue the mapping ad hoc, creating inconsistency.
