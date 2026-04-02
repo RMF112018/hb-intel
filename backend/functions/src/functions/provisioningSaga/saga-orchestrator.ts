@@ -585,6 +585,9 @@ export class SagaOrchestrator {
   /**
    * Reconcile the project setup request record to reflect the current saga lifecycle state.
    * Non-blocking: reconciliation failure must not break the saga.
+   *
+   * P6-02 invariant: `getRequest(projectId)` works because `projectId === requestId` by contract.
+   * If the aliasing invariant is ever broken, this lookup must be updated.
    */
   private async reconcileRequestState(
     projectId: string,

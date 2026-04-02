@@ -350,3 +350,35 @@ Explicitly document whether `field_17`, `field_18`, and `field_19` are intention
 | Phase 6 implementation plan | `docs/architecture/plans/MASTER/spfx/accounting/phase-6/Phase-6_Data-Contract-and-SharePoint-Schema-Hardening_Implementation-Plan.md` |
 | Phase 6 README | `docs/architecture/plans/MASTER/spfx/accounting/phase-6/README_Phase-6-Data-Contract-and-SharePoint-Schema-Hardening.md` |
 | Phase 6 prompt audit report | `docs/architecture/plans/MASTER/spfx/accounting/phase-6/Accounting_Phase6_Prompt_Audit_Report.md` |
+
+---
+
+## Prompt-02 — Contract Freeze Summary
+
+**Date**: 2026-04-02  
+**Status**: Complete
+
+### What was frozen
+
+The canonical Project Setup request-record contract was authored at `docs/reference/developer/project-setup-request-record-contract.md`. It covers:
+
+- **Identifier semantics**: `requestId` and `projectId` are documented as aliased by contract — both derive from the same `field_1` value. `projectNumber` is the separate business key. No key separation was introduced.
+- **Complete field inventory**: All 43 fields (40 persisted + 1 computed + 2 transient) classified by category, required/optional status, source-of-truth, and persistence status.
+- **Consumer reference**: Documents which surfaces use which identifiers and fields.
+- **SharePoint schema posture**: Mixed schema documented with 4 origin categories and orphaned column status.
+
+### Code comments reconciled
+
+- `projects-list-contract.ts`: `field_1` comment corrected from "ProjectId" to "aliased system key" language.
+- `projects-list-mapper.ts`: Added P6-02 aliasing comments to both `toDomain()` and `toListItem()`.
+- `IProvisioning.ts`: Added JSDoc to `requestId` and `projectId` documenting aliased relationship and persistence column.
+- `saga-orchestrator.ts`: Added P6-02 invariant comment to `reconcileRequestState()` documenting `getRequest(projectId)` aliasing dependency.
+
+### Known gaps carried forward
+
+1. `approvedBy` / `approvedByOid` not persisted to SharePoint (documented as transient).
+2. No `approvedAt` timestamp in the domain model.
+3. No intermediate state timestamps for `UnderReview` and `AwaitingExternalSetup`.
+4. No top-level `clarificationRequestedBy` actor field.
+
+These gaps are documented in the contract and remain open for future phases to address.

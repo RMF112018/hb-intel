@@ -166,7 +166,9 @@ import type { IRequestClarification } from './IRequestClarification.js';
 
 /** D-PH6-01: Project Setup Request — submitted by Estimating Coordinator. */
 export interface IProjectSetupRequest {
+  /** UUID v4 system key used for API routing (`/project-setup-requests/{requestId}`). Aliased with `projectId` — always the same value. Persisted in SP `field_1`. */
   requestId: string;
+  /** UUID v4 system key used for provisioning and Table Storage partition. Aliased with `requestId` — always the same value. Reconstructed from SP `field_1`. */
   projectId: string;
   projectName: string;
   /** W0-G4-T09: Step 1 — street address collected in the structured location group. */

@@ -89,6 +89,8 @@ export function validateSpItem(
  */
 export function toDomain(item: Record<string, unknown>, logger?: ILogger): IProjectSetupRequest {
   validateSpItem(item, logger);
+  // P6-02: field_1 stores the aliased system key. requestId and projectId are
+  // identical by contract — both are reconstructed from the same persisted value.
   const projectId = readString(item, 'field_1');
   return {
     requestId: projectId,
@@ -156,6 +158,7 @@ export function toListItem(request: IProjectSetupRequest, logger?: ILogger): IPr
   const projectNumberForTitle = request.projectNumber ?? 'TBD';
   const item: IProjectsListItem = {
     Title: `${projectNumberForTitle} — ${request.projectName}`,
+    // P6-02: requestId === projectId by contract; field_1 is the aliased system key.
     field_1: request.requestId,
     field_2: request.projectNumber ?? '',
     field_3: request.projectName,

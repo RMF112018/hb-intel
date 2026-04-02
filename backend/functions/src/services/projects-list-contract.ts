@@ -42,7 +42,7 @@ export interface IProjectsListItem {
   /** Standard SP column. Computed: `"{projectNumber} — {projectName}"`. */
   Title: string;
 
-  /** ProjectId — primary key for request lookup. */
+  /** Aliased system key — persists both `requestId` and `projectId` (identical by contract). Primary lookup key. */
   field_1: string;
   /** ProjectNumber — format `##-###-##`. */
   field_2: string;
