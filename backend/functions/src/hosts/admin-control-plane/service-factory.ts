@@ -14,11 +14,13 @@ import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '..
 import { MockGraphService, GraphService } from '../../services/graph-service.js';
 import {
   InMemoryAdminRunService,
+  DurableAdminRunStore,
+  DurableAdminAuditStore,
+  MockAdminAuditStore,
   AdminAdapterRegistry,
   registerPhase3Adapters,
   AdminActorContextResolver,
   StubAdminConfigService,
-  StubAdminAuditService,
   StubAdminPreflightService,
 } from '../../services/admin-control-plane/index.js';
 import { validateAdminControlPlaneStartupConfig } from '../../utils/validate-config.js';
@@ -98,10 +100,10 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     graph: isMock ? new MockGraphService() : new GraphService(),
 
     // Admin domain services
-    runService: new InMemoryAdminRunService(),  // P3-05: in-memory run lifecycle (Phase 4 → Table Storage)
+    runService: isMock ? new InMemoryAdminRunService() : new DurableAdminRunStore(),  // P4-03: durable Table Storage in prod, in-memory for test
     adapterRegistry: adapterRegistry,           // P3-06: real adapter registry with Phase 3 descriptors
     configService: new StubAdminConfigService(),
-    auditService: new StubAdminAuditService(),
+    auditService: isMock ? new MockAdminAuditStore() : new DurableAdminAuditStore(),  // P4-03: durable Table Storage in prod, in-memory for test
     preflightService: new StubAdminPreflightService(),
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
   };

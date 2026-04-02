@@ -21,7 +21,11 @@ export type {
   IAdminActorResolverInput,
 } from './types.js';
 
-// In-memory implementations (Phase 3 — replaced by durable implementations in Phase 4)
+// Durable implementations (Phase 4)
+export { DurableAdminRunStore, serializeRunEnvelope, deserializeRunEnvelope } from './admin-run-store.js';
+export { DurableAdminAuditStore, MockAdminAuditStore, serializeAuditRecord, deserializeAuditRecord } from './admin-audit-store.js';
+
+// In-memory implementations (Phase 3 — kept for mock/test mode)
 export { InMemoryAdminRunService } from './in-memory-run-service.js';
 
 // Adapter registry and Phase 3 adapter set

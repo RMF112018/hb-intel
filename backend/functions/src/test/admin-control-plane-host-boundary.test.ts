@@ -403,10 +403,12 @@ describe('P3-03 Admin Control Plane service container foundation', () => {
 
   describe('service implementations are wired', () => {
     const requiredStubs = [
-      'InMemoryAdminRunService',  // P3-05: real in-memory run service
+      'DurableAdminRunStore',      // P4-03: durable Table Storage run store (prod)
+      'InMemoryAdminRunService',  // P4-03: in-memory run service (mock/test)
       'AdminAdapterRegistry',     // P3-06: real adapter registry
       'StubAdminConfigService',
-      'StubAdminAuditService',
+      'DurableAdminAuditStore',    // P4-03: durable Table Storage audit store (prod)
+      'MockAdminAuditStore',       // P4-03: in-memory audit store (mock/test)
       'StubAdminPreflightService',
       'AdminActorContextResolver',   // P3-08: real actor resolver
     ];
