@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-04-02T08:31:18.900055Z",
+  "files": [
+    "00-Implementation-Summary.md",
+    "01-Findings-Summary.md",
+    "Prompt-01-repo-truth-audit-and-conformance-inventory.md",
+    "Prompt-02-sppkg-source-mapping-and-rollout-scope-freeze.md",
+    "Prompt-03-shared-ownership-freeze-for-shell-layout-and-components.md",
+    "Prompt-04-canonical-spfx-app-composition-foundation.md",
+    "Prompt-05-shared-spfx-shell-implementation-and-host-continuity.md",
+    "Prompt-06-shared-layout-family-canonicalization.md",
+    "Prompt-07-command-navigation-and-detail-surface-standardization.md",
+    "Prompt-08-shared-data-form-state-and-feedback-patterns.md",
+    "Prompt-09-accounting-rollout-and-conformance-cleanup.md",
+    "Prompt-10-project-setup-rollout-and-conformance-cleanup.md",
+    "Prompt-11-project-sites-rollout-and-conformance-cleanup.md",
+    "Prompt-12-conformance-enforcement-tests-and-guardrails.md",
+    "Prompt-13-ui-doctrine-and-spfx-guidance-update.md",
+    "Prompt-14-package-rebuild-validation-and-acceptance-evidence.md",
+    "Prompt-15-final-audit-signoff-and-follow-on-recommendations.md",
+    "README.md"
+  ]
+}
