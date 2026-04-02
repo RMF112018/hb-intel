@@ -49,5 +49,9 @@ The controller-facing provisioning launch contract is:
 
 Other provisioning entry points:
 - **Direct API** (`POST provision-project-site`): Admin-only operational endpoint; does not validate request state
-- **Admin retry** (`POST provisioning-retry/{projectId}`): Re-executes saga from last successful step; does not transition request state
+- **Shared retry** (`POST provisioning-retry/{projectId}`): Re-executes saga from last successful step; requires `overallStatus === 'Failed'` (P5-03); propagates `retryCount` and `lastRetryAt` to the new run (P5-04); accessible to both coordinators and admins (L2 scope only)
 - **Timer** (Step 5 deferred): Cron-triggered overnight retry for deferred web-part installations
+
+## Reopen and Re-Provisioning (P5-04)
+
+When a controller reopens a failed request (`Failed → UnderReview`) and later re-approves it to `ReadyToProvision`, the auto-trigger fires if provisioning status is `null`, `Failed`, or `Completed` (archived). Active statuses (`InProgress`, `WebPartsPending`, `BaseComplete`) block auto-trigger to prevent duplicate concurrent runs.

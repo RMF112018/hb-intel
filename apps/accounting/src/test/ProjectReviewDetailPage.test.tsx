@@ -187,7 +187,7 @@ describe('ProjectReviewDetailPage', () => {
   });
 
   // G4-T03-010
-  it('"Send to Admin" visible only when state is Failed', () => {
+  it('"Escalate to Admin" visible only when state is Failed', () => {
     const failedRequest = createTestRequest({ requestId: 'req-1', state: 'Failed' });
     seedListRequests([failedRequest]);
 
@@ -196,7 +196,7 @@ describe('ProjectReviewDetailPage', () => {
       requests: [failedRequest],
     });
 
-    expect(screen.getByRole('button', { name: 'Send to Admin' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Escalate to Admin' })).toBeTruthy();
     unmount();
 
     const underReviewRequest = createTestRequest({ requestId: 'req-1', state: 'UnderReview' });
@@ -207,7 +207,7 @@ describe('ProjectReviewDetailPage', () => {
       requests: [underReviewRequest],
     });
 
-    expect(screen.queryByRole('button', { name: 'Send to Admin' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Escalate to Admin' })).toBeNull();
   });
 
   // G4-T03-011
@@ -513,8 +513,8 @@ describe('ProjectReviewDetailPage', () => {
 
   // ── Admin routing and boundary verification (P3-05) ─────────────────────
 
-  // P3-05-001: Send to Admin constructs correct URL with /provisioning-failures
-  it('"Send to Admin" opens correct Admin URL with /provisioning-failures path', () => {
+  // P3-05-001: Escalate to Admin constructs correct URL with /provisioning-failures
+  it('"Escalate to Admin" opens correct Admin URL with /provisioning-failures path', () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
     const failedRequest = createTestRequest({ requestId: 'req-1', projectId: 'p-42', state: 'Failed' });
     seedListRequests([failedRequest]);
@@ -524,7 +524,7 @@ describe('ProjectReviewDetailPage', () => {
       requests: [failedRequest],
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Send to Admin' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Escalate to Admin' }));
 
     expect(openSpy).toHaveBeenCalledWith(
       'https://admin.example.com/provisioning-failures?projectId=p-42',
@@ -537,7 +537,7 @@ describe('ProjectReviewDetailPage', () => {
   // ── Failure modes (W0-G4-T07) ──────────────────────────────────────────
   describe('failure modes', () => {
     // G4-T07-009: Cross-app URL missing → warning banner
-    it('shows warning banner and hides "Send to Admin" when admin URL is missing', async () => {
+    it('shows warning banner and hides "Escalate to Admin" when admin URL is missing', async () => {
       const crossAppUrls = await import('../utils/crossAppUrls.js');
       vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue(null);
 
@@ -550,7 +550,7 @@ describe('ProjectReviewDetailPage', () => {
       });
 
       expect(screen.getByText(/Admin navigation is not configured/)).toBeTruthy();
-      expect(screen.queryByRole('button', { name: 'Send to Admin' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Escalate to Admin' })).toBeNull();
 
       // Restore the mock
       vi.mocked(crossAppUrls.getAdminAppUrl).mockReturnValue('https://admin.example.com');

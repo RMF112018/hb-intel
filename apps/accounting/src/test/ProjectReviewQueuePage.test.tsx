@@ -110,8 +110,8 @@ describe('ProjectReviewQueuePage', () => {
     expect(screen.getByText(/Alpha/)).toBeTruthy();
     expect(screen.queryByText(/Gamma/)).toBeNull();
 
-    // Click the "Failed / Needs Routing" tab
-    const failedTab = screen.getByRole('tab', { name: 'Failed / Needs Routing' });
+    // Click the "Failed — Route to Admin" tab
+    const failedTab = screen.getByRole('tab', { name: 'Failed — Route to Admin' });
     fireEvent.click(failedTab);
 
     // Gamma visible, Alpha hidden

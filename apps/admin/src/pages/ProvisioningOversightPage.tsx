@@ -605,7 +605,7 @@ function ProvisioningDetailContent({
       {/* ── G6-T05: Contextual coaching callouts ──────────────────────── */}
       {run.retryCount >= ADMIN_RETRY_CEILING && (
         <HbcCoachingCallout
-          message="Maximum retries reached. Escalation is required. See the escalation procedure in the runbook."
+          message="Maximum retries reached. As Admin, you must now escalate this failure. See the escalation procedure in the runbook."
           actionLabel="Escalation Steps"
           onAction={() => window.open(RUNBOOK_LINKS.ESCALATION_PROCEDURE, '_blank')}
         />
@@ -729,7 +729,7 @@ function ProvisioningDetailContent({
             <HbcCard>
               <HbcTypography intent="heading3">Manual State Override</HbcTypography>
               <HbcBanner variant="warning">
-                This is a last-resort recovery action. Only use if the provisioning saga is stuck and cannot recover automatically.
+                Manual state override is an Admin-only last-resort recovery action. Only use if the provisioning saga is stuck and cannot recover automatically.
               </HbcBanner>
               <div className={styles.overrideSection}>
                 <HbcSelect

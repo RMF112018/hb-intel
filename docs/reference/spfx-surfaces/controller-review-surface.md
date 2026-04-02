@@ -28,7 +28,7 @@ The controller review surface provides Accounting controllers with a queue-based
 | `pending` | Pending Review | `Submitted`, `UnderReview` |
 | `clarification` | Awaiting Re-Submission | `NeedsClarification` |
 | `external` | Awaiting External Setup | `AwaitingExternalSetup` |
-| `failed` | Failed / Needs Routing | `Failed` |
+| `failed` | Failed — Route to Admin | `Failed` |
 
 Default tab: `pending`. Sort: oldest-first by `submittedAt`.
 
@@ -96,7 +96,7 @@ All state transitions use `advanceState()` via provisioning API client.
 | Request Clarification | Secondary "Request Clarification" | `UnderReview` | → `NeedsClarification` | `HbcModal` with `HbcTextArea` |
 | Place on Hold | Secondary "Place on Hold" | `UnderReview` | → `AwaitingExternalSetup` | `HbcConfirmDialog` |
 | Resolve Hold | Primary "Resolve Hold" | `AwaitingExternalSetup` | → `ReadyToProvision` | `HbcModal` with `HbcTextField` for `projectNumber` (format: `##-###-##`, validated client-side) |
-| Route to Admin | Secondary "Send to Admin" | `Failed` | Navigation to `/provisioning-failures?projectId=` | None |
+| Route to Admin | Secondary "Escalate to Admin" | `Failed` | Navigation to `/provisioning-failures?projectId=` | None |
 
 ### API Method Mapping
 
@@ -139,7 +139,7 @@ The controller surface operates exclusively on request-lifecycle state transitio
 - **Completed** — reconciled by saga completion, timer success, admin archive, or admin force-state
 - **Failed** — reconciled by saga failure, timer ceiling, or admin force-state
 
-The controller surface does not need to read or act on `IProvisioningStatus` directly. When provisioning fails, the controller sees request state `Failed` and can route to Admin via "Send to Admin."
+The controller surface does not need to read or act on `IProvisioningStatus` directly. When provisioning fails, the controller sees request state `Failed` and can escalate to Admin via "Escalate to Admin."
 
 ## Boundary: T03 vs T04
 

@@ -18,7 +18,7 @@ export const STATE_CONTEXT_TEXT: Record<ProjectSetupRequestState, string> = {
   ReadyToProvision: 'This request has been approved and is queued for site provisioning.',
   Provisioning: 'The project site is being provisioned.',
   Completed: 'The project site has been provisioned and is ready to use.',
-  Failed: 'Site provisioning encountered an error. Route to Admin for resolution.',
+  Failed: 'Site provisioning failed. Admin must resolve this failure.',
 };
 
 export function getStateContextText(state: ProjectSetupRequestState): string {

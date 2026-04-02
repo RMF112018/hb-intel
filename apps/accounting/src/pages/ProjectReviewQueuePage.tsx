@@ -31,7 +31,7 @@ const FILTER_TABS: LayoutTab[] = [
   { id: 'pending', label: 'Pending Review' },
   { id: 'clarification', label: 'Awaiting Re-Submission' },
   { id: 'external', label: 'Awaiting External Setup' },
-  { id: 'failed', label: 'Failed / Needs Routing' },
+  { id: 'failed', label: 'Failed — Route to Admin' },
 ];
 
 const TAB_STATE_FILTER: Record<FilterTabId, string[]> = {

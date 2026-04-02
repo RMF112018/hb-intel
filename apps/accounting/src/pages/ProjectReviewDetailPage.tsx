@@ -430,7 +430,7 @@ export function ProjectReviewDetailPage(): ReactNode {
                 '_blank',
               )}
             >
-              Send to Admin
+              Escalate to Admin
             </HbcButton>
           ) : (
             <HbcBanner variant="warning">
