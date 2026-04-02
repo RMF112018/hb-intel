@@ -19,6 +19,7 @@
 import { AdminAdapterCategory } from '@hbc/models/admin-control-plane';
 import type { IAdminAdapterDescriptor } from '@hbc/models/admin-control-plane';
 import type { AdminAdapterRegistry } from './adapter-registry.js';
+import { createProvisioningBridgeInvoker } from './orchestration-bridge.js';
 
 // ─── Phase 3 Adapter Descriptors ────────────────────────────────────────────────
 
@@ -174,12 +175,17 @@ export const PHASE_3_ADAPTERS: readonly IAdminAdapterDescriptor[] = [
  * Register all Phase 3 adapter descriptors with the registry.
  *
  * Called during service factory initialization. Registers descriptors
- * only (no invokers) — real invokers are wired in P3-07 (orchestration
- * bridge) and later phases.
+ * with invokers where available. The provisioning bridge adapter gets
+ * a real invoker (P3-07); other adapters get invokers in later prompts/phases.
  */
 export function registerPhase3Adapters(registry: AdminAdapterRegistry): void {
   for (const descriptor of PHASE_3_ADAPTERS) {
-    registry.register(descriptor);
+    if (descriptor.adapterKey === 'provisioning:bridge') {
+      // P3-07: Wire provisioning bridge with real invoker
+      registry.register(descriptor, createProvisioningBridgeInvoker());
+    } else {
+      registry.register(descriptor);
+    }
   }
-  console.log(`[registerPhase3Adapters] Registered ${PHASE_3_ADAPTERS.length} adapter descriptors`);
+  console.log(`[registerPhase3Adapters] Registered ${PHASE_3_ADAPTERS.length} adapter descriptors (1 with invoker)`);
 }

@@ -29,6 +29,15 @@ export { AdminAdapterRegistry } from './adapter-registry.js';
 export type { AdapterInvoker } from './adapter-registry.js';
 export { registerPhase3Adapters, PHASE_3_ADAPTERS } from './adapters.js';
 
+// Orchestration bridge (P3-07)
+export {
+  mapProvisioningToRunEnvelope,
+  mapProvisioningStatus,
+  mapProvisioningStepStatus,
+  createProvisioningBridgeInvoker,
+} from './orchestration-bridge.js';
+export type { IProvisioningStatusSnapshot } from './orchestration-bridge.js';
+
 // Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,

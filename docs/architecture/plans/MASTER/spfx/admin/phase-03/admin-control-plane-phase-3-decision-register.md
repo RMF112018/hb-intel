@@ -68,6 +68,36 @@
 
 ---
 
+### P3-D07 — Orchestration bridge delegates via HTTP, not cross-host service call
+
+**Decision:** The provisioning bridge adapter does not directly call `SagaOrchestrator.execute()`. Instead, it acknowledges the invocation and delegates actual saga execution to the project-setup host through existing provisioning HTTP endpoints.
+
+**Rationale:** The saga requires `IProjectSetupServiceContainer` (project-setup host). The admin control plane host has `IAdminControlPlaneServiceContainer`. Cross-host service container access is intentionally prevented by the domain-host doctrine (ADR-0124). Real saga invocation goes through the existing provisioning HTTP endpoints.
+
+**Impact:** The bridge is an acknowledgment/mapping layer, not a direct invocation layer. This keeps provisioning ownership intact and prevents hidden coupling between hosts.
+
+---
+
+### P3-D08 — Provisioning status mapping uses correlationId as runId
+
+**Decision:** When mapping provisioning runs to admin run envelopes, `correlationId` becomes `runId` and `parentCorrelationId` becomes `parentRunId`.
+
+**Rationale:** The provisioning saga uses `correlationId` as the unique run identifier (partition: projectId, row: correlationId). This maps directly to the admin run model's `runId`/`parentRunId` retry chain concept.
+
+**Impact:** Admin run history for provisioning can be correlated with existing provisioning status records in Table Storage.
+
+---
+
+### P3-D09 — Provisioning runs are always Seamless execution mode, Medium risk
+
+**Decision:** All provisioning runs mapped through the bridge use `AdminExecutionMode.Seamless` and `AdminRiskLevel.Medium`.
+
+**Rationale:** The provisioning saga runs straight through unless failure occurs (locked decision #4 from end-state plan). Medium risk reflects that provisioning creates real SharePoint sites and Entra groups.
+
+**Impact:** Consistent with Phase 2 run model expectations for provisioning domain.
+
+---
+
 ## Cross-references
 
 - [Phase 3 Summary Plan](./Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md)

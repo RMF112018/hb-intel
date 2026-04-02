@@ -189,7 +189,7 @@ describe('P3-06 registerPhase3Adapters', () => {
     }
   });
 
-  it('invocation of Phase 3 adapters returns Skipped (no invokers registered)', async () => {
+  it('provisioning:bridge has a real invoker (P3-07)', async () => {
     const registry = new AdminAdapterRegistry();
     registerPhase3Adapters(registry);
 
@@ -206,6 +206,27 @@ describe('P3-06 registerPhase3Adapters', () => {
     };
 
     const result = await registry.invoke('provisioning:bridge', context);
+    expect(result.outcome).toBe(AdminAdapterOutcome.Success);
+    expect(result.adapterKey).toBe('provisioning:bridge');
+  });
+
+  it('non-bridge adapters return Skipped (no invokers)', async () => {
+    const registry = new AdminAdapterRegistry();
+    registerPhase3Adapters(registry);
+
+    const context: IAdminAdapterInvocationContext = {
+      runId: 'run-test',
+      stepNumber: 1,
+      actor: { upn: 'test@hb.com', objectId: 'oid', displayName: 'Test', capturedAt: '2026-01-01T00:00:00Z' },
+      dryRun: false,
+      isRetry: false,
+      retryAttempt: 0,
+      correlationId: 'corr-test',
+      input: {},
+      resolvedConfig: {},
+    };
+
+    const result = await registry.invoke('table-storage:config-lookup', context);
     expect(result.outcome).toBe(AdminAdapterOutcome.Skipped);
   });
 });
