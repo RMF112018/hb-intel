@@ -49,7 +49,7 @@ This contract does NOT cover:
 
 ### Audience Resolution (Frontend)
 
-Resolution order in `apps/estimating/src/config/runtimeConfig.ts` (`getApiAudience()`):
+Resolution order in each app's `src/config/runtimeConfig.ts` (`getApiAudience()`) — applies to both Estimating and Accounting:
 
 1. Runtime injection via mount config (`_config.apiAudience`) — highest priority
 2. Vite build-time env (`VITE_API_AUDIENCE`) — fallback
@@ -80,9 +80,21 @@ The resolved audience value MUST match the backend `API_AUDIENCE` env var exactl
 
 ### Accounting App (`apps/accounting/config/package-solution.json`)
 
-- **webApiPermissionRequests:** None declared
-- **Status:** The Accounting app does not currently call the Project Setup protected API
-- **Decision:** No permission request is required unless a future Accounting surface needs to call the protected API directly. If that need arises, a `webApiPermissionRequests` entry identical to the Estimating app's must be added
+```json
+{
+  "webApiPermissionRequests": [
+    {
+      "resource": "hb-intel-api-production",
+      "scope": "access_as_user"
+    }
+  ]
+}
+```
+
+- **Resource:** `hb-intel-api-production` (same app registration as Estimating)
+- **Scope:** `access_as_user` (delegated scope)
+- **Status:** Declared and active
+- **History:** Phase 7 (P7-02) correctly noted that Accounting did not call the protected API at that time. Phase 10 (P10-05) added `AccountingBackendProvider` with real API client integration, making Accounting an active protected API caller. The permission declaration was added during Phase 10 and is required for the controller review surfaces (`ProjectReviewQueuePage`, `ProjectReviewDetailPage`) to acquire tokens. Reconciled in Phase 11 (P11-03).
 
 ---
 
@@ -315,7 +327,10 @@ Authorization is exclusively claims-based via JWT `roles` and `scp` claims. No e
 | `apps/estimating/src/config/runtimeConfig.ts` | `getApiAudience()` resolution |
 | `apps/estimating/src/mount.tsx` | Token provider wiring |
 | `apps/estimating/config/package-solution.json` | SPFx `webApiPermissionRequests` declaration |
-| `apps/accounting/config/package-solution.json` | Confirms no API permission requests |
+| `apps/accounting/config/package-solution.json` | SPFx `webApiPermissionRequests` declaration (active since Phase 10) |
+| `apps/accounting/src/mount.tsx` | Token provider wiring (`createSpfxApiTokenProvider`) |
+| `apps/accounting/src/config/runtimeConfig.ts` | `getApiAudience()` resolution |
+| `apps/accounting/src/backend/AccountingBackendContext.tsx` | Token factory and API client lifecycle |
 
 ### Reference Documents
 
