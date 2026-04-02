@@ -81,7 +81,7 @@ Do not blur these categories.
 | 3 | Prompt-03 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-pilot-readiness-and-controlled-user-enablement.md` |
 | 4 | Prompt-04 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-production-cutover-and-rollback-checklist.md` |
 | 5 | Prompt-05 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-post-cutover-verification-and-hypercare-plan.md` |
-| 6 | Prompt-06 | Not started | — | — |
+| 6 | Prompt-06 | **Complete** | 2026-04-02 | `docs/architecture/reviews/phase-9-final-release-closure-and-signoff-report.md` |
 
 ## Required Working Rules For Every Prompt
 
