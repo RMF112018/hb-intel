@@ -30,6 +30,7 @@ function getParam(request: HttpRequest, name: string): string {
 }
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
 import { createAdminControlPlaneServiceFactory } from '../../hosts/admin-control-plane/service-factory.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -48,6 +49,13 @@ app.http('adminLaunchRun', {
   route: 'admin/runs',
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+
+    // P3-08: Admin role + delegated scope required for state-changing operations
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+    const adminDenied = requireAdmin(auth.claims, reqId);
+    if (adminDenied) return adminDenied;
+
     const services = createAdminControlPlaneServiceFactory();
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -79,8 +87,13 @@ app.http('adminListRuns', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'admin/runs',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, _auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+
+    // P3-08: Delegated scope required for read operations
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
     const services = createAdminControlPlaneServiceFactory();
 
     const domain = request.query.get('domain') ?? undefined;
@@ -117,8 +130,11 @@ app.http('adminGetRun', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'admin/runs/{runId}',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, _auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
     const services = createAdminControlPlaneServiceFactory();
     const runId = getParam(request, 'runId');
 
@@ -149,6 +165,11 @@ app.http('adminCancelRun', {
   route: 'admin/runs/{runId}/cancel',
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+    const adminDenied = requireAdmin(auth.claims, reqId);
+    if (adminDenied) return adminDenied;
+
     const services = createAdminControlPlaneServiceFactory();
     const runId = getParam(request, 'runId');
 
@@ -190,6 +211,11 @@ app.http('adminRetryRun', {
   route: 'admin/runs/{runId}/retry',
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+    const adminDenied = requireAdmin(auth.claims, reqId);
+    if (adminDenied) return adminDenied;
+
     const services = createAdminControlPlaneServiceFactory();
     const runId = getParam(request, 'runId');
 
@@ -226,8 +252,13 @@ app.http('adminCheckpointDecision', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'admin/runs/{runId}/checkpoint',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, _auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+    const adminDenied = requireAdmin(auth.claims, reqId);
+    if (adminDenied) return adminDenied;
+
     const runId = getParam(request, 'runId');
 
     if (!runId) {
@@ -262,8 +293,11 @@ app.http('adminPreflight', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'admin/preflight',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, _auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
     const services = createAdminControlPlaneServiceFactory();
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -290,6 +324,11 @@ app.http('adminPreview', {
   route: 'admin/runs/preview',
   handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+    const adminDenied = requireAdmin(auth.claims, reqId);
+    if (adminDenied) return adminDenied;
+
     const services = createAdminControlPlaneServiceFactory();
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -321,8 +360,11 @@ app.http('adminGetConfig', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'admin/config/{scope}',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, _auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
     const services = createAdminControlPlaneServiceFactory();
     const scope = getParam(request, 'scope');
 
@@ -347,8 +389,10 @@ app.http('adminListActions', {
   methods: ['GET'],
   authLevel: 'anonymous',
   route: 'admin/actions',
-  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, _auth): Promise<HttpResponseInit> => {
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
     const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
 
     // Action metadata listing deferred to P3-06 (adapter registry).
     // Stub returns empty list.

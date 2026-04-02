@@ -29,6 +29,9 @@ export { AdminAdapterRegistry } from './adapter-registry.js';
 export type { AdapterInvoker } from './adapter-registry.js';
 export { registerPhase3Adapters, PHASE_3_ADAPTERS } from './adapters.js';
 
+// Actor context resolver (P3-08)
+export { AdminActorContextResolver } from './actor-context-resolver.js';
+
 // Orchestration bridge (P3-07)
 export {
   mapProvisioningToRunEnvelope,

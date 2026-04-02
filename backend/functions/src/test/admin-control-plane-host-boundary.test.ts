@@ -302,6 +302,55 @@ describe('P3-04 Admin Control Plane API route registration', () => {
 });
 
 /**
+ * P3-08: Authorization, configuration, and operational safety wiring.
+ *
+ * Validates that admin API routes use proper authorization middleware
+ * and that the actor context resolver is wired correctly.
+ */
+describe('P3-08 Admin Control Plane authorization and safety wiring', () => {
+  const adminApiIndex = readFileSync(
+    resolve(FUNCTIONS_SRC, 'functions/adminApi/index.ts'),
+    'utf-8',
+  );
+  const hostFactory = readFileSync(resolve(ACP_HOST_DIR, 'service-factory.ts'), 'utf-8');
+
+  describe('authorization middleware is imported and used', () => {
+    it('imports requireAdmin from authorization middleware', () => {
+      expect(adminApiIndex).toContain('requireAdmin');
+    });
+
+    it('imports requireDelegatedScope from authorization middleware', () => {
+      expect(adminApiIndex).toContain('requireDelegatedScope');
+    });
+
+    it('all handlers check delegated scope (every handler references requireDelegatedScope)', () => {
+      const scopeCount = (adminApiIndex.match(/requireDelegatedScope/g) || []).length;
+      // Import + 10 handler usages = at least 11
+      expect(scopeCount).toBeGreaterThanOrEqual(11);
+    });
+
+    it('write handlers check admin role', () => {
+      // Write operations: launch, cancel, retry, checkpoint, preview = 5 admin checks + 1 import = 6
+      const adminCount = (adminApiIndex.match(/requireAdmin/g) || []).length;
+      expect(adminCount).toBeGreaterThanOrEqual(6);
+    });
+  });
+
+  describe('actor context resolver is production implementation', () => {
+    it('service factory uses AdminActorContextResolver, not stub', () => {
+      expect(hostFactory).toContain('AdminActorContextResolver');
+      expect(hostFactory).not.toContain('StubAdminActorContextResolver');
+    });
+  });
+
+  describe('actor-context-resolver.ts exists', () => {
+    it('implementation file exists', () => {
+      expect(existsSync(resolve(FUNCTIONS_SRC, 'services/admin-control-plane/actor-context-resolver.ts'))).toBe(true);
+    });
+  });
+});
+
+/**
  * P3-03: Admin Control Plane service container foundation.
  *
  * Validates the expanded service container includes the required admin
@@ -359,7 +408,7 @@ describe('P3-03 Admin Control Plane service container foundation', () => {
       'StubAdminConfigService',
       'StubAdminAuditService',
       'StubAdminPreflightService',
-      'StubAdminActorContextResolver',
+      'AdminActorContextResolver',   // P3-08: real actor resolver
     ];
 
     it.each(requiredStubs)(

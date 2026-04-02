@@ -16,10 +16,10 @@ import {
   InMemoryAdminRunService,
   AdminAdapterRegistry,
   registerPhase3Adapters,
+  AdminActorContextResolver,
   StubAdminConfigService,
   StubAdminAuditService,
   StubAdminPreflightService,
-  StubAdminActorContextResolver,
 } from '../../services/admin-control-plane/index.js';
 import { validateAdminControlPlaneStartupConfig } from '../../utils/validate-config.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
@@ -103,7 +103,7 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     configService: new StubAdminConfigService(),
     auditService: new StubAdminAuditService(),
     preflightService: new StubAdminPreflightService(),
-    actorContextResolver: new StubAdminActorContextResolver(),
+    actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
   };
 
   singletonContainer = container;
