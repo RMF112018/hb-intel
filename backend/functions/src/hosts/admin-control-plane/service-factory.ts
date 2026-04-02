@@ -14,7 +14,8 @@ import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '..
 import { MockGraphService, GraphService } from '../../services/graph-service.js';
 import {
   InMemoryAdminRunService,
-  StubAdminAdapterRegistry,
+  AdminAdapterRegistry,
+  registerPhase3Adapters,
   StubAdminConfigService,
   StubAdminAuditService,
   StubAdminPreflightService,
@@ -86,9 +87,10 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
   // Admin-specific prerequisites are validated at execution time, not startup.
   validateAdminControlPlaneStartupConfig();
 
-  // P3-03: Admin domain services use stubs in all modes during Phase 3 foundation.
-  // Later prompts (P3-04 through P3-08) will replace stubs with real implementations
-  // in production mode while keeping stubs for mock/test mode.
+  // P3-06: Initialize adapter registry with Phase 3 adapter descriptors.
+  const adapterRegistry = new AdminAdapterRegistry();
+  registerPhase3Adapters(adapterRegistry);
+
   const container: IAdminControlPlaneServiceContainer = {
     // Infrastructure services — real or mock based on adapter mode
     tableStorage: isMock ? new MockTableStorageService() : new RealTableStorageService(),
@@ -97,7 +99,7 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
 
     // Admin domain services
     runService: new InMemoryAdminRunService(),  // P3-05: in-memory run lifecycle (Phase 4 → Table Storage)
-    adapterRegistry: new StubAdminAdapterRegistry(),
+    adapterRegistry: adapterRegistry,           // P3-06: real adapter registry with Phase 3 descriptors
     configService: new StubAdminConfigService(),
     auditService: new StubAdminAuditService(),
     preflightService: new StubAdminPreflightService(),

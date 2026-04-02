@@ -24,6 +24,11 @@ export type {
 // In-memory implementations (Phase 3 — replaced by durable implementations in Phase 4)
 export { InMemoryAdminRunService } from './in-memory-run-service.js';
 
+// Adapter registry and Phase 3 adapter set
+export { AdminAdapterRegistry } from './adapter-registry.js';
+export type { AdapterInvoker } from './adapter-registry.js';
+export { registerPhase3Adapters, PHASE_3_ADAPTERS } from './adapters.js';
+
 // Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,
