@@ -44,3 +44,12 @@ export type {
   IAdminActionMetadataRequest,
   IAdminActionMetadata,
 } from './IAdminApi.js';
+
+export { AdminCheckpointCategory, AdminCheckpointStatus } from './IAdminCheckpoint.js';
+
+export type {
+  IAdminCheckpointDefinition,
+  IAdminCheckpoint,
+  IAdminCheckpointDecision,
+  IAdminExternalEventCorrelation,
+} from './IAdminCheckpoint.js';

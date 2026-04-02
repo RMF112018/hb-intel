@@ -91,3 +91,22 @@ This register tracks architectural decisions made during Phase 2 contract work. 
 - The input for a preview is identical to a real launch — same action, same command payload, same target entity.
 - A separate request type would duplicate fields and drift over time.
 - The response is intentionally different because a preview produces an impact summary, not a run ID.
+
+### P2-D09 — Checkpoint categories mapped to execution modes
+
+**Decision**: 5 checkpoint categories (`pre-execution-approval`, `mid-execution-review`, `destructive-confirmation`, `external-event-wait`, `post-execution-validation`) are defined. Each execution mode has a fixed pattern of which categories it uses: seamless uses none, checkpointed uses mid-execution-review, destructive uses all three gates, advisory uses none.
+
+**Rationale**:
+- Fixed mode-to-checkpoint mapping prevents ad hoc checkpoint placement that would make execution behavior unpredictable.
+- Separating categories allows different UX, timeout, and escalation behavior per category while keeping the lifecycle state machine uniform.
+- Explicitly excluding checkpoints from seamless mode preserves LD-05 (provisioning stays straight-through).
+- The `external-event-wait` category is separate because it resolves via incoming event, not operator decision, requiring different correlation and deduplication semantics.
+
+### P2-D10 — Checkpoint decisions use idempotency keys for at-least-once tolerance
+
+**Decision**: Every `IAdminCheckpointDecision` carries an `idempotencyKey` (UUID v4, caller-generated). The backend uses this key to deduplicate repeated submissions and reject conflicting decisions on the same checkpoint.
+
+**Rationale**:
+- Network retries, browser refreshes, and webhook replays can cause duplicate submissions.
+- Without idempotency, a duplicate "approve" could resume a run twice or a duplicate "reject" could conflict with an already-processed "approve."
+- Caller-generated keys (rather than server-generated) allow the client to safely retry without knowing whether the first attempt succeeded.
