@@ -1,12 +1,17 @@
 import type { useCurrentSession } from '@hbc/auth';
 
 /**
- * P3-09: Session-based token factory for the Accounting PWA surface.
+ * P3-09: Session-based token factory for the Accounting surface.
  *
  * Creates a token factory that extracts the access token from the current
- * auth session on each call. This replaces the deprecated single-capture
- * `resolveSessionToken()` pattern and supports token refresh across
- * long-lived sessions.
+ * auth session on each call.
+ *
+ * **Transitional pattern (P10-03):** In SPFx production mode, the preferred
+ * token acquisition path is `createSpfxApiTokenProvider()` via `mount.tsx`,
+ * which acquires audience-scoped tokens through the SPFx AadTokenProvider.
+ * This session-based factory remains the fallback for dev mode and for
+ * page-level API client creation until the centralized backend context
+ * provider (Prompt-05) replaces direct page-level client instantiation.
  *
  * @param getSession - Accessor returning the current session snapshot
  */
