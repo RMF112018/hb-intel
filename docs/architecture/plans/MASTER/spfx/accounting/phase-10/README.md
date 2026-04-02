@@ -24,7 +24,7 @@ The package is structured to address the work in the correct order:
 | 01 | Repo-Truth Baseline and Scope Freeze | Complete (2026-04-02) | `P10-01_Repo-Truth-Baseline-and-Scope-Freeze.md` |
 | 02 | Accounting Packaging and Runtime Injection Closure | Complete (2026-04-02) | `P10-02_Accounting-Packaging-and-Runtime-Injection-Closure.md` |
 | 03 | Accounting Auth Model and Audience Contract Freeze | Complete (2026-04-02) | `P10-03_Accounting-Auth-Model-and-Audience-Contract-Freeze.md` |
-| 04 | SPFx Package Permissions and Approval Path Alignment | Not started | — |
+| 04 | SPFx Package Permissions and Approval Path Alignment | Complete (2026-04-02) | `P10-04_SPFx-Package-Permissions-and-Approval-Path-Alignment.md` |
 | 05 | Accounting Runtime Config and Backend Provider Implementation | Not started | — |
 | 06 | Accounting Project Setup UX and Shell Alignment | Not started | — |
 | 07 | Latent Users Me Dependency Reconciliation | Not started | — |
