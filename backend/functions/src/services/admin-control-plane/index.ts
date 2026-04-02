@@ -17,6 +17,8 @@ export type {
   IAdminAuditService,
   IAdminAuditListOptions,
   IAdminPreflightService,
+  IAdminEvidenceService,
+  EvidenceRetentionClass,
   IAdminActorContextResolver,
   IAdminActorResolverInput,
 } from './types.js';
@@ -35,6 +37,9 @@ export { registerPhase3Adapters, PHASE_3_ADAPTERS } from './adapters.js';
 
 // Actor context resolver (P3-08)
 export { AdminActorContextResolver } from './actor-context-resolver.js';
+
+// Evidence service (P4-06)
+export { DurableAdminEvidenceStore, MockAdminEvidenceStore, isEvidenceInlineable, generateBlobLocator, EVIDENCE_INLINE_MAX_BYTES } from './evidence-service.js';
 
 // Provisioning audit bridge (P4-04)
 export { ProvisioningAuditBridge, createProvisioningAuditBridge } from './provisioning-audit-bridge.js';

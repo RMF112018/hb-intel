@@ -8,6 +8,7 @@ import type {
   IAdminAuditService,
   IAdminPreflightService,
   IAdminActorContextResolver,
+  IAdminEvidenceService,
 } from '../../services/admin-control-plane/index.js';
 import { MockTableStorageService, RealTableStorageService } from '../../services/table-storage-service.js';
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '../../services/managed-identity-token-service.js';
@@ -17,6 +18,8 @@ import {
   DurableAdminRunStore,
   DurableAdminAuditStore,
   MockAdminAuditStore,
+  DurableAdminEvidenceStore,
+  MockAdminEvidenceStore,
   AdminAdapterRegistry,
   registerPhase3Adapters,
   AdminActorContextResolver,
@@ -62,6 +65,7 @@ export interface IAdminControlPlaneServiceContainer {
   readonly adapterRegistry: IAdminAdapterRegistry;
   readonly configService: IAdminConfigService;
   readonly auditService: IAdminAuditService;
+  readonly evidenceService: IAdminEvidenceService;
   readonly preflightService: IAdminPreflightService;
   readonly actorContextResolver: IAdminActorContextResolver;
 }
@@ -103,7 +107,8 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     runService: isMock ? new InMemoryAdminRunService() : new DurableAdminRunStore(),  // P4-03: durable Table Storage in prod, in-memory for test
     adapterRegistry: adapterRegistry,           // P3-06: real adapter registry with Phase 3 descriptors
     configService: new StubAdminConfigService(),
-    auditService: isMock ? new MockAdminAuditStore() : new DurableAdminAuditStore(),  // P4-03: durable Table Storage in prod, in-memory for test
+    auditService: isMock ? new MockAdminAuditStore() : new DurableAdminAuditStore(),  // P4-03: durable Table Storage in prod
+    evidenceService: isMock ? new MockAdminEvidenceStore() : new DurableAdminEvidenceStore(),  // P4-06: evidence metadata
     preflightService: new StubAdminPreflightService(),
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
   };

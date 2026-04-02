@@ -415,6 +415,8 @@ describe('P3-03 Admin Control Plane service container foundation', () => {
       'StubAdminConfigService',
       'DurableAdminAuditStore',    // P4-03: durable Table Storage audit store (prod)
       'MockAdminAuditStore',       // P4-03: in-memory audit store (mock/test)
+      'DurableAdminEvidenceStore', // P4-06: durable Table Storage evidence store (prod)
+      'MockAdminEvidenceStore',    // P4-06: in-memory evidence store (mock/test)
       'StubAdminPreflightService',
       'AdminActorContextResolver',   // P3-08: real actor resolver
     ];

@@ -30,6 +30,7 @@ import type {
   AdminAuditEventType,
   IAdminActorContext,
   IAdminConfigResponse,
+  IAdminEvidenceReference,
 } from '@hbc/models/admin-control-plane';
 
 // ─── Run Service ────────────────────────────────────────────────────────────────
@@ -157,6 +158,35 @@ export interface IAdminAuditListOptions {
 export interface IAdminPreflightService {
   /** Run preflight validation for an action. */
   validate(request: IAdminPreflightRequest): Promise<IAdminPreflightResponse>;
+}
+
+// ─── Evidence Service ───────────────────────────────────────────────────────────
+
+/** Retention class determining how long evidence is kept. */
+export type EvidenceRetentionClass = 'operational' | 'compliance' | 'permanent';
+
+/**
+ * Manages evidence metadata persistence and inline/offload decisions.
+ *
+ * Evidence references track artifacts produced by runs. Small payloads
+ * (< 32 KB) are stored inline in Table Storage. Larger payloads are
+ * referenced by storageLocator for offloaded blob storage (Phase 6).
+ *
+ * Implemented in P4-06.
+ */
+export interface IAdminEvidenceService {
+  /** Record an evidence reference with retention metadata. */
+  recordEvidence(
+    ref: IAdminEvidenceReference,
+    retentionClass: EvidenceRetentionClass,
+    inlinePayload?: Record<string, unknown>,
+  ): Promise<void>;
+
+  /** List all evidence references for a run. */
+  listByRunId(runId: string): Promise<readonly IAdminEvidenceReference[]>;
+
+  /** Get a single evidence reference by ID. Returns null if not found. */
+  getEvidence(evidenceId: string): Promise<IAdminEvidenceReference | null>;
 }
 
 // ─── Actor Context Resolver ─────────────────────────────────────────────────────
