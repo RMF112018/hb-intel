@@ -79,7 +79,10 @@ The saga reconciles the project setup request at these points:
 | Timer completes Step 5 | `Completed` | completedBy = 'timer' |
 | Timer fails Step 5 (ceiling) | `Failed` | Immediate |
 | Step 5 deferred | No change | Request stays `Provisioning` |
-| Admin mutations | No change | Escalation, archive, force-state do not reconcile |
+| Admin archive (P4-04) | `Completed` | With completedBy = admin UPN |
+| Admin force-state to terminal (P4-04) | Target state | Completed or Failed only |
+| Admin escalation | No change | Annotation only (sets escalatedBy/escalatedAt) |
+| Admin acknowledge escalation | No change | Annotation cleanup (clears markers) |
 
 ## Terminal States
 

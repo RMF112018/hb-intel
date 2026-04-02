@@ -7,14 +7,44 @@
 - Check for stuck runs (overall status `InProgress` for >30 minutes): the Application Insights alert "Provisioning Run Stuck >30min" fires automatically.
 
 ## How to Manually Retry a Failed Provisioning Run
-1. Navigate to the Accounting app → Project Setup Requests → find the failed project.
-2. Click the **Retry** button (requires Admin role).
-3. Monitor progress in real time on the same page.
+1. Navigate to the **Admin app** → Provisioning Oversight (`/provisioning-failures`).
+2. Find the failed project in the **Failures** tab.
+3. Click **Force Retry** (requires `admin:provisioning:retry` permission).
+4. Confirm the danger dialog. A new saga run starts with a fresh `correlationId`.
+5. The request state is reconciled to `Provisioning` automatically.
+6. Monitor progress via the Admin detail modal or real-time events.
+
+## How to Archive a Failed Run
+Use archive when a failed run should be closed without retrying (e.g., duplicate request, abandoned project).
+1. Navigate to the **Admin app** → Provisioning Oversight → Failures tab.
+2. Click **Archive** on the failed run.
+3. Confirm the warning dialog. The run's `overallStatus` is set to `Completed`.
+4. The linked request state is reconciled to `Completed` (P4-04).
+5. The run moves from the Failures tab to the Completed tab.
+
+## How to Force a State Override
+Use force-state as a last resort when a run is stuck in a transitional state and cannot be recovered by retry.
+1. Navigate to the **Admin app** → Provisioning Oversight → find the stuck run.
+2. Open the detail modal → scroll to Expert tier → **Manual State Override**.
+3. Select the target state and confirm the danger dialog.
+4. If the target is `Completed` or `Failed`, the linked request state is reconciled automatically (P4-04).
+5. Non-terminal targets (`InProgress`, `WebPartsPending`) do not reconcile — use these only to unblock a retry path.
 
 ## How to Escalate a Stuck Run
 1. An alert email is sent automatically when a run exceeds 30 minutes.
-2. An Admin user can click **Escalate** in the Accounting app to mark the run as requiring manual intervention.
-3. This sets `overallStatus = 'Failed'` and triggers the failure alert.
+2. An Admin user can click **Escalate** in the Admin app to mark the run for attention.
+3. This sets `escalatedBy` and `escalatedAt` on the provisioning status — it does NOT change `overallStatus` or request state.
+4. Use **Ack Escalation** to clear the markers after the issue is resolved.
+
+## When to Use Archive vs Retry vs Override
+
+| Scenario | Action | Why |
+|----------|--------|-----|
+| Transient failure (timeout, API glitch) | **Retry** | Creates a new run; skips already-completed steps |
+| Permanent failure (project cancelled) | **Archive** | Closes the run and request cleanly |
+| Stuck in InProgress >1 hour | **Force-state to Failed**, then retry | Unblocks the retry path |
+| Repeated failures after 3 retries | **Archive** or **Force-state to Failed** | Stops retry loop; investigate root cause |
+| Step 5 deferred but timer not running | **Force-state to Failed**, then retry | Timer may have configuration issue |
 
 ## How to Check Azure Table Storage State
 1. Open Azure Portal → Storage Accounts → the production storage account.
