@@ -78,7 +78,7 @@ Do not blur these categories.
 |-------|--------|--------|------|--------|
 | 1 | Prompt-01 | **Complete** | 2026-04-02 | `docs/architecture/reviews/phase-9-release-readiness-audit.md` |
 | 2 | Prompt-02 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-staging-deployment-and-pre-cutover-validation-checklist.md` |
-| 3 | Prompt-03 | Not started | — | — |
+| 3 | Prompt-03 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-pilot-readiness-and-controlled-user-enablement.md` |
 | 4 | Prompt-04 | Not started | — | — |
 | 5 | Prompt-05 | Not started | — | — |
 | 6 | Prompt-06 | Not started | — | — |
