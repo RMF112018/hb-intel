@@ -95,22 +95,41 @@ Admin users (`HBC-Admin`, `HBIntelAdmin`) resolve to `expert` tier in `@hbc/comp
 
 Admin owns: full oversight, escalation acknowledgment, force-retry (regardless of failure class), archival, and expert-tier diagnostic recovery detail.
 
-## API Method Gaps
+## Phase 4 Mutation Reconciliation
 
-The following methods were added to `IProvisioningApiClient` for T04:
+Admin mutations interact with both provisioning status and the linked request record:
+
+| Action | Status change | Request reconciliation | Run identity |
+|--------|--------------|----------------------|-------------|
+| Force Retry | New run (InProgress) | -> Provisioning (via saga execute) | New correlationId |
+| Archive Failure | -> Completed | -> Completed (P4-04) | Edits latest run |
+| Acknowledge Escalation | Clears markers | No change | Edits latest run |
+| Force State Override | -> target state | -> target if terminal (P4-04) | Edits latest run |
+| Escalation | Sets markers | No change | Edits latest run |
+
+All request reconciliation is non-blocking — failure is logged but does not break the admin action.
+
+## API Methods
+
+The following methods are implemented on `IProvisioningApiClient` for T04:
 - `listProvisioningRuns(status?)` — lists all runs with optional status filter
-- `archiveFailure(projectId)` — archives a failed run
-- `acknowledgeEscalation(projectId)` — acknowledges an escalated run
-- `forceStateTransition(projectId, targetState)` — forces a state override
+- `retryProvisioning(projectId)` — triggers a new saga run (new correlationId)
+- `archiveFailure(projectId)` — archives a failed run, reconciles request to Completed
+- `acknowledgeEscalation(projectId)` — clears escalation markers
+- `forceStateTransition(projectId, targetState)` — forces state, reconciles request on terminal targets
 
-Backend implementation of these endpoints is deferred to G2 backend hardening.
-
-## Missing Diagnostic Fields
+## Diagnostic Fields
 
 The following expert-tier diagnostic fields from the spec (§7.1) are not yet on `IProvisioningStatus`:
 - `errorDetails` (raw error stack) — use `steps[].errorMessage` as partial substitute
 - `stepContext` (step input/output context) — use `steps[].metadata` as partial substitute
 - Graph API call sequence — not available; document gap for future backend amendment
+
+The following fields are available after P4-02 persistence hardening:
+- `failureClass` — backend-assigned failure classification (rendered in queue and detail)
+- `escalatedBy` + `escalatedAt` — escalation markers (rendered as badge and in detail)
+- `lastRetryAt` — most recent retry timestamp (rendered in detail)
+- `entraGroups` — Entra ID group IDs from Step 6 (expert-tier detail)
 
 These sections render conditionally — only when data is present on the model.
 

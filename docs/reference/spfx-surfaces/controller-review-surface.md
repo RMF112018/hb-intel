@@ -131,6 +131,16 @@ Failures display `HbcBanner variant="error"`.
 
 > **Phase 1 Boundary Freeze Reference:** The Accounting surface boundary, prohibited actions, and interaction with Estimating/Admin surfaces are frozen in `docs/architecture/reviews/phase-1-application-boundary-freeze.md`. Accounting is a review gate and approval-to-handoff gate — not a retry, recovery, or archive surface.
 
+## Phase 4 Reconciliation Boundary
+
+The controller surface operates exclusively on request-lifecycle state transitions (`IProjectSetupRequest`). The provisioning execution state (`IProvisioningStatus`) is owned by the Admin surface (T04). Request state reflects provisioning truth at terminal boundaries:
+
+- **Provisioning** — set by saga start (request stays here until terminal)
+- **Completed** — reconciled by saga completion, timer success, admin archive, or admin force-state
+- **Failed** — reconciled by saga failure, timer ceiling, or admin force-state
+
+The controller surface does not need to read or act on `IProvisioningStatus` directly. When provisioning fails, the controller sees request state `Failed` and can route to Admin via "Send to Admin."
+
 ## Boundary: T03 vs T04
 
 - **T03 (this surface):** Controller review, approve, clarify, hold, route-to-admin

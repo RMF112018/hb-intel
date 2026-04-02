@@ -1,6 +1,6 @@
 {
   "name": "@hbc/spfx-accounting",
-  "version": "00.000.021",
+  "version": "00.000.022",
   "private": true,
   "type": "module",
   "scripts": {
