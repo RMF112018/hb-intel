@@ -59,7 +59,8 @@ Both rows A and B persist in Table Storage. `getProvisioningStatus()` returns C 
 - **Endpoint:** `POST /api/provisioning-retry/{projectId}`
 - **Response:** HTTP 202 `{ message, projectId }`
 - **Identity:** Loads latest run, generates new `correlationId`, sets `parentCorrelationId`
-- **Behavior:** `retryCount` incremented, step idempotency guards skip completed steps
+- **State guard:** Returns 409 if `overallStatus !== 'Failed'` (P5-03)
+- **Behavior:** `retryCount` and `lastRetryAt` are propagated from the prior run to the new run via `IProvisionSiteRequest` (P5-04). New run starts with clean escalation fields (`escalatedBy`, `escalatedAt` are not carried forward). Step idempotency guards skip completed steps.
 
 ### Timer (Step 5 follow-on)
 
@@ -83,6 +84,26 @@ The saga reconciles the project setup request at these points:
 | Admin force-state to terminal (P4-04) | Target state | Completed or Failed only |
 | Admin escalation | No change | Annotation only (sets escalatedBy/escalatedAt) |
 | Admin acknowledge escalation | No change | Annotation cleanup (clears markers) |
+
+## Reopen and Re-Provisioning (P5-04)
+
+When a controller reopens a failed request (`Failed → UnderReview`), provisioning status is **not touched**. The request returns to the review workflow while the provisioning entity retains its terminal state.
+
+When the request is subsequently re-approved to `ReadyToProvision`, the auto-trigger fires if:
+- No provisioning status exists, OR
+- `overallStatus === 'Failed'` (normal failure), OR
+- `overallStatus === 'Completed'` (admin-archived failure)
+
+The auto-trigger is **skipped** if `overallStatus` is `InProgress`, `WebPartsPending`, or `BaseComplete` — these indicate a concurrent or deferred saga is still active.
+
+## Escalation Lifecycle (P5-04)
+
+Escalation is an annotation on the latest provisioning run. Lifecycle rules:
+- **Set by:** Coordinator via `escalateProvisioning()` or admin (annotation, not state change)
+- **Cleared by:** Admin via `acknowledgeEscalation()` only
+- **On retry:** New run starts with clean escalation fields — `escalatedBy` and `escalatedAt` are NOT carried forward from the prior run
+- **On reopen:** Provisioning status (including escalation) is not touched
+- **Persistence:** Escalation markers remain on the specific run entity they were set on
 
 ## Terminal States
 

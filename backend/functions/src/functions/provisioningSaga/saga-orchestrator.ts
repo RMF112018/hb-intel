@@ -82,7 +82,10 @@ export class SagaOrchestrator {
       step5DeferredToTimer: false,
       // D-PH6-13 tracks overnight Step 5 retry attempts across timer executions.
       step5TimerRetryCount: 0,
-      retryCount: 0,
+      // P5-04: Inherit retryCount and lastRetryAt from the request so retry() can propagate
+      // the accumulated count to the new run instead of resetting to 0.
+      retryCount: request.retryCount ?? 0,
+      lastRetryAt: request.lastRetryAt,
     };
 
     this.logger.trackEvent('ProvisioningSagaStarted', {
@@ -387,6 +390,10 @@ export class SagaOrchestrator {
       groupMembers: status.groupMembers,
       groupLeaders: status.groupLeaders ?? [],
       department: status.department,
+      // P5-04: Propagate accumulated retry count and timestamp to the new run
+      // so coordinator retry limits and admin retry counters work correctly.
+      retryCount: status.retryCount,
+      lastRetryAt: status.lastRetryAt,
     };
     await this.execute(request);
   }

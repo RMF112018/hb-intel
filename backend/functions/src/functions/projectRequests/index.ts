@@ -372,8 +372,15 @@ app.http('advanceRequestState', {
     // to Provisioning via reconcileRequestState(). No separate "launch" action
     // is required or expected from the controller.
     if (body.newState === 'ReadyToProvision') {
+      // P5-04: Allow auto-trigger when status is missing, Failed, or Completed (archived).
+      // Completed status on a reopened request means an admin archived the prior failure —
+      // re-provisioning is the correct behavior. Only InProgress / WebPartsPending / BaseComplete
+      // block auto-trigger to prevent duplicate concurrent saga runs.
       const existingStatus = await services.tableStorage.getProvisioningStatus(existing.projectId);
-      if (!existingStatus || existingStatus.overallStatus === 'Failed') {
+      const canAutoTrigger = !existingStatus
+        || existingStatus.overallStatus === 'Failed'
+        || existingStatus.overallStatus === 'Completed';
+      if (canAutoTrigger) {
         const provisionRequest: IProvisionSiteRequest = {
           projectId: existing.projectId,
           projectNumber: existing.projectNumber!,

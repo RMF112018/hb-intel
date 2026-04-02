@@ -48,6 +48,10 @@ export interface IProvisionSiteRequest {
   groupLeaders?: string[];
   /** W0-G1-T02: Department for background viewer access lookup. */
   department?: ProjectDepartment;
+  /** P5-04: Carried forward on retry so the new run inherits the accumulated retry count. */
+  retryCount?: number;
+  /** P5-04: Carried forward on retry so the new run records when the retry was initiated. */
+  lastRetryAt?: string;
 }
 
 /**
