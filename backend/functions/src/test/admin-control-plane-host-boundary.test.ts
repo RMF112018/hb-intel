@@ -188,6 +188,105 @@ describe('P3-02 Admin Control Plane host boundary', () => {
   });
 });
 
+/**
+ * P3-03: Admin Control Plane service container foundation.
+ *
+ * Validates the expanded service container includes the required admin
+ * domain service interfaces and that stub implementations are wired.
+ */
+describe('P3-03 Admin Control Plane service container foundation', () => {
+  const hostFactory = readFileSync(resolve(ACP_HOST_DIR, 'service-factory.ts'), 'utf-8');
+
+  describe('service container includes admin domain services', () => {
+    const requiredAdminServices = [
+      'IAdminRunService',
+      'IAdminAdapterRegistry',
+      'IAdminConfigService',
+      'IAdminAuditService',
+      'IAdminPreflightService',
+      'IAdminActorContextResolver',
+    ];
+
+    it.each(requiredAdminServices)(
+      'service factory references %s interface',
+      (serviceType) => {
+        expect(
+          hostFactory,
+          `Admin Control Plane service factory must reference '${serviceType}'`,
+        ).toContain(serviceType);
+      },
+    );
+  });
+
+  describe('service container properties are present', () => {
+    const requiredProperties = [
+      'runService',
+      'adapterRegistry',
+      'configService',
+      'auditService',
+      'preflightService',
+      'actorContextResolver',
+    ];
+
+    it.each(requiredProperties)(
+      'container interface includes %s property',
+      (prop) => {
+        expect(
+          hostFactory,
+          `IAdminControlPlaneServiceContainer must include '${prop}' property`,
+        ).toContain(prop);
+      },
+    );
+  });
+
+  describe('stub implementations are wired', () => {
+    const requiredStubs = [
+      'StubAdminRunService',
+      'StubAdminAdapterRegistry',
+      'StubAdminConfigService',
+      'StubAdminAuditService',
+      'StubAdminPreflightService',
+      'StubAdminActorContextResolver',
+    ];
+
+    it.each(requiredStubs)(
+      'factory instantiates %s',
+      (stub) => {
+        expect(
+          hostFactory,
+          `Admin Control Plane factory must instantiate '${stub}'`,
+        ).toContain(stub);
+      },
+    );
+  });
+
+  describe('service interfaces are defined in admin-control-plane services', () => {
+    it('types.ts exists', () => {
+      expect(existsSync(resolve(FUNCTIONS_SRC, 'services/admin-control-plane/types.ts'))).toBe(true);
+    });
+
+    it('stubs.ts exists', () => {
+      expect(existsSync(resolve(FUNCTIONS_SRC, 'services/admin-control-plane/stubs.ts'))).toBe(true);
+    });
+
+    it('index.ts barrel exists', () => {
+      expect(existsSync(resolve(FUNCTIONS_SRC, 'services/admin-control-plane/index.ts'))).toBe(true);
+    });
+  });
+
+  describe('factory imports from admin-control-plane services, not duplicating', () => {
+    it('imports from services/admin-control-plane/', () => {
+      expect(hostFactory).toContain("from '../../services/admin-control-plane/");
+    });
+
+    it('does not inline service interface definitions', () => {
+      // The factory should import interfaces, not define them
+      expect(hostFactory).not.toMatch(/export interface IAdminRunService/);
+      expect(hostFactory).not.toMatch(/export interface IAdminAdapterRegistry/);
+    });
+  });
+});
+
 describe('P3-02 Regression guards and release-scope proof', () => {
   const hostIndex = readFileSync(resolve(ACP_HOST_DIR, 'index.ts'), 'utf-8');
   const hostFactory = readFileSync(resolve(ACP_HOST_DIR, 'service-factory.ts'), 'utf-8');

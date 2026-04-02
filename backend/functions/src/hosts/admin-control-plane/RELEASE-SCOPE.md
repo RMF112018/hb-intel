@@ -2,7 +2,7 @@
 
 > **Machine-checkable:** The test file `src/test/admin-control-plane-host-boundary.test.ts` validates every claim in this manifest. If this document drifts from reality, tests fail.
 
-**Phase:** Phase 3 (P3-02)
+**Phase:** Phase 3 (P3-02, P3-03)
 **Governing plan:** `docs/architecture/plans/MASTER/spfx/admin/phase-03/Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md`
 
 ## In-Scope Route Families (1 — foundation)
@@ -50,9 +50,18 @@
 
 **Factory:** `createAdminControlPlaneServiceFactory()` — all admin control plane handlers resolve services through this scoped factory. Enforced by host boundary tests.
 
-**Includes (3 eager — foundation):** tableStorage, managedIdentity, graph
+**Infrastructure (3 eager):** tableStorage, managedIdentity, graph
 
-> **Note:** Later Phase 3 prompts will expand the service container as admin API routes, adapter registry, and orchestration bridge are introduced. Each expansion must update this manifest.
+**Admin domain (6 eager — stub implementations, replaced in P3-04 through P3-08):**
+- `runService` (`IAdminRunService`) — Run lifecycle: launch, status, history, cancel, retry
+- `adapterRegistry` (`IAdminAdapterRegistry`) — Adapter discovery, capability check, invocation
+- `configService` (`IAdminConfigService`) — Configuration/standards resolution by scope
+- `auditService` (`IAdminAuditService`) — Audit event recording and evidence linkage
+- `preflightService` (`IAdminPreflightService`) — Precondition validation before run launch
+- `actorContextResolver` (`IAdminActorContextResolver`) — JWT claims → actor context mapping
+
+**Service interface source:** `src/services/admin-control-plane/types.ts`
+**Stub implementation source:** `src/services/admin-control-plane/stubs.ts`
 
 **Excludes:** All Project Setup services (projectRequests, acknowledgments, signalR push), all domain CRUD services, provisioning-specific saga internals — excluded at compile time via `IAdminControlPlaneServiceContainer` type boundary.
 
