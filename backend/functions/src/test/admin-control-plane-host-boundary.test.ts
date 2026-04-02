@@ -17,8 +17,9 @@ import { resolve } from 'path';
 const FUNCTIONS_SRC = resolve(import.meta.dirname, '..');
 const ACP_HOST_DIR = resolve(FUNCTIONS_SRC, 'hosts/admin-control-plane');
 
-// Route families that MUST be in the Admin Control Plane host (foundation)
+// Route families that MUST be in the Admin Control Plane host
 const IN_SCOPE_ROUTES = [
+  'adminApi',
   'health',
 ];
 
@@ -62,12 +63,12 @@ describe('P3-02 Admin Control Plane host boundary', () => {
       },
     );
 
-    it('imports exactly 1 route family (foundation)', () => {
+    it('imports exactly 2 route families', () => {
       const importCount = (hostIndex.match(/import\s+'/g) || []).length;
       expect(
         importCount,
-        `Admin Control Plane host should import exactly 1 route family (foundation), found ${importCount}`,
-      ).toBe(1);
+        `Admin Control Plane host should import exactly 2 route families, found ${importCount}`,
+      ).toBe(2);
     });
   });
 
@@ -184,6 +185,118 @@ describe('P3-02 Admin Control Plane host boundary', () => {
 
     it('composition root imports from shared functions path', () => {
       expect(hostIndex).toContain("'../../functions/");
+    });
+  });
+});
+
+/**
+ * P3-04: Admin Control Plane API route registration.
+ *
+ * Validates that admin API routes exist, use auth middleware, and follow
+ * the repo's handler composition pattern.
+ */
+describe('P3-04 Admin Control Plane API route registration', () => {
+  const adminApiIndex = readFileSync(
+    resolve(FUNCTIONS_SRC, 'functions/adminApi/index.ts'),
+    'utf-8',
+  );
+
+  describe('all 10 admin API handlers are registered', () => {
+    const expectedHandlers = [
+      'adminLaunchRun',
+      'adminListRuns',
+      'adminGetRun',
+      'adminCancelRun',
+      'adminRetryRun',
+      'adminCheckpointDecision',
+      'adminPreflight',
+      'adminPreview',
+      'adminGetConfig',
+      'adminListActions',
+    ];
+
+    it.each(expectedHandlers)(
+      'registers handler %s',
+      (handler) => {
+        expect(
+          adminApiIndex,
+          `Admin API must register handler '${handler}'`,
+        ).toContain(`'${handler}'`);
+      },
+    );
+
+    it('registers exactly 10 HTTP handlers', () => {
+      const handlerCount = (adminApiIndex.match(/app\.http\(/g) || []).length;
+      expect(
+        handlerCount,
+        `Admin API should register exactly 10 HTTP handlers, found ${handlerCount}`,
+      ).toBe(10);
+    });
+  });
+
+  describe('all handlers use withAuth middleware', () => {
+    it('every app.http handler is wrapped with withAuth', () => {
+      // Count handler definitions and withAuth usage
+      const httpCount = (adminApiIndex.match(/app\.http\(/g) || []).length;
+      const authCount = (adminApiIndex.match(/withAuth\(/g) || []).length;
+      expect(
+        authCount,
+        `All ${httpCount} handlers must use withAuth(), found ${authCount} usages`,
+      ).toBe(httpCount);
+    });
+  });
+
+  describe('all handlers use withTelemetry', () => {
+    it('every handler is wrapped with withTelemetry', () => {
+      const httpCount = (adminApiIndex.match(/app\.http\(/g) || []).length;
+      const telemetryCount = (adminApiIndex.match(/withTelemetry\(/g) || []).length;
+      expect(telemetryCount).toBe(httpCount);
+    });
+  });
+
+  describe('handlers use admin-control-plane service factory', () => {
+    it('imports createAdminControlPlaneServiceFactory', () => {
+      expect(adminApiIndex).toContain('createAdminControlPlaneServiceFactory');
+    });
+
+    it('does NOT import createServiceFactory (monolithic)', () => {
+      expect(adminApiIndex).not.toMatch(/import.*createServiceFactory[^A]/);
+    });
+
+    it('does NOT import createProjectSetupServiceFactory', () => {
+      expect(adminApiIndex).not.toContain('createProjectSetupServiceFactory');
+    });
+  });
+
+  describe('route paths follow admin namespace', () => {
+    const expectedRoutes = [
+      'admin/runs',
+      'admin/runs/{runId}',
+      'admin/runs/{runId}/cancel',
+      'admin/runs/{runId}/retry',
+      'admin/runs/{runId}/checkpoint',
+      'admin/preflight',
+      'admin/runs/preview',
+      'admin/config/{scope}',
+      'admin/actions',
+    ];
+
+    it.each(expectedRoutes)(
+      'defines route %s',
+      (route) => {
+        expect(
+          adminApiIndex,
+          `Admin API must define route '${route}'`,
+        ).toContain(`'${route}'`);
+      },
+    );
+  });
+
+  describe('all handlers use adminControlPlane domain in telemetry', () => {
+    it('all telemetry metadata uses domain: adminControlPlane', () => {
+      const domainCount = (adminApiIndex.match(/domain: 'adminControlPlane'/g) || []).length;
+      const httpCount = (adminApiIndex.match(/app\.http\(/g) || []).length;
+      expect(domainCount).toBe(httpCount);
     });
   });
 });
@@ -353,10 +466,15 @@ describe('P3-02 Regression guards and release-scope proof', () => {
   });
 
   describe('release-scope proof: monolithic host is unchanged', () => {
-    it('monolithic index.ts still registers all 19 route families', () => {
+    // Admin-only route families are NOT in the monolithic host
+    const ADMIN_ONLY_ROUTES = new Set(['adminApi']);
+
+    it('monolithic index.ts still registers all 19 pre-existing route families', () => {
       const monoIndex = readFileSync(resolve(FUNCTIONS_SRC, 'index.ts'), 'utf-8');
+      // Check non-admin in-scope routes (health is shared and present in monolithic)
+      const sharedRoutes = IN_SCOPE_ROUTES.filter(r => !ADMIN_ONLY_ROUTES.has(r));
       const allFamilies = [
-        ...IN_SCOPE_ROUTES,
+        ...sharedRoutes,
         ...OUT_OF_SCOPE_ROUTES.filter(r => r !== 'proxy'),
       ];
       for (const route of allFamilies) {
@@ -366,6 +484,16 @@ describe('P3-02 Regression guards and release-scope proof', () => {
         ).toContain(`functions/${route}/`);
       }
       expect(monoIndex).toContain('functions/proxy/');
+    });
+
+    it('monolithic index.ts does NOT include admin-only route families', () => {
+      const monoIndex = readFileSync(resolve(FUNCTIONS_SRC, 'index.ts'), 'utf-8');
+      for (const route of ADMIN_ONLY_ROUTES) {
+        expect(
+          monoIndex,
+          `Monolithic host must NOT import admin-only '${route}' route family`,
+        ).not.toContain(`functions/${route}/`);
+      }
     });
   });
 

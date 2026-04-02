@@ -81,7 +81,7 @@ describe('P5-02 Unsupported scope regression guard', () => {
   it('no new function registration files exist without documentation', () => {
     // Track the expected function directories — any new ones should be reviewed
     const expectedDomains = new Set([
-      'acknowledgments', 'buyout', 'cleanupIdempotency', 'compliance',
+      'acknowledgments', 'adminApi', 'buyout', 'cleanupIdempotency', 'compliance',
       'contracts', 'estimating', 'health', 'leads', 'notifications',
       'pmp', 'projectRequests', 'projects', 'provisioningSaga',
       'proxy', 'risk', 'schedule', 'scorecards', 'signalr', 'timerFullSpec',

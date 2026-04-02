@@ -2,26 +2,37 @@
 
 > **Machine-checkable:** The test file `src/test/admin-control-plane-host-boundary.test.ts` validates every claim in this manifest. If this document drifts from reality, tests fail.
 
-**Phase:** Phase 3 (P3-02, P3-03)
+**Phase:** Phase 3 (P3-02, P3-03, P3-04)
 **Governing plan:** `docs/architecture/plans/MASTER/spfx/admin/phase-03/Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md`
 
-## In-Scope Route Families (1 — foundation)
+## In-Scope Route Families (2)
 
-| Family | Directory | Purpose |
-|--------|-----------|---------|
-| health | `functions/health/` | Unauthenticated operational readiness probe |
+| Family | Directory | Purpose | Endpoints |
+|--------|-----------|---------|-----------|
+| adminApi | `functions/adminApi/` | Authenticated admin control plane API (runs, preflight, config, actions) | 10 |
+| health | `functions/health/` | Unauthenticated operational readiness probe | 1 |
 
-> **Note:** This is the Phase 3 foundation scaffold. Later Phase 3 prompts (P3-04 through P3-08) will add admin API route families for launch, status, history, retry, repair, validate, and config. Each addition must update this manifest and the host boundary test.
+### Admin API Endpoints (P3-04)
 
-## Deferred Route Families (Phase 3, later prompts)
+| Method | Route | Handler | Purpose |
+|--------|-------|---------|---------|
+| POST | `/api/admin/runs` | `adminLaunchRun` | Launch a new admin run |
+| GET | `/api/admin/runs` | `adminListRuns` | List run history |
+| GET | `/api/admin/runs/{runId}` | `adminGetRun` | Get run status/detail |
+| POST | `/api/admin/runs/{runId}/cancel` | `adminCancelRun` | Cancel an in-progress run |
+| POST | `/api/admin/runs/{runId}/retry` | `adminRetryRun` | Retry a failed run |
+| POST | `/api/admin/runs/{runId}/checkpoint` | `adminCheckpointDecision` | Record checkpoint decision |
+| POST | `/api/admin/preflight` | `adminPreflight` | Run preflight validation |
+| POST | `/api/admin/runs/preview` | `adminPreview` | Preview / dry-run |
+| GET | `/api/admin/config/{scope}` | `adminGetConfig` | Get config state |
+| GET | `/api/admin/actions` | `adminListActions` | List action metadata |
 
-| Family | Target prompt | Purpose |
-|--------|--------------|---------|
-| adminRuns | P3-04/P3-05 | Run launch, status, history, cancel, retry |
-| adminRepair | P3-05 | Repair initiation |
-| adminValidate | P3-04 | Preflight validation and preview |
-| adminConfig | P3-04 | Configuration retrieval |
-| adminAdapters | P3-06 | Adapter registry and execution routing |
+## Deferred Route Families (later prompts)
+
+| Concern | Target prompt | Notes |
+|---------|--------------|-------|
+| Repair initiation detail | P3-05 | Handler behavior behind existing cancel/retry routes |
+| Adapter routing detail | P3-06 | Wired through adapter registry service behind existing launch/preview routes |
 
 ## Excluded Route Families
 

@@ -14,9 +14,28 @@ This package uses scoped domain hosts (ADR-0124) for independent deployment of d
 |------|------|---------|----------------|
 | Monolithic | `src/index.ts` | All routes (backward compat) | 19 |
 | Project Setup | `src/hosts/project-setup/` | Project Setup domain boundary | 8 |
-| Admin Control Plane | `src/hosts/admin-control-plane/` | Generalized admin backend foundation | 1 (foundation — expanding in Phase 3) |
+| Admin Control Plane | `src/hosts/admin-control-plane/` | Generalized admin backend foundation | 2 (adminApi + health) |
 
 Each host has its own composition root (`index.ts`), scoped service factory, `host.json`, and `RELEASE-SCOPE.md` boundary manifest validated by host-boundary tests.
+
+### Admin Control Plane API Endpoints (P3-04)
+
+All admin endpoints require `withAuth()` JWT authentication and are namespaced under `/api/admin/`.
+
+| Method | Route | Handler | Purpose |
+|--------|-------|---------|---------|
+| POST | `/api/admin/runs` | `adminLaunchRun` | Launch a new admin run |
+| GET | `/api/admin/runs` | `adminListRuns` | List run history |
+| GET | `/api/admin/runs/{runId}` | `adminGetRun` | Get run status/detail |
+| POST | `/api/admin/runs/{runId}/cancel` | `adminCancelRun` | Cancel an in-progress run |
+| POST | `/api/admin/runs/{runId}/retry` | `adminRetryRun` | Retry a failed run |
+| POST | `/api/admin/runs/{runId}/checkpoint` | `adminCheckpointDecision` | Record checkpoint decision |
+| POST | `/api/admin/preflight` | `adminPreflight` | Run preflight validation |
+| POST | `/api/admin/runs/preview` | `adminPreview` | Preview / dry-run |
+| GET | `/api/admin/config/{scope}` | `adminGetConfig` | Get config state |
+| GET | `/api/admin/actions` | `adminListActions` | List action metadata |
+
+Request/response DTOs are defined in `@hbc/models/admin-control-plane` (Phase 2 contracts). See the [API contract catalog](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-api-contract-catalog.md) for full contract details.
 
 ## Local Development Setup
 
