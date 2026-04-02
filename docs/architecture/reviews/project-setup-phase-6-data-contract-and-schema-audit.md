@@ -458,3 +458,60 @@ Added 17 new tests in `projects-list-contract.test.ts`:
 - Year column backfill (handled by mapper defaults)
 - `approvedBy`/`approvedByOid` SP columns (documented as transient)
 - Orphaned column cleanup (no harm from presence)
+
+---
+
+## Prompt-05 — Cross-Surface Contract Verification
+
+**Date**: 2026-04-02  
+**Status**: Complete
+
+### Consumer compatibility matrix
+
+| Surface | Identifier Usage | Contract Match | Notes |
+|---------|-----------------|----------------|-------|
+| Accounting queue page | `requestId` for route params | **Compatible** | Does not read `approvedBy` |
+| Accounting detail page | `requestId` for route, `projectId` for admin escalation | **Compatible** | Displays `approvedBy` with optional-chaining guard — see controlled gap below |
+| Admin oversight pages | `projectId` from query params / provisioning status | **Compatible** | Consumes `IProvisioningStatus`, not request record directly |
+| Backend request handlers | `requestId` from URL path | **Compatible** | Sets transient `approvedBy`/`approvedByOid` — see corrected comment |
+| Provisioning saga | `projectId` throughout | **Compatible** | P6-02 invariant comment documents aliasing dependency |
+| Provisioning API client | `requestId` for state advancement, `projectId` for provisioning | **Compatible** | Matches contract semantics exactly |
+| Estimating app | `requestId` for navigation | **Compatible** | Does not read `approvedBy` |
+
+### Compatible consumers (6 of 7)
+
+All surfaces use identifiers consistently with the frozen contract:
+- `requestId` for HTTP API routing and Accounting app navigation
+- `projectId` for provisioning saga, Table Storage partition, and admin app cross-linking
+- `projectNumber` for display, Title computation, and uniqueness enforcement
+- `state` for tab filtering, workflow routing, and state machine transitions
+- Completion fields (`completedBy`, `completedAt`, `siteUrl`) consumed correctly across detail pages and saga
+
+### Controlled gaps
+
+#### 1. `approvedBy` / `approvedByOid` transient field gap
+
+**Scope:** Backend handler + Accounting detail page
+
+The backend `advanceRequestState` handler sets `approvedBy` and `approvedByOid` on the domain object during the `ReadyToProvision` transition. The Accounting detail page displays `approvedBy` with an optional-chaining guard. However, these fields have no SharePoint column mapping and are silently dropped by the mapper on persistence round-trip.
+
+**Impact:** After a page reload or fresh data fetch, `approvedBy` will be `undefined`. The detail page handles this gracefully (the field simply doesn't render). During the initial API response within the same request lifecycle, the field is present and displays correctly.
+
+**Correction made:** The P2-04 comment in `projectRequests/index.ts` was updated to explicitly document the transient nature of these fields.
+
+**Resolution path:** Adding `approvedBy` and `approvedByOid` SP columns to the field map would make this durable. This is deferred — not in Phase 6 scope.
+
+#### 2. Mock test coverage gap
+
+The `MockProjectRequestsRepository` stores all domain fields in memory, including `approvedBy`/`approvedByOid`. This means request-lifecycle tests that verify approval identity pass against the mock but would fail against real SharePoint persistence. This is a known testing limitation, not a production bug — the real behavior is documented in the contract.
+
+### No new mismatches found
+
+- No consumer hardcodes `field_N` names outside the contract/mapper/repository boundary
+- All identifier usage is consistent with the aliased `requestId === projectId` contract
+- All state-dependent UI rendering matches the 8-state lifecycle enum
+- Clarification fields are consumed correctly across queue, detail, and API surfaces
+
+### Fixes applied
+
+- Corrected misleading P2-04 comment in `backend/functions/src/functions/projectRequests/index.ts` from "Persist controller approval identity for durable audit trail" to acknowledge the transient, non-persisted nature of these fields

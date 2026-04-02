@@ -314,7 +314,10 @@ app.http('advanceRequestState', {
       existing.projectNumber = body.projectNumber;
       // Derive year from the assigned project number
       existing.year = deriveProjectYear(body.projectNumber);
-      // P2-04: Persist controller approval identity for durable audit trail.
+      // P2-04: Set controller approval identity on the domain object.
+      // P6-05 note: These fields are NOT mapped to SharePoint columns and are
+      // lost after persistence round-trip. They survive only within the current
+      // request lifecycle in memory. See project-setup-request-record-contract.md.
       existing.approvedBy = auth.claims.upn;
       existing.approvedByOid = auth.claims.oid;
     }
