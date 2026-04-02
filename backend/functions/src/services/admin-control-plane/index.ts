@@ -36,6 +36,10 @@ export { registerPhase3Adapters, PHASE_3_ADAPTERS } from './adapters.js';
 // Actor context resolver (P3-08)
 export { AdminActorContextResolver } from './actor-context-resolver.js';
 
+// Provisioning audit bridge (P4-04)
+export { ProvisioningAuditBridge, createProvisioningAuditBridge } from './provisioning-audit-bridge.js';
+export type { ProvisioningBridgeEvent } from './provisioning-audit-bridge.js';
+
 // Orchestration bridge (P3-07)
 export {
   mapProvisioningToRunEnvelope,
