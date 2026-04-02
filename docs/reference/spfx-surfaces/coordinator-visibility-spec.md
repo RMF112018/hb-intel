@@ -126,6 +126,6 @@ Essential tier receives `detailLevel="summary"` (existing behavior).
 When a failure cannot be retried by the coordinator (structural, permissions, repeated, admin-class, or transient with exhausted retries), the UI shows:
 - `HbcBanner variant="warning"` with headline "This failure requires Admin recovery"
 - Body text from `FAILURE_CLASS_DESCRIPTIONS[failureClass]`
-- "Open Admin Recovery" button that escalates the provisioning run
+- "Open Admin Recovery" button that navigates to Admin at `/provisioning-failures?projectId={projectId}` (P5-02)
 
 Admin console recovery (T03/T04) is a separate scope.

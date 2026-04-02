@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useSearch } from '@tanstack/react-router';
 import { makeStyles } from '@griffel/react';
 import {
   useCurrentSession,
@@ -173,14 +174,19 @@ export function ProvisioningOversightPage(): ReactNode {
   }, [loadRuns]);
 
   // ── ?projectId= query param handling ────────────────────────────────────
+  // P5-02: Use TanStack Router's validated search params instead of manual URLSearchParams.
+  const { projectId: inboundProjectId } = useSearch({ from: '/provisioning-failures' }) as { projectId?: string };
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const projectId = params.get('projectId');
-    if (projectId && allRuns.length > 0) {
-      const match = allRuns.find((r) => r.projectId === projectId);
+    if (inboundProjectId && allRuns.length > 0) {
+      // P5-02: Select the latest run by startedAt for multi-run disambiguation.
+      const match = allRuns
+        .filter((r) => r.projectId === inboundProjectId)
+        .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+        .at(0);
       if (match) setSelectedRun(match);
     }
-  }, [allRuns]);
+  }, [inboundProjectId, allRuns]);
 
   // ── Tab filtering ───────────────────────────────────────────────────────
   const filteredRuns = useMemo(() => {

@@ -85,7 +85,7 @@ export function RetrySection({ status, projectId, onRetryComplete }: RetrySectio
             <HbcButton
               variant="secondary"
               onClick={() => window.open(
-                `${adminUrl}/provisioning-oversight?projectId=${projectId}`,
+                `${adminUrl}/provisioning-failures?projectId=${projectId}`,
                 '_blank',
               )}
               disabled={loading}

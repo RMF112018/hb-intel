@@ -18,7 +18,7 @@ The Admin provisioning oversight surface provides administrators with full visib
 |-------|-----------|---------|
 | `/provisioning-failures` | `ProvisioningOversightPage` | State-filtered oversight queue + detail modal |
 
-Accepts `?projectId=` query parameter for cross-app pre-selection from Estimating (coordinator "Open Admin Recovery") and Accounting (controller "Send to Admin").
+Accepts `?projectId=` query parameter for cross-app pre-selection from Estimating (coordinator "Open Admin Recovery") and Accounting (controller "Send to Admin"). When multiple provisioning runs exist for the same project, the page selects the **latest run by `startedAt`** timestamp (P5-02). Query parameters are read via TanStack Router's validated search params (`useSearch`), not manual `URLSearchParams`.
 
 ## State Filter Tabs
 
