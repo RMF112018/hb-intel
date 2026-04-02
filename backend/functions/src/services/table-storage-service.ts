@@ -4,9 +4,23 @@ import { createAppTableClient } from '../utils/table-client-factory.js';
 
 const TABLE_NAME = 'ProvisioningStatus';
 
+/**
+ * P4-02: Durable provisioning status persistence contract.
+ *
+ * Storage model: Azure Table Storage, table `ProvisioningStatus`.
+ * - PartitionKey = `projectId` (groups all runs for one project).
+ * - RowKey = `correlationId` (unique per saga run).
+ * - Upsert mode: Replace (full entity replacement per step).
+ *
+ * Read model: `getProvisioningStatus(projectId)` returns the latest run
+ * by `startedAt` timestamp. Historical per-run rows are preserved for
+ * admin audit via `listAllRuns()`.
+ */
 export interface ITableStorageService {
   upsertProvisioningStatus(status: IProvisioningStatus): Promise<void>;
+  /** Returns the latest run for a project (by startedAt). Alias for getLatestRun(). */
   getProvisioningStatus(projectId: string): Promise<IProvisioningStatus | null>;
+  /** Scans partition for projectId, returns entity with latest startedAt. */
   getLatestRun(projectId: string): Promise<IProvisioningStatus | null>;
   listFailedRuns(): Promise<IProvisioningStatus[]>;
   listPendingStep5Jobs(): Promise<IProvisioningStatus[]>;
@@ -27,7 +41,7 @@ export class RealTableStorageService implements ITableStorageService {
   async upsertProvisioningStatus(status: IProvisioningStatus): Promise<void> {
     await this.ensureTable();
 
-    // D-PH6-06 idempotent state write: each step update replaces same run entity.
+    // D-PH6-06 / P4-02: idempotent state write — each step update replaces the full run entity.
     await this.client.upsertEntity(
       {
         partitionKey: status.projectId,
@@ -50,6 +64,13 @@ export class RealTableStorageService implements ITableStorageService {
         step5TimerRetryCount: status.step5TimerRetryCount,
         retryCount: status.retryCount,
         escalatedBy: status.escalatedBy ?? '',
+        // P4-02: fields previously declared on IProvisioningStatus but not persisted.
+        groupLeadersJson: JSON.stringify(status.groupLeaders ?? []),
+        department: status.department ?? '',
+        entraGroupsJson: JSON.stringify(status.entraGroups ?? null),
+        failureClass: status.failureClass ?? '',
+        lastRetryAt: status.lastRetryAt ?? '',
+        escalatedAt: status.escalatedAt ?? '',
       },
       'Replace'
     );
@@ -120,6 +141,7 @@ export class RealTableStorageService implements ITableStorageService {
     if (!status) throw new Error(`No record found for projectId ${projectId}`);
 
     status.escalatedBy = escalatedBy;
+    status.escalatedAt = new Date().toISOString();
     await this.upsertProvisioningStatus(status);
   }
 
@@ -138,8 +160,17 @@ export class RealTableStorageService implements ITableStorageService {
     return results;
   }
 
-  /** D-PH6-06 deserialization boundary for Azure Table primitive storage model. */
+  /** D-PH6-06 / P4-02: deserialization boundary for Azure Table primitive storage model. */
   private deserialize(entity: Record<string, unknown>): IProvisioningStatus {
+    const entraGroupsRaw = (entity.entraGroupsJson as string) || '';
+    let entraGroups: IProvisioningStatus['entraGroups'];
+    try {
+      const parsed = entraGroupsRaw ? JSON.parse(entraGroupsRaw) : null;
+      entraGroups = parsed ?? undefined;
+    } catch {
+      entraGroups = undefined;
+    }
+
     return {
       projectId: entity.partitionKey as string,
       correlationId: entity.rowKey as string,
@@ -161,6 +192,13 @@ export class RealTableStorageService implements ITableStorageService {
       step5TimerRetryCount: (entity.step5TimerRetryCount as number) ?? 0,
       retryCount: entity.retryCount as number,
       escalatedBy: (entity.escalatedBy as string) || undefined,
+      // P4-02: fields now persisted and deserialized.
+      groupLeaders: JSON.parse((entity.groupLeadersJson as string) ?? '[]'),
+      department: ((entity.department as string) || undefined) as IProvisioningStatus['department'],
+      entraGroups,
+      failureClass: ((entity.failureClass as string) || undefined) as IProvisioningStatus['failureClass'],
+      lastRetryAt: (entity.lastRetryAt as string) || undefined,
+      escalatedAt: (entity.escalatedAt as string) || undefined,
     };
   }
 
@@ -177,7 +215,7 @@ export class RealTableStorageService implements ITableStorageService {
 }
 
 /**
- * D-PH6-06 mock adapter for test/mock mode. Mirrors real adapter contract in-memory.
+ * D-PH6-06 / P4-02: Mock adapter for test/mock mode. Mirrors real adapter contract in-memory.
  */
 export class MockTableStorageService implements ITableStorageService {
   private readonly store = new Map<string, IProvisioningStatus>();
@@ -219,6 +257,7 @@ export class MockTableStorageService implements ITableStorageService {
       throw new Error(`No record found for projectId ${projectId}`);
     }
     latest.escalatedBy = escalatedBy;
+    latest.escalatedAt = new Date().toISOString();
     await this.upsertProvisioningStatus(latest);
   }
 

@@ -31,8 +31,16 @@ const STEP_DEFINITIONS = [
 ];
 
 /**
- * D-PH6-05 / D-PH6-06 / D-PH6-14: Hardened provisioning saga orchestrator with
- * correlation propagation, idempotency, retry, compensation semantics, and telemetry.
+ * D-PH6-05 / D-PH6-06 / D-PH6-14 / P4-02: Hardened provisioning saga orchestrator.
+ *
+ * **Run identity (P4-02):** Each `execute()` call creates one durable status entity
+ * keyed by `projectId` (partition) + `correlationId` (row). Retries via `retry()`
+ * generate a new `correlationId` and preserve the previous one as
+ * `parentCorrelationId` on the launch request for traceability.
+ *
+ * **Request reconciliation:** The saga reconciles the project setup request state
+ * at saga start (-> Provisioning) and terminal states (-> Completed / Failed).
+ * Non-terminal transitions (e.g. Step 5 deferral) do NOT reconcile request state.
  */
 export class SagaOrchestrator {
   constructor(
@@ -344,6 +352,13 @@ export class SagaOrchestrator {
     this.logger.info('Saga completed', { correlationId, projectId, finalStatus });
   }
 
+  /**
+   * P4-02: Retry a failed provisioning run. Creates a new run identity:
+   * - Loads the latest run for `projectId`.
+   * - Generates a fresh `correlationId` (new Table Storage row).
+   * - Sets `parentCorrelationId` to the previous run's `correlationId` for chain traceability.
+   * - Increments `retryCount` and re-enters `execute()` with step idempotency guards.
+   */
   async retry(projectId: string): Promise<void> {
     const status = await this.services.tableStorage.getProvisioningStatus(projectId);
     if (!status) throw new Error(`No provisioning record found for projectId ${projectId}`);

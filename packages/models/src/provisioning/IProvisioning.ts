@@ -51,32 +51,67 @@ export interface IProvisionSiteRequest {
 }
 
 /**
- * D-PH6-01: Authoritative provisioning run record stored in Azure Table Storage.
- * Traceability: docs/architecture/plans/PH6.1-Foundation-DataModel.md §6.1.2
+ * D-PH6-01 / P4-02: Authoritative provisioning run record stored in Azure Table Storage.
+ *
+ * **Durable persistence model (P4-02):**
+ * - One entity per saga run. PartitionKey = `projectId`, RowKey = `correlationId`.
+ * - Retries create new rows with new `correlationId` in the same partition.
+ * - Each step upserts the full entity using Replace mode (idempotent).
+ *
+ * **Canonical read model:**
+ * - `getProvisioningStatus(projectId)` returns the latest run by `startedAt` timestamp.
+ * - Admin `listAllRuns()` can access all historical rows across partitions.
+ * - Client stores key status by `projectId` (one entry = latest run).
+ *
+ * **Correlation chain:**
+ * - `projectId` links to the project setup request (request.projectId = status.projectId).
+ * - `correlationId` is the unique run identity (UUID v4, generated at launch).
+ * - On retry, the new run gets a fresh `correlationId`; the previous run's
+ *   `correlationId` is passed as `parentCorrelationId` on the launch request
+ *   for traceability (see `IProvisionSiteRequest.parentCorrelationId`).
+ *
+ * Traceability: docs/reference/provisioning/durable-status-contract.md
  */
 export interface IProvisioningStatus {
+  /** Immutable project identifier (UUID v4). Azure Table PartitionKey. */
   projectId: string;
+  /** Human-assigned project number. Format: ##-###-## (e.g. "25-001-01"). */
   projectNumber: string;
+  /** Display name of the project. */
   projectName: string;
+  /** Unique run identity (UUID v4). Azure Table RowKey. Generated at launch time. */
   correlationId: string;
+  /** Saga lifecycle status. Terminal states: Completed, Failed. */
   overallStatus: 'NotStarted' | 'InProgress' | 'BaseComplete' | 'Completed' | 'Failed' | 'WebPartsPending';
+  /** Current executing step (1-7), or 0 before first step begins. */
   currentStep: number;
+  /** Per-step execution results. Always 7 entries (one per saga step). */
   steps: ISagaStepResult[];
+  /** SharePoint site URL. Populated by Step 1 on successful site creation. */
   siteUrl?: string;
+  /** UPN of the user who triggered this provisioning run. */
   triggeredBy: string;
   /** P9-G5-05: Entra Object ID of the user who triggered provisioning. */
   triggeredByOid?: string;
+  /** UPN of the Estimating Coordinator who submitted the original request. */
   submittedBy: string;
   /** P9-G5-05: Entra Object ID of the Estimating Coordinator. */
   submittedByOid?: string;
+  /** UPNs for the project Team group membership. */
   groupMembers: string[];
+  /** ISO 8601 timestamp when this run started. Used as sort key for latest-run reads. */
   startedAt: string;
+  /** ISO 8601 timestamp of terminal success. */
   completedAt?: string;
+  /** ISO 8601 timestamp of terminal failure. */
   failedAt?: string;
+  /** Whether Step 5 (Install Web Parts) was deferred to the overnight timer. */
   step5DeferredToTimer: boolean;
-  /** D-PH6-13 count of consecutive overnight timer retries for deferred Step 5. */
+  /** D-PH6-13: Count of consecutive overnight timer retries for deferred Step 5. Ceiling: 3. */
   step5TimerRetryCount: number;
+  /** Total provisioning retry count across all runs for this project. */
   retryCount: number;
+  /** UPN of the admin who escalated this run for attention. */
   escalatedBy?: string;
   /** W0-G1-T02: UPNs for the Leaders group (Full Control). */
   groupLeaders?: string[];
