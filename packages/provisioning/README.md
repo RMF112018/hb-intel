@@ -2,6 +2,8 @@
 
 Headless provisioning lifecycle, API client, state machine, and cross-module contracts for HB Intel project setup.
 
+**Relationship to admin control-plane contracts**: This package retains its own domain-specific types (`IProvisioningStatus`, `IProjectSetupRequest`, state machine, BIC config, display registries). The generalized admin control-plane contracts in `@hbc/models/admin-control-plane` are a **translation target**, not a replacement. Provisioning data is projected into the generalized model at the display boundary (Phase 5 adapter). See the [run model crosswalk](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-run-model.md) and [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
+
 **Locked ADR:** ADR-0077 — `docs/architecture/adr/ADR-0077-provisioning-package-boundary.md`
 
 ---

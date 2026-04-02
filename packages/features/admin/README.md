@@ -8,6 +8,8 @@ This package provides the Admin Intelligence layer for HB Intel, enabling platfo
 
 **Boundary**: This package is the reusable admin intelligence layer — monitors, probes, hooks, APIs, and dashboard components. It is **not** the privileged control plane. Privileged execution, durable orchestration, retry/compensation, and audit persistence belong in `backend/functions`. See the [Phase 1 boundary matrix](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-boundary-matrix.md) and [locked decisions](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-locked-decisions-and-phase-boundary-guards.md) (LD-03).
 
+**Contract alignment**: This package may import shared types from `@hbc/models/admin-control-plane` for type alignment (e.g., correlating alerts to run IDs). It must not implement control-plane runtime, orchestrator logic, or adapter execution. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
+
 ## Architecture
 
 The package follows the ports-and-adapters pattern established across HB Intel:

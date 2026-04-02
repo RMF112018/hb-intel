@@ -4,6 +4,8 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 **Current foundations**: The provisioning saga orchestrator (`saga-orchestrator.ts`), service factory, Graph/SharePoint adapters, and Azure Table persistence are the control-plane seed. Later phases generalize these patterns for additional admin domains (Entra control, SharePoint control, install/bootstrap). See the [Phase 1 architecture baseline](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-phase-1-architecture-baseline.md) for the full operating model.
 
+**Phase 2 contracts**: Phase 3 implements runtime against the shared contracts in `@hbc/models/admin-control-plane` (action catalog, run model, API DTOs, checkpoint, audit/evidence, adapter registry). This package imports those contracts — it does not define them. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
+
 ## Local Development Setup
 
 `local.settings.json` is gitignored and must be created per developer machine.

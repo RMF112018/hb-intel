@@ -137,3 +137,13 @@ This register tracks architectural decisions made during Phase 2 contract work. 
 - The orchestrator needs a consistent shape for run progression (outcome → step status), failure handling (issues → retry decision), and audit recording (evidence refs).
 - Forcing all platform details into normalized fields would either lose information or bloat the contract with per-platform unions.
 - The passthrough field preserves adapter-specific output for domain-specific display and evidence recording without coupling the orchestrator to every platform's output schema.
+
+### P2-D14 — All Phase 2 contracts confirmed in @hbc/models; no new package needed
+
+**Decision**: All 58 Phase 2 contract exports (11 enums, 47 interfaces/types) are placed in `@hbc/models/admin-control-plane/`. No new workspace package is required.
+
+**Rationale**:
+- `@hbc/models` is the established canonical home for pure shared types in the monorepo.
+- The contract surface (58 exports across 5 source files) is substantial but not large enough to warrant a separate package with its own build, test, and versioning overhead.
+- All exports are pure types with no runtime dependencies — they fit the `@hbc/models` contract perfectly.
+- If the surface grows to include runtime helpers, validation schemas, or factory functions in later phases, a dedicated package can be extracted at that point. For now, premature extraction would add workspace complexity without clear benefit.
