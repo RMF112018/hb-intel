@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Status:** Canonical Current-State
-**Last Updated:** 2026-03-30
+**Last Updated:** 2026-04-02
 **Purpose:** Single authoritative reference for the present implementation state of the HB Intel monorepo. When this document differs from historical plans or locked blueprints regarding _what exists today_, this document governs present truth.
 
 ---
@@ -335,6 +335,17 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 
 **Post-PH7.11 state (updated 2026-03-16):** 114 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (...existing text...). ADR-0114 authored 2026-03-14 to resolve score-benchmark ↔ post-bid-autopsy circular dependency. ADR-0115 authored 2026-03-15 for my-work-feed architecture. ADR-0116 authored 2026-03-16 for UI doctrine and visual governance. Next unreserved number: **ADR-0117**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
+### 2.3 Admin SPFx IT Control Center Plan Library
+
+| Document / Group | Classification | Tier / Status |
+|------------------|---------------|---------------|
+| `plans/MASTER/spfx/admin/admin-spfx-it-control-center-end-state-plan.md` | **Canonical Normative Plan** | Developer-facing end-state implementation plan for Admin SPFx as IT Control Center |
+| `plans/MASTER/spfx/admin/admin-spfx-target-architecture.md` | **Canonical Normative Plan** | 5-layer target architecture (operator console → API → orchestrator → adapters → stores) |
+| Phase 1 admin plans (6 canonical docs under `phase-01/`) | **Historical Foundational** | Architecture baseline, boundary matrix, domain taxonomy, release-scope map, locked decisions; completed 2026-03-31 |
+| Phase 2 admin plans (9 canonical docs under `phase-02/`) | **Historical Foundational** | Action catalog, run model, API contracts, checkpoints, audit/evidence, adapter registry, package placement, decision register; 58 pure-type exports in `@hbc/models/admin-control-plane`; completed 2026-04-01 |
+| Phase 3 admin plans (8 canonical docs under `phase-03/`) | **Canonical Current-State** | Runtime foundation inventory, host/composition-root plan, service-factory plan, API surface catalog, adapter registry/routing plan, orchestration bridge plan, authz/safety plan, decision register (9 decisions P3-D01–D09); completed 2026-04-02 |
+| `backend/functions/src/hosts/admin-control-plane/RELEASE-SCOPE.md` | **Canonical Current-State** | Admin control plane host boundary manifest; 2 route families, 10 admin API endpoints, 9 services |
+
 ---
 
 ## 3. Authoritative Package & Application Inventory
@@ -451,7 +462,15 @@ Repo-truth note: `apps/project-hub` now resolves the SharePoint `siteUrl` throug
 
 Key dependencies: `@azure/functions`, `@azure/data-tables`, `@azure/identity`, `@pnp/sp`, `@pnp/graph`, `jose`, `@hbc/models`.
 
-**Per-domain host architecture (ADR-0124, 2026-03-31):** The package contains two composition roots: the legacy monolithic host (`src/index.ts`, 19 route families) preserved during transition, and a dedicated Project Setup domain host (`src/hosts/project-setup/`, 8 route families) with scoped service factory, tenant-specific CORS, and domain-scoped config validation. See `src/hosts/project-setup/RELEASE-SCOPE.md` for the boundary manifest. Future domain hosts follow the same pattern under `src/hosts/`.
+**Per-domain host architecture (ADR-0124, 2026-03-31):** The package contains three composition roots:
+
+| Host | Path | Route families | Service container | Status |
+|------|------|---------------|-------------------|--------|
+| Monolithic | `src/index.ts` | 19 | `IServiceContainer` (9 eager + 10 lazy) | Legacy — preserved during transition |
+| Project Setup | `src/hosts/project-setup/` | 8 | `IProjectSetupServiceContainer` (9 eager) | Production — ADR-0124 |
+| Admin Control Plane | `src/hosts/admin-control-plane/` | 2 (adminApi + health) | `IAdminControlPlaneServiceContainer` (9 eager) | Phase 3 foundation — 2026-04-02 |
+
+The Admin Control Plane host (Phase 3) provides the generalized admin backend foundation: 10 authenticated API endpoints under `/api/admin/` for run launch/status/history/cancel/retry/checkpoint/preflight/preview/config/actions, an in-memory run service (Phase 4 → Table Storage), adapter registry with 10 registered descriptors (1 with real invoker: provisioning bridge), orchestration bridge for provisioning generalization, `requireAdmin` + `requireDelegatedScope` authorization wiring, and `AdminActorContextResolver` for audit-quality operator identification. See `src/hosts/admin-control-plane/RELEASE-SCOPE.md` for the boundary manifest.
 
 ### Category G: Build Tooling (1)
 

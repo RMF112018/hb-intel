@@ -98,10 +98,35 @@
 
 ---
 
+### P3-D10 — current-state-map updated only for landed implementation
+
+**Decision:** Update `current-state-map.md` only for actual implemented changes: the admin-control-plane host, its route families, and the Phase 3 plan library classification. No target-state claims.
+
+**Rationale:** The current-state-map is present-truth authority. Updating it with Phase 4+ aspirations would violate its purpose.
+
+**Impact:** Future phases must update current-state-map when their implementation lands — not when planned.
+
+---
+
+### P3-D11 — ProvisioningOversightPage and @hbc/provisioning unchanged
+
+**Decision:** Phase 3 does not modify `apps/admin/src/pages/ProvisioningOversightPage.tsx`, `@hbc/provisioning`, or `@hbc/features-admin`. These consumers continue using provisioning-specific endpoints unchanged.
+
+**Rationale:** The admin API is additive (P3-D05). Migration of existing consumers to the generalized admin API is a Phase 5 concern.
+
+**Impact:** Two parallel backend surfaces exist: provisioning-specific (project-setup host) and generalized admin (admin-control-plane host). This is intentional and temporary.
+
+---
+
 ## Cross-references
 
 - [Phase 3 Summary Plan](./Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md)
 - [API surface and route catalog](./admin-control-plane-api-surface-and-route-catalog.md)
 - [Service factory and container plan](./admin-control-plane-service-factory-and-container-plan.md)
+- [Adapter registry and routing foundation](./admin-control-plane-adapter-registry-and-routing-foundation.md)
+- [Orchestration bridge plan](./admin-control-plane-orchestration-bridge-plan.md)
+- [Authz, config, and operational safety plan](./admin-control-plane-authz-config-and-operational-safety-plan.md)
+- [Runtime foundation inventory](./admin-spfx-phase-3-runtime-foundation-inventory.md)
+- [Host and composition-root plan](./admin-control-plane-host-and-composition-root-plan.md)
 - [Phase 2 run model](../phase-02/admin-control-plane-run-model.md)
 - [Phase 2 decision register](../phase-02/admin-control-plane-phase-2-decision-register.md)

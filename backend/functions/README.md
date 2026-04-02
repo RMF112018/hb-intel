@@ -2,9 +2,11 @@
 
 This package hosts HB Intel Azure Functions for provisioning and integration endpoints. It serves as the **privileged control plane** for the IT Control Center — owning durable orchestration, retries, compensation, adapter invocation, run/audit persistence, and privileged execution via Managed Identity.
 
-**Current foundations**: The provisioning saga orchestrator (`saga-orchestrator.ts`), service factory, Graph/SharePoint adapters, and Azure Table persistence are the control-plane seed. Later phases generalize these patterns for additional admin domains (Entra control, SharePoint control, install/bootstrap). See the [Phase 1 architecture baseline](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-phase-1-architecture-baseline.md) for the full operating model.
+**Current foundations**: The provisioning saga orchestrator (`saga-orchestrator.ts`), service factory, Graph/SharePoint adapters, and Azure Table persistence are the original control-plane seed.
 
-**Phase 2 contracts**: Phase 3 implements runtime against the shared contracts in `@hbc/models/admin-control-plane` (action catalog, run model, API DTOs, checkpoint, audit/evidence, adapter registry). This package imports those contracts — it does not define them. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
+**Phase 2 contracts**: Shared contracts in `@hbc/models/admin-control-plane` (58 pure-type exports: action catalog, run model, API DTOs, checkpoint, audit/evidence, adapter registry). This package imports those contracts — it does not define them. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
+
+**Phase 3 foundation (2026-04-02)**: The admin control plane host (`src/hosts/admin-control-plane/`) generalizes these patterns into a reusable backend substrate. It provides 10 authenticated API endpoints under `/api/admin/`, an in-memory run service (Phase 4 → Table Storage), adapter registry with 10 descriptors and a provisioning bridge invoker, orchestration bridge for provisioning-to-admin-run mapping, and `requireAdmin`/`requireDelegatedScope` authorization wiring. See the [Phase 3 plan library](../../docs/architecture/plans/MASTER/spfx/admin/phase-03/) for the full design.
 
 ### Domain Hosts
 
