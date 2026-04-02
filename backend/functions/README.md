@@ -2,7 +2,7 @@
 
 This package hosts HB Intel Azure Functions for provisioning and integration endpoints. It serves as the **privileged control plane** for the IT Control Center — owning durable orchestration, retries, compensation, adapter invocation, run/audit persistence, and privileged execution via Managed Identity.
 
-**Current foundations**: The provisioning saga orchestrator (`saga-orchestrator.ts`), service factory, Graph/SharePoint adapters, and Azure Table persistence are the control-plane seed. Later phases generalize these patterns for additional admin domains (Entra control, SharePoint control, install/bootstrap). See the [Phase 1 architecture baseline](../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-phase-1-architecture-baseline.md) for the full operating model.
+**Current foundations**: The provisioning saga orchestrator (`saga-orchestrator.ts`), service factory, Graph/SharePoint adapters, and Azure Table persistence are the control-plane seed. Later phases generalize these patterns for additional admin domains (Entra control, SharePoint control, install/bootstrap). See the [Phase 1 architecture baseline](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-phase-1-architecture-baseline.md) for the full operating model.
 
 ## Local Development Setup
 
