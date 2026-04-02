@@ -430,12 +430,14 @@ Resolved: Remaining G7-08
 - Documented 9 external admin/tenant prerequisites with owners and verification methods
 - Documented 4 remaining service-access blockers (3 tenant-side, 1 code-side stub)
 
-### Prompt-05 — Deployment Gates, Runbooks, and Tenant Readiness Verification
+### Prompt-05 — Deployment Gates, Runbooks, and Tenant Readiness Verification — **COMPLETED (P7-05)**
 
-- Convert technical posture into rollout-ready documentation
-- Define staging, pilot, and production gates
-- Create blocker register and tenant prerequisite matrix
-- Distinguish code-complete vs environment-ready vs tenant-ready vs production-approved
+- Created `docs/maintenance/project-setup-deployment-readiness-checklist.md` — deployment gates for staging, pilot, and production with 10 code-complete, 14 environment-ready, and 13 tenant-ready criteria
+- Created `docs/maintenance/project-setup-tenant-prerequisites.md` — 18 tenant/platform prerequisites across 7 categories (Entra app registration, SharePoint admin, managed identity, Graph permissions, Sites.Selected grants, Azure resources, CORS) with operational ownership matrix and 8-item blocker register
+- Defined four readiness levels: code-complete → environment-ready → tenant-ready → production-approved
+- Documented verification steps for auth, CORS, provisioning, and permission flows
+- Documented evidence requirements for signoff at each gate
+- Documented blockers by gate with explicit owner type and resolution path
 
 ### Prompt-06 — Final Documentation Reconciliation and Readiness Report
 
