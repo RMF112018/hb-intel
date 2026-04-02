@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-accounting",
     "id": "7dca8e93-b2fb-4e06-9e4b-d14118f87990",
-    "version": "001.000.018",
+    "version": "001.000.019",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
