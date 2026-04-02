@@ -770,6 +770,90 @@ pnpm --filter @hbc/spfx-accounting run test   → 5 files, 37 tests passed
 
 ---
 
+## P8-05 Addendum — Operational Readiness, Runbook, and Support Verification
+
+**Date:** 2026-04-02
+**Prompt:** `Prompt-05_Phase-8-Operational-Readiness-Runbook-and-Support-Verification.md`
+
+### What was added
+
+New test file: `packages/provisioning/src/p08-operational-readiness-runbook-verification.test.ts`
+
+5 describe blocks, 20 tests:
+
+| Group | Tests | What It Proves | Classification |
+|-------|-------|---------------|----------------|
+| P8-05-OPS-01: Admin permission constants | 3 | 6 runbook-documented permission strings match `@hbc/auth` constants; `admin:provisioning:<action>` grammar enforced | repo-proven |
+| P8-05-OPS-02: Failure mode catalog recovery paths | 4 | All 10 FMs have UI-diagnosable degradation and recovery guidance; FM-09 matches runbook polling fallback; FM-05 matches runbook draft preservation; sequential FM-NN IDs | repo-proven |
+| P8-05-OPS-03: Notification tier model for escalation | 4 | first-failure immediate+push+email; second-failure-escalated immediate+push; recovery-resolved watch+in-app; request-submitted immediate+push | repo-proven |
+| P8-05-OPS-04: Observability event coverage | 4 | Notification targets exist for Failed/Completed; ≥15 registrations; all have descriptions; events span full lifecycle (submission → completion → failure → recovery) | repo-proven |
+| P8-05-OPS-05: Operational readiness classification | 5 | 10 FMs, 7 IRs, 6 admin permissions codified; immediate+watch tiers both populated; every FM has title+scenario for support docs | repo-proven |
+
+### Verification results
+
+```
+pnpm --filter @hbc/provisioning run test
+  Test Files  24 passed | 1 skipped (25)
+       Tests  355 passed | 1 skipped | 10 todo (366)
+    Coverage  98.78% statements
+
+pnpm --filter @hbc/spfx-accounting run lint   → clean
+pnpm --filter @hbc/spfx-accounting run build  → success
+pnpm --filter @hbc/spfx-accounting run test   → 5 files, 37 tests passed
+```
+
+### Supportability conclusions
+
+**What is diagnosable from the UI:**
+- All 10 failure modes (FM-01–FM-10) have documented graceful degradation visible to the user or admin without developer intervention
+- Admin detail modal shows saga step log, error context, and complexity-gated diagnostics
+- Coaching callouts guide admins to runbook procedures
+
+**What requires Admin action (permission-gated):**
+- Force retry (`admin:provisioning:retry`)
+- Escalate (`admin:provisioning:escalate`)
+- Archive (`admin:provisioning:archive`)
+- Force state override (`admin:provisioning:force-state`) — Expert tier only
+- View full alert detail (`admin:provisioning:alert:full-detail`)
+- Manage approval authority (`admin:approval:manage`)
+
+**What requires Azure/App Insights/portal access:**
+- KQL query templates (5 templates in observability runbook) — requires Log Analytics workspace
+- Alert rule configuration (HBIntel-ProvisioningStuck, HBIntel-TimerFullSpecFailed) — Azure Monitor
+- Azure Table Storage state inspection — Azure Portal
+- Timer trigger manual execution — Azure Portal → Function App
+- Application Insights connection string configuration
+
+**What is environment-gated:**
+- Real infrastructure probe responses (Azure Functions health, SharePoint connectivity)
+- Real alert rule activation and notification delivery
+- SignalR disconnect/reconnect timing
+- Timer trigger execution (1:00 AM CRON)
+
+**What is intentionally deferred:**
+- SF17 persistence layer (monitors/probes in-memory only) — Wave 1
+- 4 deferred monitors (overdue, stale, permission anomaly, expiration) — Wave 1
+- 3 deferred probes (search, notification, module-record-health) — Wave 1
+- Frontend Application Insights SDK — Wave 1
+
+### Runbook reconciliation status
+
+Both operational runbooks (`provisioning-runbook.md` and `provisioning-observability-runbook.md`) were audited against repo truth:
+
+| Runbook Section | Matches Repo Truth | Notes |
+|----------------|-------------------|-------|
+| Admin permissions (6 constants) | Yes — verified by P8-05-OPS-01 | Exact string match against `@hbc/auth` |
+| FM-01–FM-10 recovery table | Yes — verified by P8-05-OPS-02 | All 10 recovery paths match `failure-modes.ts` |
+| Alert thresholds (30m stuck, 2h timer) | Yes — matches `stuckWorkflowMonitor.ts` constants | Environment-gated for actual activation |
+| Retry ceiling (3 retries) | Yes — matches `ADMIN_RETRY_CEILING` constant | Tested in `alertPollingService.test.ts` |
+| KQL query templates (5) | Docs-supported — event names match telemetry constants | Azure portal execution required |
+| Alert rule definitions (2) | Docs-supported — thresholds match implementation | Azure portal configuration required |
+| Escalation path (self-service → admin → manual) | Yes — verified by permission gates and FM recovery paths | |
+
+No runbook drift was identified. Both documents accurately reflect current repo behavior.
+
+---
+
 ## 12. Exact Files Inspected
 
 ### Authoritative readiness documents
@@ -856,6 +940,7 @@ pnpm --filter @hbc/spfx-accounting run test   → 5 files, 37 tests passed
 - `packages/provisioning/src/p08-lifecycle-coverage-hardening.test.ts` (P8-02)
 - `packages/provisioning/src/p08-integration-validation-hardening.test.ts` (P8-03)
 - `packages/provisioning/src/p08-degraded-path-observability-hardening.test.ts` (P8-04)
+- `packages/provisioning/src/p08-operational-readiness-runbook-verification.test.ts` (P8-05)
 
 ### Phase 8 prompt package
 
