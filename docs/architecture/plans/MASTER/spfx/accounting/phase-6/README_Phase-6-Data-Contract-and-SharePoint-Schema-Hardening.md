@@ -59,7 +59,7 @@ These facts are the starting point for Phase 6. Do not write prompts that assume
 
 ## Ordered prompt sequence
 
-1. `Prompt-01` — repo-truth data-contract and SharePoint schema audit
+1. `Prompt-01` — repo-truth data-contract and SharePoint schema audit — **Complete** (2026-04-02)
 2. `Prompt-02` — canonical request-record contract freeze
 3. `Prompt-03` — SharePoint mapper and persistence hardening
 4. `Prompt-04` — migration / compatibility and schema validation hardening
