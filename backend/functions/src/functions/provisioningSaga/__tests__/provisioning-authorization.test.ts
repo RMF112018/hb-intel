@@ -93,7 +93,9 @@ describe('P9-G5-07 route classification alignment', () => {
 
     it('no admin check required — any role passes', () => {
       const claims = makeClaims({ scp: 'access_as_user', roles: [] });
-      // These routes do NOT call requireAdmin — just verifying the pattern
+      // These routes do NOT call requireAdmin — just verifying the pattern.
+      // P5-03: retryProvisioning and escalateProvisioning remain L2-only (shared
+      // endpoints), but now enforce overallStatus === 'Failed' at the handler level.
       expect(isAdmin(claims)).toBe(false);
       expect(isPrivileged(claims)).toBe(false);
       // But the route still allows the request (no role gate)

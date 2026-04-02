@@ -182,6 +182,16 @@ app.http('triggerTimerManually', {
   }, { domain: 'provisioningSaga', operation: 'triggerTimerManually' })),
 });
 
+/**
+ * POST /api/provisioning-retry/{projectId}
+ *
+ * Shared endpoint: accessible by both coordinators (Estimating RetrySection) and admins
+ * (ProvisioningOversightPage). Authorization is L2 delegated scope only — NOT admin-exclusive.
+ * Coordinator-tier business rules (transient-only, max 2 retries, not escalated) are enforced
+ * at the frontend via canCoordinatorRetry(). Admin bypasses those limits via Force Retry.
+ *
+ * P5-03: Added overallStatus === 'Failed' guard to prevent retrying non-failed runs.
+ */
 app.http('retryProvisioning', {
   methods: ['POST'],
   authLevel: 'anonymous',
@@ -203,6 +213,16 @@ app.http('retryProvisioning', {
 
     try {
       const services = createProjectSetupServiceFactory();
+
+      // P5-03: Guard — only failed runs may be retried.
+      const status = await services.tableStorage.getProvisioningStatus(projectId);
+      if (!status) {
+        return notFoundResponse('ProvisioningStatus', projectId, requestId);
+      }
+      if (status.overallStatus !== 'Failed') {
+        return errorResponse(409, 'CONFLICT', `Cannot retry: provisioning is ${status.overallStatus}, not Failed`, requestId);
+      }
+
       const orchestrator = new SagaOrchestrator(services, logger);
 
       orchestrator.retry(projectId).catch((err) => {
@@ -225,9 +245,14 @@ app.http('retryProvisioning', {
 });
 
 /**
- * P4-04: Escalation is an annotation — it marks the latest run for admin attention
+ * POST /api/provisioning-escalate/{projectId}
+ *
+ * Shared endpoint: accessible by coordinators (Estimating RetrySection) and admins.
+ * Escalation is an annotation — it marks the latest run for admin attention
  * without changing overallStatus or request state. No request reconciliation needed.
  * Edits the latest run in place (sets escalatedBy + escalatedAt).
+ *
+ * P5-03: Added overallStatus === 'Failed' guard to prevent escalating non-failed runs.
  */
 app.http('escalateProvisioning', {
   methods: ['POST'],
@@ -251,6 +276,16 @@ app.http('escalateProvisioning', {
     try {
       void (await request.json());
       const services = createProjectSetupServiceFactory();
+
+      // P5-03: Guard — only failed runs may be escalated.
+      const status = await services.tableStorage.getProvisioningStatus(projectId);
+      if (!status) {
+        return notFoundResponse('ProvisioningStatus', projectId, requestId);
+      }
+      if (status.overallStatus !== 'Failed') {
+        return errorResponse(409, 'CONFLICT', `Cannot escalate: provisioning is ${status.overallStatus}, not Failed`, requestId);
+      }
+
       await services.tableStorage.escalateProvisioning(projectId, auth.claims.upn);
 
       logger.info(`Provisioning escalated for ${projectId} by ${auth.claims.upn}`);

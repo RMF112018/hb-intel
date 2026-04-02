@@ -44,16 +44,28 @@ Default tab: `failures`.
 | Started | `startedAt` | Formatted date |
 | Actions | — | Details, Force Retry, Archive, Ack Escalation |
 
-## Admin-Exclusive Actions
+## Action Boundary Classification (P5-03)
 
 All actions use `createProvisioningApiClient` — no bespoke fetch calls.
 
+### Admin-Exclusive Actions (L2 + L3 Admin)
+
+These actions are gated by both delegated scope and admin app-role at the backend. Only Admin-role users can invoke them.
+
 | Action | Button | Visible When | API Method | Confirmation |
 |--------|--------|-------------|------------|-------------|
-| Force Retry | Primary "Force Retry" | `overallStatus === 'Failed'` | `retryProvisioning(projectId)` | `HbcConfirmDialog` (danger) with idempotency warning |
 | Archive Failure | Secondary "Archive" | `overallStatus === 'Failed'` | `archiveFailure(projectId)` | `HbcConfirmDialog` (warning) |
 | Acknowledge Escalation | Secondary "Ack Escalation" | `escalatedBy` is set | `acknowledgeEscalation(projectId)` | None (immediate) |
 | Manual State Override | Primary "Override State" | Expert-tier + stuck in transitional state | `forceStateTransition(projectId, targetState)` | `HbcConfirmDialog` (danger) with data inconsistency warning |
+
+### Shared Exception Actions (L2 Delegated Scope)
+
+These actions are accessible to any authenticated user with `access_as_user` scope. Both coordinators (Estimating) and admins (Admin) invoke them through the same backend endpoints. The backend enforces `overallStatus === 'Failed'` as a state guard (P5-03). Coordinator-tier business rules (transient-only, max 2, not escalated) are enforced at the frontend only.
+
+| Action | Admin UI | Estimating UI | API Method | Backend State Guard |
+|--------|----------|--------------|------------|-------------------|
+| Force Retry | "Force Retry" button (no class restriction) | "Retry Provisioning" button (`canCoordinatorRetry()` gate) | `retryProvisioning(projectId)` | `overallStatus === 'Failed'` (P5-03) |
+| Escalation | Not directly invoked from Admin | "Escalate to Admin" button | `escalateProvisioning(projectId, escalatedBy)` | `overallStatus === 'Failed'` (P5-03) |
 
 ## Detail Modal
 
