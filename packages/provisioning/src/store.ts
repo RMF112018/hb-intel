@@ -30,8 +30,19 @@ export interface IProvisioningStore {
 }
 
 /**
- * D-PH6-09 shared headless provisioning Zustand slice.
- * Traceability: docs/architecture/plans/PH6.9-Provisioning-Package.md §6.9.2
+ * D-PH6-09 / P4-03: Shared headless provisioning Zustand slice.
+ *
+ * **Authoritative status precedence (P4-03):**
+ * - `setProvisioningStatus()` performs wholesale replacement from the API endpoint.
+ *   This is the authoritative source of truth for provisioning state.
+ * - `handleProgressEvent()` performs incremental merge from SignalR events.
+ *   SignalR is an enhancement layer — it may update step status and overallStatus
+ *   but never overwrites the full status record.
+ * - A correlationId stale-event guard ensures events from a different run
+ *   than the known status are dropped. The next API fetch will bring the
+ *   authoritative status for run transitions.
+ *
+ * Traceability: docs/reference/provisioning/durable-status-contract.md
  */
 export const useProvisioningStore = create<IProvisioningStore>()(
   immer((set) => ({
@@ -62,11 +73,16 @@ export const useProvisioningStore = create<IProvisioningStore>()(
         else s.requests.push(request);
       }),
 
+    // P4-03: Wholesale replacement from the authoritative API endpoint.
+    // Overwrites any skeleton or partial SignalR state for this project.
     setProvisioningStatus: (status) =>
       set((s) => {
         s.statusByProjectId[status.projectId] = status;
       }),
 
+    // P4-03: Incremental merge from SignalR enhancement events.
+    // SignalR events update step status and overallStatus but never overwrite the
+    // full status record. The API endpoint (setProvisioningStatus) is authoritative.
     handleProgressEvent: (event) =>
       set((s) => {
         // Always store the latest event for banner/checklist consumers.
@@ -98,6 +114,13 @@ export const useProvisioningStore = create<IProvisioningStore>()(
             retryCount: 0,
           };
           s.statusByProjectId[event.projectId] = existing;
+        }
+
+        // P4-03: Stale-event guard — drop events from a different run than the
+        // known status. On retry the API fetch (setProvisioningStatus) will bring
+        // the new run's correlationId; subsequent SignalR events will then match.
+        if (existing.correlationId && existing.correlationId !== event.correlationId) {
+          return;
         }
 
         existing.overallStatus = event.overallStatus;

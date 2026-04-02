@@ -1,7 +1,14 @@
 /**
- * D-PH6F-6: Provisioning progress view with real-time SignalR connection.
- * Upgraded from scaffold to a requester-facing progress surface showing
- * step checklist, connection status, and terminal state summaries.
+ * D-PH6F-6 / P4-03: Provisioning progress view with real-time SignalR connection.
+ *
+ * **Authoritative status precedence (P4-03):**
+ * - The API endpoint (useProvisioningStatus) is the authoritative source of truth.
+ *   The step checklist and project metadata always render from apiStatus.
+ * - SignalR (latestEvent) provides real-time overallStatus overlay only —
+ *   it may show a newer overallStatus before the next API poll, but does not
+ *   override the full status record.
+ * - On terminal state (Completed/Failed): SignalR connection is closed (no
+ *   further reconnect attempts) and API polling stops (refetchInterval disabled).
  */
 import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -39,21 +46,31 @@ export function ProvisioningProgressView(): ReactNode {
   const authToken = useMemo(() => resolveSessionToken(session), [session]);
   const getToken = useCallback(async () => authToken, [authToken]);
 
+  // P4-03: Read stored status to detect terminal state before initializing hooks.
+  // Once terminal, SignalR is disabled (no reconnect attempts) and polling stops.
+  const storedOverallStatus = useProvisioningStore(
+    (s) => (projectId ? s.statusByProjectId[projectId]?.overallStatus : undefined),
+  );
+  const isKnownTerminal = storedOverallStatus === 'Completed' || storedOverallStatus === 'Failed';
+
   const { isConnected } = useProvisioningSignalR({
     negotiateUrl: `${import.meta.env.VITE_API_BASE_URL}/api/provisioning-negotiate`,
     projectId: projectId ?? '',
     getToken,
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId) && !isKnownTerminal,
   });
 
   const latestEvent = useProvisioningStore(
     (s) => (projectId ? s.latestEventByProjectId[projectId] : undefined),
   );
 
-  // API-based polling as fallback when SignalR is disconnected or for initial state
-  const { data: apiStatus } = useProvisioningStatus(projectId ?? '', Boolean(projectId));
+  // P4-03: API endpoint is the authoritative source of truth. Polling stops on terminal.
+  const { data: apiStatus } = useProvisioningStatus(
+    projectId ?? '',
+    Boolean(projectId) && !isKnownTerminal,
+  );
 
-  // Merge: prefer store data (real-time) with API data as baseline
+  // API status is the authoritative baseline; latestEvent overlays overallStatus only.
   const status = apiStatus;
   const overallStatus = latestEvent?.overallStatus ?? status?.overallStatus ?? 'Unknown';
   const isTerminal = overallStatus === 'Completed' || overallStatus === 'Failed';

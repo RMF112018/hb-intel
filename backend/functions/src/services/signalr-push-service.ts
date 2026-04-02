@@ -11,8 +11,11 @@ export interface ISignalRPushService {
 }
 
 /**
- * D-PH6-07: Production SignalR adapter that delivers provisioning events to
+ * D-PH6-07 / P4-03: Production SignalR adapter that delivers provisioning events to
  * per-project and admin groups and manages group lifecycle via data-plane REST API.
+ *
+ * SignalR is a best-effort enhancement layer. Push failures are non-blocking —
+ * clients fall back to polling the authoritative status endpoint.
  */
 export class RealSignalRPushService implements ISignalRPushService {
   private readonly endpoint: string;

@@ -19,7 +19,11 @@ const connectionInfoOutput = output.generic({
 });
 
 /**
- * D-PH6-07: SignalR negotiate endpoint for per-project real-time provisioning events.
+ * D-PH6-07 / P4-03: SignalR negotiate endpoint for per-project real-time provisioning events.
+ *
+ * SignalR is an enhancement layer — the status API endpoint remains the authoritative
+ * source of truth. If SignalR is unavailable, clients fall back to API polling.
+ *
  * Validates Bearer tokens, derives group assignments, and returns connection metadata
  * consumed by SPFx clients that implement automatic reconnect and group rejoin logic.
  */

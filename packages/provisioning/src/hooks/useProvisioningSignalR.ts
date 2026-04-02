@@ -15,8 +15,20 @@ export interface IUseProvisioningSignalROptions {
 }
 
 /**
- * D-PH6-09 managed SignalR hook for provisioning progress events.
- * Traceability: docs/architecture/plans/PH6.9-Provisioning-Package.md §6.9.3
+ * D-PH6-09 / P4-03: Managed SignalR hook for provisioning progress events.
+ *
+ * **Enhancement-layer role (P4-03):** This hook provides real-time progress
+ * updates as an enhancement to the authoritative status API endpoint. If the
+ * connection fails or is unavailable, consumers fall back to API polling.
+ * The store's stale-event guard ensures events from a different run than the
+ * known status are dropped.
+ *
+ * **Terminal-state handling:** Consumers should set `enabled: false` when a
+ * terminal state (Completed/Failed) is reached to stop the connection and
+ * prevent unnecessary reconnect attempts. The cleanup function runs
+ * automatically when `enabled` transitions from true to false.
+ *
+ * Traceability: docs/reference/provisioning/durable-status-contract.md
  */
 export function useProvisioningSignalR({
   negotiateUrl,
