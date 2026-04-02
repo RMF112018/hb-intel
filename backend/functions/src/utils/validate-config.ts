@@ -158,6 +158,23 @@ export function validateProjectSetupStartupConfig(): void {
 }
 
 /**
+ * P3-02: Validate only the config tiers required by the Admin Control Plane domain host.
+ *
+ * The Admin Control Plane host needs:
+ *   - core tier (auth, table storage, adapter mode) — required at startup
+ *
+ * The Admin Control Plane host does NOT need at startup:
+ *   - sharepoint tier (SharePoint URLs) — validated when SP operations are needed
+ *   - provisioning tier (saga prerequisites) — owned by project-setup host
+ *   - domain CRUD config — not part of this host
+ *
+ * See: Phase 3 Summary Plan, P3-02
+ */
+export function validateAdminControlPlaneStartupConfig(): void {
+  validateCoreConfig();
+}
+
+/**
  * Validates that all required production environment variables are present.
  * Throws an aggregated error listing every missing variable if any are absent.
  * Skips validation entirely in mock/test mode.

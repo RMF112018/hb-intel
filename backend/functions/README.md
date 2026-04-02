@@ -6,6 +6,18 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 **Phase 2 contracts**: Phase 3 implements runtime against the shared contracts in `@hbc/models/admin-control-plane` (action catalog, run model, API DTOs, checkpoint, audit/evidence, adapter registry). This package imports those contracts — it does not define them. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
 
+### Domain Hosts
+
+This package uses scoped domain hosts (ADR-0124) for independent deployment of domain-specific route families.
+
+| Host | Path | Purpose | Route families |
+|------|------|---------|----------------|
+| Monolithic | `src/index.ts` | All routes (backward compat) | 19 |
+| Project Setup | `src/hosts/project-setup/` | Project Setup domain boundary | 8 |
+| Admin Control Plane | `src/hosts/admin-control-plane/` | Generalized admin backend foundation | 1 (foundation — expanding in Phase 3) |
+
+Each host has its own composition root (`index.ts`), scoped service factory, `host.json`, and `RELEASE-SCOPE.md` boundary manifest validated by host-boundary tests.
+
 ## Local Development Setup
 
 `local.settings.json` is gitignored and must be created per developer machine.
