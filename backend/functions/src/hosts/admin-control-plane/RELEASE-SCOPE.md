@@ -9,7 +9,7 @@
 
 | Family | Directory | Purpose | Endpoints |
 |--------|-----------|---------|-----------|
-| adminApi | `functions/adminApi/` | Authenticated admin control plane API (runs, preflight, config, actions) | 10 |
+| adminApi | `functions/adminApi/` | Authenticated admin control plane API (runs, audit, evidence, preflight, config, actions) | 13 |
 | health | `functions/health/` | Unauthenticated operational readiness probe | 1 |
 
 ### Admin API Endpoints (P3-04)
@@ -25,6 +25,9 @@
 | POST | `/api/admin/preflight` | `adminPreflight` | Run preflight validation |
 | POST | `/api/admin/runs/preview` | `adminPreview` | Preview / dry-run |
 | GET | `/api/admin/config/{scope}` | `adminGetConfig` | Get config state |
+| GET | `/api/admin/runs/{runId}/audit` | `adminListRunAuditEvents` | List audit events for a run |
+| GET | `/api/admin/audit` | `adminListAuditEvents` | List audit events by type |
+| GET | `/api/admin/runs/{runId}/evidence` | `adminGetRunEvidence` | Get evidence manifest for a run |
 | GET | `/api/admin/actions` | `adminListActions` | List action metadata |
 
 ## Deferred Route Families (later prompts)

@@ -385,6 +385,133 @@ app.http('adminGetConfig', {
  * Query: domain?
  * Response: 200 IAdminApiListResponse<IAdminActionMetadata>
  */
+// ── List Audit Events for a Run ────────────────────────────────────────────────
+
+/**
+ * GET /api/admin/runs/{runId}/audit — List audit events for a run.
+ *
+ * Response: 200 IAdminApiListResponse<IAdminAuditRecord>
+ */
+app.http('adminListRunAuditEvents', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'admin/runs/{runId}/audit',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
+    const services = createAdminControlPlaneServiceFactory();
+    const runId = getParam(request, 'runId');
+
+    if (!runId) {
+      return errorResponse(400, 'VALIDATION_ERROR', 'runId is required', reqId);
+    }
+
+    const events = await services.auditService.listByRunId(runId);
+
+    return {
+      status: 200,
+      jsonBody: {
+        items: events,
+        pagination: { total: events.length, page: 1, pageSize: events.length, totalPages: 1 },
+        requestId: reqId,
+      },
+    };
+  }, { domain: 'adminControlPlane', operation: 'listRunAuditEvents' })),
+});
+
+// ── List Audit Events by Type ──────────────────────────────────────────────────
+
+/**
+ * GET /api/admin/audit — List audit events with optional type filter.
+ *
+ * Query: eventType?, since?, limit?
+ * Response: 200 IAdminApiListResponse<IAdminAuditRecord>
+ */
+app.http('adminListAuditEvents', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'admin/audit',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
+    const services = createAdminControlPlaneServiceFactory();
+    const eventType = request.query.get('eventType') ?? undefined;
+    const since = request.query.get('since') ?? undefined;
+    const limitStr = request.query.get('limit');
+    const limit = limitStr ? parseInt(limitStr, 10) : undefined;
+
+    if (!eventType) {
+      return errorResponse(400, 'VALIDATION_ERROR', 'eventType query parameter is required', reqId);
+    }
+
+    const events = await services.auditService.listByEventType(
+      eventType as never,
+      { since, limit },
+    );
+
+    return {
+      status: 200,
+      jsonBody: {
+        items: events,
+        pagination: { total: events.length, page: 1, pageSize: events.length, totalPages: 1 },
+        requestId: reqId,
+      },
+    };
+  }, { domain: 'adminControlPlane', operation: 'listAuditEvents' })),
+});
+
+// ── Get Evidence Manifest for a Run ────────────────────────────────────────────
+
+/**
+ * GET /api/admin/runs/{runId}/evidence — Get evidence manifest for a run.
+ *
+ * Returns all evidence references associated with the run's audit events.
+ * Phase 4 returns evidence refs from audit records; Phase 6 adds dedicated evidence store.
+ *
+ * Response: 200 IAdminApiResponse<{ runId, evidenceRefs[] }>
+ */
+app.http('adminGetRunEvidence', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'admin/runs/{runId}/evidence',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
+    const services = createAdminControlPlaneServiceFactory();
+    const runId = getParam(request, 'runId');
+
+    if (!runId) {
+      return errorResponse(400, 'VALIDATION_ERROR', 'runId is required', reqId);
+    }
+
+    // Collect evidence references from audit events for this run
+    const events = await services.auditService.listByRunId(runId);
+    const evidenceRefs = events
+      .filter(e => e.evidenceRef !== null)
+      .map(e => e.evidenceRef!);
+
+    return successResponse({
+      runId,
+      evidenceRefs,
+      total: evidenceRefs.length,
+    });
+  }, { domain: 'adminControlPlane', operation: 'getRunEvidence' })),
+});
+
+// ── List Action Metadata ───────────────────────────────────────────────────────
+
+/**
+ * GET /api/admin/actions — List available admin actions.
+ *
+ * Query: domain?
+ * Response: 200 IAdminApiListResponse<IAdminActionMetadata>
+ */
 app.http('adminListActions', {
   methods: ['GET'],
   authLevel: 'anonymous',
