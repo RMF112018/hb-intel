@@ -593,6 +593,67 @@ This order follows the dependency flow: establish lifecycle truth → validate c
 
 ---
 
+## P8-02 Addendum — Lifecycle Verification Coverage Hardening
+
+**Date:** 2026-04-02
+**Prompt:** `Prompt-02_Phase-8-Lifecycle-Verification-Coverage-Hardening.md`
+
+### What was added
+
+New test file: `packages/provisioning/src/p08-lifecycle-coverage-hardening.test.ts`
+
+6 describe blocks, 21 tests:
+
+| Group | Tests | What It Proves | Classification |
+|-------|-------|---------------|----------------|
+| P8-02-LC-01: Full lifecycle path contracts | 6 | Happy path, clarification, external setup, failure, recovery, and longest-lifecycle chains are all valid through `isValidTransition()` | repo-proven |
+| P8-02-LC-02: Auto-start guard | 2 | Only `ReadyToProvision` may transition to `Provisioning`; all other 7 states are rejected | repo-proven |
+| P8-02-LC-03: Terminal state assertions | 3 | `Completed` has zero outgoing transitions; `Failed` and `NeedsClarification` each have exactly one (`→ UnderReview`) | repo-proven |
+| P8-02-LC-04: Ownership continuity | 4 | `deriveCurrentOwner()` returns correct role at every state: Controller (Submitted, UnderReview, AwaitingExternalSetup), Requester (NeedsClarification), null/system (ReadyToProvision, Provisioning), Project Lead (Completed), Admin (Failed) | repo-proven |
+| P8-02-LC-05: Status label and badge completeness | 3 | All 8 states have non-empty labels and badge variants; Completed→completed, Failed→error | repo-proven |
+| P8-02-LC-06: Notification coverage at lifecycle boundaries | 3 | Key lifecycle events present (request-submitted, clarification-requested, ready-to-provision, first-failure, completed); all 15 registrations have non-empty eventType and channels | repo-proven |
+
+### Verification results
+
+```
+pnpm --filter @hbc/provisioning run test
+  Test Files  21 passed | 1 skipped (22)
+       Tests  293 passed | 1 skipped | 10 todo (304)
+    Coverage  98.78% statements
+
+pnpm --filter @hbc/spfx-accounting run lint   → clean
+pnpm --filter @hbc/spfx-accounting run build  → success
+pnpm --filter @hbc/spfx-accounting run test   → 5 files, 37 tests passed
+```
+
+### What remains environment-gated
+
+- Auto-start trigger mechanism (what polling/event triggers the `ReadyToProvision → Provisioning` transition at runtime)
+- Timer trigger execution (Step 5, 1:00 AM CRON)
+- Real SignalR disconnect/reconnect behavior
+- Azure alert rule activation
+- Graph API permission grants and CORS behavior
+
+### What remains intentionally deferred
+
+- `provisionedAt` field not yet in `IProjectSetupRequest` — 2 completion test todos remain blocked
+- 5 deferred surface test stubs (TC-FLOW-05, TC-DRAFT-08, TC-FAIL-02, TC-FAIL-03, TC-FAIL-05)
+- SF17 persistence layer (monitors/probes in-memory only)
+
+### P8-02 completion assessment
+
+The highest-value lifecycle coverage gaps are now repo-proven:
+- All 4 canonical lifecycle paths validated end-to-end through the state machine
+- Auto-start guard exclusivity proven (only ReadyToProvision may enter Provisioning)
+- Terminal and constrained state boundaries asserted
+- Ownership continuity proven across the full lifecycle
+- Status visibility completeness proven for all 8 states
+- Notification coverage at lifecycle boundaries confirmed
+
+Remaining gaps are either environment-gated (cannot be repo-proven) or intentionally deferred (Wave 1 / component dependency). No lifecycle gap blocks pilot entry.
+
+---
+
 ## 12. Exact Files Inspected
 
 ### Authoritative readiness documents
@@ -676,6 +737,7 @@ This order follows the dependency flow: establish lifecycle truth → validate c
 - `packages/provisioning/src/failure-modes.test.ts`
 - `packages/provisioning/src/integration-rules.test.ts`
 - `packages/provisioning/src/__tests__/handoff-config.test.ts`
+- `packages/provisioning/src/p08-lifecycle-coverage-hardening.test.ts` (P8-02)
 
 ### Phase 8 prompt package
 
