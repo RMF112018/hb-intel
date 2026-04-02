@@ -654,6 +654,66 @@ Remaining gaps are either environment-gated (cannot be repo-proven) or intention
 
 ---
 
+## P8-03 Addendum — Integration and Cross-Surface Workflow Validation Hardening
+
+**Date:** 2026-04-02
+**Prompt:** `Prompt-03_Phase-8-Integration-and-End-to-End-Workflow-Validation-Hardening.md`
+
+### What was added
+
+New test file: `packages/provisioning/src/p08-integration-validation-hardening.test.ts`
+
+5 describe blocks, 22 tests:
+
+| Group | Tests | What It Proves | Classification |
+|-------|-------|---------------|----------------|
+| P8-03-INT-01: Cross-surface state visibility contract | 4 | All 8 states have complete entries in status labels, badge variants, and action map; multi-surface states have notification targets; system-owned vs human-owned ownership consistency | repo-proven |
+| P8-03-INT-02: Notification routing aligns with state ownership | 4 | NeedsClarification → submitter (Requester), Failed → controller+submitter (Admin with multi-party), Completed → group (Project Lead); all event types use `provisioning.` prefix with channels | repo-proven |
+| P8-03-INT-03: Failure mode and integration rule catalog completeness | 4 | FM-01–FM-10 all have scenario/degradation/affectedPackages; IR-01–IR-07 all have rule/antiPattern/correctPattern; lookup by ID works for both | repo-proven |
+| P8-03-INT-04: Cross-surface handoff data contracts | 5 | Approval → system-owned (provisioning runtime handoff); Failure → Admin (exception handling handoff); Recovery → Controller (reopen handoff); Clarification round-trip ownership flip; every ownership-changing transition has notification targets | repo-proven |
+| P8-03-INT-05: Environment-gated validation register | 5 | 8-state model structural assertion; all states covered by labels and badge variants; ≥15 notification registrations; FM/IR catalogs non-empty | repo-proven |
+
+### Verification results
+
+```
+pnpm --filter @hbc/provisioning run test
+  Test Files  22 passed | 1 skipped (23)
+       Tests  315 passed | 1 skipped | 10 todo (326)
+    Coverage  98.78% statements
+
+pnpm --filter @hbc/spfx-accounting run lint   → clean
+pnpm --filter @hbc/spfx-accounting run build  → success
+pnpm --filter @hbc/spfx-accounting run test   → 5 files, 37 tests passed
+```
+
+### What is now repo-proven (cross-surface integration)
+
+- All surfaces consuming shared registries (status labels, badge variants, action map, notification targets) get complete, consistent data for all 8 states
+- Notification routing targets align with state ownership: the right parties are notified at each lifecycle boundary
+- Every ownership-changing transition has notification targets on the destination state
+- Failure mode and integration rule catalogs are complete and retrievable by ID
+- Handoff contracts are proven: approval → provisioning runtime, failure → Admin, recovery → Controller, clarification → Requester round-trip
+
+### What remains environment-gated (cannot be repo-proven)
+
+- **Real cross-app browser navigation:** `?projectId=` URL construction is tested per-surface, but actual browser navigation from Estimating → Accounting → Admin requires hosted environment
+- **SignalR real-time updates:** ProvisioningProgressView implements fallback, but real disconnect behavior requires hosted WebSocket
+- **Azure alert rule activation:** KQL queries and alert rules are documented but configured in Azure Portal
+- **Tenant permissions:** Graph API grants, SPFx API permissions, SharePoint App Catalog deployment
+- **TC-CLAR-05:** Clarification resubmission integration gated on `SHAREPOINT_INTEGRATION_TEST_ENABLED`
+- **Infrastructure probe responses:** Azure Functions and SharePoint probes require real endpoints
+
+### What cannot be claimed as full E2E/pilot proof
+
+- No test validates the hosted integration chain: SPFx shell → Function App → saga → Azure services → status feedback
+- Timer trigger verification (Step 5, 1:00 AM) requires Azure Function App
+- Real probe health checks require live infrastructure
+- Cross-app deep-link navigation requires browser context
+
+These must be validated during staging deployment as documented in the deployment readiness checklist.
+
+---
+
 ## 12. Exact Files Inspected
 
 ### Authoritative readiness documents
@@ -738,6 +798,7 @@ Remaining gaps are either environment-gated (cannot be repo-proven) or intention
 - `packages/provisioning/src/integration-rules.test.ts`
 - `packages/provisioning/src/__tests__/handoff-config.test.ts`
 - `packages/provisioning/src/p08-lifecycle-coverage-hardening.test.ts` (P8-02)
+- `packages/provisioning/src/p08-integration-validation-hardening.test.ts` (P8-03)
 
 ### Phase 8 prompt package
 
