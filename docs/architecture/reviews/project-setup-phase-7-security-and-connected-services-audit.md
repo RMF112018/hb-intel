@@ -343,7 +343,7 @@ Saga Execution Time
 | G7-05 | Managed identity vs delegated auth confusion risk | High | Code cleanly separates inbound delegated (validateToken) from outbound app-only (MI services) | **RESOLVED by P7-02:** Dedicated auth contract doc created at `docs/reference/configuration/project-setup-api-auth-contract.md` with explicit inbound/outbound separation, non-sources of authorization, and scope boundary | Confusion between inbound and outbound auth models is the highest-severity conceptual risk | **Resolved** — auth contract doc created | **Resolved** |
 | G7-06 | Stale config-registry drift | High | `wave0-env-registry.ts` shows `AZURE_CLIENT_SECRET` removed (P4-03), `AzureSignalRConnectionString` not required, validation IS wired (P4-02) | **RESOLVED by P7-03:** `wave-0-config-registry.md` classified as partially superseded. Full drift reconciliation table with 17 stale claims documented in `project-setup-environment-readiness.md` "Known Drift Docs and Reconciled Decisions" section | Deployment teams following stale docs could set unnecessary secrets or miss actual requirements | **Resolved** — environment readiness doc supersedes stale config registry for Project Setup | **Resolved** |
 | G7-07 | Stale backend README drift | Low | `backend/functions/README.md` mentions `HBC_ADAPTER_MODE=real` as legacy but doesn't warn against use | **RESOLVED by P7-03:** Classified as acceptable minor drift in `project-setup-environment-readiness.md` — local dev context only, code handles alias correctly | Low risk — adapter-mode-guard.ts handles the alias correctly | **Resolved** — classified as acceptable | **Resolved** |
-| G7-08 | Missing target docs | Medium | **PARTIALLY RESOLVED by P7-02 and P7-03:** `project-setup-api-auth-contract.md` and `project-setup-environment-readiness.md` created. Still missing: `project-setup-connected-services-readiness.md` | Remaining file referenced by Prompt-04 but not yet created | Prompt-04 must create the remaining file | Prompt 04 must create remaining file | Connected-services readiness doc still needs canonical home |
+| G7-08 | Missing target docs | Medium | **RESOLVED by P7-02, P7-03, P7-04:** All three target docs created: `project-setup-api-auth-contract.md` (P7-02), `project-setup-environment-readiness.md` (P7-03), `project-setup-connected-services-readiness.md` (P7-04) | All target docs now exist as canonical references | All Phase 7 outcomes have canonical homes | **Resolved** — all three target docs created | **Resolved** |
 
 ---
 
@@ -383,7 +383,7 @@ Saga Execution Time
 | 3 | G7-03 | Project Setup vs shared host CORS posture | Medium-High | ~~Prompt-03~~ **RESOLVED (P7-03)** |
 | 4 | G7-02 | SPFx permission/approval clarity | Medium | ~~Prompt-02~~ **RESOLVED (P7-02)** |
 | 5 | G7-04 | Tiered startup validation vs saga-time gating | Medium | ~~Prompt-03~~ **RESOLVED (P7-03)** |
-| 6 | G7-08 | Missing target docs | Medium | ~~Prompts 02, 03,~~ 04 (partially resolved by P7-02 and P7-03) |
+| 6 | G7-08 | Missing target docs | Medium | ~~Prompts 02, 03, 04~~ **RESOLVED (P7-02, P7-03, P7-04)** |
 | 7 | G7-07 | Stale backend README drift | Low | ~~Prompt-03~~ **RESOLVED (P7-03)** |
 | 8 | G7-01 | Auth-core source coverage (baseline established) | Info | Complete |
 
@@ -416,14 +416,19 @@ Resolved: G7-03, G7-04, G7-06, G7-07, partial G7-08
 - Documented adapter mode contract: `proxy` (production), `mock` (dev/test), `real` (legacy alias)
 - Documented release gate consequences for CORS, config validation, and adapter mode
 
-### Prompt-04 — Managed Identity and Connected-Service Readiness
+### Prompt-04 — Managed Identity and Connected-Service Readiness — **COMPLETED (P7-04)**
 
-Resolves: Remaining G7-08
+Resolved: Remaining G7-08
 
-- Freeze the service-by-service access model with explicit identity, permission, and gate columns
-- Separate code-ready from tenant-blocked dependencies
-- Document Sites.Selected governance posture
-- Create `docs/reference/configuration/project-setup-connected-services-readiness.md` (G7-08)
+- Created `docs/reference/configuration/project-setup-connected-services-readiness.md` — canonical connected-services readiness reference
+- Froze service-by-service readiness matrix for all 10 Project Setup dependencies (SharePoint request persistence, SharePoint provisioning, Graph groups, Graph site-grants, Table Storage x2, SignalR, Notifications, Acknowledgments, Telemetry)
+- Documented identity model for each service: app-only MI via DefaultAzureCredential (no OBO)
+- Documented minimum permission posture with least-privilege rationale per service
+- Documented code-ready vs tenant-blocked split: 7 services code-ready, 3 tenant-blocked (Graph groups, Graph site-grants, SharePoint Sites.Selected grants)
+- Documented Sites.Selected governance: preferred path vs governed fallback with ADR requirement
+- Documented known broad permissions (Group.ReadWrite.All, User.Read.All) with operational gating rationale
+- Documented 9 external admin/tenant prerequisites with owners and verification methods
+- Documented 4 remaining service-access blockers (3 tenant-side, 1 code-side stub)
 
 ### Prompt-05 — Deployment Gates, Runbooks, and Tenant Readiness Verification
 
