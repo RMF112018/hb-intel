@@ -343,8 +343,9 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `plans/MASTER/spfx/admin/admin-spfx-target-architecture.md` | **Canonical Normative Plan** | 5-layer target architecture (operator console → API → orchestrator → adapters → stores) |
 | Phase 1 admin plans (6 canonical docs under `phase-01/`) | **Historical Foundational** | Architecture baseline, boundary matrix, domain taxonomy, release-scope map, locked decisions; completed 2026-03-31 |
 | Phase 2 admin plans (9 canonical docs under `phase-02/`) | **Historical Foundational** | Action catalog, run model, API contracts, checkpoints, audit/evidence, adapter registry, package placement, decision register; 58 pure-type exports in `@hbc/models/admin-control-plane`; completed 2026-04-01 |
-| Phase 3 admin plans (8 canonical docs under `phase-03/`) | **Canonical Current-State** | Runtime foundation inventory, host/composition-root plan, service-factory plan, API surface catalog, adapter registry/routing plan, orchestration bridge plan, authz/safety plan, decision register (9 decisions P3-D01–D09); completed 2026-04-02 |
-| `backend/functions/src/hosts/admin-control-plane/RELEASE-SCOPE.md` | **Canonical Current-State** | Admin control plane host boundary manifest; 2 route families, 10 admin API endpoints, 9 services |
+| Phase 3 admin plans (8 canonical docs under `phase-03/`) | **Canonical Current-State** | Runtime foundation inventory, host/composition-root plan, service-factory plan, API surface catalog, adapter registry/routing plan, orchestration bridge plan, authz/safety plan, decision register (11 decisions P3-D01–D11); completed 2026-04-02 |
+| Phase 4 admin plans (7 canonical docs under `phase-04/`) | **Canonical Current-State** | Repo-truth audit, run/audit/evidence baseline, persistence boundary matrix, store implementation notes, provisioning bridge, retrieval API contract, evidence/retention boundaries; completed 2026-04-02 |
+| `backend/functions/src/hosts/admin-control-plane/RELEASE-SCOPE.md` | **Canonical Current-State** | Admin control plane host boundary manifest; 2 route families, 13 admin API endpoints, 10 services |
 
 ---
 
@@ -468,9 +469,9 @@ Key dependencies: `@azure/functions`, `@azure/data-tables`, `@azure/identity`, `
 |------|------|---------------|-------------------|--------|
 | Monolithic | `src/index.ts` | 19 | `IServiceContainer` (9 eager + 10 lazy) | Legacy — preserved during transition |
 | Project Setup | `src/hosts/project-setup/` | 8 | `IProjectSetupServiceContainer` (9 eager) | Production — ADR-0124 |
-| Admin Control Plane | `src/hosts/admin-control-plane/` | 2 (adminApi + health) | `IAdminControlPlaneServiceContainer` (9 eager) | Phase 3 foundation — 2026-04-02 |
+| Admin Control Plane | `src/hosts/admin-control-plane/` | 2 (adminApi + health) | `IAdminControlPlaneServiceContainer` (10 eager) | Phase 3 foundation + Phase 4 durable stores — 2026-04-02 |
 
-The Admin Control Plane host (Phase 3) provides the generalized admin backend foundation: 10 authenticated API endpoints under `/api/admin/` for run launch/status/history/cancel/retry/checkpoint/preflight/preview/config/actions, an in-memory run service (Phase 4 → Table Storage), adapter registry with 10 registered descriptors (1 with real invoker: provisioning bridge), orchestration bridge for provisioning generalization, `requireAdmin` + `requireDelegatedScope` authorization wiring, and `AdminActorContextResolver` for audit-quality operator identification. See `src/hosts/admin-control-plane/RELEASE-SCOPE.md` for the boundary manifest.
+The Admin Control Plane host (Phase 3 + Phase 4) provides the generalized admin backend foundation: 13 authenticated API endpoints under `/api/admin/` for runs, audit events, evidence, preflight, config, and actions; durable Table Storage persistence for admin runs (`AdminRuns`), audit events (`AdminAuditEvents`), and evidence metadata (`AdminEvidence`); adapter registry with 10 registered descriptors; provisioning audit bridge for fire-and-forget spine writes; `requireAdmin` + `requireDelegatedScope` authorization; and evidence inline/offload boundary logic (32 KB threshold). See `src/hosts/admin-control-plane/RELEASE-SCOPE.md` for the boundary manifest.
 
 ### Category G: Build Tooling (1)
 

@@ -44,9 +44,43 @@ Phase 2 defines stable shared contracts for the generalized admin control plane.
 | [Package Placement & Boundary Map](phase-02/admin-control-plane-package-placement-and-boundary-map.md) | Contract placement rules and import direction (P2-08) |
 | [Decision Register](phase-02/admin-control-plane-phase-2-decision-register.md) | 14 Phase 2 decisions with rationale |
 
+### Phase 3 — Privileged backend foundation
+
+Phase 3 establishes the generalized admin backend host, service container, API surface, adapter registry, orchestration bridge, and authorization wiring.
+
+| Artifact | Purpose |
+|----------|---------|
+| [Phase 3 Summary Plan](phase-03/Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md) | Objectives, deliverables, acceptance criteria |
+| [Phase 3 Prompt Package README](phase-03/README.md) | Execution order and authority posture |
+| [Runtime Foundation Inventory](phase-03/admin-spfx-phase-3-runtime-foundation-inventory.md) | Current backend foundations audit (P3-01) |
+| [Host & Composition-Root Plan](phase-03/admin-control-plane-host-and-composition-root-plan.md) | Domain host strategy (P3-02) |
+| [Service Factory & Container Plan](phase-03/admin-control-plane-service-factory-and-container-plan.md) | 9-service container design (P3-03) |
+| [API Surface & Route Catalog](phase-03/admin-control-plane-api-surface-and-route-catalog.md) | 13 admin API endpoints (P3-04, P4-05) |
+| [Adapter Registry & Routing](phase-03/admin-control-plane-adapter-registry-and-routing-foundation.md) | 10 adapter descriptors (P3-06) |
+| [Orchestration Bridge Plan](phase-03/admin-control-plane-orchestration-bridge-plan.md) | Provisioning-to-admin mapping (P3-07) |
+| [Authz/Config/Safety Plan](phase-03/admin-control-plane-authz-config-and-operational-safety-plan.md) | Route-level authorization matrix (P3-08) |
+| [Decision Register](phase-03/admin-control-plane-phase-3-decision-register.md) | 11 Phase 3 decisions |
+| [Validation Report](phase-03/admin-control-plane-phase-3-validation-report.md) | Exit reconciliation (P3-10) |
+
+### Phase 4 — Durable run history, audit spine, and evidence model
+
+Phase 4 replaces in-memory stores with durable Table Storage persistence for runs, audit events, and evidence metadata.
+
+| Artifact | Purpose |
+|----------|---------|
+| [Phase 4 Summary Plan](phase-04/Admin-SPFx-IT-Control-Center-Phase-4-Summary-Plan.md) | Objectives, deliverables, acceptance criteria |
+| [Phase 4 Prompt Package README](phase-04/README.md) | Execution order and authority posture |
+| [Repo-Truth Audit](phase-04/admin-spfx-phase-4-repo-truth-audit.md) | Provisioning persistence inventory (P4-01) |
+| [Run/Audit/Evidence Baseline](phase-04/admin-spfx-phase-4-run-audit-evidence-baseline.md) | Canonical model and doctrine (P4-02) |
+| [Persistence Boundary Matrix](phase-04/admin-spfx-phase-4-persistence-boundary-matrix.md) | Store ownership and boundary rules (P4-02) |
+| [Store Implementation Notes](phase-04/admin-spfx-phase-4-store-implementation-notes.md) | Durable store keying and serialization (P4-03) |
+| [Provisioning Bridge](phase-04/admin-spfx-phase-4-provisioning-bridge.md) | Saga-to-spine event mapping (P4-04) |
+| [Retrieval API Contract](phase-04/admin-spfx-phase-4-retrieval-api-contract.md) | Audit/evidence query endpoints (P4-05) |
+| [Evidence & Retention Boundaries](phase-04/admin-spfx-phase-4-evidence-and-retention-boundaries.md) | Inline/offload thresholds, retention classes (P4-06) |
+
 ### Later phases
 
-Phases 3–13 are defined in the [end-state plan](admin-spfx-it-control-center-end-state-plan.md). Implementation artifacts for those phases will be added as work begins.
+Phases 5–13 are defined in the [end-state plan](admin-spfx-it-control-center-end-state-plan.md). Implementation artifacts will be added as work begins.
 
 ## Quick orientation
 

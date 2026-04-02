@@ -6,7 +6,9 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 **Phase 2 contracts**: Shared contracts in `@hbc/models/admin-control-plane` (58 pure-type exports: action catalog, run model, API DTOs, checkpoint, audit/evidence, adapter registry). This package imports those contracts — it does not define them. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
 
-**Phase 3 foundation (2026-04-02)**: The admin control plane host (`src/hosts/admin-control-plane/`) generalizes these patterns into a reusable backend substrate. It provides 10 authenticated API endpoints under `/api/admin/`, an in-memory run service (Phase 4 → Table Storage), adapter registry with 10 descriptors and a provisioning bridge invoker, orchestration bridge for provisioning-to-admin-run mapping, and `requireAdmin`/`requireDelegatedScope` authorization wiring. See the [Phase 3 plan library](../../docs/architecture/plans/MASTER/spfx/admin/phase-03/) for the full design.
+**Phase 3 foundation (2026-04-02)**: The admin control plane host (`src/hosts/admin-control-plane/`) generalizes these patterns into a reusable backend substrate with 13 authenticated API endpoints under `/api/admin/`, adapter registry with 10 descriptors and a provisioning bridge invoker, orchestration bridge for provisioning-to-admin-run mapping, and `requireAdmin`/`requireDelegatedScope` authorization wiring. See the [Phase 3 plan library](../../docs/architecture/plans/MASTER/spfx/admin/phase-03/).
+
+**Phase 4 durable persistence (2026-04-02)**: Replaces in-memory stores with Azure Table Storage-backed durable persistence for admin runs (`AdminRuns` table), audit events (`AdminAuditEvents` table), and evidence metadata (`AdminEvidence` table). Adds provisioning audit bridge for fire-and-forget spine writes, 3 audit/evidence retrieval API endpoints, and evidence inline/offload boundary logic (32 KB threshold). See the [Phase 4 plan library](../../docs/architecture/plans/MASTER/spfx/admin/phase-04/).
 
 ### Domain Hosts
 

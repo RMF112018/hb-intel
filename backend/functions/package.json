@@ -1,6 +1,6 @@
 {
   "name": "@hbc/functions",
-  "version": "00.000.130",
+  "version": "00.000.131",
   "private": true,
   "type": "module",
   "main": "./dist/src/index.js",

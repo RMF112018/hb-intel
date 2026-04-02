@@ -59,6 +59,31 @@ Use this authority order when signals conflict:
 - Do not ignore Azure Table Storage payload limits when designing evidence persistence.
 - Do not remove existing repo audit or compatibility docs unless replaced by a clearly better canonical artifact.
 
+## Canonical Phase 4 artifacts
+
+### Baseline docs (define the model)
+
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Repo-Truth Audit](admin-spfx-phase-4-repo-truth-audit.md) | P4-01 | Provisioning persistence inventory, gaps, preconditions |
+| [Run/Audit/Evidence Baseline](admin-spfx-phase-4-run-audit-evidence-baseline.md) | P4-02 | Canonical concepts, capture dimensions, audit event taxonomy, storage doctrine |
+| [Persistence Boundary Matrix](admin-spfx-phase-4-persistence-boundary-matrix.md) | P4-02 | 10-row store ownership and boundary rules |
+
+### Implementation notes (document what was built)
+
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Store Implementation Notes](admin-spfx-phase-4-store-implementation-notes.md) | P4-03 | Table keying, serialization, service factory wiring |
+| [Provisioning Bridge](admin-spfx-phase-4-provisioning-bridge.md) | P4-04 | Saga-to-spine event mapping, compatibility surfaces |
+| [Retrieval API Contract](admin-spfx-phase-4-retrieval-api-contract.md) | P4-05 | Audit/evidence query endpoints and response shapes |
+| [Evidence & Retention Boundaries](admin-spfx-phase-4-evidence-and-retention-boundaries.md) | P4-06 | Inline/offload thresholds, retention classes |
+
+### Exit reconciliation (created by P4-08)
+
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| Validation Report | P4-08 | Final verification results and exit criteria assessment |
+
 ## Expected repo outputs
 
 Primary outputs should land under:
