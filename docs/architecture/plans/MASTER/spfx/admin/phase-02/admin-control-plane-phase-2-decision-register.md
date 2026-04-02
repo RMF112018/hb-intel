@@ -1,0 +1,60 @@
+# Admin Control Plane — Phase 2 Decision Register
+
+## Purpose
+
+This register tracks architectural decisions made during Phase 2 contract work. Each entry records the decision, rationale, and alternatives considered. Later prompts append to this register as new decisions are made.
+
+## Decisions
+
+### P2-D01 — Shared contract types belong in @hbc/models
+
+**Decision**: Admin control-plane contract types (enums, interfaces, type aliases) are placed in `packages/models/src/admin-control-plane/` and exported through the `@hbc/models` public surface.
+
+**Rationale**:
+- `@hbc/models` is the canonical home for pure shared types across the HB Intel monorepo.
+- The contract types are consumed by `apps/admin` (operator console), `backend/functions` (control plane), and potentially `@hbc/features-admin` (intelligence layer). Placing them in any one consumer would create the wrong dependency direction.
+- `@hbc/features-admin` is the admin-intelligence package (LD-03) — putting control-plane types there would blur the intelligence/execution boundary.
+- `apps/admin` is a consumer, not a shared type provider.
+- Creating a new package would add workspace overhead for what is currently a small set of pure types.
+
+**Alternatives rejected**:
+- `@hbc/features-admin` — wrong boundary (intelligence, not control plane).
+- `apps/admin` — app packages should not export shared types.
+- New `@hbc/admin-control-plane` package — premature; may be warranted later if the contract surface grows to include runtime behavior, but for pure types `@hbc/models` is the established pattern.
+
+### P2-D02 — 8 admin domains aligned with Phase 1 taxonomy
+
+**Decision**: The admin domain enum uses 8 domains that map to the Phase 1 domain taxonomy, consolidating the 10 Phase 1 domains into 8 by folding "Operator Console Shell" and "Runs / History / Status" into cross-cutting concerns rather than standalone action domains.
+
+**Rationale**:
+- "Operator Console Shell" is a UX concern, not an admin action domain. It does not produce control-plane actions.
+- "Runs / History / Status" is a cross-cutting capability consumed by all domains (every domain produces runs and history). It is not a source of independent actions.
+- The remaining 8 domains each represent a distinct area that generates unique admin actions with specific risk profiles.
+
+### P2-D03 — Risk level determines default execution mode
+
+**Decision**: Each risk level has a default execution mode. Domains may override the default with documented rationale. The provisioning saga's override (moderate risk → seamless) is the canonical example, explicitly allowed by LD-05.
+
+**Rationale**:
+- Fixed risk-to-mode mapping would prevent provisioning from staying seamless (violating LD-05).
+- No mapping at all would leave execution mode as an ad hoc choice per action.
+- Default-with-override provides discipline while respecting domain-specific needs.
+
+### P2-D04 — Action keys use domain:family:verb triple
+
+**Decision**: Admin action identifiers use the format `domain:family:verb` (e.g., `provisioning-rollout:saga:launch`), typed as a template literal against `AdminDomain`.
+
+**Rationale**:
+- Scoped identifiers prevent name collisions across domains.
+- The triple structure is human-readable and machine-parseable.
+- Template literal typing provides compile-time validation that the domain prefix is a valid `AdminDomain` value.
+- The pattern is consistent with the existing permission key format in the admin app (`admin:access-control:view`).
+
+### P2-D05 — Contract surface is type-only with no runtime dependencies
+
+**Decision**: The `admin-control-plane` module in `@hbc/models` contains only enums, interfaces, and type aliases. No runtime logic, no external imports, no validation schemas.
+
+**Rationale**:
+- `@hbc/models` is consumed by all layers. Runtime dependencies would create coupling across the dependency graph.
+- Validation schemas (Zod) may be added later in `api-schemas/` following the existing pattern, but contract types remain pure.
+- This preserves tree-shaking and keeps the package lightweight.

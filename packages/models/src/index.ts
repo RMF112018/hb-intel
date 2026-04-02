@@ -82,5 +82,8 @@ export * from './audit/index.js';
 // ─── UI (shared data-shape interfaces for cross-package use) ─────────────────
 export * from './ui/index.js';
 
+// ─── Admin Control Plane (action vocabulary, risk levels, execution modes) ───
+export * from './admin-control-plane/index.js';
+
 // ─── API Schemas (Zod contract schemas for E1 contract testing) ──────────────
 export * from './api-schemas/index.js';
