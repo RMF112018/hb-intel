@@ -1,9 +1,9 @@
-# Phase 6 — Repo-Truth Data Contract and SharePoint Schema Audit
+# Phase 6 — Data Contract and SharePoint Schema Hardening
 
 **Phase**: 6 — Data Contract and SharePoint Schema Hardening  
-**Prompt**: 01 — Repo-Truth Audit  
+**Prompts**: 01–06 (all complete)  
 **Date**: 2026-04-02  
-**Status**: Complete
+**Status**: **Phase Complete — GO for downstream work**
 
 ---
 
@@ -515,3 +515,103 @@ The `MockProjectRequestsRepository` stores all domain fields in memory, includin
 ### Fixes applied
 
 - Corrected misleading P2-04 comment in `backend/functions/src/functions/projectRequests/index.ts` from "Persist controller approval identity for durable audit trail" to acknowledge the transient, non-persisted nature of these fields
+
+---
+
+## Prompt-06 — Final Documentation Reconciliation and Readiness Report
+
+**Date**: 2026-04-02  
+**Status**: Complete — Phase 6 closed
+
+### Phase 6 scope completed
+
+| Prompt | Title | Status |
+|--------|-------|--------|
+| P6-01 | Repo-truth data-contract and SharePoint schema audit | Complete |
+| P6-02 | Canonical request-record contract freeze | Complete |
+| P6-03 | SharePoint mapper and persistence hardening | Complete |
+| P6-04 | Migration, compatibility, and schema validation hardening | Complete |
+| P6-05 | Cross-surface contract verification | Complete |
+| P6-06 | Final documentation reconciliation and readiness report | Complete |
+
+### Issue disposition — Risks identified in P6-01
+
+| Risk | Severity | Disposition | Closure Evidence |
+|------|----------|-------------|-----------------|
+| 1. Identifier comment/code mismatch | Medium | **Closed** | P6-02 reconciled `field_1` comment in contract, added aliasing comments to mapper `toDomain()`/`toListItem()`, added JSDoc to `IProjectSetupRequest.requestId`/`projectId`, added invariant comment to saga `reconcileRequestState()` |
+| 2. Approval identity not persisted | High | **Deferred** | P6-02 documented as transient in canonical contract; P6-04 listed in deferred migration work; P6-05 corrected misleading P2-04 comment and verified consumer handles gracefully with optional-chaining |
+| 3. Saga cross-reference fragility | Medium | **Closed** | P6-02 added P6-02 invariant comment to `reconcileRequestState()`; P6-03 added 4 identifier aliasing tests proving `requestId === projectId` round-trip stability |
+| 4. Number column type mismatch | Low | **Closed** | P6-04 compatibility posture documents 5 Number columns as permanently tolerated; mapper coercion helpers handle read/write; OData numeric operations forbidden on these columns |
+| 5. Orphaned legacy columns | Low | **Closed** | P6-04 compatibility posture documents `field_17`, `field_18`, `field_19` as tolerated indefinitely with no external dependencies |
+| 6. Mapper critical-field validation advisory | Low | **Closed** | P6-04 schema readiness validation added `REQUIRED_PRODUCTION_FIELDS` (8 fields) and `validateSchemaReadiness()` for operational diagnosis; warning-only behavior is intentional design |
+| 7. JSON-array truncation ceiling | Low | **Closed** | P6-01 truncation guard (50K char) in mapper; P6-04 documented as warning-only in compatibility posture |
+
+### Issue disposition — Gaps identified in P6-01
+
+| Gap | Disposition | Closure Evidence |
+|-----|-------------|-----------------|
+| 1. Approval identity persistence (`approvedBy`/`approvedByOid`) | **Deferred** | Documented as transient in contract (`project-setup-request-record-contract.md`), compatibility posture, and audit report. Backend comment corrected. Consumer handles gracefully. Adding SP columns deferred to future phase. |
+| 2. Missing `approvedAt` timestamp | **Deferred** | Acknowledged in contract known-gaps section. Detail page code comment documents the gap. Not in Phase 6 scope. |
+| 3. Missing intermediate state timestamps | **Deferred** | Acknowledged in contract known-gaps section. `UnderReview` and `AwaitingExternalSetup` transitions do not record timestamps. Not in Phase 6 scope. |
+| 4. No `clarificationRequestedBy` actor field | **Deferred** | Partial coverage exists via `clarificationItems[].raisedBy`. Top-level clarification request lacks a dedicated actor field. Acknowledged in contract. |
+| 5. Year column backfill | **Deferred** | Mapper defaults handle missing values gracefully (`undefined`). No production impact. Backfill script not in Phase 6 scope. |
+| 6. `field_17` purpose unknown | **Closed** | Documented as orphaned in compatibility posture. Not referenced by any code. Tolerated indefinitely. |
+
+### Canonical artifacts produced by Phase 6
+
+| Artifact | Path | Type |
+|----------|------|------|
+| Request-record contract | `docs/reference/developer/project-setup-request-record-contract.md` | Canonical reference |
+| Schema compatibility posture | `docs/reference/developer/project-setup-schema-compatibility-posture.md` | Canonical reference |
+| Phase 6 audit and closure report | `docs/architecture/reviews/project-setup-phase-6-data-contract-and-schema-audit.md` | Architecture review |
+| Schema readiness validation | `backend/functions/src/services/projects-list-contract.ts` — `validateSchemaReadiness()` | Code |
+| Identifier aliasing tests | `backend/functions/src/services/__tests__/projects-list-mapper.test.ts` — P6-03 section | Tests |
+| Repository CRUD tests | `backend/functions/src/services/__tests__/project-requests-repository.test.ts` | Tests |
+| Schema readiness tests | `backend/functions/src/services/__tests__/projects-list-contract.test.ts` | Tests |
+
+### What was hardened
+
+- **Contract**: One authoritative request-record contract document with 43 fields classified by category, required/optional status, source-of-truth, and persistence status.
+- **Identifier semantics**: `requestId === projectId` aliasing documented as canonical with invariant comments and tests. `projectNumber` confirmed as separate business key.
+- **Mapper/repository**: Logger integration for diagnostics; OData escaping extracted for testability; 22 new repository tests; 4 identifier stability tests; 17 schema readiness tests.
+- **Schema posture**: Mixed schema documented as permanent. 8 required production fields identified. `validateSchemaReadiness()` added for operational diagnosis.
+- **Cross-surface**: All 7 consumer surfaces verified compatible. Misleading P2-04 comment corrected.
+- **Code comments**: Stale identifier comments reconciled across contract, mapper, domain model, and saga orchestrator.
+
+### What remains legacy-compatible
+
+- 20 CSV-import `field_N` columns retain generic internal names (permanent — SP cannot rename).
+- 5 Number columns storing ISO 8601 strings (permanent — mapper coercion handles read/write).
+- 3 orphaned columns (`field_17`, `field_18`, `field_19`) tolerated indefinitely.
+- P2-07 and P9-G5-05 extension columns absent on legacy rows (mapper defaults handle gracefully).
+
+### What is deferred
+
+- `approvedBy` / `approvedByOid` durable persistence (requires new SP columns + field map entries).
+- `approvedAt` timestamp (requires new domain field + SP column).
+- Intermediate state timestamps for `UnderReview` / `AwaitingExternalSetup`.
+- Top-level `clarificationRequestedBy` actor field.
+- Year column backfill for legacy rows.
+
+### Go / no-go recommendation
+
+**GO — downstream phases can safely rely on the hardened contract.**
+
+The Project Setup request-record contract is now explicit, tested, and verified across all consumer surfaces. Identifier semantics are unambiguous. The SharePoint mapping contract and compatibility posture are documented. Schema readiness validation is available for operational diagnosis.
+
+Downstream work should:
+- Reference `docs/reference/developer/project-setup-request-record-contract.md` as the authoritative field contract.
+- Reference `docs/reference/developer/project-setup-schema-compatibility-posture.md` for schema shape expectations.
+- Treat `requestId === projectId` as a contractual invariant unless a future phase deliberately implements key separation.
+- Not assume `approvedBy` or `approvedByOid` are durable — they are transient until SP columns are added.
+
+### Documentation classification
+
+| Document | Classification | Location |
+|----------|---------------|----------|
+| Request-record contract | Canonical reference | `docs/reference/developer/` |
+| Schema compatibility posture | Canonical reference | `docs/reference/developer/` |
+| Phase 6 audit/closure report | Architecture review | `docs/architecture/reviews/` |
+| Phase 6 prompt package | Canonical plan | `docs/architecture/plans/MASTER/spfx/accounting/phase-6/` |
+
+All Phase 6 artifacts follow the repository documentation classification standard. No working artifacts remain under `.claude/plans/` requiring promotion.
