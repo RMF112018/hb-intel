@@ -382,3 +382,32 @@ The canonical Project Setup request-record contract was authored at `docs/refere
 4. No top-level `clarificationRequestedBy` actor field.
 
 These gaps are documented in the contract and remain open for future phases to address.
+
+---
+
+## Prompt-03 — Mapper and Persistence Hardening Summary
+
+**Date**: 2026-04-02  
+**Status**: Complete
+
+### Hardening applied
+
+1. **Repository logger integration**: `SharePointProjectRequestsAdapter` now accepts an optional `ILogger` and passes it through to all `toDomain()` and `toListItem()` calls. Schema drift diagnostics and truncation guard warnings are no longer silently discarded.
+
+2. **OData escaping extracted**: `escapeODataValue()` extracted as an exported utility for testability. Handles single-quote doubling required by OData filter expressions.
+
+3. **Repository CRUD test coverage**: Added 13 tests covering `MockProjectRequestsRepository` insert, update, get, list-with-filter, list-all, find-by-project-number, defensive copy safety, and identifier aliasing round-trip.
+
+4. **OData escaping tests**: Added 5 tests covering passthrough, single-quote doubling, multiple quotes, empty string, and UUID values.
+
+5. **P6-03 identifier stability tests** (mapper): Added 4 tests verifying:
+   - `toDomain()` always sets `requestId === projectId` from `field_1`
+   - `toListItem()` writes `requestId` to `field_1`
+   - `projectNumber` is independently persisted in `field_2`
+   - Identifier aliasing survives `toListItem → toDomain` round-trip
+
+### Verification results
+
+- 900 unit tests pass (57 test files), including 47 mapper tests and 22 repository tests
+- Backend `check-types` passes cleanly
+- Accounting app build passes cleanly

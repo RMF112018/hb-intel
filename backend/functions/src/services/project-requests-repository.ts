@@ -5,6 +5,7 @@ import '@pnp/nodejs-commonjs';
 import '@pnp/sp/items/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
+import type { ILogger } from '../utils/logger.js';
 import { PROJECTS_LIST_NAME, PROJECTS_LIST_SELECT_FIELDS } from './projects-list-contract.js';
 import { toDomain, toListItem, resolveSpField } from './projects-list-mapper.js';
 
@@ -37,8 +38,10 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
   private readonly siteUrl: string;
   private readonly tenantUrl: string;
   private readonly credential = new DefaultAzureCredential();
+  private readonly logger?: ILogger;
 
-  constructor() {
+  constructor(logger?: ILogger) {
+    this.logger = logger;
     // Prefer the site-scoped URL when available; fall back to tenant root.
     this.siteUrl = process.env.SHAREPOINT_PROJECTS_SITE_URL ?? process.env.SHAREPOINT_TENANT_URL ?? '';
     this.tenantUrl = process.env.SHAREPOINT_TENANT_URL ?? '';
@@ -57,7 +60,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const idField = resolveSpField('requestId');
 
     const existing = await list.items.filter(`${idField} eq '${key}'`).top(1).select('Id')();
-    const payload = toListItem(request);
+    const payload = toListItem(request, this.logger);
 
     if (existing.length > 0) {
       await list.items.getById(existing[0].Id).update(payload);
@@ -75,7 +78,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const items = await list.items.filter(`${idField} eq '${key}'`).top(1)();
 
     if (!items.length) return null;
-    return toDomain(items[0] as Record<string, unknown>);
+    return toDomain(items[0] as Record<string, unknown>, this.logger);
   }
 
   async listRequests(state?: ProjectSetupRequestState): Promise<IProjectSetupRequest[]> {
@@ -91,7 +94,7 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     }
 
     const items = await query.getAll(5000);
-    return (items as Array<Record<string, unknown>>).map((item) => toDomain(item));
+    return (items as Array<Record<string, unknown>>).map((item) => toDomain(item, this.logger));
   }
 
   async findByProjectNumber(projectNumber: string): Promise<IProjectSetupRequest | null> {
@@ -102,11 +105,11 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
     const items = await list.items.filter(`${pnField} eq '${key}'`).top(1)();
 
     if (!items.length) return null;
-    return toDomain(items[0] as Record<string, unknown>);
+    return toDomain(items[0] as Record<string, unknown>, this.logger);
   }
 
   private escapeODataValue(value: string): string {
-    return value.replace(/'/g, "''");
+    return escapeODataValue(value);
   }
 
   private async getSP(): Promise<any> {
@@ -123,6 +126,14 @@ export class SharePointProjectRequestsAdapter implements IProjectRequestsReposit
       },
     } as any);
   }
+}
+
+/**
+ * P6-03: Escape a string value for use in OData filter expressions.
+ * Exported for testability; delegates handle single-quote doubling required by OData.
+ */
+export function escapeODataValue(value: string): string {
+  return value.replace(/'/g, "''");
 }
 
 /**

@@ -658,3 +658,48 @@ describe('toDomain() with logger — diagnostic integration', () => {
     expect(logger.warnings).toHaveLength(0);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P6-03: Identifier aliasing invariant
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('P6-03: Identifier aliasing invariant', () => {
+  it('toDomain() always sets requestId === projectId from field_1', () => {
+    const item = { ...makeFullSpItem(), field_1: 'test-uuid-value' };
+    const domain = toDomain(item);
+
+    expect(domain.requestId).toBe('test-uuid-value');
+    expect(domain.projectId).toBe('test-uuid-value');
+    expect(domain.requestId).toBe(domain.projectId);
+  });
+
+  it('toListItem() writes requestId to field_1', () => {
+    const request = { ...makeFullDomainRequest(), requestId: 'write-test-id', projectId: 'write-test-id' };
+    const payload = toListItem(request);
+
+    expect(payload.field_1).toBe('write-test-id');
+  });
+
+  it('projectNumber is independently persisted in field_2', () => {
+    const request = {
+      ...makeFullDomainRequest(),
+      requestId: 'uuid-key',
+      projectId: 'uuid-key',
+      projectNumber: '25-300-01',
+    };
+    const payload = toListItem(request);
+
+    expect(payload.field_1).toBe('uuid-key');
+    expect(payload.field_2).toBe('25-300-01');
+    expect(payload.field_1).not.toBe(payload.field_2);
+  });
+
+  it('identifier aliasing survives toListItem → toDomain round-trip', () => {
+    const original = { ...makeFullDomainRequest(), requestId: 'rt-id', projectId: 'rt-id' };
+    const roundTripped = toDomain(toListItem(original) as unknown as Record<string, unknown>);
+
+    expect(roundTripped.requestId).toBe('rt-id');
+    expect(roundTripped.projectId).toBe('rt-id');
+    expect(roundTripped.requestId).toBe(roundTripped.projectId);
+  });
+});
