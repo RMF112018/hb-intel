@@ -338,12 +338,12 @@ Saga Execution Time
 |----|-------|---------------|--------------------|------------------------------------|----------------|----------------------|------------------------------|
 | G7-01 | Auth-core source coverage | Info | `auth.ts`, `validateToken.ts`, `authorization.ts` fully inspected and documented in this audit | N/A — no prior audit existed | Later prompts need a verified baseline | Baseline established by this audit; no further action | Low — baseline now exists |
 | G7-02 | SPFx permission/approval clarity | Medium | Estimating declares `webApiPermissionRequests`; Accounting does not | **RESOLVED by P7-02:** Admin approval workflow, SPFx permission posture, and Accounting non-participation now documented in `project-setup-api-auth-contract.md` | Deployment could stall if admin approval is not understood or requested | **Resolved** — auth contract doc created with full admin approval workflow | **Resolved** |
-| G7-03 | Project Setup vs shared host CORS posture | Medium-High | Two distinct `host.json` files with different origin lists | Platform-level Azure CORS configuration is not captured in repo | CORS could be misconfigured if platform settings override repo-defined posture | Prompt-03 should freeze CORS posture and explicitly document the platform configuration layer | CORS failures in production or security weakening |
-| G7-04 | Tiered startup validation vs saga-time gating | Medium | `validate-config.ts` implements three tiers; `service-factory.ts` applies them | Model exists in code but is not frozen in a dedicated reference doc | Later deployment work could flatten the tiers or misclassify gates | Prompt-03 should freeze the environment readiness model in a dedicated doc | Incorrect startup behavior or false deployment-readiness claims |
+| G7-03 | Project Setup vs shared host CORS posture | Medium-High | Two distinct `host.json` files with different origin lists | **RESOLVED by P7-03:** CORS posture frozen in `project-setup-environment-readiness.md` with explicit host comparison, repo-vs-Azure-resource distinction, and release gate consequences | CORS could be misconfigured if platform settings override repo-defined posture | **Resolved** — environment readiness doc created with authoritative CORS posture | **Resolved** |
+| G7-04 | Tiered startup validation vs saga-time gating | Medium | `validate-config.ts` implements three tiers; `service-factory.ts` applies them | **RESOLVED by P7-03:** Full environment variable classification matrix with startup-gated, warning-only, provisioning-time, and optional tiers frozen in `project-setup-environment-readiness.md` | Later deployment work could flatten the tiers or misclassify gates | **Resolved** — environment readiness doc created with tier-by-tier classification | **Resolved** |
 | G7-05 | Managed identity vs delegated auth confusion risk | High | Code cleanly separates inbound delegated (validateToken) from outbound app-only (MI services) | **RESOLVED by P7-02:** Dedicated auth contract doc created at `docs/reference/configuration/project-setup-api-auth-contract.md` with explicit inbound/outbound separation, non-sources of authorization, and scope boundary | Confusion between inbound and outbound auth models is the highest-severity conceptual risk | **Resolved** — auth contract doc created | **Resolved** |
-| G7-06 | Stale config-registry drift | High | `wave0-env-registry.ts` shows `AZURE_CLIENT_SECRET` removed (P4-03), `AzureSignalRConnectionString` not required, validation IS wired (P4-02) | `wave-0-config-registry.md` §2.1 marks `AZURE_CLIENT_SECRET` as `requiredInProd: true`, marks `AzureSignalRConnectionString` as required, §4 says validation "not wired" | Deployment teams following stale docs could set unnecessary secrets or miss actual requirements | Prompt-03 should reconcile this doc or create a replacement; at minimum, flag the three inaccuracies | Incorrect production configuration, unnecessary Key Vault entries, false readiness claims |
-| G7-07 | Stale backend README drift | Low | `backend/functions/README.md` mentions `HBC_ADAPTER_MODE=real` as legacy but doesn't warn against use | Minor naming inconsistency; README is otherwise current | Low risk — adapter-mode-guard.ts handles the alias correctly | Optional clarification in Prompt-03 or Prompt-06 | Minimal — code handles it |
-| G7-08 | Missing target docs | Medium | **PARTIALLY RESOLVED by P7-02:** `project-setup-api-auth-contract.md` created. Still missing: `project-setup-environment-readiness.md`, `project-setup-connected-services-readiness.md` | Remaining files referenced by Prompts 03-04 but not yet created | Later prompts assume these docs exist or will be created; without them, Phase 7 outcomes have no canonical home | Prompts 03, 04 must create remaining files deliberately | Phase 7 deliverables for CORS/env and connected-services still need canonical homes |
+| G7-06 | Stale config-registry drift | High | `wave0-env-registry.ts` shows `AZURE_CLIENT_SECRET` removed (P4-03), `AzureSignalRConnectionString` not required, validation IS wired (P4-02) | **RESOLVED by P7-03:** `wave-0-config-registry.md` classified as partially superseded. Full drift reconciliation table with 17 stale claims documented in `project-setup-environment-readiness.md` "Known Drift Docs and Reconciled Decisions" section | Deployment teams following stale docs could set unnecessary secrets or miss actual requirements | **Resolved** — environment readiness doc supersedes stale config registry for Project Setup | **Resolved** |
+| G7-07 | Stale backend README drift | Low | `backend/functions/README.md` mentions `HBC_ADAPTER_MODE=real` as legacy but doesn't warn against use | **RESOLVED by P7-03:** Classified as acceptable minor drift in `project-setup-environment-readiness.md` — local dev context only, code handles alias correctly | Low risk — adapter-mode-guard.ts handles the alias correctly | **Resolved** — classified as acceptable | **Resolved** |
+| G7-08 | Missing target docs | Medium | **PARTIALLY RESOLVED by P7-02 and P7-03:** `project-setup-api-auth-contract.md` and `project-setup-environment-readiness.md` created. Still missing: `project-setup-connected-services-readiness.md` | Remaining file referenced by Prompt-04 but not yet created | Prompt-04 must create the remaining file | Prompt 04 must create remaining file | Connected-services readiness doc still needs canonical home |
 
 ---
 
@@ -351,25 +351,26 @@ Saga Execution Time
 
 ### `docs/reference/configuration/wave-0-config-registry.md`
 
-**Status:** Stale — three material inaccuracies detected
+**Status:** Partially superseded — **RECONCILED by P7-03**
 
-| Section | Claim | Actual Code Truth | Severity |
-|---------|-------|-------------------|----------|
-| §2.1 Infrastructure table | `AZURE_CLIENT_SECRET`: `requiredInProd: true`, Key Vault: Yes | `requiredInProd: false`, removed in P4-03, never consumed by any service in production (MI only) | High |
-| §2.1 Infrastructure table | `AzureSignalRConnectionString`: `requiredInProd: true` | `requiredInProd: false`, deferred to provisioning saga real-time updates only | Medium |
-| §4 Validation status | "not wired into startup path" | IS wired as of P4-02 via `validateCoreConfig()` and `validateProjectSetupStartupConfig()` | Medium |
+17 stale claims identified and documented in `docs/reference/configuration/project-setup-environment-readiness.md` "Known Drift Docs and Reconciled Decisions" section. Key drift points:
 
-**Recommendation:** Reconcile in Prompt-03 when environment readiness is frozen. The three specific inaccuracies should be corrected or the doc should be explicitly classified as partially superseded.
+- `AZURE_CLIENT_SECRET` listed as required in prod → removed in P4-03
+- `API_AUDIENCE` omitted entirely → required in core tier since P3-03
+- Multiple provisioning/notification vars listed as required → all deferred or optional
+- Adapter mode vocabulary: doc says `live` → code uses `proxy`
+- Validation status: doc says "not wired" → fully wired since P4-02
+
+**Decision:** `wave-0-config-registry.md` remains useful as historical context. For current Project Setup environment readiness, `project-setup-environment-readiness.md` is authoritative.
 
 ### `backend/functions/README.md`
 
-**Status:** Mostly current — one minor naming quirk
+**Status:** Minor drift — **CLASSIFIED by P7-03** as acceptable
 
-| Section | Claim | Actual Code Truth | Severity |
-|---------|-------|-------------------|----------|
-| §3 Adapter Mode | Mentions `HBC_ADAPTER_MODE=real` as legacy | Correctly accepted as alias for `proxy` in code; README doesn't explicitly warn against setting it | Low |
+- `AZURE_CLIENT_SECRET` shown in local dev example → acceptable for local dev context only (not production)
+- `HBC_ADAPTER_MODE=real` mentioned as legacy → code handles alias correctly
 
-**Recommendation:** Optional clarification. The code handles the alias correctly, so this is a documentation hygiene item, not a safety issue.
+**Decision:** No changes required. Minor hygiene items that do not affect production safety.
 
 ---
 
@@ -378,12 +379,12 @@ Saga Execution Time
 | Rank | Gap ID | Topic | Severity | Remediation Stage |
 |------|--------|-------|----------|-------------------|
 | 1 | G7-05 | Managed identity vs delegated auth confusion risk | High | ~~Prompt-02~~ **RESOLVED (P7-02)** |
-| 2 | G7-06 | Stale config-registry drift | High | Prompt-03 |
-| 3 | G7-03 | Project Setup vs shared host CORS posture | Medium-High | Prompt-03 |
+| 2 | G7-06 | Stale config-registry drift | High | ~~Prompt-03~~ **RESOLVED (P7-03)** |
+| 3 | G7-03 | Project Setup vs shared host CORS posture | Medium-High | ~~Prompt-03~~ **RESOLVED (P7-03)** |
 | 4 | G7-02 | SPFx permission/approval clarity | Medium | ~~Prompt-02~~ **RESOLVED (P7-02)** |
-| 5 | G7-04 | Tiered startup validation vs saga-time gating | Medium | Prompt-03 |
-| 6 | G7-08 | Missing target docs | Medium | ~~Prompts 02,~~ 03, 04 (partially resolved by P7-02) |
-| 7 | G7-07 | Stale backend README drift | Low | Prompt-03 or Prompt-06 |
+| 5 | G7-04 | Tiered startup validation vs saga-time gating | Medium | ~~Prompt-03~~ **RESOLVED (P7-03)** |
+| 6 | G7-08 | Missing target docs | Medium | ~~Prompts 02, 03,~~ 04 (partially resolved by P7-02 and P7-03) |
+| 7 | G7-07 | Stale backend README drift | Low | ~~Prompt-03~~ **RESOLVED (P7-03)** |
 | 8 | G7-01 | Auth-core source coverage (baseline established) | Info | Complete |
 
 ---
@@ -402,15 +403,18 @@ Resolved: G7-05, G7-02, partial G7-08
 - Documented explicit non-sources of authorization (CONTROLLER_UPNS, ADMIN_UPNS)
 - Documented validation error responses, authorization error responses, and telemetry events
 
-### Prompt-03 — CORS, Origin, and Environment Configuration Hardening
+### Prompt-03 — CORS, Origin, and Environment Configuration Hardening — **COMPLETED (P7-03)**
 
-Resolves: G7-03, G7-04, G7-06, G7-07
+Resolved: G7-03, G7-04, G7-06, G7-07, partial G7-08
 
-- Freeze Project Setup CORS posture (distinguish from shared host and platform layer)
-- Freeze the tiered environment validation model
-- Reconcile `wave-0-config-registry.md` inaccuracies (AZURE_CLIENT_SECRET, SignalR, validation status)
-- Create `docs/reference/configuration/project-setup-environment-readiness.md` (G7-08)
-- Optionally clarify backend README adapter mode naming
+- Created `docs/reference/configuration/project-setup-environment-readiness.md` — canonical CORS and environment readiness reference
+- Froze Project Setup CORS posture: single exact origin (`https://hedrickbrotherscom.sharepoint.com`), credentials required, no wildcards, with explicit comparison to shared host
+- Documented repo `host.json` vs Azure resource CORS distinction and infrastructure-as-code alignment requirement
+- Froze full environment variable classification matrix: 6 core startup-gated, 2 warning-only, 7 provisioning-time, 12+ optional/deferred/stub
+- Reconciled `wave-0-config-registry.md` with 17 stale claims documented and classified as superseded
+- Classified `backend/functions/README.md` adapter mode drift as acceptable (code handles alias)
+- Documented adapter mode contract: `proxy` (production), `mock` (dev/test), `real` (legacy alias)
+- Documented release gate consequences for CORS, config validation, and adapter mode
 
 ### Prompt-04 — Managed Identity and Connected-Service Readiness
 
@@ -440,13 +444,13 @@ Resolves: Remaining G7-08
 
 1. ~~**Does the Accounting SPFx package need its own `webApiPermissionRequests`?**~~ **RESOLVED (P7-02):** No. The Accounting app does not currently call the Project Setup protected API. No permission request is required unless a future Accounting surface needs direct API access. Decision documented in `project-setup-api-auth-contract.md`.
 
-2. **Should the Project Setup production deployment use only the domain-scoped `host.json`, or does the shared host CORS posture also apply at runtime?** The deployment model determines which `host.json` is effective. Prompt-03 should clarify.
+2. ~~**Should the Project Setup production deployment use only the domain-scoped `host.json`, or does the shared host CORS posture also apply at runtime?**~~ **RESOLVED (P7-03):** The domain-scoped `hosts/project-setup/host.json` is authoritative for Project Setup production. The shared `host.json` applies to other function hosts. Documented in `project-setup-environment-readiness.md`.
 
-3. **How much of `wave-0-config-registry.md` should be repaired vs replaced?** Three inaccuracies are identified. The doc could be corrected in place or superseded by the new `project-setup-environment-readiness.md`. Prompt-03 should decide.
+3. ~~**How much of `wave-0-config-registry.md` should be repaired vs replaced?**~~ **RESOLVED (P7-03):** Classified as partially superseded. 17 stale claims documented. `project-setup-environment-readiness.md` is now authoritative for Project Setup environment readiness. `wave-0-config-registry.md` retained as historical context.
 
-4. **What Azure portal / ARM CORS settings are currently applied to the Function App resource?** This is a platform-layer question not fully answerable from repo truth alone. Prompt-03 should document what is known and flag what requires external verification.
+4. ~~**What Azure portal / ARM CORS settings are currently applied to the Function App resource?**~~ **PARTIALLY RESOLVED (P7-03):** The repo-vs-Azure-resource distinction is now documented. Actual Azure portal settings remain a platform-layer question that requires external verification. Documented as infrastructure-as-code alignment requirement.
 
-5. **Should the legacy `real` adapter mode alias be formally deprecated with a startup warning, or is silent acceptance sufficient?** Code handles it correctly today; this is a documentation/guidance question for Prompt-03 or Prompt-06.
+5. ~~**Should the legacy `real` adapter mode alias be formally deprecated with a startup warning, or is silent acceptance sufficient?**~~ **RESOLVED (P7-03):** Silent acceptance is sufficient. Code normalizes `real` to `proxy` correctly. Adapter mode contract frozen in `project-setup-environment-readiness.md`.
 
 ---
 
