@@ -22,7 +22,7 @@ The package is structured to address the work in the correct order:
 | # | Prompt | Status | Output |
 |---|--------|--------|--------|
 | 01 | Repo-Truth Baseline and Scope Freeze | Complete (2026-04-02) | `P10-01_Repo-Truth-Baseline-and-Scope-Freeze.md` |
-| 02 | Accounting Packaging and Runtime Injection Closure | Not started | — |
+| 02 | Accounting Packaging and Runtime Injection Closure | Complete (2026-04-02) | `P10-02_Accounting-Packaging-and-Runtime-Injection-Closure.md` |
 | 03 | Accounting Auth Model and Audience Contract Freeze | Not started | — |
 | 04 | SPFx Package Permissions and Approval Path Alignment | Not started | — |
 | 05 | Accounting Runtime Config and Backend Provider Implementation | Not started | — |

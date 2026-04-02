@@ -10,9 +10,11 @@ const router = createWebpartRouter();
 
 interface AppProps {
   spfxContext?: { pageContext: { user: { loginName: string } } };
+  /** SPFx API token provider for production-mode auth. */
+  getApiToken?: () => Promise<string>;
 }
 
-export function App({ spfxContext }: AppProps): React.ReactNode {
+export function App({ spfxContext, getApiToken }: AppProps): React.ReactNode {
   return (
     <HbcThemeProvider>
       <HbcToastProvider>
