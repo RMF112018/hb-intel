@@ -5,7 +5,6 @@ import { useCurrentSession } from '@hbc/auth';
 import { HbcComplexityGate } from '@hbc/complexity';
 import type { IProjectSetupRequest } from '@hbc/models';
 import {
-  createProvisioningApiClient,
   useProvisioningStore,
   PROJECT_SETUP_STATUS_LABELS,
   DEPARTMENT_DISPLAY_LABELS,
@@ -22,7 +21,7 @@ import {
   HbcTabs,
 } from '@hbc/ui-kit';
 import type { LayoutTab, ColumnDef } from '@hbc/ui-kit';
-import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
+import { useAccountingBackend } from '../backend/AccountingBackendContext.js';
 import { getStateBadgeVariant } from '../utils/stateDisplayHelpers.js';
 
 type FilterTabId = 'pending' | 'clarification' | 'external' | 'failed';
@@ -69,14 +68,7 @@ export function ProjectReviewQueuePage(): ReactNode {
   const navigate = useNavigate();
   const { requests, setRequests } = useProvisioningStore();
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  // P3-09: Factory-based token provider — extracts fresh token on each call
-  const sessionRef = useCallback(() => session, [session]);
-  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
-  const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', getToken),
-    [getToken],
-  );
+  const { client } = useAccountingBackend();
 
   useEffect(() => {
     if (!session) return;

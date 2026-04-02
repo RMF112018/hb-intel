@@ -4,6 +4,7 @@ import { HbcThemeProvider, HbcErrorBoundary, HbcToastProvider } from '@hbc/ui-ki
 import { ComplexityProvider } from '@hbc/complexity';
 import { defaultQueryOptions } from '@hbc/query-hooks';
 import { createWebpartRouter } from './router/index.js';
+import { AccountingBackendProvider } from './backend/AccountingBackendContext.js';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: defaultQueryOptions } });
 const router = createWebpartRouter();
@@ -21,7 +22,9 @@ export function App({ spfxContext, getApiToken }: AppProps): React.ReactNode {
         <QueryClientProvider client={queryClient}>
           <HbcErrorBoundary>
             <ComplexityProvider spfxContext={spfxContext}>
-              <RouterProvider router={router} />
+              <AccountingBackendProvider getApiToken={getApiToken}>
+                <RouterProvider router={router} />
+              </AccountingBackendProvider>
             </ComplexityProvider>
           </HbcErrorBoundary>
         </QueryClientProvider>

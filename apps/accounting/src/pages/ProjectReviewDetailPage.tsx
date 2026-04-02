@@ -9,7 +9,6 @@ import type { IProjectSetupRequest } from '@hbc/models';
 import type { IStatusEntry } from '@hbc/ui-kit';
 import {
   ApiError,
-  createProvisioningApiClient,
   useProvisioningStore,
   PROJECT_SETUP_STATUS_LABELS,
   DEPARTMENT_DISPLAY_LABELS,
@@ -31,7 +30,7 @@ import {
   useToast,
   HBC_SPACE_SM,
 } from '@hbc/ui-kit';
-import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
+import { useAccountingBackend } from '../backend/AccountingBackendContext.js';
 import { getStateBadgeVariant, getStateContextText } from '../utils/stateDisplayHelpers.js';
 import { getAdminAppUrl } from '../utils/crossAppUrls.js';
 
@@ -52,14 +51,7 @@ export function ProjectReviewDetailPage(): ReactNode {
   const session = useCurrentSession();
   const { toast } = useToast();
   const { requests, setRequests } = useProvisioningStore();
-
-  // P3-09: Factory-based token provider
-  const sessionRef = useCallback(() => session, [session]);
-  const getToken = useMemo(() => createSessionTokenFactory(sessionRef), [sessionRef]);
-  const client = useMemo(
-    () => createProvisioningApiClient(import.meta.env.VITE_FUNCTION_APP_URL ?? '', getToken),
-    [getToken],
-  );
+  const { client } = useAccountingBackend();
 
   // ── Local UI state ──────────────────────────────────────────────────────
   const styles = useStyles();

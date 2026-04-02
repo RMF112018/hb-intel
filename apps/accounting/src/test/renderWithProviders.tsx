@@ -6,6 +6,7 @@ import { useAuthStore } from '@hbc/auth';
 import { useProvisioningStore } from '@hbc/provisioning';
 import type { NormalizedAuthSession } from '@hbc/auth';
 import type { IProjectSetupRequest, IProvisioningStatus } from '@hbc/models';
+import { AccountingBackendProvider } from '../backend/AccountingBackendContext.js';
 
 interface RenderOptions {
   tier?: 'essential' | 'standard' | 'expert';
@@ -41,7 +42,7 @@ export function createTestSession(
 
 /**
  * Renders a component wrapped with the providers used by the Accounting app.
- * Includes HbcToastProvider (required by pages that call useToast()).
+ * Includes AccountingBackendProvider, HbcToastProvider, and ComplexityProvider.
  * Pre-seeds auth and provisioning Zustand stores for test isolation.
  */
 export function renderWithProviders(
@@ -64,7 +65,9 @@ export function renderWithProviders(
       <HbcThemeProvider>
         <HbcToastProvider>
           <ComplexityProvider _testPreference={{ tier, showCoaching: false }}>
-            {children}
+            <AccountingBackendProvider>
+              {children}
+            </AccountingBackendProvider>
           </ComplexityProvider>
         </HbcToastProvider>
       </HbcThemeProvider>
