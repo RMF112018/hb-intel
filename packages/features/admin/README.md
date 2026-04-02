@@ -6,6 +6,8 @@ Admin Intelligence feature package for HB Intel — monitors, infrastructure pro
 
 This package provides the Admin Intelligence layer for HB Intel, enabling platform administrators to monitor infrastructure health, manage approval workflows, and respond to operational alerts.
 
+**Boundary**: This package is the reusable admin intelligence layer — monitors, probes, hooks, APIs, and dashboard components. It is **not** the privileged control plane. Privileged execution, durable orchestration, retry/compensation, and audit persistence belong in `backend/functions`. See the [Phase 1 boundary matrix](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-boundary-matrix.md) and [locked decisions](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-locked-decisions-and-phase-boundary-guards.md) (LD-03).
+
 ## Architecture
 
 The package follows the ports-and-adapters pattern established across HB Intel:

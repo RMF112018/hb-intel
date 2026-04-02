@@ -1,6 +1,8 @@
 # @hbc/spfx-admin
 
-Admin Intelligence SPFx web part for HB Intel — system settings, provisioning oversight, and administrative dashboards.
+Admin SPFx web part for HB Intel — the **operator console** for the IT Control Center.
+
+This app is the human-facing shell where authorized admins observe, initiate, and manage IT control actions. It is **not** the privileged executor — privileged and long-running work belongs in the backend control plane (`backend/functions`). See the [Phase 1 architecture baseline](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-phase-1-architecture-baseline.md) for the full operating model.
 
 ## Pages
 
