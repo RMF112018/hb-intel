@@ -11,9 +11,8 @@
  * @module admin-control-plane
  */
 
-import type { AdminDomain, AdminExecutionMode, AdminRiskLevel } from './AdminEnums.js';
-import type { AdminRunStatus } from './IAdminRun.js';
-import type { IAdminActorContext } from './IAdminRun.js';
+import type { AdminDomain } from './AdminEnums.js';
+import type { AdminRunStatus, IAdminActorContext } from './IAdminRun.js';
 import type { AdminActionKey } from './types.js';
 
 // ─── Audit Records ──────────────────────────────────────────────────────────────

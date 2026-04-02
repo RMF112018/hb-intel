@@ -10,12 +10,7 @@
 
 import type { AdminActionKey } from './types.js';
 import type { AdminDomain, AdminExecutionMode, AdminRiskLevel } from './AdminEnums.js';
-import type {
-  AdminRunStatus,
-  IAdminActorContext,
-  IAdminRunEnvelope,
-  IAdminStepResult,
-} from './IAdminRun.js';
+import type { AdminRunStatus, IAdminActorContext } from './IAdminRun.js';
 
 // ─── Shared Envelopes ───────────────────────────────────────────────────────────
 
