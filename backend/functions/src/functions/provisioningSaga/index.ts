@@ -224,6 +224,11 @@ app.http('retryProvisioning', {
   }, { domain: 'provisioningSaga', operation: 'retryProvisioning' })),
 });
 
+/**
+ * P4-04: Escalation is an annotation — it marks the latest run for admin attention
+ * without changing overallStatus or request state. No request reconciliation needed.
+ * Edits the latest run in place (sets escalatedBy + escalatedAt).
+ */
 app.http('escalateProvisioning', {
   methods: ['POST'],
   authLevel: 'anonymous',
@@ -286,8 +291,9 @@ app.http('listProvisioningRuns', {
 });
 
 /**
- * W0-G4-T04 POST /api/provisioning-archive/{projectId}
+ * W0-G4-T04 / P4-04: POST /api/provisioning-archive/{projectId}
  * Archives a failed run by marking it Completed (removes from failures view). Admin-only.
+ * Edits the latest run in place. Reconciles request state to Completed to prevent drift.
  */
 app.http('archiveFailure', {
   methods: ['POST'],
@@ -315,14 +321,32 @@ app.http('archiveFailure', {
     status.completedAt = new Date().toISOString();
     await services.tableStorage.upsertProvisioningStatus(status);
 
+    // P4-04: Reconcile request state to prevent request/status drift on archive.
+    try {
+      const req = await services.projectRequests.getRequest(projectId);
+      if (req) {
+        req.state = 'Completed';
+        req.completedAt = status.completedAt;
+        req.completedBy = auth.claims.upn;
+        await services.projectRequests.upsertRequest(req);
+      }
+    } catch (reconcileErr) {
+      logger.warn('Non-critical: request state reconciliation failed on archive', {
+        projectId,
+        error: reconcileErr instanceof Error ? reconcileErr.message : String(reconcileErr),
+      });
+    }
+
     logger.info('Failure archived', { projectId, archivedBy: auth.claims.upn });
     return successResponse({ message: 'Failure archived', projectId });
   }, { domain: 'provisioningSaga', operation: 'archiveFailure' })),
 });
 
 /**
- * W0-G4-T04 POST /api/provisioning-escalation-ack/{projectId}
+ * W0-G4-T04 / P4-04: POST /api/provisioning-escalation-ack/{projectId}
  * Acknowledges an escalation by clearing the escalation markers. Admin-only.
+ * Edits the latest run in place (clears escalatedBy + escalatedAt).
+ * No request state change or reconciliation — this is annotation cleanup.
  */
 app.http('acknowledgeEscalation', {
   methods: ['POST'],
@@ -360,8 +384,10 @@ const VALID_PROVISIONING_STATES = new Set([
 ]);
 
 /**
- * W0-G4-T04 POST /api/provisioning-force-state/{projectId}
+ * W0-G4-T04 / P4-04: POST /api/provisioning-force-state/{projectId}
  * Forces a provisioning run into a specific state. Admin expert-tier only.
+ * Edits the latest run in place. Reconciles request state on terminal targets
+ * (Completed/Failed) to prevent request/status drift.
  */
 app.http('forceStateTransition', {
   methods: ['POST'],
@@ -397,6 +423,27 @@ app.http('forceStateTransition', {
     if (body.targetState === 'Failed') status.failedAt = new Date().toISOString();
 
     await services.tableStorage.upsertProvisioningStatus(status);
+
+    // P4-04: Reconcile request state on terminal force-state to prevent drift.
+    if (body.targetState === 'Completed' || body.targetState === 'Failed') {
+      try {
+        const req = await services.projectRequests.getRequest(projectId);
+        if (req) {
+          req.state = body.targetState as 'Completed' | 'Failed';
+          if (body.targetState === 'Completed') {
+            req.completedAt = status.completedAt;
+            req.completedBy = auth.claims.upn;
+          }
+          await services.projectRequests.upsertRequest(req);
+        }
+      } catch (reconcileErr) {
+        logger.warn('Non-critical: request state reconciliation failed on force-state', {
+          projectId,
+          targetState: body.targetState,
+          error: reconcileErr instanceof Error ? reconcileErr.message : String(reconcileErr),
+        });
+      }
+    }
 
     logger.warn('Manual state override applied', {
       projectId,

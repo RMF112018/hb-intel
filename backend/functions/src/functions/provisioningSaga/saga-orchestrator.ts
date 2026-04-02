@@ -353,11 +353,12 @@ export class SagaOrchestrator {
   }
 
   /**
-   * P4-02: Retry a failed provisioning run. Creates a new run identity:
+   * P4-02 / P4-04: Retry a failed provisioning run. Creates a new run identity:
    * - Loads the latest run for `projectId`.
    * - Generates a fresh `correlationId` (new Table Storage row).
    * - Sets `parentCorrelationId` to the previous run's `correlationId` for chain traceability.
-   * - Increments `retryCount` and re-enters `execute()` with step idempotency guards.
+   * - Increments `retryCount`, sets `lastRetryAt`, and re-enters `execute()` with step idempotency guards.
+   * - Request reconciliation happens inside `execute()` (-> Provisioning on start).
    */
   async retry(projectId: string): Promise<void> {
     const status = await this.services.tableStorage.getProvisioningStatus(projectId);
@@ -366,6 +367,8 @@ export class SagaOrchestrator {
     const parentCorrelationId = status.correlationId;
     status.overallStatus = 'InProgress';
     status.retryCount = (status.retryCount ?? 0) + 1;
+    // P4-04: Record retry timestamp for admin visibility.
+    status.lastRetryAt = new Date().toISOString();
     const newCorrelationId = randomUUID();
     this.logger.info('Provisioning retry initiated', {
       projectId,
