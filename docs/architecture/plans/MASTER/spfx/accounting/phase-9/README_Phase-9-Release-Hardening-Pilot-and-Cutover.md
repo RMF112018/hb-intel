@@ -80,7 +80,7 @@ Do not blur these categories.
 | 2 | Prompt-02 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-staging-deployment-and-pre-cutover-validation-checklist.md` |
 | 3 | Prompt-03 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-pilot-readiness-and-controlled-user-enablement.md` |
 | 4 | Prompt-04 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-production-cutover-and-rollback-checklist.md` |
-| 5 | Prompt-05 | Not started | — | — |
+| 5 | Prompt-05 | **Complete** | 2026-04-02 | `docs/architecture/release/phase-9-post-cutover-verification-and-hypercare-plan.md` |
 | 6 | Prompt-06 | Not started | — | — |
 
 ## Required Working Rules For Every Prompt
