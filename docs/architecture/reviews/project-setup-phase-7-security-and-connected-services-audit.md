@@ -337,13 +337,13 @@ Saga Execution Time
 | ID | Topic | Classification | Repo-Truth Evidence | Conflicting Doc / Missing Authority | Why It Matters | Recommended Resolution | Downstream Risk If Unresolved |
 |----|-------|---------------|--------------------|------------------------------------|----------------|----------------------|------------------------------|
 | G7-01 | Auth-core source coverage | Info | `auth.ts`, `validateToken.ts`, `authorization.ts` fully inspected and documented in this audit | N/A — no prior audit existed | Later prompts need a verified baseline | Baseline established by this audit; no further action | Low — baseline now exists |
-| G7-02 | SPFx permission/approval clarity | Medium | Estimating declares `webApiPermissionRequests`; Accounting does not | Admin approval workflow is implicit (SharePoint admin center); no repo doc explicitly describes the approval steps | Deployment could stall if admin approval is not understood or requested | Prompt-02 should freeze the SPFx access posture and document admin approval steps | Deployment delay if admin approval is missed |
+| G7-02 | SPFx permission/approval clarity | Medium | Estimating declares `webApiPermissionRequests`; Accounting does not | **RESOLVED by P7-02:** Admin approval workflow, SPFx permission posture, and Accounting non-participation now documented in `project-setup-api-auth-contract.md` | Deployment could stall if admin approval is not understood or requested | **Resolved** — auth contract doc created with full admin approval workflow | **Resolved** |
 | G7-03 | Project Setup vs shared host CORS posture | Medium-High | Two distinct `host.json` files with different origin lists | Platform-level Azure CORS configuration is not captured in repo | CORS could be misconfigured if platform settings override repo-defined posture | Prompt-03 should freeze CORS posture and explicitly document the platform configuration layer | CORS failures in production or security weakening |
 | G7-04 | Tiered startup validation vs saga-time gating | Medium | `validate-config.ts` implements three tiers; `service-factory.ts` applies them | Model exists in code but is not frozen in a dedicated reference doc | Later deployment work could flatten the tiers or misclassify gates | Prompt-03 should freeze the environment readiness model in a dedicated doc | Incorrect startup behavior or false deployment-readiness claims |
-| G7-05 | Managed identity vs delegated auth confusion risk | High | Code cleanly separates inbound delegated (validateToken) from outbound app-only (MI services) | No dedicated auth contract doc exists to freeze this separation | Confusion between inbound and outbound auth models is the highest-severity conceptual risk | Prompt-02 must freeze the auth contract with explicit inbound/outbound separation | Auth misconfiguration, incorrect permission grants, or security review failures |
+| G7-05 | Managed identity vs delegated auth confusion risk | High | Code cleanly separates inbound delegated (validateToken) from outbound app-only (MI services) | **RESOLVED by P7-02:** Dedicated auth contract doc created at `docs/reference/configuration/project-setup-api-auth-contract.md` with explicit inbound/outbound separation, non-sources of authorization, and scope boundary | Confusion between inbound and outbound auth models is the highest-severity conceptual risk | **Resolved** — auth contract doc created | **Resolved** |
 | G7-06 | Stale config-registry drift | High | `wave0-env-registry.ts` shows `AZURE_CLIENT_SECRET` removed (P4-03), `AzureSignalRConnectionString` not required, validation IS wired (P4-02) | `wave-0-config-registry.md` §2.1 marks `AZURE_CLIENT_SECRET` as `requiredInProd: true`, marks `AzureSignalRConnectionString` as required, §4 says validation "not wired" | Deployment teams following stale docs could set unnecessary secrets or miss actual requirements | Prompt-03 should reconcile this doc or create a replacement; at minimum, flag the three inaccuracies | Incorrect production configuration, unnecessary Key Vault entries, false readiness claims |
 | G7-07 | Stale backend README drift | Low | `backend/functions/README.md` mentions `HBC_ADAPTER_MODE=real` as legacy but doesn't warn against use | Minor naming inconsistency; README is otherwise current | Low risk — adapter-mode-guard.ts handles the alias correctly | Optional clarification in Prompt-03 or Prompt-06 | Minimal — code handles it |
-| G7-08 | Missing target docs | Medium | N/A — files do not exist | `project-setup-api-auth-contract.md`, `project-setup-environment-readiness.md`, `project-setup-connected-services-readiness.md` referenced by Prompts 02-04 but not yet created | Later prompts assume these docs exist or will be created; without them, Phase 7 outcomes have no canonical home | Prompts 02, 03, 04 must create these files deliberately and record their creation | Phase 7 deliverables scattered across ad hoc locations instead of canonical reference docs |
+| G7-08 | Missing target docs | Medium | **PARTIALLY RESOLVED by P7-02:** `project-setup-api-auth-contract.md` created. Still missing: `project-setup-environment-readiness.md`, `project-setup-connected-services-readiness.md` | Remaining files referenced by Prompts 03-04 but not yet created | Later prompts assume these docs exist or will be created; without them, Phase 7 outcomes have no canonical home | Prompts 03, 04 must create remaining files deliberately | Phase 7 deliverables for CORS/env and connected-services still need canonical homes |
 
 ---
 
@@ -377,12 +377,12 @@ Saga Execution Time
 
 | Rank | Gap ID | Topic | Severity | Remediation Stage |
 |------|--------|-------|----------|-------------------|
-| 1 | G7-05 | Managed identity vs delegated auth confusion risk | High | Prompt-02 |
+| 1 | G7-05 | Managed identity vs delegated auth confusion risk | High | ~~Prompt-02~~ **RESOLVED (P7-02)** |
 | 2 | G7-06 | Stale config-registry drift | High | Prompt-03 |
 | 3 | G7-03 | Project Setup vs shared host CORS posture | Medium-High | Prompt-03 |
-| 4 | G7-02 | SPFx permission/approval clarity | Medium | Prompt-02 |
+| 4 | G7-02 | SPFx permission/approval clarity | Medium | ~~Prompt-02~~ **RESOLVED (P7-02)** |
 | 5 | G7-04 | Tiered startup validation vs saga-time gating | Medium | Prompt-03 |
-| 6 | G7-08 | Missing target docs | Medium | Prompts 02, 03, 04 |
+| 6 | G7-08 | Missing target docs | Medium | ~~Prompts 02,~~ 03, 04 (partially resolved by P7-02) |
 | 7 | G7-07 | Stale backend README drift | Low | Prompt-03 or Prompt-06 |
 | 8 | G7-01 | Auth-core source coverage (baseline established) | Info | Complete |
 
@@ -390,15 +390,17 @@ Saga Execution Time
 
 ## Recommended Remediation Sequence for Prompts 02-06
 
-### Prompt-02 — API Auth Contract and SPFx Access Alignment
+### Prompt-02 — API Auth Contract and SPFx Access Alignment — **COMPLETED (P7-02)**
 
-Resolves: G7-05, G7-02
+Resolved: G7-05, G7-02, partial G7-08
 
-- Freeze the inbound API auth contract (audience, issuers, token versions, claims, scope)
-- Explicitly separate inbound delegated auth from outbound app-only MI
-- Document SPFx permission-request posture and admin approval workflow
-- Create `docs/reference/configuration/project-setup-api-auth-contract.md` (G7-08)
-- Confirm whether Accounting app needs its own `webApiPermissionRequests`
+- Created `docs/reference/configuration/project-setup-api-auth-contract.md` — canonical inbound API auth contract
+- Froze audience (`api://<app-registration-client-id>`), issuers (v1 + v2), token version tolerance, claims, delegated scope (`access_as_user`), app-only workload rules (`Automation` role), ownership fallback rules
+- Explicitly separated inbound delegated auth from outbound app-only MI with dedicated scope boundary
+- Documented SPFx permission-request posture: Estimating declares `access_as_user`; Accounting does not (no API calls)
+- Documented SharePoint admin API access approval workflow with critical dependencies
+- Documented explicit non-sources of authorization (CONTROLLER_UPNS, ADMIN_UPNS)
+- Documented validation error responses, authorization error responses, and telemetry events
 
 ### Prompt-03 — CORS, Origin, and Environment Configuration Hardening
 
@@ -436,7 +438,7 @@ Resolves: Remaining G7-08
 
 ## Explicit Open Questions
 
-1. **Does the Accounting SPFx package need its own `webApiPermissionRequests`?** Currently it has none. If Accounting surfaces will call Project Setup APIs, a permission request must be added. Prompt-02 should verify this.
+1. ~~**Does the Accounting SPFx package need its own `webApiPermissionRequests`?**~~ **RESOLVED (P7-02):** No. The Accounting app does not currently call the Project Setup protected API. No permission request is required unless a future Accounting surface needs direct API access. Decision documented in `project-setup-api-auth-contract.md`.
 
 2. **Should the Project Setup production deployment use only the domain-scoped `host.json`, or does the shared host CORS posture also apply at runtime?** The deployment model determines which `host.json` is effective. Prompt-03 should clarify.
 
