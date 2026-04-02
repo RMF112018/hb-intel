@@ -255,3 +255,82 @@ export type MappedDomainProperty = keyof typeof PROJECTS_LIST_FIELD_MAP;
 export const PROJECTS_LIST_SELECT_FIELDS: readonly (keyof IProjectsListItem)[] = Object.values(
   PROJECTS_LIST_FIELD_MAP,
 ).map((entry) => entry.spInternalName);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P6-04: Schema readiness validation
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * P6-04: Minimum SP internal names that must be present for production operation.
+ * A missing required field means OData queries, upserts, or state routing will fail.
+ */
+export const REQUIRED_PRODUCTION_FIELDS: readonly (keyof IProjectsListItem)[] = [
+  'field_1',   // requestId / projectId — system key
+  'field_2',   // projectNumber — business key, uniqueness enforcement
+  'field_3',   // projectName — display, Title computation
+  'field_5',   // projectType — required submission field
+  'field_7',   // submittedBy — audit identity
+  'field_8',   // submittedAt — submission timestamp
+  'field_9',   // state — lifecycle routing
+  'field_10',  // groupMembers — provisioning requirement
+];
+
+/**
+ * P6-04: Optional fields added in P2-07 and P9-G5-05 phases.
+ * Their absence on legacy rows is expected and does not indicate schema drift.
+ */
+export const OPTIONAL_EXTENSION_FIELDS: readonly (keyof IProjectsListItem)[] = [
+  'projectStreetAddress', 'projectCity', 'projectCounty', 'projectState', 'projectZip',
+  'officeDivision', 'procoreProject',
+  'projectExecutiveUpn', 'projectManagerUpn', 'leadEstimatorUpn',
+  'supportingEstimatorUpns', 'timberscanApproverUpn', 'sageAccessUpns',
+  'clarificationRequestedAt', 'requesterRetryUsed', 'clarificationItems',
+  'submittedByOid', 'completedByOid',
+];
+
+/** P6-04: Schema readiness result. */
+export interface ISchemaReadinessResult {
+  /** True only when all required production fields are present. */
+  ready: boolean;
+  /** Required fields that were found in the item. */
+  present: string[];
+  /** Required fields that were missing from the item. */
+  missing: string[];
+  /** Non-blocking observations (e.g., missing optional extension fields). */
+  warnings: string[];
+}
+
+/**
+ * P6-04: Check whether a raw SP item contains the minimum required fields.
+ *
+ * Non-blocking — never throws. Returns a structured result for diagnostic use.
+ * Call on first successful list query or during environment validation.
+ */
+export function validateSchemaReadiness(
+  item: Record<string, unknown>,
+): ISchemaReadinessResult {
+  const present: string[] = [];
+  const missing: string[] = [];
+  const warnings: string[] = [];
+
+  for (const field of REQUIRED_PRODUCTION_FIELDS) {
+    if (field in item) {
+      present.push(field);
+    } else {
+      missing.push(field);
+    }
+  }
+
+  for (const field of OPTIONAL_EXTENSION_FIELDS) {
+    if (!(field in item)) {
+      warnings.push(`Optional field '${field}' not present — expected on legacy rows`);
+    }
+  }
+
+  return {
+    ready: missing.length === 0,
+    present,
+    missing,
+    warnings,
+  };
+}

@@ -411,3 +411,50 @@ These gaps are documented in the contract and remain open for future phases to a
 - 900 unit tests pass (57 test files), including 47 mapper tests and 22 repository tests
 - Backend `check-types` passes cleanly
 - Accounting app build passes cleanly
+
+---
+
+## Prompt-04 — Migration, Compatibility, and Schema Validation Hardening Summary
+
+**Date**: 2026-04-02  
+**Status**: Complete
+
+### Compatibility posture established
+
+Created `docs/reference/developer/project-setup-schema-compatibility-posture.md` — the authoritative reference for what schema shape production requires, what is tolerated, and what would cause failures. Key decisions:
+
+- **Mixed schema is permanent** — SharePoint does not support internal name rename; `field_N` columns will retain generic names indefinitely.
+- **Production can continue safely** on the current mixed schema shape with no migration required.
+- **8 required production fields** identified (`field_1`, `field_2`, `field_3`, `field_5`, `field_7`, `field_8`, `field_9`, `field_10`).
+- **18 optional extension fields** (P2-07 + P9-G5-05) are expected to be absent on legacy rows.
+- **5 Number-column impedance mismatches** permanently tolerated with mapper coercion.
+- **3 orphaned columns** (`field_17`, `field_18`, `field_19`) tolerated indefinitely.
+
+### Schema readiness validation added
+
+Added to `projects-list-contract.ts`:
+- `REQUIRED_PRODUCTION_FIELDS` — 8 SP internal names that must exist for production operation
+- `OPTIONAL_EXTENSION_FIELDS` — 18 SP internal names from P2-07 and P9-G5-05 phases
+- `validateSchemaReadiness()` — non-blocking diagnostic function returning `{ ready, present, missing, warnings }`
+
+### Test coverage
+
+Added 17 new tests in `projects-list-contract.test.ts`:
+- Required field set validation (6 tests)
+- Optional extension field validation (4 tests)
+- Schema readiness function behavior (4 tests: complete item, missing critical fields, empty-string tolerance, legacy row warnings)
+- Contract invariants (3 tests: select-fields sync, no duplicates, no required/optional overlap)
+
+### Verification results
+
+- 919 unit tests pass (58 test files)
+- Backend `check-types` passes cleanly
+- Accounting app build passes cleanly
+
+### Migration work intentionally deferred
+
+- `field_N` column rename (not supported by SP)
+- Number-to-Text column migration (risk exceeds benefit)
+- Year column backfill (handled by mapper defaults)
+- `approvedBy`/`approvedByOid` SP columns (documented as transient)
+- Orphaned column cleanup (no harm from presence)
