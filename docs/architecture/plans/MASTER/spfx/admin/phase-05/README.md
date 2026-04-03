@@ -105,10 +105,14 @@ Run broader tests only when the touched code actually justifies them.
 | Document | Prompt | Purpose |
 |----------|--------|---------|
 | [Operator-Console Baseline](admin-spfx-phase-5-operator-console-baseline.md) | P5-01 | Current shell/route posture, page inventory, lane mapping, preservation/change requirements |
+| [Route Taxonomy](admin-spfx-phase-5-route-taxonomy.md) | P5-02 | Canonical lane model, route registry, navigation metadata, legacy redirects |
+| [Page Ownership Map](admin-spfx-phase-5-page-ownership-map.md) | P5-02 | Page-to-lane mapping, rehomed pages, scaffold pages, legacy redirects |
 
 ### Implementation notes (created by later prompts)
 
-_To be populated by Prompts 02–07._
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| Route registry (`apps/admin/src/router/lane-registry.ts`) | P5-02 | Single source of truth for lane metadata, route paths, navigation labels, ordering |
 
 ### Exit reconciliation (created by P5-08)
 
