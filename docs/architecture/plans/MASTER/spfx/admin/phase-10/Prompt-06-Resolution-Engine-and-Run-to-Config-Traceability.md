@@ -37,7 +37,7 @@ Implement:
    - snapshot ID or equivalent
    - selected standards version
    - relevant resolved values if needed
-5. compatibility seams for provisioning / SharePoint control / future Entra control runs
+5. compatibility seams for provisioning / SharePoint control / future Hybrid Identity control runs
 
 ## Required precedence behavior
 

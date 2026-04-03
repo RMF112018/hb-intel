@@ -12,7 +12,7 @@ Create the canonical doctrine for the Phase 11 safety model, including:
 
 - Use the Prompt-01 audit as the controlling repo-truth input.
 - Do not invent a phase-wide framework that contradicts current package boundaries.
-- Keep the doctrine reusable across provisioning, SharePoint control, Entra control, and future admin domains.
+- Keep the doctrine reusable across provisioning, SharePoint control, Hybrid Identity control, and future admin domains.
 
 ## Inputs
 

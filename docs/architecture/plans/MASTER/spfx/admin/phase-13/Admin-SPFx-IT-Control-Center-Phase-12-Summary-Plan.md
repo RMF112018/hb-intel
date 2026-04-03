@@ -8,7 +8,7 @@ By the end of this phase, operators should have trustworthy visibility into:
 - install and bootstrap behavior,
 - provisioning runs and failures,
 - SharePoint-control actions,
-- Entra-control actions,
+- Hybrid Identity-control actions,
 - backend health,
 - probe status,
 - alert state,
@@ -31,7 +31,7 @@ Phase 12 in the governing plan is defined as:
   - persistent observability data
   - full error/audit surfaces
 - **Exit criteria:**
-  - operators have trustworthy visibility across install, rollout, SharePoint control, Entra control, and failure states
+  - operators have trustworthy visibility across install, rollout, SharePoint control, Hybrid Identity control, and failure states
 
 ### Repo-truth signals that shape Phase 12
 Current repo truth already shows useful but incomplete foundations:

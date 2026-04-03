@@ -136,7 +136,7 @@ Therefore, Phase 11 implementation must follow this rule:
 Examples:
 - If the full live config/governance model from Phase 10 is not yet present, keep the safety policy registry code-defined first with a documented seam for future governed live overrides.
 - If the full generalized audit spine from Phase 4 is not yet complete, attach safety evidence to the best current durable run/audit structures without inventing a parallel dead-end store.
-- If SharePoint and Entra control lanes are not yet fully active, use provisioning-related actions and other live sensitive surfaces as the first adopters, while designing the framework so later domains can plug in cleanly.
+- If SharePoint and Hybrid Identity control lanes are not yet fully active, use provisioning-related actions and other live sensitive surfaces as the first adopters, while designing the framework so later domains can plug in cleanly.
 
 ## Risks Phase 11 is addressing
 

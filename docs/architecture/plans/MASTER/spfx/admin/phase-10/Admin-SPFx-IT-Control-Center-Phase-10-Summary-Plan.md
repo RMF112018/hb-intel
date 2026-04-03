@@ -30,7 +30,7 @@ into a governed model where:
    - version identity,
    - and run-time snapshots.
 6. Add admin API and SPFx operator-console surfaces for governed config management.
-7. Capture run-to-config traceability so future rollout, SharePoint-control, and Entra-control actions can record exactly which standards/config version they used.
+7. Capture run-to-config traceability so future rollout, SharePoint-control, and Hybrid Identity-control actions can record exactly which standards/config version they used.
 8. Reconcile existing wave-0 config docs and code so the repo has one coherent baseline.
 
 ## Governing constraints carried into this phase
@@ -125,7 +125,7 @@ It preserves current repo foundations, avoids forcing a new platform dependency 
 - Drift between code registry and documentation
 - No audit trail for admin changes
 - Admin UI being added before backend governance exists
-- Future SharePoint/Entra control actions operating against ambiguous standards state
+- Future SharePoint/Hybrid Identity control actions operating against ambiguous standards state
 - Phase 11 safety work being pulled too far forward into this phase
 
 ## Why Phase 10 must come before fuller standards/repair maturity
