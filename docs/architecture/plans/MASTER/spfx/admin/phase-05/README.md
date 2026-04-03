@@ -113,6 +113,7 @@ Run broader tests only when the touched code actually justifies them.
 | Document | Prompt | Purpose |
 |----------|--------|---------|
 | Route registry (`apps/admin/src/router/lane-registry.ts`) | P5-02 | Single source of truth for lane metadata, route paths, navigation labels, ordering |
+| Shell refactor (`apps/admin/src/router/root-route.tsx`, `routes.ts`) | P5-03 | Lane-driven navigation, 8 lane routes, 3 legacy redirects, operator landing page |
 
 ### Exit reconciliation (created by P5-08)
 

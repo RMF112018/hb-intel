@@ -21,7 +21,7 @@ const ERROR_LOG_EMPTY_CONFIG: ISmartEmptyStateConfig = {
       'Detailed error logging and audit trail will be available in a future release (SF17-T05).',
     primaryAction: {
       label: 'Go to Provisioning Oversight',
-      href: '/provisioning-failures',
+      href: '/runs',
     },
     coachingTip:
       'This page is intentionally deferred. All admin alerts and monitors are fully functional in the Provisioning Oversight dashboard.',
