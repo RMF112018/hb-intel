@@ -2,7 +2,7 @@ import { createRoute, lazyRouteComponent, redirect } from '@tanstack/react-route
 import { useNavStore } from '@hbc/shell';
 import { usePermissionStore } from '@hbc/auth';
 import { rootRoute } from './root-route.js';
-import { LANES, LEGACY_REDIRECTS } from './lane-registry.js';
+import { LEGACY_REDIRECTS } from './lane-registry.js';
 
 /**
  * P5-03: Route definitions for the Admin operator console.
@@ -91,15 +91,7 @@ const setupRoute = createRoute({
   path: '/setup',
   beforeLoad: adminBeforeLoad,
   component: lazyRouteComponent(() =>
-    import('../pages/LanePlaceholderPage.js').then((m) => ({
-      default: () =>
-        m.LanePlaceholderPage({
-          title: 'Setup',
-          laneId: 'setup',
-          description: LANES.find((l) => l.id === 'setup')?.scaffoldMessage ?? '',
-          deliversIn: LANES.find((l) => l.id === 'setup')?.deliversIn ?? 'a future phase',
-        }),
-    })),
+    import('../pages/SetupLanePage.js').then((m) => ({ default: m.SetupLanePage })),
   ),
 });
 
@@ -108,15 +100,7 @@ const validationRoute = createRoute({
   path: '/validation',
   beforeLoad: adminBeforeLoad,
   component: lazyRouteComponent(() =>
-    import('../pages/LanePlaceholderPage.js').then((m) => ({
-      default: () =>
-        m.LanePlaceholderPage({
-          title: 'Validation',
-          laneId: 'validation',
-          description: LANES.find((l) => l.id === 'validation')?.scaffoldMessage ?? '',
-          deliversIn: LANES.find((l) => l.id === 'validation')?.deliversIn ?? 'a future phase',
-        }),
-    })),
+    import('../pages/ValidationLanePage.js').then((m) => ({ default: m.ValidationLanePage })),
   ),
 });
 
@@ -125,15 +109,7 @@ const sharepointRoute = createRoute({
   path: '/sharepoint',
   beforeLoad: adminBeforeLoad,
   component: lazyRouteComponent(() =>
-    import('../pages/LanePlaceholderPage.js').then((m) => ({
-      default: () =>
-        m.LanePlaceholderPage({
-          title: 'SharePoint',
-          laneId: 'sharepoint',
-          description: LANES.find((l) => l.id === 'sharepoint')?.scaffoldMessage ?? '',
-          deliversIn: LANES.find((l) => l.id === 'sharepoint')?.deliversIn ?? 'a future phase',
-        }),
-    })),
+    import('../pages/SharePointLanePage.js').then((m) => ({ default: m.SharePointLanePage })),
   ),
 });
 
@@ -142,15 +118,7 @@ const entraRoute = createRoute({
   path: '/entra',
   beforeLoad: adminBeforeLoad,
   component: lazyRouteComponent(() =>
-    import('../pages/LanePlaceholderPage.js').then((m) => ({
-      default: () =>
-        m.LanePlaceholderPage({
-          title: 'Entra',
-          laneId: 'entra',
-          description: LANES.find((l) => l.id === 'entra')?.scaffoldMessage ?? '',
-          deliversIn: LANES.find((l) => l.id === 'entra')?.deliversIn ?? 'a future phase',
-        }),
-    })),
+    import('../pages/EntraLanePage.js').then((m) => ({ default: m.EntraLanePage })),
   ),
 });
 
