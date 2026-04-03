@@ -106,10 +106,13 @@ The package is complete when:
 | Document | Prompt | Purpose |
 |----------|--------|---------|
 | [Prerequisite Audit](admin-spfx-phase-6-prerequisite-audit.md) | P6-01 | Repo-truth audit, existing substrate inventory, blockers, compatibility strategy, execution sequence |
+| [Install/Bootstrap Architecture](admin-spfx-install-bootstrap-architecture.md) | P6-02 | Layer responsibilities, adapter roles, preflight/install/verification separation, boundary rules |
+| [Install/Bootstrap Step Model](admin-spfx-install-bootstrap-step-model.md) | P6-02 | 6 step families, concrete steps, inputs/outputs, blocking behavior, automation classification |
+| [Manual Checkpoint Policy](admin-spfx-install-manual-checkpoint-policy.md) | P6-02 | Checkpoint qualification, run-state representation, resume/reject/cancel, evidence/audit, anti-patterns |
 
 ### Implementation notes (created by later prompts)
 
-_To be populated by Prompts 02–09._
+_To be populated by Prompts 03–09._
 
 ### Exit reconciliation (created by P6-10)
 
