@@ -17,7 +17,8 @@ Navigation is lane-driven — the shell renders all 8 lane buttons derived from 
 | Route | Lane | Page | Status |
 |-------|------|------|--------|
 | `/` | — | Operator Landing | Active — control-center overview with lane grid |
-| `/setup` | Setup / Install | SetupLanePage | Scaffold — Phase 6 |
+| `/setup` | Setup / Install | SetupWizardPage | Active — preflight review, install launch, run tracking |
+| `/setup/run/$runId` | Setup / Install | InstallRunDetailPage | Active — step progress, checkpoint actions, verification |
 | `/validation` | Validation | ValidationLanePage | Scaffold — Phase 7 |
 | `/runs` | Runs / History | ProvisioningOversightPage | Active — monitor, retry, escalate, archive provisioning runs |
 | `/sharepoint` | SharePoint Control | SharePointLanePage | Scaffold — Phase 7 |

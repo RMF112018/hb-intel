@@ -129,6 +129,13 @@ The package is complete when:
 | [Install Run UX](admin-spfx-install-run-ux.md) | P6-09 | Run detail flow, checkpoint handling UX, verification UX, route structure |
 | Install run detail (`apps/admin/src/pages/InstallRunDetailPage.tsx`) | P6-09 | Step progress, checkpoint approve/reject, verification results, 5s polling |
 
+### Operator guidance and exit reconciliation (P6-10)
+
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Operator Runbook](admin-spfx-install-operator-runbook.md) | P6-10 | Practical operator guidance: preflight, install, checkpoints, verification, escalation |
+| [Final Reconciliation](admin-spfx-phase-6-final-reconciliation.md) | P6-10 | Acceptance criteria, validation results, residual limitations, next-phase entry |
+
 ### Exit reconciliation (created by P6-10)
 
 _To be populated by Prompt 10._
