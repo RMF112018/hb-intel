@@ -56,6 +56,18 @@ export enum AdminAuditEventType {
 
   /** An external event was received and processed */
   ExternalEventReceived = 'external-event.received',
+
+  /** A managed-app binding was published or updated */
+  BindingPublished = 'binding.published',
+
+  /** A managed-app binding was verified against live infrastructure */
+  BindingVerified = 'binding.verified',
+
+  /** Verification detected drift between published binding and live state */
+  BindingDriftDetected = 'binding.drift-detected',
+
+  /** A drifted or errored binding was repaired by operator action */
+  BindingRepaired = 'binding.repaired',
 }
 
 /**

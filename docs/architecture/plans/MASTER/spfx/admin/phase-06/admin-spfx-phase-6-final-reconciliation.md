@@ -145,6 +145,9 @@ Phase 6 touched 3 packages: `@hbc/models` (type extension), `@hbc/functions` (4 
 
 | Non-goal | Target |
 |----------|--------|
+| Durable managed-app binding publication and resolution | **Phase 6A** |
+| Target-app runtime backend binding and verification | **Phase 6A** |
+| Binding drift detection and operator repair UX | **Phase 6A** |
 | Full tenant-wide SharePoint active governance | Phase 7+ |
 | Broad Entra admin workflow completion | Phase 9+ |
 | Full standards/config registry | Phase 10+ |
@@ -154,13 +157,28 @@ Phase 6 touched 3 packages: `@hbc/models` (type extension), `@hbc/functions` (4 
 | SignalR real-time progress | Later phase |
 | Config version snapshotting | Phase 10 |
 
+**Note:** No app-binding substrate was delivered in Phase 6. Target-app backend binding remains a Phase 6A follow-on requirement. Phase 6 produced the environment values but did not establish a first-class publication, resolution, or governance channel for them.
+
 ---
 
-## 6. Recommended next-phase entry point
+## 6. Recommended next-phase entry points
 
-**Phase 7 — Rollout, SharePoint control, and repair**
+### Immediate next: Phase 6A — Managed App Binding and Backend-Setup Configuration
 
-Phase 7 should begin by:
+Phase 6A is the direct follow-on for **managed-app runtime readiness**. It should begin by:
+1. Auditing the gap between install outputs and what target apps need to resolve at runtime
+2. Defining the managed-app binding contract and durable per-app binding storage
+3. Integrating binding publication into the install/bootstrap flow
+4. Wiring target-app runtime resolution so managed apps consume binding before backend-dependent calls
+5. Adding binding verification, drift detection, and operator repair UX
+
+Until Phase 6A is complete, managed HB Intel SPFx apps (Accounting, Project Setup) cannot resolve `functionAppUrl`, `apiAudience`, `backendMode`, or `allowBackendModeSwitch` through a governed channel. "Installed" is not the same as "bound and runtime-ready."
+
+See [Phase 6A Handoff Note](admin-spfx-phase-6a-handoff-note.md) for the detailed handoff.
+
+### After Phase 6A: Phase 7 — Provisioning saga refinement and seamless rollout hardening
+
+Phase 7 follows Phase 6A (not directly after Phase 6) so provisioning hardening can assume a first-class binding model. Phase 7 should begin by:
 1. Auditing the SharePoint Control lane scaffold and existing SharePoint adapter descriptors
 2. Implementing real adapter invokers for `sharepoint-site:lifecycle` and `sharepoint-alm:package-install`
 3. Building SharePoint site provisioning and repair workflows in the `/sharepoint` lane

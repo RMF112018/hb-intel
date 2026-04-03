@@ -110,3 +110,11 @@ Escalate to a platform administrator or DevOps team when:
 | Reject checkpoint | `/setup/run/{runId}` | `POST /api/admin/runs/{runId}/checkpoint` |
 | Cancel run | (Runs lane) | `POST /api/admin/runs/{runId}/cancel` |
 | Run verification | `/setup/run/{runId}` | `POST /api/admin/preflight` (verify-only) |
+
+---
+
+## Important: install completion vs runtime readiness
+
+A successful install/bootstrap confirms that infrastructure is deployed and configured, but it does **not** automatically make managed HB Intel SPFx apps (Accounting, Project Setup) runtime-ready.
+
+After install completes, managed apps still require a **Phase 6A app-binding publication step** before they can resolve their backend configuration (`functionAppUrl`, `apiAudience`, `backendMode`, `allowBackendModeSwitch`) at runtime. Until that step is complete, "installed" means the environment is provisioned — not that managed apps are bound and operational.

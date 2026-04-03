@@ -220,7 +220,8 @@
       "Bash(BACKEND_MODE=production FUNCTION_APP_URL=https://test.azurewebsites.net API_AUDIENCE=api://test-client-id ALLOW_BACKEND_MODE_SWITCH=true npx tsx:*)",
       "Bash(SPFX_API_RESOURCE=hb-intel-api-production npx tsx tools/build-spfx-package.ts --domain estimating)",
       "Bash(SPFX_API_RESOURCE=hb-intel-api-dev npx tsx tools/build-spfx-package.ts --domain estimating)",
-      "Bash(shasum:*)"
+      "Bash(shasum:*)",
+      "Bash([ -f \"/Users/bobbyfetting/hb-intel/$f\" ])"
     ]
   },
   "enabledPlugins": {

@@ -52,6 +52,8 @@ export interface IProvisionSiteRequest {
   retryCount?: number;
   /** P5-04: Carried forward on retry so the new run records when the retry was initiated. */
   lastRetryAt?: string;
+  /** P7-05: Error message from the previous failed run, carried forward for repeated-failure classification. */
+  previousErrorMessage?: string;
 }
 
 /**
@@ -129,6 +131,8 @@ export interface IProvisioningStatus {
   lastRetryAt?: string;
   /** W0-G4-T02: ISO timestamp when the failure was escalated to admin. */
   escalatedAt?: string;
+  /** P7-06: Structured evidence payload captured at saga terminal states. */
+  evidence?: import('./IProvisioningEvidence.js').IProvisioningEvidence;
 }
 
 /** D-PH6-01: Result for a single saga step execution. */

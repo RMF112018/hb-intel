@@ -41,6 +41,20 @@ All admin endpoints require `withAuth()` JWT authentication and are namespaced u
 
 Request/response DTOs are defined in `@hbc/models/admin-control-plane` (Phase 2 contracts). See the [API contract catalog](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-api-contract-catalog.md) for full contract details.
 
+### App-Binding API Endpoints (P6A-04)
+
+Managed-app binding endpoints for publishing, resolving, verifying, and repairing backend-setup bindings for target SPFx apps. Backed by Azure Table Storage (`AdminAppBindings` table). The backend is the sole authority for binding writes — target apps and the Admin UX consume bindings but do not own the write path.
+
+| Method | Route | Handler | Purpose |
+|--------|-------|---------|---------|
+| GET | `/api/admin/apps/{appId}/binding` | `adminGetAppBinding` | Get binding for a managed app |
+| GET | `/api/admin/apps/bindings` | `adminListAppBindings` | List all app bindings |
+| POST | `/api/admin/apps/{appId}/binding/publish` | `adminPublishAppBinding` | Publish or update binding |
+| POST | `/api/admin/apps/{appId}/binding/verify` | `adminVerifyAppBinding` | Verify binding against live state |
+| POST | `/api/admin/apps/{appId}/binding/repair` | `adminRepairAppBinding` | Repair a drifted binding |
+
+Binding contracts are in `@hbc/models/admin-control-plane` (`IAppBinding.ts`). See the [binding store and API doc](../../docs/architecture/plans/MASTER/spfx/admin/phase-6a-app-binding/admin-spfx-app-binding-store-and-api.md) for persistence and keying details.
+
 ## Local Development Setup
 
 `local.settings.json` is gitignored and must be created per developer machine.
@@ -275,3 +289,63 @@ The saga orchestrator validates all provisioning prerequisites at execution time
 - Set `WEBSITE_TIME_ZONE=Eastern Standard Time` in Azure Function App settings.
 - `timerFullSpec` uses CRON `0 0 1 * * *` and relies on the timezone setting above to execute at 1:00 AM EST.
 - `POST /api/admin/trigger-timer` is admin-only and blocked when `AZURE_FUNCTIONS_ENVIRONMENT=Production`.
+
+### Phase 7 — Provisioning Saga Hardening
+
+Phase 7 preserves the existing provisioning foundations and hardens them with failure classification, structured evidence, recovery guidance, and improved prelaunch validation.
+
+#### Prelaunch validation (P7-03, P7-07)
+
+`validatePrelaunchReadiness(request)` returns a typed `IPrelaunchValidationResult` with structured failures across 6 categories:
+
+| Category | Checks |
+|----------|--------|
+| `environment` | Provisioning-specific env vars (Graph permission, SharePoint URLs, hub site, app catalog, SPFx app ID, OpEx manager) |
+| `permission` | Graph Group.ReadWrite.All confirmation, Sites.Selected grant workflow |
+| `bootstrap` | Install infrastructure (AZURE_TABLE_ENDPOINT, AZURE_CLIENT_ID, API_AUDIENCE, APPLICATIONINSIGHTS_CONNECTION_STRING) |
+| `entra-readiness` | Department viewer UPN configuration when department is specified |
+| `request-data` | Request completeness (projectId, projectNumber format, groupMembers non-empty) |
+| `configuration` | Reserved for future runtime config checks |
+
+The `POST /api/provision-project-site` endpoint performs synchronous preflight and returns HTTP 422 with structured failures when prerequisites are not satisfied.
+
+#### Failure classification (P7-04)
+
+Every saga failure is classified via `classifyFailure()` and persisted as `failureClass` on the durable status record:
+
+| Class | Meaning | Signal |
+|-------|---------|--------|
+| `transient` | Temporary platform issue | 429, timeout, ECONNRESET, fetch failed |
+| `permissions` | Missing or revoked permissions | 403, `GraphPermissionNotConfirmedError` |
+| `structural` | Configuration or data issue | 400, 404, validation error |
+| `repeated` | Same error class recurs on retry | HTTP status match or error prefix match across runs |
+| `admin-class` | Unclassifiable failure | Fallback — requires admin investigation |
+
+#### Step 6 compensation (P7-04)
+
+The compensation chain now includes Entra ID group deletion. When a saga fails after Step 6, the three security groups (leaders, team, viewers) are deleted via `deleteSecurityGroup()` on `IGraphService`. Already-deleted groups (404) are handled silently.
+
+#### Step 5 deferral deadline (P7-04)
+
+Deferred Step 5 jobs older than 7 days are auto-escalated to Failed by the timer handler with a `ProvisioningDeferralDeadlineExceeded` telemetry event.
+
+#### Recovery guidance (P7-05)
+
+`GET /api/provisioning-recovery-guidance/{projectId}` returns structured `IRecoveryGuidance` with `retryAdvisable`, `recommendedAction`, `failureSummary`, `likelyCause`, `nextStep`, `escalationReason`, and `runbookRef` — conditioned on failure class, failed step, and retry count.
+
+#### Retry audit trail (P7-05)
+
+Every retry emits a `ProvisioningRetryInitiated` telemetry event with the initiator's UPN/OID, retry count, previous failure class, and previous failed step. The saga carries forward `previousErrorMessage` for repeated-failure detection.
+
+#### Evidence payload (P7-06)
+
+Structured `IProvisioningEvidence` is captured at saga terminal states and persisted as `evidenceJson`. Includes per-step timing and attempt counts, permission posture at saga start, failure classification, and parent correlation chain.
+
+#### Phase 7 documentation
+
+Detailed references in `docs/architecture/plans/MASTER/spfx/admin/phase-07/`:
+- `provisioning-failure-classification-and-run-state-model.md`
+- `provisioning-recovery-and-operator-guidance-contract.md`
+- `provisioning-prelaunch-validation-model.md`
+- `provisioning-diagnostics-and-evidence-guide.md`
+- `provisioning-readiness-dependency-integration.md`

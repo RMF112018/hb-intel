@@ -8,7 +8,7 @@ This app is the human-facing shell where authorized admins observe, initiate, an
 
 ## Operator Console
 
-The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Three lanes have active content from existing pages that were rehomed into the lane model; four lanes are scaffolds that render clear `HbcSmartEmptyState` placeholders indicating which future phase delivers the content. The Error / Audit lane preserves its deferred state (SF17-T05).
+The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Six lanes have active content: Setup (preflight + install wizard), Runs (provisioning oversight), SharePoint Control (drift detection, preview, repair, posture), Config (access control), Health (operational dashboard), and the landing page itself. Two lanes are scaffolds that render clear `HbcSmartEmptyState` placeholders indicating which future phase delivers the content. The Error / Audit lane preserves its deferred state (SF17-T05).
 
 Navigation is lane-driven — the shell renders all 8 lane buttons derived from the canonical lane registry (`src/router/lane-registry.ts`). Active lanes appear at full opacity; scaffold lanes appear dimmed. The alert badge on the Health lane is preserved.
 
@@ -19,9 +19,10 @@ Navigation is lane-driven — the shell renders all 8 lane buttons derived from 
 | `/` | — | Operator Landing | Active — control-center overview with lane grid |
 | `/setup` | Setup / Install | SetupWizardPage | Active — preflight review, install launch, run tracking |
 | `/setup/run/$runId` | Setup / Install | InstallRunDetailPage | Active — step progress, checkpoint actions, verification |
+| `/setup/bindings` | Setup / Install | BindingStatusPage | Active — app-binding status, verification, and repair (Phase 6A) |
 | `/validation` | Validation | ValidationLanePage | Scaffold — Phase 7 |
 | `/runs` | Runs / History | ProvisioningOversightPage | Active — monitor, retry, escalate, archive provisioning runs |
-| `/sharepoint` | SharePoint Control | SharePointLanePage | Scaffold — Phase 7 |
+| `/sharepoint` | SharePoint Control | SharePointControlPage | Active — drift detection, preview, repair, posture (Phase 8) |
 | `/entra` | Entra Control | EntraLanePage | Scaffold — Phase 9 |
 | `/config` | Standards / Config | SystemSettingsPage | Active — access control and approval authority configuration |
 | `/health` | Health / Alerts | OperationalDashboardPage | Active — alert summary, probe health, infrastructure status |

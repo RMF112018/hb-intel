@@ -106,6 +106,18 @@ This contract slice is forward-compatible with broader admin-run generalization:
 
 ---
 
+## 6. App-binding contracts — Phase 6A scope
+
+The Phase 6 contract slice remains install-focused. It does not define contracts for:
+- managed-app binding records,
+- binding publication or retrieval,
+- binding verification or drift detection,
+- or target-app runtime resolution of backend configuration.
+
+These contracts are introduced in **Phase 6A — Managed App Binding and Backend-Setup Configuration**. Phase 10 later governs the maturity of live-admin configuration governance, but Phase 6A establishes the first-class binding model that target apps depend on.
+
+---
+
 ## Cross-references
 
 - [Install/Bootstrap Architecture](admin-spfx-install-bootstrap-architecture.md) — layer responsibilities

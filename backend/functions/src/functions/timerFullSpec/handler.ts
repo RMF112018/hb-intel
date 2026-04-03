@@ -45,9 +45,37 @@ export async function runTimerFullSpec(
   let deferredCount = 0;
   let failedCount = 0;
 
+  // P7-04: Maximum deferral window — escalate stale deferred jobs to Failed.
+  const DEFERRAL_DEADLINE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
   for (const status of pendingJobs) {
     const jobCorrelationId = randomUUID();
     const stepStartMs = Date.now();
+
+    // P7-04: Check deferral age — escalate if older than deadline.
+    const deferralAgeMs = Date.now() - new Date(status.startedAt).getTime();
+    if (deferralAgeMs > DEFERRAL_DEADLINE_MS) {
+      failedCount += 1;
+      const deadlineMsg = `Step 5 deferral exceeded ${Math.round(DEFERRAL_DEADLINE_MS / (24 * 60 * 60 * 1000))}-day deadline (deferred since ${status.startedAt})`;
+
+      logger.warn(deadlineMsg, {
+        correlationId: jobCorrelationId,
+        projectId: status.projectId,
+        deferralAgeDays: Math.round(deferralAgeMs / (24 * 60 * 60 * 1000)),
+      });
+
+      logger.trackEvent('ProvisioningDeferralDeadlineExceeded', {
+        timerCorrelationId,
+        projectId: status.projectId,
+        projectNumber: status.projectNumber,
+        deferralAgeMs,
+        startedAt: status.startedAt,
+      });
+
+      await markTimerFailure(status, jobCorrelationId, deadlineMsg);
+      await services.tableStorage.upsertProvisioningStatus(status);
+      continue;
+    }
 
     try {
       const step5Result = await executeStep5(services, status, logger);

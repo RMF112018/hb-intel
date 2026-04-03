@@ -21,6 +21,7 @@ export type {
   EvidenceRetentionClass,
   IAdminActorContextResolver,
   IAdminActorResolverInput,
+  IAdminAppBindingService,
 } from './types.js';
 
 // Durable implementations (Phase 4)
@@ -49,7 +50,7 @@ export type { CheckpointInstructions, CheckpointDecisionResult } from './install
 export { executeVerificationChecks, runPostInstallVerification } from './install-verification-service.js';
 
 // Install/bootstrap orchestrator (P6-05)
-export { INSTALL_STEP_CATALOG, buildInitialSteps, executeInstallRun, getInstallStepCatalog } from './install-orchestrator.js';
+export { INSTALL_STEP_CATALOG, buildInitialSteps, executeInstallRun, getInstallStepCatalog, publishBindingsAfterInstall, MANAGED_APP_IDS } from './install-orchestrator.js';
 export type { InstallOrchestratorDeps } from './install-orchestrator.js';
 
 // Evidence service (P4-06)
@@ -67,6 +68,63 @@ export {
   createProvisioningBridgeInvoker,
 } from './orchestration-bridge.js';
 export type { IProvisioningStatusSnapshot } from './orchestration-bridge.js';
+
+// App binding store (P6A-04)
+export { DurableAdminAppBindingStore, MockAdminAppBindingStore, serializeBindingRecord, deserializeBindingRecord } from './app-binding-store.js';
+
+// Binding verification service (P6A-07)
+export {
+  checkRequiredFields,
+  checkFunctionAppReachable,
+  checkApiAudienceValid,
+  checkBindingNotStale,
+  checkBindingNotSuperseded,
+  executeBindingVerificationChecks,
+  runAppBindingVerification,
+} from './binding-verification-service.js';
+
+// SharePoint drift detection service (P8-04)
+export {
+  resolveCodeDefaultStandards,
+  comparePostureToStandards,
+  buildComparisonResult,
+  runSharePointDriftDetection,
+  CODE_DEFAULT_STANDARDS_VERSION,
+} from './sharepoint-drift-service.js';
+
+// SharePoint repair preview service (P8-05)
+export {
+  generateRepairPreview,
+  runSharePointRepairPreview,
+} from './sharepoint-preview-service.js';
+
+// SharePoint repair execution service (P8-06)
+export {
+  validateRepairBoundary,
+  executeSharePointRepair,
+} from './sharepoint-repair-service.js';
+export type {
+  RepairExecutor,
+  RepairStepOutcome,
+  RepairRunOutcome,
+  ISharePointRepairStepResult,
+  ISharePointRepairResult,
+} from './sharepoint-repair-service.js';
+
+// SharePoint posture validation service (P8-07)
+export {
+  executePostureChecks,
+  buildPostureValidationResult,
+  runPostureValidation,
+  POSTURE_CHECK_CATALOG,
+} from './sharepoint-posture-service.js';
+export type {
+  PostureCategory,
+  PostureCheckStatus,
+  PostureCollector,
+  IPostureCheckFinding,
+  IPostureValidationResult,
+} from './sharepoint-posture-service.js';
 
 // Stub implementations (mock/test mode and services not yet implemented)
 export {

@@ -109,6 +109,15 @@ const setupRunDetailRoute = createRoute({
   ),
 });
 
+const bindingStatusRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/setup/bindings',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/BindingStatusPage.js').then((m) => ({ default: m.BindingStatusPage })),
+  ),
+});
+
 const validationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/validation',
@@ -123,7 +132,7 @@ const sharepointRoute = createRoute({
   path: '/sharepoint',
   beforeLoad: adminBeforeLoad,
   component: lazyRouteComponent(() =>
-    import('../pages/SharePointLanePage.js').then((m) => ({ default: m.SharePointLanePage })),
+    import('../pages/SharePointControlPage.js').then((m) => ({ default: m.SharePointControlPage })),
   ),
 });
 
@@ -186,6 +195,7 @@ export const webpartRoutes = [
   errorsRoute,
   setupRoute,
   setupRunDetailRoute,
+  bindingStatusRoute,
   validationRoute,
   sharepointRoute,
   entraRoute,

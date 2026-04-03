@@ -8,15 +8,17 @@ import type {
   ProjectSetupRequestState,
 } from '@hbc/models';
 import { withRetry } from '../../utils/retry.js';
-import { validateProvisioningPrerequisites } from '../../utils/validate-config.js';
+import { assertPrelaunchReady } from './prelaunch-validation.js';
 import { diagnosePermissionModel, diagnoseSiteGrantReadiness } from '../../utils/diagnose-permissions.js';
 import { executeStep1, compensateStep1 } from './steps/step1-create-site.js';
 import { executeStep2, compensateStep2 } from './steps/step2-document-library.js';
 import { executeStep3, compensateStep3 } from './steps/step3-template-files.js';
 import { executeStep4, compensateStep4 } from './steps/step4-data-lists.js';
 import { executeStep5 } from './steps/step5-web-parts.js';
-import { executeStep6 } from './steps/step6-permissions.js';
+import { executeStep6, compensateStep6 } from './steps/step6-permissions.js';
 import { executeStep7, compensateStep7 } from './steps/step7-hub-association.js';
+import { classifyFailure } from './classify-failure.js';
+import { buildEvidencePayload } from './build-evidence-payload.js';
 import { dispatchProvisioningNotification } from './notification-dispatch.js';
 import { PROVISIONING_NOTIFICATION_TEMPLATES } from '@hbc/provisioning';
 
@@ -49,8 +51,8 @@ export class SagaOrchestrator {
   ) {}
 
   async execute(request: IProvisionSiteRequest): Promise<void> {
-    // Fail fast if provisioning prerequisites are not satisfied.
-    validateProvisioningPrerequisites();
+    // P7-03: Fail fast with structured validation if prerequisites are not satisfied.
+    const prelaunchResult = assertPrelaunchReady(request);
 
     // Permission model diagnostic — makes the active posture visible in every saga run.
     const permissionDiag = diagnosePermissionModel();
@@ -88,6 +90,15 @@ export class SagaOrchestrator {
       lastRetryAt: request.lastRetryAt,
     };
 
+    // P7-03: Log that prelaunch validation passed (structured result available for diagnostics).
+    this.logger.trackEvent('ProvisioningPrelaunchValidation', {
+      correlationId,
+      projectId,
+      projectNumber,
+      outcome: 'passed',
+      failureCount: 0,
+    });
+
     this.logger.trackEvent('ProvisioningSagaStarted', {
       correlationId,
       projectId,
@@ -95,6 +106,12 @@ export class SagaOrchestrator {
       triggeredBy,
       submittedBy,
       permissionModel: permissionDiag.model,
+      // P7-06: Retry tracing — include parent correlation and previous error for chain visibility.
+      parentCorrelationId: request.parentCorrelationId ?? null,
+      isRetry: (request.retryCount ?? 0) > 0,
+      previousErrorMessage: request.previousErrorMessage
+        ? request.previousErrorMessage.substring(0, 200)
+        : null,
     });
 
     this.logger.trackEvent('ProvisioningPermissionModel', {
@@ -179,8 +196,14 @@ export class SagaOrchestrator {
 
       const stepStartMs = Date.now();
       let result: ISagaStepResult;
+      // P7-06: Track actual attempt count via onRetry callback.
+      let stepAttemptCount = 1;
       try {
-        result = await withRetry(() => stepExecutors[i](), { maxAttempts: 3, baseDelayMs: 2000 });
+        result = await withRetry(() => stepExecutors[i](), {
+          maxAttempts: 3,
+          baseDelayMs: 2000,
+          onRetry: () => { stepAttemptCount++; },
+        });
       } catch (err) {
         result = {
           stepNumber: stepDef.number,
@@ -195,6 +218,14 @@ export class SagaOrchestrator {
       }
 
       const durationMs = Date.now() - stepStartMs;
+
+      // P7-06: Enrich step result metadata with timing and attempt count.
+      result.metadata = {
+        ...result.metadata,
+        durationMs,
+        attemptCount: stepAttemptCount,
+      };
+
       this.logger.trackMetric('ProvisioningStepDurationMs', durationMs, {
         stepNumber: String(stepDef.number),
         stepName: stepDef.name,
@@ -211,7 +242,7 @@ export class SagaOrchestrator {
           stepNumber: stepDef.number,
           stepName: stepDef.name,
           errorMessage: result.errorMessage ?? 'Unknown step failure',
-          attempt: 3,
+          attempt: stepAttemptCount,
           durationMs,
         });
       } else {
@@ -233,7 +264,7 @@ export class SagaOrchestrator {
       await this.pushProgress(status, stepDef.number, stepDef.name, result.status);
 
       if (result.status === 'Failed') {
-        await this.compensate(status);
+        await this.compensate(status, request.previousErrorMessage, sagaStartMs, permissionDiag, grantReadiness, request.parentCorrelationId);
         return;
       }
 
@@ -292,6 +323,14 @@ export class SagaOrchestrator {
     const finalStatus = status.step5DeferredToTimer ? 'WebPartsPending' : 'Completed';
     status.overallStatus = finalStatus;
     status.completedAt = new Date().toISOString();
+
+    // P7-06: Capture structured evidence at completion.
+    const totalDurationMsForEvidence = Date.now() - sagaStartMs;
+    status.evidence = buildEvidencePayload(
+      status, totalDurationMsForEvidence, permissionDiag, grantReadiness,
+      request.parentCorrelationId,
+    );
+
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
     // Reconcile request record on non-deferred completion.
@@ -363,9 +402,14 @@ export class SagaOrchestrator {
    * - Increments `retryCount`, sets `lastRetryAt`, and re-enters `execute()` with step idempotency guards.
    * - Request reconciliation happens inside `execute()` (-> Provisioning on start).
    */
-  async retry(projectId: string): Promise<void> {
+  async retry(projectId: string, retryInitiatedBy?: string): Promise<void> {
     const status = await this.services.tableStorage.getProvisioningStatus(projectId);
     if (!status) throw new Error(`No provisioning record found for projectId ${projectId}`);
+
+    // P7-05: Capture the previous run's failed step error for repeated-failure classification.
+    const previousFailedStep = status.steps.find((s) => s.status === 'Failed');
+    const previousErrorMessage = previousFailedStep?.errorMessage;
+
     // P2-04: Preserve correlation chain across retries for traceability.
     const parentCorrelationId = status.correlationId;
     status.overallStatus = 'InProgress';
@@ -378,6 +422,9 @@ export class SagaOrchestrator {
       parentCorrelationId,
       newCorrelationId,
       retryCount: status.retryCount,
+      retryInitiatedBy: retryInitiatedBy ?? 'unknown',
+      previousFailureClass: status.failureClass,
+      previousErrorMessage: previousErrorMessage ? previousErrorMessage.substring(0, 200) : undefined,
     });
     const request: IProvisionSiteRequest = {
       projectId: status.projectId,
@@ -385,7 +432,7 @@ export class SagaOrchestrator {
       projectName: status.projectName,
       correlationId: newCorrelationId,
       parentCorrelationId,
-      triggeredBy: status.triggeredBy,
+      triggeredBy: retryInitiatedBy ?? status.triggeredBy,
       submittedBy: status.submittedBy,
       groupMembers: status.groupMembers,
       groupLeaders: status.groupLeaders ?? [],
@@ -394,6 +441,8 @@ export class SagaOrchestrator {
       // so coordinator retry limits and admin retry counters work correctly.
       retryCount: status.retryCount,
       lastRetryAt: status.lastRetryAt,
+      // P7-05: Carry forward the previous error for repeated-failure detection.
+      previousErrorMessage,
     };
     await this.execute(request);
   }
@@ -479,15 +528,46 @@ export class SagaOrchestrator {
     return result;
   }
 
-  private async compensate(status: IProvisioningStatus): Promise<void> {
+  private async compensate(
+    status: IProvisioningStatus,
+    previousErrorMessage?: string,
+    sagaStartMs?: number,
+    permissionDiag?: { model: string; groupReadWriteExpected: boolean; summary: string },
+    grantReadiness?: { permissionModel: string; grantConfirmed: boolean; automatedGrantAvailable: false; operatorAction: string },
+    parentCorrelationId?: string,
+  ): Promise<void> {
     const { projectId, projectNumber, projectName, correlationId, triggeredBy, submittedBy } = status;
     this.logger.warn('Initiating compensation', { correlationId, projectId, failedAtStep: status.currentStep });
     status.overallStatus = 'Failed';
     status.failedAt = new Date().toISOString();
 
+    // P7-04 + P7-05: Classify the failure with previous error context for repeated detection.
+    const failedStep = status.steps.find((s) => s.status === 'Failed');
+    if (failedStep) {
+      status.failureClass = classifyFailure(
+        new Error(failedStep.errorMessage ?? 'Unknown step failure'),
+        {
+          retryCount: status.retryCount ?? 0,
+          previousErrorMessage,
+        },
+      );
+      this.logger.trackEvent('ProvisioningFailureClassified', {
+        correlationId,
+        projectId,
+        projectNumber,
+        failedAtStep: status.currentStep,
+        failureClass: status.failureClass,
+        errorMessage: failedStep.errorMessage,
+      });
+    }
+
     try {
       if (status.steps.find((s) => s.stepNumber === 7)?.status === 'Completed') {
         await compensateStep7(this.services, status);
+      }
+      // P7-04: Step 6 compensation — delete Entra ID groups to prevent orphans.
+      if (status.steps.find((s) => s.stepNumber === 6)?.status === 'Completed') {
+        await compensateStep6(this.services, status);
       }
       if (status.steps.find((s) => s.stepNumber === 4)?.status === 'Completed') {
         await compensateStep4();
@@ -508,6 +588,17 @@ export class SagaOrchestrator {
       });
     }
 
+    // P7-06: Capture structured evidence at failure.
+    if (sagaStartMs && permissionDiag && grantReadiness) {
+      const failDurationMs = Date.now() - sagaStartMs;
+      status.evidence = buildEvidencePayload(
+        status, failDurationMs,
+        permissionDiag as import('../../utils/diagnose-permissions.js').IPermissionDiagnostic,
+        grantReadiness as import('../../utils/diagnose-permissions.js').ISiteGrantReadiness,
+        parentCorrelationId,
+      );
+    }
+
     await this.services.tableStorage.upsertProvisioningStatus(status);
 
     // Reconcile request record to Failed state.
@@ -518,6 +609,7 @@ export class SagaOrchestrator {
       projectId,
       projectNumber,
       failedAtStep: status.currentStep,
+      failureClass: status.failureClass ?? 'unclassified',
       errorMessage: status.steps.find((s) => s.status === 'Failed')?.errorMessage ?? 'Unknown saga failure',
     });
     this.logger.trackMetric('ProvisioningSagaSuccessRate', 0, {

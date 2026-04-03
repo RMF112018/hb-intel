@@ -138,6 +138,17 @@ See [Manual Checkpoint Policy](admin-spfx-install-manual-checkpoint-policy.md) f
 
 ---
 
+## 7. Relationship to app-binding publication
+
+Install/bootstrap execution and app-binding publication are adjacent but distinct concerns:
+
+- **Phase 6 owns** the privileged install/bootstrap execution that deploys infrastructure, configures services, and produces environment values.
+- **Phase 6A owns** the durable publication of those values as governed app-binding records and the target-app runtime resolution that consumes them.
+
+Target apps are not assumed runtime-ready solely because Phase 6 install completed. A successful install produces the binding values, but without Phase 6A's publication and resolution layer, managed apps have no governed path to consume them at runtime.
+
+---
+
 ## Cross-references
 
 - [Install/Bootstrap Step Model](admin-spfx-install-bootstrap-step-model.md) — canonical step families

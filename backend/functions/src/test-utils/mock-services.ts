@@ -64,6 +64,7 @@ export interface IMockServices extends IServiceContainer {
     createSecurityGroup: Mock;
     addGroupMembers: Mock;
     getGroupByDisplayName: Mock;
+    deleteSecurityGroup: Mock;
     grantSiteAccess: Mock;
   };
   notifications: {
@@ -107,6 +108,7 @@ export function createMockServices(): IMockServices {
       createSecurityGroup: vi.fn(async (_displayName: string, _description: string) => 'mock-group-id'),
       addGroupMembers: vi.fn(async (_groupId: string, _memberUpns: string[]) => {}),
       getGroupByDisplayName: vi.fn(async (_displayName: string) => null),
+      deleteSecurityGroup: vi.fn(async (_groupId: string) => {}),
       grantSiteAccess: vi.fn(async () => {}),
     },
     notifications: {

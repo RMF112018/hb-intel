@@ -119,6 +119,15 @@ Use `isValidTransition(from, to)` to validate transitions programmatically.
 | `getVisibleSummaryFields` | Function | Filter fields by complexity tier |
 | `isHistoryContentVisible` | Function | History content visibility check |
 | `getVisibleHistoryContent` | Function | Filter history content by level |
+| `IRecoveryGuidance` | Interface | P7-05: Structured recovery guidance for failed runs |
+| `RecoveryAction` | Type | P7-05: Recommended recovery action enum |
+| `IPrelaunchFailure` | Interface | P7-03: Single prelaunch validation failure |
+| `IPrelaunchValidationResult` | Interface | P7-03: Aggregated prelaunch validation result |
+| `PrelaunchFailureCategory` | Type | P7-03: Failure category for grouping |
+| `IProvisioningEvidence` | Interface | P7-06: Structured run evidence payload |
+| `IStepEvidence` | Interface | P7-06: Per-step execution evidence |
+| `IPermissionPosture` | Interface | P7-06: Permission posture at saga start |
+| `ProvisioningFailureClass` | Type | P7-04: Backend-assigned failure classification |
 
 ---
 
@@ -165,6 +174,32 @@ pnpm --filter @hbc/provisioning check-types    # TypeScript
 pnpm --filter @hbc/provisioning lint           # ESLint
 pnpm --filter @hbc/provisioning build          # Vite production build
 ```
+
+---
+
+## Phase 7 Client Enhancements
+
+### Recovery guidance
+
+`client.getRecoveryGuidance(projectId)` fetches structured recovery guidance for a failed run. The backend returns an `IRecoveryGuidance` payload with:
+
+- `retryAdvisable` — whether retry is likely to succeed
+- `recommendedAction` — primary action: `'retry'`, `'escalate'`, `'investigate-permissions'`, `'fix-configuration'`, `'wait-and-retry'`
+- `failureSummary`, `likelyCause`, `nextStep` — operator-facing explanations
+- `escalationReason` — when escalation is more appropriate than retry
+- `runbookRef` — relevant runbook section reference
+
+### Failure classification
+
+`IProvisioningStatus.failureClass` is now populated by the backend on every failure. Values: `'transient'`, `'structural'`, `'permissions'`, `'repeated'`, `'admin-class'`. The client returns this field via `getProvisioningStatus()` and `listProvisioningRuns()`.
+
+### Evidence payload
+
+`IProvisioningStatus.evidence` contains structured run evidence (`IProvisioningEvidence`) captured at saga terminal states. Includes per-step timing, attempt counts, permission posture, and failure details.
+
+### Prelaunch validation
+
+The `POST /api/provision-project-site` endpoint returns HTTP 422 with an `IPrelaunchValidationResult` when prerequisites are not satisfied. The client's `ApiError` carries the status code (422) and code (`PRELAUNCH_VALIDATION_FAILED`) for callers that need to distinguish validation failures from other errors.
 
 ---
 

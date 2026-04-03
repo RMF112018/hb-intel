@@ -22,8 +22,9 @@ import type {
 import type {
   IAdminRunService,
   IAdminAuditService,
+  IAdminAppBindingService,
 } from './types.js';
-import { INSTALL_STEP_CATALOG } from './install-orchestrator.js';
+import { INSTALL_STEP_CATALOG, publishBindingsAfterInstall } from './install-orchestrator.js';
 
 // ─── Checkpoint Instruction Blocks ─────────────────────────────────────────────
 
@@ -206,7 +207,7 @@ export async function processCheckpointDecision(
  * as executeInstallRun.
  */
 export async function resumeAfterCheckpoint(
-  deps: { runService: IAdminRunService; auditService: IAdminAuditService; adapterRegistry: import('./types.js').IAdminAdapterRegistry },
+  deps: { runService: IAdminRunService; auditService: IAdminAuditService; adapterRegistry: import('./types.js').IAdminAdapterRegistry; bindingService?: IAdminAppBindingService },
   runId: string,
   fromStepIndex: number,
   actor: IAdminActorContext,
@@ -305,6 +306,11 @@ export async function resumeAfterCheckpoint(
     runStatusAtEvent: AdminRunStatus.Completed,
     summary: `Install/bootstrap run ${runId} completed after checkpoint resume`,
   }).catch(() => {});
+
+  // P6A-05: Publish bindings for managed apps after successful resume completion
+  if (deps.bindingService) {
+    await publishBindingsAfterInstall(deps.bindingService, auditService, actor, runId, commandInput);
+  }
 
   return (await runService.getRun(runId)) as IAdminRunEnvelope;
 }

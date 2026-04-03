@@ -274,6 +274,42 @@ describe('undefined base URL behavior', () => {
 /*  Auth header                                                       */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/*  Recovery guidance                                                  */
+/* ------------------------------------------------------------------ */
+
+describe('getRecoveryGuidance', () => {
+  const STUB_GUIDANCE = {
+    retryAdvisable: true,
+    recommendedAction: 'retry',
+    failureSummary: 'Transient failure at Step 3',
+    likelyCause: 'Temporary platform issue',
+    nextStep: 'Retry the provisioning run.',
+    escalationReason: null,
+    runbookRef: 'provisioning-runbook.md#retry',
+  };
+
+  it('unwraps { data } envelope for recovery guidance', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ data: STUB_GUIDANCE }));
+
+    const result = await client.getRecoveryGuidance('p1');
+
+    expect(result).toEqual(STUB_GUIDANCE);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE}/api/provisioning-recovery-guidance/p1`,
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: `Bearer ${TOKEN}` }) }),
+    );
+  });
+
+  it('propagates errors from recovery guidance endpoint', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ message: 'Not found', code: 'NOT_FOUND' }, 404),
+    );
+
+    await expect(client.getRecoveryGuidance('missing')).rejects.toThrow(ApiError);
+  });
+});
+
 describe('auth header', () => {
   it('sends Bearer token on every request', async () => {
     fetchMock.mockResolvedValueOnce(

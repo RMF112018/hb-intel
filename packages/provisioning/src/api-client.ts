@@ -1,6 +1,7 @@
 import type {
   IProjectSetupRequest,
   IProvisioningStatus,
+  IRecoveryGuidance,
   ProjectSetupRequestState,
 } from '@hbc/models';
 
@@ -42,6 +43,8 @@ export interface IProvisioningApiClient {
   acknowledgeEscalation(projectId: string): Promise<void>;
   /** W0-G4-T04: Force a provisioning run into a specific state (admin expert-tier only). */
   forceStateTransition(projectId: string, targetState: string): Promise<void>;
+  /** P7-05: Fetch structured recovery guidance for a failed provisioning run. */
+  getRecoveryGuidance(projectId: string): Promise<IRecoveryGuidance>;
 }
 
 /**
@@ -154,6 +157,9 @@ export function createProvisioningApiClient(
         method: 'POST',
         body: JSON.stringify({ targetState }),
       });
+    },
+    async getRecoveryGuidance(projectId) {
+      return fetchItem<IRecoveryGuidance>(`/provisioning-recovery-guidance/${projectId}`);
     },
   };
 }

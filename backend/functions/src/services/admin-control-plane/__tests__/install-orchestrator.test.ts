@@ -10,8 +10,12 @@ import {
   buildInitialSteps,
   executeInstallRun,
   getInstallStepCatalog,
+  publishBindingsAfterInstall,
+  MANAGED_APP_IDS,
 } from '../install-orchestrator.js';
 import type { InstallOrchestratorDeps } from '../install-orchestrator.js';
+import { AppBindingStatus } from '@hbc/models/admin-control-plane';
+import { MockAdminAppBindingStore } from '../app-binding-store.js';
 import {
   AdminRunStatus,
   AdminStepStatus,
@@ -300,5 +304,167 @@ describe('P6-05 executeInstallRun', () => {
     expect(result.status).toBe(AdminRunStatus.Cancelled);
     // Should not invoke any adapter steps since getRun returns Cancelled immediately
     expect(deps.adapterRegistry.invoke).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Binding Publication Tests (P6A-05) ───────────────────────────────────────
+
+describe('P6A-05 publishBindingsAfterInstall', () => {
+  let bindingStore: MockAdminAppBindingStore;
+  let auditService: InstallOrchestratorDeps['auditService'];
+
+  beforeEach(() => {
+    bindingStore = new MockAdminAppBindingStore();
+    auditService = {
+      recordEvent: vi.fn().mockResolvedValue(undefined),
+      listByRunId: vi.fn().mockResolvedValue([]),
+      listByEventType: vi.fn().mockResolvedValue([]),
+    };
+  });
+
+  it('publishes bindings for all managed apps when commandInput has required fields', async () => {
+    await publishBindingsAfterInstall(bindingStore, auditService, TEST_ACTOR, 'run-001', {
+      functionAppUrl: 'https://hb-intel-func.azurewebsites.net',
+      apiAudience: 'api://hb-intel-api',
+    });
+
+    const bindings = await bindingStore.listBindings();
+    expect(bindings).toHaveLength(MANAGED_APP_IDS.length);
+
+    for (const appId of MANAGED_APP_IDS) {
+      const binding = await bindingStore.getBinding(appId);
+      expect(binding).not.toBeNull();
+      expect(binding!.functionAppUrl).toBe('https://hb-intel-func.azurewebsites.net');
+      expect(binding!.apiAudience).toBe('api://hb-intel-api');
+      expect(binding!.status).toBe(AppBindingStatus.Active);
+      expect(binding!.version).toBe(1);
+    }
+  });
+
+  it('includes correct publishSource with runId', async () => {
+    await publishBindingsAfterInstall(bindingStore, auditService, TEST_ACTOR, 'run-xyz-123', {
+      functionAppUrl: 'https://func.azurewebsites.net',
+      apiAudience: 'api://test',
+    });
+
+    const binding = await bindingStore.getBinding('accounting');
+    expect(binding!.publishSource).toBe('install-run:run-xyz-123');
+  });
+
+  it('records BindingPublished audit event per app', async () => {
+    await publishBindingsAfterInstall(bindingStore, auditService, TEST_ACTOR, 'run-001', {
+      functionAppUrl: 'https://func.azurewebsites.net',
+      apiAudience: 'api://test',
+    });
+
+    expect(auditService.recordEvent).toHaveBeenCalledTimes(MANAGED_APP_IDS.length);
+    const firstCall = (auditService.recordEvent as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(firstCall.eventType).toBe(AdminAuditEventType.BindingPublished);
+    expect(firstCall.runId).toBe('run-001');
+  });
+
+  it('skips publication when functionAppUrl is missing', async () => {
+    await publishBindingsAfterInstall(bindingStore, auditService, TEST_ACTOR, 'run-001', {
+      apiAudience: 'api://test',
+    });
+
+    const bindings = await bindingStore.listBindings();
+    expect(bindings).toHaveLength(0);
+    expect(auditService.recordEvent).not.toHaveBeenCalled();
+  });
+
+  it('skips publication when apiAudience is missing', async () => {
+    await publishBindingsAfterInstall(bindingStore, auditService, TEST_ACTOR, 'run-001', {
+      functionAppUrl: 'https://func.azurewebsites.net',
+    });
+
+    const bindings = await bindingStore.listBindings();
+    expect(bindings).toHaveLength(0);
+  });
+
+  it('continues publishing remaining apps if one fails', async () => {
+    // Create a store that fails on the first app but succeeds on the second
+    const failingStore: MockAdminAppBindingStore = new MockAdminAppBindingStore();
+    let callCount = 0;
+    const originalPublish = failingStore.publishBinding.bind(failingStore);
+    failingStore.publishBinding = async (req, actor) => {
+      callCount++;
+      if (callCount === 1) throw new Error('Simulated failure');
+      return originalPublish(req, actor);
+    };
+
+    await publishBindingsAfterInstall(failingStore, auditService, TEST_ACTOR, 'run-001', {
+      functionAppUrl: 'https://func.azurewebsites.net',
+      apiAudience: 'api://test',
+    });
+
+    // Second app should still be published
+    const bindings = await failingStore.listBindings();
+    expect(bindings).toHaveLength(1);
+    expect(bindings[0].appId).toBe('project-setup');
+  });
+});
+
+describe('P6A-05 executeInstallRun with binding publication', () => {
+  it('does not publish bindings when install fails at a blocking step', async () => {
+    const bindingStore = new MockAdminAppBindingStore();
+    const failingDeps = makeDeps({
+      bindingService: bindingStore,
+      adapterRegistry: {
+        ...makeDeps().adapterRegistry,
+        invoke: vi.fn().mockResolvedValue({
+          outcome: AdminAdapterOutcome.Failed,
+          adapterKey: 'test',
+          summary: 'Failed',
+          durationMs: 10,
+          warnings: [],
+          issues: [],
+          evidenceRefs: [],
+        } as IAdminAdapterResult),
+      },
+    });
+
+    await executeInstallRun(failingDeps, TEST_ACTOR, {
+      functionAppUrl: 'https://func.azurewebsites.net',
+      apiAudience: 'api://test',
+    });
+
+    const bindings = await bindingStore.listBindings();
+    expect(bindings).toHaveLength(0);
+  });
+
+  it('does not publish bindings when install is cancelled', async () => {
+    const bindingStore = new MockAdminAppBindingStore();
+    const cancelledEnvelope = makeRunEnvelope({ status: AdminRunStatus.Cancelled });
+    const deps = makeDeps({
+      bindingService: bindingStore,
+      runService: {
+        ...makeDeps().runService,
+        getRun: vi.fn().mockResolvedValue(cancelledEnvelope),
+      },
+    });
+
+    await executeInstallRun(deps, TEST_ACTOR, {
+      functionAppUrl: 'https://func.azurewebsites.net',
+      apiAudience: 'api://test',
+    });
+
+    const bindings = await bindingStore.listBindings();
+    expect(bindings).toHaveLength(0);
+  });
+
+  it('does not publish bindings when run pauses at checkpoint', async () => {
+    // Default mock: adapters return Skipped, so run pauses at first checkpoint
+    const bindingStore = new MockAdminAppBindingStore();
+    const deps = makeDeps({ bindingService: bindingStore });
+
+    await executeInstallRun(deps, TEST_ACTOR, {
+      functionAppUrl: 'https://func.azurewebsites.net',
+      apiAudience: 'api://test',
+    });
+
+    // Binding publication only happens on successful completion, not checkpoint pause
+    const bindings = await bindingStore.listBindings();
+    expect(bindings).toHaveLength(0);
   });
 });

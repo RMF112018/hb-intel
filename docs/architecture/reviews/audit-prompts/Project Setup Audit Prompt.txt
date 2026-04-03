@@ -1,0 +1,126 @@
+You are continuing an in-progress architecture, deployment, and production-readiness effort for the HB Intel Estimating / Project Setup SPFx application.
+
+Authoritative implementation repository:
+https://github.com/RMF112018/hb-intel.git
+
+Attached artifact:
+- The attached `.sppkg` package is the current Estimating / Project Setup SharePoint package artifact and must be audited as a deployable frontend truth source.
+- Treat the attached package as the current frontend deployment artifact unless the live repo proves it is stale or no longer representative.
+
+Context and intent:
+This audit is focused specifically on alignment between:
+1. the `@hbc/backend` package and its Azure Functions / identity / SharePoint integration behavior
+2. the Estimating / Project Setup SPFx `.sppkg` package
+3. current Microsoft guidance and best practices for the connected services used by this solution
+
+Primary objective:
+Conduct an exhaustive and comprehensive audit of the backend in relation to the attached Estimating / Project Setup `.sppkg` package to verify that the backend is fully aligned with the frontend.
+Additionally, verify the backend package against the most current Microsoft guidance and best practices for the connected services involved, including at minimum:
+- Azure Functions
+- Azure Storage for Functions host/runtime
+- Microsoft Entra ID app registration / API exposure / token validation
+- managed identity
+- SharePoint Online / SharePoint App Catalog / SPFx API access
+- CORS for browser-hosted SPFx calls
+- Microsoft Graph / SharePoint site permission model
+- any other connected Azure or Microsoft 365 services the backend actively depends on
+
+Critical instructions:
+- Treat the live repo as the authoritative implementation source.
+- Treat the attached `.sppkg` as the authoritative current frontend deployment artifact unless live repo proof shows a mismatch.
+- Do not re-read files already in your active context or memory unless needed to verify a contradiction or retrieve exact evidence.
+- Do not assume prior conclusions are correct.
+- Validate all meaningful conclusions against:
+  1. live repo truth
+  2. package artifact truth
+  3. current Microsoft documentation and official guidance
+- Use web search extensively and prefer official Microsoft sources wherever possible.
+- If non-Microsoft sources are used, use them only as secondary/supporting references and not as the primary basis for technical guidance.
+- Distinguish clearly between:
+  1. confirmed repo fact
+  2. confirmed package fact
+  3. confirmed Microsoft-documented requirement / best practice
+  4. inferred conclusion
+  5. unresolved issue
+
+Required working approach:
+1. Inspect the attached `.sppkg` package thoroughly:
+   - AppManifest.xml
+   - web part manifest(s)
+   - ClientSideAssets bundle(s)
+   - runtime config injection behavior
+   - route tree / visible surface posture
+   - auth/token handling assumptions
+   - backend URL/config assumptions
+   - any feature flags / ui-review / production-mode logic
+2. Audit the live repo comprehensively with emphasis on:
+   - `@hbc/backend`
+   - Azure Functions startup and registered handlers
+   - config validation / startup validation / feature gating
+   - auth middleware and token validation model
+   - managed identity usage
+   - SharePoint / Graph service access patterns
+   - CORS assumptions
+   - environment variable requirements
+   - service factory and dependency initialization
+   - any backend behavior that is broader than the Project Setup deployment posture
+3. Reconcile the backend against the package:
+   - verify every frontend expectation of the backend
+   - verify every backend route or service the frontend requires
+   - verify auth compatibility
+   - verify runtime config compatibility
+   - verify that backend startup behavior is appropriate for the actual frontend scope
+   - identify any frontend/backend contract mismatches
+4. Conduct comprehensive subject matter research using current official Microsoft guidance:
+   - Azure Functions production guidance
+   - App Service / Functions auth guidance
+   - SPFx guidance for calling Entra-secured APIs
+   - SharePoint App Catalog and API access approval guidance
+   - CORS guidance for browser-based access
+   - managed identity guidance
+   - Microsoft Graph / Sites.Selected / site permission grant guidance
+   - any other relevant service guidance implicated by the backend
+5. Audit the backend against that research:
+   - identify where implementation aligns
+   - identify where implementation deviates
+   - identify where implementation is acceptable but non-ideal
+   - identify where implementation is risky, outdated, over-broad, or inconsistent with Microsoft guidance
+
+Specific audit questions you must answer:
+- Does the backend, as currently implemented, fully support the attached Project Setup frontend package?
+- Are the backend startup requirements properly scoped to the frontend deployment posture, or are there over-broad boot blockers?
+- Does the frontend package assume runtime config or token behavior that the backend or shell does not correctly support?
+- Is the backend auth model internally consistent with the frontend package and Microsoft guidance?
+- Is the backend’s Entra / API audience / token validation model correctly designed?
+- Is the backend’s managed identity / SharePoint / Graph access model correctly designed?
+- Are required connected Azure and SharePoint services correctly identified and appropriately used?
+- Are there any Microsoft-guidance conflicts, anti-patterns, or production risks in the backend package?
+- Are there any frontend/backend contract mismatches that would block production launch?
+- Are there any “it works in a narrow demo path but is not truly production-ready” conditions?
+
+Required output:
+Produce a rigorous audit report before proposing any implementation prompts.
+
+The report must include:
+1. Executive summary
+2. Current architecture summary
+3. Confirmed frontend package facts
+4. Confirmed backend repo facts
+5. Confirmed Microsoft guidance / best-practice findings
+6. Frontend ↔ backend alignment analysis
+7. Gap analysis
+8. Risk analysis
+9. Production-readiness assessment
+10. Prioritized remediation list
+11. Explicit list of unresolved questions, if any
+
+Required output format expectations:
+- Be exhaustive and specific.
+- Use direct citations throughout.
+- Prefer official Microsoft citations for platform/best-practice claims.
+- Cite repo/package evidence when describing implementation facts.
+- Make the report suitable for architecture and deployment decision-making.
+- Do not jump into implementation prompts until the audit is complete.
+
+Required first response:
+Before proposing any implementation steps, conduct comprehensive research on the subject matter, audit the live repo, audit the attached `.sppkg` package, reconcile backend/package truth against Microsoft guidance, and then summarize the findings clearly before we proceed.

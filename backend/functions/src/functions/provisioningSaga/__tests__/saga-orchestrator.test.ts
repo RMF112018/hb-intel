@@ -186,6 +186,49 @@ describe('D-PH6-15 SagaOrchestrator', () => {
     expect(status.failedAt).toBeDefined();
   });
 
+  it('P7-04: sets failureClass on the failed run status', async () => {
+    const services = createMockServices();
+    const logger = makeLogger();
+    // Simulate a 403 permission error at Step 6 (group creation)
+    services.graph.createSecurityGroup.mockRejectedValueOnce(
+      new Error('[GraphService] createSecurityGroup failed (403): Insufficient privileges')
+    );
+
+    const orchestrator = new SagaOrchestrator(services, logger);
+    await orchestrator.execute(request);
+
+    const finalUpsert = services.tableStorage.upsertProvisioningStatus.mock.calls.at(-1)?.[0] as IProvisioningStatus;
+    expect(finalUpsert.overallStatus).toBe('Failed');
+    expect(finalUpsert.failureClass).toBe('permissions');
+  });
+
+  it('P7-04: classifies transient errors correctly', async () => {
+    const services = createMockServices();
+    const logger = makeLogger();
+    services.sharePoint.uploadTemplateFile.mockRejectedValueOnce(new Error('Request throttled (429)'));
+
+    const orchestrator = new SagaOrchestrator(services, logger);
+    await orchestrator.execute(request);
+
+    const finalUpsert = services.tableStorage.upsertProvisioningStatus.mock.calls.at(-1)?.[0] as IProvisioningStatus;
+    expect(finalUpsert.failureClass).toBe('transient');
+  });
+
+  it('P7-04: runs Step 6 compensation to delete Entra groups', async () => {
+    const services = createMockServices();
+    const logger = makeLogger();
+
+    // Step 7 fails, Step 6 completed with entra groups
+    services.sharePoint.associateHubSite.mockRejectedValueOnce(new Error('hub association failed'));
+
+    const orchestrator = new SagaOrchestrator(services, logger);
+    await orchestrator.execute(request);
+
+    // Step 6 compensation should call deleteSecurityGroup for each group
+    expect(services.graph.deleteSecurityGroup).toHaveBeenCalled();
+    expect(services.sharePoint.deleteSite).toHaveBeenCalledTimes(1);
+  });
+
   it('logs and continues when SignalR push fails during progress updates', async () => {
     const services = createMockServices();
     const logger = makeLogger();

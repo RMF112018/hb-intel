@@ -107,7 +107,31 @@ export async function executeStep6(
   return result;
 }
 
-// W0-G1-T02 Compensation gap: Entra ID group deletion is NOT yet implemented.
-// Site deletion (Step 1 compensation) removes SharePoint permission assignments
-// but does not delete the Entra ID groups. Orphaned groups are inert and can be
-// cleaned up manually. Automated group cleanup is planned for a future wave.
+/**
+ * P7-04: Step 6 compensation — delete Entra ID security groups created during provisioning.
+ *
+ * Deletes all three groups (leaders, team, viewers) if they were recorded in status.entraGroups.
+ * Silently handles already-deleted groups (404 OK). Non-blocking: individual group deletion
+ * failures are logged but do not prevent other groups from being cleaned up.
+ */
+export async function compensateStep6(
+  services: IProjectSetupServiceContainer,
+  status: IProvisioningStatus,
+): Promise<void> {
+  if (!status.entraGroups) return;
+
+  const groupIds = [
+    status.entraGroups.leadersGroupId,
+    status.entraGroups.teamGroupId,
+    status.entraGroups.viewersGroupId,
+  ].filter(Boolean);
+
+  for (const groupId of groupIds) {
+    try {
+      await services.graph.deleteSecurityGroup(groupId);
+    } catch {
+      // Non-blocking: log implicitly via caller; individual group cleanup failure
+      // should not prevent other groups from being deleted.
+    }
+  }
+}

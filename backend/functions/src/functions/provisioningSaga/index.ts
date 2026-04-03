@@ -3,6 +3,7 @@ import type { IProvisionSiteRequest, IProvisioningStatus } from '@hbc/models';
 import { randomUUID } from 'crypto';
 import { createProjectSetupServiceFactory } from '../../hosts/project-setup/service-factory.js';
 import { SagaOrchestrator } from './saga-orchestrator.js';
+import { validatePrelaunchReadiness } from './prelaunch-validation.js';
 import { createLogger } from '../../utils/logger.js';
 import { withAuth } from '../../middleware/auth.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
@@ -16,6 +17,7 @@ import {
 } from '../../utils/response-helpers.js';
 import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
 import { runTimerFullSpec } from '../timerFullSpec/handler.js';
+import { getRecoveryGuidance } from './recovery-guidance.js';
 
 /**
  * P2-02 Launch Contract: Direct provisioning endpoint.
@@ -70,6 +72,26 @@ app.http('provisionProjectSite', {
 
       if (!/^\d{2}-\d{3}-\d{2}$/.test(body.projectNumber)) {
         return errorResponse(400, 'VALIDATION_ERROR', 'projectNumber must match ##-###-## format', requestId);
+      }
+
+      // P7-03: Synchronous preflight — catch known failures before fire-and-forget.
+      const preflight = validatePrelaunchReadiness(body);
+      if (!preflight.ok) {
+        logger.warn('Prelaunch validation failed — provisioning blocked', {
+          projectId: body.projectId,
+          correlationId,
+          failureCount: preflight.failures.length,
+          failureCodes: preflight.failures.map((f) => f.code),
+        });
+        return {
+          status: 422,
+          jsonBody: {
+            message: 'Provisioning prerequisites not satisfied',
+            code: 'PRELAUNCH_VALIDATION_FAILED',
+            requestId,
+            failures: preflight.failures,
+          },
+        };
       }
 
       const services = createProjectSetupServiceFactory();
@@ -225,7 +247,17 @@ app.http('retryProvisioning', {
 
       const orchestrator = new SagaOrchestrator(services, logger);
 
-      orchestrator.retry(projectId).catch((err) => {
+      // P7-05: Audit trail — log who initiated this retry.
+      logger.trackEvent('ProvisioningRetryInitiated', {
+        projectId,
+        initiatedBy: auth.claims.upn,
+        initiatedByOid: auth.claims.oid,
+        retryCount: (status.retryCount ?? 0) + 1,
+        previousFailureClass: status.failureClass ?? 'unclassified',
+        previousFailedStep: status.currentStep,
+      });
+
+      orchestrator.retry(projectId, auth.claims.upn).catch((err) => {
         logger.error('Retry failed', {
           projectId,
           error: err instanceof Error ? err.message : String(err),
@@ -488,4 +520,35 @@ app.http('forceStateTransition', {
     });
     return successResponse({ message: `State overridden: ${fromState} → ${body.targetState}`, projectId });
   }, { domain: 'provisioningSaga', operation: 'forceStateTransition' })),
+});
+
+/**
+ * P7-05 GET /api/provisioning-recovery-guidance/{projectId}
+ * Returns structured recovery guidance for a failed provisioning run.
+ * Accessible by coordinators and admins (L2 delegated scope).
+ */
+app.http('getRecoveryGuidance', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'provisioning-recovery-guidance/{projectId}',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
+
+    const scopeDenied = requireDelegatedScope(auth.claims, requestId);
+    if (scopeDenied) return scopeDenied;
+
+    const projectId = request.params.projectId;
+    if (!projectId) {
+      return errorResponse(400, 'VALIDATION_ERROR', 'Missing projectId parameter', requestId);
+    }
+
+    const services = createProjectSetupServiceFactory();
+    const status = await services.tableStorage.getProvisioningStatus(projectId);
+    if (!status) {
+      return notFoundResponse('ProvisioningStatus', projectId, requestId);
+    }
+
+    const guidance = getRecoveryGuidance(status);
+    return successResponse(guidance);
+  }, { domain: 'provisioningSaga', operation: 'getRecoveryGuidance' })),
 });

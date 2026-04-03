@@ -20,6 +20,7 @@ import {
   InstallStepId,
   InstallStepFamily,
   INSTALL_ACTION_KEYS,
+  APP_BINDING_ACTION_KEYS,
 } from '@hbc/models/admin-control-plane';
 import type {
   IAdminActorContext,
@@ -27,6 +28,7 @@ import type {
   IAdminRunEnvelope,
   IAdminAdapterInvocationContext,
   IInstallStepDefinition,
+  BackendMode,
 } from '@hbc/models/admin-control-plane';
 import type {
   IAdminRunService,
@@ -34,6 +36,7 @@ import type {
   IAdminEvidenceService,
   IAdminAdapterRegistry,
   IAdminPreflightService,
+  IAdminAppBindingService,
 } from './types.js';
 
 // ─── Install Step Catalog ──────────────────────────────────────────────────────
@@ -249,7 +252,78 @@ export interface InstallOrchestratorDeps {
   readonly evidenceService: IAdminEvidenceService;
   readonly adapterRegistry: IAdminAdapterRegistry;
   readonly preflightService: IAdminPreflightService;
+  readonly bindingService?: IAdminAppBindingService;
 }
+
+// ─── Managed App Binding ─────────────────────────────────────────────────────
+
+/** Canonical managed app identifiers that receive binding publication after install. */
+export const MANAGED_APP_IDS = ['accounting', 'project-setup'] as const;
+
+/**
+ * Publishes binding records for all managed apps after a successful install run.
+ *
+ * Extracts `functionAppUrl` and `apiAudience` from commandInput, then publishes
+ * a binding for each managed app. Errors are non-critical — binding publication
+ * failure does not fail the install run.
+ *
+ * Called from both `executeInstallRun()` and `resumeAfterCheckpoint()`.
+ */
+export async function publishBindingsAfterInstall(
+  bindingService: IAdminAppBindingService,
+  auditService: IAdminAuditService,
+  actor: IAdminActorContext,
+  runId: string,
+  commandInput: Record<string, unknown>,
+): Promise<void> {
+  const functionAppUrl = (commandInput.functionAppUrl as string) ?? '';
+  const apiAudience = (commandInput.apiAudience as string) ?? '';
+
+  if (!functionAppUrl || !apiAudience) {
+    console.warn(
+      `[InstallOrchestrator] Binding publication skipped for run ${runId}: ` +
+      `missing functionAppUrl (${functionAppUrl ? 'present' : 'absent'}) or ` +
+      `apiAudience (${apiAudience ? 'present' : 'absent'}) in commandInput`,
+    );
+    return;
+  }
+
+  for (const appId of MANAGED_APP_IDS) {
+    try {
+      const result = await bindingService.publishBinding(
+        {
+          appId,
+          functionAppUrl,
+          apiAudience,
+          backendMode: ((commandInput.backendMode as string) ?? 'production') as BackendMode,
+          allowBackendModeSwitch: commandInput.allowBackendModeSwitch === true,
+          publishSource: `install-run:${runId}`,
+        },
+        actor,
+      );
+
+      auditService.recordEvent({
+        auditId: crypto.randomUUID(),
+        eventType: AdminAuditEventType.BindingPublished,
+        timestamp: new Date().toISOString(),
+        domain: AdminDomain.AppBinding,
+        actionKey: APP_BINDING_ACTION_KEYS.PUBLISH,
+        runId,
+        checkpointInstanceId: null,
+        actor,
+        rationale: null,
+        evidenceRef: null,
+        configSnapshotRef: null,
+        runStatusAtEvent: AdminRunStatus.Completed,
+        summary: `Published binding for ${appId} v${result.version} from install run ${runId}`,
+      }).catch(() => {});
+    } catch (err) {
+      console.error(`[InstallOrchestrator] Non-critical: binding publication failed for ${appId} in run ${runId}`, err);
+    }
+  }
+}
+
+// ─── Step Helpers ────────────────────────────────────────────────────────────
 
 /**
  * Builds the initial step result array for a new install run.
@@ -425,6 +499,11 @@ export async function executeInstallRun(
   }).catch((err) => {
     console.error(`[InstallOrchestrator] Non-critical: failed to record completion audit for ${runId}`, err);
   });
+
+  // 5. Publish bindings for managed apps (P6A-05)
+  if (deps.bindingService) {
+    await publishBindingsAfterInstall(deps.bindingService, auditService, actor, runId, commandInput);
+  }
 
   const finalRun = await runService.getRun(runId);
   return finalRun as IAdminRunEnvelope;

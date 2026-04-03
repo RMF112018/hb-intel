@@ -12,6 +12,10 @@ The platform already has meaningful provisioning foundations: an admin app, a pr
 - gives operators better recovery visibility and guidance,
 - and integrates provisioning with install/bootstrap and Entra readiness work established in earlier phases.
 
+## Prerequisite: Phase 6A
+
+Phase 7 follows **Phase 6A — Managed App Binding and Backend-Setup Configuration** in the implementation sequence. This means Phase 7 can assume a first-class app-binding model exists rather than ad hoc per-app configuration. Provisioning readiness checks may include binding posture as a dependency signal.
+
 ## Governing direction
 
 Phase 7 is controlled by the end-state plan requirement that:

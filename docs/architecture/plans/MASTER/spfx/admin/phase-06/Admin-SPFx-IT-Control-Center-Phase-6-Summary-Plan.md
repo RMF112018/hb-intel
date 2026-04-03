@@ -125,3 +125,17 @@ Do not let this phase drift into:
 - or a total generalized admin platform rewrite.
 
 Where earlier-phase substrate is missing, create only the **smallest forward-compatible compatibility slice** required to make Phase 6 coherent and executable.
+
+## Handoff to Phase 6A
+
+Phase 6 delivered the install/bootstrap execution and verification flow — preflight validation, 19-step orchestration, manual checkpoints, post-install verification, audit/evidence capture, and operator UX.
+
+Phase 6 did **not** establish:
+- durable managed-app binding publication,
+- target-app runtime resolution of backend configuration,
+- binding verification or drift detection,
+- or operator UX for binding status and repair.
+
+These concerns are the explicit scope of **Phase 6A — Managed App Binding and Backend-Setup Configuration**, which is the immediate follow-on phase. Target SPFx apps (Accounting, Project Setup) are not assumed runtime-ready solely because Phase 6 install completed. Phase 6A must publish and resolve the runtime binding (`functionAppUrl`, `apiAudience`, `backendMode`, `allowBackendModeSwitch`) before managed apps can make backend-dependent calls.
+
+See [Phase 6A Handoff Note](admin-spfx-phase-6a-handoff-note.md) for the detailed handoff.

@@ -25,6 +25,13 @@ export interface IGraphService {
   getGroupByDisplayName(displayName: string): Promise<string | null>;
 
   /**
+   * P7-04: Deletes an Entra ID security group by object ID.
+   * Used by Step 6 compensation to clean up orphaned groups on saga failure.
+   * Silently succeeds if the group does not exist (404).
+   */
+  deleteSecurityGroup(groupId: string): Promise<void>;
+
+  /**
    * Grants the specified application (Managed Identity) per-site access
    * to a SharePoint site using the Sites.Selected permission model.
    *
@@ -162,6 +169,20 @@ export class GraphService implements IGraphService {
     return result.value.length > 0 ? result.value[0].id : null;
   }
 
+  async deleteSecurityGroup(groupId: string): Promise<void> {
+    this.assertPermissionConfirmed('deleteSecurityGroup');
+
+    const response = await this.graphFetch(`/groups/${groupId}`, {
+      method: 'DELETE',
+    });
+
+    // 204 = deleted, 404 = already gone — both are acceptable
+    if (!response.ok && response.status !== 404) {
+      const body = await response.text();
+      throw new Error(`[GraphService] deleteSecurityGroup failed (${response.status}): ${body}`);
+    }
+  }
+
   async grantSiteAccess(
     siteId: string,
     appId: string,
@@ -222,6 +243,14 @@ export class MockGraphService implements IGraphService {
   async getGroupByDisplayName(displayName: string): Promise<string | null> {
     const entry = this.groups.get(displayName);
     return entry?.id ?? null;
+  }
+
+  async deleteSecurityGroup(groupId: string): Promise<void> {
+    const entry = [...this.groups.entries()].find(([, g]) => g.id === groupId);
+    if (entry) {
+      this.groups.delete(entry[0]);
+      console.log(`[MockGraph] Deleted security group ${groupId}`);
+    }
   }
 
   private readonly siteGrants = new Map<string, { appId: string; role: string }>();

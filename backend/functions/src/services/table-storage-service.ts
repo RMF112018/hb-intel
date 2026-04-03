@@ -71,6 +71,7 @@ export class RealTableStorageService implements ITableStorageService {
         failureClass: status.failureClass ?? '',
         lastRetryAt: status.lastRetryAt ?? '',
         escalatedAt: status.escalatedAt ?? '',
+        evidenceJson: JSON.stringify(status.evidence ?? null),
       },
       'Replace'
     );
@@ -199,6 +200,12 @@ export class RealTableStorageService implements ITableStorageService {
       failureClass: ((entity.failureClass as string) || undefined) as IProvisioningStatus['failureClass'],
       lastRetryAt: (entity.lastRetryAt as string) || undefined,
       escalatedAt: (entity.escalatedAt as string) || undefined,
+      evidence: (() => {
+        try {
+          const raw = (entity.evidenceJson as string) || '';
+          return raw ? JSON.parse(raw) ?? undefined : undefined;
+        } catch { return undefined; }
+      })(),
     };
   }
 

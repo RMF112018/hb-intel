@@ -28,21 +28,40 @@ export async function executeStep5(
   }
 
   for (let attempt = 1; attempt <= STEP5_MAX_ATTEMPTS; attempt++) {
+    const attemptStartMs = Date.now();
     try {
       await Promise.race([
         services.sharePoint.installWebParts(status.siteUrl),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error(`Step 5 timed out after ${STEP5_TIMEOUT_MS}ms`)), STEP5_TIMEOUT_MS)
+          setTimeout(() => reject(new Error(
+            `Step 5 timed out after ${STEP5_TIMEOUT_MS}ms (attempt ${attempt}/${STEP5_MAX_ATTEMPTS}, ` +
+            `site: ${status.siteUrl})`
+          )), STEP5_TIMEOUT_MS)
         ),
       ]);
       result.status = 'Completed';
       result.completedAt = new Date().toISOString();
+      // P7-06: Capture successful attempt metadata.
+      result.metadata = {
+        ...result.metadata,
+        attemptCount: attempt,
+        durationMs: Date.now() - attemptStartMs,
+        timeoutThresholdMs: STEP5_TIMEOUT_MS,
+      };
       return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.warn(`Step 5 attempt ${attempt} failed`, {
+      const elapsedMs = Date.now() - attemptStartMs;
+      const isTimeout = msg.includes('timed out');
+
+      logger.warn(`Step 5 attempt ${attempt}/${STEP5_MAX_ATTEMPTS} failed`, {
         correlationId: status.correlationId,
         projectId: status.projectId,
+        attempt,
+        maxAttempts: STEP5_MAX_ATTEMPTS,
+        elapsedMs,
+        isTimeout,
+        timeoutThresholdMs: STEP5_TIMEOUT_MS,
         error: msg,
       });
 
@@ -56,6 +75,14 @@ export async function executeStep5(
         result.status = 'DeferredToTimer';
         result.completedAt = new Date().toISOString();
         result.errorMessage = msg;
+        // P7-06: Capture deferral diagnostic metadata.
+        result.metadata = {
+          ...result.metadata,
+          attemptCount: attempt,
+          durationMs: elapsedMs,
+          isTimeout,
+          timeoutThresholdMs: STEP5_TIMEOUT_MS,
+        };
         return result;
       }
 

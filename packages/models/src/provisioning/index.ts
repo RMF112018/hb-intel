@@ -23,6 +23,18 @@ export type {
   IClarificationResponseInput,
 } from './IRequestClarification.js';
 export type { IProvisionSiteFormData } from './IProvisioningFormData.js';
+export type {
+  IProvisioningEvidence,
+  IStepEvidence,
+  IPermissionPosture,
+} from './IProvisioningEvidence.js';
+export type {
+  IRecoveryGuidance,
+  RecoveryAction,
+  IPrelaunchFailure,
+  IPrelaunchValidationResult,
+  PrelaunchFailureCategory,
+} from './IRecoveryGuidance.js';
 export type { ProvisioningOverallStatus, SagaStepStatus } from './ProvisioningEnums.js';
 export type { SagaStepNumber } from './types.js';
 export { SAGA_STEPS, TOTAL_SAGA_STEPS } from './constants.js';

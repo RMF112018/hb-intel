@@ -9,6 +9,7 @@ import type {
   IAdminPreflightService,
   IAdminActorContextResolver,
   IAdminEvidenceService,
+  IAdminAppBindingService,
 } from '../../services/admin-control-plane/index.js';
 import { MockTableStorageService, RealTableStorageService } from '../../services/table-storage-service.js';
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '../../services/managed-identity-token-service.js';
@@ -20,6 +21,8 @@ import {
   MockAdminAuditStore,
   DurableAdminEvidenceStore,
   MockAdminEvidenceStore,
+  DurableAdminAppBindingStore,
+  MockAdminAppBindingStore,
   AdminAdapterRegistry,
   registerPhase3Adapters,
   AdminActorContextResolver,
@@ -69,6 +72,7 @@ export interface IAdminControlPlaneServiceContainer {
   readonly evidenceService: IAdminEvidenceService;
   readonly preflightService: IAdminPreflightService;
   readonly actorContextResolver: IAdminActorContextResolver;
+  readonly bindingService: IAdminAppBindingService;
 }
 
 let singletonContainer: IAdminControlPlaneServiceContainer | null = null;
@@ -112,6 +116,7 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     evidenceService: isMock ? new MockAdminEvidenceStore() : new DurableAdminEvidenceStore(),  // P4-06: evidence metadata
     preflightService: isMock ? new StubAdminPreflightService() : new AdminPreflightService(),  // P6-04: real preflight in prod, stub for mock/test
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
+    bindingService: isMock ? new MockAdminAppBindingStore() : new DurableAdminAppBindingStore(),  // P6A-04: app-binding persistence
   };
 
   singletonContainer = container;

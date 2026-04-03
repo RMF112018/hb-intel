@@ -11,4 +11,15 @@ export type {
   ClarificationStatus,
   IRequestClarificationInput,
   IClarificationResponseInput,
+  // P7-06: Evidence payload types
+  IProvisioningEvidence,
+  IStepEvidence,
+  IPermissionPosture,
+  // P7-05 / P7-08: Recovery guidance and prelaunch validation types
+  IRecoveryGuidance,
+  RecoveryAction,
+  IPrelaunchFailure,
+  IPrelaunchValidationResult,
+  PrelaunchFailureCategory,
+  ProvisioningFailureClass,
 } from '@hbc/models';

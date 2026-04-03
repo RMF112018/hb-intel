@@ -31,6 +31,12 @@ import type {
   IAdminActorContext,
   IAdminConfigResponse,
   IAdminEvidenceReference,
+  IAppBindingRecord,
+  IAppBindingPublishRequest,
+  IAppBindingPublishResult,
+  IAppBindingVerificationResult,
+  IAppBindingRepairRequest,
+  IAppBindingRepairResult,
 } from '@hbc/models/admin-control-plane';
 
 // ─── Run Service ────────────────────────────────────────────────────────────────
@@ -210,4 +216,32 @@ export interface IAdminActorResolverInput {
   readonly upn: string;
   readonly oid: string;
   readonly displayName: string;
+}
+
+// ─── App Binding Service ──────────────────────────────────────────────────────
+
+/**
+ * Manages durable per-app backend-setup binding records.
+ *
+ * The binding service is the control-plane authority for publishing,
+ * resolving, verifying, and repairing managed-app binding records.
+ * Target apps consume bindings; only the backend may write them.
+ *
+ * Implemented in P6A-04. Backed by Azure Table Storage.
+ */
+export interface IAdminAppBindingService {
+  /** Get the active binding for a managed app. Returns null if not configured. */
+  getBinding(appId: string): Promise<IAppBindingRecord | null>;
+
+  /** List binding records for all managed apps. */
+  listBindings(): Promise<readonly IAppBindingRecord[]>;
+
+  /** Publish or update a binding for a managed app. */
+  publishBinding(request: IAppBindingPublishRequest, actor: IAdminActorContext): Promise<IAppBindingPublishResult>;
+
+  /** Verify a published binding against live infrastructure state. */
+  verifyBinding(appId: string): Promise<IAppBindingVerificationResult>;
+
+  /** Repair a drifted or errored binding with corrected values. */
+  repairBinding(request: IAppBindingRepairRequest, actor: IAdminActorContext): Promise<IAppBindingRepairResult>;
 }

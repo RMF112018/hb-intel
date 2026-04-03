@@ -8,6 +8,21 @@ This package is the **Phase 8 implementation prompt set** for the Admin SPFx IT 
 
 It is intended for a **repo-writing local code agent** and is sequenced so the work can be executed in the correct order without flattening multiple major tasks into vague all-in-one prompts.
 
+## Execution status
+
+| Prompt | Status | Date | Artifact |
+|--------|--------|------|----------|
+| P8-01 Repo-Truth Audit | **Complete** | 2026-04-03 | `admin-spfx-phase-8-repo-truth-audit.md` |
+| P8-02 SharePoint Control Baseline | **Complete** | 2026-04-03 | `admin-spfx-phase-8-sharepoint-control-baseline.md` |
+| P8-03 Standards Comparison Model | **Complete** | 2026-04-03 | `admin-spfx-phase-8-standards-comparison-model.md` + `ISharePointControl.ts` |
+| P8-04 Drift Detection Workflow | **Complete** | 2026-04-03 | `admin-spfx-phase-8-drift-detection-workflow.md` + `sharepoint-drift-service.ts` |
+| P8-05 Preview / Dry-Run | **Complete** | 2026-04-03 | `admin-spfx-phase-8-preview-and-dry-run.md` + `sharepoint-preview-service.ts` |
+| P8-06 Controlled Repair | **Complete** | 2026-04-03 | `admin-spfx-phase-8-repair-and-standards-application.md` + `sharepoint-repair-service.ts` |
+| P8-07 App Catalog / API Posture | **Complete** | 2026-04-03 | `admin-spfx-phase-8-package-and-api-posture.md` + `sharepoint-posture-service.ts` |
+| P8-08 SharePoint Control Lane UX | **Complete** | 2026-04-03 | `admin-spfx-phase-8-sharepoint-control-ux.md` + `SharePointControlPage.tsx` |
+| P8-09 Evidence, Docs, Runbooks | **Complete** | 2026-04-03 | `admin-spfx-phase-8-sharepoint-control-operator-runbook.md` |
+| P8-10 Validation and Exit | **Complete** | 2026-04-03 | `admin-spfx-phase-8-exit-reconciliation.md` |
+
 ## Included files
 
 1. `Admin-SPFx-IT-Control-Center-Phase-8-Summary-Plan.md`

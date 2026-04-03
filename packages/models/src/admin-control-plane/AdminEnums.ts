@@ -39,6 +39,9 @@ export enum AdminDomain {
 
   /** Repair, recovery, and remediation actions */
   RepairRecovery = 'repair-recovery',
+
+  /** Managed app-binding and backend-setup configuration (Phase 6A) */
+  AppBinding = 'app-binding',
 }
 
 // ─── Risk Levels ────────────────────────────────────────────────────────────────

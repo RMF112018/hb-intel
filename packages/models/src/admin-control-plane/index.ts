@@ -92,3 +92,36 @@ export type {
   IInstallStepDefinition,
   InstallActionKey,
 } from './IInstallBootstrap.js';
+
+export { AppBindingStatus, APP_BINDING_ACTION_KEYS } from './IAppBinding.js';
+
+export type {
+  BackendMode,
+  AppBindingVerificationOutcome,
+  IAppBindingRecord,
+  IAppBindingRetrievalResponse,
+  IAppBindingPublishRequest,
+  IAppBindingPublishResult,
+  IAppBindingDriftFinding,
+  IAppBindingVerificationResult,
+  IAppBindingRepairRequest,
+  IAppBindingRepairResult,
+  IAppBindingStatusSummary,
+  AppBindingActionKey,
+} from './IAppBinding.js';
+
+export { SharePointStandardsArea, SHAREPOINT_CONTROL_ACTION_KEYS } from './ISharePointControl.js';
+
+export type {
+  SharePointDriftSeverity,
+  SharePointComparisonOutcome,
+  ISharePointManagedAsset,
+  ISharePointStandardsExpectation,
+  ISharePointStandardsSnapshot,
+  ISharePointPostureObservation,
+  ISharePointPostureSnapshot,
+  ISharePointDriftFinding,
+  ISharePointAreaComparisonSummary,
+  ISharePointComparisonResult,
+  SharePointControlActionKey,
+} from './ISharePointControl.js';
