@@ -35,6 +35,10 @@ import {
   executeUserDeleteCloud,
 } from '../../services/hybrid-identity-user-workflows.js';
 import type { HybridIdentityError } from '../../services/hybrid-identity-errors.js';
+import type { IHybridIdentityAuditPayload } from '../../services/hybrid-identity-contracts.js';
+import type { IAdminAuditRecord } from '@hbc/models/admin-control-plane';
+import { AdminAuditEventType } from '@hbc/models/admin-control-plane';
+import type { IAdminControlPlaneServiceContainer } from '../../hosts/admin-control-plane/service-factory.js';
 
 // ─── Error → HTTP status mapping ───────────────────────────────────────────────
 
@@ -77,6 +81,27 @@ function resolveActor(services: ReturnType<typeof createAdminControlPlaneService
   };
 }
 
+/** Persist a hybrid identity audit payload as an admin audit record (fire-and-forget). */
+function persistIdentityAudit(services: IAdminControlPlaneServiceContainer, audit: IHybridIdentityAuditPayload): void {
+  const verb = audit.actionId.split(':').pop() ?? audit.actionId;
+  const record: IAdminAuditRecord = {
+    auditId: crypto.randomUUID(),
+    eventType: audit.success ? AdminAuditEventType.RunCompleted : AdminAuditEventType.RunFailed,
+    timestamp: audit.timestamp,
+    domain: 'entra-control' as IAdminAuditRecord['domain'],
+    actionKey: `entra-control:identity:${verb}` as IAdminAuditRecord['actionKey'],
+    runId: audit.correlationId,
+    checkpointInstanceId: null,
+    actor: { upn: audit.actor.upn, objectId: audit.actor.oid, displayName: audit.actor.displayName, capturedAt: audit.timestamp },
+    rationale: null,
+    evidenceRef: null,
+    configSnapshotRef: null,
+    runStatusAtEvent: null,
+    summary: `${audit.actionId} on ${audit.target.objectType} "${audit.target.displayName ?? audit.target.identifier}" — ${audit.success ? 'succeeded' : `failed: ${audit.errorMessage ?? 'unknown'}`}`,
+  };
+  services.auditService.recordEvent(record).catch(() => {});
+}
+
 // ─── POST /api/admin/identity/users/search ──────────────────────────────────────
 
 app.http('identityUserSearch', {
@@ -96,10 +121,11 @@ app.http('identityUserSearch', {
       return errorResponse(400, 'VALIDATION_ERROR', 'query is required', reqId);
     }
 
-    const { result } = await executeUserSearch(
+    const { result, audit } = await executeUserSearch(
       { query: body.query, top: typeof body.top === 'number' ? body.top : undefined, actor, correlationId: reqId },
       services,
     );
+    persistIdentityAudit(services, audit);
 
     if (!result.success) {
       const mapped = mapErrorToStatus({ code: result.error?.code } as never);
@@ -124,7 +150,8 @@ app.http('identityUserRead', {
     const actor = resolveActor(services, auth.claims);
     const userId = request.params.userId ?? '';
 
-    const { result } = await executeUserRead({ userIdentifier: userId, actor, correlationId: reqId }, services);
+    const { result, audit } = await executeUserRead({ userIdentifier: userId, actor, correlationId: reqId }, services);
+    persistIdentityAudit(services, audit);
 
     if (!result.success) {
       if (result.error?.code === 'NOT_FOUND') return errorResponse(404, 'NOT_FOUND', result.error.message, reqId);
@@ -151,7 +178,7 @@ app.http('identityUserCreate', {
     const body = (await request.json()) as Record<string, unknown>;
 
     const authority = body.authority as string;
-    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown>; syncState?: unknown } };
+    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown>; syncState?: unknown }; audit: IHybridIdentityAuditPayload };
 
     if (authority === 'ad-ds') {
       if (!body.samAccountName || !body.userPrincipalName || !body.displayName || !body.targetOu) {
@@ -189,6 +216,8 @@ app.http('identityUserCreate', {
       return errorResponse(400, 'VALIDATION_ERROR', 'authority must be "ad-ds" or "entra"', reqId);
     }
 
+    persistIdentityAudit(services, outcome.audit);
+
     if (!outcome.result.success) {
       const mapped = mapErrorToStatus({ code: outcome.result.error?.code } as never);
       return errorResponse(mapped.status, outcome.result.error?.code ?? 'ERROR', outcome.result.error?.message ?? 'Create failed', reqId);
@@ -220,7 +249,7 @@ app.http('identityUserUpdate', {
       return errorResponse(400, 'VALIDATION_ERROR', 'properties object is required', reqId);
     }
 
-    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> } };
+    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> }; audit: IHybridIdentityAuditPayload };
 
     if (authority === 'ad-ds') {
       outcome = await executeUserUpdateADDS({ distinguishedName: userId, properties, actor, correlationId: reqId }, services);
@@ -229,6 +258,7 @@ app.http('identityUserUpdate', {
     } else {
       return errorResponse(400, 'VALIDATION_ERROR', 'authority must be "ad-ds" or "entra"', reqId);
     }
+    persistIdentityAudit(services, outcome.audit);
 
     if (!outcome.result.success) {
       const mapped = mapErrorToStatus({ code: outcome.result.error?.code } as never);
@@ -255,13 +285,14 @@ app.http('identityUserEnable', {
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const authority = (body.authority as string) ?? 'ad-ds';
 
-    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> } };
+    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> }; audit: IHybridIdentityAuditPayload };
 
     if (authority === 'ad-ds') {
       outcome = await executeUserToggleADDS({ distinguishedName: userId, enabled: true, actor, correlationId: reqId }, services);
     } else {
       outcome = await executeUserToggleCloud({ userId, enabled: true, actor, correlationId: reqId }, services);
     }
+    persistIdentityAudit(services, outcome.audit);
 
     if (!outcome.result.success) {
       const mapped = mapErrorToStatus({ code: outcome.result.error?.code } as never);
@@ -288,13 +319,14 @@ app.http('identityUserDisable', {
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const authority = (body.authority as string) ?? 'ad-ds';
 
-    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> } };
+    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> }; audit: IHybridIdentityAuditPayload };
 
     if (authority === 'ad-ds') {
       outcome = await executeUserToggleADDS({ distinguishedName: userId, enabled: false, actor, correlationId: reqId }, services);
     } else {
       outcome = await executeUserToggleCloud({ userId, enabled: false, actor, correlationId: reqId }, services);
     }
+    persistIdentityAudit(services, outcome.audit);
 
     if (!outcome.result.success) {
       const mapped = mapErrorToStatus({ code: outcome.result.error?.code } as never);
@@ -326,13 +358,14 @@ app.http('identityUserDelete', {
       return errorResponse(400, 'VALIDATION_ERROR', 'confirmationToken is required for destructive operations', reqId);
     }
 
-    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> } };
+    let outcome: { result: { success: boolean; error?: { code?: string; message?: string }; data?: Record<string, unknown> }; audit: IHybridIdentityAuditPayload };
 
     if (authority === 'ad-ds') {
       outcome = await executeUserDeleteADDS({ distinguishedName: userId, confirmationToken, actor, correlationId: reqId }, services);
     } else {
       outcome = await executeUserDeleteCloud({ userId, confirmationToken, actor, correlationId: reqId }, services);
     }
+    persistIdentityAudit(services, outcome.audit);
 
     if (!outcome.result.success) {
       const mapped = mapErrorToStatus({ code: outcome.result.error?.code } as never);
