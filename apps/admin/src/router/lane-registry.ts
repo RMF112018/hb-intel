@@ -83,13 +83,11 @@ export const LANES: readonly LaneDefinition[] = [
   {
     id: 'entra',
     path: '/entra',
-    label: 'Entra',
+    label: 'Identity',
     order: 5,
-    status: 'scaffold',
+    status: 'active',
     permission: ADMIN_PERMISSION,
     hasSearchParams: false,
-    deliversIn: 'Phase 9',
-    scaffoldMessage: 'Entra ID app registration and permission management will be available here.',
   },
   {
     id: 'config',
