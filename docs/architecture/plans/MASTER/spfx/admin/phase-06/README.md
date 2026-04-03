@@ -126,6 +126,8 @@ The package is complete when:
 | Verification service (`backend/functions/src/services/admin-control-plane/install-verification-service.ts`) | P6-07 | `executeVerificationChecks()`, `runPostInstallVerification()` — 6 checks with audit + evidence |
 | [Setup Wizard UX](admin-spfx-setup-wizard-ux.md) | P6-08 | Route/page structure, setup flow, preflight presentation model, frontend/backend boundary |
 | Setup wizard page (`apps/admin/src/pages/SetupWizardPage.tsx`) | P6-08 | Preflight review, categorized results, install launch gated on readiness |
+| [Install Run UX](admin-spfx-install-run-ux.md) | P6-09 | Run detail flow, checkpoint handling UX, verification UX, route structure |
+| Install run detail (`apps/admin/src/pages/InstallRunDetailPage.tsx`) | P6-09 | Step progress, checkpoint approve/reject, verification results, 5s polling |
 
 ### Exit reconciliation (created by P6-10)
 

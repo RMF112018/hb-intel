@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { makeStyles } from '@griffel/react';
 import { useCurrentSession } from '@hbc/auth';
 import {
@@ -16,7 +17,7 @@ import type {
   IAdminPreflightCheck,
   IAdminPreflightResponse,
   PreflightCategory,
-} from '@hbc/models/admin-control-plane';
+} from '@hbc/models';
 import { createSessionTokenFactory } from '../utils/resolveSessionToken.js';
 
 /**
@@ -163,6 +164,7 @@ function PreflightResults({ response }: { readonly response: IAdminPreflightResp
 
 export function SetupWizardPage(): ReactNode {
   const styles = useStyles();
+  const navigate = useNavigate();
   const session = useCurrentSession();
   const getToken = createSessionTokenFactory(() => session);
 
@@ -228,6 +230,7 @@ export function SetupWizardPage(): ReactNode {
       const data = await res.json();
       const runId = data.data?.runId ?? data.runId;
       setInstallRunId(runId);
+      navigate({ to: `/setup/run/${runId}` });
     } catch (err) {
       setError(`Install launch failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {

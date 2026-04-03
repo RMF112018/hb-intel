@@ -95,6 +95,20 @@ const setupRoute = createRoute({
   ),
 });
 
+const setupRunDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/setup/run/$runId',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/InstallRunDetailPage.js').then((m) => ({
+      default: (props: Record<string, unknown>) => {
+        const params = props as { runId?: string };
+        return m.InstallRunDetailPage({ runId: params.runId ?? '' });
+      },
+    })),
+  ),
+});
+
 const validationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/validation',
@@ -171,6 +185,7 @@ export const webpartRoutes = [
   configRoute,
   errorsRoute,
   setupRoute,
+  setupRunDetailRoute,
   validationRoute,
   sharepointRoute,
   entraRoute,
