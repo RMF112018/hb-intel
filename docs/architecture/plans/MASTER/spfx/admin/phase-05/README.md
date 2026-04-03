@@ -116,6 +116,7 @@ Run broader tests only when the touched code actually justifies them.
 | Shell refactor (`apps/admin/src/router/root-route.tsx`, `routes.ts`) | P5-03 | Lane-driven navigation, 8 lane routes, 3 legacy redirects, operator landing page |
 | Lane page scaffolds (`apps/admin/src/pages/*LanePage.tsx`) | P5-04 | Dedicated scaffold pages for Setup, Validation, SharePoint, Entra with purpose/ownership/links |
 | [Rehoming Decisions](admin-spfx-phase-5-rehoming-decisions.md) | P5-05 | Page placement, legacy redirect rationale, permission model, stale reference fixes |
+| Docs alignment (P5-07) | P5-07 | README lane model guidance, admin-recovery-boundary route update, current-state-map update |
 
 ### Exit reconciliation (created by P5-08)
 

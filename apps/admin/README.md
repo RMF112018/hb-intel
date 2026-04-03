@@ -6,7 +6,13 @@ This app is the human-facing shell where authorized admins observe, initiate, an
 
 **Contract consumption**: This app consumes shared admin control-plane contracts from `@hbc/models/admin-control-plane` for type-safe API calls and display. It does not own or define those contracts. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
 
-## Operator Console Lanes
+## Operator Console
+
+The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Three lanes have active content from existing pages that were rehomed into the lane model; four lanes are scaffolds that render clear `HbcSmartEmptyState` placeholders indicating which future phase delivers the content. The Error / Audit lane preserves its deferred state (SF17-T05).
+
+Navigation is lane-driven — the shell renders all 8 lane buttons derived from the canonical lane registry (`src/router/lane-registry.ts`). Active lanes appear at full opacity; scaffold lanes appear dimmed. The alert badge on the Health lane is preserved.
+
+### Lanes
 
 | Route | Lane | Page | Status |
 |-------|------|------|--------|
