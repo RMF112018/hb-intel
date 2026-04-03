@@ -19,7 +19,7 @@ Phase 5 is governed by the Admin IT Control Center end-state plan, which defines
   - Validation
   - Runs / History
   - SharePoint Control
-  - Entra Control
+  - Identity (Hybrid Identity)
   - Standards / Config
   - Health / Alerts
   - Error / Audit
@@ -107,7 +107,7 @@ These should be treated as supporting evidence, not as a substitute for current 
    - Validation
    - Runs / History
    - SharePoint Control
-   - Entra Control
+   - Identity (Hybrid Identity)
    - Standards / Config
    - Health / Alerts
    - Error / Audit

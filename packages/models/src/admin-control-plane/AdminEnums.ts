@@ -28,7 +28,7 @@ export enum AdminDomain {
   /** HB Intel-managed SharePoint asset control */
   SharePointControl = 'sharepoint-control',
 
-  /** Entra ID user/group administration */
+  /** Hybrid identity administration (AD DS/on-prem and Entra ID/Graph) */
   EntraControl = 'entra-control',
 
   /** Standards and configuration governance */
