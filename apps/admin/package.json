@@ -1,6 +1,6 @@
 {
   "name": "@hbc/spfx-admin",
-  "version": "00.000.089",
+  "version": "00.000.090",
   "private": true,
   "type": "module",
   "scripts": {
