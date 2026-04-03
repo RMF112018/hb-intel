@@ -108,7 +108,7 @@ const DASHBOARD_EMPTY_CONFIG: ISmartEmptyStateConfig = {
     description: 'Provisioning requests will appear here once submitted.',
     primaryAction: {
       label: 'Go to Provisioning Oversight',
-      href: '/provisioning-failures',
+      href: '/runs',
     },
     coachingTip: 'This dashboard shows queue health metrics once provisioning requests are active.',
   }),

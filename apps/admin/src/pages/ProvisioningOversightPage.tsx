@@ -175,7 +175,7 @@ export function ProvisioningOversightPage(): ReactNode {
 
   // ── ?projectId= query param handling ────────────────────────────────────
   // P5-02: Use TanStack Router's validated search params instead of manual URLSearchParams.
-  const { projectId: inboundProjectId } = useSearch({ from: '/provisioning-failures' }) as { projectId?: string };
+  const { projectId: inboundProjectId } = useSearch({ from: '/runs' }) as { projectId?: string };
 
   useEffect(() => {
     if (inboundProjectId && allRuns.length > 0) {

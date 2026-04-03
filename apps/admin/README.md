@@ -6,14 +6,27 @@ This app is the human-facing shell where authorized admins observe, initiate, an
 
 **Contract consumption**: This app consumes shared admin control-plane contracts from `@hbc/models/admin-control-plane` for type-safe API calls and display. It does not own or define those contracts. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
 
-## Pages
+## Operator Console Lanes
 
-| Route | Page | Status |
-|-------|------|--------|
-| `/` | System Settings | Active — access control and configuration |
-| `/provisioning-failures` | Provisioning Oversight | Active — monitor, retry, escalate, archive provisioning runs |
-| `/dashboards` | Operational Dashboards | Active — alert summary, probe health, infrastructure status |
-| `/error-log` | Error Log | Deferred — SF17-T05 |
+| Route | Lane | Page | Status |
+|-------|------|------|--------|
+| `/` | — | Operator Landing | Active — control-center overview with lane grid |
+| `/setup` | Setup / Install | SetupLanePage | Scaffold — Phase 6 |
+| `/validation` | Validation | ValidationLanePage | Scaffold — Phase 7 |
+| `/runs` | Runs / History | ProvisioningOversightPage | Active — monitor, retry, escalate, archive provisioning runs |
+| `/sharepoint` | SharePoint Control | SharePointLanePage | Scaffold — Phase 7 |
+| `/entra` | Entra Control | EntraLanePage | Scaffold — Phase 9 |
+| `/config` | Standards / Config | SystemSettingsPage | Active — access control and approval authority configuration |
+| `/health` | Health / Alerts | OperationalDashboardPage | Active — alert summary, probe health, infrastructure status |
+| `/errors` | Error / Audit | ErrorLogPage | Deferred — SF17-T05 |
+
+### Legacy redirects (backward compatibility)
+
+| Old route | Redirects to | Reason |
+|-----------|-------------|--------|
+| `/provisioning-failures` | `/runs` (preserves `?projectId=`) | Cross-app deep links from Accounting and Estimating |
+| `/dashboards` | `/health` | Bookmarks and internal links |
+| `/error-log` | `/errors` | Bookmarks and internal links |
 
 ## Development
 
