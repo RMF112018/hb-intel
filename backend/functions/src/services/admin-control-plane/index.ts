@@ -41,6 +41,10 @@ export { AdminActorContextResolver } from './actor-context-resolver.js';
 // Preflight validation service (P6-04)
 export { AdminPreflightService } from './preflight-service.js';
 
+// Install checkpoint service (P6-06)
+export { getCheckpointInstructions, processCheckpointDecision, resumeAfterCheckpoint } from './install-checkpoint-service.js';
+export type { CheckpointInstructions, CheckpointDecisionResult } from './install-checkpoint-service.js';
+
 // Install/bootstrap orchestrator (P6-05)
 export { INSTALL_STEP_CATALOG, buildInitialSteps, executeInstallRun, getInstallStepCatalog } from './install-orchestrator.js';
 export type { InstallOrchestratorDeps } from './install-orchestrator.js';

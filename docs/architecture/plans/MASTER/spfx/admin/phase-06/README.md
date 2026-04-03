@@ -120,6 +120,8 @@ The package is complete when:
 | Preflight service (`backend/functions/src/services/admin-control-plane/preflight-service.ts`) | P6-04 | Real `AdminPreflightService` — 9 checks across 6 categories |
 | [Install Orchestrator](admin-spfx-install-orchestrator.md) | P6-05 | Orchestration entry points, 19-step catalog, adapter touchpoints, failure/checkpoint behavior |
 | Install orchestrator (`backend/functions/src/services/admin-control-plane/install-orchestrator.ts`) | P6-05 | `executeInstallRun()`, `INSTALL_STEP_CATALOG`, step sequencing with checkpoint pauses |
+| [Checkpoint Lifecycle](admin-spfx-install-checkpoint-lifecycle.md) | P6-06 | Entry conditions, instruction payloads, approve/reject/cancel, evidence, terminal-state safety |
+| Checkpoint service (`backend/functions/src/services/admin-control-plane/install-checkpoint-service.ts`) | P6-06 | `processCheckpointDecision()`, `resumeAfterCheckpoint()`, `getCheckpointInstructions()` |
 
 ### Exit reconciliation (created by P6-10)
 

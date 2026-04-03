@@ -32,6 +32,7 @@ import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
 import { createAdminControlPlaneServiceFactory } from '../../hosts/admin-control-plane/service-factory.js';
+import { processCheckpointDecision } from '../../services/admin-control-plane/install-checkpoint-service.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 
@@ -270,14 +271,29 @@ app.http('adminCheckpointDecision', {
       return errorResponse(400, 'VALIDATION_ERROR', 'stepNumber (number) and decision (approve|reject) are required', reqId);
     }
 
-    // Checkpoint decision handling deferred to P3-05 (run command handler skeleton).
-    // Stub returns the decision acknowledgment.
-    return successResponse({
-      runId,
-      stepNumber: body.stepNumber,
-      decision: body.decision,
-      updatedStatus: 'AwaitingApproval',
+    // P6-06: Real checkpoint decision processing
+    const services = createAdminControlPlaneServiceFactory();
+    const actor = services.actorContextResolver.resolve({
+      upn: auth.claims.upn,
+      oid: auth.claims.oid,
+      displayName: auth.claims.displayName ?? auth.claims.upn,
     });
+
+    const result = await processCheckpointDecision(
+      services.runService,
+      services.auditService,
+      runId,
+      body.stepNumber as number,
+      body.decision as 'approve' | 'reject',
+      actor,
+      typeof body.comment === 'string' ? body.comment : undefined,
+    );
+
+    if (!result.success) {
+      return errorResponse(409, 'CHECKPOINT_ERROR', result.error ?? 'Checkpoint decision failed', reqId);
+    }
+
+    return successResponse(result.response);
   }, { domain: 'adminControlPlane', operation: 'checkpointDecision' })),
 });
 
