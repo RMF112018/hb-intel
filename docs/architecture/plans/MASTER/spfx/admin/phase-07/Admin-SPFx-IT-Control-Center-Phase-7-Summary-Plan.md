@@ -10,7 +10,7 @@ The platform already has meaningful provisioning foundations: an admin app, a pr
 - runs straight through under normal conditions,
 - classifies and surfaces failures clearly,
 - gives operators better recovery visibility and guidance,
-- and integrates provisioning with install/bootstrap and Entra readiness work established in earlier phases.
+- and integrates provisioning with install/bootstrap and identity/connection readiness work established in earlier phases.
 
 ## Prerequisite: Phase 6A
 
@@ -23,7 +23,7 @@ Phase 7 is controlled by the end-state plan requirement that:
 - provisioning must run straight through unless failure occurs,
 - dependency validation must improve before run launch,
 - diagnostics, recovery visibility, and operator guidance must improve,
-- provisioning must integrate with install/bootstrap and Entra setup,
+- provisioning must integrate with install/bootstrap and identity/connection setup,
 - and the frontend/backend boundary must remain intact.
 
 ## Current repo-truth signals that shape this phase
@@ -46,7 +46,7 @@ The current repo already contains important Phase 7 foundations:
 2. Preserve seamless straight-through execution for normal runs.
 3. Strengthen failure taxonomy, diagnostics, and operator guidance.
 4. Improve recovery and repair visibility without moving privileged execution into SPFx.
-5. Integrate provisioning readiness with install/bootstrap and Entra setup prerequisites.
+5. Integrate provisioning readiness with install/bootstrap and identity/connection setup prerequisites.
 6. Align the admin UI, route structure, and provisioning-control-center behavior with actual provisioning workflows.
 7. Update docs and runbooks so the hardened provisioning path is explicit and maintainable.
 
@@ -93,7 +93,7 @@ The implementation prompted by this package should produce, at minimum:
 - operators receiving weak or ambiguous failure explanations
 - retry/recovery actions being available without enough evidence or guidance
 - SPFx route/UI drift causing the provisioning lane to be misleading or fragmented
-- install/bootstrap and Entra readiness becoming disconnected from provisioning launch readiness
+- install/bootstrap and identity/connection readiness becoming disconnected from provisioning launch readiness
 - docs overstating maturity or hiding current route/control-plane limitations
 
 ## Why Phase 7 must come now
@@ -108,7 +108,7 @@ The end-state plan explicitly places Phase 7 early because provisioning is alrea
 4. Harden straight-through saga execution behavior and failure classification.
 5. Improve recovery/repair semantics and operator-facing status payloads.
 6. Improve diagnostics and telemetry for provisioning runs.
-7. Integrate provisioning readiness with install/bootstrap and Entra setup conditions.
+7. Integrate provisioning readiness with install/bootstrap and identity/connection setup conditions.
 8. Correct and upgrade the SPFx provisioning control-center flow.
 9. Reconcile docs/runbooks with the implemented behavior.
 10. Validate end-to-end normal-run and failure-run outcomes.
@@ -122,6 +122,6 @@ Phase 7 is complete when all of the following are true:
 - failure states are classified and understandable,
 - retry/escalation/repair actions are grounded in durable run evidence,
 - the admin UI exposes a coherent provisioning control-center path rather than route drift or placeholder indirection,
-- provisioning readiness is explicitly integrated with install/bootstrap and Entra/setup dependencies,
+- provisioning readiness is explicitly integrated with install/bootstrap and identity/connection setup dependencies,
 - docs and runbooks explain the hardened provisioning flow accurately,
 - and validation demonstrates both seamless normal execution and clear failure visibility.
