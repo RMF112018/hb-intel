@@ -1,5 +1,54 @@
 # README — Admin SPFx IT Control Center Phase 9 Prompt Package (Hybrid Identity Redirect)
 
+## Implementation status
+
+Phase 9 core implementation is **complete** (Prompts 01–10). The following capabilities have been delivered:
+
+### Backend (backend/functions)
+- AD DS adapter (`ad-directory-service.ts`) — interface + mock for on-prem LDAPS operations
+- Graph service expansion (`graph-service.ts`) — user/group lifecycle, sync visibility, authority detection
+- Connection registry (`connection-registry-service.ts`) — UI-managed connector config with secure credential handling
+- 13 typed error categories (`hybrid-identity-errors.ts`)
+- Hybrid identity contracts, validators, and workflow router (P9-05)
+- 12 user lifecycle workflow handlers with audit payloads (P9-06)
+- 7 API endpoints under `/api/admin/identity/users/` (P9-06)
+- 3 connection management API endpoints under `/api/admin/connections` (P9-09)
+- Audit payload persistence wired to admin audit store (P9-09)
+
+### Frontend (apps/admin)
+- Hybrid Identity control lane at `/entra` with 5 tabs (P9-08, P9-09)
+- Overview: live connection status, source-of-authority info, capabilities
+- Users: search, create, enable/disable, delete with risk-aware execution UX
+- Groups: search with info banner (group action endpoints pending P9-07 backend)
+- Connections: AD DS connector config/test, Graph permission confirm/test
+- History: audit trail of identity operations from admin audit store
+- Connection preflight banners, risk-tier badges, preview/confirmation flows
+- Double-confirmation for destructive operations, sync-pending result display
+
+### Documentation (this directory)
+- Repo-truth and hybrid gap map (P9-01)
+- Hybrid identity architecture baseline and scope (P9-02)
+- Action catalog, source-of-authority matrix, risk taxonomy, permission matrix (P9-03)
+- Connection topology, management baseline, dependency matrix, UI configurability (P9-03)
+- Backend contract notes, user workflow notes (P9-05, P9-06)
+- Environment and prerequisites guide (P9-10)
+- Operator runbook (P9-10)
+- IT handoff and setup guide (P9-10)
+
+### Key document cross-links
+
+| Document | Purpose |
+|----------|---------|
+| [Action Catalog](admin-spfx-phase-9-identity-action-catalog.md) | 26 implement-now actions with risk, authority, and checkpoint |
+| [Source-of-Authority Matrix](admin-spfx-phase-9-source-of-authority-matrix.md) | AD DS vs Entra routing rules per object type |
+| [Risk Taxonomy](admin-spfx-phase-9-risk-taxonomy.md) | 5 risk tiers with confirmation and evidence requirements |
+| [Permission Matrix](admin-spfx-phase-9-permission-access-role-and-consent-matrix.md) | Graph permissions and AD DS service account delegation |
+| [Connection Dependency Matrix](admin-spfx-phase-9-connection-dependency-matrix.md) | Required connectors and degraded-mode behavior per action |
+| [UI Configurability Matrix](admin-spfx-phase-9-ui-configurability-matrix.md) | No-code handoff gate compliance per setting |
+| [Environment & Prerequisites](admin-spfx-phase-9-env-and-prerequisites.md) | External prerequisites, Graph consent, AD DS infra |
+| [Operator Runbook](admin-spfx-phase-9-operator-runbook.md) | What operators can do, risk handling, sync interpretation |
+| [IT Handoff & Setup Guide](admin-spfx-phase-9-it-handoff-and-setup-guide.md) | Step-by-step no-code setup after .sppkg delivery |
+
 ## What this package contains
 
 This package is a **local-code-agent implementation set** for **Phase 9 — Hybrid Identity Administration foundation**.

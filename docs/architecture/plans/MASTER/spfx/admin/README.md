@@ -78,9 +78,35 @@ Phase 4 replaces in-memory stores with durable Table Storage persistence for run
 | [Retrieval API Contract](phase-04/admin-spfx-phase-4-retrieval-api-contract.md) | Audit/evidence query endpoints (P4-05) |
 | [Evidence & Retention Boundaries](phase-04/admin-spfx-phase-4-evidence-and-retention-boundaries.md) | Inline/offload thresholds, retention classes (P4-06) |
 
+### Phase 5–8 — Operator console, install wizard, app-binding, SharePoint control
+
+Phases 5–8 delivered the operator console shell, install wizard with checkpoint approval, app-binding management, and SharePoint control lane (drift detection, preview/repair, posture). See individual phase folders for artifacts.
+
+### Phase 9 — Hybrid Identity Administration foundation
+
+Phase 9 delivers the **Hybrid Identity control lane** — authority-aware user lifecycle administration with AD DS and Entra/Graph as distinct sources of authority, no-code connection management, risk-aware execution UX, audit-backed workflows, and sync-status visibility.
+
+This phase was **redirected** from the original "broad Entra administration" target to a hybrid identity model where AD DS is authoritative for synced users and Graph handles cloud-only objects.
+
+**Hard gate**: After `.sppkg` delivery, IT must complete setup without code edits.
+
+| Artifact | Purpose |
+|----------|---------|
+| [Phase 9 Summary Plan](phase-09/Admin-SPFx-IT-Control-Center-Phase-9-Summary-Plan.md) | Objectives, redirect thesis, acceptance criteria |
+| [Phase 9 Prompt Package README](phase-09/README.md) | Implementation status, execution order, cross-links |
+| [Action Catalog](phase-09/admin-spfx-phase-9-identity-action-catalog.md) | 26 implement-now actions with risk and authority |
+| [Source-of-Authority Matrix](phase-09/admin-spfx-phase-9-source-of-authority-matrix.md) | AD DS vs Entra routing rules |
+| [Risk Taxonomy](phase-09/admin-spfx-phase-9-risk-taxonomy.md) | 5 risk tiers with confirmation requirements |
+| [Permission Matrix](phase-09/admin-spfx-phase-9-permission-access-role-and-consent-matrix.md) | Graph permissions and AD DS delegation |
+| [Connection Dependency Matrix](phase-09/admin-spfx-phase-9-connection-dependency-matrix.md) | Required connectors per action |
+| [Env & Prerequisites](phase-09/admin-spfx-phase-9-env-and-prerequisites.md) | External prerequisites and setup guidance |
+| [Operator Runbook](phase-09/admin-spfx-phase-9-operator-runbook.md) | Operator reference for hybrid identity lane |
+| [IT Handoff Guide](phase-09/admin-spfx-phase-9-it-handoff-and-setup-guide.md) | No-code setup instructions for IT |
+| [Ripple Update Summary](phase-09/Admin-SPFx-IT-Control-Center-Phase-9-Ripple-Update-Summary-Plan.md) | Program-wide alignment for hybrid identity redirect |
+
 ### Later phases
 
-Phases 5–13 are defined in the [end-state plan](admin-spfx-it-control-center-end-state-plan.md). Implementation artifacts will be added as work begins.
+Phases 10–13 are defined in the [end-state plan](admin-spfx-it-control-center-end-state-plan.md). Implementation artifacts will be added as work begins.
 
 ## Quick orientation
 

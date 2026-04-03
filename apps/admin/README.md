@@ -8,7 +8,11 @@ This app is the human-facing shell where authorized admins observe, initiate, an
 
 ## Operator Console
 
-The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Six lanes have active content: Setup (preflight + install wizard), Runs (provisioning oversight), SharePoint Control (drift detection, preview, repair, posture), Config (access control), Health (operational dashboard), and the landing page itself. Two lanes are scaffolds that render clear `HbcSmartEmptyState` placeholders indicating which future phase delivers the content. The Error / Audit lane preserves its deferred state (SF17-T05).
+The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Seven lanes have active content: Setup (preflight + install wizard), Runs (provisioning oversight), SharePoint Control (drift detection, preview, repair, posture), Hybrid Identity (user lifecycle, connection management, audit history), Config (access control), Health (operational dashboard), and the landing page itself. One lane is a scaffold (Validation — Phase 7). The Error / Audit lane preserves its deferred state (SF17-T05).
+
+### Hybrid Identity (Phase 9)
+
+The `/entra` lane provides authority-aware identity administration with 5 tabs: Overview (live connection status), Users (search, create, enable/disable, delete with risk-aware execution), Groups (search; lifecycle actions pending backend endpoints), Connections (AD DS and Graph connector setup/test/rotate), and History (audit trail). Actions are risk-tiered (routine/elevated/destructive) with appropriate confirmation flows. AD DS mutations show sync-pending state. Connection preflight banners block operations when connectors are unhealthy. See the [Phase 9 docs](../../docs/architecture/plans/MASTER/spfx/admin/phase-09/README.md).
 
 Navigation is lane-driven — the shell renders all 8 lane buttons derived from the canonical lane registry (`src/router/lane-registry.ts`). Active lanes appear at full opacity; scaffold lanes appear dimmed. The alert badge on the Health lane is preserved.
 
@@ -23,7 +27,7 @@ Navigation is lane-driven — the shell renders all 8 lane buttons derived from 
 | `/validation` | Validation | ValidationLanePage | Scaffold — Phase 7 |
 | `/runs` | Runs / History | ProvisioningOversightPage | Active — monitor, retry, escalate, archive provisioning runs |
 | `/sharepoint` | SharePoint Control | SharePointControlPage | Active — drift detection, preview, repair, posture (Phase 8) |
-| `/entra` | Entra Control | EntraLanePage | Scaffold — Phase 9 |
+| `/entra` | Hybrid Identity | EntraLanePage | Active — hybrid identity administration (Phase 9) |
 | `/config` | Standards / Config | SystemSettingsPage | Active — access control and approval authority configuration |
 | `/health` | Health / Alerts | OperationalDashboardPage | Active — alert summary, probe health, infrastructure status |
 | `/errors` | Error / Audit | ErrorLogPage | Deferred — SF17-T05 |

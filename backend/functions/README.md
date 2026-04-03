@@ -65,6 +65,25 @@ Managed-app binding endpoints for publishing, resolving, verifying, and repairin
 
 Binding contracts are in `@hbc/models/admin-control-plane` (`IAppBinding.ts`). See the [binding store and API doc](../../docs/architecture/plans/MASTER/spfx/admin/phase-6a-app-binding/admin-spfx-app-binding-store-and-api.md) for persistence and keying details.
 
+### Hybrid Identity API Endpoints (P9-06, P9-09)
+
+User lifecycle and connection management endpoints for the Hybrid Identity control lane. All endpoints require admin + delegated scope authentication.
+
+| Method | Route | Handler | Purpose |
+|--------|-------|---------|---------|
+| POST | `/api/admin/identity/users/search` | `identityUserSearch` | Search users |
+| GET | `/api/admin/identity/users/{userId}` | `identityUserRead` | Read user profile |
+| POST | `/api/admin/identity/users` | `identityUserCreate` | Create user (AD DS or cloud) |
+| PATCH | `/api/admin/identity/users/{userId}` | `identityUserUpdate` | Update user properties |
+| POST | `/api/admin/identity/users/{userId}/enable` | `identityUserEnable` | Enable user |
+| POST | `/api/admin/identity/users/{userId}/disable` | `identityUserDisable` | Disable user |
+| DELETE | `/api/admin/identity/users/{userId}` | `identityUserDelete` | Delete user (requires confirmationToken) |
+| GET | `/api/admin/connections` | `adminListConnections` | List all connections with health status |
+| POST | `/api/admin/connections` | `adminUpsertConnection` | Create or update a connection |
+| POST | `/api/admin/connections/{connectorId}/test` | `adminTestConnection` | Test a connection |
+
+All identity operations persist audit payloads to the admin audit store. See the [Phase 9 docs](../../docs/architecture/plans/MASTER/spfx/admin/phase-09/README.md) for action catalog, risk taxonomy, and operator guidance.
+
 ## Local Development Setup
 
 `local.settings.json` is gitignored and must be created per developer machine.
