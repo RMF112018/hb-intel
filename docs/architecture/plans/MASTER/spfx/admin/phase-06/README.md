@@ -98,3 +98,19 @@ The package is complete when:
 - post-install verification exists,
 - docs and runbooks explain the operator workflow,
 - and the implementation remains architecture-safe.
+
+## Canonical Phase 6 artifacts
+
+### Baseline docs
+
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Prerequisite Audit](admin-spfx-phase-6-prerequisite-audit.md) | P6-01 | Repo-truth audit, existing substrate inventory, blockers, compatibility strategy, execution sequence |
+
+### Implementation notes (created by later prompts)
+
+_To be populated by Prompts 02–09._
+
+### Exit reconciliation (created by P6-10)
+
+_To be populated by Prompt 10._
