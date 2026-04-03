@@ -10,6 +10,14 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 **Phase 4 durable persistence (2026-04-02)**: Replaces in-memory stores with Azure Table Storage-backed durable persistence for admin runs (`AdminRuns` table), audit events (`AdminAuditEvents` table), and evidence metadata (`AdminEvidence` table). Adds provisioning audit bridge for fire-and-forget spine writes, 3 audit/evidence retrieval API endpoints, and evidence inline/offload boundary logic (32 KB threshold). See the [Phase 4 plan library](../../docs/architecture/plans/MASTER/spfx/admin/phase-04/).
 
+**Phase 9 hybrid identity services (2026-04-03)**: Adds three new service boundaries for Hybrid Identity Administration:
+- **Graph service expansion** (`graph-service.ts`): User read/search, group read/search, sync-status visibility, cloud-only user lifecycle (create/update/disable/delete), group membership mutations. Original provisioning-era methods unchanged.
+- **AD DS adapter** (`ad-directory-service.ts`): Interface and mock for on-prem AD DS operations (user CRUD, group membership, connection test). Real LDAPS connector wired in Prompt-05+.
+- **Connection registry** (`connection-registry-service.ts`): UI-managed connector configuration with secure credential handling. Credentials are write-only (never returned in API responses). Supports test/health/rotate flows.
+- **Typed error categories** (`hybrid-identity-errors.ts`): 13 error classes covering Graph permission, AD DS connectivity/auth/permission, authority mismatch, phase boundary, protected target, not-found, conflict, validation, sync-pending, and connection not-configured/unhealthy.
+
+All three services follow the established interface + real + mock pattern and are wired into the admin control plane service factory.
+
 ### Domain Hosts
 
 This package uses scoped domain hosts (ADR-0124) for independent deployment of domain-specific route families.

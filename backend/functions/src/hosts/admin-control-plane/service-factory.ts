@@ -1,6 +1,8 @@
 import type { ITableStorageService } from '../../services/table-storage-service.js';
 import type { IManagedIdentityTokenService } from '../../services/managed-identity-token-service.js';
 import type { IGraphService } from '../../services/graph-service.js';
+import type { IADDirectoryService } from '../../services/ad-directory-service.js';
+import type { IConnectionRegistryService } from '../../services/connection-registry-service.js';
 import type {
   IAdminRunService,
   IAdminAdapterRegistry,
@@ -14,6 +16,8 @@ import type {
 import { MockTableStorageService, RealTableStorageService } from '../../services/table-storage-service.js';
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '../../services/managed-identity-token-service.js';
 import { MockGraphService, GraphService } from '../../services/graph-service.js';
+import { MockADDirectoryService, ADDirectoryService } from '../../services/ad-directory-service.js';
+import { MockConnectionRegistryService, ConnectionRegistryService } from '../../services/connection-registry-service.js';
 import {
   InMemoryAdminRunService,
   DurableAdminRunStore,
@@ -73,6 +77,10 @@ export interface IAdminControlPlaneServiceContainer {
   readonly preflightService: IAdminPreflightService;
   readonly actorContextResolver: IAdminActorContextResolver;
   readonly bindingService: IAdminAppBindingService;
+
+  // ── P9-04: Hybrid identity services ───────────────────────────────────────
+  readonly adDirectory: IADDirectoryService;
+  readonly connectionRegistry: IConnectionRegistryService;
 }
 
 let singletonContainer: IAdminControlPlaneServiceContainer | null = null;
@@ -117,6 +125,10 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     preflightService: isMock ? new StubAdminPreflightService() : new AdminPreflightService(),  // P6-04: real preflight in prod, stub for mock/test
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
     bindingService: isMock ? new MockAdminAppBindingStore() : new DurableAdminAppBindingStore(),  // P6A-04: app-binding persistence
+
+    // P9-04: Hybrid identity services
+    adDirectory: isMock ? new MockADDirectoryService() : new ADDirectoryService(),
+    connectionRegistry: isMock ? new MockConnectionRegistryService() : new ConnectionRegistryService(),
   };
 
   singletonContainer = container;
