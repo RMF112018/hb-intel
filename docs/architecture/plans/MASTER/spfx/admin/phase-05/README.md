@@ -98,6 +98,22 @@ Expected validation emphasis for this phase:
 
 Run broader tests only when the touched code actually justifies them.
 
+## Canonical Phase 5 artifacts
+
+### Baseline docs (define the model)
+
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Operator-Console Baseline](admin-spfx-phase-5-operator-console-baseline.md) | P5-01 | Current shell/route posture, page inventory, lane mapping, preservation/change requirements |
+
+### Implementation notes (created by later prompts)
+
+_To be populated by Prompts 02–07._
+
+### Exit reconciliation (created by P5-08)
+
+_To be populated by Prompt 08._
+
 ## Completion standard
 
 The package is complete when the Admin app behaves like the operator-console foundation for the control center and the repo has clear documentation explaining:
