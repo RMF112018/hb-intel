@@ -124,6 +124,8 @@ The package is complete when:
 | Checkpoint service (`backend/functions/src/services/admin-control-plane/install-checkpoint-service.ts`) | P6-06 | `processCheckpointDecision()`, `resumeAfterCheckpoint()`, `getCheckpointInstructions()` |
 | [Post-Install Verification](admin-spfx-post-install-verification.md) | P6-07 | Verification purpose, check categories, pass/fail semantics, relationship to preflight |
 | Verification service (`backend/functions/src/services/admin-control-plane/install-verification-service.ts`) | P6-07 | `executeVerificationChecks()`, `runPostInstallVerification()` — 6 checks with audit + evidence |
+| [Setup Wizard UX](admin-spfx-setup-wizard-ux.md) | P6-08 | Route/page structure, setup flow, preflight presentation model, frontend/backend boundary |
+| Setup wizard page (`apps/admin/src/pages/SetupWizardPage.tsx`) | P6-08 | Preflight review, categorized results, install launch gated on readiness |
 
 ### Exit reconciliation (created by P6-10)
 

@@ -91,7 +91,7 @@ const setupRoute = createRoute({
   path: '/setup',
   beforeLoad: adminBeforeLoad,
   component: lazyRouteComponent(() =>
-    import('../pages/SetupLanePage.js').then((m) => ({ default: m.SetupLanePage })),
+    import('../pages/SetupWizardPage.js').then((m) => ({ default: m.SetupWizardPage })),
   ),
 });
 
