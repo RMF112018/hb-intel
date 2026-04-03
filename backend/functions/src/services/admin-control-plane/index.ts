@@ -41,6 +41,10 @@ export { AdminActorContextResolver } from './actor-context-resolver.js';
 // Preflight validation service (P6-04)
 export { AdminPreflightService } from './preflight-service.js';
 
+// Install/bootstrap orchestrator (P6-05)
+export { INSTALL_STEP_CATALOG, buildInitialSteps, executeInstallRun, getInstallStepCatalog } from './install-orchestrator.js';
+export type { InstallOrchestratorDeps } from './install-orchestrator.js';
+
 // Evidence service (P4-06)
 export { DurableAdminEvidenceStore, MockAdminEvidenceStore, isEvidenceInlineable, generateBlobLocator, EVIDENCE_INLINE_MAX_BYTES } from './evidence-service.js';
 

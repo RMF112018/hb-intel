@@ -118,6 +118,8 @@ The package is complete when:
 | Install types (`packages/models/src/admin-control-plane/IInstallBootstrap.ts`) | P6-03 | Step catalog, step families, preflight/verification check IDs, action keys |
 | [Preflight Validator](admin-spfx-preflight-validator.md) | P6-04 | What is validated, severity model, UI consumption guidance |
 | Preflight service (`backend/functions/src/services/admin-control-plane/preflight-service.ts`) | P6-04 | Real `AdminPreflightService` — 9 checks across 6 categories |
+| [Install Orchestrator](admin-spfx-install-orchestrator.md) | P6-05 | Orchestration entry points, 19-step catalog, adapter touchpoints, failure/checkpoint behavior |
+| Install orchestrator (`backend/functions/src/services/admin-control-plane/install-orchestrator.ts`) | P6-05 | `executeInstallRun()`, `INSTALL_STEP_CATALOG`, step sequencing with checkpoint pauses |
 
 ### Exit reconciliation (created by P6-10)
 
