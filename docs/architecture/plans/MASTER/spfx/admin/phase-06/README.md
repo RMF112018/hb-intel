@@ -122,6 +122,8 @@ The package is complete when:
 | Install orchestrator (`backend/functions/src/services/admin-control-plane/install-orchestrator.ts`) | P6-05 | `executeInstallRun()`, `INSTALL_STEP_CATALOG`, step sequencing with checkpoint pauses |
 | [Checkpoint Lifecycle](admin-spfx-install-checkpoint-lifecycle.md) | P6-06 | Entry conditions, instruction payloads, approve/reject/cancel, evidence, terminal-state safety |
 | Checkpoint service (`backend/functions/src/services/admin-control-plane/install-checkpoint-service.ts`) | P6-06 | `processCheckpointDecision()`, `resumeAfterCheckpoint()`, `getCheckpointInstructions()` |
+| [Post-Install Verification](admin-spfx-post-install-verification.md) | P6-07 | Verification purpose, check categories, pass/fail semantics, relationship to preflight |
+| Verification service (`backend/functions/src/services/admin-control-plane/install-verification-service.ts`) | P6-07 | `executeVerificationChecks()`, `runPostInstallVerification()` — 6 checks with audit + evidence |
 
 ### Exit reconciliation (created by P6-10)
 

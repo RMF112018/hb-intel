@@ -45,6 +45,9 @@ export { AdminPreflightService } from './preflight-service.js';
 export { getCheckpointInstructions, processCheckpointDecision, resumeAfterCheckpoint } from './install-checkpoint-service.js';
 export type { CheckpointInstructions, CheckpointDecisionResult } from './install-checkpoint-service.js';
 
+// Post-install verification service (P6-07)
+export { executeVerificationChecks, runPostInstallVerification } from './install-verification-service.js';
+
 // Install/bootstrap orchestrator (P6-05)
 export { INSTALL_STEP_CATALOG, buildInitialSteps, executeInstallRun, getInstallStepCatalog } from './install-orchestrator.js';
 export type { InstallOrchestratorDeps } from './install-orchestrator.js';
