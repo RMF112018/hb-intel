@@ -18,6 +18,8 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 All three services follow the established interface + real + mock pattern and are wired into the admin control plane service factory.
 
+**Phase 9 user lifecycle workflows (2026-04-03)**: Implements 12 user lifecycle workflow handlers covering search, read, create (AD DS + cloud), update, enable/disable, and delete with confirmation tokens. 7 API endpoints under `/api/admin/identity/users/`. Each workflow validates input, runs connector preflight, executes against the correct adapter (AD DS or Graph based on authority), captures sync-pending state for AD DS mutations, and produces normalized audit payloads.
+
 ### Domain Hosts
 
 This package uses scoped domain hosts (ADR-0124) for independent deployment of domain-specific route families.

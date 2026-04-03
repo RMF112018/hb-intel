@@ -63,12 +63,12 @@ describe('P3-02 Admin Control Plane host boundary', () => {
       },
     );
 
-    it('imports exactly 2 route families', () => {
+    it('imports exactly 3 route families', () => {
       const importCount = (hostIndex.match(/import\s+'/g) || []).length;
       expect(
         importCount,
-        `Admin Control Plane host should import exactly 2 route families, found ${importCount}`,
-      ).toBe(2);
+        `Admin Control Plane host should import exactly 3 route families, found ${importCount}`,
+      ).toBe(3);
     });
   });
 

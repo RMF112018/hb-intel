@@ -10,5 +10,8 @@
 // --- Admin API (authenticated operator endpoints) ---
 import '../../functions/adminApi/index.js';
 
+// --- P9-06: Hybrid Identity user lifecycle routes ---
+import '../../functions/adminApi/hybrid-identity-routes.js';
+
 // --- Health probe (shared infrastructure, required for all hosts) ---
 import '../../functions/health/index.js';
