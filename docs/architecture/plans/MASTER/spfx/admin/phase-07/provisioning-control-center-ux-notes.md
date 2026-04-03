@@ -34,7 +34,7 @@ The canonical lane registry (`apps/admin/src/router/lane-registry.ts`) incorrect
 | Validation | `/validation` | Scaffold | Phase 7 (future) |
 | Runs / History | `/runs` | **Active** | Phase 5 |
 | SharePoint Control | `/sharepoint` | Scaffold | Phase 8 (future) |
-| Entra Control | `/entra` | Scaffold | Phase 9 (future) |
+| Hybrid Identity | `/entra` | **Active** | Phase 9 |
 | Standards / Config | `/config` | **Active** | Phase 5 |
 | Health / Alerts | `/health` | **Active** | Phase 5 |
 | Error / Audit | `/errors` | Deferred | SF17-T05 |
