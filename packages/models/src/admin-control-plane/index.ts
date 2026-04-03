@@ -77,3 +77,16 @@ export type {
   IAdminAdapterIssue,
   IAdminRemediationHint,
 } from './IAdminAdapter.js';
+
+export {
+  InstallStepId,
+  InstallStepFamily,
+  InstallPreflightCheckId,
+  InstallVerificationCheckId,
+  INSTALL_ACTION_KEYS,
+} from './IInstallBootstrap.js';
+
+export type {
+  IInstallStepDefinition,
+  InstallActionKey,
+} from './IInstallBootstrap.js';

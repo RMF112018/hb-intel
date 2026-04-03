@@ -112,7 +112,10 @@ The package is complete when:
 
 ### Implementation notes (created by later prompts)
 
-_To be populated by Prompts 03–09._
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Install Contract Slice](admin-spfx-install-contract-slice.md) | P6-03 | Shared contract location, status mapping, persistence expectations, forward compatibility |
+| Install types (`packages/models/src/admin-control-plane/IInstallBootstrap.ts`) | P6-03 | Step catalog, step families, preflight/verification check IDs, action keys |
 
 ### Exit reconciliation (created by P6-10)
 
