@@ -397,6 +397,7 @@ A developer should treat the following as implementation doctrine:
 ---
 
 ### Phase 5 — Operator console foundation in SPFx
+**Status:** Complete — 2026-04-03
 **Purpose:** turn the existing admin app into the true control-center shell.
 
 **Major objectives**

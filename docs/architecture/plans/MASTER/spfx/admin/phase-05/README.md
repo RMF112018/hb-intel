@@ -120,7 +120,9 @@ Run broader tests only when the touched code actually justifies them.
 
 ### Exit reconciliation (created by P5-08)
 
-_To be populated by Prompt 08._
+| Document | Prompt | Purpose |
+|----------|--------|---------|
+| [Exit Reconciliation](admin-spfx-phase-5-exit-reconciliation.md) | P5-08 | Acceptance criteria, validation results, residual risks, next phase entry |
 
 ## Completion standard
 
