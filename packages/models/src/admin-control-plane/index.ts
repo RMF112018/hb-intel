@@ -37,6 +37,8 @@ export type {
   IAdminPreflightRequest,
   IAdminPreflightResponse,
   IAdminPreflightCheck,
+  PreflightSeverity,
+  PreflightCategory,
   IAdminPreviewResponse,
   IAdminPreviewImpactItem,
   IAdminConfigRequest,

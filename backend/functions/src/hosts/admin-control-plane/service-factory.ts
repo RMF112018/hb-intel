@@ -25,6 +25,7 @@ import {
   AdminActorContextResolver,
   StubAdminConfigService,
   StubAdminPreflightService,
+  AdminPreflightService,
 } from '../../services/admin-control-plane/index.js';
 import { validateAdminControlPlaneStartupConfig } from '../../utils/validate-config.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
@@ -109,7 +110,7 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     configService: new StubAdminConfigService(),
     auditService: isMock ? new MockAdminAuditStore() : new DurableAdminAuditStore(),  // P4-03: durable Table Storage in prod
     evidenceService: isMock ? new MockAdminEvidenceStore() : new DurableAdminEvidenceStore(),  // P4-06: evidence metadata
-    preflightService: new StubAdminPreflightService(),
+    preflightService: isMock ? new StubAdminPreflightService() : new AdminPreflightService(),  // P6-04: real preflight in prod, stub for mock/test
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
   };
 

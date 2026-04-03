@@ -116,6 +116,8 @@ The package is complete when:
 |----------|--------|---------|
 | [Install Contract Slice](admin-spfx-install-contract-slice.md) | P6-03 | Shared contract location, status mapping, persistence expectations, forward compatibility |
 | Install types (`packages/models/src/admin-control-plane/IInstallBootstrap.ts`) | P6-03 | Step catalog, step families, preflight/verification check IDs, action keys |
+| [Preflight Validator](admin-spfx-preflight-validator.md) | P6-04 | What is validated, severity model, UI consumption guidance |
+| Preflight service (`backend/functions/src/services/admin-control-plane/preflight-service.ts`) | P6-04 | Real `AdminPreflightService` — 9 checks across 6 categories |
 
 ### Exit reconciliation (created by P6-10)
 

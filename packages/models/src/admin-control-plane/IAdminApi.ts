@@ -262,10 +262,26 @@ export interface IAdminPreflightResponse {
 }
 
 /**
+ * Preflight check severity levels.
+ */
+export type PreflightSeverity = 'critical' | 'warning' | 'info';
+
+/**
+ * Preflight check category for grouping in the UI.
+ */
+export type PreflightCategory =
+  | 'backend-config'
+  | 'auth-identity'
+  | 'sharepoint'
+  | 'graph-entra'
+  | 'persistence'
+  | 'install-compatibility';
+
+/**
  * A single preflight validation check result.
  */
 export interface IAdminPreflightCheck {
-  /** Check identifier */
+  /** Check identifier (machine-readable code) */
   readonly checkId: string;
 
   /** Human-readable check label */
@@ -279,6 +295,18 @@ export interface IAdminPreflightCheck {
 
   /** Whether this check is blocking (must pass to proceed) */
   readonly blocking: boolean;
+
+  /** Check category for grouping */
+  readonly category: PreflightCategory;
+
+  /** Severity level */
+  readonly severity: PreflightSeverity;
+
+  /** Recommended operator action when check fails */
+  readonly recommendedAction?: string;
+
+  /** Whether a manual checkpoint or admin approval may resolve this check */
+  readonly resolvableByCheckpoint?: boolean;
 }
 
 // ─── Preview / Dry-Run ──────────────────────────────────────────────────────────
