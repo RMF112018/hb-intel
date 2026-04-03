@@ -377,6 +377,7 @@ A developer should treat the following as implementation doctrine:
 ---
 
 ### Phase 4 — Durable run history, audit spine, and evidence model
+**Status:** Complete — 2026-04-03
 **Purpose:** make all admin actions reconstructable and defensible.
 
 **Major objectives**

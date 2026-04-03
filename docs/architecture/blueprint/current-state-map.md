@@ -344,7 +344,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | Phase 1 admin plans (6 canonical docs under `phase-01/`) | **Historical Foundational** | Architecture baseline, boundary matrix, domain taxonomy, release-scope map, locked decisions; completed 2026-03-31 |
 | Phase 2 admin plans (9 canonical docs under `phase-02/`) | **Historical Foundational** | Action catalog, run model, API contracts, checkpoints, audit/evidence, adapter registry, package placement, decision register; 58 pure-type exports in `@hbc/models/admin-control-plane`; completed 2026-04-01 |
 | Phase 3 admin plans (8 canonical docs under `phase-03/`) | **Canonical Current-State** | Runtime foundation inventory, host/composition-root plan, service-factory plan, API surface catalog, adapter registry/routing plan, orchestration bridge plan, authz/safety plan, decision register (11 decisions P3-D01–D11); completed 2026-04-02 |
-| Phase 4 admin plans (7 canonical docs under `phase-04/`) | **Canonical Current-State** | Repo-truth audit, run/audit/evidence baseline, persistence boundary matrix, store implementation notes, provisioning bridge, retrieval API contract, evidence/retention boundaries; completed 2026-04-02 |
+| Phase 4 admin plans (9 canonical docs under `phase-04/`) | **Canonical Current-State** | Repo-truth audit, run/audit/evidence baseline, persistence boundary matrix, store implementation notes, provisioning bridge, retrieval API contract, evidence/retention boundaries, migration/cutover notes, exit reconciliation; completed 2026-04-03 |
 | `backend/functions/src/hosts/admin-control-plane/RELEASE-SCOPE.md` | **Canonical Current-State** | Admin control plane host boundary manifest; 2 route families, 13 admin API endpoints, 10 services |
 
 ---

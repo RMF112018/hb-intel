@@ -1,5 +1,7 @@
 # Admin SPFx IT Control Center — Phase 4 Summary Plan
 
+**Status:** Complete — Exit reconciliation 2026-04-03
+
 ## Purpose
 
 Phase 4 exists to make admin execution history durable, reviewable, and defensible.

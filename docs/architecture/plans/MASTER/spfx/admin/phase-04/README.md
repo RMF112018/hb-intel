@@ -82,7 +82,8 @@ Use this authority order when signals conflict:
 
 | Document | Prompt | Purpose |
 |----------|--------|---------|
-| Validation Report | P4-08 | Final verification results and exit criteria assessment |
+| [Migration & Cutover Notes](admin-spfx-phase-4-migration-and-cutover-notes.md) | P4-08 | Forward-only migration posture, data duplication, deployment notes |
+| [Exit Reconciliation](admin-spfx-phase-4-exit-reconciliation.md) | P4-08 | Final validation, acceptance criteria, residual risks, next phase entry |
 
 ## Expected repo outputs
 

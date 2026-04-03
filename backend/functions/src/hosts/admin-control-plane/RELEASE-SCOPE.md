@@ -2,8 +2,10 @@
 
 > **Machine-checkable:** The test file `src/test/admin-control-plane-host-boundary.test.ts` validates every claim in this manifest. If this document drifts from reality, tests fail.
 
-**Phase:** Phase 3 (P3-02, P3-03, P3-04)
-**Governing plan:** `docs/architecture/plans/MASTER/spfx/admin/phase-03/Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md`
+**Phase:** Phase 3 + Phase 4 (P3-02 through P3-04, P4-03, P4-04, P4-05, P4-06)
+**Governing plans:**
+- `docs/architecture/plans/MASTER/spfx/admin/phase-03/Admin-SPFx-IT-Control-Center-Phase-3-Summary-Plan.md`
+- `docs/architecture/plans/MASTER/spfx/admin/phase-04/Admin-SPFx-IT-Control-Center-Phase-4-Summary-Plan.md`
 
 ## In-Scope Route Families (2)
 
@@ -66,11 +68,12 @@
 
 **Infrastructure (3 eager):** tableStorage, managedIdentity, graph
 
-**Admin domain (6 eager — stub implementations, replaced in P3-04 through P3-08):**
+**Admin domain (7 eager — stub implementations replaced in P3-04 through P3-08, durable stores in P4-03/P4-06):**
 - `runService` (`IAdminRunService`) — Run lifecycle: launch, status, history, cancel, retry
 - `adapterRegistry` (`IAdminAdapterRegistry`) — Adapter discovery, capability check, invocation
 - `configService` (`IAdminConfigService`) — Configuration/standards resolution by scope
 - `auditService` (`IAdminAuditService`) — Audit event recording and evidence linkage
+- `evidenceService` (`IAdminEvidenceService`) — Evidence metadata capture, inline/offload boundary (P4-06)
 - `preflightService` (`IAdminPreflightService`) — Precondition validation before run launch
 - `actorContextResolver` (`IAdminActorContextResolver`) — JWT claims → actor context mapping
 

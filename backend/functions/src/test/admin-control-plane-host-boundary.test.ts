@@ -371,6 +371,7 @@ describe('P3-03 Admin Control Plane service container foundation', () => {
       'IAdminAdapterRegistry',
       'IAdminConfigService',
       'IAdminAuditService',
+      'IAdminEvidenceService',       // P4-06: evidence metadata capture
       'IAdminPreflightService',
       'IAdminActorContextResolver',
     ];
@@ -392,6 +393,7 @@ describe('P3-03 Admin Control Plane service container foundation', () => {
       'adapterRegistry',
       'configService',
       'auditService',
+      'evidenceService',             // P4-06: evidence metadata capture
       'preflightService',
       'actorContextResolver',
     ];
