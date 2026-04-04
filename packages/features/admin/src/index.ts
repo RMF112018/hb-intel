@@ -102,6 +102,17 @@ export type {
   SafetyPreviewRequest,
 } from './hooks/index.js';
 
+export {
+  useDestructiveActionConfirmation,
+} from './hooks/index.js';
+
+export type {
+  UseDestructiveActionConfirmationConfig,
+  UseDestructiveActionConfirmationResult,
+  ConfirmationRequest,
+  SafetyGateContext,
+} from './hooks/index.js';
+
 // Integrations
 export {
   ReferenceBicNextMoveAdapter,

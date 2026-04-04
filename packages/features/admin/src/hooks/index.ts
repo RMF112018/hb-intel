@@ -4,3 +4,5 @@ export { useApprovalAuthority } from './useApprovalAuthority.js';
 export { computeAlertBadge, buildProbeStatusMap, resolveEligibility } from './helpers.js';
 export { useActionSafetyPreview, isPreviewRequired, getConfirmationType } from './useActionSafetyPreview.js';
 export type { UseActionSafetyPreviewConfig, UseActionSafetyPreviewResult, SafetyPreviewRequest } from './useActionSafetyPreview.js';
+export { useDestructiveActionConfirmation } from './useDestructiveActionConfirmation.js';
+export type { UseDestructiveActionConfirmationConfig, UseDestructiveActionConfirmationResult, ConfirmationRequest, SafetyGateContext } from './useDestructiveActionConfirmation.js';

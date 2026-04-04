@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.024  
-**Revision note:** Adds **Phase 11 operator safety UX primitives and flow patterns** (P11-06) — 6 reusable ui-kit primitives (HbcRiskBadge, HbcSafetyBanner, HbcImpactSummaryList, HbcScopeSummaryCard, HbcRecoveryGuidancePanel, HbcEvidenceSummaryBar) with Griffel styling, light/field mode support, ARIA roles, and dual-channel accessibility. 5 features-admin workflow compositions (SafetyPreviewPanel, SafetyConfirmationDialog with typed acknowledgment, SafetyActionSummaryCard, PostRunValidationPanel, SafetyWorkflowOrchestrator with multi-step flow). Preserves all prior phase content.
+**Version:** 01.000.025  
+**Revision note:** Adds **Phase 11 destructive-action confirmation and checkpoint execution** (P11-07) — implements safety-confirmation-service with `validateConfirmation` (phrase matching, scope declaration, preview evidence checks per risk tier), `recordConfirmation` (durable evidence + audit), `executeConfirmationFlow` (validate-then-record entry point for route handlers), and checkpoint bridge helpers (`requiresCheckpointExecution`, `requiresDestructiveConfirmation`). Adds `useDestructiveActionConfirmation` React hook in features-admin with `submitConfirmation`, `buildGateContext`, and `resetConfirmation`. 20 new tests all passing. Preserves all prior phase content.
 
 ---
 

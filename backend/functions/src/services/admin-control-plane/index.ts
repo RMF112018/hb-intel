@@ -190,6 +190,21 @@ export type {
   ISafetyPreviewPipelineResult,
 } from './safety-preview-service.js';
 
+// Safety confirmation service (Phase 11 — P11-07)
+export {
+  validateConfirmation,
+  recordConfirmation,
+  executeConfirmationFlow,
+  requiresCheckpointExecution,
+  requiresDestructiveConfirmation,
+} from './safety-confirmation-service.js';
+export type {
+  IConfirmationPayloadInput,
+  IConfirmationValidationResult,
+  IConfirmationRecordResult,
+  IConfirmationFlowResult,
+} from './safety-confirmation-service.js';
+
 // Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,
