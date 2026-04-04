@@ -1,9 +1,9 @@
 # 03 — Shared Homepage Primitives and Standalone SPFx Scaffolding
 
 **Naming guard**
+
 - Do **not** title or name the package as `homepage`, `home page`, `homepage-webparts`, `hb-central-homepage`, or any other homepage-labeled package.
 - The package name must be exactly: `hb-webparts`.
-
 
 ## Objective
 
@@ -31,7 +31,6 @@ Create the reusable homepage primitives, shared scaffolding, and homepage webpar
 - At the end, provide a concise handoff note with changed files, verification, risks, and next-prompt readiness.
 
 ## Implementation Tasks
-
 
 1. Scaffold the **homepage shared layer** in the repo.
    It should include reusable primitives for:
@@ -81,9 +80,7 @@ Create the reusable homepage primitives, shared scaffolding, and homepage webpar
    - loading/empty behavior
    - responsive-safe class/state behavior where testable
 
-
 ## Required Deliverables
-
 
 - homepage shared primitive components in the repo
 - common homepage helper utilities
@@ -91,19 +88,42 @@ Create the reusable homepage primitives, shared scaffolding, and homepage webpar
 - tests covering shared homepage primitives and greeting/time helpers
 - developer docs explaining how later homepage webparts should consume the shared layer
 
-
 ## Verification
-
 
 - run package typecheck
 - run relevant unit tests
 - verify shared primitives do not import broad or disallowed dependencies
 - confirm greeting / first-name / local-time helpers are deterministic and test-covered
 
-
 ## Definition of Done
-
 
 - the homepage system has a reusable foundation
 - later webpart prompts can focus on feature implementation instead of recreating layout/state primitives
 - greeting, skeleton, empty, editorial, utility, and spotlight patterns are available and governed
+
+## Prompt-03 Closure Artifacts
+
+- `apps/hb-webparts` standalone scaffold (`@hbc/spfx-hb-webparts`)
+- `apps/hb-webparts/src/homepage/shared/*` shared primitive layer
+- `apps/hb-webparts/src/homepage/helpers/*` homepage helper contracts
+- `apps/hb-webparts/src/homepage/models/contentModels.ts` shared normalized content models
+- `apps/hb-webparts/src/homepage/ReferenceHomepageComposition.tsx` reference composition
+- `apps/hb-webparts/src/homepage/__tests__/*` shared foundation tests
+- `03A_Shared_Primitives_Catalog.md`
+- `03B_Scaffolding_Conventions_and_Helpers.md`
+- `03C_Shared_Foundation_Test_and_Usage_Guide.md`
+
+## Resolved Decisions Register (Prompt 03)
+
+| Decision ID | Decision                                                                                                                 | Status |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------ |
+| D3-01       | `hb-webparts` scaffold is introduced as a standalone app under `apps/`                                                   | Closed |
+| D3-02       | Solution + feature manifest versions are initialized to `001.000.001` for first patch baseline                           | Closed |
+| D3-03       | Shared homepage primitives/helpers/models are implemented once and reused by Prompt 04–10 webparts                       | Closed |
+| D3-04       | Homepage shared layer imports remain constrained to `@hbc/ui-kit/homepage` (+ narrow theme/icons paths only when needed) | Closed |
+| D3-05       | Prompt-01/02 manifest-bump deferment is superseded because the `hb-webparts` manifest target now exists                  | Closed |
+
+## Prompt-03 Handoff
+
+- Prompt 03 foundational scope is closed; downstream prompts should focus on feature-specific webparts and property-pane/data integrations.
+- Do not recreate shared primitive variants in feature prompts unless a new approved exception record is added.

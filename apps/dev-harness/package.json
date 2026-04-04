@@ -18,7 +18,7 @@
     "@hbc/complexity": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@hbc/spfx-accounting": "workspace:*",
-    "@hbc/spfx-estimating": "workspace:*",
+    "@hbc/spfx-project-setup": "workspace:*",
     "@hbc/spfx-project-hub": "workspace:*",
     "@hbc/spfx-leadership": "workspace:*",
     "@hbc/spfx-business-development": "workspace:*",

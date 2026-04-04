@@ -14,6 +14,9 @@ import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js';
 export { HbcBanner } from './HbcBanner/index.js';
 export type { HbcBannerProps, BannerVariant } from './HbcBanner/index.js';
 
+export { HbcThemeProvider } from './HbcAppShell/index.js';
+export type { HbcThemeProviderProps } from './HbcAppShell/HbcThemeContext.js';
+
 export { HbcButton } from './HbcButton/index.js';
 export type { ButtonVariant, HbcButtonProps } from './HbcButton/index.js';
 
@@ -43,7 +46,8 @@ export type HomepagePrimitiveName =
   | 'HbcEmptyState'
   | 'HbcSearch'
   | 'HbcSpinner'
-  | 'HbcStatusBadge';
+  | 'HbcStatusBadge'
+  | 'HbcThemeProvider';
 
 /**
  * Prompt-02 locked HB homepage brand direction.

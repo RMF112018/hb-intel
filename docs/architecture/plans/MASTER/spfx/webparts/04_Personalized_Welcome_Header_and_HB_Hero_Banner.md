@@ -1,9 +1,9 @@
 # 04 — Personalized Welcome Header and HB Hero Banner
 
 **Naming guard**
+
 - Do **not** title or name the package as `homepage`, `home page`, `homepage-webparts`, `hb-central-homepage`, or any other homepage-labeled package.
 - The package name must be exactly: `hb-webparts`.
-
 
 ## Objective
 
@@ -31,7 +31,6 @@ Implement the top-band homepage experience: the signature personalized greeting 
 - At the end, provide a concise handoff note with changed files, verification, risks, and next-prompt readiness.
 
 ## Implementation Tasks
-
 
 1. Implement the **Personalized Welcome Header** webpart.
    Requirements:
@@ -71,9 +70,7 @@ Implement the top-band homepage experience: the signature personalized greeting 
    - alert rendering states
    - empty/authoring edge cases
 
-
 ## Required Deliverables
-
 
 - working Personalized Welcome Header webpart
 - working HB Hero Banner webpart
@@ -81,20 +78,46 @@ Implement the top-band homepage experience: the signature personalized greeting 
 - tests and docs for both
 - any shared helper refinements required by the implementation
 
-
 ## Verification
-
 
 - run typecheck and relevant tests
 - verify the greeting logic against multiple times of day and fallback cases
 - verify semantic structure, focus behavior, and reduced-motion support
 - confirm both webparts remain visually premium and operationally readable in SharePoint-compatible light mode
 
-
 ## Definition of Done
-
 
 - the top-band experience is implemented and clearly reflects the design brief
 - the greeting is a signature experience element
 - hero content is site-owner maintainable
 - both webparts are ready for real homepage composition
+
+## Prompt-04 Closure Artifacts
+
+- `apps/hb-webparts/src/webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.tsx`
+- `apps/hb-webparts/src/webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeaderWebPart.manifest.json`
+- `apps/hb-webparts/src/webparts/hbHeroBanner/HbHeroBanner.tsx`
+- `apps/hb-webparts/src/webparts/hbHeroBanner/HbHeroBannerWebPart.manifest.json`
+- `apps/hb-webparts/src/homepage/shared/HomepageTopBandPair.tsx`
+- `apps/hb-webparts/src/homepage/helpers/welcomeMessage.ts`
+- `apps/hb-webparts/src/homepage/helpers/topBandConfig.ts`
+- `apps/hb-webparts/src/homepage/__tests__/topBandWebparts.test.tsx`
+- `04A_Welcome_Header_Contract_and_Behavior_Matrix.md`
+- `04B_Hero_Banner_Authoring_and_Config_Contract.md`
+- `04C_Top_Band_Test_Usage_and_Handoff.md`
+
+## Resolved Decisions Register (Prompt 04)
+
+| Decision ID | Decision                                                                                                     | Status    |
+| ----------- | ------------------------------------------------------------------------------------------------------------ | --------- | ----------------------- | ------ |
+| D4-01       | Greeting format is fixed to `Good morning                                                                    | afternoon | evening, {First Name}.` | Closed |
+| D4-02       | First-name fallback order is preferred name, display name, email local-part token, then `there`              | Closed    |
+| D4-03       | Welcome alert rendering remains optional and severity-governed (`none`, `info`, `warning`, `critical`)       | Closed    |
+| D4-04       | Hero banner authored mode requires a headline; non-authored mode renders empty-state guidance                | Closed    |
+| D4-05       | Top-band pairing is standardized through shared `HomepageTopBandPair` composition helper                     | Closed    |
+| D4-06       | Prompt-04 applies manifest patch bump from `001.000.001` to `001.000.002` for `hb-webparts` solution/feature | Closed    |
+
+## Prompt-04 Handoff
+
+- Top-band welcome and hero contracts are now implementation-ready and test-covered in `hb-webparts`.
+- Prompt-05 should consume these contracts without redefining greeting, alert, hero authoring, or top-band layout policies.

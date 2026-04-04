@@ -1,0 +1,35 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
+  "alias": "HbHeroBannerWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Hero Banner"
+      },
+      "description": {
+        "default": "Authorable editorial hero banner for HB Central top-band composition."
+      },
+      "officeFabricIconFontName": "Photo2",
+      "properties": {
+        "headline": "Build with confidence.",
+        "message": "Keep teams aligned on priorities, updates, and field execution from one homepage experience.",
+        "metadata": "Updated weekly by Communications",
+        "cta": {
+          "label": "Read this week’s update",
+          "href": "/sites/hb-central"
+        }
+      }
+    }
+  ]
+}

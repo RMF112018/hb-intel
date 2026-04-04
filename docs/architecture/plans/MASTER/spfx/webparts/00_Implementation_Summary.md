@@ -213,3 +213,54 @@ Prompt 02 deliverables are now locked for downstream implementation:
 | D2-03       | HB homepage brand foundation values are encoded as implementation references                                      | Closed |
 | D2-04       | Light-theme-first, reduced-motion, focus visibility, and density guidance are explicit in contract + docs         | Closed |
 | D2-05       | SPFx manifest patch bump remains deferred until `hb-webparts` manifest target exists                              | Closed |
+
+## Prompt-03 Closure Artifacts
+
+Prompt 03 deliverables are now locked for Prompt 04–10 implementation:
+
+- `03A_Shared_Primitives_Catalog.md`
+- `03B_Scaffolding_Conventions_and_Helpers.md`
+- `03C_Shared_Foundation_Test_and_Usage_Guide.md`
+- `apps/hb-webparts` scaffold (`@hbc/spfx-hb-webparts`) with shared homepage primitives/helpers/models and baseline tests
+
+## Resolved Decisions Register (Prompt 03)
+
+| Decision ID | Decision                                                                                                                      | Status |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ |
+| D3-01       | New standalone homepage SPFx app scaffold is locked to `apps/hb-webparts` (`@hbc/spfx-hb-webparts`)                           | Closed |
+| D3-02       | `hb-webparts` solution and feature manifest baselines are initialized to `001.000.001`                                        | Closed |
+| D3-03       | Shared homepage primitives/helpers/models are centralized under `src/homepage/*` for all webparts                             | Closed |
+| D3-04       | Homepage shared layer consumption remains constrained to `@hbc/ui-kit/homepage` (+ narrow theme/icons paths only when needed) | Closed |
+| D3-05       | Prompt 01/02 manifest deferment is superseded by creation of the real `hb-webparts` manifest target                           | Closed |
+
+## Prompt-03 Handoff Note
+
+- Shared homepage foundations are implemented in the new `hb-webparts` scaffold and documented for downstream feature prompts.
+- Prompt 04–10 should consume shared primitives/helpers/models instead of introducing parallel local variants.
+- Prompt-01/02 manifest deferment no longer applies because `hb-webparts` now exists with first patch baseline `001.000.001`.
+
+## Prompt-04 Closure Artifacts
+
+Prompt 04 deliverables are now locked for Prompt 05–10 implementation:
+
+- `04A_Welcome_Header_Contract_and_Behavior_Matrix.md`
+- `04B_Hero_Banner_Authoring_and_Config_Contract.md`
+- `04C_Top_Band_Test_Usage_and_Handoff.md`
+- `apps/hb-webparts/src/webparts/personalizedWelcomeHeader/*`
+- `apps/hb-webparts/src/webparts/hbHeroBanner/*`
+- `apps/hb-webparts/src/homepage/shared/HomepageTopBandPair.tsx`
+
+## Resolved Decisions Register (Prompt 04)
+
+| Decision ID | Decision                                                                                                    | Status |
+| ----------- | ----------------------------------------------------------------------------------------------------------- | ------ |
+| D4-01       | Personalized Welcome Header greeting format is locked to morning/afternoon/evening + first-name token       | Closed |
+| D4-02       | Welcome alert state remains optional and must preserve greeting hierarchy                                   | Closed |
+| D4-03       | HB Hero Banner authored headline is required for configured mode; missing authored content uses empty state | Closed |
+| D4-04       | Top-band pair composition is standardized through shared `HomepageTopBandPair`                              | Closed |
+| D4-05       | `hb-webparts` solution + feature versions are patch-bumped to `001.000.002`                                 | Closed |
+
+## Prompt-04 Handoff Note
+
+- Top-band welcome + hero webpart contracts are implemented and documented with shared composition guidance.
+- Prompt-05 should consume top-band outputs as fixed inputs and focus on priority actions/work-hub behavior.

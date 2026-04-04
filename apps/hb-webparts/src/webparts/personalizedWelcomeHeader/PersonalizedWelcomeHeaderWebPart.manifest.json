@@ -1,0 +1,33 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f",
+  "alias": "PersonalizedWelcomeHeaderWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "Personalized Welcome Header"
+      },
+      "description": {
+        "default": "Signature greeting header for HB Central top-band composition."
+      },
+      "officeFabricIconFontName": "Contact",
+      "properties": {
+        "supportLine": "Welcome back to HB Central.",
+        "contextLine": "Here is your operational snapshot for today.",
+        "alertSeverity": "none",
+        "alertTitle": "",
+        "alertMessage": ""
+      }
+    }
+  ]
+}

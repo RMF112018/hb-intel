@@ -47,7 +47,13 @@ Run the prompts in order.
 - `02B_Homepage_UI-Kit_Usage_Guide.md`
 - `02C_HB_Brand_Foundation_Reference.md`
 - `03_Shared_Homepage_Primitives_and_Standalone_SPFx_Scaffolding.md`
+- `03A_Shared_Primitives_Catalog.md`
+- `03B_Scaffolding_Conventions_and_Helpers.md`
+- `03C_Shared_Foundation_Test_and_Usage_Guide.md`
 - `04_Personalized_Welcome_Header_and_HB_Hero_Banner.md`
+- `04A_Welcome_Header_Contract_and_Behavior_Matrix.md`
+- `04B_Hero_Banner_Authoring_and_Config_Contract.md`
+- `04C_Top_Band_Test_Usage_and_Handoff.md`
 - `05_Priority_Actions_Rail_and_Tool_Launcher_Work_Hub.md`
 - `06_Company_Pulse_Leadership_Message_and_People_Culture.md`
 - `07_Project_Portfolio_Spotlight_and_Safety_Field_Excellence.md`
@@ -82,6 +88,29 @@ Prompt 02 closure outputs are complete and are required inputs for Prompt 03+:
 - `@hbc/ui-kit/homepage` — constrained entrypoint for homepage-safe primitives and contract constants.
 
 Prompt-02 keeps SPFx manifest patch-bump deferred until `hb-webparts` exists as an actual manifest target in repo.
+
+## Prompt-03 Outputs (Locked)
+
+Prompt 03 closure outputs are complete and are required inputs for Prompt 04+:
+
+- `apps/hb-webparts` (`@hbc/spfx-hb-webparts`) — standalone SPFx homepage scaffold with locked manifest baseline `001.000.001`.
+- `03A_Shared_Primitives_Catalog.md` — shared homepage primitive inventory, ownership, and intended consumption.
+- `03B_Scaffolding_Conventions_and_Helpers.md` — canonical webpart/adapters/property-pane/test/docs placement conventions and helper/model contracts.
+- `03C_Shared_Foundation_Test_and_Usage_Guide.md` — Prompt 03 verification expectations and downstream implementation usage guidance.
+
+Prompt-01/02 manifest deferment is now superseded by the created `hb-webparts` manifest target and initialized patch baseline.
+
+## Prompt-04 Outputs (Locked)
+
+Prompt 04 closure outputs are complete and are required inputs for Prompt 05+:
+
+- `apps/hb-webparts/src/webparts/personalizedWelcomeHeader/*` — signature greeting webpart contract + manifest baseline.
+- `apps/hb-webparts/src/webparts/hbHeroBanner/*` — authored hero banner webpart contract + manifest baseline.
+- `04A_Welcome_Header_Contract_and_Behavior_Matrix.md` — greeting behavior and alert matrix.
+- `04B_Hero_Banner_Authoring_and_Config_Contract.md` — hero authoring/normalization contract.
+- `04C_Top_Band_Test_Usage_and_Handoff.md` — Prompt-04 verification and downstream usage guidance.
+
+Prompt-04 applies the first post-scaffold manifest patch bump to `001.000.002` in `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 
