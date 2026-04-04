@@ -23,6 +23,8 @@ import { requireAdmin, requireDelegatedScope } from '../../middleware/authorizat
 import { createAdminControlPlaneServiceFactory } from '../../hosts/admin-control-plane/service-factory.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
+import { AdminDomain, ObservabilityErrorSource } from '@hbc/models/admin-control-plane';
+import { emitRouteError } from './observability-emitter.js';
 
 // ─── POST /api/admin/white-glove/runs ───────────────────────────────────────
 
@@ -60,6 +62,7 @@ app.http('wgLaunchPackageRun', {
       const result = await services.whiteGloveRunService.launchPackageRun(body as never, actor);
       return successResponse(result, 202);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.WhiteGloveDeployment, source: ObservabilityErrorSource.WhiteGloveDeployment, operation: 'launchPackageRun', runId: null, actionKey: 'white-glove.launch' }, err);
       const message = err instanceof Error ? err.message : 'Launch failed';
       return errorResponse(400, 'LAUNCH_ERROR', message, reqId);
     }
@@ -153,6 +156,7 @@ app.http('wgCancelPackageRun', {
       const result = await services.whiteGloveRunService.cancelPackageRun(runId, actor, reason);
       return successResponse(result);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.WhiteGloveDeployment, source: ObservabilityErrorSource.WhiteGloveDeployment, operation: 'cancelPackageRun', runId, actionKey: 'white-glove.cancel' }, err);
       const message = err instanceof Error ? err.message : 'Cancel failed';
       if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
       return errorResponse(409, 'INVALID_STATE', message, reqId);
@@ -187,6 +191,7 @@ app.http('wgRetryPackageRun', {
       const result = await services.whiteGloveRunService.retryPackageRun(runId, actor);
       return successResponse(result, 202);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.WhiteGloveDeployment, source: ObservabilityErrorSource.WhiteGloveDeployment, operation: 'retryPackageRun', runId, actionKey: 'white-glove.retry' }, err);
       const message = err instanceof Error ? err.message : 'Retry failed';
       if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
       return errorResponse(409, 'INVALID_STATE', message, reqId);
@@ -243,6 +248,7 @@ app.http('wgRetryDeviceRun', {
       const result = await services.whiteGloveRunService.retryDeviceRun(deviceRunId, actor);
       return successResponse(result, 202);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.WhiteGloveDeployment, source: ObservabilityErrorSource.WhiteGloveDeployment, operation: 'retryDeviceRun', runId: deviceRunId, actionKey: 'white-glove.retry-device' }, err);
       const message = err instanceof Error ? err.message : 'Retry failed';
       if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
       return errorResponse(409, 'INVALID_STATE', message, reqId);
@@ -290,6 +296,7 @@ app.http('wgResolveCheckpoint', {
       );
       return successResponse(result);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.WhiteGloveDeployment, source: ObservabilityErrorSource.WhiteGloveDeployment, operation: 'resolveCheckpoint', runId: null, actionKey: 'white-glove.resolve-checkpoint' }, err);
       const message = err instanceof Error ? err.message : 'Checkpoint resolution failed';
       if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
       return errorResponse(409, 'CHECKPOINT_ERROR', message, reqId);

@@ -18,6 +18,8 @@ import { requireAdmin, requireDelegatedScope } from '../../middleware/authorizat
 import { createAdminControlPlaneServiceFactory } from '../../hosts/admin-control-plane/service-factory.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
+import { AdminDomain, ObservabilityErrorSource } from '@hbc/models/admin-control-plane';
+import { emitRouteError } from './observability-emitter.js';
 import type { ConnectorClass } from '../../services/connection-registry-service.js';
 
 // ─── GET /api/admin/connections ───────────────────────────────────────────────
@@ -104,6 +106,7 @@ app.http('adminTestConnection', {
       const result = await services.connectionRegistry.testConnection(connectorId, auth.claims.upn);
       return successResponse(result);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.EntraControl, source: ObservabilityErrorSource.EntraControl, operation: 'testConnection', runId: null, actionKey: 'connection.test' }, err);
       const message = err instanceof Error ? err.message : 'Test failed';
       return errorResponse(404, 'NOT_FOUND', message, reqId);
     }
@@ -165,6 +168,7 @@ app.http('adminUpdateConnectionPolicy', {
       const record = await services.connectionRegistry.updatePolicyToggles(connectorId, toggles, auth.claims.upn);
       return successResponse(record);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.EntraControl, source: ObservabilityErrorSource.EntraControl, operation: 'updateConnectionPolicy', runId: null, actionKey: 'connection.update-policy' }, err);
       const message = err instanceof Error ? err.message : 'Update failed';
       return errorResponse(404, 'NOT_FOUND', message, reqId);
     }

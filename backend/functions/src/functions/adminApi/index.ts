@@ -35,6 +35,8 @@ import { createAdminControlPlaneServiceFactory } from '../../hosts/admin-control
 import { processCheckpointDecision } from '../../services/admin-control-plane/install-checkpoint-service.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
+import { AdminDomain, ObservabilityErrorSource } from '@hbc/models/admin-control-plane';
+import { emitRouteError } from './observability-emitter.js';
 
 // P9.1-04: White-glove device deployment routes (side-effect import for route registration)
 import './white-glove-routes.js';
@@ -194,6 +196,7 @@ app.http('adminCancelRun', {
       const result = await services.runService.cancelRun(runId, actor, reason);
       return successResponse(result);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.ProvisioningRollout, source: ObservabilityErrorSource.AdminRun, operation: 'cancelRun', runId, actionKey: 'admin.cancel-run' }, err);
       const message = err instanceof Error ? err.message : 'Cancel failed';
       if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
       return errorResponse(409, 'INVALID_STATE', message, reqId);
@@ -237,6 +240,7 @@ app.http('adminRetryRun', {
       const result = await services.runService.retryRun(runId, actor);
       return successResponse(result, 202);
     } catch (err) {
+      emitRouteError(services, { domain: AdminDomain.ProvisioningRollout, source: ObservabilityErrorSource.AdminRun, operation: 'retryRun', runId, actionKey: 'admin.retry-run' }, err);
       const message = err instanceof Error ? err.message : 'Retry failed';
       if (message.includes('not found')) return errorResponse(404, 'NOT_FOUND', message, reqId);
       return errorResponse(409, 'INVALID_STATE', message, reqId);
