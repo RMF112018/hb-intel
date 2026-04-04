@@ -35,7 +35,7 @@ It is designed to be executed against the live repo in the order provided.
 | P11-07 | `phase-11-destructive-action-execution-model.md` + safety-confirmation-service + useDestructiveActionConfirmation hook + 20 tests | Complete |
 | P11-08 | `phase-11-post-run-validation-and-recovery-model.md` + safety-post-run-service + usePostRunSafetyValidation hook + 12 tests | Complete |
 | P11-09 | `phase-11-adoption-map.md` + ProvisioningSafetyOverrides + ProvisioningOversightPage integration | Complete |
-| P11-10 | `phase-11-exit-reconciliation.md` | Pending |
+| P11-10 | `phase-11-exit-reconciliation.md` — full validation, 8/8 acceptance criteria met | Complete |
 
 ## Intended execution order
 
