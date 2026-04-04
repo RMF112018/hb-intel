@@ -64,16 +64,22 @@ const adapter = new TeamsWebhookDispatchAdapter({
 const event = adapter.dispatch(alert);
 ```
 
-### Wave 0 known limitations
+### Current limitations (post Phase 12)
 
-- Alert store is in-memory only — does not persist across page reloads. SharePoint-list–backed persistence (`HBC_AdminAlerts`) is the Wave 1 target.
-- Teams webhook delivery is best-effort fire-and-forget.
-- Email relay is console-logged only (no SMTP client in Wave 0).
-- Only `provisioning-failure` and `stuck-workflow` monitors are wired; remaining four monitors are P3/deferred stubs.
-- Probe snapshot store is in-memory only — SharePoint-list–backed persistence (`HBC_InfrastructureProbeSnapshots`) is the Wave 1 target.
-- Only `azure-functions` and `sharepoint-infrastructure` probes have live connections; remaining three probes (`search`, `notification`, `module-record-health`) are deferred stubs.
-- `ErrorLogPage` is intentionally deferred (SF17-T05) with a clear empty state.
+**Resolved by Phase 12:**
+- Alert and probe stores are now backed by durable Azure Table Storage persistence via backend observability APIs (P12-04, P12-05). The in-memory `AdminAlertsApi` and `InfrastructureProbeApi` remain as local caches; durable state lives in the backend `ObservabilityAlerts` and `ObservabilityProbeSnapshots` tables.
+- `ErrorLogPage` is now a real observability surface querying the backend error store (P12-08). Lane status upgraded from scaffold to active.
+- `overdueProvisioningMonitor` is now live — 3 of 6 monitors are wired with real data providers (P12-06).
+- Deferred probes (`search`, `notification`, `module-record-health`) now return `unknown` status instead of misleading `healthy` (P12-06).
+- Alert `resolve()` action added alongside `acknowledge()` (P12-09).
+- Teams webhook dispatch now includes delivery status tracking (`INotificationDeliveryRecord`), acknowledged-alert suppression, and 5-minute cooldown duplicate suppression (P12-09).
+
+**Still open:**
+- Email relay is console-logged only (no SMTP client).
+- 3 of 6 monitors remain deferred stubs: `permission-anomaly` (no permission audit source), `upcoming-expiration` (no expiration model), `stale-record` (no freshness metadata). See P12-06 deferral rationale.
+- 3 of 5 probes remain deferred: `search` (no Azure Search), `notification` (no health endpoint), `module-record-health` (no integrity queries). See P12-06 deferral rationale.
 - `ApprovalAuthorityApi` is a stub — rules are not persisted until SF17-T05.
+- Teams webhook delivery is fire-and-forget (no retry queue). Failures are tracked in the delivery log but not retried.
 
 ## Installation
 

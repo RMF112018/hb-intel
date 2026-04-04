@@ -654,20 +654,30 @@ This section records the verified completion state at Wave 0 closeout. It serves
 - **G6 — Admin Support and Observability:** Admin failures inbox, provisioning override permissions (6 granular permissions), retry boundaries, operational dashboards, alert routing (AlertPollingService, monitors), embedded guidance (coaching callouts, runbook), observability probes (Azure Functions, SharePoint), integration audit, T08 verification.
 - **SF29 — My Work Feed:** `@hbc/my-work-feed` personal work aggregation feed implemented (ADR-0115); Wave 1 operating-layer primitive powering the Personal Work Hub.
 
-### 7.2 Active but Incomplete
+### 7.2 Phase 12 Completions — Admin Intelligence and Unified Observability
 
-- **SF17 persistence layer:** `AdminAlertsApi`, `ApprovalAuthorityApi`, `InfrastructureProbeApi` are in-memory only — no SharePoint list backing.
-- **Teams webhook delivery:** Fire-and-forget pattern with no delivery confirmation.
+- **Durable observability persistence:** Alert, probe snapshot, and error event stores backed by Azure Table Storage (`ObservabilityAlerts`, `ObservabilityProbeSnapshots`, `ObservabilityErrors`) with typed adapters, serialization round-trip tests, and mock/real mode support via service factory (P12-04).
+- **Backend observability APIs:** 15 HTTP endpoints for alert list/detail/acknowledge/resolve/ingest, probe latest/submit/history/health, error list/detail/ingest, dashboard summary, and correlated run timeline (P12-05).
+- **Telemetry normalization bridge:** Fire-and-forget bridge normalizing saga failures into error records and monitor evaluations into durable alert records (P12-05).
+- **Cross-domain instrumentation:** 9 route catch blocks across ProvisioningRollout, WhiteGloveDeployment, and EntraControl domains emit correlation-aware error records to the observability store (P12-07).
+- **ErrorLogPage:** Real observability error log with domain/severity/classification filtering, replacing the SF17-T05 deferred stub. Errors lane upgraded from scaffold to active (P12-08).
+- **Overdue provisioning monitor:** Third live monitor (`createOverdueProvisioningMonitor`) detects Submitted requests > 1h with severity escalation (P12-06).
+- **Notification hardening:** Delivery status tracking, acknowledged-alert suppression, cooldown duplicate suppression, and alert resolve action (P12-09).
+- **Shared observability contracts:** 11 enums and 23 typed interfaces in `@hbc/models/admin-control-plane` (P12-03).
+
+### 7.3 Active but Incomplete (post Phase 12)
+
+- **ApprovalAuthorityApi:** Still a stub — rules not persisted until SF17-T05.
+- **Deferred monitors (3):** Permission anomaly, upcoming expiration, stale record — underlying data sources do not yet exist.
+- **Deferred probes (3):** Search, notification, module-record-health — infrastructure endpoints not available. Return `unknown` status.
 - **Email relay:** Console-logged only — no live SMTP transport.
-- **Deferred monitors (4):** Overdue workflow, stale request, permission anomaly, override expiration.
-- **Deferred probes (3):** Search, notification, module-record-health.
-- **ErrorLogPage:** Intentional deferral to SF17-T05 — renders `HbcEmptyState` placeholder.
+- **Teams webhook retry:** Fire-and-forget delivery with tracking but no retry queue.
 
-### 7.3 Intentionally Deferred to Wave 1
+### 7.4 Intentionally Deferred to Wave 1+
 
-- SharePoint list persistence for alerts, probes, and approval rules.
-- Frontend Application Insights SDK (architecture constraint — backend-only observability in Wave 0).
-- Historical trend charts (Wave 0 is current-state only).
+- Frontend Application Insights SDK (architecture constraint — backend-only observability).
+- Historical trend charts (current-state only).
 - Bulk queue actions (bulk retry, bulk archive).
 - Coordinator/requester admin views.
 - Live SMTP email relay.
+- Incident management (incident creation, linking, resolution workflows).

@@ -8,7 +8,7 @@ This app is the human-facing shell where authorized admins observe, initiate, an
 
 ## Operator Console
 
-The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Seven lanes have active content: Setup (preflight + install wizard), Runs (provisioning oversight), SharePoint Control (drift detection, preview, repair, posture), Hybrid Identity (user lifecycle, connection management, audit history), Config (access control), Health (operational dashboard), and the landing page itself. One lane is a scaffold (Validation — Phase 7). The Error / Audit lane preserves its deferred state (SF17-T05).
+The admin app is organized as an 8-lane operator console (Phase 5). The **landing page** (`/`) shows an overview grid of all workflow lanes. Eight lanes have active content: Setup (preflight + install wizard), Runs (provisioning oversight), SharePoint Control (drift detection, preview, repair, posture), Hybrid Identity (user lifecycle, connection management, audit history), Config (access control), Health (operational dashboard), Errors (observability error log — Phase 12), and the landing page itself. One lane remains a scaffold (Validation — Phase 7).
 
 ### Hybrid Identity (Phase 9)
 
@@ -30,7 +30,7 @@ Navigation is lane-driven — the shell renders all 8 lane buttons derived from 
 | `/entra` | Hybrid Identity | EntraLanePage | Active — hybrid identity administration (Phase 9) |
 | `/config` | Standards / Config | SystemSettingsPage | Active — access control and approval authority configuration |
 | `/health` | Health / Alerts | OperationalDashboardPage | Active — alert summary, probe health, infrastructure status |
-| `/errors` | Error / Audit | ErrorLogPage | Deferred — SF17-T05 |
+| `/errors` | Error / Audit | ErrorLogPage | Active — observability error log (Phase 12) |
 
 ### Legacy redirects (backward compatibility)
 
@@ -59,13 +59,13 @@ The admin app runs two background polling services when a backend URL is configu
 
 Both services skip polling when no backend URL is configured (dev-harness without backend), preventing DOCTYPE parse errors from HTML fallback responses.
 
-## Deferred Pages
+## Phase 12 Observability Surfaces
 
-### Error Log (SF17-T05)
+The Error Log page (`/errors`) was implemented in Phase 12 (P12-08) and is now an active lane. It queries the backend observability error store via `useObservabilityErrors` from `@hbc/features-admin`, supports domain/severity/classification filtering via `HbcSelect`, and renders error event cards with severity badges and correlation metadata. The Health dashboard (`/health`) continues to render alert and probe dashboards with durable backend-backed data.
 
-The Error Log page is intentionally deferred. It renders a clear `HbcSmartEmptyState` from `@hbc/smart-empty-state` so the route never appears blank. All admin alert and monitoring functionality is available in the Provisioning Oversight dashboard.
+### Deferred pages
 
-Tracked in: SF17-T05 (error logging and audit trail).
+The Validation lane (`/validation`) remains a scaffold deferred to Phase 7.
 
 ## Dependencies
 
