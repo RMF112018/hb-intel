@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.020  
-**Revision note:** Adds **Phase 11 safety baseline and risk-tier taxonomy** (P11-02) — defines canonical safety doctrine (frontend vs backend ownership, backend enforcement mandate, safety control pipeline), five-tier risk model aligned to existing `AdminRiskLevel` enum, per-tier safety control matrix, action classification across all 7 admin domains (provisioning, setup/install, app binding, hybrid identity, white-glove, standards/config, SharePoint control), and safety profile contract shape. Updates Phase 11 README with deliverable tracking. Preserves all prior phase content.
+**Version:** 01.000.021  
+**Revision note:** Adds **Phase 11 shared safety contracts and model placement** (P11-03) — implements `AdminSafetyControl` enum (12 controls), `IAdminSafetyProfile` (action-to-controls mapping), `IAdminSafetyPreviewResult` and `IAdminSafetyImpactItem` (enhanced preview/dry-run), `IAdminConfirmationPayload` (confirmation evidence), `IAdminExecutionScope` (scope restriction), `IAdminRecoveryGuidance` and `IAdminRecoveryStep` (recovery model), `IAdminSafetyEvidenceSummary` (evidence rollup), and `IAdminSafetyWarning` (structured warnings) in `@hbc/models`. All contracts reuse existing enums and types. Preserves all prior phase content.
 
 ---
 

@@ -178,6 +178,22 @@ export type {
   IConfigVersionHistory,
 } from './IConfigVersioning.js';
 
+// Phase 11: Safety contracts
+export { AdminSafetyControl } from './IAdminSafety.js';
+
+export type {
+  AdminConfirmationType,
+  IAdminSafetyProfile,
+  IAdminExecutionScope,
+  IAdminSafetyWarning,
+  IAdminSafetyPreviewResult,
+  IAdminSafetyImpactItem,
+  IAdminConfirmationPayload,
+  IAdminRecoveryGuidance,
+  IAdminRecoveryStep,
+  IAdminSafetyEvidenceSummary,
+} from './IAdminSafety.js';
+
 export {
   WhiteGloveCheckpointType,
   WhiteGloveEvidenceType,
