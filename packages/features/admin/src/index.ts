@@ -57,10 +57,12 @@ export {
   stuckWorkflowMonitor,
   createStuckWorkflowMonitor,
   overdueProvisioningMonitor,
+  createOverdueProvisioningMonitor,
   upcomingExpirationMonitor,
   staleRecordMonitor,
   routeAlert,
   createDefaultMonitorRegistry,
+  generateProbeHealthAlerts,
 } from './monitors/index.js';
 
 // Probes

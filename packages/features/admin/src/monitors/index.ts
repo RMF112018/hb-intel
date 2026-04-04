@@ -2,16 +2,17 @@ export { MonitorRegistry } from './monitorRegistry.js';
 export { provisioningFailureMonitor, createProvisioningFailureMonitor } from './provisioningFailureMonitor.js';
 export { permissionAnomalyMonitor } from './permissionAnomalyMonitor.js';
 export { stuckWorkflowMonitor, createStuckWorkflowMonitor } from './stuckWorkflowMonitor.js';
-export { overdueProvisioningMonitor } from './overdueProvisioningMonitor.js';
+export { overdueProvisioningMonitor, createOverdueProvisioningMonitor } from './overdueProvisioningMonitor.js';
 export { upcomingExpirationMonitor } from './upcomingExpirationMonitor.js';
 export { staleRecordMonitor } from './staleRecordMonitor.js';
 export { routeAlert } from './notificationRouter.js';
+export { generateProbeHealthAlerts } from './probeHealthAlertBridge.js';
 
 import { MonitorRegistry } from './monitorRegistry.js';
 import { provisioningFailureMonitor, createProvisioningFailureMonitor } from './provisioningFailureMonitor.js';
 import { permissionAnomalyMonitor } from './permissionAnomalyMonitor.js';
 import { stuckWorkflowMonitor, createStuckWorkflowMonitor } from './stuckWorkflowMonitor.js';
-import { overdueProvisioningMonitor } from './overdueProvisioningMonitor.js';
+import { overdueProvisioningMonitor, createOverdueProvisioningMonitor } from './overdueProvisioningMonitor.js';
 import { upcomingExpirationMonitor } from './upcomingExpirationMonitor.js';
 import { staleRecordMonitor } from './staleRecordMonitor.js';
 import type { IProvisioningDataProvider } from '../types/IProvisioningDataProvider.js';
@@ -34,7 +35,9 @@ export function createDefaultMonitorRegistry(provider?: IProvisioningDataProvide
   registry.register(
     provider ? createStuckWorkflowMonitor(provider) : stuckWorkflowMonitor,
   );
-  registry.register(overdueProvisioningMonitor);
+  registry.register(
+    provider ? createOverdueProvisioningMonitor(provider) : overdueProvisioningMonitor,
+  );
   registry.register(upcomingExpirationMonitor);
   registry.register(staleRecordMonitor);
   return registry;
