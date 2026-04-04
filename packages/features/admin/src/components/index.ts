@@ -15,3 +15,7 @@ export { PostRunValidationPanel } from './PostRunValidationPanel.js';
 export type { PostRunValidationPanelProps } from './PostRunValidationPanel.js';
 export { SafetyWorkflowOrchestrator } from './SafetyWorkflowOrchestrator.js';
 export type { SafetyWorkflowOrchestratorProps, SafetyWorkflowStep } from './SafetyWorkflowOrchestrator.js';
+
+// Phase 11: First-adopter provisioning safety overrides (P11-09)
+export { ForceRetryConfirmation, ArchiveConfirmation, StateOverrideConfirmation } from './ProvisioningSafetyOverrides.js';
+export type { ForceRetryConfirmationProps, ArchiveConfirmationProps, StateOverrideConfirmationProps } from './ProvisioningSafetyOverrides.js';

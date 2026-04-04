@@ -13,14 +13,18 @@ import {
 import { HbcComplexityDial, HbcComplexityGate } from '@hbc/complexity';
 import type { IProvisioningStatus, ISagaStepResult } from '@hbc/models';
 import { createProvisioningApiClient } from '@hbc/provisioning';
-import { ADMIN_RETRY_CEILING } from '@hbc/features-admin';
+import {
+  ADMIN_RETRY_CEILING,
+  ForceRetryConfirmation,
+  ArchiveConfirmation,
+  StateOverrideConfirmation,
+} from '@hbc/features-admin';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
 import {
   HbcBanner,
   HbcButton,
   HbcCard,
-  HbcConfirmDialog,
   HbcDataTable,
   HbcModal,
   HbcSelect,
@@ -508,45 +512,55 @@ export function ProvisioningOversightPage(): ReactNode {
         />
       )}
 
-      {/* ── Force Retry Confirmation ──────────────────────────────────── */}
-      <HbcConfirmDialog
-        open={confirmAction?.type === 'forceRetry'}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={handleForceRetry}
-        title="Force Retry"
-        description={(() => {
-          const retryRun = confirmAction ? allRuns.find((r) => r.projectId === confirmAction.projectId) : undefined;
-          const attempt = (retryRun?.retryCount ?? 0) + 1;
-          return `This is retry attempt ${attempt} of ${ADMIN_RETRY_CEILING}. Force-retrying a structural or permissions failure may produce duplicate partial state if the failed step was not idempotent. Confirm only if you have investigated the failure cause.`;
-        })()}
-        confirmLabel="Force Retry"
-        variant="danger"
-        loading={actionLoading}
-      />
+      {/* ── P11-09: Force Retry — safety-aware confirmation ───────────── */}
+      {confirmAction?.type === 'forceRetry' && (() => {
+        const retryRun = allRuns.find((r) => r.projectId === confirmAction.projectId);
+        return (
+          <ForceRetryConfirmation
+            open={true}
+            projectNumber={retryRun?.projectNumber ?? confirmAction.projectId}
+            projectName={retryRun?.projectName ?? ''}
+            retryCount={retryRun?.retryCount ?? 0}
+            retryCeiling={ADMIN_RETRY_CEILING}
+            failureClass={retryRun?.failureClass}
+            onConfirm={handleForceRetry}
+            onCancel={() => setConfirmAction(null)}
+            loading={actionLoading}
+          />
+        );
+      })()}
 
-      {/* ── Archive Confirmation ──────────────────────────────────────── */}
-      <HbcConfirmDialog
-        open={confirmAction?.type === 'archive'}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={handleArchive}
-        title="Archive Failure"
-        description="Archive this failure? The request will be removed from the active failures queue."
-        confirmLabel="Archive"
-        variant="warning"
-        loading={actionLoading}
-      />
+      {/* ── P11-09: Archive — safety-aware confirmation ──────────────── */}
+      {confirmAction?.type === 'archive' && (() => {
+        const archiveRun = allRuns.find((r) => r.projectId === confirmAction.projectId);
+        return (
+          <ArchiveConfirmation
+            open={true}
+            projectNumber={archiveRun?.projectNumber ?? confirmAction.projectId}
+            projectName={archiveRun?.projectName ?? ''}
+            onConfirm={handleArchive}
+            onCancel={() => setConfirmAction(null)}
+            loading={actionLoading}
+          />
+        );
+      })()}
 
-      {/* ── State Override Confirmation ───────────────────────────────── */}
-      <HbcConfirmDialog
-        open={confirmAction?.type === 'stateOverride'}
-        onClose={() => { setConfirmAction(null); setOverrideTarget(''); }}
-        onConfirm={handleStateOverride}
-        title="Manual State Override"
-        description={`Manually overriding the provisioning state is a last-resort recovery action. This may cause data inconsistency if the saga has partially completed steps. Target state: ${confirmAction?.targetState ?? ''}. Confirm only after investigation.`}
-        confirmLabel="Override State"
-        variant="danger"
-        loading={actionLoading}
-      />
+      {/* ── P11-09: State Override — destructive safety-aware confirmation */}
+      {confirmAction?.type === 'stateOverride' && (
+        <StateOverrideConfirmation
+          open={true}
+          projectNumber={(() => {
+            const r = allRuns.find((run) => run.projectId === confirmAction.projectId);
+            return r?.projectNumber ?? confirmAction.projectId;
+          })()}
+          projectName={allRuns.find((r) => r.projectId === confirmAction.projectId)?.projectName ?? ''}
+          currentState={allRuns.find((r) => r.projectId === confirmAction.projectId)?.overallStatus ?? ''}
+          targetState={confirmAction.targetState ?? ''}
+          onConfirm={handleStateOverride}
+          onCancel={() => { setConfirmAction(null); setOverrideTarget(''); }}
+          loading={actionLoading}
+        />
+      )}
 
       {/* ── Detail Modal ─────────────────────────────────────────────── */}
       <HbcModal

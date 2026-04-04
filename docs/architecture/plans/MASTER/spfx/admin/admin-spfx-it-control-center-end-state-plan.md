@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.026  
-**Revision note:** Adds **Phase 11 post-run validation, recovery guidance, and evidence** (P11-08) — implements safety-post-run-service with post-run validation provider registry and `executePostRunValidation` (domain-specific checks with truthful defaults, evidence capture, audit recording), recovery guidance provider registry and `generateRecoveryGuidance` (default 3-step honest guidance with failure class context, no false automatic-rollback claims), and `assembleSafetyEvidenceSummary` (links all safety artifacts, computes controlsSatisfied/controlsSkipped per profile). Adds `usePostRunSafetyValidation` React hook in features-admin. 12 new tests all passing. Preserves all prior phase content.
+**Version:** 01.000.027  
+**Revision note:** Adds **Phase 11 first-adopter integration and route reconciliation** (P11-09) — adopts the safety framework into ProvisioningOversightPage with 3 safety-aware confirmation compositions (ForceRetryConfirmation with structured failure-class warnings and retry ceiling tracking, ArchiveConfirmation with routine risk badge, StateOverrideConfirmation with enhanced typed-phrase "OVERRIDE" acknowledgment and critical-severity warnings). Replaces 3 ad hoc HbcConfirmDialog instances with compositions that use HbcRiskBadge, HbcSafetyBanner, and HbcScopeSummaryCard. Route reconciliation confirmed clean (no stale proxy routes). Documents adoption map for 3 adopted and 19 deferred actions across 7 domains. Preserves all prior phase content.
 
 ---
 

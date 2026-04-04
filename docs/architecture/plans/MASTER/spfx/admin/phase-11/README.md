@@ -34,7 +34,7 @@ It is designed to be executed against the live repo in the order provided.
 | P11-06 | `phase-11-operator-safety-ux.md` + 6 ui-kit primitives + 5 features-admin compositions | Complete |
 | P11-07 | `phase-11-destructive-action-execution-model.md` + safety-confirmation-service + useDestructiveActionConfirmation hook + 20 tests | Complete |
 | P11-08 | `phase-11-post-run-validation-and-recovery-model.md` + safety-post-run-service + usePostRunSafetyValidation hook + 12 tests | Complete |
-| P11-09 | First-adopter integration and route reconciliation | Pending |
+| P11-09 | `phase-11-adoption-map.md` + ProvisioningSafetyOverrides + ProvisioningOversightPage integration | Complete |
 | P11-10 | `phase-11-exit-reconciliation.md` | Pending |
 
 ## Intended execution order
