@@ -56,6 +56,7 @@ const ALL_DOMAINS: DomainConfig[] = [
 const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
   '535f5a17-fc49-40ea-ac16-5d68895884f7', // legacy HbWebpartsWebPart
 ]);
+const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
 
 // ── CLI argument parsing ───────────────────────────────────────────────────
 
@@ -577,9 +578,13 @@ for (const domain of domains) {
 
   // Write primary domain manifest into the shell (additional manifests for multi-mode
   // are generated from this compiled base after gulp bundle).
+  const useNeutralShellManifestId = domain.dir === 'hb-webparts' && domain.packagingModel === 'multi';
+  const shellManifestId = useNeutralShellManifestId
+    ? HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID
+    : primarySourceManifest.id;
   const shellManifest = {
     $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
-    id: primarySourceManifest.id,
+    id: shellManifestId,
     alias: 'ShellWebPart',
     componentType: 'WebPart',
     version: '*',
@@ -650,9 +655,16 @@ for (const domain of domains) {
     allPassed = false;
     continue;
   }
-  const compiledBaseManifestPath = path.join(compiledManifestDir, compiledManifestFiles[0]);
+  const compiledBaseManifestPath = useNeutralShellManifestId
+    ? path.join(compiledManifestDir, `${HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID}.manifest.json`)
+    : path.join(compiledManifestDir, compiledManifestFiles[0]);
+  if (!fs.existsSync(compiledBaseManifestPath)) {
+    console.error(`  ❌ ${domain.dir}: compiled base manifest not found at ${compiledBaseManifestPath}`);
+    allPassed = false;
+    continue;
+  }
   const compiledBaseManifest = JSON.parse(fs.readFileSync(compiledBaseManifestPath, 'utf8'));
-  const compiledEntryModuleId = `${compiledBaseManifest.id}_${compiledBaseManifest.version}`;
+  const compiledEntryModuleId = `${shellManifestId}_${compiledBaseManifest.version}`;
   const compiledScriptResources = compiledBaseManifest.loaderConfig?.scriptResources ?? {};
   const legacyScriptResource = compiledScriptResources['shell-web-part'];
   if (!legacyScriptResource) {
@@ -702,6 +714,9 @@ for (const domain of domains) {
       path.join(compiledManifestDir, `${target.json.id}.manifest.json`),
       JSON.stringify(composed, null, 2),
     );
+  }
+  if (useNeutralShellManifestId) {
+    fs.rmSync(compiledBaseManifestPath, { force: true });
   }
   console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
   console.log(`  ✓ Base shell module identity: ${compiledEntryModuleId}`);

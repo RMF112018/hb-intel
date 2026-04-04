@@ -2,26 +2,32 @@
 
 ## Root cause
 
-The authoritative multi-webpart manifest composition step in `tools/build-spfx-package.ts` cloned one compiled shell manifest and reused its `entryModuleId` (`0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`) for every emitted hb-webparts webpart manifest.
+The authoritative multi-manifest emission logic in `tools/build-spfx-package.ts` previously used a real webpart component identity as the shared shell base module identity (`0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`).
 
-That caused unrelated webparts (for example `HB Hero Banner` and `Project / Portfolio Spotlight`) to request the first-webpart module identity at runtime. The packaged `scriptResources` map was likewise shared and only exposed the first-webpart module key, so per-webpart loader contracts were not emitted correctly.
+This made non-base webparts depend on another real webpart ID for runtime module resolution, violating neutral loader contract expectations and creating fragile coupling.
 
 ## Authoritative source of the emission defect
 
 - `tools/build-spfx-package.ts`
-  - multi-manifest cloning logic set `loaderConfig.entryModuleId` to a single shared compiled ID for all target manifests
-  - multi-manifest cloning logic wrote the same `scriptResources` object for all target manifests
+  - shell compiled identity inherited from a real webpart manifest ID
+  - per-webpart shims depended on that real webpart module identity
+  - base manifest selection depended on compiled manifest ordering behavior
 
 ## Remediation applied
 
-- Keep the compiled shell asset as the base runtime module (`shell-web-part_66a8874d87ce501231b6.js` defining `0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`).
-- Generate one per-webpart AMD shim asset for each non-base webpart in `tools/spfx-shell/release/assets/`:
-  - module ID: `<webpart-id>_1.0.0`
-  - module body: forwards to base compiled shell module ID.
-- Emit per-webpart manifest loader contracts:
-  - `entryModuleId` is now `<that-webpart-id>_1.0.0`
-  - `scriptResources` always includes the base shell module mapping
-  - `scriptResources` also includes that webpart's shim module mapping when the webpart is not the base shell module ID
+- Introduced a dedicated neutral shared shell manifest ID for `hb-webparts`:
+  - `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e`
+- Shell compile for `hb-webparts` now uses the neutral ID (shell-only identity, not a homepage webpart ID).
+- Base runtime module identity is derived deterministically from neutral shell ID + compiled version:
+  - `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`
+- After cloning/recomposition, the neutral compiled manifest is removed before `package-solution` so no extra toolbox registration is introduced.
+- Every emitted webpart manifest now uses:
+  - `entryModuleId = <webpart-id>_<version>`
+  - `scriptResources` including:
+    - SPFx component dependencies
+    - neutral shared shell module key mapping to `shell-web-part_*.js`
+    - per-webpart shim mapping to `shell-entry-<webpart-id>.js`
+- Every per-webpart shim depends on neutral shell identity, not on another webpart ID.
 
 ## Files changed
 
@@ -35,18 +41,12 @@ That caused unrelated webparts (for example `HB Hero Banner` and `Project / Port
 ## Old vs new packaged behavior
 
 ### `entryModuleId`
-- Old: all representative webparts used `0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`
-- New:
-  - Company Pulse: `0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`
-  - HB Hero Banner: `39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0`
-  - Project / Portfolio Spotlight: `8370ab0c-b6df-4db0-82f1-24b54750f508_1.0.0`
-  - Priority Actions Rail: `b3f07190-79cf-437d-a1d6-ecbf3f77e616_1.0.0`
+- Old: per-webpart entries resolved through a shared base tied to a real webpart ID.
+- New: every webpart has its own `entryModuleId` (`<webpart-id>_1.0.0`) and resolves through a neutral shared shell dependency.
 
 ### `scriptResources`
-- Old: representative webparts reused one runtime module key (`0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`) and one shell path mapping.
-- New:
-  - base shell module key is preserved for shared shell runtime
-  - each non-base webpart includes an additional per-webpart shim key mapped to `shell-entry-<webpart-id>.js`
+- Old: base dependency identity was a real webpart module ID.
+- New: base dependency identity is neutral shell module ID `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`.
 
 ## Rebuild path used
 
@@ -59,22 +59,20 @@ That caused unrelated webparts (for example `HB Hero Banner` and `Project / Port
 ## Packaged verification highlights
 
 - Rebuilt artifact: `dist/sppkg/hb-webparts.sppkg`
-- Toolbox manifests remain separately emitted (`WebPart_<id>.xml` for all intended webparts).
-- Packaged `ClientSideAssets` now include per-webpart shim files (`shell-entry-*.js`) plus the shared shell asset.
-- Representative webparts no longer reuse `0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0` as `entryModuleId` unless they are the base webpart.
+- Toolbox manifests remain separately emitted for intended webparts.
+- Packaged neutral shell asset defines:
+  - `define("9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0", ...)`
+- Packaged per-webpart shim assets define `<webpart-id>_1.0.0` and depend only on neutral shell module ID.
+- Representative webparts no longer reference another webpart ID as shared base shell dependency.
 - Version bump applied:
-  - `solution.version`: `1.0.0.10`
-  - `feature.version`: `1.0.0.10`
-
-## Why RequireJS should now resolve correctly
-
-Each packaged webpart now requests its own module identity via `entryModuleId`, and the package contains a script resource path that defines that exact module identity (either directly via shared base module for Company Pulse, or via per-webpart shim module for other webparts). This eliminates the prior cross-webpart shared-ID mismatch.
+  - `solution.version`: `1.0.0.11`
+  - `feature.version`: `1.0.0.11`
 
 ## Secondary warnings
 
-`Card` composition warnings are outside loader metadata emission scope and should be tracked as follow-up UX/component conformance work only.
+`Card` composition warnings remain separate follow-up work and are not part of this loader metadata remediation scope.
 
 ## Remaining risks
 
-- The base compiled shell module identity is still anchored to the compiled base manifest ID/version. If that selection strategy changes, shim generation must continue deriving identities from compiled output (not hardcoded values).
-- `BACKEND_MODE` remains unset by default in local packaging unless explicitly provided in CI/CD.
+- Browser runtime rendering proof in a live SharePoint page was not executed in this environment; package-level evidence confirms neutral identity and canonical loader contract emission, but page runtime should still be validated in tenant upload smoke test.
+- `BACKEND_MODE` remains unset by default in local packaging unless explicitly provided by CI/CD.

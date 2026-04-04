@@ -292,15 +292,15 @@ Per-webpart loader metadata emission remediation for `hb-webparts` is now locked
 
 | Decision ID | Decision                                                                                                     | Status |
 | ----------- | ------------------------------------------------------------------------------------------------------------ | ------ |
-| LCE-01      | Packaged `entryModuleId` emission is per-webpart (`<webpart-id>_<version>`) for `hb-webparts`              | Closed |
-| LCE-02      | Packaged `scriptResources` emission includes per-webpart shim module mapping plus shared base shell mapping | Closed |
-| LCE-03      | Authoritative defect source is multi-manifest composition in `tools/build-spfx-package.ts`                  | Closed |
-| LCE-04      | Remediation release bumps `hb-webparts` solution/feature versions to `1.0.0.10`                             | Closed |
+| LCE-01      | Shared shell runtime identity is a neutral shell-only GUID, not a real webpart component ID                 | Closed |
+| LCE-02      | Packaged `entryModuleId` remains per-webpart while `scriptResources` base dependency targets neutral shell ID | Closed |
+| LCE-03      | Authoritative defect source remains multi-manifest composition in `tools/build-spfx-package.ts`              | Closed |
+| LCE-04      | Remediation release bumps `hb-webparts` solution/feature versions to `1.0.0.11`                              | Closed |
 
 ## LoaderConfig Emission Handoff Note
 
-- Rebuilt `hb-webparts.sppkg` no longer reuses `0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0` as `entryModuleId` for unrelated webparts.
-- Per-webpart loader contracts now resolve through packaged shim assets that forward to the shared shell runtime module.
+- Rebuilt `hb-webparts.sppkg` uses neutral shared shell module identity `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`.
+- Per-webpart loader contracts resolve through packaged shim assets that depend on neutral shell identity, not another webpart ID.
 
 ## Prompt-04 Closure Artifacts
 
