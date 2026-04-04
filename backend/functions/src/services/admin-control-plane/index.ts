@@ -173,6 +173,23 @@ export type { ISafetyGateContext, ISafetyGateResult } from './safety-policy-regi
 // Safety action catalog (Phase 11 — P11-04)
 export { registerDefaultSafetyProfiles } from './safety-action-catalog.js';
 
+// Safety preview pipeline (Phase 11 — P11-05)
+export {
+  registerPreviewProvider,
+  getPreviewProvider,
+  clearPreviewProviders,
+  executeSafetyPreview,
+} from './safety-preview-service.js';
+export type {
+  IPreviewProvider,
+  IPreviewProviderInput,
+  IPreviewProviderOutput,
+  IPreviewProviderScope,
+  IPreviewLimitation,
+  ISafetyPreviewRequest,
+  ISafetyPreviewPipelineResult,
+} from './safety-preview-service.js';
+
 // Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,

@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.022  
-**Revision note:** Adds **Phase 11 backend safety policy and enforcement rails** (P11-04) — implements safety policy registry (`registerSafetyProfile`, `getSafetyProfile`, `evaluateSafetyGates`, `requireSafetyGates`, `requireSafetyProfile`), profile builder with risk-level-derived defaults, action catalog with 24 profiles across all 7 admin domains, HTTP enforcement helpers (422 for unsatisfied gates, 400 for unknown actions), query helpers for evidence/validation/recovery requirements, and Phase 10 governed-override seam. 40 new tests all passing. Preserves all prior phase content.
+**Version:** 01.000.023  
+**Revision note:** Adds **Phase 11 preview/dry-run/impact-summary pipeline** (P11-05) — implements reusable `executeSafetyPreview` pipeline with preview provider registry (action-key and domain-level resolution), truthfulness-first limitation handling, framework warning assembly (dry-run-unavailable, contains-irreversible-changes, post-run-validation-required, preview-limitation), proceed recommendation logic, evidence capture, and audit recording. Adds `useActionSafetyPreview` React hook in `@hbc/features-admin` with `isPreviewRequired` and `getConfirmationType` utilities. 16 new tests all passing. Preserves all prior phase content.
 
 ---
 

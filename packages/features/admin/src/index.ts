@@ -91,6 +91,15 @@ export {
   computeAlertBadge,
   buildProbeStatusMap,
   resolveEligibility,
+  useActionSafetyPreview,
+  isPreviewRequired,
+  getConfirmationType,
+} from './hooks/index.js';
+
+export type {
+  UseActionSafetyPreviewConfig,
+  UseActionSafetyPreviewResult,
+  SafetyPreviewRequest,
 } from './hooks/index.js';
 
 // Integrations
