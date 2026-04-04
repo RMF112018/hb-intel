@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.028  
-**Revision note:** Completes **Phase 11 — High-risk action safety model** with exit reconciliation (P11-10). All 8 acceptance criteria met: canonical safety baseline, 5-tier risk model with 24 profiled actions, shared safety contracts in `@hbc/models`, backend enforcement returning 422 for unsatisfied gates, 6 ui-kit primitives + 8 features-admin compositions, 3 provisioning first-adopter integrations, durable evidence via Phase 4 Azure Table Storage, 88 new tests and 11 Phase 11 docs. Validation: models build/check-types/lint clean, ui-kit check-types clean (95/98 test files pass, 3 pre-existing), features-admin 181 tests passed, functions 1811 tests passed, admin app build clean. Preserves all prior phase content.
+**Version:** 01.000.029  
+**Revision note:** Adds **Phase 12 — Admin intelligence completion and unified observability** gap map (P12-01). Repo-truth observability audit completed: verified 23 fully operational assets, 5 partially operational assets, and 11 current limitations mapped to 12 required closures. Documents non-gaps to preserve, prior-phase dependency status, 6 unresolved implementation issues with recommended directions, and 11-step internal execution breakdown. No code changes — audit and evidence only. Preserves all prior phase content.
 
 ---
 
