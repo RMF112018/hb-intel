@@ -18,6 +18,8 @@ This package hosts HB Intel Azure Functions for provisioning and integration end
 
 All three services follow the established interface + real + mock pattern and are wired into the admin control plane service factory.
 
+**Phase 12 observability (2026-04-04)**: Adds the durable observability layer for admin operator visibility. Three new Azure Table Storage tables (`ObservabilityAlerts`, `ObservabilityProbeSnapshots`, `ObservabilityErrors`) with durable + mock adapter pairs following the Phase 4 pattern. 15 observability API endpoints under `/api/admin/observability/` covering alert CRUD (list, get, acknowledge, resolve, summary, ingest), probe snapshots (latest, submit, history, health summary), error events (list, get, ingest), dashboard summary, and correlated run timeline. Includes `observability-emitter.ts` for fire-and-forget error classification from route catch blocks (9 routes instrumented across provisioning, white-glove, and Entra control domains), `observability-telemetry-bridge.ts` for saga failure normalization, and `observability-dashboard-service.ts` / `observability-timeline-service.ts` for composite query assembly. All observability stores wired into the admin control plane service factory with mode-based resolution. See the [Phase 12 plan library](../../docs/architecture/plans/MASTER/spfx/admin/phase-12/).
+
 **Phase 9 user lifecycle workflows (2026-04-03)**: Implements 12 user lifecycle workflow handlers covering search, read, create (AD DS + cloud), update, enable/disable, and delete with confirmation tokens. 7 API endpoints under `/api/admin/identity/users/`. Each workflow validates input, runs connector preflight, executes against the correct adapter (AD DS or Graph based on authority), captures sync-pending state for AD DS mutations, and produces normalized audit payloads.
 
 ### Domain Hosts
@@ -83,6 +85,30 @@ User lifecycle and connection management endpoints for the Hybrid Identity contr
 | POST | `/api/admin/connections/{connectorId}/test` | `adminTestConnection` | Test a connection |
 
 All identity operations persist audit payloads to the admin audit store. See the [Phase 9 docs](../../docs/architecture/plans/MASTER/spfx/admin/phase-09/README.md) for action catalog, risk taxonomy, and operator guidance.
+
+### Observability API Endpoints (P12-05)
+
+Operator-facing observability endpoints for alert management, probe health, error log, dashboard summary, and correlated run timelines. All endpoints require admin + delegated scope authentication. Registered via side-effect import of `observability-routes.ts`.
+
+| Method | Route | Handler | Purpose |
+|--------|-------|---------|---------|
+| GET | `/api/admin/observability/alerts` | `obsListAlerts` | List alerts with status/category/severity/domain/date filters |
+| GET | `/api/admin/observability/alerts/{alertId}` | `obsGetAlert` | Get single alert |
+| POST | `/api/admin/observability/alerts/{alertId}/acknowledge` | `obsAcknowledgeAlert` | Acknowledge alert (actor from JWT) |
+| POST | `/api/admin/observability/alerts/{alertId}/resolve` | `obsResolveAlert` | Resolve alert (actor from JWT) |
+| GET | `/api/admin/observability/alerts/summary` | `obsGetAlertSummary` | Aggregated active alert counts by severity |
+| POST | `/api/admin/observability/alerts/ingest` | `obsIngestAlerts` | Ingest alert evaluations from monitors |
+| GET | `/api/admin/observability/probes/latest` | `obsGetLatestProbeSnapshot` | Latest probe snapshot |
+| POST | `/api/admin/observability/probes/snapshots` | `obsSubmitProbeSnapshot` | Persist client-triggered probe results |
+| GET | `/api/admin/observability/probes/history` | `obsListProbeSnapshots` | Probe snapshot history |
+| GET | `/api/admin/observability/probes/health` | `obsGetProbeHealthSummary` | Aggregated probe health with staleness |
+| GET | `/api/admin/observability/errors` | `obsListErrors` | List/query error events with domain/source/classification filters |
+| GET | `/api/admin/observability/errors/{errorId}` | `obsGetError` | Get single error event |
+| POST | `/api/admin/observability/errors/ingest` | `obsIngestErrors` | Ingest error events |
+| GET | `/api/admin/observability/dashboard` | `obsGetDashboardSummary` | Unified alert + probe + error summary |
+| GET | `/api/admin/observability/timeline/{runId}` | `obsGetRunTimeline` | Correlated run timeline (audit + alert + error) |
+
+Observability contracts are in `@hbc/models/admin-control-plane` (11 enums + 22 interfaces). See the [Phase 12 API map](../../docs/architecture/plans/MASTER/spfx/admin/phase-12/admin-spfx-phase-12-observability-api-map.md) for full endpoint documentation.
 
 ## Local Development Setup
 
