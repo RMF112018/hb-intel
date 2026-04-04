@@ -31,6 +31,8 @@ Prompt-03 scaffold app for the HB Central homepage webpart system.
 - Awareness-zone prompts should reuse curated hierarchy/media normalization seams and preserve featured-vs-secondary editorial weighting.
 - Operational-awareness prompts should reuse freshness/status normalization seams and preserve featured-vs-secondary hierarchy with stale/no-data fallbacks.
 - Discovery prompts should reuse curated-first search/wayfinding normalization seams and preserve explicit empty/no-result fallback behavior.
+- Prompt-09 governance prompts should reuse shared authoring-governance seams for owner, freshness, rotation, and no-silent-failure authoring messages.
+- Prompt-10 release prompts should preserve verified package integrity, locked manifest patching, and deployment/site-owner handoff expectations.
 
 ## Scripts
 

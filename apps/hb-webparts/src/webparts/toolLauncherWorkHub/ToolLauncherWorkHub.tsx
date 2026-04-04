@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeToolLauncherWorkHubConfig } from '../../homepage/helpers/utilityConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
@@ -35,10 +36,12 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
 
   const normalized = normalizeToolLauncherWorkHubConfig(config, activeAudience);
   if (normalized.groups.length === 0) {
+    const hasConfiguredInput = Boolean(config?.groups?.length);
+    const message = resolveAuthoringMessage('toolLauncherWorkHub', hasConfiguredInput ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No tool launchers configured"
-        description="Add at least one launcher group with valid links in the property pane."
+        title={message.title}
+        description={message.description}
       />
     );
   }

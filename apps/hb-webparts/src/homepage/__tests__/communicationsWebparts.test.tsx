@@ -24,7 +24,7 @@ describe('Prompt-06 awareness webparts', () => {
 
   it('renders empty state for malformed leadership config', () => {
     render(<LeadershipMessage config={{ entries: [{ id: 'bad', title: '', message: '', leaderName: '' }] }} />);
-    expect(screen.getByText('No leadership message configured')).not.toBeNull();
+    expect(screen.getByText('Leadership message configuration is invalid')).not.toBeNull();
   });
 
   it('renders people and culture media optionally and keeps keyboard-access links', () => {

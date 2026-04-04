@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard, useHomepageReducedMotion } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeHeroBannerConfig } from '../../homepage/helpers/topBandConfig.js';
 import type { HbHeroBannerConfig } from '../../homepage/webparts/topBandContracts.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -14,7 +15,8 @@ export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
   const isConfigured = Boolean(config) && Boolean(config?.headline?.trim());
 
   if (!isConfigured) {
-    return <HomepageEmptyState title="Hero content not configured" description="Add a headline in the webpart property pane to publish hero content." />;
+    const message = resolveAuthoringMessage('hbHeroBanner', config ? 'invalid' : 'noData');
+    return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
   const background = normalized.background?.src

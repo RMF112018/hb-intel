@@ -1,9 +1,9 @@
 # 10 — Verification, Packaging, Release Readiness, and Handoff
 
 **Naming guard**
+
 - Do **not** title or name the package as `homepage`, `home page`, `homepage-webparts`, `hb-central-homepage`, or any other homepage-labeled package.
 - The package name must be exactly: `hb-webparts`.
-
 
 ## Objective
 
@@ -31,7 +31,6 @@ Finish the homepage webpart system with full verification, packaging validation,
 - At the end, provide a concise handoff note with changed files, verification, risks, and next-prompt readiness.
 
 ## Implementation Tasks
-
 
 1. Audit all implementation work from Prompts 01–09 against the homepage doctrine, design brief intent, and first-release constraints.
 
@@ -78,9 +77,7 @@ Finish the homepage webpart system with full verification, packaging validation,
 
 7. If any first-release webpart fails the homepage-safe standard, fix it now or explicitly mark it as deferred.
 
-
 ## Required Deliverables
-
 
 - completed verification results
 - packaging / release-readiness report
@@ -88,20 +85,40 @@ Finish the homepage webpart system with full verification, packaging validation,
 - final handoff docs
 - explicit go / conditional-go / no-go statement for the first release
 
-
 ## Verification
-
 
 - run the full relevant validation suite
 - confirm every first-release webpart is represented in verification and handoff materials
 - confirm no unresolved critical accessibility, packaging, or performance issue is hidden
 - confirm deferred items are clearly separated from release scope
 
-
 ## Definition of Done
-
 
 - the homepage webpart system is fully verified and handoff-ready
 - release posture is explicit
 - deployment and site-owner onboarding materials exist
 - a clean next-phase backlog is documented
+
+## Prompt-10 Closure Artifacts
+
+Prompt 10 deliverables are now locked as final first-release closure outputs:
+
+- `10A_Verification_Sweep_and_Results.md`
+- `10B_Packaging_Performance_and_Release_Readiness.md`
+- `10C_Deployment_Handoff_and_Phase2_Backlog.md`
+- manifest release baseline update in `apps/hb-webparts/config/package-solution.json` (`001.000.008`)
+
+## Resolved Decisions Register (Prompt 10)
+
+| Decision ID | Decision                                                                                                   | Status |
+| ----------- | ---------------------------------------------------------------------------------------------------------- | ------ |
+| D10-01      | Full `@hbc/spfx-hb-webparts` verification sweep is required before release recommendation is issued        | Closed |
+| D10-02      | Packaging and manifest integrity are validated against the real `hb-webparts` solution/feature artifacts   | Closed |
+| D10-03      | Performance posture is assessed for homepage constraints with explicit deferred optimization backlog items | Closed |
+| D10-04      | Final handoff materials must include deployment notes and site-owner quick-start guidance                  | Closed |
+| D10-05      | `hb-webparts` solution + feature versions are patch-bumped to `001.000.008`                                | Closed |
+
+## Prompt-10 Handoff Note
+
+- Verification, packaging integrity, performance posture, and handoff materials are completed for first-release scope.
+- First-release recommendation is explicitly captured with deferred items separated from release-critical scope.

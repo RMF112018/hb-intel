@@ -368,3 +368,51 @@ Prompt 08 deliverables are now locked for Prompt 09–10 implementation:
 
 - Smart search/wayfinding is implemented with shared curated discovery normalization seams and explicit future enhancement strategy metadata.
 - Prompt-09 should consume Prompt-08 discovery outputs as fixed inputs and focus on authoring/config governance plus page composition controls.
+
+## Prompt-09 Closure Artifacts
+
+Prompt 09 deliverables are now locked for Prompt 10 implementation:
+
+- `09A_Unified_Authoring_and_Configuration_Model.md`
+- `09B_Homepage_Governance_and_Zone_Ownership.md`
+- `09C_Page_Composition_and_Site_Owner_Playbook.md`
+- shared governance seams in `apps/hb-webparts/src/homepage/webparts/authoringGovernanceContracts.ts` and `apps/hb-webparts/src/homepage/helpers/authoringGovernance.ts`
+
+## Resolved Decisions Register (Prompt 09)
+
+| Decision ID | Decision                                                                                                        | Status |
+| ----------- | --------------------------------------------------------------------------------------------------------------- | ------ |
+| D9-01       | First-release authoring model is standardized around property-pane-driven curated configuration                 | Closed |
+| D9-02       | Every first-release webpart has explicit owner, freshness cadence, and allowed-content scope metadata           | Closed |
+| D9-03       | No-data, invalid, and no-result authoring paths must present explicit actionable messaging (no silent failures) | Closed |
+| D9-04       | Page composition guidance is fixed around zone ordering, above-the-fold discipline, and anti-sprawl constraints | Closed |
+| D9-05       | `hb-webparts` solution + feature versions are patch-bumped to `001.000.007`                                     | Closed |
+
+## Prompt-09 Handoff Note
+
+- Authoring/config governance and page composition controls are locked with shared runtime governance seams and site-owner guidance docs.
+- Prompt-10 should consume Prompt-09 governance outputs as fixed inputs and focus on verification, packaging, and release-readiness handoff.
+
+## Prompt-10 Closure Artifacts
+
+Prompt 10 deliverables are now locked as final first-release closure outputs:
+
+- `10A_Verification_Sweep_and_Results.md`
+- `10B_Packaging_Performance_and_Release_Readiness.md`
+- `10C_Deployment_Handoff_and_Phase2_Backlog.md`
+- manifest release baseline update in `apps/hb-webparts/config/package-solution.json` (`001.000.008`)
+
+## Resolved Decisions Register (Prompt 10)
+
+| Decision ID | Decision                                                                                                   | Status |
+| ----------- | ---------------------------------------------------------------------------------------------------------- | ------ |
+| D10-01      | Full `@hbc/spfx-hb-webparts` verification sweep is required before release recommendation is issued        | Closed |
+| D10-02      | Packaging and manifest integrity are validated against the real `hb-webparts` solution/feature artifacts   | Closed |
+| D10-03      | Performance posture is assessed for homepage constraints with explicit deferred optimization backlog items | Closed |
+| D10-04      | Final handoff materials must include deployment notes and site-owner quick-start guidance                  | Closed |
+| D10-05      | `hb-webparts` solution + feature versions are patch-bumped to `001.000.008`                                | Closed |
+
+## Prompt-10 Handoff Note
+
+- Verification, packaging integrity, performance posture, and handoff materials are completed for first-release scope.
+- First-release recommendation is explicitly captured with deferred items separated from release-critical scope.

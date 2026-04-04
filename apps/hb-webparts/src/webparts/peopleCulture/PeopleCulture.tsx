@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -27,10 +28,11 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
   const normalized = normalizePeopleCultureConfig(config, activeAudience);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
+    const message = resolveAuthoringMessage('peopleCulture', config?.entries?.length ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No people and culture moments configured"
-        description="Add people/culture entries in the property pane to show welcomes, milestones, and recognition."
+        title={message.title}
+        description={message.description}
       />
     );
   }

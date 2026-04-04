@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeLeadershipMessageConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -19,10 +20,11 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
   const normalized = normalizeLeadershipMessageConfig(config);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
+    const message = resolveAuthoringMessage('leadershipMessage', config?.entries?.length ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No leadership message configured"
-        description="Add leadership entries in the property pane to publish executive communication."
+        title={message.title}
+        description={message.description}
       />
     );
   }

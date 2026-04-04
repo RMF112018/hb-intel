@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePriorityActionsRailConfig } from '../../homepage/helpers/utilityConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
@@ -21,10 +22,12 @@ export function PriorityActionsRail({ config, activeAudience, isLoading = false 
   const normalized = normalizePriorityActionsRailConfig(config, activeAudience);
 
   if (normalized.groups.length === 0) {
+    const hasConfiguredInput = Boolean(config?.actions?.length || config?.groups?.length);
+    const message = resolveAuthoringMessage('priorityActionsRail', hasConfiguredInput ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No priority actions configured"
-        description="Add valid action links and optional audience rules in the property pane."
+        title={message.title}
+        description={message.description}
       />
     );
   }

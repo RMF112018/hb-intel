@@ -1,9 +1,9 @@
 # 09 — Authoring, Configuration, Governance, and Page Composition
 
 **Naming guard**
+
 - Do **not** title or name the package as `homepage`, `home page`, `homepage-webparts`, `hb-central-homepage`, or any other homepage-labeled package.
 - The package name must be exactly: `hb-webparts`.
-
 
 ## Objective
 
@@ -31,7 +31,6 @@ Turn the homepage webpart set into a maintainable product by implementing config
 - At the end, provide a concise handoff note with changed files, verification, risks, and next-prompt readiness.
 
 ## Implementation Tasks
-
 
 1. Audit the current implementation produced by Prompts 01–08 and standardize the configuration model across homepage webparts.
 
@@ -68,9 +67,7 @@ Turn the homepage webpart set into a maintainable product by implementing config
 
 7. Update any authoritative repo docs that should now point to the homepage webpart program and its authoring/governance model.
 
-
 ## Required Deliverables
-
 
 - unified authoring/configuration docs for the homepage system
 - homepage governance doc
@@ -78,19 +75,39 @@ Turn the homepage webpart set into a maintainable product by implementing config
 - any necessary config-validation improvements in code
 - updates to authoritative docs
 
-
 ## Verification
-
 
 - run typecheck and relevant tests
 - verify every first-release webpart has a documented owner/config model
 - verify page-composition rules are explicit and practical
 - confirm no critical authoring path still depends on developer intervention
 
-
 ## Definition of Done
-
 
 - the homepage program is maintainable and governable
 - site owners have clear composition and authoring guidance
 - the homepage is protected from uncontrolled sprawl
+
+## Prompt-09 Closure Artifacts
+
+Prompt 09 deliverables are now locked for Prompt 10 implementation:
+
+- `09A_Unified_Authoring_and_Configuration_Model.md`
+- `09B_Homepage_Governance_and_Zone_Ownership.md`
+- `09C_Page_Composition_and_Site_Owner_Playbook.md`
+- shared governance seams in `apps/hb-webparts/src/homepage/webparts/authoringGovernanceContracts.ts` and `apps/hb-webparts/src/homepage/helpers/authoringGovernance.ts`
+
+## Resolved Decisions Register (Prompt 09)
+
+| Decision ID | Decision                                                                                                        | Status |
+| ----------- | --------------------------------------------------------------------------------------------------------------- | ------ |
+| D9-01       | First-release authoring model is standardized around property-pane-driven curated configuration                 | Closed |
+| D9-02       | Every first-release webpart has explicit owner, freshness cadence, and allowed-content scope metadata           | Closed |
+| D9-03       | No-data, invalid, and no-result authoring paths must present explicit actionable messaging (no silent failures) | Closed |
+| D9-04       | Page composition guidance is fixed around zone ordering, above-the-fold discipline, and anti-sprawl constraints | Closed |
+| D9-05       | `hb-webparts` solution + feature versions are patch-bumped to `001.000.007`                                     | Closed |
+
+## Prompt-09 Handoff Note
+
+- Authoring/config governance and page composition controls are locked with shared runtime governance seams and site-owner guidance docs.
+- Prompt-10 should consume Prompt-09 governance outputs as fixed inputs and focus on verification, packaging, and release-readiness handoff.

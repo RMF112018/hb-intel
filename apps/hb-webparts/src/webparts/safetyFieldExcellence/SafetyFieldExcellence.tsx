@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeSafetyFieldExcellenceConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
@@ -31,10 +32,11 @@ export function SafetyFieldExcellence({
   const normalized = normalizeSafetyFieldExcellenceConfig(config, activeAudience);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
+    const message = resolveAuthoringMessage('safetyFieldExcellence', config?.items?.length ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No safety and field excellence items configured"
-        description="Add safety highlights, recognitions, reminders, or notices in the property pane to publish this section."
+        title={message.title}
+        description={message.description}
       />
     );
   }

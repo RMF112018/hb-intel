@@ -1,5 +1,12 @@
 export type { HbHeroBannerConfig, PersonalizedWelcomeHeaderConfig, WelcomeAlertSeverity } from './topBandContracts.js';
 export type {
+  AuthoringMessage,
+  AuthoringMessageSet,
+  FreshnessCadence,
+  HomepageAuthoringGovernanceEntry,
+  HomepageZone,
+} from './authoringGovernanceContracts.js';
+export type {
   CompanyPulseCategory,
   CompanyPulseConfig,
   CompanyPulseItem,

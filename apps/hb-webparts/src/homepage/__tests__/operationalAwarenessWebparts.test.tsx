@@ -55,7 +55,7 @@ describe('Prompt-07 operational-awareness webparts', () => {
 
   it('renders empty state for malformed project config', () => {
     render(<ProjectPortfolioSpotlight config={{ items: [{ id: 'bad', title: '', summary: '' }] }} />);
-    expect(screen.getByText('No project spotlight items configured')).not.toBeNull();
+    expect(screen.getByText('Project spotlight configuration is invalid')).not.toBeNull();
   });
 
   it('keeps CTA links keyboard-accessible for safety entries', () => {

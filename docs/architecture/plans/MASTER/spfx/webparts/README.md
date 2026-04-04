@@ -71,7 +71,13 @@ Run the prompts in order.
 - `08B_Discovery_Config_and_Category_Model.md`
 - `08C_Discovery_Test_Usage_and_Handoff.md`
 - `09_Authoring_Configuration_Governance_and_Page_Composition.md`
+- `09A_Unified_Authoring_and_Configuration_Model.md`
+- `09B_Homepage_Governance_and_Zone_Ownership.md`
+- `09C_Page_Composition_and_Site_Owner_Playbook.md`
 - `10_Verification_Packaging_Release_Readiness_and_Handoff.md`
+- `10A_Verification_Sweep_and_Results.md`
+- `10B_Packaging_Performance_and_Release_Readiness.md`
+- `10C_Deployment_Handoff_and_Phase2_Backlog.md`
 - `11_Risk_Exposure.md`
 - `12_Standards_and_Best_Practices.md`
 
@@ -171,6 +177,27 @@ Prompt 08 closure outputs are complete and are required inputs for Prompt 09+:
 - `08C_Discovery_Test_Usage_and_Handoff.md` — Prompt-08 verification and downstream usage guidance.
 
 Prompt-08 applies manifest patch bump to `001.000.006` in `hb-webparts` solution + feature versions.
+
+## Prompt-09 Outputs (Locked)
+
+Prompt 09 closure outputs are complete and are required inputs for Prompt 10:
+
+- `09A_Unified_Authoring_and_Configuration_Model.md` — unified authoring/configuration pattern and validation expectations.
+- `09B_Homepage_Governance_and_Zone_Ownership.md` — zone purpose boundaries, ownership, freshness, and anti-sprawl rules.
+- `09C_Page_Composition_and_Site_Owner_Playbook.md` — recommended zone ordering, layout coexistence guidance, and composition anti-patterns.
+- shared governance seams in `apps/hb-webparts/src/homepage/webparts/authoringGovernanceContracts.ts` and `apps/hb-webparts/src/homepage/helpers/authoringGovernance.ts`.
+
+Prompt-09 applies manifest patch bump to `001.000.007` in `hb-webparts` solution + feature versions.
+
+## Prompt-10 Outputs (Locked)
+
+Prompt 10 closure outputs are complete and finalize first-release readiness:
+
+- `10A_Verification_Sweep_and_Results.md` — full verification sweep coverage and results summary.
+- `10B_Packaging_Performance_and_Release_Readiness.md` — packaging integrity, performance posture, and go recommendation.
+- `10C_Deployment_Handoff_and_Phase2_Backlog.md` — deployment notes, site-owner quick start, and follow-on backlog.
+
+Prompt-10 applies manifest patch bump to `001.000.008` in `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 

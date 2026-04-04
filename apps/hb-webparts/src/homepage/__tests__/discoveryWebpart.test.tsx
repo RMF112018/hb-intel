@@ -65,7 +65,7 @@ describe('Prompt-08 smart search and wayfinding webpart', () => {
     expect(screen.getByText('No matching resources found')).not.toBeNull();
 
     rerender(<SmartSearchWayfinding config={{ resources: [{ id: '', title: '', href: '', type: 'tool' }] }} />);
-    expect(screen.getByText('No discovery resources configured')).not.toBeNull();
+    expect(screen.getByText('Discovery configuration is invalid')).not.toBeNull();
   });
 
   it('keeps discovery links focusable for keyboard traversal', () => {

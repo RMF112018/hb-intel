@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeCompanyPulseConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -27,10 +28,11 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
   const normalized = normalizeCompanyPulseConfig(config, activeAudience);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
+    const message = resolveAuthoringMessage('companyPulse', config?.items?.length ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No company pulse items configured"
-        description="Add featured or secondary pulse updates in the property pane to publish this section."
+        title={message.title}
+        description={message.description}
       />
     );
   }

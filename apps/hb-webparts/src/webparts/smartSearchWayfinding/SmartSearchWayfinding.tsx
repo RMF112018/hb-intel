@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcCard } from '@hbc/ui-kit/homepage';
+import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeSmartSearchWayfindingConfig } from '../../homepage/helpers/discoveryConfig.js';
 import { HomepageDiscoveryCluster } from '../../homepage/shared/HomepageDiscoveryCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -29,10 +30,12 @@ export function SmartSearchWayfinding({
     baseNormalized.hasResources || baseNormalized.quickPaths.length > 0;
 
   if (!hasDiscoverySurface) {
+    const hasConfiguredInput = Boolean(config?.resources?.length || config?.quickPaths?.length || config?.categories?.length);
+    const message = resolveAuthoringMessage('smartSearchWayfinding', hasConfiguredInput ? 'invalid' : 'noData');
     return (
       <HomepageEmptyState
-        title="No discovery resources configured"
-        description="Add categories, resources, or quick paths in the property pane to publish smart search and wayfinding."
+        title={message.title}
+        description={message.description}
       />
     );
   }
@@ -56,8 +59,8 @@ export function SmartSearchWayfinding({
           strategyLabel={normalized.strategyLabel}
         />
         <HomepageEmptyState
-          title="No matching resources found"
-          description="Try another keyword or clear search to see all curated resources."
+          title={resolveAuthoringMessage('smartSearchWayfinding', 'noResults').title}
+          description={resolveAuthoringMessage('smartSearchWayfinding', 'noResults').description}
         />
       </HbcCard>
     );
