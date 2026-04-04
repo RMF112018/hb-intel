@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.023  
-**Revision note:** Adds **Phase 11 preview/dry-run/impact-summary pipeline** (P11-05) — implements reusable `executeSafetyPreview` pipeline with preview provider registry (action-key and domain-level resolution), truthfulness-first limitation handling, framework warning assembly (dry-run-unavailable, contains-irreversible-changes, post-run-validation-required, preview-limitation), proceed recommendation logic, evidence capture, and audit recording. Adds `useActionSafetyPreview` React hook in `@hbc/features-admin` with `isPreviewRequired` and `getConfirmationType` utilities. 16 new tests all passing. Preserves all prior phase content.
+**Version:** 01.000.024  
+**Revision note:** Adds **Phase 11 operator safety UX primitives and flow patterns** (P11-06) — 6 reusable ui-kit primitives (HbcRiskBadge, HbcSafetyBanner, HbcImpactSummaryList, HbcScopeSummaryCard, HbcRecoveryGuidancePanel, HbcEvidenceSummaryBar) with Griffel styling, light/field mode support, ARIA roles, and dual-channel accessibility. 5 features-admin workflow compositions (SafetyPreviewPanel, SafetyConfirmationDialog with typed acknowledgment, SafetyActionSummaryCard, PostRunValidationPanel, SafetyWorkflowOrchestrator with multi-step flow). Preserves all prior phase content.
 
 ---
 

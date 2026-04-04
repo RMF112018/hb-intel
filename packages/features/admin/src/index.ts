@@ -134,4 +134,18 @@ export {
   ImplementationTruthDashboard,
   ApprovalAuthorityTable,
   ApprovalRuleEditor,
+  SafetyPreviewPanel,
+  SafetyConfirmationDialog,
+  SafetyActionSummaryCard,
+  PostRunValidationPanel,
+  SafetyWorkflowOrchestrator,
+} from './components/index.js';
+
+export type {
+  SafetyPreviewPanelProps,
+  SafetyConfirmationDialogProps,
+  SafetyActionSummaryCardProps,
+  PostRunValidationPanelProps,
+  SafetyWorkflowOrchestratorProps,
+  SafetyWorkflowStep,
 } from './components/index.js';

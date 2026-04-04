@@ -643,3 +643,17 @@ export { BulkActionResultsPanel } from './BulkActionResultsPanel/index.js';
 export type { BulkActionResultsPanelProps, BulkActionResultItem } from './BulkActionResultsPanel/index.js';
 export { SelectAllFilteredBanner } from './SelectAllFilteredBanner/index.js';
 export type { SelectAllFilteredBannerProps } from './SelectAllFilteredBanner/index.js';
+
+// Phase 11: Safety UX primitives (P11-06)
+export { HbcRiskBadge } from './HbcRiskBadge/index.js';
+export type { HbcRiskBadgeProps, RiskLevel } from './HbcRiskBadge/index.js';
+export { HbcSafetyBanner } from './HbcSafetyBanner/index.js';
+export type { HbcSafetyBannerProps, SafetyWarningItem } from './HbcSafetyBanner/index.js';
+export { HbcImpactSummaryList } from './HbcImpactSummaryList/index.js';
+export type { HbcImpactSummaryListProps, ImpactItem } from './HbcImpactSummaryList/index.js';
+export { HbcScopeSummaryCard } from './HbcScopeSummaryCard/index.js';
+export type { HbcScopeSummaryCardProps, ExecutionScope } from './HbcScopeSummaryCard/index.js';
+export { HbcRecoveryGuidancePanel } from './HbcRecoveryGuidancePanel/index.js';
+export type { HbcRecoveryGuidancePanelProps, RecoveryGuidance, RecoveryStep } from './HbcRecoveryGuidancePanel/index.js';
+export { HbcEvidenceSummaryBar } from './HbcEvidenceSummaryBar/index.js';
+export type { HbcEvidenceSummaryBarProps, EvidenceSummary } from './HbcEvidenceSummaryBar/index.js';

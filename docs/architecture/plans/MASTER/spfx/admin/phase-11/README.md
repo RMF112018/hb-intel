@@ -31,7 +31,7 @@ It is designed to be executed against the live repo in the order provided.
 | P11-03 | `phase-11-preview-dry-run-and-confirmation-model.md` + shared contracts in `@hbc/models` | Complete |
 | P11-04 | `phase-11-backend-safety-enforcement.md` + safety-policy-registry + safety-action-catalog + 40 tests | Complete |
 | P11-05 | `phase-11-preview-pipeline.md` + safety-preview-service + useActionSafetyPreview hook + 16 tests | Complete |
-| P11-06 | Operator safety UX primitives | Pending |
+| P11-06 | `phase-11-operator-safety-ux.md` + 6 ui-kit primitives + 5 features-admin compositions | Complete |
 | P11-07 | Destructive-action confirmation and checkpoint execution | Pending |
 | P11-08 | Post-run validation, recovery guidance, and evidence | Pending |
 | P11-09 | First-adopter integration and route reconciliation | Pending |
