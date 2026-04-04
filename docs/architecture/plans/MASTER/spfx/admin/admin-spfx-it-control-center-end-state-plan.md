@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.018  
-**Revision note:** This update completes **Phase 10** with the exit reconciliation artifact (P10-11), recording all 9 acceptance criteria as met, validation results (79/79 tests, 0 lint errors, 3 type-checks clean, build success), residual risks, and recommended Phase 11/12 entry points. Preserves all prior phase content.
+**Version:** 01.000.019  
+**Revision note:** Adds **Phase 11 repo-truth and dependency audit** (P11-01) — confirmed implementation maturity across operator console, features-admin, ui-kit, models, backend control plane, and audit/evidence; identified 5 dependency gaps (no per-action safety profile type, no centralized backend safety enforcement, no safety-specific UI primitives, no safety control catalog enum, config governance code-defined first); established natural first-adopter candidates (ProvisioningOversightPage, EntraLanePage) and recommended package placement for all safety-model responsibilities. Preserves all prior phase content.
 
 ---
 
