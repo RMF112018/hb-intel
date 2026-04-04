@@ -1,101 +1,53 @@
-# README — Admin SPFx IT Control Center Phase 12 Prompt Package
+# README — Admin SPFx IT Control Center Phase 13 Production Readiness Package
 
 ## What this package contains
 
-This package is a **local-code-agent implementation set** for **Phase 12 — Admin intelligence completion and unified observability** of the Admin SPFx IT Control Center effort.
+This directory holds the **Phase 13 — Production hardening and expansion rails** deliverables for the Admin SPFx IT Control Center. Phase 13 is the final phase of the program.
 
-Included files:
+Phase 13 is a documentation and readiness phase. It did not implement new features or change the architecture. It audited production posture, defined release gates, documented operational doctrine, created production runbooks, established the support model, and defined expansion rails.
 
-1. `Admin-SPFx-IT-Control-Center-Phase-12-Summary-Plan.md`
-2. `Prompt-01-Phase-12-Repo-Truth-Observability-Audit-and-Gap-Map.md`
-3. `Prompt-02-Phase-12-Observability-Baseline-and-Persistence-Model.md`
-4. `Prompt-03-Shared-Observability-Contracts-and-Models.md`
-5. `Prompt-04-Durable-Persistence-Adapters-and-Storage-Plumbing.md`
-6. `Prompt-05-Backend-Observability-APIs-and-Telemetry-Normalization.md`
-7. `Prompt-06-Probe-Execution-and-Alert-Evaluation-Productionization.md`
-8. `Prompt-07-Cross-Domain-Instrumentation-and-Correlation-Adoption.md`
-9. `Prompt-08-SPFx-Unified-Observability-Console-and-Routes.md`
-10. `Prompt-09-Notification-Dispatch-and-Operator-Action-Workflows.md`
-11. `Prompt-10-Testing-Docs-Runbooks-and-Config-Guidance.md`
-12. `Prompt-11-Phase-12-Exit-Reconciliation-and-Release-Readiness.md`
+## Canonical production-readiness documents
 
-## Intended execution order
+| Document | File | Purpose |
+|----------|------|---------|
+| Production Posture Audit | `admin-spfx-phase-13-production-posture-audit.md` | Present-truth audit of production readiness at Phase 13 entry (P13-01) |
+| Release Readiness Baseline | `admin-spfx-phase-13-release-readiness-baseline.md` | 10 release gate categories with testable evidence (P13-02) |
+| Environment, Identity, and Dependency Baseline | `admin-spfx-phase-13-environment-identity-and-dependency-baseline.md` | Environment model, identity posture, config tiers, dependency map (P13-03) |
+| Support Model and Escalation Matrix | `admin-spfx-phase-13-support-model-and-escalation-matrix.md` | 4-tier support ownership, severity definitions, escalation triggers (P13-04) |
+| Operational Doctrine | `admin-spfx-phase-13-operational-doctrine.md` | Service boundaries, degraded mode, change discipline, no-go behaviors (P13-07) |
+| Expansion Rails Architecture | `admin-spfx-phase-13-expansion-rails-architecture.md` | Near-term and later expansion paths with invariants and no-go shortcuts (P13-08) |
 
-Run the prompt files in numeric order.
+## Production runbook set
 
-Do **not** skip ahead unless a prompt explicitly tells the agent to stop because repo truth materially differs from the assumptions captured here.
+| Runbook | File | Purpose |
+|---------|------|---------|
+| Deployment and Promotion | `runbooks/admin-spfx-deployment-and-promotion-runbook.md` | Pre-deployment, promotion sequence, post-deploy validation (P13-05) |
+| Rollback and Recovery | `runbooks/admin-spfx-rollback-and-recovery-runbook.md` | Rollback triggers, decision tree, rollback procedures (P13-05) |
+| Incident Triage | `runbooks/admin-spfx-incident-triage-runbook.md` | Symptom categories, first checks, evidence gathering, escalation (P13-06) |
+| Service Recovery | `runbooks/admin-spfx-service-recovery-runbook.md` | 7 recovery classes with step-by-step procedures (P13-06) |
+| Break-Glass Guidance | `runbooks/admin-spfx-break-glass-guidance.md` | 4 tightly governed emergency scenarios with audit requirements (P13-06) |
 
-## How the local code agent should use these prompts
+## Also in this directory (Phase 12 prompt artifacts)
 
-- Treat the governing end-state plan as the intended destination for Phase 12.
-- Treat verified live repo state as implementation truth.
-- Read only the **smallest authoritative set** needed for the current prompt.
-- Do **not** re-read files that are still in active context or memory unless:
-  - the prompt explicitly requires a fresh check,
-  - the file changed,
-  - the context became stale,
-  - or the task widened.
-- Keep Phase 12 architecture-safe:
-  - SPFx is the operator console.
-  - Backend/control plane owns durable execution and persistence.
-  - `@hbc/features-admin` remains the reusable admin-intelligence layer, not the privileged control plane.
+This directory also contains Phase 12 prompt files and the Phase 12 summary plan. These are the prompt package that drove Phase 12 execution and remain as historical reference. They are NOT Phase 13 deliverables.
 
-## Required authority order
+## What this phase claims
 
-Use this order when signals disagree:
+- The system has been audited for production readiness.
+- Release gates, support model, runbooks, and operational doctrine are documented.
+- Known gaps and deferrals are explicitly cataloged with mitigations.
+- Expansion paths are defined without blurring current production scope.
 
-1. verified live code and configuration
-2. `docs/architecture/blueprint/current-state-map.md`
-3. the governing end-state plan
-4. relevant package/app README and tests
-5. the new Phase 12 observability docs created in this sequence
-6. older phase/task plans
+## What this phase does NOT claim
 
-## Execution cautions
+- Phase 13 did not implement new features or fix code.
+- Phase 13 did not deploy alert rules to Azure Monitor (that is a DevOps task).
+- Phase 13 did not resolve implementation-dependent gaps (email relay, deferred monitors/probes, ApprovalAuthority persistence, SignalR).
+- Phase 13 did not verify production environment configuration (that requires Azure Portal access).
+- The presence of runbooks does not mean they have been exercised in a real production incident.
 
-- This package is for **Phase 12 only**.
-- Do not turn observability work into a broad admin-platform rewrite.
-- Do not keep durable alert/probe/error state in browser memory.
-- Do not push persistence or privileged query logic into SPFx.
-- Do not leave placeholder routing in place if the route is supposed to serve a real observability page.
-- Do not “paper over” missing durability with better UI only.
-- Do not update `current-state-map.md` with target-state claims.
+## Governing docs
 
-## Expected repository outputs from executing this package
-
-Expected outputs will likely touch:
-
-### Documentation
-- `docs/architecture/plans/MASTER/spfx/admin/phase-12/**`
-- local README updates where observability behavior materially changes
-
-### Shared models / package code
-- `packages/models/**`
-- `packages/features/admin/**`
-
-### Backend/control-plane code
-- `backend/functions/**`
-
-### SPFx operator-console code
-- `apps/admin/**`
-
-## Validation posture
-
-Use the smallest meaningful validation set per prompt, but expect real code validation in this phase because the work is not docs-only.
-
-Typical expectation:
-- targeted unit tests for new models, hooks, adapters, and query logic
-- integration tests for backend APIs / persistence behavior where available
-- route / page rendering tests for SPFx observability surfaces
-- targeted formatting / linting / test commands for touched workspaces
-
-Do **not** run the full monorepo by default unless the touched areas or repo tooling require it.
-
-## Completion standard
-
-The package is complete when the repo has:
-- a real durable observability baseline,
-- durable alert and probe state,
-- production-grade admin observability APIs,
-- non-placeholder SPFx observability surfaces,
-- and a clear Phase 12 exit report with residual risks and next-phase entry guidance.
+- [End-State Plan](../admin-spfx-it-control-center-end-state-plan.md)
+- [Phase 13 Summary Plan](../phase-13r/Admin-SPFx-IT-Control-Center-Phase-13-Summary-Plan.md)
+- [Phase 13 Prompt Package](../phase-13r/README.md)

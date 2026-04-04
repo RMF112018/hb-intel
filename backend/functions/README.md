@@ -22,6 +22,8 @@ All three services follow the established interface + real + mock pattern and ar
 
 **Phase 9 user lifecycle workflows (2026-04-03)**: Implements 12 user lifecycle workflow handlers covering search, read, create (AD DS + cloud), update, enable/disable, and delete with confirmation tokens. 7 API endpoints under `/api/admin/identity/users/`. Each workflow validates input, runs connector preflight, executes against the correct adapter (AD DS or Graph based on authority), captures sync-pending state for AD DS mutations, and produces normalized audit payloads.
 
+**Phase 13 production readiness (2026-04-04)**: Production hardening documentation phase. Produced the operational doctrine, support model, release readiness baseline, deployment/rollback runbooks, incident triage and recovery runbooks, break-glass guidance, environment/identity/dependency baseline, and expansion rails architecture. No code changes — Phase 13 is docs-only. See the [Phase 13 production readiness package](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/README.md).
+
 ### Domain Hosts
 
 This package uses scoped domain hosts (ADR-0124) for independent deployment of domain-specific route families.

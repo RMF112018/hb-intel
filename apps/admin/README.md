@@ -67,6 +67,19 @@ The Error Log page (`/errors`) was implemented in Phase 12 (P12-08) and is now a
 
 The Validation lane (`/validation`) remains a scaffold deferred to Phase 7.
 
+## Production Operations
+
+Phase 13 produced the production-readiness package for this app. Key references for production operations:
+
+- [Production Posture Audit](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/admin-spfx-phase-13-production-posture-audit.md) — verified production state and gap inventory
+- [Release Readiness Baseline](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/admin-spfx-phase-13-release-readiness-baseline.md) — 10 release gate categories
+- [Support Model](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/admin-spfx-phase-13-support-model-and-escalation-matrix.md) — 4-tier ownership and escalation
+- [Operational Doctrine](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/admin-spfx-phase-13-operational-doctrine.md) — service boundaries and no-go behaviors
+- [Deployment Runbook](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/runbooks/admin-spfx-deployment-and-promotion-runbook.md) — staging-to-production promotion
+- [Rollback Runbook](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/runbooks/admin-spfx-rollback-and-recovery-runbook.md) — rollback triggers and procedures
+- [Incident Triage Runbook](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/runbooks/admin-spfx-incident-triage-runbook.md) — symptom-based triage
+- [Phase 13 README](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/README.md) — full deliverable index
+
 ## Dependencies
 
 - `@hbc/ui-kit` — design system components

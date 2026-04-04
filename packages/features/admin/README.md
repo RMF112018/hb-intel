@@ -154,6 +154,7 @@ White-glove hooks and pages live directly in `apps/admin/` because they consume 
 
 ## Related
 
+- [Phase 13 Production Readiness Package](../../docs/architecture/plans/MASTER/spfx/admin/phase-13/README.md) — production posture audit, release gates, support model, runbooks, operational doctrine, and expansion rails
 - [SF17 Admin Intelligence Plan](../../docs/architecture/plans/shared-features/SF17-Admin-Intelligence.md)
 - [SF17-T09 Testing and Deployment](../../docs/architecture/plans/shared-features/SF17-T09-Testing-and-Deployment.md)
 - [ADR-0106 — Admin Intelligence Layer](../../docs/architecture/adr/ADR-0106-admin-intelligence-layer.md)

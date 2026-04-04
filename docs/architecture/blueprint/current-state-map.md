@@ -681,3 +681,18 @@ This section records the verified completion state at Wave 0 closeout. It serves
 - Coordinator/requester admin views.
 - Live SMTP email relay.
 - Incident management (incident creation, linking, resolution workflows).
+
+### 7.5 Phase 13 Completions — Production Hardening and Expansion Rails
+
+Phase 13 is a documentation and readiness phase. It produced the production-readiness package for the Admin SPFx IT Control Center without implementing new features or changing the architecture.
+
+- **Production posture audit:** Present-truth audit identifying 16 gaps, confirmed foundations across 7 subsystems, and 11 residual unknowns requiring production environment verification (P13-01).
+- **Release readiness baseline:** 10 release gate categories with testable evidence, 5 blockers (all resolved by subsequent prompts), 8 warnings with documented mitigations, and 4-role sign-off process (P13-02).
+- **Environment, identity, and dependency baseline:** 3-environment model (local/staging/production), managed identity posture, 3 backend config tiers (25+ entries), 6 external dependency families with failure analysis (P13-03).
+- **Support model and escalation matrix:** 4-tier support ownership (operator, platform engineering, IT, architecture), severity definitions with response targets, escalation triggers, evidence requirements, out-of-scope routing (P13-04).
+- **Deployment and rollback runbooks:** Deployment/promotion runbook with 3 deployment types (SPFx-only, backend-only, coordinated), rollback runbook with decision tree and 3 rollback procedures (P13-05).
+- **Incident triage, service recovery, and break-glass runbooks:** 10 symptom categories with first checks, 7 recovery classes, 4 tightly governed break-glass scenarios with mandatory post-action review (P13-06).
+- **Operational doctrine:** 3-boundary operational model, service dependency map, 6 degraded states, audit/evidence doctrine, change discipline, 10 no-go behaviors (P13-07).
+- **Expansion rails architecture:** 6 near-term expansion rails, 3 later expansion rails, 10 architectural invariants, 8 no-go expansion shortcuts (P13-08).
+
+All Phase 13 deliverables are under `docs/architecture/plans/MASTER/spfx/admin/phase-13/`. See that directory's README for the full index.
