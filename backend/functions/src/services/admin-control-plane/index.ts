@@ -150,6 +150,29 @@ export { ConfigResolutionService, processEnvReader } from './config-resolution-s
 // Config snapshot store (Phase 10 — P10-06)
 export { DurableConfigSnapshotStore, MockConfigSnapshotStore, serializeSnapshot, deserializeSnapshot } from './config-snapshot-store.js';
 
+// Safety policy registry and enforcement (Phase 11 — P11-04)
+export {
+  registerSafetyProfile,
+  getSafetyProfile,
+  listSafetyProfiles,
+  clearSafetyRegistry,
+  getDefaultControlsForRiskLevel,
+  getDefaultConfirmationType,
+  buildSafetyProfile,
+  evaluateSafetyGates,
+  requireSafetyGates,
+  requireSafetyProfile,
+  getRequiredEvidenceControls,
+  isControlRequired,
+  isPostRunValidationRequired,
+  isRecoveryGuidanceRequired,
+  resolveSafetyProfile,
+} from './safety-policy-registry.js';
+export type { ISafetyGateContext, ISafetyGateResult } from './safety-policy-registry.js';
+
+// Safety action catalog (Phase 11 — P11-04)
+export { registerDefaultSafetyProfiles } from './safety-action-catalog.js';
+
 // Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,

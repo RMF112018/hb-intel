@@ -29,7 +29,7 @@ It is designed to be executed against the live repo in the order provided.
 | P11-02 | `phase-11-safety-baseline.md` | Complete |
 | P11-02 | `phase-11-risk-tier-and-action-classification.md` | Complete |
 | P11-03 | `phase-11-preview-dry-run-and-confirmation-model.md` + shared contracts in `@hbc/models` | Complete |
-| P11-04 | Backend safety policy and enforcement rails | Pending |
+| P11-04 | `phase-11-backend-safety-enforcement.md` + safety-policy-registry + safety-action-catalog + 40 tests | Complete |
 | P11-05 | Preview/dry-run/impact-summary pipeline | Pending |
 | P11-06 | Operator safety UX primitives | Pending |
 | P11-07 | Destructive-action confirmation and checkpoint execution | Pending |

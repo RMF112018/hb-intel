@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.021  
-**Revision note:** Adds **Phase 11 shared safety contracts and model placement** (P11-03) — implements `AdminSafetyControl` enum (12 controls), `IAdminSafetyProfile` (action-to-controls mapping), `IAdminSafetyPreviewResult` and `IAdminSafetyImpactItem` (enhanced preview/dry-run), `IAdminConfirmationPayload` (confirmation evidence), `IAdminExecutionScope` (scope restriction), `IAdminRecoveryGuidance` and `IAdminRecoveryStep` (recovery model), `IAdminSafetyEvidenceSummary` (evidence rollup), and `IAdminSafetyWarning` (structured warnings) in `@hbc/models`. All contracts reuse existing enums and types. Preserves all prior phase content.
+**Version:** 01.000.022  
+**Revision note:** Adds **Phase 11 backend safety policy and enforcement rails** (P11-04) — implements safety policy registry (`registerSafetyProfile`, `getSafetyProfile`, `evaluateSafetyGates`, `requireSafetyGates`, `requireSafetyProfile`), profile builder with risk-level-derived defaults, action catalog with 24 profiles across all 7 admin domains, HTTP enforcement helpers (422 for unsatisfied gates, 400 for unknown actions), query helpers for evidence/validation/recovery requirements, and Phase 10 governed-override seam. 40 new tests all passing. Preserves all prior phase content.
 
 ---
 
