@@ -239,6 +239,27 @@ Prompt 03 deliverables are now locked for Prompt 04–10 implementation:
 - Prompt 04–10 should consume shared primitives/helpers/models instead of introducing parallel local variants.
 - Prompt-01/02 manifest deferment no longer applies because `hb-webparts` now exists with first patch baseline `001.000.001`.
 
+## Packaging Remediation Closure Artifacts
+
+Multi-webpart packaging remediation for `hb-webparts` is now locked for release-readiness handoff:
+
+- `hb-webparts-packaging-remediation-summary.md`
+- `hb-webparts-multi-webpart-packaging-verification.md`
+
+## Resolved Decisions Register (Packaging Remediation)
+
+| Decision ID | Decision                                                                                                         | Status |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- | ------ |
+| PR-01       | `hb-webparts` uses a true multi-manifest packaging path in the authoritative orchestrator                        | Closed |
+| PR-02       | Legacy `HbWebparts` manifest is excluded from first-release toolbox inventory                                    | Closed |
+| PR-03       | Runtime surface selection is keyed by deployable webpart manifest ID, not `ReferenceHomepageComposition` default | Closed |
+| PR-04       | Solution and feature packaging versions use SharePoint-valid 4-part format (`1.0.0.8`)                           | Closed |
+
+## Packaging Remediation Handoff Note
+
+- `hb-webparts` now packages all intended first-release webparts as separate toolbox registrations in one `.sppkg`.
+- Single-manifest packaging behavior for other SPFx domains remains unchanged.
+
 ## Prompt-04 Closure Artifacts
 
 Prompt 04 deliverables are now locked for Prompt 05–10 implementation:

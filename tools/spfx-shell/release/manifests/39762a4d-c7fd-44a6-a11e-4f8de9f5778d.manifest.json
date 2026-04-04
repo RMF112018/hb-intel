@@ -1,15 +1,14 @@
 {
-  "id": "cf3c98bf-ff78-4f00-bd6d-c304433d959e",
-  "alias": "ShellWebPart",
+  "id": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
+  "alias": "HbHeroBannerWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart",
-    "TeamsPersonalApp"
+    "SharePointWebPart"
   ],
-  "supportsThemeVariants": true,
+  "supportsThemeVariants": false,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
@@ -17,14 +16,20 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Accounting"
+        "default": "HB Hero Banner"
       },
       "description": {
-        "default": "HB Intel Accounting workspace."
+        "default": "Authorable editorial hero banner for HB Central top-band composition."
       },
-      "officeFabricIconFontName": "BuildDefinition",
+      "officeFabricIconFontName": "Photo2",
       "properties": {
-        "description": "Accounting"
+        "headline": "Build with confidence.",
+        "message": "Keep teams aligned on priorities, updates, and field execution from one homepage experience.",
+        "metadata": "Updated weekly by Communications",
+        "cta": {
+          "label": "Read this week’s update",
+          "href": "/sites/hb-central"
+        }
       }
     }
   ],
@@ -36,7 +41,7 @@
     "scriptResources": {
       "shell-web-part": {
         "type": "path",
-        "path": "shell-web-part_e0c51b569817b47b5742.js"
+        "path": "shell-web-part_66a8874d87ce501231b6.js"
       },
       "@microsoft/sp-loader": {
         "type": "component",

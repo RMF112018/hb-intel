@@ -125,6 +125,8 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
         if (typeof __API_AUDIENCE__ === 'string' && __API_AUDIENCE__) {
           runtimeConfig.apiAudience = __API_AUDIENCE__;
         }
+        runtimeConfig.webPartId = (this.manifest as any).id;
+        runtimeConfig.webPartProperties = this.properties as Record<string, unknown>;
       } catch {
         // Runtime constants not defined — app will fall back to Vite env or defaults
       }

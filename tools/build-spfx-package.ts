@@ -34,6 +34,7 @@ interface DomainConfig {
   dir: string;        // directory name under apps/
   camel: string;      // camelCase for global name segment
   pascal: string;     // PascalCase for manifest lookups
+  packagingModel?: 'single' | 'multi';
 }
 
 const ALL_DOMAINS: DomainConfig[] = [
@@ -49,7 +50,12 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
+  { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi' },
 ];
+
+const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
+  '535f5a17-fc49-40ea-ac16-5d68895884f7', // legacy HbWebpartsWebPart
+]);
 
 // ── CLI argument parsing ───────────────────────────────────────────────────
 
@@ -261,7 +267,12 @@ function inspectPackagedShellAsset(
  * - At least one component manifest exists with matching webpart ID
  * - Shell webpart JS is present
  */
-function verifySppkg(sppkgPath: string, bundleName: string, expectedId: string, domainDir: string): boolean {
+function verifySppkg(
+  sppkgPath: string,
+  bundleName: string,
+  expectedIds: string[],
+  domainDir: string,
+): boolean {
   try {
     // List archive contents using unzip -l (sppkg is a ZIP/OPC archive)
     const listOutput = execSync(`unzip -l "${sppkgPath}"`, { encoding: 'utf8' });
@@ -290,17 +301,21 @@ function verifySppkg(sppkgPath: string, bundleName: string, expectedId: string, 
       ok = false;
     }
 
-    // Extract and inspect manifest for webpart ID
+    // Extract and inspect manifest payload for all expected webpart IDs
     try {
       const manifestJson = execSync(
         `unzip -p "${sppkgPath}" "*.manifest.json" 2>/dev/null || true`,
         { encoding: 'utf8' },
       );
-      if (manifestJson && manifestJson.includes(expectedId)) {
-        console.log(`  ✓ Webpart ID ${expectedId.substring(0, 8)}... found in .sppkg manifest`);
-      } else if (manifestJson) {
-        console.error(`  ❌ ${domainDir}: webpart ID ${expectedId} not found in .sppkg manifest`);
-        ok = false;
+      if (manifestJson) {
+        for (const expectedId of expectedIds) {
+          if (!manifestJson.includes(expectedId)) {
+            console.error(`  ❌ ${domainDir}: webpart ID ${expectedId} not found in .sppkg manifest`);
+            ok = false;
+          } else {
+            console.log(`  ✓ Webpart ID ${expectedId.substring(0, 8)}... found in .sppkg manifest`);
+          }
+        }
       }
     } catch {
       // Non-fatal — manifest extraction failed but archive structure is OK
@@ -340,9 +355,12 @@ for (const domain of domains) {
     continue;
   }
 
-  // Find the domain's webpart manifest
-  const manifestDir = path.join(manifestGlob, domain.camel === 'projectHub' ? 'projectHub' : domain.dir.replace(/-/g, ''));
-  let manifestFile: string | undefined;
+  // Find the domain's source webpart manifests
+  type SourceManifest = {
+    file: string;
+    json: any;
+  };
+  const sourceManifests: SourceManifest[] = [];
   if (fs.existsSync(manifestGlob)) {
     const walk = (dir: string): string[] => {
       const results: string[] = [];
@@ -353,14 +371,32 @@ for (const domain of domains) {
       }
       return results;
     };
-    const manifests = walk(manifestGlob);
-    manifestFile = manifests[0];
+    const manifests = walk(manifestGlob).sort();
+    for (const file of manifests) {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (parsed.componentType !== 'WebPart') {
+        continue;
+      }
+      if (domain.dir === 'hb-webparts' && HB_WEBPARTS_EXCLUDED_MANIFEST_IDS.has(parsed.id)) {
+        continue;
+      }
+      sourceManifests.push({ file, json: parsed });
+    }
   }
-  if (!manifestFile) {
-    console.error(`  ❌ ${domain.dir}: no webpart manifest found`);
+
+  const targetManifests =
+    domain.packagingModel === 'multi'
+      ? sourceManifests
+      : sourceManifests.slice(0, 1);
+
+  if (targetManifests.length === 0) {
+    console.error(`  ❌ ${domain.dir}: no eligible webpart manifest found`);
     allPassed = false;
     continue;
   }
+
+  const primarySourceManifest = targetManifests[0].json;
+  const targetManifestIds = targetManifests.map((m) => m.json.id);
 
   // ── Step 1: Check Vite build output exists ───────────────────────────
   // baseBundleName is the fixed name Vite always outputs.
@@ -528,24 +564,30 @@ for (const domain of domains) {
     ...domainPkgSolution,
     paths: { zippedPackage: `solution/${sppkgName}` },
   };
+  if (
+    shellPkgSolution.solution?.features?.length &&
+    Array.isArray(shellPkgSolution.solution.features)
+  ) {
+    shellPkgSolution.solution.features[0].componentIds = targetManifestIds;
+  }
   fs.writeFileSync(
     path.join(SHELL_DIR, 'config', 'package-solution.json'),
     JSON.stringify(shellPkgSolution, null, 2),
   );
 
-  // Write domain-specific manifest into the shell
-  const sourceManifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  // Write primary domain manifest into the shell (additional manifests for multi-mode
+  // are generated from this compiled base after gulp bundle).
   const shellManifest = {
     $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
-    id: sourceManifest.id,
+    id: primarySourceManifest.id,
     alias: 'ShellWebPart',
     componentType: 'WebPart',
     version: '*',
     manifestVersion: 2,
     requiresCustomScript: false,
-    supportedHosts: sourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp'],
+    supportedHosts: primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp'],
     supportsThemeVariants: true,
-    preconfiguredEntries: sourceManifest.preconfiguredEntries,
+    preconfiguredEntries: primarySourceManifest.preconfiguredEntries,
   };
   fs.writeFileSync(
     path.join(SHELL_DIR, 'src', 'webparts', 'shell', 'ShellWebPart.manifest.json'),
@@ -591,6 +633,42 @@ for (const domain of domains) {
     continue;
   }
 
+  // For multi-manifest domains, clone the compiled shell manifest to every
+  // target webpart ID while preserving each source manifest's title/entries.
+  const compiledManifestDir = path.join(SHELL_DIR, 'release', 'manifests');
+  if (!fs.existsSync(compiledManifestDir)) {
+    console.error(`  ❌ ${domain.dir}: compiled manifest directory not found`);
+    allPassed = false;
+    continue;
+  }
+  const compiledManifestFiles = fs
+    .readdirSync(compiledManifestDir)
+    .filter((file) => file.endsWith('.manifest.json'))
+    .sort();
+  if (compiledManifestFiles.length === 0) {
+    console.error(`  ❌ ${domain.dir}: no compiled manifests found`);
+    allPassed = false;
+    continue;
+  }
+  const compiledBaseManifestPath = path.join(compiledManifestDir, compiledManifestFiles[0]);
+  const compiledBaseManifest = JSON.parse(fs.readFileSync(compiledBaseManifestPath, 'utf8'));
+  for (const target of targetManifests) {
+    const composed = {
+      ...compiledBaseManifest,
+      id: target.json.id,
+      alias: target.json.alias ?? compiledBaseManifest.alias,
+      requiresCustomScript: target.json.requiresCustomScript ?? compiledBaseManifest.requiresCustomScript,
+      supportedHosts: target.json.supportedHosts ?? compiledBaseManifest.supportedHosts,
+      supportsThemeVariants: target.json.supportsThemeVariants ?? compiledBaseManifest.supportsThemeVariants,
+      preconfiguredEntries: target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
+    };
+    fs.writeFileSync(
+      path.join(compiledManifestDir, `${target.json.id}.manifest.json`),
+      JSON.stringify(composed, null, 2),
+    );
+  }
+  console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
+
   // ── Step 4: Inject Vite assets into temp/deploy/ ────────────────────
   const deployDir = path.join(SHELL_DIR, 'temp', 'deploy');
   if (!fs.existsSync(deployDir)) {
@@ -634,7 +712,7 @@ for (const domain of domains) {
   fs.copyFileSync(sppkgSource, sppkgDest);
 
   // Post-packaging verification: inspect .sppkg contents (OPC/ZIP archive)
-  const verified = verifySppkg(sppkgDest, bundleName, sourceManifest.id, domain.dir);
+  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir);
   if (!verified) {
     allPassed = false;
     continue;

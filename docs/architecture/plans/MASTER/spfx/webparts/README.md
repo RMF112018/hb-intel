@@ -199,6 +199,17 @@ Prompt 10 closure outputs are complete and finalize first-release readiness:
 
 Prompt-10 applies manifest patch bump to `001.000.008` in `hb-webparts` solution + feature versions.
 
+## Packaging Remediation Outputs (Locked)
+
+Post-Prompt remediation outputs are complete and authoritative for packaging/deployment behavior:
+
+- `hb-webparts-packaging-remediation-summary.md` — root cause, authoritative-source fix path, multi-webpart packaging model, and release verification notes.
+- `hb-webparts-multi-webpart-packaging-verification.md` — deployable toolbox matrix (title, component ID, source manifest, runtime entry, packaged presence).
+
+The authoritative packager now treats `hb-webparts` as a multi-manifest domain while preserving single-manifest behavior for existing domains.
+Legacy `HbWebparts` scaffold manifest is excluded from first-release toolbox output.
+`hb-webparts` solution/feature versions use SharePoint-valid four-part format (`1.0.0.8`) for App Catalog compatibility.
+
 ## Operating Assumptions for the Code Agent
 
 Every prompt assumes the code agent will:
