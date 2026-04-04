@@ -43,6 +43,9 @@ Run the prompts in order.
 - `01B_Lane_Assignment_Decision_Record.md`
 - `01C_Repo_Structure_and_Prompt_Sequence.md`
 - `02_Homepage_Doctrine_UI-Kit_Contract_and_Brand_Foundation.md`
+- `02A_Homepage_Doctrine.md`
+- `02B_Homepage_UI-Kit_Usage_Guide.md`
+- `02C_HB_Brand_Foundation_Reference.md`
 - `03_Shared_Homepage_Primitives_and_Standalone_SPFx_Scaffolding.md`
 - `04_Personalized_Welcome_Header_and_HB_Hero_Banner.md`
 - `05_Priority_Actions_Rail_and_Tool_Launcher_Work_Hub.md`
@@ -68,6 +71,17 @@ Prompt 01 closure outputs are complete and should be consumed before Prompt 02 w
 - Preserve the locked package naming guard (`hb-webparts`) when scaffolding begins.
 - Keep manifest patch-bump behavior deferred until the `hb-webparts` manifest target exists in-repo.
 - Use Prompt 01 closure records to drive Prompt 02–10 handoff notes and validation criteria.
+
+## Prompt-02 Outputs (Locked)
+
+Prompt 02 closure outputs are complete and are required inputs for Prompt 03+:
+
+- `02A_Homepage_Doctrine.md` — locked homepage operating doctrine and SharePoint coexistence rules.
+- `02B_Homepage_UI-Kit_Usage_Guide.md` — homepage-safe `ui-kit` import and wrapper policy.
+- `02C_HB_Brand_Foundation_Reference.md` — codified brand implementation constraints.
+- `@hbc/ui-kit/homepage` — constrained entrypoint for homepage-safe primitives and contract constants.
+
+Prompt-02 keeps SPFx manifest patch-bump deferred until `hb-webparts` exists as an actual manifest target in repo.
 
 ## Operating Assumptions for the Code Agent
 

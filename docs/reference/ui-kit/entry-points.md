@@ -1,6 +1,6 @@
 # @hbc/ui-kit Entry Points
 
-The `@hbc/ui-kit` package exposes four entry points to support tree-shaking and SPFx bundle budget constraints.
+The `@hbc/ui-kit` package exposes five entry points to support tree-shaking and SPFx bundle budget constraints.
 
 ## Entry Points
 
@@ -44,6 +44,22 @@ import { HomeIcon, RfiIcon, CameraIcon } from '@hbc/ui-kit/icons';
 
 **Use when:** Using icons independently of the component library.
 
+### `@hbc/ui-kit/homepage`
+
+Constrained homepage-safe entry point for HB Central SharePoint homepage webparts. Exposes a narrow set of approved primitives and homepage contract constants (brand aliases, typography aliases, motion/a11y policy, density policy, import guardrails).
+
+```tsx
+import {
+  HbcCard,
+  HbcStatusBadge,
+  HBC_HOMEPAGE_BRAND_FOUNDATION,
+  HBC_HOMEPAGE_ACCESSIBILITY_POLICY,
+} from '@hbc/ui-kit/homepage';
+```
+
+**Use when:** Building HB Central homepage webparts (`hb-webparts`) and shared homepage wrappers where bundle discipline and governance constraints are stricter than generic app surfaces.
+**Do not use for:** shell recreation, broad full-kit passthrough exports, or unrelated PWA app composition.
+
 ## Why the Split Exists
 
 SPFx webparts run inside SharePoint's iframe sandbox with strict bundle size constraints. The full `@hbc/ui-kit` entry point includes ECharts, TanStack Table, PDF.js integration, and other heavy dependencies that would exceed the SPFx budget. The `/app-shell` entry point provides the shell chrome (~15 KB) without those dependencies.
@@ -55,16 +71,23 @@ The `/theme` and `/icons` entry points allow granular imports for packages that 
 ```json
 {
   "exports": {
-    ".":          { "types": "./dist/index.d.ts",       "import": "./dist/index.js" },
-    "./app-shell": { "types": "./dist/app-shell.d.ts",   "import": "./dist/app-shell.js" },
-    "./theme":    { "types": "./dist/theme/index.d.ts",  "import": "./dist/theme/index.js" },
-    "./icons":    { "types": "./dist/icons/index.d.ts",  "import": "./dist/icons/index.js" }
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./app-shell": { "types": "./dist/app-shell.d.ts", "import": "./dist/app-shell.js" },
+    "./theme": { "types": "./dist/theme/index.d.ts", "import": "./dist/theme/index.js" },
+    "./icons": { "types": "./dist/icons/index.d.ts", "import": "./dist/icons/index.js" },
+    "./homepage": { "types": "./dist/homepage.d.ts", "import": "./dist/homepage.js" }
   },
   "sideEffects": false
 }
 ```
 
 The `sideEffects: false` flag enables bundlers to tree-shake unused exports from any entry point.
+
+## Homepage Guardrails
+
+- Homepage SPFx webparts should import shared visuals from `@hbc/ui-kit/homepage` and use `@hbc/ui-kit/theme`/`@hbc/ui-kit/icons` only when needed.
+- Homepage webparts should not import the full `@hbc/ui-kit` entry point.
+- `@hbc/ui-kit/app-shell` remains for shell chrome scenarios; it is not the homepage webpart composition surface.
 
 ## Related References
 

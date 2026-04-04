@@ -1,0 +1,135 @@
+/**
+ * @hbc/ui-kit/homepage
+ *
+ * Constrained entrypoint for HB Central homepage webparts.
+ * This surface intentionally exposes a small, governed subset that is safe for
+ * SPFx homepage composition and avoids shell recreation primitives.
+ */
+
+import { body, display, heading1, heading2, heading3, heading4 } from './theme/typography.js';
+import { HBC_DENSITY_TOKENS, type DensityTier } from './theme/density.js';
+import { HBC_SPACE_LG, HBC_SPACE_MD, HBC_SPACE_SM, HBC_SPACE_XL } from './theme/grid.js';
+import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js';
+
+export { HbcBanner } from './HbcBanner/index.js';
+export type { HbcBannerProps, BannerVariant } from './HbcBanner/index.js';
+
+export { HbcButton } from './HbcButton/index.js';
+export type { ButtonVariant, HbcButtonProps } from './HbcButton/index.js';
+
+export { HbcCard } from './HbcCard/index.js';
+export type { CardWeight, HbcCardProps } from './HbcCard/index.js';
+
+export { HbcEmptyState } from './HbcEmptyState/index.js';
+export type { HbcEmptyStateProps } from './HbcEmptyState/index.js';
+
+export { HbcSearch } from './HbcSearch/index.js';
+export type { HbcSearchProps, HbcSearchVariant } from './HbcSearch/index.js';
+
+export { HbcSpinner } from './HbcSpinner/index.js';
+export type { HbcSpinnerProps, SpinnerSize } from './HbcSpinner/index.js';
+
+export { HbcStatusBadge } from './HbcStatusBadge/index.js';
+export type { HbcStatusBadgeProps, StatusVariant } from './HbcStatusBadge/index.js';
+
+export { usePrefersReducedMotion as useHomepageReducedMotion };
+
+export type HomepageSurfaceClass = 'hero' | 'editorial' | 'utility' | 'operational' | 'discovery';
+
+export type HomepagePrimitiveName =
+  | 'HbcBanner'
+  | 'HbcButton'
+  | 'HbcCard'
+  | 'HbcEmptyState'
+  | 'HbcSearch'
+  | 'HbcSpinner'
+  | 'HbcStatusBadge';
+
+/**
+ * Prompt-02 locked HB homepage brand direction.
+ * These aliases are homepage-specific and do not override global ui-kit brand tokens.
+ */
+export const HBC_HOMEPAGE_BRAND_FOUNDATION = {
+  primaryBlue: {
+    rgb: 'rgb(34, 83, 145)',
+    hex: '#225391',
+  },
+  secondaryOrange: {
+    rgb: 'rgb(229, 126, 70)',
+    hex: '#E57E46',
+  },
+  posture: {
+    premium: true,
+    established: true,
+    polished: true,
+    operational: true,
+  },
+  antiPatterns: [
+    'flashy animation-first styling',
+    'template-like generic sharepoint tiles',
+    'startup-like novelty styling',
+  ],
+} as const;
+
+/**
+ * Homepage typography aliases mapped to existing ui-kit typography scale.
+ */
+export const HBC_HOMEPAGE_TYPOGRAPHY = {
+  hero: display,
+  sectionHeader: heading2,
+  editorialCardTitle: heading3,
+  utilityTileTitle: heading4,
+  intelligenceStripTitle: heading3,
+  body,
+  greeting: heading1,
+} as const;
+
+/**
+ * Shared layout rhythm for homepage compositions.
+ */
+export const HBC_HOMEPAGE_SPACING = {
+  sectionGap: HBC_SPACE_XL,
+  cardGap: HBC_SPACE_LG,
+  tileGap: HBC_SPACE_MD,
+  inlineGap: HBC_SPACE_SM,
+} as const;
+
+/**
+ * Homepage a11y and motion policy for constrained SPFx usage.
+ */
+export const HBC_HOMEPAGE_ACCESSIBILITY_POLICY = {
+  lightThemeFirst: true,
+  requireVisibleFocus: true,
+  forbidHoverOnlyCriticalInfo: true,
+  reducedMotion: {
+    mediaQuery: '(prefers-reduced-motion: reduce)',
+    required: true,
+    hook: 'useHomepageReducedMotion',
+  },
+  minimumContrast: {
+    text: '4.5:1',
+    interactive: '3:1',
+  },
+} as const;
+
+/**
+ * Homepage density guidance using existing ui-kit density system.
+ */
+export const HBC_HOMEPAGE_DENSITY_POLICY: {
+  defaultTier: DensityTier;
+  minimumTouchTargetPx: number;
+  minimumRowHeightPx: number;
+} = {
+  defaultTier: 'comfortable',
+  minimumTouchTargetPx: HBC_DENSITY_TOKENS.touch.touchTargetMin,
+  minimumRowHeightPx: HBC_DENSITY_TOKENS.comfortable.rowHeightMin,
+};
+
+/**
+ * Guardrail metadata for documentation and lint policy references.
+ */
+export const HBC_HOMEPAGE_IMPORT_GUARDRAILS = {
+  allowedEntrypoint: '@hbc/ui-kit/homepage',
+  relatedTokenEntrypoints: ['@hbc/ui-kit/theme', '@hbc/ui-kit/icons'],
+  prohibitedEntrypointsInHomepageWebparts: ['@hbc/ui-kit', '@hbc/ui-kit/app-shell'],
+} as const;

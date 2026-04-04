@@ -1,9 +1,9 @@
 # 02 — Homepage Doctrine, UI-Kit Contract, and Brand Foundation
 
 **Naming guard**
+
 - Do **not** title or name the package as `homepage`, `home page`, `homepage-webparts`, `hb-central-homepage`, or any other homepage-labeled package.
 - The package name must be exactly: `hb-webparts`.
-
 
 ## Objective
 
@@ -32,7 +32,6 @@ Create the homepage-safe visual/implementation contract that all homepage webpar
 
 ## Implementation Tasks
 
-
 1. Define the **homepage doctrine** for HB Central.
    It should cover:
    - homepage system vs monolith
@@ -55,7 +54,7 @@ Create the homepage-safe visual/implementation contract that all homepage webpar
    - homepage-focused barrel exports
    - homepage wrapper primitives
    - homepage-safe design tokens / aliases where appropriate
-   Keep it minimal and governed; do not dump unrelated exports into it.
+     Keep it minimal and governed; do not dump unrelated exports into it.
 
 4. Encode the **HB brand foundation** for homepage use:
    - primary blue `rgb(34, 83, 145)`
@@ -76,9 +75,7 @@ Create the homepage-safe visual/implementation contract that all homepage webpar
 
 7. Update authoritative docs so future work points to the homepage-safe contract instead of generic interpretation.
 
-
 ## Required Deliverables
-
 
 - homepage doctrine markdown doc
 - homepage-safe `ui-kit` usage guide
@@ -86,19 +83,29 @@ Create the homepage-safe visual/implementation contract that all homepage webpar
 - any necessary `packages/ui-kit` export or documentation updates
 - a concise brand foundation reference for homepage implementers
 
-
 ## Verification
-
 
 - typecheck all touched packages
 - ensure no prohibited or overly broad entry-point pattern remains in newly added homepage code
 - ensure light-theme-first behavior is explicit
 - confirm reduced-motion and accessibility rules are documented and represented in shared primitives
 
-
 ## Definition of Done
-
 
 - a stable homepage-safe visual / implementation contract exists
 - brand rules are encoded, not just described
 - downstream homepage webpart prompts can build on this contract without inventing their own UI rules
+
+## Implementation Status (Closed)
+
+Prompt-02 deliverables are implemented in this package and related `ui-kit` contract surfaces:
+
+- `02A_Homepage_Doctrine.md`
+- `02B_Homepage_UI-Kit_Usage_Guide.md`
+- `02C_HB_Brand_Foundation_Reference.md`
+- `@hbc/ui-kit/homepage` entrypoint (`packages/ui-kit/src/homepage.ts` + export in `packages/ui-kit/package.json`)
+- `docs/reference/ui-kit/entry-points.md` update documenting homepage entrypoint and guardrails
+
+Versioning closure for this prompt:
+
+- SPFx `{00}.{000}.{000}` manifest patch bump remains deferred until `hb-webparts` exists as a real manifest target.

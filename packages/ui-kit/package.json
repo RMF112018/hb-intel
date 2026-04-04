@@ -21,6 +21,10 @@
     "./icons": {
       "types": "./dist/icons/index.d.ts",
       "import": "./dist/icons/index.js"
+    },
+    "./homepage": {
+      "types": "./dist/homepage.d.ts",
+      "import": "./dist/homepage.js"
     }
   },
   "scripts": {

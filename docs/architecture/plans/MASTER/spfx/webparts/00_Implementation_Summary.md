@@ -195,3 +195,21 @@ Prompt 01 deliverables are locked and must be treated as authoritative inputs fo
 - Inventory, lane assignment, ownership, repo structure, and sequence dependencies are now explicit.
 - No first-release component remains in a `decide later` state.
 - Manifest version bump action is intentionally deferred until downstream scaffolding creates the `hb-webparts` package manifest target.
+
+## Prompt-02 Closure Artifacts
+
+Prompt 02 deliverables are now locked for downstream implementation:
+
+- `02A_Homepage_Doctrine.md`
+- `02B_Homepage_UI-Kit_Usage_Guide.md`
+- `02C_HB_Brand_Foundation_Reference.md`
+
+## Resolved Decisions Register (Prompt 02)
+
+| Decision ID | Decision                                                                                                          | Status |
+| ----------- | ----------------------------------------------------------------------------------------------------------------- | ------ |
+| D2-01       | Homepage delivery remains a coordinated webpart system, not a monolith                                            | Closed |
+| D2-02       | Homepage-safe UI consumption is constrained to the new `@hbc/ui-kit/homepage` contract (+ token/icon entrypoints) | Closed |
+| D2-03       | HB homepage brand foundation values are encoded as implementation references                                      | Closed |
+| D2-04       | Light-theme-first, reduced-motion, focus visibility, and density guidance are explicit in contract + docs         | Closed |
+| D2-05       | SPFx manifest patch bump remains deferred until `hb-webparts` manifest target exists                              | Closed |
