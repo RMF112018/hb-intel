@@ -48,6 +48,26 @@ export class AdminAlertsApi {
   }
 
   /**
+   * Resolve an alert by ID, marking it as no longer active.
+   *
+   * @design P12-09
+   * @throws {Error} If the alert does not exist in the store.
+   */
+  async resolve(alertId: string, resolvedBy: string): Promise<void> {
+    const existing = this.store.get(alertId);
+    if (!existing) {
+      throw new Error(`AdminAlertsApi: alert "${alertId}" not found`);
+    }
+    this.store.set(alertId, {
+      ...existing,
+      resolvedAt: new Date().toISOString(),
+      // If not yet acknowledged, acknowledge at resolution time
+      acknowledgedAt: existing.acknowledgedAt ?? new Date().toISOString(),
+      acknowledgedBy: existing.acknowledgedBy ?? resolvedBy,
+    });
+  }
+
+  /**
    * Return all alerts, optionally filtered to those whose `occurredAt`
    * falls within the given ISO-8601 range (inclusive).
    */

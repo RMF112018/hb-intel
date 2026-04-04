@@ -25,5 +25,5 @@ export type { AdminComplexityTier, IAdminComplexityGating, IAdminComplexityGatin
 export { ReferenceComplexityGatingAdapter } from './complexityGatingAdapter.js';
 
 // Teams Webhook Dispatch
-export type { TeamsWebhookConfig } from './teamsWebhookDispatchAdapter.js';
+export type { TeamsWebhookConfig, INotificationDeliveryRecord } from './teamsWebhookDispatchAdapter.js';
 export { TeamsWebhookDispatchAdapter } from './teamsWebhookDispatchAdapter.js';

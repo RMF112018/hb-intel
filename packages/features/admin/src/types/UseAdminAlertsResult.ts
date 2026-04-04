@@ -12,6 +12,8 @@ export interface UseAdminAlertsResult {
   readonly filteredAlerts: (category: AlertCategory) => readonly IAdminAlert[];
   readonly badge: IAdminAlertBadge;
   readonly acknowledge: (alertId: string) => Promise<void>;
+  /** Resolve an alert, marking it as no longer active. @design P12-09 */
+  readonly resolve: (alertId: string) => Promise<void>;
   readonly refresh: () => Promise<void>;
   readonly isLoading: boolean;
   readonly error: Error | null;

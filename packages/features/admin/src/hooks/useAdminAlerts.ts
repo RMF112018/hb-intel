@@ -34,6 +34,14 @@ export function useAdminAlerts(): UseAdminAlertsResult {
     },
   });
 
+  const resolveMutation = useMutation({
+    mutationFn: (alertId: string) =>
+      api.resolve(alertId, currentUser?.id ?? 'unknown'),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [...ADMIN_ALERTS_QUERY_KEY] });
+    },
+  });
+
   const filteredAlerts = useCallback(
     (category: AlertCategory) => alerts.filter((a) => a.category === category),
     [alerts],
@@ -52,6 +60,13 @@ export function useAdminAlerts(): UseAdminAlertsResult {
     [acknowledgeMutation],
   );
 
+  const resolve = useCallback(
+    async (alertId: string) => {
+      await resolveMutation.mutateAsync(alertId);
+    },
+    [resolveMutation],
+  );
+
   const refresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: [...ADMIN_ALERTS_QUERY_KEY] });
   }, [queryClient]);
@@ -61,6 +76,7 @@ export function useAdminAlerts(): UseAdminAlertsResult {
     filteredAlerts,
     badge,
     acknowledge,
+    resolve,
     refresh,
     isLoading,
     error: error as Error | null,
