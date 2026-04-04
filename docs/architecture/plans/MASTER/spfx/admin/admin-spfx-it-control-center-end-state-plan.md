@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.029  
-**Revision note:** Adds **Phase 12 — Admin intelligence completion and unified observability** gap map (P12-01). Repo-truth observability audit completed: verified 23 fully operational assets, 5 partially operational assets, and 11 current limitations mapped to 12 required closures. Documents non-gaps to preserve, prior-phase dependency status, 6 unresolved implementation issues with recommended directions, and 11-step internal execution breakdown. No code changes — audit and evidence only. Preserves all prior phase content.
+**Version:** 01.000.030  
+**Revision note:** Adds **Phase 12 observability baseline and storage/retention/access model** (P12-02). Defines canonical layer responsibilities (SPFx=read/interact, features-admin=hooks/components, models=contracts, backend=durable owner), 6 observability data categories (alerts, probe snapshots, incidents, errors, correlated timelines, operator actions), Azure Table Storage as canonical persistence (extending Phase 4 pattern, superseding SharePoint list targets), 7 retention tiers (90–365 days by category), permission model (`admin:observability:*`), 10 minimal query APIs for SPFx consumption, and production adapter direction following service-factory mode resolution. Preserves all prior phase content.
 
 ---
 
