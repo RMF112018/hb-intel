@@ -190,6 +190,28 @@ export type {
   ISafetyPreviewPipelineResult,
 } from './safety-preview-service.js';
 
+// Safety post-run validation and recovery (Phase 11 — P11-08)
+export {
+  registerPostRunValidationProvider,
+  getPostRunValidationProvider,
+  clearPostRunValidationProviders,
+  executePostRunValidation,
+  registerRecoveryGuidanceProvider,
+  getRecoveryGuidanceProvider,
+  clearRecoveryGuidanceProviders,
+  generateRecoveryGuidance,
+  assembleSafetyEvidenceSummary,
+} from './safety-post-run-service.js';
+export type {
+  IPostRunValidationProvider,
+  IPostRunValidationInput,
+  IPostRunValidationResult,
+  IRecoveryGuidanceProvider,
+  IRecoveryGuidanceInput,
+  IRecoveryGuidanceResult,
+  ISafetyEvidenceSummaryInput,
+} from './safety-post-run-service.js';
+
 // Safety confirmation service (Phase 11 — P11-07)
 export {
   validateConfirmation,

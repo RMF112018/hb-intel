@@ -6,3 +6,5 @@ export { useActionSafetyPreview, isPreviewRequired, getConfirmationType } from '
 export type { UseActionSafetyPreviewConfig, UseActionSafetyPreviewResult, SafetyPreviewRequest } from './useActionSafetyPreview.js';
 export { useDestructiveActionConfirmation } from './useDestructiveActionConfirmation.js';
 export type { UseDestructiveActionConfirmationConfig, UseDestructiveActionConfirmationResult, ConfirmationRequest, SafetyGateContext } from './useDestructiveActionConfirmation.js';
+export { usePostRunSafetyValidation } from './usePostRunSafetyValidation.js';
+export type { UsePostRunSafetyValidationConfig, UsePostRunSafetyValidationResult, PostRunValidationRequest, RecoveryGuidanceRequest, EvidenceSummaryRequest } from './usePostRunSafetyValidation.js';

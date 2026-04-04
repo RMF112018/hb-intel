@@ -113,6 +113,18 @@ export type {
   SafetyGateContext,
 } from './hooks/index.js';
 
+export {
+  usePostRunSafetyValidation,
+} from './hooks/index.js';
+
+export type {
+  UsePostRunSafetyValidationConfig,
+  UsePostRunSafetyValidationResult,
+  PostRunValidationRequest,
+  RecoveryGuidanceRequest,
+  EvidenceSummaryRequest,
+} from './hooks/index.js';
+
 // Integrations
 export {
   ReferenceBicNextMoveAdapter,

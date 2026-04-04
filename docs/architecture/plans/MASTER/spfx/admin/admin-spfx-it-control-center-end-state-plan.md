@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.025  
-**Revision note:** Adds **Phase 11 destructive-action confirmation and checkpoint execution** (P11-07) — implements safety-confirmation-service with `validateConfirmation` (phrase matching, scope declaration, preview evidence checks per risk tier), `recordConfirmation` (durable evidence + audit), `executeConfirmationFlow` (validate-then-record entry point for route handlers), and checkpoint bridge helpers (`requiresCheckpointExecution`, `requiresDestructiveConfirmation`). Adds `useDestructiveActionConfirmation` React hook in features-admin with `submitConfirmation`, `buildGateContext`, and `resetConfirmation`. 20 new tests all passing. Preserves all prior phase content.
+**Version:** 01.000.026  
+**Revision note:** Adds **Phase 11 post-run validation, recovery guidance, and evidence** (P11-08) — implements safety-post-run-service with post-run validation provider registry and `executePostRunValidation` (domain-specific checks with truthful defaults, evidence capture, audit recording), recovery guidance provider registry and `generateRecoveryGuidance` (default 3-step honest guidance with failure class context, no false automatic-rollback claims), and `assembleSafetyEvidenceSummary` (links all safety artifacts, computes controlsSatisfied/controlsSkipped per profile). Adds `usePostRunSafetyValidation` React hook in features-admin. 12 new tests all passing. Preserves all prior phase content.
 
 ---
 
