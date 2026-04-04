@@ -8,3 +8,5 @@ export { useDestructiveActionConfirmation } from './useDestructiveActionConfirma
 export type { UseDestructiveActionConfirmationConfig, UseDestructiveActionConfirmationResult, ConfirmationRequest, SafetyGateContext } from './useDestructiveActionConfirmation.js';
 export { usePostRunSafetyValidation } from './usePostRunSafetyValidation.js';
 export type { UsePostRunSafetyValidationConfig, UsePostRunSafetyValidationResult, PostRunValidationRequest, RecoveryGuidanceRequest, EvidenceSummaryRequest } from './usePostRunSafetyValidation.js';
+export { useObservabilityErrors, OBSERVABILITY_ERRORS_QUERY_KEY } from './useObservabilityErrors.js';
+export type { UseObservabilityErrorsResult, IErrorLogFilters } from './useObservabilityErrors.js';

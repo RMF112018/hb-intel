@@ -102,9 +102,13 @@ export type {
   UseActionSafetyPreviewConfig,
   UseActionSafetyPreviewResult,
   SafetyPreviewRequest,
+  UseObservabilityErrorsResult,
+  IErrorLogFilters,
 } from './hooks/index.js';
 
 export {
+  useObservabilityErrors,
+  OBSERVABILITY_ERRORS_QUERY_KEY,
   useDestructiveActionConfirmation,
 } from './hooks/index.js';
 

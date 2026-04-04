@@ -121,11 +121,9 @@ export const LANES: readonly LaneDefinition[] = [
     path: '/errors',
     label: 'Errors',
     order: 9,
-    status: 'scaffold',
+    status: 'active',
     permission: ADMIN_PERMISSION,
     hasSearchParams: false,
-    deliversIn: 'SF17-T05',
-    scaffoldMessage: 'Error logging and audit trail will be available here.',
   },
   {
     id: 'white-glove-connections',
