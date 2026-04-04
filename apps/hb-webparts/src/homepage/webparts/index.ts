@@ -10,6 +10,14 @@ export type {
   PeopleCultureEventType,
 } from './communicationsContracts.js';
 export type {
+  DiscoveryCategory,
+  DiscoveryQuickPath,
+  DiscoveryResourceItem,
+  DiscoveryResourceType,
+  DiscoveryStrategy,
+  SmartSearchWayfindingConfig,
+} from './discoveryContracts.js';
+export type {
   OperationalFreshness,
   OperationalSignalSource,
   OperationalStatusSignal,

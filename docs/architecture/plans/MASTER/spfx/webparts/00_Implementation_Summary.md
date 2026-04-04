@@ -343,3 +343,28 @@ Prompt 07 deliverables are now locked for Prompt 08–10 implementation:
 
 - Project/portfolio spotlight and safety/field excellence contracts are implemented with shared hierarchy/status/freshness normalization seams.
 - Prompt-08 should consume Prompt-07 operational-awareness outputs as fixed inputs and focus on smart search, wayfinding, and discovery surfaces.
+
+## Prompt-08 Closure Artifacts
+
+Prompt 08 deliverables are now locked for Prompt 09–10 implementation:
+
+- `08A_Smart_Search_Wayfinding_Strategy_and_Contract.md`
+- `08B_Discovery_Config_and_Category_Model.md`
+- `08C_Discovery_Test_Usage_and_Handoff.md`
+- `apps/hb-webparts/src/webparts/smartSearchWayfinding/*`
+- shared discovery seams in `src/homepage/helpers/discoveryConfig.ts` and `src/homepage/shared/HomepageDiscoveryCluster.tsx`
+
+## Resolved Decisions Register (Prompt 08)
+
+| Decision ID | Decision                                                                                                 | Status |
+| ----------- | -------------------------------------------------------------------------------------------------------- | ------ |
+| D8-01       | Discovery release-1 strategy is curated-first with local search filtering over authored resources        | Closed |
+| D8-02       | Promoted destinations and quick paths are required first-class discovery surfaces                        | Closed |
+| D8-03       | Malformed, partial, or no-match discovery states always render explicit premium empty/no-result guidance | Closed |
+| D8-04       | Discovery webpart remains in lightweight standalone homepage lane with homepage-safe imports only        | Closed |
+| D8-05       | `hb-webparts` solution + feature versions are patch-bumped to `001.000.006`                              | Closed |
+
+## Prompt-08 Handoff Note
+
+- Smart search/wayfinding is implemented with shared curated discovery normalization seams and explicit future enhancement strategy metadata.
+- Prompt-09 should consume Prompt-08 discovery outputs as fixed inputs and focus on authoring/config governance plus page composition controls.

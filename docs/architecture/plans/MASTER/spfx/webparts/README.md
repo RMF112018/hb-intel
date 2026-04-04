@@ -67,6 +67,9 @@ Run the prompts in order.
 - `07B_Safety_Field_Excellence_Config_and_Indicator_Contract.md`
 - `07C_Operational_Awareness_Test_Usage_and_Handoff.md`
 - `08_Smart_Search_Wayfinding_and_Discovery.md`
+- `08A_Smart_Search_Wayfinding_Strategy_and_Contract.md`
+- `08B_Discovery_Config_and_Category_Model.md`
+- `08C_Discovery_Test_Usage_and_Handoff.md`
 - `09_Authoring_Configuration_Governance_and_Page_Composition.md`
 - `10_Verification_Packaging_Release_Readiness_and_Handoff.md`
 - `11_Risk_Exposure.md`
@@ -157,6 +160,17 @@ Prompt 07 closure outputs are complete and are required inputs for Prompt 08+:
 - `07C_Operational_Awareness_Test_Usage_and_Handoff.md` — Prompt-07 verification and downstream usage guidance.
 
 Prompt-07 applies manifest patch bump to `001.000.005` in `hb-webparts` solution + feature versions.
+
+## Prompt-08 Outputs (Locked)
+
+Prompt 08 closure outputs are complete and are required inputs for Prompt 09+:
+
+- `apps/hb-webparts/src/webparts/smartSearchWayfinding/*` — smart search/wayfinding discovery webpart contract + manifest baseline.
+- `08A_Smart_Search_Wayfinding_Strategy_and_Contract.md` — curated-first discovery strategy and contract boundaries.
+- `08B_Discovery_Config_and_Category_Model.md` — category/resource/promoted destination config model and ownership.
+- `08C_Discovery_Test_Usage_and_Handoff.md` — Prompt-08 verification and downstream usage guidance.
+
+Prompt-08 applies manifest patch bump to `001.000.006` in `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 

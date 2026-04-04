@@ -1,5 +1,6 @@
 export { HomepageEditorialCard } from './HomepageEditorialCard.js';
 export { HomepageCuratedContentCluster } from './HomepageCuratedContentCluster.js';
+export { HomepageDiscoveryCluster } from './HomepageDiscoveryCluster.js';
 export { HomepageEmptyState } from './HomepageEmptyState.js';
 export { HomepageLoadingState } from './HomepageLoadingState.js';
 export { HomepageOperationalAwarenessCluster } from './HomepageOperationalAwarenessCluster.js';

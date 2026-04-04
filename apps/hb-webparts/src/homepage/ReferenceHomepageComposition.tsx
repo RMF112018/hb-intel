@@ -10,6 +10,7 @@ import { LeadershipMessage } from '../webparts/leadershipMessage/LeadershipMessa
 import { PeopleCulture } from '../webparts/peopleCulture/PeopleCulture.js';
 import { ProjectPortfolioSpotlight } from '../webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from '../webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
+import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
 
 export function ReferenceHomepageComposition(): React.JSX.Element {
   const config = normalizeHomepageConfig({ maxItems: 2 });
@@ -216,6 +217,67 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
                 eventType: 'reminder',
                 indicator: { label: 'Action Required', variant: 'warning' },
                 order: 2,
+              },
+            ],
+          }}
+        />
+      </HomepageSectionShell>
+
+      <HomepageSectionShell title="Discovery Zone">
+        <SmartSearchWayfinding
+          activeAudience="field"
+          config={{
+            strategy: { mode: 'curatedFirst', futureSearchEnhancement: 'planned' },
+            quickPaths: [
+              {
+                id: 'open-timesheet',
+                title: 'Open Timesheet',
+                href: '/timesheet',
+                description: 'Most-used weekly action',
+                order: 1,
+              },
+              {
+                id: 'field-safety',
+                title: 'Safety Center',
+                href: '/safety',
+                description: 'Field notices and protocols',
+                order: 2,
+              },
+            ],
+            categories: [
+              { id: 'systems', title: 'Systems', order: 1 },
+              { id: 'forms', title: 'Forms and Policies', order: 2 },
+              { id: 'teams', title: 'Team Spaces', order: 3 },
+            ],
+            resources: [
+              {
+                id: 'resource-procore',
+                title: 'Procore Project Hub',
+                href: '/systems/procore',
+                type: 'system',
+                categoryId: 'systems',
+                description: 'Project coordination and field updates',
+                promoted: true,
+                order: 1,
+                keywords: ['project', 'field', 'coordination'],
+              },
+              {
+                id: 'resource-change-order',
+                title: 'Change Order Form',
+                href: '/forms/change-order',
+                type: 'form',
+                categoryId: 'forms',
+                description: 'Submit approved change requests',
+                order: 2,
+              },
+              {
+                id: 'resource-ops-team',
+                title: 'Operations Team Space',
+                href: '/teams/operations',
+                type: 'teamSpace',
+                categoryId: 'teams',
+                description: 'Weekly priorities and handoff notes',
+                order: 3,
               },
             ],
           }}
