@@ -27,6 +27,9 @@ export type {
   IConfigResolutionService,
   IResolvableCatalogEntry,
   IConfigSnapshotStore,
+  IObservabilityAlertStore,
+  IObservabilityProbeSnapshotStore,
+  IObservabilityErrorStore,
 } from './types.js';
 
 // Durable implementations (Phase 4)
@@ -226,6 +229,33 @@ export type {
   IConfirmationRecordResult,
   IConfirmationFlowResult,
 } from './safety-confirmation-service.js';
+
+// Observability alert store (Phase 12 — P12-04)
+export {
+  DurableObservabilityAlertStore,
+  MockObservabilityAlertStore,
+  serializeAlertRecord,
+  deserializeAlertRecord,
+  OBSERVABILITY_ALERTS_TABLE,
+} from './observability-alert-store.js';
+
+// Observability probe snapshot store (Phase 12 — P12-04)
+export {
+  DurableObservabilityProbeSnapshotStore,
+  MockObservabilityProbeSnapshotStore,
+  serializeProbeSnapshot,
+  deserializeProbeSnapshot,
+  OBSERVABILITY_PROBE_SNAPSHOTS_TABLE,
+} from './observability-probe-store.js';
+
+// Observability error event store (Phase 12 — P12-04)
+export {
+  DurableObservabilityErrorStore,
+  MockObservabilityErrorStore,
+  serializeErrorRecord,
+  deserializeErrorRecord,
+  OBSERVABILITY_ERRORS_TABLE,
+} from './observability-error-store.js';
 
 // Stub implementations (mock/test mode and services not yet implemented)
 export {

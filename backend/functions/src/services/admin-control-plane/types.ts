@@ -37,6 +37,18 @@ import type {
   IAppBindingVerificationResult,
   IAppBindingRepairRequest,
   IAppBindingRepairResult,
+  IObservabilityAlertRecord,
+  IObservabilityAlertIngestionPayload,
+  IObservabilityAlertQuery,
+  IObservabilityAlertSummary,
+  IObservabilityProbeSnapshotRecord,
+  IObservabilityProbeSubmissionPayload,
+  IObservabilityProbeSnapshotQuery,
+  IObservabilityProbeHealthSummary,
+  IObservabilityErrorRecord,
+  IObservabilityErrorIngestionPayload,
+  IObservabilityErrorQuery,
+  IObservabilityPagedResponse,
 } from '@hbc/models/admin-control-plane';
 
 // Re-export IWhiteGloveRunService from the white-glove module
@@ -246,6 +258,81 @@ export interface IAdminActorResolverInput {
   readonly upn: string;
   readonly oid: string;
   readonly displayName: string;
+}
+
+// ─── Observability Alert Store (Phase 12) ──────────────────────────────────────
+
+/**
+ * Durable persistence for admin observability alerts.
+ *
+ * Alerts are ingested from monitor evaluations, updated on operator actions
+ * (acknowledge, resolve), and queried by SPFx operator-console hooks.
+ *
+ * Implemented in P12-04. Backed by Azure Table Storage.
+ */
+export interface IObservabilityAlertStore {
+  /** Ingest alerts from a monitor evaluation cycle. Deduplicates by dedupeKey. */
+  ingestAlerts(payload: IObservabilityAlertIngestionPayload): Promise<readonly IObservabilityAlertRecord[]>;
+
+  /** Get a single alert by ID. Returns null if not found. */
+  getAlert(alertId: string): Promise<IObservabilityAlertRecord | null>;
+
+  /** List alerts matching the given query filters. */
+  listAlerts(query: IObservabilityAlertQuery): Promise<IObservabilityPagedResponse<IObservabilityAlertRecord>>;
+
+  /** Acknowledge an active alert. Returns the updated record. */
+  acknowledgeAlert(alertId: string, actor: IAdminActorContext): Promise<IObservabilityAlertRecord>;
+
+  /** Resolve an alert. Returns the updated record. */
+  resolveAlert(alertId: string, actor: IAdminActorContext): Promise<IObservabilityAlertRecord>;
+
+  /** Get aggregated alert summary counts. */
+  getAlertSummary(): Promise<IObservabilityAlertSummary>;
+}
+
+// ─── Observability Probe Snapshot Store (Phase 12) ─────────────────────────────
+
+/**
+ * Durable persistence for infrastructure probe snapshots.
+ *
+ * Probe snapshots are append-only records captured from scheduled or manual
+ * probe executions. They are never updated after creation.
+ *
+ * Implemented in P12-04. Backed by Azure Table Storage.
+ */
+export interface IObservabilityProbeSnapshotStore {
+  /** Persist a probe snapshot from a client-triggered execution. */
+  saveSnapshot(payload: IObservabilityProbeSubmissionPayload): Promise<IObservabilityProbeSnapshotRecord>;
+
+  /** Get the most recent probe snapshot. Returns null if none exist. */
+  getLatestSnapshot(): Promise<IObservabilityProbeSnapshotRecord | null>;
+
+  /** List probe snapshots matching the given query filters. */
+  listSnapshots(query: IObservabilityProbeSnapshotQuery): Promise<IObservabilityPagedResponse<IObservabilityProbeSnapshotRecord>>;
+
+  /** Get aggregated probe health summary from the latest snapshot. */
+  getHealthSummary(): Promise<IObservabilityProbeHealthSummary>;
+}
+
+// ─── Observability Error Store (Phase 12) ──────────────────────────────────────
+
+/**
+ * Durable persistence for observability error events.
+ *
+ * Error events are append-only records ingested from admin domain operations.
+ * They are never updated after creation but may be linked to incidents.
+ *
+ * Implemented in P12-04. Backed by Azure Table Storage.
+ */
+export interface IObservabilityErrorStore {
+  /** Ingest error events. */
+  ingestErrors(payload: IObservabilityErrorIngestionPayload): Promise<readonly IObservabilityErrorRecord[]>;
+
+  /** Get a single error event by ID. Returns null if not found. */
+  getError(errorId: string): Promise<IObservabilityErrorRecord | null>;
+
+  /** List error events matching the given query filters. */
+  listErrors(query: IObservabilityErrorQuery): Promise<IObservabilityPagedResponse<IObservabilityErrorRecord>>;
 }
 
 // ─── App Binding Service ──────────────────────────────────────────────────────
