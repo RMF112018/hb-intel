@@ -6,4 +6,5 @@ export { HomepageRailShell } from './HomepageRailShell.js';
 export { HomepageSectionShell } from './HomepageSectionShell.js';
 export { HomepageSpotlightCard } from './HomepageSpotlightCard.js';
 export { HomepageTopBandPair } from './HomepageTopBandPair.js';
+export { HomepageUtilityDenseGroup } from './HomepageUtilityDenseGroup.js';
 export { HomepageUtilityTile } from './HomepageUtilityTile.js';

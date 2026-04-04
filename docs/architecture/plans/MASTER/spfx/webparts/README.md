@@ -55,6 +55,9 @@ Run the prompts in order.
 - `04B_Hero_Banner_Authoring_and_Config_Contract.md`
 - `04C_Top_Band_Test_Usage_and_Handoff.md`
 - `05_Priority_Actions_Rail_and_Tool_Launcher_Work_Hub.md`
+- `05A_Priority_Actions_Rail_Contract_and_State_Model.md`
+- `05B_Tool_Launcher_Work_Hub_Config_and_Grouping_Contract.md`
+- `05C_Utility_Zone_Test_Usage_and_Handoff.md`
 - `06_Company_Pulse_Leadership_Message_and_People_Culture.md`
 - `07_Project_Portfolio_Spotlight_and_Safety_Field_Excellence.md`
 - `08_Smart_Search_Wayfinding_and_Discovery.md`
@@ -111,6 +114,18 @@ Prompt 04 closure outputs are complete and are required inputs for Prompt 05+:
 - `04C_Top_Band_Test_Usage_and_Handoff.md` — Prompt-04 verification and downstream usage guidance.
 
 Prompt-04 applies the first post-scaffold manifest patch bump to `001.000.002` in `hb-webparts` solution + feature versions.
+
+## Prompt-05 Outputs (Locked)
+
+Prompt 05 closure outputs are complete and are required inputs for Prompt 06+:
+
+- `apps/hb-webparts/src/webparts/priorityActionsRail/*` — utility priority-actions webpart contract + manifest baseline.
+- `apps/hb-webparts/src/webparts/toolLauncherWorkHub/*` — grouped launcher/work-hub webpart contract + manifest baseline.
+- `05A_Priority_Actions_Rail_Contract_and_State_Model.md` — priority actions state and fallback behavior contract.
+- `05B_Tool_Launcher_Work_Hub_Config_and_Grouping_Contract.md` — grouped launcher config/normalization contract.
+- `05C_Utility_Zone_Test_Usage_and_Handoff.md` — Prompt-05 verification and downstream usage guidance.
+
+Prompt-05 applies manifest patch bump to `001.000.003` in `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 

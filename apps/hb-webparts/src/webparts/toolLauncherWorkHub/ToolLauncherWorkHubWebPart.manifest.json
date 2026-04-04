@@ -1,0 +1,63 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "cb7060f5-b852-4600-b912-a5f6f7221ce2",
+  "alias": "ToolLauncherWorkHubWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Tool Launcher / Work Hub" },
+      "description": { "default": "Grouped system launcher hub with role-aware visibility options." },
+      "officeFabricIconFontName": "Tiles",
+      "properties": {
+        "heading": "Tool Launcher / Work Hub",
+        "maxGroups": 4,
+        "maxItemsPerGroup": 6,
+        "groups": [
+          {
+            "id": "field-systems",
+            "title": "Field Systems",
+            "order": 1,
+            "items": [
+              {
+                "id": "safety-center",
+                "title": "Safety Center",
+                "href": "/sites/hb-central/safety",
+                "iconKey": "safety",
+                "order": 1
+              },
+              {
+                "id": "daily-reports",
+                "title": "Daily Reports",
+                "href": "/sites/hb-central/reports",
+                "iconKey": "field",
+                "order": 2,
+                "badge": { "label": "2 new", "variant": "info" }
+              }
+            ]
+          },
+          {
+            "id": "admin-systems",
+            "title": "Admin Systems",
+            "order": 2,
+            "items": [
+              {
+                "id": "finance-hub",
+                "title": "Finance Hub",
+                "href": "/sites/hb-central/finance",
+                "iconKey": "finance",
+                "order": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

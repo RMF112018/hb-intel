@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "b3f07190-79cf-437d-a1d6-ecbf3f77e616",
+  "alias": "PriorityActionsRailWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Priority Actions Rail" },
+      "description": { "default": "Role-aware urgent and frequently used action links for HB Central." },
+      "officeFabricIconFontName": "TaskList",
+      "properties": {
+        "heading": "Priority Actions",
+        "maxItems": 8,
+        "groups": [
+          { "id": "today", "title": "Today", "order": 1 },
+          { "id": "approvals", "title": "Approvals", "order": 2 }
+        ],
+        "actions": [
+          {
+            "id": "submit-daily-log",
+            "title": "Submit Daily Log",
+            "href": "/sites/hb-central/daily-log",
+            "group": "today",
+            "order": 1,
+            "badge": { "label": "Due", "variant": "warning" }
+          },
+          {
+            "id": "pending-approvals",
+            "title": "Pending Approvals",
+            "href": "/sites/hb-central/approvals",
+            "group": "approvals",
+            "order": 1,
+            "badge": { "label": "Needs attention", "variant": "critical" }
+          }
+        ]
+      }
+    }
+  ]
+}

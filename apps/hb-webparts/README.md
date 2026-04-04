@@ -12,6 +12,8 @@ Prompt-03 scaffold app for the HB Central homepage webpart system.
 - `src/webparts/hbWebparts/` package-level scaffold manifest.
 - `src/webparts/personalizedWelcomeHeader/` Prompt-04 welcome-header webpart contract.
 - `src/webparts/hbHeroBanner/` Prompt-04 hero-banner webpart contract.
+- `src/webparts/priorityActionsRail/` Prompt-05 utility priority actions webpart contract.
+- `src/webparts/toolLauncherWorkHub/` Prompt-05 grouped launcher/work-hub webpart contract.
 
 ## Scaffolding Rules
 
@@ -19,6 +21,7 @@ Prompt-03 scaffold app for the HB Central homepage webpart system.
 - Do not import broad `@hbc/ui-kit` in shared homepage scaffolding.
 - Keep property/config seams and data normalization helpers shared and deterministic.
 - Tests for greeting, empty/loading, semantic rendering, and top-band authoring states are required.
+- Utility-zone prompts should reuse shared normalization/grouping seams for visibility, ordering, and malformed-config fallbacks.
 
 ## Scripts
 

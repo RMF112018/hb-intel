@@ -264,3 +264,29 @@ Prompt 04 deliverables are now locked for Prompt 05–10 implementation:
 
 - Top-band welcome + hero webpart contracts are implemented and documented with shared composition guidance.
 - Prompt-05 should consume top-band outputs as fixed inputs and focus on priority actions/work-hub behavior.
+
+## Prompt-05 Closure Artifacts
+
+Prompt 05 deliverables are now locked for Prompt 06–10 implementation:
+
+- `05A_Priority_Actions_Rail_Contract_and_State_Model.md`
+- `05B_Tool_Launcher_Work_Hub_Config_and_Grouping_Contract.md`
+- `05C_Utility_Zone_Test_Usage_and_Handoff.md`
+- `apps/hb-webparts/src/webparts/priorityActionsRail/*`
+- `apps/hb-webparts/src/webparts/toolLauncherWorkHub/*`
+- shared utility seams in `src/homepage/helpers/utilityConfig.ts` and `src/homepage/shared/HomepageUtilityDenseGroup.tsx`
+
+## Resolved Decisions Register (Prompt 05)
+
+| Decision ID | Decision                                                                                                           | Status |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| D5-01       | Priority actions and launcher items are normalized, deduplicated, audience-filtered, and deterministically ordered | Closed |
+| D5-02       | Utility zone grouping contract is shared between rail/work-hub webparts instead of feature-local forks             | Closed |
+| D5-03       | Malformed or empty utility configuration always falls back to explicit empty-state guidance                        | Closed |
+| D5-04       | Utility surfaces remain acceleration tools (not app shell/global-nav clones) and keep homepage-safe imports only   | Closed |
+| D5-05       | `hb-webparts` solution + feature versions are patch-bumped to `001.000.003`                                        | Closed |
+
+## Prompt-05 Handoff Note
+
+- Utility/navigation zone contracts are implemented with reusable grouping/visibility seams and shared dense utility primitives.
+- Prompt-06 should consume Prompt-05 utility outputs as fixed inputs and focus on company pulse, leadership message, and people/culture surfaces.

@@ -5,14 +5,14 @@ import {
   HomepageEditorialCard,
   HomepageLoadingState,
   HomepagePersonRecognitionCard,
-  HomepageRailShell,
   HomepageSectionShell,
   HomepageSpotlightCard,
   HomepageTopBandPair,
-  HomepageUtilityTile,
 } from './shared/index.js';
 import { PersonalizedWelcomeHeader } from '../webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from '../webparts/hbHeroBanner/HbHeroBanner.js';
+import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityActionsRail.js';
+import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
 
 const rawEditorialItems = [
   {
@@ -61,21 +61,66 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
       />
 
       <HomepageSectionShell title="Company Pulse">
-        <HomepageRailShell label="editorial-zone">
+        <div aria-label="editorial-zone">
           {editorialItems.map((item) => (
             <HomepageEditorialCard item={item} key={item.id} />
           ))}
-        </HomepageRailShell>
+        </div>
       </HomepageSectionShell>
 
-      <HomepageSectionShell title="Quick Actions">
-        <HomepageRailShell label="utility-zone">
-          <HomepageUtilityTile
-            title="Tool Launcher"
-            description="Open frequently used workflows without leaving homepage context."
-            cta={{ label: 'Launch', href: '/tools' }}
-          />
-        </HomepageRailShell>
+      <HomepageSectionShell title="Quick-use / Work Zone">
+        <PriorityActionsRail
+          activeAudience="field"
+          config={{
+            heading: 'Priority Actions',
+            groups: [
+              { id: 'today', title: 'Today', order: 1 },
+              { id: 'approvals', title: 'Approvals', order: 2 },
+            ],
+            actions: [
+              {
+                id: 'complete-daily-log',
+                title: 'Complete Daily Log',
+                href: '/daily-log',
+                group: 'today',
+                order: 1,
+                audiences: ['field'],
+                badge: { label: 'Due by 4 PM', variant: 'warning' },
+              },
+              {
+                id: 'review-submittals',
+                title: 'Review Submittals',
+                href: '/submittals',
+                group: 'approvals',
+                order: 2,
+                audiences: ['field', 'leadership'],
+                badge: { label: 'Needs attention', variant: 'critical' },
+              },
+            ],
+          }}
+        />
+        <ToolLauncherWorkHub
+          activeAudience="field"
+          config={{
+            groups: [
+              {
+                id: 'field-systems',
+                title: 'Field Systems',
+                order: 1,
+                items: [
+                  { id: 'safety-center', title: 'Safety Center', href: '/safety', iconKey: 'safety', order: 1 },
+                  { id: 'daily-reports', title: 'Daily Reports', href: '/reports', iconKey: 'field', order: 2 },
+                ],
+              },
+              {
+                id: 'admin-systems',
+                title: 'Admin Systems',
+                order: 2,
+                items: [{ id: 'finance-hub', title: 'Finance Hub', href: '/finance', iconKey: 'finance', order: 1 }],
+              },
+            ],
+          }}
+        />
       </HomepageSectionShell>
 
       <HomepageSectionShell title="Operational Spotlight">
