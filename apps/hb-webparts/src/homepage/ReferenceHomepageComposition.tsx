@@ -8,6 +8,8 @@ import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLaunche
 import { CompanyPulse } from '../webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from '../webparts/leadershipMessage/LeadershipMessage.js';
 import { PeopleCulture } from '../webparts/peopleCulture/PeopleCulture.js';
+import { ProjectPortfolioSpotlight } from '../webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
+import { SafetyFieldExcellence } from '../webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 
 export function ReferenceHomepageComposition(): React.JSX.Element {
   const config = normalizeHomepageConfig({ maxItems: 2 });
@@ -160,6 +162,59 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
                 personName: 'Riley Brooks',
                 eventType: 'anniversary',
                 highlight: 'Celebrating 10 years with HB.',
+                order: 2,
+              },
+            ],
+          }}
+        />
+        <ProjectPortfolioSpotlight
+          activeAudience="field"
+          config={{
+            items: [
+              {
+                id: 'portfolio-feature',
+                title: 'Downtown Mixed-Use Tower',
+                summary: 'Curtain wall and interior sequence are synchronized for turnover readiness.',
+                featured: true,
+                strategicEmphasis: true,
+                status: { label: 'On Track', variant: 'success' },
+                freshness: { source: 'live', updatedAt: '2026-04-04T12:00:00.000Z' },
+                milestones: [
+                  { id: 'm1', title: 'MEP closeout', completed: true },
+                  { id: 'm2', title: 'Punch list reduction', completed: false },
+                ],
+                cta: { label: 'View project spotlight', href: '/projects' },
+              },
+              {
+                id: 'portfolio-secondary',
+                title: 'Coastal School Renovation',
+                summary: 'Phasing adjustments keep classroom handover dates intact.',
+                status: { label: 'Watchlist', variant: 'warning' },
+                order: 2,
+              },
+            ],
+          }}
+        />
+        <SafetyFieldExcellence
+          activeAudience="field"
+          config={{
+            items: [
+              {
+                id: 'safety-feature',
+                title: 'Field Excellence Recognition',
+                summary: 'North district crews completed all safety observations before Friday close.',
+                eventType: 'recognition',
+                featured: true,
+                indicator: { label: 'Audit Complete', variant: 'success' },
+                freshness: { source: 'live', updatedAt: '2026-04-04T13:00:00.000Z' },
+                cta: { label: 'Open safety hub', href: '/safety' },
+              },
+              {
+                id: 'safety-secondary',
+                title: 'Hydration Protocol Reminder',
+                summary: 'Shift planning now requires heat-index check before mobilization.',
+                eventType: 'reminder',
+                indicator: { label: 'Action Required', variant: 'warning' },
                 order: 2,
               },
             ],

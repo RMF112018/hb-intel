@@ -17,6 +17,8 @@ Prompt-03 scaffold app for the HB Central homepage webpart system.
 - `src/webparts/companyPulse/` Prompt-06 curated company pulse webpart contract.
 - `src/webparts/leadershipMessage/` Prompt-06 leadership message webpart contract.
 - `src/webparts/peopleCulture/` Prompt-06 people/culture webpart contract.
+- `src/webparts/projectPortfolioSpotlight/` Prompt-07 project/portfolio spotlight webpart contract.
+- `src/webparts/safetyFieldExcellence/` Prompt-07 safety/field excellence webpart contract.
 
 ## Scaffolding Rules
 
@@ -26,6 +28,7 @@ Prompt-03 scaffold app for the HB Central homepage webpart system.
 - Tests for greeting, empty/loading, semantic rendering, and top-band authoring states are required.
 - Utility-zone prompts should reuse shared normalization/grouping seams for visibility, ordering, and malformed-config fallbacks.
 - Awareness-zone prompts should reuse curated hierarchy/media normalization seams and preserve featured-vs-secondary editorial weighting.
+- Operational-awareness prompts should reuse freshness/status normalization seams and preserve featured-vs-secondary hierarchy with stale/no-data fallbacks.
 
 ## Scripts
 

@@ -63,6 +63,9 @@ Run the prompts in order.
 - `06B_Leadership_Message_Authoring_and_Rotation_Contract.md`
 - `06C_People_Culture_Config_Test_and_Handoff.md`
 - `07_Project_Portfolio_Spotlight_and_Safety_Field_Excellence.md`
+- `07A_Project_Portfolio_Spotlight_Contract_and_Status_Model.md`
+- `07B_Safety_Field_Excellence_Config_and_Indicator_Contract.md`
+- `07C_Operational_Awareness_Test_Usage_and_Handoff.md`
 - `08_Smart_Search_Wayfinding_and_Discovery.md`
 - `09_Authoring_Configuration_Governance_and_Page_Composition.md`
 - `10_Verification_Packaging_Release_Readiness_and_Handoff.md`
@@ -142,6 +145,18 @@ Prompt 06 closure outputs are complete and are required inputs for Prompt 07+:
 - `06C_People_Culture_Config_Test_and_Handoff.md` — people/culture config guidance and verification handoff.
 
 Prompt-06 applies manifest patch bump to `001.000.004` in `hb-webparts` solution + feature versions.
+
+## Prompt-07 Outputs (Locked)
+
+Prompt 07 closure outputs are complete and are required inputs for Prompt 08+:
+
+- `apps/hb-webparts/src/webparts/projectPortfolioSpotlight/*` — project/portfolio spotlight webpart contract + manifest baseline.
+- `apps/hb-webparts/src/webparts/safetyFieldExcellence/*` — safety/field excellence webpart contract + manifest baseline.
+- `07A_Project_Portfolio_Spotlight_Contract_and_Status_Model.md` — project spotlight hierarchy/status/freshness contract.
+- `07B_Safety_Field_Excellence_Config_and_Indicator_Contract.md` — safety/field configuration and indicator semantics contract.
+- `07C_Operational_Awareness_Test_Usage_and_Handoff.md` — Prompt-07 verification and downstream usage guidance.
+
+Prompt-07 applies manifest patch bump to `001.000.005` in `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 

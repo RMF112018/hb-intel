@@ -10,6 +10,18 @@ export type {
   PeopleCultureEventType,
 } from './communicationsContracts.js';
 export type {
+  OperationalFreshness,
+  OperationalSignalSource,
+  OperationalStatusSignal,
+  OperationalStatusVariant,
+  ProjectMilestone,
+  ProjectPortfolioSpotlightConfig,
+  ProjectPortfolioSpotlightItem,
+  SafetyFieldEventType,
+  SafetyFieldExcellenceConfig,
+  SafetyFieldExcellenceItem,
+} from './operationalAwarenessContracts.js';
+export type {
   PriorityActionGroup,
   PriorityActionItem,
   PriorityActionsRailConfig,
