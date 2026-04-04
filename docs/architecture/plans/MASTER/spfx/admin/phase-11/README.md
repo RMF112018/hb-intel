@@ -21,6 +21,22 @@ It is designed to be executed against the live repo in the order provided.
 11. `Prompt-09-First-Adopter-Integration-and-Route-Reconciliation.md`
 12. `Prompt-10-Tests-Docs-and-Phase-11-Exit-Reconciliation.md`
 
+## Deliverables produced
+
+| Prompt | Deliverable | Status |
+|--------|-------------|--------|
+| P11-01 | `phase-11-repo-truth-and-dependency-audit.md` | Complete |
+| P11-02 | `phase-11-safety-baseline.md` | Complete |
+| P11-02 | `phase-11-risk-tier-and-action-classification.md` | Complete |
+| P11-03 | `phase-11-preview-dry-run-and-confirmation-model.md` | Pending |
+| P11-04 | Backend safety policy and enforcement rails | Pending |
+| P11-05 | Preview/dry-run/impact-summary pipeline | Pending |
+| P11-06 | Operator safety UX primitives | Pending |
+| P11-07 | Destructive-action confirmation and checkpoint execution | Pending |
+| P11-08 | Post-run validation, recovery guidance, and evidence | Pending |
+| P11-09 | First-adopter integration and route reconciliation | Pending |
+| P11-10 | `phase-11-exit-reconciliation.md` | Pending |
+
 ## Intended execution order
 
 Run the prompts in numeric order.

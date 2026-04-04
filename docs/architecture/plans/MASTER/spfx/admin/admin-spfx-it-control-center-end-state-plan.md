@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.019  
-**Revision note:** Adds **Phase 11 repo-truth and dependency audit** (P11-01) — confirmed implementation maturity across operator console, features-admin, ui-kit, models, backend control plane, and audit/evidence; identified 5 dependency gaps (no per-action safety profile type, no centralized backend safety enforcement, no safety-specific UI primitives, no safety control catalog enum, config governance code-defined first); established natural first-adopter candidates (ProvisioningOversightPage, EntraLanePage) and recommended package placement for all safety-model responsibilities. Preserves all prior phase content.
+**Version:** 01.000.020  
+**Revision note:** Adds **Phase 11 safety baseline and risk-tier taxonomy** (P11-02) — defines canonical safety doctrine (frontend vs backend ownership, backend enforcement mandate, safety control pipeline), five-tier risk model aligned to existing `AdminRiskLevel` enum, per-tier safety control matrix, action classification across all 7 admin domains (provisioning, setup/install, app binding, hybrid identity, white-glove, standards/config, SharePoint control), and safety profile contract shape. Updates Phase 11 README with deliverable tracking. Preserves all prior phase content.
 
 ---
 
