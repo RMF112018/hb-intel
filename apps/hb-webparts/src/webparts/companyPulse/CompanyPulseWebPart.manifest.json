@@ -1,0 +1,42 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "0b53f651-fd92-4f7f-a9da-f7797017f5eb",
+  "alias": "CompanyPulseWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Company Pulse" },
+      "description": { "default": "Curated internal updates with featured and secondary editorial hierarchy." },
+      "officeFabricIconFontName": "News",
+      "properties": {
+        "heading": "Company Pulse",
+        "maxSecondaryItems": 3,
+        "items": [
+          {
+            "id": "pulse-feature",
+            "title": "Q2 Milestone Achieved",
+            "summary": "Operations and field teams completed a major safety and quality milestone.",
+            "category": "milestone",
+            "featured": true,
+            "order": 1,
+            "cta": { "label": "Read highlights", "href": "/sites/hb-central/pulse" }
+          },
+          {
+            "id": "pulse-safety",
+            "title": "Safety Highlight",
+            "summary": "Project crews completed all required toolbox talks this week.",
+            "category": "safety",
+            "order": 2
+          }
+        ]
+      }
+    }
+  ]
+}

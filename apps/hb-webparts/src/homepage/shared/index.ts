@@ -1,4 +1,5 @@
 export { HomepageEditorialCard } from './HomepageEditorialCard.js';
+export { HomepageCuratedContentCluster } from './HomepageCuratedContentCluster.js';
 export { HomepageEmptyState } from './HomepageEmptyState.js';
 export { HomepageLoadingState } from './HomepageLoadingState.js';
 export { HomepagePersonRecognitionCard } from './HomepagePersonRecognitionCard.js';

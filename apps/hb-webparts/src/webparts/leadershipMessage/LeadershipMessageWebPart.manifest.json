@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "e8fa8a84-a48a-41d2-85a6-b7c7df70aeca",
+  "alias": "LeadershipMessageWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Leadership Message" },
+      "description": { "default": "Concise executive messaging with optional media and archived entries." },
+      "officeFabricIconFontName": "Comment",
+      "properties": {
+        "heading": "Leadership Message",
+        "maxArchivedEntries": 2,
+        "entries": [
+          {
+            "id": "leadership-feature",
+            "title": "Building With Discipline",
+            "message": "Our focus this month is execution quality and proactive field communication.",
+            "leaderName": "Alex Carter",
+            "leaderRole": "Chief Operating Officer",
+            "featured": true,
+            "order": 1,
+            "cta": { "label": "Read full note", "href": "/sites/hb-central/leadership" }
+          },
+          {
+            "id": "leadership-archive-1",
+            "title": "April Field Priorities",
+            "message": "Stay aligned on schedule discipline and safety-first decisions.",
+            "leaderName": "Alex Carter",
+            "order": 2
+          }
+        ]
+      }
+    }
+  ]
+}

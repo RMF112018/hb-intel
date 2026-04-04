@@ -1,0 +1,42 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4",
+  "alias": "PeopleCultureWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "People and Culture" },
+      "description": { "default": "Curated people moments including welcomes, anniversaries, promotions, and recognition." },
+      "officeFabricIconFontName": "People",
+      "properties": {
+        "heading": "People and Culture",
+        "maxSecondaryEntries": 4,
+        "entries": [
+          {
+            "id": "culture-feature",
+            "personName": "Jordan Lee",
+            "eventType": "newHire",
+            "highlight": "Welcoming Jordan to the field operations team.",
+            "featured": true,
+            "order": 1,
+            "cta": { "label": "Meet Jordan", "href": "/sites/hb-central/people" }
+          },
+          {
+            "id": "culture-anniversary",
+            "personName": "Riley Brooks",
+            "eventType": "anniversary",
+            "highlight": "Celebrating 10 years of service and mentorship.",
+            "order": 2
+          }
+        ]
+      }
+    }
+  ]
+}

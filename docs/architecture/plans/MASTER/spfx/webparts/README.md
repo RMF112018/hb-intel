@@ -59,6 +59,9 @@ Run the prompts in order.
 - `05B_Tool_Launcher_Work_Hub_Config_and_Grouping_Contract.md`
 - `05C_Utility_Zone_Test_Usage_and_Handoff.md`
 - `06_Company_Pulse_Leadership_Message_and_People_Culture.md`
+- `06A_Company_Pulse_Contract_and_Hierarchy_Model.md`
+- `06B_Leadership_Message_Authoring_and_Rotation_Contract.md`
+- `06C_People_Culture_Config_Test_and_Handoff.md`
 - `07_Project_Portfolio_Spotlight_and_Safety_Field_Excellence.md`
 - `08_Smart_Search_Wayfinding_and_Discovery.md`
 - `09_Authoring_Configuration_Governance_and_Page_Composition.md`
@@ -126,6 +129,19 @@ Prompt 05 closure outputs are complete and are required inputs for Prompt 06+:
 - `05C_Utility_Zone_Test_Usage_and_Handoff.md` — Prompt-05 verification and downstream usage guidance.
 
 Prompt-05 applies manifest patch bump to `001.000.003` in `hb-webparts` solution + feature versions.
+
+## Prompt-06 Outputs (Locked)
+
+Prompt 06 closure outputs are complete and are required inputs for Prompt 07+:
+
+- `apps/hb-webparts/src/webparts/companyPulse/*` — curated company pulse webpart contract + manifest baseline.
+- `apps/hb-webparts/src/webparts/leadershipMessage/*` — leadership message webpart contract + manifest baseline.
+- `apps/hb-webparts/src/webparts/peopleCulture/*` — people/culture webpart contract + manifest baseline.
+- `06A_Company_Pulse_Contract_and_Hierarchy_Model.md` — pulse hierarchy and fallback contract.
+- `06B_Leadership_Message_Authoring_and_Rotation_Contract.md` — leadership authoring/media/rotation contract.
+- `06C_People_Culture_Config_Test_and_Handoff.md` — people/culture config guidance and verification handoff.
+
+Prompt-06 applies manifest patch bump to `001.000.004` in `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 

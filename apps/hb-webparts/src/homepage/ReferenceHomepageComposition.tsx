@@ -1,37 +1,16 @@
 import * as React from 'react';
 import { normalizeHomepageConfig } from './helpers/config.js';
-import { normalizeCuratedListItems } from './helpers/normalization.js';
-import {
-  HomepageEditorialCard,
-  HomepageLoadingState,
-  HomepagePersonRecognitionCard,
-  HomepageSectionShell,
-  HomepageSpotlightCard,
-  HomepageTopBandPair,
-} from './shared/index.js';
+import { HomepageLoadingState, HomepageSectionShell, HomepageTopBandPair } from './shared/index.js';
 import { PersonalizedWelcomeHeader } from '../webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from '../webparts/hbHeroBanner/HbHeroBanner.js';
 import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityActionsRail.js';
 import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
-
-const rawEditorialItems = [
-  {
-    id: 'pulse-1',
-    title: ' Company Pulse: Week in Review ',
-    summary: 'Major highlights from current projects and leadership updates.',
-    cta: { label: 'Read update', href: '/company-pulse' },
-  },
-  {
-    id: 'pulse-2',
-    title: 'Safety Milestone',
-    summary: 'Field teams reached a new audit completion milestone.',
-    cta: { label: 'View details', href: '/safety' },
-  },
-];
+import { CompanyPulse } from '../webparts/companyPulse/CompanyPulse.js';
+import { LeadershipMessage } from '../webparts/leadershipMessage/LeadershipMessage.js';
+import { PeopleCulture } from '../webparts/peopleCulture/PeopleCulture.js';
 
 export function ReferenceHomepageComposition(): React.JSX.Element {
   const config = normalizeHomepageConfig({ maxItems: 2 });
-  const editorialItems = normalizeCuratedListItems(rawEditorialItems, config.maxItems);
 
   return (
     <>
@@ -60,19 +39,12 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         }
       />
 
-      <HomepageSectionShell title="Company Pulse">
-        <div aria-label="editorial-zone">
-          {editorialItems.map((item) => (
-            <HomepageEditorialCard item={item} key={item.id} />
-          ))}
-        </div>
-      </HomepageSectionShell>
-
       <HomepageSectionShell title="Quick-use / Work Zone">
         <PriorityActionsRail
           activeAudience="field"
           config={{
             heading: 'Priority Actions',
+            maxItems: config.maxItems + 2,
             groups: [
               { id: 'today', title: 'Today', order: 1 },
               { id: 'approvals', title: 'Approvals', order: 2 },
@@ -123,21 +95,75 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         />
       </HomepageSectionShell>
 
-      <HomepageSectionShell title="Operational Spotlight">
-        <HomepageSpotlightCard
-          item={{
-            id: 'spotlight-1',
-            title: 'Project Spotlight',
-            summary: 'Two strategic milestones were completed this week.',
-            statusLabel: 'On Track',
-            cta: { label: 'Open portfolio', href: '/portfolio' },
+      <HomepageSectionShell title="Awareness Zone">
+        <CompanyPulse
+          activeAudience="field"
+          config={{
+            items: [
+              {
+                id: 'pulse-feature',
+                title: 'Project Teams Hit Safety Milestone',
+                summary: 'Crews reached a record week of audit completion and mentoring coverage.',
+                category: 'safety',
+                featured: true,
+                order: 1,
+                cta: { label: 'View pulse', href: '/pulse' },
+              },
+              {
+                id: 'pulse-secondary',
+                title: 'Recognition Moment',
+                summary: 'Field office teams recognized for schedule recovery collaboration.',
+                category: 'recognition',
+                order: 2,
+              },
+            ],
           }}
         />
-      </HomepageSectionShell>
-
-      <HomepageSectionShell title="People and Culture">
-        <HomepagePersonRecognitionCard
-          item={{ id: 'person-1', personName: 'Avery Jordan', recognitionText: 'Recognized for cross-team safety mentorship.' }}
+        <LeadershipMessage
+          config={{
+            entries: [
+              {
+                id: 'leadership-feature',
+                title: 'Leadership Focus This Week',
+                message: 'We are prioritizing closeout quality and disciplined cross-team communication.',
+                leaderName: 'Alex Carter',
+                leaderRole: 'Chief Operating Officer',
+                featured: true,
+                order: 1,
+                cta: { label: 'Read message', href: '/leadership' },
+              },
+              {
+                id: 'leadership-archive',
+                title: 'Last Week Highlights',
+                message: 'Keep momentum by closing open safety actions early.',
+                leaderName: 'Alex Carter',
+                order: 2,
+              },
+            ],
+          }}
+        />
+        <PeopleCulture
+          activeAudience="field"
+          config={{
+            entries: [
+              {
+                id: 'culture-feature',
+                personName: 'Avery Jordan',
+                eventType: 'recognition',
+                highlight: 'Recognized for cross-team safety mentorship.',
+                featured: true,
+                order: 1,
+                cta: { label: 'Celebrate', href: '/people' },
+              },
+              {
+                id: 'culture-secondary',
+                personName: 'Riley Brooks',
+                eventType: 'anniversary',
+                highlight: 'Celebrating 10 years with HB.',
+                order: 2,
+              },
+            ],
+          }}
         />
       </HomepageSectionShell>
 

@@ -290,3 +290,30 @@ Prompt 05 deliverables are now locked for Prompt 06–10 implementation:
 
 - Utility/navigation zone contracts are implemented with reusable grouping/visibility seams and shared dense utility primitives.
 - Prompt-06 should consume Prompt-05 utility outputs as fixed inputs and focus on company pulse, leadership message, and people/culture surfaces.
+
+## Prompt-06 Closure Artifacts
+
+Prompt 06 deliverables are now locked for Prompt 07–10 implementation:
+
+- `06A_Company_Pulse_Contract_and_Hierarchy_Model.md`
+- `06B_Leadership_Message_Authoring_and_Rotation_Contract.md`
+- `06C_People_Culture_Config_Test_and_Handoff.md`
+- `apps/hb-webparts/src/webparts/companyPulse/*`
+- `apps/hb-webparts/src/webparts/leadershipMessage/*`
+- `apps/hb-webparts/src/webparts/peopleCulture/*`
+- shared communication seams in `src/homepage/helpers/communicationsConfig.ts` and `src/homepage/shared/HomepageCuratedContentCluster.tsx`
+
+## Resolved Decisions Register (Prompt 06)
+
+| Decision ID | Decision                                                                                                                    | Status |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| D6-01       | Awareness content is curated into featured + bounded secondary hierarchy rather than flat equal-weight lists                | Closed |
+| D6-02       | Leadership message supports optional media only when accessible alt-text requirements are met                               | Closed |
+| D6-03       | People/culture events support new hire, anniversary, promotion, and recognition categories with warm/professional treatment | Closed |
+| D6-04       | Malformed/partial awareness content always falls back to clear empty-state guidance                                         | Closed |
+| D6-05       | `hb-webparts` solution + feature versions are patch-bumped to `001.000.004`                                                 | Closed |
+
+## Prompt-06 Handoff Note
+
+- Awareness communications and human-layer webpart contracts are implemented with shared hierarchy/media normalization seams.
+- Prompt-07 should consume Prompt-06 awareness outputs as fixed inputs and focus on project/portfolio spotlight plus safety/field excellence surfaces.

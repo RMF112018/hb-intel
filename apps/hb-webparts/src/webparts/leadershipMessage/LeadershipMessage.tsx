@@ -1,0 +1,64 @@
+import * as React from 'react';
+import { HbcCard } from '@hbc/ui-kit/homepage';
+import { normalizeLeadershipMessageConfig } from '../../homepage/helpers/communicationsConfig.js';
+import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
+import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
+import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
+import type { LeadershipMessageConfig } from '../../homepage/webparts/communicationsContracts.js';
+
+export interface LeadershipMessageProps {
+  config?: Partial<LeadershipMessageConfig>;
+  isLoading?: boolean;
+}
+
+export function LeadershipMessage({ config, isLoading = false }: LeadershipMessageProps): React.JSX.Element {
+  if (isLoading) {
+    return <HomepageLoadingState label="Loading leadership message" />;
+  }
+
+  const normalized = normalizeLeadershipMessageConfig(config);
+
+  if (!normalized.featured && normalized.secondary.length === 0) {
+    return (
+      <HomepageEmptyState
+        title="No leadership message configured"
+        description="Add leadership entries in the property pane to publish executive communication."
+      />
+    );
+  }
+
+  return (
+    <HbcCard>
+      <HomepageCuratedContentCluster
+        heading={normalized.heading}
+        featured={
+          normalized.featured ? (
+            <article>
+              <h3 style={{ margin: 0 }}>{normalized.featured.title}</h3>
+              <p style={{ margin: '8px 0 0' }}>{normalized.featured.message}</p>
+              <p style={{ margin: '8px 0 0', fontWeight: 600 }}>
+                {normalized.featured.leaderName}
+                {normalized.featured.leaderRole ? `, ${normalized.featured.leaderRole}` : ''}
+              </p>
+              {normalized.featured.media ? (
+                <img
+                  alt={normalized.featured.media.alt}
+                  src={normalized.featured.media.src}
+                  style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 6 }}
+                />
+              ) : null}
+              {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
+            </article>
+          ) : undefined
+        }
+        secondary={normalized.secondary.map((entry) => (
+          <article key={entry.id}>
+            <h3 style={{ margin: 0 }}>{entry.title}</h3>
+            <p style={{ margin: '8px 0 0' }}>{entry.message}</p>
+            <p style={{ margin: '8px 0 0' }}>{entry.leaderName}</p>
+          </article>
+        ))}
+      />
+    </HbcCard>
+  );
+}
