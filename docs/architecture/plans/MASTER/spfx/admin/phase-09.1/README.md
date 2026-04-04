@@ -1,5 +1,24 @@
 # White-Glove Device Deployment Prompt Package
 
+## Architecture baseline
+
+Before executing prompts, review the frozen architecture baseline:
+
+- [Architecture Baseline](../white-glove/white-glove-architecture-baseline.md) — layer ownership, interaction model, run hierarchy
+- [Boundary Matrix](../white-glove/white-glove-boundary-matrix.md) — operational concern ownership table
+- [Repo-Truth Reuse Map](../white-glove/white-glove-repo-truth-reuse-map.md) — existing foundations, extensions, new build areas
+- [No-Go List](../white-glove/white-glove-no-go-list.md) — implementation constraints
+
+## Implementation status
+
+**All 14 prompts complete. GO for controlled production rollout.**
+
+- [Architecture Index](../white-glove/README.md) — full document set
+- [Hardening Review](../../../reviews/phase-9.1-white-glove-hardening-review.md) — test coverage and deferred items
+- [Final Closeout Audit](../../../reviews/phase-9.1-white-glove-final-closeout.md) — go/no-go decision and artifact inventory
+- [IT Tenant Prerequisites](../../../../maintenance/white-glove-tenant-prerequisites.md) — operational handoff guide
+- [Developer Guide](../../../../how-to/developer/white-glove-development-guide.md) — development reference
+
 ## What this package is
 
 This package is a **local code-agent implementation package** for building the **white-glove employee device deployment feature** inside the **Admin SPFx IT Control Center**.

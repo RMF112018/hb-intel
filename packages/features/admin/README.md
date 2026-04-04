@@ -6,7 +6,7 @@ Admin Intelligence feature package for HB Intel — monitors, infrastructure pro
 
 This package provides the Admin Intelligence layer for HB Intel, enabling platform administrators to monitor infrastructure health, manage approval workflows, and respond to operational alerts.
 
-**Boundary**: This package is the reusable admin intelligence layer — monitors, probes, hooks, APIs, and dashboard components. It is **not** the privileged control plane. Privileged execution, durable orchestration, retry/compensation, audit persistence, and hybrid identity workflows belong in `backend/functions`. Phase 9 hybrid identity administration (user lifecycle, connection management, AD DS adapter, Graph service) lives entirely in `backend/functions` and `apps/admin` — this package has no hybrid identity role. See the [Phase 1 boundary matrix](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-boundary-matrix.md) and [locked decisions](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-locked-decisions-and-phase-boundary-guards.md) (LD-03).
+**Boundary**: This package is the reusable admin intelligence layer — monitors, probes, hooks, APIs, and dashboard components. It is **not** the privileged control plane. Privileged execution, durable orchestration, retry/compensation, audit persistence, hybrid identity workflows, and Phase 10 standards/configuration governance services belong in `backend/functions`. The Phase 10 Standards & Configuration lane (`/standards-config`) lives in `apps/admin` — this package has no config governance role. See the [Phase 1 boundary matrix](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-boundary-matrix.md) and [locked decisions](../../docs/architecture/plans/MASTER/spfx/admin/phase-01/admin-spfx-locked-decisions-and-phase-boundary-guards.md) (LD-03).
 
 **Contract alignment**: This package may import shared types from `@hbc/models/admin-control-plane` for type alignment (e.g., correlating alerts to run IDs). It must not implement control-plane runtime, orchestrator logic, or adapter execution. See the [package placement map](../../docs/architecture/plans/MASTER/spfx/admin/phase-02/admin-control-plane-package-placement-and-boundary-map.md).
 
@@ -134,6 +134,17 @@ pnpm --filter @hbc/features-admin lint           # Lint
 - Components use app-shell-safe composition only (D-09)
 - Testing sub-path (`@hbc/features-admin/testing`) is excluded from production bundle
 - ESLint boundary rules enforced via `@hb-intel/eslint-plugin-hbc`
+
+## White-Glove Device Deployment
+
+The white-glove feature is implemented across the backend (`backend/functions/src/services/white-glove/` and `backend/functions/src/services/device-management/`) and the admin app (`apps/admin/src/pages/WhiteGlove*.tsx`). This package (`@hbc/features-admin`) does not contain white-glove runtime logic — it remains the admin-intelligence layer (monitors, probes, hooks, dashboards).
+
+White-glove hooks and pages live directly in `apps/admin/` because they consume backend API endpoints specific to the admin operator console. Shared domain types live in `@hbc/models/admin-control-plane`.
+
+**White-glove documentation:**
+- [Architecture Index](../../docs/architecture/plans/MASTER/spfx/admin/white-glove/README.md)
+- [Developer Guide](../../docs/how-to/developer/white-glove-development-guide.md)
+- [IT Tenant Prerequisites](../../docs/maintenance/white-glove-tenant-prerequisites.md)
 
 ## Related
 

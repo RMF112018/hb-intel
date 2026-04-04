@@ -39,6 +39,23 @@ import type {
   IAppBindingRepairResult,
 } from '@hbc/models/admin-control-plane';
 
+// Re-export IWhiteGloveRunService from the white-glove module
+export type { IWhiteGloveRunService } from '../white-glove/white-glove-run-service.js';
+
+// Re-export Microsoft device management service interfaces
+export type { IMicrosoftIdentityService } from '../device-management/microsoft/microsoft-identity-service.js';
+export type { IMicrosoftIntuneService } from '../device-management/microsoft/microsoft-intune-service.js';
+export type { IMicrosoftAutopilotService } from '../device-management/microsoft/microsoft-autopilot-service.js';
+
+// Re-export Apple device management service interfaces
+export type { IAppleAbmService } from '../device-management/apple/apple-abm-service.js';
+export type { IAppleAdeService } from '../device-management/apple/apple-ade-service.js';
+export type { IAppleMdmService } from '../device-management/apple/apple-mdm-service.js';
+
+// Re-export NinjaOne service interfaces
+export type { INinjaOneApiService } from '../device-management/ninjaone/ninjaone-api-service.js';
+export type { INinjaOneStandardizationService } from '../device-management/ninjaone/ninjaone-standardization-service.js';
+
 // ─── Run Service ────────────────────────────────────────────────────────────────
 
 /**
@@ -122,6 +139,19 @@ export interface IAdminConfigService {
   /** Get configuration for the specified scope. */
   getConfig(scope: string): Promise<IAdminConfigResponse>;
 }
+
+// ─── Config Override Store (Phase 10) ───────────────────────────────────────────
+
+// Re-export the provider interface from its implementation module.
+// This keeps all admin-control-plane service interfaces discoverable from types.ts.
+export type { IConfigOverrideStore } from './config-override-store.js';
+
+// Re-export the versioning service interface (P10-05).
+export type { IConfigVersioningService } from './config-versioning-service.js';
+
+// Re-export the resolution service and snapshot store interfaces (P10-06).
+export type { IConfigResolutionService, IResolvableCatalogEntry, EnvReader } from './config-resolution-service.js';
+export type { IConfigSnapshotStore } from './config-snapshot-store.js';
 
 // ─── Audit Service ──────────────────────────────────────────────────────────────
 

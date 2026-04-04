@@ -22,6 +22,11 @@ export type {
   IAdminActorContextResolver,
   IAdminActorResolverInput,
   IAdminAppBindingService,
+  IConfigOverrideStore,
+  IConfigVersioningService,
+  IConfigResolutionService,
+  IResolvableCatalogEntry,
+  IConfigSnapshotStore,
 } from './types.js';
 
 // Durable implementations (Phase 4)
@@ -125,6 +130,25 @@ export type {
   IPostureCheckFinding,
   IPostureValidationResult,
 } from './sharepoint-posture-service.js';
+
+// Config override store (Phase 10 — P10-04)
+export {
+  DurableConfigOverrideStore,
+  MockConfigOverrideStore,
+  serializeOverrideRecord,
+  deserializeOverrideRecord,
+  serializeAuditEvent,
+  deserializeAuditEvent,
+} from './config-override-store.js';
+
+// Config versioning service (Phase 10 — P10-05)
+export { ConfigVersioningService, stableEquals, buildDiffSummary } from './config-versioning-service.js';
+
+// Config resolution service (Phase 10 — P10-06)
+export { ConfigResolutionService, processEnvReader } from './config-resolution-service.js';
+
+// Config snapshot store (Phase 10 — P10-06)
+export { DurableConfigSnapshotStore, MockConfigSnapshotStore, serializeSnapshot, deserializeSnapshot } from './config-snapshot-store.js';
 
 // Stub implementations (mock/test mode and services not yet implemented)
 export {

@@ -104,6 +104,20 @@ This phase was **redirected** from the original "broad Entra administration" tar
 | [IT Handoff Guide](phase-09/admin-spfx-phase-9-it-handoff-and-setup-guide.md) | No-code setup instructions for IT |
 | [Ripple Update Summary](phase-09/Admin-SPFx-IT-Control-Center-Phase-9-Ripple-Update-Summary-Plan.md) | Program-wide alignment for hybrid identity redirect |
 
+### Phase 9.1 — White-Glove Device Deployment
+
+Phase 9.1 (9B in the end-state plan) delivers white-glove employee device deployment — governed role-based device packages orchestrated across Microsoft, Apple, and NinjaOne.
+
+| Artifact | Purpose |
+|----------|---------|
+| [Architecture Baseline](white-glove/white-glove-architecture-baseline.md) | Layer ownership, interaction model, run hierarchy, package families |
+| [Boundary Matrix](white-glove/white-glove-boundary-matrix.md) | Operational concern ownership table (SPFx / Backend / Adapter / Platform / NinjaOne) |
+| [Repo-Truth Reuse Map](white-glove/white-glove-repo-truth-reuse-map.md) | Existing foundations, extensions needed, new build areas |
+| [No-Go List](white-glove/white-glove-no-go-list.md) | Implementation constraints (7 no-go rules) |
+| [Implementation Summary Plan](phase-09.1/Admin-SPFx-IT-Control-Center-White-Glove-Implementation-Summary-Plan.md) | 13-phase implementation roadmap |
+| [Gap Map](phase-09.1/admin-spfx-white-glove-gap-map.md) | 9 gaps (A–I) with ownership and priority |
+| [Prompt Package README](phase-09.1/README.md) | Execution order for 14 implementation prompts |
+
 ### Later phases
 
 Phases 10–13 are defined in the [end-state plan](admin-spfx-it-control-center-end-state-plan.md). Implementation artifacts will be added as work begins.

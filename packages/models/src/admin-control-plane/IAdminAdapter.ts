@@ -48,6 +48,27 @@ export enum AdminAdapterCategory {
 
   /** Notification dispatch (email, Teams webhook) */
   Notification = 'notification',
+
+  /** Microsoft Intune device management (enrollment, compliance, configuration) */
+  MicrosoftIntune = 'microsoft-intune',
+
+  /** Windows Autopilot registration and provisioning */
+  MicrosoftAutopilot = 'microsoft-autopilot',
+
+  /** Microsoft identity resolution for device deployment (Entra groups, user lookup) */
+  MicrosoftIdentity = 'microsoft-identity',
+
+  /** Apple Business Manager device assignment and procurement */
+  AppleAbm = 'apple-abm',
+
+  /** Apple Automated Device Enrollment */
+  AppleAde = 'apple-ade',
+
+  /** Apple MDM (APNs + Intune MDM) enrollment and supervision */
+  AppleMdm = 'apple-mdm',
+
+  /** NinjaOne post-enrollment standardization, software deployment, and validation */
+  NinjaOne = 'ninjaone',
 }
 
 // ─── Adapter Descriptor ─────────────────────────────────────────────────────────

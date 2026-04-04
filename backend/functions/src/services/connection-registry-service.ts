@@ -16,10 +16,49 @@ import { ConnectionNotConfiguredError, ConnectionUnhealthyError } from './hybrid
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 /** Connector class identifier. */
-export type ConnectorClass = 'ad-ds' | 'graph-identity';
+export type ConnectorClass =
+  | 'ad-ds'
+  | 'graph-identity'
+  | 'microsoft-intune'
+  | 'microsoft-autopilot'
+  | 'apple-abm'
+  | 'apple-ade'
+  | 'apple-apns'
+  | 'ninjaone-api';
 
 /** Connection health status. */
 export type ConnectionHealthStatus = 'healthy' | 'unhealthy' | 'untested';
+
+/** Types of changes tracked in connector change history. */
+export type ConnectionChangeType = 'created' | 'updated' | 'policy-changed' | 'credential-rotated';
+
+/** A single entry in the connector change history. */
+export interface IConnectionChangeEntry {
+  readonly version: number;
+  readonly changedAt: string;
+  readonly changedBy: string;
+  readonly changeType: ConnectionChangeType;
+  readonly summary: string;
+}
+
+/** Policy toggles governing connector behavior. */
+export interface IConnectorPolicyToggles {
+  readonly enabled: boolean;
+  readonly dryRunOnly: boolean;
+  readonly productionLaunchAllowed: boolean;
+  readonly highRiskCheckpointRequired: boolean;
+}
+
+/** Default policy toggles for newly created connectors. */
+const DEFAULT_POLICY_TOGGLES: IConnectorPolicyToggles = {
+  enabled: true,
+  dryRunOnly: true,
+  productionLaunchAllowed: false,
+  highRiskCheckpointRequired: true,
+};
+
+/** Maximum number of change history entries retained per connector. */
+const MAX_CHANGE_HISTORY = 50;
 
 /** Stored connection record (sensitive fields redacted in API responses). */
 export interface IConnectionRecord {
@@ -29,6 +68,9 @@ export interface IConnectionRecord {
   readonly config: Record<string, unknown>;
   readonly hasCredential: boolean;
   readonly healthStatus: ConnectionHealthStatus;
+  readonly configVersion: number;
+  readonly policyToggles: IConnectorPolicyToggles;
+  readonly changeHistory: readonly IConnectionChangeEntry[];
   readonly lastTestedAt: string | null;
   readonly lastTestResult: 'success' | 'failure' | null;
   readonly lastTestError: string | null;
@@ -49,6 +91,9 @@ interface IConnectionStorageEntry {
   credential: string | null;
   hasCredential: boolean;
   healthStatus: ConnectionHealthStatus;
+  configVersion: number;
+  policyToggles: IConnectorPolicyToggles;
+  changeHistory: IConnectionChangeEntry[];
   lastTestedAt: string | null;
   lastTestResult: 'success' | 'failure' | null;
   lastTestError: string | null;
@@ -66,6 +111,7 @@ export interface IConnectionUpsertRequest {
   readonly displayName: string;
   readonly config: Record<string, unknown>;
   readonly credential?: string;
+  readonly policyToggles?: Partial<IConnectorPolicyToggles>;
 }
 
 /** Result of a connection test. */
@@ -108,6 +154,12 @@ export interface IConnectionRegistryService {
 
   /** Assert a connector is configured and healthy. Throws if not. */
   assertHealthy(connectorClass: ConnectorClass): Promise<IConnectionRecord>;
+
+  /** Get the change history for a connector. Returns empty array if not found. */
+  getConnectionHistory(connectorId: string): Promise<readonly IConnectionChangeEntry[]>;
+
+  /** Update policy toggles for a connector. Returns the updated record. */
+  updatePolicyToggles(connectorId: string, toggles: Partial<IConnectorPolicyToggles>, actor: string): Promise<IConnectionRecord>;
 }
 
 // ─── Stub real implementation ──────────────────────────────────────────────────
@@ -138,6 +190,37 @@ export class ConnectionRegistryService implements IConnectionRegistryService {
   async upsertConnection(connectorId: string, request: IConnectionUpsertRequest, actor: string): Promise<IConnectionRecord> {
     const now = new Date().toISOString();
     const existing = this.store.get(connectorId);
+    const isCreate = !existing;
+    const previousVersion = existing?.configVersion ?? 0;
+    const nextVersion = previousVersion + 1;
+    const credentialRotated = !isCreate && !!request.credential && existing?.hasCredential;
+
+    const changeType: ConnectionChangeType = isCreate
+      ? 'created'
+      : credentialRotated
+        ? 'credential-rotated'
+        : 'updated';
+    const summary = isCreate
+      ? `Connector ${request.displayName} created (class: ${request.connectorClass})`
+      : credentialRotated
+        ? `Credential rotated for ${request.displayName}`
+        : `Configuration updated for ${request.displayName}`;
+
+    const previousHistory = existing?.changeHistory ?? [];
+    const newHistoryEntry: IConnectionChangeEntry = {
+      version: nextVersion,
+      changedAt: now,
+      changedBy: actor,
+      changeType,
+      summary,
+    };
+    const changeHistory = [newHistoryEntry, ...previousHistory].slice(0, MAX_CHANGE_HISTORY);
+
+    const mergedToggles: IConnectorPolicyToggles = {
+      ...(existing?.policyToggles ?? DEFAULT_POLICY_TOGGLES),
+      ...(request.policyToggles ?? {}),
+    };
+
     const entry: IConnectionStorageEntry = {
       connectorId,
       connectorClass: request.connectorClass,
@@ -146,6 +229,9 @@ export class ConnectionRegistryService implements IConnectionRegistryService {
       credential: request.credential ?? existing?.credential ?? null,
       hasCredential: !!(request.credential ?? existing?.credential),
       healthStatus: 'untested',
+      configVersion: nextVersion,
+      policyToggles: mergedToggles,
+      changeHistory,
       lastTestedAt: existing?.lastTestedAt ?? null,
       lastTestResult: existing?.lastTestResult ?? null,
       lastTestError: existing?.lastTestError ?? null,
@@ -184,6 +270,40 @@ export class ConnectionRegistryService implements IConnectionRegistryService {
 
   async resolveCredential(connectorId: string): Promise<string | null> {
     return this.store.get(connectorId)?.credential ?? null;
+  }
+
+  async getConnectionHistory(connectorId: string): Promise<readonly IConnectionChangeEntry[]> {
+    return this.store.get(connectorId)?.changeHistory ?? [];
+  }
+
+  async updatePolicyToggles(connectorId: string, toggles: Partial<IConnectorPolicyToggles>, actor: string): Promise<IConnectionRecord> {
+    const entry = this.store.get(connectorId);
+    if (!entry) throw new ConnectionNotConfiguredError(connectorId);
+
+    const now = new Date().toISOString();
+    const nextVersion = entry.configVersion + 1;
+
+    const changedKeys = Object.keys(toggles).filter(
+      (k) => toggles[k as keyof IConnectorPolicyToggles] !== entry.policyToggles[k as keyof IConnectorPolicyToggles],
+    );
+    const summary = changedKeys.length > 0
+      ? `Policy toggles updated: ${changedKeys.join(', ')}`
+      : 'Policy toggles updated (no effective change)';
+
+    const newHistoryEntry: IConnectionChangeEntry = {
+      version: nextVersion,
+      changedAt: now,
+      changedBy: actor,
+      changeType: 'policy-changed',
+      summary,
+    };
+    entry.changeHistory = [newHistoryEntry, ...entry.changeHistory].slice(0, MAX_CHANGE_HISTORY);
+    entry.policyToggles = { ...entry.policyToggles, ...toggles };
+    entry.configVersion = nextVersion;
+    entry.updatedAt = now;
+    entry.updatedBy = actor;
+
+    return redact(entry);
   }
 
   async assertHealthy(connectorClass: ConnectorClass): Promise<IConnectionRecord> {

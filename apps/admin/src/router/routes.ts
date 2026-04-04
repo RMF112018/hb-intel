@@ -68,6 +68,15 @@ const healthRoute = createRoute({
   ),
 });
 
+const standardsConfigRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/standards-config',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/StandardsConfigPage.js').then((m) => ({ default: m.StandardsConfigPage })),
+  ),
+});
+
 const configRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/config',
@@ -145,6 +154,88 @@ const entraRoute = createRoute({
   ),
 });
 
+// --- White-glove routes (P9.1-08) ---
+
+const whiteGloveConnectionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/connections',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGloveConnectionsPage.js').then((m) => ({
+      default: m.WhiteGloveConnectionsPage,
+    })),
+  ),
+});
+
+const whiteGloveReadinessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/readiness',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGloveReadinessPage.js').then((m) => ({
+      default: m.WhiteGloveReadinessPage,
+    })),
+  ),
+});
+
+const whiteGloveLaunchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/launch',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGloveLaunchPage.js').then((m) => ({
+      default: m.WhiteGloveLaunchPage,
+    })),
+  ),
+});
+
+const whiteGloveCheckpointsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/checkpoints',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGloveCheckpointPage.js').then((m) => ({
+      default: m.WhiteGloveCheckpointPage,
+    })),
+  ),
+});
+
+const whiteGloveHistoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/history',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGloveRunHistoryPage.js').then((m) => ({
+      default: m.WhiteGloveRunHistoryPage,
+    })),
+  ),
+});
+
+const whiteGloveRunDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/history/$runId',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGloveRunDetailPage.js').then((m) => ({
+      default: (props: Record<string, unknown>) => {
+        const params = props as { runId?: string };
+        return m.WhiteGloveRunDetailPage({ runId: params.runId ?? '' });
+      },
+    })),
+  ),
+});
+
+const whiteGloveStandardsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/white-glove/standards',
+  beforeLoad: adminBeforeLoad,
+  component: lazyRouteComponent(() =>
+    import('../pages/WhiteGlovePackageStandardsPage.js').then((m) => ({
+      default: m.WhiteGlovePackageStandardsPage,
+    })),
+  ),
+});
+
 // --- Legacy redirect routes (backward compatibility) ---
 
 const legacyProvisioningRoute = createRoute({
@@ -191,6 +282,7 @@ export const webpartRoutes = [
   // Lane routes
   runsRoute,
   healthRoute,
+  standardsConfigRoute,
   configRoute,
   errorsRoute,
   setupRoute,
@@ -199,6 +291,14 @@ export const webpartRoutes = [
   validationRoute,
   sharepointRoute,
   entraRoute,
+  // White-glove routes
+  whiteGloveConnectionsRoute,
+  whiteGloveReadinessRoute,
+  whiteGloveLaunchRoute,
+  whiteGloveCheckpointsRoute,
+  whiteGloveHistoryRoute,
+  whiteGloveRunDetailRoute,
+  whiteGloveStandardsRoute,
   // Legacy redirects
   legacyProvisioningRoute,
   legacyDashboardRoute,

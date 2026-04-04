@@ -36,6 +36,9 @@ import { processCheckpointDecision } from '../../services/admin-control-plane/in
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 
+// P9.1-04: White-glove device deployment routes (side-effect import for route registration)
+import './white-glove-routes.js';
+
 // ── Launch Run ─────────────────────────────────────────────────────────────────
 
 /**

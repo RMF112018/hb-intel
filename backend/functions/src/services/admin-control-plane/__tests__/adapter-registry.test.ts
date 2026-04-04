@@ -175,7 +175,7 @@ describe('P3-06 registerPhase3Adapters', () => {
     registerPhase3Adapters(registry);
 
     expect(registry.listAll()).toHaveLength(PHASE_3_ADAPTERS.length);
-    expect(PHASE_3_ADAPTERS.length).toBe(10);
+    expect(PHASE_3_ADAPTERS.length).toBe(18);
   });
 
   it('all registered adapters are resolvable by key', () => {

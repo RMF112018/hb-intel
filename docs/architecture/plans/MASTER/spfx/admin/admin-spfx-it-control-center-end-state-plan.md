@@ -1,11 +1,11 @@
-# Admin SPFx IT Control Center — End-State Plan (Updated for Phase 6A, Phase 9 Hybrid Identity Redirect, and Phase 9B White-Glove Device Deployment)
+# Admin SPFx IT Control Center — End-State Plan (Updated for Phase 6A, Phase 9 Hybrid Identity Redirect, Phase 9B White-Glove Device Deployment, and Phase 10 Configuration Governance)
 
 **Status:** Developer-facing end-state implementation plan  
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.008  
-**Revision note:** This update preserves **Phase 6A — Managed App Binding and Backend-Setup Configuration**, preserves the **Phase 9 Hybrid Identity Redirect**, and adds **Phase 9B — White-Glove Device Deployment** as an early feature slice built on the hybrid-identity and no-code setup substrate.
+**Version:** 01.000.018  
+**Revision note:** This update completes **Phase 10** with the exit reconciliation artifact (P10-11), recording all 9 acceptance criteria as met, validation results (79/79 tests, 0 lint errors, 3 type-checks clean, build success), residual risks, and recommended Phase 11/12 entry points. Preserves all prior phase content.
 
 ---
 
@@ -790,6 +790,8 @@ A developer should treat the following as implementation doctrine:
 
 ### Phase 9B — White-Glove Device Deployment foundation
 **Purpose:** establish white-glove employee device deployment as an early governed control-center feature built on the Phase 9 hybrid-identity and connection substrate.
+
+**Architecture baseline:** [white-glove/white-glove-architecture-baseline.md](white-glove/white-glove-architecture-baseline.md) — frozen boundary definitions, ownership model, and implementation constraints for this phase.
 
 **Major objectives**
 - Define the governed device package model, package metadata, and standards boundaries.

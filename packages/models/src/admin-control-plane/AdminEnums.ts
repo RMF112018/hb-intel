@@ -42,6 +42,9 @@ export enum AdminDomain {
 
   /** Managed app-binding and backend-setup configuration (Phase 6A) */
   AppBinding = 'app-binding',
+
+  /** White-glove employee device deployment (Phase 9B) */
+  WhiteGloveDeployment = 'white-glove-deployment',
 }
 
 // ─── Risk Levels ────────────────────────────────────────────────────────────────

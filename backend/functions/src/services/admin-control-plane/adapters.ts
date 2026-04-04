@@ -155,6 +155,116 @@ export const NOTIFICATION_DISPATCH_ADAPTER: IAdminAdapterDescriptor = {
   implementationStatus: 'planned',
 };
 
+// ─── Phase 9.1 Microsoft Device Management Adapters ─────────────────────────────
+
+export const MICROSOFT_INTUNE_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'microsoft-intune:device-enrollment',
+  category: AdminAdapterCategory.MicrosoftIntune,
+  label: 'Microsoft Intune — Device Enrollment',
+  description: 'Intune device enrollment, compliance policy, and configuration profile operations',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: true,
+  idempotent: false,
+  operations: ['checkEnrollment', 'assignCompliancePolicy', 'assignConfigProfile', 'getComplianceState'],
+  implementationStatus: 'partial',
+};
+
+export const MICROSOFT_AUTOPILOT_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'microsoft-autopilot:device-registration',
+  category: AdminAdapterCategory.MicrosoftAutopilot,
+  label: 'Windows Autopilot — Device Registration',
+  description: 'Autopilot device registration, deployment profile assignment, and technician pre-provisioning',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: true,
+  idempotent: false,
+  operations: ['registerDevice', 'assignProfile', 'getProfileStatus', 'technicianPreProvision'],
+  implementationStatus: 'partial',
+};
+
+export const MICROSOFT_IDENTITY_DEVICE_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'microsoft-identity:device-group',
+  category: AdminAdapterCategory.MicrosoftIdentity,
+  label: 'Microsoft Identity — Device Group Resolution',
+  description: 'Entra ID identity resolution and device group management for white-glove deployment',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: false,
+  supportsCompensation: true,
+  idempotent: false,
+  operations: ['resolveIdentity', 'resolveGroup', 'addDeviceToGroup', 'validateReadiness'],
+  implementationStatus: 'partial',
+};
+
+// ─── Phase 9.1 Apple Device Management Adapters ─────────────────────────────────
+
+export const APPLE_ABM_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'apple-abm:device-assignment',
+  category: AdminAdapterCategory.AppleAbm,
+  label: 'Apple Business Manager — Device Assignment',
+  description: 'ABM device assignment lookup, server token validation, and MDM server assignment',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: false,
+  idempotent: true,
+  operations: ['getAssignment', 'validateToken', 'getAssignmentProfile'],
+  implementationStatus: 'partial',
+};
+
+export const APPLE_ADE_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'apple-ade:enrollment',
+  category: AdminAdapterCategory.AppleAde,
+  label: 'Apple ADE — Automated Device Enrollment',
+  description: 'ADE device enrollment, profile assignment, and platform-specific posture validation',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: true,
+  idempotent: false,
+  operations: ['getDevice', 'getEnrollmentProfile', 'validatePosture'],
+  implementationStatus: 'partial',
+};
+
+export const APPLE_MDM_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'apple-mdm:supervised-enrollment',
+  category: AdminAdapterCategory.AppleMdm,
+  label: 'Apple MDM — Supervised Enrollment',
+  description: 'Apple MDM enrollment status, supervised state, and APNs-backed device management',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: true,
+  idempotent: false,
+  operations: ['getEnrollmentStatus', 'getSupervisedState', 'getMdmProfile'],
+  implementationStatus: 'partial',
+};
+
+// ─── Phase 9.1 NinjaOne Adapter ─────────────────────────────────────────────────
+
+export const NINJAONE_STANDARDIZATION_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'ninjaone:standardization',
+  category: AdminAdapterCategory.NinjaOne,
+  label: 'NinjaOne — Post-Enrollment Standardization',
+  description: 'Policy bundle assignment, software deployment, script execution, and device standardization',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: false,
+  idempotent: true,
+  operations: ['assignPolicy', 'triggerSoftware', 'triggerScript', 'getStatus'],
+  implementationStatus: 'partial',
+};
+
+export const NINJAONE_VALIDATION_ADAPTER: IAdminAdapterDescriptor = {
+  adapterKey: 'ninjaone:validation',
+  category: AdminAdapterCategory.NinjaOne,
+  label: 'NinjaOne — Post-Standardization Validation',
+  description: 'Post-enrollment validation checks and remediation verification',
+  domains: ['white-glove-deployment' as never],
+  supportsDryRun: true,
+  supportsCompensation: false,
+  idempotent: true,
+  operations: ['validate', 'getValidationResult'],
+  implementationStatus: 'partial',
+};
+
 // ─── All Phase 3 Adapter Descriptors ────────────────────────────────────────────
 
 /** All adapter descriptors registered during Phase 3 initialization. */
@@ -169,6 +279,17 @@ export const PHASE_3_ADAPTERS: readonly IAdminAdapterDescriptor[] = [
   SHAREPOINT_API_ACCESS_ADAPTER,
   SIGNALR_PROGRESS_ADAPTER,
   NOTIFICATION_DISPATCH_ADAPTER,
+  // Phase 9.1: Microsoft device management
+  MICROSOFT_INTUNE_ADAPTER,
+  MICROSOFT_AUTOPILOT_ADAPTER,
+  MICROSOFT_IDENTITY_DEVICE_ADAPTER,
+  // Phase 9.1: Apple device management
+  APPLE_ABM_ADAPTER,
+  APPLE_ADE_ADAPTER,
+  APPLE_MDM_ADAPTER,
+  // Phase 9.1: NinjaOne standardization
+  NINJAONE_STANDARDIZATION_ADAPTER,
+  NINJAONE_VALIDATION_ADAPTER,
 ];
 
 /**
