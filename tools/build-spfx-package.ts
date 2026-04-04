@@ -665,7 +665,25 @@ for (const domain of domains) {
     [compiledEntryModuleId]: legacyScriptResource,
   };
   delete (normalizedScriptResources as Record<string, unknown>)['shell-web-part'];
+  const generatedShimModuleIds: string[] = [];
   for (const target of targetManifests) {
+    const targetEntryModuleId = `${target.json.id}_${compiledBaseManifest.version}`;
+    const targetScriptResources: Record<string, unknown> = { ...normalizedScriptResources };
+
+    if (targetEntryModuleId !== compiledEntryModuleId) {
+      const shimFileName = `shell-entry-${target.json.id}.js`;
+      const shimPath = path.join(compiledShellAssetPath, shimFileName);
+      const shimSource =
+        `define("${targetEntryModuleId}", ["${compiledEntryModuleId}"], function(baseModule) { return baseModule; });\n`;
+
+      fs.writeFileSync(shimPath, shimSource);
+      targetScriptResources[targetEntryModuleId] = {
+        type: 'path',
+        path: shimFileName,
+      };
+      generatedShimModuleIds.push(targetEntryModuleId);
+    }
+
     const composed = {
       ...compiledBaseManifest,
       id: target.json.id,
@@ -676,8 +694,8 @@ for (const domain of domains) {
       preconfiguredEntries: target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
       loaderConfig: {
         ...compiledBaseManifest.loaderConfig,
-        entryModuleId: compiledEntryModuleId,
-        scriptResources: normalizedScriptResources,
+        entryModuleId: targetEntryModuleId,
+        scriptResources: targetScriptResources,
       },
     };
     fs.writeFileSync(
@@ -685,9 +703,11 @@ for (const domain of domains) {
       JSON.stringify(composed, null, 2),
     );
   }
-  console.log(
-    `  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution (entryModuleId: ${compiledEntryModuleId})`,
-  );
+  console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
+  console.log(`  ✓ Base shell module identity: ${compiledEntryModuleId}`);
+  if (generatedShimModuleIds.length > 0) {
+    console.log(`  ✓ Generated ${generatedShimModuleIds.length} per-webpart AMD shim module(s)`);
+  }
 
   // ── Step 4: Inject Vite assets into temp/deploy/ ────────────────────
   const deployDir = path.join(SHELL_DIR, 'temp', 'deploy');

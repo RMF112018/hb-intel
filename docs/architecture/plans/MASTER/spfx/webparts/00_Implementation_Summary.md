@@ -281,6 +281,27 @@ Runtime loader identity remediation for `hb-webparts` is locked for deployment u
 - Shared shell asset/module identity is now packaged coherently for all first-release `hb-webparts` webparts.
 - The prior `entryModuleId: "shell-web-part"` mismatch condition is removed from packaged hb-webparts manifests.
 
+## LoaderConfig Emission Remediation Artifacts
+
+Per-webpart loader metadata emission remediation for `hb-webparts` is now locked:
+
+- `hb-webparts-loaderconfig-emission-remediation-summary.md`
+- `hb-webparts-loaderconfig-emission-verification.md`
+
+## Resolved Decisions Register (LoaderConfig Emission Remediation)
+
+| Decision ID | Decision                                                                                                     | Status |
+| ----------- | ------------------------------------------------------------------------------------------------------------ | ------ |
+| LCE-01      | Packaged `entryModuleId` emission is per-webpart (`<webpart-id>_<version>`) for `hb-webparts`              | Closed |
+| LCE-02      | Packaged `scriptResources` emission includes per-webpart shim module mapping plus shared base shell mapping | Closed |
+| LCE-03      | Authoritative defect source is multi-manifest composition in `tools/build-spfx-package.ts`                  | Closed |
+| LCE-04      | Remediation release bumps `hb-webparts` solution/feature versions to `1.0.0.10`                             | Closed |
+
+## LoaderConfig Emission Handoff Note
+
+- Rebuilt `hb-webparts.sppkg` no longer reuses `0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0` as `entryModuleId` for unrelated webparts.
+- Per-webpart loader contracts now resolve through packaged shim assets that forward to the shared shell runtime module.
+
 ## Prompt-04 Closure Artifacts
 
 Prompt 04 deliverables are now locked for Prompt 05–10 implementation:

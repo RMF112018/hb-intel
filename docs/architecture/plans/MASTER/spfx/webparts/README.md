@@ -221,6 +221,17 @@ For `hb-webparts`, packaged loader contracts now use the compiled shared AMD mod
 This removes the prior `shell-web-part` runtime identity mismatch while preserving the single shared-shell model.
 Prompt remediation release metadata advances to valid four-part `1.0.0.9` for `hb-webparts` solution + feature versions.
 
+## LoaderConfig Emission Remediation Outputs (Locked)
+
+Per-webpart loader metadata emission remediation outputs are complete and authoritative for runtime packaging behavior:
+
+- `hb-webparts-loaderconfig-emission-remediation-summary.md` — root cause, authoritative emission defect source, old/new packaged metadata behavior, and rebuild verification.
+- `hb-webparts-loaderconfig-emission-verification.md` — representative webpart matrix for packaged `entryModuleId`, `scriptResources`, runtime assets, compiled module identities, and contract match results.
+
+For `hb-webparts`, packaged `loaderConfig.entryModuleId` is now emitted per webpart (`<webpart-id>_<version>`) and `scriptResources` includes per-webpart shim module mappings plus shared base shell mapping.
+This removes incorrect reuse of the first-webpart module identity across unrelated webparts while preserving the shared-shell runtime model.
+Prompt remediation release metadata advances to valid four-part `1.0.0.10` for `hb-webparts` solution + feature versions.
+
 ## Operating Assumptions for the Code Agent
 
 Every prompt assumes the code agent will:
