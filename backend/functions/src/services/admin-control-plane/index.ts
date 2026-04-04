@@ -257,6 +257,23 @@ export {
   OBSERVABILITY_ERRORS_TABLE,
 } from './observability-error-store.js';
 
+// Observability dashboard service (Phase 12 — P12-05)
+export { assembleDashboardSummary } from './observability-dashboard-service.js';
+
+// Observability timeline service (Phase 12 — P12-05)
+export { assembleRunTimeline } from './observability-timeline-service.js';
+
+// Observability telemetry bridge (Phase 12 — P12-05)
+export {
+  bridgeFailureToErrorStore,
+  bridgeAlertEvaluationToStore,
+  createObservabilityBridge,
+} from './observability-telemetry-bridge.js';
+export type {
+  ObservabilityBridgeEventType,
+  IObservabilityBridgeEvent,
+} from './observability-telemetry-bridge.js';
+
 // Stub implementations (mock/test mode and services not yet implemented)
 export {
   StubAdminRunService,

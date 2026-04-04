@@ -25,6 +25,9 @@ import type {
   IConfigVersioningService,
   IConfigResolutionService,
   IConfigSnapshotStore,
+  IObservabilityAlertStore,
+  IObservabilityProbeSnapshotStore,
+  IObservabilityErrorStore,
 } from '../../services/admin-control-plane/index.js';
 import { MockTableStorageService, RealTableStorageService } from '../../services/table-storage-service.js';
 import { ManagedIdentityTokenService, MockManagedIdentityTokenService } from '../../services/managed-identity-token-service.js';
@@ -61,6 +64,12 @@ import {
   ConfigResolutionService,
   DurableConfigSnapshotStore,
   MockConfigSnapshotStore,
+  DurableObservabilityAlertStore,
+  MockObservabilityAlertStore,
+  DurableObservabilityProbeSnapshotStore,
+  MockObservabilityProbeSnapshotStore,
+  DurableObservabilityErrorStore,
+  MockObservabilityErrorStore,
   AdminAdapterRegistry,
   registerPhase3Adapters,
   AdminActorContextResolver,
@@ -115,6 +124,11 @@ export interface IAdminControlPlaneServiceContainer {
   readonly preflightService: IAdminPreflightService;
   readonly actorContextResolver: IAdminActorContextResolver;
   readonly bindingService: IAdminAppBindingService;
+
+  // ── P12-04: Observability stores ────────────────────────────────────────────
+  readonly observabilityAlertStore: IObservabilityAlertStore;
+  readonly observabilityProbeStore: IObservabilityProbeSnapshotStore;
+  readonly observabilityErrorStore: IObservabilityErrorStore;
 
   // ── P9-04: Hybrid identity services ───────────────────────────────────────
   readonly adDirectory: IADDirectoryService;
@@ -184,6 +198,11 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     preflightService: isMock ? new StubAdminPreflightService() : new AdminPreflightService(),  // P6-04: real preflight in prod, stub for mock/test
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
     bindingService: isMock ? new MockAdminAppBindingStore() : new DurableAdminAppBindingStore(),  // P6A-04: app-binding persistence
+
+    // P12-04: Observability stores
+    observabilityAlertStore: isMock ? new MockObservabilityAlertStore() : new DurableObservabilityAlertStore(),
+    observabilityProbeStore: isMock ? new MockObservabilityProbeSnapshotStore() : new DurableObservabilityProbeSnapshotStore(),
+    observabilityErrorStore: isMock ? new MockObservabilityErrorStore() : new DurableObservabilityErrorStore(),
 
     // P9-04: Hybrid identity services
     adDirectory: isMock ? new MockADDirectoryService() : new ADDirectoryService(),
