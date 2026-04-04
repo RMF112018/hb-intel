@@ -194,6 +194,63 @@ export type {
   IAdminSafetyEvidenceSummary,
 } from './IAdminSafety.js';
 
+// Phase 12: Observability enums
+export {
+  ObservabilityAlertSeverity,
+  ObservabilityAlertStatus,
+  ObservabilityAlertCategory,
+  ObservabilityAffectedEntityType,
+  ObservabilityProbeKind,
+  ObservabilityProbeHealthStatus,
+  ObservabilityIncidentStatus,
+  ObservabilityErrorClassification,
+  ObservabilityErrorSource,
+  ObservabilityOperatorActionType,
+  ObservabilityTimelineItemKind,
+} from './ObservabilityEnums.js';
+
+// Phase 12: Observability alert contracts
+export type {
+  IObservabilityAlertRecord,
+  IObservabilityAlertIngestionPayload,
+  IObservabilityAlertIngestionItem,
+  IObservabilityAlertQuery,
+  IObservabilityAlertSummary,
+} from './IObservabilityAlert.js';
+
+// Phase 12: Observability probe contracts
+export type {
+  IObservabilityProbeResultRecord,
+  IObservabilityProbeSnapshotRecord,
+  IObservabilityProbeSnapshotQuery,
+  IObservabilityProbeSubmissionPayload,
+  IObservabilityProbeHealthSummary,
+} from './IObservabilityProbe.js';
+
+// Phase 12: Observability incident contracts
+export type {
+  IObservabilityIncidentRecord,
+  IObservabilityIncidentQuery,
+} from './IObservabilityIncident.js';
+
+// Phase 12: Observability error event contracts
+export type {
+  IObservabilityErrorRecord,
+  IObservabilityErrorIngestionPayload,
+  IObservabilityErrorIngestionItem,
+  IObservabilityErrorQuery,
+} from './IObservabilityError.js';
+
+// Phase 12: Observability timeline and correlation contracts
+export type {
+  IObservabilityCorrelation,
+  IObservabilityOperatorActionRecord,
+  IObservabilityTimelineItem,
+  IObservabilityTimelineQuery,
+  IObservabilityPagedResponse,
+  IObservabilityDashboardSummary,
+} from './IObservabilityTimeline.js';
+
 export {
   WhiteGloveCheckpointType,
   WhiteGloveEvidenceType,

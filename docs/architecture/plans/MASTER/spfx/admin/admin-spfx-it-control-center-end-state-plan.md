@@ -4,8 +4,8 @@
 **Primary artifact type:** Architecture + phased implementation program  
 **Primary surface:** SharePoint Online SPFx application  
 **Primary execution model:** SPFx operator console backed by a separate privileged orchestration backend  
-**Version:** 01.000.030  
-**Revision note:** Adds **Phase 12 observability baseline and storage/retention/access model** (P12-02). Defines canonical layer responsibilities (SPFx=read/interact, features-admin=hooks/components, models=contracts, backend=durable owner), 6 observability data categories (alerts, probe snapshots, incidents, errors, correlated timelines, operator actions), Azure Table Storage as canonical persistence (extending Phase 4 pattern, superseding SharePoint list targets), 7 retention tiers (90–365 days by category), permission model (`admin:observability:*`), 10 minimal query APIs for SPFx consumption, and production adapter direction following service-factory mode resolution. Preserves all prior phase content.
+**Version:** 01.000.031  
+**Revision note:** Adds **Phase 12 shared observability contracts and models** (P12-03). Introduces 11 enums (`ObservabilityAlertSeverity`, `ObservabilityAlertStatus`, `ObservabilityAlertCategory`, `ObservabilityAffectedEntityType`, `ObservabilityProbeKind`, `ObservabilityProbeHealthStatus`, `ObservabilityIncidentStatus`, `ObservabilityErrorClassification`, `ObservabilityErrorSource`, `ObservabilityOperatorActionType`, `ObservabilityTimelineItemKind`) and 23 typed contracts across 6 new files in `packages/models/src/admin-control-plane/` covering alert records/ingestion/query/summary, probe snapshot records/query/submission/health, incident records/query, error records/ingestion/query, correlation metadata, operator action records, timeline items/query, paginated response wrapper, and dashboard summary. 38 fixture-based tests added. Validation: models check-types clean, lint 0 errors (35 pre-existing warnings), build clean, 96 tests passed (5 files). Preserves all prior phase content.
 
 ---
 
