@@ -260,6 +260,27 @@ Multi-webpart packaging remediation for `hb-webparts` is now locked for release-
 - `hb-webparts` now packages all intended first-release webparts as separate toolbox registrations in one `.sppkg`.
 - Single-manifest packaging behavior for other SPFx domains remains unchanged.
 
+## Shell Loader Contract Remediation Artifacts
+
+Runtime loader identity remediation for `hb-webparts` is locked for deployment use:
+
+- `hb-webparts-shell-loader-contract-remediation-summary.md`
+- `hb-webparts-shell-loader-contract-verification.md`
+
+## Resolved Decisions Register (Shell Loader Contract Remediation)
+
+| Decision ID | Decision                                                                                                                       | Status |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| SLC-01      | `hb-webparts` remains on a shared-shell runtime model                                                                          | Closed |
+| SLC-02      | Packaged `entryModuleId` and `scriptResources` key are rewritten to the compiled shared AMD module identity (`<id>_<version>`) | Closed |
+| SLC-03      | Loader mismatch source is authoritative packaging generation, not SharePoint App Catalog or UI runtime code                    | Closed |
+| SLC-04      | Remediation release bumps `hb-webparts` solution/feature versions to `1.0.0.9` in valid four-part format                       | Closed |
+
+## Shell Loader Contract Handoff Note
+
+- Shared shell asset/module identity is now packaged coherently for all first-release `hb-webparts` webparts.
+- The prior `entryModuleId: "shell-web-part"` mismatch condition is removed from packaged hb-webparts manifests.
+
 ## Prompt-04 Closure Artifacts
 
 Prompt 04 deliverables are now locked for Prompt 05–10 implementation:

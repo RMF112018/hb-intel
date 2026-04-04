@@ -652,6 +652,19 @@ for (const domain of domains) {
   }
   const compiledBaseManifestPath = path.join(compiledManifestDir, compiledManifestFiles[0]);
   const compiledBaseManifest = JSON.parse(fs.readFileSync(compiledBaseManifestPath, 'utf8'));
+  const compiledEntryModuleId = `${compiledBaseManifest.id}_${compiledBaseManifest.version}`;
+  const compiledScriptResources = compiledBaseManifest.loaderConfig?.scriptResources ?? {};
+  const legacyScriptResource = compiledScriptResources['shell-web-part'];
+  if (!legacyScriptResource) {
+    console.error(`  ❌ ${domain.dir}: compiled shell manifest missing shell-web-part script resource`);
+    allPassed = false;
+    continue;
+  }
+  const normalizedScriptResources = {
+    ...compiledScriptResources,
+    [compiledEntryModuleId]: legacyScriptResource,
+  };
+  delete (normalizedScriptResources as Record<string, unknown>)['shell-web-part'];
   for (const target of targetManifests) {
     const composed = {
       ...compiledBaseManifest,
@@ -661,13 +674,20 @@ for (const domain of domains) {
       supportedHosts: target.json.supportedHosts ?? compiledBaseManifest.supportedHosts,
       supportsThemeVariants: target.json.supportsThemeVariants ?? compiledBaseManifest.supportsThemeVariants,
       preconfiguredEntries: target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
+      loaderConfig: {
+        ...compiledBaseManifest.loaderConfig,
+        entryModuleId: compiledEntryModuleId,
+        scriptResources: normalizedScriptResources,
+      },
     };
     fs.writeFileSync(
       path.join(compiledManifestDir, `${target.json.id}.manifest.json`),
       JSON.stringify(composed, null, 2),
     );
   }
-  console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
+  console.log(
+    `  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution (entryModuleId: ${compiledEntryModuleId})`,
+  );
 
   // ── Step 4: Inject Vite assets into temp/deploy/ ────────────────────
   const deployDir = path.join(SHELL_DIR, 'temp', 'deploy');

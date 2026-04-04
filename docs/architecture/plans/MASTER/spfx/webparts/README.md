@@ -210,6 +210,17 @@ The authoritative packager now treats `hb-webparts` as a multi-manifest domain w
 Legacy `HbWebparts` scaffold manifest is excluded from first-release toolbox output.
 `hb-webparts` solution/feature versions use SharePoint-valid four-part format (`1.0.0.8`) for App Catalog compatibility.
 
+## Shell Loader Contract Remediation Outputs (Locked)
+
+Shell loader identity remediation outputs are complete and authoritative for runtime packaging behavior:
+
+- `hb-webparts-shell-loader-contract-remediation-summary.md` — root cause, old/new loader contract, authoritative mismatch source, and rebuild verification.
+- `hb-webparts-shell-loader-contract-verification.md` — representative webpart-to-shell loader contract matrix proving packaged identity coherence.
+
+For `hb-webparts`, packaged loader contracts now use the compiled shared AMD module identity (`<compiled-id>_<version>`) consistently in both `entryModuleId` and `scriptResources` keys.
+This removes the prior `shell-web-part` runtime identity mismatch while preserving the single shared-shell model.
+Prompt remediation release metadata advances to valid four-part `1.0.0.9` for `hb-webparts` solution + feature versions.
+
 ## Operating Assumptions for the Code Agent
 
 Every prompt assumes the code agent will:
