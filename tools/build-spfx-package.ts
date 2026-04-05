@@ -37,6 +37,20 @@ interface DomainConfig {
   packagingModel?: 'single' | 'multi';
 }
 
+interface HbShimExpectation {
+  manifestId: string;
+  entryModuleId: string;
+  shimFileName: string;
+  shimFileHash: string;
+  baseModuleId: string;
+}
+
+interface HbVerificationExpectations {
+  baseModuleId: string;
+  shimExpectations: HbShimExpectation[];
+  emittedLocalShimFiles: string[];
+}
+
 const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'accounting', camel: 'accounting', pascal: 'Accounting' },
   { dir: 'estimating', camel: 'projectSetup', pascal: 'ProjectSetup' },
@@ -57,6 +71,9 @@ const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
   '535f5a17-fc49-40ea-ac16-5d68895884f7', // legacy HbWebpartsWebPart
 ]);
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
+const HB_WEBPARTS_PROOF_CASE_IDS = new Set([
+  '39762a4d-c7fd-44a6-a11e-4f8de9f5778d', // HbHeroBannerWebPart
+]);
 
 // ── CLI argument parsing ───────────────────────────────────────────────────
 
@@ -144,6 +161,15 @@ function cleanShellTemp(): void {
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function decodeXmlAttribute(value: string): string {
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
 }
 
 function inspectCompiledShellAsset(
@@ -273,11 +299,16 @@ function verifySppkg(
   bundleName: string,
   expectedIds: string[],
   domainDir: string,
+  hbExpectations?: HbVerificationExpectations,
 ): boolean {
   try {
     // List archive contents using unzip -l (sppkg is a ZIP/OPC archive)
     const listOutput = execSync(`unzip -l "${sppkgPath}"`, { encoding: 'utf8' });
     const entries = listOutput.split('\n').map((l) => l.trim());
+    const archivePaths = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' })
+      .split('\n')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
 
     const checks = [
       { name: '[Content_Types].xml', pattern: /\[Content_Types\]\.xml/ },
@@ -321,6 +352,124 @@ function verifySppkg(
     } catch {
       // Non-fatal — manifest extraction failed but archive structure is OK
       console.warn(`  ⚠ ${domainDir}: could not extract manifest for ID verification`);
+    }
+
+    if (hbExpectations) {
+      const manifestById = new Map<string, { archivePath: string; manifest: any; raw: string }>();
+      const availablePackagedShimFiles = new Set<string>();
+
+      for (const manifestId of expectedIds) {
+        const manifestXmlPath = archivePaths.find((entry) => entry.endsWith(`/WebPart_${manifestId}.xml`));
+        if (!manifestXmlPath) {
+          console.error(`  ❌ ${domainDir}: webpart xml for ${manifestId} missing from .sppkg`);
+          ok = false;
+          continue;
+        }
+        const manifestXml = execSync(
+          `unzip -p "${sppkgPath}" "${manifestXmlPath}"`,
+          { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+        );
+        const componentManifestMatch = manifestXml.match(/ComponentManifest="([^"]+)"/);
+        if (!componentManifestMatch) {
+          console.error(`  ❌ ${domainDir}: ComponentManifest payload missing in ${manifestXmlPath}`);
+          ok = false;
+          continue;
+        }
+        const manifestRaw = decodeXmlAttribute(componentManifestMatch[1]);
+        const parsedManifest = JSON.parse(manifestRaw);
+        manifestById.set(manifestId, {
+          archivePath: manifestXmlPath,
+          manifest: parsedManifest,
+          raw: manifestRaw,
+        });
+      }
+
+      for (const shimExpectation of hbExpectations.shimExpectations) {
+        const manifestRecord = manifestById.get(shimExpectation.manifestId);
+        if (!manifestRecord) {
+          continue;
+        }
+
+        const { manifest } = manifestRecord;
+        const loaderConfig = manifest.loaderConfig ?? {};
+        if (loaderConfig.entryModuleId !== shimExpectation.entryModuleId) {
+          console.error(
+            `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} entryModuleId mismatch ` +
+            `(expected ${shimExpectation.entryModuleId}, got ${String(loaderConfig.entryModuleId)})`,
+          );
+          ok = false;
+        }
+
+        const scriptResource = loaderConfig.scriptResources?.[shimExpectation.entryModuleId];
+        if (!scriptResource || scriptResource.type !== 'path' || typeof scriptResource.path !== 'string') {
+          console.error(
+            `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} missing path scriptResource for ` +
+            `${shimExpectation.entryModuleId}`,
+          );
+          ok = false;
+          continue;
+        }
+
+        if (scriptResource.path !== shimExpectation.shimFileName) {
+          console.error(
+            `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} scriptResources path mismatch ` +
+            `(expected ${shimExpectation.shimFileName}, got ${scriptResource.path})`,
+          );
+          ok = false;
+        }
+
+        if (!/^shell-entry-[0-9a-f-]{36}-[a-f0-9]{8}\.js$/i.test(scriptResource.path)) {
+          console.error(
+            `  ❌ ${domainDir}: manifest ${shimExpectation.manifestId} scriptResource path is not versioned: ${scriptResource.path}`,
+          );
+          ok = false;
+        }
+
+        const shimArchivePath = archivePaths.find((entry) => entry.endsWith(`/${scriptResource.path}`));
+        if (!shimArchivePath) {
+          console.error(`  ❌ ${domainDir}: shim asset ${scriptResource.path} missing from .sppkg`);
+          ok = false;
+          continue;
+        }
+        availablePackagedShimFiles.add(scriptResource.path);
+
+        const shimSource = execSync(
+          `unzip -p "${sppkgPath}" "${shimArchivePath}"`,
+          { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+        );
+        const expectedDefine = `define("${shimExpectation.entryModuleId}"`;
+        const expectedDependency = `["${shimExpectation.baseModuleId}"]`;
+
+        if (!shimSource.includes(expectedDefine)) {
+          console.error(
+            `  ❌ ${domainDir}: shim ${scriptResource.path} missing expected AMD define for ${shimExpectation.entryModuleId}`,
+          );
+          ok = false;
+        }
+        if (!shimSource.includes(expectedDependency)) {
+          console.error(
+            `  ❌ ${domainDir}: shim ${scriptResource.path} missing expected dependency on ${shimExpectation.baseModuleId}`,
+          );
+          ok = false;
+        }
+      }
+
+      const allManifestRaw = Array.from(manifestById.values()).map((record) => record.raw).join('\n');
+      const hasLegacyStableShimRef = /shell-entry-[0-9a-f-]{36}\.js\b/i.test(allManifestRaw);
+      if (hasLegacyStableShimRef) {
+        console.error(`  ❌ ${domainDir}: found legacy non-versioned shim path reference in packaged manifest`);
+        ok = false;
+      }
+
+      const expectedPackagedShimFiles = hbExpectations.shimExpectations.map((expectation) => expectation.shimFileName).sort();
+      const packagedShimFiles = Array.from(availablePackagedShimFiles).sort();
+      console.log(`  ✓ Packaged shim files (${packagedShimFiles.length}): ${packagedShimFiles.join(', ')}`);
+      console.log(`  ✓ Neutral shared shell module identity: ${hbExpectations.baseModuleId}`);
+
+      if (expectedPackagedShimFiles.join('|') !== packagedShimFiles.join('|')) {
+        console.error(`  ❌ ${domainDir}: packaged shim set does not match expected manifest-to-shim mapping`);
+        ok = false;
+      }
     }
 
     if (ok) {
@@ -385,10 +534,16 @@ for (const domain of domains) {
     }
   }
 
-  const targetManifests =
+  let targetManifests =
     domain.packagingModel === 'multi'
       ? sourceManifests
       : sourceManifests.slice(0, 1);
+
+  // Proof-case scope lock: restrict hb-webparts to only the proof-case
+  // webpart IDs until each has been validated in the first-class loader model.
+  if (domain.dir === 'hb-webparts' && HB_WEBPARTS_PROOF_CASE_IDS.size > 0) {
+    targetManifests = targetManifests.filter((m) => HB_WEBPARTS_PROOF_CASE_IDS.has(m.json.id));
+  }
 
   if (targetManifests.length === 0) {
     console.error(`  ❌ ${domain.dir}: no eligible webpart manifest found`);
@@ -578,7 +733,12 @@ for (const domain of domains) {
 
   // Write primary domain manifest into the shell (additional manifests for multi-mode
   // are generated from this compiled base after gulp bundle).
-  const useNeutralShellManifestId = domain.dir === 'hb-webparts' && domain.packagingModel === 'multi';
+  // Use the neutral shell manifest only when multiple target manifests require
+  // post-bundle cloning and AMD shim generation.  When a single proof-case
+  // target is active, compile with the real manifest ID so SPFx emits the
+  // loader contract natively — no shims, no cloned manifests.
+  const useNeutralShellManifestId =
+    domain.dir === 'hb-webparts' && domain.packagingModel === 'multi' && targetManifests.length > 1;
   const shellManifestId = useNeutralShellManifestId
     ? HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID
     : primarySourceManifest.id;
@@ -677,23 +837,39 @@ for (const domain of domains) {
     [compiledEntryModuleId]: legacyScriptResource,
   };
   delete (normalizedScriptResources as Record<string, unknown>)['shell-web-part'];
-  const generatedShimModuleIds: string[] = [];
+  const generatedShimExpectations: HbShimExpectation[] = [];
+
+  // Remove stale shim files before rewriting per-webpart shims so repeated
+  // local builds cannot accidentally retain obsolete stable shim filenames.
+  for (const file of fs.readdirSync(compiledShellAssetPath)) {
+    if (/^shell-entry-[0-9a-f-]{36}(?:-[a-f0-9]{8})?\.js$/i.test(file)) {
+      fs.rmSync(path.join(compiledShellAssetPath, file), { force: true });
+    }
+  }
+
   for (const target of targetManifests) {
     const targetEntryModuleId = `${target.json.id}_${compiledBaseManifest.version}`;
     const targetScriptResources: Record<string, unknown> = { ...normalizedScriptResources };
 
     if (targetEntryModuleId !== compiledEntryModuleId) {
-      const shimFileName = `shell-entry-${target.json.id}.js`;
-      const shimPath = path.join(compiledShellAssetPath, shimFileName);
       const shimSource =
         `define("${targetEntryModuleId}", ["${compiledEntryModuleId}"], function(baseModule) { return baseModule; });\n`;
+      const shimHash = createHash('sha256').update(Buffer.from(shimSource, 'utf8')).digest('hex').slice(0, 8);
+      const shimFileName = `shell-entry-${target.json.id}-${shimHash}.js`;
+      const shimPath = path.join(compiledShellAssetPath, shimFileName);
 
       fs.writeFileSync(shimPath, shimSource);
       targetScriptResources[targetEntryModuleId] = {
         type: 'path',
         path: shimFileName,
       };
-      generatedShimModuleIds.push(targetEntryModuleId);
+      generatedShimExpectations.push({
+        manifestId: target.json.id,
+        entryModuleId: targetEntryModuleId,
+        shimFileName,
+        shimFileHash: shimHash,
+        baseModuleId: compiledEntryModuleId,
+      });
     }
 
     const composed = {
@@ -720,8 +896,13 @@ for (const domain of domains) {
   }
   console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
   console.log(`  ✓ Base shell module identity: ${compiledEntryModuleId}`);
-  if (generatedShimModuleIds.length > 0) {
-    console.log(`  ✓ Generated ${generatedShimModuleIds.length} per-webpart AMD shim module(s)`);
+  if (generatedShimExpectations.length > 0) {
+    console.log(`  ✓ Generated ${generatedShimExpectations.length} per-webpart AMD shim module(s)`);
+    for (const shim of generatedShimExpectations) {
+      console.log(
+        `    - ${shim.manifestId} -> ${shim.shimFileName} (entry ${shim.entryModuleId}, sha256:${shim.shimFileHash})`,
+      );
+    }
   }
 
   // ── Step 4: Inject Vite assets into temp/deploy/ ────────────────────
@@ -767,7 +948,15 @@ for (const domain of domains) {
   fs.copyFileSync(sppkgSource, sppkgDest);
 
   // Post-packaging verification: inspect .sppkg contents (OPC/ZIP archive)
-  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir);
+  const emittedLocalShimFiles = generatedShimExpectations.map((expectation) => expectation.shimFileName).sort();
+  const hbExpectations = domain.dir === 'hb-webparts'
+    ? {
+      baseModuleId: compiledEntryModuleId,
+      shimExpectations: generatedShimExpectations,
+      emittedLocalShimFiles,
+    }
+    : undefined;
+  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir, hbExpectations);
   if (!verified) {
     allPassed = false;
     continue;
@@ -783,6 +972,30 @@ for (const domain of domains) {
   )) {
     allPassed = false;
     continue;
+  }
+
+  if (hbExpectations) {
+    const packagedShimSummary = hbExpectations.shimExpectations
+      .map((expectation) => ({
+        manifestId: expectation.manifestId,
+        entryModuleId: expectation.entryModuleId,
+        shimFileName: expectation.shimFileName,
+        shimFileHash: expectation.shimFileHash,
+        baseModuleId: expectation.baseModuleId,
+      }))
+      .sort((a, b) => a.manifestId.localeCompare(b.manifestId));
+    const proofOutputPath = path.join(OUTPUT_DIR, `${domain.dir}-shim-proof.json`);
+    fs.writeFileSync(
+      proofOutputPath,
+      `${JSON.stringify({
+        domain: domain.dir,
+        sppkgFile: path.basename(sppkgDest),
+        baseModuleId: hbExpectations.baseModuleId,
+        emittedLocalShimFiles: hbExpectations.emittedLocalShimFiles,
+        packagedShimMappings: packagedShimSummary,
+      }, null, 2)}\n`,
+    );
+    console.log(`  ✓ Shim proof written: ${proofOutputPath}`);
   }
 
   const stats = fs.statSync(sppkgDest);

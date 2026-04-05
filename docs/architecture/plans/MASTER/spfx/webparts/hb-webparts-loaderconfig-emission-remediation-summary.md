@@ -2,32 +2,37 @@
 
 ## Root cause
 
-The authoritative multi-manifest emission logic in `tools/build-spfx-package.ts` previously used a real webpart component identity as the shared shell base module identity (`0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0`).
+The authoritative multi-manifest emission logic in `tools/build-spfx-package.ts` still emitted per-webpart shim assets with stable names (`shell-entry-<webpart-id>.js`).
 
-This made non-base webparts depend on another real webpart ID for runtime module resolution, violating neutral loader contract expectations and creating fragile coupling.
+Even when package internals were structurally correct, stable shim URLs made stale browser/CDN/App Catalog bytes plausible at SharePoint loader time, including the observed `Could not load 39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0 in require` symptom.
 
 ## Authoritative source of the emission defect
 
 - `tools/build-spfx-package.ts`
-  - shell compiled identity inherited from a real webpart manifest ID
-  - per-webpart shims depended on that real webpart module identity
-  - base manifest selection depended on compiled manifest ordering behavior
+  - per-webpart shim filename generation used stable names
+  - manifest rewrite mapped `scriptResources[entryModuleId]` to those stable shim paths
+  - package verification did not fail on legacy non-versioned shim path patterns
 
 ## Remediation applied
 
-- Introduced a dedicated neutral shared shell manifest ID for `hb-webparts`:
-  - `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e`
-- Shell compile for `hb-webparts` now uses the neutral ID (shell-only identity, not a homepage webpart ID).
-- Base runtime module identity is derived deterministically from neutral shell ID + compiled version:
+- Preserved neutral shared shell module identity for `hb-webparts`:
   - `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`
-- After cloning/recomposition, the neutral compiled manifest is removed before `package-solution` so no extra toolbox registration is introduced.
-- Every emitted webpart manifest now uses:
-  - `entryModuleId = <webpart-id>_<version>`
-  - `scriptResources` including:
-    - SPFx component dependencies
-    - neutral shared shell module key mapping to `shell-web-part_*.js`
-    - per-webpart shim mapping to `shell-entry-<webpart-id>.js`
-- Every per-webpart shim depends on neutral shell identity, not on another webpart ID.
+- Replaced stable shim filenames with deterministic content-hashed names:
+  - `shell-entry-<webpart-id>-<sha256-8>.js`
+- Shim AMD payload contract remains unchanged:
+  - `define("<webpart-id>_1.0.0", ["9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0"], ...)`
+- Manifest composition now maps each target webpart `entryModuleId` to its own hashed shim path.
+- Packaging verification for `hb-webparts` now fails on any of the following:
+  - missing target manifest
+  - `entryModuleId` mismatch
+  - missing/mismatched `scriptResources[entryModuleId]`
+  - missing packaged shim asset
+  - shim asset missing expected AMD `define(...)`
+  - shim asset missing expected dependency on neutral base module identity
+  - any packaged manifest still referencing legacy `shell-entry-<webpart-id>.js`
+- Packaging emits machine-readable anti-staleness proof output:
+  - `dist/sppkg/hb-webparts-shim-proof.json`
+  - includes emitted local shim filenames, packaged manifest-to-shim mapping, and neutral base module identity
 
 ## Files changed
 
@@ -40,13 +45,17 @@ This made non-base webparts depend on another real webpart ID for runtime module
 
 ## Old vs new packaged behavior
 
-### `entryModuleId`
-- Old: per-webpart entries resolved through a shared base tied to a real webpart ID.
-- New: every webpart has its own `entryModuleId` (`<webpart-id>_1.0.0`) and resolves through a neutral shared shell dependency.
+### Shim path emission
+- Old: `shell-entry-<webpart-id>.js` (stable URL)
+- New: `shell-entry-<webpart-id>-<content-hash>.js` (cache-busting URL on shim-content change)
 
-### `scriptResources`
-- Old: base dependency identity was a real webpart module ID.
-- New: base dependency identity is neutral shell module ID `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`.
+### `entryModuleId` + `scriptResources`
+- Old: per-webpart mapping present but shim URL was stable.
+- New: per-webpart mapping present and URL is content-versioned.
+
+### Verification posture
+- Old: archive verification focused on structure + ID presence.
+- New: archive verification enforces manifest↔shim↔AMD-define↔neutral-dependency integrity and rejects legacy shim path pattern.
 
 ## Rebuild path used
 
@@ -59,14 +68,25 @@ This made non-base webparts depend on another real webpart ID for runtime module
 ## Packaged verification highlights
 
 - Rebuilt artifact: `dist/sppkg/hb-webparts.sppkg`
-- Toolbox manifests remain separately emitted for intended webparts.
 - Packaged neutral shell asset defines:
   - `define("9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0", ...)`
-- Packaged per-webpart shim assets define `<webpart-id>_1.0.0` and depend only on neutral shell module ID.
-- Representative webparts no longer reference another webpart ID as shared base shell dependency.
+- Packaged per-webpart shim assets define `<webpart-id>_1.0.0` and depend only on neutral shell module identity.
+- Legacy non-versioned shim references are explicitly rejected by verification.
 - Version bump applied:
-  - `solution.version`: `1.0.0.11`
-  - `feature.version`: `1.0.0.11`
+  - `solution.version`: `1.0.0.12`
+  - `feature.version`: `1.0.0.12`
+
+## Operator live validation checklist (SharePoint)
+
+1. Upload/deploy `hb-webparts.sppkg` and open a page with **HB Hero Banner**.
+2. In browser DevTools Network, filter for `shell-entry-39762a4d` and confirm requested filename matches `shell-entry-39762a4d-c7fd-44a6-a11e-4f8de9f5778d-<hash>.js` (hashed suffix present).
+3. Open the response body and verify it contains:
+   - `define("39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0"`
+   - dependency `"9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0"`
+4. Confirm console no longer reports `Could not load 39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0 in require`.
+5. Distinguish stale-asset state vs code defect:
+   - stale state: live requested shim filename does not match new hashed filename from `hb-webparts-shim-proof.json`
+   - code defect: live shim filename matches package proof but console still fails require resolution
 
 ## Secondary warnings
 
@@ -74,5 +94,5 @@ This made non-base webparts depend on another real webpart ID for runtime module
 
 ## Remaining risks
 
-- Browser runtime rendering proof in a live SharePoint page was not executed in this environment; package-level evidence confirms neutral identity and canonical loader contract emission, but page runtime should still be validated in tenant upload smoke test.
+- Browser runtime validation still depends on tenant deployment and cannot be fully proven in this local build environment alone.
 - `BACKEND_MODE` remains unset by default in local packaging unless explicitly provided by CI/CD.

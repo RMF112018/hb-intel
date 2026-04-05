@@ -230,8 +230,9 @@ Per-webpart loader metadata emission remediation outputs are complete and author
 
 For `hb-webparts`, packaged `loaderConfig.entryModuleId` is now emitted per webpart (`<webpart-id>_<version>`) and `scriptResources` includes per-webpart shim module mappings plus shared base shell mapping.
 Shared base shell mapping now targets neutral shell identity (`9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`), not any real homepage webpart component ID.
+Per-webpart shim assets now use content-hashed cache-busting file names (`shell-entry-<webpart-id>-<hash>.js`) to prevent stale URL byte reuse during SharePoint loader resolution.
 This removes webpart-to-webpart base dependency coupling while preserving the shared-shell runtime model.
-Prompt remediation release metadata advances to valid four-part `1.0.0.11` for `hb-webparts` solution + feature versions.
+Prompt remediation release metadata advances to valid four-part `1.0.0.12` for `hb-webparts` solution + feature versions.
 
 ## Operating Assumptions for the Code Agent
 

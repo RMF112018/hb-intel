@@ -1,14 +1,15 @@
 {
-  "id": "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f",
-  "alias": "PersonalizedWelcomeHeaderWebPart",
+  "id": "cfade002-7ec3-4939-92bf-4aec3e2162e7",
+  "alias": "AdminWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart"
+    "SharePointWebPart",
+    "TeamsPersonalApp"
   ],
-  "supportsThemeVariants": false,
+  "supportsThemeVariants": true,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
@@ -16,18 +17,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Personalized Welcome Header"
+        "default": "HB Intel Admin"
       },
       "description": {
-        "default": "Signature greeting header for HB Central top-band composition."
+        "default": "HB Intel Admin workspace."
       },
-      "officeFabricIconFontName": "Contact",
+      "officeFabricIconFontName": "BuildDefinition",
       "properties": {
-        "supportLine": "Welcome back to HB Central.",
-        "contextLine": "Here is your operational snapshot for today.",
-        "alertSeverity": "none",
-        "alertTitle": "",
-        "alertMessage": ""
+        "description": "Admin"
       }
     }
   ],
@@ -35,7 +32,7 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0",
+    "entryModuleId": "cfade002-7ec3-4939-92bf-4aec3e2162e7_1.0.0",
     "scriptResources": {
       "@microsoft/sp-loader": {
         "type": "component",
@@ -47,9 +44,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0": {
+      "cfade002-7ec3-4939-92bf-4aec3e2162e7_1.0.0": {
         "type": "path",
-        "path": "shell-web-part_66a8874d87ce501231b6.js"
+        "path": "shell-web-part_df798ce790ba852376c5.js"
       }
     }
   }

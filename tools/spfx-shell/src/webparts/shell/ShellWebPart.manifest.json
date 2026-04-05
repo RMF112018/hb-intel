@@ -1,13 +1,14 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "0b53f651-fd92-4f7f-a9da-f7797017f5eb",
+  "id": "cfade002-7ec3-4939-92bf-4aec3e2162e7",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart"
+    "SharePointWebPart",
+    "TeamsPersonalApp"
   ],
   "supportsThemeVariants": true,
   "preconfiguredEntries": [
@@ -17,36 +18,14 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Company Pulse"
+        "default": "HB Intel Admin"
       },
       "description": {
-        "default": "Curated internal updates with featured and secondary editorial hierarchy."
+        "default": "HB Intel Admin workspace."
       },
-      "officeFabricIconFontName": "News",
+      "officeFabricIconFontName": "BuildDefinition",
       "properties": {
-        "heading": "Company Pulse",
-        "maxSecondaryItems": 3,
-        "items": [
-          {
-            "id": "pulse-feature",
-            "title": "Q2 Milestone Achieved",
-            "summary": "Operations and field teams completed a major safety and quality milestone.",
-            "category": "milestone",
-            "featured": true,
-            "order": 1,
-            "cta": {
-              "label": "Read highlights",
-              "href": "/sites/hb-central/pulse"
-            }
-          },
-          {
-            "id": "pulse-safety",
-            "title": "Safety Highlight",
-            "summary": "Project crews completed all required toolbox talks this week.",
-            "category": "safety",
-            "order": 2
-          }
-        ]
+        "description": "Admin"
       }
     }
   ]

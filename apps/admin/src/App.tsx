@@ -10,6 +10,7 @@ const router = createWebpartRouter();
 
 interface AppProps {
   spfxContext?: { pageContext: { user: { loginName: string } } };
+  getApiToken?: () => Promise<string>;
 }
 
 export function App({ spfxContext }: AppProps): React.ReactNode {

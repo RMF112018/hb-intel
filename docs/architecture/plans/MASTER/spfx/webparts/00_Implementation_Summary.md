@@ -295,12 +295,14 @@ Per-webpart loader metadata emission remediation for `hb-webparts` is now locked
 | LCE-01      | Shared shell runtime identity is a neutral shell-only GUID, not a real webpart component ID                 | Closed |
 | LCE-02      | Packaged `entryModuleId` remains per-webpart while `scriptResources` base dependency targets neutral shell ID | Closed |
 | LCE-03      | Authoritative defect source remains multi-manifest composition in `tools/build-spfx-package.ts`              | Closed |
-| LCE-04      | Remediation release bumps `hb-webparts` solution/feature versions to `1.0.0.11`                              | Closed |
+| LCE-04      | Per-webpart shim asset paths are content-hashed (`shell-entry-<webpart-id>-<hash>.js`) and manifest-wired   | Closed |
+| LCE-05      | Remediation release bumps `hb-webparts` solution/feature versions to `1.0.0.12`                              | Closed |
 
 ## LoaderConfig Emission Handoff Note
 
 - Rebuilt `hb-webparts.sppkg` uses neutral shared shell module identity `9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0`.
-- Per-webpart loader contracts resolve through packaged shim assets that depend on neutral shell identity, not another webpart ID.
+- Per-webpart loader contracts resolve through packaged content-hashed shim assets that depend on neutral shell identity, not another webpart ID.
+- Packaging verification now fails on legacy non-versioned shim path patterns (`shell-entry-<webpart-id>.js`) and on shim/module dependency drift.
 
 ## Prompt-04 Closure Artifacts
 
