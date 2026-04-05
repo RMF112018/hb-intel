@@ -353,6 +353,7 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `docs/how-to/administrator/sharepoint-navigation-operating-guide.md` | **Living Reference (Diátaxis)** | Admin operating guide for approved nav changes, self-service vs approval matrix, routing rules |
 | `docs/reference/sharepoint-branding-and-page-templates.md` | **Living Reference (Diátaxis)** | Branding alignment, 5 page-template families, approved composition patterns, authoring rules, template governance |
 | `docs/how-to/administrator/sharepoint-page-authoring-guide.md` | **Living Reference (Diátaxis)** | Page author guide: template selection, step-by-step creation, review checklist, when to avoid custom webparts |
+| `docs/reference/sharepoint-homepage-ownership-and-freshness.md` | **Living Reference (Diátaxis)** | Homepage ownership by zone/webpart, freshness cadences, stale thresholds, review model, emergency update path |
 
 ### 2.4 Admin SPFx IT Control Center Plan Library
 

@@ -51,6 +51,8 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - **[Page Authoring Guide](./how-to/administrator/sharepoint-page-authoring-guide.md)** — Practical instructions for site owners and content authors creating pages on HB Central.
 
+- **[Homepage Ownership & Freshness](./reference/sharepoint-homepage-ownership-and-freshness.md)** — Zone-by-zone and webpart-by-webpart ownership, freshness cadences, stale thresholds, review model, and emergency update path.
+
 ## Development Plan Library
 
 - **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases. Phase 0 and Phase 1 planning are complete; Phases 2–7 are forward-planning drafts. Start here for program structure, milestones, and Phase 1 deliverables.
