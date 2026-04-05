@@ -1,15 +1,14 @@
 {
-  "id": "cfade002-7ec3-4939-92bf-4aec3e2162e7",
-  "alias": "AdminWebPart",
+  "id": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
+  "alias": "HbHeroBannerWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart",
-    "TeamsPersonalApp"
+    "SharePointWebPart"
   ],
-  "supportsThemeVariants": true,
+  "supportsThemeVariants": false,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
@@ -17,14 +16,20 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Admin"
+        "default": "HB Hero Banner"
       },
       "description": {
-        "default": "HB Intel Admin workspace."
+        "default": "Authorable editorial hero banner for HB Central top-band composition."
       },
-      "officeFabricIconFontName": "BuildDefinition",
+      "officeFabricIconFontName": "Photo2",
       "properties": {
-        "description": "Admin"
+        "headline": "Build with confidence.",
+        "message": "Keep teams aligned on priorities, updates, and field execution from one homepage experience.",
+        "metadata": "Updated weekly by Communications",
+        "cta": {
+          "label": "Read this week’s update",
+          "href": "/sites/hb-central"
+        }
       }
     }
   ],
@@ -32,7 +37,7 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "cfade002-7ec3-4939-92bf-4aec3e2162e7_1.0.0",
+    "entryModuleId": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0",
     "scriptResources": {
       "@microsoft/sp-loader": {
         "type": "component",
@@ -44,9 +49,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "cfade002-7ec3-4939-92bf-4aec3e2162e7_1.0.0": {
+      "39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0": {
         "type": "path",
-        "path": "shell-web-part_df798ce790ba852376c5.js"
+        "path": "shell-web-part_8324e4b9e8d300cdb032.js"
       }
     }
   }

@@ -1,14 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "cfade002-7ec3-4939-92bf-4aec3e2162e7",
+  "id": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [
-    "SharePointWebPart",
-    "TeamsPersonalApp"
+    "SharePointWebPart"
   ],
   "supportsThemeVariants": true,
   "preconfiguredEntries": [
@@ -18,14 +17,20 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Admin"
+        "default": "HB Hero Banner"
       },
       "description": {
-        "default": "HB Intel Admin workspace."
+        "default": "Authorable editorial hero banner for HB Central top-band composition."
       },
-      "officeFabricIconFontName": "BuildDefinition",
+      "officeFabricIconFontName": "Photo2",
       "properties": {
-        "description": "Admin"
+        "headline": "Build with confidence.",
+        "message": "Keep teams aligned on priorities, updates, and field execution from one homepage experience.",
+        "metadata": "Updated weekly by Communications",
+        "cta": {
+          "label": "Read this week’s update",
+          "href": "/sites/hb-central"
+        }
       }
     }
   ]

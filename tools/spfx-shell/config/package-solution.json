@@ -1,25 +1,25 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "hb-intel-admin",
-    "id": "a77a1dbc-7ba3-42e1-b8f1-3524550dd136",
-    "version": "1.0.0.0",
+    "name": "hb-webparts",
+    "id": "39b8f2ea-59bd-45b7-b4ec-b590b316833b",
+    "version": "01.000.014",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "developer": {
-      "name": "HB Caldwell",
-      "websiteUrl": "https://hbcaldwell.com",
+      "name": "Hedrick Brothers",
+      "websiteUrl": "https://hedrickbrothers.com",
       "privacyUrl": "",
       "termsOfUseUrl": "",
       "mpnId": ""
     },
     "metadata": {
       "shortDescription": {
-        "default": "HB Intel Admin workspace"
+        "default": "HB Central homepage webparts scaffold"
       },
       "longDescription": {
-        "default": "HB Intel Admin workspace for construction project management."
+        "default": "Shared homepage primitive and webpart scaffolding package for HB Central."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,17 +27,17 @@
     },
     "features": [
       {
-        "title": "hb-intel-admin Feature",
-        "description": "Deploys HB Intel Admin webpart assets.",
-        "id": "5a33a204-be56-448d-8dc3-bce7631594db",
-        "version": "1.0.0.0",
+        "title": "hb-webparts Feature",
+        "description": "Deploys HB Central homepage webpart assets.",
+        "id": "1f447e99-a2c7-43e5-83d8-d2ed78ed1a96",
+        "version": "01.000.014",
         "componentIds": [
-          "cfade002-7ec3-4939-92bf-4aec3e2162e7"
+          "39762a4d-c7fd-44a6-a11e-4f8de9f5778d"
         ]
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/hb-intel-admin.sppkg"
+    "zippedPackage": "solution/hb-webparts.sppkg"
   }
 }
