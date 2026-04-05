@@ -108,7 +108,7 @@ Built by `tools/build-spfx-package.ts --domain hb-webparts`.
 pnpm --filter @hbc/spfx-hb-webparts check-types   # TypeScript type-check
 pnpm --filter @hbc/spfx-hb-webparts lint           # ESLint (includes import guardrails)
 pnpm --filter @hbc/spfx-hb-webparts build          # Vite IIFE build
-pnpm --filter @hbc/spfx-hb-webparts test           # Vitest (13 test files)
+pnpm --filter @hbc/spfx-hb-webparts test           # Vitest (18 test files)
 ```
 
 ## Related Documents
