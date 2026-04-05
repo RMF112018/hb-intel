@@ -378,6 +378,7 @@ function verifySppkg(
   domainDir: string,
   hbExpectations?: HbVerificationExpectations,
   isExtension?: boolean,
+  fullBleedManifestIds?: Set<string>,
 ): boolean {
   try {
     // List archive contents using unzip -l (sppkg is a ZIP/OPC archive)
@@ -590,6 +591,35 @@ function verifySppkg(
       if (expectedPackagedShimFiles.join('|') !== packagedShimFiles.join('|')) {
         console.error(`  ❌ ${domainDir}: packaged shim set does not match expected manifest-to-shim mapping`);
         ok = false;
+      }
+    }
+
+    // Verify supportsFullBleed preservation for webparts that declare it
+    if (fullBleedManifestIds && fullBleedManifestIds.size > 0) {
+      for (const fbId of fullBleedManifestIds) {
+        const fbXmlPath = archivePaths.find((e) => e.endsWith(`/WebPart_${fbId}.xml`));
+        if (!fbXmlPath) {
+          console.error(`  ❌ ${domainDir}: supportsFullBleed webpart ${fbId} not found in .sppkg`);
+          ok = false;
+          continue;
+        }
+        const fbXml = execSync(
+          `unzip -p "${sppkgPath}" "${fbXmlPath}"`,
+          { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
+        );
+        const fbMatch = fbXml.match(/ComponentManifest="([^"]+)"/);
+        if (!fbMatch) {
+          console.error(`  ❌ ${domainDir}: ComponentManifest missing for supportsFullBleed webpart ${fbId}`);
+          ok = false;
+          continue;
+        }
+        const fbManifest = JSON.parse(decodeXmlAttribute(fbMatch[1]));
+        if (fbManifest.supportsFullBleed !== true) {
+          console.error(`  ❌ ${domainDir}: packaged manifest ${fbId} missing supportsFullBleed: true`);
+          ok = false;
+        } else {
+          console.log(`  ✓ ${fbId.substring(0, 8)}... supportsFullBleed: true preserved`);
+        }
       }
     }
 
@@ -969,6 +999,7 @@ for (const domain of domains) {
       requiresCustomScript: false,
       supportedHosts: primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp'],
       supportsThemeVariants: true,
+      ...(primarySourceManifest.supportsFullBleed !== undefined && { supportsFullBleed: primarySourceManifest.supportsFullBleed }),
       preconfiguredEntries: primarySourceManifest.preconfiguredEntries,
     };
     fs.writeFileSync(
@@ -1110,6 +1141,7 @@ for (const domain of domains) {
       requiresCustomScript: target.json.requiresCustomScript ?? compiledBaseManifest.requiresCustomScript,
       supportedHosts: target.json.supportedHosts ?? compiledBaseManifest.supportedHosts,
       supportsThemeVariants: target.json.supportsThemeVariants ?? compiledBaseManifest.supportsThemeVariants,
+      ...(target.json.supportsFullBleed !== undefined && { supportsFullBleed: target.json.supportsFullBleed }),
       preconfiguredEntries: target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
       loaderConfig: {
         ...compiledBaseManifest.loaderConfig,
@@ -1201,7 +1233,10 @@ for (const domain of domains) {
       emittedLocalShimFiles,
     }
     : undefined;
-  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir, hbExpectations, isExtension);
+  const fullBleedManifestIds = new Set(
+    targetManifests.filter((m) => m.json.supportsFullBleed === true).map((m) => m.json.id),
+  );
+  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir, hbExpectations, isExtension, fullBleedManifestIds);
   if (!verified) {
     allPassed = false;
     continue;
