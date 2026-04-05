@@ -74,6 +74,10 @@ const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3
 const HB_WEBPARTS_PROOF_CASE_IDS = new Set([
   '39762a4d-c7fd-44a6-a11e-4f8de9f5778d', // HbHeroBannerWebPart
 ]);
+const HB_WEBPARTS_PROOF_CASE_ENTRY_MAP: Record<string, string> = {
+  '39762a4d-c7fd-44a6-a11e-4f8de9f5778d': 'src/mount-hero-proof-case.tsx',
+  'b3f07190-79cf-437d-a1d6-ecbf3f77e616': 'src/mount-priority-actions-rail-proof-case.tsx',
+};
 
 // ── CLI argument parsing ───────────────────────────────────────────────────
 
@@ -565,10 +569,22 @@ for (const domain of domains) {
   // For the hb-webparts proof case, use the isolated entry that imports only
   // the proof-case webpart component — avoids bundle contamination from the
   // full mount.tsx which imports all 10 webpart trees.
+  // The entry file is resolved from HB_WEBPARTS_PROOF_CASE_ENTRY_MAP by
+  // manifest ID so future proof-case migrations do not require ad hoc
+  // hardcoded entry-file replacements.
   const isProofCase = domain.dir === 'hb-webparts' && HB_WEBPARTS_PROOF_CASE_IDS.size > 0 && targetManifests.length === 1;
-  const proofCaseBuildEnv: Record<string, string> = isProofCase
-    ? { HB_WEBPARTS_ENTRY: 'src/mount-hero-proof-case.tsx' }
-    : {};
+  const proofCaseBuildEnv: Record<string, string> = {};
+  if (isProofCase) {
+    const proofCaseId = targetManifests[0].json.id;
+    const proofCaseEntry = HB_WEBPARTS_PROOF_CASE_ENTRY_MAP[proofCaseId];
+    if (!proofCaseEntry) {
+      console.error(`  ❌ ${domain.dir}: no proof-case entry mapped for manifest ID ${proofCaseId}`);
+      console.error(`     Add an entry to HB_WEBPARTS_PROOF_CASE_ENTRY_MAP in build-spfx-package.ts`);
+      allPassed = false;
+      continue;
+    }
+    proofCaseBuildEnv.HB_WEBPARTS_ENTRY = proofCaseEntry;
+  }
 
   if (!fs.existsSync(distDir)) {
     console.log('  Building app with Vite...');
