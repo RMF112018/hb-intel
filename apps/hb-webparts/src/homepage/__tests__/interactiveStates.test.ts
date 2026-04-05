@@ -71,8 +71,8 @@ describe('CTA semantics audit', () => {
         // If the file contains CTA rendering, verify it uses <a href= (not <button>)
         if (content.includes('.cta.href')) {
           expect(
-            content.includes('<a href=') || content.includes('<a\n'),
-            `${folder}/${file}: CTAs with href should use <a> elements`,
+            content.includes('<a href=') || content.includes('<a\n') || content.includes('<HbcHomepageCta'),
+            `${folder}/${file}: CTAs with href should use <a> elements or HbcHomepageCta`,
           ).toBe(true);
         }
       }

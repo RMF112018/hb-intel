@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { HbcCard } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeSmartSearchWayfindingConfig } from '../../homepage/helpers/discoveryConfig.js';
 import { HomepageDiscoveryCluster } from '../../homepage/shared/HomepageDiscoveryCluster.js';
@@ -47,7 +47,7 @@ export function SmartSearchWayfinding({
 
   if (hasQueryNoResults) {
     return (
-      <HbcCard>
+      <HbcHomepageSurfaceCard surface="discovery">
         <HomepageDiscoveryCluster
           heading={normalized.heading}
           searchPlaceholder={normalized.searchPlaceholder}
@@ -62,12 +62,12 @@ export function SmartSearchWayfinding({
           title={resolveAuthoringMessage('smartSearchWayfinding', 'noResults').title}
           description={resolveAuthoringMessage('smartSearchWayfinding', 'noResults').description}
         />
-      </HbcCard>
+      </HbcHomepageSurfaceCard>
     );
   }
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="discovery">
       <HomepageDiscoveryCluster
         heading={normalized.heading}
         searchPlaceholder={normalized.searchPlaceholder}
@@ -78,6 +78,6 @@ export function SmartSearchWayfinding({
         categoryGroups={normalized.categoryGroups}
         strategyLabel={normalized.strategyLabel}
       />
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

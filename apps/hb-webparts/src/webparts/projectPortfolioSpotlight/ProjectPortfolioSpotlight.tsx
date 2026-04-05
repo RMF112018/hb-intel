@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeProjectPortfolioSpotlightConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageOperationalAwarenessCluster } from '../../homepage/shared/HomepageOperationalAwarenessCluster.js';
 import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
-import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText, hpListStyle, hpCtaLink } from '../../homepage/tokens.js';
-import styles from '../../homepage/homepage-interactive.module.css';
+import { hpHeadingReset, hpContentParagraph, hpSecondaryText, hpListStyle } from '../../homepage/tokens.js';
 
 export interface ProjectPortfolioSpotlightProps {
   config?: Partial<ProjectPortfolioSpotlightConfig>;
@@ -37,14 +36,14 @@ export function ProjectPortfolioSpotlight({
   }
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="operational">
       <HomepageOperationalAwarenessCluster
         heading={normalized.heading}
         featured={
           normalized.featured ? (
             <article>
               <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
-              <div style={hpBadgeRow}>
+              <HbcHomepageMetadataRow>
                 {normalized.featured.strategicEmphasis ? <HbcStatusBadge label="Strategic" variant="critical" /> : null}
                 {normalized.featured.status ? (
                   <HbcStatusBadge
@@ -53,7 +52,7 @@ export function ProjectPortfolioSpotlight({
                   />
                 ) : null}
                 {normalized.featured.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
-              </div>
+              </HbcHomepageMetadataRow>
               <p style={hpContentParagraph}>{normalized.featured.summary}</p>
               {normalized.featured.milestones.length > 0 ? (
                 <ul style={hpListStyle}>
@@ -68,23 +67,27 @@ export function ProjectPortfolioSpotlight({
               {normalized.featured.freshnessLabel ? (
                 <p style={hpSecondaryText}>{normalized.featured.freshnessLabel}</p>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? (
+                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+              ) : null}
             </article>
           ) : undefined
         }
         secondary={normalized.secondary.map((item) => (
           <article key={item.id}>
             <h3 style={hpHeadingReset}>{item.title}</h3>
-            <div style={hpBadgeRow}>
+            <HbcHomepageMetadataRow>
               {item.status ? <HbcStatusBadge label={item.status.label} variant={item.status.variant ?? 'info'} /> : null}
               {item.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
-            </div>
+            </HbcHomepageMetadataRow>
             <p style={hpContentParagraph}>{item.summary}</p>
             {item.freshnessLabel ? <p style={hpSecondaryText}>{item.freshnessLabel}</p> : null}
-            {item.cta ? <a href={item.cta.href} className={styles.ctaLink} style={hpCtaLink}>{item.cta.label} →</a> : null}
+            {item.cta ? (
+              <HbcHomepageCta label={item.cta.label} href={item.cta.href} variant="link" arrow />
+            ) : null}
           </article>
         ))}
       />
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

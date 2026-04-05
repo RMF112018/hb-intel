@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageActionRow, HbcHomepageIconFrame, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeToolLauncherWorkHubConfig } from '../../homepage/helpers/utilityConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -7,7 +7,7 @@ import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState
 import { HomepageRailShell } from '../../homepage/shared/HomepageRailShell.js';
 import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtilityDenseGroup.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
-import { HP_SPACE, hpHeadingReset, hpZoneFlexLayout } from '../../homepage/tokens.js';
+import { hpHeadingReset, hpZoneFlexLayout } from '../../homepage/tokens.js';
 
 export interface ToolLauncherWorkHubProps {
   config?: Partial<ToolLauncherWorkHubConfig>;
@@ -16,17 +16,15 @@ export interface ToolLauncherWorkHubProps {
 }
 
 const ICON_MAP: Record<string, string> = {
-  finance: 'FIN',
-  field: 'FLD',
+  finance: 'FI',
+  field: 'FL',
   hr: 'HR',
-  safety: 'SFT',
-  default: 'APP',
+  safety: 'SF',
+  default: 'AP',
 };
 
-function resolveIconToken(iconKey: string | undefined): string {
-  if (!iconKey) {
-    return ICON_MAP.default;
-  }
+function resolveIconInitials(iconKey: string | undefined): string {
+  if (!iconKey) return ICON_MAP.default;
   return ICON_MAP[iconKey.toLowerCase()] ?? ICON_MAP.default;
 }
 
@@ -48,25 +46,29 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   }
 
   return (
-    <HbcCard header={<h2 style={hpHeadingReset}>{normalized.heading}</h2>}>
+    <HbcHomepageSurfaceCard surface="utility" header={<h2 style={hpHeadingReset}>{normalized.heading}</h2>}>
       <HomepageRailShell label="tool-launcher-work-hub">
         <div style={hpZoneFlexLayout}>
           {normalized.groups.map((group) => (
             <HomepageUtilityDenseGroup key={group.id} title={group.title}>
               {group.items.map((item) => (
-                <div key={item.id}>
-                  <a href={item.href}>
-                    <span aria-hidden="true" style={{ marginRight: HP_SPACE.md }}>{resolveIconToken(item.iconKey)}</span>
-                    <span>{item.title}</span>
-                  </a>
-                  {item.badge ? <HbcStatusBadge label={item.badge.label} variant={item.badge.variant ?? 'neutral'} /> : null}
-                  {item.description ? <p style={{ margin: `${HP_SPACE.xs}px 0 0` }}>{item.description}</p> : null}
-                </div>
+                <HbcHomepageActionRow
+                  key={item.id}
+                  title={item.title}
+                  href={item.href}
+                  description={item.description}
+                  icon={
+                    <HbcHomepageIconFrame size="sm" tint="brand">
+                      {resolveIconInitials(item.iconKey)}
+                    </HbcHomepageIconFrame>
+                  }
+                  badge={item.badge ? <HbcStatusBadge label={item.badge.label} variant={item.badge.variant ?? 'neutral'} /> : undefined}
+                />
               ))}
             </HomepageUtilityDenseGroup>
           ))}
         </div>
       </HomepageRailShell>
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

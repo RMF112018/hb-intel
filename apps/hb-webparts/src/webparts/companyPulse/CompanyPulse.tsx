@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeCompanyPulseConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { CompanyPulseConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { hpHeadingReset, hpContentParagraph, hpSecondaryText, hpCtaLink, hpBadgeRow } from '../../homepage/tokens.js';
-import styles from '../../homepage/homepage-interactive.module.css';
+import { hpHeadingReset, hpContentParagraph, hpSecondaryText } from '../../homepage/tokens.js';
 
 export interface CompanyPulseProps {
   config?: Partial<CompanyPulseConfig>;
@@ -40,7 +39,7 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
   }
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="editorial">
       <HomepageCuratedContentCluster
         heading={normalized.heading}
         featured={
@@ -48,16 +47,18 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
             <article>
               <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
               {normalized.featured.category ? (
-                <div style={hpBadgeRow}>
+                <HbcHomepageMetadataRow>
                   <HbcStatusBadge
                     label={normalized.featured.category}
                     variant={CATEGORY_VARIANT_MAP[normalized.featured.category]}
                   />
-                </div>
+                </HbcHomepageMetadataRow>
               ) : null}
               <p style={hpContentParagraph}>{normalized.featured.summary}</p>
               {normalized.featured.metadata ? <p style={hpSecondaryText}>{normalized.featured.metadata}</p> : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? (
+                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+              ) : null}
             </article>
           ) : undefined
         }
@@ -65,10 +66,12 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
           <article key={item.id}>
             <h3 style={hpHeadingReset}>{item.title}</h3>
             <p style={hpContentParagraph}>{item.summary}</p>
-            {item.cta ? <a href={item.cta.href} className={styles.ctaLink} style={hpCtaLink}>{item.cta.label} →</a> : null}
+            {item.cta ? (
+              <HbcHomepageCta label={item.cta.label} href={item.cta.href} variant="link" arrow />
+            ) : null}
           </article>
         ))}
       />
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

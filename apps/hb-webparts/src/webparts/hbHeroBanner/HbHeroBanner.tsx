@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { HbcCard, useHomepageReducedMotion } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageCta, HbcHomepageMetadataRow, useHomepageReducedMotion } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeHeroBannerConfig } from '../../homepage/helpers/topBandConfig.js';
 import type { HbHeroBannerConfig } from '../../homepage/webparts/topBandContracts.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
-import { HP_SPACE, HP_RADIUS, HP_HERO, HP_TEXT_OPACITY, hpHeadingReset, hpContentParagraph, hpCtaLink } from '../../homepage/tokens.js';
-import styles from '../../homepage/homepage-interactive.module.css';
+import { HP_SPACE, HP_RADIUS, HP_HERO, hpHeadingReset, hpContentParagraph } from '../../homepage/tokens.js';
 
 export interface HbHeroBannerProps {
   config?: Partial<HbHeroBannerConfig>;
@@ -26,7 +25,7 @@ export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
     : HP_HERO.gradientFallback;
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="hero">
       <section
         aria-label="Hero banner"
         style={{
@@ -42,14 +41,22 @@ export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
         <h2 style={hpHeadingReset}>{normalized.headline}</h2>
         {normalized.message ? <p style={hpContentParagraph}>{normalized.message}</p> : null}
       </section>
-      {normalized.metadata ? <p style={{ margin: `${HP_SPACE.lg}px 0 0`, opacity: HP_TEXT_OPACITY.muted }}>{normalized.metadata}</p> : null}
+      {normalized.metadata ? (
+        <HbcHomepageMetadataRow>
+          <span>{normalized.metadata}</span>
+        </HbcHomepageMetadataRow>
+      ) : null}
       {normalized.cta ? (
         <div style={{ marginTop: HP_SPACE.xl }}>
-          <a href={normalized.cta.href} className={styles.ctaLink} style={hpCtaLink} rel={normalized.cta.openInNewTab ? 'noreferrer' : undefined} target={normalized.cta.openInNewTab ? '_blank' : undefined}>
-            {normalized.cta.label} →
-          </a>
+          <HbcHomepageCta
+            label={normalized.cta.label}
+            href={normalized.cta.href}
+            variant="link"
+            arrow
+            external={normalized.cta.openInNewTab}
+          />
         </div>
       ) : null}
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

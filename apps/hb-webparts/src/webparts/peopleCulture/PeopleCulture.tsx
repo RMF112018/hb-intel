@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { PeopleCultureConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { hpHeadingReset, hpContentParagraph, hpCompactImage, hpBadgeRow, hpCtaLink, hpMediaContainer } from '../../homepage/tokens.js';
-import styles from '../../homepage/homepage-interactive.module.css';
+import { hpHeadingReset, hpContentParagraph, hpCompactImage, hpMediaContainer } from '../../homepage/tokens.js';
 
 export interface PeopleCultureProps {
   config?: Partial<PeopleCultureConfig>;
@@ -40,16 +39,16 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
   }
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="editorial">
       <HomepageCuratedContentCluster
         heading={normalized.heading}
         featured={
           normalized.featured ? (
             <article>
               <h3 style={hpHeadingReset}>{normalized.featured.personName}</h3>
-              <div style={hpBadgeRow}>
+              <HbcHomepageMetadataRow>
                 <HbcStatusBadge label={normalized.featured.eventType} variant={EVENT_VARIANT_MAP[normalized.featured.eventType]} />
-              </div>
+              </HbcHomepageMetadataRow>
               <p style={hpContentParagraph}>{normalized.featured.highlight}</p>
               {normalized.featured.media ? (
                 <div style={hpMediaContainer}>
@@ -60,18 +59,22 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
                   />
                 </div>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? (
+                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+              ) : null}
             </article>
           ) : undefined
         }
         secondary={normalized.secondary.map((entry) => (
           <article key={entry.id}>
             <h3 style={hpHeadingReset}>{entry.personName}</h3>
-            <HbcStatusBadge label={entry.eventType} variant={EVENT_VARIANT_MAP[entry.eventType]} />
+            <HbcHomepageMetadataRow>
+              <HbcStatusBadge label={entry.eventType} variant={EVENT_VARIANT_MAP[entry.eventType]} />
+            </HbcHomepageMetadataRow>
             <p style={hpContentParagraph}>{entry.highlight}</p>
           </article>
         ))}
       />
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

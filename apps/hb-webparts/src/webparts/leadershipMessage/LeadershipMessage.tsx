@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { HbcCard } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageCta } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeLeadershipMessageConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { LeadershipMessageConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { hpHeadingReset, hpContentParagraph, hpFeaturedImage, hpLeaderAttribution, hpCtaLink, hpMediaContainer } from '../../homepage/tokens.js';
-import styles from '../../homepage/homepage-interactive.module.css';
+import { hpHeadingReset, hpContentParagraph, hpFeaturedImage, hpLeaderAttribution, hpMediaContainer } from '../../homepage/tokens.js';
 
 export interface LeadershipMessageProps {
   config?: Partial<LeadershipMessageConfig>;
@@ -32,7 +31,7 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
   }
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="editorial">
       <HomepageCuratedContentCluster
         heading={normalized.heading}
         featured={
@@ -53,7 +52,9 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
                   />
                 </div>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? (
+                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+              ) : null}
             </article>
           ) : undefined
         }
@@ -65,6 +66,6 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
           </article>
         ))}
       />
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

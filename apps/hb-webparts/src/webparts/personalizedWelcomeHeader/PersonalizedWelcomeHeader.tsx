@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { HbcCard, HbcStatusBadge, HBC_HOMEPAGE_BRAND_FOUNDATION, HBC_HOMEPAGE_TYPOGRAPHY } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageMetadataRow, HbcStatusBadge, HBC_HOMEPAGE_BRAND_FOUNDATION, HBC_HOMEPAGE_TYPOGRAPHY } from '@hbc/ui-kit/homepage';
 import { normalizeWelcomeHeaderConfig } from '../../homepage/helpers/topBandConfig.js';
 import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
@@ -25,7 +25,7 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
   const hasAlert = normalized.alertSeverity !== 'none' && (normalized.alertTitle || normalized.alertMessage);
 
   return (
-    <HbcCard header={<h2 style={hpGreetingHeading}>{message.headline}</h2>}>
+    <HbcHomepageSurfaceCard surface="hero" header={<h2 style={hpGreetingHeading}>{message.headline}</h2>}>
       <div
         style={{
           borderLeft: `4px solid ${HBC_HOMEPAGE_BRAND_FOUNDATION.primaryBlue.hex}`,
@@ -39,11 +39,13 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
 
         {hasAlert ? (
           <section aria-label="High priority alert" role="status">
-            <HbcStatusBadge label={normalized.alertTitle ?? 'Important update'} variant={ALERT_VARIANT_MAP[normalized.alertSeverity ?? 'none']} />
+            <HbcHomepageMetadataRow>
+              <HbcStatusBadge label={normalized.alertTitle ?? 'Important update'} variant={ALERT_VARIANT_MAP[normalized.alertSeverity ?? 'none']} />
+            </HbcHomepageMetadataRow>
             {normalized.alertMessage ? <p style={{ margin: `${HP_SPACE.sm}px 0 0` }}>{normalized.alertMessage}</p> : null}
           </section>
         ) : null}
       </div>
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }

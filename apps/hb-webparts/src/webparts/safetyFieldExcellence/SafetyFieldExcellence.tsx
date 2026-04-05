@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { HbcCard, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcHomepageSurfaceCard, HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeSafetyFieldExcellenceConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageOperationalAwarenessCluster } from '../../homepage/shared/HomepageOperationalAwarenessCluster.js';
 import type { SafetyFieldExcellenceConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
-import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText, hpCtaLink } from '../../homepage/tokens.js';
-import styles from '../../homepage/homepage-interactive.module.css';
+import { hpHeadingReset, hpContentParagraph, hpSecondaryText } from '../../homepage/tokens.js';
 
 export interface SafetyFieldExcellenceProps {
   config?: Partial<SafetyFieldExcellenceConfig>;
@@ -44,14 +43,14 @@ export function SafetyFieldExcellence({
   }
 
   return (
-    <HbcCard>
+    <HbcHomepageSurfaceCard surface="operational">
       <HomepageOperationalAwarenessCluster
         heading={normalized.heading}
         featured={
           normalized.featured ? (
             <article>
               <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
-              <div style={hpBadgeRow}>
+              <HbcHomepageMetadataRow>
                 <HbcStatusBadge
                   label={normalized.featured.eventType}
                   variant={EVENT_VARIANT_MAP[normalized.featured.eventType]}
@@ -63,30 +62,34 @@ export function SafetyFieldExcellence({
                   />
                 ) : null}
                 {normalized.featured.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
-              </div>
+              </HbcHomepageMetadataRow>
               <p style={hpContentParagraph}>{normalized.featured.summary}</p>
               {normalized.featured.metadata ? <p style={hpSecondaryText}>{normalized.featured.metadata}</p> : null}
               {normalized.featured.freshnessLabel ? (
                 <p style={hpSecondaryText}>{normalized.featured.freshnessLabel}</p>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? (
+                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+              ) : null}
             </article>
           ) : undefined
         }
         secondary={normalized.secondary.map((item) => (
           <article key={item.id}>
             <h3 style={hpHeadingReset}>{item.title}</h3>
-            <div style={hpBadgeRow}>
+            <HbcHomepageMetadataRow>
               <HbcStatusBadge label={item.eventType} variant={EVENT_VARIANT_MAP[item.eventType]} />
               {item.indicator ? <HbcStatusBadge label={item.indicator.label} variant={item.indicator.variant ?? 'warning'} /> : null}
               {item.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
-            </div>
+            </HbcHomepageMetadataRow>
             <p style={hpContentParagraph}>{item.summary}</p>
             {item.freshnessLabel ? <p style={hpSecondaryText}>{item.freshnessLabel}</p> : null}
-            {item.cta ? <a href={item.cta.href} className={styles.ctaLink} style={hpCtaLink}>{item.cta.label} →</a> : null}
+            {item.cta ? (
+              <HbcHomepageCta label={item.cta.label} href={item.cta.href} variant="link" arrow />
+            ) : null}
           </article>
         ))}
       />
-    </HbcCard>
+    </HbcHomepageSurfaceCard>
   );
 }
