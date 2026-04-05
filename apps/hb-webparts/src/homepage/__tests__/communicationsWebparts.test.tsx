@@ -45,7 +45,7 @@ describe('Prompt-06 awareness webparts', () => {
       />,
     );
 
-    expect(screen.getByRole('link', { name: 'Meet Jordan' }).getAttribute('href')).toBe('/people');
+    expect(screen.getByRole('link', { name: /Meet Jordan/ }).getAttribute('href')).toBe('/people');
     expect(screen.getByText('Welcome to the team.')).not.toBeNull();
   });
 

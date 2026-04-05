@@ -6,7 +6,7 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageOperationalAwarenessCluster } from '../../homepage/shared/HomepageOperationalAwarenessCluster.js';
 import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
-import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText, hpListStyle } from '../../homepage/tokens.js';
+import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText, hpListStyle, hpCtaLink } from '../../homepage/tokens.js';
 
 export interface ProjectPortfolioSpotlightProps {
   config?: Partial<ProjectPortfolioSpotlightConfig>;
@@ -67,7 +67,7 @@ export function ProjectPortfolioSpotlight({
               {normalized.featured.freshnessLabel ? (
                 <p style={hpSecondaryText}>{normalized.featured.freshnessLabel}</p>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
+              {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>
           ) : undefined
         }
@@ -80,7 +80,7 @@ export function ProjectPortfolioSpotlight({
             </div>
             <p style={hpContentParagraph}>{item.summary}</p>
             {item.freshnessLabel ? <p style={hpSecondaryText}>{item.freshnessLabel}</p> : null}
-            {item.cta ? <a href={item.cta.href}>{item.cta.label}</a> : null}
+            {item.cta ? <a href={item.cta.href} style={hpCtaLink}>{item.cta.label} →</a> : null}
           </article>
         ))}
       />

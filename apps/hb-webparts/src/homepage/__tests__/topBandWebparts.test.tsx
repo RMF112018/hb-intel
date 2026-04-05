@@ -69,6 +69,6 @@ describe('Prompt-04 top-band contracts', () => {
     );
 
     expect(screen.getByRole('heading', { level: 2, name: 'Leadership Message' })).not.toBeNull();
-    expect(screen.getByRole('link', { name: 'Read message' }).getAttribute('href')).toBe('/leadership');
+    expect(screen.getByRole('link', { name: /Read message/ }).getAttribute('href')).toBe('/leadership');
   });
 });

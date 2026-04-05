@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { normalizeHomepageConfig } from './helpers/config.js';
 import { HomepageLoadingState, HomepageSectionShell, HomepageTopBandPair } from './shared/index.js';
+import { HP_SPACE, hpZoneSection } from './tokens.js';
 import { PersonalizedWelcomeHeader } from '../webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from '../webparts/hbHeroBanner/HbHeroBanner.js';
 import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityActionsRail.js';
@@ -16,7 +17,8 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
   const config = normalizeHomepageConfig({ maxItems: 2 });
 
   return (
-    <>
+    <div style={{ display: 'grid', gap: HP_SPACE['2xl'] }}>
+      <div style={hpZoneSection('topBand')}>
       <HomepageTopBandPair
         hero={
           <HbHeroBanner
@@ -42,6 +44,9 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         }
       />
 
+      </div>
+
+      <div style={hpZoneSection('utility')}>
       <HomepageSectionShell title="Quick-use / Work Zone">
         <PriorityActionsRail
           activeAudience="field"
@@ -98,6 +103,9 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         />
       </HomepageSectionShell>
 
+      </div>
+
+      <div style={hpZoneSection('communications')}>
       <HomepageSectionShell title="Awareness Zone">
         <CompanyPulse
           activeAudience="field"
@@ -223,6 +231,9 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         />
       </HomepageSectionShell>
 
+      </div>
+
+      <div style={hpZoneSection('discovery')}>
       <HomepageSectionShell title="Discovery Zone">
         <SmartSearchWayfinding
           activeAudience="field"
@@ -284,7 +295,9 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         />
       </HomepageSectionShell>
 
+      </div>
+
       <HomepageLoadingState label="Loading homepage content" />
-    </>
+    </div>
   );
 }

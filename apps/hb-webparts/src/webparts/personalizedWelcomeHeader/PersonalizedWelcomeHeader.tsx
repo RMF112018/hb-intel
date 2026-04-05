@@ -4,7 +4,7 @@ import { normalizeWelcomeHeaderConfig } from '../../homepage/helpers/topBandConf
 import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { PersonalizedWelcomeHeaderConfig } from '../../homepage/webparts/topBandContracts.js';
-import { HP_SPACE, hpHeadingReset } from '../../homepage/tokens.js';
+import { HP_SPACE, HP_TEXT_OPACITY, hpGreetingHeading } from '../../homepage/tokens.js';
 
 export interface PersonalizedWelcomeHeaderProps {
   identity: HomepageIdentityInput;
@@ -25,17 +25,17 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
   const hasAlert = normalized.alertSeverity !== 'none' && (normalized.alertTitle || normalized.alertMessage);
 
   return (
-    <HbcCard header={<h2 style={hpHeadingReset}>{message.headline}</h2>}>
+    <HbcCard header={<h2 style={hpGreetingHeading}>{message.headline}</h2>}>
       <div
         style={{
           borderLeft: `4px solid ${HBC_HOMEPAGE_BRAND_FOUNDATION.primaryBlue.hex}`,
-          paddingInlineStart: HP_SPACE.xl,
+          paddingInlineStart: HP_SPACE['2xl'],
           display: 'grid',
           gap: HP_SPACE.md,
         }}
       >
         {normalized.supportLine ? <p style={{ ...(HBC_HOMEPAGE_TYPOGRAPHY.body as React.CSSProperties), margin: 0 }}>{normalized.supportLine}</p> : null}
-        {normalized.contextLine ? <p style={{ margin: 0, opacity: 0.8 }}>{normalized.contextLine}</p> : null}
+        {normalized.contextLine ? <p style={{ margin: 0, opacity: HP_TEXT_OPACITY.secondary }}>{normalized.contextLine}</p> : null}
 
         {hasAlert ? (
           <section aria-label="High priority alert" role="status">

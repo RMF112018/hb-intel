@@ -6,7 +6,7 @@ import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCur
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { CompanyPulseConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { hpHeadingReset, hpContentParagraph, hpSecondaryText } from '../../homepage/tokens.js';
+import { hpHeadingReset, hpContentParagraph, hpSecondaryText, hpCtaLink, hpBadgeRow } from '../../homepage/tokens.js';
 
 export interface CompanyPulseProps {
   config?: Partial<CompanyPulseConfig>;
@@ -47,14 +47,16 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
             <article>
               <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
               {normalized.featured.category ? (
-                <HbcStatusBadge
-                  label={normalized.featured.category}
-                  variant={CATEGORY_VARIANT_MAP[normalized.featured.category]}
-                />
+                <div style={hpBadgeRow}>
+                  <HbcStatusBadge
+                    label={normalized.featured.category}
+                    variant={CATEGORY_VARIANT_MAP[normalized.featured.category]}
+                  />
+                </div>
               ) : null}
               <p style={hpContentParagraph}>{normalized.featured.summary}</p>
               {normalized.featured.metadata ? <p style={hpSecondaryText}>{normalized.featured.metadata}</p> : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
+              {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>
           ) : undefined
         }
@@ -62,7 +64,7 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
           <article key={item.id}>
             <h3 style={hpHeadingReset}>{item.title}</h3>
             <p style={hpContentParagraph}>{item.summary}</p>
-            {item.cta ? <a href={item.cta.href}>{item.cta.label}</a> : null}
+            {item.cta ? <a href={item.cta.href} style={hpCtaLink}>{item.cta.label} →</a> : null}
           </article>
         ))}
       />

@@ -76,6 +76,6 @@ describe('Prompt-07 operational-awareness webparts', () => {
       />,
     );
 
-    expect(screen.getByRole('link', { name: 'Open packet' }).getAttribute('href')).toBe('/safety');
+    expect(screen.getByRole('link', { name: /Open packet/ }).getAttribute('href')).toBe('/safety');
   });
 });

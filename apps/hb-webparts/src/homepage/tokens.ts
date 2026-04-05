@@ -102,6 +102,44 @@ export const HP_HERO = {
   textColor: '#ffffff',
 } as const;
 
+// ── Zone differentiation ───────────────────────────────────────────────
+// Subtle background tints to create zone identity without breaking host awareness.
+
+export const HP_ZONE = {
+  /** Top-band: warm neutral tint */
+  topBand: { background: 'rgba(34,83,145,0.03)' },
+  /** Utility: clean white (default) — density creates zone identity instead of color */
+  utility: { background: 'transparent' },
+  /** Communications: light warm tint */
+  communications: { background: 'rgba(229,126,70,0.02)' },
+  /** Operational: light cool tint */
+  operational: { background: 'rgba(34,83,145,0.02)' },
+  /** Discovery: neutral */
+  discovery: { background: 'rgba(0,0,0,0.015)' },
+} as const;
+
+// ── CTA treatment ──────────────────────────────────────────────────────
+
+export const HP_CTA = {
+  /** Primary CTA color — HB brand blue */
+  color: '#225391',
+  /** CTA font weight */
+  fontWeight: 600,
+  /** CTA text decoration */
+  textDecoration: 'none' as const,
+} as const;
+
+// ── Welcome accent ─────────────────────────────────────────────────────
+
+export const HP_WELCOME = {
+  /** Left accent border width */
+  accentWidth: 4,
+  /** Greeting font size multiplier — signature-level greeting */
+  greetingFontSize: '1.5rem',
+  /** Greeting font weight */
+  greetingFontWeight: 700,
+} as const;
+
 // ── Shared inline style fragments ──────────────────────────────────────
 // Pre-composed style objects for common patterns. Using these reduces
 // object allocation in render and ensures visual consistency.
@@ -180,3 +218,32 @@ export const hpZoneFlexLayout: React.CSSProperties = {
   flexWrap: 'wrap',
   gap: HP_SPACE.xl,
 };
+
+/** CTA link — branded, weighted, no underline */
+export const hpCtaLink: React.CSSProperties = {
+  color: HP_CTA.color,
+  fontWeight: HP_CTA.fontWeight,
+  textDecoration: HP_CTA.textDecoration,
+};
+
+/** Leader attribution — weighted name line */
+export const hpLeaderAttribution: React.CSSProperties = {
+  margin: `${HP_SPACE.md}px 0 0`,
+  fontWeight: 600,
+};
+
+/** Welcome greeting heading — signature-level */
+export const hpGreetingHeading: React.CSSProperties = {
+  margin: 0,
+  fontSize: HP_WELCOME.greetingFontSize,
+  fontWeight: HP_WELCOME.greetingFontWeight,
+};
+
+/** Zone section with subtle background tint */
+export function hpZoneSection(zone: keyof typeof HP_ZONE): React.CSSProperties {
+  return {
+    background: HP_ZONE[zone].background,
+    borderRadius: HP_RADIUS.card,
+    padding: HP_SPACE['2xl'],
+  };
+}
