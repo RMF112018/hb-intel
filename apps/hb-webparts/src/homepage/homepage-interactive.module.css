@@ -79,57 +79,37 @@
   line-height: 0; /* remove inline whitespace below images */
 }
 
-/* ── Priority action row interactive container ─────────────────── */
-/* Wraps HbcHomepageActionRow in a hover-interactive surface that  */
-/* communicates clickability without overriding the shared row.     */
+/* ── Command surface interactive container ──────────────────────── */
+/* Wraps action rows and launcher tiles in a hover-interactive       */
+/* surface with snappy, responsive feedback.                         */
 
 .actionRowContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  margin: -6px -8px;
-  border-radius: 6px;
-  transition: background-color 150ms ease;
   cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
 }
 
 .actionRowContainer:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(34, 83, 145, 0.05);
 }
 
 .actionRowContainer:active {
-  background-color: rgba(0, 0, 0, 0.07);
+  background-color: rgba(34, 83, 145, 0.08);
 }
 
 .actionRowArrow {
   flex-shrink: 0;
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(34, 83, 145, 0.3);
   font-size: 14px;
+  font-weight: 600;
   transition: color 150ms ease, transform 150ms ease;
 }
 
 .actionRowContainer:hover .actionRowArrow {
-  color: rgba(0, 0, 0, 0.55);
-  transform: translateX(2px);
-}
-
-/* Urgency emphasis — applied to the first action in critical/warning groups */
-.actionRowUrgent {
-  border-left: 3px solid #c4314b;
-  padding-left: 8px;
-  margin-left: -11px;
-}
-
-/* ── Launcher tile primary emphasis ─────────────────────────────── */
-/* Applied to the first item in each launcher group for a stronger  */
-/* destination posture. Slightly more generous padding and a subtle  */
-/* bottom separator.                                                */
-
-.launcherTilePrimary {
-  padding: 8px 8px 10px;
-  margin: -8px -8px -4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  color: rgba(34, 83, 145, 0.6);
+  transform: translateX(3px);
 }
 
 /* ── Reduced-motion blanket ─────────────────────────────────────── */
