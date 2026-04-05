@@ -1,8 +1,11 @@
 # UI Doctrine — SPFx Governing Standard
 
-> **Governing Status:** Primary governing doctrine for SPFx surfaces in HB Intel.  
-> **Scope:** SharePoint-hosted webparts, homepage surfaces, communication-site compositions, shell-adjacent extension surfaces, SharePoint-aware modules, authorable SPFx experiences.  
+> **Governing Status:** Primary governing doctrine for SPFx surfaces in HB Intel.
+> **Scope:** SharePoint-hosted webparts, homepage surfaces, communication-site compositions, shell-adjacent extension surfaces, SharePoint-aware modules, authorable SPFx experiences.
 > **Supersedes:** Any older UI-kit wording that assumes SPFx has no host-specific constraints or that SPFx should be governed identically to a fully owned PWA runtime.
+> **Homepage overlay:** Homepage webparts follow the [SPFx Homepage Overlay](./UI-Doctrine-SPFx-Homepage-Overlay.md) which inherits from this standard and adds homepage-specific binding and directional rules.
+>
+> **Classification key:** Rules marked **BINDING** are mandatory. Rules marked **DIRECTIONAL** are strong guidance where justified deviation is acceptable.
 
 ---
 
@@ -32,7 +35,7 @@ The goal is a first-class HB experience inside supported SharePoint reality.
 
 ---
 
-## 2. Shared obligations that still apply
+## 2. Shared obligations that still apply — BINDING
 
 SPFx surfaces must still honor the shared HB language:
 
@@ -51,7 +54,7 @@ These remain mandatory.
 
 ## 3. SPFx-specific doctrine
 
-## 3.1 Respect the host
+## 3.1 Respect the host — BINDING
 Do not design SPFx as though HB owns:
 - suite bar chrome
 - SharePoint app bar behavior
@@ -60,7 +63,7 @@ Do not design SPFx as though HB owns:
 
 Design for coexistence, not conquest.
 
-## 3.2 Own the page canvas
+## 3.2 Own the page canvas — BINDING
 The primary place to express premium HB UI in SPFx is:
 - full-width hero composition
 - top-band layout
@@ -71,7 +74,7 @@ The primary place to express premium HB UI in SPFx is:
 - section-based intranet composition
 - supported extension placeholders
 
-## 3.3 Avoid shell duplication
+## 3.3 Avoid shell duplication — BINDING
 Do not create unnecessary fake shell layers inside page content.
 
 Avoid:
@@ -80,7 +83,7 @@ Avoid:
 - heavy chrome inside already hosted content
 - decorative shell mimicry that competes with SharePoint
 
-## 3.4 Authoring mode matters
+## 3.4 Authoring mode matters — BINDING
 Every SPFx doctrine decision must account for:
 - page authors
 - editors
@@ -96,7 +99,7 @@ A webpart that looks good only when fully configured is not production-ready.
 
 ## 4. Doctrine corrections to prior over-restrictions
 
-## 4.1 `HbcAppShell` and `WorkspacePageShell` are not universal SPFx defaults
+## 4.1 `HbcAppShell` and `WorkspacePageShell` are not universal SPFx defaults — DIRECTIONAL
 These patterns may be used selectively, but they are not the default doctrine for SharePoint-hosted surfaces.
 
 SPFx should generally favor:
@@ -105,7 +108,7 @@ SPFx should generally favor:
 - host-cooperative rendering
 - page-band composition
 
-## 4.2 Direct Fluent usage is allowed when justified
+## 4.2 Direct Fluent usage is allowed when justified — DIRECTIONAL
 Default to `@hbc/ui-kit` exports where practical.
 
 Direct Fluent usage is allowed when:
@@ -116,7 +119,7 @@ Direct Fluent usage is allowed when:
 
 If the pattern becomes common and reusable, wrap and promote it.
 
-## 4.3 Token discipline remains strong, with host-aware overlays
+## 4.3 Token discipline remains strong, with host-aware overlays — BINDING (base), DIRECTIONAL (overlays)
 Use shared semantic tokens by default.
 
 Allowed when justified:
@@ -128,7 +131,7 @@ Allowed when justified:
 
 The goal is disciplined adaptation, not forced sameness.
 
-## 4.4 Horizontal scroll is discouraged, not absolutely banned
+## 4.4 Horizontal scroll is discouraged, not absolutely banned — DIRECTIONAL
 Avoid horizontal scrolling in ordinary webparts.
 
 Allow it only when:
@@ -142,7 +145,7 @@ Use mitigation where appropriate:
 - responsive degradation
 - compact fallback strategies where feasible
 
-## 4.5 Motion should be lighter than in PWA
+## 4.5 Motion should be lighter than in PWA — DIRECTIONAL
 SPFx motion may still be refined, but it should generally be:
 - lighter
 - faster
@@ -154,7 +157,7 @@ Avoid shell-like motion behaviors that fight the host or degrade authoring/page 
 
 ---
 
-## 5. Recommended layout families
+## 5. Recommended layout families — DIRECTIONAL
 
 SPFx surfaces should favor:
 - hero + welcome pairings
@@ -170,7 +173,7 @@ These are the safest and most effective places to create visually distinguished 
 
 ---
 
-## 6. Webpart quality doctrine
+## 6. Webpart quality doctrine — BINDING
 
 Every premium webpart must behave well when:
 - minimally configured

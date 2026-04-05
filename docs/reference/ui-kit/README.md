@@ -2,21 +2,47 @@
 
 ## Governing Doctrine
 
-UI decisions in HB Intel are governed by two runtime-specific doctrine standards:
+UI decisions in HB Intel are governed by a layered doctrine stack. Rules are classified as **BINDING** (mandatory) or **DIRECTIONAL** (strong guidance, justified deviation acceptable).
 
-- **[SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md)** — Primary governing doctrine for SharePoint-hosted surfaces (homepage webparts, communication-site compositions, shell-adjacent extensions)
-- **[PWA Governing Standard](./doctrine/UI-Doctrine-PWA-Governing-Standard.md)** — Primary governing doctrine for immersive PWA surfaces (field tools, dashboards, executive views)
+### Doctrine hierarchy
+
+```
+Layer 1 — Runtime-Specific Governing Standards (top-level authority)
+  ├── SPFx Governing Standard        (all SPFx surfaces)
+  │     └── SPFx Homepage Overlay    (homepage-specific rules and freedoms)
+  └── PWA Governing Standard         (all PWA surfaces)
+
+Layer 2 — Cross-Runtime Shared Obligations
+  └── Accessibility, token discipline, package boundaries, import discipline
+
+Layer 3 — Component and Pattern Reference (implementation detail)
+  └── Component API docs, composition guides, field readability, visual language
+      (accurate for usage — do not override Layer 1 doctrine)
+```
+
+### Governing documents
+
+| Document | Scope | Classification |
+|----------|-------|----------------|
+| [SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md) | All SharePoint-hosted surfaces | Layer 1 — primary SPFx authority |
+| [SPFx Homepage Overlay](./doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md) | HB Central homepage webparts only | Layer 1 — homepage-specific overlay |
+| [PWA Governing Standard](./doctrine/UI-Doctrine-PWA-Governing-Standard.md) | All PWA surfaces | Layer 1 — primary PWA authority |
 
 ### Governance model
 
 - Shared design language and component system remain common across all surfaces
 - **PWA doctrine** governs immersive owned-application surfaces
 - **SPFx doctrine** governs SharePoint-hosted and host-aware surfaces
-- Existing UI-kit component reference docs remain valuable as implementation detail and design evidence, but are not the final governing authority for runtime-specific decisions
+- **SPFx Homepage Overlay** adds homepage-specific binding and directional rules on top of the SPFx standard
+- Layer 3 docs (component references, composition guides) remain accurate for component API and usage, but do not override Layer 1 doctrine
 
 ### Supersession
 
-These two governing standards supersede any older UI-kit wording that assumed a single universal doctrine applied identically to all runtime surfaces. Existing component-level reference docs (HbcChart, HbcInput, etc.) remain accurate for component API and usage, but do not override the runtime-specific governing standards above.
+The Layer 1 governing standards supersede any older UI-kit wording that assumed a single universal doctrine applied identically to all runtime surfaces. Specifically:
+
+- Component-level reference docs (HbcChart, HbcInput, etc.) remain accurate for API and usage details
+- Docs such as `UI-Kit-Visual-Language-Guide.md`, `UI-Kit-Usage-and-Composition-Guide.md`, and `UI-Kit-Field-Readability-Standards.md` are Layer 3 implementation reference — they inform but do not override the runtime-specific governing standards
+- When a Layer 3 doc conflicts with a Layer 1 governing standard, the Layer 1 standard governs
 
 ## Entry Points
 

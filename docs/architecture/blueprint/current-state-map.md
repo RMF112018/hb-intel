@@ -343,7 +343,8 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `docs/architecture/blueprint/sharepoint-shell/HB_Webparts_Tenant_Shell_Implementation_Blueprint.md` | **Canonical Normative Plan** | 8-phase three-lane implementation plan (homepage / shell-extension / navigation); defines supported customization posture |
 | `docs/reference/sharepoint-homepage-shell-boundaries.md` | **Living Reference (Diátaxis)** | Authoritative quick-reference for the three-lane model, supported customization posture, and lane boundary rules |
 | `docs/reference/ui-kit/entry-points.md` | **Living Reference (Diátaxis)** | Authoritative entry-point reference for all 5 `@hbc/ui-kit` entry points |
-| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md` | **Living Reference (Diátaxis)** | Runtime-specific governing doctrine for SPFx surfaces |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md` | **Living Reference (Diátaxis)** | Runtime-specific governing doctrine for SPFx surfaces; rules classified BINDING vs DIRECTIONAL |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md` | **Living Reference (Diátaxis)** | Homepage-specific doctrine overlay with binding/directional rules, freedoms, locked assumptions for Phase 01+ |
 | `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md` | **Living Reference (Diátaxis)** | Runtime-specific governing doctrine for PWA surfaces |
 | Phase 00 homepage plans (6 docs under `plans/MASTER/spfx/homepage/phase-00/`) | **Canonical Normative Plan** | UI-kit / doctrine / SPFx contract reconciliation; active gate before Phase 01 |
 | Phase 6 webpart loader plans (9 docs under `plans/MASTER/spfx/webparts/phase-6/`) | **Historical Foundational** | Cumulative loader-contract regression diagnosis and remediation; completed 2026-04-05 |
