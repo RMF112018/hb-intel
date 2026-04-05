@@ -1,3 +1,11 @@
+/**
+ * TopPlaceholder — Premium utility/signal layer for the shell top region.
+ *
+ * Phase 15-03 — Shell re-authoring:
+ * - Removed placeholder-grade text-abbreviation icon pattern
+ * - True non-render when no content (no residual empty container)
+ * - Premium ribbon and alert band styling via rebuilt CSS module
+ */
 import { useState, useCallback } from 'react';
 import * as React from 'react';
 import type { TopPlaceholderConfig, AlertBandItem } from './types.js';
@@ -16,18 +24,6 @@ const SEVERITY_CLASS: Record<string, string> = {
   critical: styles.alertCritical,
 };
 
-/**
- * Top placeholder content for the shell extension.
- *
- * Renders into SharePoint's Top placeholder region. Contains:
- * 1. A lightweight ribbon/utility strip with concise navigation links
- * 2. An alert/announcement band with severity, dismissibility, and CTAs
- *
- * Gracefully renders nothing when the placeholder is unavailable.
- * Renders minimal structure when no content is configured.
- *
- * This is a shell-adjacent surface — premium but restrained, not editorial.
- */
 export function TopPlaceholder({ available, config }: TopPlaceholderProps): React.JSX.Element | null {
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
@@ -48,12 +44,9 @@ export function TopPlaceholder({ available, config }: TopPlaceholderProps): Reac
   const hasRibbon = ribbonItems.length > 0;
   const hasAlerts = visibleAlerts.length > 0;
 
+  // True non-render: no content = no DOM output
   if (!hasRibbon && !hasAlerts) {
-    return (
-      <div data-hbc-shell-extension="top-placeholder" className={styles.topContainer}>
-        {/* No content configured — safe empty render */}
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -61,7 +54,7 @@ export function TopPlaceholder({ available, config }: TopPlaceholderProps): Reac
       data-hbc-shell-extension="top-placeholder"
       className={styles.topContainer}
       role="banner"
-      aria-label="HB Intel top ribbon"
+      aria-label="HB Central utility bar"
     >
       {hasRibbon ? (
         <nav
@@ -75,11 +68,6 @@ export function TopPlaceholder({ available, config }: TopPlaceholderProps): Reac
               href={item.href}
               className={styles.ribbonLink}
             >
-              {item.iconKey ? (
-                <span aria-hidden="true" style={{ marginRight: 4 }}>
-                  {item.iconKey.slice(0, 3).toUpperCase()}
-                </span>
-              ) : null}
               {item.label}
             </a>
           ))}

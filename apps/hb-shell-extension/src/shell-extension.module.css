@@ -1,42 +1,52 @@
 /**
  * Shell-extension styling — CSS module for Lane B placeholder surfaces.
  *
- * Premium but restrained: lighter than the homepage lane, host-cooperative,
- * concise utility surfaces only. No editorial card-heavy treatment.
+ * Phase 15-03 — Premium shell re-authoring:
+ * Rebuilt from scaffolding-grade flat strips into an authored product shell
+ * that reads as one product with the Lane A homepage below.
+ *
+ * Design intent:
+ * - Top placeholder: premium utility/signal layer with brand presence
+ * - Bottom placeholder: polished support/status rail, not a generic footer
+ * - Shell and homepage share visual DNA (brand blue, spacing rhythm, typography)
+ * - Empty regions render nothing (true non-render, no residual DOM)
  */
 
 /* ── Top placeholder container ──────────────────────────────────── */
 
 .topContainer {
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8125rem;
   line-height: 1.4;
+  background: linear-gradient(180deg, rgba(34, 83, 145, 0.06) 0%, rgba(34, 83, 145, 0.02) 100%);
+  border-bottom: 2px solid rgba(34, 83, 145, 0.12);
+  font-size: 0.8125rem;
   color: #323130;
 }
 
-/* ── Top ribbon ─────────────────────────────────────────────────── */
+/* ── Top ribbon — premium utility nav ───────────────────────────── */
 
 .ribbon {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 6px 16px;
-  background: rgba(34, 83, 145, 0.04);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 8px;
+  padding: 8px 20px;
 }
 
 .ribbonLink {
   color: #225391;
   text-decoration: none;
-  font-weight: 500;
-  padding: 2px 4px;
-  border-radius: 3px;
-  transition: background-color 150ms ease, color 150ms ease;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .ribbonLink:hover {
   background-color: rgba(34, 83, 145, 0.08);
-  text-decoration: underline;
+  border-color: rgba(34, 83, 145, 0.12);
 }
 
 .ribbonLink:focus-visible {
@@ -44,7 +54,7 @@
   outline-offset: 1px;
 }
 
-/* ── Alert band ─────────────────────────────────────────────────── */
+/* ── Alert band — premium signal layer ──────────────────────────── */
 
 .alertBand {
   display: flex;
@@ -55,28 +65,32 @@
 .alertItem {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
+  gap: 12px;
+  padding: 10px 20px;
   font-size: 0.8125rem;
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .alertInfo {
-  background: #e8f0fe;
+  background: linear-gradient(90deg, rgba(34, 83, 145, 0.10) 0%, rgba(34, 83, 145, 0.05) 100%);
   color: #1a4274;
-  border-bottom: 1px solid rgba(34, 83, 145, 0.12);
+  border-bottom: 1px solid rgba(34, 83, 145, 0.10);
+  border-left: 3px solid #225391;
 }
 
 .alertWarning {
-  background: #fff4e5;
+  background: linear-gradient(90deg, rgba(255, 176, 32, 0.12) 0%, rgba(255, 176, 32, 0.05) 100%);
   color: #6b4a00;
-  border-bottom: 1px solid rgba(180, 130, 40, 0.15);
+  border-bottom: 1px solid rgba(180, 130, 40, 0.12);
+  border-left: 3px solid #e5a100;
 }
 
 .alertCritical {
-  background: #fde7e9;
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.10) 0%, rgba(220, 38, 38, 0.04) 100%);
   color: #8b1a1a;
-  border-bottom: 1px solid rgba(139, 26, 26, 0.15);
+  border-bottom: 1px solid rgba(139, 26, 26, 0.12);
+  border-left: 3px solid #dc2626;
 }
 
 .alertMessage {
@@ -86,15 +100,20 @@
 
 .alertCta {
   font-weight: 600;
+  font-size: 0.75rem;
   text-decoration: none;
   white-space: nowrap;
-  padding: 2px 6px;
-  border-radius: 3px;
-  transition: text-decoration 150ms ease;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: inherit;
+  border: 1px solid currentColor;
+  opacity: 0.8;
+  transition: opacity 150ms ease, background-color 150ms ease;
 }
 
 .alertCta:hover {
-  text-decoration: underline;
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .alertCta:focus-visible {
@@ -104,21 +123,22 @@
 
 .alertDismiss {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px 8px;
   min-width: 32px;
   min-height: 32px;
-  border-radius: 3px;
+  border-radius: 4px;
   color: inherit;
-  opacity: 0.6;
-  font-size: 1rem;
+  opacity: 0.5;
+  font-size: 1.125rem;
   line-height: 1;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms ease, border-color 150ms ease;
 }
 
 .alertDismiss:hover {
-  opacity: 1;
+  opacity: 0.8;
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .alertDismiss:focus-visible {
@@ -127,16 +147,54 @@
   opacity: 1;
 }
 
-/* ── Support band (bottom placeholder) ──────────────────────────── */
+/* ── Bottom placeholder container ───────────────────────────────── */
+
+.bottomContainer {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.4;
+  background: linear-gradient(180deg, rgba(34, 83, 145, 0.02) 0%, rgba(34, 83, 145, 0.05) 100%);
+  border-top: 2px solid rgba(34, 83, 145, 0.10);
+  font-size: 0.75rem;
+  color: #605e5c;
+}
+
+/* ── Footer nav — polished utility links ────────────────────────── */
+
+.footerNav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.footerLink {
+  color: #225391;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  transition: background-color 150ms ease;
+}
+
+.footerLink:hover {
+  background-color: rgba(34, 83, 145, 0.06);
+}
+
+.footerLink:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 1px;
+}
+
+/* ── Support band — status/branding rail ────────────────────────── */
 
 .supportBand {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 6px 16px;
-  background: rgba(0, 0, 0, 0.02);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  font-size: 0.75rem;
+  padding: 8px 20px;
+  font-size: 0.6875rem;
   color: #605e5c;
 }
 
@@ -146,19 +204,23 @@
 }
 
 .supportDescription {
-  opacity: 0.75;
+  opacity: 0.7;
+  margin-left: 4px;
 }
 
 .operationalText {
   margin-inline-start: auto;
-  opacity: 0.6;
+  font-weight: 600;
   font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: rgba(34, 83, 145, 0.6);
 }
 
 /* ── Reduced motion ─────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   .ribbonLink,
+  .footerLink,
   .alertCta,
   .alertDismiss {
     transition: none !important;

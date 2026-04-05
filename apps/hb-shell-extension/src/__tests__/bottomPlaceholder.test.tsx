@@ -13,10 +13,9 @@ describe('BottomPlaceholder rendering', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders empty container when available but no config', () => {
+  it('renders nothing when available but no config (true non-render)', () => {
     const { container } = render(<BottomPlaceholder available />);
-    const el = container.querySelector('[data-hbc-shell-extension="bottom-placeholder"]');
-    expect(el).not.toBeNull();
+    expect(container.firstChild).toBeNull();
   });
 
   it('renders footer links when configured', () => {
@@ -49,7 +48,7 @@ describe('BottomPlaceholder rendering', () => {
       />,
     );
     expect(screen.getByRole('link', { name: 'IT Support' })).not.toBeNull();
-    expect(screen.getByText(/Mon–Fri/)).not.toBeNull();
+    expect(screen.getByText('Mon–Fri 8am–5pm')).not.toBeNull();
     expect(screen.getByText('HB Central — Hedrick Brothers')).not.toBeNull();
   });
 
@@ -104,7 +103,10 @@ describe('Bottom placeholder CSS classes', () => {
   const cssPath = resolve(__dirname, '../shell-extension.module.css');
   const cssSource = readFileSync(cssPath, 'utf8');
 
-  it('defines support band classes', () => {
+  it('defines bottom container and support band classes', () => {
+    expect(cssSource).toContain('.bottomContainer');
+    expect(cssSource).toContain('.footerNav');
+    expect(cssSource).toContain('.footerLink');
     expect(cssSource).toContain('.supportBand');
     expect(cssSource).toContain('.supportItem');
     expect(cssSource).toContain('.operationalText');

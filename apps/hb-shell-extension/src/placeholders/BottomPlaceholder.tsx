@@ -1,3 +1,12 @@
+/**
+ * BottomPlaceholder — Premium support/status rail for the shell bottom region.
+ *
+ * Phase 15-03 — Shell re-authoring:
+ * - Own container class (bottomContainer) instead of reusing topContainer
+ * - Dedicated footer nav with footerLink styling instead of reusing ribbon
+ * - True non-render when no content (no residual empty container)
+ * - Premium gradient background and brand-colored top border
+ */
 import * as React from 'react';
 import type { BottomPlaceholderConfig } from './types.js';
 import styles from '../shell-extension.module.css';
@@ -9,16 +18,6 @@ export interface BottomPlaceholderProps {
   config?: BottomPlaceholderConfig;
 }
 
-/**
- * Bottom placeholder content for the shell extension.
- *
- * Renders into SharePoint's Bottom placeholder region. Contains:
- * 1. A footer utility strip with concise navigation links
- * 2. A support band with help resources and operational text
- *
- * Gracefully renders nothing when the placeholder is unavailable.
- * Renders minimal structure when no content is configured.
- */
 export function BottomPlaceholder({ available, config }: BottomPlaceholderProps): React.JSX.Element | null {
   if (!available) {
     return null;
@@ -31,29 +30,26 @@ export function BottomPlaceholder({ available, config }: BottomPlaceholderProps)
   const hasFooter = footerLinks.length > 0;
   const hasSupport = supportItems.length > 0 || Boolean(operationalText);
 
+  // True non-render: no content = no DOM output
   if (!hasFooter && !hasSupport) {
-    return (
-      <div data-hbc-shell-extension="bottom-placeholder" className={styles.topContainer}>
-        {/* No content configured — safe empty render */}
-      </div>
-    );
+    return null;
   }
 
   return (
     <div
       data-hbc-shell-extension="bottom-placeholder"
-      className={styles.topContainer}
+      className={styles.bottomContainer}
       role="contentinfo"
-      aria-label="HB Intel footer rail"
+      aria-label="HB Central footer"
     >
       {hasFooter ? (
         <nav
           data-hbc-shell-extension="footer-rail"
-          className={styles.ribbon}
+          className={styles.footerNav}
           aria-label="Footer utilities"
         >
           {footerLinks.map((item) => (
-            <a key={item.id} href={item.href} className={styles.ribbonLink}>
+            <a key={item.id} href={item.href} className={styles.footerLink}>
               {item.label}
             </a>
           ))}
@@ -65,12 +61,12 @@ export function BottomPlaceholder({ available, config }: BottomPlaceholderProps)
           {supportItems.map((item) => (
             <span key={item.id} className={styles.supportItem}>
               {item.href ? (
-                <a href={item.href} className={styles.ribbonLink}>{item.label}</a>
+                <a href={item.href} className={styles.footerLink}>{item.label}</a>
               ) : (
                 item.label
               )}
               {item.description ? (
-                <span className={styles.supportDescription}> — {item.description}</span>
+                <span className={styles.supportDescription}>{item.description}</span>
               ) : null}
             </span>
           ))}

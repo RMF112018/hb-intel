@@ -1,4 +1,5 @@
 declare const styles: {
+  readonly shellBase: string;
   readonly topContainer: string;
   readonly ribbon: string;
   readonly ribbonLink: string;
@@ -10,6 +11,9 @@ declare const styles: {
   readonly alertMessage: string;
   readonly alertCta: string;
   readonly alertDismiss: string;
+  readonly bottomContainer: string;
+  readonly footerNav: string;
+  readonly footerLink: string;
   readonly supportBand: string;
   readonly supportItem: string;
   readonly supportDescription: string;

@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-shell-extension",
     "id": "a7c3e1f2-8b4d-4a6e-9f12-3c5d7e8a9b01",
-    "version": "1.0.0.8",
+    "version": "1.0.0.9",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "hb-shell-extension Feature",
         "description": "Deploys HB Central shell-extension placeholder assets.",
         "id": "b8d4f2a3-9c5e-4b7f-a012-4d6e8f9a0b12",
-        "version": "1.0.0.8"
+        "version": "1.0.0.9"
       }
     ]
   },

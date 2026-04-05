@@ -11,10 +11,9 @@ describe('TopPlaceholder rendering', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders empty container when available but no config', () => {
+  it('renders nothing when available but no config (true non-render)', () => {
     const { container } = render(<TopPlaceholder available />);
-    const el = container.querySelector('[data-hbc-shell-extension="top-placeholder"]');
-    expect(el).not.toBeNull();
+    expect(container.firstChild).toBeNull();
   });
 
   it('renders ribbon links when ribbon config provided', () => {
@@ -31,8 +30,8 @@ describe('TopPlaceholder rendering', () => {
         }}
       />,
     );
-    expect(screen.getByRole('link', { name: /Safety Hub/ })).not.toBeNull();
-    expect(screen.getByRole('link', { name: /Reports/ })).not.toBeNull();
+    expect(screen.getByRole('link', { name: 'Safety Hub' })).not.toBeNull();
+    expect(screen.getByRole('link', { name: 'Reports' })).not.toBeNull();
     expect(screen.getByRole('navigation', { name: 'Quick utilities' })).not.toBeNull();
   });
 
