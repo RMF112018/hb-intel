@@ -166,7 +166,7 @@ Allowed when SharePoint interoperability is easier directly or the pattern is to
 | Territory | Owned By | Examples |
 |-----------|----------|---------|
 | Reusable visual primitives | `@hbc/ui-kit` (via `/homepage` entry) | HbcCard, HbcButton, HbcBanner, HbcStatusBadge, HbcSpinner, HbcEmptyState, HbcSearch, HbcThemeProvider |
-| Homepage shared primitives (Phase 11A) | `@hbc/ui-kit/homepage` | HbcHomepageSectionShell, HbcHomepageCta, HbcHomepageMetadataRow, HbcHomepageIconFrame, HbcHomepageSurfaceCard |
+| Homepage shared primitives (Phase 11A) | `@hbc/ui-kit/homepage` | HbcHomepageSectionShell, HbcHomepageCta, HbcHomepageMetadataRow, HbcHomepageIconFrame, HbcHomepageSurfaceCard, HbcHomepageActionRow |
 | Homepage governance constants | `@hbc/ui-kit/homepage` | Brand foundation, typography aliases, spacing aliases, a11y policy, density policy, import guardrails |
 | Semantic tokens, icons | `@hbc/ui-kit/theme`, `@hbc/ui-kit/icons` | All shared tokens, all icons |
 | Homepage composition shells | `apps/hb-webparts/src/homepage/shared/` | HomepageRailShell, HomepageSectionShell, HomepageTopBandPair, etc. |
@@ -194,7 +194,7 @@ Allowed when SharePoint interoperability is easier directly or the pattern is to
 Future implementation phases should treat the following as locked and not re-litigate:
 
 1. `@hbc/ui-kit/homepage` is the primary UI entry point for homepage webparts
-2. The 13 components (8 core + 5 homepage primitives) + 5 governance constants in the homepage entry are the current approved surface
+2. The 14 components (8 core + 6 homepage primitives) + 5 governance constants in the homepage entry are the current approved surface
 3. Homepage primitives live locally in `apps/hb-webparts/src/homepage/shared/` until reuse is proven
 4. The SPFx Governing Standard's binding rules (accessibility, host awareness, token discipline) are non-negotiable
 5. Each webpart must render independently with authoring-safe defaults

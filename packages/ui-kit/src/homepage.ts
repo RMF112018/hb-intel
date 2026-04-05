@@ -49,10 +49,13 @@ export { HbcHomepageMetadataRow } from './HbcHomepageMetadataRow/index.js';
 export type { HbcHomepageMetadataRowProps } from './HbcHomepageMetadataRow/types.js';
 
 export { HbcHomepageIconFrame } from './HbcHomepageIconFrame/index.js';
-export type { HbcHomepageIconFrameProps, IconFrameSize } from './HbcHomepageIconFrame/types.js';
+export type { HbcHomepageIconFrameProps, IconFrameSize, IconFrameTint } from './HbcHomepageIconFrame/types.js';
 
 export { HbcHomepageSurfaceCard } from './HbcHomepageSurfaceCard/index.js';
 export type { HbcHomepageSurfaceCardProps } from './HbcHomepageSurfaceCard/types.js';
+
+export { HbcHomepageActionRow } from './HbcHomepageActionRow/index.js';
+export type { HbcHomepageActionRowProps } from './HbcHomepageActionRow/types.js';
 
 export type HomepageSurfaceClass = 'hero' | 'editorial' | 'utility' | 'operational' | 'discovery';
 
@@ -61,6 +64,7 @@ export type HomepagePrimitiveName =
   | 'HbcButton'
   | 'HbcCard'
   | 'HbcEmptyState'
+  | 'HbcHomepageActionRow'
   | 'HbcHomepageCta'
   | 'HbcHomepageIconFrame'
   | 'HbcHomepageMetadataRow'

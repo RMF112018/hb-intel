@@ -1,19 +1,29 @@
 /**
  * HbcHomepageSectionShell — Accessible section wrapper for homepage zones
- * Phase 11A — Shared homepage section primitive
+ * Phase 11A-02 — Production-grade section primitive
  *
- * Renders an accessible <section> with heading, optional subtitle/intro,
- * and a content region. Used by all 5 homepage zones.
+ * Renders an accessible <section> with branded heading, optional subtitle,
+ * intro text, and header-level action slot. Used by all 5 homepage zones.
  */
 import * as React from 'react';
+import { tokens } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { heading2, body, bodySmall } from '../theme/typography.js';
-import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
+import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcHomepageSectionShellProps } from './types.js';
 
 const useStyles = makeStyles({
   header: {
-    marginBottom: `${HBC_SPACE_MD}px`,
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: `${HBC_SPACE_SM}px`,
+    marginBottom: `${HBC_SPACE_LG}px`,
+  },
+  titleGroup: {
+    flexGrow: 1,
+    minWidth: 0,
   },
   title: {
     margin: 0,
@@ -22,14 +32,15 @@ const useStyles = makeStyles({
     lineHeight: heading2.lineHeight,
     letterSpacing: heading2.letterSpacing,
     fontFamily: heading2.fontFamily,
+    color: tokens.colorNeutralForeground1,
   },
   subtitle: {
-    margin: `${HBC_SPACE_SM}px 0 0`,
+    margin: `${HBC_SPACE_XS}px 0 0`,
     fontSize: bodySmall.fontSize,
     fontWeight: String(bodySmall.fontWeight),
     lineHeight: bodySmall.lineHeight,
     fontFamily: bodySmall.fontFamily,
-    opacity: 0.75,
+    color: tokens.colorNeutralForeground3,
   },
   intro: {
     margin: `${HBC_SPACE_SM}px 0 0`,
@@ -37,6 +48,11 @@ const useStyles = makeStyles({
     fontWeight: String(body.fontWeight),
     lineHeight: body.lineHeight,
     fontFamily: body.fontFamily,
+    color: tokens.colorNeutralForeground2,
+    maxWidth: '65ch',
+  },
+  content: {
+    marginTop: `${HBC_SPACE_MD}px`,
   },
 });
 
@@ -44,6 +60,7 @@ export const HbcHomepageSectionShell: React.FC<HbcHomepageSectionShellProps> = (
   title,
   subtitle,
   intro,
+  headerAction,
   children,
   className,
 }) => {
@@ -52,11 +69,14 @@ export const HbcHomepageSectionShell: React.FC<HbcHomepageSectionShellProps> = (
   return (
     <section aria-label={title} className={className} data-hbc-homepage="section-shell">
       <header className={styles.header}>
-        <h2 className={styles.title}>{title}</h2>
-        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-        {intro && <p className={styles.intro}>{intro}</p>}
+        <div className={styles.titleGroup}>
+          <h2 className={styles.title}>{title}</h2>
+          {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        </div>
+        {headerAction}
       </header>
-      <div>{children}</div>
+      {intro && <p className={styles.intro}>{intro}</p>}
+      <div className={styles.content}>{children}</div>
     </section>
   );
 };
