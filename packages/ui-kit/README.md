@@ -96,6 +96,37 @@ These rules prevent standards drift after the WS1 production scrub closes.
 
 See `docs/reference/ui-kit/UI-Kit-Usage-and-Composition-Guide.md` for detailed contribution guidance.
 
+## Brand Assets
+
+The `@hbc/ui-kit/branding` entry point provides canonical brand assets for the HB Intel platform.
+
+### Usage
+
+```ts
+import { hbLogoIcon, hedrickLogo, brandAssets } from '@hbc/ui-kit/branding';
+
+// Individual named import — resolves to a URL string at build time
+<img src={hbLogoIcon} alt="HB Logo" />
+
+// Registry object for iteration
+Object.entries(brandAssets).map(([name, src]) => (
+  <img key={name} src={src} alt={name} />
+));
+```
+
+### What belongs in shared branding
+
+- Stable corporate logos (HB, Hedrick, GRIT)
+- Brand identity marks used across multiple apps
+- Assets that multiple consuming packages need
+
+### What stays app-local
+
+- Homepage-specific editorial imagery
+- Rotating promotional banners
+- Module-specific illustrations
+- Screenshots or documentation images
+
 ## Architecture References
 
 - `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md` — MockAdapter boundary

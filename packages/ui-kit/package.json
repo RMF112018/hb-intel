@@ -25,6 +25,10 @@
     "./homepage": {
       "types": "./dist/homepage.d.ts",
       "import": "./dist/homepage.js"
+    },
+    "./branding": {
+      "types": "./dist/branding/index.d.ts",
+      "import": "./dist/branding/index.js"
     }
   },
   "scripts": {

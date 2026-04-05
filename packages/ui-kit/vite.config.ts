@@ -44,6 +44,7 @@ export default defineConfig({
     alias: {
       '@hbc/ui-kit/theme': resolve(__dirname, 'src/theme/index.ts'),
       '@hbc/ui-kit/icons': resolve(__dirname, 'src/icons/index.ts'),
+      '@hbc/ui-kit/branding': resolve(__dirname, 'src/branding/index.ts'),
     },
   },
 });
