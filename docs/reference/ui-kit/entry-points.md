@@ -83,11 +83,36 @@ The `/theme` and `/icons` entry points allow granular imports for packages that 
 
 The `sideEffects: false` flag enables bundlers to tree-shake unused exports from any entry point.
 
-## Homepage Guardrails
+## Homepage Import Policy
 
-- Homepage SPFx webparts should import shared visuals from `@hbc/ui-kit/homepage` and use `@hbc/ui-kit/theme`/`@hbc/ui-kit/icons` only when needed.
-- Homepage webparts should not import the full `@hbc/ui-kit` entry point.
-- `@hbc/ui-kit/app-shell` remains for shell chrome scenarios; it is not the homepage webpart composition surface.
+This section is the authoritative import policy for `apps/hb-webparts` and any future homepage webpart consumers. Enforced by ESLint `no-restricted-imports` in `apps/hb-webparts/.eslintrc.cjs`.
+
+### Allowed entry points
+
+| Entry Point | Use For |
+|-------------|---------|
+| `@hbc/ui-kit/homepage` | **Primary.** All shared visual primitives and governance constants for homepage webpart composition |
+| `@hbc/ui-kit/theme` | Token-only imports (semantic tokens, typography, spacing, density) when the homepage entry does not export the needed token |
+| `@hbc/ui-kit/icons` | Icon-only imports when homepage webparts need icons beyond what the homepage entry exports |
+
+### Prohibited entry points
+
+| Entry Point | Why Prohibited |
+|-------------|----------------|
+| `@hbc/ui-kit` | Full library exceeds SPFx bundle budget and bypasses homepage governance constraints |
+| `@hbc/ui-kit/app-shell` | Shell chrome entry point — homepage is a page-canvas surface, not a shell surface |
+
+### Enforcement
+
+- **ESLint:** `no-restricted-imports` rule in `apps/hb-webparts/.eslintrc.cjs` errors on `@hbc/ui-kit` and `@hbc/ui-kit/app-shell` imports
+- **Source:** `HBC_HOMEPAGE_IMPORT_GUARDRAILS` constant in `packages/ui-kit/src/homepage.ts` encodes the policy for programmatic reference
+- **Vite:** `apps/hb-webparts/vite.config.ts` aliases only the allowed entry points for build resolution
+
+### When a homepage webpart needs a component not in the homepage entry
+
+1. Check whether the component belongs in the homepage surface at all (consult the [SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md))
+2. If yes, add it to `packages/ui-kit/src/homepage.ts` and re-export
+3. If no, reconsider the webpart design — do not bypass the entry point
 
 ## Related References
 
