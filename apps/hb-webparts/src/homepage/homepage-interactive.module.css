@@ -121,6 +121,17 @@
   margin-left: -11px;
 }
 
+/* ── Launcher tile primary emphasis ─────────────────────────────── */
+/* Applied to the first item in each launcher group for a stronger  */
+/* destination posture. Slightly more generous padding and a subtle  */
+/* bottom separator.                                                */
+
+.launcherTilePrimary {
+  padding: 8px 8px 10px;
+  margin: -8px -8px -4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
 /* ── Reduced-motion blanket ─────────────────────────────────────── */
 /* Applies to all homepage interactive elements when user prefers    */
 /* reduced motion. Disables transitions universally.                 */

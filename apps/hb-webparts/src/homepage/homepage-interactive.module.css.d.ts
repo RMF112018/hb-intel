@@ -8,5 +8,6 @@ declare const styles: {
   readonly actionRowContainer: string;
   readonly actionRowArrow: string;
   readonly actionRowUrgent: string;
+  readonly launcherTilePrimary: string;
 };
 export default styles;
