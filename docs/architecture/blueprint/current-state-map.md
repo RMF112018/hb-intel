@@ -351,6 +351,8 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `docs/reference/sharepoint-navigation-governance.md` | **Living Reference (Diátaxis)** | Lane C navigation governance model: ownership, change-control, escalation, non-duplication rules |
 | `docs/reference/sharepoint-nav-taxonomy.md` | **Living Reference (Diátaxis)** | Home-site global nav taxonomy: recommended buckets, depth limits, anti-sprawl guardrails, audience targeting |
 | `docs/how-to/administrator/sharepoint-navigation-operating-guide.md` | **Living Reference (Diátaxis)** | Admin operating guide for approved nav changes, self-service vs approval matrix, routing rules |
+| `docs/reference/sharepoint-branding-and-page-templates.md` | **Living Reference (Diátaxis)** | Branding alignment, 5 page-template families, approved composition patterns, authoring rules, template governance |
+| `docs/how-to/administrator/sharepoint-page-authoring-guide.md` | **Living Reference (Diátaxis)** | Page author guide: template selection, step-by-step creation, review checklist, when to avoid custom webparts |
 
 ### 2.4 Admin SPFx IT Control Center Plan Library
 

@@ -47,6 +47,10 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - **[Navigation Operating Guide](./how-to/administrator/sharepoint-navigation-operating-guide.md)** — Site-owner and admin procedures for making approved navigation changes.
 
+- **[Branding and Page Template Rules](./reference/sharepoint-branding-and-page-templates.md)** — Template families, branding alignment, approved composition patterns, and authoring standards.
+
+- **[Page Authoring Guide](./how-to/administrator/sharepoint-page-authoring-guide.md)** — Practical instructions for site owners and content authors creating pages on HB Central.
+
 ## Development Plan Library
 
 - **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases. Phase 0 and Phase 1 planning are complete; Phases 2–7 are forward-planning drafts. Start here for program structure, milestones, and Phase 1 deliverables.
