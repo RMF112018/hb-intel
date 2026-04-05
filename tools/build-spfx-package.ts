@@ -71,8 +71,9 @@ const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
   '535f5a17-fc49-40ea-ac16-5d68895884f7', // legacy HbWebpartsWebPart
 ]);
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
-const HB_WEBPARTS_PROOF_CASE_IDS = new Set([
-  'b3f07190-79cf-437d-a1d6-ecbf3f77e616', // PriorityActionsRailWebPart
+const HB_WEBPARTS_PROOF_CASE_IDS = new Set<string>([
+  // Cumulative full-package mode: all webparts are included.
+  // Proof-case IDs validated in Phase 2-3: HbHeroBanner, PriorityActionsRail.
 ]);
 const HB_WEBPARTS_PROOF_CASE_ENTRY_MAP: Record<string, string> = {
   '39762a4d-c7fd-44a6-a11e-4f8de9f5778d': 'src/mount-hero-proof-case.tsx',
