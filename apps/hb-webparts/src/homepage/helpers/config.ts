@@ -1,3 +1,8 @@
+/**
+ * Scaffold-era generic homepage config. Used only by ReferenceHomepageComposition
+ * (dev preview). Production webpart normalization uses zone-specific normalizers
+ * with zone-specific contracts (topBandConfig, utilityConfig, etc.).
+ */
 export interface HomepageScaffoldConfig {
   maxItems: number;
   showSectionHeaders: boolean;
