@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-shell-extension",
+    "id": "a7c3e1f2-8b4d-4a6e-9f12-3c5d7e8a9b01",
+    "version": "1.0.0.1",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "Hedrick Brothers",
+      "websiteUrl": "https://hedrickbrothers.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Central shell extension"
+      },
+      "longDescription": {
+        "default": "Supported SharePoint placeholder extensions for HB Central — top ribbon, alert band, footer rail."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-shell-extension Feature",
+        "description": "Deploys HB Central shell-extension placeholder assets.",
+        "id": "b8d4f2a3-9c5e-4b7f-a012-4d6e8f9a0b12",
+        "version": "1.0.0.1"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-shell-extension.sppkg"
+  }
+}

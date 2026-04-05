@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@hbc/ui-kit/app-shell": ["../../packages/ui-kit/src/app-shell.ts"],
+      "@hbc/ui-kit/theme": ["../../packages/ui-kit/src/theme/index.ts"],
+      "@hbc/ui-kit/icons": ["../../packages/ui-kit/src/icons/index.tsx"],
+      "@hbc/ui-kit": ["../../packages/ui-kit/src/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}
