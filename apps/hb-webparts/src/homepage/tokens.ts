@@ -291,12 +291,13 @@ export const hpGreetingHeading: React.CSSProperties = {
 /**
  * Zone section with perceptible background tint.
  * Phase 15-02: Zone backgrounds are now strong enough to see.
+ * Phase 15-09: Increased padding for premium breathing room.
  */
 export function hpZoneSection(zone: keyof typeof HP_ZONE): React.CSSProperties {
   return {
     background: HP_ZONE[zone].background,
-    borderRadius: HP_RADIUS.card,
-    padding: HP_SPACE['2xl'],
+    borderRadius: HP_RADIUS.editorial,
+    padding: HP_SPACE['3xl'],
   };
 }
 

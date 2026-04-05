@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { HomepageLoadingState, HomepageSectionShell, HomepageTopBandPair } from './shared/index.js';
+import { HomepageTopBandPair } from './shared/index.js';
 import { HP_SPACE, hpZoneSection } from './tokens.js';
 import { PersonalizedWelcomeHeader } from '../webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from '../webparts/hbHeroBanner/HbHeroBanner.js';
@@ -15,30 +15,45 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
 /**
  * Governed Homepage Composition Reference
  *
- * This component is the authoritative composition reference for the HB Central
- * homepage page-canvas product. It demonstrates the governed zone structure,
- * section rhythm, and webpart arrangement with realistic sample data.
+ * Phase 15-09 — Full-page composition, QA, and visual closure.
  *
- * Roles:
- * 1. Development preview — renders when mount.tsx receives no webPartId
- * 2. Visual integration test — confirms all 10 webparts compose without errors
- * 3. Zone architecture reference — shows the 5-zone homepage structure
+ * This is the authoritative composition reference for the HB Central
+ * homepage. It demonstrates the premium 5-zone focal sequence:
+ *
+ *   1. Top Band — signature opening (welcome + hero)
+ *   2. Utility — command surfaces (priority actions + tool launcher)
+ *   3. Discovery — search and wayfinding product
+ *   4. Communications — editorial modules (pulse, leadership, people)
+ *   5. Operational — intelligence modules (projects, safety)
+ *
+ * Zone order updated in P15-09: Discovery moved before Communications
+ * per the premium focal-sequence design (action → find → read → monitor).
  *
  * This is NOT the production rendering path. In production, each webpart
- * renders independently through the mount/dispatch seam. This composition
- * exists to preview the intended homepage experience as a single surface.
+ * renders independently through the mount/dispatch seam.
  *
- * Zone order: Top Band → Utility → Communications → Operational → Discovery
- *
- * @see docs/architecture/plans/MASTER/spfx/homepage/phase-03/Homepage-Zone-Architecture.md
+ * @see docs/architecture/plans/MASTER/spfx/homepage/phase-15/
  */
+
+/** Page-level composition gap — generous separation between zones */
+const compositionStyle: React.CSSProperties = {
+  display: 'grid',
+  gap: HP_SPACE['4xl'],
+  maxWidth: 1200,
+};
+
+/** Zone wrapper — tinted background with deliberate padding and rhythm */
+const zoneStyle = (zone: Parameters<typeof hpZoneSection>[0]): React.CSSProperties => ({
+  ...hpZoneSection(zone),
+  display: 'grid',
+  gap: HP_SPACE.xl,
+});
+
 export function ReferenceHomepageComposition(): React.JSX.Element {
   return (
-    <div
-      data-hbc-homepage="composition-reference"
-      style={{ display: 'grid', gap: HP_SPACE['2xl'] }}
-    >
-      {/* ── Zone 1: Top Band ─────────────────────────────────────── */}
+    <div data-hbc-homepage="composition-reference" style={compositionStyle}>
+
+      {/* ── Zone 1: Top Band — Signature Opening ────────────────── */}
       <HomepageTopBandPair
         hero={
           <HbHeroBanner
@@ -57,7 +72,7 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             identity={{ preferredName: 'Jordan Miller' }}
             config={{
               supportLine: "Let's keep projects moving with clarity today.",
-              contextLine: 'Saturday, April 4',
+              contextLine: 'Saturday, April 5',
               alertSeverity: 'warning',
               alertTitle: 'Weather advisory',
               alertMessage: 'Review field safety updates before site mobilization.',
@@ -66,9 +81,8 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         }
       />
 
-      {/* ── Zone 2: Utility ──────────────────────────────────────── */}
-      <div style={hpZoneSection('utility')}>
-      <HomepageSectionShell title="Quick-use / Work Zone">
+      {/* ── Zone 2: Utility — Command Surfaces ──────────────────── */}
+      <section aria-label="Quick-use and work zone" style={zoneStyle('utility')}>
         <PriorityActionsRail
           activeAudience="field"
           config={{
@@ -122,13 +136,72 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             ],
           }}
         />
-      </HomepageSectionShell>
+      </section>
 
-      </div>
+      {/* ── Zone 3: Discovery — Search and Wayfinding ───────────── */}
+      <section aria-label="Discovery and wayfinding" style={zoneStyle('discovery')}>
+        <SmartSearchWayfinding
+          activeAudience="field"
+          config={{
+            strategy: { mode: 'curatedFirst', futureSearchEnhancement: 'planned' },
+            quickPaths: [
+              {
+                id: 'open-timesheet',
+                title: 'Open Timesheet',
+                href: '/timesheet',
+                description: 'Most-used weekly action',
+                order: 1,
+              },
+              {
+                id: 'field-safety',
+                title: 'Safety Center',
+                href: '/safety',
+                description: 'Field notices and protocols',
+                order: 2,
+              },
+            ],
+            categories: [
+              { id: 'systems', title: 'Systems', order: 1 },
+              { id: 'forms', title: 'Forms and Policies', order: 2 },
+              { id: 'teams', title: 'Team Spaces', order: 3 },
+            ],
+            resources: [
+              {
+                id: 'resource-procore',
+                title: 'Procore Project Hub',
+                href: '/systems/procore',
+                type: 'system',
+                categoryId: 'systems',
+                description: 'Project coordination and field updates',
+                promoted: true,
+                order: 1,
+                keywords: ['project', 'field', 'coordination'],
+              },
+              {
+                id: 'resource-change-order',
+                title: 'Change Order Form',
+                href: '/forms/change-order',
+                type: 'form',
+                categoryId: 'forms',
+                description: 'Submit approved change requests',
+                order: 2,
+              },
+              {
+                id: 'resource-ops-team',
+                title: 'Operations Team Space',
+                href: '/teams/operations',
+                type: 'teamSpace',
+                categoryId: 'teams',
+                description: 'Weekly priorities and handoff notes',
+                order: 3,
+              },
+            ],
+          }}
+        />
+      </section>
 
-      {/* ── Zone 3: Communications ───────────────────────────────── */}
-      <div style={hpZoneSection('communications')}>
-      <HomepageSectionShell title="Communications">
+      {/* ── Zone 4: Communications — Editorial Modules ──────────── */}
+      <section aria-label="Communications" style={zoneStyle('communications')}>
         <CompanyPulse
           activeAudience="field"
           config={{
@@ -198,12 +271,10 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             ],
           }}
         />
-      </HomepageSectionShell>
-      </div>
+      </section>
 
-      {/* ── Zone 4: Operational Awareness ────────────────────────── */}
-      <div style={hpZoneSection('operational')}>
-      <HomepageSectionShell title="Operational Awareness">
+      {/* ── Zone 5: Operational — Intelligence Modules ──────────── */}
+      <section aria-label="Operational awareness" style={zoneStyle('operational')}>
         <ProjectPortfolioSpotlight
           activeAudience="field"
           config={{
@@ -215,7 +286,7 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
                 featured: true,
                 strategicEmphasis: true,
                 status: { label: 'On Track', variant: 'success' },
-                freshness: { source: 'live', updatedAt: '2026-04-04T12:00:00.000Z' },
+                freshness: { source: 'live', updatedAt: '2026-04-05T12:00:00.000Z' },
                 milestones: [
                   { id: 'm1', title: 'MEP closeout', completed: true },
                   { id: 'm2', title: 'Punch list reduction', completed: false },
@@ -243,7 +314,7 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
                 eventType: 'recognition',
                 featured: true,
                 indicator: { label: 'Audit Complete', variant: 'success' },
-                freshness: { source: 'live', updatedAt: '2026-04-04T13:00:00.000Z' },
+                freshness: { source: 'live', updatedAt: '2026-04-05T13:00:00.000Z' },
                 cta: { label: 'Open safety hub', href: '/safety' },
               },
               {
@@ -257,75 +328,7 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             ],
           }}
         />
-      </HomepageSectionShell>
-      </div>
-
-      {/* ── Zone 5: Discovery ────────────────────────────────────── */}
-      <div style={hpZoneSection('discovery')}>
-      <HomepageSectionShell title="Discovery">
-        <SmartSearchWayfinding
-          activeAudience="field"
-          config={{
-            strategy: { mode: 'curatedFirst', futureSearchEnhancement: 'planned' },
-            quickPaths: [
-              {
-                id: 'open-timesheet',
-                title: 'Open Timesheet',
-                href: '/timesheet',
-                description: 'Most-used weekly action',
-                order: 1,
-              },
-              {
-                id: 'field-safety',
-                title: 'Safety Center',
-                href: '/safety',
-                description: 'Field notices and protocols',
-                order: 2,
-              },
-            ],
-            categories: [
-              { id: 'systems', title: 'Systems', order: 1 },
-              { id: 'forms', title: 'Forms and Policies', order: 2 },
-              { id: 'teams', title: 'Team Spaces', order: 3 },
-            ],
-            resources: [
-              {
-                id: 'resource-procore',
-                title: 'Procore Project Hub',
-                href: '/systems/procore',
-                type: 'system',
-                categoryId: 'systems',
-                description: 'Project coordination and field updates',
-                promoted: true,
-                order: 1,
-                keywords: ['project', 'field', 'coordination'],
-              },
-              {
-                id: 'resource-change-order',
-                title: 'Change Order Form',
-                href: '/forms/change-order',
-                type: 'form',
-                categoryId: 'forms',
-                description: 'Submit approved change requests',
-                order: 2,
-              },
-              {
-                id: 'resource-ops-team',
-                title: 'Operations Team Space',
-                href: '/teams/operations',
-                type: 'teamSpace',
-                categoryId: 'teams',
-                description: 'Weekly priorities and handoff notes',
-                order: 3,
-              },
-            ],
-          }}
-        />
-      </HomepageSectionShell>
-
-      </div>
-
-      <HomepageLoadingState label="Loading homepage content" />
+      </section>
     </div>
   );
 }
