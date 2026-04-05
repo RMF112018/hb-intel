@@ -86,13 +86,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e_1.0.0": {
-        "type": "path",
-        "path": "shell-web-part_33c64341ed81ee506c2a.js"
-      },
       "cb7060f5-b852-4600-b912-a5f6f7221ce2_1.0.0": {
         "type": "path",
-        "path": "shell-entry-cb7060f5-b852-4600-b912-a5f6f7221ce2-c5f2c9de.js"
+        "path": "shell-web-part_33c64341ed81ee506c2a.js"
       }
     }
   }

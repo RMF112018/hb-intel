@@ -874,28 +874,20 @@ for (const domain of domains) {
 
   for (const target of targetManifests) {
     const targetEntryModuleId = `${target.json.id}_${compiledBaseManifest.version}`;
-    const targetScriptResources: Record<string, unknown> = { ...normalizedScriptResources };
 
-    if (targetEntryModuleId !== compiledEntryModuleId) {
-      const shimSource =
-        `define("${targetEntryModuleId}", ["${compiledEntryModuleId}"], function(baseModule) { return baseModule; });\n`;
-      const shimHash = createHash('sha256').update(Buffer.from(shimSource, 'utf8')).digest('hex').slice(0, 8);
-      const shimFileName = `shell-entry-${target.json.id}-${shimHash}.js`;
-      const shimPath = path.join(compiledShellAssetPath, shimFileName);
-
-      fs.writeFileSync(shimPath, shimSource);
-      targetScriptResources[targetEntryModuleId] = {
-        type: 'path',
-        path: shimFileName,
-      };
-      generatedShimExpectations.push({
-        manifestId: target.json.id,
-        entryModuleId: targetEntryModuleId,
-        shimFileName,
-        shimFileHash: shimHash,
-        baseModuleId: compiledEntryModuleId,
-      });
-    }
+    // Direct-map each webpart's entryModuleId to the compiled shell asset.
+    // SPFx's module loader does not support AMD cross-module dependency
+    // resolution in entry modules, so the prior shim approach
+    //   define("{webpartId}_1.0.0", ["9a2f7f61-..._1.0.0"], fn)
+    // fails with "Could not load ... in require".  The proof cases proved
+    // that SPFx resolves scriptResources by key, not by the file's internal
+    // define() name, so all webparts can safely point to the same compiled
+    // shell asset file using their own unique scriptResources key.
+    const targetScriptResources: Record<string, unknown> = {
+      ...compiledScriptResources,
+      [targetEntryModuleId]: legacyScriptResource,
+    };
+    delete (targetScriptResources as Record<string, unknown>)['shell-web-part'];
 
     const composed = {
       ...compiledBaseManifest,
