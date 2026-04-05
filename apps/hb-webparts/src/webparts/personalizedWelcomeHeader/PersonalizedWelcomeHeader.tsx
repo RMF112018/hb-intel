@@ -1,5 +1,14 @@
+/**
+ * PersonalizedWelcomeHeader — Signature personalized greeting
+ * Phase 15-04 — Top-band signature redesign
+ *
+ * The greeting is a defining product element — not a utility label.
+ * It must immediately communicate that this homepage knows who you are
+ * and was built for you. Lives within the unified top-band container
+ * alongside the hero, not in its own isolated card.
+ */
 import * as React from 'react';
-import { HbcHomepageSurfaceCard, HbcHomepageMetadataRow, HbcHomepageEyebrow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcHomepageMetadataRow, HbcHomepageEyebrow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { hedrickLogo } from '@hbc/ui-kit/branding';
 import { normalizeWelcomeHeaderConfig } from '../../homepage/helpers/topBandConfig.js';
 import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js';
@@ -20,25 +29,6 @@ const ALERT_VARIANT_MAP = {
   critical: 'critical',
 } as const;
 
-/** Greeting prefix: heading-level size, normal weight for "Good morning," */
-const greetingPrefixStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '1.125rem',
-  fontWeight: 400,
-  lineHeight: 1.3,
-  letterSpacing: '-0.005em',
-  opacity: 0.8,
-};
-
-/** Name emphasis: display-level size, bold weight for "Avery." */
-const greetingNameStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '1.75rem',
-  fontWeight: 700,
-  lineHeight: 1.2,
-  letterSpacing: '-0.02em',
-};
-
 /** Brand lockup row: restrained horizontal mark preceding the eyebrow */
 const brandLockupStyle: React.CSSProperties = {
   display: 'flex',
@@ -46,20 +36,69 @@ const brandLockupStyle: React.CSSProperties = {
   gap: HP_SPACE.md,
 };
 
-/** Brand logo: small horizontal wordmark, premium restraint */
+/** Brand logo: small horizontal wordmark */
 const brandLogoStyle: React.CSSProperties = {
-  height: 20,
+  height: 22,
   width: 'auto',
-  opacity: 0.7,
+  opacity: 0.75,
   objectFit: 'contain',
 };
 
-/** Alert container: subtle tinted background for visual separation */
+/** Greeting prefix: "Good morning," — warm, understated */
+const greetingPrefixStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '1rem',
+  fontWeight: 400,
+  lineHeight: 1.3,
+  letterSpacing: '-0.005em',
+  opacity: 0.7,
+};
+
+/** Name emphasis: "Jordan." — signature-level, commanding */
+const greetingNameStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '2rem',
+  fontWeight: 700,
+  lineHeight: 1.15,
+  letterSpacing: '-0.025em',
+  color: 'rgb(34, 83, 145)',
+};
+
+/** Decorative accent bar beside the greeting */
+const greetingAccentStyle: React.CSSProperties = {
+  width: 4,
+  alignSelf: 'stretch',
+  borderRadius: 2,
+  background: 'linear-gradient(180deg, rgb(34, 83, 145) 0%, rgba(229, 126, 70, 0.6) 100%)',
+  flexShrink: 0,
+};
+
+/** Support text: concise orientation for the day */
+const supportLineStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.875rem',
+  lineHeight: 1.5,
+  color: 'rgba(0, 0, 0, 0.65)',
+  maxWidth: '38ch',
+};
+
+/** Context line: date or operational context */
+const contextLineStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.8125rem',
+  lineHeight: 1.5,
+  opacity: HP_TEXT_OPACITY.secondary,
+  fontWeight: 500,
+  letterSpacing: '0.01em',
+};
+
+/** Alert container: premium treatment for priority signals */
 const alertContainerStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.md,
-  padding: `${HP_SPACE.md}px ${HP_SPACE.xl}px`,
-  background: 'rgba(34, 83, 145, 0.04)',
-  borderRadius: 6,
+  marginTop: HP_SPACE.xl,
+  padding: `${HP_SPACE.lg}px ${HP_SPACE.xl}px`,
+  background: 'rgba(34, 83, 145, 0.05)',
+  borderRadius: 8,
+  borderLeft: '3px solid rgba(34, 83, 145, 0.3)',
 };
 
 export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }: PersonalizedWelcomeHeaderProps): React.JSX.Element {
@@ -68,28 +107,32 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
   const hasAlert = normalized.alertSeverity !== 'none' && (normalized.alertTitle || normalized.alertMessage);
 
   return (
-    <HbcHomepageSurfaceCard surface="welcome">
-      <div style={{ display: 'grid', gap: HP_SPACE.md }}>
-        <div style={brandLockupStyle}>
-          <img src={hedrickLogo} alt="Hedrick Brothers" style={brandLogoStyle} />
-          <HbcHomepageEyebrow tone="muted">HB Central</HbcHomepageEyebrow>
+    <div data-hbc-homepage="welcome-header" style={{ display: 'flex', flexDirection: 'column', gap: HP_SPACE.xl, height: '100%' }}>
+      {/* Brand lockup */}
+      <div style={brandLockupStyle}>
+        <img src={hedrickLogo} alt="Hedrick Brothers" style={brandLogoStyle} />
+        <HbcHomepageEyebrow tone="muted">HB Central</HbcHomepageEyebrow>
+      </div>
+
+      {/* Signature greeting with accent bar */}
+      <div style={{ display: 'flex', gap: HP_SPACE.xl, alignItems: 'flex-start' }}>
+        <div style={greetingAccentStyle} aria-hidden="true" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: HP_SPACE.md }}>
+          <h2 style={{ margin: 0 }}>
+            <span style={greetingPrefixStyle}>{message.greeting},</span>
+            <span style={greetingNameStyle}>{message.firstName}.</span>
+          </h2>
+
+          {normalized.supportLine ? (
+            <p style={supportLineStyle}>{normalized.supportLine}</p>
+          ) : null}
         </div>
+      </div>
 
-        <h2 style={{ margin: 0 }}>
-          <span style={greetingPrefixStyle}>{message.greeting},</span>
-          <span style={greetingNameStyle}>{message.firstName}.</span>
-        </h2>
-
-        {normalized.supportLine ? (
-          <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5 }}>
-            {normalized.supportLine}
-          </p>
-        ) : null}
-
+      {/* Context and alert — pushed toward bottom for visual balance */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: HP_SPACE.md }}>
         {normalized.contextLine ? (
-          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.5, opacity: HP_TEXT_OPACITY.secondary }}>
-            {normalized.contextLine}
-          </p>
+          <p style={contextLineStyle}>{normalized.contextLine}</p>
         ) : null}
 
         {hasAlert ? (
@@ -105,6 +148,6 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
           </section>
         ) : null}
       </div>
-    </HbcHomepageSurfaceCard>
+    </div>
   );
 }
