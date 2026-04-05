@@ -170,6 +170,25 @@ function cleanShellTemp(): void {
   if (fs.existsSync(staleExtensionManifest)) {
     fs.rmSync(staleExtensionManifest, { force: true });
   }
+  // Reset config.json to WebPart default so extension builds from a prior
+  // iteration do not leak into the next domain (or into manual gulp runs).
+  fs.writeFileSync(
+    path.join(SHELL_DIR, 'config', 'config.json'),
+    JSON.stringify({
+      $schema: 'https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json',
+      version: '2.0',
+      bundles: {
+        'shell-web-part': {
+          components: [{
+            entrypoint: './lib/webparts/shell/ShellWebPart.js',
+            manifest: './src/webparts/shell/ShellWebPart.manifest.json',
+          }],
+        },
+      },
+      externals: {},
+      localizedResources: {},
+    }, null, 2) + '\n',
+  );
 }
 
 function escapeRegExp(value: string): string {
@@ -358,6 +377,7 @@ function verifySppkg(
   expectedIds: string[],
   domainDir: string,
   hbExpectations?: HbVerificationExpectations,
+  isExtension?: boolean,
 ): boolean {
   try {
     // List archive contents using unzip -l (sppkg is a ZIP/OPC archive)
@@ -393,7 +413,7 @@ function verifySppkg(
       ok = false;
     }
 
-    // Extract and inspect manifest payload for all expected webpart IDs
+    // Extract and inspect manifest payload for all expected component IDs
     try {
       const manifestJson = execSync(
         `unzip -p "${sppkgPath}" "*.manifest.json" 2>/dev/null || true`,
@@ -402,16 +422,56 @@ function verifySppkg(
       if (manifestJson) {
         for (const expectedId of expectedIds) {
           if (!manifestJson.includes(expectedId)) {
-            console.error(`  ❌ ${domainDir}: webpart ID ${expectedId} not found in .sppkg manifest`);
+            console.error(`  ❌ ${domainDir}: component ID ${expectedId} not found in .sppkg manifest`);
             ok = false;
           } else {
-            console.log(`  ✓ Webpart ID ${expectedId.substring(0, 8)}... found in .sppkg manifest`);
+            console.log(`  ✓ Component ID ${expectedId.substring(0, 8)}... found in .sppkg manifest`);
           }
         }
       }
     } catch {
       // Non-fatal — manifest extraction failed but archive structure is OK
       console.warn(`  ⚠ ${domainDir}: could not extract manifest for ID verification`);
+    }
+
+    // Extension-specific verification: ClientSideInstance.xml content and no WebPart XML
+    if (isExtension) {
+      const clientSideInstancePath = archivePaths.find((e) => /ClientSideInstance\.xml$/i.test(e));
+      if (!clientSideInstancePath) {
+        console.error(`  ❌ ${domainDir}: .sppkg missing ClientSideInstance.xml`);
+        ok = false;
+      } else {
+        try {
+          const instanceXml = execSync(
+            `unzip -p "${sppkgPath}" "${clientSideInstancePath}"`,
+            { encoding: 'utf8', maxBuffer: 1024 * 1024 },
+          );
+          if (!instanceXml.includes('Location="ClientSideExtension.ApplicationCustomizer"')) {
+            console.error(`  ❌ ${domainDir}: ClientSideInstance.xml missing Location="ClientSideExtension.ApplicationCustomizer"`);
+            ok = false;
+          }
+          if (!instanceXml.includes(`ComponentId="${expectedIds[0]}"`)) {
+            console.error(`  ❌ ${domainDir}: ClientSideInstance.xml ComponentId does not match expected ${expectedIds[0]}`);
+            ok = false;
+          }
+          if (!instanceXml.includes('Properties=')) {
+            console.error(`  ❌ ${domainDir}: ClientSideInstance.xml missing Properties attribute`);
+            ok = false;
+          }
+          if (ok) {
+            console.log(`  ✓ ClientSideInstance.xml verified: Location, ComponentId, Properties correct`);
+          }
+        } catch (err) {
+          console.error(`  ❌ ${domainDir}: failed to extract ClientSideInstance.xml — ${(err as Error).message}`);
+          ok = false;
+        }
+      }
+      // Verify no WebPart_*.xml files are present in extension packages
+      const webPartXmls = archivePaths.filter((e) => /WebPart_[0-9a-f-]+\.xml$/i.test(e));
+      if (webPartXmls.length > 0) {
+        console.error(`  ❌ ${domainDir}: extension .sppkg should not contain WebPart XML files: ${webPartXmls.join(', ')}`);
+        ok = false;
+      }
     }
 
     if (hbExpectations) {
@@ -780,6 +840,29 @@ for (const domain of domains) {
   // ── Step 2: Prepare SPFx shell project ───────────────────────────────
   cleanShellTemp();
 
+  // Write domain-appropriate config.json — extension domains compile via
+  // the ShellExtensionCustomizer entry; webpart domains via ShellWebPart.
+  if (isExtension) {
+    fs.writeFileSync(
+      path.join(SHELL_DIR, 'config', 'config.json'),
+      JSON.stringify({
+        $schema: 'https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json',
+        version: '2.0',
+        bundles: {
+          'shell-extension-customizer': {
+            components: [{
+              entrypoint: './lib/extensions/customizer/ShellExtensionCustomizer.js',
+              manifest: './src/extensions/customizer/ShellExtensionCustomizer.manifest.json',
+            }],
+          },
+        },
+        externals: {},
+        localizedResources: {},
+      }, null, 2) + '\n',
+    );
+    console.log('  ✓ config.json set to extension bundle (shell-extension-customizer)');
+  }
+
   // Copy Vite assets into shell assets/.
   // Skip the base unhashed bundle (baseBundleName) — only the hashed copy is
   // copied so the .sppkg does not contain a redundant unhashed version.
@@ -810,12 +893,42 @@ for (const domain of domains) {
     shellPkgSolution.solution?.features?.length &&
     Array.isArray(shellPkgSolution.solution.features)
   ) {
-    shellPkgSolution.solution.features[0].componentIds = targetManifestIds;
+    if (isExtension) {
+      // Extensions use element manifests for automatic tenant-wide activation,
+      // not componentIds (which is a WebPart-only concept).
+      delete shellPkgSolution.solution.features[0].componentIds;
+      shellPkgSolution.solution.features[0].assets = {
+        elementManifests: ['ClientSideInstance.xml'],
+        elementFiles: ['ClientSideInstance.xml'],
+      };
+    } else {
+      shellPkgSolution.solution.features[0].componentIds = targetManifestIds;
+    }
   }
   fs.writeFileSync(
     path.join(SHELL_DIR, 'config', 'package-solution.json'),
     JSON.stringify(shellPkgSolution, null, 2),
   );
+
+  // For extension domains, generate ClientSideInstance.xml for automatic
+  // Tenant Wide Extensions registration.
+  if (isExtension) {
+    const spAssetsDir = path.join(SHELL_DIR, 'sharepoint', 'assets');
+    fs.mkdirSync(spAssetsDir, { recursive: true });
+    const clientSideInstanceXml = [
+      '<?xml version="1.0" encoding="utf-8"?>',
+      '<Elements xmlns="http://schemas.microsoft.com/sharepoint/">',
+      '  <ClientSideComponentInstance',
+      '    Title="HB Shell Extension"',
+      '    Location="ClientSideExtension.ApplicationCustomizer"',
+      `    ComponentId="${primarySourceManifest.id}"`,
+      '    Properties="{}" />',
+      '</Elements>',
+      '',
+    ].join('\n');
+    fs.writeFileSync(path.join(spAssetsDir, 'ClientSideInstance.xml'), clientSideInstanceXml);
+    console.log(`  ✓ ClientSideInstance.xml generated (ComponentId=${primarySourceManifest.id})`);
+  }
 
   // Write primary domain manifest into the shell (additional manifests for multi-mode
   // are generated from this compiled base after gulp bundle).
@@ -828,29 +941,41 @@ for (const domain of domains) {
   const shellManifestId = useNeutralShellManifestId
     ? HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID
     : primarySourceManifest.id;
-  // For extensions: compile using the webpart shell (SPFx project only compiles
-  // webpart entries), but write the extension manifest ID. The compiled shell-web-part
-  // JS loads the IIFE bundle identically for both webparts and extensions — the
-  // ShellWebPart.onInit() loads the bundle, and ShellWebPart.render() calls mount().
-  // For extensions, post-build we rewrite the packaged manifest to extension type.
-  const shellManifest = {
-    $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
-    id: shellManifestId,
-    alias: isExtension ? 'ShellExtensionCustomizer' : 'ShellWebPart',
-    componentType: 'WebPart',
-    version: '*',
-    manifestVersion: 2,
-    requiresCustomScript: false,
-    supportedHosts: isExtension ? ['SharePointFullPage'] : (primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp']),
-    supportsThemeVariants: true,
-    preconfiguredEntries: isExtension
-      ? [{ groupId: '5c03119e-3074-46fd-976b-c60198311f70', group: { default: 'HB Intel' }, title: { default: 'HB Shell Extension' }, description: { default: 'Shell extension placeholder rendering.' }, properties: {} }]
-      : primarySourceManifest.preconfiguredEntries,
-  };
-  fs.writeFileSync(
-    path.join(SHELL_DIR, 'src', 'webparts', 'shell', 'ShellWebPart.manifest.json'),
-    JSON.stringify(shellManifest, null, 2),
-  );
+  // Write the shell manifest for SPFx compilation.
+  // Extension domains: write a true Extension manifest to the extension entry path.
+  // WebPart domains: write a WebPart manifest to the webpart entry path (existing behavior).
+  if (isExtension) {
+    const shellManifest = {
+      $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json',
+      id: shellManifestId,
+      alias: 'ShellExtensionCustomizer',
+      componentType: 'Extension',
+      extensionType: 'ApplicationCustomizer',
+      version: '*',
+      manifestVersion: 2,
+    };
+    fs.writeFileSync(
+      path.join(SHELL_DIR, 'src', 'extensions', 'customizer', 'ShellExtensionCustomizer.manifest.json'),
+      JSON.stringify(shellManifest, null, 2),
+    );
+  } else {
+    const shellManifest = {
+      $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
+      id: shellManifestId,
+      alias: 'ShellWebPart',
+      componentType: 'WebPart',
+      version: '*',
+      manifestVersion: 2,
+      requiresCustomScript: false,
+      supportedHosts: primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp'],
+      supportsThemeVariants: true,
+      preconfiguredEntries: primarySourceManifest.preconfiguredEntries,
+    };
+    fs.writeFileSync(
+      path.join(SHELL_DIR, 'src', 'webparts', 'shell', 'ShellWebPart.manifest.json'),
+      JSON.stringify(shellManifest, null, 2),
+    );
+  }
 
   // ── Step 3: Run SPFx gulp build ─────────────────────────────────────
   const shellEnv = {
@@ -870,10 +995,11 @@ for (const domain of domains) {
   run('node node_modules/gulp-cli/bin/gulp.js bundle --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
 
   const compiledShellAssetPath = path.join(SHELL_DIR, 'release', 'assets');
-  // Both webpart and extension domains use the shell-web-part compiled asset
-  // because the SPFx project always compiles via the ShellWebPart entry.
+  const shellAssetPattern = isExtension
+    ? /^shell-extension-customizer.*\.js$/
+    : /^shell-web-part.*\.js$/;
   const compiledShellAsset = fs.existsSync(compiledShellAssetPath)
-    ? fs.readdirSync(compiledShellAssetPath).find((file) => /^shell-web-part.*\.js$/.test(file))
+    ? fs.readdirSync(compiledShellAssetPath).find((file) => shellAssetPattern.test(file))
     : undefined;
   if (!compiledShellAsset) {
     console.error(`  ❌ ${domain.dir}: compiled shell asset not found after gulp bundle (pattern: ${shellAssetPattern})`);
@@ -921,9 +1047,10 @@ for (const domain of domains) {
   const compiledBaseManifest = JSON.parse(fs.readFileSync(compiledBaseManifestPath, 'utf8'));
   const compiledEntryModuleId = `${shellManifestId}_${compiledBaseManifest.version}`;
   const compiledScriptResources = compiledBaseManifest.loaderConfig?.scriptResources ?? {};
-  const legacyScriptResource = compiledScriptResources['shell-web-part'];
+  const shellBundleKey = isExtension ? 'shell-extension-customizer' : 'shell-web-part';
+  const legacyScriptResource = compiledScriptResources[shellBundleKey];
   if (!legacyScriptResource) {
-    console.error(`  ❌ ${domain.dir}: compiled shell manifest missing shell-web-part script resource`);
+    console.error(`  ❌ ${domain.dir}: compiled shell manifest missing ${shellBundleKey} script resource`);
     allPassed = false;
     continue;
   }
@@ -931,7 +1058,7 @@ for (const domain of domains) {
     ...compiledScriptResources,
     [compiledEntryModuleId]: legacyScriptResource,
   };
-  delete (normalizedScriptResources as Record<string, unknown>)['shell-web-part'];
+  delete (normalizedScriptResources as Record<string, unknown>)[shellBundleKey];
   const generatedShimExpectations: HbShimExpectation[] = [];
 
   // Remove stale shim files before rewriting per-webpart shims so repeated
@@ -966,7 +1093,7 @@ for (const domain of domains) {
       ...compiledScriptResources,
       [targetEntryModuleId]: perWebpartScriptResource,
     };
-    delete (targetScriptResources as Record<string, unknown>)['shell-web-part'];
+    delete (targetScriptResources as Record<string, unknown>)[shellBundleKey];
 
     generatedShimExpectations.push({
       manifestId: target.json.id,
@@ -1074,7 +1201,7 @@ for (const domain of domains) {
       emittedLocalShimFiles,
     }
     : undefined;
-  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir, hbExpectations);
+  const verified = verifySppkg(sppkgDest, bundleName, targetManifestIds, domain.dir, hbExpectations, isExtension);
   if (!verified) {
     allPassed = false;
     continue;

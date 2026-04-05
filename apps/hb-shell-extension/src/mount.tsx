@@ -63,6 +63,11 @@ export function unmountBottom(): void {
   bottomRoot = undefined;
 }
 
-// Publish the shell-extension API on globalThis for the SPFx loader
+// Publish the shell-extension API on both globalThis and window for the SPFx
+// loader. In SPFx's runtime environment, globalThis and window can be separate
+// objects — ShellExtensionCustomizer.ts resolves via globalThis ?? window.
 const api = { mountTop, mountBottom, unmountTop, unmountBottom };
 (globalThis as { __hbIntel_hbShellExtension?: typeof api }).__hbIntel_hbShellExtension = api;
+if (typeof window !== 'undefined') {
+  (window as { __hbIntel_hbShellExtension?: typeof api }).__hbIntel_hbShellExtension = api;
+}

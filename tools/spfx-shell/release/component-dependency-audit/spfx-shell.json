@@ -1,10 +1,10 @@
 {
   "bundles": {
-    "shell-web-part": {
+    "shell-extension-customizer": {
       "dependencies": [
         {
-          "componentId": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
-          "componentName": "@microsoft/sp-loader",
+          "componentId": "4df9bb86-ab0a-4aab-ab5f-48bf167048fb",
+          "componentName": "@microsoft/sp-application-base",
           "componentVersion": "1.18.0",
           "isDirectDependency": true
         },
@@ -63,21 +63,15 @@
           "isDirectDependency": false
         },
         {
-          "componentId": "229b8d08-79f3-438b-8c21-4613fc877abd",
-          "componentName": "@microsoft/load-themed-styles",
-          "componentVersion": "0.1.2",
-          "isDirectDependency": false
-        },
-        {
-          "componentId": "974a7777-0990-4136-8fa6-95d80114c2e0",
-          "componentName": "@microsoft/sp-webpart-base",
-          "componentVersion": "1.18.0",
-          "isDirectDependency": true
-        },
-        {
           "componentId": "467dc675-7cc5-4709-8aac-78e3b71bd2f6",
           "componentName": "@microsoft/sp-component-base",
           "componentVersion": "1.18.0",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "229b8d08-79f3-438b-8c21-4613fc877abd",
+          "componentName": "@microsoft/load-themed-styles",
+          "componentVersion": "0.1.2",
           "isDirectDependency": false
         },
         {
@@ -93,9 +87,15 @@
           "isDirectDependency": false
         },
         {
-          "componentId": "42647dee-1f75-4b9f-b521-5c844a6c35cc",
-          "componentName": "@ms/sp-edit-customer-promise",
-          "componentVersion": "0.1.0",
+          "componentId": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
+          "componentName": "@microsoft/sp-loader",
+          "componentVersion": "1.18.0",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "0773bd53-a69e-4293-87e6-ba80ea4d614b",
+          "componentName": "@microsoft/sp-extension-base",
+          "componentVersion": "1.18.0",
           "isDirectDependency": false
         }
       ],
