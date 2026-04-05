@@ -35,6 +35,7 @@ interface DomainConfig {
   camel: string;      // camelCase for global name segment
   pascal: string;     // PascalCase for manifest lookups
   packagingModel?: 'single' | 'multi';
+  extensionType?: 'ApplicationCustomizer';  // set for SPFx extension domains (Lane B)
 }
 
 interface HbShimExpectation {
@@ -65,6 +66,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
   { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi' },
+  { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
 ];
 
 const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
@@ -155,13 +157,19 @@ function resolveDefaultBackendMode(domainDir: string): string {
 }
 
 function cleanShellTemp(): void {
-  for (const dir of ['temp', 'dist', 'lib', 'sharepoint', 'assets']) {
+  for (const dir of ['temp', 'dist', 'lib', 'sharepoint', 'assets', 'release']) {
     const target = path.join(SHELL_DIR, dir);
     if (fs.existsSync(target)) {
       fs.rmSync(target, { recursive: true, force: true });
     }
   }
   fs.mkdirSync(path.join(SHELL_DIR, 'assets'), { recursive: true });
+  // Remove stale extension manifest from previous builds so only the
+  // currently-intended shell type's manifest is active.
+  const staleExtensionManifest = path.join(SHELL_DIR, 'src', 'extensions', 'customizer', 'ShellExtensionCustomizer.manifest.json');
+  if (fs.existsSync(staleExtensionManifest)) {
+    fs.rmSync(staleExtensionManifest, { force: true });
+  }
 }
 
 function escapeRegExp(value: string): string {
@@ -284,10 +292,10 @@ function inspectPackagedShellAsset(
     const shellAssetPath = listOutput
       .split('\n')
       .map((entry) => entry.trim())
-      .find((entry) => /^ClientSideAssets\/shell-web-part.*\.js$/.test(entry));
+      .find((entry) => /^ClientSideAssets\/shell-(web-part|extension-customizer).*\.js$/.test(entry));
 
     if (!shellAssetPath) {
-      console.error(`  ❌ ${domainDir}: .sppkg missing packaged shell webpart asset`);
+      console.error(`  ❌ ${domainDir}: .sppkg missing packaged shell asset`);
       return false;
     }
 
@@ -376,10 +384,12 @@ function verifySppkg(
       }
     }
 
-    // Check for shell webpart JS
-    const hasShellJs = entries.some((e) => /shell-web-part.*\.js/.test(e) || /ShellWebPart.*\.js/.test(e));
+    // Check for shell JS (webpart or extension)
+    const hasShellJs = entries.some((e) =>
+      /shell-web-part.*\.js/.test(e) || /ShellWebPart.*\.js/.test(e) ||
+      /shell-extension-customizer.*\.js/.test(e) || /ShellExtensionCustomizer.*\.js/.test(e));
     if (!hasShellJs) {
-      console.error(`  ❌ ${domainDir}: .sppkg missing compiled shell webpart JS`);
+      console.error(`  ❌ ${domainDir}: .sppkg missing compiled shell JS`);
       ok = false;
     }
 
@@ -547,7 +557,11 @@ for (const domain of domains) {
   const appDir = path.join(ROOT, 'apps', domain.dir);
   const distDir = path.join(appDir, 'dist');
   const configPath = path.join(appDir, 'config', 'package-solution.json');
-  const manifestGlob = path.join(appDir, 'src', 'webparts');
+  const isExtension = Boolean(domain.extensionType);
+  const manifestGlob = isExtension
+    ? path.join(appDir, 'src', 'extensions')
+    : path.join(appDir, 'src', 'webparts');
+  const expectedComponentType = isExtension ? 'Extension' : 'WebPart';
 
   // Validate prerequisites
   if (!fs.existsSync(configPath)) {
@@ -556,7 +570,7 @@ for (const domain of domains) {
     continue;
   }
 
-  // Find the domain's source webpart manifests
+  // Find the domain's source manifests
   type SourceManifest = {
     file: string;
     json: any;
@@ -575,7 +589,7 @@ for (const domain of domains) {
     const manifests = walk(manifestGlob).sort();
     for (const file of manifests) {
       const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
-      if (parsed.componentType !== 'WebPart') {
+      if (parsed.componentType !== expectedComponentType) {
         continue;
       }
       if (domain.dir === 'hb-webparts' && HB_WEBPARTS_EXCLUDED_MANIFEST_IDS.has(parsed.id)) {
@@ -747,19 +761,20 @@ for (const domain of domains) {
     const fromVarScope = (sandbox as Record<string, any>)[globalName];
     const resolved = fromGlobalThis ?? fromWindow ?? fromVarScope;
 
-    if (
-      !resolved ||
-      typeof resolved.mount !== 'function' ||
-      typeof resolved.unmount !== 'function'
-    ) {
-      console.error(`  ❌ ${domain.dir}: runtime smoke test failed — ${globalName} does not expose mount/unmount`);
+    // Extension domains expose mountTop/mountBottom; webpart domains expose mount/unmount.
+    const requiredFns = isExtension
+      ? ['mountTop', 'mountBottom', 'unmountTop', 'unmountBottom']
+      : ['mount', 'unmount'];
+    const missingFns = requiredFns.filter((fn) => typeof resolved?.[fn] !== 'function');
+    if (!resolved || missingFns.length > 0) {
+      console.error(`  ❌ ${domain.dir}: runtime smoke test failed — ${globalName} missing: ${missingFns.join(', ')}`);
       console.error(`     fromGlobalThis:`, typeof fromGlobalThis, fromGlobalThis ? Object.keys(fromGlobalThis) : 'n/a');
       console.error(`     fromWindow:`, typeof fromWindow, fromWindow ? Object.keys(fromWindow) : 'n/a');
       console.error(`     fromVarScope:`, typeof fromVarScope, fromVarScope ? Object.keys(fromVarScope) : 'n/a');
       allPassed = false;
       continue;
     }
-    console.log(`  ✓ Runtime smoke test passed: ${globalName}.mount() and .unmount() present (globalThis + window verified independently)`);
+    console.log(`  ✓ Runtime smoke test passed: ${globalName}.${requiredFns.join('() + .')}() present (globalThis + window verified independently)`);
   }
 
   // ── Step 2: Prepare SPFx shell project ───────────────────────────────
@@ -813,17 +828,24 @@ for (const domain of domains) {
   const shellManifestId = useNeutralShellManifestId
     ? HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID
     : primarySourceManifest.id;
+  // For extensions: compile using the webpart shell (SPFx project only compiles
+  // webpart entries), but write the extension manifest ID. The compiled shell-web-part
+  // JS loads the IIFE bundle identically for both webparts and extensions — the
+  // ShellWebPart.onInit() loads the bundle, and ShellWebPart.render() calls mount().
+  // For extensions, post-build we rewrite the packaged manifest to extension type.
   const shellManifest = {
     $schema: 'https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json',
     id: shellManifestId,
-    alias: 'ShellWebPart',
+    alias: isExtension ? 'ShellExtensionCustomizer' : 'ShellWebPart',
     componentType: 'WebPart',
     version: '*',
     manifestVersion: 2,
     requiresCustomScript: false,
-    supportedHosts: primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp'],
+    supportedHosts: isExtension ? ['SharePointFullPage'] : (primarySourceManifest.supportedHosts || ['SharePointWebPart', 'TeamsPersonalApp']),
     supportsThemeVariants: true,
-    preconfiguredEntries: primarySourceManifest.preconfiguredEntries,
+    preconfiguredEntries: isExtension
+      ? [{ groupId: '5c03119e-3074-46fd-976b-c60198311f70', group: { default: 'HB Intel' }, title: { default: 'HB Shell Extension' }, description: { default: 'Shell extension placeholder rendering.' }, properties: {} }]
+      : primarySourceManifest.preconfiguredEntries,
   };
   fs.writeFileSync(
     path.join(SHELL_DIR, 'src', 'webparts', 'shell', 'ShellWebPart.manifest.json'),
@@ -848,11 +870,13 @@ for (const domain of domains) {
   run('node node_modules/gulp-cli/bin/gulp.js bundle --ship', { cwd: SHELL_DIR, env: shellEnv, useNode18: true });
 
   const compiledShellAssetPath = path.join(SHELL_DIR, 'release', 'assets');
+  // Both webpart and extension domains use the shell-web-part compiled asset
+  // because the SPFx project always compiles via the ShellWebPart entry.
   const compiledShellAsset = fs.existsSync(compiledShellAssetPath)
     ? fs.readdirSync(compiledShellAssetPath).find((file) => /^shell-web-part.*\.js$/.test(file))
     : undefined;
   if (!compiledShellAsset) {
-    console.error(`  ❌ ${domain.dir}: compiled shell webpart asset not found after gulp bundle`);
+    console.error(`  ❌ ${domain.dir}: compiled shell asset not found after gulp bundle (pattern: ${shellAssetPattern})`);
     allPassed = false;
     continue;
   }
