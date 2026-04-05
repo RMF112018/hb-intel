@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-webparts",
     "id": "39b8f2ea-59bd-45b7-b4ec-b590b316833b",
-    "version": "1.0.0.36",
+    "version": "1.0.0.37",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "hb-webparts Feature",
         "description": "Deploys HB Central homepage webpart assets.",
         "id": "1f447e99-a2c7-43e5-83d8-d2ed78ed1a96",
-        "version": "1.0.0.36"
+        "version": "1.0.0.37"
       }
     ]
   },
