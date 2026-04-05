@@ -222,7 +222,8 @@
       "Bash(SPFX_API_RESOURCE=hb-intel-api-dev npx tsx tools/build-spfx-package.ts --domain estimating)",
       "Bash(shasum:*)",
       "Bash([ -f \"/Users/bobbyfetting/hb-intel/$f\" ])",
-      "Bash(npx nx:*)"
+      "Bash(npx nx:*)",
+      "Bash(HB_WEBPARTS_ENTRY=src/mount-hero-proof-case.tsx npx vite build)"
     ]
   },
   "enabledPlugins": {

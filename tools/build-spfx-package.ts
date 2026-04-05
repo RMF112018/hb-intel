@@ -562,9 +562,17 @@ for (const domain of domains) {
   let bundleName = baseBundleName;
   let bundlePath = path.join(distDir, bundleName);
 
+  // For the hb-webparts proof case, use the isolated entry that imports only
+  // the proof-case webpart component — avoids bundle contamination from the
+  // full mount.tsx which imports all 10 webpart trees.
+  const isProofCase = domain.dir === 'hb-webparts' && HB_WEBPARTS_PROOF_CASE_IDS.size > 0 && targetManifests.length === 1;
+  const proofCaseBuildEnv: Record<string, string> = isProofCase
+    ? { HB_WEBPARTS_ENTRY: 'src/mount-hero-proof-case.tsx' }
+    : {};
+
   if (!fs.existsSync(distDir)) {
     console.log('  Building app with Vite...');
-    run(`pnpm --filter @hbc/spfx-${domain.dir} build`);
+    run(`pnpm --filter @hbc/spfx-${domain.dir} build`, { env: proofCaseBuildEnv });
   }
 
   if (!fs.existsSync(bundlePath)) {

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 const isProduction = process.env.NODE_ENV === 'production';
+const entryFile = process.env.HB_WEBPARTS_ENTRY ?? 'src/mount.tsx';
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
@@ -24,7 +25,7 @@ export default defineConfig(({ command }) => ({
     ...(isProduction || command === 'build'
       ? {
           lib: {
-            entry: resolve(__dirname, 'src/mount.tsx'),
+            entry: resolve(__dirname, entryFile),
             name: '__hbIntel_hbWebparts',
             formats: ['iife'],
             fileName: () => 'hb-webparts-app.js'
