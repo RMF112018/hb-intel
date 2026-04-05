@@ -177,6 +177,51 @@ function decodeXmlAttribute(value: string): string {
     .replace(/&amp;/g, '&');
 }
 
+/**
+ * Generate a per-webpart copy of the compiled shell JS with the AMD define()
+ * module registration name patched from the neutral shell ID to the target
+ * webpart's entryModuleId.
+ *
+ * SPFx's AMD loader requires the define() name inside the JS file to match
+ * the manifest's entryModuleId.  The neutral shell compiles as
+ * define("9a2f7f61-..._1.0.0", ...) but each webpart manifest expects
+ * define("{webpartId}_1.0.0", ...).  This function creates a dedicated copy
+ * for each webpart with the correct module name.
+ */
+function generatePerWebpartShellCopy(
+  sourceShellPath: string,
+  neutralModuleId: string,
+  targetModuleId: string,
+  targetManifestId: string,
+  outputDir: string,
+): { fileName: string; contentHash: string } {
+  const sourceJs = fs.readFileSync(sourceShellPath, 'utf8');
+
+  const definePattern = `define("${neutralModuleId}"`;
+  if (!sourceJs.includes(definePattern)) {
+    throw new Error(
+      `[generatePerWebpartShellCopy] Source shell JS does not contain expected ` +
+      `define("${neutralModuleId}"). Cannot generate per-webpart copy for ${targetManifestId}.`,
+    );
+  }
+
+  const defineReplacement = `define("${targetModuleId}"`;
+  const patchedJs = sourceJs.replace(definePattern, defineReplacement);
+
+  if (!patchedJs.includes(defineReplacement)) {
+    throw new Error(
+      `[generatePerWebpartShellCopy] Post-patch verification failed: ` +
+      `define("${targetModuleId}") not found after replacement for ${targetManifestId}.`,
+    );
+  }
+
+  const contentHash = createHash('sha256').update(patchedJs).digest('hex').slice(0, 8);
+  const fileName = `shell-entry-${targetManifestId}-${contentHash}.js`;
+  fs.writeFileSync(path.join(outputDir, fileName), patchedJs, 'utf8');
+
+  return { fileName, contentHash };
+}
+
 function inspectCompiledShellAsset(
   shellAssetPath: string,
   bundleName: string,
@@ -443,17 +488,18 @@ function verifySppkg(
           { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
         );
         const expectedDefine = `define("${shimExpectation.entryModuleId}"`;
-        const expectedDependency = `["${shimExpectation.baseModuleId}"]`;
+        const neutralDefine = `define("${shimExpectation.baseModuleId}"`;
 
         if (!shimSource.includes(expectedDefine)) {
           console.error(
-            `  ❌ ${domainDir}: shim ${scriptResource.path} missing expected AMD define for ${shimExpectation.entryModuleId}`,
+            `  ❌ ${domainDir}: shell entry ${scriptResource.path} missing expected AMD define for ${shimExpectation.entryModuleId}`,
           );
           ok = false;
         }
-        if (!shimSource.includes(expectedDependency)) {
+        if (shimSource.includes(neutralDefine)) {
           console.error(
-            `  ❌ ${domainDir}: shim ${scriptResource.path} missing expected dependency on ${shimExpectation.baseModuleId}`,
+            `  ❌ ${domainDir}: shell entry ${scriptResource.path} still contains neutral define ` +
+            `${shimExpectation.baseModuleId} — patching failed`,
           );
           ok = false;
         }
@@ -875,19 +921,36 @@ for (const domain of domains) {
   for (const target of targetManifests) {
     const targetEntryModuleId = `${target.json.id}_${compiledBaseManifest.version}`;
 
-    // Direct-map each webpart's entryModuleId to the compiled shell asset.
-    // SPFx's module loader does not support AMD cross-module dependency
-    // resolution in entry modules, so the prior shim approach
-    //   define("{webpartId}_1.0.0", ["9a2f7f61-..._1.0.0"], fn)
-    // fails with "Could not load ... in require".  The proof cases proved
-    // that SPFx resolves scriptResources by key, not by the file's internal
-    // define() name, so all webparts can safely point to the same compiled
-    // shell asset file using their own unique scriptResources key.
+    // SPFx's AMD loader requires the define() name inside the JS file to match
+    // the manifest's entryModuleId.  The compiled shell registers as the neutral
+    // ID, so generate a per-webpart copy with the define() name patched to the
+    // webpart-specific entryModuleId.
+    const { fileName: perWebpartFileName, contentHash: perWebpartHash } =
+      generatePerWebpartShellCopy(
+        path.join(compiledShellAssetPath, compiledShellAsset),
+        compiledEntryModuleId,
+        targetEntryModuleId,
+        target.json.id,
+        compiledShellAssetPath,
+      );
+
+    const perWebpartScriptResource = {
+      ...legacyScriptResource,
+      path: perWebpartFileName,
+    };
     const targetScriptResources: Record<string, unknown> = {
       ...compiledScriptResources,
-      [targetEntryModuleId]: legacyScriptResource,
+      [targetEntryModuleId]: perWebpartScriptResource,
     };
     delete (targetScriptResources as Record<string, unknown>)['shell-web-part'];
+
+    generatedShimExpectations.push({
+      manifestId: target.json.id,
+      entryModuleId: targetEntryModuleId,
+      shimFileName: perWebpartFileName,
+      shimFileHash: perWebpartHash,
+      baseModuleId: compiledEntryModuleId,
+    });
 
     const composed = {
       ...compiledBaseManifest,
@@ -907,6 +970,8 @@ for (const domain of domains) {
       path.join(compiledManifestDir, `${target.json.id}.manifest.json`),
       JSON.stringify(composed, null, 2),
     );
+
+    console.log(`  ✓ ${target.json.id}: shell copy ${perWebpartFileName} (define → ${targetEntryModuleId})`);
   }
   if (useNeutralShellManifestId) {
     fs.rmSync(compiledBaseManifestPath, { force: true });
@@ -914,7 +979,7 @@ for (const domain of domains) {
   console.log(`  ✓ Prepared ${targetManifests.length} compiled manifest(s) for package-solution`);
   console.log(`  ✓ Base shell module identity: ${compiledEntryModuleId}`);
   if (generatedShimExpectations.length > 0) {
-    console.log(`  ✓ Generated ${generatedShimExpectations.length} per-webpart AMD shim module(s)`);
+    console.log(`  ✓ Generated ${generatedShimExpectations.length} per-webpart shell entry module(s)`);
     for (const shim of generatedShimExpectations) {
       console.log(
         `    - ${shim.manifestId} -> ${shim.shimFileName} (entry ${shim.entryModuleId}, sha256:${shim.shimFileHash})`,
@@ -934,6 +999,18 @@ for (const domain of domains) {
     );
   }
   console.log(`  ✓ Vite assets copied to temp/deploy/`);
+
+  // Copy per-webpart shell entry files from release/assets/ to temp/deploy/
+  // so gulp package-solution includes them in the .sppkg archive.
+  for (const shimExpectation of generatedShimExpectations) {
+    const shimSource = path.join(compiledShellAssetPath, shimExpectation.shimFileName);
+    if (fs.existsSync(shimSource)) {
+      fs.copyFileSync(shimSource, path.join(deployDir, shimExpectation.shimFileName));
+    }
+  }
+  if (generatedShimExpectations.length > 0) {
+    console.log(`  ✓ ${generatedShimExpectations.length} per-webpart shell entry file(s) copied to temp/deploy/`);
+  }
 
   // ── Step 5: Run gulp package-solution ───────────────────────────────
   // CopyWebpackPlugin in gulpfile.js copies assets/ into the webpack output

@@ -24,10 +24,10 @@ That means the likely defect layer is the cumulative packaging/runtime path intr
 ## Package contents
 
 - `Phase-Summary-Cumulative-Loader-Regression.md`
-- `Prompt-01-Forensic-Audit-Cumulative-Regression.md`
-- `Prompt-02-Implement-Narrow-Cumulative-Loader-Remediation.md`
-- `Prompt-03-Build-Inspect-and-Tenant-Revalidate.md`
-- `Prompt-04-Closure-and-Decision-Handoff.md`
+- `Prompt-01-Forensic-Audit-Cumulative-Regression.md` / `Prompt-01-Forensic-Note.md`
+- `Prompt-02-Implement-Narrow-Cumulative-Loader-Remediation.md` / `Prompt-02-Completion-Note.md`
+- `Prompt-03-Build-Inspect-and-Tenant-Revalidate.md` / `Prompt-03-Completion-Note.md`
+- `Prompt-04-Closure-and-Decision-Handoff.md` / `Prompt-04-Completion-Note.md`
 
 ## Required posture
 

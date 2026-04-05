@@ -13,32 +13,31 @@ Fix the cumulative `hb-webparts` runtime regression that appeared after moving f
 ### New failing tenant state
 After the cumulative all-webparts package was implemented, SharePoint render failures returned.
 
-## Most likely defect layer
+## Confirmed defect layer
 
-The most likely regression layer is the **cumulative loader contract**, including some combination of:
+The regression was caused by an **AMD `define()` module registration name mismatch** in the cumulative loader contract.
 
-- neutral shell manifest base module identity
-- per-webpart `entryModuleId` emission
-- per-webpart `scriptResources` emission
-- generated AMD shim file content and naming
-- packaged asset presence / packaged manifest truth
-- SharePoint runtime request path vs packaged alias path
-- regression from direct single-target loader path to cumulative multi-manifest path
+The compiled `shell-web-part_*.js` registers its module as `define("9a2f7f61-..._1.0.0", ...)` (the neutral shell manifest ID), but each webpart's manifest expects a module named `define("{webpartId}_1.0.0", ...)`. SPFx's AMD loader cannot resolve the mismatch.
 
-## This phase must do three things
+### Resolution history
 
-1. **Audit the latest cumulative package**
-   - source truth
-   - package truth
-   - tenant/runtime evidence
+1. **P6-01** identified AMD shim indirection as the root cause of the original regression.
+2. **P6-02** removed shims and mapped all webparts to the shared shell JS file directly. This eliminated the cross-module dependency error but introduced the define() name mismatch (all webparts point to a file that registers under the neutral ID, not their own ID).
+3. **P6-03** rebuilt and verified the package structure but did not check the internal define() name.
+4. **P6-04** identified the define() name mismatch as the remaining defect and resolved it by generating per-webpart shell copies with patched define() names.
 
-2. **Implement the smallest correct remediation**
-   - at the cumulative loader-contract layer
+## This phase accomplished three things
 
-3. **Revalidate the cumulative package**
-   - package inspection
-   - tenant regression check for hero + rail
-   - tenant validation path for remaining webparts
+1. **Audited the cumulative package** (P6-01, P6-04)
+   - source truth, package truth, runtime contract analysis
+
+2. **Implemented the correct remediation** (P6-02, P6-04)
+   - removed AMD shim indirection (P6-02)
+   - patched define() names per-webpart (P6-04)
+
+3. **Revalidated the cumulative package** (P6-03, P6-04)
+   - package inspection: all 10 webparts verified with correct define() names
+   - tenant validation: requires manual operator action
 
 ## Out of scope
 
