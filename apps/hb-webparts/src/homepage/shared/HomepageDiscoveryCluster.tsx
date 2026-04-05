@@ -1,4 +1,21 @@
+/**
+ * HomepageDiscoveryCluster — Discovery zone composition
+ *
+ * Uses shared primitives from @hbc/ui-kit/homepage:
+ * - HbcHomepageSectionShell for section structure
+ * - HbcHomepageActionRow for promoted resources and category items
+ * - HbcHomepageIconFrame to replace placeholder text-token icons
+ * - HbcHomepageCta for quick-path links
+ * - HbcHomepageSurfaceCard for category group cards
+ */
 import * as React from 'react';
+import {
+  HbcHomepageSectionShell,
+  HbcHomepageActionRow,
+  HbcHomepageIconFrame,
+  HbcHomepageCta,
+  HbcHomepageSurfaceCard,
+} from '@hbc/ui-kit/homepage';
 import type {
   DiscoveryQuickPath,
 } from '../webparts/discoveryContracts.js';
@@ -6,10 +23,7 @@ import type {
   NormalizedDiscoveryCategoryGroup,
   NormalizedDiscoveryResource,
 } from '../helpers/discoveryConfig.js';
-import {
-  HP_SPACE, HP_TEXT_OPACITY,
-  hpHeadingReset, hpSecondaryText, hpSecondaryCard, hpListStyle, hpSearchInput,
-} from '../tokens.js';
+import { HP_SPACE, hpSearchInput } from '../tokens.js';
 import interactiveStyles from '../homepage-interactive.module.css';
 
 export interface HomepageDiscoveryClusterProps {
@@ -23,12 +37,26 @@ export interface HomepageDiscoveryClusterProps {
   strategyLabel: string;
 }
 
-function iconToken(iconKey: string | undefined): string {
-  if (!iconKey) {
-    return 'NAV';
-  }
-  return iconKey.slice(0, 3).toUpperCase();
+function iconInitials(iconKey: string | undefined): string {
+  if (!iconKey) return '\u2022';
+  return iconKey.slice(0, 2).toUpperCase();
 }
+
+const subheadingStyle: React.CSSProperties = {
+  margin: `0 0 ${HP_SPACE.md}px`,
+  fontWeight: 600,
+};
+
+const gridStyle: React.CSSProperties = {
+  display: 'grid',
+  gap: HP_SPACE.md,
+};
+
+const categoryGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gap: HP_SPACE.lg,
+  marginTop: HP_SPACE.xl,
+};
 
 export function HomepageDiscoveryCluster({
   heading,
@@ -41,10 +69,8 @@ export function HomepageDiscoveryCluster({
   strategyLabel,
 }: HomepageDiscoveryClusterProps): React.JSX.Element {
   return (
-    <section aria-label={heading}>
-      <h2 style={hpHeadingReset}>{heading}</h2>
-      <p style={hpSecondaryText}>{strategyLabel}</p>
-
+    <HbcHomepageSectionShell title={heading} subtitle={strategyLabel}>
+      {/* Search */}
       <div style={{ marginTop: HP_SPACE.lg }}>
         <label htmlFor="smart-search-query" style={{ display: 'block', fontWeight: 600 }}>
           Search resources
@@ -61,62 +87,76 @@ export function HomepageDiscoveryCluster({
         />
       </div>
 
+      {/* Quick Paths */}
       {quickPaths.length > 0 ? (
         <nav aria-label="Quick paths" style={{ marginTop: HP_SPACE.xl }}>
-          <h3 style={{ margin: `0 0 ${HP_SPACE.md}px` }}>Quick Paths</h3>
-          <ul style={hpListStyle}>
+          <h3 style={subheadingStyle}>Quick Paths</h3>
+          <div style={gridStyle}>
             {quickPaths.map((path) => (
-              <li key={path.id}>
-                <a href={path.href}>{path.title}</a>
-                {path.description ? <span style={{ marginLeft: HP_SPACE.sm, opacity: HP_TEXT_OPACITY.secondary }}>{path.description}</span> : null}
-              </li>
+              <HbcHomepageCta
+                key={path.id}
+                label={path.title}
+                href={path.href}
+                variant="link"
+                arrow
+              />
             ))}
-          </ul>
+          </div>
         </nav>
       ) : null}
 
+      {/* Promoted Resources */}
       {promotedResources.length > 0 ? (
         <section aria-label="Promoted destinations" style={{ marginTop: HP_SPACE.xl }}>
-          <h3 style={{ margin: `0 0 ${HP_SPACE.md}px` }}>Promoted Destinations</h3>
-          <div style={{ display: 'grid', gap: HP_SPACE.md }}>
+          <h3 style={subheadingStyle}>Promoted Destinations</h3>
+          <div style={gridStyle}>
             {promotedResources.map((resource) => (
-              <article key={resource.id} style={hpSecondaryCard}>
-                <a href={resource.href}>
-                  <span aria-hidden="true" style={{ marginRight: HP_SPACE.md }}>
-                    {iconToken(resource.iconKey)}
-                  </span>
-                  <span>{resource.title}</span>
-                </a>
-                {resource.description ? <p style={{ margin: `${HP_SPACE.sm}px 0 0` }}>{resource.description}</p> : null}
-              </article>
+              <HbcHomepageActionRow
+                key={resource.id}
+                title={resource.title}
+                href={resource.href}
+                description={resource.description}
+                icon={
+                  <HbcHomepageIconFrame size="sm" tint="brand">
+                    {iconInitials(resource.iconKey)}
+                  </HbcHomepageIconFrame>
+                }
+              />
             ))}
           </div>
         </section>
       ) : null}
 
+      {/* Category Groups */}
       {categoryGroups.length > 0 ? (
-        <section aria-label="Discovery categories" style={{ marginTop: HP_SPACE.xl, display: 'grid', gap: HP_SPACE.lg }}>
+        <section aria-label="Discovery categories" style={categoryGridStyle}>
           {categoryGroups.map((group) => (
-            <section key={group.id} aria-label={group.title} style={hpSecondaryCard}>
-              <h3 style={hpHeadingReset}>{group.title}</h3>
-              {group.description ? <p style={{ margin: `${HP_SPACE.sm}px 0 0`, opacity: HP_TEXT_OPACITY.secondary }}>{group.description}</p> : null}
-              <ul style={hpListStyle}>
+            <HbcHomepageSurfaceCard key={group.id} surface="discovery">
+              <h3 style={subheadingStyle}>{group.title}</h3>
+              {group.description ? (
+                <p style={{ margin: `0 0 ${HP_SPACE.md}px`, opacity: 0.75 }}>
+                  {group.description}
+                </p>
+              ) : null}
+              <div style={gridStyle}>
                 {group.resources.map((resource) => (
-                  <li key={resource.id}>
-                    <a href={resource.href}>
-                      <span aria-hidden="true" style={{ marginRight: HP_SPACE.md }}>
-                        {iconToken(resource.iconKey)}
-                      </span>
-                      <span>{resource.title}</span>
-                    </a>
-                    {resource.description ? <span style={{ marginLeft: HP_SPACE.sm, opacity: HP_TEXT_OPACITY.secondary }}>{resource.description}</span> : null}
-                  </li>
+                  <HbcHomepageActionRow
+                    key={resource.id}
+                    title={resource.title}
+                    href={resource.href}
+                    description={resource.description}
+                    icon={
+                      <HbcHomepageIconFrame size="sm" tint="subtle">
+                        {iconInitials(resource.iconKey)}
+                      </HbcHomepageIconFrame>
+                    }
+                  />
                 ))}
-              </ul>
-            </section>
+              </div>
+            </HbcHomepageSurfaceCard>
           ))}
         </section>
       ) : null}
-    </section>
+    </HbcHomepageSectionShell>
   );
 }
