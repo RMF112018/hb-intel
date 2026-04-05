@@ -1,10 +1,11 @@
 /**
  * HbcHomepageIconFrame — Branded icon container for homepage surfaces
  * Phase 11A-02 — Production-grade icon primitive
+ * Phase 15-02 — Premium surface rebuild: added xl size, accent/warm tints
  *
  * Renders an icon inside a sized, rounded frame with tint-controlled
- * background and foreground color. Replaces placeholder text-token icons
- * with a proper visual container for launcher tiles, discovery, and utility.
+ * background and foreground color. Stronger visual presence than Phase 11A
+ * with purpose-built tints for different homepage zones.
  */
 import * as React from 'react';
 import { mergeClasses, tokens } from '@fluentui/react-components';
@@ -17,9 +18,8 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: HBC_RADIUS_LG,
     flexShrink: 0,
-    transitionProperty: 'background-color',
+    transitionProperty: 'background-color, transform',
     transitionDuration: '150ms',
     transitionTimingFunction: 'ease',
     '@media (prefers-reduced-motion: reduce)': {
@@ -36,11 +36,19 @@ const useStyles = makeStyles({
     width: '36px',
     height: '36px',
     fontSize: '18px',
+    borderRadius: HBC_RADIUS_LG,
   },
   lg: {
     width: '44px',
     height: '44px',
     fontSize: '22px',
+    borderRadius: HBC_RADIUS_LG,
+  },
+  xl: {
+    width: '56px',
+    height: '56px',
+    fontSize: '28px',
+    borderRadius: '10px',
   },
   brand: {
     backgroundColor: tokens.colorBrandBackground2,
@@ -54,7 +62,18 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorSubtleBackground,
     color: tokens.colorNeutralForeground3,
   },
+  accent: {
+    backgroundColor: 'rgba(34, 83, 145, 0.12)',
+    color: 'rgb(34, 83, 145)',
+  },
+  warm: {
+    backgroundColor: 'rgba(229, 126, 70, 0.10)',
+    color: 'rgb(180, 90, 40)',
+  },
 });
+
+const sizeMap = { sm: 'sm', md: 'md', lg: 'lg', xl: 'xl' } as const;
+const tintMap = { brand: 'brand', neutral: 'neutral', subtle: 'subtle', accent: 'accent', warm: 'warm' } as const;
 
 export const HbcHomepageIconFrame: React.FC<HbcHomepageIconFrameProps> = ({
   children,
@@ -64,13 +83,14 @@ export const HbcHomepageIconFrame: React.FC<HbcHomepageIconFrameProps> = ({
   className,
 }) => {
   const styles = useStyles();
-  const sizeClass = size === 'sm' ? styles.sm : size === 'lg' ? styles.lg : styles.md;
-  const tintClass = tint === 'neutral' ? styles.neutral : tint === 'subtle' ? styles.subtle : styles.brand;
+  const sizeClass = styles[sizeMap[size]];
+  const tintClass = styles[tintMap[tint]];
 
   return (
     <span
       className={mergeClasses(styles.root, sizeClass, tintClass, className)}
       data-hbc-homepage="icon-frame"
+      data-hbc-icon-size={size}
       data-hbc-icon-tint={tint}
       {...(label
         ? { role: 'img' as const, 'aria-label': label }

@@ -8,7 +8,12 @@
  * These are LOCAL to apps/hb-webparts — not exported via @hbc/ui-kit.
  * Promotion to ui-kit requires 2+ non-homepage consumers.
  *
- * @see docs/architecture/plans/MASTER/spfx/homepage/phase-02/Homepage-Design-Token-Map.md
+ * Phase 15-02 — Premium surface system rebuild:
+ * - Zone backgrounds strengthened to perceptible levels
+ * - Surface-family-specific spacing and radius added
+ * - Stronger border treatments for zone differentiation
+ *
+ * @see docs/architecture/plans/MASTER/spfx/homepage/phase-15/Premium-Benchmark-Brief.md
  */
 
 // ── Spacing scale ──────────────────────────────────────────────────────
@@ -29,17 +34,28 @@ export const HP_SPACE = {
   '2xl': 16,
   /** 20px — hero interior padding */
   '3xl': 20,
+  /** 28px — signature surface interior */
+  '4xl': 28,
+  /** 40px — zone separation gap */
+  '5xl': 40,
 } as const;
 
 // ── Border radius ──────────────────────────────────────────────────────
+// Surface-family-aware radius tokens.
 
 export const HP_RADIUS = {
   /** 6px — image/media clipping */
   image: 6,
+  /** 6px — compact radius for utility/command surfaces */
+  command: 6,
   /** 8px — standard card and container radius */
   card: 8,
+  /** 10px — editorial and discovery surfaces */
+  editorial: 10,
   /** 10px — hero banner / prominent surface */
   hero: 10,
+  /** 12px — signature surfaces (welcome, hero cards) */
+  signature: 12,
 } as const;
 
 // ── Border treatment ───────────────────────────────────────────────────
@@ -52,6 +68,10 @@ export const HP_BORDER = {
   standard: '1px solid rgba(0,0,0,0.12)',
   /** Input/interactive border — rgba(0,0,0,0.25) */
   interactive: '1px solid rgba(0,0,0,0.25)',
+  /** Brand accent — visible brand-colored border for zone emphasis */
+  brandAccent: '1px solid rgba(34,83,145,0.15)',
+  /** Warm accent — visible warm-colored border for editorial zones */
+  warmAccent: '1px solid rgba(229,126,70,0.15)',
 } as const;
 
 // ── Text opacity ───────────────────────────────────────────────────────
@@ -105,19 +125,20 @@ export const HP_HERO = {
 } as const;
 
 // ── Zone differentiation ───────────────────────────────────────────────
-// Subtle background tints to create zone identity without breaking host awareness.
+// Phase 15-02: Strengthened zone backgrounds to perceptible levels.
+// Previous values (0.02–0.03 opacity) were invisible on most displays.
 
 export const HP_ZONE = {
-  /** Top-band: warm neutral tint */
-  topBand: { background: 'rgba(34,83,145,0.03)' },
-  /** Utility: clean white (default) — density creates zone identity instead of color */
-  utility: { background: 'transparent' },
-  /** Communications: light warm tint */
-  communications: { background: 'rgba(229,126,70,0.02)' },
-  /** Operational: light cool tint */
-  operational: { background: 'rgba(34,83,145,0.02)' },
-  /** Discovery: neutral */
-  discovery: { background: 'rgba(0,0,0,0.015)' },
+  /** Top-band: warm brand tint — visible but not dominant */
+  topBand: { background: 'rgba(34,83,145,0.05)' },
+  /** Utility: subtle cool tint — density and background create identity */
+  utility: { background: 'rgba(34,83,145,0.025)' },
+  /** Communications: visible warm tint — editorial warmth */
+  communications: { background: 'rgba(229,126,70,0.04)' },
+  /** Operational: cool structured tint — dashboard-adjacent feel */
+  operational: { background: 'rgba(34,83,145,0.035)' },
+  /** Discovery: warm neutral — inviting, distinct from operational */
+  discovery: { background: 'rgba(229,126,70,0.03)' },
 } as const;
 
 // ── CTA treatment ──────────────────────────────────────────────────────
@@ -135,7 +156,7 @@ export const HP_CTA = {
 
 export const HP_WELCOME = {
   /** Left accent border width */
-  accentWidth: 4,
+  accentWidth: 5,
   /** Greeting font size multiplier — signature-level greeting */
   greetingFontSize: '1.5rem',
   /** Greeting font weight */
@@ -194,22 +215,22 @@ export const hpBadgeRow: React.CSSProperties = {
   flexWrap: 'wrap',
 };
 
-/** Featured item container */
+/** Featured item container — P15-02: stronger border, more padding */
 export const hpFeaturedContainer: React.CSSProperties = {
   marginTop: HP_SPACE.lg,
   padding: HP_SPACE['2xl'],
   border: HP_BORDER.standard,
-  borderRadius: HP_RADIUS.card,
+  borderRadius: HP_RADIUS.editorial,
 };
 
-/** Secondary items grid */
+/** Secondary items grid — P15-02: wider gap for breathing room */
 export const hpSecondaryGrid: React.CSSProperties = {
   display: 'grid',
-  gap: HP_SPACE.lg,
+  gap: HP_SPACE.xl,
   marginTop: HP_SPACE.xl,
 };
 
-/** Secondary item card */
+/** Secondary item card — P15-02: editorial radius */
 export const hpSecondaryCard: React.CSSProperties = {
   padding: HP_SPACE.lg,
   border: HP_BORDER.subtle,
@@ -267,7 +288,10 @@ export const hpGreetingHeading: React.CSSProperties = {
   fontWeight: HP_WELCOME.greetingFontWeight,
 };
 
-/** Zone section with subtle background tint */
+/**
+ * Zone section with perceptible background tint.
+ * Phase 15-02: Zone backgrounds are now strong enough to see.
+ */
 export function hpZoneSection(zone: keyof typeof HP_ZONE): React.CSSProperties {
   return {
     background: HP_ZONE[zone].background,

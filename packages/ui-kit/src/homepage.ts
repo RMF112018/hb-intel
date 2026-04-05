@@ -4,6 +4,11 @@
  * Constrained entrypoint for HB Central homepage webparts.
  * This surface intentionally exposes a small, governed subset that is safe for
  * SPFx homepage composition and avoids shell recreation primitives.
+ *
+ * Phase 15-02 — Premium surface system rebuild:
+ * - Added SectionAccent type export
+ * - Added HBC_HOMEPAGE_SURFACE_FAMILIES constant
+ * - Strengthened brand foundation anti-patterns
  */
 
 import { body, display, heading1, heading2, heading3, heading4 } from './theme/typography.js';
@@ -40,7 +45,7 @@ export { usePrefersReducedMotion as useHomepageReducedMotion };
 // ── Phase 11A — Homepage shared primitives ────────────────────────────
 
 export { HbcHomepageSectionShell } from './HbcHomepageSectionShell/index.js';
-export type { HbcHomepageSectionShellProps } from './HbcHomepageSectionShell/types.js';
+export type { HbcHomepageSectionShellProps, SectionAccent } from './HbcHomepageSectionShell/types.js';
 
 export { HbcHomepageCta } from './HbcHomepageCta/index.js';
 export type { HbcHomepageCtaProps, HomepageCtaVariant, HomepageCtaSize } from './HbcHomepageCta/types.js';
@@ -83,7 +88,7 @@ export type HomepagePrimitiveName =
 
 /**
  * Prompt-02 locked HB homepage brand direction.
- * These aliases are homepage-specific and do not override global ui-kit brand tokens.
+ * Phase 15-02: strengthened anti-pattern list per Premium-Benchmark-Brief.
  */
 export const HBC_HOMEPAGE_BRAND_FOUNDATION = {
   primaryBlue: {
@@ -104,6 +109,11 @@ export const HBC_HOMEPAGE_BRAND_FOUNDATION = {
     'flashy animation-first styling',
     'template-like generic sharepoint tiles',
     'startup-like novelty styling',
+    'uniform white-card sameness across zones',
+    'invisible zone differentiation below 0.03 opacity',
+    'list-like flat launcher behavior',
+    'generic text-input search treatment',
+    'interchangeable editorial and operational surfaces',
   ],
 } as const;
 
@@ -168,4 +178,54 @@ export const HBC_HOMEPAGE_IMPORT_GUARDRAILS = {
   allowedEntrypoint: '@hbc/ui-kit/homepage',
   relatedTokenEntrypoints: ['@hbc/ui-kit/theme', '@hbc/ui-kit/icons', '@hbc/ui-kit/branding'],
   prohibitedEntrypointsInHomepageWebparts: ['@hbc/ui-kit', '@hbc/ui-kit/app-shell'],
+} as const;
+
+/**
+ * Phase 15-02 — Premium surface family definitions.
+ *
+ * Each homepage surface family has distinct visual characteristics.
+ * These definitions are reference metadata for documentation and
+ * enforcement — the actual styles live in HbcHomepageSurfaceCard.
+ */
+export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
+  signature: {
+    surfaces: ['hero', 'welcome'] as const,
+    character: 'commanding, brand-forward, high visual impact',
+    shadow: 'elevationLevel2–3',
+    radius: '12px',
+    background: 'brand-tinted',
+    border: 'brand accent or none',
+  },
+  editorial: {
+    surfaces: ['editorial'] as const,
+    character: 'spacious, curated, magazine-like hierarchy',
+    shadow: 'elevationLevel1',
+    radius: '8px',
+    background: 'clean white with warm accent',
+    border: 'warm left accent',
+  },
+  command: {
+    surfaces: ['utility'] as const,
+    character: 'dense, efficient, high-contrast, tool-like',
+    shadow: 'elevationLevel0 → elevationLevel1 on hover',
+    radius: '6px',
+    background: 'subtle cool tint',
+    border: 'brand-tinted border',
+  },
+  operational: {
+    surfaces: ['operational'] as const,
+    character: 'structured, data-credible, dashboard-adjacent',
+    shadow: 'elevationLevel1',
+    radius: '8px',
+    background: 'cool-tinted',
+    border: 'strong brand left accent',
+  },
+  discovery: {
+    surfaces: ['discovery'] as const,
+    character: 'inviting, prominent, warm neutral',
+    shadow: 'elevationLevel1',
+    radius: '10px',
+    background: 'warm-tinted',
+    border: 'warm-tinted border',
+  },
 } as const;
