@@ -475,8 +475,9 @@ function verifySppkg(
       }
     }
 
+    const manifestById = new Map<string, { archivePath: string; manifest: any; raw: string }>();
+
     if (hbExpectations) {
-      const manifestById = new Map<string, { archivePath: string; manifest: any; raw: string }>();
       const availablePackagedShimFiles = new Set<string>();
 
       for (const manifestId of expectedIds) {
@@ -594,27 +595,26 @@ function verifySppkg(
       }
     }
 
-    // Verify supportsFullBleed preservation for webparts that declare it
-    if (fullBleedManifestIds && fullBleedManifestIds.size > 0) {
+    // Verify supportsFullBleed preservation for webparts that declare it.
+    // For single-manifest domains (no hbExpectations), extract manifests on demand.
+    if (fullBleedManifestIds) {
       for (const fbId of fullBleedManifestIds) {
-        const fbXmlPath = archivePaths.find((e) => e.endsWith(`/WebPart_${fbId}.xml`));
-        if (!fbXmlPath) {
-          console.error(`  ❌ ${domainDir}: supportsFullBleed webpart ${fbId} not found in .sppkg`);
-          ok = false;
-          continue;
+        if (!manifestById.has(fbId)) {
+          const xmlPath = archivePaths.find((e) => e.endsWith(`/WebPart_${fbId}.xml`));
+          if (xmlPath) {
+            const xml = execSync(`unzip -p "${sppkgPath}" "${xmlPath}"`, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+            const match = xml.match(/ComponentManifest="([^"]+)"/);
+            if (match) {
+              const raw = decodeXmlAttribute(match[1]);
+              manifestById.set(fbId, { archivePath: xmlPath, manifest: JSON.parse(raw), raw });
+            }
+          }
         }
-        const fbXml = execSync(
-          `unzip -p "${sppkgPath}" "${fbXmlPath}"`,
-          { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
-        );
-        const fbMatch = fbXml.match(/ComponentManifest="([^"]+)"/);
-        if (!fbMatch) {
-          console.error(`  ❌ ${domainDir}: ComponentManifest missing for supportsFullBleed webpart ${fbId}`);
+        const record = manifestById.get(fbId);
+        if (!record) {
+          console.error(`  ❌ ${domainDir}: supportsFullBleed webpart ${fbId} not found in packaged manifests`);
           ok = false;
-          continue;
-        }
-        const fbManifest = JSON.parse(decodeXmlAttribute(fbMatch[1]));
-        if (fbManifest.supportsFullBleed !== true) {
+        } else if (record.manifest.supportsFullBleed !== true) {
           console.error(`  ❌ ${domainDir}: packaged manifest ${fbId} missing supportsFullBleed: true`);
           ok = false;
         } else {
