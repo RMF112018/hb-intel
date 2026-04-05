@@ -335,7 +335,20 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 
 **Post-PH7.11 state (updated 2026-03-16):** 114 ADR files on disk (active), 6 archived in `adr/archived/`. ADR-0091 through ADR-0097 assigned since PH7.11 (...existing text...). ADR-0114 authored 2026-03-14 to resolve score-benchmark ↔ post-bid-autopsy circular dependency. ADR-0115 authored 2026-03-15 for my-work-feed architecture. ADR-0116 authored 2026-03-16 for UI doctrine and visual governance. Next unreserved number: **ADR-0117**. ADR index in `docs/README.md` and `docs/architecture/adr/README.md` are synchronized.
 
-### 2.3 Admin SPFx IT Control Center Plan Library
+### 2.3 SharePoint Homepage & Shell Blueprint Library
+
+| Document / Group | Classification | Tier / Status |
+|------------------|---------------|---------------|
+| `docs/architecture/blueprint/sharepoint-shell/Hedrick_Brothers_SharePoint_Homepage_Design_Brief.md` | **Canonical Normative Plan** | Vision and requirements for the 10 HB Central homepage webparts |
+| `docs/architecture/blueprint/sharepoint-shell/HB_Webparts_Tenant_Shell_Implementation_Blueprint.md` | **Canonical Normative Plan** | 8-phase three-lane implementation plan (homepage / shell-extension / navigation); defines supported customization posture |
+| `docs/reference/sharepoint-homepage-shell-boundaries.md` | **Living Reference (Diátaxis)** | Authoritative quick-reference for the three-lane model, supported customization posture, and lane boundary rules |
+| `docs/reference/ui-kit/entry-points.md` | **Living Reference (Diátaxis)** | Authoritative entry-point reference for all 5 `@hbc/ui-kit` entry points |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md` | **Living Reference (Diátaxis)** | Runtime-specific governing doctrine for SPFx surfaces |
+| `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md` | **Living Reference (Diátaxis)** | Runtime-specific governing doctrine for PWA surfaces |
+| Phase 00 homepage plans (6 docs under `plans/MASTER/spfx/homepage/phase-00/`) | **Canonical Normative Plan** | UI-kit / doctrine / SPFx contract reconciliation; active gate before Phase 01 |
+| Phase 6 webpart loader plans (9 docs under `plans/MASTER/spfx/webparts/phase-6/`) | **Historical Foundational** | Cumulative loader-contract regression diagnosis and remediation; completed 2026-04-05 |
+
+### 2.4 Admin SPFx IT Control Center Plan Library
 
 | Document / Group | Classification | Tier / Status |
 |------------------|---------------|---------------|
@@ -444,6 +457,14 @@ All SPFx apps use Vite + React 18, build to `dist/`, and are port-mapped 4001–
 | `apps/risk-management` | @hbc/spfx-risk-management | 4009 | @hbc/features-risk-management |
 | `apps/operational-excellence` | @hbc/spfx-operational-excellence | 4010 | @hbc/features-operational-excellence |
 | `apps/human-resources` | @hbc/spfx-human-resources | 4011 | @hbc/features-human-resources |
+
+#### SPFx Homepage Product (1)
+
+| App | Name | Packaging Model | UI Entry Point |
+|-----|------|-----------------|----------------|
+| `apps/hb-webparts` | @hbc/spfx-hb-webparts | multi (10 webparts in one `.sppkg`) | `@hbc/ui-kit/homepage` |
+
+The homepage product (`hb-webparts`) is architecturally distinct from the 11 domain SPFx apps above. It packages all 10 HB Central homepage webparts into a single `.sppkg` using a cumulative multi-manifest model. Each webpart uses a per-webpart shell entry file with a patched AMD `define()` name for correct SPFx loader resolution. The homepage webparts use `@hbc/ui-kit/homepage` (not `@hbc/ui-kit/app-shell`) as their constrained UI entry point. See `docs/reference/sharepoint-homepage-shell-boundaries.md` for the three-lane architecture and boundary rules.
 
 **Financial module current-state (2026-03-28).** `@hbc/features-project-hub` exports 29 Financial UI components (`FinancialControlCenter` orchestrator, `ForecastSummaryPage`, `BudgetPage`, `CashFlowPage`, `BuyoutPage` plus headers, grids, panels, and rails), 12+ business logic subdomain modules (governance, versioning, budget-import, cash-flow, buyout, business-rules, integrations, cost-code-reference, annotations, spine-events, validation, computors), a complete type system, and 5 view-ready hooks (`useFinancialControlCenter`, `useForecastSummary`, `useBudgetSurface`, `useCashFlowSurface`, `useBuyoutSurface`). All hooks return hardcoded mock data; no `IFinancialRepository` port or adapter exists in the repo. The PWA renders `FinancialControlCenter` at `/project-hub/:projectId/financial`. Sub-tool navigation is state-based (`surfaceMode` via `useState`), not URL-routed; deep links to `/financial/budget` etc. do not exist. Shared spines are rendered as canvas tiles with mock data and are not data-connected. SPFx Financial lane routes exist as infrastructure stubs without data-connected surfaces. Maturity classification per [FIN-PR1](../plans/MASTER/phase-3-deliverables/financial/FIN-PR1-Financial-Production-Readiness-Maturity-Model.md): **Stage 2 — Architecturally Defined** (constrained by Forecast Summary and GC/GR pending T04; majority of tools at Stage 3 — Implementation Scaffold). See FIN-PR1 §3.2 for per-tool classifications.
 

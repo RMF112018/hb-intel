@@ -117,7 +117,7 @@ The following rules govern dependency decisions. Rules backed by ADRs are bindin
 All reusable visual UI components must be owned by `@hbc/ui-kit`. No package outside `@hbc/ui-kit` may introduce new standalone presentational components or visual primitives. Feature and shared packages may only compose `@hbc/ui-kit` components, provide headless logic, adapters, hooks, and state orchestration, or define thin feature-local composition shells with no reusable visual primitive behavior.
 
 **Rule R2 — UI Kit Entry Points (CLAUDE.md §6.1):**
-SPFx contexts must import from `@hbc/ui-kit/app-shell`, not full `@hbc/ui-kit`. Token-only imports must use `@hbc/ui-kit/theme`. Icon-only imports must use `@hbc/ui-kit/icons`. Full `@hbc/ui-kit` is for PWA, dev-harness, and non-constrained bundles only.
+SPFx homepage webparts (`apps/hb-webparts`) must import from `@hbc/ui-kit/homepage`, the constrained homepage-safe surface. SPFx domain apps that need shell chrome must import from `@hbc/ui-kit/app-shell`. Token-only imports must use `@hbc/ui-kit/theme`. Icon-only imports must use `@hbc/ui-kit/icons`. Full `@hbc/ui-kit` is for PWA, dev-harness, and non-constrained bundles only. See `docs/reference/ui-kit/entry-points.md` for the authoritative entry-point reference.
 
 **Rule R3 — No Direct FluentUI Imports (ESLint boundary rules, ADR-0045, PH7.5/7.6):**
 No package outside `@hbc/ui-kit` may directly import from `@fluentui/*`. All Fluent UI component access must go through `@hbc/ui-kit` re-exports. Enforced by `@hb-intel/eslint-plugin-hbc`.
@@ -373,11 +373,12 @@ The four intelligence scaffold packages (`@hbc/health-indicator`, `@hbc/score-be
 
 **Entry points:**
 - `@hbc/ui-kit` — full library (PWA, dev-harness, non-constrained contexts)
-- `@hbc/ui-kit/app-shell` — shell-only exports for SPFx (constrained bundle budget)
+- `@hbc/ui-kit/app-shell` — shell-only exports for SPFx domain apps (constrained bundle budget)
+- `@hbc/ui-kit/homepage` — constrained homepage-safe surface for HB Central homepage webparts (governed primitives + contract constants)
 - `@hbc/ui-kit/theme` — token/theme-only (styling without component payload)
 - `@hbc/ui-kit/icons` — icon-only
 
-**Correct usage:** Always use the narrowest entry point that meets requirements. SPFx webparts must use `./app-shell` — never full `@hbc/ui-kit`. All visual components for any package must originate from or be contributed to `@hbc/ui-kit`.
+**Correct usage:** Always use the narrowest entry point that meets requirements. Homepage webparts (`hb-webparts`) must use `./homepage`. SPFx domain apps must use `./app-shell`. Never import full `@hbc/ui-kit` in SPFx contexts. See `docs/reference/ui-kit/entry-points.md` for authoritative guidance.
 
 **Anti-patterns / must not:**
 - No package outside `@hbc/ui-kit` may add a new reusable presentational component.

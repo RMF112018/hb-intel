@@ -91,6 +91,8 @@ The `sideEffects: false` flag enables bundlers to tree-shake unused exports from
 
 ## Related References
 
-- [HbcChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcChart.md), [HbcBarChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcBarChart.md), [HbcDonutChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcDonutChart.md), [HbcLineChart](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcLineChart.md)
-- [HbcInput](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcInput.md), [HbcTextArea](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcTextArea.md), [HbcRichTextEditor](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcRichTextEditor.md)
-- [HbcToast](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToast.md), [HbcToastProvider](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToastProvider.md), [HbcToastContainer](/Users/bobbyfetting/hb-intel/docs/reference/ui-kit/HbcToastContainer.md)
+- [HbcChart](./HbcChart.md), [HbcBarChart](./HbcBarChart.md), [HbcDonutChart](./HbcDonutChart.md), [HbcLineChart](./HbcLineChart.md)
+- [HbcInput](./HbcInput.md), [HbcTextArea](./HbcTextArea.md), [HbcRichTextEditor](./HbcRichTextEditor.md)
+- [HbcToast](./HbcToast.md), [HbcToastProvider](./HbcToastProvider.md), [HbcToastContainer](./HbcToastContainer.md)
+- [SharePoint Homepage & Shell Boundaries](../sharepoint-homepage-shell-boundaries.md)
+- [SPFx Governing Standard](./doctrine/UI-Doctrine-SPFx-Governing-Standard.md)

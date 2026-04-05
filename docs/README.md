@@ -31,6 +31,16 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases and the plan-stack crosswalk. Start here for program structure, milestones, Phase 1 deliverables, and navigation between plan families.
 
+## SharePoint Homepage & Shell
+
+- **[Homepage & Shell Boundaries](./reference/sharepoint-homepage-shell-boundaries.md)** — Authoritative quick-reference for the three-lane SharePoint customization model (homepage / shell-extension / navigation), supported customization posture, lane boundary rules, and UI-kit entry-point mapping by lane.
+
+- **[SharePoint Homepage Design Brief](./architecture/blueprint/sharepoint-shell/Hedrick_Brothers_SharePoint_Homepage_Design_Brief.md)** — Vision and requirements for the 10 HB Central homepage webparts.
+
+- **[Tenant Shell Implementation Blueprint](./architecture/blueprint/sharepoint-shell/HB_Webparts_Tenant_Shell_Implementation_Blueprint.md)** — 8-phase implementation plan covering homepage, shell-extension, and navigation governance lanes.
+
+- **[UI Kit Entry Points](./reference/ui-kit/entry-points.md)** — Authoritative entry-point reference for all 5 `@hbc/ui-kit` entry points, including the constrained `@hbc/ui-kit/homepage` surface for homepage webparts.
+
 ## Development Plan Library
 
 - **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases. Phase 0 and Phase 1 planning are complete; Phases 2–7 are forward-planning drafts. Start here for program structure, milestones, and Phase 1 deliverables.
