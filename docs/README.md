@@ -53,6 +53,12 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - **[Homepage Ownership & Freshness](./reference/sharepoint-homepage-ownership-and-freshness.md)** — Zone-by-zone and webpart-by-webpart ownership, freshness cadences, stale thresholds, review model, and emergency update path.
 
+- **[Homepage Authoring Governance](./reference/sharepoint-homepage-authoring-governance.md)** — Self-service vs governed vs architecture-required change tiers, who may update what, homepage vs normal-page content decisions.
+
+- **[Homepage Operating Guide](./how-to/administrator/sharepoint-homepage-operating-guide.md)** — Admin procedures for processing homepage update requests, routing, and recognizing misuse.
+
+- **[Homepage Content Review Guide](./how-to/administrator/sharepoint-homepage-content-review-guide.md)** — Weekly/monthly/quarterly review checklists, drift detection, stale content handling, escalation triggers.
+
 ## Development Plan Library
 
 - **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases. Phase 0 and Phase 1 planning are complete; Phases 2–7 are forward-planning drafts. Start here for program structure, milestones, and Phase 1 deliverables.

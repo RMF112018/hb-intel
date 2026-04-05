@@ -354,6 +354,9 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `docs/reference/sharepoint-branding-and-page-templates.md` | **Living Reference (Diátaxis)** | Branding alignment, 5 page-template families, approved composition patterns, authoring rules, template governance |
 | `docs/how-to/administrator/sharepoint-page-authoring-guide.md` | **Living Reference (Diátaxis)** | Page author guide: template selection, step-by-step creation, review checklist, when to avoid custom webparts |
 | `docs/reference/sharepoint-homepage-ownership-and-freshness.md` | **Living Reference (Diátaxis)** | Homepage ownership by zone/webpart, freshness cadences, stale thresholds, review model, emergency update path |
+| `docs/reference/sharepoint-homepage-authoring-governance.md` | **Living Reference (Diátaxis)** | Homepage authoring tiers (self-service/governed/architecture), who may update what, homepage vs normal-page content decisions |
+| `docs/how-to/administrator/sharepoint-homepage-operating-guide.md` | **Living Reference (Diátaxis)** | Admin procedures for homepage update requests, routing, approval, misuse detection, stale-content handling |
+| `docs/how-to/administrator/sharepoint-homepage-content-review-guide.md` | **Living Reference (Diátaxis)** | Weekly/monthly/quarterly review checklists, duplicate/stale/outdated detection, escalation triggers |
 
 ### 2.4 Admin SPFx IT Control Center Plan Library
 
