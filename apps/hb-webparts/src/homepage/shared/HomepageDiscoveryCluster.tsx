@@ -23,6 +23,7 @@ import type {
   NormalizedDiscoveryCategoryGroup,
   NormalizedDiscoveryResource,
 } from '../helpers/discoveryConfig.js';
+import { resolveDiscoveryIconContent } from '../helpers/iconResolver.js';
 import { HP_SPACE, hpSearchInput } from '../tokens.js';
 import interactiveStyles from '../homepage-interactive.module.css';
 
@@ -35,11 +36,6 @@ export interface HomepageDiscoveryClusterProps {
   promotedResources: NormalizedDiscoveryResource[];
   categoryGroups: NormalizedDiscoveryCategoryGroup[];
   strategyLabel: string;
-}
-
-function iconInitials(iconKey: string | undefined): string {
-  if (!iconKey) return '\u2022';
-  return iconKey.slice(0, 2).toUpperCase();
 }
 
 const subheadingStyle: React.CSSProperties = {
@@ -118,7 +114,7 @@ export function HomepageDiscoveryCluster({
                 description={resource.description}
                 icon={
                   <HbcHomepageIconFrame size="sm" tint="brand">
-                    {iconInitials(resource.iconKey)}
+                    {resolveDiscoveryIconContent(resource.iconKey)}
                   </HbcHomepageIconFrame>
                 }
               />
@@ -147,7 +143,7 @@ export function HomepageDiscoveryCluster({
                     description={resource.description}
                     icon={
                       <HbcHomepageIconFrame size="sm" tint="subtle">
-                        {iconInitials(resource.iconKey)}
+                        {resolveDiscoveryIconContent(resource.iconKey)}
                       </HbcHomepageIconFrame>
                     }
                   />

@@ -6,6 +6,7 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageRailShell } from '../../homepage/shared/HomepageRailShell.js';
 import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtilityDenseGroup.js';
+import { resolveUtilityIconContent } from '../../homepage/helpers/iconResolver.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
 import { hpHeadingReset, hpZoneFlexLayout } from '../../homepage/tokens.js';
 
@@ -13,19 +14,6 @@ export interface ToolLauncherWorkHubProps {
   config?: Partial<ToolLauncherWorkHubConfig>;
   activeAudience?: string;
   isLoading?: boolean;
-}
-
-const ICON_MAP: Record<string, string> = {
-  finance: 'FI',
-  field: 'FL',
-  hr: 'HR',
-  safety: 'SF',
-  default: 'AP',
-};
-
-function resolveIconInitials(iconKey: string | undefined): string {
-  if (!iconKey) return ICON_MAP.default;
-  return ICON_MAP[iconKey.toLowerCase()] ?? ICON_MAP.default;
 }
 
 export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false }: ToolLauncherWorkHubProps): React.JSX.Element {
@@ -59,7 +47,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
                   description={item.description}
                   icon={
                     <HbcHomepageIconFrame size="sm" tint="brand">
-                      {resolveIconInitials(item.iconKey)}
+                      {resolveUtilityIconContent(item.iconKey)}
                     </HbcHomepageIconFrame>
                   }
                   badge={item.badge ? <HbcStatusBadge label={item.badge.label} variant={item.badge.variant ?? 'neutral'} /> : undefined}
