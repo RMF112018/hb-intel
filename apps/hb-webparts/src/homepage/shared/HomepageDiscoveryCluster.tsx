@@ -7,8 +7,8 @@ import type {
   NormalizedDiscoveryResource,
 } from '../helpers/discoveryConfig.js';
 import {
-  HP_SPACE, HP_RADIUS, HP_BORDER, HP_TEXT_OPACITY,
-  hpHeadingReset, hpSecondaryText, hpSecondaryCard, hpListStyle,
+  HP_SPACE, HP_TEXT_OPACITY,
+  hpHeadingReset, hpSecondaryText, hpSecondaryCard, hpListStyle, hpSearchInput,
 } from '../tokens.js';
 
 export interface HomepageDiscoveryClusterProps {
@@ -55,13 +55,7 @@ export function HomepageDiscoveryCluster({
           onChange={(event) => onQueryChange(event.currentTarget.value)}
           placeholder={searchPlaceholder}
           type="search"
-          style={{
-            width: '100%',
-            marginTop: HP_SPACE.sm,
-            padding: `${HP_SPACE.md}px ${HP_SPACE.lg}px`,
-            borderRadius: HP_RADIUS.card,
-            border: HP_BORDER.interactive,
-          }}
+          style={hpSearchInput}
         />
       </div>
 

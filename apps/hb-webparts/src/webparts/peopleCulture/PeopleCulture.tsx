@@ -6,7 +6,7 @@ import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCur
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { PeopleCultureConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { hpHeadingReset, hpContentParagraph, hpCompactImage, hpBadgeRow, hpCtaLink } from '../../homepage/tokens.js';
+import { hpHeadingReset, hpContentParagraph, hpCompactImage, hpBadgeRow, hpCtaLink, hpMediaContainer } from '../../homepage/tokens.js';
 
 export interface PeopleCultureProps {
   config?: Partial<PeopleCultureConfig>;
@@ -51,11 +51,13 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
               </div>
               <p style={hpContentParagraph}>{normalized.featured.highlight}</p>
               {normalized.featured.media ? (
-                <img
-                  alt={normalized.featured.media.alt}
-                  src={normalized.featured.media.src}
-                  style={hpCompactImage}
-                />
+                <div style={hpMediaContainer}>
+                  <img
+                    alt={normalized.featured.media.alt}
+                    src={normalized.featured.media.src}
+                    style={hpCompactImage}
+                  />
+                </div>
               ) : null}
               {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>

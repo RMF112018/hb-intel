@@ -6,7 +6,7 @@ import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCur
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { LeadershipMessageConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { hpHeadingReset, hpContentParagraph, hpFeaturedImage, hpLeaderAttribution, hpCtaLink } from '../../homepage/tokens.js';
+import { hpHeadingReset, hpContentParagraph, hpFeaturedImage, hpLeaderAttribution, hpCtaLink, hpMediaContainer } from '../../homepage/tokens.js';
 
 export interface LeadershipMessageProps {
   config?: Partial<LeadershipMessageConfig>;
@@ -44,11 +44,13 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
                 {normalized.featured.leaderRole ? `, ${normalized.featured.leaderRole}` : ''}
               </p>
               {normalized.featured.media ? (
-                <img
-                  alt={normalized.featured.media.alt}
-                  src={normalized.featured.media.src}
-                  style={hpFeaturedImage}
-                />
+                <div style={hpMediaContainer}>
+                  <img
+                    alt={normalized.featured.media.alt}
+                    src={normalized.featured.media.src}
+                    style={hpFeaturedImage}
+                  />
+                </div>
               ) : null}
               {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>

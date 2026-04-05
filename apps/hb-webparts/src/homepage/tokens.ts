@@ -140,6 +140,32 @@ export const HP_WELCOME = {
   greetingFontWeight: 700,
 } as const;
 
+// ── Motion ─────────────────────────────────────────────────────────────
+// Purposeful, fast, restrained transitions. No decorative motion.
+// All motion tokens must be gated by prefers-reduced-motion at usage site.
+
+export const HP_MOTION = {
+  /** Fast transition for hover/focus — 150ms ease */
+  fast: '150ms ease',
+  /** Standard transition for layout shifts — 200ms ease */
+  standard: '200ms ease',
+  /** Hero background transition — 300ms ease (gated in HbHeroBanner) */
+  hero: '300ms ease',
+  /** No motion — used when prefers-reduced-motion is active */
+  none: 'none',
+} as const;
+
+// ── Focus treatment ────────────────────────────────────────────────────
+// Visible focus for keyboard accessibility. Uses brand blue for
+// consistency with CTA treatment.
+
+export const HP_FOCUS = {
+  /** Focus outline — 2px solid brand blue, 2px offset */
+  outline: '2px solid #225391',
+  /** Focus outline offset */
+  outlineOffset: 2,
+} as const;
+
 // ── Shared inline style fragments ──────────────────────────────────────
 // Pre-composed style objects for common patterns. Using these reduces
 // object allocation in render and ensures visual consistency.
@@ -247,3 +273,41 @@ export function hpZoneSection(zone: keyof typeof HP_ZONE): React.CSSProperties {
     padding: HP_SPACE['2xl'],
   };
 }
+
+/** Branded empty state container — centered, padded, with border */
+export const hpEmptyStateContainer: React.CSSProperties = {
+  padding: HP_SPACE['2xl'],
+  textAlign: 'center',
+  border: HP_BORDER.subtle,
+  borderRadius: HP_RADIUS.card,
+  background: 'rgba(0,0,0,0.015)',
+};
+
+/** Branded loading state container — centered, padded */
+export const hpLoadingStateContainer: React.CSSProperties = {
+  padding: HP_SPACE['3xl'],
+  textAlign: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: HP_SPACE.md,
+};
+
+/** Media container — stable aspect ratio, prevents layout shift */
+export const hpMediaContainer: React.CSSProperties = {
+  position: 'relative',
+  overflow: 'hidden',
+  borderRadius: HP_RADIUS.image,
+  backgroundColor: 'rgba(0,0,0,0.04)',
+};
+
+/** Search input with focus-visible support */
+export const hpSearchInput: React.CSSProperties = {
+  width: '100%',
+  marginTop: HP_SPACE.sm,
+  padding: `${HP_SPACE.md}px ${HP_SPACE.lg}px`,
+  borderRadius: HP_RADIUS.card,
+  border: HP_BORDER.interactive,
+  outline: 'none',
+  transition: `border-color ${HP_MOTION.fast}`,
+};
