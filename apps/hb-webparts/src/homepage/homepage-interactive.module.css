@@ -32,14 +32,21 @@
 }
 
 /* ── Search input interactive states ────────────────────────────── */
+/* Premium discovery search with warm accent focus treatment.        */
 
 .searchInput {
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.searchInput:hover {
+  border-color: rgba(229, 126, 70, 0.30);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .searchInput:focus-visible {
-  border-color: #225391;
-  box-shadow: 0 0 0 1px #225391;
+  border-color: rgba(229, 126, 70, 0.50);
+  box-shadow: 0 0 0 3px rgba(229, 126, 70, 0.12);
+  background-color: #ffffff;
   outline: none;
 }
 

@@ -1,54 +1,66 @@
 /**
  * Icon resolution for homepage utility and discovery surfaces.
+ * Phase 15-06 — Discovery and launcher productization
  *
- * Centralizes the iconKey-to-display-content mapping used by
- * ToolLauncherWorkHub and HomepageDiscoveryCluster. Both surfaces
- * previously maintained independent placeholder-grade icon logic.
- *
- * The resolver produces short text content (initials or fallback)
- * suitable for rendering inside HbcHomepageIconFrame. Prompts 02-04
- * may enhance this to support richer icon treatments.
+ * Replaces placeholder-grade text-initials (FI, HR, SF) with semantic
+ * Unicode symbols that communicate function at a glance. These symbols
+ * render inside HbcHomepageIconFrame and work across all browsers
+ * without icon font dependencies.
  */
 
-/** Known icon-key-to-initials mapping for utility/launcher surfaces. */
+/** Semantic icon mapping for utility/launcher surfaces. */
 const UTILITY_ICON_MAP: Record<string, string> = {
-  finance: 'FI',
-  field: 'FL',
-  hr: 'HR',
-  safety: 'SF',
-  quality: 'QC',
-  risk: 'RM',
-  ops: 'OE',
-  admin: 'AD',
-  legal: 'LG',
-  it: 'IT',
+  finance:  '\u0024',   // $ — dollar sign
+  field:    '\u25C9',   // ◉ — fisheye / location marker
+  hr:       '\u263A',   // ☺ — person/smiley
+  safety:   '\u26E8',   // ⛨ — shield
+  quality:  '\u2714',   // ✔ — check mark
+  risk:     '\u26A0',   // ⚠ — warning triangle
+  ops:      '\u2699',   // ⚙ — gear
+  admin:    '\u2630',   // ☰ — hamburger/settings
+  legal:    '\u00A7',   // § — section sign
+  it:       '\u2328',   // ⌨ — keyboard
+  project:  '\u25B6',   // ▶ — play/project
+  report:   '\u25A4',   // ▤ — grid/table
+  schedule: '\u25F4',   // ◴ — clock quadrant
+  email:    '\u2709',   // ✉ — envelope
+  document: '\u25A3',   // ▣ — document square
+  team:     '\u2302',   // ⌂ — house/team space
+  form:     '\u270E',   // ✎ — pencil
+  policy:   '\u2261',   // ≡ — triple bar
+  search:   '\u2315',   // ⌕ — search/telephone recorder
+  link:     '\u2197',   // ↗ — external link arrow
 };
 
-const UTILITY_FALLBACK = 'AP';
+const UTILITY_FALLBACK = '\u2B9A';  // ⮚ — right arrowhead
 
-/** Bullet fallback for discovery surfaces where no iconKey is provided. */
-const DISCOVERY_FALLBACK = '\u2022';
+/** Semantic icon mapping for discovery surfaces. */
+const DISCOVERY_ICON_MAP: Record<string, string> = {
+  ...UTILITY_ICON_MAP,
+  tool:        '\u2699',   // ⚙
+  form:        '\u270E',   // ✎
+  policy:      '\u2261',   // ≡
+  system:      '\u2328',   // ⌨
+  teamSpace:   '\u2302',   // ⌂
+  destination: '\u2197',   // ↗
+};
+
+const DISCOVERY_FALLBACK = '\u2192';  // → — right arrow
 
 /**
- * Resolve an iconKey to short display text for utility/launcher surfaces.
- *
- * Returns a recognized initials string when the key matches, otherwise
- * falls back to the first two uppercase characters of the key or a
- * generic fallback.
+ * Resolve an iconKey to a semantic symbol for utility/launcher surfaces.
  */
 export function resolveUtilityIconContent(iconKey: string | undefined): string {
   if (!iconKey) return UTILITY_FALLBACK;
   const normalized = iconKey.trim().toLowerCase();
-  return UTILITY_ICON_MAP[normalized] ?? (iconKey.slice(0, 2).toUpperCase() || UTILITY_FALLBACK);
+  return UTILITY_ICON_MAP[normalized] ?? UTILITY_FALLBACK;
 }
 
 /**
- * Resolve an iconKey to short display text for discovery surfaces.
- *
- * Discovery items use a bullet fallback when no iconKey is provided,
- * otherwise display the first two uppercase characters.
+ * Resolve an iconKey to a semantic symbol for discovery surfaces.
  */
 export function resolveDiscoveryIconContent(iconKey: string | undefined): string {
   if (!iconKey) return DISCOVERY_FALLBACK;
-  return iconKey.slice(0, 2).toUpperCase() || DISCOVERY_FALLBACK;
+  const normalized = iconKey.trim().toLowerCase();
+  return DISCOVERY_ICON_MAP[normalized] ?? DISCOVERY_FALLBACK;
 }
