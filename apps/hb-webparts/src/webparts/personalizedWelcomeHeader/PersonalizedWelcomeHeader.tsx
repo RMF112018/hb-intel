@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { HbcHomepageSurfaceCard, HbcHomepageMetadataRow, HbcHomepageEyebrow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { hedrickLogo } from '@hbc/ui-kit/branding';
 import { normalizeWelcomeHeaderConfig } from '../../homepage/helpers/topBandConfig.js';
 import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
@@ -38,6 +39,21 @@ const greetingNameStyle: React.CSSProperties = {
   letterSpacing: '-0.02em',
 };
 
+/** Brand lockup row: restrained horizontal mark preceding the eyebrow */
+const brandLockupStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.md,
+};
+
+/** Brand logo: small horizontal wordmark, premium restraint */
+const brandLogoStyle: React.CSSProperties = {
+  height: 20,
+  width: 'auto',
+  opacity: 0.7,
+  objectFit: 'contain',
+};
+
 /** Alert container: subtle tinted background for visual separation */
 const alertContainerStyle: React.CSSProperties = {
   marginTop: HP_SPACE.md,
@@ -54,7 +70,10 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
   return (
     <HbcHomepageSurfaceCard surface="welcome">
       <div style={{ display: 'grid', gap: HP_SPACE.md }}>
-        <HbcHomepageEyebrow tone="muted">HB Central</HbcHomepageEyebrow>
+        <div style={brandLockupStyle}>
+          <img src={hedrickLogo} alt="Hedrick Brothers" style={brandLogoStyle} />
+          <HbcHomepageEyebrow tone="muted">HB Central</HbcHomepageEyebrow>
+        </div>
 
         <h2 style={{ margin: 0 }}>
           <span style={greetingPrefixStyle}>{message.greeting},</span>

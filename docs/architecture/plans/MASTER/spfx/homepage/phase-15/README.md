@@ -1,120 +1,85 @@
-# Phase E Prompt Package — Homepage Composition Pass
+# HB Central Homepage UI Reset — Forceful Phase-Based Prompt Package
 
 ## Objective
 
-This package instructs the local code agent to implement **Phase E** of the HB Central homepage premiumization program.
+This package instructs a local code agent to execute a **hard visual reset** of the HB Central SharePoint homepage experience across:
 
-Phase E is the **homepage composition pass**. Its purpose is to make the homepage read like a coherent, premium digital front door rather than a stack of individually improved modules that still lack full-page narrative, rhythm, and hierarchy.
+- `apps/hb-webparts` (Lane A)
+- `apps/hb-shell-extension` (Lane B)
+- `packages/ui-kit` (`@hbc/ui-kit`)
+- any directly-governing homepage, shell, doctrine, import, and packaging files
 
-The primary targets are:
+The package is intentionally forceful because the current rendered state is **not acceptable**. The objective is not cosmetic cleanup. The objective is to move the implementation materially closer to a **premium, productized, purchase-grade intranet experience**.
 
-- `apps/hb-webparts/src/homepage/ReferenceHomepageComposition.tsx`
-- homepage zone rhythm and section sequencing
-- homepage composition shells and wrappers
-- page-level spacing, section-intro, and inter-zone hierarchy rules
-- any shared homepage-safe composition primitives required to express the final page narrative cleanly
+## Current-State Decision
 
-Phase E must stay anchored to live repo truth and must preserve the lane boundaries, packaging model, homepage doctrine overlay, import discipline, accessibility rules, and authoring-safe behavior already established in the repo.
+Treat the following as already decided:
 
----
+- the current rendered state is unsatisfactory
+- no current homepage webpart is acceptable in its present visual state
+- the current hero is too empty and generic
+- the current welcome card is too ordinary
+- the current utility, launcher, editorial, operational, and discovery surfaces are too visually similar
+- the current shell-extension posture is too scaffold-like
+- the page still reads as “custom cards placed inside SharePoint” rather than a cohesive HB Central product
+
+The code agent must **not** spend time defending the existing UI.
 
 ## Package Contents
 
-1. `Phase-E-Implementation-Plan-Summary.md`
-2. `Prompt-01-Phase-E-Baseline-and-Composition-Architecture.md`
-3. `Prompt-02-Refine-Zone-Rhythm-and-Section-Narrative.md`
-4. `Prompt-03-Redesign-ReferenceHomepageComposition-and-Inter-Zone-Hierarchy.md`
-5. `Prompt-04-Polish-Composition-Shells-Spacing-and-Page-Level-Consistency.md`
-6. `Prompt-05-Validation-Docs-and-Completion-Closeout.md`
+- `Phase-Implementation-Plan-Summary.md`
+- `Prompt-01_Shared_Surface_System_Reset.md`
+- `Prompt-02_Lane-B_Shell-Extension_Premiumization.md`
+- `Prompt-03_Top-Band_Hard_Reset.md`
+- `Prompt-04_Utility_Command_Surfaces_Reset.md`
+- `Prompt-05_Discovery_and_Launcher_Redesign.md`
+- `Prompt-06_Communications_Surfaces_Redesign.md`
+- `Prompt-07_Operational_Surfaces_Redesign.md`
+- `Prompt-08_Composition_Integration_and_Final_Polish.md`
 
----
+## Execution Order
 
-## Required Execution Order
+Run the prompts in order. Do not skip ahead.
 
-Run the prompts in order.
+The sequencing is deliberate:
 
-Do **not** skip ahead.
+1. rebuild the shared visual system first
+2. fix the shell layer second
+3. rebuild the top-of-page signature moment third
+4. rebuild utility and discovery next
+5. rebuild editorial and operational surfaces after the system foundations are in place
+6. finish with full-page composition, integration, validation, and documentation
 
-Each prompt assumes the prior prompt's changes are already present in the working tree.
+## Non-Negotiable Rules
 
----
+- Do **not** reread files that are already in the agent’s active context or memory.
+- Do **not** perform cosmetic-only edits.
+- Do **not** preserve weak current patterns merely for continuity.
+- Do **not** invent unsupported SharePoint takeover behavior.
+- Do **not** regress packaging, import discipline, accessibility, or reduced-motion handling.
+- Do **not** claim success without rendering proof, code proof, and validation proof.
 
-## Locked Phase E Scope
+## Expected Output Quality
 
-### In scope
-- strengthen homepage zone rhythm, spacing cadence, and section narrative
-- improve inter-zone hierarchy so the page reads as one composed experience
-- refine `ReferenceHomepageComposition` so it becomes a materially stronger governed visual reference
-- refine or extend homepage composition shells/wrappers where that improves real repo truth
-- improve page-level consistency across section headers, zone intros, spacing, background posture, and grouping logic
-- preserve the distinction between what is a composition reference and what is a production rendering path
-- update docs/tests/stories required by repo truth and touched scope
-- preserve SPFx lane/package safety
+The target is **not** “clean enterprise UI.”
 
-### Out of scope
-- shell takeover / custom SharePoint chrome
-- Lane B Application Customizer work
-- backend/data-model changes
-- speculative “single homepage app” production architecture that contradicts the current independent-webpart model
-- broad redesign of unrelated webparts beyond what is necessary to express composition truth
-- major authoring-schema rewrites unless strictly required
+The target is:
 
----
+- premium
+- confident
+- composed
+- branded
+- clearly authored
+- materially stronger than stock SharePoint
+- credible as a purchasable premium intranet product
 
-## Repo-Truth Anchors
+## Required Deliverables Across the Full Package
 
-The prompts are written assuming the current live repo truth includes at least the following authoritative files and constraints:
+By the end of the package, the code agent should have produced:
 
-- `apps/hb-webparts/README.md`
-- `apps/hb-webparts/src/homepage/ReferenceHomepageComposition.tsx`
-- `apps/hb-webparts/src/homepage/tokens.ts`
-- `apps/hb-webparts/src/homepage/shared/*`
-- `apps/hb-webparts/src/webparts/*`
-- `packages/ui-kit/src/homepage.ts`
-- any homepage-safe primitives added during earlier premiumization phases
-- `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`
-
-If repo truth has materially changed, the agent must reconcile against the live code before editing.
-
----
-
-## Hard Gates
-
-The code agent must satisfy all of the following:
-
-- **Do not re-read files that are still within your current context window or memory.** Re-read only when needed to resolve uncertainty, verify drift, or inspect files not already in active context.
-- Keep homepage imports compliant with the existing homepage entry-point doctrine.
-- Do not introduce root `@hbc/ui-kit` imports into homepage webparts.
-- Preserve Lane A ownership and do not create shell chrome.
-- Do not regress `.sppkg` packaging, mount/dispatch seams, or multi-webpart cumulative behavior.
-- Keep accessibility, token discipline, reduced-motion support, and authoring-safe defaults intact.
-- Do not present the governed composition preview as if it were the production rendering path.
-- Improve composition truth without relying on unsupported SharePoint shell manipulation.
-- Update docs only where implementation truth changed; do not create speculative architecture drift.
-
----
-
-## Expected End State
-
-By the end of Phase E, the repo should have:
-
-- a materially stronger homepage composition reference
-- better zone-to-zone rhythm and section narrative
-- cleaner page-level hierarchy across the five homepage zones
-- stronger shared composition shells and spacing rules where justified
-- a more premium, composed, and leadership-ready homepage reference experience
-- validation, docs, and closeout artifacts aligned to implementation truth
-
----
-
-## Completion Artifacts Expected from the Agent
-
-At minimum, the agent should leave behind:
-
-- code changes implementing the Phase E composition pass
-- updated docs/stories/tests where required
-- a completion note summarizing:
-  - what changed
-  - what was improved in the governed composition layer vs reusable shared wrappers
-  - what remains limited by the current independent-webpart production model
-  - any risks / follow-ons / migration notes
+- implemented code changes
+- any required shared primitive additions/refactors
+- updated docs/doctrine where needed
+- validation notes
+- screenshots or rendered proof where available
+- concise completion notes per phase
