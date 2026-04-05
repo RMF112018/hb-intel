@@ -37,6 +37,23 @@ export type { HbcStatusBadgeProps, StatusVariant } from './HbcStatusBadge/index.
 
 export { usePrefersReducedMotion as useHomepageReducedMotion };
 
+// ── Phase 11A — Homepage shared primitives ────────────────────────────
+
+export { HbcHomepageSectionShell } from './HbcHomepageSectionShell/index.js';
+export type { HbcHomepageSectionShellProps } from './HbcHomepageSectionShell/types.js';
+
+export { HbcHomepageCta } from './HbcHomepageCta/index.js';
+export type { HbcHomepageCtaProps, HomepageCtaVariant } from './HbcHomepageCta/types.js';
+
+export { HbcHomepageMetadataRow } from './HbcHomepageMetadataRow/index.js';
+export type { HbcHomepageMetadataRowProps } from './HbcHomepageMetadataRow/types.js';
+
+export { HbcHomepageIconFrame } from './HbcHomepageIconFrame/index.js';
+export type { HbcHomepageIconFrameProps, IconFrameSize } from './HbcHomepageIconFrame/types.js';
+
+export { HbcHomepageSurfaceCard } from './HbcHomepageSurfaceCard/index.js';
+export type { HbcHomepageSurfaceCardProps } from './HbcHomepageSurfaceCard/types.js';
+
 export type HomepageSurfaceClass = 'hero' | 'editorial' | 'utility' | 'operational' | 'discovery';
 
 export type HomepagePrimitiveName =
@@ -44,6 +61,11 @@ export type HomepagePrimitiveName =
   | 'HbcButton'
   | 'HbcCard'
   | 'HbcEmptyState'
+  | 'HbcHomepageCta'
+  | 'HbcHomepageIconFrame'
+  | 'HbcHomepageMetadataRow'
+  | 'HbcHomepageSectionShell'
+  | 'HbcHomepageSurfaceCard'
   | 'HbcSearch'
   | 'HbcSpinner'
   | 'HbcStatusBadge'
