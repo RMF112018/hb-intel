@@ -59,15 +59,26 @@ src/
 
 This seam is the SPFx loader contract boundary. The shell webpart (`tools/spfx-shell/`) calls `mount()` after loading the IIFE bundle via `SPComponentLoader`.
 
-## Reference Homepage Composition
+## Governed Composition Reference
 
-`src/homepage/ReferenceHomepageComposition.tsx` renders all 10 webparts in a vertically stacked demo composition with sample data. It exists for:
+`src/homepage/ReferenceHomepageComposition.tsx` is the governed composition reference for the homepage package. It demonstrates the 5-zone homepage architecture with all 10 webparts composed in their intended zone arrangement:
 
+1. **Top Band** — Welcome Header + Hero Banner (warm blue tint)
+2. **Utility** — Priority Actions + Tool Launcher (transparent, density-driven)
+3. **Communications** — Company Pulse + Leadership Message + People & Culture (warm orange tint)
+4. **Operational Awareness** — Project Spotlight + Safety Excellence (cool blue tint)
+5. **Discovery** — Smart Search / Wayfinding (neutral tint)
+
+Each zone is wrapped with `hpZoneSection()` for visual differentiation. The composition uses a grid layout with `HP_SPACE['2xl']` gap for consistent zone-to-zone rhythm.
+
+**Roles:**
 - **Development preview** — renders when the app is loaded outside SharePoint (no SPFx webPartId)
-- **Visual integration testing** — confirms all webparts render together without prop errors
-- **Design reference** — demonstrates the intended zone structure and visual hierarchy
+- **Visual integration surface** — confirms all webparts compose correctly in the zone structure
+- **Zone architecture reference** — demonstrates governed zone order, tinting, and section rhythm
 
 It is **not** the production rendering path. In production, each webpart renders independently through the mount/dispatch seam.
+
+See [Homepage Zone Architecture](../../docs/architecture/plans/MASTER/spfx/homepage/phase-03/Homepage-Zone-Architecture.md) for the canonical zone model.
 
 ## Import Policy
 
