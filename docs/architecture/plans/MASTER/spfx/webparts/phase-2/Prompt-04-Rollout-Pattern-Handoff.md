@@ -1,13 +1,23 @@
 # Rollout Pattern Handoff — First-Class SPFx Loader Contract for Remaining hb-webparts
 
+## Validated webparts
+
+| Webpart | Manifest ID | Phase | Status |
+|---------|-------------|-------|--------|
+| HbHeroBannerWebPart | `39762a4d-c7fd-44a6-a11e-4f8de9f5778d` | Phase 2 | Validated |
+| PriorityActionsRailWebPart | `b3f07190-79cf-437d-a1d6-ecbf3f77e616` | Phase 3 | Validated |
+
+**Next recommended target:** LeadershipMessageWebPart (`e8fa8a84-a48a-41d2-85a6-b7c7df70aeca`)
+
 ## 1. Final proof-case architecture
 
-The `HbHeroBannerWebPart` proof case replaced the post-bundle shim loader model with a first-class SPFx loader contract. The architecture is:
+The first-class SPFx loader contract model has been proven by two webparts. The architecture is:
 
-- The build orchestrator (`tools/build-spfx-package.ts`) maintains an allowlist (`HB_WEBPARTS_PROOF_CASE_IDS`) of webpart manifest IDs that have been validated in the first-class model.
+- The build orchestrator (`tools/build-spfx-package.ts`) maintains an allowlist (`HB_WEBPARTS_PROOF_CASE_IDS`) containing the single active proof-case webpart manifest ID.
+- A manifest-ID-to-entry-file lookup map (`HB_WEBPARTS_PROOF_CASE_ENTRY_MAP`) routes each proof-case ID to its isolated Vite entry. This was generalized in Phase 3 (P3-01) and no longer requires hardcoded entry paths.
 - When a single proof-case target is active, the real webpart manifest ID is written directly into `ShellWebPart.manifest.json` before `gulp bundle` — no neutral shell manifest ID.
 - The compiled `entryModuleId` matches the webpart ID natively (`{webpartId}_1.0.0`), so SharePoint's `require()` resolves directly to the compiled shell asset.
-- A proof-case-specific Vite entry (`mount-hero-proof-case.tsx`) isolates the bundle to only the target webpart's component tree.
+- A proof-case-specific Vite entry isolates the bundle to only the target webpart's component tree.
 - `ShellWebPart.ts` is unchanged — it loads the IIFE bundle via `SPComponentLoader` and calls `mount(el, context, config)`.
 
 ### Loader chain (no shims)
@@ -92,7 +102,7 @@ const api = { mount, unmount };
 
 ### Step 2: Update allowlist
 
-In `tools/build-spfx-package.ts`, replace the current proof-case ID:
+In `tools/build-spfx-package.ts`, replace the current proof-case ID in `HB_WEBPARTS_PROOF_CASE_IDS`:
 
 ```typescript
 const HB_WEBPARTS_PROOF_CASE_IDS = new Set([
@@ -100,17 +110,15 @@ const HB_WEBPARTS_PROOF_CASE_IDS = new Set([
 ]);
 ```
 
-### Step 3: Update build entry routing
+### Step 3: Add entry to the lookup map
 
-In `tools/build-spfx-package.ts`, update the proof-case entry path:
+In `tools/build-spfx-package.ts`, add a mapping in `HB_WEBPARTS_PROOF_CASE_ENTRY_MAP`:
 
 ```typescript
-const proofCaseBuildEnv: Record<string, string> = isProofCase
-  ? { HB_WEBPARTS_ENTRY: 'src/mount-{webpartName}-proof-case.tsx' }
-  : {};
+'{new-webpart-manifest-id}': 'src/mount-{webpartName}-proof-case.tsx',
 ```
 
-**Note:** The current implementation hardcodes `src/mount-hero-proof-case.tsx`. For the rollout, this should be generalized to derive the entry filename from the active proof-case webpart. A simple lookup map keyed by manifest ID is sufficient.
+The build script resolves the entry file automatically from this map — no hardcoded entry path replacement needed. If the map entry is missing, the build fails with a clear error.
 
 ### Step 4: Build and inspect
 
@@ -138,10 +146,10 @@ Bump `apps/hb-webparts/config/package-solution.json` version (both `solution.ver
 | Change | File | Repeats per webpart |
 |--------|------|---------------------|
 | New proof-case entry | `apps/hb-webparts/src/mount-{name}-proof-case.tsx` | Yes |
-| Update allowlist ID | `tools/build-spfx-package.ts` line 74-76 | Yes (replace) |
-| Update entry path | `tools/build-spfx-package.ts` proof-case env | Yes (replace) |
+| Update allowlist ID | `tools/build-spfx-package.ts` `HB_WEBPARTS_PROOF_CASE_IDS` | Yes (replace) |
+| Add entry to lookup map | `tools/build-spfx-package.ts` `HB_WEBPARTS_PROOF_CASE_ENTRY_MAP` | Yes (add row) |
 | Version bump | `apps/hb-webparts/config/package-solution.json` | Yes |
-| Completion note | `docs/architecture/plans/MASTER/spfx/webparts/phase-2/` | Optional |
+| Completion note | `docs/architecture/plans/MASTER/spfx/webparts/phase-{N}/` | Optional |
 
 No changes needed to: `ShellWebPart.ts`, `gulpfile.js`, `mount.tsx`, `vite.config.ts`, or any webpart manifest file.
 
@@ -151,8 +159,8 @@ No changes needed to: `ShellWebPart.ts`, `gulpfile.js`, `mount.tsx`, `vite.confi
 
 | Order | Webpart | ID | LOC | Notes |
 |-------|---------|----|----|-------|
-| 1 | PriorityActionsRail | `b3f07190-79cf-437d-a1d6-ecbf3f77e616` | 54 | Stateless, no identity, simple rail |
-| 2 | LeadershipMessage | `e8fa8a84-a48a-41d2-85a6-b7c7df70aeca` | 66 | Stateless, pure data display |
+| ~~1~~ | ~~PriorityActionsRail~~ | ~~`b3f07190-79cf-437d-a1d6-ecbf3f77e616`~~ | ~~54~~ | **Validated (Phase 3)** |
+| 2 | LeadershipMessage | `e8fa8a84-a48a-41d2-85a6-b7c7df70aeca` | 66 | Stateless, pure data display — **next target** |
 | 3 | CompanyPulse | `0b53f651-fd92-4f7f-a9da-f7797017f5eb` | 70 | Stateless, featured+secondary layout |
 | 4 | PeopleCulture | `27ac10f4-4054-4dd2-bd53-3b4ef4379ab4` | 71 | Stateless, similar pattern to CompanyPulse |
 
@@ -186,7 +194,7 @@ The following are **not** part of the loader-contract rollout and should remain 
 | Restoring full `mount.tsx` as the single entry | Only after all 10 webparts are proven individually |
 | Removing shim infrastructure from `build-spfx-package.ts` | Only after full rollout — the code is dormant but safe |
 | Removing `HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID` constant | Same as above |
-| Generalizing proof-case entry selection (entry filename lookup map) | Can be done at the start of tier 1 rollout or incrementally |
+| ~~Generalizing proof-case entry selection~~ | **Done** — `HB_WEBPARTS_PROOF_CASE_ENTRY_MAP` implemented in Phase 3 (P3-01) |
 | Multi-webpart batch packaging (shipping all 10 in one `.sppkg` again) | Only after all are individually proven in first-class model |
 | Homepage composition architecture (layout, ordering, slot management) | Separate concern — not a loader-contract issue |
 | Secondary console noise unrelated to loader failures | Not blocking — address as separate cleanup |
