@@ -1,0 +1,136 @@
+/**
+ * Shell-extension styling — CSS module for Lane B placeholder surfaces.
+ *
+ * Premium but restrained: lighter than the homepage lane, host-cooperative,
+ * concise utility surfaces only. No editorial card-heavy treatment.
+ */
+
+/* ── Top placeholder container ──────────────────────────────────── */
+
+.topContainer {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #323130;
+}
+
+/* ── Top ribbon ─────────────────────────────────────────────────── */
+
+.ribbon {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 16px;
+  background: rgba(34, 83, 145, 0.04);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ribbonLink {
+  color: #225391;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.ribbonLink:hover {
+  background-color: rgba(34, 83, 145, 0.08);
+  text-decoration: underline;
+}
+
+.ribbonLink:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 1px;
+}
+
+/* ── Alert band ─────────────────────────────────────────────────── */
+
+.alertBand {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.alertItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.alertInfo {
+  background: #e8f0fe;
+  color: #1a4274;
+  border-bottom: 1px solid rgba(34, 83, 145, 0.12);
+}
+
+.alertWarning {
+  background: #fff4e5;
+  color: #6b4a00;
+  border-bottom: 1px solid rgba(180, 130, 40, 0.15);
+}
+
+.alertCritical {
+  background: #fde7e9;
+  color: #8b1a1a;
+  border-bottom: 1px solid rgba(139, 26, 26, 0.15);
+}
+
+.alertMessage {
+  flex: 1;
+  min-width: 0;
+}
+
+.alertCta {
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: text-decoration 150ms ease;
+}
+
+.alertCta:hover {
+  text-decoration: underline;
+}
+
+.alertCta:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.alertDismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 1rem;
+  line-height: 1;
+  transition: opacity 150ms ease;
+}
+
+.alertDismiss:hover {
+  opacity: 1;
+}
+
+.alertDismiss:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ribbonLink,
+  .alertCta,
+  .alertDismiss {
+    transition: none !important;
+  }
+}
