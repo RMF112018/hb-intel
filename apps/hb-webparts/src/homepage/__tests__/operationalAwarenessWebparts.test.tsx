@@ -26,7 +26,7 @@ describe('Prompt-07 operational-awareness webparts', () => {
       />, 
     );
 
-    expect(screen.getByLabelText('featured-item')).not.toBeNull();
+    expect(screen.getByLabelText(/featured/)).not.toBeNull();
     expect(screen.getByText('Featured Project')).not.toBeNull();
     expect(screen.getByText('Secondary Project')).not.toBeNull();
   });

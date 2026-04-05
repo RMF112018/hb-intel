@@ -12,12 +12,12 @@ export function HomepageCuratedContentCluster({ heading, featured, secondary = [
     <section aria-label={heading}>
       <h2 style={hpHeadingReset}>{heading}</h2>
       {featured ? (
-        <div aria-label="featured-item" style={hpFeaturedContainer}>
+        <div aria-label={`${heading} — featured`} style={hpFeaturedContainer}>
           {featured}
         </div>
       ) : null}
       {secondary.length > 0 ? (
-        <div aria-label="secondary-items" style={hpSecondaryGrid}>
+        <div aria-label={`${heading} — more items`} style={hpSecondaryGrid}>
           {secondary.map((node, index) => (
             <div key={index} style={hpSecondaryCard}>
               {node}

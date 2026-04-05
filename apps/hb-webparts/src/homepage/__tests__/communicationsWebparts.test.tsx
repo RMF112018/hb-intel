@@ -17,7 +17,7 @@ describe('Prompt-06 awareness webparts', () => {
       />,
     );
 
-    expect(screen.getByLabelText('featured-item')).not.toBeNull();
+    expect(screen.getByLabelText(/featured/)).not.toBeNull();
     expect(screen.getByText('Featured Update')).not.toBeNull();
     expect(screen.getByText('Secondary Update')).not.toBeNull();
   });

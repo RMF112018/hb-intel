@@ -9,7 +9,7 @@ export interface HomepageEmptyStateProps {
 
 export function HomepageEmptyState({ title, description }: HomepageEmptyStateProps): React.JSX.Element {
   return (
-    <div data-hbc-homepage="empty-state" style={hpEmptyStateContainer}>
+    <div data-hbc-homepage="empty-state" role="status" aria-live="polite" style={hpEmptyStateContainer}>
       <HbcEmptyState title={title} description={description} />
     </div>
   );

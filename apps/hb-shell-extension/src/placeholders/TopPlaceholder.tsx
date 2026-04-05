@@ -92,6 +92,7 @@ export function TopPlaceholder({ available, config }: TopPlaceholderProps): Reac
           className={styles.alertBand}
           role="status"
           aria-live="polite"
+          aria-atomic="true"
         >
           {visibleAlerts.map((alert: AlertBandItem) => (
             <div
