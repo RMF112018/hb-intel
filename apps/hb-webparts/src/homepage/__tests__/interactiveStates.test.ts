@@ -44,12 +44,15 @@ describe('homepage interactive CSS module', () => {
     expect(cssSource).toContain('transition: none');
   });
 
-  it('focus-visible uses brand blue outline (#225391)', () => {
-    // All focus-visible outlines should use brand blue
+  it('focus-visible uses brand blue outline (#225391) except on-dark variants', () => {
+    // Focus-visible outlines should use brand blue on standard surfaces.
+    // On-dark variants (heroCtaOnDark) use white outlines for gradient backgrounds.
     const focusBlocks = cssSource.split(':focus-visible');
     for (let i = 1; i < focusBlocks.length; i++) {
       const block = focusBlocks[i].split('}')[0];
-      if (block.includes('outline')) {
+      const precedingText = cssSource.split(':focus-visible')[i - 1] ?? '';
+      const isOnDark = precedingText.includes('heroCtaOnDark');
+      if (block.includes('outline') && !isOnDark) {
         expect(block).toContain('#225391');
       }
     }

@@ -39,15 +39,16 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
       style={{ display: 'grid', gap: HP_SPACE['2xl'] }}
     >
       {/* ── Zone 1: Top Band ─────────────────────────────────────── */}
-      <div style={hpZoneSection('topBand')}>
       <HomepageTopBandPair
         hero={
           <HbHeroBanner
             config={{
+              eyebrow: 'This week at HB',
               headline: 'HB Central: Week of April Operations',
               message: 'Track active milestones, field recognition, and leadership guidance from one homepage band.',
               metadata: 'Updated Friday at 8:00 AM',
               cta: { label: 'Read update', href: '/company-pulse' },
+              secondaryCta: { label: 'View all updates', href: '/updates' },
             }}
           />
         }
@@ -55,7 +56,7 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
           <PersonalizedWelcomeHeader
             identity={{ preferredName: 'Jordan Miller' }}
             config={{
-              supportLine: 'Let’s keep projects moving with clarity today.',
+              supportLine: "Let's keep projects moving with clarity today.",
               contextLine: 'Saturday, April 4',
               alertSeverity: 'warning',
               alertTitle: 'Weather advisory',
@@ -64,8 +65,6 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
           />
         }
       />
-
-      </div>
 
       {/* ── Zone 2: Utility ──────────────────────────────────────── */}
       <div style={hpZoneSection('utility')}>

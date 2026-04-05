@@ -1,16 +1,17 @@
 /**
  * HbcHomepageCta — Branded call-to-action for homepage surfaces
  * Phase 11A-02 — Production-grade homepage CTA primitive
+ * Phase 12B-02 — Added size prop for hero-level CTA prominence
  *
  * Provides link, button, and secondary CTA variants with brand color,
  * visible focus, reduced-motion-aware hover transitions, and optional
- * trailing arrow indicator.
+ * trailing arrow indicator. Supports 'large' size for hero-level use.
  */
 import * as React from 'react';
 import { mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_RADIUS_MD } from '../theme/radii.js';
-import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
+import { HBC_RADIUS_MD, HBC_RADIUS_LG } from '../theme/radii.js';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import type { HbcHomepageCtaProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -89,6 +90,14 @@ const useStyles = makeStyles({
       transitionDuration: '0ms',
     },
   },
+  large: {
+    paddingTop: `${HBC_SPACE_MD}px`,
+    paddingBottom: `${HBC_SPACE_MD}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+    fontSize: '0.9375rem',
+    borderRadius: HBC_RADIUS_LG,
+  },
   arrow: {
     marginLeft: '0.35em',
   },
@@ -104,6 +113,7 @@ export const HbcHomepageCta: React.FC<HbcHomepageCtaProps> = ({
   label,
   href,
   variant = 'link',
+  size = 'default',
   external = false,
   arrow = false,
   className,
@@ -112,6 +122,7 @@ export const HbcHomepageCta: React.FC<HbcHomepageCtaProps> = ({
   const styleClass = mergeClasses(
     styles.base,
     styles[variantStyleMap[variant]],
+    size === 'large' ? styles.large : undefined,
     className,
   );
 
@@ -121,6 +132,7 @@ export const HbcHomepageCta: React.FC<HbcHomepageCtaProps> = ({
       className={styleClass}
       data-hbc-homepage="cta"
       data-hbc-cta-variant={variant}
+      data-hbc-cta-size={size}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
       {label}
@@ -129,4 +141,4 @@ export const HbcHomepageCta: React.FC<HbcHomepageCtaProps> = ({
   );
 };
 
-export type { HbcHomepageCtaProps, HomepageCtaVariant } from './types.js';
+export type { HbcHomepageCtaProps, HomepageCtaVariant, HomepageCtaSize } from './types.js';

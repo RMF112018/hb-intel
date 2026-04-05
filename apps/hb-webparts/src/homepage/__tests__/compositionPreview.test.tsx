@@ -24,9 +24,10 @@ describe('ReferenceHomepageComposition', () => {
   });
 
   it('renders all 5 zone section shells', () => {
-    render(<ReferenceHomepageComposition />);
-    // The 5 zones map to section shells with these titles (some may appear multiple times)
-    expect(screen.getAllByText('Homepage Top Band').length).toBeGreaterThan(0);
+    const { container } = render(<ReferenceHomepageComposition />);
+    // Zone 1: Top band uses a direct <section aria-label> (no section shell heading)
+    expect(container.querySelector('[aria-label="Homepage top band"]')).not.toBeNull();
+    // Zones 2–5 use HomepageSectionShell with visible headings
     expect(screen.getAllByText('Quick-use / Work Zone').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Communications').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Operational Awareness').length).toBeGreaterThan(0);

@@ -43,6 +43,28 @@
   outline: none;
 }
 
+/* ── Hero CTA on-dark treatment ─────────────────────────────────── */
+/* For secondary/link CTAs rendered on the hero gradient background. */
+/* The shared HbcHomepageCta link variant uses brand-foreground tokens */
+/* that are invisible on the brand gradient — this override provides  */
+/* white text with proper hover and focus treatment.                  */
+
+.heroCtaOnDark {
+  color: rgba(255, 255, 255, 0.92) !important;
+  transition: color 150ms ease, opacity 150ms ease;
+}
+
+.heroCtaOnDark:hover {
+  color: #ffffff !important;
+  opacity: 1;
+}
+
+.heroCtaOnDark:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ── Top-band full-width posture ────────────────────────────────── */
 
 .topBandSection {
@@ -63,7 +85,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ctaLink,
-  .searchInput {
+  .searchInput,
+  .heroCtaOnDark {
     transition: none !important;
   }
 }

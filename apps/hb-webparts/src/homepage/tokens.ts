@@ -89,6 +89,8 @@ export const HP_LAYOUT = {
   welcomeFlex: '1 1 280px',
   /** Hero flex basis/ratio in top-band pair */
   heroFlex: '2 1 440px',
+  /** Gap between welcome and hero in the top-band pair (Phase 12B-05) */
+  topBandGap: 16,
 } as const;
 
 // ── Hero surface ───────────────────────────────────────────────────────

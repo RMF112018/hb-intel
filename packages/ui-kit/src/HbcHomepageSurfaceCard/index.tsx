@@ -1,10 +1,11 @@
 /**
  * HbcHomepageSurfaceCard — Surface-class-aware card for homepage zones
  * Phase 11A-02 — Production-grade surface card primitive
+ * Phase 12B-02 — Added 'welcome' surface class for greeting surfaces
  *
  * Wraps HbcCard with surface-class-aware weight mapping, density
  * adjustments, and intentional visual differentiation per surface class.
- * Each surface class (hero, editorial, utility, operational, discovery)
+ * Each surface class (hero, welcome, editorial, utility, operational, discovery)
  * maps to an appropriate card weight with distinct padding and border.
  */
 import * as React from 'react';
@@ -18,6 +19,7 @@ import type { HbcHomepageSurfaceCardProps } from './types.js';
 
 const surfaceWeightMap: Record<HomepageSurfaceClass, CardWeight> = {
   hero: 'primary',
+  welcome: 'primary',
   editorial: 'standard',
   utility: 'supporting',
   operational: 'standard',
@@ -27,6 +29,9 @@ const surfaceWeightMap: Record<HomepageSurfaceClass, CardWeight> = {
 const useStyles = makeStyles({
   hero: {
     ...shorthands.borderBottom('3px', 'solid', tokens.colorBrandBackground),
+  },
+  welcome: {
+    ...shorthands.borderLeft('4px', 'solid', tokens.colorBrandBackground),
   },
   editorial: {
     /* Standard weight — no additional overrides */

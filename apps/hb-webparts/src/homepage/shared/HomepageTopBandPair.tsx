@@ -1,13 +1,13 @@
 /**
  * HomepageTopBandPair — Top-band flex layout for welcome + hero
+ * Phase 12B-05 — Flagship composition without section-shell heading
  *
- * Uses HbcHomepageSectionShell for accessible structure and
- * HomepageRailShell for the flex layout of the two top-band columns.
+ * The top band IS the homepage's visual anchor — it does not need a
+ * labeling section shell above it. Uses a clean accessible <section>
+ * with flex layout for the two top-band columns.
  */
 import * as React from 'react';
-import { HbcHomepageSectionShell } from '@hbc/ui-kit/homepage';
-import { HomepageRailShell } from './HomepageRailShell.js';
-import { HP_LAYOUT, hpZoneSection } from '../tokens.js';
+import { HP_SPACE, HP_LAYOUT, hpZoneSection } from '../tokens.js';
 import topBandStyles from '../homepage-interactive.module.css';
 
 export interface HomepageTopBandPairProps {
@@ -25,18 +25,25 @@ const heroStyle: React.CSSProperties = {
   minWidth: HP_LAYOUT.heroMinWidth,
 };
 
+const railStyle: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: HP_SPACE['2xl'],
+  alignItems: 'flex-start',
+};
+
 export function HomepageTopBandPair({ welcome, hero }: HomepageTopBandPairProps): React.JSX.Element {
   return (
-    <div className={topBandStyles.topBandSection} style={hpZoneSection('topBand')}>
-      <HbcHomepageSectionShell
-        title="Homepage Top Band"
-        subtitle="Signature greeting and authored hero region"
-      >
-        <HomepageRailShell label="top-band-pair">
-          <div style={welcomeStyle}>{welcome}</div>
-          <div style={heroStyle}>{hero}</div>
-        </HomepageRailShell>
-      </HbcHomepageSectionShell>
-    </div>
+    <section
+      aria-label="Homepage top band"
+      className={topBandStyles.topBandSection}
+      style={hpZoneSection('topBand')}
+      data-hbc-homepage="top-band"
+    >
+      <div style={railStyle}>
+        <div style={welcomeStyle}>{welcome}</div>
+        <div style={heroStyle}>{hero}</div>
+      </div>
+    </section>
   );
 }

@@ -24,7 +24,11 @@ describe('Lane A bundle budget', () => {
 
   it('JS bundle is under hard budget', () => {
     if (!existsSync(DIST_PATH)) return;
-    const jsFiles = readdirSync(DIST_PATH).filter((f) => f.endsWith('.js'));
+    // Exclude content-hashed copies produced by build-spfx-package (e.g. hb-webparts-app-cb6e4e81.js)
+    // to avoid double-counting the same bundle. Only count the Vite-emitted originals.
+    const jsFiles = readdirSync(DIST_PATH).filter(
+      (f) => f.endsWith('.js') && !/^hb-webparts-app-[a-f0-9]{8}\.js$/.test(f),
+    );
     const totalBytes = jsFiles.reduce(
       (sum, f) => sum + statSync(join(DIST_PATH, f)).size,
       0,

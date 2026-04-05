@@ -224,7 +224,11 @@
       "Bash([ -f \"/Users/bobbyfetting/hb-intel/$f\" ])",
       "Bash(npx nx:*)",
       "Bash(HB_WEBPARTS_ENTRY=src/mount-hero-proof-case.tsx npx vite build)",
-      "Bash(HB_WEBPARTS_ENTRY=src/mount-priority-actions-rail-proof-case.tsx npx vite build)"
+      "Bash(HB_WEBPARTS_ENTRY=src/mount-priority-actions-rail-proof-case.tsx npx vite build)",
+      "Bash(ln -s ../../packages/eslint-plugin-hbc apps/hb-shell-extension/node_modules/@hb-intel/eslint-plugin-hbc)",
+      "Bash(ln -sf ../../../packages/eslint-plugin-hbc apps/hb-shell-extension/node_modules/@hb-intel/eslint-plugin-hbc)",
+      "Bash(/Users/bobbyfetting/.nvm/versions/node/v18.20.8/bin/node /Users/bobbyfetting/.nvm/versions/node/v18.20.8/bin/npm install)",
+      "Bash(xxd /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/homepage/ReferenceHomepageComposition.tsx)"
     ]
   },
   "enabledPlugins": {

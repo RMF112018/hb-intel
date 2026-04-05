@@ -18,18 +18,25 @@ export function normalizeWelcomeHeaderConfig(input: Partial<PersonalizedWelcomeH
   };
 }
 
+function normalizeCta(cta: { label?: string; href?: string; openInNewTab?: boolean } | undefined): { label: string; href: string; openInNewTab?: boolean } | undefined {
+  if (!hasText(cta?.label) || !hasText(cta?.href)) return undefined;
+  return {
+    label: cta!.label!.trim(),
+    href: cta!.href!.trim(),
+    openInNewTab: cta?.openInNewTab,
+  };
+}
+
 export function normalizeHeroBannerConfig(input: Partial<HbHeroBannerConfig> | undefined): HbHeroBannerConfig {
   const headline = hasText(input?.headline) ? input?.headline.trim() : DEFAULT_HERO_BANNER_CONFIG.headline;
 
   return {
     headline,
     message: hasText(input?.message) ? input?.message?.trim() : DEFAULT_HERO_BANNER_CONFIG.message,
+    eyebrow: hasText(input?.eyebrow) ? input?.eyebrow?.trim() : undefined,
     metadata: hasText(input?.metadata) ? input?.metadata?.trim() : undefined,
     background: input?.background,
-    cta: hasText(input?.cta?.label) && hasText(input?.cta?.href) ? {
-      label: input?.cta?.label.trim(),
-      href: input?.cta?.href.trim(),
-      openInNewTab: input?.cta?.openInNewTab,
-    } : undefined,
+    cta: normalizeCta(input?.cta),
+    secondaryCta: normalizeCta(input?.secondaryCta),
   };
 }

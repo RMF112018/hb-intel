@@ -34,8 +34,10 @@ export function mountTop(el: HTMLElement | null | undefined): void {
     console.debug('[HB-Intel ShellExtension] Top placeholder not available — skipping.');
     return;
   }
+  const props = { available: true } as const;
+  console.debug('[HB-Intel ShellExtension] mountTop called — props:', props);
   topRoot = createRoot(el);
-  topRoot.render(createElement(TopPlaceholder, { available: true }));
+  topRoot.render(createElement(TopPlaceholder, props));
 }
 
 /**
@@ -47,8 +49,10 @@ export function mountBottom(el: HTMLElement | null | undefined): void {
     console.debug('[HB-Intel ShellExtension] Bottom placeholder not available — skipping.');
     return;
   }
+  const props = { available: true } as const;
+  console.debug('[HB-Intel ShellExtension] mountBottom called — props:', props);
   bottomRoot = createRoot(el);
-  bottomRoot.render(createElement(BottomPlaceholder, { available: true }));
+  bottomRoot.render(createElement(BottomPlaceholder, props));
 }
 
 /** Unmount top placeholder content. */

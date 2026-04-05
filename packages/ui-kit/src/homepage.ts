@@ -43,7 +43,7 @@ export { HbcHomepageSectionShell } from './HbcHomepageSectionShell/index.js';
 export type { HbcHomepageSectionShellProps } from './HbcHomepageSectionShell/types.js';
 
 export { HbcHomepageCta } from './HbcHomepageCta/index.js';
-export type { HbcHomepageCtaProps, HomepageCtaVariant } from './HbcHomepageCta/types.js';
+export type { HbcHomepageCtaProps, HomepageCtaVariant, HomepageCtaSize } from './HbcHomepageCta/types.js';
 
 export { HbcHomepageMetadataRow } from './HbcHomepageMetadataRow/index.js';
 export type { HbcHomepageMetadataRowProps } from './HbcHomepageMetadataRow/types.js';
@@ -57,7 +57,12 @@ export type { HbcHomepageSurfaceCardProps } from './HbcHomepageSurfaceCard/types
 export { HbcHomepageActionRow } from './HbcHomepageActionRow/index.js';
 export type { HbcHomepageActionRowProps } from './HbcHomepageActionRow/types.js';
 
-export type HomepageSurfaceClass = 'hero' | 'editorial' | 'utility' | 'operational' | 'discovery';
+// ── Phase 12B-02 — Top-band editorial hierarchy primitive ────────────
+
+export { HbcHomepageEyebrow } from './HbcHomepageEyebrow/index.js';
+export type { HbcHomepageEyebrowProps, EyebrowTone } from './HbcHomepageEyebrow/types.js';
+
+export type HomepageSurfaceClass = 'hero' | 'welcome' | 'editorial' | 'utility' | 'operational' | 'discovery';
 
 export type HomepagePrimitiveName =
   | 'HbcBanner'
@@ -66,6 +71,7 @@ export type HomepagePrimitiveName =
   | 'HbcEmptyState'
   | 'HbcHomepageActionRow'
   | 'HbcHomepageCta'
+  | 'HbcHomepageEyebrow'
   | 'HbcHomepageIconFrame'
   | 'HbcHomepageMetadataRow'
   | 'HbcHomepageSectionShell'
