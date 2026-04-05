@@ -5,5 +5,8 @@ declare const styles: {
   readonly searchInput: string;
   readonly topBandSection: string;
   readonly mediaContainer: string;
+  readonly actionRowContainer: string;
+  readonly actionRowArrow: string;
+  readonly actionRowUrgent: string;
 };
 export default styles;
