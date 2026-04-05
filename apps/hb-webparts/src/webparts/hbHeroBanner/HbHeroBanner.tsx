@@ -4,6 +4,7 @@ import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGoverna
 import { normalizeHeroBannerConfig } from '../../homepage/helpers/topBandConfig.js';
 import type { HbHeroBannerConfig } from '../../homepage/webparts/topBandContracts.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
+import { HP_SPACE, HP_RADIUS, HP_HERO, HP_TEXT_OPACITY, hpHeadingReset, hpContentParagraph } from '../../homepage/tokens.js';
 
 export interface HbHeroBannerProps {
   config?: Partial<HbHeroBannerConfig>;
@@ -20,8 +21,8 @@ export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
   }
 
   const background = normalized.background?.src
-    ? `linear-gradient(120deg, rgba(34,83,145,0.9), rgba(229,126,70,0.75)), url(${normalized.background.src})`
-    : 'linear-gradient(120deg, rgba(34,83,145,0.94), rgba(28,71,124,0.92))';
+    ? `${HP_HERO.gradientWithImage}, url(${normalized.background.src})`
+    : HP_HERO.gradientFallback;
 
   return (
     <HbcCard>
@@ -32,17 +33,17 @@ export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           transition: reducedMotion ? 'none' : 'background-position 300ms ease',
-          color: '#ffffff',
-          borderRadius: 10,
-          padding: 20,
+          color: HP_HERO.textColor,
+          borderRadius: HP_RADIUS.hero,
+          padding: HP_SPACE['3xl'],
         }}
       >
-        <h2 style={{ margin: 0 }}>{normalized.headline}</h2>
-        {normalized.message ? <p style={{ margin: '10px 0 0' }}>{normalized.message}</p> : null}
+        <h2 style={hpHeadingReset}>{normalized.headline}</h2>
+        {normalized.message ? <p style={hpContentParagraph}>{normalized.message}</p> : null}
       </section>
-      {normalized.metadata ? <p style={{ margin: '10px 0 0', opacity: 0.85 }}>{normalized.metadata}</p> : null}
+      {normalized.metadata ? <p style={{ margin: `${HP_SPACE.lg}px 0 0`, opacity: HP_TEXT_OPACITY.muted }}>{normalized.metadata}</p> : null}
       {normalized.cta ? (
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: HP_SPACE.xl }}>
           <a href={normalized.cta.href} rel={normalized.cta.openInNewTab ? 'noreferrer' : undefined} target={normalized.cta.openInNewTab ? '_blank' : undefined}>
             {normalized.cta.label}
           </a>

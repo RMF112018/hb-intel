@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { HomepageRailShell } from './HomepageRailShell.js';
 import { HomepageSectionShell } from './HomepageSectionShell.js';
+import { HP_LAYOUT } from '../tokens.js';
 
 export interface HomepageTopBandPairProps {
   welcome: React.ReactNode;
@@ -11,8 +12,8 @@ export function HomepageTopBandPair({ welcome, hero }: HomepageTopBandPairProps)
   return (
     <HomepageSectionShell title="Homepage Top Band" subtitle="Signature greeting and authored hero region">
       <HomepageRailShell label="top-band-pair">
-        <div style={{ flex: '1 1 280px', minWidth: 280 }}>{welcome}</div>
-        <div style={{ flex: '2 1 440px', minWidth: 320 }}>{hero}</div>
+        <div style={{ flex: HP_LAYOUT.welcomeFlex, minWidth: HP_LAYOUT.welcomeMinWidth }}>{welcome}</div>
+        <div style={{ flex: HP_LAYOUT.heroFlex, minWidth: HP_LAYOUT.heroMinWidth }}>{hero}</div>
       </HomepageRailShell>
     </HomepageSectionShell>
   );

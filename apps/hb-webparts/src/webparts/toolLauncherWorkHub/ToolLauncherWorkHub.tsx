@@ -7,6 +7,7 @@ import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState
 import { HomepageRailShell } from '../../homepage/shared/HomepageRailShell.js';
 import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtilityDenseGroup.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
+import { HP_SPACE, hpHeadingReset, hpZoneFlexLayout } from '../../homepage/tokens.js';
 
 export interface ToolLauncherWorkHubProps {
   config?: Partial<ToolLauncherWorkHubConfig>;
@@ -47,19 +48,19 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   }
 
   return (
-    <HbcCard header={<h2 style={{ margin: 0 }}>{normalized.heading}</h2>}>
+    <HbcCard header={<h2 style={hpHeadingReset}>{normalized.heading}</h2>}>
       <HomepageRailShell label="tool-launcher-work-hub">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <div style={hpZoneFlexLayout}>
           {normalized.groups.map((group) => (
             <HomepageUtilityDenseGroup key={group.id} title={group.title}>
               {group.items.map((item) => (
                 <div key={item.id}>
                   <a href={item.href}>
-                    <span aria-hidden="true" style={{ marginRight: 8 }}>{resolveIconToken(item.iconKey)}</span>
+                    <span aria-hidden="true" style={{ marginRight: HP_SPACE.md }}>{resolveIconToken(item.iconKey)}</span>
                     <span>{item.title}</span>
                   </a>
                   {item.badge ? <HbcStatusBadge label={item.badge.label} variant={item.badge.variant ?? 'neutral'} /> : null}
-                  {item.description ? <p style={{ margin: '4px 0 0' }}>{item.description}</p> : null}
+                  {item.description ? <p style={{ margin: `${HP_SPACE.xs}px 0 0` }}>{item.description}</p> : null}
                 </div>
               ))}
             </HomepageUtilityDenseGroup>

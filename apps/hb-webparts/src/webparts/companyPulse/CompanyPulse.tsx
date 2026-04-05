@@ -6,6 +6,7 @@ import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCur
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { CompanyPulseConfig } from '../../homepage/webparts/communicationsContracts.js';
+import { hpHeadingReset, hpContentParagraph, hpSecondaryText } from '../../homepage/tokens.js';
 
 export interface CompanyPulseProps {
   config?: Partial<CompanyPulseConfig>;
@@ -44,23 +45,23 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
         featured={
           normalized.featured ? (
             <article>
-              <h3 style={{ margin: 0 }}>{normalized.featured.title}</h3>
+              <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
               {normalized.featured.category ? (
                 <HbcStatusBadge
                   label={normalized.featured.category}
                   variant={CATEGORY_VARIANT_MAP[normalized.featured.category]}
                 />
               ) : null}
-              <p style={{ margin: '8px 0 0' }}>{normalized.featured.summary}</p>
-              {normalized.featured.metadata ? <p style={{ margin: '8px 0 0', opacity: 0.75 }}>{normalized.featured.metadata}</p> : null}
+              <p style={hpContentParagraph}>{normalized.featured.summary}</p>
+              {normalized.featured.metadata ? <p style={hpSecondaryText}>{normalized.featured.metadata}</p> : null}
               {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
             </article>
           ) : undefined
         }
         secondary={normalized.secondary.map((item) => (
           <article key={item.id}>
-            <h3 style={{ margin: 0 }}>{item.title}</h3>
-            <p style={{ margin: '8px 0 0' }}>{item.summary}</p>
+            <h3 style={hpHeadingReset}>{item.title}</h3>
+            <p style={hpContentParagraph}>{item.summary}</p>
             {item.cta ? <a href={item.cta.href}>{item.cta.label}</a> : null}
           </article>
         ))}

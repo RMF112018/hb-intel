@@ -6,6 +6,7 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageOperationalAwarenessCluster } from '../../homepage/shared/HomepageOperationalAwarenessCluster.js';
 import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
+import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText, hpListStyle } from '../../homepage/tokens.js';
 
 export interface ProjectPortfolioSpotlightProps {
   config?: Partial<ProjectPortfolioSpotlightConfig>;
@@ -41,8 +42,8 @@ export function ProjectPortfolioSpotlight({
         featured={
           normalized.featured ? (
             <article>
-              <h3 style={{ margin: 0 }}>{normalized.featured.title}</h3>
-              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
+              <div style={hpBadgeRow}>
                 {normalized.featured.strategicEmphasis ? <HbcStatusBadge label="Strategic" variant="critical" /> : null}
                 {normalized.featured.status ? (
                   <HbcStatusBadge
@@ -52,9 +53,9 @@ export function ProjectPortfolioSpotlight({
                 ) : null}
                 {normalized.featured.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
               </div>
-              <p style={{ margin: '8px 0 0' }}>{normalized.featured.summary}</p>
+              <p style={hpContentParagraph}>{normalized.featured.summary}</p>
               {normalized.featured.milestones.length > 0 ? (
-                <ul style={{ margin: '8px 0 0', paddingInlineStart: 18 }}>
+                <ul style={hpListStyle}>
                   {normalized.featured.milestones.map((milestone) => (
                     <li key={milestone.id}>
                       {milestone.title}
@@ -64,7 +65,7 @@ export function ProjectPortfolioSpotlight({
                 </ul>
               ) : null}
               {normalized.featured.freshnessLabel ? (
-                <p style={{ margin: '8px 0 0', opacity: 0.75 }}>{normalized.featured.freshnessLabel}</p>
+                <p style={hpSecondaryText}>{normalized.featured.freshnessLabel}</p>
               ) : null}
               {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
             </article>
@@ -72,13 +73,13 @@ export function ProjectPortfolioSpotlight({
         }
         secondary={normalized.secondary.map((item) => (
           <article key={item.id}>
-            <h3 style={{ margin: 0 }}>{item.title}</h3>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+            <h3 style={hpHeadingReset}>{item.title}</h3>
+            <div style={hpBadgeRow}>
               {item.status ? <HbcStatusBadge label={item.status.label} variant={item.status.variant ?? 'info'} /> : null}
               {item.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
             </div>
-            <p style={{ margin: '8px 0 0' }}>{item.summary}</p>
-            {item.freshnessLabel ? <p style={{ margin: '8px 0 0', opacity: 0.75 }}>{item.freshnessLabel}</p> : null}
+            <p style={hpContentParagraph}>{item.summary}</p>
+            {item.freshnessLabel ? <p style={hpSecondaryText}>{item.freshnessLabel}</p> : null}
             {item.cta ? <a href={item.cta.href}>{item.cta.label}</a> : null}
           </article>
         ))}

@@ -7,6 +7,7 @@ import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState
 import { HomepageRailShell } from '../../homepage/shared/HomepageRailShell.js';
 import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtilityDenseGroup.js';
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
+import { HP_SPACE, hpHeadingReset, hpZoneFlexLayout } from '../../homepage/tokens.js';
 
 export interface PriorityActionsRailProps {
   config?: Partial<PriorityActionsRailConfig>;
@@ -33,16 +34,16 @@ export function PriorityActionsRail({ config, activeAudience, isLoading = false 
   }
 
   return (
-    <HbcCard header={<h2 style={{ margin: 0 }}>{normalized.heading}</h2>}>
+    <HbcCard header={<h2 style={hpHeadingReset}>{normalized.heading}</h2>}>
       <HomepageRailShell label="priority-actions-rail">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <div style={hpZoneFlexLayout}>
           {normalized.groups.map((group) => (
             <HomepageUtilityDenseGroup key={group.id} title={group.title}>
               {group.actions.map((action) => (
                 <div key={action.id}>
                   <a href={action.href}>{action.title}</a>
                   {action.badge ? <HbcStatusBadge label={action.badge.label} variant={action.badge.variant ?? 'info'} /> : null}
-                  {action.description ? <p style={{ margin: '4px 0 0' }}>{action.description}</p> : null}
+                  {action.description ? <p style={{ margin: `${HP_SPACE.xs}px 0 0` }}>{action.description}</p> : null}
                 </div>
               ))}
             </HomepageUtilityDenseGroup>

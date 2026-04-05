@@ -6,6 +6,7 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageOperationalAwarenessCluster } from '../../homepage/shared/HomepageOperationalAwarenessCluster.js';
 import type { SafetyFieldExcellenceConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
+import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText } from '../../homepage/tokens.js';
 
 export interface SafetyFieldExcellenceProps {
   config?: Partial<SafetyFieldExcellenceConfig>;
@@ -48,8 +49,8 @@ export function SafetyFieldExcellence({
         featured={
           normalized.featured ? (
             <article>
-              <h3 style={{ margin: 0 }}>{normalized.featured.title}</h3>
-              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
+              <div style={hpBadgeRow}>
                 <HbcStatusBadge
                   label={normalized.featured.eventType}
                   variant={EVENT_VARIANT_MAP[normalized.featured.eventType]}
@@ -62,10 +63,10 @@ export function SafetyFieldExcellence({
                 ) : null}
                 {normalized.featured.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
               </div>
-              <p style={{ margin: '8px 0 0' }}>{normalized.featured.summary}</p>
-              {normalized.featured.metadata ? <p style={{ margin: '8px 0 0', opacity: 0.75 }}>{normalized.featured.metadata}</p> : null}
+              <p style={hpContentParagraph}>{normalized.featured.summary}</p>
+              {normalized.featured.metadata ? <p style={hpSecondaryText}>{normalized.featured.metadata}</p> : null}
               {normalized.featured.freshnessLabel ? (
-                <p style={{ margin: '8px 0 0', opacity: 0.75 }}>{normalized.featured.freshnessLabel}</p>
+                <p style={hpSecondaryText}>{normalized.featured.freshnessLabel}</p>
               ) : null}
               {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
             </article>
@@ -73,14 +74,14 @@ export function SafetyFieldExcellence({
         }
         secondary={normalized.secondary.map((item) => (
           <article key={item.id}>
-            <h3 style={{ margin: 0 }}>{item.title}</h3>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+            <h3 style={hpHeadingReset}>{item.title}</h3>
+            <div style={hpBadgeRow}>
               <HbcStatusBadge label={item.eventType} variant={EVENT_VARIANT_MAP[item.eventType]} />
               {item.indicator ? <HbcStatusBadge label={item.indicator.label} variant={item.indicator.variant ?? 'warning'} /> : null}
               {item.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
             </div>
-            <p style={{ margin: '8px 0 0' }}>{item.summary}</p>
-            {item.freshnessLabel ? <p style={{ margin: '8px 0 0', opacity: 0.75 }}>{item.freshnessLabel}</p> : null}
+            <p style={hpContentParagraph}>{item.summary}</p>
+            {item.freshnessLabel ? <p style={hpSecondaryText}>{item.freshnessLabel}</p> : null}
             {item.cta ? <a href={item.cta.href}>{item.cta.label}</a> : null}
           </article>
         ))}

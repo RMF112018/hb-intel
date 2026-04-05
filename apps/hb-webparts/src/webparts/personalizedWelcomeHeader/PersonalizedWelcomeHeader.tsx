@@ -4,6 +4,7 @@ import { normalizeWelcomeHeaderConfig } from '../../homepage/helpers/topBandConf
 import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { PersonalizedWelcomeHeaderConfig } from '../../homepage/webparts/topBandContracts.js';
+import { HP_SPACE, hpHeadingReset } from '../../homepage/tokens.js';
 
 export interface PersonalizedWelcomeHeaderProps {
   identity: HomepageIdentityInput;
@@ -24,13 +25,13 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
   const hasAlert = normalized.alertSeverity !== 'none' && (normalized.alertTitle || normalized.alertMessage);
 
   return (
-    <HbcCard header={<h2 style={{ margin: 0 }}>{message.headline}</h2>}>
+    <HbcCard header={<h2 style={hpHeadingReset}>{message.headline}</h2>}>
       <div
         style={{
           borderLeft: `4px solid ${HBC_HOMEPAGE_BRAND_FOUNDATION.primaryBlue.hex}`,
-          paddingInlineStart: 12,
+          paddingInlineStart: HP_SPACE.xl,
           display: 'grid',
-          gap: 8,
+          gap: HP_SPACE.md,
         }}
       >
         {normalized.supportLine ? <p style={{ ...(HBC_HOMEPAGE_TYPOGRAPHY.body as React.CSSProperties), margin: 0 }}>{normalized.supportLine}</p> : null}
@@ -39,7 +40,7 @@ export function PersonalizedWelcomeHeader({ identity, config, now = new Date() }
         {hasAlert ? (
           <section aria-label="High priority alert" role="status">
             <HbcStatusBadge label={normalized.alertTitle ?? 'Important update'} variant={ALERT_VARIANT_MAP[normalized.alertSeverity ?? 'none']} />
-            {normalized.alertMessage ? <p style={{ margin: '6px 0 0' }}>{normalized.alertMessage}</p> : null}
+            {normalized.alertMessage ? <p style={{ margin: `${HP_SPACE.sm}px 0 0` }}>{normalized.alertMessage}</p> : null}
           </section>
         ) : null}
       </div>

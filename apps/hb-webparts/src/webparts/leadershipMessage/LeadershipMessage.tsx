@@ -6,6 +6,7 @@ import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCur
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { LeadershipMessageConfig } from '../../homepage/webparts/communicationsContracts.js';
+import { hpHeadingReset, hpContentParagraph, hpFeaturedImage } from '../../homepage/tokens.js';
 
 export interface LeadershipMessageProps {
   config?: Partial<LeadershipMessageConfig>;
@@ -36,8 +37,8 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
         featured={
           normalized.featured ? (
             <article>
-              <h3 style={{ margin: 0 }}>{normalized.featured.title}</h3>
-              <p style={{ margin: '8px 0 0' }}>{normalized.featured.message}</p>
+              <h3 style={hpHeadingReset}>{normalized.featured.title}</h3>
+              <p style={hpContentParagraph}>{normalized.featured.message}</p>
               <p style={{ margin: '8px 0 0', fontWeight: 600 }}>
                 {normalized.featured.leaderName}
                 {normalized.featured.leaderRole ? `, ${normalized.featured.leaderRole}` : ''}
@@ -46,7 +47,7 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
                 <img
                   alt={normalized.featured.media.alt}
                   src={normalized.featured.media.src}
-                  style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 6 }}
+                  style={hpFeaturedImage}
                 />
               ) : null}
               {normalized.featured.cta ? <a href={normalized.featured.cta.href}>{normalized.featured.cta.label}</a> : null}
@@ -55,9 +56,9 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
         }
         secondary={normalized.secondary.map((entry) => (
           <article key={entry.id}>
-            <h3 style={{ margin: 0 }}>{entry.title}</h3>
-            <p style={{ margin: '8px 0 0' }}>{entry.message}</p>
-            <p style={{ margin: '8px 0 0' }}>{entry.leaderName}</p>
+            <h3 style={hpHeadingReset}>{entry.title}</h3>
+            <p style={hpContentParagraph}>{entry.message}</p>
+            <p style={hpContentParagraph}>{entry.leaderName}</p>
           </article>
         ))}
       />

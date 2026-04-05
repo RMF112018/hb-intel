@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { HP_SPACE, HP_LAYOUT } from '../tokens.js';
 
 export interface HomepageUtilityDenseGroupProps {
   title: string;
@@ -7,9 +8,9 @@ export interface HomepageUtilityDenseGroupProps {
 
 export function HomepageUtilityDenseGroup({ title, children }: HomepageUtilityDenseGroupProps): React.JSX.Element {
   return (
-    <section aria-label={title} style={{ minWidth: 220 }}>
-      <h3 style={{ margin: '0 0 8px' }}>{title}</h3>
-      <div style={{ display: 'grid', gap: 6 }}>{children}</div>
+    <section aria-label={title} style={{ minWidth: HP_LAYOUT.utilityGroupMinWidth }}>
+      <h3 style={{ margin: `0 0 ${HP_SPACE.md}px` }}>{title}</h3>
+      <div style={{ display: 'grid', gap: HP_SPACE.sm }}>{children}</div>
     </section>
   );
 }
