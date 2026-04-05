@@ -10,5 +10,9 @@ declare const styles: {
   readonly alertMessage: string;
   readonly alertCta: string;
   readonly alertDismiss: string;
+  readonly supportBand: string;
+  readonly supportItem: string;
+  readonly supportDescription: string;
+  readonly operationalText: string;
 };
 export default styles;

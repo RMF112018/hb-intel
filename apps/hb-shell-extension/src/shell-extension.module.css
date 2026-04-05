@@ -125,6 +125,34 @@
   opacity: 1;
 }
 
+/* ── Support band (bottom placeholder) ──────────────────────────── */
+
+.supportBand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.75rem;
+  color: #605e5c;
+}
+
+.supportItem {
+  display: inline-flex;
+  align-items: center;
+}
+
+.supportDescription {
+  opacity: 0.75;
+}
+
+.operationalText {
+  margin-inline-start: auto;
+  opacity: 0.6;
+  font-size: 0.6875rem;
+}
+
 /* ── Reduced motion ─────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

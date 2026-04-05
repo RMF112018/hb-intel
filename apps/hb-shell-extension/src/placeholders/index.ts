@@ -7,5 +7,6 @@ export type {
   RibbonUtilityItem, TopRibbonConfig,
   AlertSeverity, AlertBandItem, AlertBandConfig,
   TopPlaceholderConfig,
+  FooterUtilityItem, SupportItem, BottomPlaceholderConfig,
 } from './types.js';
-export { DEFAULT_SHELL_EXTENSION_CONFIG } from './types.js';
+export { DEFAULT_SHELL_EXTENSION_CONFIG, ACTIVATION_GOVERNANCE } from './types.js';
