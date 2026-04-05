@@ -127,6 +127,10 @@ Object.entries(brandAssets).map(([name, src]) => (
 - Module-specific illustrations
 - Screenshots or documentation images
 
+### Governance
+
+Consuming apps must import shared brand assets from `@hbc/ui-kit/branding` rather than creating local copies. Vite-based consumers inline small assets as base64 data URIs automatically — no CDN hosting or external asset deployment is required. SPFx manifest toolbox icons remain `officeFabricIconFontName`-based (semantic Fabric icons) and are not sourced from this branding lane.
+
 ## Architecture References
 
 - `docs/architecture/adr/ADR-0075-dev-auth-bypass-storybook-boundary.md` — MockAdapter boundary

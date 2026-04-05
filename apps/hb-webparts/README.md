@@ -87,10 +87,21 @@ Homepage webparts use `@hbc/ui-kit/homepage` as their primary UI entry point. Br
 | Entry Point | Status |
 |-------------|--------|
 | `@hbc/ui-kit/homepage` | **Allowed — Primary** |
+| `@hbc/ui-kit/branding` | Allowed — shared brand assets |
 | `@hbc/ui-kit/theme` | Allowed — supplementary tokens |
 | `@hbc/ui-kit/icons` | Allowed — supplementary icons |
 | `@hbc/ui-kit` | Prohibited |
 | `@hbc/ui-kit/app-shell` | Prohibited |
+
+## Brand Assets
+
+Stable corporate brand assets are sourced from `@hbc/ui-kit/branding`, not stored locally. The `PersonalizedWelcomeHeader` uses the shared `hedrickLogo` as a restrained brand lockup in the welcome surface.
+
+**Do not** create local copies of HB brand logos in this package. Homepage-specific editorial imagery (hero backgrounds, campaign visuals, rotating content) may remain app-local since it is not shared across packages.
+
+### Manifest Icon Posture
+
+All webpart manifests use `officeFabricIconFontName` with semantic Office Fabric icons (Contact, News, Shield, etc.). Branded HB icons were evaluated and intentionally deferred — the semantic icons provide better discoverability in the SharePoint toolbox, and custom icons would require CDN hosting with no clear UX benefit.
 
 ## Packaging Model
 

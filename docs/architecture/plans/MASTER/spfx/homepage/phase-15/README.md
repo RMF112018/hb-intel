@@ -1,85 +1,74 @@
-# HB Central Homepage UI Reset — Forceful Phase-Based Prompt Package
+# HB Central — Origami-Grade Homepage UI Reset Prompt Package
 
-## Objective
+## Purpose
 
-This package instructs a local code agent to execute a **hard visual reset** of the HB Central SharePoint homepage experience across:
+This package is the second, more aggressive prompt series for the HB Central SharePoint homepage.  
+It is intentionally stronger than the prior package and is tuned for a **premium purchasable intranet-product standard**.
 
-- `apps/hb-webparts` (Lane A)
-- `apps/hb-shell-extension` (Lane B)
-- `packages/ui-kit` (`@hbc/ui-kit`)
-- any directly-governing homepage, shell, doctrine, import, and packaging files
+The target is not generic enterprise polish.  
+The target is a homepage and shell experience that would feel credible beside premium vendors and custom SharePoint products.
 
-The package is intentionally forceful because the current rendered state is **not acceptable**. The objective is not cosmetic cleanup. The objective is to move the implementation materially closer to a **premium, productized, purchase-grade intranet experience**.
+This package assumes the following:
 
-## Current-State Decision
+- the current rendered homepage state is unacceptable
+- no current homepage webpart is approved as rendered
+- the current UI reads as careful scaffolding rather than premium product
+- the next implementation cycle must behave like a **visual reset**, not a cleanup pass
 
-Treat the following as already decided:
+## Primary Objective
 
-- the current rendered state is unsatisfactory
-- no current homepage webpart is acceptable in its present visual state
-- the current hero is too empty and generic
-- the current welcome card is too ordinary
-- the current utility, launcher, editorial, operational, and discovery surfaces are too visually similar
-- the current shell-extension posture is too scaffold-like
-- the page still reads as “custom cards placed inside SharePoint” rather than a cohesive HB Central product
+Direct the local code agent to redesign the HB Central homepage so it no longer feels like standard SharePoint with custom cards, and instead feels like a **premium, authored, branded internal product experience**.
 
-The code agent must **not** spend time defending the existing UI.
+## Hard Position
 
-## Package Contents
+The code agent must not defend the current visuals.  
+It must not preserve weak current patterns out of convenience.  
+It must not make “safe incremental” adjustments when a surface clearly requires redesign.
 
-- `Phase-Implementation-Plan-Summary.md`
-- `Prompt-01_Shared_Surface_System_Reset.md`
-- `Prompt-02_Lane-B_Shell-Extension_Premiumization.md`
-- `Prompt-03_Top-Band_Hard_Reset.md`
-- `Prompt-04_Utility_Command_Surfaces_Reset.md`
-- `Prompt-05_Discovery_and_Launcher_Redesign.md`
-- `Prompt-06_Communications_Surfaces_Redesign.md`
-- `Prompt-07_Operational_Surfaces_Redesign.md`
-- `Prompt-08_Composition_Integration_and_Final_Polish.md`
+## Repo and Product Scope
 
-## Execution Order
+Primary repo: `https://github.com/RMF112018/hb-intel`
 
-Run the prompts in order. Do not skip ahead.
+Primary surfaces:
 
-The sequencing is deliberate:
+- `apps/hb-webparts`
+- `apps/hb-shell-extension`
+- `packages/ui-kit`
+- relevant docs, doctrine, shell boundaries, homepage design brief, and lane ownership rules
 
-1. rebuild the shared visual system first
-2. fix the shell layer second
-3. rebuild the top-of-page signature moment third
-4. rebuild utility and discovery next
-5. rebuild editorial and operational surfaces after the system foundations are in place
-6. finish with full-page composition, integration, validation, and documentation
+## Package Sequence
 
-## Non-Negotiable Rules
+1. Prompt-01 — Vision Lock and Premium Benchmark Reset
+2. Prompt-02 — Shared Premium Surface System Rebuild
+3. Prompt-03 — Lane B Shell Experience Re-Authoring
+4. Prompt-04 — Top Band Signature Redesign
+5. Prompt-05 — Command and Utility Surface Overhaul
+6. Prompt-06 — Discovery / Launcher Productization
+7. Prompt-07 — Editorial Communications Redesign
+8. Prompt-08 — Operational Intelligence Redesign
+9. Prompt-09 — Full-Page Composition, QA, and Visual Closure
 
-- Do **not** reread files that are already in the agent’s active context or memory.
-- Do **not** perform cosmetic-only edits.
-- Do **not** preserve weak current patterns merely for continuity.
-- Do **not** invent unsupported SharePoint takeover behavior.
-- Do **not** regress packaging, import discipline, accessibility, or reduced-motion handling.
-- Do **not** claim success without rendering proof, code proof, and validation proof.
+## Global Instructions for Every Prompt
 
-## Expected Output Quality
+- Treat repo truth as authoritative.
+- Treat the attached screenshots from the current rendered state as binding evidence of current failure.
+- Do not reread files that are still within current context or memory.
+- Perform exhaustive subject matter research before concluding design direction.
+- Do not stop at “cleaner.” Push toward **premium, authored, product-grade**.
+- Respect actual SPFx platform constraints. No fake full takeover patterns.
+- Update docs when architecture, doctrine, or ownership boundaries change.
+- Validate accessibility, reduced motion, focus states, and SharePoint-hosted realism.
+- Capture before/after evidence at the end of each phase.
 
-The target is **not** “clean enterprise UI.”
+## What Success Looks Like
 
-The target is:
+Success is not “improved.”  
+Success is when:
 
-- premium
-- confident
-- composed
-- branded
-- clearly authored
-- materially stronger than stock SharePoint
-- credible as a purchasable premium intranet product
-
-## Required Deliverables Across the Full Package
-
-By the end of the package, the code agent should have produced:
-
-- implemented code changes
-- any required shared primitive additions/refactors
-- updated docs/doctrine where needed
-- validation notes
-- screenshots or rendered proof where available
-- concise completion notes per phase
+- the top of the homepage feels memorable
+- the shell feels intentional, not technical
+- utility surfaces feel like command surfaces
+- discovery feels like a product, not a form field
+- editorial modules feel authored
+- operational modules feel credible and important
+- the full page feels like one product, not a grid of similar cards

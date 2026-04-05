@@ -166,6 +166,6 @@ export const HBC_HOMEPAGE_DENSITY_POLICY: {
  */
 export const HBC_HOMEPAGE_IMPORT_GUARDRAILS = {
   allowedEntrypoint: '@hbc/ui-kit/homepage',
-  relatedTokenEntrypoints: ['@hbc/ui-kit/theme', '@hbc/ui-kit/icons'],
+  relatedTokenEntrypoints: ['@hbc/ui-kit/theme', '@hbc/ui-kit/icons', '@hbc/ui-kit/branding'],
   prohibitedEntrypointsInHomepageWebparts: ['@hbc/ui-kit', '@hbc/ui-kit/app-shell'],
 } as const;
