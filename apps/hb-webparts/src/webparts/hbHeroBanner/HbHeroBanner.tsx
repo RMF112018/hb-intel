@@ -5,6 +5,7 @@ import { normalizeHeroBannerConfig } from '../../homepage/helpers/topBandConfig.
 import type { HbHeroBannerConfig } from '../../homepage/webparts/topBandContracts.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HP_SPACE, HP_RADIUS, HP_HERO, HP_TEXT_OPACITY, hpHeadingReset, hpContentParagraph, hpCtaLink } from '../../homepage/tokens.js';
+import styles from '../../homepage/homepage-interactive.module.css';
 
 export interface HbHeroBannerProps {
   config?: Partial<HbHeroBannerConfig>;
@@ -44,7 +45,7 @@ export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
       {normalized.metadata ? <p style={{ margin: `${HP_SPACE.lg}px 0 0`, opacity: HP_TEXT_OPACITY.muted }}>{normalized.metadata}</p> : null}
       {normalized.cta ? (
         <div style={{ marginTop: HP_SPACE.xl }}>
-          <a href={normalized.cta.href} style={hpCtaLink} rel={normalized.cta.openInNewTab ? 'noreferrer' : undefined} target={normalized.cta.openInNewTab ? '_blank' : undefined}>
+          <a href={normalized.cta.href} className={styles.ctaLink} style={hpCtaLink} rel={normalized.cta.openInNewTab ? 'noreferrer' : undefined} target={normalized.cta.openInNewTab ? '_blank' : undefined}>
             {normalized.cta.label} →
           </a>
         </div>

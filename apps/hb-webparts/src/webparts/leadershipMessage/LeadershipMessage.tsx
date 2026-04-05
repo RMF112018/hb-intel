@@ -7,6 +7,7 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { LeadershipMessageConfig } from '../../homepage/webparts/communicationsContracts.js';
 import { hpHeadingReset, hpContentParagraph, hpFeaturedImage, hpLeaderAttribution, hpCtaLink, hpMediaContainer } from '../../homepage/tokens.js';
+import styles from '../../homepage/homepage-interactive.module.css';
 
 export interface LeadershipMessageProps {
   config?: Partial<LeadershipMessageConfig>;
@@ -52,7 +53,7 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
                   />
                 </div>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>
           ) : undefined
         }

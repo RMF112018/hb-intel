@@ -7,6 +7,7 @@ import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState
 import { HomepageOperationalAwarenessCluster } from '../../homepage/shared/HomepageOperationalAwarenessCluster.js';
 import type { SafetyFieldExcellenceConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
 import { hpHeadingReset, hpBadgeRow, hpContentParagraph, hpSecondaryText, hpCtaLink } from '../../homepage/tokens.js';
+import styles from '../../homepage/homepage-interactive.module.css';
 
 export interface SafetyFieldExcellenceProps {
   config?: Partial<SafetyFieldExcellenceConfig>;
@@ -68,7 +69,7 @@ export function SafetyFieldExcellence({
               {normalized.featured.freshnessLabel ? (
                 <p style={hpSecondaryText}>{normalized.featured.freshnessLabel}</p>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>
           ) : undefined
         }
@@ -82,7 +83,7 @@ export function SafetyFieldExcellence({
             </div>
             <p style={hpContentParagraph}>{item.summary}</p>
             {item.freshnessLabel ? <p style={hpSecondaryText}>{item.freshnessLabel}</p> : null}
-            {item.cta ? <a href={item.cta.href} style={hpCtaLink}>{item.cta.label} →</a> : null}
+            {item.cta ? <a href={item.cta.href} className={styles.ctaLink} style={hpCtaLink}>{item.cta.label} →</a> : null}
           </article>
         ))}
       />

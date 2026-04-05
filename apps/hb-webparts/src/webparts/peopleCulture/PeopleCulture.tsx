@@ -7,6 +7,7 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { PeopleCultureConfig } from '../../homepage/webparts/communicationsContracts.js';
 import { hpHeadingReset, hpContentParagraph, hpCompactImage, hpBadgeRow, hpCtaLink, hpMediaContainer } from '../../homepage/tokens.js';
+import styles from '../../homepage/homepage-interactive.module.css';
 
 export interface PeopleCultureProps {
   config?: Partial<PeopleCultureConfig>;
@@ -59,7 +60,7 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
                   />
                 </div>
               ) : null}
-              {normalized.featured.cta ? <a href={normalized.featured.cta.href} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
+              {normalized.featured.cta ? <a href={normalized.featured.cta.href} className={styles.ctaLink} style={hpCtaLink}>{normalized.featured.cta.label} →</a> : null}
             </article>
           ) : undefined
         }

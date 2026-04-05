@@ -10,6 +10,7 @@ import {
   HP_SPACE, HP_TEXT_OPACITY,
   hpHeadingReset, hpSecondaryText, hpSecondaryCard, hpListStyle, hpSearchInput,
 } from '../tokens.js';
+import interactiveStyles from '../homepage-interactive.module.css';
 
 export interface HomepageDiscoveryClusterProps {
   heading: string;
@@ -55,6 +56,7 @@ export function HomepageDiscoveryCluster({
           onChange={(event) => onQueryChange(event.currentTarget.value)}
           placeholder={searchPlaceholder}
           type="search"
+          className={interactiveStyles.searchInput}
           style={hpSearchInput}
         />
       </div>

@@ -1,0 +1,69 @@
+/**
+ * Homepage interactive states — CSS module companion to tokens.ts.
+ *
+ * Provides pseudo-class and media-query behaviors that inline styles
+ * cannot express: :hover, :focus-visible, @media (prefers-reduced-motion).
+ *
+ * Import as: import styles from './homepage-interactive.module.css';
+ * Usage:     <a className={styles.ctaLink} style={hpCtaLink} ...>
+ *
+ * Inline styles from tokens.ts set base appearance (color, weight, etc).
+ * This CSS module adds interactive state overlays on top of those bases.
+ *
+ * @see src/homepage/tokens.ts — base inline style fragments
+ * @see docs/architecture/plans/MASTER/spfx/homepage/phase-03/Phase-03-02-Completion-Note.md
+ */
+
+/* ── CTA link interactive states ────────────────────────────────── */
+
+.ctaLink {
+  transition: color 150ms ease, text-decoration 150ms ease;
+}
+
+.ctaLink:hover {
+  text-decoration: underline;
+  color: #1a4274; /* darker brand blue for hover contrast */
+}
+
+.ctaLink:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Search input interactive states ────────────────────────────── */
+
+.searchInput {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.searchInput:focus-visible {
+  border-color: #225391;
+  box-shadow: 0 0 0 1px #225391;
+  outline: none;
+}
+
+/* ── Top-band full-width posture ────────────────────────────────── */
+
+.topBandSection {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Media container stability ──────────────────────────────────── */
+
+.mediaContainer {
+  display: block;
+  line-height: 0; /* remove inline whitespace below images */
+}
+
+/* ── Reduced-motion blanket ─────────────────────────────────────── */
+/* Applies to all homepage interactive elements when user prefers    */
+/* reduced motion. Disables transitions universally.                 */
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaLink,
+  .searchInput {
+    transition: none !important;
+  }
+}
