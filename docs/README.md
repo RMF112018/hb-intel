@@ -41,6 +41,12 @@ Navigation index for the HB Intel documentation suite. All documentation follows
 
 - **[UI Kit Entry Points](./reference/ui-kit/entry-points.md)** — Authoritative entry-point reference for all 5 `@hbc/ui-kit` entry points, including the constrained `@hbc/ui-kit/homepage` surface for homepage webparts.
 
+- **[Navigation Governance](./reference/sharepoint-navigation-governance.md)** — Lane C governance model: ownership, change-control, escalation rules, and non-duplication rules for global/hub navigation.
+
+- **[Navigation Taxonomy](./reference/sharepoint-nav-taxonomy.md)** — Recommended global nav structure, bucket definitions, anti-sprawl guardrails, and audience targeting guidance.
+
+- **[Navigation Operating Guide](./how-to/administrator/sharepoint-navigation-operating-guide.md)** — Site-owner and admin procedures for making approved navigation changes.
+
 ## Development Plan Library
 
 - **[Master Plan Set](./architecture/plans/MASTER/README.md)** — Program-level planning index covering all eight development phases. Phase 0 and Phase 1 planning are complete; Phases 2–7 are forward-planning drafts. Start here for program structure, milestones, and Phase 1 deliverables.

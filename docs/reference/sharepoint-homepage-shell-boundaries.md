@@ -43,9 +43,14 @@ Shell-extension surfaces operate in SharePoint's supported placeholder regions, 
 
 ### Lane C — Navigation & Governance
 
-**Status:** Planned — Phases 5–6 of the Tenant Shell Implementation Blueprint
+**Status:** Active — governance model established in Phase 05
 
-Covers navigation governance, branding alignment, and content authoring governance using supported SharePoint home-site, hub, and global-nav strategies. Does not involve custom code packages.
+Governs navigation taxonomy, home-site posture, hub-site branding, and global-nav configuration using supported SharePoint administration tools only. Does not involve custom code packages.
+
+See:
+- [Navigation Governance Model](./sharepoint-navigation-governance.md) — ownership, change-control, escalation
+- [Navigation Taxonomy Reference](./sharepoint-nav-taxonomy.md) — recommended structure, buckets, anti-sprawl
+- [Navigation Operating Guide](../how-to/administrator/sharepoint-navigation-operating-guide.md) — admin procedures
 
 ## Supported Customization Posture
 

@@ -348,6 +348,9 @@ All conflicts identified during PH7.10R validation have been resolved in PH7.11 
 | `docs/reference/ui-kit/doctrine/UI-Doctrine-PWA-Governing-Standard.md` | **Living Reference (Diátaxis)** | Runtime-specific governing doctrine for PWA surfaces |
 | Phase 00 homepage plans (6 docs under `plans/MASTER/spfx/homepage/phase-00/`) | **Canonical Normative Plan** | UI-kit / doctrine / SPFx contract reconciliation; active gate before Phase 01 |
 | Phase 6 webpart loader plans (9 docs under `plans/MASTER/spfx/webparts/phase-6/`) | **Historical Foundational** | Cumulative loader-contract regression diagnosis and remediation; completed 2026-04-05 |
+| `docs/reference/sharepoint-navigation-governance.md` | **Living Reference (Diátaxis)** | Lane C navigation governance model: ownership, change-control, escalation, non-duplication rules |
+| `docs/reference/sharepoint-nav-taxonomy.md` | **Living Reference (Diátaxis)** | Home-site global nav taxonomy: recommended buckets, depth limits, anti-sprawl guardrails, audience targeting |
+| `docs/how-to/administrator/sharepoint-navigation-operating-guide.md` | **Living Reference (Diátaxis)** | Admin operating guide for approved nav changes, self-service vs approval matrix, routing rules |
 
 ### 2.4 Admin SPFx IT Control Center Plan Library
 
