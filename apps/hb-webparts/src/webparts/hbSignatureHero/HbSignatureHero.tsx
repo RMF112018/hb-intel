@@ -1,30 +1,33 @@
 /**
- * HbSignatureHero — Canonical flagship homepage hero
- * Phase 16-03 — Unified signature hero with design breakout
- * Phase 18-01 — Canonicalized as the single homepage top-band surface
- * Phase 18-02 — Rebuilt as minimal premium identity surface
- * Phase 18-03 — Premium background system (charcoal base + authored image)
- * Phase 18-04 — Accessibility, authoring safety, and doctrine hardening
+ * HbSignatureHero — Canonical flagship homepage hero (rebuilt from zero)
+ *
+ * Phase 01-02 — Complete structural rebuild as premium identity plate.
  *
  * This is the canonical homepage hero for HB Central. All flagship
  * homepage compositions must use this component.
  *
- * Content is intentionally locked to three identity elements:
- *   1. Company logo / brand lockup
- *   2. Tagline: "Build with GRIT."
- *   3. Personalized welcome message
+ * Composition model:
+ *   CSS Grid with a single content region anchored bottom-left.
+ *   The hero occupies the full available width of a SharePoint
+ *   full-width section. Content sits within a constrained column
+ *   that leaves intentional negative space on the right, creating
+ *   asymmetric visual balance across the full canvas.
  *
- * Authoring safety: The hero has no "unconfigured" or "empty" state
- * because all primary content is locked. The logo is a static asset,
- * the tagline is hardcoded, and the greeting falls back to "Good
- * {time-of-day}, there." when identity is unavailable. The optional
- * `backgroundImage` degrades to the charcoal textured fallback.
+ * Locked content:
+ *   1. Company logo / brand lockup — subtle, supporting
+ *   2. Tagline: "Build with GRIT." — primary typographic statement
+ *   3. Personalized welcome message — warm, subordinate to tagline
  *
- * Accessibility: WCAG 2.1 AA contrast verified against charcoal base.
- * All typography uses rem units for zoom resilience. Reduced-motion
- * media query disables all animation. No interactive elements.
+ * Background system:
+ *   - Authored photography (optional) with gradient scrim for readability
+ *   - Fallback: deep charcoal field with material grain texture
+ *   - No gradient wash, no glow effects, no decorative overlays
  *
- * No gradient wash. No editorial furniture. No CTA clutter.
+ * Accessibility:
+ *   - WCAG 2.1 AA contrast verified against charcoal base
+ *   - All typography uses rem units for zoom resilience
+ *   - prefers-reduced-motion disables all animation
+ *   - No interactive elements
  */
 import * as React from 'react';
 import { motion } from '@hbc/ui-kit/homepage';
@@ -40,13 +43,17 @@ export interface HbSignatureHeroProps {
   now?: Date;
 }
 
-/** Subtle reveal animation for content regions */
-const revealVariants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: (delay: number) => ({
+/**
+ * Reveal choreography — content fades up from below with a soft ease.
+ * The brand lockup, tagline, and greeting enter as a staggered sequence
+ * so the eye settles naturally down the hierarchy.
+ */
+const reveal = {
+  hidden: { opacity: 0, y: 20 },
+  show: (delay: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+    transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
   }),
 };
 
@@ -60,66 +67,63 @@ export function HbSignatureHero({
   return (
     <section
       aria-label="HB Central homepage hero"
-      className={styles.hero}
+      className={styles.surface}
       data-hbc-premium="signature-hero"
     >
-      {/* Background image layer (when authored image is provided) */}
+      {/* ── Background ── */}
       {backgroundImage ? (
-        <>
-          <div
-            className={styles.backgroundImage}
-            style={{ backgroundImage: `url(${backgroundImage})` }}
-            aria-hidden="true"
-          />
-          <div className={styles.backgroundScrim} aria-hidden="true" />
-        </>
+        <div
+          className={styles.photo}
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+          aria-hidden="true"
+        />
       ) : null}
+      <div className={styles.scrim} aria-hidden="true" />
+      <div className={styles.grain} aria-hidden="true" />
 
-      {/* Decorative layer — ambient depth and materiality */}
-      <div className={styles.ambientLayer} aria-hidden="true">
-        <div className={styles.vignette} />
-        <div className={styles.warmShift} />
-        <div className={styles.edgeHighlight} />
-        <div className={styles.grain} />
-      </div>
-
-      {/* Content layer */}
-      <div className={styles.contentLayer}>
-        {/* Brand lockup */}
+      {/* ── Content ── */}
+      <div className={styles.content}>
+        {/* Brand lockup — subtle top anchor */}
         <motion.div
-          className={styles.brandLockup}
-          variants={revealVariants}
+          className={styles.lockup}
+          variants={reveal}
           initial="hidden"
-          animate="visible"
+          animate="show"
           custom={0}
         >
-          <img src={hedrickLogo} alt="Hedrick Brothers" className={styles.brandLogo} />
-          <span className={styles.brandLabel}>HB Central</span>
+          <img
+            src={hedrickLogo}
+            alt="Hedrick Brothers"
+            className={styles.logo}
+          />
+          <span className={styles.label}>HB Central</span>
         </motion.div>
 
-        {/* Identity block: tagline + greeting */}
-        <div className={styles.identityBlock}>
-          {/* Tagline */}
-          <motion.p
+        {/* Identity cluster — tagline + greeting */}
+        <div className={styles.identity}>
+          <motion.h1
             className={styles.tagline}
-            variants={revealVariants}
+            variants={reveal}
             initial="hidden"
-            animate="visible"
-            custom={0.12}
+            animate="show"
+            custom={0.1}
           >
             Build with GRIT.
-          </motion.p>
+          </motion.h1>
 
-          {/* Personalized greeting */}
           <motion.div
-            className={styles.greetingBlock}
-            variants={revealVariants}
+            className={styles.greeting}
+            variants={reveal}
             initial="hidden"
-            animate="visible"
-            custom={0.24}
+            animate="show"
+            custom={0.2}
           >
-            <span className={styles.greetingPrefix}>{message.greeting},</span>
-            <span className={styles.greetingName}>{message.firstName}.</span>
+            <span className={styles.greetingLine}>
+              {message.greeting},
+            </span>
+            <span className={styles.greetingName}>
+              {message.firstName}.
+            </span>
           </motion.div>
         </div>
       </div>
