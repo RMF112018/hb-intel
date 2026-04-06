@@ -1,18 +1,25 @@
 /**
  * LauncherUtilityRail — Secondary support/utility surface for Tool Launcher.
  *
- * Phase 02-03: Desktop skeleton with structured sections for:
- *   - Platform notices (outages, maintenance, info)
- *   - Need Help section (help links from platform support metadata)
- *   - Request Access section (access-request destinations)
- *   - Placeholder for favorites/recent (deferred to Phase 04)
+ * Phase 04-01: Utility rail contract locked with 4 content categories:
+ *   1. Platform Notices — outages, maintenance, info (urgent-first)
+ *   2. Need Help — help destination CTAs with ExternalLink affordance
+ *   3. Request Access — access-request CTAs with ExternalLink affordance
+ *   4. Support Contacts — support-owner navigation links
  *
- * Visually quieter than the flagship stage. Each section is
- * independently suppressible when its data is unavailable.
- * The entire rail returns null when all sections are empty.
+ * Each section is independently suppressible. The entire rail returns
+ * null when all sections are empty, causing the composition shell body
+ * grid to collapse from 2fr/1fr to 1fr.
+ *
+ * Contract rules:
+ *   - Notices render as metadata (status labels, not CTAs)
+ *   - Help and access links render as CTAs (blue, with ExternalLink icon)
+ *   - Support contacts render as quiet metadata links
+ *   - All data comes from normalized LauncherPlatformRecord, not raw SP fields
+ *   - The rail must remain visually secondary to the flagship stage
  */
 import * as React from 'react';
-import { AlertCircle, Info, Link2 } from '@hbc/ui-kit/homepage';
+import { AlertCircle, Info, Link2, Users, ExternalLink } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import type {
   LauncherPlatformRecord,
@@ -23,7 +30,7 @@ import type {
 
 export interface LauncherUtilityRailProps {
   presentation: LauncherPresentationModel;
-  /** All active platforms for deriving help/access links. */
+  /** All active platforms for deriving help/access/support links. */
   platforms: LauncherPlatformRecord[];
 }
 
@@ -32,6 +39,15 @@ export interface LauncherUtilityRailProps {
 const railContainerStyle: React.CSSProperties = {
   display: 'grid',
   gap: HP_SPACE.lg,
+};
+
+const railLabelStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.68rem',
+  fontWeight: 600,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.06em',
+  color: 'rgba(0,0,0,0.35)',
 };
 
 const sectionStyle: React.CSSProperties = {
@@ -51,6 +67,15 @@ const sectionHeadingStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: HP_SPACE.sm,
+};
+
+const countBadgeStyle: React.CSSProperties = {
+  fontSize: '0.62rem',
+  fontWeight: 500,
+  padding: `0 ${HP_SPACE.xs}px`,
+  borderRadius: 3,
+  background: 'rgba(0,0,0,0.06)',
+  color: 'rgba(0,0,0,0.5)',
 };
 
 const noticeItemStyle: React.CSSProperties = {
@@ -80,15 +105,28 @@ const NOTICE_TONE_COLORS: Record<string, { bg: string; color: string }> = {
   neutral: { bg: 'rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.55)' },
 };
 
-const linkItemStyle: React.CSSProperties = {
-  display: 'block',
+/** CTA link — blue, with inline ExternalLink icon affordance */
+const ctaLinkStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 4,
   marginTop: HP_SPACE.sm,
   fontSize: '0.78rem',
+  fontWeight: 500,
   color: '#225391',
   textDecoration: 'none',
 };
 
-const supportOwnerStyle: React.CSSProperties = {
+/** Quiet metadata link — muted, no icon affordance */
+const metadataLinkStyle: React.CSSProperties = {
+  display: 'block',
+  marginTop: HP_SPACE.sm,
+  fontSize: '0.75rem',
+  color: 'rgba(0,0,0,0.6)',
+  textDecoration: 'none',
+};
+
+const supportOwnerLabelStyle: React.CSSProperties = {
   fontSize: '0.68rem',
   color: 'rgba(0,0,0,0.4)',
   marginLeft: HP_SPACE.xs,
@@ -100,10 +138,11 @@ function NoticesSection({ notices }: { notices: LauncherPresentationModel['notic
   if (notices.length === 0) return null;
 
   return (
-    <div style={sectionStyle}>
+    <div style={sectionStyle} data-rail-section="notices">
       <h4 style={sectionHeadingStyle}>
         <AlertCircle size={13} strokeWidth={2} />
         Platform Notices
+        <span style={countBadgeStyle}>{notices.length}</span>
       </h4>
       {notices.map((n) => {
         const tone = NOTICE_TONE_COLORS[n.notice.tone] ?? NOTICE_TONE_COLORS.info;
@@ -130,7 +169,7 @@ function NeedHelpSection({ platforms }: { platforms: LauncherPlatformRecord[] })
   if (withHelp.length === 0) return null;
 
   return (
-    <div style={sectionStyle}>
+    <div style={sectionStyle} data-rail-section="help">
       <h4 style={sectionHeadingStyle}>
         <Info size={13} strokeWidth={2} />
         Need Help
@@ -141,12 +180,10 @@ function NeedHelpSection({ platforms }: { platforms: LauncherPlatformRecord[] })
           href={p.support.helpUrl}
           target="_blank"
           rel="noopener noreferrer"
-          style={linkItemStyle}
+          style={ctaLinkStyle}
         >
           {p.name}
-          {p.support.supportOwnerName && (
-            <span style={supportOwnerStyle}>· {p.support.supportOwnerName}</span>
-          )}
+          <ExternalLink size={11} strokeWidth={2} />
         </a>
       ))}
     </div>
@@ -158,7 +195,7 @@ function RequestAccessSection({ platforms }: { platforms: LauncherPlatformRecord
   if (withAccess.length === 0) return null;
 
   return (
-    <div style={sectionStyle}>
+    <div style={sectionStyle} data-rail-section="access">
       <h4 style={sectionHeadingStyle}>
         <Link2 size={13} strokeWidth={2} />
         Request Access
@@ -169,11 +206,44 @@ function RequestAccessSection({ platforms }: { platforms: LauncherPlatformRecord
           href={p.support.accessRequestUrl}
           target="_blank"
           rel="noopener noreferrer"
-          style={linkItemStyle}
+          style={ctaLinkStyle}
         >
           {p.name}
+          <ExternalLink size={11} strokeWidth={2} />
         </a>
       ))}
+    </div>
+  );
+}
+
+function SupportContactsSection({ platforms }: { platforms: LauncherPlatformRecord[] }): React.JSX.Element | null {
+  const withOwner = platforms.filter((p) => p.support.supportOwnerName);
+  if (withOwner.length === 0) return null;
+
+  return (
+    <div style={sectionStyle} data-rail-section="contacts">
+      <h4 style={sectionHeadingStyle}>
+        <Users size={13} strokeWidth={2} />
+        Support Contacts
+      </h4>
+      {withOwner.slice(0, 5).map((p) => {
+        const ownerUrl = p.support.supportOwnerUrl;
+        return (
+          <div key={p.platformKey}>
+            {ownerUrl ? (
+              <a href={ownerUrl} target="_blank" rel="noopener noreferrer" style={metadataLinkStyle}>
+                {p.name}
+                <span style={supportOwnerLabelStyle}>· {p.support.supportOwnerName}</span>
+              </a>
+            ) : (
+              <div style={metadataLinkStyle}>
+                {p.name}
+                <span style={supportOwnerLabelStyle}>· {p.support.supportOwnerName}</span>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -184,17 +254,20 @@ export function LauncherUtilityRail({ presentation, platforms }: LauncherUtility
   const { activeNotices } = presentation.noticesSummary;
   const hasHelp = platforms.some((p) => p.support.helpUrl);
   const hasAccess = platforms.some((p) => p.support.accessRequestUrl);
+  const hasContacts = platforms.some((p) => p.support.supportOwnerName);
 
   // Suppress the entire rail when no content is available
-  if (activeNotices.length === 0 && !hasHelp && !hasAccess) {
+  if (activeNotices.length === 0 && !hasHelp && !hasAccess && !hasContacts) {
     return null;
   }
 
   return (
     <div style={railContainerStyle}>
+      <p style={railLabelStyle}>Support &amp; Status</p>
       <NoticesSection notices={activeNotices} />
       <NeedHelpSection platforms={platforms} />
       <RequestAccessSection platforms={platforms} />
+      <SupportContactsSection platforms={platforms} />
     </div>
   );
 }
