@@ -138,6 +138,69 @@ for (const d of domains) {
   }
 }
 
+// ── hb-webparts multi-manifest validation ────────────────────────────────────
+// Validates the hb-webparts domain's source manifests for packaging correctness.
+// This catches stale manifest defaults and missing toolbox-hiding before .sppkg emission.
+
+const HB_WEBPARTS_SRC = path.join('apps', 'hb-webparts', 'src', 'webparts');
+const SIGNATURE_HERO_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
+const STALE_HERO_PROPS = ['headline', 'message', 'metadata', 'cta', 'secondaryCta', 'eyebrow'];
+const HB_WEBPARTS_EXCLUDED_IDS = new Set([
+  '535f5a17-fc49-40ea-ac16-5d68895884f7', // HbWebparts scaffold
+]);
+
+if (fs.existsSync(HB_WEBPARTS_SRC)) {
+  const webpartDirs = fs.readdirSync(HB_WEBPARTS_SRC, { withFileTypes: true })
+    .filter((d) => d.isDirectory());
+
+  for (const dir of webpartDirs) {
+    const manifestFiles = fs.readdirSync(path.join(HB_WEBPARTS_SRC, dir.name))
+      .filter((f) => f.endsWith('.manifest.json'));
+
+    for (const manifestFile of manifestFiles) {
+      const manifestPath = path.join(HB_WEBPARTS_SRC, dir.name, manifestFile);
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      const id = manifest.id;
+      const entry = manifest.preconfiguredEntries?.[0];
+      const label = `hb-webparts/${dir.name}`;
+
+      if (HB_WEBPARTS_EXCLUDED_IDS.has(id)) continue;
+
+      checkGuid(id, label);
+
+      // Signature Hero specific checks
+      if (id === SIGNATURE_HERO_ID) {
+        // Must have supportsFullBleed
+        if (manifest.supportsFullBleed !== true) {
+          console.error(`MISSING supportsFullBleed: ${label} — flagship hero must declare supportsFullBleed: true`);
+          errors++;
+        }
+
+        // Must NOT have stale editorial defaults
+        const props = entry?.properties ?? {};
+        for (const staleKey of STALE_HERO_PROPS) {
+          if (staleKey in props) {
+            console.error(`STALE HERO DEFAULT: ${label} — manifest properties contains "${staleKey}" which is no longer part of the flagship hero`);
+            errors++;
+          }
+        }
+
+        // Must NOT be hidden from toolbox (it's the flagship)
+        if (entry?.hiddenFromToolbox === true) {
+          console.error(`WRONG VISIBILITY: ${label} — flagship Signature Hero must NOT be hidden from toolbox`);
+          errors++;
+        }
+      } else {
+        // Non-hero webparts must be hidden from toolbox for this rollout cycle
+        if (entry?.hiddenFromToolbox !== true) {
+          console.error(`MISSING hiddenFromToolbox: ${label} (${id}) — non-hero webpart must be hidden from toolbox for this rollout cycle`);
+          errors++;
+        }
+      }
+    }
+  }
+}
+
 // ── Bundle format and IIFE global export check ─────────────────────────────
 // Verify production builds are IIFE with proper global name assignment.
 
