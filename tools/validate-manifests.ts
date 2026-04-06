@@ -201,6 +201,44 @@ if (fs.existsSync(HB_WEBPARTS_SRC)) {
   }
 }
 
+// ── hb-webparts bundle registry proof ────────────────────────────────────────
+// Validates that the built hb-webparts bundle contains the Signature Hero ID
+// in its runtime WEBPART_RENDERERS map and that mount.tsx imports the component.
+
+const HB_WEBPARTS_BUNDLE = path.join('apps', 'hb-webparts', 'dist', 'hb-webparts-app.js');
+const HB_WEBPARTS_MOUNT = path.join('apps', 'hb-webparts', 'src', 'mount.tsx');
+
+if (fs.existsSync(HB_WEBPARTS_BUNDLE)) {
+  const bundleContent = fs.readFileSync(HB_WEBPARTS_BUNDLE, 'utf8');
+  if (!bundleContent.includes(SIGNATURE_HERO_ID)) {
+    console.error(`MISSING REGISTRY: hb-webparts bundle does not contain Signature Hero ID (${SIGNATURE_HERO_ID}) — webpart will not route correctly at runtime`);
+    errors++;
+  }
+}
+
+if (fs.existsSync(HB_WEBPARTS_MOUNT)) {
+  const mountContent = fs.readFileSync(HB_WEBPARTS_MOUNT, 'utf8');
+
+  // Signature Hero must be imported
+  if (!mountContent.includes('HbSignatureHero')) {
+    console.error('MISSING IMPORT: mount.tsx does not import HbSignatureHero — webpart will fall through to default composition');
+    errors++;
+  }
+
+  // Signature Hero ID must be in WEBPART_RENDERERS
+  if (!mountContent.includes(SIGNATURE_HERO_ID)) {
+    console.error(`MISSING RENDERER: mount.tsx WEBPART_RENDERERS does not contain Signature Hero ID (${SIGNATURE_HERO_ID})`);
+    errors++;
+  }
+
+  // Legacy hero/welcome IDs should NOT be the only top-band entries (they're standalone-only)
+  // This is a warning, not an error — they remain for non-flagship use
+  if (!mountContent.includes(SIGNATURE_HERO_ID) && mountContent.includes('39762a4d-c7fd-44a6-a11e-4f8de9f5778d')) {
+    console.warn('WARNING: HbHeroBanner is registered but HbSignatureHero is not — legacy hero may be hijacking flagship routing');
+    warnings++;
+  }
+}
+
 // ── Bundle format and IIFE global export check ─────────────────────────────
 // Verify production builds are IIFE with proper global name assignment.
 
