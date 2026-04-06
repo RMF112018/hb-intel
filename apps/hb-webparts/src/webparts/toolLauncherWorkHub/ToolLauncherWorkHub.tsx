@@ -1,23 +1,35 @@
 /**
  * ToolLauncherWorkHub — Premium command launcher surface
- * Phase 15-05 — Command and utility surface overhaul
+ * Phase 17-04 — Structural rebuild with P17 surface family
  *
- * Each tool group renders with a deliberate heading and icon-forward
- * tile presentation. Primary items (first in group) get larger icon
- * frames with accent tint and visual emphasis. The surface reads as
- * a command launcher, not a categorized link list.
+ * Rebuilt on HbcLauncherSurface with icon-led tiles, grouped
+ * categories, and motion interaction feedback. Replaces the old
+ * composition shells (HomepageRailShell, HomepageUtilityDenseGroup)
+ * with the dedicated launcher surface.
  */
 import * as React from 'react';
-import { HbcPremiumSurface, HbcPremiumIcon, HbcPremiumBadge, HbcPremiumSection, HbcHomepageActionRow, Settings, Shield, DollarSign, HardHat, Users, Building2, Keyboard, Landmark, BarChart3, FileText, Briefcase, type LucideIcon } from '@hbc/ui-kit/homepage';
+import {
+  HbcLauncherSurface,
+  Settings,
+  Shield,
+  DollarSign,
+  HardHat,
+  Users,
+  Building2,
+  Keyboard,
+  Landmark,
+  BarChart3,
+  FileText,
+  Briefcase,
+  type LucideIcon,
+  type LauncherGroup,
+  type LauncherTileTint,
+} from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeToolLauncherWorkHubConfig } from '../../homepage/helpers/utilityConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
-import { HomepageRailShell } from '../../homepage/shared/HomepageRailShell.js';
-import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtilityDenseGroup.js';
-import type { ToolLauncherWorkHubConfig, ToolLauncherItem } from '../../homepage/webparts/utilityContracts.js';
-import { hpZoneFlexLayout, HP_SPACE } from '../../homepage/tokens.js';
-import interactiveStyles from '../../homepage/homepage-interactive.module.css';
+import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
 
 export interface ToolLauncherWorkHubProps {
   config?: Partial<ToolLauncherWorkHubConfig>;
@@ -41,63 +53,37 @@ const TOOL_ICON_MAP: Record<string, LucideIcon> = {
   project: Briefcase,
 };
 
+const TOOL_TINT_MAP: Record<string, LauncherTileTint> = {
+  safety: 'danger',
+  finance: 'accent',
+  field: 'warm',
+  hr: 'brand',
+  ops: 'neutral',
+  admin: 'brand',
+  it: 'neutral',
+  legal: 'brand',
+  report: 'accent',
+  document: 'neutral',
+  project: 'brand',
+};
+
 function resolveToolIcon(iconKey: string | undefined): LucideIcon {
   if (!iconKey) return Settings;
   return TOOL_ICON_MAP[iconKey.trim().toLowerCase()] ?? Settings;
 }
 
-// ── Primary launcher tile (first item in group) ──────────────────────
+function resolveToolTint(iconKey: string | undefined): LauncherTileTint {
+  if (!iconKey) return 'brand';
+  return TOOL_TINT_MAP[iconKey.trim().toLowerCase()] ?? 'brand';
+}
 
-const primaryTileStyle: React.CSSProperties = {
-  padding: `${HP_SPACE.md}px ${HP_SPACE.xl}px`,
-  background: 'rgba(34, 83, 145, 0.03)',
-  borderBottom: '1px solid rgba(34, 83, 145, 0.08)',
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.md,
-};
-
-// ── Secondary launcher tile ──────────────────────────────────────────
-
-const secondaryTileStyle: React.CSSProperties = {
-  padding: `${HP_SPACE.sm}px ${HP_SPACE.xl}px`,
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.md,
-};
-
-function LauncherTileItem({
-  item,
-  isPrimary,
-}: {
-  item: ToolLauncherItem;
-  isPrimary: boolean;
-}): React.JSX.Element {
-  const iconSize = isPrimary ? 'lg' : 'md';
-  const iconTint = isPrimary ? 'accent' : 'brand';
-  const tileStyle = isPrimary ? primaryTileStyle : secondaryTileStyle;
-  const containerClass = interactiveStyles.actionRowContainer;
-
-  return (
-    <div style={tileStyle} className={containerClass}>
-      <div style={{ flexGrow: 1, minWidth: 0 }}>
-        <HbcHomepageActionRow
-          title={item.title}
-          href={item.href}
-          description={item.description}
-          icon={
-            <HbcPremiumIcon icon={resolveToolIcon(item.iconKey)} size={iconSize} tint={iconTint} />
-          }
-          badge={
-            item.badge
-              ? <HbcPremiumBadge label={item.badge.label} status={item.badge.variant ?? 'neutral'} />
-              : undefined
-          }
-        />
-      </div>
-      <span className={interactiveStyles.actionRowArrow} aria-hidden="true">{'\u203A'}</span>
-    </div>
-  );
+function resolveGroupIcon(groupTitle: string): LucideIcon {
+  const key = groupTitle.toLowerCase();
+  if (key.includes('safety') || key.includes('field')) return Shield;
+  if (key.includes('finance') || key.includes('accounting')) return DollarSign;
+  if (key.includes('admin')) return Building2;
+  if (key.includes('hr') || key.includes('human') || key.includes('people')) return Users;
+  return Settings;
 }
 
 export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false }: ToolLauncherWorkHubProps): React.JSX.Element {
@@ -109,33 +95,28 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   if (normalized.groups.length === 0) {
     const hasConfiguredInput = Boolean(config?.groups?.length);
     const message = resolveAuthoringMessage('toolLauncherWorkHub', hasConfiguredInput ? 'invalid' : 'noData');
-    return (
-      <HomepageEmptyState
-        title={message.title}
-        description={message.description}
-      />
-    );
+    return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
+  const groups: LauncherGroup[] = normalized.groups.map((group) => ({
+    id: group.id,
+    label: group.title,
+    icon: resolveGroupIcon(group.title),
+    tiles: group.items.map((item) => ({
+      id: item.id,
+      label: item.title,
+      description: item.description,
+      icon: resolveToolIcon(item.iconKey),
+      tint: resolveToolTint(item.iconKey),
+      href: item.href,
+    })),
+  }));
+
   return (
-    <HbcPremiumSurface intent="command">
-      <HbcPremiumSection title={normalized.heading} icon={Settings} accent="brand">
-      <HomepageRailShell label="tool-launcher-work-hub">
-        <div style={hpZoneFlexLayout}>
-          {normalized.groups.map((group) => (
-            <HomepageUtilityDenseGroup key={group.id} title={group.title}>
-              {group.items.map((item, idx) => (
-                <LauncherTileItem
-                  key={item.id}
-                  item={item}
-                  isPrimary={idx === 0}
-                />
-              ))}
-            </HomepageUtilityDenseGroup>
-          ))}
-        </div>
-      </HomepageRailShell>
-      </HbcPremiumSection>
-    </HbcPremiumSurface>
+    <HbcLauncherSurface
+      groups={groups}
+      layout="grid"
+      aria-label={normalized.heading}
+    />
   );
 }
