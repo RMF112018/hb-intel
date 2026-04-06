@@ -315,6 +315,8 @@ Core elements:
 - message area
 - optional CTA region
 
+> **Phase 18-01 addendum:** For flagship homepage composition, the Personalized Welcome Header (§13.1) and HB Hero Banner (§13.2) are unified into a single `HbSignatureHero` component that integrates greeting, editorial content, and CTA hierarchy into one authored top-band surface. The standalone webparts remain available for non-flagship placement.
+
 ### 3. Priority Actions Rail
 Purpose:
 - surface the employee’s most-used tools and next destinations

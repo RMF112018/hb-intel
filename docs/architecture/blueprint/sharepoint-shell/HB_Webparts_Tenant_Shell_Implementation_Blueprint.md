@@ -52,6 +52,8 @@ Production objective:
 - personalized welcome header
 - hero banner
 - priority actions rail
+
+> **Phase 18-01 addendum:** For flagship homepage top-band composition, the personalized welcome header and hero banner are now unified into a single `HbSignatureHero` component. The standalone webparts remain available for non-flagship placement.
 - tool launcher / work hub
 - company pulse
 - leadership message

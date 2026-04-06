@@ -1,11 +1,14 @@
 /**
- * PersonalizedWelcomeHeader — Signature personalized greeting
+ * PersonalizedWelcomeHeader — Standalone personalized greeting surface
  * Phase 17-04 — Structural rebuild with P17 surface family
+ * Phase 18-01 — Reclassified as standalone; not for flagship homepage use
  *
  * Rebuilt with motion reveal choreography, lucide icons for contextual
- * accents, and HbcPremiumBadge for alert severity. The greeting is
- * designed to integrate into the unified top-band experience via
- * HbcSignatureHeroSurface rather than standing as an isolated card.
+ * accents, and HbcPremiumBadge for alert severity.
+ *
+ * For flagship homepage top-band composition, the personalized greeting
+ * is integrated directly into {@link HbSignatureHero}. This component
+ * remains available for standalone or non-flagship placement.
  */
 import * as React from 'react';
 import {

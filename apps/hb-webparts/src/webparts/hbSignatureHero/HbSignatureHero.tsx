@@ -1,6 +1,12 @@
 /**
- * HbSignatureHero — Unified premium signature hero
+ * HbSignatureHero — Canonical flagship homepage hero
  * Phase 16-03 — Unified signature hero with design breakout
+ * Phase 18-01 — Canonicalized as the single homepage top-band surface
+ *
+ * This is the canonical homepage hero for HB Central. All flagship
+ * homepage compositions must use this component. The split-path pattern
+ * (separate `hbHeroBanner` + `personalizedWelcomeHeader`) is retired
+ * for flagship homepage use.
  *
  * Merges the personalized greeting and hero content into ONE integrated
  * premium surface. The greeting is no longer a separate adjacent card —

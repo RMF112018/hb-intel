@@ -1,12 +1,13 @@
 /**
- * HomepageTopBandPair — Signature opening sequence for the homepage
+ * HomepageTopBandPair — Legacy split-path top-band composition shell
  * Phase 12B-05 — Initial flagship composition
  * Phase 15-04 — Top-band signature redesign
+ * Phase 18-01 — Superseded by HbSignatureHero for flagship homepage use
  *
- * The top band is the homepage's most memorable surface. It integrates
- * the welcome greeting and hero content into a single authored visual
- * sequence with a shared brand-tinted container, creating the impression
- * of one composed opening — not two adjacent cards.
+ * @deprecated Phase 18-01 canonicalized {@link HbSignatureHero} as the
+ * single flagship homepage top-band surface. This split-path composition
+ * (separate welcome + hero slots) is no longer the homepage flagship
+ * pattern. Retained for potential non-flagship or archival use.
  */
 import * as React from 'react';
 import { HP_SPACE, HP_LAYOUT, HP_RADIUS } from '../tokens.js';

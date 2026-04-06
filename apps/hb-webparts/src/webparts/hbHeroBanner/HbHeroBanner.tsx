@@ -1,11 +1,16 @@
 /**
- * HbHeroBanner — Flagship editorial hero for the homepage top band
+ * HbHeroBanner — Standalone editorial hero surface
  * Phase 17-04 — Structural rebuild with P17 surface family
+ * Phase 18-01 — Reclassified as standalone; not for flagship homepage use
  *
  * Rebuilt on HbcSignatureHeroSurface for full-width, motion-choreographed
  * hero rendering. Uses HbcPremiumCta for CTA hierarchy, lucide icons for
  * accents, and cva-driven surface variants. Designed for full-bleed
  * placement with supportsFullBleed manifest support.
+ *
+ * For flagship homepage top-band composition, use {@link HbSignatureHero}
+ * which integrates greeting and editorial content into a single surface.
+ * This component remains available for standalone or non-flagship placement.
  */
 import * as React from 'react';
 import {
