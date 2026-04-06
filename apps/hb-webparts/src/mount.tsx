@@ -2,6 +2,7 @@ import { createElement, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { ReferenceHomepageComposition } from './homepage/ReferenceHomepageComposition.js';
+import { storeSiteUrl } from './homepage/data/spContext.js';
 import { PersonalizedWelcomeHeader } from './webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from './webparts/hbHeroBanner/HbHeroBanner.js';
 import { PriorityActionsRail } from './webparts/priorityActionsRail/PriorityActionsRail.js';
@@ -47,7 +48,7 @@ export async function mount(
   spfxContext?: WebPartContext,
   config?: MountConfig,
 ): Promise<void> {
-  void spfxContext;
+  storeSiteUrl(spfxContext?.pageContext?.web?.absoluteUrl);
 
   const webPartId = typeof config?.webPartId === 'string' ? config.webPartId : '';
   const webPartProperties =

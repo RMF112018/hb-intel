@@ -40,6 +40,7 @@ import {
   HP_RADIUS,
   HP_IMAGE,
 } from '../../homepage/tokens.js';
+import { useProjectSpotlightData } from '../../homepage/data/useProjectSpotlightData.js';
 import interactiveStyles from '../../homepage/homepage-interactive.module.css';
 
 export interface ProjectPortfolioSpotlightProps {
@@ -809,17 +810,22 @@ export function ProjectPortfolioSpotlight({
   isLoading = false,
 }: ProjectPortfolioSpotlightProps): React.JSX.Element {
   const tier = useResponsiveTier();
+  const { listConfig, isLoading: listLoading } = useProjectSpotlightData();
 
-  if (isLoading) {
+  if (isLoading || listLoading) {
     return <HomepageLoadingState label="Loading project spotlight" />;
   }
 
-  const normalized = normalizeProjectPortfolioSpotlightConfig(config, activeAudience);
+  // List-sourced data is the primary operating model.
+  // Manifest config (props) is the narrow fallback for local dev / demo / packaging.
+  const effectiveConfig = listConfig ?? config;
+
+  const normalized = normalizeProjectPortfolioSpotlightConfig(effectiveConfig, activeAudience);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
     const message = resolveAuthoringMessage(
       'projectPortfolioSpotlight',
-      config?.items?.length ? 'invalid' : 'noData',
+      effectiveConfig?.items?.length ? 'invalid' : 'noData',
     );
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
