@@ -19,9 +19,10 @@
         "default": "Personalized Welcome Header"
       },
       "description": {
-        "default": "Signature greeting header for HB Central top-band composition."
+        "default": "Standalone greeting header. Not for flagship homepage use — greeting is integrated into HB Signature Hero."
       },
       "officeFabricIconFontName": "Contact",
+      "hiddenFromToolbox": true,
       "properties": {
         "supportLine": "Welcome back to HB Central.",
         "contextLine": "Here is your operational snapshot for today.",
@@ -49,7 +50,7 @@
       },
       "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f_1.0.0": {
         "type": "path",
-        "path": "shell-entry-46bfde64-f0cb-4f62-9f6b-a466f8fadc1f-bdb4a835.js"
+        "path": "shell-entry-46bfde64-f0cb-4f62-9f6b-a466f8fadc1f-3612a356.js"
       }
     }
   }

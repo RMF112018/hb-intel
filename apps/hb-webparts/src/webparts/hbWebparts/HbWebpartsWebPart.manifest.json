@@ -21,6 +21,7 @@
         "default": "HB Central homepage webpart scaffold and shared primitive foundation."
       },
       "officeFabricIconFontName": "Home",
+      "hiddenFromToolbox": true,
       "properties": {}
     }
   ]

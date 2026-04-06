@@ -17,6 +17,7 @@
         "default": "Curated safety and field signals with highlights, reminders, recognitions, and notices."
       },
       "officeFabricIconFontName": "Shield",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Safety and Field Excellence",
         "maxSecondaryItems": 4,

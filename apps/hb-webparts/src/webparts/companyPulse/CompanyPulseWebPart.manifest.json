@@ -15,6 +15,7 @@
       "title": { "default": "Company Pulse" },
       "description": { "default": "Curated internal updates with featured and secondary editorial hierarchy." },
       "officeFabricIconFontName": "News",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Company Pulse",
         "maxSecondaryItems": 3,

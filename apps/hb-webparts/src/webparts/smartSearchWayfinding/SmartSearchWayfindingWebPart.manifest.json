@@ -17,6 +17,7 @@
         "default": "Curated smart search and wayfinding surface for tools, forms, systems, policies, and team spaces."
       },
       "officeFabricIconFontName": "SearchAndApps",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Smart Search and Wayfinding",
         "searchPlaceholder": "Search tools, forms, policies, and destinations",

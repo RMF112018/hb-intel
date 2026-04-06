@@ -15,6 +15,7 @@
       "title": { "default": "People and Culture" },
       "description": { "default": "Curated people moments including welcomes, anniversaries, promotions, and recognition." },
       "officeFabricIconFontName": "People",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "People and Culture",
         "maxSecondaryEntries": 4,

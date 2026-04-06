@@ -15,6 +15,7 @@
       "title": { "default": "Leadership Message" },
       "description": { "default": "Concise executive messaging with optional media and archived entries." },
       "officeFabricIconFontName": "Comment",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Leadership Message",
         "maxArchivedEntries": 2,

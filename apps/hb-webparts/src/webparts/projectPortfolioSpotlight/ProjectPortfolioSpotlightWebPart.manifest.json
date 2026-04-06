@@ -17,6 +17,7 @@
         "default": "Curated project and portfolio signals with featured hierarchy, status, milestones, and CTA handoff."
       },
       "officeFabricIconFontName": "ActivateOrders",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Project and Portfolio Spotlight",
         "maxSecondaryItems": 3,

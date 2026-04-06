@@ -22,6 +22,7 @@
         "default": "Role-aware urgent and frequently used action links for HB Central."
       },
       "officeFabricIconFontName": "TaskList",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Priority Actions",
         "maxItems": 8,
@@ -82,7 +83,7 @@
       },
       "b3f07190-79cf-437d-a1d6-ecbf3f77e616_1.0.0": {
         "type": "path",
-        "path": "shell-entry-b3f07190-79cf-437d-a1d6-ecbf3f77e616-43cd3bc9.js"
+        "path": "shell-entry-b3f07190-79cf-437d-a1d6-ecbf3f77e616-a1347290.js"
       }
     }
   }

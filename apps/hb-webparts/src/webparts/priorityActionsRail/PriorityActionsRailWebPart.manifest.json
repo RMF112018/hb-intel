@@ -15,6 +15,7 @@
       "title": { "default": "Priority Actions Rail" },
       "description": { "default": "Role-aware urgent and frequently used action links for HB Central." },
       "officeFabricIconFontName": "TaskList",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Priority Actions",
         "maxItems": 8,

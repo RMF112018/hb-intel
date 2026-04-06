@@ -15,6 +15,7 @@
       "title": { "default": "Tool Launcher / Work Hub" },
       "description": { "default": "Grouped system launcher hub with role-aware visibility options." },
       "officeFabricIconFontName": "Tiles",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Tool Launcher / Work Hub",
         "maxGroups": 4,

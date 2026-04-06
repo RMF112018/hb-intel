@@ -22,6 +22,7 @@
         "default": "Grouped system launcher hub with role-aware visibility options."
       },
       "officeFabricIconFontName": "Tiles",
+      "hiddenFromToolbox": true,
       "properties": {
         "heading": "Tool Launcher / Work Hub",
         "maxGroups": 4,
@@ -88,7 +89,7 @@
       },
       "cb7060f5-b852-4600-b912-a5f6f7221ce2_1.0.0": {
         "type": "path",
-        "path": "shell-entry-cb7060f5-b852-4600-b912-a5f6f7221ce2-64f52f3c.js"
+        "path": "shell-entry-cb7060f5-b852-4600-b912-a5f6f7221ce2-fde0a0b5.js"
       }
     }
   }
