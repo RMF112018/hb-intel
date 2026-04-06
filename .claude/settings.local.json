@@ -232,7 +232,8 @@
       "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/Logos/GRIT-LOGO.jpg\" /Users/bobbyfetting/hb-intel/packages/ui-kit/src/branding/assets/grit-logo.jpg)",
       "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/Logos/hb_icon_blueBG.jpg\" /Users/bobbyfetting/hb-intel/packages/ui-kit/src/branding/assets/hb-icon-blue-bg.jpg)",
       "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/Logos/hb_logo_icon.jpg\" /Users/bobbyfetting/hb-intel/packages/ui-kit/src/branding/assets/hb-logo-icon.jpg)",
-      "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/Logos/hedrick-logo.png\" /Users/bobbyfetting/hb-intel/packages/ui-kit/src/branding/assets/hedrick-logo.png)"
+      "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/Logos/hedrick-logo.png\" /Users/bobbyfetting/hb-intel/packages/ui-kit/src/branding/assets/hedrick-logo.png)",
+      "Bash(npm view:*)"
     ]
   },
   "enabledPlugins": {
