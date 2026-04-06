@@ -108,7 +108,7 @@ export interface RawSpotlightListItem {
   Summary?: string;
   LocationText?: string;
   Sector?: string;
-  PrimaryImage?: string | { serverRelativeUrl?: string; serverUrl?: string };
+  PrimaryImage?: string | { Url?: string; Description?: string } | { serverRelativeUrl?: string; serverUrl?: string };
   PrimaryImageAltText?: string;
   StatusLabel?: string;
   StatusVariant?: string;
@@ -171,19 +171,21 @@ function extractUrl(field: string | { Url?: string; Description?: string } | und
 /**
  * Extract a usable image URL from a SharePoint PrimaryImage field.
  *
- * SharePoint Image columns return a **JSON-encoded string** via REST API
- * (odata=nometadata) — not a plain URL or a pre-parsed object. The JSON
- * contains `serverUrl` and `serverRelativeUrl` which must be combined
- * to produce a full image URL.
+ * The column is a **Hyperlink** pointing at a media-library asset.
+ * With `odata=nometadata` the REST API returns either a plain URL string
+ * or an object `{ Url, Description }`.  Legacy Image-column shapes
+ * (JSON-encoded `{ serverUrl, serverRelativeUrl }`) are still handled
+ * defensively so previously-cached responses do not break.
  *
- * Handles: JSON string, plain URL string, and pre-parsed object shapes.
+ * Handles: Hyperlink object, plain URL string, JSON-encoded Image
+ * column string, and pre-parsed seed-data object shapes.
  */
 function extractImageSrc(field: RawSpotlightListItem['PrimaryImage'], siteUrl: string): string | undefined {
   if (!field) return undefined;
 
+  // ── String value ────────────────────────────────────────────────
   if (typeof field === 'string') {
-    // SharePoint Image columns arrive as JSON-encoded strings.
-    // Try to parse before assuming it's a direct URL.
+    // Legacy: Image columns arrive as JSON-encoded strings.
     try {
       const parsed: unknown = JSON.parse(field);
       if (parsed && typeof parsed === 'object') {
@@ -194,16 +196,22 @@ function extractImageSrc(field: RawSpotlightListItem['PrimaryImage'], siteUrl: s
         }
       }
     } catch {
-      // Not JSON — treat as a plain URL string
+      // Not JSON — treat as a plain URL string (normal Hyperlink path)
     }
     return field || undefined;
   }
 
-  // Pre-parsed object (defensive — may come from manifest seed data)
-  if (field.serverRelativeUrl) {
-    const base = field.serverUrl || siteUrl;
+  // ── Hyperlink object { Url, Description } ───────────────────────
+  if ('Url' in field && field.Url) {
+    return field.Url;
+  }
+
+  // ── Legacy Image-column object { serverRelativeUrl, serverUrl } ─
+  if ('serverRelativeUrl' in field && field.serverRelativeUrl) {
+    const base = ('serverUrl' in field && field.serverUrl) || siteUrl;
     return `${base}${field.serverRelativeUrl}`;
   }
+
   return undefined;
 }
 
