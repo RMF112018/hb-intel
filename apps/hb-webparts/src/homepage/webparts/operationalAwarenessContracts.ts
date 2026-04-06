@@ -1,4 +1,4 @@
-import type { HomepageCtaLink } from '../models/contentModels.js';
+import type { HomepageCtaLink, HomepageMediaSlot } from '../models/contentModels.js';
 
 export type OperationalStatusVariant = 'info' | 'success' | 'warning' | 'critical' | 'neutral';
 
@@ -35,6 +35,14 @@ export interface ProjectPortfolioSpotlightItem {
   featured?: boolean;
   order?: number;
   audiences?: string[];
+  /** Project photography for image-led editorial composition. */
+  image?: HomepageMediaSlot;
+  /** Short editorial headline (distinct from title). */
+  highlightHeadline?: string;
+  /** Project location (city, region). */
+  location?: string;
+  /** Project sector or market (e.g., "Commercial", "Luxury Residential"). */
+  sector?: string;
 }
 
 export interface ProjectPortfolioSpotlightConfig {

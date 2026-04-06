@@ -19,29 +19,29 @@
       "officeFabricIconFontName": "ActivateOrders",
       "hiddenFromToolbox": true,
       "properties": {
-        "heading": "Project and Portfolio Spotlight",
+        "heading": "Project Spotlight",
         "maxSecondaryItems": 3,
         "items": [
           {
             "id": "project-featured",
             "title": "Palm Beach Medical Campus Expansion",
-            "summary": "Structural turnover enters final phase with field quality walkthroughs this week.",
+            "summary": "Structural turnover enters final phase with field quality walkthroughs scheduled this week. Owner coordination and commissioning prep are on track.",
+            "highlightHeadline": "Final structural turnover phase — field walkthroughs underway",
+            "location": "Palm Beach, FL",
+            "sector": "Healthcare",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/palm-beach-medical.jpg",
+              "alt": "Palm Beach Medical Campus construction site aerial view",
+              "aspectRatio": "16:9"
+            },
             "featured": true,
             "strategicEmphasis": true,
             "order": 1,
             "status": { "label": "On Track", "variant": "success" },
             "freshness": { "source": "live", "updatedAt": "2026-04-04T12:00:00.000Z" },
             "milestones": [
-              {
-                "id": "m1",
-                "title": "MEP closeout",
-                "completed": true
-              },
-              {
-                "id": "m2",
-                "title": "Owner turnover prep",
-                "completed": false
-              }
+              { "id": "m1", "title": "MEP closeout", "completed": true },
+              { "id": "m2", "title": "Owner turnover prep", "completed": false }
             ],
             "cta": { "label": "View project brief", "href": "/sites/hb-central/portfolio" }
           },
@@ -49,6 +49,8 @@
             "id": "project-secondary",
             "title": "Fort Lauderdale Waterfront Residence",
             "summary": "Facade sequence revised to maintain schedule and safety overlap controls.",
+            "location": "Fort Lauderdale, FL",
+            "sector": "Luxury Residential",
             "order": 2,
             "status": { "label": "Watchlist", "variant": "warning" }
           }

@@ -1,4 +1,5 @@
 import { isVisibleForAudience } from './visibility.js';
+import type { HomepageMediaSlot } from '../models/contentModels.js';
 import {
   DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG,
   DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG,
@@ -19,6 +20,10 @@ export interface NormalizedProjectPortfolioSpotlightItem extends ProjectPortfoli
   milestones: ProjectMilestone[];
   isStale: boolean;
   freshnessLabel?: string;
+  image?: HomepageMediaSlot;
+  highlightHeadline?: string;
+  location?: string;
+  sector?: string;
 }
 
 export interface NormalizedSafetyFieldExcellenceItem extends SafetyFieldExcellenceItem {
@@ -140,6 +145,12 @@ export function normalizeProjectPortfolioSpotlightConfig(
         milestones: normalizeMilestones(item.milestones),
         isStale: freshness.isStale,
         freshnessLabel: freshness.freshnessLabel,
+        image: hasText(item.image?.src)
+          ? { src: item.image.src.trim(), alt: (item.image.alt ?? '').trim(), aspectRatio: item.image.aspectRatio }
+          : undefined,
+        highlightHeadline: hasText(item.highlightHeadline) ? item.highlightHeadline.trim() : undefined,
+        location: hasText(item.location) ? item.location.trim() : undefined,
+        sector: hasText(item.sector) ? item.sector.trim() : undefined,
       });
     })
     .sort(byPriority);
