@@ -239,6 +239,29 @@ if (fs.existsSync(HB_WEBPARTS_MOUNT)) {
   }
 }
 
+// ── hb-webparts CSS emission proof ───────────────────────────────────────────
+// Validates that the emitted CSS file contains the expected hero class patterns.
+// This catches silent CSS stripping, tree-shaking, or broken module extraction.
+
+const HB_WEBPARTS_CSS = path.join('apps', 'hb-webparts', 'dist', 'spfx-hb-webparts.css');
+const EXPECTED_HERO_CSS_MARKERS = ['surface', 'tagline', 'grain', 'lockup', 'greeting'];
+
+if (fs.existsSync(HB_WEBPARTS_CSS)) {
+  const cssContent = fs.readFileSync(HB_WEBPARTS_CSS, 'utf8');
+
+  for (const marker of EXPECTED_HERO_CSS_MARKERS) {
+    if (!cssContent.includes(marker)) {
+      console.error(`MISSING CSS CLASS: hb-webparts CSS does not contain expected hero marker "${marker}" — hero will render unstyled`);
+      errors++;
+    }
+  }
+
+  if (cssContent.length < 1000) {
+    console.error(`CSS TOO SMALL: hb-webparts CSS is only ${cssContent.length} bytes — likely incomplete or stripped`);
+    errors++;
+  }
+}
+
 // ── Bundle format and IIFE global export check ─────────────────────────────
 // Verify production builds are IIFE with proper global name assignment.
 

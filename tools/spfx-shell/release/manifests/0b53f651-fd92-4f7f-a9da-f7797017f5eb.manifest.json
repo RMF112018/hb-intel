@@ -1,6 +1,6 @@
 {
-  "id": "9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e",
-  "alias": "ShellWebPart",
+  "id": "0b53f651-fd92-4f7f-a9da-f7797017f5eb",
+  "alias": "CompanyPulseWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -8,7 +8,7 @@
   "supportedHosts": [
     "SharePointWebPart"
   ],
-  "supportsThemeVariants": true,
+  "supportsThemeVariants": false,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
@@ -54,12 +54,8 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "shell-web-part",
+    "entryModuleId": "0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0",
     "scriptResources": {
-      "shell-web-part": {
-        "type": "path",
-        "path": "shell-web-part_9242d3f4e65998163b05.js"
-      },
       "@microsoft/sp-loader": {
         "type": "component",
         "id": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
@@ -69,6 +65,10 @@
         "type": "component",
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
+      },
+      "0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0": {
+        "type": "path",
+        "path": "shell-entry-0b53f651-fd92-4f7f-a9da-f7797017f5eb-190b87d9.js"
       }
     }
   }
