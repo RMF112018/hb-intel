@@ -129,6 +129,39 @@ export interface RawSpotlightListItem {
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
 
+/** HTML entity map for the most common SharePoint rich-text entities. */
+const HTML_ENTITIES: Record<string, string> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
+  '&apos;': "'",
+  '&nbsp;': ' ',
+};
+
+const ENTITY_RE = /&(?:amp|lt|gt|quot|apos|nbsp|#39);/g;
+
+/**
+ * Strip HTML tags and decode common entities from a SharePoint
+ * Enhanced Rich Text value, returning clean plain text.
+ *
+ * Designed for the list-source mapping boundary so downstream code
+ * (normalization pipeline, component) can rely on `summary` being
+ * plain text as the contract requires.
+ */
+function stripHtml(value: string | undefined): string {
+  if (!value) return '';
+  return value
+    .replace(/<br\s*\/?>/gi, ' ')     // <br> → space
+    .replace(/<\/(?:p|div|li|h\d)>/gi, ' ')  // block-end tags → space (preserve word boundaries)
+    .replace(/<[^>]*>/g, '')           // strip all remaining tags
+    .replace(ENTITY_RE, (m) => HTML_ENTITIES[m] ?? m)  // decode named entities
+    .replace(/&#(\d+);/g, (_m, code) => String.fromCharCode(Number(code)))  // decode numeric entities
+    .replace(/\s+/g, ' ')             // collapse whitespace
+    .trim();
+}
+
 function extractUrl(field: string | { Url?: string; Description?: string } | undefined): string | undefined {
   if (!field) return undefined;
   if (typeof field === 'string') return field || undefined;
@@ -244,7 +277,7 @@ export function mapListItemToSpotlight(raw: RawSpotlightListItem, siteUrl: strin
   return {
     id: raw.ProjectId?.trim() || raw.Title?.trim() || '',
     title: raw.Title?.trim() || '',
-    summary: raw.Summary?.trim() || '',
+    summary: stripHtml(raw.Summary),
     highlightHeadline: raw.Headline?.trim() || undefined,
     location: raw.LocationText?.trim() || undefined,
     sector: raw.Sector?.trim() || undefined,
