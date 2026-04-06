@@ -962,10 +962,10 @@ export function ProjectPortfolioSpotlight({
       {/* Header */}
       <div style={getHeaderStyle(tier)}>
         <h2 style={headerTitleStyle}>{normalized.heading}</h2>
-        {feat.cta ? (
+        {normalized.allProjectsUrl ? (
           <HbcPremiumCta
-            label="View all projects"
-            href={feat.cta.href}
+            label={normalized.allProjectsLabel || 'View all projects'}
+            href={normalized.allProjectsUrl}
             variant="ghost"
             size="sm"
             arrow

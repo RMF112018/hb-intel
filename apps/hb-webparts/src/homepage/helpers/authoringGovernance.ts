@@ -151,12 +151,12 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
     allowedContentScope: 'Featured project, bounded secondary items, status signals, milestones, and CTA.',
     messages: {
       noData: {
-        title: 'No project spotlight items configured',
-        description: 'Add featured or secondary project spotlight items in the property pane to publish this section.',
+        title: 'No project spotlight items available',
+        description: 'Publish items in the Homepage Project Spotlights list with HomepageEnabled set to Yes.',
       },
       invalid: {
-        title: 'Project spotlight configuration is invalid',
-        description: 'Review project IDs, summaries, status signals, and milestone metadata.',
+        title: 'Project spotlight items could not be displayed',
+        description: 'Verify that list items have a Title, Summary, and valid status fields.',
       },
     },
   },

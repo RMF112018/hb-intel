@@ -15,6 +15,10 @@ export interface CuratedOperationalCollection<T> {
   heading: string;
   featured?: T;
   secondary: T[];
+  /** Section-level CTA label (decoupled from featured item CTA). */
+  allProjectsLabel?: string;
+  /** Section-level CTA URL. */
+  allProjectsUrl?: string;
 }
 
 /** Content completeness tier for authoring safety. */
@@ -221,10 +225,19 @@ export function normalizeProjectPortfolioSpotlightConfig(
   const stale = rest.filter((item) => item.isStale);
   const secondary = [...fresh, ...stale].slice(0, maxSecondaryItems);
 
+  const allProjectsLabel = hasText(input?.allProjectsLabel)
+    ? input.allProjectsLabel.trim()
+    : DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG.allProjectsLabel;
+  const allProjectsUrl = hasText(input?.allProjectsUrl)
+    ? input.allProjectsUrl.trim()
+    : DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG.allProjectsUrl;
+
   return {
     heading,
     featured,
     secondary,
+    allProjectsLabel,
+    allProjectsUrl,
   };
 }
 

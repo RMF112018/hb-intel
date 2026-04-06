@@ -59,6 +59,10 @@ export interface ProjectPortfolioSpotlightConfig {
   items?: ProjectPortfolioSpotlightItem[];
   maxSecondaryItems?: number;
   staleAfterHours?: number;
+  /** Label for the section-level "all projects" action (decoupled from featured CTA). */
+  allProjectsLabel?: string;
+  /** URL for the section-level "all projects" action. */
+  allProjectsUrl?: string;
 }
 
 export type SafetyFieldEventType = 'highlight' | 'recognition' | 'reminder' | 'notice';
@@ -85,11 +89,13 @@ export interface SafetyFieldExcellenceConfig {
 }
 
 export const DEFAULT_PROJECT_PORTFOLIO_SPOTLIGHT_CONFIG: Required<
-  Pick<ProjectPortfolioSpotlightConfig, 'heading' | 'maxSecondaryItems' | 'staleAfterHours'>
+  Pick<ProjectPortfolioSpotlightConfig, 'heading' | 'maxSecondaryItems' | 'staleAfterHours' | 'allProjectsLabel' | 'allProjectsUrl'>
 > = {
   heading: 'Project and Portfolio Spotlight',
   maxSecondaryItems: 3,
   staleAfterHours: 168,
+  allProjectsLabel: 'View all projects',
+  allProjectsUrl: '/sites/hb-central/portfolio',
 };
 
 export const DEFAULT_SAFETY_FIELD_EXCELLENCE_CONFIG: Required<

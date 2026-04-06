@@ -3,7 +3,7 @@
   "id": "8370ab0c-b6df-4db0-82f1-24b54750f508",
   "alias": "ProjectPortfolioSpotlightWebPart",
   "componentType": "WebPart",
-  "version": "0.0.5.0",
+  "version": "0.0.6.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportsFullBleed": true,
@@ -22,6 +22,8 @@
       "properties": {
         "heading": "Project Spotlight",
         "maxSecondaryItems": 3,
+        "allProjectsLabel": "View all projects",
+        "allProjectsUrl": "/sites/hb-central/portfolio",
         "items": [
           {
             "id": "project-featured",
