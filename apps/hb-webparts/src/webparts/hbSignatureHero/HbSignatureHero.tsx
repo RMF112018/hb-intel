@@ -3,6 +3,7 @@
  * Phase 16-03 — Unified signature hero with design breakout
  * Phase 18-01 — Canonicalized as the single homepage top-band surface
  * Phase 18-02 — Rebuilt as minimal premium identity surface
+ * Phase 18-03 — Premium background system (charcoal base + authored image)
  *
  * This is the canonical homepage hero for HB Central. All flagship
  * homepage compositions must use this component.
@@ -12,20 +13,14 @@
  *   2. Tagline: "Build with GRIT."
  *   3. Personalized welcome message
  *
- * Nothing else. Premium presence is achieved through composition,
- * scale, spacing, typography, and materiality — not content volume.
+ * Background system:
+ *   - When `backgroundImage` is provided: authored photography with
+ *     a subtle readability scrim overlay
+ *   - When absent: deep charcoal/graphite surface with grain texture,
+ *     atmospheric vignetting, and restrained tonal warmth
  *
- * Composition:
- *   ┌─────────────────────────────────────────────────────┐
- *   │                                                     │
- *   │  [logo] HB Central                                  │
- *   │                                                     │
- *   │  Build with GRIT.                                   │
- *   │                                                     │
- *   │  Good morning,                                      │
- *   │  Jordan.                                            │
- *   │                                                     │
- *   └─────────────────────────────────────────────────────┘
+ * No gradient wash. Premium presence comes from material depth,
+ * composition, and typography — not color effects.
  */
 import * as React from 'react';
 import { motion } from '@hbc/ui-kit/homepage';
@@ -36,6 +31,8 @@ import styles from './signature-hero.module.css';
 
 export interface HbSignatureHeroProps {
   identity: HomepageIdentityInput;
+  /** Optional authored background image URL (wide, low-clutter photography preferred). */
+  backgroundImage?: string;
   now?: Date;
 }
 
@@ -51,6 +48,7 @@ const revealVariants = {
 
 export function HbSignatureHero({
   identity,
+  backgroundImage,
   now = new Date(),
 }: HbSignatureHeroProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
@@ -61,10 +59,22 @@ export function HbSignatureHero({
       className={styles.hero}
       data-hbc-premium="signature-hero"
     >
+      {/* Background image layer (when authored image is provided) */}
+      {backgroundImage ? (
+        <>
+          <div
+            className={styles.backgroundImage}
+            style={{ backgroundImage: `url(${backgroundImage})` }}
+            aria-hidden="true"
+          />
+          <div className={styles.backgroundScrim} aria-hidden="true" />
+        </>
+      ) : null}
+
       {/* Decorative layer — ambient depth and materiality */}
       <div className={styles.ambientLayer} aria-hidden="true">
-        <div className={styles.glowTopRight} />
-        <div className={styles.glowBottomLeft} />
+        <div className={styles.vignette} />
+        <div className={styles.warmShift} />
         <div className={styles.edgeHighlight} />
         <div className={styles.grain} />
       </div>

@@ -1,8 +1,10 @@
 declare const styles: {
   readonly hero: string;
+  readonly backgroundImage: string;
+  readonly backgroundScrim: string;
   readonly ambientLayer: string;
-  readonly glowTopRight: string;
-  readonly glowBottomLeft: string;
+  readonly vignette: string;
+  readonly warmShift: string;
   readonly edgeHighlight: string;
   readonly grain: string;
   readonly contentLayer: string;
