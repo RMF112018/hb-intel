@@ -52,7 +52,7 @@ export interface ProjectPortfolioSpotlightProps {
 /* ── Constants ─────────────────────────────────────────────────── */
 const MAX_VISIBLE_AVATARS = 5;
 const AVATAR_SIZE = 30;
-const DETAIL_AVATAR_SIZE = 36;
+const DETAIL_AVATAR_SIZE = 40;
 
 /* ── Warm accent palette (aligned with HbcEditorialSurface) ─────── */
 const WARM = {
@@ -291,12 +291,12 @@ const teamStripStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: 6,
-  padding: '4px 8px',
+  padding: '5px 10px 5px 4px',
   margin: 0,
   border: 'none',
-  background: 'none',
+  background: 'rgba(229, 126, 70, 0.03)',
   cursor: 'pointer',
-  borderRadius: 20,
+  borderRadius: 22,
   transition: 'background-color 150ms ease',
   fontFamily: 'inherit',
   color: 'inherit',
@@ -306,8 +306,8 @@ const teamStripStyle: React.CSSProperties = {
 const teamStripLabelStyle: React.CSSProperties = {
   fontSize: '0.6875rem',
   fontWeight: 600,
-  color: 'rgba(26, 26, 26, 0.50)',
-  marginLeft: 4,
+  color: 'rgba(26, 26, 26, 0.45)',
+  marginLeft: 6,
   whiteSpace: 'nowrap' as const,
 };
 
@@ -317,7 +317,8 @@ const avatarStyle = (index: number): React.CSSProperties => ({
   borderRadius: '50%',
   objectFit: 'cover' as const,
   border: '2px solid #ffffff',
-  marginLeft: index > 0 ? -8 : 0,
+  boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.06)',
+  marginLeft: index > 0 ? -6 : 0,
   position: 'relative' as const,
   zIndex: MAX_VISIBLE_AVATARS - index,
   flexShrink: 0,
@@ -328,7 +329,7 @@ const initialsStyle = (index: number): React.CSSProperties => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(34, 83, 145, 0.10)',
+  backgroundColor: 'rgba(34, 83, 145, 0.08)',
   color: '#225391',
   fontSize: '0.625rem',
   fontWeight: 700,
@@ -340,11 +341,11 @@ const overflowStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(229, 126, 70, 0.10)',
+  backgroundColor: 'rgba(229, 126, 70, 0.08)',
   color: WARM.dark,
   fontSize: '0.5625rem',
   fontWeight: 700,
-  marginLeft: -8,
+  marginLeft: -6,
 };
 
 /* ── Team detail panel styles ──────────────────────────────────── */
@@ -373,26 +374,27 @@ function getDetailPanelStyle(tier: ResponsiveTier): React.CSSProperties {
     left: 0,
     marginTop: 6,
     zIndex: 10,
-    minWidth: tier === 'tablet' ? 280 : 240,
-    maxWidth: tier === 'tablet' ? 360 : 300,
+    minWidth: tier === 'tablet' ? 280 : 260,
+    maxWidth: tier === 'tablet' ? 360 : 320,
     background: '#ffffff',
-    borderRadius: HP_RADIUS.card,
+    borderRadius: HP_RADIUS.editorial,
     border: `1px solid ${WARM.borderSubtle}`,
-    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06)',
+    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.05)',
     overflow: 'hidden',
   };
 }
 
 const detailHeaderStyle: React.CSSProperties = {
-  padding: '10px 14px 8px',
+  padding: '12px 14px 10px',
   fontSize: '0.6875rem',
-  fontWeight: 700,
+  fontWeight: 600,
   letterSpacing: '0.04em',
   textTransform: 'uppercase' as const,
-  color: 'rgba(26, 26, 26, 0.40)',
+  color: 'rgba(26, 26, 26, 0.36)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  borderBottom: `1px solid ${WARM.tileSeparator}`,
 };
 
 const detailCloseStyle: React.CSSProperties = {
@@ -415,15 +417,15 @@ const detailCloseStyle: React.CSSProperties = {
 const detailListStyle: React.CSSProperties = {
   listStyle: 'none',
   margin: 0,
-  padding: '0 0 6px',
+  padding: '4px 0 8px',
 };
 
 function getDetailItemStyle(tier: ResponsiveTier): React.CSSProperties {
   return {
     display: 'flex',
     alignItems: 'center',
-    gap: 10,
-    padding: tier === 'mobile' ? '10px 16px' : '6px 14px',
+    gap: 12,
+    padding: tier === 'mobile' ? '10px 16px' : '8px 14px',
     minHeight: 44,
   };
 }
@@ -434,6 +436,7 @@ const detailAvatarStyle: React.CSSProperties = {
   borderRadius: '50%',
   objectFit: 'cover' as const,
   flexShrink: 0,
+  boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.06)',
 };
 
 const detailInitialsStyle: React.CSSProperties = {
@@ -484,37 +487,38 @@ function getRailWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
 function getRailHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
   return {
     padding: tier === 'mobile'
-      ? `${HP_SPACE.xl}px ${HP_SPACE.xl}px ${HP_SPACE.md}px`
-      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px ${HP_SPACE.md}px`,
+      ? `${HP_SPACE['2xl']}px ${HP_SPACE.xl}px ${HP_SPACE.lg}px`
+      : `${HP_SPACE['2xl']}px ${HP_SPACE['2xl']}px ${HP_SPACE.lg}px`,
     fontSize: '0.6875rem',
-    fontWeight: 700,
-    letterSpacing: '0.04em',
+    fontWeight: 600,
+    letterSpacing: '0.05em',
     textTransform: 'uppercase' as const,
-    color: 'rgba(26, 26, 26, 0.40)',
+    color: 'rgba(26, 26, 26, 0.36)',
   };
 }
 
 function getRailTileStyle(tier: ResponsiveTier): React.CSSProperties {
   return {
     display: 'flex',
-    gap: HP_SPACE.lg,
+    gap: HP_SPACE.xl,
     padding: tier === 'mobile'
-      ? `${HP_SPACE.lg}px ${HP_SPACE.xl}px`
-      : `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
+      ? `${HP_SPACE.xl}px ${HP_SPACE.xl}px`
+      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
     textDecoration: 'none',
     color: 'inherit',
-    transition: 'background-color 150ms ease',
+    transition: 'background-color 150ms ease, box-shadow 150ms ease',
     cursor: 'pointer',
     borderTop: `1px solid ${WARM.tileSeparator}`,
-    alignItems: 'flex-start',
+    alignItems: 'center',
     minHeight: 44,
+    borderRadius: HP_RADIUS.image,
   };
 }
 
 const railThumbnailWrapperStyle: React.CSSProperties = {
   position: 'relative',
-  flex: '0 0 72px',
-  height: 54,
+  flex: '0 0 80px',
+  height: 60,
   borderRadius: HP_RADIUS.image,
   overflow: 'hidden',
   backgroundColor: 'rgba(0, 0, 0, 0.025)',
@@ -542,14 +546,15 @@ const railContentStyle: React.CSSProperties = {
   minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
-  gap: 3,
+  gap: 4,
 };
 
 const railTitleStyle: React.CSSProperties = {
   margin: 0,
   fontSize: '0.8125rem',
   fontWeight: 600,
-  lineHeight: 1.3,
+  lineHeight: 1.35,
+  letterSpacing: '-0.01em',
   color: '#1a1a1a',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -629,8 +634,8 @@ function RailThumbnail({
     <img
       src={src}
       alt={alt}
-      width={72}
-      height={54}
+      width={80}
+      height={60}
       decoding="async"
       loading="lazy"
       style={railThumbnailStyle}
@@ -812,8 +817,8 @@ function ProjectTeamStrip({
           <span style={overflowStyle} aria-hidden="true">+{overflow}</span>
         ) : null}
         <span style={teamStripLabelStyle}>
-          <Users size={10} aria-hidden="true" style={{ marginRight: 3, verticalAlign: -1, opacity: 0.5 }} />
-          {members.length} team
+          <Users size={10} aria-hidden="true" style={{ marginRight: 4, verticalAlign: -1, opacity: 0.45 }} />
+          {members.length} {members.length === 1 ? 'member' : 'members'}
         </span>
       </button>
 
@@ -866,7 +871,8 @@ function SupportingTile({
   const baseTileStyle = getRailTileStyle(tier);
   const style: React.CSSProperties = {
     ...baseTileStyle,
-    backgroundColor: hovered ? WARM.tileHover : 'transparent',
+    backgroundColor: hovered ? 'rgba(229, 126, 70, 0.04)' : 'transparent',
+    boxShadow: hovered ? '0 1px 4px rgba(0, 0, 0, 0.04)' : 'none',
   };
 
   const Tag = tileProps.as;
@@ -1062,7 +1068,7 @@ export function ProjectPortfolioSpotlight({
             role="list"
             aria-label="Additional projects"
           >
-            <div style={getRailHeaderStyle(tier)}>Also in progress</div>
+            <div style={getRailHeaderStyle(tier)}>More projects</div>
             {normalized.secondary.map((item) => (
               <SupportingTile key={item.id} item={item} tier={tier} />
             ))}
