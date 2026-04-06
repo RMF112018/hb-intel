@@ -645,6 +645,9 @@ function ProjectTeamStrip({
               <img
                 src={member.photoUrl}
                 alt={member.displayName}
+                width={DETAIL_AVATAR_SIZE}
+                height={DETAIL_AVATAR_SIZE}
+                decoding="async"
                 style={detailAvatarStyle}
               />
             ) : (
@@ -679,6 +682,9 @@ function ProjectTeamStrip({
               key={member.id}
               src={member.photoUrl}
               alt={member.displayName}
+              width={AVATAR_SIZE}
+              height={AVATAR_SIZE}
+              decoding="async"
               style={avatarStyle(i)}
             />
           ) : (
@@ -765,8 +771,11 @@ function SupportingTile({
           <img
             src={item.image.src}
             alt={item.image.alt || item.title}
-            style={railThumbnailStyle}
+            width={72}
+            height={54}
+            decoding="async"
             loading="lazy"
+            style={railThumbnailStyle}
           />
         ) : (
           <div style={railThumbnailPlaceholderStyle} aria-hidden="true" />
@@ -777,14 +786,16 @@ function SupportingTile({
       <div style={railContentStyle}>
         <p style={railTitleStyle}>{item.title}</p>
         {metaText ? <span style={railMetaStyle}>{metaText}</span> : null}
-        <div style={badgeRowStyle}>
-          {item.isStale ? (
-            <HbcPremiumBadge label="Stale" status="warning" size="sm" />
-          ) : null}
-          {item.status ? (
-            <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" />
-          ) : null}
-        </div>
+        {(item.isStale || item.status) ? (
+          <div style={badgeRowStyle}>
+            {item.isStale ? (
+              <HbcPremiumBadge label="Stale" status="warning" size="sm" />
+            ) : null}
+            {item.status ? (
+              <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" />
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </Tag>
   );
@@ -862,8 +873,9 @@ export function ProjectPortfolioSpotlight({
                   <img
                     src={feat.image.src}
                     alt={feat.image.alt || feat.title}
-                    style={imageStyle}
+                    decoding="async"
                     loading="lazy"
+                    style={imageStyle}
                   />
                   <div style={imageScrimStyle} aria-hidden="true" />
                 </>
