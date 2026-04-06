@@ -17,6 +17,9 @@ export interface CuratedOperationalCollection<T> {
   secondary: T[];
 }
 
+/** Content completeness tier for authoring safety. */
+export type ContentCompleteness = 'full' | 'partial' | 'minimal';
+
 export interface NormalizedProjectPortfolioSpotlightItem extends ProjectPortfolioSpotlightItem {
   milestones: ProjectMilestone[];
   isStale: boolean;
@@ -26,6 +29,8 @@ export interface NormalizedProjectPortfolioSpotlightItem extends ProjectPortfoli
   location?: string;
   sector?: string;
   teamMembers: ProjectTeamMember[];
+  /** How complete the authored content is — drives UI fallback behavior. */
+  contentCompleteness: ContentCompleteness;
 }
 
 export interface NormalizedSafetyFieldExcellenceItem extends SafetyFieldExcellenceItem {
@@ -41,9 +46,16 @@ function isValidDate(value: string | undefined): value is string {
   return Boolean(value && Number.isFinite(Date.parse(value)));
 }
 
+/**
+ * Deterministic selection sort: featured > order > recency > title.
+ *
+ * Featured items always sort first. Within the same priority tier,
+ * more recently updated items are preferred. Title is the final
+ * stable tiebreaker for identical timestamps or missing freshness.
+ */
 function byPriority(
-  a: { featured?: boolean; order?: number; title: string },
-  b: { featured?: boolean; order?: number; title: string },
+  a: { featured?: boolean; order?: number; title: string; freshness?: { updatedAt?: string } },
+  b: { featured?: boolean; order?: number; title: string; freshness?: { updatedAt?: string } },
 ): number {
   const aFeatured = a.featured ? 0 : 1;
   const bFeatured = b.featured ? 0 : 1;
@@ -55,6 +67,13 @@ function byPriority(
   const bOrder = Number.isFinite(b.order) ? (b.order as number) : Number.MAX_SAFE_INTEGER;
   if (aOrder !== bOrder) {
     return aOrder - bOrder;
+  }
+
+  // Recency tiebreak: prefer more recently updated items
+  const aTime = isValidDate(a.freshness?.updatedAt) ? Date.parse(a.freshness!.updatedAt!) : 0;
+  const bTime = isValidDate(b.freshness?.updatedAt) ? Date.parse(b.freshness!.updatedAt!) : 0;
+  if (aTime !== bTime) {
+    return bTime - aTime; // descending — newer first
   }
 
   return a.title.localeCompare(b.title);
@@ -97,6 +116,21 @@ function normalizeTeamMembers(members: ProjectTeamMember[] | undefined): Project
     }));
 }
 
+/**
+ * Produce a concise relative time label (e.g. "2 days ago", "3 hours ago").
+ * Falls back to the date portion of the ISO string when the gap exceeds 30 days.
+ */
+function relativeTimeLabel(isoDate: string, now: Date): string {
+  const deltaMs = now.getTime() - Date.parse(isoDate);
+  const hours = Math.floor(deltaMs / (1000 * 60 * 60));
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Yesterday';
+  if (days <= 30) return `${days} days ago`;
+  return isoDate.slice(0, 10);
+}
+
 function resolveFreshness(
   freshness: { source?: 'curated' | 'live'; updatedAt?: string; expiresAt?: string } | undefined,
   staleAfterHours: number,
@@ -116,7 +150,7 @@ function resolveFreshness(
   }
 
   if (updatedAt) {
-    return { isStale: false, freshnessLabel: `Updated ${updatedAt.slice(0, 10)}` };
+    return { isStale: false, freshnessLabel: `Updated ${relativeTimeLabel(updatedAt, now)}` };
   }
 
   return {
@@ -143,6 +177,17 @@ export function normalizeProjectPortfolioSpotlightConfig(
     .filter((item) => isVisibleForAudience(item.audiences, activeAudience))
     .map((item) => {
       const freshness = resolveFreshness(item.freshness, staleAfterHours, now);
+      const image = hasText(item.image?.src)
+        ? { src: item.image.src.trim(), alt: (item.image.alt ?? '').trim(), aspectRatio: item.image.aspectRatio }
+        : undefined;
+      const highlightHeadline = hasText(item.highlightHeadline) ? item.highlightHeadline.trim() : undefined;
+
+      // Content completeness: full (image + headline + status), partial (missing 1-2), minimal (bare minimum)
+      const signals = [Boolean(image), Boolean(highlightHeadline), Boolean(hasText(item.status?.label))];
+      const signalCount = signals.filter(Boolean).length;
+      const contentCompleteness: ContentCompleteness =
+        signalCount === 3 ? 'full' : signalCount >= 1 ? 'partial' : 'minimal';
+
       return normalizeCta({
         ...item,
         id: item.id.trim(),
@@ -158,23 +203,28 @@ export function normalizeProjectPortfolioSpotlightConfig(
         milestones: normalizeMilestones(item.milestones),
         isStale: freshness.isStale,
         freshnessLabel: freshness.freshnessLabel,
-        image: hasText(item.image?.src)
-          ? { src: item.image.src.trim(), alt: (item.image.alt ?? '').trim(), aspectRatio: item.image.aspectRatio }
-          : undefined,
-        highlightHeadline: hasText(item.highlightHeadline) ? item.highlightHeadline.trim() : undefined,
+        image,
+        highlightHeadline,
         location: hasText(item.location) ? item.location.trim() : undefined,
         sector: hasText(item.sector) ? item.sector.trim() : undefined,
         teamMembers: normalizeTeamMembers(item.teamMembers),
+        contentCompleteness,
       });
     })
     .sort(byPriority);
 
-  const [featured, ...secondary] = normalized;
+  const [featured, ...rest] = normalized;
+
+  // Stale demotion: push stale items to the end of the secondary rail
+  // so fresh items get priority visibility in the limited rail space.
+  const fresh = rest.filter((item) => !item.isStale);
+  const stale = rest.filter((item) => item.isStale);
+  const secondary = [...fresh, ...stale].slice(0, maxSecondaryItems);
 
   return {
     heading,
     featured,
-    secondary: secondary.slice(0, maxSecondaryItems),
+    secondary,
   };
 }
 

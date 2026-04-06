@@ -777,9 +777,14 @@ function SupportingTile({
       <div style={railContentStyle}>
         <p style={railTitleStyle}>{item.title}</p>
         {metaText ? <span style={railMetaStyle}>{metaText}</span> : null}
-        {item.status ? (
-          <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" />
-        ) : null}
+        <div style={badgeRowStyle}>
+          {item.isStale ? (
+            <HbcPremiumBadge label="Stale" status="warning" size="sm" />
+          ) : null}
+          {item.status ? (
+            <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" />
+          ) : null}
+        </div>
       </div>
     </Tag>
   );
@@ -901,8 +906,11 @@ export function ProjectPortfolioSpotlight({
               <p style={getSummaryStyle(tier)}>{feat.summary}</p>
 
               {/* Badges — restrained */}
-              {(feat.status || feat.strategicEmphasis) ? (
+              {(feat.status || feat.strategicEmphasis || feat.isStale) ? (
                 <div style={badgeRowStyle}>
+                  {feat.isStale ? (
+                    <HbcPremiumBadge label="Stale" status="warning" size="sm" />
+                  ) : null}
                   {feat.status ? (
                     <HbcPremiumBadge label={feat.status.label} status={feat.status.variant ?? 'info'} size="sm" />
                   ) : null}
