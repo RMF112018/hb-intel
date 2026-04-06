@@ -19,7 +19,7 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
  * This is the authoritative composition reference for the HB Central
  * homepage. It demonstrates the premium 5-zone focal sequence:
  *
- *   1. Signature Hero — unified greeting + editorial hero (one surface)
+ *   1. Signature Hero — minimal premium identity surface (logo, tagline, greeting)
  *   2. Utility — command surfaces (priority actions + tool launcher)
  *   3. Discovery — search and wayfinding product
  *   4. Communications — editorial modules (pulse, leadership, people)
@@ -57,25 +57,8 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
   return (
     <div data-hbc-homepage="composition-reference" style={compositionStyle}>
 
-      {/* ── Zone 1: Signature Hero — Unified Greeting + Editorial ── */}
-      <HbSignatureHero
-        identity={{ preferredName: 'Jordan Miller' }}
-        welcomeConfig={{
-          supportLine: "Let's keep projects moving with clarity today.",
-          contextLine: 'Saturday, April 5',
-          alertSeverity: 'warning',
-          alertTitle: 'Weather advisory',
-          alertMessage: 'Review field safety updates before site mobilization.',
-        }}
-        heroConfig={{
-          eyebrow: 'This week at HB',
-          headline: 'HB Central: Week of April Operations',
-          message: 'Track active milestones, field recognition, and leadership guidance from one homepage band.',
-          metadata: 'Updated Friday at 8:00 AM',
-          cta: { label: 'Read update', href: '/company-pulse' },
-          secondaryCta: { label: 'View all updates', href: '/updates' },
-        }}
-      />
+      {/* ── Zone 1: Signature Hero — Premium Identity Surface ──── */}
+      <HbSignatureHero identity={{ preferredName: 'Jordan Miller' }} />
 
       {/* ── Zone 2: Utility — Command Surfaces ──────────────────── */}
       <section aria-label="Quick-use and work zone" style={zoneStyle('utility')}>
