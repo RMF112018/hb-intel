@@ -135,10 +135,38 @@ function extractUrl(field: string | { Url?: string; Description?: string } | und
   return field.Url || undefined;
 }
 
+/**
+ * Extract a usable image URL from a SharePoint PrimaryImage field.
+ *
+ * SharePoint Image columns return a **JSON-encoded string** via REST API
+ * (odata=nometadata) — not a plain URL or a pre-parsed object. The JSON
+ * contains `serverUrl` and `serverRelativeUrl` which must be combined
+ * to produce a full image URL.
+ *
+ * Handles: JSON string, plain URL string, and pre-parsed object shapes.
+ */
 function extractImageSrc(field: RawSpotlightListItem['PrimaryImage'], siteUrl: string): string | undefined {
   if (!field) return undefined;
-  if (typeof field === 'string') return field || undefined;
-  // SharePoint Image column JSON — construct full URL
+
+  if (typeof field === 'string') {
+    // SharePoint Image columns arrive as JSON-encoded strings.
+    // Try to parse before assuming it's a direct URL.
+    try {
+      const parsed: unknown = JSON.parse(field);
+      if (parsed && typeof parsed === 'object') {
+        const obj = parsed as Record<string, unknown>;
+        if (typeof obj.serverRelativeUrl === 'string' && obj.serverRelativeUrl) {
+          const base = (typeof obj.serverUrl === 'string' && obj.serverUrl) || siteUrl;
+          return `${base}${obj.serverRelativeUrl}`;
+        }
+      }
+    } catch {
+      // Not JSON — treat as a plain URL string
+    }
+    return field || undefined;
+  }
+
+  // Pre-parsed object (defensive — may come from manifest seed data)
   if (field.serverRelativeUrl) {
     const base = field.serverUrl || siteUrl;
     return `${base}${field.serverRelativeUrl}`;
