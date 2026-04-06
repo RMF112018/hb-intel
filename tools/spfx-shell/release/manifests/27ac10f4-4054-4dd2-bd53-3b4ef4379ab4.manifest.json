@@ -1,26 +1,19 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
   "id": "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4",
   "alias": "PeopleCultureWebPart",
   "componentType": "WebPart",
-  "version": "1.0.0",
+  "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
-  "supportedHosts": [
-    "SharePointWebPart"
-  ],
+  "supportedHosts": ["SharePointWebPart"],
   "supportsThemeVariants": false,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": {
-        "default": "HB Intel"
-      },
-      "title": {
-        "default": "People and Culture"
-      },
-      "description": {
-        "default": "Curated people moments including welcomes, anniversaries, promotions, and recognition."
-      },
+      "group": { "default": "HB Intel" },
+      "title": { "default": "People and Culture" },
+      "description": { "default": "Curated people moments including welcomes, anniversaries, promotions, and recognition." },
       "officeFabricIconFontName": "People",
       "properties": {
         "heading": "People and Culture",
@@ -33,10 +26,7 @@
             "highlight": "Welcoming Jordan to the field operations team.",
             "featured": true,
             "order": 1,
-            "cta": {
-              "label": "Meet Jordan",
-              "href": "/sites/hb-central/people"
-            }
+            "cta": { "label": "Meet Jordan", "href": "/sites/hb-central/people" }
           },
           {
             "id": "culture-anniversary",
@@ -48,27 +38,5 @@
         ]
       }
     }
-  ],
-  "loaderConfig": {
-    "internalModuleBaseUrls": [
-      "<!-- PATH TO CDN -->"
-    ],
-    "entryModuleId": "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4_1.0.0",
-    "scriptResources": {
-      "@microsoft/sp-loader": {
-        "type": "component",
-        "id": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
-        "version": "1.18.0"
-      },
-      "@microsoft/sp-webpart-base": {
-        "type": "component",
-        "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
-        "version": "1.18.0"
-      },
-      "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4_1.0.0": {
-        "type": "path",
-        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-9554a971.js"
-      }
-    }
-  }
+  ]
 }
