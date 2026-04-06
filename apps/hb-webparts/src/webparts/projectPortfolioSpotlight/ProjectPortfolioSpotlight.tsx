@@ -1,10 +1,14 @@
 /**
  * ProjectPortfolioSpotlight — Premium editorial spotlight surface
- * Phase P05-03 — Supporting rail and hierarchy enforcement
+ * Phase P05-04 — Signature Hero alignment pass
  *
  * Image-led editorial composition with warm accent styling aligned
  * with HbcEditorialSurface. Desktop layout: dominant featured spotlight
  * (~65%) plus subordinate supporting rail (~35%).
+ *
+ * Typography, spacing, image treatment, and chrome refined to belong
+ * to the same premium homepage family as the Signature Hero without
+ * duplicating its visual language.
  */
 import * as React from 'react';
 import {
@@ -42,12 +46,12 @@ const WARM = {
   dark: '#c26434',
   border: 'rgba(229, 126, 70, 0.40)',
   borderSubtle: 'rgba(0, 0, 0, 0.06)',
-  separator: 'linear-gradient(90deg, rgba(229, 126, 70, 0.30) 0%, rgba(229, 126, 70, 0.05) 100%)',
+  separator: 'linear-gradient(90deg, rgba(229, 126, 70, 0.22) 0%, rgba(229, 126, 70, 0.04) 100%)',
   eyebrow: 'rgba(229, 126, 70, 0.70)',
   iconBg: 'rgba(229, 126, 70, 0.08)',
-  scrim: 'linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.08) 40%, transparent 100%)',
+  scrim: 'linear-gradient(to top, rgba(0, 0, 0, 0.22) 0%, transparent 60%)',
   tileHover: 'rgba(229, 126, 70, 0.03)',
-  tileSeparator: 'rgba(229, 126, 70, 0.08)',
+  tileSeparator: 'rgba(229, 126, 70, 0.06)',
 } as const;
 
 /* ── Root and header styles ────────────────────────────────────── */
@@ -66,7 +70,7 @@ const rootStyle: React.CSSProperties = {
 };
 
 const headerStyle: React.CSSProperties = {
-  padding: `${HP_SPACE['3xl']}px ${HP_SPACE['2xl']}px ${HP_SPACE.xl}px`,
+  padding: `${HP_SPACE['3xl']}px 24px ${HP_SPACE.xl}px`,
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -84,9 +88,9 @@ const headerTitleStyle: React.CSSProperties = {
 };
 
 const separatorStyle: React.CSSProperties = {
-  height: 2,
+  height: 1,
   background: WARM.separator,
-  margin: `0 ${HP_SPACE['2xl']}px`,
+  margin: '0 24px',
   border: 'none',
 };
 
@@ -115,7 +119,7 @@ const imageZoneStyle: React.CSSProperties = {
   flex: '0 0 48%',
   minHeight: 280,
   overflow: 'hidden',
-  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+  backgroundColor: 'rgba(0, 0, 0, 0.025)',
 };
 
 const imageStyle: React.CSSProperties = {
@@ -150,34 +154,37 @@ const imagePlaceholderStyle: React.CSSProperties = {
 
 const contentZoneStyle: React.CSSProperties = {
   flex: '1 1 52%',
-  padding: `${HP_SPACE['3xl']}px ${HP_SPACE['2xl']}px`,
+  padding: '24px',
   display: 'flex',
   flexDirection: 'column',
-  gap: HP_SPACE.md,
+  gap: 10,
 };
 
 const titleStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '1.375rem',
+  fontSize: '1.5rem',
   fontWeight: 700,
-  letterSpacing: '-0.02em',
-  lineHeight: 1.2,
+  letterSpacing: '-0.025em',
+  lineHeight: 1.15,
   color: '#1a1a1a',
+  maxWidth: '20ch',
 };
 
 const headlineStyle: React.CSSProperties = {
   margin: 0,
   fontSize: '0.9375rem',
-  fontWeight: 500,
-  lineHeight: 1.5,
-  color: 'rgba(26, 26, 26, 0.75)',
+  fontWeight: 400,
+  lineHeight: 1.6,
+  color: 'rgba(26, 26, 26, 0.78)',
+  maxWidth: '38ch',
 };
 
 const summaryStyle: React.CSSProperties = {
   margin: 0,
   fontSize: '0.8125rem',
-  lineHeight: 1.55,
-  color: 'rgba(26, 26, 26, 0.60)',
+  lineHeight: 1.6,
+  color: 'rgba(26, 26, 26, 0.55)',
+  maxWidth: '48ch',
   display: '-webkit-box',
   WebkitLineClamp: 3,
   WebkitBoxOrient: 'vertical' as unknown as React.CSSProperties['WebkitBoxOrient'],
@@ -202,7 +209,7 @@ const metaItemStyle: React.CSSProperties = {
 };
 
 const teamStripPlaceholderStyle: React.CSSProperties = {
-  minHeight: 32,
+  minHeight: 16,
 };
 
 const ctaWrapperStyle: React.CSSProperties = {
@@ -247,7 +254,7 @@ const railThumbnailWrapperStyle: React.CSSProperties = {
   height: 54,
   borderRadius: HP_RADIUS.image,
   overflow: 'hidden',
-  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+  backgroundColor: 'rgba(0, 0, 0, 0.025)',
 };
 
 const railThumbnailStyle: React.CSSProperties = {
@@ -297,9 +304,9 @@ const railMetaStyle: React.CSSProperties = {
 /* ── Motion ────────────────────────────────────────────────────── */
 
 const featuredMotion = {
-  initial: { opacity: 0, y: 8 },
+  initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] as const },
+  transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as const },
 };
 
 const railMotion = {
@@ -508,7 +515,7 @@ export function ProjectPortfolioSpotlight({
                     label={feat.cta.label}
                     href={feat.cta.href}
                     variant="secondary"
-                    size="sm"
+                    size="md"
                     arrow
                   />
                 </div>
