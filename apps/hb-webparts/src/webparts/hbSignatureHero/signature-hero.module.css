@@ -1,12 +1,11 @@
 /**
- * Signature hero styles — Phase 01-02 rebuild
+ * Signature hero styles — Phase 04 refinement
  *
  * Premium identity plate for the HB Central homepage.
- * Full-width surface with asymmetric content placement,
- * bottom-left anchored text cluster, and confident negative space.
+ * Two-zone composition: text-left / full-color logo-right.
  *
- * Background: deep charcoal field with material grain.
- * Optional authored photography layer with readability scrim.
+ * Background: authored photography with readability scrim.
+ * Fallback: deep charcoal field with material grain.
  *
  * Accessibility:
  *   - WCAG 2.1 AA contrast (white text on charcoal ≥ 12.6:1)
@@ -68,40 +67,65 @@
   background-size: 200px 200px;
 }
 
-/* ── Content grid ──────────────────────────────────────── */
+/* ── Right-side luminance overlay ──────────────────────── */
+
+/* Soft directional brightness lift behind the logo zone.
+   Left-to-right gradient + diffused radial highlight.
+   Sits above scrim/grain, below content. */
+.brighten {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 40% 60% at 85% 50%,
+      hsla(0 0% 100% / 0.07) 0%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 25%,
+      hsla(0 0% 100% / 0.10) 65%,
+      hsla(0 0% 100% / 0.18) 100%
+    );
+}
+
+/* ── Content — two-zone flex row ───────────────────────── */
 
 .content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
   padding: 1.75rem 3.5rem;
-  gap: 1.5rem;
-  max-width: 56%;
+  gap: 2rem;
 }
 
-/* ── Brand lockup ──────────────────────────────────────── */
+/* ── Left zone: greeting + tagline ────────────────────── */
 
-.lockup {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logo {
-  height: 28px;
-  width: auto;
-  opacity: 0.70;
-  filter: brightness(10);
-}
-
-/* ── Identity cluster ──────────────────────────────────── */
-
-.identity {
+.textZone {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-width: 56%;
+}
+
+/* ── Right zone: full-color logo ──────────────────────── */
+
+.logoZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 64px;
+  width: auto;
+  /* Full-color original — no filter, no opacity reduction */
 }
 
 /* Tagline — primary typographic statement */
@@ -141,8 +165,15 @@
 
 @media (max-width: 768px) {
   .content {
-    max-width: 72%;
     padding: 1.5rem 2.5rem;
+  }
+
+  .textZone {
+    max-width: 64%;
+  }
+
+  .logo {
+    height: 48px;
   }
 
   .tagline {
@@ -162,9 +193,22 @@
   }
 
   .content {
-    max-width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
     padding: 1.25rem 1.5rem;
     gap: 1.25rem;
+  }
+
+  .textZone {
+    max-width: 100%;
+  }
+
+  .logoZone {
+    align-self: flex-end;
+  }
+
+  .logo {
+    height: 40px;
   }
 
   .tagline {

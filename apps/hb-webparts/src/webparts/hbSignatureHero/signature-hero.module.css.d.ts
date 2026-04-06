@@ -3,10 +3,11 @@ declare const styles: {
   readonly photo: string;
   readonly scrim: string;
   readonly grain: string;
+  readonly brighten: string;
   readonly content: string;
-  readonly lockup: string;
+  readonly textZone: string;
+  readonly logoZone: string;
   readonly logo: string;
-  readonly identity: string;
   readonly tagline: string;
   readonly greeting: string;
   readonly greetingLine: string;

@@ -7,16 +7,16 @@
  * homepage compositions must use this component.
  *
  * Composition model:
- *   CSS Grid with a single content region anchored bottom-left.
+ *   Two-zone flex row — text-left / logo-right.
  *   The hero occupies the full available width of a SharePoint
- *   full-width section. Content sits within a constrained column
- *   that leaves intentional negative space on the right, creating
- *   asymmetric visual balance across the full canvas.
+ *   full-width section. Text content (greeting + tagline) anchors
+ *   on the left as the primary focal point. The full-color company
+ *   logo sits on the right, creating a premium branded masthead.
  *
  * Locked content:
- *   1. Company logo — subtle, supporting
- *   2. Personalized greeting — warm entry line, refined
- *   3. Tagline: "Build with GRIT." — primary typographic statement
+ *   1. Personalized greeting — warm entry line, refined (left)
+ *   2. Tagline: "Build with GRIT." — primary typographic statement (left)
+ *   3. Company logo — full-color, balanced (right)
  *
  * Background system:
  *   - Default: repo-controlled banner_home_7.png (center-cropped)
@@ -89,32 +89,18 @@ export function HbSignatureHero({
       ) : null}
       <div className={styles.scrim} aria-hidden="true" />
       <div className={styles.grain} aria-hidden="true" />
+      <div className={styles.brighten} aria-hidden="true" />
 
-      {/* ── Content ── */}
+      {/* ── Content — text-left / logo-right ── */}
       <div className={styles.content}>
-        {/* Brand lockup — subtle top anchor */}
-        <motion.div
-          className={styles.lockup}
-          variants={reveal}
-          initial="hidden"
-          animate="show"
-          custom={0}
-        >
-          <img
-            src={hedrickLogo}
-            alt="Hedrick Brothers"
-            className={styles.logo}
-          />
-        </motion.div>
-
-        {/* Identity cluster — greeting + tagline */}
-        <div className={styles.identity}>
+        {/* Left zone: greeting + tagline */}
+        <div className={styles.textZone}>
           <motion.div
             className={styles.greeting}
             variants={reveal}
             initial="hidden"
             animate="show"
-            custom={0.1}
+            custom={0}
           >
             <span className={styles.greetingLine}>
               {message.greeting},
@@ -129,11 +115,26 @@ export function HbSignatureHero({
             variants={reveal}
             initial="hidden"
             animate="show"
-            custom={0.2}
+            custom={0.1}
           >
             Build with GRIT.
           </motion.h1>
         </div>
+
+        {/* Right zone: full-color logo */}
+        <motion.div
+          className={styles.logoZone}
+          variants={reveal}
+          initial="hidden"
+          animate="show"
+          custom={0.2}
+        >
+          <img
+            src={hedrickLogo}
+            alt="Hedrick Brothers"
+            className={styles.logo}
+          />
+        </motion.div>
       </div>
     </section>
   );

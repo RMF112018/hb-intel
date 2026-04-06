@@ -241,7 +241,12 @@
       "Bash(rm -f /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts.sppkg /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts-shim-proof.json)",
       "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/sharepoint)",
       "Bash(mkdir -p /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/webparts/hbSignatureHero/assets)",
-      "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/NAS - HB/SOP/Sharepoint/HB_images/banner_home_7.png\" /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/webparts/hbSignatureHero/assets/banner_home_7.png)"
+      "Bash(cp \"/Users/bobbyfetting/Library/CloudStorage/SynologyDrive-BFmacSync/Work/NAS - HB/SOP/Sharepoint/HB_images/banner_home_7.png\" /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/webparts/hbSignatureHero/assets/banner_home_7.png)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/apps/hb-webparts/dist/)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/dist/sppkg/)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/sharepoint/)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/temp/)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/dist/)"
     ]
   },
   "enabledPlugins": {

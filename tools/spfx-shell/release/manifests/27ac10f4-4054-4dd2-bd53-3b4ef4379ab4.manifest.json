@@ -56,6 +56,11 @@
     ],
     "entryModuleId": "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4_1.0.0",
     "scriptResources": {
+      "@microsoft/sp-property-pane": {
+        "type": "component",
+        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db",
+        "version": "1.18.0"
+      },
       "@microsoft/sp-loader": {
         "type": "component",
         "id": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
@@ -68,7 +73,7 @@
       },
       "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4_1.0.0": {
         "type": "path",
-        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-e3ebeff8.js"
+        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-12c43162.js"
       }
     }
   }
