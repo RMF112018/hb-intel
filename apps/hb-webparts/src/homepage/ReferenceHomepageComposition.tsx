@@ -14,7 +14,9 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
  * Governed Homepage Composition Reference
  *
  * Phase 16-03 — Unified signature hero with design breakout.
- * Phase 18-01 — Signature hero canonicalized as sole flagship top-band path.
+ * Phase 18 (01–04) — Signature hero canonicalized, rebuilt as minimal
+ *   premium identity surface, gradient replaced with charcoal background
+ *   system, accessibility and doctrine hardened.
  *
  * This is the authoritative composition reference for the HB Central
  * homepage. It demonstrates the premium 5-zone focal sequence:
@@ -28,9 +30,10 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
  * P16-03: Top band merged from two-panel welcome+hero into a single
  * unified HbSignatureHero with motion reveal choreography.
  *
- * P18-01: HbSignatureHero formally canonicalized as the only homepage
- * flagship hero. The split-path pattern (separate hbHeroBanner +
- * personalizedWelcomeHeader) is retired for flagship composition.
+ * P18: HbSignatureHero formally canonicalized as the only homepage
+ * flagship hero. Content reduced to three locked identity elements.
+ * Split-path pattern retired. Gradient wash replaced with premium
+ * charcoal background system. Accessibility and authoring hardened.
  *
  * This is NOT the production rendering path. In production, each webpart
  * renders independently through the mount/dispatch seam.

@@ -205,6 +205,24 @@ The top band must establish the page’s quality standard immediately through:
 - stronger brand expression
 - materially better use of available width
 
+### 6.5 Locked hero content — BINDING (Phase 18)
+The flagship homepage hero contains exactly three identity elements:
+
+1. **Company logo / brand lockup** (Hedrick Brothers + "HB Central")
+2. **Tagline:** "Build with GRIT."
+3. **Personalized welcome message** ("Good {morning/afternoon/evening}, {First Name}.")
+
+No editorial headline, CTA, metadata row, alert chip, context line, eyebrow, or other furniture. Premium presence is achieved through composition, scale, spacing, typography, and materiality — not content volume.
+
+### 6.6 Hero background standard — BINDING (Phase 18)
+The hero background must not use a gradient wash (no blue/orange enterprise banner treatment).
+
+Approved background system:
+- **Primary:** Authored photography (wide, low-clutter project or craft imagery) with a subtle readability scrim overlay
+- **Fallback:** Deep charcoal/graphite surface (`hsl(220, 12%, 13%)`) with grain texture, atmospheric vignetting, and restrained tonal warmth
+
+The background must support text readability without heavy overlay bands.
+
 ---
 
 ## 7. Directional homepage guidance
@@ -329,3 +347,6 @@ Future implementation phases should treat the following as locked:
 7. the top band must render as one flagship surface
 8. the three-lane model remains the governing architecture
 9. supported customization posture remains page canvas + placeholders only
+10. the flagship hero contains only logo, tagline "Build with GRIT.", and personalized greeting (Phase 18)
+11. the hero background must not use a gradient wash — charcoal base or authored photography only (Phase 18)
+12. the split-path hero pattern (separate greeting + editorial hero) is retired for flagship use (Phase 18)

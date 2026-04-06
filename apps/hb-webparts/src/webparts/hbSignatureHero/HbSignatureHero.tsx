@@ -4,23 +4,27 @@
  * Phase 18-01 — Canonicalized as the single homepage top-band surface
  * Phase 18-02 — Rebuilt as minimal premium identity surface
  * Phase 18-03 — Premium background system (charcoal base + authored image)
+ * Phase 18-04 — Accessibility, authoring safety, and doctrine hardening
  *
  * This is the canonical homepage hero for HB Central. All flagship
  * homepage compositions must use this component.
  *
- * The hero contains exactly three identity elements:
+ * Content is intentionally locked to three identity elements:
  *   1. Company logo / brand lockup
  *   2. Tagline: "Build with GRIT."
  *   3. Personalized welcome message
  *
- * Background system:
- *   - When `backgroundImage` is provided: authored photography with
- *     a subtle readability scrim overlay
- *   - When absent: deep charcoal/graphite surface with grain texture,
- *     atmospheric vignetting, and restrained tonal warmth
+ * Authoring safety: The hero has no "unconfigured" or "empty" state
+ * because all primary content is locked. The logo is a static asset,
+ * the tagline is hardcoded, and the greeting falls back to "Good
+ * {time-of-day}, there." when identity is unavailable. The optional
+ * `backgroundImage` degrades to the charcoal textured fallback.
  *
- * No gradient wash. Premium presence comes from material depth,
- * composition, and typography — not color effects.
+ * Accessibility: WCAG 2.1 AA contrast verified against charcoal base.
+ * All typography uses rem units for zoom resilience. Reduced-motion
+ * media query disables all animation. No interactive elements.
+ *
+ * No gradient wash. No editorial furniture. No CTA clutter.
  */
 import * as React from 'react';
 import { motion } from '@hbc/ui-kit/homepage';

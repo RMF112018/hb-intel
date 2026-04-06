@@ -1,16 +1,22 @@
 /**
- * Signature hero styles — Phase 18-03
+ * Signature hero styles — Phase 18-04
  *
- * Premium background system for the minimal identity surface.
- * Dark charcoal/graphite base with optional authored photography.
+ * Canonical minimal premium identity surface.
+ * Three locked content elements: logo, tagline, personalized greeting.
  *
- * Background hierarchy:
- *   1. Authored image (if provided) with readability overlay
- *   2. Premium textured fallback — deep charcoal with subtle
- *      material depth, grain, and atmospheric vignetting
+ * Background system:
+ *   1. Authored image (if provided) with readability scrim
+ *   2. Premium textured fallback — deep charcoal with grain,
+ *      atmospheric vignetting, and restrained tonal warmth
  *
- * No gradient wash. Premium presence comes from material depth,
- * restrained tonal layering, and cinematic photographic quality.
+ * Accessibility:
+ *   - WCAG 2.1 AA contrast on all text elements (4.5:1 minimum)
+ *   - prefers-reduced-motion disables all animation/transition
+ *   - rem-based typography for zoom resilience
+ *   - responsive reflow at 640px breakpoint
+ *   - no interactive elements requiring focus management
+ *
+ * No gradient wash. No editorial furniture. No CTA clutter.
  */
 
 /* ── Hero container ─────────────────────────────────────── */
@@ -145,7 +151,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.50;
+  opacity: 0.58;
 }
 
 /* ── Identity block: tagline + greeting ─────────────────── */
@@ -179,7 +185,7 @@
 .greetingPrefix {
   font-size: 1rem;
   font-weight: 400;
-  opacity: 0.55;
+  opacity: 0.62;
   line-height: 1.3;
   letter-spacing: 0.01em;
 }

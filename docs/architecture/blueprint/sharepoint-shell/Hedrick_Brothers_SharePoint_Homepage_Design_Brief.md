@@ -153,6 +153,8 @@ The greeting may be paired with a concise supporting line such as:
 - Your tools, updates, and priorities are ready.
 - Start with what matters most.
 
+> **Phase 18 addendum:** The flagship hero now contains only the personalized greeting, the tagline "Build with GRIT.", and the company logo. Supporting subtext, alert state, and context line have been removed from the hero to achieve a minimal premium identity surface. These supporting elements may appear in other homepage zones.
+
 ---
 
 ## 9. Target Audiences
