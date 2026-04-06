@@ -6,7 +6,6 @@ declare const styles: {
   readonly content: string;
   readonly lockup: string;
   readonly logo: string;
-  readonly label: string;
   readonly identity: string;
   readonly tagline: string;
   readonly greeting: string;

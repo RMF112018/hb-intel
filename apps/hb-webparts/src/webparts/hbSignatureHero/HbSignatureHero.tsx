@@ -14,9 +14,9 @@
  *   asymmetric visual balance across the full canvas.
  *
  * Locked content:
- *   1. Company logo / brand lockup — subtle, supporting
- *   2. Tagline: "Build with GRIT." — primary typographic statement
- *   3. Personalized welcome message — warm, subordinate to tagline
+ *   1. Company logo — subtle, supporting
+ *   2. Personalized greeting — warm entry line, refined
+ *   3. Tagline: "Build with GRIT." — primary typographic statement
  *
  * Background system:
  *   - Authored photography (optional) with gradient scrim for readability
@@ -96,27 +96,16 @@ export function HbSignatureHero({
             alt="Hedrick Brothers"
             className={styles.logo}
           />
-          <span className={styles.label}>HB Central</span>
         </motion.div>
 
-        {/* Identity cluster — tagline + greeting */}
+        {/* Identity cluster — greeting + tagline */}
         <div className={styles.identity}>
-          <motion.h1
-            className={styles.tagline}
-            variants={reveal}
-            initial="hidden"
-            animate="show"
-            custom={0.1}
-          >
-            Build with GRIT.
-          </motion.h1>
-
           <motion.div
             className={styles.greeting}
             variants={reveal}
             initial="hidden"
             animate="show"
-            custom={0.2}
+            custom={0.1}
           >
             <span className={styles.greetingLine}>
               {message.greeting},
@@ -125,6 +114,16 @@ export function HbSignatureHero({
               {message.firstName}.
             </span>
           </motion.div>
+
+          <motion.h1
+            className={styles.tagline}
+            variants={reveal}
+            initial="hidden"
+            animate="show"
+            custom={0.2}
+          >
+            Build with GRIT.
+          </motion.h1>
         </div>
       </div>
     </section>
