@@ -236,7 +236,10 @@
       "Bash(npm view:*)",
       "Bash(rm /Users/bobbyfetting/hb-intel/tools/spfx-shell/sharepoint/solution/hb-webparts.sppkg)",
       "Bash(rm /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts.sppkg)",
-      "Bash(fnm ls:*)"
+      "Bash(fnm ls:*)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/apps/hb-webparts/dist)",
+      "Bash(rm -f /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts.sppkg /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts-shim-proof.json)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/sharepoint)"
     ]
   },
   "enabledPlugins": {
