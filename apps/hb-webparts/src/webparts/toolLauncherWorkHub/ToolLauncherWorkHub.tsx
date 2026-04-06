@@ -1,17 +1,19 @@
 /**
  * ToolLauncherWorkHub — Premium command launcher surface
  *
- * Phase 02-01: Desktop composition skeleton using LauncherCompositionShell.
+ * Phase 02-03: Flagship stage and utility rail extracted to dedicated
+ * components with brand-asset slots, support metadata, and notice
+ * rendering.
  *
  * Primary data source: live SharePoint list "Tool Launcher Contents"
  * via useToolLauncherData(). Falls back to manifest config props when
  * running outside SPFx (local dev / demo / packaging).
  *
  * Live data is rendered through the 4-region composition shell:
- *   1. Command band — title + placeholder action area
- *   2. Flagship stage — featured platforms as prominent launch cards
- *   3. Utility rail — notices summary (support/access deferred)
- *   4. Workflow shelves — categorized platform groups
+ *   1. Command band — LauncherCommandBand
+ *   2. Flagship stage — LauncherFlagshipStage
+ *   3. Utility rail — LauncherUtilityRail
+ *   4. Workflow shelves — HbcLauncherSurface per shelf
  *
  * Config fallback still uses the flat HbcLauncherSurface bridge.
  */
@@ -41,9 +43,11 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { LauncherCompositionShell } from './LauncherCompositionShell.js';
 import { LauncherCommandBand } from './LauncherCommandBand.js';
-import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
+import { LauncherFlagshipStage } from './LauncherFlagshipStage.js';
+import { LauncherUtilityRail } from './LauncherUtilityRail.js';
+import { HP_SPACE, HP_BORDER } from '../../homepage/tokens.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
-import type { LauncherPlatformRecord, LauncherPresentationModel } from '../../homepage/webparts/toolLauncherContracts.js';
+import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
 
 export interface ToolLauncherWorkHubProps {
   config?: Partial<ToolLauncherWorkHubConfig>;
@@ -51,7 +55,7 @@ export interface ToolLauncherWorkHubProps {
   isLoading?: boolean;
 }
 
-// ── Platform-specific fallback icons (from asset manifest fallbackLucideIcon) ──
+// ── Icon resolution for config fallback + workflow shelves ──
 
 const PLATFORM_FALLBACK_ICON: Record<string, LucideIcon> = {
   bamboohr: Users,
@@ -64,8 +68,6 @@ const PLATFORM_FALLBACK_ICON: Record<string, LucideIcon> = {
   'document-crunch': FileText,
   hedricklearn: FileText,
 };
-
-// ── Lucide icon resolution (transitional — will be replaced by logo assets) ──
 
 const TOOL_ICON_MAP: Record<string, LucideIcon> = {
   safety: Shield,
@@ -134,117 +136,7 @@ function platformToTile(platform: LauncherPlatformRecord) {
   };
 }
 
-// ── Region renderers for the composition shell ──
-
-const flagshipCardStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.lg,
-  padding: HP_SPACE['2xl'],
-  border: HP_BORDER.standard,
-  borderRadius: HP_RADIUS.card,
-  background: 'rgba(255,255,255,0.6)',
-  textDecoration: 'none',
-  color: 'inherit',
-  transition: 'box-shadow 150ms ease, transform 150ms ease',
-};
-
-const flagshipIconContainerStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 44,
-  height: 44,
-  borderRadius: HP_RADIUS.command,
-  background: 'rgba(34,83,145,0.06)',
-  flexShrink: 0,
-};
-
-const flagshipNameStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.9rem',
-  fontWeight: 600,
-};
-
-const flagshipDescStyle: React.CSSProperties = {
-  margin: `${HP_SPACE.xs}px 0 0`,
-  fontSize: '0.78rem',
-  color: 'rgba(0,0,0,0.6)',
-};
-
-const flagshipGridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-  gap: HP_SPACE.xl,
-};
-
-function renderFlagshipStage(platforms: LauncherPlatformRecord[]): React.ReactNode {
-  if (platforms.length === 0) return null;
-  return (
-    <div style={flagshipGridStyle}>
-      {platforms.map((p) => {
-        const Icon = resolvePlatformIcon(p);
-        return (
-          <a
-            key={p.platformKey}
-            href={p.launchUrl}
-            target={p.openInNewTab ? '_blank' : undefined}
-            rel={p.openInNewTab ? 'noopener noreferrer' : undefined}
-            style={flagshipCardStyle}
-          >
-            <div style={flagshipIconContainerStyle}>
-              <Icon size={22} strokeWidth={1.8} />
-            </div>
-            <div>
-              <p style={flagshipNameStyle}>{p.name}</p>
-              {p.descriptor && <p style={flagshipDescStyle}>{p.descriptor}</p>}
-            </div>
-          </a>
-        );
-      })}
-    </div>
-  );
-}
-
-const railSectionStyle: React.CSSProperties = {
-  padding: HP_SPACE.lg,
-  border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.card,
-  background: 'rgba(0,0,0,0.015)',
-};
-
-const railHeadingStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.04em',
-  color: 'rgba(0,0,0,0.5)',
-};
-
-const railItemStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.md,
-  fontSize: '0.8rem',
-  color: 'rgba(0,0,0,0.7)',
-};
-
-function renderUtilityRail(presentation: LauncherPresentationModel): React.ReactNode {
-  const { activeNotices } = presentation.noticesSummary;
-  // Rail is suppressible when no content is available
-  if (activeNotices.length === 0) return null;
-
-  return (
-    <div style={railSectionStyle}>
-      <h4 style={railHeadingStyle}>Platform Notices</h4>
-      {activeNotices.map((n) => (
-        <div key={n.platformKey} style={railItemStyle}>
-          <strong>{n.name}</strong>: {n.notice.label}
-          {n.notice.details && <span> — {n.notice.details}</span>}
-        </div>
-      ))}
-    </div>
-  );
-}
+// ── Workflow shelves renderer ──
 
 const shelfHeadingStyle: React.CSSProperties = {
   margin: 0,
@@ -257,12 +149,12 @@ const shelfHeadingStyle: React.CSSProperties = {
   borderBottom: HP_BORDER.subtle,
 };
 
-function renderWorkflowShelves(presentation: LauncherPresentationModel): React.ReactNode {
-  if (presentation.workflowShelves.length === 0) return null;
+function renderWorkflowShelves(shelves: { shelfName: string; platforms: LauncherPlatformRecord[] }[]): React.ReactNode {
+  if (shelves.length === 0) return null;
 
   return (
     <>
-      {presentation.workflowShelves.map((shelf) => (
+      {shelves.map((shelf) => (
         <div key={shelf.shelfName}>
           <h4 style={shelfHeadingStyle}>{shelf.shelfName}</h4>
           <HbcLauncherSurface
@@ -282,7 +174,7 @@ function renderWorkflowShelves(presentation: LauncherPresentationModel): React.R
   );
 }
 
-// ── Config fallback bridge (unchanged from Phase 01) ──
+// ── Config fallback bridge ──
 
 function bridgeConfigToGroups(
   config: Partial<ToolLauncherWorkHubConfig> | undefined,
@@ -330,9 +222,9 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
     return (
       <LauncherCompositionShell
         commandBand={<LauncherCommandBand platformCount={listPlatforms.length} />}
-        flagshipStage={renderFlagshipStage(presentation.featuredStage.platforms)}
-        utilityRail={renderUtilityRail(presentation)}
-        workflowShelves={renderWorkflowShelves(presentation)}
+        flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} />}
+        utilityRail={<LauncherUtilityRail presentation={presentation} platforms={listPlatforms} />}
+        workflowShelves={renderWorkflowShelves(presentation.workflowShelves)}
       />
     );
   }
