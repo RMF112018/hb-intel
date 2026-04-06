@@ -55,38 +55,43 @@ const MAX_VISIBLE_AVATARS = 5;
 const AVATAR_SIZE = 30;
 const DETAIL_AVATAR_SIZE = 40;
 
-/* ── Warm accent palette (aligned with HbcEditorialSurface) ─────── */
+/* ── Premium dark palette — flagship editorial surface ─────────── */
+const DARK = {
+  bg: 'hsl(220, 14%, 12%)',
+  bgRaised: 'hsl(220, 12%, 16%)',
+  bgTile: 'hsl(220, 12%, 15%)',
+  bgTileHover: 'hsl(220, 12%, 19%)',
+  textPrimary: 'rgba(255, 255, 255, 0.95)',
+  textSecondary: 'rgba(255, 255, 255, 0.70)',
+  textMuted: 'rgba(255, 255, 255, 0.45)',
+  textQuiet: 'rgba(255, 255, 255, 0.32)',
+  border: 'rgba(255, 255, 255, 0.08)',
+  borderAccent: 'rgba(229, 126, 70, 0.50)',
+} as const;
+
 const WARM = {
   accent: 'rgb(229, 126, 70)',
+  accentLight: 'rgb(241, 164, 117)',
   dark: '#c26434',
-  border: 'rgba(229, 126, 70, 0.40)',
-  borderSubtle: 'rgba(0, 0, 0, 0.06)',
-  separator: 'linear-gradient(90deg, rgba(229, 126, 70, 0.22) 0%, rgba(229, 126, 70, 0.04) 100%)',
-  eyebrow: 'rgba(229, 126, 70, 0.70)',
-  iconBg: 'rgba(229, 126, 70, 0.08)',
-  scrim: 'linear-gradient(to top, rgba(0, 0, 0, 0.28) 0%, transparent 65%)',
-  tileHover: 'rgba(229, 126, 70, 0.03)',
-  tileSeparator: 'rgba(229, 126, 70, 0.06)',
+  scrim: 'linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 100%)',
+  tileSeparator: 'rgba(255, 255, 255, 0.06)',
 } as const;
 
 /* ── Root and header styles ────────────────────────────────────── */
 
 const rootStyle: React.CSSProperties = {
   fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-  color: '#1a1a1a',
-  background: '#ffffff',
+  color: DARK.textPrimary,
+  background: DARK.bg,
   borderRadius: HP_RADIUS.signature,
-  borderLeft: `3px solid ${WARM.border}`,
-  borderTop: `1px solid ${WARM.borderSubtle}`,
-  borderRight: `1px solid ${WARM.borderSubtle}`,
-  borderBottom: `1px solid ${WARM.borderSubtle}`,
-  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.07), 0 4px 16px rgba(0, 0, 0, 0.05)',
+  borderLeft: `3px solid ${DARK.borderAccent}`,
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.18), 0 8px 32px rgba(0, 0, 0, 0.14)',
   overflow: 'hidden',
 };
 
 const separatorStyle: React.CSSProperties = {
   height: 1,
-  background: WARM.separator,
+  background: `linear-gradient(90deg, ${DARK.borderAccent} 0%, transparent 100%)`,
   margin: '0 24px',
   border: 'none',
 };
@@ -98,18 +103,18 @@ const NO_MOTION = { initial: undefined, animate: undefined, transition: undefine
 function getFeaturedMotion(reduced: boolean) {
   if (reduced) return NO_MOTION;
   return {
-    initial: { opacity: 0, y: 8 },
+    initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
   };
 }
 
 function getRailMotion(reduced: boolean) {
   if (reduced) return NO_MOTION;
   return {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
+    initial: { opacity: 0, x: 8 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.35, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const },
   };
 }
 
@@ -138,9 +143,11 @@ function getHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
 
 const headerTitleStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '1rem',
-  fontWeight: 700,
-  letterSpacing: '-0.015em',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase' as const,
+  color: WARM.accentLight,
   display: 'flex',
   alignItems: 'center',
   gap: HP_SPACE.md,
@@ -155,7 +162,7 @@ function getCompositionStyle(tier: ResponsiveTier): React.CSSProperties {
 
 function getFeaturedWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
   if (tier === 'desktop') {
-    return { flex: '1 1 68%', minWidth: 420 };
+    return { flex: '1 1 70%', minWidth: 440 };
   }
   return { flex: '1 1 100%', minWidth: 0 };
 }
@@ -171,17 +178,16 @@ function getImageZoneStyle(tier: ResponsiveTier): React.CSSProperties {
   const base: React.CSSProperties = {
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: 'rgba(0, 0, 0, 0.025)',
-    // Explicit containment prevents layout shift during image load
+    backgroundColor: 'hsl(220, 12%, 8%)',
     contain: 'layout style',
   };
   if (tier === 'mobile') {
-    return { ...base, minHeight: 220, maxHeight: 280 };
+    return { ...base, minHeight: 240, maxHeight: 320 };
   }
   if (tier === 'tablet') {
-    return { ...base, flex: '0 0 44%', minHeight: 280 };
+    return { ...base, flex: '0 0 48%', minHeight: 320 };
   }
-  return { ...base, flex: '0 0 52%', minHeight: 320 };
+  return { ...base, flex: '0 0 56%', minHeight: 380 };
 }
 
 const imageStyle: React.CSSProperties = {
@@ -203,12 +209,12 @@ function getImagePlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
   return {
     width: '100%',
     height: '100%',
-    minHeight: tier === 'mobile' ? 220 : 320,
+    minHeight: tier === 'mobile' ? 240 : 380,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, rgba(229, 126, 70, 0.06) 0%, rgba(34, 83, 145, 0.04) 100%)',
-    color: 'rgba(0, 0, 0, 0.18)',
+    background: 'linear-gradient(135deg, hsl(220, 14%, 14%) 0%, hsl(25, 30%, 14%) 100%)',
+    color: 'rgba(255, 255, 255, 0.15)',
     fontSize: '0.6875rem',
     fontWeight: 600,
     letterSpacing: '0.06em',
@@ -219,30 +225,30 @@ function getImagePlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
 function getContentZoneStyle(tier: ResponsiveTier): React.CSSProperties {
   if (tier === 'mobile') {
     return {
-      padding: '16px 16px 20px',
+      padding: '20px 16px 24px',
       display: 'flex',
       flexDirection: 'column',
-      gap: 10,
+      gap: 12,
     };
   }
   return {
-    flex: '1 1 48%',
-    padding: tier === 'tablet' ? '24px 24px 28px' : '28px 28px 32px',
+    flex: '1 1 44%',
+    padding: tier === 'tablet' ? '28px 24px 32px' : '32px 32px 36px',
     display: 'flex',
     flexDirection: 'column',
-    gap: 12,
+    gap: 14,
   };
 }
 
 function getTitleStyle(tier: ResponsiveTier): React.CSSProperties {
   return {
     margin: 0,
-    fontSize: tier === 'mobile' ? '1.375rem' : '1.75rem',
+    fontSize: tier === 'mobile' ? '1.5rem' : '2rem',
     fontWeight: 700,
-    letterSpacing: '-0.03em',
-    lineHeight: 1.12,
-    color: '#1a1a1a',
-    maxWidth: tier === 'mobile' ? undefined : '22ch',
+    letterSpacing: '-0.035em',
+    lineHeight: 1.08,
+    color: DARK.textPrimary,
+    maxWidth: tier === 'mobile' ? undefined : '20ch',
   };
 }
 
@@ -252,7 +258,7 @@ function getHeadlineStyle(tier: ResponsiveTier): React.CSSProperties {
     fontSize: '1rem',
     fontWeight: 400,
     lineHeight: 1.55,
-    color: 'rgba(26, 26, 26, 0.72)',
+    color: DARK.textSecondary,
     maxWidth: tier === 'mobile' ? undefined : '40ch',
   };
 }
@@ -262,7 +268,7 @@ function getSummaryStyle(tier: ResponsiveTier): React.CSSProperties {
     margin: 0,
     fontSize: '0.8125rem',
     lineHeight: 1.65,
-    color: 'rgba(26, 26, 26, 0.50)',
+    color: DARK.textMuted,
     maxWidth: tier === 'mobile' ? undefined : '50ch',
     display: '-webkit-box',
     WebkitLineClamp: tier === 'mobile' ? 4 : 3,
@@ -278,8 +284,9 @@ const badgeRowStyle: React.CSSProperties = {
 };
 
 const metaIconStyle: React.CSSProperties = {
-  opacity: 0.5,
+  opacity: 0.6,
   flexShrink: 0,
+  color: WARM.accentLight,
 };
 
 const metaItemStyle: React.CSSProperties = {
@@ -308,7 +315,7 @@ const teamStripStyle: React.CSSProperties = {
   padding: '5px 10px 5px 4px',
   margin: 0,
   border: 'none',
-  background: 'rgba(229, 126, 70, 0.03)',
+  background: 'rgba(255, 255, 255, 0.04)',
   cursor: 'pointer',
   borderRadius: 22,
   transition: 'background-color 150ms ease',
@@ -320,7 +327,7 @@ const teamStripStyle: React.CSSProperties = {
 const teamStripLabelStyle: React.CSSProperties = {
   fontSize: '0.6875rem',
   fontWeight: 600,
-  color: 'rgba(26, 26, 26, 0.45)',
+  color: DARK.textMuted,
   marginLeft: 6,
   whiteSpace: 'nowrap' as const,
 };
@@ -330,8 +337,8 @@ const avatarStyle = (index: number): React.CSSProperties => ({
   height: AVATAR_SIZE,
   borderRadius: '50%',
   objectFit: 'cover' as const,
-  border: '2px solid #ffffff',
-  boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.06)',
+  border: `2px solid ${DARK.bg}`,
+  boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.10)',
   marginLeft: index > 0 ? -6 : 0,
   position: 'relative' as const,
   zIndex: MAX_VISIBLE_AVATARS - index,
@@ -343,8 +350,8 @@ const initialsStyle = (index: number): React.CSSProperties => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(34, 83, 145, 0.08)',
-  color: '#225391',
+  backgroundColor: 'rgba(229, 126, 70, 0.15)',
+  color: WARM.accentLight,
   fontSize: '0.625rem',
   fontWeight: 700,
   letterSpacing: '0.02em',
@@ -355,8 +362,8 @@ const overflowStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(229, 126, 70, 0.08)',
-  color: WARM.dark,
+  backgroundColor: 'rgba(229, 126, 70, 0.12)',
+  color: WARM.accentLight,
   fontSize: '0.5625rem',
   fontWeight: 700,
   marginLeft: -6,
@@ -374,7 +381,7 @@ function getDetailPanelStyle(tier: ResponsiveTier): React.CSSProperties {
       zIndex: 100,
       background: '#ffffff',
       borderRadius: '12px 12px 0 0',
-      border: `1px solid ${WARM.borderSubtle}`,
+      border: '1px solid rgba(0, 0, 0, 0.08)',
       borderBottom: 'none',
       boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.14), 0 -1px 6px rgba(0, 0, 0, 0.06)',
       overflow: 'hidden',
@@ -392,8 +399,8 @@ function getDetailPanelStyle(tier: ResponsiveTier): React.CSSProperties {
     maxWidth: tier === 'tablet' ? 360 : 320,
     background: '#ffffff',
     borderRadius: HP_RADIUS.editorial,
-    border: `1px solid ${WARM.borderSubtle}`,
-    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.05)',
+    border: '1px solid rgba(0, 0, 0, 0.08)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0, 0, 0, 0.12)',
     overflow: 'hidden',
   };
 }
@@ -408,7 +415,7 @@ const detailHeaderStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  borderBottom: `1px solid ${WARM.tileSeparator}`,
+  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
 };
 
 const detailCloseStyle: React.CSSProperties = {
@@ -482,19 +489,21 @@ const detailRoleStyle: React.CSSProperties = {
 function getRailWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
   if (tier === 'desktop') {
     return {
-      flex: '1 1 28%',
+      flex: '1 1 26%',
       minWidth: 220,
-      borderLeft: `1px solid ${WARM.tileSeparator}`,
+      borderLeft: `1px solid ${DARK.border}`,
       display: 'flex',
       flexDirection: 'column',
+      background: DARK.bgRaised,
     };
   }
   return {
     flex: '1 1 100%',
     minWidth: 0,
-    borderTop: `1px solid ${WARM.tileSeparator}`,
+    borderTop: `1px solid ${DARK.border}`,
     display: 'flex',
     flexDirection: 'column',
+    background: DARK.bgRaised,
   };
 }
 
@@ -507,7 +516,7 @@ function getRailHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
     fontWeight: 600,
     letterSpacing: '0.05em',
     textTransform: 'uppercase' as const,
-    color: 'rgba(26, 26, 26, 0.36)',
+    color: DARK.textQuiet,
   };
 }
 
@@ -520,9 +529,9 @@ function getRailTileStyle(tier: ResponsiveTier): React.CSSProperties {
       : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
     textDecoration: 'none',
     color: 'inherit',
-    transition: 'background-color 150ms ease, box-shadow 150ms ease',
+    transition: 'background-color 180ms ease, transform 180ms ease',
     cursor: 'pointer',
-    borderTop: `1px solid ${WARM.tileSeparator}`,
+    borderTop: `1px solid ${DARK.border}`,
     alignItems: 'center',
     minHeight: 44,
     borderRadius: HP_RADIUS.image,
@@ -531,11 +540,11 @@ function getRailTileStyle(tier: ResponsiveTier): React.CSSProperties {
 
 const railThumbnailWrapperStyle: React.CSSProperties = {
   position: 'relative',
-  flex: '0 0 80px',
-  height: 60,
-  borderRadius: HP_RADIUS.image,
+  flex: '0 0 88px',
+  height: 66,
+  borderRadius: HP_RADIUS.card,
   overflow: 'hidden',
-  backgroundColor: 'rgba(0, 0, 0, 0.025)',
+  backgroundColor: 'hsl(220, 12%, 10%)',
   contain: 'strict',
 };
 
@@ -553,7 +562,7 @@ const railThumbnailPlaceholderStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: 'linear-gradient(135deg, rgba(229, 126, 70, 0.04) 0%, rgba(34, 83, 145, 0.03) 100%)',
+  background: 'linear-gradient(135deg, hsl(220, 14%, 14%) 0%, hsl(25, 20%, 13%) 100%)',
 };
 
 const railContentStyle: React.CSSProperties = {
@@ -570,7 +579,7 @@ const railTitleStyle: React.CSSProperties = {
   fontWeight: 600,
   lineHeight: 1.35,
   letterSpacing: '-0.01em',
-  color: '#1a1a1a',
+  color: DARK.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap' as const,
@@ -578,7 +587,7 @@ const railTitleStyle: React.CSSProperties = {
 
 const railMetaStyle: React.CSSProperties = {
   fontSize: '0.6875rem',
-  color: 'rgba(26, 26, 26, 0.50)',
+  color: DARK.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap' as const,
@@ -649,8 +658,8 @@ function RailThumbnail({
     <img
       src={src}
       alt={alt}
-      width={80}
-      height={60}
+      width={88}
+      height={66}
       decoding="async"
       loading="lazy"
       style={railThumbnailStyle}
@@ -889,8 +898,8 @@ function SupportingTile({
   const baseTileStyle = getRailTileStyle(tier);
   const style: React.CSSProperties = {
     ...baseTileStyle,
-    backgroundColor: hovered ? 'rgba(229, 126, 70, 0.04)' : 'transparent',
-    boxShadow: hovered ? '0 1px 4px rgba(0, 0, 0, 0.04)' : 'none',
+    backgroundColor: hovered ? DARK.bgTileHover : 'transparent',
+    transform: hovered ? 'translateX(2px)' : 'none',
   };
 
   const Tag = tileProps.as;
