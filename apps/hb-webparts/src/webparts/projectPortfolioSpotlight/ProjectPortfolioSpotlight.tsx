@@ -41,6 +41,7 @@ import {
   HP_IMAGE,
 } from '../../homepage/tokens.js';
 import { useProjectSpotlightData } from '../../homepage/data/useProjectSpotlightData.js';
+import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
 import interactiveStyles from '../../homepage/homepage-interactive.module.css';
 
 export interface ProjectPortfolioSpotlightProps {
@@ -90,25 +91,36 @@ const separatorStyle: React.CSSProperties = {
   border: 'none',
 };
 
-/* ── Motion ────────────────────────────────────────────────────── */
+/* ── Motion (respects prefers-reduced-motion) ─────────────────── */
 
-const featuredMotion = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
-};
+const NO_MOTION = { initial: undefined, animate: undefined, transition: undefined };
 
-const railMotion = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
-};
+function getFeaturedMotion(reduced: boolean) {
+  if (reduced) return NO_MOTION;
+  return {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
+  };
+}
 
-const bottomSheetMotion = {
-  initial: { opacity: 0, y: 40 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] as const },
-};
+function getRailMotion(reduced: boolean) {
+  if (reduced) return NO_MOTION;
+  return {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
+  };
+}
+
+function getBottomSheetMotion(reduced: boolean) {
+  if (reduced) return NO_MOTION;
+  return {
+    initial: { opacity: 0, y: 40 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] as const },
+  };
+}
 
 /* ── Responsive style helpers ────────────────────────────────────── */
 
@@ -160,6 +172,8 @@ function getImageZoneStyle(tier: ResponsiveTier): React.CSSProperties {
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.025)',
+    // Explicit containment prevents layout shift during image load
+    contain: 'layout style',
   };
   if (tier === 'mobile') {
     return { ...base, minHeight: 220, maxHeight: 280 };
@@ -522,6 +536,7 @@ const railThumbnailWrapperStyle: React.CSSProperties = {
   borderRadius: HP_RADIUS.image,
   overflow: 'hidden',
   backgroundColor: 'rgba(0, 0, 0, 0.025)',
+  contain: 'strict',
 };
 
 const railThumbnailStyle: React.CSSProperties = {
@@ -698,9 +713,11 @@ function getInitials(name: string): string {
 function ProjectTeamStrip({
   members,
   tier,
+  reducedMotion = false,
 }: {
   members: ProjectTeamMember[];
   tier: ResponsiveTier;
+  reducedMotion?: boolean;
 }): React.JSX.Element | null {
   const [isOpen, setIsOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -795,6 +812,7 @@ function ProjectTeamStrip({
         style={teamStripStyle}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
+        aria-haspopup="dialog"
         aria-label={`Project team: ${members.length} member${members.length !== 1 ? 's' : ''}`}
       >
         {visible.map((member, i) =>
@@ -831,7 +849,7 @@ function ProjectTeamStrip({
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
-            <motion.div {...bottomSheetMotion}>
+            <motion.div {...getBottomSheetMotion(reducedMotion)}>
               {detailPanel}
             </motion.div>
           </>
@@ -922,6 +940,7 @@ export function ProjectPortfolioSpotlight({
   isLoading = false,
 }: ProjectPortfolioSpotlightProps): React.JSX.Element {
   const tier = useResponsiveTier();
+  const reducedMotion = usePrefersReducedMotion();
   const { listConfig, isLoading: listLoading } = useProjectSpotlightData();
 
   if (isLoading || listLoading) {
@@ -981,7 +1000,7 @@ export function ProjectPortfolioSpotlight({
         {/* Featured spotlight — dominant */}
         <motion.div
           style={getFeaturedWrapperStyle(tier)}
-          {...featuredMotion}
+          {...getFeaturedMotion(reducedMotion)}
         >
           <div style={getFeaturedLayoutStyle(tier)}>
             {/* Image zone — safe: placeholder visible during load and on error */}
@@ -1042,7 +1061,7 @@ export function ProjectPortfolioSpotlight({
               ) : null}
 
               {/* Project Team strip */}
-              <ProjectTeamStrip members={feat.teamMembers} tier={tier} />
+              <ProjectTeamStrip members={feat.teamMembers} tier={tier} reducedMotion={reducedMotion} />
 
               {/* Primary CTA */}
               {feat.cta ? (
@@ -1064,7 +1083,7 @@ export function ProjectPortfolioSpotlight({
         {hasRail ? (
           <motion.div
             style={getRailWrapperStyle(tier)}
-            {...railMotion}
+            {...getRailMotion(reducedMotion)}
             role="list"
             aria-label="Additional projects"
           >
