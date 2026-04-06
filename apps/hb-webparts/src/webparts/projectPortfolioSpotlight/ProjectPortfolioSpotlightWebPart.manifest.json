@@ -46,13 +46,46 @@
             "cta": { "label": "View project brief", "href": "/sites/hb-central/portfolio" }
           },
           {
-            "id": "project-secondary",
+            "id": "project-secondary-1",
             "title": "Fort Lauderdale Waterfront Residence",
             "summary": "Facade sequence revised to maintain schedule and safety overlap controls.",
             "location": "Fort Lauderdale, FL",
             "sector": "Luxury Residential",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/ftl-waterfront.jpg",
+              "alt": "Fort Lauderdale waterfront residence exterior"
+            },
             "order": 2,
-            "status": { "label": "Watchlist", "variant": "warning" }
+            "status": { "label": "Watchlist", "variant": "warning" },
+            "freshness": { "source": "curated", "updatedAt": "2026-04-02T09:00:00.000Z" }
+          },
+          {
+            "id": "project-secondary-2",
+            "title": "Boca Raton Corporate Campus",
+            "summary": "Interior buildout progressing through floors 3–5 with MEP rough-in complete.",
+            "location": "Boca Raton, FL",
+            "sector": "Commercial",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/boca-corporate.jpg",
+              "alt": "Boca Raton corporate campus construction"
+            },
+            "order": 3,
+            "status": { "label": "On Track", "variant": "success" },
+            "freshness": { "source": "curated", "updatedAt": "2026-04-03T14:00:00.000Z" }
+          },
+          {
+            "id": "project-secondary-3",
+            "title": "Jupiter Inlet Marina Renovation",
+            "summary": "Structural reinforcement phase complete; dock system installation underway.",
+            "location": "Jupiter, FL",
+            "sector": "Marine",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/jupiter-marina.jpg",
+              "alt": "Jupiter Inlet marina renovation"
+            },
+            "order": 4,
+            "status": { "label": "On Track", "variant": "success" },
+            "freshness": { "source": "curated", "updatedAt": "2026-04-01T10:00:00.000Z" }
           }
         ]
       }

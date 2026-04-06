@@ -1,10 +1,10 @@
 /**
  * ProjectPortfolioSpotlight — Premium editorial spotlight surface
- * Phase P05-02 — Featured spotlight anatomy and desktop composition
+ * Phase P05-03 — Supporting rail and hierarchy enforcement
  *
  * Image-led editorial composition with warm accent styling aligned
- * with HbcEditorialSurface. Featured spotlight is the dominant surface;
- * supporting rail is deferred to Phase 03.
+ * with HbcEditorialSurface. Desktop layout: dominant featured spotlight
+ * (~65%) plus subordinate supporting rail (~35%).
  */
 import * as React from 'react';
 import {
@@ -17,7 +17,10 @@ import {
   CheckCircle2,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
-import { normalizeProjectPortfolioSpotlightConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
+import {
+  normalizeProjectPortfolioSpotlightConfig,
+  type NormalizedProjectPortfolioSpotlightItem,
+} from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
@@ -43,9 +46,11 @@ const WARM = {
   eyebrow: 'rgba(229, 126, 70, 0.70)',
   iconBg: 'rgba(229, 126, 70, 0.08)',
   scrim: 'linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.08) 40%, transparent 100%)',
+  tileHover: 'rgba(229, 126, 70, 0.03)',
+  tileSeparator: 'rgba(229, 126, 70, 0.08)',
 } as const;
 
-/* ── Style objects ──────────────────────────────────────────────── */
+/* ── Root and header styles ────────────────────────────────────── */
 
 const rootStyle: React.CSSProperties = {
   fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
@@ -85,9 +90,24 @@ const separatorStyle: React.CSSProperties = {
   border: 'none',
 };
 
+/* ── Desktop composition layout ────────────────────────────────── */
+
+const compositionStyle: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+};
+
+/* ── Featured spotlight styles ─────────────────────────────────── */
+
+const featuredWrapperStyle: React.CSSProperties = {
+  flex: '1 1 62%',
+  minWidth: 400,
+};
+
 const featuredLayoutStyle: React.CSSProperties = {
   display: 'flex',
   gap: 0,
+  height: '100%',
 };
 
 const imageZoneStyle: React.CSSProperties = {
@@ -190,14 +210,166 @@ const ctaWrapperStyle: React.CSSProperties = {
   paddingTop: HP_SPACE.md,
 };
 
-/* ── Featured reveal animation ──────────────────────────────────── */
+/* ── Supporting rail styles ────────────────────────────────────── */
+
+const railWrapperStyle: React.CSSProperties = {
+  flex: '1 1 33%',
+  minWidth: 240,
+  borderLeft: `1px solid ${WARM.tileSeparator}`,
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const railHeaderStyle: React.CSSProperties = {
+  padding: `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px ${HP_SPACE.md}px`,
+  fontSize: '0.6875rem',
+  fontWeight: 700,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase' as const,
+  color: 'rgba(26, 26, 26, 0.40)',
+};
+
+const railTileStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: HP_SPACE.lg,
+  padding: `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
+  textDecoration: 'none',
+  color: 'inherit',
+  transition: 'background-color 150ms ease',
+  cursor: 'pointer',
+  borderTop: `1px solid ${WARM.tileSeparator}`,
+  alignItems: 'flex-start',
+};
+
+const railThumbnailWrapperStyle: React.CSSProperties = {
+  position: 'relative',
+  flex: '0 0 72px',
+  height: 54,
+  borderRadius: HP_RADIUS.image,
+  overflow: 'hidden',
+  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+};
+
+const railThumbnailStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: HP_IMAGE.objectFit,
+  objectPosition: 'center',
+  display: 'block',
+};
+
+const railThumbnailPlaceholderStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  background: 'linear-gradient(135deg, rgba(229, 126, 70, 0.04) 0%, rgba(34, 83, 145, 0.03) 100%)',
+};
+
+const railContentStyle: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 3,
+};
+
+const railTitleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  color: '#1a1a1a',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap' as const,
+};
+
+const railMetaStyle: React.CSSProperties = {
+  fontSize: '0.6875rem',
+  color: 'rgba(26, 26, 26, 0.50)',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap' as const,
+};
+
+/* ── Motion ────────────────────────────────────────────────────── */
+
 const featuredMotion = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] as const },
 };
 
-/* ── Component ──────────────────────────────────────────────────── */
+const railMotion = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
+};
+
+/* ── Supporting tile component ─────────────────────────────────── */
+
+function SupportingTile({ item }: { item: NormalizedProjectPortfolioSpotlightItem }): React.JSX.Element {
+  const [hovered, setHovered] = React.useState(false);
+  const metaText = [item.location, item.sector].filter(Boolean).join(' \u00B7 ') || item.freshnessLabel;
+  const href = item.cta?.href;
+
+  const tileProps = href
+    ? {
+        as: 'a' as const,
+        href,
+        role: undefined as undefined,
+      }
+    : {
+        as: 'div' as const,
+        href: undefined as undefined,
+        role: 'listitem' as const,
+      };
+
+  const style: React.CSSProperties = {
+    ...railTileStyle,
+    backgroundColor: hovered ? WARM.tileHover : 'transparent',
+  };
+
+  const Tag = tileProps.as;
+
+  return (
+    <Tag
+      href={tileProps.href}
+      role={tileProps.role}
+      style={style}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      data-hbc-homepage="spotlight-tile"
+    >
+      {/* Compact thumbnail */}
+      <div style={railThumbnailWrapperStyle}>
+        {item.image ? (
+          <img
+            src={item.image.src}
+            alt={item.image.alt || item.title}
+            style={railThumbnailStyle}
+            loading="lazy"
+          />
+        ) : (
+          <div style={railThumbnailPlaceholderStyle} aria-hidden="true" />
+        )}
+      </div>
+
+      {/* Tile content */}
+      <div style={railContentStyle}>
+        <p style={railTitleStyle}>{item.title}</p>
+        {metaText ? <span style={railMetaStyle}>{metaText}</span> : null}
+        {item.status ? (
+          <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" />
+        ) : null}
+      </div>
+    </Tag>
+  );
+}
+
+/* ── Main component ────────────────────────────────────────────── */
 
 export function ProjectPortfolioSpotlight({
   config,
@@ -227,6 +399,7 @@ export function ProjectPortfolioSpotlight({
   const eyebrowText = [feat.sector, feat.location].filter(Boolean).join(' \u00B7 ') || 'Featured Project';
   const completedMilestones = feat.milestones.filter((m) => m.completed).length;
   const totalMilestones = feat.milestones.length;
+  const hasRail = normalized.secondary.length > 0;
 
   return (
     <section
@@ -251,94 +424,114 @@ export function ProjectPortfolioSpotlight({
       {/* Separator */}
       <div role="separator" style={separatorStyle} />
 
-      {/* Featured spotlight */}
-      <motion.div
-        style={featuredLayoutStyle}
-        {...featuredMotion}
-      >
-        {/* Image zone */}
-        <div style={imageZoneStyle}>
-          {feat.image ? (
-            <>
-              <img
-                src={feat.image.src}
-                alt={feat.image.alt || feat.title}
-                style={imageStyle}
-                loading="lazy"
+      {/* Desktop composition: featured + rail */}
+      <div style={compositionStyle}>
+        {/* Featured spotlight — dominant */}
+        <motion.div
+          style={featuredWrapperStyle}
+          {...featuredMotion}
+        >
+          <div style={featuredLayoutStyle}>
+            {/* Image zone */}
+            <div style={imageZoneStyle}>
+              {feat.image ? (
+                <>
+                  <img
+                    src={feat.image.src}
+                    alt={feat.image.alt || feat.title}
+                    style={imageStyle}
+                    loading="lazy"
+                  />
+                  <div style={imageScrimStyle} aria-hidden="true" />
+                </>
+              ) : (
+                <div style={imagePlaceholderStyle} aria-hidden="true">
+                  Project Image
+                </div>
+              )}
+            </div>
+
+            {/* Content zone */}
+            <div style={contentZoneStyle}>
+              <HbcHomepageEyebrow>{eyebrowText}</HbcHomepageEyebrow>
+
+              <h3 style={titleStyle}>{feat.title}</h3>
+
+              {feat.highlightHeadline ? (
+                <p style={headlineStyle}>{feat.highlightHeadline}</p>
+              ) : null}
+
+              {/* Metadata row — milestone + freshness */}
+              {(totalMilestones > 0 || feat.freshnessLabel) ? (
+                <HbcHomepageMetadataRow separated>
+                  {totalMilestones > 0 ? (
+                    <span style={metaItemStyle}>
+                      <CheckCircle2 size={11} aria-hidden="true" style={metaIconStyle} />
+                      {completedMilestones}/{totalMilestones} milestones
+                    </span>
+                  ) : null}
+                  {feat.freshnessLabel ? (
+                    <span style={metaItemStyle}>
+                      <Calendar size={11} aria-hidden="true" style={metaIconStyle} />
+                      {feat.freshnessLabel}
+                    </span>
+                  ) : null}
+                </HbcHomepageMetadataRow>
+              ) : null}
+
+              {/* Summary */}
+              <p style={summaryStyle}>{feat.summary}</p>
+
+              {/* Badges — restrained */}
+              {(feat.status || feat.strategicEmphasis) ? (
+                <div style={badgeRowStyle}>
+                  {feat.status ? (
+                    <HbcPremiumBadge label={feat.status.label} status={feat.status.variant ?? 'info'} size="sm" />
+                  ) : null}
+                  {feat.strategicEmphasis ? (
+                    <HbcPremiumBadge label="Strategic" status="info" size="sm" />
+                  ) : null}
+                </div>
+              ) : null}
+
+              {/* Team strip placeholder — reserved for Phase 05 */}
+              <div
+                data-slot="team-strip"
+                style={teamStripPlaceholderStyle}
+                aria-hidden="true"
               />
-              <div style={imageScrimStyle} aria-hidden="true" />
-            </>
-          ) : (
-            <div style={imagePlaceholderStyle} aria-hidden="true">
-              Project Image
-            </div>
-          )}
-        </div>
 
-        {/* Content zone */}
-        <div style={contentZoneStyle}>
-          <HbcHomepageEyebrow>{eyebrowText}</HbcHomepageEyebrow>
-
-          <h3 style={titleStyle}>{feat.title}</h3>
-
-          {feat.highlightHeadline ? (
-            <p style={headlineStyle}>{feat.highlightHeadline}</p>
-          ) : null}
-
-          {/* Metadata row — milestone + freshness */}
-          {(totalMilestones > 0 || feat.freshnessLabel) ? (
-            <HbcHomepageMetadataRow separated>
-              {totalMilestones > 0 ? (
-                <span style={metaItemStyle}>
-                  <CheckCircle2 size={11} aria-hidden="true" style={metaIconStyle} />
-                  {completedMilestones}/{totalMilestones} milestones
-                </span>
-              ) : null}
-              {feat.freshnessLabel ? (
-                <span style={metaItemStyle}>
-                  <Calendar size={11} aria-hidden="true" style={metaIconStyle} />
-                  {feat.freshnessLabel}
-                </span>
-              ) : null}
-            </HbcHomepageMetadataRow>
-          ) : null}
-
-          {/* Summary */}
-          <p style={summaryStyle}>{feat.summary}</p>
-
-          {/* Badges — restrained: status only, strategic only when flagged */}
-          {(feat.status || feat.strategicEmphasis) ? (
-            <div style={badgeRowStyle}>
-              {feat.status ? (
-                <HbcPremiumBadge label={feat.status.label} status={feat.status.variant ?? 'info'} size="sm" />
-              ) : null}
-              {feat.strategicEmphasis ? (
-                <HbcPremiumBadge label="Strategic" status="info" size="sm" />
+              {/* Primary CTA */}
+              {feat.cta ? (
+                <div style={ctaWrapperStyle}>
+                  <HbcPremiumCta
+                    label={feat.cta.label}
+                    href={feat.cta.href}
+                    variant="secondary"
+                    size="sm"
+                    arrow
+                  />
+                </div>
               ) : null}
             </div>
-          ) : null}
+          </div>
+        </motion.div>
 
-          {/* Team strip placeholder — reserved for Phase 05 */}
-          <div
-            data-slot="team-strip"
-            style={teamStripPlaceholderStyle}
-            aria-hidden="true"
-          />
-
-          {/* Primary CTA */}
-          {feat.cta ? (
-            <div style={ctaWrapperStyle}>
-              <HbcPremiumCta
-                label={feat.cta.label}
-                href={feat.cta.href}
-                variant="secondary"
-                size="sm"
-                arrow
-              />
-            </div>
-          ) : null}
-        </div>
-      </motion.div>
+        {/* Supporting rail — subordinate */}
+        {hasRail ? (
+          <motion.div
+            style={railWrapperStyle}
+            {...railMotion}
+            role="list"
+            aria-label="Additional projects"
+          >
+            <div style={railHeaderStyle}>Also in progress</div>
+            {normalized.secondary.map((item) => (
+              <SupportingTile key={item.id} item={item} />
+            ))}
+          </motion.div>
+        ) : null}
+      </div>
     </section>
   );
 }
