@@ -9,7 +9,7 @@
  * communications zone.
  */
 import * as React from 'react';
-import { HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge, HbcHomepageEyebrow } from '@hbc/ui-kit/homepage';
+import { HbcPremiumCta, HbcPremiumBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
@@ -97,13 +97,13 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
       featured={
         normalized.featured ? (
           <article>
-            <HbcHomepageEyebrow tone="default">
+            <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(180, 90, 40, 0.7)', marginBottom: 6 }}>
               {EVENT_LABEL_MAP[normalized.featured.eventType] ?? 'People'}
-            </HbcHomepageEyebrow>
+            </span>
             <h3 style={featuredNameStyle}>{normalized.featured.personName}</h3>
-            <HbcHomepageMetadataRow>
-              <HbcStatusBadge label={normalized.featured.eventType} variant={EVENT_VARIANT_MAP[normalized.featured.eventType]} />
-            </HbcHomepageMetadataRow>
+            <div style={{ marginTop: HP_SPACE.md }}>
+              <HbcPremiumBadge label={normalized.featured.eventType} status={EVENT_VARIANT_MAP[normalized.featured.eventType]} />
+            </div>
             <p style={featuredHighlightStyle}>{normalized.featured.highlight}</p>
             {normalized.featured.media ? (
               <div style={{ ...hpMediaContainer, marginTop: HP_SPACE.xl }}>
@@ -116,7 +116,7 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
             ) : null}
             {normalized.featured.cta ? (
               <div style={{ marginTop: HP_SPACE.xl }}>
-                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+                <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
               </div>
             ) : null}
           </article>
@@ -125,9 +125,9 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
       secondary={normalized.secondary.map((entry) => (
         <article key={entry.id}>
           <h3 style={secondaryNameStyle}>{entry.personName}</h3>
-          <HbcHomepageMetadataRow>
-            <HbcStatusBadge label={entry.eventType} variant={EVENT_VARIANT_MAP[entry.eventType]} />
-          </HbcHomepageMetadataRow>
+          <div style={{ marginTop: HP_SPACE.sm }}>
+            <HbcPremiumBadge label={entry.eventType} status={EVENT_VARIANT_MAP[entry.eventType]} />
+          </div>
           <p style={secondaryHighlightStyle}>{entry.highlight}</p>
         </article>
       ))}

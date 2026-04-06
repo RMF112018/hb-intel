@@ -8,7 +8,7 @@
  * reads as an authored news digest, not a list of announcements.
  */
 import * as React from 'react';
-import { HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcPremiumCta, HbcPremiumBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeCompanyPulseConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
@@ -97,19 +97,19 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
         normalized.featured ? (
           <article>
             {normalized.featured.category ? (
-              <HbcHomepageMetadataRow>
-                <HbcStatusBadge
+              <div style={{ marginBottom: HP_SPACE.md }}>
+                <HbcPremiumBadge
                   label={normalized.featured.category}
-                  variant={CATEGORY_VARIANT_MAP[normalized.featured.category]}
+                  status={CATEGORY_VARIANT_MAP[normalized.featured.category]}
                 />
-              </HbcHomepageMetadataRow>
+              </div>
             ) : null}
             <h3 style={featuredHeadlineStyle}>{normalized.featured.title}</h3>
             <p style={featuredSummaryStyle}>{normalized.featured.summary}</p>
             {normalized.featured.metadata ? <p style={featuredMetaStyle}>{normalized.featured.metadata}</p> : null}
             {normalized.featured.cta ? (
               <div style={{ marginTop: HP_SPACE.xl }}>
-                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+                <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
               </div>
             ) : null}
           </article>
@@ -121,7 +121,7 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
           <p style={secondarySummaryStyle}>{item.summary}</p>
           {item.cta ? (
             <div style={{ marginTop: HP_SPACE.md }}>
-              <HbcHomepageCta label={item.cta.label} href={item.cta.href} variant="link" arrow />
+              <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
             </div>
           ) : null}
         </article>

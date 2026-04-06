@@ -8,7 +8,7 @@
  * business module, not an editorial card with badges.
  */
 import * as React from 'react';
-import { HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge, HbcHomepageEyebrow } from '@hbc/ui-kit/homepage';
+import { HbcPremiumCta, HbcPremiumBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeProjectPortfolioSpotlightConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -140,20 +140,20 @@ export function ProjectPortfolioSpotlight({
         normalized.featured ? (
           <article>
             {normalized.featured.strategicEmphasis ? (
-              <HbcHomepageEyebrow tone="default">Strategic Initiative</HbcHomepageEyebrow>
+              <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(34, 83, 145, 0.6)', marginBottom: 6 }}>Strategic Initiative</span>
             ) : null}
             <h3 style={featuredTitleStyle}>{normalized.featured.title}</h3>
 
             {/* Status strip — structured horizontal rail */}
             <div style={statusStripStyle}>
-              {normalized.featured.strategicEmphasis ? <HbcStatusBadge label="Strategic" variant="critical" /> : null}
+              {normalized.featured.strategicEmphasis ? <HbcPremiumBadge label="Strategic" status="critical" /> : null}
               {normalized.featured.status ? (
-                <HbcStatusBadge
+                <HbcPremiumBadge
                   label={normalized.featured.status.label}
-                  variant={normalized.featured.status.variant ?? 'info'}
+                  status={normalized.featured.status.variant ?? 'info'}
                 />
               ) : null}
-              {normalized.featured.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
+              {normalized.featured.isStale ? <HbcPremiumBadge label="Stale" status="warning" /> : null}
             </div>
 
             <p style={featuredSummaryStyle}>{normalized.featured.summary}</p>
@@ -176,7 +176,7 @@ export function ProjectPortfolioSpotlight({
             ) : null}
             {normalized.featured.cta ? (
               <div style={{ marginTop: HP_SPACE.xl }}>
-                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+                <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
               </div>
             ) : null}
           </article>
@@ -185,15 +185,15 @@ export function ProjectPortfolioSpotlight({
       secondary={normalized.secondary.map((item) => (
         <article key={item.id}>
           <h3 style={secondaryTitleStyle}>{item.title}</h3>
-          <HbcHomepageMetadataRow>
-            {item.status ? <HbcStatusBadge label={item.status.label} variant={item.status.variant ?? 'info'} /> : null}
-            {item.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
-          </HbcHomepageMetadataRow>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            {item.status ? <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" /> : null}
+            {item.isStale ? <HbcPremiumBadge label="Stale" status="warning" size="sm" /> : null}
+          </div>
           <p style={secondarySummaryStyle}>{item.summary}</p>
           {item.freshnessLabel ? <p style={freshnessStyle}>{item.freshnessLabel}</p> : null}
           {item.cta ? (
             <div style={{ marginTop: HP_SPACE.md }}>
-              <HbcHomepageCta label={item.cta.label} href={item.cta.href} variant="link" arrow />
+              <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
             </div>
           ) : null}
         </article>

@@ -8,7 +8,7 @@
  * notice) get distinct visual framing with urgency-aware colors.
  */
 import * as React from 'react';
-import { HbcHomepageCta, HbcHomepageMetadataRow, HbcStatusBadge, HbcHomepageEyebrow } from '@hbc/ui-kit/homepage';
+import { HbcPremiumCta, HbcPremiumBadge } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeSafetyFieldExcellenceConfig } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -138,24 +138,24 @@ export function SafetyFieldExcellence({
       featured={
         normalized.featured ? (
           <article>
-            <HbcHomepageEyebrow tone="default">
+            <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: EVENT_COLOR_MAP[normalized.featured.eventType] ?? '#323130', opacity: 0.7, marginBottom: 6 }}>
               {EVENT_EYEBROW_MAP[normalized.featured.eventType] ?? 'Safety'}
-            </HbcHomepageEyebrow>
+            </span>
             <h3 style={featuredTitleStyle(normalized.featured.eventType)}>{normalized.featured.title}</h3>
 
             {/* Status strip — urgency-framed indicators */}
             <div style={statusStripStyle}>
-              <HbcStatusBadge
+              <HbcPremiumBadge
                 label={normalized.featured.eventType}
-                variant={EVENT_VARIANT_MAP[normalized.featured.eventType]}
+                status={EVENT_VARIANT_MAP[normalized.featured.eventType]}
               />
               {normalized.featured.indicator ? (
-                <HbcStatusBadge
+                <HbcPremiumBadge
                   label={normalized.featured.indicator.label}
-                  variant={normalized.featured.indicator.variant ?? 'warning'}
+                  status={normalized.featured.indicator.variant ?? 'warning'}
                 />
               ) : null}
-              {normalized.featured.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
+              {normalized.featured.isStale ? <HbcPremiumBadge label="Stale" status="warning" /> : null}
             </div>
 
             <p style={featuredSummaryStyle}>{normalized.featured.summary}</p>
@@ -165,7 +165,7 @@ export function SafetyFieldExcellence({
             ) : null}
             {normalized.featured.cta ? (
               <div style={{ marginTop: HP_SPACE.xl }}>
-                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+                <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
               </div>
             ) : null}
           </article>
@@ -174,16 +174,16 @@ export function SafetyFieldExcellence({
       secondary={normalized.secondary.map((item) => (
         <article key={item.id}>
           <h3 style={secondaryTitleStyle}>{item.title}</h3>
-          <HbcHomepageMetadataRow>
-            <HbcStatusBadge label={item.eventType} variant={EVENT_VARIANT_MAP[item.eventType]} />
-            {item.indicator ? <HbcStatusBadge label={item.indicator.label} variant={item.indicator.variant ?? 'warning'} /> : null}
-            {item.isStale ? <HbcStatusBadge label="Stale" variant="warning" /> : null}
-          </HbcHomepageMetadataRow>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            <HbcPremiumBadge label={item.eventType} status={EVENT_VARIANT_MAP[item.eventType]} size="sm" />
+            {item.indicator ? <HbcPremiumBadge label={item.indicator.label} status={item.indicator.variant ?? 'warning'} size="sm" /> : null}
+            {item.isStale ? <HbcPremiumBadge label="Stale" status="warning" size="sm" /> : null}
+          </div>
           <p style={secondarySummaryStyle}>{item.summary}</p>
           {item.freshnessLabel ? <p style={freshnessStyle}>{item.freshnessLabel}</p> : null}
           {item.cta ? (
             <div style={{ marginTop: HP_SPACE.md }}>
-              <HbcHomepageCta label={item.cta.label} href={item.cta.href} variant="link" arrow />
+              <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
             </div>
           ) : null}
         </article>

@@ -8,7 +8,7 @@
  * but purposeful.
  */
 import * as React from 'react';
-import { HbcHomepageSurfaceCard, HbcHomepageActionRow, HbcHomepageIconFrame, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcPremiumSurface, HbcPremiumIcon, HbcPremiumBadge, HbcPremiumSection, HbcHomepageActionRow, AlertTriangle, AlertCircle, CheckCircle2, ArrowRight, Briefcase, type LucideIcon } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePriorityActionsRailConfig } from '../../homepage/helpers/utilityConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
@@ -18,7 +18,7 @@ import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtility
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
 import type { NormalizedPriorityActionItem } from '../../homepage/helpers/utilityConfig.js';
 import type { UtilityBadgeVariant } from '../../homepage/webparts/utilityContracts.js';
-import { hpHeadingReset, hpZoneFlexLayout, HP_SPACE } from '../../homepage/tokens.js';
+import { hpZoneFlexLayout, HP_SPACE } from '../../homepage/tokens.js';
 import interactiveStyles from '../../homepage/homepage-interactive.module.css';
 
 export interface PriorityActionsRailProps {
@@ -29,25 +29,25 @@ export interface PriorityActionsRailProps {
 
 // ── Urgency resolution ───────────────────────────────────────────────
 
-type IconTint = 'brand' | 'neutral' | 'subtle' | 'accent';
+type IconTint = 'brand' | 'neutral' | 'subtle' | 'accent' | 'danger' | 'success';
 
 interface UrgencyResolution {
   tint: IconTint;
-  indicator: string;
+  icon: LucideIcon;
   featured: boolean;
 }
 
 const URGENCY_MAP: Record<string, UrgencyResolution> = {
-  critical: { tint: 'accent', indicator: '!', featured: true },
-  warning: { tint: 'accent', indicator: '!', featured: true },
-  error: { tint: 'accent', indicator: '!', featured: true },
-  atRisk: { tint: 'accent', indicator: '!', featured: true },
-  success: { tint: 'brand', indicator: '\u2713', featured: false },
-  completed: { tint: 'brand', indicator: '\u2713', featured: false },
-  onTrack: { tint: 'brand', indicator: '\u2713', featured: false },
+  critical: { tint: 'danger', icon: AlertCircle, featured: true },
+  warning: { tint: 'danger', icon: AlertTriangle, featured: true },
+  error: { tint: 'danger', icon: AlertCircle, featured: true },
+  atRisk: { tint: 'danger', icon: AlertTriangle, featured: true },
+  success: { tint: 'success', icon: CheckCircle2, featured: false },
+  completed: { tint: 'success', icon: CheckCircle2, featured: false },
+  onTrack: { tint: 'success', icon: CheckCircle2, featured: false },
 };
 
-const DEFAULT_URGENCY: UrgencyResolution = { tint: 'neutral', indicator: '\u203A', featured: false };
+const DEFAULT_URGENCY: UrgencyResolution = { tint: 'neutral', icon: ArrowRight, featured: false };
 
 function resolveUrgency(variant: UtilityBadgeVariant | undefined): UrgencyResolution {
   if (!variant) return DEFAULT_URGENCY;
@@ -101,13 +101,11 @@ function PriorityActionRowItem({
           href={action.href}
           description={action.description}
           icon={
-            <HbcHomepageIconFrame size={iconSize} tint={urgency.tint}>
-              {urgency.indicator}
-            </HbcHomepageIconFrame>
+            <HbcPremiumIcon icon={urgency.icon} size={iconSize} tint={urgency.tint} />
           }
           badge={
             action.badge
-              ? <HbcStatusBadge label={action.badge.label} variant={action.badge.variant ?? 'info'} />
+              ? <HbcPremiumBadge label={action.badge.label} status={action.badge.variant ?? 'info'} />
               : undefined
           }
         />
@@ -136,7 +134,8 @@ export function PriorityActionsRail({ config, activeAudience, isLoading = false 
   }
 
   return (
-    <HbcHomepageSurfaceCard surface="utility" header={<h2 style={hpHeadingReset}>{normalized.heading}</h2>}>
+    <HbcPremiumSurface intent="command">
+      <HbcPremiumSection title={normalized.heading} icon={Briefcase} accent="brand">
       <HomepageRailShell label="priority-actions-rail">
         <div style={hpZoneFlexLayout}>
           {normalized.groups.map((group) => {
@@ -158,6 +157,7 @@ export function PriorityActionsRail({ config, activeAudience, isLoading = false 
           })}
         </div>
       </HomepageRailShell>
-    </HbcHomepageSurfaceCard>
+      </HbcPremiumSection>
+    </HbcPremiumSurface>
   );
 }

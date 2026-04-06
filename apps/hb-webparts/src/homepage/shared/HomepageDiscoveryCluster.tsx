@@ -13,10 +13,22 @@
  */
 import * as React from 'react';
 import {
-  HbcHomepageSectionShell,
+  HbcPremiumSection,
+  HbcPremiumSurface,
+  HbcPremiumIcon,
   HbcHomepageActionRow,
-  HbcHomepageIconFrame,
-  HbcHomepageSurfaceCard,
+  Search,
+  Link2,
+  Shield,
+  DollarSign,
+  HardHat,
+  Users,
+  Settings,
+  Building2,
+  Keyboard,
+  FileText,
+  Briefcase,
+  type LucideIcon,
 } from '@hbc/ui-kit/homepage';
 import type {
   DiscoveryQuickPath,
@@ -25,9 +37,21 @@ import type {
   NormalizedDiscoveryCategoryGroup,
   NormalizedDiscoveryResource,
 } from '../helpers/discoveryConfig.js';
-import { resolveDiscoveryIconContent } from '../helpers/iconResolver.js';
 import { HP_SPACE, HP_RADIUS } from '../tokens.js';
 import interactiveStyles from '../homepage-interactive.module.css';
+
+// ── Lucide icon resolution for discovery keys ─────────────────────────
+
+const DISCOVERY_ICON_MAP: Record<string, LucideIcon> = {
+  tool: Settings, system: Keyboard, form: FileText, policy: FileText,
+  teamSpace: Building2, destination: Link2, safety: Shield,
+  finance: DollarSign, field: HardHat, hr: Users, project: Briefcase,
+};
+
+function resolveDiscoveryIcon(iconKey: string | undefined): LucideIcon {
+  if (!iconKey) return Link2;
+  return DISCOVERY_ICON_MAP[iconKey.trim().toLowerCase()] ?? Link2;
+}
 
 export interface HomepageDiscoveryClusterProps {
   heading: string;
@@ -123,9 +147,7 @@ function QuickPathRow({ path }: { path: DiscoveryQuickPath }): React.JSX.Element
           href={path.href}
           description={path.description}
           icon={
-            <HbcHomepageIconFrame size="md" tint="warm">
-              {resolveDiscoveryIconContent(path.iconKey)}
-            </HbcHomepageIconFrame>
+            <HbcPremiumIcon icon={resolveDiscoveryIcon(path.iconKey)} size="md" tint="warm" />
           }
         />
       </div>
@@ -152,9 +174,7 @@ function PromotedDestinationTile({ resource }: { resource: NormalizedDiscoveryRe
           href={resource.href}
           description={resource.description}
           icon={
-            <HbcHomepageIconFrame size="xl" tint="warm">
-              {resolveDiscoveryIconContent(resource.iconKey)}
-            </HbcHomepageIconFrame>
+            <HbcPremiumIcon icon={resolveDiscoveryIcon(resource.iconKey)} size="xl" tint="warm" />
           }
         />
       </div>
@@ -174,9 +194,7 @@ function CategoryResourceRow({ resource }: { resource: NormalizedDiscoveryResour
           href={resource.href}
           description={resource.description}
           icon={
-            <HbcHomepageIconFrame size="md" tint="brand">
-              {resolveDiscoveryIconContent(resource.iconKey)}
-            </HbcHomepageIconFrame>
+            <HbcPremiumIcon icon={resolveDiscoveryIcon(resource.iconKey)} size="md" tint="brand" />
           }
         />
       </div>
@@ -198,7 +216,7 @@ export function HomepageDiscoveryCluster({
   strategyLabel,
 }: HomepageDiscoveryClusterProps): React.JSX.Element {
   return (
-    <HbcHomepageSectionShell title={heading} subtitle={strategyLabel} accent="warm">
+    <HbcPremiumSection title={heading} subtitle={strategyLabel} icon={Search} accent="warm">
       {/* Search area — premium warm-themed container */}
       <div style={searchAreaStyle}>
         <label htmlFor="smart-search-query" style={searchLabelStyle}>
@@ -242,7 +260,7 @@ export function HomepageDiscoveryCluster({
       {categoryGroups.length > 0 ? (
         <section aria-label="Discovery categories" style={categoryGridStyle}>
           {categoryGroups.map((group) => (
-            <HbcHomepageSurfaceCard key={group.id} surface="discovery">
+            <HbcPremiumSurface key={group.id} intent="discovery">
               <h3 style={categoryHeadingStyle}>{group.title}</h3>
               {group.description ? (
                 <p style={{ margin: `0 0 ${HP_SPACE.md}px`, opacity: 0.65, fontSize: '0.875rem' }}>
@@ -254,10 +272,10 @@ export function HomepageDiscoveryCluster({
                   <CategoryResourceRow key={resource.id} resource={resource} />
                 ))}
               </div>
-            </HbcHomepageSurfaceCard>
+            </HbcPremiumSurface>
           ))}
         </section>
       ) : null}
-    </HbcHomepageSectionShell>
+    </HbcPremiumSection>
   );
 }

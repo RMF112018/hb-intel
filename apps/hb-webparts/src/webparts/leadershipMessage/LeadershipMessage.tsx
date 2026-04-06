@@ -8,7 +8,7 @@
  * from the news-digest style of CompanyPulse.
  */
 import * as React from 'react';
-import { HbcHomepageCta, HbcHomepageEyebrow } from '@hbc/ui-kit/homepage';
+import { HbcPremiumCta } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeLeadershipMessageConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
@@ -102,7 +102,7 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
       featured={
         normalized.featured ? (
           <article>
-            <HbcHomepageEyebrow tone="default">From Leadership</HbcHomepageEyebrow>
+            <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(34, 83, 145, 0.6)', marginBottom: 6 }}>From Leadership</span>
             <h3 style={featuredHeadlineStyle}>{normalized.featured.title}</h3>
             <p style={featuredMessageStyle}>{normalized.featured.message}</p>
             <div style={attributionStyle}>
@@ -122,7 +122,7 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
             ) : null}
             {normalized.featured.cta ? (
               <div style={{ marginTop: HP_SPACE.xl }}>
-                <HbcHomepageCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="link" arrow />
+                <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
               </div>
             ) : null}
           </article>

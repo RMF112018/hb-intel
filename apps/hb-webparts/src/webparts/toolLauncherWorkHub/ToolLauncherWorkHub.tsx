@@ -8,22 +8,42 @@
  * a command launcher, not a categorized link list.
  */
 import * as React from 'react';
-import { HbcHomepageSurfaceCard, HbcHomepageActionRow, HbcHomepageIconFrame, HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcPremiumSurface, HbcPremiumIcon, HbcPremiumBadge, HbcPremiumSection, HbcHomepageActionRow, Settings, Shield, DollarSign, HardHat, Users, Building2, Keyboard, Landmark, BarChart3, FileText, Briefcase, type LucideIcon } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeToolLauncherWorkHubConfig } from '../../homepage/helpers/utilityConfig.js';
-import { resolveUtilityIconContent } from '../../homepage/helpers/iconResolver.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { HomepageRailShell } from '../../homepage/shared/HomepageRailShell.js';
 import { HomepageUtilityDenseGroup } from '../../homepage/shared/HomepageUtilityDenseGroup.js';
 import type { ToolLauncherWorkHubConfig, ToolLauncherItem } from '../../homepage/webparts/utilityContracts.js';
-import { hpHeadingReset, hpZoneFlexLayout, HP_SPACE } from '../../homepage/tokens.js';
+import { hpZoneFlexLayout, HP_SPACE } from '../../homepage/tokens.js';
 import interactiveStyles from '../../homepage/homepage-interactive.module.css';
 
 export interface ToolLauncherWorkHubProps {
   config?: Partial<ToolLauncherWorkHubConfig>;
   activeAudience?: string;
   isLoading?: boolean;
+}
+
+// ── Lucide icon resolution for tool keys ─────────────────────────────
+
+const TOOL_ICON_MAP: Record<string, LucideIcon> = {
+  safety: Shield,
+  finance: DollarSign,
+  field: HardHat,
+  hr: Users,
+  ops: Settings,
+  admin: Building2,
+  it: Keyboard,
+  legal: Landmark,
+  report: BarChart3,
+  document: FileText,
+  project: Briefcase,
+};
+
+function resolveToolIcon(iconKey: string | undefined): LucideIcon {
+  if (!iconKey) return Settings;
+  return TOOL_ICON_MAP[iconKey.trim().toLowerCase()] ?? Settings;
 }
 
 // ── Primary launcher tile (first item in group) ──────────────────────
@@ -66,13 +86,11 @@ function LauncherTileItem({
           href={item.href}
           description={item.description}
           icon={
-            <HbcHomepageIconFrame size={iconSize} tint={iconTint}>
-              {resolveUtilityIconContent(item.iconKey)}
-            </HbcHomepageIconFrame>
+            <HbcPremiumIcon icon={resolveToolIcon(item.iconKey)} size={iconSize} tint={iconTint} />
           }
           badge={
             item.badge
-              ? <HbcStatusBadge label={item.badge.label} variant={item.badge.variant ?? 'neutral'} />
+              ? <HbcPremiumBadge label={item.badge.label} status={item.badge.variant ?? 'neutral'} />
               : undefined
           }
         />
@@ -100,7 +118,8 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   }
 
   return (
-    <HbcHomepageSurfaceCard surface="utility" header={<h2 style={hpHeadingReset}>{normalized.heading}</h2>}>
+    <HbcPremiumSurface intent="command">
+      <HbcPremiumSection title={normalized.heading} icon={Settings} accent="brand">
       <HomepageRailShell label="tool-launcher-work-hub">
         <div style={hpZoneFlexLayout}>
           {normalized.groups.map((group) => (
@@ -116,6 +135,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
           ))}
         </div>
       </HomepageRailShell>
-    </HbcHomepageSurfaceCard>
+      </HbcPremiumSection>
+    </HbcPremiumSurface>
   );
 }
