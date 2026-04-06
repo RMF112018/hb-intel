@@ -3,9 +3,10 @@
   "id": "8370ab0c-b6df-4db0-82f1-24b54750f508",
   "alias": "ProjectPortfolioSpotlightWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "0.0.1.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
+  "supportsFullBleed": true,
   "supportedHosts": ["SharePointWebPart"],
   "supportsThemeVariants": false,
   "preconfiguredEntries": [
