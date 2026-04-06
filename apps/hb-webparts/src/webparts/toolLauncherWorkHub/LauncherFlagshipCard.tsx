@@ -1,24 +1,25 @@
 /**
  * LauncherFlagshipCard — Premium brand-led launch card for featured platforms.
  *
- * Phase 03-01: Flagship card primitive with:
- *   - 56px logo container (renders <img> when logoAssetRef exists,
- *     falls back to platform-specific Lucide icon)
- *   - Platform name at primary weight
- *   - Optional short descriptor
- *   - Launch CTA with ExternalLink icon
- *   - Optional notice badge with tone coloring
- *   - Premium hover/tap interaction via motion (gated by prefers-reduced-motion)
+ * Phase 03-03: Logo asset binding via launcherAssetResolution with
+ * governed fallback chain and onError recovery for broken images.
  *
- * Accepts a single LauncherPlatformRecord — does not depend on raw
- * SharePoint fields. Structurally distinct from workflow shelf tiles
- * (larger, column-layout, logo container, CTA row).
+ * Logo resolution order:
+ *   1. Record logoAssetRef (from SharePoint list)
+ *   2. Asset manifest governed logo (light/dark variant)
+ *   3. Manifest fallback Lucide icon
+ *   4. Platform/category Lucide icon
+ *   5. Monogram (first letter) as final fallback
+ *
+ * If an <img> fails to load (onError), the card falls back to the
+ * next viable resolution (icon or monogram) without layout shift.
  */
 import * as React from 'react';
 import { motion, ExternalLink } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
 import { resolvePlatformIcon } from './launcherIconResolution.js';
+import { resolveLogoAsset, type LogoResolution } from './launcherAssetResolution.js';
 import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
@@ -42,7 +43,6 @@ const cardStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-/** Logo/icon container — 56px, ready for real brand asset images */
 const logoContainerStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -60,6 +60,14 @@ const logoImageStyle: React.CSSProperties = {
   height: '100%',
   objectFit: 'contain',
   padding: 8,
+};
+
+const monogramStyle: React.CSSProperties = {
+  fontSize: '1.25rem',
+  fontWeight: 700,
+  color: 'rgba(34,83,145,0.5)',
+  lineHeight: 1,
+  userSelect: 'none',
 };
 
 const cardHeaderStyle: React.CSSProperties = {
@@ -121,12 +129,47 @@ const hoverVariant = { scale: 1.015, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' };
 const tapVariant = { scale: 0.985 };
 const restVariant = { scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)' };
 
+/* ── Logo renderer ───────────────────────────────────────────────── */
+
+function LogoContent({ resolution, onImageError }: {
+  resolution: LogoResolution;
+  onImageError: () => void;
+}): React.JSX.Element {
+  switch (resolution.type) {
+    case 'image':
+      return (
+        <img
+          src={resolution.src}
+          alt={resolution.alt}
+          style={logoImageStyle}
+          onError={onImageError}
+        />
+      );
+    case 'icon': {
+      const Icon = resolution.icon;
+      return <Icon size={26} strokeWidth={1.6} color="rgba(34,83,145,0.6)" />;
+    }
+    case 'monogram':
+      return <span style={monogramStyle} aria-hidden="true">{resolution.letter}</span>;
+  }
+}
+
 /* ── Component ───────────────────────────────────────────────────── */
 
 export function LauncherFlagshipCard({ platform: p }: LauncherFlagshipCardProps): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
-  const Icon = resolvePlatformIcon(p);
-  const hasLogo = Boolean(p.logoAssetRef);
+  const [imageErrored, setImageErrored] = React.useState(false);
+
+  // Resolve logo: primary resolution, or fallback icon on image error
+  const primaryResolution = resolveLogoAsset(p);
+  const fallbackResolution: LogoResolution = {
+    type: 'icon',
+    icon: resolvePlatformIcon(p),
+  };
+  const resolution = imageErrored && primaryResolution.type === 'image'
+    ? fallbackResolution
+    : primaryResolution;
+
   const badgeColors = p.notice
     ? BADGE_TONE_COLORS[p.notice.tone] ?? BADGE_TONE_COLORS.info
     : undefined;
@@ -147,15 +190,10 @@ export function LauncherFlagshipCard({ platform: p }: LauncherFlagshipCardProps)
       {/* Header: logo + name */}
       <div style={cardHeaderStyle}>
         <div style={logoContainerStyle}>
-          {hasLogo ? (
-            <img
-              src={p.logoAssetRef}
-              alt={`${p.name} logo`}
-              style={logoImageStyle}
-            />
-          ) : (
-            <Icon size={26} strokeWidth={1.6} color="rgba(34,83,145,0.6)" />
-          )}
+          <LogoContent
+            resolution={resolution}
+            onImageError={() => setImageErrored(true)}
+          />
         </div>
         <p style={nameStyle}>{p.name}</p>
       </div>
