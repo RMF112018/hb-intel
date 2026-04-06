@@ -1,22 +1,25 @@
 /**
  * LauncherUtilityRail — Secondary support/utility surface for Tool Launcher.
  *
- * Phase 04-02: Support actions wired through pre-derived supportSummary
- * from the presentation model. Help, access-request, and support-contact
- * sections now consume LauncherSupportSummary instead of filtering
- * raw platform arrays directly.
+ * Phase 04-03: Notice rendering with priority ordering and visual
+ * emphasis for critical/warning notices. Degraded states documented
+ * and implemented for all partial-data combinations.
  *
  * Content categories (ordered by urgency):
- *   1. Platform Notices — outages, maintenance, info (metadata)
- *   2. Need Help — help destination CTAs (action links)
- *   3. Request Access — access-request CTAs (action links)
- *   4. Support Contacts — support-owner metadata (quiet links)
+ *   1. Platform Notices — priority-sorted (critical → warning → info → neutral),
+ *      with stronger visual treatment for critical/warning notices
+ *   2. Need Help — help destination CTAs
+ *   3. Request Access — access-request CTAs
+ *   4. Support Contacts — support-owner metadata
  *
- * Each section is independently suppressible. The entire rail returns
- * null when all sections are empty.
+ * Degraded states:
+ *   - Single-section rail: renders that section alone with full rail label
+ *   - Notices without details: badge-only rendering, no detail line
+ *   - Help without notices: help section alone, no empty notice placeholder
+ *   - Each section independently suppressible; rail suppresses when all empty
  */
 import * as React from 'react';
-import { AlertCircle, Info, Link2, Users, ExternalLink } from '@hbc/ui-kit/homepage';
+import { AlertCircle, AlertTriangle, Info, Link2, Users, ExternalLink } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import type {
   LauncherPresentationModel,
@@ -27,6 +30,26 @@ import type {
 
 export interface LauncherUtilityRailProps {
   presentation: LauncherPresentationModel;
+}
+
+/* ── Notice priority ordering ────────────────────────────────────── */
+
+const TONE_PRIORITY: Record<string, number> = {
+  critical: 0,
+  warning: 1,
+  info: 2,
+  success: 3,
+  neutral: 4,
+};
+
+function byNoticePriority(
+  a: LauncherPresentationModel['noticesSummary']['activeNotices'][number],
+  b: LauncherPresentationModel['noticesSummary']['activeNotices'][number],
+): number {
+  const aPri = TONE_PRIORITY[a.notice.tone] ?? 4;
+  const bPri = TONE_PRIORITY[b.notice.tone] ?? 4;
+  if (aPri !== bPri) return aPri - bPri;
+  return a.name.localeCompare(b.name);
 }
 
 /* ── Styles ───────────────────────────────────────────────────────── */
@@ -52,6 +75,12 @@ const sectionStyle: React.CSSProperties = {
   background: 'rgba(0,0,0,0.015)',
 };
 
+/** Stronger container for sections with critical/warning notices */
+const urgentSectionStyle: React.CSSProperties = {
+  ...sectionStyle,
+  borderLeft: '3px solid rgba(200,40,40,0.3)',
+};
+
 const sectionHeadingStyle: React.CSSProperties = {
   margin: 0,
   fontSize: '0.72rem',
@@ -71,6 +100,12 @@ const countBadgeStyle: React.CSSProperties = {
   borderRadius: 3,
   background: 'rgba(0,0,0,0.06)',
   color: 'rgba(0,0,0,0.5)',
+};
+
+const urgentCountBadgeStyle: React.CSSProperties = {
+  ...countBadgeStyle,
+  background: 'rgba(200,40,40,0.1)',
+  color: '#a02020',
 };
 
 const noticeItemStyle: React.CSSProperties = {
@@ -100,7 +135,6 @@ const NOTICE_TONE_COLORS: Record<string, { bg: string; color: string }> = {
   neutral: { bg: 'rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.55)' },
 };
 
-/** CTA link — blue, with inline ExternalLink icon affordance */
 const ctaLinkStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -112,7 +146,6 @@ const ctaLinkStyle: React.CSSProperties = {
   textDecoration: 'none',
 };
 
-/** Quiet metadata link — muted, no icon affordance */
 const metadataLinkStyle: React.CSSProperties = {
   display: 'block',
   marginTop: HP_SPACE.sm,
@@ -132,14 +165,19 @@ const supportOwnerLabelStyle: React.CSSProperties = {
 function NoticesSection({ notices }: { notices: LauncherPresentationModel['noticesSummary']['activeNotices'] }): React.JSX.Element | null {
   if (notices.length === 0) return null;
 
+  // Sort by priority: critical → warning → info → success → neutral
+  const sorted = [...notices].sort(byNoticePriority);
+  const hasUrgent = sorted.some((n) => n.notice.tone === 'critical' || n.notice.tone === 'warning');
+  const NoticeIcon = hasUrgent ? AlertTriangle : AlertCircle;
+
   return (
-    <div style={sectionStyle} data-rail-section="notices">
+    <div style={hasUrgent ? urgentSectionStyle : sectionStyle} data-rail-section="notices">
       <h4 style={sectionHeadingStyle}>
-        <AlertCircle size={13} strokeWidth={2} />
+        <NoticeIcon size={13} strokeWidth={2} />
         Platform Notices
-        <span style={countBadgeStyle}>{notices.length}</span>
+        <span style={hasUrgent ? urgentCountBadgeStyle : countBadgeStyle}>{sorted.length}</span>
       </h4>
-      {notices.map((n) => {
+      {sorted.map((n) => {
         const tone = NOTICE_TONE_COLORS[n.notice.tone] ?? NOTICE_TONE_COLORS.info;
         return (
           <div key={n.platformKey} style={noticeItemStyle}>
