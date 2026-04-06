@@ -7,5 +7,7 @@ declare const styles: {
   readonly mediaContainer: string;
   readonly actionRowContainer: string;
   readonly actionRowArrow: string;
+  readonly teamStripButton: string;
+  readonly teamDetailBackdrop: string;
 };
 export default styles;

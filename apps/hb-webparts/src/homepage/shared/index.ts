@@ -10,3 +10,6 @@ export { HomepageSectionShell } from './HomepageSectionShell.js';
 export { HomepageSpotlightCard } from './HomepageSpotlightCard.js';
 
 export { HomepageUtilityDenseGroup } from './HomepageUtilityDenseGroup.js';
+
+export { useResponsiveTier } from './useResponsiveTier.js';
+export type { ResponsiveTier } from './useResponsiveTier.js';

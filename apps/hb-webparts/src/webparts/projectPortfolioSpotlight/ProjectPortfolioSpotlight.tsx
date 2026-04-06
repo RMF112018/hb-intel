@@ -1,13 +1,16 @@
 /**
  * ProjectPortfolioSpotlight — Premium editorial spotlight surface
- * Phase P05-05 — Project Team strip and detail layer
+ * Phase P06 — Responsive adaptation and device behavior
  *
  * Image-led editorial composition with warm accent styling aligned
- * with HbcEditorialSurface. Desktop layout: dominant featured spotlight
- * (~65%) plus subordinate supporting rail (~35%).
+ * with HbcEditorialSurface. Adapts across desktop, tablet, and mobile
+ * while preserving the featured-first hierarchy and premium interaction
+ * quality.
  *
- * Project Team avatar strip inside the featured content zone with an
- * anchored detail panel for team member expansion.
+ * Desktop: dominant featured spotlight (~65%) plus subordinate supporting rail (~35%).
+ * Tablet:  featured spotlight full-width on top, rail below.
+ * Mobile:  featured image stacks above content, rail stacked below,
+ *          team detail uses bottom-sheet fallback.
  */
 import * as React from 'react';
 import {
@@ -27,6 +30,7 @@ import {
 } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
+import { useResponsiveTier, type ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 import type {
   ProjectPortfolioSpotlightConfig,
   ProjectTeamMember,
@@ -36,6 +40,7 @@ import {
   HP_RADIUS,
   HP_IMAGE,
 } from '../../homepage/tokens.js';
+import interactiveStyles from '../../homepage/homepage-interactive.module.css';
 
 export interface ProjectPortfolioSpotlightProps {
   config?: Partial<ProjectPortfolioSpotlightConfig>;
@@ -77,13 +82,46 @@ const rootStyle: React.CSSProperties = {
   overflow: 'hidden',
 };
 
-const headerStyle: React.CSSProperties = {
-  padding: `${HP_SPACE['3xl']}px 24px ${HP_SPACE.xl}px`,
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: HP_SPACE.xl,
+const separatorStyle: React.CSSProperties = {
+  height: 1,
+  background: WARM.separator,
+  margin: '0 24px',
+  border: 'none',
 };
+
+/* ── Motion ────────────────────────────────────────────────────── */
+
+const featuredMotion = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as const },
+};
+
+const railMotion = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
+};
+
+const bottomSheetMotion = {
+  initial: { opacity: 0, y: 40 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] as const },
+};
+
+/* ── Responsive style helpers ────────────────────────────────────── */
+
+function getHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    padding: tier === 'mobile'
+      ? `${HP_SPACE['3xl']}px 16px ${HP_SPACE.xl}px`
+      : `${HP_SPACE['3xl']}px 24px ${HP_SPACE.xl}px`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: HP_SPACE.xl,
+  };
+}
 
 const headerTitleStyle: React.CSSProperties = {
   margin: 0,
@@ -95,40 +133,41 @@ const headerTitleStyle: React.CSSProperties = {
   gap: HP_SPACE.md,
 };
 
-const separatorStyle: React.CSSProperties = {
-  height: 1,
-  background: WARM.separator,
-  margin: '0 24px',
-  border: 'none',
-};
+function getCompositionStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'desktop') {
+    return { display: 'flex', flexWrap: 'wrap' };
+  }
+  return { display: 'flex', flexDirection: 'column' };
+}
 
-/* ── Desktop composition layout ────────────────────────────────── */
+function getFeaturedWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'desktop') {
+    return { flex: '1 1 62%', minWidth: 400 };
+  }
+  return { flex: '1 1 100%', minWidth: 0 };
+}
 
-const compositionStyle: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-};
+function getFeaturedLayoutStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'mobile') {
+    return { display: 'flex', flexDirection: 'column', gap: 0 };
+  }
+  return { display: 'flex', gap: 0, height: '100%' };
+}
 
-/* ── Featured spotlight styles ─────────────────────────────────── */
-
-const featuredWrapperStyle: React.CSSProperties = {
-  flex: '1 1 62%',
-  minWidth: 400,
-};
-
-const featuredLayoutStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: 0,
-  height: '100%',
-};
-
-const imageZoneStyle: React.CSSProperties = {
-  position: 'relative',
-  flex: '0 0 48%',
-  minHeight: 280,
-  overflow: 'hidden',
-  backgroundColor: 'rgba(0, 0, 0, 0.025)',
-};
+function getImageZoneStyle(tier: ResponsiveTier): React.CSSProperties {
+  const base: React.CSSProperties = {
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.025)',
+  };
+  if (tier === 'mobile') {
+    return { ...base, minHeight: 200, maxHeight: 240 };
+  }
+  if (tier === 'tablet') {
+    return { ...base, flex: '0 0 40%', minHeight: 240 };
+  }
+  return { ...base, flex: '0 0 48%', minHeight: 280 };
+}
 
 const imageStyle: React.CSSProperties = {
   width: '100%',
@@ -145,59 +184,77 @@ const imageScrimStyle: React.CSSProperties = {
   pointerEvents: 'none',
 };
 
-const imagePlaceholderStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  minHeight: 280,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'linear-gradient(135deg, rgba(229, 126, 70, 0.06) 0%, rgba(34, 83, 145, 0.04) 100%)',
-  color: 'rgba(0, 0, 0, 0.20)',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase' as const,
-};
+function getImagePlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    width: '100%',
+    height: '100%',
+    minHeight: tier === 'mobile' ? 200 : 280,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, rgba(229, 126, 70, 0.06) 0%, rgba(34, 83, 145, 0.04) 100%)',
+    color: 'rgba(0, 0, 0, 0.20)',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase' as const,
+  };
+}
 
-const contentZoneStyle: React.CSSProperties = {
-  flex: '1 1 52%',
-  padding: '24px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 10,
-};
+function getContentZoneStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'mobile') {
+    return {
+      padding: '16px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+    };
+  }
+  return {
+    flex: '1 1 52%',
+    padding: '24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+  };
+}
 
-const titleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1.5rem',
-  fontWeight: 700,
-  letterSpacing: '-0.025em',
-  lineHeight: 1.15,
-  color: '#1a1a1a',
-  maxWidth: '20ch',
-};
+function getTitleStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    margin: 0,
+    fontSize: tier === 'mobile' ? '1.25rem' : '1.5rem',
+    fontWeight: 700,
+    letterSpacing: '-0.025em',
+    lineHeight: 1.15,
+    color: '#1a1a1a',
+    maxWidth: tier === 'mobile' ? undefined : '20ch',
+  };
+}
 
-const headlineStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.9375rem',
-  fontWeight: 400,
-  lineHeight: 1.6,
-  color: 'rgba(26, 26, 26, 0.78)',
-  maxWidth: '38ch',
-};
+function getHeadlineStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    margin: 0,
+    fontSize: '0.9375rem',
+    fontWeight: 400,
+    lineHeight: 1.6,
+    color: 'rgba(26, 26, 26, 0.78)',
+    maxWidth: tier === 'mobile' ? undefined : '38ch',
+  };
+}
 
-const summaryStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.8125rem',
-  lineHeight: 1.6,
-  color: 'rgba(26, 26, 26, 0.55)',
-  maxWidth: '48ch',
-  display: '-webkit-box',
-  WebkitLineClamp: 3,
-  WebkitBoxOrient: 'vertical' as unknown as React.CSSProperties['WebkitBoxOrient'],
-  overflow: 'hidden',
-};
+function getSummaryStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    margin: 0,
+    fontSize: '0.8125rem',
+    lineHeight: 1.6,
+    color: 'rgba(26, 26, 26, 0.55)',
+    maxWidth: tier === 'mobile' ? undefined : '48ch',
+    display: '-webkit-box',
+    WebkitLineClamp: tier === 'mobile' ? 4 : 3,
+    WebkitBoxOrient: 'vertical' as unknown as React.CSSProperties['WebkitBoxOrient'],
+    overflow: 'hidden',
+  };
+}
 
 const badgeRowStyle: React.CSSProperties = {
   display: 'flex',
@@ -223,15 +280,17 @@ const ctaWrapperStyle: React.CSSProperties = {
 
 /* ── Team strip styles ─────────────────────────────────────────── */
 
-const teamStripWrapperStyle: React.CSSProperties = {
-  position: 'relative',
-};
+function getTeamStripWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    position: tier === 'mobile' ? 'static' : 'relative',
+  };
+}
 
 const teamStripStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: 6,
-  padding: 0,
+  padding: '4px 8px',
   margin: 0,
   border: 'none',
   background: 'none',
@@ -240,6 +299,7 @@ const teamStripStyle: React.CSSProperties = {
   transition: 'background-color 150ms ease',
   fontFamily: 'inherit',
   color: 'inherit',
+  minHeight: 44,
 };
 
 const teamStripLabelStyle: React.CSSProperties = {
@@ -288,20 +348,39 @@ const overflowStyle: React.CSSProperties = {
 
 /* ── Team detail panel styles ──────────────────────────────────── */
 
-const detailPanelStyle: React.CSSProperties = {
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  marginTop: 6,
-  zIndex: 10,
-  minWidth: 240,
-  maxWidth: 300,
-  background: '#ffffff',
-  borderRadius: HP_RADIUS.card,
-  border: `1px solid ${WARM.borderSubtle}`,
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06)',
-  overflow: 'hidden',
-};
+function getDetailPanelStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'mobile') {
+    return {
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: 100,
+      background: '#ffffff',
+      borderRadius: '12px 12px 0 0',
+      border: `1px solid ${WARM.borderSubtle}`,
+      borderBottom: 'none',
+      boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.14), 0 -1px 6px rgba(0, 0, 0, 0.06)',
+      overflow: 'hidden',
+      maxHeight: '60vh',
+      overflowY: 'auto',
+    };
+  }
+  return {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    marginTop: 6,
+    zIndex: 10,
+    minWidth: tier === 'tablet' ? 280 : 240,
+    maxWidth: tier === 'tablet' ? 360 : 300,
+    background: '#ffffff',
+    borderRadius: HP_RADIUS.card,
+    border: `1px solid ${WARM.borderSubtle}`,
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06)',
+    overflow: 'hidden',
+  };
+}
 
 const detailHeaderStyle: React.CSSProperties = {
   padding: '10px 14px 8px',
@@ -325,6 +404,11 @@ const detailCloseStyle: React.CSSProperties = {
   borderRadius: 4,
   lineHeight: 1,
   fontFamily: 'inherit',
+  minWidth: 44,
+  minHeight: 44,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
 const detailListStyle: React.CSSProperties = {
@@ -333,12 +417,15 @@ const detailListStyle: React.CSSProperties = {
   padding: '0 0 6px',
 };
 
-const detailItemStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-  padding: '6px 14px',
-};
+function getDetailItemStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: tier === 'mobile' ? '10px 16px' : '6px 14px',
+    minHeight: 44,
+  };
+}
 
 const detailAvatarStyle: React.CSSProperties = {
   width: DETAIL_AVATAR_SIZE,
@@ -374,34 +461,54 @@ const detailRoleStyle: React.CSSProperties = {
 
 /* ── Supporting rail styles ────────────────────────────────────── */
 
-const railWrapperStyle: React.CSSProperties = {
-  flex: '1 1 33%',
-  minWidth: 240,
-  borderLeft: `1px solid ${WARM.tileSeparator}`,
-  display: 'flex',
-  flexDirection: 'column',
-};
+function getRailWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'desktop') {
+    return {
+      flex: '1 1 33%',
+      minWidth: 240,
+      borderLeft: `1px solid ${WARM.tileSeparator}`,
+      display: 'flex',
+      flexDirection: 'column',
+    };
+  }
+  return {
+    flex: '1 1 100%',
+    minWidth: 0,
+    borderTop: `1px solid ${WARM.tileSeparator}`,
+    display: 'flex',
+    flexDirection: 'column',
+  };
+}
 
-const railHeaderStyle: React.CSSProperties = {
-  padding: `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px ${HP_SPACE.md}px`,
-  fontSize: '0.6875rem',
-  fontWeight: 700,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase' as const,
-  color: 'rgba(26, 26, 26, 0.40)',
-};
+function getRailHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    padding: tier === 'mobile'
+      ? `${HP_SPACE.xl}px ${HP_SPACE.xl}px ${HP_SPACE.md}px`
+      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px ${HP_SPACE.md}px`,
+    fontSize: '0.6875rem',
+    fontWeight: 700,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase' as const,
+    color: 'rgba(26, 26, 26, 0.40)',
+  };
+}
 
-const railTileStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: HP_SPACE.lg,
-  padding: `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
-  textDecoration: 'none',
-  color: 'inherit',
-  transition: 'background-color 150ms ease',
-  cursor: 'pointer',
-  borderTop: `1px solid ${WARM.tileSeparator}`,
-  alignItems: 'flex-start',
-};
+function getRailTileStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    display: 'flex',
+    gap: HP_SPACE.lg,
+    padding: tier === 'mobile'
+      ? `${HP_SPACE.lg}px ${HP_SPACE.xl}px`
+      : `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
+    textDecoration: 'none',
+    color: 'inherit',
+    transition: 'background-color 150ms ease',
+    cursor: 'pointer',
+    borderTop: `1px solid ${WARM.tileSeparator}`,
+    alignItems: 'flex-start',
+    minHeight: 44,
+  };
+}
 
 const railThumbnailWrapperStyle: React.CSSProperties = {
   position: 'relative',
@@ -456,20 +563,6 @@ const railMetaStyle: React.CSSProperties = {
   whiteSpace: 'nowrap' as const,
 };
 
-/* ── Motion ────────────────────────────────────────────────────── */
-
-const featuredMotion = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as const },
-};
-
-const railMotion = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
-};
-
 /* ── Helper: extract initials ──────────────────────────────────── */
 
 function getInitials(name: string): string {
@@ -481,7 +574,13 @@ function getInitials(name: string): string {
 
 /* ── Project Team strip component ──────────────────────────────── */
 
-function ProjectTeamStrip({ members }: { members: ProjectTeamMember[] }): React.JSX.Element | null {
+function ProjectTeamStrip({
+  members,
+  tier,
+}: {
+  members: ProjectTeamMember[];
+  tier: ResponsiveTier;
+}): React.JSX.Element | null {
   const [isOpen, setIsOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -499,7 +598,7 @@ function ProjectTeamStrip({ members }: { members: ProjectTeamMember[] }): React.
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  // Close on outside click
+  // Close on outside click (desktop/tablet popover) or backdrop tap (mobile)
   React.useEffect(() => {
     if (!isOpen) return;
     function handleClick(e: MouseEvent): void {
@@ -519,12 +618,56 @@ function ProjectTeamStrip({ members }: { members: ProjectTeamMember[] }): React.
 
   const visible = members.slice(0, MAX_VISIBLE_AVATARS);
   const overflow = members.length - MAX_VISIBLE_AVATARS;
+  const isMobile = tier === 'mobile';
+
+  const detailPanel = (
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-label="Project team members"
+      style={getDetailPanelStyle(tier)}
+    >
+      <div style={detailHeaderStyle}>
+        <span>Project Team</span>
+        <button
+          type="button"
+          style={detailCloseStyle}
+          onClick={() => { setIsOpen(false); triggerRef.current?.focus(); }}
+          aria-label="Close team panel"
+        >
+          ✕
+        </button>
+      </div>
+      <ul style={detailListStyle}>
+        {members.map((member) => (
+          <li key={member.id} style={getDetailItemStyle(tier)}>
+            {member.photoUrl ? (
+              <img
+                src={member.photoUrl}
+                alt={member.displayName}
+                style={detailAvatarStyle}
+              />
+            ) : (
+              <span style={detailInitialsStyle} aria-hidden="true">
+                {getInitials(member.displayName)}
+              </span>
+            )}
+            <div>
+              <div style={detailNameStyle}>{member.displayName}</div>
+              {member.role ? <div style={detailRoleStyle}>{member.role}</div> : null}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
   return (
-    <div style={teamStripWrapperStyle} data-hbc-homepage="team-strip">
+    <div style={getTeamStripWrapperStyle(tier)} data-hbc-homepage="team-strip">
       <button
         ref={triggerRef}
         type="button"
+        className={interactiveStyles.teamStripButton}
         style={teamStripStyle}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
@@ -554,45 +697,21 @@ function ProjectTeamStrip({ members }: { members: ProjectTeamMember[] }): React.
       </button>
 
       {isOpen ? (
-        <div
-          ref={panelRef}
-          role="dialog"
-          aria-label="Project team members"
-          style={detailPanelStyle}
-        >
-          <div style={detailHeaderStyle}>
-            <span>Project Team</span>
-            <button
-              type="button"
-              style={detailCloseStyle}
-              onClick={() => { setIsOpen(false); triggerRef.current?.focus(); }}
-              aria-label="Close team panel"
-            >
-              ✕
-            </button>
-          </div>
-          <ul style={detailListStyle}>
-            {members.map((member) => (
-              <li key={member.id} style={detailItemStyle}>
-                {member.photoUrl ? (
-                  <img
-                    src={member.photoUrl}
-                    alt={member.displayName}
-                    style={detailAvatarStyle}
-                  />
-                ) : (
-                  <span style={detailInitialsStyle} aria-hidden="true">
-                    {getInitials(member.displayName)}
-                  </span>
-                )}
-                <div>
-                  <div style={detailNameStyle}>{member.displayName}</div>
-                  {member.role ? <div style={detailRoleStyle}>{member.role}</div> : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        isMobile ? (
+          <>
+            {/* Backdrop overlay for mobile bottom-sheet */}
+            <div
+              className={interactiveStyles.teamDetailBackdrop}
+              onClick={() => setIsOpen(false)}
+              aria-hidden="true"
+            />
+            <motion.div {...bottomSheetMotion}>
+              {detailPanel}
+            </motion.div>
+          </>
+        ) : (
+          detailPanel
+        )
       ) : null}
     </div>
   );
@@ -600,7 +719,13 @@ function ProjectTeamStrip({ members }: { members: ProjectTeamMember[] }): React.
 
 /* ── Supporting tile component ─────────────────────────────────── */
 
-function SupportingTile({ item }: { item: NormalizedProjectPortfolioSpotlightItem }): React.JSX.Element {
+function SupportingTile({
+  item,
+  tier,
+}: {
+  item: NormalizedProjectPortfolioSpotlightItem;
+  tier: ResponsiveTier;
+}): React.JSX.Element {
   const [hovered, setHovered] = React.useState(false);
   const metaText = [item.location, item.sector].filter(Boolean).join(' \u00B7 ') || item.freshnessLabel;
   const href = item.cta?.href;
@@ -617,8 +742,9 @@ function SupportingTile({ item }: { item: NormalizedProjectPortfolioSpotlightIte
         role: 'listitem' as const,
       };
 
+  const baseTileStyle = getRailTileStyle(tier);
   const style: React.CSSProperties = {
-    ...railTileStyle,
+    ...baseTileStyle,
     backgroundColor: hovered ? WARM.tileHover : 'transparent',
   };
 
@@ -666,6 +792,8 @@ export function ProjectPortfolioSpotlight({
   activeAudience,
   isLoading = false,
 }: ProjectPortfolioSpotlightProps): React.JSX.Element {
+  const tier = useResponsiveTier();
+
   if (isLoading) {
     return <HomepageLoadingState label="Loading project spotlight" />;
   }
@@ -698,7 +826,7 @@ export function ProjectPortfolioSpotlight({
       style={rootStyle}
     >
       {/* Header */}
-      <div style={headerStyle}>
+      <div style={getHeaderStyle(tier)}>
         <h2 style={headerTitleStyle}>{normalized.heading}</h2>
         {feat.cta ? (
           <HbcPremiumCta
@@ -714,16 +842,16 @@ export function ProjectPortfolioSpotlight({
       {/* Separator */}
       <div role="separator" style={separatorStyle} />
 
-      {/* Desktop composition: featured + rail */}
-      <div style={compositionStyle}>
+      {/* Responsive composition: featured + rail */}
+      <div style={getCompositionStyle(tier)}>
         {/* Featured spotlight — dominant */}
         <motion.div
-          style={featuredWrapperStyle}
+          style={getFeaturedWrapperStyle(tier)}
           {...featuredMotion}
         >
-          <div style={featuredLayoutStyle}>
+          <div style={getFeaturedLayoutStyle(tier)}>
             {/* Image zone */}
-            <div style={imageZoneStyle}>
+            <div style={getImageZoneStyle(tier)}>
               {feat.image ? (
                 <>
                   <img
@@ -735,20 +863,20 @@ export function ProjectPortfolioSpotlight({
                   <div style={imageScrimStyle} aria-hidden="true" />
                 </>
               ) : (
-                <div style={imagePlaceholderStyle} aria-hidden="true">
+                <div style={getImagePlaceholderStyle(tier)} aria-hidden="true">
                   Project Image
                 </div>
               )}
             </div>
 
             {/* Content zone */}
-            <div style={contentZoneStyle}>
+            <div style={getContentZoneStyle(tier)}>
               <HbcHomepageEyebrow>{eyebrowText}</HbcHomepageEyebrow>
 
-              <h3 style={titleStyle}>{feat.title}</h3>
+              <h3 style={getTitleStyle(tier)}>{feat.title}</h3>
 
               {feat.highlightHeadline ? (
-                <p style={headlineStyle}>{feat.highlightHeadline}</p>
+                <p style={getHeadlineStyle(tier)}>{feat.highlightHeadline}</p>
               ) : null}
 
               {/* Metadata row — milestone + freshness */}
@@ -770,7 +898,7 @@ export function ProjectPortfolioSpotlight({
               ) : null}
 
               {/* Summary */}
-              <p style={summaryStyle}>{feat.summary}</p>
+              <p style={getSummaryStyle(tier)}>{feat.summary}</p>
 
               {/* Badges — restrained */}
               {(feat.status || feat.strategicEmphasis) ? (
@@ -785,7 +913,7 @@ export function ProjectPortfolioSpotlight({
               ) : null}
 
               {/* Project Team strip */}
-              <ProjectTeamStrip members={feat.teamMembers} />
+              <ProjectTeamStrip members={feat.teamMembers} tier={tier} />
 
               {/* Primary CTA */}
               {feat.cta ? (
@@ -806,14 +934,14 @@ export function ProjectPortfolioSpotlight({
         {/* Supporting rail — subordinate */}
         {hasRail ? (
           <motion.div
-            style={railWrapperStyle}
+            style={getRailWrapperStyle(tier)}
             {...railMotion}
             role="list"
             aria-label="Additional projects"
           >
-            <div style={railHeaderStyle}>Also in progress</div>
+            <div style={getRailHeaderStyle(tier)}>Also in progress</div>
             {normalized.secondary.map((item) => (
-              <SupportingTile key={item.id} item={item} />
+              <SupportingTile key={item.id} item={item} tier={tier} />
             ))}
           </motion.div>
         ) : null}
