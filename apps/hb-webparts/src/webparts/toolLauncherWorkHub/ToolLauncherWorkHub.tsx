@@ -44,6 +44,21 @@ export interface ToolLauncherWorkHubProps {
   isLoading?: boolean;
 }
 
+// ── Platform-specific fallback icons (from asset manifest fallbackLucideIcon) ──
+// Used when logo assets are unavailable. Keyed by platformKey (slugified name).
+
+const PLATFORM_FALLBACK_ICON: Record<string, LucideIcon> = {
+  bamboohr: Users,
+  hh2: Briefcase,
+  'sap-concur': BarChart3,
+  'employee-navigator': Users,
+  adp: BarChart3,
+  procore: Building2,
+  compass: Settings,
+  'document-crunch': FileText,
+  hedricklearn: FileText,
+};
+
 // ── Lucide icon resolution (transitional — will be replaced by logo assets) ──
 
 const TOOL_ICON_MAP: Record<string, LucideIcon> = {
@@ -97,13 +112,17 @@ function resolveGroupIcon(groupTitle: string): LucideIcon {
 // ── Bridge: live data → LauncherGroup[] for HbcLauncherSurface ──
 
 function platformToTile(platform: LauncherPlatformRecord) {
-  // Use category as icon hint for live data (transitional until logo assets)
+  // Resolution order (transitional until logo assets):
+  // 1. Platform-specific fallback from asset manifest (by platformKey)
+  // 2. Category-based icon hint
+  // 3. Default Settings icon
+  const manifestIcon = PLATFORM_FALLBACK_ICON[platform.platformKey];
   const iconHint = platform.category?.toLowerCase() ?? platform.platformKey;
   return {
     id: platform.platformKey,
     label: platform.name,
     description: platform.descriptor,
-    icon: resolveToolIcon(iconHint),
+    icon: manifestIcon ?? resolveToolIcon(iconHint),
     tint: resolveToolTint(iconHint),
     href: platform.launchUrl,
   };
@@ -156,18 +175,19 @@ function bridgeLiveDataToGroups(platforms: LauncherPlatformRecord[]): LauncherGr
 // ── Component ──
 
 export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false }: ToolLauncherWorkHubProps): React.JSX.Element {
-  const { platforms: listPlatforms, isLoading: listLoading } = useToolLauncherData();
+  const { platforms: listPlatforms, isLoading: listLoading, error: listError } = useToolLauncherData();
 
   if (isLoading || listLoading) {
     return <HomepageLoadingState label="Loading tool launchers" />;
   }
 
   // Live list data is the primary operating model.
-  // Manifest config (props) is the narrow fallback for local dev / demo / packaging.
-  if (listPlatforms) {
+  // On fetch error: fall through to config fallback silently (no error UI for end users).
+  // Manifest config (props) is the narrow fallback for local dev / demo / packaging / errors.
+  if (listPlatforms && !listError) {
     const groups = bridgeLiveDataToGroups(listPlatforms);
     if (groups.length === 0) {
-      const message = resolveAuthoringMessage('toolLauncherWorkHub', 'noData');
+      const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
       return <HomepageEmptyState title={message.title} description={message.description} />;
     }
     return (

@@ -132,8 +132,18 @@ export async function fetchToolLauncherListItems(
     throw new Error(`Tool Launcher list request failed: ${response.status} ${response.statusText}`);
   }
 
-  const body = (await response.json()) as { value?: RawToolLauncherListItem[] };
-  const rawItems = body.value ?? [];
+  let body: { value?: unknown };
+  try {
+    body = (await response.json()) as { value?: unknown };
+  } catch {
+    throw new Error('Tool Launcher list response was not valid JSON');
+  }
+
+  // Guard against malformed responses — value must be an array
+  const rawValue = body.value;
+  const rawItems: RawToolLauncherListItem[] = Array.isArray(rawValue)
+    ? (rawValue as RawToolLauncherListItem[])
+    : [];
 
   return normalizeToolLauncherItems(rawItems);
 }

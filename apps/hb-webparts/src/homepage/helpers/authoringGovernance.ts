@@ -82,6 +82,10 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
         title: 'Tool launcher configuration is invalid',
         description: 'Review launcher group IDs, item links, and optional visibility constraints.',
       },
+      listEmpty: {
+        title: 'No platforms available',
+        description: 'The Tool Launcher Contents list has no active platform entries. Add platforms with IsActive set to Yes.',
+      },
     },
   },
   companyPulse: {
@@ -206,12 +210,16 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
 
 export function resolveAuthoringMessage(
   webpartKey: keyof typeof HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY,
-  state: 'noData' | 'invalid' | 'noResults',
+  state: 'noData' | 'invalid' | 'noResults' | 'listEmpty',
 ): AuthoringMessage {
   const entry = HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY[webpartKey];
 
   if (state === 'noResults' && entry.messages.noResults) {
     return entry.messages.noResults;
+  }
+
+  if (state === 'listEmpty' && entry.messages.listEmpty) {
+    return entry.messages.listEmpty;
   }
 
   if (state === 'invalid') {

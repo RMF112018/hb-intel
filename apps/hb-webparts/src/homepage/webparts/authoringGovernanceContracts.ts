@@ -16,6 +16,8 @@ export interface AuthoringMessageSet {
   noData: AuthoringMessage;
   invalid: AuthoringMessage;
   noResults?: AuthoringMessage;
+  /** Shown when the live SharePoint list returns zero active items. */
+  listEmpty?: AuthoringMessage;
 }
 
 export interface HomepageAuthoringGovernanceEntry {

@@ -245,6 +245,8 @@ export function normalizeToolLauncherItems(
   const records: LauncherPlatformRecord[] = [];
 
   for (const raw of rawItems) {
+    // Guard against null, undefined, or non-object entries in the array
+    if (!raw || typeof raw !== 'object') continue;
     const record = normalizeToolLauncherItem(raw);
     if (!record) continue;
     if (seen.has(record.platformKey)) continue;
