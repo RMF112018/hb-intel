@@ -40,6 +40,7 @@ import { useToolLauncherData } from '../../homepage/data/useToolLauncherData.js'
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { LauncherCompositionShell } from './LauncherCompositionShell.js';
+import { LauncherCommandBand } from './LauncherCommandBand.js';
 import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
 import type { LauncherPlatformRecord, LauncherPresentationModel } from '../../homepage/webparts/toolLauncherContracts.js';
@@ -134,34 +135,6 @@ function platformToTile(platform: LauncherPlatformRecord) {
 }
 
 // ── Region renderers for the composition shell ──
-
-const commandBandTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.85rem',
-  fontWeight: 600,
-  letterSpacing: '0.02em',
-  color: 'rgba(0,0,0,0.7)',
-};
-
-const commandBandActionsStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: HP_SPACE.md,
-  fontSize: '0.75rem',
-  color: 'rgba(0,0,0,0.5)',
-};
-
-function renderCommandBand(): React.ReactNode {
-  return (
-    <>
-      <h3 style={commandBandTitleStyle}>Work Hub</h3>
-      <div style={commandBandActionsStyle}>
-        <span>All Platforms</span>
-        <span>·</span>
-        <span>Need Help</span>
-      </div>
-    </>
-  );
-}
 
 const flagshipCardStyle: React.CSSProperties = {
   display: 'flex',
@@ -356,7 +329,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
 
     return (
       <LauncherCompositionShell
-        commandBand={renderCommandBand()}
+        commandBand={<LauncherCommandBand platformCount={listPlatforms.length} />}
         flagshipStage={renderFlagshipStage(presentation.featuredStage.platforms)}
         utilityRail={renderUtilityRail(presentation)}
         workflowShelves={renderWorkflowShelves(presentation)}

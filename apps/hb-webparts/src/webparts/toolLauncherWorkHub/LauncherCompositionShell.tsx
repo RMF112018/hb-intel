@@ -2,16 +2,18 @@
  * LauncherCompositionShell — Desktop anatomy shell for Tool Launcher.
  *
  * Implements the 4-region desktop layout:
- *   1. Command band (top) — title, search placeholder, utility actions
+ *   1. Command band (top) — LauncherCommandBand owns its own styling
  *   2. Flagship stage (primary body, left ~65%) — featured platforms
  *   3. Utility rail (secondary body, right ~35%) — support, notices
  *   4. Workflow shelves (below body) — categorized platform groups
  *
- * This shell owns layout/spacing only. Each region accepts ReactNode
- * children so downstream prompts can deepen visuals without redoing
- * the structural composition.
+ * This shell owns layout/spacing between regions. Each region accepts
+ * ReactNode children so downstream prompts can deepen visuals without
+ * redoing the structural composition.
  *
  * Phase 02-01: Desktop skeleton — composition first, not polish first.
+ * Phase 02-02: Command band extracted to own component; shell refined
+ *   with stronger outer container and region separation.
  */
 import * as React from 'react';
 import { HP_SPACE, HP_RADIUS, HP_BORDER } from '../../homepage/tokens.js';
@@ -19,7 +21,7 @@ import { HP_SPACE, HP_RADIUS, HP_BORDER } from '../../homepage/tokens.js';
 /* ── Region props ────────────────────────────────────────────────── */
 
 export interface LauncherCompositionShellProps {
-  /** Command band content (title, search, utility actions). Suppressed if absent. */
+  /** Command band content (LauncherCommandBand). Suppressed if absent. */
   commandBand?: React.ReactNode;
   /** Flagship stage content (featured platform cards). Required for meaningful render. */
   flagshipStage?: React.ReactNode;
@@ -33,21 +35,14 @@ export interface LauncherCompositionShellProps {
 
 /* ── Styles ──────────────────────────────────────────────────────── */
 
+/** Outer launcher container — premium utility-zone product surface */
 const shellStyle: React.CSSProperties = {
   display: 'grid',
-  gap: HP_SPACE.xl,
-};
-
-const commandBandStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: HP_SPACE.xl,
-  padding: `${HP_SPACE.md}px ${HP_SPACE.lg}px`,
-  borderRadius: HP_RADIUS.command,
+  gap: HP_SPACE['2xl'],
+  padding: HP_SPACE['2xl'],
+  borderRadius: HP_RADIUS.card,
   border: HP_BORDER.subtle,
-  background: 'rgba(34,83,145,0.03)',
-  minHeight: 40,
+  background: 'rgba(255,255,255,0.4)',
 };
 
 /** 8/4 desktop split: flagship stage ~65%, utility rail ~35% */
@@ -93,7 +88,7 @@ export function LauncherCompositionShell({
   return (
     <div role="region" aria-label={ariaLabel} style={shellStyle}>
       {commandBand && (
-        <div data-launcher-region="command-band" style={commandBandStyle}>
+        <div data-launcher-region="command-band">
           {commandBand}
         </div>
       )}
