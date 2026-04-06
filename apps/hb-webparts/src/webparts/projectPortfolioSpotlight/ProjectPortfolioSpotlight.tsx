@@ -55,43 +55,54 @@ const MAX_VISIBLE_AVATARS = 5;
 const AVATAR_SIZE = 30;
 const DETAIL_AVATAR_SIZE = 40;
 
-/* ── Premium dark palette — flagship editorial surface ─────────── */
-const DARK = {
-  bg: 'hsl(220, 14%, 12%)',
-  bgRaised: 'hsl(220, 12%, 16%)',
-  bgTile: 'hsl(220, 12%, 15%)',
-  bgTileHover: 'hsl(220, 12%, 19%)',
-  textPrimary: 'rgba(255, 255, 255, 0.95)',
-  textSecondary: 'rgba(255, 255, 255, 0.70)',
-  textMuted: 'rgba(255, 255, 255, 0.45)',
-  textQuiet: 'rgba(255, 255, 255, 0.32)',
-  border: 'rgba(255, 255, 255, 0.08)',
-  borderAccent: 'rgba(229, 126, 70, 0.50)',
+/* ── Brand-native premium palette — light surface, HB brand hierarchy ── */
+
+/** HB brand foundation — sourced from @hbc/ui-kit HBC_HOMEPAGE_BRAND_FOUNDATION */
+const HB = {
+  blue: '#225391',
+  blueRgb: '34, 83, 145',
+  orange: '#E57E46',
+  orangeRgb: '229, 126, 70',
 } as const;
 
-const WARM = {
-  accent: 'rgb(229, 126, 70)',
-  accentLight: 'rgb(241, 164, 117)',
-  dark: '#c26434',
-  scrim: 'linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 100%)',
-  tileSeparator: 'rgba(255, 255, 255, 0.06)',
+const BRAND = {
+  /** Featured section tint — subtle blue foundation for authority */
+  featuredBg: `rgba(${HB.blueRgb}, 0.025)`,
+  /** Rail background — subtle blue tint for clear zone separation */
+  railBg: `rgba(${HB.blueRgb}, 0.04)`,
+  /** Rail tile hover — warmer blue tint */
+  railTileHover: `rgba(${HB.blueRgb}, 0.06)`,
+  /** Image scrim — editorial readability on light surfaces */
+  scrim: `linear-gradient(to top, rgba(${HB.blueRgb}, 0.65) 0%, rgba(${HB.blueRgb}, 0.12) 50%, transparent 100%)`,
+  /** Section separator — blue-to-orange brand gradient */
+  separator: `linear-gradient(90deg, rgba(${HB.blueRgb}, 0.20) 0%, rgba(${HB.orangeRgb}, 0.10) 60%, transparent 100%)`,
+  /** Tile divider */
+  tileDivider: `rgba(${HB.blueRgb}, 0.08)`,
+  /** Text hierarchy on light surfaces */
+  textPrimary: '#1a1a1a',
+  textSecondary: 'rgba(26, 26, 26, 0.68)',
+  textMuted: 'rgba(26, 26, 26, 0.48)',
+  textQuiet: 'rgba(26, 26, 26, 0.34)',
 } as const;
 
 /* ── Root and header styles ────────────────────────────────────── */
 
 const rootStyle: React.CSSProperties = {
   fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-  color: DARK.textPrimary,
-  background: DARK.bg,
+  color: BRAND.textPrimary,
+  background: '#ffffff',
   borderRadius: HP_RADIUS.signature,
-  borderLeft: `3px solid ${DARK.borderAccent}`,
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.18), 0 8px 32px rgba(0, 0, 0, 0.14)',
+  borderLeft: `4px solid ${HB.blue}`,
+  borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+  borderRight: '1px solid rgba(0, 0, 0, 0.06)',
+  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+  boxShadow: `0 1px 3px rgba(${HB.blueRgb}, 0.06), 0 4px 20px rgba(${HB.blueRgb}, 0.08)`,
   overflow: 'hidden',
 };
 
 const separatorStyle: React.CSSProperties = {
   height: 1,
-  background: `linear-gradient(90deg, ${DARK.borderAccent} 0%, transparent 100%)`,
+  background: BRAND.separator,
   margin: '0 24px',
   border: 'none',
 };
@@ -143,11 +154,10 @@ function getHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
 
 const headerTitleStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.8125rem',
-  fontWeight: 600,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase' as const,
-  color: WARM.accentLight,
+  fontSize: '0.875rem',
+  fontWeight: 700,
+  letterSpacing: '-0.01em',
+  color: HB.blue,
   display: 'flex',
   alignItems: 'center',
   gap: HP_SPACE.md,
@@ -178,7 +188,7 @@ function getImageZoneStyle(tier: ResponsiveTier): React.CSSProperties {
   const base: React.CSSProperties = {
     position: 'relative',
     overflow: 'hidden',
-    backgroundColor: 'hsl(220, 12%, 8%)',
+    backgroundColor: `rgba(${HB.blueRgb}, 0.04)`,
     contain: 'layout style',
   };
   if (tier === 'mobile') {
@@ -201,7 +211,7 @@ const imageStyle: React.CSSProperties = {
 const imageScrimStyle: React.CSSProperties = {
   position: 'absolute',
   inset: 0,
-  background: WARM.scrim,
+  background: BRAND.scrim,
   pointerEvents: 'none',
 };
 
@@ -213,8 +223,8 @@ function getImagePlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, hsl(220, 14%, 14%) 0%, hsl(25, 30%, 14%) 100%)',
-    color: 'rgba(255, 255, 255, 0.15)',
+    background: `linear-gradient(135deg, rgba(${HB.blueRgb}, 0.06) 0%, rgba(${HB.orangeRgb}, 0.04) 100%)`,
+    color: `rgba(${HB.blueRgb}, 0.25)`,
     fontSize: '0.6875rem',
     fontWeight: 600,
     letterSpacing: '0.06em',
@@ -247,7 +257,7 @@ function getTitleStyle(tier: ResponsiveTier): React.CSSProperties {
     fontWeight: 700,
     letterSpacing: '-0.035em',
     lineHeight: 1.08,
-    color: DARK.textPrimary,
+    color: BRAND.textPrimary,
     maxWidth: tier === 'mobile' ? undefined : '20ch',
   };
 }
@@ -258,7 +268,7 @@ function getHeadlineStyle(tier: ResponsiveTier): React.CSSProperties {
     fontSize: '1rem',
     fontWeight: 400,
     lineHeight: 1.55,
-    color: DARK.textSecondary,
+    color: BRAND.textSecondary,
     maxWidth: tier === 'mobile' ? undefined : '40ch',
   };
 }
@@ -268,7 +278,7 @@ function getSummaryStyle(tier: ResponsiveTier): React.CSSProperties {
     margin: 0,
     fontSize: '0.8125rem',
     lineHeight: 1.65,
-    color: DARK.textMuted,
+    color: BRAND.textMuted,
     maxWidth: tier === 'mobile' ? undefined : '50ch',
     display: '-webkit-box',
     WebkitLineClamp: tier === 'mobile' ? 4 : 3,
@@ -284,9 +294,9 @@ const badgeRowStyle: React.CSSProperties = {
 };
 
 const metaIconStyle: React.CSSProperties = {
-  opacity: 0.6,
+  opacity: 0.7,
   flexShrink: 0,
-  color: WARM.accentLight,
+  color: HB.blue,
 };
 
 const metaItemStyle: React.CSSProperties = {
@@ -315,7 +325,7 @@ const teamStripStyle: React.CSSProperties = {
   padding: '5px 10px 5px 4px',
   margin: 0,
   border: 'none',
-  background: 'rgba(255, 255, 255, 0.04)',
+  background: `rgba(${HB.blueRgb}, 0.03)`,
   cursor: 'pointer',
   borderRadius: 22,
   transition: 'background-color 150ms ease',
@@ -327,7 +337,7 @@ const teamStripStyle: React.CSSProperties = {
 const teamStripLabelStyle: React.CSSProperties = {
   fontSize: '0.6875rem',
   fontWeight: 600,
-  color: DARK.textMuted,
+  color: BRAND.textMuted,
   marginLeft: 6,
   whiteSpace: 'nowrap' as const,
 };
@@ -337,8 +347,8 @@ const avatarStyle = (index: number): React.CSSProperties => ({
   height: AVATAR_SIZE,
   borderRadius: '50%',
   objectFit: 'cover' as const,
-  border: `2px solid ${DARK.bg}`,
-  boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.10)',
+  border: '2px solid #ffffff',
+  boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.08)',
   marginLeft: index > 0 ? -6 : 0,
   position: 'relative' as const,
   zIndex: MAX_VISIBLE_AVATARS - index,
@@ -350,8 +360,8 @@ const initialsStyle = (index: number): React.CSSProperties => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(229, 126, 70, 0.15)',
-  color: WARM.accentLight,
+  backgroundColor: `rgba(${HB.blueRgb}, 0.10)`,
+  color: HB.blue,
   fontSize: '0.625rem',
   fontWeight: 700,
   letterSpacing: '0.02em',
@@ -362,8 +372,8 @@ const overflowStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(229, 126, 70, 0.12)',
-  color: WARM.accentLight,
+  backgroundColor: `rgba(${HB.orangeRgb}, 0.10)`,
+  color: HB.orange,
   fontSize: '0.5625rem',
   fontWeight: 700,
   marginLeft: -6,
@@ -400,7 +410,7 @@ function getDetailPanelStyle(tier: ResponsiveTier): React.CSSProperties {
     background: '#ffffff',
     borderRadius: HP_RADIUS.editorial,
     border: '1px solid rgba(0, 0, 0, 0.08)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0, 0, 0, 0.12)',
+    boxShadow: `0 6px 24px rgba(${HB.blueRgb}, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06)`,
     overflow: 'hidden',
   };
 }
@@ -491,19 +501,19 @@ function getRailWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
     return {
       flex: '1 1 26%',
       minWidth: 220,
-      borderLeft: `1px solid ${DARK.border}`,
+      borderLeft: `1px solid ${BRAND.tileDivider}`,
       display: 'flex',
       flexDirection: 'column',
-      background: DARK.bgRaised,
+      background: BRAND.railBg,
     };
   }
   return {
     flex: '1 1 100%',
     minWidth: 0,
-    borderTop: `1px solid ${DARK.border}`,
+    borderTop: `1px solid ${BRAND.tileDivider}`,
     display: 'flex',
     flexDirection: 'column',
-    background: DARK.bgRaised,
+    background: BRAND.railBg,
   };
 }
 
@@ -516,7 +526,7 @@ function getRailHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
     fontWeight: 600,
     letterSpacing: '0.05em',
     textTransform: 'uppercase' as const,
-    color: DARK.textQuiet,
+    color: BRAND.textQuiet,
   };
 }
 
@@ -531,7 +541,7 @@ function getRailTileStyle(tier: ResponsiveTier): React.CSSProperties {
     color: 'inherit',
     transition: 'background-color 180ms ease, transform 180ms ease',
     cursor: 'pointer',
-    borderTop: `1px solid ${DARK.border}`,
+    borderTop: `1px solid ${BRAND.tileDivider}`,
     alignItems: 'center',
     minHeight: 44,
     borderRadius: HP_RADIUS.image,
@@ -544,7 +554,7 @@ const railThumbnailWrapperStyle: React.CSSProperties = {
   height: 66,
   borderRadius: HP_RADIUS.card,
   overflow: 'hidden',
-  backgroundColor: 'hsl(220, 12%, 10%)',
+  backgroundColor: `rgba(${HB.blueRgb}, 0.04)`,
   contain: 'strict',
 };
 
@@ -562,7 +572,7 @@ const railThumbnailPlaceholderStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: 'linear-gradient(135deg, hsl(220, 14%, 14%) 0%, hsl(25, 20%, 13%) 100%)',
+  background: `linear-gradient(135deg, rgba(${HB.blueRgb}, 0.06) 0%, rgba(${HB.orangeRgb}, 0.04) 100%)`,
 };
 
 const railContentStyle: React.CSSProperties = {
@@ -579,7 +589,7 @@ const railTitleStyle: React.CSSProperties = {
   fontWeight: 600,
   lineHeight: 1.35,
   letterSpacing: '-0.01em',
-  color: DARK.textPrimary,
+  color: BRAND.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap' as const,
@@ -587,7 +597,7 @@ const railTitleStyle: React.CSSProperties = {
 
 const railMetaStyle: React.CSSProperties = {
   fontSize: '0.6875rem',
-  color: DARK.textMuted,
+  color: BRAND.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap' as const,
@@ -898,7 +908,7 @@ function SupportingTile({
   const baseTileStyle = getRailTileStyle(tier);
   const style: React.CSSProperties = {
     ...baseTileStyle,
-    backgroundColor: hovered ? DARK.bgTileHover : 'transparent',
+    backgroundColor: hovered ? BRAND.railTileHover : 'transparent',
     transform: hovered ? 'translateX(2px)' : 'none',
   };
 
