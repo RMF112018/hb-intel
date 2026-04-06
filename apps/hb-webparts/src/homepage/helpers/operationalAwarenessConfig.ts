@@ -6,6 +6,7 @@ import {
   type ProjectMilestone,
   type ProjectPortfolioSpotlightConfig,
   type ProjectPortfolioSpotlightItem,
+  type ProjectTeamMember,
   type SafetyFieldExcellenceConfig,
   type SafetyFieldExcellenceItem,
 } from '../webparts/operationalAwarenessContracts.js';
@@ -24,6 +25,7 @@ export interface NormalizedProjectPortfolioSpotlightItem extends ProjectPortfoli
   highlightHeadline?: string;
   location?: string;
   sector?: string;
+  teamMembers: ProjectTeamMember[];
 }
 
 export interface NormalizedSafetyFieldExcellenceItem extends SafetyFieldExcellenceItem {
@@ -81,6 +83,17 @@ function normalizeMilestones(milestones: ProjectMilestone[] | undefined): Projec
       title: milestone.title.trim(),
       dueDate: hasText(milestone.dueDate) ? milestone.dueDate.trim() : undefined,
       completed: milestone.completed,
+    }));
+}
+
+function normalizeTeamMembers(members: ProjectTeamMember[] | undefined): ProjectTeamMember[] {
+  return (members ?? [])
+    .filter((m) => hasText(m.id) && hasText(m.displayName))
+    .map((m) => ({
+      id: m.id.trim(),
+      displayName: m.displayName.trim(),
+      role: hasText(m.role) ? m.role.trim() : undefined,
+      photoUrl: hasText(m.photoUrl) ? m.photoUrl.trim() : undefined,
     }));
 }
 
@@ -151,6 +164,7 @@ export function normalizeProjectPortfolioSpotlightConfig(
         highlightHeadline: hasText(item.highlightHeadline) ? item.highlightHeadline.trim() : undefined,
         location: hasText(item.location) ? item.location.trim() : undefined,
         sector: hasText(item.sector) ? item.sector.trim() : undefined,
+        teamMembers: normalizeTeamMembers(item.teamMembers),
       });
     })
     .sort(byPriority);

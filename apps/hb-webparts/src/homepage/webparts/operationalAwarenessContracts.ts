@@ -22,6 +22,13 @@ export interface ProjectMilestone {
   completed?: boolean;
 }
 
+export interface ProjectTeamMember {
+  id: string;
+  displayName: string;
+  role?: string;
+  photoUrl?: string;
+}
+
 export interface ProjectPortfolioSpotlightItem {
   id: string;
   title: string;
@@ -43,6 +50,8 @@ export interface ProjectPortfolioSpotlightItem {
   location?: string;
   /** Project sector or market (e.g., "Commercial", "Luxury Residential"). */
   sector?: string;
+  /** Project team members for the avatar strip. */
+  teamMembers?: ProjectTeamMember[];
 }
 
 export interface ProjectPortfolioSpotlightConfig {

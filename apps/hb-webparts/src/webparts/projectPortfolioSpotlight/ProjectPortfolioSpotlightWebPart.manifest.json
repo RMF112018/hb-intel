@@ -43,7 +43,15 @@
               { "id": "m1", "title": "MEP closeout", "completed": true },
               { "id": "m2", "title": "Owner turnover prep", "completed": false }
             ],
-            "cta": { "label": "View project brief", "href": "/sites/hb-central/portfolio" }
+            "cta": { "label": "View project brief", "href": "/sites/hb-central/portfolio" },
+            "teamMembers": [
+              { "id": "tm1", "displayName": "Jane Smith", "role": "Project Manager" },
+              { "id": "tm2", "displayName": "Mike Torres", "role": "Superintendent", "photoUrl": "/sites/hb-central/SiteAssets/people/mike-torres.jpg" },
+              { "id": "tm3", "displayName": "Sarah Chen", "role": "Safety Director" },
+              { "id": "tm4", "displayName": "Alex Rivera", "role": "Estimator", "photoUrl": "/sites/hb-central/SiteAssets/people/alex-rivera.jpg" },
+              { "id": "tm5", "displayName": "Chris Park", "role": "Field Engineer" },
+              { "id": "tm6", "displayName": "Dana Wilson", "role": "MEP Coordinator" }
+            ]
           },
           {
             "id": "project-secondary-1",

@@ -1,14 +1,13 @@
 /**
  * ProjectPortfolioSpotlight — Premium editorial spotlight surface
- * Phase P05-04 — Signature Hero alignment pass
+ * Phase P05-05 — Project Team strip and detail layer
  *
  * Image-led editorial composition with warm accent styling aligned
  * with HbcEditorialSurface. Desktop layout: dominant featured spotlight
  * (~65%) plus subordinate supporting rail (~35%).
  *
- * Typography, spacing, image treatment, and chrome refined to belong
- * to the same premium homepage family as the Signature Hero without
- * duplicating its visual language.
+ * Project Team avatar strip inside the featured content zone with an
+ * anchored detail panel for team member expansion.
  */
 import * as React from 'react';
 import {
@@ -19,6 +18,7 @@ import {
   motion,
   Calendar,
   CheckCircle2,
+  Users,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import {
@@ -27,7 +27,10 @@ import {
 } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
-import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
+import type {
+  ProjectPortfolioSpotlightConfig,
+  ProjectTeamMember,
+} from '../../homepage/webparts/operationalAwarenessContracts.js';
 import {
   HP_SPACE,
   HP_RADIUS,
@@ -39,6 +42,11 @@ export interface ProjectPortfolioSpotlightProps {
   activeAudience?: string;
   isLoading?: boolean;
 }
+
+/* ── Constants ─────────────────────────────────────────────────── */
+const MAX_VISIBLE_AVATARS = 5;
+const AVATAR_SIZE = 30;
+const DETAIL_AVATAR_SIZE = 36;
 
 /* ── Warm accent palette (aligned with HbcEditorialSurface) ─────── */
 const WARM = {
@@ -208,13 +216,160 @@ const metaItemStyle: React.CSSProperties = {
   gap: 4,
 };
 
-const teamStripPlaceholderStyle: React.CSSProperties = {
-  minHeight: 16,
-};
-
 const ctaWrapperStyle: React.CSSProperties = {
   marginTop: 'auto',
   paddingTop: HP_SPACE.md,
+};
+
+/* ── Team strip styles ─────────────────────────────────────────── */
+
+const teamStripWrapperStyle: React.CSSProperties = {
+  position: 'relative',
+};
+
+const teamStripStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  padding: 0,
+  margin: 0,
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  borderRadius: 20,
+  transition: 'background-color 150ms ease',
+  fontFamily: 'inherit',
+  color: 'inherit',
+};
+
+const teamStripLabelStyle: React.CSSProperties = {
+  fontSize: '0.6875rem',
+  fontWeight: 600,
+  color: 'rgba(26, 26, 26, 0.50)',
+  marginLeft: 4,
+  whiteSpace: 'nowrap' as const,
+};
+
+const avatarStyle = (index: number): React.CSSProperties => ({
+  width: AVATAR_SIZE,
+  height: AVATAR_SIZE,
+  borderRadius: '50%',
+  objectFit: 'cover' as const,
+  border: '2px solid #ffffff',
+  marginLeft: index > 0 ? -8 : 0,
+  position: 'relative' as const,
+  zIndex: MAX_VISIBLE_AVATARS - index,
+  flexShrink: 0,
+});
+
+const initialsStyle = (index: number): React.CSSProperties => ({
+  ...avatarStyle(index),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(34, 83, 145, 0.10)',
+  color: '#225391',
+  fontSize: '0.625rem',
+  fontWeight: 700,
+  letterSpacing: '0.02em',
+});
+
+const overflowStyle: React.CSSProperties = {
+  ...avatarStyle(MAX_VISIBLE_AVATARS),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(229, 126, 70, 0.10)',
+  color: WARM.dark,
+  fontSize: '0.5625rem',
+  fontWeight: 700,
+  marginLeft: -8,
+};
+
+/* ── Team detail panel styles ──────────────────────────────────── */
+
+const detailPanelStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  marginTop: 6,
+  zIndex: 10,
+  minWidth: 240,
+  maxWidth: 300,
+  background: '#ffffff',
+  borderRadius: HP_RADIUS.card,
+  border: `1px solid ${WARM.borderSubtle}`,
+  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06)',
+  overflow: 'hidden',
+};
+
+const detailHeaderStyle: React.CSSProperties = {
+  padding: '10px 14px 8px',
+  fontSize: '0.6875rem',
+  fontWeight: 700,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase' as const,
+  color: 'rgba(26, 26, 26, 0.40)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+};
+
+const detailCloseStyle: React.CSSProperties = {
+  padding: '2px 6px',
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  fontSize: '0.75rem',
+  color: 'rgba(26, 26, 26, 0.40)',
+  borderRadius: 4,
+  lineHeight: 1,
+  fontFamily: 'inherit',
+};
+
+const detailListStyle: React.CSSProperties = {
+  listStyle: 'none',
+  margin: 0,
+  padding: '0 0 6px',
+};
+
+const detailItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  padding: '6px 14px',
+};
+
+const detailAvatarStyle: React.CSSProperties = {
+  width: DETAIL_AVATAR_SIZE,
+  height: DETAIL_AVATAR_SIZE,
+  borderRadius: '50%',
+  objectFit: 'cover' as const,
+  flexShrink: 0,
+};
+
+const detailInitialsStyle: React.CSSProperties = {
+  ...detailAvatarStyle,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(34, 83, 145, 0.10)',
+  color: '#225391',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+};
+
+const detailNameStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  color: '#1a1a1a',
+};
+
+const detailRoleStyle: React.CSSProperties = {
+  fontSize: '0.6875rem',
+  color: 'rgba(26, 26, 26, 0.50)',
+  lineHeight: 1.3,
 };
 
 /* ── Supporting rail styles ────────────────────────────────────── */
@@ -314,6 +469,134 @@ const railMotion = {
   animate: { opacity: 1 },
   transition: { duration: 0.25, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] as const },
 };
+
+/* ── Helper: extract initials ──────────────────────────────────── */
+
+function getInitials(name: string): string {
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+/* ── Project Team strip component ──────────────────────────────── */
+
+function ProjectTeamStrip({ members }: { members: ProjectTeamMember[] }): React.JSX.Element | null {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  // Close on Escape
+  React.useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  // Close on outside click
+  React.useEffect(() => {
+    if (!isOpen) return;
+    function handleClick(e: MouseEvent): void {
+      const target = e.target as Node;
+      if (
+        panelRef.current && !panelRef.current.contains(target) &&
+        triggerRef.current && !triggerRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [isOpen]);
+
+  if (members.length === 0) return null;
+
+  const visible = members.slice(0, MAX_VISIBLE_AVATARS);
+  const overflow = members.length - MAX_VISIBLE_AVATARS;
+
+  return (
+    <div style={teamStripWrapperStyle} data-hbc-homepage="team-strip">
+      <button
+        ref={triggerRef}
+        type="button"
+        style={teamStripStyle}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-label={`Project team: ${members.length} member${members.length !== 1 ? 's' : ''}`}
+      >
+        {visible.map((member, i) =>
+          member.photoUrl ? (
+            <img
+              key={member.id}
+              src={member.photoUrl}
+              alt={member.displayName}
+              style={avatarStyle(i)}
+            />
+          ) : (
+            <span key={member.id} style={initialsStyle(i)} aria-hidden="true">
+              {getInitials(member.displayName)}
+            </span>
+          ),
+        )}
+        {overflow > 0 ? (
+          <span style={overflowStyle} aria-hidden="true">+{overflow}</span>
+        ) : null}
+        <span style={teamStripLabelStyle}>
+          <Users size={10} aria-hidden="true" style={{ marginRight: 3, verticalAlign: -1, opacity: 0.5 }} />
+          {members.length} team
+        </span>
+      </button>
+
+      {isOpen ? (
+        <div
+          ref={panelRef}
+          role="dialog"
+          aria-label="Project team members"
+          style={detailPanelStyle}
+        >
+          <div style={detailHeaderStyle}>
+            <span>Project Team</span>
+            <button
+              type="button"
+              style={detailCloseStyle}
+              onClick={() => { setIsOpen(false); triggerRef.current?.focus(); }}
+              aria-label="Close team panel"
+            >
+              ✕
+            </button>
+          </div>
+          <ul style={detailListStyle}>
+            {members.map((member) => (
+              <li key={member.id} style={detailItemStyle}>
+                {member.photoUrl ? (
+                  <img
+                    src={member.photoUrl}
+                    alt={member.displayName}
+                    style={detailAvatarStyle}
+                  />
+                ) : (
+                  <span style={detailInitialsStyle} aria-hidden="true">
+                    {getInitials(member.displayName)}
+                  </span>
+                )}
+                <div>
+                  <div style={detailNameStyle}>{member.displayName}</div>
+                  {member.role ? <div style={detailRoleStyle}>{member.role}</div> : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 /* ── Supporting tile component ─────────────────────────────────── */
 
@@ -501,12 +784,8 @@ export function ProjectPortfolioSpotlight({
                 </div>
               ) : null}
 
-              {/* Team strip placeholder — reserved for Phase 05 */}
-              <div
-                data-slot="team-strip"
-                style={teamStripPlaceholderStyle}
-                aria-hidden="true"
-              />
+              {/* Project Team strip */}
+              <ProjectTeamStrip members={feat.teamMembers} />
 
               {/* Primary CTA */}
               {feat.cta ? (
