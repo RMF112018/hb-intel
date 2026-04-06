@@ -1,0 +1,157 @@
+/**
+ * SignatureHeroSurface — Full-width flagship opening surface
+ * Phase 17-03 — Shared primitive system rebuild
+ */
+
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 280px;
+  overflow: hidden;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #ffffff;
+}
+
+/* ── Background variants ───────────────────────────────── */
+.bgBrand {
+  background: linear-gradient(135deg, rgba(34, 83, 145, 0.95) 0%, rgba(28, 71, 124, 0.90) 45%, rgba(229, 126, 70, 0.75) 100%);
+}
+
+.bgSubtle {
+  background: linear-gradient(135deg, rgba(34, 83, 145, 0.08) 0%, rgba(229, 126, 70, 0.04) 60%, rgba(34, 83, 145, 0.05) 100%);
+  color: #1a1a1a;
+}
+
+/* ── Ambient decoration layer ──────────────────────────── */
+.ambientLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.glowTopRight {
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 50%;
+  height: 80%;
+  background: radial-gradient(ellipse, rgba(229, 126, 70, 0.15) 0%, transparent 70%);
+}
+
+.glowBottomLeft {
+  position: absolute;
+  bottom: -20%;
+  left: -5%;
+  width: 40%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(34, 83, 145, 0.12) 0%, transparent 70%);
+}
+
+/* ── Content layer ─────────────────────────────────────── */
+.contentLayer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px 48px;
+  flex: 1;
+}
+
+/* ── Top row: brand + eyebrow ──────────────────────────── */
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brandSlot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eyebrowSlot {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ── Main content: two-column layout ───────────────────── */
+.mainContent {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(280px, 2fr);
+  gap: 40px;
+  align-items: center;
+  flex: 1;
+}
+
+.greetingSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editorialSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── CTA row ───────────────────────────────────────────── */
+.ctaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+/* ── Bottom row: context + metadata ────────────────────── */
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.8125rem;
+  opacity: 0.85;
+}
+
+.bottomLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Compact single-column mode ────────────────────────── */
+.compact .mainContent {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.compact .contentLayer {
+  padding: 28px 32px;
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .root * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Focus ─────────────────────────────────────────────── */
+.root :focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.bgSubtle :focus-visible {
+  outline-color: #225391;
+}

@@ -1,0 +1,245 @@
+/**
+ * DiscoverySurface — Search, suggestion, and wayfinding surface
+ * Phase 17-03 — Shared primitive system rebuild
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  background: linear-gradient(135deg, rgba(229, 126, 70, 0.04) 0%, rgba(229, 126, 70, 0.015) 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(229, 126, 70, 0.12);
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* ── Search input area ─────────────────────────────────── */
+.searchArea {
+  position: relative;
+}
+
+.searchInput {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(229, 126, 70, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.searchInput:focus-within {
+  border-color: #225391;
+  box-shadow: 0 0 0 3px rgba(34, 83, 145, 0.12);
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  color: rgba(229, 126, 70, 0.55);
+  flex-shrink: 0;
+}
+
+/* ── Separator ─────────────────────────────────────────── */
+.separator {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(229, 126, 70, 0.12) 0%, transparent 100%);
+  border: none;
+  margin: 4px 0;
+}
+
+/* ── Quick paths ───────────────────────────────────────── */
+.quickPaths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quickPath {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(229, 126, 70, 0.06);
+  border: 1px solid rgba(229, 126, 70, 0.10);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease;
+  min-height: 36px;
+}
+
+.quickPath:hover {
+  background: rgba(229, 126, 70, 0.10);
+  border-color: rgba(229, 126, 70, 0.18);
+}
+
+.quickPath:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.quickPathIcon {
+  display: flex;
+  color: rgba(229, 126, 70, 0.65);
+}
+
+/* ── Category shelves ──────────────────────────────────── */
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.categoryTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.50);
+}
+
+.categoryTitleIcon {
+  display: flex;
+  color: rgba(229, 126, 70, 0.50);
+}
+
+.categoryItems {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 150ms ease;
+  min-height: 40px;
+}
+
+.categoryItem:hover {
+  background: rgba(229, 126, 70, 0.06);
+}
+
+.categoryItem:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+}
+
+.categoryItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(229, 126, 70, 0.08);
+  color: rgba(229, 126, 70, 0.65);
+  flex-shrink: 0;
+}
+
+.categoryItemLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoryItemArrow {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  color: rgba(229, 126, 70, 0.40);
+}
+
+.categoryItem:hover .categoryItemArrow {
+  opacity: 1;
+}
+
+/* ── Promoted destinations ─────────────────────────────── */
+.promoted {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.promotedItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(229, 126, 70, 0.10);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  min-height: 44px;
+}
+
+.promotedItem:hover {
+  border-color: rgba(229, 126, 70, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.promotedItem:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.promotedIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(229, 126, 70, 0.08);
+  color: #c26434;
+  flex-shrink: 0;
+}
+
+.promotedLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .searchInput,
+  .quickPath,
+  .categoryItem,
+  .categoryItemArrow,
+  .promotedItem {
+    transition: none !important;
+  }
+}

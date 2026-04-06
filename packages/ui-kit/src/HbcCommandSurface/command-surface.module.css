@@ -1,0 +1,169 @@
+/**
+ * CommandSurface — Dense, efficient command surface
+ * Phase 17-03 — Shared primitive system rebuild
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  background: rgba(34, 83, 145, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(34, 83, 145, 0.10);
+  overflow: hidden;
+}
+
+/* ── Urgency variants ──────────────────────────────────── */
+.urgencyDefault {
+  border-top: 2px solid rgba(34, 83, 145, 0.20);
+}
+
+.urgencyHigh {
+  border-top: 3px solid rgba(229, 126, 70, 0.65);
+  background: linear-gradient(180deg, rgba(229, 126, 70, 0.04) 0%, rgba(34, 83, 145, 0.03) 20%);
+}
+
+.urgencyCritical {
+  border-top: 3px solid #c4362a;
+  background: linear-gradient(180deg, rgba(196, 54, 42, 0.03) 0%, rgba(34, 83, 145, 0.03) 20%);
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  gap: 10px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(34, 83, 145, 0.08);
+  color: #225391;
+}
+
+.headerAction {
+  flex-shrink: 0;
+}
+
+/* ── Separator ─────────────────────────────────────────── */
+.separator {
+  height: 1px;
+  background: rgba(34, 83, 145, 0.08);
+  border: none;
+  margin: 0;
+}
+
+/* ── Item list ─────────────────────────────────────────── */
+.items {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Individual command item ───────────────────────────── */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 150ms ease;
+  min-height: 44px;
+}
+
+.item:hover {
+  background: rgba(34, 83, 145, 0.05);
+}
+
+.item:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+}
+
+.itemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(34, 83, 145, 0.07);
+  color: #225391;
+  flex-shrink: 0;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #225391;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemDescription {
+  font-size: 0.75rem;
+  color: rgba(26, 26, 26, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemBadge {
+  flex-shrink: 0;
+}
+
+.itemArrow {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 150ms ease, transform 150ms ease;
+  color: rgba(34, 83, 145, 0.4);
+}
+
+.item:hover .itemArrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* ── Item separator ────────────────────────────────────── */
+.itemSeparator {
+  height: 1px;
+  background: rgba(34, 83, 145, 0.06);
+  border: none;
+  margin: 0 18px;
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .itemArrow {
+    transition: none !important;
+  }
+}

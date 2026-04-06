@@ -122,12 +122,51 @@ export type { HbcPremiumBadgeProps, PremiumBadgeStatus, PremiumBadgeSize } from 
 export { HbcPremiumSection } from './HbcPremiumSection/index.js';
 export type { HbcPremiumSectionProps, PremiumSectionAccent } from './HbcPremiumSection/index.js';
 
+// ── Phase 17-03 — Surface family primitives ─────────────────────────────
+// Purpose-built surface components per homepage zone family.
+
+export { HbcSignatureHeroSurface } from './HbcSignatureHeroSurface/index.js';
+export type { HbcSignatureHeroSurfaceProps, HeroBackground, HeroLayout } from './HbcSignatureHeroSurface/index.js';
+
+export { HbcCommandSurface } from './HbcCommandSurface/index.js';
+export type { HbcCommandSurfaceProps, CommandUrgency, CommandItem } from './HbcCommandSurface/index.js';
+
+export { HbcLauncherSurface } from './HbcLauncherSurface/index.js';
+export type { HbcLauncherSurfaceProps, LauncherLayout, LauncherTileTint, LauncherTile, LauncherGroup } from './HbcLauncherSurface/index.js';
+
+export { HbcDiscoverySurface } from './HbcDiscoverySurface/index.js';
+export type {
+  HbcDiscoverySurfaceProps,
+  DiscoveryQuickPath,
+  DiscoveryCategory,
+  DiscoveryCategoryItem,
+  DiscoveryPromotedItem,
+} from './HbcDiscoverySurface/index.js';
+
+export { HbcEditorialSurface } from './HbcEditorialSurface/index.js';
+export type {
+  HbcEditorialSurfaceProps,
+  EditorialFeaturedItem,
+  EditorialSecondaryItem,
+} from './HbcEditorialSurface/index.js';
+
+export { HbcOperationalSurface } from './HbcOperationalSurface/index.js';
+export type {
+  HbcOperationalSurfaceProps,
+  OperationalSignalSeverity,
+  OperationalFeatured,
+  OperationalSignal,
+} from './HbcOperationalSurface/index.js';
+
 export type HomepageSurfaceClass = 'hero' | 'welcome' | 'editorial' | 'utility' | 'operational' | 'discovery';
 
 export type HomepagePrimitiveName =
   | 'HbcBanner'
   | 'HbcButton'
   | 'HbcCard'
+  | 'HbcCommandSurface'
+  | 'HbcDiscoverySurface'
+  | 'HbcEditorialSurface'
   | 'HbcEmptyState'
   | 'HbcHomepageActionRow'
   | 'HbcHomepageCta'
@@ -136,7 +175,10 @@ export type HomepagePrimitiveName =
   | 'HbcHomepageMetadataRow'
   | 'HbcHomepageSectionShell'
   | 'HbcHomepageSurfaceCard'
+  | 'HbcLauncherSurface'
+  | 'HbcOperationalSurface'
   | 'HbcSearch'
+  | 'HbcSignatureHeroSurface'
   | 'HbcSpinner'
   | 'HbcStatusBadge'
   | 'HbcThemeProvider';

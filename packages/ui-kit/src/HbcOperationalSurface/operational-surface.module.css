@@ -1,0 +1,217 @@
+/**
+ * OperationalSurface — Dashboard-adjacent operational data surface
+ * Phase 17-03 — Shared primitive system rebuild
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  background: rgba(34, 83, 145, 0.025);
+  border-radius: 12px;
+  border-left: 4px solid rgba(34, 83, 145, 0.35);
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  border-right: 1px solid rgba(34, 83, 145, 0.08);
+  border-bottom: 1px solid rgba(34, 83, 145, 0.08);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  gap: 10px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: rgba(34, 83, 145, 0.08);
+  color: #225391;
+}
+
+.headerAction {
+  flex-shrink: 0;
+}
+
+/* ── Separator ─────────────────────────────────────────── */
+.separator {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(34, 83, 145, 0.25) 0%, rgba(34, 83, 145, 0.05) 100%);
+  border: none;
+  margin: 0 20px;
+}
+
+/* ── Content ───────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 20px 18px;
+  gap: 12px;
+}
+
+/* ── Featured highlight ────────────────────────────────── */
+.featured {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: rgba(34, 83, 145, 0.04);
+  border: 1px solid rgba(34, 83, 145, 0.08);
+}
+
+.featuredHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.featuredTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.featuredBadge {
+  flex-shrink: 0;
+}
+
+.featuredDescription {
+  font-size: 0.8125rem;
+  color: rgba(26, 26, 26, 0.70);
+  line-height: 1.45;
+}
+
+.featuredMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: rgba(26, 26, 26, 0.50);
+}
+
+.featuredMetaIcon {
+  display: flex;
+  align-items: center;
+  color: rgba(34, 83, 145, 0.45);
+}
+
+/* ── Signal items ──────────────────────────────────────── */
+.signals {
+  display: flex;
+  flex-direction: column;
+}
+
+.signal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+  border-radius: 6px;
+  min-height: 44px;
+}
+
+.signal:hover {
+  background: rgba(34, 83, 145, 0.04);
+  margin: 0 -8px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.signal:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+}
+
+.signalIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Signal severity tints ─────────────────────────────── */
+.signalIconDefault {
+  background: rgba(34, 83, 145, 0.07);
+  color: #225391;
+}
+
+.signalIconSuccess {
+  background: rgba(34, 145, 90, 0.08);
+  color: #1a7a42;
+}
+
+.signalIconWarning {
+  background: rgba(229, 126, 70, 0.10);
+  color: #c26434;
+}
+
+.signalIconDanger {
+  background: rgba(196, 54, 42, 0.08);
+  color: #c4362a;
+}
+
+.signalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.signalTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.signalMeta {
+  font-size: 0.6875rem;
+  color: rgba(26, 26, 26, 0.50);
+}
+
+.signalBadge {
+  flex-shrink: 0;
+}
+
+/* ── Signal separator ──────────────────────────────────── */
+.signalSeparator {
+  height: 1px;
+  background: rgba(34, 83, 145, 0.06);
+  border: none;
+  margin: 0;
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .signal {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,160 @@
+/**
+ * LauncherSurface — Grouped tool launcher surface
+ * Phase 17-03 — Shared primitive system rebuild
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+}
+
+/* ── Group ─────────────────────────────────────────────── */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.groupIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  background: rgba(34, 83, 145, 0.08);
+  color: #225391;
+}
+
+.groupLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.55);
+}
+
+.groupSeparator {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(34, 83, 145, 0.10) 0%, transparent 80%);
+  border: none;
+  margin: 0;
+}
+
+/* ── Tile grid ─────────────────────────────────────────── */
+.tiles {
+  display: grid;
+  gap: 8px;
+}
+
+.layoutGrid .tiles {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.layoutList .tiles {
+  grid-template-columns: 1fr;
+}
+
+/* ── Individual tile ───────────────────────────────────── */
+.tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(34, 83, 145, 0.025);
+  border: 1px solid rgba(34, 83, 145, 0.06);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  min-height: 44px;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.tile:hover {
+  background: rgba(34, 83, 145, 0.06);
+  border-color: rgba(34, 83, 145, 0.14);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.tile:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.tileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Tile icon tints ───────────────────────────────────── */
+.tileIconBrand {
+  background: rgba(34, 83, 145, 0.10);
+  color: #225391;
+}
+
+.tileIconWarm {
+  background: rgba(229, 126, 70, 0.10);
+  color: #c26434;
+}
+
+.tileIconNeutral {
+  background: rgba(26, 26, 26, 0.06);
+  color: rgba(26, 26, 26, 0.65);
+}
+
+.tileIconAccent {
+  background: rgba(34, 145, 90, 0.10);
+  color: #1a7a42;
+}
+
+.tileIconDanger {
+  background: rgba(196, 54, 42, 0.08);
+  color: #c4362a;
+}
+
+.tileContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tileLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileDescription {
+  font-size: 0.6875rem;
+  color: rgba(26, 26, 26, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none !important;
+  }
+}
