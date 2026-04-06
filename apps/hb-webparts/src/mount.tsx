@@ -12,6 +12,7 @@ import { PeopleCulture } from './webparts/peopleCulture/PeopleCulture.js';
 import { ProjectPortfolioSpotlight } from './webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from './webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 import { SmartSearchWayfinding } from './webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
+import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';
 
 let root: Root | undefined;
@@ -32,6 +33,7 @@ const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknow
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),
+  '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ identity }) => createElement(HbSignatureHero, { identity }),
 };
 
 export async function mount(
