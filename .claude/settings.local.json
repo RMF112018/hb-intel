@@ -246,7 +246,9 @@
       "Bash(rm -rf /Users/bobbyfetting/hb-intel/dist/sppkg/)",
       "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/sharepoint/)",
       "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/temp/)",
-      "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/dist/)"
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/dist/)",
+      "Bash(npm info:*)",
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts*)"
     ]
   },
   "enabledPlugins": {
