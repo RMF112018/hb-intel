@@ -27,4 +27,6 @@ export interface HomepageAuthoringGovernanceEntry {
   zoneIntent: string;
   allowedContentScope: string;
   messages: AuthoringMessageSet;
+  /** When true, this webpart is no longer used for flagship homepage composition. */
+  deprecated?: boolean;
 }

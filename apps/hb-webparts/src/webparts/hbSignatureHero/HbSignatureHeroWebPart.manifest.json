@@ -19,18 +19,10 @@
         "default": "HB Signature Hero"
       },
       "description": {
-        "default": "Unified premium signature hero with integrated greeting, editorial headline, and CTA hierarchy for full-width top-band composition."
+        "default": "Canonical flagship homepage hero with brand lockup, tagline, and personalized greeting for full-width top-band composition."
       },
       "officeFabricIconFontName": "Header1",
-      "properties": {
-        "headline": "Build with confidence.",
-        "message": "Keep teams aligned on priorities, updates, and field execution from one homepage experience.",
-        "metadata": "Updated weekly by Communications",
-        "cta": {
-          "label": "Read this week's update",
-          "href": "/sites/hb-central"
-        }
-      }
+      "properties": {}
     }
   ]
 }

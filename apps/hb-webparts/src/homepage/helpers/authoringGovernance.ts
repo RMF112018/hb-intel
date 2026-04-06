@@ -4,14 +4,16 @@ import type {
 } from '../webparts/authoringGovernanceContracts.js';
 
 export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuthoringGovernanceEntry> = {
+  /** @deprecated Phase 18-01 — Standalone only. Flagship greeting is integrated into HbSignatureHero. */
   personalizedWelcomeHeader: {
     webpartKey: 'personalizedWelcomeHeader',
     zone: 'topBand',
     ownerRole: 'Corporate Communications',
     freshnessCadence: 'daily',
     rotationExpectation: 'Update support/context lines as daily operational context changes.',
-    zoneIntent: 'Signature greeting and high-priority context.',
+    zoneIntent: 'Standalone greeting surface only — not for flagship homepage use.',
     allowedContentScope: 'Greeting context, high-priority alert messaging, and concise support lines only.',
+    deprecated: true,
     messages: {
       noData: {
         title: 'Welcome header content not configured',
@@ -23,14 +25,16 @@ export const HOMEPAGE_AUTHORING_GOVERNANCE_REGISTRY: Record<string, HomepageAuth
       },
     },
   },
+  /** @deprecated Phase 18-01 — Standalone only. Flagship hero is HbSignatureHero. */
   hbHeroBanner: {
     webpartKey: 'hbHeroBanner',
     zone: 'topBand',
     ownerRole: 'Corporate Communications',
     freshnessCadence: 'weekly',
     rotationExpectation: 'Refresh headline and CTA to match current executive priorities.',
-    zoneIntent: 'Primary authored homepage message.',
+    zoneIntent: 'Standalone editorial hero only — not for flagship homepage use.',
     allowedContentScope: 'Headline, supporting message, metadata, optional media, and CTA.',
+    deprecated: true,
     messages: {
       noData: {
         title: 'Hero content not configured',

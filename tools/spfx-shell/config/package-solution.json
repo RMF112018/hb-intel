@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-webparts",
     "id": "39b8f2ea-59bd-45b7-b4ec-b590b316833b",
-    "version": "1.0.0.68",
+    "version": "1.0.0.66",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -19,7 +19,7 @@
         "default": "HB Central homepage webparts"
       },
       "longDescription": {
-        "default": "Eleven premium homepage webparts for the HB Central SharePoint homepage."
+        "default": "Ten premium homepage webparts for the HB Central SharePoint homepage."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -30,11 +30,11 @@
         "title": "hb-webparts Feature",
         "description": "Deploys HB Central homepage webpart assets.",
         "id": "1f447e99-a2c7-43e5-83d8-d2ed78ed1a96",
-        "version": "1.0.0.68",
+        "version": "1.0.0.66",
         "componentIds": [
-          "28acd6a7-2582-4d8a-86d4-b52bfbeb375c",
           "0b53f651-fd92-4f7f-a9da-f7797017f5eb",
           "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
+          "28acd6a7-2582-4d8a-86d4-b52bfbeb375c",
           "e8fa8a84-a48a-41d2-85a6-b7c7df70aeca",
           "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4",
           "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f",
