@@ -12,7 +12,7 @@
 This overlay does not replace the SPFx Governing Standard. It sits on top of it.
 
 **Reading order for homepage work:**
-1. SPFx Governing Standard — binding shared rules (accessibility, token discipline, host awareness, import discipline)
+1. SPFx Governing Standard — binding shared rules (accessibility, token discipline, host awareness, stack standard, anti-safety-zone posture)
 2. This homepage overlay — homepage-specific rules, freedoms, and constraints
 3. SharePoint Homepage & Shell Boundaries — lane boundaries and supported customization posture
 4. Homepage Import Policy — entry-point and import rules (in `entry-points.md`)
@@ -22,181 +22,310 @@ When this overlay speaks, it takes precedence for homepage surfaces.
 
 ---
 
-## 2. Binding homepage rules
+## 2. Locked homepage scope
 
-These rules are mandatory for all homepage webpart work. They are not flexible.
+### 2.1 Actual rebuild focus — BINDING
+Homepage structural rebuild work must focus on the real webpart code under:
 
-### 2.1 Page-canvas ownership — BINDING
+- `apps/hb-webparts/src/webparts/`
 
+Shared primitives matter, but homepage success or failure is judged by the webparts that actually render in SharePoint.
+
+### 2.2 Homepage-specific manifest focus — BINDING
+Every homepage webpart under `apps/hb-webparts/src/webparts/` must include the appropriate adjacent manifest.
+
+This is a homepage requirement, not an optional packaging detail.
+
+---
+
+## 3. Binding homepage rules
+
+### 3.1 Page-canvas ownership — BINDING
 Homepage webparts own the page canvas. They must not:
 - create shell chrome (nav bars, sidebars, footer rails)
 - duplicate or fight SharePoint's host chrome
 - render placeholder-extension content (belongs to Lane B)
 - assume control over page regions they do not own
 
-### 2.2 Import discipline — BINDING
-
+### 3.2 Import discipline — BINDING
 Homepage webparts must import from `@hbc/ui-kit/homepage` as their primary UI entry point. Broad `@hbc/ui-kit` and `@hbc/ui-kit/app-shell` are prohibited. Enforced by ESLint `no-restricted-imports` in `apps/hb-webparts/.eslintrc.cjs`.
 
 Supplementary token imports from `@hbc/ui-kit/theme` and icon imports from `@hbc/ui-kit/icons` are allowed when the homepage entry point does not export the needed item.
 
-### 2.3 Accessibility — BINDING
-
+### 3.3 Accessibility — BINDING
 All homepage webparts must meet:
 - WCAG 2.1 AA minimum contrast (4.5:1 text, 3:1 interactive)
 - Visible keyboard focus indicators
-- `prefers-reduced-motion` support (use `useHomepageReducedMotion` hook)
+- `prefers-reduced-motion` support
 - No hover-only critical information
-- Light theme first (dark theme is not a homepage priority)
+- Light theme first
 
-### 2.4 Authoring safety — BINDING
-
+### 3.4 Authoring safety — BINDING
 Every homepage webpart must behave well when:
-- minimally configured (default property pane values only)
-- partially configured (some fields set, others empty)
-- moved between page sections (different widths)
+- minimally configured
+- partially configured
+- moved between page sections
 - viewed in SharePoint edit mode
 - loaded with missing, stale, or empty data
 
 A webpart that looks good only when fully configured is not production-ready.
 
-### 2.5 Empty and loading states — BINDING
-
+### 3.5 Empty, loading, and error states — BINDING
 Every webpart must have:
-- a clear empty state (not a blank rectangle)
-- a professional loading state (use `HbcSpinner` from the homepage entry)
-- a graceful error state (not a stack trace or `[object Object]`)
+- a clear empty state
+- a professional loading state
+- a graceful error state
 - author-safe defaults that communicate what the webpart does
 
-### 2.6 Token discipline — BINDING
+### 3.6 Token discipline — BINDING
+Use shared semantic tokens from `@hbc/ui-kit/theme` by default.
+Homepage-specific aliases are allowed and expected where they materially support the premium homepage posture.
 
-Use shared semantic tokens from `@hbc/ui-kit/theme` by default. Homepage-specific aliases (typography, spacing, density) are published through `HBC_HOMEPAGE_TYPOGRAPHY`, `HBC_HOMEPAGE_SPACING`, and `HBC_HOMEPAGE_DENSITY_POLICY` in the homepage entry point.
-
-Direct hex/rgb values and hardcoded pixel spacing are prohibited in homepage webpart source. Enforced by `@hb-intel/hbc/enforce-hbc-tokens` ESLint rule.
+Direct hex/rgb values and hardcoded pixel spacing are prohibited in ordinary homepage webpart source unless documented as a deliberate local exception for flagship work.
 
 ---
 
-## 3. Directional homepage guidance
+## 4. Binding top-of-class stack standard for homepage work
 
-These rules represent strong guidance. Deviation is allowed when it produces a materially better homepage experience, but should be justified.
+### 4.1 Homepage premium stack — BINDING
+Homepage rebuild work must use the approved premium stack where relevant:
 
-### 3.1 Editorial hierarchy — DIRECTIONAL
+- `motion`
+- `lucide-react`
+- `@floating-ui/react`
+- `@radix-ui/react-slot`
+- `@radix-ui/react-tooltip`
+- `@radix-ui/react-separator`
+- `@radix-ui/react-scroll-area`
+- `class-variance-authority`
+- `clsx`
 
+Installing this stack without materially using it is non-compliant.
+
+### 4.2 Required stack usage posture — BINDING
+
+#### `motion`
+Use through `motion/react` for:
+- signature hero reveal choreography
+- premium CTA response
+- hover and press refinement
+- subtle section and panel transitions
+
+#### `lucide-react`
+Use as the homepage icon system for:
+- priority actions
+- launcher items
+- search/discovery affordances
+- operational cues
+- editorial metadata accents where useful
+
+Do not use Unicode glyphs or text initials as pseudo-icons in homepage webparts.
+
+#### `@floating-ui/react`
+Use for:
+- search suggestions
+- anchored overlays
+- launcher flyouts
+- premium contextual panels
+
+#### `@radix-ui/react-slot`
+Use for composable shells and reusable CTA/link/button patterns.
+
+#### `@radix-ui/react-tooltip`
+Use for elegant micro-help, especially where compact affordances need clarification.
+
+#### `@radix-ui/react-separator`
+Use for refined hierarchy and rhythm.
+
+#### `@radix-ui/react-scroll-area`
+Use for polished overflow in discovery and curated surfaces where needed.
+
+#### `class-variance-authority` and `clsx`
+Use to create serious homepage surface variants and readable class composition.
+
+---
+
+## 5. Binding anti-safety-zone homepage rules
+
+### 5.1 Generic enterprise card-grid outcomes are prohibited — BINDING
+Homepage webparts must not settle into:
+- thin-border white-card repetition
+- timid hierarchy
+- small polite modules floating in excessive empty canvas
+- subtle, barely noticeable premiumization passes
+
+### 5.2 Large empty hero slabs are prohibited — BINDING
+A flagship homepage hero may not be:
+- mostly empty blue area
+- a text block plus one button with dead space around it
+- visually weaker than the modules beneath it
+
+### 5.3 Pseudo-icons are prohibited — BINDING
+The homepage may not use:
+- Unicode icons
+- text initials
+- placeholder glyph substitutes
+
+where a real premium icon system is expected.
+
+### 5.4 Structural rebuild takes precedence over decorative polish — BINDING
+If the homepage still reads as a cautious enterprise card grid, the correct response is structural replacement, not incremental styling.
+
+---
+
+## 6. Homepage-specific top-band doctrine
+
+### 6.1 Signature hero standard — BINDING
+The homepage top band must behave as a **single flagship product surface**.
+
+It must not read as:
+- one greeting surface plus one hero surface
+- a greeting card beside the hero
+- a greeting block below the hero that still feels separate
+
+### 6.2 Greeting integration — BINDING
+The personalized greeting must be integrated into the signature hero experience in rendered output.
+
+Internal logic may be modular, but the rendered result must be one authored top-band object.
+
+### 6.3 Full-width support — BINDING
+The signature hero banner manifest must explicitly include:
+
+```json
+"supportsFullBleed": true,
+```
+
+This is locked.
+
+### 6.4 Visual authority — BINDING
+The top band must establish the page’s quality standard immediately through:
+- stronger hierarchy
+- stronger scale
+- stronger composition
+- stronger brand expression
+- materially better use of available width
+
+---
+
+## 7. Directional homepage guidance
+
+### 7.1 Editorial hierarchy — DIRECTIONAL
 Homepage compositions should establish clear visual hierarchy:
-- Hero / top-band content is visually dominant (large, branded, compelling)
-- Section headers establish rhythm between zones (utility, communications, operations, discovery)
-- Editorial cards support scanning — title, summary, metadata, CTA
-- Utility tiles are compact and action-oriented
+- the signature hero is visually dominant
+- section headers establish rhythm between zones
+- editorial cards support scanning
+- utility and command surfaces are compact but forceful
+- discovery surfaces feel active and premium, not passive
 
-This is guidance, not a pixel-level mandate. The design brief establishes the zone structure; the webpart implementations should express appropriate visual weight for their zone.
+### 7.2 Width and scale — DIRECTIONAL
+Homepage work should use the available canvas with confidence.
 
-### 3.2 Premium top-band / hero expectations — DIRECTIONAL
+Avoid:
+- timid centered-rail layouts
+- undersized modules
+- empty canvas created by weak width usage
 
-The Personalized Welcome Header and HB Hero Banner form the homepage's top-band pair. They should:
-- feel premium and branded (not generic SharePoint)
-- use `HBC_HOMEPAGE_BRAND_FOUNDATION` for color direction
-- support personalization (greeting, role-awareness)
-- establish the page's visual quality standard immediately
+Prefer:
+- confident width usage
+- asymmetric balance where appropriate
+- focal sequencing that still reads well when zoomed out
 
-### 3.3 Motion with discipline — DIRECTIONAL
-
+### 7.3 Motion with discipline — DIRECTIONAL
 Homepage motion should be:
-- lighter and faster than PWA motion
-- purposeful (state transitions, loading feedback) — not decorative
-- `prefers-reduced-motion` aware (binding, via §2.3)
-- page-composition friendly (no animations that fight section reflow)
+- lighter than PWA motion
+- purposeful
+- visibly premium
+- `prefers-reduced-motion` aware
 
-Avoid theatrical motion, parallax effects, or scroll-triggered animations in homepage webparts.
+Avoid theatrical motion, but do not collapse into lifeless hover states.
 
-### 3.4 Media and image treatment — DIRECTIONAL
-
+### 7.4 Media treatment — DIRECTIONAL
 When homepage webparts include media:
-- images should have defined aspect ratios (prevent layout shift)
-- placeholder states should be visually clean (solid color or shimmer, not broken-image icons)
-- hero imagery should support responsive sizing (full-width to column-width)
-- alt text should be authoring-governed (property pane field, not hardcoded)
+- images should have defined aspect ratios
+- placeholders should be visually clean
+- hero imagery should support responsive full-width treatment
+- alt text should be authoring-governed
 
-### 3.5 Utility-density expectations — DIRECTIONAL
+### 7.5 Command and discovery expectations — DIRECTIONAL
+Utility and discovery zone webparts should favor:
+- compact, premium command layouts
+- real iconography
+- strong affordance clarity
+- richer search/discovery behavior
+- anchored overlays where genuinely useful
 
-Utility-zone webparts (Priority Actions Rail, Tool Launcher) should favor:
-- compact, scannable layouts
-- dense information presentation where appropriate
-- touch-safe minimum targets (`HBC_HOMEPAGE_DENSITY_POLICY.minimumTouchTargetPx`)
-- clear affordance for actionable items (links, buttons, status)
-
-### 3.6 Content freshness guardrails — DIRECTIONAL
-
-Webparts that display time-sensitive content (Company Pulse, Leadership Message) should:
-- display metadata that communicates recency (date, "Updated weekly", etc.)
-- degrade gracefully when content is stale (do not show year-old content as "new")
-- support author-governed freshness through property pane configuration
-
-This is doctrine-level guidance, not a runtime enforcement mechanism.
+### 7.6 Content freshness guardrails — DIRECTIONAL
+Webparts that display time-sensitive content should:
+- communicate recency clearly
+- degrade gracefully when stale
+- support author-governed freshness treatment
 
 ---
 
-## 4. Homepage freedoms
+## 8. Homepage freedoms
 
-These patterns are explicitly allowed for homepage work, even if generic UI-kit or SPFx guidance might seem to discourage them.
+### 8.1 Full-width composition
+Homepage webparts may use full-width section layouts when the page section supports it. This is standard and expected for the signature hero.
 
-### 4.1 Full-width composition
+### 8.2 Zone-specific visual treatment
+Different homepage zones may have different visual density, card styles, and spacing. Strong zone differentiation is allowed and often desirable.
 
-Homepage webparts may use full-width section layouts when the page section supports it. This is standard for hero and top-band compositions.
+### 8.3 Local homepage primitives
+Homepage-local shared components are allowed and encouraged when specific to homepage composition and not yet proven for broader reuse.
 
-### 4.2 Zone-specific visual treatment
+### 8.4 Brand expression
+Homepage webparts may express HB brand identity more strongly than generic operational SPFx surfaces. The result should feel premium and established, not flashy or startup-like.
 
-Different homepage zones (top-band, utility, communications, operations, discovery) may have different visual density, card styles, and spacing. Visual uniformity across zones is not required — appropriate contrast between zones improves scannability.
-
-### 4.3 Local homepage primitives
-
-Homepage-local shared components (`apps/hb-webparts/src/homepage/shared/`) are allowed and encouraged when the pattern is specific to homepage composition and not yet proven for reuse. Promote to `@hbc/ui-kit` only when reuse across non-homepage surfaces is justified (2+ meaningful consumers outside homepage).
-
-### 4.4 Brand expression
-
-Homepage webparts may express HB brand identity more strongly than generic operational SPFx surfaces. Use `HBC_HOMEPAGE_BRAND_FOUNDATION` for color direction. Branded expression should feel premium and established, not flashy or startup-like (see the brand anti-patterns in the constant).
-
-### 4.5 Direct Fluent usage (inherited from SPFx Standard §4.2)
-
-Allowed when SharePoint interoperability is easier directly or the pattern is too specialized to wrap yet. If the pattern becomes common, wrap and promote.
+### 8.5 Stronger stack adoption
+Homepage work is explicitly allowed to adopt the approved premium stack when it materially improves:
+- iconography
+- motion
+- overlays
+- discovery behavior
+- compositional quality
+- surface elegance
 
 ---
 
-## 5. Shared UI-kit vs local homepage territory
+## 9. Shared UI-kit vs local homepage territory
 
 | Territory | Owned By | Examples |
 |-----------|----------|---------|
-| Reusable visual primitives | `@hbc/ui-kit` (via `/homepage` entry) | HbcCard, HbcButton, HbcBanner, HbcStatusBadge, HbcSpinner, HbcEmptyState, HbcSearch, HbcThemeProvider |
-| Homepage shared primitives (Phase 11A) | `@hbc/ui-kit/homepage` | HbcHomepageSectionShell, HbcHomepageCta, HbcHomepageMetadataRow, HbcHomepageIconFrame, HbcHomepageSurfaceCard, HbcHomepageActionRow |
-| Homepage governance constants | `@hbc/ui-kit/homepage` | Brand foundation, typography aliases, spacing aliases, a11y policy, density policy, import guardrails |
-| Semantic tokens, icons | `@hbc/ui-kit/theme`, `@hbc/ui-kit/icons` | All shared tokens, all icons |
-| Homepage composition shells | `apps/hb-webparts/src/homepage/shared/` | HomepageRailShell, HomepageSectionShell, HomepageTopBandPair, etc. |
-| Webpart components | `apps/hb-webparts/src/webparts/` | Each webpart folder (CompanyPulse, HbHeroBanner, etc.) |
-| Homepage helpers | `apps/hb-webparts/src/homepage/helpers/` | Config normalization, identity resolution, greeting logic |
-| Homepage contracts | `apps/hb-webparts/src/homepage/webparts/` | Per-zone configuration type contracts |
+| Reusable visual primitives | `@hbc/ui-kit` (via `/homepage` entry) | homepage primitives, CTA shells, icon frames, search primitives, premium surface families |
+| Homepage governance constants | `@hbc/ui-kit/homepage` | brand foundation, typography aliases, spacing aliases, accessibility policy, density policy, import guardrails |
+| Semantic tokens | `@hbc/ui-kit/theme` | shared tokens and homepage-aware aliases |
+| Homepage composition shells | `apps/hb-webparts/src/homepage/shared/` | composition shells only when they materially support homepage structure |
+| Webpart components | `apps/hb-webparts/src/webparts/` | each homepage webpart folder |
+| Homepage helpers | `apps/hb-webparts/src/homepage/helpers/` | config normalization, identity resolution, greeting logic, overlay helpers |
+| Homepage contracts | `apps/hb-webparts/src/homepage/webparts/` | per-zone configuration contracts |
 
-**Promotion rule:** A local homepage component should be promoted to `@hbc/ui-kit` only when it has 2+ meaningful consumers outside the homepage package and is visually aligned with the shared HB design language. Until then, local ownership is preferred.
-
----
-
-## 6. What homepage surfaces must NOT do
-
-- Import from `@hbc/ui-kit` root or `@hbc/ui-kit/app-shell` (enforced by ESLint)
-- Create shell chrome, navigation, or footer elements (belongs to Lane B)
-- Use unsupported SharePoint DOM manipulation or CSS overrides
-- Suppress or fight the SharePoint host chrome
-- Depend on other feature packages (`@hbc/features-*`) — homepage is self-contained
-- Assume all 10 webparts are always on the same page (each must render independently)
+**Promotion rule:** Promote local homepage components to `@hbc/ui-kit` only when reuse beyond homepage is justified and the pattern is aligned with the shared premium design language.
 
 ---
 
-## 7. Locked assumptions for Phase 01+
+## 10. What homepage surfaces must NOT do
 
-Future implementation phases should treat the following as locked and not re-litigate:
+- import from `@hbc/ui-kit` root or `@hbc/ui-kit/app-shell`
+- create shell chrome, navigation, or footer elements
+- use unsupported SharePoint DOM manipulation
+- suppress or fight the SharePoint host chrome
+- depend on fake premiumization through tint-only card changes
+- use Unicode icons in place of a real icon system
+- leave the hero without full-bleed support when it is intended to be flagship
+- assume the page author’s SharePoint section layout will rescue weak structural design
 
-1. `@hbc/ui-kit/homepage` is the primary UI entry point for homepage webparts
-2. The 14 components (8 core + 6 homepage primitives) + 5 governance constants in the homepage entry are the current approved surface
-3. Homepage primitives live locally in `apps/hb-webparts/src/homepage/shared/` until reuse is proven
-4. The SPFx Governing Standard's binding rules (accessibility, host awareness, token discipline) are non-negotiable
-5. Each webpart must render independently with authoring-safe defaults
-6. The three-lane model (homepage / shell-extension / navigation) is the governing architecture
-7. The supported customization posture (page canvas + placeholder extensions, no shell DOM hacks) is locked
+---
+
+## 11. Locked assumptions for future homepage work
+
+Future implementation phases should treat the following as locked:
+
+1. `apps/hb-webparts/src/webparts/` is the primary rebuild focus
+2. each homepage webpart must have the correct adjacent manifest
+3. the signature hero banner manifest must include `"supportsFullBleed": true`
+4. `@hbc/ui-kit/homepage` remains the primary homepage entry point
+5. the approved premium stack is mandatory where relevant
+6. Unicode icons and timid enterprise card-grid outcomes are non-compliant
+7. the top band must render as one flagship surface
+8. the three-lane model remains the governing architecture
+9. supported customization posture remains page canvas + placeholders only

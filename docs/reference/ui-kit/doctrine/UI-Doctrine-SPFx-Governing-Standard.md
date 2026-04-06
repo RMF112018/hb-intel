@@ -33,6 +33,14 @@ The goal is not full shell domination.
 
 The goal is a first-class HB experience inside supported SharePoint reality.
 
+This standard now also locks a higher bar:
+
+- premium authored composition
+- visibly non-generic visual identity
+- deliberate escape from the default enterprise card grid
+- stronger webpart-specific product thinking
+- a top-of-class stack for premium SPFx surfaces where justified
+
 ---
 
 ## 2. Shared obligations that still apply — BINDING
@@ -54,7 +62,7 @@ These remain mandatory.
 
 ## 3. SPFx-specific doctrine
 
-## 3.1 Respect the host — BINDING
+### 3.1 Respect the host — BINDING
 Do not design SPFx as though HB owns:
 - suite bar chrome
 - SharePoint app bar behavior
@@ -63,7 +71,7 @@ Do not design SPFx as though HB owns:
 
 Design for coexistence, not conquest.
 
-## 3.2 Own the page canvas — BINDING
+### 3.2 Own the page canvas — BINDING
 The primary place to express premium HB UI in SPFx is:
 - full-width hero composition
 - top-band layout
@@ -74,7 +82,7 @@ The primary place to express premium HB UI in SPFx is:
 - section-based intranet composition
 - supported extension placeholders
 
-## 3.3 Avoid shell duplication — BINDING
+### 3.3 Avoid shell duplication — BINDING
 Do not create unnecessary fake shell layers inside page content.
 
 Avoid:
@@ -83,7 +91,7 @@ Avoid:
 - heavy chrome inside already hosted content
 - decorative shell mimicry that competes with SharePoint
 
-## 3.4 Authoring mode matters — BINDING
+### 3.4 Authoring mode matters — BINDING
 Every SPFx doctrine decision must account for:
 - page authors
 - editors
@@ -97,18 +105,114 @@ A webpart that looks good only when fully configured is not production-ready.
 
 ---
 
-## 4. Doctrine corrections to prior over-restrictions
+## 4. Structural rebuild posture for premium SPFx surfaces
 
-## 4.1 `HbcAppShell` and `WorkspacePageShell` are not universal SPFx defaults — DIRECTIONAL
-These patterns may be used selectively, but they are not the default doctrine for SharePoint-hosted surfaces.
+### 4.1 Default Fluent visual language is prohibited as the premium answer — BINDING
+Fluent may remain in the technical stack for:
+- accessibility alignment
+- host-safe primitives
+- interoperability
+- token interoperability
+- low-level utility use
 
-SPFx should generally favor:
-- webpart-first composition
-- section-aware layout
-- host-cooperative rendering
-- page-band composition
+Fluent must **not** define the dominant premium visual language of flagship SharePoint surfaces.
 
-## 4.2 Direct Fluent usage is allowed when justified — DIRECTIONAL
+Prohibited as the dominant posture:
+- generic Fluent-shaped cards
+- default Fluent-feeling buttons and inputs
+- safe enterprise panel styling used as the primary homepage language
+- visual outcomes that still read as stock enterprise UI with a brand tint
+
+### 4.2 Design-safety-zone outcomes are prohibited — BINDING
+Premium SPFx surfaces must not settle into:
+- thin-border white-card grids as the dominant page language
+- timid hierarchy
+- undersized modules floating in excessive empty canvas
+- large empty hero slabs with minor copy changes
+- pseudo-icons made from initials or Unicode symbols where a real icon system is expected
+- subtle before/after deltas presented as a successful redesign
+
+### 4.3 Structural rebuild is preferred over decorative refinement — BINDING
+When a surface is materially underperforming, the default doctrine response is to:
+- replace weak primitives
+- replace weak composition models
+- replace weak interaction patterns
+- rebuild webpart architecture where needed
+
+Do not preserve a weak system simply because it is already compiling.
+
+---
+
+## 5. Approved premium stack for advanced SPFx surfaces
+
+### 5.1 Stack standard — BINDING for flagship homepage and premium communication surfaces
+For flagship homepage and premium communication-site surfaces, the following stack is approved and expected where justified:
+
+- `motion`
+- `lucide-react`
+- `@floating-ui/react`
+- `@radix-ui/react-slot`
+- `@radix-ui/react-tooltip`
+- `@radix-ui/react-separator`
+- `@radix-ui/react-scroll-area`
+- `class-variance-authority`
+- `clsx`
+
+### 5.2 Stack usage intent — BINDING
+These packages are not to be installed symbolically. They must be used deliberately.
+
+#### `motion`
+Use through `motion/react` for:
+- reveal choreography
+- premium hover and press states
+- CTA response
+- refined state transitions
+- controlled depth and transform motion
+
+#### `lucide-react`
+Use as the canonical premium icon system for:
+- launcher systems
+- priority actions
+- discovery/search affordances
+- operational status cues
+- editorial metadata accents where useful
+
+Do not use Unicode icons or text initials as pseudo-icons when a premium icon system is expected.
+
+#### `@floating-ui/react`
+Use for:
+- search suggestions
+- anchored launcher flyouts
+- command popovers
+- contextual overlays
+- premium tooltip positioning
+
+#### `@radix-ui/react-slot`
+Use for composable, reusable primitive shells.
+
+#### `@radix-ui/react-tooltip`
+Use for elegant micro-help and icon clarification.
+
+#### `@radix-ui/react-separator`
+Use for refined hierarchy and content rhythm.
+
+#### `@radix-ui/react-scroll-area`
+Use where polished overflow behavior is materially useful.
+
+#### `class-variance-authority`
+Use to define serious variant systems for:
+- signature surfaces
+- command surfaces
+- launcher surfaces
+- discovery surfaces
+- editorial surfaces
+- operational surfaces
+- recognition surfaces
+
+#### `clsx`
+Use for readable class composition and variant orchestration.
+
+### 5.3 Direct Fluent usage is allowed when justified — DIRECTIONAL
 Default to `@hbc/ui-kit` exports where practical.
 
 Direct Fluent usage is allowed when:
@@ -119,7 +223,13 @@ Direct Fluent usage is allowed when:
 
 If the pattern becomes common and reusable, wrap and promote it.
 
-## 4.3 Token discipline remains strong, with host-aware overlays — BINDING (base), DIRECTIONAL (overlays)
+This allowance does **not** override §4.1.
+
+---
+
+## 6. Token, motion, and layout doctrine
+
+### 6.1 Token discipline remains strong, with host-aware overlays — BINDING (base), DIRECTIONAL (overlays)
 Use shared semantic tokens by default.
 
 Allowed when justified:
@@ -131,36 +241,38 @@ Allowed when justified:
 
 The goal is disciplined adaptation, not forced sameness.
 
-## 4.4 Horizontal scroll is discouraged, not absolutely banned — DIRECTIONAL
-Avoid horizontal scrolling in ordinary webparts.
-
-Allow it only when:
-- the data is genuinely wide
-- expert workflows justify it
-- alternate presentation would meaningfully reduce utility
-
-Use mitigation where appropriate:
-- sticky headers
-- key-column persistence
-- responsive degradation
-- compact fallback strategies where feasible
-
-## 4.5 Motion should be lighter than in PWA — DIRECTIONAL
-SPFx motion may still be refined, but it should generally be:
+### 6.2 Motion should be lighter than in PWA but still premium — DIRECTIONAL
+SPFx motion should generally be:
 - lighter
 - faster
-- less theatrical
 - more restrained
 - more page-composition-friendly
 
+But “restrained” does not mean lifeless.
+
+Premium SPFx motion should still be:
+- clearly intentional
+- visibly refined
+- materially better than default enterprise hover states
+
 Avoid shell-like motion behaviors that fight the host or degrade authoring/page performance.
+
+### 6.3 Width and compositional authority matter — DIRECTIONAL
+SPFx page-canvas work must not collapse into an overly narrow, timid content rail unless the content specifically justifies it.
+
+Preferred patterns:
+- strong asymmetric compositions
+- confident width usage
+- clear focal sequences
+- deliberately authored negative space
+- hierarchy that survives zoomed-out viewing
 
 ---
 
-## 5. Recommended layout families — DIRECTIONAL
+## 7. Recommended layout families — DIRECTIONAL
 
 SPFx surfaces should favor:
-- hero + welcome pairings
+- integrated signature heroes
 - editorial top bands
 - announcement and pulse strips
 - premium launcher rails
@@ -173,7 +285,7 @@ These are the safest and most effective places to create visually distinguished 
 
 ---
 
-## 6. Webpart quality doctrine — BINDING
+## 8. Webpart quality doctrine — BINDING
 
 Every premium webpart must behave well when:
 - minimally configured
@@ -190,9 +302,35 @@ Every webpart should have:
 - author-safe defaults
 - host-safe responsive behavior
 
+Premium webparts must also have:
+- real internal hierarchy
+- credible iconography
+- premium CTA behavior
+- visibly distinct surface logic relative to their role
+
 ---
 
-## 7. Exception standard
+## 9. Manifest and packaging doctrine for premium homepage work
+
+### 9.1 Manifest adjacency — BINDING
+Every SPFx webpart must include the appropriate manifest adjacent to its webpart entry.
+
+Do not treat manifest correctness as secondary to visual work.
+
+### 9.2 Full-width support must be explicit where required — BINDING
+Where a flagship hero or signature banner is intended to support SharePoint full-width placement, its manifest must explicitly declare full-bleed support.
+
+This is not optional.
+
+### 9.3 Structural intent must survive packaging — BINDING
+Premium design work is not complete until:
+- manifest intent is preserved into the package
+- the `.sppkg` validates
+- the rendered SharePoint-hosted output matches the intended structural upgrade
+
+---
+
+## 10. Exception standard
 
 A doctrinal exception is acceptable when it materially improves:
 - brand expression
@@ -211,7 +349,7 @@ An exception is not acceptable when it:
 
 ---
 
-## 8. Definition of success
+## 11. Definition of success
 
 This doctrine succeeds when SPFx surfaces feel:
 - premium
@@ -220,4 +358,6 @@ This doctrine succeeds when SPFx surfaces feel:
 - useful
 - modern
 - clearly better than default SharePoint
-- but still compatible with SharePoint’s operating reality
+- visibly non-generic
+- structurally productized rather than merely restyled
+- compatible with SharePoint’s operating reality
