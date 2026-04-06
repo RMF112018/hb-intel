@@ -19,8 +19,10 @@
  *   3. Tagline: "Build with GRIT." — primary typographic statement
  *
  * Background system:
- *   - Authored photography (optional) with gradient scrim for readability
- *   - Fallback: deep charcoal field with material grain texture
+ *   - Default: repo-controlled banner_home_7.png (center-cropped)
+ *   - Override: authored photography URL via backgroundImage prop
+ *   - Readability scrim overlay for text contrast
+ *   - Fallback: deep charcoal field with material grain texture (when image fails)
  *   - No gradient wash, no glow effects, no decorative overlays
  *
  * Accessibility:
@@ -36,10 +38,15 @@ import { resolveWelcomeMessage } from '../../homepage/helpers/welcomeMessage.js'
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import styles from './signature-hero.module.css';
 
+/** Default banner filename deployed alongside JS/CSS in the .sppkg ClientSideAssets. */
+const DEFAULT_BANNER = 'banner_home_7.png';
+
 export interface HbSignatureHeroProps {
   identity: HomepageIdentityInput;
   /** Optional authored background image URL (wide, low-clutter photography preferred). */
   backgroundImage?: string;
+  /** CDN base URL for static assets (injected by SPFx shell at runtime). */
+  assetBaseUrl?: string;
   now?: Date;
 }
 
@@ -60,9 +67,11 @@ const reveal = {
 export function HbSignatureHero({
   identity,
   backgroundImage,
+  assetBaseUrl,
   now = new Date(),
 }: HbSignatureHeroProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
+  const heroBackground = backgroundImage ?? (assetBaseUrl ? assetBaseUrl + DEFAULT_BANNER : undefined);
 
   return (
     <section
@@ -71,10 +80,10 @@ export function HbSignatureHero({
       data-hbc-premium="signature-hero"
     >
       {/* ── Background ── */}
-      {backgroundImage ? (
+      {heroBackground ? (
         <div
           className={styles.photo}
-          style={{ backgroundImage: `url(${backgroundImage})` }}
+          style={{ backgroundImage: `url(${heroBackground})` }}
           aria-hidden="true"
         />
       ) : null}

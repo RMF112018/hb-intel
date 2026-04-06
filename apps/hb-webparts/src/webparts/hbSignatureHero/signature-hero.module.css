@@ -34,12 +34,14 @@
 
 /* ── Background layers ─────────────────────────────────── */
 
-/* Authored photography (covers full surface, behind scrim) */
+/* Background photography (covers full surface, behind scrim).
+   Default: repo-controlled banner_home_7.png resolved via CDN base URL.
+   Override: backgroundImage prop. */
 .photo {
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center 40%;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 

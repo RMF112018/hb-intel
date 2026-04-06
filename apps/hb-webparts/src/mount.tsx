@@ -20,9 +20,10 @@ let root: Root | undefined;
 interface MountConfig {
   webPartId?: unknown;
   webPartProperties?: unknown;
+  assetBaseUrl?: unknown;
 }
 
-const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknown>; identity: HomepageIdentityInput }) => ReactNode> = {
+const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknown>; identity: HomepageIdentityInput; assetBaseUrl?: string }) => ReactNode> = {
   '46bfde64-f0cb-4f62-9f6b-a466f8fadc1f': ({ config, identity }) => createElement(PersonalizedWelcomeHeader, { config, identity }),
   '39762a4d-c7fd-44a6-a11e-4f8de9f5778d': ({ config }) => createElement(HbHeroBanner, { config }),
   'b3f07190-79cf-437d-a1d6-ecbf3f77e616': ({ config }) => createElement(PriorityActionsRail, { config }),
@@ -33,7 +34,7 @@ const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknow
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),
-  '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ identity }) => createElement(HbSignatureHero, { identity }),
+  '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ identity, assetBaseUrl }) => createElement(HbSignatureHero, { identity, assetBaseUrl }),
 };
 
 export async function mount(
@@ -48,6 +49,7 @@ export async function mount(
     typeof config?.webPartProperties === 'object' && config.webPartProperties !== null
       ? (config.webPartProperties as Record<string, unknown>)
       : undefined;
+  const assetBaseUrl = typeof config?.assetBaseUrl === 'string' ? config.assetBaseUrl : undefined;
   const identity: HomepageIdentityInput = {
     displayName: spfxContext?.pageContext?.user?.displayName,
     email: spfxContext?.pageContext?.user?.email,
@@ -56,7 +58,7 @@ export async function mount(
 
   root = createRoot(el);
   if (renderWebPart) {
-    root.render(renderWebPart({ config: webPartProperties, identity }));
+    root.render(renderWebPart({ config: webPartProperties, identity, assetBaseUrl }));
     return;
   }
   root.render(createElement(ReferenceHomepageComposition));

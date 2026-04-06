@@ -33,6 +33,7 @@ interface IAppModule {
 
 export default class ShellWebPart extends BaseClientSideWebPart<{}> {
   private _appModule: IAppModule | undefined;
+  private _assetBaseUrl = '';
 
   public async onInit(): Promise<void> {
     await super.onInit();
@@ -53,6 +54,7 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     //   ...d01a9600-a68a-4afe-83a5-514339f47dbbestimating-app.js  (broken)
     //   ...d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js (correct)
     const normalizedBase = rawBaseUrl.endsWith('/') ? rawBaseUrl : rawBaseUrl + '/';
+    this._assetBaseUrl = normalizedBase;
     const bundleUrl = normalizedBase + __APP_BUNDLE_NAME__;
 
     // Load companion CSS asset if one was provided at build time.
@@ -137,6 +139,7 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
         }
         runtimeConfig.webPartId = (this.manifest as any).id;
         runtimeConfig.webPartProperties = this.properties as Record<string, unknown>;
+        runtimeConfig.assetBaseUrl = this._assetBaseUrl;
       } catch {
         // Runtime constants not defined — app will fall back to Vite env or defaults
       }
