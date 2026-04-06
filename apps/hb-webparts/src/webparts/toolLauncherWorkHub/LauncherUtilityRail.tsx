@@ -1,37 +1,32 @@
 /**
  * LauncherUtilityRail — Secondary support/utility surface for Tool Launcher.
  *
- * Phase 04-01: Utility rail contract locked with 4 content categories:
- *   1. Platform Notices — outages, maintenance, info (urgent-first)
- *   2. Need Help — help destination CTAs with ExternalLink affordance
- *   3. Request Access — access-request CTAs with ExternalLink affordance
- *   4. Support Contacts — support-owner navigation links
+ * Phase 04-02: Support actions wired through pre-derived supportSummary
+ * from the presentation model. Help, access-request, and support-contact
+ * sections now consume LauncherSupportSummary instead of filtering
+ * raw platform arrays directly.
+ *
+ * Content categories (ordered by urgency):
+ *   1. Platform Notices — outages, maintenance, info (metadata)
+ *   2. Need Help — help destination CTAs (action links)
+ *   3. Request Access — access-request CTAs (action links)
+ *   4. Support Contacts — support-owner metadata (quiet links)
  *
  * Each section is independently suppressible. The entire rail returns
- * null when all sections are empty, causing the composition shell body
- * grid to collapse from 2fr/1fr to 1fr.
- *
- * Contract rules:
- *   - Notices render as metadata (status labels, not CTAs)
- *   - Help and access links render as CTAs (blue, with ExternalLink icon)
- *   - Support contacts render as quiet metadata links
- *   - All data comes from normalized LauncherPlatformRecord, not raw SP fields
- *   - The rail must remain visually secondary to the flagship stage
+ * null when all sections are empty.
  */
 import * as React from 'react';
 import { AlertCircle, Info, Link2, Users, ExternalLink } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import type {
-  LauncherPlatformRecord,
   LauncherPresentationModel,
+  LauncherSupportSummary,
 } from '../../homepage/webparts/toolLauncherContracts.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
 
 export interface LauncherUtilityRailProps {
   presentation: LauncherPresentationModel;
-  /** All active platforms for deriving help/access/support links. */
-  platforms: LauncherPlatformRecord[];
 }
 
 /* ── Styles ───────────────────────────────────────────────────────── */
@@ -164,9 +159,8 @@ function NoticesSection({ notices }: { notices: LauncherPresentationModel['notic
   );
 }
 
-function NeedHelpSection({ platforms }: { platforms: LauncherPlatformRecord[] }): React.JSX.Element | null {
-  const withHelp = platforms.filter((p) => p.support.helpUrl);
-  if (withHelp.length === 0) return null;
+function NeedHelpSection({ actions }: { actions: LauncherSupportSummary['helpActions'] }): React.JSX.Element | null {
+  if (actions.length === 0) return null;
 
   return (
     <div style={sectionStyle} data-rail-section="help">
@@ -174,15 +168,15 @@ function NeedHelpSection({ platforms }: { platforms: LauncherPlatformRecord[] })
         <Info size={13} strokeWidth={2} />
         Need Help
       </h4>
-      {withHelp.slice(0, 5).map((p) => (
+      {actions.slice(0, 5).map((a) => (
         <a
-          key={p.platformKey}
-          href={p.support.helpUrl}
+          key={a.platformKey}
+          href={a.helpUrl}
           target="_blank"
           rel="noopener noreferrer"
           style={ctaLinkStyle}
         >
-          {p.name}
+          {a.name} Help
           <ExternalLink size={11} strokeWidth={2} />
         </a>
       ))}
@@ -190,9 +184,8 @@ function NeedHelpSection({ platforms }: { platforms: LauncherPlatformRecord[] })
   );
 }
 
-function RequestAccessSection({ platforms }: { platforms: LauncherPlatformRecord[] }): React.JSX.Element | null {
-  const withAccess = platforms.filter((p) => p.support.accessRequestUrl);
-  if (withAccess.length === 0) return null;
+function RequestAccessSection({ actions }: { actions: LauncherSupportSummary['accessActions'] }): React.JSX.Element | null {
+  if (actions.length === 0) return null;
 
   return (
     <div style={sectionStyle} data-rail-section="access">
@@ -200,15 +193,15 @@ function RequestAccessSection({ platforms }: { platforms: LauncherPlatformRecord
         <Link2 size={13} strokeWidth={2} />
         Request Access
       </h4>
-      {withAccess.slice(0, 5).map((p) => (
+      {actions.slice(0, 5).map((a) => (
         <a
-          key={p.platformKey}
-          href={p.support.accessRequestUrl}
+          key={a.platformKey}
+          href={a.accessRequestUrl}
           target="_blank"
           rel="noopener noreferrer"
           style={ctaLinkStyle}
         >
-          {p.name}
+          {a.name}
           <ExternalLink size={11} strokeWidth={2} />
         </a>
       ))}
@@ -216,9 +209,8 @@ function RequestAccessSection({ platforms }: { platforms: LauncherPlatformRecord
   );
 }
 
-function SupportContactsSection({ platforms }: { platforms: LauncherPlatformRecord[] }): React.JSX.Element | null {
-  const withOwner = platforms.filter((p) => p.support.supportOwnerName);
-  if (withOwner.length === 0) return null;
+function SupportContactsSection({ contacts }: { contacts: LauncherSupportSummary['supportContacts'] }): React.JSX.Element | null {
+  if (contacts.length === 0) return null;
 
   return (
     <div style={sectionStyle} data-rail-section="contacts">
@@ -226,38 +218,38 @@ function SupportContactsSection({ platforms }: { platforms: LauncherPlatformReco
         <Users size={13} strokeWidth={2} />
         Support Contacts
       </h4>
-      {withOwner.slice(0, 5).map((p) => {
-        const ownerUrl = p.support.supportOwnerUrl;
-        return (
-          <div key={p.platformKey}>
-            {ownerUrl ? (
-              <a href={ownerUrl} target="_blank" rel="noopener noreferrer" style={metadataLinkStyle}>
-                {p.name}
-                <span style={supportOwnerLabelStyle}>· {p.support.supportOwnerName}</span>
-              </a>
-            ) : (
-              <div style={metadataLinkStyle}>
-                {p.name}
-                <span style={supportOwnerLabelStyle}>· {p.support.supportOwnerName}</span>
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {contacts.slice(0, 5).map((c) => (
+        <div key={c.platformKey}>
+          {c.supportOwnerUrl ? (
+            <a href={c.supportOwnerUrl} target="_blank" rel="noopener noreferrer" style={metadataLinkStyle}>
+              {c.name}
+              <span style={supportOwnerLabelStyle}>· {c.supportOwnerName}</span>
+            </a>
+          ) : (
+            <div style={metadataLinkStyle}>
+              {c.name}
+              <span style={supportOwnerLabelStyle}>· {c.supportOwnerName}</span>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
 
 /* ── Component ───────────────────────────────────────────────────── */
 
-export function LauncherUtilityRail({ presentation, platforms }: LauncherUtilityRailProps): React.JSX.Element | null {
+export function LauncherUtilityRail({ presentation }: LauncherUtilityRailProps): React.JSX.Element | null {
   const { activeNotices } = presentation.noticesSummary;
-  const hasHelp = platforms.some((p) => p.support.helpUrl);
-  const hasAccess = platforms.some((p) => p.support.accessRequestUrl);
-  const hasContacts = platforms.some((p) => p.support.supportOwnerName);
+  const { helpActions, accessActions, supportContacts } = presentation.supportSummary;
 
   // Suppress the entire rail when no content is available
-  if (activeNotices.length === 0 && !hasHelp && !hasAccess && !hasContacts) {
+  if (
+    activeNotices.length === 0 &&
+    helpActions.length === 0 &&
+    accessActions.length === 0 &&
+    supportContacts.length === 0
+  ) {
     return null;
   }
 
@@ -265,9 +257,9 @@ export function LauncherUtilityRail({ presentation, platforms }: LauncherUtility
     <div style={railContainerStyle}>
       <p style={railLabelStyle}>Support &amp; Status</p>
       <NoticesSection notices={activeNotices} />
-      <NeedHelpSection platforms={platforms} />
-      <RequestAccessSection platforms={platforms} />
-      <SupportContactsSection platforms={platforms} />
+      <NeedHelpSection actions={helpActions} />
+      <RequestAccessSection actions={accessActions} />
+      <SupportContactsSection contacts={supportContacts} />
     </div>
   );
 }

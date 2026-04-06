@@ -92,7 +92,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
       <LauncherCompositionShell
         commandBand={<LauncherCommandBand platformCount={presentation.allPlatforms.length} featuredCount={featuredCount} />}
         flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} />}
-        utilityRail={<LauncherUtilityRail presentation={presentation} platforms={listPlatforms} />}
+        utilityRail={<LauncherUtilityRail presentation={presentation} />}
         workflowShelves={<LauncherWorkflowShelves shelves={presentation.workflowShelves} />}
       />
     );

@@ -153,12 +153,23 @@ export interface LauncherNoticesSummary {
   activeNotices: Array<{ platformKey: string; name: string; notice: LauncherNoticeBadge }>;
 }
 
+/** Pre-derived support action summaries for the utility rail. */
+export interface LauncherSupportSummary {
+  /** Platforms with help destinations. */
+  helpActions: Array<{ platformKey: string; name: string; helpUrl: string; supportOwnerName?: string }>;
+  /** Platforms with access-request destinations. */
+  accessActions: Array<{ platformKey: string; name: string; accessRequestUrl: string }>;
+  /** Platforms with named support contacts. */
+  supportContacts: Array<{ platformKey: string; name: string; supportOwnerName: string; supportOwnerUrl?: string }>;
+}
+
 /** Complete presentation model derived from normalized records. */
 export interface LauncherPresentationModel {
   featuredStage: LauncherFeaturedStage;
   workflowShelves: LauncherWorkflowShelf[];
   platformIndex: LauncherPlatformIndex;
   noticesSummary: LauncherNoticesSummary;
+  supportSummary: LauncherSupportSummary;
   /** All active platforms, sorted by sortOrder then name. */
   allPlatforms: LauncherPlatformRecord[];
 }

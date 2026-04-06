@@ -21,6 +21,7 @@ import type {
   LauncherPlatformRecord,
   LauncherPresentationModel,
   LauncherSupportInfo,
+  LauncherSupportSummary,
   LauncherWorkflowShelf,
   RawToolLauncherListItem,
 } from '../webparts/toolLauncherContracts.js';
@@ -341,6 +342,40 @@ function deriveNoticesSummary(platforms: LauncherPlatformRecord[]): LauncherNoti
   };
 }
 
+function deriveSupportSummary(platforms: LauncherPlatformRecord[]): LauncherSupportSummary {
+  const helpActions: LauncherSupportSummary['helpActions'] = [];
+  const accessActions: LauncherSupportSummary['accessActions'] = [];
+  const supportContacts: LauncherSupportSummary['supportContacts'] = [];
+
+  for (const p of platforms) {
+    if (p.support.helpUrl) {
+      helpActions.push({
+        platformKey: p.platformKey,
+        name: p.name,
+        helpUrl: p.support.helpUrl,
+        supportOwnerName: p.support.supportOwnerName,
+      });
+    }
+    if (p.support.accessRequestUrl) {
+      accessActions.push({
+        platformKey: p.platformKey,
+        name: p.name,
+        accessRequestUrl: p.support.accessRequestUrl,
+      });
+    }
+    if (p.support.supportOwnerName) {
+      supportContacts.push({
+        platformKey: p.platformKey,
+        name: p.name,
+        supportOwnerName: p.support.supportOwnerName,
+        supportOwnerUrl: p.support.supportOwnerUrl,
+      });
+    }
+  }
+
+  return { helpActions, accessActions, supportContacts };
+}
+
 /**
  * Derive the full presentation model from normalized platform records.
  * This is the primary entry point for the Tool Launcher component to
@@ -360,6 +395,7 @@ export function deriveToolLauncherPresentation(
     workflowShelves: deriveWorkflowShelves(visible),
     platformIndex: derivePlatformIndex(visible),
     noticesSummary: deriveNoticesSummary(visible),
+    supportSummary: deriveSupportSummary(visible),
     allPlatforms: [...visible],
   };
 }
