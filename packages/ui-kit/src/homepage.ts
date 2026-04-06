@@ -67,6 +67,44 @@ export type { HbcHomepageActionRowProps } from './HbcHomepageActionRow/types.js'
 export { HbcHomepageEyebrow } from './HbcHomepageEyebrow/index.js';
 export type { HbcHomepageEyebrowProps, EyebrowTone } from './HbcHomepageEyebrow/types.js';
 
+// ── Phase 16-02 — Premium dependency re-exports ──────────────────────
+// Re-export key P16 dependencies so homepage webparts can consume them
+// through the governed @hbc/ui-kit/homepage entrypoint without needing
+// direct package.json dependencies on motion, lucide, clsx, or cva.
+
+export { motion, AnimatePresence } from 'motion/react';
+export { clsx } from 'clsx';
+export { cva } from 'class-variance-authority';
+export type { VariantProps } from 'class-variance-authority';
+
+// Lucide icons — curated set for homepage use
+export {
+  ArrowRight,
+  ExternalLink,
+  Calendar,
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Clock,
+  Circle,
+  Search,
+  Shield,
+  DollarSign,
+  Users,
+  Settings,
+  FileText,
+  Briefcase,
+  Building2,
+  HardHat,
+  BarChart3,
+  Landmark,
+  Keyboard,
+  Mail,
+  Link2,
+  type LucideIcon,
+} from 'lucide-react';
+
 // ── Phase 16-02 — Premium primitives (cva + lucide + motion + radix) ──
 
 export { HbcPremiumSurface } from './HbcPremiumSurface/index.js';

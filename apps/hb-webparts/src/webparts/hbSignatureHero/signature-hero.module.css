@@ -1,0 +1,310 @@
+/**
+ * Signature hero styles — Phase 16-03
+ *
+ * A single premium surface that integrates the personalized greeting
+ * and hero editorial content. No cards, no adjacent panels —
+ * one layered, branded, memorable surface.
+ */
+
+/* ── Hero container ─────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  border-radius: 16px;
+  color: #ffffff;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Ambient decorative layer ───────────────────────────── */
+
+.ambientLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.glowTopRight {
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 126, 70, 0.15) 0%, transparent 65%);
+}
+
+.glowBottomLeft {
+  position: absolute;
+  bottom: -100px;
+  left: -80px;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 83, 145, 0.12) 0%, transparent 60%);
+}
+
+.edgeHighlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.30) 0%, rgba(229,126,70,0.50) 40%, rgba(255,255,255,0.10) 100%);
+}
+
+/* ── Content layer ───���──────────────────────────────────── */
+
+.contentLayer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px 36px;
+  flex: 1;
+}
+
+/* ── Top row: brand + eyebrow ────────────────��──────────── */
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brandLockup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandLogo {
+  height: 20px;
+  width: auto;
+  opacity: 0.80;
+  filter: brightness(10);
+}
+
+.brandLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.60;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+/* ── Main content: greeting + editorial columns ─────────── */
+
+.mainContent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+/* Left: greeting */
+.greetingColumn {
+  flex: 1 1 240px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.greetingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.greetingPrefix {
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.70;
+  line-height: 1.3;
+}
+
+.greetingName {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  /* Slight warm tint on the name to catch the eye */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.supportLine {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  opacity: 0.70;
+  max-width: 30ch;
+}
+
+/* Right: editorial headline + message + CTAs */
+.editorialColumn {
+  flex: 2 1 360px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.headline {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  max-width: 28ch;
+}
+
+.heroMessage {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.6;
+  opacity: 0.80;
+  max-width: 50ch;
+}
+
+/* ── CTA row ────────────────────────────────────────────── */
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #225391;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ctaPrimary:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.ctaPrimary:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.80);
+  outline-offset: 2px;
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.ctaSecondary:hover {
+  color: #ffffff;
+}
+
+.ctaSecondary:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.70);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Bottom row: context/alert + metadata ───────────────── */
+
+.bottomRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.bottomLeft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.contextLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.55;
+  letter-spacing: 0.01em;
+}
+
+.alertChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
+.alertText {
+  opacity: 0.75;
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metadata {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  opacity: 0.45;
+  letter-spacing: 0.01em;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ctaPrimary,
+  .ctaSecondary {
+    transition: none !important;
+  }
+}

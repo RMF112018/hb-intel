@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { HomepageTopBandPair } from './shared/index.js';
 import { HP_SPACE, hpZoneSection } from './tokens.js';
-import { PersonalizedWelcomeHeader } from '../webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
-import { HbHeroBanner } from '../webparts/hbHeroBanner/HbHeroBanner.js';
+import { HbSignatureHero } from '../webparts/hbSignatureHero/HbSignatureHero.js';
 import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityActionsRail.js';
 import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
 import { CompanyPulse } from '../webparts/companyPulse/CompanyPulse.js';
@@ -15,24 +13,24 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
 /**
  * Governed Homepage Composition Reference
  *
- * Phase 15-09 — Full-page composition, QA, and visual closure.
+ * Phase 16-03 — Unified signature hero with design breakout.
  *
  * This is the authoritative composition reference for the HB Central
  * homepage. It demonstrates the premium 5-zone focal sequence:
  *
- *   1. Top Band — signature opening (welcome + hero)
+ *   1. Signature Hero — unified greeting + editorial hero (one surface)
  *   2. Utility — command surfaces (priority actions + tool launcher)
  *   3. Discovery — search and wayfinding product
  *   4. Communications — editorial modules (pulse, leadership, people)
  *   5. Operational — intelligence modules (projects, safety)
  *
- * Zone order updated in P15-09: Discovery moved before Communications
- * per the premium focal-sequence design (action → find → read → monitor).
+ * P16-03: Top band merged from two-panel welcome+hero into a single
+ * unified HbSignatureHero with motion reveal choreography.
  *
  * This is NOT the production rendering path. In production, each webpart
  * renders independently through the mount/dispatch seam.
  *
- * @see docs/architecture/plans/MASTER/spfx/homepage/phase-15/
+ * @see docs/architecture/plans/MASTER/spfx/homepage/phase-16/
  */
 
 /** Page-level composition gap — generous separation between zones */
@@ -53,32 +51,24 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
   return (
     <div data-hbc-homepage="composition-reference" style={compositionStyle}>
 
-      {/* ── Zone 1: Top Band — Signature Opening ────────────────── */}
-      <HomepageTopBandPair
-        hero={
-          <HbHeroBanner
-            config={{
-              eyebrow: 'This week at HB',
-              headline: 'HB Central: Week of April Operations',
-              message: 'Track active milestones, field recognition, and leadership guidance from one homepage band.',
-              metadata: 'Updated Friday at 8:00 AM',
-              cta: { label: 'Read update', href: '/company-pulse' },
-              secondaryCta: { label: 'View all updates', href: '/updates' },
-            }}
-          />
-        }
-        welcome={
-          <PersonalizedWelcomeHeader
-            identity={{ preferredName: 'Jordan Miller' }}
-            config={{
-              supportLine: "Let's keep projects moving with clarity today.",
-              contextLine: 'Saturday, April 5',
-              alertSeverity: 'warning',
-              alertTitle: 'Weather advisory',
-              alertMessage: 'Review field safety updates before site mobilization.',
-            }}
-          />
-        }
+      {/* ── Zone 1: Signature Hero — Unified Greeting + Editorial ── */}
+      <HbSignatureHero
+        identity={{ preferredName: 'Jordan Miller' }}
+        welcomeConfig={{
+          supportLine: "Let's keep projects moving with clarity today.",
+          contextLine: 'Saturday, April 5',
+          alertSeverity: 'warning',
+          alertTitle: 'Weather advisory',
+          alertMessage: 'Review field safety updates before site mobilization.',
+        }}
+        heroConfig={{
+          eyebrow: 'This week at HB',
+          headline: 'HB Central: Week of April Operations',
+          message: 'Track active milestones, field recognition, and leadership guidance from one homepage band.',
+          metadata: 'Updated Friday at 8:00 AM',
+          cta: { label: 'Read update', href: '/company-pulse' },
+          secondaryCta: { label: 'View all updates', href: '/updates' },
+        }}
       />
 
       {/* ── Zone 2: Utility — Command Surfaces ──────────────────── */}
