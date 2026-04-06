@@ -138,7 +138,13 @@ export interface LauncherFeaturedStage {
 
 /** A single workflow shelf grouping. */
 export interface LauncherWorkflowShelf {
+  /** Shelf identity key (slugified shelf name for React keys and data attributes). */
+  shelfId: string;
+  /** Display name (e.g., "People & Payroll", "Field & Operations"). */
   shelfName: string;
+  /** Number of visible platforms in this shelf. */
+  platformCount: number;
+  /** Platforms in this shelf, sorted by sortOrder then name. */
   platforms: LauncherPlatformRecord[];
 }
 

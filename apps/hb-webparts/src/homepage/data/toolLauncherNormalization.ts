@@ -286,6 +286,13 @@ function deriveFeaturedStage(platforms: LauncherPlatformRecord[]): LauncherFeatu
   };
 }
 
+function slugifyShelfName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function deriveWorkflowShelves(platforms: LauncherPlatformRecord[]): LauncherWorkflowShelf[] {
   const shelfMap = new Map<string, LauncherPlatformRecord[]>();
 
@@ -300,10 +307,15 @@ function deriveWorkflowShelves(platforms: LauncherPlatformRecord[]): LauncherWor
   }
 
   return [...shelfMap.entries()]
-    .map(([shelfName, items]) => ({
-      shelfName,
-      platforms: items.sort(bySortOrderThenName),
-    }))
+    .map(([shelfName, items]) => {
+      const sorted = items.sort(bySortOrderThenName);
+      return {
+        shelfId: `shelf-${slugifyShelfName(shelfName)}`,
+        shelfName,
+        platformCount: sorted.length,
+        platforms: sorted,
+      };
+    })
     .sort((a, b) => a.shelfName.localeCompare(b.shelfName));
 }
 
