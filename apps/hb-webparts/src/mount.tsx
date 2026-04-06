@@ -34,7 +34,12 @@ const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknow
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),
-  '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ identity, assetBaseUrl }) => createElement(HbSignatureHero, { identity, assetBaseUrl }),
+  '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl }) => {
+    const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
+      ? config.backgroundImageUrl
+      : undefined;
+    return createElement(HbSignatureHero, { identity, backgroundImage, assetBaseUrl });
+  },
 };
 
 export async function mount(

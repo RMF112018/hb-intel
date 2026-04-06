@@ -17,6 +17,10 @@
  */
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { SPComponentLoader } from '@microsoft/sp-loader';
+import {
+  type IPropertyPaneConfiguration,
+  PropertyPaneTextField,
+} from '@microsoft/sp-property-pane';
 
 declare const __APP_BUNDLE_NAME__: string;
 declare const __APP_GLOBAL_NAME__: string;
@@ -31,7 +35,15 @@ interface IAppModule {
   unmount(): void;
 }
 
-export default class ShellWebPart extends BaseClientSideWebPart<{}> {
+/** Webpart IDs that expose property-pane configuration. */
+const HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
+
+interface IShellWebPartProperties {
+  /** Author-configurable background image URL for the Signature Hero. */
+  backgroundImageUrl?: string;
+}
+
+export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
   private _appModule: IAppModule | undefined;
   private _assetBaseUrl = '';
 
@@ -157,7 +169,34 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     super.onDispose();
   }
 
-  protected getPropertyPaneConfiguration(): any {
+  protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+    const webPartId = (this.manifest as any).id;
+
+    // Show hero-specific property pane fields only for the Signature Hero webpart.
+    if (webPartId === HERO_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'Signature Hero Settings' },
+            groups: [
+              {
+                groupName: 'Background Image',
+                groupFields: [
+                  PropertyPaneTextField('backgroundImageUrl', {
+                    label: 'Background image URL',
+                    description:
+                      'Enter a SharePoint-hosted image URL to override the default hero background. ' +
+                      'Leave blank to use the default banner image.',
+                    placeholder: 'https://your-tenant.sharepoint.com/sites/.../image.jpg',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
     return { pages: [] };
   }
 }
