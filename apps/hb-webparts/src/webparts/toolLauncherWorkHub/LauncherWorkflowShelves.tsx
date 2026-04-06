@@ -1,22 +1,21 @@
 /**
  * LauncherWorkflowShelves — Secondary platform groupings by work pattern.
  *
- * Phase 05-01: Contract-driven shelf rendering using enriched
- * LauncherWorkflowShelf with shelfId, platformCount, and pre-sorted
- * platforms from the normalization layer.
+ * Phase 05-02: Renders LauncherShelfCard instances instead of delegating
+ * to HbcLauncherSurface. Each shelf has a heading row with name + count
+ * badge, followed by a responsive card grid.
  *
- * Shelf headings show the shelf name + platform count badge.
- * Visually secondary to the flagship stage — uses HbcLauncherSurface
- * tile grid with smaller tiles.
+ * Shelf cards are medium-weight (40px logo, horizontal layout, no motion)
+ * — visually subordinate to flagship cards (56px logo, column layout,
+ * spring motion, CTA row).
  *
  * Empty shelves are suppressed by the normalization layer (zero-platform
  * shelves are never derived). The component returns null if the shelves
  * array is empty.
  */
 import * as React from 'react';
-import { HbcLauncherSurface } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER } from '../../homepage/tokens.js';
-import { resolveGroupIcon, platformToTile } from './launcherIconResolution.js';
+import { LauncherShelfCard } from './LauncherShelfCard.js';
 import type { LauncherWorkflowShelf } from '../../homepage/webparts/toolLauncherContracts.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
@@ -29,7 +28,7 @@ export interface LauncherWorkflowShelvesProps {
 
 const shelfContainerStyle: React.CSSProperties = {
   display: 'grid',
-  gap: HP_SPACE.md,
+  gap: HP_SPACE.lg,
 };
 
 const shelfHeadingRowStyle: React.CSSProperties = {
@@ -58,6 +57,12 @@ const shelfCountStyle: React.CSSProperties = {
   color: 'rgba(0,0,0,0.45)',
 };
 
+const shelfGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+  gap: HP_SPACE.md,
+};
+
 /* ── Component ───────────────────────────────────────────────────── */
 
 export function LauncherWorkflowShelves({ shelves }: LauncherWorkflowShelvesProps): React.JSX.Element | null {
@@ -71,17 +76,11 @@ export function LauncherWorkflowShelves({ shelves }: LauncherWorkflowShelvesProp
             <span style={shelfTitleStyle}>{shelf.shelfName}</span>
             <span style={shelfCountStyle}>{shelf.platformCount}</span>
           </div>
-          <HbcLauncherSurface
-            groups={[
-              {
-                id: shelf.shelfId,
-                label: shelf.shelfName,
-                icon: resolveGroupIcon(shelf.shelfName),
-                tiles: shelf.platforms.map(platformToTile),
-              },
-            ]}
-            layout="grid"
-          />
+          <div style={shelfGridStyle}>
+            {shelf.platforms.map((p) => (
+              <LauncherShelfCard key={p.platformKey} platform={p} />
+            ))}
+          </div>
         </div>
       ))}
     </>
