@@ -14,58 +14,10 @@
  *   - optional notice badge
  */
 import * as React from 'react';
-import {
-  Settings,
-  Shield,
-  DollarSign,
-  HardHat,
-  Users,
-  Building2,
-  Keyboard,
-  Landmark,
-  BarChart3,
-  FileText,
-  Briefcase,
-  ExternalLink,
-  type LucideIcon,
-} from '@hbc/ui-kit/homepage';
+import { ExternalLink } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS, HP_MOTION } from '../../homepage/tokens.js';
+import { resolvePlatformIcon } from './launcherIconResolution.js';
 import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
-
-/* ── Icon resolution (shared with main component — will consolidate in Phase 03) ── */
-
-const PLATFORM_FALLBACK_ICON: Record<string, LucideIcon> = {
-  bamboohr: Users,
-  hh2: Briefcase,
-  'sap-concur': BarChart3,
-  'employee-navigator': Users,
-  adp: BarChart3,
-  procore: Building2,
-  compass: Settings,
-  'document-crunch': FileText,
-  hedricklearn: FileText,
-};
-
-const CATEGORY_ICON_MAP: Record<string, LucideIcon> = {
-  safety: Shield,
-  finance: DollarSign,
-  field: HardHat,
-  hr: Users,
-  ops: Settings,
-  admin: Building2,
-  it: Keyboard,
-  legal: Landmark,
-  report: BarChart3,
-  document: FileText,
-  project: Briefcase,
-};
-
-function resolvePlatformIcon(platform: LauncherPlatformRecord): LucideIcon {
-  const manifestIcon = PLATFORM_FALLBACK_ICON[platform.platformKey];
-  if (manifestIcon) return manifestIcon;
-  const hint = platform.category?.toLowerCase() ?? '';
-  return CATEGORY_ICON_MAP[hint] ?? Settings;
-}
 
 /* ── Props ────────────────────────────────────────────────────────── */
 
