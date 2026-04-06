@@ -1,0 +1,59 @@
+/**
+ * Premium icon styles — Phase 16-02
+ * Lucide-based icon containers with size and tint variants.
+ */
+
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+/* ── Sizes ──────────────────────────────────────────────── */
+.sm { width: 28px; height: 28px; border-radius: 6px; }
+.md { width: 36px; height: 36px; border-radius: 8px; }
+.lg { width: 44px; height: 44px; border-radius: 10px; }
+.xl { width: 56px; height: 56px; border-radius: 12px; }
+
+/* ── Tints ──────────────────────────────────────────────── */
+.tintBrand {
+  background: rgba(34, 83, 145, 0.10);
+  color: rgb(34, 83, 145);
+}
+
+.tintWarm {
+  background: rgba(229, 126, 70, 0.10);
+  color: rgb(180, 90, 40);
+}
+
+.tintAccent {
+  background: rgba(34, 83, 145, 0.15);
+  color: rgb(28, 71, 124);
+}
+
+.tintNeutral {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.tintSubtle {
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.40);
+}
+
+.tintDanger {
+  background: rgba(220, 38, 38, 0.10);
+  color: rgb(180, 40, 40);
+}
+
+.tintSuccess {
+  background: rgba(16, 124, 65, 0.10);
+  color: rgb(16, 100, 55);
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .base { transition: none !important; }
+}

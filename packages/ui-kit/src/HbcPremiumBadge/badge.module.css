@@ -1,0 +1,50 @@
+/**
+ * Premium badge styles — Phase 16-02
+ */
+
+.base {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 9999px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* ── Sizes ──────────────────────────────────────────────── */
+.sm { font-size: 0.6875rem; padding: 3px 8px; }
+.md { font-size: 0.75rem; padding: 4px 10px; }
+
+/* ── Status variants ────────────────────────────────────── */
+.success {
+  background: rgba(16, 124, 65, 0.10);
+  color: rgb(16, 100, 55);
+}
+
+.warning {
+  background: rgba(217, 166, 20, 0.12);
+  color: rgb(140, 100, 10);
+}
+
+.critical {
+  background: rgba(220, 38, 38, 0.10);
+  color: rgb(180, 30, 30);
+}
+
+.info {
+  background: rgba(34, 83, 145, 0.10);
+  color: rgb(34, 83, 145);
+}
+
+.pending {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.neutral {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.45);
+}

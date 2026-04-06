@@ -67,6 +67,23 @@ export type { HbcHomepageActionRowProps } from './HbcHomepageActionRow/types.js'
 export { HbcHomepageEyebrow } from './HbcHomepageEyebrow/index.js';
 export type { HbcHomepageEyebrowProps, EyebrowTone } from './HbcHomepageEyebrow/types.js';
 
+// ── Phase 16-02 — Premium primitives (cva + lucide + motion + radix) ──
+
+export { HbcPremiumSurface } from './HbcPremiumSurface/index.js';
+export type { HbcPremiumSurfaceProps, SurfaceIntent, SurfaceElevation } from './HbcPremiumSurface/index.js';
+
+export { HbcPremiumIcon } from './HbcPremiumIcon/index.js';
+export type { HbcPremiumIconProps, PremiumIconSize, PremiumIconTint } from './HbcPremiumIcon/index.js';
+
+export { HbcPremiumCta } from './HbcPremiumCta/index.js';
+export type { HbcPremiumCtaProps, PremiumCtaVariant, PremiumCtaSize } from './HbcPremiumCta/index.js';
+
+export { HbcPremiumBadge } from './HbcPremiumBadge/index.js';
+export type { HbcPremiumBadgeProps, PremiumBadgeStatus, PremiumBadgeSize } from './HbcPremiumBadge/index.js';
+
+export { HbcPremiumSection } from './HbcPremiumSection/index.js';
+export type { HbcPremiumSectionProps, PremiumSectionAccent } from './HbcPremiumSection/index.js';
+
 export type HomepageSurfaceClass = 'hero' | 'welcome' | 'editorial' | 'utility' | 'operational' | 'discovery';
 
 export type HomepagePrimitiveName =

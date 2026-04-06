@@ -1,0 +1,111 @@
+/**
+ * Premium surface styles — Phase 16-02
+ * Each intent produces a materially distinct visual surface.
+ */
+
+.base {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  position: relative;
+}
+
+/* ── Intent: Signature ──────────────────────────────────── */
+.signature {
+  background: linear-gradient(135deg, rgba(34, 83, 145, 0.06) 0%, rgba(229, 126, 70, 0.03) 60%, rgba(34, 83, 145, 0.04) 100%);
+  border-radius: 16px;
+  border-bottom: 3px solid rgba(34, 83, 145, 0.18);
+  padding: 32px 28px;
+}
+
+/* ── Intent: Command ────────────────────────────────────── */
+.command {
+  background: rgba(34, 83, 145, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(34, 83, 145, 0.10);
+  padding: 0;
+}
+
+/* ── Intent: Editorial ──────────────────────────────────── */
+.editorial {
+  background: #ffffff;
+  border-radius: 12px;
+  border-left: 3px solid rgba(229, 126, 70, 0.40);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* ── Intent: Operational ────────────────────────────────── */
+.operational {
+  background: rgba(34, 83, 145, 0.025);
+  border-radius: 12px;
+  border-left: 4px solid rgba(34, 83, 145, 0.35);
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  border-right: 1px solid rgba(34, 83, 145, 0.08);
+  border-bottom: 1px solid rgba(34, 83, 145, 0.08);
+  padding: 24px;
+}
+
+/* ── Intent: Discovery ──────────────────────────────────── */
+.discovery {
+  background: linear-gradient(135deg, rgba(229, 126, 70, 0.04) 0%, rgba(229, 126, 70, 0.015) 100%);
+  border-radius: 14px;
+  border: 1px solid rgba(229, 126, 70, 0.12);
+  padding: 24px;
+}
+
+/* ── Elevation ──────────────────────────────────────────── */
+.elevFlat {
+  box-shadow: none;
+}
+
+.elevRaised {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.elevProminent {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Interactive ────────────────────────────────────────── */
+.interactive {
+  cursor: pointer;
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.interactive:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.interactive:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+/* ── Regions ────────────────────────────────────────────── */
+.header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.body {
+  flex: 1;
+}
+
+.footer {
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: 16px;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .interactive {
+    transition: none !important;
+  }
+}

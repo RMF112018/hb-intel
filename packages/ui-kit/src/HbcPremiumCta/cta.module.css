@@ -1,0 +1,93 @@
+/**
+ * Premium CTA styles — Phase 16-02
+ */
+
+.base {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.base:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ── Sizes ──────────────────────────────────────────────── */
+.sm { font-size: 0.8125rem; padding: 6px 12px; border-radius: 6px; }
+.md { font-size: 0.875rem; padding: 8px 16px; border-radius: 8px; }
+.lg { font-size: 0.9375rem; padding: 12px 24px; border-radius: 10px; }
+
+/* ── Primary: filled brand button ───────────────────────── */
+.primary {
+  background: linear-gradient(135deg, #225391 0%, #1a4274 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(34, 83, 145, 0.25);
+}
+
+.primary:hover {
+  background: linear-gradient(135deg, #1a4274 0%, #153560 100%);
+  box-shadow: 0 4px 12px rgba(34, 83, 145, 0.35);
+}
+
+/* ── Secondary: outlined ────────────────────────────────── */
+.secondary {
+  background: transparent;
+  color: #225391;
+  border: 1.5px solid rgba(34, 83, 145, 0.30);
+}
+
+.secondary:hover {
+  background: rgba(34, 83, 145, 0.05);
+  border-color: rgba(34, 83, 145, 0.50);
+}
+
+/* ── Ghost: text-only link style ────────────────────────── */
+.ghost {
+  background: transparent;
+  color: #225391;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ghost:hover {
+  color: #1a4274;
+}
+
+/* ── OnDark: for gradient/dark surfaces ─────────────────── */
+.onDark {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.onDark:hover {
+  color: #ffffff;
+}
+
+.onDark:focus-visible {
+  outline-color: rgba(255, 255, 255, 0.80);
+}
+
+/* ── Arrow icon ─────────────────────────────────────────── */
+.arrowIcon {
+  opacity: 0.7;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.base:hover .arrowIcon {
+  opacity: 1;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .base, .arrowIcon {
+    transition: none !important;
+  }
+}
