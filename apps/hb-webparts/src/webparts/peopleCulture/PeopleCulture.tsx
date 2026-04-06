@@ -1,22 +1,25 @@
 /**
  * PeopleCulture — Warm celebratory recognition surface
- * Phase 15-07 — Editorial communications redesign
+ * Phase 17-05 — Structural rebuild with P17 surface family
  *
- * People recognition with warmth and celebration energy. Visually
- * distinct from the formal editorial (CompanyPulse) and executive
- * (LeadershipMessage) modules. Uses warm-tinted containers, larger
- * person names, and celebratory event badges to humanize the
- * communications zone.
+ * Rebuilt on HbcEditorialSurface with warm celebratory treatment,
+ * lucide icons for person/event accents, HbcPremiumBadge for event
+ * type classification, and HbcPremiumCta. Visually distinct from
+ * formal editorial with warm tones and celebratory energy.
  */
 import * as React from 'react';
-import { HbcPremiumCta, HbcPremiumBadge } from '@hbc/ui-kit/homepage';
+import {
+  HbcEditorialSurface,
+  HbcPremiumCta,
+  HbcPremiumBadge,
+  Users,
+  type EditorialSecondaryItem,
+} from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureConfig } from '../../homepage/helpers/communicationsConfig.js';
-import { HomepageCuratedContentCluster } from '../../homepage/shared/HomepageCuratedContentCluster.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import type { PeopleCultureConfig } from '../../homepage/webparts/communicationsContracts.js';
-import { HP_SPACE, hpCompactImage, hpMediaContainer } from '../../homepage/tokens.js';
 
 export interface PeopleCultureProps {
   config?: Partial<PeopleCultureConfig>;
@@ -31,46 +34,11 @@ const EVENT_VARIANT_MAP = {
   recognition: 'warning',
 } as const;
 
-/** Event label for the eyebrow */
 const EVENT_LABEL_MAP: Record<string, string> = {
   newHire: 'Welcome',
   anniversary: 'Milestone',
   promotion: 'Congratulations',
   recognition: 'Recognition',
-};
-
-/** Featured person name — celebratory, warm, larger */
-const featuredNameStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1.25rem',
-  fontWeight: 700,
-  lineHeight: 1.3,
-  color: 'rgb(180, 90, 40)',
-};
-
-/** Featured highlight — warm, personal tone */
-const featuredHighlightStyle: React.CSSProperties = {
-  margin: `${HP_SPACE.md}px 0 0`,
-  fontSize: '0.9375rem',
-  lineHeight: 1.6,
-  maxWidth: '50ch',
-  color: 'rgba(0, 0, 0, 0.70)',
-};
-
-/** Secondary person name — warm accent */
-const secondaryNameStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.9375rem',
-  fontWeight: 700,
-  color: 'rgb(180, 90, 40)',
-};
-
-/** Secondary highlight — compact */
-const secondaryHighlightStyle: React.CSSProperties = {
-  margin: `${HP_SPACE.sm}px 0 0`,
-  fontSize: '0.875rem',
-  lineHeight: 1.5,
-  color: 'rgba(0, 0, 0, 0.60)',
 };
 
 export function PeopleCulture({ config, activeAudience, isLoading = false }: PeopleCultureProps): React.JSX.Element {
@@ -82,55 +50,47 @@ export function PeopleCulture({ config, activeAudience, isLoading = false }: Peo
 
   if (!normalized.featured && normalized.secondary.length === 0) {
     const message = resolveAuthoringMessage('peopleCulture', config?.entries?.length ? 'invalid' : 'noData');
-    return (
-      <HomepageEmptyState
-        title={message.title}
-        description={message.description}
-      />
-    );
+    return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
+  const secondaryItems: EditorialSecondaryItem[] = normalized.secondary.map((entry) => ({
+    id: entry.id,
+    title: entry.personName,
+    meta: EVENT_LABEL_MAP[entry.eventType] ?? 'People',
+    icon: Users,
+  }));
+
   return (
-    <HomepageCuratedContentCluster
-      heading={normalized.heading}
-      variant="celebration"
-      featured={
-        normalized.featured ? (
-          <article>
-            <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(180, 90, 40, 0.7)', marginBottom: 6 }}>
-              {EVENT_LABEL_MAP[normalized.featured.eventType] ?? 'People'}
-            </span>
-            <h3 style={featuredNameStyle}>{normalized.featured.personName}</h3>
-            <div style={{ marginTop: HP_SPACE.md }}>
-              <HbcPremiumBadge label={normalized.featured.eventType} status={EVENT_VARIANT_MAP[normalized.featured.eventType]} />
-            </div>
-            <p style={featuredHighlightStyle}>{normalized.featured.highlight}</p>
-            {normalized.featured.media ? (
-              <div style={{ ...hpMediaContainer, marginTop: HP_SPACE.xl }}>
-                <img
-                  alt={normalized.featured.media.alt}
-                  src={normalized.featured.media.src}
-                  style={hpCompactImage}
-                />
-              </div>
-            ) : null}
-            {normalized.featured.cta ? (
-              <div style={{ marginTop: HP_SPACE.xl }}>
-                <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
-              </div>
-            ) : null}
-          </article>
-        ) : undefined
-      }
-      secondary={normalized.secondary.map((entry) => (
-        <article key={entry.id}>
-          <h3 style={secondaryNameStyle}>{entry.personName}</h3>
-          <div style={{ marginTop: HP_SPACE.sm }}>
-            <HbcPremiumBadge label={entry.eventType} status={EVENT_VARIANT_MAP[entry.eventType]} />
-          </div>
-          <p style={secondaryHighlightStyle}>{entry.highlight}</p>
-        </article>
-      ))}
-    />
+    <HbcEditorialSurface
+      title={normalized.heading}
+      icon={Users}
+      featured={normalized.featured ? {
+        eyebrow: EVENT_LABEL_MAP[normalized.featured.eventType] ?? 'People',
+        title: normalized.featured.personName,
+        excerpt: normalized.featured.highlight,
+        meta: (
+          <HbcPremiumBadge
+            label={EVENT_LABEL_MAP[normalized.featured.eventType] ?? normalized.featured.eventType}
+            status={EVENT_VARIANT_MAP[normalized.featured.eventType]}
+            size="sm"
+          />
+        ),
+        cta: normalized.featured.cta ? (
+          <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
+        ) : undefined,
+      } : undefined}
+      items={secondaryItems}
+    >
+      {/* Media slot for featured entry */}
+      {normalized.featured?.media ? (
+        <div style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden' }}>
+          <img
+            alt={normalized.featured.media.alt}
+            src={normalized.featured.media.src}
+            style={{ width: '100%', maxHeight: 160, objectFit: 'cover', display: 'block' }}
+          />
+        </div>
+      ) : null}
+    </HbcEditorialSurface>
   );
 }
