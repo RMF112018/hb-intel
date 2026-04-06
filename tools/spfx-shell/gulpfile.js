@@ -10,6 +10,7 @@ build.addSuppression(/Warning/gi);
 const requireDomainAppConfig = process.env.REQUIRE_DOMAIN_APP_CONFIG === 'true';
 const appBundleName = process.env.APP_BUNDLE_NAME || 'app.js';
 const appGlobalName = process.env.APP_GLOBAL_NAME || '__hbIntel_app';
+const appCssName = process.env.APP_CSS_NAME || '';
 
 if (requireDomainAppConfig && (!process.env.APP_BUNDLE_NAME || !process.env.APP_GLOBAL_NAME)) {
   throw new Error(
@@ -26,6 +27,7 @@ build.configureWebpack.mergeConfig({
       new webpack.DefinePlugin({
         __APP_BUNDLE_NAME__: JSON.stringify(appBundleName),
         __APP_GLOBAL_NAME__: JSON.stringify(appGlobalName),
+        __APP_CSS_NAME__: JSON.stringify(appCssName),
         __FUNCTION_APP_URL__: JSON.stringify(process.env.FUNCTION_APP_URL || ''),
         __BACKEND_MODE__: JSON.stringify(process.env.BACKEND_MODE || ''),
         __ALLOW_BACKEND_MODE_SWITCH__: JSON.stringify(process.env.ALLOW_BACKEND_MODE_SWITCH || ''),

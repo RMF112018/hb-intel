@@ -20,6 +20,7 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 
 declare const __APP_BUNDLE_NAME__: string;
 declare const __APP_GLOBAL_NAME__: string;
+declare const __APP_CSS_NAME__: string;
 declare const __FUNCTION_APP_URL__: string;
 declare const __BACKEND_MODE__: string;
 declare const __ALLOW_BACKEND_MODE_SWITCH__: string;
@@ -53,6 +54,15 @@ export default class ShellWebPart extends BaseClientSideWebPart<{}> {
     //   ...d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js (correct)
     const normalizedBase = rawBaseUrl.endsWith('/') ? rawBaseUrl : rawBaseUrl + '/';
     const bundleUrl = normalizedBase + __APP_BUNDLE_NAME__;
+
+    // Load companion CSS asset if one was provided at build time.
+    // Vite extracts CSS to a separate file that the JS bundle does not self-inject.
+    // Without this, the app renders with correct markup but no styling.
+    if (typeof __APP_CSS_NAME__ === 'string' && __APP_CSS_NAME__) {
+      const cssUrl = normalizedBase + __APP_CSS_NAME__;
+      console.debug('[HB-Intel ShellWebPart] cssUrl:', cssUrl);
+      SPComponentLoader.loadCss(cssUrl);
+    }
 
     console.debug('[HB-Intel ShellWebPart] rawBaseUrl:', rawBaseUrl);
     console.debug('[HB-Intel ShellWebPart] bundleUrl:', bundleUrl);

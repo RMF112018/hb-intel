@@ -1008,10 +1008,20 @@ for (const domain of domains) {
     );
   }
 
+  // ── Step 2d: Detect companion CSS asset ─────────────────────────────
+  // Vite extracts CSS to a separate file. If one exists, pass its name to
+  // the shell so it can load the stylesheet at runtime via SPComponentLoader.
+  const cssFiles = fs.readdirSync(path.join(SHELL_DIR, 'assets')).filter((f) => f.endsWith('.css'));
+  const appCssName = cssFiles.length === 1 ? cssFiles[0] : '';
+  if (appCssName) {
+    console.log(`  ✓ Companion CSS detected: ${appCssName}`);
+  }
+
   // ── Step 3: Run SPFx gulp build ─────────────────────────────────────
   const shellEnv = {
     APP_BUNDLE_NAME: bundleName,
     APP_GLOBAL_NAME: globalName,
+    APP_CSS_NAME: appCssName,
     REQUIRE_DOMAIN_APP_CONFIG: 'true',
     // Pass Function App URL through to webpack DefinePlugin so the shell
     // webpart can inject it into the loaded app at runtime.
