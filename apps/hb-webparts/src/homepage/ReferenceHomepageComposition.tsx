@@ -96,6 +96,10 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             ],
           }}
         />
+        {/* Phase 03: Live-data path renders 4-region composition shell
+            (command band, flagship stage, utility rail, workflow shelves)
+            when SPFx context is available. Config below is the local-dev
+            fallback only — renders flat HbcLauncherSurface bridge. */}
         <ToolLauncherWorkHub
           activeAudience="field"
           config={{
