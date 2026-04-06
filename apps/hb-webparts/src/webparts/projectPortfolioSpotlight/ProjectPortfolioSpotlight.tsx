@@ -564,6 +564,121 @@ const railMetaStyle: React.CSSProperties = {
   whiteSpace: 'nowrap' as const,
 };
 
+/* ── Media safety components ──────────────────────────────────── */
+
+/**
+ * Safe featured image with branded placeholder visible during load
+ * and on error. The placeholder sits behind the img via absolute
+ * positioning; on success the image covers it, on error the img is
+ * removed and the placeholder remains.
+ */
+function FeaturedImage({
+  src,
+  alt,
+  tier,
+}: {
+  src: string;
+  alt: string;
+  tier: ResponsiveTier;
+}): React.JSX.Element {
+  const [error, setError] = React.useState(false);
+
+  return (
+    <>
+      {/* Branded placeholder — always rendered as load/error fallback */}
+      <div
+        style={{ ...getImagePlaceholderStyle(tier), position: 'absolute', inset: 0, zIndex: 0 }}
+        aria-hidden="true"
+      >
+        Project Image
+      </div>
+      {!error ? (
+        <>
+          <img
+            src={src}
+            alt={alt}
+            decoding="async"
+            loading="lazy"
+            style={{ ...imageStyle, position: 'relative', zIndex: 1 }}
+            onError={() => setError(true)}
+          />
+          <div style={{ ...imageScrimStyle, zIndex: 2 }} aria-hidden="true" />
+        </>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * Safe rail thumbnail — falls back to branded gradient placeholder on error.
+ */
+function RailThumbnail({
+  src,
+  alt,
+}: {
+  src: string;
+  alt: string;
+}): React.JSX.Element {
+  const [error, setError] = React.useState(false);
+
+  if (error) {
+    return <div style={railThumbnailPlaceholderStyle} aria-hidden="true" />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      width={72}
+      height={54}
+      decoding="async"
+      loading="lazy"
+      style={railThumbnailStyle}
+      onError={() => setError(true)}
+    />
+  );
+}
+
+/**
+ * Safe avatar image — falls back to initials on load error.
+ * Uses key={src} at call site to reset state when the URL changes.
+ */
+function SafeAvatar({
+  src,
+  name,
+  size,
+  imgStyle,
+  fallbackStyle,
+}: {
+  src: string;
+  name: string;
+  size: number;
+  imgStyle: React.CSSProperties;
+  fallbackStyle: React.CSSProperties;
+}): React.JSX.Element {
+  const [error, setError] = React.useState(false);
+
+  if (error) {
+    return (
+      <span style={fallbackStyle} aria-hidden="true">
+        {getInitials(name)}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={name}
+      width={size}
+      height={size}
+      decoding="async"
+      style={imgStyle}
+      onError={() => setError(true)}
+    />
+  );
+}
+
 /* ── Helper: extract initials ──────────────────────────────────── */
 
 function getInitials(name: string): string {
@@ -643,13 +758,13 @@ function ProjectTeamStrip({
         {members.map((member) => (
           <li key={member.id} style={getDetailItemStyle(tier)}>
             {member.photoUrl ? (
-              <img
+              <SafeAvatar
+                key={member.id}
                 src={member.photoUrl}
-                alt={member.displayName}
-                width={DETAIL_AVATAR_SIZE}
-                height={DETAIL_AVATAR_SIZE}
-                decoding="async"
-                style={detailAvatarStyle}
+                name={member.displayName}
+                size={DETAIL_AVATAR_SIZE}
+                imgStyle={detailAvatarStyle}
+                fallbackStyle={detailInitialsStyle}
               />
             ) : (
               <span style={detailInitialsStyle} aria-hidden="true">
@@ -679,14 +794,13 @@ function ProjectTeamStrip({
       >
         {visible.map((member, i) =>
           member.photoUrl ? (
-            <img
+            <SafeAvatar
               key={member.id}
               src={member.photoUrl}
-              alt={member.displayName}
-              width={AVATAR_SIZE}
-              height={AVATAR_SIZE}
-              decoding="async"
-              style={avatarStyle(i)}
+              name={member.displayName}
+              size={AVATAR_SIZE}
+              imgStyle={avatarStyle(i)}
+              fallbackStyle={initialsStyle(i)}
             />
           ) : (
             <span key={member.id} style={initialsStyle(i)} aria-hidden="true">
@@ -766,18 +880,10 @@ function SupportingTile({
       onMouseLeave={() => setHovered(false)}
       data-hbc-homepage="spotlight-tile"
     >
-      {/* Compact thumbnail */}
+      {/* Compact thumbnail — safe: falls back to gradient on error */}
       <div style={railThumbnailWrapperStyle}>
         {item.image ? (
-          <img
-            src={item.image.src}
-            alt={item.image.alt || item.title}
-            width={72}
-            height={54}
-            decoding="async"
-            loading="lazy"
-            style={railThumbnailStyle}
-          />
+          <RailThumbnail key={item.image.src} src={item.image.src} alt={item.image.alt || item.title} />
         ) : (
           <div style={railThumbnailPlaceholderStyle} aria-hidden="true" />
         )}
@@ -872,19 +978,10 @@ export function ProjectPortfolioSpotlight({
           {...featuredMotion}
         >
           <div style={getFeaturedLayoutStyle(tier)}>
-            {/* Image zone */}
+            {/* Image zone — safe: placeholder visible during load and on error */}
             <div style={getImageZoneStyle(tier)}>
               {feat.image ? (
-                <>
-                  <img
-                    src={feat.image.src}
-                    alt={feat.image.alt || feat.title}
-                    decoding="async"
-                    loading="lazy"
-                    style={imageStyle}
-                  />
-                  <div style={imageScrimStyle} aria-hidden="true" />
-                </>
+                <FeaturedImage key={feat.image.src} src={feat.image.src} alt={feat.image.alt || feat.title} tier={tier} />
               ) : (
                 <div style={getImagePlaceholderStyle(tier)} aria-hidden="true">
                   Project Image
