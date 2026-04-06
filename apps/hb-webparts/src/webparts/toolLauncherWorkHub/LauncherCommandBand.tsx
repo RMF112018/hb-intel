@@ -34,6 +34,8 @@ export interface LauncherCommandBandProps {
   onNeedHelp?: () => void;
   /** Total platform count for the supporting line (e.g., "9 platforms"). */
   platformCount?: number;
+  /** Number of featured platforms (shown in supporting line context). */
+  featuredCount?: number;
 }
 
 /* ── Styles ──────────────────────────────────────────────────────── */
@@ -132,12 +134,23 @@ export function LauncherCommandBand({
   onAllPlatforms,
   onNeedHelp,
   platformCount,
+  featuredCount,
 }: LauncherCommandBandProps): React.JSX.Element {
-  const effectiveSupportingLine =
-    supportingLine ??
-    (typeof platformCount === 'number' && platformCount > 0
-      ? `${platformCount} platform${platformCount === 1 ? '' : 's'} · Launch the systems your team uses every day`
-      : 'Launch the systems your team uses every day');
+  let effectiveSupportingLine = supportingLine;
+  if (!effectiveSupportingLine) {
+    const parts: string[] = [];
+    if (typeof platformCount === 'number' && platformCount > 0) {
+      parts.push(`${platformCount} platform${platformCount === 1 ? '' : 's'}`);
+    }
+    if (typeof featuredCount === 'number' && featuredCount > 0) {
+      parts.push(`${featuredCount} featured`);
+    }
+    if (parts.length > 0) {
+      effectiveSupportingLine = `${parts.join(' · ')} · Launch the systems your team uses every day`;
+    } else {
+      effectiveSupportingLine = 'Launch the systems your team uses every day';
+    }
+  }
 
   return (
     <div style={bandStyle} role="toolbar" aria-label={`${title} command band`}>

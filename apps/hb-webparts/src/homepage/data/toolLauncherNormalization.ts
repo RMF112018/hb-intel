@@ -257,6 +257,26 @@ export function normalizeToolLauncherItems(
   return records.sort(bySortOrderThenName);
 }
 
+/* ── Audience filtering ──────────────────────────────────────────── */
+
+/**
+ * Filter platforms by audience visibility. A platform is visible when:
+ *   - it has no audience restrictions (empty audiences array), OR
+ *   - the activeAudience matches one of its audiences
+ *
+ * When activeAudience is undefined, all platforms are visible
+ * (no filtering applied — e.g., admin view or no audience context).
+ */
+function filterByAudience(
+  platforms: LauncherPlatformRecord[],
+  activeAudience: string | undefined,
+): LauncherPlatformRecord[] {
+  if (!activeAudience) return platforms;
+  return platforms.filter(
+    (p) => p.audiences.length === 0 || p.audiences.includes(activeAudience),
+  );
+}
+
 /* ── Presentation model derivation ───────────────────────────────── */
 
 function deriveFeaturedStage(platforms: LauncherPlatformRecord[]): LauncherFeaturedStage {
@@ -325,15 +345,21 @@ function deriveNoticesSummary(platforms: LauncherPlatformRecord[]): LauncherNoti
  * Derive the full presentation model from normalized platform records.
  * This is the primary entry point for the Tool Launcher component to
  * obtain all presentation-ready data structures.
+ *
+ * When activeAudience is provided, platforms are filtered by audience
+ * visibility before derivation. Platforms with no audience restrictions
+ * are always included.
  */
 export function deriveToolLauncherPresentation(
   platforms: LauncherPlatformRecord[],
+  activeAudience?: string,
 ): LauncherPresentationModel {
+  const visible = filterByAudience(platforms, activeAudience);
   return {
-    featuredStage: deriveFeaturedStage(platforms),
-    workflowShelves: deriveWorkflowShelves(platforms),
-    platformIndex: derivePlatformIndex(platforms),
-    noticesSummary: deriveNoticesSummary(platforms),
-    allPlatforms: [...platforms],
+    featuredStage: deriveFeaturedStage(visible),
+    workflowShelves: deriveWorkflowShelves(visible),
+    platformIndex: derivePlatformIndex(visible),
+    noticesSummary: deriveNoticesSummary(visible),
+    allPlatforms: [...visible],
   };
 }

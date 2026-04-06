@@ -1,7 +1,8 @@
 /**
  * ToolLauncherWorkHub — Premium command launcher surface
  *
- * Phase 02-04: All 4 regions extracted to dedicated components.
+ * Phase 03-02: Featured stage binding with audience-aware filtering.
+ * All 4 regions extracted to dedicated components.
  * Icon resolution consolidated in launcherIconResolution.ts.
  *
  * Primary data source: live SharePoint list "Tool Launcher Contents"
@@ -84,11 +85,12 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
       return <HomepageEmptyState title={message.title} description={message.description} />;
     }
 
-    const presentation = deriveToolLauncherPresentation(listPlatforms);
+    const presentation = deriveToolLauncherPresentation(listPlatforms, activeAudience);
+    const featuredCount = presentation.featuredStage.platforms.length;
 
     return (
       <LauncherCompositionShell
-        commandBand={<LauncherCommandBand platformCount={listPlatforms.length} />}
+        commandBand={<LauncherCommandBand platformCount={presentation.allPlatforms.length} featuredCount={featuredCount} />}
         flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} />}
         utilityRail={<LauncherUtilityRail presentation={presentation} platforms={listPlatforms} />}
         workflowShelves={<LauncherWorkflowShelves shelves={presentation.workflowShelves} />}
