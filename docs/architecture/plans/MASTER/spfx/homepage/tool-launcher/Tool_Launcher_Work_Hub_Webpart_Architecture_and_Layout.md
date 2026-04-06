@@ -475,12 +475,130 @@ This creates a launcher that feels like a curated premium internal app marketpla
 
 ---
 
+
+
+---
+
+## Current Implementation Status — Live SharePoint Source Exists
+
+The platform registry is **no longer a planning-only concern**.
+
+A live SharePoint list now exists and is the correct source of truth for the Tool Launcher / Work Hub content layer:
+
+- **List title:** `Tool Launcher Contents`
+- **Site:** `HBCentral`
+- **Status:** created, schema set, and seeded
+
+This changes the implementation sequence.
+
+The next development phase should **not** spend time designing or creating the platform schema from scratch.  
+That work is already complete enough to support UI wiring.
+
+### Development-phase correction
+
+The appropriate next phase is now:
+
+**Live SharePoint list wiring and normalization**
+
+That phase should:
+
+1. wire the webpart to the live `Tool Launcher Contents` list
+2. read and normalize the current list fields into a typed launcher data model
+3. use the seeded records to power:
+   - flagship platform stage
+   - workflow shelves
+   - all-platforms inventory
+   - help / access-request destinations
+   - notice badge support
+4. preserve the premium hierarchy defined in this brief rather than collapsing the data into a flat grouped-tile renderer
+
+### Important wiring note
+
+Because the list was created and seeded in SharePoint already, the development phase must validate the **actual live field names returned by the chosen SharePoint access method** rather than assuming idealized hand-authored internal names.
+
+Treat the list as the current truth source and add a **single normalization layer** between SharePoint data and the launcher UI.
+
+### Recommended live-field contract to normalize
+
+The wiring phase should normalize the live list into the following launcher record contract:
+
+- platform name
+- platform key
+- launch URL
+- official logo asset reference
+- dark logo asset reference
+- preferred logo type
+- short descriptor
+- workflow shelf
+- category
+- featured flag
+- featured sort order
+- sort order
+- audience visibility
+- audience rules JSON
+- aliases / keywords
+- help link
+- support owner
+- support owner reference
+- access request destination
+- notice status
+- notice badge text
+- notice details
+- notice expires on
+- is active
+- open in new tab
+- favorite eligible
+- status badge tone
+- vendor / product family
+- tenant / environment label
+- requires review
+- last reviewed on
+- notes
+
+### UI implication
+
+Because the list already contains seeded platform content, the UI build phase can now proceed against **real launcher data** instead of placeholder mock objects.
+
+That means the next implementation work should prove:
+
+- featured stage ordering from live list data
+- shelf grouping from `Workflow Shelf`
+- search matching from `Platform Name`, `Aliases / Keywords`, `Short Descriptor`, `Category`, and related fields
+- support / help CTA routing from `Help Link`, `Support Owner Reference`, and `Access Request Destination`
+- optional notice badge rendering from the seeded notice/status fields
+
+### Guardrail
+
+Do **not** let the existence of the list push the implementation toward a generic data-table or equal-weight tile surface.
+
+The SharePoint list is the **content source**.  
+This architecture brief remains the **UI composition and hierarchy source**.
+
+
 ## Recommended Next Step
 
-Translate this architecture into:
+Translate this architecture into the following implementation sequence:
 
-1. a **platform data schema**
-2. a **search/result behavior spec**
-3. a **component anatomy specification**
+1. a **component anatomy specification** for the premium launcher surfaces
+2. a **live SharePoint list wiring and normalization layer** targeting `Tool Launcher Contents`
+3. a **search/result behavior spec** grounded in the seeded list fields
 4. a **responsive interaction plan**
-5. an **authoring and governance model** for featured vs secondary platform entries
+5. an **authoring and governance model** for ongoing maintenance of featured vs secondary platform entries
+
+### Explicit next development phase
+
+The next development phase should be:
+
+**Tool Launcher live list wiring**
+
+That phase should target the existing SharePoint list `Tool Launcher Contents` and prove that the webpart can:
+
+- read the seeded records from the live list
+- normalize the live fields into a stable launcher data model
+- render the flagship stage from the featured and sort-order fields
+- render workflow shelves from the shelf/category metadata
+- route help and access actions from the support/access fields
+- support notice/status rendering without changing the premium layout direction
+
+Schema creation is **not** the next phase anymore.
+Live list wiring is.
