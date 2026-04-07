@@ -21,3 +21,4 @@ This phase exists because later UI phases need a deterministic output shape that
 - `apps/hb-webparts/src/homepage/helpers/communicationsConfig.ts` — `normalizePeopleCultureMergedConfig()` normalizer
 - `apps/hb-webparts/src/homepage/webparts/index.ts` — public type exports
 - `apps/hb-webparts/src/homepage/helpers/authoringGovernance.ts` — updated governance entry
+- `apps/hb-webparts/src/homepage/__tests__/peopleCultureMerged.test.ts` — deterministic proof (32 tests)

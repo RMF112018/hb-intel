@@ -166,8 +166,8 @@ const ANNOUNCEMENT_PERSISTENCE_DAYS: Record<AnnouncementType, number> = {
 
 const MS_PER_DAY = 86_400_000;
 
-function startOfDay(date: Date): number {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+function startOfDayUtc(ms: number): number {
+  return ms - (ms % MS_PER_DAY);
 }
 
 function parseDate(value: string | undefined): number | undefined {
@@ -186,7 +186,7 @@ function isAnnouncementVisible(item: AnnouncementEntry, todayMs: number): boolea
   if (item.homepageEnabled === false) return false;
 
   const start = parseDate(item.startDisplayDate) ?? parseDate(item.publishDate);
-  if (start === undefined || todayMs < startOfDay(new Date(start))) return false;
+  if (start === undefined || todayMs < startOfDayUtc(start)) return false;
 
   const end = parseDate(item.endDisplayDate);
   if (end !== undefined) return todayMs <= end;
@@ -244,7 +244,7 @@ function isKudosHomepageVisible(item: KudosEntry, todayMs: number): boolean {
   if (item.homepageEnabled === false) return false;
 
   const start = parseDate(item.publishStartDate) ?? parseDate(item.approvedDate);
-  if (start === undefined || todayMs < startOfDay(new Date(start))) return false;
+  if (start === undefined || todayMs < startOfDayUtc(start)) return false;
 
   const end = parseDate(item.publishEndDate);
   if (end !== undefined) return todayMs <= end;
@@ -304,8 +304,8 @@ function isCelebrationVisible(item: WeeklyCelebrationEntry, todayMs: number): bo
   const celebMs = parseDate(item.celebrationDate);
   if (celebMs === undefined) return false;
 
-  const todayStart = startOfDay(new Date(todayMs));
-  const celebStart = startOfDay(new Date(celebMs));
+  const todayStart = startOfDayUtc(todayMs);
+  const celebStart = startOfDayUtc(celebMs);
 
   return celebStart >= todayStart && celebStart <= todayStart + 7 * MS_PER_DAY;
 }
