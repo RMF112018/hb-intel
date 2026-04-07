@@ -1,7 +1,7 @@
 # Phase 1B — Visibility, Persistence, Approval, and Editorial Rules — Validation Checklist
 
-- [ ] announcement rules preserved
-- [ ] Kudos rules defined
-- [ ] featured/recent Kudos logic defined
-- [ ] priority tie-break logic defined
-- [ ] no adapter or UI work introduced
+- [x] announcement rules preserved
+- [x] Kudos rules defined
+- [x] featured/recent Kudos logic defined
+- [x] priority tie-break logic defined
+- [x] no adapter or UI work introduced

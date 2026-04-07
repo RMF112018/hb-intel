@@ -14,4 +14,5 @@ This phase exists because the merged surface depends on deterministic visibility
 - prompt 01
 - prompt 02
 - visibility, approval, and aging rules
+- featured/recent Kudos and priority truth table
 - validation checklist
