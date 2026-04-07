@@ -1,19 +1,23 @@
 /**
- * LauncherCommandBand — Responsive top identity and command surface.
+ * LauncherCommandBand — Responsive command surface with live search.
  *
- * Phase 07-02: Tier-aware layout adaptation.
- *   Desktop: 3-column grid (title, search, actions)
- *   Tablet:  3-column grid (same — auto-wraps at narrow tablet)
- *   Mobile:  2-column grid (title + actions; search hidden)
+ * Phase 08-02: Interactive search with inline suggestion dropdown.
+ *   - Live filtering via launcherSearch contract (pre-computed searchText)
+ *   - Keyboard: ArrowDown/Up to navigate, Enter to launch, Escape to dismiss
+ *   - Suggestion dropdown shows top 6 matches with name + category
+ *   - No-match state: "No platforms matching '{query}'"
+ *   - Focus returns to input on Escape; suggestions dismiss on blur
+ *   - Desktop/tablet: full search + actions; Mobile: search hidden
  */
 import * as React from 'react';
-import { Search } from '@hbc/ui-kit/homepage';
+import { Search, ExternalLink } from '@hbc/ui-kit/homepage';
 import {
   HP_SPACE,
   HP_RADIUS,
   HP_BORDER,
   HP_MOTION,
 } from '../../homepage/tokens.js';
+import { matchesQuery, type SearchablePlatform } from './launcherSearch.js';
 import type { ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 
 /* ── Props ───────────────────────────────────────────────────────── */
@@ -26,7 +30,11 @@ export interface LauncherCommandBandProps {
   platformCount?: number;
   featuredCount?: number;
   tier?: ResponsiveTier;
+  /** Pre-computed searchable records for inline suggestions. */
+  searchable?: SearchablePlatform[];
 }
+
+const MAX_SUGGESTIONS = 6;
 
 /* ── Style factories ─────────────────────────────────────────────── */
 
@@ -73,10 +81,8 @@ const supportingLineStyle: React.CSSProperties = {
   textOverflow: 'ellipsis',
 };
 
-const searchContainerStyle: React.CSSProperties = {
+const searchWrapperStyle: React.CSSProperties = {
   position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
   minWidth: 0,
   maxWidth: 320,
 };
@@ -88,17 +94,73 @@ const searchInputStyle: React.CSSProperties = {
   border: HP_BORDER.subtle,
   background: 'rgba(255,255,255,0.6)',
   fontSize: '0.78rem',
-  color: 'rgba(0,0,0,0.5)',
+  color: 'rgba(0,0,0,0.8)',
   outline: 'none',
   transition: `border-color ${HP_MOTION.fast}`,
-  cursor: 'default',
 };
 
 const searchIconStyle: React.CSSProperties = {
   position: 'absolute',
   left: 10,
+  top: '50%',
+  transform: 'translateY(-50%)',
   pointerEvents: 'none',
   color: 'rgba(0,0,0,0.3)',
+};
+
+const dropdownStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  right: 0,
+  marginTop: 4,
+  zIndex: 50,
+  border: HP_BORDER.standard,
+  borderRadius: HP_RADIUS.command,
+  background: 'rgba(255,255,255,0.98)',
+  boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+  maxHeight: 240,
+  overflowY: 'auto',
+};
+
+const suggestionStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: HP_SPACE.sm,
+  padding: `${HP_SPACE.sm}px ${HP_SPACE.lg}px`,
+  fontSize: '0.76rem',
+  color: 'rgba(0,0,0,0.75)',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  transition: `background ${HP_MOTION.fast}`,
+};
+
+const suggestionActiveStyle: React.CSSProperties = {
+  ...suggestionStyle,
+  background: 'rgba(34,83,145,0.06)',
+};
+
+const suggestionNameStyle: React.CSSProperties = {
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  minWidth: 0,
+};
+
+const suggestionCategoryStyle: React.CSSProperties = {
+  fontSize: '0.65rem',
+  color: 'rgba(0,0,0,0.4)',
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+};
+
+const noMatchStyle: React.CSSProperties = {
+  padding: `${HP_SPACE.lg}px`,
+  fontSize: '0.75rem',
+  color: 'rgba(0,0,0,0.4)',
+  textAlign: 'center',
 };
 
 const actionsStyle: React.CSSProperties = {
@@ -132,9 +194,70 @@ export function LauncherCommandBand({
   platformCount,
   featuredCount,
   tier = 'desktop',
+  searchable = [],
 }: LauncherCommandBandProps): React.JSX.Element {
   const isMobile = tier === 'mobile';
+  const [query, setQuery] = React.useState('');
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [activeIndex, setActiveIndex] = React.useState(-1);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
+  // Compute suggestions from search contract
+  const suggestions = React.useMemo(() => {
+    if (!query.trim() || searchable.length === 0) return [];
+    return searchable
+      .filter((sp) => matchesQuery(sp, query))
+      .slice(0, MAX_SUGGESTIONS);
+  }, [query, searchable]);
+
+  const hasQuery = query.trim().length > 0;
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setQuery(e.target.value);
+    setShowDropdown(true);
+    setActiveIndex(-1);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!showDropdown || !hasQuery) {
+      if (e.key === 'Escape') {
+        setQuery('');
+        setShowDropdown(false);
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setActiveIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (activeIndex >= 0 && activeIndex < suggestions.length) {
+          const target = suggestions[activeIndex].record;
+          window.open(target.launchUrl, target.openInNewTab ? '_blank' : '_self');
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setShowDropdown(false);
+        setQuery('');
+        inputRef.current?.focus();
+        break;
+    }
+  }
+
+  function handleBlur() {
+    // Delay to allow click on suggestion before blur hides dropdown
+    setTimeout(() => setShowDropdown(false), 150);
+  }
+
+  // Supporting line
   let effectiveSupportingLine = supportingLine;
   if (!effectiveSupportingLine) {
     const parts: string[] = [];
@@ -163,18 +286,56 @@ export function LauncherCommandBand({
         )}
       </div>
 
-      {/* Center: search (hidden on mobile — users access overlay search instead) */}
+      {/* Center: search with inline suggestions (hidden on mobile) */}
       {!isMobile && (
-        <div style={searchContainerStyle}>
+        <div style={searchWrapperStyle}>
           <Search size={14} strokeWidth={2} style={searchIconStyle} />
           <input
+            ref={inputRef}
             type="text"
-            placeholder="Search platforms, workflows, or support"
-            readOnly
-            tabIndex={-1}
-            aria-label="Search platforms (coming soon)"
+            placeholder="Search platforms..."
+            value={query}
+            onChange={handleInputChange}
+            onFocus={() => hasQuery && setShowDropdown(true)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            aria-label="Search platforms"
+            aria-expanded={showDropdown && hasQuery}
+            aria-haspopup="listbox"
+            role="combobox"
+            aria-autocomplete="list"
             style={searchInputStyle}
           />
+
+          {/* Suggestion dropdown */}
+          {showDropdown && hasQuery && (
+            <div style={dropdownStyle} role="listbox" aria-label="Platform suggestions">
+              {suggestions.length === 0 ? (
+                <div style={noMatchStyle}>
+                  No platforms matching &ldquo;{query}&rdquo;
+                </div>
+              ) : (
+                suggestions.map((sp, i) => (
+                  <a
+                    key={sp.record.platformKey}
+                    href={sp.record.launchUrl}
+                    target={sp.record.openInNewTab ? '_blank' : undefined}
+                    rel={sp.record.openInNewTab ? 'noopener noreferrer' : undefined}
+                    role="option"
+                    aria-selected={i === activeIndex}
+                    style={i === activeIndex ? suggestionActiveStyle : suggestionStyle}
+                    onMouseEnter={() => setActiveIndex(i)}
+                  >
+                    <span style={suggestionNameStyle}>{sp.record.name}</span>
+                    {sp.record.category && (
+                      <span style={suggestionCategoryStyle}>{sp.record.category}</span>
+                    )}
+                    <ExternalLink size={11} strokeWidth={1.8} color="rgba(0,0,0,0.25)" />
+                  </a>
+                ))
+              )}
+            </div>
+          )}
         </div>
       )}
 

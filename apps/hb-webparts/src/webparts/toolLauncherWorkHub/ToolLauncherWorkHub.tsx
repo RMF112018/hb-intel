@@ -35,6 +35,7 @@ import { LauncherFlagshipStage } from './LauncherFlagshipStage.js';
 import { LauncherUtilityRail } from './LauncherUtilityRail.js';
 import { LauncherWorkflowShelves } from './LauncherWorkflowShelves.js';
 import { LauncherAllPlatformsOverlay } from './LauncherAllPlatformsOverlay.js';
+import { prepareAllForSearch } from './launcherSearch.js';
 import { useResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 import { resolveToolIcon, resolveToolTint, resolveGroupIcon } from './launcherIconResolution.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
@@ -79,6 +80,12 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   const [overlayOpen, setOverlayOpen] = React.useState(false);
   const tier = useResponsiveTier();
 
+  // Pre-compute searchable records for command band inline search (stable across renders)
+  const searchable = React.useMemo(
+    () => (listPlatforms ? prepareAllForSearch(listPlatforms) : []),
+    [listPlatforms],
+  );
+
   if (isLoading || listLoading) {
     return <HomepageLoadingState label="Loading tool launchers" />;
   }
@@ -102,6 +109,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
             featuredCount={featuredCount}
             onAllPlatforms={() => setOverlayOpen(true)}
             tier={tier}
+            searchable={searchable}
           />
         }
         flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} tier={tier} />}
