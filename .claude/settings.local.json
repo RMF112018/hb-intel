@@ -248,7 +248,14 @@
       "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/temp/)",
       "Bash(rm -rf /Users/bobbyfetting/hb-intel/tools/spfx-shell/dist/)",
       "Bash(npm info:*)",
-      "Bash(rm -rf /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts*)"
+      "Bash(rm -rf /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts*)",
+      "Bash(rm -rf apps/hb-webparts/dist)",
+      "Bash(rm -rf dist/sppkg/hb-webparts*)",
+      "Bash(rm -rf tools/spfx-shell/temp)",
+      "Bash(rm -rf tools/spfx-shell/sharepoint)",
+      "Bash(command -v nvm)",
+      "Bash(fnm list:*)",
+      "Bash(volta list:*)"
     ]
   },
   "enabledPlugins": {
