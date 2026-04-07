@@ -35,6 +35,7 @@ import { LauncherFlagshipStage } from './LauncherFlagshipStage.js';
 import { LauncherUtilityRail } from './LauncherUtilityRail.js';
 import { LauncherWorkflowShelves } from './LauncherWorkflowShelves.js';
 import { LauncherAllPlatformsOverlay } from './LauncherAllPlatformsOverlay.js';
+import { useResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 import { resolveToolIcon, resolveToolTint, resolveGroupIcon } from './launcherIconResolution.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
 
@@ -76,6 +77,7 @@ function bridgeConfigToGroups(
 export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false }: ToolLauncherWorkHubProps): React.JSX.Element {
   const { platforms: listPlatforms, isLoading: listLoading, error: listError } = useToolLauncherData();
   const [overlayOpen, setOverlayOpen] = React.useState(false);
+  const tier = useResponsiveTier();
 
   if (isLoading || listLoading) {
     return <HomepageLoadingState label="Loading tool launchers" />;
@@ -93,6 +95,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
 
     return (
       <LauncherCompositionShell
+        tier={tier}
         commandBand={
           <LauncherCommandBand
             platformCount={presentation.allPlatforms.length}

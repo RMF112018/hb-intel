@@ -1,61 +1,58 @@
 /**
- * LauncherCompositionShell — Desktop anatomy shell for Tool Launcher.
+ * LauncherCompositionShell — Responsive anatomy shell for Tool Launcher.
  *
- * Implements the 4-region desktop layout:
- *   1. Command band (top) — LauncherCommandBand owns its own styling
- *   2. Flagship stage (primary body, left ~65%) — featured platforms
- *   3. Utility rail (secondary body, right ~35%) — support, notices
- *   4. Workflow shelves (below body) — categorized platform groups
+ * Phase 07-01: Responsive contract implemented via ResponsiveTier prop.
  *
- * This shell owns layout/spacing between regions. Each region accepts
- * ReactNode children so downstream prompts can deepen visuals without
- * redoing the structural composition.
+ * Desktop (≥1200px): 2fr/1fr body split, 16px gap/padding
+ * Tablet (768–1199px): stacked body (flagship full-width, rail below), 16px gap/padding
+ * Mobile (≤767px): stacked, 12px gap/padding, tighter spacing
  *
- * Phase 02-01: Desktop skeleton — composition first, not polish first.
- * Phase 02-02: Command band extracted to own component; shell refined
- *   with stronger outer container and region separation.
+ * Each region accepts ReactNode children. The shell owns layout and
+ * spacing — region components handle their own content adaptation.
  */
 import * as React from 'react';
 import { HP_SPACE, HP_RADIUS, HP_BORDER } from '../../homepage/tokens.js';
+import type { ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 
 /* ── Region props ────────────────────────────────────────────────── */
 
 export interface LauncherCompositionShellProps {
-  /** Command band content (LauncherCommandBand). Suppressed if absent. */
+  /** Command band content. Suppressed if absent. */
   commandBand?: React.ReactNode;
-  /** Flagship stage content (featured platform cards). Required for meaningful render. */
+  /** Flagship stage content. Required for meaningful render. */
   flagshipStage?: React.ReactNode;
-  /** Utility rail content (support, notices, favorites). Suppressed if absent. */
+  /** Utility rail content. Suppressed if absent. */
   utilityRail?: React.ReactNode;
-  /** Workflow shelf content (categorized platform groups). Suppressed if absent. */
+  /** Workflow shelf content. Suppressed if absent. */
   workflowShelves?: React.ReactNode;
+  /** Current responsive tier. Defaults to 'desktop'. */
+  tier?: ResponsiveTier;
   /** aria-label for the launcher landmark */
   'aria-label'?: string;
 }
 
-/* ── Styles ──────────────────────────────────────────────────────── */
+/* ── Style factories ─────────────────────────────────────────────── */
 
-/** Outer launcher container — premium utility-zone product surface */
-const shellStyle: React.CSSProperties = {
-  display: 'grid',
-  gap: HP_SPACE['2xl'],
-  padding: HP_SPACE['2xl'],
-  borderRadius: HP_RADIUS.card,
-  border: HP_BORDER.subtle,
-  background: 'rgba(255,255,255,0.4)',
-};
+function getShellStyle(tier: ResponsiveTier): React.CSSProperties {
+  const compact = tier === 'mobile';
+  return {
+    display: 'grid',
+    gap: compact ? HP_SPACE.xl : HP_SPACE['2xl'],
+    padding: compact ? HP_SPACE.xl : HP_SPACE['2xl'],
+    borderRadius: HP_RADIUS.card,
+    border: HP_BORDER.subtle,
+    background: 'rgba(255,255,255,0.4)',
+  };
+}
 
-/** 8/4 desktop split: flagship stage ~65%, utility rail ~35% */
-const bodyStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr',
-  gap: HP_SPACE.xl,
-};
-
-const bodyWithRailStyle: React.CSSProperties = {
-  ...bodyStyle,
-  gridTemplateColumns: '2fr 1fr',
-};
+function getBodyStyle(tier: ResponsiveTier, hasRail: boolean): React.CSSProperties {
+  const useSideBySide = tier === 'desktop' && hasRail;
+  return {
+    display: 'grid',
+    gridTemplateColumns: useSideBySide ? '2fr 1fr' : '1fr',
+    gap: HP_SPACE.xl,
+  };
+}
 
 const flagshipStageStyle: React.CSSProperties = {
   minWidth: 0,
@@ -80,13 +77,14 @@ export function LauncherCompositionShell({
   flagshipStage,
   utilityRail,
   workflowShelves,
+  tier = 'desktop',
   'aria-label': ariaLabel = 'Tool Launcher / Work Hub',
 }: LauncherCompositionShellProps): React.JSX.Element {
   const hasBody = flagshipStage || utilityRail;
   const hasRail = Boolean(utilityRail);
 
   return (
-    <div role="region" aria-label={ariaLabel} style={shellStyle}>
+    <div role="region" aria-label={ariaLabel} style={getShellStyle(tier)}>
       {commandBand && (
         <div data-launcher-region="command-band">
           {commandBand}
@@ -94,10 +92,7 @@ export function LauncherCompositionShell({
       )}
 
       {hasBody && (
-        <div
-          data-launcher-region="body"
-          style={hasRail ? bodyWithRailStyle : bodyStyle}
-        >
+        <div data-launcher-region="body" style={getBodyStyle(tier, hasRail)}>
           {flagshipStage && (
             <div data-launcher-region="flagship-stage" style={flagshipStageStyle}>
               {flagshipStage}
