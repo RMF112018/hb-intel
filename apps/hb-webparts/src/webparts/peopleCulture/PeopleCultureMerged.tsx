@@ -4,6 +4,8 @@
  * Phase 3: Desktop composition skeleton with four-part structure.
  * Phase 4: Band A editorial announcement grid with medium-format cards,
  *          adaptive grid layout, and partial-data resilience.
+ * Phase 5: Kudos featured spotlight and recent headlines with recipient
+ *          display, avatar thumbnails, and celebrate counts.
  */
 import * as React from 'react';
 import {
@@ -179,13 +181,85 @@ const kudosFeaturedStyle: React.CSSProperties = {
   border: HP_BORDER.standard,
   borderRadius: HP_RADIUS.editorial,
   background: 'rgba(229,126,70,0.02)',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: HP_SPACE.sm,
 };
 
-const kudosHeadlineStyle: React.CSSProperties = {
+const kudosFeaturedImageStyle: React.CSSProperties = {
+  width: '100%',
+  maxHeight: 200,
+  objectFit: 'cover' as const,
+  borderRadius: HP_RADIUS.image,
+  display: 'block',
+};
+
+const kudosFeaturedHeadlineStyle: React.CSSProperties = {
+  fontSize: '0.9375rem',
+  fontWeight: 600,
+  lineHeight: 1.4,
+};
+
+const kudosFeaturedRecipientsStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  fontWeight: 500,
+  lineHeight: 1.4,
+  opacity: HP_TEXT_OPACITY.muted,
+};
+
+const kudosFeaturedExcerptStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  opacity: HP_TEXT_OPACITY.secondary,
+  lineHeight: 1.5,
+  margin: 0,
+};
+
+const kudosFeaturedMetaStyle: React.CSSProperties = {
   display: 'flex',
-  alignItems: 'baseline',
+  alignItems: 'center',
   gap: HP_SPACE.md,
-  padding: `${HP_SPACE.sm}px 0`,
+  fontSize: '0.75rem',
+  opacity: HP_TEXT_OPACITY.secondary,
+  flexWrap: 'wrap',
+};
+
+const kudosHeadlineItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.lg,
+  padding: `${HP_SPACE.md}px 0`,
+  borderBottom: HP_BORDER.subtle,
+};
+
+const kudosHeadlineItemLastStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.lg,
+  padding: `${HP_SPACE.md}px 0`,
+};
+
+const kudosHeadlineAvatarStyle: React.CSSProperties = {
+  width: 32,
+  height: 32,
+  borderRadius: '50%',
+  objectFit: 'cover' as const,
+  flexShrink: 0,
+};
+
+const kudosHeadlineAvatarPlaceholderStyle: React.CSSProperties = {
+  width: 32,
+  height: 32,
+  borderRadius: '50%',
+  background: 'rgba(229,126,70,0.08)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+};
+
+const kudosHeadlineContentStyle: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
 };
 
 const kudosEmptyStyle: React.CSSProperties = {
@@ -289,6 +363,68 @@ function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | n
   );
 }
 
+function formatRecipients(recipients: KudosModuleOutput['featured'] extends undefined ? never : NonNullable<KudosModuleOutput['featured']>['recipients']): string {
+  if (recipients.length === 0) return '';
+  if (recipients.length === 1) return recipients[0].name;
+  if (recipients.length === 2) return `${recipients[0].name} and ${recipients[1].name}`;
+  return `${recipients[0].name}, ${recipients[1].name}, and ${recipients.length - 2} more`;
+}
+
+function KudosFeaturedSpotlight({ item }: { item: NonNullable<KudosModuleOutput['featured']> }): React.JSX.Element {
+  const recipientLabel = formatRecipients(item.recipients);
+
+  return (
+    <div style={kudosFeaturedStyle}>
+      {item.media && (
+        <img src={item.media.src} alt={item.media.alt} style={kudosFeaturedImageStyle} />
+      )}
+      <div style={kudosFeaturedHeadlineStyle}>{item.headline}</div>
+      {recipientLabel && (
+        <div style={kudosFeaturedRecipientsStyle}>{recipientLabel}</div>
+      )}
+      <p style={kudosFeaturedExcerptStyle}>{item.excerpt}</p>
+      <div style={kudosFeaturedMetaStyle}>
+        <span>by {item.submittedBy.displayName}</span>
+        {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 && (
+          <span>{item.celebrateCount} celebrate</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function KudosHeadlineItem({ item, isLast }: { item: NonNullable<KudosModuleOutput['featured']>; isLast: boolean }): React.JSX.Element {
+  const recipientLabel = formatRecipients(item.recipients);
+  const hasAvatar = Boolean(item.recipients[0]?.media?.src);
+
+  return (
+    <div style={isLast ? kudosHeadlineItemLastStyle : kudosHeadlineItemStyle}>
+      {hasAvatar ? (
+        <img
+          src={item.recipients[0].media!.src}
+          alt={item.recipients[0].media!.alt ?? item.recipients[0].name}
+          style={kudosHeadlineAvatarStyle}
+        />
+      ) : (
+        <div style={kudosHeadlineAvatarPlaceholderStyle}>
+          <CheckCircle2 size={14} />
+        </div>
+      )}
+      <div style={kudosHeadlineContentStyle}>
+        <div style={{ fontWeight: 500, fontSize: '0.875rem', lineHeight: 1.3 }}>{item.headline}</div>
+        <div style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, marginTop: 2, lineHeight: 1.4 }}>
+          {recipientLabel ? `${recipientLabel} · ` : ''}by {item.submittedBy.displayName}
+        </div>
+      </div>
+      {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 && (
+        <span style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
+          {item.celebrateCount}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Element {
   return (
     <section aria-label="Kudos recognition" data-hbc-homepage="kudos-module">
@@ -311,31 +447,19 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
         ) : (
           <>
             {output.featured && (
-              <div style={kudosFeaturedStyle}>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.4 }}>
-                  {output.featured.headline}
-                </div>
-                <div style={{ marginTop: HP_SPACE.sm, fontSize: '0.8125rem', opacity: HP_TEXT_OPACITY.secondary, lineHeight: 1.5 }}>
-                  {output.featured.excerpt}
-                </div>
-                <div style={{ marginTop: HP_SPACE.md, fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary }}>
-                  by {output.featured.submittedBy.displayName}
-                  {output.featured.celebrateCount ? ` · ${output.featured.celebrateCount} celebrate` : ''}
-                </div>
-              </div>
+              <KudosFeaturedSpotlight item={output.featured} />
             )}
 
             {output.recentHeadlines.length > 0 && (
               <>
                 <Separator decorative style={{ margin: `${HP_SPACE.xl}px 0` }} />
                 <div>
-                  {output.recentHeadlines.map((item) => (
-                    <div key={item.id} style={kudosHeadlineStyle}>
-                      <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>{item.headline}</span>
-                      <span style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, whiteSpace: 'nowrap' }}>
-                        by {item.submittedBy.displayName}
-                      </span>
-                    </div>
+                  {output.recentHeadlines.map((item, index) => (
+                    <KudosHeadlineItem
+                      key={item.id}
+                      item={item}
+                      isLast={index === output.recentHeadlines.length - 1}
+                    />
                   ))}
                 </div>
               </>

@@ -14,3 +14,7 @@ This phase exists because Kudos is the main new engagement feature and needs its
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — KudosFeaturedSpotlight, KudosHeadlineItem, KudosRegion
