@@ -22,6 +22,21 @@ describe('Prompt-06 awareness webparts', () => {
     expect(screen.getByLabelText('Company Pulse')).not.toBeNull();
   });
 
+  it('renders premium newsroom surface with data-hbc-premium attribute', () => {
+    const { container } = render(
+      <CompanyPulse
+        config={{
+          items: [
+            { id: 'lead', title: 'Lead Story', summary: 'Body', featured: true, order: 1 },
+          ],
+        }}
+      />,
+    );
+
+    const surface = container.querySelector('[data-hbc-premium="newsroom-surface"]');
+    expect(surface).not.toBeNull();
+  });
+
   it('renders byline and publish date on lead story', () => {
     render(
       <CompanyPulse
@@ -35,6 +50,39 @@ describe('Prompt-06 awareness webparts', () => {
 
     expect(screen.getByText('Safety Team')).not.toBeNull();
     expect(screen.getAllByText('2026-04-07').length).toBeGreaterThan(0);
+  });
+
+  it('renders sparse layout when only lead story exists', () => {
+    render(
+      <CompanyPulse
+        config={{
+          archiveHref: '/sites/hb-central/pulse',
+          items: [
+            { id: 'only', title: 'Solo Story', summary: 'Just one story', featured: true, order: 1 },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Solo Story')).not.toBeNull();
+    expect(screen.getByText('View all news')).not.toBeNull();
+  });
+
+  it('renders rich layout with lead and secondary when multiple items provided', () => {
+    render(
+      <CompanyPulse
+        config={{
+          items: [
+            { id: 'a', title: 'First Story', summary: 'Body A', order: 1 },
+            { id: 'b', title: 'Second Story', summary: 'Body B', order: 2 },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('First Story')).not.toBeNull();
+    expect(screen.getByText('Second Story')).not.toBeNull();
+    expect(screen.getAllByText('More headlines').length).toBeGreaterThan(0);
   });
 
   it('renders empty state for malformed leadership config', () => {
