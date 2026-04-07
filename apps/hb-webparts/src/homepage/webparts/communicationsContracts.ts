@@ -74,3 +74,122 @@ export const DEFAULT_PEOPLE_CULTURE_CONFIG: Required<Pick<PeopleCultureConfig, '
   heading: 'People and Culture',
   maxSecondaryEntries: 4,
 };
+
+// ---------------------------------------------------------------------------
+// Merged People & Culture content model (Band A + Kudos + Band B)
+// ---------------------------------------------------------------------------
+
+// --- Band A: Announcements ---
+
+export type AnnouncementType = 'promotion' | 'newHire' | 'baby' | 'wedding' | 'special';
+
+export interface AnnouncementEntry {
+  id: string;
+  personName: string;
+  announcementType: AnnouncementType;
+  headline: string;
+  summary: string;
+  publishDate: string;
+  media?: HomepageMediaSlot;
+  cta?: HomepageCtaLink;
+  startDisplayDate?: string;
+  endDisplayDate?: string;
+  isPinned?: boolean;
+  priorityOverride?: number;
+  homepageEnabled?: boolean;
+  audiences?: string[];
+}
+
+// --- Kudos Module ---
+
+export type KudosStatus = 'pending' | 'approved' | 'rejected';
+
+export type KudosRecipientType = 'individual' | 'team' | 'department' | 'projectGroup';
+
+export interface PersonReference {
+  id: string;
+  displayName: string;
+  email?: string;
+  media?: HomepageMediaSlot;
+}
+
+export interface KudosRecipient {
+  id: string;
+  name: string;
+  recipientType: KudosRecipientType;
+  media?: HomepageMediaSlot;
+}
+
+export interface KudosEntry {
+  id: string;
+  headline: string;
+  excerpt: string;
+  submittedBy: PersonReference;
+  submittedDate: string;
+  status: KudosStatus;
+  approvedBy?: PersonReference;
+  approvedDate?: string;
+  recipients: KudosRecipient[];
+  media?: HomepageMediaSlot;
+  isPinned?: boolean;
+  homepageEnabled?: boolean;
+  publishStartDate?: string;
+  publishEndDate?: string;
+  celebrateCount?: number;
+}
+
+// --- Band B: Weekly Celebrations ---
+
+export type WeeklyCelebrationType = 'birthday' | 'anniversary';
+
+export interface WeeklyCelebrationEntry {
+  id: string;
+  personName: string;
+  celebrationType: WeeklyCelebrationType;
+  celebrationDate: string;
+  anniversaryYears?: number;
+  media?: HomepageMediaSlot;
+  audiences?: string[];
+}
+
+// --- Merged config and output ---
+
+export interface PeopleCultureMergedConfig {
+  heading?: string;
+  announcements?: AnnouncementEntry[];
+  kudos?: KudosEntry[];
+  celebrations?: WeeklyCelebrationEntry[];
+  maxAnnouncements?: number;
+  maxKudosHeadlines?: number;
+  maxCelebrations?: number;
+}
+
+export interface BandAOutput {
+  items: AnnouncementEntry[];
+  isEmpty: boolean;
+}
+
+export interface KudosModuleOutput {
+  featured?: KudosEntry;
+  recentHeadlines: KudosEntry[];
+  isEmpty: boolean;
+}
+
+export interface BandBOutput {
+  items: WeeklyCelebrationEntry[];
+  isEmpty: boolean;
+}
+
+export interface PeopleCultureMergedOutput {
+  heading: string;
+  bandA: BandAOutput;
+  kudos: KudosModuleOutput;
+  bandB: BandBOutput;
+}
+
+export const DEFAULT_PEOPLE_CULTURE_MERGED_CONFIG = {
+  heading: 'Celebrating Our People',
+  maxAnnouncements: 4,
+  maxKudosHeadlines: 6,
+  maxCelebrations: 8,
+} as const;

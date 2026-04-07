@@ -14,3 +14,10 @@ This phase exists because later UI phases need a deterministic output shape that
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/homepage/webparts/communicationsContracts.ts` — merged content model types
+- `apps/hb-webparts/src/homepage/helpers/communicationsConfig.ts` — `normalizePeopleCultureMergedConfig()` normalizer
+- `apps/hb-webparts/src/homepage/webparts/index.ts` — public type exports
+- `apps/hb-webparts/src/homepage/helpers/authoringGovernance.ts` — updated governance entry
