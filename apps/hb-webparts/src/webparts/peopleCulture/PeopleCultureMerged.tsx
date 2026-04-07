@@ -5,7 +5,8 @@
  * Phase 4: Band A editorial announcement grid with medium-format cards,
  *          adaptive grid layout, and partial-data resilience.
  * Phase 5: Kudos featured spotlight and recent headlines with recipient
- *          display, avatar thumbnails, and celebrate counts.
+ *          display, avatar thumbnails, celebrate counts, Give Kudos
+ *          entry posture, Celebrate affordance, and empty states.
  */
 import * as React from 'react';
 import {
@@ -262,13 +263,55 @@ const kudosHeadlineContentStyle: React.CSSProperties = {
   minWidth: 0,
 };
 
+const kudosCelebrateButtonStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: HP_SPACE.xs,
+  padding: `${HP_SPACE.xs}px ${HP_SPACE.md}px`,
+  border: HP_BORDER.subtle,
+  borderRadius: HP_RADIUS.command,
+  background: 'transparent',
+  cursor: 'pointer',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+  lineHeight: 1,
+  color: 'inherit',
+  transition: 'background 150ms ease',
+  flexShrink: 0,
+};
+
+const kudosCtaRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.xl,
+  flexWrap: 'wrap',
+};
+
 const kudosEmptyStyle: React.CSSProperties = {
   marginTop: HP_SPACE.xl,
-  padding: `${HP_SPACE['3xl']}px ${HP_SPACE['2xl']}px`,
+  padding: `${HP_SPACE['4xl']}px ${HP_SPACE['2xl']}px`,
   textAlign: 'center',
+  border: HP_BORDER.subtle,
+  borderRadius: HP_RADIUS.editorial,
+  background: 'rgba(229,126,70,0.015)',
+};
+
+const kudosEmptyHeadingStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.9375rem',
+  fontWeight: 600,
+  lineHeight: 1.4,
+};
+
+const kudosEmptyDescriptionStyle: React.CSSProperties = {
+  margin: `${HP_SPACE.sm}px 0 0`,
+  fontSize: '0.8125rem',
   opacity: HP_TEXT_OPACITY.secondary,
-  fontSize: '0.875rem',
   lineHeight: 1.5,
+};
+
+const kudosEmptyCtaStyle: React.CSSProperties = {
+  marginTop: HP_SPACE.xl,
 };
 
 // ---------------------------------------------------------------------------
@@ -370,6 +413,16 @@ function formatRecipients(recipients: KudosModuleOutput['featured'] extends unde
   return `${recipients[0].name}, ${recipients[1].name}, and ${recipients.length - 2} more`;
 }
 
+function CelebrateButton({ count }: { count?: number }): React.JSX.Element {
+  const label = typeof count === 'number' && count > 0 ? `Celebrate (${count})` : 'Celebrate';
+  return (
+    <button type="button" style={kudosCelebrateButtonStyle} aria-label={label}>
+      <CheckCircle2 size={12} />
+      <span>{label}</span>
+    </button>
+  );
+}
+
 function KudosFeaturedSpotlight({ item }: { item: NonNullable<KudosModuleOutput['featured']> }): React.JSX.Element {
   const recipientLabel = formatRecipients(item.recipients);
 
@@ -385,9 +438,7 @@ function KudosFeaturedSpotlight({ item }: { item: NonNullable<KudosModuleOutput[
       <p style={kudosFeaturedExcerptStyle}>{item.excerpt}</p>
       <div style={kudosFeaturedMetaStyle}>
         <span>by {item.submittedBy.displayName}</span>
-        {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 && (
-          <span>{item.celebrateCount} celebrate</span>
-        )}
+        <CelebrateButton count={item.celebrateCount} />
       </div>
     </div>
   );
@@ -416,11 +467,7 @@ function KudosHeadlineItem({ item, isLast }: { item: NonNullable<KudosModuleOutp
           {recipientLabel ? `${recipientLabel} · ` : ''}by {item.submittedBy.displayName}
         </div>
       </div>
-      {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 && (
-        <span style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, whiteSpace: 'nowrap', flexShrink: 0 }}>
-          {item.celebrateCount}
-        </span>
-      )}
+      <CelebrateButton count={item.celebrateCount} />
     </div>
   );
 }
@@ -434,7 +481,10 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
             <CheckCircle2 size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
             Kudos
           </h3>
-          <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" arrow />
+          <div style={kudosCtaRowStyle}>
+            <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" arrow />
+            <HbcPremiumCta label="View All Kudos" href="#view-all-kudos" variant="ghost" arrow />
+          </div>
         </div>
         <p style={kudosDescriptionStyle}>
           Recognize great work, celebrate teammates, and spotlight wins across the company
@@ -442,7 +492,13 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
 
         {output.isEmpty ? (
           <div role="status" aria-live="polite" style={kudosEmptyStyle}>
-            No Kudos yet — be the first to recognize a teammate.
+            <div style={kudosEmptyHeadingStyle}>No Kudos yet</div>
+            <p style={kudosEmptyDescriptionStyle}>
+              Be the first to recognize a teammate. Share appreciation for great work, team wins, or everyday excellence.
+            </p>
+            <div style={kudosEmptyCtaStyle}>
+              <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" arrow />
+            </div>
           </div>
         ) : (
           <>
@@ -463,6 +519,12 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
                   ))}
                 </div>
               </>
+            )}
+
+            {output.recentHeadlines.length >= 6 && (
+              <div style={{ marginTop: HP_SPACE.xl, textAlign: 'center' }}>
+                <HbcPremiumCta label="View All Kudos" href="#view-all-kudos" variant="ghost" arrow />
+              </div>
             )}
           </>
         )}
