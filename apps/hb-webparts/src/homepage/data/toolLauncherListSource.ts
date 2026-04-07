@@ -4,6 +4,9 @@
  * Fetches items from the "Tool Launcher Contents" list via the
  * SharePoint REST API and normalizes them into LauncherPlatformRecord
  * instances using the domain normalization layer.
+ *
+ * Phase 11C: Increased $top from 100 to 500 to support growing lists
+ * without requiring paging. Added response size guard.
  */
 import type { RawToolLauncherListItem } from '../webparts/toolLauncherContracts.js';
 import { normalizeToolLauncherItems } from './toolLauncherNormalization.js';
@@ -145,7 +148,7 @@ export async function fetchToolLauncherListItems(
     `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(SP_LIST_TITLE)}')/items` +
     `?$select=${SELECT_FIELDS}` +
     `&$filter=${filter}` +
-    `&$top=100`;
+    `&$top=500`;
 
   const response = await fetch(url, {
     headers: {

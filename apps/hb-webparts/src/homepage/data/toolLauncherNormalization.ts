@@ -4,15 +4,26 @@
  * Converts raw SharePoint list items from the "Tool Launcher Contents"
  * list into the stable LauncherPlatformRecord model and derives the
  * presentation structures (featured stage, workflow shelves, platform
- * index, notices summary).
+ * index, notices summary, governance summary, discovery hints).
  *
  * All SharePoint-specific value shapes (Hyperlink objects, multi-value
  * Choice arrays, nullable booleans) are absorbed here so downstream
  * code only works with clean TypeScript types.
+ *
+ * Phase 11C: Presentation model and data hardening.
+ * - Resolved AudienceRulesJSON: stored on record, not evaluated at runtime
+ * - Added hasSupportCoverage derivation
+ * - Added governance summary derivation
+ * - Added discovery hints derivation
+ * - Shelf ordering: sortOrder-weighted then alphabetical (not purely alphabetical)
+ * - Category ordering: featured-weighted (categories with featured items first)
+ * - Increased list fetch limit from 100 to 500 (in list source)
  */
 
 import type {
+  LauncherDiscoveryHints,
   LauncherFeaturedStage,
+  LauncherGovernanceSummary,
   LauncherLogoPreference,
   LauncherNoticeBadge,
   LauncherNoticeStatus,
@@ -192,6 +203,15 @@ export function normalizeToolLauncherItem(
     accessRequestUrl: extractUrl(raw.AccessRequestDestination),
   };
 
+  // Support coverage flag
+  const hasSupportCoverage = Boolean(support.helpUrl || support.supportOwnerName);
+
+  // AudienceRulesJSON: store raw value for future rule-based evaluation.
+  // Currently not evaluated at runtime — audience filtering uses the
+  // simpler AudienceVisibility field. This resolves the ambiguous
+  // half-state identified in the Phase 11A brief.
+  const audienceRulesRaw = trimOrUndefined(raw.AudienceRulesJSON);
+
   return {
     platformKey: trimOrUndefined(raw.PlatformKey) ?? slugify(name),
     name,
@@ -212,9 +232,11 @@ export function normalizeToolLauncherItem(
     audiences: normalizeAudiences(raw.AudienceVisibility),
     openInNewTab: normalizeBool(raw.OpenInNewTab, true),
     favoriteEligible: normalizeBool(raw.FavoriteEligible, true),
+    audienceRulesRaw,
 
     support,
     notice,
+    hasSupportCoverage,
 
     vendorFamily: trimOrUndefined(raw.VendorProductFamily),
     tenantLabel: trimOrUndefined(raw.TenantEnvironmentLabel),
@@ -263,7 +285,7 @@ export function normalizeToolLauncherItems(
 /**
  * Filter platforms by audience visibility. A platform is visible when:
  *   - it has no audience restrictions (empty audiences array), OR
- *   - the activeAudience matches one of its audiences
+ *   - the activeAudience matches one of its audiences (case-insensitive)
  *
  * When activeAudience is undefined, all platforms are visible
  * (no filtering applied — e.g., admin view or no audience context).
@@ -273,8 +295,9 @@ function filterByAudience(
   activeAudience: string | undefined,
 ): LauncherPlatformRecord[] {
   if (!activeAudience) return platforms;
+  const normalized = activeAudience.trim().toLowerCase();
   return platforms.filter(
-    (p) => p.audiences.length === 0 || p.audiences.includes(activeAudience),
+    (p) => p.audiences.length === 0 || p.audiences.some((a) => a.toLowerCase() === normalized),
   );
 }
 
@@ -293,6 +316,12 @@ function slugifyShelfName(name: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/**
+ * Derive workflow shelves with sort-order-weighted ordering.
+ * Shelves are ordered by the minimum sortOrder of their platforms
+ * (shelves containing higher-priority platforms appear first),
+ * then alphabetically as a tiebreaker.
+ */
 function deriveWorkflowShelves(platforms: LauncherPlatformRecord[]): LauncherWorkflowShelf[] {
   const shelfMap = new Map<string, LauncherPlatformRecord[]>();
 
@@ -316,9 +345,20 @@ function deriveWorkflowShelves(platforms: LauncherPlatformRecord[]): LauncherWor
         platforms: sorted,
       };
     })
-    .sort((a, b) => a.shelfName.localeCompare(b.shelfName));
+    .sort((a, b) => {
+      // Sort by minimum platform sortOrder (priority-weighted), then alphabetical
+      const aMin = Math.min(...a.platforms.map((p) => p.sortOrder));
+      const bMin = Math.min(...b.platforms.map((p) => p.sortOrder));
+      if (aMin !== bMin) return aMin - bMin;
+      return a.shelfName.localeCompare(b.shelfName);
+    });
 }
 
+/**
+ * Derive platform index with featured-weighted category ordering.
+ * Categories containing featured platforms appear before categories
+ * without, then sorted alphabetically within each tier.
+ */
 function derivePlatformIndex(platforms: LauncherPlatformRecord[]): LauncherPlatformIndex {
   const categoryMap = new Map<string, LauncherPlatformRecord[]>();
 
@@ -338,7 +378,13 @@ function derivePlatformIndex(platforms: LauncherPlatformRecord[]): LauncherPlatf
         category,
         platforms: items.sort(bySortOrderThenName),
       }))
-      .sort((a, b) => a.category.localeCompare(b.category)),
+      .sort((a, b) => {
+        // Featured-weighted: categories with featured items first
+        const aHasFeatured = a.platforms.some((p) => p.isFeatured) ? 0 : 1;
+        const bHasFeatured = b.platforms.some((p) => p.isFeatured) ? 0 : 1;
+        if (aHasFeatured !== bHasFeatured) return aHasFeatured - bHasFeatured;
+        return a.category.localeCompare(b.category);
+      }),
   };
 }
 
@@ -389,6 +435,48 @@ function deriveSupportSummary(platforms: LauncherPlatformRecord[]): LauncherSupp
 }
 
 /**
+ * Derive governance health summary from the visible dataset.
+ * Not rendered directly — available for future admin UX and
+ * freshness/trust-cue displays.
+ */
+function deriveGovernanceSummary(platforms: LauncherPlatformRecord[]): LauncherGovernanceSummary {
+  return {
+    totalPlatforms: platforms.length,
+    requiresReviewCount: platforms.filter((p) => p.requiresReview).length,
+    neverReviewedCount: platforms.filter((p) => !p.lastReviewedOn).length,
+    noSupportCoverageCount: platforms.filter((p) => !p.hasSupportCoverage).length,
+    uncategorizedCount: platforms.filter((p) => !p.category).length,
+    unshelvedCount: platforms.filter((p) => !p.workflowShelf).length,
+  };
+}
+
+/**
+ * Derive discovery hints from the visible dataset.
+ * Provides metadata for future search/filter/favorite UX
+ * without implementing those features in this phase.
+ */
+function deriveDiscoveryHints(platforms: LauncherPlatformRecord[]): LauncherDiscoveryHints {
+  const categories = new Set<string>();
+  const shelves = new Set<string>();
+  let favoriteEligibleCount = 0;
+  let hasSupportOwners = false;
+
+  for (const p of platforms) {
+    if (p.category) categories.add(p.category);
+    if (p.workflowShelf) shelves.add(p.workflowShelf);
+    if (p.favoriteEligible) favoriteEligibleCount++;
+    if (p.support.supportOwnerName) hasSupportOwners = true;
+  }
+
+  return {
+    availableCategories: [...categories].sort(),
+    availableShelves: [...shelves].sort(),
+    favoriteEligibleCount,
+    hasSupportOwners,
+  };
+}
+
+/**
  * Derive the full presentation model from normalized platform records.
  * This is the primary entry point for the Tool Launcher component to
  * obtain all presentation-ready data structures.
@@ -408,6 +496,8 @@ export function deriveToolLauncherPresentation(
     platformIndex: derivePlatformIndex(visible),
     noticesSummary: deriveNoticesSummary(visible),
     supportSummary: deriveSupportSummary(visible),
+    governanceSummary: deriveGovernanceSummary(visible),
+    discoveryHints: deriveDiscoveryHints(visible),
     allPlatforms: [...visible],
   };
 }

@@ -5,6 +5,13 @@
  * 1. RawToolLauncherListItem  — runtime payload from SharePoint REST API
  * 2. LauncherPlatformRecord   — normalized internal model
  * 3. Presentation types       — derived structures for stage, shelves, index
+ *
+ * Phase 11C: Presentation model and data hardening.
+ * - Added governance metadata to presentation model
+ * - Added discovery hints for future search/filter UX
+ * - Added audienceRulesRaw for future rule-based visibility
+ * - Added shelf sort weighting for curated ordering
+ * - Added governance summary to presentation model
  */
 
 import type { UtilityBadgeVariant } from './utilityContracts.js';
@@ -116,17 +123,32 @@ export interface LauncherPlatformRecord {
   openInNewTab: boolean;
   favoriteEligible: boolean;
 
+  /**
+   * Raw audience rules JSON string from the list.
+   * Stored for future rule-based visibility evaluation.
+   * Not currently evaluated at runtime — audience filtering
+   * uses the simpler AudienceVisibility field.
+   */
+  audienceRulesRaw?: string;
+
   /* Support */
   support: LauncherSupportInfo;
 
   /* Notice */
   notice?: LauncherNoticeBadge;
 
-  /* Governance (not rendered; available for staleness checks) */
+  /* Governance */
   vendorFamily?: string;
   tenantLabel?: string;
   requiresReview: boolean;
   lastReviewedOn?: Date;
+
+  /**
+   * Whether this record has complete support metadata.
+   * True when at least helpUrl or supportOwnerName is present.
+   * Used by derivation logic for support-quality weighting.
+   */
+  hasSupportCoverage: boolean;
 }
 
 /* ── 3. Presentation-oriented derived structures ──────────────────── */
@@ -169,6 +191,34 @@ export interface LauncherSupportSummary {
   supportContacts: Array<{ platformKey: string; name: string; supportOwnerName: string; supportOwnerUrl?: string }>;
 }
 
+/** Governance health summary for the launcher dataset. */
+export interface LauncherGovernanceSummary {
+  /** Total platforms in the dataset (after audience filtering). */
+  totalPlatforms: number;
+  /** Platforms flagged as requiring review. */
+  requiresReviewCount: number;
+  /** Platforms that have never been reviewed (no lastReviewedOn). */
+  neverReviewedCount: number;
+  /** Platforms without any support metadata (no help URL, no support owner). */
+  noSupportCoverageCount: number;
+  /** Platforms without a category assignment. */
+  uncategorizedCount: number;
+  /** Platforms without a workflow shelf assignment. */
+  unshelvedCount: number;
+}
+
+/** Discovery-readiness hints derived from the dataset. */
+export interface LauncherDiscoveryHints {
+  /** Distinct category values in the dataset (sorted). */
+  availableCategories: string[];
+  /** Distinct workflow shelf names in the dataset (sorted). */
+  availableShelves: string[];
+  /** Platforms eligible for future favorites feature. */
+  favoriteEligibleCount: number;
+  /** Whether the dataset has any support-owner coverage. */
+  hasSupportOwners: boolean;
+}
+
 /** Complete presentation model derived from normalized records. */
 export interface LauncherPresentationModel {
   featuredStage: LauncherFeaturedStage;
@@ -176,6 +226,10 @@ export interface LauncherPresentationModel {
   platformIndex: LauncherPlatformIndex;
   noticesSummary: LauncherNoticesSummary;
   supportSummary: LauncherSupportSummary;
+  /** Governance health summary. Not rendered directly — available for future admin/freshness UX. */
+  governanceSummary: LauncherGovernanceSummary;
+  /** Discovery hints for future search/filter UX. */
+  discoveryHints: LauncherDiscoveryHints;
   /** All active platforms, sorted by sortOrder then name. */
   allPlatforms: LauncherPlatformRecord[];
 }
