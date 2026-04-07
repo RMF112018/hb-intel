@@ -14,3 +14,7 @@ This phase exists because the final surface now has more states, more content ty
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — hardened state handling and authoring safety

@@ -11,6 +11,8 @@
  *          celebration type label, and relative date display.
  * Phase 8A: Responsive adaptation for tablet and mobile — tier-aware
  *           grid layouts preserving hierarchy across breakpoints.
+ * Phase 8B: Authoring/loading/empty/invalid hardening — safe behavior
+ *           in SharePoint edit mode and imperfect data conditions.
  */
 import * as React from 'react';
 import {
@@ -484,7 +486,7 @@ function BandARegion({ output, tier }: { output: BandAOutput; tier: ResponsiveTi
   if (output.isEmpty) return null;
 
   return (
-    <section aria-label="Announcements" data-hbc-homepage="band-a">
+    <section aria-label="Announcements" data-hbc-homepage="band-a" data-hbc-region-state="populated">
       <div style={getBandARegionStyle(tier)}>
         <h3 style={bandAHeaderStyle}>
           <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
@@ -568,7 +570,7 @@ function KudosHeadlineItem({ item, isLast, tier }: { item: NonNullable<KudosModu
 
 function KudosRegion({ output, tier }: { output: KudosModuleOutput; tier: ResponsiveTier }): React.JSX.Element {
   return (
-    <section aria-label="Kudos recognition" data-hbc-homepage="kudos-module">
+    <section aria-label="Kudos recognition" data-hbc-homepage="kudos-module" data-hbc-region-state={output.isEmpty ? 'empty' : 'populated'}>
       <div style={getKudosRegionStyle(tier)}>
         <div style={getKudosHeaderRowStyle(tier)}>
           <h3 style={kudosHeaderStyle}>
@@ -666,7 +668,7 @@ function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): Reac
 
 function BandBRegion({ output, tier }: { output: BandBOutput; tier: ResponsiveTier }): React.JSX.Element {
   return (
-    <section aria-label="This week celebrations" data-hbc-homepage="band-b">
+    <section aria-label="This week celebrations" data-hbc-homepage="band-b" data-hbc-region-state={output.isEmpty ? 'empty' : 'populated'}>
       <div style={getBandBRegionStyle(tier)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md }}>
           <h3 style={bandBHeaderStyle}>
@@ -700,6 +702,14 @@ function BandBRegion({ output, tier }: { output: BandBOutput; tier: ResponsiveTi
 // Main component
 // ---------------------------------------------------------------------------
 
+function hasAnyInputData(config: Partial<PeopleCultureMergedConfig> | undefined): boolean {
+  return Boolean(
+    config?.announcements?.length
+    || config?.kudos?.length
+    || config?.celebrations?.length,
+  );
+}
+
 export function PeopleCultureMerged({
   config,
   activeAudience,
@@ -707,22 +717,46 @@ export function PeopleCultureMerged({
 }: PeopleCultureMergedProps): React.JSX.Element {
   const tier = useResponsiveTier();
 
+  // State 1: Loading
   if (isLoading) {
     return <HomepageLoadingState label="Loading people and culture" />;
   }
 
-  const output = normalizePeopleCultureMergedConfig(config, activeAudience);
+  // Normalize — safe even with undefined/malformed input
+  let output: ReturnType<typeof normalizePeopleCultureMergedConfig>;
+  try {
+    output = normalizePeopleCultureMergedConfig(config, activeAudience);
+  } catch {
+    const message = resolveAuthoringMessage('peopleCulture', 'invalid');
+    return <HomepageEmptyState title={message.title} description={message.description} />;
+  }
 
   const allEmpty = output.bandA.isEmpty && output.kudos.isEmpty && output.bandB.isEmpty;
+  const hadInput = hasAnyInputData(config);
 
-  if (allEmpty && (!config?.announcements?.length && !config?.kudos?.length && !config?.celebrations?.length)) {
+  // State 2: No data configured — authoring guidance
+  if (allEmpty && !hadInput) {
     const message = resolveAuthoringMessage('peopleCulture', 'noData');
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
+  // State 3: Data configured but all filtered/invalid — invalid guidance
+  if (allEmpty && hadInput) {
+    const message = resolveAuthoringMessage('peopleCulture', 'invalid');
+    return <HomepageEmptyState title={message.title} description={message.description} />;
+  }
+
+  // State 4: Normal render — at least one region has content
   return (
-    <HbcHomepageSectionShell title={output.heading} subtitle="Birthdays, anniversaries, recognition, milestones, and team news">
-      <div style={getShellStyle(tier)} data-hbc-homepage="people-culture-merged">
+    <HbcHomepageSectionShell
+      title={output.heading}
+      subtitle="Birthdays, anniversaries, recognition, milestones, and team news"
+    >
+      <div
+        style={getShellStyle(tier)}
+        data-hbc-homepage="people-culture-merged"
+        data-hbc-authoring-safe="true"
+      >
         <BandARegion output={output.bandA} tier={tier} />
         <KudosRegion output={output.kudos} tier={tier} />
         <BandBRegion output={output.bandB} tier={tier} />
