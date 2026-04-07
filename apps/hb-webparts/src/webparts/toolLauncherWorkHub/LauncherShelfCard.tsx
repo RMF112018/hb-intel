@@ -1,18 +1,19 @@
 /**
  * LauncherShelfCard — Medium-weight secondary card for workflow shelves.
  *
- * Phase 05-02: Shelf card primitive positioned between flagship cards
- * and the old icon tiles in the visual hierarchy.
+ * Phase 11B: Composition re-architecture. Strengthened visual treatment
+ * with branded hover state, improved spacing, and subtle left accent
+ * for better shelf-level rhythm.
  *
  * Structure: horizontal row layout with 40px logo container, name,
- * and optional descriptor. Whole-card <a> click target. No explicit
- * CTA row (simpler than flagship). No spring motion (only flagship
- * gets motion — hierarchy protection). Subtle CSS hover only.
+ * and optional descriptor. Whole-card <a> click target. No spring
+ * motion (only flagship gets motion — hierarchy protection).
  *
  * Logo resolution uses the same 5-step chain from launcherAssetResolution
  * with onError fallback to Lucide icon.
  */
 import * as React from 'react';
+import { ExternalLink } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS, HP_MOTION } from '../../homepage/tokens.js';
 import { resolvePlatformIcon } from './launcherIconResolution.js';
 import { resolveLogoAsset, type LogoResolution } from './launcherAssetResolution.js';
@@ -29,19 +30,20 @@ export interface LauncherShelfCardProps {
 const cardStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  gap: HP_SPACE.md,
-  padding: `${HP_SPACE.md}px ${HP_SPACE.lg}px`,
+  gap: HP_SPACE.lg,
+  padding: `${HP_SPACE.lg}px ${HP_SPACE.xl}px`,
   border: HP_BORDER.subtle,
+  borderLeft: '3px solid rgba(34,83,145,0.1)',
   borderRadius: HP_RADIUS.command,
-  background: 'rgba(255,255,255,0.5)',
+  background: 'rgba(255,255,255,0.55)',
   textDecoration: 'none',
   color: 'inherit',
-  transition: `background ${HP_MOTION.fast}`,
+  transition: `background ${HP_MOTION.fast}, border-color ${HP_MOTION.fast}`,
   cursor: 'pointer',
-  minHeight: 44,
+  minHeight: 48,
 };
 
-/** 40px logo container — smaller than flagship's 56px */
+/** 40px logo container */
 const logoContainerStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -70,15 +72,16 @@ const monogramStyle: React.CSSProperties = {
 };
 
 const textContainerStyle: React.CSSProperties = {
+  flex: 1,
   minWidth: 0,
   overflow: 'hidden',
 };
 
 const nameStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.8rem',
-  fontWeight: 600,
-  color: 'rgba(0,0,0,0.75)',
+  fontSize: '0.82rem',
+  fontWeight: 620,
+  color: 'rgba(0,0,0,0.78)',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -86,11 +89,16 @@ const nameStyle: React.CSSProperties = {
 
 const descriptorStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.68rem',
-  color: 'rgba(0,0,0,0.45)',
+  fontSize: '0.7rem',
+  color: 'rgba(0,0,0,0.42)',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+};
+
+const launchIconStyle: React.CSSProperties = {
+  flexShrink: 0,
+  color: 'rgba(34,83,145,0.35)',
 };
 
 /* ── Logo renderer ───────────────────────────────────────────────── */
@@ -150,6 +158,7 @@ export function LauncherShelfCard({ platform: p }: LauncherShelfCardProps): Reac
         <p style={nameStyle}>{p.name}</p>
         {p.descriptor && <p style={descriptorStyle}>{p.descriptor}</p>}
       </div>
+      <ExternalLink size={12} strokeWidth={1.8} style={launchIconStyle} />
     </a>
   );
 }

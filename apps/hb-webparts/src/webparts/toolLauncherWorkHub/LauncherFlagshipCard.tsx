@@ -1,18 +1,17 @@
 /**
  * LauncherFlagshipCard — Premium brand-led launch card for featured platforms.
  *
- * Phase 03-03: Logo asset binding via launcherAssetResolution with
- * governed fallback chain and onError recovery for broken images.
+ * Phase 11B: Composition re-architecture. Two variants:
+ *   - "hero": full-width horizontal layout with larger logo, descriptor,
+ *     and prominent CTA. Used for the primary featured platform.
+ *   - "standard": compact vertical layout for secondary featured platforms.
  *
- * Logo resolution order:
+ * Logo resolution order (unchanged from Phase 03-03):
  *   1. Record logoAssetRef (from SharePoint list)
  *   2. Asset manifest governed logo (light/dark variant)
  *   3. Manifest fallback Lucide icon
  *   4. Platform/category Lucide icon
  *   5. Monogram (first letter) as final fallback
- *
- * If an <img> fails to load (onError), the card falls back to the
- * next viable resolution (icon or monogram) without layout shift.
  */
 import * as React from 'react';
 import { motion, ExternalLink } from '@hbc/ui-kit/homepage';
@@ -26,83 +25,122 @@ import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLaunche
 
 export interface LauncherFlagshipCardProps {
   platform: LauncherPlatformRecord;
+  /** Card variant. 'hero' is full-width horizontal; 'standard' is compact vertical. */
+  variant?: 'hero' | 'standard';
 }
 
-/* ── Styles ───────────────────────────────────────────────────────── */
+/* ── Hero variant styles ─────────────────────────────────────────── */
 
-const cardStyle: React.CSSProperties = {
+const heroCardStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr',
+  gap: HP_SPACE['2xl'],
+  alignItems: 'center',
+  padding: HP_SPACE['2xl'],
+  border: HP_BORDER.standard,
+  borderRadius: HP_RADIUS.editorial,
+  background: 'linear-gradient(135deg, rgba(34,83,145,0.04) 0%, rgba(255,255,255,0.8) 100%)',
+  textDecoration: 'none',
+  color: 'inherit',
+  cursor: 'pointer',
+  borderLeft: '4px solid rgba(34,83,145,0.25)',
+};
+
+const heroLogoContainerStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 64,
+  height: 64,
+  borderRadius: HP_RADIUS.card,
+  background: 'rgba(34,83,145,0.06)',
+  flexShrink: 0,
+  overflow: 'hidden',
+};
+
+const heroContentStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: HP_SPACE.sm,
+  minWidth: 0,
+};
+
+const heroNameStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '1.05rem',
+  fontWeight: 700,
+  color: 'rgba(0,0,0,0.88)',
+  lineHeight: 1.2,
+};
+
+const heroDescriptorStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.82rem',
+  lineHeight: 1.45,
+  color: 'rgba(0,0,0,0.55)',
+};
+
+const heroCtaRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.xl,
+  marginTop: HP_SPACE.xs,
+};
+
+/* ── Standard variant styles ─────────────────────────────────────── */
+
+const standardCardStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: HP_SPACE.md,
-  padding: HP_SPACE['2xl'],
+  padding: HP_SPACE.xl,
   border: HP_BORDER.standard,
   borderRadius: HP_RADIUS.card,
-  background: 'rgba(255,255,255,0.7)',
+  background: 'rgba(255,255,255,0.75)',
   textDecoration: 'none',
   color: 'inherit',
   cursor: 'pointer',
 };
 
-const logoContainerStyle: React.CSSProperties = {
+const standardLogoContainerStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: 56,
-  height: 56,
-  borderRadius: HP_RADIUS.card,
+  width: 48,
+  height: 48,
+  borderRadius: HP_RADIUS.command,
   background: 'rgba(34,83,145,0.05)',
   flexShrink: 0,
   overflow: 'hidden',
 };
 
-const logoImageStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  padding: 8,
-};
-
-const monogramStyle: React.CSSProperties = {
-  fontSize: '1.25rem',
-  fontWeight: 700,
-  color: 'rgba(34,83,145,0.5)',
-  lineHeight: 1,
-  userSelect: 'none',
-};
-
-const cardHeaderStyle: React.CSSProperties = {
+const standardHeaderStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: HP_SPACE.lg,
 };
 
-const nameStyle: React.CSSProperties = {
+const standardNameStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.92rem',
+  fontSize: '0.88rem',
   fontWeight: 650,
   color: 'rgba(0,0,0,0.85)',
 };
 
-const descriptorStyle: React.CSSProperties = {
+const standardDescriptorStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.78rem',
+  fontSize: '0.76rem',
   lineHeight: 1.4,
-  color: 'rgba(0,0,0,0.55)',
+  color: 'rgba(0,0,0,0.5)',
 };
 
-const ctaRowStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  marginTop: 'auto',
-  paddingTop: HP_SPACE.md,
-};
+/* ── Shared styles ───────────────────────────────────────────────── */
 
 const ctaLabelStyle: React.CSSProperties = {
-  fontSize: '0.73rem',
+  fontSize: '0.74rem',
   fontWeight: 600,
   color: '#225391',
-  display: 'flex',
+  display: 'inline-flex',
   alignItems: 'center',
   gap: 4,
 };
@@ -111,7 +149,7 @@ const noticeBadgeStyle: React.CSSProperties = {
   fontSize: '0.68rem',
   fontWeight: 500,
   padding: `2px ${HP_SPACE.sm}px`,
-  borderRadius: 3,
+  borderRadius: 4,
   whiteSpace: 'nowrap',
 };
 
@@ -123,44 +161,89 @@ const BADGE_TONE_COLORS: Record<string, { bg: string; color: string }> = {
   neutral: { bg: 'rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.55)' },
 };
 
+const standardCtaRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginTop: 'auto',
+  paddingTop: HP_SPACE.sm,
+};
+
+const heroLogoImageStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'contain',
+  padding: 10,
+};
+
+const standardLogoImageStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'contain',
+  padding: 7,
+};
+
+const heroMonogramStyle: React.CSSProperties = {
+  fontSize: '1.4rem',
+  fontWeight: 700,
+  color: 'rgba(34,83,145,0.5)',
+  lineHeight: 1,
+  userSelect: 'none',
+};
+
+const standardMonogramStyle: React.CSSProperties = {
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  color: 'rgba(34,83,145,0.45)',
+  lineHeight: 1,
+  userSelect: 'none',
+};
+
 /* ── Motion variants ─────────────────────────────────────────────── */
 
-const hoverVariant = { scale: 1.015, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' };
+const heroHover = { scale: 1.008, boxShadow: '0 6px 24px rgba(34,83,145,0.1)' };
+const standardHover = { scale: 1.015, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' };
 const tapVariant = { scale: 0.985 };
 const restVariant = { scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)' };
 
 /* ── Logo renderer ───────────────────────────────────────────────── */
 
-function LogoContent({ resolution, onImageError }: {
+function LogoContent({ resolution, onImageError, variant }: {
   resolution: LogoResolution;
   onImageError: () => void;
+  variant: 'hero' | 'standard';
 }): React.JSX.Element {
+  const isHero = variant === 'hero';
   switch (resolution.type) {
     case 'image':
       return (
         <img
           src={resolution.src}
           alt={resolution.alt}
-          style={logoImageStyle}
+          style={isHero ? heroLogoImageStyle : standardLogoImageStyle}
           onError={onImageError}
         />
       );
     case 'icon': {
       const Icon = resolution.icon;
-      return <Icon size={26} strokeWidth={1.6} color="rgba(34,83,145,0.6)" />;
+      const size = isHero ? 30 : 24;
+      return <Icon size={size} strokeWidth={1.6} color="rgba(34,83,145,0.6)" />;
     }
     case 'monogram':
-      return <span style={monogramStyle} aria-hidden="true">{resolution.letter}</span>;
+      return (
+        <span style={isHero ? heroMonogramStyle : standardMonogramStyle} aria-hidden="true">
+          {resolution.letter}
+        </span>
+      );
   }
 }
 
 /* ── Component ───────────────────────────────────────────────────── */
 
-export function LauncherFlagshipCard({ platform: p }: LauncherFlagshipCardProps): React.JSX.Element {
+export function LauncherFlagshipCard({ platform: p, variant = 'standard' }: LauncherFlagshipCardProps): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
   const [imageErrored, setImageErrored] = React.useState(false);
 
-  // Resolve logo: primary resolution, or fallback icon on image error
   const primaryResolution = resolveLogoAsset(p);
   const fallbackResolution: LogoResolution = {
     type: 'icon',
@@ -174,12 +257,15 @@ export function LauncherFlagshipCard({ platform: p }: LauncherFlagshipCardProps)
     ? BADGE_TONE_COLORS[p.notice.tone] ?? BADGE_TONE_COLORS.info
     : undefined;
 
+  const isHero = variant === 'hero';
+  const hoverVariant = isHero ? heroHover : standardHover;
+
   return (
     <motion.a
       href={p.launchUrl}
       target={p.openInNewTab ? '_blank' : undefined}
       rel={p.openInNewTab ? 'noopener noreferrer' : undefined}
-      style={cardStyle}
+      style={isHero ? heroCardStyle : standardCardStyle}
       aria-label={`Launch ${p.name}`}
       initial={false}
       whileHover={reducedMotion ? undefined : hoverVariant}
@@ -187,37 +273,69 @@ export function LauncherFlagshipCard({ platform: p }: LauncherFlagshipCardProps)
       animate={restVariant}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
-      {/* Header: logo + name */}
-      <div style={cardHeaderStyle}>
-        <div style={logoContainerStyle}>
-          <LogoContent
-            resolution={resolution}
-            onImageError={() => setImageErrored(true)}
-          />
-        </div>
-        <p style={nameStyle}>{p.name}</p>
-      </div>
-
-      {/* Descriptor */}
-      {p.descriptor && <p style={descriptorStyle}>{p.descriptor}</p>}
-
-      {/* CTA row + optional notice badge */}
-      <div style={ctaRowStyle}>
-        <span style={ctaLabelStyle}>
-          Launch <ExternalLink size={11} strokeWidth={2} />
-        </span>
-        {p.notice && badgeColors && (
-          <span
-            style={{
-              ...noticeBadgeStyle,
-              background: badgeColors.bg,
-              color: badgeColors.color,
-            }}
-          >
-            {p.notice.label}
-          </span>
-        )}
-      </div>
+      {isHero ? (
+        /* ── Hero layout: horizontal with large logo ── */
+        <>
+          <div style={heroLogoContainerStyle}>
+            <LogoContent
+              resolution={resolution}
+              onImageError={() => setImageErrored(true)}
+              variant="hero"
+            />
+          </div>
+          <div style={heroContentStyle}>
+            <p style={heroNameStyle}>{p.name}</p>
+            {p.descriptor && <p style={heroDescriptorStyle}>{p.descriptor}</p>}
+            <div style={heroCtaRowStyle}>
+              <span style={ctaLabelStyle}>
+                Launch <ExternalLink size={12} strokeWidth={2} />
+              </span>
+              {p.notice && badgeColors && (
+                <span
+                  style={{
+                    ...noticeBadgeStyle,
+                    background: badgeColors.bg,
+                    color: badgeColors.color,
+                  }}
+                >
+                  {p.notice.label}
+                </span>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        /* ── Standard layout: compact vertical ── */
+        <>
+          <div style={standardHeaderStyle}>
+            <div style={standardLogoContainerStyle}>
+              <LogoContent
+                resolution={resolution}
+                onImageError={() => setImageErrored(true)}
+                variant="standard"
+              />
+            </div>
+            <p style={standardNameStyle}>{p.name}</p>
+          </div>
+          {p.descriptor && <p style={standardDescriptorStyle}>{p.descriptor}</p>}
+          <div style={standardCtaRowStyle}>
+            <span style={ctaLabelStyle}>
+              Launch <ExternalLink size={11} strokeWidth={2} />
+            </span>
+            {p.notice && badgeColors && (
+              <span
+                style={{
+                  ...noticeBadgeStyle,
+                  background: badgeColors.bg,
+                  color: badgeColors.color,
+                }}
+              >
+                {p.notice.label}
+              </span>
+            )}
+          </div>
+        </>
+      )}
     </motion.a>
   );
 }

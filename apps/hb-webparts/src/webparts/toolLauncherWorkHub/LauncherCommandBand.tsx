@@ -1,16 +1,19 @@
 /**
- * LauncherCommandBand — Responsive command surface with live search.
+ * LauncherCommandBand — Premium command surface with authoritative identity
+ * and live search.
  *
- * Phase 08-02: Interactive search with inline suggestion dropdown.
+ * Phase 11B: Composition re-architecture. Stronger identity region with
+ * brand accent, elevated search placement, forceful action buttons, and
+ * clearer hierarchy between identity / search / actions.
+ *
+ * Search behavior preserved from Phase 08-02:
  *   - Live filtering via launcherSearch contract (pre-computed searchText)
  *   - Keyboard: ArrowDown/Up to navigate, Enter to launch, Escape to dismiss
  *   - Suggestion dropdown shows top 6 matches with name + category
  *   - No-match state: "No platforms matching '{query}'"
- *   - Focus returns to input on Escape; suggestions dismiss on blur
- *   - Desktop/tablet: full search + actions; Mobile: search hidden
  */
 import * as React from 'react';
-import { Search, ExternalLink } from '@hbc/ui-kit/homepage';
+import { Search, ExternalLink, Settings, Info } from '@hbc/ui-kit/homepage';
 import {
   HP_SPACE,
   HP_RADIUS,
@@ -42,32 +45,50 @@ function getBandStyle(tier: ResponsiveTier): React.CSSProperties {
   const isMobile = tier === 'mobile';
   return {
     display: 'grid',
-    gridTemplateColumns: isMobile ? 'auto 1fr' : 'auto 1fr auto',
+    gridTemplateColumns: isMobile ? '1fr auto' : 'auto 1fr auto',
     alignItems: 'center',
-    gap: isMobile ? HP_SPACE.md : HP_SPACE['2xl'],
+    gap: isMobile ? HP_SPACE.lg : HP_SPACE['2xl'],
     padding: isMobile
-      ? `${HP_SPACE.md}px ${HP_SPACE.lg}px`
-      : `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
-    borderRadius: HP_RADIUS.command,
-    border: HP_BORDER.subtle,
-    background: 'rgba(34,83,145,0.03)',
-    minHeight: isMobile ? 38 : 44,
+      ? `${HP_SPACE.lg}px ${HP_SPACE.xl}px`
+      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
+    borderRadius: HP_RADIUS.card,
+    background: 'rgba(34,83,145,0.05)',
+    border: HP_BORDER.brandAccent,
+    minHeight: isMobile ? 44 : 52,
   };
 }
 
 const identityStyle: React.CSSProperties = {
   display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.lg,
+  minWidth: 0,
+};
+
+const identityIconContainerStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 32,
+  height: 32,
+  borderRadius: HP_RADIUS.command,
+  background: 'rgba(34,83,145,0.08)',
+  flexShrink: 0,
+};
+
+const identityTextStyle: React.CSSProperties = {
+  display: 'flex',
   flexDirection: 'column',
-  gap: 2,
+  gap: 1,
   minWidth: 0,
 };
 
 const titleStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.88rem',
-  fontWeight: 650,
-  letterSpacing: '0.015em',
-  color: 'rgba(0,0,0,0.8)',
+  fontSize: '0.95rem',
+  fontWeight: 700,
+  letterSpacing: '0.01em',
+  color: 'rgba(0,0,0,0.85)',
   whiteSpace: 'nowrap',
 };
 
@@ -84,28 +105,29 @@ const supportingLineStyle: React.CSSProperties = {
 const searchWrapperStyle: React.CSSProperties = {
   position: 'relative',
   minWidth: 0,
-  maxWidth: 320,
+  maxWidth: 360,
+  flex: 1,
 };
 
 const searchInputStyle: React.CSSProperties = {
   width: '100%',
-  padding: `${HP_SPACE.sm}px ${HP_SPACE.lg}px ${HP_SPACE.sm}px 32px`,
-  borderRadius: HP_RADIUS.command,
+  padding: `${HP_SPACE.md}px ${HP_SPACE.xl}px ${HP_SPACE.md}px 36px`,
+  borderRadius: HP_RADIUS.card,
   border: HP_BORDER.subtle,
-  background: 'rgba(255,255,255,0.6)',
-  fontSize: '0.78rem',
+  background: 'rgba(255,255,255,0.8)',
+  fontSize: '0.8rem',
   color: 'rgba(0,0,0,0.8)',
   outline: 'none',
-  transition: `border-color ${HP_MOTION.fast}`,
+  transition: `border-color ${HP_MOTION.fast}, box-shadow ${HP_MOTION.fast}`,
 };
 
 const searchIconStyle: React.CSSProperties = {
   position: 'absolute',
-  left: 10,
+  left: 12,
   top: '50%',
   transform: 'translateY(-50%)',
   pointerEvents: 'none',
-  color: 'rgba(0,0,0,0.3)',
+  color: 'rgba(34,83,145,0.4)',
 };
 
 const dropdownStyle: React.CSSProperties = {
@@ -116,10 +138,10 @@ const dropdownStyle: React.CSSProperties = {
   marginTop: 4,
   zIndex: 50,
   border: HP_BORDER.standard,
-  borderRadius: HP_RADIUS.command,
-  background: 'rgba(255,255,255,0.98)',
-  boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-  maxHeight: 240,
+  borderRadius: HP_RADIUS.card,
+  background: 'rgba(255,255,255,0.99)',
+  boxShadow: '0 6px 24px rgba(0,0,0,0.12)',
+  maxHeight: 260,
   overflowY: 'auto',
 };
 
@@ -127,9 +149,9 @@ const suggestionStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: HP_SPACE.sm,
-  padding: `${HP_SPACE.sm}px ${HP_SPACE.lg}px`,
-  fontSize: '0.76rem',
+  gap: HP_SPACE.md,
+  padding: `${HP_SPACE.md}px ${HP_SPACE.xl}px`,
+  fontSize: '0.78rem',
   color: 'rgba(0,0,0,0.75)',
   textDecoration: 'none',
   cursor: 'pointer',
@@ -150,15 +172,15 @@ const suggestionNameStyle: React.CSSProperties = {
 };
 
 const suggestionCategoryStyle: React.CSSProperties = {
-  fontSize: '0.65rem',
-  color: 'rgba(0,0,0,0.4)',
+  fontSize: '0.67rem',
+  color: 'rgba(0,0,0,0.38)',
   whiteSpace: 'nowrap',
   flexShrink: 0,
 };
 
 const noMatchStyle: React.CSSProperties = {
-  padding: `${HP_SPACE.lg}px`,
-  fontSize: '0.75rem',
+  padding: `${HP_SPACE.xl}px`,
+  fontSize: '0.76rem',
   color: 'rgba(0,0,0,0.4)',
   textAlign: 'center',
 };
@@ -168,19 +190,21 @@ const actionsStyle: React.CSSProperties = {
   alignItems: 'center',
   gap: HP_SPACE.md,
   flexShrink: 0,
-  justifyContent: 'flex-end',
 };
 
 const actionButtonStyle: React.CSSProperties = {
-  padding: `${HP_SPACE.xs}px ${HP_SPACE.lg}px`,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: HP_SPACE.xs,
+  padding: `${HP_SPACE.sm}px ${HP_SPACE.xl}px`,
   borderRadius: HP_RADIUS.command,
   border: HP_BORDER.subtle,
-  background: 'rgba(255,255,255,0.5)',
-  fontSize: '0.73rem',
-  fontWeight: 500,
-  color: 'rgba(0,0,0,0.6)',
+  background: 'rgba(255,255,255,0.7)',
+  fontSize: '0.74rem',
+  fontWeight: 600,
+  color: '#225391',
   cursor: 'pointer',
-  transition: `background ${HP_MOTION.fast}, color ${HP_MOTION.fast}`,
+  transition: `background ${HP_MOTION.fast}, border-color ${HP_MOTION.fast}`,
   whiteSpace: 'nowrap',
 };
 
@@ -278,18 +302,25 @@ export function LauncherCommandBand({
 
   return (
     <div style={getBandStyle(tier)} role="toolbar" aria-label={`${title} command band`}>
-      {/* Left: identity */}
+      {/* Left: identity with icon */}
       <div style={identityStyle}>
-        <h3 style={titleStyle}>{title}</h3>
-        {effectiveSupportingLine && (
-          <p style={supportingLineStyle}>{effectiveSupportingLine}</p>
+        {!isMobile && (
+          <div style={identityIconContainerStyle}>
+            <Settings size={16} strokeWidth={1.8} color="#225391" />
+          </div>
         )}
+        <div style={identityTextStyle}>
+          <h3 style={titleStyle}>{title}</h3>
+          {effectiveSupportingLine && (
+            <p style={supportingLineStyle}>{effectiveSupportingLine}</p>
+          )}
+        </div>
       </div>
 
       {/* Center: search with inline suggestions (hidden on mobile) */}
       {!isMobile && (
         <div style={searchWrapperStyle}>
-          <Search size={14} strokeWidth={2} style={searchIconStyle} />
+          <Search size={15} strokeWidth={2} style={searchIconStyle} />
           <input
             ref={inputRef}
             type="text"
@@ -348,6 +379,7 @@ export function LauncherCommandBand({
           disabled={!onAllPlatforms}
           aria-label="View all platforms"
         >
+          <Settings size={13} strokeWidth={2} />
           All Platforms
         </button>
         {!isMobile && (
@@ -358,6 +390,7 @@ export function LauncherCommandBand({
             disabled={!onNeedHelp}
             aria-label="Get help with platforms"
           >
+            <Info size={13} strokeWidth={2} />
             Need Help
           </button>
         )}

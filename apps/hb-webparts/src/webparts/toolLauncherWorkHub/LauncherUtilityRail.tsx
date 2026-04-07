@@ -1,21 +1,18 @@
 /**
- * LauncherUtilityRail — Secondary support/utility surface for Tool Launcher.
+ * LauncherUtilityRail — Premium support/utility surface for Tool Launcher.
  *
- * Phase 04-03: Notice rendering with priority ordering and visual
- * emphasis for critical/warning notices. Degraded states documented
- * and implemented for all partial-data combinations.
+ * Phase 11B: Composition re-architecture. Stronger section identity with
+ * branded icons, better visual rhythm between sections, and more
+ * intentional hierarchy for notices vs. support actions.
  *
  * Content categories (ordered by urgency):
- *   1. Platform Notices — priority-sorted (critical → warning → info → neutral),
- *      with stronger visual treatment for critical/warning notices
+ *   1. Platform Notices — priority-sorted (critical → warning → info → neutral)
  *   2. Need Help — help destination CTAs
  *   3. Request Access — access-request CTAs
  *   4. Support Contacts — support-owner metadata
  *
  * Degraded states:
- *   - Single-section rail: renders that section alone with full rail label
- *   - Notices without details: badge-only rendering, no detail line
- *   - Help without notices: help section alone, no empty notice placeholder
+ *   - Single-section rail: renders that section alone
  *   - Each section independently suppressible; rail suppresses when all empty
  */
 import * as React from 'react';
@@ -56,50 +53,70 @@ function byNoticePriority(
 
 const railContainerStyle: React.CSSProperties = {
   display: 'grid',
-  gap: HP_SPACE.lg,
+  gap: HP_SPACE.xl,
 };
 
-const railLabelStyle: React.CSSProperties = {
+const railHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: HP_SPACE.sm,
   margin: 0,
-  fontSize: '0.68rem',
-  fontWeight: 600,
+  fontSize: '0.72rem',
+  fontWeight: 700,
   textTransform: 'uppercase' as const,
   letterSpacing: '0.06em',
-  color: 'rgba(0,0,0,0.35)',
+  color: 'rgba(34,83,145,0.55)',
 };
 
 const sectionStyle: React.CSSProperties = {
-  padding: HP_SPACE.lg,
+  padding: HP_SPACE.xl,
   border: HP_BORDER.subtle,
   borderRadius: HP_RADIUS.card,
-  background: 'rgba(0,0,0,0.015)',
+  background: 'rgba(255,255,255,0.5)',
 };
 
 /** Stronger container for sections with critical/warning notices */
 const urgentSectionStyle: React.CSSProperties = {
   ...sectionStyle,
-  borderLeft: '3px solid rgba(200,40,40,0.3)',
+  borderLeft: '3px solid rgba(200,40,40,0.35)',
+  background: 'rgba(200,40,40,0.02)',
 };
 
 const sectionHeadingStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '0.72rem',
+  fontSize: '0.73rem',
   fontWeight: 650,
   textTransform: 'uppercase' as const,
   letterSpacing: '0.05em',
-  color: 'rgba(0,0,0,0.45)',
+  color: 'rgba(0,0,0,0.5)',
   display: 'flex',
   alignItems: 'center',
   gap: HP_SPACE.sm,
 };
 
+const sectionIconContainerStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 22,
+  height: 22,
+  borderRadius: 4,
+  background: 'rgba(34,83,145,0.06)',
+  flexShrink: 0,
+};
+
+const urgentIconContainerStyle: React.CSSProperties = {
+  ...sectionIconContainerStyle,
+  background: 'rgba(200,40,40,0.08)',
+};
+
 const countBadgeStyle: React.CSSProperties = {
   fontSize: '0.62rem',
   fontWeight: 500,
-  padding: `0 ${HP_SPACE.xs}px`,
-  borderRadius: 3,
-  background: 'rgba(0,0,0,0.06)',
-  color: 'rgba(0,0,0,0.5)',
+  padding: `1px ${HP_SPACE.sm}px`,
+  borderRadius: 4,
+  background: 'rgba(34,83,145,0.07)',
+  color: 'rgba(34,83,145,0.55)',
 };
 
 const urgentCountBadgeStyle: React.CSSProperties = {
@@ -109,22 +126,22 @@ const urgentCountBadgeStyle: React.CSSProperties = {
 };
 
 const noticeItemStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.md,
+  marginTop: HP_SPACE.lg,
   fontSize: '0.78rem',
-  lineHeight: 1.4,
+  lineHeight: 1.45,
   color: 'rgba(0,0,0,0.7)',
 };
 
 const noticeNameStyle: React.CSSProperties = {
-  fontWeight: 600,
+  fontWeight: 620,
 };
 
 const noticeLabelStyle: React.CSSProperties = {
   fontSize: '0.68rem',
   fontWeight: 500,
   padding: `1px ${HP_SPACE.xs}px`,
-  borderRadius: 3,
-  marginLeft: HP_SPACE.xs,
+  borderRadius: 4,
+  marginLeft: HP_SPACE.sm,
 };
 
 const NOTICE_TONE_COLORS: Record<string, { bg: string; color: string }> = {
@@ -138,17 +155,17 @@ const NOTICE_TONE_COLORS: Record<string, { bg: string; color: string }> = {
 const ctaLinkStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  gap: 4,
-  marginTop: HP_SPACE.sm,
+  gap: 5,
+  marginTop: HP_SPACE.md,
   fontSize: '0.78rem',
-  fontWeight: 500,
+  fontWeight: 550,
   color: '#225391',
   textDecoration: 'none',
 };
 
 const metadataLinkStyle: React.CSSProperties = {
   display: 'block',
-  marginTop: HP_SPACE.sm,
+  marginTop: HP_SPACE.md,
   fontSize: '0.75rem',
   color: 'rgba(0,0,0,0.6)',
   textDecoration: 'none',
@@ -165,7 +182,6 @@ const supportOwnerLabelStyle: React.CSSProperties = {
 function NoticesSection({ notices }: { notices: LauncherPresentationModel['noticesSummary']['activeNotices'] }): React.JSX.Element | null {
   if (notices.length === 0) return null;
 
-  // Sort by priority: critical → warning → info → success → neutral
   const sorted = [...notices].sort(byNoticePriority);
   const hasUrgent = sorted.some((n) => n.notice.tone === 'critical' || n.notice.tone === 'warning');
   const NoticeIcon = hasUrgent ? AlertTriangle : AlertCircle;
@@ -173,7 +189,9 @@ function NoticesSection({ notices }: { notices: LauncherPresentationModel['notic
   return (
     <div style={hasUrgent ? urgentSectionStyle : sectionStyle} data-rail-section="notices">
       <h4 style={sectionHeadingStyle}>
-        <NoticeIcon size={13} strokeWidth={2} />
+        <div style={hasUrgent ? urgentIconContainerStyle : sectionIconContainerStyle}>
+          <NoticeIcon size={12} strokeWidth={2} color={hasUrgent ? '#a02020' : 'rgba(34,83,145,0.5)'} />
+        </div>
         Platform Notices
         <span style={hasUrgent ? urgentCountBadgeStyle : countBadgeStyle}>{sorted.length}</span>
       </h4>
@@ -186,7 +204,7 @@ function NoticesSection({ notices }: { notices: LauncherPresentationModel['notic
               {n.notice.label}
             </span>
             {n.notice.details && (
-              <div style={{ marginTop: 2, fontSize: '0.72rem', color: 'rgba(0,0,0,0.5)' }}>
+              <div style={{ marginTop: 3, fontSize: '0.72rem', color: 'rgba(0,0,0,0.48)' }}>
                 {n.notice.details}
               </div>
             )}
@@ -203,7 +221,9 @@ function NeedHelpSection({ actions }: { actions: LauncherSupportSummary['helpAct
   return (
     <div style={sectionStyle} data-rail-section="help">
       <h4 style={sectionHeadingStyle}>
-        <Info size={13} strokeWidth={2} />
+        <div style={sectionIconContainerStyle}>
+          <Info size={12} strokeWidth={2} color="rgba(34,83,145,0.5)" />
+        </div>
         Need Help
       </h4>
       {actions.slice(0, 5).map((a) => (
@@ -228,7 +248,9 @@ function RequestAccessSection({ actions }: { actions: LauncherSupportSummary['ac
   return (
     <div style={sectionStyle} data-rail-section="access">
       <h4 style={sectionHeadingStyle}>
-        <Link2 size={13} strokeWidth={2} />
+        <div style={sectionIconContainerStyle}>
+          <Link2 size={12} strokeWidth={2} color="rgba(34,83,145,0.5)" />
+        </div>
         Request Access
       </h4>
       {actions.slice(0, 5).map((a) => (
@@ -253,7 +275,9 @@ function SupportContactsSection({ contacts }: { contacts: LauncherSupportSummary
   return (
     <div style={sectionStyle} data-rail-section="contacts">
       <h4 style={sectionHeadingStyle}>
-        <Users size={13} strokeWidth={2} />
+        <div style={sectionIconContainerStyle}>
+          <Users size={12} strokeWidth={2} color="rgba(34,83,145,0.5)" />
+        </div>
         Support Contacts
       </h4>
       {contacts.slice(0, 5).map((c) => (
@@ -293,7 +317,10 @@ export function LauncherUtilityRail({ presentation }: LauncherUtilityRailProps):
 
   return (
     <div style={railContainerStyle}>
-      <p style={railLabelStyle}>Support &amp; Status</p>
+      <p style={railHeaderStyle}>
+        <Info size={12} strokeWidth={2} />
+        Support &amp; Status
+      </p>
       <NoticesSection notices={activeNotices} />
       <NeedHelpSection actions={helpActions} />
       <RequestAccessSection actions={accessActions} />
