@@ -19,32 +19,32 @@
         "default": "People and Culture"
       },
       "description": {
-        "default": "Curated people moments including welcomes, anniversaries, promotions, and recognition."
+        "default": "People & Culture homepage surface — Kudos recognition, announcements, and weekly celebrations with rail-first composition and region suppression."
       },
       "officeFabricIconFontName": "People",
       "hiddenFromToolbox": true,
       "properties": {
-        "heading": "People and Culture",
-        "maxSecondaryEntries": 4,
-        "entries": [
+        "heading": "Celebrating Our People",
+        "maxAnnouncements": 4,
+        "maxKudosHeadlines": 6,
+        "maxCelebrations": 8,
+        "announcements": [
           {
-            "id": "culture-feature",
+            "id": "demo-promo",
             "personName": "Jordan Lee",
-            "eventType": "newHire",
-            "highlight": "Welcoming Jordan to the field operations team.",
-            "featured": true,
-            "order": 1,
-            "cta": {
-              "label": "Meet Jordan",
-              "href": "/sites/hb-central/people"
-            }
-          },
+            "announcementType": "promotion",
+            "headline": "Promoted to Senior Project Manager",
+            "summary": "Congratulations to Jordan on this well-deserved milestone.",
+            "publishDate": "2026-04-06"
+          }
+        ],
+        "kudos": [],
+        "celebrations": [
           {
-            "id": "culture-anniversary",
+            "id": "demo-bday",
             "personName": "Riley Brooks",
-            "eventType": "anniversary",
-            "highlight": "Celebrating 10 years of service and mentorship.",
-            "order": 2
+            "celebrationType": "birthday",
+            "celebrationDate": "2026-04-09"
           }
         ]
       }
@@ -73,7 +73,7 @@
       },
       "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4_1.0.0": {
         "type": "path",
-        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-8ba82947.js"
+        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-67f0f100.js"
       }
     }
   }
