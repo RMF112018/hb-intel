@@ -18,4 +18,5 @@ This phase exists because the full recognition feature requires archive browsing
 ## Implementation artifacts
 
 - `apps/hb-webparts/src/webparts/kudosPage/KudosPage.tsx` — employee-facing Kudos page
+- `apps/hb-webparts/src/webparts/kudosPage/KudosModerationWorkspace.tsx` — HR/admin moderation workspace
 - `apps/hb-webparts/src/webparts/kudosPage/index.ts` — exports
