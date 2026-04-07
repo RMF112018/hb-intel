@@ -10,6 +10,8 @@ Lock the People & Culture implementation to the final merged target architecture
 - explicitly define Kudos as a distinct recognition module
 - reject invalid implementation outcomes
 - define the final phase sequence
+- produce a gap register documenting assumption changes from the Kudos merge
+- define downstream phase responsibilities for Phases 1A through 10
 
 ## What this phase must exclude
 

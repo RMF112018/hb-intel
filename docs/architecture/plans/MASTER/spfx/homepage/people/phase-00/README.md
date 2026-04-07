@@ -13,4 +13,5 @@ This phase exists because the implementation must begin with the correct target 
 - implementation summary
 - prompt 01
 - prompt 02
+- gap register and downstream phase boundaries
 - validation checklist
