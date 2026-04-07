@@ -9,6 +9,7 @@
     "SharePointWebPart"
   ],
   "supportsThemeVariants": false,
+  "supportsFullBleed": true,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
@@ -74,7 +75,7 @@
       },
       "e8fa8a84-a48a-41d2-85a6-b7c7df70aeca_1.0.0": {
         "type": "path",
-        "path": "shell-entry-e8fa8a84-a48a-41d2-85a6-b7c7df70aeca-95ee1fcc.js"
+        "path": "shell-entry-e8fa8a84-a48a-41d2-85a6-b7c7df70aeca-813ef5e4.js"
       }
     }
   }
