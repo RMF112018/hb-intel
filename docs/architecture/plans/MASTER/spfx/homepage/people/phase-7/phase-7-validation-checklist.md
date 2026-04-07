@@ -1,6 +1,6 @@
 # Phase 7 — Band B — This Week — Validation Checklist
 
-- [ ] Band B layout implemented
-- [ ] tile structure implemented
-- [ ] density tuned beneath Kudos
-- [ ] no redesign of other regions introduced
+- [x] Band B layout implemented
+- [x] tile structure implemented
+- [x] density tuned beneath Kudos
+- [x] no redesign of other regions introduced

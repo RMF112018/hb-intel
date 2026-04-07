@@ -337,34 +337,34 @@ const bandBHeaderStyle: React.CSSProperties = {
 
 const celebrationGridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-  gap: HP_SPACE.md,
-  marginTop: HP_SPACE.xl,
+  gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+  gap: HP_SPACE.sm,
+  marginTop: HP_SPACE.md,
 };
 
 const celebrationTileStyle: React.CSSProperties = {
-  padding: HP_SPACE.lg,
+  padding: HP_SPACE.md,
   border: HP_BORDER.subtle,
   borderRadius: HP_RADIUS.card,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: HP_SPACE.xs,
+  gap: 3,
   textAlign: 'center' as const,
-  fontSize: '0.8125rem',
-  lineHeight: 1.4,
+  fontSize: '0.75rem',
+  lineHeight: 1.3,
 };
 
 const celebrationAvatarStyle: React.CSSProperties = {
-  width: 40,
-  height: 40,
+  width: 36,
+  height: 36,
   borderRadius: '50%',
   objectFit: 'cover' as const,
 };
 
 const celebrationAvatarPlaceholderStyle: React.CSSProperties = {
-  width: 40,
-  height: 40,
+  width: 36,
+  height: 36,
   borderRadius: '50%',
   background: 'rgba(34,83,145,0.06)',
   display: 'flex',
@@ -374,18 +374,12 @@ const celebrationAvatarPlaceholderStyle: React.CSSProperties = {
 
 const celebrationNameStyle: React.CSSProperties = {
   fontWeight: 500,
-  fontSize: '0.8125rem',
+  fontSize: '0.75rem',
   lineHeight: 1.3,
 };
 
-const celebrationTypeStyle: React.CSSProperties = {
-  fontSize: '0.6875rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-  lineHeight: 1.3,
-};
-
-const celebrationDateStyle: React.CSSProperties = {
-  fontSize: '0.6875rem',
+const celebrationMetaStyle: React.CSSProperties = {
+  fontSize: '0.625rem',
   opacity: HP_TEXT_OPACITY.secondary,
   lineHeight: 1.3,
 };
@@ -588,11 +582,12 @@ function formatRelativeDate(iso: string): string {
 function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): React.JSX.Element {
   const hasAvatar = Boolean(item.media?.src);
   const typeLabel = item.celebrationType === 'anniversary' && item.anniversaryYears
-    ? `${item.anniversaryYears} yr anniversary`
+    ? `${item.anniversaryYears} yr`
     : item.celebrationType === 'anniversary'
       ? 'Anniversary'
       : 'Birthday';
   const dateLabel = formatRelativeDate(item.celebrationDate);
+  const metaLabel = dateLabel ? `${typeLabel} · ${dateLabel}` : typeLabel;
 
   return (
     <div style={celebrationTileStyle}>
@@ -600,12 +595,11 @@ function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): Reac
         <img src={item.media!.src} alt={item.media!.alt ?? item.personName} style={celebrationAvatarStyle} />
       ) : (
         <div style={celebrationAvatarPlaceholderStyle}>
-          <Users size={16} />
+          <Users size={14} />
         </div>
       )}
       <div style={celebrationNameStyle}>{item.personName}</div>
-      <div style={celebrationTypeStyle}>{typeLabel}</div>
-      {dateLabel && <div style={celebrationDateStyle}>{dateLabel}</div>}
+      <div style={celebrationMetaStyle}>{metaLabel}</div>
     </div>
   );
 }
@@ -614,10 +608,17 @@ function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
   return (
     <section aria-label="This week celebrations" data-hbc-homepage="band-b">
       <div style={bandBRegionStyle}>
-        <h3 style={bandBHeaderStyle}>
-          <Calendar size={ICON_SIZE - 2} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
-          This Week
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md }}>
+          <h3 style={bandBHeaderStyle}>
+            <Calendar size={ICON_SIZE - 2} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
+            This Week
+          </h3>
+          {!output.isEmpty && (
+            <span style={{ fontSize: '0.6875rem', opacity: HP_TEXT_OPACITY.secondary }}>
+              {output.items.length}
+            </span>
+          )}
+        </div>
 
         {output.isEmpty ? (
           <div role="status" aria-live="polite" style={bandBEmptyStyle}>
