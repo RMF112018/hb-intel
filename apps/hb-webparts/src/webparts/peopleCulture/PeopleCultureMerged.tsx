@@ -1,19 +1,19 @@
 /**
- * PeopleCultureMerged — Premium People & Culture homepage surface
+ * PeopleCultureMerged — Signature People & Culture homepage surface
  *
- * Phase 11 / P03–P05: Rebuilt with rail-first composition and hardening.
- * Phase 11 / UI Remediation: Elevated to premium surface parity with
- * ProjectPortfolioSpotlight — adopting the same container, depth, hierarchy,
- * and polish grammar but shifted to a warmer, more celebratory register.
+ * A bold, warm, celebratory culture module designed as a homepage signature
+ * experience. Adopts the premium surface grammar from ProjectPortfolioSpotlight
+ * but translates it into a warmer, more expressive, more human-centered
+ * register appropriate for recognition, kudos, and celebrations.
  *
- * Focal sequence: Kudos → Announcements → Celebrations
- * Suppression: Empty regions omitted; module-level empty state when all empty.
+ * Design language: warm gradient hero banner, bold typography, orange-accent
+ * celebration energy, avatar-rich composition, layered card depth, editorial
+ * asymmetry between dominant spotlight and subordinate supporting zones.
  */
 import * as React from 'react';
 import {
   HbcPremiumBadge,
   HbcPremiumCta,
-  HbcHomepageEyebrow,
   HbcHomepageMetadataRow,
   motion,
   Users,
@@ -25,10 +25,6 @@ import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js'
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { useResponsiveTier, type ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
-import {
-  HP_SPACE,
-  HP_RADIUS,
-} from '../../homepage/tokens.js';
 import type { PeopleCultureMergedConfig } from '../../homepage/webparts/communicationsContracts.js';
 import type { BandAOutput, KudosModuleOutput, BandBOutput } from '../../homepage/webparts/communicationsContracts.js';
 
@@ -43,7 +39,7 @@ export interface PeopleCultureMergedProps {
 }
 
 // ---------------------------------------------------------------------------
-// Brand-native premium palette — warm People & Culture register
+// Brand palette — warm, celebratory register
 // ---------------------------------------------------------------------------
 
 const HB = {
@@ -51,552 +47,308 @@ const HB = {
   blueRgb: '34, 83, 145',
   orange: '#E57E46',
   orangeRgb: '229, 126, 70',
+  warmCream: '#FDF8F4',
+  warmCreamRgb: '253, 248, 244',
 } as const;
 
-const BRAND = {
-  /** Kudos spotlight background — warm subtle tint */
-  spotlightBg: `rgba(${HB.orangeRgb}, 0.03)`,
-  /** Supporting zone background — cool subtle tint */
-  supportBg: `rgba(${HB.blueRgb}, 0.025)`,
-  /** Supporting tile hover — warmer blue tint */
-  tileHover: `rgba(${HB.orangeRgb}, 0.06)`,
-  /** Section separator — orange-to-blue brand gradient (inverted from Spotlight) */
-  separator: `linear-gradient(90deg, rgba(${HB.orangeRgb}, 0.20) 0%, rgba(${HB.blueRgb}, 0.10) 60%, transparent 100%)`,
+const P = {
+  /** Hero banner gradient — warm brand statement */
+  heroBg: `linear-gradient(135deg, ${HB.orange} 0%, #D4693A 45%, ${HB.blue} 100%)`,
+  /** Spotlight zone — warm cream */
+  spotlightBg: HB.warmCream,
+  /** Support zone — cool mist */
+  supportBg: `rgba(${HB.blueRgb}, 0.022)`,
+  /** Featured card inner glow */
+  cardGlow: `0 4px 24px rgba(${HB.orangeRgb}, 0.12), 0 1px 4px rgba(0,0,0,0.04)`,
+  /** Root shadow — deep premium */
+  rootShadow: `0 2px 6px rgba(${HB.orangeRgb}, 0.08), 0 8px 32px rgba(${HB.blueRgb}, 0.10)`,
+  /** Separator gradient */
+  sep: `linear-gradient(90deg, rgba(${HB.orangeRgb}, 0.18) 0%, rgba(${HB.blueRgb}, 0.08) 60%, transparent 100%)`,
   /** Tile divider */
-  tileDivider: `rgba(${HB.orangeRgb}, 0.08)`,
-  /** Text hierarchy on light surfaces */
-  textPrimary: '#1a1a1a',
-  textSecondary: 'rgba(26, 26, 26, 0.68)',
-  textMuted: 'rgba(26, 26, 26, 0.48)',
-  textQuiet: 'rgba(26, 26, 26, 0.34)',
+  div: `rgba(${HB.orangeRgb}, 0.07)`,
+  /** Text scale */
+  text1: '#1a1a1a',
+  text2: 'rgba(26,26,26,0.68)',
+  text3: 'rgba(26,26,26,0.48)',
+  text4: 'rgba(26,26,26,0.34)',
 } as const;
 
 // ---------------------------------------------------------------------------
-// Root container — premium surface matching Spotlight grammar
+// Root container
 // ---------------------------------------------------------------------------
 
 const rootStyle: React.CSSProperties = {
   fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-  color: BRAND.textPrimary,
+  color: P.text1,
   background: '#ffffff',
-  borderRadius: HP_RADIUS.signature,
-  borderLeft: `4px solid ${HB.orange}`,
-  borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-  borderRight: '1px solid rgba(0, 0, 0, 0.06)',
-  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-  boxShadow: `0 1px 3px rgba(${HB.orangeRgb}, 0.06), 0 4px 20px rgba(${HB.orangeRgb}, 0.08)`,
+  borderRadius: 16,
+  border: '1px solid rgba(0,0,0,0.05)',
+  boxShadow: P.rootShadow,
   overflow: 'hidden',
-};
-
-const separatorStyle: React.CSSProperties = {
-  height: 1,
-  background: BRAND.separator,
-  margin: '0 24px',
-  border: 'none',
+  position: 'relative',
 };
 
 // ---------------------------------------------------------------------------
-// Motion — respects prefers-reduced-motion
+// Motion
 // ---------------------------------------------------------------------------
 
 const NO_MOTION = { initial: undefined, animate: undefined, transition: undefined };
 
-function getSpotlightMotion(reduced: boolean) {
-  if (reduced) return NO_MOTION;
-  return {
-    initial: { opacity: 0, y: 12 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-  };
+function heroMotion(r: boolean) {
+  return r ? NO_MOTION : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const } };
 }
-
-function getSupportMotion(reduced: boolean) {
-  if (reduced) return NO_MOTION;
-  return {
-    initial: { opacity: 0, x: 8 },
-    animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.35, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const },
-  };
+function railMotion(r: boolean) {
+  return r ? NO_MOTION : { initial: { opacity: 0, x: 10 }, animate: { opacity: 1, x: 0 }, transition: { duration: 0.4, delay: 0.15, ease: [0.22, 1, 0.36, 1] as const } };
 }
-
-// ---------------------------------------------------------------------------
-// Responsive style helpers
-// ---------------------------------------------------------------------------
-
-function getHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    padding: tier === 'mobile'
-      ? `${HP_SPACE['3xl']}px 16px ${HP_SPACE.xl}px`
-      : `${HP_SPACE['3xl']}px 24px ${HP_SPACE.xl}px`,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: HP_SPACE.xl,
-  };
-}
-
-const headerTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.875rem',
-  fontWeight: 700,
-  letterSpacing: '-0.01em',
-  color: HB.orange,
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.md,
-};
-
-function getCompositionStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'desktop') {
-    return { display: 'flex', flexWrap: 'wrap' };
-  }
-  return { display: 'flex', flexDirection: 'column' };
-}
-
-// ---------------------------------------------------------------------------
-// Announcement type maps
-// ---------------------------------------------------------------------------
-
-const ANNOUNCEMENT_LABEL: Record<string, string> = {
-  promotion: 'Congratulations',
-  newHire: 'Welcome',
-  baby: 'Baby Announcement',
-  wedding: 'Wedding Announcement',
-  special: 'Special Announcement',
-};
-
-const ANNOUNCEMENT_BADGE: Record<string, 'info' | 'success' | 'warning' | 'critical'> = {
-  promotion: 'critical',
-  newHire: 'info',
-  baby: 'success',
-  wedding: 'success',
-  special: 'warning',
-};
 
 // ---------------------------------------------------------------------------
 // Utility
 // ---------------------------------------------------------------------------
 
-function getInitials(name: string): string {
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+function initials(name: string): string {
+  const p = name.split(/\s+/).filter(Boolean);
+  if (p.length === 0) return '?';
+  if (p.length === 1) return p[0][0].toUpperCase();
+  return (p[0][0] + p[p.length - 1][0]).toUpperCase();
 }
 
-function formatRecipients(recipients: { name: string }[]): string {
-  if (recipients.length === 0) return '';
-  if (recipients.length === 1) return recipients[0].name;
-  if (recipients.length === 2) return `${recipients[0].name} and ${recipients[1].name}`;
-  return `${recipients[0].name}, ${recipients[1].name}, and ${recipients.length - 2} more`;
+function fmtRecipients(r: { name: string }[]): string {
+  if (r.length === 0) return '';
+  if (r.length === 1) return r[0].name;
+  if (r.length === 2) return `${r[0].name} and ${r[1].name}`;
+  return `${r[0].name}, ${r[1].name}, and ${r.length - 2} more`;
 }
 
-function formatRelativeDate(iso: string): string {
-  const celebMs = Date.parse(iso);
-  if (Number.isNaN(celebMs)) return '';
-  const todayMs = Date.now();
-  const diffDays = Math.round((celebMs - todayMs) / 86_400_000);
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Tomorrow';
-  if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
-  return new Date(celebMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function relDate(iso: string): string {
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) return '';
+  const d = Math.round((ms - Date.now()) / 86_400_000);
+  if (d === 0) return 'Today';
+  if (d === 1) return 'Tomorrow';
+  if (d > 1 && d <= 7) return `In ${d} days`;
+  return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
+
+const ANN_LABEL: Record<string, string> = { promotion: 'Promoted', newHire: 'New Hire', baby: 'Baby', wedding: 'Wedding', special: 'Special' };
+const ANN_BADGE: Record<string, 'info' | 'success' | 'warning' | 'critical'> = { promotion: 'critical', newHire: 'info', baby: 'success', wedding: 'success', special: 'warning' };
 
 // ---------------------------------------------------------------------------
-// Safe avatar — branded initials fallback on error
+// Avatar components
 // ---------------------------------------------------------------------------
 
-const AVATAR_SIZE = 36;
+function Avatar({ src, name, size, ring }: { src?: string; name: string; size: number; ring?: boolean }): React.JSX.Element {
+  const [err, setErr] = React.useState(false);
+  const borderStyle = ring ? `3px solid #ffffff` : `2px solid #ffffff`;
+  const shadowStyle = ring ? `0 0 0 2px ${HB.orange}` : '0 0 0 1px rgba(0,0,0,0.08)';
 
-function SafeAvatar({
-  src,
-  name,
-  size,
-}: {
-  src: string;
-  name: string;
-  size: number;
-}): React.JSX.Element {
-  const [error, setError] = React.useState(false);
-
-  if (error) {
+  if (src && !err) {
     return (
-      <span
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: `rgba(${HB.orangeRgb}, 0.10)`,
-          color: HB.orange,
-          fontSize: size < 30 ? '0.5625rem' : '0.6875rem',
-          fontWeight: 700,
-          letterSpacing: '0.02em',
-          flexShrink: 0,
-          border: '2px solid #ffffff',
-          boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.08)',
-        }}
-        aria-hidden="true"
-      >
-        {getInitials(name)}
-      </span>
+      <img src={src} alt={name} width={size} height={size} decoding="async"
+        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: borderStyle, boxShadow: shadowStyle }}
+        onError={() => setErr(true)}
+      />
     );
   }
 
   return (
-    <img
-      src={src}
-      alt={name}
-      width={size}
-      height={size}
-      decoding="async"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        objectFit: 'cover',
-        flexShrink: 0,
-        border: '2px solid #ffffff',
-        boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.08)',
-      }}
-      onError={() => setError(true)}
-    />
-  );
-}
-
-function AvatarPlaceholder({
-  name,
-  size,
-}: {
-  name: string;
-  size: number;
-}): React.JSX.Element {
-  return (
-    <span
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: `rgba(${HB.orangeRgb}, 0.10)`,
-        color: HB.orange,
-        fontSize: size < 30 ? '0.5625rem' : '0.6875rem',
-        fontWeight: 700,
-        letterSpacing: '0.02em',
-        flexShrink: 0,
-      }}
-      aria-hidden="true"
-    >
-      {getInitials(name)}
+    <span aria-hidden="true" style={{
+      width: size, height: size, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      background: `linear-gradient(135deg, rgba(${HB.orangeRgb},0.15), rgba(${HB.orangeRgb},0.08))`,
+      color: HB.orange, fontSize: size < 28 ? '0.5rem' : size < 40 ? '0.625rem' : '0.8125rem', fontWeight: 700, letterSpacing: '0.02em',
+      border: borderStyle, boxShadow: shadowStyle,
+    }}>
+      {initials(name)}
     </span>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Kudos featured spotlight — dominant zone (warm, celebratory)
+// Hero banner — warm gradient header strip
 // ---------------------------------------------------------------------------
 
-function KudosSpotlightZone({
-  output,
-  tier,
-  reducedMotion,
-}: {
-  output: KudosModuleOutput;
-  tier: ResponsiveTier;
-  reducedMotion: boolean;
-}): React.JSX.Element | null {
-  if (output.isEmpty) return null;
+function HeroBanner({ heading, tier }: { heading: string; tier: ResponsiveTier }): React.JSX.Element {
+  const h = tier === 'mobile' ? 72 : 88;
+  return (
+    <div style={{ background: P.heroBg, padding: `0 ${tier === 'mobile' ? 16 : 28}px`, height: h, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, position: 'relative', overflow: 'hidden' }}>
+      {/* Decorative circle — brand geo */}
+      <div aria-hidden="true" style={{ position: 'absolute', right: -20, top: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+      <div aria-hidden="true" style={{ position: 'absolute', right: 60, bottom: -30, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
-  const feat = output.featured;
-  if (!feat) return null;
+      <h2 style={{ margin: 0, fontSize: tier === 'mobile' ? '1.125rem' : '1.375rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#ffffff', display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 1 }}>
+        <Users size={tier === 'mobile' ? 16 : 20} aria-hidden="true" style={{ opacity: 0.9 }} />
+        {heading}
+      </h2>
 
-  const recipientLabel = formatRecipients(feat.recipients);
-  const hasMedia = Boolean(feat.recipients[0]?.media?.src);
-  const maxHeadlines = tier === 'mobile' ? 3 : 4;
-  const headlines = output.recentHeadlines.slice(0, maxHeadlines);
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" size="sm" />
+        <HbcPremiumCta label="View All" href="#view-all-kudos" variant="ghost" size="sm" arrow />
+      </div>
+    </div>
+  );
+}
 
-  const spotlightPadding = tier === 'mobile' ? '20px 16px 24px' : '28px 28px 32px';
+// ---------------------------------------------------------------------------
+// Kudos Spotlight — dominant hero zone
+// ---------------------------------------------------------------------------
+
+function KudosSpotlight({ output, tier, rm }: { output: KudosModuleOutput; tier: ResponsiveTier; rm: boolean }): React.JSX.Element | null {
+  if (output.isEmpty || !output.featured) return null;
+
+  const f = output.featured;
+  const rLabel = fmtRecipients(f.recipients);
+  const headlines = output.recentHeadlines.slice(0, tier === 'mobile' ? 2 : 3);
 
   return (
-    <motion.div
-      style={{
-        flex: tier === 'desktop' ? '1 1 60%' : '1 1 100%',
-        minWidth: tier === 'desktop' ? 380 : 0,
-        background: BRAND.spotlightBg,
-      }}
-      {...getSpotlightMotion(reducedMotion)}
-    >
-      <div style={{ padding: spotlightPadding, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <HbcHomepageEyebrow>Kudos Spotlight</HbcHomepageEyebrow>
+    <motion.div style={{ flex: tier === 'desktop' ? '1 1 62%' : '1 1 100%', minWidth: tier === 'desktop' ? 400 : 0, background: P.spotlightBg, padding: tier === 'mobile' ? '20px 16px 24px' : '28px 28px 32px' }} {...heroMotion(rm)}>
 
-        {/* Featured recognition card */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: tier === 'mobile' ? 'column' : 'row',
-            gap: 20,
-            padding: tier === 'mobile' ? '16px' : '20px 24px',
-            background: '#ffffff',
-            borderRadius: HP_RADIUS.editorial,
-            border: '1px solid rgba(0, 0, 0, 0.06)',
-            boxShadow: `0 2px 12px rgba(${HB.orangeRgb}, 0.08)`,
-          }}
-        >
-          {/* Avatar cluster */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-            {hasMedia ? (
-              <SafeAvatar src={feat.recipients[0].media!.src} name={feat.recipients[0].name} size={56} />
-            ) : (
-              <AvatarPlaceholder name={feat.recipients[0]?.name ?? 'Kudos'} size={56} />
-            )}
-            {feat.recipients.length > 1 && (
-              <div style={{ display: 'flex', marginTop: -8 }}>
-                {feat.recipients.slice(1, 4).map((r, i) => (
-                  <span key={r.id} style={{ marginLeft: i > 0 ? -6 : 0, position: 'relative', zIndex: 3 - i }}>
-                    {r.media?.src ? (
-                      <SafeAvatar src={r.media.src} name={r.name} size={24} />
-                    ) : (
-                      <AvatarPlaceholder name={r.name} size={24} />
-                    )}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <h3 style={{
-              margin: 0,
-              fontSize: tier === 'mobile' ? '1.125rem' : '1.25rem',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2,
-              color: BRAND.textPrimary,
-            }}>
-              {feat.headline}
-            </h3>
-
-            {recipientLabel && (
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: HB.orange }}>
-                {recipientLabel}
-              </span>
-            )}
-
-            <p style={{
-              margin: 0,
-              fontSize: '0.8125rem',
-              lineHeight: 1.65,
-              color: BRAND.textSecondary,
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical' as unknown as React.CSSProperties['WebkitBoxOrient'],
-              overflow: 'hidden',
-            }}>
-              {feat.excerpt}
-            </p>
-
-            <HbcHomepageMetadataRow separated>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Users size={11} aria-hidden="true" style={{ opacity: 0.7, color: HB.orange }} />
-                by {feat.submittedBy.displayName}
-              </span>
-              {typeof feat.celebrateCount === 'number' && feat.celebrateCount > 0 && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckCircle2 size={11} aria-hidden="true" style={{ opacity: 0.7, color: HB.orange }} />
-                  {feat.celebrateCount} celebration{feat.celebrateCount !== 1 ? 's' : ''}
+      {/* ── Featured praise card ── */}
+      <div style={{
+        background: '#ffffff', borderRadius: 14, padding: tier === 'mobile' ? 16 : 24,
+        boxShadow: P.cardGlow, border: '1px solid rgba(0,0,0,0.04)',
+        borderLeft: `5px solid ${HB.orange}`,
+        display: 'flex', flexDirection: tier === 'mobile' ? 'column' : 'row', gap: tier === 'mobile' ? 16 : 24,
+      }}>
+        {/* Avatar hero */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0, paddingTop: 2 }}>
+          <Avatar src={f.recipients[0]?.media?.src} name={f.recipients[0]?.name ?? 'Kudos'} size={68} ring />
+          {f.recipients.length > 1 && (
+            <div style={{ display: 'flex', marginTop: -10 }}>
+              {f.recipients.slice(1, 4).map((r, i) => (
+                <span key={r.id} style={{ marginLeft: i > 0 ? -8 : 0, position: 'relative', zIndex: 3 - i }}>
+                  <Avatar src={r.media?.src} name={r.name} size={26} />
                 </span>
-              )}
-            </HbcHomepageMetadataRow>
-
-            {/* CTA row */}
-            <div style={{ marginTop: 'auto', paddingTop: HP_SPACE.sm, display: 'flex', gap: HP_SPACE.xl, flexWrap: 'wrap' }}>
-              <HbcPremiumCta label="Celebrate" href="#celebrate" variant="secondary" size="sm" />
-              <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" size="sm" arrow />
+              ))}
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Recent kudos headlines */}
-        {headlines.length > 0 && (
-          <div>
-            {headlines.map((item) => {
-              const rLabel = formatRecipients(item.recipients);
-              const hasAv = Boolean(item.recipients[0]?.media?.src);
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '8px 4px',
-                    borderBottom: `1px solid ${BRAND.tileDivider}`,
-                    transition: 'background-color 150ms ease',
-                  }}
-                >
-                  {hasAv ? (
-                    <SafeAvatar src={item.recipients[0].media!.src} name={item.recipients[0].name} size={28} />
-                  ) : (
-                    <AvatarPlaceholder name={item.recipients[0]?.name ?? '?'} size={28} />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.35, color: BRAND.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
-                      {item.headline}
-                    </div>
-                    <span style={{ fontSize: '0.6875rem', color: BRAND.textMuted }}>
-                      {rLabel ? `${rLabel} · ` : ''}by {item.submittedBy.displayName}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* Eyebrow */}
+          <span style={{ fontSize: '0.625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: HB.orange, opacity: 0.85 }}>
+            Kudos Spotlight
+          </span>
+
+          <h3 style={{ margin: 0, fontSize: tier === 'mobile' ? '1.25rem' : '1.625rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.12, color: P.text1 }}>
+            {f.headline}
+          </h3>
+
+          {rLabel && (
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: HB.orange }}>
+              {rLabel}
+            </span>
+          )}
+
+          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.65, color: P.text2, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as unknown as React.CSSProperties['WebkitBoxOrient'], overflow: 'hidden' }}>
+            {f.excerpt}
+          </p>
+
+          <HbcHomepageMetadataRow separated>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Users size={11} aria-hidden="true" style={{ opacity: 0.6, color: HB.orange }} />
+              by {f.submittedBy.displayName}
+            </span>
+            {typeof f.celebrateCount === 'number' && f.celebrateCount > 0 && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: HB.orange, fontWeight: 600 }}>
+                <CheckCircle2 size={11} aria-hidden="true" />
+                {f.celebrateCount}
+              </span>
+            )}
+          </HbcHomepageMetadataRow>
+
+          <div style={{ marginTop: 'auto', paddingTop: 8, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <HbcPremiumCta label="Celebrate" href="#celebrate" variant="secondary" size="sm" />
+            <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" size="sm" arrow />
           </div>
-        )}
+        </div>
       </div>
+
+      {/* ── Recent kudos ribbon ── */}
+      {headlines.length > 0 && (
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: P.text4, marginBottom: 8 }}>
+            Recent Recognition
+          </div>
+          {headlines.map((item, idx) => {
+            const rl = fmtRecipients(item.recipients);
+            return (
+              <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 8px', borderRadius: 10, borderBottom: idx < headlines.length - 1 ? `1px solid ${P.div}` : undefined, transition: 'background 150ms ease', cursor: 'default' }}>
+                <Avatar src={item.recipients[0]?.media?.src} name={item.recipients[0]?.name ?? '?'} size={30} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.3, color: P.text1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{item.headline}</div>
+                  <span style={{ fontSize: '0.6875rem', color: P.text3 }}>{rl ? `${rl} · ` : ''}by {item.submittedBy.displayName}</span>
+                </div>
+                {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 && (
+                  <span style={{ fontSize: '0.625rem', fontWeight: 700, color: HB.orange, flexShrink: 0 }}>{item.celebrateCount}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </motion.div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Supporting zone — Announcements + Celebrations (subordinate)
+// Supporting zone — Announcements + Celebrations
 // ---------------------------------------------------------------------------
 
-function SupportingZone({
-  bandA,
-  bandB,
-  tier,
-  reducedMotion,
-}: {
-  bandA: BandAOutput;
-  bandB: BandBOutput;
-  tier: ResponsiveTier;
-  reducedMotion: boolean;
-}): React.JSX.Element | null {
+function SupportRail({ bandA, bandB, tier, rm }: { bandA: BandAOutput; bandB: BandBOutput; tier: ResponsiveTier; rm: boolean }): React.JSX.Element | null {
   if (bandA.isEmpty && bandB.isEmpty) return null;
 
-  const maxAnn = tier === 'mobile' ? 2 : 3;
-  const annItems = bandA.items.slice(0, maxAnn);
-  const maxCel = tier === 'mobile' ? 4 : 6;
-  const celItems = bandB.items.slice(0, maxCel);
-  const padX = tier === 'mobile' ? 16 : 20;
+  const ann = bandA.items.slice(0, tier === 'mobile' ? 2 : 3);
+  const cel = bandB.items.slice(0, tier === 'mobile' ? 4 : 6);
+  const px = tier === 'mobile' ? 16 : 20;
 
   return (
-    <motion.div
-      style={{
-        flex: tier === 'desktop' ? '1 1 36%' : '1 1 100%',
-        minWidth: tier === 'desktop' ? 240 : 0,
-        borderLeft: tier === 'desktop' ? `1px solid ${BRAND.tileDivider}` : undefined,
-        borderTop: tier !== 'desktop' ? `1px solid ${BRAND.tileDivider}` : undefined,
-        display: 'flex',
-        flexDirection: 'column',
-        background: BRAND.supportBg,
-      }}
-      {...getSupportMotion(reducedMotion)}
-    >
-      {/* Announcements */}
-      {annItems.length > 0 && (
-        <div style={{ padding: `${HP_SPACE['2xl']}px ${padX}px ${HP_SPACE.xl}px` }}>
-          <div style={{
-            fontSize: '0.6875rem',
-            fontWeight: 600,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase' as const,
-            color: BRAND.textQuiet,
-            marginBottom: HP_SPACE.lg,
-          }}>
-            Highlights
-          </div>
-          {annItems.map((item) => {
-            const label = ANNOUNCEMENT_LABEL[item.announcementType] ?? item.announcementType;
-            const badgeStatus = ANNOUNCEMENT_BADGE[item.announcementType] ?? 'info';
+    <motion.div style={{
+      flex: tier === 'desktop' ? '1 1 34%' : '1 1 100%',
+      minWidth: tier === 'desktop' ? 240 : 0,
+      borderLeft: tier === 'desktop' ? `1px solid ${P.div}` : undefined,
+      borderTop: tier !== 'desktop' ? `1px solid ${P.div}` : undefined,
+      background: P.supportBg,
+      display: 'flex', flexDirection: 'column',
+    }} {...railMotion(rm)}>
+
+      {/* ── Announcements ── */}
+      {ann.length > 0 && (
+        <div style={{ padding: `18px ${px}px 14px` }}>
+          <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: P.text4, marginBottom: 10 }}>Highlights</div>
+          {ann.map((item, idx) => {
+            const label = ANN_LABEL[item.announcementType] ?? item.announcementType;
+            const badge = ANN_BADGE[item.announcementType] ?? 'info';
             return (
-              <div
-                key={item.id}
-                style={{
-                  display: 'flex',
-                  gap: HP_SPACE.xl,
-                  padding: `${HP_SPACE.lg}px 0`,
-                  borderTop: `1px solid ${BRAND.tileDivider}`,
-                  alignItems: 'flex-start',
-                  minHeight: 44,
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <p style={{ margin: 0, fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.35, color: BRAND.textPrimary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
-                    {item.personName}
-                  </p>
-                  <span style={{ fontSize: '0.6875rem', color: BRAND.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
-                    {item.headline}
-                  </span>
-                  <div style={{ display: 'flex', gap: HP_SPACE.sm, flexWrap: 'wrap', marginTop: 2 }}>
-                    <HbcPremiumBadge label={label} status={badgeStatus} size="sm" />
-                  </div>
+              <div key={item.id} style={{ display: 'flex', gap: 10, padding: '8px 0', borderTop: idx > 0 ? `1px solid ${P.div}` : undefined, alignItems: 'center', minHeight: 44 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, lineHeight: 1.3, color: P.text1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{item.personName}</div>
+                  <div style={{ fontSize: '0.6875rem', color: P.text3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{item.headline}</div>
                 </div>
+                <HbcPremiumBadge label={label} status={badge} size="sm" />
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Celebrations */}
-      {celItems.length > 0 && (
-        <div style={{
-          padding: `${HP_SPACE['2xl']}px ${padX}px ${HP_SPACE['2xl']}px`,
-          borderTop: annItems.length > 0 ? `1px solid ${BRAND.tileDivider}` : undefined,
-          flex: 1,
-        }}>
-          <div style={{
-            fontSize: '0.6875rem',
-            fontWeight: 600,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase' as const,
-            color: BRAND.textQuiet,
-            marginBottom: HP_SPACE.lg,
-          }}>
-            This Week
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))',
-            gap: HP_SPACE.md,
-          }}>
-            {celItems.map((item) => {
-              const typeLabel = item.celebrationType === 'anniversary' && item.anniversaryYears
-                ? `${item.anniversaryYears} yr`
-                : item.celebrationType === 'anniversary'
-                  ? 'Anniv.'
-                  : '🎂';
-              const dateLabel = formatRelativeDate(item.celebrationDate);
-              const hasAvatar = Boolean(item.media?.src);
+      {/* ── Celebrations ribbon ── */}
+      {cel.length > 0 && (
+        <div style={{ padding: `14px ${px}px 18px`, borderTop: ann.length > 0 ? `1px solid ${P.div}` : undefined, flex: 1 }}>
+          <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: P.text4, marginBottom: 10 }}>This Week</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {cel.map((item) => {
+              const tl = item.celebrationType === 'anniversary' && item.anniversaryYears ? `${item.anniversaryYears} yr` : item.celebrationType === 'birthday' ? 'Birthday' : 'Anniv.';
+              const dl = relDate(item.celebrationDate);
               return (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: HP_SPACE.sm,
-                    borderRadius: HP_RADIUS.card,
-                    textAlign: 'center',
-                    transition: 'background-color 150ms ease',
-                  }}
-                >
-                  {hasAvatar ? (
-                    <SafeAvatar src={item.media!.src} name={item.personName} size={AVATAR_SIZE} />
-                  ) : (
-                    <AvatarPlaceholder name={item.personName} size={AVATAR_SIZE} />
-                  )}
-                  <div style={{ fontWeight: 600, fontSize: '0.6875rem', lineHeight: 1.3, color: BRAND.textPrimary, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
-                    {item.personName.split(' ')[0]}
-                  </div>
-                  <div style={{ fontSize: '0.5625rem', color: BRAND.textMuted, lineHeight: 1.2 }}>
-                    {typeLabel}{dateLabel ? ` · ${dateLabel}` : ''}
+                <div key={item.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px 6px 6px',
+                  background: `rgba(${HB.orangeRgb}, 0.04)`, borderRadius: 20, border: `1px solid rgba(${HB.orangeRgb}, 0.08)`,
+                  transition: 'background 150ms ease, border-color 150ms ease',
+                }}>
+                  <Avatar src={item.media?.src} name={item.personName} size={28} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.6875rem', fontWeight: 700, lineHeight: 1.2, color: P.text1, whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 100 }}>{item.personName.split(' ')[0]}</div>
+                    <div style={{ fontSize: '0.5625rem', color: P.text3, lineHeight: 1.2 }}>{tl}{dl ? ` · ${dl}` : ''}</div>
                   </div>
                 </div>
               );
@@ -605,12 +357,8 @@ function SupportingZone({
         </div>
       )}
 
-      {/* Footer CTA */}
-      <div style={{
-        padding: `${HP_SPACE.lg}px ${padX}px ${HP_SPACE['2xl']}px`,
-        borderTop: `1px solid ${BRAND.tileDivider}`,
-        textAlign: 'right',
-      }}>
+      {/* Footer */}
+      <div style={{ padding: `10px ${px}px 16px`, borderTop: `1px solid ${P.div}`, textAlign: 'right', marginTop: 'auto' }}>
         <HbcPremiumCta label="View all" href="#people-culture" variant="ghost" size="sm" arrow />
       </div>
     </motion.div>
@@ -618,94 +366,67 @@ function SupportingZone({
 }
 
 // ---------------------------------------------------------------------------
-// Sparse fallback — when we have some data but no featured kudos
+// Sparse layout — no featured kudos
 // ---------------------------------------------------------------------------
 
-function SparseLayout({
-  bandA,
-  bandB,
-  tier,
-  reducedMotion,
-}: {
-  bandA: BandAOutput;
-  bandB: BandBOutput;
-  tier: ResponsiveTier;
-  reducedMotion: boolean;
-}): React.JSX.Element {
-  const padX = tier === 'mobile' ? 16 : 24;
-  const annItems = bandA.items.slice(0, 3);
-  const celItems = bandB.items.slice(0, 6);
+function SparseLayout({ bandA, bandB, tier, rm }: { bandA: BandAOutput; bandB: BandBOutput; tier: ResponsiveTier; rm: boolean }): React.JSX.Element {
+  const px = tier === 'mobile' ? 16 : 28;
+  const ann = bandA.items.slice(0, 3);
+  const cel = bandB.items.slice(0, 6);
 
   return (
-    <motion.div
-      style={{ padding: `${HP_SPACE['2xl']}px ${padX}px ${HP_SPACE['3xl']}px`, display: 'flex', flexDirection: 'column', gap: 20 }}
-      {...getSpotlightMotion(reducedMotion)}
-    >
-      {/* Warm encouragement when no Kudos */}
+    <motion.div style={{ padding: `24px ${px}px 32px`, display: 'flex', flexDirection: 'column', gap: 24 }} {...heroMotion(rm)}>
+      {/* Invite hero */}
       <div style={{
-        padding: '20px 24px',
-        background: `linear-gradient(135deg, rgba(${HB.orangeRgb}, 0.04) 0%, rgba(${HB.blueRgb}, 0.02) 100%)`,
-        borderRadius: HP_RADIUS.editorial,
-        border: '1px solid rgba(0, 0, 0, 0.04)',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 10,
+        padding: '28px 24px', borderRadius: 14,
+        background: `linear-gradient(135deg, rgba(${HB.orangeRgb},0.06) 0%, rgba(${HB.blueRgb},0.03) 100%)`,
+        border: `1px solid rgba(${HB.orangeRgb},0.08)`,
+        textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
       }}>
-        <CheckCircle2 size={24} style={{ color: HB.orange, opacity: 0.6 }} />
-        <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: BRAND.textPrimary }}>
-          Recognize a teammate
+        <div style={{ width: 48, height: 48, borderRadius: '50%', background: `linear-gradient(135deg, ${HB.orange}, #D4693A)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CheckCircle2 size={22} style={{ color: '#ffffff' }} />
         </div>
-        <p style={{ margin: 0, fontSize: '0.8125rem', color: BRAND.textMuted, maxWidth: '32ch' }}>
+        <div style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '-0.02em', color: P.text1 }}>Recognize a teammate</div>
+        <p style={{ margin: 0, fontSize: '0.8125rem', color: P.text3, maxWidth: '36ch', lineHeight: 1.6 }}>
           Be the first to spotlight great work, team wins, or everyday excellence.
         </p>
-        <div style={{ marginTop: HP_SPACE.sm }}>
-          <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="secondary" size="sm" arrow />
-        </div>
+        <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="secondary" size="md" arrow />
       </div>
 
-      {/* Announcements as compact cards if available */}
-      {annItems.length > 0 && (
+      {/* Announcements */}
+      {ann.length > 0 && (
         <div>
-          <HbcHomepageEyebrow>Highlights</HbcHomepageEyebrow>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginTop: HP_SPACE.lg }}>
-            {annItems.map((item) => {
-              const label = ANNOUNCEMENT_LABEL[item.announcementType] ?? item.announcementType;
-              const badgeStatus = ANNOUNCEMENT_BADGE[item.announcementType] ?? 'info';
-              return (
-                <div key={item.id} style={{ display: 'flex', gap: 12, padding: '10px 4px', borderBottom: `1px solid ${BRAND.tileDivider}`, alignItems: 'center' }}>
-                  <HbcPremiumBadge label={label} status={badgeStatus} size="sm" />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.35, color: BRAND.textPrimary }}>{item.personName}</div>
-                    <div style={{ fontSize: '0.6875rem', color: BRAND.textMuted }}>{item.headline}</div>
-                  </div>
+          <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: P.text4, marginBottom: 10 }}>Highlights</div>
+          {ann.map((item) => {
+            const label = ANN_LABEL[item.announcementType] ?? item.announcementType;
+            const badge = ANN_BADGE[item.announcementType] ?? 'info';
+            return (
+              <div key={item.id} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: `1px solid ${P.div}`, alignItems: 'center' }}>
+                <HbcPremiumBadge label={label} status={badge} size="sm" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, lineHeight: 1.3, color: P.text1 }}>{item.personName}</div>
+                  <div style={{ fontSize: '0.6875rem', color: P.text3 }}>{item.headline}</div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Celebrations inline */}
-      {celItems.length > 0 && (
+      {/* Celebrations chips */}
+      {cel.length > 0 && (
         <div>
-          <HbcHomepageEyebrow>This Week</HbcHomepageEyebrow>
-          <div style={{ display: 'flex', gap: HP_SPACE.xl, marginTop: HP_SPACE.lg, flexWrap: 'wrap' }}>
-            {celItems.map((item) => {
-              const hasAvatar = Boolean(item.media?.src);
-              const typeLabel = item.celebrationType === 'anniversary' && item.anniversaryYears
-                ? `${item.anniversaryYears} yr`
-                : item.celebrationType === 'birthday' ? '🎂' : 'Anniv.';
+          <div style={{ fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: P.text4, marginBottom: 10 }}>This Week</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {cel.map((item) => {
+              const tl = item.celebrationType === 'birthday' ? 'Birthday' : item.anniversaryYears ? `${item.anniversaryYears} yr` : 'Anniv.';
               return (
-                <div key={item.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: 56, textAlign: 'center' }}>
-                  {hasAvatar ? (
-                    <SafeAvatar src={item.media!.src} name={item.personName} size={32} />
-                  ) : (
-                    <AvatarPlaceholder name={item.personName} size={32} />
-                  )}
-                  <div style={{ fontWeight: 600, fontSize: '0.625rem', lineHeight: 1.2, color: BRAND.textPrimary }}>{item.personName.split(' ')[0]}</div>
-                  <div style={{ fontSize: '0.5625rem', color: BRAND.textMuted }}>{typeLabel}</div>
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px 6px 6px', background: `rgba(${HB.orangeRgb},0.04)`, borderRadius: 20, border: `1px solid rgba(${HB.orangeRgb},0.08)` }}>
+                  <Avatar name={item.personName} size={26} />
+                  <div>
+                    <div style={{ fontSize: '0.6875rem', fontWeight: 700, lineHeight: 1.2, color: P.text1 }}>{item.personName.split(' ')[0]}</div>
+                    <div style={{ fontSize: '0.5625rem', color: P.text3 }}>{tl}</div>
+                  </div>
                 </div>
               );
             })}
@@ -720,81 +441,35 @@ function SparseLayout({
 // Main component
 // ---------------------------------------------------------------------------
 
-function hasAnyInputData(config: Partial<PeopleCultureMergedConfig> | undefined): boolean {
-  return Boolean(
-    config?.announcements?.length
-    || config?.kudos?.length
-    || config?.celebrations?.length,
-  );
+function hasAnyInput(c: Partial<PeopleCultureMergedConfig> | undefined): boolean {
+  return Boolean(c?.announcements?.length || c?.kudos?.length || c?.celebrations?.length);
 }
 
-export function PeopleCultureMerged({
-  config,
-  activeAudience,
-  isLoading = false,
-}: PeopleCultureMergedProps): React.JSX.Element {
+export function PeopleCultureMerged({ config, activeAudience, isLoading = false }: PeopleCultureMergedProps): React.JSX.Element {
   const tier = useResponsiveTier();
-  const reducedMotion = usePrefersReducedMotion();
+  const rm = usePrefersReducedMotion();
 
-  // Loading
-  if (isLoading) {
-    return <HomepageLoadingState label="Loading People & Culture" />;
-  }
+  if (isLoading) return <HomepageLoadingState label="Loading People & Culture" />;
 
-  // Normalize
   let output: ReturnType<typeof normalizePeopleCultureMergedConfig>;
-  try {
-    output = normalizePeopleCultureMergedConfig(config, activeAudience);
-  } catch {
-    const message = resolveAuthoringMessage('peopleCulture', 'invalid');
-    return <HomepageEmptyState title={message.title} description={message.description} />;
-  }
+  try { output = normalizePeopleCultureMergedConfig(config, activeAudience); }
+  catch { const m = resolveAuthoringMessage('peopleCulture', 'invalid'); return <HomepageEmptyState title={m.title} description={m.description} />; }
 
   const allEmpty = output.bandA.isEmpty && output.kudos.isEmpty && output.bandB.isEmpty;
-  const hadInput = hasAnyInputData(config);
-
-  if (allEmpty && !hadInput) {
-    const message = resolveAuthoringMessage('peopleCulture', 'noData');
-    return <HomepageEmptyState title={message.title} description={message.description} />;
-  }
-
-  if (allEmpty && hadInput) {
-    const message = resolveAuthoringMessage('peopleCulture', 'invalid');
-    return <HomepageEmptyState title={message.title} description={message.description} />;
-  }
-
-  const hasKudos = !output.kudos.isEmpty;
+  if (allEmpty && !hasAnyInput(config)) { const m = resolveAuthoringMessage('peopleCulture', 'noData'); return <HomepageEmptyState title={m.title} description={m.description} />; }
+  if (allEmpty) { const m = resolveAuthoringMessage('peopleCulture', 'invalid'); return <HomepageEmptyState title={m.title} description={m.description} />; }
 
   return (
-    <section
-      data-hbc-homepage="people-culture"
-      data-hbc-authoring-safe="true"
-      aria-label={output.heading}
-      style={rootStyle}
-    >
-      {/* Header */}
-      <div style={getHeaderStyle(tier)}>
-        <h2 style={headerTitleStyle}>
-          <Users size={14} aria-hidden="true" />
-          {output.heading}
-        </h2>
-        <div style={{ display: 'flex', gap: HP_SPACE.md, alignItems: 'center' }}>
-          <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" size="sm" />
-          <HbcPremiumCta label="View All Kudos" href="#view-all-kudos" variant="ghost" size="sm" arrow />
-        </div>
-      </div>
+    <section data-hbc-homepage="people-culture" data-hbc-authoring-safe="true" aria-label={output.heading} style={rootStyle}>
+      <HeroBanner heading={output.heading} tier={tier} />
 
-      {/* Separator */}
-      <div role="separator" style={separatorStyle} />
-
-      {/* Content composition */}
-      {hasKudos ? (
-        <div style={getCompositionStyle(tier)}>
-          <KudosSpotlightZone output={output.kudos} tier={tier} reducedMotion={reducedMotion} />
-          <SupportingZone bandA={output.bandA} bandB={output.bandB} tier={tier} reducedMotion={reducedMotion} />
+      {!output.kudos.isEmpty ? (
+        <div style={tier === 'desktop' ? { display: 'flex', flexWrap: 'wrap' } : { display: 'flex', flexDirection: 'column' }}>
+          <KudosSpotlight output={output.kudos} tier={tier} rm={rm} />
+          <SupportRail bandA={output.bandA} bandB={output.bandB} tier={tier} rm={rm} />
         </div>
       ) : (
-        <SparseLayout bandA={output.bandA} bandB={output.bandB} tier={tier} reducedMotion={reducedMotion} />
+        <SparseLayout bandA={output.bandA} bandB={output.bandB} tier={tier} rm={rm} />
       )}
     </section>
   );
