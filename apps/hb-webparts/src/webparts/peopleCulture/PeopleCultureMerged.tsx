@@ -1,15 +1,8 @@
 /**
  * PeopleCultureMerged — Three-region People & Culture desktop shell
- * Phase 3 — Desktop Composition Skeleton
  *
- * Structural shell with header, Band A (announcements), Kudos Module,
- * and Band B (weekly celebrations). Each region renders independently
- * with its own empty/populated state. Detailed region UIs are built
- * in Phases 4–7.
- *
- * Phase 3-02: Tuned hierarchy, spacing, and visual weight so the
- * four-part structure feels intentional and premium before detailed
- * region work begins.
+ * Phase 3: Desktop composition skeleton with four-part structure.
+ * Phase 4: Band A editorial announcement grid with medium-format cards.
  */
 import * as React from 'react';
 import {
@@ -63,6 +56,26 @@ const shellStyle: React.CSSProperties = {
 };
 
 // ---------------------------------------------------------------------------
+// Band A — Announcement type label and badge mappings
+// ---------------------------------------------------------------------------
+
+const ANNOUNCEMENT_LABEL_MAP: Record<string, string> = {
+  promotion: 'Congratulations',
+  newHire: 'Welcome',
+  baby: 'Baby Announcement',
+  wedding: 'Wedding Announcement',
+  special: 'Special Announcement',
+};
+
+const ANNOUNCEMENT_BADGE_MAP: Record<string, 'info' | 'success' | 'warning' | 'critical'> = {
+  promotion: 'critical',
+  newHire: 'info',
+  baby: 'success',
+  wedding: 'success',
+  special: 'warning',
+};
+
+// ---------------------------------------------------------------------------
 // Band A styles — editorial announcement layer (most formal)
 // ---------------------------------------------------------------------------
 
@@ -79,17 +92,47 @@ const bandAHeaderStyle: React.CSSProperties = {
   letterSpacing: '0.01em',
 };
 
-const announcementItemStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.lg,
-  padding: `${HP_SPACE.md}px 0`,
-  borderBottom: HP_BORDER.subtle,
+const announcementGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gap: HP_SPACE.xl,
+  marginTop: HP_SPACE.xl,
 };
 
-const announcementItemLastStyle: React.CSSProperties = {
-  ...announcementItemStyle,
-  borderBottom: 'none',
+const announcementCardStyle: React.CSSProperties = {
+  padding: HP_SPACE['2xl'],
+  border: HP_BORDER.standard,
+  borderRadius: HP_RADIUS.editorial,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: HP_SPACE.sm,
+};
+
+const announcementCardImageStyle: React.CSSProperties = {
+  width: '100%',
+  maxHeight: 160,
+  objectFit: 'cover' as const,
+  borderRadius: HP_RADIUS.image,
+  display: 'block',
+};
+
+const announcementCardNameStyle: React.CSSProperties = {
+  fontSize: '0.9375rem',
+  fontWeight: 600,
+  lineHeight: 1.3,
+};
+
+const announcementCardHeadlineStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  fontWeight: 500,
+  lineHeight: 1.4,
+};
+
+const announcementCardSummaryStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  lineHeight: 1.5,
+  opacity: HP_TEXT_OPACITY.secondary,
+  margin: 0,
 };
 
 // ---------------------------------------------------------------------------
@@ -203,14 +246,29 @@ function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | n
           <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
           Highlights
         </h3>
-        <div style={{ marginTop: HP_SPACE.xl }}>
-          {output.items.map((item, index) => (
-            <div key={item.id} style={index === output.items.length - 1 ? announcementItemLastStyle : announcementItemStyle}>
-              <HbcPremiumBadge label={item.announcementType} status="info" size="sm" />
-              <span style={{ fontWeight: 500 }}>{item.personName}</span>
-              <span style={{ opacity: HP_TEXT_OPACITY.secondary, fontSize: '0.8125rem', flex: 1 }}>
-                {item.headline}
-              </span>
+        <div style={announcementGridStyle}>
+          {output.items.map((item) => (
+            <div key={item.id} style={announcementCardStyle}>
+              {item.media && (
+                <img
+                  src={item.media.src}
+                  alt={item.media.alt}
+                  style={announcementCardImageStyle}
+                />
+              )}
+              <HbcPremiumBadge
+                label={ANNOUNCEMENT_LABEL_MAP[item.announcementType] ?? item.announcementType}
+                status={ANNOUNCEMENT_BADGE_MAP[item.announcementType] ?? 'info'}
+                size="sm"
+              />
+              <div style={announcementCardNameStyle}>{item.personName}</div>
+              <div style={announcementCardHeadlineStyle}>{item.headline}</div>
+              <p style={announcementCardSummaryStyle}>{item.summary}</p>
+              {item.cta && (
+                <div style={{ marginTop: HP_SPACE.xs }}>
+                  <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
+                </div>
+              )}
             </div>
           ))}
         </div>

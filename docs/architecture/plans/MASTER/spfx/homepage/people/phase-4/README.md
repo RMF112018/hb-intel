@@ -14,3 +14,7 @@ This phase exists because Band A remains the most editorial top layer and must b
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — Band A editorial grid in BandARegion
