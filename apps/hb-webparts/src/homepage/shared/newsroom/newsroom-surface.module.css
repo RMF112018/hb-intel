@@ -40,6 +40,32 @@
   overflow: hidden;
 }
 
+/* ── SharePoint global CSS defense ──────────────────────────── */
+
+.root *,
+.root *::before,
+.root *::after {
+  box-sizing: border-box;
+}
+
+.root a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.root a:hover {
+  text-decoration: none;
+}
+
+.root h2,
+.root h3,
+.root h4,
+.root p,
+.root hr {
+  margin: 0;
+  padding: 0;
+}
+
 /* ── Header ──────────────────────────────────────────────────── */
 
 .header {
