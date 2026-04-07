@@ -17,28 +17,33 @@ import * as React from 'react';
 import { HP_SPACE } from '../../homepage/tokens.js';
 import { LauncherFlagshipCard } from './LauncherFlagshipCard.js';
 import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
+import type { ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
 
 export interface LauncherFlagshipStageProps {
   platforms: LauncherPlatformRecord[];
+  tier?: ResponsiveTier;
 }
 
-/* ── Styles ───────────────────────────────────────────────────────── */
+/* ── Style factory ───────────────────────────────────────────────── */
 
-const gridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-  gap: HP_SPACE['2xl'],
-};
+function getGridStyle(tier: ResponsiveTier): React.CSSProperties {
+  const minWidth = tier === 'mobile' ? '160px' : '240px';
+  return {
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}, 1fr))`,
+    gap: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
+  };
+}
 
 /* ── Component ───────────────────────────────────────────────────── */
 
-export function LauncherFlagshipStage({ platforms }: LauncherFlagshipStageProps): React.JSX.Element | null {
+export function LauncherFlagshipStage({ platforms, tier = 'desktop' }: LauncherFlagshipStageProps): React.JSX.Element | null {
   if (platforms.length === 0) return null;
 
   return (
-    <div style={gridStyle} data-launcher-sub="flagship-grid">
+    <div style={getGridStyle(tier)} data-launcher-sub="flagship-grid">
       {platforms.map((p) => (
         <LauncherFlagshipCard key={p.platformKey} platform={p} />
       ))}

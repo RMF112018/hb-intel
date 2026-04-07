@@ -1,16 +1,10 @@
 /**
- * LauncherCommandBand — Top identity and command surface for Tool Launcher.
+ * LauncherCommandBand — Responsive top identity and command surface.
  *
- * Phase 02-02: Implements the command band as a productized surface with:
- *   - Left: launcher title + optional supporting line
- *   - Center: search placeholder (visual affordance; behavior deferred to Phase 08)
- *   - Right: utility action buttons (All Platforms, Need Help; interaction deferred)
- *
- * The band must:
- *   - Read as a premium utility-zone product identity, not app-shell chrome
- *   - Not compete visually with the Signature Hero above
- *   - Degrade safely when optional content is unavailable
- *   - Accept future deepening without structural replacement
+ * Phase 07-02: Tier-aware layout adaptation.
+ *   Desktop: 3-column grid (title, search, actions)
+ *   Tablet:  3-column grid (same — auto-wraps at narrow tablet)
+ *   Mobile:  2-column grid (title + actions; search hidden)
  */
 import * as React from 'react';
 import { Search } from '@hbc/ui-kit/homepage';
@@ -20,37 +14,38 @@ import {
   HP_BORDER,
   HP_MOTION,
 } from '../../homepage/tokens.js';
+import type { ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 
 /* ── Props ───────────────────────────────────────────────────────── */
 
 export interface LauncherCommandBandProps {
-  /** Primary launcher title. Defaults to "Work Hub". */
   title?: string;
-  /** Optional supporting line below the title. */
   supportingLine?: string;
-  /** Callback when "All Platforms" is activated (deferred — placeholder if absent). */
   onAllPlatforms?: () => void;
-  /** Callback when "Need Help" is activated (deferred — placeholder if absent). */
   onNeedHelp?: () => void;
-  /** Total platform count for the supporting line (e.g., "9 platforms"). */
   platformCount?: number;
-  /** Number of featured platforms (shown in supporting line context). */
   featuredCount?: number;
+  tier?: ResponsiveTier;
 }
 
-/* ── Styles ──────────────────────────────────────────────────────── */
+/* ── Style factories ─────────────────────────────────────────────── */
 
-const bandStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'auto 1fr auto',
-  alignItems: 'center',
-  gap: HP_SPACE['2xl'],
-  padding: `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
-  borderRadius: HP_RADIUS.command,
-  border: HP_BORDER.subtle,
-  background: 'rgba(34,83,145,0.03)',
-  minHeight: 44,
-};
+function getBandStyle(tier: ResponsiveTier): React.CSSProperties {
+  const isMobile = tier === 'mobile';
+  return {
+    display: 'grid',
+    gridTemplateColumns: isMobile ? 'auto 1fr' : 'auto 1fr auto',
+    alignItems: 'center',
+    gap: isMobile ? HP_SPACE.md : HP_SPACE['2xl'],
+    padding: isMobile
+      ? `${HP_SPACE.md}px ${HP_SPACE.lg}px`
+      : `${HP_SPACE.lg}px ${HP_SPACE['2xl']}px`,
+    borderRadius: HP_RADIUS.command,
+    border: HP_BORDER.subtle,
+    background: 'rgba(34,83,145,0.03)',
+    minHeight: isMobile ? 38 : 44,
+  };
+}
 
 const identityStyle: React.CSSProperties = {
   display: 'flex',
@@ -111,6 +106,7 @@ const actionsStyle: React.CSSProperties = {
   alignItems: 'center',
   gap: HP_SPACE.md,
   flexShrink: 0,
+  justifyContent: 'flex-end',
 };
 
 const actionButtonStyle: React.CSSProperties = {
@@ -135,7 +131,10 @@ export function LauncherCommandBand({
   onNeedHelp,
   platformCount,
   featuredCount,
+  tier = 'desktop',
 }: LauncherCommandBandProps): React.JSX.Element {
+  const isMobile = tier === 'mobile';
+
   let effectiveSupportingLine = supportingLine;
   if (!effectiveSupportingLine) {
     const parts: string[] = [];
@@ -146,32 +145,38 @@ export function LauncherCommandBand({
       parts.push(`${featuredCount} featured`);
     }
     if (parts.length > 0) {
-      effectiveSupportingLine = `${parts.join(' · ')} · Launch the systems your team uses every day`;
+      effectiveSupportingLine = isMobile
+        ? parts.join(' · ')
+        : `${parts.join(' · ')} · Launch the systems your team uses every day`;
     } else {
-      effectiveSupportingLine = 'Launch the systems your team uses every day';
+      effectiveSupportingLine = isMobile ? '' : 'Launch the systems your team uses every day';
     }
   }
 
   return (
-    <div style={bandStyle} role="toolbar" aria-label={`${title} command band`}>
+    <div style={getBandStyle(tier)} role="toolbar" aria-label={`${title} command band`}>
       {/* Left: identity */}
       <div style={identityStyle}>
         <h3 style={titleStyle}>{title}</h3>
-        <p style={supportingLineStyle}>{effectiveSupportingLine}</p>
+        {effectiveSupportingLine && (
+          <p style={supportingLineStyle}>{effectiveSupportingLine}</p>
+        )}
       </div>
 
-      {/* Center: search placeholder */}
-      <div style={searchContainerStyle}>
-        <Search size={14} strokeWidth={2} style={searchIconStyle} />
-        <input
-          type="text"
-          placeholder="Search platforms, workflows, or support"
-          readOnly
-          tabIndex={-1}
-          aria-label="Search platforms (coming soon)"
-          style={searchInputStyle}
-        />
-      </div>
+      {/* Center: search (hidden on mobile — users access overlay search instead) */}
+      {!isMobile && (
+        <div style={searchContainerStyle}>
+          <Search size={14} strokeWidth={2} style={searchIconStyle} />
+          <input
+            type="text"
+            placeholder="Search platforms, workflows, or support"
+            readOnly
+            tabIndex={-1}
+            aria-label="Search platforms (coming soon)"
+            style={searchInputStyle}
+          />
+        </div>
+      )}
 
       {/* Right: utility actions */}
       <div style={actionsStyle}>
@@ -184,15 +189,17 @@ export function LauncherCommandBand({
         >
           All Platforms
         </button>
-        <button
-          type="button"
-          style={actionButtonStyle}
-          onClick={onNeedHelp}
-          disabled={!onNeedHelp}
-          aria-label="Get help with platforms"
-        >
-          Need Help
-        </button>
+        {!isMobile && (
+          <button
+            type="button"
+            style={actionButtonStyle}
+            onClick={onNeedHelp}
+            disabled={!onNeedHelp}
+            aria-label="Get help with platforms"
+          >
+            Need Help
+          </button>
+        )}
       </div>
     </div>
   );

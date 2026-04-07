@@ -101,9 +101,10 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
             platformCount={presentation.allPlatforms.length}
             featuredCount={featuredCount}
             onAllPlatforms={() => setOverlayOpen(true)}
+            tier={tier}
           />
         }
-        flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} />}
+        flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} tier={tier} />}
         utilityRail={<LauncherUtilityRail presentation={presentation} />}
         workflowShelves={
           <>
