@@ -10,6 +10,7 @@ export type {
   CompanyPulseCategory,
   CompanyPulseConfig,
   CompanyPulseItem,
+  NewsroomOutput,
   LeadershipMessageConfig,
   LeadershipMessageEntry,
   PeopleCultureConfig,

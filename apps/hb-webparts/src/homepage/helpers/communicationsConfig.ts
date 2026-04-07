@@ -9,11 +9,11 @@ import {
   type BandAOutput,
   type BandBOutput,
   type CompanyPulseConfig,
-  type CompanyPulseItem,
   type KudosEntry,
   type KudosModuleOutput,
   type LeadershipMessageConfig,
   type LeadershipMessageEntry,
+  type NewsroomOutput,
   type PeopleCultureConfig,
   type PeopleCultureEntry,
   type PeopleCultureMergedConfig,
@@ -62,11 +62,14 @@ function byPriority(a: { featured?: boolean; order?: number; title?: string; per
   return (a.title ?? a.personName ?? '').localeCompare(b.title ?? b.personName ?? '');
 }
 
-export function normalizeCompanyPulseConfig(input: Partial<CompanyPulseConfig> | undefined, activeAudience?: string): CuratedCollection<CompanyPulseItem> {
+export function normalizeCompanyPulseConfig(input: Partial<CompanyPulseConfig> | undefined, activeAudience?: string): NewsroomOutput {
   const heading = hasText(input?.heading) ? input?.heading.trim() : DEFAULT_COMPANY_PULSE_CONFIG.heading;
   const maxSecondaryItems = Number.isFinite(input?.maxSecondaryItems) && (input?.maxSecondaryItems ?? 0) > 0
     ? (input?.maxSecondaryItems as number)
     : DEFAULT_COMPANY_PULSE_CONFIG.maxSecondaryItems;
+  const maxTertiaryItems = Number.isFinite(input?.maxTertiaryItems) && (input?.maxTertiaryItems ?? 0) > 0
+    ? (input?.maxTertiaryItems as number)
+    : DEFAULT_COMPANY_PULSE_CONFIG.maxTertiaryItems;
 
   const normalized = (input?.items ?? [])
     .filter((item) => hasText(item.id) && hasText(item.title) && hasText(item.summary))
@@ -78,16 +81,23 @@ export function normalizeCompanyPulseConfig(input: Partial<CompanyPulseConfig> |
         title: item.title.trim(),
         summary: item.summary.trim(),
         metadata: hasText(item.metadata) ? item.metadata.trim() : undefined,
+        byline: hasText(item.byline) ? item.byline.trim() : undefined,
+        publishDate: hasText(item.publishDate) ? item.publishDate.trim() : undefined,
+        media: item.media?.src && hasText(item.media.alt) ? item.media : undefined,
       }),
     )
     .sort(byPriority);
 
-  const [featured, ...secondary] = normalized;
+  const [lead, ...rest] = normalized;
+  const secondary = rest.slice(0, maxSecondaryItems);
+  const tertiary = rest.slice(maxSecondaryItems, maxSecondaryItems + maxTertiaryItems);
 
   return {
     heading,
-    featured,
-    secondary: secondary.slice(0, maxSecondaryItems),
+    lead,
+    secondary,
+    tertiary,
+    archiveHref: hasText(input?.archiveHref) ? input?.archiveHref.trim() : undefined,
   };
 }
 

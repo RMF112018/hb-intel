@@ -5,21 +5,36 @@ import { LeadershipMessage } from '../../webparts/leadershipMessage/LeadershipMe
 import { PeopleCultureMerged } from '../../webparts/peopleCulture/PeopleCultureMerged.js';
 
 describe('Prompt-06 awareness webparts', () => {
-  it('renders featured hierarchy and secondary items for company pulse', () => {
+  it('renders lead story hierarchy and secondary items for company pulse', () => {
     render(
       <CompanyPulse
         config={{
           items: [
-            { id: 'feat', title: 'Featured Update', summary: 'Main summary', featured: true, order: 1 },
+            { id: 'feat', title: 'Featured Update', summary: 'Main summary', featured: true, order: 1, byline: 'Corporate Comms', publishDate: '2026-04-07' },
             { id: 'secondary', title: 'Secondary Update', summary: 'Secondary summary', order: 2 },
           ],
         }}
       />,
     );
 
-    expect(screen.getByLabelText(/featured/)).not.toBeNull();
     expect(screen.getByText('Featured Update')).not.toBeNull();
     expect(screen.getByText('Secondary Update')).not.toBeNull();
+    expect(screen.getByLabelText('Company Pulse')).not.toBeNull();
+  });
+
+  it('renders byline and publish date on lead story', () => {
+    render(
+      <CompanyPulse
+        config={{
+          items: [
+            { id: 'lead', title: 'Lead', summary: 'Body', featured: true, order: 1, byline: 'Safety Team', publishDate: '2026-04-07' },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Safety Team')).not.toBeNull();
+    expect(screen.getAllByText('2026-04-07').length).toBeGreaterThan(0);
   });
 
   it('renders empty state for malformed leadership config', () => {
@@ -57,5 +72,10 @@ describe('Prompt-06 awareness webparts', () => {
   it('renders loading state for communications webparts', () => {
     render(<CompanyPulse isLoading />);
     expect(screen.getAllByRole('status').length).toBeGreaterThan(0);
+  });
+
+  it('renders newsroom empty state with updated messaging', () => {
+    render(<CompanyPulse config={{}} />);
+    expect(screen.getByText('No newsroom content configured')).not.toBeNull();
   });
 });

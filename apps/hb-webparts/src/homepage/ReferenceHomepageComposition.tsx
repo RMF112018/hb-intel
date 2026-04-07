@@ -191,22 +191,36 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
         <CompanyPulse
           activeAudience="field"
           config={{
+            archiveHref: '/sites/hb-central/pulse',
             items: [
               {
-                id: 'pulse-feature',
+                id: 'pulse-lead',
                 title: 'Project Teams Hit Safety Milestone',
-                summary: 'Crews reached a record week of audit completion and mentoring coverage.',
+                summary: 'Crews reached a record week of audit completion and mentoring coverage across all active project sites.',
                 category: 'safety',
+                byline: 'Safety & Field Excellence',
+                publishDate: '2026-04-07',
+                media: { src: '/sites/hb-central/assets/safety-milestone.jpg', alt: 'Field team at safety milestone event' },
                 featured: true,
                 order: 1,
-                cta: { label: 'View pulse', href: '/pulse' },
+                cta: { label: 'Read highlights', href: '/sites/hb-central/pulse/safety-milestone' },
               },
               {
                 id: 'pulse-secondary',
-                title: 'Recognition Moment',
+                title: 'Recognition Moment: Schedule Recovery',
                 summary: 'Field office teams recognized for schedule recovery collaboration.',
                 category: 'recognition',
+                byline: 'Project Controls',
+                publishDate: '2026-04-06',
                 order: 2,
+              },
+              {
+                id: 'pulse-tertiary',
+                title: 'New Subcontractor Onboarding Process',
+                summary: 'Preconstruction has rolled out a streamlined onboarding workflow.',
+                category: 'update',
+                publishDate: '2026-04-05',
+                order: 3,
               },
             ],
           }}

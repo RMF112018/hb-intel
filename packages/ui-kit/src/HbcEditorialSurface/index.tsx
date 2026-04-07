@@ -20,6 +20,7 @@ export interface EditorialFeaturedItem {
   excerpt?: string;
   meta?: React.ReactNode;
   cta?: React.ReactNode;
+  media?: React.ReactNode;
 }
 
 export interface EditorialSecondaryItem {
@@ -89,6 +90,9 @@ export function HbcEditorialSurface({
             <h3 className={styles.featuredTitle}>{featured.title}</h3>
             {featured.excerpt ? (
               <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
+            ) : null}
+            {featured.media ? (
+              <div className={styles.featuredMedia}>{featured.media}</div>
             ) : null}
             {featured.meta ? (
               <div className={styles.featuredMeta}>{featured.meta}</div>

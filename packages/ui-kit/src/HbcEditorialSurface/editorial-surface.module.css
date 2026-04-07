@@ -97,6 +97,17 @@
   line-height: 1.5;
 }
 
+.featuredMedia {
+  margin-top: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.featuredMedia img {
+  display: block;
+  max-width: 100%;
+}
+
 .featuredMeta {
   display: flex;
   align-items: center;

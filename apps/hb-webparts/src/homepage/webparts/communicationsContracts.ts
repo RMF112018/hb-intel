@@ -8,6 +8,9 @@ export interface CompanyPulseItem {
   summary: string;
   category?: CompanyPulseCategory;
   metadata?: string;
+  byline?: string;
+  publishDate?: string;
+  media?: HomepageMediaSlot;
   cta?: HomepageCtaLink;
   featured?: boolean;
   order?: number;
@@ -18,6 +21,16 @@ export interface CompanyPulseConfig {
   heading?: string;
   items?: CompanyPulseItem[];
   maxSecondaryItems?: number;
+  maxTertiaryItems?: number;
+  archiveHref?: string;
+}
+
+export interface NewsroomOutput {
+  heading: string;
+  lead?: CompanyPulseItem;
+  secondary: CompanyPulseItem[];
+  tertiary: CompanyPulseItem[];
+  archiveHref?: string;
 }
 
 export interface LeadershipMessageEntry {
@@ -60,9 +73,10 @@ export interface PeopleCultureConfig {
   maxSecondaryEntries?: number;
 }
 
-export const DEFAULT_COMPANY_PULSE_CONFIG: Required<Pick<CompanyPulseConfig, 'heading' | 'maxSecondaryItems'>> = {
+export const DEFAULT_COMPANY_PULSE_CONFIG: Required<Pick<CompanyPulseConfig, 'heading' | 'maxSecondaryItems' | 'maxTertiaryItems'>> = {
   heading: 'Company Pulse',
   maxSecondaryItems: 3,
+  maxTertiaryItems: 4,
 };
 
 export const DEFAULT_LEADERSHIP_MESSAGE_CONFIG: Required<Pick<LeadershipMessageConfig, 'heading' | 'maxArchivedEntries'>> = {

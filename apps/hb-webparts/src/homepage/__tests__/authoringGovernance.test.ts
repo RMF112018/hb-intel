@@ -34,6 +34,6 @@ describe('Prompt-09 authoring governance seam', () => {
   it('returns no-result messaging for discovery and invalid/no-data for other states', () => {
     expect(resolveAuthoringMessage('smartSearchWayfinding', 'noResults').title).toBe('No matching resources found');
     expect(resolveAuthoringMessage('priorityActionsRail', 'invalid').title).toBe('Priority actions configuration is invalid');
-    expect(resolveAuthoringMessage('companyPulse', 'noData').title).toBe('No company pulse items configured');
+    expect(resolveAuthoringMessage('companyPulse', 'noData').title).toBe('No newsroom content configured');
   });
 });

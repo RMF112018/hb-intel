@@ -1,10 +1,11 @@
 /**
- * CompanyPulse — Premium editorial news digest
- * Phase 17-05 — Structural rebuild with P17 surface family
+ * CompanyPulse — Premium editorial newsroom surface
+ * Wave 01 — Newsroom source model with lead / secondary / tertiary hierarchy
  *
  * Rebuilt on HbcEditorialSurface with magazine-like featured/secondary
  * rhythm, lucide icons for editorial metadata accents, HbcPremiumBadge
  * for category classification, and HbcPremiumCta for CTA hierarchy.
+ * Now supports byline, publishDate, media, and three-tier newsroom output.
  */
 import * as React from 'react';
 import {
@@ -41,7 +42,7 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
 
   const normalized = normalizeCompanyPulseConfig(config, activeAudience);
 
-  if (!normalized.featured && normalized.secondary.length === 0) {
+  if (!normalized.lead && normalized.secondary.length === 0) {
     const message = resolveAuthoringMessage('companyPulse', config?.items?.length ? 'invalid' : 'noData');
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
@@ -49,7 +50,7 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
   const secondaryItems: EditorialSecondaryItem[] = normalized.secondary.map((item) => ({
     id: item.id,
     title: item.title,
-    meta: item.metadata,
+    meta: item.byline ?? item.metadata,
     icon: FileText,
     href: item.cta?.href,
   }));
@@ -58,36 +59,56 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
     <HbcEditorialSurface
       title={normalized.heading}
       icon={FileText}
-      featured={normalized.featured ? {
-        eyebrow: normalized.featured.category
-          ? normalized.featured.category.charAt(0).toUpperCase() + normalized.featured.category.slice(1)
+      featured={normalized.lead ? {
+        eyebrow: normalized.lead.category
+          ? normalized.lead.category.charAt(0).toUpperCase() + normalized.lead.category.slice(1)
           : undefined,
-        title: normalized.featured.title,
-        excerpt: normalized.featured.summary,
+        title: normalized.lead.title,
+        excerpt: normalized.lead.summary,
         meta: (
           <>
-            {normalized.featured.category ? (
+            {normalized.lead.category ? (
               <HbcPremiumBadge
-                label={normalized.featured.category}
-                status={CATEGORY_VARIANT_MAP[normalized.featured.category]}
+                label={normalized.lead.category}
+                status={CATEGORY_VARIANT_MAP[normalized.lead.category]}
                 size="sm"
               />
             ) : null}
-            {normalized.featured.metadata ? (
+            {normalized.lead.byline ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, opacity: 0.7 }}>
+                {normalized.lead.byline}
+              </span>
+            ) : null}
+            {(normalized.lead.publishDate ?? normalized.lead.metadata) ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Clock size={11} aria-hidden="true" style={{ opacity: 0.5 }} />
-                {normalized.featured.metadata}
+                {normalized.lead.publishDate ?? normalized.lead.metadata}
               </span>
             ) : null}
           </>
         ),
-        cta: normalized.featured.cta ? (
-          <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
+        cta: normalized.lead.cta ? (
+          <HbcPremiumCta label={normalized.lead.cta.label} href={normalized.lead.cta.href} variant="ghost" arrow />
+        ) : undefined,
+        media: normalized.lead.media ? (
+          <img
+            src={normalized.lead.media.src}
+            alt={normalized.lead.media.alt}
+            style={{ borderRadius: 8, maxHeight: 200, width: '100%', objectFit: 'cover' }}
+            loading="lazy"
+            decoding="async"
+          />
         ) : undefined,
       } : undefined}
       items={secondaryItems}
       headerAction={
-        <HbcPremiumCta label="See all" href="#" variant="ghost" size="sm" arrow />
+        <HbcPremiumCta
+          label="See all"
+          href={normalized.archiveHref ?? '#'}
+          variant="ghost"
+          size="sm"
+          arrow
+        />
       }
     />
   );
