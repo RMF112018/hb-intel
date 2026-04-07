@@ -9,6 +9,8 @@
  *          entry posture, Celebrate affordance, and empty states.
  * Phase 7: Band B compact weekly celebration tiles with avatar/photo,
  *          celebration type label, and relative date display.
+ * Phase 8A: Responsive adaptation for tablet and mobile — tier-aware
+ *           grid layouts preserving hierarchy across breakpoints.
  */
 import * as React from 'react';
 import {
@@ -24,6 +26,7 @@ import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGoverna
 import { normalizePeopleCultureMergedConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
+import { useResponsiveTier, type ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 import {
   HP_SPACE,
   HP_RADIUS,
@@ -54,12 +57,15 @@ const ICON_SIZE = 16;
 // Shared styles — shell
 // ---------------------------------------------------------------------------
 
-const shellStyle: React.CSSProperties = {
-  ...hpZoneSection('communications'),
-  display: 'flex',
-  flexDirection: 'column',
-  gap: HP_SPACE['3xl'],
-};
+function getShellStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    ...hpZoneSection('communications'),
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tier === 'mobile' ? HP_SPACE['2xl'] : HP_SPACE['3xl'],
+    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['3xl'],
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Band A — Announcement type label and badge mappings
@@ -98,12 +104,22 @@ const bandAHeaderStyle: React.CSSProperties = {
   letterSpacing: '0.01em',
 };
 
-function announcementGridColumns(itemCount: number): React.CSSProperties {
+function announcementGridColumns(itemCount: number, tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'mobile') {
+    return {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: HP_SPACE.md,
+      marginTop: HP_SPACE.md,
+    };
+  }
   return {
     display: 'grid',
     gridTemplateColumns: itemCount === 1
       ? 'minmax(0, 480px)'
-      : 'repeat(auto-fit, minmax(280px, 1fr))',
+      : tier === 'tablet'
+        ? 'repeat(auto-fit, minmax(240px, 1fr))'
+        : 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: HP_SPACE.xl,
     marginTop: HP_SPACE.xl,
   };
@@ -335,12 +351,24 @@ const bandBHeaderStyle: React.CSSProperties = {
   opacity: HP_TEXT_OPACITY.muted,
 };
 
-const celebrationGridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-  gap: HP_SPACE.sm,
-  marginTop: HP_SPACE.md,
-};
+function getCelebrationGridStyle(tier: ResponsiveTier): React.CSSProperties {
+  if (tier === 'mobile') {
+    return {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+      gap: HP_SPACE.xs,
+      marginTop: HP_SPACE.sm,
+    };
+  }
+  return {
+    display: 'grid',
+    gridTemplateColumns: tier === 'tablet'
+      ? 'repeat(auto-fill, minmax(100px, 1fr))'
+      : 'repeat(auto-fill, minmax(120px, 1fr))',
+    gap: HP_SPACE.sm,
+    marginTop: HP_SPACE.md,
+  };
+}
 
 const celebrationTileStyle: React.CSSProperties = {
   padding: HP_SPACE.md,
@@ -421,7 +449,7 @@ function AnnouncementCard({ item }: { item: BandAOutput['items'][number] }): Rea
   );
 }
 
-function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | null {
+function BandARegion({ output, tier }: { output: BandAOutput; tier: ResponsiveTier }): React.JSX.Element | null {
   if (output.isEmpty) return null;
 
   return (
@@ -431,7 +459,7 @@ function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | n
           <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
           Highlights
         </h3>
-        <div style={announcementGridColumns(output.items.length)}>
+        <div style={announcementGridColumns(output.items.length, tier)}>
           {output.items.map((item) => (
             <AnnouncementCard key={item.id} item={item} />
           ))}
@@ -604,7 +632,7 @@ function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): Reac
   );
 }
 
-function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
+function BandBRegion({ output, tier }: { output: BandBOutput; tier: ResponsiveTier }): React.JSX.Element {
   return (
     <section aria-label="This week celebrations" data-hbc-homepage="band-b">
       <div style={bandBRegionStyle}>
@@ -625,7 +653,7 @@ function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
             No upcoming celebrations this week.
           </div>
         ) : (
-          <div style={celebrationGridStyle}>
+          <div style={getCelebrationGridStyle(tier)}>
             {output.items.map((item) => (
               <CelebrationTile key={item.id} item={item} />
             ))}
@@ -645,6 +673,8 @@ export function PeopleCultureMerged({
   activeAudience,
   isLoading = false,
 }: PeopleCultureMergedProps): React.JSX.Element {
+  const tier = useResponsiveTier();
+
   if (isLoading) {
     return <HomepageLoadingState label="Loading people and culture" />;
   }
@@ -660,10 +690,10 @@ export function PeopleCultureMerged({
 
   return (
     <HbcHomepageSectionShell title={output.heading} subtitle="Birthdays, anniversaries, recognition, milestones, and team news">
-      <div style={shellStyle} data-hbc-homepage="people-culture-merged">
-        <BandARegion output={output.bandA} />
+      <div style={getShellStyle(tier)} data-hbc-homepage="people-culture-merged">
+        <BandARegion output={output.bandA} tier={tier} />
         <KudosRegion output={output.kudos} />
-        <BandBRegion output={output.bandB} />
+        <BandBRegion output={output.bandB} tier={tier} />
       </div>
     </HbcHomepageSectionShell>
   );

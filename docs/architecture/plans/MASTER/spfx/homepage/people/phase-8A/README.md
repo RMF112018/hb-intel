@@ -14,3 +14,8 @@ This phase exists because the final homepage structure now contains three conten
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — tier-aware responsive layouts
+- `apps/hb-webparts/src/homepage/shared/useResponsiveTier.ts` — responsive tier hook (reused)
