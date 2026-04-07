@@ -98,6 +98,13 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
     }
 
     const presentation = deriveToolLauncherPresentation(listPlatforms, activeAudience);
+
+    // All platforms filtered by audience → show empty state
+    if (presentation.allPlatforms.length === 0) {
+      const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
+      return <HomepageEmptyState title={message.title} description={message.description} />;
+    }
+
     const featuredCount = presentation.featuredStage.platforms.length;
 
     return (
