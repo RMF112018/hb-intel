@@ -1,8 +1,8 @@
 /**
  * ToolLauncherWorkHub — Premium command launcher surface
  *
- * Phase 03-02: Featured stage binding with audience-aware filtering.
- * All 4 regions extracted to dedicated components.
+ * Phase 06-01: All-platforms overlay wired to command band button.
+ * All 4 regions + overlay extracted to dedicated components.
  * Icon resolution consolidated in launcherIconResolution.ts.
  *
  * Primary data source: live SharePoint list "Tool Launcher Contents"
@@ -10,10 +10,11 @@
  * running outside SPFx (local dev / demo / packaging).
  *
  * Live data is rendered through the 4-region composition shell:
- *   1. Command band — LauncherCommandBand
+ *   1. Command band — LauncherCommandBand (with "All Platforms" action)
  *   2. Flagship stage — LauncherFlagshipStage
  *   3. Utility rail — LauncherUtilityRail
  *   4. Workflow shelves — LauncherWorkflowShelves
+ *   + All-platforms overlay — LauncherAllPlatformsOverlay (toggled by command band)
  *
  * Config fallback still uses the flat HbcLauncherSurface bridge.
  */
@@ -33,6 +34,7 @@ import { LauncherCommandBand } from './LauncherCommandBand.js';
 import { LauncherFlagshipStage } from './LauncherFlagshipStage.js';
 import { LauncherUtilityRail } from './LauncherUtilityRail.js';
 import { LauncherWorkflowShelves } from './LauncherWorkflowShelves.js';
+import { LauncherAllPlatformsOverlay } from './LauncherAllPlatformsOverlay.js';
 import { resolveToolIcon, resolveToolTint, resolveGroupIcon } from './launcherIconResolution.js';
 import type { ToolLauncherWorkHubConfig } from '../../homepage/webparts/utilityContracts.js';
 
@@ -73,12 +75,13 @@ function bridgeConfigToGroups(
 
 export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false }: ToolLauncherWorkHubProps): React.JSX.Element {
   const { platforms: listPlatforms, isLoading: listLoading, error: listError } = useToolLauncherData();
+  const [overlayOpen, setOverlayOpen] = React.useState(false);
 
   if (isLoading || listLoading) {
     return <HomepageLoadingState label="Loading tool launchers" />;
   }
 
-  // Live list data → 4-region composition shell
+  // Live list data → 4-region composition shell + overlay
   if (listPlatforms && !listError) {
     if (listPlatforms.length === 0) {
       const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
@@ -90,10 +93,26 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
 
     return (
       <LauncherCompositionShell
-        commandBand={<LauncherCommandBand platformCount={presentation.allPlatforms.length} featuredCount={featuredCount} />}
+        commandBand={
+          <LauncherCommandBand
+            platformCount={presentation.allPlatforms.length}
+            featuredCount={featuredCount}
+            onAllPlatforms={() => setOverlayOpen(true)}
+          />
+        }
         flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} />}
         utilityRail={<LauncherUtilityRail presentation={presentation} />}
-        workflowShelves={<LauncherWorkflowShelves shelves={presentation.workflowShelves} />}
+        workflowShelves={
+          <>
+            <LauncherWorkflowShelves shelves={presentation.workflowShelves} />
+            {overlayOpen && (
+              <LauncherAllPlatformsOverlay
+                index={presentation.platformIndex}
+                onClose={() => setOverlayOpen(false)}
+              />
+            )}
+          </>
+        }
       />
     );
   }
