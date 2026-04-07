@@ -6,6 +6,10 @@
  * brand accent, elevated search placement, forceful action buttons, and
  * clearer hierarchy between identity / search / actions.
  *
+ * Phase 11D: Premium primitives and surface layer.
+ *   - CSS module interactive states (:hover, :focus-visible, :active)
+ *     on buttons, search input, and suggestion rows
+ *
  * Search behavior preserved from Phase 08-02:
  *   - Live filtering via launcherSearch contract (pre-computed searchText)
  *   - Keyboard: ArrowDown/Up to navigate, Enter to launch, Escape to dismiss
@@ -18,9 +22,9 @@ import {
   HP_SPACE,
   HP_RADIUS,
   HP_BORDER,
-  HP_MOTION,
 } from '../../homepage/tokens.js';
 import { matchesQuery, type SearchablePlatform } from './launcherSearch.js';
+import interactiveStyles from './launcher-interactive.module.css';
 import type { ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 
 /* ── Props ───────────────────────────────────────────────────────── */
@@ -118,7 +122,6 @@ const searchInputStyle: React.CSSProperties = {
   fontSize: '0.8rem',
   color: 'rgba(0,0,0,0.8)',
   outline: 'none',
-  transition: `border-color ${HP_MOTION.fast}, box-shadow ${HP_MOTION.fast}`,
 };
 
 const searchIconStyle: React.CSSProperties = {
@@ -155,7 +158,6 @@ const suggestionStyle: React.CSSProperties = {
   color: 'rgba(0,0,0,0.75)',
   textDecoration: 'none',
   cursor: 'pointer',
-  transition: `background ${HP_MOTION.fast}`,
 };
 
 const suggestionActiveStyle: React.CSSProperties = {
@@ -204,7 +206,6 @@ const actionButtonStyle: React.CSSProperties = {
   fontWeight: 600,
   color: '#225391',
   cursor: 'pointer',
-  transition: `background ${HP_MOTION.fast}, border-color ${HP_MOTION.fast}`,
   whiteSpace: 'nowrap',
 };
 
@@ -335,6 +336,7 @@ export function LauncherCommandBand({
             aria-haspopup="listbox"
             role="combobox"
             aria-autocomplete="list"
+            className={interactiveStyles.commandSearchInput}
             style={searchInputStyle}
           />
 
@@ -354,6 +356,7 @@ export function LauncherCommandBand({
                     rel={sp.record.openInNewTab ? 'noopener noreferrer' : undefined}
                     role="option"
                     aria-selected={i === activeIndex}
+                    className={interactiveStyles.suggestion}
                     style={i === activeIndex ? suggestionActiveStyle : suggestionStyle}
                     onMouseEnter={() => setActiveIndex(i)}
                   >
@@ -374,6 +377,7 @@ export function LauncherCommandBand({
       <div style={actionsStyle}>
         <button
           type="button"
+          className={interactiveStyles.commandButton}
           style={actionButtonStyle}
           onClick={onAllPlatforms}
           disabled={!onAllPlatforms}
@@ -385,6 +389,7 @@ export function LauncherCommandBand({
         {!isMobile && (
           <button
             type="button"
+            className={interactiveStyles.commandButton}
             style={actionButtonStyle}
             onClick={onNeedHelp}
             disabled={!onNeedHelp}

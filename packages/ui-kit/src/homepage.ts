@@ -76,6 +76,7 @@ export { motion, AnimatePresence } from 'motion/react';
 export { clsx } from 'clsx';
 export { cva } from 'class-variance-authority';
 export type { VariantProps } from 'class-variance-authority';
+export { Root as Separator } from '@radix-ui/react-separator';
 
 // Lucide icons — curated set for homepage use
 export {

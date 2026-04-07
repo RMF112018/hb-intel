@@ -5,6 +5,10 @@
  * with branded hover state, improved spacing, and subtle left accent
  * for better shelf-level rhythm.
  *
+ * Phase 11D: Premium primitives and surface layer.
+ *   - Shared LauncherLogo primitive (replaces inline ShelfLogoContent)
+ *   - CSS module interactive states (:hover, :focus-visible, :active)
+ *
  * Structure: horizontal row layout with 40px logo container, name,
  * and optional descriptor. Whole-card <a> click target. No spring
  * motion (only flagship gets motion — hierarchy protection).
@@ -14,9 +18,11 @@
  */
 import * as React from 'react';
 import { ExternalLink } from '@hbc/ui-kit/homepage';
-import { HP_SPACE, HP_BORDER, HP_RADIUS, HP_MOTION } from '../../homepage/tokens.js';
+import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import { resolvePlatformIcon } from './launcherIconResolution.js';
 import { resolveLogoAsset, type LogoResolution } from './launcherAssetResolution.js';
+import { LauncherLogo } from './LauncherLogo.js';
+import interactiveStyles from './launcher-interactive.module.css';
 import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
@@ -38,37 +44,8 @@ const cardStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.55)',
   textDecoration: 'none',
   color: 'inherit',
-  transition: `background ${HP_MOTION.fast}, border-color ${HP_MOTION.fast}`,
   cursor: 'pointer',
   minHeight: 48,
-};
-
-/** 40px logo container */
-const logoContainerStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 40,
-  height: 40,
-  borderRadius: HP_RADIUS.command,
-  background: 'rgba(34,83,145,0.04)',
-  flexShrink: 0,
-  overflow: 'hidden',
-};
-
-const logoImageStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  padding: 6,
-};
-
-const monogramStyle: React.CSSProperties = {
-  fontSize: '0.9rem',
-  fontWeight: 700,
-  color: 'rgba(34,83,145,0.45)',
-  lineHeight: 1,
-  userSelect: 'none',
 };
 
 const textContainerStyle: React.CSSProperties = {
@@ -101,31 +78,6 @@ const launchIconStyle: React.CSSProperties = {
   color: 'rgba(34,83,145,0.35)',
 };
 
-/* ── Logo renderer ───────────────────────────────────────────────── */
-
-function ShelfLogoContent({ resolution, onImageError }: {
-  resolution: LogoResolution;
-  onImageError: () => void;
-}): React.JSX.Element {
-  switch (resolution.type) {
-    case 'image':
-      return (
-        <img
-          src={resolution.src}
-          alt={resolution.alt}
-          style={logoImageStyle}
-          onError={onImageError}
-        />
-      );
-    case 'icon': {
-      const Icon = resolution.icon;
-      return <Icon size={20} strokeWidth={1.6} color="rgba(34,83,145,0.5)" />;
-    }
-    case 'monogram':
-      return <span style={monogramStyle} aria-hidden="true">{resolution.letter}</span>;
-  }
-}
-
 /* ── Component ───────────────────────────────────────────────────── */
 
 export function LauncherShelfCard({ platform: p }: LauncherShelfCardProps): React.JSX.Element {
@@ -145,15 +97,15 @@ export function LauncherShelfCard({ platform: p }: LauncherShelfCardProps): Reac
       href={p.launchUrl}
       target={p.openInNewTab ? '_blank' : undefined}
       rel={p.openInNewTab ? 'noopener noreferrer' : undefined}
+      className={interactiveStyles.shelfCard}
       style={cardStyle}
       aria-label={`Launch ${p.name}`}
     >
-      <div style={logoContainerStyle}>
-        <ShelfLogoContent
-          resolution={resolution}
-          onImageError={() => setImageErrored(true)}
-        />
-      </div>
+      <LauncherLogo
+        resolution={resolution}
+        onImageError={() => setImageErrored(true)}
+        size="shelf"
+      />
       <div style={textContainerStyle}>
         <p style={nameStyle}>{p.name}</p>
         {p.descriptor && <p style={descriptorStyle}>{p.descriptor}</p>}

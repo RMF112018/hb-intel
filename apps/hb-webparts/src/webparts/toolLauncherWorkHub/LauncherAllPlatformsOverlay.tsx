@@ -5,17 +5,21 @@
  * accent, better search placement, premium category headings, and
  * consistent visual language with the rest of the launcher.
  *
+ * Phase 11D: Premium primitives and surface layer.
+ *   - CSS module interactive states on search input and close button
+ *
  * Search via launcherSearch.ts contract with pre-computed searchable
  * records. Matches against name, aliases, descriptor, category,
  * workflowShelf, and support owner name.
  */
 import * as React from 'react';
 import { motion, AnimatePresence, Search } from '@hbc/ui-kit/homepage';
-import { HP_SPACE, HP_BORDER, HP_RADIUS, HP_MOTION } from '../../homepage/tokens.js';
+import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
 import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
 import { resolveGroupIcon } from './launcherIconResolution.js';
 import { LauncherIndexRow } from './LauncherIndexRow.js';
 import { prepareAllForSearch, filterIndexByQuery, countIndexPlatforms } from './launcherSearch.js';
+import interactiveStyles from './launcher-interactive.module.css';
 import type { LauncherPlatformIndex } from '../../homepage/webparts/toolLauncherContracts.js';
 import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
 
@@ -92,7 +96,6 @@ const searchInputStyle: React.CSSProperties = {
   fontSize: '0.78rem',
   color: 'rgba(0,0,0,0.8)',
   outline: 'none',
-  transition: `border-color ${HP_MOTION.fast}`,
 };
 
 const searchIconStyle: React.CSSProperties = {
@@ -247,11 +250,13 @@ function OverlayContent({ index, allPlatforms, onClose }: {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search all platforms"
+                className={interactiveStyles.commandSearchInput}
                 style={searchInputStyle}
               />
             </div>
             <button
               type="button"
+              className={interactiveStyles.closeButton}
               style={closeButtonStyle}
               onClick={onClose}
               aria-label="Close all platforms"

@@ -1,0 +1,168 @@
+/**
+ * Tool Launcher interactive states — CSS module for pseudo-class behaviors.
+ *
+ * Phase 11D: Premium primitives and surface layer.
+ * Provides :hover, :focus-visible, :active states that inline styles
+ * cannot express. Inline styles from component files set base appearance;
+ * this CSS module adds interactive state overlays.
+ *
+ * @see src/homepage/homepage-interactive.module.css — homepage-wide pattern
+ * @see src/homepage/tokens.ts — HP_FOCUS token values used here
+ */
+
+/* ── Flagship card (hero + standard variants) ──────────────────── */
+
+.flagshipCard {
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.flagshipCard:hover {
+  border-color: rgba(34, 83, 145, 0.20);
+}
+
+.flagshipCard:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.flagshipCard:active {
+  background-color: rgba(34, 83, 145, 0.04);
+}
+
+/* ── Shelf card (medium-weight secondary) ──────────────────────── */
+
+.shelfCard {
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.shelfCard:hover {
+  background-color: rgba(34, 83, 145, 0.06);
+  border-left-color: rgba(34, 83, 145, 0.35);
+}
+
+.shelfCard:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.shelfCard:active {
+  background-color: rgba(34, 83, 145, 0.09);
+}
+
+/* ── Index row (compact overlay row) ───────────────────────────── */
+
+.indexRow {
+  transition: background-color 150ms ease;
+}
+
+.indexRow:hover {
+  background-color: rgba(34, 83, 145, 0.04);
+}
+
+.indexRow:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.indexRow:active {
+  background-color: rgba(34, 83, 145, 0.07);
+}
+
+/* ── Command band button ───────────────────────────────────────── */
+
+.commandButton {
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.commandButton:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(34, 83, 145, 0.25);
+}
+
+.commandButton:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.commandButton:active {
+  background-color: rgba(34, 83, 145, 0.06);
+}
+
+/* ── Command search input ──────────────────────────────────────── */
+
+.commandSearchInput {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.commandSearchInput:hover {
+  border-color: rgba(34, 83, 145, 0.25);
+}
+
+.commandSearchInput:focus-visible {
+  border-color: #225391;
+  box-shadow: 0 0 0 3px rgba(34, 83, 145, 0.12);
+  outline: none;
+}
+
+/* ── Search suggestion row ─────────────────────────────────────── */
+
+.suggestion {
+  transition: background-color 150ms ease;
+}
+
+.suggestion:hover {
+  background-color: rgba(34, 83, 145, 0.06);
+}
+
+.suggestion:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+}
+
+/* ── Utility rail CTA link ─────────────────────────────────────── */
+
+.utilityCtaLink {
+  transition: color 150ms ease;
+}
+
+.utilityCtaLink:hover {
+  color: #1a4274;
+  text-decoration: underline;
+}
+
+.utilityCtaLink:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Close / dismiss button ────────────────────────────────────── */
+
+.closeButton {
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+/* ── Reduced-motion blanket ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .flagshipCard,
+  .shelfCard,
+  .indexRow,
+  .commandButton,
+  .commandSearchInput,
+  .suggestion,
+  .utilityCtaLink,
+  .closeButton {
+    transition: none !important;
+  }
+}

@@ -5,8 +5,14 @@
  * branded icons, better visual rhythm between sections, and more
  * intentional hierarchy for notices vs. support actions.
  *
+ * Phase 11D: Premium primitives and surface layer.
+ *   - Shared LAUNCHER_TONE_COLORS / LAUNCHER_TONE_PRIORITY (replaces
+ *     inline NOTICE_TONE_COLORS / TONE_PRIORITY)
+ *   - CSS module interactive states on CTA links
+ *   - Radix Separator between rail sections for refined hierarchy
+ *
  * Content categories (ordered by urgency):
- *   1. Platform Notices — priority-sorted (critical → warning → info → neutral)
+ *   1. Platform Notices — priority-sorted (critical > warning > info > neutral)
  *   2. Need Help — help destination CTAs
  *   3. Request Access — access-request CTAs
  *   4. Support Contacts — support-owner metadata
@@ -16,8 +22,10 @@
  *   - Each section independently suppressible; rail suppresses when all empty
  */
 import * as React from 'react';
-import { AlertCircle, AlertTriangle, Info, Link2, Users, ExternalLink } from '@hbc/ui-kit/homepage';
+import { AlertCircle, AlertTriangle, Info, Link2, Users, ExternalLink, Separator } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS } from '../../homepage/tokens.js';
+import { LAUNCHER_TONE_COLORS, LAUNCHER_TONE_PRIORITY } from './launcherTokens.js';
+import interactiveStyles from './launcher-interactive.module.css';
 import type {
   LauncherPresentationModel,
   LauncherSupportSummary,
@@ -31,20 +39,12 @@ export interface LauncherUtilityRailProps {
 
 /* ── Notice priority ordering ────────────────────────────────────── */
 
-const TONE_PRIORITY: Record<string, number> = {
-  critical: 0,
-  warning: 1,
-  info: 2,
-  success: 3,
-  neutral: 4,
-};
-
 function byNoticePriority(
   a: LauncherPresentationModel['noticesSummary']['activeNotices'][number],
   b: LauncherPresentationModel['noticesSummary']['activeNotices'][number],
 ): number {
-  const aPri = TONE_PRIORITY[a.notice.tone] ?? 4;
-  const bPri = TONE_PRIORITY[b.notice.tone] ?? 4;
+  const aPri = LAUNCHER_TONE_PRIORITY[a.notice.tone] ?? 4;
+  const bPri = LAUNCHER_TONE_PRIORITY[b.notice.tone] ?? 4;
   if (aPri !== bPri) return aPri - bPri;
   return a.name.localeCompare(b.name);
 }
@@ -144,14 +144,6 @@ const noticeLabelStyle: React.CSSProperties = {
   marginLeft: HP_SPACE.sm,
 };
 
-const NOTICE_TONE_COLORS: Record<string, { bg: string; color: string }> = {
-  info: { bg: 'rgba(34,83,145,0.1)', color: '#225391' },
-  warning: { bg: 'rgba(229,126,70,0.12)', color: '#b5652a' },
-  critical: { bg: 'rgba(200,40,40,0.1)', color: '#a02020' },
-  success: { bg: 'rgba(40,160,60,0.1)', color: '#1a7a2e' },
-  neutral: { bg: 'rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.55)' },
-};
-
 const ctaLinkStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -177,6 +169,13 @@ const supportOwnerLabelStyle: React.CSSProperties = {
   marginLeft: HP_SPACE.xs,
 };
 
+const separatorStyle: React.CSSProperties = {
+  height: 1,
+  background: 'linear-gradient(90deg, rgba(34,83,145,0.10) 0%, transparent 80%)',
+  border: 'none',
+  margin: 0,
+};
+
 /* ── Section renderers ───────────────────────────────────────────── */
 
 function NoticesSection({ notices }: { notices: LauncherPresentationModel['noticesSummary']['activeNotices'] }): React.JSX.Element | null {
@@ -196,7 +195,7 @@ function NoticesSection({ notices }: { notices: LauncherPresentationModel['notic
         <span style={hasUrgent ? urgentCountBadgeStyle : countBadgeStyle}>{sorted.length}</span>
       </h4>
       {sorted.map((n) => {
-        const tone = NOTICE_TONE_COLORS[n.notice.tone] ?? NOTICE_TONE_COLORS.info;
+        const tone = LAUNCHER_TONE_COLORS[n.notice.tone] ?? LAUNCHER_TONE_COLORS.info;
         return (
           <div key={n.platformKey} style={noticeItemStyle}>
             <span style={noticeNameStyle}>{n.name}</span>
@@ -232,6 +231,7 @@ function NeedHelpSection({ actions }: { actions: LauncherSupportSummary['helpAct
           href={a.helpUrl}
           target="_blank"
           rel="noopener noreferrer"
+          className={interactiveStyles.utilityCtaLink}
           style={ctaLinkStyle}
         >
           {a.name} Help
@@ -259,6 +259,7 @@ function RequestAccessSection({ actions }: { actions: LauncherSupportSummary['ac
           href={a.accessRequestUrl}
           target="_blank"
           rel="noopener noreferrer"
+          className={interactiveStyles.utilityCtaLink}
           style={ctaLinkStyle}
         >
           {a.name}
@@ -315,16 +316,25 @@ export function LauncherUtilityRail({ presentation }: LauncherUtilityRailProps):
     return null;
   }
 
+  // Collect non-null sections and interleave separators
+  const sections: React.ReactNode[] = [];
+  if (activeNotices.length > 0) sections.push(<NoticesSection key="notices" notices={activeNotices} />);
+  if (helpActions.length > 0) sections.push(<NeedHelpSection key="help" actions={helpActions} />);
+  if (accessActions.length > 0) sections.push(<RequestAccessSection key="access" actions={accessActions} />);
+  if (supportContacts.length > 0) sections.push(<SupportContactsSection key="contacts" contacts={supportContacts} />);
+
   return (
     <div style={railContainerStyle}>
       <p style={railHeaderStyle}>
         <Info size={12} strokeWidth={2} />
         Support &amp; Status
       </p>
-      <NoticesSection notices={activeNotices} />
-      <NeedHelpSection actions={helpActions} />
-      <RequestAccessSection actions={accessActions} />
-      <SupportContactsSection contacts={supportContacts} />
+      {sections.map((section, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && <Separator decorative style={separatorStyle} />}
+          {section}
+        </React.Fragment>
+      ))}
     </div>
   );
 }
