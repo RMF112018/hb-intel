@@ -14,3 +14,8 @@ This phase exists because the finished surface now has four structural parts: he
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — three-region desktop shell
+- `apps/hb-webparts/src/webparts/peopleCulture/index.ts` — component exports
