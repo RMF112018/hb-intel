@@ -3,7 +3,7 @@
   "id": "0b53f651-fd92-4f7f-a9da-f7797017f5eb",
   "alias": "CompanyPulseWebPart",
   "componentType": "WebPart",
-  "version": "0.0.18.0",
+  "version": "0.0.19.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
