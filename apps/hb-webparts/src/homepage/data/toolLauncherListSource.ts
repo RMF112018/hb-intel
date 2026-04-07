@@ -15,53 +15,78 @@ export const SP_LIST_TITLE = 'Tool Launcher Contents';
 
 /* ── SharePoint field internal names ────────────────────────────── */
 
+/**
+ * Maps semantic field names (used by the domain model) to the live
+ * SharePoint internal column names from the "Tool Launcher Contents"
+ * list export. Many columns retain generic `field_N` internal names
+ * from original list creation.
+ */
 export const SP_FIELDS = {
   /* Core identity */
   Title: 'Title',
-  PlatformKey: 'PlatformKey',
-  LaunchURL: 'LaunchURL',
+  PlatformKey: 'field_1',
+  LaunchURL: 'field_2',
 
   /* Logo / brand treatment */
-  OfficialLogoAssetReference: 'OfficialLogoAssetReference',
-  DarkLogoAssetReference: 'DarkLogoAssetReference',
-  PreferredLogoType: 'PreferredLogoType',
+  OfficialLogoAssetReference: 'field_3',
+  DarkLogoAssetReference: 'field_4',
+  PreferredLogoType: 'field_5',
 
   /* Content / description */
-  ShortDescriptor: 'ShortDescriptor',
-  Category: 'Category',
-  WorkflowShelf: 'WorkflowShelf',
-  AliasesKeywords: 'AliasesKeywords',
-  Notes: 'Notes',
+  ShortDescriptor: 'field_6',
+  Category: 'field_8',
+  WorkflowShelf: 'field_7',
+  AliasesKeywords: 'field_14',
+  Notes: 'field_31',
 
   /* Visibility and featured */
   IsActive: 'IsActive',
   Featured: 'Featured',
-  FeaturedSortOrder: 'FeaturedSortOrder',
-  SortOrder: 'SortOrder',
-  AudienceVisibility: 'AudienceVisibility',
-  AudienceRulesJSON: 'AudienceRulesJSON',
+  FeaturedSortOrder: 'field_10',
+  SortOrder: 'field_11',
+  AudienceVisibility: 'field_12',
+  AudienceRulesJSON: 'field_13',
   OpenInNewTab: 'OpenInNewTab',
   FavoriteEligible: 'FavoriteEligible',
 
   /* Support / help */
   HelpLink: 'HelpLink',
-  SupportOwner: 'SupportOwner',
+  SupportOwner: 'field_16',
   SupportOwnerReference: 'SupportOwnerReference',
   AccessRequestDestination: 'AccessRequestDestination',
 
   /* Notice / status */
-  NoticeStatus: 'NoticeStatus',
-  NoticeBadgeText: 'NoticeBadgeText',
-  NoticeDetails: 'NoticeDetails',
-  NoticeExpiresOn: 'NoticeExpiresOn',
-  StatusBadgeTone: 'StatusBadgeTone',
+  NoticeStatus: 'field_19',
+  NoticeBadgeText: 'field_20',
+  NoticeDetails: 'field_21',
+  NoticeExpiresOn: 'field_22',
+  StatusBadgeTone: 'field_26',
 
   /* Governance */
-  VendorProductFamily: 'VendorProductFamily',
-  TenantEnvironmentLabel: 'TenantEnvironmentLabel',
+  VendorProductFamily: 'field_27',
+  TenantEnvironmentLabel: 'field_28',
   RequiresReview: 'RequiresReview',
-  LastReviewedOn: 'LastReviewedOn',
+  LastReviewedOn: 'field_30',
 } as const;
+
+/* ── Reverse map: live internal name → semantic key ────────────── */
+
+const SP_FIELD_REVERSE: Record<string, string> = Object.fromEntries(
+  Object.entries(SP_FIELDS).map(([semantic, internal]) => [internal, semantic]),
+);
+
+/**
+ * Translate a raw SharePoint REST item (keyed by live internal names)
+ * into the semantic {@link RawToolLauncherListItem} shape expected by
+ * the normalization layer.
+ */
+function mapToSemanticItem(spItem: Record<string, unknown>): RawToolLauncherListItem {
+  const semantic: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(spItem)) {
+    semantic[SP_FIELD_REVERSE[key] ?? key] = value;
+  }
+  return semantic as RawToolLauncherListItem;
+}
 
 /**
  * $select fields for the REST query.
@@ -141,9 +166,12 @@ export async function fetchToolLauncherListItems(
 
   // Guard against malformed responses — value must be an array
   const rawValue = body.value;
-  const rawItems: RawToolLauncherListItem[] = Array.isArray(rawValue)
-    ? (rawValue as RawToolLauncherListItem[])
+  const spItems: Record<string, unknown>[] = Array.isArray(rawValue)
+    ? (rawValue as Record<string, unknown>[])
     : [];
+
+  // Translate live internal names back to semantic keys before normalization
+  const rawItems: RawToolLauncherListItem[] = spItems.map(mapToSemanticItem);
 
   return normalizeToolLauncherItems(rawItems);
 }
