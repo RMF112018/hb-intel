@@ -13,4 +13,5 @@ This phase exists because the merged surface depends on deterministic visibility
 - implementation summary
 - prompt 01
 - prompt 02
+- visibility, approval, and aging rules
 - validation checklist

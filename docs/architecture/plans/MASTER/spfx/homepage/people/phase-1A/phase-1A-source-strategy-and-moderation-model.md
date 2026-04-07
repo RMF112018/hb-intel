@@ -69,6 +69,7 @@ Each of the three content regions reads from its own SharePoint list. The webpar
 #### Choice values for `AnnouncementType`
 
 - `Promotion`
+- `NewHire`
 - `Baby`
 - `Wedding`
 - `Special`

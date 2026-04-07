@@ -30,7 +30,7 @@ Formal editorial milestones with type-specific persistence windows.
 #### Event types
 
 ```typescript
-type AnnouncementType = 'promotion' | 'baby' | 'wedding' | 'special';
+type AnnouncementType = 'promotion' | 'baby' | 'wedding' | 'special' | 'newHire';
 ```
 
 #### Contract: `AnnouncementEntry`
@@ -57,6 +57,7 @@ type AnnouncementType = 'promotion' | 'baby' | 'wedding' | 'special';
 | Type | Duration |
 |------|----------|
 | `promotion` | 5 days from `publishDate` |
+| `newHire` | 5 days from `publishDate` |
 | `baby` | 3 days from `publishDate` |
 | `wedding` | 3 days from `publishDate` |
 | `special` | 3 days from `publishDate` unless pinned |
@@ -259,12 +260,7 @@ The existing flat model must be replaced, not extended:
 
 ### `newHire` disposition
 
-The current `PeopleCultureEventType` includes `newHire`. Under the merged architecture:
-
-- If new-hire announcements should appear in Band A, add `'newHire'` to `AnnouncementType` with an appropriate persistence window
-- If new hires are a separate homepage concern, remove them from this webpart entirely
-
-This decision is deferred to Phase 1B (visibility and editorial rules) for final resolution.
+**Resolved in Phase 1B:** New-hire announcements are treated as a Band A announcement type with a 5-day persistence window (same as promotions). `'newHire'` is included in `AnnouncementType` and all standard editorial overrides apply.
 
 ---
 
