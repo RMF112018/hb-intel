@@ -21,6 +21,7 @@ import {
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureMergedConfig } from '../../homepage/helpers/communicationsConfig.js';
+import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { useResponsiveTier, type ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
@@ -448,15 +449,20 @@ function hasAnyInput(c: Partial<PeopleCultureMergedConfig> | undefined): boolean
 export function PeopleCultureMerged({ config, activeAudience, isLoading = false }: PeopleCultureMergedProps): React.JSX.Element {
   const tier = useResponsiveTier();
   const rm = usePrefersReducedMotion();
+  const { listConfig, isLoading: listLoading } = usePeopleCultureData();
 
-  if (isLoading) return <HomepageLoadingState label="Loading People & Culture" />;
+  if (isLoading || listLoading) return <HomepageLoadingState label="Loading People & Culture" />;
+
+  // List-sourced data is the primary operating model.
+  // Manifest config (props) is the narrow fallback for local dev / demo / packaging.
+  const effectiveConfig = listConfig ?? config;
 
   let output: ReturnType<typeof normalizePeopleCultureMergedConfig>;
-  try { output = normalizePeopleCultureMergedConfig(config, activeAudience); }
+  try { output = normalizePeopleCultureMergedConfig(effectiveConfig, activeAudience); }
   catch { const m = resolveAuthoringMessage('peopleCulture', 'invalid'); return <HomepageEmptyState title={m.title} description={m.description} />; }
 
   const allEmpty = output.bandA.isEmpty && output.kudos.isEmpty && output.bandB.isEmpty;
-  if (allEmpty && !hasAnyInput(config)) { const m = resolveAuthoringMessage('peopleCulture', 'noData'); return <HomepageEmptyState title={m.title} description={m.description} />; }
+  if (allEmpty && !hasAnyInput(effectiveConfig)) { const m = resolveAuthoringMessage('peopleCulture', 'noData'); return <HomepageEmptyState title={m.title} description={m.description} />; }
   if (allEmpty) { const m = resolveAuthoringMessage('peopleCulture', 'invalid'); return <HomepageEmptyState title={m.title} description={m.description} />; }
 
   return (
