@@ -54,6 +54,7 @@ export interface PeopleCultureMergedProps {
 // ---------------------------------------------------------------------------
 
 const ICON_SIZE = 16;
+const HP_FOCUS_OUTLINE = '2px solid #225391';
 
 // ---------------------------------------------------------------------------
 // Shared styles — shell
@@ -323,8 +324,9 @@ const kudosCelebrateButtonStyle: React.CSSProperties = {
   fontWeight: 500,
   lineHeight: 1,
   color: 'inherit',
-  transition: 'background 150ms ease',
+  transition: 'background 150ms ease, border-color 150ms ease',
   flexShrink: 0,
+  outline: 'none',
 };
 
 const kudosCtaRowStyle: React.CSSProperties = {
@@ -488,10 +490,13 @@ function BandARegion({ output, tier }: { output: BandAOutput; tier: ResponsiveTi
   return (
     <section aria-label="Announcements" data-hbc-homepage="band-a" data-hbc-region-state="populated">
       <div style={getBandARegionStyle(tier)}>
-        <h3 style={bandAHeaderStyle}>
-          <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
-          Highlights
-        </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: HP_SPACE.sm }}>
+          <h3 style={bandAHeaderStyle}>
+            <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
+            Highlights
+          </h3>
+          <HbcPremiumCta label="Submit announcement" href="#submit-announcement" variant="ghost" arrow />
+        </div>
         <div style={announcementGridColumns(output.items.length, tier)}>
           {output.items.map((item) => (
             <AnnouncementCard key={item.id} item={item} tier={tier} />
@@ -510,9 +515,18 @@ function formatRecipients(recipients: KudosModuleOutput['featured'] extends unde
 }
 
 function CelebrateButton({ count }: { count?: number }): React.JSX.Element {
-  const label = typeof count === 'number' && count > 0 ? `Celebrate (${count})` : 'Celebrate';
+  const hasCount = typeof count === 'number' && count > 0;
+  const label = hasCount ? `Celebrate (${count})` : 'Celebrate';
   return (
-    <button type="button" style={kudosCelebrateButtonStyle} aria-label={label}>
+    <button
+      type="button"
+      style={kudosCelebrateButtonStyle}
+      aria-label={label}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(229,126,70,0.06)'; e.currentTarget.style.borderColor = 'rgba(229,126,70,0.25)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = ''; }}
+      onFocus={(e) => { e.currentTarget.style.outline = HP_FOCUS_OUTLINE; e.currentTarget.style.outlineOffset = '2px'; }}
+      onBlur={(e) => { e.currentTarget.style.outline = 'none'; e.currentTarget.style.outlineOffset = ''; }}
+    >
       <CheckCircle2 size={12} />
       <span>{label}</span>
     </button>
@@ -751,6 +765,7 @@ export function PeopleCultureMerged({
     <HbcHomepageSectionShell
       title={output.heading}
       subtitle="Birthdays, anniversaries, recognition, milestones, and team news"
+      headerAction={<HbcPremiumCta label="View all" href="#people-culture" variant="ghost" arrow />}
     >
       <div
         style={getShellStyle(tier)}

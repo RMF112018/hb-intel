@@ -14,3 +14,7 @@ This phase exists because the fully built feature needs coherent CTA posture, in
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — CTA posture, focus/hover treatment, section-level actions
