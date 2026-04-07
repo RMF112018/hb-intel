@@ -8,9 +8,17 @@
  * Phase 11D: Premium primitives and surface layer.
  *   - CSS module interactive states on search input and close button
  *
- * Search via launcherSearch.ts contract with pre-computed searchable
- * records. Matches against name, aliases, descriptor, category,
- * workflowShelf, and support owner name.
+ * Phase 11E: Search and discovery upgrade.
+ *   - Scored search replaces flat substring filtering
+ *   - Platforms within groups re-ordered by relevance when searching
+ *   - Groups re-ordered by best match score when searching
+ *   - Category count badges show filtered/total in search mode
+ *   - Improved no-results treatment with helpful guidance
+ *   - Search scope signal in header (result count with categories)
+ *
+ * Search via launcherSearch.ts contract with weighted multi-field scoring.
+ * Matches against name, aliases, descriptor, category, workflowShelf,
+ * and support owner name. Results ranked by relevance score.
  */
 import * as React from 'react';
 import { motion, AnimatePresence, Search } from '@hbc/ui-kit/homepage';
@@ -77,6 +85,12 @@ const titleStyle: React.CSSProperties = {
   fontWeight: 700,
   color: 'rgba(0,0,0,0.85)',
   whiteSpace: 'nowrap',
+};
+
+const titleDetailStyle: React.CSSProperties = {
+  fontWeight: 400,
+  color: 'rgba(0,0,0,0.4)',
+  fontSize: '0.78rem',
 };
 
 const searchContainerStyle: React.CSSProperties = {
@@ -176,6 +190,12 @@ const noResultsStyle: React.CSSProperties = {
   fontSize: '0.78rem',
 };
 
+const noResultsHintStyle: React.CSSProperties = {
+  marginTop: HP_SPACE.md,
+  fontSize: '0.7rem',
+  color: 'rgba(0,0,0,0.3)',
+};
+
 /* ── Motion variants ─────────────────────────────────────────────── */
 
 const overlayMotion = {
@@ -214,9 +234,35 @@ function OverlayContent({ index, allPlatforms, onClose }: {
   }, []);
 
   const totalPlatforms = countIndexPlatforms(index);
+  const totalCategories = index.groups.length;
   const filtered = filterIndexByQuery(index, searchable, searchQuery);
   const filteredCount = countIndexPlatforms(filtered);
+  const filteredCategories = filtered.groups.length;
   const isSearching = searchQuery.trim().length > 0;
+
+  // Build header title based on search state
+  let headerTitle: React.ReactNode;
+  if (!isSearching) {
+    headerTitle = (
+      <>
+        All Platforms{' '}
+        <span style={titleDetailStyle}>
+          ({totalPlatforms} in {totalCategories} {totalCategories === 1 ? 'category' : 'categories'})
+        </span>
+      </>
+    );
+  } else if (filteredCount === 0) {
+    headerTitle = 'No results';
+  } else {
+    headerTitle = (
+      <>
+        {filteredCount} result{filteredCount === 1 ? '' : 's'}{' '}
+        <span style={titleDetailStyle}>
+          across {filteredCategories} {filteredCategories === 1 ? 'category' : 'categories'}
+        </span>
+      </>
+    );
+  }
 
   return (
     <>
@@ -236,17 +282,13 @@ function OverlayContent({ index, allPlatforms, onClose }: {
         {/* Sticky header */}
         <div style={stickyHeaderStyle}>
           <div style={headerRowStyle}>
-            <h3 style={titleStyle}>
-              {isSearching
-                ? `${filteredCount} result${filteredCount === 1 ? '' : 's'}`
-                : `All Platforms (${totalPlatforms})`}
-            </h3>
+            <h3 style={titleStyle}>{headerTitle}</h3>
             <div style={searchContainerStyle}>
               <Search size={14} strokeWidth={2} style={searchIconStyle} />
               <input
                 ref={searchRef}
                 type="text"
-                placeholder="Search platforms..."
+                placeholder="Search by name, category, or workflow..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search all platforms"
@@ -273,10 +315,20 @@ function OverlayContent({ index, allPlatforms, onClose }: {
           ) : filtered.groups.length === 0 ? (
             <div style={noResultsStyle}>
               No platforms matching &ldquo;{searchQuery}&rdquo;
+              <div style={noResultsHintStyle}>
+                Try searching by platform name, category, workflow, or support owner
+              </div>
             </div>
           ) : (
             filtered.groups.map((group, i) => {
               const GroupIcon = resolveGroupIcon(group.category);
+              // Find original group to show filtered/total count when searching
+              const originalGroup = isSearching
+                ? index.groups.find((g) => g.category === group.category)
+                : undefined;
+              const countLabel = originalGroup
+                ? `${group.platforms.length}/${originalGroup.platforms.length}`
+                : `${group.platforms.length}`;
               return (
                 <div key={group.category}>
                   <div style={i === 0 ? firstCategoryHeadingStyle : categoryHeadingStyle}>
@@ -284,7 +336,7 @@ function OverlayContent({ index, allPlatforms, onClose }: {
                       <GroupIcon size={11} strokeWidth={2} color="rgba(34,83,145,0.5)" />
                     </div>
                     {group.category}
-                    <span style={categoryCountStyle}>{group.platforms.length}</span>
+                    <span style={categoryCountStyle}>{countLabel}</span>
                   </div>
                   {group.platforms.map((p) => (
                     <LauncherIndexRow key={p.platformKey} platform={p} />

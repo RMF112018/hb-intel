@@ -10,11 +10,17 @@
  *   - CSS module interactive states (:hover, :focus-visible, :active)
  *     on buttons, search input, and suggestion rows
  *
- * Search behavior preserved from Phase 08-02:
- *   - Live filtering via launcherSearch contract (pre-computed searchText)
+ * Phase 11E: Search and discovery upgrade.
+ *   - Weighted multi-field scoring replaces flat filter + slice
+ *   - Suggestions show match context (category, workflow shelf, or
+ *     support owner) based on which field scored highest
+ *   - Professional no-results treatment with helpful guidance
+ *   - Result count signal in dropdown header
+ *
+ * Search behavior:
+ *   - Live scoring via launcherSearch contract (scoreAndRank)
  *   - Keyboard: ArrowDown/Up to navigate, Enter to launch, Escape to dismiss
- *   - Suggestion dropdown shows top 6 matches with name + category
- *   - No-match state: "No platforms matching '{query}'"
+ *   - Suggestion dropdown shows top 6 ranked matches with contextual hints
  */
 import * as React from 'react';
 import { Search, ExternalLink, Settings, Info } from '@hbc/ui-kit/homepage';
@@ -23,7 +29,7 @@ import {
   HP_RADIUS,
   HP_BORDER,
 } from '../../homepage/tokens.js';
-import { matchesQuery, type SearchablePlatform } from './launcherSearch.js';
+import { scoreAndRank, type SearchablePlatform, type ScoredResult } from './launcherSearch.js';
 import interactiveStyles from './launcher-interactive.module.css';
 import type { ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 
@@ -144,14 +150,23 @@ const dropdownStyle: React.CSSProperties = {
   borderRadius: HP_RADIUS.card,
   background: 'rgba(255,255,255,0.99)',
   boxShadow: '0 6px 24px rgba(0,0,0,0.12)',
-  maxHeight: 260,
+  maxHeight: 300,
   overflowY: 'auto',
+};
+
+const dropdownHeaderStyle: React.CSSProperties = {
+  padding: `${HP_SPACE.sm}px ${HP_SPACE.xl}px`,
+  fontSize: '0.64rem',
+  fontWeight: 600,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.05em',
+  color: 'rgba(0,0,0,0.35)',
+  borderBottom: HP_BORDER.subtle,
 };
 
 const suggestionStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
   gap: HP_SPACE.md,
   padding: `${HP_SPACE.md}px ${HP_SPACE.xl}px`,
   fontSize: '0.78rem',
@@ -165,19 +180,27 @@ const suggestionActiveStyle: React.CSSProperties = {
   background: 'rgba(34,83,145,0.06)',
 };
 
+const suggestionContentStyle: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 1,
+};
+
 const suggestionNameStyle: React.CSSProperties = {
   fontWeight: 600,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  minWidth: 0,
 };
 
-const suggestionCategoryStyle: React.CSSProperties = {
-  fontSize: '0.67rem',
+const suggestionHintStyle: React.CSSProperties = {
+  fontSize: '0.64rem',
   color: 'rgba(0,0,0,0.38)',
   whiteSpace: 'nowrap',
-  flexShrink: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 };
 
 const noMatchStyle: React.CSSProperties = {
@@ -185,6 +208,12 @@ const noMatchStyle: React.CSSProperties = {
   fontSize: '0.76rem',
   color: 'rgba(0,0,0,0.4)',
   textAlign: 'center',
+};
+
+const noMatchHintStyle: React.CSSProperties = {
+  marginTop: HP_SPACE.sm,
+  fontSize: '0.68rem',
+  color: 'rgba(0,0,0,0.3)',
 };
 
 const actionsStyle: React.CSSProperties = {
@@ -209,6 +238,30 @@ const actionButtonStyle: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+/** Build a contextual hint line based on which field matched best. */
+function buildHint(result: ScoredResult): string | undefined {
+  const r = result.platform.record;
+  switch (result.matchField) {
+    case 'category':
+      return r.category ? `Category: ${r.category}` : undefined;
+    case 'workflow':
+      return r.workflowShelf ? `Workflow: ${r.workflowShelf}` : undefined;
+    case 'support':
+      return r.support.supportOwnerName ? `Support: ${r.support.supportOwnerName}` : undefined;
+    case 'alias':
+      return r.category ? `${r.category}` : r.workflowShelf ? `${r.workflowShelf}` : undefined;
+    case 'descriptor':
+      return r.category ? `${r.category}` : undefined;
+    case 'name':
+    default:
+      // For name matches, show category or workflow as context
+      if (r.category && r.workflowShelf) return `${r.category} · ${r.workflowShelf}`;
+      return r.category ?? r.workflowShelf ?? undefined;
+  }
+}
+
 /* ── Component ───────────────────────────────────────────────────── */
 
 export function LauncherCommandBand({
@@ -227,14 +280,14 @@ export function LauncherCommandBand({
   const [activeIndex, setActiveIndex] = React.useState(-1);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Compute suggestions from search contract
-  const suggestions = React.useMemo(() => {
+  // Score and rank suggestions
+  const rankedResults = React.useMemo(() => {
     if (!query.trim() || searchable.length === 0) return [];
-    return searchable
-      .filter((sp) => matchesQuery(sp, query))
-      .slice(0, MAX_SUGGESTIONS);
+    return scoreAndRank(searchable, query);
   }, [query, searchable]);
 
+  const suggestions = rankedResults.slice(0, MAX_SUGGESTIONS);
+  const totalMatches = rankedResults.length;
   const hasQuery = query.trim().length > 0;
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -264,7 +317,7 @@ export function LauncherCommandBand({
       case 'Enter':
         e.preventDefault();
         if (activeIndex >= 0 && activeIndex < suggestions.length) {
-          const target = suggestions[activeIndex].record;
+          const target = suggestions[activeIndex].platform.record;
           window.open(target.launchUrl, target.openInNewTab ? '_blank' : '_self');
         }
         break;
@@ -346,27 +399,43 @@ export function LauncherCommandBand({
               {suggestions.length === 0 ? (
                 <div style={noMatchStyle}>
                   No platforms matching &ldquo;{query}&rdquo;
+                  <div style={noMatchHintStyle}>
+                    Try a different name, category, or workflow
+                  </div>
                 </div>
               ) : (
-                suggestions.map((sp, i) => (
-                  <a
-                    key={sp.record.platformKey}
-                    href={sp.record.launchUrl}
-                    target={sp.record.openInNewTab ? '_blank' : undefined}
-                    rel={sp.record.openInNewTab ? 'noopener noreferrer' : undefined}
-                    role="option"
-                    aria-selected={i === activeIndex}
-                    className={interactiveStyles.suggestion}
-                    style={i === activeIndex ? suggestionActiveStyle : suggestionStyle}
-                    onMouseEnter={() => setActiveIndex(i)}
-                  >
-                    <span style={suggestionNameStyle}>{sp.record.name}</span>
-                    {sp.record.category && (
-                      <span style={suggestionCategoryStyle}>{sp.record.category}</span>
-                    )}
-                    <ExternalLink size={11} strokeWidth={1.8} color="rgba(0,0,0,0.25)" />
-                  </a>
-                ))
+                <>
+                  <div style={dropdownHeaderStyle} aria-hidden="true">
+                    {totalMatches === 1
+                      ? '1 result'
+                      : totalMatches <= MAX_SUGGESTIONS
+                        ? `${totalMatches} results`
+                        : `Top ${suggestions.length} of ${totalMatches}`}
+                  </div>
+                  {suggestions.map((result, i) => {
+                    const r = result.platform.record;
+                    const hint = buildHint(result);
+                    return (
+                      <a
+                        key={r.platformKey}
+                        href={r.launchUrl}
+                        target={r.openInNewTab ? '_blank' : undefined}
+                        rel={r.openInNewTab ? 'noopener noreferrer' : undefined}
+                        role="option"
+                        aria-selected={i === activeIndex}
+                        className={interactiveStyles.suggestion}
+                        style={i === activeIndex ? suggestionActiveStyle : suggestionStyle}
+                        onMouseEnter={() => setActiveIndex(i)}
+                      >
+                        <div style={suggestionContentStyle}>
+                          <span style={suggestionNameStyle}>{r.name}</span>
+                          {hint && <span style={suggestionHintStyle}>{hint}</span>}
+                        </div>
+                        <ExternalLink size={11} strokeWidth={1.8} color="rgba(0,0,0,0.25)" />
+                      </a>
+                    );
+                  })}
+                </>
               )}
             </div>
           )}
