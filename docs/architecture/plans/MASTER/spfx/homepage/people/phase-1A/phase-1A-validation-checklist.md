@@ -1,7 +1,7 @@
 # Phase 1A — Content Model and Source Strategy — Validation Checklist
 
-- [ ] merged content model documented
-- [ ] Kudos schema fields defined
-- [ ] multiple recipients supported
-- [ ] reviewer/approver property strategy defined
-- [ ] no UI or rules work introduced
+- [x] merged content model documented
+- [x] Kudos schema fields defined
+- [x] multiple recipients supported
+- [x] reviewer/approver property strategy defined
+- [x] no UI or rules work introduced

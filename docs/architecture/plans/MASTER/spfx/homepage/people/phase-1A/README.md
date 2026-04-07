@@ -13,4 +13,5 @@ This phase exists because the feature can no longer rely on the original celebra
 - implementation summary
 - prompt 01
 - prompt 02
+- merged content model specification
 - validation checklist
