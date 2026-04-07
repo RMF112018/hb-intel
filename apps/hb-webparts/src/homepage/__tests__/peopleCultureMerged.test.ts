@@ -428,4 +428,101 @@ describe('normalizePeopleCultureMergedConfig', () => {
       expect(result.bandA.items[0].media?.src).toBe('/img.jpg');
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Partial-data resilience (Phase 8B)
+  // ---------------------------------------------------------------------------
+
+  describe('Partial-data resilience', () => {
+    it('skips null/undefined items in arrays', () => {
+      const result = normalizePeopleCultureMergedConfig({
+        announcements: [null, undefined, makeAnnouncement({ id: 'a1', publishDate: '2026-04-06' })] as unknown as AnnouncementEntry[],
+        kudos: [null, makeKudos({ id: 'k1', approvedDate: '2026-04-05' })] as unknown as KudosEntry[],
+        celebrations: [undefined, makeCelebration({ id: 'c1', celebrationDate: '2026-04-09' })] as unknown as WeeklyCelebrationEntry[],
+      }, undefined, NOW);
+
+      expect(result.bandA.items).toHaveLength(1);
+      expect(result.kudos.featured?.id).toBe('k1');
+      expect(result.bandB.items).toHaveLength(1);
+    });
+
+    it('drops announcements with invalid announcementType', () => {
+      const result = normalizePeopleCultureMergedConfig({
+        announcements: [
+          makeAnnouncement({ id: 'good', announcementType: 'promotion', publishDate: '2026-04-06' }),
+          { ...makeAnnouncement({ id: 'bad', publishDate: '2026-04-06' }), announcementType: 'unknown' as AnnouncementEntry['announcementType'] },
+        ],
+      }, undefined, NOW);
+
+      expect(result.bandA.items.map((i) => i.id)).toEqual(['good']);
+    });
+
+    it('drops Kudos with missing submittedBy', () => {
+      const result = normalizePeopleCultureMergedConfig({
+        kudos: [
+          makeKudos({ id: 'good', approvedDate: '2026-04-05' }),
+          { ...makeKudos({ id: 'bad', approvedDate: '2026-04-05' }), submittedBy: null } as unknown as KudosEntry,
+        ],
+      }, undefined, NOW);
+
+      expect(result.kudos.featured?.id).toBe('good');
+      expect(result.kudos.recentHeadlines).toEqual([]);
+    });
+
+    it('drops Kudos with empty submittedBy displayName', () => {
+      const result = normalizePeopleCultureMergedConfig({
+        kudos: [
+          makeKudos({ id: 'good', approvedDate: '2026-04-05' }),
+          { ...makeKudos({ id: 'bad', approvedDate: '2026-04-05' }), submittedBy: { id: 'u1', displayName: '' } } as KudosEntry,
+        ],
+      }, undefined, NOW);
+
+      expect(result.kudos.featured?.id).toBe('good');
+    });
+
+    it('normalizes Kudos recipients — filters out invalid entries', () => {
+      const result = normalizePeopleCultureMergedConfig({
+        kudos: [
+          makeKudos({
+            id: 'k1',
+            approvedDate: '2026-04-05',
+            recipients: [
+              { id: 'r1', name: 'Valid', recipientType: 'individual' },
+              null,
+              { id: '', name: 'No ID', recipientType: 'team' },
+            ] as unknown as KudosEntry['recipients'],
+          }),
+        ],
+      }, undefined, NOW);
+
+      expect(result.kudos.featured?.recipients).toHaveLength(1);
+      expect(result.kudos.featured?.recipients[0].name).toBe('Valid');
+    });
+
+    it('drops celebrations with invalid celebrationType', () => {
+      const result = normalizePeopleCultureMergedConfig({
+        celebrations: [
+          makeCelebration({ id: 'good', celebrationType: 'birthday', celebrationDate: '2026-04-09' }),
+          { ...makeCelebration({ id: 'bad', celebrationDate: '2026-04-09' }), celebrationType: 'unknown' as WeeklyCelebrationEntry['celebrationType'] },
+        ],
+      }, undefined, NOW);
+
+      expect(result.bandB.items.map((i) => i.id)).toEqual(['good']);
+    });
+
+    it('handles completely undefined config gracefully', () => {
+      const result = normalizePeopleCultureMergedConfig(undefined, undefined, NOW);
+      expect(result.bandA.isEmpty).toBe(true);
+      expect(result.kudos.isEmpty).toBe(true);
+      expect(result.bandB.isEmpty).toBe(true);
+    });
+
+    it('handles empty object config gracefully', () => {
+      const result = normalizePeopleCultureMergedConfig({}, undefined, NOW);
+      expect(result.heading).toBe('Celebrating Our People');
+      expect(result.bandA.isEmpty).toBe(true);
+      expect(result.kudos.isEmpty).toBe(true);
+      expect(result.bandB.isEmpty).toBe(true);
+    });
+  });
 });

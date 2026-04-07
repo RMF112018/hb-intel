@@ -213,6 +213,10 @@ function byAnnouncementPriority(a: AnnouncementEntry, b: AnnouncementEntry): num
   return a.personName.localeCompare(b.personName);
 }
 
+function isValidAnnouncementType(type: unknown): type is AnnouncementType {
+  return typeof type === 'string' && type in ANNOUNCEMENT_PERSISTENCE_DAYS;
+}
+
 function normalizeBandA(
   items: AnnouncementEntry[] | undefined,
   activeAudience: string | undefined,
@@ -220,7 +224,9 @@ function normalizeBandA(
   todayMs: number,
 ): BandAOutput {
   const visible = (items ?? [])
+    .filter((item): item is AnnouncementEntry => item != null && typeof item === 'object')
     .filter((item) => hasText(item.id) && hasText(item.personName) && hasText(item.headline) && hasText(item.summary))
+    .filter((item) => isValidAnnouncementType(item.announcementType))
     .filter((item) => isVisibleForAudience(item.audiences, activeAudience))
     .filter((item) => isAnnouncementVisible(item, todayMs))
     .map((item) => normalizeCta({
@@ -269,19 +275,36 @@ function byKudosPriority(a: KudosEntry, b: KudosEntry): number {
   return a.headline.localeCompare(b.headline);
 }
 
+function hasValidSubmitter(item: KudosEntry): boolean {
+  return item.submittedBy != null
+    && typeof item.submittedBy === 'object'
+    && hasText(item.submittedBy.displayName);
+}
+
+function normalizeRecipients(recipients: unknown): KudosEntry['recipients'] {
+  if (!Array.isArray(recipients)) return [];
+  return recipients.filter(
+    (r): r is KudosEntry['recipients'][number] =>
+      r != null && typeof r === 'object' && hasText(r.id) && hasText(r.name),
+  );
+}
+
 function normalizeKudos(
   items: KudosEntry[] | undefined,
   maxHeadlines: number,
   todayMs: number,
 ): KudosModuleOutput {
   const visible = (items ?? [])
+    .filter((item): item is KudosEntry => item != null && typeof item === 'object')
     .filter((item) => hasText(item.id) && hasText(item.headline) && hasText(item.excerpt))
+    .filter((item) => hasValidSubmitter(item))
     .filter((item) => isKudosHomepageVisible(item, todayMs))
     .map((item) => ({
       ...item,
       id: item.id.trim(),
       headline: item.headline.trim(),
       excerpt: item.excerpt.trim(),
+      recipients: normalizeRecipients(item.recipients),
       media: normalizeMedia(item.media),
     }))
     .sort(byKudosPriority);
@@ -318,6 +341,8 @@ function byCelebrationDate(a: WeeklyCelebrationEntry, b: WeeklyCelebrationEntry)
   return a.personName.localeCompare(b.personName);
 }
 
+const VALID_CELEBRATION_TYPES = new Set<string>(['birthday', 'anniversary']);
+
 function normalizeBandB(
   items: WeeklyCelebrationEntry[] | undefined,
   activeAudience: string | undefined,
@@ -325,7 +350,9 @@ function normalizeBandB(
   todayMs: number,
 ): BandBOutput {
   const visible = (items ?? [])
+    .filter((item): item is WeeklyCelebrationEntry => item != null && typeof item === 'object')
     .filter((item) => hasText(item.id) && hasText(item.personName))
+    .filter((item) => VALID_CELEBRATION_TYPES.has(item.celebrationType))
     .filter((item) => isVisibleForAudience(item.audiences, activeAudience))
     .filter((item) => isCelebrationVisible(item, todayMs))
     .map((item) => ({
