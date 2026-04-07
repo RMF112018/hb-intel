@@ -13,28 +13,31 @@
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "HB Intel" },
       "title": { "default": "People and Culture" },
-      "description": { "default": "Curated people moments including welcomes, anniversaries, promotions, and recognition." },
+      "description": { "default": "Announcements, Kudos recognition, birthdays, and anniversaries — merged three-region People & Culture surface." },
       "officeFabricIconFontName": "People",
       "hiddenFromToolbox": true,
       "properties": {
-        "heading": "People and Culture",
-        "maxSecondaryEntries": 4,
-        "entries": [
+        "heading": "Celebrating Our People",
+        "maxAnnouncements": 4,
+        "maxKudosHeadlines": 6,
+        "maxCelebrations": 8,
+        "announcements": [
           {
-            "id": "culture-feature",
+            "id": "demo-promo",
             "personName": "Jordan Lee",
-            "eventType": "newHire",
-            "highlight": "Welcoming Jordan to the field operations team.",
-            "featured": true,
-            "order": 1,
-            "cta": { "label": "Meet Jordan", "href": "/sites/hb-central/people" }
-          },
+            "announcementType": "promotion",
+            "headline": "Promoted to Senior Project Manager",
+            "summary": "Congratulations to Jordan on this well-deserved milestone.",
+            "publishDate": "2026-04-06"
+          }
+        ],
+        "kudos": [],
+        "celebrations": [
           {
-            "id": "culture-anniversary",
+            "id": "demo-bday",
             "personName": "Riley Brooks",
-            "eventType": "anniversary",
-            "highlight": "Celebrating 10 years of service and mentorship.",
-            "order": 2
+            "celebrationType": "birthday",
+            "celebrationDate": "2026-04-09"
           }
         ]
       }
