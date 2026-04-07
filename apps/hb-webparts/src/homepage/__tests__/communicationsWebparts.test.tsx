@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { CompanyPulse } from '../../webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from '../../webparts/leadershipMessage/LeadershipMessage.js';
-import { PeopleCulture } from '../../webparts/peopleCulture/PeopleCulture.js';
+import { PeopleCultureMerged } from '../../webparts/peopleCulture/PeopleCultureMerged.js';
 
 describe('Prompt-06 awareness webparts', () => {
   it('renders featured hierarchy and secondary items for company pulse', () => {
@@ -27,26 +27,31 @@ describe('Prompt-06 awareness webparts', () => {
     expect(screen.getByText('Leadership message configuration is invalid')).not.toBeNull();
   });
 
-  it('renders people and culture media optionally and keeps keyboard-access links', () => {
+  it('renders people and culture merged with announcement data', () => {
     render(
-      <PeopleCulture
+      <PeopleCultureMerged
         config={{
-          entries: [
+          announcements: [
             {
-              id: 'feat',
+              id: 'ann1',
               personName: 'Jordan Lee',
-              eventType: 'newHire',
-              highlight: 'Welcome to the team.',
-              featured: true,
-              cta: { label: 'Meet Jordan', href: '/people' },
+              announcementType: 'promotion',
+              headline: 'Promoted to Senior PM',
+              summary: 'Congratulations.',
+              publishDate: new Date().toISOString().slice(0, 10),
             },
           ],
         }}
       />,
     );
 
-    expect(screen.getByRole('link', { name: /Meet Jordan/ }).getAttribute('href')).toBe('/people');
-    expect(screen.getByText('Welcome to the team.')).not.toBeNull();
+    expect(screen.getByText('Promoted to Senior PM')).not.toBeNull();
+    expect(screen.getByText('Jordan Lee')).not.toBeNull();
+  });
+
+  it('renders module-level empty state when no data configured', () => {
+    render(<PeopleCultureMerged config={{}} />);
+    expect(screen.getAllByRole('status').length).toBeGreaterThan(0);
   });
 
   it('renders loading state for communications webparts', () => {

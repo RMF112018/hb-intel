@@ -5,7 +5,7 @@ import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityAct
 import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
 import { CompanyPulse } from '../webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from '../webparts/leadershipMessage/LeadershipMessage.js';
-import { PeopleCulture } from '../webparts/peopleCulture/PeopleCulture.js';
+import { PeopleCultureMerged } from '../webparts/peopleCulture/PeopleCultureMerged.js';
 import { ProjectPortfolioSpotlight } from '../webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from '../webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
@@ -234,25 +234,46 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             ],
           }}
         />
-        <PeopleCulture
+        <PeopleCultureMerged
           activeAudience="field"
           config={{
-            entries: [
+            heading: 'People & Culture',
+            announcements: [
               {
-                id: 'culture-feature',
+                id: 'ann-promo',
                 personName: 'Avery Jordan',
-                eventType: 'recognition',
-                highlight: 'Recognized for cross-team safety mentorship.',
-                featured: true,
-                order: 1,
-                cta: { label: 'Celebrate', href: '/people' },
+                announcementType: 'promotion',
+                headline: 'Promoted to Senior Project Manager',
+                summary: 'Recognized for cross-team safety mentorship and project leadership.',
+                publishDate: new Date().toISOString().slice(0, 10),
+              },
+            ],
+            kudos: [
+              {
+                id: 'kudos-demo',
+                headline: 'Outstanding Safety Leadership',
+                excerpt: 'Led the team to 500 days without a recordable incident.',
+                submittedBy: { id: 'u1', displayName: 'Casey Martin', email: 'casey@hb.com' },
+                submittedDate: new Date().toISOString().slice(0, 10),
+                status: 'approved',
+                approvedDate: new Date().toISOString().slice(0, 10),
+                recipients: [{ id: 'r1', name: 'Riley Brooks', recipientType: 'individual' }],
+                celebrateCount: 12,
+              },
+            ],
+            celebrations: [
+              {
+                id: 'cel-bday',
+                personName: 'Riley Brooks',
+                celebrationType: 'birthday',
+                celebrationDate: new Date(Date.now() + 86_400_000 * 2).toISOString().slice(0, 10),
               },
               {
-                id: 'culture-secondary',
-                personName: 'Riley Brooks',
-                eventType: 'anniversary',
-                highlight: 'Celebrating 10 years with HB.',
-                order: 2,
+                id: 'cel-anniv',
+                personName: 'Morgan Chen',
+                celebrationType: 'anniversary',
+                celebrationDate: new Date(Date.now() + 86_400_000 * 3).toISOString().slice(0, 10),
+                anniversaryYears: 10,
               },
             ],
           }}

@@ -13,7 +13,7 @@
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "HB Intel" },
       "title": { "default": "People and Culture" },
-      "description": { "default": "Announcements, Kudos recognition, birthdays, and anniversaries — merged three-region People & Culture surface." },
+      "description": { "default": "People & Culture homepage surface — Kudos recognition, announcements, and weekly celebrations with rail-first composition and region suppression." },
       "officeFabricIconFontName": "People",
       "hiddenFromToolbox": true,
       "properties": {

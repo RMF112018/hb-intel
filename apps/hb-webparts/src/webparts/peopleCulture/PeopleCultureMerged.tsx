@@ -1,20 +1,14 @@
 /**
- * PeopleCultureMerged — Three-region People & Culture desktop shell
+ * PeopleCultureMerged — Rebuilt People & Culture homepage surface
  *
- * Phase 3: Desktop composition skeleton with four-part structure.
- * Phase 4: Band A editorial announcement grid with medium-format cards,
- *          adaptive grid layout, and partial-data resilience.
- * Phase 5: Kudos featured spotlight and recent headlines with recipient
- *          display, avatar thumbnails, celebrate counts, Give Kudos
- *          entry posture, Celebrate affordance, and empty states.
- * Phase 7: Band B compact weekly celebration tiles with avatar/photo,
- *          celebration type label, and relative date display.
- * Phase 8A: Responsive adaptation for tablet and mobile — tier-aware
- *           grid layouts preserving hierarchy across breakpoints.
- * Phase 8B: Authoring/loading/empty/invalid hardening — safe behavior
- *           in SharePoint edit mode and imperfect data conditions.
- * Phase 9: CTA posture, editorial action hierarchy, motion/interaction
- *          polish, hover/focus treatments, and final warmth refinement.
+ * Phase 11 / P03: Full rebuild against P01 Surface Blueprint.
+ *
+ * Focal sequence: Kudos → Announcements → Celebrations
+ * Layout: Rail-first (300-400px) with wide-mode adaptation (>480px)
+ * Suppression: Empty regions are not rendered; module-level empty state
+ * only when all regions are empty.
+ * Visual: Single module header, eyebrow region labels, separator rhythm
+ * instead of per-region box boundaries.
  */
 import * as React from 'react';
 import {
@@ -36,7 +30,6 @@ import {
   HP_RADIUS,
   HP_BORDER,
   HP_TEXT_OPACITY,
-  hpZoneSection,
 } from '../../homepage/tokens.js';
 import type { PeopleCultureMergedConfig } from '../../homepage/webparts/communicationsContracts.js';
 import type { BandAOutput, KudosModuleOutput, BandBOutput } from '../../homepage/webparts/communicationsContracts.js';
@@ -52,31 +45,26 @@ export interface PeopleCultureMergedProps {
 }
 
 // ---------------------------------------------------------------------------
-// Icon size constant — consistent across all region headers
+// Layout mode — rail vs wide
 // ---------------------------------------------------------------------------
 
-const ICON_SIZE = 16;
-const HP_FOCUS_OUTLINE = '2px solid #225391';
+type LayoutMode = 'rail' | 'wide';
 
-// ---------------------------------------------------------------------------
-// Shared styles — shell
-// ---------------------------------------------------------------------------
-
-function getShellStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    ...hpZoneSection('communications'),
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tier === 'mobile' ? HP_SPACE['2xl'] : HP_SPACE['3xl'],
-    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['3xl'],
-  };
+function resolveLayout(tier: ResponsiveTier): LayoutMode {
+  return tier === 'desktop' ? 'wide' : 'rail';
 }
 
 // ---------------------------------------------------------------------------
-// Band A — Announcement type label and badge mappings
+// Constants
 // ---------------------------------------------------------------------------
 
-const ANNOUNCEMENT_LABEL_MAP: Record<string, string> = {
+const FOCUS_OUTLINE = '2px solid #225391';
+
+// ---------------------------------------------------------------------------
+// Announcement maps
+// ---------------------------------------------------------------------------
+
+const ANNOUNCEMENT_LABEL: Record<string, string> = {
   promotion: 'Congratulations',
   newHire: 'Welcome',
   baby: 'Baby Announcement',
@@ -84,7 +72,7 @@ const ANNOUNCEMENT_LABEL_MAP: Record<string, string> = {
   special: 'Special Announcement',
 };
 
-const ANNOUNCEMENT_BADGE_MAP: Record<string, 'info' | 'success' | 'warning' | 'critical'> = {
+const ANNOUNCEMENT_BADGE: Record<string, 'info' | 'success' | 'warning' | 'critical'> = {
   promotion: 'critical',
   newHire: 'info',
   baby: 'success',
@@ -93,434 +81,33 @@ const ANNOUNCEMENT_BADGE_MAP: Record<string, 'info' | 'success' | 'warning' | 'c
 };
 
 // ---------------------------------------------------------------------------
-// Band A styles — editorial announcement layer (most formal)
+// Shared styles
 // ---------------------------------------------------------------------------
 
-function getBandARegionStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
-    border: HP_BORDER.subtle,
-    borderRadius: HP_RADIUS.editorial,
-  };
-}
-
-const bandAHeaderStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.9375rem',
-  fontWeight: 600,
-  letterSpacing: '0.01em',
-};
-
-function announcementGridColumns(itemCount: number, tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'mobile') {
-    return {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: HP_SPACE.md,
-      marginTop: HP_SPACE.md,
-    };
-  }
-  return {
-    display: 'grid',
-    gridTemplateColumns: itemCount === 1
-      ? 'minmax(0, 480px)'
-      : tier === 'tablet'
-        ? 'repeat(auto-fit, minmax(240px, 1fr))'
-        : 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: HP_SPACE.xl,
-    marginTop: HP_SPACE.xl,
-  };
-}
-
-const announcementCardStyle: React.CSSProperties = {
-  padding: HP_SPACE['2xl'],
-  border: HP_BORDER.standard,
-  borderRadius: HP_RADIUS.editorial,
+const moduleBodyStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: HP_SPACE.sm,
-  minHeight: 120,
-  overflowWrap: 'break-word',
-  wordBreak: 'break-word',
-  transition: 'border-color 150ms ease, box-shadow 150ms ease',
+  gap: 0,
 };
 
-function getAnnouncementCardImageStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    width: '100%',
-    maxHeight: tier === 'mobile' ? 120 : 160,
-    objectFit: 'cover' as const,
-    borderRadius: HP_RADIUS.image,
-    display: 'block',
-  };
-}
-
-const announcementCardNameStyle: React.CSSProperties = {
-  fontSize: '0.9375rem',
-  fontWeight: 600,
-  lineHeight: 1.3,
-};
-
-const announcementCardHeadlineStyle: React.CSSProperties = {
-  fontSize: '0.8125rem',
-  fontWeight: 500,
-  lineHeight: 1.4,
-};
-
-const announcementCardSummaryStyle: React.CSSProperties = {
-  fontSize: '0.8125rem',
-  lineHeight: 1.5,
-  opacity: HP_TEXT_OPACITY.secondary,
+const eyebrowStyle: React.CSSProperties = {
   margin: 0,
-};
-
-// ---------------------------------------------------------------------------
-// Kudos styles — engagement center (warmest, most prominent)
-// ---------------------------------------------------------------------------
-
-function getKudosRegionStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
-    border: HP_BORDER.warmAccent,
-    borderRadius: HP_RADIUS.editorial,
-  };
-}
-
-function getKudosHeaderRowStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    display: 'flex',
-    justifyContent: tier === 'mobile' ? 'flex-start' : 'space-between',
-    alignItems: tier === 'mobile' ? 'flex-start' : 'center',
-    flexDirection: tier === 'mobile' ? 'column' : 'row',
-    gap: HP_SPACE.md,
-    flexWrap: 'wrap',
-  };
-}
-
-const kudosHeaderStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1rem',
-  fontWeight: 700,
-  letterSpacing: '0.01em',
-};
-
-const kudosDescriptionStyle: React.CSSProperties = {
-  margin: `${HP_SPACE.sm}px 0 0`,
-  fontSize: '0.8125rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-  lineHeight: 1.5,
-};
-
-function getKudosFeaturedStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    marginTop: HP_SPACE.xl,
-    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
-    border: HP_BORDER.standard,
-    borderTop: '3px solid rgba(229,126,70,0.35)',
-    borderRadius: HP_RADIUS.editorial,
-    background: 'rgba(229,126,70,0.02)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: HP_SPACE.sm,
-    overflowWrap: 'break-word',
-    wordBreak: 'break-word',
-    transition: 'border-color 150ms ease, box-shadow 150ms ease',
-  };
-}
-
-function getKudosFeaturedImageStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    width: '100%',
-    maxHeight: tier === 'mobile' ? 140 : 200,
-    objectFit: 'cover' as const,
-    borderRadius: HP_RADIUS.image,
-    display: 'block',
-  };
-}
-
-const kudosFeaturedHeadlineStyle: React.CSSProperties = {
-  fontSize: '0.9375rem',
+  fontSize: '0.6875rem',
   fontWeight: 600,
-  lineHeight: 1.4,
-};
-
-const kudosFeaturedRecipientsStyle: React.CSSProperties = {
-  fontSize: '0.8125rem',
-  fontWeight: 500,
-  lineHeight: 1.4,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
   opacity: HP_TEXT_OPACITY.muted,
 };
 
-const kudosFeaturedExcerptStyle: React.CSSProperties = {
-  fontSize: '0.8125rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-  lineHeight: 1.5,
-  margin: 0,
-};
-
-const kudosFeaturedMetaStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.md,
-  fontSize: '0.75rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-  flexWrap: 'wrap',
-};
-
-const kudosHeadlineItemBaseStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.lg,
-  padding: `${HP_SPACE.md}px ${HP_SPACE.sm}px`,
-  borderRadius: HP_RADIUS.command,
-  transition: 'background 150ms ease',
-};
-
-const kudosHeadlineItemStyle: React.CSSProperties = {
-  ...kudosHeadlineItemBaseStyle,
-  borderBottom: HP_BORDER.subtle,
-};
-
-const kudosHeadlineItemLastStyle: React.CSSProperties = {
-  ...kudosHeadlineItemBaseStyle,
-};
-
-function getKudosHeadlineAvatarSize(tier: ResponsiveTier): number {
-  return tier === 'mobile' ? 28 : 32;
-}
-
-function getKudosHeadlineAvatarStyle(tier: ResponsiveTier): React.CSSProperties {
-  const size = getKudosHeadlineAvatarSize(tier);
-  return {
-    width: size,
-    height: size,
-    borderRadius: '50%',
-    objectFit: 'cover' as const,
-    flexShrink: 0,
-  };
-}
-
-function getKudosHeadlineAvatarPlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
-  const size = getKudosHeadlineAvatarSize(tier);
-  return {
-    width: size,
-    height: size,
-    borderRadius: '50%',
-    background: 'rgba(229,126,70,0.08)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  };
-}
-
-const kudosHeadlineContentStyle: React.CSSProperties = {
-  flex: 1,
-  minWidth: 0,
-};
-
-const kudosCelebrateButtonStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: HP_SPACE.xs,
-  padding: `${HP_SPACE.xs}px ${HP_SPACE.md}px`,
-  border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.command,
-  background: 'transparent',
-  cursor: 'pointer',
-  fontSize: '0.75rem',
-  fontWeight: 500,
-  lineHeight: 1,
-  color: 'inherit',
-  transition: 'background 150ms ease, border-color 150ms ease',
-  flexShrink: 0,
-  outline: 'none',
-};
-
-const kudosCtaRowStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.xl,
-  flexWrap: 'wrap',
-};
-
-const kudosEmptyStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.xl,
-  padding: `${HP_SPACE['4xl']}px ${HP_SPACE['2xl']}px`,
-  textAlign: 'center',
-  border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.editorial,
-  background: 'rgba(229,126,70,0.015)',
-};
-
-const kudosEmptyHeadingStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.9375rem',
-  fontWeight: 600,
-  lineHeight: 1.4,
-};
-
-const kudosEmptyDescriptionStyle: React.CSSProperties = {
-  margin: `${HP_SPACE.sm}px 0 0`,
-  fontSize: '0.8125rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-  lineHeight: 1.5,
-};
-
-const kudosEmptyCtaStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.xl,
+const separatorMargin: React.CSSProperties = {
+  margin: `${HP_SPACE.xl}px 0`,
 };
 
 // ---------------------------------------------------------------------------
-// Band B styles — compact weekly layer (lightest, densest)
+// Kudos region
 // ---------------------------------------------------------------------------
 
-function getBandBRegionStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    padding: tier === 'mobile'
-      ? `${HP_SPACE.md}px ${HP_SPACE.xl}px`
-      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
-    border: HP_BORDER.subtle,
-    borderRadius: HP_RADIUS.card,
-  };
-}
-
-const bandBHeaderStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.8125rem',
-  fontWeight: 600,
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.04em',
-  opacity: HP_TEXT_OPACITY.muted,
-};
-
-function getCelebrationGridStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'mobile') {
-    return {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
-      gap: HP_SPACE.xs,
-      marginTop: HP_SPACE.sm,
-    };
-  }
-  return {
-    display: 'grid',
-    gridTemplateColumns: tier === 'tablet'
-      ? 'repeat(auto-fill, minmax(100px, 1fr))'
-      : 'repeat(auto-fill, minmax(120px, 1fr))',
-    gap: HP_SPACE.sm,
-    marginTop: HP_SPACE.md,
-  };
-}
-
-const celebrationTileStyle: React.CSSProperties = {
-  padding: HP_SPACE.md,
-  border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.card,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: 3,
-  textAlign: 'center' as const,
-  fontSize: '0.75rem',
-  lineHeight: 1.3,
-  transition: 'background 150ms ease, border-color 150ms ease',
-};
-
-const celebrationAvatarStyle: React.CSSProperties = {
-  width: 36,
-  height: 36,
-  borderRadius: '50%',
-  objectFit: 'cover' as const,
-};
-
-const celebrationAvatarPlaceholderStyle: React.CSSProperties = {
-  width: 36,
-  height: 36,
-  borderRadius: '50%',
-  background: 'rgba(34,83,145,0.06)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
-
-const celebrationNameStyle: React.CSSProperties = {
-  fontWeight: 500,
-  fontSize: '0.75rem',
-  lineHeight: 1.3,
-};
-
-const celebrationMetaStyle: React.CSSProperties = {
-  fontSize: '0.625rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-  lineHeight: 1.3,
-};
-
-const bandBEmptyStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.md,
-  fontSize: '0.8125rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-};
-
-// ---------------------------------------------------------------------------
-// Region components
-// ---------------------------------------------------------------------------
-
-function AnnouncementCard({ item, tier }: { item: BandAOutput['items'][number]; tier: ResponsiveTier }): React.JSX.Element {
-  const label = ANNOUNCEMENT_LABEL_MAP[item.announcementType] ?? item.announcementType;
-  const badgeStatus = ANNOUNCEMENT_BADGE_MAP[item.announcementType] ?? 'info';
-  const hasSummary = Boolean(item.summary?.trim());
-
-  return (
-    <div
-      style={announcementCardStyle}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = ''; }}
-    >
-      {item.media && (
-        <img
-          src={item.media.src}
-          alt={item.media.alt}
-          style={getAnnouncementCardImageStyle(tier)}
-        />
-      )}
-      <HbcPremiumBadge label={label} status={badgeStatus} size="sm" />
-      <div style={announcementCardNameStyle}>{item.personName}</div>
-      <div style={announcementCardHeadlineStyle}>{item.headline}</div>
-      {hasSummary && <p style={announcementCardSummaryStyle}>{item.summary}</p>}
-      {item.cta && (
-        <div style={{ marginTop: 'auto', paddingTop: HP_SPACE.sm }}>
-          <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function BandARegion({ output, tier }: { output: BandAOutput; tier: ResponsiveTier }): React.JSX.Element | null {
-  if (output.isEmpty) return null;
-
-  return (
-    <section aria-label="Announcements" data-hbc-homepage="band-a" data-hbc-region-state="populated">
-      <div style={getBandARegionStyle(tier)}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: HP_SPACE.sm }}>
-          <h3 style={bandAHeaderStyle}>
-            <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
-            Highlights
-          </h3>
-          <HbcPremiumCta label="Submit announcement" href="#submit-announcement" variant="ghost" arrow />
-        </div>
-        <div style={announcementGridColumns(output.items.length, tier)}>
-          {output.items.map((item) => (
-            <AnnouncementCard key={item.id} item={item} tier={tier} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function formatRecipients(recipients: KudosModuleOutput['featured'] extends undefined ? never : NonNullable<KudosModuleOutput['featured']>['recipients']): string {
+function formatRecipients(recipients: { name: string }[]): string {
   if (recipients.length === 0) return '';
   if (recipients.length === 1) return recipients[0].name;
   if (recipients.length === 2) return `${recipients[0].name} and ${recipients[1].name}`;
@@ -530,14 +117,33 @@ function formatRecipients(recipients: KudosModuleOutput['featured'] extends unde
 function CelebrateButton({ count }: { count?: number }): React.JSX.Element {
   const hasCount = typeof count === 'number' && count > 0;
   const label = hasCount ? `Celebrate (${count})` : 'Celebrate';
+
+  const style: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: HP_SPACE.xs,
+    padding: `${HP_SPACE.xs}px ${HP_SPACE.md}px`,
+    border: HP_BORDER.subtle,
+    borderRadius: HP_RADIUS.command,
+    background: 'transparent',
+    cursor: 'pointer',
+    fontSize: '0.75rem',
+    fontWeight: 500,
+    lineHeight: 1,
+    color: 'inherit',
+    transition: 'background 150ms ease, border-color 150ms ease',
+    flexShrink: 0,
+    outline: 'none',
+  };
+
   return (
     <button
       type="button"
-      style={kudosCelebrateButtonStyle}
+      style={style}
       aria-label={label}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(229,126,70,0.06)'; e.currentTarget.style.borderColor = 'rgba(229,126,70,0.25)'; }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = `rgba(229,126,70,0.06)`; e.currentTarget.style.borderColor = `rgba(229,126,70,0.25)`; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = ''; }}
-      onFocus={(e) => { e.currentTarget.style.outline = HP_FOCUS_OUTLINE; e.currentTarget.style.outlineOffset = '2px'; }}
+      onFocus={(e) => { e.currentTarget.style.outline = FOCUS_OUTLINE; e.currentTarget.style.outlineOffset = '2px'; }}
       onBlur={(e) => { e.currentTarget.style.outline = 'none'; e.currentTarget.style.outlineOffset = ''; }}
     >
       <CheckCircle2 size={12} />
@@ -546,124 +152,195 @@ function CelebrateButton({ count }: { count?: number }): React.JSX.Element {
   );
 }
 
-function KudosFeaturedSpotlight({ item, tier }: { item: NonNullable<KudosModuleOutput['featured']>; tier: ResponsiveTier }): React.JSX.Element {
+function KudosSpotlight({ item, layout }: { item: NonNullable<KudosModuleOutput['featured']>; layout: LayoutMode }): React.JSX.Element {
   const recipientLabel = formatRecipients(item.recipients);
+  const mediaSize = layout === 'rail' ? 64 : 120;
+
+  const spotlightStyle: React.CSSProperties = {
+    padding: HP_SPACE.xl,
+    borderLeft: `3px solid rgba(229,126,70,0.35)`,
+    background: 'rgba(229,126,70,0.02)',
+    borderRadius: HP_RADIUS.card,
+    display: 'flex',
+    flexDirection: layout === 'wide' ? 'row' : 'column',
+    gap: HP_SPACE.lg,
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    transition: 'box-shadow 150ms ease',
+  };
 
   return (
     <div
-      style={getKudosFeaturedStyle(tier)}
+      style={spotlightStyle}
       onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(229,126,70,0.1)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ''; }}
     >
       {item.media && (
-        <img src={item.media.src} alt={item.media.alt} style={getKudosFeaturedImageStyle(tier)} />
+        <img
+          src={item.media.src}
+          alt={item.media.alt}
+          style={{
+            width: mediaSize,
+            height: mediaSize,
+            objectFit: 'cover',
+            borderRadius: HP_RADIUS.image,
+            flexShrink: 0,
+          }}
+        />
       )}
-      <div style={kudosFeaturedHeadlineStyle}>{item.headline}</div>
-      {recipientLabel && (
-        <div style={kudosFeaturedRecipientsStyle}>{recipientLabel}</div>
-      )}
-      <p style={kudosFeaturedExcerptStyle}>{item.excerpt}</p>
-      <div style={kudosFeaturedMetaStyle}>
-        <span>by {item.submittedBy.displayName}</span>
-        <CelebrateButton count={item.celebrateCount} />
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: HP_SPACE.xs }}>
+        <div style={{ fontWeight: 600, fontSize: '0.9375rem', lineHeight: 1.4 }}>{item.headline}</div>
+        {recipientLabel && (
+          <div style={{ fontSize: '0.8125rem', fontWeight: 500, opacity: HP_TEXT_OPACITY.muted }}>{recipientLabel}</div>
+        )}
+        <p style={{ fontSize: '0.8125rem', opacity: HP_TEXT_OPACITY.secondary, lineHeight: 1.5, margin: 0 }}>{item.excerpt}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md, fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, flexWrap: 'wrap', marginTop: HP_SPACE.xs }}>
+          <span>by {item.submittedBy.displayName}</span>
+          <CelebrateButton count={item.celebrateCount} />
+        </div>
       </div>
     </div>
   );
 }
 
-function KudosHeadlineItem({ item, isLast, tier }: { item: NonNullable<KudosModuleOutput['featured']>; isLast: boolean; tier: ResponsiveTier }): React.JSX.Element {
+function KudosHeadlineRow({ item, isLast, tier }: { item: NonNullable<KudosModuleOutput['featured']>; isLast: boolean; tier: ResponsiveTier }): React.JSX.Element {
   const recipientLabel = formatRecipients(item.recipients);
   const hasAvatar = Boolean(item.recipients[0]?.media?.src);
+  const avatarSize = tier === 'mobile' ? 24 : 24;
+
+  const rowStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: HP_SPACE.md,
+    padding: `${HP_SPACE.sm}px 0`,
+    borderBottom: isLast ? 'none' : HP_BORDER.subtle,
+    transition: 'background 150ms ease',
+  };
+
+  const avatarStyle: React.CSSProperties = {
+    width: avatarSize,
+    height: avatarSize,
+    borderRadius: '50%',
+    objectFit: 'cover',
+    flexShrink: 0,
+  };
+
+  const placeholderStyle: React.CSSProperties = {
+    ...avatarStyle,
+    background: 'rgba(229,126,70,0.08)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
 
   return (
     <div
-      style={isLast ? kudosHeadlineItemLastStyle : kudosHeadlineItemStyle}
+      style={rowStyle}
       onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(229,126,70,0.03)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
     >
       {hasAvatar ? (
-        <img
-          src={item.recipients[0].media!.src}
-          alt={item.recipients[0].media!.alt ?? item.recipients[0].name}
-          style={getKudosHeadlineAvatarStyle(tier)}
-        />
+        <img src={item.recipients[0].media!.src} alt={item.recipients[0].media!.alt ?? item.recipients[0].name} style={avatarStyle} />
       ) : (
-        <div style={getKudosHeadlineAvatarPlaceholderStyle(tier)}>
-          <CheckCircle2 size={tier === 'mobile' ? 12 : 14} />
+        <div style={placeholderStyle}>
+          <CheckCircle2 size={12} />
         </div>
       )}
-      <div style={kudosHeadlineContentStyle}>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 500, fontSize: '0.875rem', lineHeight: 1.3 }}>{item.headline}</div>
-        <div style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, marginTop: 2, lineHeight: 1.4 }}>
+        <div style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, marginTop: 1 }}>
           {recipientLabel ? `${recipientLabel} · ` : ''}by {item.submittedBy.displayName}
         </div>
       </div>
-      <CelebrateButton count={item.celebrateCount} />
     </div>
   );
 }
 
-function KudosRegion({ output, tier }: { output: KudosModuleOutput; tier: ResponsiveTier }): React.JSX.Element {
+function KudosRegion({ output, layout, tier }: { output: KudosModuleOutput; layout: LayoutMode; tier: ResponsiveTier }): React.JSX.Element | null {
+  if (output.isEmpty) return null;
+
+  const maxHeadlines = layout === 'rail' ? 4 : 6;
+  const headlines = output.recentHeadlines.slice(0, maxHeadlines);
+
   return (
-    <section aria-label="Kudos recognition" data-hbc-homepage="kudos-module" data-hbc-region-state={output.isEmpty ? 'empty' : 'populated'}>
-      <div style={getKudosRegionStyle(tier)}>
-        <div style={getKudosHeaderRowStyle(tier)}>
-          <h3 style={kudosHeaderStyle}>
-            <CheckCircle2 size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
-            Kudos
-          </h3>
-          <div style={kudosCtaRowStyle}>
-            <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" arrow />
-            <HbcPremiumCta label="View All Kudos" href="#view-all-kudos" variant="ghost" arrow />
-          </div>
-        </div>
-        <p style={kudosDescriptionStyle}>
-          Recognize great work, celebrate teammates, and spotlight wins across the company
-        </p>
-
-        {output.isEmpty ? (
-          <div role="status" aria-live="polite" style={kudosEmptyStyle}>
-            <div style={kudosEmptyHeadingStyle}>No Kudos yet</div>
-            <p style={kudosEmptyDescriptionStyle}>
-              Be the first to recognize a teammate. Share appreciation for great work, team wins, or everyday excellence.
-            </p>
-            <div style={kudosEmptyCtaStyle}>
-              <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" arrow />
-            </div>
-          </div>
-        ) : (
-          <>
-            {output.featured && (
-              <KudosFeaturedSpotlight item={output.featured} tier={tier} />
-            )}
-
-            {output.recentHeadlines.length > 0 && (
-              <>
-                <Separator decorative style={{ margin: `${HP_SPACE.xl}px 0` }} />
-                <div>
-                  {output.recentHeadlines.map((item, index) => (
-                    <KudosHeadlineItem
-                      key={item.id}
-                      item={item}
-                      isLast={index === output.recentHeadlines.length - 1}
-                      tier={tier}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {output.recentHeadlines.length >= 6 && (
-              <div style={{ marginTop: HP_SPACE.xl, textAlign: 'center' }}>
-                <HbcPremiumCta label="View All Kudos" href="#view-all-kudos" variant="ghost" arrow />
-              </div>
-            )}
-          </>
-        )}
+    <div data-hbc-region="kudos">
+      <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md, marginBottom: HP_SPACE.md }}>
+        <CheckCircle2 size={12} style={{ opacity: HP_TEXT_OPACITY.muted }} />
+        <span style={eyebrowStyle}>Kudos</span>
       </div>
-    </section>
+
+      {output.featured && (
+        <KudosSpotlight item={output.featured} layout={layout} />
+      )}
+
+      {headlines.length > 0 && (
+        <div style={{ marginTop: HP_SPACE.lg }}>
+          {headlines.map((item, idx) => (
+            <KudosHeadlineRow key={item.id} item={item} isLast={idx === headlines.length - 1} tier={tier} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Announcements region
+// ---------------------------------------------------------------------------
+
+function AnnouncementCard({ item, layout }: { item: BandAOutput['items'][number]; layout: LayoutMode }): React.JSX.Element {
+  const label = ANNOUNCEMENT_LABEL[item.announcementType] ?? item.announcementType;
+  const badgeStatus = ANNOUNCEMENT_BADGE[item.announcementType] ?? 'info';
+  const showSummary = layout === 'wide' && Boolean(item.summary?.trim());
+
+  const cardStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: HP_SPACE.md,
+    padding: `${HP_SPACE.sm}px 0`,
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+  };
+
+  return (
+    <div style={cardStyle}>
+      <HbcPremiumBadge label={label} status={badgeStatus} size="sm" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: '0.875rem', lineHeight: 1.3 }}>{item.personName}</div>
+        <div style={{ fontWeight: 500, fontSize: '0.8125rem', lineHeight: 1.4, marginTop: 1 }}>{item.headline}</div>
+        {showSummary && (
+          <p style={{ fontSize: '0.8125rem', opacity: HP_TEXT_OPACITY.secondary, lineHeight: 1.5, margin: `${HP_SPACE.xs}px 0 0` }}>{item.summary}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AnnouncementsRegion({ output, layout }: { output: BandAOutput; layout: LayoutMode }): React.JSX.Element | null {
+  if (output.isEmpty) return null;
+
+  const maxItems = layout === 'rail' ? 3 : 4;
+  const items = output.items.slice(0, maxItems);
+
+  return (
+    <div data-hbc-region="announcements">
+      <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md, marginBottom: HP_SPACE.md }}>
+        <Users size={12} style={{ opacity: HP_TEXT_OPACITY.muted }} />
+        <span style={eyebrowStyle}>Highlights</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: HP_SPACE.xs }}>
+        {items.map((item) => (
+          <AnnouncementCard key={item.id} item={item} layout={layout} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Celebrations region
+// ---------------------------------------------------------------------------
 
 function formatRelativeDate(iso: string): string {
   const celebMs = Date.parse(iso);
@@ -676,7 +353,7 @@ function formatRelativeDate(iso: string): string {
   return new Date(celebMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): React.JSX.Element {
+function CelebrationItem({ item, layout }: { item: BandBOutput['items'][number]; layout: LayoutMode }): React.JSX.Element {
   const hasAvatar = Boolean(item.media?.src);
   const typeLabel = item.celebrationType === 'anniversary' && item.anniversaryYears
     ? `${item.anniversaryYears} yr`
@@ -684,56 +361,131 @@ function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): Reac
       ? 'Anniversary'
       : 'Birthday';
   const dateLabel = formatRelativeDate(item.celebrationDate);
-  const metaLabel = dateLabel ? `${typeLabel} · ${dateLabel}` : typeLabel;
+
+  if (layout === 'wide') {
+    // Grid tile for wide mode
+    const tileStyle: React.CSSProperties = {
+      padding: HP_SPACE.md,
+      borderRadius: HP_RADIUS.card,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 3,
+      textAlign: 'center',
+      fontSize: '0.75rem',
+      lineHeight: 1.3,
+      transition: 'background 150ms ease',
+    };
+
+    return (
+      <div
+        style={tileStyle}
+        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,83,145,0.03)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+      >
+        {hasAvatar ? (
+          <img src={item.media!.src} alt={item.media!.alt ?? item.personName} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+        ) : (
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(34,83,145,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 600 }}>
+            {item.personName.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div style={{ fontWeight: 500, fontSize: '0.75rem' }}>{item.personName.split(' ')[0]}</div>
+        <div style={{ fontSize: '0.625rem', opacity: HP_TEXT_OPACITY.secondary }}>{typeLabel}</div>
+      </div>
+    );
+  }
+
+  // Rail: compact horizontal strip item
+  const stripItemStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 2,
+    flexShrink: 0,
+    width: 56,
+    textAlign: 'center',
+  };
 
   return (
-    <div
-      style={celebrationTileStyle}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,83,145,0.03)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.borderColor = ''; }}
-    >
+    <div style={stripItemStyle}>
       {hasAvatar ? (
-        <img src={item.media!.src} alt={item.media!.alt ?? item.personName} style={celebrationAvatarStyle} />
+        <img src={item.media!.src} alt={item.media!.alt ?? item.personName} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
       ) : (
-        <div style={celebrationAvatarPlaceholderStyle}>
-          <Users size={14} />
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(34,83,145,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 600 }}>
+          {item.personName.charAt(0).toUpperCase()}
         </div>
       )}
-      <div style={celebrationNameStyle}>{item.personName}</div>
-      <div style={celebrationMetaStyle}>{metaLabel}</div>
+      <div style={{ fontWeight: 500, fontSize: '0.625rem', lineHeight: 1.2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {item.personName.split(' ')[0]}
+      </div>
+      <div style={{ fontSize: '0.5625rem', opacity: HP_TEXT_OPACITY.secondary, lineHeight: 1.2 }}>
+        {dateLabel || typeLabel}
+      </div>
     </div>
   );
 }
 
-function BandBRegion({ output, tier }: { output: BandBOutput; tier: ResponsiveTier }): React.JSX.Element {
-  return (
-    <section aria-label="This week celebrations" data-hbc-homepage="band-b" data-hbc-region-state={output.isEmpty ? 'empty' : 'populated'}>
-      <div style={getBandBRegionStyle(tier)}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md }}>
-          <h3 style={bandBHeaderStyle}>
-            <Calendar size={ICON_SIZE - 2} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
-            This Week
-          </h3>
-          {!output.isEmpty && (
-            <span style={{ fontSize: '0.6875rem', opacity: HP_TEXT_OPACITY.secondary }}>
-              {output.items.length}
-            </span>
-          )}
-        </div>
+function CelebrationsRegion({ output, layout }: { output: BandBOutput; layout: LayoutMode }): React.JSX.Element | null {
+  if (output.isEmpty) return null;
 
-        {output.isEmpty ? (
-          <div role="status" aria-live="polite" style={bandBEmptyStyle}>
-            No upcoming celebrations this week.
-          </div>
-        ) : (
-          <div style={getCelebrationGridStyle(tier)}>
-            {output.items.map((item) => (
-              <CelebrationTile key={item.id} item={item} />
-            ))}
-          </div>
-        )}
+  const maxItems = layout === 'rail' ? 6 : 8;
+  const items = output.items.slice(0, maxItems);
+
+  if (layout === 'wide') {
+    return (
+      <div data-hbc-region="celebrations">
+        <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md, marginBottom: HP_SPACE.md }}>
+          <Calendar size={12} style={{ opacity: HP_TEXT_OPACITY.muted }} />
+          <span style={eyebrowStyle}>This Week</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: HP_SPACE.sm }}>
+          {items.map((item) => (
+            <CelebrationItem key={item.id} item={item} layout={layout} />
+          ))}
+        </div>
       </div>
-    </section>
+    );
+  }
+
+  // Rail: horizontal scroll strip
+  return (
+    <div data-hbc-region="celebrations">
+      <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md, marginBottom: HP_SPACE.md }}>
+        <Calendar size={12} style={{ opacity: HP_TEXT_OPACITY.muted }} />
+        <span style={eyebrowStyle}>This Week</span>
+      </div>
+      <div style={{
+        display: 'flex',
+        gap: HP_SPACE.md,
+        overflowX: 'auto',
+        paddingBottom: HP_SPACE.xs,
+        WebkitOverflowScrolling: 'touch',
+        maskImage: items.length > 4 ? 'linear-gradient(to right, black 85%, transparent 100%)' : undefined,
+        WebkitMaskImage: items.length > 4 ? 'linear-gradient(to right, black 85%, transparent 100%)' : undefined,
+      }}>
+        {items.map((item) => (
+          <CelebrationItem key={item.id} item={item} layout="rail" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Region assembly with suppression + separators
+// ---------------------------------------------------------------------------
+
+function RegionAssembly({ regions }: { regions: React.JSX.Element[] }): React.JSX.Element {
+  return (
+    <div style={moduleBodyStyle}>
+      {regions.map((region, idx) => (
+        <React.Fragment key={idx}>
+          {idx > 0 && <Separator decorative style={separatorMargin} />}
+          {region}
+        </React.Fragment>
+      ))}
+    </div>
   );
 }
 
@@ -755,10 +507,11 @@ export function PeopleCultureMerged({
   isLoading = false,
 }: PeopleCultureMergedProps): React.JSX.Element {
   const tier = useResponsiveTier();
+  const layout = resolveLayout(tier);
 
-  // State 1: Loading
+  // Loading state — module level
   if (isLoading) {
-    return <HomepageLoadingState label="Loading people and culture" />;
+    return <HomepageLoadingState label="Loading People & Culture" />;
   }
 
   // Normalize — safe even with undefined/malformed input
@@ -773,33 +526,58 @@ export function PeopleCultureMerged({
   const allEmpty = output.bandA.isEmpty && output.kudos.isEmpty && output.bandB.isEmpty;
   const hadInput = hasAnyInputData(config);
 
-  // State 2: No data configured — authoring guidance
+  // No data configured — authoring guidance
   if (allEmpty && !hadInput) {
     const message = resolveAuthoringMessage('peopleCulture', 'noData');
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
-  // State 3: Data configured but all filtered/invalid — invalid guidance
+  // Data configured but all filtered/invalid
   if (allEmpty && hadInput) {
     const message = resolveAuthoringMessage('peopleCulture', 'invalid');
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
-  // State 4: Normal render — at least one region has content
+  // Assemble rendered regions — focal sequence: Kudos → Announcements → Celebrations
+  // Only populated regions render; empty regions are suppressed
+  const rendered: React.JSX.Element[] = [];
+
+  const kudos = KudosRegion({ output: output.kudos, layout, tier });
+  if (kudos) rendered.push(kudos);
+
+  const announcements = AnnouncementsRegion({ output: output.bandA, layout });
+  if (announcements) rendered.push(announcements);
+
+  const celebrations = CelebrationsRegion({ output: output.bandB, layout });
+  if (celebrations) rendered.push(celebrations);
+
+  // Header CTA — "Give Kudos" always visible as participation prompt
+  const headerAction = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md }}>
+      <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" />
+      {layout === 'wide' && !output.kudos.isEmpty && (
+        <HbcPremiumCta label="View All Kudos" href="#view-all-kudos" variant="ghost" arrow />
+      )}
+    </div>
+  );
+
   return (
     <HbcHomepageSectionShell
       title={output.heading}
-      subtitle="Birthdays, anniversaries, recognition, milestones, and team news"
-      headerAction={<HbcPremiumCta label="View all" href="#people-culture" variant="ghost" arrow />}
+      headerAction={headerAction}
     >
       <div
-        style={getShellStyle(tier)}
-        data-hbc-homepage="people-culture-merged"
+        style={{ padding: tier === 'mobile' ? HP_SPACE.lg : HP_SPACE.xl }}
+        data-hbc-homepage="people-culture"
         data-hbc-authoring-safe="true"
+        data-hbc-layout={layout}
       >
-        <BandARegion output={output.bandA} tier={tier} />
-        <KudosRegion output={output.kudos} tier={tier} />
-        <BandBRegion output={output.bandB} tier={tier} />
+        <RegionAssembly regions={rendered} />
+
+        {/* Module footer — view all destination */}
+        <div style={{ marginTop: HP_SPACE.xl, textAlign: 'right' }}>
+          <HbcPremiumCta label="View all" href="#people-culture" variant="ghost" arrow />
+        </div>
       </div>
     </HbcHomepageSectionShell>
   );
