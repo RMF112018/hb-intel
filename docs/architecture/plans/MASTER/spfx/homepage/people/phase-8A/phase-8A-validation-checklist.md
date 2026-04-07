@@ -1,6 +1,6 @@
 # Phase 8A — Responsive Behavior — Validation Checklist
 
-- [ ] responsive behavior implemented for all regions
-- [ ] hierarchy preserved across breakpoints
-- [ ] one/two/three-region states safe
-- [ ] no schema/rules changes introduced
+- [x] responsive behavior implemented for all regions
+- [x] hierarchy preserved across breakpoints
+- [x] one/two/three-region states safe
+- [x] no schema/rules changes introduced

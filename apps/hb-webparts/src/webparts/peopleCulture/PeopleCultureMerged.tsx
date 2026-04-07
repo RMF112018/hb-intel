@@ -91,11 +91,13 @@ const ANNOUNCEMENT_BADGE_MAP: Record<string, 'info' | 'success' | 'warning' | 'c
 // Band A styles — editorial announcement layer (most formal)
 // ---------------------------------------------------------------------------
 
-const bandARegionStyle: React.CSSProperties = {
-  padding: HP_SPACE['2xl'],
-  border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.editorial,
-};
+function getBandARegionStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
+    border: HP_BORDER.subtle,
+    borderRadius: HP_RADIUS.editorial,
+  };
+}
 
 const bandAHeaderStyle: React.CSSProperties = {
   margin: 0,
@@ -133,15 +135,19 @@ const announcementCardStyle: React.CSSProperties = {
   flexDirection: 'column',
   gap: HP_SPACE.sm,
   minHeight: 120,
+  overflowWrap: 'break-word',
+  wordBreak: 'break-word',
 };
 
-const announcementCardImageStyle: React.CSSProperties = {
-  width: '100%',
-  maxHeight: 160,
-  objectFit: 'cover' as const,
-  borderRadius: HP_RADIUS.image,
-  display: 'block',
-};
+function getAnnouncementCardImageStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    width: '100%',
+    maxHeight: tier === 'mobile' ? 120 : 160,
+    objectFit: 'cover' as const,
+    borderRadius: HP_RADIUS.image,
+    display: 'block',
+  };
+}
 
 const announcementCardNameStyle: React.CSSProperties = {
   fontSize: '0.9375rem',
@@ -166,19 +172,24 @@ const announcementCardSummaryStyle: React.CSSProperties = {
 // Kudos styles — engagement center (warmest, most prominent)
 // ---------------------------------------------------------------------------
 
-const kudosRegionStyle: React.CSSProperties = {
-  padding: HP_SPACE['2xl'],
-  border: HP_BORDER.warmAccent,
-  borderRadius: HP_RADIUS.editorial,
-};
+function getKudosRegionStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
+    border: HP_BORDER.warmAccent,
+    borderRadius: HP_RADIUS.editorial,
+  };
+}
 
-const kudosHeaderRowStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: HP_SPACE.md,
-  flexWrap: 'wrap',
-};
+function getKudosHeaderRowStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    display: 'flex',
+    justifyContent: tier === 'mobile' ? 'flex-start' : 'space-between',
+    alignItems: tier === 'mobile' ? 'flex-start' : 'center',
+    flexDirection: tier === 'mobile' ? 'column' : 'row',
+    gap: HP_SPACE.md,
+    flexWrap: 'wrap',
+  };
+}
 
 const kudosHeaderStyle: React.CSSProperties = {
   margin: 0,
@@ -194,24 +205,30 @@ const kudosDescriptionStyle: React.CSSProperties = {
   lineHeight: 1.5,
 };
 
-const kudosFeaturedStyle: React.CSSProperties = {
-  marginTop: HP_SPACE.xl,
-  padding: HP_SPACE['2xl'],
-  border: HP_BORDER.standard,
-  borderRadius: HP_RADIUS.editorial,
-  background: 'rgba(229,126,70,0.02)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: HP_SPACE.sm,
-};
+function getKudosFeaturedStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    marginTop: HP_SPACE.xl,
+    padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
+    border: HP_BORDER.standard,
+    borderRadius: HP_RADIUS.editorial,
+    background: 'rgba(229,126,70,0.02)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: HP_SPACE.sm,
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+  };
+}
 
-const kudosFeaturedImageStyle: React.CSSProperties = {
-  width: '100%',
-  maxHeight: 200,
-  objectFit: 'cover' as const,
-  borderRadius: HP_RADIUS.image,
-  display: 'block',
-};
+function getKudosFeaturedImageStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    width: '100%',
+    maxHeight: tier === 'mobile' ? 140 : 200,
+    objectFit: 'cover' as const,
+    borderRadius: HP_RADIUS.image,
+    display: 'block',
+  };
+}
 
 const kudosFeaturedHeadlineStyle: React.CSSProperties = {
   fontSize: '0.9375rem',
@@ -257,24 +274,34 @@ const kudosHeadlineItemLastStyle: React.CSSProperties = {
   padding: `${HP_SPACE.md}px 0`,
 };
 
-const kudosHeadlineAvatarStyle: React.CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: '50%',
-  objectFit: 'cover' as const,
-  flexShrink: 0,
-};
+function getKudosHeadlineAvatarSize(tier: ResponsiveTier): number {
+  return tier === 'mobile' ? 28 : 32;
+}
 
-const kudosHeadlineAvatarPlaceholderStyle: React.CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: '50%',
-  background: 'rgba(229,126,70,0.08)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-};
+function getKudosHeadlineAvatarStyle(tier: ResponsiveTier): React.CSSProperties {
+  const size = getKudosHeadlineAvatarSize(tier);
+  return {
+    width: size,
+    height: size,
+    borderRadius: '50%',
+    objectFit: 'cover' as const,
+    flexShrink: 0,
+  };
+}
+
+function getKudosHeadlineAvatarPlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
+  const size = getKudosHeadlineAvatarSize(tier);
+  return {
+    width: size,
+    height: size,
+    borderRadius: '50%',
+    background: 'rgba(229,126,70,0.08)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  };
+}
 
 const kudosHeadlineContentStyle: React.CSSProperties = {
   flex: 1,
@@ -336,11 +363,15 @@ const kudosEmptyCtaStyle: React.CSSProperties = {
 // Band B styles — compact weekly layer (lightest, densest)
 // ---------------------------------------------------------------------------
 
-const bandBRegionStyle: React.CSSProperties = {
-  padding: `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
-  border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.card,
-};
+function getBandBRegionStyle(tier: ResponsiveTier): React.CSSProperties {
+  return {
+    padding: tier === 'mobile'
+      ? `${HP_SPACE.md}px ${HP_SPACE.xl}px`
+      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
+    border: HP_BORDER.subtle,
+    borderRadius: HP_RADIUS.card,
+  };
+}
 
 const bandBHeaderStyle: React.CSSProperties = {
   margin: 0,
@@ -422,7 +453,7 @@ const bandBEmptyStyle: React.CSSProperties = {
 // Region components
 // ---------------------------------------------------------------------------
 
-function AnnouncementCard({ item }: { item: BandAOutput['items'][number] }): React.JSX.Element {
+function AnnouncementCard({ item, tier }: { item: BandAOutput['items'][number]; tier: ResponsiveTier }): React.JSX.Element {
   const label = ANNOUNCEMENT_LABEL_MAP[item.announcementType] ?? item.announcementType;
   const badgeStatus = ANNOUNCEMENT_BADGE_MAP[item.announcementType] ?? 'info';
   const hasSummary = Boolean(item.summary?.trim());
@@ -433,7 +464,7 @@ function AnnouncementCard({ item }: { item: BandAOutput['items'][number] }): Rea
         <img
           src={item.media.src}
           alt={item.media.alt}
-          style={announcementCardImageStyle}
+          style={getAnnouncementCardImageStyle(tier)}
         />
       )}
       <HbcPremiumBadge label={label} status={badgeStatus} size="sm" />
@@ -454,14 +485,14 @@ function BandARegion({ output, tier }: { output: BandAOutput; tier: ResponsiveTi
 
   return (
     <section aria-label="Announcements" data-hbc-homepage="band-a">
-      <div style={bandARegionStyle}>
+      <div style={getBandARegionStyle(tier)}>
         <h3 style={bandAHeaderStyle}>
           <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
           Highlights
         </h3>
         <div style={announcementGridColumns(output.items.length, tier)}>
           {output.items.map((item) => (
-            <AnnouncementCard key={item.id} item={item} />
+            <AnnouncementCard key={item.id} item={item} tier={tier} />
           ))}
         </div>
       </div>
@@ -486,13 +517,13 @@ function CelebrateButton({ count }: { count?: number }): React.JSX.Element {
   );
 }
 
-function KudosFeaturedSpotlight({ item }: { item: NonNullable<KudosModuleOutput['featured']> }): React.JSX.Element {
+function KudosFeaturedSpotlight({ item, tier }: { item: NonNullable<KudosModuleOutput['featured']>; tier: ResponsiveTier }): React.JSX.Element {
   const recipientLabel = formatRecipients(item.recipients);
 
   return (
-    <div style={kudosFeaturedStyle}>
+    <div style={getKudosFeaturedStyle(tier)}>
       {item.media && (
-        <img src={item.media.src} alt={item.media.alt} style={kudosFeaturedImageStyle} />
+        <img src={item.media.src} alt={item.media.alt} style={getKudosFeaturedImageStyle(tier)} />
       )}
       <div style={kudosFeaturedHeadlineStyle}>{item.headline}</div>
       {recipientLabel && (
@@ -507,7 +538,7 @@ function KudosFeaturedSpotlight({ item }: { item: NonNullable<KudosModuleOutput[
   );
 }
 
-function KudosHeadlineItem({ item, isLast }: { item: NonNullable<KudosModuleOutput['featured']>; isLast: boolean }): React.JSX.Element {
+function KudosHeadlineItem({ item, isLast, tier }: { item: NonNullable<KudosModuleOutput['featured']>; isLast: boolean; tier: ResponsiveTier }): React.JSX.Element {
   const recipientLabel = formatRecipients(item.recipients);
   const hasAvatar = Boolean(item.recipients[0]?.media?.src);
 
@@ -517,11 +548,11 @@ function KudosHeadlineItem({ item, isLast }: { item: NonNullable<KudosModuleOutp
         <img
           src={item.recipients[0].media!.src}
           alt={item.recipients[0].media!.alt ?? item.recipients[0].name}
-          style={kudosHeadlineAvatarStyle}
+          style={getKudosHeadlineAvatarStyle(tier)}
         />
       ) : (
-        <div style={kudosHeadlineAvatarPlaceholderStyle}>
-          <CheckCircle2 size={14} />
+        <div style={getKudosHeadlineAvatarPlaceholderStyle(tier)}>
+          <CheckCircle2 size={tier === 'mobile' ? 12 : 14} />
         </div>
       )}
       <div style={kudosHeadlineContentStyle}>
@@ -535,11 +566,11 @@ function KudosHeadlineItem({ item, isLast }: { item: NonNullable<KudosModuleOutp
   );
 }
 
-function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Element {
+function KudosRegion({ output, tier }: { output: KudosModuleOutput; tier: ResponsiveTier }): React.JSX.Element {
   return (
     <section aria-label="Kudos recognition" data-hbc-homepage="kudos-module">
-      <div style={kudosRegionStyle}>
-        <div style={kudosHeaderRowStyle}>
+      <div style={getKudosRegionStyle(tier)}>
+        <div style={getKudosHeaderRowStyle(tier)}>
           <h3 style={kudosHeaderStyle}>
             <CheckCircle2 size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
             Kudos
@@ -566,7 +597,7 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
         ) : (
           <>
             {output.featured && (
-              <KudosFeaturedSpotlight item={output.featured} />
+              <KudosFeaturedSpotlight item={output.featured} tier={tier} />
             )}
 
             {output.recentHeadlines.length > 0 && (
@@ -578,6 +609,7 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
                       key={item.id}
                       item={item}
                       isLast={index === output.recentHeadlines.length - 1}
+                      tier={tier}
                     />
                   ))}
                 </div>
@@ -635,7 +667,7 @@ function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): Reac
 function BandBRegion({ output, tier }: { output: BandBOutput; tier: ResponsiveTier }): React.JSX.Element {
   return (
     <section aria-label="This week celebrations" data-hbc-homepage="band-b">
-      <div style={bandBRegionStyle}>
+      <div style={getBandBRegionStyle(tier)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: HP_SPACE.md }}>
           <h3 style={bandBHeaderStyle}>
             <Calendar size={ICON_SIZE - 2} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
@@ -692,7 +724,7 @@ export function PeopleCultureMerged({
     <HbcHomepageSectionShell title={output.heading} subtitle="Birthdays, anniversaries, recognition, milestones, and team news">
       <div style={getShellStyle(tier)} data-hbc-homepage="people-culture-merged">
         <BandARegion output={output.bandA} tier={tier} />
-        <KudosRegion output={output.kudos} />
+        <KudosRegion output={output.kudos} tier={tier} />
         <BandBRegion output={output.bandB} tier={tier} />
       </div>
     </HbcHomepageSectionShell>
