@@ -19,7 +19,7 @@
         "default": "Company Pulse"
       },
       "description": {
-        "default": "Curated internal updates with featured and secondary editorial hierarchy."
+        "default": "Premium internal newsroom surface with lead story, secondary headlines, and tertiary quick-read hierarchy."
       },
       "officeFabricIconFontName": "News",
       "hiddenFromToolbox": true,
@@ -73,7 +73,7 @@
       },
       "0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0": {
         "type": "path",
-        "path": "shell-entry-0b53f651-fd92-4f7f-a9da-f7797017f5eb-f22074b1.js"
+        "path": "shell-entry-0b53f651-fd92-4f7f-a9da-f7797017f5eb-de3494a5.js"
       }
     }
   }
