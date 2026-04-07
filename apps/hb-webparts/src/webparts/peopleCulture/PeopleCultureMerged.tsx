@@ -6,6 +6,10 @@
  * and Band B (weekly celebrations). Each region renders independently
  * with its own empty/populated state. Detailed region UIs are built
  * in Phases 4–7.
+ *
+ * Phase 3-02: Tuned hierarchy, spacing, and visual weight so the
+ * four-part structure feels intentional and premium before detailed
+ * region work begins.
  */
 import * as React from 'react';
 import {
@@ -42,46 +46,132 @@ export interface PeopleCultureMergedProps {
 }
 
 // ---------------------------------------------------------------------------
-// Shared styles
+// Icon size constant — consistent across all region headers
+// ---------------------------------------------------------------------------
+
+const ICON_SIZE = 16;
+
+// ---------------------------------------------------------------------------
+// Shared styles — shell
 // ---------------------------------------------------------------------------
 
 const shellStyle: React.CSSProperties = {
   ...hpZoneSection('communications'),
   display: 'flex',
   flexDirection: 'column',
-  gap: HP_SPACE['2xl'],
+  gap: HP_SPACE['3xl'],
 };
 
-const regionStyle: React.CSSProperties = {
+// ---------------------------------------------------------------------------
+// Band A styles — editorial announcement layer (most formal)
+// ---------------------------------------------------------------------------
+
+const bandARegionStyle: React.CSSProperties = {
   padding: HP_SPACE['2xl'],
   border: HP_BORDER.subtle,
-  borderRadius: HP_RADIUS.card,
+  borderRadius: HP_RADIUS.editorial,
 };
 
-const regionHeaderStyle: React.CSSProperties = {
+const bandAHeaderStyle: React.CSSProperties = {
   margin: 0,
   fontSize: '0.9375rem',
   fontWeight: 600,
+  letterSpacing: '0.01em',
 };
 
-const regionMetaStyle: React.CSSProperties = {
-  margin: `${HP_SPACE.xs}px 0 0`,
-  fontSize: '0.8125rem',
-  opacity: HP_TEXT_OPACITY.secondary,
-};
-
-const itemRowStyle: React.CSSProperties = {
+const announcementItemStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
+  gap: HP_SPACE.lg,
+  padding: `${HP_SPACE.md}px 0`,
+  borderBottom: HP_BORDER.subtle,
+};
+
+const announcementItemLastStyle: React.CSSProperties = {
+  ...announcementItemStyle,
+  borderBottom: 'none',
+};
+
+// ---------------------------------------------------------------------------
+// Kudos styles — engagement center (warmest, most prominent)
+// ---------------------------------------------------------------------------
+
+const kudosRegionStyle: React.CSSProperties = {
+  padding: HP_SPACE['2xl'],
+  border: HP_BORDER.warmAccent,
+  borderRadius: HP_RADIUS.editorial,
+};
+
+const kudosHeaderRowStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: HP_SPACE.md,
+  flexWrap: 'wrap',
+};
+
+const kudosHeaderStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '1rem',
+  fontWeight: 700,
+  letterSpacing: '0.01em',
+};
+
+const kudosDescriptionStyle: React.CSSProperties = {
+  margin: `${HP_SPACE.sm}px 0 0`,
+  fontSize: '0.8125rem',
+  opacity: HP_TEXT_OPACITY.secondary,
+  lineHeight: 1.5,
+};
+
+const kudosFeaturedStyle: React.CSSProperties = {
+  marginTop: HP_SPACE.xl,
+  padding: HP_SPACE['2xl'],
+  border: HP_BORDER.standard,
+  borderRadius: HP_RADIUS.editorial,
+  background: 'rgba(229,126,70,0.02)',
+};
+
+const kudosHeadlineStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'baseline',
   gap: HP_SPACE.md,
   padding: `${HP_SPACE.sm}px 0`,
 };
 
+const kudosEmptyStyle: React.CSSProperties = {
+  marginTop: HP_SPACE.xl,
+  padding: `${HP_SPACE['3xl']}px ${HP_SPACE['2xl']}px`,
+  textAlign: 'center',
+  opacity: HP_TEXT_OPACITY.secondary,
+  fontSize: '0.875rem',
+  lineHeight: 1.5,
+};
+
+// ---------------------------------------------------------------------------
+// Band B styles — compact weekly layer (lightest, densest)
+// ---------------------------------------------------------------------------
+
+const bandBRegionStyle: React.CSSProperties = {
+  padding: `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
+  border: HP_BORDER.subtle,
+  borderRadius: HP_RADIUS.card,
+};
+
+const bandBHeaderStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.04em',
+  opacity: HP_TEXT_OPACITY.muted,
+};
+
 const celebrationGridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-  gap: HP_SPACE.md,
-  marginTop: HP_SPACE.md,
+  gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+  gap: HP_SPACE.lg,
+  marginTop: HP_SPACE.xl,
 };
 
 const celebrationTileStyle: React.CSSProperties = {
@@ -90,6 +180,13 @@ const celebrationTileStyle: React.CSSProperties = {
   borderRadius: HP_RADIUS.card,
   textAlign: 'center' as const,
   fontSize: '0.8125rem',
+  lineHeight: 1.4,
+};
+
+const bandBEmptyStyle: React.CSSProperties = {
+  marginTop: HP_SPACE.md,
+  fontSize: '0.8125rem',
+  opacity: HP_TEXT_OPACITY.secondary,
 };
 
 // ---------------------------------------------------------------------------
@@ -101,17 +198,17 @@ function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | n
 
   return (
     <section aria-label="Announcements" data-hbc-homepage="band-a">
-      <div style={regionStyle}>
-        <h3 style={regionHeaderStyle}>
-          <Users size={14} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
+      <div style={bandARegionStyle}>
+        <h3 style={bandAHeaderStyle}>
+          <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
           Highlights
         </h3>
-        <div style={{ marginTop: HP_SPACE.md }}>
-          {output.items.map((item) => (
-            <div key={item.id} style={itemRowStyle}>
+        <div style={{ marginTop: HP_SPACE.xl }}>
+          {output.items.map((item, index) => (
+            <div key={item.id} style={index === output.items.length - 1 ? announcementItemLastStyle : announcementItemStyle}>
               <HbcPremiumBadge label={item.announcementType} status="info" size="sm" />
               <span style={{ fontWeight: 500 }}>{item.personName}</span>
-              <span style={{ opacity: HP_TEXT_OPACITY.secondary, fontSize: '0.8125rem' }}>
+              <span style={{ opacity: HP_TEXT_OPACITY.secondary, fontSize: '0.8125rem', flex: 1 }}>
                 {item.headline}
               </span>
             </div>
@@ -125,35 +222,33 @@ function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | n
 function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Element {
   return (
     <section aria-label="Kudos recognition" data-hbc-homepage="kudos-module">
-      <div style={regionStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={regionHeaderStyle}>
-            <CheckCircle2 size={14} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
+      <div style={kudosRegionStyle}>
+        <div style={kudosHeaderRowStyle}>
+          <h3 style={kudosHeaderStyle}>
+            <CheckCircle2 size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
             Kudos
           </h3>
           <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" arrow />
         </div>
-        <p style={regionMetaStyle}>
+        <p style={kudosDescriptionStyle}>
           Recognize great work, celebrate teammates, and spotlight wins across the company
         </p>
 
         {output.isEmpty ? (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{ marginTop: HP_SPACE.md, padding: HP_SPACE['2xl'], textAlign: 'center', opacity: HP_TEXT_OPACITY.secondary, fontSize: '0.875rem' }}
-          >
+          <div role="status" aria-live="polite" style={kudosEmptyStyle}>
             No Kudos yet — be the first to recognize a teammate.
           </div>
         ) : (
           <>
             {output.featured && (
-              <div style={{ marginTop: HP_SPACE.md, padding: HP_SPACE.lg, border: HP_BORDER.standard, borderRadius: HP_RADIUS.editorial }}>
-                <div style={{ fontWeight: 600 }}>{output.featured.headline}</div>
-                <div style={{ marginTop: HP_SPACE.xs, fontSize: '0.8125rem', opacity: HP_TEXT_OPACITY.secondary }}>
+              <div style={kudosFeaturedStyle}>
+                <div style={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.4 }}>
+                  {output.featured.headline}
+                </div>
+                <div style={{ marginTop: HP_SPACE.sm, fontSize: '0.8125rem', opacity: HP_TEXT_OPACITY.secondary, lineHeight: 1.5 }}>
                   {output.featured.excerpt}
                 </div>
-                <div style={{ marginTop: HP_SPACE.sm, fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary }}>
+                <div style={{ marginTop: HP_SPACE.md, fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary }}>
                   by {output.featured.submittedBy.displayName}
                   {output.featured.celebrateCount ? ` · ${output.featured.celebrateCount} celebrate` : ''}
                 </div>
@@ -162,12 +257,12 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
 
             {output.recentHeadlines.length > 0 && (
               <>
-                <Separator decorative style={{ margin: `${HP_SPACE.md}px 0` }} />
+                <Separator decorative style={{ margin: `${HP_SPACE.xl}px 0` }} />
                 <div>
                   {output.recentHeadlines.map((item) => (
-                    <div key={item.id} style={itemRowStyle}>
-                      <span style={{ fontWeight: 500 }}>{item.headline}</span>
-                      <span style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary }}>
+                    <div key={item.id} style={kudosHeadlineStyle}>
+                      <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>{item.headline}</span>
+                      <span style={{ fontSize: '0.75rem', opacity: HP_TEXT_OPACITY.secondary, whiteSpace: 'nowrap' }}>
                         by {item.submittedBy.displayName}
                       </span>
                     </div>
@@ -185,18 +280,14 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
 function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
   return (
     <section aria-label="This week celebrations" data-hbc-homepage="band-b">
-      <div style={regionStyle}>
-        <h3 style={regionHeaderStyle}>
-          <Calendar size={14} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
+      <div style={bandBRegionStyle}>
+        <h3 style={bandBHeaderStyle}>
+          <Calendar size={ICON_SIZE - 2} style={{ marginRight: HP_SPACE.sm, verticalAlign: 'text-bottom' }} />
           This Week
         </h3>
 
         {output.isEmpty ? (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{ marginTop: HP_SPACE.md, fontSize: '0.8125rem', opacity: HP_TEXT_OPACITY.secondary }}
-          >
+          <div role="status" aria-live="polite" style={bandBEmptyStyle}>
             No upcoming celebrations this week.
           </div>
         ) : (
@@ -205,9 +296,8 @@ function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
               <div key={item.id} style={celebrationTileStyle}>
                 <div style={{ fontWeight: 500 }}>{item.personName}</div>
                 <div style={{ marginTop: HP_SPACE.xs, opacity: HP_TEXT_OPACITY.secondary }}>
-                  {item.celebrationType === 'birthday' ? '🎂' : '🎉'}{' '}
                   {item.celebrationType === 'anniversary' && item.anniversaryYears
-                    ? `${item.anniversaryYears} yr`
+                    ? `${item.anniversaryYears} yr anniversary`
                     : item.celebrationType}
                 </div>
               </div>
