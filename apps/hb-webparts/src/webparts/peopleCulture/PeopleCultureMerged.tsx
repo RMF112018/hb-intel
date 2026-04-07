@@ -2,7 +2,8 @@
  * PeopleCultureMerged — Three-region People & Culture desktop shell
  *
  * Phase 3: Desktop composition skeleton with four-part structure.
- * Phase 4: Band A editorial announcement grid with medium-format cards.
+ * Phase 4: Band A editorial announcement grid with medium-format cards,
+ *          adaptive grid layout, and partial-data resilience.
  */
 import * as React from 'react';
 import {
@@ -92,12 +93,16 @@ const bandAHeaderStyle: React.CSSProperties = {
   letterSpacing: '0.01em',
 };
 
-const announcementGridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  gap: HP_SPACE.xl,
-  marginTop: HP_SPACE.xl,
-};
+function announcementGridColumns(itemCount: number): React.CSSProperties {
+  return {
+    display: 'grid',
+    gridTemplateColumns: itemCount === 1
+      ? 'minmax(0, 480px)'
+      : 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: HP_SPACE.xl,
+    marginTop: HP_SPACE.xl,
+  };
+}
 
 const announcementCardStyle: React.CSSProperties = {
   padding: HP_SPACE['2xl'],
@@ -106,6 +111,7 @@ const announcementCardStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: HP_SPACE.sm,
+  minHeight: 120,
 };
 
 const announcementCardImageStyle: React.CSSProperties = {
@@ -236,6 +242,33 @@ const bandBEmptyStyle: React.CSSProperties = {
 // Region components
 // ---------------------------------------------------------------------------
 
+function AnnouncementCard({ item }: { item: BandAOutput['items'][number] }): React.JSX.Element {
+  const label = ANNOUNCEMENT_LABEL_MAP[item.announcementType] ?? item.announcementType;
+  const badgeStatus = ANNOUNCEMENT_BADGE_MAP[item.announcementType] ?? 'info';
+  const hasSummary = Boolean(item.summary?.trim());
+
+  return (
+    <div style={announcementCardStyle}>
+      {item.media && (
+        <img
+          src={item.media.src}
+          alt={item.media.alt}
+          style={announcementCardImageStyle}
+        />
+      )}
+      <HbcPremiumBadge label={label} status={badgeStatus} size="sm" />
+      <div style={announcementCardNameStyle}>{item.personName}</div>
+      <div style={announcementCardHeadlineStyle}>{item.headline}</div>
+      {hasSummary && <p style={announcementCardSummaryStyle}>{item.summary}</p>}
+      {item.cta && (
+        <div style={{ marginTop: 'auto', paddingTop: HP_SPACE.sm }}>
+          <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | null {
   if (output.isEmpty) return null;
 
@@ -246,30 +279,9 @@ function BandARegion({ output }: { output: BandAOutput }): React.JSX.Element | n
           <Users size={ICON_SIZE} style={{ marginRight: HP_SPACE.md, verticalAlign: 'text-bottom' }} />
           Highlights
         </h3>
-        <div style={announcementGridStyle}>
+        <div style={announcementGridColumns(output.items.length)}>
           {output.items.map((item) => (
-            <div key={item.id} style={announcementCardStyle}>
-              {item.media && (
-                <img
-                  src={item.media.src}
-                  alt={item.media.alt}
-                  style={announcementCardImageStyle}
-                />
-              )}
-              <HbcPremiumBadge
-                label={ANNOUNCEMENT_LABEL_MAP[item.announcementType] ?? item.announcementType}
-                status={ANNOUNCEMENT_BADGE_MAP[item.announcementType] ?? 'info'}
-                size="sm"
-              />
-              <div style={announcementCardNameStyle}>{item.personName}</div>
-              <div style={announcementCardHeadlineStyle}>{item.headline}</div>
-              <p style={announcementCardSummaryStyle}>{item.summary}</p>
-              {item.cta && (
-                <div style={{ marginTop: HP_SPACE.xs }}>
-                  <HbcPremiumCta label={item.cta.label} href={item.cta.href} variant="ghost" arrow />
-                </div>
-              )}
-            </div>
+            <AnnouncementCard key={item.id} item={item} />
           ))}
         </div>
       </div>
