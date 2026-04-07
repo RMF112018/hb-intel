@@ -1,23 +1,21 @@
 /**
- * LauncherAllPlatformsOverlay — Full platform inventory overlay.
+ * LauncherAllPlatformsOverlay — Full platform inventory overlay with search.
  *
- * Phase 06-02: Refined overlay shell with:
- *   - Sticky header with title, search placeholder, and close button
- *   - Motion entrance/exit via AnimatePresence + motion.div
- *   - Auto-focus on open via ref
- *   - Category-grouped sections with index rows
- *   - Scrollable body (60vh max-height)
- *   - Escape key and click-outside dismissal
+ * Phase 06-03: Live search filtering against normalized launcher fields
+ * (name, aliases, descriptor, category). Sticky header with interactive
+ * search input auto-focused on open. Empty-result state. Motion
+ * entrance/exit. Escape key and click-outside dismissal.
  *
- * Consumes LauncherPlatformIndex from the presentation model.
- * Stays anchored to the launcher composition — not a separate page.
+ * Search matching: case-insensitive substring against name, each alias,
+ * descriptor, and category. Filtered results re-grouped by category.
+ * Categories with zero matches are suppressed.
  */
 import * as React from 'react';
 import { motion, AnimatePresence, Search } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS, HP_MOTION } from '../../homepage/tokens.js';
 import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
 import { LauncherIndexRow } from './LauncherIndexRow.js';
-import type { LauncherPlatformIndex } from '../../homepage/webparts/toolLauncherContracts.js';
+import type { LauncherPlatformIndex, LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
 
@@ -25,6 +23,32 @@ export interface LauncherAllPlatformsOverlayProps {
   index: LauncherPlatformIndex;
   isOpen: boolean;
   onClose: () => void;
+}
+
+/* ── Search logic ────────────────────────────────────────────────── */
+
+function matchesPlatform(platform: LauncherPlatformRecord, query: string): boolean {
+  const q = query.toLowerCase();
+  if (platform.name.toLowerCase().includes(q)) return true;
+  if (platform.descriptor?.toLowerCase().includes(q)) return true;
+  if (platform.category?.toLowerCase().includes(q)) return true;
+  for (const alias of platform.aliases) {
+    if (alias.toLowerCase().includes(q)) return true;
+  }
+  return false;
+}
+
+function filterIndex(index: LauncherPlatformIndex, query: string): LauncherPlatformIndex {
+  if (!query.trim()) return index;
+
+  const filtered = index.groups
+    .map((group) => ({
+      category: group.category,
+      platforms: group.platforms.filter((p) => matchesPlatform(p, query)),
+    }))
+    .filter((group) => group.platforms.length > 0);
+
+  return { groups: filtered };
 }
 
 /* ── Styles ───────────────────────────────────────────────────────── */
@@ -88,10 +112,9 @@ const searchInputStyle: React.CSSProperties = {
   border: HP_BORDER.subtle,
   background: 'rgba(0,0,0,0.02)',
   fontSize: '0.75rem',
-  color: 'rgba(0,0,0,0.5)',
+  color: 'rgba(0,0,0,0.8)',
   outline: 'none',
   transition: `border-color ${HP_MOTION.fast}`,
-  cursor: 'default',
 };
 
 const searchIconStyle: React.CSSProperties = {
@@ -139,6 +162,13 @@ const emptyStyle: React.CSSProperties = {
   fontSize: '0.8rem',
 };
 
+const noResultsStyle: React.CSSProperties = {
+  textAlign: 'center',
+  padding: HP_SPACE['3xl'],
+  color: 'rgba(0,0,0,0.4)',
+  fontSize: '0.78rem',
+};
+
 /* ── Motion variants ─────────────────────────────────────────────── */
 
 const overlayMotion = {
@@ -151,7 +181,8 @@ const overlayMotion = {
 
 function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onClose: () => void }): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
-  const overlayRef = React.useRef<HTMLDivElement>(null);
+  const searchRef = React.useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   // Escape key dismissal
   React.useEffect(() => {
@@ -162,23 +193,26 @@ function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onCl
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Auto-focus overlay on mount
+  // Auto-focus search input on mount
   React.useEffect(() => {
-    overlayRef.current?.focus();
+    // Small delay to ensure motion animation doesn't steal focus
+    const timer = setTimeout(() => searchRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
   }, []);
 
   const totalPlatforms = index.groups.reduce((sum, g) => sum + g.platforms.length, 0);
+  const filtered = filterIndex(index, searchQuery);
+  const filteredCount = filtered.groups.reduce((sum, g) => sum + g.platforms.length, 0);
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <>
       <div style={backdropStyle} onClick={onClose} aria-hidden="true" />
 
       <motion.div
-        ref={overlayRef}
         role="dialog"
         aria-label="All Platforms"
         aria-modal="false"
-        tabIndex={-1}
         style={overlayStyle}
         data-launcher-region="all-platforms-overlay"
         initial={reducedMotion ? false : overlayMotion.initial}
@@ -190,16 +224,19 @@ function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onCl
         <div style={stickyHeaderStyle}>
           <div style={headerRowStyle}>
             <h3 style={titleStyle}>
-              All Platforms{totalPlatforms > 0 ? ` (${totalPlatforms})` : ''}
+              {isSearching
+                ? `${filteredCount} result${filteredCount === 1 ? '' : 's'}`
+                : `All Platforms (${totalPlatforms})`}
             </h3>
             <div style={searchContainerStyle}>
               <Search size={13} strokeWidth={2} style={searchIconStyle} />
               <input
+                ref={searchRef}
                 type="text"
                 placeholder="Search platforms..."
-                readOnly
-                tabIndex={-1}
-                aria-label="Search platforms (coming soon)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search all platforms"
                 style={searchInputStyle}
               />
             </div>
@@ -216,10 +253,14 @@ function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onCl
 
         {/* Scrollable body */}
         <div style={scrollBodyStyle}>
-          {index.groups.length === 0 ? (
+          {totalPlatforms === 0 ? (
             <div style={emptyStyle}>No platforms available</div>
+          ) : filtered.groups.length === 0 ? (
+            <div style={noResultsStyle}>
+              No platforms matching &ldquo;{searchQuery}&rdquo;
+            </div>
           ) : (
-            index.groups.map((group, i) => (
+            filtered.groups.map((group, i) => (
               <div key={group.category}>
                 <div style={i === 0 ? firstCategoryHeadingStyle : categoryHeadingStyle}>
                   {group.category} ({group.platforms.length})
