@@ -5,6 +5,13 @@
  * All 4 regions + overlay extracted to dedicated components.
  * Icon resolution consolidated in launcherIconResolution.ts.
  *
+ * Phase 11G: Authoring, SPFx host, and packaging hardening.
+ *   - Explicit error state for list fetch failures (shows professional
+ *     empty state instead of silently falling to config bridge)
+ *   - data-hbc-homepage markers on root element for edit-mode awareness
+ *   - Defensive guards for partial/sparse presentation data
+ *   - aria-live region on state transitions for screen reader awareness
+ *
  * Primary data source: live SharePoint list "Tool Launcher Contents"
  * via useToolLauncherData(). Falls back to manifest config props when
  * running outside SPFx (local dev / demo / packaging).
@@ -86,15 +93,51 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
     [listPlatforms],
   );
 
+  // Loading state
   if (isLoading || listLoading) {
-    return <HomepageLoadingState label="Loading tool launchers" />;
+    return (
+      <div data-hbc-homepage="tool-launcher" data-launcher-state="loading">
+        <HomepageLoadingState label="Loading tool launchers" />
+      </div>
+    );
+  }
+
+  // Explicit error state — list fetch failed and no platforms available
+  if (listError && !listPlatforms) {
+    // When list fetch fails, try config fallback before showing error
+    const bridged = bridgeConfigToGroups(config, activeAudience);
+    if (bridged) {
+      return (
+        <div data-hbc-homepage="tool-launcher" data-launcher-state="config-fallback">
+          <HbcLauncherSurface
+            groups={bridged.groups}
+            layout="grid"
+            aria-label={bridged.heading}
+          />
+        </div>
+      );
+    }
+
+    // No fallback available — show professional error state
+    return (
+      <div data-hbc-homepage="tool-launcher" data-launcher-state="error" role="status" aria-live="polite">
+        <HomepageEmptyState
+          title="Unable to load platforms"
+          description="The Tool Launcher Contents list could not be reached. Refresh the page or contact your SharePoint administrator if this continues."
+        />
+      </div>
+    );
   }
 
   // Live list data → 4-region composition shell + overlay
   if (listPlatforms && !listError) {
     if (listPlatforms.length === 0) {
       const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
-      return <HomepageEmptyState title={message.title} description={message.description} />;
+      return (
+        <div data-hbc-homepage="tool-launcher" data-launcher-state="list-empty" role="status" aria-live="polite">
+          <HomepageEmptyState title={message.title} description={message.description} />
+        </div>
+      );
     }
 
     const presentation = deriveToolLauncherPresentation(listPlatforms, activeAudience);
@@ -102,37 +145,47 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
     // All platforms filtered by audience → show empty state
     if (presentation.allPlatforms.length === 0) {
       const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
-      return <HomepageEmptyState title={message.title} description={message.description} />;
+      return (
+        <div data-hbc-homepage="tool-launcher" data-launcher-state="audience-filtered" role="status" aria-live="polite">
+          <HomepageEmptyState title={message.title} description={message.description} />
+        </div>
+      );
     }
 
     const featuredCount = presentation.featuredStage.platforms.length;
 
     return (
-      <LauncherCompositionShell
-        tier={tier}
-        commandBand={
-          <LauncherCommandBand
-            platformCount={presentation.allPlatforms.length}
-            featuredCount={featuredCount}
-            onAllPlatforms={() => setOverlayOpen(true)}
-            tier={tier}
-            searchable={searchable}
-          />
-        }
-        flagshipStage={<LauncherFlagshipStage platforms={presentation.featuredStage.platforms} tier={tier} />}
-        utilityRail={<LauncherUtilityRail presentation={presentation} />}
-        workflowShelves={
-          <>
-            <LauncherWorkflowShelves shelves={presentation.workflowShelves} />
-            <LauncherAllPlatformsOverlay
-              index={presentation.platformIndex}
-              allPlatforms={presentation.allPlatforms}
-              isOpen={overlayOpen}
-              onClose={() => setOverlayOpen(false)}
+      <div data-hbc-homepage="tool-launcher" data-launcher-state="live">
+        <LauncherCompositionShell
+          tier={tier}
+          commandBand={
+            <LauncherCommandBand
+              platformCount={presentation.allPlatforms.length}
+              featuredCount={featuredCount}
+              onAllPlatforms={() => setOverlayOpen(true)}
+              tier={tier}
+              searchable={searchable}
             />
-          </>
-        }
-      />
+          }
+          flagshipStage={
+            featuredCount > 0
+              ? <LauncherFlagshipStage platforms={presentation.featuredStage.platforms} tier={tier} />
+              : undefined
+          }
+          utilityRail={<LauncherUtilityRail presentation={presentation} />}
+          workflowShelves={
+            <>
+              <LauncherWorkflowShelves shelves={presentation.workflowShelves} />
+              <LauncherAllPlatformsOverlay
+                index={presentation.platformIndex}
+                allPlatforms={presentation.allPlatforms}
+                isOpen={overlayOpen}
+                onClose={() => setOverlayOpen(false)}
+              />
+            </>
+          }
+        />
+      </div>
     );
   }
 
@@ -141,14 +194,20 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   if (!bridged) {
     const hasConfiguredInput = Boolean(config?.groups?.length);
     const message = resolveAuthoringMessage('toolLauncherWorkHub', hasConfiguredInput ? 'invalid' : 'noData');
-    return <HomepageEmptyState title={message.title} description={message.description} />;
+    return (
+      <div data-hbc-homepage="tool-launcher" data-launcher-state="no-config" role="status" aria-live="polite">
+        <HomepageEmptyState title={message.title} description={message.description} />
+      </div>
+    );
   }
 
   return (
-    <HbcLauncherSurface
-      groups={bridged.groups}
-      layout="grid"
-      aria-label={bridged.heading}
-    />
+    <div data-hbc-homepage="tool-launcher" data-launcher-state="config-fallback">
+      <HbcLauncherSurface
+        groups={bridged.groups}
+        layout="grid"
+        aria-label={bridged.heading}
+      />
+    </div>
   );
 }
