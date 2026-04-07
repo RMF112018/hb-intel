@@ -14,3 +14,7 @@ This phase exists because Band B must now be tuned relative to both Band A and K
 - prompt 01
 - prompt 02
 - validation checklist
+
+## Implementation artifacts
+
+- `apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureMerged.tsx` — CelebrationTile, BandBRegion

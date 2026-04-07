@@ -7,6 +7,8 @@
  * Phase 5: Kudos featured spotlight and recent headlines with recipient
  *          display, avatar thumbnails, celebrate counts, Give Kudos
  *          entry posture, Celebrate affordance, and empty states.
+ * Phase 7: Band B compact weekly celebration tiles with avatar/photo,
+ *          celebration type label, and relative date display.
  */
 import * as React from 'react';
 import {
@@ -335,8 +337,8 @@ const bandBHeaderStyle: React.CSSProperties = {
 
 const celebrationGridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-  gap: HP_SPACE.lg,
+  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+  gap: HP_SPACE.md,
   marginTop: HP_SPACE.xl,
 };
 
@@ -344,9 +346,48 @@ const celebrationTileStyle: React.CSSProperties = {
   padding: HP_SPACE.lg,
   border: HP_BORDER.subtle,
   borderRadius: HP_RADIUS.card,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: HP_SPACE.xs,
   textAlign: 'center' as const,
   fontSize: '0.8125rem',
   lineHeight: 1.4,
+};
+
+const celebrationAvatarStyle: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  borderRadius: '50%',
+  objectFit: 'cover' as const,
+};
+
+const celebrationAvatarPlaceholderStyle: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  borderRadius: '50%',
+  background: 'rgba(34,83,145,0.06)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const celebrationNameStyle: React.CSSProperties = {
+  fontWeight: 500,
+  fontSize: '0.8125rem',
+  lineHeight: 1.3,
+};
+
+const celebrationTypeStyle: React.CSSProperties = {
+  fontSize: '0.6875rem',
+  opacity: HP_TEXT_OPACITY.secondary,
+  lineHeight: 1.3,
+};
+
+const celebrationDateStyle: React.CSSProperties = {
+  fontSize: '0.6875rem',
+  opacity: HP_TEXT_OPACITY.secondary,
+  lineHeight: 1.3,
 };
 
 const bandBEmptyStyle: React.CSSProperties = {
@@ -533,6 +574,42 @@ function KudosRegion({ output }: { output: KudosModuleOutput }): React.JSX.Eleme
   );
 }
 
+function formatRelativeDate(iso: string): string {
+  const celebMs = Date.parse(iso);
+  if (Number.isNaN(celebMs)) return '';
+  const todayMs = Date.now();
+  const diffDays = Math.round((celebMs - todayMs) / 86_400_000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
+  return new Date(celebMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): React.JSX.Element {
+  const hasAvatar = Boolean(item.media?.src);
+  const typeLabel = item.celebrationType === 'anniversary' && item.anniversaryYears
+    ? `${item.anniversaryYears} yr anniversary`
+    : item.celebrationType === 'anniversary'
+      ? 'Anniversary'
+      : 'Birthday';
+  const dateLabel = formatRelativeDate(item.celebrationDate);
+
+  return (
+    <div style={celebrationTileStyle}>
+      {hasAvatar ? (
+        <img src={item.media!.src} alt={item.media!.alt ?? item.personName} style={celebrationAvatarStyle} />
+      ) : (
+        <div style={celebrationAvatarPlaceholderStyle}>
+          <Users size={16} />
+        </div>
+      )}
+      <div style={celebrationNameStyle}>{item.personName}</div>
+      <div style={celebrationTypeStyle}>{typeLabel}</div>
+      {dateLabel && <div style={celebrationDateStyle}>{dateLabel}</div>}
+    </div>
+  );
+}
+
 function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
   return (
     <section aria-label="This week celebrations" data-hbc-homepage="band-b">
@@ -549,14 +626,7 @@ function BandBRegion({ output }: { output: BandBOutput }): React.JSX.Element {
         ) : (
           <div style={celebrationGridStyle}>
             {output.items.map((item) => (
-              <div key={item.id} style={celebrationTileStyle}>
-                <div style={{ fontWeight: 500 }}>{item.personName}</div>
-                <div style={{ marginTop: HP_SPACE.xs, opacity: HP_TEXT_OPACITY.secondary }}>
-                  {item.celebrationType === 'anniversary' && item.anniversaryYears
-                    ? `${item.anniversaryYears} yr anniversary`
-                    : item.celebrationType}
-                </div>
-              </div>
+              <CelebrationTile key={item.id} item={item} />
             ))}
           </div>
         )}
