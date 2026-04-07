@@ -87,10 +87,22 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
   const [overlayOpen, setOverlayOpen] = React.useState(false);
   const tier = useResponsiveTier();
 
+  // Stable callbacks to prevent unnecessary child re-renders
+  const openOverlay = React.useCallback(() => setOverlayOpen(true), []);
+  const closeOverlay = React.useCallback(() => setOverlayOpen(false), []);
+
   // Pre-compute searchable records for command band inline search (stable across renders)
   const searchable = React.useMemo(
     () => (listPlatforms ? prepareAllForSearch(listPlatforms) : []),
     [listPlatforms],
+  );
+
+  // Memoize presentation derivation to avoid recomputing on unrelated state changes
+  const presentation = React.useMemo(
+    () => (listPlatforms && listPlatforms.length > 0
+      ? deriveToolLauncherPresentation(listPlatforms, activeAudience)
+      : undefined),
+    [listPlatforms, activeAudience],
   );
 
   // Loading state
@@ -131,22 +143,11 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
 
   // Live list data → 4-region composition shell + overlay
   if (listPlatforms && !listError) {
-    if (listPlatforms.length === 0) {
+    if (!presentation || presentation.allPlatforms.length === 0) {
+      const isEmpty = listPlatforms.length === 0;
       const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
       return (
-        <div data-hbc-homepage="tool-launcher" data-launcher-state="list-empty" role="status" aria-live="polite">
-          <HomepageEmptyState title={message.title} description={message.description} />
-        </div>
-      );
-    }
-
-    const presentation = deriveToolLauncherPresentation(listPlatforms, activeAudience);
-
-    // All platforms filtered by audience → show empty state
-    if (presentation.allPlatforms.length === 0) {
-      const message = resolveAuthoringMessage('toolLauncherWorkHub', 'listEmpty');
-      return (
-        <div data-hbc-homepage="tool-launcher" data-launcher-state="audience-filtered" role="status" aria-live="polite">
+        <div data-hbc-homepage="tool-launcher" data-launcher-state={isEmpty ? 'list-empty' : 'audience-filtered'} role="status" aria-live="polite">
           <HomepageEmptyState title={message.title} description={message.description} />
         </div>
       );
@@ -162,7 +163,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
             <LauncherCommandBand
               platformCount={presentation.allPlatforms.length}
               featuredCount={featuredCount}
-              onAllPlatforms={() => setOverlayOpen(true)}
+              onAllPlatforms={openOverlay}
               tier={tier}
               searchable={searchable}
             />
@@ -180,7 +181,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
                 index={presentation.platformIndex}
                 allPlatforms={presentation.allPlatforms}
                 isOpen={overlayOpen}
-                onClose={() => setOverlayOpen(false)}
+                onClose={closeOverlay}
               />
             </>
           }

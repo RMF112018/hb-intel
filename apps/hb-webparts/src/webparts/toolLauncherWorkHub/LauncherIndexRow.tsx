@@ -115,7 +115,7 @@ export function LauncherIndexRow({ platform: p }: LauncherIndexRowProps): React.
         {p.descriptor && <p style={descriptorStyle}>{p.descriptor}</p>}
       </div>
       {p.category && <span style={categoryTagStyle}>{p.category}</span>}
-      <ExternalLink size={12} strokeWidth={1.8} style={launchIconStyle} />
+      <ExternalLink size={12} strokeWidth={1.8} style={launchIconStyle} aria-hidden="true" />
     </a>
   );
 }

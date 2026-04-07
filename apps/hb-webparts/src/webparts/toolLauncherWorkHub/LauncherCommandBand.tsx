@@ -286,9 +286,15 @@ export function LauncherCommandBand({
     return scoreAndRank(searchable, query);
   }, [query, searchable]);
 
-  const suggestions = rankedResults.slice(0, MAX_SUGGESTIONS);
+  const suggestions = React.useMemo(
+    () => rankedResults.slice(0, MAX_SUGGESTIONS),
+    [rankedResults],
+  );
   const totalMatches = rankedResults.length;
   const hasQuery = query.trim().length > 0;
+  const activeSuggestionId = activeIndex >= 0 && activeIndex < suggestions.length
+    ? `launcher-suggestion-${suggestions[activeIndex].platform.record.platformKey}`
+    : undefined;
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setQuery(e.target.value);
@@ -389,6 +395,7 @@ export function LauncherCommandBand({
             aria-haspopup="listbox"
             role="combobox"
             aria-autocomplete="list"
+            aria-activedescendant={activeSuggestionId}
             className={interactiveStyles.commandSearchInput}
             style={searchInputStyle}
           />
@@ -418,6 +425,7 @@ export function LauncherCommandBand({
                     return (
                       <a
                         key={r.platformKey}
+                        id={`launcher-suggestion-${r.platformKey}`}
                         href={r.launchUrl}
                         target={r.openInNewTab ? '_blank' : undefined}
                         rel={r.openInNewTab ? 'noopener noreferrer' : undefined}
@@ -431,7 +439,7 @@ export function LauncherCommandBand({
                           <span style={suggestionNameStyle}>{r.name}</span>
                           {hint && <span style={suggestionHintStyle}>{hint}</span>}
                         </div>
-                        <ExternalLink size={11} strokeWidth={1.8} color="rgba(0,0,0,0.25)" />
+                        <ExternalLink size={11} strokeWidth={1.8} color="rgba(0,0,0,0.25)" aria-hidden="true" />
                       </a>
                     );
                   })}

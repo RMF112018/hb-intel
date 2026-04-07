@@ -271,7 +271,7 @@ function OverlayContent({ index, allPlatforms, onClose }: {
       <motion.div
         role="dialog"
         aria-label="All Platforms"
-        aria-modal="false"
+        aria-modal="true"
         style={overlayStyle}
         data-launcher-region="all-platforms-overlay"
         initial={reducedMotion ? false : overlayMotion.initial}

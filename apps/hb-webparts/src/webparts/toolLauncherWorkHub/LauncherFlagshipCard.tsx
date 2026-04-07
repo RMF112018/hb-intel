@@ -216,7 +216,7 @@ export function LauncherFlagshipCard({ platform: p, variant = 'standard' }: Laun
             {p.descriptor && <p style={heroDescriptorStyle}>{p.descriptor}</p>}
             <div style={heroCtaRowStyle}>
               <span style={ctaLabelStyle}>
-                Launch <ExternalLink size={12} strokeWidth={2} />
+                Launch <ExternalLink size={12} strokeWidth={2} aria-hidden="true" />
               </span>
               {p.notice && badgeColors && (
                 <span

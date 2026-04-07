@@ -107,6 +107,7 @@ export function LauncherLogo({ resolution, onImageError, size }: LauncherLogoPro
         <img
           src={resolution.src}
           alt={resolution.alt}
+          loading="lazy"
           style={{
             width: '100%',
             height: '100%',

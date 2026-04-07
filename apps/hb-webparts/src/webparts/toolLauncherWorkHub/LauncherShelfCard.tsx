@@ -110,7 +110,7 @@ export function LauncherShelfCard({ platform: p }: LauncherShelfCardProps): Reac
         <p style={nameStyle}>{p.name}</p>
         {p.descriptor && <p style={descriptorStyle}>{p.descriptor}</p>}
       </div>
-      <ExternalLink size={12} strokeWidth={1.8} style={launchIconStyle} />
+      <ExternalLink size={12} strokeWidth={1.8} style={launchIconStyle} aria-hidden="true" />
     </a>
   );
 }
