@@ -14,4 +14,5 @@ This phase exists because the feature can no longer rely on the original celebra
 - prompt 01
 - prompt 02
 - merged content model specification
+- source strategy and moderation model
 - validation checklist
