@@ -104,17 +104,19 @@ export function NewsroomFeaturedStory({ item, tier, reducedMotion }: NewsroomFea
           {item.summary}
         </p>
 
-        <div className={s.featuredMeta}>
-          {item.byline ? (
-            <span className={s.featuredByline}>{item.byline}</span>
-          ) : null}
-          {item.publishDate ? (
-            <span className={s.featuredDate}>
-              <Clock size={11} aria-hidden="true" className={s.featuredDateIcon} />
-              {item.publishDate}
-            </span>
-          ) : null}
-        </div>
+        {(item.byline || item.publishDate) ? (
+          <div className={s.featuredMeta}>
+            {item.byline ? (
+              <span className={s.featuredByline}>{item.byline}</span>
+            ) : null}
+            {item.publishDate ? (
+              <span className={s.featuredDate}>
+                <Clock size={11} aria-hidden="true" className={s.featuredDateIcon} />
+                {item.publishDate}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
         {item.cta ? (
           <div className={s.featuredCta}>

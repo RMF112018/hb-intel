@@ -85,6 +85,84 @@ describe('Prompt-06 awareness webparts', () => {
     expect(screen.getAllByText('More headlines').length).toBeGreaterThan(0);
   });
 
+  // ── Wave 05: Sparse-state and governance hardening tests ──────
+
+  it('renders lead story without metadata fields and no empty meta container', () => {
+    const { container } = render(
+      <CompanyPulse
+        config={{
+          items: [
+            { id: 'bare', title: 'Bare Story', summary: 'Minimal content', featured: true, order: 1 },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Bare Story')).not.toBeNull();
+    expect(screen.getByText('Minimal content')).not.toBeNull();
+    // Meta row with border-top should not render when no byline or date
+    const metaRows = container.querySelectorAll('[class*="featuredMeta"]');
+    expect(metaRows.length).toBe(0);
+  });
+
+  it('renders headline items without CTA as non-interactive elements', () => {
+    const { container } = render(
+      <CompanyPulse
+        config={{
+          items: [
+            { id: 'lead', title: 'Lead', summary: 'Body', featured: true, order: 1 },
+            { id: 'no-cta', title: 'No CTA Headline', summary: 'Body', order: 2 },
+          ],
+        }}
+      />,
+    );
+
+    // The non-CTA headline should render as a div, not an anchor
+    const links = container.querySelectorAll('a');
+    const noCtaLink = Array.from(links).find((a) => a.textContent?.includes('No CTA Headline'));
+    expect(noCtaLink).toBeUndefined();
+  });
+
+  it('renders invalid state for items with empty required fields', () => {
+    render(
+      <CompanyPulse
+        config={{
+          items: [
+            { id: 'bad', title: '', summary: '', order: 1 },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Newsroom configuration needs attention')).not.toBeNull();
+  });
+
+  it('renders tertiary zone only for items with authored categories', () => {
+    const { container } = render(
+      <CompanyPulse
+        config={{
+          archiveHref: '/pulse',
+          maxSecondaryItems: 1,
+          maxTertiaryItems: 3,
+          items: [
+            { id: 'lead', title: 'Lead', summary: 'Body', featured: true, order: 1 },
+            { id: 'sec', title: 'Secondary', summary: 'Body', order: 2, category: 'safety' },
+            { id: 'tert-cat', title: 'Tertiary With Category', summary: 'Body', order: 3, category: 'milestone' },
+            { id: 'tert-nocat', title: 'Tertiary No Category', summary: 'Body', order: 4 },
+          ],
+        }}
+      />,
+    );
+
+    // Milestone chip should render, but no fabricated 'update' chip for the no-category item
+    const chips = container.querySelectorAll('[class*="chip"]');
+    const chipTexts = Array.from(chips).map((el) => el.textContent);
+    expect(chipTexts).toContain('milestone');
+    expect(chipTexts).not.toContain('update');
+  });
+
+  // ── Other webpart tests ───────────────────────────────────────
+
   it('renders empty state for malformed leadership config', () => {
     render(<LeadershipMessage config={{ entries: [{ id: 'bad', title: '', message: '', leaderName: '' }] }} />);
     expect(screen.getByText('Leadership message configuration is invalid')).not.toBeNull();

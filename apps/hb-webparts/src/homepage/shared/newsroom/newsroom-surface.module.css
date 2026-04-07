@@ -326,6 +326,15 @@
   outline-offset: 2px;
 }
 
+.headlineItemStatic {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 8px;
+  color: inherit;
+  border-radius: 6px;
+}
+
 .headlineIcon {
   display: flex;
   align-items: center;

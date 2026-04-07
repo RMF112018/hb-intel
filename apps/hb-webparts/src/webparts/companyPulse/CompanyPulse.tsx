@@ -48,12 +48,13 @@ function TertiaryZone({ items, archiveHref, isMobile }: {
   archiveHref?: string;
   isMobile: boolean;
 }): React.JSX.Element | null {
-  if (items.length === 0 && !archiveHref) return null;
+  const categorizedItems = items.filter((item) => Boolean(item.category));
+  if (categorizedItems.length === 0 && !archiveHref) return null;
 
   return (
     <div className={isMobile ? s.tertiaryZoneMobile : s.tertiaryZone}>
-      {items.map((item) => (
-        <NewsroomCategoryChip key={item.id} category={item.category ?? 'update'} size="sm" />
+      {categorizedItems.map((item) => (
+        <NewsroomCategoryChip key={item.id} category={item.category!} size="sm" />
       ))}
       {archiveHref ? (
         <div className={s.tertiaryArchive}>

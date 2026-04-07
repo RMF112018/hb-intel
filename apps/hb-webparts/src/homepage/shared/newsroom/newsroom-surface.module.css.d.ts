@@ -37,6 +37,7 @@ declare const styles: {
   readonly railHeader: string;
   readonly railDivider: string;
   readonly headlineItem: string;
+  readonly headlineItemStatic: string;
   readonly headlineIcon: string;
   readonly headlineContent: string;
   readonly headlineTitle: string;

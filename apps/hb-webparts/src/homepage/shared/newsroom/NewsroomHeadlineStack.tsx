@@ -28,11 +28,12 @@ export interface NewsroomHeadlineStackProps {
 /* ── Headline item ────────────────────────────────────────────── */
 
 function HeadlineItem({ item }: { item: CompanyPulseItem }): React.JSX.Element {
-  const Tag = item.cta?.href ? 'a' : 'div';
-  const tagProps = item.cta?.href ? { href: item.cta.href } : {};
+  const isClickable = Boolean(item.cta?.href);
+  const Tag = isClickable ? 'a' : 'div';
+  const tagProps = isClickable ? { href: item.cta!.href } : {};
 
   return (
-    <Tag {...tagProps} className={s.headlineItem}>
+    <Tag {...tagProps} className={isClickable ? s.headlineItem : s.headlineItemStatic}>
       <span className={s.headlineIcon} aria-hidden="true">
         <FileText size={14} strokeWidth={2} />
       </span>
