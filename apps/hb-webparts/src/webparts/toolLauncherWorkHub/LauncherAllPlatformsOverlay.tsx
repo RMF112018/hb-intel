@@ -1,54 +1,27 @@
 /**
  * LauncherAllPlatformsOverlay — Full platform inventory overlay with search.
  *
- * Phase 06-03: Live search filtering against normalized launcher fields
- * (name, aliases, descriptor, category). Sticky header with interactive
- * search input auto-focused on open. Empty-result state. Motion
- * entrance/exit. Escape key and click-outside dismissal.
- *
- * Search matching: case-insensitive substring against name, each alias,
- * descriptor, and category. Filtered results re-grouped by category.
- * Categories with zero matches are suppressed.
+ * Phase 08-01: Search via launcherSearch.ts contract with pre-computed
+ * searchable records. Matches against name, aliases, descriptor,
+ * category, workflowShelf, and support owner name.
  */
 import * as React from 'react';
 import { motion, AnimatePresence, Search } from '@hbc/ui-kit/homepage';
 import { HP_SPACE, HP_BORDER, HP_RADIUS, HP_MOTION } from '../../homepage/tokens.js';
 import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
 import { LauncherIndexRow } from './LauncherIndexRow.js';
-import type { LauncherPlatformIndex, LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
+import { prepareAllForSearch, filterIndexByQuery, countIndexPlatforms } from './launcherSearch.js';
+import type { LauncherPlatformIndex } from '../../homepage/webparts/toolLauncherContracts.js';
+import type { LauncherPlatformRecord } from '../../homepage/webparts/toolLauncherContracts.js';
 
 /* ── Props ────────────────────────────────────────────────────────── */
 
 export interface LauncherAllPlatformsOverlayProps {
   index: LauncherPlatformIndex;
+  /** All platforms for search preparation. */
+  allPlatforms: LauncherPlatformRecord[];
   isOpen: boolean;
   onClose: () => void;
-}
-
-/* ── Search logic ────────────────────────────────────────────────── */
-
-function matchesPlatform(platform: LauncherPlatformRecord, query: string): boolean {
-  const q = query.toLowerCase();
-  if (platform.name.toLowerCase().includes(q)) return true;
-  if (platform.descriptor?.toLowerCase().includes(q)) return true;
-  if (platform.category?.toLowerCase().includes(q)) return true;
-  for (const alias of platform.aliases) {
-    if (alias.toLowerCase().includes(q)) return true;
-  }
-  return false;
-}
-
-function filterIndex(index: LauncherPlatformIndex, query: string): LauncherPlatformIndex {
-  if (!query.trim()) return index;
-
-  const filtered = index.groups
-    .map((group) => ({
-      category: group.category,
-      platforms: group.platforms.filter((p) => matchesPlatform(p, query)),
-    }))
-    .filter((group) => group.platforms.length > 0);
-
-  return { groups: filtered };
 }
 
 /* ── Styles ───────────────────────────────────────────────────────── */
@@ -179,10 +152,17 @@ const overlayMotion = {
 
 /* ── Component ───────────────────────────────────────────────────── */
 
-function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onClose: () => void }): React.JSX.Element {
+function OverlayContent({ index, allPlatforms, onClose }: {
+  index: LauncherPlatformIndex;
+  allPlatforms: LauncherPlatformRecord[];
+  onClose: () => void;
+}): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
+
+  // Pre-compute searchable records (once per data set, not per keystroke)
+  const searchable = React.useMemo(() => prepareAllForSearch(allPlatforms), [allPlatforms]);
 
   // Escape key dismissal
   React.useEffect(() => {
@@ -195,14 +175,13 @@ function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onCl
 
   // Auto-focus search input on mount
   React.useEffect(() => {
-    // Small delay to ensure motion animation doesn't steal focus
     const timer = setTimeout(() => searchRef.current?.focus(), 50);
     return () => clearTimeout(timer);
   }, []);
 
-  const totalPlatforms = index.groups.reduce((sum, g) => sum + g.platforms.length, 0);
-  const filtered = filterIndex(index, searchQuery);
-  const filteredCount = filtered.groups.reduce((sum, g) => sum + g.platforms.length, 0);
+  const totalPlatforms = countIndexPlatforms(index);
+  const filtered = filterIndexByQuery(index, searchable, searchQuery);
+  const filteredCount = countIndexPlatforms(filtered);
   const isSearching = searchQuery.trim().length > 0;
 
   return (
@@ -277,10 +256,10 @@ function OverlayContent({ index, onClose }: { index: LauncherPlatformIndex; onCl
   );
 }
 
-export function LauncherAllPlatformsOverlay({ index, isOpen, onClose }: LauncherAllPlatformsOverlayProps): React.JSX.Element {
+export function LauncherAllPlatformsOverlay({ index, allPlatforms, isOpen, onClose }: LauncherAllPlatformsOverlayProps): React.JSX.Element {
   return (
     <AnimatePresence>
-      {isOpen && <OverlayContent index={index} onClose={onClose} />}
+      {isOpen && <OverlayContent index={index} allPlatforms={allPlatforms} onClose={onClose} />}
     </AnimatePresence>
   );
 }

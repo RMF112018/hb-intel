@@ -111,6 +111,7 @@ export function ToolLauncherWorkHub({ config, activeAudience, isLoading = false 
             <LauncherWorkflowShelves shelves={presentation.workflowShelves} />
             <LauncherAllPlatformsOverlay
               index={presentation.platformIndex}
+              allPlatforms={presentation.allPlatforms}
               isOpen={overlayOpen}
               onClose={() => setOverlayOpen(false)}
             />
