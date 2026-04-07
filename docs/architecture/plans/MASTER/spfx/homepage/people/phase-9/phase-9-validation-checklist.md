@@ -1,6 +1,6 @@
 # Phase 9 — CTA, Editorial Controls, and Final Refinement — Validation Checklist
 
-- [ ] CTA posture refined
-- [ ] final motion and interaction polish added
-- [ ] hierarchy preserved
-- [ ] resilience preserved
+- [x] CTA posture refined
+- [x] final motion and interaction polish added
+- [x] hierarchy preserved
+- [x] resilience preserved

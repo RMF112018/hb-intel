@@ -13,6 +13,8 @@
  *           grid layouts preserving hierarchy across breakpoints.
  * Phase 8B: Authoring/loading/empty/invalid hardening — safe behavior
  *           in SharePoint edit mode and imperfect data conditions.
+ * Phase 9: CTA posture, editorial action hierarchy, motion/interaction
+ *          polish, hover/focus treatments, and final warmth refinement.
  */
 import * as React from 'react';
 import {
@@ -140,6 +142,7 @@ const announcementCardStyle: React.CSSProperties = {
   minHeight: 120,
   overflowWrap: 'break-word',
   wordBreak: 'break-word',
+  transition: 'border-color 150ms ease, box-shadow 150ms ease',
 };
 
 function getAnnouncementCardImageStyle(tier: ResponsiveTier): React.CSSProperties {
@@ -213,6 +216,7 @@ function getKudosFeaturedStyle(tier: ResponsiveTier): React.CSSProperties {
     marginTop: HP_SPACE.xl,
     padding: tier === 'mobile' ? HP_SPACE.xl : HP_SPACE['2xl'],
     border: HP_BORDER.standard,
+    borderTop: '3px solid rgba(229,126,70,0.35)',
     borderRadius: HP_RADIUS.editorial,
     background: 'rgba(229,126,70,0.02)',
     display: 'flex',
@@ -220,6 +224,7 @@ function getKudosFeaturedStyle(tier: ResponsiveTier): React.CSSProperties {
     gap: HP_SPACE.sm,
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
+    transition: 'border-color 150ms ease, box-shadow 150ms ease',
   };
 }
 
@@ -262,19 +267,22 @@ const kudosFeaturedMetaStyle: React.CSSProperties = {
   flexWrap: 'wrap',
 };
 
-const kudosHeadlineItemStyle: React.CSSProperties = {
+const kudosHeadlineItemBaseStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: HP_SPACE.lg,
-  padding: `${HP_SPACE.md}px 0`,
+  padding: `${HP_SPACE.md}px ${HP_SPACE.sm}px`,
+  borderRadius: HP_RADIUS.command,
+  transition: 'background 150ms ease',
+};
+
+const kudosHeadlineItemStyle: React.CSSProperties = {
+  ...kudosHeadlineItemBaseStyle,
   borderBottom: HP_BORDER.subtle,
 };
 
 const kudosHeadlineItemLastStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.lg,
-  padding: `${HP_SPACE.md}px 0`,
+  ...kudosHeadlineItemBaseStyle,
 };
 
 function getKudosHeadlineAvatarSize(tier: ResponsiveTier): number {
@@ -416,6 +424,7 @@ const celebrationTileStyle: React.CSSProperties = {
   textAlign: 'center' as const,
   fontSize: '0.75rem',
   lineHeight: 1.3,
+  transition: 'background 150ms ease, border-color 150ms ease',
 };
 
 const celebrationAvatarStyle: React.CSSProperties = {
@@ -463,7 +472,11 @@ function AnnouncementCard({ item, tier }: { item: BandAOutput['items'][number]; 
   const hasSummary = Boolean(item.summary?.trim());
 
   return (
-    <div style={announcementCardStyle}>
+    <div
+      style={announcementCardStyle}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = ''; }}
+    >
       {item.media && (
         <img
           src={item.media.src}
@@ -537,7 +550,11 @@ function KudosFeaturedSpotlight({ item, tier }: { item: NonNullable<KudosModuleO
   const recipientLabel = formatRecipients(item.recipients);
 
   return (
-    <div style={getKudosFeaturedStyle(tier)}>
+    <div
+      style={getKudosFeaturedStyle(tier)}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(229,126,70,0.1)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ''; }}
+    >
       {item.media && (
         <img src={item.media.src} alt={item.media.alt} style={getKudosFeaturedImageStyle(tier)} />
       )}
@@ -559,7 +576,11 @@ function KudosHeadlineItem({ item, isLast, tier }: { item: NonNullable<KudosModu
   const hasAvatar = Boolean(item.recipients[0]?.media?.src);
 
   return (
-    <div style={isLast ? kudosHeadlineItemLastStyle : kudosHeadlineItemStyle}>
+    <div
+      style={isLast ? kudosHeadlineItemLastStyle : kudosHeadlineItemStyle}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(229,126,70,0.03)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+    >
       {hasAvatar ? (
         <img
           src={item.recipients[0].media!.src}
@@ -666,7 +687,11 @@ function CelebrationTile({ item }: { item: BandBOutput['items'][number] }): Reac
   const metaLabel = dateLabel ? `${typeLabel} · ${dateLabel}` : typeLabel;
 
   return (
-    <div style={celebrationTileStyle}>
+    <div
+      style={celebrationTileStyle}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,83,145,0.03)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.borderColor = ''; }}
+    >
       {hasAvatar ? (
         <img src={item.media!.src} alt={item.media!.alt ?? item.personName} style={celebrationAvatarStyle} />
       ) : (
