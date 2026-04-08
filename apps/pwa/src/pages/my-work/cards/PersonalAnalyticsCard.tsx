@@ -13,16 +13,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import {
-  tokens,
-  HbcKpiCard,
-  HbcSpinner,
-  HBC_SPACE_MD,
-  HBC_STATUS_RAMP_RED,
-  HBC_STATUS_RAMP_INFO,
-  HBC_STATUS_ACTION_GREEN,
-  HBC_PRIMARY_BLUE,
-} from '@hbc/ui-kit';
+import { HbcKpiCard, HbcSpinner, HBC_SPACE_MD, HBC_STATUS_RAMP_RED, HBC_STATUS_RAMP_INFO, HBC_STATUS_ACTION_GREEN, HBC_PRIMARY_BLUE } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 import { useMyWorkCounts } from '@hbc/my-work-feed';
 import { ViewList, SparkleIcon, Cancel, Notifications } from '@hbc/ui-kit/icons';
 

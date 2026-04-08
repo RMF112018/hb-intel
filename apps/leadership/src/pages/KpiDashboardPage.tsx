@@ -1,18 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import {
-  Text,
-  Card,
-  CardHeader,
-  WorkspacePageShell,
-  HbcChart,
-  HBC_SPACE_XS,
-  HBC_SPACE_SM,
-  HBC_SPACE_MD,
-  HBC_SPACE_LG,
-  HBC_SPACE_XXL,
-  HBC_SURFACE_LIGHT,
-} from '@hbc/ui-kit';
+import { WorkspacePageShell, HbcChart, HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XXL, HBC_SURFACE_LIGHT } from '@hbc/ui-kit';
+import { Text, Card, CardHeader } from '@hbc/ui-kit/fluent';
 
 const useStyles = makeStyles({
   kpiGrid: {

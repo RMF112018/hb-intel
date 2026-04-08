@@ -1,17 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import {
-  Card,
-  CardHeader,
-  HBC_SPACE_MD,
-  HBC_SPACE_SM,
-  HBC_STATUS_COLORS,
-  HBC_SURFACE_LIGHT,
-  HbcButton,
-  Text,
-  useDensity,
-  HBC_DENSITY_TOKENS,
-} from '@hbc/ui-kit';
+import { HBC_SPACE_MD, HBC_SPACE_SM, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT, HbcButton, useDensity, HBC_DENSITY_TOKENS } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 
 import type { ProjectHubModulePostureSummary } from '../types.js';
 

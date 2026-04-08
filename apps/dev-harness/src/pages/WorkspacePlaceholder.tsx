@@ -4,7 +4,8 @@
  * Foundation Plan Phase 3.
  */
 import { makeStyles } from '@griffel/react';
-import { HbcStatusBadge, tokens } from '@hbc/ui-kit';
+import { HbcStatusBadge } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 import { useProjectStore } from '@hbc/shell';
 import { DemoDataGrid } from './DemoDataGrid.js';
 import { DemoCharts } from './DemoCharts.js';

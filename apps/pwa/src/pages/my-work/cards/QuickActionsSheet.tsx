@@ -9,7 +9,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
 import { useRouter } from '@tanstack/react-router';
-import { tokens, HbcButton, heading4, Create, ViewList, ViewGrid } from '@hbc/ui-kit';
+import { HbcButton, heading4, Create, ViewList, ViewGrid } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 
 const SHEET_Z = 1200; // Above bottomNav (300), below modal (1300)
 const DISMISS_THRESHOLD = 80; // px drag distance to dismiss

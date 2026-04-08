@@ -3,7 +3,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { Card, CardHeader, Text, HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 import type { BudgetLineRow } from '../hooks/useBudgetSurface.js';
 
 const LAYER_COLORS: Record<string, string> = {

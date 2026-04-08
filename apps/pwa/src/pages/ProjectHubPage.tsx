@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { HbcButton, HbcTextField, HbcSelect, Text, Card, CardHeader, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
+import { HbcButton, HbcTextField, HbcSelect, WorkspacePageShell, HbcDataTable } from '@hbc/ui-kit';
+import { Text, Card, CardHeader } from '@hbc/ui-kit/fluent';
 import type { ColumnDef, HbcSelectOption } from '@hbc/ui-kit';
 import {
   HBC_SPACE_XS,

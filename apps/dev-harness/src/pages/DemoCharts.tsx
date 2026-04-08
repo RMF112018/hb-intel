@@ -3,7 +3,8 @@
  * Foundation Plan Phase 3.
  */
 import { makeStyles } from '@griffel/react';
-import { HbcChart, HBC_SPACE_MD, tokens } from '@hbc/ui-kit';
+import { HbcChart, HBC_SPACE_MD } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 
 const useStyles = makeStyles({
   chartGrid: {

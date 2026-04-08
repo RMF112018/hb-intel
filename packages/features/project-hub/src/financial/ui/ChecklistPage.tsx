@@ -8,7 +8,8 @@
 
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { Text, HbcStatusBadge, HbcCard, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HbcStatusBadge, HbcCard, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 import { useChecklistSurface } from '../hooks/useChecklistSurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 

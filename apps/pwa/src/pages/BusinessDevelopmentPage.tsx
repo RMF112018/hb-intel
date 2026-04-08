@@ -4,15 +4,8 @@
  */
 import { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import {
-  Text,
-  Card,
-  CardHeader,
-  HbcDataTable,
-  HbcStatusBadge,
-  WorkspacePageShell,
-  ListLayout,
-} from '@hbc/ui-kit';
+import { HbcDataTable, HbcStatusBadge, WorkspacePageShell, ListLayout } from '@hbc/ui-kit';
+import { Text, Card, CardHeader } from '@hbc/ui-kit/fluent';
 import type { ColumnDef, ListFilterDef } from '@hbc/ui-kit';
 import {
   useListFilterStoreBinding,

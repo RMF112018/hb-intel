@@ -2,20 +2,8 @@ import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { ISmartEmptyStateConfig, IEmptyStateContext } from '@hbc/smart-empty-state';
-import {
-  HBC_BREAKPOINT_SIDEBAR,
-  HBC_DENSITY_TOKENS,
-  HBC_SPACE_MD,
-  HBC_SPACE_SM,
-  Card,
-  CardHeader,
-  HbcButton,
-  HbcStatusBadge,
-  HBC_SURFACE_LIGHT,
-  Text,
-  useDensity,
-  elevationLevel1,
-} from '@hbc/ui-kit';
+import { HBC_BREAKPOINT_SIDEBAR, HBC_DENSITY_TOKENS, HBC_SPACE_MD, HBC_SPACE_SM, HbcButton, HbcStatusBadge, HBC_SURFACE_LIGHT, useDensity, elevationLevel1 } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 import type {
   ProjectHubSpfxDensityTier,
   ProjectHubSpfxLaunchAction,

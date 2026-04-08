@@ -1,20 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
 import { useProjectStore } from '@hbc/shell';
-import {
-  HBC_DENSITY_TOKENS,
-  HBC_SPACE_MD,
-  HBC_SPACE_SM,
-  HBC_SURFACE_LIGHT,
-  Card,
-  CardHeader,
-  HbcButton,
-  HbcTextField,
-  Text,
-  WorkspacePageShell,
-  useDensity,
-  elevationLevel1,
-} from '@hbc/ui-kit';
+import { HBC_DENSITY_TOKENS, HBC_SPACE_MD, HBC_SPACE_SM, HBC_SURFACE_LIGHT, HbcButton, HbcTextField, WorkspacePageShell, useDensity, elevationLevel1 } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 import { HbcSmartEmptyState } from '@hbc/smart-empty-state';
 import type { IEmptyStateContext, ISmartEmptyStateConfig } from '@hbc/smart-empty-state';
 import {

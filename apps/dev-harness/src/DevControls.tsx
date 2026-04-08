@@ -5,7 +5,8 @@
  */
 import { useState } from 'react';
 import { makeStyles } from '@griffel/react';
-import { Button, HBC_SPACE_XS, HBC_SPACE_SM, tokens, Switch } from '@hbc/ui-kit';
+import { HBC_SPACE_XS, HBC_SPACE_SM } from '@hbc/ui-kit';
+import { Button, tokens, Switch } from '@hbc/ui-kit/fluent';
 import { useAuthStore, usePermissionStore } from '@hbc/auth';
 import { useProjectStore, useNavStore } from '@hbc/shell';
 import { bootstrapMockEnvironment, DEFAULT_FEATURE_FLAGS } from './bootstrap.js';

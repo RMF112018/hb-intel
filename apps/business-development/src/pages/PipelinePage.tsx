@@ -1,16 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import {
-  Text,
-  Card,
-  CardHeader,
-  WorkspacePageShell,
-  HbcDataTable,
-  HbcStatusBadge,
-  HBC_SPACE_SM,
-  HBC_SPACE_MD,
-  HBC_SPACE_LG,
-} from '@hbc/ui-kit';
+import { WorkspacePageShell, HbcDataTable, HbcStatusBadge, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '@hbc/ui-kit';
+import { Text, Card, CardHeader } from '@hbc/ui-kit/fluent';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface LeadItem { name: string; client: string; value: string; stage: string; probability: string; }

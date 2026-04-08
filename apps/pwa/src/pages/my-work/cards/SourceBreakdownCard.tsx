@@ -12,20 +12,8 @@
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import {
-  tokens,
-  HbcCard,
-  HbcSpinner,
-  HBC_SPACE_SM,
-  HBC_SPACE_MD,
-  HBC_PRIMARY_BLUE,
-  HBC_STATUS_RAMP_GREEN,
-  HBC_STATUS_RAMP_AMBER,
-  HBC_STATUS_RAMP_INFO,
-  HBC_STATUS_RAMP_RED,
-  HBC_STATUS_RAMP_GRAY,
-  heading4,
-} from '@hbc/ui-kit';
+import { HbcCard, HbcSpinner, HBC_SPACE_SM, HBC_SPACE_MD, HBC_PRIMARY_BLUE, HBC_STATUS_RAMP_GREEN, HBC_STATUS_RAMP_AMBER, HBC_STATUS_RAMP_INFO, HBC_STATUS_RAMP_RED, HBC_STATUS_RAMP_GRAY, heading4 } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 import { useMyWork, formatModuleLabel } from '@hbc/my-work-feed';
 
 export type SourceBreakdownVariant = 'essential' | 'standard' | 'expert';

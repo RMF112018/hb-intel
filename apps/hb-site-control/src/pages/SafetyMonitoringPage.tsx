@@ -5,17 +5,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import {
-  Text,
-  Badge,
-  tokens,
-  HbcStatusBadge,
-  HbcChart,
-  WorkspacePageShell,
-  HBC_SPACE_XS,
-  HBC_SPACE_SM,
-  HBC_SPACE_MD,
-} from '@hbc/ui-kit';
+import { HbcStatusBadge, HbcChart, WorkspacePageShell, HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD } from '@hbc/ui-kit';
+import { Text, Badge, tokens } from '@hbc/ui-kit/fluent';
 import type { StatusVariant } from '@hbc/ui-kit';
 import { useSignalR } from '../hooks/useSignalR.js';
 import type { SignalREvent } from '../hooks/useSignalR.js';

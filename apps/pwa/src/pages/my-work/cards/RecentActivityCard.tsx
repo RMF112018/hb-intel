@@ -16,7 +16,8 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { useRouter } from '@tanstack/react-router';
-import { tokens, HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
+import { HbcCard, HbcEmptyState, HbcButton, heading4 } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 import { BlueprintRoll } from '@hbc/ui-kit/icons';
 
 const useStyles = makeStyles({

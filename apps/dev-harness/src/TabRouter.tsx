@@ -3,8 +3,8 @@
  * Foundation Plan Phase 3 — no router library, React state tabs.
  */
 import { useState } from 'react';
-import { TabList, Tab } from '@hbc/ui-kit';
-import type { SelectTabData } from '@hbc/ui-kit';
+import { TabList, Tab } from '@hbc/ui-kit/fluent';
+import type { SelectTabData } from '@hbc/ui-kit/fluent';
 import { PwaPreview } from './tabs/PwaPreview.js';
 import { SiteControlPreview } from './tabs/SiteControlPreview.js';
 import { AccountingTab } from './tabs/AccountingTab.js';

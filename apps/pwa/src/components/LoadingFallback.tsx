@@ -2,7 +2,7 @@
  * LoadingFallback — route pending/suspense fallback with HB branding.
  */
 import type { ReactNode } from 'react';
-import { Spinner, Text } from '@hbc/ui-kit';
+import { Spinner, Text } from '@hbc/ui-kit/fluent';
 
 export function LoadingFallback(): ReactNode {
   return (

@@ -3,7 +3,8 @@
  * Executive dashboard with KPI cards and chart.
  */
 import type { ReactNode } from 'react';
-import { Text, Card, CardHeader, HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
+import { HbcChart, WorkspacePageShell } from '@hbc/ui-kit';
+import { Text, Card, CardHeader } from '@hbc/ui-kit/fluent';
 
 export function LeadershipPage(): ReactNode {
   const kpis = [

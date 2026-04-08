@@ -1,16 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import {
-  Card,
-  CardHeader,
-  HBC_DENSITY_TOKENS,
-  HBC_SPACE_MD,
-  HBC_SPACE_SM,
-  HbcButton,
-  Text,
-  HBC_STATUS_COLORS,
-  HBC_SURFACE_LIGHT,
-} from '@hbc/ui-kit';
+import { HBC_DENSITY_TOKENS, HBC_SPACE_MD, HBC_SPACE_SM, HbcButton, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 
 import type { FieldActionItem } from '../hooks/useFieldFocusSummary.js';
 

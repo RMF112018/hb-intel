@@ -7,7 +7,8 @@
 
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { Card, CardHeader, Text, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 
 import type { ForecastFormSection, ForecastSurfaceState } from '../hooks/useForecastSummary.js';
 

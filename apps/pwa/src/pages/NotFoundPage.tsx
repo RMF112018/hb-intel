@@ -2,7 +2,8 @@
  * NotFoundPage — 404 catch-all.
  */
 import type { ReactNode } from 'react';
-import { Button, Text, WorkspacePageShell } from '@hbc/ui-kit';
+import { WorkspacePageShell } from '@hbc/ui-kit';
+import { Button, Text } from '@hbc/ui-kit/fluent';
 import { useRouter } from '@tanstack/react-router';
 
 export function NotFoundPage(): ReactNode {

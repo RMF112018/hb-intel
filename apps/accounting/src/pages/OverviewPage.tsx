@@ -1,15 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import {
-  Text,
-  Card,
-  CardHeader,
-  WorkspacePageShell,
-  HbcDataTable,
-  HBC_SPACE_MD,
-  HBC_SPACE_LG,
-  HBC_SPACE_SM,
-} from '@hbc/ui-kit';
+import { WorkspacePageShell, HbcDataTable, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_SM } from '@hbc/ui-kit';
+import { Text, Card, CardHeader } from '@hbc/ui-kit/fluent';
 import type { ColumnDef } from '@hbc/ui-kit';
 
 interface BudgetItem { category: string; budget: string; actual: string; variance: string; percent: string; }

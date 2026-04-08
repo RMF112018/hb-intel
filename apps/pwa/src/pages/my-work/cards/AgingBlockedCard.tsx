@@ -11,14 +11,8 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import {
-  tokens,
-  HbcKpiCard,
-  HbcSpinner,
-  HBC_SPACE_MD,
-  HBC_STATUS_RAMP_AMBER,
-  HBC_STATUS_RAMP_GRAY,
-} from '@hbc/ui-kit';
+import { HbcKpiCard, HbcSpinner, HBC_SPACE_MD, HBC_STATUS_RAMP_AMBER, HBC_STATUS_RAMP_GRAY } from '@hbc/ui-kit';
+import { tokens } from '@hbc/ui-kit/fluent';
 import { RoleGate } from '@hbc/auth';
 import { useMyWorkTeamFeed } from '@hbc/my-work-feed';
 import { Upload, StatusOverdueIcon } from '@hbc/ui-kit/icons';

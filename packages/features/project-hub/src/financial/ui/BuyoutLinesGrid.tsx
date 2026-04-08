@@ -3,7 +3,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import { Text, HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 import type { BuyoutLineRow } from '../hooks/useBuyoutSurface.js';
 
 const STATUS_COLORS: Record<string, string> = {

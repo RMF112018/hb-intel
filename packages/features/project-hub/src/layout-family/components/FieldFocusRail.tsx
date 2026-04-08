@@ -1,13 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import {
-  HBC_DENSITY_TOKENS,
-  HBC_SPACE_SM,
-  HBC_SPACE_XS,
-  Text,
-  HBC_STATUS_COLORS,
-  HBC_SURFACE_LIGHT,
-} from '@hbc/ui-kit';
+import { HBC_DENSITY_TOKENS, HBC_SPACE_SM, HBC_SPACE_XS, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 
 import type { FieldFocusArea } from '../hooks/useFieldFocusSummary.js';
 

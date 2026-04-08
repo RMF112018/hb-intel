@@ -1,16 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import {
-  Card,
-  CardHeader,
-  HBC_DENSITY_TOKENS,
-  HBC_SPACE_SM,
-  HBC_SPACE_XS,
-  Text,
-  useDensity,
-  HBC_STATUS_COLORS,
-  HBC_SURFACE_LIGHT,
-} from '@hbc/ui-kit';
+import { HBC_DENSITY_TOKENS, HBC_SPACE_SM, HBC_SPACE_XS, useDensity, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 
 import type { WatchlistItem, WatchlistSummary } from '../hooks/useWatchlistSummary.js';
 import { WATCHLIST_SIGNAL_TYPE_LABELS } from '../hooks/useWatchlistSummary.js';

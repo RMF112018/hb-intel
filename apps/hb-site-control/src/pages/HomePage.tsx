@@ -6,20 +6,8 @@
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
 import { useRouter } from '@tanstack/react-router';
-import {
-  Text,
-  Card,
-  CardHeader,
-  Button,
-  HbcStatusBadge,
-  WorkspacePageShell,
-  HBC_SPACE_XS,
-  HBC_SPACE_SM,
-  HBC_SPACE_MD,
-  HBC_SPACE_LG,
-  HBC_SPACE_XL,
-  tokens,
-} from '@hbc/ui-kit';
+import { HbcStatusBadge, WorkspacePageShell, HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XL } from '@hbc/ui-kit';
+import { Text, Card, CardHeader, Button, tokens } from '@hbc/ui-kit/fluent';
 
 const useStyles = makeStyles({
   grid: {

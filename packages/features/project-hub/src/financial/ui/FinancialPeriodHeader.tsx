@@ -7,7 +7,8 @@
 
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { Text, HbcButton, HBC_SPACE_SM, HBC_SPACE_XS, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HbcButton, HBC_SPACE_SM, HBC_SPACE_XS, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 
 import type {
   FinancialPeriodInfo,

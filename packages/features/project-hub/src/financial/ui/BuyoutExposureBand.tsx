@@ -3,7 +3,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { Card, CardHeader, Text, HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 import type { BuyoutExposureKpi } from '../hooks/useBuyoutSurface.js';
 
 const SEVERITY_COLORS: Record<string, string> = { healthy: HBC_STATUS_COLORS.success, watch: HBC_STATUS_COLORS.warning, 'at-risk': HBC_STATUS_COLORS.atRisk, critical: HBC_STATUS_COLORS.critical, neutral: HBC_STATUS_COLORS.neutral };

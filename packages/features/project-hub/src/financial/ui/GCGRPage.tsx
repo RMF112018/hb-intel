@@ -9,7 +9,8 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { makeStyles } from '@griffel/react';
-import { Text, HbcStatusBadge, HbcKpiCard, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { HbcStatusBadge, HbcKpiCard, HbcButton, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 import { useGCGRSurface } from '../hooks/useGCGRSurface.js';
 import { useFinancialRepository } from '../hooks/useFinancialRepository.js';
 import { GCGRService } from '../services/GCGRService.js';

@@ -1,17 +1,7 @@
 import type { ReactNode } from 'react';
 import { makeStyles, mergeClasses } from '@griffel/react';
-import {
-  Card,
-  CardHeader,
-  HBC_DENSITY_TOKENS,
-  HBC_SPACE_MD,
-  HBC_SPACE_SM,
-  HbcButton,
-  Text,
-  useDensity,
-  HBC_STATUS_COLORS,
-  HBC_SURFACE_LIGHT,
-} from '@hbc/ui-kit';
+import { HBC_DENSITY_TOKENS, HBC_SPACE_MD, HBC_SPACE_SM, HbcButton, useDensity, HBC_STATUS_COLORS, HBC_SURFACE_LIGHT } from '@hbc/ui-kit';
+import { Card, CardHeader, Text } from '@hbc/ui-kit/fluent';
 
 import type { RiskExposureSummary } from '../hooks/useRiskExposureSummary.js';
 

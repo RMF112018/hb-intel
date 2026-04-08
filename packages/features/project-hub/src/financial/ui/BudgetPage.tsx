@@ -7,7 +7,8 @@
  */
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { MultiColumnLayout, Text, HbcStatusBadge, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { MultiColumnLayout, HbcStatusBadge, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_XS, HBC_STATUS_COLORS } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 import { useBudgetSurface } from '../hooks/useBudgetSurface.js';
 import type { FinancialViewerRole, FinancialComplexityTier } from '../hooks/useFinancialControlCenter.js';
 import { BudgetSnapshotHeader } from './BudgetSnapshotHeader.js';

@@ -10,7 +10,8 @@
 
 import type { ReactNode } from 'react';
 import { makeStyles } from '@griffel/react';
-import { Text, HbcStatusBadge, HbcButton, HBC_SPACE_SM, HBC_SPACE_XS } from '@hbc/ui-kit';
+import { HbcStatusBadge, HbcButton, HBC_SPACE_SM, HBC_SPACE_XS } from '@hbc/ui-kit';
+import { Text } from '@hbc/ui-kit/fluent';
 import type { FinancialOperationalState, OperationalBlocker } from '../hooks/useFinancialOperationalState.js';
 
 const useStyles = makeStyles({
