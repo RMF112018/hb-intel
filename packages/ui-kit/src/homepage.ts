@@ -14,7 +14,14 @@
 import { body, display, displayLg, displayXl, heading1, heading2, heading3, heading4 } from './theme/typography.js';
 import { HBC_DENSITY_TOKENS, type DensityTier } from './theme/density.js';
 import { HBC_SPACE_LG, HBC_SPACE_MD, HBC_SPACE_SM, HBC_SPACE_XL, HBC_SPACE_2XL, HBC_SPACE_3XL } from './theme/grid.js';
-import { HBC_SURFACE_PRESENTATION, hbcPresentationCSSVars } from './theme/tokens.js';
+import {
+  HBC_SURFACE_PRESENTATION,
+  hbcPresentationCSSVars,
+  HBC_PRESENTATION_BLUE,
+  HBC_PRESENTATION_BLUE_RGB,
+  HBC_PRESENTATION_ORANGE,
+  HBC_PRESENTATION_ORANGE_RGB,
+} from './theme/tokens.js';
 import { elevationHero, elevationEditorial } from './theme/elevation.js';
 import { TRANSITION_DRAMATIC } from './theme/animations.js';
 
@@ -24,6 +31,8 @@ export { elevationHero, elevationEditorial };
 export { TRANSITION_DRAMATIC };
 export { displayLg, displayXl };
 export { HBC_SPACE_2XL, HBC_SPACE_3XL };
+// W01r-P08: Governed presentation-lane brand colors for consumer use
+export { HBC_PRESENTATION_BLUE, HBC_PRESENTATION_BLUE_RGB, HBC_PRESENTATION_ORANGE, HBC_PRESENTATION_ORANGE_RGB };
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js';
 
 export { HbcBanner } from './HbcBanner/index.js';
@@ -197,15 +206,16 @@ export type HomepagePrimitiveName =
 /**
  * Prompt-02 locked HB homepage brand direction.
  * Phase 15-02: strengthened anti-pattern list per Premium-Benchmark-Brief.
+ * W01r-P08: Colors now derive from governed HBC_PRESENTATION_* tokens in tokens.ts.
  */
 export const HBC_HOMEPAGE_BRAND_FOUNDATION = {
   primaryBlue: {
-    rgb: 'rgb(34, 83, 145)',
-    hex: '#225391',
+    rgb: `rgb(${HBC_PRESENTATION_BLUE_RGB})`,
+    hex: HBC_PRESENTATION_BLUE,
   },
   secondaryOrange: {
-    rgb: 'rgb(229, 126, 70)',
-    hex: '#E57E46',
+    rgb: `rgb(${HBC_PRESENTATION_ORANGE_RGB})`,
+    hex: HBC_PRESENTATION_ORANGE,
   },
   posture: {
     premium: true,
@@ -290,11 +300,18 @@ export const HBC_HOMEPAGE_DENSITY_POLICY: {
 
 /**
  * Guardrail metadata for documentation and lint policy references.
+ * W01r-P08: Made primitives/fluent prohibition explicit. Homepage webparts
+ * should get all needed primitives through @hbc/ui-kit/homepage re-exports.
  */
 export const HBC_HOMEPAGE_IMPORT_GUARDRAILS = {
   allowedEntrypoint: '@hbc/ui-kit/homepage',
   relatedTokenEntrypoints: ['@hbc/ui-kit/theme', '@hbc/ui-kit/icons', '@hbc/ui-kit/branding'],
-  prohibitedEntrypointsInHomepageWebparts: ['@hbc/ui-kit', '@hbc/ui-kit/app-shell'],
+  prohibitedEntrypointsInHomepageWebparts: [
+    '@hbc/ui-kit',
+    '@hbc/ui-kit/app-shell',
+    '@hbc/ui-kit/primitives',
+    '@hbc/ui-kit/fluent',
+  ],
 } as const;
 
 /**

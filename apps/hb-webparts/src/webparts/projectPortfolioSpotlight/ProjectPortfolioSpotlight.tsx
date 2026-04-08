@@ -22,6 +22,10 @@ import {
   Calendar,
   CheckCircle2,
   Users,
+  HBC_PRESENTATION_BLUE,
+  HBC_PRESENTATION_BLUE_RGB,
+  HBC_PRESENTATION_ORANGE,
+  HBC_PRESENTATION_ORANGE_RGB,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import {
@@ -57,12 +61,12 @@ const DETAIL_AVATAR_SIZE = 40;
 
 /* ── Brand-native premium palette — light surface, HB brand hierarchy ── */
 
-/** HB brand foundation — sourced from @hbc/ui-kit HBC_HOMEPAGE_BRAND_FOUNDATION */
+/** HB brand foundation — governed by @hbc/ui-kit presentation-lane tokens (W01r-P08) */
 const HB = {
-  blue: '#225391',
-  blueRgb: '34, 83, 145',
-  orange: '#E57E46',
-  orangeRgb: '229, 126, 70',
+  blue: HBC_PRESENTATION_BLUE,
+  blueRgb: HBC_PRESENTATION_BLUE_RGB,
+  orange: HBC_PRESENTATION_ORANGE,
+  orangeRgb: HBC_PRESENTATION_ORANGE_RGB,
 } as const;
 
 const BRAND = {

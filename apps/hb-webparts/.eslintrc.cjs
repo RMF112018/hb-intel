@@ -13,6 +13,8 @@
  * Prohibited entry points:
  *   @hbc/ui-kit            — full library (exceeds SPFx bundle budget, breaks governance)
  *   @hbc/ui-kit/app-shell  — shell chrome (homepage is not a shell surface)
+ *   @hbc/ui-kit/primitives — homepage gets needed primitives via /homepage re-exports
+ *   @hbc/ui-kit/fluent     — Fluent passthroughs are not part of the governed homepage system
  *
  * @see docs/reference/ui-kit/entry-points.md
  * @see docs/reference/sharepoint-homepage-shell-boundaries.md
@@ -29,6 +31,14 @@ module.exports = {
         {
           name: '@hbc/ui-kit/app-shell',
           message: 'Homepage webparts must import from @hbc/ui-kit/homepage, not @hbc/ui-kit/app-shell. The app-shell entry point is for SPFx domain apps that need shell chrome.',
+        },
+        {
+          name: '@hbc/ui-kit/primitives',
+          message: 'Homepage webparts must import from @hbc/ui-kit/homepage, which re-exports all primitives needed for homepage composition. Direct @hbc/ui-kit/primitives access risks pulling productive-lane-only components into the SPFx bundle.',
+        },
+        {
+          name: '@hbc/ui-kit/fluent',
+          message: 'Homepage webparts must import from @hbc/ui-kit/homepage. Fluent UI passthroughs are not part of the governed homepage surface system.',
         },
       ],
     }],

@@ -15,6 +15,10 @@ export default defineConfig(({ command }) => ({
       '@hbc/ui-kit/homepage': resolve(__dirname, '../../packages/ui-kit/src/homepage.ts'),
       '@hbc/ui-kit/icons': resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx'),
       '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
+      // Root barrel alias exists only for transitive dependency resolution.
+      // Homepage webpart source files must NOT import from '@hbc/ui-kit' directly —
+      // ESLint no-restricted-imports enforces this at lint time. This alias ensures
+      // that any internal ui-kit module-to-module imports resolve correctly at build time.
       '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts')
     }
   },

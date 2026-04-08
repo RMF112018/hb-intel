@@ -18,6 +18,10 @@ import {
   motion,
   Users,
   CheckCircle2,
+  HBC_PRESENTATION_BLUE,
+  HBC_PRESENTATION_BLUE_RGB,
+  HBC_PRESENTATION_ORANGE,
+  HBC_PRESENTATION_ORANGE_RGB,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureMergedConfig } from '../../homepage/helpers/communicationsConfig.js';
@@ -50,11 +54,12 @@ export interface PeopleCultureMergedProps {
 // Brand palette — warm, celebratory register
 // ---------------------------------------------------------------------------
 
+/** HB brand foundation — governed by @hbc/ui-kit presentation-lane tokens (W01r-P08) */
 const HB = {
-  blue: '#225391',
-  blueRgb: '34, 83, 145',
-  orange: '#E57E46',
-  orangeRgb: '229, 126, 70',
+  blue: HBC_PRESENTATION_BLUE,
+  blueRgb: HBC_PRESENTATION_BLUE_RGB,
+  orange: HBC_PRESENTATION_ORANGE,
+  orangeRgb: HBC_PRESENTATION_ORANGE_RGB,
   warmCream: '#FDF8F4',
   warmCreamRgb: '253, 248, 244',
 } as const;

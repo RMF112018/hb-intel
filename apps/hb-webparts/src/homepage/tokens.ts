@@ -8,6 +8,14 @@
  * These are LOCAL to apps/hb-webparts — not exported via @hbc/ui-kit.
  * Promotion to ui-kit requires 2+ non-homepage consumers.
  *
+ * Brand color governance (W01r-P08):
+ * The presentation-lane brand colors used here (#225391 / #E57E46) are
+ * formally governed in @hbc/ui-kit as HBC_PRESENTATION_BLUE / HBC_PRESENTATION_ORANGE.
+ * Consumer webparts should import those tokens via @hbc/ui-kit/homepage
+ * rather than hardcoding. This file retains inline rgba() values for
+ * composition-level gradients and zone tints where template interpolation
+ * would reduce readability.
+ *
  * Phase 15-02 — Premium surface system rebuild:
  * - Zone backgrounds strengthened to perceptible levels
  * - Surface-family-specific spacing and radius added

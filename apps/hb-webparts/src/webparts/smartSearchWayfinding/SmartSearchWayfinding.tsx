@@ -17,6 +17,7 @@ import {
   Users,
   Briefcase,
   Building2,
+  HBC_PRESENTATION_ORANGE_RGB,
   type LucideIcon,
   type DiscoveryQuickPath as SurfaceQuickPath,
   type DiscoveryCategory as SurfaceCategory,
@@ -128,11 +129,11 @@ export function SmartSearchWayfinding({
               padding: '12px 16px',
               borderRadius: 10,
               background: '#ffffff',
-              border: '1px solid rgba(229, 126, 70, 0.15)',
+              border: `1px solid rgba(${HBC_PRESENTATION_ORANGE_RGB}, 0.15)`,
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
             }}
           >
-            <Search size={18} style={{ color: 'rgba(229, 126, 70, 0.55)', flexShrink: 0 }} aria-hidden="true" />
+            <Search size={18} style={{ color: `rgba(${HBC_PRESENTATION_ORANGE_RGB}, 0.55)`, flexShrink: 0 }} aria-hidden="true" />
             <input
               type="text"
               value={query}

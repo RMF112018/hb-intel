@@ -329,6 +329,28 @@ export const HBC_SURFACE_ROLES = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Presentation-lane brand tokens (W01r-P08)
+// The presentation lane uses softer, warmer brand tones than the canonical
+// primary palette. These exist because premium homepage/editorial surfaces
+// need different visual energy than productive-lane app chrome — lighter,
+// warmer, less saturated. The values are governed here (not in homepage.ts)
+// so consumers import from one authoritative source.
+//
+// Canonical primary:  #004B87 / #F37021  (productive lane, app shell, CTAs)
+// Presentation-lane:  #225391 / #E57E46  (homepage surfaces, editorial)
+// ---------------------------------------------------------------------------
+
+/** Presentation-lane brand blue — softer than HBC_PRIMARY_BLUE for premium surfaces */
+export const HBC_PRESENTATION_BLUE = '#225391' as const;
+/** RGB triplet for rgba() usage in presentation-lane compositions */
+export const HBC_PRESENTATION_BLUE_RGB = '34, 83, 145' as const;
+
+/** Presentation-lane accent orange — warmer than HBC_ACCENT_ORANGE for editorial surfaces */
+export const HBC_PRESENTATION_ORANGE = '#E57E46' as const;
+/** RGB triplet for rgba() usage in presentation-lane compositions */
+export const HBC_PRESENTATION_ORANGE_RGB = '229, 126, 70' as const;
+
+// ---------------------------------------------------------------------------
 // Presentation-lane surface tint tokens (W01-P01)
 // Semantic tints derived from the brand ramp for premium homepage/editorial
 // surfaces. These are shared foundation tokens — both lanes may use them,

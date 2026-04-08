@@ -2,7 +2,7 @@
 
 > Prompt-00 deliverable -- repo-truth reconciliation of `@hbc/ui-kit` against the two-lane UI system direction.
 >
-> **Status:** Wave 01 complete (P00-P08). Version 2.5.5. Verified W01-P08.
+> **Status:** Wave 01 complete (P00-P08). Version 2.5.6. Verified W01-P08. Remediation pass W01r-P08 applied.
 
 ## Governing references
 
@@ -14,7 +14,7 @@
 
 ## Current state summary
 
-`@hbc/ui-kit` v2.5.5 exports 160+ public symbols from a layered entry point system (W01-P06):
+`@hbc/ui-kit` v2.5.6 exports 160+ public symbols from a layered entry point system (W01-P06):
 
 | Entry point | Layer | Purpose | Status |
 |---|---|---|---|
@@ -135,25 +135,30 @@ All productive-lane surfaces and representative consumers audited for presentati
 
 **Productive-lane surface family (confirmed clean):**
 
-| Surface | Key pattern | Status |
-|---|---|---|
-| `WorkspacePageShell` | Standard elevation, density tokens, shimmer loading | Clean |
-| `HbcDataTable` | TRANSITION_FAST, elevationRest, useAdaptiveDensity, virtualization | Clean |
-| `HbcCommandBar` | No animation, elevationRaised, auto-density, semantic urgency tokens | Clean |
-| `HbcKpiCard` | clamp() responsive, standard hover elevation, minimal gradient wash (8% opacity) | Clean |
-| `HbcChart` / `HbcBarChart` / `HbcDonutChart` / `HbcLineChart` | Echarts wrapper, no presentation tokens | Clean |
-| 6 page layouts | Pure productive composition patterns | Clean |
-| Multi-column primitives (`NavRail`, `ContextRail`, `ActivityStrip`, `QuickActionBar`, `SyncStatusBar`) | Productive composition utilities | Clean |
+| Surface | Key pattern | Status | Named consumer checked |
+|---|---|---|---|
+| `WorkspacePageShell` | Standard elevation, density tokens, shimmer loading | Clean | accounting/ProjectReviewQueuePage, estimating/ProjectSetupPage, project-hub/DashboardPage |
+| `HbcDataTable` | TRANSITION_FAST, elevationRest, useAdaptiveDensity, virtualization | Clean | accounting/ProjectReviewQueuePage, estimating/ProjectSetupPage |
+| `HbcCommandBar` | No animation, elevationRaised, auto-density, semantic urgency tokens | Clean | accounting/ProjectReviewQueuePage |
+| `HbcKpiCard` | clamp() responsive, standard hover elevation, minimal gradient wash (8% opacity) | Clean | project-hub/DashboardPage |
+| `HbcChart` / `HbcBarChart` / `HbcDonutChart` / `HbcLineChart` | Echarts wrapper, no presentation tokens | Clean | project-hub canvas views |
+| 6 page layouts | Pure productive composition patterns | Clean | various |
+| Multi-column primitives (`NavRail`, `ContextRail`, `ActivityStrip`, `QuickActionBar`, `SyncStatusBar`) | Productive composition utilities | Clean | project-hub, accounting |
 
-**Consumer apps audited (all clean — zero `@hbc/ui-kit/homepage` imports across 11 productive apps):**
+**Named consumer apps audited (all clean — zero `@hbc/ui-kit/homepage` imports across 11 productive apps):**
 
-| Consumer | Pattern |
-|---|---|
-| `apps/accounting` (ProjectReviewQueuePage) | WorkspacePageShell + DataTable + Tabs |
-| `apps/estimating` (ProjectSetupPage) | WorkspacePageShell + forms + DataTable, excellent token usage |
-| `apps/admin` (App) | Minimal providers only |
-| `apps/project-hub` (DashboardPage) | WorkspacePageShell + delegated canvas |
-| `apps/hb-site-control` (HomePage) | WorkspacePageShell + cards (minor: Fluent palette tokens should migrate to HBC tokens) |
+| Consumer | Named page/surface inspected | Pattern | Status |
+|---|---|---|---|
+| `apps/accounting` | `ProjectReviewQueuePage` | WorkspacePageShell + DataTable + Tabs | Clean — no presentation tokens |
+| `apps/estimating` | `ProjectSetupPage` | WorkspacePageShell + forms + DataTable | Clean — excellent token usage |
+| `apps/admin` | `App` (root) | Minimal providers only | Clean — no UI surfaces |
+| `apps/project-hub` | `DashboardPage` | WorkspacePageShell + delegated canvas | Clean — productive patterns throughout |
+| `apps/hb-site-control` | `HomePage` | WorkspacePageShell + cards | Clean (minor note: Fluent palette tokens should migrate to HBC tokens) |
+
+> **W01r-P08 evidence note:** The productive-lane audit above names specific consumer pages and surfaces
+> inspected for each productive surface family. The "zero contamination" finding is based on these named
+> inspections plus a workspace-wide scan confirming zero `@hbc/ui-kit/homepage` imports across all 11
+> productive apps. This constitutes sufficient evidence for the productive-lane hardening claim.
 
 **No productive-lane code changes required** — surfaces are architecturally sound, density-disciplined, and free of presentation-lane drama.
 
@@ -362,24 +367,32 @@ Each migration: move source, add deprecated re-export shim, update feature packa
 
 All 9 homepage webpart modules audited against the shared presentation surface family system.
 
+> **W01r-P08 correction:** The original P05 count of "6/9 migrated" was overstated. It counted modules
+> that import shared helpers (e.g. `HbcPremiumCta`, `motion`) as "migrated." Migration requires delegating
+> the core surface grammar to a shared surface family component. The corrected count below distinguishes
+> clean shared-family delegation from helper-import-only usage.
+
 | Module | Surface family | Status | Justification |
 |---|---|---|---|
-| **HbHeroBanner** | `HbcSignatureHeroSurface` | Migrated | Full-width editorial hero with brand lockup |
-| **LeadershipMessage** | `HbcEditorialSurface` | Migrated | Featured leader + secondary items editorial |
-| **PeopleCulture** | `HbcEditorialSurface` | Migrated | Person recognition with event-type badges |
-| **PriorityActionsRail** | `HbcCommandSurface` | Migrated | Urgency-grouped action items |
-| **SafetyFieldExcellence** | `HbcOperationalSurface` | Migrated | Severity-aware operational signals |
-| **SmartSearchWayfinding** | `HbcDiscoverySurface` | Migrated | Search + quick paths + categories |
-| **CompanyPulse** | Local (newsroom CSS modules) | Keep local | Specialized 3-layout-mode newsroom system (Rich/Sparse/Headline-only) with magazine-style featured story + headline rail; exceeds shared surface API |
-| **PeopleCultureMerged** | Local (inline CSS) | Keep local | Three-band merged composition (Band A announcements + Kudos composer + Band B celebrations) with integrated approval workflow; no single shared surface can accommodate |
-| **ProjectPortfolioSpotlight** | Local (inline CSS) | Keep local | Image-led editorial with responsive 3-tier layout, team strips, avatar stacks, bottom-sheet mobile fallback; far exceeds `HbcEditorialSurface` API surface |
+| **LeadershipMessage** | `HbcEditorialSurface` | Cleanly migrated | Fully delegates to shared editorial surface; only local styling is neutral gray text |
+| **PriorityActionsRail** | `HbcCommandSurface` | Cleanly migrated | Fully delegates to shared command surface; pure mapping layer |
+| **SafetyFieldExcellence** | `HbcOperationalSurface` | Cleanly migrated | Fully delegates to shared operational surface; pure mapping layer |
+| **SmartSearchWayfinding** | `HbcDiscoverySurface` | Cleanly migrated | Mostly delegates to shared discovery surface; custom search slot rendering |
+| **ToolLauncherWorkHub** | `HbcLauncherSurface` | Partially migrated | Live data path uses 4-region composition shell; only manifest-config fallback delegates to `HbcLauncherSurface` |
+| **HbSignatureHero** | None | Local | 141-line CSS-module composition; `HbcSignatureHeroSurface` exists but uses a different composition model (inline gradient vs background-image-first). Migration deferred — would require adapting the shared surface API. |
+| **CompanyPulse** | None | Local by design | Specialized 3-layout-mode newsroom system (Rich/Sparse/Headline-only) with magazine-style featured story + headline rail; exceeds shared surface API |
+| **PeopleCultureMerged** | None | Local — should likely migrate | 652-line three-band merged composition with inline styles; composes shared helpers but builds entire surface grammar locally. Brand colors now governed (W01r-P08). |
+| **ProjectPortfolioSpotlight** | None | Local — should likely migrate | 1,118-line image-led editorial with inline styles; composes shared helpers but builds entire surface grammar locally. Brand colors now governed (W01r-P08). |
 
-### Migration summary
+### Migration summary (corrected W01r-P08)
 
-- **6/9 modules (67%)** fully migrated to shared presentation surface families
-- **3/9 modules (33%)** remain local — all three are genuinely specialized compositions that exceed shared surface family APIs, not weak local-card treatments
-- All 3 local modules compose shared primitives (`HbcPremiumCta`, `HbcPremiumBadge`, `HbcHomepageEyebrow`, `HbcHomepageMetadataRow`) from `@hbc/ui-kit/homepage`
-- Zero modules are "weak local-card compositions" — the original concern that prompted this migration wave is resolved
+- **4/9 modules (44%)** cleanly migrated to shared presentation surface families
+- **1/9 module (11%)** partially migrated (ToolLauncherWorkHub — shared surface in fallback path only)
+- **1/9 module (11%)** local by design (CompanyPulse — specialized newsroom system)
+- **3/9 modules (33%)** local, should likely migrate in future waves (HbSignatureHero, PeopleCultureMerged, ProjectPortfolioSpotlight)
+- All local modules compose shared premium primitives (`HbcPremiumCta`, `HbcPremiumBadge`, `HbcHomepageEyebrow`, `HbcHomepageMetadataRow`) from `@hbc/ui-kit/homepage`
+- **Importing shared helpers is not equivalent to shared-surface-family migration.** Migration requires delegating the core surface grammar.
+- The two largest local consumers (ProjectPortfolioSpotlight, PeopleCultureMerged) now import governed presentation-lane brand tokens instead of hardcoding values locally (W01r-P08).
 
 ### Shared wrapper components (keep local, correctly delegating)
 
@@ -390,10 +403,6 @@ All 9 homepage webpart modules audited against the shared presentation surface f
 | `HomepageEditorialCard` | Thin wrapper over `HbcCard` |
 | `HomepageSpotlightCard` | Thin wrapper over `HbcCard` + `HbcStatusBadge` |
 | `NewsroomFeaturedStory` | Specialized image-led editorial, justified local |
-
-### No code changes required
-
-The migration wave 1 is complete. No additional module migrations are warranted — the remaining local compositions are architecturally justified and already compose shared presentation-lane primitives.
 
 ---
 
@@ -465,7 +474,7 @@ Wave 01 established the two-lane UI system architecture across 8 prompts (P00-P0
 | P02 | Primitives entry point — `@hbc/ui-kit/primitives` with 30 Layer-2 components | Code (v2.5.3) |
 | P03 | Presentation surface formalization — token wiring into `HbcHomepageSurfaceCard`/`HbcHomepageSectionShell`, homepage entry exports | Code (v2.5.4) |
 | P04 | Productive lane hardening — audit confirmed clean, boundary annotations | Documentation |
-| P05 | Homepage migration wave 1 — 6/9 modules migrated, 3 justified local | Documentation |
+| P05 | Homepage migration wave 1 — 4/9 cleanly migrated, 1 partial, 4 local (corrected W01r-P08) | Documentation |
 | P06 | Fluent adapter entry point — `@hbc/ui-kit/fluent`, deprecation markers | Code (v2.5.5) |
 | P07 | Docs reconciliation — entry-points.md, README.md updated for 8 entry points | Documentation |
 | P08 | Verification and packaging | This document |
@@ -511,8 +520,19 @@ CSS-module surfaces retain design-driven values intentionally. The `hbcPresentat
 - `@hbc/spfx-admin` (admin) — no check-types script; covered by workspace run
 - `@hbc/pwa` (PWA umbrella) — no check-types script
 
-**Visual proof notes:**
-Wave 01 changes to presentation surfaces were structural (token wiring, elevation semantics, entry point governance) not visual redesigns. The surfaces themselves were not visually altered — they retain their existing production-grade design. Visual proof of material surface redesign is not applicable for this wave. The corrective addendum's visual proof requirements apply to future waves where surface visual composition changes materially.
+**Visual proof notes (corrected W01r-P08):**
+
+Visual proof exists at two levels with different coverage:
+
+| Level | Coverage | Status |
+|---|---|---|
+| Surface-family (isolated) | 5/6 families: SignatureHero, Editorial, Command, Discovery, Operational (desktop + tablet) | Present in `docs/architecture/reviews/evidence/ui-system-visual-proof/` |
+| Surface-family (isolated) | Launcher | **Missing** |
+| Consumer-level (webpart) | LeadershipMessage, PriorityActionsRail, SafetyFieldExcellence, SmartSearchWayfinding, ToolLauncherWorkHub | Documented in W01r-P08 consumer verification matrix |
+| Consumer-level (webpart) | CompanyPulse, PeopleCultureMerged, ProjectPortfolioSpotlight, HbSignatureHero | Not visually proven — remain local compositions |
+| Before/after comparison | All consumers | **Not produced** — Prompt 00A requires this for material visual changes |
+
+Wave 01 changes were structural (token wiring, elevation semantics, entry point governance), not visual redesigns. The corrective addendum's before/after screenshot requirements apply to future waves where surface visual composition changes materially.
 
 ### Remaining risks or regressions
 
