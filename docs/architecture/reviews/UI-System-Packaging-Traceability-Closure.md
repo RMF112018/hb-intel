@@ -14,7 +14,7 @@ The packaging verification matrix previously documented manifest paths, GUIDs, a
 
 ## What the Matrix Previously Proved
 
-- 10 webpart manifest paths exist with correct GUIDs
+- 11 webpart manifest paths exist with correct GUIDs (10 original + HB Signature Hero added in traceability pass)
 - Each GUID maps to a `WEBPART_RENDERERS` entry in `mount.tsx`
 - Build evidence (W01r-P02) confirmed all GUIDs present in the compiled IIFE bundle
 - One excluded legacy manifest documented with rationale

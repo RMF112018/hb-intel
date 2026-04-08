@@ -44,11 +44,11 @@ This report validates the UI-Kit Wave-01 refactor audit findings against live re
 
 ## Executive Conclusion
 
-The UI system refactor has advanced from "mostly conforming with targeted gaps" to **conforming with minor residual debt**. All 7 formerly open gaps identified in the initial validation have been addressed — 6 are fully closed and 1 (main barrel reduction) is partially closed with measurable progress.
+The UI system refactor has advanced from "mostly conforming with targeted gaps" to **conforming with minor residual debt**. All 7 formerly open gaps identified in the initial validation have been addressed: 6 are fully closed and 1 — main-barrel reduction — remains partially closed. The partially closed item is cleanup debt (removing deprecated Fluent and `@hbc/shell` re-exports that now have zero active consumers), not a structural or proof deficiency.
 
-Structural and architectural conformance remain strong. Proof conformance — formerly the weakest category — has materially improved: rendered visual proof now exists for all 5 shared-surface families, build evidence with GUID verification is committed, and end-to-end traceability from manifest through compiled bundle is documented.
+Structural and architectural conformance remain strong. Proof conformance — formerly the weakest category — has materially improved: rendered visual proof now exists for all 5 shared-surface families, build evidence with 11-GUID bundle verification is committed, and end-to-end traceability from manifest through compiled bundle is documented for all 11 production webparts.
 
-The remaining work is incremental cleanup (removing deprecated Fluent/shell re-exports from the main barrel, eventual removal of compatibility shims in `theme/tokens.ts`) rather than structural or proof gaps.
+The remaining work is incremental cleanup rather than structural or proof gaps.
 
 **Overall verdict:** Conforming. Prior gaps materially closed. Residual items are cleanup debt, not architectural or proof deficiencies.
 

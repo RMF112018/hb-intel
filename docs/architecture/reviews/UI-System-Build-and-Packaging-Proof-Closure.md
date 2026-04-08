@@ -8,7 +8,7 @@
 
 ## Summary
 
-The audit validation report rated packaging proof as **moderate** — matrix-level verification existed but no artifact-level build evidence was committed. This closure note documents the resolution: a clean build of `@hbc/spfx-hb-webparts` was executed, the IIFE bundle was inspected, and all 10 webpart GUIDs were verified present in the compiled output.
+The audit validation report rated packaging proof as **moderate** — matrix-level verification existed but no artifact-level build evidence was committed. This closure note documents the resolution: a clean build of `@hbc/spfx-hb-webparts` was executed, the IIFE bundle was inspected, and all 11 production webpart GUIDs were verified present in the compiled output.
 
 ---
 
@@ -31,7 +31,7 @@ The audit validation report rated packaging proof as **moderate** — matrix-lev
 
 ## Consumer Webparts Covered
 
-All 10 homepage webparts are traceable from manifest → mount.tsx → IIFE bundle:
+All 11 production webparts are traceable from manifest → mount.tsx → IIFE bundle:
 
 | Webpart | GUID | Manifest | Bundle | Mount |
 |---------|------|----------|--------|-------|
@@ -45,6 +45,7 @@ All 10 homepage webparts are traceable from manifest → mount.tsx → IIFE bund
 | Project Portfolio Spotlight | `8370ab0c-...` | ✓ | ✓ | ✓ |
 | Safety and Field Excellence | `89ca5ff3-...` | ✓ | ✓ | ✓ |
 | Smart Search / Wayfinding | `11d72b36-...` | ✓ | ✓ | ✓ |
+| HB Signature Hero | `28acd6a7-...` | ✓ | ✓ | ✓ |
 
 ---
 
@@ -52,9 +53,9 @@ All 10 homepage webparts are traceable from manifest → mount.tsx → IIFE bund
 
 1. **Build pipeline succeeds cleanly** — check-types, lint, and vite build all pass without errors.
 2. **IIFE bundle is produced** — `hb-webparts-app.js` at `apps/hb-webparts/dist/`, globally exposed as `__hbIntel_hbWebparts`.
-3. **All 10 webpart GUIDs are present in the bundle** — verified by string search in the compiled output.
-4. **All 10 manifest files exist and contain correct GUIDs** — verified by file existence and content check.
-5. **Mount dispatch seam is intact** — `WEBPART_RENDERERS` in `mount.tsx` maps all 10 GUIDs to their React components.
+3. **All 11 webpart GUIDs are present in the bundle** — verified by string search in the compiled output.
+4. **All 11 manifest files exist and contain correct GUIDs** — verified by file existence and content check.
+5. **Mount dispatch seam is intact** — `WEBPART_RENDERERS` in `mount.tsx` maps all 11 GUIDs to their React components.
 6. **4,383 modules were transformed** — the full dependency graph was resolved and bundled.
 
 ## What Was Not Proven
@@ -71,7 +72,7 @@ All 10 homepage webparts are traceable from manifest → mount.tsx → IIFE bund
 |------------|-------------|----------------|
 | Matrix-level (manifest → mount mapping) | Documented | Documented — unchanged |
 | Build-level (clean build, artifact produced) | **Not committed** | **Committed** — build evidence log with output, sizes, GUID verification |
-| Bundle-level (GUIDs in compiled output) | **Not verified** | **Verified** — all 10 GUIDs confirmed present in IIFE bundle |
+| Bundle-level (GUIDs in compiled output) | **Not verified** | **Verified** — all 11 GUIDs confirmed present in IIFE bundle |
 | `.sppkg`-level (final SharePoint package) | Not in scope | Not in scope — requires SPFx toolchain in `tools/spfx-shell/` |
 | Deployment-level (tenant App Catalog) | Not in scope | Not in scope |
 
@@ -79,4 +80,4 @@ All 10 homepage webparts are traceable from manifest → mount.tsx → IIFE bund
 
 ## Gap Status
 
-The packaging proof gap is **materially closed** at the build and bundle level. The IIFE bundle that SPFx loads is proven to contain all 10 webpart dispatch paths. The remaining gap — `.sppkg` assembly and deployment — is outside this package's build scope and requires the SPFx shell toolchain.
+The packaging proof gap is **materially closed** at the build and bundle level. The IIFE bundle that SPFx loads is proven to contain all 11 webpart dispatch paths. The remaining gap — `.sppkg` assembly and deployment — is outside this package's build scope and requires the SPFx shell toolchain.
