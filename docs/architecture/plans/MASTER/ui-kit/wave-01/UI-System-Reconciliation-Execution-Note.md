@@ -1,6 +1,8 @@
 # UI System Reconciliation and Execution Note
 
 > Prompt-00 deliverable -- repo-truth reconciliation of `@hbc/ui-kit` v2.2.19 against the two-lane UI system direction.
+>
+> **Status:** Accepted with corrective addendum applied (see `Prompt-00-Acceptance-and-Corrective-Addendum.md`).
 
 ## Governing references
 
@@ -84,9 +86,11 @@ The foundation layer (`src/theme/`) is well-structured with dedicated files for 
 
 This layer has the highest violation density. Three distinct problems:
 
-#### 3a. Presentation surfaces: correctly built, entry-point leak
+#### 3a. Presentation surfaces: correctly built, entry-point governance is sound
 
-The `homepage.ts` entry point is well-governed with import discipline enforced by tests. However, all presentation surface families (`HbcHomepage*`, `HbcPremium*`, `HbcSignatureHeroSurface`, `HbcCommandSurface`, `HbcLauncherSurface`, `HbcDiscoverySurface`, `HbcEditorialSurface`, `HbcOperationalSurface`) are also individually importable through the main barrel since their source directories exist under `src/`. This means productive-lane consumers can bypass the constrained entry point.
+The `homepage.ts` entry point is well-governed with import discipline enforced by tests. Presentation surface families (`HbcHomepage*`, `HbcPremium*`, `HbcSignatureHeroSurface`, `HbcCommandSurface`, `HbcLauncherSurface`, `HbcDiscoverySurface`, `HbcEditorialSurface`, `HbcOperationalSurface`) are **not** re-exported through the main barrel (`src/index.ts`) and are **not** exposed through the package exports map outside the `@hbc/ui-kit/homepage` entry point. The entry-point boundary is correctly enforced.
+
+The remaining structural concern is whether any future barrel changes could accidentally re-expose presentation surfaces through the main entry point. The existing `importDiscipline.test.ts` guard provides runtime protection against this regression.
 
 #### 3b. Productive surfaces: correctly placed, unnamed lane
 
@@ -168,7 +172,7 @@ Correctly layered, well-owned, no action needed:
 Correctly placed but needs refinement, lane classification, or entry-point consolidation:
 
 - **Productive surface families** (~20): DataTable, Charts, KpiCard, CommandBar, WorkspacePageShell, 6 page layouts, multi-column composition primitives (NavRail, ContextRail, ActivityStrip, QuickActionBar, SyncStatusBar)
-- **Presentation surface families** (~20): Homepage*, Premium*, SignatureHeroSurface, CommandSurface, LauncherSurface, DiscoverySurface, EditorialSurface, OperationalSurface -- correctly segregated in `homepage.ts` but also leaked through main barrel
+- **Presentation surface families** (~20): Homepage*, Premium*, SignatureHeroSurface, CommandSurface, LauncherSurface, DiscoverySurface, EditorialSurface, OperationalSurface -- correctly segregated in `homepage.ts` with no main-barrel leakage; transitional because visual quality obligations and proof requirements are not yet formally integrated into the development workflow
 - **App Shell** (~13): all shell sub-components -- need consolidation into `app-shell` entry point
 - **Borderline module primitives** (~5): `HbcScoreBar`, `HbcApprovalStepper`, `HbcPhotoGrid`, `HbcCalendarGrid`, `HbcDrawingViewer` -- labeled PH4.13 module-specific but some have cross-module reuse potential; need case-by-case review
 - **Complexity-aware components** (~5): `HbcAuditTrailPanel`, `HbcFormField`, `HbcStatusTimeline`, `HbcPermissionMatrix`, `HbcCoachingCallout` -- most generic enough to be primitives; AuditTrailPanel and PermissionMatrix are borderline
@@ -224,7 +228,7 @@ Misplaced, should migrate or be deprecated:
 | **App Shell** | **Adapt** | Consolidate entry point. Move shell constants from tokens. Use compatibility shims. No structural rebuild. |
 | **Layouts** | **Adapt** | Add explicit productive-lane classification. No structural rebuild. |
 | **DataTable** | **Adapt** | Extract `useSavedViews` types to saved-views package. Table itself stays as productive surface primitive. |
-| **Homepage surfaces** | Keep in ui-kit, **restrict** to `homepage.ts` only | Already well-structured. Stop exporting from main barrel. |
+| **Homepage surfaces** | Keep in ui-kit, governed by `homepage.ts` | Entry-point governance is already correct. Focus shifts to visual quality obligations. |
 | **Premium surfaces** | Keep as-is | Part of presentation lane, correctly governed. |
 | **Activity Timeline** | **Move** to `packages/activity-timeline` | Domain-specific UI with no cross-domain reuse. Source should relocate entirely. |
 | **Export System** | **Move** to `packages/export-runtime` | Domain-specific UI. Source should relocate. |
@@ -255,7 +259,7 @@ Misplaced, should migrate or be deprecated:
 - Create `@hbc/ui-kit/primitives` entry point exporting only Layer 2 components
 - Consolidate all app-shell exports into `@hbc/ui-kit/app-shell`; add deprecation markers on main-barrel shell exports
 - Create `@hbc/ui-kit/fluent` entry point for Fluent passthrough adapters; deprecate their main-barrel export
-- Stop exporting presentation surface families from the main barrel (they should only be available through `@hbc/ui-kit/homepage`); add deprecation re-exports for transition
+- Verify presentation surface families remain unexposed through the main barrel (currently correct; add regression guard if not already covered by `importDiscipline.test.ts`)
 - Remove module config re-exports from ui-kit with deprecation notice (they already live in `@hbc/shell`)
 - Update `package.json` exports map
 
@@ -293,6 +297,60 @@ Each migration: move source, add deprecated re-export shim, update feature packa
 |---|---|---|
 | Saved Views types coupled to DataTable hooks | Medium -- moving types requires DataTable to depend on saved-views package | Define shared interface types in saved-views package; DataTable imports from there |
 | Feature package shell wrappers become redundant | Low -- the shell wrapper pattern collapses cleanly when source moves | Shell wrappers become the actual components; remove the indirection layer |
-| Homepage import discipline test breakage | High -- `importDiscipline.test.ts` enforces `@hbc/ui-kit/homepage` as sole entry | Ensure deprecated re-exports from main barrel are removed before they create false passes |
+| Homepage import discipline regression | Medium -- `importDiscipline.test.ts` enforces `@hbc/ui-kit/homepage` as sole entry | Maintain the existing test guard; ensure future barrel changes do not accidentally re-export presentation surfaces through the main entry point |
 | Third-party re-exports in homepage entry | Medium -- removing `motion`, `clsx`, `cva`, `lucide-react` later is breaking | Evaluate moving to peer dependencies of homepage consumers in Wave 4 |
 | Fluent naming collisions during transition | Low -- both `Button` and `HbcButton` exported | Moving Fluent re-exports to `@hbc/ui-kit/fluent` resolves collisions cleanly |
+
+---
+
+## 6. Presentation-lane quality obligations
+
+> Applied per Prompt-00 Acceptance and Corrective Addendum.
+
+### Structural correctness is necessary but not sufficient
+
+Layer cleanup, package placement, barrel cleanup, and migration mechanics are required but do not define success for presentation-lane work. This refactor exists because current homepage and presentation surfaces are too close to functional internal application UI and do not consistently achieve premium, attention-grabbing, authored web-content quality. Structural work that does not advance visual quality is incomplete.
+
+### Visual obligations for presentation-lane work
+
+All presentation-lane prompts and implementation waves must preserve and strengthen:
+
+- Large-scale composition
+- Strong visual hierarchy
+- Editorial rhythm
+- Premium image treatment
+- Stronger focal points
+- Premium motion and reveal choreography where appropriate
+- Clearly differentiated homepage/editorial surfaces that do not collapse back into productive-card UI
+
+Presentation-lane work must not be solved with disguised productive-lane surfaces.
+
+### Visual proof requirements
+
+For presentation-lane work, verification must include visual proof, not just code-level validation. At a minimum, require as applicable:
+
+- Before/after screenshots
+- Storybook stories or equivalent isolated examples for new or rebuilt surface families
+- Side-by-side comparison against the pre-refactor state
+- Explicit statement of how the outcome improved the presentation lane rather than merely preserving functionality
+
+Do not mark presentation-lane work complete based solely on lint, typecheck, tests, or packaging success.
+
+### Signature hero quality floor
+
+The existing `HbcSignatureHeroSurface` is the current presentation-lane quality floor, not merely one example among many. Subsequent presentation-lane work must avoid regressing toward generic card UI and must meet or exceed:
+
+- Compositional intent
+- Branded presence
+- Layered background/readability treatment
+- Asymmetry and focal control
+- Premium homepage suitability
+
+### Reporting structure for later prompts
+
+When reporting completion for Prompt-01 and later, explicitly distinguish:
+
+- **Structural / architectural progress** -- layer placement, export hygiene, entry-point governance
+- **Visual / presentation-quality progress** -- how the result advances the homepage/web-content lane beyond generic internal-app feel
+- **Verification performed** -- code-level and visual proof
+- **Remaining risks or regressions** -- structural and visual
