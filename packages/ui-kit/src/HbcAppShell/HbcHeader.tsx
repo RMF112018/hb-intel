@@ -7,7 +7,8 @@
  */
 import * as React from 'react';
 import { makeStyles, shorthands } from '@griffel/react';
-import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_ACCENT_ORANGE, HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE } from '../theme/tokens.js';
+import { HBC_DARK_HEADER, HBC_HEADER_TEXT, HBC_ACCENT_ORANGE } from '../theme/tokens.js';
+import { HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE } from './constants.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';

@@ -3,6 +3,16 @@
 
 export { HbcConnectivityBar, HbcAppShell } from './HbcAppShell/index.js';
 
+// Shell chrome layout constants — canonical source (W01r-P03)
+export {
+  HBC_HEADER_HEIGHT,
+  HBC_CONNECTIVITY_HEIGHT_ONLINE,
+  HBC_CONNECTIVITY_HEIGHT_OFFLINE,
+  HBC_SIDEBAR_WIDTH_COLLAPSED,
+  HBC_SIDEBAR_WIDTH_EXPANDED,
+  HBC_BOTTOM_NAV_HEIGHT,
+} from './HbcAppShell/constants.js';
+
 export type {
   ConnectivityStatus,
   HbcConnectivityBarProps,

@@ -48,23 +48,20 @@ export const HBC_HEADER_TEXT = '#FFFFFF' as const;
 export const HBC_HEADER_ICON_MUTED = '#A0A0A0' as const;
 
 // ---------------------------------------------------------------------------
-// Shell chrome dimensions (app-shell concern, not design tokens)
-// These are layout constants for shell offset calculations.
-// Used by HbcHeader, HbcAppShell, HbcSidebar, HbcBottomNav, WorkspacePageShell.
-// Future: migrate to HbcAppShell/constants.ts (Wave 0 execution plan).
+// Shell chrome dimensions — compatibility re-exports (W01r-P03)
+// Canonical source: HbcAppShell/constants.ts (app-shell boundary)
+// These re-exports exist only for backward compatibility with consumers
+// that import shell layout constants from the theme path.
 // ---------------------------------------------------------------------------
-/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
-export const HBC_HEADER_HEIGHT = 56;
-/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
-export const HBC_CONNECTIVITY_HEIGHT_ONLINE = 2;
-/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
-export const HBC_CONNECTIVITY_HEIGHT_OFFLINE = 4;
-/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
-export const HBC_SIDEBAR_WIDTH_COLLAPSED = 56;
-/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
-export const HBC_SIDEBAR_WIDTH_EXPANDED = 240;
-/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
-export const HBC_BOTTOM_NAV_HEIGHT = 56;
+/** @deprecated Use import from '@hbc/ui-kit/app-shell' or HbcAppShell/constants.ts */
+export {
+  HBC_HEADER_HEIGHT,
+  HBC_CONNECTIVITY_HEIGHT_ONLINE,
+  HBC_CONNECTIVITY_HEIGHT_OFFLINE,
+  HBC_SIDEBAR_WIDTH_COLLAPSED,
+  HBC_SIDEBAR_WIDTH_EXPANDED,
+  HBC_BOTTOM_NAV_HEIGHT,
+} from '../HbcAppShell/constants.js';
 
 // ---------------------------------------------------------------------------
 // V2.1 Sunlight-optimized status colors

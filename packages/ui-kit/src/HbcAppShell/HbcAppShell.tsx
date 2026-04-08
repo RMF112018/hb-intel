@@ -19,7 +19,7 @@ import { useSidebarState } from './hooks/useSidebarState.js';
 import { useIsTablet } from '../hooks/useIsTablet.js';
 import { useOnlineStatus } from './hooks/useOnlineStatus.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
-import { HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE, HBC_SIDEBAR_WIDTH_COLLAPSED, HBC_SIDEBAR_WIDTH_EXPANDED, HBC_BOTTOM_NAV_HEIGHT } from '../theme/tokens.js';
+import { HBC_HEADER_HEIGHT, HBC_CONNECTIVITY_HEIGHT_ONLINE, HBC_CONNECTIVITY_HEIGHT_OFFLINE, HBC_SIDEBAR_WIDTH_COLLAPSED, HBC_SIDEBAR_WIDTH_EXPANDED, HBC_BOTTOM_NAV_HEIGHT } from './constants.js';
 import type { HbcAppShellProps } from './types.js';
 import type { BottomNavItem } from '../HbcBottomNav/types.js';
 

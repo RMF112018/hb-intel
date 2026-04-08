@@ -14,7 +14,8 @@
 import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
-import { HBC_DARK_HEADER, HBC_ACCENT_ORANGE, HBC_HEADER_ICON_MUTED, HBC_BOTTOM_NAV_HEIGHT } from '../theme/tokens.js';
+import { HBC_DARK_HEADER, HBC_ACCENT_ORANGE, HBC_HEADER_ICON_MUTED } from '../theme/tokens.js';
+import { HBC_BOTTOM_NAV_HEIGHT } from '../HbcAppShell/constants.js';
 import { keyframes, TRANSITION_FAST, TRANSITION_NORMAL } from '../theme/animations.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { MoreActions } from '../icons/index.js';
