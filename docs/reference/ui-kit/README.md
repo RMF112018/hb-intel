@@ -46,17 +46,40 @@ The Layer 1 governing standards supersede any older UI-kit wording that assumed 
 
 ## Entry Points
 
-See **[entry-points.md](./entry-points.md)** for the authoritative reference on all 5 `@hbc/ui-kit` entry points.
+See **[entry-points.md](./entry-points.md)** for the authoritative reference on all 8 `@hbc/ui-kit` entry points (W01-P06).
 
-Quick summary:
+| Entry Point | Layer | Use For |
+|-------------|-------|---------|
+| `@hbc/ui-kit` | All | PWA, dev-harness, non-constrained bundles |
+| `@hbc/ui-kit/theme` | Foundation | Token-only imports |
+| `@hbc/ui-kit/icons` | Foundation | Icon-only imports |
+| `@hbc/ui-kit/branding` | Foundation | Brand asset registry |
+| `@hbc/ui-kit/primitives` | Primitive | Layer 2 building blocks (30 components) |
+| `@hbc/ui-kit/homepage` | Surface | Presentation-lane surface families + tokens |
+| `@hbc/ui-kit/app-shell` | Cross | SPFx domain apps needing shell chrome |
+| `@hbc/ui-kit/fluent` | Adapter | Fluent UI passthroughs (R3 compliance) |
 
-| Entry Point | Use For |
-|-------------|---------|
-| `@hbc/ui-kit` | PWA, dev-harness, non-constrained bundles |
-| `@hbc/ui-kit/homepage` | HB Central homepage SPFx webparts |
-| `@hbc/ui-kit/app-shell` | SPFx domain apps needing shell chrome |
-| `@hbc/ui-kit/theme` | Token-only imports |
-| `@hbc/ui-kit/icons` | Icon-only imports |
+## Two-Lane UI System
+
+The UI system distinguishes two lanes at the surface family level (Layer 3):
+
+| Lane | Governs | Key docs |
+|---|---|---|
+| **Productive** | Forms, tables, workflows, dashboards, admin | [Productive-Lane-Standard](./Productive-Lane-Standard.md) |
+| **Presentation** | Homepage heroes, editorial, spotlights, culture | [Presentation-Lane-Standard](./Presentation-Lane-Standard.md) |
+
+Both lanes share foundations (Layer 1) and primitives (Layer 2). See [UI-System-Layer-Model](./UI-System-Layer-Model.md) and [Why-Two-Lanes](../../explanation/ui-system/Why-Two-Lanes.md).
+
+### Documentation governance map
+
+| Consumer area | Governing docs |
+|---|---|
+| Homepage webparts (`apps/hb-webparts`) | SPFx Homepage Overlay → Presentation-Lane-Standard → entry-points.md |
+| PWA productive apps (`apps/accounting`, `apps/estimating`, `apps/admin`, etc.) | PWA Governing Standard → Productive-Lane-Standard |
+| SPFx domain apps (`apps/project-sites`, `tools/spfx-shell`) | SPFx Governing Standard |
+| Feature packages (`packages/saved-views`, `packages/bulk-actions`, etc.) | Package-Relationship-Map (R1-R3) → Layer Model |
+| New homepage surfaces | [Building-New-Homepage-Surfaces](../../how-to/developer/Building-New-Homepage-Surfaces.md) |
+| Legacy UI migration | [Migrating-Legacy-UI](../../how-to/developer/Migrating-Legacy-UI-to-the-Two-Lane-System.md) |
 
 ## Related
 

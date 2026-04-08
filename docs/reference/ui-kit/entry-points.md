@@ -1,12 +1,25 @@
 # @hbc/ui-kit Entry Points
 
-The `@hbc/ui-kit` package exposes five entry points to support tree-shaking and SPFx bundle budget constraints.
+The `@hbc/ui-kit` package exposes eight entry points aligned to the 4-layer UI system model (W01-P06).
+
+## Entry Point Summary
+
+| Entry point | Layer | Purpose |
+|---|---|---|
+| `@hbc/ui-kit` | All | Main barrel — full library |
+| `@hbc/ui-kit/theme` | 1 (Foundation) | Tokens, hooks, density |
+| `@hbc/ui-kit/icons` | 1 (Foundation) | SVG icon factory |
+| `@hbc/ui-kit/branding` | 1 (Foundation) | Brand asset registry |
+| `@hbc/ui-kit/primitives` | 2 (Primitive) | 30 Layer-2 building blocks |
+| `@hbc/ui-kit/homepage` | 3 (Surface) | Presentation-lane surface families + tokens |
+| `@hbc/ui-kit/app-shell` | Cross-lane | Lean shell for SPFx customizer |
+| `@hbc/ui-kit/fluent` | Adapter | Fluent UI passthroughs for R3 compliance |
 
 ## Entry Points
 
 ### `@hbc/ui-kit` (Main)
 
-The full library entry point. Exports all 35 component families, theme tokens, icons, hooks, layouts, and module configurations.
+The full library entry point. Exports all component families, theme tokens, icons, hooks, layouts, and module configurations. Contains transitional deprecated exports that will be removed in future versions.
 
 ```tsx
 import { HbcButton, HbcDataTable, HbcAppShell } from '@hbc/ui-kit';
@@ -60,6 +73,38 @@ import {
 **Use when:** Building HB Central homepage webparts (`hb-webparts`) and shared homepage wrappers where bundle discipline and governance constraints are stricter than generic app surfaces.
 **Do not use for:** shell recreation, broad full-kit passthrough exports, or unrelated PWA app composition.
 
+### `@hbc/ui-kit/branding`
+
+Brand asset registry. Exports logo assets and brand lookup patterns.
+
+```tsx
+import { gritLogo, hbIconBlueBg, brandAssets } from '@hbc/ui-kit/branding';
+```
+
+**Use when:** Displaying brand assets (logos, partner marks) without pulling in component code.
+
+### `@hbc/ui-kit/primitives` (W01-P02)
+
+Layer 2 building blocks shared across both productive and presentation lanes. Exports 30 primitive components organized by category: button/typography, status/badges, form primitives, overlay/dialog, messaging/feedback, navigation, data display, and workflow.
+
+```tsx
+import { HbcButton, HbcCard, HbcStatusBadge, HbcTabs } from '@hbc/ui-kit/primitives';
+```
+
+**Use when:** Consuming only Layer 2 primitives without surface families, module-specific UI, or app-shell components. Preferred for new feature packages that need clean dependency boundaries.
+**Does not include:** DataTable, Charts, Layouts, WorkspacePageShell, CommandBar (surface families), PeoplePicker (has data-fetching dependency), or module-specific UI.
+
+### `@hbc/ui-kit/fluent` (W01-P06)
+
+Fluent UI passthrough adapters. Re-exports Fluent components through ui-kit to enforce Rule R3 (no direct `@fluentui/*` imports outside ui-kit).
+
+```tsx
+import { FluentProvider, Text, tokens } from '@hbc/ui-kit/fluent';
+```
+
+**Use when:** Consuming Fluent components where no HBC equivalent exists. Where an HBC equivalent is available (`HbcButton` instead of `Button`, `HbcCard` instead of `Card`, `HbcSpinner` instead of `Spinner`), prefer the HBC primitive from `@hbc/ui-kit/primitives`.
+**Naming collisions:** Fluent `Button`, `Card`, `Spinner` overlap with HBC equivalents — use the HBC versions for branded, token-aware behavior.
+
 ## Why the Split Exists
 
 SPFx webparts run inside SharePoint's iframe sandbox with strict bundle size constraints. The full `@hbc/ui-kit` entry point includes ECharts, TanStack Table, PDF.js integration, and other heavy dependencies that would exceed the SPFx budget. The `/app-shell` entry point provides the shell chrome (~15 KB) without those dependencies.
@@ -75,7 +120,10 @@ The `/theme` and `/icons` entry points allow granular imports for packages that 
     "./app-shell": { "types": "./dist/app-shell.d.ts", "import": "./dist/app-shell.js" },
     "./theme": { "types": "./dist/theme/index.d.ts", "import": "./dist/theme/index.js" },
     "./icons": { "types": "./dist/icons/index.d.ts", "import": "./dist/icons/index.js" },
-    "./homepage": { "types": "./dist/homepage.d.ts", "import": "./dist/homepage.js" }
+    "./homepage": { "types": "./dist/homepage.d.ts", "import": "./dist/homepage.js" },
+    "./branding": { "types": "./dist/branding/index.d.ts", "import": "./dist/branding/index.js" },
+    "./primitives": { "types": "./dist/primitives.d.ts", "import": "./dist/primitives.js" },
+    "./fluent": { "types": "./dist/fluent.d.ts", "import": "./dist/fluent.js" }
   },
   "sideEffects": false
 }
@@ -101,6 +149,8 @@ This section is the authoritative import policy for `apps/hb-webparts` and any f
 |-------------|----------------|
 | `@hbc/ui-kit` | Full library exceeds SPFx bundle budget and bypasses homepage governance constraints |
 | `@hbc/ui-kit/app-shell` | Shell chrome entry point — homepage is a page-canvas surface, not a shell surface |
+| `@hbc/ui-kit/primitives` | Layer 2 primitives not governed for SPFx homepage context — use `@hbc/ui-kit/homepage` instead |
+| `@hbc/ui-kit/fluent` | Raw Fluent components bypass homepage governance — use governed equivalents from `@hbc/ui-kit/homepage` |
 
 ### Enforcement
 
