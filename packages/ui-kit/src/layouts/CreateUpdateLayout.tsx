@@ -10,7 +10,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { heading2 } from '../theme/typography.js';
 import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XL } from '../theme/grid.js';
-import { elevationRaised } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
 import {
   HBC_SURFACE_LIGHT,
   HBC_ACCENT_ORANGE,
@@ -152,7 +152,7 @@ const useStyles = makeStyles({
     },
   },
   formContentFocused: {
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
     ...shorthands.borderRadius('8px'),
     marginTop: `${HBC_SPACE_LG}px`,
@@ -169,7 +169,7 @@ const useStyles = makeStyles({
     paddingLeft: `${HBC_SPACE_LG}px`,
     paddingRight: `${HBC_SPACE_LG}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
     zIndex: 10,
     flexShrink: 0,
   },

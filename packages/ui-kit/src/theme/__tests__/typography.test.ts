@@ -13,8 +13,8 @@ import {
 } from '../typography.js';
 
 describe('Typography scale (typography.ts)', () => {
-  it('hbcTypeScale has all 9 intent keys', () => {
-    const intentKeys = ['display', 'heading1', 'heading2', 'heading3', 'heading4', 'body', 'bodySmall', 'label', 'code'];
+  it('hbcTypeScale has all 11 intent keys', () => {
+    const intentKeys = ['displayXl', 'displayLg', 'display', 'heading1', 'heading2', 'heading3', 'heading4', 'body', 'bodySmall', 'label', 'code'];
     for (const key of intentKeys) {
       expect(hbcTypeScale[key as keyof typeof hbcTypeScale]).toBeDefined();
     }
@@ -28,18 +28,6 @@ describe('Typography scale (typography.ts)', () => {
       expect(level).toHaveProperty('fontWeight');
       expect(level).toHaveProperty('lineHeight');
     }
-  });
-
-  it('deprecated aliases map to correct intent levels', () => {
-    expect(hbcTypeScale.displayHero).toBe(display);
-    expect(hbcTypeScale.displayLarge).toBe(heading1);
-    expect(hbcTypeScale.displayMedium).toBe(heading2);
-    expect(hbcTypeScale.titleLarge).toBe(heading3);
-    expect(hbcTypeScale.titleMedium).toBe(heading4);
-    expect(hbcTypeScale.bodyLarge).toBe(body);
-    expect(hbcTypeScale.bodyMedium).toBe(bodySmall);
-    expect(hbcTypeScale.caption).toBe(label);
-    expect(hbcTypeScale.monospace).toBe(code);
   });
 
   it('font sizes are in descending order from display to bodySmall', () => {

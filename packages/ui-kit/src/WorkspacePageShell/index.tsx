@@ -31,7 +31,7 @@ import {
 } from '../theme/tokens.js';
 import { hbcSpacing } from '../theme/grid.js';
 import { HBC_RADIUS_MD, HBC_RADIUS_FULL } from '../theme/radii.js';
-import { elevationRaised } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
 import { display, heading3, body } from '../theme/typography.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
 import { setFieldModeActions } from '../HbcCommandBar/fieldModeActionsStore.js';
@@ -91,7 +91,7 @@ const useStyles = makeStyles({
     top: '56px',
     zIndex: 2,
     backgroundColor: tokens.colorNeutralBackground1,
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
   },
   commandBarZone: {
     paddingLeft: `${hbcSpacing.md}px`,
@@ -199,7 +199,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
     cursor: 'pointer',
     zIndex: 10,
   },

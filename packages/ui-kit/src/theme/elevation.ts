@@ -74,43 +74,16 @@ export const hbcElevationField = {
   level4: elevationFieldLevel4,
 } as const;
 
-// ---------------------------------------------------------------------------
-// Deprecated Aliases (backward-compatible mapping to V2.1)
-// ---------------------------------------------------------------------------
-// elevationRest had a visible shadow used by HbcDataTable and ToolLandingLayout,
-// so it maps to Level 1 (card) rather than Level 0 (none).
-
-/** @deprecated Use `elevationLevel1` — maps to card shadow for backward compatibility */
-export const elevationRest = elevationLevel1;
-
-/** @deprecated Use `elevationLevel1` */
-export const elevationHover = elevationLevel1;
-
-/** @deprecated Use `elevationLevel2` */
-export const elevationRaised = elevationLevel2;
-
-/** @deprecated Use `elevationLevel2` */
-export const elevationOverlay = elevationLevel2;
-
-/** @deprecated Use `elevationLevel3` */
-export const elevationDialog = elevationLevel3;
-
 /** Complete elevation scale for theme integration */
 export const hbcElevation = {
-  rest: elevationRest,
-  hover: elevationHover,
-  raised: elevationRaised,
-  overlay: elevationOverlay,
-  dialog: elevationDialog,
-  // V2.1 levels
   level0: elevationLevel0,
   level1: elevationLevel1,
   level2: elevationLevel2,
   level3: elevationLevel3,
-  // V2.1.2 levels (WS1-T04)
   level4: elevationLevel4,
+  card: elevationCard,
+  modal: elevationModal,
   blocking: elevationBlocking,
-  // W01-P01 presentation-lane semantic levels
   hero: elevationHero,
   editorial: elevationEditorial,
 } as const;

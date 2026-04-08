@@ -9,7 +9,7 @@ import * as React from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import { HBC_SURFACE_LIGHT, HBC_PRIMARY_BLUE, HBC_HEADER_TEXT } from '../theme/tokens.js';
-import { elevationRaised } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { HbcSearch } from '../HbcSearch/index.js';
 import { HbcButton } from '../HbcButton/index.js';
@@ -210,7 +210,7 @@ const useStyles = makeStyles({
     paddingTop: `${HBC_SPACE_SM}px`,
     paddingBottom: `${HBC_SPACE_SM}px`,
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
     ...shorthands.borderRadius('8px'),
     marginLeft: `${HBC_SPACE_MD}px`,
     marginRight: `${HBC_SPACE_MD}px`,

@@ -36,7 +36,7 @@ import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { HBC_SPACE_SM, HBC_SPACE_MD } from '../theme/grid.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
-import { elevationRest } from '../theme/elevation.js';
+import { elevationLevel1 } from '../theme/elevation.js';
 import { HBC_ACCENT_ORANGE } from '../theme/tokens.js';
 import { useAdaptiveDensity } from './hooks/useAdaptiveDensity.js';
 import { useHbcTheme } from '../theme/useHbcTheme.js';
@@ -55,7 +55,7 @@ const useStyles = makeStyles({
   wrapper: {
     position: 'relative',
     borderRadius: '4px',
-    boxShadow: elevationRest,
+    boxShadow: elevationLevel1,
     backgroundColor: 'var(--colorNeutralBackground1)',
   },
   wrapperStale: {

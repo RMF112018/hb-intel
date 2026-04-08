@@ -10,7 +10,7 @@ import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import { heading1, label as labelType } from '../theme/typography.js';
 import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG } from '../theme/grid.js';
 import { HBC_BREAKPOINT_CONTENT_MEDIUM, HBC_BREAKPOINT_MOBILE, HBC_BREAKPOINT_SIDEBAR } from '../theme/breakpoints.js';
-import { elevationRest } from '../theme/elevation.js';
+import { elevationLevel1 } from '../theme/elevation.js';
 import {
   HBC_SURFACE_LIGHT,
   HBC_ACCENT_ORANGE,
@@ -120,7 +120,7 @@ const useStyles = makeStyles({
   },
   kpiCard: {
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    boxShadow: elevationRest,
+    boxShadow: elevationLevel1,
     ...shorthands.borderRadius('8px'),
     paddingLeft: `${HBC_SPACE_MD}px`,
     paddingRight: `${HBC_SPACE_MD}px`,

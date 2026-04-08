@@ -18,7 +18,7 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
-import { elevationRaised } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
 import { HBC_ACCENT_ORANGE, HBC_STATUS_COLORS, HBC_HEADER_TEXT, HBC_DANGER_HOVER } from '../theme/tokens.js';
 import { HbcTooltip } from '../HbcTooltip/index.js';
 import { HbcButton } from '../HbcButton/index.js';
@@ -81,7 +81,7 @@ const useStyles = makeStyles({
     paddingBottom: `${HBC_SPACE_SM}px`,
     paddingLeft: '12px',
     paddingRight: '12px',
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
     backgroundColor: 'var(--colorNeutralBackground1)',
     borderRadius: '4px',
     gap: `${HBC_SPACE_SM}px`,

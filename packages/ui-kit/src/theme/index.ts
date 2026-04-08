@@ -66,7 +66,7 @@ export {
   useReducedMotionStyles,
 } from './animations.js';
 
-// Typography (V2.1 intent-based + deprecated aliases)
+// Typography (V2.1 intent-based scale)
 export {
   hbcTypeScale,
   displayXl,
@@ -80,19 +80,9 @@ export {
   bodySmall,
   label,
   code,
-  // Deprecated aliases
-  displayHero,
-  displayLarge,
-  displayMedium,
-  titleLarge,
-  titleMedium,
-  bodyLarge,
-  bodyMedium,
-  caption,
-  monospace,
 } from './typography.js';
 
-// Elevation (V2.1 dual-shadow + deprecated aliases)
+// Elevation (V2.1 dual-shadow scale)
 export {
   hbcElevation,
   elevationLevel0,
@@ -113,12 +103,6 @@ export {
   // W01-P01 presentation-lane semantic aliases
   elevationHero,
   elevationEditorial,
-  // Deprecated aliases
-  elevationRest,
-  elevationHover,
-  elevationRaised,
-  elevationOverlay,
-  elevationDialog,
 } from './elevation.js';
 
 // Hierarchy system (V2.1.2 — WS1-T04)

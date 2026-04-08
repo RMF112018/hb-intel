@@ -13,7 +13,7 @@ import { makeStyles } from '@griffel/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type { FieldErrors } from 'react-hook-form';
-import { elevationRaised } from '../theme/elevation.js';
+import { elevationLevel2 } from '../theme/elevation.js';
 import { HBC_SURFACE_LIGHT } from '../theme/tokens.js';
 import { Z_INDEX } from '../theme/z-index.js';
 import { HbcBanner } from '../HbcBanner/index.js';
@@ -39,7 +39,7 @@ const useStyles = makeStyles({
     gap: '8px',
     padding: '12px 16px',
     backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
-    boxShadow: elevationRaised,
+    boxShadow: elevationLevel2,
     borderTop: `1px solid ${HBC_SURFACE_LIGHT['border-default']}`,
     zIndex: Z_INDEX.stickyFooter,
   },

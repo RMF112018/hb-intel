@@ -125,36 +125,4 @@ export const hbcTypeScale = {
   bodySmall,
   label,
   code,
-  // Deprecated aliases (included for internal migration)
-  displayHero: display,
-  displayLarge: heading1,
-  displayMedium: heading2,
-  titleLarge: heading3,
-  titleMedium: heading4,
-  bodyLarge: body,
-  bodyMedium: bodySmall,
-  caption: label,
-  monospace: code,
 } as const;
-
-// ---------------------------------------------------------------------------
-// Deprecated aliases — kept for backward compatibility during migration
-// ---------------------------------------------------------------------------
-/** @deprecated Use `display` */
-export const displayHero = display;
-/** @deprecated Use `heading1` */
-export const displayLarge = heading1;
-/** @deprecated Use `heading2` */
-export const displayMedium = heading2;
-/** @deprecated Use `heading3` */
-export const titleLarge = heading3;
-/** @deprecated Use `heading4` */
-export const titleMedium = heading4;
-/** @deprecated Use `body` */
-export const bodyLarge = body;
-/** @deprecated Use `bodySmall` */
-export const bodyMedium = bodySmall;
-/** @deprecated Use `label` */
-export const caption = label;
-/** @deprecated Use `code` */
-export const monospace = code;
