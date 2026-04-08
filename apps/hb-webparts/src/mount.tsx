@@ -31,7 +31,7 @@ const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknow
   'cb7060f5-b852-4600-b912-a5f6f7221ce2': ({ config }) => createElement(ToolLauncherWorkHub, { config }),
   '0b53f651-fd92-4f7f-a9da-f7797017f5eb': ({ config }) => createElement(CompanyPulse, { config }),
   'e8fa8a84-a48a-41d2-85a6-b7c7df70aeca': ({ config }) => createElement(LeadershipMessage, { config }),
-  '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4': ({ config }) => createElement(PeopleCultureMerged, { config }),
+  '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4': ({ config, identity }) => createElement(PeopleCultureMerged, { config, identity }),
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),

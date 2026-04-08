@@ -22,10 +22,16 @@ import {
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizePeopleCultureMergedConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
+import { useKudosComposer } from '../../homepage/data/useKudosComposer.js';
+import { submitKudosDraft } from '../../homepage/data/peopleCultureSubmissionSource.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
 import { useResponsiveTier, type ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
 import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
+import { KudosComposerFlyout } from './KudosComposerFlyout.js';
+import { KudosComposerForm } from './KudosComposerForm.js';
+import { KudosComposerPreview } from './KudosComposerPreview.js';
+import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { PeopleCultureMergedConfig } from '../../homepage/webparts/communicationsContracts.js';
 import type { BandAOutput, KudosModuleOutput, BandBOutput } from '../../homepage/webparts/communicationsContracts.js';
 
@@ -37,6 +43,7 @@ export interface PeopleCultureMergedProps {
   config?: Partial<PeopleCultureMergedConfig>;
   activeAudience?: string;
   isLoading?: boolean;
+  identity?: HomepageIdentityInput;
 }
 
 // ---------------------------------------------------------------------------
@@ -134,6 +141,44 @@ const ANN_LABEL: Record<string, string> = { promotion: 'Promoted', newHire: 'New
 const ANN_BADGE: Record<string, 'info' | 'success' | 'warning' | 'critical'> = { promotion: 'critical', newHire: 'info', baby: 'success', wedding: 'success', special: 'warning' };
 
 // ---------------------------------------------------------------------------
+// Give Kudos button — matches HbcPremiumCta visual but uses <button>
+// ---------------------------------------------------------------------------
+
+function GiveKudosButton({ onClick, variant, size, arrow }: {
+  onClick: () => void;
+  variant: 'ghost' | 'secondary';
+  size: 'sm' | 'md';
+  arrow?: boolean;
+}): React.JSX.Element {
+  const isGhost = variant === 'ghost';
+  const isSm = size === 'sm';
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: isSm ? '6px 14px' : '9px 20px',
+        fontSize: isSm ? '0.75rem' : '0.8125rem',
+        fontWeight: 700,
+        fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
+        letterSpacing: '0.01em',
+        borderRadius: 8,
+        border: isGhost ? '1px solid rgba(255,255,255,0.25)' : `1.5px solid ${HB.orange}`,
+        background: isGhost ? 'rgba(255,255,255,0.1)' : HB.orange,
+        color: isGhost ? '#ffffff' : '#ffffff',
+        cursor: 'pointer',
+        transition: 'background 150ms ease, border-color 150ms ease, opacity 150ms ease',
+        whiteSpace: 'nowrap' as const,
+        lineHeight: 1.3,
+      }}
+    >
+      Give Kudos{arrow && <span aria-hidden="true" style={{ fontSize: '0.625rem', opacity: 0.7 }}>→</span>}
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Avatar components
 // ---------------------------------------------------------------------------
 
@@ -167,7 +212,7 @@ function Avatar({ src, name, size, ring }: { src?: string; name: string; size: n
 // Hero banner — warm gradient header strip
 // ---------------------------------------------------------------------------
 
-function HeroBanner({ heading, tier }: { heading: string; tier: ResponsiveTier }): React.JSX.Element {
+function HeroBanner({ heading, tier, onGiveKudos }: { heading: string; tier: ResponsiveTier; onGiveKudos: () => void }): React.JSX.Element {
   const h = tier === 'mobile' ? 72 : 88;
   return (
     <div style={{ background: P.heroBg, padding: `0 ${tier === 'mobile' ? 16 : 28}px`, height: h, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, position: 'relative', overflow: 'hidden' }}>
@@ -181,7 +226,7 @@ function HeroBanner({ heading, tier }: { heading: string; tier: ResponsiveTier }
       </h2>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', position: 'relative', zIndex: 1 }}>
-        <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" size="sm" />
+        <GiveKudosButton onClick={onGiveKudos} variant="ghost" size="sm" />
         <HbcPremiumCta label="View All" href="#view-all-kudos" variant="ghost" size="sm" arrow />
       </div>
     </div>
@@ -192,7 +237,7 @@ function HeroBanner({ heading, tier }: { heading: string; tier: ResponsiveTier }
 // Kudos Spotlight — dominant hero zone
 // ---------------------------------------------------------------------------
 
-function KudosSpotlight({ output, tier, rm }: { output: KudosModuleOutput; tier: ResponsiveTier; rm: boolean }): React.JSX.Element | null {
+function KudosSpotlight({ output, tier, rm, onGiveKudos }: { output: KudosModuleOutput; tier: ResponsiveTier; rm: boolean; onGiveKudos: () => void }): React.JSX.Element | null {
   if (output.isEmpty || !output.featured) return null;
 
   const f = output.featured;
@@ -259,7 +304,7 @@ function KudosSpotlight({ output, tier, rm }: { output: KudosModuleOutput; tier:
 
           <div style={{ marginTop: 'auto', paddingTop: 8, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <HbcPremiumCta label="Celebrate" href="#celebrate" variant="secondary" size="sm" />
-            <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="ghost" size="sm" arrow />
+            <GiveKudosButton onClick={onGiveKudos} variant="ghost" size="sm" arrow />
           </div>
         </div>
       </div>
@@ -370,7 +415,7 @@ function SupportRail({ bandA, bandB, tier, rm }: { bandA: BandAOutput; bandB: Ba
 // Sparse layout — no featured kudos
 // ---------------------------------------------------------------------------
 
-function SparseLayout({ bandA, bandB, tier, rm }: { bandA: BandAOutput; bandB: BandBOutput; tier: ResponsiveTier; rm: boolean }): React.JSX.Element {
+function SparseLayout({ bandA, bandB, tier, rm, onGiveKudos }: { bandA: BandAOutput; bandB: BandBOutput; tier: ResponsiveTier; rm: boolean; onGiveKudos: () => void }): React.JSX.Element {
   const px = tier === 'mobile' ? 16 : 28;
   const ann = bandA.items.slice(0, 3);
   const cel = bandB.items.slice(0, 6);
@@ -391,7 +436,7 @@ function SparseLayout({ bandA, bandB, tier, rm }: { bandA: BandAOutput; bandB: B
         <p style={{ margin: 0, fontSize: '0.8125rem', color: P.text3, maxWidth: '36ch', lineHeight: 1.6 }}>
           Be the first to spotlight great work, team wins, or everyday excellence.
         </p>
-        <HbcPremiumCta label="Give Kudos" href="#give-kudos" variant="secondary" size="md" arrow />
+        <GiveKudosButton onClick={onGiveKudos} variant="secondary" size="md" arrow />
       </div>
 
       {/* Announcements */}
@@ -446,10 +491,21 @@ function hasAnyInput(c: Partial<PeopleCultureMergedConfig> | undefined): boolean
   return Boolean(c?.announcements?.length || c?.kudos?.length || c?.celebrations?.length);
 }
 
-export function PeopleCultureMerged({ config, activeAudience, isLoading = false }: PeopleCultureMergedProps): React.JSX.Element {
+export function PeopleCultureMerged({ config, activeAudience, isLoading = false, identity }: PeopleCultureMergedProps): React.JSX.Element {
   const tier = useResponsiveTier();
   const rm = usePrefersReducedMotion();
   const { listConfig, isLoading: listLoading } = usePeopleCultureData();
+
+  // Composer: submission wired to the live Kudos SharePoint list
+  const handleSubmit = React.useCallback(async (draft: Parameters<typeof submitKudosDraft>[0]) => {
+    const result = await submitKudosDraft(draft, {
+      submitterDisplayName: identity?.displayName,
+      submitterEmail: identity?.email,
+    });
+    if (!result.ok) throw new Error(result.error);
+  }, [identity?.displayName, identity?.email]);
+
+  const { state: composer, actions: composerActions } = useKudosComposer(handleSubmit);
 
   if (isLoading || listLoading) return <HomepageLoadingState label="Loading People & Culture" />;
 
@@ -465,18 +521,132 @@ export function PeopleCultureMerged({ config, activeAudience, isLoading = false 
   if (allEmpty && !hasAnyInput(effectiveConfig)) { const m = resolveAuthoringMessage('peopleCulture', 'noData'); return <HomepageEmptyState title={m.title} description={m.description} />; }
   if (allEmpty) { const m = resolveAuthoringMessage('peopleCulture', 'invalid'); return <HomepageEmptyState title={m.title} description={m.description} />; }
 
-  return (
-    <section data-hbc-homepage="people-culture" data-hbc-authoring-safe="true" aria-label={output.heading} style={rootStyle}>
-      <HeroBanner heading={output.heading} tier={tier} />
+  // Unsaved-changes guard for closing the composer
+  const handleComposerClose = () => {
+    if (composer.isDirty && composer.status === 'editing') {
+      // eslint-disable-next-line no-alert
+      if (!window.confirm('You have unsaved changes. Discard your draft?')) return;
+    }
+    composerActions.close();
+  };
 
-      {!output.kudos.isEmpty ? (
-        <div style={tier === 'desktop' ? { display: 'flex', flexWrap: 'wrap' } : { display: 'flex', flexDirection: 'column' }}>
-          <KudosSpotlight output={output.kudos} tier={tier} rm={rm} />
-          <SupportRail bandA={output.bandA} bandB={output.bandB} tier={tier} rm={rm} />
-        </div>
-      ) : (
-        <SparseLayout bandA={output.bandA} bandB={output.bandB} tier={tier} rm={rm} />
-      )}
-    </section>
+  return (
+    <>
+      <section data-hbc-homepage="people-culture" data-hbc-authoring-safe="true" aria-label={output.heading} style={rootStyle}>
+        <HeroBanner heading={output.heading} tier={tier} onGiveKudos={composerActions.open} />
+
+        {!output.kudos.isEmpty ? (
+          <div style={tier === 'desktop' ? { display: 'flex', flexWrap: 'wrap' } : { display: 'flex', flexDirection: 'column' }}>
+            <KudosSpotlight output={output.kudos} tier={tier} rm={rm} onGiveKudos={composerActions.open} />
+            <SupportRail bandA={output.bandA} bandB={output.bandB} tier={tier} rm={rm} />
+          </div>
+        ) : (
+          <SparseLayout bandA={output.bandA} bandB={output.bandB} tier={tier} rm={rm} onGiveKudos={composerActions.open} />
+        )}
+      </section>
+
+      {/* ── Kudos Composer Flyout ── */}
+      <KudosComposerFlyout
+        open={composer.isOpen}
+        onClose={handleComposerClose}
+        title="Give Kudos"
+        footer={
+          composer.status === 'success' ? (
+            <div style={{ display: 'flex', gap: 10, width: '100%', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={() => { composerActions.reset(); }} style={{
+                padding: '9px 20px', fontSize: '0.8125rem', fontWeight: 700, borderRadius: 8,
+                border: `1.5px solid rgba(${HB.orangeRgb}, 0.2)`, background: '#ffffff', color: P.text1,
+                cursor: 'pointer', fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
+              }}>
+                Send Another
+              </button>
+              <button type="button" onClick={composerActions.close} style={{
+                padding: '9px 20px', fontSize: '0.8125rem', fontWeight: 700, borderRadius: 8,
+                border: 'none', background: HB.orange, color: '#ffffff',
+                cursor: 'pointer', fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
+              }}>
+                Done
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 10, width: '100%', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={handleComposerClose} style={{
+                padding: '9px 20px', fontSize: '0.8125rem', fontWeight: 700, borderRadius: 8,
+                border: `1.5px solid rgba(${HB.orangeRgb}, 0.2)`, background: '#ffffff', color: P.text1,
+                cursor: 'pointer', fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
+              }}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={composerActions.submit}
+                disabled={composer.status === 'submitting'}
+                style={{
+                  padding: '9px 20px', fontSize: '0.8125rem', fontWeight: 700, borderRadius: 8,
+                  border: 'none', background: composer.status === 'submitting' ? `rgba(${HB.orangeRgb}, 0.5)` : HB.orange, color: '#ffffff',
+                  cursor: composer.status === 'submitting' ? 'not-allowed' : 'pointer',
+                  fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
+                  transition: 'background 150ms ease',
+                }}
+              >
+                {composer.status === 'submitting' ? 'Sending…' : 'Send Kudos'}
+              </button>
+            </div>
+          )
+        }
+      >
+        {/* Success state */}
+        {composer.status === 'success' && (
+          <div style={{ textAlign: 'center', padding: '40px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%',
+              background: `linear-gradient(135deg, ${HB.orange}, #D4693A)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <CheckCircle2 size={28} style={{ color: '#ffffff' }} />
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', color: P.text1 }}>
+              Kudos sent!
+            </div>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: P.text3, maxWidth: '32ch', lineHeight: 1.6 }}>
+              Your recognition has been submitted for review. It will appear on the homepage once approved.
+            </p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {composer.status === 'error' && (
+          <div style={{
+            padding: '12px 16px', borderRadius: 10, marginBottom: 16,
+            background: 'rgba(196, 49, 75, 0.06)', border: '1px solid rgba(196, 49, 75, 0.15)',
+          }}>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#c4314b', marginBottom: 4 }}>
+              Submission failed
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(196, 49, 75, 0.8)', lineHeight: 1.5 }}>
+              {composer.submitError || 'An unexpected error occurred. Please try again.'}
+            </div>
+          </div>
+        )}
+
+        {/* Form + Preview (editing / error states) */}
+        {(composer.status === 'editing' || composer.status === 'error' || composer.status === 'submitting') && (
+          <>
+            <KudosComposerForm
+              draft={composer.draft}
+              onDraftChange={composerActions.updateDraft}
+              validationErrors={composer.validationErrors}
+              disabled={composer.status === 'submitting'}
+            />
+            <div style={{ marginTop: 24 }}>
+              <KudosComposerPreview
+                draft={composer.draft}
+                submitterName={identity?.displayName ?? ''}
+              />
+            </div>
+          </>
+        )}
+      </KudosComposerFlyout>
+    </>
   );
 }
