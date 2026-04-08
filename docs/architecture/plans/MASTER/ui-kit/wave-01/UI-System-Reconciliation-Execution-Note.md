@@ -342,7 +342,48 @@ Each migration: move source, add deprecated re-export shim, update feature packa
 
 ---
 
-## 6. Presentation-lane quality obligations
+## 6. Homepage migration wave 1 status (W01-P05)
+
+### Migration target audit
+
+All 9 homepage webpart modules audited against the shared presentation surface family system.
+
+| Module | Surface family | Status | Justification |
+|---|---|---|---|
+| **HbHeroBanner** | `HbcSignatureHeroSurface` | Migrated | Full-width editorial hero with brand lockup |
+| **LeadershipMessage** | `HbcEditorialSurface` | Migrated | Featured leader + secondary items editorial |
+| **PeopleCulture** | `HbcEditorialSurface` | Migrated | Person recognition with event-type badges |
+| **PriorityActionsRail** | `HbcCommandSurface` | Migrated | Urgency-grouped action items |
+| **SafetyFieldExcellence** | `HbcOperationalSurface` | Migrated | Severity-aware operational signals |
+| **SmartSearchWayfinding** | `HbcDiscoverySurface` | Migrated | Search + quick paths + categories |
+| **CompanyPulse** | Local (newsroom CSS modules) | Keep local | Specialized 3-layout-mode newsroom system (Rich/Sparse/Headline-only) with magazine-style featured story + headline rail; exceeds shared surface API |
+| **PeopleCultureMerged** | Local (inline CSS) | Keep local | Three-band merged composition (Band A announcements + Kudos composer + Band B celebrations) with integrated approval workflow; no single shared surface can accommodate |
+| **ProjectPortfolioSpotlight** | Local (inline CSS) | Keep local | Image-led editorial with responsive 3-tier layout, team strips, avatar stacks, bottom-sheet mobile fallback; far exceeds `HbcEditorialSurface` API surface |
+
+### Migration summary
+
+- **6/9 modules (67%)** fully migrated to shared presentation surface families
+- **3/9 modules (33%)** remain local — all three are genuinely specialized compositions that exceed shared surface family APIs, not weak local-card treatments
+- All 3 local modules compose shared primitives (`HbcPremiumCta`, `HbcPremiumBadge`, `HbcHomepageEyebrow`, `HbcHomepageMetadataRow`) from `@hbc/ui-kit/homepage`
+- Zero modules are "weak local-card compositions" — the original concern that prompted this migration wave is resolved
+
+### Shared wrapper components (keep local, correctly delegating)
+
+| Component | Pattern |
+|---|---|
+| `HomepageCuratedContentCluster` | Wrapper using `HbcHomepageSectionShell` + `HbcHomepageSurfaceCard` |
+| `HomepageOperationalAwarenessCluster` | Wrapper using `HbcHomepageSectionShell` + `HbcHomepageSurfaceCard` |
+| `HomepageEditorialCard` | Thin wrapper over `HbcCard` |
+| `HomepageSpotlightCard` | Thin wrapper over `HbcCard` + `HbcStatusBadge` |
+| `NewsroomFeaturedStory` | Specialized image-led editorial, justified local |
+
+### No code changes required
+
+The migration wave 1 is complete. No additional module migrations are warranted — the remaining local compositions are architecturally justified and already compose shared presentation-lane primitives.
+
+---
+
+## 7. Presentation-lane quality obligations
 
 > Applied per Prompt-00 Acceptance and Corrective Addendum.
 
