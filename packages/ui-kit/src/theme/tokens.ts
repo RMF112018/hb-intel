@@ -358,3 +358,26 @@ export const HBC_SURFACE_PRESENTATION = {
   /** Hero gradient end — transparent fade */
   heroGradientEnd: 'rgba(0, 75, 135, 0.02)',
 } as const;
+
+/**
+ * Generate CSS custom property declarations for presentation surface tokens.
+ * Inject these into a container element's style to bridge CSS-module surfaces
+ * to the foundation token system without hardcoding.
+ *
+ * Usage: `<div style={{ ...hbcPresentationCSSVars() }}>` around CSS-module surfaces.
+ * CSS modules reference: `var(--hbc-surface-brand-tint)`, etc.
+ *
+ * @returns Record of CSS custom property key-value pairs
+ */
+export function hbcPresentationCSSVars(): Record<string, string> {
+  return {
+    '--hbc-surface-brand-tint': HBC_SURFACE_PRESENTATION.brandTint,
+    '--hbc-surface-warm-tint': HBC_SURFACE_PRESENTATION.warmTint,
+    '--hbc-surface-brand-tint-strong': HBC_SURFACE_PRESENTATION.brandTintStrong,
+    '--hbc-surface-warm-tint-strong': HBC_SURFACE_PRESENTATION.warmTintStrong,
+    '--hbc-surface-editorial-border': HBC_SURFACE_PRESENTATION.editorialBorder,
+    '--hbc-surface-warm-border': HBC_SURFACE_PRESENTATION.warmBorder,
+    '--hbc-surface-hero-gradient-start': HBC_SURFACE_PRESENTATION.heroGradientStart,
+    '--hbc-surface-hero-gradient-end': HBC_SURFACE_PRESENTATION.heroGradientEnd,
+  };
+}

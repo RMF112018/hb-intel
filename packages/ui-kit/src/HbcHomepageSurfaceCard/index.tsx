@@ -14,7 +14,8 @@ import { mergeClasses, tokens } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@griffel/react';
 import { HBC_RADIUS_LG, HBC_RADIUS_XL } from '../theme/radii.js';
 import { HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XL } from '../theme/grid.js';
-import { elevationLevel0, elevationLevel1, elevationLevel2, elevationLevel3 } from '../theme/elevation.js';
+import { elevationLevel0, elevationLevel1, elevationLevel2, elevationHero, elevationEditorial } from '../theme/elevation.js';
+import { HBC_SURFACE_PRESENTATION } from '../theme/tokens.js';
 import type { HbcHomepageSurfaceCardProps } from './types.js';
 
 /**
@@ -39,7 +40,7 @@ const useStyles = makeStyles({
 
   hero: {
     backgroundColor: 'rgba(34, 83, 145, 0.04)',
-    boxShadow: elevationLevel3,
+    boxShadow: elevationHero,
     borderRadius: '12px',
     ...shorthands.border('0'),
     ...shorthands.borderBottom('4px', 'solid', 'rgb(34, 83, 145)'),
@@ -64,7 +65,7 @@ const useStyles = makeStyles({
 
   editorial: {
     backgroundColor: tokens.colorNeutralBackground1,
-    boxShadow: elevationLevel1,
+    boxShadow: elevationEditorial,
     borderRadius: HBC_RADIUS_XL,
     ...shorthands.border('1px', 'solid', 'rgba(0, 0, 0, 0.10)'),
     ...shorthands.borderLeft('3px', 'solid', 'rgba(229, 126, 70, 0.5)'),

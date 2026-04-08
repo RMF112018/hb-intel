@@ -90,11 +90,30 @@ The foundation layer (`src/theme/`) is well-structured with dedicated files for 
 
 This layer has the highest violation density. Three distinct problems:
 
-#### 3a. Presentation surfaces: correctly built, entry-point governance is sound
+#### 3a. Presentation surfaces: formalized as first-class surface family system (W01-P03)
 
-The `homepage.ts` entry point is well-governed with import discipline enforced by tests. Presentation surface families (`HbcHomepage*`, `HbcPremium*`, `HbcSignatureHeroSurface`, `HbcCommandSurface`, `HbcLauncherSurface`, `HbcDiscoverySurface`, `HbcEditorialSurface`, `HbcOperationalSurface`) are **not** re-exported through the main barrel (`src/index.ts`) and are **not** exposed through the package exports map outside the `@hbc/ui-kit/homepage` entry point. The entry-point boundary is correctly enforced.
+The `homepage.ts` entry point is well-governed with import discipline enforced by tests. Eight production-grade presentation surface families are correctly scoped to `@hbc/ui-kit/homepage`:
 
-The remaining structural concern is whether any future barrel changes could accidentally re-expose presentation surfaces through the main entry point. The existing `importDiscipline.test.ts` guard provides runtime protection against this regression.
+| Surface family | Component | Zone | Status |
+|---|---|---|---|
+| Signature Hero | `HbcSignatureHeroSurface` | Identity band | Production — quality floor |
+| Editorial | `HbcEditorialSurface` | Communications | Production |
+| Operational | `HbcOperationalSurface` | Operational intelligence | Production |
+| Command | `HbcCommandSurface` | Utility / priority actions | Production |
+| Launcher | `HbcLauncherSurface` | Tool access / wayfinding | Production |
+| Discovery | `HbcDiscoverySurface` | Onboarding / search | Production |
+| Section Shell | `HbcHomepageSectionShell` | Section container | Production |
+| Surface Card | `HbcHomepageSurfaceCard` | Zone-aware card | Production |
+
+**W01-P03 token adoption:**
+- `HbcHomepageSurfaceCard`: wired `elevationHero` (hero surface) and `elevationEditorial` (editorial surface) for presentation-grade depth
+- `HbcHomepageSectionShell`: wired `HBC_SPACE_2XL` (64px) for editorial vertical rhythm
+- `homepage.ts` entry: exports W01-P01 foundation tokens (`displayXl`, `displayLg`, `HBC_SPACE_2XL`, `HBC_SPACE_3XL`, `elevationHero`, `elevationEditorial`, `TRANSITION_DRAMATIC`, `HBC_SURFACE_PRESENTATION`, `hbcPresentationCSSVars`)
+- `HBC_HOMEPAGE_TYPOGRAPHY`: added `heroHeadline` (displayXl, 48px) and `heroTitle` (displayLg, 40px)
+- `HBC_HOMEPAGE_SPACING`: added `heroGap` (80px) and `sectionBreak` (64px)
+- `hbcPresentationCSSVars()`: CSS custom property bridge for CSS-module surfaces
+
+**Remaining CSS-module surfaces** (SignatureHero, Editorial, Operational, Command, Launcher, Discovery) use design-driven hardcoded values in CSS modules. The `hbcPresentationCSSVars()` bridge is available but not yet adopted by these surfaces — intentionally deferred to avoid visual regression against the quality floor.
 
 #### 3b. Productive surfaces: correctly placed, unnamed lane
 

@@ -12,7 +12,7 @@ import { tokens } from '@fluentui/react-components';
 import { mergeClasses } from '@fluentui/react-components';
 import { makeStyles } from '@griffel/react';
 import { heading2, body, bodySmall } from '../theme/typography.js';
-import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XL } from '../theme/grid.js';
+import { HBC_SPACE_XS, HBC_SPACE_SM, HBC_SPACE_MD, HBC_SPACE_LG, HBC_SPACE_XL, HBC_SPACE_2XL } from '../theme/grid.js';
 import type { HbcHomepageSectionShellProps } from './types.js';
 
 const useStyles = makeStyles({
@@ -71,7 +71,11 @@ const useStyles = makeStyles({
     maxWidth: '65ch',
   },
   content: {
-    marginTop: `${HBC_SPACE_MD}px`,
+    marginTop: `${HBC_SPACE_LG}px`,
+  },
+  /** Presentation-grade section gap for editorial vertical rhythm (W01-P03) */
+  sectionRoot: {
+    marginBottom: `${HBC_SPACE_2XL}px`,
   },
 });
 
@@ -94,7 +98,7 @@ export const HbcHomepageSectionShell: React.FC<HbcHomepageSectionShellProps> = (
   const accentClass = styles[accentMap[accent]];
 
   return (
-    <section aria-label={title} className={className} data-hbc-homepage="section-shell">
+    <section aria-label={title} className={mergeClasses(styles.sectionRoot, className)} data-hbc-homepage="section-shell">
       <header className={mergeClasses(styles.header, accentClass)}>
         <div className={styles.titleGroup}>
           <h2 className={styles.title}>{title}</h2>

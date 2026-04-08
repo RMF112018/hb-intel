@@ -5,7 +5,7 @@
  * Unified component library for the HB Intel construction intelligence platform.
  * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
  *
- * @version 2.5.3
+ * @version 2.5.4
  * @see docs/reference/ui-kit/ for per-component documentation
  */
 
@@ -42,6 +42,7 @@ export {
   HBC_DANGER_PRESSED,
   HBC_SURFACE_ROLES,
   HBC_SURFACE_PRESENTATION,
+  hbcPresentationCSSVars,
   HBC_RADIUS_NONE,
   HBC_RADIUS_SM,
   HBC_RADIUS_MD,

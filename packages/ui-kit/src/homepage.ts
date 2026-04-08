@@ -11,9 +11,19 @@
  * - Strengthened brand foundation anti-patterns
  */
 
-import { body, display, heading1, heading2, heading3, heading4 } from './theme/typography.js';
+import { body, display, displayLg, displayXl, heading1, heading2, heading3, heading4 } from './theme/typography.js';
 import { HBC_DENSITY_TOKENS, type DensityTier } from './theme/density.js';
-import { HBC_SPACE_LG, HBC_SPACE_MD, HBC_SPACE_SM, HBC_SPACE_XL } from './theme/grid.js';
+import { HBC_SPACE_LG, HBC_SPACE_MD, HBC_SPACE_SM, HBC_SPACE_XL, HBC_SPACE_2XL, HBC_SPACE_3XL } from './theme/grid.js';
+import { HBC_SURFACE_PRESENTATION, hbcPresentationCSSVars } from './theme/tokens.js';
+import { elevationHero, elevationEditorial } from './theme/elevation.js';
+import { TRANSITION_DRAMATIC } from './theme/animations.js';
+
+// W01-P03: Presentation-lane foundation tokens for homepage compositions
+export { HBC_SURFACE_PRESENTATION, hbcPresentationCSSVars };
+export { elevationHero, elevationEditorial };
+export { TRANSITION_DRAMATIC };
+export { displayLg, displayXl };
+export { HBC_SPACE_2XL, HBC_SPACE_3XL };
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.js';
 
 export { HbcBanner } from './HbcBanner/index.js';
@@ -219,6 +229,11 @@ export const HBC_HOMEPAGE_BRAND_FOUNDATION = {
  * Homepage typography aliases mapped to existing ui-kit typography scale.
  */
 export const HBC_HOMEPAGE_TYPOGRAPHY = {
+  /** W01-P03: Signature hero headline — largest presentation scale */
+  heroHeadline: displayXl,
+  /** W01-P03: Section hero / editorial feature title */
+  heroTitle: displayLg,
+  /** Legacy alias — maps to display (32px) */
   hero: display,
   sectionHeader: heading2,
   editorialCardTitle: heading3,
@@ -232,6 +247,10 @@ export const HBC_HOMEPAGE_TYPOGRAPHY = {
  * Shared layout rhythm for homepage compositions.
  */
 export const HBC_HOMEPAGE_SPACING = {
+  /** W01-P03: Hero-scale vertical rhythm between major zones */
+  heroGap: HBC_SPACE_3XL,
+  /** W01-P03: Editorial section break spacing */
+  sectionBreak: HBC_SPACE_2XL,
   sectionGap: HBC_SPACE_XL,
   cardGap: HBC_SPACE_LG,
   tileGap: HBC_SPACE_MD,
