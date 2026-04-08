@@ -41,7 +41,9 @@ This report independently validates prior audit findings about the UI-Kit Wave-0
 
 ## Executive Conclusion
 
-The UI system refactor is architecturally real and well-structured. The two-lane, four-layer model is implemented in code and documented in doctrine — it is not aspirational. Consumer migration is substantively complete for the 5 shared-surface homepage webparts, with 3 additional consumers correctly identified as intentionally local with design justification. No audit claims were rejected.
+The UI system refactor is architecturally real and well-structured. The two-lane, four-layer model is implemented in code and documented in doctrine — it is not aspirational. Consumer migration is substantively complete for the 5 shared-surface homepage webparts, with 3 additional consumers correctly identified as intentionally local with design justification. No audit claims were materially contradicted within the validated scope of this review. Productive-lane conformance is directionally supported but validated at lighter depth than presentation-lane migration.
+
+Code-structure and architectural conformance are strongly validated here; visual and artifact-level proof conformance — including rendered output, packaging artifacts, and productive-lane consumer depth — are not validated at the same level.
 
 The remaining gaps are transitional debt — barrel export size, deprecated alias cleanup, shell-layout constant placement, and a naming ambiguity in the PeopleCulture files — rather than structural defects. The weakest area is proof quality: visual proof is documentation-level only (no rendered artifacts), and packaging proof is matrix-level only (no committed `.sppkg` build evidence).
 
@@ -63,7 +65,7 @@ The remaining gaps are transitional debt — barrel export size, deprecated alia
 | **P-03** | homepage.ts exposes real presentation-lane surface families | **Confirmed** | `packages/ui-kit/src/homepage.ts` | HbcSignatureHeroSurface, HbcCommandSurface, HbcDiscoverySurface, HbcEditorialSurface, HbcOperationalSurface + 13 components + tokens |
 | **P-03** | 5 named consumers use shared homepage surface families | **Confirmed** | Individual webpart source files | All import from `@hbc/ui-kit/homepage` |
 | **P-03** | 3 named consumers are intentionally local | **Confirmed** | Individual webpart source files | Design justification present in each |
-| **P-04** | Productive lane is distinct from presentation lane | **Confirmed** | Entry point separation and token structure | No presentation contamination observed |
+| **P-04** | Productive lane is distinct from presentation lane | **Directionally Confirmed** | Entry point separation and token structure | Structural boundary verified; no dedicated productive consumer depth validation in scope |
 | **P-04** | Productive-lane evidence is lighter than homepage evidence | **Refined** | No dedicated productive consumer validation in audit scope | Audit focused on homepage migration; productive lane was a boundary check |
 | **P-05** | Homepage migration is substantively real | **Confirmed** | 5 consumer import statements + mount.tsx GUID mapping | Deterministic evidence |
 | **P-05** | 3 local exceptions are architecturally justified | **Confirmed** | CompanyPulse, ProjectPortfolioSpotlight, PeopleCultureMerged source code | Each has distinct premium composition rationale |
@@ -161,9 +163,9 @@ Additionally exports premium building blocks (`HbcPremiumSurface`, `HbcPremiumIc
 
 ### Prompt 04 — Productive Lane
 
-**Lane Distinction:** **Confirmed.** Productive-lane components (forms, tables, workflows) share foundations with presentation-lane but do not inherit editorial drama or presentation styling. The entry point separation (`primitives.ts` vs `homepage.ts`) enforces this boundary.
+**Lane Distinction:** **Directionally Confirmed.** Productive-lane components (forms, tables, workflows) share foundations with presentation-lane but do not inherit editorial drama or presentation styling. The entry point separation (`primitives.ts` vs `homepage.ts`) enforces this boundary at the structural level. However, this review did not perform dedicated productive-lane consumer validation at the same depth as the presentation-lane homepage migration work.
 
-**Evidence Depth:** **Refined.** The audit's own finding that productive-lane evidence is lighter than homepage evidence is accurate. The wave-01 effort focused heavily on presentation-lane migration. Productive-lane hardening reads as a documented boundary verification rather than a deep implementation wave.
+**Evidence Depth:** **Refined.** The audit's own finding that productive-lane evidence is lighter than homepage evidence is accurate. The wave-01 effort focused heavily on presentation-lane migration. Productive-lane hardening reads as a documented boundary verification rather than a deep implementation wave. The structural boundary is real; consumer-level depth validation remains lighter.
 
 ---
 
@@ -375,12 +377,13 @@ This is the weakest proof category. The acceptance brief requires consumer-tied 
 - All 10 wave-01 plan files exist under the MASTER plan directory
 - Deprecated aliases (8 typography + 5 elevation) are present for backward compatibility
 - The packaging verification matrix exists at repo root
-- The overall audit conclusion — "mostly conforming with targeted gaps" — is accurate
+- The overall audit conclusion — "mostly conforming with targeted gaps" — is accurate within validated scope
 
 ---
 
 ## Findings Refined
 
+- **Productive-lane conformance:** Directionally confirmed at the structural boundary level (entry point separation, no presentation contamination observed), but not validated at the same consumer depth as presentation-lane migration. The audit finding was accurate in tone; this refinement makes the confidence level explicit.
 - **Main barrel size:** Claimed as transitional; confirmed at 180+ symbols. The index.ts barrel has not been reduced and remains the primary cleanup target. The audit was directionally correct but could state the magnitude more precisely.
 - **Shell-layout constant migration:** Claimed as incomplete; confirmed — constants are in `theme/tokens.ts` with deprecation markers but have not moved to `app-shell.ts`. The audit was accurate; the refinement is that deprecation markers are in place (partial progress).
 - **Deprecated alias count:** Claimed as present; confirmed at exactly 8 typography + 5 elevation = 13 total. The audit was correct; this refinement adds precision.
@@ -392,7 +395,7 @@ This is the weakest proof category. The acceptance brief requires consumer-tied 
 
 ## Findings Rejected
 
-**None.** All audit claims were confirmed or refined. No claim was found to be fabricated, materially incorrect, or contradicted by repo evidence.
+**No findings were rejected within the validated scope of this review.** All audit claims were confirmed or refined against code-structure and import-level evidence. No claim was found to be fabricated or materially contradicted by repo evidence. This assessment is bounded by the scope limits stated above — runtime behavior, visual rendering, and artifact-level packaging were not independently validated.
 
 ---
 
