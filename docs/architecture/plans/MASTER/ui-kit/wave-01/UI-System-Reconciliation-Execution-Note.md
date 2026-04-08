@@ -75,12 +75,16 @@ The foundation layer (`src/theme/`) is well-structured with dedicated files for 
 | Form system (TextField, Select, Checkbox, Form, FormLayout, FormSection, FormRow, StickyFormFooter, FormGuard) | 194-221 |
 | `HbcTextArea`, `HbcRichTextEditor` | 317-323 |
 
-**Primitive mismatches:**
+**Primitive mismatches (resolved W01-P02):**
 
-| Issue | Severity |
+| Issue | Resolution |
 |---|---|
-| `HbcPeoplePicker` bundles `useGraphPeopleSearch` -- data-fetching hook in a primitive (line 172) | Medium -- the `createStaticPeopleSearch` factory is fine, but the Graph hook ties a primitive to a specific data backend |
-| No explicit primitive-layer entry point | Medium -- consumers cannot import only primitives |
+| `HbcPeoplePicker` bundles `useGraphPeopleSearch` -- data-fetching hook in a primitive (line 172) | Classified as **surface**, excluded from `@hbc/ui-kit/primitives`. Available only through main barrel. |
+| No explicit primitive-layer entry point | **Resolved**: `@hbc/ui-kit/primitives` entry point created (W01-P02) with 30 primitive components. |
+
+**Promoted to primitive (W01-P02):** `HbcRiskBadge`, `HbcScoreBar`, `HbcStatusTimeline`, `HbcCoachingCallout`, `HbcFormField`, `HbcApprovalStepper` -- all generic, no data-fetching, reused across domains.
+
+**Excluded from primitives (remain in main barrel as surfaces):** `HbcPeoplePicker` (Graph data-fetching), `HbcAuditTrailPanel` (domain-specific stub), `HbcPermissionMatrix` (domain-specific composition).
 
 ### Layer 3 -- Surface families: major mismatch zone
 

@@ -1,6 +1,6 @@
 {
   "name": "@hbc/ui-kit",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -29,6 +29,10 @@
     "./branding": {
       "types": "./dist/branding/index.d.ts",
       "import": "./dist/branding/index.js"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "import": "./dist/primitives.js"
     }
   },
   "scripts": {
