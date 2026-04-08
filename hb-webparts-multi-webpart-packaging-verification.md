@@ -18,3 +18,7 @@
 | Webpart Title        | Component ID                         | Source Manifest Path                                                       | Exclusion Rationale                                                                                            |
 | -------------------- | ------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | HB Webparts (legacy) | 535f5a17-fc49-40ea-ac16-5d68895884f7 | `apps/hb-webparts/src/webparts/hbWebparts/HbWebpartsWebPart.manifest.json` | Legacy single-surface scaffold manifest intentionally excluded from first-release 10-webpart toolbox inventory |
+
+## Build Artifact Verification (2026-04-08)
+
+All 10 webpart component IDs were verified present in the compiled IIFE bundle (`apps/hb-webparts/dist/hb-webparts-app.js`, 575.08 KB) produced by a clean `pnpm --filter @hbc/spfx-hb-webparts build` on commit `8426a7df`. Build pipeline (check-types, lint, vite build) passed cleanly. Full evidence log at `docs/architecture/reviews/evidence/ui-system-build-proof/build-evidence-log.md`.
