@@ -57,8 +57,22 @@ export function usePeopleCultureData(): PeopleCultureDataResult {
         const { config } = await fetchPeopleCultureListData(siteUrl);
         if (cancelled) return;
 
+        // When all lists return empty arrays (failed or truly empty), return
+        // undefined so the component falls back to manifest config props.
+        const hasData = Boolean(
+          config.announcements?.length ||
+            config.kudos?.length ||
+            config.celebrations?.length,
+        );
+
         _cache = { config, fetchedAt: Date.now() };
-        setResult({ listConfig: config, isLoading: false, error: undefined });
+        setResult({
+          listConfig: hasData ? config : undefined,
+          isLoading: false,
+          error: hasData
+            ? undefined
+            : 'All People & Culture lists returned empty results',
+        });
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : 'Failed to load People & Culture data';

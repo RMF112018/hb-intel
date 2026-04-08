@@ -22,17 +22,10 @@ import type {
 
 /* ── List metadata ──────────────────────────────────────────────── */
 
-export const SP_LIST_ANNOUNCEMENTS = 'People Culture Announcements1';
+export const SP_LIST_ANNOUNCEMENTS = 'People Culture Announcements';
 export const SP_LIST_KUDOS = 'People Culture Kudos';
 
-/**
- * Celebrations list title is uncertain from CSV exports.
- * Try these candidates in order at runtime.
- */
-const CELEBRATIONS_TITLE_CANDIDATES = [
-  'People Culture Celebrations',
-  'People Culture Celebrations1',
-] as const;
+export const SP_LIST_CELEBRATIONS = 'People Culture Celebrations';
 
 /* ── SharePoint field internal names ────────────────────────────── */
 
@@ -85,7 +78,8 @@ export const CEL_FIELDS = {
   CelebrationType: 'CelebrationType',
   CelebrationDate: 'CelebrationDate',
   AnniversaryYears: 'AnniversaryYears',
-  HomepageEnabled: 'HomepageEnabled',
+  /** SP mangled the column name — live internal name is 'HomepageEnabledGovernanceextensi'. */
+  HomepageEnabled: 'HomepageEnabledGovernanceextensi',
   AudienceTags: 'AudienceTags',
   PrimaryImage: 'PrimaryImage',
   ImageAltText: 'ImageAltText',
@@ -93,28 +87,31 @@ export const CEL_FIELDS = {
 
 /* ── $select / $expand strings ─────────────────────────────────── */
 
-const ANN_SELECT = [
-  ANN_FIELDS.AnnouncementId,
-  `${ANN_FIELDS.AnnouncementPerson}/Id`,
-  `${ANN_FIELDS.AnnouncementPerson}/Title`,
-  `${ANN_FIELDS.AnnouncementPerson}/EMail`,
-  ANN_FIELDS.PersonDisplayName,
-  ANN_FIELDS.AnnouncementType,
-  ANN_FIELDS.Headline,
-  ANN_FIELDS.Summary,
-  ANN_FIELDS.PublishDate,
-  ANN_FIELDS.StartDisplayDate,
-  ANN_FIELDS.EndDisplayDate,
-  ANN_FIELDS.IsPinned,
-  ANN_FIELDS.PriorityOverride,
-  ANN_FIELDS.HomepageEnabled,
-  ANN_FIELDS.AudienceTags,
-  ANN_FIELDS.CtaLabel,
-  ANN_FIELDS.CtaUrl,
-  ANN_FIELDS.OpenInNewTab,
-  ANN_FIELDS.PrimaryImage,
-  ANN_FIELDS.ImageAltText,
-].join(',');
+/** Build the announcements $select string, substituting the resolved PublishDate internal name. */
+function buildAnnSelect(publishDateField: string): string {
+  return [
+    ANN_FIELDS.AnnouncementId,
+    `${ANN_FIELDS.AnnouncementPerson}/Id`,
+    `${ANN_FIELDS.AnnouncementPerson}/Title`,
+    `${ANN_FIELDS.AnnouncementPerson}/EMail`,
+    ANN_FIELDS.PersonDisplayName,
+    ANN_FIELDS.AnnouncementType,
+    ANN_FIELDS.Headline,
+    ANN_FIELDS.Summary,
+    publishDateField,
+    ANN_FIELDS.StartDisplayDate,
+    ANN_FIELDS.EndDisplayDate,
+    ANN_FIELDS.IsPinned,
+    ANN_FIELDS.PriorityOverride,
+    ANN_FIELDS.HomepageEnabled,
+    ANN_FIELDS.AudienceTags,
+    ANN_FIELDS.CtaLabel,
+    ANN_FIELDS.CtaUrl,
+    ANN_FIELDS.OpenInNewTab,
+    ANN_FIELDS.PrimaryImage,
+    ANN_FIELDS.ImageAltText,
+  ].join(',');
+}
 
 const ANN_EXPAND = ANN_FIELDS.AnnouncementPerson;
 
@@ -225,7 +222,8 @@ interface RawCelebrationItem {
   CelebrationType?: string;
   CelebrationDate?: string;
   AnniversaryYears?: number;
-  HomepageEnabled?: boolean;
+  /** SP mangled the column name — live internal name is 'HomepageEnabledGovernanceextensi'. */
+  HomepageEnabledGovernanceextensi?: boolean;
   AudienceTags?: string;
   PrimaryImage?: string | { Url?: string; Description?: string };
   ImageAltText?: string;
@@ -451,7 +449,7 @@ function mapCelebrations(raw: RawCelebrationItem, siteUrl: string): WeeklyCelebr
   if (!VALID_CELEBRATION_TYPES.has(celebrationType)) return [];
 
   // HomepageEnabled filter — treat missing/undefined as enabled
-  if (raw.HomepageEnabled === false) return [];
+  if (raw.HomepageEnabledGovernanceextensi === false) return [];
 
   const imageSrc = extractImageSrc(raw.PrimaryImage, siteUrl);
   const media = buildMedia(imageSrc, raw.ImageAltText);
@@ -521,26 +519,6 @@ async function fetchListItems<T>(
   return body.value ?? [];
 }
 
-/**
- * Resolve the actual celebrations list title by trying known candidates.
- * Returns the first title that responds successfully, or undefined.
- */
-async function resolveCelebrationsListTitle(siteUrl: string): Promise<string | undefined> {
-  for (const candidate of CELEBRATIONS_TITLE_CANDIDATES) {
-    try {
-      const url =
-        `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(candidate)}')?$select=Title,Id`;
-      const response = await fetch(url, {
-        headers: { Accept: 'application/json;odata=nometadata' },
-      });
-      if (response.ok) return candidate;
-    } catch {
-      // Try next candidate
-    }
-  }
-  return undefined;
-}
-
 /* ── Resolve PublishDate internal name ──────────────────────────── */
 
 /**
@@ -593,13 +571,16 @@ export async function fetchPeopleCultureListData(
   siteUrl: string,
   _now = new Date(),
 ): Promise<PeopleCultureListDataResult> {
-  // Resolve the PublishDate field name in parallel with list fetches
-  const [publishDateField, rawAnnouncements, rawKudos, celebrationsResult] = await Promise.all([
-    resolvePublishDateField(siteUrl),
+  // Resolve the PublishDate field internal name first — SP mangled it to
+  // 'PublishDateMapstopublishDate_x00' so we need the real name for $select.
+  const publishDateField = await resolvePublishDateField(siteUrl);
+  const annSelect = buildAnnSelect(publishDateField);
+
+  const [rawAnnouncements, rawKudos, rawCelebrations] = await Promise.all([
     fetchListItems<RawAnnouncementItem>(
       siteUrl,
       SP_LIST_ANNOUNCEMENTS,
-      ANN_SELECT,
+      annSelect,
       ANN_EXPAND,
       `${ANN_FIELDS.HomepageEnabled} eq 1`,
     ).catch((): RawAnnouncementItem[] => []),
@@ -609,16 +590,12 @@ export async function fetchPeopleCultureListData(
       KUDOS_SELECT,
       KUDOS_EXPAND,
     ).catch((): RawKudosItem[] => []),
-    (async (): Promise<RawCelebrationItem[]> => {
-      const title = await resolveCelebrationsListTitle(siteUrl);
-      if (!title) return [];
-      return fetchListItems<RawCelebrationItem>(
-        siteUrl,
-        title,
-        CEL_SELECT,
-        CEL_EXPAND,
-      ).catch((): RawCelebrationItem[] => []);
-    })(),
+    fetchListItems<RawCelebrationItem>(
+      siteUrl,
+      SP_LIST_CELEBRATIONS,
+      CEL_SELECT,
+      CEL_EXPAND,
+    ).catch((): RawCelebrationItem[] => []),
   ]);
 
   // Remap PublishDate if the internal name differs from the default
@@ -641,7 +618,7 @@ export async function fetchPeopleCultureListData(
     .map((raw) => mapKudos(raw, siteUrl))
     .filter((item): item is KudosEntry => item != null);
 
-  const mappedCelebrations = celebrationsResult
+  const mappedCelebrations = rawCelebrations
     .flatMap((raw) => mapCelebrations(raw, siteUrl));
 
   return {
