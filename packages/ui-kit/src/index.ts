@@ -259,6 +259,13 @@ export type {
   UseUnsavedChangesBlockerReturn,
 } from './hooks/useUnsavedChangesBlocker.js';
 
+// ---------------------------------------------------------------------------
+// Productive-lane surface families (W01-P04: audited, no presentation contamination)
+// These surfaces are density-disciplined, use standard elevation and restrained
+// motion. They must NOT import presentation-lane tokens (elevationHero,
+// elevationEditorial, TRANSITION_DRAMATIC, HBC_SURFACE_PRESENTATION, displayXl/Lg).
+// ---------------------------------------------------------------------------
+
 export { HbcCommandBar } from './HbcCommandBar/index.js';
 export { useFieldModeActions, setFieldModeActions } from './HbcCommandBar/fieldModeActionsStore.js';
 export type {

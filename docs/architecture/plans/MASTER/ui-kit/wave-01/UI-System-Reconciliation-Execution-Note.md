@@ -115,17 +115,33 @@ The `homepage.ts` entry point is well-governed with import discipline enforced b
 
 **Remaining CSS-module surfaces** (SignatureHero, Editorial, Operational, Command, Launcher, Discovery) use design-driven hardcoded values in CSS modules. The `hbcPresentationCSSVars()` bridge is available but not yet adopted by these surfaces — intentionally deferred to avoid visual regression against the quality floor.
 
-#### 3b. Productive surfaces: correctly placed, unnamed lane
+#### 3b. Productive surfaces: audited and hardened (W01-P04)
 
-These are correctly general-purpose productive-lane surfaces but lack explicit lane classification or a dedicated entry point:
+All productive-lane surfaces and representative consumers audited for presentation-lane contamination. **No contamination found.** The productive lane maintains clear separation with proper density discipline, restrained motion (TRANSITION_FAST/TRANSITION_NORMAL only), standard elevation (elevationRest, elevationRaised, elevationLevel1-2), and zero presentation-lane imports.
 
-- `HbcDataTable` + `useAdaptiveDensity` + `useSavedViews` (lines 263-281)
-- `HbcChart`, `HbcBarChart`, `HbcDonutChart`, `HbcLineChart` (lines 283-295)
-- `HbcKpiCard` (lines 298-299)
-- `HbcCommandBar` (lines 253-261)
-- `WorkspacePageShell` (lines 301-308)
-- 6 page layouts: `ToolLandingLayout`, `DetailLayout`, `CreateUpdateLayout`, `DashboardLayout`, `ListLayout`, `MultiColumnLayout` (lines 437-479)
-- Multi-column composition primitives: `HbcNavRail`, `HbcContextRail`, `HbcActivityStrip`, `HbcQuickActionBar`, `HbcSyncStatusBar` (lines 482-486)
+**Productive-lane surface family (confirmed clean):**
+
+| Surface | Key pattern | Status |
+|---|---|---|
+| `WorkspacePageShell` | Standard elevation, density tokens, shimmer loading | Clean |
+| `HbcDataTable` | TRANSITION_FAST, elevationRest, useAdaptiveDensity, virtualization | Clean |
+| `HbcCommandBar` | No animation, elevationRaised, auto-density, semantic urgency tokens | Clean |
+| `HbcKpiCard` | clamp() responsive, standard hover elevation, minimal gradient wash (8% opacity) | Clean |
+| `HbcChart` / `HbcBarChart` / `HbcDonutChart` / `HbcLineChart` | Echarts wrapper, no presentation tokens | Clean |
+| 6 page layouts | Pure productive composition patterns | Clean |
+| Multi-column primitives (`NavRail`, `ContextRail`, `ActivityStrip`, `QuickActionBar`, `SyncStatusBar`) | Productive composition utilities | Clean |
+
+**Consumer apps audited (all clean — zero `@hbc/ui-kit/homepage` imports across 11 productive apps):**
+
+| Consumer | Pattern |
+|---|---|
+| `apps/accounting` (ProjectReviewQueuePage) | WorkspacePageShell + DataTable + Tabs |
+| `apps/estimating` (ProjectSetupPage) | WorkspacePageShell + forms + DataTable, excellent token usage |
+| `apps/admin` (App) | Minimal providers only |
+| `apps/project-hub` (DashboardPage) | WorkspacePageShell + delegated canvas |
+| `apps/hb-site-control` (HomePage) | WorkspacePageShell + cards (minor: Fluent palette tokens should migrate to HBC tokens) |
+
+**No productive-lane code changes required** — surfaces are architecturally sound, density-disciplined, and free of presentation-lane drama.
 
 #### 3c. Module-specific UI in ui-kit: layer violation
 
