@@ -48,7 +48,7 @@ dist/hb-webparts-app.js    575.08 kB │ gzip: 204.00 kB
 
 ## Webpart GUID Verification
 
-All 10 webpart component IDs are present in the built IIFE bundle:
+All 11 webpart component IDs are present in the built IIFE bundle:
 
 | Webpart | GUID | In Bundle | Manifest Exists |
 |---------|------|-----------|-----------------|
@@ -62,6 +62,7 @@ All 10 webpart component IDs are present in the built IIFE bundle:
 | Project Portfolio Spotlight | `8370ab0c-b6df-4db0-82f1-24b54750f508` | ✓ | ✓ |
 | Safety and Field Excellence | `89ca5ff3-21f4-4b23-a953-4b7306ea1029` | ✓ | ✓ |
 | Smart Search / Wayfinding | `11d72b36-a92f-4e2d-9918-75df2cb0d11e` | ✓ | ✓ |
+| HB Signature Hero | `28acd6a7-2582-4d8a-86d4-b52bfbeb375c` | ✓ | ✓ |
 
 ---
 
