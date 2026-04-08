@@ -5,7 +5,7 @@
  * Unified component library for the HB Intel construction intelligence platform.
  * Supports PWA (Next.js 14) and SPFx (SharePoint Framework) dual-target rendering.
  *
- * @version 2.5.4
+ * @version 2.5.5
  * @see docs/reference/ui-kit/ for per-component documentation
  */
 
@@ -533,7 +533,8 @@ export type {
 } from './HbcDrawingViewer/index.js';
 
 // Module Configuration Objects — moved to @hbc/shell (PH4B.2 F-014)
-// Re-export from @hbc/shell for backward compatibility
+// @deprecated W01-P06: Import directly from @hbc/shell. These re-exports
+// will be removed in a future version.
 export {
   scorecardsLanding,
   scorecardsDetail,
@@ -559,9 +560,10 @@ export type {
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Fluent UI passthrough re-exports (D-10)
- * PH4B.11 §4b.11.4 — apps must import from @hb-intel/ui-kit, not @fluentui/*
- * These re-exports allow apps to consume Fluent primitives through ui-kit
- * without violating the no-direct-fluent-import rule.
+ * @deprecated W01-P06: Use @hbc/ui-kit/fluent for Fluent passthroughs,
+ * or prefer HBC-branded equivalents (HbcButton, HbcCard, HbcSpinner)
+ * from @hbc/ui-kit/primitives. These main-barrel re-exports will be
+ * removed in a future version.
  * ───────────────────────────────────────────────────────────────────────────── */
 export {
   FluentProvider,

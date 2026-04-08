@@ -14,16 +14,30 @@
 
 ## Current state summary
 
-`@hbc/ui-kit` v2.2.19 exports 160+ public symbols from a single flat barrel (`src/index.ts`, 660 lines) plus three sub-entry points:
+`@hbc/ui-kit` v2.5.5 exports 160+ public symbols from a layered entry point system (W01-P06):
 
-| Entry point | Purpose | Export count |
-|---|---|---|
-| `@hbc/ui-kit` | Main barrel -- everything | 160+ |
-| `@hbc/ui-kit/homepage` | Constrained presentation-lane subset for SPFx homepage webparts | ~50 |
-| `@hbc/ui-kit/app-shell` | Lean shell for SPFx customizer | 3 components + types |
-| `@hbc/ui-kit/theme` | Foundation tokens only | ~42 |
+| Entry point | Layer | Purpose | Status |
+|---|---|---|---|
+| `@hbc/ui-kit` | All | Main barrel -- full library | Stable (transitional exports deprecated) |
+| `@hbc/ui-kit/theme` | 1 | Foundation tokens, hooks, density | Stable |
+| `@hbc/ui-kit/icons` | 1 | SVG icon factory | Stable |
+| `@hbc/ui-kit/branding` | 1 | Brand asset registry | Stable |
+| `@hbc/ui-kit/primitives` | 2 | 30 Layer-2 building blocks (W01-P02) | Stable |
+| `@hbc/ui-kit/homepage` | 3 | Presentation-lane surface families + tokens (W01-P03) | Stable |
+| `@hbc/ui-kit/app-shell` | Cross | Lean shell for SPFx customizer | Stable |
+| `@hbc/ui-kit/fluent` | Adapter | Fluent UI passthroughs for R3 compliance (W01-P06) | New -- consumers should migrate from main barrel |
+
+**Deprecated main-barrel exports (W01-P06):**
+- Fluent UI passthroughs (`FluentProvider`, `Text`, `Badge`, `Switch`, `Spinner`, `TabList`, `Tab`, `Card`, `CardHeader`, `Button`, `tokens`) -- use `@hbc/ui-kit/fluent` or prefer HBC equivalents from `@hbc/ui-kit/primitives`
+- Module config re-exports (`scorecardsLanding`, `rfisLanding`, etc.) -- use `@hbc/shell` directly
 
 250+ consumer files import from `@hbc/ui-kit` across 14 PWA apps, homepage webparts, and ~10 feature packages.
+
+**Named consumers using deprecated Fluent passthroughs (should migrate to `@hbc/ui-kit/fluent`):**
+- `apps/pwa` (Text, Spinner, Button, Card, CardHeader, tokens)
+- `apps/dev-harness` (Button, Switch, TabList, Tab, tokens)
+- `apps/hb-site-control` (Text, Card, CardHeader, Button, tokens)
+- `apps/accounting` (Text, Card, CardHeader via pwa shared pages)
 
 ---
 
