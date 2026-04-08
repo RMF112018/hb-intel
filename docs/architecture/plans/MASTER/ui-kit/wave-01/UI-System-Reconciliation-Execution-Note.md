@@ -1,8 +1,8 @@
 # UI System Reconciliation and Execution Note
 
-> Prompt-00 deliverable -- repo-truth reconciliation of `@hbc/ui-kit` v2.2.19 against the two-lane UI system direction.
+> Prompt-00 deliverable -- repo-truth reconciliation of `@hbc/ui-kit` against the two-lane UI system direction.
 >
-> **Status:** Accepted with corrective addendum applied (see `Prompt-00-Acceptance-and-Corrective-Addendum.md`).
+> **Status:** Wave 01 complete (P00-P08). Version 2.5.5. Verified W01-P08.
 
 ## Governing references
 
@@ -448,3 +448,79 @@ When reporting completion for Prompt-01 and later, explicitly distinguish:
 - **Visual / presentation-quality progress** -- how the result advances the homepage/web-content lane beyond generic internal-app feel
 - **Verification performed** -- code-level and visual proof
 - **Remaining risks or regressions** -- structural and visual
+
+---
+
+## 8. Wave 01 completion report (W01-P08)
+
+### Structural / architectural progress
+
+Wave 01 established the two-lane UI system architecture across 8 prompts (P00-P08):
+
+| Prompt | Deliverable | Type |
+|---|---|---|
+| P00 | Reconciliation execution note — 160+ exports classified as healthy/transitional/legacy | Documentation |
+| P00A | Corrective addendum — presentation-lane quality obligations | Documentation |
+| P01 | Foundation extensions — `displayXl`/`displayLg`, `HBC_SPACE_2XL`/`3XL`, `elevationHero`/`elevationEditorial`, `TRANSITION_DRAMATIC`, `HBC_SURFACE_PRESENTATION` | Code (v2.5.2) |
+| P02 | Primitives entry point — `@hbc/ui-kit/primitives` with 30 Layer-2 components | Code (v2.5.3) |
+| P03 | Presentation surface formalization — token wiring into `HbcHomepageSurfaceCard`/`HbcHomepageSectionShell`, homepage entry exports | Code (v2.5.4) |
+| P04 | Productive lane hardening — audit confirmed clean, boundary annotations | Documentation |
+| P05 | Homepage migration wave 1 — 6/9 modules migrated, 3 justified local | Documentation |
+| P06 | Fluent adapter entry point — `@hbc/ui-kit/fluent`, deprecation markers | Code (v2.5.5) |
+| P07 | Docs reconciliation — entry-points.md, README.md updated for 8 entry points | Documentation |
+| P08 | Verification and packaging | This document |
+
+**Entry point system (8 total):** `.` (main), `./theme`, `./icons`, `./branding`, `./primitives`, `./homepage`, `./app-shell`, `./fluent`
+
+### Visual / presentation-quality progress
+
+Foundation tokens now provide presentation-lane consumers with purpose-built typography (`displayXl` 48px, `displayLg` 40px), editorial spacing (`HBC_SPACE_2XL` 64px, `HBC_SPACE_3XL` 80px), dramatic elevation (`elevationHero`, `elevationEditorial`), deliberate motion (`TRANSITION_DRAMATIC` 600ms), and semantic surface tints (`HBC_SURFACE_PRESENTATION`). The `HbcHomepageSurfaceCard` hero and editorial surfaces use presentation-grade elevation. The `HbcHomepageSectionShell` uses editorial vertical rhythm. The `HbcSignatureHeroSurface` remains the quality floor — no regressions detected.
+
+Named presentation-lane surfaces remain visually differentiated:
+- **HbcSignatureHeroSurface**: Ambient decoration, motion choreography, brand gradient layering — unchanged, quality floor maintained
+- **HbcEditorialSurface**: Warm accent hierarchy, featured/secondary rhythm — unchanged
+- **HbcOperationalSurface**: Cool brand severity signaling — unchanged
+- **HbcCommandSurface**: Dense urgency-aware command bands — unchanged
+- **HbcLauncherSurface**: Tinted tile groups, responsive grid — unchanged
+- **HbcDiscoverySurface**: Warm discovery atmosphere with category shelves — unchanged
+
+CSS-module surfaces retain design-driven values intentionally. The `hbcPresentationCSSVars()` bridge is available for future token adoption without visual regression.
+
+### Verification performed
+
+| Target | Verification | Result |
+|---|---|---|
+| `@hbc/ui-kit` check-types | `pnpm --filter @hbc/ui-kit check-types` | Pass |
+| `@hbc/ui-kit` build | `pnpm --filter @hbc/ui-kit build` | Pass |
+| `@hbc/ui-kit` lint | `pnpm --filter @hbc/ui-kit lint` | 1 pre-existing error (`useVoiceDictation.test.ts` `Function` type) — not W01 |
+| `@hbc/spfx-hb-webparts` check-types | `pnpm --filter @hbc/spfx-hb-webparts check-types` | Pass |
+| Workspace check-types | `pnpm check-types` | 56/71 pass, 1 pre-existing failure (`@hbc/spfx-leadership` — accesses non-existent `HBC_SURFACE_LIGHT['text-secondary']`) — not W01 |
+| dist/index.js | W01-P01 tokens present | Confirmed (3 matches) |
+| dist/homepage.js | W01-P01 tokens present | Confirmed (14 matches) |
+| dist/primitives.js | 30 primitives exported | Confirmed (6 key symbols verified) |
+| dist/fluent.js | Fluent passthroughs exported | Confirmed |
+| dist/primitives.d.ts | Type declarations emitted | Confirmed (5562 bytes) |
+| dist/fluent.d.ts | Type declarations emitted | Confirmed (1059 bytes) |
+
+**Named consumers verified:**
+- `@hbc/spfx-hb-webparts` (homepage webparts — presentation lane): check-types pass
+- `@hbc/ui-kit` (shared library): check-types, build, lint pass
+
+**Named consumers NOT individually verified (no check-types script):**
+- `@hbc/spfx-project-setup` (estimating) — no check-types script; covered by workspace run
+- `@hbc/spfx-admin` (admin) — no check-types script; covered by workspace run
+- `@hbc/pwa` (PWA umbrella) — no check-types script
+
+**Visual proof notes:**
+Wave 01 changes to presentation surfaces were structural (token wiring, elevation semantics, entry point governance) not visual redesigns. The surfaces themselves were not visually altered — they retain their existing production-grade design. Visual proof of material surface redesign is not applicable for this wave. The corrective addendum's visual proof requirements apply to future waves where surface visual composition changes materially.
+
+### Remaining risks or regressions
+
+| Risk | Status | Notes |
+|---|---|---|
+| Pre-existing `@hbc/spfx-leadership` build failure | Not W01 | Accesses `HBC_SURFACE_LIGHT['text-secondary']` which never existed |
+| Pre-existing lint error in `useVoiceDictation.test.ts` | Not W01 | `Function` type usage |
+| CSS-module surfaces not yet token-wired | Intentional | `hbcPresentationCSSVars()` bridge available; deferred to avoid quality regression |
+| Deprecated Fluent passthroughs still in main barrel | Transitional | Consumers should migrate to `@hbc/ui-kit/fluent` or HBC primitives |
+| Deprecated module config re-exports still in main barrel | Transitional | Consumers should migrate to `@hbc/shell` direct imports |
+| 36 module-specific UI exports still in ui-kit | Deferred to Wave 2 | Saved Views, Bulk Actions, Export, Publish, Record Form, Activity Timeline, Safety/Risk |
