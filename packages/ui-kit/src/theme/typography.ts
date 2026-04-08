@@ -11,6 +11,24 @@ const FONT_FAMILY_MONO = '"Courier New", "Cascadia Code", "Fira Code", "Consolas
 // V2.1 intent-based typography scale
 // ---------------------------------------------------------------------------
 
+/** Display XL — signature hero headlines, full-bleed presentation banners (W01-P01) */
+export const displayXl = {
+  fontFamily: FONT_FAMILY,
+  fontSize: '3rem',
+  fontWeight: '700',
+  lineHeight: '1.15',
+  letterSpacing: '-0.03em',
+} as const;
+
+/** Display Lg — section hero titles, editorial feature headers (W01-P01) */
+export const displayLg = {
+  fontFamily: FONT_FAMILY,
+  fontSize: '2.5rem',
+  fontWeight: '700',
+  lineHeight: '1.2',
+  letterSpacing: '-0.025em',
+} as const;
+
 /** Display — dashboard headers, feature banners */
 export const display = {
   fontFamily: FONT_FAMILY,
@@ -96,6 +114,8 @@ export const code = {
 // V2.1 type scale object (primary — intent-based keys)
 // ---------------------------------------------------------------------------
 export const hbcTypeScale = {
+  displayXl,
+  displayLg,
   display,
   heading1,
   heading2,

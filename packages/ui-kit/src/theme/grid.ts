@@ -12,6 +12,10 @@ export const HBC_SPACE_MD = 16;
 export const HBC_SPACE_LG = 24;
 export const HBC_SPACE_XL = 32;
 export const HBC_SPACE_XXL = 48;
+/** Section-break spacing for editorial/presentation vertical rhythm (W01-P01) */
+export const HBC_SPACE_2XL = 64;
+/** Hero-scale spacing for signature presentation surfaces (W01-P01) */
+export const HBC_SPACE_3XL = 80;
 
 export const hbcSpacing = {
   xs: HBC_SPACE_XS,
@@ -20,6 +24,8 @@ export const hbcSpacing = {
   lg: HBC_SPACE_LG,
   xl: HBC_SPACE_XL,
   xxl: HBC_SPACE_XXL,
+  '2xl': HBC_SPACE_2XL,
+  '3xl': HBC_SPACE_3XL,
 } as const;
 
 export type HbcSpacingKey = keyof typeof hbcSpacing;

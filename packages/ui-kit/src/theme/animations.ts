@@ -50,6 +50,8 @@ export const keyframes = {
 export const TRANSITION_FAST = '150ms' as const;
 export const TRANSITION_NORMAL = '250ms' as const;
 export const TRANSITION_SLOW = '400ms' as const;
+/** Presentation-lane reveal/entrance duration for editorial surfaces (W01-P01) */
+export const TRANSITION_DRAMATIC = '600ms' as const;
 
 /** Named timing constants for interaction patterns (PH4.12) */
 export const TIMING = {
@@ -62,6 +64,12 @@ export const TIMING = {
   focusActivation: '200ms',
   connectivityExpand: '100ms',
   buttonLoading: '150ms',
+  /** Presentation-lane: hero section entrance choreography (W01-P01) */
+  heroReveal: '600ms',
+  /** Presentation-lane: editorial card stagger entrance (W01-P01) */
+  editorialStagger: '100ms',
+  /** Presentation-lane: section crossfade for scroll-triggered reveals (W01-P01) */
+  sectionReveal: '400ms',
 } as const;
 
 /** Common transition presets for component use */
@@ -69,6 +77,8 @@ export const transitions = {
   fast: `all ${TRANSITION_FAST} ease-in-out`,
   normal: `all ${TRANSITION_NORMAL} ease-in-out`,
   slow: `all ${TRANSITION_SLOW} ease-in-out`,
+  /** Presentation-lane: deliberate reveal with deceleration curve (W01-P01) */
+  dramatic: `all ${TRANSITION_DRAMATIC} cubic-bezier(0.16, 1, 0.3, 1)`,
 } as const;
 
 /** Shared animation utility styles (Griffel) */

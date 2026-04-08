@@ -35,6 +35,13 @@ export const elevationModal = elevationLevel3;
 /** Semantic alias — blocking overlays that demand exclusive attention (V2.1.2) */
 export const elevationBlocking = elevationLevel4;
 
+/** Semantic alias — dramatic depth for presentation-lane hero/signature surfaces (W01-P01) */
+export const elevationHero =
+  '0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08)' as const;
+/** Semantic alias — subtle premium lift for editorial/spotlight cards (W01-P01) */
+export const elevationEditorial =
+  '0 6px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04)' as const;
+
 // ---------------------------------------------------------------------------
 // Field Mode Variants (opacity +50%)
 // ---------------------------------------------------------------------------
@@ -103,4 +110,7 @@ export const hbcElevation = {
   // V2.1.2 levels (WS1-T04)
   level4: elevationLevel4,
   blocking: elevationBlocking,
+  // W01-P01 presentation-lane semantic levels
+  hero: elevationHero,
+  editorial: elevationEditorial,
 } as const;

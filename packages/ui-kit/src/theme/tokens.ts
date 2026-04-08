@@ -47,19 +47,23 @@ export const HBC_HEADER_TEXT = '#FFFFFF' as const;
 /** Header muted icon color */
 export const HBC_HEADER_ICON_MUTED = '#A0A0A0' as const;
 
-// Shell chrome dimensions — single source of truth for all shell offset calculations.
+// ---------------------------------------------------------------------------
+// Shell chrome dimensions (app-shell concern, not design tokens)
+// These are layout constants for shell offset calculations.
 // Used by HbcHeader, HbcAppShell, HbcSidebar, HbcBottomNav, WorkspacePageShell.
-/** Fixed header bar height (px) */
+// Future: migrate to HbcAppShell/constants.ts (Wave 0 execution plan).
+// ---------------------------------------------------------------------------
+/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
 export const HBC_HEADER_HEIGHT = 56;
-/** Connectivity bar height when online (px) */
+/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
 export const HBC_CONNECTIVITY_HEIGHT_ONLINE = 2;
-/** Connectivity bar height when offline/syncing (px) */
+/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
 export const HBC_CONNECTIVITY_HEIGHT_OFFLINE = 4;
-/** Sidebar collapsed (icon rail) width (px) */
+/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
 export const HBC_SIDEBAR_WIDTH_COLLAPSED = 56;
-/** Sidebar expanded width (px) */
+/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
 export const HBC_SIDEBAR_WIDTH_EXPANDED = 240;
-/** Bottom navigation bar height (px) */
+/** @deprecated W01-P01: shell layout constant, not a design token. Will move to app-shell entry. */
 export const HBC_BOTTOM_NAV_HEIGHT = 56;
 
 // ---------------------------------------------------------------------------
@@ -325,4 +329,32 @@ export const HBC_SURFACE_ROLES = {
     elevation: 'elevationLevel2',
     radius: 'xl',
   },
+} as const;
+
+// ---------------------------------------------------------------------------
+// Presentation-lane surface tint tokens (W01-P01)
+// Semantic tints derived from the brand ramp for premium homepage/editorial
+// surfaces. These are shared foundation tokens — both lanes may use them,
+// but they are designed to support the stronger visual hierarchy and
+// branded presence required by presentation-lane compositions.
+// ---------------------------------------------------------------------------
+
+/** Presentation-lane surface tint palette (W01-P01) */
+export const HBC_SURFACE_PRESENTATION = {
+  /** Cool brand tint for hero/signature background areas — brandRamp[150] */
+  brandTint: '#E6F6FD',
+  /** Warm neutral tint for editorial/culture sections */
+  warmTint: '#FFF8F0',
+  /** Deep brand tint for high-emphasis zones — brandRamp[140] */
+  brandTintStrong: '#CCEDFA',
+  /** Warm accent tint for recognition/celebration surfaces */
+  warmTintStrong: '#FFF0E0',
+  /** Brand-tinted border for editorial accent lines — brandRamp[100] at reduced opacity */
+  editorialBorder: 'rgba(102, 169, 207, 0.35)',
+  /** Warm-tinted border for culture/recognition accent lines */
+  warmBorder: 'rgba(243, 112, 33, 0.20)',
+  /** Hero gradient start — deep brand for layered readability */
+  heroGradientStart: 'rgba(0, 75, 135, 0.08)',
+  /** Hero gradient end — transparent fade */
+  heroGradientEnd: 'rgba(0, 75, 135, 0.02)',
 } as const;

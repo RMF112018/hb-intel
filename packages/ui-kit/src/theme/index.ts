@@ -26,6 +26,7 @@ export {
   HBC_DANGER_HOVER,
   HBC_DANGER_PRESSED,
   HBC_SURFACE_ROLES,
+  HBC_SURFACE_PRESENTATION,
   HBC_HEADER_HEIGHT,
   HBC_CONNECTIVITY_HEIGHT_ONLINE,
   HBC_CONNECTIVITY_HEIGHT_OFFLINE,
@@ -58,6 +59,7 @@ export {
   TRANSITION_FAST,
   TRANSITION_NORMAL,
   TRANSITION_SLOW,
+  TRANSITION_DRAMATIC,
   TIMING,
   useAnimationStyles,
   useReducedMotionStyles,
@@ -66,6 +68,8 @@ export {
 // Typography (V2.1 intent-based + deprecated aliases)
 export {
   hbcTypeScale,
+  displayXl,
+  displayLg,
   display,
   heading1,
   heading2,
@@ -105,6 +109,9 @@ export {
   elevationLevel4,
   elevationBlocking,
   elevationFieldLevel4,
+  // W01-P01 presentation-lane semantic aliases
+  elevationHero,
+  elevationEditorial,
   // Deprecated aliases
   elevationRest,
   elevationHover,
@@ -142,6 +149,8 @@ export {
   HBC_SPACE_LG,
   HBC_SPACE_XL,
   HBC_SPACE_XXL,
+  HBC_SPACE_2XL,
+  HBC_SPACE_3XL,
   hbcSpacing,
   BREAKPOINT_MOBILE,
   BREAKPOINT_TABLET,
