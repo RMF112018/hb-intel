@@ -1,0 +1,298 @@
+# UI System Reconciliation and Execution Note
+
+> Prompt-00 deliverable -- repo-truth reconciliation of `@hbc/ui-kit` v2.2.19 against the two-lane UI system direction.
+
+## Governing references
+
+- `docs/reference/ui-kit/UI-System-Layer-Model.md` -- canonical 4-layer architecture
+- `docs/reference/ui-kit/Presentation-Lane-Standard.md` -- presentation lane visual standards
+- `docs/reference/ui-kit/Productive-Lane-Standard.md` -- productive lane visual standards
+- `docs/architecture/blueprint/ui-system-target-architecture.md` -- target architecture
+- `docs/explanation/ui-system/Why-Two-Lanes.md` -- rationale
+
+## Current state summary
+
+`@hbc/ui-kit` v2.2.19 exports 160+ public symbols from a single flat barrel (`src/index.ts`, 660 lines) plus three sub-entry points:
+
+| Entry point | Purpose | Export count |
+|---|---|---|
+| `@hbc/ui-kit` | Main barrel -- everything | 160+ |
+| `@hbc/ui-kit/homepage` | Constrained presentation-lane subset for SPFx homepage webparts | ~50 |
+| `@hbc/ui-kit/app-shell` | Lean shell for SPFx customizer | 3 components + types |
+| `@hbc/ui-kit/theme` | Foundation tokens only | ~42 |
+
+250+ consumer files import from `@hbc/ui-kit` across 14 PWA apps, homepage webparts, and ~10 feature packages.
+
+---
+
+## 1. Layer-and-lane mismatch register
+
+### Layer 1 -- Foundations: mostly healthy
+
+The foundation layer (`src/theme/`) is well-structured with dedicated files for tokens, radii, themes, animations, typography, elevation, hierarchy, z-index, spacing, breakpoints, and density.
+
+**Mismatches:**
+
+| Issue | Location | Severity |
+|---|---|---|
+| Shell-layout constants in token file | `HBC_HEADER_HEIGHT`, `HBC_CONNECTIVITY_HEIGHT_ONLINE/OFFLINE`, `HBC_SIDEBAR_WIDTH_COLLAPSED/EXPANDED`, `HBC_BOTTOM_NAV_HEIGHT` in `src/theme/tokens.ts` (lines 18-27 of barrel) | Low -- app-shell composition values, not design tokens |
+| Deprecated typography aliases still exported | `displayHero`, `displayLarge`, `displayMedium`, `titleLarge`, `titleMedium`, `bodyLarge`, `bodyMedium`, `caption`, `monospace` (lines 72-80) | Low -- tagged deprecated but inflate public surface |
+| Deprecated elevation aliases still exported | `elevationRest`, `elevationHover`, `elevationRaised`, `elevationOverlay`, `elevationDialog` (lines 100-104) | Low -- same pattern |
+
+### Layer 2 -- Primitives: structurally present, boundary is implicit
+
+24 clean primitives exist but share a flat barrel with surfaces, module-specific UI, and adapters. No `@hbc/ui-kit/primitives` entry point exists.
+
+**Healthy primitives (keep as-is):**
+
+| Primitive | Lines in barrel |
+|---|---|
+| `HbcButton` | 311-312 |
+| `HbcTypography` | 314-315 |
+| `HbcStatusBadge` | 170-171 |
+| `HbcSpinner` | 412-413 |
+| `HbcBreadcrumbs` | 416-417 |
+| `HbcTabs` | 419-420 |
+| `HbcPagination` | 422-423 |
+| `HbcSearch` | 425-431 |
+| `HbcSegmentedControl` | 185-186 |
+| `HbcDescriptionList` | 188-189 |
+| `HbcTooltip` | 409-410 |
+| `HbcCard` | 227-228 |
+| `HbcModal` | 230-231 |
+| `HbcPanel` | 223-224 |
+| `HbcTearsheet` | 233-234 |
+| `HbcPopover` | 236-237 |
+| `HbcConfirmDialog` | 344-345 |
+| `HbcBanner` | 396-397 |
+| `HbcToast*` (Provider, useToast, Container) | 399-407 |
+| `HbcEmptyState` | 182-183 |
+| `HbcErrorBoundary` | 191-192 |
+| `HbcTree` | 433-434 |
+| `HbcBottomNav` | 356-357 |
+| Form system (TextField, Select, Checkbox, Form, FormLayout, FormSection, FormRow, StickyFormFooter, FormGuard) | 194-221 |
+| `HbcTextArea`, `HbcRichTextEditor` | 317-323 |
+
+**Primitive mismatches:**
+
+| Issue | Severity |
+|---|---|
+| `HbcPeoplePicker` bundles `useGraphPeopleSearch` -- data-fetching hook in a primitive (line 172) | Medium -- the `createStaticPeopleSearch` factory is fine, but the Graph hook ties a primitive to a specific data backend |
+| No explicit primitive-layer entry point | Medium -- consumers cannot import only primitives |
+
+### Layer 3 -- Surface families: major mismatch zone
+
+This layer has the highest violation density. Three distinct problems:
+
+#### 3a. Presentation surfaces: correctly built, entry-point leak
+
+The `homepage.ts` entry point is well-governed with import discipline enforced by tests. However, all presentation surface families (`HbcHomepage*`, `HbcPremium*`, `HbcSignatureHeroSurface`, `HbcCommandSurface`, `HbcLauncherSurface`, `HbcDiscoverySurface`, `HbcEditorialSurface`, `HbcOperationalSurface`) are also individually importable through the main barrel since their source directories exist under `src/`. This means productive-lane consumers can bypass the constrained entry point.
+
+#### 3b. Productive surfaces: correctly placed, unnamed lane
+
+These are correctly general-purpose productive-lane surfaces but lack explicit lane classification or a dedicated entry point:
+
+- `HbcDataTable` + `useAdaptiveDensity` + `useSavedViews` (lines 263-281)
+- `HbcChart`, `HbcBarChart`, `HbcDonutChart`, `HbcLineChart` (lines 283-295)
+- `HbcKpiCard` (lines 298-299)
+- `HbcCommandBar` (lines 253-261)
+- `WorkspacePageShell` (lines 301-308)
+- 6 page layouts: `ToolLandingLayout`, `DetailLayout`, `CreateUpdateLayout`, `DashboardLayout`, `ListLayout`, `MultiColumnLayout` (lines 437-479)
+- Multi-column composition primitives: `HbcNavRail`, `HbcContextRail`, `HbcActivityStrip`, `HbcQuickActionBar`, `HbcSyncStatusBar` (lines 482-486)
+
+#### 3c. Module-specific UI in ui-kit: layer violation
+
+36 module-specific component exports live in `@hbc/ui-kit` but represent domain-specific compositions that belong in their existing feature packages:
+
+| Component group | Exports | Barrel lines | Existing feature package |
+|---|---|---|---|
+| **Activity Timeline** | `ActivityEventIcon`, `ActivityEventRow`, `HbcActivityTimeline`, `ActivityFilterBar`, `ActivityDiffPopover`, `ActivityEmptyState` | 566-579 | `packages/activity-timeline` |
+| **Export System** | `ExportActionMenu`, `ExportFormatPicker`, `ExportProgressToast`, `ExportReceiptCard` | 582-591 | `packages/export-runtime` |
+| **Record Form** | `HbcRecordForm`, `HbcRecordSubmitBar`, `HbcRecordReviewPanel`, `HbcRecordRecoveryBanner` | 594-603 | `packages/record-form` |
+| **Saved Views** | `SavedViewPicker`, `SavedViewChip`, `SaveViewDialog`, `SavedViewScopeBadge`, `DefaultViewToggle`, `ViewCompatibilityBanner` | 606-619 | `packages/saved-views` |
+| **Publish System** | `HbcPublishPanel`, `PublishTargetSelector`, `PublishApprovalChecklist`, `PublishReceiptCard` | 622-631 | `packages/publish-workflow` |
+| **Bulk Actions** | `BulkSelectionBar`, `BulkActionMenu`, `BulkActionConfirmDialog`, `BulkActionInputDialog`, `BulkActionResultsPanel`, `SelectAllFilteredBanner` | 634-645 | `packages/bulk-actions` |
+| **Safety/Risk** | `HbcRiskBadge`, `HbcSafetyBanner`, `HbcImpactSummaryList`, `HbcScopeSummaryCard`, `HbcRecoveryGuidancePanel`, `HbcEvidenceSummaryBar` | 648-659 | Consumer-local (safety app) or `packages/health-indicator` |
+
+Each destination feature package already exists. The current pattern has those packages importing their own domain UI from ui-kit, creating an inverted dependency.
+
+#### 3d. Module config re-exports: deprecated shims
+
+14 module configuration objects (lines 521-542) are re-exported from `@hbc/shell` for backward compatibility:
+
+```
+scorecardsLanding, scorecardsDetail, rfisLanding, rfisDetail,
+punchListLanding, punchListDetail, drawingsLanding, disciplineFilters,
+budgetLanding, dailyLogSections, dailyLogVoiceFields,
+turnoverLanding, turnoverDetail, turnoverTearsheetSteps, documentsLanding
+```
+
+These are already marked "moved to @hbc/shell" and should be removed after a deprecation period.
+
+### Adapters: Fluent UI passthroughs with naming collisions
+
+11 Fluent UI symbols re-exported at lines 550-563 (`FluentProvider`, `Text`, `Badge`, `Switch`, `Spinner`, `TabList`, `Tab`, `Card`, `CardHeader`, `Button`, `tokens`). These enforce the no-direct-Fluent-import rule but create naming collisions with HB Intel primitives (`Button` vs `HbcButton`, `Spinner` vs `HbcSpinner`, `Card` vs `HbcCard`).
+
+### App Shell: cross-lane concern, sparse sub-entry
+
+The `app-shell.ts` entry point exports only `HbcConnectivityBar`, `HbcAppShell`, and `Popover` (16 lines). All 13 shell sub-components (`HbcHeader`, `HbcSidebar`, `HbcProjectSelector`, etc.) are only available through the main barrel (lines 360-393). Shell-layout constants live in the foundation barrel instead of the shell.
+
+### Homepage entry point: third-party re-exports
+
+`homepage.ts` (lines 75-107) re-exports external library symbols to avoid SPFx webparts needing direct `package.json` dependencies:
+
+- `motion`, `AnimatePresence` from `motion/react`
+- `clsx` from `clsx`
+- `cva`, `VariantProps` from `class-variance-authority`
+- `Separator` from `@radix-ui/react-separator`
+- 23 named Lucide icon exports
+
+These are intentional and documented but leak implementation details. Classified as transitional.
+
+---
+
+## 2. Export health classification
+
+### Healthy (~75 exports)
+
+Correctly layered, well-owned, no action needed:
+
+- **All foundation tokens** (~42): colors, radii, themes, spacing, breakpoints, animations, typography scale (canonical names), elevation (canonical names), hierarchy, z-index, density tokens, canonical hooks (`useHbcTheme`, `useConnectivity`, `useDensity`)
+- **Core primitives** (~24): Button, Typography, StatusBadge, Spinner, Breadcrumbs, Tabs, Pagination, Search, SegmentedControl, DescriptionList, Tooltip, Card, Modal, Panel, Tearsheet, Popover, ConfirmDialog, Banner, Toast, EmptyState, ErrorBoundary, Tree, BottomNav, Form system
+- **Icons** (~60): SVG icon factory with size/weight presets
+- **Branding** (5): logo assets and brand registry
+- **Utility hooks** (7): `useFocusTrap`, `useIsMobile`, `useIsTablet`, `useMinDisplayTime`, `usePrefersReducedMotion`, `useOptimisticMutation`, `useUnsavedChangesBlocker`
+
+### Transitional (~45 exports)
+
+Correctly placed but needs refinement, lane classification, or entry-point consolidation:
+
+- **Productive surface families** (~20): DataTable, Charts, KpiCard, CommandBar, WorkspacePageShell, 6 page layouts, multi-column composition primitives (NavRail, ContextRail, ActivityStrip, QuickActionBar, SyncStatusBar)
+- **Presentation surface families** (~20): Homepage*, Premium*, SignatureHeroSurface, CommandSurface, LauncherSurface, DiscoverySurface, EditorialSurface, OperationalSurface -- correctly segregated in `homepage.ts` but also leaked through main barrel
+- **App Shell** (~13): all shell sub-components -- need consolidation into `app-shell` entry point
+- **Borderline module primitives** (~5): `HbcScoreBar`, `HbcApprovalStepper`, `HbcPhotoGrid`, `HbcCalendarGrid`, `HbcDrawingViewer` -- labeled PH4.13 module-specific but some have cross-module reuse potential; need case-by-case review
+- **Complexity-aware components** (~5): `HbcAuditTrailPanel`, `HbcFormField`, `HbcStatusTimeline`, `HbcPermissionMatrix`, `HbcCoachingCallout` -- most generic enough to be primitives; AuditTrailPanel and PermissionMatrix are borderline
+
+### Legacy (~50 exports)
+
+Misplaced, should migrate or be deprecated:
+
+- **Module-specific UI** (36): Activity Timeline (6), Export System (4), Saved Views (6), Bulk Actions (6), Publish System (4), Record Form (4), Safety/Risk (6)
+- **Module config re-exports** (14): all `@hbc/shell` backward-compatibility shims
+- **Fluent passthroughs** (11): `FluentProvider`, `Text`, `Badge`, `Switch`, `Spinner`, `TabList`, `Tab`, `Card`, `CardHeader`, `Button`, `tokens`
+- **Deprecated foundation aliases** (~15): typography aliases (`displayHero`, `displayLarge`, etc.) and elevation aliases (`elevationRest`, `elevationHover`, etc.)
+
+---
+
+## 3. Recommended first migration wave
+
+**Saved Views** and **Bulk Actions** are the best first migration targets:
+
+| Criterion | Saved Views | Bulk Actions |
+|---|---|---|
+| Existing feature package | `packages/saved-views` | `packages/bulk-actions` |
+| Export count | 6 components | 6 components |
+| Consumer file count | ~4 | ~6 |
+| Shell wrapper pattern | Yes -- destination package already has shell wrappers | Yes |
+| Cross-domain coupling | Low -- types shared with DataTable's `useSavedViews` hook | None |
+| Risk | Low-medium (DataTable type coupling) | Low |
+
+**Migration pattern for both:**
+
+1. Move source files from `packages/ui-kit/src/<Component>/` to the feature package
+2. Add deprecated re-export shim in `packages/ui-kit/src/index.ts` pointing to new location
+3. Update the feature package's `package.json` dependencies
+4. Update consumer imports in affected files
+5. Run targeted verification (typecheck + lint for ui-kit and affected consumers)
+
+**Note on Saved Views / DataTable coupling:** The `useSavedViews` hook and `SavedViewConfig`/`SavedViewEntry`/`SavedViewsPersistenceAdapter` types are currently exported from `HbcDataTable/hooks/` and `HbcDataTable/saved-views-types.ts`. When saved-views UI moves to its own package, these shared types should move with it, and DataTable should import them from the saved-views package. This inverts the current dependency direction correctly.
+
+---
+
+## 4. Rebuild vs. adapt
+
+| Component group | Decision | Rationale |
+|---|---|---|
+| **Foundations** | Keep as-is | Clean, well-structured. Minor cleanup: move shell constants, deprecate aliases. |
+| **Icons** | Keep as-is | Factory pattern is clean. No layer violation. |
+| **Branding** | Keep as-is | Small, stable, correctly isolated. |
+| **Core primitives** | Keep as-is | Healthy, well-typed, well-tested. |
+| **Overlay primitives** | Keep as-is | Correctly layered. |
+| **Form system** | Keep as-is | Good react-hook-form + zod integration. |
+| **Toast / Banner** | Keep as-is | Correct primitive layer. |
+| **Charts** | Keep as-is | Correctly a productive surface family. |
+| **App Shell** | **Adapt** | Consolidate entry point. Move shell constants from tokens. Use compatibility shims. No structural rebuild. |
+| **Layouts** | **Adapt** | Add explicit productive-lane classification. No structural rebuild. |
+| **DataTable** | **Adapt** | Extract `useSavedViews` types to saved-views package. Table itself stays as productive surface primitive. |
+| **Homepage surfaces** | Keep in ui-kit, **restrict** to `homepage.ts` only | Already well-structured. Stop exporting from main barrel. |
+| **Premium surfaces** | Keep as-is | Part of presentation lane, correctly governed. |
+| **Activity Timeline** | **Move** to `packages/activity-timeline` | Domain-specific UI with no cross-domain reuse. Source should relocate entirely. |
+| **Export System** | **Move** to `packages/export-runtime` | Domain-specific UI. Source should relocate. |
+| **Record Form** | **Move** to `packages/record-form` | Domain-specific compositions. Source should relocate. |
+| **Saved Views** | **Move** to `packages/saved-views` | Domain-specific UI. Source should relocate. First migration wave. |
+| **Publish System** | **Move** to `packages/publish-workflow` | Domain-specific UI. Source should relocate. |
+| **Bulk Actions** | **Move** to `packages/bulk-actions` | Domain-specific UI. Source should relocate. First migration wave. |
+| **Safety/Risk** | **Move** to consumer | Domain-specific. Move to safety app or `packages/health-indicator`. |
+| **Fluent adapters** | **Adapt** | Move to `@hbc/ui-kit/fluent` entry point. Long-term, shape into HB Intel wrappers or retire as HbcPrimitives cover the same needs. |
+| **Module configs** | **Remove** | Already live in `@hbc/shell`. Remove shim after deprecation period. |
+| **HbcScoreBar, HbcApprovalStepper** | **Review** | Cross-module reuse potential. Defer to Wave 3 review. |
+| **HbcPhotoGrid, HbcCalendarGrid, HbcDrawingViewer** | **Move** to consumer | Module-specific without clear reuse outside their domain. |
+| **HbcAuditTrailPanel, HbcPermissionMatrix** | **Review** | Cross-domain reuse potential (audit trails and permissions appear in multiple modules). Defer to Wave 3. |
+| **HbcStatusTimeline, HbcCoachingCallout** | Keep as-is | Generic enough to be primitives. |
+
+---
+
+## 5. Execution plan
+
+### Wave 0 -- Foundation cleanup
+
+- Move shell-layout constants from `theme/tokens.ts` to `HbcAppShell/constants.ts`; re-export from theme with `@deprecated` JSDoc
+- Add `@deprecated` JSDoc to all legacy typography and elevation aliases if not already present
+- No breaking changes; all moves use re-export shims
+
+### Wave 1 -- Entry point restructuring
+
+- Create `@hbc/ui-kit/primitives` entry point exporting only Layer 2 components
+- Consolidate all app-shell exports into `@hbc/ui-kit/app-shell`; add deprecation markers on main-barrel shell exports
+- Create `@hbc/ui-kit/fluent` entry point for Fluent passthrough adapters; deprecate their main-barrel export
+- Stop exporting presentation surface families from the main barrel (they should only be available through `@hbc/ui-kit/homepage`); add deprecation re-exports for transition
+- Remove module config re-exports from ui-kit with deprecation notice (they already live in `@hbc/shell`)
+- Update `package.json` exports map
+
+### Wave 2 -- Module-specific UI migration
+
+Priority order based on existing feature-package readiness and consumer count:
+
+1. **Saved Views** (6 exports) -- move to `packages/saved-views`
+2. **Bulk Actions** (6 exports) -- move to `packages/bulk-actions`
+3. **Export System** (4 exports) -- move to `packages/export-runtime`
+4. **Publish System** (4 exports) -- move to `packages/publish-workflow`
+5. **Record Form** (4 exports) -- move to `packages/record-form`
+6. **Activity Timeline** (6 exports) -- move to `packages/activity-timeline`
+7. **Safety/Risk** (6 exports) -- move to consumer-local or `packages/health-indicator`
+
+Each migration: move source, add deprecated re-export shim, update feature package dependencies, update consumer imports, verify.
+
+### Wave 3 -- Primitive layer review
+
+- Review `HbcPeoplePicker` -- extract `useGraphPeopleSearch` to data-access layer or keep injection-based
+- Classify borderline module primitives (`HbcScoreBar`, `HbcApprovalStepper`, `HbcPhotoGrid`, `HbcCalendarGrid`, `HbcDrawingViewer`) as primitive (keep) or feature-local (move)
+- Review complexity-aware components (`HbcAuditTrailPanel`, `HbcPermissionMatrix`) for primitive fitness
+
+### Wave 4 -- Documentation reconciliation
+
+- Update `docs/reference/ui-kit/` to reflect new entry-point structure
+- Retire any doctrine that conflicts with the 4-layer model
+- Update conformance reviewer agent config if entry-point guidance changed
+
+---
+
+## Risk register
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Saved Views types coupled to DataTable hooks | Medium -- moving types requires DataTable to depend on saved-views package | Define shared interface types in saved-views package; DataTable imports from there |
+| Feature package shell wrappers become redundant | Low -- the shell wrapper pattern collapses cleanly when source moves | Shell wrappers become the actual components; remove the indirection layer |
+| Homepage import discipline test breakage | High -- `importDiscipline.test.ts` enforces `@hbc/ui-kit/homepage` as sole entry | Ensure deprecated re-exports from main barrel are removed before they create false passes |
+| Third-party re-exports in homepage entry | Medium -- removing `motion`, `clsx`, `cva`, `lucide-react` later is breaking | Evaluate moving to peer dependencies of homepage consumers in Wave 4 |
+| Fluent naming collisions during transition | Low -- both `Button` and `HbcButton` exported | Moving Fluent re-exports to `@hbc/ui-kit/fluent` resolves collisions cleanly |
