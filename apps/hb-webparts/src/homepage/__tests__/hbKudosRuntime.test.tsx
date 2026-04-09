@@ -5,9 +5,13 @@
  * validation layer and the webpart render path. SharePoint REST calls
  * are mocked so these tests can run in the jsdom environment.
  */
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as React from 'react';
+
+afterEach(() => {
+  cleanup();
+});
 
 // Mock SPFx site context before importing the webpart so the data
 // hooks fall through to the manifest-config fallback path.
@@ -41,6 +45,12 @@ describe('HbKudos webpart — runtime smoke', () => {
 
 describe('HbKudos — typed composer hook integration', () => {
   // The hook module under test is the one the webpart uses directly.
+  // Split button handlers so state updates flush between steps — the
+  // useCallback-based `actions.submit` closes over `draft`, and React
+  // batches state updates within a single event handler, which means a
+  // single click that updates then submits reads the stale draft. All
+  // three tests split update + submit into separate clicks.
+
   it('typed recipients mode blocks submit until an individual email is added', async () => {
     const { useKudosComposer } = await import('../data/useKudosComposer.js');
     const submitSpy = vi.fn().mockResolvedValue(undefined);
@@ -50,10 +60,9 @@ describe('HbKudos — typed composer hook integration', () => {
       return (
         <div>
           <span data-testid="status">{state.status}</span>
-          <span data-testid="isDirty">{String(state.isDirty)}</span>
           <span data-testid="recipientsError">{state.validationErrors.recipients ?? ''}</span>
           <button
-            data-testid="open"
+            data-testid="openAndFillContent"
             onClick={() => {
               actions.open();
               actions.updateDraft({ headline: 'Great work', excerpt: 'Thanks for the help' });
@@ -61,12 +70,9 @@ describe('HbKudos — typed composer hook integration', () => {
           >
             open
           </button>
-          <button data-testid="submitNone" onClick={() => actions.submit()}>
-            submit
-          </button>
           <button
-            data-testid="submitWithValid"
-            onClick={() => {
+            data-testid="addIndividual"
+            onClick={() =>
               actions.updateDraft({
                 recipients: {
                   individualEmails: ['riley@hedrickbrothers.com'],
@@ -74,29 +80,32 @@ describe('HbKudos — typed composer hook integration', () => {
                   departmentLabels: [],
                   projectGroupLabels: [],
                 },
-              });
-              actions.submit();
-            }}
+              })
+            }
           >
-            valid
+            add
+          </button>
+          <button data-testid="submitBtn" onClick={() => actions.submit()}>
+            submit
           </button>
         </div>
       );
     }
 
     const { getByTestId } = render(<Harness />);
-    getByTestId('open').click();
-    getByTestId('submitNone').click();
-    // Wait a microtask so validate() commits
+    fireEvent.click(getByTestId('openAndFillContent'));
+    // First submit — no recipients yet.
+    fireEvent.click(getByTestId('submitBtn'));
     await Promise.resolve();
     expect(getByTestId('recipientsError').textContent).toBe(
       'Add at least one individual recipient email',
     );
     expect(submitSpy).not.toHaveBeenCalled();
 
-    getByTestId('submitWithValid').click();
-    // Allow microtasks to flush: submit is async but state updates synchronously
-    // after the promise resolves because our spy returns a resolved promise.
+    // Add a valid individual, then submit again.
+    fireEvent.click(getByTestId('addIndividual'));
+    fireEvent.click(getByTestId('submitBtn'));
+    // Allow microtasks to flush.
     await Promise.resolve();
     await Promise.resolve();
     expect(submitSpy).toHaveBeenCalled();
@@ -114,7 +123,7 @@ describe('HbKudos — typed composer hook integration', () => {
         <div>
           <span data-testid="err">{state.validationErrors.recipients ?? ''}</span>
           <button
-            data-testid="submit"
+            data-testid="fill"
             onClick={() => {
               actions.open();
               actions.updateDraft({
@@ -127,17 +136,20 @@ describe('HbKudos — typed composer hook integration', () => {
                   projectGroupLabels: [],
                 },
               });
-              actions.submit();
             }}
           >
-            go
+            fill
+          </button>
+          <button data-testid="submit" onClick={() => actions.submit()}>
+            submit
           </button>
         </div>
       );
     }
 
     const { getByTestId } = render(<Harness />);
-    getByTestId('submit').click();
+    fireEvent.click(getByTestId('fill'));
+    fireEvent.click(getByTestId('submit'));
     await Promise.resolve();
     expect(getByTestId('err').textContent).toContain('not-an-email');
     expect(submitSpy).not.toHaveBeenCalled();
@@ -152,21 +164,24 @@ describe('HbKudos — typed composer hook integration', () => {
         <div>
           <span data-testid="err">{state.validationErrors.recipientNames ?? ''}</span>
           <button
-            data-testid="submit"
+            data-testid="fill"
             onClick={() => {
               actions.open();
               actions.updateDraft({ headline: 'h', excerpt: 'e' });
-              actions.submit();
             }}
           >
-            go
+            fill
+          </button>
+          <button data-testid="submit" onClick={() => actions.submit()}>
+            submit
           </button>
         </div>
       );
     }
 
     const { getByTestId } = render(<Harness />);
-    getByTestId('submit').click();
+    fireEvent.click(getByTestId('fill'));
+    fireEvent.click(getByTestId('submit'));
     await Promise.resolve();
     expect(getByTestId('err').textContent).toBe('At least one recipient is required');
     expect(submitSpy).not.toHaveBeenCalled();
@@ -267,5 +282,3 @@ describe('HbcKudosComposerForm — typed recipient bucket input', () => {
   });
 });
 
-// Avoid unused import warning — `within` is convenient for future extensions.
-void within;
