@@ -1,0 +1,14 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#sites/$entity",
+  "createdDateTime": "2025-08-26T10:12:28.667Z",
+  "description": "HB Intranet Home Page",
+  "id": "hedrickbrotherscom.sharepoint.com,a40963f8-7702-4f7a-a65b-27e6bf96a09e,b0421fa9-8885-4449-b281-95a5f4512102",
+  "lastModifiedDateTime": "2026-04-09T17:24:43Z",
+  "name": "HBCentral",
+  "webUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "displayName": "HB Central",
+  "root": {},
+  "siteCollection": {
+    "hostname": "hedrickbrotherscom.sharepoint.com"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "$comment": "Example harness config for the People + Culture / HB Kudos preliminary workflow test. Copy to peopleKudosWorkflow.config.json (gitignored) and pass with --config. All keys are optional — unspecified keys inherit harness defaults.",
+  "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "lists": {
+    "peopleCultureKudos": "People Culture Kudos",
+    "kudosAuditEvents": "Kudos Audit Events",
+    "peopleCultureAnnouncements": "People Culture Announcements",
+    "peopleCultureCelebrations": "People Culture Celebrations"
+  },
+  "testPrefix": "TEST-HBI",
+  "cleanup": true,
+  "auditParity": true,
+  "docsDir": "docs/architecture/plans/MASTER/spfx/homepage/people/phase-14"
+}
