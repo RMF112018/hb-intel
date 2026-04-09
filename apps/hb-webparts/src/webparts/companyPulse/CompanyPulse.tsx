@@ -109,5 +109,10 @@ export function CompanyPulse({
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
-  return <HbcNewsroomSurface model={toSurfaceModel(normalized)} />;
+  return (
+    <HbcNewsroomSurface
+      model={toSurfaceModel(normalized)}
+      variant="company-pulse-homepage"
+    />
+  );
 }

@@ -112,6 +112,21 @@ export interface HbcNewsroomSurfaceModel {
 
 export type HbcNewsroomLayoutMode = 'rich' | 'sparse' | 'headline-only';
 
+/**
+ * Opt-in presentation variant for the newsroom surface.
+ *
+ * - `default` — the canonical editorial composition with a dominant lead
+ *   image zone and a 68/28 featured/rail split at desktop widths.
+ * - `company-pulse-homepage` — scoped homepage-fit tuning for the Company
+ *   Pulse webpart when it renders inside a narrower SharePoint section.
+ *   Tightens vertical density, shrinks the lead image zone (real + failed /
+ *   no-media placeholder), rebalances the featured/rail proportions, and
+ *   tightens masthead, content, rail, and quick-reads rhythm so the module
+ *   fits comfortably against adjacent homepage cards without flattening the
+ *   premium newsroom grammar. No other consumer is affected.
+ */
+export type HbcNewsroomSurfaceVariant = 'default' | 'company-pulse-homepage';
+
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
@@ -119,6 +134,7 @@ export type HbcNewsroomLayoutMode = 'rich' | 'sparse' | 'headline-only';
 export interface HbcNewsroomSurfaceProps {
   model: HbcNewsroomSurfaceModel;
   className?: string;
+  variant?: HbcNewsroomSurfaceVariant;
   'aria-label'?: string;
 }
 
@@ -570,6 +586,7 @@ function FooterStrip({
 export function HbcNewsroomSurface({
   model,
   className,
+  variant = 'default',
   'aria-label': ariaLabel,
 }: HbcNewsroomSurfaceProps): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
@@ -588,10 +605,15 @@ export function HbcNewsroomSurface({
   return (
     <section
       aria-label={ariaLabel ?? model.heading}
-      className={clsx(styles.root, className)}
+      className={clsx(
+        styles.root,
+        variant === 'company-pulse-homepage' && styles.companyPulseHomepage,
+        className,
+      )}
       data-hbc-presentation="newsroom-surface"
       data-hbc-homepage="company-pulse"
       data-hbc-newsroom-layout={layout}
+      data-hbc-newsroom-variant={variant}
     >
       <Masthead
         heading={model.heading}

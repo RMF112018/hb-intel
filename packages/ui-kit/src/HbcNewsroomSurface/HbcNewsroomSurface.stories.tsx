@@ -138,6 +138,29 @@ const headlineOnlyModel: HbcNewsroomSurfaceModel = {
 
 const wrapStyle: React.CSSProperties = { maxWidth: 1200 };
 const mobileWrapStyle: React.CSSProperties = { maxWidth: 420 };
+/**
+ * Constrained homepage-section wrapper used by the Company Pulse
+ * homepage-fit stories. Mirrors the real width of the SharePoint
+ * section where the webpart currently renders so the tuned
+ * variant is reviewed under the same constraints as production.
+ */
+const homepageSectionWrapStyle: React.CSSProperties = { maxWidth: 720 };
+
+/** Forces the FeaturedImage onError → ImagePlaceholder fallback
+ *  so the no-media / failed-media placeholder state of the
+ *  homepage-fit variant can be visually verified. */
+const noMediaModel: HbcNewsroomSurfaceModel = {
+  ...richModel,
+  lead: richModel.lead
+    ? {
+        ...richModel.lead,
+        media: {
+          src: 'https://invalid.example.invalid/company-pulse-missing.jpg',
+          alt: 'Intentionally missing lead image',
+        },
+      }
+    : undefined,
+};
 
 export const RichEditorial: Story = {
   render: () => (
@@ -175,6 +198,37 @@ export const Mobile: Story = {
   render: () => (
     <div style={mobileWrapStyle}>
       <HbcNewsroomSurface model={richModel} />
+    </div>
+  ),
+};
+
+/**
+ * Homepage-fit Company Pulse variant rendered inside a constrained
+ * 720px wrapper that approximates the real SharePoint homepage
+ * section width. Shrinks the lead image zone, tightens vertical
+ * rhythm, and rebalances the featured/rail proportions so the
+ * module feels comfortable against adjacent homepage cards
+ * without losing the premium newsroom register.
+ */
+export const CompanyPulseHomepageNarrow: Story = {
+  render: () => (
+    <div style={homepageSectionWrapStyle}>
+      <HbcNewsroomSurface model={richModel} variant="company-pulse-homepage" />
+    </div>
+  ),
+};
+
+/**
+ * Homepage-fit variant under the no-media / failed-media
+ * placeholder state. The lead image URL is intentionally
+ * unresolvable so FeaturedImage falls back to ImagePlaceholder,
+ * proving the placeholder no longer drives a tall dead block
+ * in narrow SharePoint sections.
+ */
+export const CompanyPulseHomepageNoMedia: Story = {
+  render: () => (
+    <div style={homepageSectionWrapStyle}>
+      <HbcNewsroomSurface model={noMediaModel} variant="company-pulse-homepage" />
     </div>
   ),
 };
