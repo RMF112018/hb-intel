@@ -6,15 +6,21 @@
  *
  * @see tools/spfx-shell/src/webparts/shell/ShellWebPart.ts
  * @see packages/spfx/src/webparts/projectSites/ProjectSitesRoot.tsx
+ *
+ * Import discipline (W01r-P11 Project Sites compliance closure):
+ *   - `HbcThemeProvider` comes from `@hbc/ui-kit/app-shell` — the narrow
+ *     sanctioned SPFx-safe entry point for theme context and shell chrome.
+ *   - `ProjectSitesRoot` comes from `@hbc/spfx/project-sites` — the
+ *     package-oriented barrel that replaces the previous relative
+ *     source reach into `packages/spfx`.
  */
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { HbcThemeProvider } from '@hbc/ui-kit';
+import { HbcThemeProvider } from '@hbc/ui-kit/app-shell';
 import { bootstrapSpfxAuth, resolveSpfxPermissions } from '@hbc/auth/spfx';
-// Use relative path — Vite resolves via alias, tsc resolves via filesystem
-import { ProjectSitesRoot } from '../../../packages/spfx/src/webparts/projectSites/ProjectSitesRoot.js';
+import { ProjectSitesRoot } from '@hbc/spfx/project-sites';
 
 let root: Root | undefined;
 let queryClient: QueryClient | undefined;
@@ -65,9 +71,10 @@ export function unmount(): void {
 }
 
 // ── Global publication (belt-and-suspenders) ──────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const api = { mount, unmount };
 (globalThis as any).__hbIntel_projectSites = api;
 if (typeof window !== 'undefined' && globalThis !== window) {
   (window as any).__hbIntel_projectSites = api;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

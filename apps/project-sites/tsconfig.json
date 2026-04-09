@@ -4,10 +4,14 @@
     "noEmit": true,
     "types": ["vite/client"],
     "paths": {
+      "@hbc/spfx/project-sites": ["../../packages/spfx/src/webparts/projectSites/index.ts"],
       "@hbc/spfx/project-sites/*": ["../../packages/spfx/src/webparts/projectSites/*"],
       "@hbc/auth/spfx": ["../../packages/auth/src/spfx/index.ts"],
       "@hbc/auth": ["../../packages/auth/src/index.ts"],
-      "@hbc/ui-kit": ["../../packages/ui-kit/src/index.ts"],
+      "@hbc/ui-kit/app-shell": ["../../packages/ui-kit/src/app-shell.ts"],
+      "@hbc/ui-kit/primitives": ["../../packages/ui-kit/src/primitives.ts"],
+      "@hbc/ui-kit/theme": ["../../packages/ui-kit/src/theme/index.ts"],
+      "@hbc/ui-kit/icons": ["../../packages/ui-kit/src/icons/index.tsx"],
       "@hbc/models": ["../../packages/models/src/index.ts"]
     }
   },

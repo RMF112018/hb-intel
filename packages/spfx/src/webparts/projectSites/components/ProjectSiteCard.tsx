@@ -2,16 +2,31 @@
  * ProjectSiteCard — Governed project-site link card with state differentiation.
  *
  * Three visual states:
- * - **Active** (hasSiteUrl + active/pursuit stage): HBC blue top accent, full elevation, hover lift
- * - **Provisioning** (!hasSiteUrl): HBC orange top accent, dashed border, pulsing dot
- * - **Archived/Other** (hasSiteUrl + non-active stage): muted top accent, reduced elevation
+ * - **Active** (hasSiteUrl + active/pursuit stage): HBC blue top accent,
+ *   full elevation, hover lift, and a brand-tinted action chip for the
+ *   "Open Site" affordance.
+ * - **Archived/Other** (hasSiteUrl + non-active stage): muted top accent,
+ *   reduced elevation, neutral action chip.
+ * - **Provisioning** (!hasSiteUrl): HBC orange top accent, dashed border,
+ *   pulsing indicator dot, non-interactive.
  *
- * Light-theme only, governed by @hbc/ui-kit tokens.
+ * Light-theme only, governed by `@hbc/ui-kit/theme` tokens.
+ *
+ * Import discipline (W01r-P11 Project Sites compliance closure):
+ *   - Primitives from `@hbc/ui-kit/primitives`
+ *   - Tokens, typography, elevation, motion from `@hbc/ui-kit/theme`
+ *   - Icons from `@hbc/ui-kit/icons`
+ *   - No root `@hbc/ui-kit` imports.
  */
 import React, { useMemo, type FC } from 'react';
-import { makeStyles, mergeClasses } from '@griffel/react';
-import { HbcCard, HbcStatusBadge, HbcDescriptionList } from '@hbc/ui-kit';
-import type { StatusVariant, DescriptionListItem } from '@hbc/ui-kit';
+import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
+import {
+  HbcCard,
+  HbcStatusBadge,
+  HbcDescriptionList,
+  type StatusVariant,
+  type DescriptionListItem,
+} from '@hbc/ui-kit/primitives';
 import {
   HBC_PRIMARY_BLUE,
   HBC_ACCENT_ORANGE,
@@ -19,15 +34,19 @@ import {
   HBC_SURFACE_LIGHT,
   HBC_RADIUS_SM,
   HBC_RADIUS_XL,
+  HBC_RADIUS_FULL,
+  HBC_SPACE_XS,
+  HBC_SPACE_SM,
   hbcBrandRamp,
+  elevationLevel0,
   elevationLevel1,
   elevationLevel2,
-  elevationLevel0,
   TRANSITION_FAST,
+  TRANSITION_SLOW,
   heading3,
   bodySmall,
   label as labelType,
-} from '@hbc/ui-kit';
+} from '@hbc/ui-kit/theme';
 import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
 
@@ -40,12 +59,15 @@ const useStyles = makeStyles({
     color: 'inherit',
     display: 'flex',
     borderRadius: HBC_RADIUS_XL,
-    transitionProperty: 'box-shadow, transform',
+    transitionProperty: 'box-shadow, transform, border-color',
     transitionDuration: TRANSITION_FAST,
     transitionTimingFunction: 'ease-in-out',
     height: '100%',
     '@media (prefers-reduced-motion: reduce)': {
       transitionDuration: '0.01ms',
+      ':hover': {
+        transform: 'none',
+      },
     },
   },
   cardFull: {
@@ -68,20 +90,20 @@ const useStyles = makeStyles({
     },
   },
   activeAccent: {
-    borderTopWidth: '3px',
-    borderTopStyle: 'solid',
-    borderTopColor: HBC_PRIMARY_BLUE,
+    ...shorthands.borderTop('3px', 'solid', HBC_PRIMARY_BLUE),
   },
 
   // ── Archived/other state (live site, non-active stage) ─────────────
   archivedWrapper: {
     boxShadow: elevationLevel0,
-    opacity: 0.8,
+    opacity: 0.82,
     ':hover': {
+      opacity: 1,
       boxShadow: elevationLevel1,
       transform: 'translateY(-1px)',
     },
     ':focus-visible': {
+      opacity: 1,
       outlineWidth: '2px',
       outlineStyle: 'solid',
       outlineColor: HBC_PRIMARY_BLUE,
@@ -90,28 +112,17 @@ const useStyles = makeStyles({
     },
   },
   archivedAccent: {
-    borderTopWidth: '3px',
-    borderTopStyle: 'solid',
-    borderTopColor: HBC_SURFACE_LIGHT['surface-3'],
+    ...shorthands.borderTop('3px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
   },
 
   // ── Provisioning state (no site yet) ───────────────────────────────
   provisioningWrapper: {
     cursor: 'default',
-    opacity: 0.75,
+    opacity: 0.78,
     boxShadow: 'none',
-    borderTopWidth: '3px',
-    borderBottomWidth: '1px',
-    borderLeftWidth: '1px',
-    borderRightWidth: '1px',
-    borderTopStyle: 'solid',
-    borderBottomStyle: 'dashed',
-    borderLeftStyle: 'dashed',
-    borderRightStyle: 'dashed',
-    borderTopColor: HBC_ACCENT_ORANGE,
-    borderBottomColor: HBC_SURFACE_LIGHT['surface-3'],
-    borderLeftColor: HBC_SURFACE_LIGHT['surface-3'],
-    borderRightColor: HBC_SURFACE_LIGHT['surface-3'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    ...shorthands.border('1px', 'dashed', HBC_SURFACE_LIGHT['surface-3']),
+    ...shorthands.borderTop('3px', 'solid', HBC_ACCENT_ORANGE),
     ':hover': {
       boxShadow: 'none',
       transform: 'none',
@@ -123,23 +134,23 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: '8px',
+    gap: `${HBC_SPACE_SM}px`,
     minHeight: '24px',
   },
   projectNumber: {
     fontSize: bodySmall.fontSize,
-    fontWeight: '600',
+    fontWeight: 600,
     letterSpacing: '0.03em',
     fontVariantNumeric: 'tabular-nums',
     color: HBC_PRIMARY_BLUE,
     backgroundColor: hbcBrandRamp[150],
     paddingTop: '2px',
     paddingBottom: '2px',
-    paddingLeft: '8px',
-    paddingRight: '8px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
     borderRadius: HBC_RADIUS_SM,
     whiteSpace: 'nowrap',
-    lineHeight: '1.4',
+    lineHeight: 1.4,
   },
   stageBadge: {
     marginLeft: 'auto',
@@ -149,7 +160,7 @@ const useStyles = makeStyles({
   body: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: `${HBC_SPACE_SM}px`,
   },
   projectName: {
     fontSize: heading3.fontSize,
@@ -173,8 +184,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: '8px',
-    minHeight: '20px',
+    gap: `${HBC_SPACE_SM}px`,
+    minHeight: '24px',
   },
   department: {
     fontSize: bodySmall.fontSize,
@@ -188,24 +199,36 @@ const useStyles = makeStyles({
     flexShrink: 1,
     minWidth: 0,
   },
+  // Premium productive action chip for "Open Site": brand-tinted
+  // background, tighter horizontal padding, disciplined hover treatment.
   openSiteAction: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '4px',
+    gap: `${HBC_SPACE_XS}px`,
     fontSize: bodySmall.fontSize,
-    fontWeight: '600',
+    fontWeight: 600,
     color: HBC_BRAND_ACTION,
+    backgroundColor: hbcBrandRamp[100],
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    borderRadius: HBC_RADIUS_SM,
     textDecorationLine: 'none',
     whiteSpace: 'nowrap',
     flexShrink: 0,
-    transitionProperty: 'color',
+    transitionProperty: 'background-color, color, transform',
     transitionDuration: TRANSITION_FAST,
     transitionTimingFunction: 'ease-in-out',
+  },
+  openSiteActionArchived: {
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    color: HBC_SURFACE_LIGHT['text-muted'],
   },
   provisioningLabel: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: `${HBC_SPACE_XS}px`,
     fontSize: bodySmall.fontSize,
     fontWeight: labelType.fontWeight,
     fontStyle: 'italic',
@@ -214,16 +237,16 @@ const useStyles = makeStyles({
   },
   provisioningDot: {
     display: 'inline-block',
-    width: '6px',
-    height: '6px',
-    borderRadius: '3px',
+    width: `${HBC_SPACE_XS + 2}px`,
+    height: `${HBC_SPACE_XS + 2}px`,
+    borderRadius: HBC_RADIUS_FULL,
     backgroundColor: HBC_ACCENT_ORANGE,
     animationName: {
       '0%': { opacity: 0.3 },
       '50%': { opacity: 1 },
       '100%': { opacity: 0.3 },
     },
-    animationDuration: '1.5s',
+    animationDuration: TRANSITION_SLOW,
     animationIterationCount: 'infinite',
     animationTimingFunction: 'ease-in-out',
     '@media (prefers-reduced-motion: reduce)': {
@@ -232,6 +255,10 @@ const useStyles = makeStyles({
         to: { opacity: 0.6 },
       },
     },
+  },
+  metaList: {
+    paddingTop: `${HBC_SPACE_XS}px`,
+    ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['surface-2']),
   },
 });
 
@@ -295,11 +322,16 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     </div>
   );
 
+  const openSiteActionClass = mergeClasses(
+    classes.openSiteAction,
+    cardState === 'archived' && classes.openSiteActionArchived,
+  );
+
   const footerContent = (
     <div className={classes.footer}>
       <span className={classes.department}>{deptLabel}</span>
       {entry.hasSiteUrl ? (
-        <span className={classes.openSiteAction} aria-hidden="true">
+        <span className={openSiteActionClass} aria-hidden="true">
           Open Site <ExternalLink size="sm" />
         </span>
       ) : (
@@ -315,7 +347,9 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     <div className={classes.body}>
       <h3 className={classes.projectName}>{entry.projectName}</h3>
       {metadataItems.length > 0 && (
-        <HbcDescriptionList items={metadataItems} dense />
+        <div className={classes.metaList}>
+          <HbcDescriptionList items={metadataItems} dense />
+        </div>
       )}
     </div>
   );

@@ -214,6 +214,8 @@ export default defineWorkspace([
       alias: {
         '@hbc/auth/spfx': resolve(__dirname, './packages/auth/src/spfx/index.ts'),
         '@hbc/auth': resolve(__dirname, './packages/auth/src/index.ts'),
+        '@hbc/ui-kit/app-shell': resolve(__dirname, './packages/ui-kit/src/app-shell.ts'),
+        '@hbc/ui-kit/primitives': resolve(__dirname, './packages/ui-kit/src/primitives.ts'),
         '@hbc/ui-kit/icons': resolve(__dirname, './packages/ui-kit/src/icons/index.tsx'),
         '@hbc/ui-kit/theme': resolve(__dirname, './packages/ui-kit/src/theme/index.ts'),
         '@hbc/ui-kit': resolve(__dirname, './packages/ui-kit/src/index.ts'),

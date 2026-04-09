@@ -7,16 +7,28 @@ const isProduction = process.env.NODE_ENV === 'production';
 export default defineConfig(({ command }) => ({
   plugins: [react()],
   resolve: {
-    alias: {
-      // Subpath alias MUST come before the parent alias
-      '@hbc/auth/spfx': resolve(__dirname, '../../packages/auth/src/spfx/index.ts'),
-      '@hbc/auth': resolve(__dirname, '../../packages/auth/src/index.ts'),
-      '@hbc/ui-kit/icons': resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx'),
-      '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
-      '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts'),
-      '@hbc/models': resolve(__dirname, '../../packages/models/src/index.ts'),
-      '@hbc/spfx/project-sites': resolve(__dirname, '../../packages/spfx/src/webparts/projectSites'),
-    },
+    alias: [
+      // Subpath aliases MUST come before parent aliases. Order matters in
+      // Vite's alias resolver because it walks the list top-to-bottom.
+      // W01r-P11 (Project Sites compliance closure):
+      //   - Layered `@hbc/ui-kit/*` entry points are the canonical imports.
+      //     The root `@hbc/ui-kit` alias is intentionally NOT declared here
+      //     — Project Sites must import from the narrower entry points.
+      //   - `HbcThemeProvider` is now exported from `@hbc/ui-kit/app-shell`,
+      //     so SPFx productive-lane consumers have a narrow sanctioned path.
+      //   - `@hbc/spfx/project-sites` resolves to the package-oriented
+      //     barrel (packages/spfx/src/webparts/projectSites/index.ts),
+      //     replacing the previous relative source reach from mount.tsx.
+      { find: '@hbc/auth/spfx', replacement: resolve(__dirname, '../../packages/auth/src/spfx/index.ts') },
+      { find: '@hbc/auth', replacement: resolve(__dirname, '../../packages/auth/src/index.ts') },
+      { find: '@hbc/ui-kit/app-shell', replacement: resolve(__dirname, '../../packages/ui-kit/src/app-shell.ts') },
+      { find: '@hbc/ui-kit/primitives', replacement: resolve(__dirname, '../../packages/ui-kit/src/primitives.ts') },
+      { find: '@hbc/ui-kit/theme', replacement: resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts') },
+      { find: '@hbc/ui-kit/icons', replacement: resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx') },
+      { find: '@hbc/models', replacement: resolve(__dirname, '../../packages/models/src/index.ts') },
+      { find: /^@hbc\/spfx\/project-sites$/, replacement: resolve(__dirname, '../../packages/spfx/src/webparts/projectSites/index.ts') },
+      { find: '@hbc/spfx/project-sites', replacement: resolve(__dirname, '../../packages/spfx/src/webparts/projectSites') },
+    ],
   },
   build: {
     outDir: 'dist',

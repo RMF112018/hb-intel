@@ -29,13 +29,19 @@ import { HbcButton, HbcDataTable, HbcAppShell } from '@hbc/ui-kit';
 
 ### `@hbc/ui-kit/app-shell`
 
-Lean entry point for SPFx webparts. Exports only `HbcConnectivityBar`, `HbcAppShell`, and their associated types.
+Lean entry point for SPFx webparts and customizer bundles. Exports the shell chrome (`HbcAppShell`, `HbcConnectivityBar`), shell-chrome layout constants, the `Popover` alias, and — since W01r-P11 — the shell-adjacent theme-context wrapper (`HbcThemeProvider`, `HbcThemeContext`, `HbcThemeProviderProps`).
 
 ```tsx
-import { HbcAppShell, HbcConnectivityBar } from '@hbc/ui-kit/app-shell';
+import {
+  HbcAppShell,
+  HbcConnectivityBar,
+  HbcThemeProvider,
+} from '@hbc/ui-kit/app-shell';
 ```
 
-**Use when:** Building SPFx webparts that need the shell chrome but must stay within the SharePoint bundle budget (~200 KB gzipped).
+**Use when:** Building SPFx webparts or SPFx application customizers that need shell chrome **or** the theme-context wrapper to enforce a stable theme at the mount boundary (e.g. `forceTheme='light'`), while staying within the SharePoint bundle budget (~200 KB gzipped).
+
+**`HbcThemeProvider` rationale:** Theme context physically lives in `packages/ui-kit/src/HbcAppShell/HbcThemeContext.tsx`, is consumed internally by `HbcAppShell` itself, and is the correct narrow path for productive-lane SPFx consumers that need to force a theme without pulling in the full `@hbc/ui-kit` root barrel. Previously it was only reachable via `@hbc/ui-kit` or `@hbc/ui-kit/homepage`.
 
 ### `@hbc/ui-kit/theme`
 

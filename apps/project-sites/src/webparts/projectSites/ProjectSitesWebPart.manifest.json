@@ -3,9 +3,10 @@
   "id": "e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b",
   "alias": "ProjectSitesWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "0.1.0.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
+  "supportsFullBleed": true,
   "supportedHosts": [
     "SharePointWebPart"
   ],

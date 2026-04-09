@@ -10,6 +10,7 @@
   "dependencies": {
     "@griffel/react": "^1.5.0",
     "@hbc/auth": "workspace:*",
+    "@hbc/spfx": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@pnp/sp": "^4.0.0",
     "@tanstack/react-query": "^5.0.0",

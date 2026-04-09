@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./project-sites": {
+      "types": "./dist/webparts/projectSites/index.d.ts",
+      "import": "./dist/webparts/projectSites/index.js"
     }
   },
   "scripts": {
