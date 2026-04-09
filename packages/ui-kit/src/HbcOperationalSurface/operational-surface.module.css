@@ -1,6 +1,26 @@
 /**
- * OperationalSurface — Dashboard-adjacent operational data surface
- * Phase 17-03 — Shared primitive system rebuild
+ * HbcOperationalSurface — Signature operational command surface.
+ *
+ * W01r-P20 — Safety & Field Excellence rebuild:
+ *   • Field Safety-register nameplate masthead (Shield eyebrow badge,
+ *     dominant title, freshness dateline, ghost action)
+ *   • Severity spectrum strip across the top of the content area
+ *     (red → amber → blue → green) as a persistent cultural reminder
+ *     that safety is a first-class HB value
+ *   • Dominant featured signal card with severity-colored left accent,
+ *     large severity icon badge, 1.5→1.875rem title, body, chips,
+ *     dashed-top meta row
+ *   • Signal rows upgraded to bordered tiles with per-severity left
+ *     accents (danger red, warning amber, success green, default blue),
+ *     stronger typography, hover lift, optional trailing arrow
+ *   • Presentation-lane brand tokens inlined
+ *
+ * Governed brand tokens:
+ *   HBC_PRESENTATION_BLUE   #225391 / 34, 83, 145
+ *   Severity accents: danger #c4362a, warning #c26434, success #1a7a42
+ *
+ * Responsive via viewport media queries (mobile base, tablet ≥ 768px,
+ * desktop ≥ 1200px).
  */
 
 .root {
@@ -8,208 +28,598 @@
   flex-direction: column;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   color: #1a1a1a;
-  background: rgba(34, 83, 145, 0.025);
+  background: #ffffff;
   border-radius: 12px;
-  border-left: 4px solid rgba(34, 83, 145, 0.35);
-  border-top: 1px solid rgba(34, 83, 145, 0.08);
-  border-right: 1px solid rgba(34, 83, 145, 0.08);
-  border-bottom: 1px solid rgba(34, 83, 145, 0.08);
+  border-left: 5px solid #225391;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(34, 83, 145, 0.08),
+    0 6px 18px rgba(34, 83, 145, 0.08),
+    0 22px 48px rgba(10, 24, 45, 0.06);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
-/* ── Header ────────────────────────────────────────────── */
-.header {
+/* ── SharePoint global CSS defense ──────────────────────── */
+
+.root *,
+.root *::before,
+.root *::after {
+  box-sizing: border-box;
+}
+
+.root a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.root a:hover {
+  text-decoration: none;
+}
+
+.root h2,
+.root h3,
+.root h4,
+.root p {
+  margin: 0;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MASTHEAD
+   ═══════════════════════════════════════════════════════════════ */
+
+.masthead {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px 12px;
+  flex-direction: column;
   gap: 10px;
+  padding: 22px 22px 14px;
 }
 
-.headerTitle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #1a1a1a;
+@media (min-width: 768px) {
+  .masthead {
+    padding: 26px 32px 16px;
+    gap: 12px;
+  }
 }
 
-.headerIcon {
+@media (min-width: 1200px) {
+  .masthead {
+    padding: 30px 36px 18px;
+  }
+}
+
+.mastheadEyebrow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: rgba(34, 83, 145, 0.08);
+  gap: 12px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: #225391;
 }
 
-.headerAction {
+.mastheadEyebrowIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(34, 83, 145, 0.10);
+  color: #225391;
+  border: 1px solid rgba(34, 83, 145, 0.16);
+}
+
+.mastheadEyebrowRule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(34, 83, 145, 0.35) 0%,
+    rgba(34, 83, 145, 0.08) 60%,
+    transparent 100%
+  );
+}
+
+.mastheadEyebrowDate {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.5);
+  white-space: nowrap;
+}
+
+.mastheadRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mastheadHeadline {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #0a1b33;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .mastheadHeadline {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .mastheadHeadline {
+    font-size: 1.9375rem;
+  }
+}
+
+.mastheadAction {
   flex-shrink: 0;
+  padding-bottom: 4px;
 }
 
-/* ── Separator ─────────────────────────────────────────── */
-.separator {
-  height: 2px;
-  background: linear-gradient(90deg, rgba(34, 83, 145, 0.25) 0%, rgba(34, 83, 145, 0.05) 100%);
-  border: none;
-  margin: 0 20px;
+/* Severity spectrum strip — cultural reminder that safety is a first-class
+   HB value. Each segment corresponds to a severity the surface can render. */
+
+.severityStrip {
+  position: relative;
+  display: flex;
+  height: 4px;
+  margin: 0 22px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(34, 83, 145, 0.06);
 }
 
-/* ── Content ───────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .severityStrip {
+    margin: 0 32px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .severityStrip {
+    margin: 0 36px;
+  }
+}
+
+.severityStripSegment {
+  flex: 1;
+  height: 100%;
+}
+
+.severityStripDanger {
+  background: linear-gradient(90deg, #c4362a 0%, rgba(196, 54, 42, 0.45) 100%);
+}
+
+.severityStripWarning {
+  background: linear-gradient(90deg, rgba(196, 54, 42, 0.45) 0%, #c26434 50%, rgba(194, 100, 52, 0.35) 100%);
+}
+
+.severityStripDefault {
+  background: linear-gradient(90deg, rgba(194, 100, 52, 0.35) 0%, #225391 50%, rgba(34, 83, 145, 0.35) 100%);
+}
+
+.severityStripSuccess {
+  background: linear-gradient(90deg, rgba(34, 83, 145, 0.35) 0%, #1a7a42 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTENT
+   ═══════════════════════════════════════════════════════════════ */
+
 .content {
   display: flex;
   flex-direction: column;
-  padding: 14px 20px 18px;
-  gap: 12px;
+  gap: 18px;
+  padding: 22px 22px 22px;
 }
 
-/* ── Featured highlight ────────────────────────────────── */
+@media (min-width: 768px) {
+  .content {
+    gap: 20px;
+    padding: 26px 32px 26px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .content {
+    gap: 22px;
+    padding: 30px 36px 30px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURED SIGNAL
+   ═══════════════════════════════════════════════════════════════ */
+
 .featured {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  padding: 22px 22px 22px 26px;
+  background: #ffffff;
+  border: 1px solid rgba(34, 83, 145, 0.12);
+  border-left: 5px solid #225391;
+  border-radius: 12px;
+  box-shadow:
+    0 2px 4px rgba(10, 24, 45, 0.04),
+    0 10px 28px rgba(10, 24, 45, 0.06);
+}
+
+@media (min-width: 768px) {
+  .featured {
+    padding: 28px 32px 28px 36px;
+    gap: 22px;
+  }
+}
+
+/* Severity variant left accents */
+
+.featuredDanger {
+  border-left-color: #c4362a;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(196, 54, 42, 0.025) 100%);
+}
+
+.featuredWarning {
+  border-left-color: #c26434;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(194, 100, 52, 0.030) 100%);
+}
+
+.featuredSuccess {
+  border-left-color: #1a7a42;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(26, 122, 66, 0.025) 100%);
+}
+
+.featuredDefault {
+  border-left-color: #225391;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(34, 83, 145, 0.025) 100%);
+}
+
+.featuredIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  border: 1px solid currentColor;
+  color: #225391;
+  background: rgba(34, 83, 145, 0.10);
+}
+
+.featuredIconDanger {
+  color: #c4362a;
+  background: rgba(196, 54, 42, 0.10);
+}
+
+.featuredIconWarning {
+  color: #c26434;
+  background: rgba(194, 100, 52, 0.12);
+}
+
+.featuredIconSuccess {
+  color: #1a7a42;
+  background: rgba(26, 122, 66, 0.10);
+}
+
+.featuredBody {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 8px;
-  background: rgba(34, 83, 145, 0.04);
-  border: 1px solid rgba(34, 83, 145, 0.08);
+  gap: 10px;
 }
 
-.featuredHeader {
+.featuredEyebrow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: currentColor;
+}
+
+.featuredEyebrowDanger {
+  color: #c4362a;
+}
+
+.featuredEyebrowWarning {
+  color: #c26434;
+}
+
+.featuredEyebrowSuccess {
+  color: #1a7a42;
+}
+
+.featuredEyebrowDefault {
+  color: #225391;
+}
+
+.featuredEyebrowDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(34, 83, 145, 0.18);
+}
+
+.featuredEyebrowDotDanger {
+  box-shadow: 0 0 0 3px rgba(196, 54, 42, 0.22);
+}
+
+.featuredEyebrowDotWarning {
+  box-shadow: 0 0 0 3px rgba(194, 100, 52, 0.22);
+}
+
+.featuredEyebrowDotSuccess {
+  box-shadow: 0 0 0 3px rgba(26, 122, 66, 0.22);
 }
 
 .featuredTitle {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: #0a1b33;
+  max-width: 34ch;
 }
 
-.featuredBadge {
-  flex-shrink: 0;
+@media (min-width: 768px) {
+  .featuredTitle {
+    font-size: 1.625rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .featuredTitle {
+    font-size: 1.8125rem;
+  }
 }
 
 .featuredDescription {
-  font-size: 0.8125rem;
-  color: rgba(26, 26, 26, 0.70);
-  line-height: 1.45;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: rgba(26, 19, 16, 0.72);
+  max-width: 58ch;
+}
+
+.featuredBadgeRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .featuredMeta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(34, 83, 145, 0.22);
   font-size: 0.75rem;
-  color: rgba(26, 26, 26, 0.50);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(26, 19, 16, 0.55);
+}
+
+.featuredMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .featuredMetaIcon {
-  display: flex;
-  align-items: center;
-  color: rgba(34, 83, 145, 0.45);
+  color: #225391;
+  opacity: 0.7;
 }
 
-/* ── Signal items ──────────────────────────────────────── */
-.signals {
-  display: flex;
-  flex-direction: column;
+.featuredCta {
+  margin-top: 6px;
 }
 
-.signal {
+/* ═══════════════════════════════════════════════════════════════
+   SIGNAL LIST
+   ═══════════════════════════════════════════════════════════════ */
+
+.signalsHeader {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 4px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #225391;
+  margin-bottom: -4px;
+}
+
+.signalsHeaderRule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(34, 83, 145, 0.28) 0%,
+    rgba(34, 83, 145, 0.06) 60%,
+    transparent 100%
+  );
+}
+
+.signals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px 14px 18px;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: background-color 150ms ease;
-  border-radius: 6px;
-  min-height: 44px;
+  border: 1px solid rgba(34, 83, 145, 0.10);
+  border-left: 4px solid #225391;
+  background: #ffffff;
+  border-radius: 10px;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+  min-height: 56px;
 }
 
 .signal:hover {
-  background: rgba(34, 83, 145, 0.04);
-  margin: 0 -8px;
-  padding-left: 12px;
-  padding-right: 12px;
+  background: rgba(34, 83, 145, 0.03);
+  border-color: rgba(34, 83, 145, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(34, 83, 145, 0.08);
 }
 
 .signal:focus-visible {
   outline: 2px solid #225391;
-  outline-offset: -2px;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal,
+  .signal:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+.signalDanger {
+  border-left-color: #c4362a;
+}
+
+.signalDanger:hover {
+  background: rgba(196, 54, 42, 0.04);
+  border-color: rgba(196, 54, 42, 0.28);
+  box-shadow: 0 6px 16px rgba(196, 54, 42, 0.10);
+}
+
+.signalWarning {
+  border-left-color: #c26434;
+}
+
+.signalWarning:hover {
+  background: rgba(194, 100, 52, 0.04);
+  border-color: rgba(194, 100, 52, 0.28);
+  box-shadow: 0 6px 16px rgba(194, 100, 52, 0.10);
+}
+
+.signalSuccess {
+  border-left-color: #1a7a42;
+}
+
+.signalSuccess:hover {
+  background: rgba(26, 122, 66, 0.04);
+  border-color: rgba(26, 122, 66, 0.28);
+  box-shadow: 0 6px 16px rgba(26, 122, 66, 0.10);
+}
+
+.signalDefault {
+  border-left-color: #225391;
 }
 
 .signalIcon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   flex-shrink: 0;
 }
 
-/* ── Signal severity tints ─────────────────────────────── */
 .signalIconDefault {
-  background: rgba(34, 83, 145, 0.07);
+  background: rgba(34, 83, 145, 0.10);
   color: #225391;
+  border: 1px solid rgba(34, 83, 145, 0.20);
 }
 
 .signalIconSuccess {
-  background: rgba(34, 145, 90, 0.08);
+  background: rgba(26, 122, 66, 0.10);
   color: #1a7a42;
+  border: 1px solid rgba(26, 122, 66, 0.22);
 }
 
 .signalIconWarning {
-  background: rgba(229, 126, 70, 0.10);
+  background: rgba(194, 100, 52, 0.12);
   color: #c26434;
+  border: 1px solid rgba(194, 100, 52, 0.25);
 }
 
 .signalIconDanger {
-  background: rgba(196, 54, 42, 0.08);
+  background: rgba(196, 54, 42, 0.10);
   color: #c4362a;
+  border: 1px solid rgba(196, 54, 42, 0.24);
 }
 
 .signalContent {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
   flex: 1;
   min-width: 0;
 }
 
 .signalTitle {
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 700;
   line-height: 1.3;
+  color: #0a1b33;
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .signalMeta {
-  font-size: 0.6875rem;
-  color: rgba(26, 26, 26, 0.50);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(26, 19, 16, 0.55);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .signalBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
 }
 
-/* ── Signal separator ──────────────────────────────────── */
-.signalSeparator {
-  height: 1px;
-  background: rgba(34, 83, 145, 0.06);
-  border: none;
-  margin: 0;
-}
+/* ═══════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ── Reduced motion ────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .signal {
     transition: none !important;

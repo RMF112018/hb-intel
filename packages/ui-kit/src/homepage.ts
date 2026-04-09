@@ -447,10 +447,11 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
   },
   operational: {
     surfaces: ['operational'] as const,
-    character: 'structured, data-credible, dashboard-adjacent',
-    shadow: 'elevationLevel1',
-    radius: '8px',
-    background: 'cool-tinted',
+    character:
+      'authoritative operational command surface with safety-register nameplate masthead, persistent severity spectrum strip, severity-accented featured signal (default / success / warning / danger), and severity-left-accent signal rows — built to carry Safety & Field Excellence and other high-importance operational storytelling',
+    shadow: 'elevationEditorial',
+    radius: '12px',
+    background: 'clean white with severity-aware accents',
     border: 'strong brand left accent',
   },
   discovery: {
