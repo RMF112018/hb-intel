@@ -20,7 +20,7 @@
         "default": "Personalized Welcome Header"
       },
       "description": {
-        "default": "Standalone greeting header. Not for flagship homepage use — greeting is integrated into HB Signature Hero."
+        "default": "Subordinate day-start context strip — date tear-off, quiet welcome eyebrow, optional context line and alert. Designed to sit alongside the flagship HB Signature Hero, never compete with it."
       },
       "officeFabricIconFontName": "Contact",
       "hiddenFromToolbox": true,

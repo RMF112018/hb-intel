@@ -1,0 +1,21 @@
+declare const styles: {
+  readonly surface: string;
+  readonly row: string;
+  readonly dateBlock: string;
+  readonly dateWeekday: string;
+  readonly dateDay: string;
+  readonly dateMonth: string;
+  readonly welcomeZone: string;
+  readonly eyebrow: string;
+  readonly name: string;
+  readonly nameValue: string;
+  readonly supportLine: string;
+  readonly contextLine: string;
+  readonly contextIcon: string;
+  readonly alertZone: string;
+  readonly alertSection: string;
+  readonly alertHeader: string;
+  readonly alertIcon: string;
+  readonly alertMessage: string;
+};
+export default styles;

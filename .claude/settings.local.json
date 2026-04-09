@@ -281,7 +281,12 @@
       "Bash(cp temp/deploy/shell-entry-*.js release/assets/)",
       "Bash(cp temp/deploy/spfx-hb-webparts.css release/assets/)",
       "Bash(rm -f release/assets/shell-entry-*.js release/assets/hb-webparts-app-*.js)",
-      "Bash([ -f /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts.sppkg ])"
+      "Bash([ -f /Users/bobbyfetting/hb-intel/dist/sppkg/hb-webparts.sppkg ])",
+      "Bash(npx http-server:*)",
+      "Bash(/tmp/fluent_search.sh)",
+      "Bash(file /Users/bobbyfetting/hb-intel/docs/architecture/reviews/project*)",
+      "Bash(BACKEND_MODE=fake-graph npx tsx tools/build-spfx-package.ts --domain hb-webparts)",
+      "Skill(commit-commands:commit)"
     ]
   },
   "enabledPlugins": {
