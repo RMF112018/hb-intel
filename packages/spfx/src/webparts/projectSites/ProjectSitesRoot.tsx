@@ -43,6 +43,7 @@ import {
   HBC_SPACE_MD,
   HBC_SPACE_LG,
   HBC_SPACE_XL,
+  HBC_SPACE_2XL,
   TRANSITION_FAST,
   TRANSITION_NORMAL,
   TRANSITION_SLOW,
@@ -84,8 +85,23 @@ const useStyles = makeStyles({
     color: HBC_SURFACE_LIGHT['text-primary'],
     paddingTop: `${HBC_SPACE_LG}px`,
     paddingBottom: `${HBC_SPACE_XL}px`,
-    paddingLeft: 0,
-    paddingRight: 0,
+    // W01r-P14: responsive horizontal inset so the full-bleed
+    // SharePoint-section rendering has comfortable breathing room
+    // at the left/right edges without collapsing the full-width
+    // behavior or introducing a fixed max-width lock. Mobile keeps
+    // a modest 16 px gutter; tablet widens to 32 px; desktop opens
+    // to 64 px so the header / control bar / card grid never feel
+    // pressed against the section edges.
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    [hbcMediaQuery('tablet')]: {
+      paddingLeft: `${HBC_SPACE_XL}px`,
+      paddingRight: `${HBC_SPACE_XL}px`,
+    },
+    [hbcMediaQuery('desktop')]: {
+      paddingLeft: `${HBC_SPACE_2XL}px`,
+      paddingRight: `${HBC_SPACE_2XL}px`,
+    },
   },
 
   // ── Header bar ──────────────────────────────────────────────────────
