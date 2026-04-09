@@ -615,3 +615,219 @@
     transition: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LEADERSHIP MODIFIER (W01r-P23)
+   ───────────────────────────────────────────────────────────────
+   Scoped narrow-section refinement for the Leadership Message
+   webpart. The shared editorial surface must remain usable in a
+   wider-section authored context (and still ships for other
+   editorial consumers at its default scale), so the Leadership
+   Message consumer opts into this modifier via `variant="leadership"`
+   rather than broadly restyling every editorial surface.
+
+   Goals:
+   - Reduce excess top/bottom padding and vertical heaviness
+   - Tighten masthead → featured → archive → footer rhythm
+   - Pull the featured block's interior whitespace in so the quote,
+     title, excerpt, signature, and CTA sit closer together
+   - Keep the executive editorial register: nameplate masthead,
+     warm accent hierarchy, quote-framed featured, formal signature,
+     numbered archive, premium CTA treatment
+
+   Specificity note: every rule below is `.leadership .child`
+   (specificity 0,2,0) so it overrides the base `.child` rules
+   (specificity 0,1,0) inside their own media-query blocks without
+   needing `!important`. The Leadership Message webpart renders in
+   a narrow SharePoint section even when the viewport is desktop
+   width, so these rules deliberately apply at every breakpoint.
+   ═══════════════════════════════════════════════════════════════ */
+
+.leadership .masthead {
+  gap: 10px;
+  padding: 18px 20px 12px;
+}
+
+.leadership .mastheadHeadline {
+  font-size: 1.375rem;
+}
+
+.leadership .separator {
+  margin: 0 20px;
+}
+
+.leadership .content {
+  padding: 16px 20px 0;
+}
+
+.leadership .featured {
+  gap: 12px;
+  padding: 16px 18px 18px 32px;
+}
+
+.leadership .featuredQuoteMark {
+  top: 4px;
+  left: 6px;
+  font-size: 52px;
+}
+
+.leadership .featuredEyebrow {
+  letter-spacing: 0.12em;
+}
+
+.leadership .featuredTitle {
+  font-size: 1.1875rem;
+  max-width: 30ch;
+  line-height: 1.22;
+}
+
+.leadership .featuredExcerpt {
+  font-size: 0.9375rem;
+  line-height: 1.62;
+  max-width: 46ch;
+}
+
+.leadership .featuredMedia {
+  margin-top: 2px;
+}
+
+.leadership .signature {
+  gap: 12px;
+  padding-top: 12px;
+  margin-top: 2px;
+}
+
+.leadership .signatureAvatar {
+  width: 38px;
+  height: 38px;
+  font-size: 0.8125rem;
+}
+
+.leadership .signatureName {
+  font-size: 0.875rem;
+}
+
+.leadership .signatureRole {
+  font-size: 0.75rem;
+}
+
+.leadership .featuredCta {
+  margin-top: 2px;
+}
+
+.leadership .archive {
+  margin: 20px 0 0;
+  padding: 14px 0 0;
+  gap: 10px;
+}
+
+.leadership .archiveItem,
+.leadership .archiveItemStatic {
+  padding: 10px 8px 10px 6px;
+  gap: 12px;
+}
+
+.leadership .archiveItemIndex {
+  width: 28px;
+  font-size: 0.75rem;
+}
+
+.leadership .archiveItemTitle {
+  font-size: 0.875rem;
+}
+
+.leadership .archiveItemMeta {
+  font-size: 0.65rem;
+}
+
+.leadership .archiveDivider {
+  margin: 0 0 0 36px;
+}
+
+.leadership .footer {
+  padding: 12px 20px 14px;
+  margin-top: 18px;
+}
+
+.leadership .bottomSpacer {
+  height: 16px;
+}
+
+/* Hold the narrow-section scale at wider viewports. The Leadership
+   Message webpart sits inside a narrow SharePoint page section even
+   when the viewport is tablet or desktop width, so we explicitly
+   reassert the tuned values to override the base `.masthead`,
+   `.mastheadHeadline`, `.separator`, `.content`, `.featured`,
+   `.featuredQuoteMark`, `.featuredTitle`, `.featuredExcerpt`, and
+   `.footer` rules that would otherwise inflate at those
+   breakpoints. */
+
+@media (min-width: 768px) {
+  .leadership .masthead {
+    padding: 20px 22px 12px;
+  }
+  .leadership .mastheadHeadline {
+    font-size: 1.4375rem;
+  }
+  .leadership .separator {
+    margin: 0 22px;
+  }
+  .leadership .content {
+    padding: 18px 22px 0;
+  }
+  .leadership .featured {
+    padding: 18px 22px 20px 34px;
+    gap: 12px;
+  }
+  .leadership .featuredQuoteMark {
+    top: 6px;
+    left: 8px;
+    font-size: 60px;
+  }
+  .leadership .featuredTitle {
+    font-size: 1.25rem;
+  }
+  .leadership .featuredExcerpt {
+    font-size: 0.96875rem;
+  }
+  .leadership .archive {
+    margin: 22px 0 0;
+  }
+  .leadership .footer {
+    padding: 14px 22px 16px;
+    margin-top: 20px;
+  }
+  .leadership .archiveDivider {
+    margin: 0 0 0 38px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .leadership .masthead {
+    padding: 22px 24px 14px;
+  }
+  .leadership .mastheadHeadline {
+    font-size: 1.5rem;
+  }
+  .leadership .separator {
+    margin: 0 24px;
+  }
+  .leadership .content {
+    padding: 20px 24px 0;
+  }
+  .leadership .featured {
+    padding: 20px 24px 22px 36px;
+  }
+  .leadership .featuredQuoteMark {
+    font-size: 64px;
+  }
+  .leadership .featuredTitle {
+    font-size: 1.3125rem;
+  }
+  .leadership .featuredExcerpt {
+    font-size: 1rem;
+  }
+  .leadership .footer {
+    padding: 16px 24px 18px;
+  }
+}

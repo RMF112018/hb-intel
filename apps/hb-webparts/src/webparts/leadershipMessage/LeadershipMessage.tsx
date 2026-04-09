@@ -69,6 +69,7 @@ export function LeadershipMessage({
       mastheadEyebrow="From Leadership"
       archiveTitle="From the archive"
       archiveHref={normalized.archiveHref}
+      variant="leadership"
       featured={
         normalized.featured
           ? {

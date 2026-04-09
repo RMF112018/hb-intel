@@ -88,6 +88,16 @@ export interface EditorialSecondaryItem {
   openInNewTab?: boolean;
 }
 
+/**
+ * Narrow-section refinement variant. `"leadership"` opts into a tuned
+ * rhythm designed for the Leadership Message webpart's narrow
+ * SharePoint column (tighter masthead padding, reduced featured
+ * interior whitespace, smaller decorative quote mark, compact archive
+ * rail, quieter footer). Default is the wider authored editorial
+ * layout used by other consumers.
+ */
+export type HbcEditorialSurfaceVariant = 'default' | 'leadership';
+
 export interface HbcEditorialSurfaceProps {
   /** Dominant masthead title. */
   title: string;
@@ -113,6 +123,12 @@ export interface HbcEditorialSurfaceProps {
   featured?: EditorialFeaturedItem;
   /** Archive / secondary entries. */
   items?: EditorialSecondaryItem[];
+  /**
+   * Layout variant. Use `"leadership"` from the Leadership Message
+   * webpart to opt into the narrow-section refinement. Defaults to
+   * `"default"` so other editorial consumers are unaffected.
+   */
+  variant?: HbcEditorialSurfaceVariant;
   children?: React.ReactNode;
   className?: string;
   'aria-label'?: string;
@@ -428,6 +444,7 @@ export function HbcEditorialSurface({
   archiveTitle = 'From the archive',
   featured,
   items,
+  variant = 'default',
   children,
   className,
   'aria-label': ariaLabel,
@@ -438,9 +455,14 @@ export function HbcEditorialSurface({
   return (
     <section
       aria-label={ariaLabel ?? title}
-      className={clsx(styles.root, className)}
+      className={clsx(
+        styles.root,
+        variant === 'leadership' && styles.leadership,
+        className,
+      )}
       data-hbc-premium="editorial-surface"
       data-hbc-homepage="leadership-message"
+      data-hbc-editorial-variant={variant}
     >
       <Masthead
         title={title}
