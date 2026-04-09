@@ -43,10 +43,27 @@
  */
 import * as React from 'react';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
+import type {
+  PeopleCulturePublicConfig,
+  PeopleCultureViewerAudience,
+} from '../../homepage/webparts/peopleCultureSplitContracts.js';
 
 export interface PeopleCulturePublicProps {
+  /**
+   * Raw config blob from the SPFx manifest / host. The structural scaffold
+   * accepts an untyped record for backward compatibility; downstream work
+   * (Phase-14 pc/ Prompt-02) will migrate the runtime onto `splitConfig`,
+   * which is the strongly-typed split contract introduced in Prompt-01.
+   */
   config?: Record<string, unknown>;
+  /**
+   * Strongly-typed People & Culture public split config (Phase-14 pc/
+   * Prompt-01). Optional today because the scaffold does not consume it;
+   * the Prompt-02 public runtime will require it.
+   */
+  splitConfig?: Partial<PeopleCulturePublicConfig>;
   identity?: HomepageIdentityInput;
+  viewerAudience?: PeopleCultureViewerAudience;
   assetBaseUrl?: string;
 }
 
@@ -88,7 +105,9 @@ const BODY_STYLE: React.CSSProperties = {
 
 export function PeopleCulturePublic({
   config: _config,
+  splitConfig: _splitConfig,
   identity: _identity,
+  viewerAudience: _viewerAudience,
 }: PeopleCulturePublicProps): React.JSX.Element {
   return (
     <section
