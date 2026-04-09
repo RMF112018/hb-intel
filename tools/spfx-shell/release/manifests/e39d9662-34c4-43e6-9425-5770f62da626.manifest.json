@@ -20,7 +20,7 @@
         "default": "People and Culture"
       },
       "description": {
-        "default": "Public People and Culture surface — announcements, celebrations and milestones, and broader culture programming. Phase-14 structural scaffold seam; implementation intentionally deferred to a later Phase-14 prompt. The legacy merged People & Culture webpart remains available as a compatibility entry under its original GUID."
+        "default": "Public People and Culture surface — announcements, celebrations and milestones, and broader culture programming. Consumes the split-aware governance model and hides recognition content (HB Kudos is a separate webpart). The legacy merged People & Culture webpart remains available as a compatibility entry under its original GUID."
       },
       "officeFabricIconFontName": "People",
       "hiddenFromToolbox": true,
@@ -52,7 +52,7 @@
       },
       "e39d9662-34c4-43e6-9425-5770f62da626_1.0.0": {
         "type": "path",
-        "path": "shell-entry-e39d9662-34c4-43e6-9425-5770f62da626-0571b5c0.js"
+        "path": "shell-entry-e39d9662-34c4-43e6-9425-5770f62da626-b894bf49.js"
       }
     }
   }
