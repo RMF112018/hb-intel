@@ -476,7 +476,7 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
   newsroom: {
     surfaces: ['newsroom'] as const,
     character:
-      'premium internal newsroom / editorial hierarchy with image-led lead story, subordinate headline rail, and tertiary quick-read zone',
+      'premium internal editorial newsroom with nameplate masthead, image-led lead dominance, numbered supporting headline rail, and a quick-reads footer grid rendering tertiary story titles',
     shadow: 'elevationEditorial',
     radius: '12px',
     background: 'clean white lead content + cool-tinted rail',

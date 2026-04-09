@@ -2,7 +2,8 @@
  * HbcNewsroomSurface stories — visual proof for the signature Company Pulse
  * newsroom surface family.
  *
- * Wave 01 follow-on: Company Pulse migration to @hbc/ui-kit/homepage.
+ * W01r-P16: editorial rebuild stories exercise the new nameplate masthead,
+ * image-led lead dominance, numbered supporting rail, and quick-reads grid.
  */
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -62,8 +63,22 @@ const richModel: HbcNewsroomSurfaceModel = {
     },
   ],
   tertiary: [
-    { id: 'ter-1', title: 'IT Systems Maintenance Window', category: 'update' },
-    { id: 'ter-2', title: 'PPE Refresh Reminder', category: 'safety' },
+    { id: 'ter-1', title: 'IT Systems Maintenance Window This Weekend', category: 'update' },
+    { id: 'ter-2', title: 'PPE Refresh Reminder for Active Sites', category: 'safety' },
+    { id: 'ter-3', title: 'Employee Benefits Portal Upgrade', category: 'update' },
+    { id: 'ter-4', title: 'Volunteer Day Registration Now Open', category: 'recognition' },
+  ],
+};
+
+const richShortQuickReads: HbcNewsroomSurfaceModel = {
+  ...richModel,
+  tertiary: [
+    {
+      id: 'ter-1',
+      title: 'IT Systems Maintenance Window This Weekend',
+      category: 'update',
+      cta: { label: 'Details', href: '#it' },
+    },
   ],
 };
 
@@ -115,16 +130,27 @@ const headlineOnlyModel: HbcNewsroomSurfaceModel = {
       publishDate: '2026-04-05',
     },
   ],
-  tertiary: [{ id: 'ho-ter-1', title: 'Toolbox Talk Archive', category: 'safety' }],
+  tertiary: [
+    { id: 'ho-ter-1', title: 'Toolbox Talk Archive Now Available', category: 'safety' },
+    { id: 'ho-ter-2', title: 'Benefits Open Enrollment Reminder', category: 'update' },
+  ],
 };
 
 const wrapStyle: React.CSSProperties = { maxWidth: 1200 };
 const mobileWrapStyle: React.CSSProperties = { maxWidth: 420 };
 
-export const Default: Story = {
+export const RichEditorial: Story = {
   render: () => (
     <div style={wrapStyle}>
       <HbcNewsroomSurface model={richModel} />
+    </div>
+  ),
+};
+
+export const RichShortQuickReads: Story = {
+  render: () => (
+    <div style={wrapStyle}>
+      <HbcNewsroomSurface model={richShortQuickReads} />
     </div>
   ),
 };

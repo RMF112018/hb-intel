@@ -2,24 +2,31 @@
  * HbcNewsroomSurface — Signature internal newsroom / editorial surface family.
  *
  * Cohesive presentation-lane surface for the homepage Company Pulse zone:
- * a premium editorial composition with a dominant image-led lead story,
- * a subordinate supporting headline rail, an optional tertiary quick-read
- * chip zone, and an "archive" sparse-state CTA. Three layout modes
+ * a premium editorial composition with a nameplate masthead, an image-led
+ * dominant lead story, a numbered supporting headline rail, an optional
+ * quick-reads editorial grid rendering tertiary story titles, and bordered
+ * footer strips for the sparse / archive states. Three layout modes
  * (`rich`, `sparse`, `headline-only`) are derived from the view-model via
  * `resolveNewsroomLayout`, preserving the data-driven layout selection
- * from the legacy consumer while moving the structural grammar into the
+ * from the legacy consumer while moving the editorial grammar into the
  * shared layer.
  *
  * Blue-led editorial hierarchy tuned for a newsroom register — cooler and
  * more authoritative than the warm celebratory HbcPeopleCultureSurface,
- * and with a distinct secondary-headline-rail behavior that sets it apart
- * from the image-led HbcProjectSpotlightSurface.
+ * and with a distinct numbered supporting-rail + quick-reads grid that
+ * sets it apart from the image-led HbcProjectSpotlightSurface.
  *
- * Wave 01 follow-on: Company Pulse migration to @hbc/ui-kit/homepage.
- * Mirrors the HbcPeopleCultureSurface / HbcProjectSpotlightSurface pattern
- * (view-model contract, flat directory, CSS-module responsive, internal
- * sub-components). Consumers stay thin — normalization, audience filtering,
- * authoring governance, and webpart integration remain local.
+ * W01r-P16 — editorial rebuild:
+ *   • nameplate masthead (eyebrow + dominant headline + action)
+ *   • 70/30 desktop composition with 420px hero image zone
+ *   • two-stop editorial scrim + frosted overlay category chip
+ *   • numbered 01/02/03 supporting headline rail with left-accent hover
+ *   • quick-reads grid rendering tertiary story titles (previously lost)
+ *   • bordered sparse / headline-only footer strips
+ *
+ * Consumers stay thin — normalization, audience filtering, authoring
+ * governance, and webpart integration remain local to the consuming
+ * webpart. The view-model contract is unchanged and backward compatible.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -85,6 +92,7 @@ export interface HbcNewsroomTertiaryItem {
   id: string;
   title: string;
   category?: HbcNewsroomCategoryKey;
+  cta?: HbcNewsroomCta;
 }
 
 export interface HbcNewsroomSurfaceModel {
@@ -92,13 +100,13 @@ export interface HbcNewsroomSurfaceModel {
   lead?: HbcNewsroomFeaturedItem;
   secondary: HbcNewsroomHeadlineItem[];
   tertiary?: HbcNewsroomTertiaryItem[];
-  /** href for the header "See all" and sparse-state / tertiary archive CTAs. */
+  /** href for the masthead "See all" and quick-reads / sparse archive CTA. */
   archiveHref?: string;
-  /** Override the header action label. Defaults to "See all". */
+  /** Override the masthead action label. Defaults to "See all". */
   headerSeeAllLabel?: string;
   /** Override the rail header. Defaults to a layout-appropriate label. */
   secondaryHeader?: string;
-  /** Override the sparse-footer / tertiary archive label. Defaults to "View all news". */
+  /** Override the quick-reads / sparse-footer archive label. Defaults to "View all news". */
   archiveLabel?: string;
 }
 
@@ -122,9 +130,9 @@ export interface HbcNewsroomSurfaceProps {
  * Derive the layout mode from the view-model. Consumers pass the full model
  * into the surface; the surface decides the composition.
  *
- * - `rich`: lead story + supporting headline rail (+ optional tertiary zone)
- * - `sparse`: lead story only, with an archive-footer CTA
- * - `headline-only`: full-width headline stack, no lead (+ optional tertiary zone)
+ * - `rich`: lead story + supporting headline rail (+ optional quick-reads grid)
+ * - `sparse`: lead story only, with an archive footer strip
+ * - `headline-only`: full-width headline stack, no lead (+ optional quick-reads grid)
  */
 export function resolveNewsroomLayout(
   model: HbcNewsroomSurfaceModel,
@@ -189,9 +197,9 @@ const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as [number, number, number, number];
 function getFeaturedMotion(reducedMotion: boolean) {
   if (reducedMotion) return {};
   return {
-    initial: { opacity: 0, y: 12 },
+    initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.45, ease: EASE_OUT_EXPO },
+    transition: { duration: 0.55, ease: EASE_OUT_EXPO },
   } as const;
 }
 
@@ -200,7 +208,7 @@ function getRailMotion(reducedMotion: boolean) {
   return {
     initial: { opacity: 0, x: 8 },
     animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.3, delay: 0.15, ease: EASE_OUT_EXPO },
+    transition: { duration: 0.35, delay: 0.15, ease: EASE_OUT_EXPO },
   } as const;
 }
 
@@ -211,6 +219,25 @@ function getSparseFooterMotion(reducedMotion: boolean) {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.3, delay: 0.2, ease: EASE_OUT_EXPO },
   } as const;
+}
+
+function getQuickReadsMotion(reducedMotion: boolean) {
+  if (reducedMotion) return {};
+  return {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.35, delay: 0.25, ease: EASE_OUT_EXPO },
+  } as const;
+}
+
+/** Format a 1-based index as zero-padded editorial numeral ("01", "02", ...). */
+function formatEditorialIndex(index: number): string {
+  return index < 10 ? `0${index}` : String(index);
+}
+
+/** Pick the most recent publish date across lead + secondary for the masthead eyebrow. */
+function resolveLatestPublishDate(model: HbcNewsroomSurfaceModel): string | undefined {
+  return model.lead?.publishDate ?? model.secondary[0]?.publishDate;
 }
 
 // ---------------------------------------------------------------------------
@@ -233,6 +260,18 @@ function CategoryChip({ category, size = 'sm' }: CategoryChipProps): React.JSX.E
         border: `1px solid ${swatch.border}`,
       }}
     >
+      {category}
+    </span>
+  );
+}
+
+interface FeaturedCategoryOverlayProps {
+  category: string;
+}
+
+function FeaturedCategoryOverlay({ category }: FeaturedCategoryOverlayProps): React.JSX.Element {
+  return (
+    <span className={styles.featuredCategoryOverlay} aria-hidden="true">
       {category}
     </span>
   );
@@ -266,12 +305,54 @@ function ImagePlaceholder(): React.JSX.Element {
   );
 }
 
+interface MastheadProps {
+  heading: string;
+  latestPublishDate?: string;
+  archiveHref?: string;
+  seeAllLabel: string;
+}
+
+function Masthead({
+  heading,
+  latestPublishDate,
+  archiveHref,
+  seeAllLabel,
+}: MastheadProps): React.JSX.Element {
+  return (
+    <div className={styles.masthead}>
+      <div className={styles.mastheadEyebrow}>
+        <span>Newsroom</span>
+        <span className={styles.mastheadEyebrowRule} aria-hidden="true" />
+        {latestPublishDate ? (
+          <span className={styles.mastheadEyebrowDate}>Updated {latestPublishDate}</span>
+        ) : null}
+      </div>
+      <div className={styles.mastheadRow}>
+        <h2 className={styles.mastheadHeadline}>{heading}</h2>
+        {archiveHref ? (
+          <div className={styles.mastheadAction}>
+            <HbcPremiumCta
+              label={seeAllLabel}
+              href={archiveHref}
+              variant="ghost"
+              size="sm"
+              arrow
+            />
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 interface FeaturedStoryProps {
   item: HbcNewsroomFeaturedItem;
   reducedMotion: boolean;
 }
 
 function FeaturedStory({ item, reducedMotion }: FeaturedStoryProps): React.JSX.Element {
+  const hasMedia = Boolean(item.media);
+
   return (
     <motion.article
       aria-label={`Featured: ${item.title}`}
@@ -279,10 +360,11 @@ function FeaturedStory({ item, reducedMotion }: FeaturedStoryProps): React.JSX.E
       {...getFeaturedMotion(reducedMotion)}
     >
       <div className={styles.imageZone}>
-        {item.media ? (
+        {hasMedia ? (
           <>
-            <FeaturedImage src={item.media.src} alt={item.media.alt} />
+            <FeaturedImage src={item.media!.src} alt={item.media!.alt} />
             <div className={styles.imageScrim} aria-hidden="true" />
+            {item.category ? <FeaturedCategoryOverlay category={item.category} /> : null}
           </>
         ) : (
           <ImagePlaceholder />
@@ -290,7 +372,7 @@ function FeaturedStory({ item, reducedMotion }: FeaturedStoryProps): React.JSX.E
       </div>
 
       <div className={styles.contentZone}>
-        {item.category ? (
+        {item.category && !hasMedia ? (
           <div className={styles.featuredCategory}>
             <CategoryChip category={item.category} size="sm" />
           </div>
@@ -304,6 +386,11 @@ function FeaturedStory({ item, reducedMotion }: FeaturedStoryProps): React.JSX.E
           <div className={styles.featuredMeta}>
             {item.byline ? (
               <span className={styles.featuredByline}>{item.byline}</span>
+            ) : null}
+            {item.byline && item.publishDate ? (
+              <span className={styles.featuredMetaDot} aria-hidden="true">
+                •
+              </span>
             ) : null}
             {item.publishDate ? (
               <span className={styles.featuredDate}>
@@ -319,8 +406,8 @@ function FeaturedStory({ item, reducedMotion }: FeaturedStoryProps): React.JSX.E
             <HbcPremiumCta
               label={item.cta.label}
               href={item.cta.href}
-              variant="secondary"
-              size="sm"
+              variant="primary"
+              size="md"
               arrow
             />
           </div>
@@ -332,14 +419,16 @@ function FeaturedStory({ item, reducedMotion }: FeaturedStoryProps): React.JSX.E
 
 interface HeadlineItemProps {
   item: HbcNewsroomHeadlineItem;
+  index: number;
 }
 
-function HeadlineItem({ item }: HeadlineItemProps): React.JSX.Element {
+function HeadlineRow({ item, index }: HeadlineItemProps): React.JSX.Element {
   const isClickable = Boolean(item.cta?.href);
+  const label = formatEditorialIndex(index);
   const commonContent = (
     <>
-      <span className={styles.headlineIcon} aria-hidden="true">
-        <FileText size={14} strokeWidth={2} />
+      <span className={styles.headlineIndex} aria-hidden="true">
+        {label}
       </span>
       <div className={styles.headlineContent}>
         <span className={styles.headlineTitle}>{item.title}</span>
@@ -387,57 +476,88 @@ function HeadlineStack({
   return (
     <motion.div className={styles.rail} {...getRailMotion(reducedMotion)}>
       <h4 className={styles.railHeader}>{header}</h4>
+      <hr className={styles.railRule} />
       {items.map((item, i) => (
         <React.Fragment key={item.id}>
           {i > 0 ? <hr className={styles.railDivider} /> : null}
-          <HeadlineItem item={item} />
+          <HeadlineRow item={item} index={i + 1} />
         </React.Fragment>
       ))}
     </motion.div>
   );
 }
 
-interface TertiaryZoneProps {
+interface QuickReadsZoneProps {
   items: HbcNewsroomTertiaryItem[];
-  archiveHref?: string;
-  archiveLabel: string;
-}
-
-function TertiaryZone({
-  items,
-  archiveHref,
-  archiveLabel,
-}: TertiaryZoneProps): React.JSX.Element | null {
-  const categorized = items.filter((item) => Boolean(item.category));
-  if (categorized.length === 0 && !archiveHref) return null;
-  return (
-    <div className={styles.tertiaryZone}>
-      {categorized.map((item) => (
-        <CategoryChip key={item.id} category={item.category!} size="sm" />
-      ))}
-      {archiveHref ? (
-        <div className={styles.tertiaryArchive}>
-          <HbcPremiumCta label={archiveLabel} href={archiveHref} variant="ghost" size="sm" arrow />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-interface SparseFooterProps {
-  archiveHref?: string;
-  archiveLabel: string;
   reducedMotion: boolean;
 }
 
-function SparseFooter({
+function QuickReadsZone({
+  items,
+  reducedMotion,
+}: QuickReadsZoneProps): React.JSX.Element | null {
+  const visible = items.filter((item) => Boolean(item.title));
+  if (visible.length === 0) return null;
+
+  return (
+    <motion.div className={styles.quickReads} {...getQuickReadsMotion(reducedMotion)}>
+      <div className={styles.quickReadsHeader}>
+        <span>Quick reads</span>
+        <span className={styles.quickReadsHeaderRule} aria-hidden="true" />
+      </div>
+      <div className={styles.quickReadsGrid}>
+        {visible.map((item) => {
+          const isClickable = Boolean(item.cta?.href);
+          const content = (
+            <>
+              <span className={styles.quickReadsItemTitle}>{item.title}</span>
+              {item.category ? (
+                <div className={styles.quickReadsItemMeta}>
+                  <CategoryChip category={item.category} size="sm" />
+                </div>
+              ) : null}
+            </>
+          );
+          if (isClickable) {
+            return (
+              <a
+                key={item.id}
+                href={item.cta!.href}
+                target={item.cta!.openInNewTab ? '_blank' : undefined}
+                rel={item.cta!.openInNewTab ? 'noopener noreferrer' : undefined}
+                className={styles.quickReadsItem}
+              >
+                {content}
+              </a>
+            );
+          }
+          return (
+            <div key={item.id} className={styles.quickReadsItem}>
+              {content}
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
+
+interface FooterStripProps {
+  archiveHref?: string;
+  archiveLabel: string;
+  className: string;
+  reducedMotion: boolean;
+}
+
+function FooterStrip({
   archiveHref,
   archiveLabel,
+  className,
   reducedMotion,
-}: SparseFooterProps): React.JSX.Element | null {
+}: FooterStripProps): React.JSX.Element | null {
   if (!archiveHref) return null;
   return (
-    <motion.div className={styles.sparseFooter} {...getSparseFooterMotion(reducedMotion)}>
+    <motion.div className={className} {...getSparseFooterMotion(reducedMotion)}>
       <HbcPremiumCta label={archiveLabel} href={archiveHref} variant="ghost" size="sm" arrow />
     </motion.div>
   );
@@ -459,8 +579,11 @@ export function HbcNewsroomSurface({
   const archiveLabel = model.archiveLabel ?? 'View all news';
   const secondaryHeader =
     model.secondaryHeader ??
-    (layout === 'headline-only' ? 'Latest headlines' : 'More headlines');
+    (layout === 'headline-only' ? 'Latest headlines' : 'More from the newsroom');
   const tertiaryItems = model.tertiary ?? [];
+  const latestPublishDate = resolveLatestPublishDate(model);
+
+  const hasQuickReads = tertiaryItems.some((item) => Boolean(item.title));
 
   return (
     <section
@@ -470,27 +593,14 @@ export function HbcNewsroomSurface({
       data-hbc-homepage="company-pulse"
       data-hbc-newsroom-layout={layout}
     >
-      <div className={styles.header}>
-        <h2 className={styles.headerTitle}>
-          <span className={styles.headerIcon} aria-hidden="true">
-            <FileText size={16} strokeWidth={2} />
-          </span>
-          {model.heading}
-        </h2>
-        {model.archiveHref ? (
-          <div className={styles.headerAction}>
-            <HbcPremiumCta
-              label={headerSeeAllLabel}
-              href={model.archiveHref}
-              variant="ghost"
-              size="sm"
-              arrow
-            />
-          </div>
-        ) : null}
-      </div>
+      <Masthead
+        heading={model.heading}
+        latestPublishDate={latestPublishDate}
+        archiveHref={model.archiveHref}
+        seeAllLabel={headerSeeAllLabel}
+      />
 
-      <hr className={styles.separator} />
+      <hr className={styles.nameplate} />
 
       {layout === 'rich' ? (
         <>
@@ -506,25 +616,40 @@ export function HbcNewsroomSurface({
               />
             </div>
           </div>
-          <TertiaryZone
-            items={tertiaryItems}
-            archiveHref={model.archiveHref}
-            archiveLabel={archiveLabel}
-          />
+          {hasQuickReads ? (
+            <QuickReadsZone items={tertiaryItems} reducedMotion={reducedMotion} />
+          ) : null}
+          {model.archiveHref ? (
+            <FooterStrip
+              archiveHref={model.archiveHref}
+              archiveLabel={archiveLabel}
+              className={styles.quickReadsFooter}
+              reducedMotion={reducedMotion}
+            />
+          ) : (
+            <div className={styles.bottomSpacer} aria-hidden="true" />
+          )}
         </>
       ) : layout === 'sparse' ? (
         <>
-          <FeaturedStory item={model.lead!} reducedMotion={reducedMotion} />
-          <SparseFooter
-            archiveHref={model.archiveHref}
-            archiveLabel={archiveLabel}
-            reducedMotion={reducedMotion}
-          />
+          <div className={styles.sparseBody}>
+            <FeaturedStory item={model.lead!} reducedMotion={reducedMotion} />
+          </div>
+          {model.archiveHref ? (
+            <FooterStrip
+              archiveHref={model.archiveHref}
+              archiveLabel={archiveLabel}
+              className={styles.sparseFooter}
+              reducedMotion={reducedMotion}
+            />
+          ) : (
+            <div className={styles.bottomSpacer} aria-hidden="true" />
+          )}
         </>
       ) : (
         <>
-          <div className={styles.composition}>
-            <div className={styles.railWrapper}>
+          <div className={styles.headlineOnlyWrap}>
+            <div className={styles.headlineOnlyRail}>
               <HeadlineStack
                 items={model.secondary}
                 header={secondaryHeader}
@@ -532,11 +657,19 @@ export function HbcNewsroomSurface({
               />
             </div>
           </div>
-          <TertiaryZone
-            items={tertiaryItems}
-            archiveHref={model.archiveHref}
-            archiveLabel={archiveLabel}
-          />
+          {hasQuickReads ? (
+            <QuickReadsZone items={tertiaryItems} reducedMotion={reducedMotion} />
+          ) : null}
+          {model.archiveHref ? (
+            <FooterStrip
+              archiveHref={model.archiveHref}
+              archiveLabel={archiveLabel}
+              className={styles.quickReadsFooter}
+              reducedMotion={reducedMotion}
+            />
+          ) : (
+            <div className={styles.bottomSpacer} aria-hidden="true" />
+          )}
         </>
       )}
     </section>

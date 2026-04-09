@@ -20,7 +20,7 @@
         "default": "Company Pulse"
       },
       "description": {
-        "default": "Premium internal newsroom surface with lead story, secondary headlines, and tertiary quick-read hierarchy."
+        "default": "Premium internal editorial newsroom surface with nameplate masthead, image-led lead story, numbered supporting headline rail, and a quick-reads footer grid."
       },
       "officeFabricIconFontName": "News",
       "hiddenFromToolbox": true,
@@ -87,6 +87,30 @@
             "category": "update",
             "publishDate": "2026-04-03",
             "order": 5
+          },
+          {
+            "id": "pulse-tertiary-2",
+            "title": "PPE Refresh Reminder for Active Sites",
+            "summary": "Project safety leads asked to confirm quarterly PPE refresh across all active sites.",
+            "category": "safety",
+            "publishDate": "2026-04-03",
+            "order": 6
+          },
+          {
+            "id": "pulse-tertiary-3",
+            "title": "Employee Benefits Portal Upgrade",
+            "summary": "The benefits portal will move to a new vendor next month with single sign-on.",
+            "category": "update",
+            "publishDate": "2026-04-02",
+            "order": 7
+          },
+          {
+            "id": "pulse-tertiary-4",
+            "title": "Volunteer Day Registration Now Open",
+            "summary": "Quarterly volunteer day signups are open across all regions.",
+            "category": "recognition",
+            "publishDate": "2026-04-02",
+            "order": 8
           }
         ]
       }
@@ -115,7 +139,7 @@
       },
       "0b53f651-fd92-4f7f-a9da-f7797017f5eb_1.0.0": {
         "type": "path",
-        "path": "shell-entry-0b53f651-fd92-4f7f-a9da-f7797017f5eb-42317c96.js"
+        "path": "shell-entry-0b53f651-fd92-4f7f-a9da-f7797017f5eb-0fb0d822.js"
       }
     }
   }

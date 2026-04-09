@@ -82,7 +82,7 @@ describe('Prompt-06 awareness webparts', () => {
 
     expect(screen.getByText('First Story')).not.toBeNull();
     expect(screen.getByText('Second Story')).not.toBeNull();
-    expect(screen.getAllByText('More headlines').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('More from the newsroom').length).toBeGreaterThan(0);
   });
 
   // ── Wave 05: Sparse-state and governance hardening tests ──────
