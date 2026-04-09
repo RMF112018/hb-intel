@@ -1,89 +1,91 @@
 # Prompt 06 — Validation, Packaging, and Closure
 
+Validate the HB Kudos + HR approval companion implementation, rebuild the required artifacts, and produce final closure evidence.
+
 ## Objective
 
-Validate the full HB Kudos + HR companion implementation, reconcile remaining gaps, and rebuild/package the final SharePoint artifact.
+Prove that the implementation is:
 
-## Required Inputs
+- schema-aligned
+- role-safe
+- shared-surface-disciplined
+- homepage-entry-point-compliant
+- functionally coherent
+- packaging-current
 
-- live repo: `https://github.com/RMF112018/hb-intel`
-- `apps/hb-webparts/src/webparts/peopleCulture/`
-- adjacent homepage/data/contracts/helper seams
-- `packages/ui-kit/`
-- `docs/reference/ui-kit/`
-- `Decision-Lock-Appendix.md`
-- `Plan-Summary.md`
+This prompt is the final proof pass, not a new design phase.
 
-## Governing Rules
+## Required Validation Areas
 
-- Treat repo truth as authoritative.
-- Implement the locked decisions exactly unless a hard repo-truth conflict prevents it.
-- Do not preserve the current merged People & Culture architecture as the end-state for Kudos.
-- Do not re-read files that are still within your current context window or memory unless you need to verify a specific uncertain detail.
-- Preserve SPFx packaging discipline and shared import discipline.
-- Prefer narrow, controlled edits over speculative rewrites unless a structural change is clearly required by the locked product shape.
+### 1. Contract / schema validation
+Prove that:
+- recipient handling is typed against the real list fields
+- workflow/scheduling/prominence logic aligns to the live schema
+- audit-event writes use the expected audit-event shape
 
-## Scope
+### 2. Import-discipline validation
+Prove that homepage webparts in scope use `@hbc/ui-kit/homepage` as the primary UI entry point.
 
-1. End-to-end state-machine validation
-2. Permission validation
-3. Packaging validation
-4. Closure report
+Explicitly check for prohibited homepage webpart imports from:
+- `@hbc/ui-kit`
+- `@hbc/ui-kit/primitives`
+- `@hbc/ui-kit/app-shell`
+- `@hbc/ui-kit/fluent`
 
-## Instructions for the Agent
+### 3. Shared-primitive validation
+Prove that repeated recognition/governance patterns were promoted into shared homepage-safe primitives instead of being left as local premium duplication.
 
-1. Validate the full workflow/state machine end to end:
-   - submit
-   - approve
-   - approve+flag
-   - revision requested
-   - reject
-   - reopen rejected
-   - withdraw
-   - remove/unpublish
-   - restore
-   - schedule
-   - scheduled go-live
-   - missed prominence fallback
-2. Validate visibility rules for:
-   - public user
-   - submitter
-   - recipient
-   - HR reviewer
-   - Kudos admin
-3. Validate claim/reassign behavior and queue ordering.
-4. Validate overdue reminders and shared presets.
-5. Validate detail-panel content by audience/role.
-6. Validate celebrate toggle and lifecycle count persistence.
-7. Rebuild/package the final `hb-webparts.sppkg`.
-8. Prove the final package contains the latest source changes and correct manifest registrations.
-9. Produce a closure report naming:
-   - completed work
-   - validation evidence
-   - remaining defects/gaps
-   - package outcome
+Explicitly call out:
+- shared primitives reused directly
+- shared primitives newly created or extended
+- local patterns intentionally left local and why
 
-## Deliverables
+### 4. Functional flow validation
+Validate critical flows at minimum:
+- submit kudos
+- request revision
+- resubmit revision
+- approve
+- reject
+- approve + flag for admin review
+- claim / reassign
+- schedule / cancel schedule
+- pin / unpin
+- feature / unfeature
+- remove / restore
+- detail-panel access by role
+- associated-item visibility after age-off/removal where allowed
 
-- final validated runtime
-- final package build
-- proof of package freshness
-- final closure report
+### 5. Notification / reminder validation
+Validate:
+- submitter notifications
+- recipient notifications only on actual go-live
+- overdue/reminder targeting and cadence hooks
 
-## Validation
+### 6. Packaging / artifact freshness validation
+Rebuild the relevant package(s), then prove the final artifact is current:
+- manifests/registrations are correct
+- the built artifact reflects the latest source
+- no stale package contents remain
 
-- compile/typecheck/lint as repo permits
-- validate critical user flows
-- validate authorization paths
-- validate package generation and contents
-- validate no forbidden behaviors were introduced contrary to the decision register
+## Required Evidence
 
-## Required Report Back
+Produce explicit proof for:
 
-Return:
-1. final changed-file summary
+1. files changed
 2. validation matrix
-3. package build result
-4. proof the package is fresh/current
-5. remaining issues, if any
-6. final closure recommendation
+3. list fields read/written by each critical flow
+4. audit-event validation summary
+5. import-discipline summary
+6. shared-primitive summary
+7. build/package result
+8. freshness proof for the final artifact
+9. remaining issues, if any
+10. final closure recommendation
+
+## Important Rules
+
+- Do not claim closure if the final recipient model is still string-based.
+- Do not claim closure if homepage webparts still rely on prohibited entry points.
+- Do not claim closure if repeated recognition/governance patterns remain duplicated locally without justification.
+- Do not re-read files that are still within your active context window or memory unless a detail is genuinely uncertain.

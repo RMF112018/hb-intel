@@ -1,73 +1,134 @@
-# Prompt 00 — Authority and Scope Lock
+# Prompt 00 — Authority, Scope, and UI Governance Lock
+
+Use the live repo as authoritative and perform a targeted implementation-start audit for the HB Kudos + HR Approval Companion work. This is not a broad discovery phase. This is a repo-truth lock and execution setup pass.
 
 ## Objective
 
-Audit the live repo, reconcile the current merged People & Culture implementation against the locked product decisions, and establish the exact implementation target state before changing runtime behavior.
+Before implementation, reconcile the current repo against the v3 package assumptions and freeze:
 
-## Required Inputs
+- file ownership
+- actual current component/runtime seams
+- homepage UI-kit entry-point discipline
+- shared-versus-local UI boundaries
+- data/storage assumptions against the live SharePoint list posture
+- any stale documentation conflicts that could mislead later prompts
 
-- live repo: `https://github.com/RMF112018/hb-intel`
+## Primary Inputs
+
+Audit at minimum:
+
+### Repo / implementation
 - `apps/hb-webparts/src/webparts/peopleCulture/`
-- adjacent homepage/data/contracts/helper seams
+- adjacent seams under `apps/hb-webparts/src/homepage/`
+- `apps/hb-webparts/src/mount.tsx`
+- relevant manifests for the target webparts
+- any current HB Kudos / moderation / archive / page / companion files actually present in repo truth
+
+### Shared UI
 - `packages/ui-kit/`
-- `docs/reference/ui-kit/`
-- `Decision-Lock-Appendix.md`
-- `Plan-Summary.md`
+- `packages/ui-kit/src/homepage.ts`
+- relevant component folders exported through the homepage entry point
 
-## Governing Rules
+### Doctrine
+- `docs/reference/ui-kit/README.md`
+- `docs/reference/ui-kit/entry-points.md`
+- `docs/reference/ui-kit/Presentation-Lane-Standard.md`
+- `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+- `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`
 
-- Treat repo truth as authoritative.
-- Implement the locked decisions exactly unless a hard repo-truth conflict prevents it.
-- Do not preserve the current merged People & Culture architecture as the end-state for Kudos.
-- Do not re-read files that are still within your current context window or memory unless you need to verify a specific uncertain detail.
-- Preserve SPFx packaging discipline and shared import discipline.
-- Prefer narrow, controlled edits over speculative rewrites unless a structural change is clearly required by the locked product shape.
+### Supporting notes
+- latest migration/completion notes relevant to People & Culture / ui-kit migration
+- latest schema/report files under `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/`
 
-## Scope
+## Required Conflict-Resolution Rule
 
-1. Confirm the current HB Kudos / People & Culture file ownership model.
-2. Confirm which current files are transitional, deprecated, or unsuitable as final architecture.
-3. Freeze the target end-state structure for:
-   - People & Culture webpart
-   - HB Kudos webpart
-   - HR approval companion webpart
-4. Produce the exact file move/create/update/delete plan required before or during implementation.
+If older review documents conflict with current code or later migration notes, prefer:
+1. current source code
+2. latest implementation/migration note
+3. older review/audit text
 
-## Instructions for the Agent
+Do not let stale review documents override current repo truth.
 
-1. Inspect the current People & Culture and Kudos-related source paths.
-2. Document which existing components remain viable and which are transitional only.
-3. Explicitly confirm that:
-   - People & Culture remains the communication surface
-   - HB Kudos becomes the recognition product surface
-   - the HR approval companion becomes a separate moderation/governance surface
-4. Create an implementation map that names:
-   - webpart entry points
-   - manifest implications
-   - shared contract/helper seams
-   - new or expanded runtime/data hooks
-   - any required UI-kit extension points
-5. Record any repo-truth conflict between the locked decisions and the live implementation.
-6. Do not start broad runtime rewrites in this prompt unless a tiny enabling change is required to unblock later phases.
+## Required UI Classification Deliverable
+
+Inventory the UI work needed for HB Kudos and classify every required pattern into one of these buckets:
+
+### A. Use existing shared homepage primitive directly
+Examples may include:
+- premium badges
+- premium CTAs
+- avatar stack
+- premium section/surface framing
+- existing homepage metadata/action row patterns
+
+### B. Extend or create a shared homepage-safe primitive first
+Examples may include:
+- recognition archive cards
+- mixed-recipient summary/bucket patterns
+- governance queue rows
+- governance toolbar/filter/preset controls
+- workflow state / aging / ownership chips
+- governance detail sections
+- audit timeline presentation blocks
+- inline governance action bars
+
+### C. Keep local
+Only keep work local when it is truly feature/business-logic-specific, such as:
+- SharePoint reads/writes
+- workflow reducers
+- permission checks
+- notification routing
+- view-model adaptation
+- mount/runtime registration
+
+## Locked UI Entry-Point Rules
+
+Confirm and then obey these rules in later prompts:
+
+- Homepage webparts use `@hbc/ui-kit/homepage` as the primary UI entry point.
+- Do not use `@hbc/ui-kit`, `@hbc/ui-kit/primitives`, `@hbc/ui-kit/app-shell`, or `@hbc/ui-kit/fluent` as homepage webpart UI entry points.
+- Only use `@hbc/ui-kit/theme`, `@hbc/ui-kit/icons`, or `@hbc/ui-kit/branding` where the homepage entry point does not expose what is needed.
+- Do not bypass the shared kit with new local premium shells for repeated patterns.
+
+## Recipient Model Lock
+
+Confirm the live schema and current code path, then explicitly freeze this rule:
+
+- the final HB Kudos submission/editing model must be typed against:
+  - `IndividualRecipients`
+  - `TeamRecipients`
+  - `DepartmentRecipients`
+  - `ProjectGroupRecipients`
+- the current string/comma-delimited recipient model is not final-state compliant
+
+## Tasks
+
+1. Audit the actual current webpart/component file set.
+2. Identify which legacy files named in older prompts no longer exist or are no longer authoritative.
+3. Inspect current homepage entry-point exports and list the relevant existing shared components.
+4. Identify missing shared recognition/governance primitives that must be added before local implementation proceeds.
+5. Verify the live SharePoint schema files and confirm the current code assumptions that do or do not align.
+6. Freeze file ownership boundaries:
+   - shared UI-kit files
+   - homepage shared helpers/contracts
+   - local webpart consumers
+   - manifests/runtime mount files
+7. Produce an execution-start note that later prompts can rely on.
 
 ## Deliverables
 
-- written architecture decision note in the execution report
-- exact file map for create/update/delete/move work
-- confirmation of the final product-surface split
-- list of blockers or repo-truth conflicts, if any
-
-## Validation
-
-- verify the proposed target structure is internally consistent
-- verify no unnecessary packaging changes were made
-- verify no runtime behavior was silently altered beyond minimal enabling edits
-
-## Required Report Back
-
 Return:
-1. architecture conclusion
-2. file ownership map
-3. repo-truth conflicts
-4. enabling edits made, if any
-5. readiness to proceed to Prompt 01
+
+1. **Repo-truth file inventory**
+2. **Authority resolution note**
+3. **Homepage UI inventory**
+4. **Shared-vs-local classification table**
+5. **Recipient-model compliance note**
+6. **List-schema alignment summary**
+7. **Implementation scope lock**
+
+## Important Rules
+
+- Do not start major code edits in this prompt unless a tiny corrective change is needed to unblock later prompts.
+- Do not re-read files that are still within your active context window or memory unless a detail is genuinely uncertain.
+- Be explicit about what must be built in shared layers before local implementation proceeds.

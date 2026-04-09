@@ -1,87 +1,145 @@
 # Prompt 01 — Data Model and Contracts
 
+Use the v3 package, the live repo, and the Prompt 00 authority lock to normalize the HB Kudos data model and implementation contracts against the final SharePoint list posture.
+
 ## Objective
 
-Implement the explicit state/contract model needed to support the locked HB Kudos workflow, recipient model, permissions, scheduling, prominence, queueing, and audit behavior.
+Define and/or refactor the typed contracts so the repo uses a clean, explicit, final-state operating model for:
 
-## Required Inputs
+- workflow/status
+- recipients
+- visibility
+- scheduling
+- prominence
+- claim/assignment
+- audit events
+- employee-facing recognition view models
+- governance workspace view models
 
-- live repo: `https://github.com/RMF112018/hb-intel`
-- `apps/hb-webparts/src/webparts/peopleCulture/`
-- adjacent homepage/data/contracts/helper seams
-- `packages/ui-kit/`
-- `docs/reference/ui-kit/`
-- `Decision-Lock-Appendix.md`
-- `Plan-Summary.md`
+The goal is to eliminate schema drift, loose strings, and placeholder contracts.
 
-## Governing Rules
+## Governing Inputs
 
-- Treat repo truth as authoritative.
-- Implement the locked decisions exactly unless a hard repo-truth conflict prevents it.
-- Do not preserve the current merged People & Culture architecture as the end-state for Kudos.
-- Do not re-read files that are still within your current context window or memory unless you need to verify a specific uncertain detail.
-- Preserve SPFx packaging discipline and shared import discipline.
-- Prefer narrow, controlled edits over speculative rewrites unless a structural change is clearly required by the locked product shape.
+Use at minimum:
+- current code contracts/hooks/helpers in the HB Kudos / People & Culture seams
+- `People Culture Kudos` list schema
+- `Kudos Audit Events` list schema
+- Prompt 00 output
+- current `packages/ui-kit/src/homepage.ts` exports to understand current shared component prop shapes
 
-## Scope
+## Required Contract Outcomes
 
-1. Add or normalize the explicit workflow/status model.
-2. Replace weak/inferred state handling with clear contracts.
-3. Prepare the data model for the dedicated Kudos product and HR companion workspace.
+### 1. Typed recipient contracts
+Replace any final-state contract that treats recipients as a single string.
 
-## Instructions for the Agent
+Define a typed recipient model that cleanly represents:
+- individual recipients
+- team recipients
+- department recipients
+- project-group recipients
+- mixed-recipient submissions
 
-1. Identify all current Kudos-related types, interfaces, normalizers, hooks, and submission sources.
-2. Introduce or normalize explicit contract support for:
-   - Pending
-   - Revision Requested
-   - Approved
-   - Rejected
-   - Withdrawn
-   - Approved/Scheduled
-   - Removed/Unpublished
-   - Flagged for Admin Review
-3. Introduce contract support for:
-   - shared role model
-   - claim owner / reassignment
-   - overdue state
-   - scheduled publish metadata
-   - featured/pinned/standard prominence state
-   - pin order
-   - admin review flag
-   - audit timeline events
-   - associated-party visibility distinctions
-4. Rework recipient contracts so the final model supports:
-   - individual recipients
-   - team recipients
-   - department recipients
-   - project group recipients
-   - mixed recipient types in one submission
-5. Eliminate dependence on the plain text pseudo-recipient input as the authoritative submission model.
-6. Ensure the contract layer can support shared operational filter/preset behavior.
-7. Keep the shape strongly typed and aligned with the existing SharePoint list where practical.
-8. If the current list schema cannot express a needed state directly, define the app-layer model and clearly document the mapping.
+The result should support:
+- SharePoint write payloads
+- read normalization
+- employee-facing summary rendering
+- detail-panel rendering
+- governance filtering/search
+
+### 2. Workflow/status contracts
+Normalize the live workflow model into explicit internal types and mapping helpers for:
+- pending
+- revisionRequested
+- approved
+- approvedScheduled
+- rejected
+- withdrawn
+- removedUnpublished
+- flaggedForAdminReview as a distinct governance flag/overlay where appropriate
+
+### 3. Visibility contracts
+Normalize:
+- public visibility
+- associated-only visibility
+- internal-only visibility
+
+Be explicit about:
+- current public visibility
+- associated visibility
+- archive eligibility
+- recipient visibility before/after publish
+
+### 4. Scheduling/prominence contracts
+Define clean contracts for:
+- scheduled publish metadata
+- pinned state/order
+- featured state/expiration
+- prominence failures
+- admin-review flagging for missed prominence outcomes
+
+### 5. Work-management contracts
+Define clean contracts for:
+- claim owner
+- assigned owner
+- reassignment
+- reviewed by / reviewed at
+- queue ownership views
+- overdue metadata and reminder targeting
+
+### 6. Audit-event contracts
+Define typed event contracts aligned to the audit list:
+- event type
+- actor
+- event time
+- public note
+- internal note
+- old/new value payload shape
+- reducer/replay friendliness
+
+## Required Shared View-Model Outcomes
+
+Create or normalize shared view-model contracts for:
+
+### Employee-facing recognition
+- spotlight item
+- feed/rail/archive item
+- recipient summary model
+- detail-panel recognition sections
+
+### Governance workspace
+- queue row
+- toolbar/filter state
+- governance detail sections
+- state/aging/ownership chips
+- audit timeline entries
+
+Where these models expose repeated visual patterns, shape them so they can feed shared homepage-safe primitives rather than local one-off markup.
+
+## Tasks
+
+1. Audit current contracts/types/hooks/helpers.
+2. Identify schema drift, placeholder strings, and missing enums.
+3. Define or refactor typed recipient contracts.
+4. Define or refactor workflow/visibility/scheduling/prominence contracts.
+5. Define or refactor audit-event contracts.
+6. Define or refactor shared employee/governance view models.
+7. Update affected helpers/adapters as needed so later UI prompts are building on final-state contracts.
 
 ## Deliverables
 
-- updated contracts/types
-- updated normalization/helpers/hooks as needed
-- clear status/state mapping
-- explicit recipient model
-- explicit prominence/scheduling model
-- explicit work-management and audit model
-
-## Validation
-
-- typecheck all changed files
-- verify existing consumers are either updated or clearly marked for follow-on prompt work
-- verify no hidden status inference remains where explicit state is required
-
-## Required Report Back
-
 Return:
-1. contracts changed
-2. status/state model implemented
-3. recipient model implemented
-4. SharePoint mapping assumptions
-5. follow-on files that must be updated next
+
+1. changed-file summary
+2. contract map
+3. recipient-model summary
+4. workflow/status map
+5. event-type map
+6. known schema/code mismatches resolved
+7. remaining blockers, if any
+
+## Important Rules
+
+- Do not preserve stringly-typed recipient or workflow contracts merely for backward convenience.
+- Prefer explicit mapping helpers over loose string comparisons scattered across files.
+- Keep local business/data logic local, but shape the contracts so the later shared-primitive work can stay disciplined.
+- Do not re-read files that are still within your active context window or memory unless a detail is genuinely uncertain.

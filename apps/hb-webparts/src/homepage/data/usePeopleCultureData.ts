@@ -54,7 +54,7 @@ export function usePeopleCultureData(): PeopleCultureDataResult {
 
     (async () => {
       try {
-        const { config } = await fetchPeopleCultureListData(siteUrl);
+        const { config, errors } = await fetchPeopleCultureListData(siteUrl);
         if (cancelled) return;
 
         // When all lists return empty arrays (failed or truly empty), return
@@ -66,12 +66,20 @@ export function usePeopleCultureData(): PeopleCultureDataResult {
         );
 
         _cache = { config, fetchedAt: Date.now() };
+
+        // Prefer surfacing binding errors over the generic "empty" message
+        // so schema-drift breakage is never silently treated as success.
+        const bindingError = errors.length > 0 ? errors.join(' | ') : undefined;
+        const errorMessage = bindingError
+          ? bindingError
+          : hasData
+            ? undefined
+            : 'All People & Culture lists returned empty results';
+
         setResult({
           listConfig: hasData ? config : undefined,
           isLoading: false,
-          error: hasData
-            ? undefined
-            : 'All People & Culture lists returned empty results',
+          error: errorMessage,
         });
       } catch (err) {
         if (cancelled) return;

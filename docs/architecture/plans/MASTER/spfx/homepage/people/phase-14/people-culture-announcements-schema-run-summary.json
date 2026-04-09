@@ -1,0 +1,24 @@
+[
+  {
+    "listTitle": "People Culture Announcements1",
+    "status": "success",
+    "rawPath": "/Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-announcements1-list-schema.raw.json",
+    "normalizedPath": "/Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-announcements1-list-schema.normalized.json",
+    "samplePath": "/Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-announcements1-list-sample-items.json",
+    "fieldCount": 106,
+    "viewCount": 1,
+    "contentTypeCount": 2,
+    "sampleCount": 1
+  },
+  {
+    "listTitle": "People Culture Announcements",
+    "status": "success",
+    "rawPath": "/Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-announcements-list-schema.raw.json",
+    "normalizedPath": "/Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-announcements-list-schema.normalized.json",
+    "samplePath": "/Users/bobbyfetting/hb-intel/docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-announcements-list-sample-items.json",
+    "fieldCount": 100,
+    "viewCount": 1,
+    "contentTypeCount": 2,
+    "sampleCount": 1
+  }
+]

@@ -1,12 +1,22 @@
-# Decision Lock Appendix — HB Kudos + HR Approval Companion
+# Decision Lock Appendix — HB Kudos + HR Approval Companion v3
 
 This file is the governing decision register for the implementation prompts in this package.
+
+## UI Governance Locks
+
+- Homepage webparts in this implementation use `@hbc/ui-kit/homepage` as the primary UI entry point.
+- Employee-facing HB Kudos must read as a premium recognition product surface, not a timid enterprise card grid.
+- The HR approval companion must read as a premium governance workspace, not a plain admin table with cosmetic styling.
+- Repeated premium recognition/governance patterns must be promoted into shared homepage-safe primitives before local duplication.
+- Plain-text comma-delimited recipients are not an acceptable final-state UI model.
+- Shared surface extensions are explicitly allowed and expected where the current homepage entry lacks the required recognition/governance primitives.
+- Local inline premium styling is prohibited except for isolated, documented micro-layout shims that do not create a reusable visual pattern.
 
 ## Governance / Authority Model
 
 - Approval model: **mixed authority by action**
 - Access to the HR approval companion webpart: **HR reviewers + Kudos admins only**
-- Shared permission model across surfaces: **one shared role model** governs both the main HB Kudos webpart and the HR companion webpart
+- Shared permission model across surfaces: **one shared role model** governs both the main HB Kudos webpart and the HR companion
 - Role assignment mechanism: **configurable webpart properties** managed by an existing SharePoint admin
 - Role model should resolve to **real SharePoint principals/groups**, not loose text entries
 - UI and action/mutation enforcement must both honor the same role model
@@ -21,6 +31,7 @@ Admins only can:
 - schedule future publishing
 - change or cancel a scheduled publish
 - restore removed public items
+- perform final admin-review closeout where required
 
 ## Core Workflow Model
 
@@ -71,7 +82,7 @@ Statuses / states required in the operating model include, at minimum:
 ## Visibility Model
 
 ### Public Visibility
-- Only currently public items appear on public Kudos surfaces
+- Only currently public items appear on public HB Kudos surfaces
 - Celebrate is allowed only on **currently publicly visible** items
 - No public comments/replies in v1
 
@@ -138,7 +149,7 @@ Notify submitter on:
 - On featured expiration:
   - demote to standard approved
   - remain public only if still within the normal homepage window
-- If a scheduled featured item goes live while featured slot is occupied:
+- If a scheduled featured item goes live while the featured slot is occupied:
   - publish as standard approved
   - no displacement
   - notify admins
@@ -218,50 +229,3 @@ Withdrawn is not a prime top-level tab; it may live in search/history.
   - Assigned to me
   - Unassigned
   - Assigned to others
-- Include queue counts for workload distribution
-
-## Search / Filters / Presets
-
-Broader operational filter model required:
-- keyword search
-- recipient type
-- submitter
-- recipient
-- current status / queue
-- flagged for admin review
-- overdue state
-- published at least once / never published
-- pinned / featured / standard
-- date ranges for submitted, approved, and publish window
-
-Saved views:
-- shared operational presets only
-- no personal saved views in v1
-
-## Bulk Actions
-
-Limited safe bulk actions only.
-Default safe set:
-- clear admin-review flag
-- mark reviewed
-- remove pin
-- clear featured state
-- move approved items out of prominence without deleting them
-
-No risky batch approve/reject/revision workflow actions in v1.
-
-## Detail Panel
-
-- Fuller kudos detail experience = **detail panel / flyout**
-- HR/admin can take only limited inline actions there:
-  - mark reviewed
-  - clear admin-review flag
-  - claim / reassign
-- Heavier workflow and prominence actions stay in the main companion workspace
-
-## Engagement
-
-### Celebrate
-- Toggle behavior
-- Count only; no public people list
-- Celebrate counts persist across item lifecycle unless explicitly removed by admin policy later

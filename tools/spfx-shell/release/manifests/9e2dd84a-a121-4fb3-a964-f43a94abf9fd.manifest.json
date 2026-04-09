@@ -1,6 +1,6 @@
 {
-  "id": "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e",
-  "alias": "PeopleCultureCompanionWebPart",
+  "id": "9e2dd84a-a121-4fb3-a964-f43a94abf9fd",
+  "alias": "PnpOpsWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -17,15 +17,18 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "People and Culture HR Companion"
+        "default": "PnP Operations"
       },
       "description": {
-        "default": "HR operating console for the People & Culture public webpart — overview dashboard, announcements / celebrations / culture-program workspaces with full lifecycle views, cross-family approvals inbox with claim and reassignment, lightweight homepage governance, shared quick-edit drawer and full editor, and a calendar planning mode. Scoped strictly to non-recognition content; HB Kudos is a separate webpart boundary."
+        "default": "Operator shell for read-only SharePoint PnP extraction actions with preflight, run status, and artifact manifest visibility."
       },
-      "officeFabricIconFontName": "PeopleSettings",
+      "officeFabricIconFontName": "Processing",
       "hiddenFromToolbox": true,
       "properties": {
-        "heading": "People & Culture Operating Console"
+        "backendUrl": "",
+        "backendAudience": "",
+        "defaultTargetSiteUrl": "",
+        "mockMode": false
       }
     }
   ],
@@ -33,7 +36,7 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e_1.0.0",
+    "entryModuleId": "9e2dd84a-a121-4fb3-a964-f43a94abf9fd_1.0.0",
     "scriptResources": {
       "@microsoft/sp-property-pane": {
         "type": "component",
@@ -50,9 +53,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e_1.0.0": {
+      "9e2dd84a-a121-4fb3-a964-f43a94abf9fd_1.0.0": {
         "type": "path",
-        "path": "shell-entry-7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e-7359eb15.js"
+        "path": "shell-entry-9e2dd84a-a121-4fb3-a964-f43a94abf9fd-334fde9d.js"
       }
     }
   }

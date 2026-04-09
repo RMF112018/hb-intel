@@ -117,7 +117,37 @@ export interface AnnouncementEntry {
 
 // --- Kudos Module ---
 
+/**
+ * Narrow domain status kept for backward compatibility with the
+ * merged People & Culture normalizer. `KudosWorkflowStatus` below is
+ * the full-fidelity type that matches the live SharePoint
+ * `WorkflowStatus` choice field.
+ */
 export type KudosStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * Full-fidelity Kudos workflow status as persisted on the live
+ * `People Culture Kudos` SharePoint list (`b01fa4d2-…`).
+ * Mirrors the authoritative `WorkflowStatus` choice field. See
+ * `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-kudos-sharepoint-schema-report.md`.
+ *
+ * `_ModerationStatus` is NOT authoritative for these lists — this
+ * field is the only publish-state source of truth.
+ */
+export type KudosWorkflowStatus =
+  | 'pending'
+  | 'revisionRequested'
+  | 'approved'
+  | 'approvedScheduled'
+  | 'rejected'
+  | 'withdrawn'
+  | 'removedUnpublished';
+
+/** Prominence intent as persisted on the live Kudos list. */
+export type KudosProminenceIntent = 'standard' | 'pinned' | 'featured';
+
+/** Visibility mode as persisted on the live Kudos list. */
+export type KudosCurrentVisibilityMode = 'public' | 'associatedOnly' | 'internalOnly';
 
 export type KudosRecipientType = 'individual' | 'team' | 'department' | 'projectGroup';
 
@@ -139,15 +169,50 @@ export interface KudosEntry {
   id: string;
   headline: string;
   excerpt: string;
+  /** Optional long-form body from the live `Details` field on the Kudos list. */
+  details?: string;
   submittedBy: PersonReference;
   submittedDate: string;
+  /**
+   * Narrow domain status retained for merged-webpart compatibility.
+   * Derived from the authoritative `workflowStatus` field at read time:
+   *   - `approved`           → `approved`
+   *   - `approvedScheduled`  → `approved`
+   *   - `rejected`           → `rejected`
+   *   - `withdrawn`          → `rejected`
+   *   - `removedUnpublished` → `rejected`
+   *   - `pending`            → `pending`
+   *   - `revisionRequested`  → `pending`
+   */
   status: KudosStatus;
+  /**
+   * Authoritative workflow status from the live `WorkflowStatus` field.
+   * Consumers that need the full 7-state shape should read this rather
+   * than `status`.
+   */
+  workflowStatus?: KudosWorkflowStatus;
+  /** Mirrors the live `WasEverPublished` flag. */
+  wasEverPublished?: boolean;
   approvedBy?: PersonReference;
   approvedDate?: string;
   recipients: KudosRecipient[];
   media?: HomepageMediaSlot;
   isPinned?: boolean;
+  /** Mirrors the live `PinOrder` number field. */
+  pinOrder?: number;
+  /** Mirrors the live `IsFeatured` boolean. */
+  isFeatured?: boolean;
+  /** Mirrors the live `FeaturedExpiresAt` datetime. */
+  featuredExpiresAt?: string;
+  /** Mirrors the live `ProminenceIntent` choice. */
+  prominenceIntent?: KudosProminenceIntent;
+  /** Mirrors the live `CurrentVisibilityMode` choice. */
+  visibilityMode?: KudosCurrentVisibilityMode;
   homepageEnabled?: boolean;
+  /** Mirrors the live `IsScheduled` boolean. */
+  isScheduled?: boolean;
+  /** Mirrors the live `ScheduledPublishAt` datetime. */
+  scheduledPublishAt?: string;
   publishStartDate?: string;
   publishEndDate?: string;
   celebrateCount?: number;

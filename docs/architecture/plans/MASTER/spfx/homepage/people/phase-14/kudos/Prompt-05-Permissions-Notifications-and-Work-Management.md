@@ -1,85 +1,84 @@
 # Prompt 05 — Permissions, Notifications, and Work Management
 
+Implement the role model, notification behavior, overdue/reminder logic, and work-management behaviors for HB Kudos and the HR companion.
+
 ## Objective
 
-Implement the shared role model, queue-specific notifications, admin review handoff behavior, and limited safe bulk administrative controls.
+Complete the non-visual operating logic for:
 
-## Required Inputs
+- shared role/permission enforcement
+- employee submitter/recipient visibility rules
+- notification triggers
+- overdue/reminder targeting
+- claim / assignment / reassignment behavior
+- work-management views
+- safe operational presets and filter behavior
 
-- live repo: `https://github.com/RMF112018/hb-intel`
-- `apps/hb-webparts/src/webparts/peopleCulture/`
-- adjacent homepage/data/contracts/helper seams
-- `packages/ui-kit/`
-- `docs/reference/ui-kit/`
-- `Decision-Lock-Appendix.md`
-- `Plan-Summary.md`
+The result should align tightly to the decision lock and the live schema.
 
 ## Governing Rules
 
-- Treat repo truth as authoritative.
-- Implement the locked decisions exactly unless a hard repo-truth conflict prevents it.
-- Do not preserve the current merged People & Culture architecture as the end-state for Kudos.
-- Do not re-read files that are still within your current context window or memory unless you need to verify a specific uncertain detail.
-- Preserve SPFx packaging discipline and shared import discipline.
-- Prefer narrow, controlled edits over speculative rewrites unless a structural change is clearly required by the locked product shape.
+### Roles
+- One shared role model governs both surfaces.
+- Role assignment comes from configurable webpart properties resolving to real SharePoint principals/groups.
+- UI gating and mutation authorization must use the same authority model.
 
-## Scope
+### Notifications
+Notify submitter on:
+- approve
+- reject
+- revision requested
 
-1. Shared permissions
-2. Queue-specific reminders
-3. Notification behavior
-4. Safe bulk actions
-5. Search/filter operations
+Notify recipients:
+- only after the item is actually live
+- not for later public removal/unpublish
+- for scheduled items only when the item actually publishes
 
-## Instructions for the Agent
+### Overdue/reminders
+- Pending / Revision Requested reminders → HR reviewers
+- Flagged for Admin Review reminders → Kudos admins
+- Approved / Rejected / Removed-Unpublished → no routine overdue reminders
+- thresholds and cadence are configurable through webpart properties
 
-1. Wire the shared role model into both visibility and action authorization.
-2. Ensure role assignments are configurable through webpart properties using SharePoint principal/group resolution.
-3. Implement queue-specific overdue reminder behavior and configurable reminder cadence.
-4. Implement submitter and recipient notification behavior exactly as locked.
-5. Implement admin review flag behavior, including mark reviewed and clear flag semantics.
-6. Implement the broader operational search/filter model:
-   - keyword
-   - recipient type
-   - submitter
-   - recipient
-   - status/queue
-   - flagged for admin review
-   - overdue
-   - published-once / never-published
-   - pinned / featured / standard
-   - submitted/approved/publish-window date ranges
-7. Implement the limited safe bulk-action set only:
-   - clear admin-review flag
-   - mark reviewed
-   - remove pin
-   - clear featured state
-   - move approved items out of prominence without deleting them
-8. Do not implement risky batch approve/reject/revision actions.
-9. Ensure the flagged queue is visible to both HR and admins but authority remains role-aware.
+### Work ownership
+- claim model is soft, not exclusive
+- reassignment authority varies by queue/state per the decision lock
+- work-management views required:
+  - Assigned to me
+  - Unassigned
+  - Assigned to others
+
+## Required UI / Shared Primitive Outcomes
+
+If operational views expose repeated preset/filter/toggle patterns, ensure those patterns use shared homepage-safe governance toolbar/filter primitives rather than one-off local controls.
+
+If overdue/state/owner indicators repeat, ensure they use shared status/aging/ownership chips rather than local badge duplication.
+
+## Tasks
+
+1. Audit the current role model and authorization seams.
+2. Implement/refine the shared permission model for both surfaces.
+3. Implement/refine notification triggers and delivery hooks/call sites.
+4. Implement overdue/reminder logic and configuration use.
+5. Implement/refine claim / assignment / reassignment logic.
+6. Implement/refine work-management views and preset/filter behavior.
+7. Ensure the UI uses shared governance toolbar/chip patterns where repeated.
 
 ## Deliverables
 
-- shared role enforcement
-- configurable principal/group property handling
-- queue reminder behavior
-- notification behavior
-- safe bulk actions
-- operational filter model
-
-## Validation
-
-- verify role-aware visibility and actions
-- verify reminders target the correct owning role by queue
-- verify scheduled notification timing
-- verify safe bulk actions only
-- verify filter set works across the companion workspace
-
-## Required Report Back
-
 Return:
-1. permissions model implemented
-2. reminder/notification behavior implemented
-3. bulk actions implemented
-4. filter/search behavior implemented
-5. unresolved constraints or schema gaps
+
+1. changed-file summary
+2. role-model implementation summary
+3. notification summary
+4. overdue/reminder summary
+5. work-management summary
+6. validation performed
+7. remaining issues, if any
+
+## Important Rules
+
+- Do not let UI gating diverge from mutation authorization.
+- Do not leak associated/private/governance views to unauthorized users.
+- Do not implement repeated work-management controls as one-off local UI if shared primitives already exist or should exist.
+- Do not re-read files that are still within your active context window or memory unless a detail is genuinely uncertain.

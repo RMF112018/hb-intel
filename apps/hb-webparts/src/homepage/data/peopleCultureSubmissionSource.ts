@@ -1,20 +1,34 @@
 /**
  * SharePoint write seam for People & Culture Kudos submissions.
  *
- * Creates new items in the live People Culture Kudos list via
- * SharePoint REST API. All submissions default to a moderated state
- * (HomepageEnabled=false, no approval) so they require admin review
- * before appearing on the homepage.
+ * Creates new items in the live `People Culture Kudos` list via the
+ * SharePoint REST API. All submissions land in the
+ * `WorkflowStatus: 'pending'` state, with `HomepageEnabled=false` and
+ * `CurrentVisibilityMode: 'internalOnly'` so they require HR review
+ * before appearing on the public homepage surface.
  *
- * Follows the same isolation pattern as projectSpotlightListSource.ts
- * — no REST calls leak into the rendering layer.
+ * The SharePoint list does NOT have moderation enabled, so
+ * `_ModerationStatus` is never written — `WorkflowStatus` is the
+ * authoritative publish-state signal.
+ *
+ * Binds by list GUID via `peopleCultureSpListRegistry` so title
+ * drift cannot cross-bind the writer to the wrong list.
  */
 import { getSiteUrl } from './spContext.js';
+import {
+  buildPcListItemsEndpoint,
+  PEOPLE_CULTURE_LIST_REGISTRY,
+} from './peopleCultureSpListRegistry.js';
 import type { KudosComposerDraft } from './useKudosComposer.js';
 
 /* ── List metadata ──────────────────────────────────────────────── */
 
-export const SP_KUDOS_LIST_TITLE = 'People Culture Kudos';
+/**
+ * @deprecated Kept only for callers that still import the string.
+ * The submission writer binds by list ID via
+ * `PEOPLE_CULTURE_LIST_REGISTRY.kudos`.
+ */
+export const SP_KUDOS_LIST_TITLE = PEOPLE_CULTURE_LIST_REGISTRY.kudos.title;
 
 /* ── Types ──────────────────────────────────────────────────────── */
 
@@ -93,6 +107,38 @@ async function resolveUserId(siteUrl: string, email: string, digest: string): Pr
 
 /* ── Payload construction ──────────────────────────────────────── */
 
+/**
+ * Kudos list item payload. Every field name here is a live
+ * InternalName verified against
+ * `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-kudos-list-schema.normalized.json`.
+ *
+ * Fields intentionally set on every submission:
+ *   - `KudosId`            — stable app-side GUID
+ *   - `Headline`, `Excerpt`— required editorial fields
+ *   - `Details`            — optional long-form body
+ *   - `SubmittedDate`      — required editorial submission timestamp
+ *   - `SubmittedById`      — resolved SharePoint user id for the
+ *                            `SubmittedBy` Person field
+ *   - `WorkflowStatus`     — authoritative publish state. New drafts
+ *                            land in `pending`.
+ *   - `WasEverPublished`   — required Boolean. Always `false` on create.
+ *   - `ProminenceIntent`   — Choice. Default `standard` on create.
+ *   - `HomepageEnabled`    — `false` until HR explicitly promotes.
+ *   - `IsPinned`           — `false` until HR explicitly pins.
+ *   - `IsFeatured`         — `false` until HR explicitly features.
+ *   - `IsScheduled`        — `false` until HR schedules a publish time.
+ *   - `CelebrateCount`     — initialized to 0.
+ *
+ * Not set on submission:
+ *   - `CurrentVisibilityMode` — defaults to `internalOnly` on the
+ *     list itself; HR decides when to promote.
+ *   - `IndividualRecipients` / `TeamRecipients` / `DepartmentRecipients`
+ *     / `ProjectGroupRecipients` — the composer currently accepts
+ *     free-text recipient names. Proper Person / Taxonomy field writes
+ *     require a SharePoint people-picker + term-store lookup which
+ *     the current composer does not collect. HR assigns these during
+ *     the review workflow.
+ */
 interface KudosListItemPayload {
   KudosId: string;
   Headline: string;
@@ -100,8 +146,13 @@ interface KudosListItemPayload {
   Details?: string;
   SubmittedDate: string;
   SubmittedById?: number;
-  IsPinned: boolean;
+  WorkflowStatus: 'pending';
+  WasEverPublished: boolean;
+  ProminenceIntent: 'standard';
   HomepageEnabled: boolean;
+  IsPinned: boolean;
+  IsFeatured: boolean;
+  IsScheduled: boolean;
   CelebrateCount: number;
 }
 
@@ -114,9 +165,16 @@ function buildPayload(
     Headline: draft.headline.trim(),
     Excerpt: draft.excerpt.trim(),
     SubmittedDate: new Date().toISOString(),
-    // Moderation defaults — require admin review before homepage
-    IsPinned: false,
+    // Authoritative publish-state defaults — HR review required
+    // before this item goes live. `WorkflowStatus` is the single
+    // source of truth; `_ModerationStatus` is not written.
+    WorkflowStatus: 'pending',
+    WasEverPublished: false,
+    ProminenceIntent: 'standard',
     HomepageEnabled: false,
+    IsPinned: false,
+    IsFeatured: false,
+    IsScheduled: false,
     CelebrateCount: 0,
   };
 
@@ -191,8 +249,12 @@ export async function submitKudosDraft(
     // Build the list item payload
     const payload = buildPayload(draft, submitterUserId);
 
-    // Create the list item
-    const url = `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(SP_KUDOS_LIST_TITLE)}')/items`;
+    // Create the list item — bind by list GUID so title drift cannot
+    // cross-bind the writer to the wrong list.
+    const url = buildPcListItemsEndpoint(
+      siteUrl,
+      PEOPLE_CULTURE_LIST_REGISTRY.kudos,
+    );
 
     const response = await fetch(url, {
       method: 'POST',

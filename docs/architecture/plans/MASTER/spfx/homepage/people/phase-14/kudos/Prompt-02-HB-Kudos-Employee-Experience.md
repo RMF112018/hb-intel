@@ -1,79 +1,98 @@
 # Prompt 02 — HB Kudos Employee Experience
 
+Implement the employee-facing HB Kudos recognition experience as a dedicated premium homepage product surface using disciplined shared homepage primitives and shared surface extensions where required.
+
 ## Objective
 
-Build the dedicated employee-facing HB Kudos experience and remove the merged-surface dependence for recognition-specific runtime behavior.
+Build or refactor the employee-facing HB Kudos experience so it supports:
 
-## Required Inputs
+- featured kudos spotlight
+- pinned and standard feed behavior
+- archive / browse experience
+- typed submission flow
+- celebrate interaction
+- role-aware detail panel behavior
+- associated-item access after public visibility changes where allowed
 
-- live repo: `https://github.com/RMF112018/hb-intel`
-- `apps/hb-webparts/src/webparts/peopleCulture/`
-- adjacent homepage/data/contracts/helper seams
-- `packages/ui-kit/`
-- `docs/reference/ui-kit/`
-- `Decision-Lock-Appendix.md`
-- `Plan-Summary.md`
+The result must feel like a signature recognition product, not a generic SharePoint card list.
 
-## Governing Rules
+## Governing UI Rules
 
-- Treat repo truth as authoritative.
-- Implement the locked decisions exactly unless a hard repo-truth conflict prevents it.
-- Do not preserve the current merged People & Culture architecture as the end-state for Kudos.
-- Do not re-read files that are still within your current context window or memory unless you need to verify a specific uncertain detail.
-- Preserve SPFx packaging discipline and shared import discipline.
-- Prefer narrow, controlled edits over speculative rewrites unless a structural change is clearly required by the locked product shape.
+1. Use `@hbc/ui-kit/homepage` as the primary UI entry point.
+2. Use existing shared recognition primitives where they fit.
+3. If archive cards, recipient-summary patterns, or detail-panel sections are missing from the shared homepage entry, create/extend shared homepage-safe primitives first.
+4. Do not create one-off local premium shells for repeated patterns.
+5. Do not keep the current `HbcKudosComposer*` recipient model unchanged if it still assumes a plain text recipient string.
 
-## Scope
+## Required Employee-Facing Surface Areas
 
-1. Dedicated Kudos runtime/UI
-2. Submission experience
-3. Archive/feed behavior
-4. Celebrate and detail panel behavior
-5. Associated-item access rules
+### A. Homepage recognition surface
+Implement/refine the main HB Kudos homepage surface for:
+- featured spotlight
+- pinned items
+- standard items
+- summary recipient presentation
+- clear prominence/state language
+- strong CTA behavior
 
-## Instructions for the Agent
+### B. Submission / edit flow
+Implement/refine the submission flow so it supports:
+- typed recipient buckets
+- required content fields
+- optional media fields as supported
+- validation/error/success states
+- revision resubmission flow
+- dirty-state handling
 
-1. Create or normalize the dedicated HB Kudos surface so it is not subordinate to the merged People & Culture composition.
-2. Rework the submission experience to support the locked recipient model and approval-aware behavior.
-3. Replace the plain text recipient entry path with the correct SharePoint-backed people/group/team/department/project-group selection model or the closest repo-appropriate adapter path.
-4. Implement or update:
-   - featured spotlight behavior
-   - pinned / standard feed behavior
-   - archive browsing
-   - celebrate toggle
-   - count-only celebrate presentation
-   - detail panel / flyout
-5. Ensure detail-panel access follows the locked visibility rules:
-   - public users for public items
-   - submitter / recipients / HR-admin for allowed associated/governed items
-6. Ensure associated no-longer-public items show the reduced history-safe view.
-7. Ensure mixed-recipient submissions publish as one shared kudos item with summarized card presentation and full detail in the panel.
-8. Keep public engagement limited to Celebrate only.
-9. Do not implement public comments/replies.
-10. Preserve celebrate counts across lifecycle changes.
+If the existing shared composer shell is reusable, extend it. If it is structurally insufficient, replace it with a shared homepage-safe recognition composer family.
+
+### C. Archive / browse experience
+Implement the archive/browse experience using shared recognition card/list patterns, not ad hoc local card duplication.
+
+Archive should support:
+- browse/search/filter as appropriate
+- mixed visibility handling
+- prominence/history-safe presentation
+- summarized cards with richer detail in the panel/page
+
+### D. Shared detail panel / detail surface
+Implement/refine the employee-facing detail experience so it supports:
+- full recognition content
+- recipient detail
+- submitter detail where appropriate
+- current high-level status
+- celebrate interaction where public/live
+- associated-item reduced view where no longer public
+- no internal-only governance leakage to ordinary viewers
+
+## Tasks
+
+1. Identify the existing shared recognition primitives that can be used directly.
+2. Add/extend shared homepage-safe recognition primitives where needed:
+   - archive card/list patterns
+   - recipient summary/bucket patterns
+   - detail-section patterns
+   - any submission-related shells that should be shared
+3. Refactor the employee-facing webpart/page consumers to use those shared primitives.
+4. Replace the plain text recipient submission path with the typed recipient model.
+5. Implement the visibility/detail rules from the decision lock.
+6. Keep SharePoint data access and normalization local and thin.
 
 ## Deliverables
 
-- dedicated HB Kudos runtime surface
-- corrected submission flow
-- corrected recipient handling
-- detail panel implementation/update
-- celebrate behavior implementation/update
-- archive/feed implementation/update
-
-## Validation
-
-- verify public vs associated-party visibility
-- verify recipient summary vs full detail behavior
-- verify celebrate toggle behavior
-- verify no comments/replies were introduced
-- verify mixed-recipient submissions remain one item
-
-## Required Report Back
-
 Return:
-1. files changed
-2. submission/runtime flows completed
-3. visibility rules implemented
-4. known remaining gaps
-5. readiness for moderation workspace integration
+
+1. changed-file summary
+2. shared primitives created/extended
+3. employee-facing consumer files changed
+4. recipient-flow summary
+5. archive/detail behavior summary
+6. validation performed
+7. remaining issues, if any
+
+## Important Rules
+
+- Do not flatten the experience into weak generic cards for the sake of convenience.
+- Do not bypass the shared kit with local premium look-alikes.
+- Do not leave the employee-facing surface visually interchangeable with the HR governance workspace.
+- Do not re-read files that are still within your active context window or memory unless a detail is genuinely uncertain.
