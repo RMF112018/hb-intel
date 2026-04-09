@@ -1,20 +1,31 @@
 /**
  * HbcProjectSpotlightSurface — Premium project / portfolio spotlight surface.
  *
- * W01r-P19 — flagship rebuild:
+ * W01r-P22 — single-column stacked reorientation for SharePoint fit:
+ *   • Desktop composition is now a single column at all breakpoints —
+ *     featured hero fills the full section width, supporting projects
+ *     stack below as an editorial "more from the portfolio" block.
+ *   • Overall scale is tuned down slightly (masthead padding, featured
+ *     media min-height, featured title, featured content padding) so the
+ *     module fits cleanly inside a real SharePoint page section without
+ *     feeling cramped.
+ *   • Supporting rail stays a bordered editorial container with numbered
+ *     01/02/03 indexing; at desktop the thumbnails grow modestly to
+ *     balance the wider tile footprint and the tile padding is nudged up.
+ *
+ * W01r-P19 — flagship rebuild (preserved):
  *   • Nameplate-style editorial masthead ("PORTFOLIO" eyebrow + dominant
  *     headline + updated dateline + ghost view-all action)
  *   • Short blue nameplate bar fading into neutral (consistent with the
  *     Newsroom and Editorial surfaces)
- *   • Dominant image-led featured hero: 440px min-height at desktop,
- *     overlay status + strategic chips on the image, two-stop editorial
- *     scrim, optional Ken-Burns hover
- *   • Stronger headline typography (1.5 → 2.125rem) and more confident
- *     summary treatment
+ *   • Dominant image-led featured hero with overlay status + strategic
+ *     chips on the image, two-stop editorial scrim, optional Ken-Burns
+ *     hover
+ *   • Confident headline typography and summary treatment
  *   • Dedicated milestone strip with a progress bar + checklist, not
  *     a buried metadata pill
- *   • Upgraded supporting rail with numbered 01/02/03 editorial index,
- *     larger 120×90 thumbnails, hover-lift, and a bordered footer CTA
+ *   • Upgraded supporting rail with numbered editorial index, hover-lift,
+ *     and a bordered footer CTA
  *   • Primary-variant CTA on the featured project so the flagship
  *     module carries real conversion weight
  *
@@ -22,8 +33,9 @@
  *   HBC_PRESENTATION_BLUE   #225391 / 34, 83, 145
  *   HBC_PRESENTATION_ORANGE #e57e46 / 229, 126, 70
  * Responsive via viewport media queries (mobile <768, tablet ≥768,
- * desktop ≥1200). Team detail panel remains a popover at desktop
- * and a bottom sheet on mobile.
+ * desktop ≥1200). Desktop is single-column stacked (W01r-P22) — the
+ * rail no longer becomes a right-side sidebar. Team detail panel
+ * remains a popover at desktop and a bottom sheet on mobile.
  */
 
 .root {
@@ -90,7 +102,7 @@
 
 @media (min-width: 1200px) {
   .masthead {
-    padding: 30px 36px 18px;
+    padding: 24px 30px 14px;
   }
 }
 
@@ -163,7 +175,7 @@
 
 @media (min-width: 1200px) {
   .mastheadHeadline {
-    font-size: 1.9375rem;
+    font-size: 1.75rem;
   }
 }
 
@@ -199,7 +211,7 @@
 
 @media (min-width: 1200px) {
   .separator {
-    margin: 0 36px;
+    margin: 0 30px;
   }
 }
 
@@ -221,10 +233,11 @@
 
 @media (min-width: 1200px) {
   .composition {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 24px;
-    padding: 28px 36px 0;
+    /* W01r-P22: single-column stacked layout at desktop. Featured hero
+       fills the full section width and the supporting rail becomes an
+       editorial "more from the portfolio" block stacked below it.
+       Breathing room between the two is owned by .rail margin-top. */
+    padding: 22px 30px 0;
   }
 }
 
@@ -233,16 +246,11 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .featuredWrap {
+  /* W01r-P22: full-width at every breakpoint in the single-column
+     stacked composition. Previously narrowed to ~68% at desktop so a
+     supporting rail could sit alongside it; the rail now stacks below. */
   flex: 1 1 100%;
   min-width: 0;
-}
-
-@media (min-width: 1200px) {
-  .featuredWrap {
-    flex: 1 1 0;
-    min-width: 0;
-    width: 68%;
-  }
 }
 
 .featuredLayout {
@@ -277,7 +285,7 @@
 
 @media (min-width: 1200px) {
   .mediaZone {
-    min-height: 440px;
+    min-height: 380px;
   }
 }
 
@@ -442,7 +450,8 @@
 
 @media (min-width: 1200px) {
   .featuredContent {
-    padding: 32px 36px 34px;
+    gap: 14px;
+    padding: 26px 30px 28px;
   }
 }
 
@@ -464,7 +473,7 @@
 
 @media (min-width: 1200px) {
   .featuredTitle {
-    font-size: 2.125rem;
+    font-size: 1.8125rem;
   }
 }
 
@@ -885,10 +894,26 @@
 
 @media (min-width: 1200px) {
   .rail {
-    flex: 0 0 28%;
-    min-width: 260px;
-    margin-top: 0;
-    padding: 20px 18px;
+    /* W01r-P22: stacked editorial container below the featured hero,
+       not a right-side sidebar. Full width of the composition column,
+       slightly larger breathing room from the featured hero above, and
+       roomier padding so the wider tiles don't look cramped. */
+    flex: 1 1 100%;
+    min-width: 0;
+    margin-top: 28px;
+    padding: 22px 24px;
+    gap: 12px;
+  }
+
+  .railTile {
+    padding: 12px 14px;
+    gap: 16px;
+  }
+
+  .railThumbWrap,
+  .railThumb {
+    flex: 0 0 132px;
+    height: 88px;
   }
 }
 

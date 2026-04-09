@@ -69,15 +69,18 @@ items are demoted to the end of the supporting rail.
 
 ## Responsive behavior
 
-Responsive layout is now handled entirely by the shared surface family's
+Responsive layout is handled entirely by the shared surface family's
 CSS module via viewport media queries. No `useResponsiveTier` hook is
-used by the consumer.
+used by the consumer. The composition is single-column stacked at every
+breakpoint — featured hero first, supporting projects stacked below as
+an editorial "more from the portfolio" block — so the module fits a
+real SharePoint page section cleanly at every width.
 
 | Breakpoint | Layout |
 |-----------|--------|
-| `< 768px` (mobile) | Featured image stacks above content; rail below featured; team detail panel becomes a fixed bottom sheet. |
-| `768–1199px` (tablet) | Featured image + content side-by-side; rail stacks below featured. |
-| `>= 1200px` (desktop) | Featured (~70%) and rail (~30%) side-by-side; team detail panel becomes a popover. |
+| `< 768px` (mobile) | Featured image stacks above content; rail stacks below featured; team detail panel becomes a fixed bottom sheet. |
+| `768–1199px` (tablet) | Featured image + content still stack as a single column; rail stacks below featured with a bordered editorial container. |
+| `>= 1200px` (desktop) | Single-column stacked composition: featured hero fills the full section width at a slightly tightened scale, supporting rail stacks below as a full-width editorial block with larger 132×88 thumbnails and roomier tile padding; team detail panel becomes a popover. |
 
 ## Media reliability
 

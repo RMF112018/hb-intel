@@ -4,6 +4,12 @@
  *
  * Wave 01 follow-on: Project / Portfolio Spotlight migration to
  * @hbc/ui-kit/homepage.
+ *
+ * W01r-P22: Default story wrapper widened to ~1080px to reflect a
+ * realistic SharePoint page-section width. A second `SharePointSection`
+ * story renders the same full model at ~920px to validate the new
+ * single-column stacked composition in a narrower section. Mobile story
+ * is left untouched.
  */
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -99,12 +105,25 @@ const noRailModel: ProjectSpotlightSurfaceModel = {
   secondary: [],
 };
 
-const wrapStyle: React.CSSProperties = { maxWidth: 1200 };
+// W01r-P22: widened from a loose 1200px container to a SharePoint-
+// realistic ~1080px so Storybook reflects the actual section width
+// the surface is expected to render inside. Media queries still fire
+// off viewport width, so desktop styles remain in scope.
+const wrapStyle: React.CSSProperties = { maxWidth: 1080 };
+const narrowSectionWrapStyle: React.CSSProperties = { maxWidth: 920 };
 const mobileWrapStyle: React.CSSProperties = { maxWidth: 420 };
 
 export const Default: Story = {
   render: () => (
     <div style={wrapStyle}>
+      <HbcProjectSpotlightSurface model={fullModel} />
+    </div>
+  ),
+};
+
+export const SharePointSection: Story = {
+  render: () => (
+    <div style={narrowSectionWrapStyle}>
       <HbcProjectSpotlightSurface model={fullModel} />
     </div>
   ),
