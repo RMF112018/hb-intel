@@ -119,23 +119,6 @@
   transform: translateX(3px);
 }
 
-/* ── Team strip button focus treatment ─────────────────────────── */
-
-.teamStripButton:focus-visible {
-  outline: 2px solid #225391;
-  outline-offset: 2px;
-  border-radius: 20px;
-}
-
-/* ── Mobile bottom-sheet backdrop ──────────────────────────────── */
-
-.teamDetailBackdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 99;
-}
-
 /* ── Reduced-motion blanket ─────────────────────────────────────── */
 /* Applies to all homepage interactive elements when user prefers    */
 /* reduced motion. Disables transitions universally.                 */
@@ -145,9 +128,7 @@
   .searchInput,
   .heroCtaOnDark,
   .actionRowContainer,
-  .actionRowArrow,
-  .teamStripButton,
-  .teamDetailBackdrop {
+  .actionRowArrow {
     transition: none !important;
     transform: none !important;
   }

@@ -1,35 +1,46 @@
 # Project / Portfolio Spotlight
 
-Premium editorial spotlight surface for the HB Central homepage. Renders one dominant featured project with a subordinate supporting rail of secondary projects, sourced from the **Homepage Project Spotlights** SharePoint list.
+Thin SPFx integration consumer for the **Project / Portfolio Spotlight**
+homepage section. The authored presentation grammar (featured hero,
+image-led composition, team strip + detail panel, supporting rail) lives
+in the shared `HbcProjectSpotlightSurface` family in `@hbc/ui-kit/homepage`.
+This webpart owns only data fetch, normalization, and view-model mapping.
 
 ## Manifest
 
 - **ID:** `8370ab0c-b6df-4db0-82f1-24b54750f508`
 - **Zone:** Operational Awareness
 - **Alias:** `ProjectPortfolioSpotlightWebPart`
-- **Version:** `0.0.7.0`
+- **Version:** `0.0.22.0`
 
 ## Data source
 
-**Primary:** SharePoint list `Homepage Project Spotlights` via REST API fetch.
+**Primary:** SharePoint list `Homepage Project Spotlights` via REST API.
 **Fallback:** Manifest `preconfiguredEntries` seed data (local dev / demo only).
 
-The list is fetched when SPFx context provides a site URL. Items are filtered server-side by `HomepageEnabled eq 1` and client-side by publish window (`PublishStart`/`PublishEnd`). Audience filtering and stale detection happen during normalization.
+The list is fetched when SPFx context provides a site URL. Items are
+filtered server-side by `HomepageEnabled eq 1` and client-side by publish
+window (`PublishStart`/`PublishEnd`). Audience filtering, stale detection,
+and featured-vs-secondary partitioning happen during normalization.
 
-Field mapping, fetch logic, and raw-to-contract mapping live in `homepage/data/projectSpotlightListSource.ts`. The fetch hook with 5-minute cache is in `homepage/data/useProjectSpotlightData.ts`. Site URL storage is in `homepage/data/spContext.ts`.
+Field mapping, fetch logic, and raw-to-contract mapping live in
+`homepage/data/projectSpotlightListSource.ts`. The fetch hook with
+5-minute cache is in `homepage/data/useProjectSpotlightData.ts`. Site URL
+storage is in `homepage/data/spContext.ts`.
 
-## Component structure
+## Ownership boundary
 
-```
-ProjectPortfolioSpotlight          Main component, responsive layout orchestration
-  FeaturedImage                    Safe featured image with branded placeholder fallback
-  ProjectTeamStrip                 Avatar strip + detail panel (popover or mobile bottom-sheet)
-    SafeAvatar                     Avatar with initials fallback on error
-  SupportingTile                   Secondary project tile in the rail
-    RailThumbnail                  Safe thumbnail with gradient fallback on error
-```
+| Layer | What lives there |
+|-------|------------------|
+| **Shared UI (`@hbc/ui-kit/homepage`)** | `HbcProjectSpotlightSurface` — the full authored surface family: root shell, header, separator, featured composition, image-safe rendering, team strip + detail panel, supporting rail, hover/focus states, responsive CSS, reduced-motion handling. Reuses `HbcAvatarStack` for the project team visual. |
+| **Webpart (local)** | This file — calls `useProjectSpotlightData()`, normalizes via `normalizeProjectPortfolioSpotlightConfig`, resolves empty/loading/authoring states, and maps the normalized collection into a `ProjectSpotlightSurfaceModel` before passing it to `HbcProjectSpotlightSurface`. |
+| **Homepage data/helpers (local)** | `spContext.ts`, `projectSpotlightListSource.ts`, `useProjectSpotlightData.ts`, `operationalAwarenessConfig.ts` (normalization), `operationalAwarenessContracts.ts` (business contracts), `authoringGovernance.ts`, `visibility.ts`. |
+| **Homepage shared loading/empty (local)** | `HomepageLoadingState`, `HomepageEmptyState`. |
 
-All sub-components are defined locally in `ProjectPortfolioSpotlight.tsx`. Nothing is exported beyond the main component and its props type.
+No presentation grammar remains local to the webpart: all featured-image
+rendering, avatar strip behavior, popover/bottom-sheet detail panel,
+rail tiles, and tier-aware layout are now governed by the shared surface
+family and its CSS module.
 
 ## Props
 
@@ -51,48 +62,56 @@ All sub-components are defined locally in `ProjectPortfolioSpotlight.tsx`. Nothi
 
 ## Selection logic
 
-Items are sorted deterministically: `featured: true` first, then by `order`, then by recency (`freshness.updatedAt`), then alphabetically by title. The first item after sorting becomes the featured project. Stale items are demoted to the end of the supporting rail.
+Items are sorted deterministically: `featured: true` first, then by
+`order`, then by recency (`freshness.updatedAt`), then alphabetically by
+title. The first item after sorting becomes the featured project. Stale
+items are demoted to the end of the supporting rail.
 
 ## Responsive behavior
 
-Uses `useResponsiveTier()` from `homepage/shared/` to adapt across three tiers:
+Responsive layout is now handled entirely by the shared surface family's
+CSS module via viewport media queries. No `useResponsiveTier` hook is
+used by the consumer.
 
-| Tier | Breakpoint | Layout |
-|------|-----------|--------|
-| Desktop | >= 1200px | Featured (68%) + rail (28%) side by side |
-| Tablet | 768-1199px | Featured full-width on top, rail below |
-| Mobile | <= 767px | Image stacks above content, rail below, team detail uses bottom-sheet |
+| Breakpoint | Layout |
+|-----------|--------|
+| `< 768px` (mobile) | Featured image stacks above content; rail below featured; team detail panel becomes a fixed bottom sheet. |
+| `768–1199px` (tablet) | Featured image + content side-by-side; rail stacks below featured. |
+| `>= 1200px` (desktop) | Featured (~70%) and rail (~30%) side-by-side; team detail panel becomes a popover. |
 
 ## Media reliability
 
-All images use safe rendering components with `onError` fallbacks:
-
-- **Featured image:** Branded gradient placeholder always behind image; on error, img removed and placeholder remains.
-- **Rail thumbnails:** On error, switches to branded gradient placeholder.
-- **Avatars (strip + detail):** On error, falls back to initials badge.
-
-## Ownership
-
-- **Spotlight-local:** Component, team strip, supporting tile, safe media components, all styles and constants
-- **Homepage data:** `spContext.ts`, `projectSpotlightListSource.ts`, `useProjectSpotlightData.ts`
-- **Homepage shared:** `useResponsiveTier` hook, `usePrefersReducedMotion` hook
-- **Homepage helpers:** `operationalAwarenessConfig.ts` (normalization), `authoringGovernance.ts` (empty/error state), `visibility.ts` (audience filtering)
-- **Contracts:** `operationalAwarenessContracts.ts` (data types and defaults)
+Media safety, image fallbacks, and avatar initials fallbacks are
+implemented inside `HbcProjectSpotlightSurface` — no local safe-media
+components in this webpart. The surface renders a branded gradient
+placeholder behind every featured image, swaps to a gradient placeholder
+on rail-thumbnail error, and delegates avatar fallbacks to `HbcAvatarStack`.
 
 ## Accessibility
 
+All accessibility guarantees now live in the shared surface:
+
 - Semantic HTML: `section`, `h2`, `h3`, `ul`, `li`, `button`, `a`
-- Team detail panel: `role="dialog"`, `aria-haspopup="dialog"`, Escape to close, focus return, outside-click dismissal
-- Mobile bottom-sheet: backdrop overlay, motion animation respects `prefers-reduced-motion`
-- All entry animations (featured reveal, rail reveal, bottom-sheet) suppressed when reduced motion preferred
+- Team detail panel: `role="dialog"`, `aria-haspopup="dialog"`, Escape to
+  close, focus return, outside-click dismissal
+- Mobile bottom-sheet: backdrop overlay, motion animation respects
+  `prefers-reduced-motion`
 - Touch targets: >= 44px on all interactive elements
-- Focus-visible: `.teamStripButton` class in `homepage-interactive.module.css`
-- Images: `decoding="async"`, `loading="lazy"`, explicit dimensions, `onError` fallbacks
+- Focus-visible outlines on the team strip button and rail tiles
+- Images: `decoding="async"`, `loading="lazy"`, explicit dimensions,
+  `onError` fallbacks
 - CLS prevention: `contain` on image zones and thumbnail wrappers
-- No hover-only dependencies
+
+## Migration status
+
+Cleanly migrated to shared presentation-lane ownership. The full
+authored spotlight grammar moved into `@hbc/ui-kit/homepage` under
+`HbcProjectSpotlightSurface`. Only data/business-logic plumbing,
+normalization, authoring-state resolution, and view-model mapping remain
+local.
 
 ## Related docs
 
-- [Phase 02 Package README](../../../docs/architecture/plans/MASTER/spfx/homepage/projects/phase-02/00_README_Project_Spotlight_List_Integration_and_Polish_Package.md)
-- [Phase 02 Summary](../../../docs/architecture/plans/MASTER/spfx/homepage/projects/phase-02/09_Project_Spotlight_List_Integration_and_Polish_Summary.md)
-- [UI Doctrine SPFx Homepage Overlay](../../../docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md)
+- [UI-Kit Project Spotlight completion report](../../../../docs/architecture/reviews/project-spotlight-ui-kit-migration-completion.md)
+- [People & Culture precedent](../../../../docs/architecture/reviews/people-culture-ui-kit-migration-completion.md)
+- [UI System Layer Model](../../../../docs/reference/ui-kit/UI-System-Layer-Model.md)

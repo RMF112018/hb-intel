@@ -1,0 +1,603 @@
+/**
+ * HbcProjectSpotlightSurface — Premium project / portfolio spotlight surface.
+ *
+ * Presentation-lane styling for the homepage "Project Spotlight" zone.
+ * Image-led editorial composition with a dominant featured hero and
+ * subordinate supporting rail. Responsive via viewport media queries
+ * (mobile < 1200px, desktop >= 1200px); the team detail panel becomes a
+ * fixed bottom sheet at narrow widths.
+ *
+ * Governed presentation-lane brand tokens are inlined as CSS values
+ * matching the HBC_PRESENTATION_BLUE (#225391 / 34, 83, 145) and
+ * HBC_PRESENTATION_ORANGE (#e57e46 / 229, 126, 70) families, and the
+ * HBC_SURFACE_PRESENTATION surface roles — consistent with the other
+ * homepage surface families (HbcPeopleCultureSurface, HbcEditorialSurface).
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  background: #ffffff;
+  border-radius: 12px;
+  border-left: 4px solid #225391;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(34, 83, 145, 0.06),
+    0 4px 20px rgba(34, 83, 145, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 16px 12px;
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 24px 24px 14px;
+  }
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #225391;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.separator {
+  height: 1px;
+  border: none;
+  margin: 0 24px;
+  background: linear-gradient(
+    90deg,
+    rgba(34, 83, 145, 0.2) 0%,
+    rgba(229, 126, 70, 0.1) 60%,
+    transparent 100%
+  );
+}
+
+/* ── Composition (featured + rail) ────────────────────── */
+.composition {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1200px) {
+  .composition {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Featured spotlight ───────────────────────────────── */
+.featuredWrap {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .featuredWrap {
+    flex: 1 1 70%;
+    min-width: 440px;
+  }
+}
+
+.featuredLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (min-width: 768px) {
+  .featuredLayout {
+    flex-direction: row;
+    gap: 0;
+    min-height: 320px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .featuredLayout {
+    min-height: 380px;
+  }
+}
+
+/* ── Media zone ───────────────────────────────────────── */
+.mediaZone {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(34, 83, 145, 0.04);
+  contain: layout style;
+  flex: 1 1 auto;
+  min-height: 240px;
+  max-height: 320px;
+}
+
+@media (min-width: 768px) {
+  .mediaZone {
+    flex: 0 0 48%;
+    min-height: 320px;
+    max-height: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .mediaZone {
+    flex: 0 0 56%;
+    min-height: 380px;
+  }
+}
+
+.mediaPlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 83, 145, 0.06) 0%,
+    rgba(229, 126, 70, 0.04) 100%
+  );
+  color: rgba(34, 83, 145, 0.25);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mediaImage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.mediaScrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(34, 83, 145, 0.65) 0%,
+    rgba(34, 83, 145, 0.12) 50%,
+    transparent 100%
+  );
+}
+
+/* ── Featured content zone ────────────────────────────── */
+.featuredContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px 24px;
+}
+
+@media (min-width: 768px) {
+  .featuredContent {
+    flex: 1 1 44%;
+    padding: 28px 24px 32px;
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .featuredContent {
+    padding: 32px 32px 36px;
+  }
+}
+
+.featuredTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: #1a1a1a;
+}
+
+@media (min-width: 768px) {
+  .featuredTitle {
+    font-size: 2rem;
+    max-width: 20ch;
+  }
+}
+
+.featuredHeadline {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(26, 26, 26, 0.68);
+}
+
+@media (min-width: 768px) {
+  .featuredHeadline {
+    max-width: 40ch;
+  }
+}
+
+.featuredSummary {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: rgba(26, 26, 26, 0.48);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .featuredSummary {
+    -webkit-line-clamp: 3;
+    max-width: 50ch;
+  }
+}
+
+.featuredCta {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+/* ── Metadata + badges ────────────────────────────────── */
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metaIcon {
+  opacity: 0.7;
+  flex-shrink: 0;
+  color: #225391;
+}
+
+.badgeRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ── Team strip ───────────────────────────────────────── */
+.teamStripWrap {
+  position: relative;
+}
+
+.teamStripButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 4px;
+  margin: 0;
+  border: none;
+  background: rgba(34, 83, 145, 0.03);
+  cursor: pointer;
+  border-radius: 22px;
+  transition: background-color 150ms ease;
+  font-family: inherit;
+  color: inherit;
+  min-height: 44px;
+}
+
+.teamStripButton:hover {
+  background: rgba(34, 83, 145, 0.06);
+}
+
+.teamStripButton:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+  border-radius: 22px;
+}
+
+.teamStripLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(26, 26, 26, 0.48);
+  margin-left: 4px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.teamStripIcon {
+  opacity: 0.45;
+  color: #225391;
+}
+
+/* ── Team detail panel (popover desktop / bottom sheet mobile) ── */
+.teamBackdrop {
+  display: none;
+}
+
+.teamPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  z-index: 10;
+  min-width: 260px;
+  max-width: 320px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 6px 24px rgba(34, 83, 145, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .teamBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 99;
+  }
+  .teamPanel {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    z-index: 100;
+    min-width: 0;
+    max-width: none;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+    box-shadow:
+      0 -4px 24px rgba(0, 0, 0, 0.14),
+      0 -1px 6px rgba(0, 0, 0, 0.06);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+.teamPanelHeader {
+  padding: 12px 14px 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.36);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.teamPanelClose {
+  padding: 2px 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: rgba(26, 26, 26, 0.4);
+  border-radius: 4px;
+  line-height: 1;
+  font-family: inherit;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teamPanelClose:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.teamPanelList {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 8px;
+}
+
+.teamPanelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  min-height: 44px;
+}
+
+@media (max-width: 767px) {
+  .teamPanelRow {
+    padding: 10px 16px;
+  }
+}
+
+.teamPanelAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.teamPanelInitials {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(34, 83, 145, 0.1);
+  color: #225391;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.teamPanelBody {
+  min-width: 0;
+}
+
+.teamPanelName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+.teamPanelRole {
+  font-size: 0.6875rem;
+  color: rgba(26, 26, 26, 0.5);
+  line-height: 1.3;
+}
+
+/* ── Supporting rail ──────────────────────────────────── */
+.rail {
+  flex: 1 1 100%;
+  min-width: 0;
+  background: rgba(34, 83, 145, 0.04);
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1200px) {
+  .rail {
+    flex: 1 1 26%;
+    min-width: 220px;
+    border-top: none;
+    border-left: 1px solid rgba(34, 83, 145, 0.08);
+  }
+}
+
+.railHeader {
+  padding: 20px 16px 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.34);
+}
+
+@media (min-width: 1200px) {
+  .railHeader {
+    padding: 20px 20px 10px;
+  }
+}
+
+.railTile {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  align-items: center;
+  min-height: 44px;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+@media (min-width: 1200px) {
+  .railTile {
+    padding: 14px 20px;
+  }
+}
+
+.railTile:hover {
+  background-color: rgba(34, 83, 145, 0.06);
+  transform: translateX(2px);
+}
+
+.railTile:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+  background-color: rgba(34, 83, 145, 0.06);
+}
+
+.railThumbWrap {
+  position: relative;
+  flex: 0 0 88px;
+  height: 66px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: rgba(34, 83, 145, 0.04);
+  contain: strict;
+}
+
+.railThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.railThumb {
+  flex: 0 0 88px;
+  height: 66px;
+  border-radius: 6px;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 83, 145, 0.06) 0%,
+    rgba(229, 126, 70, 0.04) 100%
+  );
+}
+
+.railContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.railTitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.railMeta {
+  font-size: 0.6875rem;
+  color: rgba(26, 26, 26, 0.48);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Reduced motion ───────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .teamStripButton,
+  .railTile {
+    transition: none !important;
+    transform: none !important;
+  }
+}

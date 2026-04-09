@@ -1,31 +1,26 @@
 /**
- * ProjectPortfolioSpotlight — Premium editorial spotlight surface
- * Phase P06 — Responsive adaptation and device behavior
+ * ProjectPortfolioSpotlight — thin SPFx integration consumer.
  *
- * Image-led editorial composition with warm accent styling aligned
- * with HbcEditorialSurface. Adapts across desktop, tablet, and mobile
- * while preserving the featured-first hierarchy and premium interaction
- * quality.
+ * Wave 01 follow-on: the authored presentation grammar (featured hero,
+ * image-led composition, team strip + detail panel, supporting rail) now
+ * lives in `@hbc/ui-kit/homepage`'s `HbcProjectSpotlightSurface`. This
+ * webpart owns only:
  *
- * Desktop: dominant featured spotlight (~65%) plus subordinate supporting rail (~35%).
- * Tablet:  featured spotlight full-width on top, rail below.
- * Mobile:  featured image stacks above content, rail stacked below,
- *          team detail uses bottom-sheet fallback.
+ *  - SharePoint list fetch (via `useProjectSpotlightData`)
+ *  - manifest-config fallback
+ *  - normalization and audience filtering
+ *    (via `normalizeProjectPortfolioSpotlightConfig`)
+ *  - authoring/empty/loading state handling
+ *  - mapping the normalized collection into the shared view-model
+ *    (`ProjectSpotlightSurfaceModel`)
  */
 import * as React from 'react';
 import {
-  HbcPremiumCta,
-  HbcPremiumBadge,
-  HbcHomepageEyebrow,
-  HbcHomepageMetadataRow,
-  motion,
-  Calendar,
-  CheckCircle2,
-  Users,
-  HBC_PRESENTATION_BLUE,
-  HBC_PRESENTATION_BLUE_RGB,
-  HBC_PRESENTATION_ORANGE,
-  HBC_PRESENTATION_ORANGE_RGB,
+  HbcProjectSpotlightSurface,
+  type ProjectSpotlightFeaturedItem,
+  type ProjectSpotlightRailItem,
+  type ProjectSpotlightStatusVariant,
+  type ProjectSpotlightSurfaceModel,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import {
@@ -34,19 +29,8 @@ import {
 } from '../../homepage/helpers/operationalAwarenessConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
-import { useResponsiveTier, type ResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
-import type {
-  ProjectPortfolioSpotlightConfig,
-  ProjectTeamMember,
-} from '../../homepage/webparts/operationalAwarenessContracts.js';
-import {
-  HP_SPACE,
-  HP_RADIUS,
-  HP_IMAGE,
-} from '../../homepage/tokens.js';
+import type { ProjectPortfolioSpotlightConfig } from '../../homepage/webparts/operationalAwarenessContracts.js';
 import { useProjectSpotlightData } from '../../homepage/data/useProjectSpotlightData.js';
-import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
-import interactiveStyles from '../../homepage/homepage-interactive.module.css';
 
 export interface ProjectPortfolioSpotlightProps {
   config?: Partial<ProjectPortfolioSpotlightConfig>;
@@ -54,916 +38,85 @@ export interface ProjectPortfolioSpotlightProps {
   isLoading?: boolean;
 }
 
-/* ── Constants ─────────────────────────────────────────────────── */
-const MAX_VISIBLE_AVATARS = 5;
-const AVATAR_SIZE = 30;
-const DETAIL_AVATAR_SIZE = 40;
+// OperationalStatusVariant is structurally identical to
+// ProjectSpotlightStatusVariant, so a direct pass-through cast is safe.
+function toStatusVariant(
+  variant: string | undefined,
+): ProjectSpotlightStatusVariant | undefined {
+  return variant as ProjectSpotlightStatusVariant | undefined;
+}
 
-/* ── Brand-native premium palette — light surface, HB brand hierarchy ── */
-
-/** HB brand foundation — governed by @hbc/ui-kit presentation-lane tokens (W01r-P08) */
-const HB = {
-  blue: HBC_PRESENTATION_BLUE,
-  blueRgb: HBC_PRESENTATION_BLUE_RGB,
-  orange: HBC_PRESENTATION_ORANGE,
-  orangeRgb: HBC_PRESENTATION_ORANGE_RGB,
-} as const;
-
-const BRAND = {
-  /** Featured section tint — subtle blue foundation for authority */
-  featuredBg: `rgba(${HB.blueRgb}, 0.025)`,
-  /** Rail background — subtle blue tint for clear zone separation */
-  railBg: `rgba(${HB.blueRgb}, 0.04)`,
-  /** Rail tile hover — warmer blue tint */
-  railTileHover: `rgba(${HB.blueRgb}, 0.06)`,
-  /** Image scrim — editorial readability on light surfaces */
-  scrim: `linear-gradient(to top, rgba(${HB.blueRgb}, 0.65) 0%, rgba(${HB.blueRgb}, 0.12) 50%, transparent 100%)`,
-  /** Section separator — blue-to-orange brand gradient */
-  separator: `linear-gradient(90deg, rgba(${HB.blueRgb}, 0.20) 0%, rgba(${HB.orangeRgb}, 0.10) 60%, transparent 100%)`,
-  /** Tile divider */
-  tileDivider: `rgba(${HB.blueRgb}, 0.08)`,
-  /** Text hierarchy on light surfaces */
-  textPrimary: '#1a1a1a',
-  textSecondary: 'rgba(26, 26, 26, 0.68)',
-  textMuted: 'rgba(26, 26, 26, 0.48)',
-  textQuiet: 'rgba(26, 26, 26, 0.34)',
-} as const;
-
-/* ── Root and header styles ────────────────────────────────────── */
-
-const rootStyle: React.CSSProperties = {
-  fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-  color: BRAND.textPrimary,
-  background: '#ffffff',
-  borderRadius: HP_RADIUS.signature,
-  borderLeft: `4px solid ${HB.blue}`,
-  borderTop: '1px solid rgba(0, 0, 0, 0.06)',
-  borderRight: '1px solid rgba(0, 0, 0, 0.06)',
-  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-  boxShadow: `0 1px 3px rgba(${HB.blueRgb}, 0.06), 0 4px 20px rgba(${HB.blueRgb}, 0.08)`,
-  overflow: 'hidden',
-};
-
-const separatorStyle: React.CSSProperties = {
-  height: 1,
-  background: BRAND.separator,
-  margin: '0 24px',
-  border: 'none',
-};
-
-/* ── Motion (respects prefers-reduced-motion) ─────────────────── */
-
-const NO_MOTION = { initial: undefined, animate: undefined, transition: undefined };
-
-function getFeaturedMotion(reduced: boolean) {
-  if (reduced) return NO_MOTION;
+function toFeatured(
+  item: NormalizedProjectPortfolioSpotlightItem,
+): ProjectSpotlightFeaturedItem {
   return {
-    initial: { opacity: 0, y: 12 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    id: item.id,
+    title: item.title,
+    headline: item.highlightHeadline,
+    summary: item.summary,
+    location: item.location,
+    sector: item.sector,
+    image: item.image
+      ? { src: item.image.src, alt: item.image.alt }
+      : undefined,
+    status: item.status
+      ? { label: item.status.label, variant: toStatusVariant(item.status.variant) }
+      : undefined,
+    strategicEmphasis: item.strategicEmphasis,
+    isStale: item.isStale,
+    freshnessLabel: item.freshnessLabel,
+    milestones: item.milestones.map((m) => ({
+      id: m.id,
+      title: m.title,
+      completed: m.completed,
+    })),
+    teamMembers: item.teamMembers.map((tm) => ({
+      id: tm.id,
+      displayName: tm.displayName,
+      role: tm.role,
+      photoUrl: tm.photoUrl,
+    })),
+    cta: item.cta
+      ? {
+          label: item.cta.label,
+          href: item.cta.href,
+          openInNewTab: item.cta.openInNewTab,
+        }
+      : undefined,
   };
 }
 
-function getRailMotion(reduced: boolean) {
-  if (reduced) return NO_MOTION;
+function toRailItem(
+  item: NormalizedProjectPortfolioSpotlightItem,
+): ProjectSpotlightRailItem {
   return {
-    initial: { opacity: 0, x: 8 },
-    animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.35, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const },
+    id: item.id,
+    title: item.title,
+    location: item.location,
+    sector: item.sector,
+    image: item.image
+      ? { src: item.image.src, alt: item.image.alt }
+      : undefined,
+    status: item.status
+      ? { label: item.status.label, variant: toStatusVariant(item.status.variant) }
+      : undefined,
+    isStale: item.isStale,
+    freshnessLabel: item.freshnessLabel,
+    cta: item.cta
+      ? {
+          label: item.cta.label,
+          href: item.cta.href,
+          openInNewTab: item.cta.openInNewTab,
+        }
+      : undefined,
   };
 }
-
-function getBottomSheetMotion(reduced: boolean) {
-  if (reduced) return NO_MOTION;
-  return {
-    initial: { opacity: 0, y: 40 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] as const },
-  };
-}
-
-/* ── Responsive style helpers ────────────────────────────────────── */
-
-function getHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    padding: tier === 'mobile'
-      ? `${HP_SPACE['3xl']}px 16px ${HP_SPACE.xl}px`
-      : `${HP_SPACE['3xl']}px 24px ${HP_SPACE.xl}px`,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: HP_SPACE.xl,
-  };
-}
-
-const headerTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.875rem',
-  fontWeight: 700,
-  letterSpacing: '-0.01em',
-  color: HB.blue,
-  display: 'flex',
-  alignItems: 'center',
-  gap: HP_SPACE.md,
-};
-
-function getCompositionStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'desktop') {
-    return { display: 'flex', flexWrap: 'wrap' };
-  }
-  return { display: 'flex', flexDirection: 'column' };
-}
-
-function getFeaturedWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'desktop') {
-    return { flex: '1 1 70%', minWidth: 440 };
-  }
-  return { flex: '1 1 100%', minWidth: 0 };
-}
-
-function getFeaturedLayoutStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'mobile') {
-    return { display: 'flex', flexDirection: 'column', gap: 0 };
-  }
-  return { display: 'flex', gap: 0, height: '100%' };
-}
-
-function getImageZoneStyle(tier: ResponsiveTier): React.CSSProperties {
-  const base: React.CSSProperties = {
-    position: 'relative',
-    overflow: 'hidden',
-    backgroundColor: `rgba(${HB.blueRgb}, 0.04)`,
-    contain: 'layout style',
-  };
-  if (tier === 'mobile') {
-    return { ...base, minHeight: 240, maxHeight: 320 };
-  }
-  if (tier === 'tablet') {
-    return { ...base, flex: '0 0 48%', minHeight: 320 };
-  }
-  return { ...base, flex: '0 0 56%', minHeight: 380 };
-}
-
-const imageStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: HP_IMAGE.objectFit,
-  objectPosition: 'center',
-  display: 'block',
-};
-
-const imageScrimStyle: React.CSSProperties = {
-  position: 'absolute',
-  inset: 0,
-  background: BRAND.scrim,
-  pointerEvents: 'none',
-};
-
-function getImagePlaceholderStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    width: '100%',
-    height: '100%',
-    minHeight: tier === 'mobile' ? 240 : 380,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: `linear-gradient(135deg, rgba(${HB.blueRgb}, 0.06) 0%, rgba(${HB.orangeRgb}, 0.04) 100%)`,
-    color: `rgba(${HB.blueRgb}, 0.25)`,
-    fontSize: '0.6875rem',
-    fontWeight: 600,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase' as const,
-  };
-}
-
-function getContentZoneStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'mobile') {
-    return {
-      padding: '20px 16px 24px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-    };
-  }
-  return {
-    flex: '1 1 44%',
-    padding: tier === 'tablet' ? '28px 24px 32px' : '32px 32px 36px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 14,
-  };
-}
-
-function getTitleStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    margin: 0,
-    fontSize: tier === 'mobile' ? '1.5rem' : '2rem',
-    fontWeight: 700,
-    letterSpacing: '-0.035em',
-    lineHeight: 1.08,
-    color: BRAND.textPrimary,
-    maxWidth: tier === 'mobile' ? undefined : '20ch',
-  };
-}
-
-function getHeadlineStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    margin: 0,
-    fontSize: '1rem',
-    fontWeight: 400,
-    lineHeight: 1.55,
-    color: BRAND.textSecondary,
-    maxWidth: tier === 'mobile' ? undefined : '40ch',
-  };
-}
-
-function getSummaryStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    margin: 0,
-    fontSize: '0.8125rem',
-    lineHeight: 1.65,
-    color: BRAND.textMuted,
-    maxWidth: tier === 'mobile' ? undefined : '50ch',
-    display: '-webkit-box',
-    WebkitLineClamp: tier === 'mobile' ? 4 : 3,
-    WebkitBoxOrient: 'vertical' as unknown as React.CSSProperties['WebkitBoxOrient'],
-    overflow: 'hidden',
-  };
-}
-
-const badgeRowStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: HP_SPACE.sm,
-  flexWrap: 'wrap',
-};
-
-const metaIconStyle: React.CSSProperties = {
-  opacity: 0.7,
-  flexShrink: 0,
-  color: HB.blue,
-};
-
-const metaItemStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 4,
-};
-
-const ctaWrapperStyle: React.CSSProperties = {
-  marginTop: 'auto',
-  paddingTop: HP_SPACE.md,
-};
-
-/* ── Team strip styles ─────────────────────────────────────────── */
-
-function getTeamStripWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    position: tier === 'mobile' ? 'static' : 'relative',
-  };
-}
-
-const teamStripStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 6,
-  padding: '5px 10px 5px 4px',
-  margin: 0,
-  border: 'none',
-  background: `rgba(${HB.blueRgb}, 0.03)`,
-  cursor: 'pointer',
-  borderRadius: 22,
-  transition: 'background-color 150ms ease',
-  fontFamily: 'inherit',
-  color: 'inherit',
-  minHeight: 44,
-};
-
-const teamStripLabelStyle: React.CSSProperties = {
-  fontSize: '0.6875rem',
-  fontWeight: 600,
-  color: BRAND.textMuted,
-  marginLeft: 6,
-  whiteSpace: 'nowrap' as const,
-};
-
-const avatarStyle = (index: number): React.CSSProperties => ({
-  width: AVATAR_SIZE,
-  height: AVATAR_SIZE,
-  borderRadius: '50%',
-  objectFit: 'cover' as const,
-  border: '2px solid #ffffff',
-  boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.08)',
-  marginLeft: index > 0 ? -6 : 0,
-  position: 'relative' as const,
-  zIndex: MAX_VISIBLE_AVATARS - index,
-  flexShrink: 0,
-});
-
-const initialsStyle = (index: number): React.CSSProperties => ({
-  ...avatarStyle(index),
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: `rgba(${HB.blueRgb}, 0.10)`,
-  color: HB.blue,
-  fontSize: '0.625rem',
-  fontWeight: 700,
-  letterSpacing: '0.02em',
-});
-
-const overflowStyle: React.CSSProperties = {
-  ...avatarStyle(MAX_VISIBLE_AVATARS),
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: `rgba(${HB.orangeRgb}, 0.10)`,
-  color: HB.orange,
-  fontSize: '0.5625rem',
-  fontWeight: 700,
-  marginLeft: -6,
-};
-
-/* ── Team detail panel styles ──────────────────────────────────── */
-
-function getDetailPanelStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'mobile') {
-    return {
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      zIndex: 100,
-      background: '#ffffff',
-      borderRadius: '12px 12px 0 0',
-      border: '1px solid rgba(0, 0, 0, 0.08)',
-      borderBottom: 'none',
-      boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.14), 0 -1px 6px rgba(0, 0, 0, 0.06)',
-      overflow: 'hidden',
-      maxHeight: '60vh',
-      overflowY: 'auto',
-    };
-  }
-  return {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    marginTop: 6,
-    zIndex: 10,
-    minWidth: tier === 'tablet' ? 280 : 260,
-    maxWidth: tier === 'tablet' ? 360 : 320,
-    background: '#ffffff',
-    borderRadius: HP_RADIUS.editorial,
-    border: '1px solid rgba(0, 0, 0, 0.08)',
-    boxShadow: `0 6px 24px rgba(${HB.blueRgb}, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06)`,
-    overflow: 'hidden',
-  };
-}
-
-const detailHeaderStyle: React.CSSProperties = {
-  padding: '12px 14px 10px',
-  fontSize: '0.6875rem',
-  fontWeight: 600,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase' as const,
-  color: 'rgba(26, 26, 26, 0.36)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
-};
-
-const detailCloseStyle: React.CSSProperties = {
-  padding: '2px 6px',
-  border: 'none',
-  background: 'none',
-  cursor: 'pointer',
-  fontSize: '0.75rem',
-  color: 'rgba(26, 26, 26, 0.40)',
-  borderRadius: 4,
-  lineHeight: 1,
-  fontFamily: 'inherit',
-  minWidth: 44,
-  minHeight: 44,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
-
-const detailListStyle: React.CSSProperties = {
-  listStyle: 'none',
-  margin: 0,
-  padding: '4px 0 8px',
-};
-
-function getDetailItemStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    padding: tier === 'mobile' ? '10px 16px' : '8px 14px',
-    minHeight: 44,
-  };
-}
-
-const detailAvatarStyle: React.CSSProperties = {
-  width: DETAIL_AVATAR_SIZE,
-  height: DETAIL_AVATAR_SIZE,
-  borderRadius: '50%',
-  objectFit: 'cover' as const,
-  flexShrink: 0,
-  boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.06)',
-};
-
-const detailInitialsStyle: React.CSSProperties = {
-  ...detailAvatarStyle,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: 'rgba(34, 83, 145, 0.10)',
-  color: '#225391',
-  fontSize: '0.75rem',
-  fontWeight: 700,
-};
-
-const detailNameStyle: React.CSSProperties = {
-  fontSize: '0.8125rem',
-  fontWeight: 600,
-  lineHeight: 1.3,
-  color: '#1a1a1a',
-};
-
-const detailRoleStyle: React.CSSProperties = {
-  fontSize: '0.6875rem',
-  color: 'rgba(26, 26, 26, 0.50)',
-  lineHeight: 1.3,
-};
-
-/* ── Supporting rail styles ────────────────────────────────────── */
-
-function getRailWrapperStyle(tier: ResponsiveTier): React.CSSProperties {
-  if (tier === 'desktop') {
-    return {
-      flex: '1 1 26%',
-      minWidth: 220,
-      borderLeft: `1px solid ${BRAND.tileDivider}`,
-      display: 'flex',
-      flexDirection: 'column',
-      background: BRAND.railBg,
-    };
-  }
-  return {
-    flex: '1 1 100%',
-    minWidth: 0,
-    borderTop: `1px solid ${BRAND.tileDivider}`,
-    display: 'flex',
-    flexDirection: 'column',
-    background: BRAND.railBg,
-  };
-}
-
-function getRailHeaderStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    padding: tier === 'mobile'
-      ? `${HP_SPACE['2xl']}px ${HP_SPACE.xl}px ${HP_SPACE.lg}px`
-      : `${HP_SPACE['2xl']}px ${HP_SPACE['2xl']}px ${HP_SPACE.lg}px`,
-    fontSize: '0.6875rem',
-    fontWeight: 600,
-    letterSpacing: '0.05em',
-    textTransform: 'uppercase' as const,
-    color: BRAND.textQuiet,
-  };
-}
-
-function getRailTileStyle(tier: ResponsiveTier): React.CSSProperties {
-  return {
-    display: 'flex',
-    gap: HP_SPACE.xl,
-    padding: tier === 'mobile'
-      ? `${HP_SPACE.xl}px ${HP_SPACE.xl}px`
-      : `${HP_SPACE.xl}px ${HP_SPACE['2xl']}px`,
-    textDecoration: 'none',
-    color: 'inherit',
-    transition: 'background-color 180ms ease, transform 180ms ease',
-    cursor: 'pointer',
-    borderTop: `1px solid ${BRAND.tileDivider}`,
-    alignItems: 'center',
-    minHeight: 44,
-    borderRadius: HP_RADIUS.image,
-  };
-}
-
-const railThumbnailWrapperStyle: React.CSSProperties = {
-  position: 'relative',
-  flex: '0 0 88px',
-  height: 66,
-  borderRadius: HP_RADIUS.card,
-  overflow: 'hidden',
-  backgroundColor: `rgba(${HB.blueRgb}, 0.04)`,
-  contain: 'strict',
-};
-
-const railThumbnailStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: HP_IMAGE.objectFit,
-  objectPosition: 'center',
-  display: 'block',
-};
-
-const railThumbnailPlaceholderStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: `linear-gradient(135deg, rgba(${HB.blueRgb}, 0.06) 0%, rgba(${HB.orangeRgb}, 0.04) 100%)`,
-};
-
-const railContentStyle: React.CSSProperties = {
-  flex: 1,
-  minWidth: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 4,
-};
-
-const railTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.8125rem',
-  fontWeight: 600,
-  lineHeight: 1.35,
-  letterSpacing: '-0.01em',
-  color: BRAND.textPrimary,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap' as const,
-};
-
-const railMetaStyle: React.CSSProperties = {
-  fontSize: '0.6875rem',
-  color: BRAND.textMuted,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap' as const,
-};
-
-/* ── Media safety components ──────────────────────────────────── */
-
-/**
- * Safe featured image with branded placeholder visible during load
- * and on error. The placeholder sits behind the img via absolute
- * positioning; on success the image covers it, on error the img is
- * removed and the placeholder remains.
- */
-function FeaturedImage({
-  src,
-  alt,
-  tier,
-}: {
-  src: string;
-  alt: string;
-  tier: ResponsiveTier;
-}): React.JSX.Element {
-  const [error, setError] = React.useState(false);
-
-  return (
-    <>
-      {/* Branded placeholder — always rendered as load/error fallback */}
-      <div
-        style={{ ...getImagePlaceholderStyle(tier), position: 'absolute', inset: 0, zIndex: 0 }}
-        aria-hidden="true"
-      >
-        Project Image
-      </div>
-      {!error ? (
-        <>
-          <img
-            src={src}
-            alt={alt}
-            decoding="async"
-            loading="lazy"
-            style={{ ...imageStyle, position: 'relative', zIndex: 1 }}
-            onError={() => setError(true)}
-          />
-          <div style={{ ...imageScrimStyle, zIndex: 2 }} aria-hidden="true" />
-        </>
-      ) : null}
-    </>
-  );
-}
-
-/**
- * Safe rail thumbnail — falls back to branded gradient placeholder on error.
- */
-function RailThumbnail({
-  src,
-  alt,
-}: {
-  src: string;
-  alt: string;
-}): React.JSX.Element {
-  const [error, setError] = React.useState(false);
-
-  if (error) {
-    return <div style={railThumbnailPlaceholderStyle} aria-hidden="true" />;
-  }
-
-  return (
-    <img
-      src={src}
-      alt={alt}
-      width={88}
-      height={66}
-      decoding="async"
-      loading="lazy"
-      style={railThumbnailStyle}
-      onError={() => setError(true)}
-    />
-  );
-}
-
-/**
- * Safe avatar image — falls back to initials on load error.
- * Uses key={src} at call site to reset state when the URL changes.
- */
-function SafeAvatar({
-  src,
-  name,
-  size,
-  imgStyle,
-  fallbackStyle,
-}: {
-  src: string;
-  name: string;
-  size: number;
-  imgStyle: React.CSSProperties;
-  fallbackStyle: React.CSSProperties;
-}): React.JSX.Element {
-  const [error, setError] = React.useState(false);
-
-  if (error) {
-    return (
-      <span style={fallbackStyle} aria-hidden="true">
-        {getInitials(name)}
-      </span>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt={name}
-      width={size}
-      height={size}
-      decoding="async"
-      style={imgStyle}
-      onError={() => setError(true)}
-    />
-  );
-}
-
-/* ── Helper: extract initials ──────────────────────────────────── */
-
-function getInitials(name: string): string {
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-/* ── Project Team strip component ──────────────────────────────── */
-
-function ProjectTeamStrip({
-  members,
-  tier,
-  reducedMotion = false,
-}: {
-  members: ProjectTeamMember[];
-  tier: ResponsiveTier;
-  reducedMotion?: boolean;
-}): React.JSX.Element | null {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const triggerRef = React.useRef<HTMLButtonElement>(null);
-  const panelRef = React.useRef<HTMLDivElement>(null);
-
-  // Close on Escape
-  React.useEffect(() => {
-    if (!isOpen) return;
-    function handleKeyDown(e: KeyboardEvent): void {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        triggerRef.current?.focus();
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
-
-  // Close on outside click (desktop/tablet popover) or backdrop tap (mobile)
-  React.useEffect(() => {
-    if (!isOpen) return;
-    function handleClick(e: MouseEvent): void {
-      const target = e.target as Node;
-      if (
-        panelRef.current && !panelRef.current.contains(target) &&
-        triggerRef.current && !triggerRef.current.contains(target)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [isOpen]);
-
-  if (members.length === 0) return null;
-
-  const visible = members.slice(0, MAX_VISIBLE_AVATARS);
-  const overflow = members.length - MAX_VISIBLE_AVATARS;
-  const isMobile = tier === 'mobile';
-
-  const detailPanel = (
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-label="Project team members"
-      style={getDetailPanelStyle(tier)}
-    >
-      <div style={detailHeaderStyle}>
-        <span>Project Team</span>
-        <button
-          type="button"
-          style={detailCloseStyle}
-          onClick={() => { setIsOpen(false); triggerRef.current?.focus(); }}
-          aria-label="Close team panel"
-        >
-          ✕
-        </button>
-      </div>
-      <ul style={detailListStyle}>
-        {members.map((member) => (
-          <li key={member.id} style={getDetailItemStyle(tier)}>
-            {member.photoUrl ? (
-              <SafeAvatar
-                key={member.id}
-                src={member.photoUrl}
-                name={member.displayName}
-                size={DETAIL_AVATAR_SIZE}
-                imgStyle={detailAvatarStyle}
-                fallbackStyle={detailInitialsStyle}
-              />
-            ) : (
-              <span style={detailInitialsStyle} aria-hidden="true">
-                {getInitials(member.displayName)}
-              </span>
-            )}
-            <div>
-              <div style={detailNameStyle}>{member.displayName}</div>
-              {member.role ? <div style={detailRoleStyle}>{member.role}</div> : null}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-
-  return (
-    <div style={getTeamStripWrapperStyle(tier)} data-hbc-homepage="team-strip">
-      <button
-        ref={triggerRef}
-        type="button"
-        className={interactiveStyles.teamStripButton}
-        style={teamStripStyle}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="dialog"
-        aria-label={`Project team: ${members.length} member${members.length !== 1 ? 's' : ''}`}
-      >
-        {visible.map((member, i) =>
-          member.photoUrl ? (
-            <SafeAvatar
-              key={member.id}
-              src={member.photoUrl}
-              name={member.displayName}
-              size={AVATAR_SIZE}
-              imgStyle={avatarStyle(i)}
-              fallbackStyle={initialsStyle(i)}
-            />
-          ) : (
-            <span key={member.id} style={initialsStyle(i)} aria-hidden="true">
-              {getInitials(member.displayName)}
-            </span>
-          ),
-        )}
-        {overflow > 0 ? (
-          <span style={overflowStyle} aria-hidden="true">+{overflow}</span>
-        ) : null}
-        <span style={teamStripLabelStyle}>
-          <Users size={10} aria-hidden="true" style={{ marginRight: 4, verticalAlign: -1, opacity: 0.45 }} />
-          {members.length} {members.length === 1 ? 'member' : 'members'}
-        </span>
-      </button>
-
-      {isOpen ? (
-        isMobile ? (
-          <>
-            {/* Backdrop overlay for mobile bottom-sheet */}
-            <div
-              className={interactiveStyles.teamDetailBackdrop}
-              onClick={() => setIsOpen(false)}
-              aria-hidden="true"
-            />
-            <motion.div {...getBottomSheetMotion(reducedMotion)}>
-              {detailPanel}
-            </motion.div>
-          </>
-        ) : (
-          detailPanel
-        )
-      ) : null}
-    </div>
-  );
-}
-
-/* ── Supporting tile component ─────────────────────────────────── */
-
-function SupportingTile({
-  item,
-  tier,
-}: {
-  item: NormalizedProjectPortfolioSpotlightItem;
-  tier: ResponsiveTier;
-}): React.JSX.Element {
-  const [hovered, setHovered] = React.useState(false);
-  const metaText = [item.location, item.sector].filter(Boolean).join(' \u00B7 ') || item.freshnessLabel;
-  const href = item.cta?.href;
-
-  const tileProps = href
-    ? {
-        as: 'a' as const,
-        href,
-        role: undefined as undefined,
-      }
-    : {
-        as: 'div' as const,
-        href: undefined as undefined,
-        role: 'listitem' as const,
-      };
-
-  const baseTileStyle = getRailTileStyle(tier);
-  const style: React.CSSProperties = {
-    ...baseTileStyle,
-    backgroundColor: hovered ? BRAND.railTileHover : 'transparent',
-    transform: hovered ? 'translateX(2px)' : 'none',
-  };
-
-  const Tag = tileProps.as;
-
-  return (
-    <Tag
-      href={tileProps.href}
-      role={tileProps.role}
-      style={style}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      data-hbc-homepage="spotlight-tile"
-    >
-      {/* Compact thumbnail — safe: falls back to gradient on error */}
-      <div style={railThumbnailWrapperStyle}>
-        {item.image ? (
-          <RailThumbnail key={item.image.src} src={item.image.src} alt={item.image.alt || item.title} />
-        ) : (
-          <div style={railThumbnailPlaceholderStyle} aria-hidden="true" />
-        )}
-      </div>
-
-      {/* Tile content */}
-      <div style={railContentStyle}>
-        <p style={railTitleStyle}>{item.title}</p>
-        {metaText ? <span style={railMetaStyle}>{metaText}</span> : null}
-        {(item.isStale || item.status) ? (
-          <div style={badgeRowStyle}>
-            {item.isStale ? (
-              <HbcPremiumBadge label="Stale" status="warning" size="sm" />
-            ) : null}
-            {item.status ? (
-              <HbcPremiumBadge label={item.status.label} status={item.status.variant ?? 'info'} size="sm" />
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </Tag>
-  );
-}
-
-/* ── Main component ────────────────────────────────────────────── */
 
 export function ProjectPortfolioSpotlight({
   config,
   activeAudience,
   isLoading = false,
 }: ProjectPortfolioSpotlightProps): React.JSX.Element {
-  const tier = useResponsiveTier();
-  const reducedMotion = usePrefersReducedMotion();
   const { listConfig, isLoading: listLoading } = useProjectSpotlightData();
 
   if (isLoading || listLoading) {
@@ -973,150 +126,31 @@ export function ProjectPortfolioSpotlight({
   // List-sourced data is the primary operating model.
   // Manifest config (props) is the narrow fallback for local dev / demo / packaging.
   const effectiveConfig = listConfig ?? config;
+  const normalized = normalizeProjectPortfolioSpotlightConfig(
+    effectiveConfig,
+    activeAudience,
+  );
 
-  const normalized = normalizeProjectPortfolioSpotlightConfig(effectiveConfig, activeAudience);
-
-  if (!normalized.featured && normalized.secondary.length === 0) {
+  if (!normalized.featured) {
     const message = resolveAuthoringMessage(
       'projectPortfolioSpotlight',
       effectiveConfig?.items?.length ? 'invalid' : 'noData',
     );
-    return <HomepageEmptyState title={message.title} description={message.description} />;
+    return (
+      <HomepageEmptyState
+        title={message.title}
+        description={message.description}
+      />
+    );
   }
 
-  const feat = normalized.featured;
-  if (!feat) {
-    const message = resolveAuthoringMessage('projectPortfolioSpotlight', 'noData');
-    return <HomepageEmptyState title={message.title} description={message.description} />;
-  }
+  const model: ProjectSpotlightSurfaceModel = {
+    heading: normalized.heading,
+    allProjectsLabel: normalized.allProjectsLabel,
+    allProjectsUrl: normalized.allProjectsUrl,
+    featured: toFeatured(normalized.featured),
+    secondary: normalized.secondary.map(toRailItem),
+  };
 
-  const eyebrowText = [feat.sector, feat.location].filter(Boolean).join(' \u00B7 ') || 'Featured Project';
-  const completedMilestones = feat.milestones.filter((m) => m.completed).length;
-  const totalMilestones = feat.milestones.length;
-  const hasRail = normalized.secondary.length > 0;
-
-  return (
-    <section
-      data-hbc-homepage="project-spotlight"
-      aria-label={normalized.heading}
-      style={rootStyle}
-    >
-      {/* Header */}
-      <div style={getHeaderStyle(tier)}>
-        <h2 style={headerTitleStyle}>{normalized.heading}</h2>
-        {normalized.allProjectsUrl ? (
-          <HbcPremiumCta
-            label={normalized.allProjectsLabel || 'View all projects'}
-            href={normalized.allProjectsUrl}
-            variant="ghost"
-            size="sm"
-            arrow
-          />
-        ) : null}
-      </div>
-
-      {/* Separator */}
-      <div role="separator" style={separatorStyle} />
-
-      {/* Responsive composition: featured + rail */}
-      <div style={getCompositionStyle(tier)}>
-        {/* Featured spotlight — dominant */}
-        <motion.div
-          style={getFeaturedWrapperStyle(tier)}
-          {...getFeaturedMotion(reducedMotion)}
-        >
-          <div style={getFeaturedLayoutStyle(tier)}>
-            {/* Image zone — safe: placeholder visible during load and on error */}
-            <div style={getImageZoneStyle(tier)}>
-              {feat.image ? (
-                <FeaturedImage key={feat.image.src} src={feat.image.src} alt={feat.image.alt || feat.title} tier={tier} />
-              ) : (
-                <div style={getImagePlaceholderStyle(tier)} aria-hidden="true">
-                  Project Image
-                </div>
-              )}
-            </div>
-
-            {/* Content zone */}
-            <div style={getContentZoneStyle(tier)}>
-              <HbcHomepageEyebrow>{eyebrowText}</HbcHomepageEyebrow>
-
-              <h3 style={getTitleStyle(tier)}>{feat.title}</h3>
-
-              {feat.highlightHeadline ? (
-                <p style={getHeadlineStyle(tier)}>{feat.highlightHeadline}</p>
-              ) : null}
-
-              {/* Metadata row — milestone + freshness */}
-              {(totalMilestones > 0 || feat.freshnessLabel) ? (
-                <HbcHomepageMetadataRow separated>
-                  {totalMilestones > 0 ? (
-                    <span style={metaItemStyle}>
-                      <CheckCircle2 size={11} aria-hidden="true" style={metaIconStyle} />
-                      {completedMilestones}/{totalMilestones} milestones
-                    </span>
-                  ) : null}
-                  {feat.freshnessLabel ? (
-                    <span style={metaItemStyle}>
-                      <Calendar size={11} aria-hidden="true" style={metaIconStyle} />
-                      {feat.freshnessLabel}
-                    </span>
-                  ) : null}
-                </HbcHomepageMetadataRow>
-              ) : null}
-
-              {/* Summary */}
-              <p style={getSummaryStyle(tier)}>{feat.summary}</p>
-
-              {/* Badges — restrained */}
-              {(feat.status || feat.strategicEmphasis || feat.isStale) ? (
-                <div style={badgeRowStyle}>
-                  {feat.isStale ? (
-                    <HbcPremiumBadge label="Stale" status="warning" size="sm" />
-                  ) : null}
-                  {feat.status ? (
-                    <HbcPremiumBadge label={feat.status.label} status={feat.status.variant ?? 'info'} size="sm" />
-                  ) : null}
-                  {feat.strategicEmphasis ? (
-                    <HbcPremiumBadge label="Strategic" status="info" size="sm" />
-                  ) : null}
-                </div>
-              ) : null}
-
-              {/* Project Team strip */}
-              <ProjectTeamStrip members={feat.teamMembers} tier={tier} reducedMotion={reducedMotion} />
-
-              {/* Primary CTA */}
-              {feat.cta ? (
-                <div style={ctaWrapperStyle}>
-                  <HbcPremiumCta
-                    label={feat.cta.label}
-                    href={feat.cta.href}
-                    variant="secondary"
-                    size="md"
-                    arrow
-                  />
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Supporting rail — subordinate */}
-        {hasRail ? (
-          <motion.div
-            style={getRailWrapperStyle(tier)}
-            {...getRailMotion(reducedMotion)}
-            role="list"
-            aria-label="Additional projects"
-          >
-            <div style={getRailHeaderStyle(tier)}>More projects</div>
-            {normalized.secondary.map((item) => (
-              <SupportingTile key={item.id} item={item} tier={tier} />
-            ))}
-          </motion.div>
-        ) : null}
-      </div>
-    </section>
-  );
+  return <HbcProjectSpotlightSurface model={model} />;
 }

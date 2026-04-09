@@ -217,6 +217,26 @@ export type {
   HbcAvatarSize,
 } from './HbcAvatarStack/index.js';
 
+// ── Wave 01 follow-on — Project / Portfolio Spotlight surface family ──
+// Cohesive presentation-lane surface for the homepage project-spotlight
+// zone. Reuses HbcAvatarStack for the project team strip. Consumers stay
+// thin — SharePoint fetch, normalization, stale detection, and manifest
+// fallback remain local to the consuming webpart.
+
+export { HbcProjectSpotlightSurface } from './HbcProjectSpotlightSurface/index.js';
+export type {
+  HbcProjectSpotlightSurfaceProps,
+  ProjectSpotlightSurfaceModel,
+  ProjectSpotlightFeaturedItem,
+  ProjectSpotlightRailItem,
+  ProjectSpotlightMilestone,
+  ProjectSpotlightTeamMember,
+  ProjectSpotlightStatus,
+  ProjectSpotlightStatusVariant,
+  ProjectSpotlightMedia,
+  ProjectSpotlightCta,
+} from './HbcProjectSpotlightSurface/index.js';
+
 export type HomepageSurfaceClass =
   | 'hero'
   | 'welcome'
@@ -248,6 +268,7 @@ export type HomepagePrimitiveName =
   | 'HbcLauncherSurface'
   | 'HbcOperationalSurface'
   | 'HbcPeopleCultureSurface'
+  | 'HbcProjectSpotlightSurface'
   | 'HbcSearch'
   | 'HbcSignatureHeroSurface'
   | 'HbcSpinner'
@@ -420,5 +441,14 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
     radius: '16px',
     background: 'warm cream spotlight + cool mist rail',
     border: 'warm gradient hero band',
+  },
+  projectSpotlight: {
+    surfaces: ['operational'] as const,
+    character:
+      'premium image-led editorial spotlight with featured project dominance and subordinate supporting rail',
+    shadow: 'elevationEditorial',
+    radius: '12px',
+    background: 'clean white featured zone + cool-tinted rail',
+    border: 'strong brand left accent',
   },
 } as const;
