@@ -3,7 +3,7 @@
   "id": "8370ab0c-b6df-4db0-82f1-24b54750f508",
   "alias": "ProjectPortfolioSpotlightWebPart",
   "componentType": "WebPart",
-  "version": "0.0.22.0",
+  "version": "0.0.23.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportsFullBleed": true,
@@ -15,7 +15,7 @@
       "group": { "default": "HB Intel" },
       "title": { "default": "Project / Portfolio Spotlight" },
       "description": {
-        "default": "Curated project and portfolio signals with featured hierarchy, status, milestones, and CTA handoff."
+        "default": "Flagship project portfolio spotlight with editorial nameplate masthead, dominant image-led featured project, overlay status chips, milestone progress strip, team detail panel, and numbered supporting rail."
       },
       "officeFabricIconFontName": "ActivateOrders",
       "hiddenFromToolbox": true,

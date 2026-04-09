@@ -473,7 +473,7 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
   projectSpotlight: {
     surfaces: ['operational'] as const,
     character:
-      'premium image-led editorial spotlight with featured project dominance and subordinate supporting rail',
+      'flagship image-led portfolio spotlight with nameplate masthead, dominant 440px featured hero, overlay eyebrow + status chips, milestone progress strip, team detail panel, and a numbered 01/02/03 supporting rail',
     shadow: 'elevationEditorial',
     radius: '12px',
     background: 'clean white featured zone + cool-tinted rail',

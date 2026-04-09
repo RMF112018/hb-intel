@@ -20,7 +20,7 @@
         "default": "Project / Portfolio Spotlight"
       },
       "description": {
-        "default": "Curated project and portfolio signals with featured hierarchy, status, milestones, and CTA handoff."
+        "default": "Flagship project portfolio spotlight with editorial nameplate masthead, dominant image-led featured project, overlay status chips, milestone progress strip, team detail panel, and numbered supporting rail."
       },
       "officeFabricIconFontName": "ActivateOrders",
       "hiddenFromToolbox": true,
@@ -191,7 +191,7 @@
       },
       "8370ab0c-b6df-4db0-82f1-24b54750f508_1.0.0": {
         "type": "path",
-        "path": "shell-entry-8370ab0c-b6df-4db0-82f1-24b54750f508-cbeee5ba.js"
+        "path": "shell-entry-8370ab0c-b6df-4db0-82f1-24b54750f508-44b41ba4.js"
       }
     }
   }
