@@ -96,37 +96,107 @@ export const ANN_FIELDS = {
 
 /**
  * InternalName values verified against
- * `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-kudos-list-schema.normalized.json`.
+ * `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-kudos-list-schema.normalized.json`
+ * and the Schema Reference Appendix (Phase-14 kudos/ Prompt-01). All
+ * live field names are mirrored here so write-path code in Prompts
+ * 03–05 can reference them without re-verifying the list schema.
  */
 export const KUDOS_FIELDS = {
+  // Core identity and content
   KudosId: 'KudosId',
   Headline: 'Headline',
   Excerpt: 'Excerpt',
   Details: 'Details',
+  PrimaryImage: 'PrimaryImage',
+  ImageAltText: 'ImageAltText',
+
+  // Submission / approval identities
   SubmittedBy: 'SubmittedBy',
   SubmittedDate: 'SubmittedDate',
   ApprovedBy: 'ApprovedBy',
   ApprovedDate: 'ApprovedDate',
+
+  // Recipient targeting
   IndividualRecipients: 'IndividualRecipients',
   TeamRecipients: 'TeamRecipients',
   DepartmentRecipients: 'DepartmentRecipients',
   ProjectGroupRecipients: 'ProjectGroupRecipients',
+
+  // Workflow / moderation / lifecycle
   WorkflowStatus: 'WorkflowStatus',
   WasEverPublished: 'WasEverPublished',
+  RejectionReason: 'RejectionReason',
+  ModeratorNotes: 'ModeratorNotes',
+  RevisionRequestedBy: 'RevisionRequestedBy',
+  RevisionRequestedAt: 'RevisionRequestedAt',
+  RevisionGuidance: 'RevisionGuidance',
+  WithdrawnBy: 'WithdrawnBy',
+  WithdrawnAt: 'WithdrawnAt',
+  IsFlaggedForAdminReview: 'IsFlaggedForAdminReview',
+  AdminReviewFlaggedBy: 'AdminReviewFlaggedBy',
+  AdminReviewFlaggedAt: 'AdminReviewFlaggedAt',
+  AdminReviewReason: 'AdminReviewReason',
+  AdminReviewedBy: 'AdminReviewedBy',
+  AdminReviewedAt: 'AdminReviewedAt',
+  RemovedBy: 'RemovedBy',
+  RemovedAt: 'RemovedAt',
+  RemovedReason: 'RemovedReason',
+  IsRemovedFromPublicView: 'IsRemovedFromPublicView',
+  RestoredBy: 'RestoredBy',
+  RestoredAt: 'RestoredAt',
+
+  // Public visibility / prominence
+  HomepageEnabled: 'HomepageEnabled',
+  PublishStartDate: 'PublishStartDate',
+  PublishEndDate: 'PublishEndDate',
   IsPinned: 'IsPinned',
   PinOrder: 'PinOrder',
   IsFeatured: 'IsFeatured',
   FeaturedExpiresAt: 'FeaturedExpiresAt',
   ProminenceIntent: 'ProminenceIntent',
-  CurrentVisibilityMode: 'CurrentVisibilityMode',
-  HomepageEnabled: 'HomepageEnabled',
+  ProminenceFailureAt: 'ProminenceFailureAt',
+  ProminenceFailureReason: 'ProminenceFailureReason',
+
+  // Scheduling
   IsScheduled: 'IsScheduled',
   ScheduledPublishAt: 'ScheduledPublishAt',
-  PublishStartDate: 'PublishStartDate',
-  PublishEndDate: 'PublishEndDate',
+  ScheduledBy: 'ScheduledBy',
+  ScheduleChangedBy: 'ScheduleChangedBy',
+  ScheduleChangedAt: 'ScheduleChangedAt',
+  ScheduleCancelledBy: 'ScheduleCancelledBy',
+  ScheduleCancelledAt: 'ScheduleCancelledAt',
+
+  // Work ownership
+  ClaimOwner: 'ClaimOwner',
+  ClaimedAt: 'ClaimedAt',
+  AssignedOwner: 'AssignedOwner',
+  ReassignedBy: 'ReassignedBy',
+  ReassignedAt: 'ReassignedAt',
+  ReviewedBy: 'ReviewedBy',
+  ReviewedAt: 'ReviewedAt',
+
+  // Audience / engagement
+  CurrentVisibilityMode: 'CurrentVisibilityMode',
   CelebrateCount: 'CelebrateCount',
-  PrimaryImage: 'PrimaryImage',
-  ImageAltText: 'ImageAltText',
+} as const;
+
+/**
+ * InternalName values for the `Kudos Audit Events` list. This is the
+ * durable event journal for workflow transitions, claim/reassignment,
+ * scheduling/prominence actions, and moderation notes.
+ *
+ * Bind by list GUID via `PEOPLE_CULTURE_LIST_REGISTRY.kudosAuditEvents`.
+ */
+export const KUDOS_AUDIT_FIELDS = {
+  Title: 'Title',
+  KudosId: 'KudosId',
+  EventType: 'EventType',
+  Actor: 'Actor',
+  EventAt: 'EventAt',
+  OldValue: 'OldValue',
+  NewValue: 'NewValue',
+  PublicNote: 'PublicNote',
+  InternalNote: 'InternalNote',
 } as const;
 
 /**
