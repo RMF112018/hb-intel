@@ -15,7 +15,7 @@
 import { odata } from '@azure/data-tables';
 import type { IAdminEvidenceReference } from '@hbc/models/admin-control-plane';
 import { createAppTableClient } from '../../utils/table-client-factory.js';
-import type { IAdminEvidenceService, EvidenceRetentionClass } from './types.js';
+import type { IAdminEvidenceService, EvidenceRetentionClass, IAdminEvidencePayloadRecord } from './types.js';
 
 const ADMIN_EVIDENCE_TABLE = 'AdminEvidence';
 
@@ -116,6 +116,32 @@ export class DurableAdminEvidenceStore implements IAdminEvidenceService {
     }
     return null;
   }
+
+  async getEvidencePayload(evidenceId: string): Promise<IAdminEvidencePayloadRecord | null> {
+    await this.ensureTable();
+    const entities = this.client.listEntities<Record<string, unknown>>({
+      queryOptions: { filter: odata`RowKey eq ${evidenceId}` },
+    });
+    for await (const entity of entities) {
+      const inlineRaw = (entity.inlinePayloadJson as string) || '';
+      let inlinePayload: Record<string, unknown> | null = null;
+      if (inlineRaw) {
+        try {
+          inlinePayload = JSON.parse(inlineRaw) as Record<string, unknown>;
+        } catch {
+          inlinePayload = null;
+        }
+      }
+      return {
+        evidenceId: entity.rowKey as string,
+        runId: (entity.runId as string) || null,
+        storageLocator: (entity.storageLocator as string) || '',
+        offloaded: entity.isOffloaded === true,
+        inlinePayload,
+      };
+    }
+    return null;
+  }
 }
 
 /**
@@ -141,6 +167,20 @@ export class MockAdminEvidenceStore implements IAdminEvidenceService {
 
   async getEvidence(evidenceId: string): Promise<IAdminEvidenceReference | null> {
     return this.store.get(evidenceId)?.ref ?? null;
+  }
+
+  async getEvidencePayload(evidenceId: string): Promise<IAdminEvidencePayloadRecord | null> {
+    const entry = this.store.get(evidenceId);
+    if (!entry) {
+      return null;
+    }
+    return {
+      evidenceId: entry.ref.evidenceId,
+      runId: entry.ref.runId,
+      storageLocator: entry.ref.storageLocator,
+      offloaded: false,
+      inlinePayload: entry.inlinePayload ?? null,
+    };
   }
 }
 

@@ -23,12 +23,14 @@ import {
   type PnpOpsPreflightResponse,
   type PnpOpsRunEnvelope,
   type PnpOpsRunEvidenceResponse,
+  type PnpOpsTokenProvider,
 } from './pnpOpsClient.js';
 import { parseCsvFilters, validatePnpOpsForm } from './pnpOpsValidation.js';
 
 export interface PnpOpsProps {
   config?: Record<string, unknown>;
   identity?: HomepageIdentityInput;
+  getApiToken?: PnpOpsTokenProvider;
 }
 
 interface PnpOpsRuntimeConfig {
@@ -159,7 +161,7 @@ function getEvidenceDownloadUrl(ref: unknown): string | null {
   return direct ?? null;
 }
 
-export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
+export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JSX.Element {
   const runtime = React.useMemo(() => readRuntimeConfig(config), [config]);
   const [actionCatalog, setActionCatalog] = React.useState<readonly PnpOpsActionDefinition[]>(PNP_V1_ACTIONS);
   const [catalogWarning, setCatalogWarning] = React.useState<string | null>(null);
@@ -190,9 +192,17 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
       );
       return;
     }
+    if (!getApiToken) {
+      const fallback = resolvePnpActionCatalog(null);
+      setActionCatalog(fallback.actions);
+      setCatalogWarning(
+        'Backend URL is configured but backendAudience token acquisition is not configured; using locked Prompt-01 action catalog.',
+      );
+      return;
+    }
 
     try {
-      const metadata = await fetchPnpActionMetadata(runtime.backendUrl);
+      const metadata = await fetchPnpActionMetadata(runtime.backendUrl, getApiToken);
       const resolved = resolvePnpActionCatalog(metadata);
       setActionCatalog(resolved.actions);
       setCatalogWarning(resolved.warning);
@@ -204,7 +214,7 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
         'Locked Prompt-01 catalog defaults are shown.',
       );
     }
-  }, [runtime.backendUrl, runtime.mockMode]);
+  }, [runtime.backendUrl, runtime.mockMode, getApiToken]);
 
   React.useEffect(() => {
     loadCatalog().catch(() => undefined);
@@ -217,10 +227,10 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
 
     setBusyState('refresh');
     try {
-      const latestRun = await fetchPnpRun(runtime.backendUrl, runStatus.runId);
+      const latestRun = await fetchPnpRun(runtime.backendUrl, runStatus.runId, getApiToken);
       setRunStatus(latestRun);
       if (isTerminal(latestRun.status)) {
-        const evidence = await fetchPnpRunEvidence(runtime.backendUrl, latestRun.runId);
+        const evidence = await fetchPnpRunEvidence(runtime.backendUrl, latestRun.runId, getApiToken);
         setEvidenceManifest(evidence);
       }
     } catch (error) {
@@ -228,7 +238,7 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
     } finally {
       setBusyState('idle');
     }
-  }, [runtime.backendUrl, runtime.mockMode, runStatus?.runId]);
+  }, [runtime.backendUrl, runtime.mockMode, runStatus?.runId, getApiToken]);
 
   React.useEffect(() => {
     if (!runStatus?.runId || isTerminal(runStatus.status) || runtime.mockMode) {
@@ -265,9 +275,11 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
             { checkId: 'mock-02', label: 'Action payload normalized', passed: true, message: `${selectedAction.key} payload accepted.`, blocking: false },
           ],
         });
-      } else if (runtime.backendUrl) {
-        const result = await runPnpPreflight(runtime.backendUrl, selectedAction.key, commandInput);
+      } else if (runtime.backendUrl && getApiToken) {
+        const result = await runPnpPreflight(runtime.backendUrl, selectedAction.key, commandInput, getApiToken);
         setPreflightResult(result);
+      } else if (runtime.backendUrl && !getApiToken) {
+        setServiceError('Backend token provider is unavailable. Configure backendAudience for SPFx token acquisition.');
       } else {
         setServiceError('Backend URL is not configured.');
       }
@@ -276,7 +288,7 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
     } finally {
       setBusyState('idle');
     }
-  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.mockMode, runtime.backendUrl]);
+  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.mockMode, runtime.backendUrl, getApiToken]);
 
   const launchRun = React.useCallback(async (): Promise<void> => {
     const validation = validatePnpOpsForm(selectedAction, { targetSiteUrl, listFilterInput, pageFilterInput });
@@ -336,16 +348,18 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
             ],
           });
         }, 1_300);
-      } else if (runtime.backendUrl) {
-        const launched = await launchPnpRun(runtime.backendUrl, selectedAction.key, commandInput);
-        const latestRun = await fetchPnpRun(runtime.backendUrl, launched.runId);
+      } else if (runtime.backendUrl && getApiToken) {
+        const launched = await launchPnpRun(runtime.backendUrl, selectedAction.key, commandInput, getApiToken);
+        const latestRun = await fetchPnpRun(runtime.backendUrl, launched.runId, getApiToken);
         setRunStatus(latestRun);
         if (isTerminal(latestRun.status)) {
-          const evidence = await fetchPnpRunEvidence(runtime.backendUrl, latestRun.runId);
+          const evidence = await fetchPnpRunEvidence(runtime.backendUrl, latestRun.runId, getApiToken);
           setEvidenceManifest(evidence);
         } else {
           setEvidenceManifest(null);
         }
+      } else if (runtime.backendUrl && !getApiToken) {
+        setServiceError('Backend token provider is unavailable. Configure backendAudience for SPFx token acquisition.');
       } else {
         setServiceError('Backend URL is not configured.');
       }
@@ -354,7 +368,7 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
     } finally {
       setBusyState('idle');
     }
-  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.mockMode, runtime.backendUrl]);
+  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.mockMode, runtime.backendUrl, getApiToken]);
 
   return (
     <section aria-label="PnP Operations webpart shell" data-hbc-webpart="pnp-ops" style={LAYOUT.root}>
@@ -379,6 +393,12 @@ export function PnpOps({ config, identity }: PnpOpsProps): React.JSX.Element {
       </HbcCard>
 
       {catalogWarning && <HbcBanner variant="info">{catalogWarning}</HbcBanner>}
+      {!runtime.mockMode && runtime.backendUrl && !getApiToken && (
+        <HbcBanner variant="warning">
+          Backend mode is configured but no API token provider is available. Set `backendAudience`
+          so SPFx can acquire a bearer token for `/api/admin/*`.
+        </HbcBanner>
+      )}
       {serviceError && <HbcBanner variant="error">{serviceError}</HbcBanner>}
       {formErrors.length > 0 && (
         <HbcBanner variant="error">

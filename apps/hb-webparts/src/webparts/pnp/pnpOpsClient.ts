@@ -52,6 +52,8 @@ export interface PnpOpsCommandInput {
   };
 }
 
+export type PnpOpsTokenProvider = (() => Promise<string>) | undefined;
+
 interface ApiEnvelope<T> {
   readonly data: T;
 }
@@ -78,15 +80,33 @@ async function assertOk(response: Response, operation: string): Promise<void> {
   }
 }
 
+async function buildAuthHeaders(
+  tokenProvider: PnpOpsTokenProvider,
+  extraHeaders?: Record<string, string>,
+): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { ...(extraHeaders ?? {}) };
+  if (!tokenProvider) {
+    return headers;
+  }
+  const token = await tokenProvider();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 function normalizeBaseUrl(baseUrl: string): string {
   return baseUrl.replace(/\/+$/, '');
 }
 
 export async function fetchPnpActionMetadata(
   backendUrl: string,
+  tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<readonly AdminActionMetadataDto[]> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/actions`);
+  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/actions`, {
+    headers: await buildAuthHeaders(tokenProvider),
+  });
   await assertOk(response, 'Action catalog load');
   const payload = await readJson<ApiListEnvelope<AdminActionMetadataDto>>(response);
   return payload.items ?? [];
@@ -96,11 +116,12 @@ export async function runPnpPreflight(
   backendUrl: string,
   actionKey: PnpOpsActionKey,
   commandInput: PnpOpsCommandInput,
+  tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsPreflightResponse> {
   const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/preflight`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await buildAuthHeaders(tokenProvider, { 'Content-Type': 'application/json' }),
     body: JSON.stringify({
       actionKey,
       targetEntityId: commandInput.targetSiteUrl,
@@ -116,11 +137,12 @@ export async function launchPnpRun(
   backendUrl: string,
   actionKey: PnpOpsActionKey,
   commandInput: PnpOpsCommandInput,
+  tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunLaunchResponse> {
   const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await buildAuthHeaders(tokenProvider, { 'Content-Type': 'application/json' }),
     body: JSON.stringify({
       actionKey,
       targetEntityId: commandInput.targetSiteUrl,
@@ -136,9 +158,12 @@ export async function launchPnpRun(
 export async function fetchPnpRun(
   backendUrl: string,
   runId: string,
+  tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunEnvelope> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs/${encodeURIComponent(runId)}`);
+  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs/${encodeURIComponent(runId)}`, {
+    headers: await buildAuthHeaders(tokenProvider),
+  });
   await assertOk(response, 'Run status');
   const payload = await readJson<ApiEnvelope<PnpOpsRunEnvelope>>(response);
   return payload.data;
@@ -147,9 +172,12 @@ export async function fetchPnpRun(
 export async function fetchPnpRunEvidence(
   backendUrl: string,
   runId: string,
+  tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunEvidenceResponse> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs/${encodeURIComponent(runId)}/evidence`);
+  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs/${encodeURIComponent(runId)}/evidence`, {
+    headers: await buildAuthHeaders(tokenProvider),
+  });
   await assertOk(response, 'Run evidence');
   const payload = await readJson<ApiEnvelope<PnpOpsRunEvidenceResponse>>(response);
   return payload.data;

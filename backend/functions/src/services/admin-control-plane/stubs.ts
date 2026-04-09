@@ -36,6 +36,7 @@ import type {
   IAdminRunService,
   IAdminRunListOptions,
   IAdminRunListResult,
+  IAdminRunUpdate,
   IAdminAdapterRegistry,
   IAdminConfigService,
   IAdminAuditService,
@@ -69,6 +70,10 @@ export class StubAdminRunService implements IAdminRunService {
 
   async retryRun(_parentRunId: string, _actor: IAdminActorContext): Promise<IAdminRunLaunchResponse> {
     throw new Error('[StubAdminRunService] retryRun not implemented — awaiting P3-05');
+  }
+
+  async updateRun(_runId: string, _updates: IAdminRunUpdate): Promise<IAdminRunEnvelope> {
+    throw new Error('[StubAdminRunService] updateRun not implemented');
   }
 }
 

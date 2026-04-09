@@ -19,6 +19,11 @@ import type {
 } from '@hbc/models/admin-control-plane';
 import { InstallPreflightCheckId } from '@hbc/models/admin-control-plane';
 import type { IAdminPreflightService } from './types.js';
+import {
+  getPnpActionDescriptor,
+  normalizeFilterList,
+  normalizePnpActionKey,
+} from './pnp-action-catalog.js';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -251,6 +256,101 @@ function checkInstallCompatibility(): IAdminPreflightCheck[] {
   return results;
 }
 
+function checkPnpActionInput(request: IAdminPreflightRequest): IAdminPreflightCheck[] {
+  const checks: IAdminPreflightCheck[] = [];
+  const commandInput = (request.commandInput ?? {}) as Record<string, unknown>;
+  const targetSiteUrl = typeof commandInput.targetSiteUrl === 'string' ? commandInput.targetSiteUrl.trim() : '';
+  const listFilters = normalizeFilterList(commandInput.listFilters);
+  const pageFilters = normalizeFilterList(commandInput.pageFilters);
+  const descriptor = getPnpActionDescriptor(request.actionKey);
+
+  checks.push(check(
+    'pnp-target-site-url',
+    'Target SharePoint site URL',
+    /^https:\/\/.+\.sharepoint\.com\/sites\/.+/i.test(targetSiteUrl),
+    /^https:\/\/.+\.sharepoint\.com\/sites\/.+/i.test(targetSiteUrl)
+      ? `Target site URL accepted: ${targetSiteUrl}`
+      : 'targetSiteUrl is missing or not a valid /sites/ SharePoint URL.',
+    {
+      category: 'sharepoint',
+      severity: 'critical',
+      blocking: true,
+      recommendedAction: 'Provide a targetSiteUrl like https://<tenant>.sharepoint.com/sites/<site>.',
+    },
+  ));
+
+  checks.push(check(
+    'pnp-read-only-intent',
+    'Read-only execution intent',
+    commandInput.executionIntent !== null && typeof commandInput.executionIntent === 'object',
+    commandInput.executionIntent !== null && typeof commandInput.executionIntent === 'object'
+      ? 'Execution intent metadata is present.'
+      : 'executionIntent metadata is missing.',
+    {
+      category: 'sharepoint',
+      severity: 'warning',
+      blocking: false,
+      recommendedAction: 'Include executionIntent.mode=read-only-export from the webpart launch payload.',
+    },
+  ));
+
+  if (descriptor?.requiredInput === 'site-and-list-filter') {
+    checks.push(check(
+      'pnp-list-filters',
+      'List filters provided',
+      listFilters.length > 0,
+      listFilters.length > 0
+        ? `List filters accepted (${listFilters.length}).`
+        : 'listFilters is required for list schema extraction.',
+      {
+        category: 'sharepoint',
+        severity: 'critical',
+        blocking: true,
+        recommendedAction: 'Provide one or more list names in listFilters.',
+      },
+    ));
+  }
+
+  if (descriptor?.requiredInput === 'site-and-page-filter') {
+    checks.push(check(
+      'pnp-page-filters',
+      'Page filters provided',
+      pageFilters.length > 0,
+      pageFilters.length > 0
+        ? `Page filters accepted (${pageFilters.length}).`
+        : 'pageFilters is required for page/layout extraction.',
+      {
+        category: 'sharepoint',
+        severity: 'critical',
+        blocking: true,
+        recommendedAction: 'Provide one or more page filters in pageFilters.',
+      },
+    ));
+  }
+
+  return checks;
+}
+
+function checkPnpBackendPrerequisites(): IAdminPreflightCheck[] {
+  const mode = process.env.HBC_ADAPTER_MODE ?? '';
+  return [
+    check(
+      'pnp-backend-mode',
+      'Backend execution mode',
+      mode.length > 0,
+      mode.length > 0
+        ? `Backend adapter mode is configured (${mode}).`
+        : 'HBC_ADAPTER_MODE is not configured.',
+      {
+        category: 'backend-config',
+        severity: 'warning',
+        blocking: false,
+        recommendedAction: 'Set HBC_ADAPTER_MODE to proxy or mock before production usage.',
+      },
+    ),
+  ];
+}
+
 // ─── Service Implementation ────────────────────────────────────────────────────
 
 /**
@@ -265,15 +365,26 @@ function checkInstallCompatibility(): IAdminPreflightCheck[] {
  * 6. Install-lane compatibility
  */
 export class AdminPreflightService implements IAdminPreflightService {
-  async validate(_request: IAdminPreflightRequest): Promise<IAdminPreflightResponse> {
-    const checks: IAdminPreflightCheck[] = [
+  async validate(request: IAdminPreflightRequest): Promise<IAdminPreflightResponse> {
+    const normalizedPnpAction = normalizePnpActionKey(request.actionKey);
+    const checks: IAdminPreflightCheck[] = normalizedPnpAction
+      ? [
+          ...checkBackendConfig(),
+          ...checkSharePoint(),
+          ...checkPnpBackendPrerequisites(),
+          ...checkPnpActionInput({
+            ...request,
+            actionKey: normalizedPnpAction,
+          }),
+        ]
+      : [
       ...checkBackendConfig(),
       ...checkAuthIdentity(),
       ...checkSharePoint(),
       ...checkGraphEntra(),
       ...checkPersistence(),
       ...checkInstallCompatibility(),
-    ];
+        ];
 
     const ready = checks.filter((c) => c.blocking).every((c) => c.passed);
 

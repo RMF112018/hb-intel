@@ -201,7 +201,7 @@ describe('P3-04 Admin Control Plane API route registration', () => {
     'utf-8',
   );
 
-  describe('all 10 admin API handlers are registered', () => {
+  describe('all admin API handlers are registered', () => {
     const expectedHandlers = [
       'adminLaunchRun',
       'adminListRuns',
@@ -215,6 +215,7 @@ describe('P3-04 Admin Control Plane API route registration', () => {
       'adminListRunAuditEvents',
       'adminListAuditEvents',
       'adminGetRunEvidence',
+      'adminDownloadRunArtifact',
       'adminListActions',
     ];
 
@@ -228,12 +229,12 @@ describe('P3-04 Admin Control Plane API route registration', () => {
       },
     );
 
-    it('registers exactly 13 HTTP handlers', () => {
+    it('registers exactly 14 HTTP handlers', () => {
       const handlerCount = (adminApiIndex.match(/app\.http\(/g) || []).length;
       expect(
         handlerCount,
-        `Admin API should register exactly 13 HTTP handlers, found ${handlerCount}`,
-      ).toBe(13);
+        `Admin API should register exactly 14 HTTP handlers, found ${handlerCount}`,
+      ).toBe(14);
     });
   });
 
@@ -284,6 +285,7 @@ describe('P3-04 Admin Control Plane API route registration', () => {
       'admin/runs/{runId}/audit',
       'admin/audit',
       'admin/runs/{runId}/evidence',
+      'admin/runs/{runId}/artifacts/{evidenceId}/download',
       'admin/actions',
     ];
 
@@ -331,8 +333,8 @@ describe('P3-08 Admin Control Plane authorization and safety wiring', () => {
 
     it('all handlers check delegated scope (every handler references requireDelegatedScope)', () => {
       const scopeCount = (adminApiIndex.match(/requireDelegatedScope/g) || []).length;
-      // Import + 13 handler usages = at least 14
-      expect(scopeCount).toBeGreaterThanOrEqual(14);
+      // Import + 14 handler usages = at least 15
+      expect(scopeCount).toBeGreaterThanOrEqual(15);
     });
 
     it('write handlers check admin role', () => {

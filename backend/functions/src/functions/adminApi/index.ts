@@ -33,6 +33,7 @@ import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { requireAdmin, requireDelegatedScope } from '../../middleware/authorization.js';
 import { createAdminControlPlaneServiceFactory } from '../../hosts/admin-control-plane/service-factory.js';
 import { processCheckpointDecision } from '../../services/admin-control-plane/install-checkpoint-service.js';
+import { normalizePnpActionKey, toActionMetadata } from '../../services/admin-control-plane/pnp-action-catalog.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { AdminDomain, ObservabilityErrorSource } from '@hbc/models/admin-control-plane';
@@ -79,7 +80,25 @@ app.http('adminLaunchRun', {
       displayName: auth.claims.displayName ?? auth.claims.upn,
     });
 
-    const result = await services.runService.launchRun(body as never, actor);
+    const normalizedRequest = services.pnpOpsOrchestrator.normalizeLaunchRequest(body as never);
+    const result = await services.runService.launchRun(normalizedRequest as never, actor);
+
+    if (services.pnpOpsOrchestrator.isPnpAction(String(normalizedRequest.actionKey))) {
+      const backendUrl = (() => {
+        try {
+          return new URL(request.url).origin;
+        } catch {
+          return '';
+        }
+      })();
+      void services.pnpOpsOrchestrator
+        .executeRun(result.runId, normalizedRequest as never, actor, backendUrl)
+        .catch((err) => {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error(`[adminLaunchRun] PnP run orchestration failed for ${result.runId}: ${message}`);
+        });
+    }
+
     return successResponse(result, 202);
   }, { domain: 'adminControlPlane', operation: 'launchRun' })),
 });
@@ -331,7 +350,11 @@ app.http('adminPreflight', {
       return errorResponse(400, 'VALIDATION_ERROR', 'actionKey is required', reqId);
     }
 
-    const result = await services.preflightService.validate(body as never);
+    const normalizedActionKey = normalizePnpActionKey(body.actionKey) ?? body.actionKey;
+    const result = await services.preflightService.validate({
+      ...body,
+      actionKey: normalizedActionKey,
+    } as never);
     return successResponse(result);
   }, { domain: 'adminControlPlane', operation: 'preflight' })),
 });
@@ -522,12 +545,77 @@ app.http('adminGetRunEvidence', {
       .filter(e => e.evidenceRef !== null)
       .map(e => e.evidenceRef!);
 
+    const backendOrigin = (() => {
+      try {
+        return new URL(request.url).origin;
+      } catch {
+        return '';
+      }
+    })();
+    const mappedEvidenceRefs = evidenceRefs.map((ref) => ({
+      ...ref,
+      downloadUrl: backendOrigin
+        ? `${backendOrigin}/api/admin/runs/${encodeURIComponent(runId)}/artifacts/${encodeURIComponent(ref.evidenceId)}/download`
+        : null,
+    }));
+
     return successResponse({
       runId,
-      evidenceRefs,
-      total: evidenceRefs.length,
+      evidenceRefs: mappedEvidenceRefs,
+      total: mappedEvidenceRefs.length,
     });
   }, { domain: 'adminControlPlane', operation: 'getRunEvidence' })),
+});
+
+// ── Download Run Artifact by Evidence ID ──────────────────────────────────────
+
+/**
+ * GET /api/admin/runs/{runId}/artifacts/{evidenceId}/download — download one artifact payload.
+ */
+app.http('adminDownloadRunArtifact', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'admin/runs/{runId}/artifacts/{evidenceId}/download',
+  handler: withAuth(withTelemetry(async (request: HttpRequest, _context: InvocationContext, auth): Promise<HttpResponseInit> => {
+    const reqId = extractOrGenerateRequestId(request);
+    const scopeDenied = requireDelegatedScope(auth.claims, reqId);
+    if (scopeDenied) return scopeDenied;
+
+    const services = createAdminControlPlaneServiceFactory();
+    const runId = getParam(request, 'runId');
+    const evidenceId = getParam(request, 'evidenceId');
+    if (!runId || !evidenceId) {
+      return errorResponse(400, 'VALIDATION_ERROR', 'runId and evidenceId are required', reqId);
+    }
+
+    const payload = await services.evidenceService.getEvidencePayload(evidenceId);
+    if (!payload || payload.runId !== runId) {
+      return errorResponse(404, 'NOT_FOUND', `Artifact ${evidenceId} not found for run ${runId}`, reqId);
+    }
+    if (payload.offloaded || !payload.inlinePayload) {
+      return errorResponse(409, 'ARTIFACT_UNAVAILABLE', 'Artifact payload is offloaded or unavailable inline', reqId);
+    }
+
+    const fileName = typeof payload.inlinePayload.fileName === 'string'
+      ? payload.inlinePayload.fileName
+      : `${evidenceId}.json`;
+    const contentType = typeof payload.inlinePayload.contentType === 'string'
+      ? payload.inlinePayload.contentType
+      : 'application/json';
+    const content = typeof payload.inlinePayload.content === 'string'
+      ? payload.inlinePayload.content
+      : JSON.stringify(payload.inlinePayload, null, 2);
+
+    return {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Cache-Control': 'no-store',
+      },
+      body: content,
+    };
+  }, { domain: 'adminControlPlane', operation: 'downloadRunArtifact' })),
 });
 
 // ── List Action Metadata ───────────────────────────────────────────────────────
@@ -547,13 +635,31 @@ app.http('adminListActions', {
     const scopeDenied = requireDelegatedScope(auth.claims, reqId);
     if (scopeDenied) return scopeDenied;
 
-    // Action metadata listing deferred to P3-06 (adapter registry).
-    // Stub returns empty list.
+    const domain = request.query.get('domain');
+    const matchesDomain = !domain || domain === 'sharepoint-control';
+    const hasBasePrereqs =
+      typeof process.env.HBC_ADAPTER_MODE === 'string' &&
+      process.env.HBC_ADAPTER_MODE.length > 0 &&
+      typeof process.env.AZURE_TABLE_ENDPOINT === 'string' &&
+      process.env.AZURE_TABLE_ENDPOINT.length > 0;
+
+    const items = matchesDomain
+      ? toActionMetadata(
+          hasBasePrereqs,
+          hasBasePrereqs ? null : 'Backend prerequisites are not fully configured (HBC_ADAPTER_MODE, AZURE_TABLE_ENDPOINT).',
+        )
+      : [];
+
     return {
       status: 200,
       jsonBody: {
-        items: [],
-        pagination: { total: 0, page: 1, pageSize: 25, totalPages: 0 },
+        items,
+        pagination: {
+          total: items.length,
+          page: 1,
+          pageSize: 25,
+          totalPages: items.length === 0 ? 0 : 1,
+        },
         requestId: reqId,
       },
     };

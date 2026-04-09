@@ -21,6 +21,11 @@ import type {
   IAdminRunLaunchRequest,
   IAdminRunLaunchResponse,
   IAdminRunSummary,
+  IAdminStepResult,
+  IAdminFailureSummary,
+  AdminRunStatus,
+  AdminExecutionMode,
+  AdminRiskLevel,
   IAdminPreflightRequest,
   IAdminPreflightResponse,
   IAdminAdapterDescriptor,
@@ -50,6 +55,9 @@ import type {
   IObservabilityErrorQuery,
   IObservabilityPagedResponse,
 } from '@hbc/models/admin-control-plane';
+
+// Re-export PnP orchestrator interface from implementation module.
+export type { IPnpOpsOrchestrator } from './pnp-orchestrator.js';
 
 // Re-export IWhiteGloveRunService from the white-glove module
 export type { IWhiteGloveRunService } from '../white-glove/white-glove-run-service.js';
@@ -90,6 +98,25 @@ export interface IAdminRunService {
 
   /** Retry a failed run. Creates a new run linked to the failed parent. */
   retryRun(parentRunId: string, actor: IAdminActorContext): Promise<IAdminRunLaunchResponse>;
+
+  /** Apply controlled updates to an existing run envelope. */
+  updateRun(runId: string, updates: IAdminRunUpdate): Promise<IAdminRunEnvelope>;
+}
+
+/** Controlled run-envelope updates used by backend orchestrators. */
+export interface IAdminRunUpdate {
+  readonly status?: AdminRunStatus;
+  readonly executionMode?: AdminExecutionMode;
+  readonly riskLevel?: AdminRiskLevel;
+  readonly totalSteps?: number;
+  readonly currentStep?: number | null;
+  readonly steps?: readonly IAdminStepResult[];
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly failure?: IAdminFailureSummary | null;
+  readonly commandInputRef?: string | null;
+  readonly configSnapshotRef?: string | null;
+  readonly targetEntityLabel?: string | null;
 }
 
 /** Options for listing admin runs. */
@@ -235,6 +262,18 @@ export interface IAdminEvidenceService {
 
   /** Get a single evidence reference by ID. Returns null if not found. */
   getEvidence(evidenceId: string): Promise<IAdminEvidenceReference | null>;
+
+  /** Get stored payload metadata and inline content for one evidence item. */
+  getEvidencePayload(evidenceId: string): Promise<IAdminEvidencePayloadRecord | null>;
+}
+
+/** Evidence payload lookup result for artifact download surfaces. */
+export interface IAdminEvidencePayloadRecord {
+  readonly evidenceId: string;
+  readonly runId: string | null;
+  readonly storageLocator: string;
+  readonly offloaded: boolean;
+  readonly inlinePayload: Record<string, unknown> | null;
 }
 
 // ─── Actor Context Resolver ─────────────────────────────────────────────────────

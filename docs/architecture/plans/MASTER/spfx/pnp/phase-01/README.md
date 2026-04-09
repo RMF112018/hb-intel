@@ -79,6 +79,23 @@ This includes:
 - Preflight/launch/poll client adapter seam to `/api/admin/*`
 - Result and artifact-manifest rendering with locked fallback catalog + mock mode
 
+## Prompt-02 repo truth note
+
+Prompt-02 backend orchestration and execution seam is landed in:
+
+- `backend/functions/src/functions/adminApi/index.ts`
+- `backend/functions/src/services/admin-control-plane/pnp-action-catalog.ts`
+- `backend/functions/src/services/admin-control-plane/pnp-orchestrator.ts`
+
+This includes:
+
+- Canonical v1 action catalog on `/api/admin/actions` with Prompt-00 alias normalization support.
+- Secured server-side PnP run orchestration (`Pending -> Running -> Completed|Failed`) through admin run/audit/evidence services.
+- Artifact evidence publishing and download route:
+  - `/api/admin/runs/{runId}/evidence`
+  - `/api/admin/runs/{runId}/artifacts/{evidenceId}/download`
+- SPFx bearer-token wiring requirement for `apps/hb-webparts/src/webparts/pnp/` via `backendAudience`.
+
 ## Mandatory operating rules for the agent
 
 1. Use local repo truth at HEAD as the final authority.

@@ -36,6 +36,7 @@ import type {
   IAdminRunService,
   IAdminRunListOptions,
   IAdminRunListResult,
+  IAdminRunUpdate,
 } from './types.js';
 
 /**
@@ -51,10 +52,8 @@ export class InMemoryAdminRunService implements IAdminRunService {
     const runId = crypto.randomUUID();
     const now = new Date().toISOString();
 
-    // Default execution mode and risk level — later prompts will resolve
-    // these from the action catalog based on actionKey.
-    const executionMode = AdminExecutionMode.Seamless;
-    const riskLevel = AdminRiskLevel.Low;
+    const executionMode = deriveExecutionMode(request.actionKey);
+    const riskLevel = deriveRiskLevel(request.actionKey);
 
     const envelope: IAdminRunEnvelope = {
       runId,
@@ -207,4 +206,42 @@ export class InMemoryAdminRunService implements IAdminRunService {
       riskLevel: parentRun.riskLevel,
     };
   }
+
+  async updateRun(runId: string, updates: IAdminRunUpdate): Promise<IAdminRunEnvelope> {
+    const existing = this.runs.get(runId);
+    if (!existing) {
+      throw new Error(`Run ${runId} not found`);
+    }
+    const updated: IAdminRunEnvelope = {
+      ...existing,
+      ...(updates.status ? { status: updates.status } : {}),
+      ...(updates.executionMode ? { executionMode: updates.executionMode } : {}),
+      ...(updates.riskLevel ? { riskLevel: updates.riskLevel } : {}),
+      ...(typeof updates.totalSteps === 'number' ? { totalSteps: updates.totalSteps } : {}),
+      ...(updates.currentStep !== undefined ? { currentStep: updates.currentStep } : {}),
+      ...(updates.steps ? { steps: updates.steps } : {}),
+      ...(updates.startedAt !== undefined ? { startedAt: updates.startedAt } : {}),
+      ...(updates.completedAt !== undefined ? { completedAt: updates.completedAt } : {}),
+      ...(updates.failure !== undefined ? { failure: updates.failure } : {}),
+      ...(updates.commandInputRef !== undefined ? { commandInputRef: updates.commandInputRef } : {}),
+      ...(updates.configSnapshotRef !== undefined ? { configSnapshotRef: updates.configSnapshotRef } : {}),
+      ...(updates.targetEntityLabel !== undefined ? { targetEntityLabel: updates.targetEntityLabel } : {}),
+    };
+    this.runs.set(runId, updated);
+    return updated;
+  }
+}
+
+function deriveExecutionMode(actionKey: string): AdminExecutionMode {
+  if (actionKey.startsWith('sharepoint-control:extraction:')) {
+    return AdminExecutionMode.Advisory;
+  }
+  return AdminExecutionMode.Seamless;
+}
+
+function deriveRiskLevel(actionKey: string): AdminRiskLevel {
+  if (actionKey.startsWith('sharepoint-control:extraction:')) {
+    return AdminRiskLevel.ReadOnly;
+  }
+  return AdminRiskLevel.Low;
 }

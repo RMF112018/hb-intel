@@ -20,6 +20,7 @@ import type {
   IAdminPreflightService,
   IAdminActorContextResolver,
   IAdminEvidenceService,
+  IPnpOpsOrchestrator,
   IAdminAppBindingService,
   IConfigOverrideStore,
   IConfigVersioningService,
@@ -76,6 +77,7 @@ import {
   StubAdminConfigService,
   StubAdminPreflightService,
   AdminPreflightService,
+  PnpOpsOrchestrator,
 } from '../../services/admin-control-plane/index.js';
 import { validateAdminControlPlaneStartupConfig } from '../../utils/validate-config.js';
 import { assertAdapterModeValid } from '../../utils/adapter-mode-guard.js';
@@ -122,6 +124,7 @@ export interface IAdminControlPlaneServiceContainer {
   readonly auditService: IAdminAuditService;
   readonly evidenceService: IAdminEvidenceService;
   readonly preflightService: IAdminPreflightService;
+  readonly pnpOpsOrchestrator: IPnpOpsOrchestrator;
   readonly actorContextResolver: IAdminActorContextResolver;
   readonly bindingService: IAdminAppBindingService;
 
@@ -196,6 +199,7 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
     auditService: isMock ? new MockAdminAuditStore() : new DurableAdminAuditStore(),  // P4-03: durable Table Storage in prod
     evidenceService: isMock ? new MockAdminEvidenceStore() : new DurableAdminEvidenceStore(),  // P4-06: evidence metadata
     preflightService: isMock ? new StubAdminPreflightService() : new AdminPreflightService(),  // P6-04: real preflight in prod, stub for mock/test
+    pnpOpsOrchestrator: null as unknown as IPnpOpsOrchestrator,
     actorContextResolver: new AdminActorContextResolver(),  // P3-08: real actor resolver
     bindingService: isMock ? new MockAdminAppBindingStore() : new DurableAdminAppBindingStore(),  // P6A-04: app-binding persistence
 
@@ -234,6 +238,10 @@ export function createAdminControlPlaneServiceFactory(): IAdminControlPlaneServi
   // Note: catalog entries will be registered by Prompt-09 seeding; empty catalog is safe for now
   (container as { configResolution: IConfigResolutionService }).configResolution =
     new ConfigResolutionService([], container.configOverrideStore, container.configSnapshotStore);
+
+  // Wire white-glove run service with dependencies from the container
+  (container as { pnpOpsOrchestrator: IPnpOpsOrchestrator }).pnpOpsOrchestrator =
+    new PnpOpsOrchestrator(container.runService, container.auditService, container.evidenceService);
 
   // Wire white-glove run service with dependencies from the container
   (container as { whiteGloveRunService: IWhiteGloveRunService }).whiteGloveRunService = isMock

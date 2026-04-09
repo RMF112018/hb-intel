@@ -30,6 +30,7 @@ export type {
   IObservabilityAlertStore,
   IObservabilityProbeSnapshotStore,
   IObservabilityErrorStore,
+  IPnpOpsOrchestrator,
 } from './types.js';
 
 // Durable implementations (Phase 4)
@@ -63,6 +64,9 @@ export type { InstallOrchestratorDeps } from './install-orchestrator.js';
 
 // Evidence service (P4-06)
 export { DurableAdminEvidenceStore, MockAdminEvidenceStore, isEvidenceInlineable, generateBlobLocator, EVIDENCE_INLINE_MAX_BYTES } from './evidence-service.js';
+export { PnpOpsOrchestrator } from './pnp-orchestrator.js';
+export { PNP_ACTION_CATALOG, getPnpActionDescriptor, isPnpActionKey, normalizePnpActionKey, toActionMetadata } from './pnp-action-catalog.js';
+export type { CanonicalPnpActionKey, PnpActionDescriptor } from './pnp-action-catalog.js';
 
 // Provisioning audit bridge (P4-04)
 export { ProvisioningAuditBridge, createProvisioningAuditBridge } from './provisioning-audit-bridge.js';

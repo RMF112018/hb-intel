@@ -34,6 +34,7 @@ interface WebPartRendererContext {
   identity: HomepageIdentityInput;
   assetBaseUrl?: string;
   siteUrl?: string;
+  getApiToken?: () => Promise<string>;
 }
 
 const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => ReactNode> = {
@@ -79,8 +80,8 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),
   // Prompt-01 PnP operations shell.
-  '9e2dd84a-a121-4fb3-a964-f43a94abf9fd': ({ config, identity }) =>
-    createElement(PnpOps, { config, identity }),
+  '9e2dd84a-a121-4fb3-a964-f43a94abf9fd': ({ config, identity, getApiToken }) =>
+    createElement(PnpOps, { config, identity, getApiToken }),
   '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl }) => {
     const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
       ? config.backgroundImageUrl
@@ -88,6 +89,19 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
     return createElement(HbSignatureHero, { identity, backgroundImage, assetBaseUrl });
   },
 };
+
+function createApiTokenProvider(
+  context: WebPartContext | undefined,
+  audience: string,
+): (() => Promise<string>) | undefined {
+  if (!context || !audience) {
+    return undefined;
+  }
+  return async (): Promise<string> => {
+    const provider = await context.aadTokenProviderFactory.getTokenProvider();
+    return provider.getToken(audience);
+  };
+}
 
 export async function mount(
   el: HTMLElement,
@@ -107,11 +121,24 @@ export async function mount(
     displayName: spfxContext?.pageContext?.user?.displayName,
     email: spfxContext?.pageContext?.user?.email,
   };
+  const backendAudience =
+    typeof webPartProperties?.backendAudience === 'string'
+      ? webPartProperties.backendAudience.trim()
+      : '';
+  const getApiToken = createApiTokenProvider(spfxContext, backendAudience);
   const renderWebPart = WEBPART_RENDERERS[webPartId];
 
   root = createRoot(el);
   if (renderWebPart) {
-    root.render(renderWebPart({ config: webPartProperties, identity, assetBaseUrl, siteUrl }));
+    root.render(
+      renderWebPart({
+        config: webPartProperties,
+        identity,
+        assetBaseUrl,
+        siteUrl,
+        getApiToken,
+      }),
+    );
     return;
   }
   root.render(createElement(ReferenceHomepageComposition));
