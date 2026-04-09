@@ -1,18 +1,22 @@
 /**
- * LeadershipMessage — Premium executive communication channel
- * Phase 17-05 — Structural rebuild with P17 surface family
+ * LeadershipMessage — Premium executive communication channel.
  *
- * Rebuilt on HbcEditorialSurface with formal executive voice,
- * quote-like featured treatment, lucide icons for editorial accents,
- * and HbcPremiumCta for CTA hierarchy. Visually distinct from the
- * news-digest style of CompanyPulse.
+ * Wave 01r Prompt 17 — executive editorial rebuild:
+ * The webpart is now a thin integration consumer of the enhanced shared
+ * `HbcEditorialSurface` surface family in `@hbc/ui-kit/homepage`.
+ * Normalization, authoring governance, loading, and empty-state handling
+ * stay local to the consumer; all durable editorial presentation grammar
+ * (nameplate masthead, quote-framed featured block, signature, archive
+ * rail, and footer strip) lives in the shared surface.
+ *
+ * This consumer no longer carries any inline style — the surface owns
+ * typography, spacing, warm-accent color language, and layout. The webpart
+ * only shapes the authoring model into the editorial view-model.
  */
 import * as React from 'react';
 import {
   HbcEditorialSurface,
-  HbcPremiumCta,
   Briefcase,
-  Users,
   type EditorialSecondaryItem,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
@@ -26,7 +30,10 @@ export interface LeadershipMessageProps {
   isLoading?: boolean;
 }
 
-export function LeadershipMessage({ config, isLoading = false }: LeadershipMessageProps): React.JSX.Element {
+export function LeadershipMessage({
+  config,
+  isLoading = false,
+}: LeadershipMessageProps): React.JSX.Element {
   if (isLoading) {
     return <HomepageLoadingState label="Loading leadership message" />;
   }
@@ -34,53 +41,60 @@ export function LeadershipMessage({ config, isLoading = false }: LeadershipMessa
   const normalized = normalizeLeadershipMessageConfig(config);
 
   if (!normalized.featured && normalized.secondary.length === 0) {
-    const message = resolveAuthoringMessage('leadershipMessage', config?.entries?.length ? 'invalid' : 'noData');
+    const message = resolveAuthoringMessage(
+      'leadershipMessage',
+      config?.entries?.length ? 'invalid' : 'noData',
+    );
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
-  const secondaryItems: EditorialSecondaryItem[] = normalized.secondary.map((entry) => ({
-    id: entry.id,
-    title: entry.title,
-    meta: entry.leaderName,
-    icon: Users,
-  }));
+  const archiveItems: EditorialSecondaryItem[] = normalized.secondary.map((entry) => {
+    const metaParts: string[] = [];
+    if (entry.leaderName) metaParts.push(entry.leaderName);
+    if (entry.leaderRole) metaParts.push(entry.leaderRole);
+    if (entry.metadata) metaParts.push(entry.metadata);
+    return {
+      id: entry.id,
+      title: entry.title,
+      meta: metaParts.length > 0 ? metaParts.join('  ·  ') : undefined,
+      href: entry.cta?.href,
+      openInNewTab: entry.cta?.openInNewTab,
+    };
+  });
 
   return (
     <HbcEditorialSurface
       title={normalized.heading}
       icon={Briefcase}
-      featured={normalized.featured ? {
-        eyebrow: 'From Leadership',
-        title: normalized.featured.title,
-        excerpt: normalized.featured.message,
-        meta: (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#323130' }}>
-              {normalized.featured.leaderName}
-            </span>
-            {normalized.featured.leaderRole ? (
-              <span style={{ fontSize: '0.8125rem', fontWeight: 400, color: 'rgba(0, 0, 0, 0.55)' }}>
-                {normalized.featured.leaderRole}
-              </span>
-            ) : null}
-          </div>
-        ),
-        cta: normalized.featured.cta ? (
-          <HbcPremiumCta label={normalized.featured.cta.label} href={normalized.featured.cta.href} variant="ghost" arrow />
-        ) : undefined,
-      } : undefined}
-      items={secondaryItems}
-    >
-      {/* Media slot for featured entry */}
-      {normalized.featured?.media ? (
-        <div style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden' }}>
-          <img
-            alt={normalized.featured.media.alt}
-            src={normalized.featured.media.src}
-            style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }}
-          />
-        </div>
-      ) : null}
-    </HbcEditorialSurface>
+      mastheadEyebrow="From Leadership"
+      archiveTitle="From the archive"
+      archiveHref={normalized.archiveHref}
+      featured={
+        normalized.featured
+          ? {
+              eyebrow: 'Message of the week',
+              title: normalized.featured.title,
+              excerpt: normalized.featured.message,
+              leaderName: normalized.featured.leaderName,
+              leaderRole: normalized.featured.leaderRole,
+              publishDate: normalized.featured.metadata,
+              mediaImage: normalized.featured.media
+                ? {
+                    src: normalized.featured.media.src,
+                    alt: normalized.featured.media.alt,
+                  }
+                : undefined,
+              cta: normalized.featured.cta
+                ? {
+                    label: normalized.featured.cta.label,
+                    href: normalized.featured.cta.href,
+                    openInNewTab: normalized.featured.cta.openInNewTab,
+                  }
+                : undefined,
+            }
+          : undefined
+      }
+      items={archiveItems}
+    />
   );
 }

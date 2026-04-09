@@ -25,6 +25,7 @@ export interface CuratedCollection<T> {
   heading: string;
   featured?: T;
   secondary: T[];
+  archiveHref?: string;
 }
 
 function hasText(value: string | undefined): value is string {
@@ -129,6 +130,7 @@ export function normalizeLeadershipMessageConfig(input: Partial<LeadershipMessag
     heading,
     featured,
     secondary: secondary.slice(0, maxArchivedEntries),
+    archiveHref: hasText(input?.archiveHref) ? input?.archiveHref.trim() : undefined,
   };
 }
 

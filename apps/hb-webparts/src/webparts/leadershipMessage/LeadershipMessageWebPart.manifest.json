@@ -3,7 +3,7 @@
   "id": "e8fa8a84-a48a-41d2-85a6-b7c7df70aeca",
   "alias": "LeadershipMessageWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "0.0.2.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
@@ -13,29 +13,54 @@
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "HB Intel" },
       "title": { "default": "Leadership Message" },
-      "description": { "default": "Concise executive messaging with optional media and archived entries." },
+      "description": { "default": "Premium executive editorial surface with nameplate masthead, quote-framed message, leader signature block, and archived leadership notes." },
       "officeFabricIconFontName": "Comment",
       "hiddenFromToolbox": true,
       "properties": {
         "heading": "Leadership Message",
-        "maxArchivedEntries": 2,
+        "maxArchivedEntries": 3,
+        "archiveHref": "/sites/hb-central/leadership",
         "entries": [
           {
             "id": "leadership-feature",
             "title": "Building With Discipline",
-            "message": "Our focus this month is execution quality and proactive field communication.",
+            "message": "Our focus this month is execution quality and proactive field communication. Every closeout we deliver on schedule is a promise kept to our clients, our trade partners, and each other.",
             "leaderName": "Alex Carter",
             "leaderRole": "Chief Operating Officer",
+            "metadata": "2026-04-07",
             "featured": true,
             "order": 1,
-            "cta": { "label": "Read full note", "href": "/sites/hb-central/leadership" }
+            "cta": { "label": "Read the full note", "href": "/sites/hb-central/leadership/building-with-discipline" }
           },
           {
             "id": "leadership-archive-1",
             "title": "April Field Priorities",
-            "message": "Stay aligned on schedule discipline and safety-first decisions.",
+            "message": "Stay aligned on schedule discipline and safety-first decisions across all active sites.",
             "leaderName": "Alex Carter",
-            "order": 2
+            "leaderRole": "Chief Operating Officer",
+            "metadata": "2026-04-05",
+            "order": 2,
+            "cta": { "label": "Read", "href": "/sites/hb-central/leadership/april-priorities" }
+          },
+          {
+            "id": "leadership-archive-2",
+            "title": "Q1 Financial Summary",
+            "message": "Quarterly review highlights, cash position, and the outlook for Q2 investment.",
+            "leaderName": "Maya Reeves",
+            "leaderRole": "Chief Financial Officer",
+            "metadata": "2026-04-03",
+            "order": 3,
+            "cta": { "label": "Read", "href": "/sites/hb-central/leadership/q1-financial-summary" }
+          },
+          {
+            "id": "leadership-archive-3",
+            "title": "Welcoming Our New Regional Directors",
+            "message": "Please join us in welcoming the next generation of regional leadership.",
+            "leaderName": "Jordan Pierce",
+            "leaderRole": "Chief Executive Officer",
+            "metadata": "2026-04-01",
+            "order": 4,
+            "cta": { "label": "Read", "href": "/sites/hb-central/leadership/new-regional-directors" }
           }
         ]
       }

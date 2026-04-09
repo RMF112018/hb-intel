@@ -50,6 +50,7 @@ export interface LeadershipMessageConfig {
   heading?: string;
   entries?: LeadershipMessageEntry[];
   maxArchivedEntries?: number;
+  archiveHref?: string;
 }
 
 export type PeopleCultureEventType = 'newHire' | 'anniversary' | 'promotion' | 'recognition';
