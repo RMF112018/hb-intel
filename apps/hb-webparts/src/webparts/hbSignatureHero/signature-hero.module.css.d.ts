@@ -1,5 +1,6 @@
 declare const styles: {
   readonly surface: string;
+  readonly noImage: string;
   readonly photo: string;
   readonly scrim: string;
   readonly grain: string;

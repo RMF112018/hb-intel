@@ -1,0 +1,198 @@
+{
+  "id": "8370ab0c-b6df-4db0-82f1-24b54750f508",
+  "alias": "ProjectPortfolioSpotlightWebPart",
+  "componentType": "WebPart",
+  "version": "1.0.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart"
+  ],
+  "supportsThemeVariants": false,
+  "supportsFullBleed": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "Project / Portfolio Spotlight"
+      },
+      "description": {
+        "default": "Curated project and portfolio signals with featured hierarchy, status, milestones, and CTA handoff."
+      },
+      "officeFabricIconFontName": "ActivateOrders",
+      "hiddenFromToolbox": true,
+      "properties": {
+        "heading": "Project Spotlight",
+        "maxSecondaryItems": 3,
+        "allProjectsLabel": "View all projects",
+        "allProjectsUrl": "/sites/hb-central/portfolio",
+        "items": [
+          {
+            "id": "project-featured",
+            "title": "Palm Beach Medical Campus Expansion",
+            "summary": "Structural turnover enters final phase with field quality walkthroughs scheduled this week. Owner coordination and commissioning prep are on track.",
+            "highlightHeadline": "Final structural turnover phase — field walkthroughs underway",
+            "location": "Palm Beach, FL",
+            "sector": "Healthcare",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/palm-beach-medical.jpg",
+              "alt": "Palm Beach Medical Campus construction site aerial view",
+              "aspectRatio": "16:9"
+            },
+            "featured": true,
+            "strategicEmphasis": true,
+            "order": 1,
+            "status": {
+              "label": "On Track",
+              "variant": "success"
+            },
+            "freshness": {
+              "source": "live",
+              "updatedAt": "2026-04-04T12:00:00.000Z"
+            },
+            "milestones": [
+              {
+                "id": "m1",
+                "title": "MEP closeout",
+                "completed": true
+              },
+              {
+                "id": "m2",
+                "title": "Owner turnover prep",
+                "completed": false
+              }
+            ],
+            "cta": {
+              "label": "View project brief",
+              "href": "/sites/hb-central/portfolio"
+            },
+            "teamMembers": [
+              {
+                "id": "tm1",
+                "displayName": "Jane Smith",
+                "role": "Project Manager"
+              },
+              {
+                "id": "tm2",
+                "displayName": "Mike Torres",
+                "role": "Superintendent",
+                "photoUrl": "/sites/hb-central/SiteAssets/people/mike-torres.jpg"
+              },
+              {
+                "id": "tm3",
+                "displayName": "Sarah Chen",
+                "role": "Safety Director"
+              },
+              {
+                "id": "tm4",
+                "displayName": "Alex Rivera",
+                "role": "Estimator",
+                "photoUrl": "/sites/hb-central/SiteAssets/people/alex-rivera.jpg"
+              },
+              {
+                "id": "tm5",
+                "displayName": "Chris Park",
+                "role": "Field Engineer"
+              },
+              {
+                "id": "tm6",
+                "displayName": "Dana Wilson",
+                "role": "MEP Coordinator"
+              }
+            ]
+          },
+          {
+            "id": "project-secondary-1",
+            "title": "Fort Lauderdale Waterfront Residence",
+            "summary": "Facade sequence revised to maintain schedule and safety overlap controls.",
+            "location": "Fort Lauderdale, FL",
+            "sector": "Luxury Residential",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/ftl-waterfront.jpg",
+              "alt": "Fort Lauderdale waterfront residence exterior"
+            },
+            "order": 2,
+            "status": {
+              "label": "Watchlist",
+              "variant": "warning"
+            },
+            "freshness": {
+              "source": "curated",
+              "updatedAt": "2026-04-02T09:00:00.000Z"
+            }
+          },
+          {
+            "id": "project-secondary-2",
+            "title": "Boca Raton Corporate Campus",
+            "summary": "Interior buildout progressing through floors 3–5 with MEP rough-in complete.",
+            "location": "Boca Raton, FL",
+            "sector": "Commercial",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/boca-corporate.jpg",
+              "alt": "Boca Raton corporate campus construction"
+            },
+            "order": 3,
+            "status": {
+              "label": "On Track",
+              "variant": "success"
+            },
+            "freshness": {
+              "source": "curated",
+              "updatedAt": "2026-04-03T14:00:00.000Z"
+            }
+          },
+          {
+            "id": "project-secondary-3",
+            "title": "Jupiter Inlet Marina Renovation",
+            "summary": "Structural reinforcement phase complete; dock system installation underway.",
+            "location": "Jupiter, FL",
+            "sector": "Marine",
+            "image": {
+              "src": "/sites/hb-central/SiteAssets/projects/jupiter-marina.jpg",
+              "alt": "Jupiter Inlet marina renovation"
+            },
+            "order": 4,
+            "status": {
+              "label": "On Track",
+              "variant": "success"
+            },
+            "freshness": {
+              "source": "curated",
+              "updatedAt": "2026-04-01T10:00:00.000Z"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "loaderConfig": {
+    "internalModuleBaseUrls": [
+      "<!-- PATH TO CDN -->"
+    ],
+    "entryModuleId": "8370ab0c-b6df-4db0-82f1-24b54750f508_1.0.0",
+    "scriptResources": {
+      "@microsoft/sp-property-pane": {
+        "type": "component",
+        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db",
+        "version": "1.18.0"
+      },
+      "@microsoft/sp-loader": {
+        "type": "component",
+        "id": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
+        "version": "1.18.0"
+      },
+      "@microsoft/sp-webpart-base": {
+        "type": "component",
+        "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
+        "version": "1.18.0"
+      },
+      "8370ab0c-b6df-4db0-82f1-24b54750f508_1.0.0": {
+        "type": "path",
+        "path": "shell-entry-8370ab0c-b6df-4db0-82f1-24b54750f508-c43fc068.js"
+      }
+    }
+  }
+}

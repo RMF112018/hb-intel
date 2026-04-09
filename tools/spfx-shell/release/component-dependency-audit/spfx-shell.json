@@ -1,10 +1,10 @@
 {
   "bundles": {
-    "shell-extension-customizer": {
+    "shell-web-part": {
       "dependencies": [
         {
-          "componentId": "4df9bb86-ab0a-4aab-ab5f-48bf167048fb",
-          "componentName": "@microsoft/sp-application-base",
+          "componentId": "f9e737b7-f0df-4597-ba8c-3060f82380db",
+          "componentName": "@microsoft/sp-property-pane",
           "componentVersion": "1.18.0",
           "isDirectDependency": true
         },
@@ -12,6 +12,18 @@
           "componentId": "01c4df03-e775-48cb-aa14-171ee5199a15",
           "componentName": "tslib",
           "componentVersion": "2.3.1",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "396bbc17-3d18-4f43-8299-d99720d88e22",
+          "componentName": "@ms/office-ui-fabric-react-bundle",
+          "componentVersion": "1.18.1",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
+          "componentName": "@microsoft/sp-loader",
+          "componentVersion": "1.18.0",
           "isDirectDependency": false
         },
         {
@@ -63,15 +75,33 @@
           "isDirectDependency": false
         },
         {
-          "componentId": "467dc675-7cc5-4709-8aac-78e3b71bd2f6",
-          "componentName": "@microsoft/sp-component-base",
-          "componentVersion": "1.18.0",
-          "isDirectDependency": false
-        },
-        {
           "componentId": "229b8d08-79f3-438b-8c21-4613fc877abd",
           "componentName": "@microsoft/load-themed-styles",
           "componentVersion": "0.1.2",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "0d910c1c-13b9-4e1c-9aa4-b008c5e42d7d",
+          "componentName": "react",
+          "componentVersion": "17.0.1",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "aa0a46ec-1505-43cd-a44a-93f3a5aa460a",
+          "componentName": "react-dom",
+          "componentVersion": "17.0.1",
+          "isDirectDependency": false
+        },
+        {
+          "componentId": "974a7777-0990-4136-8fa6-95d80114c2e0",
+          "componentName": "@microsoft/sp-webpart-base",
+          "componentVersion": "1.18.0",
+          "isDirectDependency": true
+        },
+        {
+          "componentId": "467dc675-7cc5-4709-8aac-78e3b71bd2f6",
+          "componentName": "@microsoft/sp-component-base",
+          "componentVersion": "1.18.0",
           "isDirectDependency": false
         },
         {
@@ -87,15 +117,9 @@
           "isDirectDependency": false
         },
         {
-          "componentId": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
-          "componentName": "@microsoft/sp-loader",
-          "componentVersion": "1.18.0",
-          "isDirectDependency": false
-        },
-        {
-          "componentId": "0773bd53-a69e-4293-87e6-ba80ea4d614b",
-          "componentName": "@microsoft/sp-extension-base",
-          "componentVersion": "1.18.0",
+          "componentId": "42647dee-1f75-4b9f-b521-5c844a6c35cc",
+          "componentName": "@ms/sp-edit-customer-promise",
+          "componentVersion": "0.1.0",
           "isDirectDependency": false
         }
       ],
