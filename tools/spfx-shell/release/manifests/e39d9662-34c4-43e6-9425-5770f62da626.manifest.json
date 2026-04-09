@@ -1,6 +1,6 @@
 {
-  "id": "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f",
-  "alias": "PersonalizedWelcomeHeaderWebPart",
+  "id": "e39d9662-34c4-43e6-9425-5770f62da626",
+  "alias": "PeopleCulturePublicWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -17,19 +17,15 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Personalized Welcome Header"
+        "default": "People and Culture"
       },
       "description": {
-        "default": "Subordinate day-start context strip — date tear-off, quiet welcome eyebrow, optional context line and alert. Designed to sit alongside the flagship HB Signature Hero, never compete with it."
+        "default": "Public People and Culture surface — announcements, celebrations and milestones, and broader culture programming. Phase-14 structural scaffold seam; implementation intentionally deferred to a later Phase-14 prompt. The legacy merged People & Culture webpart remains available as a compatibility entry under its original GUID."
       },
-      "officeFabricIconFontName": "Contact",
+      "officeFabricIconFontName": "People",
       "hiddenFromToolbox": true,
       "properties": {
-        "supportLine": "Welcome back to HB Central.",
-        "contextLine": "Here is your operational snapshot for today.",
-        "alertSeverity": "none",
-        "alertTitle": "",
-        "alertMessage": ""
+        "heading": "People and Culture"
       }
     }
   ],
@@ -37,7 +33,7 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f_1.0.0",
+    "entryModuleId": "e39d9662-34c4-43e6-9425-5770f62da626_1.0.0",
     "scriptResources": {
       "@microsoft/sp-property-pane": {
         "type": "component",
@@ -54,9 +50,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f_1.0.0": {
+      "e39d9662-34c4-43e6-9425-5770f62da626_1.0.0": {
         "type": "path",
-        "path": "shell-entry-46bfde64-f0cb-4f62-9f6b-a466f8fadc1f-58966722.js"
+        "path": "shell-entry-e39d9662-34c4-43e6-9425-5770f62da626-0571b5c0.js"
       }
     }
   }

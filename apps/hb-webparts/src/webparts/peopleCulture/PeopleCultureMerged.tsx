@@ -1,5 +1,24 @@
 /**
- * PeopleCultureMerged — Thin consumer for the shared People & Culture surface.
+ * PeopleCultureMerged — LEGACY COMPATIBILITY runtime for the merged
+ * People & Culture webpart.
+ *
+ * Phase-14 Prompt-01 introduced two new first-class webpart seams that
+ * will replace this merged runtime over time:
+ *
+ *   - PeopleCulturePublic (manifest `e39d9662-34c4-43e6-9425-5770f62da626`)
+ *     at `apps/hb-webparts/src/webparts/peopleCulturePublic/PeopleCulturePublic.tsx`
+ *   - HbKudos            (manifest `f14e59a3-4d6b-43b2-952e-ba02dea11dad`)
+ *     at `apps/hb-webparts/src/webparts/hbKudos/HbKudos.tsx`
+ *
+ * This file and its manifest (`PeopleCultureWebPart.manifest.json`,
+ * id `27ac10f4-4054-4dd2-bd53-3b4ef4379ab4`) are preserved intentionally
+ * as the **backward-compatibility seam** for already-placed SharePoint
+ * page instances that still reference the merged GUID. Do not delete,
+ * retarget, or repoint this GUID until the Phase-14 split rollout is
+ * complete and every page placement has been migrated off the merged
+ * entry. See
+ * `docs/architecture/reviews/people-culture-split-initiation-structure.md`
+ * for the full structural decision history.
  *
  * W01r-P18 recognition rebuild:
  * All visual grammar now lives in `@hbc/ui-kit/homepage` —

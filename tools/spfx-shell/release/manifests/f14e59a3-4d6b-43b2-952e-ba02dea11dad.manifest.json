@@ -1,6 +1,6 @@
 {
-  "id": "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f",
-  "alias": "PersonalizedWelcomeHeaderWebPart",
+  "id": "f14e59a3-4d6b-43b2-952e-ba02dea11dad",
+  "alias": "HbKudosWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -17,19 +17,15 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Personalized Welcome Header"
+        "default": "HB Kudos"
       },
       "description": {
-        "default": "Subordinate day-start context strip — date tear-off, quiet welcome eyebrow, optional context line and alert. Designed to sit alongside the flagship HB Signature Hero, never compete with it."
+        "default": "Public HB Kudos recognition surface — feed, spotlight, archive, celebrate, and kudos submission entry. Phase-14 structural scaffold seam; implementation intentionally deferred to a later Phase-14 prompt."
       },
-      "officeFabricIconFontName": "Contact",
+      "officeFabricIconFontName": "Trophy",
       "hiddenFromToolbox": true,
       "properties": {
-        "supportLine": "Welcome back to HB Central.",
-        "contextLine": "Here is your operational snapshot for today.",
-        "alertSeverity": "none",
-        "alertTitle": "",
-        "alertMessage": ""
+        "heading": "HB Kudos"
       }
     }
   ],
@@ -37,7 +33,7 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f_1.0.0",
+    "entryModuleId": "f14e59a3-4d6b-43b2-952e-ba02dea11dad_1.0.0",
     "scriptResources": {
       "@microsoft/sp-property-pane": {
         "type": "component",
@@ -54,9 +50,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "46bfde64-f0cb-4f62-9f6b-a466f8fadc1f_1.0.0": {
+      "f14e59a3-4d6b-43b2-952e-ba02dea11dad_1.0.0": {
         "type": "path",
-        "path": "shell-entry-46bfde64-f0cb-4f62-9f6b-a466f8fadc1f-58966722.js"
+        "path": "shell-entry-f14e59a3-4d6b-43b2-952e-ba02dea11dad-16bd308c.js"
       }
     }
   }

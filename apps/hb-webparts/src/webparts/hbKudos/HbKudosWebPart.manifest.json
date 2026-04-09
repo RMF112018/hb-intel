@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "f14e59a3-4d6b-43b2-952e-ba02dea11dad",
+  "alias": "HbKudosWebPart",
+  "componentType": "WebPart",
+  "version": "0.0.1.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "HB Kudos" },
+      "description": { "default": "Public HB Kudos recognition surface — feed, spotlight, archive, celebrate, and kudos submission entry. Phase-14 structural scaffold seam; implementation intentionally deferred to a later Phase-14 prompt." },
+      "officeFabricIconFontName": "Trophy",
+      "hiddenFromToolbox": true,
+      "properties": {
+        "heading": "HB Kudos"
+      }
+    }
+  ]
+}
