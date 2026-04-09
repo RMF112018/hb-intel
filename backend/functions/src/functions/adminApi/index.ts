@@ -539,11 +539,7 @@ app.http('adminGetRunEvidence', {
       return errorResponse(400, 'VALIDATION_ERROR', 'runId is required', reqId);
     }
 
-    // Collect evidence references from audit events for this run
-    const events = await services.auditService.listByRunId(runId);
-    const evidenceRefs = events
-      .filter(e => e.evidenceRef !== null)
-      .map(e => e.evidenceRef!);
+    const evidenceRefs = await services.evidenceService.listByRunId(runId);
 
     const backendOrigin = (() => {
       try {
@@ -552,11 +548,21 @@ app.http('adminGetRunEvidence', {
         return '';
       }
     })();
-    const mappedEvidenceRefs = evidenceRefs.map((ref) => ({
-      ...ref,
-      downloadUrl: backendOrigin
-        ? `${backendOrigin}/api/admin/runs/${encodeURIComponent(runId)}/artifacts/${encodeURIComponent(ref.evidenceId)}/download`
-        : null,
+    const mappedEvidenceRefs = await Promise.all(evidenceRefs.map(async (ref) => {
+      const payload = await services.evidenceService.getEvidencePayload(ref.evidenceId);
+      const inline = payload?.inlinePayload ?? null;
+      return {
+        ...ref,
+        downloadUrl: backendOrigin
+          ? `${backendOrigin}/api/admin/runs/${encodeURIComponent(runId)}/artifacts/${encodeURIComponent(ref.evidenceId)}/download`
+          : null,
+        fileName: typeof inline?.fileName === 'string' ? inline.fileName : ref.label,
+        contentType: typeof inline?.contentType === 'string' ? inline.contentType : null,
+        sizeBytes: typeof inline?.sizeBytes === 'number' ? inline.sizeBytes : null,
+        isBundle: inline?.isBundle === true,
+        bundleFormat: typeof inline?.bundleFormat === 'string' ? inline.bundleFormat : null,
+        availability: payload?.offloaded ? 'offloaded' : (typeof inline?.availability === 'string' ? inline.availability : 'available'),
+      };
     }));
 
     return successResponse({
@@ -602,9 +608,15 @@ app.http('adminDownloadRunArtifact', {
     const contentType = typeof payload.inlinePayload.contentType === 'string'
       ? payload.inlinePayload.contentType
       : 'application/json';
+    const encoding = typeof payload.inlinePayload.contentEncoding === 'string'
+      ? payload.inlinePayload.contentEncoding
+      : 'utf-8';
     const content = typeof payload.inlinePayload.content === 'string'
       ? payload.inlinePayload.content
       : JSON.stringify(payload.inlinePayload, null, 2);
+    const body = encoding === 'base64'
+      ? Buffer.from(content, 'base64')
+      : content;
 
     return {
       status: 200,
@@ -613,7 +625,7 @@ app.http('adminDownloadRunArtifact', {
         'Content-Disposition': `attachment; filename="${fileName}"`,
         'Cache-Control': 'no-store',
       },
-      body: content,
+      body,
     };
   }, { domain: 'adminControlPlane', operation: 'downloadRunArtifact' })),
 });

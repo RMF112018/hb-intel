@@ -37,8 +37,23 @@ export interface PnpOpsPreflightResponse {
 
 export interface PnpOpsRunEvidenceResponse {
   readonly runId: string;
-  readonly evidenceRefs: readonly unknown[];
+  readonly evidenceRefs: readonly PnpOpsEvidenceRef[];
   readonly total: number;
+}
+
+export interface PnpOpsEvidenceRef {
+  readonly evidenceId?: string;
+  readonly label?: string;
+  readonly note?: string;
+  readonly fileName?: string;
+  readonly contentType?: string | null;
+  readonly sizeBytes?: number | null;
+  readonly isBundle?: boolean;
+  readonly bundleFormat?: string | null;
+  readonly availability?: string | null;
+  readonly downloadUrl?: string | null;
+  readonly url?: string | null;
+  readonly href?: string | null;
 }
 
 export interface PnpOpsCommandInput {

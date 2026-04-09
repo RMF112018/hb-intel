@@ -70,14 +70,31 @@ describe('pnpOpsClient auth wiring', () => {
 
   it('omits authorization header when token provider is missing', async () => {
     const fetchMock = vi.fn(async () =>
-      makeOkResponse({ data: { runId: 'run-1', evidenceRefs: [], total: 0 } }),
+      makeOkResponse({
+        data: {
+          runId: 'run-1',
+          evidenceRefs: [
+            {
+              label: 'artifact-bundle.zip',
+              isBundle: true,
+              bundleFormat: 'zip',
+              contentType: 'application/zip',
+              sizeBytes: 256,
+              availability: 'available',
+              downloadUrl: 'https://functions.example.com/api/admin/runs/run-1/artifacts/e1/download',
+            },
+          ],
+          total: 1,
+        },
+      }),
     );
-    await fetchPnpRunEvidence(
+    const result = await fetchPnpRunEvidence(
       'https://functions.example.com',
       'run-1',
       undefined,
       fetchMock as unknown as typeof fetch,
     );
+    expect(result.evidenceRefs[0]?.isBundle).toBe(true);
     const firstCall = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     const init = (firstCall[1] ?? {}) as RequestInit;
     const headers = (init.headers ?? {}) as Record<string, string>;

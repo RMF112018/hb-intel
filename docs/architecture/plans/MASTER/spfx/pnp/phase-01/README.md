@@ -96,6 +96,23 @@ This includes:
   - `/api/admin/runs/{runId}/artifacts/{evidenceId}/download`
 - SPFx bearer-token wiring requirement for `apps/hb-webparts/src/webparts/pnp/` via `backendAudience`.
 
+## Prompt-03 repo truth note
+
+Prompt-03 extraction workflow and artifact generation is landed in:
+
+- `backend/functions/src/services/admin-control-plane/pnp-extraction-workflows.ts`
+- `backend/functions/src/services/admin-control-plane/pnp-orchestrator.ts`
+- `backend/functions/src/functions/adminApi/index.ts`
+- `apps/hb-webparts/src/webparts/pnp/`
+
+This includes:
+
+- Action-specific workflow generation for v1 extraction actions (site-template, list-schema, page-layout, site-inventory).
+- Deterministic artifacts per run: `raw.json`, `normalized.json`, `summary.md`, `artifact-manifest.json`.
+- Preferred multi-file bundle artifact (`artifact-bundle.zip`) with download metadata (`fileName`, `contentType`, `sizeBytes`, `isBundle`, `bundleFormat`, `availability`).
+- Evidence endpoint enrichment and binary-safe download handling for bundle/file artifacts.
+- PnP webpart artifact rendering that prioritizes bundle downloads and shows metadata/availability states.
+
 ## Mandatory operating rules for the agent
 
 1. Use local repo truth at HEAD as the final authority.

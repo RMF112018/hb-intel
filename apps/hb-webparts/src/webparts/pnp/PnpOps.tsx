@@ -20,6 +20,7 @@ import {
   launchPnpRun,
   runPnpPreflight,
   type PnpOpsCommandInput,
+  type PnpOpsEvidenceRef,
   type PnpOpsPreflightResponse,
   type PnpOpsRunEnvelope,
   type PnpOpsRunEvidenceResponse,
@@ -146,19 +147,25 @@ function normalizeCommandInput(
   };
 }
 
-function getEvidenceDownloadUrl(ref: unknown): string | null {
-  if (!ref || typeof ref !== 'object') {
-    return null;
-  }
-  const record = ref as Record<string, unknown>;
-  const direct = typeof record.downloadUrl === 'string'
-    ? record.downloadUrl
-    : typeof record.url === 'string'
-      ? record.url
-      : typeof record.href === 'string'
-        ? record.href
+function getEvidenceDownloadUrl(ref: PnpOpsEvidenceRef): string | null {
+  const direct = typeof ref.downloadUrl === 'string'
+    ? ref.downloadUrl
+    : typeof ref.url === 'string'
+      ? ref.url
+      : typeof ref.href === 'string'
+        ? ref.href
         : null;
   return direct ?? null;
+}
+
+function orderEvidenceRefs(evidenceRefs: readonly PnpOpsEvidenceRef[]): readonly PnpOpsEvidenceRef[] {
+  const refs = [...evidenceRefs];
+  refs.sort((a, b) => {
+    if (a.isBundle && !b.isBundle) return -1;
+    if (!a.isBundle && b.isBundle) return 1;
+    return (a.label ?? a.fileName ?? '').localeCompare(b.label ?? b.fileName ?? '');
+  });
+  return refs;
 }
 
 export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JSX.Element {
@@ -551,15 +558,17 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
             <h4>Artifact Manifest</h4>
             {evidenceManifest && evidenceManifest.total > 0 ? (
               <div style={LAYOUT.artifactList}>
-                {evidenceManifest.evidenceRefs.map((ref, index) => {
+                {orderEvidenceRefs(evidenceManifest.evidenceRefs).map((ref, index) => {
                   const downloadUrl = getEvidenceDownloadUrl(ref);
-                  const label = typeof (ref as { label?: unknown }).label === 'string'
-                    ? (ref as { label: string }).label
-                    : `artifact-${index + 1}`;
+                  const label = ref.label ?? ref.fileName ?? `artifact-${index + 1}`;
+                  const contentType = typeof ref.contentType === 'string' ? ref.contentType : 'unknown-type';
+                  const sizeLabel = typeof ref.sizeBytes === 'number' ? ` (${ref.sizeBytes} bytes)` : '';
+                  const availability = ref.availability ?? 'available';
+                  const bundleSuffix = ref.isBundle ? ` [bundle${ref.bundleFormat ? `:${ref.bundleFormat}` : ''}]` : '';
                   return (
                     <div key={`${label}-${index}`}>
                       <p>
-                        {label}
+                        {label}{bundleSuffix}{sizeLabel} — {contentType} — {availability}
                         {downloadUrl ? ' — ' : ' — reference captured (download URL pending) '}
                         {downloadUrl ? <a href={downloadUrl} target="_blank" rel="noreferrer">Download</a> : null}
                       </p>

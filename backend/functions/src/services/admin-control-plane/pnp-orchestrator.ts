@@ -1,3 +1,4 @@
+import { createHash, randomUUID } from 'node:crypto';
 import {
   AdminAuditEventType,
   AdminEvidenceType,
@@ -18,11 +19,22 @@ import {
   normalizePnpActionKey,
   type CanonicalPnpActionKey,
 } from './pnp-action-catalog.js';
+import {
+  runPnpExtractionWorkflow,
+  type PnpExtractionWorkflowContext,
+} from './pnp-extraction-workflows.js';
 
 interface ArtifactPayload {
   readonly fileName: string;
-  readonly contentType: 'application/json' | 'text/markdown';
+  readonly label: string;
+  readonly contentType: 'application/json' | 'text/markdown' | 'application/zip';
+  readonly contentEncoding: 'utf-8' | 'base64';
   readonly content: string;
+  readonly sizeBytes: number;
+  readonly sha256: string;
+  readonly availability: 'available';
+  readonly isBundle: boolean;
+  readonly bundleFormat: 'zip' | null;
 }
 
 interface PnpCommandInput {
@@ -34,13 +46,6 @@ interface PnpCommandInput {
     readonly source?: string;
     readonly requestedAt?: string;
   };
-}
-
-interface PnpExecutionContext {
-  readonly runId: string;
-  readonly actionKey: CanonicalPnpActionKey;
-  readonly commandInput: PnpCommandInput;
-  readonly actor: IAdminActorContext;
 }
 
 export interface IPnpOpsOrchestrator {
@@ -56,8 +61,10 @@ export interface IPnpOpsOrchestrator {
 
 const STEP_LABELS = {
   resolve: 'Resolve action contract',
-  execute: 'Execute server-side read-only extraction seam',
-  publish: 'Publish artifact manifest and evidence',
+  extract: 'Execute extraction workflow',
+  normalize: 'Build normalized outputs and manifest',
+  publish: 'Publish artifacts and evidence references',
+  finalize: 'Finalize run outcome',
 } as const;
 
 function makePendingSteps(): readonly IAdminStepResult[] {
@@ -75,7 +82,7 @@ function makePendingSteps(): readonly IAdminStepResult[] {
     },
     {
       stepNumber: 2,
-      stepLabel: STEP_LABELS.execute,
+      stepLabel: STEP_LABELS.extract,
       status: AdminStepStatus.Pending,
       startedAt: null,
       completedAt: null,
@@ -86,7 +93,29 @@ function makePendingSteps(): readonly IAdminStepResult[] {
     },
     {
       stepNumber: 3,
+      stepLabel: STEP_LABELS.normalize,
+      status: AdminStepStatus.Pending,
+      startedAt: null,
+      completedAt: null,
+      durationMs: null,
+      errorMessage: null,
+      compensatable: false,
+      compensated: false,
+    },
+    {
+      stepNumber: 4,
       stepLabel: STEP_LABELS.publish,
+      status: AdminStepStatus.Pending,
+      startedAt: null,
+      completedAt: null,
+      durationMs: null,
+      errorMessage: null,
+      compensatable: false,
+      compensated: false,
+    },
+    {
+      stepNumber: 5,
+      stepLabel: STEP_LABELS.finalize,
       status: AdminStepStatus.Pending,
       startedAt: null,
       completedAt: null,
@@ -177,99 +206,231 @@ function validateCommandInput(
   return errors;
 }
 
-function buildArtifacts(ctx: PnpExecutionContext): readonly ArtifactPayload[] {
+function createArtifactFromText(
+  fileName: string,
+  label: string,
+  contentType: 'application/json' | 'text/markdown',
+  content: string,
+): ArtifactPayload {
+  const sizeBytes = Buffer.byteLength(content, 'utf-8');
+  const sha256 = createHash('sha256').update(content, 'utf-8').digest('hex');
+  return {
+    fileName,
+    label,
+    contentType,
+    contentEncoding: 'utf-8',
+    content,
+    sizeBytes,
+    sha256,
+    availability: 'available',
+    isBundle: false,
+    bundleFormat: null,
+  };
+}
+
+function toDosDateTime(value: Date): { dosTime: number; dosDate: number } {
+  const year = Math.max(1980, value.getUTCFullYear());
+  const month = value.getUTCMonth() + 1;
+  const day = value.getUTCDate();
+  const hours = value.getUTCHours();
+  const minutes = value.getUTCMinutes();
+  const seconds = Math.floor(value.getUTCSeconds() / 2);
+  const dosTime = (hours << 11) | (minutes << 5) | seconds;
+  const dosDate = ((year - 1980) << 9) | (month << 5) | day;
+  return { dosTime, dosDate };
+}
+
+const CRC32_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i += 1) {
+    let c = i;
+    for (let j = 0; j < 8; j += 1) {
+      c = (c & 1) !== 0 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    }
+    table[i] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(buffer: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (let i = 0; i < buffer.length; i += 1) {
+    crc = CRC32_TABLE[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function buildZipBundle(
+  fileName: string,
+  label: string,
+  files: readonly ArtifactPayload[],
+): ArtifactPayload {
+  type Entry = {
+    readonly nameBytes: Buffer;
+    readonly dataBytes: Buffer;
+    readonly crc: number;
+    readonly offset: number;
+    readonly dosTime: number;
+    readonly dosDate: number;
+  };
+
+  const now = toDosDateTime(new Date());
+  const localParts: Buffer[] = [];
+  const centralParts: Buffer[] = [];
+  const entries: Entry[] = [];
+  let offset = 0;
+
+  for (const file of files) {
+    const nameBytes = Buffer.from(file.fileName, 'utf-8');
+    const dataBytes = file.contentEncoding === 'base64'
+      ? Buffer.from(file.content, 'base64')
+      : Buffer.from(file.content, 'utf-8');
+    const crc = crc32(dataBytes);
+
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);
+    localHeader.writeUInt16LE(20, 4);
+    localHeader.writeUInt16LE(0, 6);
+    localHeader.writeUInt16LE(0, 8);
+    localHeader.writeUInt16LE(now.dosTime, 10);
+    localHeader.writeUInt16LE(now.dosDate, 12);
+    localHeader.writeUInt32LE(crc, 14);
+    localHeader.writeUInt32LE(dataBytes.length, 18);
+    localHeader.writeUInt32LE(dataBytes.length, 22);
+    localHeader.writeUInt16LE(nameBytes.length, 26);
+    localHeader.writeUInt16LE(0, 28);
+
+    localParts.push(localHeader, nameBytes, dataBytes);
+
+    entries.push({
+      nameBytes,
+      dataBytes,
+      crc,
+      offset,
+      dosTime: now.dosTime,
+      dosDate: now.dosDate,
+    });
+
+    offset += localHeader.length + nameBytes.length + dataBytes.length;
+  }
+
+  let centralSize = 0;
+  for (const entry of entries) {
+    const centralHeader = Buffer.alloc(46);
+    centralHeader.writeUInt32LE(0x02014b50, 0);
+    centralHeader.writeUInt16LE(20, 4);
+    centralHeader.writeUInt16LE(20, 6);
+    centralHeader.writeUInt16LE(0, 8);
+    centralHeader.writeUInt16LE(0, 10);
+    centralHeader.writeUInt16LE(entry.dosTime, 12);
+    centralHeader.writeUInt16LE(entry.dosDate, 14);
+    centralHeader.writeUInt32LE(entry.crc, 16);
+    centralHeader.writeUInt32LE(entry.dataBytes.length, 20);
+    centralHeader.writeUInt32LE(entry.dataBytes.length, 24);
+    centralHeader.writeUInt16LE(entry.nameBytes.length, 28);
+    centralHeader.writeUInt16LE(0, 30);
+    centralHeader.writeUInt16LE(0, 32);
+    centralHeader.writeUInt16LE(0, 34);
+    centralHeader.writeUInt16LE(0, 36);
+    centralHeader.writeUInt32LE(0, 38);
+    centralHeader.writeUInt32LE(entry.offset, 42);
+
+    centralParts.push(centralHeader, entry.nameBytes);
+    centralSize += centralHeader.length + entry.nameBytes.length;
+  }
+
+  const end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50, 0);
+  end.writeUInt16LE(0, 4);
+  end.writeUInt16LE(0, 6);
+  end.writeUInt16LE(entries.length, 8);
+  end.writeUInt16LE(entries.length, 10);
+  end.writeUInt32LE(centralSize, 12);
+  end.writeUInt32LE(offset, 16);
+  end.writeUInt16LE(0, 20);
+
+  const zipBuffer = Buffer.concat([...localParts, ...centralParts, end]);
+  return {
+    fileName,
+    label,
+    contentType: 'application/zip',
+    contentEncoding: 'base64',
+    content: zipBuffer.toString('base64'),
+    sizeBytes: zipBuffer.length,
+    sha256: createHash('sha256').update(zipBuffer).digest('hex'),
+    availability: 'available',
+    isBundle: true,
+    bundleFormat: 'zip',
+  };
+}
+
+function buildArtifacts(ctx: PnpExtractionWorkflowContext): readonly ArtifactPayload[] {
+  const workflow = runPnpExtractionWorkflow(ctx);
   const generatedAt = new Date().toISOString();
-  const descriptor = getPnpActionDescriptor(ctx.actionKey);
-  const targetSiteUrl =
-    typeof ctx.commandInput.targetSiteUrl === 'string'
-      ? ctx.commandInput.targetSiteUrl
-      : '';
-  const listFilters = normalizeFilterList(ctx.commandInput.listFilters);
-  const pageFilters = normalizeFilterList(ctx.commandInput.pageFilters);
 
-  const raw = {
-    runId: ctx.runId,
-    actionKey: ctx.actionKey,
-    targetSiteUrl,
-    listFilters,
-    pageFilters,
-    generatedAt,
-    method: 'server-side admin-control-plane seam',
-    note: 'Prompt-02 seam output. Live SharePoint extraction wiring is handled by action invoker implementations in later prompts.',
-  };
+  const rawArtifact = createArtifactFromText(
+    'raw.json',
+    'Raw extraction payload',
+    'application/json',
+    JSON.stringify(workflow.raw, null, 2),
+  );
+  const normalizedArtifact = createArtifactFromText(
+    'normalized.json',
+    'Normalized extraction payload',
+    'application/json',
+    JSON.stringify(workflow.normalized, null, 2),
+  );
+  const summaryArtifact = createArtifactFromText(
+    'summary.md',
+    'Extraction summary',
+    'text/markdown',
+    workflow.summaryMarkdown,
+  );
 
-  const normalized = {
-    metadata: {
-      runId: ctx.runId,
-      actionKey: ctx.actionKey,
-      generatedAt,
-      operator: ctx.actor.upn,
-    },
-    inputs: {
-      targetSiteUrl,
-      listFilters,
-      pageFilters,
-    },
-    execution: {
-      mode: 'read-only-export',
-      source: ctx.commandInput.executionIntent?.source ?? 'unknown',
-    },
-    counts: {
-      listFilterCount: listFilters.length,
-      pageFilterCount: pageFilters.length,
-    },
-  };
-
-  const summary = [
-    '# PnP Extraction Run Summary',
-    '',
-    `- Run ID: ${ctx.runId}`,
-    `- Action: ${ctx.actionKey}`,
-    `- Target Site: ${targetSiteUrl || '(missing)'}`,
-    `- Generated At: ${generatedAt}`,
-    `- Expected Artifacts: ${(descriptor?.expectedArtifacts ?? []).join(', ')}`,
-    '',
-    'This run used the secured backend extraction seam. No browser-side privileged execution was performed.',
-  ].join('\n');
-
-  const manifest = {
-    runId: ctx.runId,
-    actionKey: ctx.actionKey,
-    generatedAt,
-    artifacts: [
-      { fileName: 'raw.json', contentType: 'application/json' },
-      { fileName: 'normalized.json', contentType: 'application/json' },
-      { fileName: 'summary.md', contentType: 'text/markdown' },
-    ],
-  };
-
-  return [
-    {
-      fileName: 'raw.json',
-      contentType: 'application/json',
-      content: JSON.stringify(raw, null, 2),
-    },
-    {
-      fileName: 'normalized.json',
-      contentType: 'application/json',
-      content: JSON.stringify(normalized, null, 2),
-    },
-    { fileName: 'summary.md', contentType: 'text/markdown', content: summary },
-    {
-      fileName: 'artifact-manifest.json',
-      contentType: 'application/json',
-      content: JSON.stringify(manifest, null, 2),
-    },
+  const filesForBundle: readonly ArtifactPayload[] = [
+    rawArtifact,
+    normalizedArtifact,
+    summaryArtifact,
   ];
+
+  const bundleArtifact = buildZipBundle('artifact-bundle.zip', 'Preferred download bundle', filesForBundle);
+
+  const manifestPayload = {
+    schemaVersion: '1.0.0',
+    runId: ctx.runId,
+    actionKey: ctx.actionKey,
+    generatedAt,
+    warnings: workflow.warnings,
+    preferredDownload: bundleArtifact.fileName,
+    files: [bundleArtifact, ...filesForBundle].map((artifact) => ({
+      fileName: artifact.fileName,
+      label: artifact.label,
+      contentType: artifact.contentType,
+      sizeBytes: artifact.sizeBytes,
+      sha256: artifact.sha256,
+      availability: artifact.availability,
+      isBundle: artifact.isBundle,
+      bundleFormat: artifact.bundleFormat,
+    })),
+  };
+
+  const manifestArtifact = createArtifactFromText(
+    'artifact-manifest.json',
+    'Artifact manifest',
+    'application/json',
+    JSON.stringify(manifestPayload, null, 2),
+  );
+
+  return [bundleArtifact, rawArtifact, normalizedArtifact, summaryArtifact, manifestArtifact];
 }
 
 function buildEvidenceRef(runId: string, fileName: string): IAdminEvidenceReference {
   return {
-    evidenceId: crypto.randomUUID(),
+    evidenceId: randomUUID(),
     evidenceType: AdminEvidenceType.StepResultDetail,
     label: fileName,
     runId,
-    stepNumber: 3,
+    stepNumber: 4,
     capturedAt: new Date().toISOString(),
     storageLocator: `inline://admin/runs/${runId}/artifacts/${encodeURIComponent(fileName)}`,
   };
@@ -285,7 +446,7 @@ function buildAuditRecord(
   evidenceRef: IAdminEvidenceReference | null,
 ): IAdminAuditRecord {
   return {
-    auditId: crypto.randomUUID(),
+    auditId: randomUUID(),
     eventType,
     timestamp: new Date().toISOString(),
     domain: 'sharepoint-control' as never,
@@ -299,6 +460,23 @@ function buildAuditRecord(
     runStatusAtEvent,
     summary,
   };
+}
+
+function classifyFailure(message: string): {
+  readonly failureClass: 'transient' | 'structural' | 'permissions';
+  readonly retryEligible: boolean;
+} {
+  const lower = message.toLowerCase();
+  if (lower.includes('permission') || lower.includes('forbidden') || lower.includes('unauthorized')) {
+    return { failureClass: 'permissions', retryEligible: false };
+  }
+  if (lower.includes('validation') || lower.includes('required') || lower.includes('must be')) {
+    return { failureClass: 'structural', retryEligible: false };
+  }
+  if (lower.includes('connect') || lower.includes('timeout') || lower.includes('network')) {
+    return { failureClass: 'transient', retryEligible: true };
+  }
+  return { failureClass: 'structural', retryEligible: true };
 }
 
 export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
@@ -339,11 +517,12 @@ export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
     const commandInput = (launchRequest.commandInput ?? {}) as PnpCommandInput;
     const startedAt = new Date().toISOString();
     let steps = makePendingSteps();
+    let failingStep = 1;
 
     await this.runService.updateRun(runId, {
       status: AdminRunStatus.Running,
       startedAt,
-      totalSteps: 3,
+      totalSteps: 5,
       currentStep: 1,
       steps,
     });
@@ -361,26 +540,40 @@ export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
     );
 
     try {
+      failingStep = 1;
+      steps = applyStep(steps, 1, AdminStepStatus.Running, null);
+      await this.runService.updateRun(runId, { steps, currentStep: 1 });
+
       const validationErrors = validateCommandInput(canonicalAction, commandInput);
+      if (validationErrors.length > 0) {
+        throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
+      }
+
+      const descriptor = getPnpActionDescriptor(canonicalAction);
+      if (!descriptor) {
+        throw new Error(`Validation failed: Unknown action descriptor for ${canonicalAction}.`);
+      }
+
       steps = applyStep(steps, 1, AdminStepStatus.Completed, null);
       await this.runService.updateRun(runId, {
         currentStep: 2,
         steps,
       });
 
-      if (validationErrors.length > 0) {
-        throw new Error(validationErrors.join(' '));
-      }
-
+      failingStep = 2;
       steps = applyStep(steps, 2, AdminStepStatus.Running, null);
-      await this.runService.updateRun(runId, { steps });
+      await this.runService.updateRun(runId, {
+        currentStep: 2,
+        steps,
+      });
 
-      const artifacts = buildArtifacts({
+      const workflowContext: PnpExtractionWorkflowContext = {
         runId,
         actionKey: canonicalAction,
         commandInput,
         actor,
-      });
+      };
+      const artifacts = buildArtifacts(workflowContext);
 
       steps = applyStep(steps, 2, AdminStepStatus.Completed, null);
       steps = applyStep(steps, 3, AdminStepStatus.Running, null);
@@ -389,13 +582,28 @@ export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
         steps,
       });
 
+      steps = applyStep(steps, 3, AdminStepStatus.Completed, null);
+      steps = applyStep(steps, 4, AdminStepStatus.Running, null);
+      await this.runService.updateRun(runId, {
+        currentStep: 4,
+        steps,
+      });
+
+      failingStep = 4;
       const evidenceRefs: IAdminEvidenceReference[] = [];
       for (const artifact of artifacts) {
         const evidenceRef = buildEvidenceRef(runId, artifact.fileName);
         evidenceRefs.push(evidenceRef);
         await this.evidenceService.recordEvidence(evidenceRef, 'operational', {
           fileName: artifact.fileName,
+          label: artifact.label,
           contentType: artifact.contentType,
+          sizeBytes: artifact.sizeBytes,
+          sha256: artifact.sha256,
+          availability: artifact.availability,
+          isBundle: artifact.isBundle,
+          bundleFormat: artifact.bundleFormat,
+          contentEncoding: artifact.contentEncoding,
           content: artifact.content,
           downloadable: true,
         });
@@ -421,10 +629,18 @@ export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
         );
       }
 
-      steps = applyStep(steps, 3, AdminStepStatus.Completed, null);
+      steps = applyStep(steps, 4, AdminStepStatus.Completed, null);
+      steps = applyStep(steps, 5, AdminStepStatus.Running, null);
+      await this.runService.updateRun(runId, {
+        currentStep: 5,
+        steps,
+      });
+
+      failingStep = 5;
+      steps = applyStep(steps, 5, AdminStepStatus.Completed, null);
       await this.runService.updateRun(runId, {
         status: AdminRunStatus.Completed,
-        currentStep: 3,
+        currentStep: 5,
         steps,
         completedAt: new Date().toISOString(),
       });
@@ -443,16 +659,17 @@ export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'PnP extraction run failed.';
-      steps = applyStep(steps, 3, AdminStepStatus.Failed, message);
+      const failure = classifyFailure(message);
+      steps = applyStep(steps, failingStep, AdminStepStatus.Failed, message);
       await this.runService.updateRun(runId, {
         status: AdminRunStatus.Failed,
         steps,
         completedAt: new Date().toISOString(),
         failure: {
-          failedAtStep: 3,
-          failureClass: 'structural',
+          failedAtStep: failingStep,
+          failureClass: failure.failureClass,
           failureMessage: message,
-          retryEligible: true,
+          retryEligible: failure.retryEligible,
           retryCount: 0,
           lastRetryAt: null,
           escalated: false,
