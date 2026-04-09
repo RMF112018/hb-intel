@@ -201,11 +201,16 @@ export {
   HbcKudosComposerFlyout,
   HbcKudosComposerForm,
   HbcKudosComposerPreview,
+  HbcKudosComposerSuccess,
+  HbcKudosComposerError,
 } from './HbcKudosComposer/index.js';
 export type {
   HbcKudosComposerFlyoutProps,
   HbcKudosComposerFormProps,
   HbcKudosComposerPreviewProps,
+  HbcKudosComposerSuccessProps,
+  HbcKudosComposerErrorProps,
+  HbcKudosComposerActionProps,
   KudosComposerDraft,
   KudosComposerValidationErrors,
 } from './HbcKudosComposer/index.js';
@@ -458,9 +463,10 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
   },
   peopleCulture: {
     surfaces: ['people-culture'] as const,
-    character: 'warm-celebratory, recognition-forward, human-centered',
+    character:
+      'premium celebratory recognition surface with layered warm gradient hero + confetti-dot field, ribbon-tagged kudos spotlight, ringed hero avatar, colored-strip announcement rows, and bolder celebration tiles',
     shadow: 'elevationEditorial',
-    radius: '16px',
+    radius: '20px',
     background: 'warm cream spotlight + cool mist rail',
     border: 'warm gradient hero band',
   },

@@ -20,7 +20,7 @@
         "default": "People and Culture"
       },
       "description": {
-        "default": "People & Culture homepage surface — Kudos recognition, announcements, and weekly celebrations with premium composition."
+        "default": "Premium celebratory People & Culture surface — warm gradient hero with confetti-dot field, ribbon-tagged kudos spotlight with ringed hero avatar, recent recognition, colored-strip announcements, celebration tiles, and a coherent kudos composer experience."
       },
       "officeFabricIconFontName": "People",
       "hiddenFromToolbox": true,
@@ -169,7 +169,7 @@
       },
       "27ac10f4-4054-4dd2-bd53-3b4ef4379ab4_1.0.0": {
         "type": "path",
-        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-7da8fce3.js"
+        "path": "shell-entry-27ac10f4-4054-4dd2-bd53-3b4ef4379ab4-62fb151c.js"
       }
     }
   }

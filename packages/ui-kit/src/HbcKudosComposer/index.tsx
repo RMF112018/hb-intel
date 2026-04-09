@@ -2,22 +2,27 @@
  * HbcKudosComposer — Shared presentation primitives for the People &
  * Culture kudos submission flow.
  *
- * Three sibling components:
- *   - HbcKudosComposerFlyout  — premium right-side sheet shell with
- *     focus trap, escape-to-close, scroll lock, and motion choreography.
- *   - HbcKudosComposerForm    — labeled form grid with validation
- *     and warm focus treatment.
- *   - HbcKudosComposerPreview — preview card mirroring the
+ * Five sibling components that compose a premium kudos submission
+ * experience coherent with `HbcPeopleCultureSurface`:
+ *   - HbcKudosComposerFlyout   — premium right-side sheet shell with
+ *     focus trap, escape-to-close, scroll lock, motion choreography,
+ *     and typed primary/secondary/tertiary footer action props.
+ *   - HbcKudosComposerForm     — labeled form grid with validation
+ *     and warm focus treatment; warm intro callout.
+ *   - HbcKudosComposerPreview  — live preview card mirroring the
  *     spotlight visual register.
+ *   - HbcKudosComposerSuccess  — post-submit confirmation pane with
+ *     celebratory gradient icon, matching the surface register.
+ *   - HbcKudosComposerError    — inline error banner for submission
+ *     failures.
  *
  * Pure presentation: state, validation, and submission live in the
- * consumer. Wave 01 follow-on: People & Culture migration to
- * @hbc/ui-kit/homepage.
+ * consumer. W01r-P18 — recognition rebuild.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, Users } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Sparkles, Users } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import styles from './kudos-composer.module.css';
@@ -40,14 +45,31 @@ export interface KudosComposerValidationErrors {
 }
 
 // ---------------------------------------------------------------------------
-// Flyout
+// Flyout — typed footer actions
 // ---------------------------------------------------------------------------
+
+export interface HbcKudosComposerActionProps {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+}
 
 export interface HbcKudosComposerFlyoutProps {
   open: boolean;
   onClose: () => void;
   title: string;
+  /** Optional sub-caption under the title in the gradient header. */
+  subtitle?: string;
   children: React.ReactNode;
+  /**
+   * Primary action (warm gradient button). Shows "Sending…" when
+   * `loading` is true. Preferred over the legacy `footer` slot.
+   */
+  primaryAction?: HbcKudosComposerActionProps;
+  /** Secondary action (ghost button, typically "Cancel" / "Send Another"). */
+  secondaryAction?: HbcKudosComposerActionProps;
+  /** Legacy custom footer slot — retained for backward compatibility. */
   footer?: React.ReactNode;
 }
 
@@ -88,7 +110,10 @@ export function HbcKudosComposerFlyout({
   open,
   onClose,
   title,
+  subtitle,
   children,
+  primaryAction,
+  secondaryAction,
   footer,
 }: HbcKudosComposerFlyoutProps): React.JSX.Element | null {
   const reducedMotion = usePrefersReducedMotion();
@@ -152,6 +177,8 @@ export function HbcKudosComposerFlyout({
         transition: { duration: 0.2 },
       };
 
+  const hasTypedActions = Boolean(primaryAction || secondaryAction);
+
   return (
     <AnimatePresence>
       {open && (
@@ -173,10 +200,16 @@ export function HbcKudosComposerFlyout({
             {...panelMotion}
           >
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>
-                <Users size={isMobile ? 16 : 18} aria-hidden="true" className={styles.panelTitleIcon} />
-                {title}
-              </h2>
+              <div className={styles.panelHeaderDots} aria-hidden="true" />
+              <div className={styles.panelHeaderCopy}>
+                <h2 className={styles.panelTitle}>
+                  <span className={styles.panelTitleIcon} aria-hidden="true">
+                    <Users size={isMobile ? 16 : 18} strokeWidth={2.25} />
+                  </span>
+                  {title}
+                </h2>
+                {subtitle ? <p className={styles.panelSubtitle}>{subtitle}</p> : null}
+              </div>
               <button
                 type="button"
                 onClick={onClose}
@@ -189,7 +222,38 @@ export function HbcKudosComposerFlyout({
 
             <div className={styles.panelBody}>{children}</div>
 
-            {footer ? <div className={styles.panelFooter}>{footer}</div> : null}
+            {hasTypedActions ? (
+              <div className={styles.panelFooter}>
+                {secondaryAction ? (
+                  <button
+                    type="button"
+                    onClick={secondaryAction.onClick}
+                    disabled={secondaryAction.disabled}
+                    className={styles.footerSecondary}
+                  >
+                    {secondaryAction.label}
+                  </button>
+                ) : null}
+                {primaryAction ? (
+                  <button
+                    type="button"
+                    onClick={primaryAction.onClick}
+                    disabled={primaryAction.disabled || primaryAction.loading}
+                    className={clsx(
+                      styles.footerPrimary,
+                      primaryAction.loading && styles.footerPrimaryLoading,
+                    )}
+                  >
+                    {primaryAction.loading ? null : (
+                      <Sparkles size={14} aria-hidden="true" strokeWidth={2.5} />
+                    )}
+                    {primaryAction.loading ? 'Sending…' : primaryAction.label}
+                  </button>
+                ) : null}
+              </div>
+            ) : footer ? (
+              <div className={styles.panelFooter}>{footer}</div>
+            ) : null}
           </motion.div>
         </>
       )}
@@ -217,8 +281,16 @@ export function HbcKudosComposerForm({
   return (
     <div className={styles.form}>
       <div className={styles.formIntro}>
-        Recognize a teammate for great work, a team win, or everyday excellence. Your kudos
-        will be reviewed before appearing on the homepage.
+        <span className={styles.formIntroIcon} aria-hidden="true">
+          <Sparkles size={14} strokeWidth={2.5} />
+        </span>
+        <div>
+          <strong className={styles.formIntroTitle}>Recognize a teammate</strong>
+          <span className={styles.formIntroBody}>
+            Celebrate great work, team wins, or everyday excellence. Your kudos will be
+            reviewed before appearing on the homepage.
+          </span>
+        </div>
       </div>
 
       {/* Recipients */}
@@ -331,8 +403,16 @@ export function HbcKudosComposerPreview({
 
   return (
     <div className={styles.previewWrap}>
-      <div className={styles.previewLabel}>Preview</div>
+      <div className={styles.previewLabel}>
+        <span className={styles.previewLabelDot} aria-hidden="true" />
+        Live preview
+      </div>
       <article className={clsx(styles.previewCard, isEmpty && styles.previewCardEmpty)}>
+        <span className={styles.previewRibbon} aria-hidden="true">
+          <Sparkles size={10} strokeWidth={2.5} />
+          Kudos Spotlight
+        </span>
+
         {recipients.length > 0 ? (
           <div className={styles.previewAvatars}>
             <HbcAvatarStack
@@ -347,20 +427,69 @@ export function HbcKudosComposerPreview({
           </div>
         ) : null}
 
-        <span className={styles.previewEyebrow}>Kudos Spotlight</span>
         <h3 className={styles.previewHeadline}>{headline}</h3>
 
         {recipientLine ? (
-          <span className={styles.previewRecipients}>{recipientLine}</span>
+          <span className={styles.previewRecipients}>For {recipientLine}</span>
         ) : null}
 
         <p className={styles.previewExcerpt}>{excerpt}</p>
 
         <div className={styles.previewSubmitter}>
           <CheckCircle2 size={11} aria-hidden="true" className={styles.previewSubmitterIcon} />
-          by {submitterName || 'You'}
+          Nominated by {submitterName || 'You'}
         </div>
       </article>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Success pane
+// ---------------------------------------------------------------------------
+
+export interface HbcKudosComposerSuccessProps {
+  title?: string;
+  body?: string;
+}
+
+export function HbcKudosComposerSuccess({
+  title = 'Kudos sent!',
+  body = 'Your recognition has been submitted for review. It will appear on the homepage once approved.',
+}: HbcKudosComposerSuccessProps): React.JSX.Element {
+  return (
+    <div className={styles.successPane}>
+      <div className={styles.successIcon} aria-hidden="true">
+        <CheckCircle2 size={30} strokeWidth={2.2} />
+      </div>
+      <div className={styles.successTitle}>{title}</div>
+      <p className={styles.successBody}>{body}</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Error banner
+// ---------------------------------------------------------------------------
+
+export interface HbcKudosComposerErrorProps {
+  title?: string;
+  body: string;
+}
+
+export function HbcKudosComposerError({
+  title = 'Submission failed',
+  body,
+}: HbcKudosComposerErrorProps): React.JSX.Element {
+  return (
+    <div role="alert" className={styles.errorBanner}>
+      <span className={styles.errorBannerIcon} aria-hidden="true">
+        <AlertCircle size={14} strokeWidth={2.5} />
+      </span>
+      <div className={styles.errorBannerBody}>
+        <div className={styles.errorBannerTitle}>{title}</div>
+        <div className={styles.errorBannerMessage}>{body}</div>
+      </div>
     </div>
   );
 }

@@ -1,19 +1,23 @@
 /**
  * PeopleCultureMerged — Thin consumer for the shared People & Culture surface.
  *
- * Wave 01 follow-on (named-consumer migration): all durable presentation
- * grammar moved into @hbc/ui-kit/homepage as `HbcPeopleCultureSurface` +
- * `HbcKudosComposer*`. This file is now responsible for:
+ * W01r-P18 recognition rebuild:
+ * All visual grammar now lives in `@hbc/ui-kit/homepage` —
+ *   - `HbcPeopleCultureSurface` (hero, spotlight, rail, sparse invite)
+ *   - `HbcKudosComposerFlyout` (typed primary/secondary footer actions)
+ *   - `HbcKudosComposerForm` / `HbcKudosComposerPreview`
+ *   - `HbcKudosComposerSuccess` / `HbcKudosComposerError`
  *
+ * This file is now responsible purely for the non-visual concerns:
  *   1. Fetching SharePoint list data via `usePeopleCultureData`,
  *   2. Falling back to manifest prop config for local dev / packaging,
  *   3. Normalizing the merged config via `normalizePeopleCultureMergedConfig`,
- *   4. Adapting the normalized output into the surface's view-model,
+ *   4. Adapting the normalized output into the surface view-model,
  *   5. Wiring the kudos composer state hook to the shared flyout/form/preview,
  *   6. Submitting drafts via the SharePoint REST helper.
  *
- * Business logic, contracts, normalization, and submission stay local.
- * Visual grammar lives in the shared layer.
+ * No inline styling. Business logic, contracts, normalization, and
+ * submission stay local; the shared layer owns every visual decision.
  */
 import * as React from 'react';
 import {
@@ -21,7 +25,8 @@ import {
   HbcKudosComposerFlyout,
   HbcKudosComposerForm,
   HbcKudosComposerPreview,
-  CheckCircle2,
+  HbcKudosComposerSuccess,
+  HbcKudosComposerError,
   type PeopleCultureSurfaceModel,
   type KudosSpotlightItem,
   type KudosRailItem,
@@ -123,38 +128,10 @@ function adaptOutput(output: PeopleCultureMergedOutput): PeopleCultureSurfaceMod
 }
 
 function hasAnyInput(config: Partial<PeopleCultureMergedConfig> | undefined): boolean {
-  return Boolean(config?.announcements?.length || config?.kudos?.length || config?.celebrations?.length);
+  return Boolean(
+    config?.announcements?.length || config?.kudos?.length || config?.celebrations?.length,
+  );
 }
-
-// ---------------------------------------------------------------------------
-// Composer footer renderers (kept local — wire shared button styles or
-// existing webpart button conventions; remain inline for the small footer)
-// ---------------------------------------------------------------------------
-
-const FOOTER_CANCEL_STYLE: React.CSSProperties = {
-  padding: '9px 20px',
-  fontSize: '0.8125rem',
-  fontWeight: 700,
-  borderRadius: 8,
-  border: '1.5px solid rgba(229, 126, 70, 0.2)',
-  background: '#ffffff',
-  color: '#1a1a1a',
-  cursor: 'pointer',
-  fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-};
-
-const FOOTER_PRIMARY_STYLE: React.CSSProperties = {
-  padding: '9px 20px',
-  fontSize: '0.8125rem',
-  fontWeight: 700,
-  borderRadius: 8,
-  border: 'none',
-  background: '#e57e46',
-  color: '#ffffff',
-  cursor: 'pointer',
-  fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-  transition: 'background 150ms ease',
-};
 
 // ---------------------------------------------------------------------------
 // Main consumer
@@ -218,37 +195,24 @@ export function PeopleCultureMerged({
     composerActions.close();
   };
 
-  const submittingStyle: React.CSSProperties = {
-    ...FOOTER_PRIMARY_STYLE,
-    background: composer.status === 'submitting' ? 'rgba(229, 126, 70, 0.5)' : '#e57e46',
-    cursor: composer.status === 'submitting' ? 'not-allowed' : 'pointer',
-  };
+  const isEditing =
+    composer.status === 'editing' ||
+    composer.status === 'error' ||
+    composer.status === 'submitting';
 
-  const composerFooter =
-    composer.status === 'success' ? (
-      <>
-        <button type="button" onClick={() => composerActions.reset()} style={FOOTER_CANCEL_STYLE}>
-          Send Another
-        </button>
-        <button type="button" onClick={composerActions.close} style={FOOTER_PRIMARY_STYLE}>
-          Done
-        </button>
-      </>
-    ) : (
-      <>
-        <button type="button" onClick={handleComposerClose} style={FOOTER_CANCEL_STYLE}>
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={composerActions.submit}
-          disabled={composer.status === 'submitting'}
-          style={submittingStyle}
-        >
-          {composer.status === 'submitting' ? 'Sending…' : 'Send Kudos'}
-        </button>
-      </>
-    );
+  const primaryAction =
+    composer.status === 'success'
+      ? { label: 'Done', onClick: composerActions.close }
+      : {
+          label: 'Send Kudos',
+          onClick: composerActions.submit,
+          loading: composer.status === 'submitting',
+        };
+
+  const secondaryAction =
+    composer.status === 'success'
+      ? { label: 'Send Another', onClick: () => composerActions.reset() }
+      : { label: 'Cancel', onClick: handleComposerClose };
 
   return (
     <>
@@ -263,94 +227,21 @@ export function PeopleCultureMerged({
         open={composer.isOpen}
         onClose={handleComposerClose}
         title="Give Kudos"
-        footer={composerFooter}
+        subtitle="Celebrate a teammate with a warm recognition note"
+        primaryAction={primaryAction}
+        secondaryAction={secondaryAction}
       >
-        {composer.status === 'success' ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '40px 16px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 16,
-              fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #e57e46, #d4693a)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <CheckCircle2 size={28} style={{ color: '#ffffff' }} />
-            </div>
-            <div
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
-                color: '#1a1a1a',
-              }}
-            >
-              Kudos sent!
-            </div>
-            <p
-              style={{
-                margin: 0,
-                fontSize: '0.8125rem',
-                color: 'rgba(26, 26, 26, 0.48)',
-                maxWidth: '32ch',
-                lineHeight: 1.6,
-              }}
-            >
-              Your recognition has been submitted for review. It will appear on the
-              homepage once approved.
-            </p>
-          </div>
-        ) : null}
+        {composer.status === 'success' ? <HbcKudosComposerSuccess /> : null}
 
         {composer.status === 'error' ? (
-          <div
-            style={{
-              padding: '12px 16px',
-              borderRadius: 10,
-              marginBottom: 16,
-              background: 'rgba(196, 49, 75, 0.06)',
-              border: '1px solid rgba(196, 49, 75, 0.15)',
-              fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-                color: '#c4314b',
-                marginBottom: 4,
-              }}
-            >
-              Submission failed
-            </div>
-            <div
-              style={{
-                fontSize: '0.75rem',
-                color: 'rgba(196, 49, 75, 0.8)',
-                lineHeight: 1.5,
-              }}
-            >
-              {composer.submitError || 'An unexpected error occurred. Please try again.'}
-            </div>
-          </div>
+          <HbcKudosComposerError
+            body={
+              composer.submitError || 'An unexpected error occurred. Please try again.'
+            }
+          />
         ) : null}
 
-        {composer.status === 'editing' ||
-        composer.status === 'error' ||
-        composer.status === 'submitting' ? (
+        {isEditing ? (
           <>
             <HbcKudosComposerForm
               draft={composer.draft}
