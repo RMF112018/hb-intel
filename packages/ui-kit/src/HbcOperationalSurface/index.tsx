@@ -120,6 +120,16 @@ export interface OperationalSignal {
   openInNewTab?: boolean;
 }
 
+/**
+ * Layout variant. `"safety-homepage"` opts into a scoped homepage-fit
+ * refinement designed for the Safety & Field Excellence webpart's
+ * narrow SharePoint section (tighter masthead padding, severity
+ * strip, and content padding; compact featured card and signal
+ * rows). Default is the wider authored operational scale used by
+ * other consumers.
+ */
+export type HbcOperationalSurfaceVariant = 'default' | 'safety-homepage';
+
 export interface HbcOperationalSurfaceProps {
   title: string;
   icon?: LucideIcon;
@@ -133,6 +143,11 @@ export interface HbcOperationalSurfaceProps {
   action?: OperationalCta;
   featured?: OperationalFeatured;
   signals?: OperationalSignal[];
+  /**
+   * Layout variant. Use `"safety-homepage"` from SafetyFieldExcellence
+   * to opt into the homepage-fit refinement. Defaults to `"default"`.
+   */
+  variant?: HbcOperationalSurfaceVariant;
   children?: React.ReactNode;
   className?: string;
   'aria-label'?: string;
@@ -390,6 +405,7 @@ export function HbcOperationalSurface({
   action,
   featured,
   signals,
+  variant = 'default',
   children,
   className,
   'aria-label': ariaLabel,
@@ -400,9 +416,14 @@ export function HbcOperationalSurface({
   return (
     <section
       aria-label={ariaLabel ?? title}
-      className={clsx(styles.root, className)}
+      className={clsx(
+        styles.root,
+        variant === 'safety-homepage' && styles.safetyHomepage,
+        className,
+      )}
       data-hbc-premium="operational-surface"
       data-hbc-homepage="operational-safety"
+      data-hbc-operational-variant={variant}
     >
       <Masthead
         title={title}

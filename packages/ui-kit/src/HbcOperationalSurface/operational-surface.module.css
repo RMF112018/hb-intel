@@ -625,3 +625,192 @@
     transition: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SAFETY-HOMEPAGE MODIFIER (W01r-P25)
+   ───────────────────────────────────────────────────────────────
+   Scoped homepage-fit refinement for the Safety & Field Excellence
+   webpart. The shared operational surface is still used at its
+   authored scale by wider-section consumers, so this modifier is
+   opted into only by SafetyFieldExcellence via
+   `variant="safety-homepage"`.
+
+   Problem the modifier solves:
+   - In the SharePoint homepage section the featured signal card
+     reads over-committed vertically (too much padding around the
+     eyebrow/title/description/badge/meta/CTA stack).
+   - The Active Signals area sits too far away from the featured
+     card when only one signal is authored, which makes the lower
+     half of the module feel sparse and over-separated.
+   - Masthead padding + severity strip margin + content padding
+     stack up and add vertical heaviness.
+
+   Strategy:
+   - Pull masthead, severity strip, and content padding in.
+   - Tighten featured card padding, featured icon size, featured
+     title/description scale, badge/meta/CTA rhythm.
+   - Reduce content gap so the signals header sits tight to the
+     featured card, and reduce the signalsHeader → signals gap so
+     the one-signal case reads as an intentional tail section.
+   - Compact signal rows (padding, min-height, icon, title, meta)
+     so a single signal row is proportional to the tightened
+     featured card rather than dwarfed by a giant pad of
+     whitespace.
+
+   Specificity note: every rule below is `.safetyHomepage .child`
+   (specificity 0,2,0) so it overrides the base `.child` rules
+   (specificity 0,1,0) inside their own media-query blocks without
+   needing `!important`. The Safety webpart renders in a narrow
+   SharePoint homepage column even at desktop viewport width, so
+   the rules deliberately apply at every breakpoint.
+   ═══════════════════════════════════════════════════════════════ */
+
+.safetyHomepage .masthead {
+  gap: 8px;
+  padding: 18px 20px 12px;
+}
+
+.safetyHomepage .mastheadHeadline {
+  font-size: 1.3125rem;
+}
+
+.safetyHomepage .severityStrip {
+  height: 3px;
+  margin: 0 20px;
+}
+
+.safetyHomepage .content {
+  gap: 14px;
+  padding: 16px 20px 18px;
+}
+
+.safetyHomepage .featured {
+  gap: 14px;
+  padding: 16px 16px 16px 20px;
+}
+
+.safetyHomepage .featuredIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.safetyHomepage .featuredBody {
+  gap: 8px;
+}
+
+.safetyHomepage .featuredTitle {
+  font-size: 1.1875rem;
+  max-width: 28ch;
+  line-height: 1.18;
+}
+
+.safetyHomepage .featuredDescription {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  max-width: 46ch;
+}
+
+.safetyHomepage .featuredBadgeRow {
+  gap: 6px;
+}
+
+.safetyHomepage .featuredMeta {
+  padding-top: 8px;
+  gap: 12px;
+  font-size: 0.6875rem;
+}
+
+.safetyHomepage .featuredCta {
+  margin-top: 2px;
+}
+
+.safetyHomepage .signalsHeader {
+  font-size: 0.625rem;
+  margin-bottom: -2px;
+}
+
+.safetyHomepage .signals {
+  gap: 8px;
+}
+
+.safetyHomepage .signal {
+  gap: 12px;
+  padding: 10px 14px 10px 14px;
+  min-height: 48px;
+  border-left-width: 3px;
+  border-radius: 9px;
+}
+
+.safetyHomepage .signalIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.safetyHomepage .signalContent {
+  gap: 2px;
+}
+
+.safetyHomepage .signalTitle {
+  font-size: 0.875rem;
+  line-height: 1.28;
+}
+
+.safetyHomepage .signalMeta {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+
+/* Hold the homepage-fit scale at tablet/desktop viewports. The
+   Safety webpart renders inside a narrow SharePoint section even
+   when the viewport is wider, so we deliberately reassert the
+   tuned values at the 768 and 1200 breakpoints. */
+
+@media (min-width: 768px) {
+  .safetyHomepage .masthead {
+    padding: 20px 22px 12px;
+  }
+  .safetyHomepage .mastheadHeadline {
+    font-size: 1.375rem;
+  }
+  .safetyHomepage .severityStrip {
+    margin: 0 22px;
+  }
+  .safetyHomepage .content {
+    gap: 14px;
+    padding: 18px 22px 20px;
+  }
+  .safetyHomepage .featured {
+    padding: 18px 20px 18px 24px;
+    gap: 16px;
+  }
+  .safetyHomepage .featuredTitle {
+    font-size: 1.25rem;
+  }
+  .safetyHomepage .featuredDescription {
+    font-size: 0.9375rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .safetyHomepage .masthead {
+    padding: 22px 24px 14px;
+  }
+  .safetyHomepage .mastheadHeadline {
+    font-size: 1.4375rem;
+  }
+  .safetyHomepage .severityStrip {
+    margin: 0 24px;
+  }
+  .safetyHomepage .content {
+    gap: 16px;
+    padding: 20px 24px 22px;
+  }
+  .safetyHomepage .featured {
+    padding: 20px 22px 20px 26px;
+  }
+  .safetyHomepage .featuredTitle {
+    font-size: 1.375rem;
+  }
+}

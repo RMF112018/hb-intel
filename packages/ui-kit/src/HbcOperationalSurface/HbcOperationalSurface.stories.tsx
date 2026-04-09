@@ -4,6 +4,14 @@
  * W01r-P10: Expanded Safety & Field Excellence consumer-level proof
  *           (Sparse, SignalsOnly, Mobile) as part of the Safety &
  *           Field Excellence migration-confirmation pass.
+ * W01r-P25: Added `SafetyHomepageNarrow` and
+ *           `SafetyHomepageOneSignal` stories that opt into the new
+ *           `variant="safety-homepage"` refinement at ~540px so the
+ *           homepage-fit scale (tightened masthead, severity strip,
+ *           featured card, signal rows) has credible visual proof
+ *           that mirrors the actual SharePoint render. The default
+ *           wider-column stories continue to render at the original
+ *           scale, proving other operational consumers are unaffected.
  */
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -155,6 +163,74 @@ export const SignalsOnly: Story = {
         title="Safety and Field Excellence"
         icon={Shield}
         signals={safetySignalFixtures}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Homepage-fit narrow-section proof for the W01r-P25 Safety variant.
+ * Renders the full safety model (featured + 4 severity-mapped
+ * signals) at ~540px with `variant="safety-homepage"` so Storybook
+ * documents the tightened rhythm that ships to the SharePoint
+ * homepage column.
+ */
+export const SafetyHomepageNarrow: Story = {
+  render: () => (
+    <div style={{ maxWidth: 540 }}>
+      <HbcOperationalSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        variant="safety-homepage"
+        latestUpdated="Updated 2026-04-08"
+        featured={{
+          title: 'Zero-Incident Week: South Region',
+          description:
+            'South region crews completed the week with full pre-task planning compliance and green PPE audits across every site.',
+          eyebrow: 'Safety recognition',
+          icon: CheckCircle2,
+          severity: 'success',
+          metaItems: [
+            { label: 'Audit complete' },
+            { label: 'Updated 2026-04-08' },
+          ],
+          cta: { label: 'Review the audit', href: '#audit' },
+        }}
+        signals={safetySignalFixtures}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Homepage-fit narrow-section proof for the one-signal case — the
+ * condition visible in the current SharePoint render where the
+ * webpart has only one active supporting signal. Proves the
+ * tightened rhythm keeps the lower section proportional to the
+ * featured card rather than floating in whitespace.
+ */
+export const SafetyHomepageOneSignal: Story = {
+  render: () => (
+    <div style={{ maxWidth: 540 }}>
+      <HbcOperationalSurface
+        title="Safety and Field Excellence"
+        icon={Shield}
+        variant="safety-homepage"
+        latestUpdated="Updated 2026-04-08"
+        featured={{
+          title: 'Zero-Incident Week: South Region',
+          description:
+            'South region crews completed the week with full pre-task planning compliance.',
+          eyebrow: 'Safety recognition',
+          icon: CheckCircle2,
+          severity: 'success',
+          metaItems: [
+            { label: 'Audit complete' },
+            { label: 'Updated 2026-04-08' },
+          ],
+          cta: { label: 'Review the audit', href: '#audit' },
+        }}
+        signals={[safetySignalFixtures[1]!]}
       />
     </div>
   ),

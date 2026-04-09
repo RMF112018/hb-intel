@@ -137,6 +137,7 @@ export function SafetyFieldExcellence({
       icon={Shield}
       mastheadEyebrow="Field Safety"
       latestUpdated={normalized.featured?.freshnessLabel}
+      variant="safety-homepage"
       featured={
         normalized.featured
           ? {
