@@ -1,39 +1,36 @@
 /**
- * CompanyPulse — Premium internal newsroom surface
- * Wave 04 — CSS-module premium surface architecture
+ * CompanyPulse — Premium internal newsroom webpart.
  *
- * Custom composition using the newsroom CSS module system for a
- * premium editorial surface aligned with ProjectPortfolioSpotlight's
- * family grammar but tuned for newsroom/editorial content.
+ * Wave 01 follow-on: migrated from a local newsroom CSS-module composition
+ * to the shared `HbcNewsroomSurface` surface family in `@hbc/ui-kit/homepage`.
  *
- * Desktop: dominant lead story (~65%) + subordinate headline stack (~35%).
- * Tablet/Mobile: stacked vertical.
- *
- * Three layout modes:
- * - Rich: lead + headline stack + tertiary zone
- * - Sparse: lead only + archive CTA
- * - Headline-only: full-width headline stack (no featured lead)
+ * The webpart is now a thin integration consumer:
+ *   • normalizes the SharePoint / manifest config,
+ *   • adapts the local `NewsroomOutput` domain shape to the shared
+ *     `HbcNewsroomSurfaceModel` view-model,
+ *   • handles loading, no-data, and invalid authoring states with the
+ *     local homepage fallback components and authoring governance,
+ *   • and delegates all durable newsroom presentation grammar
+ *     (section shell, featured story, headline rail, tertiary quick-read
+ *     zone, sparse-state footer) to the shared surface.
  */
 import * as React from 'react';
 import {
-  HbcPremiumCta,
-  motion,
-  FileText,
+  HbcNewsroomSurface,
+  type HbcNewsroomFeaturedItem,
+  type HbcNewsroomHeadlineItem,
+  type HbcNewsroomSurfaceModel,
+  type HbcNewsroomTertiaryItem,
 } from '@hbc/ui-kit/homepage';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import { normalizeCompanyPulseConfig } from '../../homepage/helpers/communicationsConfig.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
 import { HomepageLoadingState } from '../../homepage/shared/HomepageLoadingState.js';
-import { useResponsiveTier } from '../../homepage/shared/useResponsiveTier.js';
-import { usePrefersReducedMotion } from '../../homepage/shared/usePrefersReducedMotion.js';
-import {
-  NewsroomFeaturedStory,
-  NewsroomHeadlineStack,
-  NewsroomCategoryChip,
-  NR_NO_MOTION,
-} from '../../homepage/shared/newsroom/index.js';
-import type { CompanyPulseConfig } from '../../homepage/webparts/communicationsContracts.js';
-import s from '../../homepage/shared/newsroom/newsroom-surface.module.css';
+import type {
+  CompanyPulseConfig,
+  CompanyPulseItem,
+  NewsroomOutput,
+} from '../../homepage/webparts/communicationsContracts.js';
 
 export interface CompanyPulseProps {
   config?: Partial<CompanyPulseConfig>;
@@ -41,63 +38,61 @@ export interface CompanyPulseProps {
   isLoading?: boolean;
 }
 
-/* ── Tertiary zone ──────────────────────────────────────────────── */
+/* ── Adapter: NewsroomOutput → HbcNewsroomSurfaceModel ─────────── */
 
-function TertiaryZone({ items, archiveHref, isMobile }: {
-  items: { id: string; title: string; category?: string }[];
-  archiveHref?: string;
-  isMobile: boolean;
-}): React.JSX.Element | null {
-  const categorizedItems = items.filter((item) => Boolean(item.category));
-  if (categorizedItems.length === 0 && !archiveHref) return null;
-
-  return (
-    <div className={isMobile ? s.tertiaryZoneMobile : s.tertiaryZone}>
-      {categorizedItems.map((item) => (
-        <NewsroomCategoryChip key={item.id} category={item.category!} size="sm" />
-      ))}
-      {archiveHref ? (
-        <div className={s.tertiaryArchive}>
-          <HbcPremiumCta label="View all news" href={archiveHref} variant="ghost" size="sm" arrow />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/* ── Sparse layout ──────────────────────────────────────────────── */
-
-function SparseFooter({ archiveHref, isMobile, reducedMotion }: {
-  archiveHref?: string;
-  isMobile: boolean;
-  reducedMotion: boolean;
-}): React.JSX.Element | null {
-  if (!archiveHref) return null;
-
-  const motionProps = reducedMotion ? NR_NO_MOTION : {
-    initial: { opacity: 0, y: 6 } as const,
-    animate: { opacity: 1, y: 0 } as const,
-    transition: { duration: 0.3, delay: 0.2, ease: [0.22, 1, 0.36, 1] as const },
+function toFeaturedItem(item: CompanyPulseItem): HbcNewsroomFeaturedItem {
+  return {
+    id: item.id,
+    title: item.title,
+    summary: item.summary,
+    category: item.category,
+    byline: item.byline,
+    publishDate: item.publishDate,
+    media: item.media ? { src: item.media.src, alt: item.media.alt } : undefined,
+    cta: item.cta
+      ? { label: item.cta.label, href: item.cta.href, openInNewTab: item.cta.openInNewTab }
+      : undefined,
   };
-
-  return (
-    <motion.div
-      className={isMobile ? s.sparseFooterMobile : s.sparseFooter}
-      {...motionProps}
-    >
-      <HbcPremiumCta label="View all news" href={archiveHref} variant="ghost" size="sm" arrow />
-    </motion.div>
-  );
 }
 
-/* ── Main component ─────────────────────────────────────────────── */
+function toHeadlineItem(item: CompanyPulseItem): HbcNewsroomHeadlineItem {
+  return {
+    id: item.id,
+    title: item.title,
+    category: item.category,
+    byline: item.byline,
+    publishDate: item.publishDate,
+    cta: item.cta
+      ? { label: item.cta.label, href: item.cta.href, openInNewTab: item.cta.openInNewTab }
+      : undefined,
+  };
+}
 
-export function CompanyPulse({ config, activeAudience, isLoading = false }: CompanyPulseProps): React.JSX.Element {
-  const tier = useResponsiveTier();
-  const reducedMotion = usePrefersReducedMotion();
-  const isMobile = tier === 'mobile';
-  const isDesktop = tier === 'desktop';
+function toTertiaryItem(item: CompanyPulseItem): HbcNewsroomTertiaryItem {
+  return {
+    id: item.id,
+    title: item.title,
+    category: item.category,
+  };
+}
 
+function toSurfaceModel(normalized: NewsroomOutput): HbcNewsroomSurfaceModel {
+  return {
+    heading: normalized.heading,
+    lead: normalized.lead ? toFeaturedItem(normalized.lead) : undefined,
+    secondary: normalized.secondary.map(toHeadlineItem),
+    tertiary: normalized.tertiary.map(toTertiaryItem),
+    archiveHref: normalized.archiveHref,
+  };
+}
+
+/* ── Component ─────────────────────────────────────────────────── */
+
+export function CompanyPulse({
+  config,
+  activeAudience,
+  isLoading = false,
+}: CompanyPulseProps): React.JSX.Element {
   if (isLoading) {
     return <HomepageLoadingState label="Loading company pulse" />;
   }
@@ -107,61 +102,12 @@ export function CompanyPulse({ config, activeAudience, isLoading = false }: Comp
   const hasSecondary = normalized.secondary.length > 0;
 
   if (!hasLead && !hasSecondary) {
-    const message = resolveAuthoringMessage('companyPulse', config?.items?.length ? 'invalid' : 'noData');
+    const message = resolveAuthoringMessage(
+      'companyPulse',
+      config?.items?.length ? 'invalid' : 'noData',
+    );
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 
-  return (
-    <section
-      aria-label={normalized.heading}
-      className={s.root}
-      data-hbc-premium="newsroom-surface"
-    >
-      {/* Header */}
-      <div className={isMobile ? s.headerMobile : s.header}>
-        <h2 className={s.headerTitle}>
-          <span className={s.headerIcon} aria-hidden="true">
-            <FileText size={16} strokeWidth={2} />
-          </span>
-          {normalized.heading}
-        </h2>
-        {normalized.archiveHref ? (
-          <div className={s.headerAction}>
-            <HbcPremiumCta label="See all" href={normalized.archiveHref} variant="ghost" size="sm" arrow />
-          </div>
-        ) : null}
-      </div>
-
-      <hr className={isMobile ? s.separatorMobile : s.separator} />
-
-      {/* Content */}
-      {hasLead && hasSecondary ? (
-        <>
-          <div className={isDesktop ? s.composition : s.compositionStacked}>
-            <div className={isDesktop ? s.featuredWrapper : s.featuredWrapperFull}>
-              <NewsroomFeaturedStory item={normalized.lead!} tier={tier} reducedMotion={reducedMotion} />
-            </div>
-            <div className={isDesktop ? s.railWrapper : s.railWrapperFull}>
-              <NewsroomHeadlineStack items={normalized.secondary} tier={tier} reducedMotion={reducedMotion} header="More headlines" />
-            </div>
-          </div>
-          <TertiaryZone items={normalized.tertiary} archiveHref={normalized.archiveHref} isMobile={isMobile} />
-        </>
-      ) : hasLead ? (
-        <>
-          <NewsroomFeaturedStory item={normalized.lead!} tier={tier} reducedMotion={reducedMotion} />
-          <SparseFooter archiveHref={normalized.archiveHref} isMobile={isMobile} reducedMotion={reducedMotion} />
-        </>
-      ) : (
-        <>
-          <div className={s.compositionStacked}>
-            <div className={s.railWrapperFull}>
-              <NewsroomHeadlineStack items={normalized.secondary} tier={tier} reducedMotion={reducedMotion} header="Latest headlines" />
-            </div>
-          </div>
-          <TertiaryZone items={normalized.tertiary} archiveHref={normalized.archiveHref} isMobile={isMobile} />
-        </>
-      )}
-    </section>
-  );
+  return <HbcNewsroomSurface model={toSurfaceModel(normalized)} />;
 }

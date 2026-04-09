@@ -512,3 +512,25 @@ Business logic, SharePoint list fetching, normalization, validation, and submiss
 - See `docs/architecture/reviews/people-culture-ui-kit-migration-completion.md` for the full file-by-file change list, ownership decisions, token strategy, and verification record.
 
 **Recommended next move (revised):** Tackle `HbSignatureHero` (smallest remaining migration target) and produce consumer-level visual proof for the previously-migrated 5 consumers + the new People & Culture consumer.
+
+---
+
+## 11. Closure update — Company Pulse migration (W01 follow-on)
+
+**Status update:** `CompanyPulse` has now been cleanly migrated to a new shared surface family in `@hbc/ui-kit/homepage`. The previous "Local by design" characterization in the execution note was an understatement — the 3-layout-mode behavior, featured-story grammar, headline-rail grammar, and tertiary quick-read zone are all durable shared-family presentation concerns. A cohesive `HbcNewsroomSurface` makes that ownership explicit, preserving the blue-led editorial register that keeps Company Pulse visually distinct from the warm celebratory People & Culture surface.
+
+The ~600-line local `apps/hb-webparts/src/homepage/shared/newsroom/` module (featured story component + headline stack component + category chip component + palette utilities + CSS module) has been removed and folded into the cohesive new surface family. The consumer now delegates to:
+
+- `HbcNewsroomSurface` — cohesive presentation-lane surface family with inline featured-story, headline-stack, headline-item, category-chip, tertiary-zone, and sparse-footer sub-components
+- `resolveNewsroomLayout(model)` — pure presentation-layer helper that derives the `rich` / `sparse` / `headline-only` layout from the view-model
+
+Business logic, normalization (`normalizeCompanyPulseConfig`), audience filtering, authoring-governance messaging (`resolveAuthoringMessage`), loading / no-data / invalid fallback rendering, and SPFx webpart integration all remain local to the webpart.
+
+**Impact on this validation report:**
+
+- The "named consumers still entirely local" set drops from `{HbSignatureHero, ProjectPortfolioSpotlight}` to `{HbSignatureHero}` in practice. (Note: the Wave 01 Execution Note still lists `ProjectPortfolioSpotlight` as "should likely migrate", which is pre-existing drift against the repo state recorded in `docs/architecture/reviews/project-spotlight-ui-kit-migration-completion.md`; reconciling that is out of scope for this Company Pulse closure.)
+- The cleanly-migrated count rises from 5/9 (56%) to **6/9 (67%)** per the updated execution-note summary.
+- Company Pulse is now visually proven at the surface-family level via Storybook stories under `packages/ui-kit/src/HbcNewsroomSurface/HbcNewsroomSurface.stories.tsx` covering Default (rich), Sparse, HeadlineOnly, and Mobile variants.
+- See `docs/architecture/reviews/company-pulse-ui-kit-migration-completion.md` for the full file-by-file change list, ownership decisions, token strategy, and verification record.
+
+**Recommended next move (revised again):** Tackle `HbSignatureHero` (the last remaining named local consumer) and reconcile the stale `ProjectPortfolioSpotlight` row in the Wave 01 Execution Note with the committed Project Spotlight migration already recorded in its own completion report.

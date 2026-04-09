@@ -237,6 +237,26 @@ export type {
   ProjectSpotlightCta,
 } from './HbcProjectSpotlightSurface/index.js';
 
+// ── Wave 01 follow-on — Newsroom / Company Pulse surface family ──────
+// Cohesive presentation-lane surface for the homepage Company Pulse
+// newsroom zone. Three data-driven layout modes (rich / sparse /
+// headline-only) resolved via `resolveNewsroomLayout`. Consumers stay
+// thin — normalization, audience filtering, authoring governance, and
+// webpart integration remain local to the consuming webpart.
+
+export { HbcNewsroomSurface, resolveNewsroomLayout } from './HbcNewsroomSurface/index.js';
+export type {
+  HbcNewsroomSurfaceProps,
+  HbcNewsroomSurfaceModel,
+  HbcNewsroomFeaturedItem,
+  HbcNewsroomHeadlineItem,
+  HbcNewsroomTertiaryItem,
+  HbcNewsroomMedia,
+  HbcNewsroomCta,
+  HbcNewsroomCategoryKey,
+  HbcNewsroomLayoutMode,
+} from './HbcNewsroomSurface/index.js';
+
 export type HomepageSurfaceClass =
   | 'hero'
   | 'welcome'
@@ -244,7 +264,8 @@ export type HomepageSurfaceClass =
   | 'utility'
   | 'operational'
   | 'discovery'
-  | 'people-culture';
+  | 'people-culture'
+  | 'newsroom';
 
 export type HomepagePrimitiveName =
   | 'HbcAvatarStack'
@@ -266,6 +287,7 @@ export type HomepagePrimitiveName =
   | 'HbcKudosComposerForm'
   | 'HbcKudosComposerPreview'
   | 'HbcLauncherSurface'
+  | 'HbcNewsroomSurface'
   | 'HbcOperationalSurface'
   | 'HbcPeopleCultureSurface'
   | 'HbcProjectSpotlightSurface'
@@ -449,6 +471,15 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
     shadow: 'elevationEditorial',
     radius: '12px',
     background: 'clean white featured zone + cool-tinted rail',
+    border: 'strong brand left accent',
+  },
+  newsroom: {
+    surfaces: ['newsroom'] as const,
+    character:
+      'premium internal newsroom / editorial hierarchy with image-led lead story, subordinate headline rail, and tertiary quick-read zone',
+    shadow: 'elevationEditorial',
+    radius: '12px',
+    background: 'clean white lead content + cool-tinted rail',
     border: 'strong brand left accent',
   },
 } as const;

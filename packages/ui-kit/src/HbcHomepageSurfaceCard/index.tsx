@@ -142,6 +142,24 @@ const useStyles = makeStyles({
     paddingLeft: `${HBC_SPACE_LG}px`,
     paddingRight: `${HBC_SPACE_LG}px`,
   },
+
+  /* ── Newsroom surfaces ──────────────────────────────────── */
+  // Wave 01 follow-on. Cool blue-led editorial treatment for the
+  // internal newsroom / Company Pulse zone. The full surface composition
+  // lives in HbcNewsroomSurface; this surface-card variant exists so the
+  // generic surface-card primitive can render a thin newsroom wrapper
+  // for ad-hoc local use without contaminating other families.
+  newsroom: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    boxShadow: elevationEditorial,
+    borderRadius: '12px',
+    ...shorthands.border('1px', 'solid', 'rgba(0, 0, 0, 0.06)'),
+    ...shorthands.borderLeft('4px', 'solid', 'rgb(34, 83, 145)'),
+    paddingTop: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_LG}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+  },
 });
 
 export const HbcHomepageSurfaceCard: React.FC<HbcHomepageSurfaceCardProps> = ({

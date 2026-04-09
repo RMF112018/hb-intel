@@ -1,43 +1,36 @@
 /**
- * Newsroom premium surface — CSS module
- * Wave 04 — Premium surface architecture remediation
+ * HbcNewsroomSurface — Premium internal newsroom / editorial surface.
  *
- * Blue-authority editorial palette. Cooler and more authoritative
- * than the warm orange editorial surfaces. Aligned with
- * ProjectPortfolioSpotlight's premium grammar but tuned for
- * newsroom/editorial content.
+ * Presentation-lane styling for the homepage "Company Pulse" newsroom
+ * zone. Blue-led editorial composition with a dominant lead story and
+ * subordinate supporting headline rail. Responsive via viewport media
+ * queries (mobile base, tablet ≥ 768px, desktop ≥ 1200px). Three layout
+ * modes (`rich`, `sparse`, `headline-only`) are driven by the consumer
+ * view-model via `resolveNewsroomLayout`.
  *
- * Palette tokens:
- *   --nr-blue:        #225391
- *   --nr-blue-rgb:    34, 83, 145
- *   --nr-orange-rgb:  229, 126, 70
+ * Governed presentation-lane brand tokens are inlined as CSS values
+ * matching HBC_PRESENTATION_BLUE (#225391 / 34, 83, 145) and
+ * HBC_PRESENTATION_ORANGE (#e57e46 / 229, 126, 70), consistent with
+ * the other homepage surface families (HbcPeopleCultureSurface,
+ * HbcProjectSpotlightSurface, HbcEditorialSurface).
  */
 
-/* ═══════════════════════════════════════════════════════════════
-   ROOT SURFACE
-   ═══════════════════════════════════════════════════════════════ */
-
 .root {
-  --nr-blue: #225391;
-  --nr-blue-rgb: 34, 83, 145;
-  --nr-orange-rgb: 229, 126, 70;
-  --nr-text-1: #1a1a1a;
-  --nr-text-2: rgba(26, 26, 26, 0.68);
-  --nr-text-3: rgba(26, 26, 26, 0.48);
-  --nr-text-4: rgba(26, 26, 26, 0.34);
-
+  display: flex;
+  flex-direction: column;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-  color: var(--nr-text-1);
+  color: #1a1a1a;
   background: #ffffff;
   border-radius: 12px;
-  border-left: 4px solid var(--nr-blue);
+  border-left: 4px solid #225391;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   border-right: 1px solid rgba(0, 0, 0, 0.06);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
-    0 1px 3px rgba(var(--nr-blue-rgb), 0.06),
-    0 4px 20px rgba(var(--nr-blue-rgb), 0.08);
+    0 1px 3px rgba(34, 83, 145, 0.06),
+    0 4px 20px rgba(34, 83, 145, 0.08);
   overflow: hidden;
+  position: relative;
 }
 
 /* ── SharePoint global CSS defense ──────────────────────────── */
@@ -66,14 +59,20 @@
   padding: 0;
 }
 
-/* ── Header ──────────────────────────────────────────────────── */
+/* ── Header ─────────────────────────────────────────────────── */
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 12px;
   gap: 12px;
+  padding: 18px 16px 10px;
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 20px 24px 12px;
+  }
 }
 
 .headerTitle {
@@ -81,7 +80,7 @@
   font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--nr-blue);
+  color: #225391;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -94,8 +93,9 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: rgba(var(--nr-blue-rgb), 0.08);
-  color: var(--nr-blue);
+  background: rgba(34, 83, 145, 0.08);
+  color: #225391;
+  flex-shrink: 0;
 }
 
 .headerAction {
@@ -106,44 +106,56 @@
   height: 2px;
   background: linear-gradient(
     90deg,
-    rgba(var(--nr-blue-rgb), 0.25) 0%,
-    rgba(var(--nr-orange-rgb), 0.10) 60%,
+    rgba(34, 83, 145, 0.25) 0%,
+    rgba(229, 126, 70, 0.10) 60%,
     transparent 100%
   );
   border: none;
-  margin: 0 24px;
+  margin: 0 16px;
 }
 
-/* ── Composition layout ──────────────────────────────────────── */
+@media (min-width: 768px) {
+  .separator {
+    margin: 0 24px;
+  }
+}
+
+/* ── Composition layout (lead + rail) ───────────────────────── */
 
 .composition {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.compositionStacked {
   display: flex;
   flex-direction: column;
 }
 
-.featuredWrapper {
-  flex: 1 1 65%;
-  min-width: 380px;
+@media (min-width: 1200px) {
+  .composition {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
-.featuredWrapperFull {
+.featuredWrapper {
   flex: 1 1 100%;
   min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .featuredWrapper {
+    flex: 1 1 65%;
+    min-width: 380px;
+  }
 }
 
 .railWrapper {
-  flex: 1 1 26%;
-  min-width: 240px;
-}
-
-.railWrapperFull {
   flex: 1 1 100%;
   min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .railWrapper {
+    flex: 1 1 26%;
+    min-width: 240px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -152,13 +164,14 @@
 
 .featured {
   display: flex;
+  flex-direction: column;
   gap: 0;
 }
 
-.featuredStacked {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+@media (min-width: 768px) {
+  .featured {
+    flex-direction: row;
+  }
 }
 
 /* Image zone */
@@ -166,25 +179,25 @@
 .imageZone {
   position: relative;
   overflow: hidden;
-  background-color: rgba(var(--nr-blue-rgb), 0.06);
-  contain: layout style;
-  flex: 0 0 55%;
-  min-height: 320px;
-}
-
-.imageZoneTablet {
-  composes: imageZone;
-  flex: 0 0 48%;
-  min-height: 280px;
-}
-
-.imageZoneMobile {
-  position: relative;
-  overflow: hidden;
-  background-color: rgba(var(--nr-blue-rgb), 0.06);
+  background-color: rgba(34, 83, 145, 0.06);
   contain: layout style;
   min-height: 200px;
   max-height: 280px;
+}
+
+@media (min-width: 768px) {
+  .imageZone {
+    flex: 0 0 48%;
+    min-height: 280px;
+    max-height: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .imageZone {
+    flex: 0 0 55%;
+    min-height: 320px;
+  }
 }
 
 .imageZoneImg {
@@ -200,8 +213,8 @@
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(var(--nr-blue-rgb), 0.60) 0%,
-    rgba(var(--nr-blue-rgb), 0.10) 50%,
+    rgba(34, 83, 145, 0.60) 0%,
+    rgba(34, 83, 145, 0.10) 50%,
     transparent 100%
   );
   pointer-events: none;
@@ -213,8 +226,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--nr-blue-rgb), 0.06);
-  color: var(--nr-text-3);
+  background: rgba(34, 83, 145, 0.06);
+  color: rgba(26, 26, 26, 0.48);
 }
 
 /* Content zone */
@@ -223,16 +236,17 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 24px 28px 28px;
-  background: rgba(var(--nr-blue-rgb), 0.025);
+  gap: 10px;
+  padding: 18px 16px 22px;
+  background: rgba(34, 83, 145, 0.025);
   min-width: 0;
 }
 
-.contentZoneMobile {
-  composes: contentZone;
-  padding: 18px 16px 22px;
-  gap: 10px;
+@media (min-width: 768px) {
+  .contentZone {
+    gap: 12px;
+    padding: 24px 28px 28px;
+  }
 }
 
 /* Featured typography */
@@ -245,23 +259,24 @@
 
 .featuredHeadline {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.0625rem;
   font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1.25;
-  color: var(--nr-text-1);
+  color: #1a1a1a;
 }
 
-.featuredHeadlineMobile {
-  composes: featuredHeadline;
-  font-size: 1.0625rem;
+@media (min-width: 768px) {
+  .featuredHeadline {
+    font-size: 1.25rem;
+  }
 }
 
 .featuredExcerpt {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.6;
-  color: var(--nr-text-2);
+  color: rgba(26, 26, 26, 0.68);
   max-width: 52ch;
 }
 
@@ -270,15 +285,15 @@
   align-items: center;
   gap: 14px;
   font-size: 0.75rem;
-  color: var(--nr-text-3);
+  color: rgba(26, 26, 26, 0.48);
   flex-wrap: wrap;
   padding-top: 2px;
-  border-top: 1px solid rgba(var(--nr-blue-rgb), 0.06);
+  border-top: 1px solid rgba(34, 83, 145, 0.06);
 }
 
 .featuredByline {
   font-weight: 600;
-  color: var(--nr-text-2);
+  color: rgba(26, 26, 26, 0.68);
 }
 
 .featuredDate {
@@ -302,14 +317,15 @@
 .rail {
   display: flex;
   flex-direction: column;
-  background: rgba(var(--nr-blue-rgb), 0.035);
-  padding: 18px 20px 20px;
+  background: rgba(34, 83, 145, 0.035);
+  padding: 14px 16px 16px;
   gap: 0;
 }
 
-.railMobile {
-  composes: rail;
-  padding: 14px 16px 16px;
+@media (min-width: 768px) {
+  .rail {
+    padding: 18px 20px 20px;
+  }
 }
 
 .railHeader {
@@ -318,13 +334,13 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--nr-blue);
+  color: #225391;
   opacity: 0.55;
 }
 
 .railDivider {
   height: 1px;
-  background: rgba(var(--nr-blue-rgb), 0.08);
+  background: rgba(34, 83, 145, 0.08);
   border: none;
   margin: 0;
 }
@@ -344,11 +360,11 @@
 }
 
 .headlineItem:hover {
-  background: rgba(var(--nr-blue-rgb), 0.06);
+  background: rgba(34, 83, 145, 0.06);
 }
 
 .headlineItem:focus-visible {
-  outline: 2px solid var(--nr-blue);
+  outline: 2px solid #225391;
   outline-offset: 2px;
 }
 
@@ -368,8 +384,8 @@
   width: 30px;
   height: 30px;
   border-radius: 7px;
-  background: rgba(var(--nr-blue-rgb), 0.07);
-  color: var(--nr-blue);
+  background: rgba(34, 83, 145, 0.07);
+  color: #225391;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -386,7 +402,7 @@
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--nr-text-1);
+  color: #1a1a1a;
 }
 
 .headlineMeta {
@@ -394,7 +410,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.6875rem;
-  color: var(--nr-text-3);
+  color: rgba(26, 26, 26, 0.48);
   flex-wrap: wrap;
 }
 
@@ -406,7 +422,7 @@
    CATEGORY CHIP
    ═══════════════════════════════════════════════════════════════ */
 
-.chip {
+.chipSm {
   display: inline-flex;
   align-items: center;
   font-weight: 700;
@@ -415,16 +431,19 @@
   line-height: 1.4;
   border-radius: 4px;
   white-space: nowrap;
-}
-
-.chipSm {
-  composes: chip;
   padding: 2px 8px;
   font-size: 0.625rem;
 }
 
 .chipMd {
-  composes: chip;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  border-radius: 4px;
+  white-space: nowrap;
   padding: 3px 10px;
   font-size: 0.6875rem;
 }
@@ -438,13 +457,14 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 12px 24px 18px;
-  border-top: 1px solid rgba(var(--nr-blue-rgb), 0.08);
+  padding: 10px 16px 14px;
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
 }
 
-.tertiaryZoneMobile {
-  composes: tertiaryZone;
-  padding: 10px 16px 14px;
+@media (min-width: 768px) {
+  .tertiaryZone {
+    padding: 12px 24px 18px;
+  }
 }
 
 .tertiaryArchive {
@@ -452,40 +472,20 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SPARSE LAYOUT
+   SPARSE LAYOUT FOOTER
    ═══════════════════════════════════════════════════════════════ */
 
 .sparseFooter {
   display: flex;
   justify-content: flex-end;
-  padding: 14px 24px 18px;
-  border-top: 1px solid rgba(var(--nr-blue-rgb), 0.08);
-}
-
-.sparseFooterMobile {
-  composes: sparseFooter;
   padding: 12px 16px 14px;
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   MOBILE OVERRIDES
-   ═══════════════════════════════════════════════════════════════ */
-
-.headerMobile {
-  composes: header;
-  padding: 18px 16px 10px;
-}
-
-.separatorMobile {
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    rgba(var(--nr-blue-rgb), 0.25) 0%,
-    rgba(var(--nr-orange-rgb), 0.10) 60%,
-    transparent 100%
-  );
-  border: none;
-  margin: 0 16px;
+@media (min-width: 768px) {
+  .sparseFooter {
+    padding: 14px 24px 18px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════

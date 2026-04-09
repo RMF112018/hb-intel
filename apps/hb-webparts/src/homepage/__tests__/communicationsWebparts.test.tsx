@@ -22,7 +22,7 @@ describe('Prompt-06 awareness webparts', () => {
     expect(screen.getByLabelText('Company Pulse')).not.toBeNull();
   });
 
-  it('renders premium newsroom surface with data-hbc-premium attribute', () => {
+  it('renders the shared HbcNewsroomSurface family presentation wrapper', () => {
     const { container } = render(
       <CompanyPulse
         config={{
@@ -33,7 +33,7 @@ describe('Prompt-06 awareness webparts', () => {
       />,
     );
 
-    const surface = container.querySelector('[data-hbc-premium="newsroom-surface"]');
+    const surface = container.querySelector('[data-hbc-presentation="newsroom-surface"]');
     expect(surface).not.toBeNull();
   });
 
