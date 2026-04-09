@@ -11,6 +11,7 @@ import { CompanyPulse } from './webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from './webparts/leadershipMessage/LeadershipMessage.js';
 import { PeopleCultureMerged } from './webparts/peopleCulture/PeopleCultureMerged.js';
 import { PeopleCulturePublic } from './webparts/peopleCulturePublic/PeopleCulturePublic.js';
+import { PeopleCultureCompanion } from './webparts/peopleCultureCompanion/PeopleCultureCompanion.js';
 import { HbKudos } from './webparts/hbKudos/HbKudos.js';
 import { ProjectPortfolioSpotlight } from './webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from './webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
@@ -39,6 +40,8 @@ const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknow
   '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4': ({ config, identity }) => createElement(PeopleCultureMerged, { config, identity }),
   // Phase-14 Prompt-01 structural scaffold: new People & Culture public seam.
   'e39d9662-34c4-43e6-9425-5770f62da626': ({ config, identity, assetBaseUrl }) => createElement(PeopleCulturePublic, { config, identity, assetBaseUrl }),
+  // Phase-14 pc/ Prompt-03: People & Culture HR operating companion webpart.
+  '7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e': ({ config, identity, assetBaseUrl }) => createElement(PeopleCultureCompanion, { config, identity, assetBaseUrl }),
   // Phase-14 Prompt-01 structural scaffold: new HB Kudos public seam.
   'f14e59a3-4d6b-43b2-952e-ba02dea11dad': ({ config, identity, assetBaseUrl }) => createElement(HbKudos, { config, identity, assetBaseUrl }),
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
