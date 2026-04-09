@@ -59,7 +59,12 @@ import { PEOPLE_CULTURE_CONTENT_FAMILIES } from '../../homepage/webparts/peopleC
 import {
   buildCompanionOverview,
   detectHomepageConflicts,
+  type ProfilePhotoResolver,
 } from '../../homepage/helpers/peopleCultureSplitModel.js';
+import {
+  generateMilestoneCandidates,
+  type PeopleSourceRecord,
+} from '../../homepage/helpers/peopleCultureMilestoneGenerator.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import {
   COMPANION_EYEBROW_STYLE,
@@ -76,6 +81,7 @@ import { ApprovalsSection } from './sections/ApprovalsSection.js';
 import { HomepageSection } from './sections/HomepageSection.js';
 import { QuickEditDrawer } from './editing/QuickEditDrawer.js';
 import { FullEditor } from './editing/FullEditor.js';
+import { PreviewPanel } from './preview/PreviewPanel.js';
 
 export type CompanionTabKey =
   | 'overview'
@@ -83,7 +89,8 @@ export type CompanionTabKey =
   | 'celebrationMilestone'
   | 'cultureProgramEvent'
   | 'approvals'
-  | 'homepage';
+  | 'homepage'
+  | 'preview';
 
 const COMPANION_TABS: ReadonlyArray<{ key: CompanionTabKey; label: string }> = [
   { key: 'overview', label: 'Overview' },
@@ -92,6 +99,7 @@ const COMPANION_TABS: ReadonlyArray<{ key: CompanionTabKey; label: string }> = [
   { key: 'cultureProgramEvent', label: 'Culture Programs / Events' },
   { key: 'approvals', label: 'Approvals' },
   { key: 'homepage', label: 'Homepage' },
+  { key: 'preview', label: 'Preview' },
 ];
 
 export interface PeopleCultureCompanionProps {
@@ -99,6 +107,28 @@ export interface PeopleCultureCompanionProps {
   splitConfig?: Partial<PeopleCultureCompanionConfig>;
   identity?: HomepageIdentityInput;
   assetBaseUrl?: string;
+  /**
+   * Profile-photo resolver used by the multi-context preview panel
+   * and by the eventual content-family surfaces that render media.
+   * When omitted, `profilePhoto` sources fall through to
+   * placeholders — matching the same fail-closed behavior as the
+   * public webpart runtime.
+   */
+  profilePhotoResolver?: ProfilePhotoResolver;
+  /**
+   * Optional trusted people-source snapshot. When supplied, the
+   * companion seeds the milestone candidate queue at mount time via
+   * `generateMilestoneCandidates`, deduping against any candidates
+   * already present in the split config. Real persistence lands in
+   * a later prompt; for now the generated candidates live in the
+   * companion's internal reducer alongside HR-authored candidates.
+   */
+  peopleSource?: ReadonlyArray<PeopleSourceRecord>;
+  /**
+   * Forward window (in days) for the milestone generator. Defaults
+   * to 14. Ignored unless `peopleSource` is supplied.
+   */
+  milestoneWindowDays?: number;
 }
 
 interface CompanionState {
@@ -353,10 +383,28 @@ function resolveCompanionConfig(
   };
 }
 
-function initialState(config: PeopleCultureCompanionConfig): CompanionState {
+interface InitialStateOptions {
+  peopleSource?: ReadonlyArray<PeopleSourceRecord>;
+  milestoneWindowDays?: number;
+  now?: Date;
+}
+
+function initialState(
+  config: PeopleCultureCompanionConfig,
+  options: InitialStateOptions = {},
+): CompanionState {
+  const seedCandidates = config.milestoneCandidates ?? [];
+  const generated =
+    options.peopleSource && options.peopleSource.length > 0
+      ? generateMilestoneCandidates(options.peopleSource, {
+          referenceDate: options.now,
+          windowDays: options.milestoneWindowDays,
+          dedupeAgainst: seedCandidates,
+        })
+      : [];
   return {
     items: config.items ?? [],
-    milestoneCandidates: config.milestoneCandidates ?? [],
+    milestoneCandidates: [...seedCandidates, ...generated],
     intakeSubmissions: config.intakeSubmissions ?? [],
   };
 }
@@ -365,16 +413,24 @@ export function PeopleCultureCompanion({
   config,
   splitConfig,
   identity,
+  profilePhotoResolver,
+  peopleSource,
+  milestoneWindowDays,
 }: PeopleCultureCompanionProps): React.JSX.Element {
   const resolvedConfig = React.useMemo(
     () => resolveCompanionConfig(splitConfig, config),
     [config, splitConfig],
   );
 
+  const initialStateOptions = React.useMemo<InitialStateOptions>(
+    () => ({ peopleSource, milestoneWindowDays }),
+    [peopleSource, milestoneWindowDays],
+  );
+
   const [state, dispatch] = React.useReducer(
     companionReducer,
-    resolvedConfig,
-    initialState,
+    undefined,
+    () => initialState(resolvedConfig, initialStateOptions),
   );
 
   // Keep reducer state in sync when the incoming config changes.
@@ -384,10 +440,10 @@ export function PeopleCultureCompanion({
       configRef.current = resolvedConfig;
       dispatch({
         type: 'replaceState',
-        payload: initialState(resolvedConfig),
+        payload: initialState(resolvedConfig, initialStateOptions),
       });
     }
-  }, [resolvedConfig]);
+  }, [resolvedConfig, initialStateOptions]);
 
   const [activeTab, setActiveTab] = React.useState<CompanionTabKey>('overview');
   const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>();
@@ -413,14 +469,36 @@ export function PeopleCultureCompanion({
     [state.items],
   );
 
+  // Propagate detected conflicts onto the items the companion renders,
+  // so preview frames, approval rows, and homepage rows all agree about
+  // which items are currently conflicted without the reducer persisting
+  // transient conflict state.
+  const itemsWithConflicts = React.useMemo(
+    () =>
+      state.items.map((item) => {
+        const reason = homepageConflicts.get(item.id);
+        const currentReason = item.homepage.conflictReason;
+        if (reason === currentReason) return item;
+        if (!reason && !currentReason) return item;
+        return {
+          ...item,
+          homepage: {
+            ...item.homepage,
+            conflictReason: reason,
+          },
+        };
+      }),
+    [state.items, homepageConflicts],
+  );
+
   const selectedItem = React.useMemo(
-    () => (selectedItemId ? state.items.find((item) => item.id === selectedItemId) : undefined),
-    [selectedItemId, state.items],
+    () => (selectedItemId ? itemsWithConflicts.find((item) => item.id === selectedItemId) : undefined),
+    [selectedItemId, itemsWithConflicts],
   );
 
   const fullEditorItem = React.useMemo(
-    () => (fullEditorItemId ? state.items.find((item) => item.id === fullEditorItemId) : undefined),
-    [fullEditorItemId, state.items],
+    () => (fullEditorItemId ? itemsWithConflicts.find((item) => item.id === fullEditorItemId) : undefined),
+    [fullEditorItemId, itemsWithConflicts],
   );
 
   const heading = resolvedConfig.heading ?? 'People & Culture Operating Console';
@@ -499,15 +577,20 @@ export function PeopleCultureCompanion({
       {contentFamilyKeys.has(activeTab as PeopleCultureContentFamily) ? (
         <ContentFamilySection
           family={activeTab as PeopleCultureContentFamily}
-          items={state.items.filter((item) => item.family === activeTab)}
+          items={itemsWithConflicts.filter((item) => item.family === activeTab)}
+          profilePhotoResolver={profilePhotoResolver}
           onSelect={(id) => setSelectedItemId(id)}
           onOpenFullEditor={(id) => setFullEditorItemId(id)}
+          onPreview={(id) => {
+            setSelectedItemId(id);
+            setActiveTab('preview');
+          }}
         />
       ) : null}
 
       {activeTab === 'approvals' ? (
         <ApprovalsSection
-          items={state.items.filter((item) => item.lifecycleState === 'needsApproval')}
+          items={itemsWithConflicts.filter((item) => item.lifecycleState === 'needsApproval')}
           currentUserRole={currentUserRole}
           currentUser={{ id: reviewerId, displayName: reviewerName }}
           onApprove={(id) =>
@@ -534,7 +617,7 @@ export function PeopleCultureCompanion({
 
       {activeTab === 'homepage' ? (
         <HomepageSection
-          items={state.items}
+          items={itemsWithConflicts}
           conflicts={homepageConflicts}
           currentUserRole={currentUserRole}
           onSetTier={(id, tier, hrOverride) =>
@@ -546,7 +629,14 @@ export function PeopleCultureCompanion({
         />
       ) : null}
 
-      {selectedItem ? (
+      {activeTab === 'preview' ? (
+        <PreviewPanel
+          item={selectedItem}
+          profilePhotoResolver={profilePhotoResolver}
+        />
+      ) : null}
+
+      {selectedItem && activeTab !== 'preview' ? (
         <QuickEditDrawer
           item={selectedItem}
           onClose={() => setSelectedItemId(undefined)}

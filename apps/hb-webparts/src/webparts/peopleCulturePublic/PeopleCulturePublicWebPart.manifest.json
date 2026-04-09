@@ -3,7 +3,7 @@
   "id": "e39d9662-34c4-43e6-9425-5770f62da626",
   "alias": "PeopleCulturePublicWebPart",
   "componentType": "WebPart",
-  "version": "0.0.3.0",
+  "version": "0.0.4.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],

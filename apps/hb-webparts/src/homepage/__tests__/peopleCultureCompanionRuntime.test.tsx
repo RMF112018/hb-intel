@@ -92,7 +92,7 @@ function baseConfig(): PeopleCultureCompanionConfig {
 }
 
 describe('PeopleCultureCompanion shell', () => {
-  it('renders all six top-level tabs', () => {
+  it('renders all top-level tabs', () => {
     const { getAllByRole } = render(<PeopleCultureCompanion splitConfig={baseConfig()} />);
     const tabs = getAllByRole('tab').map((el) => el.textContent);
     expect(tabs).toEqual([
@@ -102,6 +102,7 @@ describe('PeopleCultureCompanion shell', () => {
       'Culture Programs / Events',
       'Approvals',
       'Homepage',
+      'Preview',
     ]);
   });
 

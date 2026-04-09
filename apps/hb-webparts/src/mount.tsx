@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { ReferenceHomepageComposition } from './homepage/ReferenceHomepageComposition.js';
 import { storeSiteUrl } from './homepage/data/spContext.js';
+import { createSharePointUserPhotoResolver } from './homepage/helpers/peopleCultureProfilePhotoResolver.js';
 import { PersonalizedWelcomeHeader } from './webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from './webparts/hbHeroBanner/HbHeroBanner.js';
 import { PriorityActionsRail } from './webparts/priorityActionsRail/PriorityActionsRail.js';
@@ -27,7 +28,14 @@ interface MountConfig {
   assetBaseUrl?: unknown;
 }
 
-const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknown>; identity: HomepageIdentityInput; assetBaseUrl?: string }) => ReactNode> = {
+interface WebPartRendererContext {
+  config?: Record<string, unknown>;
+  identity: HomepageIdentityInput;
+  assetBaseUrl?: string;
+  siteUrl?: string;
+}
+
+const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => ReactNode> = {
   '46bfde64-f0cb-4f62-9f6b-a466f8fadc1f': ({ config, identity }) => createElement(PersonalizedWelcomeHeader, { config, identity }),
   '39762a4d-c7fd-44a6-a11e-4f8de9f5778d': ({ config }) => createElement(HbHeroBanner, { config }),
   'b3f07190-79cf-437d-a1d6-ecbf3f77e616': ({ config }) => createElement(PriorityActionsRail, { config }),
@@ -38,10 +46,32 @@ const WEBPART_RENDERERS: Record<string, (props: { config?: Record<string, unknow
   // with already-placed SharePoint page instances. Phase-14 Prompt-01 split
   // into PeopleCulturePublic + HbKudos below; legacy stays live until rollout.
   '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4': ({ config, identity }) => createElement(PeopleCultureMerged, { config, identity }),
-  // Phase-14 Prompt-01 structural scaffold: new People & Culture public seam.
-  'e39d9662-34c4-43e6-9425-5770f62da626': ({ config, identity, assetBaseUrl }) => createElement(PeopleCulturePublic, { config, identity, assetBaseUrl }),
+  // Phase-14 pc/ Prompt-02: People & Culture public webpart (real runtime).
+  // Prompt-04 wires a SharePoint profile-photo resolver so profile-photo-first
+  // media renders through `/_layouts/15/userphoto.aspx` when a site URL is
+  // available.
+  'e39d9662-34c4-43e6-9425-5770f62da626': ({ config, identity, assetBaseUrl, siteUrl }) =>
+    createElement(PeopleCulturePublic, {
+      config,
+      identity,
+      assetBaseUrl,
+      profilePhotoResolver: siteUrl
+        ? createSharePointUserPhotoResolver({ siteUrl })
+        : undefined,
+    }),
   // Phase-14 pc/ Prompt-03: People & Culture HR operating companion webpart.
-  '7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e': ({ config, identity, assetBaseUrl }) => createElement(PeopleCultureCompanion, { config, identity, assetBaseUrl }),
+  // Prompt-04 passes the same profile-photo resolver so the multi-context
+  // preview panel and content-family list rows render the same media the
+  // public surface will.
+  '7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e': ({ config, identity, assetBaseUrl, siteUrl }) =>
+    createElement(PeopleCultureCompanion, {
+      config,
+      identity,
+      assetBaseUrl,
+      profilePhotoResolver: siteUrl
+        ? createSharePointUserPhotoResolver({ siteUrl })
+        : undefined,
+    }),
   // Phase-14 Prompt-01 structural scaffold: new HB Kudos public seam.
   'f14e59a3-4d6b-43b2-952e-ba02dea11dad': ({ config, identity, assetBaseUrl }) => createElement(HbKudos, { config, identity, assetBaseUrl }),
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
@@ -68,6 +98,7 @@ export async function mount(
       ? (config.webPartProperties as Record<string, unknown>)
       : undefined;
   const assetBaseUrl = typeof config?.assetBaseUrl === 'string' ? config.assetBaseUrl : undefined;
+  const siteUrl = spfxContext?.pageContext?.web?.absoluteUrl;
   const identity: HomepageIdentityInput = {
     displayName: spfxContext?.pageContext?.user?.displayName,
     email: spfxContext?.pageContext?.user?.email,
@@ -76,7 +107,7 @@ export async function mount(
 
   root = createRoot(el);
   if (renderWebPart) {
-    root.render(renderWebPart({ config: webPartProperties, identity, assetBaseUrl }));
+    root.render(renderWebPart({ config: webPartProperties, identity, assetBaseUrl, siteUrl }));
     return;
   }
   root.render(createElement(ReferenceHomepageComposition));

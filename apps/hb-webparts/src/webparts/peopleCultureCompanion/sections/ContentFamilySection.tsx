@@ -22,6 +22,10 @@ import type {
 } from '../../../homepage/webparts/peopleCultureSplitContracts.js';
 import { PEOPLE_CULTURE_LIFECYCLE_STATES } from '../../../homepage/webparts/peopleCultureSplitContracts.js';
 import {
+  resolveMediaSource,
+  type ProfilePhotoResolver,
+} from '../../../homepage/helpers/peopleCultureSplitModel.js';
+import {
   BADGE_STYLE,
   CALENDAR_CELL_STYLE,
   CALENDAR_DAY_LABEL_STYLE,
@@ -61,13 +65,23 @@ const LIFECYCLE_LABEL: Record<PeopleCultureLifecycleState, string> = {
   suppressed: 'Suppressed',
 };
 
+const MEDIA_SOURCE_LABEL: Record<string, string> = {
+  profilePhoto: 'Profile photo',
+  hrUpload: 'HR upload',
+  campaignArtwork: 'Campaign art',
+  eventPhotography: 'Event photo',
+  none: 'No image',
+};
+
 export type ContentFamilyView = 'list' | 'calendar';
 
 export interface ContentFamilySectionProps {
   family: PeopleCultureContentFamily;
   items: PeopleCultureItem[];
+  profilePhotoResolver?: ProfilePhotoResolver;
   onSelect: (id: string) => void;
   onOpenFullEditor: (id: string) => void;
+  onPreview: (id: string) => void;
 }
 
 function parseMs(value: string | undefined): number | undefined {
@@ -158,8 +172,10 @@ function CalendarView({
 export function ContentFamilySection({
   family,
   items,
+  profilePhotoResolver,
   onSelect,
   onOpenFullEditor,
+  onPreview,
 }: ContentFamilySectionProps): React.JSX.Element {
   const [lifecycleFilter, setLifecycleFilter] = React.useState<PeopleCultureLifecycleState>('live');
   const [view, setView] = React.useState<ContentFamilyView>('list');
@@ -256,48 +272,70 @@ export function ContentFamilySection({
         </div>
       ) : (
         <ul style={LIST_STYLE} data-hbc-companion-view="list">
-          {filtered.map((item) => (
-            <li
-              key={item.id}
-              style={LIST_ROW_STYLE}
-              data-hbc-companion-item-id={item.id}
-              data-hbc-companion-item-lifecycle={item.lifecycleState}
-            >
-              <div
-                style={LIST_ROW_TEXT_STYLE}
-                onClick={() => onSelect(item.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    onSelect(item.id);
-                  }
-                }}
+          {filtered.map((item) => {
+            const resolvedMedia = resolveMediaSource(item.mediaSource, profilePhotoResolver);
+            const activeSourceKind = resolvedMedia?.sourceKind ?? item.mediaSource.kind;
+            return (
+              <li
+                key={item.id}
+                style={LIST_ROW_STYLE}
+                data-hbc-companion-item-id={item.id}
+                data-hbc-companion-item-lifecycle={item.lifecycleState}
+                data-hbc-companion-item-media-source={activeSourceKind}
               >
-                <p style={LIST_TITLE_STYLE}>{item.title}</p>
-                <p style={LIST_BODY_STYLE}>{item.body}</p>
-                <div style={LIST_META_ROW_STYLE}>
-                  <span style={BADGE_STYLE}>{item.homepage.tier}</span>
-                  {item.homepage.isPinned ? (
-                    <span style={PINNED_BADGE_STYLE}>Pinned</span>
-                  ) : null}
-                  {item.approvalTrigger !== 'standard' ? (
-                    <span style={BADGE_STYLE}>{item.approvalTrigger}</span>
-                  ) : null}
+                <div
+                  style={LIST_ROW_TEXT_STYLE}
+                  onClick={() => onSelect(item.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onSelect(item.id);
+                    }
+                  }}
+                >
+                  <p style={LIST_TITLE_STYLE}>{item.title}</p>
+                  <p style={LIST_BODY_STYLE}>{item.body}</p>
+                  <div style={LIST_META_ROW_STYLE}>
+                    <span style={BADGE_STYLE}>{item.homepage.tier}</span>
+                    {item.homepage.isPinned ? (
+                      <span style={PINNED_BADGE_STYLE}>Pinned</span>
+                    ) : null}
+                    {item.approvalTrigger !== 'standard' ? (
+                      <span style={BADGE_STYLE}>{item.approvalTrigger}</span>
+                    ) : null}
+                    <span style={BADGE_STYLE}>
+                      {MEDIA_SOURCE_LABEL[activeSourceKind] ?? activeSourceKind}
+                    </span>
+                    {item.homepage.conflictReason ? (
+                      <span style={BADGE_STYLE}>Conflict</span>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-              <button
-                type="button"
-                style={SECONDARY_BUTTON_STYLE}
-                onClick={() => onOpenFullEditor(item.id)}
-                data-hbc-companion-action="open-full-editor"
-                data-hbc-companion-action-target={item.id}
-              >
-                Full editor
-              </button>
-            </li>
-          ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <button
+                    type="button"
+                    style={SECONDARY_BUTTON_STYLE}
+                    onClick={() => onPreview(item.id)}
+                    data-hbc-companion-action="preview-item"
+                    data-hbc-companion-action-target={item.id}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    type="button"
+                    style={SECONDARY_BUTTON_STYLE}
+                    onClick={() => onOpenFullEditor(item.id)}
+                    data-hbc-companion-action="open-full-editor"
+                    data-hbc-companion-action-target={item.id}
+                  >
+                    Full editor
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
