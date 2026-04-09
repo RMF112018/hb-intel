@@ -1045,3 +1045,338 @@
     transform: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PEOPLE-CULTURE-HOMEPAGE MODIFIER (W01r-P26)
+   ───────────────────────────────────────────────────────────────
+   Scoped homepage-fit refinement for the `PeopleCultureMerged`
+   webpart. The shared surface still ships its authored scale for
+   wider-section consumers, so this modifier is opted into only by
+   the homepage consumer via `variant="people-culture-homepage"`.
+
+   Problem the modifier solves:
+   - The hero band is tall (22/22 → 34/40/30) for a narrow
+     SharePoint column and its heading inflates up to 2.0625rem.
+   - The spotlight card commits large padding (up to 32 28 28 32)
+     and an 18→28 internal gap, giving the featured recognition
+     excess vertical whitespace.
+   - At viewport width ≥ 1024px the base body flips to
+     `flex-direction: row` with a 62% spotlight / 34% rail split
+     and a 420px spotlight min-width + 280px rail min-width. In a
+     narrow SharePoint column on a desktop browser the viewport is
+     still ≥ 1024px, so the 2-column layout fires even though the
+     container is only ~700px wide — squeezing both zones.
+   - With the 2-col split, the right rail starts too low and reads
+     as visually buried under the tall spotlight card.
+   - Recent recognition rows, rail announcements, and celebration
+     tiles all use the authored wider-section scale.
+
+   Strategy:
+   - Force `.body` to stay column at all breakpoints so the rail
+     always renders full-width below the spotlight in the narrow
+     SharePoint section. The rail keeps its editorial warm-tinted
+     background, loses the left border, and picks up a tighter
+     top border for a clean separator.
+   - Reduce hero padding, heading scale, icon size, and subcaption
+     so the hero feels like a section masthead rather than a
+     marketing cover.
+   - Tighten spotlight padding, card padding + gap, ribbon scale,
+     title scale (1.4375→1.1875rem / 1.75→1.3125rem /
+     1.9375→1.375rem), excerpt measure (56ch → 48ch) and line
+     clamp (4 → 3), meta row padding, and actions row margins.
+   - Force the spotlight card to stay column at 768+ so avatars
+     stack above content in the narrow section instead of fighting
+     for horizontal room.
+   - Compact recent recognition rows, rail section padding,
+     announcement rows, and celebration tiles. Keep the
+     celebration grid at 2 columns everywhere (it would otherwise
+     degrade to 1 column between 1024 and 1200).
+
+   Specificity note: every rule below is `.peopleCultureHomepage
+   .child` (specificity 0,2,0), which overrides the base `.child`
+   rules (specificity 0,1,0) inside their own media-query blocks
+   without needing `!important`.
+   ═══════════════════════════════════════════════════════════════ */
+
+.peopleCultureHomepage {
+  border-radius: 16px;
+  box-shadow:
+    0 1px 3px rgba(229, 126, 70, 0.08),
+    0 6px 18px rgba(229, 126, 70, 0.08),
+    0 20px 44px rgba(34, 83, 145, 0.06);
+}
+
+/* ── Hero (homepage fit) ── */
+.peopleCultureHomepage .hero {
+  gap: 10px;
+  padding: 18px 20px 18px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.peopleCultureHomepage .heroCopy {
+  gap: 2px;
+}
+
+.peopleCultureHomepage .heroHeading {
+  font-size: 1.3125rem;
+  gap: 8px;
+}
+
+.peopleCultureHomepage .heroIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.peopleCultureHomepage .heroSubcaption {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  max-width: 42ch;
+}
+
+.peopleCultureHomepage .heroActions {
+  gap: 8px;
+}
+
+.peopleCultureHomepage .giveKudosPrimary {
+  padding: 8px 14px;
+  font-size: 0.75rem;
+  border-radius: 9px;
+}
+
+/* ── Body: force column at all breakpoints ── */
+.peopleCultureHomepage .body {
+  flex-direction: column;
+}
+
+/* ── Spotlight zone (homepage fit) ── */
+.peopleCultureHomepage .spotlight {
+  flex: 1 1 100%;
+  min-width: 0;
+  padding: 18px 18px 20px;
+}
+
+.peopleCultureHomepage .spotlightCard {
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 18px 18px;
+  border-radius: 14px;
+}
+
+.peopleCultureHomepage .spotlightRibbon {
+  top: -11px;
+  left: 16px;
+  padding: 6px 12px;
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+}
+
+.peopleCultureHomepage .spotlightAvatars {
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.peopleCultureHomepage .spotlightHeroAvatarRing {
+  padding: 3px;
+}
+
+.peopleCultureHomepage .spotlightHeroAvatarRingInner {
+  padding: 2px;
+}
+
+.peopleCultureHomepage .spotlightContent {
+  gap: 8px;
+}
+
+.peopleCultureHomepage .spotlightRecipientTag {
+  font-size: 0.625rem;
+  padding: 2px 8px;
+  letter-spacing: 0.06em;
+}
+
+.peopleCultureHomepage .spotlightTitle {
+  font-size: 1.1875rem;
+  line-height: 1.18;
+  max-width: 28ch;
+}
+
+.peopleCultureHomepage .spotlightExcerpt {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  max-width: 48ch;
+  -webkit-line-clamp: 3;
+}
+
+.peopleCultureHomepage .spotlightMeta {
+  padding-top: 8px;
+  gap: 10px;
+  font-size: 0.6875rem;
+}
+
+.peopleCultureHomepage .metaCount {
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+}
+
+.peopleCultureHomepage .spotlightActions {
+  margin-top: 2px;
+  padding-top: 2px;
+  gap: 8px;
+}
+
+.peopleCultureHomepage .giveKudosGhostInline {
+  padding: 7px 14px;
+  font-size: 0.75rem;
+  border-radius: 9px;
+}
+
+/* ── Recent recognition list (homepage fit) ── */
+.peopleCultureHomepage .recentList {
+  margin-top: 16px;
+  gap: 4px;
+}
+
+.peopleCultureHomepage .sectionLabel {
+  margin-bottom: 6px;
+  font-size: 0.625rem;
+}
+
+.peopleCultureHomepage .recentRow {
+  gap: 10px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 10px;
+}
+
+.peopleCultureHomepage .recentHeadline {
+  font-size: 0.875rem;
+}
+
+.peopleCultureHomepage .recentMeta {
+  font-size: 0.6875rem;
+}
+
+.peopleCultureHomepage .recentCount {
+  padding: 3px 8px;
+  font-size: 0.625rem;
+}
+
+/* ── Rail (homepage fit — always full-width below spotlight) ── */
+.peopleCultureHomepage .rail {
+  flex: 1 1 100%;
+  min-width: 0;
+  border-top: 1px solid rgba(229, 126, 70, 0.12);
+  border-left: none;
+}
+
+.peopleCultureHomepage .railHighlights {
+  padding: 16px 18px 14px;
+}
+
+.peopleCultureHomepage .railCelebrations {
+  padding: 14px 18px 16px;
+}
+
+.peopleCultureHomepage .railFooter {
+  padding: 10px 18px 14px;
+}
+
+.peopleCultureHomepage .announcementRow {
+  padding: 10px 12px 10px 14px;
+  gap: 10px;
+}
+
+.peopleCultureHomepage .announcementName {
+  font-size: 0.8125rem;
+}
+
+.peopleCultureHomepage .announcementHeadline {
+  font-size: 0.6875rem;
+}
+
+/* Keep celebration grid at 2 columns at every breakpoint so it
+   feels balanced below the spotlight in a narrow column. */
+.peopleCultureHomepage .celebrationGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.peopleCultureHomepage .celebrationTile {
+  padding: 8px 10px;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.peopleCultureHomepage .celebrationAvatar {
+  padding: 2px;
+}
+
+.peopleCultureHomepage .celebrationAvatarInner {
+  padding: 1px;
+}
+
+.peopleCultureHomepage .celebrationName {
+  font-size: 0.75rem;
+}
+
+.peopleCultureHomepage .celebrationMeta {
+  font-size: 0.625rem;
+}
+
+/* Tablet / desktop holds — the Safety and Leadership variants
+   reassert their narrow-fit values at wider viewports because the
+   SharePoint column stays narrow even on desktop. Same applies
+   here: we reassert hero and spotlight values so the base 768+
+   and 1200+ media queries don't reinflate the module. */
+
+@media (min-width: 768px) {
+  .peopleCultureHomepage .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px 24px 20px;
+    gap: 12px;
+  }
+  .peopleCultureHomepage .heroHeading {
+    font-size: 1.4375rem;
+  }
+  .peopleCultureHomepage .spotlight {
+    padding: 22px 22px 24px;
+  }
+  .peopleCultureHomepage .spotlightCard {
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 22px 22px;
+  }
+  .peopleCultureHomepage .spotlightRibbon {
+    left: 20px;
+    padding: 7px 14px;
+    font-size: 0.625rem;
+  }
+  .peopleCultureHomepage .spotlightTitle {
+    font-size: 1.3125rem;
+  }
+  .peopleCultureHomepage .spotlightExcerpt {
+    font-size: 0.9375rem;
+  }
+  .peopleCultureHomepage .railHighlights {
+    padding: 18px 22px 16px;
+  }
+  .peopleCultureHomepage .railCelebrations {
+    padding: 16px 22px 18px;
+  }
+  .peopleCultureHomepage .railFooter {
+    padding: 12px 22px 16px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .peopleCultureHomepage .hero {
+    padding: 24px 26px 22px;
+  }
+  .peopleCultureHomepage .heroHeading {
+    font-size: 1.5rem;
+  }
+  .peopleCultureHomepage .spotlightTitle {
+    font-size: 1.375rem;
+  }
+}

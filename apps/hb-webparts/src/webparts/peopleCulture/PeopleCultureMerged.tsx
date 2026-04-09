@@ -221,6 +221,7 @@ export function PeopleCultureMerged({
         onGiveKudos={composerActions.open}
         viewAllHref="#view-all-kudos"
         celebrateHref="#celebrate"
+        variant="people-culture-homepage"
       />
 
       <HbcKudosComposerFlyout

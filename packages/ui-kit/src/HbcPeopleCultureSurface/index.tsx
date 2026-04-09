@@ -87,6 +87,17 @@ export interface PeopleCultureSurfaceModel {
 // Props
 // ---------------------------------------------------------------------------
 
+/**
+ * Layout variant. `"people-culture-homepage"` opts into a scoped
+ * homepage-fit refinement designed for the PeopleCultureMerged
+ * webpart's narrow SharePoint column (tighter hero, spotlight,
+ * recent recognition list, and right-side rail; rail always renders
+ * full-width below the spotlight instead of as a 2-col sidebar).
+ * Default is the wider authored recognition scale used by other
+ * consumers.
+ */
+export type HbcPeopleCultureSurfaceVariant = 'default' | 'people-culture-homepage';
+
 export interface HbcPeopleCultureSurfaceProps {
   model: PeopleCultureSurfaceModel;
   /** Open the kudos composer (or any consumer-defined create flow). */
@@ -99,6 +110,13 @@ export interface HbcPeopleCultureSurfaceProps {
   heroEyebrow?: string;
   /** Hero sub-caption under the headline. Defaults to "Celebrating our people". */
   heroSubcaption?: string;
+  /**
+   * Layout variant. Use `"people-culture-homepage"` from
+   * PeopleCultureMerged to opt into the homepage-fit refinement.
+   * Defaults to `"default"` so other recognition consumers are
+   * unaffected.
+   */
+  variant?: HbcPeopleCultureSurfaceVariant;
   className?: string;
   'aria-label'?: string;
 }
@@ -573,6 +591,7 @@ export function HbcPeopleCultureSurface({
   celebrateHref,
   heroEyebrow = 'People & Culture',
   heroSubcaption = 'Celebrating our people',
+  variant = 'default',
   className,
   'aria-label': ariaLabel,
 }: HbcPeopleCultureSurfaceProps): React.JSX.Element {
@@ -582,9 +601,14 @@ export function HbcPeopleCultureSurface({
   return (
     <section
       aria-label={ariaLabel ?? model.heading}
-      className={clsx(styles.root, className)}
+      className={clsx(
+        styles.root,
+        variant === 'people-culture-homepage' && styles.peopleCultureHomepage,
+        className,
+      )}
       data-hbc-presentation="people-culture-surface"
       data-hbc-homepage="people-culture"
+      data-hbc-people-culture-variant={variant}
     >
       <HeroBanner
         heading={model.heading}

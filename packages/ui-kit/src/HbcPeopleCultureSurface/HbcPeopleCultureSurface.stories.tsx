@@ -1,6 +1,12 @@
 /**
  * HbcPeopleCultureSurface stories — visual proof for the signature
  * People & Culture homepage surface family. Wave 01 follow-on.
+ *
+ * W01r-P26: adds `PeopleCultureHomepageNarrow` that renders the
+ * full model inside a ~720px SharePoint-column wrapper with
+ * `variant="people-culture-homepage"`, proving the new scoped
+ * refinement keeps the rail full-width below the spotlight and
+ * tightens the hero + spotlight + recent list + rail rhythm.
  */
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -74,6 +80,7 @@ const sparseModel: PeopleCultureSurfaceModel = {
 };
 
 const wrapStyle: React.CSSProperties = { maxWidth: 960 };
+const homepageWrapStyle: React.CSSProperties = { maxWidth: 720 };
 const mobileWrapStyle: React.CSSProperties = { maxWidth: 420 };
 
 export const Default: Story = {
@@ -97,6 +104,22 @@ export const Sparse: Story = {
       <HbcPeopleCultureSurface
         model={sparseModel}
         viewAllHref="#all"
+        onGiveKudos={() => {
+          /* story noop */
+        }}
+      />
+    </div>
+  ),
+};
+
+export const PeopleCultureHomepageNarrow: Story = {
+  render: () => (
+    <div style={homepageWrapStyle}>
+      <HbcPeopleCultureSurface
+        model={fullModel}
+        viewAllHref="#all"
+        celebrateHref="#celebrate"
+        variant="people-culture-homepage"
         onGiveKudos={() => {
           /* story noop */
         }}
