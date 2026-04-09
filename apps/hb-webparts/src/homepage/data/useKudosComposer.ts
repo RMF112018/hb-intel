@@ -4,25 +4,24 @@
  * Manages draft form state, validation, and submission lifecycle for
  * the People & Culture Kudos Composer flyout. Submit is wired to a
  * pluggable async callback so the data layer remains decoupled.
+ *
+ * Wave 01 follow-on: the draft and validation-errors shapes now live in
+ * `@hbc/ui-kit/homepage` (shared with `HbcKudosComposerForm` /
+ * `HbcKudosComposerPreview`). They are re-exported from this module so
+ * existing webpart imports continue to work without churn.
  */
 import { useState, useCallback, useMemo } from 'react';
+import type {
+  KudosComposerDraft as SharedKudosComposerDraft,
+  KudosComposerValidationErrors as SharedKudosComposerValidationErrors,
+} from '@hbc/ui-kit/homepage';
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
 export type ComposerStatus = 'idle' | 'editing' | 'submitting' | 'success' | 'error';
 
-export interface KudosComposerDraft {
-  recipientNames: string;
-  headline: string;
-  excerpt: string;
-  details: string;
-}
-
-export interface KudosComposerValidationErrors {
-  recipientNames?: string;
-  headline?: string;
-  excerpt?: string;
-}
+export type KudosComposerDraft = SharedKudosComposerDraft;
+export type KudosComposerValidationErrors = SharedKudosComposerValidationErrors;
 
 export type SubmitFn = (draft: KudosComposerDraft) => Promise<void>;
 

@@ -178,9 +178,56 @@ export type {
   OperationalSignal,
 } from './HbcOperationalSurface/index.js';
 
-export type HomepageSurfaceClass = 'hero' | 'welcome' | 'editorial' | 'utility' | 'operational' | 'discovery';
+// ── Wave 01 follow-on — People & Culture surface family ──────────────
+// Cohesive presentation-lane surface for the warm-celebratory recognition
+// zone, plus the kudos composer flyout/form/preview group and a shared
+// avatar stack primitive used by both.
+
+export { HbcPeopleCultureSurface } from './HbcPeopleCultureSurface/index.js';
+export type {
+  HbcPeopleCultureSurfaceProps,
+  PeopleCultureSurfaceModel,
+  PeopleCultureKudosModel,
+  PeopleCultureRecipient,
+  PeopleCultureAnnouncement,
+  PeopleCultureCelebration,
+  PeopleCultureAnnouncementType,
+  PeopleCultureCelebrationType,
+  KudosSpotlightItem,
+  KudosRailItem,
+} from './HbcPeopleCultureSurface/index.js';
+
+export {
+  HbcKudosComposerFlyout,
+  HbcKudosComposerForm,
+  HbcKudosComposerPreview,
+} from './HbcKudosComposer/index.js';
+export type {
+  HbcKudosComposerFlyoutProps,
+  HbcKudosComposerFormProps,
+  HbcKudosComposerPreviewProps,
+  KudosComposerDraft,
+  KudosComposerValidationErrors,
+} from './HbcKudosComposer/index.js';
+
+export { HbcAvatarStack } from './HbcAvatarStack/index.js';
+export type {
+  HbcAvatarStackProps,
+  HbcAvatarStackPerson,
+  HbcAvatarSize,
+} from './HbcAvatarStack/index.js';
+
+export type HomepageSurfaceClass =
+  | 'hero'
+  | 'welcome'
+  | 'editorial'
+  | 'utility'
+  | 'operational'
+  | 'discovery'
+  | 'people-culture';
 
 export type HomepagePrimitiveName =
+  | 'HbcAvatarStack'
   | 'HbcBanner'
   | 'HbcButton'
   | 'HbcCard'
@@ -195,8 +242,12 @@ export type HomepagePrimitiveName =
   | 'HbcHomepageMetadataRow'
   | 'HbcHomepageSectionShell'
   | 'HbcHomepageSurfaceCard'
+  | 'HbcKudosComposerFlyout'
+  | 'HbcKudosComposerForm'
+  | 'HbcKudosComposerPreview'
   | 'HbcLauncherSurface'
   | 'HbcOperationalSurface'
+  | 'HbcPeopleCultureSurface'
   | 'HbcSearch'
   | 'HbcSignatureHeroSurface'
   | 'HbcSpinner'
@@ -361,5 +412,13 @@ export const HBC_HOMEPAGE_SURFACE_FAMILIES = {
     radius: '10px',
     background: 'warm-tinted',
     border: 'warm-tinted border',
+  },
+  peopleCulture: {
+    surfaces: ['people-culture'] as const,
+    character: 'warm-celebratory, recognition-forward, human-centered',
+    shadow: 'elevationEditorial',
+    radius: '16px',
+    background: 'warm cream spotlight + cool mist rail',
+    border: 'warm gradient hero band',
   },
 } as const;

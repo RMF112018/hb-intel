@@ -124,6 +124,24 @@ const useStyles = makeStyles({
     paddingLeft: `${HBC_SPACE_LG}px`,
     paddingRight: `${HBC_SPACE_LG}px`,
   },
+
+  /* ── People & Culture surfaces ──────────────────────────── */
+  // Wave 01 follow-on. Warm cream backdrop with cool mist border accent
+  // for the recognition zone. The full surface composition lives in
+  // HbcPeopleCultureSurface; this surface-card variant exists so the
+  // generic surface-card primitive can render a thin people-culture
+  // wrapper for ad-hoc local use without contaminating other families.
+  'people-culture': {
+    backgroundColor: 'rgba(229, 126, 70, 0.04)',
+    boxShadow: elevationEditorial,
+    borderRadius: '14px',
+    ...shorthands.border('1px', 'solid', 'rgba(229, 126, 70, 0.12)'),
+    ...shorthands.borderLeft('4px', 'solid', 'rgb(229, 126, 70)'),
+    paddingTop: `${HBC_SPACE_LG}px`,
+    paddingBottom: `${HBC_SPACE_LG}px`,
+    paddingLeft: `${HBC_SPACE_LG}px`,
+    paddingRight: `${HBC_SPACE_LG}px`,
+  },
 });
 
 export const HbcHomepageSurfaceCard: React.FC<HbcHomepageSurfaceCardProps> = ({

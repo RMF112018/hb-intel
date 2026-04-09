@@ -381,18 +381,18 @@ All 9 homepage webpart modules audited against the shared presentation surface f
 | **ToolLauncherWorkHub** | `HbcLauncherSurface` | Partially migrated | Live data path uses 4-region composition shell; only manifest-config fallback delegates to `HbcLauncherSurface` |
 | **HbSignatureHero** | None | Local | 141-line CSS-module composition; `HbcSignatureHeroSurface` exists but uses a different composition model (inline gradient vs background-image-first). Migration deferred — would require adapting the shared surface API. |
 | **CompanyPulse** | None | Local by design | Specialized 3-layout-mode newsroom system (Rich/Sparse/Headline-only) with magazine-style featured story + headline rail; exceeds shared surface API |
-| **PeopleCultureMerged** | None | Local — should likely migrate | 652-line three-band merged composition with inline styles; composes shared helpers but builds entire surface grammar locally. Brand colors now governed (W01r-P08). |
+| **PeopleCultureMerged** | `HbcPeopleCultureSurface` + `HbcKudosComposer*` | Cleanly migrated (W01 follow-on) | All durable presentation grammar (gradient hero, kudos spotlight, recognition rail, sparse-state invite, composer flyout/form/preview, avatar stack) moved to `@hbc/ui-kit/homepage` as a new surface family + sibling primitives. The webpart is now a thin consumer that fetches list data, normalizes, and adapts to the surface view-model. See `docs/architecture/reviews/people-culture-ui-kit-migration-completion.md`. |
 | **ProjectPortfolioSpotlight** | None | Local — should likely migrate | 1,118-line image-led editorial with inline styles; composes shared helpers but builds entire surface grammar locally. Brand colors now governed (W01r-P08). |
 
-### Migration summary (corrected W01r-P08)
+### Migration summary (W01 follow-on, post People & Culture migration)
 
-- **4/9 modules (44%)** cleanly migrated to shared presentation surface families
+- **5/9 modules (56%)** cleanly migrated to shared presentation surface families (including PeopleCultureMerged → `HbcPeopleCultureSurface` + `HbcKudosComposer*`)
 - **1/9 module (11%)** partially migrated (ToolLauncherWorkHub — shared surface in fallback path only)
 - **1/9 module (11%)** local by design (CompanyPulse — specialized newsroom system)
-- **3/9 modules (33%)** local, should likely migrate in future waves (HbSignatureHero, PeopleCultureMerged, ProjectPortfolioSpotlight)
+- **2/9 modules (22%)** local, should likely migrate in future waves (HbSignatureHero, ProjectPortfolioSpotlight)
 - All local modules compose shared premium primitives (`HbcPremiumCta`, `HbcPremiumBadge`, `HbcHomepageEyebrow`, `HbcHomepageMetadataRow`) from `@hbc/ui-kit/homepage`
 - **Importing shared helpers is not equivalent to shared-surface-family migration.** Migration requires delegating the core surface grammar.
-- The two largest local consumers (ProjectPortfolioSpotlight, PeopleCultureMerged) now import governed presentation-lane brand tokens instead of hardcoding values locally (W01r-P08).
+- The remaining largest local consumer (ProjectPortfolioSpotlight) still imports governed presentation-lane brand tokens but builds its own surface grammar locally (W01r-P08 brand-token governance).
 
 ### Shared wrapper components (keep local, correctly delegating)
 
@@ -526,10 +526,10 @@ Visual proof exists at two levels with different coverage:
 
 | Level | Coverage | Status |
 |---|---|---|
-| Surface-family (isolated) | 5/6 families: SignatureHero, Editorial, Command, Discovery, Operational (desktop + tablet) | Present in `docs/architecture/reviews/evidence/ui-system-visual-proof/` |
+| Surface-family (isolated) | 6/7 families: SignatureHero, Editorial, Command, Discovery, Operational, PeopleCulture (desktop + tablet + sparse + composer states) | Present in `docs/architecture/reviews/evidence/ui-system-visual-proof/` and Storybook stories under `packages/ui-kit/src/HbcPeopleCultureSurface/`, `HbcKudosComposer/`, `HbcAvatarStack/` |
 | Surface-family (isolated) | Launcher | **Missing** |
-| Consumer-level (webpart) | LeadershipMessage, PriorityActionsRail, SafetyFieldExcellence, SmartSearchWayfinding, ToolLauncherWorkHub | Documented in W01r-P08 consumer verification matrix |
-| Consumer-level (webpart) | CompanyPulse, PeopleCultureMerged, ProjectPortfolioSpotlight, HbSignatureHero | Not visually proven — remain local compositions |
+| Consumer-level (webpart) | LeadershipMessage, PriorityActionsRail, SafetyFieldExcellence, SmartSearchWayfinding, ToolLauncherWorkHub, PeopleCultureMerged | Documented in W01r-P08 consumer verification matrix and the People & Culture migration completion report |
+| Consumer-level (webpart) | CompanyPulse, ProjectPortfolioSpotlight, HbSignatureHero | Not visually proven — remain local compositions |
 | Before/after comparison | All consumers | **Not produced** — Prompt 00A requires this for material visual changes |
 
 Wave 01 changes were structural (token wiring, elevation semantics, entry point governance), not visual redesigns. The corrective addendum's before/after screenshot requirements apply to future waves where surface visual composition changes materially.

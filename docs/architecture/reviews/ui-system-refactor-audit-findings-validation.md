@@ -491,3 +491,24 @@ The single highest-value next action is to resolve the foundation color drift be
 This unblocks clean consumer migration by ensuring that when consumers adopt shared surfaces, they inherit from a governed color source rather than propagating a second ungoverned palette.
 
 After color governance: prioritize consumer-level visual proof for the 4 already-migrated consumers to close the Prompt 08 gap, then tackle migration of `HbSignatureHero` (which should use `HbcSignatureHeroSurface`) as the simplest remaining migration.
+
+---
+
+## 10. Closure update — People & Culture migration (W01 follow-on)
+
+**Status update:** `PeopleCultureMerged` has now been cleanly migrated to a new shared surface family in `@hbc/ui-kit/homepage`. The 652-line local composition has been replaced with a thin consumer that delegates to:
+
+- `HbcPeopleCultureSurface` — cohesive presentation-lane surface family (gradient hero band, kudos spotlight, recognition rail, sparse-state invite)
+- `HbcKudosComposerFlyout` / `HbcKudosComposerForm` / `HbcKudosComposerPreview` — sibling presentation primitives for the kudos submission flow
+- `HbcAvatarStack` — new shared homepage primitive used by both the surface family and the composer preview
+
+Business logic, SharePoint list fetching, normalization, validation, and submission all remain local to the webpart. The kudos draft / validation-error type contracts now live in `@hbc/ui-kit/homepage` with a re-export shim in `useKudosComposer.ts` so existing imports keep working.
+
+**Impact on this validation report:**
+
+- The "named consumers still entirely local" set drops from `{HbSignatureHero, PeopleCultureMerged, ProjectPortfolioSpotlight}` to `{HbSignatureHero, ProjectPortfolioSpotlight}`.
+- The cleanly-migrated count rises from 4/9 (44%) to **5/9 (56%)**.
+- People & Culture is now visually proven at the surface-family level via Storybook stories under `packages/ui-kit/src/HbcPeopleCultureSurface/`, `HbcKudosComposer/`, and `HbcAvatarStack/`.
+- See `docs/architecture/reviews/people-culture-ui-kit-migration-completion.md` for the full file-by-file change list, ownership decisions, token strategy, and verification record.
+
+**Recommended next move (revised):** Tackle `HbSignatureHero` (smallest remaining migration target) and produce consumer-level visual proof for the previously-migrated 5 consumers + the new People & Culture consumer.
