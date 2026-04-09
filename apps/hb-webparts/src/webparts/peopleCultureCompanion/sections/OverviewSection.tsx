@@ -44,6 +44,9 @@ export interface OverviewSectionProps {
   onNavigateToApprovals: () => void;
   onNavigateToHomepage: () => void;
   onNavigateToFamily: (family: PeopleCultureContentFamily) => void;
+  onNavigateToNotifications?: () => void;
+  onNavigateToIntake?: () => void;
+  notificationsCount?: number;
   onAcceptMilestone: (id: string) => void;
   onSuppressMilestone: (id: string) => void;
   onPromoteIntake: (id: string) => void;
@@ -133,18 +136,85 @@ export function OverviewSection({
   onNavigateToApprovals,
   onNavigateToHomepage,
   onNavigateToFamily,
+  onNavigateToNotifications,
+  onNavigateToIntake,
+  notificationsCount,
   onAcceptMilestone,
   onSuppressMilestone,
   onPromoteIntake,
   onDeclineIntake,
 }: OverviewSectionProps): React.JSX.Element {
+  const queueHealth = overview.queueHealth;
+  const queueHealthBadgeStyle =
+    queueHealth === 'attention'
+      ? WARNING_BADGE_STYLE
+      : queueHealth === 'watch'
+        ? BADGE_STYLE
+        : BADGE_STYLE;
+
   return (
     <div
       role="tabpanel"
       aria-label="Companion overview"
       data-hbc-companion-section="overview"
+      data-hbc-companion-queue-health={queueHealth}
       style={PANEL_STYLE}
     >
+      <div>
+        <h3 style={SECTION_TITLE_STYLE}>Queue health</h3>
+      </div>
+      <div style={CARD_GRID_STYLE}>
+        <div style={CARD_STYLE} data-hbc-companion-overview-card="queue-health">
+          <span style={CARD_LABEL_STYLE}>Queue health</span>
+          <span style={CARD_VALUE_STYLE}>{queueHealth}</span>
+          <span style={{ fontSize: '0.6875rem', color: 'rgba(10,27,51,0.55)' }}>
+            <span style={queueHealthBadgeStyle}>
+              {queueHealth === 'attention'
+                ? 'Needs attention'
+                : queueHealth === 'watch'
+                  ? 'Watch'
+                  : 'Healthy'}
+            </span>
+          </span>
+        </div>
+        <div style={CARD_STYLE} data-hbc-companion-overview-card="pending-approvals-summary">
+          <span style={CARD_LABEL_STYLE}>Pending approvals</span>
+          <span style={CARD_VALUE_STYLE}>{overview.pendingApprovals.length}</span>
+        </div>
+        <div style={CARD_STYLE} data-hbc-companion-overview-card="expiring-soon-summary">
+          <span style={CARD_LABEL_STYLE}>Expiring soon</span>
+          <span style={CARD_VALUE_STYLE}>{overview.expiringSoonItems.length}</span>
+        </div>
+        <div style={CARD_STYLE} data-hbc-companion-overview-card="homepage-conflicts-summary">
+          <span style={CARD_LABEL_STYLE}>Homepage conflicts</span>
+          <span style={CARD_VALUE_STYLE}>{overview.homepageConflicts.length}</span>
+        </div>
+      </div>
+
+      <div style={TOOLBAR_STYLE}>
+        {onNavigateToNotifications ? (
+          <button
+            type="button"
+            style={SECONDARY_BUTTON_STYLE}
+            onClick={onNavigateToNotifications}
+            data-hbc-companion-action="open-notifications"
+          >
+            Open notifications
+            {typeof notificationsCount === 'number' ? ` (${notificationsCount})` : ''}
+          </button>
+        ) : null}
+        {onNavigateToIntake ? (
+          <button
+            type="button"
+            style={SECONDARY_BUTTON_STYLE}
+            onClick={onNavigateToIntake}
+            data-hbc-companion-action="open-intake"
+          >
+            Open intake ({overview.pendingIntakeSubmissions.length})
+          </button>
+        ) : null}
+      </div>
+
       <div>
         <h3 style={SECTION_TITLE_STYLE}>Content families</h3>
         <p style={SECTION_HINT_STYLE}>

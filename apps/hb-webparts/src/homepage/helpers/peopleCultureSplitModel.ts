@@ -35,6 +35,7 @@ import type {
   PeopleCultureMilestoneCandidate,
   PeopleCulturePublicConfig,
   PeopleCulturePublicOutput,
+  PeopleCultureQueueHealth,
   PeopleCultureResolvedMedia,
   PeopleCultureRole,
   PeopleCultureRoleCapabilities,
@@ -382,10 +383,26 @@ export function countLifecycleStatesByFamily(
   return byFamily;
 }
 
+export interface QueueHealthThresholds {
+  /** Pending approvals that move health to `watch`. Default: 3. */
+  pendingApprovalsWatch?: number;
+  /** Pending approvals that move health to `attention`. Default: 6. */
+  pendingApprovalsAttention?: number;
+  /** Expiring-soon count that moves health to `watch`. Default: 2. */
+  expiringSoonWatch?: number;
+  /** Expiring-soon count that moves health to `attention`. Default: 5. */
+  expiringSoonAttention?: number;
+  /** Homepage conflict count that moves health to `watch`. Default: 1. */
+  homepageConflictsWatch?: number;
+  /** Homepage conflict count that moves health to `attention`. Default: 3. */
+  homepageConflictsAttention?: number;
+}
+
 export interface BuildCompanionOverviewOptions {
   now?: Date;
   expiringSoonWindowDays?: number;
   upcomingScheduledWindowDays?: number;
+  queueHealthThresholds?: QueueHealthThresholds;
 }
 
 /**
@@ -432,6 +449,13 @@ export function buildCompanionOverview(
     (s) => s.reviewState === 'awaitingHrReview',
   );
 
+  const queueHealth = deriveQueueHealth({
+    pendingApprovalsCount: pendingApprovals.length,
+    expiringSoonCount: expiringSoonItems.length,
+    homepageConflictsCount: homepageConflicts.length,
+    thresholds: options.queueHealthThresholds,
+  });
+
   return {
     lifecycleCountsByFamily: countLifecycleStatesByFamily(items),
     pendingApprovals,
@@ -440,7 +464,55 @@ export function buildCompanionOverview(
     homepageConflicts,
     pendingMilestoneCandidates,
     pendingIntakeSubmissions,
+    queueHealth,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Queue health derivation
+// ---------------------------------------------------------------------------
+
+const DEFAULT_QUEUE_HEALTH_THRESHOLDS: Required<QueueHealthThresholds> = {
+  pendingApprovalsWatch: 3,
+  pendingApprovalsAttention: 6,
+  expiringSoonWatch: 2,
+  expiringSoonAttention: 5,
+  homepageConflictsWatch: 1,
+  homepageConflictsAttention: 3,
+};
+
+export interface DeriveQueueHealthInput {
+  pendingApprovalsCount: number;
+  expiringSoonCount: number;
+  homepageConflictsCount: number;
+  thresholds?: QueueHealthThresholds;
+}
+
+/**
+ * Derive the companion queue-health label from signal counts.
+ * Any signal at or above its `attention` threshold → `attention`.
+ * Otherwise, any signal at or above its `watch` threshold → `watch`.
+ * Otherwise → `healthy`.
+ */
+export function deriveQueueHealth(
+  input: DeriveQueueHealthInput,
+): PeopleCultureQueueHealth {
+  const t = { ...DEFAULT_QUEUE_HEALTH_THRESHOLDS, ...(input.thresholds ?? {}) };
+  if (
+    input.pendingApprovalsCount >= t.pendingApprovalsAttention ||
+    input.expiringSoonCount >= t.expiringSoonAttention ||
+    input.homepageConflictsCount >= t.homepageConflictsAttention
+  ) {
+    return 'attention';
+  }
+  if (
+    input.pendingApprovalsCount >= t.pendingApprovalsWatch ||
+    input.expiringSoonCount >= t.expiringSoonWatch ||
+    input.homepageConflictsCount >= t.homepageConflictsWatch
+  ) {
+    return 'watch';
+  }
+  return 'healthy';
 }
 
 // ---------------------------------------------------------------------------

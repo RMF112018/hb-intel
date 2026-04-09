@@ -53,18 +53,22 @@ import type {
   PeopleCultureIntakeSubmission,
   PeopleCultureItem,
   PeopleCultureMilestoneCandidate,
+  PeopleCultureNotificationEvent,
   PeopleCultureRole,
+  PeopleCultureRoleCapabilities,
 } from '../../homepage/webparts/peopleCultureSplitContracts.js';
 import { PEOPLE_CULTURE_CONTENT_FAMILIES } from '../../homepage/webparts/peopleCultureSplitContracts.js';
 import {
   buildCompanionOverview,
   detectHomepageConflicts,
+  hasPeopleCultureCapability,
   type ProfilePhotoResolver,
 } from '../../homepage/helpers/peopleCultureSplitModel.js';
 import {
   generateMilestoneCandidates,
   type PeopleSourceRecord,
 } from '../../homepage/helpers/peopleCultureMilestoneGenerator.js';
+import { buildPeopleCultureNotifications } from '../../homepage/helpers/peopleCultureNotificationBuilder.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import {
   COMPANION_EYEBROW_STYLE,
@@ -79,9 +83,12 @@ import { OverviewSection } from './sections/OverviewSection.js';
 import { ContentFamilySection } from './sections/ContentFamilySection.js';
 import { ApprovalsSection } from './sections/ApprovalsSection.js';
 import { HomepageSection } from './sections/HomepageSection.js';
+import { NotificationsSection } from './sections/NotificationsSection.js';
+import { IntakeSection } from './sections/IntakeSection.js';
 import { QuickEditDrawer } from './editing/QuickEditDrawer.js';
 import { FullEditor } from './editing/FullEditor.js';
 import { PreviewPanel } from './preview/PreviewPanel.js';
+import { COMPANION_COLORS } from './companionStyles.js';
 
 export type CompanionTabKey =
   | 'overview'
@@ -90,6 +97,8 @@ export type CompanionTabKey =
   | 'cultureProgramEvent'
   | 'approvals'
   | 'homepage'
+  | 'notifications'
+  | 'intake'
   | 'preview';
 
 const COMPANION_TABS: ReadonlyArray<{ key: CompanionTabKey; label: string }> = [
@@ -99,8 +108,35 @@ const COMPANION_TABS: ReadonlyArray<{ key: CompanionTabKey; label: string }> = [
   { key: 'cultureProgramEvent', label: 'Culture Programs / Events' },
   { key: 'approvals', label: 'Approvals' },
   { key: 'homepage', label: 'Homepage' },
+  { key: 'notifications', label: 'Notifications' },
+  { key: 'intake', label: 'Intake' },
   { key: 'preview', label: 'Preview' },
 ];
+
+/**
+ * Capability gate per reducer action type. An action whose required
+ * capability is absent for the current role is no-opped by the
+ * dispatch guard inside PeopleCultureCompanion. Actions without a
+ * required capability (internal state bookkeeping) always pass.
+ */
+const ACTION_CAPABILITY_REQUIREMENTS: Partial<
+  Record<CompanionAction['type'], keyof PeopleCultureRoleCapabilities>
+> = {
+  updateItem: 'canEdit',
+  approveItem: 'canApprove',
+  rejectItem: 'canResolveApprovals',
+  claimApproval: 'canClaimApproval',
+  reassignApproval: 'canReassignApproval',
+  suppressItem: 'canSuppress',
+  archiveItem: 'canUnpublish',
+  pinItem: 'canPin',
+  setHomepageTier: 'canManageHomepage',
+  acceptMilestoneCandidate: 'canResolveApprovals',
+  suppressMilestoneCandidate: 'canSuppress',
+  promoteIntake: 'canResolveApprovals',
+  declineIntake: 'canResolveApprovals',
+  returnIntakeForChanges: 'canResolveApprovals',
+};
 
 export interface PeopleCultureCompanionProps {
   config?: Record<string, unknown>;
@@ -149,8 +185,9 @@ type CompanionAction =
   | { type: 'setHomepageTier'; payload: { id: string; tier: PeopleCultureItem['homepage']['tier']; hrOverride: boolean } }
   | { type: 'acceptMilestoneCandidate'; payload: { id: string; reviewerId: string; reviewerName: string; now: string } }
   | { type: 'suppressMilestoneCandidate'; payload: { id: string; reviewerId: string; reviewerName: string; now: string } }
-  | { type: 'promoteIntake'; payload: { id: string; reviewerId: string; reviewerName: string; now: string } }
+  | { type: 'promoteIntake'; payload: { id: string; reviewerId: string; reviewerName: string; now: string; notes?: string } }
   | { type: 'declineIntake'; payload: { id: string; reviewerId: string; reviewerName: string; now: string; notes?: string } }
+  | { type: 'returnIntakeForChanges'; payload: { id: string; reviewerId: string; reviewerName: string; now: string; notes: string } }
   | { type: 'replaceState'; payload: CompanionState };
 
 function companionReducer(state: CompanionState, action: CompanionAction): CompanionState {
@@ -301,7 +338,7 @@ function companionReducer(state: CompanionState, action: CompanionAction): Compa
       };
     }
     case 'promoteIntake': {
-      const { id, reviewerId, reviewerName, now } = action.payload;
+      const { id, reviewerId, reviewerName, now, notes } = action.payload;
       return {
         ...state,
         intakeSubmissions: state.intakeSubmissions.map((s) =>
@@ -311,6 +348,7 @@ function companionReducer(state: CompanionState, action: CompanionAction): Compa
                 reviewState: 'acceptedIntoDraft',
                 reviewedBy: { id: reviewerId, displayName: reviewerName },
                 reviewedAt: now,
+                reviewNotes: notes ?? s.reviewNotes,
               }
             : s,
         ),
@@ -328,6 +366,23 @@ function companionReducer(state: CompanionState, action: CompanionAction): Compa
                 reviewedBy: { id: reviewerId, displayName: reviewerName },
                 reviewedAt: now,
                 reviewNotes: notes ?? s.reviewNotes,
+              }
+            : s,
+        ),
+      };
+    }
+    case 'returnIntakeForChanges': {
+      const { id, reviewerId, reviewerName, now, notes } = action.payload;
+      return {
+        ...state,
+        intakeSubmissions: state.intakeSubmissions.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                reviewState: 'returnedForChanges',
+                reviewedBy: { id: reviewerId, displayName: reviewerName },
+                reviewedAt: now,
+                reviewNotes: notes,
               }
             : s,
         ),
@@ -427,13 +482,39 @@ export function PeopleCultureCompanion({
     [peopleSource, milestoneWindowDays],
   );
 
-  const [state, dispatch] = React.useReducer(
+  const [state, rawDispatch] = React.useReducer(
     companionReducer,
     undefined,
     () => initialState(resolvedConfig, initialStateOptions),
   );
 
-  // Keep reducer state in sync when the incoming config changes.
+  const [activeTab, setActiveTab] = React.useState<CompanionTabKey>('overview');
+  const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>();
+  const [fullEditorItemId, setFullEditorItemId] = React.useState<string | undefined>();
+
+  const currentUserRole: PeopleCultureRole = resolvedConfig.currentUserRole ?? 'approver';
+
+  /**
+   * Capability-gated dispatch. Actions that require a capability the
+   * current role does not have are silently dropped so UI gating can
+   * never be bypassed by direct dispatch from a test or future code.
+   * Actions without a required capability (replaceState, internal
+   * bookkeeping) always pass.
+   */
+  const dispatch = React.useCallback(
+    (action: CompanionAction): void => {
+      const required = ACTION_CAPABILITY_REQUIREMENTS[action.type];
+      if (required && !hasPeopleCultureCapability(currentUserRole, required)) {
+        return;
+      }
+      rawDispatch(action);
+    },
+    [currentUserRole],
+  );
+
+  // Keep reducer state in sync when the incoming config changes. The
+  // replaceState action has no capability requirement so it always
+  // runs through the guarded dispatch without being blocked.
   const configRef = React.useRef(resolvedConfig);
   React.useEffect(() => {
     if (configRef.current !== resolvedConfig) {
@@ -443,13 +524,7 @@ export function PeopleCultureCompanion({
         payload: initialState(resolvedConfig, initialStateOptions),
       });
     }
-  }, [resolvedConfig, initialStateOptions]);
-
-  const [activeTab, setActiveTab] = React.useState<CompanionTabKey>('overview');
-  const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>();
-  const [fullEditorItemId, setFullEditorItemId] = React.useState<string | undefined>();
-
-  const currentUserRole: PeopleCultureRole = resolvedConfig.currentUserRole ?? 'approver';
+  }, [resolvedConfig, initialStateOptions, dispatch]);
   const reviewerId = identity?.email ?? 'hr-operator';
   const reviewerName = identity?.displayName ?? 'HR Operator';
   const nowIso = React.useMemo(() => new Date().toISOString(), []);
@@ -467,6 +542,11 @@ export function PeopleCultureCompanion({
   const homepageConflicts = React.useMemo(
     () => detectHomepageConflicts(state.items),
     [state.items],
+  );
+
+  const notificationEvents: PeopleCultureNotificationEvent[] = React.useMemo(
+    () => buildPeopleCultureNotifications(state.items, { emittedAt: nowIso }),
+    [state.items, nowIso],
   );
 
   // Propagate detected conflicts onto the items the companion renders,
@@ -525,6 +605,24 @@ export function PeopleCultureCompanion({
         </div>
       </header>
 
+      {currentUserRole === 'editor' ? (
+        <div
+          role="note"
+          data-hbc-companion-banner="editor-read-only"
+          style={{
+            padding: '10px 24px',
+            background: COMPANION_COLORS.surfaceMuted,
+            borderBottom: `1px solid ${COMPANION_COLORS.surfaceLine}`,
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            color: COMPANION_COLORS.inkMuted,
+          }}
+        >
+          You are signed in as an Editor. Approval, pin/tier, suppress/archive,
+          and intake triage actions are read-only for your role.
+        </div>
+      ) : null}
+
       <nav role="tablist" aria-label="Companion sections" style={TAB_ROW_STYLE}>
         {COMPANION_TABS.map((tab) => (
           <button
@@ -547,6 +645,9 @@ export function PeopleCultureCompanion({
           onNavigateToApprovals={() => setActiveTab('approvals')}
           onNavigateToHomepage={() => setActiveTab('homepage')}
           onNavigateToFamily={(family) => setActiveTab(family)}
+          onNavigateToNotifications={() => setActiveTab('notifications')}
+          onNavigateToIntake={() => setActiveTab('intake')}
+          notificationsCount={notificationEvents.length}
           onAcceptMilestone={(id) =>
             dispatch({
               type: 'acceptMilestoneCandidate',
@@ -569,6 +670,40 @@ export function PeopleCultureCompanion({
             dispatch({
               type: 'declineIntake',
               payload: { id, reviewerId, reviewerName, now: nowIso },
+            })
+          }
+        />
+      ) : null}
+
+      {activeTab === 'notifications' ? (
+        <NotificationsSection
+          events={notificationEvents}
+          currentUserRole={currentUserRole}
+          currentUserEmail={identity?.email}
+          currentUserId={reviewerId}
+        />
+      ) : null}
+
+      {activeTab === 'intake' ? (
+        <IntakeSection
+          submissions={state.intakeSubmissions}
+          currentUserRole={currentUserRole}
+          onPromote={(id, notes) =>
+            dispatch({
+              type: 'promoteIntake',
+              payload: { id, reviewerId, reviewerName, now: nowIso, notes },
+            })
+          }
+          onDecline={(id, notes) =>
+            dispatch({
+              type: 'declineIntake',
+              payload: { id, reviewerId, reviewerName, now: nowIso, notes },
+            })
+          }
+          onReturnForChanges={(id, notes) =>
+            dispatch({
+              type: 'returnIntakeForChanges',
+              payload: { id, reviewerId, reviewerName, now: nowIso, notes },
             })
           }
         />

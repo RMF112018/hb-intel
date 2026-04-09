@@ -102,6 +102,8 @@ describe('PeopleCultureCompanion shell', () => {
       'Culture Programs / Events',
       'Approvals',
       'Homepage',
+      'Notifications',
+      'Intake',
       'Preview',
     ]);
   });

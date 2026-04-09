@@ -404,6 +404,35 @@ export interface PeopleCultureIntakeSubmission {
   linkedItemId?: string;
 }
 
+/**
+ * A rendered notification event. The notification runtime derives these
+ * from item state transitions — it does NOT persist them. Recipients are
+ * the current operator cohort plus the content owner / submitter; the
+ * featured subject of an announcement is explicitly not a recipient.
+ */
+export interface PeopleCultureNotificationEvent {
+  id: string;
+  trigger: PeopleCultureNotificationTrigger;
+  itemId: string;
+  itemTitle: string;
+  itemFamily: PeopleCultureContentFamily;
+  recipientKind: PeopleCultureNotificationRecipientKind;
+  recipient?: PersonReference;
+  /** ISO timestamp when the event was emitted. */
+  emittedAt: string;
+  /** Optional one-line context the companion renders with the event. */
+  context?: string;
+}
+
+/**
+ * Targeting-risk reasons surfaced by the targeting guardrails helper.
+ * Used to flag items whose `targeted` audience scope looks dangerous.
+ */
+export type PeopleCultureTargetingRiskReason =
+  | 'emptyTargetedAudience'
+  | 'unknownDimension'
+  | 'outOfTaxonomyValue';
+
 // ---------------------------------------------------------------------------
 // 10. Preview model
 // ---------------------------------------------------------------------------
@@ -553,6 +582,13 @@ export type PeopleCultureLifecycleCountsByFamily = Record<
 >;
 
 /**
+ * Aggregate queue-health label for the companion overview. Derived from
+ * pending-approval, expiring-soon, and homepage-conflict counts against
+ * configurable thresholds.
+ */
+export type PeopleCultureQueueHealth = 'healthy' | 'watch' | 'attention';
+
+/**
  * Overview data for the companion landing page. Lightweight operational
  * dashboard — not a heavy analytics board.
  */
@@ -564,4 +600,10 @@ export interface PeopleCultureCompanionOverview {
   homepageConflicts: PeopleCultureItem[];
   pendingMilestoneCandidates: PeopleCultureMilestoneCandidate[];
   pendingIntakeSubmissions: PeopleCultureIntakeSubmission[];
+  /**
+   * Aggregate queue health. `healthy` when all signals are low, `watch`
+   * when at least one signal is elevated, `attention` when any signal
+   * crosses the attention threshold.
+   */
+  queueHealth: PeopleCultureQueueHealth;
 }
