@@ -1,21 +1,57 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import type { IAvailableYearsResult, IProjectSitesResult } from './types.js';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import type {
+  IAvailableYearsResult,
+  IProjectSitesResult,
+  IProjectSiteEntry,
+  ProjectSitesScope,
+} from './types.js';
+import { scopeFromYear, SCOPE_ALL } from './types.js';
 
 // ── Mock hooks ────────────────────────────────────────────────────────────
 
 const mockUseAvailableYears = vi.fn<() => IAvailableYearsResult>();
-const mockUseProjectSites = vi.fn<(year: number | null) => IProjectSitesResult | null>();
+const mockUseProjectSites = vi.fn<(scope: ProjectSitesScope | null) => IProjectSitesResult | null>();
 
 vi.mock('./hooks/useAvailableYears.js', () => ({
   useAvailableYears: () => mockUseAvailableYears(),
 }));
 
 vi.mock('./hooks/useProjectSites.js', () => ({
-  useProjectSites: (year: number | null) => mockUseProjectSites(year),
+  useProjectSites: (scope: ProjectSitesScope | null) => mockUseProjectSites(scope),
 }));
 
 import { ProjectSitesRoot } from './ProjectSitesRoot.js';
+
+// ── Test entry factory ────────────────────────────────────────────────────
+
+function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
+  return {
+    id: 1,
+    projectName: 'Test Project',
+    projectNumber: '25-001-01',
+    siteUrl: 'https://example.com',
+    year: 2025,
+    department: '',
+    officeDivision: '',
+    projectLocation: '',
+    projectType: '',
+    projectStage: '',
+    clientName: '',
+    projectStreetAddress: '',
+    projectCity: '',
+    projectCounty: '',
+    projectState: '',
+    projectZip: '',
+    projectExecutiveUpn: '',
+    projectManagerUpn: '',
+    leadEstimatorUpn: '',
+    supportingEstimatorUpns: [],
+    procoreProject: '',
+    hasSiteUrl: true,
+    ...overrides,
+  };
+}
 
 // ── Tests ─────────────────────────────────────────────────────────────────
 
@@ -31,7 +67,7 @@ describe('ProjectSitesRoot', () => {
 
     render(<ProjectSitesRoot />);
     expect(screen.getByText('Project Sites')).toBeInTheDocument();
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: /loading project sites/i })).toBeInTheDocument();
   });
 
   it('renders error when years fail to load', () => {
@@ -51,15 +87,17 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText('No Project Sites')).toBeInTheDocument();
   });
 
-  it('renders year selector buttons when years load', () => {
+  it('renders scope segmented control with All Projects + year options', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'success', selectedYear: 2026,
-      entries: [{ id: 1, projectName: 'Test', projectNumber: '', siteUrl: 'https://x.com', year: 2026, department: '', projectLocation: '', projectType: '', projectStage: '', clientName: '', hasSiteUrl: true }],
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Test', projectNumber: '', year: 2026 })],
       errorMessage: null,
     });
 
     render(<ProjectSitesRoot />);
+    expect(screen.getByText('All Projects')).toBeInTheDocument();
     expect(screen.getByText('2026')).toBeInTheDocument();
     expect(screen.getByText('2025')).toBeInTheDocument();
   });
@@ -67,10 +105,11 @@ describe('ProjectSitesRoot', () => {
   it('renders project cards on success', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'success', selectedYear: 2025,
+      status: 'success',
+      scope: scopeFromYear(2025),
       entries: [
-        { id: 1, projectName: 'Alpha Project', projectNumber: '25-001-01', siteUrl: 'https://x.com', year: 2025, department: 'commercial', projectLocation: '', projectType: '', projectStage: 'Active', clientName: '', hasSiteUrl: true },
-        { id: 2, projectName: 'Beta Project', projectNumber: '25-002-01', siteUrl: 'https://y.com', year: 2025, department: '', projectLocation: '', projectType: '', projectStage: '', clientName: '', hasSiteUrl: true },
+        createEntry({ id: 1, projectName: 'Alpha Project', projectNumber: '25-001-01', year: 2025, projectStage: 'Active' }),
+        createEntry({ id: 2, projectName: 'Beta Project', projectNumber: '25-002-01', year: 2025 }),
       ],
       errorMessage: null,
     });
@@ -84,7 +123,10 @@ describe('ProjectSitesRoot', () => {
   it('renders empty state for a year with no projects', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'empty', selectedYear: 2025, entries: [], errorMessage: null,
+      status: 'empty',
+      scope: scopeFromYear(2025),
+      entries: [],
+      errorMessage: null,
     });
 
     render(<ProjectSitesRoot />);
@@ -95,7 +137,10 @@ describe('ProjectSitesRoot', () => {
   it('renders error with role="alert" when project query fails', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'error', selectedYear: 2025, entries: [], errorMessage: 'SP error',
+      status: 'error',
+      scope: scopeFromYear(2025),
+      entries: [],
+      errorMessage: 'SP error',
     });
 
     render(<ProjectSitesRoot />);
@@ -106,12 +151,201 @@ describe('ProjectSitesRoot', () => {
   it('renders section landmark with accessible label', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
-      status: 'success', selectedYear: 2025,
-      entries: [{ id: 1, projectName: 'Test', projectNumber: '', siteUrl: 'https://x.com', year: 2025, department: '', projectLocation: '', projectType: '', projectStage: '', clientName: '', hasSiteUrl: true }],
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [createEntry({ id: 1, projectName: 'Test', projectNumber: '', year: 2025 })],
       errorMessage: null,
     });
 
     render(<ProjectSitesRoot />);
     expect(screen.getByRole('region', { name: 'Project Sites' })).toBeInTheDocument();
+  });
+
+  // ── W01r-P12: search / filter / sort ─────────────────────────────────
+
+  it('filters entries by search term (debounced)', async () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Alpha Healthcare', projectNumber: '25-001-01', clientName: 'HCA' }),
+        createEntry({ id: 2, projectName: 'Beta Commercial', projectNumber: '25-002-01', clientName: 'Regions' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    expect(screen.getByText('Alpha Healthcare')).toBeInTheDocument();
+    expect(screen.getByText('Beta Commercial')).toBeInTheDocument();
+
+    const searchInput = screen.getByPlaceholderText(/search by name/i);
+    fireEvent.change(searchInput, { target: { value: 'healthcare' } });
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Beta Commercial')).not.toBeInTheDocument();
+      },
+      { timeout: 1000 },
+    );
+    expect(screen.getByText('Alpha Healthcare')).toBeInTheDocument();
+    expect(screen.getByText(/1 of 2 shown/i)).toBeInTheDocument();
+  });
+
+  it('shows a no-results empty state when search matches nothing', async () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Alpha', projectNumber: '25-001-01' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    const searchInput = screen.getByPlaceholderText(/search by name/i);
+    fireEvent.change(searchInput, { target: { value: 'zzz-nomatch' } });
+
+    await waitFor(
+      () => {
+        expect(screen.getByText('No matching projects')).toBeInTheDocument();
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it('sorts entries by the selected sort key', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Zulu', projectNumber: '25-999-01' }),
+        createEntry({ id: 2, projectName: 'Alpha', projectNumber: '25-001-01' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    // Default sort is number-asc: 25-001-01 comes before 25-999-01
+    const linksBefore = screen.getAllByRole('link');
+    expect(linksBefore[0]).toHaveAttribute('aria-label', expect.stringContaining('Alpha'));
+
+    const sortSelect = screen.getByLabelText('Sort project sites');
+    fireEvent.change(sortSelect, { target: { value: 'name-desc' } });
+
+    const linksAfter = screen.getAllByRole('link');
+    expect(linksAfter[0]).toHaveAttribute('aria-label', expect.stringContaining('Zulu'));
+  });
+
+  it('opens the filter panel and filters by project stage', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Active Project', projectStage: 'Active' }),
+        createEntry({ id: 2, projectName: 'Pursuit Project', projectStage: 'Pursuit' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    fireEvent.click(filtersButton);
+
+    // Find the Active stage checkbox and check it
+    const activeCheckboxes = screen.getAllByLabelText('Active');
+    const checkbox = activeCheckboxes.find(
+      (el) => (el as HTMLInputElement).type === 'checkbox',
+    ) as HTMLInputElement;
+    fireEvent.click(checkbox);
+
+    // Now only Active Project should be in the grid
+    expect(screen.getByText('Active Project')).toBeInTheDocument();
+    expect(screen.queryByText('Pursuit Project')).not.toBeInTheDocument();
+
+    // Active filter chip should be present
+    expect(screen.getByText(/stage:/i)).toBeInTheDocument();
+  });
+
+  it('removes a filter via the chip ✕ button', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Active Project', projectStage: 'Active' }),
+        createEntry({ id: 2, projectName: 'Pursuit Project', projectStage: 'Pursuit' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    const activeCheckboxes = screen.getAllByLabelText('Active');
+    const checkbox = activeCheckboxes.find(
+      (el) => (el as HTMLInputElement).type === 'checkbox',
+    ) as HTMLInputElement;
+    fireEvent.click(checkbox);
+    expect(screen.queryByText('Pursuit Project')).not.toBeInTheDocument();
+
+    // Click the remove chip button
+    const removeChipBtn = screen.getByRole('button', { name: /remove stage filter active/i });
+    fireEvent.click(removeChipBtn);
+
+    // Both projects should be visible again
+    expect(screen.getByText('Active Project')).toBeInTheDocument();
+    expect(screen.getByText('Pursuit Project')).toBeInTheDocument();
+  });
+
+  it('clears search, sort, and filters when Reset is clicked', async () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Alpha', projectNumber: '25-001-01' }),
+        createEntry({ id: 2, projectName: 'Bravo', projectNumber: '25-002-01' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    fireEvent.change(screen.getByPlaceholderText(/search by name/i), {
+      target: { value: 'alpha' },
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Bravo')).not.toBeInTheDocument();
+    }, { timeout: 1000 });
+
+    fireEvent.click(screen.getByRole('button', { name: /reset/i }));
+
+    // The debounced search value takes ~200ms to clear after Reset; wait for it.
+    await waitFor(() => {
+      expect(screen.getByText('Bravo')).toBeInTheDocument();
+    }, { timeout: 1000 });
+    expect(screen.getByText('Alpha')).toBeInTheDocument();
+  });
+
+  it('renders All Projects across multiple years when the All scope is selected', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: SCOPE_ALL,
+      entries: [
+        createEntry({ id: 1, projectName: 'Project 2026', year: 2026, projectNumber: '26-001-01' }),
+        createEntry({ id: 2, projectName: 'Project 2025', year: 2025, projectNumber: '25-001-01' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    expect(screen.getByText('Project 2026')).toBeInTheDocument();
+    expect(screen.getByText('Project 2025')).toBeInTheDocument();
+    expect(screen.getByText('2 projects')).toBeInTheDocument();
   });
 });

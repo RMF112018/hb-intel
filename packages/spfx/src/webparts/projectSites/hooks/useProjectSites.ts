@@ -1,11 +1,18 @@
 /**
  * React hook that queries the HBCentral Projects list for project sites
- * matching the selected year.
+ * in a user-selected scope.
  *
- * Does NOT use $select — SharePoint returns all fields. This eliminates
- * field-name mismatch issues where display names differ from internal names.
- * The normalizer reads whichever fields are present and falls back to
- * Title parsing for missing custom fields.
+ * W01r-P12 scope model:
+ *   - `{ kind: 'year', year }` — server-side filtered by `Year eq {year}`
+ *   - `{ kind: 'all' }` — unfiltered, capped at `top(5000)`
+ *
+ * The hook does NOT apply search/sort/filter — those are composed on top
+ * of the normalized entries by the consumer via `projectSitesFilter.ts`.
+ *
+ * Does NOT use `$select` — SharePoint returns all fields. This eliminates
+ * field-name mismatch issues between the legacy `field_N` columns and the
+ * W01r-P12 display-name columns. The normalizer reads whichever fields are
+ * present and falls back to Title parsing for missing custom fields.
  */
 import { useQuery } from '@tanstack/react-query';
 import { spfi, SPFx } from '@pnp/sp';
@@ -16,6 +23,7 @@ import { getSpfxContext } from '@hbc/auth/spfx';
 import type {
   IRawProjectSiteItem,
   IProjectSitesResult,
+  ProjectSitesScope,
 } from '../types.js';
 import { SP_PROJECTS_FIELDS } from '../types.js';
 import { normalizeProjectSiteEntries } from '../normalizeProjectSiteEntry.js';
@@ -26,46 +34,66 @@ const PROJECTS_LIST_TITLE = 'Projects';
 /** Stale time: 5 minutes — project list data changes infrequently. */
 const STALE_TIME_MS = 5 * 60 * 1000;
 
+/** Hard cap on `All Projects` scope fetches to keep the client set bounded. */
+const ALL_PROJECTS_TOP = 5000;
+
 /**
- * Fetch project site entries from the HBCentral Projects list.
- * No $select — returns all fields to avoid internal-name mismatches.
+ * Build a stable query-key suffix for the scope. Used by React Query so
+ * year-scoped and all-projects scopes have distinct cache entries.
  */
-async function fetchProjectSites(year: number): Promise<IRawProjectSiteItem[]> {
+function scopeCacheKey(scope: ProjectSitesScope): string {
+  return scope.kind === 'year' ? `year:${scope.year}` : 'all';
+}
+
+/**
+ * Fetch project site entries from the HBCentral Projects list for the
+ * given scope. No `$select` — returns all fields to avoid internal-name
+ * mismatches.
+ */
+async function fetchProjectSites(scope: ProjectSitesScope): Promise<IRawProjectSiteItem[]> {
   const context = getSpfxContext();
   const sp = spfi().using(SPFx(context));
 
-  const items = await sp.web.lists
-    .getByTitle(PROJECTS_LIST_TITLE)
-    .items.filter(`${SP_PROJECTS_FIELDS.YEAR} eq ${year}`)();
+  const list = sp.web.lists.getByTitle(PROJECTS_LIST_TITLE);
 
+  if (scope.kind === 'year') {
+    const items = await list.items.filter(`${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}`)();
+    return items as IRawProjectSiteItem[];
+  }
+
+  // All Projects scope — bounded fetch, no year filter.
+  const items = await list.items.top(ALL_PROJECTS_TOP)();
   return items as IRawProjectSiteItem[];
 }
 
 /**
- * Hook: query project sites for the selected year.
+ * Hook: query project sites for the given scope.
  *
- * @param selectedYear - The year selected in the UI, or null if none selected yet
- * @returns IProjectSitesResult with status, entries, and error info
+ * @param scope - Scope discriminated union; null means "not ready yet"
+ * @returns `IProjectSitesResult` with status, entries, and error info, or
+ *          `null` when `scope` is still null (pre-initialization)
  */
 export function useProjectSites(
-  selectedYear: number | null,
+  scope: ProjectSitesScope | null,
 ): IProjectSitesResult | null {
+  const enabled = scope !== null && (scope.kind === 'all' || (scope.kind === 'year' && scope.year > 0));
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['project-sites', selectedYear],
-    queryFn: () => fetchProjectSites(selectedYear!),
-    enabled: selectedYear !== null && selectedYear > 0,
+    queryKey: ['project-sites', scope ? scopeCacheKey(scope) : 'none'],
+    queryFn: () => fetchProjectSites(scope!),
+    enabled,
     staleTime: STALE_TIME_MS,
     retry: 1,
   });
 
-  if (selectedYear === null) {
+  if (scope === null) {
     return null;
   }
 
   if (isLoading) {
     return {
       status: 'loading',
-      selectedYear,
+      scope,
       entries: [],
       errorMessage: null,
     };
@@ -78,7 +106,7 @@ export function useProjectSites(
         : 'Failed to load project sites from the Projects list.';
     return {
       status: 'error',
-      selectedYear,
+      scope,
       entries: [],
       errorMessage: message,
     };
@@ -89,7 +117,7 @@ export function useProjectSites(
   if (entries.length === 0) {
     return {
       status: 'empty',
-      selectedYear,
+      scope,
       entries: [],
       errorMessage: null,
     };
@@ -97,7 +125,7 @@ export function useProjectSites(
 
   return {
     status: 'success',
-    selectedYear,
+    scope,
     entries,
     errorMessage: null,
   };

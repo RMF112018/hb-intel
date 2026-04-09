@@ -1,15 +1,21 @@
 /**
- * Normalizes raw SharePoint Projects list items into UI-ready IProjectSiteEntry records.
+ * Normalizes raw SharePoint Projects list items into UI-ready `IProjectSiteEntry`
+ * records.
  *
- * Uses the confirmed internal field name mapping (field_1 through field_23)
- * from the HBCentral Projects list schema. No fuzzy matching — direct key access
- * using the known internal names.
+ * Uses the confirmed internal field name mapping (legacy `field_N` columns for
+ * the older set, display-name internal names for the W01r-P12 added set) from
+ * the HBCentral Projects list schema. No fuzzy matching — direct key access
+ * using the known internal names, with display-name fallbacks for forward
+ * compatibility if the list is ever re-provisioned.
  *
- * The Title field ("{number} — {name}") is used as a fallback when the dedicated
- * ProjectName (field_3) or ProjectNumber (field_2) fields are empty.
+ * The Title field (`{number} — {name}`) is used as a fallback when the
+ * dedicated ProjectName (`field_3`) or ProjectNumber (`field_2`) fields are
+ * empty.
  */
 import type { IProjectSiteEntry } from './types.js';
 import { SP_PROJECTS_FIELDS } from './types.js';
+
+// ── Helpers ───────────────────────────────────────────────────────────────
 
 /**
  * Safely coerce a value to a trimmed string.
@@ -19,11 +25,22 @@ function safeString(value: unknown, fallback = ''): string {
 }
 
 /**
+ * Safely coerce a potentially-number/string zip value to a trimmed string.
+ * The Projects list stores `projectZip` as a Number column, so raw values
+ * come back as `number | null`.
+ */
+function safeZip(value: unknown): string {
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return '';
+}
+
+/**
  * Extract a usable URL string from a SharePoint field value.
  *
  * SharePoint URL/Hyperlink columns can return:
  *   - Plain string: "https://..."
- *   - Hyperlink object: { Url: "https://...", Description: "..." }
+ *   - Hyperlink object: `{ Url: "https://...", Description: "..." }`
  *   - null / undefined
  */
 function extractUrl(value: unknown): string {
@@ -40,7 +57,46 @@ function extractUrl(value: unknown): string {
 }
 
 /**
- * Parse the Title field which uses "{number} — {name}" or "{number} - {name}" format.
+ * Parse a Note-type SharePoint field value into an array of trimmed string
+ * tokens. The `supportingEstimatorUpns` column is stored as a Note (text
+ * blob). Accepted shapes:
+ *
+ *   - JSON array:     `'["a@x","b@y"]'`
+ *   - Comma list:     `'a@x, b@y'`
+ *   - Semicolon list: `'a@x; b@y'`
+ *   - Plain array:    `['a@x', 'b@y']`
+ *   - null / undefined → empty array
+ */
+function parseUpnList(value: unknown): string[] {
+  if (value === null || value === undefined) return [];
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === 'string').map((v) => v.trim()).filter(Boolean);
+  }
+  if (typeof value !== 'string') return [];
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+
+  // Try JSON array first
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((v): v is string => typeof v === 'string').map((v) => v.trim()).filter(Boolean);
+      }
+    } catch {
+      // fall through to delimited parsing
+    }
+  }
+
+  // Fall back to delimiter split
+  return trimmed
+    .split(/[,;]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Parse the Title field which uses `{number} — {name}` or `{number} - {name}` format.
  */
 function parseTitle(title: string): [string, string] {
   const separators = [' — ', ' – ', ' - '];
@@ -53,11 +109,13 @@ function parseTitle(title: string): [string, string] {
   return ['', title];
 }
 
+// ── Main normalizer ───────────────────────────────────────────────────────
+
 /**
  * Normalize a single raw SharePoint list item into a UI-ready record.
  *
- * Reads fields by their confirmed internal names (field_N) with display-name
- * fallbacks for forward compatibility if the list is ever re-provisioned.
+ * Reads fields by their confirmed internal names with display-name fallbacks
+ * for forward compatibility if the list is ever re-provisioned.
  */
 export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjectSiteEntry {
   // Standard fields
@@ -70,7 +128,7 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
   // Parse Title for fallback name/number
   const [parsedNumber, parsedName] = title ? parseTitle(title) : ['', ''];
 
-  // Custom fields — read by confirmed internal name, fallback to display name
+  // Legacy custom fields — read by confirmed internal name, fallback to display name
   const projectNameRaw = raw[SP_PROJECTS_FIELDS.PROJECT_NAME] ?? raw['ProjectName'];
   const projectNumberRaw = raw[SP_PROJECTS_FIELDS.PROJECT_NUMBER] ?? raw['ProjectNumber'];
   const siteUrlRaw = raw[SP_PROJECTS_FIELDS.SITE_URL] ?? raw['SiteUrl'];
@@ -80,6 +138,19 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
   const stageRaw = raw[SP_PROJECTS_FIELDS.PROJECT_STAGE] ?? raw['ProjectStage'];
   const clientRaw = raw[SP_PROJECTS_FIELDS.CLIENT_NAME] ?? raw['ClientName'];
 
+  // W01r-P12 added fields — read by display-name internal name
+  const officeDivisionRaw = raw[SP_PROJECTS_FIELDS.OFFICE_DIVISION];
+  const procoreProjectRaw = raw[SP_PROJECTS_FIELDS.PROCORE_PROJECT];
+  const streetAddressRaw = raw[SP_PROJECTS_FIELDS.PROJECT_STREET_ADDRESS];
+  const cityRaw = raw[SP_PROJECTS_FIELDS.PROJECT_CITY];
+  const countyRaw = raw[SP_PROJECTS_FIELDS.PROJECT_COUNTY];
+  const stateRaw = raw[SP_PROJECTS_FIELDS.PROJECT_STATE];
+  const zipRaw = raw[SP_PROJECTS_FIELDS.PROJECT_ZIP];
+  const executiveUpnRaw = raw[SP_PROJECTS_FIELDS.PROJECT_EXECUTIVE_UPN];
+  const managerUpnRaw = raw[SP_PROJECTS_FIELDS.PROJECT_MANAGER_UPN];
+  const leadEstimatorUpnRaw = raw[SP_PROJECTS_FIELDS.LEAD_ESTIMATOR_UPN];
+  const supportingEstimatorUpnsRaw = raw[SP_PROJECTS_FIELDS.SUPPORTING_ESTIMATOR_UPNS];
+
   const projectName = safeString(projectNameRaw) || parsedName || '(Untitled Project)';
   const projectNumber = safeString(projectNumberRaw) || parsedNumber;
   const siteUrl = extractUrl(siteUrlRaw);
@@ -88,19 +159,32 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
     id,
     projectName,
     projectNumber,
-    siteUrl,
     year,
     department: safeString(departmentRaw),
-    projectLocation: safeString(locationRaw),
+    officeDivision: safeString(officeDivisionRaw),
     projectType: safeString(typeRaw),
     projectStage: safeString(stageRaw),
     clientName: safeString(clientRaw),
+    projectLocation: safeString(locationRaw),
+    projectStreetAddress: safeString(streetAddressRaw),
+    projectCity: safeString(cityRaw),
+    projectCounty: safeString(countyRaw),
+    projectState: safeString(stateRaw),
+    projectZip: safeZip(zipRaw),
+    projectExecutiveUpn: safeString(executiveUpnRaw),
+    projectManagerUpn: safeString(managerUpnRaw),
+    leadEstimatorUpn: safeString(leadEstimatorUpnRaw),
+    supportingEstimatorUpns: parseUpnList(supportingEstimatorUpnsRaw),
+    procoreProject: safeString(procoreProjectRaw),
+    siteUrl,
     hasSiteUrl: siteUrl.length > 0,
   };
 }
 
 /**
- * Normalize and sort an array of raw list items.
+ * Normalize an array of raw list items. Uses a stable default sort by
+ * `projectNumber` then `projectName`, which the UI's sort pipeline will
+ * override per the user's selected sort key.
  */
 export function normalizeProjectSiteEntries(
   rawItems: Record<string, unknown>[],
