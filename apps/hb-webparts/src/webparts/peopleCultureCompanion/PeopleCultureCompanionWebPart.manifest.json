@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e",
+  "alias": "PeopleCultureCompanionWebPart",
+  "componentType": "WebPart",
+  "version": "0.0.1.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "People and Culture HR Companion" },
+      "description": { "default": "HR operating console for the People & Culture public webpart — overview dashboard, announcements / celebrations / culture-program workspaces with full lifecycle views, cross-family approvals inbox with claim and reassignment, lightweight homepage governance, shared quick-edit drawer and full editor, and a calendar planning mode. Scoped strictly to non-recognition content; HB Kudos is a separate webpart boundary." },
+      "officeFabricIconFontName": "PeopleSettings",
+      "hiddenFromToolbox": true,
+      "properties": {
+        "heading": "People & Culture Operating Console"
+      }
+    }
+  ]
+}
