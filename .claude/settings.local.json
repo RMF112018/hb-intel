@@ -286,7 +286,16 @@
       "Bash(/tmp/fluent_search.sh)",
       "Bash(file /Users/bobbyfetting/hb-intel/docs/architecture/reviews/project*)",
       "Bash(BACKEND_MODE=fake-graph npx tsx tools/build-spfx-package.ts --domain hb-webparts)",
-      "Skill(commit-commands:commit)"
+      "Skill(commit-commands:commit)",
+      "Bash(env)",
+      "Bash(pwsh --version)",
+      "Bash(pwsh:*)",
+      "Bash(break)",
+      "Bash(uuidgen)",
+      "Bash(~/.nvm/versions/node/v18.20.8/bin/node node_modules/gulp-cli/bin/gulp.js clean)",
+      "Bash(export PATH=\"$HOME/.nvm/versions/node/v18.20.8/bin:$HOME/.nvm/versions/node/v22.14.0/bin:/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(npm --version)",
+      "Bash(export PATH=\"$HOME/.nvm/versions/node/v22.14.0/bin:$HOME/.nvm/versions/node/v18.20.8/bin:/usr/local/bin:/opt/homebrew/bin:$PATH\")"
     ]
   },
   "enabledPlugins": {

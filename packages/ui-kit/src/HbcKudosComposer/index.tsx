@@ -22,7 +22,7 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
-import { AlertCircle, CheckCircle2, Sparkles, Users } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Sparkles, Users, X as XIcon } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import styles from './kudos-composer.module.css';
@@ -31,8 +31,56 @@ import styles from './kudos-composer.module.css';
 // Shared types (consumer state shapes)
 // ---------------------------------------------------------------------------
 
+/**
+ * Typed recipient bucket draft for the kudos composer. Phase-14 kudos/
+ * Prompt-02 introduces this alongside the legacy `recipientNames`
+ * string field so HB Kudos can build against the typed People Culture
+ * Kudos schema (four recipient fields) while the transitional merged
+ * People & Culture webpart keeps its existing text-mode composer.
+ *
+ * Convention:
+ *   - `individualEmails` holds typed-in email addresses (or resolved
+ *     people-picker selections once that primitive lands). Writers
+ *     resolve these via ensureUser to `IndividualRecipientsId` on
+ *     `People Culture Kudos`.
+ *   - `teamLabels`, `departmentLabels`, `projectGroupLabels` hold
+ *     taxonomy labels. Writers resolve these once a term-store lookup
+ *     is wired. Until then, consumers may pass them through as
+ *     moderator hints on the item.
+ */
+export interface KudosComposerRecipientBucketsDraft {
+  individualEmails: string[];
+  teamLabels: string[];
+  departmentLabels: string[];
+  projectGroupLabels: string[];
+}
+
+export const EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS: KudosComposerRecipientBucketsDraft = {
+  individualEmails: [],
+  teamLabels: [],
+  departmentLabels: [],
+  projectGroupLabels: [],
+};
+
+/**
+ * Bucket kind discriminator used by the typed recipient chip input.
+ */
+export type KudosComposerRecipientBucketKind =
+  | 'individualEmails'
+  | 'teamLabels'
+  | 'departmentLabels'
+  | 'projectGroupLabels';
+
 export interface KudosComposerDraft {
+  /**
+   * Legacy text recipient field. Kept as an explicit fallback so the
+   * transitional merged People & Culture webpart continues to work
+   * unchanged. New consumers should set `recipientsMode='typed'` and
+   * populate `recipients` instead.
+   */
   recipientNames: string;
+  /** Typed recipient buckets — final-state shape for HB Kudos. */
+  recipients?: KudosComposerRecipientBucketsDraft;
   headline: string;
   excerpt: string;
   details: string;
@@ -40,9 +88,13 @@ export interface KudosComposerDraft {
 
 export interface KudosComposerValidationErrors {
   recipientNames?: string;
+  /** Typed-mode aggregate error (any bucket problem). */
+  recipients?: string;
   headline?: string;
   excerpt?: string;
 }
+
+export type KudosComposerRecipientsMode = 'text' | 'typed';
 
 // ---------------------------------------------------------------------------
 // Flyout — typed footer actions
@@ -270,6 +322,155 @@ export interface HbcKudosComposerFormProps {
   onDraftChange: (patch: Partial<KudosComposerDraft>) => void;
   errors?: KudosComposerValidationErrors;
   disabled?: boolean;
+  /**
+   * Recipient input mode. Defaults to `'text'` for backward compat
+   * with the legacy merged People & Culture composer. The HB Kudos
+   * webpart passes `'typed'` to render four explicit recipient
+   * buckets aligned to the People Culture Kudos schema.
+   */
+  recipientsMode?: KudosComposerRecipientsMode;
+}
+
+const BUCKET_CONFIG: Record<
+  KudosComposerRecipientBucketKind,
+  { label: string; placeholder: string; hint: string; required?: boolean }
+> = {
+  individualEmails: {
+    label: 'Individuals',
+    placeholder: 'person@hedrickbrothers.com',
+    hint: 'Press Enter to add each email address. Moderators resolve these to SharePoint people on approval.',
+    required: true,
+  },
+  teamLabels: {
+    label: 'Teams',
+    placeholder: 'e.g. Field Safety',
+    hint: 'Press Enter to add each team. HR confirms the taxonomy match during review.',
+  },
+  departmentLabels: {
+    label: 'Departments',
+    placeholder: 'e.g. Construction Operations',
+    hint: 'Press Enter to add each department.',
+  },
+  projectGroupLabels: {
+    label: 'Project groups',
+    placeholder: 'e.g. Downtown Mixed-Use Tower',
+    hint: 'Press Enter to add each project group.',
+  },
+};
+
+function HbcKudosComposerTypedRecipients({
+  buckets,
+  onChange,
+  disabled,
+  errorMessage,
+}: {
+  buckets: KudosComposerRecipientBucketsDraft;
+  onChange: (patch: Partial<KudosComposerRecipientBucketsDraft>) => void;
+  disabled: boolean;
+  errorMessage?: string;
+}): React.JSX.Element {
+  return (
+    <div className={styles.field}>
+      <label className={styles.label}>
+        Recipients <span className={styles.requiredMark}>*</span>
+      </label>
+      <div className={styles.typedRecipientWrap}>
+        {(Object.keys(BUCKET_CONFIG) as KudosComposerRecipientBucketKind[]).map((kind) => (
+          <HbcKudosComposerRecipientBucket
+            key={kind}
+            kind={kind}
+            values={buckets[kind]}
+            onChange={(next) => onChange({ [kind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
+            disabled={disabled}
+          />
+        ))}
+      </div>
+      {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
+      <div className={styles.hint}>
+        At least one individual email is required so HR can route the recognition to a real SharePoint person.
+      </div>
+    </div>
+  );
+}
+
+interface HbcKudosComposerRecipientBucketProps {
+  kind: KudosComposerRecipientBucketKind;
+  values: string[];
+  onChange: (next: string[]) => void;
+  disabled: boolean;
+}
+
+function HbcKudosComposerRecipientBucket({
+  kind,
+  values,
+  onChange,
+  disabled,
+}: HbcKudosComposerRecipientBucketProps): React.JSX.Element {
+  const [draft, setDraft] = React.useState('');
+  const config = BUCKET_CONFIG[kind];
+  const inputId = `hbc-kudos-bucket-${kind}`;
+
+  function commit(): void {
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    if (values.includes(trimmed)) {
+      setDraft('');
+      return;
+    }
+    onChange([...values, trimmed]);
+    setDraft('');
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      commit();
+    } else if (e.key === 'Backspace' && draft === '' && values.length > 0) {
+      e.preventDefault();
+      onChange(values.slice(0, -1));
+    }
+  }
+
+  function removeAt(index: number): void {
+    onChange(values.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div className={styles.bucket}>
+      <div className={styles.bucketLabel}>
+        {config.label}
+        {config.required ? <span className={styles.requiredMark}> *</span> : null}
+      </div>
+      <div className={styles.bucketChips}>
+        {values.map((value, index) => (
+          <span key={`${value}-${index}`} className={styles.bucketChip}>
+            <span className={styles.bucketChipLabel}>{value}</span>
+            <button
+              type="button"
+              onClick={() => removeAt(index)}
+              disabled={disabled}
+              aria-label={`Remove ${value}`}
+              className={styles.bucketChipRemove}
+            >
+              <XIcon size={10} strokeWidth={3} aria-hidden="true" />
+            </button>
+          </span>
+        ))}
+        <input
+          id={inputId}
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={commit}
+          disabled={disabled}
+          placeholder={values.length === 0 ? config.placeholder : ''}
+          className={styles.bucketInput}
+        />
+      </div>
+      <div className={styles.bucketHint}>{config.hint}</div>
+    </div>
+  );
 }
 
 export function HbcKudosComposerForm({
@@ -277,7 +478,16 @@ export function HbcKudosComposerForm({
   onDraftChange,
   errors = {},
   disabled = false,
+  recipientsMode = 'text',
 }: HbcKudosComposerFormProps): React.JSX.Element {
+  const typedBuckets = draft.recipients ?? EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS;
+  const handleTypedChange = React.useCallback(
+    (patch: Partial<KudosComposerRecipientBucketsDraft>) => {
+      onDraftChange({ recipients: { ...typedBuckets, ...patch } });
+    },
+    [onDraftChange, typedBuckets],
+  );
+
   return (
     <div className={styles.form}>
       <div className={styles.formIntro}>
@@ -294,24 +504,33 @@ export function HbcKudosComposerForm({
       </div>
 
       {/* Recipients */}
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="hbc-kudos-recipients">
-          Recipients <span className={styles.requiredMark}>*</span>
-        </label>
-        <input
-          id="hbc-kudos-recipients"
-          type="text"
-          placeholder="e.g. Riley Brooks, Morgan Chen"
-          value={draft.recipientNames}
-          onChange={(e) => onDraftChange({ recipientNames: e.target.value })}
+      {recipientsMode === 'typed' ? (
+        <HbcKudosComposerTypedRecipients
+          buckets={typedBuckets}
+          onChange={handleTypedChange}
           disabled={disabled}
-          className={clsx(styles.input, errors.recipientNames && styles.inputError)}
+          errorMessage={errors.recipients}
         />
-        {errors.recipientNames ? (
-          <div className={styles.error}>{errors.recipientNames}</div>
-        ) : null}
-        <div className={styles.hint}>Separate multiple names with commas</div>
-      </div>
+      ) : (
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="hbc-kudos-recipients">
+            Recipients <span className={styles.requiredMark}>*</span>
+          </label>
+          <input
+            id="hbc-kudos-recipients"
+            type="text"
+            placeholder="e.g. Riley Brooks, Morgan Chen"
+            value={draft.recipientNames}
+            onChange={(e) => onDraftChange({ recipientNames: e.target.value })}
+            disabled={disabled}
+            className={clsx(styles.input, errors.recipientNames && styles.inputError)}
+          />
+          {errors.recipientNames ? (
+            <div className={styles.error}>{errors.recipientNames}</div>
+          ) : null}
+          <div className={styles.hint}>Separate multiple names with commas</div>
+        </div>
+      )}
 
       {/* Headline */}
       <div className={styles.field}>
@@ -385,11 +604,27 @@ function parseRecipients(raw: string): string[] {
     .filter(Boolean);
 }
 
+function flattenTypedRecipients(
+  buckets: KudosComposerRecipientBucketsDraft | undefined,
+): string[] {
+  if (!buckets) return [];
+  return [
+    ...buckets.individualEmails,
+    ...buckets.teamLabels,
+    ...buckets.departmentLabels,
+    ...buckets.projectGroupLabels,
+  ].filter(Boolean);
+}
+
 export function HbcKudosComposerPreview({
   draft,
   submitterName,
 }: HbcKudosComposerPreviewProps): React.JSX.Element {
-  const recipients = parseRecipients(draft.recipientNames);
+  // Typed buckets take precedence when any bucket has entries; otherwise
+  // fall back to the legacy comma-delimited text field so the transitional
+  // merged People & Culture webpart continues to render correctly.
+  const typedFlat = flattenTypedRecipients(draft.recipients);
+  const recipients = typedFlat.length > 0 ? typedFlat : parseRecipients(draft.recipientNames);
   const headline = draft.headline.trim() || 'Your headline here';
   const excerpt = draft.excerpt.trim() || 'Your recognition message will appear here…';
   const isEmpty =

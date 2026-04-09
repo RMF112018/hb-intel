@@ -203,6 +203,7 @@ export {
   HbcKudosComposerPreview,
   HbcKudosComposerSuccess,
   HbcKudosComposerError,
+  EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS,
 } from './HbcKudosComposer/index.js';
 export type {
   HbcKudosComposerFlyoutProps,
@@ -213,6 +214,9 @@ export type {
   HbcKudosComposerActionProps,
   KudosComposerDraft,
   KudosComposerValidationErrors,
+  KudosComposerRecipientBucketsDraft,
+  KudosComposerRecipientBucketKind,
+  KudosComposerRecipientsMode,
 } from './HbcKudosComposer/index.js';
 
 export { HbcAvatarStack } from './HbcAvatarStack/index.js';

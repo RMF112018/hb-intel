@@ -11,9 +11,11 @@
  * existing webpart imports continue to work without churn.
  */
 import { useState, useCallback, useMemo } from 'react';
-import type {
-  KudosComposerDraft as SharedKudosComposerDraft,
-  KudosComposerValidationErrors as SharedKudosComposerValidationErrors,
+import {
+  EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS,
+  type KudosComposerDraft as SharedKudosComposerDraft,
+  type KudosComposerRecipientsMode,
+  type KudosComposerValidationErrors as SharedKudosComposerValidationErrors,
 } from '@hbc/ui-kit/homepage';
 
 /* ── Types ─────────────────────────────────────────────────────── */
@@ -22,6 +24,9 @@ export type ComposerStatus = 'idle' | 'editing' | 'submitting' | 'success' | 'er
 
 export type KudosComposerDraft = SharedKudosComposerDraft;
 export type KudosComposerValidationErrors = SharedKudosComposerValidationErrors;
+
+/** Basic RFC-5322 lite email check for the typed composer. */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type SubmitFn = (draft: KudosComposerDraft) => Promise<void>;
 
@@ -49,23 +54,49 @@ export interface UseKudosComposerResult {
 
 /* ── Constants ─────────────────────────────────────────────────── */
 
-const EMPTY_DRAFT: KudosComposerDraft = {
-  recipientNames: '',
-  headline: '',
-  excerpt: '',
-  details: '',
-};
+function buildEmptyDraft(mode: KudosComposerRecipientsMode): KudosComposerDraft {
+  if (mode === 'typed') {
+    return {
+      recipientNames: '',
+      recipients: { ...EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS },
+      headline: '',
+      excerpt: '',
+      details: '',
+    };
+  }
+  return {
+    recipientNames: '',
+    headline: '',
+    excerpt: '',
+    details: '',
+  };
+}
 
 const NO_ERRORS: KudosComposerValidationErrors = {};
 
 /* ── Validation ────────────────────────────────────────────────── */
 
-function validate(draft: KudosComposerDraft): KudosComposerValidationErrors {
+function validate(
+  draft: KudosComposerDraft,
+  mode: KudosComposerRecipientsMode,
+): KudosComposerValidationErrors {
   const errors: KudosComposerValidationErrors = {};
 
-  const names = draft.recipientNames.trim();
-  if (!names) {
-    errors.recipientNames = 'At least one recipient is required';
+  if (mode === 'typed') {
+    const buckets = draft.recipients ?? EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS;
+    if (buckets.individualEmails.length === 0) {
+      errors.recipients = 'Add at least one individual recipient email';
+    } else {
+      const invalid = buckets.individualEmails.find((email) => !EMAIL_RE.test(email.trim()));
+      if (invalid) {
+        errors.recipients = `"${invalid}" does not look like a valid email address`;
+      }
+    }
+  } else {
+    const names = draft.recipientNames.trim();
+    if (!names) {
+      errors.recipientNames = 'At least one recipient is required';
+    }
   }
 
   if (!draft.headline.trim()) {
@@ -85,19 +116,46 @@ function hasErrors(errors: KudosComposerValidationErrors): boolean {
   return Object.keys(errors).length > 0;
 }
 
-function isDraftDirty(draft: KudosComposerDraft): boolean {
-  return draft.recipientNames.trim() !== ''
-    || draft.headline.trim() !== ''
-    || draft.excerpt.trim() !== ''
-    || draft.details.trim() !== '';
+function isDraftDirty(draft: KudosComposerDraft, mode: KudosComposerRecipientsMode): boolean {
+  if (
+    draft.headline.trim() !== '' ||
+    draft.excerpt.trim() !== '' ||
+    draft.details.trim() !== ''
+  ) {
+    return true;
+  }
+  if (mode === 'typed') {
+    const buckets = draft.recipients ?? EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS;
+    return (
+      buckets.individualEmails.length > 0 ||
+      buckets.teamLabels.length > 0 ||
+      buckets.departmentLabels.length > 0 ||
+      buckets.projectGroupLabels.length > 0
+    );
+  }
+  return draft.recipientNames.trim() !== '';
 }
 
 /* ── Hook ──────────────────────────────────────────────────────── */
 
-export function useKudosComposer(onSubmit?: SubmitFn): UseKudosComposerResult {
+export interface UseKudosComposerOptions {
+  /**
+   * Recipient collection mode. Defaults to `'text'` for backward-compat
+   * with the transitional merged People & Culture webpart. The HB Kudos
+   * webpart passes `'typed'` to validate typed recipient buckets.
+   */
+  recipientsMode?: KudosComposerRecipientsMode;
+}
+
+export function useKudosComposer(
+  onSubmit?: SubmitFn,
+  options: UseKudosComposerOptions = {},
+): UseKudosComposerResult {
+  const recipientsMode: KudosComposerRecipientsMode = options.recipientsMode ?? 'text';
+  const EMPTY_DRAFT = useMemo(() => buildEmptyDraft(recipientsMode), [recipientsMode]);
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<ComposerStatus>('idle');
-  const [draft, setDraft] = useState<KudosComposerDraft>(EMPTY_DRAFT);
+  const [draft, setDraft] = useState<KudosComposerDraft>(() => buildEmptyDraft(recipientsMode));
   const [validationErrors, setValidationErrors] = useState<KudosComposerValidationErrors>(NO_ERRORS);
   const [submitError, setSubmitError] = useState<string | undefined>();
 
@@ -136,7 +194,7 @@ export function useKudosComposer(onSubmit?: SubmitFn): UseKudosComposerResult {
   }, []);
 
   const submit = useCallback(async () => {
-    const errors = validate(draft);
+    const errors = validate(draft, recipientsMode);
     setValidationErrors(errors);
     if (hasErrors(errors)) return;
 
@@ -153,7 +211,7 @@ export function useKudosComposer(onSubmit?: SubmitFn): UseKudosComposerResult {
       setSubmitError(message);
       setStatus('error');
     }
-  }, [draft, onSubmit]);
+  }, [draft, onSubmit, recipientsMode]);
 
   const state = useMemo<KudosComposerState>(() => ({
     isOpen,
@@ -161,8 +219,8 @@ export function useKudosComposer(onSubmit?: SubmitFn): UseKudosComposerResult {
     draft,
     validationErrors,
     submitError,
-    isDirty: isDraftDirty(draft),
-  }), [isOpen, status, draft, validationErrors, submitError]);
+    isDirty: isDraftDirty(draft, recipientsMode),
+  }), [isOpen, status, draft, validationErrors, submitError, recipientsMode]);
 
   const actions = useMemo<KudosComposerActions>(() => ({
     open,

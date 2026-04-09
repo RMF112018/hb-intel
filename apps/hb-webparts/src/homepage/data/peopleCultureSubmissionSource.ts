@@ -129,21 +129,29 @@ async function resolveUserId(siteUrl: string, email: string, digest: string): Pr
  *   - `IsScheduled`        — `false` until HR schedules a publish time.
  *   - `CelebrateCount`     — initialized to 0.
  *
+ * Typed recipient handling (Phase-14 kudos/ Prompt-02):
+ *   - `IndividualRecipientsId` (UserMulti) is resolved via
+ *     `ensureUser` when the typed composer passes a list of
+ *     individual emails. Unresolvable emails are skipped and
+ *     collected in `ModeratorNotes` so HR can fix them during review.
+ *   - `TeamRecipients` / `DepartmentRecipients` / `ProjectGroupRecipients`
+ *     are taxonomy fields. Labels collected by the typed composer are
+ *     captured in `ModeratorNotes` until a term-store lookup lands in
+ *     a follow-up prompt; HR confirms the taxonomy match on approval.
+ *
  * Not set on submission:
  *   - `CurrentVisibilityMode` — defaults to `internalOnly` on the
  *     list itself; HR decides when to promote.
- *   - `IndividualRecipients` / `TeamRecipients` / `DepartmentRecipients`
- *     / `ProjectGroupRecipients` — the composer currently accepts
- *     free-text recipient names. Proper Person / Taxonomy field writes
- *     require a SharePoint people-picker + term-store lookup which
- *     the current composer does not collect. HR assigns these during
- *     the review workflow.
+ *   - text-mode submissions continue to skip the four recipient
+ *     fields entirely so the transitional merged People & Culture
+ *     webpart keeps its existing behavior.
  */
 interface KudosListItemPayload {
   KudosId: string;
   Headline: string;
   Excerpt: string;
   Details?: string;
+  ModeratorNotes?: string;
   SubmittedDate: string;
   SubmittedById?: number;
   WorkflowStatus: 'pending';
@@ -154,11 +162,83 @@ interface KudosListItemPayload {
   IsFeatured: boolean;
   IsScheduled: boolean;
   CelebrateCount: number;
+  /** SharePoint UserMulti write convention: `{FieldName}Id: { results: [ids] }` */
+  IndividualRecipientsId?: { results: number[] };
+}
+
+export interface KudosTypedRecipientResolution {
+  /** SharePoint user ids successfully resolved via ensureUser. */
+  resolvedIndividualUserIds: number[];
+  /** Emails that did not resolve (surfaced in ModeratorNotes for HR). */
+  unresolvedIndividualEmails: string[];
+  /** Team taxonomy labels captured for HR review. */
+  teamLabels: string[];
+  /** Department taxonomy labels captured for HR review. */
+  departmentLabels: string[];
+  /** Project-group taxonomy labels captured for HR review. */
+  projectGroupLabels: string[];
+}
+
+function buildModeratorNotesFromTyped(resolution: KudosTypedRecipientResolution): string | undefined {
+  const parts: string[] = [];
+  if (resolution.unresolvedIndividualEmails.length > 0) {
+    parts.push(
+      `Unresolved individual recipients: ${resolution.unresolvedIndividualEmails.join(', ')}`,
+    );
+  }
+  if (resolution.teamLabels.length > 0) {
+    parts.push(`Suggested teams: ${resolution.teamLabels.join(', ')}`);
+  }
+  if (resolution.departmentLabels.length > 0) {
+    parts.push(`Suggested departments: ${resolution.departmentLabels.join(', ')}`);
+  }
+  if (resolution.projectGroupLabels.length > 0) {
+    parts.push(`Suggested project groups: ${resolution.projectGroupLabels.join(', ')}`);
+  }
+  return parts.length > 0 ? parts.join(' | ') : undefined;
+}
+
+/**
+ * Resolve the typed recipient buckets from the composer into the shape
+ * the SharePoint writer needs. Exposed for tests.
+ */
+export async function resolveTypedRecipientBuckets(
+  siteUrl: string,
+  buckets: {
+    individualEmails: string[];
+    teamLabels: string[];
+    departmentLabels: string[];
+    projectGroupLabels: string[];
+  },
+  digest: string,
+): Promise<KudosTypedRecipientResolution> {
+  const resolvedIndividualUserIds: number[] = [];
+  const unresolvedIndividualEmails: string[] = [];
+
+  for (const rawEmail of buckets.individualEmails) {
+    const email = rawEmail.trim();
+    if (!email) continue;
+    const id = await resolveUserId(siteUrl, email, digest);
+    if (typeof id === 'number') {
+      resolvedIndividualUserIds.push(id);
+    } else {
+      unresolvedIndividualEmails.push(email);
+    }
+  }
+
+  return {
+    resolvedIndividualUserIds,
+    unresolvedIndividualEmails,
+    teamLabels: buckets.teamLabels.map((v) => v.trim()).filter(Boolean),
+    departmentLabels: buckets.departmentLabels.map((v) => v.trim()).filter(Boolean),
+    projectGroupLabels: buckets.projectGroupLabels.map((v) => v.trim()).filter(Boolean),
+  };
 }
 
 function buildPayload(
   draft: KudosComposerDraft,
   submitterUserId: number | undefined,
+  typedResolution: KudosTypedRecipientResolution | undefined,
 ): KudosListItemPayload {
   const payload: KudosListItemPayload = {
     KudosId: generateKudosId(),
@@ -185,6 +265,16 @@ function buildPayload(
   // SubmittedBy is a Person field — set via the Id suffix convention
   if (submitterUserId) {
     payload.SubmittedById = submitterUserId;
+  }
+
+  if (typedResolution) {
+    if (typedResolution.resolvedIndividualUserIds.length > 0) {
+      payload.IndividualRecipientsId = { results: typedResolution.resolvedIndividualUserIds };
+    }
+    const moderatorNotes = buildModeratorNotesFromTyped(typedResolution);
+    if (moderatorNotes) {
+      payload.ModeratorNotes = moderatorNotes;
+    }
   }
 
   return payload;
@@ -232,7 +322,16 @@ export async function submitKudosDraft(
   if (!draft.excerpt.trim()) {
     return { ok: false, error: 'Message is required.' };
   }
-  if (!draft.recipientNames.trim()) {
+
+  // Recipient validation: typed buckets take precedence when present,
+  // otherwise fall back to the legacy text field for merged webpart callers.
+  const typedBuckets = draft.recipients;
+  const hasTypedIndividuals = (typedBuckets?.individualEmails.length ?? 0) > 0;
+  if (typedBuckets) {
+    if (!hasTypedIndividuals) {
+      return { ok: false, error: 'At least one individual recipient email is required.' };
+    }
+  } else if (!draft.recipientNames.trim()) {
     return { ok: false, error: 'At least one recipient is required.' };
   }
 
@@ -246,8 +345,14 @@ export async function submitKudosDraft(
       submitterUserId = await resolveUserId(siteUrl, options.submitterEmail, digest);
     }
 
+    // Resolve typed recipient buckets when the caller used the typed composer mode.
+    let typedResolution: KudosTypedRecipientResolution | undefined;
+    if (typedBuckets) {
+      typedResolution = await resolveTypedRecipientBuckets(siteUrl, typedBuckets, digest);
+    }
+
     // Build the list item payload
-    const payload = buildPayload(draft, submitterUserId);
+    const payload = buildPayload(draft, submitterUserId, typedResolution);
 
     // Create the list item — bind by list GUID so title drift cannot
     // cross-bind the writer to the wrong list.
