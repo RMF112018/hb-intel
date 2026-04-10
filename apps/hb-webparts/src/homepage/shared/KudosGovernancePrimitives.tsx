@@ -141,7 +141,11 @@ export function KudosActionButton({
 }
 
 // ---------------------------------------------------------------------------
-// TabButton — governance queue tab
+// TabButton — governance queue filter button
+//
+// Semantics: these are filter buttons, not WAI-ARIA tabs. The content
+// is filtered in-place (no distinct tabpanel per filter), so we use
+// aria-pressed to convey the active state instead of fake tab semantics.
 // ---------------------------------------------------------------------------
 
 export function KudosGovernanceTabButton({
@@ -155,9 +159,8 @@ export function KudosGovernanceTabButton({
 }): React.JSX.Element {
   return (
     <button
-      role="tab"
-      aria-selected={active}
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       style={{
         padding: '8px 14px',
@@ -351,7 +354,6 @@ export function KudosGovernanceInputDialog({
               fontSize: '0.875rem',
               borderRadius: 8,
               border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              outline: 'none',
               fontFamily: 'inherit',
             }}
           />

@@ -225,7 +225,6 @@ function ArchiveList({
               fontSize: '0.8125rem',
               borderRadius: 8,
               border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              outline: 'none',
               minWidth: 200,
             }}
           />

@@ -1067,8 +1067,9 @@ export function HbKudosCompanion({
         </div>
       </header>
 
-      {/* Tabs */}
-      <div role="tablist" aria-label="Queue tabs" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {/* Queue filter buttons — not WAI-ARIA tabs (no tabpanels; content
+           is filtered in-place). Each button uses aria-pressed. */}
+      <div role="group" aria-label="Queue filters" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {COMPANION_TABS.map((tab) => (
           <KudosGovernanceTabButton
             key={tab.id}
@@ -1079,10 +1080,10 @@ export function HbKudosCompanion({
         ))}
       </div>
 
-      {/* Toolbar */}
+      {/* Search and filter controls */}
       <div
-        role="toolbar"
-        aria-label="Queue filters"
+        role="group"
+        aria-label="Search and filter controls"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -1106,7 +1107,6 @@ export function HbKudosCompanion({
               fontSize: '0.8125rem',
               borderRadius: 8,
               border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              outline: 'none',
               minWidth: 200,
             }}
           />

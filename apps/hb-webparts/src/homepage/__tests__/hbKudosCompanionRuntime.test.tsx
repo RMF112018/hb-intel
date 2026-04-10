@@ -502,8 +502,8 @@ describe('HbKudosCompanion webpart — runtime smoke', () => {
       expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-prompt-03');
       expect(section?.getAttribute('data-hbc-role')).toBe('reviewer');
     });
-    // Tab bar should render the Pending tab by default.
-    expect(screen.getByRole('tab', { name: 'Pending' })).toBeTruthy();
+    // Filter bar should render the Pending filter as active by default.
+    expect(screen.getByRole('button', { name: 'Pending' })).toBeTruthy();
     // Toolbar search is visible.
     expect(screen.getByPlaceholderText('Search recognition…')).toBeTruthy();
   });
@@ -517,15 +517,15 @@ describe('HbKudosCompanion webpart — runtime smoke', () => {
     });
   });
 
-  it('tab switching updates the active tab', async () => {
+  it('filter switching updates the active filter button', async () => {
     await act(async () => {
       render(<HbKudosCompanion config={{ simulatedRole: 'reviewer' }} />);
     });
     await waitFor(() => {
-      expect(screen.getByRole('tab', { name: 'Flagged for admin' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Rejected' })).toBeTruthy();
     });
-    const flaggedTab = screen.getByRole('tab', { name: 'Flagged for admin' });
-    fireEvent.click(flaggedTab);
-    expect(flaggedTab.getAttribute('aria-selected')).toBe('true');
+    const rejectedBtn = screen.getByRole('button', { name: 'Rejected' });
+    fireEvent.click(rejectedBtn);
+    expect(rejectedBtn.getAttribute('aria-pressed')).toBe('true');
   });
 });
