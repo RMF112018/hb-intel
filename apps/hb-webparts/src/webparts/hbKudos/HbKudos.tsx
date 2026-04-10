@@ -71,6 +71,9 @@ import {
   isPubliclyVisible,
   type KudosEntry,
 } from '../../homepage/webparts/kudosContracts.js';
+import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
+import { fetchKudosAuditTimeline, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
+import { getSiteUrl } from '../../homepage/data/spContext.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -348,7 +351,7 @@ function ArchiveList({
 }
 
 // ---------------------------------------------------------------------------
-// Detail panel (local composition of shared primitives)
+// Detail panel (shared content via KudosDetailPanelContent)
 // ---------------------------------------------------------------------------
 
 interface DetailPanelProps {
@@ -359,8 +362,21 @@ interface DetailPanelProps {
 
 function DetailPanel({ entry, onClose, onCelebrate }: DetailPanelProps): React.JSX.Element {
   const isPublic = entry ? isPubliclyVisible(entry) : false;
-  const summary = entry ? buildKudosRecipientSummary(entry.recipients) : undefined;
-  const chip = entry?.workflowStatus ? buildWorkflowChipDescriptor(entry.workflowStatus) : undefined;
+
+  // Fetch audit timeline when the panel opens. Employee role = viewer.
+  const [timeline, setTimeline] = React.useState<KudosAuditTimelineEntry[]>([]);
+  const [timelineLoading, setTimelineLoading] = React.useState(false);
+  React.useEffect(() => {
+    if (!entry) { setTimeline([]); return; }
+    const siteUrl = getSiteUrl();
+    if (!siteUrl) return;
+    let cancelled = false;
+    setTimelineLoading(true);
+    fetchKudosAuditTimeline(siteUrl, entry.id).then((events) => {
+      if (!cancelled) { setTimeline(events); setTimelineLoading(false); }
+    }).catch(() => { if (!cancelled) setTimelineLoading(false); });
+    return () => { cancelled = true; };
+  }, [entry?.id]);
 
   return (
     <HbcKudosComposerFlyout
@@ -376,118 +392,12 @@ function DetailPanel({ entry, onClose, onCelebrate }: DetailPanelProps): React.J
       secondaryAction={isPublic && onCelebrate ? { label: 'Close', onClick: onClose } : undefined}
     >
       {entry ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {chip ? (
-            <div>
-              <HbcStatusBadge
-                variant={
-                  chip.tone === 'success'
-                    ? 'success'
-                    : chip.tone === 'warning'
-                      ? 'warning'
-                      : chip.tone === 'danger'
-                        ? 'critical'
-                        : 'info'
-                }
-                size="small"
-                label={chip.label}
-              />
-            </div>
-          ) : null}
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: '0.9375rem',
-              lineHeight: 1.6,
-              color: 'rgba(26, 19, 16, 0.8)',
-            }}
-          >
-            {entry.excerpt}
-          </p>
-
-          {entry.details && isPublic ? (
-            <div>
-              <div
-                style={{
-                  fontSize: '0.6875rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(26, 19, 16, 0.55)',
-                  marginBottom: 6,
-                }}
-              >
-                Additional details
-              </div>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: '0.875rem',
-                  lineHeight: 1.6,
-                  color: 'rgba(26, 19, 16, 0.68)',
-                }}
-              >
-                {entry.details}
-              </p>
-            </div>
-          ) : null}
-
-          {summary && summary.total > 0 ? (
-            <div>
-              <div
-                style={{
-                  fontSize: '0.6875rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(26, 19, 16, 0.55)',
-                  marginBottom: 10,
-                }}
-              >
-                Recipients
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <HbcAvatarStack
-                  people={entry.recipients.slice(0, 6).map((r) => ({
-                    id: r.id,
-                    name: r.name,
-                    src: r.media?.src,
-                  }))}
-                  size="md"
-                  max={6}
-                />
-                <span
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: 'rgba(26, 19, 16, 0.68)',
-                    fontWeight: 600,
-                  }}
-                >
-                  {summary.label}
-                </span>
-              </div>
-            </div>
-          ) : null}
-
-          {!isPublic ? (
-            <div
-              style={{
-                padding: '12px 14px',
-                borderRadius: 10,
-                background: 'rgba(34, 83, 145, 0.06)',
-                border: '1px solid rgba(34, 83, 145, 0.14)',
-                fontSize: '0.75rem',
-                color: 'rgba(34, 83, 145, 0.82)',
-                fontWeight: 600,
-                lineHeight: 1.5,
-              }}
-            >
-              This recognition is no longer on the public homepage. You can see it here because
-              you are associated with it.
-            </div>
-          ) : null}
-        </div>
+        <KudosDetailPanelContent
+          entry={entry}
+          role="viewer"
+          timeline={timeline}
+          timelineLoading={timelineLoading}
+        />
       ) : null}
     </HbcKudosComposerFlyout>
   );

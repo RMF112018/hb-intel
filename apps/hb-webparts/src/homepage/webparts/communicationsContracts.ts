@@ -216,6 +216,25 @@ export interface KudosEntry {
   publishStartDate?: string;
   publishEndDate?: string;
   celebrateCount?: number;
+  // Governance metadata (Phase-14 Prompt-04 read-path extension)
+  /** Mirrors the live `RejectionReason` field. */
+  rejectionReason?: string;
+  /** Mirrors the live `ModeratorNotes` field. */
+  moderatorNotes?: string;
+  /** Mirrors the live `RevisionGuidance` field. */
+  revisionGuidance?: string;
+  /** Mirrors the live `IsFlaggedForAdminReview` boolean. */
+  isFlaggedForAdminReview?: boolean;
+  /** Mirrors the live `AdminReviewReason` field. */
+  adminReviewReason?: string;
+  /** Mirrors the live `IsRemovedFromPublicView` boolean. */
+  isRemovedFromPublicView?: boolean;
+  /** Mirrors the live `RemovedReason` field. */
+  removedReason?: string;
+  /** Mirrors the live `ProminenceFailureAt` datetime. */
+  prominenceFailureAt?: string;
+  /** Mirrors the live `ProminenceFailureReason` field. */
+  prominenceFailureReason?: string;
 }
 
 // --- Band B: Weekly Celebrations ---

@@ -211,20 +211,91 @@ describe('kudosGovernanceWriter — buildKudosPatchPlan', () => {
     expect(plan.auditEvent.eventType).toBe('clearAdminReview');
   });
 
-  it('deferred patch kinds return a NotImplemented error', () => {
-    const deferred: Array<
-      Parameters<typeof buildKudosPatchPlan>[0]
-    > = [
+  it('Prompt-04 scheduling/prominence/remove/restore writers return ok plans', () => {
+    const implemented: Array<Parameters<typeof buildKudosPatchPlan>[0]> = [
       { kind: 'schedule', kudosId: 'k', scheduledPublishAtIso: NOW },
       { kind: 'unschedule', kudosId: 'k' },
       { kind: 'pin', kudosId: 'k' },
       { kind: 'unpin', kudosId: 'k' },
       { kind: 'feature', kudosId: 'k' },
       { kind: 'unfeature', kudosId: 'k' },
+      { kind: 'remove', kudosId: 'k', removedReason: 'test' },
+      { kind: 'restore', kudosId: 'k' },
+    ];
+    for (const patch of implemented) {
+      const plan = buildKudosPatchPlan(patch);
+      expect(plan.ok).toBe(true);
+    }
+  });
+
+  it('schedule plan sets WorkflowStatus=approvedScheduled and IsScheduled=true', () => {
+    const plan = buildKudosPatchPlan({
+      kind: 'schedule',
+      kudosId: 'k',
+      actorUserId: 7,
+      actedAtIso: NOW,
+      scheduledPublishAtIso: '2026-05-01T09:00:00Z',
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.fields[KUDOS_FIELDS.WorkflowStatus]).toBe('approvedScheduled');
+    expect(plan.fields[KUDOS_FIELDS.IsScheduled]).toBe(true);
+    expect(plan.fields[KUDOS_FIELDS.ScheduledPublishAt]).toBe('2026-05-01T09:00:00Z');
+    expect(plan.auditEvent.eventType).toBe('schedule');
+  });
+
+  it('pin plan sets ProminenceIntent=pinned and clears IsFeatured', () => {
+    const plan = buildKudosPatchPlan({
+      kind: 'pin',
+      kudosId: 'k',
+      pinOrder: 2,
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.fields[KUDOS_FIELDS.IsPinned]).toBe(true);
+    expect(plan.fields[KUDOS_FIELDS.IsFeatured]).toBe(false);
+    expect(plan.fields[KUDOS_FIELDS.ProminenceIntent]).toBe('pinned');
+    expect(plan.fields[KUDOS_FIELDS.PinOrder]).toBe(2);
+  });
+
+  it('feature plan sets ProminenceIntent=featured and clears IsPinned', () => {
+    const plan = buildKudosPatchPlan({
+      kind: 'feature',
+      kudosId: 'k',
+      featuredExpiresAtIso: '2026-06-01T00:00:00Z',
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.fields[KUDOS_FIELDS.IsFeatured]).toBe(true);
+    expect(plan.fields[KUDOS_FIELDS.IsPinned]).toBe(false);
+    expect(plan.fields[KUDOS_FIELDS.ProminenceIntent]).toBe('featured');
+  });
+
+  it('remove plan requires a reason and disables homepage visibility', () => {
+    const missing = buildKudosPatchPlan({ kind: 'remove', kudosId: 'k', removedReason: '' });
+    expect(missing.ok).toBe(false);
+
+    const plan = buildKudosPatchPlan({ kind: 'remove', kudosId: 'k', removedReason: 'inappropriate', actorUserId: 3, actedAtIso: NOW });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.fields[KUDOS_FIELDS.WorkflowStatus]).toBe('removedUnpublished');
+    expect(plan.fields[KUDOS_FIELDS.IsRemovedFromPublicView]).toBe(true);
+    expect(plan.fields[KUDOS_FIELDS.HomepageEnabled]).toBe(false);
+  });
+
+  it('restore plan re-enables homepage and clears the removed flag', () => {
+    const plan = buildKudosPatchPlan({ kind: 'restore', kudosId: 'k', actorUserId: 5, actedAtIso: NOW });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.fields[KUDOS_FIELDS.WorkflowStatus]).toBe('approved');
+    expect(plan.fields[KUDOS_FIELDS.IsRemovedFromPublicView]).toBe(false);
+    expect(plan.fields[KUDOS_FIELDS.HomepageEnabled]).toBe(true);
+  });
+
+  it('deferred patch kinds return a NotImplemented error', () => {
+    const deferred: Array<Parameters<typeof buildKudosPatchPlan>[0]> = [
       { kind: 'claim', kudosId: 'k' },
       { kind: 'reassign', kudosId: 'k', assignedUserId: 1 },
-      { kind: 'remove', kudosId: 'k', removedReason: 'r' },
-      { kind: 'restore', kudosId: 'k' },
       { kind: 'celebrate', kudosId: 'k', nextCount: 5 },
       { kind: 'updateContent', kudosId: 'k', headline: 'h' },
       { kind: 'resubmit', kudosId: 'k' },

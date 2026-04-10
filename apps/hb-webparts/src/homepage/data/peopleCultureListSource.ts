@@ -261,10 +261,12 @@ function buildAnnSelect(publishDateField: string): string {
 const ANN_EXPAND = ANN_FIELDS.AnnouncementPerson;
 
 const KUDOS_SELECT = [
+  // Core identity + content
   KUDOS_FIELDS.KudosId,
   KUDOS_FIELDS.Headline,
   KUDOS_FIELDS.Excerpt,
   KUDOS_FIELDS.Details,
+  // Submission / approval identities (expanded)
   `${KUDOS_FIELDS.SubmittedBy}/Id`,
   `${KUDOS_FIELDS.SubmittedBy}/Title`,
   `${KUDOS_FIELDS.SubmittedBy}/EMail`,
@@ -273,26 +275,43 @@ const KUDOS_SELECT = [
   `${KUDOS_FIELDS.ApprovedBy}/Title`,
   `${KUDOS_FIELDS.ApprovedBy}/EMail`,
   KUDOS_FIELDS.ApprovedDate,
+  // Recipients (expanded)
   `${KUDOS_FIELDS.IndividualRecipients}/Id`,
   `${KUDOS_FIELDS.IndividualRecipients}/Title`,
   `${KUDOS_FIELDS.IndividualRecipients}/EMail`,
   KUDOS_FIELDS.TeamRecipients,
   KUDOS_FIELDS.DepartmentRecipients,
   KUDOS_FIELDS.ProjectGroupRecipients,
+  // Workflow / lifecycle
   KUDOS_FIELDS.WorkflowStatus,
   KUDOS_FIELDS.WasEverPublished,
+  KUDOS_FIELDS.RejectionReason,
+  KUDOS_FIELDS.ModeratorNotes,
+  KUDOS_FIELDS.RevisionGuidance,
+  // Admin review
+  KUDOS_FIELDS.IsFlaggedForAdminReview,
+  KUDOS_FIELDS.AdminReviewReason,
+  // Removal / restore
+  KUDOS_FIELDS.IsRemovedFromPublicView,
+  KUDOS_FIELDS.RemovedReason,
+  // Prominence / visibility
   KUDOS_FIELDS.IsPinned,
   KUDOS_FIELDS.PinOrder,
   KUDOS_FIELDS.IsFeatured,
   KUDOS_FIELDS.FeaturedExpiresAt,
   KUDOS_FIELDS.ProminenceIntent,
+  KUDOS_FIELDS.ProminenceFailureAt,
+  KUDOS_FIELDS.ProminenceFailureReason,
   KUDOS_FIELDS.CurrentVisibilityMode,
   KUDOS_FIELDS.HomepageEnabled,
+  // Scheduling
   KUDOS_FIELDS.IsScheduled,
   KUDOS_FIELDS.ScheduledPublishAt,
   KUDOS_FIELDS.PublishStartDate,
   KUDOS_FIELDS.PublishEndDate,
+  // Engagement
   KUDOS_FIELDS.CelebrateCount,
+  // Media
   KUDOS_FIELDS.PrimaryImage,
   KUDOS_FIELDS.ImageAltText,
 ].join(',');
@@ -372,11 +391,22 @@ interface RawKudosItem {
   ProjectGroupRecipients?: string;
   WorkflowStatus?: string;
   WasEverPublished?: boolean;
+  // Governance metadata (Prompt-04 read-path extension)
+  RejectionReason?: string;
+  ModeratorNotes?: string;
+  RevisionGuidance?: string;
+  IsFlaggedForAdminReview?: boolean;
+  AdminReviewReason?: string;
+  IsRemovedFromPublicView?: boolean;
+  RemovedReason?: string;
+  // Prominence / visibility
   IsPinned?: boolean;
   PinOrder?: number;
   IsFeatured?: boolean;
   FeaturedExpiresAt?: string;
   ProminenceIntent?: string;
+  ProminenceFailureAt?: string;
+  ProminenceFailureReason?: string;
   CurrentVisibilityMode?: string;
   HomepageEnabled?: boolean;
   IsScheduled?: boolean;
@@ -676,6 +706,16 @@ function mapKudos(raw: RawKudosItem, siteUrl: string): KudosEntry | undefined {
     publishEndDate: raw.PublishEndDate,
     celebrateCount: typeof raw.CelebrateCount === 'number' ? raw.CelebrateCount : undefined,
     media: buildMedia(imageSrc, raw.ImageAltText),
+    // Governance metadata (Phase-14 Prompt-04 read-path extension)
+    rejectionReason: raw.RejectionReason?.trim() || undefined,
+    moderatorNotes: raw.ModeratorNotes?.trim() || undefined,
+    revisionGuidance: raw.RevisionGuidance?.trim() || undefined,
+    isFlaggedForAdminReview: raw.IsFlaggedForAdminReview === true ? true : undefined,
+    adminReviewReason: raw.AdminReviewReason?.trim() || undefined,
+    isRemovedFromPublicView: raw.IsRemovedFromPublicView === true ? true : undefined,
+    removedReason: raw.RemovedReason?.trim() || undefined,
+    prominenceFailureAt: raw.ProminenceFailureAt || undefined,
+    prominenceFailureReason: raw.ProminenceFailureReason?.trim() || undefined,
   };
 }
 

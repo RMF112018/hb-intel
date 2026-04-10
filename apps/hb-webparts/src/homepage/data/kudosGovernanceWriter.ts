@@ -403,23 +403,215 @@ export function buildKudosPatchPlan(
       };
     }
 
+    // ── Prompt-04 scheduling/prominence writers ─────────────────────
+
+    case 'schedule': {
+      if (!patch.scheduledPublishAtIso?.trim()) {
+        return { ok: false, error: 'Scheduled publish date is required.' };
+      }
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'approvedScheduled',
+        [KUDOS_FIELDS.IsScheduled]: true,
+        [KUDOS_FIELDS.ScheduledPublishAt]: patch.scheduledPublishAtIso.trim(),
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.ScheduledBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'schedule',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { scheduledPublishAt: patch.scheduledPublishAtIso.trim() },
+        },
+      };
+    }
+
+    case 'unschedule': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'approved',
+        [KUDOS_FIELDS.IsScheduled]: false,
+        [KUDOS_FIELDS.ScheduledPublishAt]: null,
+        [KUDOS_FIELDS.ScheduleCancelledAt]: actedAtIso,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.ScheduleCancelledBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'unschedule',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isScheduled: false },
+        },
+      };
+    }
+
+    case 'pin': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.IsPinned]: true,
+        [KUDOS_FIELDS.IsFeatured]: false,
+        [KUDOS_FIELDS.ProminenceIntent]: 'pinned',
+      };
+      if (typeof patch.pinOrder === 'number') {
+        fields[KUDOS_FIELDS.PinOrder] = patch.pinOrder;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'pin',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isPinned: true, pinOrder: patch.pinOrder ?? null },
+        },
+      };
+    }
+
+    case 'unpin': {
+      return {
+        ok: true,
+        fields: {
+          [KUDOS_FIELDS.IsPinned]: false,
+          [KUDOS_FIELDS.PinOrder]: null,
+          [KUDOS_FIELDS.ProminenceIntent]: 'standard',
+        },
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'unpin',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isPinned: false },
+        },
+      };
+    }
+
+    case 'feature': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.IsFeatured]: true,
+        [KUDOS_FIELDS.IsPinned]: false,
+        [KUDOS_FIELDS.ProminenceIntent]: 'featured',
+      };
+      if (patch.featuredExpiresAtIso) {
+        fields[KUDOS_FIELDS.FeaturedExpiresAt] = patch.featuredExpiresAtIso;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'feature',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isFeatured: true, featuredExpiresAt: patch.featuredExpiresAtIso ?? null },
+        },
+      };
+    }
+
+    case 'unfeature': {
+      return {
+        ok: true,
+        fields: {
+          [KUDOS_FIELDS.IsFeatured]: false,
+          [KUDOS_FIELDS.FeaturedExpiresAt]: null,
+          [KUDOS_FIELDS.ProminenceIntent]: 'standard',
+        },
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'unfeature',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isFeatured: false },
+        },
+      };
+    }
+
+    // ── Prompt-04 also lands remove/restore (detail-panel needs them) ──
+
+    case 'remove': {
+      if (!patch.removedReason.trim()) {
+        return { ok: false, error: 'Removal reason is required.' };
+      }
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'removedUnpublished',
+        [KUDOS_FIELDS.IsRemovedFromPublicView]: true,
+        [KUDOS_FIELDS.RemovedReason]: patch.removedReason.trim(),
+        [KUDOS_FIELDS.RemovedAt]: actedAtIso,
+        [KUDOS_FIELDS.HomepageEnabled]: false,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.RemovedBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'remove',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'removedUnpublished', removedReason: patch.removedReason.trim() },
+        },
+      };
+    }
+
+    case 'restore': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'approved',
+        [KUDOS_FIELDS.IsRemovedFromPublicView]: false,
+        [KUDOS_FIELDS.RestoredAt]: actedAtIso,
+        [KUDOS_FIELDS.HomepageEnabled]: true,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.RestoredBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'restore',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'approved', isRemovedFromPublicView: false },
+        },
+      };
+    }
+
+    // ── Deferred to Prompt-05 ─────────────────────────────────────
+
     case 'resubmit':
     case 'withdraw':
-    case 'schedule':
-    case 'unschedule':
-    case 'pin':
-    case 'unpin':
-    case 'feature':
-    case 'unfeature':
     case 'claim':
     case 'reassign':
-    case 'remove':
-    case 'restore':
     case 'celebrate':
     case 'updateContent':
       return {
         ok: false,
-        error: `NotImplemented — '${patch.kind}' writer is deferred to Prompt-04 / Prompt-05.`,
+        error: `NotImplemented — '${patch.kind}' writer is deferred to Prompt-05.`,
       };
 
     default: {
@@ -521,7 +713,105 @@ export async function submitKudosGovernanceAction(
   }
 }
 
-// Silence the unused import warning for KUDOS_AUDIT_FIELDS — kept in
-// scope so future writer code can reference the audit field names
-// without re-importing.
-void KUDOS_AUDIT_FIELDS;
+// ---------------------------------------------------------------------------
+// Audit timeline reader (Phase-14 Prompt-04)
+// ---------------------------------------------------------------------------
+
+interface RawAuditEventItem {
+  Id: number;
+  KudosId?: string;
+  EventType?: string;
+  Actor?: SpPersonValue | null;
+  EventAt?: string;
+  PublicNote?: string;
+  InternalNote?: string;
+  OldValue?: string;
+  NewValue?: string;
+}
+
+interface SpPersonValue {
+  Id: number;
+  Title: string;
+  EMail?: string;
+}
+
+/**
+ * Fetch the audit-event timeline for a given `KudosId`. Returns the
+ * rows sorted by `EventAt` ascending so the UI can render a
+ * chronological timeline. Uses the `Kudos Audit Events` list
+ * bound by GUID via `peopleCultureSpListRegistry`.
+ */
+export async function fetchKudosAuditTimeline(
+  siteUrl: string,
+  kudosId: string,
+): Promise<KudosAuditTimelineEntry[]> {
+  if (!kudosId.trim()) return [];
+
+  const select = [
+    'Id',
+    KUDOS_AUDIT_FIELDS.KudosId,
+    KUDOS_AUDIT_FIELDS.EventType,
+    `${KUDOS_AUDIT_FIELDS.Actor}/Id`,
+    `${KUDOS_AUDIT_FIELDS.Actor}/Title`,
+    `${KUDOS_AUDIT_FIELDS.Actor}/EMail`,
+    KUDOS_AUDIT_FIELDS.EventAt,
+    KUDOS_AUDIT_FIELDS.PublicNote,
+    KUDOS_AUDIT_FIELDS.InternalNote,
+    KUDOS_AUDIT_FIELDS.OldValue,
+    KUDOS_AUDIT_FIELDS.NewValue,
+  ].join(',');
+
+  const url = buildPcListItemsEndpoint(
+    siteUrl,
+    PEOPLE_CULTURE_LIST_REGISTRY.kudosAuditEvents,
+    {
+      select,
+      expand: KUDOS_AUDIT_FIELDS.Actor,
+      filter: `${KUDOS_AUDIT_FIELDS.KudosId} eq '${escapeODataString(kudosId)}'`,
+      top: 100,
+    },
+  );
+
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json;odata=nometadata' },
+  });
+
+  if (!response.ok) return [];
+
+  const body = (await response.json()) as { value?: RawAuditEventItem[] };
+  const items = body.value ?? [];
+
+  return items
+    .map((raw): KudosAuditTimelineEntry | undefined => {
+      if (!raw.EventType || !raw.EventAt) return undefined;
+      return {
+        id: raw.Id,
+        kudosId: raw.KudosId ?? kudosId,
+        eventType: raw.EventType as KudosAuditEventType,
+        actorDisplayName: raw.Actor?.Title?.trim(),
+        eventAt: raw.EventAt,
+        publicNote: raw.PublicNote?.trim() || undefined,
+        internalNote: raw.InternalNote?.trim() || undefined,
+      };
+    })
+    .filter((e): e is KudosAuditTimelineEntry => e != null)
+    .sort((a, b) => Date.parse(a.eventAt) - Date.parse(b.eventAt));
+}
+
+/**
+ * Compact read shape returned by `fetchKudosAuditTimeline`. This is
+ * not the same as `KudosAuditEvent` from kudosContracts (which is
+ * the full read shape with old/newValue blobs). The timeline entry
+ * is intentionally narrower — just what the detail-panel timeline
+ * block needs to render.
+ */
+export interface KudosAuditTimelineEntry {
+  id: number;
+  kudosId: string;
+  eventType: KudosAuditEventType;
+  actorDisplayName?: string;
+  eventAt: string;
+  publicNote?: string;
+  /** HR-only. Must not leak to employee-facing views. */
+  internalNote?: string;
+}

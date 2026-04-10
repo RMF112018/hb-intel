@@ -51,7 +51,9 @@ import {
   HbcStatusBadge,
 } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
-import { submitKudosGovernanceAction } from '../../homepage/data/kudosGovernanceWriter.js';
+import { submitKudosGovernanceAction, fetchKudosAuditTimeline, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
+import { getSiteUrl } from '../../homepage/data/spContext.js';
+import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
 import {
   KUDOS_ROLE_LABELS,
   deriveKudosCapabilities,
@@ -65,7 +67,6 @@ import {
   buildWorkflowChipDescriptor,
   deriveAgingBucket,
   DEFAULT_KUDOS_QUEUE_FILTER_STATE,
-  mapAuditEventTypeLabel,
   needsAdminReview,
   type KudosAgingBucket,
   type KudosEntry,
@@ -444,30 +445,46 @@ function QueueRow({
 // Detail panel
 // ---------------------------------------------------------------------------
 
+type DetailActionKind = 'approve' | 'reject' | 'requestRevision' | 'flagAdminReview' | 'clearAdminReview' | 'schedule' | 'unschedule' | 'pin' | 'unpin' | 'feature' | 'unfeature' | 'remove' | 'restore';
+
 interface DetailPanelProps {
   entry: KudosEntry | undefined;
   onClose: () => void;
   capabilities: KudosCapabilities;
+  role: KudosRole;
   dispatching: boolean;
   error?: string;
-  onAction: (kind: 'approve' | 'reject' | 'requestRevision' | 'flagAdminReview' | 'clearAdminReview') => void;
+  onAction: (kind: DetailActionKind) => void;
 }
 
 function DetailPanel({
   entry,
   onClose,
   capabilities,
+  role,
   dispatching,
   error,
   onAction,
 }: DetailPanelProps): React.JSX.Element {
-  const summary = entry ? buildKudosRecipientSummary(entry.recipients) : undefined;
-  const chip = entry?.workflowStatus ? buildWorkflowChipDescriptor(entry.workflowStatus) : undefined;
-
   const canApprove = capabilities.canApprove && entry?.workflowStatus !== 'approved';
   const canReject = capabilities.canReject && entry?.workflowStatus !== 'rejected';
   const canRequestRevision =
     capabilities.canRequestRevision && entry?.workflowStatus === 'pending';
+
+  // Fetch audit timeline when the panel opens.
+  const [timeline, setTimeline] = React.useState<KudosAuditTimelineEntry[]>([]);
+  const [timelineLoading, setTimelineLoading] = React.useState(false);
+  React.useEffect(() => {
+    if (!entry) { setTimeline([]); return; }
+    const siteUrl = getSiteUrl();
+    if (!siteUrl) return;
+    let cancelled = false;
+    setTimelineLoading(true);
+    fetchKudosAuditTimeline(siteUrl, entry.id).then((events) => {
+      if (!cancelled) { setTimeline(events); setTimelineLoading(false); }
+    }).catch(() => { if (!cancelled) setTimelineLoading(false); });
+    return () => { cancelled = true; };
+  }, [entry?.id]);
 
   return (
     <HbcKudosComposerFlyout
@@ -489,96 +506,12 @@ function DetailPanel({
     >
       {entry ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {chip ? (
-            <div>
-              <HbcStatusBadge
-                variant={
-                  chip.tone === 'success'
-                    ? 'success'
-                    : chip.tone === 'warning'
-                      ? 'warning'
-                      : chip.tone === 'danger'
-                        ? 'critical'
-                        : 'info'
-                }
-                size="small"
-                label={chip.label}
-              />
-            </div>
-          ) : null}
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: '0.9375rem',
-              lineHeight: 1.6,
-              color: 'rgba(26, 19, 16, 0.8)',
-            }}
-          >
-            {entry.excerpt}
-          </p>
-
-          {entry.details ? (
-            <div>
-              <SectionHeading>Additional details</SectionHeading>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: '0.875rem',
-                  lineHeight: 1.6,
-                  color: 'rgba(26, 19, 16, 0.68)',
-                }}
-              >
-                {entry.details}
-              </p>
-            </div>
-          ) : null}
-
-          {summary && summary.total > 0 ? (
-            <div>
-              <SectionHeading>Recipients</SectionHeading>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <HbcAvatarStack
-                  people={entry.recipients.slice(0, 6).map((r) => ({
-                    id: r.id,
-                    name: r.name,
-                    src: r.media?.src,
-                  }))}
-                  size="md"
-                  max={6}
-                />
-                <span
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: 'rgba(26, 19, 16, 0.68)',
-                    fontWeight: 600,
-                  }}
-                >
-                  {summary.label}
-                </span>
-              </div>
-            </div>
-          ) : null}
-
-          <div>
-            <SectionHeading>Audit timeline</SectionHeading>
-            <div
-              style={{
-                fontSize: '0.75rem',
-                color: 'rgba(26, 19, 16, 0.6)',
-                lineHeight: 1.5,
-              }}
-            >
-              {mapAuditEventTypeLabel('submit')} · {new Date(entry.submittedDate).toLocaleString()}
-              {entry.approvedDate ? (
-                <>
-                  <br />
-                  {mapAuditEventTypeLabel('approve')} ·{' '}
-                  {new Date(entry.approvedDate).toLocaleString()}
-                </>
-              ) : null}
-            </div>
-          </div>
+          <KudosDetailPanelContent
+            entry={entry}
+            role={role}
+            timeline={timeline}
+            timelineLoading={timelineLoading}
+          />
 
           {error ? (
             <div
@@ -608,33 +541,34 @@ function DetailPanel({
               borderTop: '1px dashed rgba(229, 126, 70, 0.22)',
             }}
           >
-            <ActionButton
-              label="Reject"
-              onClick={() => onAction('reject')}
-              disabled={!canReject || dispatching}
-              tone="danger"
-            />
-            <ActionButton
-              label="Request revision"
-              onClick={() => onAction('requestRevision')}
-              disabled={!canRequestRevision || dispatching}
-              tone="warning"
-            />
+            <ActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" />
+            <ActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" />
+            {capabilities.canSchedule ? (
+              entry?.isScheduled
+                ? <ActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" />
+                : <ActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" />
+            ) : null}
+            {capabilities.canPin ? (
+              entry?.isPinned
+                ? <ActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" />
+                : <ActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" />
+            ) : null}
+            {capabilities.canFeature ? (
+              entry?.isFeatured
+                ? <ActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" />
+                : <ActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" />
+            ) : null}
+            {capabilities.canRemove && entry?.workflowStatus !== 'removedUnpublished' ? (
+              <ActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" />
+            ) : null}
+            {capabilities.canRestore && entry?.workflowStatus === 'removedUnpublished' ? (
+              <ActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" />
+            ) : null}
             {capabilities.canFlagAdminReview && !needsAdminReview(entry) ? (
-              <ActionButton
-                label="Flag for admin review"
-                onClick={() => onAction('flagAdminReview')}
-                disabled={dispatching}
-                tone="warning"
-              />
+              <ActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" />
             ) : null}
             {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
-              <ActionButton
-                label="Clear admin review"
-                onClick={() => onAction('clearAdminReview')}
-                disabled={dispatching}
-                tone="info"
-              />
+              <ActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" />
             ) : null}
           </div>
         </div>
@@ -643,22 +577,7 @@ function DetailPanel({
   );
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return (
-    <div
-      style={{
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: 'rgba(26, 19, 16, 0.55)',
-        marginBottom: 10,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+// SectionHeading was moved into KudosDetailPanelContent.tsx (Prompt-04).
 
 function ActionButton({
   label,
@@ -746,15 +665,9 @@ export function HbKudosCompanion({
   const clearSelection = React.useCallback(() => setSelectedIds(new Set()), []);
 
   const handleDetailAction = React.useCallback(
-    async (
-      kind: 'approve' | 'reject' | 'requestRevision' | 'flagAdminReview' | 'clearAdminReview',
-    ) => {
+    async (kind: DetailActionKind) => {
       if (!detailEntry) return;
       setActionError(undefined);
-      // Prompt-03 collects rejectionReason / revisionGuidance / adminReviewReason
-      // via window.prompt — a later prompt will promote a proper shared
-      // dialog primitive. Using prompt() here keeps the scope tight and
-      // the action wiring real.
       let patch: KudosPatch;
       if (kind === 'reject') {
         // eslint-disable-next-line no-alert
@@ -765,22 +678,41 @@ export function HbKudosCompanion({
         // eslint-disable-next-line no-alert
         const guidance = window.prompt('Revision guidance for the submitter?');
         if (!guidance || !guidance.trim()) return;
-        patch = {
-          kind: 'requestRevision',
-          kudosId: detailEntry.id,
-          revisionGuidance: guidance.trim(),
-        };
+        patch = { kind: 'requestRevision', kudosId: detailEntry.id, revisionGuidance: guidance.trim() };
       } else if (kind === 'flagAdminReview') {
         // eslint-disable-next-line no-alert
         const reason = window.prompt('Admin review reason?');
         if (!reason || !reason.trim()) return;
-        patch = {
-          kind: 'flagAdminReview',
-          kudosId: detailEntry.id,
-          adminReviewReason: reason.trim(),
-        };
+        patch = { kind: 'flagAdminReview', kudosId: detailEntry.id, adminReviewReason: reason.trim() };
       } else if (kind === 'clearAdminReview') {
         patch = { kind: 'clearAdminReview', kudosId: detailEntry.id };
+      } else if (kind === 'schedule') {
+        // eslint-disable-next-line no-alert
+        const dateStr = window.prompt('Scheduled publish date (ISO)?');
+        if (!dateStr?.trim()) return;
+        patch = { kind: 'schedule', kudosId: detailEntry.id, scheduledPublishAtIso: dateStr.trim() };
+      } else if (kind === 'unschedule') {
+        patch = { kind: 'unschedule', kudosId: detailEntry.id };
+      } else if (kind === 'pin') {
+        // eslint-disable-next-line no-alert
+        const orderStr = window.prompt('Pin order (1-3)?', '1');
+        const pinOrder = Number(orderStr);
+        patch = { kind: 'pin', kudosId: detailEntry.id, pinOrder: Number.isFinite(pinOrder) ? pinOrder : undefined };
+      } else if (kind === 'unpin') {
+        patch = { kind: 'unpin', kudosId: detailEntry.id };
+      } else if (kind === 'feature') {
+        // eslint-disable-next-line no-alert
+        const expiresStr = window.prompt('Featured expires at (ISO, optional)?');
+        patch = { kind: 'feature', kudosId: detailEntry.id, featuredExpiresAtIso: expiresStr?.trim() || undefined };
+      } else if (kind === 'unfeature') {
+        patch = { kind: 'unfeature', kudosId: detailEntry.id };
+      } else if (kind === 'remove') {
+        // eslint-disable-next-line no-alert
+        const reason = window.prompt('Removal reason?');
+        if (!reason?.trim()) return;
+        patch = { kind: 'remove', kudosId: detailEntry.id, removedReason: reason.trim() };
+      } else if (kind === 'restore') {
+        patch = { kind: 'restore', kudosId: detailEntry.id };
       } else {
         patch = { kind: 'approve', kudosId: detailEntry.id };
       }
@@ -1133,6 +1065,7 @@ export function HbKudosCompanion({
         entry={detailEntry}
         onClose={() => setDetailEntry(undefined)}
         capabilities={capabilities}
+        role={role}
         dispatching={dispatching}
         error={actionError}
         onAction={(kind) => void handleDetailAction(kind)}
