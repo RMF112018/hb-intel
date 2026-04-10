@@ -137,6 +137,15 @@ function getEndpointLabel(runtime: PnpOpsRuntimeConfig): string {
   return runtime.runnerBaseUrl;
 }
 
+function formatServiceError(error: unknown, runtime: PnpOpsRuntimeConfig): string {
+  const message = error instanceof Error ? error.message : String(error);
+  const isRunnerMode = runtime.executionMode === 'local-runner' || runtime.executionMode === 'remote-runner';
+  if (isRunnerMode && /fetch|network|certificate|tls|self[- ]signed/i.test(message)) {
+    return `${message} Verify local runner HTTPS certificate trust and that runner origin is listed in PNP_RUNNER_ALLOWED_ORIGINS.`;
+  }
+  return message;
+}
+
 function isTerminal(status: string | null | undefined): boolean {
   return status === 'Completed' || status === 'Failed' || status === 'Cancelled';
 }
@@ -264,10 +273,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
     } catch (error) {
       const resolved = resolvePnpActionCatalog(null);
       setActionCatalog(resolved.actions);
-      setCatalogWarning(
-        `Action catalog request failed (${error instanceof Error ? error.message : String(error)}). ` +
-        'Locked Prompt-01 catalog defaults are shown.',
-      );
+      setCatalogWarning(`Action catalog request failed (${formatServiceError(error, runtime)}). Locked Prompt-01 catalog defaults are shown.`);
     }
   }, [runtime, getApiToken, clientConfig]);
 
@@ -293,7 +299,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
         setEvidenceManifest(evidence);
       }
     } catch (error) {
-      setServiceError(error instanceof Error ? error.message : String(error));
+      setServiceError(formatServiceError(error, runtime));
     } finally {
       setBusyState('idle');
     }
@@ -347,7 +353,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
         setPreflightResult(result);
       }
     } catch (error) {
-      setServiceError(error instanceof Error ? error.message : String(error));
+      setServiceError(formatServiceError(error, runtime));
     } finally {
       setBusyState('idle');
     }
@@ -431,7 +437,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
         }
       }
     } catch (error) {
-      setServiceError(error instanceof Error ? error.message : String(error));
+      setServiceError(formatServiceError(error, runtime));
     } finally {
       setBusyState('idle');
     }

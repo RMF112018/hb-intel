@@ -1,0 +1,118 @@
+export type CanonicalPnpActionKey =
+  | 'sharepoint-control:extraction:site-template'
+  | 'sharepoint-control:extraction:list-schema'
+  | 'sharepoint-control:extraction:page-layout'
+  | 'sharepoint-control:extraction:site-inventory'
+  | 'sharepoint-control:extraction:library-folder-tree'
+  | 'sharepoint-control:extraction:site-groups-summary'
+  | 'sharepoint-control:extraction:page-webpart-inventory';
+
+export interface PnpExecutionIntent {
+  readonly mode?: string;
+  readonly source?: string;
+  readonly requestedAt?: string;
+}
+
+export interface PnpCommandInput {
+  readonly targetSiteUrl?: string;
+  readonly listFilters?: readonly string[];
+  readonly pageFilters?: readonly string[];
+  readonly executionIntent?: PnpExecutionIntent;
+}
+
+export interface RunLaunchRequest {
+  readonly actionKey: string;
+  readonly targetEntityId?: string;
+  readonly commandInput?: PnpCommandInput;
+  readonly dryRun?: boolean;
+}
+
+export interface PreflightRequest {
+  readonly actionKey: string;
+  readonly targetEntityId?: string;
+  readonly commandInput?: PnpCommandInput;
+}
+
+export interface PreflightCheck {
+  readonly checkId: string;
+  readonly label: string;
+  readonly passed: boolean;
+  readonly message: string;
+  readonly blocking: boolean;
+}
+
+export interface PreflightResult {
+  readonly ready: boolean;
+  readonly checks: readonly PreflightCheck[];
+}
+
+export interface StepResult {
+  readonly stepNumber: number;
+  readonly stepLabel: string;
+  readonly status: 'Pending' | 'Running' | 'Completed' | 'Failed';
+  readonly errorMessage: string | null;
+  readonly startedAt: string | null;
+  readonly completedAt: string | null;
+}
+
+export interface RunRecord {
+  readonly runId: string;
+  readonly actionKey: CanonicalPnpActionKey;
+  readonly status: 'Pending' | 'Running' | 'Completed' | 'Failed';
+  readonly totalSteps: number;
+  readonly currentStep: number | null;
+  readonly startedAt: string | null;
+  readonly completedAt: string | null;
+  readonly steps: readonly StepResult[];
+}
+
+export interface EvidenceRef {
+  readonly evidenceId: string;
+  readonly label: string;
+  readonly note?: string;
+  readonly fileName: string;
+  readonly contentType: string | null;
+  readonly sizeBytes: number | null;
+  readonly isBundle: boolean;
+  readonly bundleFormat: 'zip' | null;
+  readonly availability: 'available' | 'unavailable';
+  readonly downloadUrl: string | null;
+}
+
+export interface RunEvidence {
+  readonly runId: string;
+  readonly evidenceRefs: readonly EvidenceRef[];
+  readonly total: number;
+}
+
+export interface ActionDescriptor {
+  readonly actionKey: CanonicalPnpActionKey;
+  readonly label: string;
+  readonly description: string;
+  readonly riskLevel: 'read-only';
+  readonly executionMode: 'advisory';
+  readonly supportsPreview: boolean;
+  readonly available: boolean;
+  readonly unavailableReason: string | null;
+  readonly requiredInput: 'site-only' | 'site-and-list-filter' | 'site-and-page-filter';
+  readonly expectedArtifacts: readonly string[];
+}
+
+export interface RunnerConfig {
+  readonly host: string;
+  readonly port: number;
+  readonly certPath: string;
+  readonly keyPath: string;
+  readonly allowedOrigins: readonly string[];
+  readonly storageDir: string;
+  readonly authMode: 'DeviceLogin' | 'Interactive';
+  readonly clientId: string;
+  readonly tenant: string;
+  readonly allowNonLoopback: boolean;
+}
+
+export interface ExtractionResultFileSet {
+  readonly rawPath: string;
+  readonly normalizedPath: string;
+  readonly summaryPath: string;
+}

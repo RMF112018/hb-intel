@@ -112,6 +112,11 @@ Prompt-01 architecture and contract lock artifacts:
 
 - `Prompt-02_PnpOps-Runner-Abstraction-Completion-Report.md`
 
+## Prompt-03 outputs (local runner implementation)
+
+- `Prompt-03_PnpOps-Local-Runner-Setup-Guide.md`
+- `Prompt-03_PnpOps-Local-Runner-Completion-Report.md`
+
 ---
 
 ## Expected deliverables by the end of the package
