@@ -691,6 +691,40 @@ export function isHomepageVisible(
 }
 
 /**
+ * `true` when a standard-approved item has exceeded its homepage age-off
+ * window. Pinned and featured items never age off. The age-off duration
+ * is a configurable webpart property (Decision Lock §Prominence).
+ */
+export function hasAgedOff(
+  entry: Pick<KudosEntry, 'isPinned' | 'isFeatured'> & { approvedDate?: string },
+  ageOffDays: number,
+  nowMs?: number,
+): boolean {
+  if (entry.isPinned || entry.isFeatured) return false;
+  if (!entry.approvedDate) return false;
+  const approvedMs = Date.parse(entry.approvedDate);
+  if (Number.isNaN(approvedMs)) return false;
+  const now = nowMs ?? Date.now();
+  return now > approvedMs + ageOffDays * MS_PER_DAY;
+}
+
+/**
+ * `true` when a featured item's expiration date has passed. These items
+ * should be treated as standard approved in public views — the actual
+ * SharePoint field demotion happens lazily when governance surfaces load.
+ */
+export function hasFeaturedExpired(
+  entry: Pick<KudosEntry, 'isFeatured'> & { featuredExpiresAt?: string },
+  nowMs?: number,
+): boolean {
+  if (!entry.isFeatured) return false;
+  if (!entry.featuredExpiresAt) return false;
+  const expiresMs = Date.parse(entry.featuredExpiresAt);
+  if (Number.isNaN(expiresMs)) return false;
+  return (nowMs ?? Date.now()) > expiresMs;
+}
+
+/**
  * Associated-item visibility: submitters and recipients can see items
  * that were once published, even after age-off, unpublish, or removal.
  * Recipients cannot see items that were never published (rejected/withdrawn

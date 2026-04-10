@@ -20,6 +20,7 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField,
+  PropertyPaneSlider,
 } from '@microsoft/sp-property-pane';
 
 declare const __APP_BUNDLE_NAME__: string;
@@ -37,6 +38,7 @@ interface IAppModule {
 
 /** Webpart IDs that expose property-pane configuration. */
 const HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
+const KUDOS_WEBPART_ID = 'f14e59a3-4d6b-43b2-952e-ba02dea11dad';
 const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
 
 interface IShellWebPartProperties {
@@ -48,6 +50,8 @@ interface IShellWebPartProperties {
   kudosReviewersGroup?: string;
   /** Optional display heading override for the Kudos Companion. */
   heading?: string;
+  /** Number of days before standard approved kudos age off the homepage. */
+  homepageAgeOffDays?: number;
 }
 
 export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
@@ -195,6 +199,31 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                       'Enter a SharePoint-hosted image URL to override the default hero background. ' +
                       'Leave blank to use the default banner image.',
                     placeholder: 'https://your-tenant.sharepoint.com/sites/.../image.jpg',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    // Show homepage/age-off property pane for the HB Kudos employee webpart.
+    if (webPartId === KUDOS_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'HB Kudos Settings' },
+            groups: [
+              {
+                groupName: 'Homepage Visibility',
+                groupFields: [
+                  PropertyPaneSlider('homepageAgeOffDays', {
+                    label: 'Age-off duration (days)',
+                    min: 7,
+                    max: 90,
+                    step: 1,
+                    value: 14,
                   }),
                 ],
               },

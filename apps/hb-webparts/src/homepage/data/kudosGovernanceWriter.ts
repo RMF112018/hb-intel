@@ -38,6 +38,7 @@ import { deriveKudosCapabilities, type KudosRole } from '../helpers/kudosCapabil
 import { buildKudosNotificationIntents } from '../helpers/kudosNotificationBuilder.js';
 import { dispatchKudosNotifications } from './kudosNotificationDispatch.js';
 import {
+  handleScheduledProminenceCollision,
   validateFeatureAction,
   validatePinAction,
   validateReassignmentAuthority,
@@ -946,6 +947,8 @@ export async function submitKudosGovernanceAction(
     isFirstPublish?: boolean;
     /** True when the item is currently flagged for admin review (for reassign authority). */
     itemIsFlaggedForAdminReview?: boolean;
+    /** Prominence intent when approving a scheduled item (for collision handling). */
+    prominenceIntent?: 'featured' | 'pinned';
   } = {},
 ): Promise<KudosGovernanceResult> {
   if (!siteUrl) {
@@ -985,6 +988,27 @@ export async function submitKudosGovernanceAction(
       const validation = validatePinAction(slots);
       if (!validation.ok) {
         return { ok: false, error: validation.error! };
+      }
+    }
+
+    // Scheduled prominence collision: when approving a scheduled item
+    // with a prominence intent (featured/pinned), check if the slot is
+    // occupied. If so, demote to standard and flag for admin review.
+    let prominenceCollisionDemotion = false;
+    if (enrichedPatch.kind === 'approve' && options.prominenceIntent) {
+      const slots = await fetchProminenceSlotState(siteUrl);
+      const collision = handleScheduledProminenceCollision(slots, options.prominenceIntent);
+      if (collision.demoteToStandard) {
+        prominenceCollisionDemotion = true;
+        // The approve plan will proceed as standard — no featured/pinned
+        // fields will be set. The caller should flag for admin review.
+        if (!enrichedPatch.flagForAdminReview) {
+          enrichedPatch = {
+            ...enrichedPatch,
+            flagForAdminReview: true,
+            adminReviewReason: collision.adminNotificationReason ?? 'Scheduled prominence slot was occupied at go-live.',
+          };
+        }
       }
     }
 

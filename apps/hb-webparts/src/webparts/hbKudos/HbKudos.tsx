@@ -67,6 +67,7 @@ import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import {
   buildKudosRecipientSummary,
   buildWorkflowChipDescriptor,
+  hasAgedOff,
   isArchiveEligible,
   isAssociatedVisible,
   isPubliclyVisible,
@@ -454,10 +455,16 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
 // Main webpart
 // ---------------------------------------------------------------------------
 
+const DEFAULT_AGE_OFF_DAYS = 14;
+
 export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
   const heading =
     (typeof config?.heading === 'string' && config.heading) || 'HB Kudos';
   const showArchive = config?.showArchive !== false;
+  const ageOffDays =
+    typeof config?.homepageAgeOffDays === 'number' && config.homepageAgeOffDays > 0
+      ? config.homepageAgeOffDays
+      : DEFAULT_AGE_OFF_DAYS;
 
   const { listConfig, isLoading } = usePeopleCultureData();
 
@@ -496,11 +503,18 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         // field. Treat them as public only when the read path set the
         // derived `status === 'approved'`.
         if (entry.workflowStatus) {
-          return isPubliclyVisible(entry);
+          if (!isPubliclyVisible(entry)) return false;
+          // Age-off: standard approved items expire after the configured
+          // window. Pinned and featured items are exempt.
+          if (hasAgedOff(entry, ageOffDays)) return false;
+          // Featured expiration: treat expired featured items as standard
+          // for public rendering. They remain visible unless also aged off.
+          // (hasFeaturedExpired affects display styling, not visibility here.)
+          return true;
         }
         return entry.status === 'approved';
       }),
-    [allKudos],
+    [allKudos, ageOffDays],
   );
 
   const archiveKudos = React.useMemo(
