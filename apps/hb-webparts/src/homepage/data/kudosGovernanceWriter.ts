@@ -44,6 +44,7 @@ import {
   validateReassignmentAuthority,
   type ProminenceSlotState,
 } from '../helpers/kudosProminenceRules.js';
+import { invalidatePeopleCultureCache } from './usePeopleCultureData.js';
 
 // ---------------------------------------------------------------------------
 // Public result shape
@@ -1052,6 +1053,10 @@ export async function submitKudosGovernanceAction(
         dispatchKudosNotifications(notificationIntents);
       }
     }
+
+    // Invalidate the shared People & Culture cache so consumers
+    // refetch fresh data on next render, preventing stale-after-action UI.
+    invalidatePeopleCultureCache();
 
     return result;
   } catch (err) {

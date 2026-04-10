@@ -15,6 +15,7 @@
  * drift cannot cross-bind the writer to the wrong list.
  */
 import { getSiteUrl } from './spContext.js';
+import { invalidatePeopleCultureCache } from './usePeopleCultureData.js';
 import {
   buildPcListItemsEndpoint,
   PEOPLE_CULTURE_LIST_REGISTRY,
@@ -401,6 +402,10 @@ export async function submitKudosDraft(
     if (typeof itemId !== 'number') {
       return { ok: false, error: 'Item was created but the response did not include an item ID.' };
     }
+
+    // Invalidate the shared People & Culture cache so the new
+    // submission appears immediately in queue/archive views.
+    invalidatePeopleCultureCache();
 
     return { ok: true, itemId };
   } catch (err) {

@@ -664,7 +664,7 @@ export function HbKudosCompanion({
     adminReviewOverdueDays: typeof config?.adminReviewOverdueDays === 'number' ? config.adminReviewOverdueDays : DEFAULT_KUDOS_OVERDUE_THRESHOLDS.adminReviewOverdueDays,
   }), [config?.pendingOverdueDays, config?.adminReviewOverdueDays]);
 
-  const { listConfig, isLoading } = usePeopleCultureData();
+  const { listConfig, isLoading, refresh: refreshData } = usePeopleCultureData();
   const allKudos: KudosEntry[] = React.useMemo(() => listConfig?.kudos ?? [], [listConfig?.kudos]);
 
   const [filter, dispatch] = React.useReducer(filterReducer, INITIAL_FILTER_STATE);
@@ -767,11 +767,13 @@ export function HbKudosCompanion({
         }
         setActionError(undefined);
         setDetailEntry(undefined);
+        // Trigger immediate data refresh so the queue reflects the mutation.
+        refreshData();
       } finally {
         setDispatching(false);
       }
     },
-    [detailEntry, identity?.email, role],
+    [detailEntry, identity?.email, role, refreshData],
   );
 
   // Phase A: route detail actions. Actions requiring input open the

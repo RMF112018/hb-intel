@@ -7,7 +7,7 @@
  *
  * Follows the same pattern as useProjectSpotlightData.ts.
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getSiteUrl } from './spContext.js';
 import { fetchPeopleCultureListData } from './peopleCultureListSource.js';
 import type { PeopleCultureMergedConfig } from '../webparts/communicationsContracts.js';
@@ -25,8 +25,31 @@ export interface PeopleCultureDataResult {
 let _cache: { config: Partial<PeopleCultureMergedConfig>; fetchedAt: number } | undefined;
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-export function usePeopleCultureData(): PeopleCultureDataResult {
+/**
+ * Generation counter incremented when `invalidatePeopleCultureCache` is
+ * called. Hooks that depend on the generation re-fetch when it bumps.
+ */
+let _cacheGeneration = 0;
+
+/**
+ * Clear the shared People & Culture data cache so the next render
+ * triggers a fresh fetch from SharePoint. Call this after any
+ * mutation (governance action, new submission, celebrate, etc.)
+ * to prevent stale-after-action UI.
+ */
+export function invalidatePeopleCultureCache(): void {
+  _cache = undefined;
+  _cacheGeneration += 1;
+}
+
+export interface PeopleCultureDataResultWithRefresh extends PeopleCultureDataResult {
+  /** Force a fresh fetch from SharePoint, clearing the cache. */
+  refresh: () => void;
+}
+
+export function usePeopleCultureData(): PeopleCultureDataResultWithRefresh {
   const siteUrl = getSiteUrl();
+  const [generation, setGeneration] = useState(_cacheGeneration);
   const [result, setResult] = useState<PeopleCultureDataResult>(() => {
     // If cache is still fresh, use it immediately (no loading flash)
     if (_cache && Date.now() - _cache.fetchedAt < CACHE_TTL_MS) {
@@ -41,11 +64,25 @@ export function usePeopleCultureData(): PeopleCultureDataResult {
 
   const abortRef = useRef<AbortController | undefined>();
 
+  // Detect external invalidation via the global generation counter.
+  useEffect(() => {
+    if (_cacheGeneration !== generation) {
+      setGeneration(_cacheGeneration);
+    }
+  });
+
+  const refresh = useCallback(() => {
+    invalidatePeopleCultureCache();
+    setGeneration(_cacheGeneration);
+  }, []);
+
   useEffect(() => {
     if (!siteUrl) return;
 
     // Cache still valid → skip fetch
     if (_cache && Date.now() - _cache.fetchedAt < CACHE_TTL_MS) return;
+
+    setResult((prev) => prev.isLoading ? prev : { ...prev, isLoading: true });
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -92,7 +129,7 @@ export function usePeopleCultureData(): PeopleCultureDataResult {
       cancelled = true;
       controller.abort();
     };
-  }, [siteUrl]);
+  }, [siteUrl, generation]);
 
-  return result;
+  return { ...result, refresh };
 }

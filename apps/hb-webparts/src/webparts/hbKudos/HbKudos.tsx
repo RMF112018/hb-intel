@@ -434,7 +434,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
       ? config.homepageAgeOffDays
       : DEFAULT_AGE_OFF_DAYS;
 
-  const { listConfig, isLoading } = usePeopleCultureData();
+  const { listConfig, isLoading, refresh: refreshData } = usePeopleCultureData();
 
   // Resolve current user ID for associated-item visibility.
   const [currentUserId, setCurrentUserId] = React.useState<number | undefined>();
@@ -528,7 +528,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
           siteUrl,
           { kind: 'withdraw', kudosId: detailEntry.id },
           { actorEmail: identity?.email },
-        ).then((result) => { if (result.ok) setDetailEntry(undefined); });
+        ).then((result) => { if (result.ok) { setDetailEntry(undefined); refreshData(); } });
         return;
       }
 
@@ -556,10 +556,10 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
           siteUrl,
           { kind: 'resubmit', kudosId: detailEntry.id, updatedHeadline, updatedExcerpt },
           { actorEmail: identity?.email },
-        ).then((result) => { if (result.ok) setDetailEntry(undefined); });
+        ).then((result) => { if (result.ok) { setDetailEntry(undefined); refreshData(); } });
       }
     },
-    [detailEntry, submitterDialog, pendingResubmitHeadline, identity?.email],
+    [detailEntry, submitterDialog, pendingResubmitHeadline, identity?.email, refreshData],
   );
 
   if (isLoading) {
@@ -674,7 +674,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
             siteUrl,
             { kind: 'celebrate', kudosId: detailEntry.id, nextCount: current + 1 },
             { actorEmail: identity?.email },
-          );
+          ).then(() => refreshData());
         } : undefined}
         onWithdraw={detailEntry ? () => {
           setSubmitterDialog({
