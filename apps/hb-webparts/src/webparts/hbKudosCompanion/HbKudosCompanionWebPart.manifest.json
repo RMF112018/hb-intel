@@ -14,7 +14,7 @@
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "HB Intel" },
       "title": { "default": "HB Kudos Approval Companion" },
-      "description": { "default": "HR moderation workspace for HB Kudos — queue with governance actions, scheduling, prominence, claim/reassign, role-aware detail panel with audit timeline, bulk approve, and configurable overdue indicators. Notification intents are built and session-queued but delivery channels (email/Teams) are not yet integrated." },
+      "description": { "default": "HR moderation workspace for HB Kudos. Requires kudosAdminsGroup and/or kudosReviewersGroup to be configured in the property pane — the webpart shows a configuration-required state until at least one group is set. Includes governance actions, scheduling, prominence, claim/reassign, role-aware detail panel with audit timeline, bulk approve, and configurable overdue thresholds (pendingOverdueDays, adminReviewOverdueDays). Notification intents are session-queued; delivery channels (email/Teams) are not yet integrated. simulatedRole is dev-only and ignored in live SharePoint." },
       "officeFabricIconFontName": "ShieldAlert",
       "hiddenFromToolbox": false,
       "properties": {

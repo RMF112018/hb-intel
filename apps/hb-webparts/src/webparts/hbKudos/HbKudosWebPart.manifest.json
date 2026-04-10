@@ -13,7 +13,7 @@
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "HB Intel" },
       "title": { "default": "HB Kudos" },
-      "description": { "default": "Premium HB Kudos recognition surface — featured spotlight, recent recognition rail, typed-recipient submission, archive browse with configurable age-off, role-safe detail panel, celebrate interaction, and submitter withdraw/resubmit flows." },
+      "description": { "default": "Employee-facing HB Kudos recognition surface — featured spotlight, recent recognition rail, typed-recipient submission (individual/team/department/project group), archive browse with configurable age-off (homepageAgeOffDays property, default 14 days), role-safe detail panel, celebrate interaction, and submitter withdraw/resubmit flows." },
       "officeFabricIconFontName": "Trophy",
       "hiddenFromToolbox": false,
       "properties": {
