@@ -445,7 +445,7 @@ function QueueRow({
 // Detail panel
 // ---------------------------------------------------------------------------
 
-type DetailActionKind = 'approve' | 'reject' | 'requestRevision' | 'flagAdminReview' | 'clearAdminReview' | 'schedule' | 'unschedule' | 'pin' | 'unpin' | 'feature' | 'unfeature' | 'remove' | 'restore';
+type DetailActionKind = 'approve' | 'reject' | 'requestRevision' | 'flagAdminReview' | 'clearAdminReview' | 'schedule' | 'unschedule' | 'pin' | 'unpin' | 'feature' | 'unfeature' | 'remove' | 'restore' | 'claim' | 'reassign' | 'celebrate';
 
 interface DetailPanelProps {
   entry: KudosEntry | undefined;
@@ -570,6 +570,13 @@ function DetailPanel({
             {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
               <ActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" />
             ) : null}
+            {capabilities.canClaim ? (
+              <ActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" />
+            ) : null}
+            {capabilities.canClaim ? (
+              <ActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" />
+            ) : null}
+            <ActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
           </div>
         </div>
       ) : null}
@@ -713,6 +720,17 @@ export function HbKudosCompanion({
         patch = { kind: 'remove', kudosId: detailEntry.id, removedReason: reason.trim() };
       } else if (kind === 'restore') {
         patch = { kind: 'restore', kudosId: detailEntry.id };
+      } else if (kind === 'claim') {
+        patch = { kind: 'claim', kudosId: detailEntry.id };
+      } else if (kind === 'reassign') {
+        // eslint-disable-next-line no-alert
+        const userIdStr = window.prompt('SharePoint user ID to reassign to?');
+        const assignedUserId = Number(userIdStr);
+        if (!Number.isFinite(assignedUserId) || assignedUserId <= 0) return;
+        patch = { kind: 'reassign', kudosId: detailEntry.id, assignedUserId };
+      } else if (kind === 'celebrate') {
+        const currentCount = detailEntry.celebrateCount ?? 0;
+        patch = { kind: 'celebrate', kudosId: detailEntry.id, nextCount: currentCount + 1 };
       } else {
         patch = { kind: 'approve', kudosId: detailEntry.id };
       }

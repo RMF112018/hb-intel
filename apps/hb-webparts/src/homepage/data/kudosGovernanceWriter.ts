@@ -601,18 +601,141 @@ export function buildKudosPatchPlan(
       };
     }
 
-    // ── Deferred to Prompt-05 ─────────────────────────────────────
+    // ── Prompt-05 work-management + lifecycle writers ───────────────
 
-    case 'resubmit':
-    case 'withdraw':
-    case 'claim':
-    case 'reassign':
-    case 'celebrate':
-    case 'updateContent':
-      return {
-        ok: false,
-        error: `NotImplemented — '${patch.kind}' writer is deferred to Prompt-05.`,
+    case 'claim': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.ClaimedAt]: actedAtIso,
       };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.ClaimOwner}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'claim',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { claimOwnerId: patch.actorUserId },
+        },
+      };
+    }
+
+    case 'reassign': {
+      const fields: Record<string, unknown> = {
+        [`${KUDOS_FIELDS.AssignedOwner}Id`]: patch.assignedUserId,
+        [KUDOS_FIELDS.ReassignedAt]: actedAtIso,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.ReassignedBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'reassign',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { assignedUserId: patch.assignedUserId },
+        },
+      };
+    }
+
+    case 'celebrate': {
+      return {
+        ok: true,
+        fields: {
+          [KUDOS_FIELDS.CelebrateCount]: patch.nextCount,
+        },
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'celebrate',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { celebrateCount: patch.nextCount },
+        },
+      };
+    }
+
+    case 'resubmit': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'pending',
+      };
+      if (patch.updatedHeadline?.trim()) fields[KUDOS_FIELDS.Headline] = patch.updatedHeadline.trim();
+      if (patch.updatedExcerpt?.trim()) fields[KUDOS_FIELDS.Excerpt] = patch.updatedExcerpt.trim();
+      if (patch.updatedDetails?.trim()) fields[KUDOS_FIELDS.Details] = patch.updatedDetails.trim();
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'reopen',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'pending' },
+        },
+      };
+    }
+
+    case 'withdraw': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'withdrawn',
+        [KUDOS_FIELDS.WithdrawnAt]: actedAtIso,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.WithdrawnBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'reopen',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'withdrawn' },
+        },
+      };
+    }
+
+    case 'updateContent': {
+      const fields: Record<string, unknown> = {};
+      if (patch.headline?.trim()) fields[KUDOS_FIELDS.Headline] = patch.headline.trim();
+      if (patch.excerpt?.trim()) fields[KUDOS_FIELDS.Excerpt] = patch.excerpt.trim();
+      if (patch.details?.trim()) fields[KUDOS_FIELDS.Details] = patch.details.trim();
+      if (patch.primaryImageUrl) fields[KUDOS_FIELDS.PrimaryImage] = patch.primaryImageUrl;
+      if (patch.imageAltText) fields[KUDOS_FIELDS.ImageAltText] = patch.imageAltText;
+      if (Object.keys(fields).length === 0) {
+        return { ok: false, error: 'No content fields to update.' };
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'reopen',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote ?? 'Content updated',
+          oldValue: undefined,
+          newValue: fields,
+        },
+      };
+    }
 
     default: {
       // Exhaustiveness check: if a new kind lands in KudosPatch, this

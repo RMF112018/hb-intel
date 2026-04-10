@@ -72,7 +72,7 @@ import {
   type KudosEntry,
 } from '../../homepage/webparts/kudosContracts.js';
 import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
-import { fetchKudosAuditTimeline, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
+import { fetchKudosAuditTimeline, submitKudosGovernanceAction, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
 import { getSiteUrl } from '../../homepage/data/spContext.js';
 
 // ---------------------------------------------------------------------------
@@ -563,7 +563,18 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         ) : null}
       </HbcKudosComposerFlyout>
 
-      <DetailPanel entry={detailEntry} onClose={() => setDetailEntry(undefined)} />
+      <DetailPanel
+        entry={detailEntry}
+        onClose={() => setDetailEntry(undefined)}
+        onCelebrate={detailEntry ? () => {
+          const current = detailEntry.celebrateCount ?? 0;
+          void submitKudosGovernanceAction(
+            '',
+            { kind: 'celebrate', kudosId: detailEntry.id, nextCount: current + 1 },
+            { actorEmail: identity?.email },
+          );
+        } : undefined}
+      />
     </section>
   );
 }
