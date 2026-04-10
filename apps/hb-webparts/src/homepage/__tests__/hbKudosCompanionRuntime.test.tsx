@@ -6,7 +6,7 @@
  * a lightweight runtime smoke for the new webpart.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
 
 afterEach(() => {
@@ -20,6 +20,18 @@ afterEach(() => {
 vi.mock('../data/spContext.js', () => ({
   getSiteUrl: () => undefined,
   storeSiteUrl: vi.fn(),
+}));
+
+// ---------------------------------------------------------------------------
+// Role resolver mock — resolves immediately using the simulatedRole
+// fallback path (siteUrl is undefined in test context).
+// ---------------------------------------------------------------------------
+vi.mock('../helpers/kudosRoleResolver.js', () => ({
+  resolveKudosRole: vi.fn(async (config: { simulatedRole?: unknown }) => {
+    const { parseKudosRole } = await import('../helpers/kudosCapabilities.js');
+    return parseKudosRole(config.simulatedRole);
+  }),
+  clearKudosRoleCache: vi.fn(),
 }));
 
 import { HbKudosCompanion } from '../../webparts/hbKudosCompanion/HbKudosCompanion.js';
@@ -468,32 +480,49 @@ describe('kudosNotificationBuilder — overdue helpers', () => {
 });
 
 describe('HbKudosCompanion webpart — runtime smoke', () => {
-  it('viewer role sees the access-restricted empty state', () => {
-    render(<HbKudosCompanion config={{ simulatedRole: 'viewer' }} />);
+  it('viewer role sees the access-restricted empty state', async () => {
+    await act(async () => {
+      render(<HbKudosCompanion config={{ simulatedRole: 'viewer' }} />);
+    });
     const section = document.querySelector('[data-hbc-webpart="hb-kudos-companion"]');
     expect(section).not.toBeNull();
-    expect(section?.getAttribute('data-hbc-role')).toBe('viewer');
-    expect(screen.getByText('Access restricted')).toBeTruthy();
+    await waitFor(() => {
+      expect(section?.getAttribute('data-hbc-role')).toBe('viewer');
+      expect(screen.getByText('Access restricted')).toBeTruthy();
+    });
   });
 
-  it('reviewer role renders the workspace with the Phase-14 Prompt-03 marker', () => {
-    render(<HbKudosCompanion config={{ simulatedRole: 'reviewer' }} />);
-    const section = document.querySelector('[data-hbc-webpart="hb-kudos-companion"]');
-    expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-prompt-03');
-    expect(section?.getAttribute('data-hbc-role')).toBe('reviewer');
+  it('reviewer role renders the workspace with the Phase-14 Prompt-03 marker', async () => {
+    await act(async () => {
+      render(<HbKudosCompanion config={{ simulatedRole: 'reviewer' }} />);
+    });
+    await waitFor(() => {
+      const section = document.querySelector('[data-hbc-webpart="hb-kudos-companion"]');
+      expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-prompt-03');
+      expect(section?.getAttribute('data-hbc-role')).toBe('reviewer');
+    });
     // Tab bar should render the Pending tab by default.
     expect(screen.getByRole('tab', { name: 'Pending review' })).toBeTruthy();
     // Toolbar search is visible.
     expect(screen.getByPlaceholderText('Search recognition…')).toBeTruthy();
   });
 
-  it('admin role shows the admin role label chip', () => {
-    render(<HbKudosCompanion config={{ simulatedRole: 'admin' }} />);
-    expect(screen.getByText('Kudos Admin')).toBeTruthy();
+  it('admin role shows the admin role label chip', async () => {
+    await act(async () => {
+      render(<HbKudosCompanion config={{ simulatedRole: 'admin' }} />);
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Kudos Admin')).toBeTruthy();
+    });
   });
 
-  it('tab switching updates the active tab', () => {
-    render(<HbKudosCompanion config={{ simulatedRole: 'reviewer' }} />);
+  it('tab switching updates the active tab', async () => {
+    await act(async () => {
+      render(<HbKudosCompanion config={{ simulatedRole: 'reviewer' }} />);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: 'Flagged for admin' })).toBeTruthy();
+    });
     const flaggedTab = screen.getByRole('tab', { name: 'Flagged for admin' });
     fireEvent.click(flaggedTab);
     expect(flaggedTab.getAttribute('aria-selected')).toBe('true');

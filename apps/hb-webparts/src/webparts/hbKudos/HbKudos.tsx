@@ -568,8 +568,10 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         onClose={() => setDetailEntry(undefined)}
         onCelebrate={detailEntry ? () => {
           const current = detailEntry.celebrateCount ?? 0;
+          const siteUrl = getSiteUrl();
+          if (!siteUrl) return;
           void submitKudosGovernanceAction(
-            '',
+            siteUrl,
             { kind: 'celebrate', kudosId: detailEntry.id, nextCount: current + 1 },
             { actorEmail: identity?.email },
           );

@@ -1,23 +1,20 @@
 /**
- * HB Kudos role capabilities — Phase-14 kudos/ Prompt-03.
+ * HB Kudos role capabilities.
  *
  * Pure helper that maps the Decision-Lock-Appendix admin / reviewer /
  * viewer role matrix into a capability flag record. The HR approval
  * companion webpart consumes this to gate action availability in the
  * UI; the governance writer (`kudosGovernanceWriter.ts`) consumes the
- * same flags as a server-side safety check before issuing any PATCH.
+ * same flags as a writer-level authorization check before issuing any
+ * PATCH.
  *
  * This is a pure, synchronous helper. Real SharePoint group membership
- * resolution against `kudosAdminsGroup` / `kudosReviewersGroup` is
- * scoped out of Prompt-03 and deferred to Prompt-05 (Permissions,
- * Notifications, and Work Management). Until that lands, the HR
- * companion uses the `simulatedRole` webpart property so the UI gates
- * can be exercised in development and packaging.
+ * resolution lives in `kudosRoleResolver.ts` — the companion uses
+ * `resolveKudosRole()` at mount time and passes the resolved role here.
+ * `simulatedRole` is dev/test-only (used when siteUrl is unavailable).
  *
  * Governing sources:
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-00-Authority-and-Scope-Lock-Report.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-03-HR-Approval-Companion-Webpart.md`
  */
 
 /**

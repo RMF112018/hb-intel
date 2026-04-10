@@ -1,8 +1,8 @@
 /**
- * HB Kudos governance writer — Phase-14 kudos/ Prompt-03.
+ * HB Kudos governance writer.
  *
- * SharePoint write seam for the HR approval companion webpart. Every
- * governance action routes through this module so:
+ * SharePoint write seam for both the employee and HR companion webparts.
+ * Every governance action routes through this module so:
  *
  *   1. list-item lookups are bound to the `People Culture Kudos` GUID
  *      via `peopleCultureSpListRegistry` (never by list title),
@@ -11,22 +11,13 @@
  *   3. every workflow transition writes a matching row to the
  *      `Kudos Audit Events` list so the durable event timeline is
  *      correct by construction,
- *   4. the discriminator over `KudosPatch` is exhaustive so later
- *      prompts can land the remaining writers without touching the
- *      calling UI.
- *
- * Prompt-03 implements the review-workflow writers (`approve`,
- * `reject`, `requestRevision`, `flagAdminReview`, `clearAdminReview`).
- * The remaining `KudosPatch` kinds are accepted at compile time but
- * return `{ ok: false, error: 'NotImplemented — deferred to Prompt-04/05' }`
- * so the HR companion UI can dispatch today and the writer gets
- * upgraded in later prompts without a caller change.
+ *   4. the discriminator over `KudosPatch` is exhaustive,
+ *   5. writer-level authorization verifies the caller's resolved role
+ *      against the required capability before any network call.
  *
  * Governing sources:
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Schema-Reference-Appendix.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-kudos-sharepoint-schema-report.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-03-HR-Approval-Companion-Webpart.md`
  */
 import {
   PEOPLE_CULTURE_LIST_REGISTRY,
@@ -43,6 +34,7 @@ import type {
   KudosAuditEventType,
   KudosPatch,
 } from '../webparts/kudosContracts.js';
+import { deriveKudosCapabilities, type KudosRole } from '../helpers/kudosCapabilities.js';
 
 // ---------------------------------------------------------------------------
 // Public result shape
@@ -748,6 +740,81 @@ export function buildKudosPatchPlan(
 }
 
 // ---------------------------------------------------------------------------
+// Writer-level authorization preflight
+// ---------------------------------------------------------------------------
+
+/**
+ * Map a `KudosPatch.kind` to the capability flag that must be `true`
+ * for the caller to execute it. Returns `undefined` for actions that
+ * any authenticated user may perform (e.g. `celebrate`).
+ */
+function requiredCapabilityForPatch(
+  kind: KudosPatch['kind'],
+): keyof import('../helpers/kudosCapabilities.js').KudosCapabilities | undefined {
+  switch (kind) {
+    case 'approve':
+    case 'resubmit':
+      return 'canApprove';
+    case 'reject':
+      return 'canReject';
+    case 'requestRevision':
+      return 'canRequestRevision';
+    case 'flagAdminReview':
+      return 'canFlagAdminReview';
+    case 'clearAdminReview':
+      return 'canClearAdminReview';
+    case 'schedule':
+    case 'unschedule':
+      return 'canSchedule';
+    case 'pin':
+    case 'unpin':
+      return 'canPin';
+    case 'feature':
+    case 'unfeature':
+      return 'canFeature';
+    case 'remove':
+      return 'canRemove';
+    case 'restore':
+      return 'canRestore';
+    case 'claim':
+    case 'reassign':
+      return 'canClaim';
+    case 'updateContent':
+      return 'canEditPublished';
+    case 'withdraw':
+    case 'celebrate':
+      // Any authenticated user may celebrate or withdraw their own.
+      return undefined;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Verify the caller's role authorizes the requested patch kind.
+ * Returns an error string when denied, `undefined` when allowed.
+ */
+function authorizeKudosPatch(
+  callerRole: KudosRole | undefined,
+  patchKind: KudosPatch['kind'],
+): string | undefined {
+  // celebrate and withdraw are open to all authenticated users.
+  const cap = requiredCapabilityForPatch(patchKind);
+  if (!cap) return undefined;
+
+  // When no callerRole is supplied, deny all gated actions.
+  if (!callerRole) {
+    return `Authorization denied: caller role is unknown for action '${patchKind}'.`;
+  }
+
+  const capabilities = deriveKudosCapabilities(callerRole);
+  if (!capabilities[cap]) {
+    return `Authorization denied: role '${callerRole}' cannot perform '${patchKind}'.`;
+  }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
 // High-level dispatcher: executeKudosPatch + submitKudosGovernanceAction
 // ---------------------------------------------------------------------------
 
@@ -793,21 +860,30 @@ export async function executeKudosPatch(
 }
 
 /**
- * Public wrapper used by the HR companion UI. Fetches the request
- * digest, resolves the SharePoint list item meta for the given
- * `KudosId`, and dispatches through `executeKudosPatch`.
+ * Public wrapper used by both the employee and HR companion UIs.
+ * Fetches the request digest, resolves the SharePoint list item meta
+ * for the given `KudosId`, and dispatches through `executeKudosPatch`.
  *
- * Optional `actorEmail` is resolved via `ensureUser` so the writer
- * can stamp the actor's user id on the patch + audit event when the
- * caller does not already have it.
+ * Writer-level authorization: when `callerRole` is provided, the
+ * writer verifies the caller's capability before executing the patch.
+ * Actions gated to admin-only (schedule, pin, feature, remove,
+ * restore) are denied for reviewer/viewer roles. `celebrate` and
+ * `withdraw` are open to any authenticated user and do not require
+ * a `callerRole`.
  */
 export async function submitKudosGovernanceAction(
   siteUrl: string,
   patch: KudosPatch,
-  options: { actorEmail?: string } = {},
+  options: { actorEmail?: string; callerRole?: KudosRole } = {},
 ): Promise<KudosGovernanceResult> {
   if (!siteUrl) {
     return { ok: false, error: 'SharePoint site context is not available.' };
+  }
+
+  // Writer-level authorization: verify before any network call.
+  const authError = authorizeKudosPatch(options.callerRole, patch.kind);
+  if (authError) {
+    return { ok: false, error: authError };
   }
 
   try {

@@ -19,11 +19,11 @@
  *     toggles + bulk selection).
  *   - Write: `submitKudosGovernanceAction` from
  *     `data/kudosGovernanceWriter.ts`. Each action sends one PATCH
- *     + one audit event.
- *   - Role gating: `deriveKudosCapabilities` from
- *     `helpers/kudosCapabilities.ts`. Prompt-03 reads a dev-mode
- *     `simulatedRole` webpart property; Prompt-05 will plug in real
- *     SharePoint group resolution behind the same capability shape.
+ *     + one audit event. Writer-level authorization verifies the
+ *     caller's role before any network call.
+ *   - Role gating: `resolveKudosRole` from `helpers/kudosRoleResolver.ts`
+ *     queries SharePoint group membership at mount time. Falls back to
+ *     `simulatedRole` only when siteUrl is unavailable (local dev).
  *   - Detail panel: reuses `HbcKudosComposerFlyout` as the shell and
  *     composes existing shared primitives inside.
  *
@@ -57,10 +57,10 @@ import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelC
 import {
   KUDOS_ROLE_LABELS,
   deriveKudosCapabilities,
-  parseKudosRole,
   type KudosCapabilities,
   type KudosRole,
 } from '../../homepage/helpers/kudosCapabilities.js';
+import { resolveKudosRole } from '../../homepage/helpers/kudosRoleResolver.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import {
   buildKudosRecipientSummary,
@@ -633,7 +633,27 @@ export function HbKudosCompanion({
 }: HbKudosCompanionProps): React.JSX.Element {
   const heading =
     (typeof config?.heading === 'string' && config.heading) || 'HB Kudos Approval Companion';
-  const role: KudosRole = parseKudosRole(config?.simulatedRole);
+
+  // Resolve real role from SharePoint group membership. Falls back to
+  // simulatedRole only when siteUrl is unavailable (local dev).
+  const [role, setRole] = React.useState<KudosRole>('viewer');
+  const [roleResolving, setRoleResolving] = React.useState(true);
+  React.useEffect(() => {
+    let cancelled = false;
+    setRoleResolving(true);
+    resolveKudosRole({
+      siteUrl: getSiteUrl(),
+      currentUserEmail: identity?.email,
+      kudosAdminsGroup: typeof config?.kudosAdminsGroup === 'string' ? config.kudosAdminsGroup : undefined,
+      kudosReviewersGroup: typeof config?.kudosReviewersGroup === 'string' ? config.kudosReviewersGroup : undefined,
+      simulatedRole: config?.simulatedRole,
+    }).then((resolved) => {
+      if (!cancelled) { setRole(resolved); setRoleResolving(false); }
+    }).catch(() => {
+      if (!cancelled) { setRole('viewer'); setRoleResolving(false); }
+    });
+    return () => { cancelled = true; };
+  }, [config?.kudosAdminsGroup, config?.kudosReviewersGroup, config?.simulatedRole, identity?.email]);
   const capabilities = React.useMemo(() => deriveKudosCapabilities(role), [role]);
 
   const { listConfig, isLoading } = usePeopleCultureData();
@@ -735,17 +755,17 @@ export function HbKudosCompanion({
         patch = { kind: 'approve', kudosId: detailEntry.id };
       }
 
+      const siteUrl = getSiteUrl();
+      if (!siteUrl) {
+        setActionError('SharePoint site context is not available.');
+        return;
+      }
       setDispatching(true);
       try {
         const result = await submitKudosGovernanceAction(
-          // usePeopleCultureData only runs inside SPFx context; the
-          // writer needs the same siteUrl so it passes through here
-          // via the shared spContext getter (the writer reads it
-          // itself — we pass empty string as a fallback to keep the
-          // caller signature clean).
-          '',
+          siteUrl,
           patch,
-          { actorEmail: identity?.email },
+          { actorEmail: identity?.email, callerRole: role },
         );
         if (!result.ok) {
           setActionError(result.error);
@@ -763,6 +783,11 @@ export function HbKudosCompanion({
   const handleBulkApprove = React.useCallback(async () => {
     if (!capabilities.canBulkApprove) return;
     if (selectedIds.size === 0) return;
+    const siteUrl = getSiteUrl();
+    if (!siteUrl) {
+      setActionError('SharePoint site context is not available.');
+      return;
+    }
     setActionError(undefined);
     setDispatching(true);
     let failures = 0;
@@ -776,9 +801,9 @@ export function HbKudosCompanion({
           continue;
         }
         const result = await submitKudosGovernanceAction(
-          '',
+          siteUrl,
           { kind: 'approve', kudosId: entry.id },
-          { actorEmail: identity?.email },
+          { actorEmail: identity?.email, callerRole: role },
         );
         if (!result.ok) failures += 1;
       }
@@ -793,6 +818,17 @@ export function HbKudosCompanion({
 
   const selectable =
     capabilities.canBulkApprove && (filter.tabId === 'pending' || filter.tabId === 'flagged');
+
+  if (roleResolving) {
+    return (
+      <section
+        data-hbc-webpart="hb-kudos-companion"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
+      >
+        <HbcSpinner size="md" />
+      </section>
+    );
+  }
 
   if (!capabilities.canViewGovernance) {
     return (
