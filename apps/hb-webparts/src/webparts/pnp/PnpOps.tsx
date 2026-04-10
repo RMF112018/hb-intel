@@ -19,6 +19,7 @@ import {
   fetchPnpRunEvidence,
   launchPnpRun,
   runPnpPreflight,
+  type PnpOpsClientConfig,
   type PnpOpsCommandInput,
   type PnpOpsEvidenceRef,
   type PnpOpsPreflightResponse,
@@ -26,6 +27,11 @@ import {
   type PnpOpsRunEvidenceResponse,
   type PnpOpsTokenProvider,
 } from './pnpOpsClient.js';
+import {
+  PNP_OPS_LEGACY_MODE,
+  resolvePnpOpsExecutionMode,
+  type PnpOpsExecutionMode,
+} from './pnpOpsExecutionModes.js';
 import { parseCsvFilters, validatePnpOpsForm } from './pnpOpsValidation.js';
 
 export interface PnpOpsProps {
@@ -35,12 +41,11 @@ export interface PnpOpsProps {
 }
 
 interface PnpOpsRuntimeConfig {
-  readonly backendUrl: string;
+  readonly executionMode: PnpOpsExecutionMode;
+  readonly runnerBaseUrl: string;
+  readonly legacyAdminApiBaseUrl: string;
   readonly defaultTargetSiteUrl: string;
-  readonly mockMode: boolean;
 }
-// TODO(prompt-02): replace backendUrl/mockMode-first runtime config with
-// executionMode + runnerBaseUrl contract from pnpOpsExecutionModes.ts.
 
 const LAYOUT: Record<string, React.CSSProperties> = {
   root: {
@@ -89,17 +94,47 @@ const LAYOUT: Record<string, React.CSSProperties> = {
 const POLL_INTERVAL_MS = 5_000;
 
 function readRuntimeConfig(input: Record<string, unknown> | undefined): PnpOpsRuntimeConfig {
+  const legacyBackendUrl = typeof input?.backendUrl === 'string'
+    ? input.backendUrl.replace(/\/+$/, '')
+    : '';
+  const executionMode = resolvePnpOpsExecutionMode(input);
+  const runnerBaseUrl = typeof input?.runnerBaseUrl === 'string'
+    ? input.runnerBaseUrl.replace(/\/+$/, '')
+    : '';
+  const legacyAdminApiBaseUrl = typeof input?.legacyAdminApiBaseUrl === 'string'
+    ? input.legacyAdminApiBaseUrl.replace(/\/+$/, '')
+    : legacyBackendUrl;
   return {
-    backendUrl:
-      typeof input?.backendUrl === 'string'
-        ? input.backendUrl.replace(/\/+$/, '')
-        : '',
+    executionMode,
+    runnerBaseUrl: runnerBaseUrl || (executionMode === PNP_OPS_LEGACY_MODE ? legacyBackendUrl : ''),
+    legacyAdminApiBaseUrl,
     defaultTargetSiteUrl:
       typeof input?.defaultTargetSiteUrl === 'string'
         ? input.defaultTargetSiteUrl
         : '',
-    mockMode: input?.mockMode === true,
   };
+}
+
+function describeMode(mode: PnpOpsExecutionMode): string {
+  switch (mode) {
+    case 'local-runner':
+      return 'local-runner (preferred live path)';
+    case 'remote-runner':
+      return 'remote-runner (self-hosted fallback)';
+    case 'mock':
+      return 'mock (no live execution)';
+    case 'legacy-admin-api':
+      return 'legacy-admin-api (deprecated compatibility)';
+    default:
+      return mode;
+  }
+}
+
+function getEndpointLabel(runtime: PnpOpsRuntimeConfig): string {
+  if (runtime.executionMode === 'legacy-admin-api') {
+    return runtime.legacyAdminApiBaseUrl || runtime.runnerBaseUrl;
+  }
+  return runtime.runnerBaseUrl;
 }
 
 function isTerminal(status: string | null | undefined): boolean {
@@ -172,6 +207,11 @@ function orderEvidenceRefs(evidenceRefs: readonly PnpOpsEvidenceRef[]): readonly
 
 export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JSX.Element {
   const runtime = React.useMemo(() => readRuntimeConfig(config), [config]);
+  const clientConfig = React.useMemo<PnpOpsClientConfig>(() => ({
+    executionMode: runtime.executionMode,
+    runnerBaseUrl: runtime.runnerBaseUrl,
+    legacyAdminApiBaseUrl: runtime.legacyAdminApiBaseUrl || undefined,
+  }), [runtime.executionMode, runtime.runnerBaseUrl, runtime.legacyAdminApiBaseUrl]);
   const [actionCatalog, setActionCatalog] = React.useState<readonly PnpOpsActionDefinition[]>(PNP_V1_ACTIONS);
   const [catalogWarning, setCatalogWarning] = React.useState<string | null>(null);
   const [selectedActionKey, setSelectedActionKey] = React.useState<PnpOpsActionKey>(getDefaultPnpActionKey());
@@ -191,27 +231,33 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
   );
 
   const loadCatalog = React.useCallback(async (): Promise<void> => {
-    if (!runtime.backendUrl || runtime.mockMode) {
+    if (runtime.executionMode === 'mock') {
+      const fallback = resolvePnpActionCatalog(null);
+      setActionCatalog(fallback.actions);
+      setCatalogWarning('Mock mode is active. Using locked Prompt-01 action catalog without runner calls.');
+      return;
+    }
+    const needsLegacyToken = runtime.executionMode === PNP_OPS_LEGACY_MODE;
+    const endpoint = getEndpointLabel(runtime);
+    if (!endpoint) {
       const fallback = resolvePnpActionCatalog(null);
       setActionCatalog(fallback.actions);
       setCatalogWarning(
-        runtime.mockMode
-          ? 'Mock mode is active. Using locked Prompt-01 action catalog without backend calls.'
-          : 'Backend URL is not configured. Using locked Prompt-01 action catalog.',
+        runtime.executionMode === PNP_OPS_LEGACY_MODE
+          ? 'Legacy mode is selected but no legacy API endpoint is configured; using locked catalog.'
+          : `${runtime.executionMode} mode is selected but runner endpoint is not configured; using locked catalog.`,
       );
       return;
     }
-    if (!getApiToken) {
+    if (needsLegacyToken && !getApiToken) {
       const fallback = resolvePnpActionCatalog(null);
       setActionCatalog(fallback.actions);
-      setCatalogWarning(
-        'Backend URL is configured but backendAudience token acquisition is not configured; using locked Prompt-01 action catalog.',
-      );
+      setCatalogWarning('Legacy admin API mode requires token acquisition (`backendAudience`). Using locked catalog.');
       return;
     }
 
     try {
-      const metadata = await fetchPnpActionMetadata(runtime.backendUrl, getApiToken);
+      const metadata = await fetchPnpActionMetadata(clientConfig, getApiToken);
       const resolved = resolvePnpActionCatalog(metadata);
       setActionCatalog(resolved.actions);
       setCatalogWarning(resolved.warning);
@@ -223,23 +269,27 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
         'Locked Prompt-01 catalog defaults are shown.',
       );
     }
-  }, [runtime.backendUrl, runtime.mockMode, getApiToken]);
+  }, [runtime, getApiToken, clientConfig]);
 
   React.useEffect(() => {
     loadCatalog().catch(() => undefined);
   }, [loadCatalog]);
 
   const refreshRun = React.useCallback(async (): Promise<void> => {
-    if (!runtime.backendUrl || !runStatus?.runId || runtime.mockMode) {
+    if (!runStatus?.runId || runtime.executionMode === 'mock') {
+      return;
+    }
+    const endpoint = getEndpointLabel(runtime);
+    if (!endpoint) {
       return;
     }
 
     setBusyState('refresh');
     try {
-      const latestRun = await fetchPnpRun(runtime.backendUrl, runStatus.runId, getApiToken);
+      const latestRun = await fetchPnpRun(clientConfig, runStatus.runId, getApiToken);
       setRunStatus(latestRun);
       if (isTerminal(latestRun.status)) {
-        const evidence = await fetchPnpRunEvidence(runtime.backendUrl, latestRun.runId, getApiToken);
+        const evidence = await fetchPnpRunEvidence(clientConfig, latestRun.runId, getApiToken);
         setEvidenceManifest(evidence);
       }
     } catch (error) {
@@ -247,20 +297,28 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
     } finally {
       setBusyState('idle');
     }
-  }, [runtime.backendUrl, runtime.mockMode, runStatus?.runId, getApiToken]);
+  }, [runtime, runStatus?.runId, getApiToken, clientConfig]);
 
   React.useEffect(() => {
-    if (!runStatus?.runId || isTerminal(runStatus.status) || runtime.mockMode) {
+    if (!runStatus?.runId || isTerminal(runStatus.status) || runtime.executionMode === 'mock') {
       return undefined;
     }
     const handle = window.setInterval(() => {
       refreshRun().catch(() => undefined);
     }, POLL_INTERVAL_MS);
     return () => window.clearInterval(handle);
-  }, [refreshRun, runStatus?.runId, runStatus?.status, runtime.mockMode]);
+  }, [refreshRun, runStatus?.runId, runStatus?.status, runtime.executionMode]);
 
   const submitPreflight = React.useCallback(async (): Promise<void> => {
-    const validation = validatePnpOpsForm(selectedAction, { targetSiteUrl, listFilterInput, pageFilterInput });
+    const validation = validatePnpOpsForm(
+      selectedAction,
+      { targetSiteUrl, listFilterInput, pageFilterInput },
+      {
+        executionMode: runtime.executionMode,
+        runnerBaseUrl: runtime.runnerBaseUrl,
+        legacyAdminApiBaseUrl: runtime.legacyAdminApiBaseUrl,
+      },
+    );
     setFormErrors(validation.errors);
     setServiceError(null);
     if (!validation.isValid || !selectedAction) {
@@ -276,31 +334,35 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
 
     setBusyState('preflight');
     try {
-      if (runtime.mockMode) {
+      if (runtime.executionMode === 'mock') {
         setPreflightResult({
           ready: true,
           checks: [
-            { checkId: 'mock-01', label: 'Mock backend reachable', passed: true, message: 'Mock mode bypassed backend auth.', blocking: false },
+            { checkId: 'mock-01', label: 'Mock runner available', passed: true, message: 'Mock mode bypassed live runner checks.', blocking: false },
             { checkId: 'mock-02', label: 'Action payload normalized', passed: true, message: `${selectedAction.key} payload accepted.`, blocking: false },
           ],
         });
-      } else if (runtime.backendUrl && getApiToken) {
-        const result = await runPnpPreflight(runtime.backendUrl, selectedAction.key, commandInput, getApiToken);
-        setPreflightResult(result);
-      } else if (runtime.backendUrl && !getApiToken) {
-        setServiceError('Backend token provider is unavailable. Configure backendAudience for SPFx token acquisition.');
       } else {
-        setServiceError('Backend URL is not configured.');
+        const result = await runPnpPreflight(clientConfig, selectedAction.key, commandInput, getApiToken);
+        setPreflightResult(result);
       }
     } catch (error) {
       setServiceError(error instanceof Error ? error.message : String(error));
     } finally {
       setBusyState('idle');
     }
-  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.mockMode, runtime.backendUrl, getApiToken]);
+  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.executionMode, runtime.runnerBaseUrl, runtime.legacyAdminApiBaseUrl, getApiToken, clientConfig]);
 
   const launchRun = React.useCallback(async (): Promise<void> => {
-    const validation = validatePnpOpsForm(selectedAction, { targetSiteUrl, listFilterInput, pageFilterInput });
+    const validation = validatePnpOpsForm(
+      selectedAction,
+      { targetSiteUrl, listFilterInput, pageFilterInput },
+      {
+        executionMode: runtime.executionMode,
+        runnerBaseUrl: runtime.runnerBaseUrl,
+        legacyAdminApiBaseUrl: runtime.legacyAdminApiBaseUrl,
+      },
+    );
     setFormErrors(validation.errors);
     setServiceError(null);
     if (!validation.isValid || !selectedAction) {
@@ -316,7 +378,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
 
     setBusyState('launch');
     try {
-      if (runtime.mockMode) {
+      if (runtime.executionMode === 'mock') {
         const runId = `mock-${Date.now()}`;
         setRunStatus({
           runId,
@@ -357,27 +419,23 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
             ],
           });
         }, 1_300);
-      } else if (runtime.backendUrl && getApiToken) {
-        const launched = await launchPnpRun(runtime.backendUrl, selectedAction.key, commandInput, getApiToken);
-        const latestRun = await fetchPnpRun(runtime.backendUrl, launched.runId, getApiToken);
+      } else {
+        const launched = await launchPnpRun(clientConfig, selectedAction.key, commandInput, getApiToken);
+        const latestRun = await fetchPnpRun(clientConfig, launched.runId, getApiToken);
         setRunStatus(latestRun);
         if (isTerminal(latestRun.status)) {
-          const evidence = await fetchPnpRunEvidence(runtime.backendUrl, latestRun.runId, getApiToken);
+          const evidence = await fetchPnpRunEvidence(clientConfig, latestRun.runId, getApiToken);
           setEvidenceManifest(evidence);
         } else {
           setEvidenceManifest(null);
         }
-      } else if (runtime.backendUrl && !getApiToken) {
-        setServiceError('Backend token provider is unavailable. Configure backendAudience for SPFx token acquisition.');
-      } else {
-        setServiceError('Backend URL is not configured.');
       }
     } catch (error) {
       setServiceError(error instanceof Error ? error.message : String(error));
     } finally {
       setBusyState('idle');
     }
-  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.mockMode, runtime.backendUrl, getApiToken]);
+  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.executionMode, runtime.runnerBaseUrl, runtime.legacyAdminApiBaseUrl, getApiToken, clientConfig]);
 
   return (
     <section aria-label="PnP Operations webpart shell" data-hbc-webpart="pnp-ops" style={LAYOUT.root}>
@@ -385,27 +443,42 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
         <div style={LAYOUT.cardPad}>
           <h2>PnP Operations</h2>
           <p>
-            Read-only SharePoint extraction shell. Heavy execution runs through backend admin APIs.
+            Read-only SharePoint extraction shell. Execution is routed by configured mode.
           </p>
           <p>
             Operator: {identity?.displayName ?? 'Unknown'}{identity?.email ? ` (${identity.email})` : ''}
           </p>
           <p>
             <span style={LAYOUT.monospace}>
-              Backend: {runtime.backendUrl || 'Not configured'}
+              Execution mode: {describeMode(runtime.executionMode)}
+            </span>
+          </p>
+          <p>
+            <span style={LAYOUT.monospace}>
+              Endpoint: {getEndpointLabel(runtime) || 'Not configured'}
             </span>
           </p>
           <HbcBanner variant="warning">
-            Browser execution is intentionally not supported. Privileged PnP operations must run through backend controls and audit/evidence pipelines.
+            Browser execution is intentionally not supported. Privileged PnP operations must run through a runner service with audit/evidence controls.
           </HbcBanner>
         </div>
       </HbcCard>
 
       {catalogWarning && <HbcBanner variant="info">{catalogWarning}</HbcBanner>}
-      {!runtime.mockMode && runtime.backendUrl && !getApiToken && (
+      {runtime.executionMode === PNP_OPS_LEGACY_MODE && getEndpointLabel(runtime) && !getApiToken && (
         <HbcBanner variant="warning">
-          Backend mode is configured but no API token provider is available. Set `backendAudience`
-          so SPFx can acquire a bearer token for `/api/admin/*`.
+          Legacy mode is configured but no API token provider is available. Set `backendAudience`
+          so SPFx can acquire a bearer token for legacy `/api/admin/*` calls.
+        </HbcBanner>
+      )}
+      {(runtime.executionMode === 'local-runner' || runtime.executionMode === 'remote-runner') && !runtime.runnerBaseUrl && (
+        <HbcBanner variant="warning">
+          {runtime.executionMode} is selected but `runnerBaseUrl` is not configured.
+        </HbcBanner>
+      )}
+      {runtime.executionMode === 'mock' && (
+        <HbcBanner variant="info">
+          Mock mode is active. No network calls are made.
         </HbcBanner>
       )}
       {serviceError && <HbcBanner variant="error">{serviceError}</HbcBanner>}
@@ -509,7 +582,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
                 refreshRun().catch(() => undefined);
               }}
               loading={busyState === 'refresh'}
-              disabled={!runStatus || runtime.mockMode}
+              disabled={!runStatus || runtime.executionMode === 'mock'}
             >
               Refresh Run
             </HbcButton>

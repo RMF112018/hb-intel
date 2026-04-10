@@ -1,6 +1,23 @@
 import type { AdminActionMetadataDto, PnpOpsActionKey } from './pnpOpsActionCatalog.js';
-// TODO(prompt-02): replace admin-api route construction with runner abstraction
-// from pnpOpsExecutionModes.ts while preserving current DTO compatibility.
+import {
+  PNP_OPS_LEGACY_MODE,
+  type PnpOpsExecutionMode,
+} from './pnpOpsExecutionModes.js';
+import {
+  fetchLegacyActionMetadata,
+  fetchLegacyRun,
+  fetchLegacyRunEvidence,
+  launchLegacyRun,
+  runLegacyPreflight,
+} from './pnpOpsLegacyAdminClient.js';
+import {
+  fetchRunnerActionMetadata,
+  fetchRunnerRun,
+  fetchRunnerRunEvidence,
+  isRunnerMode,
+  launchRunnerRun,
+  runRunnerPreflight,
+} from './pnpOpsRunnerClient.js';
 
 export interface PnpOpsRunLaunchResponse {
   readonly runId: string;
@@ -69,133 +86,79 @@ export interface PnpOpsCommandInput {
   };
 }
 
+export interface PnpOpsClientConfig {
+  readonly executionMode: PnpOpsExecutionMode;
+  readonly runnerBaseUrl: string;
+  readonly legacyAdminApiBaseUrl?: string;
+}
+
 export type PnpOpsTokenProvider = (() => Promise<string>) | undefined;
 
-interface ApiEnvelope<T> {
-  readonly data: T;
-}
-
-interface ApiListEnvelope<T> {
-  readonly items: readonly T[];
-}
-
-async function readJson<T>(response: Response): Promise<T> {
-  const payload = (await response.json().catch(() => null)) as T | null;
-  if (!payload) {
-    throw new Error(`Unexpected empty response (${response.status}).`);
-  }
-  return payload;
-}
-
-async function assertOk(response: Response, operation: string): Promise<void> {
-  if (!response.ok) {
-    const message = await response
-      .json()
-      .then((body) => (body as { message?: string }).message)
-      .catch(() => undefined);
-    throw new Error(`${operation} failed (${response.status}): ${message ?? response.statusText}`);
-  }
-}
-
-async function buildAuthHeaders(
-  tokenProvider: PnpOpsTokenProvider,
-  extraHeaders?: Record<string, string>,
-): Promise<Record<string, string>> {
-  const headers: Record<string, string> = { ...(extraHeaders ?? {}) };
-  if (!tokenProvider) {
-    return headers;
-  }
-  const token = await tokenProvider();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
-}
-
-function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.replace(/\/+$/, '');
+function resolveLegacyBaseUrl(config: PnpOpsClientConfig): string {
+  return config.legacyAdminApiBaseUrl?.trim() || config.runnerBaseUrl.trim();
 }
 
 export async function fetchPnpActionMetadata(
-  backendUrl: string,
+  config: PnpOpsClientConfig,
   tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<readonly AdminActionMetadataDto[]> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/actions`, {
-    headers: await buildAuthHeaders(tokenProvider),
-  });
-  await assertOk(response, 'Action catalog load');
-  const payload = await readJson<ApiListEnvelope<AdminActionMetadataDto>>(response);
-  return payload.items ?? [];
+  if (isRunnerMode(config.executionMode)) {
+    return fetchRunnerActionMetadata(config.runnerBaseUrl, fetchImpl);
+  }
+  if (config.executionMode === PNP_OPS_LEGACY_MODE) {
+    return fetchLegacyActionMetadata(resolveLegacyBaseUrl(config), tokenProvider, fetchImpl);
+  }
+  return [];
 }
 
 export async function runPnpPreflight(
-  backendUrl: string,
+  config: PnpOpsClientConfig,
   actionKey: PnpOpsActionKey,
   commandInput: PnpOpsCommandInput,
   tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsPreflightResponse> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/preflight`, {
-    method: 'POST',
-    headers: await buildAuthHeaders(tokenProvider, { 'Content-Type': 'application/json' }),
-    body: JSON.stringify({
-      actionKey,
-      targetEntityId: commandInput.targetSiteUrl,
-      commandInput,
-    }),
-  });
-  await assertOk(response, 'Preflight');
-  const payload = await readJson<ApiEnvelope<PnpOpsPreflightResponse>>(response);
-  return payload.data;
+  if (isRunnerMode(config.executionMode)) {
+    return runRunnerPreflight(config.runnerBaseUrl, actionKey, commandInput, fetchImpl);
+  }
+  return runLegacyPreflight(resolveLegacyBaseUrl(config), actionKey, commandInput, tokenProvider, fetchImpl);
 }
 
 export async function launchPnpRun(
-  backendUrl: string,
+  config: PnpOpsClientConfig,
   actionKey: PnpOpsActionKey,
   commandInput: PnpOpsCommandInput,
   tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunLaunchResponse> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs`, {
-    method: 'POST',
-    headers: await buildAuthHeaders(tokenProvider, { 'Content-Type': 'application/json' }),
-    body: JSON.stringify({
-      actionKey,
-      targetEntityId: commandInput.targetSiteUrl,
-      commandInput,
-      dryRun: false,
-    }),
-  });
-  await assertOk(response, 'Run launch');
-  const payload = await readJson<ApiEnvelope<PnpOpsRunLaunchResponse>>(response);
-  return payload.data;
+  if (isRunnerMode(config.executionMode)) {
+    return launchRunnerRun(config.runnerBaseUrl, actionKey, commandInput, fetchImpl);
+  }
+  return launchLegacyRun(resolveLegacyBaseUrl(config), actionKey, commandInput, tokenProvider, fetchImpl);
 }
 
 export async function fetchPnpRun(
-  backendUrl: string,
+  config: PnpOpsClientConfig,
   runId: string,
   tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunEnvelope> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs/${encodeURIComponent(runId)}`, {
-    headers: await buildAuthHeaders(tokenProvider),
-  });
-  await assertOk(response, 'Run status');
-  const payload = await readJson<ApiEnvelope<PnpOpsRunEnvelope>>(response);
-  return payload.data;
+  if (isRunnerMode(config.executionMode)) {
+    return fetchRunnerRun(config.runnerBaseUrl, runId, fetchImpl);
+  }
+  return fetchLegacyRun(resolveLegacyBaseUrl(config), runId, tokenProvider, fetchImpl);
 }
 
 export async function fetchPnpRunEvidence(
-  backendUrl: string,
+  config: PnpOpsClientConfig,
   runId: string,
   tokenProvider: PnpOpsTokenProvider,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunEvidenceResponse> {
-  const response = await fetchImpl(`${normalizeBaseUrl(backendUrl)}/api/admin/runs/${encodeURIComponent(runId)}/evidence`, {
-    headers: await buildAuthHeaders(tokenProvider),
-  });
-  await assertOk(response, 'Run evidence');
-  const payload = await readJson<ApiEnvelope<PnpOpsRunEvidenceResponse>>(response);
-  return payload.data;
+  if (isRunnerMode(config.executionMode)) {
+    return fetchRunnerRunEvidence(config.runnerBaseUrl, runId, fetchImpl);
+  }
+  return fetchLegacyRunEvidence(resolveLegacyBaseUrl(config), runId, tokenProvider, fetchImpl);
 }
+

@@ -20,6 +20,7 @@ import { SafetyFieldExcellence } from './webparts/safetyFieldExcellence/SafetyFi
 import { SmartSearchWayfinding } from './webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
 import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import { PnpOps } from './webparts/pnp/PnpOps.js';
+import { PNP_OPS_LEGACY_MODE, resolvePnpOpsExecutionMode } from './webparts/pnp/pnpOpsExecutionModes.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';
 
 let root: Root | undefined;
@@ -125,11 +126,14 @@ export async function mount(
     displayName: spfxContext?.pageContext?.user?.displayName,
     email: spfxContext?.pageContext?.user?.email,
   };
-  const backendAudience =
-    typeof webPartProperties?.backendAudience === 'string'
-      ? webPartProperties.backendAudience.trim()
-      : '';
-  const getApiToken = createApiTokenProvider(spfxContext, backendAudience);
+  const pnpExecutionMode = resolvePnpOpsExecutionMode(webPartProperties);
+  const backendAudience = pnpExecutionMode === PNP_OPS_LEGACY_MODE
+    && typeof webPartProperties?.backendAudience === 'string'
+    ? webPartProperties.backendAudience.trim()
+    : '';
+  const getApiToken = pnpExecutionMode === PNP_OPS_LEGACY_MODE
+    ? createApiTokenProvider(spfxContext, backendAudience)
+    : undefined;
   const renderWebPart = WEBPART_RENDERERS[webPartId];
 
   root = createRoot(el);

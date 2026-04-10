@@ -108,6 +108,10 @@ Prompt-01 architecture and contract lock artifacts:
 - `Prompt-01_PnpOps-Runner-Contract-Lock.md`
 - `Prompt-01_PnpOps-NonAzure-Completion-Report.md`
 
+## Prompt-02 outputs (runner abstraction refactor)
+
+- `Prompt-02_PnpOps-Runner-Abstraction-Completion-Report.md`
+
 ---
 
 ## Expected deliverables by the end of the package

@@ -1,4 +1,5 @@
 import type { PnpOpsActionDefinition } from './pnpOpsActionCatalog.js';
+import { PNP_OPS_LEGACY_MODE, type PnpOpsExecutionMode } from './pnpOpsExecutionModes.js';
 
 export interface PnpOpsFormState {
   readonly targetSiteUrl: string;
@@ -9,6 +10,12 @@ export interface PnpOpsFormState {
 export interface PnpOpsFormValidationResult {
   readonly isValid: boolean;
   readonly errors: readonly string[];
+}
+
+export interface PnpOpsRuntimeValidationConfig {
+  readonly executionMode: PnpOpsExecutionMode;
+  readonly runnerBaseUrl?: string;
+  readonly legacyAdminApiBaseUrl?: string;
 }
 
 const SHAREPOINT_SITE_URL_PATTERN =
@@ -28,12 +35,34 @@ export function parseCsvFilters(input: string): string[] {
 export function validatePnpOpsForm(
   action: PnpOpsActionDefinition | null | undefined,
   state: PnpOpsFormState,
+  runtime: PnpOpsRuntimeValidationConfig,
 ): PnpOpsFormValidationResult {
   const errors: string[] = [];
   const targetSiteUrl = state.targetSiteUrl.trim();
+  const runnerBaseUrl = runtime.runnerBaseUrl?.trim() ?? '';
+  const legacyBaseUrl = runtime.legacyAdminApiBaseUrl?.trim() ?? '';
 
   if (!action) {
     errors.push('Select an action before running preflight or launch.');
+  }
+
+  if (runtime.executionMode === 'local-runner' || runtime.executionMode === 'remote-runner') {
+    if (!runnerBaseUrl) {
+      errors.push(`${runtime.executionMode} mode requires a runner base URL.`);
+    } else {
+      try {
+        const parsed = new URL(runnerBaseUrl);
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+          errors.push('Runner base URL must use http or https.');
+        }
+      } catch {
+        errors.push('Runner base URL must be a valid absolute URL.');
+      }
+    }
+  }
+
+  if (runtime.executionMode === PNP_OPS_LEGACY_MODE && !legacyBaseUrl && !runnerBaseUrl) {
+    errors.push('legacy-admin-api mode requires `legacyAdminApiBaseUrl` or compatible `backendUrl` configuration.');
   }
 
   if (!targetSiteUrl) {

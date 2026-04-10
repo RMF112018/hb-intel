@@ -4,6 +4,7 @@ import {
   fetchPnpRunEvidence,
   launchPnpRun,
   runPnpPreflight,
+  type PnpOpsClientConfig,
 } from './pnpOpsClient.js';
 
 function makeOkResponse(data: unknown): Response {
@@ -14,52 +15,107 @@ function makeOkResponse(data: unknown): Response {
   } as unknown as Response;
 }
 
-describe('pnpOpsClient auth wiring', () => {
-  it('sends bearer token for action metadata calls', async () => {
-    const fetchMock = vi.fn(async () => makeOkResponse({ items: [] }));
-    await fetchPnpActionMetadata(
-      'https://functions.example.com',
-      async () => 'token-123',
-      fetchMock as unknown as typeof fetch,
-    );
-    const firstCall = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-    const init = firstCall[1];
-    const headers = init.headers as Record<string, string>;
-    expect(headers.Authorization).toBe('Bearer token-123');
-  });
+const commandInput = {
+  targetSiteUrl: 'https://tenant.sharepoint.com/sites/Test',
+  listFilters: ['List A'],
+  executionIntent: {
+    mode: 'read-only-export' as const,
+    source: 'spfx-webpart' as const,
+    requestedAt: new Date().toISOString(),
+  },
+};
 
-  it('sends bearer token and payload for preflight and launch', async () => {
+describe('pnpOpsClient mode routing', () => {
+  it('uses neutral runner endpoints for local-runner mode', async () => {
+    const config: PnpOpsClientConfig = {
+      executionMode: 'local-runner',
+      runnerBaseUrl: 'https://runner.internal',
+    };
     const fetchMock = vi
       .fn(async () => makeOkResponse({ data: { ready: true, checks: [] } }))
+      .mockImplementationOnce(async () => makeOkResponse({ items: [] }))
       .mockImplementationOnce(async () => makeOkResponse({ data: { ready: true, checks: [] } }))
-      .mockImplementationOnce(
-        async () => makeOkResponse({ data: { runId: 'run-1', status: 'Pending', actionKey: 'sharepoint-control:extraction:list-schema' } }),
-      );
+      .mockImplementationOnce(async () => makeOkResponse({
+        data: { runId: 'run-1', status: 'Pending', actionKey: 'sharepoint-control:extraction:list-schema' },
+      }));
 
-    const input = {
-      targetSiteUrl: 'https://tenant.sharepoint.com/sites/Test',
-      listFilters: ['List A'],
-      executionIntent: {
-        mode: 'read-only-export' as const,
-        source: 'spfx-webpart' as const,
-        requestedAt: new Date().toISOString(),
-      },
+    await fetchPnpActionMetadata(config, undefined, fetchMock as unknown as typeof fetch);
+    await runPnpPreflight(
+      config,
+      'sharepoint-control:extraction:list-schema',
+      commandInput,
+      undefined,
+      fetchMock as unknown as typeof fetch,
+    );
+    await launchPnpRun(
+      config,
+      'sharepoint-control:extraction:list-schema',
+      commandInput,
+      undefined,
+      fetchMock as unknown as typeof fetch,
+    );
+
+    const calledUrls = fetchMock.mock.calls.map((call) => String((call as unknown[])[0] ?? ''));
+    expect(calledUrls[0]).toBe('https://runner.internal/actions');
+    expect(calledUrls[1]).toBe('https://runner.internal/preflight');
+    expect(calledUrls[2]).toBe('https://runner.internal/runs');
+
+    for (const call of fetchMock.mock.calls) {
+      const init = ((call as unknown as [string, RequestInit])[1] ?? {}) as RequestInit;
+      const headers = (init.headers ?? {}) as Record<string, string>;
+      expect(headers.Authorization).toBeUndefined();
+    }
+  });
+
+  it('uses legacy admin endpoints with bearer auth in legacy-admin-api mode', async () => {
+    const config: PnpOpsClientConfig = {
+      executionMode: 'legacy-admin-api',
+      runnerBaseUrl: 'https://functions.example.com',
+      legacyAdminApiBaseUrl: 'https://functions.example.com',
     };
 
+    const fetchMock = vi
+      .fn(async () => makeOkResponse({ data: { ready: true, checks: [] } }))
+      .mockImplementationOnce(async () => makeOkResponse({ items: [] }))
+      .mockImplementationOnce(async () => makeOkResponse({ data: { ready: true, checks: [] } }))
+      .mockImplementationOnce(async () => makeOkResponse({
+        data: { runId: 'run-1', status: 'Pending', actionKey: 'sharepoint-control:extraction:list-schema' },
+      }))
+      .mockImplementationOnce(async () => makeOkResponse({
+        data: {
+          runId: 'run-1',
+          evidenceRefs: [{ label: 'artifact-bundle.zip', downloadUrl: 'https://functions.example.com/file.zip' }],
+          total: 1,
+        },
+      }));
+
+    await fetchPnpActionMetadata(config, async () => 'token-xyz', fetchMock as unknown as typeof fetch);
     await runPnpPreflight(
-      'https://functions.example.com',
+      config,
       'sharepoint-control:extraction:list-schema',
-      input,
+      commandInput,
       async () => 'token-xyz',
       fetchMock as unknown as typeof fetch,
     );
     await launchPnpRun(
-      'https://functions.example.com',
+      config,
       'sharepoint-control:extraction:list-schema',
-      input,
+      commandInput,
       async () => 'token-xyz',
       fetchMock as unknown as typeof fetch,
     );
+    await fetchPnpRunEvidence(
+      config,
+      'run-1',
+      async () => 'token-xyz',
+      fetchMock as unknown as typeof fetch,
+    );
+
+    const calledUrls = fetchMock.mock.calls.map((call) => String((call as unknown[])[0] ?? ''));
+    expect(calledUrls[0]).toBe('https://functions.example.com/api/admin/actions');
+    expect(calledUrls[1]).toBe('https://functions.example.com/api/admin/preflight');
+    expect(calledUrls[2]).toBe('https://functions.example.com/api/admin/runs');
+    expect(calledUrls[3]).toBe('https://functions.example.com/api/admin/runs/run-1/evidence');
 
     for (const call of fetchMock.mock.calls) {
       const init = ((call as unknown as [string, RequestInit])[1] ?? {}) as RequestInit;
@@ -68,36 +124,16 @@ describe('pnpOpsClient auth wiring', () => {
     }
   });
 
-  it('omits authorization header when token provider is missing', async () => {
-    const fetchMock = vi.fn(async () =>
-      makeOkResponse({
-        data: {
-          runId: 'run-1',
-          evidenceRefs: [
-            {
-              label: 'artifact-bundle.zip',
-              isBundle: true,
-              bundleFormat: 'zip',
-              contentType: 'application/zip',
-              sizeBytes: 256,
-              availability: 'available',
-              downloadUrl: 'https://functions.example.com/api/admin/runs/run-1/artifacts/e1/download',
-            },
-          ],
-          total: 1,
-        },
-      }),
-    );
-    const result = await fetchPnpRunEvidence(
-      'https://functions.example.com',
-      'run-1',
-      undefined,
-      fetchMock as unknown as typeof fetch,
-    );
-    expect(result.evidenceRefs[0]?.isBundle).toBe(true);
-    const firstCall = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-    const init = (firstCall[1] ?? {}) as RequestInit;
-    const headers = (init.headers ?? {}) as Record<string, string>;
-    expect(headers.Authorization).toBeUndefined();
+  it('returns local locked catalog when mode is mock', async () => {
+    const config: PnpOpsClientConfig = {
+      executionMode: 'mock',
+      runnerBaseUrl: '',
+    };
+
+    const fetchMock = vi.fn();
+    const metadata = await fetchPnpActionMetadata(config, undefined, fetchMock as unknown as typeof fetch);
+
+    expect(metadata).toEqual([]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
