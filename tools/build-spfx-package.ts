@@ -52,6 +52,98 @@ interface HbVerificationExpectations {
   emittedLocalShimFiles: string[];
 }
 
+interface FreshnessEvidence {
+  runId: string;
+  sourceBundleSha256: string;
+  sourceBundleMtimeIso: string;
+  sourceBundleSizeBytes: number;
+}
+
+interface FileFingerprint {
+  path: string;
+  sha256: string;
+  sizeBytes: number;
+  mtimeIso: string;
+}
+
+interface ExpectedShimAsset {
+  manifestId: string;
+  entryModuleId: string;
+  fileName: string;
+  expectedHashPrefix: string;
+}
+
+interface PackagedAssetFingerprint {
+  archivePath: string;
+  fileName: string;
+  sha256: string;
+  sizeBytes: number;
+}
+
+interface ManifestSemanticComparison {
+  manifestId: string;
+  xmlPath: string;
+  entryModuleId: {
+    expected: string;
+    actual: string;
+    matches: boolean;
+  };
+  fields: Record<string, {
+    expected: unknown;
+    actual: unknown;
+    matches: boolean;
+  }>;
+  allMatched: boolean;
+}
+
+interface HbPackageTruthProof {
+  domain: string;
+  generatedAt: string;
+  packagingRunId: string;
+  sppkgFile: string;
+  pnpOpsWebpartId: string;
+  sourceFingerprints: {
+    criticalRuntimeFiles: FileFingerprint[];
+  };
+  expectedAssets: {
+    appBundle: {
+      fileName: string;
+      sha256: string;
+      sizeBytes: number;
+      mtimeIso: string;
+    };
+    shimEntries: ExpectedShimAsset[];
+  };
+  packagedAssets: {
+    appBundle: PackagedAssetFingerprint;
+    shimEntries: PackagedAssetFingerprint[];
+  };
+  manifestLinkage: ManifestSemanticComparison[];
+  checks: {
+    structuralValidity: {
+      pass: boolean;
+      details: string[];
+    };
+    freshness: {
+      pass: boolean;
+      details: string[];
+    };
+    sourcePackageSemanticAlignment: {
+      pass: boolean;
+      details: string[];
+    };
+    liveRuntimeProof: {
+      pass: boolean;
+      details: string[];
+    };
+  };
+}
+
+interface BuildHbPackageTruthProofResult {
+  ok: boolean;
+  proof: HbPackageTruthProof;
+}
+
 const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'accounting', camel: 'accounting', pascal: 'Accounting' },
   { dir: 'estimating', camel: 'projectSetup', pascal: 'ProjectSetup' },
@@ -73,6 +165,8 @@ const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
   '535f5a17-fc49-40ea-ac16-5d68895884f7', // legacy HbWebpartsWebPart
 ]);
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
+const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
+const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
 const HB_WEBPARTS_PROOF_CASE_IDS = new Set<string>([
   // Cumulative full-package mode: all webparts are included.
   // Proof-case IDs validated in Phase 2-3: HbHeroBanner, PriorityActionsRail.
@@ -202,6 +296,373 @@ function decodeXmlAttribute(value: string): string {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&');
+}
+
+function sha256Hex(input: Buffer | string): string {
+  return createHash('sha256').update(input).digest('hex');
+}
+
+function readArchiveBytes(sppkgPath: string, archivePath: string): Buffer {
+  return execSync(`unzip -p "${sppkgPath}" "${archivePath}"`, {
+    maxBuffer: 256 * 1024 * 1024,
+  });
+}
+
+function getArchivePaths(sppkgPath: string): string[] {
+  return execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' })
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function stableJson(value: unknown): string {
+  return JSON.stringify(value ?? null);
+}
+
+function normalizeSourceManifestField(field: string, sourceManifest: any): unknown {
+  const value = sourceManifest[field];
+  switch (field) {
+    case 'supportedHosts':
+      return Array.isArray(value) ? value : DEFAULT_SUPPORTED_HOSTS;
+    case 'requiresCustomScript':
+      return typeof value === 'boolean' ? value : false;
+    case 'supportsThemeVariants':
+      return typeof value === 'boolean' ? value : true;
+    case 'supportsFullBleed':
+      return typeof value === 'boolean' ? value : null;
+    case 'preconfiguredEntries':
+      return Array.isArray(value) ? value : [];
+    default:
+      return value ?? null;
+  }
+}
+
+function normalizePackagedManifestField(field: string, packagedManifest: any): unknown {
+  const value = packagedManifest[field];
+  switch (field) {
+    case 'supportedHosts':
+      return Array.isArray(value) ? value : DEFAULT_SUPPORTED_HOSTS;
+    case 'requiresCustomScript':
+      return typeof value === 'boolean' ? value : false;
+    case 'supportsThemeVariants':
+      return typeof value === 'boolean' ? value : true;
+    case 'supportsFullBleed':
+      return typeof value === 'boolean' ? value : null;
+    case 'preconfiguredEntries':
+      return Array.isArray(value) ? value : [];
+    default:
+      return value ?? null;
+  }
+}
+
+function collectRuntimeSourceFingerprints(root: string): FileFingerprint[] {
+  const criticalPaths = [
+    'apps/hb-webparts/src/mount.tsx',
+    'apps/hb-webparts/src/webparts/pnp/PnpOps.tsx',
+    'apps/hb-webparts/src/webparts/pnp/pnpOpsClient.ts',
+    'apps/hb-webparts/src/webparts/pnp/pnpOpsRunnerClient.ts',
+    'apps/hb-webparts/src/webparts/pnp/pnpOpsActionCatalog.ts',
+    'apps/hb-webparts/src/webparts/pnp/pnpOpsValidation.ts',
+    'apps/hb-webparts/src/webparts/pnp/pnpOpsExecutionModes.ts',
+    'apps/hb-webparts/src/webparts/pnp/PnpOpsWebPart.manifest.json',
+  ];
+
+  const fingerprints: FileFingerprint[] = [];
+  for (const relPath of criticalPaths) {
+    const absPath = path.join(root, relPath);
+    if (!fs.existsSync(absPath)) {
+      continue;
+    }
+    const bytes = fs.readFileSync(absPath);
+    const stats = fs.statSync(absPath);
+    fingerprints.push({
+      path: relPath,
+      sha256: sha256Hex(bytes),
+      sizeBytes: stats.size,
+      mtimeIso: new Date(stats.mtimeMs).toISOString(),
+    });
+  }
+  return fingerprints.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+function parsePackagedComponentManifestById(
+  sppkgPath: string,
+  archivePaths: string[],
+  manifestId: string,
+): { xmlPath: string; manifest: any } | null {
+  const xmlPath = archivePaths.find((entry) => entry.endsWith(`/WebPart_${manifestId}.xml`));
+  if (!xmlPath) {
+    return null;
+  }
+  const manifestXml = readArchiveBytes(sppkgPath, xmlPath).toString('utf8');
+  const componentManifestMatch = manifestXml.match(/ComponentManifest="([^"]+)"/);
+  if (!componentManifestMatch) {
+    return null;
+  }
+  const manifestRaw = decodeXmlAttribute(componentManifestMatch[1]);
+  return { xmlPath, manifest: JSON.parse(manifestRaw) };
+}
+
+function buildHbPackageTruthProof(
+  root: string,
+  sppkgPath: string,
+  sppkgFile: string,
+  packagingRunId: string,
+  bundleName: string,
+  freshnessEvidence: FreshnessEvidence,
+  targetManifests: Array<{ file: string; json: any }>,
+  generatedShimExpectations: HbShimExpectation[],
+): BuildHbPackageTruthProofResult {
+  const structuralDetails: string[] = [];
+  const freshnessDetails: string[] = [];
+  const semanticDetails: string[] = [];
+  const runtimeDetails: string[] = [];
+  let structuralPass = true;
+  let freshnessPass = true;
+  let semanticPass = true;
+  let runtimePass = true;
+
+  const archivePaths = getArchivePaths(sppkgPath);
+  const expectedBundlePath = `ClientSideAssets/${bundleName}`;
+  const bundleArchivePath = archivePaths.find(
+    (entry) => entry === expectedBundlePath || entry.endsWith(`/${expectedBundlePath}`),
+  );
+
+  let packagedAppBundle: PackagedAssetFingerprint = {
+    archivePath: '',
+    fileName: bundleName,
+    sha256: '',
+    sizeBytes: 0,
+  };
+
+  if (!bundleArchivePath) {
+    structuralPass = false;
+    freshnessPass = false;
+    structuralDetails.push(`Missing packaged app bundle in archive: ${bundleName}`);
+    freshnessDetails.push(`Cannot verify packaged app hash because ${bundleName} is missing`);
+  } else {
+    const appBytes = readArchiveBytes(sppkgPath, bundleArchivePath);
+    const appSha = sha256Hex(appBytes);
+    packagedAppBundle = {
+      archivePath: bundleArchivePath,
+      fileName: bundleName,
+      sha256: appSha,
+      sizeBytes: appBytes.length,
+    };
+    if (appSha !== freshnessEvidence.sourceBundleSha256) {
+      freshnessPass = false;
+      freshnessDetails.push(
+        `App bundle hash mismatch for ${bundleName} (source=${freshnessEvidence.sourceBundleSha256}, packaged=${appSha})`,
+      );
+    } else {
+      freshnessDetails.push(`App bundle hash matches current build (${bundleName})`);
+    }
+
+    if (!appBytes.toString('utf8').includes(HB_PNP_OPS_WEBPART_ID)) {
+      runtimePass = false;
+      semanticPass = false;
+      runtimeDetails.push(`Packaged app bundle ${bundleName} does not contain PnP webpart ID ${HB_PNP_OPS_WEBPART_ID}`);
+      semanticDetails.push(`Missing PnP component ID marker in packaged runtime bundle (${bundleName})`);
+    } else {
+      runtimeDetails.push(`Packaged app bundle contains PnP webpart ID marker ${HB_PNP_OPS_WEBPART_ID}`);
+    }
+  }
+
+  const packagedShimEntries: PackagedAssetFingerprint[] = [];
+  const expectedShimEntries: ExpectedShimAsset[] = generatedShimExpectations.map((expectation) => ({
+    manifestId: expectation.manifestId,
+    entryModuleId: expectation.entryModuleId,
+    fileName: expectation.shimFileName,
+    expectedHashPrefix: expectation.shimFileHash,
+  }));
+
+  for (const expectedShim of expectedShimEntries) {
+    const shimArchivePath = archivePaths.find(
+      (entry) => entry === `ClientSideAssets/${expectedShim.fileName}` || entry.endsWith(`/ClientSideAssets/${expectedShim.fileName}`),
+    );
+    if (!shimArchivePath) {
+      structuralPass = false;
+      freshnessPass = false;
+      semanticPass = false;
+      structuralDetails.push(`Missing packaged shim asset ${expectedShim.fileName}`);
+      freshnessDetails.push(`Cannot verify shim hash because ${expectedShim.fileName} is missing`);
+      semanticDetails.push(`Manifest linkage cannot be trusted because shim ${expectedShim.fileName} is missing`);
+      continue;
+    }
+
+    const shimBytes = readArchiveBytes(sppkgPath, shimArchivePath);
+    const shimSha = sha256Hex(shimBytes);
+    packagedShimEntries.push({
+      archivePath: shimArchivePath,
+      fileName: expectedShim.fileName,
+      sha256: shimSha,
+      sizeBytes: shimBytes.length,
+    });
+
+    if (!shimSha.startsWith(expectedShim.expectedHashPrefix)) {
+      freshnessPass = false;
+      semanticPass = false;
+      freshnessDetails.push(
+        `Shim hash mismatch for ${expectedShim.fileName} (expected prefix=${expectedShim.expectedHashPrefix}, packaged=${shimSha})`,
+      );
+      semanticDetails.push(`Shim linkage hash mismatch for ${expectedShim.manifestId}`);
+    } else {
+      freshnessDetails.push(`Shim hash matches generated mapping for ${expectedShim.fileName}`);
+    }
+  }
+
+  const manifestComparisons: ManifestSemanticComparison[] = [];
+  const requiredFields = [
+    'id',
+    'alias',
+    'componentType',
+    'supportedHosts',
+    'preconfiguredEntries',
+    'requiresCustomScript',
+    'supportsThemeVariants',
+    'supportsFullBleed',
+  ] as const;
+
+  const shimByManifestId = new Map(expectedShimEntries.map((entry) => [entry.manifestId, entry]));
+  for (const sourceManifest of targetManifests) {
+    const packaged = parsePackagedComponentManifestById(sppkgPath, archivePaths, sourceManifest.json.id);
+    if (!packaged) {
+      structuralPass = false;
+      semanticPass = false;
+      structuralDetails.push(`Missing packaged WebPart XML or ComponentManifest for ${sourceManifest.json.id}`);
+      semanticDetails.push(`Missing packaged manifest linkage for ${sourceManifest.json.id}`);
+      continue;
+    }
+
+    const expectedShim = shimByManifestId.get(sourceManifest.json.id);
+    const expectedEntryModuleId = expectedShim?.entryModuleId ?? `${sourceManifest.json.id}_${packaged.manifest.version}`;
+    const actualEntryModuleId = String(packaged.manifest.loaderConfig?.entryModuleId ?? '');
+    const fieldResults: ManifestSemanticComparison['fields'] = {};
+    let allMatched = actualEntryModuleId === expectedEntryModuleId;
+
+    for (const field of requiredFields) {
+      const expectedValue = normalizeSourceManifestField(field, sourceManifest.json);
+      const actualValue = normalizePackagedManifestField(field, packaged.manifest);
+      const matches = stableJson(expectedValue) === stableJson(actualValue);
+      if (!matches) {
+        allMatched = false;
+      }
+      fieldResults[field] = {
+        expected: expectedValue ?? null,
+        actual: actualValue ?? null,
+        matches,
+      };
+    }
+
+    const expectedScriptPath = expectedShim?.fileName;
+    if (expectedScriptPath) {
+      const scriptResource = packaged.manifest.loaderConfig?.scriptResources?.[expectedEntryModuleId];
+      const actualPath = typeof scriptResource?.path === 'string' ? scriptResource.path : '';
+      const pathMatches = actualPath === expectedScriptPath;
+      if (!pathMatches) {
+        allMatched = false;
+      }
+      fieldResults.scriptResourcePath = {
+        expected: expectedScriptPath,
+        actual: actualPath || null,
+        matches: pathMatches,
+      };
+    }
+
+    manifestComparisons.push({
+      manifestId: sourceManifest.json.id,
+      xmlPath: packaged.xmlPath,
+      entryModuleId: {
+        expected: expectedEntryModuleId,
+        actual: actualEntryModuleId,
+        matches: actualEntryModuleId === expectedEntryModuleId,
+      },
+      fields: fieldResults,
+      allMatched,
+    });
+
+    if (!allMatched) {
+      semanticPass = false;
+      semanticDetails.push(`Manifest semantic mismatch detected for ${sourceManifest.json.id}`);
+    } else {
+      semanticDetails.push(`Manifest semantic alignment verified for ${sourceManifest.json.id}`);
+    }
+  }
+
+  const pnpManifest = manifestComparisons.find((comparison) => comparison.manifestId === HB_PNP_OPS_WEBPART_ID);
+  if (!pnpManifest) {
+    structuralPass = false;
+    semanticPass = false;
+    runtimePass = false;
+    structuralDetails.push(`PnP webpart manifest ${HB_PNP_OPS_WEBPART_ID} not found in packaged XML`);
+    semanticDetails.push(`PnP webpart linkage missing for ${HB_PNP_OPS_WEBPART_ID}`);
+    runtimeDetails.push(`Cannot prove PnP manifest linkage without packaged XML for ${HB_PNP_OPS_WEBPART_ID}`);
+  } else {
+    const pnpShim = shimByManifestId.get(HB_PNP_OPS_WEBPART_ID);
+    const pnpScriptPath = pnpManifest.fields.scriptResourcePath;
+    if (!pnpShim || !pnpScriptPath?.matches) {
+      semanticPass = false;
+      runtimePass = false;
+      semanticDetails.push(`PnP webpart shim linkage mismatch for ${HB_PNP_OPS_WEBPART_ID}`);
+      runtimeDetails.push(`PnP webpart entry mapping does not resolve to expected shell-entry shim`);
+    } else {
+      runtimeDetails.push(`PnP webpart linkage verified: ${HB_PNP_OPS_WEBPART_ID} -> ${pnpShim.fileName}`);
+    }
+  }
+
+  const sourceFingerprints = collectRuntimeSourceFingerprints(root);
+  if (sourceFingerprints.length === 0) {
+    semanticPass = false;
+    semanticDetails.push('No critical runtime source fingerprints were captured');
+  }
+
+  const proof: HbPackageTruthProof = {
+    domain: 'hb-webparts',
+    generatedAt: new Date().toISOString(),
+    packagingRunId,
+    sppkgFile,
+    pnpOpsWebpartId: HB_PNP_OPS_WEBPART_ID,
+    sourceFingerprints: {
+      criticalRuntimeFiles: sourceFingerprints,
+    },
+    expectedAssets: {
+      appBundle: {
+        fileName: 'hb-webparts-app.js',
+        sha256: freshnessEvidence.sourceBundleSha256,
+        sizeBytes: freshnessEvidence.sourceBundleSizeBytes,
+        mtimeIso: freshnessEvidence.sourceBundleMtimeIso,
+      },
+      shimEntries: expectedShimEntries,
+    },
+    packagedAssets: {
+      appBundle: packagedAppBundle,
+      shimEntries: packagedShimEntries.sort((a, b) => a.fileName.localeCompare(b.fileName)),
+    },
+    manifestLinkage: manifestComparisons.sort((a, b) => a.manifestId.localeCompare(b.manifestId)),
+    checks: {
+      structuralValidity: {
+        pass: structuralPass,
+        details: structuralDetails.length ? structuralDetails : ['All required package structures and assets are present'],
+      },
+      freshness: {
+        pass: freshnessPass,
+        details: freshnessDetails.length ? freshnessDetails : ['Freshness checks passed'],
+      },
+      sourcePackageSemanticAlignment: {
+        pass: semanticPass,
+        details: semanticDetails.length ? semanticDetails : ['Source/package semantic alignment checks passed'],
+      },
+      liveRuntimeProof: {
+        pass: runtimePass,
+        details: runtimeDetails.length
+          ? runtimeDetails
+          : ['Static runtime guards passed; SharePoint page-hosted runtime still requires live validation'],
+      },
+    },
+  };
+
+  const ok = structuralPass && freshnessPass && semanticPass && runtimePass;
+  return { ok, proof };
 }
 
 /**
@@ -633,6 +1094,46 @@ function verifySppkg(
   }
 }
 
+function verifyPackagedBundleFreshness(
+  sppkgPath: string,
+  bundleName: string,
+  evidence: FreshnessEvidence,
+  domainDir: string,
+): boolean {
+  try {
+    const archivePaths = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' })
+      .split('\n')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    const expectedBundlePath = `ClientSideAssets/${bundleName}`;
+    const bundleArchivePath = archivePaths.find(
+      (entry) => entry === expectedBundlePath || entry.endsWith(`/${expectedBundlePath}`),
+    );
+    if (!bundleArchivePath) {
+      console.error(`  ❌ ${domainDir}: packaged bundle ${bundleName} not found for freshness verification`);
+      return false;
+    }
+
+    const packagedBytes = execSync(`unzip -p "${sppkgPath}" "${bundleArchivePath}"`, {
+      maxBuffer: 256 * 1024 * 1024,
+    });
+    const packagedSha = sha256Hex(packagedBytes);
+    if (packagedSha !== evidence.sourceBundleSha256) {
+      console.error(
+        `  ❌ ${domainDir}: packaged bundle hash mismatch for ${bundleName}\n` +
+        `     source:   ${evidence.sourceBundleSha256}\n` +
+        `     packaged: ${packagedSha}`,
+      );
+      return false;
+    }
+    console.log(`  ✓ Packaged bundle freshness verified (${bundleName}, sha256:${packagedSha.slice(0, 12)}...)`);
+    return true;
+  } catch (err) {
+    console.error(`  ❌ ${domainDir}: failed packaged freshness verification — ${(err as Error).message}`);
+    return false;
+  }
+}
+
 // ── Main loop ──────────────────────────────────────────────────────────────
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -709,13 +1210,15 @@ for (const domain of domains) {
   const primarySourceManifest = targetManifests[0].json;
   const targetManifestIds = targetManifests.map((m) => m.json.id);
 
-  // ── Step 1: Check Vite build output exists ───────────────────────────
+  // ── Step 1: Enforce fresh build output ───────────────────────────────
   // baseBundleName is the fixed name Vite always outputs.
   // After content hashing (Step 1c), bundleName is updated to the hashed
   // filename which is what gulp, the .sppkg, and SharePoint will reference.
   const baseBundleName = `${domain.dir}-app.js`;
   let bundleName = baseBundleName;
   let bundlePath = path.join(distDir, bundleName);
+  const packagingRunId = `${new Date().toISOString()}-${Math.random().toString(16).slice(2, 10)}`;
+  let freshnessEvidence: FreshnessEvidence | undefined;
 
   // For the hb-webparts proof case, use the isolated entry that imports only
   // the proof-case webpart component — avoids bundle contamination from the
@@ -737,15 +1240,38 @@ for (const domain of domains) {
     proofCaseBuildEnv.HB_WEBPARTS_ENTRY = proofCaseEntry;
   }
 
-  if (!fs.existsSync(distDir)) {
+  const enforceFreshBuild = domain.dir === 'hb-webparts';
+  if (enforceFreshBuild) {
+    if (fs.existsSync(distDir)) {
+      fs.rmSync(distDir, { recursive: true, force: true });
+      console.log(`  ✓ Freshness gate: removed stale dist directory ${path.relative(ROOT, distDir)}`);
+    }
+    console.log('  Building app with Vite (fresh build enforced)...');
+    run(`pnpm --filter @hbc/spfx-${domain.dir} build`, { env: proofCaseBuildEnv });
+  } else if (!fs.existsSync(distDir)) {
     console.log('  Building app with Vite...');
     run(`pnpm --filter @hbc/spfx-${domain.dir} build`, { env: proofCaseBuildEnv });
   }
 
   if (!fs.existsSync(bundlePath)) {
-    console.error(`  ❌ ${domain.dir}: expected ${bundleName} in dist/ after build`);
+    console.error(`  ❌ ${domain.dir}: expected ${bundleName} in dist/ after build${enforceFreshBuild ? ' (fresh build gate active)' : ''}`);
     allPassed = false;
     continue;
+  }
+
+  if (enforceFreshBuild) {
+    const stats = fs.statSync(bundlePath);
+    freshnessEvidence = {
+      runId: packagingRunId,
+      sourceBundleSha256: sha256Hex(fs.readFileSync(bundlePath)),
+      sourceBundleMtimeIso: new Date(stats.mtimeMs).toISOString(),
+      sourceBundleSizeBytes: stats.size,
+    };
+    console.log(
+      `  ✓ Freshness evidence captured: ${bundleName} ` +
+      `(sha256:${freshnessEvidence.sourceBundleSha256.slice(0, 12)}..., ` +
+      `mtime:${freshnessEvidence.sourceBundleMtimeIso}, bytes:${freshnessEvidence.sourceBundleSizeBytes})`,
+    );
   }
 
   // Verify IIFE format (no ES module exports)
@@ -780,7 +1306,7 @@ for (const domain of domains) {
     }
 
     const bundleBytes = fs.readFileSync(bundlePath);
-    const contentHash = createHash('sha256').update(bundleBytes).digest('hex').slice(0, 8);
+    const contentHash = sha256Hex(bundleBytes).slice(0, 8);
     const hashedBundleName = `${domain.dir}-app-${contentHash}.js`;
     const hashedBundlePath = path.join(distDir, hashedBundleName);
     fs.copyFileSync(bundlePath, hashedBundlePath);
@@ -1151,7 +1677,6 @@ for (const domain of domains) {
       requiresCustomScript: target.json.requiresCustomScript ?? compiledBaseManifest.requiresCustomScript,
       supportedHosts: target.json.supportedHosts ?? compiledBaseManifest.supportedHosts,
       supportsThemeVariants: target.json.supportsThemeVariants ?? compiledBaseManifest.supportsThemeVariants,
-      ...(target.json.supportsFullBleed !== undefined && { supportsFullBleed: target.json.supportsFullBleed }),
       preconfiguredEntries: target.json.preconfiguredEntries ?? compiledBaseManifest.preconfiguredEntries,
       loaderConfig: {
         ...compiledBaseManifest.loaderConfig,
@@ -1159,6 +1684,11 @@ for (const domain of domains) {
         scriptResources: targetScriptResources,
       },
     };
+    if (typeof target.json.supportsFullBleed === 'boolean') {
+      composed.supportsFullBleed = target.json.supportsFullBleed;
+    } else {
+      delete (composed as Record<string, unknown>).supportsFullBleed;
+    }
     fs.writeFileSync(
       path.join(compiledManifestDir, `${target.json.id}.manifest.json`),
       JSON.stringify(composed, null, 2),
@@ -1251,6 +1781,12 @@ for (const domain of domains) {
     allPassed = false;
     continue;
   }
+  if (domain.dir === 'hb-webparts' && freshnessEvidence) {
+    if (!verifyPackagedBundleFreshness(sppkgDest, bundleName, freshnessEvidence, domain.dir)) {
+      allPassed = false;
+      continue;
+    }
+  }
   if (!inspectPackagedShellAsset(
     sppkgDest,
     bundleName,
@@ -1280,12 +1816,46 @@ for (const domain of domains) {
       `${JSON.stringify({
         domain: domain.dir,
         sppkgFile: path.basename(sppkgDest),
+        packagingRunId: freshnessEvidence?.runId ?? null,
+        sourceBundle: freshnessEvidence
+          ? {
+            fileName: baseBundleName,
+            sha256: freshnessEvidence.sourceBundleSha256,
+            mtimeIso: freshnessEvidence.sourceBundleMtimeIso,
+            sizeBytes: freshnessEvidence.sourceBundleSizeBytes,
+          }
+          : null,
+        packagedBundleName: bundleName,
         baseModuleId: hbExpectations.baseModuleId,
         emittedLocalShimFiles: hbExpectations.emittedLocalShimFiles,
         packagedShimMappings: packagedShimSummary,
       }, null, 2)}\n`,
     );
     console.log(`  ✓ Shim proof written: ${proofOutputPath}`);
+
+    if (!freshnessEvidence) {
+      console.error(`  ❌ ${domain.dir}: missing freshness evidence required for package-truth proof`);
+      allPassed = false;
+      continue;
+    }
+    const packageTruth = buildHbPackageTruthProof(
+      ROOT,
+      sppkgDest,
+      path.basename(sppkgDest),
+      freshnessEvidence.runId,
+      bundleName,
+      freshnessEvidence,
+      targetManifests,
+      generatedShimExpectations,
+    );
+    const packageTruthPath = path.join(OUTPUT_DIR, `${domain.dir}-package-truth-proof.json`);
+    fs.writeFileSync(packageTruthPath, `${JSON.stringify(packageTruth.proof, null, 2)}\n`);
+    console.log(`  ✓ Package-truth proof written: ${packageTruthPath}`);
+    if (!packageTruth.ok) {
+      console.error(`  ❌ ${domain.dir}: package-truth verification failed; see ${packageTruthPath}`);
+      allPassed = false;
+      continue;
+    }
   }
 
   const stats = fs.statSync(sppkgDest);
