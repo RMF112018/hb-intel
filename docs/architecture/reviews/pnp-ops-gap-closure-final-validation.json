@@ -1,0 +1,77 @@
+{
+  "generatedAtUtc": "2026-04-10T16:22:15Z",
+  "scope": "spfx/pnp/phase-03/prompt-05",
+  "commands": [
+    {
+      "cmd": "pnpm --filter @hbc/spfx-hb-webparts check-types",
+      "status": "pass"
+    },
+    {
+      "cmd": "pnpm --filter @hbc/spfx-hb-webparts exec vitest run --config vitest.config.ts src/webparts/pnp/pnpOpsValidation.test.ts src/webparts/pnp/pnpOpsClient.test.ts src/webparts/pnp/pnpOpsActionCatalog.test.ts",
+      "status": "pass",
+      "details": {
+        "testFiles": 3,
+        "tests": 19
+      }
+    },
+    {
+      "cmd": "npx tsx tools/build-spfx-package.ts --domain hb-webparts",
+      "status": "pass",
+      "details": {
+        "freshnessGateApplied": true,
+        "buildEnforced": true,
+        "packagingRunId": "2026-04-10T16:21:18.376Z-8c6cba4c"
+      }
+    }
+  ],
+  "artifacts": {
+    "sppkg": {
+      "path": "dist/sppkg/hb-webparts.sppkg",
+      "sizeBytes": 3174746,
+      "mtimeLocal": "2026-04-10T12:21:30Z",
+      "sha256": "7f0e30dd93e43c77ea4cc9b46a09daf2d617b8decff9ff4029b9f136a263477c"
+    },
+    "shimProof": {
+      "path": "dist/sppkg/hb-webparts-shim-proof.json",
+      "sizeBytes": 6872,
+      "mtimeLocal": "2026-04-10T12:21:30Z",
+      "sha256": "4c11076705b4c269a19b6d0b97aa042f54d75d1bfa11ffb084d197e27ae7c348"
+    },
+    "packageTruthProof": {
+      "path": "dist/sppkg/hb-webparts-package-truth-proof.json",
+      "sizeBytes": 122783,
+      "mtimeLocal": "2026-04-10T12:21:30Z",
+      "sha256": "8ca4e95bc782dd6c24e5ebe188928310627ac7cdcb5f97a0032ef255eea93a8b"
+    }
+  },
+  "archiveInspection": {
+    "expectedPnPWebPartId": "9e2dd84a-a121-4fb3-a964-f43a94abf9fd",
+    "pnPWebPartXmlPath": "1f447e99-a2c7-43e5-83d8-d2ed78ed1a96/WebPart_9e2dd84a-a121-4fb3-a964-f43a94abf9fd.xml",
+    "packagedBundle": "ClientSideAssets/hb-webparts-app-8d19b782.js",
+    "packagedPnPShim": "ClientSideAssets/shell-entry-9e2dd84a-a121-4fb3-a964-f43a94abf9fd-ea18dd16.js"
+  },
+  "proofChecks": {
+    "structuralValidity": true,
+    "freshness": true,
+    "sourcePackageSemanticAlignment": true,
+    "liveRuntimeProof": true
+  },
+  "runtimeGuardrailSignals": {
+    "shellDiagnostics": true,
+    "mountUnknownIdHandling": true,
+    "pnpToolboxVisible": true,
+    "runnerValidationHardened": true,
+    "proactiveModeWarnings": true
+  },
+  "remainingLiveGaps": [
+    "No tenant-hosted SharePoint page execution evidence in this pass",
+    "No browser console/screenshot capture from live pages",
+    "No tenant policy/CSP/network proof for runner reachability"
+  ],
+  "judgment": {
+    "staleBundleReuseBlocked": true,
+    "packageSourceDriftHarderToShip": true,
+    "packagedRuntimeAppearsCurrent": true,
+    "requiresTenantSmokeForFullConfidence": true
+  }
+}
