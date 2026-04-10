@@ -1,0 +1,14 @@
+{
+  "$comment": "Example harness config for the comprehensive People & Culture + HB Kudos test suite.",
+  "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral",
+  "lists": {
+    "peopleCultureKudos": "People Culture Kudos",
+    "kudosAuditEvents": "Kudos Audit Events",
+    "peopleCultureAnnouncements": "People Culture Announcements",
+    "peopleCultureCelebrations": "People Culture Celebrations"
+  },
+  "testPrefix": "TEST-HBI",
+  "cleanup": true,
+  "auditParity": true,
+  "docsDir": "docs/architecture/plans/MASTER/spfx/homepage/people/phase-14"
+}
