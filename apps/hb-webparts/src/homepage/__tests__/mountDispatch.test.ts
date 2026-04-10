@@ -1,4 +1,22 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import type { ReactNode } from 'react';
+import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
+import { PnpOps } from '../../webparts/pnp/PnpOps.js';
+import { ReferenceHomepageComposition } from '../ReferenceHomepageComposition.js';
+
+const { renderMock, unmountMock, createRootMock } = vi.hoisted(() => {
+  const render = vi.fn<(node: ReactNode) => void>();
+  const unmount = vi.fn();
+  const createRoot = vi.fn(() => ({
+    render,
+    unmount,
+  }));
+  return { renderMock: render, unmountMock: unmount, createRootMock: createRoot };
+});
+
+vi.mock('react-dom/client', () => ({
+  createRoot: createRootMock,
+}));
 
 /**
  * Mount/dispatch seam tests.
@@ -27,6 +45,12 @@ const EXPECTED_WEBPART_IDS = [
 ];
 
 describe('mount/dispatch seam', () => {
+  beforeEach(() => {
+    createRootMock.mockClear();
+    renderMock.mockClear();
+    unmountMock.mockClear();
+  });
+
   it('publishes mount and unmount on globalThis', () => {
     const api = (globalThis as Record<string, unknown>).__hbIntel_hbWebparts as
       | { mount: unknown; unmount: unknown }
@@ -44,6 +68,43 @@ describe('mount/dispatch seam', () => {
 
     // mount(el, spfxContext?, config?) — at least 1 param
     expect(api.mount.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('wraps the PnP branch in HbcThemeProvider with forceTheme=light', async () => {
+    const api = (globalThis as Record<string, unknown>).__hbIntel_hbWebparts as {
+      mount: (el: HTMLElement, spfxContext?: unknown, config?: unknown) => Promise<void>;
+    };
+    await api.mount({} as HTMLElement, undefined, {
+      webPartId: '9e2dd84a-a121-4fb3-a964-f43a94abf9fd',
+      webPartProperties: {},
+    });
+
+    expect(createRootMock).toHaveBeenCalledTimes(1);
+    expect(renderMock).toHaveBeenCalledTimes(1);
+    const renderedRoot = renderMock.mock.calls[0]?.[0] as {
+      type: unknown;
+      props: { forceTheme?: unknown; children?: { type?: unknown } };
+    };
+    expect(renderedRoot?.type).toBe(HbcThemeProvider);
+    expect(renderedRoot?.props?.forceTheme).toBe('light');
+    expect(renderedRoot?.props?.children?.type).toBe(PnpOps);
+  });
+
+  it('wraps the no-ID composition path in HbcThemeProvider with forceTheme=light', async () => {
+    const api = (globalThis as Record<string, unknown>).__hbIntel_hbWebparts as {
+      mount: (el: HTMLElement, spfxContext?: unknown, config?: unknown) => Promise<void>;
+    };
+    await api.mount({} as HTMLElement, undefined, {});
+
+    expect(createRootMock).toHaveBeenCalledTimes(1);
+    expect(renderMock).toHaveBeenCalledTimes(1);
+    const renderedRoot = renderMock.mock.calls[0]?.[0] as {
+      type: unknown;
+      props: { forceTheme?: unknown; children?: { type?: unknown } };
+    };
+    expect(renderedRoot?.type).toBe(HbcThemeProvider);
+    expect(renderedRoot?.props?.forceTheme).toBe('light');
+    expect(renderedRoot?.props?.children?.type).toBe(ReferenceHomepageComposition);
   });
 });
 
