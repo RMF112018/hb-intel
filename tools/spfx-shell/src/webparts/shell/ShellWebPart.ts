@@ -52,6 +52,10 @@ interface IShellWebPartProperties {
   heading?: string;
   /** Number of days before standard approved kudos age off the homepage. */
   homepageAgeOffDays?: number;
+  /** Days before pending/revision items are flagged overdue in the companion. */
+  pendingOverdueDays?: number;
+  /** Days before admin-review items are flagged overdue in the companion. */
+  adminReviewOverdueDays?: number;
 }
 
 export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
@@ -258,6 +262,25 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                       'Kudos reviewer privileges (approve, reject, request revision). ' +
                       'At least one of Admins or Reviewers must be configured for the companion to function.',
                     placeholder: 'e.g. HB Kudos Reviewers',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Overdue Thresholds',
+                groupFields: [
+                  PropertyPaneSlider('pendingOverdueDays', {
+                    label: 'Pending / revision overdue (days)',
+                    min: 1,
+                    max: 14,
+                    step: 1,
+                    value: 3,
+                  }),
+                  PropertyPaneSlider('adminReviewOverdueDays', {
+                    label: 'Admin review overdue (days)',
+                    min: 1,
+                    max: 14,
+                    step: 1,
+                    value: 2,
                   }),
                 ],
               },

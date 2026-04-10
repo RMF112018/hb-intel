@@ -3,7 +3,7 @@
   "id": "f14e59a3-4d6b-43b2-952e-ba02dea11dad",
   "alias": "HbKudosWebPart",
   "componentType": "WebPart",
-  "version": "0.2.11.0",
+  "version": "0.2.12.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
@@ -13,7 +13,7 @@
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "HB Intel" },
       "title": { "default": "HB Kudos" },
-      "description": { "default": "Premium HB Kudos recognition surface — featured spotlight, recent recognition rail, typed-recipient submission, archive browse, role-aware detail panel with audit timeline, and celebrate interaction. Phase-14 kudos/ Prompts 02-06 complete." },
+      "description": { "default": "Premium HB Kudos recognition surface — featured spotlight, recent recognition rail, typed-recipient submission, archive browse with configurable age-off, role-safe detail panel, celebrate interaction, and submitter withdraw/resubmit flows." },
       "officeFabricIconFontName": "Trophy",
       "hiddenFromToolbox": false,
       "properties": {
