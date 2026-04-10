@@ -122,6 +122,13 @@ Prompt-01 architecture and contract lock artifacts:
 - `Prompt-04_PnpOps-Remote-Runner-Setup-Guide.md`
 - `Prompt-04_PnpOps-Remote-Runner-Completion-Report.md`
 
+## Prompt-05 outputs (packaging, UX validation, closure)
+
+- `Prompt-05_PnpOps-Validation-Evidence.md`
+- `Prompt-05_PnpOps-Packaging-Proof.md`
+- `Prompt-05_PnpOps-Operator-Guide.md`
+- `Prompt-05_PnpOps-Completion-Report.md`
+
 ---
 
 ## Expected deliverables by the end of the package
