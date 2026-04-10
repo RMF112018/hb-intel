@@ -61,6 +61,7 @@ import {
   type KudosRole,
 } from '../../homepage/helpers/kudosCapabilities.js';
 import { resolveKudosRole } from '../../homepage/helpers/kudosRoleResolver.js';
+import { KudosActionButton } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import {
   deriveKudosOverdueStatus,
   findKudosReminderTargets,
@@ -322,8 +323,8 @@ function QueueRow({
           display: 'grid',
           gridTemplateColumns: selectable ? 'auto 1fr auto' : '1fr auto',
           alignItems: 'flex-start',
-          gap: 14,
-          padding: '14px 16px',
+          gap: 10,
+          padding: '10px 14px',
         }}
       >
         {selectable ? (
@@ -579,42 +580,42 @@ function DetailPanel({
               borderTop: '1px dashed rgba(229, 126, 70, 0.22)',
             }}
           >
-            <ActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" />
-            <ActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" />
+            <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" />
+            <KudosActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" />
             {capabilities.canSchedule ? (
               entry?.isScheduled
-                ? <ActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" />
-                : <ActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" />
+                ? <KudosActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" />
+                : <KudosActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canPin ? (
               entry?.isPinned
-                ? <ActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" />
-                : <ActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" />
+                ? <KudosActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" />
+                : <KudosActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canFeature ? (
               entry?.isFeatured
-                ? <ActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" />
-                : <ActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" />
+                ? <KudosActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" />
+                : <KudosActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canRemove && entry?.workflowStatus !== 'removedUnpublished' ? (
-              <ActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" />
+              <KudosActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" />
             ) : null}
             {capabilities.canRestore && entry?.workflowStatus === 'removedUnpublished' ? (
-              <ActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canFlagAdminReview && !needsAdminReview(entry) ? (
-              <ActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" />
+              <KudosActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" />
             ) : null}
             {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
-              <ActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canClaim ? (
-              <ActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canClaim ? (
-              <ActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" />
             ) : null}
-            <ActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
+            <KudosActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
           </div>
         </div>
       ) : null}
@@ -622,43 +623,7 @@ function DetailPanel({
   );
 }
 
-// SectionHeading was moved into KudosDetailPanelContent.tsx (Prompt-04).
-
-function ActionButton({
-  label,
-  onClick,
-  disabled,
-  tone,
-}: {
-  label: string;
-  onClick: () => void;
-  disabled: boolean;
-  tone: 'info' | 'warning' | 'danger';
-}): React.JSX.Element {
-  const toneColor =
-    tone === 'danger' ? '#c4314b' : tone === 'warning' ? '#c26434' : '#225391';
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        padding: '8px 14px',
-        borderRadius: 8,
-        border: `1.5px solid ${toneColor}`,
-        background: disabled ? 'rgba(128, 128, 128, 0.08)' : '#ffffff',
-        color: disabled ? 'rgba(26, 19, 16, 0.4)' : toneColor,
-        fontSize: '0.75rem',
-        fontWeight: 800,
-        letterSpacing: '0.02em',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'inherit',
-      }}
-    >
-      {label}
-    </button>
-  );
-}
+// ActionButton promoted to shared KudosGovernancePrimitives.
 
 // ---------------------------------------------------------------------------
 // Main webpart

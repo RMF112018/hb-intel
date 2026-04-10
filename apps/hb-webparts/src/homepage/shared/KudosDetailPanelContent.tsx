@@ -1,23 +1,13 @@
 /**
  * KudosDetailPanelContent — shared role-aware detail panel content.
  *
- * Phase-14 kudos/ Prompt-04. Renders the recognition + governance
- * sections of the detail panel for both the employee-facing HbKudos
- * webpart and the HR approval companion. The consumer supplies the
- * flyout shell (typically `HbcKudosComposerFlyout`); this component
- * only renders the body content.
+ * Renders recognition + governance sections for both the employee-facing
+ * HbKudos webpart and the HR approval companion. The consumer supplies
+ * the flyout shell; this component only renders the body content.
  *
  * Role safety:
- *   - `role='viewer'` renders recognition-safe content only.
- *   - `role='reviewer'|'admin'` additionally renders governance
- *     sections: rejection reason, revision guidance, admin-review
- *     metadata, moderator notes, prominence failure, removal reason,
- *     scheduling metadata, and the full audit timeline.
- *   - internalNote on audit events is suppressed for viewer.
- *
- * Visual grammar: composes existing shared primitives from
- * `@hbc/ui-kit/homepage`. No imports from `@hbc/ui-kit` bare,
- * `/primitives`, `/app-shell`, or `/fluent`.
+ *   - `role='viewer'` → recognition-safe content only.
+ *   - `role='reviewer'|'admin'` → full governance sections + audit timeline.
  */
 import * as React from 'react';
 import {
@@ -33,6 +23,11 @@ import {
 } from '../webparts/kudosContracts.js';
 import type { KudosAuditTimelineEntry } from '../data/kudosGovernanceWriter.js';
 import type { KudosRole } from '../helpers/kudosCapabilities.js';
+import {
+  KudosSectionHeading,
+  KudosInfoRow,
+  KudosAuditTimelineBlock,
+} from './KudosGovernancePrimitives.js';
 
 export interface KudosDetailPanelContentProps {
   entry: KudosEntry;
@@ -48,32 +43,6 @@ function chipVariant(tone: string): 'success' | 'warning' | 'critical' | 'info' 
   return 'info';
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return (
-    <div
-      style={{
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: 'rgba(26, 19, 16, 0.55)',
-        marginBottom: 8,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value?: string }): React.JSX.Element | null {
-  if (!value?.trim()) return null;
-  return (
-    <div style={{ fontSize: '0.8125rem', lineHeight: 1.55, color: 'rgba(26, 19, 16, 0.72)', marginBottom: 6 }}>
-      <span style={{ fontWeight: 700, color: 'rgba(26, 19, 16, 0.62)' }}>{label}:</span> {value}
-    </div>
-  );
-}
-
 export function KudosDetailPanelContent({
   entry,
   role,
@@ -85,28 +54,28 @@ export function KudosDetailPanelContent({
   const isGovernance = role === 'admin' || role === 'reviewer';
   const isPublic = entry.workflowStatus === 'approved' && entry.homepageEnabled === true;
 
+  const timelineFallback = entry.approvedDate
+    ? `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}\n${mapAuditEventTypeLabel('approve')} · ${new Date(entry.approvedDate).toLocaleString()}`
+    : `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}`;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Status chip */}
       {chip ? (
         <div>
-          <HbcStatusBadge
-            variant={chipVariant(chip.tone)}
-            size="small"
-            label={chip.label}
-          />
+          <HbcStatusBadge variant={chipVariant(chip.tone)} size="small" label={chip.label} />
         </div>
       ) : null}
 
       {/* Recognition content */}
-      <p style={{ margin: 0, fontSize: '0.9375rem', lineHeight: 1.6, color: 'rgba(26, 19, 16, 0.8)' }}>
+      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.6, color: 'rgba(26, 19, 16, 0.8)' }}>
         {entry.excerpt}
       </p>
 
       {entry.details && (isPublic || isGovernance) ? (
         <div>
-          <SectionHeading>Additional details</SectionHeading>
-          <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.6, color: 'rgba(26, 19, 16, 0.68)' }}>
+          <KudosSectionHeading>Additional details</KudosSectionHeading>
+          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.6, color: 'rgba(26, 19, 16, 0.68)' }}>
             {entry.details}
           </p>
         </div>
@@ -115,7 +84,7 @@ export function KudosDetailPanelContent({
       {/* Recipients */}
       {summary.total > 0 ? (
         <div>
-          <SectionHeading>Recipients</SectionHeading>
+          <KudosSectionHeading>Recipients</KudosSectionHeading>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <HbcAvatarStack
               people={entry.recipients.slice(0, 6).map((r) => ({
@@ -133,31 +102,26 @@ export function KudosDetailPanelContent({
         </div>
       ) : null}
 
-      {/* Prominence / scheduling (governance + employee can see basic flags) */}
+      {/* Prominence / scheduling */}
       {(entry.isScheduled || entry.isPinned || entry.isFeatured || entry.prominenceFailureAt) ? (
         <div>
-          <SectionHeading>Prominence &amp; scheduling</SectionHeading>
+          <KudosSectionHeading>Prominence &amp; scheduling</KudosSectionHeading>
           {entry.isScheduled && entry.scheduledPublishAt ? (
-            <InfoRow
-              label="Scheduled for"
-              value={new Date(entry.scheduledPublishAt).toLocaleString()}
-            />
+            <KudosInfoRow label="Scheduled for" value={new Date(entry.scheduledPublishAt).toLocaleString()} />
           ) : null}
           {entry.isPinned ? (
-            <InfoRow label="Pinned" value={`Order ${entry.pinOrder ?? '—'}`} />
+            <KudosInfoRow label="Pinned" value={`Order ${entry.pinOrder ?? '—'}`} />
           ) : null}
           {entry.isFeatured ? (
-            <InfoRow
+            <KudosInfoRow
               label="Featured"
-              value={entry.featuredExpiresAt
-                ? `Expires ${new Date(entry.featuredExpiresAt).toLocaleDateString()}`
-                : 'Active'}
+              value={entry.featuredExpiresAt ? `Expires ${new Date(entry.featuredExpiresAt).toLocaleDateString()}` : 'Active'}
             />
           ) : null}
           {isGovernance && entry.prominenceFailureAt ? (
             <>
-              <InfoRow label="Prominence failure" value={new Date(entry.prominenceFailureAt).toLocaleString()} />
-              <InfoRow label="Failure reason" value={entry.prominenceFailureReason} />
+              <KudosInfoRow label="Prominence failure" value={new Date(entry.prominenceFailureAt).toLocaleString()} />
+              <KudosInfoRow label="Failure reason" value={entry.prominenceFailureReason} />
             </>
           ) : null}
         </div>
@@ -168,12 +132,12 @@ export function KudosDetailPanelContent({
         <>
           {entry.rejectionReason || entry.revisionGuidance || entry.moderatorNotes || entry.adminReviewReason || entry.removedReason ? (
             <div>
-              <SectionHeading>Governance metadata</SectionHeading>
-              <InfoRow label="Rejection reason" value={entry.rejectionReason} />
-              <InfoRow label="Revision guidance" value={entry.revisionGuidance} />
-              <InfoRow label="Admin review reason" value={entry.adminReviewReason} />
-              <InfoRow label="Removal reason" value={entry.removedReason} />
-              <InfoRow label="Moderator notes" value={entry.moderatorNotes} />
+              <KudosSectionHeading>Governance metadata</KudosSectionHeading>
+              <KudosInfoRow label="Rejection reason" value={entry.rejectionReason} />
+              <KudosInfoRow label="Revision guidance" value={entry.revisionGuidance} />
+              <KudosInfoRow label="Admin review reason" value={entry.adminReviewReason} />
+              <KudosInfoRow label="Removal reason" value={entry.removedReason} />
+              <KudosInfoRow label="Moderator notes" value={entry.moderatorNotes} />
             </div>
           ) : null}
         </>
@@ -183,7 +147,7 @@ export function KudosDetailPanelContent({
       {!isPublic && !isGovernance ? (
         <div
           style={{
-            padding: '12px 14px',
+            padding: '10px 12px',
             borderRadius: 10,
             background: 'rgba(34, 83, 145, 0.06)',
             border: '1px solid rgba(34, 83, 145, 0.14)',
@@ -199,59 +163,15 @@ export function KudosDetailPanelContent({
 
       {/* Audit timeline */}
       <div>
-        <SectionHeading>Audit timeline</SectionHeading>
-        {timelineLoading ? (
-          <div style={{ fontSize: '0.75rem', color: 'rgba(26, 19, 16, 0.5)' }}>Loading timeline…</div>
-        ) : timeline && timeline.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {timeline.map((evt) => {
-              const tone = mapAuditEventTypeChipTone(evt.eventType);
-              return (
-                <div
-                  key={evt.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 10,
-                    fontSize: '0.75rem',
-                    lineHeight: 1.5,
-                    paddingBottom: 8,
-                    borderBottom: '1px solid rgba(229, 126, 70, 0.10)',
-                  }}
-                >
-                  <HbcStatusBadge
-                    variant={chipVariant(tone)}
-                    size="small"
-                    label={mapAuditEventTypeLabel(evt.eventType)}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ color: 'rgba(26, 19, 16, 0.62)', fontWeight: 600 }}>
-                      {evt.actorDisplayName ?? 'System'} · {new Date(evt.eventAt).toLocaleString()}
-                    </div>
-                    {evt.publicNote ? (
-                      <div style={{ color: 'rgba(26, 19, 16, 0.58)', marginTop: 2 }}>{evt.publicNote}</div>
-                    ) : null}
-                    {isGovernance && evt.internalNote ? (
-                      <div style={{ color: 'rgba(196, 49, 75, 0.72)', marginTop: 2, fontStyle: 'italic' }}>
-                        Internal: {evt.internalNote}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div style={{ fontSize: '0.75rem', color: 'rgba(26, 19, 16, 0.5)' }}>
-            {mapAuditEventTypeLabel('submit')} · {new Date(entry.submittedDate).toLocaleString()}
-            {entry.approvedDate ? (
-              <>
-                <br />
-                {mapAuditEventTypeLabel('approve')} · {new Date(entry.approvedDate).toLocaleString()}
-              </>
-            ) : null}
-          </div>
-        )}
+        <KudosSectionHeading>Audit timeline</KudosSectionHeading>
+        <KudosAuditTimelineBlock
+          events={timeline ?? []}
+          showInternalNotes={isGovernance}
+          loading={timelineLoading}
+          fallbackText={timelineFallback}
+          mapLabel={(t) => mapAuditEventTypeLabel(t as Parameters<typeof mapAuditEventTypeLabel>[0])}
+          mapTone={(t) => mapAuditEventTypeChipTone(t as Parameters<typeof mapAuditEventTypeChipTone>[0])}
+        />
       </div>
     </div>
   );

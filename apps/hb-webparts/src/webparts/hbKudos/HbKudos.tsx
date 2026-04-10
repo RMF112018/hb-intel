@@ -213,13 +213,14 @@ function ArchiveList({
             value={searchText}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search recognition…"
+            aria-label="Search recognition archive"
             style={{
               padding: '6px 10px',
               fontSize: '0.8125rem',
               borderRadius: 8,
               border: '1px solid rgba(229, 126, 70, 0.28)',
               outline: 'none',
-              minWidth: 220,
+              minWidth: 200,
             }}
           />
         </label>
@@ -231,7 +232,7 @@ function ArchiveList({
           description="Approved kudos that cycle off the homepage will appear here."
         />
       ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 10 }}>
           {filtered.map((entry) => {
             const summary = buildKudosRecipientSummary(entry.recipients);
             const workflowChip = entry.workflowStatus
@@ -249,20 +250,13 @@ function ArchiveList({
                     textAlign: 'left',
                     background: 'transparent',
                     border: 'none',
-                    padding: '16px 18px',
+                    padding: '12px 14px',
                     cursor: 'pointer',
                     color: 'inherit',
                     font: 'inherit',
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      marginBottom: 8,
-                    }}
-                  >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                     {workflowChip ? (
                       <HbcStatusBadge
                         variant={
@@ -280,7 +274,7 @@ function ArchiveList({
                     ) : null}
                     <span
                       style={{
-                        fontSize: '0.6875rem',
+                        fontSize: '0.625rem',
                         fontWeight: 700,
                         color: 'rgba(26, 19, 16, 0.45)',
                         textTransform: 'uppercase',
@@ -296,8 +290,8 @@ function ArchiveList({
                   </div>
                   <h4
                     style={{
-                      margin: '0 0 6px',
-                      fontSize: '1rem',
+                      margin: '0 0 4px',
+                      fontSize: '0.9375rem',
                       fontWeight: 800,
                       letterSpacing: '-0.015em',
                       color: '#1a1310',
@@ -307,9 +301,9 @@ function ArchiveList({
                   </h4>
                   <p
                     style={{
-                      margin: '0 0 10px',
+                      margin: '0 0 8px',
                       fontSize: '0.8125rem',
-                      lineHeight: 1.55,
+                      lineHeight: 1.5,
                       color: 'rgba(26, 19, 16, 0.68)',
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -320,7 +314,7 @@ function ArchiveList({
                     {entry.excerpt}
                   </p>
                   {entry.recipients.length > 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <HbcAvatarStack
                         people={entry.recipients.slice(0, 4).map((r) => ({
                           id: r.id,
@@ -330,13 +324,7 @@ function ArchiveList({
                         size="sm"
                         max={4}
                       />
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: 'rgba(26, 19, 16, 0.58)',
-                          fontWeight: 600,
-                        }}
-                      >
+                      <span style={{ fontSize: '0.6875rem', color: 'rgba(26, 19, 16, 0.58)', fontWeight: 600 }}>
                         {summary.label}
                       </span>
                     </div>
