@@ -74,6 +74,11 @@ import {
   type KudosEntry,
 } from '../../homepage/webparts/kudosContracts.js';
 import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
+import {
+  KUDOS_GOV_TOKENS,
+  KudosActionButton,
+  KudosGovernanceInputDialog,
+} from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { submitKudosGovernanceAction } from '../../homepage/data/kudosGovernanceWriter.js';
 import { getSiteUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 
@@ -183,7 +188,7 @@ function ArchiveList({
   }, [entries, searchText]);
 
   return (
-    <section aria-label="HB Kudos archive" data-hbc-webpart-section="hb-kudos-archive">
+    <section id="hb-kudos-archive" aria-label="HB Kudos archive" data-hbc-webpart-section="hb-kudos-archive">
       <div
         style={{
           display: 'flex',
@@ -200,7 +205,7 @@ function ArchiveList({
             fontWeight: 800,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color: 'rgba(26, 19, 16, 0.62)',
+            color: KUDOS_GOV_TOKENS.textTertiary,
           }}
         >
           Recognition archive
@@ -208,7 +213,7 @@ function ArchiveList({
         <label
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.75rem' }}
         >
-          <span style={{ color: 'rgba(26, 19, 16, 0.55)', fontWeight: 600 }}>Search</span>
+          <span style={{ color: KUDOS_GOV_TOKENS.textMuted, fontWeight: 600 }}>Search</span>
           <input
             type="search"
             value={searchText}
@@ -219,7 +224,7 @@ function ArchiveList({
               padding: '6px 10px',
               fontSize: '0.8125rem',
               borderRadius: 8,
-              border: '1px solid rgba(229, 126, 70, 0.28)',
+              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
               outline: 'none',
               minWidth: 200,
             }}
@@ -277,7 +282,7 @@ function ArchiveList({
                       style={{
                         fontSize: '0.625rem',
                         fontWeight: 700,
-                        color: 'rgba(26, 19, 16, 0.45)',
+                        color: KUDOS_GOV_TOKENS.textCaption,
                         textTransform: 'uppercase',
                         letterSpacing: '0.08em',
                       }}
@@ -295,7 +300,7 @@ function ArchiveList({
                       fontSize: '0.9375rem',
                       fontWeight: 800,
                       letterSpacing: '-0.015em',
-                      color: '#1a1310',
+                      color: KUDOS_GOV_TOKENS.textPrimary,
                     }}
                   >
                     {entry.headline}
@@ -305,7 +310,7 @@ function ArchiveList({
                       margin: '0 0 8px',
                       fontSize: '0.8125rem',
                       lineHeight: 1.5,
-                      color: 'rgba(26, 19, 16, 0.68)',
+                      color: KUDOS_GOV_TOKENS.textSecondary,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
@@ -325,7 +330,7 @@ function ArchiveList({
                         size="sm"
                         max={4}
                       />
-                      <span style={{ fontSize: '0.6875rem', color: 'rgba(26, 19, 16, 0.58)', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.6875rem', color: KUDOS_GOV_TOKENS.textFaint, fontWeight: 600 }}>
                         {summary.label}
                       </span>
                     </div>
@@ -369,8 +374,6 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
   // receive internal workflow history per Decision Lock §103-107.
   // The detail panel renders a reduced submission-info block instead.
 
-  const [dispatching, setDispatching] = React.useState(false);
-
   return (
     <HbcKudosComposerFlyout
       open={Boolean(entry)}
@@ -400,48 +403,14 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
                 flexWrap: 'wrap',
                 gap: 8,
                 paddingTop: 6,
-                borderTop: '1px dashed rgba(229, 126, 70, 0.22)',
+                borderTop: `1px dashed ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
               }}
             >
               {canResubmit && onResubmit ? (
-                <button
-                  type="button"
-                  disabled={dispatching}
-                  onClick={() => { setDispatching(true); onResubmit(); setDispatching(false); }}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #225391',
-                    background: '#225391',
-                    color: '#fff',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  Resubmit for review
-                </button>
+                <KudosActionButton label="Resubmit for review" onClick={onResubmit} disabled={false} tone="info" />
               ) : null}
               {canWithdraw && onWithdraw ? (
-                <button
-                  type="button"
-                  disabled={dispatching}
-                  onClick={() => { setDispatching(true); onWithdraw(); setDispatching(false); }}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid rgba(196, 49, 75, 0.55)',
-                    background: 'transparent',
-                    color: '#c4314b',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  Withdraw
-                </button>
+                <KudosActionButton label="Withdraw" onClick={onWithdraw} disabled={false} tone="danger" />
               ) : null}
             </div>
           ) : null}
@@ -536,6 +505,64 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
 
   const [archiveSearch, setArchiveSearch] = React.useState('');
 
+  // Dialog state for submitter actions (replaces window.prompt/confirm).
+  const [submitterDialog, setSubmitterDialog] = React.useState<{
+    action: 'withdraw' | 'resubmitHeadline' | 'resubmitExcerpt';
+    title: string;
+    description?: string;
+    placeholder?: string;
+    defaultValue?: string;
+    confirmLabel?: string;
+    allowEmpty?: boolean;
+  } | null>(null);
+  const [pendingResubmitHeadline, setPendingResubmitHeadline] = React.useState<string | undefined>();
+
+  const handleSubmitterDialogConfirm = React.useCallback(
+    (value: string) => {
+      if (!detailEntry || !submitterDialog) return;
+      const siteUrl = getSiteUrl();
+      if (!siteUrl) return;
+
+      if (submitterDialog.action === 'withdraw') {
+        setSubmitterDialog(null);
+        void submitKudosGovernanceAction(
+          siteUrl,
+          { kind: 'withdraw', kudosId: detailEntry.id },
+          { actorEmail: identity?.email },
+        ).then((result) => { if (result.ok) setDetailEntry(undefined); });
+        return;
+      }
+
+      if (submitterDialog.action === 'resubmitHeadline') {
+        setPendingResubmitHeadline(value);
+        setSubmitterDialog({
+          action: 'resubmitExcerpt',
+          title: 'Edit excerpt',
+          description: 'Update the recognition excerpt before resubmitting.',
+          placeholder: 'Enter updated excerpt…',
+          defaultValue: detailEntry.excerpt ?? '',
+          confirmLabel: 'Resubmit',
+        });
+        return;
+      }
+
+      if (submitterDialog.action === 'resubmitExcerpt') {
+        setSubmitterDialog(null);
+        const hl = (pendingResubmitHeadline ?? '').trim();
+        const updatedHeadline = hl && hl !== (detailEntry.headline ?? '') ? hl : undefined;
+        const ex = value.trim();
+        const updatedExcerpt = ex && ex !== (detailEntry.excerpt ?? '') ? ex : undefined;
+        setPendingResubmitHeadline(undefined);
+        void submitKudosGovernanceAction(
+          siteUrl,
+          { kind: 'resubmit', kudosId: detailEntry.id, updatedHeadline, updatedExcerpt },
+          { actorEmail: identity?.email },
+        ).then((result) => { if (result.ok) setDetailEntry(undefined); });
+      }
+    },
+    [detailEntry, submitterDialog, pendingResubmitHeadline, identity?.email],
+  );
+
   if (isLoading) {
     return (
       <div
@@ -586,7 +613,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         model={surfaceModel}
         onGiveKudos={composerActions.open}
         viewAllHref="#hb-kudos-archive"
-        celebrateHref="#hb-kudos-celebrate"
+        celebrateHref={undefined}
         heroEyebrow="HB Kudos"
         heroSubcaption="Signature recognition across the company"
         variant="people-culture-homepage"
@@ -651,37 +678,36 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
           );
         } : undefined}
         onWithdraw={detailEntry ? () => {
-          const siteUrl = getSiteUrl();
-          if (!siteUrl) return;
-          // eslint-disable-next-line no-alert
-          if (!window.confirm('Withdraw this recognition? This action is final and cannot be undone.')) return;
-          void submitKudosGovernanceAction(
-            siteUrl,
-            { kind: 'withdraw', kudosId: detailEntry.id },
-            { actorEmail: identity?.email },
-          ).then((result) => {
-            if (result.ok) setDetailEntry(undefined);
+          setSubmitterDialog({
+            action: 'withdraw',
+            title: 'Withdraw recognition',
+            description: 'This action is final and cannot be undone. The recognition will be permanently withdrawn from review.',
+            confirmLabel: 'Withdraw',
+            allowEmpty: true,
           });
         } : undefined}
         onResubmit={detailEntry ? () => {
-          const siteUrl = getSiteUrl();
-          if (!siteUrl) return;
-          // eslint-disable-next-line no-alert
-          const headline = window.prompt('Updated headline (leave blank to keep current)?', detailEntry.headline ?? '');
-          if (headline === null) return;
-          // eslint-disable-next-line no-alert
-          const excerpt = window.prompt('Updated excerpt (leave blank to keep current)?', detailEntry.excerpt ?? '');
-          if (excerpt === null) return;
-          const updatedHeadline = headline.trim() && headline.trim() !== (detailEntry.headline ?? '') ? headline.trim() : undefined;
-          const updatedExcerpt = excerpt.trim() && excerpt.trim() !== (detailEntry.excerpt ?? '') ? excerpt.trim() : undefined;
-          void submitKudosGovernanceAction(
-            siteUrl,
-            { kind: 'resubmit', kudosId: detailEntry.id, updatedHeadline, updatedExcerpt },
-            { actorEmail: identity?.email },
-          ).then((result) => {
-            if (result.ok) setDetailEntry(undefined);
+          setSubmitterDialog({
+            action: 'resubmitHeadline',
+            title: 'Edit headline',
+            description: 'Update the recognition headline before resubmitting for review.',
+            placeholder: 'Enter updated headline…',
+            defaultValue: detailEntry.headline ?? '',
+            confirmLabel: 'Next: excerpt',
           });
         } : undefined}
+      />
+
+      <KudosGovernanceInputDialog
+        open={submitterDialog !== null}
+        onClose={() => { setSubmitterDialog(null); setPendingResubmitHeadline(undefined); }}
+        onConfirm={handleSubmitterDialogConfirm}
+        title={submitterDialog?.title ?? ''}
+        description={submitterDialog?.description}
+        placeholder={submitterDialog?.placeholder}
+        defaultValue={submitterDialog?.defaultValue}
+        confirmLabel={submitterDialog?.confirmLabel}
+        allowEmpty={submitterDialog?.allowEmpty}
       />
     </section>
   );
