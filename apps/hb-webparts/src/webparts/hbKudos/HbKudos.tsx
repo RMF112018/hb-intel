@@ -1,47 +1,33 @@
 /**
  * HbKudos — Employee-facing HB Kudos recognition webpart.
  *
- * Phase-14 kudos/ Prompt-02 — HB Kudos Employee Experience.
- *
- * This replaces the Phase-14 Prompt-01 structural scaffold with a real
- * runtime that delivers the signature HB Kudos experience:
+ * Premium homepage-hosted recognition surface delivering:
  *
  *   - featured spotlight + recent recognition rail via
- *     `HbcPeopleCultureSurface` (kudos-only configuration — no
- *     announcements or celebrations; those live on the sibling
- *     People & Culture public webpart),
- *   - typed-recipient submission flow via the extended
- *     `HbcKudosComposer*` shared primitives (Prompt-02 extension),
- *   - archive / browse experience for previously-approved kudos,
- *   - role-aware detail panel for the full recognition content,
- *     recipients, and submitter.
+ *     `HbcPeopleCultureSurface`,
+ *   - typed-recipient submission flow via `HbcKudosComposer*` shared
+ *     primitives with any-bucket validation (individual, team,
+ *     department, project group, or mixed),
+ *   - archive browse with configurable age-off for previously-approved
+ *     kudos,
+ *   - role-safe detail panel (Decision Lock §99-107): viewers see
+ *     recognition content, recipient detail, and high-level status
+ *     only — no audit timeline, governance metadata, or prominence
+ *     internals,
+ *   - submitter withdraw and resubmit flows via dialog-driven
+ *     interactions (no window.prompt).
  *
- * The SharePoint data access, typed-recipient resolution, and runtime
- * wiring remain local to this webpart. All durable visual grammar is
- * delivered through `@hbc/ui-kit/homepage` — the homepage-entry-point
- * rule is strictly enforced (no imports from `@hbc/ui-kit` bare,
- * `/primitives`, `/app-shell`, or `/fluent`).
+ * All visual grammar delivered through `@hbc/ui-kit/homepage` and
+ * shared governance primitives from `KudosGovernancePrimitives.tsx`.
  *
- * Visibility rules (Phase-14 Prompt-02):
- *
- *   - Homepage spotlight + rail surfaces only items that satisfy the
- *     `isPubliclyVisible` predicate from `kudosContracts.ts`
- *     (`workflowStatus === 'approved' && homepageEnabled === true`).
- *   - Archive browse surfaces items that satisfy `isArchiveEligible`
- *     (`wasEverPublished === true && !isRemovedFromPublicView`). This
- *     lets viewers find previously-live recognition even after it has
- *     cycled off the homepage.
- *   - The detail panel is role-safe: no moderation notes, rejection
- *     reasons, or internal-only governance data is exposed to
- *     ordinary viewers. When an item is no longer publicly visible,
- *     the detail panel renders a reduced "associated-only" view.
+ * Visibility rules:
+ *   - Public: `isPubliclyVisible` + `hasAgedOff` predicate with
+ *     configurable `homepageAgeOffDays` property.
+ *   - Archive: `isArchiveEligible` + `isAssociatedVisible` for
+ *     submitter/recipient access to no-longer-public items.
  *
  * Governing sources:
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Plan-Summary.md`
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Schema-Reference-Appendix.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-00-Authority-and-Scope-Lock-Report.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-02-HB-Kudos-Employee-Experience.md`
  */
 import * as React from 'react';
 import {
@@ -475,9 +461,9 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
           // Age-off: standard approved items expire after the configured
           // window. Pinned and featured items are exempt.
           if (hasAgedOff(entry, ageOffDays)) return false;
-          // Featured expiration: treat expired featured items as standard
-          // for public rendering. They remain visible unless also aged off.
-          // (hasFeaturedExpired affects display styling, not visibility here.)
+          // Featured items with expired dates remain visible unless aged
+          // off. Lazy demotion is handled by the companion governance
+          // surface, not the public view.
           return true;
         }
         return entry.status === 'approved';

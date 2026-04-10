@@ -301,21 +301,21 @@ function buildPayload(
  * enters a pending state: HomepageEnabled=false, no approval dates,
  * no publish window. Moderators complete the review workflow.
  *
- * ### Recipient field limitation
+ * ### Recipient resolution
  *
- * The current composer accepts recipient names as free text (comma-
- * separated). SharePoint Person (multi) fields require resolved user
- * IDs, which in turn require a live people-picker or ensureUser lookup
- * per name. Since the current form does not collect email addresses or
- * user principals, IndividualRecipients cannot be populated as Person
- * values in this pass.
+ * When the typed composer mode is used (`recipientsMode: 'typed'`),
+ * individual email addresses are resolved to SharePoint user IDs via
+ * `resolveTypedRecipientBuckets` / `ensureUser`. Non-individual
+ * buckets (team, department, project group) are written as taxonomy
+ * label strings. Any non-empty combination of recipient buckets is
+ * valid per Decision Lock §Recipient Model.
  *
- * Recipient names are captured in the Headline and Excerpt fields as
- * authored by the submitter. Moderators assign proper Person field
- * values during the review workflow.
+ * The legacy text-mode path (`recipientNames` string) is retained for
+ * backward compatibility with older callers but does not resolve
+ * Person field values.
  *
- * A future pass with a SharePoint people-picker component will enable
- * direct Person field population.
+ * Invalidates the shared People & Culture cache after successful
+ * submission so consumers refetch fresh data.
  */
 export async function submitKudosDraft(
   draft: KudosComposerDraft,

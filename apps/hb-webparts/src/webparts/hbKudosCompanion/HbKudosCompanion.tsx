@@ -1,45 +1,40 @@
 /**
  * HbKudosCompanion — HR Approval Companion webpart.
  *
- * Phase-14 kudos/ Prompt-03 — HR Approval Companion.
- *
  * Premium homepage-hosted governance workspace for HB Kudos
- * moderation. This webpart is distinct from the employee-facing
- * `HbKudos` surface (Prompt-02): it is HR / admin only, renders a
- * filterable queue of kudos entries across the full 7-state
- * `KudosWorkflowStatus` union, and dispatches typed governance
- * actions through `submitKudosGovernanceAction` with matching
- * writes to `Kudos Audit Events`.
+ * moderation. HR / admin only — renders a filterable queue of kudos
+ * entries across the full `KudosWorkflowStatus` union and dispatches
+ * typed governance actions through `submitKudosGovernanceAction` with
+ * matching writes to `Kudos Audit Events`.
  *
  * Architecture:
- *   - Data read: `usePeopleCultureData` (shared with the employee
- *     webpart) returns the current kudos snapshot.
- *   - State: a reducer-light local filter state over
- *     `KudosQueueFilterState` (tabs + ownership + search + quick
- *     toggles + bulk selection).
- *   - Write: `submitKudosGovernanceAction` from
- *     `data/kudosGovernanceWriter.ts`. Each action sends one PATCH
- *     + one audit event. Writer-level authorization verifies the
- *     caller's role before any network call.
- *   - Role gating: `resolveKudosRole` from `helpers/kudosRoleResolver.ts`
- *     queries SharePoint group membership at mount time. Falls back to
- *     `simulatedRole` only when siteUrl is unavailable (local dev).
- *   - Detail panel: reuses `HbcKudosComposerFlyout` as the shell and
- *     composes existing shared primitives inside.
+ *   - Data: `usePeopleCultureData` with post-mutation cache
+ *     invalidation via `invalidatePeopleCultureCache`.
+ *   - Filter: reducer-light local state over `KudosQueueFilterState`
+ *     (filter buttons + ownership + search + toggle chips + bulk
+ *     selection).
+ *   - Write: `submitKudosGovernanceAction` — one PATCH + one audit
+ *     event per action. Writer-level authorization verifies role
+ *     before any network call.
+ *   - Role: `resolveKudosRole` queries SharePoint group membership;
+ *     configurable via property pane (kudosAdminsGroup,
+ *     kudosReviewersGroup).
+ *   - Dialog: all governance inputs use `KudosGovernanceInputDialog`
+ *     (no window.prompt). Actions dispatched via two-phase state
+ *     pattern (open dialog → confirm → dispatch).
+ *   - Detail panel: `HbcKudosComposerFlyout` shell + shared
+ *     `KudosDetailPanelContent` with full audit timeline for
+ *     governance roles.
  *
- * Shared-primitive discipline: this webpart follows the same local
- * composition stance the employee webpart (`HbKudos.tsx`) landed with
- * in Prompt-02. All UI is built from primitives exported via
- * `@hbc/ui-kit/homepage` — no imports from `@hbc/ui-kit` bare,
- * `/primitives`, `/app-shell`, or `/fluent`. Promotion of the queue
- * row / governance toolbar / audit timeline as dedicated shared
- * primitives is deliberately deferred to Prompt-06 closure once
- * overlap between the employee + HR consumers can be audited.
+ * Shared-primitive discipline: UI composed from `@hbc/ui-kit/homepage`
+ * primitives + shared governance primitives in
+ * `KudosGovernancePrimitives.tsx` (tokenized colors, tab buttons,
+ * toggle chips, toolbar labels, error alerts, input dialog, action
+ * buttons, audit timeline). Queue rows remain local — too coupled to
+ * companion-specific data shapes for premature promotion.
  *
  * Governing sources:
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-00-Authority-and-Scope-Lock-Report.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-03-HR-Approval-Companion-Webpart.md`
  */
 import * as React from 'react';
 import {

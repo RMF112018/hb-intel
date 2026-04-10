@@ -712,6 +712,10 @@ export function hasAgedOff(
  * `true` when a featured item's expiration date has passed. These items
  * should be treated as standard approved in public views — the actual
  * SharePoint field demotion happens lazily when governance surfaces load.
+ *
+ * Intentionally retained: not yet consumed by runtime filtering but
+ * needed when the companion implements lazy featured-expiration
+ * demotion on governance surface load.
  */
 export function hasFeaturedExpired(
   entry: Pick<KudosEntry, 'isFeatured'> & { featuredExpiresAt?: string },

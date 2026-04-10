@@ -1,12 +1,11 @@
 /**
- * HB Kudos notification builder — Phase-14 kudos/ Prompt-05.
+ * HB Kudos notification builder.
  *
  * Pure helper that determines when and whom to notify for kudos
- * governance events. Does NOT dispatch emails/Teams messages — it
- * only builds a typed notification intent that the caller can
- * persist to a queue or log. Delivery infrastructure is out of
- * scope for Phase-14 (the patterns are documented so a future
- * integration prompt can plug in a delivery channel).
+ * governance events. Builds typed notification intents that the
+ * governance writer dispatches via `kudosNotificationDispatch.ts`
+ * (currently console-logs and session-queues intents; real delivery
+ * channels like email/Teams are not yet integrated).
  *
  * Notification rules (Decision-Lock-Appendix + Prompt-05):
  *
