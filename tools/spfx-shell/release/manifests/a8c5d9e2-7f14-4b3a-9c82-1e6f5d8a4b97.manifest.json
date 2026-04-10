@@ -20,7 +20,7 @@
         "default": "HB Kudos Approval Companion"
       },
       "description": {
-        "default": "HR moderation workspace for HB Kudos — queue workspace with approval, rejection, revision request, admin-review flagging, detail panel, and audit timeline. Phase-14 kudos/ Prompt-03 first real runtime."
+        "default": "HR moderation workspace for HB Kudos — queue with all 19 governance actions, scheduling, prominence, claim/reassign, shared role-aware detail panel with full audit timeline, bulk approve, overdue/reminder helpers, and notification intents. Phase-14 kudos/ Prompts 03-06 complete."
       },
       "officeFabricIconFontName": "ShieldAlert",
       "hiddenFromToolbox": false,
