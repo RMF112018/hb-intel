@@ -185,6 +185,9 @@ export type KudosAuditEventType =
   | 'reject'
   | 'revisionRequested'
   | 'reopen'
+  | 'resubmit'
+  | 'withdraw'
+  | 'updateContent'
   | 'remove'
   | 'restore'
   | 'flagAdminReview'
@@ -205,6 +208,9 @@ export const KUDOS_AUDIT_EVENT_TYPES: readonly KudosAuditEventType[] = [
   'reject',
   'revisionRequested',
   'reopen',
+  'resubmit',
+  'withdraw',
+  'updateContent',
   'remove',
   'restore',
   'flagAdminReview',
@@ -299,6 +305,11 @@ export interface KudosWithdrawPatch extends KudosPatchBase {
   kind: 'withdraw';
 }
 
+export interface KudosReopenPatch extends KudosPatchBase {
+  kind: 'reopen';
+  targetStatus: 'pending' | 'revisionRequested';
+}
+
 export interface KudosRemovePatch extends KudosPatchBase {
   kind: 'remove';
   removedReason: string;
@@ -376,6 +387,7 @@ export type KudosPatch =
   | KudosRevisionRequestPatch
   | KudosResubmitPatch
   | KudosWithdrawPatch
+  | KudosReopenPatch
   | KudosRemovePatch
   | KudosRestorePatch
   | KudosSchedulePatch
@@ -558,6 +570,9 @@ const AUDIT_EVENT_LABELS: Record<KudosAuditEventType, string> = {
   reject: 'Rejected',
   revisionRequested: 'Revision requested',
   reopen: 'Reopened',
+  resubmit: 'Resubmitted',
+  withdraw: 'Withdrawn',
+  updateContent: 'Content updated',
   remove: 'Removed from public view',
   restore: 'Restored',
   flagAdminReview: 'Flagged for admin review',
@@ -579,6 +594,9 @@ const AUDIT_EVENT_CHIP_TONES: Record<KudosAuditEventType, KudosChipTone> = {
   reject: 'danger',
   revisionRequested: 'warning',
   reopen: 'info',
+  resubmit: 'info',
+  withdraw: 'muted',
+  updateContent: 'info',
   remove: 'danger',
   restore: 'success',
   flagAdminReview: 'warning',

@@ -347,10 +347,22 @@ interface DetailPanelProps {
   entry: KudosEntry | undefined;
   onClose: () => void;
   onCelebrate?: () => void;
+  onWithdraw?: () => void;
+  onResubmit?: () => void;
+  identity?: HomepageIdentityInput;
 }
 
-function DetailPanel({ entry, onClose, onCelebrate }: DetailPanelProps): React.JSX.Element {
+function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, identity }: DetailPanelProps): React.JSX.Element {
   const isPublic = entry ? isPubliclyVisible(entry) : false;
+
+  // Check if the current user is the submitter of this entry.
+  const isSubmitter = Boolean(
+    identity?.email && entry?.submittedBy?.email &&
+    identity.email.toLowerCase() === entry.submittedBy.email.toLowerCase(),
+  );
+  const canWithdraw = isSubmitter &&
+    (entry?.workflowStatus === 'pending' || entry?.workflowStatus === 'revisionRequested');
+  const canResubmit = isSubmitter && entry?.workflowStatus === 'revisionRequested';
 
   // Fetch audit timeline when the panel opens. Employee role = viewer.
   const [timeline, setTimeline] = React.useState<KudosAuditTimelineEntry[]>([]);
@@ -367,6 +379,8 @@ function DetailPanel({ entry, onClose, onCelebrate }: DetailPanelProps): React.J
     return () => { cancelled = true; };
   }, [entry?.id]);
 
+  const [dispatching, setDispatching] = React.useState(false);
+
   return (
     <HbcKudosComposerFlyout
       open={Boolean(entry)}
@@ -381,12 +395,69 @@ function DetailPanel({ entry, onClose, onCelebrate }: DetailPanelProps): React.J
       secondaryAction={isPublic && onCelebrate ? { label: 'Close', onClick: onClose } : undefined}
     >
       {entry ? (
-        <KudosDetailPanelContent
-          entry={entry}
-          role="viewer"
-          timeline={timeline}
-          timelineLoading={timelineLoading}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <KudosDetailPanelContent
+            entry={entry}
+            role="viewer"
+            timeline={timeline}
+            timelineLoading={timelineLoading}
+          />
+
+          {(canWithdraw || canResubmit) ? (
+            <div
+              role="group"
+              aria-label="Submitter actions"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 8,
+                paddingTop: 6,
+                borderTop: '1px dashed rgba(229, 126, 70, 0.22)',
+              }}
+            >
+              {canResubmit && onResubmit ? (
+                <button
+                  type="button"
+                  disabled={dispatching}
+                  onClick={() => { setDispatching(true); onResubmit(); setDispatching(false); }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 8,
+                    border: '1.5px solid #225391',
+                    background: '#225391',
+                    color: '#fff',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Resubmit for review
+                </button>
+              ) : null}
+              {canWithdraw && onWithdraw ? (
+                <button
+                  type="button"
+                  disabled={dispatching}
+                  onClick={() => { setDispatching(true); onWithdraw(); setDispatching(false); }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 8,
+                    border: '1.5px solid rgba(196, 49, 75, 0.55)',
+                    background: 'transparent',
+                    color: '#c4314b',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Withdraw
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </HbcKudosComposerFlyout>
   );
@@ -567,6 +638,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
       <DetailPanel
         entry={detailEntry}
         onClose={() => setDetailEntry(undefined)}
+        identity={identity}
         onCelebrate={detailEntry ? () => {
           const current = detailEntry.celebrateCount ?? 0;
           const siteUrl = getSiteUrl();
@@ -576,6 +648,38 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
             { kind: 'celebrate', kudosId: detailEntry.id, nextCount: current + 1 },
             { actorEmail: identity?.email },
           );
+        } : undefined}
+        onWithdraw={detailEntry ? () => {
+          const siteUrl = getSiteUrl();
+          if (!siteUrl) return;
+          // eslint-disable-next-line no-alert
+          if (!window.confirm('Withdraw this recognition? This action is final and cannot be undone.')) return;
+          void submitKudosGovernanceAction(
+            siteUrl,
+            { kind: 'withdraw', kudosId: detailEntry.id },
+            { actorEmail: identity?.email },
+          ).then((result) => {
+            if (result.ok) setDetailEntry(undefined);
+          });
+        } : undefined}
+        onResubmit={detailEntry ? () => {
+          const siteUrl = getSiteUrl();
+          if (!siteUrl) return;
+          // eslint-disable-next-line no-alert
+          const headline = window.prompt('Updated headline (leave blank to keep current)?', detailEntry.headline ?? '');
+          if (headline === null) return;
+          // eslint-disable-next-line no-alert
+          const excerpt = window.prompt('Updated excerpt (leave blank to keep current)?', detailEntry.excerpt ?? '');
+          if (excerpt === null) return;
+          const updatedHeadline = headline.trim() && headline.trim() !== (detailEntry.headline ?? '') ? headline.trim() : undefined;
+          const updatedExcerpt = excerpt.trim() && excerpt.trim() !== (detailEntry.excerpt ?? '') ? excerpt.trim() : undefined;
+          void submitKudosGovernanceAction(
+            siteUrl,
+            { kind: 'resubmit', kudosId: detailEntry.id, updatedHeadline, updatedExcerpt },
+            { actorEmail: identity?.email },
+          ).then((result) => {
+            if (result.ok) setDetailEntry(undefined);
+          });
         } : undefined}
       />
     </section>

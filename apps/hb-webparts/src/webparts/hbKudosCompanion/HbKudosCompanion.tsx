@@ -484,7 +484,7 @@ function QueueRow({
 // Detail panel
 // ---------------------------------------------------------------------------
 
-type DetailActionKind = 'approve' | 'reject' | 'requestRevision' | 'flagAdminReview' | 'clearAdminReview' | 'schedule' | 'unschedule' | 'pin' | 'unpin' | 'feature' | 'unfeature' | 'remove' | 'restore' | 'claim' | 'reassign' | 'celebrate';
+type DetailActionKind = 'approve' | 'reject' | 'requestRevision' | 'reopen' | 'flagAdminReview' | 'clearAdminReview' | 'schedule' | 'unschedule' | 'pin' | 'unpin' | 'feature' | 'unfeature' | 'remove' | 'restore' | 'claim' | 'reassign' | 'celebrate' | 'updateContent';
 
 interface DetailPanelProps {
   entry: KudosEntry | undefined;
@@ -608,6 +608,12 @@ function DetailPanel({
             ) : null}
             {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
               <KudosActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" />
+            ) : null}
+            {capabilities.canApprove && entry?.workflowStatus === 'rejected' ? (
+              <KudosActionButton label="Reopen" onClick={() => onAction('reopen')} disabled={dispatching} tone="info" />
+            ) : null}
+            {capabilities.canEditPublished && entry?.workflowStatus === 'approved' ? (
+              <KudosActionButton label="Edit published" onClick={() => onAction('updateContent')} disabled={dispatching} tone="info" />
             ) : null}
             {capabilities.canClaim ? (
               <KudosActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" />
@@ -780,6 +786,24 @@ export function HbKudosCompanion({
         const assignedUserId = Number(userIdStr);
         if (!Number.isFinite(assignedUserId) || assignedUserId <= 0) return;
         patch = { kind: 'reassign', kudosId: detailEntry.id, assignedUserId };
+      } else if (kind === 'reopen') {
+        // eslint-disable-next-line no-alert
+        const target = window.prompt('Reopen to which status? Enter "pending" or "revision"');
+        if (!target?.trim()) return;
+        const targetStatus = target.trim().toLowerCase().startsWith('revision') ? 'revisionRequested' as const : 'pending' as const;
+        patch = { kind: 'reopen', kudosId: detailEntry.id, targetStatus };
+      } else if (kind === 'updateContent') {
+        // eslint-disable-next-line no-alert
+        const headline = window.prompt('Updated headline (leave blank to keep current)?', detailEntry.headline ?? '');
+        if (headline === null) return;
+        // eslint-disable-next-line no-alert
+        const excerpt = window.prompt('Updated excerpt (leave blank to keep current)?', detailEntry.excerpt ?? '');
+        if (excerpt === null) return;
+        const patchFields: { headline?: string; excerpt?: string } = {};
+        if (headline.trim() && headline.trim() !== (detailEntry.headline ?? '')) patchFields.headline = headline.trim();
+        if (excerpt.trim() && excerpt.trim() !== (detailEntry.excerpt ?? '')) patchFields.excerpt = excerpt.trim();
+        if (Object.keys(patchFields).length === 0) return;
+        patch = { kind: 'updateContent', kudosId: detailEntry.id, ...patchFields };
       } else if (kind === 'celebrate') {
         const currentCount = detailEntry.celebrateCount ?? 0;
         patch = { kind: 'celebrate', kudosId: detailEntry.id, nextCount: currentCount + 1 };

@@ -714,7 +714,7 @@ export function buildKudosPatchPlan(
         fields,
         auditEvent: {
           kudosId: patch.kudosId,
-          eventType: 'reopen',
+          eventType: 'resubmit',
           actorUserId: patch.actorUserId,
           eventAtIso: actedAtIso,
           publicNote: patch.publicNote,
@@ -737,12 +737,30 @@ export function buildKudosPatchPlan(
         fields,
         auditEvent: {
           kudosId: patch.kudosId,
-          eventType: 'reopen',
+          eventType: 'withdraw',
           actorUserId: patch.actorUserId,
           eventAtIso: actedAtIso,
           publicNote: patch.publicNote,
           internalNote: patch.internalNote,
           newValue: { workflowStatus: 'withdrawn' },
+        },
+      };
+    }
+
+    case 'reopen': {
+      return {
+        ok: true,
+        fields: {
+          [KUDOS_FIELDS.WorkflowStatus]: patch.targetStatus,
+        },
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'reopen',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: patch.targetStatus },
         },
       };
     }
@@ -762,7 +780,7 @@ export function buildKudosPatchPlan(
         fields,
         auditEvent: {
           kudosId: patch.kudosId,
-          eventType: 'reopen',
+          eventType: 'updateContent',
           actorUserId: patch.actorUserId,
           eventAtIso: actedAtIso,
           publicNote: patch.publicNote,
@@ -797,7 +815,7 @@ function requiredCapabilityForPatch(
 ): keyof import('../helpers/kudosCapabilities.js').KudosCapabilities | undefined {
   switch (kind) {
     case 'approve':
-    case 'resubmit':
+    case 'reopen':
       return 'canApprove';
     case 'reject':
       return 'canReject';
@@ -826,8 +844,9 @@ function requiredCapabilityForPatch(
     case 'updateContent':
       return 'canEditPublished';
     case 'withdraw':
+    case 'resubmit':
     case 'celebrate':
-      // Any authenticated user may celebrate or withdraw their own.
+      // Any authenticated user may celebrate, withdraw, or resubmit their own.
       return undefined;
     default:
       return undefined;
