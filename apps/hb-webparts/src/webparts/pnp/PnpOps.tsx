@@ -39,6 +39,8 @@ interface PnpOpsRuntimeConfig {
   readonly defaultTargetSiteUrl: string;
   readonly mockMode: boolean;
 }
+// TODO(prompt-02): replace backendUrl/mockMode-first runtime config with
+// executionMode + runnerBaseUrl contract from pnpOpsExecutionModes.ts.
 
 const LAYOUT: Record<string, React.CSSProperties> = {
   root: {

@@ -1,4 +1,6 @@
 import type { AdminActionMetadataDto, PnpOpsActionKey } from './pnpOpsActionCatalog.js';
+// TODO(prompt-02): replace admin-api route construction with runner abstraction
+// from pnpOpsExecutionModes.ts while preserving current DTO compatibility.
 
 export interface PnpOpsRunLaunchResponse {
   readonly runId: string;
