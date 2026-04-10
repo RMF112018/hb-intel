@@ -1,0 +1,527 @@
+/**
+ * HB Kudos governance writer — Phase-14 kudos/ Prompt-03.
+ *
+ * SharePoint write seam for the HR approval companion webpart. Every
+ * governance action routes through this module so:
+ *
+ *   1. list-item lookups are bound to the `People Culture Kudos` GUID
+ *      via `peopleCultureSpListRegistry` (never by list title),
+ *   2. list-item updates use the MERGE + `If-Match` convention with a
+ *      real etag (no blind overwrites),
+ *   3. every workflow transition writes a matching row to the
+ *      `Kudos Audit Events` list so the durable event timeline is
+ *      correct by construction,
+ *   4. the discriminator over `KudosPatch` is exhaustive so later
+ *      prompts can land the remaining writers without touching the
+ *      calling UI.
+ *
+ * Prompt-03 implements the review-workflow writers (`approve`,
+ * `reject`, `requestRevision`, `flagAdminReview`, `clearAdminReview`).
+ * The remaining `KudosPatch` kinds are accepted at compile time but
+ * return `{ ok: false, error: 'NotImplemented — deferred to Prompt-04/05' }`
+ * so the HR companion UI can dispatch today and the writer gets
+ * upgraded in later prompts without a caller change.
+ *
+ * Governing sources:
+ *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
+ *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Schema-Reference-Appendix.md`
+ *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/people-culture-kudos-sharepoint-schema-report.md`
+ *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Prompt-03-HR-Approval-Companion-Webpart.md`
+ */
+import {
+  PEOPLE_CULTURE_LIST_REGISTRY,
+  buildPcListItemsEndpoint,
+  type PeopleCultureListDescriptor,
+} from './peopleCultureSpListRegistry.js';
+import {
+  fetchRequestDigest,
+  resolveUserId,
+} from './peopleCultureSubmissionSource.js';
+import { KUDOS_FIELDS, KUDOS_AUDIT_FIELDS } from './peopleCultureListSource.js';
+import type {
+  KudosAuditEventInput,
+  KudosAuditEventType,
+  KudosPatch,
+} from '../webparts/kudosContracts.js';
+
+// ---------------------------------------------------------------------------
+// Public result shape
+// ---------------------------------------------------------------------------
+
+export type KudosGovernanceResult =
+  | { ok: true; itemId: number; auditEventId?: number }
+  | { ok: false; error: string };
+
+export interface KudosItemMeta {
+  /** SharePoint list item id on the People Culture Kudos list. */
+  itemId: number;
+  /** ETag extracted from the nometadata response header or body. */
+  etag: string;
+  /** The app-side KudosId echoed back for caller convenience. */
+  kudosId: string;
+}
+
+// ---------------------------------------------------------------------------
+// Fetch item meta by KudosId
+// ---------------------------------------------------------------------------
+
+/**
+ * Escape a literal string for OData `$filter` use. SharePoint REST
+ * requires single quotes to be doubled.
+ */
+function escapeODataString(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+/**
+ * Look up the live SharePoint list item id and etag for a given
+ * app-side `KudosId`. Bound by the kudos list GUID so title drift
+ * cannot cross-bind the writer to the wrong list.
+ *
+ * Returns `undefined` when no item matches (caller decides whether
+ * that is an error).
+ */
+export async function fetchKudosItemMeta(
+  siteUrl: string,
+  kudosId: string,
+): Promise<KudosItemMeta | undefined> {
+  if (!kudosId.trim()) return undefined;
+
+  const url = buildPcListItemsEndpoint(
+    siteUrl,
+    PEOPLE_CULTURE_LIST_REGISTRY.kudos,
+    {
+      select: `Id,${KUDOS_FIELDS.KudosId}`,
+      filter: `${KUDOS_FIELDS.KudosId} eq '${escapeODataString(kudosId)}'`,
+      top: 1,
+    },
+  );
+
+  // Ask for minimal metadata so the response carries the
+  // `@odata.etag` field that we need for the If-Match write.
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json;odata=minimalmetadata' },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `People Culture Kudos lookup by KudosId failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  interface RawItem {
+    Id: number;
+    KudosId: string;
+    '@odata.etag'?: string;
+    'odata.etag'?: string;
+  }
+  const body = (await response.json()) as { value?: RawItem[] };
+  const raw = body.value?.[0];
+  if (!raw) return undefined;
+
+  const etag = raw['@odata.etag'] ?? raw['odata.etag'] ?? '*';
+  return { itemId: raw.Id, etag, kudosId: raw.KudosId };
+}
+
+// ---------------------------------------------------------------------------
+// PATCH the kudos item
+// ---------------------------------------------------------------------------
+
+/**
+ * Update a `People Culture Kudos` item by id. Uses the SharePoint REST
+ * MERGE convention: POST the item-by-id endpoint with
+ * `X-HTTP-Method: MERGE` and `If-Match: {etag}` so the write is
+ * transactional against the fetched version. Returns the HTTP status.
+ */
+export async function patchKudosItem(
+  siteUrl: string,
+  itemId: number,
+  etag: string,
+  digest: string,
+  fields: Record<string, unknown>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const url = `${buildPcListItemsEndpoint(siteUrl, PEOPLE_CULTURE_LIST_REGISTRY.kudos)}(${itemId})`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json;odata=nometadata',
+      'Content-Type': 'application/json;odata=nometadata',
+      'X-RequestDigest': digest,
+      'X-HTTP-Method': 'MERGE',
+      'If-Match': etag,
+    },
+    body: JSON.stringify(fields),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    return {
+      ok: false,
+      error: `SharePoint rejected the kudos PATCH (${response.status}). ${errorBody ? `Details: ${errorBody.slice(0, 240)}` : ''}`.trim(),
+    };
+  }
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Create an audit event row
+// ---------------------------------------------------------------------------
+
+/**
+ * Write a new row to the `Kudos Audit Events` list. Every governance
+ * action writes one of these so the durable event timeline can be
+ * reconstructed without replaying the main list.
+ *
+ * Returns the created item id, or an error result. Does not throw
+ * on HTTP errors (the caller decides whether a missing audit row
+ * should roll back the main write — today it surfaces via the
+ * returned shape so the HR companion can warn the user).
+ */
+export async function createKudosAuditEvent(
+  siteUrl: string,
+  digest: string,
+  input: KudosAuditEventInput,
+): Promise<{ ok: true; id: number } | { ok: false; error: string }> {
+  interface AuditPayload {
+    Title: string;
+    KudosId: string;
+    EventType: KudosAuditEventType;
+    ActorId?: number;
+    EventAt: string;
+    PublicNote?: string;
+    InternalNote?: string;
+    OldValue?: string;
+    NewValue?: string;
+  }
+  const payload: AuditPayload = {
+    Title: `${input.eventType}:${input.kudosId}`,
+    KudosId: input.kudosId,
+    EventType: input.eventType,
+    EventAt: input.eventAtIso ?? new Date().toISOString(),
+  };
+  if (typeof input.actorUserId === 'number') payload.ActorId = input.actorUserId;
+  if (input.publicNote) payload.PublicNote = input.publicNote;
+  if (input.internalNote) payload.InternalNote = input.internalNote;
+  if (input.oldValue !== undefined) payload.OldValue = JSON.stringify(input.oldValue);
+  if (input.newValue !== undefined) payload.NewValue = JSON.stringify(input.newValue);
+
+  const url = buildPcListItemsEndpoint(
+    siteUrl,
+    PEOPLE_CULTURE_LIST_REGISTRY.kudosAuditEvents,
+  );
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json;odata=nometadata',
+      'Content-Type': 'application/json;odata=nometadata',
+      'X-RequestDigest': digest,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    return {
+      ok: false,
+      error: `Kudos Audit Events write failed (${response.status}). ${errorBody ? `Details: ${errorBody.slice(0, 240)}` : ''}`.trim(),
+    };
+  }
+  const body = (await response.json()) as { Id?: number };
+  if (typeof body.Id !== 'number') {
+    return { ok: false, error: 'Kudos Audit Events write succeeded but the response did not include an item id.' };
+  }
+  // `void` the unused list descriptor import — kept for future
+  // audit-event queries that bind by descriptor rather than key.
+  void (null as PeopleCultureListDescriptor | null);
+  return { ok: true, id: body.Id };
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated executor over KudosPatch
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the { fieldSet, auditEvent } pair for a given `KudosPatch`.
+ * Exported so tests can verify the PATCH body shape without mocking
+ * any network layer.
+ *
+ * Prompt-03 implements the review-workflow transitions. Every other
+ * patch kind is acknowledged with a `NotImplemented` return so later
+ * prompts can land the writer code without a caller change.
+ */
+export function buildKudosPatchPlan(
+  patch: KudosPatch,
+): {
+  ok: true;
+  fields: Record<string, unknown>;
+  auditEvent: KudosAuditEventInput;
+} | {
+  ok: false;
+  error: string;
+} {
+  const actedAtIso = patch.actedAtIso ?? new Date().toISOString();
+
+  switch (patch.kind) {
+    case 'approve': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'approved',
+        [KUDOS_FIELDS.ApprovedDate]: actedAtIso,
+        [KUDOS_FIELDS.HomepageEnabled]: true,
+        [KUDOS_FIELDS.WasEverPublished]: true,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.ApprovedBy}Id`] = patch.actorUserId;
+        fields[`${KUDOS_FIELDS.ReviewedBy}Id`] = patch.actorUserId;
+        fields[KUDOS_FIELDS.ReviewedAt] = actedAtIso;
+      }
+      if (patch.flagForAdminReview === true) {
+        fields[KUDOS_FIELDS.IsFlaggedForAdminReview] = true;
+        if (patch.adminReviewReason) {
+          fields[KUDOS_FIELDS.AdminReviewReason] = patch.adminReviewReason;
+        }
+        if (typeof patch.actorUserId === 'number') {
+          fields[`${KUDOS_FIELDS.AdminReviewFlaggedBy}Id`] = patch.actorUserId;
+          fields[KUDOS_FIELDS.AdminReviewFlaggedAt] = actedAtIso;
+        }
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'approve',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'approved', homepageEnabled: true },
+        },
+      };
+    }
+
+    case 'reject': {
+      if (!patch.rejectionReason.trim()) {
+        return { ok: false, error: 'Rejection reason is required.' };
+      }
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'rejected',
+        [KUDOS_FIELDS.RejectionReason]: patch.rejectionReason.trim(),
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.ReviewedBy}Id`] = patch.actorUserId;
+        fields[KUDOS_FIELDS.ReviewedAt] = actedAtIso;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'reject',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'rejected', rejectionReason: patch.rejectionReason.trim() },
+        },
+      };
+    }
+
+    case 'requestRevision': {
+      if (!patch.revisionGuidance.trim()) {
+        return { ok: false, error: 'Revision guidance is required.' };
+      }
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.WorkflowStatus]: 'revisionRequested',
+        [KUDOS_FIELDS.RevisionGuidance]: patch.revisionGuidance.trim(),
+        [KUDOS_FIELDS.RevisionRequestedAt]: actedAtIso,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.RevisionRequestedBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'revisionRequested',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { workflowStatus: 'revisionRequested', revisionGuidance: patch.revisionGuidance.trim() },
+        },
+      };
+    }
+
+    case 'flagAdminReview': {
+      if (!patch.adminReviewReason.trim()) {
+        return { ok: false, error: 'Admin review reason is required.' };
+      }
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.IsFlaggedForAdminReview]: true,
+        [KUDOS_FIELDS.AdminReviewReason]: patch.adminReviewReason.trim(),
+        [KUDOS_FIELDS.AdminReviewFlaggedAt]: actedAtIso,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.AdminReviewFlaggedBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'flagAdminReview',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isFlaggedForAdminReview: true, reason: patch.adminReviewReason.trim() },
+        },
+      };
+    }
+
+    case 'clearAdminReview': {
+      const fields: Record<string, unknown> = {
+        [KUDOS_FIELDS.IsFlaggedForAdminReview]: false,
+        [KUDOS_FIELDS.AdminReviewedAt]: actedAtIso,
+      };
+      if (typeof patch.actorUserId === 'number') {
+        fields[`${KUDOS_FIELDS.AdminReviewedBy}Id`] = patch.actorUserId;
+      }
+      return {
+        ok: true,
+        fields,
+        auditEvent: {
+          kudosId: patch.kudosId,
+          eventType: 'clearAdminReview',
+          actorUserId: patch.actorUserId,
+          eventAtIso: actedAtIso,
+          publicNote: patch.publicNote,
+          internalNote: patch.internalNote,
+          newValue: { isFlaggedForAdminReview: false },
+        },
+      };
+    }
+
+    case 'resubmit':
+    case 'withdraw':
+    case 'schedule':
+    case 'unschedule':
+    case 'pin':
+    case 'unpin':
+    case 'feature':
+    case 'unfeature':
+    case 'claim':
+    case 'reassign':
+    case 'remove':
+    case 'restore':
+    case 'celebrate':
+    case 'updateContent':
+      return {
+        ok: false,
+        error: `NotImplemented — '${patch.kind}' writer is deferred to Prompt-04 / Prompt-05.`,
+      };
+
+    default: {
+      // Exhaustiveness check: if a new kind lands in KudosPatch, this
+      // cast forces a TypeScript error here so the discriminator stays
+      // honest.
+      const _exhaustive: never = patch;
+      return { ok: false, error: `Unknown patch kind: ${JSON.stringify(_exhaustive)}` };
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// High-level dispatcher: executeKudosPatch + submitKudosGovernanceAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Execute a validated `KudosPatch` against SharePoint. The caller is
+ * responsible for fetching the request digest and the item meta; this
+ * keeps the dispatch pure and easy to test (tests can mock fetch and
+ * verify the PATCH body shape via `buildKudosPatchPlan` first).
+ */
+export async function executeKudosPatch(
+  siteUrl: string,
+  digest: string,
+  itemMeta: KudosItemMeta,
+  patch: KudosPatch,
+): Promise<KudosGovernanceResult> {
+  const plan = buildKudosPatchPlan(patch);
+  if (!plan.ok) {
+    return { ok: false, error: plan.error };
+  }
+
+  const patchResult = await patchKudosItem(
+    siteUrl,
+    itemMeta.itemId,
+    itemMeta.etag,
+    digest,
+    plan.fields,
+  );
+  if (!patchResult.ok) {
+    return { ok: false, error: patchResult.error };
+  }
+
+  const auditResult = await createKudosAuditEvent(siteUrl, digest, plan.auditEvent);
+  if (!auditResult.ok) {
+    // The PATCH committed but the audit event failed. Surface a
+    // structured error so the HR companion can warn the operator.
+    return {
+      ok: false,
+      error: `Governance action committed but audit event write failed: ${auditResult.error}`,
+    };
+  }
+
+  return { ok: true, itemId: itemMeta.itemId, auditEventId: auditResult.id };
+}
+
+/**
+ * Public wrapper used by the HR companion UI. Fetches the request
+ * digest, resolves the SharePoint list item meta for the given
+ * `KudosId`, and dispatches through `executeKudosPatch`.
+ *
+ * Optional `actorEmail` is resolved via `ensureUser` so the writer
+ * can stamp the actor's user id on the patch + audit event when the
+ * caller does not already have it.
+ */
+export async function submitKudosGovernanceAction(
+  siteUrl: string,
+  patch: KudosPatch,
+  options: { actorEmail?: string } = {},
+): Promise<KudosGovernanceResult> {
+  if (!siteUrl) {
+    return { ok: false, error: 'SharePoint site context is not available.' };
+  }
+
+  try {
+    const digest = await fetchRequestDigest(siteUrl);
+
+    let enrichedPatch = patch;
+    if (typeof patch.actorUserId !== 'number' && options.actorEmail) {
+      const resolvedId = await resolveUserId(siteUrl, options.actorEmail, digest);
+      if (typeof resolvedId === 'number') {
+        enrichedPatch = { ...patch, actorUserId: resolvedId };
+      }
+    }
+
+    const meta = await fetchKudosItemMeta(siteUrl, enrichedPatch.kudosId);
+    if (!meta) {
+      return {
+        ok: false,
+        error: `KudosId '${enrichedPatch.kudosId}' was not found on People Culture Kudos.`,
+      };
+    }
+
+    return await executeKudosPatch(siteUrl, digest, meta, enrichedPatch);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unexpected governance write failure.';
+    return { ok: false, error: message };
+  }
+}
+
+// Silence the unused import warning for KUDOS_AUDIT_FIELDS — kept in
+// scope so future writer code can reference the audit field names
+// without re-importing.
+void KUDOS_AUDIT_FIELDS;

@@ -672,8 +672,17 @@ export function isHomepageVisible(
   return isPubliclyVisible(entry);
 }
 
-export function needsAdminReview(entry: Partial<KudosAdminReviewMetadata>): boolean {
-  return entry.isFlaggedForAdminReview === true && !entry.adminReviewedAt;
+/**
+ * `true` when an entry is flagged for admin review and that review
+ * has not yet been resolved. Accepts an unknown shape because the
+ * read path in Prompt-03 does not yet hydrate the admin review
+ * metadata onto every `KudosEntry` — callers can pass any entry and
+ * the function defensively reads only the fields it needs.
+ */
+export function needsAdminReview(entry: unknown): boolean {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Partial<KudosAdminReviewMetadata>;
+  return e.isFlaggedForAdminReview === true && !e.adminReviewedAt;
 }
 
 // ---------------------------------------------------------------------------

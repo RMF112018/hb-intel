@@ -60,7 +60,7 @@ function generateKudosId(): string {
  * The digest token authenticates POST/PATCH/DELETE requests against
  * the SharePoint REST API.
  */
-async function fetchRequestDigest(siteUrl: string): Promise<string> {
+export async function fetchRequestDigest(siteUrl: string): Promise<string> {
   const response = await fetch(`${siteUrl}/_api/contextinfo`, {
     method: 'POST',
     headers: {
@@ -85,7 +85,7 @@ async function fetchRequestDigest(siteUrl: string): Promise<string> {
  * Attempt to resolve a SharePoint user ID from an email address
  * using the ensureUser endpoint. Returns undefined if resolution fails.
  */
-async function resolveUserId(siteUrl: string, email: string, digest: string): Promise<number | undefined> {
+export async function resolveUserId(siteUrl: string, email: string, digest: string): Promise<number | undefined> {
   try {
     const response = await fetch(`${siteUrl}/_api/web/ensureuser('${encodeURIComponent(email)}')`, {
       method: 'POST',

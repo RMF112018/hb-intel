@@ -14,6 +14,7 @@ import { PeopleCultureMerged } from './webparts/peopleCulture/PeopleCultureMerge
 import { PeopleCulturePublic } from './webparts/peopleCulturePublic/PeopleCulturePublic.js';
 import { PeopleCultureCompanion } from './webparts/peopleCultureCompanion/PeopleCultureCompanion.js';
 import { HbKudos } from './webparts/hbKudos/HbKudos.js';
+import { HbKudosCompanion } from './webparts/hbKudosCompanion/HbKudosCompanion.js';
 import { ProjectPortfolioSpotlight } from './webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from './webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 import { SmartSearchWayfinding } from './webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
@@ -74,8 +75,11 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
         ? createSharePointUserPhotoResolver({ siteUrl })
         : undefined,
     }),
-  // Phase-14 Prompt-01 structural scaffold: new HB Kudos public seam.
+  // Phase-14 kudos/ Prompt-02: HB Kudos employee recognition webpart.
   'f14e59a3-4d6b-43b2-952e-ba02dea11dad': ({ config, identity, assetBaseUrl }) => createElement(HbKudos, { config, identity, assetBaseUrl }),
+  // Phase-14 kudos/ Prompt-03: HB Kudos HR Approval Companion webpart.
+  'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97': ({ config, identity, assetBaseUrl }) =>
+    createElement(HbKudosCompanion, { config, identity, assetBaseUrl }),
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),
