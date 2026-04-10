@@ -43,6 +43,7 @@ export interface PnpOpsProps {
 interface PnpOpsRuntimeConfig {
   readonly executionMode: PnpOpsExecutionMode;
   readonly runnerBaseUrl: string;
+  readonly runnerApiKey: string;
   readonly legacyAdminApiBaseUrl: string;
   readonly defaultTargetSiteUrl: string;
 }
@@ -101,12 +102,16 @@ function readRuntimeConfig(input: Record<string, unknown> | undefined): PnpOpsRu
   const runnerBaseUrl = typeof input?.runnerBaseUrl === 'string'
     ? input.runnerBaseUrl.replace(/\/+$/, '')
     : '';
+  const runnerApiKey = typeof input?.runnerApiKey === 'string'
+    ? input.runnerApiKey.trim()
+    : '';
   const legacyAdminApiBaseUrl = typeof input?.legacyAdminApiBaseUrl === 'string'
     ? input.legacyAdminApiBaseUrl.replace(/\/+$/, '')
     : legacyBackendUrl;
   return {
     executionMode,
     runnerBaseUrl: runnerBaseUrl || (executionMode === PNP_OPS_LEGACY_MODE ? legacyBackendUrl : ''),
+    runnerApiKey,
     legacyAdminApiBaseUrl,
     defaultTargetSiteUrl:
       typeof input?.defaultTargetSiteUrl === 'string'
@@ -139,9 +144,11 @@ function getEndpointLabel(runtime: PnpOpsRuntimeConfig): string {
 
 function formatServiceError(error: unknown, runtime: PnpOpsRuntimeConfig): string {
   const message = error instanceof Error ? error.message : String(error);
-  const isRunnerMode = runtime.executionMode === 'local-runner' || runtime.executionMode === 'remote-runner';
-  if (isRunnerMode && /fetch|network|certificate|tls|self[- ]signed/i.test(message)) {
+  if (runtime.executionMode === 'local-runner' && /fetch|network|certificate|tls|self[- ]signed/i.test(message)) {
     return `${message} Verify local runner HTTPS certificate trust and that runner origin is listed in PNP_RUNNER_ALLOWED_ORIGINS.`;
+  }
+  if (runtime.executionMode === 'remote-runner' && /fetch|network|certificate|tls|self[- ]signed|401|403|unauthorized/i.test(message)) {
+    return `${message} Verify remote runner HTTPS reachability, X-Pnp-Runner-Key/runnerApiKey configuration, and PNP_RUNNER_ALLOWED_ORIGINS on the host.`;
   }
   return message;
 }
@@ -219,8 +226,9 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
   const clientConfig = React.useMemo<PnpOpsClientConfig>(() => ({
     executionMode: runtime.executionMode,
     runnerBaseUrl: runtime.runnerBaseUrl,
+    runnerApiKey: runtime.runnerApiKey || undefined,
     legacyAdminApiBaseUrl: runtime.legacyAdminApiBaseUrl || undefined,
-  }), [runtime.executionMode, runtime.runnerBaseUrl, runtime.legacyAdminApiBaseUrl]);
+  }), [runtime.executionMode, runtime.runnerBaseUrl, runtime.runnerApiKey, runtime.legacyAdminApiBaseUrl]);
   const [actionCatalog, setActionCatalog] = React.useState<readonly PnpOpsActionDefinition[]>(PNP_V1_ACTIONS);
   const [catalogWarning, setCatalogWarning] = React.useState<string | null>(null);
   const [selectedActionKey, setSelectedActionKey] = React.useState<PnpOpsActionKey>(getDefaultPnpActionKey());
@@ -322,6 +330,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
       {
         executionMode: runtime.executionMode,
         runnerBaseUrl: runtime.runnerBaseUrl,
+        runnerApiKey: runtime.runnerApiKey,
         legacyAdminApiBaseUrl: runtime.legacyAdminApiBaseUrl,
       },
     );
@@ -357,7 +366,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
     } finally {
       setBusyState('idle');
     }
-  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.executionMode, runtime.runnerBaseUrl, runtime.legacyAdminApiBaseUrl, getApiToken, clientConfig]);
+  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.executionMode, runtime.runnerBaseUrl, runtime.runnerApiKey, runtime.legacyAdminApiBaseUrl, getApiToken, clientConfig]);
 
   const launchRun = React.useCallback(async (): Promise<void> => {
     const validation = validatePnpOpsForm(
@@ -366,6 +375,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
       {
         executionMode: runtime.executionMode,
         runnerBaseUrl: runtime.runnerBaseUrl,
+        runnerApiKey: runtime.runnerApiKey,
         legacyAdminApiBaseUrl: runtime.legacyAdminApiBaseUrl,
       },
     );
@@ -441,7 +451,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
     } finally {
       setBusyState('idle');
     }
-  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.executionMode, runtime.runnerBaseUrl, runtime.legacyAdminApiBaseUrl, getApiToken, clientConfig]);
+  }, [selectedAction, targetSiteUrl, listFilterInput, pageFilterInput, runtime.executionMode, runtime.runnerBaseUrl, runtime.runnerApiKey, runtime.legacyAdminApiBaseUrl, getApiToken, clientConfig]);
 
   return (
     <section aria-label="PnP Operations webpart shell" data-hbc-webpart="pnp-ops" style={LAYOUT.root}>
@@ -480,6 +490,11 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
       {(runtime.executionMode === 'local-runner' || runtime.executionMode === 'remote-runner') && !runtime.runnerBaseUrl && (
         <HbcBanner variant="warning">
           {runtime.executionMode} is selected but `runnerBaseUrl` is not configured.
+        </HbcBanner>
+      )}
+      {runtime.executionMode === 'remote-runner' && !runtime.runnerApiKey && (
+        <HbcBanner variant="warning">
+          `remote-runner` mode expects `runnerApiKey` so requests pass the remote host auth gate.
         </HbcBanner>
       )}
       {runtime.executionMode === 'mock' && (

@@ -47,9 +47,15 @@ export function readRunnerConfig(): RunnerConfig {
   const clientId = readEnv('PNP_RUNNER_CLIENT_ID') || '9bc3ab49-b65d-410a-85ad-de819febfddc';
   const tenant = readEnv('PNP_RUNNER_TENANT') || 'hedrickbrothers.com';
   const allowNonLoopback = readEnv('PNP_RUNNER_ALLOW_NON_LOOPBACK').toLowerCase() === 'true';
+  const apiKey = readEnv('PNP_RUNNER_API_KEY') || null;
+  const profile: RunnerConfig['profile'] = allowNonLoopback ? 'remote-runner' : 'local-runner';
+  const authRequired = allowNonLoopback;
 
   if (!certPath || !keyPath) {
     throw new Error('HTTPS is required. Set PNP_RUNNER_CERT_PATH and PNP_RUNNER_KEY_PATH.');
+  }
+  if (authRequired && !apiKey) {
+    throw new Error('PNP_RUNNER_API_KEY is required when PNP_RUNNER_ALLOW_NON_LOOPBACK=true.');
   }
 
   ensureLoopback(host, allowNonLoopback);
@@ -57,6 +63,7 @@ export function readRunnerConfig(): RunnerConfig {
   return {
     host,
     port,
+    profile,
     certPath,
     keyPath,
     allowedOrigins,
@@ -65,5 +72,7 @@ export function readRunnerConfig(): RunnerConfig {
     clientId,
     tenant,
     allowNonLoopback,
+    authRequired,
+    apiKey,
   };
 }

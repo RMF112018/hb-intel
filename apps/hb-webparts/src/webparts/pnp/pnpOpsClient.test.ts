@@ -30,6 +30,7 @@ describe('pnpOpsClient mode routing', () => {
     const config: PnpOpsClientConfig = {
       executionMode: 'local-runner',
       runnerBaseUrl: 'https://runner.internal',
+      runnerApiKey: 'runner-secret',
     };
     const fetchMock = vi
       .fn(async () => makeOkResponse({ data: { ready: true, checks: [] } }))
@@ -64,7 +65,20 @@ describe('pnpOpsClient mode routing', () => {
       const init = ((call as unknown as [string, RequestInit])[1] ?? {}) as RequestInit;
       const headers = (init.headers ?? {}) as Record<string, string>;
       expect(headers.Authorization).toBeUndefined();
+      expect(headers['X-Pnp-Runner-Key']).toBe('runner-secret');
     }
+  });
+
+  it('does not send runner key header when not configured', async () => {
+    const config: PnpOpsClientConfig = {
+      executionMode: 'remote-runner',
+      runnerBaseUrl: 'https://runner.internal',
+    };
+    const fetchMock = vi.fn(async () => makeOkResponse({ items: [] }));
+    await fetchPnpActionMetadata(config, undefined, fetchMock as unknown as typeof fetch);
+    const init = ((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1] ?? {}) as RequestInit;
+    const headers = (init.headers ?? {}) as Record<string, string>;
+    expect(headers['X-Pnp-Runner-Key']).toBeUndefined();
   });
 
   it('uses legacy admin endpoints with bearer auth in legacy-admin-api mode', async () => {

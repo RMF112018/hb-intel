@@ -5,6 +5,7 @@ import { parseCsvFilters, validatePnpOpsForm } from './pnpOpsValidation.js';
 const LOCAL_RUNTIME = {
   executionMode: 'local-runner' as const,
   runnerBaseUrl: 'http://127.0.0.1:5010',
+  runnerApiKey: '',
   legacyAdminApiBaseUrl: '',
 };
 
@@ -86,6 +87,7 @@ describe('pnpOpsValidation', () => {
     }, {
       executionMode: 'local-runner',
       runnerBaseUrl: '',
+      runnerApiKey: '',
       legacyAdminApiBaseUrl: '',
     });
     expect(result.isValid).toBe(false);
@@ -101,6 +103,7 @@ describe('pnpOpsValidation', () => {
     }, {
       executionMode: 'legacy-admin-api',
       runnerBaseUrl: '',
+      runnerApiKey: '',
       legacyAdminApiBaseUrl: '',
     });
     expect(result.isValid).toBe(false);
@@ -116,8 +119,26 @@ describe('pnpOpsValidation', () => {
     }, {
       executionMode: 'mock',
       runnerBaseUrl: '',
+      runnerApiKey: '',
       legacyAdminApiBaseUrl: '',
     });
     expect(result.isValid).toBe(true);
+  });
+
+  it('requires HTTPS and runnerApiKey for remote-runner mode', () => {
+    const action = PNP_V1_ACTIONS.find((entry) => entry.key === 'sharepoint-control:extraction:site-template');
+    const result = validatePnpOpsForm(action, {
+      targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      listFilterInput: '',
+      pageFilterInput: '',
+    }, {
+      executionMode: 'remote-runner',
+      runnerBaseUrl: 'http://runner.internal',
+      runnerApiKey: '',
+      legacyAdminApiBaseUrl: '',
+    });
+    expect(result.isValid).toBe(false);
+    expect(result.errors.join(' ')).toContain('requires `runnerApiKey`');
+    expect(result.errors.join(' ')).toContain('requires an HTTPS runner base URL');
   });
 });

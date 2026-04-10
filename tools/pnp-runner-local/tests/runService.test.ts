@@ -25,6 +25,7 @@ function makeConfig(storageDir: string): RunnerConfig {
   return {
     host: '127.0.0.1',
     port: 5010,
+    profile: 'local-runner',
     certPath: '/tmp/cert.pem',
     keyPath: '/tmp/key.pem',
     allowedOrigins: ['https://hedrickbrotherscom.sharepoint.com'],
@@ -33,6 +34,8 @@ function makeConfig(storageDir: string): RunnerConfig {
     clientId: '9bc3ab49-b65d-410a-85ad-de819febfddc',
     tenant: 'hedrickbrothers.com',
     allowNonLoopback: false,
+    authRequired: false,
+    apiKey: null,
   };
 }
 

@@ -101,6 +101,7 @@ export interface ActionDescriptor {
 export interface RunnerConfig {
   readonly host: string;
   readonly port: number;
+  readonly profile: 'local-runner' | 'remote-runner';
   readonly certPath: string;
   readonly keyPath: string;
   readonly allowedOrigins: readonly string[];
@@ -109,6 +110,8 @@ export interface RunnerConfig {
   readonly clientId: string;
   readonly tenant: string;
   readonly allowNonLoopback: boolean;
+  readonly authRequired: boolean;
+  readonly apiKey: string | null;
 }
 
 export interface ExtractionResultFileSet {

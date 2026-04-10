@@ -89,6 +89,7 @@ export interface PnpOpsCommandInput {
 export interface PnpOpsClientConfig {
   readonly executionMode: PnpOpsExecutionMode;
   readonly runnerBaseUrl: string;
+  readonly runnerApiKey?: string;
   readonly legacyAdminApiBaseUrl?: string;
 }
 
@@ -104,7 +105,7 @@ export async function fetchPnpActionMetadata(
   fetchImpl: typeof fetch = fetch,
 ): Promise<readonly AdminActionMetadataDto[]> {
   if (isRunnerMode(config.executionMode)) {
-    return fetchRunnerActionMetadata(config.runnerBaseUrl, fetchImpl);
+    return fetchRunnerActionMetadata(config, fetchImpl);
   }
   if (config.executionMode === PNP_OPS_LEGACY_MODE) {
     return fetchLegacyActionMetadata(resolveLegacyBaseUrl(config), tokenProvider, fetchImpl);
@@ -120,7 +121,7 @@ export async function runPnpPreflight(
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsPreflightResponse> {
   if (isRunnerMode(config.executionMode)) {
-    return runRunnerPreflight(config.runnerBaseUrl, actionKey, commandInput, fetchImpl);
+    return runRunnerPreflight(config, actionKey, commandInput, fetchImpl);
   }
   return runLegacyPreflight(resolveLegacyBaseUrl(config), actionKey, commandInput, tokenProvider, fetchImpl);
 }
@@ -133,7 +134,7 @@ export async function launchPnpRun(
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunLaunchResponse> {
   if (isRunnerMode(config.executionMode)) {
-    return launchRunnerRun(config.runnerBaseUrl, actionKey, commandInput, fetchImpl);
+    return launchRunnerRun(config, actionKey, commandInput, fetchImpl);
   }
   return launchLegacyRun(resolveLegacyBaseUrl(config), actionKey, commandInput, tokenProvider, fetchImpl);
 }
@@ -145,7 +146,7 @@ export async function fetchPnpRun(
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunEnvelope> {
   if (isRunnerMode(config.executionMode)) {
-    return fetchRunnerRun(config.runnerBaseUrl, runId, fetchImpl);
+    return fetchRunnerRun(config, runId, fetchImpl);
   }
   return fetchLegacyRun(resolveLegacyBaseUrl(config), runId, tokenProvider, fetchImpl);
 }
@@ -157,8 +158,7 @@ export async function fetchPnpRunEvidence(
   fetchImpl: typeof fetch = fetch,
 ): Promise<PnpOpsRunEvidenceResponse> {
   if (isRunnerMode(config.executionMode)) {
-    return fetchRunnerRunEvidence(config.runnerBaseUrl, runId, fetchImpl);
+    return fetchRunnerRunEvidence(config, runId, fetchImpl);
   }
   return fetchLegacyRunEvidence(resolveLegacyBaseUrl(config), runId, tokenProvider, fetchImpl);
 }
-

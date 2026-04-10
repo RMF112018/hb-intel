@@ -5,7 +5,9 @@ import { URL } from 'node:url';
 import { getActions } from './actionCatalog.js';
 import { readRunnerConfig } from './config.js';
 import { LocalRunnerService } from './runService.js';
-import type { PreflightRequest, RunLaunchRequest } from './types.js';
+import type { PreflightRequest, RunLaunchRequest, RunnerConfig } from './types.js';
+
+const RUNNER_API_KEY_HEADER = 'x-pnp-runner-key';
 
 function writeJson(res: ServerResponse, statusCode: number, body: unknown, origin: string | null): void {
   const payload = JSON.stringify(body);
@@ -48,6 +50,24 @@ function matchPath(pathname: string): {
   return { isRunById: false, isRunEvidence: false, isArtifactDownload: false };
 }
 
+export function isAuthExemptPath(pathname: string): boolean {
+  return pathname === '/health';
+}
+
+export function isAuthorizedRequest(
+  method: string,
+  pathname: string,
+  headers: IncomingMessage['headers'],
+  config: RunnerConfig,
+): boolean {
+  if (method === 'OPTIONS' || !config.authRequired || isAuthExemptPath(pathname)) {
+    return true;
+  }
+  const provided = headers[RUNNER_API_KEY_HEADER];
+  const providedKey = Array.isArray(provided) ? provided[0] : provided;
+  return typeof providedKey === 'string' && providedKey.trim().length > 0 && providedKey === config.apiKey;
+}
+
 export async function startRunnerServer(): Promise<https.Server> {
   const config = readRunnerConfig();
   const service = new LocalRunnerService(config);
@@ -73,15 +93,20 @@ export async function startRunnerServer(): Promise<https.Server> {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Vary', 'Origin');
       }
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Pnp-Runner-Key');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
       res.end();
       return;
     }
 
+    if (!isAuthorizedRequest(method, parsed.pathname, req.headers, config)) {
+      writeJson(res, 401, { error: 'Runner API key is missing or invalid.' }, origin);
+      return;
+    }
+
     try {
       if (method === 'GET' && parsed.pathname === '/health') {
-        writeJson(res, 200, { data: { healthy: true, mode: 'local-runner', timestamp: new Date().toISOString() } }, origin);
+        writeJson(res, 200, { data: { healthy: true, mode: config.profile, timestamp: new Date().toISOString() } }, origin);
         return;
       }
       if (method === 'GET' && parsed.pathname === '/capabilities') {
@@ -90,8 +115,10 @@ export async function startRunnerServer(): Promise<https.Server> {
           200,
           {
             data: {
-              mode: 'local-runner',
+              mode: config.profile,
               authMode: config.authMode,
+              authRequired: config.authRequired,
+              authScheme: config.authRequired ? 'api-key' : 'none',
               actions: getActions().map((action) => action.actionKey),
               host: config.host,
               port: config.port,

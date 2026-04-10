@@ -15,6 +15,7 @@ export interface PnpOpsFormValidationResult {
 export interface PnpOpsRuntimeValidationConfig {
   readonly executionMode: PnpOpsExecutionMode;
   readonly runnerBaseUrl?: string;
+  readonly runnerApiKey?: string;
   readonly legacyAdminApiBaseUrl?: string;
 }
 
@@ -40,6 +41,7 @@ export function validatePnpOpsForm(
   const errors: string[] = [];
   const targetSiteUrl = state.targetSiteUrl.trim();
   const runnerBaseUrl = runtime.runnerBaseUrl?.trim() ?? '';
+  const runnerApiKey = runtime.runnerApiKey?.trim() ?? '';
   const legacyBaseUrl = runtime.legacyAdminApiBaseUrl?.trim() ?? '';
 
   if (!action) {
@@ -57,6 +59,21 @@ export function validatePnpOpsForm(
         }
       } catch {
         errors.push('Runner base URL must be a valid absolute URL.');
+      }
+    }
+  }
+  if (runtime.executionMode === 'remote-runner') {
+    if (!runnerApiKey) {
+      errors.push('remote-runner mode requires `runnerApiKey`.');
+    }
+    if (runnerBaseUrl) {
+      try {
+        const parsed = new URL(runnerBaseUrl);
+        if (parsed.protocol !== 'https:') {
+          errors.push('remote-runner mode requires an HTTPS runner base URL.');
+        }
+      } catch {
+        // URL parse failure is already reported by generic runner URL validation.
       }
     }
   }

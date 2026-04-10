@@ -12,6 +12,7 @@ export type PnpOpsExecutionMode =
 export interface PnpOpsRunnerConfig {
   readonly executionMode: PnpOpsExecutionMode;
   readonly runnerBaseUrl: string;
+  readonly runnerApiKey?: string;
   readonly defaultTargetSiteUrl: string;
   readonly legacyAdminApiBaseUrl?: string;
   readonly mockMode?: boolean;
