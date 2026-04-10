@@ -1,17 +1,63 @@
 /**
  * Shared governance UI primitives for HB Kudos surfaces.
  *
- * Extracted from repeated local patterns in KudosDetailPanelContent,
- * HbKudosCompanion, and HbKudos archive to avoid duplication and
- * ensure consistent premium governance visual grammar.
+ * Provides tokenized visual grammar for the governance workspace so
+ * consumers avoid duplicating hardcoded inline color/spacing values.
  *
  * These live in the webpart shared layer (not @hbc/ui-kit) because
  * they compose @hbc/ui-kit/homepage primitives and are specific to
  * the kudos governance domain. Promotion to ui-kit is appropriate
  * if/when other governance surfaces reuse them.
+ *
+ * All imports stay within the @hbc/ui-kit/homepage boundary.
  */
 import * as React from 'react';
-import { HbcStatusBadge } from '@hbc/ui-kit/homepage';
+import { HbcStatusBadge, HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
+
+// ---------------------------------------------------------------------------
+// Governance design tokens
+// ---------------------------------------------------------------------------
+
+export const KUDOS_GOV_TOKENS = {
+  // Brand
+  brandBlue: '#225391',
+  brandOrange: '#e57e46',
+  dangerRed: '#c4314b',
+  warningOrange: '#c26434',
+
+  // Text hierarchy — rgba(26, 19, 16, X)
+  textPrimary: '#1a1310',
+  textHeading: '#0a1b33',
+  textSecondary: 'rgba(26, 19, 16, 0.72)',
+  textTertiary: 'rgba(26, 19, 16, 0.62)',
+  textMuted: 'rgba(26, 19, 16, 0.55)',
+  textFaint: 'rgba(26, 19, 16, 0.48)',
+  textCaption: 'rgba(26, 19, 16, 0.45)',
+  textDisabled: 'rgba(26, 19, 16, 0.4)',
+
+  // Blue opacity — rgba(34, 83, 145, X)
+  blueSubtle04: 'rgba(34, 83, 145, 0.04)',
+  blueSubtle06: 'rgba(34, 83, 145, 0.06)',
+  blueSubtle08: 'rgba(34, 83, 145, 0.08)',
+  blueSubtle12: 'rgba(34, 83, 145, 0.12)',
+  blueSubtle14: 'rgba(34, 83, 145, 0.14)',
+  blueSubtle18: 'rgba(34, 83, 145, 0.18)',
+  blueSubtle20: 'rgba(34, 83, 145, 0.2)',
+  blueText82: 'rgba(34, 83, 145, 0.82)',
+
+  // Orange opacity — rgba(229, 126, 70, X)
+  orangeSubtle10: 'rgba(229, 126, 70, 0.10)',
+  orangeSubtle18: 'rgba(229, 126, 70, 0.18)',
+  orangeSubtle22: 'rgba(229, 126, 70, 0.22)',
+  orangeSubtle25: 'rgba(229, 126, 70, 0.25)',
+  orangeSubtle28: 'rgba(229, 126, 70, 0.28)',
+
+  // Danger opacity — rgba(196, 49, 75, X)
+  dangerSubtle08: 'rgba(196, 49, 75, 0.08)',
+  dangerSubtle22: 'rgba(196, 49, 75, 0.22)',
+  dangerSubtle55: 'rgba(196, 49, 75, 0.55)',
+  dangerItalic72: 'rgba(196, 49, 75, 0.72)',
+} as const;
 
 // ---------------------------------------------------------------------------
 // SectionHeading — governance metadata section label
@@ -25,7 +71,7 @@ export function KudosSectionHeading({ children }: { children: React.ReactNode })
         fontWeight: 800,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
-        color: 'rgba(26, 19, 16, 0.55)',
+        color: KUDOS_GOV_TOKENS.textMuted,
         marginBottom: 8,
       }}
     >
@@ -41,8 +87,8 @@ export function KudosSectionHeading({ children }: { children: React.ReactNode })
 export function KudosInfoRow({ label, value }: { label: string; value?: string }): React.JSX.Element | null {
   if (!value?.trim()) return null;
   return (
-    <div style={{ fontSize: '0.8125rem', lineHeight: 1.55, color: 'rgba(26, 19, 16, 0.72)', marginBottom: 6 }}>
-      <span style={{ fontWeight: 700, color: 'rgba(26, 19, 16, 0.62)' }}>{label}:</span> {value}
+    <div style={{ fontSize: '0.8125rem', lineHeight: 1.55, color: KUDOS_GOV_TOKENS.textSecondary, marginBottom: 6 }}>
+      <span style={{ fontWeight: 700, color: KUDOS_GOV_TOKENS.textTertiary }}>{label}:</span> {value}
     </div>
   );
 }
@@ -54,9 +100,9 @@ export function KudosInfoRow({ label, value }: { label: string; value?: string }
 export type GovernanceActionTone = 'info' | 'warning' | 'danger';
 
 const TONE_COLORS: Record<GovernanceActionTone, string> = {
-  danger: '#c4314b',
-  warning: '#c26434',
-  info: '#225391',
+  danger: KUDOS_GOV_TOKENS.dangerRed,
+  warning: KUDOS_GOV_TOKENS.warningOrange,
+  info: KUDOS_GOV_TOKENS.brandBlue,
 };
 
 export function KudosActionButton({
@@ -81,7 +127,7 @@ export function KudosActionButton({
         borderRadius: 8,
         border: `1.5px solid ${toneColor}`,
         background: disabled ? 'rgba(128, 128, 128, 0.08)' : '#ffffff',
-        color: disabled ? 'rgba(26, 19, 16, 0.4)' : toneColor,
+        color: disabled ? KUDOS_GOV_TOKENS.textDisabled : toneColor,
         fontSize: '0.6875rem',
         fontWeight: 800,
         letterSpacing: '0.02em',
@@ -91,6 +137,227 @@ export function KudosActionButton({
     >
       {label}
     </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TabButton — governance queue tab
+// ---------------------------------------------------------------------------
+
+export function KudosGovernanceTabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}): React.JSX.Element {
+  return (
+    <button
+      role="tab"
+      aria-selected={active}
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: '8px 14px',
+        borderRadius: 999,
+        border: '1.5px solid',
+        borderColor: active ? KUDOS_GOV_TOKENS.brandBlue : KUDOS_GOV_TOKENS.blueSubtle18,
+        background: active ? KUDOS_GOV_TOKENS.brandBlue : '#ffffff',
+        color: active ? '#ffffff' : 'rgba(26, 19, 16, 0.68)',
+        fontSize: '0.75rem',
+        fontWeight: 800,
+        letterSpacing: '0.02em',
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ToggleChip — governance filter toggle
+// ---------------------------------------------------------------------------
+
+export function KudosGovernanceToggleChip({
+  label,
+  active,
+  onToggle,
+}: {
+  label: string;
+  active: boolean;
+  onToggle: () => void;
+}): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={active}
+      style={{
+        padding: '5px 12px',
+        fontSize: '0.6875rem',
+        fontWeight: 800,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+        borderRadius: 999,
+        border: '1.5px solid',
+        borderColor: active ? KUDOS_GOV_TOKENS.brandBlue : KUDOS_GOV_TOKENS.blueSubtle20,
+        background: active ? KUDOS_GOV_TOKENS.blueSubtle12 : '#ffffff',
+        color: active ? KUDOS_GOV_TOKENS.brandBlue : KUDOS_GOV_TOKENS.textMuted,
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ToolbarLabel — inline uppercase field label
+// ---------------------------------------------------------------------------
+
+export function KudosGovernanceToolbarLabel({ children }: { children: React.ReactNode }): React.JSX.Element {
+  return (
+    <span
+      style={{
+        fontSize: '0.6875rem',
+        fontWeight: 800,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        color: KUDOS_GOV_TOKENS.textMuted,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ErrorAlert — governance error message
+// ---------------------------------------------------------------------------
+
+export function KudosGovernanceErrorAlert({ message }: { message: string }): React.JSX.Element {
+  return (
+    <div
+      role="alert"
+      style={{
+        padding: '10px 12px',
+        borderRadius: 8,
+        background: KUDOS_GOV_TOKENS.dangerSubtle08,
+        border: `1px solid ${KUDOS_GOV_TOKENS.dangerSubtle22}`,
+        color: KUDOS_GOV_TOKENS.dangerRed,
+        fontSize: '0.8125rem',
+        fontWeight: 600,
+      }}
+    >
+      {message}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// InputDialog — governance action input dialog (replaces window.prompt)
+// ---------------------------------------------------------------------------
+
+export interface KudosGovernanceInputDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (value: string) => void;
+  title: string;
+  description?: string;
+  placeholder?: string;
+  defaultValue?: string;
+  confirmLabel?: string;
+  /** Render a <select> instead of a text input. */
+  choices?: readonly { value: string; label: string }[];
+  /** When true, empty input is accepted (e.g. optional expiry). */
+  allowEmpty?: boolean;
+}
+
+export function KudosGovernanceInputDialog({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  placeholder,
+  defaultValue,
+  confirmLabel,
+  choices,
+  allowEmpty,
+}: KudosGovernanceInputDialogProps): React.JSX.Element {
+  const [draft, setDraft] = React.useState(defaultValue ?? (choices?.[0]?.value ?? ''));
+
+  // Reset draft when dialog opens with a new default.
+  React.useEffect(() => {
+    if (open) {
+      setDraft(defaultValue ?? (choices?.[0]?.value ?? ''));
+    }
+  }, [open, defaultValue, choices]);
+
+  const handleConfirm = (): void => {
+    if (!allowEmpty && !draft.trim()) return;
+    onConfirm(draft);
+    onClose();
+  };
+
+  return (
+    <HbcKudosComposerFlyout
+      open={open}
+      onClose={onClose}
+      title={title}
+      primaryAction={{
+        label: confirmLabel ?? 'Confirm',
+        onClick: handleConfirm,
+      }}
+      secondaryAction={{ label: 'Cancel', onClick: onClose }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {description ? (
+          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.55, color: KUDOS_GOV_TOKENS.textSecondary }}>
+            {description}
+          </p>
+        ) : null}
+        {choices ? (
+          <select
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            style={{
+              padding: '8px 10px',
+              fontSize: '0.875rem',
+              borderRadius: 8,
+              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
+              fontFamily: 'inherit',
+            }}
+          >
+            {choices.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
+            placeholder={placeholder}
+            autoFocus
+            style={{
+              padding: '8px 10px',
+              fontSize: '0.875rem',
+              borderRadius: 8,
+              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
+              outline: 'none',
+              fontFamily: 'inherit',
+            }}
+          />
+        )}
+      </div>
+    </HbcKudosComposerFlyout>
   );
 }
 
@@ -130,12 +397,12 @@ export function KudosAuditTimelineBlock({
   }
 
   if (loading) {
-    return <div style={{ fontSize: '0.75rem', color: 'rgba(26, 19, 16, 0.5)' }}>Loading timeline…</div>;
+    return <div style={{ fontSize: '0.75rem', color: KUDOS_GOV_TOKENS.textMuted }}>Loading timeline…</div>;
   }
 
   if (events.length === 0) {
     return (
-      <div style={{ fontSize: '0.75rem', color: 'rgba(26, 19, 16, 0.5)' }}>
+      <div style={{ fontSize: '0.75rem', color: KUDOS_GOV_TOKENS.textMuted }}>
         {fallbackText ?? 'No timeline events.'}
       </div>
     );
@@ -153,7 +420,7 @@ export function KudosAuditTimelineBlock({
             fontSize: '0.75rem',
             lineHeight: 1.5,
             paddingBottom: 6,
-            borderBottom: '1px solid rgba(229, 126, 70, 0.10)',
+            borderBottom: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle10}`,
           }}
         >
           <HbcStatusBadge
@@ -162,14 +429,14 @@ export function KudosAuditTimelineBlock({
             label={mapLabel(evt.eventType)}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: 'rgba(26, 19, 16, 0.62)', fontWeight: 600 }}>
+            <div style={{ color: KUDOS_GOV_TOKENS.textTertiary, fontWeight: 600 }}>
               {evt.actorDisplayName ?? 'System'} · {new Date(evt.eventAt).toLocaleString()}
             </div>
             {evt.publicNote ? (
-              <div style={{ color: 'rgba(26, 19, 16, 0.58)', marginTop: 2 }}>{evt.publicNote}</div>
+              <div style={{ color: KUDOS_GOV_TOKENS.textFaint, marginTop: 2 }}>{evt.publicNote}</div>
             ) : null}
             {showInternalNotes && evt.internalNote ? (
-              <div style={{ color: 'rgba(196, 49, 75, 0.72)', marginTop: 2, fontStyle: 'italic' }}>
+              <div style={{ color: KUDOS_GOV_TOKENS.dangerItalic72, marginTop: 2, fontStyle: 'italic' }}>
                 Internal: {evt.internalNote}
               </div>
             ) : null}

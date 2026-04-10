@@ -61,7 +61,15 @@ import {
   type KudosRole,
 } from '../../homepage/helpers/kudosCapabilities.js';
 import { resolveKudosRole } from '../../homepage/helpers/kudosRoleResolver.js';
-import { KudosActionButton } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import {
+  KUDOS_GOV_TOKENS,
+  KudosActionButton,
+  KudosGovernanceTabButton,
+  KudosGovernanceToggleChip,
+  KudosGovernanceToolbarLabel,
+  KudosGovernanceErrorAlert,
+  KudosGovernanceInputDialog,
+} from '../../homepage/shared/KudosGovernancePrimitives.js';
 import {
   deriveKudosOverdueStatus,
   findKudosReminderTargets,
@@ -387,8 +395,8 @@ function QueueRow({
                 textTransform: 'uppercase',
                 padding: '3px 8px',
                 borderRadius: 999,
-                background: 'rgba(34, 83, 145, 0.08)',
-                color: '#225391',
+                background: KUDOS_GOV_TOKENS.blueSubtle08,
+                color: KUDOS_GOV_TOKENS.brandBlue,
               }}
             >
               {AGING_LABEL[aging]}
@@ -408,7 +416,7 @@ function QueueRow({
               fontSize: '1rem',
               fontWeight: 800,
               letterSpacing: '-0.015em',
-              color: '#1a1310',
+              color: KUDOS_GOV_TOKENS.textPrimary,
             }}
           >
             {entry.headline}
@@ -418,7 +426,7 @@ function QueueRow({
               margin: '0 0 10px',
               fontSize: '0.8125rem',
               lineHeight: 1.55,
-              color: 'rgba(26, 19, 16, 0.68)',
+              color: KUDOS_GOV_TOKENS.textSecondary,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -441,7 +449,7 @@ function QueueRow({
               <span
                 style={{
                   fontSize: '0.75rem',
-                  color: 'rgba(26, 19, 16, 0.58)',
+                  color: KUDOS_GOV_TOKENS.textFaint,
                   fontWeight: 600,
                 }}
               >
@@ -450,7 +458,7 @@ function QueueRow({
               <span
                 style={{
                   fontSize: '0.6875rem',
-                  color: 'rgba(26, 19, 16, 0.48)',
+                  color: KUDOS_GOV_TOKENS.textFaint,
                   fontWeight: 500,
                   marginLeft: 'auto',
                 }}
@@ -465,7 +473,7 @@ function QueueRow({
           <span
             style={{
               fontSize: '0.6875rem',
-              color: 'rgba(26, 19, 16, 0.45)',
+              color: KUDOS_GOV_TOKENS.textCaption,
               fontWeight: 600,
             }}
           >
@@ -552,22 +560,7 @@ function DetailPanel({
             timelineLoading={timelineLoading}
           />
 
-          {error ? (
-            <div
-              role="alert"
-              style={{
-                padding: '10px 12px',
-                borderRadius: 8,
-                background: 'rgba(196, 49, 75, 0.08)',
-                border: '1px solid rgba(196, 49, 75, 0.22)',
-                color: '#c4314b',
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-              }}
-            >
-              {error}
-            </div>
-          ) : null}
+          {error ? <KudosGovernanceErrorAlert message={error} /> : null}
 
           <div
             role="group"
@@ -577,7 +570,7 @@ function DetailPanel({
               flexWrap: 'wrap',
               gap: 8,
               paddingTop: 6,
-              borderTop: '1px dashed rgba(229, 126, 70, 0.22)',
+              borderTop: `1px dashed ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
             }}
           >
             <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" />
@@ -680,6 +673,21 @@ export function HbKudosCompanion({
   const [dispatching, setDispatching] = React.useState(false);
   const [actionError, setActionError] = React.useState<string | undefined>();
 
+  // Governance input dialog state — replaces window.prompt calls.
+  const [inputDialog, setInputDialog] = React.useState<{
+    kind: DetailActionKind;
+    title: string;
+    description?: string;
+    placeholder?: string;
+    defaultValue?: string;
+    confirmLabel?: string;
+    choices?: readonly { value: string; label: string }[];
+    allowEmpty?: boolean;
+  } | null>(null);
+
+  // Two-phase updateContent: after headline is confirmed, prompt for excerpt.
+  const [pendingUpdateHeadline, setPendingUpdateHeadline] = React.useState<string | undefined>();
+
   const now = nowIso ?? new Date().toISOString();
 
   // Resolve the current user's SharePoint ID for ownership filtering.
@@ -729,88 +737,12 @@ export function HbKudosCompanion({
 
   const clearSelection = React.useCallback(() => setSelectedIds(new Set()), []);
 
-  const handleDetailAction = React.useCallback(
-    async (kind: DetailActionKind) => {
+  // Dispatch a governance patch — shared by both immediate actions and
+  // dialog-confirmed actions. Separated from action routing so the
+  // dialog confirm handler can call it without duplicating network code.
+  const dispatchGovernancePatch = React.useCallback(
+    async (patch: KudosPatch) => {
       if (!detailEntry) return;
-      setActionError(undefined);
-      let patch: KudosPatch;
-      if (kind === 'reject') {
-        // eslint-disable-next-line no-alert
-        const reason = window.prompt('Rejection reason?');
-        if (!reason || !reason.trim()) return;
-        patch = { kind: 'reject', kudosId: detailEntry.id, rejectionReason: reason.trim() };
-      } else if (kind === 'requestRevision') {
-        // eslint-disable-next-line no-alert
-        const guidance = window.prompt('Revision guidance for the submitter?');
-        if (!guidance || !guidance.trim()) return;
-        patch = { kind: 'requestRevision', kudosId: detailEntry.id, revisionGuidance: guidance.trim() };
-      } else if (kind === 'flagAdminReview') {
-        // eslint-disable-next-line no-alert
-        const reason = window.prompt('Admin review reason?');
-        if (!reason || !reason.trim()) return;
-        patch = { kind: 'flagAdminReview', kudosId: detailEntry.id, adminReviewReason: reason.trim() };
-      } else if (kind === 'clearAdminReview') {
-        patch = { kind: 'clearAdminReview', kudosId: detailEntry.id };
-      } else if (kind === 'schedule') {
-        // eslint-disable-next-line no-alert
-        const dateStr = window.prompt('Scheduled publish date (ISO)?');
-        if (!dateStr?.trim()) return;
-        patch = { kind: 'schedule', kudosId: detailEntry.id, scheduledPublishAtIso: dateStr.trim() };
-      } else if (kind === 'unschedule') {
-        patch = { kind: 'unschedule', kudosId: detailEntry.id };
-      } else if (kind === 'pin') {
-        // eslint-disable-next-line no-alert
-        const orderStr = window.prompt('Pin order (1-3)?', '1');
-        const pinOrder = Number(orderStr);
-        patch = { kind: 'pin', kudosId: detailEntry.id, pinOrder: Number.isFinite(pinOrder) ? pinOrder : undefined };
-      } else if (kind === 'unpin') {
-        patch = { kind: 'unpin', kudosId: detailEntry.id };
-      } else if (kind === 'feature') {
-        // eslint-disable-next-line no-alert
-        const expiresStr = window.prompt('Featured expires at (ISO, optional)?');
-        patch = { kind: 'feature', kudosId: detailEntry.id, featuredExpiresAtIso: expiresStr?.trim() || undefined };
-      } else if (kind === 'unfeature') {
-        patch = { kind: 'unfeature', kudosId: detailEntry.id };
-      } else if (kind === 'remove') {
-        // eslint-disable-next-line no-alert
-        const reason = window.prompt('Removal reason?');
-        if (!reason?.trim()) return;
-        patch = { kind: 'remove', kudosId: detailEntry.id, removedReason: reason.trim() };
-      } else if (kind === 'restore') {
-        patch = { kind: 'restore', kudosId: detailEntry.id };
-      } else if (kind === 'claim') {
-        patch = { kind: 'claim', kudosId: detailEntry.id };
-      } else if (kind === 'reassign') {
-        // eslint-disable-next-line no-alert
-        const userIdStr = window.prompt('SharePoint user ID to reassign to?');
-        const assignedUserId = Number(userIdStr);
-        if (!Number.isFinite(assignedUserId) || assignedUserId <= 0) return;
-        patch = { kind: 'reassign', kudosId: detailEntry.id, assignedUserId };
-      } else if (kind === 'reopen') {
-        // eslint-disable-next-line no-alert
-        const target = window.prompt('Reopen to which status? Enter "pending" or "revision"');
-        if (!target?.trim()) return;
-        const targetStatus = target.trim().toLowerCase().startsWith('revision') ? 'revisionRequested' as const : 'pending' as const;
-        patch = { kind: 'reopen', kudosId: detailEntry.id, targetStatus };
-      } else if (kind === 'updateContent') {
-        // eslint-disable-next-line no-alert
-        const headline = window.prompt('Updated headline (leave blank to keep current)?', detailEntry.headline ?? '');
-        if (headline === null) return;
-        // eslint-disable-next-line no-alert
-        const excerpt = window.prompt('Updated excerpt (leave blank to keep current)?', detailEntry.excerpt ?? '');
-        if (excerpt === null) return;
-        const patchFields: { headline?: string; excerpt?: string } = {};
-        if (headline.trim() && headline.trim() !== (detailEntry.headline ?? '')) patchFields.headline = headline.trim();
-        if (excerpt.trim() && excerpt.trim() !== (detailEntry.excerpt ?? '')) patchFields.excerpt = excerpt.trim();
-        if (Object.keys(patchFields).length === 0) return;
-        patch = { kind: 'updateContent', kudosId: detailEntry.id, ...patchFields };
-      } else if (kind === 'celebrate') {
-        const currentCount = detailEntry.celebrateCount ?? 0;
-        patch = { kind: 'celebrate', kudosId: detailEntry.id, nextCount: currentCount + 1 };
-      } else {
-        patch = { kind: 'approve', kudosId: detailEntry.id };
-      }
-
       const siteUrl = getSiteUrl();
       if (!siteUrl) {
         setActionError('SharePoint site context is not available.');
@@ -839,7 +771,146 @@ export function HbKudosCompanion({
         setDispatching(false);
       }
     },
-    [detailEntry, identity?.email],
+    [detailEntry, identity?.email, role],
+  );
+
+  // Phase A: route detail actions. Actions requiring input open the
+  // dialog; no-input actions dispatch immediately.
+  const handleDetailAction = React.useCallback(
+    (kind: DetailActionKind) => {
+      if (!detailEntry) return;
+      setActionError(undefined);
+
+      // Actions that dispatch immediately (no input needed).
+      switch (kind) {
+        case 'approve':
+          void dispatchGovernancePatch({ kind: 'approve', kudosId: detailEntry.id });
+          return;
+        case 'clearAdminReview':
+          void dispatchGovernancePatch({ kind: 'clearAdminReview', kudosId: detailEntry.id });
+          return;
+        case 'unschedule':
+          void dispatchGovernancePatch({ kind: 'unschedule', kudosId: detailEntry.id });
+          return;
+        case 'unpin':
+          void dispatchGovernancePatch({ kind: 'unpin', kudosId: detailEntry.id });
+          return;
+        case 'unfeature':
+          void dispatchGovernancePatch({ kind: 'unfeature', kudosId: detailEntry.id });
+          return;
+        case 'restore':
+          void dispatchGovernancePatch({ kind: 'restore', kudosId: detailEntry.id });
+          return;
+        case 'claim':
+          void dispatchGovernancePatch({ kind: 'claim', kudosId: detailEntry.id });
+          return;
+        case 'celebrate': {
+          const currentCount = detailEntry.celebrateCount ?? 0;
+          void dispatchGovernancePatch({ kind: 'celebrate', kudosId: detailEntry.id, nextCount: currentCount + 1 });
+          return;
+        }
+        default:
+          break;
+      }
+
+      // Actions that require dialog input.
+      const dialogMap: Record<string, Omit<NonNullable<typeof inputDialog>, 'kind'>> = {
+        reject: { title: 'Rejection reason', description: 'Provide a submitter-facing reason for the rejection.', placeholder: 'Enter rejection reason…' },
+        requestRevision: { title: 'Revision guidance', description: 'Provide guidance so the submitter knows what to change.', placeholder: 'Enter revision guidance…' },
+        flagAdminReview: { title: 'Admin review reason', description: 'Why does this item need admin review?', placeholder: 'Enter reason…' },
+        schedule: { title: 'Scheduled publish date', description: 'Enter the date/time when this item should go live.', placeholder: 'e.g. 2026-05-01T09:00:00Z' },
+        pin: { title: 'Pin order', description: 'Select the pin slot (1 is highest).', choices: [{ value: '1', label: '1 — Top' }, { value: '2', label: '2 — Middle' }, { value: '3', label: '3 — Bottom' }] },
+        feature: { title: 'Featured expiry date', description: 'When should the featured status expire? Leave empty for default.', placeholder: 'e.g. 2026-06-01T00:00:00Z', allowEmpty: true },
+        remove: { title: 'Removal reason', description: 'Provide a reason for removing this item from public view.', placeholder: 'Enter removal reason…' },
+        reassign: { title: 'Reassign to user', description: 'Enter the SharePoint user ID of the new assignee.', placeholder: 'e.g. 42' },
+        reopen: { title: 'Reopen to status', description: 'Choose which status the item should return to.', choices: [{ value: 'pending', label: 'Pending review' }, { value: 'revisionRequested', label: 'Revision requested' }] },
+        updateContent: { title: 'Edit headline', description: 'Update the recognition headline.', placeholder: 'Enter updated headline…', defaultValue: detailEntry.headline ?? '', confirmLabel: 'Next: excerpt' },
+      };
+
+      const config = dialogMap[kind];
+      if (config) {
+        setInputDialog({ kind, ...config });
+      }
+    },
+    [detailEntry, dispatchGovernancePatch],
+  );
+
+  // Phase B: dialog confirm handler — build the patch from the dialog
+  // value and dispatch.
+  const handleInputDialogConfirm = React.useCallback(
+    (value: string) => {
+      if (!detailEntry || !inputDialog) return;
+      const kind = inputDialog.kind;
+
+      // Special two-phase flow for updateContent: headline → excerpt.
+      if (kind === 'updateContent' && pendingUpdateHeadline === undefined) {
+        setPendingUpdateHeadline(value);
+        setInputDialog({
+          kind: 'updateContent',
+          title: 'Edit excerpt',
+          description: 'Update the recognition excerpt.',
+          placeholder: 'Enter updated excerpt…',
+          defaultValue: detailEntry.excerpt ?? '',
+          confirmLabel: 'Save changes',
+        });
+        return;
+      }
+
+      setInputDialog(null);
+
+      let patch: KudosPatch;
+      switch (kind) {
+        case 'reject':
+          patch = { kind: 'reject', kudosId: detailEntry.id, rejectionReason: value.trim() };
+          break;
+        case 'requestRevision':
+          patch = { kind: 'requestRevision', kudosId: detailEntry.id, revisionGuidance: value.trim() };
+          break;
+        case 'flagAdminReview':
+          patch = { kind: 'flagAdminReview', kudosId: detailEntry.id, adminReviewReason: value.trim() };
+          break;
+        case 'schedule':
+          patch = { kind: 'schedule', kudosId: detailEntry.id, scheduledPublishAtIso: value.trim() };
+          break;
+        case 'pin': {
+          const pinOrder = Number(value);
+          patch = { kind: 'pin', kudosId: detailEntry.id, pinOrder: Number.isFinite(pinOrder) ? pinOrder : undefined };
+          break;
+        }
+        case 'feature':
+          patch = { kind: 'feature', kudosId: detailEntry.id, featuredExpiresAtIso: value.trim() || undefined };
+          break;
+        case 'remove':
+          patch = { kind: 'remove', kudosId: detailEntry.id, removedReason: value.trim() };
+          break;
+        case 'reassign': {
+          const assignedUserId = Number(value);
+          if (!Number.isFinite(assignedUserId) || assignedUserId <= 0) return;
+          patch = { kind: 'reassign', kudosId: detailEntry.id, assignedUserId };
+          break;
+        }
+        case 'reopen': {
+          const targetStatus = value.startsWith('revision') ? 'revisionRequested' as const : 'pending' as const;
+          patch = { kind: 'reopen', kudosId: detailEntry.id, targetStatus };
+          break;
+        }
+        case 'updateContent': {
+          const patchFields: { headline?: string; excerpt?: string } = {};
+          const hl = (pendingUpdateHeadline ?? '').trim();
+          if (hl && hl !== (detailEntry.headline ?? '')) patchFields.headline = hl;
+          const ex = value.trim();
+          if (ex && ex !== (detailEntry.excerpt ?? '')) patchFields.excerpt = ex;
+          setPendingUpdateHeadline(undefined);
+          if (Object.keys(patchFields).length === 0) return;
+          patch = { kind: 'updateContent', kudosId: detailEntry.id, ...patchFields };
+          break;
+        }
+        default:
+          return;
+      }
+      void dispatchGovernancePatch(patch);
+    },
+    [detailEntry, inputDialog, pendingUpdateHeadline, dispatchGovernancePatch],
   );
 
   const handleBulkApprove = React.useCallback(async () => {
@@ -952,7 +1023,7 @@ export function HbKudosCompanion({
           justifyContent: 'space-between',
           gap: 16,
           padding: '8px 4px 16px',
-          borderBottom: '1px solid rgba(229, 126, 70, 0.18)',
+          borderBottom: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle18}`,
         }}
       >
         <div>
@@ -962,7 +1033,7 @@ export function HbKudosCompanion({
               fontWeight: 800,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              color: '#225391',
+              color: KUDOS_GOV_TOKENS.brandBlue,
               marginBottom: 4,
             }}
           >
@@ -974,7 +1045,7 @@ export function HbKudosCompanion({
               fontSize: '1.375rem',
               fontWeight: 800,
               letterSpacing: '-0.02em',
-              color: '#0a1b33',
+              color: KUDOS_GOV_TOKENS.textHeading,
             }}
           >
             {heading}
@@ -998,33 +1069,14 @@ export function HbKudosCompanion({
 
       {/* Tabs */}
       <div role="tablist" aria-label="Queue tabs" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {COMPANION_TABS.map((tab) => {
-          const active = tab.id === filter.tabId;
-          return (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={active}
-              type="button"
-              onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
-              style={{
-                padding: '8px 14px',
-                borderRadius: 999,
-                border: '1.5px solid',
-                borderColor: active ? '#225391' : 'rgba(34, 83, 145, 0.18)',
-                background: active ? '#225391' : '#ffffff',
-                color: active ? '#ffffff' : 'rgba(26, 19, 16, 0.68)',
-                fontSize: '0.75rem',
-                fontWeight: 800,
-                letterSpacing: '0.02em',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+        {COMPANION_TABS.map((tab) => (
+          <KudosGovernanceTabButton
+            key={tab.id}
+            label={tab.label}
+            active={tab.id === filter.tabId}
+            onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
+          />
+        ))}
       </div>
 
       {/* Toolbar */}
@@ -1038,22 +1090,12 @@ export function HbKudosCompanion({
           flexWrap: 'wrap',
           padding: '10px 12px',
           borderRadius: 10,
-          background: 'rgba(34, 83, 145, 0.04)',
-          border: '1px solid rgba(34, 83, 145, 0.14)',
+          background: KUDOS_GOV_TOKENS.blueSubtle04,
+          border: `1px solid ${KUDOS_GOV_TOKENS.blueSubtle14}`,
         }}
       >
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span
-            style={{
-              fontSize: '0.6875rem',
-              fontWeight: 800,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'rgba(26, 19, 16, 0.55)',
-            }}
-          >
-            Search
-          </span>
+          <KudosGovernanceToolbarLabel>Search</KudosGovernanceToolbarLabel>
           <input
             type="search"
             value={filter.searchText ?? ''}
@@ -1063,7 +1105,7 @@ export function HbKudosCompanion({
               padding: '6px 10px',
               fontSize: '0.8125rem',
               borderRadius: 8,
-              border: '1px solid rgba(229, 126, 70, 0.28)',
+              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
               outline: 'none',
               minWidth: 200,
             }}
@@ -1071,17 +1113,7 @@ export function HbKudosCompanion({
         </label>
 
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span
-            style={{
-              fontSize: '0.6875rem',
-              fontWeight: 800,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'rgba(26, 19, 16, 0.55)',
-            }}
-          >
-            Ownership
-          </span>
+          <KudosGovernanceToolbarLabel>Ownership</KudosGovernanceToolbarLabel>
           <select
             value={filter.ownership}
             onChange={(e) =>
@@ -1094,7 +1126,7 @@ export function HbKudosCompanion({
               padding: '6px 8px',
               fontSize: '0.8125rem',
               borderRadius: 8,
-              border: '1px solid rgba(229, 126, 70, 0.28)',
+              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
             }}
           >
             <option value="all">All</option>
@@ -1104,12 +1136,12 @@ export function HbKudosCompanion({
           </select>
         </label>
 
-        <ToggleChip
+        <KudosGovernanceToggleChip
           label="Flagged for admin"
           active={filter.adminReviewOnly}
           onToggle={() => dispatch({ type: 'toggleAdminReviewOnly' })}
         />
-        <ToggleChip
+        <KudosGovernanceToggleChip
           label="Scheduled only"
           active={filter.scheduledOnly}
           onToggle={() => dispatch({ type: 'toggleScheduledOnly' })}
@@ -1125,11 +1157,11 @@ export function HbKudosCompanion({
             gap: 12,
             padding: '10px 14px',
             borderRadius: 10,
-            background: 'linear-gradient(90deg, rgba(229, 126, 70, 0.10), rgba(34, 83, 145, 0.06))',
-            border: '1px solid rgba(229, 126, 70, 0.25)',
+            background: `linear-gradient(90deg, ${KUDOS_GOV_TOKENS.orangeSubtle10}, ${KUDOS_GOV_TOKENS.blueSubtle06})`,
+            border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle25}`,
           }}
         >
-          <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1a1310' }}>
+          <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: KUDOS_GOV_TOKENS.textPrimary }}>
             {selectedIds.size} selected
           </span>
           <button
@@ -1141,7 +1173,7 @@ export function HbKudosCompanion({
               fontSize: '0.75rem',
               fontWeight: 800,
               color: '#ffffff',
-              background: 'linear-gradient(135deg, #e57e46 0%, #d4693a 100%)',
+              background: `linear-gradient(135deg, ${KUDOS_GOV_TOKENS.brandOrange} 0%, #d4693a 100%)`,
               border: 'none',
               borderRadius: 8,
               cursor: dispatching ? 'not-allowed' : 'pointer',
@@ -1157,7 +1189,7 @@ export function HbKudosCompanion({
               padding: '6px 10px',
               fontSize: '0.75rem',
               fontWeight: 700,
-              color: 'rgba(26, 19, 16, 0.62)',
+              color: KUDOS_GOV_TOKENS.textTertiary,
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
@@ -1168,22 +1200,7 @@ export function HbKudosCompanion({
         </div>
       ) : null}
 
-      {actionError ? (
-        <div
-          role="alert"
-          style={{
-            padding: '10px 12px',
-            borderRadius: 8,
-            background: 'rgba(196, 49, 75, 0.08)',
-            border: '1px solid rgba(196, 49, 75, 0.22)',
-            color: '#c4314b',
-            fontSize: '0.8125rem',
-            fontWeight: 600,
-          }}
-        >
-          {actionError}
-        </div>
-      ) : null}
+      {actionError ? <KudosGovernanceErrorAlert message={actionError} /> : null}
 
       {/* Queue list */}
       {queue.length === 0 ? (
@@ -1220,44 +1237,21 @@ export function HbKudosCompanion({
         error={actionError}
         onAction={(kind) => void handleDetailAction(kind)}
       />
+
+      <KudosGovernanceInputDialog
+        open={inputDialog !== null}
+        onClose={() => { setInputDialog(null); setPendingUpdateHeadline(undefined); }}
+        onConfirm={handleInputDialogConfirm}
+        title={inputDialog?.title ?? ''}
+        description={inputDialog?.description}
+        placeholder={inputDialog?.placeholder}
+        defaultValue={inputDialog?.defaultValue}
+        confirmLabel={inputDialog?.confirmLabel}
+        choices={inputDialog?.choices}
+        allowEmpty={inputDialog?.allowEmpty}
+      />
     </section>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Toggle chip (local helper)
-// ---------------------------------------------------------------------------
-
-function ToggleChip({
-  label,
-  active,
-  onToggle,
-}: {
-  label: string;
-  active: boolean;
-  onToggle: () => void;
-}): React.JSX.Element {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={active}
-      style={{
-        padding: '5px 12px',
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.04em',
-        textTransform: 'uppercase',
-        borderRadius: 999,
-        border: '1.5px solid',
-        borderColor: active ? '#225391' : 'rgba(34, 83, 145, 0.2)',
-        background: active ? 'rgba(34, 83, 145, 0.12)' : '#ffffff',
-        color: active ? '#225391' : 'rgba(26, 19, 16, 0.55)',
-        cursor: 'pointer',
-        fontFamily: 'inherit',
-      }}
-    >
-      {label}
-    </button>
-  );
-}
+// ToggleChip promoted to KudosGovernanceToggleChip in shared governance primitives.

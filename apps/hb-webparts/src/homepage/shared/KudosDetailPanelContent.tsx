@@ -27,6 +27,7 @@ import {
 import type { KudosAuditTimelineEntry } from '../data/kudosGovernanceWriter.js';
 import type { KudosRole } from '../helpers/kudosCapabilities.js';
 import {
+  KUDOS_GOV_TOKENS,
   KudosSectionHeading,
   KudosInfoRow,
   KudosAuditTimelineBlock,
@@ -71,14 +72,14 @@ export function KudosDetailPanelContent({
       ) : null}
 
       {/* Recognition content */}
-      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.6, color: 'rgba(26, 19, 16, 0.8)' }}>
+      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.6, color: KUDOS_GOV_TOKENS.textSecondary }}>
         {entry.excerpt}
       </p>
 
       {entry.details && (isPublic || isGovernance) ? (
         <div>
           <KudosSectionHeading>Additional details</KudosSectionHeading>
-          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.6, color: 'rgba(26, 19, 16, 0.68)' }}>
+          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.6, color: KUDOS_GOV_TOKENS.textSecondary }}>
             {entry.details}
           </p>
         </div>
@@ -98,7 +99,7 @@ export function KudosDetailPanelContent({
               size="md"
               max={6}
             />
-            <span style={{ fontSize: '0.8125rem', color: 'rgba(26, 19, 16, 0.68)', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.8125rem', color: KUDOS_GOV_TOKENS.textSecondary, fontWeight: 600 }}>
               {summary.label}
             </span>
           </div>
@@ -152,10 +153,10 @@ export function KudosDetailPanelContent({
           style={{
             padding: '10px 12px',
             borderRadius: 10,
-            background: 'rgba(34, 83, 145, 0.06)',
-            border: '1px solid rgba(34, 83, 145, 0.14)',
+            background: KUDOS_GOV_TOKENS.blueSubtle06,
+            border: `1px solid ${KUDOS_GOV_TOKENS.blueSubtle14}`,
             fontSize: '0.75rem',
-            color: 'rgba(34, 83, 145, 0.82)',
+            color: KUDOS_GOV_TOKENS.blueText82,
             fontWeight: 600,
             lineHeight: 1.5,
           }}
