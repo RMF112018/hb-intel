@@ -66,6 +66,10 @@ Unless local HEAD proves a narrow conflict, the agent should assume:
 - `Prompt-04-High-ROI-Additional-PnP-Operations.md`
 - `Prompt-04-Action-Selection-Note.md`
 - `Prompt-05-Validation-Packaging-and-Operator-Guide.md`
+- `Prompt-05-Validation-Evidence.md`
+- `Prompt-05-Packaging-Proof.md`
+- `Prompt-05-Operator-Guide.md`
+- `Prompt-05-Completion-Report.md`
 
 ## Prompt-01 repo truth note
 
@@ -135,6 +139,22 @@ This includes:
   - navigation export summary,
   - deeper site-inventory variant,
   - mutating/admin-center expansion.
+
+## Prompt-05 repo truth note
+
+Prompt-05 validation/packaging/operator closure artifacts are landed in:
+
+- `docs/architecture/plans/MASTER/spfx/pnp/phase-01/Prompt-05-Validation-Evidence.md`
+- `docs/architecture/plans/MASTER/spfx/pnp/phase-01/Prompt-05-Packaging-Proof.md`
+- `docs/architecture/plans/MASTER/spfx/pnp/phase-01/Prompt-05-Operator-Guide.md`
+- `docs/architecture/plans/MASTER/spfx/pnp/phase-01/Prompt-05-Completion-Report.md`
+
+This closure includes:
+
+- command-level validation evidence for backend and PnP webpart scope,
+- explicit separation of live-vs-mock/local coverage and unresolved live-runtime prerequisites,
+- package proof for `dist/sppkg/hb-webparts.sppkg` with PnP Ops component registration evidence,
+- and a concise operator runbook for prerequisites, supported actions, run steps, and artifact downloads.
 
 ## Mandatory operating rules for the agent
 
