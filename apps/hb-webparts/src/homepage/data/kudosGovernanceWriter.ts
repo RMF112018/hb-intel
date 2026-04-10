@@ -35,6 +35,14 @@ import type {
   KudosPatch,
 } from '../webparts/kudosContracts.js';
 import { deriveKudosCapabilities, type KudosRole } from '../helpers/kudosCapabilities.js';
+import { buildKudosNotificationIntents } from '../helpers/kudosNotificationBuilder.js';
+import { dispatchKudosNotifications } from './kudosNotificationDispatch.js';
+import {
+  validateFeatureAction,
+  validatePinAction,
+  validateReassignmentAuthority,
+  type ProminenceSlotState,
+} from '../helpers/kudosProminenceRules.js';
 
 // ---------------------------------------------------------------------------
 // Public result shape
@@ -113,6 +121,42 @@ export async function fetchKudosItemMeta(
 
   const etag = raw['@odata.etag'] ?? raw['odata.etag'] ?? '*';
   return { itemId: raw.Id, etag, kudosId: raw.KudosId };
+}
+
+// ---------------------------------------------------------------------------
+// Prominence slot counting
+// ---------------------------------------------------------------------------
+
+/**
+ * Count the current number of featured and pinned items on the live
+ * kudos list. Used by prominence rule validation before executing
+ * pin/feature actions.
+ */
+export async function fetchProminenceSlotState(
+  siteUrl: string,
+): Promise<ProminenceSlotState> {
+  const baseUrl = buildPcListItemsEndpoint(
+    siteUrl,
+    PEOPLE_CULTURE_LIST_REGISTRY.kudos,
+  );
+  const countFeatured = fetch(
+    `${baseUrl}?$filter=${KUDOS_FIELDS.IsFeatured} eq true&$select=Id&$top=10`,
+    { headers: { Accept: 'application/json;odata=nometadata' } },
+  )
+    .then((r) => (r.ok ? r.json() : { value: [] }))
+    .then((b: { value?: unknown[] }) => b.value?.length ?? 0)
+    .catch(() => 0);
+
+  const countPinned = fetch(
+    `${baseUrl}?$filter=${KUDOS_FIELDS.IsPinned} eq true&$select=Id&$top=10`,
+    { headers: { Accept: 'application/json;odata=nometadata' } },
+  )
+    .then((r) => (r.ok ? r.json() : { value: [] }))
+    .then((b: { value?: unknown[] }) => b.value?.length ?? 0)
+    .catch(() => 0);
+
+  const [featuredCount, pinnedCount] = await Promise.all([countFeatured, countPinned]);
+  return { featuredCount, pinnedCount };
 }
 
 // ---------------------------------------------------------------------------
@@ -874,7 +918,16 @@ export async function executeKudosPatch(
 export async function submitKudosGovernanceAction(
   siteUrl: string,
   patch: KudosPatch,
-  options: { actorEmail?: string; callerRole?: KudosRole } = {},
+  options: {
+    actorEmail?: string;
+    callerRole?: KudosRole;
+    /** Item headline for notification content. */
+    headline?: string;
+    /** True when the item's wasEverPublished was false before this action. */
+    isFirstPublish?: boolean;
+    /** True when the item is currently flagged for admin review (for reassign authority). */
+    itemIsFlaggedForAdminReview?: boolean;
+  } = {},
 ): Promise<KudosGovernanceResult> {
   if (!siteUrl) {
     return { ok: false, error: 'SharePoint site context is not available.' };
@@ -897,6 +950,36 @@ export async function submitKudosGovernanceAction(
       }
     }
 
+    // Prominence rule enforcement: validate slot limits before writing.
+    if (enrichedPatch.kind === 'feature') {
+      const slots = await fetchProminenceSlotState(siteUrl);
+      const validation = validateFeatureAction(
+        slots,
+        enrichedPatch.featuredExpiresAtIso,
+      );
+      if (!validation.ok) {
+        return { ok: false, error: validation.error! };
+      }
+    }
+    if (enrichedPatch.kind === 'pin') {
+      const slots = await fetchProminenceSlotState(siteUrl);
+      const validation = validatePinAction(slots);
+      if (!validation.ok) {
+        return { ok: false, error: validation.error! };
+      }
+    }
+
+    // State-aware reassignment authority: flagged items require admin.
+    if (enrichedPatch.kind === 'reassign' && options.callerRole) {
+      const reassignError = validateReassignmentAuthority(
+        options.callerRole,
+        options.itemIsFlaggedForAdminReview === true,
+      );
+      if (reassignError) {
+        return { ok: false, error: reassignError };
+      }
+    }
+
     const meta = await fetchKudosItemMeta(siteUrl, enrichedPatch.kudosId);
     if (!meta) {
       return {
@@ -905,7 +988,29 @@ export async function submitKudosGovernanceAction(
       };
     }
 
-    return await executeKudosPatch(siteUrl, digest, meta, enrichedPatch);
+    const result = await executeKudosPatch(siteUrl, digest, meta, enrichedPatch);
+
+    // Dispatch notifications after successful governance actions.
+    if (result.ok) {
+      const isApproval = enrichedPatch.kind === 'approve';
+      const notificationIntents = buildKudosNotificationIntents({
+        eventType: enrichedPatch.kind === 'requestRevision' ? 'revisionRequested' : enrichedPatch.kind as Parameters<typeof buildKudosNotificationIntents>[0]['eventType'],
+        kudosId: enrichedPatch.kudosId,
+        headline: options.headline ?? enrichedPatch.kudosId,
+        isLive: isApproval,
+        isFirstPublish: isApproval && options.isFirstPublish === true,
+        reason: 'rejectionReason' in enrichedPatch
+          ? (enrichedPatch as { rejectionReason?: string }).rejectionReason
+          : 'revisionGuidance' in enrichedPatch
+            ? (enrichedPatch as { revisionGuidance?: string }).revisionGuidance
+            : undefined,
+      });
+      if (notificationIntents.length > 0) {
+        dispatchKudosNotifications(notificationIntents);
+      }
+    }
+
+    return result;
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected governance write failure.';
     return { ok: false, error: message };

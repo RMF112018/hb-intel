@@ -61,6 +61,13 @@ import {
   type KudosRole,
 } from '../../homepage/helpers/kudosCapabilities.js';
 import { resolveKudosRole } from '../../homepage/helpers/kudosRoleResolver.js';
+import {
+  deriveKudosOverdueStatus,
+  findKudosReminderTargets,
+  DEFAULT_KUDOS_OVERDUE_THRESHOLDS,
+  type KudosOverdueStatus,
+  type KudosOverdueThresholds,
+} from '../../homepage/helpers/kudosNotificationBuilder.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import {
   buildKudosRecipientSummary,
@@ -279,6 +286,7 @@ interface QueueRowProps {
   nowIso: string;
   selected: boolean;
   selectable: boolean;
+  overdueStatus: KudosOverdueStatus;
   onToggleSelect: (id: string) => void;
   onOpenDetail: (entry: KudosEntry) => void;
 }
@@ -296,6 +304,7 @@ function QueueRow({
   nowIso,
   selected,
   selectable,
+  overdueStatus,
   onToggleSelect,
   onOpenDetail,
 }: QueueRowProps): React.JSX.Element {
@@ -385,6 +394,11 @@ function QueueRow({
             </span>
             {flagged ? (
               <HbcStatusBadge variant="warning" size="small" label="Flagged for admin" />
+            ) : null}
+            {overdueStatus === 'overdue' ? (
+              <HbcStatusBadge variant="critical" size="small" label="Overdue" />
+            ) : overdueStatus === 'approaching' ? (
+              <HbcStatusBadge variant="warning" size="small" label="Approaching due" />
             ) : null}
           </div>
           <h4
@@ -680,6 +694,12 @@ export function HbKudosCompanion({
   }, [config?.kudosAdminsGroup, config?.kudosReviewersGroup, config?.simulatedRole, identity?.email]);
   const capabilities = React.useMemo(() => deriveKudosCapabilities(role), [role]);
 
+  // Configurable overdue thresholds from webpart properties.
+  const overdueThresholds: KudosOverdueThresholds = React.useMemo(() => ({
+    pendingOverdueDays: typeof config?.pendingOverdueDays === 'number' ? config.pendingOverdueDays : DEFAULT_KUDOS_OVERDUE_THRESHOLDS.pendingOverdueDays,
+    adminReviewOverdueDays: typeof config?.adminReviewOverdueDays === 'number' ? config.adminReviewOverdueDays : DEFAULT_KUDOS_OVERDUE_THRESHOLDS.adminReviewOverdueDays,
+  }), [config?.pendingOverdueDays, config?.adminReviewOverdueDays]);
+
   const { listConfig, isLoading } = usePeopleCultureData();
   const allKudos: KudosEntry[] = React.useMemo(() => listConfig?.kudos ?? [], [listConfig?.kudos]);
 
@@ -700,6 +720,28 @@ export function HbKudosCompanion({
   const queue = React.useMemo(
     () => applyCompanionFilter(allKudos, filter, now, currentUserId),
     [allKudos, filter, now, currentUserId],
+  );
+
+  // Compute overdue status per queue entry for visual indicators.
+  const overdueMap = React.useMemo(() => {
+    const map = new Map<string, KudosOverdueStatus>();
+    for (const entry of queue) {
+      const ws = entry.workflowStatus;
+      if (ws === 'pending' || ws === 'revisionRequested') {
+        map.set(entry.id, deriveKudosOverdueStatus(entry.submittedDate, now, overdueThresholds.pendingOverdueDays));
+      } else if (entry.isFlaggedForAdminReview === true) {
+        map.set(entry.id, deriveKudosOverdueStatus(entry.submittedDate, now, overdueThresholds.adminReviewOverdueDays));
+      } else {
+        map.set(entry.id, 'ok');
+      }
+    }
+    return map;
+  }, [queue, now, overdueThresholds]);
+
+  // Compute reminder targets for the header summary badge.
+  const reminderTargets = React.useMemo(
+    () => findKudosReminderTargets(allKudos, now, overdueThresholds),
+    [allKudos, now, overdueThresholds],
   );
 
   const toggleSelect = React.useCallback((id: string) => {
@@ -790,7 +832,13 @@ export function HbKudosCompanion({
         const result = await submitKudosGovernanceAction(
           siteUrl,
           patch,
-          { actorEmail: identity?.email, callerRole: role },
+          {
+            actorEmail: identity?.email,
+            callerRole: role,
+            headline: detailEntry.headline,
+            isFirstPublish: patch.kind === 'approve' && detailEntry.wasEverPublished !== true,
+            itemIsFlaggedForAdminReview: detailEntry.isFlaggedForAdminReview === true,
+          },
         );
         if (!result.ok) {
           setActionError(result.error);
@@ -828,7 +876,12 @@ export function HbKudosCompanion({
         const result = await submitKudosGovernanceAction(
           siteUrl,
           { kind: 'approve', kudosId: entry.id },
-          { actorEmail: identity?.email, callerRole: role },
+          {
+            actorEmail: identity?.email,
+            callerRole: role,
+            headline: entry.headline,
+            isFirstPublish: entry.wasEverPublished !== true,
+          },
         );
         if (!result.ok) failures += 1;
       }
@@ -920,11 +973,20 @@ export function HbKudosCompanion({
             {heading}
           </h2>
         </div>
-        <HbcStatusBadge
-          variant={role === 'admin' ? 'critical' : role === 'reviewer' ? 'info' : 'warning'}
-          size="small"
-          label={KUDOS_ROLE_LABELS[role]}
-        />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {reminderTargets.length > 0 ? (
+            <HbcStatusBadge
+              variant="warning"
+              size="small"
+              label={`${reminderTargets.length} overdue`}
+            />
+          ) : null}
+          <HbcStatusBadge
+            variant={role === 'admin' ? 'critical' : role === 'reviewer' ? 'info' : 'warning'}
+            size="small"
+            label={KUDOS_ROLE_LABELS[role]}
+          />
+        </div>
       </header>
 
       {/* Tabs */}
@@ -1131,6 +1193,7 @@ export function HbKudosCompanion({
               nowIso={now}
               selected={selectedIds.has(entry.id)}
               selectable={selectable}
+              overdueStatus={overdueMap.get(entry.id) ?? 'ok'}
               onToggleSelect={toggleSelect}
               onOpenDetail={(e) => {
                 setDetailEntry(e);
