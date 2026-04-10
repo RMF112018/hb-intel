@@ -141,4 +141,20 @@ describe('pnpOpsValidation', () => {
     expect(result.errors.join(' ')).toContain('requires `runnerApiKey`');
     expect(result.errors.join(' ')).toContain('requires an HTTPS runner base URL');
   });
+
+  it('requires HTTPS for local-runner when host is not loopback', () => {
+    const action = PNP_V1_ACTIONS.find((entry) => entry.key === 'sharepoint-control:extraction:site-template');
+    const result = validatePnpOpsForm(action, {
+      targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      listFilterInput: '',
+      pageFilterInput: '',
+    }, {
+      executionMode: 'local-runner',
+      runnerBaseUrl: 'http://runner.internal:5010',
+      runnerApiKey: '',
+      legacyAdminApiBaseUrl: '',
+    });
+    expect(result.isValid).toBe(false);
+    expect(result.errors.join(' ')).toContain('local-runner mode requires HTTPS');
+  });
 });

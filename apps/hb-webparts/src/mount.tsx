@@ -136,6 +136,15 @@ export async function mount(
     : undefined;
   const renderWebPart = WEBPART_RENDERERS[webPartId];
 
+  if (webPartId === '9e2dd84a-a121-4fb3-a964-f43a94abf9fd' && pnpExecutionMode === PNP_OPS_LEGACY_MODE && !getApiToken) {
+    console.warn('[hb-webparts mount] PnP Ops is configured in legacy-admin-api mode without token-provider prerequisites.', {
+      webPartId,
+      executionMode: pnpExecutionMode,
+      hasBackendAudience: Boolean(backendAudience),
+      hasSpfxContext: Boolean(spfxContext),
+    });
+  }
+
   root = createRoot(el);
   if (renderWebPart) {
     root.render(
@@ -146,6 +155,26 @@ export async function mount(
         siteUrl,
         getApiToken,
       }),
+    );
+    return;
+  }
+  if (webPartId) {
+    console.error('[hb-webparts mount] Unknown webPartId requested by shell runtime.', {
+      webPartId,
+      knownWebPartIds: Object.keys(WEBPART_RENDERERS),
+    });
+    root.render(
+      createElement('section', {
+        role: 'alert',
+        style: {
+          border: '1px solid #d13438',
+          background: '#fdf3f4',
+          color: '#242424',
+          padding: '12px',
+          borderRadius: '4px',
+          fontFamily: 'Segoe UI, Arial, sans-serif',
+        },
+      }, `Unsupported webPartId "${webPartId}" in hb-webparts mount map. Check packaged manifest linkage and shell-entry mapping.`),
     );
     return;
   }

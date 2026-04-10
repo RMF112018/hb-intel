@@ -142,6 +142,36 @@ function getEndpointLabel(runtime: PnpOpsRuntimeConfig): string {
   return runtime.runnerBaseUrl;
 }
 
+function isLoopbackHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '::1';
+}
+
+function getRunnerModeWarning(runtime: PnpOpsRuntimeConfig): string | null {
+  if (runtime.executionMode !== 'local-runner' && runtime.executionMode !== 'remote-runner') {
+    return null;
+  }
+  if (!runtime.runnerBaseUrl) {
+    return `${runtime.executionMode} is selected but \`runnerBaseUrl\` is not configured.`;
+  }
+  try {
+    const parsed = new URL(runtime.runnerBaseUrl);
+    if (runtime.executionMode === 'local-runner') {
+      const isLocalHttp = parsed.protocol === 'http:' && isLoopbackHost(parsed.hostname);
+      if (parsed.protocol !== 'https:' && !isLocalHttp) {
+        return 'local-runner should use HTTPS (HTTP is only acceptable for loopback hosts such as localhost/127.0.0.1).';
+      }
+      return null;
+    }
+    if (parsed.protocol !== 'https:') {
+      return 'remote-runner requires an HTTPS `runnerBaseUrl`.';
+    }
+  } catch {
+    return 'Runner base URL must be a valid absolute URL.';
+  }
+  return null;
+}
+
 function formatServiceError(error: unknown, runtime: PnpOpsRuntimeConfig): string {
   const message = error instanceof Error ? error.message : String(error);
   if (runtime.executionMode === 'local-runner' && /fetch|network|certificate|tls|self[- ]signed/i.test(message)) {
@@ -246,6 +276,7 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
     () => actionCatalog.find((action) => action.key === selectedActionKey) ?? null,
     [actionCatalog, selectedActionKey],
   );
+  const runnerModeWarning = React.useMemo(() => getRunnerModeWarning(runtime), [runtime]);
 
   const loadCatalog = React.useCallback(async (): Promise<void> => {
     if (runtime.executionMode === 'mock') {
@@ -487,9 +518,9 @@ export function PnpOps({ config, identity, getApiToken }: PnpOpsProps): React.JS
           so SPFx can acquire a bearer token for legacy `/api/admin/*` calls.
         </HbcBanner>
       )}
-      {(runtime.executionMode === 'local-runner' || runtime.executionMode === 'remote-runner') && !runtime.runnerBaseUrl && (
+      {runnerModeWarning && (
         <HbcBanner variant="warning">
-          {runtime.executionMode} is selected but `runnerBaseUrl` is not configured.
+          {runnerModeWarning}
         </HbcBanner>
       )}
       {runtime.executionMode === 'remote-runner' && !runtime.runnerApiKey && (

@@ -19,6 +19,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 import {
   type IPropertyPaneConfiguration,
+  PropertyPaneDropdown,
   PropertyPaneTextField,
   PropertyPaneSlider,
 } from '@microsoft/sp-property-pane';
@@ -40,6 +41,7 @@ interface IAppModule {
 const HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
 const KUDOS_WEBPART_ID = 'f14e59a3-4d6b-43b2-952e-ba02dea11dad';
 const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
+const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 
 interface IShellWebPartProperties {
   /** Author-configurable background image URL for the Signature Hero. */
@@ -56,14 +58,73 @@ interface IShellWebPartProperties {
   pendingOverdueDays?: number;
   /** Days before admin-review items are flagged overdue in the companion. */
   adminReviewOverdueDays?: number;
+  /** PnP execution mode selection. */
+  executionMode?: 'local-runner' | 'remote-runner' | 'mock' | 'legacy-admin-api';
+  /** Runner service base URL for local/remote mode. */
+  runnerBaseUrl?: string;
+  /** Shared secret for remote-runner auth. */
+  runnerApiKey?: string;
+  /** Optional prefilled target site URL in PnP UI. */
+  defaultTargetSiteUrl?: string;
+  /** Explicit legacy admin API base URL. */
+  legacyAdminApiBaseUrl?: string;
+  /** @deprecated Legacy compatibility only. */
+  backendUrl?: string;
+  /** @deprecated Legacy compatibility only. */
+  backendAudience?: string;
 }
 
 export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
   private _appModule: IAppModule | undefined;
   private _assetBaseUrl = '';
+  private _diagnosticId = '';
+
+  private getModeSpecificGuidance(): string {
+    const mode = this.properties.executionMode ?? 'local-runner';
+    if (mode === 'local-runner') {
+      return 'Verify runnerBaseUrl is configured, reachable over HTTPS, and its certificate is trusted by the browser.';
+    }
+    if (mode === 'remote-runner') {
+      return 'Verify runnerBaseUrl is HTTPS, reachable from this page origin, and runnerApiKey matches the remote host configuration.';
+    }
+    if (mode === 'legacy-admin-api') {
+      return 'Verify legacyAdminApiBaseUrl/backendUrl is configured and backendAudience is set so SPFx can acquire a bearer token.';
+    }
+    return 'Mock mode bypasses live execution and is intended for non-production diagnostics only.';
+  }
+
+  private buildDiagnostics(bundleUrl: string): Record<string, unknown> {
+    const mode = this.properties.executionMode ?? 'local-runner';
+    return {
+      diagnosticId: this._diagnosticId,
+      webPartId: (this.manifest as any).id,
+      globalName: __APP_GLOBAL_NAME__,
+      bundleUrl,
+      executionMode: mode,
+      hasRunnerBaseUrl: Boolean(this.properties.runnerBaseUrl?.trim()),
+      hasLegacyEndpoint: Boolean(this.properties.legacyAdminApiBaseUrl?.trim() || this.properties.backendUrl?.trim()),
+      hasRunnerApiKey: Boolean(this.properties.runnerApiKey?.trim()),
+      hasBackendAudience: Boolean(this.properties.backendAudience?.trim()),
+    };
+  }
+
+  private renderErrorState(title: string, detail: string, diagnostics: Record<string, unknown>): void {
+    const guidance = this.getModeSpecificGuidance();
+    this.domElement.innerHTML = `
+      <div style="border:1px solid #d13438;background:#fdf3f4;color:#242424;padding:12px;border-radius:4px;">
+        <div style="font-weight:600;margin-bottom:6px;">${title}</div>
+        <div style="margin-bottom:6px;">${detail}</div>
+        <div style="margin-bottom:6px;">${guidance}</div>
+        <div style="font-family:Consolas,Menlo,monospace;font-size:12px;color:#605e5c;">
+          Diagnostic ID: ${(diagnostics.diagnosticId as string) || 'n/a'}
+        </div>
+      </div>
+    `;
+  }
 
   public async onInit(): Promise<void> {
     await super.onInit();
+    this._diagnosticId = `${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 8)}`;
 
     // Resolve the CDN base URL from the SPFx manifest loaderConfig.
     // When includeClientSideAssets is true, SharePoint rewrites the
@@ -100,9 +161,22 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
     //   1. loadScript return value (SPComponentLoader reads globalExportsName)
     //   2. globalThis[globalName]  (explicit publication from mount.tsx)
     //   3. window[globalName]      (legacy / IIFE var fallback)
-    const loadScriptResult = await SPComponentLoader.loadScript<IAppModule>(bundleUrl, {
-      globalExportsName: __APP_GLOBAL_NAME__,
-    });
+    const diagnostics = this.buildDiagnostics(bundleUrl);
+    let loadScriptResult: IAppModule | undefined;
+    try {
+      loadScriptResult = await SPComponentLoader.loadScript<IAppModule>(bundleUrl, {
+        globalExportsName: __APP_GLOBAL_NAME__,
+      });
+    } catch (error) {
+      console.error('[HB-Intel ShellWebPart] Bundle load failed.', {
+        ...diagnostics,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error(
+        `[HB-Intel] Failed to load app bundle ${bundleUrl}. ` +
+        `Diagnostic ID: ${this._diagnosticId}. ${this.getModeSpecificGuidance()}`,
+      );
+    }
 
     const explicitGlobal =
       (globalThis as any)[__APP_GLOBAL_NAME__] ??
@@ -113,6 +187,7 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
     // Hard-fail with actionable diagnostics if the module didn't resolve.
     if (!this._appModule?.mount || !this._appModule?.unmount) {
       console.error('[HB-Intel ShellWebPart] Module resolution failed.', {
+        ...diagnostics,
         bundleUrl,
         globalName: __APP_GLOBAL_NAME__,
         loadScriptResult: typeof loadScriptResult,
@@ -170,11 +245,30 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
       } catch {
         // Runtime constants not defined — app will fall back to Vite env or defaults
       }
-      this._appModule.mount(this.domElement, this.context, runtimeConfig);
+      const diagnostics = this.buildDiagnostics(this._assetBaseUrl + __APP_BUNDLE_NAME__);
+      void this._appModule.mount(this.domElement, this.context, runtimeConfig).catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('[HB-Intel ShellWebPart] mount() failed.', {
+          ...diagnostics,
+          runtimeConfig,
+          error: message,
+        });
+        this.renderErrorState(
+          'PnP/Webpart runtime mount failed.',
+          `The bundle loaded but mount() threw an error: ${message}`,
+          diagnostics,
+        );
+      });
     } else {
       // This path should be unreachable because onInit throws on missing module,
       // but defend against framework edge cases that skip onInit.
-      this.domElement.innerHTML = '<div style="padding:1rem;color:#a4262c;">App bundle failed to load.</div>';
+      const diagnostics = this.buildDiagnostics(this._assetBaseUrl + __APP_BUNDLE_NAME__);
+      console.error('[HB-Intel ShellWebPart] render() called without resolved app module.', diagnostics);
+      this.renderErrorState(
+        'App bundle failed to initialize.',
+        'The app module did not expose mount/unmount at render time.',
+        diagnostics,
+      );
     }
   }
 
@@ -291,6 +385,64 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                     label: 'Webpart heading',
                     description: 'Override the default heading displayed above the governance workspace.',
                     placeholder: 'HB Kudos Approval Companion',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (webPartId === PNP_OPS_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'PnP Operations Settings' },
+            groups: [
+              {
+                groupName: 'Execution Mode',
+                groupFields: [
+                  PropertyPaneDropdown('executionMode', {
+                    label: 'Execution mode',
+                    options: [
+                      { key: 'local-runner', text: 'local-runner (preferred live path)' },
+                      { key: 'remote-runner', text: 'remote-runner (fallback)' },
+                      { key: 'mock', text: 'mock (no live execution)' },
+                      { key: 'legacy-admin-api', text: 'legacy-admin-api (deprecated compatibility)' },
+                    ],
+                    selectedKey: this.properties.executionMode ?? 'local-runner',
+                  }),
+                  PropertyPaneTextField('runnerBaseUrl', {
+                    label: 'Runner base URL',
+                    description: 'Absolute URL for local/remote runner endpoints (for example https://127.0.0.1:5010).',
+                    placeholder: 'https://127.0.0.1:5010',
+                  }),
+                  PropertyPaneTextField('runnerApiKey', {
+                    label: 'Runner API key',
+                    description: 'Required for remote-runner mode; passed as runner auth header.',
+                  }),
+                  PropertyPaneTextField('defaultTargetSiteUrl', {
+                    label: 'Default target site URL',
+                    description: 'Optional SharePoint site URL prefilled in the PnP Operations form.',
+                    placeholder: 'https://<tenant>.sharepoint.com/sites/<site>',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Legacy Compatibility (Deprecated)',
+                groupFields: [
+                  PropertyPaneTextField('legacyAdminApiBaseUrl', {
+                    label: 'Legacy admin API base URL',
+                    description: 'Deprecated. Use only for controlled legacy /api/admin/* compatibility.',
+                  }),
+                  PropertyPaneTextField('backendUrl', {
+                    label: 'backendUrl (deprecated)',
+                    description: 'Deprecated compatibility field. Prefer legacyAdminApiBaseUrl.',
+                  }),
+                  PropertyPaneTextField('backendAudience', {
+                    label: 'backendAudience (deprecated)',
+                    description: 'Deprecated compatibility field used for SPFx bearer token acquisition in legacy mode.',
                   }),
                 ],
               },

@@ -22,6 +22,11 @@ export interface PnpOpsRuntimeValidationConfig {
 const SHAREPOINT_SITE_URL_PATTERN =
   /^https:\/\/[a-z0-9.-]+\.sharepoint\.com\/(sites|teams)\/[^/?#]+(?:\/.*)?$/i;
 
+function isLoopbackHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '::1';
+}
+
 export function isValidSharePointSiteUrl(candidate: string): boolean {
   return SHAREPOINT_SITE_URL_PATTERN.test(candidate.trim());
 }
@@ -54,8 +59,13 @@ export function validatePnpOpsForm(
     } else {
       try {
         const parsed = new URL(runnerBaseUrl);
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-          errors.push('Runner base URL must use http or https.');
+        if (runtime.executionMode === 'local-runner') {
+          const isLocalHttp = parsed.protocol === 'http:' && isLoopbackHost(parsed.hostname);
+          if (parsed.protocol !== 'https:' && !isLocalHttp) {
+            errors.push('local-runner mode requires HTTPS (HTTP is allowed only for loopback hosts like localhost/127.0.0.1).');
+          }
+        } else if (parsed.protocol !== 'https:') {
+          errors.push('remote-runner mode requires an HTTPS runner base URL.');
         }
       } catch {
         errors.push('Runner base URL must be a valid absolute URL.');
