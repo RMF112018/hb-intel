@@ -339,7 +339,6 @@ const BUCKET_CONFIG: Record<
     label: 'Individuals',
     placeholder: 'person@hedrickbrothers.com',
     hint: 'Press Enter to add each email address. Moderators resolve these to SharePoint people on approval.',
-    required: true,
   },
   teamLabels: {
     label: 'Teams',
@@ -387,7 +386,7 @@ function HbcKudosComposerTypedRecipients({
       </div>
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
       <div className={styles.hint}>
-        At least one individual email is required so HR can route the recognition to a real SharePoint person.
+        Add recipients in at least one bucket. Individual, team, department, and project group recipients can be combined.
       </div>
     </div>
   );

@@ -51,7 +51,7 @@ describe('HbKudos — typed composer hook integration', () => {
   // single click that updates then submits reads the stale draft. All
   // three tests split update + submit into separate clicks.
 
-  it('typed recipients mode blocks submit until an individual email is added', async () => {
+  it('typed recipients mode blocks submit until at least one recipient bucket is populated', async () => {
     const { useKudosComposer } = await import('../data/useKudosComposer.js');
     const submitSpy = vi.fn().mockResolvedValue(undefined);
 
@@ -83,7 +83,67 @@ describe('HbKudos — typed composer hook integration', () => {
               })
             }
           >
-            add
+            add individual
+          </button>
+          <button
+            data-testid="addTeamOnly"
+            onClick={() =>
+              actions.updateDraft({
+                recipients: {
+                  individualEmails: [],
+                  teamLabels: ['Field Safety'],
+                  departmentLabels: [],
+                  projectGroupLabels: [],
+                },
+              })
+            }
+          >
+            add team
+          </button>
+          <button
+            data-testid="addDeptOnly"
+            onClick={() =>
+              actions.updateDraft({
+                recipients: {
+                  individualEmails: [],
+                  teamLabels: [],
+                  departmentLabels: ['Construction Operations'],
+                  projectGroupLabels: [],
+                },
+              })
+            }
+          >
+            add dept
+          </button>
+          <button
+            data-testid="addProjectOnly"
+            onClick={() =>
+              actions.updateDraft({
+                recipients: {
+                  individualEmails: [],
+                  teamLabels: [],
+                  departmentLabels: [],
+                  projectGroupLabels: ['Downtown Tower'],
+                },
+              })
+            }
+          >
+            add project
+          </button>
+          <button
+            data-testid="addMixed"
+            onClick={() =>
+              actions.updateDraft({
+                recipients: {
+                  individualEmails: ['riley@hedrickbrothers.com'],
+                  teamLabels: ['Field Safety'],
+                  departmentLabels: [],
+                  projectGroupLabels: ['Downtown Tower'],
+                },
+              })
+            }
+          >
+            add mixed
           </button>
           <button data-testid="submitBtn" onClick={() => actions.submit()}>
             submit
@@ -98,20 +158,104 @@ describe('HbKudos — typed composer hook integration', () => {
     fireEvent.click(getByTestId('submitBtn'));
     await Promise.resolve();
     expect(getByTestId('recipientsError').textContent).toBe(
-      'Add at least one individual recipient email',
+      'Add at least one recipient in any bucket',
     );
     expect(submitSpy).not.toHaveBeenCalled();
 
     // Add a valid individual, then submit again.
     fireEvent.click(getByTestId('addIndividual'));
     fireEvent.click(getByTestId('submitBtn'));
-    // Allow microtasks to flush.
     await Promise.resolve();
     await Promise.resolve();
     expect(submitSpy).toHaveBeenCalled();
     const submittedDraft = submitSpy.mock.calls[0][0];
     expect(submittedDraft.recipients.individualEmails).toEqual(['riley@hedrickbrothers.com']);
     expect(submittedDraft.headline).toBe('Great work');
+  });
+
+  it('team-only submission validates and submits correctly', async () => {
+    const { useKudosComposer } = await import('../data/useKudosComposer.js');
+    const submitSpy = vi.fn().mockResolvedValue(undefined);
+
+    function Harness(): React.JSX.Element {
+      const { state, actions } = useKudosComposer(submitSpy, { recipientsMode: 'typed' });
+      return (
+        <div>
+          <span data-testid="recipientsError">{state.validationErrors.recipients ?? ''}</span>
+          <button
+            data-testid="fill"
+            onClick={() => {
+              actions.open();
+              actions.updateDraft({
+                headline: 'Team effort',
+                excerpt: 'Great teamwork',
+                recipients: {
+                  individualEmails: [],
+                  teamLabels: ['Field Safety'],
+                  departmentLabels: [],
+                  projectGroupLabels: [],
+                },
+              });
+            }}
+          >
+            fill
+          </button>
+          <button data-testid="submitBtn" onClick={() => actions.submit()}>submit</button>
+        </div>
+      );
+    }
+
+    const { getByTestId } = render(<Harness />);
+    fireEvent.click(getByTestId('fill'));
+    fireEvent.click(getByTestId('submitBtn'));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(getByTestId('recipientsError').textContent).toBe('');
+    expect(submitSpy).toHaveBeenCalled();
+    expect(submitSpy.mock.calls[0][0].recipients.teamLabels).toEqual(['Field Safety']);
+    expect(submitSpy.mock.calls[0][0].recipients.individualEmails).toEqual([]);
+  });
+
+  it('department-only and project-group-only submissions validate correctly', async () => {
+    const { useKudosComposer } = await import('../data/useKudosComposer.js');
+    const submitSpy = vi.fn().mockResolvedValue(undefined);
+
+    function Harness(): React.JSX.Element {
+      const { state, actions } = useKudosComposer(submitSpy, { recipientsMode: 'typed' });
+      return (
+        <div>
+          <span data-testid="recipientsError">{state.validationErrors.recipients ?? ''}</span>
+          <button
+            data-testid="fillDept"
+            onClick={() => {
+              actions.open();
+              actions.updateDraft({
+                headline: 'Dept recognition',
+                excerpt: 'Well done',
+                recipients: {
+                  individualEmails: [],
+                  teamLabels: [],
+                  departmentLabels: ['Construction Operations'],
+                  projectGroupLabels: [],
+                },
+              });
+            }}
+          >
+            fill
+          </button>
+          <button data-testid="submitBtn" onClick={() => actions.submit()}>submit</button>
+        </div>
+      );
+    }
+
+    const { getByTestId } = render(<Harness />);
+    fireEvent.click(getByTestId('fillDept'));
+    fireEvent.click(getByTestId('submitBtn'));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(getByTestId('recipientsError').textContent).toBe('');
+    expect(submitSpy).toHaveBeenCalled();
+    expect(submitSpy.mock.calls[0][0].recipients.departmentLabels).toEqual(['Construction Operations']);
   });
 
   it('typed recipients mode rejects obviously invalid email addresses', async () => {

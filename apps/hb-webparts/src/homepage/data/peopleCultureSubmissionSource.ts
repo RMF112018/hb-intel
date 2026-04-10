@@ -336,11 +336,16 @@ export async function submitKudosDraft(
 
   // Recipient validation: typed buckets take precedence when present,
   // otherwise fall back to the legacy text field for merged webpart callers.
+  // Any non-empty supported bucket combination is valid per the Decision Lock.
   const typedBuckets = draft.recipients;
-  const hasTypedIndividuals = (typedBuckets?.individualEmails.length ?? 0) > 0;
   if (typedBuckets) {
-    if (!hasTypedIndividuals) {
-      return { ok: false, error: 'At least one individual recipient email is required.' };
+    const hasAnyRecipient =
+      (typedBuckets.individualEmails.length ?? 0) > 0 ||
+      (typedBuckets.teamLabels.length ?? 0) > 0 ||
+      (typedBuckets.departmentLabels.length ?? 0) > 0 ||
+      (typedBuckets.projectGroupLabels.length ?? 0) > 0;
+    if (!hasAnyRecipient) {
+      return { ok: false, error: 'At least one recipient is required in any bucket.' };
     }
   } else if (!draft.recipientNames.trim()) {
     return { ok: false, error: 'At least one recipient is required.' };

@@ -84,9 +84,14 @@ function validate(
 
   if (mode === 'typed') {
     const buckets = draft.recipients ?? EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS;
-    if (buckets.individualEmails.length === 0) {
-      errors.recipients = 'Add at least one individual recipient email';
-    } else {
+    const hasAnyRecipient =
+      buckets.individualEmails.length > 0 ||
+      buckets.teamLabels.length > 0 ||
+      buckets.departmentLabels.length > 0 ||
+      buckets.projectGroupLabels.length > 0;
+    if (!hasAnyRecipient) {
+      errors.recipients = 'Add at least one recipient in any bucket';
+    } else if (buckets.individualEmails.length > 0) {
       const invalid = buckets.individualEmails.find((email) => !EMAIL_RE.test(email.trim()));
       if (invalid) {
         errors.recipients = `"${invalid}" does not look like a valid email address`;
