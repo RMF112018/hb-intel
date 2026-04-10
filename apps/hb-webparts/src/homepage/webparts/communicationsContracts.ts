@@ -235,6 +235,14 @@ export interface KudosEntry {
   prominenceFailureAt?: string;
   /** Mirrors the live `ProminenceFailureReason` field. */
   prominenceFailureReason?: string;
+  /** SharePoint user ID of the submitter (for associated-item access). */
+  submittedById?: number;
+  /** Individual recipient SharePoint user IDs (for associated-item access). */
+  recipientUserIds?: number[];
+  /** SharePoint user ID of the current claim owner. */
+  claimOwnerId?: number;
+  /** SharePoint user ID of the assigned owner. */
+  assignedOwnerId?: number;
 }
 
 // --- Band B: Weekly Celebrations ---

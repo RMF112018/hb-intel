@@ -68,12 +68,13 @@ import {
   buildKudosRecipientSummary,
   buildWorkflowChipDescriptor,
   isArchiveEligible,
+  isAssociatedVisible,
   isPubliclyVisible,
   type KudosEntry,
 } from '../../homepage/webparts/kudosContracts.js';
 import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
 import { fetchKudosAuditTimeline, submitKudosGovernanceAction, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
-import { getSiteUrl } from '../../homepage/data/spContext.js';
+import { getSiteUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -414,6 +415,12 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
 
   const { listConfig, isLoading } = usePeopleCultureData();
 
+  // Resolve current user ID for associated-item visibility.
+  const [currentUserId, setCurrentUserId] = React.useState<number | undefined>();
+  React.useEffect(() => {
+    resolveCurrentUserId().then(setCurrentUserId).catch(() => {});
+  }, []);
+
   const handleSubmit = React.useCallback(
     async (draft: Parameters<typeof submitKudosDraft>[0]) => {
       const result = await submitKudosDraft(draft, {
@@ -454,11 +461,17 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
     () =>
       sortByRecency(
         allKudos.filter((entry) => {
-          if (entry.workflowStatus) return isArchiveEligible(entry);
+          // Standard archive: approved, ever-published, not removed.
+          if (entry.workflowStatus) {
+            if (isArchiveEligible(entry)) return true;
+            // Associated-item access: submitter/recipients can see items
+            // that are no longer public but were once published.
+            return isAssociatedVisible(entry, currentUserId);
+          }
           return entry.status === 'approved';
         }),
       ),
-    [allKudos],
+    [allKudos, currentUserId],
   );
 
   const [archiveSearch, setArchiveSearch] = React.useState('');

@@ -129,15 +129,12 @@ export async function resolveUserId(siteUrl: string, email: string, digest: stri
  *   - `IsScheduled`        — `false` until HR schedules a publish time.
  *   - `CelebrateCount`     — initialized to 0.
  *
- * Typed recipient handling (Phase-14 kudos/ Prompt-02):
+ * Typed recipient handling:
  *   - `IndividualRecipientsId` (UserMulti) is resolved via
- *     `ensureUser` when the typed composer passes a list of
- *     individual emails. Unresolvable emails are skipped and
- *     collected in `ModeratorNotes` so HR can fix them during review.
+ *     `ensureUser` when the typed composer passes individual emails.
+ *     Unresolvable emails are collected in `ModeratorNotes` for HR.
  *   - `TeamRecipients` / `DepartmentRecipients` / `ProjectGroupRecipients`
- *     are taxonomy fields. Labels collected by the typed composer are
- *     captured in `ModeratorNotes` until a term-store lookup lands in
- *     a follow-up prompt; HR confirms the taxonomy match on approval.
+ *     are written directly as semicolon-delimited label strings.
  *
  * Not set on submission:
  *   - `CurrentVisibilityMode` — defaults to `internalOnly` on the
@@ -164,6 +161,10 @@ interface KudosListItemPayload {
   CelebrateCount: number;
   /** SharePoint UserMulti write convention: `{FieldName}Id: { results: [ids] }` */
   IndividualRecipientsId?: { results: number[] };
+  /** Taxonomy text fields — semicolon-delimited labels. */
+  TeamRecipients?: string;
+  DepartmentRecipients?: string;
+  ProjectGroupRecipients?: string;
 }
 
 export interface KudosTypedRecipientResolution {
@@ -271,9 +272,19 @@ function buildPayload(
     if (typedResolution.resolvedIndividualUserIds.length > 0) {
       payload.IndividualRecipientsId = { results: typedResolution.resolvedIndividualUserIds };
     }
-    const moderatorNotes = buildModeratorNotesFromTyped(typedResolution);
-    if (moderatorNotes) {
-      payload.ModeratorNotes = moderatorNotes;
+    // Write taxonomy labels directly to their real fields.
+    if (typedResolution.teamLabels.length > 0) {
+      payload.TeamRecipients = typedResolution.teamLabels.join(';');
+    }
+    if (typedResolution.departmentLabels.length > 0) {
+      payload.DepartmentRecipients = typedResolution.departmentLabels.join(';');
+    }
+    if (typedResolution.projectGroupLabels.length > 0) {
+      payload.ProjectGroupRecipients = typedResolution.projectGroupLabels.join(';');
+    }
+    // ModeratorNotes now only captures unresolved individual emails.
+    if (typedResolution.unresolvedIndividualEmails.length > 0) {
+      payload.ModeratorNotes = `Unresolved individual recipients: ${typedResolution.unresolvedIndividualEmails.join(', ')}`;
     }
   }
 

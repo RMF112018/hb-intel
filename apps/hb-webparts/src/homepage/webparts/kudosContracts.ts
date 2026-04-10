@@ -502,7 +502,7 @@ export interface KudosQueueRowViewModel {
 
 export interface KudosQueueFilterState {
   statuses: readonly KudosWorkflowStatus[];
-  ownership: 'all' | 'mine' | 'unassigned';
+  ownership: 'all' | 'mine' | 'unassigned' | 'others';
   aging: readonly KudosAgingBucket[];
   adminReviewOnly: boolean;
   scheduledOnly: boolean;
@@ -670,6 +670,30 @@ export function isHomepageVisible(
   entry: Pick<KudosEntry, 'workflowStatus' | 'homepageEnabled'>,
 ): boolean {
   return isPubliclyVisible(entry);
+}
+
+/**
+ * Associated-item visibility: submitters and recipients can see items
+ * that were once published, even after age-off, unpublish, or removal.
+ * Recipients cannot see items that were never published (rejected/withdrawn
+ * before going live). Before publish, only the submitter sees the item.
+ */
+export function isAssociatedVisible(
+  entry: Pick<KudosEntry, 'workflowStatus' | 'wasEverPublished' | 'submittedById' | 'recipientUserIds'>,
+  currentUserId: number | undefined,
+): boolean {
+  if (!currentUserId) return false;
+
+  const isSubmitter = entry.submittedById === currentUserId;
+  const isRecipient = entry.recipientUserIds?.includes(currentUserId) ?? false;
+
+  // Submitter can always see their own submissions regardless of state.
+  if (isSubmitter) return true;
+
+  // Recipients can only see items that reached published state at least once.
+  if (isRecipient && entry.wasEverPublished === true) return true;
+
+  return false;
 }
 
 /**

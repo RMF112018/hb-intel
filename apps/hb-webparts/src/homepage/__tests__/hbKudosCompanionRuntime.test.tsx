@@ -20,6 +20,7 @@ afterEach(() => {
 vi.mock('../data/spContext.js', () => ({
   getSiteUrl: () => undefined,
   storeSiteUrl: vi.fn(),
+  resolveCurrentUserId: () => Promise.resolve(undefined),
 }));
 
 // ---------------------------------------------------------------------------
@@ -502,7 +503,7 @@ describe('HbKudosCompanion webpart — runtime smoke', () => {
       expect(section?.getAttribute('data-hbc-role')).toBe('reviewer');
     });
     // Tab bar should render the Pending tab by default.
-    expect(screen.getByRole('tab', { name: 'Pending review' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Pending' })).toBeTruthy();
     // Toolbar search is visible.
     expect(screen.getByPlaceholderText('Search recognition…')).toBeTruthy();
   });

@@ -314,12 +314,19 @@ const KUDOS_SELECT = [
   // Media
   KUDOS_FIELDS.PrimaryImage,
   KUDOS_FIELDS.ImageAltText,
+  // Work ownership (expanded)
+  `${KUDOS_FIELDS.ClaimOwner}/Id`,
+  `${KUDOS_FIELDS.ClaimOwner}/Title`,
+  `${KUDOS_FIELDS.AssignedOwner}/Id`,
+  `${KUDOS_FIELDS.AssignedOwner}/Title`,
 ].join(',');
 
 const KUDOS_EXPAND = [
   KUDOS_FIELDS.SubmittedBy,
   KUDOS_FIELDS.ApprovedBy,
   KUDOS_FIELDS.IndividualRecipients,
+  KUDOS_FIELDS.ClaimOwner,
+  KUDOS_FIELDS.AssignedOwner,
 ].join(',');
 
 const CEL_SELECT = [
@@ -416,6 +423,9 @@ interface RawKudosItem {
   CelebrateCount?: number;
   PrimaryImage?: string | { Url?: string; Description?: string };
   ImageAltText?: string;
+  // Work ownership (Phase-14 read-path extension)
+  ClaimOwner?: SpPersonValue | null;
+  AssignedOwner?: SpPersonValue | null;
 }
 
 interface RawCelebrationItem {
@@ -716,6 +726,11 @@ function mapKudos(raw: RawKudosItem, siteUrl: string): KudosEntry | undefined {
     removedReason: raw.RemovedReason?.trim() || undefined,
     prominenceFailureAt: raw.ProminenceFailureAt || undefined,
     prominenceFailureReason: raw.ProminenceFailureReason?.trim() || undefined,
+    // Identity fields for associated-item access and ownership
+    submittedById: raw.SubmittedBy?.Id,
+    recipientUserIds: individualPeople.filter((p) => p.Id).map((p) => p.Id),
+    claimOwnerId: raw.ClaimOwner?.Id,
+    assignedOwnerId: raw.AssignedOwner?.Id,
   };
 }
 

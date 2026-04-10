@@ -52,7 +52,7 @@ import {
 } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
 import { submitKudosGovernanceAction, fetchKudosAuditTimeline, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
-import { getSiteUrl } from '../../homepage/data/spContext.js';
+import { getSiteUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
 import {
   KUDOS_ROLE_LABELS,
@@ -98,34 +98,52 @@ interface CompanionTab {
   statuses: readonly KudosWorkflowStatus[];
   /** Optional additional predicate (e.g. admin review flag). */
   extraPredicate?: (entry: KudosEntry) => boolean;
+  /** Queue ordering: oldest-first for review queues, newest-first for resolved. */
+  sortDirection: 'oldest' | 'newest';
 }
 
+/**
+ * Decision-Lock-Appendix queue model:
+ * Pending → Revision Requested → Flagged for Admin Review →
+ * Approved → Rejected → Removed / Unpublished
+ */
 const COMPANION_TABS: readonly CompanionTab[] = [
   {
     id: 'pending',
-    label: 'Pending review',
-    statuses: ['pending', 'revisionRequested'],
+    label: 'Pending',
+    statuses: ['pending'],
+    sortDirection: 'oldest',
   },
   {
-    id: 'approved',
-    label: 'Approved',
-    statuses: ['approved'],
-  },
-  {
-    id: 'scheduled',
-    label: 'Scheduled',
-    statuses: ['approvedScheduled'],
+    id: 'revisionRequested',
+    label: 'Revision requested',
+    statuses: ['revisionRequested'],
+    sortDirection: 'oldest',
   },
   {
     id: 'flagged',
     label: 'Flagged for admin',
     statuses: ['pending', 'revisionRequested', 'approved', 'approvedScheduled'],
     extraPredicate: (entry) => needsAdminReview(entry),
+    sortDirection: 'newest',
   },
   {
-    id: 'resolved',
-    label: 'Resolved',
-    statuses: ['rejected', 'withdrawn', 'removedUnpublished'],
+    id: 'approved',
+    label: 'Approved',
+    statuses: ['approved', 'approvedScheduled'],
+    sortDirection: 'newest',
+  },
+  {
+    id: 'rejected',
+    label: 'Rejected',
+    statuses: ['rejected', 'withdrawn'],
+    sortDirection: 'newest',
+  },
+  {
+    id: 'removed',
+    label: 'Removed / Unpublished',
+    statuses: ['removedUnpublished'],
+    sortDirection: 'newest',
   },
 ];
 
@@ -192,12 +210,12 @@ export function applyCompanionFilter(
   entries: KudosEntry[],
   state: CompanionFilterState,
   nowIso: string,
-  identityId: string | undefined,
+  currentUserId: number | undefined,
 ): KudosEntry[] {
   const tab = COMPANION_TABS.find((t) => t.id === state.tabId);
   if (!tab) return [];
   const q = state.searchText?.trim().toLowerCase() ?? '';
-  return entries.filter((entry) => {
+  const filtered = entries.filter((entry) => {
     // Workflow status gate — fall back to the narrow status for rows
     // that predate the workflow column.
     if (entry.workflowStatus) {
@@ -206,7 +224,7 @@ export function applyCompanionFilter(
       if (entry.status !== 'pending') return false;
     } else if (tab.id === 'approved') {
       if (entry.status !== 'approved') return false;
-    } else if (tab.id === 'resolved') {
+    } else if (tab.id === 'rejected') {
       if (entry.status !== 'rejected') return false;
     } else {
       return false;
@@ -214,18 +232,16 @@ export function applyCompanionFilter(
     if (tab.extraPredicate && !tab.extraPredicate(entry)) return false;
     if (state.adminReviewOnly && !needsAdminReview(entry)) return false;
     if (state.scheduledOnly && entry.isScheduled !== true) return false;
+    // Ownership filter using real claim/assignment data.
+    const ownerId = entry.assignedOwnerId ?? entry.claimOwnerId;
     if (state.ownership === 'unassigned') {
-      // Placeholder until claim/reassign writers land in Prompt-05.
-      // For now, treat rows with no claimOwner field on KudosEntry as unassigned.
-      if ('claimOwner' in entry && (entry as { claimOwner?: unknown }).claimOwner) return false;
+      if (ownerId != null) return false;
     }
-    if (state.ownership === 'mine' && identityId) {
-      if ('claimOwner' in entry) {
-        const owner = (entry as { claimOwner?: { id?: string } }).claimOwner;
-        if (!owner || owner.id !== identityId) return false;
-      } else {
-        return false;
-      }
+    if (state.ownership === 'mine' && currentUserId) {
+      if (ownerId !== currentUserId) return false;
+    }
+    if (state.ownership === 'others' && currentUserId) {
+      if (ownerId == null || ownerId === currentUserId) return false;
     }
     if (state.aging.length > 0) {
       const bucket = deriveAgingBucket(entry.submittedDate, nowIso);
@@ -243,6 +259,14 @@ export function applyCompanionFilter(
       if (!haystack.includes(q)) return false;
     }
     return true;
+  });
+
+  // Sort per decision-lock: oldest-first for review queues, newest-first otherwise.
+  const direction = tab.sortDirection === 'oldest' ? 1 : -1;
+  return filtered.sort((a, b) => {
+    const aTs = Date.parse(a.submittedDate) || 0;
+    const bTs = Date.parse(b.submittedDate) || 0;
+    return (aTs - bTs) * direction;
   });
 }
 
@@ -667,14 +691,15 @@ export function HbKudosCompanion({
 
   const now = nowIso ?? new Date().toISOString();
 
-  // Identity email is the closest stable per-user key available in
-  // the current HomepageIdentityInput shape — Prompt-05 will swap in
-  // a resolved SharePoint user id once the permissions resolver
-  // lands. Until then, "assigned to me" compares against email.
-  const currentUserKey = identity?.email;
+  // Resolve the current user's SharePoint ID for ownership filtering.
+  const [currentUserId, setCurrentUserId] = React.useState<number | undefined>();
+  React.useEffect(() => {
+    resolveCurrentUserId().then(setCurrentUserId).catch(() => {});
+  }, []);
+
   const queue = React.useMemo(
-    () => applyCompanionFilter(allKudos, filter, now, currentUserKey),
-    [allKudos, filter, now, currentUserKey],
+    () => applyCompanionFilter(allKudos, filter, now, currentUserId),
+    [allKudos, filter, now, currentUserId],
   );
 
   const toggleSelect = React.useCallback((id: string) => {
@@ -817,7 +842,7 @@ export function HbKudosCompanion({
   }, [capabilities.canBulkApprove, clearSelection, identity?.email, queue, selectedIds]);
 
   const selectable =
-    capabilities.canBulkApprove && (filter.tabId === 'pending' || filter.tabId === 'flagged');
+    capabilities.canBulkApprove && (filter.tabId === 'pending' || filter.tabId === 'revisionRequested' || filter.tabId === 'flagged');
 
   if (roleResolving) {
     return (
@@ -1006,6 +1031,7 @@ export function HbKudosCompanion({
             <option value="all">All</option>
             <option value="mine">Assigned to me</option>
             <option value="unassigned">Unassigned</option>
+            <option value="others">Assigned to others</option>
           </select>
         </label>
 
