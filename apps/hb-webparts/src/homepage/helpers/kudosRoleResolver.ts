@@ -100,9 +100,10 @@ export async function resolveKudosRole(
       resolved = 'reviewer';
     }
   } catch {
-    // Group resolution failed — fall back to simulated role, failing
-    // closed (viewer) when that is also absent.
-    resolved = parseKudosRole(config.simulatedRole);
+    // Group resolution failed in live SharePoint — fail closed to viewer.
+    // Do NOT fall back to simulatedRole when siteUrl is present; the
+    // simulated role is a dev-only escape hatch for local/preview contexts.
+    resolved = 'viewer';
   }
 
   _cachedRole = { siteUrl, email, role: resolved };

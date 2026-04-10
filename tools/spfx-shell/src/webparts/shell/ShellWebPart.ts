@@ -37,10 +37,17 @@ interface IAppModule {
 
 /** Webpart IDs that expose property-pane configuration. */
 const HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
+const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
 
 interface IShellWebPartProperties {
   /** Author-configurable background image URL for the Signature Hero. */
   backgroundImageUrl?: string;
+  /** SharePoint group name for Kudos admin-level access. */
+  kudosAdminsGroup?: string;
+  /** SharePoint group name for Kudos reviewer-level access. */
+  kudosReviewersGroup?: string;
+  /** Optional display heading override for the Kudos Companion. */
+  heading?: string;
 }
 
 export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartProperties> {
@@ -188,6 +195,50 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                       'Enter a SharePoint-hosted image URL to override the default hero background. ' +
                       'Leave blank to use the default banner image.',
                     placeholder: 'https://your-tenant.sharepoint.com/sites/.../image.jpg',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    // Show role-assignment property pane for the HB Kudos Companion webpart.
+    if (webPartId === KUDOS_COMPANION_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'HB Kudos Companion Settings' },
+            groups: [
+              {
+                groupName: 'Role Assignment',
+                groupFields: [
+                  PropertyPaneTextField('kudosAdminsGroup', {
+                    label: 'Kudos Admins SharePoint group',
+                    description:
+                      'Enter the exact name of the SharePoint group whose members should have ' +
+                      'Kudos admin privileges (pin, feature, schedule, remove, restore). ' +
+                      'Leave blank only if no admin role is needed.',
+                    placeholder: 'e.g. HB Kudos Admins',
+                  }),
+                  PropertyPaneTextField('kudosReviewersGroup', {
+                    label: 'Kudos Reviewers SharePoint group',
+                    description:
+                      'Enter the exact name of the SharePoint group whose members should have ' +
+                      'Kudos reviewer privileges (approve, reject, request revision). ' +
+                      'At least one of Admins or Reviewers must be configured for the companion to function.',
+                    placeholder: 'e.g. HB Kudos Reviewers',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Display',
+                groupFields: [
+                  PropertyPaneTextField('heading', {
+                    label: 'Webpart heading',
+                    description: 'Override the default heading displayed above the governance workspace.',
+                    placeholder: 'HB Kudos Approval Companion',
                   }),
                 ],
               },

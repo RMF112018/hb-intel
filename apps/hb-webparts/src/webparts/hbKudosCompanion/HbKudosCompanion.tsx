@@ -873,6 +873,24 @@ export function HbKudosCompanion({
     );
   }
 
+  // Explicit empty-config state: when running in live SharePoint but no
+  // admin/reviewer groups are configured, show an operator-facing message
+  // instead of silently resolving to viewer and displaying "Access restricted".
+  const siteUrl = getSiteUrl();
+  const hasGroupConfig =
+    (typeof config?.kudosAdminsGroup === 'string' && config.kudosAdminsGroup.trim() !== '') ||
+    (typeof config?.kudosReviewersGroup === 'string' && config.kudosReviewersGroup.trim() !== '');
+  if (siteUrl && !hasGroupConfig) {
+    return (
+      <section data-hbc-webpart="hb-kudos-companion" data-hbc-state="unconfigured">
+        <HbcEmptyState
+          title="Configuration required"
+          description="This webpart requires Kudos admin and reviewer SharePoint groups to be configured. Open the webpart property pane to assign groups."
+        />
+      </section>
+    );
+  }
+
   if (!capabilities.canViewGovernance) {
     return (
       <section data-hbc-webpart="hb-kudos-companion" data-hbc-role={role}>
