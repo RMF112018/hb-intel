@@ -73,7 +73,7 @@ import {
   type KudosEntry,
 } from '../../homepage/webparts/kudosContracts.js';
 import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
-import { fetchKudosAuditTimeline, submitKudosGovernanceAction, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
+import { submitKudosGovernanceAction } from '../../homepage/data/kudosGovernanceWriter.js';
 import { getSiteUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 
 // ---------------------------------------------------------------------------
@@ -364,20 +364,9 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
     (entry?.workflowStatus === 'pending' || entry?.workflowStatus === 'revisionRequested');
   const canResubmit = isSubmitter && entry?.workflowStatus === 'revisionRequested';
 
-  // Fetch audit timeline when the panel opens. Employee role = viewer.
-  const [timeline, setTimeline] = React.useState<KudosAuditTimelineEntry[]>([]);
-  const [timelineLoading, setTimelineLoading] = React.useState(false);
-  React.useEffect(() => {
-    if (!entry) { setTimeline([]); return; }
-    const siteUrl = getSiteUrl();
-    if (!siteUrl) return;
-    let cancelled = false;
-    setTimelineLoading(true);
-    fetchKudosAuditTimeline(siteUrl, entry.id).then((events) => {
-      if (!cancelled) { setTimeline(events); setTimelineLoading(false); }
-    }).catch(() => { if (!cancelled) setTimelineLoading(false); });
-    return () => { cancelled = true; };
-  }, [entry?.id]);
+  // No timeline fetch for the employee surface — viewers must not
+  // receive internal workflow history per Decision Lock §103-107.
+  // The detail panel renders a reduced submission-info block instead.
 
   const [dispatching, setDispatching] = React.useState(false);
 
@@ -399,8 +388,6 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
           <KudosDetailPanelContent
             entry={entry}
             role="viewer"
-            timeline={timeline}
-            timelineLoading={timelineLoading}
           />
 
           {(canWithdraw || canResubmit) ? (

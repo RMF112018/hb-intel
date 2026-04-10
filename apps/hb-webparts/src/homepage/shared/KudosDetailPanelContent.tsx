@@ -5,9 +5,12 @@
  * HbKudos webpart and the HR approval companion. The consumer supplies
  * the flyout shell; this component only renders the body content.
  *
- * Role safety:
- *   - `role='viewer'` → recognition-safe content only.
- *   - `role='reviewer'|'admin'` → full governance sections + audit timeline.
+ * Role safety (Decision Lock §99-107):
+ *   - `role='viewer'` → recognition content, recipient detail, high-level
+ *     status only. No audit timeline, no governance metadata, no
+ *     prominence/scheduling internals.
+ *   - `role='reviewer'|'admin'` → full governance sections + audit timeline
+ *     + internal notes.
  */
 import * as React from 'react';
 import {
@@ -102,8 +105,8 @@ export function KudosDetailPanelContent({
         </div>
       ) : null}
 
-      {/* Prominence / scheduling */}
-      {(entry.isScheduled || entry.isPinned || entry.isFeatured || entry.prominenceFailureAt) ? (
+      {/* Prominence / scheduling — governance only */}
+      {isGovernance && (entry.isScheduled || entry.isPinned || entry.isFeatured || entry.prominenceFailureAt) ? (
         <div>
           <KudosSectionHeading>Prominence &amp; scheduling</KudosSectionHeading>
           {entry.isScheduled && entry.scheduledPublishAt ? (
@@ -118,7 +121,7 @@ export function KudosDetailPanelContent({
               value={entry.featuredExpiresAt ? `Expires ${new Date(entry.featuredExpiresAt).toLocaleDateString()}` : 'Active'}
             />
           ) : null}
-          {isGovernance && entry.prominenceFailureAt ? (
+          {entry.prominenceFailureAt ? (
             <>
               <KudosInfoRow label="Prominence failure" value={new Date(entry.prominenceFailureAt).toLocaleString()} />
               <KudosInfoRow label="Failure reason" value={entry.prominenceFailureReason} />
@@ -143,7 +146,7 @@ export function KudosDetailPanelContent({
         </>
       ) : null}
 
-      {/* Associated-only reduced view */}
+      {/* Associated-only reduced view — Decision Lock §103-107 */}
       {!isPublic && !isGovernance ? (
         <div
           style={{
@@ -161,18 +164,32 @@ export function KudosDetailPanelContent({
         </div>
       ) : null}
 
-      {/* Audit timeline */}
-      <div>
-        <KudosSectionHeading>Audit timeline</KudosSectionHeading>
-        <KudosAuditTimelineBlock
-          events={timeline ?? []}
-          showInternalNotes={isGovernance}
-          loading={timelineLoading}
-          fallbackText={timelineFallback}
-          mapLabel={(t) => mapAuditEventTypeLabel(t as Parameters<typeof mapAuditEventTypeLabel>[0])}
-          mapTone={(t) => mapAuditEventTypeChipTone(t as Parameters<typeof mapAuditEventTypeChipTone>[0])}
-        />
-      </div>
+      {/* Viewer-safe submission info — shown instead of the full audit
+          timeline for non-governance roles. Shows only the submission date
+          without exposing internal workflow progression. */}
+      {!isGovernance ? (
+        <div>
+          <KudosSectionHeading>Submission</KudosSectionHeading>
+          <KudosInfoRow label="Submitted" value={new Date(entry.submittedDate).toLocaleDateString()} />
+          <KudosInfoRow label="Submitted by" value={entry.submittedBy.displayName} />
+        </div>
+      ) : null}
+
+      {/* Audit timeline — governance roles only. Non-governance viewers
+          must not see internal workflow history per Decision Lock §103-107. */}
+      {isGovernance ? (
+        <div>
+          <KudosSectionHeading>Audit timeline</KudosSectionHeading>
+          <KudosAuditTimelineBlock
+            events={timeline ?? []}
+            showInternalNotes={isGovernance}
+            loading={timelineLoading}
+            fallbackText={timelineFallback}
+            mapLabel={(t) => mapAuditEventTypeLabel(t as Parameters<typeof mapAuditEventTypeLabel>[0])}
+            mapTone={(t) => mapAuditEventTypeChipTone(t as Parameters<typeof mapAuditEventTypeChipTone>[0])}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
