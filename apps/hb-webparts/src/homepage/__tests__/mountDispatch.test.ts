@@ -85,4 +85,22 @@ describe('webpart renderer registry', () => {
       'mount.tsx must NOT reference the excluded scaffold manifest ID',
     ).toBe(false);
   });
+
+  it('mount module wires HbcThemeProvider at the render boundary', async () => {
+    const { readFileSync } = await import('fs');
+    const { resolve } = await import('path');
+    const mountSource = readFileSync(
+      resolve(__dirname, '../../mount.tsx'),
+      'utf8',
+    );
+
+    expect(
+      mountSource.includes('HbcThemeProvider'),
+      'mount.tsx must include HbcThemeProvider wiring for ui-kit homepage consumers',
+    ).toBe(true);
+    expect(
+      mountSource.includes("forceTheme: 'light'"),
+      'mount.tsx must enforce SharePoint light-mode theme context',
+    ).toBe(true);
+  });
 });

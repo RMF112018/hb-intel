@@ -1,6 +1,7 @@
 import { createElement, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
+import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import { ReferenceHomepageComposition } from './homepage/ReferenceHomepageComposition.js';
 import { storeSiteUrl } from './homepage/data/spContext.js';
 import { createSharePointUserPhotoResolver } from './homepage/helpers/peopleCultureProfilePhotoResolver.js';
@@ -135,6 +136,8 @@ export async function mount(
     ? createApiTokenProvider(spfxContext, backendAudience)
     : undefined;
   const renderWebPart = WEBPART_RENDERERS[webPartId];
+  const withThemeProvider = (node: ReactNode): ReactNode =>
+    createElement(HbcThemeProvider, { forceTheme: 'light' as const, children: node });
 
   if (webPartId === '9e2dd84a-a121-4fb3-a964-f43a94abf9fd' && pnpExecutionMode === PNP_OPS_LEGACY_MODE && !getApiToken) {
     console.warn('[hb-webparts mount] PnP Ops is configured in legacy-admin-api mode without token-provider prerequisites.', {
@@ -148,13 +151,15 @@ export async function mount(
   root = createRoot(el);
   if (renderWebPart) {
     root.render(
-      renderWebPart({
-        config: webPartProperties,
-        identity,
-        assetBaseUrl,
-        siteUrl,
-        getApiToken,
-      }),
+      withThemeProvider(
+        renderWebPart({
+          config: webPartProperties,
+          identity,
+          assetBaseUrl,
+          siteUrl,
+          getApiToken,
+        }),
+      ),
     );
     return;
   }
@@ -178,7 +183,9 @@ export async function mount(
     );
     return;
   }
-  root.render(createElement(ReferenceHomepageComposition));
+  // No webPartId context (local composition preview path) still requires
+  // theme context for @hbc/ui-kit/homepage primitives/hooks.
+  root.render(withThemeProvider(createElement(ReferenceHomepageComposition)));
 }
 
 export function unmount(): void {
