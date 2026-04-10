@@ -173,6 +173,11 @@ function validateCommandInput(
   input: PnpCommandInput,
 ): string[] {
   const errors: string[] = [];
+  const descriptor = getPnpActionDescriptor(actionKey);
+  if (!descriptor) {
+    errors.push(`Action descriptor not found for ${actionKey}.`);
+    return errors;
+  }
   const siteError = validateTargetSiteUrl(
     typeof input.targetSiteUrl === 'string' ? input.targetSiteUrl.trim() : '',
   );
@@ -183,17 +188,11 @@ function validateCommandInput(
   const listFilters = normalizeFilterList(input.listFilters);
   const pageFilters = normalizeFilterList(input.pageFilters);
 
-  if (
-    actionKey === 'sharepoint-control:extraction:list-schema' &&
-    listFilters.length === 0
-  ) {
-    errors.push('listFilters is required for list schema extraction.');
+  if (descriptor.requiredInput === 'site-and-list-filter' && listFilters.length === 0) {
+    errors.push('listFilters is required for this extraction action.');
   }
-  if (
-    actionKey === 'sharepoint-control:extraction:page-layout' &&
-    pageFilters.length === 0
-  ) {
-    errors.push('pageFilters is required for page/layout extraction.');
+  if (descriptor.requiredInput === 'site-and-page-filter' && pageFilters.length === 0) {
+    errors.push('pageFilters is required for this extraction action.');
   }
 
   if (
@@ -547,11 +546,6 @@ export class PnpOpsOrchestrator implements IPnpOpsOrchestrator {
       const validationErrors = validateCommandInput(canonicalAction, commandInput);
       if (validationErrors.length > 0) {
         throw new Error(`Validation failed: ${validationErrors.join(' ')}`);
-      }
-
-      const descriptor = getPnpActionDescriptor(canonicalAction);
-      if (!descriptor) {
-        throw new Error(`Validation failed: Unknown action descriptor for ${canonicalAction}.`);
       }
 
       steps = applyStep(steps, 1, AdminStepStatus.Completed, null);

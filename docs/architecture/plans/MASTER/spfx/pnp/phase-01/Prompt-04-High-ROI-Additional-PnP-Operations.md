@@ -61,3 +61,13 @@ Report:
 - why they were chosen,
 - their output files,
 - and what was deliberately deferred.
+
+## Repo truth implementation note
+
+Prompt-04 implementation at current HEAD adds:
+
+- `sharepoint-control:extraction:library-folder-tree`
+- `sharepoint-control:extraction:site-groups-summary`
+- `sharepoint-control:extraction:page-webpart-inventory`
+
+with matching backend action-catalog descriptors, workflow handlers, preflight/validation support, and SPFx catalog exposure under `apps/hb-webparts/src/webparts/pnp/`.

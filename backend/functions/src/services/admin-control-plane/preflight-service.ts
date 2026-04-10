@@ -301,7 +301,7 @@ function checkPnpActionInput(request: IAdminPreflightRequest): IAdminPreflightCh
       listFilters.length > 0,
       listFilters.length > 0
         ? `List filters accepted (${listFilters.length}).`
-        : 'listFilters is required for list schema extraction.',
+        : 'listFilters is required for this extraction action.',
       {
         category: 'sharepoint',
         severity: 'critical',
@@ -318,7 +318,7 @@ function checkPnpActionInput(request: IAdminPreflightRequest): IAdminPreflightCh
       pageFilters.length > 0,
       pageFilters.length > 0
         ? `Page filters accepted (${pageFilters.length}).`
-        : 'pageFilters is required for page/layout extraction.',
+        : 'pageFilters is required for this extraction action.',
       {
         category: 'sharepoint',
         severity: 'critical',

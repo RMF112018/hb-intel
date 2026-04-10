@@ -28,6 +28,38 @@ describe('pnpOpsValidation', () => {
     expect(result.errors.join(' ')).toContain('list filters');
   });
 
+  it('requires list filter input for library folder tree action', () => {
+    const action = PNP_V1_ACTIONS.find((entry) => entry.key === 'sharepoint-control:extraction:library-folder-tree');
+    const result = validatePnpOpsForm(action, {
+      targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      listFilterInput: '',
+      pageFilterInput: '',
+    });
+    expect(result.isValid).toBe(false);
+    expect(result.errors.join(' ')).toContain('list filters');
+  });
+
+  it('requires page filter input for page webpart inventory action', () => {
+    const action = PNP_V1_ACTIONS.find((entry) => entry.key === 'sharepoint-control:extraction:page-webpart-inventory');
+    const result = validatePnpOpsForm(action, {
+      targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      listFilterInput: '',
+      pageFilterInput: '',
+    });
+    expect(result.isValid).toBe(false);
+    expect(result.errors.join(' ')).toContain('page filters');
+  });
+
+  it('accepts site-only input for site groups summary action', () => {
+    const action = PNP_V1_ACTIONS.find((entry) => entry.key === 'sharepoint-control:extraction:site-groups-summary');
+    const result = validatePnpOpsForm(action, {
+      targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      listFilterInput: '',
+      pageFilterInput: '',
+    });
+    expect(result.isValid).toBe(true);
+  });
+
   it('rejects non-SharePoint URLs', () => {
     const siteTemplateAction = PNP_V1_ACTIONS.find((action) => action.key === 'sharepoint-control:extraction:site-template');
     const result = validatePnpOpsForm(siteTemplateAction, {

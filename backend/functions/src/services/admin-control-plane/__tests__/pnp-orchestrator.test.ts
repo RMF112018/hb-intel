@@ -58,6 +58,40 @@ describe('PnpOpsOrchestrator', () => {
     }
   });
 
+  it('completes a site-groups-summary run without list/page filters', async () => {
+    const runService = new InMemoryAdminRunService();
+    const auditService = new MockAdminAuditStore();
+    const evidenceService = new MockAdminEvidenceStore();
+    const orchestrator = new PnpOpsOrchestrator(runService, auditService, evidenceService);
+
+    const launchRequest = orchestrator.normalizeLaunchRequest({
+      actionKey: 'sharepoint-control:extraction:site-groups-summary',
+      commandInput: {
+        targetSiteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+        executionIntent: {
+          mode: 'read-only-export',
+          source: 'spfx-webpart',
+          requestedAt: new Date().toISOString(),
+        },
+      },
+      targetEntityId: 'https://tenant.sharepoint.com/sites/HBCentral',
+      dryRun: false,
+    });
+
+    const launched = await runService.launchRun(launchRequest, TEST_ACTOR);
+    await orchestrator.executeRun(
+      launched.runId,
+      launchRequest,
+      TEST_ACTOR,
+      'https://functions.example.com',
+    );
+
+    const run = await runService.getRun(launched.runId);
+    expect(run?.status).toBe('Completed');
+    const evidence = await evidenceService.listByRunId(launched.runId);
+    expect(evidence.length).toBeGreaterThanOrEqual(5);
+  });
+
   it('fails run when required filters are missing', async () => {
     const runService = new InMemoryAdminRunService();
     const auditService = new MockAdminAuditStore();

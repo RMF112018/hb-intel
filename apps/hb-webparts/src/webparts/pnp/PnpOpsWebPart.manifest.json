@@ -3,7 +3,7 @@
   "id": "9e2dd84a-a121-4fb3-a964-f43a94abf9fd",
   "alias": "PnpOpsWebPart",
   "componentType": "WebPart",
-  "version": "0.0.3.0",
+  "version": "0.0.4.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],

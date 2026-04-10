@@ -176,4 +176,55 @@ describe('P6-04 AdminPreflightService', () => {
       }
     });
   });
+
+  describe('PnP extraction action input checks', () => {
+    beforeEach(() => {
+      vi.stubEnv('HBC_ADAPTER_MODE', 'mock');
+      vi.stubEnv('SHAREPOINT_TENANT_URL', 'https://contoso.sharepoint.com');
+    });
+
+    it('requires list filters for library-folder-tree', async () => {
+      const result = await service.validate(makeRequest({
+        actionKey: 'sharepoint-control:extraction:library-folder-tree',
+        commandInput: {
+          targetSiteUrl: 'https://contoso.sharepoint.com/sites/HBCentral',
+          executionIntent: { mode: 'read-only-export' },
+        },
+      }));
+      const listCheck = findCheck(result.checks, 'pnp-list-filters');
+      expect(listCheck).toBeDefined();
+      expect(listCheck?.passed).toBe(false);
+      expect(listCheck?.blocking).toBe(true);
+    });
+
+    it('requires page filters for page-webpart-inventory', async () => {
+      const result = await service.validate(makeRequest({
+        actionKey: 'sharepoint-control:extraction:page-webpart-inventory',
+        commandInput: {
+          targetSiteUrl: 'https://contoso.sharepoint.com/sites/HBCentral',
+          executionIntent: { mode: 'read-only-export' },
+        },
+      }));
+      const pageCheck = findCheck(result.checks, 'pnp-page-filters');
+      expect(pageCheck).toBeDefined();
+      expect(pageCheck?.passed).toBe(false);
+      expect(pageCheck?.blocking).toBe(true);
+    });
+
+    it('accepts site-only input for site-groups-summary', async () => {
+      const result = await service.validate(makeRequest({
+        actionKey: 'sharepoint-control:extraction:site-groups-summary',
+        commandInput: {
+          targetSiteUrl: 'https://contoso.sharepoint.com/sites/HBCentral',
+          executionIntent: { mode: 'read-only-export' },
+        },
+      }));
+      const targetCheck = findCheck(result.checks, 'pnp-target-site-url');
+      const listCheck = findCheck(result.checks, 'pnp-list-filters');
+      const pageCheck = findCheck(result.checks, 'pnp-page-filters');
+      expect(targetCheck?.passed).toBe(true);
+      expect(listCheck).toBeUndefined();
+      expect(pageCheck).toBeUndefined();
+    });
+  });
 });

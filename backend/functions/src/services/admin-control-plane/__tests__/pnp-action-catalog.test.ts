@@ -29,5 +29,35 @@ describe('pnp-action-catalog', () => {
           entry.actionKey === 'sharepoint-control:extraction:site-inventory',
       ),
     ).toBe(true);
+    expect(
+      metadata.some(
+        (entry) =>
+          entry.actionKey === 'sharepoint-control:extraction:library-folder-tree',
+      ),
+    ).toBe(true);
+    expect(
+      metadata.some(
+        (entry) =>
+          entry.actionKey === 'sharepoint-control:extraction:site-groups-summary',
+      ),
+    ).toBe(true);
+    expect(
+      metadata.some(
+        (entry) =>
+          entry.actionKey === 'sharepoint-control:extraction:page-webpart-inventory',
+      ),
+    ).toBe(true);
+  });
+
+  it('normalizes Prompt-04 alias keys to canonical keys', () => {
+    expect(
+      normalizePnpActionKey('sharepoint:pnp:library-folder-tree-export'),
+    ).toBe('sharepoint-control:extraction:library-folder-tree');
+    expect(
+      normalizePnpActionKey('sharepoint:pnp:site-groups-summary-export'),
+    ).toBe('sharepoint-control:extraction:site-groups-summary');
+    expect(
+      normalizePnpActionKey('sharepoint:pnp:page-webpart-inventory-export'),
+    ).toBe('sharepoint-control:extraction:page-webpart-inventory');
   });
 });

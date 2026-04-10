@@ -4,7 +4,10 @@ export type CanonicalPnpActionKey =
   | 'sharepoint-control:extraction:site-template'
   | 'sharepoint-control:extraction:list-schema'
   | 'sharepoint-control:extraction:page-layout'
-  | 'sharepoint-control:extraction:site-inventory';
+  | 'sharepoint-control:extraction:site-inventory'
+  | 'sharepoint-control:extraction:library-folder-tree'
+  | 'sharepoint-control:extraction:site-groups-summary'
+  | 'sharepoint-control:extraction:page-webpart-inventory';
 
 const ACTION_ALIASES: Record<string, CanonicalPnpActionKey> = {
   'sharepoint-control:extraction:site-template': 'sharepoint-control:extraction:site-template',
@@ -14,6 +17,12 @@ const ACTION_ALIASES: Record<string, CanonicalPnpActionKey> = {
   'sharepoint-control:extraction:page-layout': 'sharepoint-control:extraction:page-layout',
   'sharepoint:pnp:page-layout-export': 'sharepoint-control:extraction:page-layout',
   'sharepoint-control:extraction:site-inventory': 'sharepoint-control:extraction:site-inventory',
+  'sharepoint:pnp:library-folder-tree-export': 'sharepoint-control:extraction:library-folder-tree',
+  'sharepoint-control:extraction:library-folder-tree': 'sharepoint-control:extraction:library-folder-tree',
+  'sharepoint:pnp:site-groups-summary-export': 'sharepoint-control:extraction:site-groups-summary',
+  'sharepoint-control:extraction:site-groups-summary': 'sharepoint-control:extraction:site-groups-summary',
+  'sharepoint:pnp:page-webpart-inventory-export': 'sharepoint-control:extraction:page-webpart-inventory',
+  'sharepoint-control:extraction:page-webpart-inventory': 'sharepoint-control:extraction:page-webpart-inventory',
 };
 
 export interface PnpActionDescriptor {
@@ -64,6 +73,30 @@ export const PNP_ACTION_CATALOG: readonly PnpActionDescriptor[] = [
     description: 'Exports high-level inventory of lists, libraries, pages, and baseline site settings.',
     requiredInput: 'site-only',
     expectedArtifacts: ['site-inventory.raw.json', 'site-inventory.normalized.json', 'site-inventory-report.md', 'artifact-manifest.json'],
+    ...COMMON,
+  },
+  {
+    key: 'sharepoint-control:extraction:library-folder-tree',
+    label: 'Library Folder Tree Export',
+    description: 'Exports folder and subfolder hierarchy for selected document libraries.',
+    requiredInput: 'site-and-list-filter',
+    expectedArtifacts: ['library-folder-tree.raw.json', 'library-folder-tree.normalized.json', 'library-folder-tree-report.md', 'artifact-manifest.json'],
+    ...COMMON,
+  },
+  {
+    key: 'sharepoint-control:extraction:site-groups-summary',
+    label: 'Site Groups / Membership Summary Export',
+    description: 'Exports owners, members, visitors, and related site-group membership rollups.',
+    requiredInput: 'site-only',
+    expectedArtifacts: ['site-groups-summary.raw.json', 'site-groups-summary.normalized.json', 'site-groups-summary-report.md', 'artifact-manifest.json'],
+    ...COMMON,
+  },
+  {
+    key: 'sharepoint-control:extraction:page-webpart-inventory',
+    label: 'Page Webpart Manifest Inventory',
+    description: 'Maps modern page client-side webparts by page, webpart ID, and control count.',
+    requiredInput: 'site-and-page-filter',
+    expectedArtifacts: ['page-webpart-inventory.raw.json', 'page-webpart-inventory.normalized.json', 'page-webpart-inventory-report.md', 'artifact-manifest.json'],
     ...COMMON,
   },
 ] as const;

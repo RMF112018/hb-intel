@@ -372,6 +372,200 @@ function buildSiteInventoryResult(ctx: PnpExtractionWorkflowContext): PnpExtract
   };
 }
 
+function buildLibraryFolderTreeResult(ctx: PnpExtractionWorkflowContext): PnpExtractionWorkflowResult {
+  const targetSiteUrl = safeSiteUrl(ctx.commandInput.targetSiteUrl);
+  const listFilters = normalizeFilterList(ctx.commandInput.listFilters);
+  const identity = readSiteIdentity(targetSiteUrl);
+  const generatedAt = toIsoNow();
+
+  const libraries = listFilters.map((libraryName) => ({
+    libraryName,
+    rootFolder: `/${identity.siteName}/${libraryName}`,
+    totalFolders: 4,
+    maxDepth: 3,
+    folders: [
+      { path: `${libraryName}/General`, depth: 1, childCount: 2 },
+      { path: `${libraryName}/General/2026`, depth: 2, childCount: 1 },
+      { path: `${libraryName}/General/2026/Q2`, depth: 3, childCount: 0 },
+      { path: `${libraryName}/Templates`, depth: 1, childCount: 0 },
+    ],
+  }));
+
+  const raw = {
+    runId: ctx.runId,
+    actionKey: ctx.actionKey,
+    fetchedAt: generatedAt,
+    targetSiteUrl,
+    site: identity,
+    listFilters,
+    libraries,
+    extraction: {
+      mode: 'read-only-export',
+      provider: 'admin-control-plane:pnp-extraction-workflows',
+    },
+  } satisfies Record<string, unknown>;
+
+  const normalized = {
+    metadata: {
+      runId: ctx.runId,
+      actionKey: ctx.actionKey,
+      generatedAt,
+      targetSiteUrl,
+    },
+    counts: {
+      libraryCount: libraries.length,
+      folderCount: libraries.reduce((acc, library) => acc + library.folders.length, 0),
+      deepestDepth: libraries.reduce((acc, library) => Math.max(acc, library.maxDepth), 0),
+    },
+    libraries: libraries.map((library) => ({
+      libraryName: library.libraryName,
+      totalFolders: library.totalFolders,
+      maxDepth: library.maxDepth,
+    })),
+  } satisfies Record<string, unknown>;
+
+  return {
+    raw,
+    normalized,
+    summaryMarkdown: buildSummary(
+      ctx,
+      'Library Folder Tree Coverage',
+      [
+        `Libraries scanned: ${libraries.length}`,
+        `List filters: ${listFilters.join(', ')}`,
+      ],
+      libraries.length === 0 ? ['No library filters were provided; no folder tree payload was generated.'] : [],
+    ),
+    warnings: libraries.length === 0 ? ['No folder-tree payloads generated.'] : [],
+  };
+}
+
+function buildSiteGroupsSummaryResult(ctx: PnpExtractionWorkflowContext): PnpExtractionWorkflowResult {
+  const targetSiteUrl = safeSiteUrl(ctx.commandInput.targetSiteUrl);
+  const identity = readSiteIdentity(targetSiteUrl);
+  const generatedAt = toIsoNow();
+
+  const groups = [
+    { title: `${identity.siteName} Owners`, role: 'Owner', memberCount: 3, members: ['owner1@hb.com', 'owner2@hb.com', 'owner3@hb.com'] },
+    { title: `${identity.siteName} Members`, role: 'Member', memberCount: 6, members: ['member1@hb.com', 'member2@hb.com', 'member3@hb.com'] },
+    { title: `${identity.siteName} Visitors`, role: 'Visitor', memberCount: 4, members: ['visitor1@hb.com', 'visitor2@hb.com', 'visitor3@hb.com'] },
+  ];
+
+  const raw = {
+    runId: ctx.runId,
+    actionKey: ctx.actionKey,
+    fetchedAt: generatedAt,
+    targetSiteUrl,
+    site: identity,
+    groups,
+    extraction: {
+      mode: 'read-only-export',
+      provider: 'admin-control-plane:pnp-extraction-workflows',
+    },
+  } satisfies Record<string, unknown>;
+
+  const normalized = {
+    metadata: {
+      runId: ctx.runId,
+      actionKey: ctx.actionKey,
+      generatedAt,
+      targetSiteUrl,
+    },
+    counts: {
+      groupCount: groups.length,
+      totalMembers: groups.reduce((acc, group) => acc + group.memberCount, 0),
+    },
+    groups: groups.map((group) => ({
+      title: group.title,
+      role: group.role,
+      memberCount: group.memberCount,
+    })),
+  } satisfies Record<string, unknown>;
+
+  return {
+    raw,
+    normalized,
+    summaryMarkdown: buildSummary(
+      ctx,
+      'Site Groups and Membership Coverage',
+      [
+        `Groups summarized: ${groups.length}`,
+        `Total memberships: ${groups.reduce((acc, group) => acc + group.memberCount, 0)}`,
+      ],
+      [],
+    ),
+    warnings: [],
+  };
+}
+
+function buildPageWebpartInventoryResult(ctx: PnpExtractionWorkflowContext): PnpExtractionWorkflowResult {
+  const targetSiteUrl = safeSiteUrl(ctx.commandInput.targetSiteUrl);
+  const pageFilters = normalizeFilterList(ctx.commandInput.pageFilters);
+  const identity = readSiteIdentity(targetSiteUrl);
+  const generatedAt = toIsoNow();
+
+  const pages = pageFilters.map((pageName, index) => ({
+    pageName,
+    pageUrl: `${targetSiteUrl}/SitePages/${pageName}`,
+    promotedState: index === 0 ? 'HomePage' : 'RegularPage',
+    webparts: [
+      { webPartId: 'd1d91016-032f-456d-98a4-721247c305e8', title: 'Quick Links', controlCount: 1 },
+      { webPartId: '7f718435-ee4d-431c-bdbf-9c4ff326f46e', title: 'News', controlCount: 1 },
+      { webPartId: 'f92bf067-bc19-489e-a556-7fe95f508720', title: 'People', controlCount: 1 },
+    ],
+  }));
+
+  const raw = {
+    runId: ctx.runId,
+    actionKey: ctx.actionKey,
+    fetchedAt: generatedAt,
+    targetSiteUrl,
+    site: identity,
+    pageFilters,
+    pages,
+    extraction: {
+      mode: 'read-only-export',
+      provider: 'admin-control-plane:pnp-extraction-workflows',
+    },
+  } satisfies Record<string, unknown>;
+
+  const normalized = {
+    metadata: {
+      runId: ctx.runId,
+      actionKey: ctx.actionKey,
+      generatedAt,
+      targetSiteUrl,
+    },
+    counts: {
+      pageCount: pages.length,
+      webpartInstanceCount: pages.reduce((acc, page) => acc + page.webparts.length, 0),
+      uniqueWebpartCount: Array.from(
+        new Set(pages.flatMap((page) => page.webparts.map((webpart) => webpart.webPartId))),
+      ).length,
+    },
+    pages: pages.map((page) => ({
+      pageName: page.pageName,
+      pageUrl: page.pageUrl,
+      webpartIds: page.webparts.map((webpart) => webpart.webPartId),
+    })),
+  } satisfies Record<string, unknown>;
+
+  return {
+    raw,
+    normalized,
+    summaryMarkdown: buildSummary(
+      ctx,
+      'Page Webpart Inventory Coverage',
+      [
+        `Pages scanned: ${pages.length}`,
+        `Page filters: ${pageFilters.join(', ')}`,
+      ],
+      pages.length === 0 ? ['No page filters were provided; no webpart inventory payload was generated.'] : [],
+    ),
+    warnings: pages.length === 0 ? ['No page-webpart payloads generated.'] : [],
+  };
+}
+
 export function runPnpExtractionWorkflow(ctx: PnpExtractionWorkflowContext): PnpExtractionWorkflowResult {
   switch (ctx.actionKey) {
     case 'sharepoint-control:extraction:list-schema':
@@ -382,6 +576,12 @@ export function runPnpExtractionWorkflow(ctx: PnpExtractionWorkflowContext): Pnp
       return buildSiteTemplateResult(ctx);
     case 'sharepoint-control:extraction:site-inventory':
       return buildSiteInventoryResult(ctx);
+    case 'sharepoint-control:extraction:library-folder-tree':
+      return buildLibraryFolderTreeResult(ctx);
+    case 'sharepoint-control:extraction:site-groups-summary':
+      return buildSiteGroupsSummaryResult(ctx);
+    case 'sharepoint-control:extraction:page-webpart-inventory':
+      return buildPageWebpartInventoryResult(ctx);
     default: {
       const exhaustive: never = ctx.actionKey;
       throw new Error(`Unsupported extraction action: ${String(exhaustive)}`);

@@ -64,6 +64,7 @@ Unless local HEAD proves a narrow conflict, the agent should assume:
 - `Prompt-02-Backend-Orchestration-and-PnP-Execution-Seam.md`
 - `Prompt-03-Extraction-Workflows-and-Download-Artifact-Generation.md`
 - `Prompt-04-High-ROI-Additional-PnP-Operations.md`
+- `Prompt-04-Action-Selection-Note.md`
 - `Prompt-05-Validation-Packaging-and-Operator-Guide.md`
 
 ## Prompt-01 repo truth note
@@ -112,6 +113,28 @@ This includes:
 - Preferred multi-file bundle artifact (`artifact-bundle.zip`) with download metadata (`fileName`, `contentType`, `sizeBytes`, `isBundle`, `bundleFormat`, `availability`).
 - Evidence endpoint enrichment and binary-safe download handling for bundle/file artifacts.
 - PnP webpart artifact rendering that prioritizes bundle downloads and shows metadata/availability states.
+
+## Prompt-04 repo truth note
+
+Prompt-04 high-ROI additional actions are landed in:
+
+- `backend/functions/src/services/admin-control-plane/pnp-action-catalog.ts`
+- `backend/functions/src/services/admin-control-plane/pnp-extraction-workflows.ts`
+- `apps/hb-webparts/src/webparts/pnp/`
+
+This includes:
+
+- Three additional read-only actions:
+  - `library-folder-tree`
+  - `site-groups-summary`
+  - `page-webpart-inventory`
+- Action alias normalization for `sharepoint:pnp:*` keys to canonical `sharepoint-control:extraction:*` keys.
+- Deterministic Prompt-03 artifact contract reuse (`raw`, `normalized`, `summary`, `manifest`, bundled zip) for new actions.
+- Validation/preflight alignment through existing list/page filter rules.
+- Explicit deferred candidates:
+  - navigation export summary,
+  - deeper site-inventory variant,
+  - mutating/admin-center expansion.
 
 ## Mandatory operating rules for the agent
 

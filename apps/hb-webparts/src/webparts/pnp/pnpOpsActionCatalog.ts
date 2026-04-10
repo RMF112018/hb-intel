@@ -2,7 +2,10 @@ export type PnpOpsActionKey =
   | 'sharepoint-control:extraction:site-template'
   | 'sharepoint-control:extraction:list-schema'
   | 'sharepoint-control:extraction:page-layout'
-  | 'sharepoint-control:extraction:site-inventory';
+  | 'sharepoint-control:extraction:site-inventory'
+  | 'sharepoint-control:extraction:library-folder-tree'
+  | 'sharepoint-control:extraction:site-groups-summary'
+  | 'sharepoint-control:extraction:page-webpart-inventory';
 
 export type ActionFilterKind = 'none' | 'list' | 'page';
 
@@ -81,6 +84,45 @@ export const PNP_V1_ACTIONS: readonly PnpOpsActionDefinition[] = [
     executionMode: 'advisory',
     supportsPreview: true,
     requiredFilter: 'none',
+  },
+  {
+    key: 'sharepoint-control:extraction:library-folder-tree',
+    label: 'Library Folder Tree Export',
+    description:
+      'Exports folder and subfolder hierarchy for selected document libraries using list filters.',
+    warning:
+      'Read-only export. Provide one or more document library names in list filters for scoped results.',
+    expectedOutputs: ['raw.json', 'normalized.json', 'library-folder-tree-report.md', 'manifest.json'],
+    riskLevel: 'read-only',
+    executionMode: 'advisory',
+    supportsPreview: true,
+    requiredFilter: 'list',
+  },
+  {
+    key: 'sharepoint-control:extraction:site-groups-summary',
+    label: 'Site Groups / Membership Summary Export',
+    description:
+      'Builds a summary of owners, members, visitors, and group membership rollups for the site.',
+    warning:
+      'Read-only export. Useful for permission inspection without mutating any site access settings.',
+    expectedOutputs: ['raw.json', 'normalized.json', 'site-groups-summary.md', 'manifest.json'],
+    riskLevel: 'read-only',
+    executionMode: 'advisory',
+    supportsPreview: true,
+    requiredFilter: 'none',
+  },
+  {
+    key: 'sharepoint-control:extraction:page-webpart-inventory',
+    label: 'Page Webpart Manifest Inventory',
+    description:
+      'Maps client-side webparts used across selected modern pages with webpart IDs and control counts.',
+    warning:
+      'Read-only export. Provide page filters to keep webpart manifest scans focused and deterministic.',
+    expectedOutputs: ['raw.json', 'normalized.json', 'page-webpart-inventory.md', 'manifest.json'],
+    riskLevel: 'read-only',
+    executionMode: 'advisory',
+    supportsPreview: true,
+    requiredFilter: 'page',
   },
 ] as const;
 
