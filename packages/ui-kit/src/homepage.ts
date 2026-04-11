@@ -219,8 +219,9 @@ export type {
   KudosComposerRecipientsMode,
 } from './HbcKudosComposer/index.js';
 
-export type { PersonEntry, PeopleSearchFn } from './HbcPeoplePicker/types.js';
-export { createStaticPeopleSearch } from './HbcPeoplePicker/useGraphPeopleSearch.js';
+export { HbcPeoplePicker } from './HbcPeoplePicker/index.js';
+export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn } from './HbcPeoplePicker/index.js';
+export { useGraphPeopleSearch, createStaticPeopleSearch } from './HbcPeoplePicker/useGraphPeopleSearch.js';
 
 export { HbcAvatarStack } from './HbcAvatarStack/index.js';
 export type {
@@ -299,6 +300,7 @@ export type HomepagePrimitiveName =
   | 'HbcKudosComposerForm'
   | 'HbcKudosComposerPreview'
   | 'HbcLauncherSurface'
+  | 'HbcPeoplePicker'
   | 'HbcNewsroomSurface'
   | 'HbcOperationalSurface'
   | 'HbcPeopleCultureSurface'

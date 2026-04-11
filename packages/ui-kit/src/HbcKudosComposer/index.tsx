@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, Building2, CheckCircle2, FolderKanban, Sparkles, User, Users, X as XIcon, type LucideIcon } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
+import { HbcPeoplePicker } from '../HbcPeoplePicker/index.js';
 import type { PersonEntry, PeopleSearchFn } from '../HbcPeoplePicker/types.js';
 import styles from './kudos-composer.module.css';
 
@@ -413,9 +414,9 @@ function HbcKudosComposerTypedRecipients({
 
   return (
     <>
-      {/* Primary bucket — people picker when searchPeople provided, text otherwise */}
+      {/* Primary bucket — shared people picker when searchPeople provided, text otherwise */}
       {searchPeople ? (
-        <HbcKudosComposerPeopleBucket
+        <KudosSharedPickerBridge
           values={buckets[primaryKind]}
           onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
           disabled={disabled}
@@ -478,10 +479,11 @@ function HbcKudosComposerTypedRecipients({
 }
 
 // ---------------------------------------------------------------------------
-// People picker bucket (search-select for individualEmails)
+// People picker bridge — thin adapter between shared HbcPeoplePicker and
+// the Kudos composer draft shape (individualEmails: string[]).
 // ---------------------------------------------------------------------------
 
-interface HbcKudosComposerPeopleBucketProps {
+interface KudosSharedPickerBridgeProps {
   values: string[];
   onChange: (next: string[]) => void;
   disabled: boolean;
@@ -489,261 +491,58 @@ interface HbcKudosComposerPeopleBucketProps {
   errorMessage?: string;
 }
 
-function HbcKudosComposerPeopleBucket({
+/**
+ * Thin bridge that renders the shared `HbcPeoplePicker` in bare mode
+ * inside the Kudos composer bucket layout. Converts between the Kudos
+ * draft shape (`string[]` of UPNs) and the picker's `PersonEntry[]`.
+ */
+function KudosSharedPickerBridge({
   values,
   onChange,
   disabled,
   searchPeople,
   errorMessage,
-}: HbcKudosComposerPeopleBucketProps): React.JSX.Element {
-  const P_TAG = '[HB Kudos Picker]';
-
-  const [query, setQuery] = React.useState('');
-  const [results, setResults] = React.useState<PersonEntry[]>([]);
-  const [isSearching, setIsSearching] = React.useState(false);
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [activeIndex, setActiveIndex] = React.useState(-1);
-  const [searchError, setSearchError] = React.useState(false);
-  // Cache display names for selected people so chips show names, not UPNs.
-  const [nameCache, setNameCache] = React.useState<Map<string, string>>(() => new Map());
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const listboxId = React.useId();
-
-  // Instrumented input handler — checkpoint A
-  const handleInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    console.warn(P_TAG, 'input-change', { raw, trimmed: raw.trim(), length: raw.length });
-    setQuery(raw);
-  }, []);
-
-  // Debounced search — fully instrumented
-  React.useEffect(() => {
-    // Checkpoint B: early-return branches
-    if (!query) {
-      console.warn(P_TAG, 'search-skip-empty', { query: '(empty)', reason: 'query is falsy' });
-      setResults([]);
-      setIsOpen(false);
-      setIsSearching(false);
-      return;
-    }
-    if (query.trim().length < 2) {
-      console.warn(P_TAG, 'search-skip-short-query', { query, trimmedLength: query.trim().length, reason: 'trimmed length < 2' });
-      setResults([]);
-      setIsOpen(false);
-      setIsSearching(false);
-      return;
-    }
-
-    // Checkpoint C: debounce timer set
-    setIsSearching(true);
-    const hadPriorTimer = debounceRef.current !== null;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    console.warn(P_TAG, 'debounce-set', { query, trimmed: query.trim(), delayMs: 300, priorCleared: hadPriorTimer, searchPeopleDefined: typeof searchPeople === 'function' });
-
-    debounceRef.current = setTimeout(async () => {
-      // Checkpoint D: debounce timer fire
-      console.warn(P_TAG, 'debounce-fire', { query, selectedCount: values.length, searchPeopleType: typeof searchPeople, searchPeopleDefined: !!searchPeople, disabled });
-
-      if (!searchPeople) {
-        console.warn(P_TAG, 'search-skip-missing-searchPeople', { query, searchPeopleType: typeof searchPeople });
-        setResults([]);
-        setSearchError(true);
-        setIsOpen(true);
-        setIsSearching(false);
-        return;
-      }
-
-      if (disabled) {
-        console.warn(P_TAG, 'search-skip-disabled', { query });
-        setIsSearching(false);
-        return;
-      }
-
-      try {
-        // Checkpoint E: pre-call
-        const trimmedQuery = query.trim();
-        console.warn(P_TAG, 'search-call-start', { query, trimmed: trimmedQuery, typeofSearchPeople: typeof searchPeople, valuesCount: values.length, activeIndex });
-
-        const hits = await searchPeople(trimmedQuery);
-
-        // Checkpoint F: post-call resolve + filtering
-        console.warn(P_TAG, 'search-call-resolve', {
-          query: trimmedQuery,
-          hitCount: hits.length,
-          first3: hits.slice(0, 3).map((h) => `${h.displayName} <${h.upn}>`),
-        });
-
-        const selectedUpns = new Set(values.map((v) => v.toLowerCase()));
-        console.warn(P_TAG, 'filtering-start', { beforeCount: hits.length, selectedUpns: [...selectedUpns] });
-        const filtered = hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase()));
-        console.warn(P_TAG, 'filtering-result', {
-          afterCount: filtered.length,
-          removedBySelection: hits.length - filtered.length,
-        });
-
-        setResults(filtered);
-        setSearchError(false);
-        setIsOpen(true);
-        setActiveIndex(-1);
-      } catch (err: unknown) {
-        // Checkpoint G: post-call reject + failure-state assignment
-        const errObj = err instanceof Error ? err : new Error(String(err));
-        console.warn(P_TAG, 'search-call-reject', {
-          query: query.trim(),
-          errorMessage: errObj.message,
-          errorStack: errObj.stack,
-        });
-        console.warn(P_TAG, 'ui-failure-state-set', {
-          reason: 'searchPeople threw',
-          query: query.trim(),
-          errorMessage: errObj.message,
-        });
-        setResults([]);
-        setSearchError(true);
-        setIsOpen(true);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [query, searchPeople, values, disabled, activeIndex]);
-
-  // Close on outside click
-  React.useEffect(() => {
-    function handleClick(e: MouseEvent): void {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
-  function selectPerson(person: PersonEntry): void {
-    setNameCache((prev) => {
-      const next = new Map(prev);
-      next.set(person.upn.toLowerCase(), person.displayName);
-      return next;
-    });
-    onChange([...values, person.upn]);
-    setQuery('');
-    setResults([]);
-    setIsOpen(false);
-    inputRef.current?.focus();
-  }
-
-  function removeAt(index: number): void {
-    onChange(values.filter((_, i) => i !== index));
-    inputRef.current?.focus();
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
-    if (e.key === 'ArrowDown' && isOpen && results.length > 0) {
-      e.preventDefault();
-      setActiveIndex((i) => (i < results.length - 1 ? i + 1 : 0));
-    } else if (e.key === 'ArrowUp' && isOpen && results.length > 0) {
-      e.preventDefault();
-      setActiveIndex((i) => (i > 0 ? i - 1 : results.length - 1));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (isOpen && activeIndex >= 0 && results[activeIndex]) {
-        selectPerson(results[activeIndex]);
-      }
-    } else if (e.key === 'Escape') {
-      setIsOpen(false);
-      setActiveIndex(-1);
-    } else if (e.key === 'Backspace' && query === '' && values.length > 0) {
-      e.preventDefault();
-      removeAt(values.length - 1);
-    }
-  }
-
+}: KudosSharedPickerBridgeProps): React.JSX.Element {
   const BucketIcon = BUCKET_CONFIG.individualEmails.icon;
+
+  // Convert string[] UPNs to PersonEntry[] for the shared picker.
+  const pickerValue = React.useMemo<PersonEntry[]>(
+    () => values.filter(Boolean).map((upn) => ({ upn, displayName: upn })),
+    [values],
+  );
+
+  // Convert PersonEntry[] back to string[] UPNs for the draft.
+  const handlePickerChange = React.useCallback(
+    (people: PersonEntry[]) => {
+      onChange(people.map((p) => p.upn));
+    },
+    [onChange],
+  );
 
   return (
     <div className={styles.field}>
       <label className={styles.label}>
         Recipients <span className={styles.requiredMark}>*</span>
       </label>
-      <div ref={containerRef} className={styles.pickerContainer}>
+      <div className={styles.pickerContainer}>
         <div className={styles.bucket}>
           <div className={styles.bucketLabel}>
             <BucketIcon size={12} strokeWidth={2.2} aria-hidden="true" className={styles.bucketLabelIcon} />
             People
           </div>
-          <div className={styles.bucketChips}>
-            {values.map((upn, index) => {
-              const display = nameCache.get(upn.toLowerCase()) ?? upn;
-              return (
-                <span key={`${upn}-${index}`} className={clsx(styles.bucketChip, styles.bucketChip_individualEmails)}>
-                  <BucketIcon size={10} strokeWidth={2.5} aria-hidden="true" className={styles.bucketChipIcon} />
-                  <span className={styles.bucketChipLabel}>{display}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeAt(index)}
-                    disabled={disabled}
-                    aria-label={`Remove ${display}`}
-                    className={styles.bucketChipRemove}
-                  >
-                    <XIcon size={10} strokeWidth={3} aria-hidden="true" />
-                  </button>
-                </span>
-              );
-            })}
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              disabled={disabled}
-              placeholder={values.length === 0 ? 'Search for a person…' : ''}
-              autoComplete="off"
-              role="combobox"
-              aria-expanded={isOpen}
-              aria-controls={listboxId}
-              aria-activedescendant={activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined}
-              aria-autocomplete="list"
-              className={styles.bucketInput}
-            />
-          </div>
+          <HbcPeoplePicker
+            label="People"
+            value={pickerValue}
+            onChange={handlePickerChange}
+            searchPeople={searchPeople}
+            mode="multi"
+            disabled={disabled}
+            placeholder="Search for a person\u2026"
+            validationMessage={errorMessage}
+            bare
+          />
         </div>
-
-        {isOpen ? (
-          <div id={listboxId} className={styles.pickerDropdown} role="listbox" aria-label="People search results">
-            {isSearching ? (
-              <div className={styles.pickerStatus}>Searching…</div>
-            ) : null}
-            {!isSearching && searchError && query.trim().length >= 2 ? (
-              <div className={styles.pickerStatus}>People search failed — check connection and try again</div>
-            ) : null}
-            {!isSearching && !searchError && results.length === 0 && query.trim().length >= 2 ? (
-              <div className={styles.pickerStatus}>No people found for &ldquo;{query}&rdquo;</div>
-            ) : null}
-            {results.map((person, index) => (
-              <div
-                key={person.upn}
-                id={`${listboxId}-opt-${index}`}
-                className={clsx(styles.pickerOption, index === activeIndex && styles.pickerOptionActive)}
-                role="option"
-                aria-selected={index === activeIndex}
-                onClick={() => selectPerson(person)}
-                onMouseEnter={() => setActiveIndex(index)}
-              >
-                <span className={styles.pickerOptionName}>{person.displayName}</span>
-                <span className={styles.pickerOptionMeta}>
-                  {person.upn}
-                  {person.jobTitle ? ` · ${person.jobTitle}` : ''}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : null}
       </div>
-
-      {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
       <div className={styles.hint}>Search by name or email. Select from results.</div>
     </div>
   );

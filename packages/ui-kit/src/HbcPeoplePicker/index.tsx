@@ -1,9 +1,10 @@
 /**
  * HbcPeoplePicker — Production-grade people selection with Graph live lookup.
  *
- * Replaces the D-PH6-10 textarea stub with a governed combobox + chip pattern.
- * Supports single-select and multi-select modes, keyboard navigation,
- * loading/empty/disabled/error states, and Graph-backed search.
+ * Governed combobox + chip pattern supporting single-select and multi-select
+ * modes, keyboard navigation, loading/empty/disabled/error states,
+ * Graph-backed search, avatar/initials rendering, and a `bare` mode for
+ * embedding inside consumer-owned label/layout shells.
  *
  * When no searchPeople adapter is provided, falls back to manual UPN entry.
  */
@@ -17,6 +18,76 @@ import { label as labelType, body as bodyType, bodySmall } from '../theme/typogr
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { Cancel } from '../icons/index.js';
 import type { HbcPeoplePickerProps, PersonEntry } from './types.js';
+
+// ── Avatar helpers ────────────────────────────────────────────────────────
+
+/** Extract up to two initials from a PersonEntry for fallback display. */
+function getInitials(person: PersonEntry): string {
+  if (person.givenName && person.surname) {
+    return `${person.givenName[0]}${person.surname[0]}`.toUpperCase();
+  }
+  const parts = person.displayName.trim().split(/\s+/);
+  if (parts.length >= 2) return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase();
+  return (parts[0]?.[0] ?? '?').toUpperCase();
+}
+
+/** Tiny inline avatar circle — shows photo when available, initials fallback. */
+function PersonAvatar({
+  person,
+  size,
+}: {
+  person: PersonEntry;
+  size: 'sm' | 'md';
+}): React.JSX.Element {
+  const px = size === 'sm' ? 20 : 28;
+  const fontSize = size === 'sm' ? '0.5625rem' : '0.6875rem';
+
+  if (person.photoUrl) {
+    return (
+      <img
+        src={person.photoUrl}
+        alt=""
+        aria-hidden="true"
+        style={{
+          width: px,
+          height: px,
+          borderRadius: '50%',
+          objectFit: 'cover',
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: px,
+        height: px,
+        borderRadius: '50%',
+        backgroundColor: HBC_SURFACE_LIGHT['surface-3'],
+        color: HBC_SURFACE_LIGHT['text-primary'],
+        fontSize,
+        fontWeight: 700,
+        lineHeight: 1,
+        flexShrink: 0,
+        userSelect: 'none',
+      }}
+    >
+      {getInitials(person)}
+    </span>
+  );
+}
+
+/** Build a display label for a person — prefers "First Last", falls back to displayName. */
+function personDisplayLabel(person: PersonEntry): string {
+  if (person.givenName && person.surname) return `${person.givenName} ${person.surname}`;
+  return person.displayName;
+}
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
@@ -95,7 +166,7 @@ const useStyles = makeStyles({
     maxWidth: '240px',
     paddingTop: '2px',
     paddingBottom: '2px',
-    paddingLeft: '8px',
+    paddingLeft: '4px',
     paddingRight: '4px',
     borderRadius: HBC_RADIUS_SM,
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
@@ -154,8 +225,8 @@ const useStyles = makeStyles({
   },
   option: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '1px',
+    alignItems: 'center',
+    gap: '8px',
     paddingTop: '8px',
     paddingBottom: '8px',
     paddingLeft: '12px',
@@ -168,6 +239,12 @@ const useStyles = makeStyles({
   optionActive: {
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
   },
+  optionText: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1px',
+    minWidth: '0',
+  },
   optionName: {
     fontSize: bodyType.fontSize,
     fontWeight: bodyType.fontWeight,
@@ -176,6 +253,9 @@ const useStyles = makeStyles({
   optionMeta: {
     fontSize: bodySmall.fontSize,
     color: HBC_SURFACE_LIGHT['text-muted'],
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   statusMessage: {
     paddingTop: '12px',
@@ -219,6 +299,7 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
   disabled,
   validationMessage,
   className,
+  bare,
 }) => {
   const classes = useStyles();
   const selected = React.useMemo(() => normalizeValue(value), [value]);
@@ -347,67 +428,57 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
     ? 'Search for a person...'
     : 'Enter email address (e.g. name@hb.com)';
 
-  return (
-    <div
-      ref={containerRef}
-      className={mergeClasses(classes.container, className)}
-      data-hbc-ui="people-picker"
-    >
-      <Field
-        label={label}
-        required={required}
-        validationMessage={validationMessage}
-        validationState={validationMessage ? 'error' : undefined}
+  const inputAreaContent = (
+    <>
+      <div
+        className={mergeClasses(
+          classes.inputArea,
+          disabled && classes.inputAreaDisabled,
+          validationMessage && classes.inputAreaError,
+        )}
+        onClick={() => !disabled && inputRef.current?.focus()}
       >
-        <div
-          className={mergeClasses(
-            classes.inputArea,
-            disabled && classes.inputAreaDisabled,
-            validationMessage && classes.inputAreaError,
-          )}
-          onClick={() => !disabled && inputRef.current?.focus()}
-        >
-          {selected.map((person) => (
-            <span key={person.upn} className={classes.chip}>
-              <span className={classes.chipLabel} title={person.upn}>
-                {person.displayName}
-              </span>
-              {!disabled && (
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removePerson(person.upn);
-                  }}
-                  aria-label={`Remove ${person.displayName}`}
-                  tabIndex={-1}
-                >
-                  <Cancel size="sm" />
-                </button>
-              )}
+        {selected.map((person) => (
+          <span key={person.upn} className={classes.chip}>
+            <PersonAvatar person={person} size="sm" />
+            <span className={classes.chipLabel} title={person.upn}>
+              {personDisplayLabel(person)}
             </span>
-          ))}
-          {showInput && (
-            <input
-              ref={inputRef}
-              type="text"
-              className={classes.searchInput}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={selected.length === 0 ? (placeholder ?? defaultPlaceholder) : ''}
-              disabled={disabled}
-              role="combobox"
-              aria-expanded={isOpen}
-              aria-controls={listboxId}
-              aria-activedescendant={activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined}
-              aria-autocomplete="list"
-              autoComplete="off"
-            />
-          )}
-        </div>
-      </Field>
+            {!disabled && (
+              <button
+                type="button"
+                className={classes.chipRemove}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removePerson(person.upn);
+                }}
+                aria-label={`Remove ${personDisplayLabel(person)}`}
+                tabIndex={-1}
+              >
+                <Cancel size="sm" />
+              </button>
+            )}
+          </span>
+        ))}
+        {showInput && (
+          <input
+            ref={inputRef}
+            type="text"
+            className={classes.searchInput}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={selected.length === 0 ? (placeholder ?? defaultPlaceholder) : ''}
+            disabled={disabled}
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-activedescendant={activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined}
+            aria-autocomplete="list"
+            autoComplete="off"
+          />
+        )}
+      </div>
 
       {!searchPeople && !disabled && (
         <div className={classes.hint}>
@@ -437,15 +508,48 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
               onClick={() => selectPerson(person)}
               onMouseEnter={() => setActiveIndex(index)}
             >
-              <span className={classes.optionName}>{person.displayName}</span>
-              <span className={classes.optionMeta}>
-                {person.upn}
-                {person.jobTitle && ` · ${person.jobTitle}`}
-              </span>
+              <PersonAvatar person={person} size="md" />
+              <div className={classes.optionText}>
+                <span className={classes.optionName}>{personDisplayLabel(person)}</span>
+                <span className={classes.optionMeta}>
+                  {person.upn}
+                  {person.jobTitle && ` \u00b7 ${person.jobTitle}`}
+                </span>
+              </div>
             </div>
           ))}
         </div>
       )}
+    </>
+  );
+
+  // Bare mode: render only the input area + dropdown, no Field wrapper.
+  if (bare) {
+    return (
+      <div
+        ref={containerRef}
+        className={mergeClasses(classes.container, className)}
+        data-hbc-ui="people-picker"
+      >
+        {inputAreaContent}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={mergeClasses(classes.container, className)}
+      data-hbc-ui="people-picker"
+    >
+      <Field
+        label={label}
+        required={required}
+        validationMessage={validationMessage}
+        validationState={validationMessage ? 'error' : undefined}
+      >
+        {inputAreaContent}
+      </Field>
     </div>
   );
 };

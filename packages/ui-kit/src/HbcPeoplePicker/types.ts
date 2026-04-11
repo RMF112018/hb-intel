@@ -1,8 +1,7 @@
 /**
- * HbcPeoplePicker — Governed people selection primitive
+ * HbcPeoplePicker — Governed people selection primitive.
  * Graph live lookup as sanctioned identity source.
  */
-import type * as React from 'react';
 
 // ── Person data ──────────────────────────────────────────────────────────
 
@@ -11,10 +10,24 @@ export interface PersonEntry {
   upn: string;
   /** Display name from directory */
   displayName: string;
+  /** Entra/Graph stable object ID when available */
+  id?: string;
+  /** Given (first) name from directory */
+  givenName?: string;
+  /** Surname (last name) from directory */
+  surname?: string;
+  /** Primary mail address when distinct from UPN */
+  mail?: string;
   /** Job title from directory */
   jobTitle?: string;
   /** Department from directory */
   department?: string;
+  /**
+   * Photo URL or blob URL when available. Photo retrieval is a
+   * separate path from user search — this field is populated
+   * asynchronously after the initial search result arrives.
+   */
+  photoUrl?: string;
 }
 
 // ── Search adapter ───────────────────────────────────────────────────────
@@ -45,4 +58,10 @@ export interface HbcPeoplePickerProps {
   validationMessage?: string;
   /** Additional CSS class */
   className?: string;
+  /**
+   * When true, the picker hides the outer Field/label wrapper and
+   * renders only the input area + dropdown. Useful when the consumer
+   * provides its own label and layout (e.g. KudosComposer buckets).
+   */
+  bare?: boolean;
 }

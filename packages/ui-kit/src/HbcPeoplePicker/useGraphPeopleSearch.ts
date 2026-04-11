@@ -12,7 +12,7 @@ import { useCallback } from 'react';
 import type { PersonEntry, PeopleSearchFn } from './types.js';
 
 const GRAPH_USERS_ENDPOINT = 'https://graph.microsoft.com/v1.0/users';
-const GRAPH_SELECT_FIELDS = 'id,displayName,mail,userPrincipalName,jobTitle,department';
+const GRAPH_SELECT_FIELDS = 'id,displayName,givenName,surname,mail,userPrincipalName,jobTitle,department';
 const MAX_RESULTS = 10;
 
 /**
@@ -51,7 +51,10 @@ export function useGraphPeopleSearch(
 
       const data = (await response.json()) as {
         value: Array<{
+          id?: string;
           displayName?: string;
+          givenName?: string;
+          surname?: string;
           mail?: string;
           userPrincipalName?: string;
           jobTitle?: string;
@@ -64,6 +67,10 @@ export function useGraphPeopleSearch(
         .map((u) => ({
           upn: u.userPrincipalName ?? u.mail ?? '',
           displayName: u.displayName ?? u.userPrincipalName ?? '',
+          id: u.id ?? undefined,
+          givenName: u.givenName ?? undefined,
+          surname: u.surname ?? undefined,
+          mail: u.mail ?? undefined,
           jobTitle: u.jobTitle ?? undefined,
           department: u.department ?? undefined,
         }));
