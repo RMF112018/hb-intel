@@ -41,6 +41,7 @@
   right: 0;
   bottom: 0;
   width: 440px;
+  max-width: 100vw;
   box-shadow:
     -4px 0 20px rgba(10, 8, 6, 0.08),
     -16px 0 48px rgba(10, 8, 6, 0.14);
@@ -171,6 +172,14 @@
   }
 }
 
+/* ── Footer action zone ──────────────────────────────────
+   Host-aware bottom padding accommodates persistent SharePoint
+   controls (feedback button, accessibility checker, Copilot
+   launcher) that occupy the lower-right viewport area (~48px).
+   Desktop retains env(safe-area-inset-bottom) instead of
+   overriding it, so the safe zone adapts to both host controls
+   and device-level insets (iPad in SPFx, notch devices). */
+
 .panelFooter {
   flex-shrink: 0;
   padding: 14px 18px;
@@ -189,7 +198,7 @@
 @media (min-width: 768px) {
   .panelFooter {
     padding: 16px 26px;
-    padding-bottom: 16px;
+    padding-bottom: max(28px, env(safe-area-inset-bottom, 28px));
   }
 }
 
