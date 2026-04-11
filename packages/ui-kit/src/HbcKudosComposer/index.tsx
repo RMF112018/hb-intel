@@ -122,6 +122,12 @@ export interface KudosComposerDraft {
    * names instead of raw email addresses.
    */
   recipientDisplayMap?: Record<string, string>;
+  /**
+   * Maps UPN → photo URL for preview avatar rendering. Populated by
+   * the people picker bridge so the preview card can show the
+   * recipient's actual directory photo instead of initials-only.
+   */
+  recipientPhotoMap?: Record<string, string>;
   headline: string;
   excerpt: string;
   details: string;
@@ -480,6 +486,7 @@ function HbcKudosComposerTypedRecipients({
           values={buckets[primaryKind]}
           onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
           onDisplayMapChange={onDraftChange ? (map) => onDraftChange({ recipientDisplayMap: map }) : undefined}
+          onPhotoMapChange={onDraftChange ? (map) => onDraftChange({ recipientPhotoMap: map }) : undefined}
           disabled={disabled}
           searchPeople={searchPeople}
           fetchPersonPhoto={fetchPersonPhoto}
@@ -549,6 +556,7 @@ interface KudosSharedPickerBridgeProps {
   values: string[];
   onChange: (next: string[]) => void;
   onDisplayMapChange?: (map: Record<string, string>) => void;
+  onPhotoMapChange?: (map: Record<string, string>) => void;
   disabled: boolean;
   searchPeople: PeopleSearchFn;
   fetchPersonPhoto?: PersonPhotoFn;
@@ -568,6 +576,7 @@ function KudosSharedPickerBridge({
   values,
   onChange,
   onDisplayMapChange,
+  onPhotoMapChange,
   disabled,
   searchPeople,
   fetchPersonPhoto,
@@ -606,8 +615,15 @@ function KudosSharedPickerBridge({
         }
         onDisplayMapChange(map);
       }
+      if (onPhotoMapChange) {
+        const map: Record<string, string> = {};
+        for (const p of people) {
+          if (p.photoUrl) map[p.upn] = p.photoUrl;
+        }
+        onPhotoMapChange(map);
+      }
     },
-    [onChange, onDisplayMapChange],
+    [onChange, onDisplayMapChange, onPhotoMapChange],
   );
 
   return (
@@ -871,20 +887,27 @@ function parseRecipients(raw: string): string[] {
     .filter(Boolean);
 }
 
+interface PreviewRecipient {
+  name: string;
+  photoUrl?: string;
+}
+
 function flattenTypedRecipients(
   buckets: KudosComposerRecipientBucketsDraft | undefined,
   displayMap?: Record<string, string>,
-): string[] {
+  photoMap?: Record<string, string>,
+): PreviewRecipient[] {
   if (!buckets) return [];
-  const individuals = buckets.individualEmails.map((upn) =>
-    displayMap?.[upn] || upn,
-  );
-  return [
-    ...individuals,
+  const individuals: PreviewRecipient[] = buckets.individualEmails.map((upn) => ({
+    name: displayMap?.[upn] || upn,
+    photoUrl: photoMap?.[upn],
+  }));
+  const labels: PreviewRecipient[] = [
     ...buckets.teamLabels,
     ...buckets.departmentLabels,
     ...buckets.projectGroupLabels,
-  ].filter(Boolean);
+  ].filter(Boolean).map((label) => ({ name: label }));
+  return [...individuals, ...labels];
 }
 
 export function HbcKudosComposerPreview({
@@ -894,18 +917,20 @@ export function HbcKudosComposerPreview({
   // Typed buckets take precedence when any bucket has entries; otherwise
   // fall back to the legacy comma-delimited text field so the transitional
   // merged People & Culture webpart continues to render correctly.
-  const typedFlat = flattenTypedRecipients(draft.recipients, draft.recipientDisplayMap);
-  const recipients = typedFlat.length > 0 ? typedFlat : parseRecipients(draft.recipientNames);
+  const typedFlat = flattenTypedRecipients(draft.recipients, draft.recipientDisplayMap, draft.recipientPhotoMap);
+  const recipients: PreviewRecipient[] = typedFlat.length > 0
+    ? typedFlat
+    : parseRecipients(draft.recipientNames).map((name) => ({ name }));
   const headline = draft.headline.trim() || 'Your headline here';
   const excerpt = draft.excerpt.trim() || 'Your recognition message will appear here…';
   const isEmpty =
     !draft.headline.trim() && !draft.excerpt.trim() && recipients.length === 0;
 
   let recipientLine = '';
-  if (recipients.length === 1) recipientLine = recipients[0]!;
-  else if (recipients.length === 2) recipientLine = `${recipients[0]} and ${recipients[1]}`;
+  if (recipients.length === 1) recipientLine = recipients[0]!.name;
+  else if (recipients.length === 2) recipientLine = `${recipients[0]!.name} and ${recipients[1]!.name}`;
   else if (recipients.length > 2)
-    recipientLine = `${recipients[0]}, ${recipients[1]}, and ${recipients.length - 2} more`;
+    recipientLine = `${recipients[0]!.name}, ${recipients[1]!.name}, and ${recipients.length - 2} more`;
 
   return (
     <div className={styles.previewWrap}>
@@ -917,7 +942,7 @@ export function HbcKudosComposerPreview({
         {recipients.length > 0 ? (
           <div className={styles.previewAvatars}>
             <HbcAvatarStack
-              people={recipients.slice(0, 4).map((name, i) => ({ id: `prev-${i}`, name }))}
+              people={recipients.slice(0, 4).map((r, i) => ({ id: `prev-${i}`, name: r.name, src: r.photoUrl }))}
               size="md"
               max={4}
               overflow={recipients.length > 4 ? 'inline-text' : 'none'}
