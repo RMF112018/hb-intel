@@ -92,6 +92,19 @@ function sortByRecency(entries: KudosEntry[]): KudosEntry[] {
 }
 
 /**
+ * Content-quality gate for the featured spotlight slot. An entry is
+ * "featured-worthy" when it carries enough content to render the
+ * premium spotlight card credibly — at minimum one recipient (for
+ * the hero avatar ring) or an excerpt (for body content). Without
+ * either, the card would render as a hollow headline-only shell.
+ */
+function isFeaturedWorthy(entry: KudosEntry): boolean {
+  if ((entry.recipients ?? []).length > 0) return true;
+  if (entry.excerpt?.trim()) return true;
+  return false;
+}
+
+/**
  * Map a KudosEntry to the ui-kit KudosSpotlightItem contract.
  * Only employee-facing fields are projected — no governance metadata,
  * no prominence internals, no audit history.
@@ -129,17 +142,30 @@ function adaptRail(entries: KudosEntry[]): KudosRailItem[] {
   }));
 }
 
+/**
+ * Build the surface model with featured-quality selection. The first
+ * entry that meets the content-quality threshold becomes featured;
+ * remaining entries (including sparse ones) flow to the recent rail
+ * where their simpler row layout tolerates minimal content. If no
+ * entry meets the threshold, the surface gracefully falls back to
+ * the SparseInvite state rather than rendering a hollow spotlight.
+ */
 function buildKudosSurfaceModel(
   heading: string,
   publicEntries: KudosEntry[],
 ): PeopleCultureSurfaceModel {
   const sorted = sortByRecency(publicEntries);
-  const featured = sorted[0];
-  const rest = sorted.slice(1, 7);
+
+  // Find the best featured candidate — first entry that passes
+  // the content-quality gate.
+  const featuredIdx = sorted.findIndex(isFeaturedWorthy);
+  const featured = featuredIdx >= 0 ? sorted[featuredIdx] : undefined;
+  const rest = sorted.filter((_, i) => i !== featuredIdx).slice(0, 7);
+
   return {
     heading,
     kudos: {
-      isEmpty: sorted.length === 0,
+      isEmpty: !featured,
       featured: featured ? adaptSpotlight(featured) : undefined,
       recent: adaptRail(rest),
     },
