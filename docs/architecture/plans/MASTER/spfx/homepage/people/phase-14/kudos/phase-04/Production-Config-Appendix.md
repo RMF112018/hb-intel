@@ -101,6 +101,20 @@ The production permissions authority model for HB Kudos is centralized and final
 
 No page configuration, webpart property edit, or site-page authoring action can alter who has governance access. Permissions are changed exclusively by updating Entra group membership.
 
+## Implementation closure note
+
+The following production configuration changes have been implemented:
+
+1. **Property-pane permission fields removed** — `simulatedRole`, `kudosAdminsGroup`, and `kudosReviewersGroup` are no longer in the production property pane or manifest preconfigured properties. The property pane retains only product configuration (overdue thresholds, heading).
+
+2. **Security-group-only authority model implemented** — `kudosRoleResolver.ts` hardcodes the canonical Entra group constants (`HB Kudos Admins`, `HB Kudos Reviewers`) and resolves role via `/_api/web/currentuser?$expand=Groups`. Group names are not configurable per instance. `simulatedRole` is isolated to the dev-only path (no `siteUrl`).
+
+3. **Unified capability enforcement** — both UI gating (`HbKudosCompanion.tsx` via `deriveKudosCapabilities`) and writer-level authorization (`kudosGovernanceWriter.ts` via `authorizeKudosPatch`) consume the same capability model derived from the resolved role.
+
+4. **Permissions documentation** — `docs/how-to/administrator/hb-kudos-permissions-guide.md` provides layman-friendly documentation covering what controls access, what each group does, and how to update membership in Entra.
+
+5. **Manifest descriptions updated** — source and release manifests describe the Entra-only permission model. No remaining product copy implies property-pane permission configuration.
+
 ## Closure expectation
 
 The final implementation must leave behind a clear, documented production configuration model that another maintainer can understand without reverse-engineering prompt history.
