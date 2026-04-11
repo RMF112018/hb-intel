@@ -19,7 +19,7 @@
         "default": "HB Kudos"
       },
       "description": {
-        "default": "Premium HB Kudos recognition surface — featured spotlight, recent recognition rail, typed-recipient submission, archive browse with configurable age-off, role-safe detail panel, celebrate interaction, and submitter withdraw/resubmit flows."
+        "default": "Employee-facing HB Kudos recognition surface — featured spotlight, recent recognition rail, typed-recipient submission (individual/team/department/project group), archive browse with configurable age-off (homepageAgeOffDays property, default 14 days), role-safe detail panel, celebrate interaction, and submitter withdraw/resubmit flows."
       },
       "officeFabricIconFontName": "Trophy",
       "hiddenFromToolbox": false,
@@ -53,7 +53,7 @@
       },
       "f14e59a3-4d6b-43b2-952e-ba02dea11dad_1.0.0": {
         "type": "path",
-        "path": "shell-entry-f14e59a3-4d6b-43b2-952e-ba02dea11dad-409b6e41.js"
+        "path": "shell-entry-f14e59a3-4d6b-43b2-952e-ba02dea11dad-a91b4668.js"
       }
     }
   }
