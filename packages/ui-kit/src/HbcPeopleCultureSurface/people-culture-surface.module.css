@@ -1106,10 +1106,17 @@
     0 20px 44px rgba(34, 83, 145, 0.06);
 }
 
-/* ── Hero (homepage fit) ── */
+/* ── Hero (homepage fit — unified masthead) ──────────────────
+   The hero extends its gradient through the featured spotlight
+   zone via extra bottom padding + negative margin. The spotlight
+   card sits on the gradient with a frosted-glass treatment,
+   creating one authoritative masthead zone instead of three
+   separate visual layers (hero → warm bg → white card). */
+
 .peopleCultureHomepage .hero {
   gap: 10px;
-  padding: 18px 20px 18px;
+  padding: 18px 20px 68px;
+  margin-bottom: -50px;
   flex-direction: column;
   align-items: flex-start;
 }
@@ -1150,26 +1157,47 @@
   flex-direction: column;
 }
 
-/* ── Spotlight zone (homepage fit) ── */
+/* ── Spotlight zone (homepage fit — transparent over gradient) ── */
 .peopleCultureHomepage .spotlight {
   flex: 1 1 100%;
   min-width: 0;
-  padding: 18px 18px 20px;
+  padding: 0 18px 0;
+  background: transparent;
+  position: relative;
+  z-index: 1;
 }
+
+/* ── Spotlight card (homepage fit — frosted glass on gradient) ──
+   Removes the white card chrome (bg, border, shadow) and replaces
+   with a subtle frosted-glass treatment so featured recognition
+   reads as embedded within the masthead, not a nested card. */
 
 .peopleCultureHomepage .spotlightCard {
   flex-direction: column;
   gap: 14px;
-  padding: 22px 18px 18px;
+  padding: 22px 20px 20px;
   border-radius: 14px;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
+@supports not (backdrop-filter: blur(16px)) {
+  .peopleCultureHomepage .spotlightCard {
+    background: rgba(30, 55, 90, 0.82);
+  }
+}
+
+/* ── Spotlight ribbon: hidden for homepage variant ──
+   The "Kudos Spotlight" label is redundant when the featured
+   recognition is embedded in the masthead composition. */
+
 .peopleCultureHomepage .spotlightRibbon {
-  top: -11px;
-  left: 16px;
-  padding: 6px 12px;
-  font-size: 0.5625rem;
-  letter-spacing: 0.14em;
+  display: none;
 }
 
 .peopleCultureHomepage .spotlightAvatars {
@@ -1179,6 +1207,9 @@
 
 .peopleCultureHomepage .spotlightHeroAvatarRing {
   padding: 3px;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.10);
 }
 
 .peopleCultureHomepage .spotlightHeroAvatarRingInner {
@@ -1189,16 +1220,24 @@
   gap: 8px;
 }
 
+/* ── Spotlight content: on-dark readability ─────────────────
+   All spotlight text and decorative elements restyle for legibility
+   over the hero gradient / frosted-glass card. */
+
 .peopleCultureHomepage .spotlightRecipientTag {
   font-size: 0.625rem;
   padding: 2px 8px;
   letter-spacing: 0.06em;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .peopleCultureHomepage .spotlightTitle {
   font-size: 1.1875rem;
   line-height: 1.18;
   max-width: 28ch;
+  color: #ffffff;
 }
 
 .peopleCultureHomepage .spotlightExcerpt {
@@ -1206,17 +1245,35 @@
   line-height: 1.55;
   max-width: 48ch;
   -webkit-line-clamp: 3;
+  color: rgba(255, 255, 255, 0.80);
 }
 
 .peopleCultureHomepage .spotlightMeta {
   padding-top: 8px;
   gap: 10px;
   font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.62);
+  border-top-color: rgba(255, 255, 255, 0.16);
+}
+
+.peopleCultureHomepage .metaItem {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.peopleCultureHomepage .metaIcon {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .peopleCultureHomepage .metaCount {
   padding: 3px 8px;
   font-size: 0.6875rem;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.peopleCultureHomepage .metaCountIcon {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .peopleCultureHomepage .spotlightActions {
@@ -1225,16 +1282,39 @@
   gap: 8px;
 }
 
+/* ── Spotlight CTAs: on-dark treatment ── */
+
 .peopleCultureHomepage .giveKudosGhostInline {
   padding: 7px 14px;
   font-size: 0.75rem;
   border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
 }
 
-/* ── Recent recognition list (homepage fit) ── */
+.peopleCultureHomepage .giveKudosGhostInline:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.42);
+  color: #ffffff;
+}
+
+.peopleCultureHomepage .giveKudosGhostInline:focus-visible {
+  outline-color: #ffffff;
+}
+
+/* ── Recent recognition list (homepage fit — white subordinate zone) ──
+   The recent list breaks out of the gradient masthead with its own
+   white background, creating a clean visual transition from the
+   authoritative masthead above to the subordinate browse content. */
+
 .peopleCultureHomepage .recentList {
-  margin-top: 16px;
+  margin: 20px -18px 0;
+  padding: 18px 18px 4px;
   gap: 4px;
+  background: #ffffff;
+  border-radius: 14px 14px 0 0;
+  border-top: 1px solid rgba(229, 126, 70, 0.10);
 }
 
 .peopleCultureHomepage .sectionLabel {
@@ -1267,6 +1347,7 @@
   min-width: 0;
   border-top: 1px solid rgba(229, 126, 70, 0.12);
   border-left: none;
+  background: #ffffff;
 }
 
 .peopleCultureHomepage .railHighlights {
@@ -1323,6 +1404,87 @@
   font-size: 0.625rem;
 }
 
+/* ── Sparse state (homepage fit — on-gradient) ──────────────
+   When no kudos exist, the sparse invite renders over the gradient
+   masthead with frosted-glass treatment matching the spotlight. */
+
+.peopleCultureHomepage .sparse {
+  background: transparent;
+  position: relative;
+  z-index: 1;
+  padding: 0 18px 24px;
+}
+
+.peopleCultureHomepage .sparseInvite {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(255, 255, 255, 0.20);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+@supports not (backdrop-filter: blur(16px)) {
+  .peopleCultureHomepage .sparseInvite {
+    background: rgba(30, 55, 90, 0.82);
+  }
+}
+
+.peopleCultureHomepage .sparseInvite::before {
+  background-image:
+    radial-gradient(circle at 18% 32%, rgba(255, 255, 255, 0.35) 1.5px, transparent 2px),
+    radial-gradient(circle at 82% 28%, rgba(255, 255, 255, 0.25) 1px, transparent 1.5px),
+    radial-gradient(circle at 58% 72%, rgba(255, 255, 255, 0.30) 1.5px, transparent 2px),
+    radial-gradient(circle at 28% 84%, rgba(255, 255, 255, 0.18) 1px, transparent 1.5px);
+}
+
+.peopleCultureHomepage .sparseIcon {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.peopleCultureHomepage .sparseTitle {
+  color: #ffffff;
+}
+
+.peopleCultureHomepage .sparseBody {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.peopleCultureHomepage .giveKudosSolid {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.peopleCultureHomepage .giveKudosSolid:hover {
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 5px 16px rgba(0, 0, 0, 0.16),
+    0 2px 4px rgba(0, 0, 0, 0.10);
+}
+
+/* ── Surface footer (archive / browse zone) ─────────────────
+   Content rendered via the `footer` prop lives inside the surface
+   container so it inherits the border-radius and overflow clipping.
+   White background with subtle warm top border for clean separation. */
+
+.surfaceFooter {
+  background: #ffffff;
+  padding: 0 20px 22px;
+  border-top: 1px solid rgba(229, 126, 70, 0.10);
+}
+
+.peopleCultureHomepage .surfaceFooter {
+  padding: 0 18px 18px;
+}
+
 /* Tablet / desktop holds — the Safety and Leadership variants
    reassert their narrow-fit values at wider viewports because the
    SharePoint column stays narrow even on desktop. Same applies
@@ -1333,30 +1495,30 @@
   .peopleCultureHomepage .hero {
     flex-direction: column;
     align-items: flex-start;
-    padding: 22px 24px 20px;
+    padding: 22px 24px 76px;
+    margin-bottom: -56px;
     gap: 12px;
   }
   .peopleCultureHomepage .heroHeading {
     font-size: 1.4375rem;
   }
   .peopleCultureHomepage .spotlight {
-    padding: 22px 22px 24px;
+    padding: 0 22px 0;
   }
   .peopleCultureHomepage .spotlightCard {
     flex-direction: column;
     gap: 16px;
-    padding: 24px 22px 22px;
-  }
-  .peopleCultureHomepage .spotlightRibbon {
-    left: 20px;
-    padding: 7px 14px;
-    font-size: 0.625rem;
+    padding: 24px 24px 22px;
   }
   .peopleCultureHomepage .spotlightTitle {
     font-size: 1.3125rem;
   }
   .peopleCultureHomepage .spotlightExcerpt {
     font-size: 0.9375rem;
+  }
+  .peopleCultureHomepage .recentList {
+    margin: 22px -22px 0;
+    padding: 20px 22px 4px;
   }
   .peopleCultureHomepage .railHighlights {
     padding: 18px 22px 16px;
@@ -1367,11 +1529,15 @@
   .peopleCultureHomepage .railFooter {
     padding: 12px 22px 16px;
   }
+  .peopleCultureHomepage .surfaceFooter {
+    padding: 0 22px 20px;
+  }
 }
 
 @media (min-width: 1200px) {
   .peopleCultureHomepage .hero {
-    padding: 24px 26px 22px;
+    padding: 24px 26px 80px;
+    margin-bottom: -60px;
   }
   .peopleCultureHomepage .heroHeading {
     font-size: 1.5rem;

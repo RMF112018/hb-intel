@@ -117,6 +117,12 @@ export interface HbcPeopleCultureSurfaceProps {
    * unaffected.
    */
   variant?: HbcPeopleCultureSurfaceVariant;
+  /**
+   * Optional content rendered after the main body, inside the
+   * surface container. Useful for archive or browse zones that
+   * should visually belong to the same surface.
+   */
+  footer?: React.ReactNode;
   className?: string;
   'aria-label'?: string;
 }
@@ -237,6 +243,7 @@ interface KudosSpotlightProps {
   onGiveKudos?: () => void;
   celebrateHref?: string;
   reducedMotion: boolean;
+  isHomepage?: boolean;
 }
 
 function KudosSpotlight({
@@ -245,6 +252,7 @@ function KudosSpotlight({
   onGiveKudos,
   celebrateHref,
   reducedMotion,
+  isHomepage,
 }: KudosSpotlightProps): React.JSX.Element {
   const recipientLabel = fmtRecipients(featured.recipients);
   const motionProps = reducedMotion
@@ -320,7 +328,7 @@ function KudosSpotlight({
               <HbcPremiumCta
                 label="Celebrate this team"
                 href={celebrateHref}
-                variant="primary"
+                variant={isHomepage ? 'onDark' : 'primary'}
                 size="md"
                 arrow
               />
@@ -592,18 +600,20 @@ export function HbcPeopleCultureSurface({
   heroEyebrow = 'People & Culture',
   heroSubcaption = 'Celebrating our people',
   variant = 'default',
+  footer,
   className,
   'aria-label': ariaLabel,
 }: HbcPeopleCultureSurfaceProps): React.JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
   const showSpotlight = !model.kudos.isEmpty && model.kudos.featured;
+  const isHomepage = variant === 'people-culture-homepage';
 
   return (
     <section
       aria-label={ariaLabel ?? model.heading}
       className={clsx(
         styles.root,
-        variant === 'people-culture-homepage' && styles.peopleCultureHomepage,
+        isHomepage && styles.peopleCultureHomepage,
         className,
       )}
       data-hbc-presentation="people-culture-surface"
@@ -626,6 +636,7 @@ export function HbcPeopleCultureSurface({
             onGiveKudos={onGiveKudos}
             celebrateHref={celebrateHref}
             reducedMotion={reducedMotion}
+            isHomepage={isHomepage}
           />
           <RecognitionRail
             announcements={model.announcements}
@@ -642,6 +653,8 @@ export function HbcPeopleCultureSurface({
           reducedMotion={reducedMotion}
         />
       )}
+
+      {footer ? <div className={styles.surfaceFooter}>{footer}</div> : null}
     </section>
   );
 }

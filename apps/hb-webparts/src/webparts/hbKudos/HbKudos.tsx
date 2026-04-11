@@ -604,7 +604,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
   return (
     <section
       data-hbc-webpart="hb-kudos"
-      data-hbc-webpart-phase="phase-14-kudos-phase-04"
+      data-hbc-webpart-phase="phase-14-kudos-phase-05"
       aria-label="HB Kudos recognition"
     >
       <HbcPeopleCultureSurface
@@ -615,16 +615,15 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         heroEyebrow="HB Kudos"
         heroSubcaption="Signature recognition across the company"
         variant="people-culture-homepage"
+        footer={showArchive ? (
+          <ArchiveList
+            entries={archiveKudos}
+            searchText={archiveSearch}
+            onSearchChange={setArchiveSearch}
+            onOpenDetail={setDetailEntry}
+          />
+        ) : undefined}
       />
-
-      {showArchive ? (
-        <ArchiveList
-          entries={archiveKudos}
-          searchText={archiveSearch}
-          onSearchChange={setArchiveSearch}
-          onOpenDetail={setDetailEntry}
-        />
-      ) : null}
 
       <HbcKudosComposerFlyout
         open={composer.isOpen}
