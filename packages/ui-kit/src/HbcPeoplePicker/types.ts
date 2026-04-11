@@ -30,6 +30,37 @@ export interface PersonEntry {
   photoUrl?: string;
 }
 
+// ── Photo state ─────────────────────────────────────────────────────────
+
+/**
+ * Typed avatar/photo state for a person. Distinguishes the normal
+ * "user has no photo" case (ImageNotFound) from transient failures.
+ *
+ * - `idle`         — photo not yet requested
+ * - `loading`      — fetch in progress
+ * - `available`    — photo blob URL ready for rendering
+ * - `missing`      — endpoint returned 404 ImageNotFound (normal)
+ * - `failed`       — transient error (network, auth, unexpected status)
+ */
+export type PhotoState = 'idle' | 'loading' | 'available' | 'missing' | 'failed';
+
+export interface PersonPhotoEntry {
+  /** The person's canonical key (UPN or Graph id) used for cache keying */
+  key: string;
+  state: PhotoState;
+  /** Blob URL when state is 'available'; undefined otherwise */
+  url?: string;
+}
+
+// ── Photo adapter ───────────────────────────────────────────────────────
+
+/**
+ * Async function that fetches a person's photo binary and returns a
+ * blob URL, or `undefined` if the photo is missing (404 ImageNotFound).
+ * Throws on transient failures so callers can distinguish missing from broken.
+ */
+export type PersonPhotoFn = (personIdOrUpn: string) => Promise<string | undefined>;
+
 // ── Search adapter ───────────────────────────────────────────────────────
 
 /** Async function that searches people by query string and returns matches. */
@@ -64,4 +95,12 @@ export interface HbcPeoplePickerProps {
    * provides its own label and layout (e.g. KudosComposer buckets).
    */
   bare?: boolean;
+  /**
+   * Photo retrieval adapter. When provided, the picker fetches avatars
+   * for search results and selected chips through this separate path
+   * (Graph /photo/$value or equivalent). The adapter returns a blob URL
+   * when the photo exists and `undefined` for 404 ImageNotFound.
+   * Throws on transient failures.
+   */
+  fetchPersonPhoto?: PersonPhotoFn;
 }

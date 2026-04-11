@@ -164,8 +164,8 @@ export * from './icons/index.js';
 // Components
 export { HbcStatusBadge } from './HbcStatusBadge/index.js';
 export type { HbcStatusBadgeProps, StatusVariant } from './HbcStatusBadge/index.js';
-export { HbcPeoplePicker, useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults } from './HbcPeoplePicker/index.js';
-export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn } from './HbcPeoplePicker/index.js';
+export { HbcPeoplePicker, useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults, usePersonPhotoCache, createGraphPersonPhotoFn } from './HbcPeoplePicker/index.js';
+export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn, PersonPhotoFn, PhotoState, PersonPhotoEntry } from './HbcPeoplePicker/index.js';
 export {
   ProvisioningNotificationBanner,
 } from './components/ProvisioningNotificationBanner/index.js';

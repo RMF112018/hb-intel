@@ -220,8 +220,9 @@ export type {
 } from './HbcKudosComposer/index.js';
 
 export { HbcPeoplePicker } from './HbcPeoplePicker/index.js';
-export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn } from './HbcPeoplePicker/index.js';
+export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn, PersonPhotoFn, PhotoState, PersonPhotoEntry } from './HbcPeoplePicker/index.js';
 export { useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults } from './HbcPeoplePicker/useGraphPeopleSearch.js';
+export { usePersonPhotoCache, createGraphPersonPhotoFn } from './HbcPeoplePicker/usePersonPhotoCache.js';
 
 export { HbcAvatarStack } from './HbcAvatarStack/index.js';
 export type {

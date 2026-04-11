@@ -17,7 +17,8 @@ import { elevationLevel2 } from '../theme/elevation.js';
 import { label as labelType, body as bodyType, bodySmall } from '../theme/typography.js';
 import { TRANSITION_FAST } from '../theme/animations.js';
 import { Cancel } from '../icons/index.js';
-import type { HbcPeoplePickerProps, PersonEntry } from './types.js';
+import type { HbcPeoplePickerProps, PersonEntry, PersonPhotoFn } from './types.js';
+import { usePersonPhotoCache } from './usePersonPhotoCache.js';
 
 // ── Avatar helpers ────────────────────────────────────────────────────────
 
@@ -31,34 +32,16 @@ function getInitials(person: PersonEntry): string {
   return (parts[0]?.[0] ?? '?').toUpperCase();
 }
 
-/** Tiny inline avatar circle — shows photo when available, initials fallback. */
-function PersonAvatar({
+/** Initials circle — governed fallback when photo is unavailable. */
+function InitialsAvatar({
   person,
-  size,
+  px,
+  fontSize,
 }: {
   person: PersonEntry;
-  size: 'sm' | 'md';
+  px: number;
+  fontSize: string;
 }): React.JSX.Element {
-  const px = size === 'sm' ? 20 : 28;
-  const fontSize = size === 'sm' ? '0.5625rem' : '0.6875rem';
-
-  if (person.photoUrl) {
-    return (
-      <img
-        src={person.photoUrl}
-        alt=""
-        aria-hidden="true"
-        style={{
-          width: px,
-          height: px,
-          borderRadius: '50%',
-          objectFit: 'cover',
-          flexShrink: 0,
-        }}
-      />
-    );
-  }
-
   return (
     <span
       aria-hidden="true"
@@ -81,6 +64,54 @@ function PersonAvatar({
       {getInitials(person)}
     </span>
   );
+}
+
+/**
+ * Inline avatar circle with photo cache integration.
+ *
+ * Resolution order:
+ *   1. `person.photoUrl` already set → render immediately
+ *   2. `getPhoto` cache → fetch via adapter, render when available
+ *   3. Fallback → initials circle (missing-photo or no adapter)
+ */
+function PersonAvatar({
+  person,
+  size,
+  getPhoto,
+}: {
+  person: PersonEntry;
+  size: 'sm' | 'md';
+  getPhoto?: (key: string) => { state: string; url?: string };
+}): React.JSX.Element {
+  const px = size === 'sm' ? 20 : 28;
+  const fontSize = size === 'sm' ? '0.5625rem' : '0.6875rem';
+
+  // Prefer pre-set photoUrl (e.g. from static data or pre-fetched)
+  const presetUrl = person.photoUrl;
+
+  // Try cache-backed photo fetch if adapter is available
+  const photoKey = person.id ?? person.upn;
+  const cached = getPhoto?.(photoKey);
+  const resolvedUrl = presetUrl ?? cached?.url;
+
+  if (resolvedUrl) {
+    return (
+      <img
+        src={resolvedUrl}
+        alt=""
+        aria-hidden="true"
+        style={{
+          width: px,
+          height: px,
+          borderRadius: '50%',
+          objectFit: 'cover',
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+
+  return <InitialsAvatar person={person} px={px} fontSize={fontSize} />;
 }
 
 /** Build a display label for a person — prefers "First Last", falls back to displayName. */
@@ -300,8 +331,10 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
   validationMessage,
   className,
   bare,
+  fetchPersonPhoto,
 }) => {
   const classes = useStyles();
+  const { getPhoto } = usePersonPhotoCache(fetchPersonPhoto);
   const selected = React.useMemo(() => normalizeValue(value), [value]);
   const [query, setQuery] = React.useState('');
   const [results, setResults] = React.useState<PersonEntry[]>([]);
@@ -440,7 +473,7 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
       >
         {selected.map((person) => (
           <span key={person.upn} className={classes.chip}>
-            <PersonAvatar person={person} size="sm" />
+            <PersonAvatar person={person} size="sm" getPhoto={getPhoto} />
             <span className={classes.chipLabel} title={person.upn}>
               {personDisplayLabel(person)}
             </span>
@@ -508,7 +541,7 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
               onClick={() => selectPerson(person)}
               onMouseEnter={() => setActiveIndex(index)}
             >
-              <PersonAvatar person={person} size="md" />
+              <PersonAvatar person={person} size="md" getPhoto={getPhoto} />
               <div className={classes.optionText}>
                 <span className={classes.optionName}>{personDisplayLabel(person)}</span>
                 <span className={classes.optionMeta}>
@@ -554,5 +587,6 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
   );
 };
 
-export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn } from './types.js';
+export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn, PersonPhotoFn, PhotoState, PersonPhotoEntry } from './types.js';
 export { useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults } from './useGraphPeopleSearch.js';
+export { usePersonPhotoCache, createGraphPersonPhotoFn } from './usePersonPhotoCache.js';
