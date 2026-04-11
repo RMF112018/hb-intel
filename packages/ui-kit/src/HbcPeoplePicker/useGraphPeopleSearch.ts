@@ -70,7 +70,8 @@ export function rankPeopleResults(results: PersonEntry[], query: string): Person
  * Creates a stable PeopleSearchFn backed by Microsoft Graph /users.
  *
  * @param getAccessToken - Async function returning a Graph-scoped Bearer token.
- *   In SPFx: use createSpfxGraphTokenProvider() from @hbc/auth/spfx.
+ *   In SPFx: use the AAD token provider factory with audience
+ *   `https://graph.microsoft.com` (see mount.tsx createApiTokenProvider).
  *   In PWA: use MSAL acquireTokenSilent() with Graph scope.
  *   In tests: return a mock token or use the fallback adapter.
  */
@@ -83,8 +84,11 @@ export function useGraphPeopleSearch(
       if (!query || query.trim().length < 2) return [];
 
       const token = await getAccessToken();
-      const encoded = encodeURIComponent(query);
-      const filter = `startswith(displayName,'${encoded}') or startswith(mail,'${encoded}') or startswith(userPrincipalName,'${encoded}')`;
+      // Sanitize for OData $filter: encode the query for the URL and
+      // escape single quotes (OData string delimiter) to prevent
+      // syntax breakage when users type names containing apostrophes.
+      const sanitized = encodeURIComponent(query.replace(/'/g, "''"));
+      const filter = `startswith(displayName,'${sanitized}') or startswith(mail,'${sanitized}') or startswith(userPrincipalName,'${sanitized}')`;
 
       const url = `${GRAPH_USERS_ENDPOINT}?$filter=${filter}&$select=${GRAPH_SELECT_FIELDS}&$top=${MAX_RESULTS}&$orderby=displayName`;
 
