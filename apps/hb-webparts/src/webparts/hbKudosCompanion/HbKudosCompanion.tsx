@@ -631,8 +631,10 @@ export function HbKudosCompanion({
   const heading =
     (typeof config?.heading === 'string' && config.heading) || 'HB Kudos Approval Companion';
 
-  // Resolve real role from SharePoint group membership. Falls back to
-  // simulatedRole only when siteUrl is unavailable (local dev).
+  // Resolve role from the real SharePoint site permission model.
+  // In production, queries IsSiteAdmin + group membership on the
+  // companion's host site. Falls back to simulatedRole only when
+  // siteUrl is unavailable (local dev / jsdom).
   const [role, setRole] = React.useState<KudosRole>('viewer');
   const [roleResolving, setRoleResolving] = React.useState(true);
   React.useEffect(() => {
@@ -650,7 +652,10 @@ export function HbKudosCompanion({
       if (!cancelled) { setRole('viewer'); setRoleResolving(false); }
     });
     return () => { cancelled = true; };
-  }, [config?.kudosAdminsGroup, config?.kudosReviewersGroup, config?.simulatedRole, identity?.email]);
+    // simulatedRole intentionally excluded — dev-only, should not
+    // re-trigger production resolution on property pane changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config?.kudosAdminsGroup, config?.kudosReviewersGroup, identity?.email]);
   const capabilities = React.useMemo(() => deriveKudosCapabilities(role), [role]);
 
   // Configurable overdue thresholds from webpart properties.
