@@ -17,9 +17,12 @@
  * `ClientPeoplePickerSearchUser` is a tenant-wide directory search.
  * Results are org-wide regardless of which site URL routes the request.
  *
- * Instrumentation: every decision point logs to console.warn (always on)
- * so failures are never silent. Detailed debug logging is available via
- * `window.__HB_KUDOS_DEBUG__ = true`.
+ * Response shape handling: SharePoint can return the principal string
+ * under several property names depending on OData metadata settings:
+ *   - `ClientPeoplePickerSearchUser` (common with odata=nometadata)
+ *   - `value` (common with some SP Online builds for static methods)
+ *   - `d.ClientPeoplePickerSearchUser` (odata=verbose)
+ * The adapter handles all three shapes.
  */
 import { useCallback, useRef } from 'react';
 import { getSiteUrl, getKudosListHostUrl } from './spContext.js';
@@ -56,10 +59,6 @@ interface ClientPeoplePickerResult {
 
 /**
  * Resolve the best available site URL for the people search request.
- *
- * Prefers the hosting site (SPFx session guaranteed), falls back to the
- * Kudos list host (hardcoded HBCentral). Returns undefined only when
- * both are unavailable (non-SPFx context with no override).
  */
 function resolvePeopleSearchSiteUrl(): string | undefined {
   const hostingSite = getSiteUrl();
@@ -78,17 +77,50 @@ function resolvePeopleSearchSiteUrl(): string | undefined {
 }
 
 /**
+ * Extract the principal JSON string from the SharePoint response body.
+ *
+ * SharePoint returns the people-picker results under different property
+ * names depending on the OData format negotiated. This function checks
+ * all known shapes and returns the raw string (or array) for parsing.
+ */
+function extractPrincipalPayload(body: Record<string, unknown>): string | unknown[] | undefined {
+  // Shape 1: odata=nometadata — { ClientPeoplePickerSearchUser: "..." }
+  if (typeof body.ClientPeoplePickerSearchUser === 'string') {
+    return body.ClientPeoplePickerSearchUser;
+  }
+  // Shape 1b: already-parsed array
+  if (Array.isArray(body.ClientPeoplePickerSearchUser)) {
+    return body.ClientPeoplePickerSearchUser as unknown[];
+  }
+
+  // Shape 2: static method value wrapper — { value: "..." }
+  if (typeof body.value === 'string') {
+    return body.value;
+  }
+  // Shape 2b: already-parsed array
+  if (Array.isArray(body.value)) {
+    return body.value as unknown[];
+  }
+
+  // Shape 3: odata=verbose — { d: { ClientPeoplePickerSearchUser: "..." } }
+  if (body.d && typeof body.d === 'object') {
+    const d = body.d as Record<string, unknown>;
+    if (typeof d.ClientPeoplePickerSearchUser === 'string') {
+      return d.ClientPeoplePickerSearchUser;
+    }
+    if (Array.isArray(d.ClientPeoplePickerSearchUser)) {
+      return d.ClientPeoplePickerSearchUser as unknown[];
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Search SharePoint users via ClientPeoplePickerSearchUser.
  *
- * This is the same API the native SharePoint people picker uses.
- * It searches the User Profile Service / Azure AD across the entire
- * tenant. The site URL is only the routing entry point — results are
- * org-wide regardless of which site collection is targeted.
- *
- * Requires X-RequestDigest for POST authentication.
- *
- * **Throws on any failure** — callers must handle errors and must
- * not conflate a thrown error with a genuine empty result set.
+ * Throws on any failure. Callers must handle errors and must not
+ * conflate a thrown error with a genuine empty result set.
  */
 async function searchSharePointPeople(
   siteUrl: string,
@@ -96,12 +128,12 @@ async function searchSharePointPeople(
 ): Promise<PersonEntry[]> {
   const endpoint = `${siteUrl}/_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.ClientPeoplePickerSearchUser`;
 
-  console.log(TAG, 'dispatch:', { query, siteUrl, endpoint });
+  console.warn(TAG, 'dispatch:', { query, siteUrl, endpoint });
 
   let digest: string;
   try {
     digest = await fetchRequestDigest(siteUrl);
-    if (isDebug()) console.log(TAG, 'digest acquired');
+    console.warn(TAG, 'digest acquired');
   } catch (digestErr) {
     console.warn(TAG, 'digest fetch failed for', siteUrl, digestErr);
     throw digestErr;
@@ -127,7 +159,7 @@ async function searchSharePointPeople(
     }),
   });
 
-  console.log(TAG, 'response:', response.status, response.statusText);
+  console.warn(TAG, 'response:', response.status, response.statusText, '| ok:', response.ok);
 
   if (!response.ok) {
     const msg = `People search failed: ${response.status} ${response.statusText}`;
@@ -135,38 +167,99 @@ async function searchSharePointPeople(
     throw new Error(msg);
   }
 
-  const body = (await response.json()) as {
-    ClientPeoplePickerSearchUser?: string;
-  };
+  // A. Read raw response body as text first — never skip this.
+  const rawText = await response.text();
+  console.warn(TAG, 'response-raw-body', {
+    length: rawText.length,
+    first500: rawText.slice(0, 500),
+  });
 
-  if (!body.ClientPeoplePickerSearchUser) {
-    const msg = 'People search returned no ClientPeoplePickerSearchUser field';
-    console.warn(TAG, msg, body);
-    throw new Error(msg);
-  }
-
-  let results: ClientPeoplePickerResult[];
+  // B. Parse outer JSON
+  let body: Record<string, unknown>;
   try {
-    results = JSON.parse(body.ClientPeoplePickerSearchUser) as ClientPeoplePickerResult[];
-  } catch (parseErr) {
-    const msg = 'Failed to parse ClientPeoplePickerSearchUser response';
-    console.warn(TAG, msg, parseErr);
+    body = JSON.parse(rawText) as Record<string, unknown>;
+  } catch (outerParseErr) {
+    console.warn(TAG, 'response-outer-parse FAILED', { rawFirst200: rawText.slice(0, 200), error: outerParseErr });
+    throw new Error('People search: outer JSON parse failed');
+  }
+
+  const outerKeys = Object.keys(body);
+  console.warn(TAG, 'response-outer-parse', {
+    keys: outerKeys,
+    hasClientPeoplePickerSearchUser: 'ClientPeoplePickerSearchUser' in body,
+    hasValue: 'value' in body,
+    hasD: 'd' in body,
+    typeOfClientPPS: typeof body.ClientPeoplePickerSearchUser,
+    typeOfValue: typeof body.value,
+  });
+
+  // C. Extract principal payload from whichever shape SP returned
+  const principalPayload = extractPrincipalPayload(body);
+
+  if (principalPayload === undefined || principalPayload === null || principalPayload === '') {
+    const msg = 'People search: no principal payload found in response body';
+    console.warn(TAG, msg, { outerKeys, bodySnapshot: JSON.stringify(body).slice(0, 300) });
     throw new Error(msg);
   }
 
-  const entries = results
-    .filter((r) => r.Key && r.DisplayText)
-    .map((r) => ({
+  // D. Parse principals — either from string or already-parsed array
+  let rawPrincipals: ClientPeoplePickerResult[];
+
+  if (Array.isArray(principalPayload)) {
+    // Already an array (some SP builds return pre-parsed)
+    rawPrincipals = principalPayload as ClientPeoplePickerResult[];
+    console.warn(TAG, 'principals-raw-string', '(already array, no parse needed)', { count: rawPrincipals.length });
+  } else {
+    // It's a JSON string that needs parsing
+    console.warn(TAG, 'principals-raw-string', {
+      length: principalPayload.length,
+      first300: principalPayload.slice(0, 300),
+    });
+
+    try {
+      rawPrincipals = JSON.parse(principalPayload) as ClientPeoplePickerResult[];
+      console.warn(TAG, 'principals-parse-success', {
+        count: rawPrincipals.length,
+        first3: rawPrincipals.slice(0, 3).map((r) => ({
+          Key: r.Key?.slice(0, 60),
+          DisplayText: r.DisplayText,
+          Email: r.EntityData?.Email,
+        })),
+      });
+    } catch (parseErr) {
+      console.warn(TAG, 'principals-parse-failure', {
+        error: parseErr,
+        rawFirst200: principalPayload.slice(0, 200),
+      });
+      throw new Error('People search: principal JSON parse failed');
+    }
+  }
+
+  // E. Map raw principals to PersonEntry[]
+  console.warn(TAG, 'mapping-start', { rawCount: rawPrincipals.length });
+
+  const entries: PersonEntry[] = [];
+  for (let i = 0; i < rawPrincipals.length; i++) {
+    const r = rawPrincipals[i];
+    if (!r.Key && !r.DisplayText) {
+      console.warn(TAG, 'mapping-drop', { index: i, reason: 'missing Key and DisplayText', raw: JSON.stringify(r).slice(0, 200) });
+      continue;
+    }
+    const entry: PersonEntry = {
       upn: r.EntityData?.Email ?? r.Description ?? r.Key ?? '',
-      displayName: r.DisplayText ?? '',
+      displayName: r.DisplayText ?? r.Key ?? '',
       jobTitle: r.EntityData?.Title ?? undefined,
       department: r.EntityData?.Department ?? undefined,
-    }));
+    };
+    entries.push(entry);
+  }
 
-  console.log(
-    TAG, 'results:', entries.length,
-    '| first 3:', entries.slice(0, 3).map((e) => `${e.displayName} <${e.upn}>`),
-  );
+  console.warn(TAG, 'mapping-result', {
+    rawCount: rawPrincipals.length,
+    mappedCount: entries.length,
+    droppedCount: rawPrincipals.length - entries.length,
+    first3: entries.slice(0, 3).map((e) => `${e.displayName} <${e.upn}>`),
+  });
 
   return entries;
 }
@@ -181,15 +274,13 @@ async function searchSharePointPeople(
  * collapsed into empty arrays.
  */
 export function useSharePointPeopleSearch(): PeopleSearchFn | undefined {
-  // Resolve on every render so we pick up late-stored URLs.
   const siteUrl = resolvePeopleSearchSiteUrl();
 
-  // Track whether we've logged the URL resolution (once per resolved value).
   const loggedUrlRef = useRef<string | undefined>(undefined);
   if (loggedUrlRef.current !== siteUrl) {
     loggedUrlRef.current = siteUrl;
     if (siteUrl) {
-      console.log(TAG, 'hook: resolved site URL =', siteUrl);
+      console.warn(TAG, 'hook: resolved site URL =', siteUrl);
     } else {
       console.warn(TAG, 'hook: NO site URL available — people search will be disabled');
     }
@@ -197,8 +288,6 @@ export function useSharePointPeopleSearch(): PeopleSearchFn | undefined {
 
   const searchFn = useCallback(
     async (query: string): Promise<PersonEntry[]> => {
-      // Re-resolve at call time in case the URL became available after
-      // the hook last rendered (module-level variable, not React state).
       const callTimeSiteUrl = resolvePeopleSearchSiteUrl();
 
       if (!callTimeSiteUrl) {
@@ -211,17 +300,13 @@ export function useSharePointPeopleSearch(): PeopleSearchFn | undefined {
         return [];
       }
 
-      console.log(TAG, 'call: dispatching search for', JSON.stringify(query.trim()), 'via', callTimeSiteUrl);
+      console.warn(TAG, 'call: dispatching search for', JSON.stringify(query.trim()), 'via', callTimeSiteUrl);
       return await searchSharePointPeople(callTimeSiteUrl, query.trim());
     },
     [siteUrl],
   );
 
-  // Return undefined only when truly no URL is available, so the
-  // consumer can render a text fallback instead of a broken picker.
   if (!siteUrl) {
-    // Re-check at return time — the module variable may have been set
-    // between render start and return.
     const lateCheck = resolvePeopleSearchSiteUrl();
     if (!lateCheck) return undefined;
   }

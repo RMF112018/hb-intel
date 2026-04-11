@@ -568,14 +568,18 @@ function HbcKudosComposerPeopleBucket({
 
         const hits = await searchPeople(trimmedQuery);
 
-        // Checkpoint F: post-call resolve
-        const selectedUpns = new Set(values.map((v) => v.toLowerCase()));
-        const filtered = hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase()));
+        // Checkpoint F: post-call resolve + filtering
         console.warn(P_TAG, 'search-call-resolve', {
           query: trimmedQuery,
           hitCount: hits.length,
-          filteredCount: filtered.length,
-          first3: hits.slice(0, 3).map((h) => h.displayName),
+          first3: hits.slice(0, 3).map((h) => `${h.displayName} <${h.upn}>`),
+        });
+
+        const selectedUpns = new Set(values.map((v) => v.toLowerCase()));
+        console.warn(P_TAG, 'filtering-start', { beforeCount: hits.length, selectedUpns: [...selectedUpns] });
+        const filtered = hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase()));
+        console.warn(P_TAG, 'filtering-result', {
+          afterCount: filtered.length,
           removedBySelection: hits.length - filtered.length,
         });
 
@@ -584,13 +588,17 @@ function HbcKudosComposerPeopleBucket({
         setIsOpen(true);
         setActiveIndex(-1);
       } catch (err: unknown) {
-        // Checkpoint G: post-call reject
+        // Checkpoint G: post-call reject + failure-state assignment
         const errObj = err instanceof Error ? err : new Error(String(err));
         console.warn(P_TAG, 'search-call-reject', {
           query: query.trim(),
           errorMessage: errObj.message,
           errorStack: errObj.stack,
-          settingSearchError: true,
+        });
+        console.warn(P_TAG, 'ui-failure-state-set', {
+          reason: 'searchPeople threw',
+          query: query.trim(),
+          errorMessage: errObj.message,
         });
         setResults([]);
         setSearchError(true);
