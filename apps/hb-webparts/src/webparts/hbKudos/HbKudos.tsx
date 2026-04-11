@@ -407,7 +407,7 @@ function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): React.JSX
   }, [entries, search]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <input
         type="search"
         value={search}
@@ -434,9 +434,18 @@ function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): React.JSX
           description={search ? 'Try a different search term.' : 'Recognition will appear here once approved.'}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {filtered.map((entry) => {
             const summary = buildKudosRecipientSummary(entry.recipients);
+            const recipientLabel =
+              entry.recipients.length === 1
+                ? entry.recipients[0]!.name
+                : entry.recipients.length === 2
+                  ? `${entry.recipients[0]!.name} and ${entry.recipients[1]!.name}`
+                  : entry.recipients.length > 2
+                    ? `${entry.recipients[0]!.name}, ${entry.recipients[1]!.name}, and ${entry.recipients.length - 2} more`
+                    : '';
+
             return (
               <button
                 key={entry.id}
@@ -445,87 +454,133 @@ function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): React.JSX
                 aria-label={`Open recognition: ${entry.headline}`}
                 style={{
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 12,
+                  flexDirection: 'column',
+                  gap: 0,
                   width: '100%',
                   textAlign: 'left',
-                  background: KUDOS_GOV_TOKENS.orangeSubtle02,
+                  background: '#ffffff',
                   border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle06}`,
-                  borderRadius: 12,
-                  padding: '12px 14px',
+                  borderLeft: `3px solid rgba(229, 126, 70, 0.55)`,
+                  borderRadius: 14,
+                  padding: '16px 18px 14px',
                   cursor: 'pointer',
                   color: 'inherit',
                   font: 'inherit',
                   outline: 'none',
-                  transition: 'background 160ms ease, border-color 160ms ease',
+                  transition: 'background 160ms ease, border-color 160ms ease, box-shadow 160ms ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = KUDOS_GOV_TOKENS.orangeSubtle06;
+                  e.currentTarget.style.background = 'rgba(255, 250, 246, 0.8)';
                   e.currentTarget.style.borderColor = KUDOS_GOV_TOKENS.orangeSubtle18;
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(229, 126, 70, 0.08)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = KUDOS_GOV_TOKENS.orangeSubtle02;
+                  e.currentTarget.style.background = '#ffffff';
                   e.currentTarget.style.borderColor = KUDOS_GOV_TOKENS.orangeSubtle06;
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
+                {/* Recipient avatars */}
                 {entry.recipients.length > 0 ? (
-                  <div style={{ flexShrink: 0, paddingTop: 2 }}>
+                  <div style={{ marginBottom: 10 }}>
                     <HbcAvatarStack
-                      people={entry.recipients.slice(0, 2).map((r) => ({
+                      people={entry.recipients.slice(0, 4).map((r) => ({
                         id: r.id,
                         name: r.name,
                         src: r.media?.src,
                       }))}
-                      size="sm"
-                      max={2}
+                      size="md"
+                      max={4}
                     />
                   </div>
                 ) : null}
-                <div style={{ flex: 1, minWidth: 0 }}>
+
+                {/* Headline */}
+                <div
+                  style={{
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    lineHeight: 1.25,
+                    letterSpacing: '-0.01em',
+                    color: KUDOS_GOV_TOKENS.textPrimary,
+                    marginBottom: 4,
+                  }}
+                >
+                  {entry.headline}
+                </div>
+
+                {/* Recipient name line */}
+                {recipientLabel ? (
+                  <div
+                    style={{
+                      fontSize: '0.8125rem',
+                      fontWeight: 700,
+                      color: KUDOS_GOV_TOKENS.brandOrange,
+                      marginBottom: 6,
+                    }}
+                  >
+                    {recipientLabel}
+                  </div>
+                ) : null}
+
+                {/* Full excerpt — no line clamp */}
+                {entry.excerpt ? (
                   <div
                     style={{
                       fontSize: '0.875rem',
-                      fontWeight: 700,
-                      lineHeight: 1.3,
-                      color: KUDOS_GOV_TOKENS.textPrimary,
-                      marginBottom: 2,
+                      lineHeight: 1.6,
+                      color: 'rgba(26, 19, 16, 0.68)',
+                      marginBottom: 10,
                     }}
                   >
-                    {entry.headline}
+                    {entry.excerpt}
                   </div>
-                  {entry.excerpt ? (
-                    <div
-                      style={{
-                        fontSize: '0.8125rem',
-                        lineHeight: 1.5,
-                        color: 'rgba(26, 19, 16, 0.65)',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        marginBottom: 4,
-                      }}
-                    >
-                      {entry.excerpt}
-                    </div>
+                ) : null}
+
+                {/* Meta footer — submitter, date, celebrate count */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    flexWrap: 'wrap',
+                    fontSize: '0.6875rem',
+                    fontWeight: 600,
+                    color: KUDOS_GOV_TOKENS.textFaint,
+                    paddingTop: 8,
+                    borderTop: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle06}`,
+                  }}
+                >
+                  {entry.submittedBy?.displayName ? (
+                    <span>By {entry.submittedBy.displayName}</span>
                   ) : null}
-                  <div
-                    style={{
-                      fontSize: '0.6875rem',
-                      fontWeight: 500,
-                      color: KUDOS_GOV_TOKENS.textFaint,
-                    }}
-                  >
-                    {summary.label}
-                    {' · '}
+                  <span>
                     {new Date(entry.submittedDate).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
+                      year: 'numeric',
                     })}
-                    {typeof entry.celebrateCount === 'number' && entry.celebrateCount > 0
-                      ? ` · ✦ ${entry.celebrateCount}`
-                      : ''}
-                  </div>
+                  </span>
+                  {summary.total > 0 && entry.recipients.length > 1 ? (
+                    <span>{summary.label}</span>
+                  ) : null}
+                  {typeof entry.celebrateCount === 'number' && entry.celebrateCount > 0 ? (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        background: 'rgba(229, 126, 70, 0.08)',
+                        border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle18}`,
+                        color: KUDOS_GOV_TOKENS.brandOrange,
+                        fontWeight: 800,
+                      }}
+                    >
+                      ✦ {entry.celebrateCount}
+                    </span>
+                  ) : null}
                 </div>
               </button>
             );
