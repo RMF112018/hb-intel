@@ -292,7 +292,10 @@ function KudosSpotlight({
 
         <div className={styles.spotlightContent}>
           {isHomepage ? (
-            <span className={styles.spotlightEyebrow}>Featured Recognition</span>
+            <span className={styles.spotlightEyebrow}>
+              <Sparkles size={9} aria-hidden="true" strokeWidth={2.5} />
+              Featured Recognition
+            </span>
           ) : null}
 
           <h3 className={styles.spotlightTitle}>{featured.headline}</h3>

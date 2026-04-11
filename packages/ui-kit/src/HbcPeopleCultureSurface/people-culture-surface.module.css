@@ -1169,18 +1169,20 @@
   gap: 14px;
   padding: 22px 20px 20px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 3px solid rgba(229, 126, 70, 0.85);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
 }
 
-@supports not (backdrop-filter: blur(16px)) {
+@supports not (backdrop-filter: blur(20px)) {
   .peopleCultureHomepage .spotlightCard {
-    background: rgba(30, 55, 90, 0.82);
+    background: rgba(30, 55, 90, 0.88);
   }
 }
 
@@ -1195,6 +1197,7 @@
 .peopleCultureHomepage .spotlightAvatars {
   gap: 6px;
   padding-top: 2px;
+  align-items: flex-start;
 }
 
 .peopleCultureHomepage .spotlightHeroAvatarRing {
@@ -1210,8 +1213,8 @@
 
 .peopleCultureHomepage .spotlightContent {
   gap: 8px;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 /* ── Featured eyebrow (homepage variant) ───────────────────
@@ -1219,11 +1222,19 @@
    identifying the card as the featured recognition moment. */
 
 .spotlightEyebrow {
-  font-size: 0.5625rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.625rem;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(229, 126, 70, 0.30);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 126, 70, 0.35);
+  width: fit-content;
 }
 
 /* ── Spotlight content: on-dark readability ─────────────────
@@ -1232,28 +1243,28 @@
 
 .peopleCultureHomepage .spotlightRecipientTag {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .peopleCultureHomepage .spotlightTitle {
   font-size: 1.1875rem;
   line-height: 1.18;
-  max-width: 28ch;
+  max-width: 36ch;
   color: #ffffff;
 }
 
 .peopleCultureHomepage .spotlightExcerpt {
   font-size: 0.875rem;
   line-height: 1.55;
-  max-width: 48ch;
+  max-width: 52ch;
   -webkit-line-clamp: 3;
-  color: rgba(255, 255, 255, 0.80);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .peopleCultureHomepage .spotlightMeta {
   gap: 10px;
   font-size: 0.6875rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .peopleCultureHomepage .metaItem {
@@ -1509,6 +1520,7 @@
     flex-direction: column;
     gap: 16px;
     padding: 24px 24px 22px;
+    border-left: 3px solid rgba(229, 126, 70, 0.85);
   }
   .peopleCultureHomepage .spotlightTitle {
     font-size: 1.3125rem;

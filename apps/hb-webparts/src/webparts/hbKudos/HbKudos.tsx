@@ -93,27 +93,39 @@ function sortByRecency(entries: KudosEntry[]): KudosEntry[] {
 
 /**
  * Content-quality gate for the featured spotlight slot. An entry is
- * "featured-worthy" when it carries enough content to render the
- * premium spotlight card credibly — at minimum one recipient (for
- * the hero avatar ring) or an excerpt (for body content). Without
- * either, the card would render as a hollow headline-only shell.
+ * "featured-worthy" only when it carries enough content for the
+ * premium spotlight card to render credibly — requires BOTH at least
+ * one recipient (for the hero avatar ring) AND textual body content
+ * from excerpt or details (for the content area). Without both
+ * dimensions the card renders as a hollow shell. Entries that fail
+ * this gate still flow to the recent rail where the simpler row
+ * layout tolerates minimal content.
  */
 function isFeaturedWorthy(entry: KudosEntry): boolean {
-  if ((entry.recipients ?? []).length > 0) return true;
-  if (entry.excerpt?.trim()) return true;
-  return false;
+  const hasRecipients = (entry.recipients ?? []).length > 0;
+  const hasText = !!(entry.excerpt?.trim() || entry.details?.trim());
+  return hasRecipients && hasText;
 }
 
 /**
  * Map a KudosEntry to the ui-kit KudosSpotlightItem contract.
  * Only employee-facing fields are projected — no governance metadata,
- * no prominence internals, no audit history.
+ * no prominence internals, no audit history. When `excerpt` is empty,
+ * falls back to `details` (truncated to ~200 chars) so the spotlight
+ * card always carries body content.
  */
 function adaptSpotlight(entry: KudosEntry): KudosSpotlightItem {
+  const excerpt =
+    entry.excerpt?.trim() ||
+    (entry.details?.trim()
+      ? entry.details.trim().slice(0, 200) +
+        (entry.details.trim().length > 200 ? '\u2026' : '')
+      : undefined);
+
   return {
     id: entry.id,
     headline: entry.headline || 'Recognition',
-    excerpt: entry.excerpt,
+    excerpt,
     recipients: (entry.recipients ?? []).map((r) => ({
       id: r.id,
       name: r.name,
