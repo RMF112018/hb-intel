@@ -26,7 +26,7 @@ import { AlertCircle, Building2, CheckCircle2, FolderKanban, Sparkles, User, Use
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import { HbcPeoplePicker } from '../HbcPeoplePicker/index.js';
-import type { PersonEntry, PeopleSearchFn } from '../HbcPeoplePicker/types.js';
+import type { PersonEntry, PeopleSearchFn, PersonPhotoFn } from '../HbcPeoplePicker/types.js';
 import styles from './kudos-composer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -41,10 +41,9 @@ import styles from './kudos-composer.module.css';
  * People & Culture webpart keeps its existing text-mode composer.
  *
  * Convention:
- *   - `individualEmails` holds typed-in email addresses (or resolved
- *     people-picker selections once that primitive lands). Writers
- *     resolve these via ensureUser to `IndividualRecipientsId` on
- *     `People Culture Kudos`.
+ *   - `individualEmails` holds UPN strings resolved from the shared
+ *     people picker. Writers resolve these via ensureUser to
+ *     `IndividualRecipientsId` on `People Culture Kudos`.
  *   - `teamLabels`, `departmentLabels`, `projectGroupLabels` hold
  *     taxonomy labels. Writers resolve these once a term-store lookup
  *     is wired. Until then, consumers may pass them through as
@@ -353,6 +352,12 @@ export interface HbcKudosComposerFormProps {
    * SharePoint-aware people search function.
    */
   searchPeople?: PeopleSearchFn;
+  /**
+   * Photo retrieval adapter for avatar display in the people picker.
+   * When provided, search result rows and selected chips show the
+   * person's directory photo with initials fallback.
+   */
+  fetchPersonPhoto?: PersonPhotoFn;
 }
 
 const BUCKET_CONFIG: Record<
@@ -361,7 +366,7 @@ const BUCKET_CONFIG: Record<
 > = {
   individualEmails: {
     label: 'People',
-    placeholder: 'person@hedrickbrothers.com',
+    placeholder: 'Search by name or email',
     icon: User,
   },
   teamLabels: {
@@ -387,12 +392,14 @@ function HbcKudosComposerTypedRecipients({
   disabled,
   errorMessage,
   searchPeople,
+  fetchPersonPhoto,
 }: {
   buckets: KudosComposerRecipientBucketsDraft;
   onChange: (patch: Partial<KudosComposerRecipientBucketsDraft>) => void;
   disabled: boolean;
   errorMessage?: string;
   searchPeople?: PeopleSearchFn;
+  fetchPersonPhoto?: PersonPhotoFn;
 }): React.JSX.Element {
   // Individuals always expanded; other buckets expand on click or when populated.
   const [expanded, setExpanded] = React.useState<Set<KudosComposerRecipientBucketKind>>(
@@ -421,6 +428,7 @@ function HbcKudosComposerTypedRecipients({
           onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
           disabled={disabled}
           searchPeople={searchPeople}
+          fetchPersonPhoto={fetchPersonPhoto}
           errorMessage={errorMessage}
         />
       ) : (
@@ -488,6 +496,7 @@ interface KudosSharedPickerBridgeProps {
   onChange: (next: string[]) => void;
   disabled: boolean;
   searchPeople: PeopleSearchFn;
+  fetchPersonPhoto?: PersonPhotoFn;
   errorMessage?: string;
 }
 
@@ -495,25 +504,43 @@ interface KudosSharedPickerBridgeProps {
  * Thin bridge that renders the shared `HbcPeoplePicker` in bare mode
  * inside the Kudos composer bucket layout. Converts between the Kudos
  * draft shape (`string[]` of UPNs) and the picker's `PersonEntry[]`.
+ *
+ * Maintains a local person cache so selected chips show display names,
+ * givenName/surname, and photo URLs rather than raw UPN strings after
+ * the PersonEntry[] → string[] → PersonEntry[] round-trip.
  */
 function KudosSharedPickerBridge({
   values,
   onChange,
   disabled,
   searchPeople,
+  fetchPersonPhoto,
   errorMessage,
 }: KudosSharedPickerBridgeProps): React.JSX.Element {
   const BucketIcon = BUCKET_CONFIG.individualEmails.icon;
 
-  // Convert string[] UPNs to PersonEntry[] for the shared picker.
+  // Cache full PersonEntry objects so the string[] round-trip preserves
+  // display names, givenName/surname, and photo state for selected chips.
+  const personCacheRef = React.useRef<Map<string, PersonEntry>>(new Map());
+
+  // Convert string[] UPNs to PersonEntry[] using the cache.
   const pickerValue = React.useMemo<PersonEntry[]>(
-    () => values.filter(Boolean).map((upn) => ({ upn, displayName: upn })),
+    () =>
+      values.filter(Boolean).map((upn) => {
+        const cached = personCacheRef.current.get(upn.toLowerCase());
+        if (cached) return cached;
+        return { upn, displayName: upn };
+      }),
     [values],
   );
 
-  // Convert PersonEntry[] back to string[] UPNs for the draft.
+  // Convert PersonEntry[] back to string[] UPNs for the draft,
+  // and cache the full PersonEntry for future round-trips.
   const handlePickerChange = React.useCallback(
     (people: PersonEntry[]) => {
+      for (const p of people) {
+        personCacheRef.current.set(p.upn.toLowerCase(), p);
+      }
       onChange(people.map((p) => p.upn));
     },
     [onChange],
@@ -535,6 +562,7 @@ function KudosSharedPickerBridge({
             value={pickerValue}
             onChange={handlePickerChange}
             searchPeople={searchPeople}
+            fetchPersonPhoto={fetchPersonPhoto}
             mode="multi"
             disabled={disabled}
             placeholder="Search for a person\u2026"
@@ -642,6 +670,7 @@ export function HbcKudosComposerForm({
   disabled = false,
   recipientsMode = 'text',
   searchPeople,
+  fetchPersonPhoto,
 }: HbcKudosComposerFormProps): React.JSX.Element {
   const typedBuckets = draft.recipients ?? EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS;
   const handleTypedChange = React.useCallback(
@@ -667,6 +696,7 @@ export function HbcKudosComposerForm({
           disabled={disabled}
           errorMessage={errors.recipients}
           searchPeople={searchPeople}
+          fetchPersonPhoto={fetchPersonPhoto}
         />
       ) : (
         <div className={styles.field}>
