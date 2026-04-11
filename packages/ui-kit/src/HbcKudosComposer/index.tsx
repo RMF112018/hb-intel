@@ -496,6 +496,8 @@ function HbcKudosComposerPeopleBucket({
   searchPeople,
   errorMessage,
 }: HbcKudosComposerPeopleBucketProps): React.JSX.Element {
+  const P_TAG = '[HB Kudos Picker]';
+
   const [query, setQuery] = React.useState('');
   const [results, setResults] = React.useState<PersonEntry[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
@@ -509,25 +511,87 @@ function HbcKudosComposerPeopleBucket({
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const listboxId = React.useId();
 
-  // Debounced search
+  // Instrumented input handler — checkpoint A
+  const handleInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    console.warn(P_TAG, 'input-change', { raw, trimmed: raw.trim(), length: raw.length });
+    setQuery(raw);
+  }, []);
+
+  // Debounced search — fully instrumented
   React.useEffect(() => {
-    if (!query || query.trim().length < 2) {
+    // Checkpoint B: early-return branches
+    if (!query) {
+      console.warn(P_TAG, 'search-skip-empty', { query: '(empty)', reason: 'query is falsy' });
       setResults([]);
       setIsOpen(false);
       setIsSearching(false);
       return;
     }
+    if (query.trim().length < 2) {
+      console.warn(P_TAG, 'search-skip-short-query', { query, trimmedLength: query.trim().length, reason: 'trimmed length < 2' });
+      setResults([]);
+      setIsOpen(false);
+      setIsSearching(false);
+      return;
+    }
+
+    // Checkpoint C: debounce timer set
     setIsSearching(true);
+    const hadPriorTimer = debounceRef.current !== null;
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    console.warn(P_TAG, 'debounce-set', { query, trimmed: query.trim(), delayMs: 300, priorCleared: hadPriorTimer, searchPeopleDefined: typeof searchPeople === 'function' });
+
     debounceRef.current = setTimeout(async () => {
+      // Checkpoint D: debounce timer fire
+      console.warn(P_TAG, 'debounce-fire', { query, selectedCount: values.length, searchPeopleType: typeof searchPeople, searchPeopleDefined: !!searchPeople, disabled });
+
+      if (!searchPeople) {
+        console.warn(P_TAG, 'search-skip-missing-searchPeople', { query, searchPeopleType: typeof searchPeople });
+        setResults([]);
+        setSearchError(true);
+        setIsOpen(true);
+        setIsSearching(false);
+        return;
+      }
+
+      if (disabled) {
+        console.warn(P_TAG, 'search-skip-disabled', { query });
+        setIsSearching(false);
+        return;
+      }
+
       try {
-        const hits = await searchPeople(query.trim());
+        // Checkpoint E: pre-call
+        const trimmedQuery = query.trim();
+        console.warn(P_TAG, 'search-call-start', { query, trimmed: trimmedQuery, typeofSearchPeople: typeof searchPeople, valuesCount: values.length, activeIndex });
+
+        const hits = await searchPeople(trimmedQuery);
+
+        // Checkpoint F: post-call resolve
         const selectedUpns = new Set(values.map((v) => v.toLowerCase()));
-        setResults(hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase())));
+        const filtered = hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase()));
+        console.warn(P_TAG, 'search-call-resolve', {
+          query: trimmedQuery,
+          hitCount: hits.length,
+          filteredCount: filtered.length,
+          first3: hits.slice(0, 3).map((h) => h.displayName),
+          removedBySelection: hits.length - filtered.length,
+        });
+
+        setResults(filtered);
         setSearchError(false);
         setIsOpen(true);
         setActiveIndex(-1);
-      } catch {
+      } catch (err: unknown) {
+        // Checkpoint G: post-call reject
+        const errObj = err instanceof Error ? err : new Error(String(err));
+        console.warn(P_TAG, 'search-call-reject', {
+          query: query.trim(),
+          errorMessage: errObj.message,
+          errorStack: errObj.stack,
+          settingSearchError: true,
+        });
         setResults([]);
         setSearchError(true);
         setIsOpen(true);
@@ -536,7 +600,7 @@ function HbcKudosComposerPeopleBucket({
       }
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [query, searchPeople, values]);
+  }, [query, searchPeople, values, disabled, activeIndex]);
 
   // Close on outside click
   React.useEffect(() => {
@@ -624,7 +688,7 @@ function HbcKudosComposerPeopleBucket({
               ref={inputRef}
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               disabled={disabled}
               placeholder={values.length === 0 ? 'Search for a person…' : ''}
