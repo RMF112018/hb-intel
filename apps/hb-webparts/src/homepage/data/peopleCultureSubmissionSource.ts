@@ -135,7 +135,8 @@ export async function resolveUserId(siteUrl: string, email: string, digest: stri
  *     `ensureUser` when the typed composer passes individual emails.
  *     Unresolvable emails are collected in `ModeratorNotes` for HR.
  *   - `TeamRecipients` / `DepartmentRecipients` / `ProjectGroupRecipients`
- *     are written directly as semicolon-delimited label strings.
+ *     are Taxonomy fields requiring term-store resolution (not yet
+ *     wired). Labels are captured in `ModeratorNotes` for HR review.
  *
  * Not set on submission:
  *   - `CurrentVisibilityMode` — defaults to `internalOnly` on the
@@ -145,6 +146,9 @@ export async function resolveUserId(siteUrl: string, email: string, digest: stri
  *     webpart keeps its existing behavior.
  */
 interface KudosListItemPayload {
+  /** OData verbose type annotation — required for SharePoint to
+   *  correctly deserialize collection-typed fields. */
+  __metadata: { type: string };
   KudosId: string;
   Headline: string;
   Excerpt: string;
@@ -160,12 +164,9 @@ interface KudosListItemPayload {
   IsFeatured: boolean;
   IsScheduled: boolean;
   CelebrateCount: number;
-  /** SharePoint UserMulti write convention: `{FieldName}Id: { results: [ids] }` */
-  IndividualRecipientsId?: { results: number[] };
-  /** Taxonomy text fields — semicolon-delimited labels. */
-  TeamRecipients?: string;
-  DepartmentRecipients?: string;
-  ProjectGroupRecipients?: string;
+  /** SharePoint UserMulti write convention (odata=verbose):
+   *  `{FieldName}Id: { __metadata: { type }, results: [ids] }` */
+  IndividualRecipientsId?: { __metadata: { type: string }; results: number[] };
 }
 
 export interface KudosTypedRecipientResolution {
@@ -237,12 +238,21 @@ export async function resolveTypedRecipientBuckets(
   };
 }
 
+/**
+ * OData verbose type name for the People Culture Kudos list.
+ * Format: `SP.Data.{ListInternalName}ListItem` with spaces encoded
+ * as `_x0020_`. Matches the list title "People Culture Kudos".
+ */
+const SP_KUDOS_LIST_ITEM_TYPE =
+  'SP.Data.People_x0020_Culture_x0020_KudosListItem';
+
 function buildPayload(
   draft: KudosComposerDraft,
   submitterUserId: number | undefined,
   typedResolution: KudosTypedRecipientResolution | undefined,
 ): KudosListItemPayload {
   const payload: KudosListItemPayload = {
+    __metadata: { type: SP_KUDOS_LIST_ITEM_TYPE },
     KudosId: generateKudosId(),
     Headline: draft.headline.trim(),
     Excerpt: draft.excerpt.trim(),
@@ -264,28 +274,45 @@ function buildPayload(
     payload.Details = draft.details.trim();
   }
 
-  // SubmittedBy is a Person field — set via the Id suffix convention
+  // SubmittedBy is a Person field — set via the Id suffix convention.
   if (submitterUserId) {
     payload.SubmittedById = submitterUserId;
   }
 
   if (typedResolution) {
+    // IndividualRecipients is a UserMulti field. odata=verbose
+    // requires Collection(Edm.Int32) __metadata on the results
+    // wrapper so SharePoint correctly deserializes the array.
     if (typedResolution.resolvedIndividualUserIds.length > 0) {
-      payload.IndividualRecipientsId = { results: typedResolution.resolvedIndividualUserIds };
+      payload.IndividualRecipientsId = {
+        __metadata: { type: 'Collection(Edm.Int32)' },
+        results: typedResolution.resolvedIndividualUserIds,
+      };
     }
-    // Write taxonomy labels directly to their real fields.
+
+    // Taxonomy fields (TeamRecipients, DepartmentRecipients,
+    // ProjectGroupRecipients) require term-store resolution that
+    // is not yet wired. Capture labels in ModeratorNotes so HR
+    // can see what the submitter intended. Direct writes to managed
+    // metadata columns require the hidden Note field and WssId
+    // resolution — deferred until taxonomy adapter lands.
+    const notes: string[] = [];
+
+    if (typedResolution.unresolvedIndividualEmails.length > 0) {
+      notes.push(`Unresolved individual recipients: ${typedResolution.unresolvedIndividualEmails.join(', ')}`);
+    }
     if (typedResolution.teamLabels.length > 0) {
-      payload.TeamRecipients = typedResolution.teamLabels.join(';');
+      notes.push(`Teams: ${typedResolution.teamLabels.join(', ')}`);
     }
     if (typedResolution.departmentLabels.length > 0) {
-      payload.DepartmentRecipients = typedResolution.departmentLabels.join(';');
+      notes.push(`Departments: ${typedResolution.departmentLabels.join(', ')}`);
     }
     if (typedResolution.projectGroupLabels.length > 0) {
-      payload.ProjectGroupRecipients = typedResolution.projectGroupLabels.join(';');
+      notes.push(`Projects: ${typedResolution.projectGroupLabels.join(', ')}`);
     }
-    // ModeratorNotes now only captures unresolved individual emails.
-    if (typedResolution.unresolvedIndividualEmails.length > 0) {
-      payload.ModeratorNotes = `Unresolved individual recipients: ${typedResolution.unresolvedIndividualEmails.join(', ')}`;
+
+    if (notes.length > 0) {
+      payload.ModeratorNotes = notes.join(' | ');
     }
   }
 
@@ -382,7 +409,10 @@ export async function submitKudosDraft(
       method: 'POST',
       headers: {
         Accept: 'application/json;odata=nometadata',
-        'Content-Type': 'application/json;odata=nometadata',
+        // odata=verbose is required for writes so SharePoint can
+        // correctly deserialize collection-typed fields (UserMulti).
+        // nometadata causes "StartObject" errors on { results: [] }.
+        'Content-Type': 'application/json;odata=verbose',
         'X-RequestDigest': digest,
       },
       body: JSON.stringify(payload),
@@ -390,14 +420,25 @@ export async function submitKudosDraft(
 
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '');
-      return {
-        ok: false,
-        error: `SharePoint rejected the submission (${response.status}). ${errorBody ? `Details: ${errorBody.slice(0, 200)}` : ''}`.trim(),
-      };
+      // Log structured diagnostic detail for debugging but surface
+      // a cleaner message to the end user.
+      // eslint-disable-next-line no-console
+      console.error(
+        '[HB Kudos] Submission failed',
+        { status: response.status, url, errorBody: errorBody.slice(0, 500) },
+      );
+      const userMessage =
+        response.status === 400
+          ? 'The submission was rejected by SharePoint. Please check your entries and try again.'
+          : response.status === 403
+            ? 'You do not have permission to submit kudos. Please contact your administrator.'
+            : `Something went wrong (${response.status}). Please try again.`;
+      return { ok: false, error: userMessage };
     }
 
-    const created = (await response.json()) as { Id?: number };
-    const itemId = created.Id;
+    const created = (await response.json()) as { Id?: number; d?: { Id?: number } };
+    // odata=verbose responses wrap the result in a `d` property.
+    const itemId = created.Id ?? created.d?.Id;
 
     if (typeof itemId !== 'number') {
       return { ok: false, error: 'Item was created but the response did not include an item ID.' };
