@@ -322,7 +322,18 @@ export function KudosGovernanceInputDialog({
       }}
       secondaryAction={{ label: 'Cancel', onClick: onClose }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Scoped focus-visible styles for dialog inputs — inline styles
+          cannot express pseudo-classes so keyboard focus is handled here. */}
+      {/* eslint-disable-next-line react/no-unknown-property */}
+      <style>{`
+        [data-hbc-gov-dialog] input:focus-visible,
+        [data-hbc-gov-dialog] select:focus-visible {
+          outline: 2px solid ${KUDOS_GOV_TOKENS.brandBlue};
+          outline-offset: 1px;
+          border-color: ${KUDOS_GOV_TOKENS.brandOrange};
+        }
+      `}</style>
+      <div data-hbc-gov-dialog="" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {description ? (
           <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.55, color: KUDOS_GOV_TOKENS.textSecondary }}>
             {description}
@@ -338,6 +349,7 @@ export function KudosGovernanceInputDialog({
               borderRadius: 8,
               border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
               fontFamily: 'inherit',
+              outline: 'none',
             }}
           >
             {choices.map((c) => (
@@ -358,6 +370,7 @@ export function KudosGovernanceInputDialog({
               borderRadius: 8,
               border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
               fontFamily: 'inherit',
+              outline: 'none',
             }}
           />
         )}
