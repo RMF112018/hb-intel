@@ -173,12 +173,19 @@
 }
 
 /* ── Footer action zone ──────────────────────────────────
-   Host-aware bottom padding accommodates persistent SharePoint
-   controls (feedback button, accessibility checker, Copilot
-   launcher) that occupy the lower-right viewport area (~48px).
-   Desktop retains env(safe-area-inset-bottom) instead of
-   overriding it, so the safe zone adapts to both host controls
-   and device-level insets (iPad in SPFx, notch devices). */
+   Two independent inset concerns compose the bottom padding:
+
+   1. Device safe-area inset — `env(safe-area-inset-bottom)` handles
+      notch devices, iPad in SPFx, and OS-level chrome.
+   2. Host-control clearance — `--hbc-host-ctrl-clearance` (set on
+      the panel element at runtime when SharePoint host chrome is
+      detected) reserves space for persistent SP controls in the
+      lower-right viewport area (feedback button, accessibility
+      checker, Copilot launcher — typically a ~48px floating button
+      at ~16px from the bottom-right corner).
+
+   Both layers compose via max() so the largest required clearance
+   wins. When neither is active the footer uses its base padding. */
 
 .panelFooter {
   flex-shrink: 0;
@@ -199,7 +206,11 @@
 @media (min-width: 768px) {
   .panelFooter {
     padding: 18px 26px;
-    padding-bottom: max(28px, env(safe-area-inset-bottom, 28px));
+    padding-bottom: max(
+      28px,
+      env(safe-area-inset-bottom, 0px),
+      var(--hbc-host-ctrl-clearance, 0px)
+    );
   }
 }
 

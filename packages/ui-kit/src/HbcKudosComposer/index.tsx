@@ -305,7 +305,10 @@ export function HbcKudosComposerFlyout({
             aria-modal="true"
             aria-label={title}
             className={clsx(styles.panel, isMobile ? styles.panelMobile : styles.panelDesktop)}
-            style={!isMobile && hostOffset > 0 ? { top: hostOffset } : undefined}
+            style={!isMobile && hostOffset > 0
+              ? { top: hostOffset, '--hbc-host-ctrl-clearance': '56px' } as React.CSSProperties
+              : undefined
+            }
             {...panelMotion}
           >
             <div className={styles.panelHeader}>
