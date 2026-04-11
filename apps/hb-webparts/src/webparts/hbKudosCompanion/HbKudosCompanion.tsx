@@ -969,23 +969,8 @@ export function HbKudosCompanion({
     );
   }
 
-  // Production configuration validation: when running in live SharePoint,
-  // verify that list-host config is present. Permission groups are
-  // canonical constants (HB Kudos Admins / HB Kudos Reviewers) and
-  // not configurable per webpart instance.
-  const siteUrl = getSiteUrl();
-  const hasListHostConfig =
-    typeof config?.kudosListHostUrl === 'string' && config.kudosListHostUrl.trim() !== '';
-  if (siteUrl && !hasListHostConfig) {
-    return (
-      <section data-hbc-webpart="hb-kudos-companion" data-hbc-state="unconfigured">
-        <HbcEmptyState
-          title="Configuration required"
-          description="This webpart requires the canonical Kudos list-host URL (kudosListHostUrl) to be configured. The Kudos lists are hosted on HBCentral — set the property pane value to the HBCentral site URL."
-        />
-      </section>
-    );
-  }
+  // Permission groups and list-host URL are canonical constants — no
+  // per-instance configuration is required for production runtime.
 
   if (!capabilities.canViewGovernance) {
     return (

@@ -21,30 +21,39 @@ export function getSiteUrl(): string | undefined {
 /* ── Kudos list host URL (cross-site data access) ────────────── */
 
 /**
- * Explicit list-host URL for HB Kudos list operations.
+ * Canonical Kudos list host — the sole production location for HB
+ * Kudos lists. Hardcoded as a locked production fact, not a per-
+ * instance configuration value. This ensures the companion always
+ * targets HBCentral even when hosted on HBKudosAdminReview and
+ * regardless of whether the webpart property bag contains
+ * `kudosListHostUrl`.
  *
- * When the companion webpart is hosted on a different site
- * (`HBKudosAdminReview`) than the canonical list host (`HBCentral`),
- * this override ensures all list reads, writes, and audit-event
- * queries target the correct site.
- *
- * Falls back to `_siteAbsoluteUrl` when not set, which is the
- * correct behavior for the public webpart hosted on the same site
- * as the lists.
+ * The same pattern used for canonical permission groups in
+ * `kudosRoleResolver.ts` — locked infrastructure, not editor config.
  */
-let _kudosListHostUrl: string | undefined;
+const KUDOS_LIST_HOST_URL = 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
 
-/** Store the explicit Kudos list-host URL from webpart properties. */
+/**
+ * Optional override — set from webpart properties via `mount.tsx`.
+ * When present, takes precedence over the hardcoded constant.
+ * In normal production runtime this is not needed; it exists as a
+ * dev/test escape hatch.
+ */
+let _kudosListHostUrlOverride: string | undefined;
+
+/** Store an explicit Kudos list-host URL override from webpart properties. */
 export function storeKudosListHostUrl(url: string | undefined): void {
-  _kudosListHostUrl = url?.replace(/\/+$/, '');
+  _kudosListHostUrlOverride = url?.replace(/\/+$/, '');
 }
 
 /**
- * Retrieve the Kudos list-host URL. Returns the explicit override
- * when set, otherwise falls back to the hosting site URL.
+ * Retrieve the Kudos list-host URL. Resolution order:
+ *   1. Explicit override from webpart properties (if set)
+ *   2. Hardcoded canonical constant (HBCentral)
+ *   3. Hosting site URL (fallback for non-Kudos contexts)
  */
 export function getKudosListHostUrl(): string | undefined {
-  return _kudosListHostUrl ?? _siteAbsoluteUrl;
+  return _kudosListHostUrlOverride ?? KUDOS_LIST_HOST_URL ?? _siteAbsoluteUrl;
 }
 
 /* ── Current user ID resolution ───────────────────────────────── */
@@ -62,7 +71,7 @@ let _currentUserIdPromise: Promise<number | undefined> | undefined;
  */
 export function resolveCurrentUserId(): Promise<number | undefined> {
   if (_currentUserIdPromise) return _currentUserIdPromise;
-  const siteUrl = _kudosListHostUrl ?? _siteAbsoluteUrl;
+  const siteUrl = _kudosListHostUrlOverride ?? KUDOS_LIST_HOST_URL ?? _siteAbsoluteUrl;
   if (!siteUrl) {
     _currentUserIdPromise = Promise.resolve(undefined);
     return _currentUserIdPromise;
