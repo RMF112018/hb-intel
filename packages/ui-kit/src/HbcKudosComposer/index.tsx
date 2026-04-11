@@ -30,6 +30,40 @@ import type { PersonEntry, PeopleSearchFn, PersonPhotoFn } from '../HbcPeoplePic
 import styles from './kudos-composer.module.css';
 
 // ---------------------------------------------------------------------------
+// Host-chrome detection — SharePoint-hosted overlay accommodation
+// ---------------------------------------------------------------------------
+
+/**
+ * Measure the bottom edge of persistent SharePoint host chrome (suite
+ * bar) so the flyout panel can offset below it. Returns 0 when not
+ * running inside SharePoint or when the suite bar element is absent.
+ */
+function measureHostChromeTop(): number {
+  if (typeof document === 'undefined') return 0;
+  const suiteNav = document.getElementById('SuiteNavPlaceholder');
+  if (suiteNav) return suiteNav.getBoundingClientRect().bottom;
+  const suiteBarTop = document.getElementById('suiteBarTop');
+  if (suiteBarTop) return suiteBarTop.getBoundingClientRect().bottom;
+  return 0;
+}
+
+/**
+ * Track SharePoint host chrome height while the flyout is active.
+ * Re-measures on resize so the panel adapts if the suite bar reflows.
+ */
+function useHostChromeOffset(active: boolean): number {
+  const [offset, setOffset] = React.useState(0);
+  React.useEffect(() => {
+    if (!active) return;
+    const measure = () => setOffset(measureHostChromeTop());
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [active]);
+  return offset;
+}
+
+// ---------------------------------------------------------------------------
 // Shared types (consumer state shapes)
 // ---------------------------------------------------------------------------
 
@@ -186,6 +220,7 @@ export function HbcKudosComposerFlyout({
   const reducedMotion = usePrefersReducedMotion();
   const panelRef = React.useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = React.useState(false);
+  const hostOffset = useHostChromeOffset(open);
   useFocusTrap(panelRef, open, reducedMotion);
 
   // Track viewport width for sheet orientation (mobile = bottom slide-up,
@@ -209,13 +244,19 @@ export function HbcKudosComposerFlyout({
     return () => document.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
-  // Body scroll lock while open
+  // Scroll lock while open — host-aware. In SharePoint-hosted runtime
+  // the scrollable container is a workspace div rather than <body>.
+  // Locking <body> directly in SPFx can cause scroll-position jumps
+  // and fight with the host's own scroll management.
   React.useEffect(() => {
     if (!open || typeof document === 'undefined') return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const spWorkspace = document.getElementById('spPageCanvasContent')
+      ?? document.getElementById('workspaceContainer');
+    const target = spWorkspace ?? document.body;
+    const previous = target.style.overflow;
+    target.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = previous;
+      target.style.overflow = previous;
     };
   }, [open]);
 
@@ -264,6 +305,7 @@ export function HbcKudosComposerFlyout({
             aria-modal="true"
             aria-label={title}
             className={clsx(styles.panel, isMobile ? styles.panelMobile : styles.panelDesktop)}
+            style={!isMobile && hostOffset > 0 ? { top: hostOffset } : undefined}
             {...panelMotion}
           >
             <div className={styles.panelHeader}>
