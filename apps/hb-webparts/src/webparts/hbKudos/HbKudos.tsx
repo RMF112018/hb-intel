@@ -278,7 +278,7 @@ function ArchiveList({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 12,
-          padding: '16px 0 10px',
+          padding: '14px 0 12px',
         }}
       >
         <span
@@ -301,12 +301,12 @@ function ArchiveList({
           aria-label="Search recognition archive"
           className="hbk-archive-search"
           style={{
-            padding: '5px 10px',
+            padding: '6px 12px',
             fontSize: '0.75rem',
             borderRadius: 8,
             border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
             background: KUDOS_GOV_TOKENS.orangeSubtle03,
-            maxWidth: 180,
+            maxWidth: 220,
             outline: 'none',
             fontFamily: 'inherit',
             color: KUDOS_GOV_TOKENS.textPrimary,
@@ -320,7 +320,7 @@ function ArchiveList({
           description="Approved kudos that cycle off the homepage will appear here."
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {filtered.map((entry) => {
             const summary = buildKudosRecipientSummary(entry.recipients);
             return (
