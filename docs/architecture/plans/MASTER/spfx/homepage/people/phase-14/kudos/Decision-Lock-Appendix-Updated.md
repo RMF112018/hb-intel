@@ -1,13 +1,33 @@
-# Decision Lock Appendix — HB Kudos + HR Approval Companion v4
+# Decision Lock Appendix — HB Kudos + HR Approval Companion v5
 
 This file is the governing decision register for the implementation prompts in this package.
 
-This revision updates the appendix for the locked production deployment model:
+This revision updates the appendix for the locked production deployment model and the newly locked permissions-authority model:
 
 - the **HB Kudos public-facing surface** is hosted on `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`
 - the **HB Kudos Approval Companion** is hosted on `https://hedrickbrotherscom.sharepoint.com/sites/HBKudosAdminReview`
 - the canonical HB Kudos lists remain on **HBCentral**
-- production permissions must resolve from **real group membership**, not simulated roles
+- production permissions resolve solely from **real membership in the canonical Entra security groups**
+- the webpart property pane is **not** a production permissions-authority surface
+
+---
+
+## Production Permissions Authority
+
+This is a final production decision. It is not a pending recommendation or a future goal.
+
+**The sole source of truth for HB Kudos companion access and governance permissions is membership in the following Entra ID security groups:**
+
+- **`HB Kudos Admins`** — full admin authority including admin-only governance actions
+- **`HB Kudos Reviewers`** — reviewer authority for standard review and approval actions
+
+**The following are explicitly excluded from production permission authority:**
+
+- `simulatedRole` — retired from production; dev-only, and unavailable in the production property pane
+- `kudosAdminsGroup` / `kudosReviewersGroup` property-pane fields — removed from production; the property pane is not a permissions-management surface
+- Any other per-instance, page-author-editable permission override
+
+**Production permissions are centralized.** Page configuration, webpart property edits, and site-page authoring do not alter who has governance access. Only Entra ID group membership changes affect companion permissions.
 
 ---
 
@@ -40,7 +60,7 @@ Locks:
 
 - `simulatedRole` is **dev-only** and is not an acceptable production authorization mechanism
 - Production behavior must not be driven by loose text role simulation
-- In production mode, the companion must resolve real user access from configured principals/groups and deny governance access when resolution fails
+- In production mode, the companion must resolve real user access from canonical security-group membership and deny governance access when resolution fails
 - Dev-mode fallback must not remain active in normal production runtime
 
 ---
@@ -62,9 +82,9 @@ Locks:
 - Approval model: **mixed authority by action**
 - Access to the HR approval companion webpart: **HR reviewers + Kudos admins only**
 - Shared permission model across surfaces: **one shared role model** governs both the main HB Kudos webpart and the HR companion
-- Role assignment mechanism: **real group/principal resolution in production**
-- Role model must resolve to **real SharePoint-accessible principals/groups**, not loose text entries
-- UI and action/mutation enforcement must both honor the same role model
+- Role assignment mechanism: **solely from real runtime resolution of canonical Entra security-group membership** — no property-pane fields, no simulated roles, no page-author-configurable overrides
+- Role model must resolve to **real SharePoint-accessible principals/groups**, not loose text entries or editable per-instance config
+- UI and action/mutation enforcement must both honor the same role result
 
 ### Locked production groups
 
@@ -80,19 +100,24 @@ Current locked deployment facts:
 
 Implementation locks:
 
-- The companion must resolve the current user against these production groups/principals
-- `kudosAdminsGroup` and `kudosReviewersGroup` must map to real production principals, not simulated labels
+- The companion must resolve the current user against these canonical production groups/principals
+- Companion access and governance permissions must be derived solely from actual membership in those groups
 - If the runtime cannot positively resolve the current user into an allowed admin/reviewer principal, the companion must fail closed and render an access-restricted state
 - Governance actions must never rely solely on client-visible tab access or hidden buttons; the same role result must govern mutation eligibility
 
 ### Property model locks
 
-- `simulatedRole` must be retired from production runtime behavior
-- If kept for local development, it must be explicitly gated to non-production/dev mode only
-- Production defaults should point to the locked principal names:
-  - `kudosAdminsGroup = HB Kudos Admins`
-  - `kudosReviewersGroup = HB Kudos Reviewers`
-- The implementation must support an explicit data-site/list-host configuration so the companion hosted on `HBKudosAdminReview` can target the canonical lists on `HBCentral`
+- `simulatedRole` is retired from production runtime behavior — it is dev-only and is not present in the production property pane
+- `kudosAdminsGroup` and `kudosReviewersGroup` editable fields are removed from the production property pane — they are not production permission-authority inputs
+- The production property pane retains only settings that are genuinely product configuration, not access control
+- The implementation supports an explicit data-site/list-host configuration so the companion hosted on `HBKudosAdminReview` targets the canonical lists on `HBCentral`
+
+### Permissions documentation locks
+
+- Production documentation states that the canonical source of truth for permissions is membership in the Entra security groups `HB Kudos Admins` and `HB Kudos Reviewers`
+- Documentation explains, in layman's terms, the difference between the two groups
+- Documentation explains, in layman's terms, that changing access requires updating Entra group membership, not editing webpart settings
+- No product copy, README text, property help text, or admin note implies that companion access is managed through property-pane access fields in production
 
 ---
 
@@ -338,9 +363,12 @@ Withdrawn is not a prime top-level tab; it may live in search/history.
 ## Packaging / Release Locks
 
 - Production manifests, preconfigured entries, and user-facing descriptions must no longer describe the implementation as dev-mode or simulated-role driven
+- Production property panes must no longer expose editable permission-authority fields for companion access
 - The final production `.sppkg` must be rebuilt fresh from `main` after:
   - simulated-role runtime dependence is removed or dev-gated
-  - real group-based resolution is active
+  - real security-group-based resolution is active
+  - property-pane permission authority is removed
   - cross-site list-host wiring is validated
   - public/admin site split is validated
+  - permissions documentation is in place
 - Production closure is not complete until the packaged output is proven fresh and aligned with source truth
