@@ -1,0 +1,11 @@
+# HB Kudos Root-Cause Matrix
+
+| Failure | Severity | Repo-truth cause | Why prior rounds failed | Required correction |
+|---|---:|---|---|---|
+| People search returns no results | Critical | `useSharePointPeopleSearch.ts` uses a custom raw `fetch()` wrapper to `ClientPeoplePickerSearchUser`, swallows errors, and returns `[]` on all failure paths | Prior rounds accepted the existence of a search UI as proof of a picker | Replace the resolver with a proven SPFx-aware implementation, add diagnostics, add fallback search mode, and prove resolution of known users |
+| Picker behaves like typed entry with search veneer | Critical | The UI kit picker shell exists, but it is only as good as the failing search adapter | Prior rounds protected the abstraction instead of the outcome | Treat this as unresolved until real principal suggestions, chips, remove behavior, and successful submission all work end-to-end |
+| Featured card looks hollow / blank | Critical | Homepage variant pairs near-white text with a light translucent card background | Prior rounds assumed data sufficiency was the main issue | Fix contrast and card treatment in-host. If shared variant cannot support this cleanly, split or replace it |
+| Boundary preserved ahead of proof | High | `HbKudos.tsx` explicitly argues the boundary is affirmed and should not be split | Prior rounds were too deferential to existing structure | Remove the structural lock. Prove or replace the boundary |
+| Silent failure behavior | High | Search adapter catches all errors and returns `[]` | Failures became invisible and looked like “no people found” | Surface debug state during validation and remove silent empty-result fallback as the only outcome |
+| Real host layout still needs reduced zoom | High | Current CSS is tuned heavily by viewport breakpoints and stylistic overrides rather than measured host width | Prior rounds optimized authored styling more than host-fit behavior | Validate and adjust against actual SharePoint rendered width at normal zoom |
+| Closure claims outpace proof | High | Existing repo has many plan/prompt files defending closure narratives | Prior rounds closed on code churn rather than visible outcome | Require hard proof: screenshots, successful lookup evidence, packaged artifact proof |

@@ -1,0 +1,968 @@
+{
+  "v1_direct_full": {
+    "@odata.context": "ht***y",
+    "businessPhones": [],
+    "displayName": "Bo***g",
+    "givenName": "Bo***y",
+    "id": "0026a9f0-****-****-****-8e1593fcc37b",
+    "jobTitle": "Pr***e",
+    "mail": "bf***@hedrickbrothers.com",
+    "mobilePhone": "56***75",
+    "officeLocation": null,
+    "preferredLanguage": null,
+    "surname": "Fe***g",
+    "userPrincipalName": "bf***@hedrickbrothers.com"
+  },
+  "beta_direct_full": {
+    "@odata.context": "ht***y",
+    "accountEnabled": true,
+    "ageGroup": null,
+    "agentIdentityBlueprintId": null,
+    "assignedLicenses": [
+      {
+        "disabledPlans": [],
+        "skuId": "cbdc14ab-****-****-****-6ada7cdc1d46"
+      },
+      {
+        "disabledPlans": [],
+        "skuId": "5b631642-****-****-****-1daaa972ef80"
+      },
+      {
+        "disabledPlans": [],
+        "skuId": "f8a1db68-****-****-****-cb42ce701560"
+      },
+      {
+        "disabledPlans": [],
+        "skuId": "639dec6b-****-****-****-c5c441c4b0cb"
+      },
+      {
+        "disabledPlans": [],
+        "skuId": "a403ebcc-****-****-****-7a907fd6c235"
+      },
+      {
+        "disabledPlans": [],
+        "skuId": "f30db892-****-****-****-80727f46fd3d"
+      },
+      {
+        "disabledPlans": [],
+        "skuId": "53818b1b-****-****-****-0dba576410e6"
+      }
+    ],
+    "assignedPlans": [
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "199a5c09-****-****-****-b05d533e1ea2"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Dy***V",
+        "servicePlanId": "39b5c996-****-****-****-46066f572726"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***e",
+        "servicePlanId": "0f9b09cb-****-****-****-43f4996f83f4"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Wh***s",
+        "servicePlanId": "94a54592-****-****-****-97868b000b91"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "33c4f319-****-****-****-410b750a4a5a"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Sh***t",
+        "servicePlanId": "5dbe027f-****-****-****-606e4d348a72"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Pr***s",
+        "servicePlanId": "31b4e2fc-****-****-****-41407303bd66"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "C***",
+        "servicePlanId": "95b76021-****-****-****-1d1f3d66a95a"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Vi***s",
+        "servicePlanId": "13b6da2c-****-****-****-a33e221387ca"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***s",
+        "servicePlanId": "dcf9d2f4-****-****-****-77a453cfbc02"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "C***",
+        "servicePlanId": "afa73018-****-****-****-f75d2b1b8430"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***e",
+        "servicePlanId": "094e7854-****-****-****-3ab5369ebdc1"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Wh***s",
+        "servicePlanId": "b8afc642-****-****-****-507a7bba7e5d"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "C***",
+        "servicePlanId": "28b0fa46-****-****-****-58e979a6b014"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "B***",
+        "servicePlanId": "0d0c0d31-****-****-****-eaf4d7f26dba"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***a",
+        "servicePlanId": "54fc630f-****-****-****-af0503c1386e"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Ad***m",
+        "servicePlanId": "932ad362-****-****-****-97849a1a30b9"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Ch***p",
+        "servicePlanId": "c4b8c31a-****-****-****-a21f55fcabda"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "ex***e",
+        "servicePlanId": "5136a095-****-****-****-e84448b38ea5"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Sh***t",
+        "servicePlanId": "e95bec33-****-****-****-b10bd9d0c014"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mu***e",
+        "servicePlanId": "8a256a2b-****-****-****-e76466e88db0"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "AA***e",
+        "servicePlanId": "41781fb2-****-****-****-b576c07bb09d"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "De***s",
+        "servicePlanId": "8c7d2df8-****-****-****-a0458298f3b3"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***s",
+        "servicePlanId": "b21a6b06-****-****-****-51ec6d9f52ad"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***t",
+        "servicePlanId": "b737dad2-****-****-****-ca563267e8b9"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***t",
+        "servicePlanId": "795f6fe0-****-****-****-5dde4dc704c9"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "RM***e",
+        "servicePlanId": "6c57d4b6-****-****-****-69f17b4947b3"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Le***s",
+        "servicePlanId": "b76fb638-****-****-****-83d28acb3d86"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "On***e",
+        "servicePlanId": "1fe6227d-****-****-****-0acad4ff6e94"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Po***e",
+        "servicePlanId": "92f7a6f3-****-****-****-809e6da5ad1c"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Mi***e",
+        "servicePlanId": "43de0ff5-****-****-****-175376d08c38"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "C***",
+        "servicePlanId": "4ff01e01-****-****-****-ce96c3bbcf14"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Te***I",
+        "servicePlanId": "57ff2da0-****-****-****-ffb7a2317929"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "S***",
+        "servicePlanId": "c1ec4a95-****-****-****-aa3fa01094f5"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Wi***s",
+        "servicePlanId": "7bf960f6-****-****-****-5dbff9558365"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Sh***t",
+        "servicePlanId": "a1ace008-****-****-****-33b3a23a2472"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "5bfe124c-****-****-****-f1297d457d79"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "9aaf7827-****-****-****-182f06f82e5c"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Of***s",
+        "servicePlanId": "159f4cd6-****-****-****-af1a9ef76344"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "cc***d",
+        "servicePlanId": "041fe683-****-****-****-c0cdc516daee"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***m",
+        "servicePlanId": "743dd19e-****-****-****-49ba8f63a2f6"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "AA***e",
+        "servicePlanId": "de377cbc-****-****-****-3f223947e102"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Mi***a",
+        "servicePlanId": "aebd3021-****-****-****-0ed2f4f047a1"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "S***",
+        "servicePlanId": "a23b959c-****-****-****-b90eb88a9e97"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***e",
+        "servicePlanId": "0feaeb32-****-****-****-43b5b83db82c"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "a6520331-****-****-****-15c0933bc757"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "176a09a6-****-****-****-b2791c6ba793"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Wi***P",
+        "servicePlanId": "bfc1bbd9-****-****-****-17c35fd0e2a4"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "S***",
+        "servicePlanId": "8e9ff0ff-****-****-****-2f636b600ac2"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Of***s",
+        "servicePlanId": "2789c901-****-****-****-be334d9d793a"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Mi***m",
+        "servicePlanId": "9e700747-****-****-****-ef187ceec156"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "To***o",
+        "servicePlanId": "5e62787c-****-****-****-1d05acd4d12c"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Wi***s",
+        "servicePlanId": "8e229017-****-****-****-903395523b99"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Sh***t",
+        "servicePlanId": "c7699d2e-****-****-****-1736da088ca1"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "9bec7e34-****-****-****-bd6d1165c7ed"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***s",
+        "servicePlanId": "3efbd4ed-****-****-****-1321f8730af8"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Po***e",
+        "servicePlanId": "c68f8d98-****-****-****-22fa496fa792"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Ya***e",
+        "servicePlanId": "a82fbf69-****-****-****-915b2cf354f4"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***s",
+        "servicePlanId": "f0ff6ac6-****-****-****-6dfef97f0c28"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "ex***e",
+        "servicePlanId": "efb87545-****-****-****-69c6916d9eb0"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Ya***e",
+        "servicePlanId": "7547a3fe-****-****-****-5077c5041653"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "cc***d",
+        "servicePlanId": "ded3d325-****-****-****-5bac26d7a014"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "To***o",
+        "servicePlanId": "c87f142c-****-****-****-aaea9c4d9ae5"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "De***d",
+        "service": "Pr***e",
+        "servicePlanId": "76846ad7-****-****-****-a386362dd1b9"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "RM***e",
+        "servicePlanId": "bea4c11e-****-****-****-8ea15d019f90"
+      },
+      {
+        "assignedDateTime": "20***9Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***e",
+        "servicePlanId": "276d6e8a-****-****-****-4fc27f79f809"
+      },
+      {
+        "assignedDateTime": "20***6Z",
+        "capabilityStatus": "En***d",
+        "service": "Po***e",
+        "servicePlanId": "a2729df7-****-****-****-8a8484121554"
+      },
+      {
+        "assignedDateTime": "20***6Z",
+        "capabilityStatus": "En***d",
+        "service": "C***",
+        "servicePlanId": "d8c638e2-****-****-****-feb87603837b"
+      },
+      {
+        "assignedDateTime": "20***6Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***e",
+        "servicePlanId": "c7ce3f26-****-****-****-d8ab868c85fe"
+      },
+      {
+        "assignedDateTime": "20***3Z",
+        "capabilityStatus": "En***d",
+        "service": "Po***I",
+        "servicePlanId": "70d33638-****-****-****-562de28bd4ba"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "cc***d",
+        "servicePlanId": "fe6c28b3-****-****-****-a10a5167435c"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "Sh***t",
+        "servicePlanId": "0aedf20c-****-****-****-30c042609612"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "931e4a88-****-****-****-16a5f1e6028d"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "82d30987-****-****-****-198b21d164c7"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "C***",
+        "servicePlanId": "89f1c4c8-****-****-****-869c9128ab5d"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "Te***I",
+        "servicePlanId": "b95945de-****-****-****-f2beb6ea2347"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "3f30311c-****-****-****-725b469da960"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "ex***e",
+        "servicePlanId": "b622badb-****-****-****-4b27a2c0996c"
+      },
+      {
+        "assignedDateTime": "20***1Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***e",
+        "servicePlanId": "a62f8878-****-****-****-6149a25ceb97"
+      },
+      {
+        "assignedDateTime": "20***5Z",
+        "capabilityStatus": "En***d",
+        "service": "Az***s",
+        "servicePlanId": "2049e525-****-****-****-e0a31c4b1fe4"
+      },
+      {
+        "assignedDateTime": "20***5Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***n",
+        "servicePlanId": "c948ea65-****-****-****-9eaaaf11b522"
+      },
+      {
+        "assignedDateTime": "20***5Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***e",
+        "servicePlanId": "50e68c76-****-****-****-75456511b170"
+      },
+      {
+        "assignedDateTime": "20***5Z",
+        "capabilityStatus": "En***d",
+        "service": "C***",
+        "servicePlanId": "17ab22cd-****-****-****-cb6eb12696c0"
+      },
+      {
+        "assignedDateTime": "20***7Z",
+        "capabilityStatus": "En***d",
+        "service": "C***",
+        "servicePlanId": "50554c47-****-****-****-42a2765c555c"
+      },
+      {
+        "assignedDateTime": "20***7Z",
+        "capabilityStatus": "En***d",
+        "service": "Sh***t",
+        "servicePlanId": "fe71d6c3-****-****-****-da042bf08063"
+      },
+      {
+        "assignedDateTime": "20***7Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***e",
+        "servicePlanId": "fa200448-****-****-****-ea106ed2199d"
+      },
+      {
+        "assignedDateTime": "20***7Z",
+        "capabilityStatus": "En***d",
+        "service": "Mi***e",
+        "servicePlanId": "fafd7243-****-****-****-495efcb1d3c3"
+      },
+      {
+        "assignedDateTime": "20***7Z",
+        "capabilityStatus": "En***d",
+        "service": "Pr***s",
+        "servicePlanId": "818523f5-****-****-****-ed6944946ea7"
+      }
+    ],
+    "authorizationInfo": {
+      "certificateUserIds": []
+    },
+    "businessPhones": [],
+    "city": "W***",
+    "cloudRealtimeCommunicationInfo": {
+      "isSipEnabled": true
+    },
+    "companyName": "He***n",
+    "consentProvidedForMinor": null,
+    "country": null,
+    "createdDateTime": "20***1Z",
+    "creationType": null,
+    "deletedDateTime": null,
+    "department": "Co***l",
+    "deviceKeys": [
+      {
+        "deviceId": "b83a862d-****-****-****-2e82161d217c",
+        "keyMaterial": "[redacted-key-material]",
+        "keyType": "N***"
+      },
+      {
+        "deviceId": "6756217c-****-****-****-4dd9a0a5c9f7",
+        "keyMaterial": "[redacted-key-material]",
+        "keyType": "N***"
+      },
+      {
+        "deviceId": "5ba9331c-****-****-****-37c6b580ac75",
+        "keyMaterial": "[redacted-key-material]",
+        "keyType": "N***"
+      }
+    ],
+    "displayName": "Bo***g",
+    "employeeHireDate": null,
+    "employeeId": null,
+    "employeeLeaveDateTime": null,
+    "employeeOrgData": null,
+    "employeeType": null,
+    "externalUserConvertedOn": null,
+    "externalUserState": null,
+    "externalUserStateChangeDateTime": null,
+    "faxNumber": null,
+    "givenName": "Bo***y",
+    "id": "0026a9f0-****-****-****-8e1593fcc37b",
+    "identities": [
+      {
+        "issuer": "he***m",
+        "issuerAssignedId": "bf***@hedrickbrothers.com",
+        "signInType": "us***e"
+      }
+    ],
+    "identityParentId": null,
+    "imAddresses": [
+      "bf***@hedrickbrothers.com"
+    ],
+    "infoCatalogs": [],
+    "isLicenseReconciliationNeeded": false,
+    "isManagementRestricted": null,
+    "isResourceAccount": null,
+    "jobTitle": "Pr***e",
+    "legalAgeGroupClassification": null,
+    "mail": "bf***@hedrickbrothers.com",
+    "mailNickname": "bf***g",
+    "mobilePhone": "56***75",
+    "officeLocation": null,
+    "onPremisesDistinguishedName": "CN***l",
+    "onPremisesDomainName": "hb***l",
+    "onPremisesExtensionAttributes": {
+      "extensionAttribute1": null,
+      "extensionAttribute10": null,
+      "extensionAttribute11": null,
+      "extensionAttribute12": null,
+      "extensionAttribute13": null,
+      "extensionAttribute14": null,
+      "extensionAttribute15": null,
+      "extensionAttribute2": null,
+      "extensionAttribute3": null,
+      "extensionAttribute4": null,
+      "extensionAttribute5": null,
+      "extensionAttribute6": null,
+      "extensionAttribute7": null,
+      "extensionAttribute8": null,
+      "extensionAttribute9": null
+    },
+    "onPremisesImmutableId": "ny***=",
+    "onPremisesLastSyncDateTime": "20***1Z",
+    "onPremisesObjectIdentifier": "1238209f-****-****-****-beab2c27aade",
+    "onPremisesProvisioningErrors": [],
+    "onPremisesSamAccountName": "bf***g",
+    "onPremisesSecurityIdentifier": "S-***55",
+    "onPremisesSipInfo": {
+      "isSipEnabled": false,
+      "sipDeploymentLocation": null,
+      "sipPrimaryAddress": null
+    },
+    "onPremisesSyncEnabled": true,
+    "onPremisesUserPrincipalName": "bf***@hedrickbrothers.com",
+    "otherMails": [],
+    "passwordPolicies": "Di***n",
+    "passwordProfile": null,
+    "postalCode": "33***9",
+    "preferredDataLocation": null,
+    "preferredLanguage": null,
+    "provisionedPlans": [
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Sh***t"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Sh***t"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Sh***t"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Sh***t"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Mi***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "De***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "De***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Sh***t"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "ex***e"
+      },
+      {
+        "capabilityStatus": "En***d",
+        "provisioningStatus": "Su***s",
+        "service": "Sh***t"
+      }
+    ],
+    "proxyAddresses": [
+      "sm***@hedrickbrotherscom.onmicrosoft.com",
+      "SM***@hedrickbrothers.com"
+    ],
+    "refreshTokensValidFromDateTime": "20***0Z",
+    "securityIdentifier": "S-***47",
+    "serviceProvisioningErrors": [],
+    "showInAddressList": null,
+    "signInSessionsValidFromDateTime": "20***0Z",
+    "state": "F***",
+    "streetAddress": "22***e",
+    "surname": "Fe***g",
+    "usageLocation": "U***",
+    "userPrincipalName": "bf***@hedrickbrothers.com",
+    "userType": "Me***r"
+  },
+  "comparison_shapes": {
+    "search_john": {
+      "@odata.context": "ht***)",
+      "@odata.nextLink": "ht***Ow",
+      "value": [
+        {
+          "accountEnabled": true,
+          "businessPhones": [],
+          "department": null,
+          "displayName": "jo***@protonelectric.com",
+          "givenName": null,
+          "id": "090a3c8a-****-****-****-63f246053ae7",
+          "jobTitle": null,
+          "mail": "jo***@protonelectric.com",
+          "mobilePhone": null,
+          "officeLocation": null,
+          "surname": null,
+          "userPrincipalName": "jo***@hedrickbrothers.com"
+        },
+        {
+          "accountEnabled": false,
+          "businessPhones": [],
+          "department": "Co***l",
+          "displayName": "Jo***r",
+          "givenName": "J***",
+          "id": "13e17590-****-****-****-7ae02aed1524",
+          "jobTitle": "In***n",
+          "mail": "jg***@hedrickbrothers.com",
+          "mobilePhone": null,
+          "officeLocation": null,
+          "surname": "Ga***r",
+          "userPrincipalName": "jg***@hedrickbrothers.com"
+        },
+        {
+          "accountEnabled": true,
+          "businessPhones": [],
+          "department": null,
+          "displayName": "jo***@crystalblueimage.com",
+          "givenName": null,
+          "id": "1443b889-****-****-****-8fa18da2afdf",
+          "jobTitle": null,
+          "mail": "jo***@crystalblueimage.com",
+          "mobilePhone": null,
+          "officeLocation": null,
+          "surname": null,
+          "userPrincipalName": "jo***@hedrickbrothers.com"
+        }
+      ]
+    },
+    "search_smith": {
+      "@odata.context": "ht***)",
+      "value": [
+        {
+          "accountEnabled": true,
+          "businessPhones": [],
+          "department": null,
+          "displayName": "pa***@truteam.com",
+          "givenName": null,
+          "id": "0b877ea0-****-****-****-eb619707b7db",
+          "jobTitle": null,
+          "mail": "pa***@truteam.com",
+          "mobilePhone": null,
+          "officeLocation": null,
+          "surname": null,
+          "userPrincipalName": "pa***@hedrickbrothers.com"
+        },
+        {
+          "accountEnabled": true,
+          "businessPhones": [],
+          "department": null,
+          "displayName": "Da***h",
+          "givenName": "Da***d",
+          "id": "72b9832d-****-****-****-5a8c1aaab689",
+          "jobTitle": null,
+          "mail": "ds***@hedrickbrothers.com",
+          "mobilePhone": null,
+          "officeLocation": null,
+          "surname": "Sm***h",
+          "userPrincipalName": "ds***@hedrickbrothers.com"
+        }
+      ]
+    },
+    "search_full_name": {
+      "@odata.context": "ht***)",
+      "value": [
+        {
+          "accountEnabled": false,
+          "businessPhones": [],
+          "department": "Co***l",
+          "displayName": "Jo***r",
+          "givenName": "J***",
+          "id": "13e17590-****-****-****-7ae02aed1524",
+          "jobTitle": "In***n",
+          "mail": "jg***@hedrickbrothers.com",
+          "mobilePhone": null,
+          "officeLocation": null,
+          "surname": "Ga***r",
+          "userPrincipalName": "jg***@hedrickbrothers.com"
+        }
+      ]
+    },
+    "filter_upn": {
+      "@odata.context": "ht***)",
+      "value": [
+        {
+          "accountEnabled": true,
+          "businessPhones": [],
+          "department": "Co***l",
+          "displayName": "Bo***g",
+          "givenName": "Bo***y",
+          "id": "0026a9f0-****-****-****-8e1593fcc37b",
+          "jobTitle": "Pr***e",
+          "mail": "bf***@hedrickbrothers.com",
+          "mobilePhone": "56***75",
+          "officeLocation": null,
+          "surname": "Fe***g",
+          "userPrincipalName": "bf***@hedrickbrothers.com"
+        }
+      ]
+    },
+    "select_direct": {
+      "@odata.context": "ht***y",
+      "accountEnabled": true,
+      "businessPhones": [],
+      "department": "Co***l",
+      "displayName": "Bo***g",
+      "givenName": "Bo***y",
+      "id": "0026a9f0-****-****-****-8e1593fcc37b",
+      "jobTitle": "Pr***e",
+      "mail": "bf***@hedrickbrothers.com",
+      "mobilePhone": "56***75",
+      "officeLocation": null,
+      "surname": "Fe***g",
+      "userPrincipalName": "bf***@hedrickbrothers.com"
+    },
+    "cli_user_show": {
+      "@odata.context": "ht***y",
+      "businessPhones": [],
+      "displayName": "Bo***g",
+      "givenName": "Bo***y",
+      "id": "0026a9f0-****-****-****-8e1593fcc37b",
+      "jobTitle": "Pr***e",
+      "mail": "bf***@hedrickbrothers.com",
+      "mobilePhone": "56***75",
+      "officeLocation": null,
+      "preferredLanguage": null,
+      "surname": "Fe***g",
+      "userPrincipalName": "bf***@hedrickbrothers.com"
+    },
+    "cli_user_list_display_name": [
+      {
+        "businessPhones": [],
+        "displayName": "Jo***r",
+        "givenName": "J***",
+        "id": "13e17590-****-****-****-7ae02aed1524",
+        "jobTitle": "In***n",
+        "mail": "jg***@hedrickbrothers.com",
+        "mobilePhone": null,
+        "officeLocation": null,
+        "preferredLanguage": null,
+        "surname": "Ga***r",
+        "userPrincipalName": "jg***@hedrickbrothers.com"
+      }
+    ],
+    "unsupported_filter_error_text": "ERROR: Bad Request({\"error\":{\"code\":\"Request_UnsupportedQuery\",\"message\":\"Unsupported Query.\",\"innerError\":{\"date\":\"2026-04-11T19:02:02\",\"request-id\":\"2a0ed920-0d5f-4365-887c-879d0d206eb6\",\"client-request-id\":\"2a0ed920-0d5f-4365-887c-879d0d206eb6\"}}})"
+  }
+}

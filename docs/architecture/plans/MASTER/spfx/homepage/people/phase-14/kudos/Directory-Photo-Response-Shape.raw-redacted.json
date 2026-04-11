@@ -1,0 +1,145 @@
+{
+  "auth_context": {
+    "observed": true,
+    "token_source": "az account get-access-token --resource-type ms-graph",
+    "auth_type": "delegated bearer token via Azure CLI"
+  },
+  "photo_metadata": {
+    "v1_present_user": {
+      "request": {
+        "method": "GET",
+        "url": "https://graph.microsoft.com/v1.0/users/bf***@hedrickbrothers.com/photo"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/json",
+        "top_level_keys": [
+          "@odata.context",
+          "@odata.mediaContentType",
+          "@odata.mediaEtag",
+          "height",
+          "id",
+          "width"
+        ],
+        "body_redacted": {
+          "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('bf***%40hedrickbrothers.com')/photo/$entity",
+          "@odata.mediaContentType": "image/jpeg",
+          "@odata.mediaEtag": "W/\"04e1***471e\"",
+          "height": 256,
+          "id": "default",
+          "width": 256
+        }
+      }
+    },
+    "v1_missing_user": {
+      "request": {
+        "method": "GET",
+        "url": "https://graph.microsoft.com/v1.0/users/jg***@hedrickbrothers.com/photo"
+      },
+      "response": {
+        "status": 404,
+        "content_type": "application/json",
+        "body_redacted": {
+          "error": {
+            "code": "ImageNotFound",
+            "message": "Exception of type 'Microsoft.Fast.Profile.Core.Exception.ImageNotFoundException' was thrown.",
+            "innerError": {
+              "date": "2026-04-11T19:12:08",
+              "request-id": "6920***cb6f",
+              "client-request-id": "6920***cb6f"
+            }
+          }
+        }
+      }
+    },
+    "beta_parity": {
+      "observed": true,
+      "summary": "beta /photo returned same key shape and values class as v1.0 for tested users (present and missing-photo error)."
+    }
+  },
+  "photo_binary_value": {
+    "v1_present_user": {
+      "request": {
+        "method": "GET",
+        "url": "https://graph.microsoft.com/v1.0/users/bf***@hedrickbrothers.com/photo/$value"
+      },
+      "response_characteristics": {
+        "status": 200,
+        "content_type": "image/jpeg",
+        "etag_redacted": "W/\"04e1***471e\"",
+        "binary_body_returned": true,
+        "binary_body_omitted": true,
+        "observed_file_characteristics": {
+          "file_type": "JPEG",
+          "dimensions": "256x256",
+          "non_empty": true
+        }
+      }
+    },
+    "v1_missing_user": {
+      "request": {
+        "method": "GET",
+        "url": "https://graph.microsoft.com/v1.0/users/jg***@hedrickbrothers.com/photo/$value"
+      },
+      "response_characteristics": {
+        "status": 404,
+        "content_type": "application/json",
+        "binary_body_returned": false,
+        "body_redacted": {
+          "error": {
+            "code": "ImageNotFound",
+            "message": "Exception of type 'Microsoft.Fast.Profile.Core.Exception.ImageNotFoundException' was thrown.",
+            "innerError": {
+              "date": "2026-04-11T19:13:09",
+              "request-id": "7e3f***8ee9",
+              "client-request-id": "7e3f***8ee9"
+            }
+          }
+        }
+      }
+    },
+    "beta_present_user": {
+      "request": {
+        "method": "GET",
+        "url": "https://graph.microsoft.com/beta/users/bf***@hedrickbrothers.com/photo/$value"
+      },
+      "response_characteristics": {
+        "status": 200,
+        "content_type": "image/jpeg",
+        "binary_body_returned": true,
+        "binary_body_omitted": true,
+        "observed_file_characteristics": {
+          "file_type": "JPEG",
+          "dimensions": "256x256",
+          "non_empty": true
+        }
+      }
+    },
+    "beta_missing_user": {
+      "request": {
+        "method": "GET",
+        "url": "https://graph.microsoft.com/beta/users/jg***@hedrickbrothers.com/photo/$value"
+      },
+      "response_characteristics": {
+        "status": 404,
+        "content_type": "application/json",
+        "binary_body_returned": false,
+        "body_redacted": {
+          "error": {
+            "code": "ImageNotFound",
+            "message": "Exception of type 'Microsoft.Fast.Profile.Core.Exception.ImageNotFoundException' was thrown.",
+            "innerError": {
+              "date": "2026-04-11T19:14:33",
+              "request-id": "f7e8***cd4b",
+              "client-request-id": "f7e8***cd4b"
+            }
+          }
+        }
+      }
+    }
+  },
+  "notes": {
+    "binary_storage_policy": "Raw image bytes intentionally omitted from repository artifacts.",
+    "scope_boundary": "This artifact records response shape/behavior only; no UI or ranking changes."
+  }
+}
