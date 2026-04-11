@@ -10,6 +10,14 @@
  * W01r-P18 — recognition rebuild. Composes `HbcAvatarStack` and the
  * governed presentation tokens; consumers stay thin. The view-model
  * contract is unchanged from prior versions.
+ *
+ * Consumers: HbKudos (variant `people-culture-homepage`) and
+ * PeopleCultureMerged (variant `people-culture-homepage`). The
+ * `people-culture-homepage` variant provides a homepage-fit CSS
+ * specialization (frosted-glass spotlight card, left-accent border,
+ * on-dark text, compact spacing). PeopleCulturePublic deliberately
+ * does not consume this surface — it implements its own local
+ * composition to avoid re-coupling to the kudos rendering path.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
