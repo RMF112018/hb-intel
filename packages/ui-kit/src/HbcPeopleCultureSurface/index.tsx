@@ -271,22 +271,24 @@ function KudosSpotlight({
           Kudos Spotlight
         </span>
 
-        <div className={styles.spotlightAvatars}>
-          <div className={styles.spotlightHeroAvatarRing}>
-            <div className={styles.spotlightHeroAvatarRingInner}>
-              <HbcAvatarStack people={featured.recipients.slice(0, 1)} size="xl" />
+        {featured.recipients.length > 0 ? (
+          <div className={styles.spotlightAvatars}>
+            <div className={styles.spotlightHeroAvatarRing}>
+              <div className={styles.spotlightHeroAvatarRingInner}>
+                <HbcAvatarStack people={featured.recipients.slice(0, 1)} size="xl" />
+              </div>
             </div>
+            {featured.recipients.length > 1 ? (
+              <div className={styles.spotlightAvatarStrip}>
+                <HbcAvatarStack
+                  people={featured.recipients.slice(1, 5)}
+                  size="sm"
+                  max={4}
+                />
+              </div>
+            ) : null}
           </div>
-          {featured.recipients.length > 1 ? (
-            <div className={styles.spotlightAvatarStrip}>
-              <HbcAvatarStack
-                people={featured.recipients.slice(1, 5)}
-                size="sm"
-                max={4}
-              />
-            </div>
-          ) : null}
-        </div>
+        ) : null}
 
         <div className={styles.spotlightContent}>
           {isHomepage ? (

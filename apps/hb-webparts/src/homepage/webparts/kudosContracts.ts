@@ -666,7 +666,7 @@ export function isWorkflowResolved(status: KudosWorkflowStatus): boolean {
  * go-live.
  */
 export function isPubliclyVisible(entry: Pick<KudosEntry, 'workflowStatus' | 'homepageEnabled'>): boolean {
-  if (entry.homepageEnabled !== true) return false;
+  if (entry.homepageEnabled === false) return false;
   return entry.workflowStatus === 'approved';
 }
 
