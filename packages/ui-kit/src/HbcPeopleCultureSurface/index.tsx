@@ -338,7 +338,7 @@ function KudosSpotlight({
             </div>
           ) : null}
 
-          {celebrateHref || onGiveKudos ? (
+          {celebrateHref || (onGiveKudos && !isHomepage) ? (
             <div className={styles.spotlightActions}>
               {celebrateHref ? (
                 <HbcPremiumCta
@@ -349,7 +349,7 @@ function KudosSpotlight({
                   arrow
                 />
               ) : null}
-              {onGiveKudos && !celebrateHref ? (
+              {onGiveKudos && !celebrateHref && !isHomepage ? (
                 <button type="button" onClick={onGiveKudos} className={styles.giveKudosGhostInline}>
                   <Sparkles size={13} aria-hidden="true" strokeWidth={2.5} />
                   Give Kudos
