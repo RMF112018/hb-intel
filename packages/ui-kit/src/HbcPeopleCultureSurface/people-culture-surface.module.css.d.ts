@@ -21,6 +21,7 @@ declare const styles: {
   readonly spotlightHeroAvatarRingInner: string;
   readonly spotlightAvatarStrip: string;
   readonly spotlightContent: string;
+  readonly spotlightEyebrow: string;
   readonly spotlightRecipientTag: string;
   readonly spotlightTitle: string;
   readonly spotlightRecipients: string;

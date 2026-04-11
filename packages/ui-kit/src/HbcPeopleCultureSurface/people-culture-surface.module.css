@@ -1210,6 +1210,20 @@
 
 .peopleCultureHomepage .spotlightContent {
   gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+/* ── Featured eyebrow (homepage variant) ───────────────────
+   Replaces the hidden ribbon with a subtle on-dark label
+   identifying the card as the featured recognition moment. */
+
+.spotlightEyebrow {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
 }
 
 /* ── Spotlight content: on-dark readability ─────────────────

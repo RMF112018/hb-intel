@@ -289,6 +289,10 @@ function KudosSpotlight({
         </div>
 
         <div className={styles.spotlightContent}>
+          {isHomepage ? (
+            <span className={styles.spotlightEyebrow}>Featured Recognition</span>
+          ) : null}
+
           <h3 className={styles.spotlightTitle}>{featured.headline}</h3>
 
           {recipientLabel ? (
@@ -319,15 +323,23 @@ function KudosSpotlight({
             ) : null}
           </div>
 
-          {celebrateHref ? (
+          {celebrateHref || onGiveKudos ? (
             <div className={styles.spotlightActions}>
-              <HbcPremiumCta
-                label="Celebrate"
-                href={celebrateHref}
-                variant={isHomepage ? 'onDark' : 'primary'}
-                size="sm"
-                arrow
-              />
+              {celebrateHref ? (
+                <HbcPremiumCta
+                  label="Celebrate"
+                  href={celebrateHref}
+                  variant={isHomepage ? 'onDark' : 'primary'}
+                  size="sm"
+                  arrow
+                />
+              ) : null}
+              {onGiveKudos && !celebrateHref ? (
+                <button type="button" onClick={onGiveKudos} className={styles.giveKudosGhostInline}>
+                  <Sparkles size={13} aria-hidden="true" strokeWidth={2.5} />
+                  Give Kudos
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>
