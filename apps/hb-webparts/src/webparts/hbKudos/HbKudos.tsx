@@ -91,31 +91,40 @@ function sortByRecency(entries: KudosEntry[]): KudosEntry[] {
   });
 }
 
+/**
+ * Map a KudosEntry to the ui-kit KudosSpotlightItem contract.
+ * Only employee-facing fields are projected — no governance metadata,
+ * no prominence internals, no audit history.
+ */
 function adaptSpotlight(entry: KudosEntry): KudosSpotlightItem {
   return {
     id: entry.id,
-    headline: entry.headline,
+    headline: entry.headline || 'Recognition',
     excerpt: entry.excerpt,
-    recipients: entry.recipients.map((r) => ({
+    recipients: (entry.recipients ?? []).map((r) => ({
       id: r.id,
       name: r.name,
       src: r.media?.src,
     })),
-    submittedByName: entry.submittedBy.displayName,
+    submittedByName: entry.submittedBy?.displayName,
     celebrateCount: entry.celebrateCount,
   };
 }
 
+/**
+ * Map KudosEntry[] to the ui-kit KudosRailItem[] contract.
+ * Same boundary rules as adaptSpotlight — employee-facing fields only.
+ */
 function adaptRail(entries: KudosEntry[]): KudosRailItem[] {
   return entries.map((entry) => ({
     id: entry.id,
-    headline: entry.headline,
-    recipients: entry.recipients.map((r) => ({
+    headline: entry.headline || 'Recognition',
+    recipients: (entry.recipients ?? []).map((r) => ({
       id: r.id,
       name: r.name,
       src: r.media?.src,
     })),
-    submittedByName: entry.submittedBy.displayName,
+    submittedByName: entry.submittedBy?.displayName,
     celebrateCount: entry.celebrateCount,
   }));
 }
@@ -448,28 +457,23 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
   const [celebrating, setCelebrating] = React.useState(false);
   const [discardDialog, setDiscardDialog] = React.useState(false);
 
-  const allKudos: KudosEntry[] = React.useMemo(() => {
-    const fromList = listConfig?.kudos ?? [];
-    return [...fromList];
-  }, [listConfig?.kudos]);
+  const allKudos: KudosEntry[] = listConfig?.kudos ?? [];
 
   const publicKudos = React.useMemo(
     () =>
       allKudos.filter((entry) => {
-        // HB Kudos lists some entries that pre-date the workflowStatus
-        // field. Treat them as public only when the read path set the
-        // derived `status === 'approved'`.
         if (entry.workflowStatus) {
           if (!isPubliclyVisible(entry)) return false;
-          // Age-off: standard approved items expire after the configured
-          // window. Pinned and featured items are exempt.
           if (hasAgedOff(entry, ageOffDays)) return false;
-          // Featured items with expired dates remain visible unless aged
-          // off. Lazy demotion is handled by the companion governance
-          // surface, not the public view.
           return true;
         }
-        return entry.status === 'approved';
+        // Legacy entries pre-dating the workflowStatus field: require
+        // approved status AND homepageEnabled not explicitly disabled.
+        // This prevents entries that were disabled via governance from
+        // leaking through the legacy fallback path.
+        if (entry.status !== 'approved') return false;
+        if (entry.homepageEnabled === false) return false;
+        return true;
       }),
     [allKudos, ageOffDays],
   );
@@ -478,14 +482,15 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
     () =>
       sortByRecency(
         allKudos.filter((entry) => {
-          // Standard archive: approved, ever-published, not removed.
           if (entry.workflowStatus) {
             if (isArchiveEligible(entry)) return true;
-            // Associated-item access: submitter/recipients can see items
-            // that are no longer public but were once published.
             return isAssociatedVisible(entry, currentUserId);
           }
-          return entry.status === 'approved';
+          // Legacy fallback: require approved status and not explicitly
+          // removed from public view.
+          if (entry.status !== 'approved') return false;
+          if ((entry as Partial<{ isRemovedFromPublicView: boolean }>).isRemovedFromPublicView === true) return false;
+          return true;
         }),
       ),
     [allKudos, currentUserId],
