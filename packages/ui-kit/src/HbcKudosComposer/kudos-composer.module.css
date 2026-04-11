@@ -868,6 +868,12 @@
   background: rgba(229, 126, 70, 0.10);
 }
 
+.pickerOption:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 1px;
+  background: rgba(229, 126, 70, 0.10);
+}
+
 .pickerOptionName {
   font-size: 0.875rem;
   font-weight: 700;
@@ -898,7 +904,8 @@
   .input,
   .previewCard,
   .footerPrimary,
-  .footerSecondary {
+  .footerSecondary,
+  .pickerOption {
     transition: none !important;
   }
 }

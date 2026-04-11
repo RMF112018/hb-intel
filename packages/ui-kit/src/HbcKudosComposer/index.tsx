@@ -506,6 +506,7 @@ function HbcKudosComposerPeopleBucket({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listboxId = React.useId();
 
   // Debounced search
   React.useEffect(() => {
@@ -626,6 +627,8 @@ function HbcKudosComposerPeopleBucket({
               autoComplete="off"
               role="combobox"
               aria-expanded={isOpen}
+              aria-controls={listboxId}
+              aria-activedescendant={activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined}
               aria-autocomplete="list"
               className={styles.bucketInput}
             />
@@ -633,7 +636,7 @@ function HbcKudosComposerPeopleBucket({
         </div>
 
         {isOpen ? (
-          <div className={styles.pickerDropdown} role="listbox" aria-label="People search results">
+          <div id={listboxId} className={styles.pickerDropdown} role="listbox" aria-label="People search results">
             {isSearching ? (
               <div className={styles.pickerStatus}>Searching…</div>
             ) : null}
@@ -643,6 +646,7 @@ function HbcKudosComposerPeopleBucket({
             {results.map((person, index) => (
               <div
                 key={person.upn}
+                id={`${listboxId}-opt-${index}`}
                 className={clsx(styles.pickerOption, index === activeIndex && styles.pickerOptionActive)}
                 role="option"
                 aria-selected={index === activeIndex}
