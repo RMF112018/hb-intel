@@ -112,6 +112,12 @@ export interface HbcPeopleCultureSurfaceProps {
   onGiveKudos?: () => void;
   /** href for the "View All" CTA in the hero band. */
   viewAllHref?: string;
+  /**
+   * Callback-driven "View All" handler. When provided, the hero band
+   * and rail footer render the CTA as a button instead of an anchor.
+   * Takes precedence over `viewAllHref` when both are provided.
+   */
+  onViewAll?: () => void;
   /** href for the "Celebrate" CTA in the featured spotlight card. */
   celebrateHref?: string;
   /**
@@ -204,6 +210,7 @@ interface HeroBannerProps {
   subcaption: string;
   onGiveKudos?: () => void;
   viewAllHref?: string;
+  onViewAll?: () => void;
 }
 
 function HeroBanner({
@@ -212,6 +219,7 @@ function HeroBanner({
   subcaption,
   onGiveKudos,
   viewAllHref,
+  onViewAll,
 }: HeroBannerProps): React.JSX.Element {
   return (
     <div className={styles.hero}>
@@ -240,7 +248,12 @@ function HeroBanner({
             Give Kudos
           </button>
         ) : null}
-        {viewAllHref ? (
+        {onViewAll ? (
+          <button type="button" onClick={onViewAll} className={styles.viewAllButton}>
+            View All
+            <span className={styles.viewAllArrow} aria-hidden="true">→</span>
+          </button>
+        ) : viewAllHref ? (
           <HbcPremiumCta
             label="View All"
             href={viewAllHref}
@@ -437,6 +450,7 @@ interface RecognitionRailProps {
   announcements: PeopleCultureAnnouncement[];
   celebrations: PeopleCultureCelebration[];
   viewAllHref?: string;
+  onViewAll?: () => void;
   reducedMotion: boolean;
 }
 
@@ -444,6 +458,7 @@ function RecognitionRail({
   announcements,
   celebrations,
   viewAllHref,
+  onViewAll,
   reducedMotion,
 }: RecognitionRailProps): React.JSX.Element | null {
   if (announcements.length === 0 && celebrations.length === 0) return null;
@@ -526,7 +541,14 @@ function RecognitionRail({
         </div>
       ) : null}
 
-      {viewAllHref ? (
+      {onViewAll ? (
+        <div className={styles.railFooter}>
+          <button type="button" onClick={onViewAll} className={styles.viewAllButtonGhost}>
+            View all
+            <span className={styles.viewAllArrow} aria-hidden="true">→</span>
+          </button>
+        </div>
+      ) : viewAllHref ? (
         <div className={styles.railFooter}>
           <HbcPremiumCta label="View all" href={viewAllHref} variant="ghost" size="sm" arrow />
         </div>
@@ -650,6 +672,7 @@ export function HbcPeopleCultureSurface({
   model,
   onGiveKudos,
   viewAllHref,
+  onViewAll,
   celebrateHref,
   onCelebrate,
   celebrateLoading,
@@ -682,6 +705,7 @@ export function HbcPeopleCultureSurface({
         subcaption={heroSubcaption}
         onGiveKudos={onGiveKudos}
         viewAllHref={viewAllHref}
+        onViewAll={onViewAll}
       />
 
       {showSpotlight ? (
@@ -700,6 +724,7 @@ export function HbcPeopleCultureSurface({
             announcements={model.announcements}
             celebrations={model.celebrations}
             viewAllHref={viewAllHref}
+            onViewAll={onViewAll}
             reducedMotion={reducedMotion}
           />
         </div>

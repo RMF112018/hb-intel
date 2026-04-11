@@ -74,6 +74,9 @@ declare const styles: {
   readonly giveKudosPrimaryIcon: string;
   readonly giveKudosGhostInline: string;
   readonly giveKudosSolid: string;
+  readonly viewAllButton: string;
+  readonly viewAllButtonGhost: string;
+  readonly viewAllArrow: string;
   readonly peopleCultureHomepage: string;
   readonly surfaceFooter: string;
 };

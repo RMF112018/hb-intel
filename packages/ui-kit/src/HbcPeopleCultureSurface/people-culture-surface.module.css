@@ -1079,6 +1079,89 @@
   outline-offset: 2px;
 }
 
+/* ── View All button (callback-driven variant of the CTA) ── */
+
+.viewAllButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-family: inherit;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.3;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  outline: none;
+}
+
+.viewAllButton:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.viewAllButton:active {
+  transform: scale(0.97);
+}
+
+.viewAllButton:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.viewAllButtonGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  font-family: inherit;
+  border-radius: 10px;
+  border: 1.5px solid rgba(229, 126, 70, 0.22);
+  background: transparent;
+  color: #c26434;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.3;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  outline: none;
+}
+
+.viewAllButtonGhost:hover {
+  background: rgba(229, 126, 70, 0.06);
+  border-color: rgba(229, 126, 70, 0.38);
+  color: #b75a32;
+}
+
+.viewAllButtonGhost:active {
+  transform: scale(0.97);
+}
+
+.viewAllButtonGhost:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.viewAllArrow {
+  font-size: 0.875em;
+  transition: transform 160ms ease;
+}
+
+.viewAllButton:hover .viewAllArrow,
+.viewAllButtonGhost:hover .viewAllArrow {
+  transform: translateX(2px);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    REDUCED MOTION
    ═══════════════════════════════════════════════════════════════ */
@@ -1086,12 +1169,20 @@
 @media (prefers-reduced-motion: reduce) {
   .giveKudosPrimary,
   .giveKudosGhostInline,
-  .giveKudosSolid {
+  .giveKudosSolid,
+  .viewAllButton,
+  .viewAllButtonGhost {
     transition: none !important;
     transform: none !important;
   }
   .giveKudosPrimary:hover,
-  .giveKudosSolid:hover {
+  .giveKudosSolid:hover,
+  .viewAllButton:hover,
+  .viewAllButtonGhost:hover {
+    transform: none !important;
+  }
+  .viewAllArrow {
+    transition: none !important;
     transform: none !important;
   }
 }
@@ -1196,7 +1287,8 @@
   gap: 8px;
 }
 
-.peopleCultureHomepage .giveKudosPrimary {
+.peopleCultureHomepage .giveKudosPrimary,
+.peopleCultureHomepage .viewAllButton {
   padding: 8px 14px;
   font-size: 0.75rem;
   border-radius: 9px;
