@@ -26,32 +26,8 @@
  *   - Archive: `isArchiveEligible` + `isAssociatedVisible` for
  *     submitter/recipient access to no-longer-public items.
  *
- * Boundary decision (phase-08 closure):
- *
- *   The shared/ui-kit/local boundary is affirmed as fit for purpose.
- *
- *   - `@hbc/ui-kit/homepage` owns reusable visual grammar:
- *     `HbcPeopleCultureSurface` (spotlight, rail, hero, sparse invite),
- *     `HbcKudosComposer*` (flyout, form, preview, success, error),
- *     `HbcAvatarStack`, and premium primitives. These are consumed by
- *     both HbKudos and PeopleCultureMerged — shared placement is
- *     justified by multi-consumer reuse.
- *   - `homepage/shared/` owns kudos-domain governance primitives
- *     (`KudosGovernancePrimitives`, `KudosDetailPanelContent`) shared
- *     between HbKudos and HbKudosCompanion only. Promotion to ui-kit
- *     is deferred until multi-surface governance reuse emerges.
- *   - This webpart owns data adaptation (`isFeaturedWorthy`,
- *     `adaptSpotlight`, `buildKudosSurfaceModel`), state orchestration,
- *     archive composition, and all business-logic filtering.
- *   - The `people-culture-homepage` variant in
- *     `HbcPeopleCultureSurface` provides CSS-level specialization
- *     without forking the shared component.
- *   - No surface path was split, forked, or relocated. The rendered
- *     product failures were CSS visual treatment issues (resolved in
- *     phase-08 prompts 01–02), not structural boundary problems.
- *
- * Governing sources:
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
+ * Surface path: shared visual grammar via @hbc/ui-kit/homepage,
+ * local data adaptation and state orchestration in this webpart.
  */
 import * as React from 'react';
 import {

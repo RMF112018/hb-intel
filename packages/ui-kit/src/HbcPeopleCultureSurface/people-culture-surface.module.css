@@ -1170,20 +1170,20 @@
   gap: 14px;
   padding: 22px 20px 20px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(30, 55, 90, 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-left: 3px solid rgba(229, 126, 70, 0.85);
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.12),
     0 1px 3px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 @supports not (backdrop-filter: blur(20px)) {
   .peopleCultureHomepage .spotlightCard {
-    background: rgba(30, 55, 90, 0.88);
+    background: rgba(30, 55, 90, 0.92);
   }
 }
 
