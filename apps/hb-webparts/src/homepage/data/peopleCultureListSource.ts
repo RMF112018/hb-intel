@@ -675,6 +675,7 @@ function mapKudos(raw: RawKudosItem, siteUrl: string): KudosEntry | undefined {
     .map((p) => ({
       id: `individual:${p.Id}`,
       name: p.Title.trim(),
+      email: p.EMail?.trim() || undefined,
       recipientType: 'individual' as KudosRecipientType,
     }));
 

@@ -506,6 +506,55 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
 
   const allKudos: KudosEntry[] = listConfig?.kudos ?? [];
 
+  // Hydrate individual recipient photos from Graph. Maintains a
+  // cache keyed by email so photos are fetched once per recipient
+  // across featured/recent/archive surfaces.
+  const [recipientPhotoCache, setRecipientPhotoCache] = React.useState<Record<string, string>>({});
+  React.useEffect(() => {
+    if (!fetchPersonPhoto || allKudos.length === 0) return;
+    let cancelled = false;
+    const emails = new Set<string>();
+    for (const entry of allKudos) {
+      for (const r of entry.recipients) {
+        if (r.recipientType === 'individual' && r.email && !recipientPhotoCache[r.email]) {
+          emails.add(r.email);
+        }
+      }
+    }
+    if (emails.size === 0) return;
+    const fetchAll = async (): Promise<void> => {
+      const results: Record<string, string> = {};
+      for (const email of emails) {
+        try {
+          const url = await fetchPersonPhoto(email);
+          if (url && !cancelled) results[email] = url;
+        } catch { /* no photo available — initials fallback */ }
+      }
+      if (!cancelled && Object.keys(results).length > 0) {
+        setRecipientPhotoCache((prev) => ({ ...prev, ...results }));
+      }
+    };
+    void fetchAll();
+    return () => { cancelled = true; };
+  }, [fetchPersonPhoto, allKudos]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Inject hydrated photos into entries for the surface adapters.
+  const hydrateRecipientPhotos = React.useCallback(
+    (entries: KudosEntry[]): KudosEntry[] => {
+      if (Object.keys(recipientPhotoCache).length === 0) return entries;
+      return entries.map((entry) => ({
+        ...entry,
+        recipients: entry.recipients.map((r) => {
+          if (r.recipientType !== 'individual' || !r.email) return r;
+          const photoUrl = recipientPhotoCache[r.email];
+          if (!photoUrl) return r;
+          return { ...r, media: { src: photoUrl, alt: r.name } };
+        }),
+      }));
+    },
+    [recipientPhotoCache],
+  );
+
   const publicKudos = React.useMemo(
     () =>
       allKudos.filter((entry) => {
@@ -652,7 +701,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       ? { label: 'Send Another', onClick: () => composerActions.reset() }
       : { label: 'Cancel', onClick: handleComposerClose };
 
-  const surfaceModel = buildKudosSurfaceModel(heading, publicKudos);
+  const surfaceModel = buildKudosSurfaceModel(heading, hydrateRecipientPhotos(publicKudos));
 
   return (
     <section
@@ -670,7 +719,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         variant="people-culture-homepage"
         footer={showArchive ? (
           <ArchiveList
-            entries={archiveKudos}
+            entries={hydrateRecipientPhotos(archiveKudos)}
             searchText={archiveSearch}
             onSearchChange={setArchiveSearch}
             onOpenDetail={setDetailEntry}

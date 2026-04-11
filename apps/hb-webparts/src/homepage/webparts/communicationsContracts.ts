@@ -161,6 +161,8 @@ export interface PersonReference {
 export interface KudosRecipient {
   id: string;
   name: string;
+  /** UPN / email for individual recipients — used for photo hydration. */
+  email?: string;
   recipientType: KudosRecipientType;
   media?: HomepageMediaSlot;
 }
