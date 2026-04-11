@@ -172,6 +172,39 @@ function ArchiveList({
 
   return (
     <section id="hb-kudos-archive" aria-label="HB Kudos archive" data-hbc-webpart-section="hb-kudos-archive">
+      {/* Scoped styles for archive rows — hover/focus-visible via CSS
+          instead of JS handlers so keyboard focus is properly visible. */}
+      {/* eslint-disable-next-line react/no-unknown-property */}
+      <style>{`
+        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
+          display: flex; align-items: center; gap: 12px; width: 100%;
+          text-align: left; background: rgba(229,126,70,0.02);
+          border: 1px solid rgba(229,126,70,0.06); border-radius: 10px;
+          padding: 10px 12px; cursor: pointer; color: inherit; font: inherit;
+          transition: background 160ms ease, border-color 160ms ease;
+          outline: none;
+        }
+        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:hover {
+          background: rgba(229,126,70,0.06);
+          border-color: rgba(229,126,70,0.18);
+        }
+        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:focus-visible {
+          outline: 2px solid #225391;
+          outline-offset: 2px;
+          background: rgba(229,126,70,0.06);
+          border-color: rgba(229,126,70,0.18);
+        }
+        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-search:focus-visible {
+          outline: 2px solid #225391;
+          outline-offset: 1px;
+          border-color: #e57e46;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
+            transition: none !important;
+          }
+        }
+      `}</style>
       <div
         style={{
           display: 'flex',
@@ -186,7 +219,7 @@ function ArchiveList({
             fontSize: '0.625rem',
             fontWeight: 800,
             letterSpacing: '0.14em',
-            textTransform: 'uppercase',
+            textTransform: 'uppercase' as const,
             color: '#c26434',
             flexShrink: 0,
           }}
@@ -199,6 +232,7 @@ function ArchiveList({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search…"
           aria-label="Search recognition archive"
+          className="hbk-archive-search"
           style={{
             padding: '5px 10px',
             fontSize: '0.75rem',
@@ -228,29 +262,7 @@ function ArchiveList({
                 type="button"
                 onClick={() => onOpenDetail(entry)}
                 aria-label={`Open recognition: ${entry.headline}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  width: '100%',
-                  textAlign: 'left',
-                  background: 'rgba(229, 126, 70, 0.02)',
-                  border: '1px solid rgba(229, 126, 70, 0.06)',
-                  borderRadius: 10,
-                  padding: '10px 12px',
-                  cursor: 'pointer',
-                  color: 'inherit',
-                  font: 'inherit',
-                  transition: 'background 160ms ease, border-color 160ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(229, 126, 70, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(229, 126, 70, 0.18)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(229, 126, 70, 0.02)';
-                  e.currentTarget.style.borderColor = 'rgba(229, 126, 70, 0.06)';
-                }}
+                className="hbk-archive-row"
               >
                 {entry.recipients.length > 0 ? (
                   <HbcAvatarStack

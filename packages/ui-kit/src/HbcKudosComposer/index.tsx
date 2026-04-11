@@ -268,7 +268,7 @@ export function HbcKudosComposerFlyout({
                 aria-label="Close"
                 className={styles.panelClose}
               >
-                ✕
+                <XIcon size={16} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
 
@@ -425,6 +425,7 @@ function HbcKudosComposerTypedRecipients({
               type="button"
               onClick={() => toggleExpand(kind)}
               disabled={disabled}
+              aria-expanded="false"
               className={styles.bucketAddButton}
             >
               <BucketIcon size={13} strokeWidth={2.2} aria-hidden="true" />
@@ -515,6 +516,7 @@ function HbcKudosComposerRecipientBucket({
           onBlur={commit}
           disabled={disabled}
           placeholder={values.length === 0 ? config.placeholder : ''}
+          autoComplete="off"
           className={styles.bucketInput}
         />
       </div>
