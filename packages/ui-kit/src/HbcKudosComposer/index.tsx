@@ -501,6 +501,7 @@ function HbcKudosComposerPeopleBucket({
   const [isSearching, setIsSearching] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(-1);
+  const [searchError, setSearchError] = React.useState(false);
   // Cache display names for selected people so chips show names, not UPNs.
   const [nameCache, setNameCache] = React.useState<Map<string, string>>(() => new Map());
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -523,10 +524,13 @@ function HbcKudosComposerPeopleBucket({
         const hits = await searchPeople(query.trim());
         const selectedUpns = new Set(values.map((v) => v.toLowerCase()));
         setResults(hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase())));
+        setSearchError(false);
         setIsOpen(true);
         setActiveIndex(-1);
       } catch {
         setResults([]);
+        setSearchError(true);
+        setIsOpen(true);
       } finally {
         setIsSearching(false);
       }
@@ -640,7 +644,10 @@ function HbcKudosComposerPeopleBucket({
             {isSearching ? (
               <div className={styles.pickerStatus}>Searching…</div>
             ) : null}
-            {!isSearching && results.length === 0 && query.trim().length >= 2 ? (
+            {!isSearching && searchError && query.trim().length >= 2 ? (
+              <div className={styles.pickerStatus}>People search failed — check connection and try again</div>
+            ) : null}
+            {!isSearching && !searchError && results.length === 0 && query.trim().length >= 2 ? (
               <div className={styles.pickerStatus}>No people found for &ldquo;{query}&rdquo;</div>
             ) : null}
             {results.map((person, index) => (
