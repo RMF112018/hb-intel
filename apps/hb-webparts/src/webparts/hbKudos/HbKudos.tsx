@@ -374,7 +374,7 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
       open={Boolean(entry)}
       onClose={onClose}
       title={entry?.headline ?? 'Recognition detail'}
-      subtitle={entry ? `Nominated by ${entry.submittedBy.displayName}` : undefined}
+      subtitle={entry ? `Nominated by ${entry.submittedBy?.displayName ?? 'Unknown'}` : undefined}
       primaryAction={
         isPublic && onCelebrate
           ? { label: 'Celebrate', onClick: onCelebrate }
