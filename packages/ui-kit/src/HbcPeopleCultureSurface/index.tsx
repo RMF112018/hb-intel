@@ -305,25 +305,27 @@ function KudosSpotlight({
             <p className={styles.spotlightExcerpt}>{featured.excerpt}</p>
           ) : null}
 
-          <div className={styles.spotlightMeta}>
-            {featured.submittedByName ? (
-              <span className={styles.metaItem}>
-                <Users size={12} aria-hidden="true" className={styles.metaIcon} />
-                {featured.submittedByName}
-              </span>
-            ) : null}
-            {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
-              <span className={styles.metaCount}>
-                <Sparkles
-                  size={11}
-                  aria-hidden="true"
-                  className={styles.metaCountIcon}
-                  strokeWidth={2.5}
-                />
-                {featured.celebrateCount}
-              </span>
-            ) : null}
-          </div>
+          {featured.submittedByName || (typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0) ? (
+            <div className={styles.spotlightMeta}>
+              {featured.submittedByName ? (
+                <span className={styles.metaItem}>
+                  <Users size={12} aria-hidden="true" className={styles.metaIcon} />
+                  {featured.submittedByName}
+                </span>
+              ) : null}
+              {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
+                <span className={styles.metaCount}>
+                  <Sparkles
+                    size={11}
+                    aria-hidden="true"
+                    className={styles.metaCountIcon}
+                    strokeWidth={2.5}
+                  />
+                  {featured.celebrateCount}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
 
           {celebrateHref || onGiveKudos ? (
             <div className={styles.spotlightActions}>
@@ -353,26 +355,33 @@ function KudosSpotlight({
             <span>Recent recognition</span>
             <span className={styles.sectionLabelRule} aria-hidden="true" />
           </div>
-          {recent.map((item) => (
-            <div key={item.id} className={styles.recentRow}>
-              <HbcAvatarStack people={item.recipients.slice(0, 1)} size="md" />
-              <div className={styles.recentBody}>
-                <div className={styles.recentHeadline}>{item.headline}</div>
-                <span className={styles.recentMeta}>
-                  {fmtRecipients(item.recipients) ? fmtRecipients(item.recipients) : ''}
-                  {item.submittedByName
-                    ? `${fmtRecipients(item.recipients) ? '  ·  ' : ''}by ${item.submittedByName}`
-                    : ''}
-                </span>
+          {recent.map((item) => {
+            const itemRecipientLabel = fmtRecipients(item.recipients);
+            const itemMeta = [
+              itemRecipientLabel,
+              item.submittedByName ? `by ${item.submittedByName}` : '',
+            ].filter(Boolean).join('  ·  ');
+
+            return (
+              <div key={item.id} className={styles.recentRow}>
+                {item.recipients.length > 0 ? (
+                  <HbcAvatarStack people={item.recipients.slice(0, 1)} size="md" />
+                ) : null}
+                <div className={styles.recentBody}>
+                  <div className={styles.recentHeadline}>{item.headline}</div>
+                  {itemMeta ? (
+                    <span className={styles.recentMeta}>{itemMeta}</span>
+                  ) : null}
+                </div>
+                {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 ? (
+                  <span className={styles.recentCount}>
+                    <Sparkles size={10} aria-hidden="true" strokeWidth={2.5} />
+                    {item.celebrateCount}
+                  </span>
+                ) : null}
               </div>
-              {typeof item.celebrateCount === 'number' && item.celebrateCount > 0 ? (
-                <span className={styles.recentCount}>
-                  <Sparkles size={10} aria-hidden="true" strokeWidth={2.5} />
-                  {item.celebrateCount}
-                </span>
-              ) : null}
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : null}
     </motion.div>
