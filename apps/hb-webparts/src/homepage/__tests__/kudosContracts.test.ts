@@ -81,8 +81,9 @@ describe('kudosContracts — workflow helpers', () => {
 });
 
 describe('kudosContracts — visibility predicates', () => {
-  it('isPubliclyVisible requires approved + homepageEnabled', () => {
+  it('isPubliclyVisible requires approved workflow and homepageEnabled not explicitly false', () => {
     expect(isPubliclyVisible(entry({ workflowStatus: 'approved', homepageEnabled: true }))).toBe(true);
+    expect(isPubliclyVisible(entry({ workflowStatus: 'approved', homepageEnabled: undefined }))).toBe(true);
     expect(isPubliclyVisible(entry({ workflowStatus: 'approvedScheduled', homepageEnabled: true }))).toBe(false);
     expect(isPubliclyVisible(entry({ workflowStatus: 'approved', homepageEnabled: false }))).toBe(false);
     expect(isPubliclyVisible(entry({ workflowStatus: 'rejected', homepageEnabled: true }))).toBe(false);
