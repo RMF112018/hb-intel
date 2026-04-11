@@ -16,9 +16,9 @@
  *   - Write: `submitKudosGovernanceAction` — one PATCH + one audit
  *     event per action. Writer-level authorization verifies role
  *     before any network call.
- *   - Role: `resolveKudosRole` queries SharePoint group membership;
- *     configurable via property pane (kudosAdminsGroup,
- *     kudosReviewersGroup).
+ *   - Role: `resolveKudosRole` queries SharePoint group membership
+ *     against canonical Entra security groups (HB Kudos Admins,
+ *     HB Kudos Reviewers). Not configurable per webpart instance.
  *   - Dialog: all governance inputs use `KudosGovernanceInputDialog`
  *     (no window.prompt). Actions dispatched via two-phase state
  *     pattern (open dialog → confirm → dispatch).
@@ -633,8 +633,9 @@ export function HbKudosCompanion({
 
   // Resolve role from the real SharePoint site permission model.
   // In production, queries IsSiteAdmin + group membership on the
-  // companion's host site. Falls back to simulatedRole only when
-  // siteUrl is unavailable (local dev / jsdom).
+  // companion's host site against canonical Entra security groups.
+  // Falls back to simulatedRole only when siteUrl is unavailable
+  // (local dev / jsdom).
   const [role, setRole] = React.useState<KudosRole>('viewer');
   const [roleResolving, setRoleResolving] = React.useState(true);
   React.useEffect(() => {
@@ -643,8 +644,6 @@ export function HbKudosCompanion({
     resolveKudosRole({
       siteUrl: getSiteUrl(),
       currentUserEmail: identity?.email,
-      kudosAdminsGroup: typeof config?.kudosAdminsGroup === 'string' ? config.kudosAdminsGroup : undefined,
-      kudosReviewersGroup: typeof config?.kudosReviewersGroup === 'string' ? config.kudosReviewersGroup : undefined,
       simulatedRole: config?.simulatedRole,
     }).then((resolved) => {
       if (!cancelled) { setRole(resolved); setRoleResolving(false); }
@@ -655,7 +654,7 @@ export function HbKudosCompanion({
     // simulatedRole intentionally excluded — dev-only, should not
     // re-trigger production resolution on property pane changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config?.kudosAdminsGroup, config?.kudosReviewersGroup, identity?.email]);
+  }, [identity?.email]);
   const capabilities = React.useMemo(() => deriveKudosCapabilities(role), [role]);
 
   // Configurable overdue thresholds from webpart properties.
@@ -971,23 +970,12 @@ export function HbKudosCompanion({
   }
 
   // Production configuration validation: when running in live SharePoint,
-  // verify that both group config and list-host config are present.
+  // verify that list-host config is present. Permission groups are
+  // canonical constants (HB Kudos Admins / HB Kudos Reviewers) and
+  // not configurable per webpart instance.
   const siteUrl = getSiteUrl();
-  const hasGroupConfig =
-    (typeof config?.kudosAdminsGroup === 'string' && config.kudosAdminsGroup.trim() !== '') ||
-    (typeof config?.kudosReviewersGroup === 'string' && config.kudosReviewersGroup.trim() !== '');
   const hasListHostConfig =
     typeof config?.kudosListHostUrl === 'string' && config.kudosListHostUrl.trim() !== '';
-  if (siteUrl && !hasGroupConfig) {
-    return (
-      <section data-hbc-webpart="hb-kudos-companion" data-hbc-state="unconfigured">
-        <HbcEmptyState
-          title="Configuration required"
-          description="This webpart requires Kudos admin and reviewer SharePoint groups to be configured. Open the webpart property pane to assign groups."
-        />
-      </section>
-    );
-  }
   if (siteUrl && !hasListHostConfig) {
     return (
       <section data-hbc-webpart="hb-kudos-companion" data-hbc-state="unconfigured">

@@ -11,10 +11,12 @@
  * This is a pure, synchronous helper. Real SharePoint group membership
  * resolution lives in `kudosRoleResolver.ts` — the companion uses
  * `resolveKudosRole()` at mount time and passes the resolved role here.
- * `simulatedRole` is dev/test-only (used when siteUrl is unavailable).
+ * Production permissions resolve solely from Entra security group
+ * membership (HB Kudos Admins / HB Kudos Reviewers), not from
+ * property-pane configuration.
  *
- * Governing sources:
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
+ * Governing source:
+ *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix-Updated.md`
  */
 
 /**

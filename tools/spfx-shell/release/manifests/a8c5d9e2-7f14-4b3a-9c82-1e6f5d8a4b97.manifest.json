@@ -20,15 +20,12 @@
         "default": "HB Kudos Approval Companion"
       },
       "description": {
-        "default": "HR moderation workspace for HB Kudos. Requires kudosAdminsGroup and/or kudosReviewersGroup to be configured in the property pane — the webpart shows a configuration-required state until at least one group is set. Includes governance actions, scheduling, prominence, claim/reassign, role-aware detail panel with audit timeline, bulk approve, and configurable overdue thresholds (pendingOverdueDays, adminReviewOverdueDays). Notification intents are session-queued; delivery channels (email/Teams) are not yet integrated. simulatedRole is dev-only and ignored in live SharePoint."
+        "default": "HR moderation workspace for HB Kudos. Production permissions resolve solely from Entra ID security group membership in HB Kudos Admins and HB Kudos Reviewers — the webpart denies governance access when the current user is not a member. Cross-site list access targets the canonical list host on HBCentral. Includes governance actions, scheduling, prominence, claim/reassign, role-aware detail panel with audit timeline, bulk approve, and configurable overdue thresholds (pendingOverdueDays, adminReviewOverdueDays). Notification intents are session-queued; delivery channels (email/Teams) are not yet integrated."
       },
       "officeFabricIconFontName": "ShieldAlert",
       "hiddenFromToolbox": false,
       "properties": {
         "heading": "HB Kudos Approval Companion",
-        "simulatedRole": "reviewer",
-        "kudosAdminsGroup": "",
-        "kudosReviewersGroup": "",
         "pendingOverdueDays": 3,
         "adminReviewOverdueDays": 2
       }

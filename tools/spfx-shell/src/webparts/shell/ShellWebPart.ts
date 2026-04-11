@@ -46,10 +46,6 @@ const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 interface IShellWebPartProperties {
   /** Author-configurable background image URL for the Signature Hero. */
   backgroundImageUrl?: string;
-  /** SharePoint group name for Kudos admin-level access. */
-  kudosAdminsGroup?: string;
-  /** SharePoint group name for Kudos reviewer-level access. */
-  kudosReviewersGroup?: string;
   /** Optional display heading override for the Kudos Companion. */
   heading?: string;
   /** Number of days before standard approved kudos age off the homepage. */
@@ -331,34 +327,15 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
       };
     }
 
-    // Show role-assignment property pane for the HB Kudos Companion webpart.
+    // HB Kudos Companion property pane — product configuration only.
+    // Permission authority comes from Entra security group membership
+    // (HB Kudos Admins / HB Kudos Reviewers), not from property-pane fields.
     if (webPartId === KUDOS_COMPANION_WEBPART_ID) {
       return {
         pages: [
           {
             header: { description: 'HB Kudos Companion Settings' },
             groups: [
-              {
-                groupName: 'Role Assignment',
-                groupFields: [
-                  PropertyPaneTextField('kudosAdminsGroup', {
-                    label: 'Kudos Admins SharePoint group',
-                    description:
-                      'Enter the exact name of the SharePoint group whose members should have ' +
-                      'Kudos admin privileges (pin, feature, schedule, remove, restore). ' +
-                      'Leave blank only if no admin role is needed.',
-                    placeholder: 'e.g. HB Kudos Admins',
-                  }),
-                  PropertyPaneTextField('kudosReviewersGroup', {
-                    label: 'Kudos Reviewers SharePoint group',
-                    description:
-                      'Enter the exact name of the SharePoint group whose members should have ' +
-                      'Kudos reviewer privileges (approve, reject, request revision). ' +
-                      'At least one of Admins or Reviewers must be configured for the companion to function.',
-                    placeholder: 'e.g. HB Kudos Reviewers',
-                  }),
-                ],
-              },
               {
                 groupName: 'Overdue Thresholds',
                 groupFields: [

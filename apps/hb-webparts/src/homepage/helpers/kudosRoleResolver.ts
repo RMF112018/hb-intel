@@ -5,7 +5,15 @@
  * site permission model on the companion's host site
  * (`HBKudosAdminReview`).
  *
- * Production resolution strategy (strongest feasible path):
+ * Production permissions resolve solely from Entra ID security group
+ * membership. The canonical production groups are hardcoded:
+ *   - `HB Kudos Admins`  → admin role
+ *   - `HB Kudos Reviewers` → reviewer role
+ *
+ * These are not configurable per webpart instance. The property pane
+ * is not a permissions-authority surface.
+ *
+ * Production resolution strategy:
  *
  *   1. Fetch `/_api/web/currentuser?$expand=Groups` — a single REST
  *      call that returns the current user object with their resolved
@@ -19,22 +27,27 @@
  *      production admin site), resolve immediately as `admin`.
  *
  *   3. Check group membership by title — compare the user's resolved
- *      group titles against the configured `kudosAdminsGroup` and
- *      `kudosReviewersGroup` values.
+ *      group titles against the canonical admin/reviewer group names.
  *
  *   4. Fail closed to `viewer` when no match is found or when any
  *      error occurs.
  *
  * Dev-only fallback: when `siteUrl` is unavailable (local workbench
- * or jsdom tests), the `simulatedRole` webpart property is used
- * instead. This path is never active in live SharePoint.
+ * or jsdom tests), the `simulatedRole` property is used instead.
+ * This path is never active in live SharePoint.
  *
- * Governing sources:
+ * Governing source:
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix-Updated.md`
- *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/phase-04/Prompt-02-Identity-and-Permissions-Resolution.md`
  */
 import type { KudosRole } from './kudosCapabilities.js';
 import { parseKudosRole } from './kudosCapabilities.js';
+
+/**
+ * Canonical Entra security groups — the sole production permission
+ * authority. Not configurable per webpart instance.
+ */
+const KUDOS_ADMINS_GROUP = 'HB Kudos Admins';
+const KUDOS_REVIEWERS_GROUP = 'HB Kudos Reviewers';
 
 /** Cache resolved role per site+user pair for the session duration. */
 let _cachedRole: { siteUrl: string; email: string; role: KudosRole } | undefined;
@@ -45,13 +58,11 @@ let _cachedRole: { siteUrl: string; email: string; role: KudosRole } | undefined
  * Uses a single `/_api/web/currentuser?$expand=Groups` call that
  * returns the user object with resolved group memberships (including
  * Entra security group nesting). Checks `IsSiteAdmin` first, then
- * matches group titles against the configured admin/reviewer group
+ * matches group titles against the canonical admin/reviewer group
  * names.
  */
 async function resolveRoleFromSiteModel(
   siteUrl: string,
-  kudosAdminsGroup: string | undefined,
-  kudosReviewersGroup: string | undefined,
 ): Promise<KudosRole> {
   const userRes = await fetch(
     `${siteUrl}/_api/web/currentuser?$expand=Groups`,
@@ -75,9 +86,9 @@ async function resolveRoleFromSiteModel(
       .filter((t): t is string => typeof t === 'string'),
   );
 
-  // Explicit group-name resolution against the user's group memberships.
-  if (kudosAdminsGroup && userGroupTitles.has(kudosAdminsGroup)) return 'admin';
-  if (kudosReviewersGroup && userGroupTitles.has(kudosReviewersGroup)) return 'reviewer';
+  // Canonical group-name resolution against the user's group memberships.
+  if (userGroupTitles.has(KUDOS_ADMINS_GROUP)) return 'admin';
+  if (userGroupTitles.has(KUDOS_REVIEWERS_GROUP)) return 'reviewer';
 
   return 'viewer';
 }
@@ -85,12 +96,11 @@ async function resolveRoleFromSiteModel(
 export interface KudosRoleResolverConfig {
   siteUrl?: string;
   currentUserEmail?: string;
-  kudosAdminsGroup?: string;
-  kudosReviewersGroup?: string;
   /**
    * Dev-only: role to simulate when `siteUrl` is unavailable (local
    * workbench / jsdom tests). Ignored in live SharePoint — real site
-   * permission model is queried instead.
+   * permission model is queried instead. Not exposed in the production
+   * property pane.
    */
   simulatedRole?: unknown;
 }
@@ -101,13 +111,14 @@ export interface KudosRoleResolverConfig {
  *
  * Production resolution order (first match wins):
  *   1. `IsSiteAdmin === true` → `admin`.
- *   2. User's group memberships include `kudosAdminsGroup` → `admin`.
- *   3. User's group memberships include `kudosReviewersGroup` → `reviewer`.
+ *   2. User's group memberships include `HB Kudos Admins` → `admin`.
+ *   3. User's group memberships include `HB Kudos Reviewers` → `reviewer`.
  *   4. Otherwise → `viewer` (fail closed).
  *
+ * Group names are canonical constants, not configurable per instance.
+ *
  * Falls back to `simulatedRole` only when `siteUrl` is unavailable
- * (local dev / jsdom tests). Never falls back to `simulatedRole`
- * when running in live SharePoint.
+ * (local dev / jsdom tests). Never falls back in live SharePoint.
  *
  * The result is cached for the session to avoid redundant REST calls
  * on every re-render.
@@ -130,11 +141,7 @@ export async function resolveKudosRole(
 
   let resolved: KudosRole = 'viewer';
   try {
-    resolved = await resolveRoleFromSiteModel(
-      siteUrl,
-      config.kudosAdminsGroup?.trim() || undefined,
-      config.kudosReviewersGroup?.trim() || undefined,
-    );
+    resolved = await resolveRoleFromSiteModel(siteUrl);
   } catch {
     // Site permission resolution failed — fail closed to viewer.
     // Do NOT fall back to simulatedRole when siteUrl is present.
