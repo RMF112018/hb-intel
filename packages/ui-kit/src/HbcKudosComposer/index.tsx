@@ -128,13 +128,24 @@ export interface HbcKudosComposerFlyoutProps {
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-function useFocusTrap(ref: React.RefObject<HTMLDivElement | null>, active: boolean): void {
+function useFocusTrap(
+  ref: React.RefObject<HTMLDivElement | null>,
+  active: boolean,
+  reducedMotion: boolean,
+): void {
   React.useEffect(() => {
     if (!active || !ref.current) return;
 
     const el = ref.current;
-    const first = el.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-    first?.focus();
+
+    // Delay initial focus until after the slide-in animation (280ms)
+    // so the first focusable element is on-screen when focused.
+    // When reduced-motion is active, focus immediately.
+    const delay = reducedMotion ? 0 : 300;
+    const timer = setTimeout(() => {
+      const first = el.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      first?.focus();
+    }, delay);
 
     function handleKeyDown(e: KeyboardEvent): void {
       if (e.key !== 'Tab') return;
@@ -154,8 +165,11 @@ function useFocusTrap(ref: React.RefObject<HTMLDivElement | null>, active: boole
     }
 
     el.addEventListener('keydown', handleKeyDown);
-    return () => el.removeEventListener('keydown', handleKeyDown);
-  }, [ref, active]);
+    return () => {
+      clearTimeout(timer);
+      el.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [ref, active, reducedMotion]);
 }
 
 export function HbcKudosComposerFlyout({
@@ -171,7 +185,7 @@ export function HbcKudosComposerFlyout({
   const reducedMotion = usePrefersReducedMotion();
   const panelRef = React.useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = React.useState(false);
-  useFocusTrap(panelRef, open);
+  useFocusTrap(panelRef, open, reducedMotion);
 
   // Track viewport width for sheet orientation (mobile = bottom slide-up,
   // desktop = right slide-in). SSR-safe: defaults to desktop on first paint.
