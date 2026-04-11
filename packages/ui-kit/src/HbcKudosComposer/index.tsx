@@ -116,6 +116,12 @@ export interface KudosComposerDraft {
   recipientNames: string;
   /** Typed recipient buckets — final-state shape for HB Kudos. */
   recipients?: KudosComposerRecipientBucketsDraft;
+  /**
+   * Maps UPN → display name for preview rendering. Populated by the
+   * people picker bridge so the preview card shows human-readable
+   * names instead of raw email addresses.
+   */
+  recipientDisplayMap?: Record<string, string>;
   headline: string;
   excerpt: string;
   details: string;
@@ -434,6 +440,7 @@ const BUCKET_CONFIG: Record<
 function HbcKudosComposerTypedRecipients({
   buckets,
   onChange,
+  onDraftChange,
   disabled,
   errorMessage,
   searchPeople,
@@ -441,6 +448,7 @@ function HbcKudosComposerTypedRecipients({
 }: {
   buckets: KudosComposerRecipientBucketsDraft;
   onChange: (patch: Partial<KudosComposerRecipientBucketsDraft>) => void;
+  onDraftChange?: (patch: Partial<KudosComposerDraft>) => void;
   disabled: boolean;
   errorMessage?: string;
   searchPeople?: PeopleSearchFn;
@@ -471,6 +479,7 @@ function HbcKudosComposerTypedRecipients({
         <KudosSharedPickerBridge
           values={buckets[primaryKind]}
           onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
+          onDisplayMapChange={onDraftChange ? (map) => onDraftChange({ recipientDisplayMap: map }) : undefined}
           disabled={disabled}
           searchPeople={searchPeople}
           fetchPersonPhoto={fetchPersonPhoto}
@@ -539,6 +548,7 @@ function HbcKudosComposerTypedRecipients({
 interface KudosSharedPickerBridgeProps {
   values: string[];
   onChange: (next: string[]) => void;
+  onDisplayMapChange?: (map: Record<string, string>) => void;
   disabled: boolean;
   searchPeople: PeopleSearchFn;
   fetchPersonPhoto?: PersonPhotoFn;
@@ -557,6 +567,7 @@ interface KudosSharedPickerBridgeProps {
 function KudosSharedPickerBridge({
   values,
   onChange,
+  onDisplayMapChange,
   disabled,
   searchPeople,
   fetchPersonPhoto,
@@ -580,15 +591,23 @@ function KudosSharedPickerBridge({
   );
 
   // Convert PersonEntry[] back to string[] UPNs for the draft,
-  // and cache the full PersonEntry for future round-trips.
+  // cache the full PersonEntry for future round-trips, and emit
+  // display names so the preview card shows names instead of emails.
   const handlePickerChange = React.useCallback(
     (people: PersonEntry[]) => {
       for (const p of people) {
         personCacheRef.current.set(p.upn.toLowerCase(), p);
       }
       onChange(people.map((p) => p.upn));
+      if (onDisplayMapChange) {
+        const map: Record<string, string> = {};
+        for (const p of people) {
+          map[p.upn] = p.displayName || p.upn;
+        }
+        onDisplayMapChange(map);
+      }
     },
-    [onChange],
+    [onChange, onDisplayMapChange],
   );
 
   return (
@@ -738,6 +757,7 @@ export function HbcKudosComposerForm({
         <HbcKudosComposerTypedRecipients
           buckets={typedBuckets}
           onChange={handleTypedChange}
+          onDraftChange={onDraftChange}
           disabled={disabled}
           errorMessage={errors.recipients}
           searchPeople={searchPeople}
@@ -853,10 +873,14 @@ function parseRecipients(raw: string): string[] {
 
 function flattenTypedRecipients(
   buckets: KudosComposerRecipientBucketsDraft | undefined,
+  displayMap?: Record<string, string>,
 ): string[] {
   if (!buckets) return [];
+  const individuals = buckets.individualEmails.map((upn) =>
+    displayMap?.[upn] || upn,
+  );
   return [
-    ...buckets.individualEmails,
+    ...individuals,
     ...buckets.teamLabels,
     ...buckets.departmentLabels,
     ...buckets.projectGroupLabels,
@@ -870,7 +894,7 @@ export function HbcKudosComposerPreview({
   // Typed buckets take precedence when any bucket has entries; otherwise
   // fall back to the legacy comma-delimited text field so the transitional
   // merged People & Culture webpart continues to render correctly.
-  const typedFlat = flattenTypedRecipients(draft.recipients);
+  const typedFlat = flattenTypedRecipients(draft.recipients, draft.recipientDisplayMap);
   const recipients = typedFlat.length > 0 ? typedFlat : parseRecipients(draft.recipientNames);
   const headline = draft.headline.trim() || 'Your headline here';
   const excerpt = draft.excerpt.trim() || 'Your recognition message will appear here…';
