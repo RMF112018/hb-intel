@@ -46,6 +46,9 @@ export const KUDOS_GOV_TOKENS = {
   blueText82: 'rgba(34, 83, 145, 0.82)',
 
   // Orange opacity — rgba(229, 126, 70, X)
+  orangeSubtle02: 'rgba(229, 126, 70, 0.02)',
+  orangeSubtle03: 'rgba(229, 126, 70, 0.03)',
+  orangeSubtle06: 'rgba(229, 126, 70, 0.06)',
   orangeSubtle10: 'rgba(229, 126, 70, 0.10)',
   orangeSubtle18: 'rgba(229, 126, 70, 0.18)',
   orangeSubtle22: 'rgba(229, 126, 70, 0.22)',

@@ -170,34 +170,50 @@ function ArchiveList({
     );
   }, [entries, searchText]);
 
+  // Bridge governance tokens into CSS custom properties so the scoped
+  // style block can reference governed values instead of magic strings.
+  const archiveCssVars = {
+    '--hbk-orange-02': KUDOS_GOV_TOKENS.orangeSubtle02,
+    '--hbk-orange-06': KUDOS_GOV_TOKENS.orangeSubtle06,
+    '--hbk-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
+    '--hbk-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
+    '--hbk-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
+  } as React.CSSProperties;
+
   return (
-    <section id="hb-kudos-archive" aria-label="HB Kudos archive" data-hbc-webpart-section="hb-kudos-archive">
+    <section
+      id="hb-kudos-archive"
+      aria-label="HB Kudos archive"
+      data-hbc-webpart-section="hb-kudos-archive"
+      style={archiveCssVars}
+    >
       {/* Scoped styles for archive rows — hover/focus-visible via CSS
-          instead of JS handlers so keyboard focus is properly visible. */}
+          instead of JS handlers so keyboard focus is properly visible.
+          Color values use CSS custom properties bridged from KUDOS_GOV_TOKENS. */}
       {/* eslint-disable-next-line react/no-unknown-property */}
       <style>{`
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
           display: flex; align-items: center; gap: 12px; width: 100%;
-          text-align: left; background: rgba(229,126,70,0.02);
-          border: 1px solid rgba(229,126,70,0.06); border-radius: 10px;
+          text-align: left; background: var(--hbk-orange-02);
+          border: 1px solid var(--hbk-orange-06); border-radius: 10px;
           padding: 10px 12px; cursor: pointer; color: inherit; font: inherit;
           transition: background 160ms ease, border-color 160ms ease;
           outline: none;
         }
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:hover {
-          background: rgba(229,126,70,0.06);
-          border-color: rgba(229,126,70,0.18);
+          background: var(--hbk-orange-06);
+          border-color: var(--hbk-orange-18);
         }
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:focus-visible {
-          outline: 2px solid #225391;
+          outline: 2px solid var(--hbk-brand-blue);
           outline-offset: 2px;
-          background: rgba(229,126,70,0.06);
-          border-color: rgba(229,126,70,0.18);
+          background: var(--hbk-orange-06);
+          border-color: var(--hbk-orange-18);
         }
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-search:focus-visible {
-          outline: 2px solid #225391;
+          outline: 2px solid var(--hbk-brand-blue);
           outline-offset: 1px;
-          border-color: #e57e46;
+          border-color: var(--hbk-brand-orange);
         }
         @media (prefers-reduced-motion: reduce) {
           [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
@@ -220,7 +236,7 @@ function ArchiveList({
             fontWeight: 800,
             letterSpacing: '0.14em',
             textTransform: 'uppercase' as const,
-            color: '#c26434',
+            color: KUDOS_GOV_TOKENS.warningOrange,
             flexShrink: 0,
           }}
         >
@@ -237,12 +253,12 @@ function ArchiveList({
             padding: '5px 10px',
             fontSize: '0.75rem',
             borderRadius: 8,
-            border: '1px solid rgba(229, 126, 70, 0.22)',
-            background: 'rgba(229, 126, 70, 0.03)',
+            border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
+            background: KUDOS_GOV_TOKENS.orangeSubtle03,
             maxWidth: 180,
             outline: 'none',
             fontFamily: 'inherit',
-            color: '#1a1310',
+            color: KUDOS_GOV_TOKENS.textPrimary,
           }}
         />
       </div>
@@ -280,7 +296,7 @@ function ArchiveList({
                       fontSize: '0.875rem',
                       fontWeight: 700,
                       lineHeight: 1.3,
-                      color: '#1a1310',
+                      color: KUDOS_GOV_TOKENS.textPrimary,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -292,7 +308,7 @@ function ArchiveList({
                     style={{
                       fontSize: '0.6875rem',
                       fontWeight: 500,
-                      color: 'rgba(26, 19, 16, 0.50)',
+                      color: KUDOS_GOV_TOKENS.textFaint,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
