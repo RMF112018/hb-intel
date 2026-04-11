@@ -247,7 +247,7 @@ function ArchiveList({
           display: flex; align-items: center; gap: 12px; width: 100%;
           text-align: left; background: var(--hbk-orange-02);
           border: 1px solid var(--hbk-orange-06); border-radius: 10px;
-          padding: 10px 12px; cursor: pointer; color: inherit; font: inherit;
+          padding: 11px 14px; cursor: pointer; color: inherit; font: inherit;
           transition: background 160ms ease, border-color 160ms ease;
           outline: none;
         }
@@ -277,13 +277,13 @@ function ArchiveList({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 12,
-          padding: '14px 0 12px',
+          gap: 14,
+          padding: '18px 0 14px',
         }}
       >
         <span
           style={{
-            fontSize: '0.625rem',
+            fontSize: '0.6875rem',
             fontWeight: 800,
             letterSpacing: '0.14em',
             textTransform: 'uppercase' as const,
@@ -297,16 +297,17 @@ function ArchiveList({
           type="search"
           value={searchText}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search…"
+          placeholder="Search recognition..."
           aria-label="Search recognition archive"
           className="hbk-archive-search"
           style={{
-            padding: '6px 12px',
-            fontSize: '0.75rem',
-            borderRadius: 8,
+            padding: '7px 14px',
+            fontSize: '0.8125rem',
+            borderRadius: 10,
             border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
             background: KUDOS_GOV_TOKENS.orangeSubtle03,
-            maxWidth: 220,
+            flex: '1 1 auto',
+            maxWidth: 320,
             outline: 'none',
             fontFamily: 'inherit',
             color: KUDOS_GOV_TOKENS.textPrimary,
@@ -320,7 +321,7 @@ function ArchiveList({
           description="Approved kudos that cycle off the homepage will appear here."
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {filtered.map((entry) => {
             const summary = buildKudosRecipientSummary(entry.recipients);
             return (

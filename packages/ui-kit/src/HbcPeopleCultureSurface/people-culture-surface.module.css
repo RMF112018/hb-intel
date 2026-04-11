@@ -1489,12 +1489,12 @@
 
 .surfaceFooter {
   background: #ffffff;
-  padding: 2px 20px 22px;
+  padding: 6px 20px 22px;
   border-top: 1px solid rgba(229, 126, 70, 0.10);
 }
 
 .peopleCultureHomepage .surfaceFooter {
-  padding: 2px 18px 18px;
+  padding: 6px 18px 20px;
 }
 
 /* Tablet / desktop holds — the Safety and Leadership variants
@@ -1543,7 +1543,7 @@
     padding: 12px 22px 16px;
   }
   .peopleCultureHomepage .surfaceFooter {
-    padding: 4px 22px 22px;
+    padding: 8px 22px 22px;
   }
 }
 
