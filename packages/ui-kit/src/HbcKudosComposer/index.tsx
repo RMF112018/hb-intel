@@ -22,7 +22,7 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
-import { AlertCircle, CheckCircle2, Sparkles, Users, X as XIcon } from 'lucide-react';
+import { AlertCircle, Building2, CheckCircle2, FolderKanban, Sparkles, User, Users, X as XIcon, type LucideIcon } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
 import styles from './kudos-composer.module.css';
@@ -333,23 +333,27 @@ export interface HbcKudosComposerFormProps {
 
 const BUCKET_CONFIG: Record<
   KudosComposerRecipientBucketKind,
-  { label: string; placeholder: string }
+  { label: string; placeholder: string; icon: LucideIcon }
 > = {
   individualEmails: {
-    label: 'Individuals',
+    label: 'People',
     placeholder: 'person@hedrickbrothers.com',
+    icon: User,
   },
   teamLabels: {
     label: 'Teams',
     placeholder: 'e.g. Field Safety',
+    icon: Users,
   },
   departmentLabels: {
     label: 'Departments',
     placeholder: 'e.g. Construction Operations',
+    icon: Building2,
   },
   projectGroupLabels: {
-    label: 'Project groups',
+    label: 'Projects',
     placeholder: 'e.g. Downtown Mixed-Use Tower',
+    icon: FolderKanban,
   },
 };
 
@@ -364,26 +368,74 @@ function HbcKudosComposerTypedRecipients({
   disabled: boolean;
   errorMessage?: string;
 }): React.JSX.Element {
+  // Individuals always expanded; other buckets expand on click or when populated.
+  const [expanded, setExpanded] = React.useState<Set<KudosComposerRecipientBucketKind>>(
+    () => new Set<KudosComposerRecipientBucketKind>(['individualEmails']),
+  );
+
+  const toggleExpand = React.useCallback((kind: KudosComposerRecipientBucketKind) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(kind)) next.delete(kind);
+      else next.add(kind);
+      return next;
+    });
+  }, []);
+
+  const allKinds = Object.keys(BUCKET_CONFIG) as KudosComposerRecipientBucketKind[];
+  const primaryKind: KudosComposerRecipientBucketKind = 'individualEmails';
+  const secondaryKinds = allKinds.filter((k) => k !== primaryKind);
+
   return (
     <div className={styles.field}>
       <label className={styles.label}>
         Recipients <span className={styles.requiredMark}>*</span>
       </label>
-      <div className={styles.typedRecipientWrap}>
-        {(Object.keys(BUCKET_CONFIG) as KudosComposerRecipientBucketKind[]).map((kind) => (
-          <HbcKudosComposerRecipientBucket
-            key={kind}
-            kind={kind}
-            values={buckets[kind]}
-            onChange={(next) => onChange({ [kind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
-            disabled={disabled}
-          />
-        ))}
+
+      {/* Primary bucket — always expanded */}
+      <HbcKudosComposerRecipientBucket
+        kind={primaryKind}
+        values={buckets[primaryKind]}
+        onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
+        disabled={disabled}
+      />
+
+      {/* Secondary buckets — progressive disclosure */}
+      <div className={styles.bucketSecondaryRow}>
+        {secondaryKinds.map((kind) => {
+          const hasValues = buckets[kind].length > 0;
+          const isExpanded = expanded.has(kind) || hasValues;
+          const BucketIcon = BUCKET_CONFIG[kind].icon;
+
+          if (isExpanded) {
+            return (
+              <HbcKudosComposerRecipientBucket
+                key={kind}
+                kind={kind}
+                values={buckets[kind]}
+                onChange={(next) => onChange({ [kind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
+                disabled={disabled}
+              />
+            );
+          }
+
+          return (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => toggleExpand(kind)}
+              disabled={disabled}
+              className={styles.bucketAddButton}
+            >
+              <BucketIcon size={13} strokeWidth={2.2} aria-hidden="true" />
+              {BUCKET_CONFIG[kind].label}
+            </button>
+          );
+        })}
       </div>
+
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
-      <div className={styles.hint}>
-        Add at least one recipient. Press Enter to add each entry.
-      </div>
+      <div className={styles.hint}>Press Enter to add each entry.</div>
     </div>
   );
 }
@@ -430,12 +482,18 @@ function HbcKudosComposerRecipientBucket({
     onChange(values.filter((_, i) => i !== index));
   }
 
+  const BucketIcon = config.icon;
+
   return (
     <div className={styles.bucket}>
-      <div className={styles.bucketLabel}>{config.label}</div>
+      <div className={styles.bucketLabel}>
+        <BucketIcon size={12} strokeWidth={2.2} aria-hidden="true" className={styles.bucketLabelIcon} />
+        {config.label}
+      </div>
       <div className={styles.bucketChips}>
         {values.map((value, index) => (
-          <span key={`${value}-${index}`} className={styles.bucketChip}>
+          <span key={`${value}-${index}`} className={clsx(styles.bucketChip, styles[`bucketChip_${kind}` as keyof typeof styles])}>
+            <BucketIcon size={10} strokeWidth={2.5} aria-hidden="true" className={styles.bucketChipIcon} />
             <span className={styles.bucketChipLabel}>{value}</span>
             <button
               type="button"
