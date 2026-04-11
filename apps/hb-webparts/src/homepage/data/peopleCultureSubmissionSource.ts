@@ -14,7 +14,7 @@
  * Binds by list GUID via `peopleCultureSpListRegistry` so title
  * drift cannot cross-bind the writer to the wrong list.
  */
-import { getSiteUrl } from './spContext.js';
+import { getKudosListHostUrl } from './spContext.js';
 import { invalidatePeopleCultureCache } from './usePeopleCultureData.js';
 import {
   buildPcListItemsEndpoint,
@@ -321,8 +321,8 @@ export async function submitKudosDraft(
   draft: KudosComposerDraft,
   options: KudosSubmissionOptions = {},
 ): Promise<KudosSubmissionResult> {
-  // Validate site URL
-  const siteUrl = getSiteUrl();
+  // Validate list host URL (uses explicit override or falls back to current site)
+  const siteUrl = getKudosListHostUrl();
   if (!siteUrl) {
     return { ok: false, error: 'SharePoint site context is not available. Kudos submission requires a SharePoint-hosted environment.' };
   }

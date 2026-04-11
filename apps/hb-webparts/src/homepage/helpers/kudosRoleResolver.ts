@@ -60,6 +60,11 @@ export interface KudosRoleResolverConfig {
   currentUserEmail?: string;
   kudosAdminsGroup?: string;
   kudosReviewersGroup?: string;
+  /**
+   * Dev-only: role to simulate when `siteUrl` is unavailable (local
+   * workbench / jsdom tests). Ignored in live SharePoint — real group
+   * membership is queried instead.
+   */
   simulatedRole?: unknown;
 }
 

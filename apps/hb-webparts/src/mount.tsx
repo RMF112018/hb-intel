@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import { ReferenceHomepageComposition } from './homepage/ReferenceHomepageComposition.js';
-import { storeSiteUrl } from './homepage/data/spContext.js';
+import { storeSiteUrl, storeKudosListHostUrl } from './homepage/data/spContext.js';
 import { createSharePointUserPhotoResolver } from './homepage/helpers/peopleCultureProfilePhotoResolver.js';
 import { PersonalizedWelcomeHeader } from './webparts/personalizedWelcomeHeader/PersonalizedWelcomeHeader.js';
 import { HbHeroBanner } from './webparts/hbHeroBanner/HbHeroBanner.js';
@@ -121,6 +121,13 @@ export async function mount(
     typeof config?.webPartProperties === 'object' && config.webPartProperties !== null
       ? (config.webPartProperties as Record<string, unknown>)
       : undefined;
+
+  // For companion webparts hosted on a different site than the canonical
+  // list host, store the explicit list-host URL from webpart properties
+  // so data operations target the correct site (e.g. HBCentral).
+  if (typeof webPartProperties?.kudosListHostUrl === 'string' && webPartProperties.kudosListHostUrl.trim()) {
+    storeKudosListHostUrl(webPartProperties.kudosListHostUrl.trim());
+  }
   const assetBaseUrl = typeof config?.assetBaseUrl === 'string' ? config.assetBaseUrl : undefined;
   const siteUrl = spfxContext?.pageContext?.web?.absoluteUrl;
   const identity: HomepageIdentityInput = {

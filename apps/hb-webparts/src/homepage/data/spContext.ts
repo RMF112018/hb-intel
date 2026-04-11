@@ -18,6 +18,35 @@ export function getSiteUrl(): string | undefined {
   return _siteAbsoluteUrl;
 }
 
+/* ── Kudos list host URL (cross-site data access) ────────────── */
+
+/**
+ * Explicit list-host URL for HB Kudos list operations.
+ *
+ * When the companion webpart is hosted on a different site
+ * (`HBKudosAdminReview`) than the canonical list host (`HBCentral`),
+ * this override ensures all list reads, writes, and audit-event
+ * queries target the correct site.
+ *
+ * Falls back to `_siteAbsoluteUrl` when not set, which is the
+ * correct behavior for the public webpart hosted on the same site
+ * as the lists.
+ */
+let _kudosListHostUrl: string | undefined;
+
+/** Store the explicit Kudos list-host URL from webpart properties. */
+export function storeKudosListHostUrl(url: string | undefined): void {
+  _kudosListHostUrl = url?.replace(/\/+$/, '');
+}
+
+/**
+ * Retrieve the Kudos list-host URL. Returns the explicit override
+ * when set, otherwise falls back to the hosting site URL.
+ */
+export function getKudosListHostUrl(): string | undefined {
+  return _kudosListHostUrl ?? _siteAbsoluteUrl;
+}
+
 /* ── Current user ID resolution ───────────────────────────────── */
 
 let _currentUserIdPromise: Promise<number | undefined> | undefined;

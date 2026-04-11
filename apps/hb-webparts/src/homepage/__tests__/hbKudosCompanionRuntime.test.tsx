@@ -19,7 +19,9 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 vi.mock('../data/spContext.js', () => ({
   getSiteUrl: () => undefined,
+  getKudosListHostUrl: () => undefined,
   storeSiteUrl: vi.fn(),
+  storeKudosListHostUrl: vi.fn(),
   resolveCurrentUserId: () => Promise.resolve(undefined),
 }));
 

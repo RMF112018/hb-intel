@@ -8,7 +8,7 @@
  * Follows the same pattern as useProjectSpotlightData.ts.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getSiteUrl } from './spContext.js';
+import { getKudosListHostUrl } from './spContext.js';
 import { fetchPeopleCultureListData } from './peopleCultureListSource.js';
 import type { PeopleCultureMergedConfig } from '../webparts/communicationsContracts.js';
 
@@ -48,7 +48,7 @@ export interface PeopleCultureDataResultWithRefresh extends PeopleCultureDataRes
 }
 
 export function usePeopleCultureData(): PeopleCultureDataResultWithRefresh {
-  const siteUrl = getSiteUrl();
+  const siteUrl = getKudosListHostUrl();
   const [generation, setGeneration] = useState(_cacheGeneration);
   const [result, setResult] = useState<PeopleCultureDataResult>(() => {
     // If cache is still fresh, use it immediately (no loading flash)

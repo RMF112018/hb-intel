@@ -47,7 +47,7 @@ import {
 } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
 import { submitKudosGovernanceAction, fetchKudosAuditTimeline, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
-import { getSiteUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
+import { getSiteUrl, getKudosListHostUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
 import {
   KUDOS_ROLE_LABELS,
@@ -518,11 +518,11 @@ function DetailPanel({
   const [timelineLoading, setTimelineLoading] = React.useState(false);
   React.useEffect(() => {
     if (!entry) { setTimeline([]); return; }
-    const siteUrl = getSiteUrl();
-    if (!siteUrl) return;
+    const listHostUrl = getKudosListHostUrl();
+    if (!listHostUrl) return;
     let cancelled = false;
     setTimelineLoading(true);
-    fetchKudosAuditTimeline(siteUrl, entry.id).then((events) => {
+    fetchKudosAuditTimeline(listHostUrl, entry.id).then((events) => {
       if (!cancelled) { setTimeline(events); setTimelineLoading(false); }
     }).catch(() => { if (!cancelled) setTimelineLoading(false); });
     return () => { cancelled = true; };
@@ -738,15 +738,15 @@ export function HbKudosCompanion({
   const dispatchGovernancePatch = React.useCallback(
     async (patch: KudosPatch) => {
       if (!detailEntry) return;
-      const siteUrl = getSiteUrl();
-      if (!siteUrl) {
+      const listHostUrl = getKudosListHostUrl();
+      if (!listHostUrl) {
         setActionError('SharePoint site context is not available.');
         return;
       }
       setDispatching(true);
       try {
         const result = await submitKudosGovernanceAction(
-          siteUrl,
+          listHostUrl,
           patch,
           {
             actorEmail: identity?.email,
@@ -913,8 +913,8 @@ export function HbKudosCompanion({
   const handleBulkApprove = React.useCallback(async () => {
     if (!capabilities.canBulkApprove) return;
     if (selectedIds.size === 0) return;
-    const siteUrl = getSiteUrl();
-    if (!siteUrl) {
+    const listHostUrl = getKudosListHostUrl();
+    if (!listHostUrl) {
       setActionError('SharePoint site context is not available.');
       return;
     }
@@ -931,7 +931,7 @@ export function HbKudosCompanion({
           continue;
         }
         const result = await submitKudosGovernanceAction(
-          siteUrl,
+          listHostUrl,
           { kind: 'approve', kudosId: entry.id },
           {
             actorEmail: identity?.email,
