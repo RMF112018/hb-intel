@@ -6,22 +6,23 @@
  * (proven in submission and governance write paths) to authenticate the
  * POST request.
  *
- * Critical routing decision: the search targets the **hosting site URL**
- * (`getSiteUrl()`), not the Kudos list host (HBCentral).
- * `ClientPeoplePickerSearchUser` is a tenant-wide directory search — it
- * returns the same org-wide results regardless of which site routes the
- * request. Using the hosting site ensures the browser session context
- * established by SPFx is valid for the raw `fetch()` call. Targeting a
- * different site collection (HBCentral) via raw `fetch()` fails
- * authentication because SPFx session cookies are scoped to the hosting
- * site.
+ * Site URL resolution chain:
+ *   1. Hosting site (`getSiteUrl()`) — preferred because the browser
+ *      session established by SPFx is guaranteed valid here.
+ *   2. Kudos list host (`getKudosListHostUrl()`) — fallback; the
+ *      hardcoded HBCentral URL always provides a value. Same-origin
+ *      SharePoint cookies are shared across site collections on the
+ *      same tenant domain, so auth typically works here too.
  *
- * Debug mode: set `window.__HB_KUDOS_DEBUG__ = true` in the browser
- * console to log query text, endpoint, result count, first principals,
- * and error details. Safe to leave disabled in production.
+ * `ClientPeoplePickerSearchUser` is a tenant-wide directory search.
+ * Results are org-wide regardless of which site URL routes the request.
+ *
+ * Instrumentation: every decision point logs to console.warn (always on)
+ * so failures are never silent. Detailed debug logging is available via
+ * `window.__HB_KUDOS_DEBUG__ = true`.
  */
-import { useCallback } from 'react';
-import { getSiteUrl } from './spContext.js';
+import { useCallback, useRef } from 'react';
+import { getSiteUrl, getKudosListHostUrl } from './spContext.js';
 import { fetchRequestDigest } from './peopleCultureSubmissionSource.js';
 import type { PersonEntry, PeopleSearchFn } from '@hbc/ui-kit/homepage';
 
@@ -39,6 +40,7 @@ function isDebug(): boolean {
   }
 }
 
+const TAG = '[HB Kudos People Search]';
 const MAX_SUGGESTIONS = 10;
 
 interface ClientPeoplePickerResult {
@@ -50,6 +52,29 @@ interface ClientPeoplePickerResult {
     Department?: string;
   };
   Description?: string;
+}
+
+/**
+ * Resolve the best available site URL for the people search request.
+ *
+ * Prefers the hosting site (SPFx session guaranteed), falls back to the
+ * Kudos list host (hardcoded HBCentral). Returns undefined only when
+ * both are unavailable (non-SPFx context with no override).
+ */
+function resolvePeopleSearchSiteUrl(): string | undefined {
+  const hostingSite = getSiteUrl();
+  const kudosHost = getKudosListHostUrl();
+  const resolved = hostingSite ?? kudosHost;
+
+  if (isDebug()) {
+    console.log(TAG, 'URL resolution:', {
+      hostingSite: hostingSite ?? '(undefined)',
+      kudosHost: kudosHost ?? '(undefined)',
+      resolved: resolved ?? '(undefined)',
+    });
+  }
+
+  return resolved;
 }
 
 /**
@@ -71,14 +96,15 @@ async function searchSharePointPeople(
 ): Promise<PersonEntry[]> {
   const endpoint = `${siteUrl}/_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.ClientPeoplePickerSearchUser`;
 
-  if (isDebug()) {
-    console.log('[HB Kudos People Search] query:', query, '| site:', siteUrl, '| endpoint:', endpoint);
-  }
+  console.log(TAG, 'dispatch:', { query, siteUrl, endpoint });
 
-  const digest = await fetchRequestDigest(siteUrl);
-
-  if (isDebug()) {
-    console.log('[HB Kudos People Search] digest acquired, sending search request…');
+  let digest: string;
+  try {
+    digest = await fetchRequestDigest(siteUrl);
+    if (isDebug()) console.log(TAG, 'digest acquired');
+  } catch (digestErr) {
+    console.warn(TAG, 'digest fetch failed for', siteUrl, digestErr);
+    throw digestErr;
   }
 
   const response = await fetch(endpoint, {
@@ -101,13 +127,11 @@ async function searchSharePointPeople(
     }),
   });
 
-  if (isDebug()) {
-    console.log('[HB Kudos People Search] response status:', response.status, response.statusText);
-  }
+  console.log(TAG, 'response:', response.status, response.statusText);
 
   if (!response.ok) {
     const msg = `People search failed: ${response.status} ${response.statusText}`;
-    if (isDebug()) console.error('[HB Kudos People Search]', msg);
+    console.warn(TAG, msg);
     throw new Error(msg);
   }
 
@@ -117,7 +141,7 @@ async function searchSharePointPeople(
 
   if (!body.ClientPeoplePickerSearchUser) {
     const msg = 'People search returned no ClientPeoplePickerSearchUser field';
-    if (isDebug()) console.warn('[HB Kudos People Search]', msg, body);
+    console.warn(TAG, msg, body);
     throw new Error(msg);
   }
 
@@ -126,7 +150,7 @@ async function searchSharePointPeople(
     results = JSON.parse(body.ClientPeoplePickerSearchUser) as ClientPeoplePickerResult[];
   } catch (parseErr) {
     const msg = 'Failed to parse ClientPeoplePickerSearchUser response';
-    if (isDebug()) console.error('[HB Kudos People Search]', msg, parseErr);
+    console.warn(TAG, msg, parseErr);
     throw new Error(msg);
   }
 
@@ -139,12 +163,10 @@ async function searchSharePointPeople(
       department: r.EntityData?.Department ?? undefined,
     }));
 
-  if (isDebug()) {
-    console.log(
-      '[HB Kudos People Search] results:', entries.length,
-      '| first 3:', entries.slice(0, 3).map((e) => `${e.displayName} <${e.upn}>`),
-    );
-  }
+  console.log(
+    TAG, 'results:', entries.length,
+    '| first 3:', entries.slice(0, 3).map((e) => `${e.displayName} <${e.upn}>`),
+  );
 
   return entries;
 }
@@ -153,25 +175,56 @@ async function searchSharePointPeople(
  * Hook returning a stable PeopleSearchFn backed by SharePoint
  * ClientPeoplePickerSearchUser.
  *
- * Targets the **hosting site** (`getSiteUrl()`) so the raw `fetch()`
- * call carries the SPFx-established browser session. Returns undefined
- * when no site URL is available (non-SPFx context).
- *
- * **Error propagation**: errors from the search adapter are NOT caught
- * here. They propagate to the calling UI component so the component
- * can distinguish a failed search from a genuine empty result set.
- * The prior pattern of catching all errors and returning `[]` is
- * explicitly removed — that behavior masked auth and transport
- * failures as "No people found."
+ * Returns `undefined` when no site URL is available at all (truly
+ * non-SPFx context). When a URL is available, errors from the search
+ * adapter propagate to the calling UI component — they are never
+ * collapsed into empty arrays.
  */
 export function useSharePointPeopleSearch(): PeopleSearchFn | undefined {
-  const siteUrl = getSiteUrl();
+  // Resolve on every render so we pick up late-stored URLs.
+  const siteUrl = resolvePeopleSearchSiteUrl();
 
-  return useCallback(
+  // Track whether we've logged the URL resolution (once per resolved value).
+  const loggedUrlRef = useRef<string | undefined>(undefined);
+  if (loggedUrlRef.current !== siteUrl) {
+    loggedUrlRef.current = siteUrl;
+    if (siteUrl) {
+      console.log(TAG, 'hook: resolved site URL =', siteUrl);
+    } else {
+      console.warn(TAG, 'hook: NO site URL available — people search will be disabled');
+    }
+  }
+
+  const searchFn = useCallback(
     async (query: string): Promise<PersonEntry[]> => {
-      if (!siteUrl || !query || query.trim().length < 2) return [];
-      return await searchSharePointPeople(siteUrl, query.trim());
+      // Re-resolve at call time in case the URL became available after
+      // the hook last rendered (module-level variable, not React state).
+      const callTimeSiteUrl = resolvePeopleSearchSiteUrl();
+
+      if (!callTimeSiteUrl) {
+        console.warn(TAG, 'call: no site URL at call time — cannot dispatch. getSiteUrl()=', getSiteUrl(), 'getKudosListHostUrl()=', getKudosListHostUrl());
+        throw new Error('People search unavailable: no SharePoint site URL resolved');
+      }
+
+      if (!query || query.trim().length < 2) {
+        if (isDebug()) console.log(TAG, 'call: query too short, skipping:', JSON.stringify(query));
+        return [];
+      }
+
+      console.log(TAG, 'call: dispatching search for', JSON.stringify(query.trim()), 'via', callTimeSiteUrl);
+      return await searchSharePointPeople(callTimeSiteUrl, query.trim());
     },
     [siteUrl],
-  ) as PeopleSearchFn | undefined;
+  );
+
+  // Return undefined only when truly no URL is available, so the
+  // consumer can render a text fallback instead of a broken picker.
+  if (!siteUrl) {
+    // Re-check at return time — the module variable may have been set
+    // between render start and return.
+    const lateCheck = resolvePeopleSearchSiteUrl();
+    if (!lateCheck) return undefined;
+  }
+
+  return searchFn;
 }
