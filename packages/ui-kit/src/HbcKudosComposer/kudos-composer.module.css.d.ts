@@ -43,6 +43,7 @@ declare const styles: {
   readonly bucketHint: string;
   readonly bucketSecondaryRow: string;
   readonly bucketAddButton: string;
+  readonly formDivider: string;
   readonly detailsToggle: string;
   readonly previewWrap: string;
   readonly previewLabel: string;

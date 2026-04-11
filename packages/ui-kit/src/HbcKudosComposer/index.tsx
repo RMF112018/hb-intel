@@ -590,6 +590,8 @@ export function HbcKudosComposerForm({
         </div>
       )}
 
+      <hr className={styles.formDivider} />
+
       {/* Headline */}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="hbc-kudos-headline">

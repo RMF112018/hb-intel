@@ -182,14 +182,15 @@
 
 .panelFooter {
   flex-shrink: 0;
-  padding: 14px 18px;
-  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
-  border-top: 1px solid rgba(229, 126, 70, 0.12);
+  padding: 16px 18px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  border-top: 1px solid rgba(229, 126, 70, 0.18);
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    rgba(229, 126, 70, 0.025) 100%
+    rgba(255, 250, 246, 0.5) 0%,
+    rgba(229, 126, 70, 0.05) 100%
   );
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -197,7 +198,7 @@
 
 @media (min-width: 768px) {
   .panelFooter {
-    padding: 16px 26px;
+    padding: 18px 26px;
     padding-bottom: max(28px, env(safe-area-inset-bottom, 28px));
   }
 }
@@ -285,15 +286,19 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .formNotice {
   font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(26, 19, 16, 0.48);
-  line-height: 1.45;
-  padding: 0 2px;
+  font-weight: 600;
+  color: rgba(26, 19, 16, 0.62);
+  line-height: 1.5;
+  padding: 10px 14px;
+  background: rgba(229, 126, 70, 0.05);
+  border: 1px solid rgba(229, 126, 70, 0.12);
+  border-left: 3px solid rgba(229, 126, 70, 0.55);
+  border-radius: 8px;
 }
 
 .field {
@@ -591,6 +596,15 @@
   cursor: not-allowed;
 }
 
+/* ── Form section divider ────────────────────────────── */
+
+.formDivider {
+  height: 0;
+  border: none;
+  border-top: 1px solid rgba(229, 126, 70, 0.10);
+  margin: 2px 0;
+}
+
 /* ── Details toggle ──────────────────────────────────── */
 
 .detailsToggle {
@@ -625,7 +639,9 @@
 /* ── Preview ──────────────────────────────────────────── */
 
 .previewWrap {
-  margin-top: 4px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(229, 126, 70, 0.10);
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -651,10 +667,11 @@
 
 .previewCard {
   position: relative;
-  background: rgba(255, 250, 246, 0.6);
+  background: rgba(255, 250, 246, 0.8);
   border-radius: 12px;
   padding: 18px 18px 16px;
-  border: 1px solid rgba(229, 126, 70, 0.12);
+  border: 1px solid rgba(229, 126, 70, 0.16);
+  box-shadow: 0 2px 8px rgba(229, 126, 70, 0.06);
   transition: opacity 200ms ease;
 }
 

@@ -694,12 +694,10 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
               disabled={composer.status === 'submitting'}
               recipientsMode="typed"
             />
-            <div style={{ marginTop: 24 }}>
-              <HbcKudosComposerPreview
-                draft={composer.draft}
-                submitterName={identity?.displayName ?? ''}
-              />
-            </div>
+            <HbcKudosComposerPreview
+              draft={composer.draft}
+              submitterName={identity?.displayName ?? ''}
+            />
           </>
         ) : null}
       </HbcKudosComposerFlyout>
