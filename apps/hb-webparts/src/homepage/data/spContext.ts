@@ -52,13 +52,17 @@ export function getKudosListHostUrl(): string | undefined {
 let _currentUserIdPromise: Promise<number | undefined> | undefined;
 
 /**
- * Resolve the current SharePoint user's numeric ID. Cached for the
- * session so repeated calls do not issue redundant REST requests.
- * Returns `undefined` outside SPFx context.
+ * Resolve the current SharePoint user's numeric ID on the canonical
+ * list-host site. Uses `getKudosListHostUrl()` so the returned ID
+ * matches user references stored in list items on `HBCentral`,
+ * regardless of which site the webpart is hosted on.
+ *
+ * Cached for the session so repeated calls do not issue redundant
+ * REST requests. Returns `undefined` outside SPFx context.
  */
 export function resolveCurrentUserId(): Promise<number | undefined> {
   if (_currentUserIdPromise) return _currentUserIdPromise;
-  const siteUrl = _siteAbsoluteUrl;
+  const siteUrl = _kudosListHostUrl ?? _siteAbsoluteUrl;
   if (!siteUrl) {
     _currentUserIdPromise = Promise.resolve(undefined);
     return _currentUserIdPromise;

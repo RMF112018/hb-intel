@@ -66,7 +66,7 @@ import {
   KudosGovernanceInputDialog,
 } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { submitKudosGovernanceAction } from '../../homepage/data/kudosGovernanceWriter.js';
-import { getSiteUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
+import { getKudosListHostUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -505,7 +505,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
   const handleSubmitterDialogConfirm = React.useCallback(
     (value: string) => {
       if (!detailEntry || !submitterDialog) return;
-      const siteUrl = getSiteUrl();
+      const siteUrl = getKudosListHostUrl();
       if (!siteUrl) return;
 
       if (submitterDialog.action === 'withdraw') {
@@ -654,7 +654,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         identity={identity}
         onCelebrate={detailEntry ? () => {
           const current = detailEntry.celebrateCount ?? 0;
-          const siteUrl = getSiteUrl();
+          const siteUrl = getKudosListHostUrl();
           if (!siteUrl) return;
           void submitKudosGovernanceAction(
             siteUrl,
