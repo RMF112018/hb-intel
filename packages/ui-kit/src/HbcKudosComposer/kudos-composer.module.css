@@ -40,7 +40,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 440px;
+  width: 480px;
   max-width: 100vw;
   box-shadow:
     -4px 0 20px rgba(10, 8, 6, 0.08),
@@ -64,7 +64,7 @@
 
 @media (min-width: 768px) {
   .panelHeader {
-    padding: 24px 26px 22px;
+    padding: 22px 26px 18px;
   }
 }
 
@@ -168,7 +168,7 @@
 
 @media (min-width: 768px) {
   .panelBody {
-    padding: 26px 28px;
+    padding: 22px 24px;
   }
 }
 
@@ -205,7 +205,7 @@
 
 @media (min-width: 768px) {
   .panelFooter {
-    padding: 18px 26px;
+    padding: 16px 24px;
     padding-bottom: max(
       28px,
       env(safe-area-inset-bottom, 0px),
@@ -219,7 +219,7 @@
 .footerSecondary {
   display: inline-flex;
   align-items: center;
-  padding: 10px 20px;
+  padding: 9px 18px;
   font-size: 0.8125rem;
   font-weight: 800;
   font-family: inherit;
@@ -250,7 +250,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
+  padding: 9px 20px;
   font-size: 0.8125rem;
   font-weight: 800;
   font-family: inherit;
@@ -297,7 +297,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .formNotice {
@@ -305,7 +305,7 @@
   font-weight: 600;
   color: rgba(26, 19, 16, 0.62);
   line-height: 1.5;
-  padding: 10px 14px;
+  padding: 8px 12px;
   background: rgba(229, 126, 70, 0.05);
   border: 1px solid rgba(229, 126, 70, 0.12);
   border-left: 3px solid rgba(229, 126, 70, 0.55);
@@ -324,7 +324,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(26, 19, 16, 0.55);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .requiredMark {
@@ -340,8 +340,8 @@
 
 .input {
   width: 100%;
-  padding: 11px 14px;
-  font-size: 0.9375rem;
+  padding: 9px 12px;
+  font-size: 0.875rem;
   font-family: inherit;
   color: #1a1310;
   background: #ffffff;
@@ -376,11 +376,11 @@
 
 .textarea {
   resize: vertical;
-  min-height: 88px;
+  min-height: 72px;
 }
 
 .textareaShort {
-  min-height: 64px;
+  min-height: 54px;
 }
 
 .error {
@@ -650,8 +650,8 @@
 /* ── Preview ──────────────────────────────────────────── */
 
 .previewWrap {
-  margin-top: 8px;
-  padding-top: 20px;
+  margin-top: 4px;
+  padding-top: 14px;
   border-top: 1px solid rgba(229, 126, 70, 0.10);
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -665,7 +665,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(194, 100, 52, 0.85);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .previewLabelDot {
@@ -680,7 +680,7 @@
   position: relative;
   background: rgba(255, 250, 246, 0.8);
   border-radius: 12px;
-  padding: 18px 18px 16px;
+  padding: 14px 16px 12px;
   border: 1px solid rgba(229, 126, 70, 0.16);
   box-shadow: 0 2px 8px rgba(229, 126, 70, 0.06);
   transition: opacity 200ms ease;
