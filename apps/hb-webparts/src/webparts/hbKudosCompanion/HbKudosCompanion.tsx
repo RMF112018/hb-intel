@@ -1024,7 +1024,7 @@ export function HbKudosCompanion({
   return (
     <section
       data-hbc-webpart="hb-kudos-companion"
-      data-hbc-webpart-phase="phase-14-kudos-prompt-03"
+      data-hbc-webpart-phase="phase-14-kudos-phase-04"
       data-hbc-role={role}
       aria-label="HB Kudos Approval Companion"
       style={{ display: 'flex', flexDirection: 'column', gap: 16 }}

@@ -420,7 +420,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
       ? config.homepageAgeOffDays
       : DEFAULT_AGE_OFF_DAYS;
 
-  const { listConfig, isLoading, refresh: refreshData } = usePeopleCultureData();
+  const { listConfig, isLoading, error: listError, refresh: refreshData } = usePeopleCultureData();
 
   // Resolve current user ID for associated-item visibility.
   const [currentUserId, setCurrentUserId] = React.useState<number | undefined>();
@@ -444,6 +444,8 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
   });
 
   const [detailEntry, setDetailEntry] = React.useState<KudosEntry | undefined>();
+  const [celebrating, setCelebrating] = React.useState(false);
+  const [discardDialog, setDiscardDialog] = React.useState(false);
 
   const allKudos: KudosEntry[] = React.useMemo(() => {
     const fromList = listConfig?.kudos ?? [];
@@ -559,10 +561,21 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
     );
   }
 
+  if (listError && !listConfig) {
+    return (
+      <section data-hbc-webpart="hb-kudos" data-hbc-state="error">
+        <HbcEmptyState
+          title="Recognition data unavailable"
+          description="Unable to load HB Kudos data. Please try refreshing the page."
+        />
+      </section>
+    );
+  }
+
   const handleComposerClose = (): void => {
     if (composer.isDirty && composer.status === 'editing') {
-      // eslint-disable-next-line no-alert
-      if (!window.confirm('You have unsaved changes. Discard your draft?')) return;
+      setDiscardDialog(true);
+      return;
     }
     composerActions.close();
   };
@@ -591,7 +604,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
   return (
     <section
       data-hbc-webpart="hb-kudos"
-      data-hbc-webpart-phase="phase-14-kudos-prompt-02"
+      data-hbc-webpart-phase="phase-14-kudos-phase-04"
       aria-label="HB Kudos recognition"
     >
       <HbcPeopleCultureSurface
@@ -652,15 +665,16 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         entry={detailEntry}
         onClose={() => setDetailEntry(undefined)}
         identity={identity}
-        onCelebrate={detailEntry ? () => {
+        onCelebrate={detailEntry && !celebrating ? () => {
+          setCelebrating(true);
           const current = detailEntry.celebrateCount ?? 0;
           const siteUrl = getKudosListHostUrl();
-          if (!siteUrl) return;
+          if (!siteUrl) { setCelebrating(false); return; }
           void submitKudosGovernanceAction(
             siteUrl,
             { kind: 'celebrate', kudosId: detailEntry.id, nextCount: current + 1 },
             { actorEmail: identity?.email },
-          ).then(() => refreshData());
+          ).then(() => refreshData()).finally(() => setCelebrating(false));
         } : undefined}
         onWithdraw={detailEntry ? () => {
           setSubmitterDialog({
@@ -693,6 +707,16 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
         defaultValue={submitterDialog?.defaultValue}
         confirmLabel={submitterDialog?.confirmLabel}
         allowEmpty={submitterDialog?.allowEmpty}
+      />
+
+      <KudosGovernanceInputDialog
+        open={discardDialog}
+        onClose={() => setDiscardDialog(false)}
+        onConfirm={() => { setDiscardDialog(false); composerActions.close(); }}
+        title="Discard draft?"
+        description="You have unsaved changes. Your draft will be lost."
+        confirmLabel="Discard"
+        allowEmpty
       />
     </section>
   );

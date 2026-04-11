@@ -501,7 +501,7 @@ describe('HbKudosCompanion webpart — runtime smoke', () => {
     });
     await waitFor(() => {
       const section = document.querySelector('[data-hbc-webpart="hb-kudos-companion"]');
-      expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-prompt-03');
+      expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-phase-04');
       expect(section?.getAttribute('data-hbc-role')).toBe('reviewer');
     });
     // Filter bar should render the Pending filter as active by default.
