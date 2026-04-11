@@ -121,6 +121,8 @@ export interface HbcPeopleCultureSurfaceProps {
    * both are provided.
    */
   onCelebrate?: (id: string) => void;
+  /** True while a celebrate action is in-flight — disables the button. */
+  celebrateLoading?: boolean;
   /** Hero eyebrow tag. Defaults to "People & Culture". */
   heroEyebrow?: string;
   /** Hero sub-caption under the headline. Defaults to "Celebrating our people". */
@@ -258,6 +260,7 @@ interface KudosSpotlightProps {
   onGiveKudos?: () => void;
   celebrateHref?: string;
   onCelebrate?: (id: string) => void;
+  celebrateLoading?: boolean;
   reducedMotion: boolean;
   isHomepage?: boolean;
 }
@@ -268,6 +271,7 @@ function KudosSpotlight({
   onGiveKudos,
   celebrateHref,
   onCelebrate,
+  celebrateLoading,
   reducedMotion,
   isHomepage,
 }: KudosSpotlightProps): React.JSX.Element {
@@ -336,8 +340,12 @@ function KudosSpotlight({
               <button
                 type="button"
                 onClick={() => onCelebrate(featured.id)}
+                disabled={celebrateLoading}
                 aria-label={`Celebrate this recognition${typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? ` (${featured.celebrateCount})` : ''}`}
-                className={styles.metaReaction}
+                className={clsx(
+                  styles.metaReaction,
+                  celebrateLoading && styles.metaReactionLoading,
+                )}
               >
                 <Sparkles
                   size={12}
@@ -345,9 +353,11 @@ function KudosSpotlight({
                   strokeWidth={2.5}
                   className={styles.metaReactionIcon}
                 />
-                {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0
-                  ? featured.celebrateCount
-                  : 'Celebrate'}
+                {celebrateLoading
+                  ? '…'
+                  : typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0
+                    ? featured.celebrateCount
+                    : 'Celebrate'}
               </button>
             ) : typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
               <span className={styles.metaCount}>
@@ -642,6 +652,7 @@ export function HbcPeopleCultureSurface({
   viewAllHref,
   celebrateHref,
   onCelebrate,
+  celebrateLoading,
   heroEyebrow = 'People & Culture',
   heroSubcaption = 'Celebrating our people',
   variant = 'default',
@@ -681,6 +692,7 @@ export function HbcPeopleCultureSurface({
             onGiveKudos={onGiveKudos}
             celebrateHref={celebrateHref}
             onCelebrate={onCelebrate}
+            celebrateLoading={celebrateLoading}
             reducedMotion={reducedMotion}
             isHomepage={isHomepage}
           />

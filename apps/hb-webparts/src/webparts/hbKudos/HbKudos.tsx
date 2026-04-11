@@ -715,6 +715,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         onGiveKudos={composerActions.open}
         viewAllHref="#hb-kudos-archive"
         celebrateHref={undefined}
+        celebrateLoading={celebrating}
         onCelebrate={(kudosId) => {
           const entry = publicKudos.find((e) => e.id === kudosId);
           if (!entry || celebrating) return;

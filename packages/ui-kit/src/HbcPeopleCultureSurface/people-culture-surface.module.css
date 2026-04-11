@@ -481,15 +481,30 @@
   outline: none;
 }
 
-.metaReaction:hover {
+.metaReaction:hover:not(:disabled) {
   background: rgba(229, 126, 70, 0.14);
   border-color: rgba(229, 126, 70, 0.35);
   transform: translateY(-1px);
 }
 
+.metaReaction:active:not(:disabled) {
+  transform: scale(0.96);
+  background: rgba(229, 126, 70, 0.18);
+}
+
 .metaReaction:focus-visible {
   outline: 2px solid #225391;
   outline-offset: 2px;
+}
+
+.metaReaction:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.metaReactionLoading {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .metaReactionIcon {
@@ -498,7 +513,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .metaReaction,
-  .metaReaction:hover {
+  .metaReaction:hover,
+  .metaReaction:active {
     transition: none !important;
     transform: none !important;
   }
@@ -1336,9 +1352,14 @@
   color: rgba(255, 255, 255, 0.90);
 }
 
-.peopleCultureHomepage .metaReaction:hover {
+.peopleCultureHomepage .metaReaction:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.38);
+}
+
+.peopleCultureHomepage .metaReaction:active:not(:disabled) {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .peopleCultureHomepage .metaReaction:focus-visible {
