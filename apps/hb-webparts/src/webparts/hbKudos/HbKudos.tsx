@@ -37,9 +37,7 @@ import {
   HbcKudosComposerPreview,
   HbcKudosComposerSuccess,
   HbcKudosComposerError,
-  HbcCard,
   HbcAvatarStack,
-  HbcStatusBadge,
   HbcEmptyState,
   HbcSpinner,
   type PeopleCultureSurfaceModel,
@@ -52,7 +50,6 @@ import { submitKudosDraft } from '../../homepage/data/peopleCultureSubmissionSou
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import {
   buildKudosRecipientSummary,
-  buildWorkflowChipDescriptor,
   hasAgedOff,
   isArchiveEligible,
   isAssociatedVisible,
@@ -178,43 +175,42 @@ function ArchiveList({
       <div
         style={{
           display: 'flex',
-          alignItems: 'baseline',
+          alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 16,
-          padding: '18px 2px 12px',
+          gap: 12,
+          padding: '16px 0 10px',
         }}
       >
-        <h3
+        <span
           style={{
-            margin: 0,
-            fontSize: '0.875rem',
+            fontSize: '0.625rem',
             fontWeight: 800,
-            letterSpacing: '0.12em',
+            letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: KUDOS_GOV_TOKENS.textTertiary,
+            color: '#c26434',
+            flexShrink: 0,
           }}
         >
-          Recognition archive
-        </h3>
-        <label
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.75rem' }}
-        >
-          <span style={{ color: KUDOS_GOV_TOKENS.textMuted, fontWeight: 600 }}>Search</span>
-          <input
-            type="search"
-            value={searchText}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search recognition…"
-            aria-label="Search recognition archive"
-            style={{
-              padding: '6px 10px',
-              fontSize: '0.8125rem',
-              borderRadius: 8,
-              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              minWidth: 200,
-            }}
-          />
-        </label>
+          Archive
+        </span>
+        <input
+          type="search"
+          value={searchText}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search…"
+          aria-label="Search recognition archive"
+          style={{
+            padding: '5px 10px',
+            fontSize: '0.75rem',
+            borderRadius: 8,
+            border: '1px solid rgba(229, 126, 70, 0.22)',
+            background: 'rgba(229, 126, 70, 0.03)',
+            maxWidth: 180,
+            outline: 'none',
+            fontFamily: 'inherit',
+            color: '#1a1310',
+          }}
+        />
       </div>
 
       {filtered.length === 0 ? (
@@ -223,105 +219,82 @@ function ArchiveList({
           description="Approved kudos that cycle off the homepage will appear here."
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {filtered.map((entry) => {
             const summary = buildKudosRecipientSummary(entry.recipients);
-            const workflowChip = entry.workflowStatus
-              ? buildWorkflowChipDescriptor(entry.workflowStatus)
-              : undefined;
             return (
-              <HbcCard key={entry.id} weight="standard">
-                <button
-                  type="button"
-                  onClick={() => onOpenDetail(entry)}
-                  aria-label={`Open recognition: ${entry.headline}`}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    background: 'transparent',
-                    border: 'none',
-                    padding: '12px 14px',
-                    cursor: 'pointer',
-                    color: 'inherit',
-                    font: 'inherit',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    {workflowChip ? (
-                      <HbcStatusBadge
-                        variant={
-                          workflowChip.tone === 'success'
-                            ? 'success'
-                            : workflowChip.tone === 'warning'
-                              ? 'warning'
-                              : workflowChip.tone === 'danger'
-                                ? 'critical'
-                                : 'info'
-                        }
-                        size="small"
-                        label={workflowChip.label}
-                      />
-                    ) : null}
-                    <span
-                      style={{
-                        fontSize: '0.625rem',
-                        fontWeight: 700,
-                        color: KUDOS_GOV_TOKENS.textCaption,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
-                      }}
-                    >
-                      {new Date(entry.submittedDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                  <h4
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => onOpenDetail(entry)}
+                aria-label={`Open recognition: ${entry.headline}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  width: '100%',
+                  textAlign: 'left',
+                  background: 'rgba(229, 126, 70, 0.02)',
+                  border: '1px solid rgba(229, 126, 70, 0.06)',
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  font: 'inherit',
+                  transition: 'background 160ms ease, border-color 160ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(229, 126, 70, 0.06)';
+                  e.currentTarget.style.borderColor = 'rgba(229, 126, 70, 0.18)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(229, 126, 70, 0.02)';
+                  e.currentTarget.style.borderColor = 'rgba(229, 126, 70, 0.06)';
+                }}
+              >
+                {entry.recipients.length > 0 ? (
+                  <HbcAvatarStack
+                    people={entry.recipients.slice(0, 1).map((r) => ({
+                      id: r.id,
+                      name: r.name,
+                      src: r.media?.src,
+                    }))}
+                    size="sm"
+                  />
+                ) : null}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
                     style={{
-                      margin: '0 0 4px',
-                      fontSize: '0.9375rem',
-                      fontWeight: 800,
-                      letterSpacing: '-0.015em',
-                      color: KUDOS_GOV_TOKENS.textPrimary,
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      lineHeight: 1.3,
+                      color: '#1a1310',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {entry.headline}
-                  </h4>
-                  <p
+                  </div>
+                  <div
                     style={{
-                      margin: '0 0 8px',
-                      fontSize: '0.8125rem',
-                      lineHeight: 1.5,
-                      color: KUDOS_GOV_TOKENS.textSecondary,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
+                      fontSize: '0.6875rem',
+                      fontWeight: 500,
+                      color: 'rgba(26, 19, 16, 0.50)',
                       overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {entry.excerpt}
-                  </p>
-                  {entry.recipients.length > 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <HbcAvatarStack
-                        people={entry.recipients.slice(0, 4).map((r) => ({
-                          id: r.id,
-                          name: r.name,
-                          src: r.media?.src,
-                        }))}
-                        size="sm"
-                        max={4}
-                      />
-                      <span style={{ fontSize: '0.6875rem', color: KUDOS_GOV_TOKENS.textFaint, fontWeight: 600 }}>
-                        {summary.label}
-                      </span>
-                    </div>
-                  ) : null}
-                </button>
-              </HbcCard>
+                    {summary.label}
+                    {' · '}
+                    {new Date(entry.submittedDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </div>
+                </div>
+              </button>
             );
           })}
         </div>

@@ -289,61 +289,47 @@ function KudosSpotlight({
         </div>
 
         <div className={styles.spotlightContent}>
-          {recipientLabel ? (
-            <span className={styles.spotlightRecipientTag}>For {recipientLabel}</span>
-          ) : null}
-
           <h3 className={styles.spotlightTitle}>{featured.headline}</h3>
+
+          {recipientLabel ? (
+            <span className={styles.spotlightRecipientTag}>{recipientLabel}</span>
+          ) : null}
 
           {featured.excerpt ? (
             <p className={styles.spotlightExcerpt}>{featured.excerpt}</p>
           ) : null}
 
-          {featured.submittedByName ||
-          (typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0) ? (
-            <div className={styles.spotlightMeta}>
-              {featured.submittedByName ? (
-                <span className={styles.metaItem}>
-                  <Users size={12} aria-hidden="true" className={styles.metaIcon} />
-                  Nominated by {featured.submittedByName}
-                </span>
-              ) : null}
-              {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
-                <span className={styles.metaCount}>
-                  <Sparkles
-                    size={11}
-                    aria-hidden="true"
-                    className={styles.metaCountIcon}
-                    strokeWidth={2.5}
-                  />
-                  {featured.celebrateCount} celebration
-                  {featured.celebrateCount === 1 ? '' : 's'}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-
-          <div className={styles.spotlightActions}>
-            {celebrateHref ? (
-              <HbcPremiumCta
-                label="Celebrate this team"
-                href={celebrateHref}
-                variant={isHomepage ? 'onDark' : 'primary'}
-                size="md"
-                arrow
-              />
+          <div className={styles.spotlightMeta}>
+            {featured.submittedByName ? (
+              <span className={styles.metaItem}>
+                <Users size={12} aria-hidden="true" className={styles.metaIcon} />
+                {featured.submittedByName}
+              </span>
             ) : null}
-            {onGiveKudos ? (
-              <button
-                type="button"
-                onClick={onGiveKudos}
-                className={styles.giveKudosGhostInline}
-              >
-                <Sparkles size={13} aria-hidden="true" strokeWidth={2.5} />
-                Give Kudos
-              </button>
+            {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
+              <span className={styles.metaCount}>
+                <Sparkles
+                  size={11}
+                  aria-hidden="true"
+                  className={styles.metaCountIcon}
+                  strokeWidth={2.5}
+                />
+                {featured.celebrateCount}
+              </span>
             ) : null}
           </div>
+
+          {celebrateHref ? (
+            <div className={styles.spotlightActions}>
+              <HbcPremiumCta
+                label="Celebrate"
+                href={celebrateHref}
+                variant={isHomepage ? 'onDark' : 'primary'}
+                size="sm"
+                arrow
+              />
+            </div>
+          ) : null}
         </div>
       </article>
 
