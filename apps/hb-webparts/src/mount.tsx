@@ -38,6 +38,7 @@ interface WebPartRendererContext {
   assetBaseUrl?: string;
   siteUrl?: string;
   getApiToken?: () => Promise<string>;
+  getGraphToken?: () => Promise<string>;
 }
 
 const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => ReactNode> = {
@@ -78,7 +79,9 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
         : undefined,
     }),
   // Phase-14 kudos/ Prompt-02: HB Kudos employee recognition webpart.
-  'f14e59a3-4d6b-43b2-952e-ba02dea11dad': ({ config, identity, assetBaseUrl }) => createElement(HbKudos, { config, identity, assetBaseUrl }),
+  // Phase-11 Prompt-01: getGraphToken wired so the shared people picker
+  // can resolve directory photos via Graph /users/{upn}/photo/$value.
+  'f14e59a3-4d6b-43b2-952e-ba02dea11dad': ({ config, identity, assetBaseUrl, getGraphToken }) => createElement(HbKudos, { config, identity, assetBaseUrl, getGraphToken }),
   // Phase-14 kudos/ Prompt-03: HB Kudos HR Approval Companion webpart.
   'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97': ({ config, identity, assetBaseUrl }) =>
     createElement(HbKudosCompanion, { config, identity, assetBaseUrl }),
@@ -142,6 +145,7 @@ export async function mount(
   const getApiToken = pnpExecutionMode === PNP_OPS_LEGACY_MODE
     ? createApiTokenProvider(spfxContext, backendAudience)
     : undefined;
+  const getGraphToken = createApiTokenProvider(spfxContext, 'https://graph.microsoft.com');
   const renderWebPart = WEBPART_RENDERERS[webPartId];
   const withThemeProvider = (node: ReactNode): ReactNode =>
     createElement(HbcThemeProvider, { forceTheme: 'light' as const, children: node });
@@ -165,6 +169,7 @@ export async function mount(
           assetBaseUrl,
           siteUrl,
           getApiToken,
+          getGraphToken,
         }),
       ),
     );

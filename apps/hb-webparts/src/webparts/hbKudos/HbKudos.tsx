@@ -43,6 +43,7 @@ import {
   type PeopleCultureSurfaceModel,
   type KudosSpotlightItem,
   type KudosRailItem,
+  createGraphPersonPhotoFn,
 } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
@@ -74,6 +75,8 @@ export interface HbKudosProps {
   config?: Record<string, unknown>;
   identity?: HomepageIdentityInput;
   assetBaseUrl?: string;
+  /** Graph-scoped token provider for directory photo fetch. */
+  getGraphToken?: () => Promise<string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -460,7 +463,7 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
 
 const DEFAULT_AGE_OFF_DAYS = 14;
 
-export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
+export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): React.JSX.Element {
   const heading =
     (typeof config?.heading === 'string' && config.heading) || 'HB Kudos';
   const showArchive = config?.showArchive !== false;
@@ -471,6 +474,10 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
 
   const { listConfig, isLoading, error: listError, refresh: refreshData } = usePeopleCultureData();
   const searchPeople = useSharePointPeopleSearch();
+  const fetchPersonPhoto = React.useMemo(
+    () => getGraphToken ? createGraphPersonPhotoFn(getGraphToken) : undefined,
+    [getGraphToken],
+  );
 
   // Resolve current user ID for associated-item visibility.
   const [currentUserId, setCurrentUserId] = React.useState<number | undefined>();
@@ -696,6 +703,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
               disabled={composer.status === 'submitting'}
               recipientsMode="typed"
               searchPeople={searchPeople}
+              fetchPersonPhoto={fetchPersonPhoto}
             />
             <HbcKudosComposerPreview
               draft={composer.draft}
