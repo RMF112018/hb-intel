@@ -295,7 +295,8 @@
       "Bash(~/.nvm/versions/node/v18.20.8/bin/node node_modules/gulp-cli/bin/gulp.js clean)",
       "Bash(export PATH=\"$HOME/.nvm/versions/node/v18.20.8/bin:$HOME/.nvm/versions/node/v22.14.0/bin:/usr/local/bin:/opt/homebrew/bin:$PATH\")",
       "Bash(npm --version)",
-      "Bash(export PATH=\"$HOME/.nvm/versions/node/v22.14.0/bin:$HOME/.nvm/versions/node/v18.20.8/bin:/usr/local/bin:/opt/homebrew/bin:$PATH\")"
+      "Bash(export PATH=\"$HOME/.nvm/versions/node/v22.14.0/bin:$HOME/.nvm/versions/node/v18.20.8/bin:/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(npm list:*)"
     ]
   },
   "enabledPlugins": {
