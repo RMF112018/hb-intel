@@ -1159,10 +1159,11 @@
   z-index: 1;
 }
 
-/* ── Spotlight card (homepage fit — frosted glass on gradient) ──
-   Removes the white card chrome (bg, border, shadow) and replaces
-   with a subtle frosted-glass treatment so featured recognition
-   reads as embedded within the masthead, not a nested card. */
+/* ── Spotlight card (homepage fit — substantial frosted glass) ──
+   Replaces the white card chrome with a substantial frosted-glass
+   treatment anchored by a left-accent orange border. The card reads
+   as a distinct, content-carrying spotlight embedded within the
+   masthead — visually prominent, not a hollow transparent overlay. */
 
 .peopleCultureHomepage .spotlightCard {
   flex-direction: column;
