@@ -555,4 +555,4 @@ export const HbcPeoplePicker: React.FC<HbcPeoplePickerProps> = ({
 };
 
 export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn } from './types.js';
-export { useGraphPeopleSearch, createStaticPeopleSearch } from './useGraphPeopleSearch.js';
+export { useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults } from './useGraphPeopleSearch.js';

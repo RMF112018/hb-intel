@@ -221,7 +221,7 @@ export type {
 
 export { HbcPeoplePicker } from './HbcPeoplePicker/index.js';
 export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn } from './HbcPeoplePicker/index.js';
-export { useGraphPeopleSearch, createStaticPeopleSearch } from './HbcPeoplePicker/useGraphPeopleSearch.js';
+export { useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults } from './HbcPeoplePicker/useGraphPeopleSearch.js';
 
 export { HbcAvatarStack } from './HbcAvatarStack/index.js';
 export type {

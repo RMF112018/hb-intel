@@ -27,6 +27,7 @@
 import { useCallback, useRef } from 'react';
 import { getSiteUrl, getKudosListHostUrl } from './spContext.js';
 import { fetchRequestDigest } from './peopleCultureSubmissionSource.js';
+import { rankPeopleResults } from '@hbc/ui-kit/homepage';
 import type { PersonEntry, PeopleSearchFn } from '@hbc/ui-kit/homepage';
 
 declare global {
@@ -245,9 +246,20 @@ async function searchSharePointPeople(
       console.warn(TAG, 'mapping-drop', { index: i, reason: 'missing Key and DisplayText', raw: JSON.stringify(r).slice(0, 200) });
       continue;
     }
+    const displayName = r.DisplayText ?? r.Key ?? '';
+
+    // Best-effort parse of givenName/surname from DisplayText.
+    // SharePoint principal DisplayText is typically "First Last".
+    const nameParts = displayName.trim().split(/\s+/);
+    const givenName = nameParts.length >= 2 ? nameParts[0] : undefined;
+    const surname = nameParts.length >= 2 ? nameParts.slice(1).join(' ') : undefined;
+
     const entry: PersonEntry = {
       upn: r.EntityData?.Email ?? r.Description ?? r.Key ?? '',
-      displayName: r.DisplayText ?? r.Key ?? '',
+      displayName,
+      givenName,
+      surname,
+      mail: r.EntityData?.Email ?? undefined,
       jobTitle: r.EntityData?.Title ?? undefined,
       department: r.EntityData?.Department ?? undefined,
     };
@@ -261,7 +273,7 @@ async function searchSharePointPeople(
     first3: entries.slice(0, 3).map((e) => `${e.displayName} <${e.upn}>`),
   });
 
-  return entries;
+  return rankPeopleResults(entries, query);
 }
 
 /**
