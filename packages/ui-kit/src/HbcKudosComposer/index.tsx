@@ -610,7 +610,7 @@ function KudosSharedPickerBridge({
             fetchPersonPhoto={fetchPersonPhoto}
             mode="multi"
             disabled={disabled}
-            placeholder="Search for a person\u2026"
+            placeholder="Who are you giving kudos to? Type to search..."
             validationMessage={errorMessage}
             bare
           />
