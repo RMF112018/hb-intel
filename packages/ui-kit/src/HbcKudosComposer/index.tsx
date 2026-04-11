@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, Building2, CheckCircle2, FolderKanban, Sparkles, User, Users, X as XIcon, type LucideIcon } from 'lucide-react';
 import { HbcAvatarStack } from '../HbcAvatarStack/index.js';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.js';
+import type { PersonEntry, PeopleSearchFn } from '../HbcPeoplePicker/types.js';
 import styles from './kudos-composer.module.css';
 
 // ---------------------------------------------------------------------------
@@ -343,6 +344,14 @@ export interface HbcKudosComposerFormProps {
    * buckets aligned to the People Culture Kudos schema.
    */
   recipientsMode?: KudosComposerRecipientsMode;
+  /**
+   * People search adapter for the People bucket. When provided, the
+   * individualEmails bucket renders as a true people picker with
+   * search, selection, and chips instead of freeform text entry.
+   * Pass `useGraphPeopleSearch(getToken)` from the consumer or a
+   * SharePoint-aware people search function.
+   */
+  searchPeople?: PeopleSearchFn;
 }
 
 const BUCKET_CONFIG: Record<
@@ -376,11 +385,13 @@ function HbcKudosComposerTypedRecipients({
   onChange,
   disabled,
   errorMessage,
+  searchPeople,
 }: {
   buckets: KudosComposerRecipientBucketsDraft;
   onChange: (patch: Partial<KudosComposerRecipientBucketsDraft>) => void;
   disabled: boolean;
   errorMessage?: string;
+  searchPeople?: PeopleSearchFn;
 }): React.JSX.Element {
   // Individuals always expanded; other buckets expand on click or when populated.
   const [expanded, setExpanded] = React.useState<Set<KudosComposerRecipientBucketKind>>(
@@ -401,18 +412,29 @@ function HbcKudosComposerTypedRecipients({
   const secondaryKinds = allKinds.filter((k) => k !== primaryKind);
 
   return (
-    <div className={styles.field}>
-      <label className={styles.label}>
-        Recipients <span className={styles.requiredMark}>*</span>
-      </label>
-
-      {/* Primary bucket — always expanded */}
-      <HbcKudosComposerRecipientBucket
-        kind={primaryKind}
-        values={buckets[primaryKind]}
-        onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
-        disabled={disabled}
-      />
+    <>
+      {/* Primary bucket — people picker when searchPeople provided, text otherwise */}
+      {searchPeople ? (
+        <HbcKudosComposerPeopleBucket
+          values={buckets[primaryKind]}
+          onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
+          disabled={disabled}
+          searchPeople={searchPeople}
+          errorMessage={errorMessage}
+        />
+      ) : (
+        <div className={styles.field}>
+          <label className={styles.label}>
+            Recipients <span className={styles.requiredMark}>*</span>
+          </label>
+          <HbcKudosComposerRecipientBucket
+            kind={primaryKind}
+            values={buckets[primaryKind]}
+            onChange={(next) => onChange({ [primaryKind]: next } as Partial<KudosComposerRecipientBucketsDraft>)}
+            disabled={disabled}
+          />
+        </div>
+      )}
 
       {/* Secondary buckets — progressive disclosure */}
       <div className={styles.bucketSecondaryRow}>
@@ -449,11 +471,204 @@ function HbcKudosComposerTypedRecipients({
         })}
       </div>
 
+      {!searchPeople && errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
+      {!searchPeople ? <div className={styles.hint}>Press Enter to add each entry.</div> : null}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// People picker bucket (search-select for individualEmails)
+// ---------------------------------------------------------------------------
+
+interface HbcKudosComposerPeopleBucketProps {
+  values: string[];
+  onChange: (next: string[]) => void;
+  disabled: boolean;
+  searchPeople: PeopleSearchFn;
+  errorMessage?: string;
+}
+
+function HbcKudosComposerPeopleBucket({
+  values,
+  onChange,
+  disabled,
+  searchPeople,
+  errorMessage,
+}: HbcKudosComposerPeopleBucketProps): React.JSX.Element {
+  const [query, setQuery] = React.useState('');
+  const [results, setResults] = React.useState<PersonEntry[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [activeIndex, setActiveIndex] = React.useState(-1);
+  // Cache display names for selected people so chips show names, not UPNs.
+  const [nameCache, setNameCache] = React.useState<Map<string, string>>(() => new Map());
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced search
+  React.useEffect(() => {
+    if (!query || query.trim().length < 2) {
+      setResults([]);
+      setIsOpen(false);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const hits = await searchPeople(query.trim());
+        const selectedUpns = new Set(values.map((v) => v.toLowerCase()));
+        setResults(hits.filter((h) => !selectedUpns.has(h.upn.toLowerCase())));
+        setIsOpen(true);
+        setActiveIndex(-1);
+      } catch {
+        setResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, searchPeople, values]);
+
+  // Close on outside click
+  React.useEffect(() => {
+    function handleClick(e: MouseEvent): void {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function selectPerson(person: PersonEntry): void {
+    setNameCache((prev) => {
+      const next = new Map(prev);
+      next.set(person.upn.toLowerCase(), person.displayName);
+      return next;
+    });
+    onChange([...values, person.upn]);
+    setQuery('');
+    setResults([]);
+    setIsOpen(false);
+    inputRef.current?.focus();
+  }
+
+  function removeAt(index: number): void {
+    onChange(values.filter((_, i) => i !== index));
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+    if (e.key === 'ArrowDown' && isOpen && results.length > 0) {
+      e.preventDefault();
+      setActiveIndex((i) => (i < results.length - 1 ? i + 1 : 0));
+    } else if (e.key === 'ArrowUp' && isOpen && results.length > 0) {
+      e.preventDefault();
+      setActiveIndex((i) => (i > 0 ? i - 1 : results.length - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (isOpen && activeIndex >= 0 && results[activeIndex]) {
+        selectPerson(results[activeIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    } else if (e.key === 'Backspace' && query === '' && values.length > 0) {
+      e.preventDefault();
+      removeAt(values.length - 1);
+    }
+  }
+
+  const BucketIcon = BUCKET_CONFIG.individualEmails.icon;
+
+  return (
+    <div className={styles.field}>
+      <label className={styles.label}>
+        Recipients <span className={styles.requiredMark}>*</span>
+      </label>
+      <div ref={containerRef} className={styles.pickerContainer}>
+        <div className={styles.bucket}>
+          <div className={styles.bucketLabel}>
+            <BucketIcon size={12} strokeWidth={2.2} aria-hidden="true" className={styles.bucketLabelIcon} />
+            People
+          </div>
+          <div className={styles.bucketChips}>
+            {values.map((upn, index) => {
+              const display = nameCache.get(upn.toLowerCase()) ?? upn;
+              return (
+                <span key={`${upn}-${index}`} className={clsx(styles.bucketChip, styles.bucketChip_individualEmails)}>
+                  <BucketIcon size={10} strokeWidth={2.5} aria-hidden="true" className={styles.bucketChipIcon} />
+                  <span className={styles.bucketChipLabel}>{display}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAt(index)}
+                    disabled={disabled}
+                    aria-label={`Remove ${display}`}
+                    className={styles.bucketChipRemove}
+                  >
+                    <XIcon size={10} strokeWidth={3} aria-hidden="true" />
+                  </button>
+                </span>
+              );
+            })}
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={disabled}
+              placeholder={values.length === 0 ? 'Search for a person…' : ''}
+              autoComplete="off"
+              role="combobox"
+              aria-expanded={isOpen}
+              aria-autocomplete="list"
+              className={styles.bucketInput}
+            />
+          </div>
+        </div>
+
+        {isOpen ? (
+          <div className={styles.pickerDropdown} role="listbox" aria-label="People search results">
+            {isSearching ? (
+              <div className={styles.pickerStatus}>Searching…</div>
+            ) : null}
+            {!isSearching && results.length === 0 && query.trim().length >= 2 ? (
+              <div className={styles.pickerStatus}>No people found for &ldquo;{query}&rdquo;</div>
+            ) : null}
+            {results.map((person, index) => (
+              <div
+                key={person.upn}
+                className={clsx(styles.pickerOption, index === activeIndex && styles.pickerOptionActive)}
+                role="option"
+                aria-selected={index === activeIndex}
+                onClick={() => selectPerson(person)}
+                onMouseEnter={() => setActiveIndex(index)}
+              >
+                <span className={styles.pickerOptionName}>{person.displayName}</span>
+                <span className={styles.pickerOptionMeta}>
+                  {person.upn}
+                  {person.jobTitle ? ` · ${person.jobTitle}` : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
-      <div className={styles.hint}>Press Enter to add each entry.</div>
+      <div className={styles.hint}>Search by name or email. Select from results.</div>
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Standard bucket (text entry for teams/departments/projects and fallback)
+// ---------------------------------------------------------------------------
 
 interface HbcKudosComposerRecipientBucketProps {
   kind: KudosComposerRecipientBucketKind;
@@ -544,6 +759,7 @@ export function HbcKudosComposerForm({
   errors = {},
   disabled = false,
   recipientsMode = 'text',
+  searchPeople,
 }: HbcKudosComposerFormProps): React.JSX.Element {
   const typedBuckets = draft.recipients ?? EMPTY_KUDOS_COMPOSER_RECIPIENT_BUCKETS;
   const handleTypedChange = React.useCallback(
@@ -568,6 +784,7 @@ export function HbcKudosComposerForm({
           onChange={handleTypedChange}
           disabled={disabled}
           errorMessage={errors.recipients}
+          searchPeople={searchPeople}
         />
       ) : (
         <div className={styles.field}>

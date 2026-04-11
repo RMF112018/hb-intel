@@ -67,5 +67,12 @@ declare const styles: {
   readonly errorBannerBody: string;
   readonly errorBannerTitle: string;
   readonly errorBannerMessage: string;
+  readonly pickerContainer: string;
+  readonly pickerDropdown: string;
+  readonly pickerOption: string;
+  readonly pickerOptionActive: string;
+  readonly pickerOptionName: string;
+  readonly pickerOptionMeta: string;
+  readonly pickerStatus: string;
 };
 export default styles;

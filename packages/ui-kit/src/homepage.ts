@@ -219,6 +219,9 @@ export type {
   KudosComposerRecipientsMode,
 } from './HbcKudosComposer/index.js';
 
+export type { PersonEntry, PeopleSearchFn } from './HbcPeoplePicker/types.js';
+export { createStaticPeopleSearch } from './HbcPeoplePicker/useGraphPeopleSearch.js';
+
 export { HbcAvatarStack } from './HbcAvatarStack/index.js';
 export type {
   HbcAvatarStackProps,

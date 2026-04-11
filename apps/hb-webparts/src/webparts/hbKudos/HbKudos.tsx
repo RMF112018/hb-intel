@@ -69,6 +69,7 @@ import {
   type KudosRailItem,
 } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
+import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useKudosComposer } from '../../homepage/data/useKudosComposer.js';
 import { submitKudosDraft } from '../../homepage/data/peopleCultureSubmissionSource.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
@@ -493,6 +494,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
       : DEFAULT_AGE_OFF_DAYS;
 
   const { listConfig, isLoading, error: listError, refresh: refreshData } = usePeopleCultureData();
+  const searchPeople = useSharePointPeopleSearch();
 
   // Resolve current user ID for associated-item visibility.
   const [currentUserId, setCurrentUserId] = React.useState<number | undefined>();
@@ -717,6 +719,7 @@ export function HbKudos({ config, identity }: HbKudosProps): React.JSX.Element {
               errors={composer.validationErrors}
               disabled={composer.status === 'submitting'}
               recipientsMode="typed"
+              searchPeople={searchPeople}
             />
             <HbcKudosComposerPreview
               draft={composer.draft}
