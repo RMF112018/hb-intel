@@ -462,6 +462,48 @@
   color: #c26434;
 }
 
+/* ── Reaction affordance (interactive celebrate button) ── */
+
+.metaReaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(229, 126, 70, 0.08);
+  border: 1px solid rgba(229, 126, 70, 0.20);
+  color: #c26434;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  outline: none;
+}
+
+.metaReaction:hover {
+  background: rgba(229, 126, 70, 0.14);
+  border-color: rgba(229, 126, 70, 0.35);
+  transform: translateY(-1px);
+}
+
+.metaReaction:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.metaReactionIcon {
+  color: #c26434;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metaReaction,
+  .metaReaction:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 .spotlightActions {
   margin-top: 6px;
   padding-top: 6px;
@@ -1286,6 +1328,25 @@
 
 .peopleCultureHomepage .metaCountIcon {
   color: rgba(255, 255, 255, 0.82);
+}
+
+.peopleCultureHomepage .metaReaction {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.peopleCultureHomepage .metaReaction:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.peopleCultureHomepage .metaReaction:focus-visible {
+  outline-color: #ffffff;
+}
+
+.peopleCultureHomepage .metaReactionIcon {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .peopleCultureHomepage .spotlightActions {

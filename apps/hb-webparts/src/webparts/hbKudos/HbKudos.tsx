@@ -715,6 +715,19 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         onGiveKudos={composerActions.open}
         viewAllHref="#hb-kudos-archive"
         celebrateHref={undefined}
+        onCelebrate={(kudosId) => {
+          const entry = publicKudos.find((e) => e.id === kudosId);
+          if (!entry || celebrating) return;
+          setCelebrating(true);
+          const current = entry.celebrateCount ?? 0;
+          const siteUrl = getKudosListHostUrl();
+          if (!siteUrl) { setCelebrating(false); return; }
+          void submitKudosGovernanceAction(
+            siteUrl,
+            { kind: 'celebrate', kudosId: entry.id, nextCount: current + 1 },
+            { actorEmail: identity?.email },
+          ).then(() => refreshData()).finally(() => setCelebrating(false));
+        }}
         heroEyebrow="HB Kudos"
         heroSubcaption="Signature recognition across the company"
         variant="people-culture-homepage"

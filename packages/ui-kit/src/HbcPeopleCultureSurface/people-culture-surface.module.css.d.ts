@@ -31,6 +31,8 @@ declare const styles: {
   readonly metaIcon: string;
   readonly metaCount: string;
   readonly metaCountIcon: string;
+  readonly metaReaction: string;
+  readonly metaReactionIcon: string;
   readonly spotlightActions: string;
   readonly recentList: string;
   readonly sectionLabel: string;

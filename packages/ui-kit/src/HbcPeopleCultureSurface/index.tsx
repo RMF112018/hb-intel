@@ -114,6 +114,13 @@ export interface HbcPeopleCultureSurfaceProps {
   viewAllHref?: string;
   /** href for the "Celebrate" CTA in the featured spotlight card. */
   celebrateHref?: string;
+  /**
+   * Callback-driven reaction handler for the featured spotlight card.
+   * Called with the featured item's `id` when the user clicks the
+   * reaction affordance. Takes precedence over `celebrateHref` when
+   * both are provided.
+   */
+  onCelebrate?: (id: string) => void;
   /** Hero eyebrow tag. Defaults to "People & Culture". */
   heroEyebrow?: string;
   /** Hero sub-caption under the headline. Defaults to "Celebrating our people". */
@@ -250,6 +257,7 @@ interface KudosSpotlightProps {
   recent: KudosRailItem[];
   onGiveKudos?: () => void;
   celebrateHref?: string;
+  onCelebrate?: (id: string) => void;
   reducedMotion: boolean;
   isHomepage?: boolean;
 }
@@ -259,6 +267,7 @@ function KudosSpotlight({
   recent,
   onGiveKudos,
   celebrateHref,
+  onCelebrate,
   reducedMotion,
   isHomepage,
 }: KudosSpotlightProps): React.JSX.Element {
@@ -316,31 +325,46 @@ function KudosSpotlight({
             <p className={styles.spotlightExcerpt}>{featured.excerpt}</p>
           ) : null}
 
-          {featured.submittedByName || (typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0) ? (
-            <div className={styles.spotlightMeta}>
-              {featured.submittedByName ? (
-                <span className={styles.metaItem}>
-                  <Users size={12} aria-hidden="true" className={styles.metaIcon} />
-                  {featured.submittedByName}
-                </span>
-              ) : null}
-              {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
-                <span className={styles.metaCount}>
-                  <Sparkles
-                    size={11}
-                    aria-hidden="true"
-                    className={styles.metaCountIcon}
-                    strokeWidth={2.5}
-                  />
-                  {featured.celebrateCount}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
+          <div className={styles.spotlightMeta}>
+            {featured.submittedByName ? (
+              <span className={styles.metaItem}>
+                <Users size={12} aria-hidden="true" className={styles.metaIcon} />
+                {featured.submittedByName}
+              </span>
+            ) : null}
+            {onCelebrate ? (
+              <button
+                type="button"
+                onClick={() => onCelebrate(featured.id)}
+                aria-label={`Celebrate this recognition${typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? ` (${featured.celebrateCount})` : ''}`}
+                className={styles.metaReaction}
+              >
+                <Sparkles
+                  size={12}
+                  aria-hidden="true"
+                  strokeWidth={2.5}
+                  className={styles.metaReactionIcon}
+                />
+                {typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0
+                  ? featured.celebrateCount
+                  : 'Celebrate'}
+              </button>
+            ) : typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
+              <span className={styles.metaCount}>
+                <Sparkles
+                  size={11}
+                  aria-hidden="true"
+                  className={styles.metaCountIcon}
+                  strokeWidth={2.5}
+                />
+                {featured.celebrateCount}
+              </span>
+            ) : null}
+          </div>
 
           {celebrateHref || (onGiveKudos && !isHomepage) ? (
             <div className={styles.spotlightActions}>
-              {celebrateHref ? (
+              {celebrateHref && !onCelebrate ? (
                 <HbcPremiumCta
                   label="Celebrate"
                   href={celebrateHref}
@@ -617,6 +641,7 @@ export function HbcPeopleCultureSurface({
   onGiveKudos,
   viewAllHref,
   celebrateHref,
+  onCelebrate,
   heroEyebrow = 'People & Culture',
   heroSubcaption = 'Celebrating our people',
   variant = 'default',
@@ -655,6 +680,7 @@ export function HbcPeopleCultureSurface({
             recent={model.kudos.recent ?? []}
             onGiveKudos={onGiveKudos}
             celebrateHref={celebrateHref}
+            onCelebrate={onCelebrate}
             reducedMotion={reducedMotion}
             isHomepage={isHomepage}
           />
