@@ -1,5 +1,5 @@
 /**
- * HB Kudos runtime smoke tests — Phase-14 kudos/ Prompt-02.
+ * HB Kudos runtime smoke tests — Phase-14 kudos/ phase-05.
  *
  * Covers the employee-facing HB Kudos webpart at the composer draft +
  * validation layer and the webpart render path. SharePoint REST calls
@@ -18,6 +18,8 @@ afterEach(() => {
 vi.mock('../data/spContext.js', () => ({
   getSiteUrl: () => undefined,
   storeSiteUrl: vi.fn(),
+  getKudosListHostUrl: () => undefined,
+  resolveCurrentUserId: () => Promise.resolve(undefined),
 }));
 
 import { HbKudos } from '../../webparts/hbKudos/HbKudos.js';
@@ -27,19 +29,19 @@ describe('HbKudos webpart — runtime smoke', () => {
     render(<HbKudos />);
     const section = document.querySelector('[data-hbc-webpart="hb-kudos"]');
     expect(section).not.toBeNull();
-    expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-prompt-02');
+    expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-phase-05');
   });
 
   it('renders the recognition archive heading by default (empty state when no data)', () => {
     render(<HbKudos />);
     // Archive heading is always rendered; the list body falls through to
     // the empty state when no approved kudos exist.
-    expect(screen.getByText('Recognition archive')).toBeTruthy();
+    expect(screen.getByText('Archive')).toBeTruthy();
   });
 
   it('hides the recognition archive when showArchive=false', () => {
     render(<HbKudos config={{ showArchive: false }} />);
-    expect(screen.queryByText('Recognition archive')).toBeNull();
+    expect(screen.queryByText('Archive')).toBeNull();
   });
 });
 
@@ -398,10 +400,10 @@ describe('HbcKudosComposerForm — typed recipient bucket input', () => {
       <HbcKudosComposerForm draft={draft} onDraftChange={() => {}} recipientsMode="typed" />,
     );
 
-    expect(screen.getByText('Individuals')).toBeTruthy();
+    expect(screen.getByText('People')).toBeTruthy();
     expect(screen.getByText('Teams')).toBeTruthy();
     expect(screen.getByText('Departments')).toBeTruthy();
-    expect(screen.getByText('Project groups')).toBeTruthy();
+    expect(screen.getByText('Projects')).toBeTruthy();
   });
 
   it('renders the legacy text field when recipientsMode is omitted', async () => {
@@ -422,7 +424,7 @@ describe('HbcKudosComposerForm — typed recipient bucket input', () => {
     expect(input).not.toBeNull();
     expect(input?.value).toBe('Riley Brooks');
     // Bucket labels should be absent in text mode.
-    expect(screen.queryByText('Individuals')).toBeNull();
+    expect(screen.queryByText('People')).toBeNull();
   });
 });
 
