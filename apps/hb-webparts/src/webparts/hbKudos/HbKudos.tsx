@@ -384,6 +384,159 @@ function ArchiveList({
 }
 
 // ---------------------------------------------------------------------------
+// Feed body (slide-out browse panel content)
+// ---------------------------------------------------------------------------
+
+interface KudosFeedBodyProps {
+  entries: KudosEntry[];
+  onOpenDetail: (entry: KudosEntry) => void;
+}
+
+function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): React.JSX.Element {
+  const [search, setSearch] = React.useState('');
+
+  const filtered = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return entries;
+    return entries.filter((entry) =>
+      [entry.headline, entry.excerpt, ...entry.recipients.map((r) => r.name)]
+        .join(' ')
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [entries, search]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search recognition..."
+        aria-label="Search recognition feed"
+        style={{
+          padding: '8px 14px',
+          fontSize: '0.8125rem',
+          borderRadius: 10,
+          border: `1.5px solid ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
+          background: KUDOS_GOV_TOKENS.orangeSubtle03,
+          outline: 'none',
+          fontFamily: 'inherit',
+          color: KUDOS_GOV_TOKENS.textPrimary,
+          width: '100%',
+          boxSizing: 'border-box' as const,
+        }}
+      />
+
+      {filtered.length === 0 ? (
+        <HbcEmptyState
+          title="No recognition found"
+          description={search ? 'Try a different search term.' : 'Recognition will appear here once approved.'}
+        />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map((entry) => {
+            const summary = buildKudosRecipientSummary(entry.recipients);
+            return (
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => onOpenDetail(entry)}
+                aria-label={`Open recognition: ${entry.headline}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                  width: '100%',
+                  textAlign: 'left',
+                  background: KUDOS_GOV_TOKENS.orangeSubtle02,
+                  border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle06}`,
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  font: 'inherit',
+                  outline: 'none',
+                  transition: 'background 160ms ease, border-color 160ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = KUDOS_GOV_TOKENS.orangeSubtle06;
+                  e.currentTarget.style.borderColor = KUDOS_GOV_TOKENS.orangeSubtle18;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = KUDOS_GOV_TOKENS.orangeSubtle02;
+                  e.currentTarget.style.borderColor = KUDOS_GOV_TOKENS.orangeSubtle06;
+                }}
+              >
+                {entry.recipients.length > 0 ? (
+                  <div style={{ flexShrink: 0, paddingTop: 2 }}>
+                    <HbcAvatarStack
+                      people={entry.recipients.slice(0, 2).map((r) => ({
+                        id: r.id,
+                        name: r.name,
+                        src: r.media?.src,
+                      }))}
+                      size="sm"
+                      max={2}
+                    />
+                  </div>
+                ) : null}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      lineHeight: 1.3,
+                      color: KUDOS_GOV_TOKENS.textPrimary,
+                      marginBottom: 2,
+                    }}
+                  >
+                    {entry.headline}
+                  </div>
+                  {entry.excerpt ? (
+                    <div
+                      style={{
+                        fontSize: '0.8125rem',
+                        lineHeight: 1.5,
+                        color: 'rgba(26, 19, 16, 0.65)',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        marginBottom: 4,
+                      }}
+                    >
+                      {entry.excerpt}
+                    </div>
+                  ) : null}
+                  <div
+                    style={{
+                      fontSize: '0.6875rem',
+                      fontWeight: 500,
+                      color: KUDOS_GOV_TOKENS.textFaint,
+                    }}
+                  >
+                    {summary.label}
+                    {' · '}
+                    {new Date(entry.submittedDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                    {typeof entry.celebrateCount === 'number' && entry.celebrateCount > 0
+                      ? ` · ✦ ${entry.celebrateCount}`
+                      : ''}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Detail panel (shared content via KudosDetailPanelContent)
 // ---------------------------------------------------------------------------
 
@@ -504,6 +657,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
   const [detailEntry, setDetailEntry] = React.useState<KudosEntry | undefined>();
   const [celebrating, setCelebrating] = React.useState(false);
   const [discardDialog, setDiscardDialog] = React.useState(false);
+  const [feedOpen, setFeedOpen] = React.useState(false);
 
   const allKudos: KudosEntry[] = listConfig?.kudos ?? [];
 
@@ -713,7 +867,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       <HbcPeopleCultureSurface
         model={surfaceModel}
         onGiveKudos={composerActions.open}
-        viewAllHref="#hb-kudos-archive"
+        onViewAll={() => setFeedOpen(true)}
         celebrateHref={undefined}
         celebrateLoading={celebrating}
         onCelebrate={(kudosId) => {
@@ -775,6 +929,19 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
             />
           </>
         ) : null}
+      </HbcKudosComposerFlyout>
+
+      <HbcKudosComposerFlyout
+        open={feedOpen}
+        onClose={() => setFeedOpen(false)}
+        title="HB Kudos"
+        subtitle="All recognition across the company"
+        primaryAction={{ label: 'Close', onClick: () => setFeedOpen(false) }}
+      >
+        <KudosFeedBody
+          entries={hydrateRecipientPhotos([...sortByRecency(publicKudos), ...archiveKudos.filter((a) => !publicKudos.some((p) => p.id === a.id))])}
+          onOpenDetail={(entry) => { setFeedOpen(false); setDetailEntry(entry); }}
+        />
       </HbcKudosComposerFlyout>
 
       <DetailPanel
