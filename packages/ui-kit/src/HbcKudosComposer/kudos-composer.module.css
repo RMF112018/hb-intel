@@ -272,51 +272,15 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px;
 }
 
-.formIntro {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(229, 126, 70, 0.08) 0%,
-    rgba(34, 83, 145, 0.03) 100%
-  );
-  border: 1px solid rgba(229, 126, 70, 0.16);
-  border-left: 3px solid #e57e46;
-}
-
-.formIntroIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #e57e46 0%, #d4693a 100%);
-  color: #ffffff;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(229, 126, 70, 0.28);
-}
-
-.formIntroTitle {
-  display: block;
-  font-size: 0.8125rem;
-  font-weight: 800;
-  color: #1a1310;
-  margin-bottom: 2px;
-  letter-spacing: -0.005em;
-}
-
-.formIntroBody {
-  display: block;
+.formNotice {
   font-size: 0.75rem;
-  color: rgba(26, 19, 16, 0.62);
-  line-height: 1.55;
+  font-weight: 500;
+  color: rgba(26, 19, 16, 0.48);
+  line-height: 1.45;
+  padding: 0 2px;
 }
 
 .field {
@@ -383,7 +347,7 @@
 
 .textarea {
   resize: vertical;
-  min-height: 110px;
+  min-height: 88px;
 }
 
 .textareaShort {
@@ -411,8 +375,8 @@
 .typedRecipientWrap {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 14px;
+  gap: 10px;
+  padding: 12px;
   border: 1.5px solid rgba(229, 126, 70, 0.22);
   border-radius: 12px;
   background: rgba(255, 250, 246, 0.55);
@@ -524,6 +488,37 @@
   font-weight: 500;
 }
 
+/* ── Details toggle ──────────────────────────────────── */
+
+.detailsToggle {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 6px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #c26434;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.detailsToggle:hover {
+  color: #e57e46;
+}
+
+.detailsToggle:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.detailsToggle:disabled {
+  color: rgba(26, 19, 16, 0.35);
+  cursor: not-allowed;
+}
+
 /* ── Preview ──────────────────────────────────────────── */
 
 .previewWrap {
@@ -553,44 +548,25 @@
 
 .previewCard {
   position: relative;
-  background: linear-gradient(180deg, #fffaf6 0%, #fef3eb 100%);
-  border-radius: 16px;
-  padding: 28px 22px 22px;
-  box-shadow:
-    0 2px 4px rgba(229, 126, 70, 0.06),
-    0 10px 24px rgba(229, 126, 70, 0.12);
-  border: 1px solid rgba(229, 126, 70, 0.14);
+  background: rgba(255, 250, 246, 0.6);
+  border-radius: 12px;
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(229, 126, 70, 0.12);
   transition: opacity 200ms ease;
 }
 
 .previewCardEmpty {
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 .previewRibbon {
-  position: absolute;
-  top: -12px;
-  left: 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 0.5625rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #ffffff;
-  background: linear-gradient(135deg, #e57e46 0%, #d4693a 100%);
-  border-radius: 999px;
-  box-shadow:
-    0 3px 10px rgba(229, 126, 70, 0.35),
-    0 1px 2px rgba(0, 0, 0, 0.08);
+  display: none;
 }
 
 .previewAvatars {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .previewOverflow {
@@ -602,11 +578,11 @@
 }
 
 .previewHeadline {
-  margin: 4px 0 0;
-  font-size: 1.375rem;
+  margin: 0;
+  font-size: 1.125rem;
   font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: #1a1310;
 }
 
@@ -619,12 +595,12 @@
 }
 
 .previewExcerpt {
-  margin: 10px 0 0;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: rgba(26, 19, 16, 0.72);
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(26, 19, 16, 0.65);
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -632,14 +608,11 @@
 .previewSubmitter {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(229, 126, 70, 0.22);
+  gap: 5px;
+  margin-top: 10px;
   font-size: 0.6875rem;
-  color: rgba(26, 19, 16, 0.55);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  color: rgba(26, 19, 16, 0.45);
+  font-weight: 600;
 }
 
 .previewSubmitterIcon {

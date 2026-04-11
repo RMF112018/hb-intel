@@ -333,27 +333,23 @@ export interface HbcKudosComposerFormProps {
 
 const BUCKET_CONFIG: Record<
   KudosComposerRecipientBucketKind,
-  { label: string; placeholder: string; hint: string; required?: boolean }
+  { label: string; placeholder: string }
 > = {
   individualEmails: {
     label: 'Individuals',
     placeholder: 'person@hedrickbrothers.com',
-    hint: 'Press Enter to add each email address. Moderators resolve these to SharePoint people on approval.',
   },
   teamLabels: {
     label: 'Teams',
     placeholder: 'e.g. Field Safety',
-    hint: 'Press Enter to add each team. HR confirms the taxonomy match during review.',
   },
   departmentLabels: {
     label: 'Departments',
     placeholder: 'e.g. Construction Operations',
-    hint: 'Press Enter to add each department.',
   },
   projectGroupLabels: {
     label: 'Project groups',
     placeholder: 'e.g. Downtown Mixed-Use Tower',
-    hint: 'Press Enter to add each project group.',
   },
 };
 
@@ -386,7 +382,7 @@ function HbcKudosComposerTypedRecipients({
       </div>
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
       <div className={styles.hint}>
-        Add recipients in at least one bucket. Individual, team, department, and project group recipients can be combined.
+        Add at least one recipient. Press Enter to add each entry.
       </div>
     </div>
   );
@@ -436,10 +432,7 @@ function HbcKudosComposerRecipientBucket({
 
   return (
     <div className={styles.bucket}>
-      <div className={styles.bucketLabel}>
-        {config.label}
-        {config.required ? <span className={styles.requiredMark}> *</span> : null}
-      </div>
+      <div className={styles.bucketLabel}>{config.label}</div>
       <div className={styles.bucketChips}>
         {values.map((value, index) => (
           <span key={`${value}-${index}`} className={styles.bucketChip}>
@@ -467,7 +460,6 @@ function HbcKudosComposerRecipientBucket({
           className={styles.bucketInput}
         />
       </div>
-      <div className={styles.bucketHint}>{config.hint}</div>
     </div>
   );
 }
@@ -487,19 +479,12 @@ export function HbcKudosComposerForm({
     [onDraftChange, typedBuckets],
   );
 
+  const [showDetails, setShowDetails] = React.useState(Boolean(draft.details));
+
   return (
     <div className={styles.form}>
-      <div className={styles.formIntro}>
-        <span className={styles.formIntroIcon} aria-hidden="true">
-          <Sparkles size={14} strokeWidth={2.5} />
-        </span>
-        <div>
-          <strong className={styles.formIntroTitle}>Recognize a teammate</strong>
-          <span className={styles.formIntroBody}>
-            Celebrate great work, team wins, or everyday excellence. Your kudos will be
-            reviewed before appearing on the homepage.
-          </span>
-        </div>
+      <div className={styles.formNotice}>
+        Your kudos will be reviewed before appearing on the homepage.
       </div>
 
       {/* Recipients */}
@@ -547,7 +532,9 @@ export function HbcKudosComposerForm({
           className={clsx(styles.input, errors.headline && styles.inputError)}
         />
         {errors.headline ? <div className={styles.error}>{errors.headline}</div> : null}
-        <div className={styles.hint}>{draft.headline.length}/120 characters</div>
+        {draft.headline.length > 80 ? (
+          <div className={styles.hint}>{draft.headline.length}/120</div>
+        ) : null}
       </div>
 
       {/* Message */}
@@ -561,28 +548,39 @@ export function HbcKudosComposerForm({
           value={draft.excerpt}
           onChange={(e) => onDraftChange({ excerpt: e.target.value })}
           disabled={disabled}
-          rows={4}
+          rows={3}
           className={clsx(styles.input, styles.textarea, errors.excerpt && styles.inputError)}
         />
         {errors.excerpt ? <div className={styles.error}>{errors.excerpt}</div> : null}
       </div>
 
-      {/* Details */}
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="hbc-kudos-details">
-          Additional details{' '}
-          <span className={styles.optionalMark}>(optional)</span>
-        </label>
-        <textarea
-          id="hbc-kudos-details"
-          placeholder="Any extra context or background"
-          value={draft.details}
-          onChange={(e) => onDraftChange({ details: e.target.value })}
+      {/* Details — progressive disclosure */}
+      {showDetails ? (
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="hbc-kudos-details">
+            Additional details{' '}
+            <span className={styles.optionalMark}>(optional)</span>
+          </label>
+          <textarea
+            id="hbc-kudos-details"
+            placeholder="Any extra context or background"
+            value={draft.details}
+            onChange={(e) => onDraftChange({ details: e.target.value })}
+            disabled={disabled}
+            rows={2}
+            className={clsx(styles.input, styles.textarea, styles.textareaShort)}
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowDetails(true)}
           disabled={disabled}
-          rows={2}
-          className={clsx(styles.input, styles.textarea, styles.textareaShort)}
-        />
-      </div>
+          className={styles.detailsToggle}
+        >
+          + Add details
+        </button>
+      )}
     </div>
   );
 }
@@ -639,14 +637,9 @@ export function HbcKudosComposerPreview({
     <div className={styles.previewWrap}>
       <div className={styles.previewLabel}>
         <span className={styles.previewLabelDot} aria-hidden="true" />
-        Live preview
+        Preview
       </div>
       <article className={clsx(styles.previewCard, isEmpty && styles.previewCardEmpty)}>
-        <span className={styles.previewRibbon} aria-hidden="true">
-          <Sparkles size={10} strokeWidth={2.5} />
-          Kudos Spotlight
-        </span>
-
         {recipients.length > 0 ? (
           <div className={styles.previewAvatars}>
             <HbcAvatarStack
@@ -664,14 +657,14 @@ export function HbcKudosComposerPreview({
         <h3 className={styles.previewHeadline}>{headline}</h3>
 
         {recipientLine ? (
-          <span className={styles.previewRecipients}>For {recipientLine}</span>
+          <span className={styles.previewRecipients}>{recipientLine}</span>
         ) : null}
 
         <p className={styles.previewExcerpt}>{excerpt}</p>
 
         <div className={styles.previewSubmitter}>
           <CheckCircle2 size={11} aria-hidden="true" className={styles.previewSubmitterIcon} />
-          Nominated by {submitterName || 'You'}
+          {submitterName || 'You'}
         </div>
       </article>
     </div>
