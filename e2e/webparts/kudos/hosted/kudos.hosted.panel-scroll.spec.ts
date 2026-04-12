@@ -28,7 +28,7 @@ async function bodyScrolls(
 }
 
 test.describe('kudos.hosted.panel-scroll', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`View All feed panel body scrolls ${matrixTag('H6', 'P1')}`, async ({ page }) => {
     await gotoKudosPublic(page, workflowBaseline());

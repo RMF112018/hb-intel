@@ -30,7 +30,7 @@ async function assertNotHiddenUnderChrome(
 }
 
 test.describe('kudos.hosted.chrome-overlap', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test.afterEach(async ({ page }) => {
     await removeHostedChrome(page).catch(() => {});

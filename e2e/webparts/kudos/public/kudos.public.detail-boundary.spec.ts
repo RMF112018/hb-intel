@@ -19,7 +19,7 @@ import {
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.public.detail-boundary', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`public detail excludes audit timeline ${matrixTag('BOUNDARY', 'P0')}`, async ({ page }) => {
     await gotoKudosPublic(page, workflowBaseline());

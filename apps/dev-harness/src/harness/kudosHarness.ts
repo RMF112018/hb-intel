@@ -25,7 +25,10 @@
 import {
   PEOPLE_CULTURE_LIST_REGISTRY,
 } from '../../../hb-webparts/src/homepage/data/peopleCultureSpListRegistry.js';
-import { storeSiteUrl } from '../../../hb-webparts/src/homepage/data/spContext.js';
+import {
+  storeKudosListHostUrl,
+  storeSiteUrl,
+} from '../../../hb-webparts/src/homepage/data/spContext.js';
 import { invalidatePeopleCultureCache } from '../../../hb-webparts/src/homepage/data/usePeopleCultureData.js';
 
 const HARNESS_SITE_URL = 'https://harness.local/sites/hb';
@@ -344,7 +347,14 @@ async function handleKudosRequest(
     const itemId = listMatch[2] ? Number.parseInt(listMatch[2], 10) : undefined;
     const isKudos = listId === KUDOS_GUID;
     const isAudit = listId === AUDIT_GUID;
-    if (!isKudos && !isAudit) return undefined;
+    // Unknown PC list (announcements, celebrations, or anything else
+    // addressed via the harness site URL) → serve an empty value array
+    // so parallel fetchPeopleCultureListData callers don't push binding
+    // errors and fail the top-level hook.
+    if (!isKudos && !isAudit) {
+      if (method === 'GET') return jsonResponse({ value: [] });
+      return new Response(null, { status: 204 });
+    }
 
     // Reads
     if (method === 'GET') {
@@ -492,6 +502,7 @@ export function installKudosHarness(): void {
   installed = true;
 
   storeSiteUrl(HARNESS_SITE_URL);
+  storeKudosListHostUrl(HARNESS_SITE_URL);
 
   const realFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -527,6 +538,16 @@ export function installKudosHarness(): void {
     store.nextAuditId = (payload.audits?.length ?? 0) + 1;
     invalidatePeopleCultureCache();
     bumpInvalidation();
+    // Notify React-aware subscribers (the dev-harness tab wrappers)
+    // to remount their Kudos subtree so the hook's initial-fetch
+    // error state is replaced by a fresh fetch against the seeded
+    // store. A plain cache-invalidation alone cannot force a
+    // re-render from outside React's commit loop.
+    try {
+      window.dispatchEvent(new CustomEvent('hb-kudos-seeded'));
+    } catch {
+      /* jsdom / non-browser context */
+    }
   };
 
   g.__hbKudosProbe = {

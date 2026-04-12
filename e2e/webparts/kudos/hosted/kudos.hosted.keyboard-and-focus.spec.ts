@@ -15,7 +15,7 @@ import { governanceBaseline, workflowBaseline } from '../fixtures';
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.hosted.keyboard-and-focus', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`tab order reaches public primary controls ${matrixTag('H4', 'P1')}`, async ({ page }) => {
     await gotoKudosPublic(page, workflowBaseline());

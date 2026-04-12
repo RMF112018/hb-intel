@@ -13,7 +13,7 @@ import { identityMediaBaseline } from '../fixtures';
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.public.identity-media', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test.beforeEach(async ({ page }) => {
     await gotoKudosPublic(page, identityMediaBaseline());

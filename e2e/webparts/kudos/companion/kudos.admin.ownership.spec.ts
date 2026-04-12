@@ -9,7 +9,7 @@ import { governanceBaseline, USERS } from '../fixtures';
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.admin.ownership', () => {
-  test.fixme(true, 'Requires dev-harness kudos-companion tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test.beforeEach(async ({ page }) => {
     await gotoKudosCompanion(page, governanceBaseline());

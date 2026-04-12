@@ -23,7 +23,7 @@ const BUCKETS: QueueBucket[] = [
 ];
 
 test.describe('kudos.admin.queue-tabs-and-filters', () => {
-  test.fixme(true, 'Requires dev-harness kudos-companion tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test.beforeEach(async ({ page }) => {
     await gotoKudosCompanion(page, auditTimelineBaseline());

@@ -867,6 +867,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
     return (
       <div
         data-hbc-webpart="hb-kudos"
+        data-hbc-testid="hb-kudos-public-root"
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
       >
         <HbcSpinner size="md" />
@@ -876,7 +877,11 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
 
   if (listError && !listConfig) {
     return (
-      <section data-hbc-webpart="hb-kudos" data-hbc-state="error">
+      <section
+        data-hbc-webpart="hb-kudos"
+        data-hbc-state="error"
+        data-hbc-testid="hb-kudos-public-root"
+      >
         <HbcEmptyState
           title="Recognition data unavailable"
           description="Unable to load HB Kudos data. Please try refreshing the page."

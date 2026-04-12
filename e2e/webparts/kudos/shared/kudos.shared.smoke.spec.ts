@@ -11,7 +11,8 @@ import { matrixTag } from '../helpers/kudosLocators';
 import { assertWorkflowEnumLocked } from '../helpers/kudosAssertions';
 
 test.describe('kudos.shared.smoke', () => {
-  test.fixme(true, 'Requires dev-harness probe exposure (prompt 04 dependency).');
+  // Activated phase-16a/04 — dev-harness probe landed in phase-16a/02,
+  // 03a-Locator-Coverage-Note § hb-kudos-public-root.
 
   test(`workflow enum drift guard ${matrixTag('DRIFT', 'P0')}`, async ({ page }) => {
     await gotoKudosPublic(page, workflowBaseline());

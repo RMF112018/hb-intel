@@ -16,7 +16,7 @@ import { auditTimelineBaseline, visibilityBaseline, workflowBaseline } from '../
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.hosted.dead-control-sweep', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`public main surface ${matrixTag('H7', 'P0')}`, async ({ page }) => {
     await gotoKudosPublic(page, workflowBaseline());

@@ -21,7 +21,7 @@ import {
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.public.workflow-visibility', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`unrelated viewer sees only approvedLive ${matrixTag('A3', 'C1', 'P0')}`, async ({ page }) => {
     await gotoKudosPublic(page, workflowBaseline());

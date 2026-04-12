@@ -51,7 +51,7 @@ async function openFirstRowOnTab(
 }
 
 test.describe('kudos.admin.governance-actions', () => {
-  test.fixme(true, 'Requires dev-harness kudos-companion tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   for (const c of CASES) {
     test(`${c.action} on ${c.openOn} row ${matrixTag('ACTION', c.action.toUpperCase(), 'P1')}`, async ({

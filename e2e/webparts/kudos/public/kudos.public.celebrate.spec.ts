@@ -13,7 +13,7 @@ import { interactionBaseline } from '../fixtures';
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.public.celebrate', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`celebrate count zero renders (E1) ${matrixTag('E1', 'P1')}`, async ({ page }) => {
     await gotoKudosPublic(page, interactionBaseline());

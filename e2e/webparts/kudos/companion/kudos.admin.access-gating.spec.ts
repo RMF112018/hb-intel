@@ -12,7 +12,7 @@ import { governanceBaseline, reviewerPerspectiveBaseline, USERS } from '../fixtu
 const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 test.describe('kudos.admin.access-gating', () => {
-  test.fixme(true, 'Requires dev-harness kudos-companion tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`unauthorized public viewer blocked ${matrixTag('ROLE', 'P0')}`, async ({ page }) => {
     await gotoKudosCompanion(page, {

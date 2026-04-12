@@ -21,7 +21,7 @@ async function setZoom(page: import('@playwright/test').Page, percent: number): 
 }
 
 test.describe('kudos.hosted.zoom-regression', () => {
-  test.fixme(true, 'Requires dev-harness kudos tab + seed hook (prompt 04 prerequisite).');
+  // Activated phase-16a/04.
 
   test(`100% baseline capture ${matrixTag('H8', 'P1')}`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
