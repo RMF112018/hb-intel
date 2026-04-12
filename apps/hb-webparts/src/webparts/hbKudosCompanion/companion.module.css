@@ -110,7 +110,7 @@
 .searchInput {
   padding: 6px 10px;
   font-size: 0.8125rem;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   border: 1px solid var(--hbk-orange-28);
   /* Fill whatever width the wrapped field gets rather than force a
      hard min-width that overflows narrow SharePoint columns. */
@@ -138,7 +138,7 @@
 .ownershipSelect {
   padding: 6px 8px;
   font-size: 0.8125rem;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   border: 1px solid var(--hbk-orange-28);
   font-family: inherit;
   outline: none;
@@ -155,7 +155,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--hbk-radius-md);
   background: linear-gradient(90deg, var(--hbk-orange-10), var(--hbk-blue-06));
   border: 1px solid var(--hbk-orange-25);
   /* Host-safe: under narrow widths the approve/clear buttons drop
@@ -173,10 +173,10 @@
   padding: 6px 14px;
   font-size: 0.75rem;
   font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--hbk-brand-orange) 0%, #d4693a 100%);
+  color: var(--hbk-surface-0);
+  background: linear-gradient(135deg, var(--hbk-brand-orange) 0%, var(--hbk-orange-cta-deep) 100%);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   cursor: pointer;
   outline: none;
 }
@@ -200,7 +200,7 @@
   border: none;
   cursor: pointer;
   outline: none;
-  border-radius: 6px;
+  border-radius: var(--hbk-radius-xs);
 }
 
 .bulkClearBtn:focus-visible {
@@ -268,7 +268,7 @@
   min-width: 0;
   /* Restrained interaction polish — headline bumps to the brand
      ink on hover/focus. Reduced-motion aware. */
-  transition: color 120ms ease;
+  transition: color var(--hbk-motion-fast);
 }
 
 .queueRowButton:hover .queueRowHeadline,
@@ -277,7 +277,7 @@
 }
 
 .queueRowHeadline {
-  transition: color 120ms ease;
+  transition: color var(--hbk-motion-fast);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -386,7 +386,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: var(--hbk-blue-08);
   color: var(--hbk-brand-blue);
 }
@@ -502,7 +502,7 @@
   position: relative;
   width: 100%;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: var(--hbk-blue-08);
   overflow: hidden;
 }
@@ -512,9 +512,9 @@
   left: 0;
   top: 0;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: linear-gradient(90deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
-  transition: width 160ms ease;
+  transition: width var(--hbk-motion-mid);
 }
 
 .bulkSummary {
@@ -522,7 +522,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--hbk-radius-md);
   border: 1px solid var(--hbk-blue-14);
   background: var(--hbk-blue-04);
 }
@@ -556,7 +556,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   border: 1px solid transparent;
   font-variant-numeric: tabular-nums;
 }
@@ -616,10 +616,10 @@
   padding: 6px 12px;
   font-size: 0.75rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--hbk-surface-0);
   background: linear-gradient(135deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
   border: none;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   cursor: pointer;
   outline: none;
 }
@@ -642,7 +642,7 @@
   color: var(--hbk-text-tertiary);
   background: transparent;
   border: 1px solid var(--hbk-blue-14);
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   cursor: pointer;
   outline: none;
 }
@@ -667,7 +667,7 @@
 .queueRowStateRail {
   width: 4px;
   align-self: stretch;
-  border-radius: 2px;
+  border-radius: var(--hbk-radius-hairline);
   background: var(--hbk-text-caption);
   margin-right: 6px;
   flex: 0 0 auto;
@@ -712,7 +712,7 @@
   height: 16px;
   padding: 0 5px;
   margin-left: 6px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: var(--hbk-blue-12);
   color: var(--hbk-brand-blue);
   font-size: 0.625rem;
@@ -752,7 +752,7 @@
   align-items: center;
   gap: 4px;
   padding: 3px 4px 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: var(--hbk-orange-06);
   border: 1px solid var(--hbk-orange-22);
   font-size: 0.6875rem;
@@ -766,13 +766,13 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   border: none;
   background: transparent;
   color: var(--hbk-text-muted);
   cursor: pointer;
   outline: none;
-  font-size: 12px;
+  font-size: var(--hbk-icon-sm);
   line-height: 1;
 }
 
@@ -791,7 +791,7 @@
   padding: 3px 10px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   font-size: 0.6875rem;
   font-weight: 700;
   color: var(--hbk-brand-blue);
@@ -845,7 +845,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--hbk-radius-lg);
   background: var(--hbk-blue-04);
   border: 1px solid var(--hbk-blue-14);
   /* Sticky control zone — Phase-27 Prompt-06 moderation UX upgrade.
@@ -856,7 +856,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  box-shadow: 0 4px 12px var(--hbk-ink-shadow-04);
+  box-shadow: var(--hbk-elev-zone);
 }
 
 .controlZoneTabs {

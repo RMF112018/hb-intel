@@ -13,13 +13,13 @@
      32px so keyboard + touch users get a real target rather than
      a tightly-padded label. */
   min-height: 32px;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   /* `--hbk-tone` is resolved by the tone-selector block below from
      the operator-facing tone (info / warning / danger). Runtime
      source must NOT inject `--hbk-tone` as an inline style — the
      selectors here own that mapping. */
   border: 1.5px solid var(--hbk-tone, var(--hbk-brand-blue));
-  background: #ffffff;
+  background: var(--hbk-surface-0);
   color: var(--hbk-tone, var(--hbk-brand-blue));
   font-size: 0.6875rem;
   font-weight: 800;
@@ -31,16 +31,16 @@
      ~120ms is below the perceptible-motion threshold and avoids
      theatrical animation under the homepage doctrine. */
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease,
-    transform 120ms ease;
+    background-color var(--hbk-motion-fast),
+    color var(--hbk-motion-fast),
+    border-color var(--hbk-motion-fast),
+    transform var(--hbk-motion-fast);
 }
 
 .actionButton:hover:not(:disabled):not([aria-disabled='true']),
 .actionButton:focus-visible {
   background: var(--hbk-tone, var(--hbk-brand-blue));
-  color: #ffffff;
+  color: var(--hbk-surface-0);
 }
 
 .actionButton:active:not(:disabled):not([aria-disabled='true']) {
@@ -68,7 +68,7 @@
 .toggleChip:focus-visible {
   outline: 2px solid var(--hbk-brand-blue);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
 }
 
 .actionButton:disabled,
@@ -82,7 +82,7 @@
 }
 
 .actionButton:disabled {
-  background: rgba(128, 128, 128, 0.08);
+  background: var(--hbk-neutral-disabled-08);
   color: var(--hbk-text-disabled);
 }
 
@@ -91,10 +91,10 @@
   /* Queue-filter button. 36px matches the celebrate-pill density
      and keeps the filter row comfortable for keyboard / touch use. */
   min-height: 36px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   border: 1.5px solid var(--hbk-blue-18);
-  background: #ffffff;
-  color: rgba(26, 19, 16, 0.68);
+  background: var(--hbk-surface-0);
+  color: var(--hbk-text-tab-resting);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -102,9 +102,9 @@
   font-family: inherit;
   outline: none;
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease;
+    background-color var(--hbk-motion-fast),
+    color var(--hbk-motion-fast),
+    border-color var(--hbk-motion-fast);
 }
 
 .tabButton:hover:not(:disabled):not([aria-disabled='true']) {
@@ -115,7 +115,7 @@
 .tabButtonActive {
   border-color: var(--hbk-brand-blue);
   background: var(--hbk-brand-blue);
-  color: #ffffff;
+  color: var(--hbk-surface-0);
 }
 
 .toggleChip {
@@ -127,17 +127,17 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   border: 1.5px solid var(--hbk-blue-20);
-  background: #ffffff;
+  background: var(--hbk-surface-0);
   color: var(--hbk-text-muted);
   cursor: pointer;
   font-family: inherit;
   outline: none;
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease;
+    background-color var(--hbk-motion-fast),
+    color var(--hbk-motion-fast),
+    border-color var(--hbk-motion-fast);
 }
 
 .toggleChip:hover:not(:disabled):not([aria-disabled='true']) {
@@ -182,7 +182,7 @@
 
 .errorAlert {
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   background: var(--hbk-danger-08);
   border: 1px solid var(--hbk-danger-22);
   color: var(--hbk-danger);
@@ -226,11 +226,11 @@
 
 .detailReducedView {
   padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--hbk-blue-06, rgba(34, 83, 145, 0.06));
+  border-radius: var(--hbk-radius-md);
+  background: var(--hbk-blue-06);
   border: 1px solid var(--hbk-blue-14);
   font-size: 0.75rem;
-  color: var(--hbk-blue-ink, rgba(34, 83, 145, 0.82));
+  color: var(--hbk-blue-ink);
   font-weight: 600;
   line-height: 1.5;
 }
@@ -257,7 +257,7 @@
 .dialogInput {
   padding: 8px 10px;
   font-size: 0.875rem;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   border: 1px solid var(--hbk-orange-28);
   font-family: inherit;
   outline: none;
@@ -292,7 +292,7 @@
   font-size: 0.8125rem;
   color: var(--hbk-text-secondary);
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   background: var(--hbk-blue-06);
   border: 1px solid var(--hbk-blue-14);
 }

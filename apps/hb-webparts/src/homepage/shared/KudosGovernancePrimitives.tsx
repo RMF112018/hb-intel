@@ -100,6 +100,11 @@ const HERO_BLUE_3 = '#1a3354';
 const ORANGE_DEEP = '#d16a34';
 const ORANGE_HOVER = '#ea8c56';
 const ORANGE_DEEP_HOVER = '#d77139';
+// Companion bulk-approve gradient terminal stop. Slightly cooler than
+// `ORANGE_DEEP` so the moderation CTA reads as a distinct operational
+// action, not a duplicate of the public Give-CTA. Previously a raw
+// `#d4693a` hex in `companion.module.css`.
+const ORANGE_CTA_DEEP = '#d4693a';
 
 // Editorial warm highlight — peach text accent reading against the
 // deep-blue hero. No shared equivalent yet.
@@ -138,6 +143,14 @@ export const KUDOS_GOV_TOKENS = {
   textFaint: alpha(INK_RGB, 0.48),
   textCaption: alpha(INK_RGB, 0.45),
   textDisabled: alpha(INK_RGB, 0.4),
+  // Governance tab-button resting label — ink at 68% so the label reads
+  // as tertiary in the queue scope row. Previously hardcoded as
+  // `rgba(26, 19, 16, 0.68)` in `governance.module.css`.
+  textTabResting: alpha(INK_RGB, 0.68),
+  // Neutral disabled-surface wash — inert governance action fill that
+  // must not borrow a tonal ramp. Previously `rgba(128, 128, 128, 0.08)`
+  // in `governance.module.css`.
+  neutralDisabled08: 'rgba(128, 128, 128, 0.08)',
 
   // Presentation-blue opacity ramp — derived from HBC_PRESENTATION_BLUE_RGB
   blueSubtle04: alpha(BLUE_RGB, 0.04),
@@ -314,6 +327,109 @@ export function kudosCSSVars(): React.CSSProperties {
     // HBC_PRESENTATION_ORANGE_RGB).
     '--hbk-orange-cast-10': alpha(ORANGE_RGB, 0.1),
     '--hbk-orange-cast-08': alpha(ORANGE_RGB, 0.08),
+
+    // Companion bulk-approve gradient terminal stop.
+    '--hbk-orange-cta-deep': ORANGE_CTA_DEEP,
+
+    // Governance neutrals — ink at 68% for tab-button resting label and
+    // a tone-neutral disabled wash for governance actions.
+    '--hbk-text-tab-resting': KUDOS_GOV_TOKENS.textTabResting,
+    '--hbk-neutral-disabled-08': KUDOS_GOV_TOKENS.neutralDisabled08,
+
+    // ── Phase-28 Prompt-01 — doctrine / token closure ─────────────
+    // Geometry, motion, elevation, and icon-size seams. Ordinary
+    // webpart CSS must never hardcode raw radius / transition ms /
+    // elevation offsets — every governed surface consumes these.
+
+    // Radius scale
+    '--hbk-radius-hairline': '2px',
+    '--hbk-radius-chip': '3px',
+    '--hbk-radius-xs': '6px',
+    '--hbk-radius-sm': '8px',
+    '--hbk-radius-md': '10px',
+    '--hbk-radius-lg': '12px',
+    '--hbk-radius-xl': '14px',
+    '--hbk-radius-2xl': '18px',
+    '--hbk-radius-pill': '999px',
+
+    // Motion scale — durations + easings as composed transition-shorthand
+    // fragments so call sites read as `transition: color var(--hbk-motion-fast)`.
+    '--hbk-motion-fast': '120ms ease',
+    '--hbk-motion-base': '140ms ease',
+    '--hbk-motion-mid': '160ms ease',
+    '--hbk-motion-slow': '240ms cubic-bezier(0.22, 1, 0.36, 1)',
+    '--hbk-motion-snap': '140ms cubic-bezier(0.22, 1, 0.36, 1)',
+
+    // Icon sizing — one scale so filter-chip / inline-glyph sizes never
+    // land as raw `font-size: 12px` in ordinary CSS.
+    '--hbk-icon-sm': '12px',
+
+    // Elevation scale — composed box-shadow strings referencing the
+    // ink-shadow and on-dark ramps above. Consumers use a single
+    // `box-shadow: var(--hbk-elev-*)` instead of authoring multi-stop
+    // shadow blocks inline.
+    '--hbk-elev-hero':
+      '0 1px 0 ' +
+      alpha(WHITE_RGB, 0.06) +
+      ' inset, 0 14px 36px ' +
+      alpha(INK_HEADING_RGB, 0.22) +
+      ', 0 2px 6px ' +
+      alpha(INK_HEADING_RGB, 0.14),
+    '--hbk-elev-featured':
+      '0 1px 0 ' +
+      alpha(WHITE_RGB, 0.18) +
+      ' inset, 0 4px 14px ' +
+      alpha(INK_HEADING_RGB, 0.18),
+    '--hbk-elev-featured-badge':
+      '0 1px 0 ' +
+      alpha(WHITE_RGB, 0.24) +
+      ' inset, 0 2px 6px ' +
+      alpha(INK_HEADING_RGB, 0.18),
+    '--hbk-elev-title-icon':
+      '0 1px 0 ' +
+      alpha(WHITE_RGB, 0.3) +
+      ' inset, 0 6px 14px ' +
+      alpha(ORANGE_RGB, 0.35),
+    '--hbk-elev-cta':
+      '0 1px 0 ' +
+      alpha(WHITE_RGB, 0.3) +
+      ' inset, 0 4px 10px ' +
+      alpha(ORANGE_RGB, 0.38) +
+      ', 0 1px 2px ' +
+      alpha(INK_HEADING_RGB, 0.18),
+    '--hbk-elev-cta-hover':
+      '0 1px 0 ' +
+      alpha(WHITE_RGB, 0.32) +
+      ' inset, 0 6px 16px ' +
+      alpha(ORANGE_RGB, 0.48) +
+      ', 0 2px 4px ' +
+      alpha(INK_HEADING_RGB, 0.22),
+    '--hbk-elev-row':
+      '0 1px 2px ' +
+      alpha(INK_HEADING_RGB, 0.04) +
+      ', 0 1px 0 ' +
+      alpha(WHITE_RGB, 0.55) +
+      ' inset',
+    '--hbk-elev-row-hover':
+      '0 4px 12px ' +
+      alpha(ORANGE_RGB, 0.1) +
+      ', 0 1px 0 ' +
+      alpha(WHITE_RGB, 0.55) +
+      ' inset',
+    '--hbk-elev-row-compact':
+      '0 1px 0 ' + alpha(WHITE_RGB, 0.55) + ' inset',
+    '--hbk-elev-row-compact-hover':
+      '0 3px 10px ' +
+      alpha(ORANGE_RGB, 0.08) +
+      ', 0 1px 0 ' +
+      alpha(WHITE_RGB, 0.55) +
+      ' inset',
+    '--hbk-elev-celebrate-inset':
+      '0 1px 0 ' + alpha(WHITE_RGB, 0.18) + ' inset',
+    '--hbk-elev-feed-cta-hover': '0 3px 10px ' + alpha(ORANGE_RGB, 0.08),
+    '--hbk-elev-feed-cta-rest':
+      '0 1px 2px ' + alpha(INK_HEADING_RGB, 0.04),
+    '--hbk-elev-zone': '0 4px 12px ' + alpha(INK_HEADING_RGB, 0.04),
   } as React.CSSProperties;
 }
 
