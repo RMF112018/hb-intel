@@ -11,7 +11,6 @@ import { PriorityActionsRail } from './webparts/priorityActionsRail/PriorityActi
 import { ToolLauncherWorkHub } from './webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
 import { CompanyPulse } from './webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from './webparts/leadershipMessage/LeadershipMessage.js';
-import { PeopleCultureMerged } from './webparts/peopleCulture/PeopleCultureMerged.js';
 import { PeopleCulturePublic } from './webparts/peopleCulturePublic/PeopleCulturePublic.js';
 import { PeopleCultureCompanion } from './webparts/peopleCultureCompanion/PeopleCultureCompanion.js';
 import { HbKudos } from './webparts/hbKudos/HbKudos.js';
@@ -52,10 +51,10 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   'cb7060f5-b852-4600-b912-a5f6f7221ce2': ({ config }) => createElement(ToolLauncherWorkHub, { config }),
   '0b53f651-fd92-4f7f-a9da-f7797017f5eb': ({ config }) => createElement(CompanyPulse, { config }),
   'e8fa8a84-a48a-41d2-85a6-b7c7df70aeca': ({ config }) => createElement(LeadershipMessage, { config }),
-  // Legacy merged People & Culture seam — preserved for backward compatibility
-  // with already-placed SharePoint page instances. Phase-14 Prompt-01 split
-  // into PeopleCulturePublic + HbKudos below; legacy stays live until rollout.
-  '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4': ({ config, identity }) => createElement(PeopleCultureMerged, { config, identity }),
+  // Legacy merged People & Culture seam (27ac10f4-…) was retired in the
+  // Phase-23 closure. It is no longer packaged into hb-webparts.sppkg and
+  // no longer rendered by the runtime. Consumers must migrate to the
+  // split webparts below (PeopleCulturePublic + HbKudos).
   // Phase-14 pc/ Prompt-02: People & Culture public webpart (real runtime).
   // Prompt-04 wires a SharePoint profile-photo resolver so profile-photo-first
   // media renders through `/_layouts/15/userphoto.aspx` when a site URL is

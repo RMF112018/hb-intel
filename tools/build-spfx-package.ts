@@ -163,6 +163,14 @@ const ALL_DOMAINS: DomainConfig[] = [
 
 const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
   '535f5a17-fc49-40ea-ac16-5d68895884f7', // legacy HbWebpartsWebPart
+  // Retired merged People & Culture seam. Superseded by the split
+  // PeopleCulturePublic (e39d9662-…) + PeopleCultureCompanion
+  // (7c3f8e24-…) + HbKudos (f14e59a3-…) + HbKudosCompanion
+  // (a8c5d9e2-…) webparts. Excluded from the packaging walk so the
+  // rebuilt .sppkg no longer advertises the retired GUID; any
+  // SharePoint pages still using this GUID must migrate to the
+  // split seams.
+  '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4',
 ]);
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
 const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';

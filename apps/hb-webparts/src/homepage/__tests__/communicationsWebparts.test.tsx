@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { CompanyPulse } from '../../webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from '../../webparts/leadershipMessage/LeadershipMessage.js';
-import { PeopleCultureMerged } from '../../webparts/peopleCulture/PeopleCultureMerged.js';
 
 describe('Prompt-06 awareness webparts', () => {
   it('renders lead story hierarchy and secondary items for company pulse', () => {
@@ -166,33 +165,6 @@ describe('Prompt-06 awareness webparts', () => {
   it('renders empty state for malformed leadership config', () => {
     render(<LeadershipMessage config={{ entries: [{ id: 'bad', title: '', message: '', leaderName: '' }] }} />);
     expect(screen.getByText('Leadership message configuration is invalid')).not.toBeNull();
-  });
-
-  it('renders people and culture merged with announcement data', () => {
-    render(
-      <PeopleCultureMerged
-        config={{
-          announcements: [
-            {
-              id: 'ann1',
-              personName: 'Jordan Lee',
-              announcementType: 'promotion',
-              headline: 'Promoted to Senior PM',
-              summary: 'Congratulations.',
-              publishDate: new Date().toISOString().slice(0, 10),
-            },
-          ],
-        }}
-      />,
-    );
-
-    expect(screen.getByText('Promoted to Senior PM')).not.toBeNull();
-    expect(screen.getByText('Jordan Lee')).not.toBeNull();
-  });
-
-  it('renders module-level empty state when no data configured', () => {
-    render(<PeopleCultureMerged config={{}} />);
-    expect(screen.getAllByRole('status').length).toBeGreaterThan(0);
   });
 
   it('renders loading state for communications webparts', () => {

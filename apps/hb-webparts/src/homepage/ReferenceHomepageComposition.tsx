@@ -5,7 +5,6 @@ import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityAct
 import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
 import { CompanyPulse } from '../webparts/companyPulse/CompanyPulse.js';
 import { LeadershipMessage } from '../webparts/leadershipMessage/LeadershipMessage.js';
-import { PeopleCultureMerged } from '../webparts/peopleCulture/PeopleCultureMerged.js';
 import { ProjectPortfolioSpotlight } from '../webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from '../webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
@@ -248,50 +247,12 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
             ],
           }}
         />
-        <PeopleCultureMerged
-          activeAudience="field"
-          config={{
-            heading: 'People & Culture',
-            announcements: [
-              {
-                id: 'ann-promo',
-                personName: 'Avery Jordan',
-                announcementType: 'promotion',
-                headline: 'Promoted to Senior Project Manager',
-                summary: 'Recognized for cross-team safety mentorship and project leadership.',
-                publishDate: new Date().toISOString().slice(0, 10),
-              },
-            ],
-            kudos: [
-              {
-                id: 'kudos-demo',
-                headline: 'Outstanding Safety Leadership',
-                excerpt: 'Led the team to 500 days without a recordable incident.',
-                submittedBy: { id: 'u1', displayName: 'Casey Martin', email: 'casey@hb.com' },
-                submittedDate: new Date().toISOString().slice(0, 10),
-                status: 'approved',
-                approvedDate: new Date().toISOString().slice(0, 10),
-                recipients: [{ id: 'r1', name: 'Riley Brooks', recipientType: 'individual' }],
-                celebrateCount: 12,
-              },
-            ],
-            celebrations: [
-              {
-                id: 'cel-bday',
-                personName: 'Riley Brooks',
-                celebrationType: 'birthday',
-                celebrationDate: new Date(Date.now() + 86_400_000 * 2).toISOString().slice(0, 10),
-              },
-              {
-                id: 'cel-anniv',
-                personName: 'Morgan Chen',
-                celebrationType: 'anniversary',
-                celebrationDate: new Date(Date.now() + 86_400_000 * 3).toISOString().slice(0, 10),
-                anniversaryYears: 10,
-              },
-            ],
-          }}
-        />
+        {/* Legacy merged People & Culture preview block retired in the
+            Phase-23 closure. The split PeopleCulturePublic /
+            PeopleCultureCompanion / HbKudos surfaces each own their
+            own preview harness under the dev-harness tabs; this
+            reference composition intentionally stops at the editorial
+            pulse + leadership zone here. */}
       </section>
 
       {/* ── Zone 5: Operational — Intelligence Modules ──────────── */}
