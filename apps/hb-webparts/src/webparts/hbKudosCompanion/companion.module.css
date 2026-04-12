@@ -264,6 +264,25 @@
   color: inherit;
   font: inherit;
   min-width: 0;
+  /* Restrained interaction polish — headline bumps to the brand
+     ink on hover/focus. Reduced-motion aware. */
+  transition: color 120ms ease;
+}
+
+.queueRowButton:hover .queueRowHeadline,
+.queueRowButton:focus-visible .queueRowHeadline {
+  color: var(--hbk-brand-blue);
+}
+
+.queueRowHeadline {
+  transition: color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .queueRowButton,
+  .queueRowHeadline {
+    transition: none;
+  }
 }
 
 .queueRowChipRow {

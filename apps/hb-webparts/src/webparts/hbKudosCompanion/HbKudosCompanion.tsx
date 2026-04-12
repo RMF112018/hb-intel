@@ -53,6 +53,7 @@
  *   - `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/Decision-Lock-Appendix.md`
  */
 import * as React from 'react';
+import { clsx } from 'clsx';
 import {
   HbcAvatarStack,
   HbcCard,
@@ -344,7 +345,10 @@ function QueueRow({
     <HbcCard weight="standard">
       <div
         data-hbc-testid="hb-kudos-queue-row"
-        className={`${companionStyles.queueRow} ${selectable ? companionStyles.queueRowSelectable : ''}`}
+        className={clsx(
+          companionStyles.queueRow,
+          selectable && companionStyles.queueRowSelectable,
+        )}
       >
         {selectable ? (
           <label
@@ -627,7 +631,10 @@ function DetailPanel({
               <div
                 role="group"
                 aria-label="Takedown"
-                className={`${kudosFlyoutStyles.actionFamily} ${kudosFlyoutStyles.actionFamilyDestructive}`}
+                className={clsx(
+                  kudosFlyoutStyles.actionFamily,
+                  kudosFlyoutStyles.actionFamilyDestructive,
+                )}
               >
                 <span className={kudosFlyoutStyles.actionFamilyLabel}>
                   Takedown
@@ -1285,7 +1292,7 @@ export function HbKudosCompanion({
         <div
           role="group"
           aria-label="Queue scope"
-          className={`${companionStyles.filterBar} ${companionStyles.controlZoneTabs}`}
+          className={clsx(companionStyles.filterBar, companionStyles.controlZoneTabs)}
         >
           {COMPANION_TABS.map((tab) => (
             <KudosGovernanceTabButton
@@ -1302,7 +1309,7 @@ export function HbKudosCompanion({
         <div
           role="group"
           aria-label="Refinement controls"
-          className={`${companionStyles.searchCluster} ${companionStyles.controlZoneRefinement}`}
+          className={clsx(companionStyles.searchCluster, companionStyles.controlZoneRefinement)}
         >
         <label className={companionStyles.searchField}>
           <KudosGovernanceToolbarLabel>Search</KudosGovernanceToolbarLabel>

@@ -27,6 +27,35 @@
   cursor: pointer;
   font-family: inherit;
   outline: none;
+  /* Restrained premium polish — tone invert on hover/focus.
+     ~120ms is below the perceptible-motion threshold and avoids
+     theatrical animation under the homepage doctrine. */
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.actionButton:hover:not(:disabled):not([aria-disabled='true']),
+.actionButton:focus-visible {
+  background: var(--hbk-tone, var(--hbk-brand-blue));
+  color: #ffffff;
+}
+
+.actionButton:active:not(:disabled):not([aria-disabled='true']) {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actionButton,
+  .tabButton,
+  .toggleChip {
+    transition: none;
+  }
+  .actionButton:active:not(:disabled):not([aria-disabled='true']) {
+    transform: none;
+  }
 }
 
 /* Tone-to-color mapping — CSS-owned, token-backed. */
@@ -72,6 +101,15 @@
   cursor: pointer;
   font-family: inherit;
   outline: none;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.tabButton:hover:not(:disabled):not([aria-disabled='true']) {
+  border-color: var(--hbk-brand-blue);
+  color: var(--hbk-brand-blue);
 }
 
 .tabButtonActive {
@@ -96,6 +134,15 @@
   cursor: pointer;
   font-family: inherit;
   outline: none;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.toggleChip:hover:not(:disabled):not([aria-disabled='true']) {
+  border-color: var(--hbk-brand-blue);
+  color: var(--hbk-brand-blue);
 }
 
 .toggleChipActive {
