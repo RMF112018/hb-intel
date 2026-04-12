@@ -28,6 +28,19 @@ which is the single source of truth consumed by:
 - `../../mount.tsx` (renderer map)
 - Wave 4 doctrine guards (`../../homepage/__tests__/` — see Proof)
 
+## Placement intent — full-bleed posture
+
+The two webparts deliberately carry different manifest placement
+flags. This asymmetry is doctrine, not drift (closed by Phase-28
+Prompt-06). Doctrine guards in
+`../../homepage/__tests__/kudosDoctrineGuards.test.ts` enforce the
+split so either manifest cannot regress silently:
+
+| Manifest                                   | `supportsFullBleed` | Why                                                                                                                                                                                      |
+|--------------------------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `HbKudosWebPart.manifest.json` (public)    | **absent / false**  | Zone-aligned homepage composition. The public surface is authored to read as a premium editorial card inside standard SharePoint section columns (1/1, 1/2, 1/3, 1/4) alongside siblings. |
+| `HbKudosCompanionWebPart.manifest.json` (companion) | **true**            | Dedicated HR moderation workspace. Authored to occupy a full-width operator page; pulse strip + triage spotlight + triage list use every available column so reviewers work the queue without competing chrome. |
+
 `kudosRuntimeContract.ts` also exports `KUDOS_RUNTIME_OWNERSHIP`, a
 machine-readable ownership map naming what each runtime owns, what
 it must not own (owned by the sibling), and what is shared.

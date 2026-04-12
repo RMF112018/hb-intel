@@ -309,6 +309,24 @@ describe('HB Kudos doctrine guards', () => {
       expect(src).toMatch(/export function KudosGovernanceDetailShell/);
     });
 
+    it('Phase-28 Prompt-06: manifest full-bleed posture matches product placement intent', () => {
+      // Packaging intent is doctrine. The public `HbKudos` is a
+      // zone-aligned homepage surface and must NOT set
+      // `supportsFullBleed`. The companion is a dedicated
+      // moderation workspace and MUST set `supportsFullBleed: true`.
+      // Either flag flipping silently is a packaging-intent drift —
+      // this guard fails fast when it happens.
+      const publicManifest = JSON.parse(
+        read('webparts/hbKudos/HbKudosWebPart.manifest.json'),
+      ) as { supportsFullBleed?: boolean };
+      const companionManifest = JSON.parse(
+        read('webparts/hbKudosCompanion/HbKudosCompanionWebPart.manifest.json'),
+      ) as { supportsFullBleed?: boolean };
+
+      expect(publicManifest.supportsFullBleed).not.toBe(true);
+      expect(companionManifest.supportsFullBleed).toBe(true);
+    });
+
     it('Phase-28 Prompt-05: KudosGovernanceAssignmentDialog uses HbcPeoplePicker instead of a raw email textbox', () => {
       // The Phase-28 Prompt-05 UX upgrade replaced the raw
       // "email textbox + Resolve user" interaction with the
