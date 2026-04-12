@@ -35,9 +35,18 @@
  *   - Role: `resolveKudosRole` queries SharePoint group membership
  *     against canonical Entra security groups (HB Kudos Admins,
  *     HB Kudos Reviewers). Not configurable per webpart instance.
- *   - Dialog: all governance inputs use `KudosGovernanceInputDialog`
- *     (no window.prompt). Actions dispatched via two-phase state
- *     pattern (open dialog → confirm → dispatch).
+ *   - Dialogs: governance inputs route to one of three shared
+ *     primitives (no window.prompt):
+ *       - `KudosGovernanceInputDialog` — free-text / select: reject,
+ *         requestRevision, flagAdminReview, pin, remove, reopen,
+ *         updateContent (two-phase headline → excerpt).
+ *       - `KudosGovernanceDateTimeDialog` — datetime picker: schedule
+ *         and feature-expiry. Local-tz picker → ISO-UTC on confirm.
+ *       - `KudosGovernanceAssignmentDialog` — email-resolving
+ *         picker: reassign. Resolves against siteusers/getByEmail
+ *         on the canonical list-host; dispatches numeric SP user id.
+ *     All three follow the two-phase state pattern
+ *     (open dialog → confirm → dispatch typed patch).
  *   - Detail panel: `HbcKudosComposerFlyout` shell + shared
  *     `KudosDetailPanelContent` with full audit timeline for
  *     governance roles.
