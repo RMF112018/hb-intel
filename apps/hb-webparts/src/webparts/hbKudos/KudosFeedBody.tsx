@@ -33,8 +33,43 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
     );
   }, [entries, search]);
 
+  // Bridge governance tokens into CSS custom properties so the scoped
+  // style block can reference governed values. Mirrors the pattern used
+  // by ArchiveList.tsx so feed + archive share the same public-surface
+  // affordance grammar (hover + focus-visible).
+  const feedCssVars = {
+    '--hbk-orange-06': KUDOS_GOV_TOKENS.orangeSubtle06,
+    '--hbk-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
+    '--hbk-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
+  } as React.CSSProperties;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div
+      data-hbc-webpart-section="hb-kudos-feed"
+      style={{ display: 'flex', flexDirection: 'column', gap: 10, ...feedCssVars }}
+    >
+      {/* eslint-disable-next-line react/no-unknown-property */}
+      <style>{`
+        [data-hbc-webpart-section="hb-kudos-feed"] .hbk-feed-row {
+          transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+          outline: none;
+        }
+        [data-hbc-webpart-section="hb-kudos-feed"] .hbk-feed-row:hover {
+          background: rgba(255, 250, 246, 0.8);
+          border-color: var(--hbk-orange-18);
+          box-shadow: 0 2px 8px rgba(229, 126, 70, 0.08);
+        }
+        [data-hbc-webpart-section="hb-kudos-feed"] .hbk-feed-row:focus-visible {
+          outline: 2px solid var(--hbk-brand-blue);
+          outline-offset: 2px;
+          border-color: var(--hbk-orange-18);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [data-hbc-webpart-section="hb-kudos-feed"] .hbk-feed-row {
+            transition: none !important;
+          }
+        }
+      `}</style>
       <input
         type="search"
         value={search}
@@ -79,6 +114,8 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
                 type="button"
                 onClick={() => onOpenDetail(entry)}
                 aria-label={`Open recognition: ${entry.headline}`}
+                data-hbc-testid="hb-kudos-public-feed-item"
+                className="hbk-feed-row"
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -93,18 +130,6 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
                   cursor: 'pointer',
                   color: 'inherit',
                   font: 'inherit',
-                  outline: 'none',
-                  transition: 'background 160ms ease, border-color 160ms ease, box-shadow 160ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 250, 246, 0.8)';
-                  e.currentTarget.style.borderColor = KUDOS_GOV_TOKENS.orangeSubtle18;
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(229, 126, 70, 0.08)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#ffffff';
-                  e.currentTarget.style.borderColor = KUDOS_GOV_TOKENS.orangeSubtle06;
-                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 {entry.recipients.length > 0 ? (
