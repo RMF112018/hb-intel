@@ -17,7 +17,7 @@
 .feedSearch {
   padding: 6px 12px;
   font-size: 0.8125rem;
-  border-radius: 10px;
+  border-radius: var(--hbk-radius-md);
   border: 1.5px solid var(--hbk-orange-22);
   background: var(--hbk-orange-03);
   outline: none;
@@ -47,15 +47,15 @@
   background: var(--hbk-surface-0);
   border: 1px solid var(--hbk-orange-06);
   border-left: 3px solid var(--hbk-orange-55);
-  border-radius: 14px;
+  border-radius: var(--hbk-radius-xl);
   padding: 12px 16px 10px;
   cursor: pointer;
   color: inherit;
   font: inherit;
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+    background var(--hbk-motion-mid),
+    border-color var(--hbk-motion-mid),
+    box-shadow var(--hbk-motion-mid);
   outline: none;
 }
 
@@ -115,7 +115,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: var(--hbk-orange-08);
   border: 1px solid var(--hbk-orange-18);
   color: var(--hbk-brand-orange);

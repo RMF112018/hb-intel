@@ -30,6 +30,11 @@ example of what "compliant" looks like in the current codebase.
       The sole escape is authored governance constants declared in
       a single `tokens.ts` co-located with the surface family, with
       an inline `// §6.1 …` governance comment.
+      Enforced statically for the HB Kudos family by
+      `apps/hb-webparts/src/homepage/__tests__/kudosStaticGuardrails.test.ts`
+      (Phase-28 Prompt-07). The guard fails the suite the moment a
+      raw hex, rgba(), `border-radius: Npx`, or `Nms` literal
+      re-enters any kudos-family ordinary-source CSS module.
 - [ ] Values flow from governed `theme/tokens.ts`, `grid.ts`,
       `radii.ts`, `elevation.ts`, `animations.ts` via one
       CSS-custom-property bridge (`kudosComposerCSSVars()` inside

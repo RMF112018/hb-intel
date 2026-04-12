@@ -73,7 +73,7 @@
   padding: 8px 12px;
   font: inherit;
   font-size: 0.875rem;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   border: 1px solid var(--hbk-blue-18);
   background: var(--hbk-surface-0);
   color: var(--hbk-text-primary);
@@ -100,7 +100,7 @@
 
 .taskDialogResolved {
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--hbk-radius-sm);
   background: var(--hbk-blue-06);
   border: 1px solid var(--hbk-blue-14);
   font-size: 0.8125rem;

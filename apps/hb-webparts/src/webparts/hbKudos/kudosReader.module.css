@@ -66,7 +66,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--hbk-radius-pill);
   background: var(--hbk-orange-shadow);
   border: 1px solid var(--hbk-orange-18);
   color: var(--hbk-text-primary);
