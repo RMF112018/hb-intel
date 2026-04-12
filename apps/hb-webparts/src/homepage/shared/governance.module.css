@@ -14,9 +14,13 @@
      a tightly-padded label. */
   min-height: 32px;
   border-radius: 8px;
-  border: 1.5px solid var(--hbk-tone);
+  /* `--hbk-tone` is resolved by the tone-selector block below from
+     the operator-facing tone (info / warning / danger). Runtime
+     source must NOT inject `--hbk-tone` as an inline style — the
+     selectors here own that mapping. */
+  border: 1.5px solid var(--hbk-tone, var(--hbk-brand-blue));
   background: #ffffff;
-  color: var(--hbk-tone);
+  color: var(--hbk-tone, var(--hbk-brand-blue));
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -24,6 +28,11 @@
   font-family: inherit;
   outline: none;
 }
+
+/* Tone-to-color mapping — CSS-owned, token-backed. */
+.actionButton[data-tone='info']    { --hbk-tone: var(--hbk-brand-blue); }
+.actionButton[data-tone='warning'] { --hbk-tone: var(--hbk-warning-orange); }
+.actionButton[data-tone='danger']  { --hbk-tone: var(--hbk-danger); }
 
 .actionButton:focus-visible,
 .tabButton:focus-visible,

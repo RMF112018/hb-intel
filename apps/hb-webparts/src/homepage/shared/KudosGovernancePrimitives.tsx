@@ -267,6 +267,11 @@ export function kudosCSSVars(): React.CSSProperties {
     '--hbk-surface-0': '#ffffff',
     '--hbk-surface-warm': 'rgba(255, 250, 246, 0.8)',
 
+    // Warning (surface-lane amber — no own ramp; exposed as a single
+    // var so tone-driven CSS selectors can resolve --hbk-tone from
+    // data-tone without inline style injection).
+    '--hbk-warning-orange': KUDOS_GOV_TOKENS.warningOrange,
+
     // Danger
     '--hbk-danger': KUDOS_GOV_TOKENS.dangerRed,
     '--hbk-danger-08': KUDOS_GOV_TOKENS.dangerSubtle08,
@@ -311,12 +316,12 @@ export function KudosInfoRow({ label, value }: { label: string; value?: string }
 
 export type GovernanceActionTone = 'info' | 'warning' | 'danger';
 
-const TONE_COLORS: Record<GovernanceActionTone, string> = {
-  danger: KUDOS_GOV_TOKENS.dangerRed,
-  warning: KUDOS_GOV_TOKENS.warningOrange,
-  info: KUDOS_GOV_TOKENS.brandBlue,
-};
-
+/**
+ * Tone resolution moved to CSS. The runtime only attaches
+ * `data-tone={tone}` and the `governance.module.css` selectors
+ * resolve `--hbk-tone` from the tokenized ramp. This keeps dynamic
+ * visual values out of ordinary runtime source.
+ */
 export function KudosActionButton({
   label,
   onClick,
@@ -330,18 +335,15 @@ export function KudosActionButton({
   tone: GovernanceActionTone;
   testId?: string;
 }): React.JSX.Element {
-  const toneColor = TONE_COLORS[tone];
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       data-hbc-testid={testId}
+      data-tone={tone}
       className={governanceActionButton()}
-      style={{
-        ...kudosCSSVars(),
-        '--hbk-tone': toneColor,
-      } as React.CSSProperties}
+      style={kudosCSSVars()}
     >
       {label}
     </button>
