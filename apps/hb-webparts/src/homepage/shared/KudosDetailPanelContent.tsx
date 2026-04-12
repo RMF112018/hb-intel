@@ -11,6 +11,12 @@
  *     prominence/scheduling internals.
  *   - `role='reviewer'|'admin'` → full governance sections + audit timeline
  *     + internal notes.
+ *
+ * Phase-21 Wave 4 model-grade closure: inline style objects retired in
+ * favor of classes in `governance.module.css`. Token values flow
+ * through the `--hbk-gov-*` custom properties that the consuming
+ * primitives already seed, so the detail panel inherits the same
+ * governance chrome grammar as the companion + public surface.
  */
 import * as React from 'react';
 import {
@@ -32,6 +38,7 @@ import {
   KudosInfoRow,
   KudosAuditTimelineBlock,
 } from './KudosGovernancePrimitives.js';
+import governanceStyles from './governance.module.css';
 
 export interface KudosDetailPanelContentProps {
   entry: KudosEntry;
@@ -62,8 +69,20 @@ export function KudosDetailPanelContent({
     ? `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}\n${mapAuditEventTypeLabel('approve')} · ${new Date(entry.approvedDate).toLocaleString()}`
     : `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}`;
 
+  // Seed governance custom-property vars so our module classes resolve
+  // to the governed presentation-lane tokens inside the flyout shell.
+  const detailVars = {
+    '--hbk-gov-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
+    '--hbk-gov-blue-06': KUDOS_GOV_TOKENS.blueSubtle06,
+    '--hbk-gov-blue-14': KUDOS_GOV_TOKENS.blueSubtle14,
+    '--hbk-gov-blue-ink': KUDOS_GOV_TOKENS.blueText82,
+    '--hbk-gov-danger-08': KUDOS_GOV_TOKENS.dangerSubtle08,
+    '--hbk-gov-danger-22': KUDOS_GOV_TOKENS.dangerSubtle22,
+    '--hbk-gov-danger': KUDOS_GOV_TOKENS.dangerRed,
+  } as React.CSSProperties;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className={governanceStyles.detailStack} style={detailVars}>
       {/* Status chip */}
       {chip ? (
         <div>
@@ -72,16 +91,12 @@ export function KudosDetailPanelContent({
       ) : null}
 
       {/* Recognition content */}
-      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.6, color: KUDOS_GOV_TOKENS.textSecondary }}>
-        {entry.excerpt}
-      </p>
+      <p className={governanceStyles.detailProse}>{entry.excerpt}</p>
 
       {entry.details && (isPublic || isGovernance) ? (
         <div>
           <KudosSectionHeading>Additional details</KudosSectionHeading>
-          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.6, color: KUDOS_GOV_TOKENS.textSecondary }}>
-            {entry.details}
-          </p>
+          <p className={governanceStyles.detailSmallProse}>{entry.details}</p>
         </div>
       ) : null}
 
@@ -89,7 +104,7 @@ export function KudosDetailPanelContent({
       {summary.total > 0 ? (
         <div>
           <KudosSectionHeading>Recipients</KudosSectionHeading>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className={governanceStyles.detailRow}>
             <HbcAvatarStack
               people={entry.recipients.slice(0, 6).map((r) => ({
                 id: r.id,
@@ -99,9 +114,7 @@ export function KudosDetailPanelContent({
               size="md"
               max={6}
             />
-            <span style={{ fontSize: '0.8125rem', color: KUDOS_GOV_TOKENS.textSecondary, fontWeight: 600 }}>
-              {summary.label}
-            </span>
+            <span className={governanceStyles.detailRowLabel}>{summary.label}</span>
           </div>
         </div>
       ) : null}
@@ -149,18 +162,7 @@ export function KudosDetailPanelContent({
 
       {/* Associated-only reduced view — Decision Lock §103-107 */}
       {!isPublic && !isGovernance ? (
-        <div
-          style={{
-            padding: '10px 12px',
-            borderRadius: 10,
-            background: KUDOS_GOV_TOKENS.blueSubtle06,
-            border: `1px solid ${KUDOS_GOV_TOKENS.blueSubtle14}`,
-            fontSize: '0.75rem',
-            color: KUDOS_GOV_TOKENS.blueText82,
-            fontWeight: 600,
-            lineHeight: 1.5,
-          }}
-        >
+        <div className={governanceStyles.detailReducedView}>
           This recognition is no longer on the public homepage. You can see it here because you are associated with it.
         </div>
       ) : null}

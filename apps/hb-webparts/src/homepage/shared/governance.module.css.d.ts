@@ -10,5 +10,11 @@ declare const styles: {
   readonly infoRowLabel: string;
   readonly toolbarLabel: string;
   readonly errorAlert: string;
+  readonly detailStack: string;
+  readonly detailProse: string;
+  readonly detailSmallProse: string;
+  readonly detailRow: string;
+  readonly detailRowLabel: string;
+  readonly detailReducedView: string;
 };
 export default styles;

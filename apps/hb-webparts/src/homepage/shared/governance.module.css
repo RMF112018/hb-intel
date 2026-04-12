@@ -123,3 +123,48 @@
   font-size: 0.8125rem;
   font-weight: 600;
 }
+
+/* Detail panel layout (KudosDetailPanelContent) */
+
+.detailStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailProse {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--hbk-gov-text-secondary);
+}
+
+.detailSmallProse {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--hbk-gov-text-secondary);
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detailRowLabel {
+  font-size: 0.8125rem;
+  color: var(--hbk-gov-text-secondary);
+  font-weight: 600;
+}
+
+.detailReducedView {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--hbk-gov-blue-06, rgba(34, 83, 145, 0.06));
+  border: 1px solid var(--hbk-gov-blue-14);
+  font-size: 0.75rem;
+  color: var(--hbk-gov-blue-ink, rgba(34, 83, 145, 0.82));
+  font-weight: 600;
+  line-height: 1.5;
+}
