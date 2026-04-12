@@ -28,6 +28,7 @@ declare const styles: {
   readonly queueRowExcerpt: string;
   readonly queueRowRecipients: string;
   readonly queueRowRecipientSummary: string;
+  readonly queueRowRecipientsEmpty: string;
   readonly queueRowSubmittedBy: string;
   readonly queueRowDateCell: string;
   readonly queueRowDate: string;

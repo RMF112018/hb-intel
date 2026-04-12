@@ -407,28 +407,37 @@ function QueueRow({
               {entry.excerpt}
             </p>
           </div>
-          {/* Row footer — submission context, separated by a dashed
-              divider so operators parse origin data as a distinct
-              zone from the recognition body. */}
-          {entry.recipients.length > 0 ? (
-            <div className={companionStyles.queueRowFooter}>
-              <HbcAvatarStack
-                people={entry.recipients.slice(0, 4).map((r) => ({
-                  id: r.id,
-                  name: r.name,
-                  src: r.media?.src,
-                }))}
-                size="sm"
-                max={4}
-              />
-              <span className={companionStyles.queueRowRecipientSummary}>
-                {summary.label}
+          {/* Row footer — submission context is a first-class scan
+              target and must render regardless of recipient
+              presence. The footer zone always exists; only the
+              avatar stack and the computed recipient summary are
+              gated by recipient presence, and the empty case
+              degrades to a muted, data-honest placeholder. */}
+          <div className={companionStyles.queueRowFooter}>
+            {entry.recipients.length > 0 ? (
+              <>
+                <HbcAvatarStack
+                  people={entry.recipients.slice(0, 4).map((r) => ({
+                    id: r.id,
+                    name: r.name,
+                    src: r.media?.src,
+                  }))}
+                  size="sm"
+                  max={4}
+                />
+                <span className={companionStyles.queueRowRecipientSummary}>
+                  {summary.label}
+                </span>
+              </>
+            ) : (
+              <span className={companionStyles.queueRowRecipientsEmpty}>
+                No recipients linked
               </span>
-              <span className={companionStyles.queueRowSubmittedBy}>
-                Submitted by {entry.submittedBy.displayName}
-              </span>
-            </div>
-          ) : null}
+            )}
+            <span className={companionStyles.queueRowSubmittedBy}>
+              Submitted by {entry.submittedBy.displayName}
+            </span>
+          </div>
         </button>
 
         <div className={companionStyles.queueRowDateCell}>

@@ -423,6 +423,17 @@
   font-weight: 600;
 }
 
+/* Data-honest placeholder for rows with no linked recipients.
+   Reads as an intentional absence rather than a broken zone; the
+   row keeps its five-zone anatomy so submission metadata + date
+   spine stay stable. */
+.queueRowRecipientsEmpty {
+  font-size: 0.75rem;
+  color: var(--hbk-text-faint);
+  font-weight: 500;
+  font-style: italic;
+}
+
 .queueRowSubmittedBy {
   font-size: 0.6875rem;
   color: var(--hbk-text-faint);
