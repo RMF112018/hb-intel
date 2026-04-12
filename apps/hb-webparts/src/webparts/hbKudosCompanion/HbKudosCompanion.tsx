@@ -516,53 +516,131 @@ function DetailPanel({
 
           {error ? <KudosGovernanceErrorAlert message={error} /> : null}
 
-          <div
-            role="group"
-            aria-label="Governance actions"
-            className={kudosFlyoutStyles.actionZone}
-          >
-            <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" testId="hb-kudos-action-reject" />
-            <KudosActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" testId="hb-kudos-action-request-revision" />
-            {capabilities.canSchedule ? (
-              entry?.isScheduled
-                ? <KudosActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" testId="hb-kudos-action-unschedule" />
-                : <KudosActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" testId="hb-kudos-action-schedule" />
+          {/* Action families — governance operations grouped by
+              operator intent rather than a flat wrapped strip.
+              Destructive "Takedown" family is set apart with its
+              own separator and tint so removal is never buried.
+              Capability gates are preserved 1:1 per button. */}
+          <div className={kudosFlyoutStyles.actionFamilies}>
+
+            {/* Review decision — moderation outcome for this item. */}
+            <div
+              role="group"
+              aria-label="Review decision"
+              className={kudosFlyoutStyles.actionFamily}
+            >
+              <span className={kudosFlyoutStyles.actionFamilyLabel}>
+                Review decision
+              </span>
+              <div className={kudosFlyoutStyles.actionFamilyRow}>
+                <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" testId="hb-kudos-action-reject" />
+                <KudosActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" testId="hb-kudos-action-request-revision" />
+                {capabilities.canApprove && entry?.workflowStatus === 'rejected' ? (
+                  <KudosActionButton label="Reopen" onClick={() => onAction('reopen')} disabled={dispatching} tone="info" testId="hb-kudos-action-reopen" />
+                ) : null}
+              </div>
+            </div>
+
+            {/* Publication & prominence — what the approved item
+                does on the public surface. Rendered only when the
+                operator has at least one capability in the family. */}
+            {(capabilities.canSchedule ||
+              capabilities.canPin ||
+              capabilities.canFeature ||
+              (capabilities.canEditPublished && entry?.workflowStatus === 'approved')) ? (
+              <div
+                role="group"
+                aria-label="Publication and prominence"
+                className={kudosFlyoutStyles.actionFamily}
+              >
+                <span className={kudosFlyoutStyles.actionFamilyLabel}>
+                  Publication &amp; prominence
+                </span>
+                <div className={kudosFlyoutStyles.actionFamilyRow}>
+                  {capabilities.canSchedule ? (
+                    entry?.isScheduled
+                      ? <KudosActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" testId="hb-kudos-action-unschedule" />
+                      : <KudosActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" testId="hb-kudos-action-schedule" />
+                  ) : null}
+                  {capabilities.canPin ? (
+                    entry?.isPinned
+                      ? <KudosActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" testId="hb-kudos-action-unpin" />
+                      : <KudosActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" testId="hb-kudos-action-pin" />
+                  ) : null}
+                  {capabilities.canFeature ? (
+                    entry?.isFeatured
+                      ? <KudosActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" testId="hb-kudos-action-unfeature" />
+                      : <KudosActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" testId="hb-kudos-action-feature" />
+                  ) : null}
+                  {capabilities.canEditPublished && entry?.workflowStatus === 'approved' ? (
+                    <KudosActionButton label="Edit published" onClick={() => onAction('updateContent')} disabled={dispatching} tone="info" testId="hb-kudos-action-update-content" />
+                  ) : null}
+                  <KudosActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
+                </div>
+              </div>
             ) : null}
-            {capabilities.canPin ? (
-              entry?.isPinned
-                ? <KudosActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" testId="hb-kudos-action-unpin" />
-                : <KudosActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" testId="hb-kudos-action-pin" />
+
+            {/* Admin review flag — internal routing signal. */}
+            {(capabilities.canFlagAdminReview || capabilities.canClearAdminReview) ? (
+              <div
+                role="group"
+                aria-label="Admin review flag"
+                className={kudosFlyoutStyles.actionFamily}
+              >
+                <span className={kudosFlyoutStyles.actionFamilyLabel}>
+                  Admin review flag
+                </span>
+                <div className={kudosFlyoutStyles.actionFamilyRow}>
+                  {capabilities.canFlagAdminReview && !needsAdminReview(entry) ? (
+                    <KudosActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" testId="hb-kudos-action-flag" />
+                  ) : null}
+                  {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
+                    <KudosActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" testId="hb-kudos-action-clear-flag" />
+                  ) : null}
+                </div>
+              </div>
             ) : null}
-            {capabilities.canFeature ? (
-              entry?.isFeatured
-                ? <KudosActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" testId="hb-kudos-action-unfeature" />
-                : <KudosActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" testId="hb-kudos-action-feature" />
-            ) : null}
-            {capabilities.canRemove && entry?.workflowStatus !== 'removedUnpublished' ? (
-              <KudosActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" testId="hb-kudos-action-remove" />
-            ) : null}
-            {capabilities.canRestore && entry?.workflowStatus === 'removedUnpublished' ? (
-              <KudosActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" testId="hb-kudos-action-restore" />
-            ) : null}
-            {capabilities.canFlagAdminReview && !needsAdminReview(entry) ? (
-              <KudosActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" testId="hb-kudos-action-flag" />
-            ) : null}
-            {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
-              <KudosActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" testId="hb-kudos-action-clear-flag" />
-            ) : null}
-            {capabilities.canApprove && entry?.workflowStatus === 'rejected' ? (
-              <KudosActionButton label="Reopen" onClick={() => onAction('reopen')} disabled={dispatching} tone="info" testId="hb-kudos-action-reopen" />
-            ) : null}
-            {capabilities.canEditPublished && entry?.workflowStatus === 'approved' ? (
-              <KudosActionButton label="Edit published" onClick={() => onAction('updateContent')} disabled={dispatching} tone="info" testId="hb-kudos-action-update-content" />
-            ) : null}
+
+            {/* Ownership — assignment operations. */}
             {capabilities.canClaim ? (
-              <KudosActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" testId="hb-kudos-action-claim" />
+              <div
+                role="group"
+                aria-label="Ownership"
+                className={kudosFlyoutStyles.actionFamily}
+              >
+                <span className={kudosFlyoutStyles.actionFamilyLabel}>
+                  Ownership
+                </span>
+                <div className={kudosFlyoutStyles.actionFamilyRow}>
+                  <KudosActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" testId="hb-kudos-action-claim" />
+                  <KudosActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" testId="hb-kudos-action-assign" />
+                </div>
+              </div>
             ) : null}
-            {capabilities.canClaim ? (
-              <KudosActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" testId="hb-kudos-action-assign" />
+
+            {/* Takedown — destructive family. Visibly separated so
+                remove/restore decisions read as deliberate work. */}
+            {((capabilities.canRemove && entry?.workflowStatus !== 'removedUnpublished') ||
+              (capabilities.canRestore && entry?.workflowStatus === 'removedUnpublished')) ? (
+              <div
+                role="group"
+                aria-label="Takedown"
+                className={`${kudosFlyoutStyles.actionFamily} ${kudosFlyoutStyles.actionFamilyDestructive}`}
+              >
+                <span className={kudosFlyoutStyles.actionFamilyLabel}>
+                  Takedown
+                </span>
+                <div className={kudosFlyoutStyles.actionFamilyRow}>
+                  {capabilities.canRemove && entry?.workflowStatus !== 'removedUnpublished' ? (
+                    <KudosActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" testId="hb-kudos-action-remove" />
+                  ) : null}
+                  {capabilities.canRestore && entry?.workflowStatus === 'removedUnpublished' ? (
+                    <KudosActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" testId="hb-kudos-action-restore" />
+                  ) : null}
+                </div>
+              </div>
             ) : null}
-            <KudosActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
+
           </div>
         </KudosFlyoutBody>
       ) : null}

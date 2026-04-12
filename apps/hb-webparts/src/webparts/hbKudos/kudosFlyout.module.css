@@ -57,3 +57,50 @@
   padding-top: 6px;
   border-top: 1px dashed var(--hbk-orange-18);
 }
+
+/* ── Action families ──────────────────────────────────────
+   Phase-25 Prompt-02: the governance action strip is now
+   grouped into operator-oriented families (review decision,
+   publication/prominence, admin-review flag, ownership,
+   takedown) instead of a flat wrapped band. Labels are
+   compact eyebrows; rows wrap; the takedown family carries a
+   stronger separator and danger-tinted label so destructive
+   actions read as deliberate work. */
+
+.actionFamilies {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--hbk-orange-18);
+}
+
+.actionFamily {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.actionFamilyLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hbk-text-muted);
+}
+
+.actionFamilyRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actionFamilyDestructive {
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--hbk-danger-22);
+}
+
+.actionFamilyDestructive .actionFamilyLabel {
+  color: var(--hbk-danger);
+}

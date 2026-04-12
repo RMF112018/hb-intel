@@ -5,5 +5,10 @@ declare const styles: {
   readonly sectionHeading: string;
   readonly metaRow: string;
   readonly actionZone: string;
+  readonly actionFamilies: string;
+  readonly actionFamily: string;
+  readonly actionFamilyLabel: string;
+  readonly actionFamilyRow: string;
+  readonly actionFamilyDestructive: string;
 };
 export default styles;
