@@ -32,6 +32,10 @@ export const KUDOS_TESTIDS = {
   viewAllTrigger: 'hb-kudos-view-all',
   viewAllFeedPanel: 'hb-kudos-view-all-panel',
   archiveSearchInput: 'hb-kudos-archive-search',
+  // Phase-17 vertical compaction: hosted bottom-right assistant-overlay
+  // no-conflict sentinel. Present only when the webpart detects it is
+  // rendered inside a host iframe.
+  assistantSafeZone: 'kudos-assistant-safezone',
 
   // Companion webpart
   companionRoot: 'hb-kudos-companion-root',

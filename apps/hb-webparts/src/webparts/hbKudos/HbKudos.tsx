@@ -244,10 +244,10 @@ function ArchiveList({
       {/* eslint-disable-next-line react/no-unknown-property */}
       <style>{`
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
-          display: flex; align-items: center; gap: 12px; width: 100%;
+          display: flex; align-items: center; gap: 10px; width: 100%;
           text-align: left; background: var(--hbk-orange-02);
           border: 1px solid var(--hbk-orange-06); border-radius: 10px;
-          padding: 11px 14px; cursor: pointer; color: inherit; font: inherit;
+          padding: 8px 12px; cursor: pointer; color: inherit; font: inherit;
           transition: background 160ms ease, border-color 160ms ease;
           outline: none;
         }
@@ -278,7 +278,7 @@ function ArchiveList({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 14,
-          padding: '18px 0 14px',
+          padding: '12px 0 10px',
         }}
       >
         <span
@@ -322,7 +322,7 @@ function ArchiveList({
           description="Approved kudos that cycle off the homepage will appear here."
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {filtered.map((entry) => {
             const summary = buildKudosRecipientSummary(entry.recipients);
             return (
@@ -919,12 +919,23 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
 
   const surfaceModel = buildKudosSurfaceModel(heading, hydrateRecipientPhotos(publicKudos));
 
+  // Hosted safe zone: when rendered inside the SharePoint iframe the
+  // persistent bottom-right assistant overlay can conflict with the
+  // archive/footer. Reserve a 72×72 no-conflict zone at the bottom-right
+  // and expose a sentinel so the harness can assert non-overlap.
+  const isHostedEnvironment =
+    typeof window !== 'undefined' && window.self !== window.top;
+  const hostedSafeZonePadding: React.CSSProperties = isHostedEnvironment
+    ? { paddingRight: 72, paddingBottom: 72 }
+    : {};
+
   return (
     <section
       data-hbc-webpart="hb-kudos"
       data-hbc-webpart-phase="phase-14-kudos-phase-05"
       data-hbc-testid="hb-kudos-public-root"
       aria-label="HB Kudos recognition"
+      style={{ position: 'relative', ...hostedSafeZonePadding }}
     >
       <HbcPeopleCultureSurface
         model={surfaceModel}
@@ -1075,6 +1086,23 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         confirmLabel="Discard"
         allowEmpty
       />
+
+      {/* Hosted bottom-right safe-zone sentinel. Harness uses this to assert
+          the persistent assistant overlay never intersects archive/footer. */}
+      {isHostedEnvironment ? (
+        <div
+          data-hbc-testid="kudos-assistant-safezone"
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            width: 72,
+            height: 72,
+            pointerEvents: 'none',
+          }}
+        />
+      ) : null}
     </section>
   );
 }
