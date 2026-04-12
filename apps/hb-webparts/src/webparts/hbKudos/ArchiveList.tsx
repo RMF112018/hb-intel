@@ -13,9 +13,9 @@
  *     masthead).
  *   - Row click opens the article reader via `onOpenEntry`.
  *
- * Extracted out of HbKudos.tsx in phase-17 and kept local because
- * the archive zone is webpart-specific composition, not reusable
- * visual UI.
+ * Phase-18 Wave 1 styling rebuild: the archive-zone visual grammar now
+ * lives in `kudosSurface.module.css`; token-backed CSS custom properties
+ * are injected at the section root from KUDOS_GOV_TOKENS.
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
@@ -23,6 +23,7 @@ import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ChevronDown, ArrowRight } from './kudosIcons.js';
+import styles from './kudosSurface.module.css';
 
 export interface ArchiveListProps {
   entries: KudosEntry[];
@@ -62,6 +63,9 @@ export function ArchiveList({
     '--hbk-orange-22': KUDOS_GOV_TOKENS.orangeSubtle22,
     '--hbk-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
     '--hbk-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
+    '--hbk-text-primary': KUDOS_GOV_TOKENS.textPrimary,
+    '--hbk-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
+    '--hbk-text-faint': KUDOS_GOV_TOKENS.textFaint,
   } as React.CSSProperties;
 
   const toggleLabel = expanded ? 'Archive' : 'View archive';
@@ -75,133 +79,17 @@ export function ArchiveList({
       data-hbc-archive-expanded={expanded ? 'true' : 'false'}
       style={archiveCssVars}
     >
-      {/* eslint-disable-next-line react/no-unknown-property */}
-      <style>{`
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-toggle {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 0;
-          border: none;
-          background: none;
-          font: inherit;
-          font-size: 0.6875rem;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          color: var(--hbk-brand-orange);
-          cursor: pointer;
-          outline: none;
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-toggle:focus-visible {
-          outline: 2px solid var(--hbk-brand-blue);
-          outline-offset: 2px;
-          border-radius: 4px;
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-chevron {
-          display: inline-block;
-          transition: transform 160ms ease;
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"][data-hbc-archive-expanded="true"] .hbk-archive-chevron {
-          transform: rotate(180deg);
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-search {
-          padding: 6px 12px;
-          font-size: 0.8125rem;
-          border-radius: 8px;
-          border: 1px solid var(--hbk-orange-18);
-          background: var(--hbk-orange-02);
-          flex: 1 1 auto;
-          max-width: 320px;
-          outline: none;
-          font-family: inherit;
-          color: ${KUDOS_GOV_TOKENS.textPrimary};
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-search:focus-visible {
-          outline: 2px solid var(--hbk-brand-blue);
-          outline-offset: 1px;
-          border-color: var(--hbk-brand-orange);
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
-          display: flex; align-items: center; gap: 12px; width: 100%;
-          text-align: left;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 250, 244, 0.62) 100%);
-          border: 1px solid rgba(255, 255, 255, 0.55);
-          border-radius: 12px;
-          padding: 8px 12px; cursor: pointer; color: inherit; font: inherit;
-          backdrop-filter: blur(5px);
-          -webkit-backdrop-filter: blur(5px);
-          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-          transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-          outline: none;
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:hover {
-          background: linear-gradient(135deg, rgba(255, 250, 244, 0.92) 0%, rgba(255, 241, 228, 0.92) 100%);
-          border-color: var(--hbk-orange-22);
-          transform: translateY(-1px);
-          box-shadow:
-            0 3px 10px rgba(229, 126, 70, 0.08),
-            0 1px 0 rgba(255, 255, 255, 0.55) inset;
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:focus-visible {
-          outline: 2px solid var(--hbk-brand-blue);
-          outline-offset: 2px;
-          background: var(--hbk-orange-06);
-          border-color: var(--hbk-orange-18);
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-viewall {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          padding: 6px 0;
-          border: none;
-          background: none;
-          font: inherit;
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: ${KUDOS_GOV_TOKENS.textSecondary};
-          cursor: pointer;
-          text-decoration: underline;
-          outline: none;
-          align-self: flex-end;
-          margin-top: 4px;
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-viewall:hover {
-          color: var(--hbk-brand-orange);
-        }
-        [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-viewall:focus-visible {
-          outline: 2px solid var(--hbk-brand-blue);
-          outline-offset: 2px;
-          border-radius: 3px;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row,
-          [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-chevron {
-            transition: none !important;
-          }
-        }
-      `}</style>
-
-      {/* Header row: toggle title + (when expanded) search */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 14,
-          padding: '8px 0 6px',
-        }}
-      >
+      <div className={styles.archiveHeader}>
         <button
           type="button"
-          className="hbk-archive-toggle"
+          className={styles.archiveToggle}
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls="hb-kudos-archive-body"
           data-hbc-testid="hb-kudos-archive-toggle"
         >
           {toggleLabel}
-          <span className="hbk-archive-chevron" aria-hidden="true">
+          <span className={styles.archiveChevron} aria-hidden="true">
             <ChevronDown size={14} strokeWidth={2.5} />
           </span>
         </button>
@@ -213,21 +101,20 @@ export function ArchiveList({
             placeholder="Search recognition..."
             aria-label="Search recognition archive"
             data-hbc-testid="hb-kudos-archive-search"
-            className="hbk-archive-search"
+            className={styles.archiveSearch}
           />
         ) : null}
       </div>
 
-      {/* Body — only rendered when expanded */}
       {expanded ? (
-        <div id="hb-kudos-archive-body" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div id="hb-kudos-archive-body" className={styles.archiveBody}>
           {filtered.length === 0 ? (
             <HbcEmptyState
               title="No archived recognition yet"
               description="Approved kudos that cycle off the homepage will appear here."
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className={styles.archiveRows}>
               {filtered.map((entry) => {
                 const recipientDisplay = formatRecipientDisplay(entry.recipients);
                 return (
@@ -236,7 +123,7 @@ export function ArchiveList({
                     type="button"
                     onClick={() => onOpenEntry(entry)}
                     aria-label={`Open recognition: ${entry.headline || recipientDisplay}`}
-                    className="hbk-archive-row"
+                    className={styles.archiveRow}
                     data-hbc-testid="hb-kudos-archive-row"
                   >
                     {entry.recipients.length > 0 ? (
@@ -249,30 +136,9 @@ export function ArchiveList({
                         size="sm"
                       />
                     ) : null}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: '0.875rem',
-                          fontWeight: 700,
-                          lineHeight: 1.3,
-                          color: KUDOS_GOV_TOKENS.textPrimary,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {recipientDisplay}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '0.6875rem',
-                          fontWeight: 500,
-                          color: KUDOS_GOV_TOKENS.textFaint,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
+                    <div className={styles.archiveRowBody}>
+                      <div className={styles.archiveRowRecipient}>{recipientDisplay}</div>
+                      <div className={styles.archiveRowMeta}>
                         {entry.headline || 'Recognition'}
                         {' · '}
                         {new Date(entry.submittedDate).toLocaleDateString('en-US', {
@@ -290,7 +156,7 @@ export function ArchiveList({
           {onViewAll ? (
             <button
               type="button"
-              className="hbk-archive-viewall"
+              className={styles.archiveViewAll}
               onClick={onViewAll}
               data-hbc-testid="hb-kudos-view-all"
             >

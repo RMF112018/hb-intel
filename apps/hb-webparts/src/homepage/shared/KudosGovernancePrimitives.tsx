@@ -20,6 +20,12 @@ import {
   HBC_PRESENTATION_ORANGE,
   HBC_PRESENTATION_ORANGE_RGB,
 } from '@hbc/ui-kit/homepage';
+import {
+  governanceActionButton,
+  governanceTabButton,
+  governanceToggleChip,
+} from '../../webparts/hbKudos/kudosVariants.js';
+import governanceStyles from './governance.module.css';
 
 // ---------------------------------------------------------------------------
 // Governance design tokens — theme-derived alias layer
@@ -148,18 +154,25 @@ export const KUDOS_RADIUS = {
 // SectionHeading — governance metadata section label
 // ---------------------------------------------------------------------------
 
+function governanceVars(): React.CSSProperties {
+  return {
+    '--hbk-gov-blue': KUDOS_GOV_TOKENS.brandBlue,
+    '--hbk-gov-blue-12': KUDOS_GOV_TOKENS.blueSubtle12,
+    '--hbk-gov-blue-18': KUDOS_GOV_TOKENS.blueSubtle18,
+    '--hbk-gov-blue-20': KUDOS_GOV_TOKENS.blueSubtle20,
+    '--hbk-gov-danger': KUDOS_GOV_TOKENS.dangerRed,
+    '--hbk-gov-danger-08': KUDOS_GOV_TOKENS.dangerSubtle08,
+    '--hbk-gov-danger-22': KUDOS_GOV_TOKENS.dangerSubtle22,
+    '--hbk-gov-text-muted': KUDOS_GOV_TOKENS.textMuted,
+    '--hbk-gov-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
+    '--hbk-gov-text-tertiary': KUDOS_GOV_TOKENS.textTertiary,
+    '--hbk-gov-text-disabled': KUDOS_GOV_TOKENS.textDisabled,
+  } as React.CSSProperties;
+}
+
 export function KudosSectionHeading({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <div
-      style={{
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: KUDOS_GOV_TOKENS.textMuted,
-        marginBottom: 8,
-      }}
-    >
+    <div className={governanceStyles.sectionHeading} style={governanceVars()}>
       {children}
     </div>
   );
@@ -172,8 +185,8 @@ export function KudosSectionHeading({ children }: { children: React.ReactNode })
 export function KudosInfoRow({ label, value }: { label: string; value?: string }): React.JSX.Element | null {
   if (!value?.trim()) return null;
   return (
-    <div style={{ fontSize: '0.8125rem', lineHeight: 1.55, color: KUDOS_GOV_TOKENS.textSecondary, marginBottom: 6 }}>
-      <span style={{ fontWeight: 700, color: KUDOS_GOV_TOKENS.textTertiary }}>{label}:</span> {value}
+    <div className={governanceStyles.infoRow} style={governanceVars()}>
+      <span className={governanceStyles.infoRowLabel}>{label}:</span> {value}
     </div>
   );
 }
@@ -210,18 +223,11 @@ export function KudosActionButton({
       onClick={onClick}
       disabled={disabled}
       data-hbc-testid={testId}
+      className={governanceActionButton()}
       style={{
-        padding: '7px 13px',
-        borderRadius: 8,
-        border: `1.5px solid ${toneColor}`,
-        background: disabled ? 'rgba(128, 128, 128, 0.08)' : '#ffffff',
-        color: disabled ? KUDOS_GOV_TOKENS.textDisabled : toneColor,
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.02em',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'inherit',
-      }}
+        ...governanceVars(),
+        '--hbk-gov-tone': toneColor,
+      } as React.CSSProperties}
     >
       {label}
     </button>
@@ -253,19 +259,8 @@ export function KudosGovernanceTabButton({
       aria-pressed={active}
       onClick={onClick}
       data-hbc-testid={testId}
-      style={{
-        padding: '8px 14px',
-        borderRadius: 999,
-        border: '1.5px solid',
-        borderColor: active ? KUDOS_GOV_TOKENS.brandBlue : KUDOS_GOV_TOKENS.blueSubtle18,
-        background: active ? KUDOS_GOV_TOKENS.brandBlue : '#ffffff',
-        color: active ? '#ffffff' : 'rgba(26, 19, 16, 0.68)',
-        fontSize: '0.75rem',
-        fontWeight: 800,
-        letterSpacing: '0.02em',
-        cursor: 'pointer',
-        fontFamily: 'inherit',
-      }}
+      className={governanceTabButton({ active })}
+      style={governanceVars()}
     >
       {label}
     </button>
@@ -293,20 +288,8 @@ export function KudosGovernanceToggleChip({
       onClick={onToggle}
       aria-pressed={active}
       data-hbc-testid={testId}
-      style={{
-        padding: '5px 12px',
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.04em',
-        textTransform: 'uppercase',
-        borderRadius: 999,
-        border: '1.5px solid',
-        borderColor: active ? KUDOS_GOV_TOKENS.brandBlue : KUDOS_GOV_TOKENS.blueSubtle20,
-        background: active ? KUDOS_GOV_TOKENS.blueSubtle12 : '#ffffff',
-        color: active ? KUDOS_GOV_TOKENS.brandBlue : KUDOS_GOV_TOKENS.textMuted,
-        cursor: 'pointer',
-        fontFamily: 'inherit',
-      }}
+      className={governanceToggleChip({ active })}
+      style={governanceVars()}
     >
       {label}
     </button>
@@ -319,15 +302,7 @@ export function KudosGovernanceToggleChip({
 
 export function KudosGovernanceToolbarLabel({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span
-      style={{
-        fontSize: '0.6875rem',
-        fontWeight: 800,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: KUDOS_GOV_TOKENS.textMuted,
-      }}
-    >
+    <span className={governanceStyles.toolbarLabel} style={governanceVars()}>
       {children}
     </span>
   );
@@ -339,18 +314,7 @@ export function KudosGovernanceToolbarLabel({ children }: { children: React.Reac
 
 export function KudosGovernanceErrorAlert({ message }: { message: string }): React.JSX.Element {
   return (
-    <div
-      role="alert"
-      style={{
-        padding: '10px 12px',
-        borderRadius: 8,
-        background: KUDOS_GOV_TOKENS.dangerSubtle08,
-        border: `1px solid ${KUDOS_GOV_TOKENS.dangerSubtle22}`,
-        color: KUDOS_GOV_TOKENS.dangerRed,
-        fontSize: '0.8125rem',
-        fontWeight: 600,
-      }}
-    >
+    <div role="alert" className={governanceStyles.errorAlert} style={governanceVars()}>
       {message}
     </div>
   );

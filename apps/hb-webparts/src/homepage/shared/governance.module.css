@@ -1,0 +1,105 @@
+/**
+ * governance.module.css — HB Kudos governance primitives.
+ *
+ * Owns the shared governance-button / chip / alert grammar used by the
+ * HR Approval Companion and the role-aware detail panel. Token-backed
+ * CSS custom properties are injected from KUDOS_GOV_TOKENS at usage
+ * sites (see governance variants in kudosVariants.ts).
+ */
+
+.actionButton {
+  padding: 7px 13px;
+  border-radius: 8px;
+  border: 1.5px solid var(--hbk-gov-tone);
+  background: #ffffff;
+  color: var(--hbk-gov-tone);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.actionButton:disabled {
+  background: rgba(128, 128, 128, 0.08);
+  color: var(--hbk-gov-text-disabled);
+  cursor: not-allowed;
+}
+
+.tabButton {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--hbk-gov-blue-18);
+  background: #ffffff;
+  color: rgba(26, 19, 16, 0.68);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tabButtonActive {
+  border-color: var(--hbk-gov-blue);
+  background: var(--hbk-gov-blue);
+  color: #ffffff;
+}
+
+.toggleChip {
+  padding: 5px 12px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1.5px solid var(--hbk-gov-blue-20);
+  background: #ffffff;
+  color: var(--hbk-gov-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.toggleChipActive {
+  border-color: var(--hbk-gov-blue);
+  background: var(--hbk-gov-blue-12);
+  color: var(--hbk-gov-blue);
+}
+
+.sectionHeading {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbk-gov-text-muted);
+  margin-bottom: 8px;
+}
+
+.infoRow {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--hbk-gov-text-secondary);
+  margin-bottom: 6px;
+}
+
+.infoRowLabel {
+  font-weight: 700;
+  color: var(--hbk-gov-text-tertiary);
+}
+
+.toolbarLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbk-gov-text-muted);
+}
+
+.errorAlert {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--hbk-gov-danger-08);
+  border: 1px solid var(--hbk-gov-danger-22);
+  color: var(--hbk-gov-danger);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}

@@ -20,17 +20,18 @@
  *   Recent list:
  *     - each row is a button that opens the article reader
  *
- * This module composes @hbc/ui-kit primitives (HbcAvatarStack,
- * HbcEmptyState) but owns the layout itself so the HB Kudos public
- * webpart is no longer coupled to the opinionated
- * HbcPeopleCultureSurface homepage variant (which remains in use by
- * the PeopleCultureMerged webpart, unaffected by this change).
+ * Phase-18 Wave 1 styling rebuild: the dominant <style>{...}</style>
+ * block formerly rendered inline here has moved into
+ * `kudosSurface.module.css` + variant slots. Token-backed CSS custom
+ * properties are set at the section root from KUDOS_GOV_TOKENS so the
+ * module's `var(--pks-*)` references always resolve to governed values.
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { Trophy, Sparkles, ThumbsUp } from './kudosIcons.js';
+import styles from './kudosSurface.module.css';
 
 /**
  * formatRecipientDisplay — produce a real honoree-name label for the
@@ -115,423 +116,24 @@ export function PublicKudosSurface({
 
   return (
     <section
+      className={styles.section}
       data-hbc-webpart-section="hb-kudos-public-surface"
       aria-label={heading}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 14,
-        ...surfaceVars,
-      }}
+      style={surfaceVars}
     >
-      {/* eslint-disable-next-line react/no-unknown-property */}
-      <style>{`
-        [data-hbc-webpart-section="hb-kudos-public-surface"] {
-          /* Outer layout container — no atmospheric treatment of its
-             own. The hero wrapper owns the branded gradient; recent/
-             archive sit below as subordinate zones in their native
-             page tone. */
-          position: relative;
-          padding: 4px 2px 2px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-hero {
-          /* Unified hero zone — masthead (upper band) + featured
-             (nested content surface) live in one shared atmosphere.
-             Shared diagonal gradient flows top-left -> bottom-right;
-             two radial blooms add warm + cool depth. */
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          padding: 14px 16px 16px;
-          border-radius: 18px;
-          overflow: hidden;
-          background:
-            radial-gradient(ellipse at 6% 2%, rgba(255, 196, 140, 0.22) 0%, rgba(255, 196, 140, 0) 55%),
-            radial-gradient(ellipse at 100% 110%, rgba(229, 126, 70, 0.28) 0%, rgba(229, 126, 70, 0) 58%),
-            linear-gradient(135deg, #2b4f80 0%, #1f3a65 35%, #172c4c 70%, #1a3354 100%);
-          color: #ffffff;
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.06) inset,
-            0 14px 36px rgba(10, 27, 51, 0.22),
-            0 2px 6px rgba(10, 27, 51, 0.14);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-hero::before {
-          /* Diagonal light bloom — reinforces the top-left origin of
-             the hero atmosphere without adding a second gradient. */
-          content: '';
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 45%),
-            radial-gradient(circle at 90% 100%, rgba(255, 196, 140, 0.12) 0%, rgba(255, 196, 140, 0) 48%);
-          pointer-events: none;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-masthead {
-          /* Upper band of the unified hero — lighter / more transparent
-             than the featured card so the two zones read as one
-             composition with the featured card as the content surface. */
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 4px 6px 6px;
-          color: #ffffff;
-          background: transparent;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-title {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 1.1875rem;
-          font-weight: 800;
-          letter-spacing: -0.01em;
-          color: #ffffff;
-          margin: 0;
-          position: relative;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-title-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 30px;
-          height: 30px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, rgba(229, 126, 70, 0.9) 0%, rgba(209, 106, 52, 0.9) 100%);
-          color: #ffffff;
-          font-size: 16px;
-          line-height: 1;
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.3) inset,
-            0 6px 14px rgba(229, 126, 70, 0.35);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 14px;
-          border-radius: 10px;
-          border: 1px solid rgba(255, 255, 255, 0.22);
-          background: linear-gradient(135deg, #e57e46 0%, #d16a34 100%);
-          color: #ffffff;
-          font: inherit;
-          font-size: 0.8125rem;
-          font-weight: 700;
-          letter-spacing: 0.01em;
-          cursor: pointer;
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.3) inset,
-            0 4px 10px rgba(229, 126, 70, 0.38),
-            0 1px 2px rgba(0, 0, 0, 0.18);
-          transition: transform 120ms ease, box-shadow 160ms ease, background 160ms ease;
-          outline: none;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn:hover {
-          transform: translateY(-1px);
-          background: linear-gradient(135deg, #ea8c56 0%, #d77139 100%);
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.32) inset,
-            0 6px 16px rgba(229, 126, 70, 0.48),
-            0 2px 4px rgba(0, 0, 0, 0.22);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn:focus-visible {
-          outline: 2px solid #ffffff;
-          outline-offset: 2px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured {
-          /* Featured card — nested content surface. Reads as slightly
-             more opaque / frosted than the hero so it still feels like
-             the primary content panel, but without its own independent
-             drop-shadow (shadow now comes from the hero wrapper). The
-             hero's diagonal gradient is visible through the frost. */
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 18px 20px 16px;
-          border-radius: 14px;
-          background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%),
-            linear-gradient(135deg, rgba(15, 30, 55, 0.55) 0%, rgba(15, 30, 55, 0.48) 100%);
-          color: #ffffff;
-          backdrop-filter: blur(16px) saturate(125%);
-          -webkit-backdrop-filter: blur(16px) saturate(125%);
-          border: 1px solid rgba(255, 255, 255, 0.22);
-          border-left: 3px solid rgba(229, 126, 70, 0.92);
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.18) inset,
-            0 4px 14px rgba(10, 27, 51, 0.18);
-          overflow: hidden;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(circle at 8% 0%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 45%);
-          pointer-events: none;
-        }
-        @supports not (backdrop-filter: blur(14px)) {
-          [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured {
-            background: linear-gradient(135deg, rgba(39, 72, 118, 0.92) 0%, rgba(27, 50, 88, 0.94) 100%);
-          }
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-badge {
-          position: absolute;
-          top: 12px;
-          right: 14px;
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          font-size: 0.625rem;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          color: #ffffff;
-          background: linear-gradient(135deg, rgba(229, 126, 70, 0.55) 0%, rgba(209, 106, 52, 0.55) 100%);
-          padding: 4px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.28);
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.24) inset,
-            0 2px 6px rgba(0, 0, 0, 0.18);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-top {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          padding-right: 130px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-recipient {
-          font-size: 1.3125rem;
-          font-weight: 800;
-          line-height: 1.2;
-          letter-spacing: -0.015em;
-          color: #ffffff;
-          margin: 0;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-headline {
-          font-size: 0.9375rem;
-          font-weight: 600;
-          line-height: 1.4;
-          color: rgba(255, 255, 255, 0.82);
-          margin: 0;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-body {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-excerpt {
-          font-size: 0.9375rem;
-          line-height: 1.6;
-          color: rgba(255, 255, 255, 0.9);
-          display: -webkit-box;
-          -webkit-box-orient: vertical;
-          -webkit-line-clamp: 3;
-          overflow: hidden;
-          margin: 0;
-          white-space: pre-wrap;
-          word-break: break-word;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-readmore-btn {
-          align-self: flex-start;
-          display: inline-flex;
-          align-items: center;
-          padding: 0;
-          border: none;
-          background: none;
-          font: inherit;
-          font-size: 0.8125rem;
-          font-weight: 700;
-          color: #ffd7bf;
-          text-decoration: underline;
-          text-decoration-color: rgba(255, 215, 191, 0.55);
-          text-underline-offset: 2px;
-          cursor: pointer;
-          margin: 2px 0 0;
-          outline: none;
-          transition: color 140ms ease, text-decoration-color 140ms ease;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-readmore-btn:hover {
-          color: #ffffff;
-          text-decoration-color: #ffffff;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-readmore-btn:focus-visible {
-          outline: 2px solid #ffffff;
-          outline-offset: 2px;
-          border-radius: 3px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          padding-top: 10px;
-          margin-top: 2px;
-          border-top: 1px solid rgba(255, 255, 255, 0.16);
-          font-size: 0.75rem;
-          color: rgba(255, 255, 255, 0.78);
-          letter-spacing: 0.01em;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 12px;
-          border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.28);
-          background: rgba(255, 255, 255, 0.14);
-          color: #ffffff;
-          font: inherit;
-          font-size: 0.75rem;
-          font-weight: 700;
-          cursor: pointer;
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
-          transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background 140ms ease, border-color 140ms ease;
-          outline: none;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.24);
-          border-color: rgba(255, 255, 255, 0.42);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:active:not(:disabled) {
-          transform: scale(1.08);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:focus-visible {
-          outline: 2px solid #ffffff;
-          outline-offset: 2px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:disabled {
-          opacity: 0.6;
-          cursor: progress;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-icon {
-          display: inline-block;
-          font-size: 13px;
-          line-height: 1;
-          transform-origin: center bottom;
-          transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:active .pks-celebrate-icon {
-          transform: rotate(-16deg) scale(1.12);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-label {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.625rem;
-          font-weight: 800;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: var(--pks-brand-orange);
-          margin: 2px 4px 2px;
-          padding-top: 4px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-label::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: linear-gradient(90deg, rgba(229, 126, 70, 0.32) 0%, rgba(229, 126, 70, 0) 100%);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-list {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          width: 100%;
-          padding: 10px 12px;
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.6);
-          background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 250, 244, 0.72) 100%);
-          color: inherit;
-          font: inherit;
-          text-align: left;
-          cursor: pointer;
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-          box-shadow:
-            0 1px 2px rgba(10, 27, 51, 0.04),
-            0 1px 0 rgba(255, 255, 255, 0.5) inset;
-          transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-          outline: none;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row:hover {
-          background: linear-gradient(135deg, rgba(255, 250, 244, 0.95) 0%, rgba(255, 241, 228, 0.95) 100%);
-          border-color: var(--pks-orange-22);
-          transform: translateY(-1px);
-          box-shadow:
-            0 4px 12px rgba(229, 126, 70, 0.1),
-            0 1px 0 rgba(255, 255, 255, 0.6) inset;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row:focus-visible {
-          outline: 2px solid var(--pks-brand-blue);
-          outline-offset: 2px;
-          border-color: var(--pks-orange-22);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-body {
-          flex: 1;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-recipient {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: var(--pks-text-primary);
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-headline {
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: var(--pks-text-secondary);
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn,
-          [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn,
-          [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-icon,
-          [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row {
-            transition: none !important;
-          }
-        }
-      `}</style>
-
       {/* Unified hero zone — masthead (upper band) + featured
           (nested content surface) share one gradient atmosphere. */}
-      <div className="pks-hero" data-hbc-testid="hb-kudos-hero-zone">
-        <div className="pks-masthead">
-          <h2 className="pks-title" data-hbc-testid="hb-kudos-hero-band">
-            <span className="pks-title-icon" aria-hidden="true">
+      <div className={styles.hero} data-hbc-testid="hb-kudos-hero-zone">
+        <div className={styles.masthead}>
+          <h2 className={styles.title} data-hbc-testid="hb-kudos-hero-band">
+            <span className={styles.titleIcon} aria-hidden="true">
               <Trophy size={16} strokeWidth={2.25} />
             </span>
             {heading}
           </h2>
           <button
             type="button"
-            className="pks-give-btn"
+            className={styles.giveBtn}
             onClick={onGiveKudos}
             data-hbc-testid="hb-kudos-give-trigger"
           >
@@ -559,17 +161,17 @@ export function PublicKudosSurface({
       {/* Recent */}
       {recent.length > 0 ? (
         <>
-          <div className="pks-recent-label" data-hbc-testid="hb-kudos-recent-section">
+          <div className={styles.recentLabel} data-hbc-testid="hb-kudos-recent-section">
             Recent recognition
           </div>
-          <div className="pks-recent-list">
+          <div className={styles.recentList}>
             {recent.map((item) => {
               const recipientDisplay = formatRecipientDisplay(item.recipients);
               return (
                 <button
                   key={item.id}
                   type="button"
-                  className="pks-recent-row"
+                  className={styles.recentRow}
                   onClick={() => onOpenArticle(item)}
                   aria-label={`Open recognition for ${recipientDisplay}`}
                   data-hbc-testid="hb-kudos-recent-row"
@@ -584,9 +186,9 @@ export function PublicKudosSurface({
                       size="sm"
                     />
                   ) : null}
-                  <div className="pks-recent-body">
-                    <div className="pks-recent-recipient">{recipientDisplay}</div>
-                    <div className="pks-recent-headline">{item.headline || 'Recognition'}</div>
+                  <div className={styles.recentBody}>
+                    <div className={styles.recentRecipient}>{recipientDisplay}</div>
+                    <div className={styles.recentHeadline}>{item.headline || 'Recognition'}</div>
                   </div>
                 </button>
               );
@@ -657,13 +259,13 @@ function FeaturedCard({
   const showReadMore = hasPreview && (isClampTruncated || detailsExceedsPreview);
 
   return (
-    <article className="pks-featured" data-hbc-testid="hb-kudos-featured-card">
-      <span className="pks-featured-badge" aria-label={badgeLabel}>
+    <article className={styles.featured} data-hbc-testid="hb-kudos-featured-card">
+      <span className={styles.featuredBadge} aria-label={badgeLabel}>
         <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
         {badgeLabel}
       </span>
 
-      <div className="pks-featured-top">
+      <div className={styles.featuredTop}>
         {entry.recipients.length > 0 ? (
           <HbcAvatarStack
             people={entry.recipients.slice(0, 3).map((r) => ({
@@ -675,21 +277,21 @@ function FeaturedCard({
             max={3}
           />
         ) : null}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-          <h3 className="pks-featured-recipient">{recipientDisplay}</h3>
+        <div className={styles.featuredHeader}>
+          <h3 className={styles.featuredRecipient}>{recipientDisplay}</h3>
           {entry.headline ? (
-            <p className="pks-featured-headline">{entry.headline}</p>
+            <p className={styles.featuredHeadline}>{entry.headline}</p>
           ) : null}
         </div>
       </div>
 
       {hasPreview ? (
-        <div className="pks-featured-body">
+        <div className={styles.featuredBody}>
           {/* Clamped container is markup-only text so the webkit-box
               clamp never hides the action affordance below. */}
           <div
             ref={excerptRef}
-            className="pks-featured-excerpt"
+            className={styles.featuredExcerpt}
             data-hbc-testid="hb-kudos-featured-excerpt"
           >
             {previewBody}
@@ -697,7 +299,7 @@ function FeaturedCard({
           {showReadMore ? (
             <button
               type="button"
-              className="pks-readmore-btn"
+              className={styles.readmoreBtn}
               onClick={() => onOpenArticle(entry)}
               aria-label="Read full recognition"
               data-hbc-testid="hb-kudos-featured-readmore"
@@ -708,18 +310,18 @@ function FeaturedCard({
         </div>
       ) : null}
 
-      <div className="pks-featured-footer">
+      <div className={styles.featuredFooter}>
         <span>{formatSubmittedBy(entry)}</span>
         {onCelebrate ? (
           <button
             type="button"
-            className="pks-celebrate-btn"
+            className={styles.celebrateBtn}
             onClick={() => onCelebrate(entry.id)}
             disabled={celebrateLoading}
             aria-label="Celebrate this recognition"
             data-hbc-testid="hb-kudos-celebrate"
           >
-            <span className="pks-celebrate-icon" aria-hidden="true">
+            <span className={styles.celebrateIcon} aria-hidden="true">
               <ThumbsUp size={13} strokeWidth={2.25} />
             </span>
             <span data-hbc-testid="hb-kudos-celebrate-count">{celebrateCount}</span>
