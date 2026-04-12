@@ -1,12 +1,17 @@
 /**
  * useRecipientPhotoHydration — Graph-backed recipient photo cache.
  *
- * Extracted from HbKudos.tsx (phase-19 Wave 2 orchestration refactor).
  * Owns a single concern: fetch individual recipient photos via the
  * provided Graph photo fn, memoize them by email, and expose a
  * hydrator that injects the cached photos into KudosEntry recipients
  * for downstream surface components (PublicKudosSurface, ArchiveList,
  * KudosFeedBody).
+ *
+ * Phase-19 Wave 2 hook-discipline scrub: the previous implementation
+ * required an `exhaustive-deps` suppression because including the
+ * cache in the effect's deps would re-trigger the effect on every
+ * write. The cache is now read from a ref inside the effect so the
+ * deps array is `[fetchPersonPhoto, entries]` — honest and lint-clean.
  */
 import * as React from 'react';
 import { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
@@ -26,6 +31,10 @@ export function useRecipientPhotoHydration(
   );
 
   const [cache, setCache] = React.useState<Record<string, string>>({});
+  const cacheRef = React.useRef(cache);
+  React.useEffect(() => {
+    cacheRef.current = cache;
+  }, [cache]);
 
   React.useEffect(() => {
     if (!fetchPersonPhoto || entries.length === 0) return;
@@ -33,7 +42,7 @@ export function useRecipientPhotoHydration(
     const emails = new Set<string>();
     for (const entry of entries) {
       for (const r of entry.recipients) {
-        if (r.recipientType === 'individual' && r.email && !cache[r.email]) {
+        if (r.recipientType === 'individual' && r.email && !cacheRef.current[r.email]) {
           emails.add(r.email);
         }
       }
@@ -53,7 +62,7 @@ export function useRecipientPhotoHydration(
     };
     void fetchAll();
     return () => { cancelled = true; };
-  }, [fetchPersonPhoto, entries]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchPersonPhoto, entries]);
 
   const hydrate = React.useCallback(
     (list: KudosEntry[]): KudosEntry[] => {

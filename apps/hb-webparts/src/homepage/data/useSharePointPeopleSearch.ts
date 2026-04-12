@@ -23,8 +23,14 @@
  *   - `value` (common with some SP Online builds for static methods)
  *   - `d.ClientPeoplePickerSearchUser` (odata=verbose)
  * The adapter handles all three shapes.
+ *
+ * Phase-19 Wave 2 scrub: all production console traces are now gated
+ * behind the `__HB_KUDOS_DEBUG__` window flag via the `debug()` helper.
+ * The previous adapter emitted ~15 `console.warn` calls per search in
+ * production; those are now silent unless diagnostics are explicitly
+ * enabled. Genuine failures still throw — callers own error handling.
  */
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { getSiteUrl, getKudosListHostUrl } from './spContext.js';
 import { fetchRequestDigest } from './peopleCultureSubmissionSource.js';
 import { rankPeopleResults } from '@hbc/ui-kit/homepage';
@@ -47,6 +53,15 @@ function isDebug(): boolean {
 const TAG = '[HB Kudos People Search]';
 const MAX_SUGGESTIONS = 10;
 
+/**
+ * Gated debug log. Silent by default; opt in via `window.__HB_KUDOS_DEBUG__`.
+ */
+function debug(...args: unknown[]): void {
+  if (!isDebug()) return;
+  // eslint-disable-next-line no-console
+  console.log(TAG, ...args);
+}
+
 interface ClientPeoplePickerResult {
   Key?: string;
   DisplayText?: string;
@@ -66,13 +81,11 @@ function resolvePeopleSearchSiteUrl(): string | undefined {
   const kudosHost = getKudosListHostUrl();
   const resolved = hostingSite ?? kudosHost;
 
-  if (isDebug()) {
-    console.log(TAG, 'URL resolution:', {
-      hostingSite: hostingSite ?? '(undefined)',
-      kudosHost: kudosHost ?? '(undefined)',
-      resolved: resolved ?? '(undefined)',
-    });
-  }
+  debug('URL resolution:', {
+    hostingSite: hostingSite ?? '(undefined)',
+    kudosHost: kudosHost ?? '(undefined)',
+    resolved: resolved ?? '(undefined)',
+  });
 
   return resolved;
 }
@@ -89,7 +102,6 @@ function extractPrincipalPayload(body: Record<string, unknown>): string | unknow
   if (typeof body.ClientPeoplePickerSearchUser === 'string') {
     return body.ClientPeoplePickerSearchUser;
   }
-  // Shape 1b: already-parsed array
   if (Array.isArray(body.ClientPeoplePickerSearchUser)) {
     return body.ClientPeoplePickerSearchUser as unknown[];
   }
@@ -98,7 +110,6 @@ function extractPrincipalPayload(body: Record<string, unknown>): string | unknow
   if (typeof body.value === 'string') {
     return body.value;
   }
-  // Shape 2b: already-parsed array
   if (Array.isArray(body.value)) {
     return body.value as unknown[];
   }
@@ -129,16 +140,10 @@ async function searchSharePointPeople(
 ): Promise<PersonEntry[]> {
   const endpoint = `${siteUrl}/_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.ClientPeoplePickerSearchUser`;
 
-  console.warn(TAG, 'dispatch:', { query, siteUrl, endpoint });
+  debug('dispatch:', { query, siteUrl, endpoint });
 
-  let digest: string;
-  try {
-    digest = await fetchRequestDigest(siteUrl);
-    console.warn(TAG, 'digest acquired');
-  } catch (digestErr) {
-    console.warn(TAG, 'digest fetch failed for', siteUrl, digestErr);
-    throw digestErr;
-  }
+  const digest = await fetchRequestDigest(siteUrl);
+  debug('digest acquired');
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -160,92 +165,52 @@ async function searchSharePointPeople(
     }),
   });
 
-  console.warn(TAG, 'response:', response.status, response.statusText, '| ok:', response.ok);
+  debug('response:', response.status, response.statusText, '| ok:', response.ok);
 
   if (!response.ok) {
-    const msg = `People search failed: ${response.status} ${response.statusText}`;
-    console.warn(TAG, msg);
-    throw new Error(msg);
+    throw new Error(`People search failed: ${response.status} ${response.statusText}`);
   }
 
   // A. Read raw response body as text first — never skip this.
   const rawText = await response.text();
-  console.warn(TAG, 'response-raw-body', {
-    length: rawText.length,
-    first500: rawText.slice(0, 500),
-  });
+  debug('response-raw-body length:', rawText.length);
 
   // B. Parse outer JSON
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(rawText) as Record<string, unknown>;
-  } catch (outerParseErr) {
-    console.warn(TAG, 'response-outer-parse FAILED', { rawFirst200: rawText.slice(0, 200), error: outerParseErr });
+  } catch {
     throw new Error('People search: outer JSON parse failed');
   }
 
-  const outerKeys = Object.keys(body);
-  console.warn(TAG, 'response-outer-parse', {
-    keys: outerKeys,
-    hasClientPeoplePickerSearchUser: 'ClientPeoplePickerSearchUser' in body,
-    hasValue: 'value' in body,
-    hasD: 'd' in body,
-    typeOfClientPPS: typeof body.ClientPeoplePickerSearchUser,
-    typeOfValue: typeof body.value,
-  });
+  debug('response-outer-parse keys:', Object.keys(body));
 
   // C. Extract principal payload from whichever shape SP returned
   const principalPayload = extractPrincipalPayload(body);
 
   if (principalPayload === undefined || principalPayload === null || principalPayload === '') {
-    const msg = 'People search: no principal payload found in response body';
-    console.warn(TAG, msg, { outerKeys, bodySnapshot: JSON.stringify(body).slice(0, 300) });
-    throw new Error(msg);
+    throw new Error('People search: no principal payload found in response body');
   }
 
   // D. Parse principals — either from string or already-parsed array
   let rawPrincipals: ClientPeoplePickerResult[];
 
   if (Array.isArray(principalPayload)) {
-    // Already an array (some SP builds return pre-parsed)
     rawPrincipals = principalPayload as ClientPeoplePickerResult[];
-    console.warn(TAG, 'principals-raw-string', '(already array, no parse needed)', { count: rawPrincipals.length });
+    debug('principals: already-array, count=', rawPrincipals.length);
   } else {
-    // It's a JSON string that needs parsing
-    console.warn(TAG, 'principals-raw-string', {
-      length: principalPayload.length,
-      first300: principalPayload.slice(0, 300),
-    });
-
     try {
       rawPrincipals = JSON.parse(principalPayload) as ClientPeoplePickerResult[];
-      console.warn(TAG, 'principals-parse-success', {
-        count: rawPrincipals.length,
-        first3: rawPrincipals.slice(0, 3).map((r) => ({
-          Key: r.Key?.slice(0, 60),
-          DisplayText: r.DisplayText,
-          Email: r.EntityData?.Email,
-        })),
-      });
-    } catch (parseErr) {
-      console.warn(TAG, 'principals-parse-failure', {
-        error: parseErr,
-        rawFirst200: principalPayload.slice(0, 200),
-      });
+      debug('principals: parse-success, count=', rawPrincipals.length);
+    } catch {
       throw new Error('People search: principal JSON parse failed');
     }
   }
 
   // E. Map raw principals to PersonEntry[]
-  console.warn(TAG, 'mapping-start', { rawCount: rawPrincipals.length });
-
   const entries: PersonEntry[] = [];
-  for (let i = 0; i < rawPrincipals.length; i++) {
-    const r = rawPrincipals[i];
-    if (!r.Key && !r.DisplayText) {
-      console.warn(TAG, 'mapping-drop', { index: i, reason: 'missing Key and DisplayText', raw: JSON.stringify(r).slice(0, 200) });
-      continue;
-    }
+  for (const r of rawPrincipals) {
+    if (!r.Key && !r.DisplayText) continue;
     const displayName = r.DisplayText ?? r.Key ?? '';
 
     // Best-effort parse of givenName/surname from DisplayText.
@@ -254,7 +219,7 @@ async function searchSharePointPeople(
     const givenName = nameParts.length >= 2 ? nameParts[0] : undefined;
     const surname = nameParts.length >= 2 ? nameParts.slice(1).join(' ') : undefined;
 
-    const entry: PersonEntry = {
+    entries.push({
       upn: r.EntityData?.Email ?? r.Description ?? r.Key ?? '',
       displayName,
       givenName,
@@ -262,15 +227,13 @@ async function searchSharePointPeople(
       mail: r.EntityData?.Email ?? undefined,
       jobTitle: r.EntityData?.Title ?? undefined,
       department: r.EntityData?.Department ?? undefined,
-    };
-    entries.push(entry);
+    });
   }
 
-  console.warn(TAG, 'mapping-result', {
+  debug('mapping-result:', {
     rawCount: rawPrincipals.length,
     mappedCount: entries.length,
     droppedCount: rawPrincipals.length - entries.length,
-    first3: entries.slice(0, 3).map((e) => `${e.displayName} <${e.upn}>`),
   });
 
   return rankPeopleResults(entries, query);
@@ -288,34 +251,34 @@ async function searchSharePointPeople(
 export function useSharePointPeopleSearch(): PeopleSearchFn | undefined {
   const siteUrl = resolvePeopleSearchSiteUrl();
 
+  // One-time debug trace when the resolved site URL changes — runs
+  // after commit so we do not emit side effects during render.
   const loggedUrlRef = useRef<string | undefined>(undefined);
-  if (loggedUrlRef.current !== siteUrl) {
+  useEffect(() => {
+    if (loggedUrlRef.current === siteUrl) return;
     loggedUrlRef.current = siteUrl;
     if (siteUrl) {
-      console.warn(TAG, 'hook: resolved site URL =', siteUrl);
+      debug('hook: resolved site URL =', siteUrl);
     } else {
-      console.warn(TAG, 'hook: NO site URL available — people search will be disabled');
+      debug('hook: no site URL resolved — people search disabled');
     }
-  }
+  }, [siteUrl]);
 
   const searchFn = useCallback(
     async (query: string): Promise<PersonEntry[]> => {
       const callTimeSiteUrl = resolvePeopleSearchSiteUrl();
 
       if (!callTimeSiteUrl) {
-        console.warn(TAG, 'call: no site URL at call time — cannot dispatch. getSiteUrl()=', getSiteUrl(), 'getKudosListHostUrl()=', getKudosListHostUrl());
         throw new Error('People search unavailable: no SharePoint site URL resolved');
       }
 
       if (!query || query.trim().length < 2) {
-        if (isDebug()) console.log(TAG, 'call: query too short, skipping:', JSON.stringify(query));
         return [];
       }
 
-      console.warn(TAG, 'call: dispatching search for', JSON.stringify(query.trim()), 'via', callTimeSiteUrl);
       return await searchSharePointPeople(callTimeSiteUrl, query.trim());
     },
-    [siteUrl],
+    [],
   );
 
   if (!siteUrl) {
