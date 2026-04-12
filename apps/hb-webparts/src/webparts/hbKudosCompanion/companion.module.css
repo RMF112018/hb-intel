@@ -10,9 +10,18 @@
  */
 
 .root {
+  /* Host-safe width containment: SharePoint page sections can place
+     the webpart in 1/3- or 1/4-column layouts. Declaring an inline
+     containment context lets child clusters respond to the actual
+     rendered width rather than the viewport. `min-width: 0` is
+     required so a long title or wide control does not force the
+     whole webpart to overflow the section. */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .header {
@@ -22,6 +31,9 @@
   gap: 16px;
   padding: 8px 4px 16px;
   border-bottom: 1px solid var(--hbk-orange-18);
+  /* Authoring-safe wrap: under narrow SharePoint columns the header
+     meta badges drop below the title instead of squeezing it. */
+  flex-wrap: wrap;
 }
 
 .headerLead {
@@ -29,6 +41,16 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  /* Allow the lead to shrink ahead of the meta badges but keep a
+     sensible minimum so the title does not collapse into a single
+     character per line under extreme widths. */
+  flex: 1 1 260px;
+}
+
+.title {
+  /* Long governance titles must wrap inside narrow columns rather
+     than overflow the container. */
+  overflow-wrap: anywhere;
 }
 
 .eyebrow {
@@ -78,6 +100,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  /* Allow the field to stretch and fall to its own row under narrow
+     widths without pushing the input off-canvas. */
+  flex: 1 1 220px;
+  min-width: 0;
 }
 
 .searchInput {
@@ -85,7 +111,11 @@
   font-size: 0.8125rem;
   border-radius: 8px;
   border: 1px solid var(--hbk-orange-28);
-  min-width: 200px;
+  /* Fill whatever width the wrapped field gets rather than force a
+     hard min-width that overflows narrow SharePoint columns. */
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
   font-family: inherit;
   outline: none;
 }
@@ -100,6 +130,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .ownershipSelect {
@@ -125,6 +157,9 @@
   border-radius: 10px;
   background: linear-gradient(90deg, var(--hbk-orange-10), var(--hbk-blue-06));
   border: 1px solid var(--hbk-orange-25);
+  /* Host-safe: under narrow widths the approve/clear buttons drop
+     beneath the selection count instead of overflowing. */
+  flex-wrap: wrap;
 }
 
 .bulkCount {
@@ -180,4 +215,12 @@
 .queueGrid {
   display: grid;
   gap: 12px;
+  /* Prevent grid children from forcing the track wider than the
+     container — essential when a queue-row carries a long recipient
+     summary or unbroken text in a narrow SharePoint column. */
+  min-width: 0;
+}
+
+.queueGrid > * {
+  min-width: 0;
 }
