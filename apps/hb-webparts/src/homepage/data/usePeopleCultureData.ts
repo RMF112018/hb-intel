@@ -104,19 +104,18 @@ export function usePeopleCultureData(): PeopleCultureDataResultWithRefresh {
 
         _cache = { config, fetchedAt: Date.now() };
 
-        // Prefer surfacing binding errors over the generic "empty" message
-        // so schema-drift breakage is never silently treated as success.
+        // `error` is reserved for genuine binding/network failures so the
+        // consumer can render a distinct load-failure state. A successful
+        // fetch where all lists are simply empty is a legitimate true-empty
+        // condition — it must NOT be flagged as an error. Consumers
+        // distinguish true-empty from error via (listConfig === undefined
+        // && error === undefined).
         const bindingError = errors.length > 0 ? errors.join(' | ') : undefined;
-        const errorMessage = bindingError
-          ? bindingError
-          : hasData
-            ? undefined
-            : 'All People & Culture lists returned empty results';
 
         setResult({
           listConfig: hasData ? config : undefined,
           isLoading: false,
-          error: errorMessage,
+          error: bindingError,
         });
       } catch (err) {
         if (cancelled) return;

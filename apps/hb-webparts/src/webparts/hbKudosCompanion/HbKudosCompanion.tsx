@@ -682,7 +682,7 @@ export function HbKudosCompanion({
     adminReviewOverdueDays: typeof config?.adminReviewOverdueDays === 'number' ? config.adminReviewOverdueDays : DEFAULT_KUDOS_OVERDUE_THRESHOLDS.adminReviewOverdueDays,
   }), [config?.pendingOverdueDays, config?.adminReviewOverdueDays]);
 
-  const { listConfig, isLoading, refresh: refreshData } = usePeopleCultureData();
+  const { listConfig, isLoading, error: loadError, refresh: refreshData } = usePeopleCultureData();
   const allKudos: KudosEntry[] = React.useMemo(() => listConfig?.kudos ?? [], [listConfig?.kudos]);
 
   const [filter, dispatch] = React.useReducer(filterReducer, INITIAL_FILTER_STATE);
@@ -1006,9 +1006,44 @@ export function HbKudosCompanion({
     return (
       <section
         data-hbc-webpart="hb-kudos-companion"
+        data-hbc-state="loading"
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
       >
         <HbcSpinner size="md" />
+      </section>
+    );
+  }
+
+  // Load / binding failure — a distinct render path from an ordinary
+  // empty queue. Required by the SPFx homepage overlay doctrine so a
+  // data-fetch failure is never mistaken for "no kudos to review".
+  if (loadError) {
+    return (
+      <section
+        data-hbc-webpart="hb-kudos-companion"
+        data-hbc-state="load-error"
+        data-hbc-testid="hb-kudos-companion-load-error"
+        data-hbc-role={role}
+        aria-label="HB Kudos Approval Companion"
+        className={companionStyles.root}
+        style={kudosCSSVars()}
+      >
+        <KudosGovernanceErrorAlert
+          message={`Unable to load kudos data: ${loadError}. This is a data-load problem, not an empty queue.`}
+        />
+        <HbcEmptyState
+          title="Kudos data unavailable"
+          description="The governance workspace could not load kudos from SharePoint. Try refreshing; if the problem persists, contact your SharePoint admin."
+          primaryAction={
+            <KudosActionButton
+              label="Retry"
+              tone="info"
+              disabled={false}
+              onClick={refreshData}
+              testId="hb-kudos-companion-load-error-retry"
+            />
+          }
+        />
       </section>
     );
   }
@@ -1152,12 +1187,24 @@ export function HbKudosCompanion({
 
       {actionError ? <KudosGovernanceErrorAlert message={actionError} /> : null}
 
-      {/* Queue list */}
+      {/* Queue list — distinct true-empty vs filtered-empty branches so
+          operators can tell a quiet system apart from an over-filtered view. */}
       {queue.length === 0 ? (
-        <HbcEmptyState
-          title="No kudos match this view"
-          description="Try a different tab, clear filters, or check back after the next submission."
-        />
+        allKudos.length === 0 ? (
+          <div data-hbc-state="true-empty">
+            <HbcEmptyState
+              title="No kudos in the system yet"
+              description="The governance workspace is connected and working — there are currently no kudos submissions to review."
+            />
+          </div>
+        ) : (
+          <div data-hbc-state="filtered-empty">
+            <HbcEmptyState
+              title="No kudos match this view"
+              description="Kudos exist outside the current filter. Try a different tab, clear search, or adjust the ownership / flag filters to see them."
+            />
+          </div>
+        )
       ) : (
         <div className={companionStyles.queueGrid}>
           {queue.map((entry) => (
