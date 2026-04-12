@@ -49,6 +49,7 @@ import { submitKudosDraft } from '../../homepage/data/peopleCultureSubmissionSou
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KudosGovernanceInputDialog } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import kudosSurfaceStyles from './kudosSurface.module.css';
 import { ArchiveList } from './ArchiveList.js';
 import { PublicKudosSurface } from './PublicKudosSurface.js';
 import { KudosArticleReader } from './KudosArticleReader.js';
@@ -154,7 +155,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       <div
         data-hbc-webpart="hb-kudos"
         data-hbc-testid="hb-kudos-public-root"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
+        className={kudosSurfaceStyles.shellLoading}
       >
         <HbcSpinner size="md" />
       </div>
@@ -192,7 +193,11 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       data-hbc-testid="hb-kudos-public-root"
       data-hbc-hosted={isHosted ? 'true' : 'false'}
       aria-label="HB Kudos recognition"
-      style={{ position: 'relative', ...safeZonePadding }}
+      className={kudosSurfaceStyles.shellRoot}
+      style={{
+        ...safeZonePadding,
+        '--hbk-safe-zone-size': `${SAFE_ZONE_SIZE_PX}px`,
+      } as React.CSSProperties}
     >
       <PublicKudosSurface
         heading={heading}
@@ -253,14 +258,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         <div
           data-hbc-testid="kudos-assistant-safezone"
           aria-hidden="true"
-          style={{
-            position: 'absolute',
-            right: 0,
-            bottom: 0,
-            width: SAFE_ZONE_SIZE_PX,
-            height: SAFE_ZONE_SIZE_PX,
-            pointerEvents: 'none',
-          }}
+          className={kudosSurfaceStyles.shellSafeZoneSentinel}
         />
       ) : null}
     </section>

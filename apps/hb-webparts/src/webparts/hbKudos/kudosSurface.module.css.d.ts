@@ -35,5 +35,8 @@ declare const styles: {
   readonly archiveRowRecipient: string;
   readonly archiveRowMeta: string;
   readonly archiveViewAll: string;
+  readonly shellRoot: string;
+  readonly shellLoading: string;
+  readonly shellSafeZoneSentinel: string;
 };
 export default styles;

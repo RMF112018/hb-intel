@@ -1,0 +1,129 @@
+/**
+ * kudosFeed.module.css — slide-out "View All" feed panel body grammar.
+ *
+ * Phase-23 Prompt 03: replaces the runtime-injected <style> block and
+ * inline style objects previously carried by KudosFeedBody.tsx. Token
+ * values are sourced through the `--hbk-*` custom properties set at
+ * the feed root from KUDOS_GOV_TOKENS so this module stays free of
+ * raw hex / rgba and always reflects governed theme values.
+ */
+
+.feedRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feedSearch {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--hbk-orange-22);
+  background: var(--hbk-orange-03);
+  outline: none;
+  font-family: inherit;
+  color: var(--hbk-text-primary);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.feedSearch:focus-visible {
+  border-color: var(--hbk-brand-orange);
+  box-shadow: 0 0 0 3px var(--hbk-orange-18);
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feedRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  text-align: left;
+  background: var(--hbk-surface-0);
+  border: 1px solid var(--hbk-orange-06);
+  border-left: 3px solid var(--hbk-orange-55);
+  border-radius: 14px;
+  padding: 12px 16px 10px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+  outline: none;
+}
+
+.feedRow:hover {
+  background: var(--hbk-surface-warm);
+  border-color: var(--hbk-orange-18);
+  box-shadow: 0 2px 8px var(--hbk-orange-shadow);
+}
+
+.feedRow:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
+  border-color: var(--hbk-orange-18);
+}
+
+.feedRowAvatars {
+  margin-bottom: 6px;
+}
+
+.feedRowHeadline {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--hbk-text-primary);
+  margin-bottom: 2px;
+}
+
+.feedRowRecipient {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--hbk-brand-orange);
+  margin-bottom: 4px;
+}
+
+.feedRowExcerpt {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--hbk-text-secondary);
+  margin-bottom: 6px;
+}
+
+.feedRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--hbk-text-faint);
+  padding-top: 6px;
+  border-top: 1px solid var(--hbk-orange-06);
+}
+
+.feedRowCelebratePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--hbk-orange-08);
+  border: 1px solid var(--hbk-orange-18);
+  color: var(--hbk-brand-orange);
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedRow {
+    transition: none !important;
+  }
+}

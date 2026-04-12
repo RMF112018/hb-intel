@@ -611,3 +611,25 @@
     transition: none !important;
   }
 }
+
+/* ── Webpart shell — HbKudos root, loading, safe-zone sentinel ────── */
+
+.shellRoot {
+  position: relative;
+}
+
+.shellLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.shellSafeZoneSentinel {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--hbk-safe-zone-size, 72px);
+  height: var(--hbk-safe-zone-size, 72px);
+  pointer-events: none;
+}

@@ -14,6 +14,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import governanceStyles from '../../homepage/shared/governance.module.css';
 import kudosSurfaceStyles from './kudosSurface.module.css';
+import kudosFeedStyles from './kudosFeed.module.css';
 
 // ---------------------------------------------------------------------------
 // Governance: action button, tab button, toggle chip
@@ -113,3 +114,20 @@ export const kudosFeaturedBadge = cva(kudosSurfaceStyles.featuredBadge);
 export const kudosArchiveToggle = cva(kudosSurfaceStyles.archiveToggle);
 export const kudosArchiveChevron = cva(kudosSurfaceStyles.archiveChevron);
 export const kudosArchiveViewAll = cva(kudosSurfaceStyles.archiveViewAll);
+
+// ---------------------------------------------------------------------------
+// Feed slide-out: row + celebrate pill
+// ---------------------------------------------------------------------------
+
+/**
+ * Feed-panel row — slide-out "View All" browse surface. Single-variant
+ * wrapper mirroring the recent/archive row family; reserved for future
+ * feed-row variants (e.g. pinned / flagged).
+ */
+export const kudosFeedRow = cva(kudosFeedStyles.feedRow);
+
+/**
+ * Feed-panel celebrate pill — visually subordinate celebrate badge on
+ * each feed row footer.
+ */
+export const kudosFeedCelebratePill = cva(kudosFeedStyles.feedRowCelebratePill);
