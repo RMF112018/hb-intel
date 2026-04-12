@@ -469,7 +469,11 @@
 
 .queueRowDateCell {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 .queueRowDate {
@@ -1206,4 +1210,94 @@
 .spotlightReviewBtn:focus-visible {
   outline: 2px solid var(--hbk-brand-blue);
   outline-offset: 2px;
+}
+
+/* ── Phase-28 Prompt-03 — row-level quick-triage actions ──────────
+   Inline safe-action buttons that sit beside the submitted-date
+   spine on each triage row. Intentionally restrained: only the
+   dominant safe actions render (Approve / Clear flag / Claim) so
+   the queue stays scannable rather than becoming a wall of
+   buttons. Reason-carrying and structurally riskier actions stay
+   inside the detail panel. */
+
+.queueRowQuickActions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.queueRowQuickActionBtn {
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: var(--hbk-radius-pill);
+  border: 1px solid var(--hbk-blue-18);
+  background: var(--hbk-surface-0);
+  color: var(--hbk-brand-blue);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background var(--hbk-motion-fast),
+    color var(--hbk-motion-fast),
+    border-color var(--hbk-motion-fast),
+    transform var(--hbk-motion-fast);
+}
+
+.queueRowQuickActionBtn:hover:not(:disabled) {
+  background: var(--hbk-blue-06);
+  border-color: var(--hbk-brand-blue);
+}
+
+.queueRowQuickActionBtn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.queueRowQuickActionBtn:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
+}
+
+.queueRowQuickActionBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Primary quick action — Approve. Dominant affordance so the
+   operator's eye lands on the safe "move this forward" path. */
+.queueRowQuickActionPrimary {
+  background: linear-gradient(135deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
+  border-color: transparent;
+  color: var(--hbk-surface-0);
+}
+
+.queueRowQuickActionPrimary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
+  color: var(--hbk-surface-0);
+  border-color: transparent;
+  box-shadow: var(--hbk-elev-zone);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .queueRowQuickActionBtn {
+    transition: none;
+  }
+}
+
+/* Under narrow column widths quick actions drop beneath the date
+   spine so they never steal headline real estate. Triggered by the
+   existing `.root` container-query breakpoint. */
+@container (max-width: 560px) {
+  .queueRowDateCell {
+    align-items: flex-start;
+    flex-direction: row;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .queueRowQuickActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

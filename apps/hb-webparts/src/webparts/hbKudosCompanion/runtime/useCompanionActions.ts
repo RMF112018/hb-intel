@@ -20,6 +20,13 @@ import { getKudosListHostUrl } from '../../../homepage/data/spContext.js';
 import type { KudosRole } from '../../../homepage/helpers/kudosCapabilities.js';
 import type { KudosEntry, KudosPatch } from '../../../homepage/webparts/kudosContracts.js';
 
+/**
+ * Row-level quick-triage action set — a strict subset of
+ * `DetailActionKind` that is safe to fire directly from a queue row
+ * without an extra confirmation / reason dialog.
+ */
+export type QuickActionKind = 'approve' | 'clearAdminReview' | 'claim';
+
 export type DetailActionKind =
   | 'approve'
   | 'reject'
@@ -86,6 +93,7 @@ export interface UseCompanionActionsResult {
 
   // Action routing
   handleDetailAction: (kind: DetailActionKind) => void;
+  handleQuickAction: (kind: QuickActionKind, entry: KudosEntry) => void;
 
   // Dialog slots
   inputDialog: InputDialogState | null;
@@ -138,8 +146,13 @@ export function useCompanionActions({
   );
 
   const dispatchGovernancePatch = React.useCallback(
-    async (patch: KudosPatch) => {
-      if (!detailEntry) return;
+    async (patch: KudosPatch, entryOverride?: KudosEntry) => {
+      // Phase-28 Prompt-03 quick-triage extension: row-level callers
+      // pass the entry explicitly so the patch can dispatch without
+      // the detail panel being open. Detail-panel callers keep using
+      // `detailEntry` implicitly.
+      const target = entryOverride ?? detailEntry;
+      if (!target) return;
       const listHostUrl = getKudosListHostUrl();
       if (!listHostUrl) {
         setActionError('SharePoint site context is not available.');
@@ -150,18 +163,21 @@ export function useCompanionActions({
         const result = await submitKudosGovernanceAction(listHostUrl, patch, {
           actorEmail: identityEmail,
           callerRole: role,
-          headline: detailEntry.headline,
+          headline: target.headline,
           isFirstPublish:
-            patch.kind === 'approve' && detailEntry.wasEverPublished !== true,
+            patch.kind === 'approve' && target.wasEverPublished !== true,
           itemIsFlaggedForAdminReview:
-            detailEntry.isFlaggedForAdminReview === true,
+            target.isFlaggedForAdminReview === true,
         });
         if (!result.ok) {
           setActionError(result.error);
           return;
         }
         setActionError(undefined);
-        setDetailEntry(undefined);
+        // Only close the detail panel when the dispatch originated
+        // from it (no explicit entry override). Row-level quick
+        // actions must not close a panel the operator never opened.
+        if (!entryOverride) setDetailEntry(undefined);
         refreshData();
       } finally {
         setDispatching(false);
@@ -414,6 +430,33 @@ export function useCompanionActions({
     setAssignmentDialogOpen(false);
   }, []);
 
+  // ── Phase-28 Prompt-03 — row-level quick triage ────────────────
+  // Safe, no-input governance patches that can fire directly from a
+  // queue row without forcing the operator to open the detail panel.
+  // Reason-carrying and structurally riskier actions (reject,
+  // requestRevision, flagAdminReview, remove, schedule, feature,
+  // pin, reassign) intentionally stay detail-panel-only.
+  const handleQuickAction = React.useCallback(
+    (kind: QuickActionKind, entry: KudosEntry) => {
+      setActionError(undefined);
+      switch (kind) {
+        case 'approve':
+          void dispatchGovernancePatch({ kind: 'approve', kudosId: entry.id }, entry);
+          return;
+        case 'clearAdminReview':
+          void dispatchGovernancePatch(
+            { kind: 'clearAdminReview', kudosId: entry.id },
+            entry,
+          );
+          return;
+        case 'claim':
+          void dispatchGovernancePatch({ kind: 'claim', kudosId: entry.id }, entry);
+          return;
+      }
+    },
+    [dispatchGovernancePatch],
+  );
+
   return {
     selectedIds,
     toggleSelect,
@@ -423,6 +466,7 @@ export function useCompanionActions({
     actionError,
     setActionError,
     handleDetailAction,
+    handleQuickAction,
     inputDialog,
     closeInputDialog,
     handleInputDialogConfirm,

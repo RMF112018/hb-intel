@@ -29,8 +29,10 @@ import {
   type KudosEntry,
 } from '../../../homepage/webparts/kudosContracts.js';
 import type { KudosOverdueStatus } from '../../../homepage/helpers/kudosNotificationBuilder.js';
+import type { KudosCapabilities } from '../../../homepage/helpers/kudosCapabilities.js';
 import companionStyles from '../companion.module.css';
 import { AGING_LABEL } from '../runtime/companionTabs.js';
+import type { QuickActionKind } from '../runtime/useCompanionActions.js';
 
 export interface QueueRowProps {
   entry: KudosEntry;
@@ -40,6 +42,16 @@ export interface QueueRowProps {
   overdueStatus: KudosOverdueStatus;
   onToggleSelect: (id: string) => void;
   onOpenDetail: (entry: KudosEntry) => void;
+  /**
+   * Phase-28 Prompt-03 quick-triage wiring. When present, the row
+   * renders inline safe-action buttons for the common moderation
+   * flows (approve, clear admin flag, claim). Gated by capability
+   * and the entry's current workflow/ownership state.
+   */
+  capabilities?: KudosCapabilities;
+  dispatching?: boolean;
+  onQuickAction?: (kind: QuickActionKind, entry: KudosEntry) => void;
+  currentUserId?: number | undefined;
 }
 
 export function QueueRow({
@@ -50,6 +62,10 @@ export function QueueRow({
   overdueStatus,
   onToggleSelect,
   onOpenDetail,
+  capabilities,
+  dispatching,
+  onQuickAction,
+  currentUserId,
 }: QueueRowProps): React.JSX.Element {
   const summary = buildKudosRecipientSummary(entry.recipients);
   const workflowChip = entry.workflowStatus
@@ -57,6 +73,23 @@ export function QueueRow({
     : undefined;
   const aging = deriveAgingBucket(entry.submittedDate, nowIso);
   const flagged = needsAdminReview(entry);
+
+  // Quick-triage gating — mirrors detail-panel capability logic so
+  // the row never offers an action the operator can't actually take.
+  const canQuickApprove =
+    Boolean(capabilities?.canApprove) &&
+    (entry.workflowStatus === 'pending' ||
+      entry.workflowStatus === 'revisionRequested');
+  const canQuickClearFlag =
+    Boolean(capabilities?.canClearAdminReview) && flagged;
+  const ownerId = entry.assignedOwnerId ?? entry.claimOwnerId;
+  const canQuickClaim =
+    Boolean(capabilities?.canClaim) &&
+    ownerId == null &&
+    currentUserId !== undefined;
+  const hasQuickActions =
+    Boolean(onQuickAction) &&
+    (canQuickApprove || canQuickClearFlag || canQuickClaim);
 
   return (
     <li className={companionStyles.triageItem}>
@@ -160,6 +193,57 @@ export function QueueRow({
               day: 'numeric',
             })}
           </span>
+          {hasQuickActions && onQuickAction ? (
+            <div
+              className={companionStyles.queueRowQuickActions}
+              role="group"
+              aria-label="Quick triage actions"
+              data-hbc-testid="hb-kudos-queue-row-quick-actions"
+              /* Stop the row-level click handler on the surrounding
+                 button from intercepting these action clicks. */
+              onClick={(e) => e.stopPropagation()}
+            >
+              {canQuickApprove ? (
+                <button
+                  type="button"
+                  className={clsx(
+                    companionStyles.queueRowQuickActionBtn,
+                    companionStyles.queueRowQuickActionPrimary,
+                  )}
+                  onClick={() => onQuickAction('approve', entry)}
+                  disabled={dispatching}
+                  data-hbc-testid="hb-kudos-queue-row-quick-approve"
+                  aria-label={`Approve: ${entry.headline}`}
+                >
+                  Approve
+                </button>
+              ) : null}
+              {canQuickClearFlag ? (
+                <button
+                  type="button"
+                  className={companionStyles.queueRowQuickActionBtn}
+                  onClick={() => onQuickAction('clearAdminReview', entry)}
+                  disabled={dispatching}
+                  data-hbc-testid="hb-kudos-queue-row-quick-clear-flag"
+                  aria-label={`Clear admin flag: ${entry.headline}`}
+                >
+                  Clear flag
+                </button>
+              ) : null}
+              {canQuickClaim ? (
+                <button
+                  type="button"
+                  className={companionStyles.queueRowQuickActionBtn}
+                  onClick={() => onQuickAction('claim', entry)}
+                  disabled={dispatching}
+                  data-hbc-testid="hb-kudos-queue-row-quick-claim"
+                  aria-label={`Claim: ${entry.headline}`}
+                >
+                  Claim
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </li>

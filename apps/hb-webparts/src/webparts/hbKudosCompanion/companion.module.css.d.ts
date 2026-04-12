@@ -90,5 +90,8 @@ declare const styles: {
   readonly spotlightRecipientsEmpty: string;
   readonly spotlightSubmittedMeta: string;
   readonly spotlightReviewBtn: string;
+  readonly queueRowQuickActions: string;
+  readonly queueRowQuickActionBtn: string;
+  readonly queueRowQuickActionPrimary: string;
 };
 export default styles;

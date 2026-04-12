@@ -20,25 +20,19 @@
  *   → bulk bar → (spotlight + triage list) → detail panel → dialogs
  * and nothing more.
  *
- * Phase-28 Prompt-02 structural redesign: the workspace is no longer
- * a flat stack of generic cards. Two new surfaces elevate the
- * moderation product:
- *   - `PriorityPulseStrip` renders the true workload (overdue,
- *     approaching, flagged, pending) above the control zone.
- *   - `TriageSpotlight` elevates the single most-pressing queue item
- *     above the list so "what to review first" is explicit.
- * The queue itself renders as an `<ol className="triageList">` of
- * borderless `QueueRow` items sharing a single productized surface —
- * no more per-row `HbcCard` frame.
+ * Phase-28 Prompt-02 structural redesign: adds PriorityPulseStrip
+ * (workload signals) and TriageSpotlight (next-up). Queue renders
+ * as <ol.triageList> of borderless rows — no per-row HbcCard.
+ *
+ * Phase-28 Prompt-03: rows expose inline safe-action buttons
+ * (Approve / Clear flag / Claim) via `handleQuickAction`.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { HbcEmptyState, HbcStatusBadge } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
 import { getKudosListHostUrl } from '../../homepage/data/spContext.js';
-import {
-  KUDOS_ROLE_LABELS,
-} from '../../homepage/helpers/kudosCapabilities.js';
+import { KUDOS_ROLE_LABELS } from '../../homepage/helpers/kudosCapabilities.js';
 import {
   KudosGovernanceTabButton,
   KudosGovernanceToggleChip,
@@ -254,7 +248,7 @@ export function HbKudosCompanion({
 
   const now = nowIso ?? new Date().toISOString();
 
-  const { queue, overdueMap, reminderTargets, scopeCount, isRefined, tabCounts } =
+  const { queue, overdueMap, reminderTargets, scopeCount, isRefined, tabCounts, currentUserId } =
     useCompanionQueue({ allKudos, filter, nowIso: now, overdueThresholds });
 
   const actions = useCompanionActions({
@@ -272,6 +266,7 @@ export function HbKudosCompanion({
     actionError,
     setActionError,
     handleDetailAction,
+    handleQuickAction,
     inputDialog,
     closeInputDialog,
     handleInputDialogConfirm,
@@ -543,6 +538,10 @@ export function HbKudosCompanion({
                     setDetailEntry(e);
                     setActionError(undefined);
                   }}
+                  capabilities={capabilities}
+                  dispatching={dispatching}
+                  onQuickAction={handleQuickAction}
+                  currentUserId={currentUserId}
                 />
               ))}
             </ol>
