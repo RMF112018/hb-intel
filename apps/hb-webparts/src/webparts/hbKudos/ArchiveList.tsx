@@ -24,6 +24,12 @@ import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitive
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ChevronDown, ArrowRight } from './kudosIcons.js';
 import styles from './kudosSurface.module.css';
+import {
+  kudosRow,
+  kudosArchiveToggle,
+  kudosArchiveChevron,
+  kudosArchiveViewAll,
+} from './kudosVariants.js';
 
 export interface ArchiveListProps {
   entries: KudosEntry[];
@@ -82,14 +88,14 @@ export function ArchiveList({
       <div className={styles.archiveHeader}>
         <button
           type="button"
-          className={styles.archiveToggle}
+          className={kudosArchiveToggle()}
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls="hb-kudos-archive-body"
           data-hbc-testid="hb-kudos-archive-toggle"
         >
           {toggleLabel}
-          <span className={styles.archiveChevron} aria-hidden="true">
+          <span className={kudosArchiveChevron()} aria-hidden="true">
             <ChevronDown size={14} strokeWidth={2.5} />
           </span>
         </button>
@@ -123,7 +129,7 @@ export function ArchiveList({
                     type="button"
                     onClick={() => onOpenEntry(entry)}
                     aria-label={`Open recognition: ${entry.headline || recipientDisplay}`}
-                    className={styles.archiveRow}
+                    className={kudosRow({ variant: 'archive' })}
                     data-hbc-testid="hb-kudos-archive-row"
                   >
                     {entry.recipients.length > 0 ? (
@@ -156,7 +162,7 @@ export function ArchiveList({
           {onViewAll ? (
             <button
               type="button"
-              className={styles.archiveViewAll}
+              className={kudosArchiveViewAll()}
               onClick={onViewAll}
               data-hbc-testid="hb-kudos-view-all"
             >

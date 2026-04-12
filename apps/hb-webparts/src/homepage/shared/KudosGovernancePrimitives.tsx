@@ -24,6 +24,11 @@ import {
   governanceActionButton,
   governanceTabButton,
   governanceToggleChip,
+  governanceSectionHeading,
+  governanceInfoRow,
+  governanceInfoRowLabel,
+  governanceToolbarLabel,
+  governanceErrorAlert,
 } from '../../webparts/hbKudos/kudosVariants.js';
 import governanceStyles from './governance.module.css';
 
@@ -132,6 +137,67 @@ export const KUDOS_GOV_TOKENS = {
 // framework.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Semantic intent aliases over KUDOS_GOV_TOKENS
+// ---------------------------------------------------------------------------
+//
+// Phase-19 Wave 2: surface files should read tokens by intent, not by
+// opacity step. `KUDOS_INTENT` is a thin alias layer that names each
+// member by the role it plays in the Kudos UI (ink tier, governance
+// border, governance surface, danger surface, celebrate surface, etc.).
+//
+// Adoption is incremental. `KUDOS_GOV_TOKENS` remains the canonical
+// source — every intent name maps to exactly one opacity-scale member
+// below, so both APIs always agree.
+// ---------------------------------------------------------------------------
+
+export const KUDOS_INTENT = {
+  // Brand
+  brandBlue: KUDOS_GOV_TOKENS.brandBlue,
+  brandOrange: KUDOS_GOV_TOKENS.brandOrange,
+
+  // Ink hierarchy (body copy on light editorial surfaces)
+  inkPrimary: KUDOS_GOV_TOKENS.textPrimary,
+  inkHeading: KUDOS_GOV_TOKENS.textHeading,
+  inkSecondary: KUDOS_GOV_TOKENS.textSecondary,
+  inkTertiary: KUDOS_GOV_TOKENS.textTertiary,
+  inkMuted: KUDOS_GOV_TOKENS.textMuted,
+  inkFaint: KUDOS_GOV_TOKENS.textFaint,
+  inkCaption: KUDOS_GOV_TOKENS.textCaption,
+  inkDisabled: KUDOS_GOV_TOKENS.textDisabled,
+
+  // Governance (presentation-blue ramp)
+  governanceSurfaceIdle: KUDOS_GOV_TOKENS.blueSubtle04,
+  governanceSurfaceFocus: KUDOS_GOV_TOKENS.blueSubtle08,
+  governanceSurfaceActive: KUDOS_GOV_TOKENS.blueSubtle12,
+  governanceBorderSubtle: KUDOS_GOV_TOKENS.blueSubtle14,
+  governanceBorderIdle: KUDOS_GOV_TOKENS.blueSubtle18,
+  governanceBorderStrong: KUDOS_GOV_TOKENS.blueSubtle20,
+  governanceAccentInk: KUDOS_GOV_TOKENS.blueText82,
+
+  // Recognition surfaces (presentation-orange ramp)
+  recognitionSurfaceWhisper: KUDOS_GOV_TOKENS.orangeSubtle02,
+  recognitionSurfaceIdle: KUDOS_GOV_TOKENS.orangeSubtle03,
+  recognitionSurfaceHover: KUDOS_GOV_TOKENS.orangeSubtle06,
+  recognitionSurfaceFocus: KUDOS_GOV_TOKENS.orangeSubtle10,
+  recognitionBorderSubtle: KUDOS_GOV_TOKENS.orangeSubtle18,
+  recognitionBorderStrong: KUDOS_GOV_TOKENS.orangeSubtle22,
+  recognitionBorderEmphasis: KUDOS_GOV_TOKENS.orangeSubtle25,
+  recognitionBorderFocus: KUDOS_GOV_TOKENS.orangeSubtle28,
+
+  // Danger surfaces
+  dangerInk: KUDOS_GOV_TOKENS.dangerRed,
+  dangerSurface: KUDOS_GOV_TOKENS.dangerSubtle08,
+  dangerBorder: KUDOS_GOV_TOKENS.dangerSubtle22,
+  dangerAccent: KUDOS_GOV_TOKENS.dangerSubtle55,
+  dangerInkItalic: KUDOS_GOV_TOKENS.dangerItalic72,
+
+  // Warning
+  warningInk: KUDOS_GOV_TOKENS.warningOrange,
+} as const;
+
+export type KudosIntentToken = keyof typeof KUDOS_INTENT;
+
 export const KUDOS_SPACE = {
   xs: 4,
   sm: 6,
@@ -172,7 +238,7 @@ function governanceVars(): React.CSSProperties {
 
 export function KudosSectionHeading({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <div className={governanceStyles.sectionHeading} style={governanceVars()}>
+    <div className={governanceSectionHeading()} style={governanceVars()}>
       {children}
     </div>
   );
@@ -185,8 +251,8 @@ export function KudosSectionHeading({ children }: { children: React.ReactNode })
 export function KudosInfoRow({ label, value }: { label: string; value?: string }): React.JSX.Element | null {
   if (!value?.trim()) return null;
   return (
-    <div className={governanceStyles.infoRow} style={governanceVars()}>
-      <span className={governanceStyles.infoRowLabel}>{label}:</span> {value}
+    <div className={governanceInfoRow()} style={governanceVars()}>
+      <span className={governanceInfoRowLabel()}>{label}:</span> {value}
     </div>
   );
 }
@@ -302,7 +368,7 @@ export function KudosGovernanceToggleChip({
 
 export function KudosGovernanceToolbarLabel({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span className={governanceStyles.toolbarLabel} style={governanceVars()}>
+    <span className={governanceToolbarLabel()} style={governanceVars()}>
       {children}
     </span>
   );
@@ -314,7 +380,7 @@ export function KudosGovernanceToolbarLabel({ children }: { children: React.Reac
 
 export function KudosGovernanceErrorAlert({ message }: { message: string }): React.JSX.Element {
   return (
-    <div role="alert" className={governanceStyles.errorAlert} style={governanceVars()}>
+    <div role="alert" className={governanceErrorAlert()} style={governanceVars()}>
       {message}
     </div>
   );

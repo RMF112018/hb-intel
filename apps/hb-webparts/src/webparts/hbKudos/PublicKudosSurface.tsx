@@ -32,6 +32,14 @@ import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { Trophy, Sparkles, ThumbsUp } from './kudosIcons.js';
 import styles from './kudosSurface.module.css';
+import {
+  kudosGiveCta,
+  kudosCelebrateBtn,
+  kudosCelebrateIcon,
+  kudosReadmoreBtn,
+  kudosFeaturedBadge,
+  kudosRow,
+} from './kudosVariants.js';
 
 /**
  * formatRecipientDisplay — produce a real honoree-name label for the
@@ -133,7 +141,7 @@ export function PublicKudosSurface({
           </h2>
           <button
             type="button"
-            className={styles.giveBtn}
+            className={kudosGiveCta()}
             onClick={onGiveKudos}
             data-hbc-testid="hb-kudos-give-trigger"
           >
@@ -171,7 +179,7 @@ export function PublicKudosSurface({
                 <button
                   key={item.id}
                   type="button"
-                  className={styles.recentRow}
+                  className={kudosRow({ variant: 'recent' })}
                   onClick={() => onOpenArticle(item)}
                   aria-label={`Open recognition for ${recipientDisplay}`}
                   data-hbc-testid="hb-kudos-recent-row"
@@ -260,7 +268,7 @@ function FeaturedCard({
 
   return (
     <article className={styles.featured} data-hbc-testid="hb-kudos-featured-card">
-      <span className={styles.featuredBadge} aria-label={badgeLabel}>
+      <span className={kudosFeaturedBadge()} aria-label={badgeLabel}>
         <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
         {badgeLabel}
       </span>
@@ -299,7 +307,7 @@ function FeaturedCard({
           {showReadMore ? (
             <button
               type="button"
-              className={styles.readmoreBtn}
+              className={kudosReadmoreBtn()}
               onClick={() => onOpenArticle(entry)}
               aria-label="Read full recognition"
               data-hbc-testid="hb-kudos-featured-readmore"
@@ -315,13 +323,13 @@ function FeaturedCard({
         {onCelebrate ? (
           <button
             type="button"
-            className={styles.celebrateBtn}
+            className={kudosCelebrateBtn()}
             onClick={() => onCelebrate(entry.id)}
             disabled={celebrateLoading}
             aria-label="Celebrate this recognition"
             data-hbc-testid="hb-kudos-celebrate"
           >
-            <span className={styles.celebrateIcon} aria-hidden="true">
+            <span className={kudosCelebrateIcon()} aria-hidden="true">
               <ThumbsUp size={13} strokeWidth={2.25} />
             </span>
             <span data-hbc-testid="hb-kudos-celebrate-count">{celebrateCount}</span>

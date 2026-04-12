@@ -1,0 +1,77 @@
+/**
+ * kudosReader.module.css — HB Kudos article reader grammar.
+ *
+ * Phase-19 Wave 2 shared-UI hardening. Owns the reader-panel visual
+ * language (header, body, footer, celebrate-count pill) that was
+ * previously inline in KudosArticleReader.tsx. Token-backed via
+ * `--hbk-reader-*` CSS custom properties set on the article root
+ * from KUDOS_GOV_TOKENS.
+ */
+
+.article {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 2px 8px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 4px 16px;
+  border-bottom: 1px solid var(--hbk-reader-border);
+}
+
+.headerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.recipient {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--hbk-reader-ink-primary);
+}
+
+.headline {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--hbk-reader-ink-secondary);
+}
+
+.body {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--hbk-reader-ink-primary);
+  white-space: pre-wrap;
+  padding: 0 4px;
+  max-width: 64ch;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hbk-reader-border);
+  font-size: 0.75rem;
+  color: var(--hbk-reader-ink-faint);
+}
+
+.celebratePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--hbk-reader-celebrate-surface);
+  border: 1px solid var(--hbk-reader-border);
+  color: var(--hbk-reader-brand-orange);
+  font-weight: 700;
+}

@@ -46,11 +46,13 @@
  *   token language, and one variant vocabulary.
  */
 
-// Tokens + spacing
+// Tokens + spacing + semantic intent aliases
 export {
   KUDOS_GOV_TOKENS,
+  KUDOS_INTENT,
   KUDOS_SPACE,
   KUDOS_RADIUS,
+  type KudosIntentToken,
 } from '../../homepage/shared/KudosGovernancePrimitives.js';
 
 // Icon seam
@@ -65,15 +67,33 @@ export {
 
 // Variants (class-variance-authority)
 export {
+  // Governance
   governanceActionButton,
   governanceTabButton,
   governanceToggleChip,
+  governanceSectionHeading,
+  governanceInfoRow,
+  governanceInfoRowLabel,
+  governanceToolbarLabel,
+  governanceErrorAlert,
   type GovernanceTabButtonVariants,
   type GovernanceToggleChipVariants,
+  // Public surface
+  kudosRow,
+  kudosGiveCta,
+  kudosCelebrateBtn,
+  kudosCelebrateIcon,
+  kudosReadmoreBtn,
+  kudosFeaturedBadge,
+  kudosArchiveToggle,
+  kudosArchiveChevron,
+  kudosArchiveViewAll,
+  type KudosRowVariants,
 } from './kudosVariants.js';
 
 // Style modules — consumers `import styles from 'kudosSurface.module.css'`
 // directly when they need class identifiers; this namespace re-exports
 // the default imports for convenience in composition helpers.
 export { default as kudosSurfaceStyles } from './kudosSurface.module.css';
+export { default as kudosReaderStyles } from './kudosReader.module.css';
 export { default as governanceStyles } from '../../homepage/shared/governance.module.css';
