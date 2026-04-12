@@ -1,5 +1,13 @@
 /**
- * QueueRow — companion queue row anatomy (Phase-23 Prompt-04 model).
+ * QueueRow — companion triage-list row anatomy.
+ *
+ * Phase-28 Prompt-02 structural redesign: the row no longer wraps
+ * itself in `HbcCard`. The Companion workspace now presents the
+ * queue as a single productized triage list surface (see
+ * `.triageList` in `companion.module.css`) with shared rhythm and
+ * subtle dividers, rather than a stack of repeated generic cards.
+ * Each row owns only its own internal anatomy — rail, selection,
+ * content, and date spine — and inherits the list's frame.
  *
  * Renders a single moderation queue entry: selection checkbox (when
  * bulk-select is permitted), state/scan chip row, headline, excerpt,
@@ -11,7 +19,6 @@ import * as React from 'react';
 import { clsx } from 'clsx';
 import {
   HbcAvatarStack,
-  HbcCard,
   HbcStatusBadge,
 } from '@hbc/ui-kit/homepage';
 import {
@@ -52,7 +59,7 @@ export function QueueRow({
   const flagged = needsAdminReview(entry);
 
   return (
-    <HbcCard weight="standard">
+    <li className={companionStyles.triageItem}>
       <div
         data-hbc-testid="hb-kudos-queue-row"
         data-workflow-status={entry.workflowStatus ?? ''}
@@ -155,6 +162,6 @@ export function QueueRow({
           </span>
         </div>
       </div>
-    </HbcCard>
+    </li>
   );
 }

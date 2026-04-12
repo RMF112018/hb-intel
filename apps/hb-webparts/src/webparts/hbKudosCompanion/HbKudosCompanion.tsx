@@ -15,8 +15,21 @@
  * role resolution, queue derivation, and action planning each have a
  * dedicated hook under `./runtime/`; queue-row, detail-panel, and
  * degraded-state JSX live in `./components/`. The host composes them
- * into header → control zone → bulk bar → queue region → detail panel
- * → task dialogs, nothing more.
+ * into
+ *   header → priority pulse strip → control zone → active-filter bar
+ *   → bulk bar → (spotlight + triage list) → detail panel → dialogs
+ * and nothing more.
+ *
+ * Phase-28 Prompt-02 structural redesign: the workspace is no longer
+ * a flat stack of generic cards. Two new surfaces elevate the
+ * moderation product:
+ *   - `PriorityPulseStrip` renders the true workload (overdue,
+ *     approaching, flagged, pending) above the control zone.
+ *   - `TriageSpotlight` elevates the single most-pressing queue item
+ *     above the list so "what to review first" is explicit.
+ * The queue itself renders as an `<ol className="triageList">` of
+ * borderless `QueueRow` items sharing a single productized surface —
+ * no more per-row `HbcCard` frame.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -58,6 +71,9 @@ import { useBulkApproval } from './runtime/useBulkApproval.js';
 import { BulkActionBar } from './components/BulkActionBar.js';
 import { QueueRow } from './components/QueueRow.js';
 import { DetailPanel } from './components/DetailPanel.js';
+import { PriorityPulseStrip } from './components/PriorityPulseStrip.js';
+import { TriageSpotlight } from './components/TriageSpotlight.js';
+import { useCompanionPulseSignals } from './runtime/useCompanionPulseSignals.js';
 import {
   CompanionAccessRestricted,
   CompanionHostUnconfigured,
@@ -285,6 +301,25 @@ export function HbKudosCompanion({
 
   const activeTab = COMPANION_TABS.find((t) => t.id === filter.tabId) ?? COMPANION_TABS[0]!;
 
+  const { signals: pulseSignals } = useCompanionPulseSignals({
+    allKudos,
+    nowIso: now,
+    overdueThresholds,
+    tabCounts,
+    activeTabId: filter.tabId,
+    adminReviewOnly: filter.adminReviewOnly,
+    dispatch,
+  });
+
+  // Spotlight only surfaces on triage-oriented tabs. On approved /
+  // rejected / revisionRequested-audit scopes the operator is not
+  // picking "what to review first," so the spotlight would add noise.
+  const showSpotlight =
+    (filter.tabId === 'pending' ||
+      filter.tabId === 'flagged' ||
+      filter.tabId === 'revisionRequested') &&
+    queue.length > 0;
+
   // Degraded render paths.
   if (roleResolving) return <CompanionRoleResolving />;
   if (roleStatus === 'resolution-failed')
@@ -343,6 +378,16 @@ export function HbKudosCompanion({
           />
         </div>
       </header>
+
+      {/* Priority pulse strip — Phase-28 Prompt-02 structural upgrade.
+          Advertises the true workload (overdue / approaching / flagged
+          / pending) in a compact band above the control zone so the
+          operator sees what actually needs attention before scanning
+          the queue. Each pulse chip is a scoping shortcut. */}
+      <PriorityPulseStrip
+        signals={pulseSignals}
+        totalPending={tabCounts['pending'] ?? 0}
+      />
 
       <section className={companionStyles.controlZone} aria-label="Queue controls">
         <div
@@ -470,23 +515,38 @@ export function HbKudosCompanion({
             </div>
           )
         ) : (
-          <div className={companionStyles.queueGrid}>
-            {queue.map((entry) => (
-              <QueueRow
-                key={entry.id}
-                entry={entry}
-                nowIso={now}
-                selected={selectedIds.has(entry.id)}
-                selectable={selectable}
-                overdueStatus={overdueMap.get(entry.id) ?? 'ok'}
-                onToggleSelect={toggleSelect}
-                onOpenDetail={(e) => {
+          <>
+            {showSpotlight ? (
+              <TriageSpotlight
+                queue={queue}
+                overdueMap={overdueMap}
+                onReview={(e) => {
                   setDetailEntry(e);
                   setActionError(undefined);
                 }}
               />
-            ))}
-          </div>
+            ) : null}
+            <ol
+              className={companionStyles.triageList}
+              data-hbc-testid="hb-kudos-triage-list"
+            >
+              {queue.map((entry) => (
+                <QueueRow
+                  key={entry.id}
+                  entry={entry}
+                  nowIso={now}
+                  selected={selectedIds.has(entry.id)}
+                  selectable={selectable}
+                  overdueStatus={overdueMap.get(entry.id) ?? 'ok'}
+                  onToggleSelect={toggleSelect}
+                  onOpenDetail={(e) => {
+                    setDetailEntry(e);
+                    setActionError(undefined);
+                  }}
+                />
+              ))}
+            </ol>
+          </>
         )}
       </section>
 

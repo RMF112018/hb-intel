@@ -213,17 +213,42 @@
   cursor: not-allowed;
 }
 
-.queueGrid {
-  display: grid;
-  gap: 12px;
-  /* Prevent grid children from forcing the track wider than the
-     container — essential when a queue-row carries a long recipient
+/* ── Phase-28 Prompt-02 — triage list surface ──────────────────────
+   The queue no longer renders as a stack of `HbcCard`-wrapped rows.
+   It renders as a single productized triage list surface: one
+   shared frame, hairline dividers between rows, and a single rhythm.
+   This eliminates the "repeated generic card" posture the audit
+   flagged as compositionally cautious. */
+
+.triageList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* Prevent list children from forcing the track wider than the
+     container — essential when a row carries a long recipient
      summary or unbroken text in a narrow SharePoint column. */
   min-width: 0;
+  border: 1px solid var(--hbk-blue-14);
+  border-radius: var(--hbk-radius-lg);
+  background: var(--hbk-surface-0);
+  overflow: hidden;
+  box-shadow: var(--hbk-elev-zone);
 }
 
-.queueGrid > * {
+.triageItem {
   min-width: 0;
+  border-top: 1px solid var(--hbk-blue-14);
+  transition: background var(--hbk-motion-fast);
+}
+
+.triageItem:first-child {
+  border-top: none;
+}
+
+.triageItem:hover {
+  background: var(--hbk-blue-04);
 }
 
 /* ── Queue row ─────────────────────────────────────────────────
@@ -918,4 +943,267 @@
   padding-top: 8px;
   margin-top: 8px;
   border-top: 1px dashed var(--hbk-orange-18);
+}
+
+/* ── Phase-28 Prompt-02 — priority pulse strip ─────────────────────
+   Compact band above the sticky control zone. Gives the moderation
+   operator an instant read on the true workload (overdue /
+   approaching / flagged / pending) and acts as a set of scoping
+   shortcuts. Sits outside the control zone frame by design so it
+   reads as a first-class workspace signal, not a buried filter. */
+
+.pulseStrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 2px 0;
+}
+
+.pulseStripLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hbk-text-muted);
+  margin-right: 4px;
+}
+
+.pulseChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--hbk-radius-pill);
+  border: 1px solid var(--hbk-blue-14);
+  background: var(--hbk-surface-0);
+  color: var(--hbk-text-primary);
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background var(--hbk-motion-fast),
+    border-color var(--hbk-motion-fast),
+    color var(--hbk-motion-fast);
+}
+
+.pulseChip:hover {
+  border-color: var(--hbk-brand-blue);
+}
+
+.pulseChip:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
+}
+
+.pulseChipCount {
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--hbk-text-heading);
+}
+
+.pulseChipLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hbk-text-secondary);
+}
+
+/* Tone grammar — the pulse chip's count/label re-tints when the chip
+   is carrying a danger / warning signal so the operator parses
+   overdue vs. approaching vs. informational at a glance. */
+.pulseChip[data-pulse-tone='danger'] {
+  border-color: var(--hbk-danger-22);
+  background: var(--hbk-danger-08);
+}
+
+.pulseChip[data-pulse-tone='danger'] .pulseChipCount,
+.pulseChip[data-pulse-tone='danger'] .pulseChipLabel {
+  color: var(--hbk-danger);
+}
+
+.pulseChip[data-pulse-tone='warning'] {
+  border-color: var(--hbk-orange-22);
+  background: var(--hbk-orange-06);
+}
+
+.pulseChip[data-pulse-tone='warning'] .pulseChipCount,
+.pulseChip[data-pulse-tone='warning'] .pulseChipLabel {
+  color: var(--hbk-warning-orange);
+}
+
+.pulseChipActive {
+  border-color: var(--hbk-brand-blue);
+  box-shadow: 0 0 0 2px var(--hbk-blue-12);
+}
+
+.pulseAllClear {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: var(--hbk-radius-pill);
+  border: 1px solid var(--hbk-blue-14);
+  background: var(--hbk-blue-04);
+  color: var(--hbk-text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pulseAllClearDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--hbk-radius-pill);
+  background: var(--hbk-brand-blue);
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulseChip,
+  .triageItem {
+    transition: none;
+  }
+}
+
+/* ── Phase-28 Prompt-02 — triage spotlight ─────────────────────────
+   Elevates the single most-pressing queue item above the list so
+   "what to review first" is explicit, not implied. Composed of
+   eyebrow + reason badge, headline, excerpt, and a recipients /
+   submitted-meta / Review footer. Only rendered on triage-oriented
+   tabs (pending / flagged / revisionRequested) when the queue is
+   non-empty. */
+
+.spotlight {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: var(--hbk-radius-xl);
+  background:
+    linear-gradient(135deg, var(--hbk-blue-06) 0%, var(--hbk-surface-0) 100%);
+  border: 1px solid var(--hbk-blue-18);
+  box-shadow: var(--hbk-elev-zone);
+}
+
+.spotlight[data-spotlight-reason='overdue'] {
+  background: linear-gradient(135deg, var(--hbk-danger-08) 0%, var(--hbk-surface-0) 100%);
+  border-color: var(--hbk-danger-22);
+}
+
+.spotlight[data-spotlight-reason='approaching'],
+.spotlight[data-spotlight-reason='flagged'] {
+  background: linear-gradient(135deg, var(--hbk-orange-06) 0%, var(--hbk-surface-0) 100%);
+  border-color: var(--hbk-orange-22);
+}
+
+.spotlightHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.spotlightEyebrow {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hbk-brand-blue);
+}
+
+.spotlight[data-spotlight-reason='overdue'] .spotlightEyebrow {
+  color: var(--hbk-danger);
+}
+
+.spotlight[data-spotlight-reason='approaching'] .spotlightEyebrow,
+.spotlight[data-spotlight-reason='flagged'] .spotlightEyebrow {
+  color: var(--hbk-warning-orange);
+}
+
+.spotlightHeadline {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--hbk-text-heading);
+  overflow-wrap: anywhere;
+}
+
+.spotlightExcerpt {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--hbk-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.spotlightFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px dashed var(--hbk-blue-14);
+}
+
+.spotlightRecipients {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.spotlightRecipientSummary {
+  font-size: 0.75rem;
+  color: var(--hbk-text-secondary);
+  font-weight: 600;
+}
+
+.spotlightRecipientsEmpty {
+  font-size: 0.75rem;
+  color: var(--hbk-text-faint);
+  font-style: italic;
+}
+
+.spotlightSubmittedMeta {
+  font-size: 0.6875rem;
+  color: var(--hbk-text-faint);
+  font-weight: 500;
+}
+
+.spotlightReviewBtn {
+  padding: 8px 18px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--hbk-surface-0);
+  background: linear-gradient(135deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
+  border: none;
+  border-radius: var(--hbk-radius-sm);
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform var(--hbk-motion-fast),
+    box-shadow var(--hbk-motion-mid);
+}
+
+.spotlightReviewBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--hbk-elev-zone);
+}
+
+.spotlightReviewBtn:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
 }
