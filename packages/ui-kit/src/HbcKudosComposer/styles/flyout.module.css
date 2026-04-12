@@ -1,0 +1,337 @@
+/**
+ * HbcKudosComposer — Flyout shell, header, footer, scroll area.
+ *
+ * Every color, ink, spacing, radius, elevation, and transition value
+ * is sourced from `var(--hbc-kudos-*)` custom properties populated by
+ * `kudosComposerCSSVars()` in tokens.ts. No hardcoded hex/rgb/px.
+ */
+
+/* ── Flyout backdrop + panel ──────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1099;
+  background: color-mix(in srgb, var(--hbc-kudos-ink-primary) 42%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.panel {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  background: var(--hbc-kudos-surface-0);
+}
+
+.panelMobile {
+  inset: 0;
+}
+
+.panelDesktop {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 480px;
+  max-width: 100vw;
+  box-shadow: var(--hbc-kudos-elev-overlay);
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+
+.panelHeader {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--hbc-kudos-space-sm);
+  padding: var(--hbc-kudos-space-lg) var(--hbc-kudos-space-lg) var(--hbc-kudos-space-md);
+  background:
+    radial-gradient(
+      circle at 12% 20%,
+      rgba(var(--hbc-kudos-on-brand-rgb), 0.2) 0%,
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 86% 80%,
+      rgba(var(--hbc-kudos-on-brand-rgb), 0.14) 0%,
+      transparent 45%
+    ),
+    linear-gradient(
+      135deg,
+      var(--hbc-kudos-brand-orange) 0%,
+      var(--hbc-kudos-brand-orange-deep) 40%,
+      var(--hbc-kudos-brand-blue) 100%
+    );
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .panelHeader {
+    padding: var(--hbc-kudos-space-lg) var(--hbc-kudos-space-lg) var(--hbc-kudos-space-md);
+  }
+}
+
+.panelHeaderDots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 22% 38%, rgba(var(--hbc-kudos-on-brand-rgb), 0.55) 1.5px, transparent 2px),
+    radial-gradient(circle at 44% 18%, rgba(var(--hbc-kudos-on-brand-rgb), 0.35) 1px, transparent 1.5px),
+    radial-gradient(circle at 68% 72%, rgba(var(--hbc-kudos-on-brand-rgb), 0.40) 1.5px, transparent 2px),
+    radial-gradient(circle at 82% 32%, rgba(var(--hbc-kudos-on-brand-rgb), 0.28) 1px, transparent 1.5px);
+  background-size: 220px 220px;
+  opacity: 0.85;
+}
+
+.panelHeaderCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hbc-kudos-space-xs);
+  min-width: 0;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--hbc-kudos-on-brand);
+  display: flex;
+  align-items: center;
+  gap: var(--hbc-kudos-space-sm);
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .panelTitle {
+    font-size: 1.25rem;
+  }
+}
+
+.panelTitleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hbc-kudos-space-xl);
+  height: var(--hbc-kudos-space-xl);
+  border-radius: var(--hbc-kudos-radius-xl);
+  background: rgba(var(--hbc-kudos-on-brand-rgb), 0.18);
+  border: 1px solid rgba(var(--hbc-kudos-on-brand-rgb), 0.25);
+  color: var(--hbc-kudos-on-brand);
+}
+
+.panelSubtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(var(--hbc-kudos-on-brand-rgb), 0.82);
+  line-height: 1.4;
+  max-width: 36ch;
+}
+
+.panelClose {
+  position: relative;
+  z-index: 1;
+  background: rgba(var(--hbc-kudos-on-brand-rgb), 0.18);
+  border: 1px solid rgba(var(--hbc-kudos-on-brand-rgb), 0.22);
+  border-radius: var(--hbc-kudos-radius-xl);
+  color: var(--hbc-kudos-on-brand);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  width: var(--hbc-kudos-space-xl);
+  height: var(--hbc-kudos-space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--hbc-kudos-trans-fast) ease,
+    border-color var(--hbc-kudos-trans-fast) ease;
+  flex-shrink: 0;
+}
+
+.panelClose:hover {
+  background: rgba(var(--hbc-kudos-on-brand-rgb), 0.30);
+  border-color: rgba(var(--hbc-kudos-on-brand-rgb), 0.45);
+}
+
+.panelClose:focus-visible {
+  outline: 2px solid var(--hbc-kudos-on-brand);
+  outline-offset: 2px;
+}
+
+/* ── Scroll-area body ─────────────────────────────────── */
+
+.scrollRoot {
+  flex: 1 1 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.scrollViewport {
+  width: 100%;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.scrollViewportInner {
+  padding: var(--hbc-kudos-space-lg);
+}
+
+@media (min-width: 768px) {
+  .scrollViewportInner {
+    padding: var(--hbc-kudos-space-lg) var(--hbc-kudos-space-lg);
+  }
+}
+
+.scrollBar {
+  display: flex;
+  user-select: none;
+  touch-action: none;
+  padding: 2px;
+  background: transparent;
+  transition: background var(--hbc-kudos-trans-fast) ease;
+  width: 10px;
+}
+
+.scrollBar[data-orientation='horizontal'] {
+  flex-direction: column;
+  height: 10px;
+  width: auto;
+}
+
+.scrollThumb {
+  flex: 1;
+  background: rgba(var(--hbc-kudos-ink-primary-rgb), 0.22);
+  border-radius: var(--hbc-kudos-radius-full);
+  position: relative;
+}
+
+.scrollThumb:hover {
+  background: rgba(var(--hbc-kudos-ink-primary-rgb), 0.36);
+}
+
+/* ── Footer action zone ──────────────────────────────────
+   Two independent inset concerns compose the bottom padding:
+
+   1. Device safe-area inset — `env(safe-area-inset-bottom)` handles
+      notch devices, iPad in SPFx, and OS-level chrome.
+   2. Host-control clearance — `--hbc-host-ctrl-clearance` (set on
+      the panel element at runtime when SharePoint host chrome is
+      detected) reserves space for persistent SP controls in the
+      lower-right viewport area.
+
+   Both layers compose via max() so the largest required clearance
+   wins. When neither is active the footer uses its base padding. */
+
+.panelFooter {
+  flex-shrink: 0;
+  padding: var(--hbc-kudos-space-md) var(--hbc-kudos-space-md);
+  padding-bottom: max(
+    var(--hbc-kudos-space-md),
+    env(safe-area-inset-bottom, var(--hbc-kudos-space-md))
+  );
+  border-top: 1px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.18);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--hbc-kudos-brand-orange-rgb), 0.04) 0%,
+    rgba(var(--hbc-kudos-brand-orange-rgb), 0.05) 100%
+  );
+  display: flex;
+  justify-content: flex-start;
+  gap: var(--hbc-kudos-space-sm);
+}
+
+@media (min-width: 768px) {
+  .panelFooter {
+    padding: var(--hbc-kudos-space-md) var(--hbc-kudos-space-lg);
+    padding-bottom: max(
+      var(--hbc-kudos-space-lg),
+      env(safe-area-inset-bottom, 0px),
+      var(--hbc-host-ctrl-clearance, 0px)
+    );
+  }
+}
+
+/* ── Footer buttons (base) ───────────────────────────────
+   Variant branching (primary vs secondary, rest vs loading)
+   is governed by cva in variants.ts. Each variant pushes an
+   additional class; base class holds shared rhythm. */
+
+.footerButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--hbc-kudos-space-sm) var(--hbc-kudos-space-md);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  font-family: inherit;
+  border-radius: var(--hbc-kudos-radius-xl);
+  cursor: pointer;
+  transition: background var(--hbc-kudos-trans-fast) ease,
+    border-color var(--hbc-kudos-trans-fast) ease,
+    transform var(--hbc-kudos-trans-fast) ease,
+    box-shadow var(--hbc-kudos-trans-fast) ease;
+  gap: var(--hbc-kudos-space-sm);
+}
+
+.footerButton:focus-visible {
+  outline: 2px solid var(--hbc-kudos-brand-blue);
+  outline-offset: 2px;
+}
+
+.footerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.footerSecondary {
+  border: 1.5px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.28);
+  background: var(--hbc-kudos-surface-0);
+  color: var(--hbc-kudos-ink-primary);
+}
+
+.footerSecondary:hover:not(:disabled) {
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.06);
+  border-color: rgba(var(--hbc-kudos-brand-orange-rgb), 0.45);
+}
+
+.footerPrimary {
+  border: 1px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.35);
+  background: linear-gradient(
+    135deg,
+    var(--hbc-kudos-brand-orange) 0%,
+    var(--hbc-kudos-brand-orange-deep) 100%
+  );
+  color: var(--hbc-kudos-on-brand);
+  box-shadow: var(--hbc-kudos-elev-editorial);
+}
+
+.footerPrimary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--hbc-kudos-elev-overlay);
+}
+
+.footerPrimaryLoading,
+.footerPrimary:disabled {
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.5);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footerPrimary,
+  .footerPrimary:hover {
+    transform: none !important;
+  }
+  .panelClose,
+  .footerButton {
+    transition: none !important;
+  }
+}

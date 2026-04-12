@@ -1,0 +1,109 @@
+/**
+ * HbcKudosComposer — Preview card. Fully tokenized.
+ */
+
+.previewRoot {
+  /* Outermost root — injects kudosComposerCSSVars() when used standalone. */
+}
+
+.previewWrap {
+  margin-top: var(--hbc-kudos-space-xs);
+  padding-top: var(--hbc-kudos-space-md);
+  border-top: 1px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.10);
+}
+
+.previewLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--hbc-kudos-space-sm);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-kudos-brand-orange-rgb), 0.85);
+  margin-bottom: var(--hbc-kudos-space-sm);
+}
+
+.previewLabelDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--hbc-kudos-radius-full);
+  background: var(--hbc-kudos-brand-orange);
+  box-shadow: 0 0 0 3px rgba(var(--hbc-kudos-brand-orange-rgb), 0.18);
+}
+
+.previewCard {
+  position: relative;
+  background: var(--hbc-kudos-warm-tint);
+  border-radius: var(--hbc-kudos-radius-xl);
+  padding: var(--hbc-kudos-space-md);
+  border: 1px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.16);
+  box-shadow: var(--hbc-kudos-elev-editorial);
+  transition: opacity var(--hbc-kudos-trans-normal) ease;
+}
+
+.previewCardEmpty {
+  opacity: 0.45;
+}
+
+.previewAvatars {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--hbc-kudos-space-sm);
+}
+
+.previewOverflow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.52);
+  margin-left: var(--hbc-kudos-space-sm);
+  align-self: center;
+}
+
+.previewHeadline {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--hbc-kudos-ink-primary);
+}
+
+.previewRecipients {
+  display: block;
+  margin-top: var(--hbc-kudos-space-xs);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--hbc-kudos-brand-orange);
+}
+
+.previewExcerpt {
+  margin: var(--hbc-kudos-space-xs) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.65);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.previewSubmitter {
+  display: flex;
+  align-items: center;
+  gap: var(--hbc-kudos-space-xs);
+  margin-top: var(--hbc-kudos-space-sm);
+  font-size: 0.6875rem;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.45);
+  font-weight: 600;
+}
+
+.previewSubmitterIcon {
+  color: var(--hbc-kudos-brand-orange);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewCard {
+    transition: none !important;
+  }
+}

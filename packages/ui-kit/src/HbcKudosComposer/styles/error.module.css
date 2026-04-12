@@ -1,0 +1,46 @@
+/**
+ * HbcKudosComposer — Error banner. Fully tokenized.
+ */
+
+.errorBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hbc-kudos-space-sm);
+  padding: var(--hbc-kudos-space-sm) var(--hbc-kudos-space-md);
+  border-radius: var(--hbc-kudos-radius-xl);
+  margin-bottom: var(--hbc-kudos-space-md);
+  background: rgba(var(--hbc-kudos-danger-rgb), 0.06);
+  border: 1px solid rgba(var(--hbc-kudos-danger-rgb), 0.18);
+  border-left: 3px solid var(--hbc-kudos-danger-fg);
+}
+
+.errorBannerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--hbc-kudos-radius-lg);
+  background: rgba(var(--hbc-kudos-danger-rgb), 0.12);
+  color: var(--hbc-kudos-danger-fg);
+  flex-shrink: 0;
+}
+
+.errorBannerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.errorBannerTitle {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--hbc-kudos-danger-fg);
+  margin-bottom: 2px;
+  letter-spacing: -0.005em;
+}
+
+.errorBannerMessage {
+  font-size: 0.75rem;
+  color: rgba(var(--hbc-kudos-danger-rgb), 0.82);
+  line-height: 1.55;
+}

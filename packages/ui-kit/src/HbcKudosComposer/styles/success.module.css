@@ -1,0 +1,43 @@
+/**
+ * HbcKudosComposer — Success pane. Fully tokenized.
+ */
+
+.successPane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--hbc-kudos-space-md);
+  padding: var(--hbc-kudos-space-xxl) var(--hbc-kudos-space-lg) var(--hbc-kudos-space-xl);
+}
+
+.successIcon {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--hbc-kudos-radius-full);
+  background: linear-gradient(
+    135deg,
+    var(--hbc-kudos-brand-orange) 0%,
+    var(--hbc-kudos-brand-orange-deep) 100%
+  );
+  color: var(--hbc-kudos-on-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--hbc-kudos-elev-overlay);
+}
+
+.successTitle {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--hbc-kudos-ink-primary);
+}
+
+.successBody {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.6);
+  max-width: 36ch;
+  line-height: 1.6;
+}

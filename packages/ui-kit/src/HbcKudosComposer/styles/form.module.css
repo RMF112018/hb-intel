@@ -1,0 +1,389 @@
+/**
+ * HbcKudosComposer — Form grid, fields, typed recipient buckets.
+ * Fully tokenized via `var(--hbc-kudos-*)`.
+ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hbc-kudos-space-md);
+}
+
+.formNotice {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.62);
+  line-height: 1.5;
+  padding: var(--hbc-kudos-space-sm) var(--hbc-kudos-space-sm);
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.05);
+  border: 1px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.12);
+  border-left: 3px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.55);
+  border-radius: var(--hbc-kudos-radius-xl);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.55);
+  margin-bottom: var(--hbc-kudos-space-xs);
+}
+
+.requiredMark {
+  color: var(--hbc-kudos-brand-orange);
+}
+
+.optionalMark {
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.45);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Inputs (base + invalid variant via cva) ─────────── */
+
+.input {
+  width: 100%;
+  padding: var(--hbc-kudos-space-sm) var(--hbc-kudos-space-sm);
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--hbc-kudos-ink-primary);
+  background: var(--hbc-kudos-surface-0);
+  border: 1.5px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.22);
+  border-radius: var(--hbc-kudos-radius-xl);
+  outline: none;
+  transition: border-color var(--hbc-kudos-trans-fast) ease,
+    box-shadow var(--hbc-kudos-trans-fast) ease;
+  box-sizing: border-box;
+}
+
+.input:focus-visible {
+  border-color: var(--hbc-kudos-brand-orange);
+  box-shadow: 0 0 0 3px rgba(var(--hbc-kudos-brand-orange-rgb), 0.16);
+}
+
+.input:disabled {
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.03);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.inputInvalid {
+  border-color: var(--hbc-kudos-danger-fg);
+}
+
+.inputInvalid:focus-visible {
+  border-color: var(--hbc-kudos-danger-fg);
+  box-shadow: 0 0 0 3px rgba(var(--hbc-kudos-danger-rgb), 0.14);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.textareaShort {
+  min-height: 54px;
+}
+
+.error {
+  font-size: 0.75rem;
+  color: var(--hbc-kudos-danger-fg);
+  margin-top: var(--hbc-kudos-space-xs);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.hint {
+  font-size: 0.6875rem;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.48);
+  margin-top: var(--hbc-kudos-space-xs);
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+/* ── Typed recipient buckets ───────────────────────────── */
+
+.bucket {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hbc-kudos-space-xs);
+}
+
+.bucketLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--hbc-kudos-space-xs);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.55);
+}
+
+.bucketLabelIcon {
+  color: rgba(var(--hbc-kudos-brand-orange-rgb), 0.7);
+  flex-shrink: 0;
+}
+
+.bucketChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hbc-kudos-space-xs);
+  min-height: 36px;
+  padding: var(--hbc-kudos-space-xs) var(--hbc-kudos-space-sm);
+  background: var(--hbc-kudos-surface-0);
+  border: 1.5px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.18);
+  border-radius: var(--hbc-kudos-radius-xl);
+  transition: border-color var(--hbc-kudos-trans-fast) ease,
+    box-shadow var(--hbc-kudos-trans-fast) ease;
+}
+
+.bucketChips:focus-within {
+  border-color: var(--hbc-kudos-brand-orange);
+  box-shadow: 0 0 0 3px rgba(var(--hbc-kudos-brand-orange-rgb), 0.14);
+}
+
+/* ── Chips: base + governed type-specific tints ── */
+
+.bucketChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hbc-kudos-space-xs);
+  padding: 3px 6px 3px var(--hbc-kudos-space-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--hbc-kudos-ink-primary);
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.08);
+  border: 1px solid rgba(var(--hbc-kudos-brand-orange-rgb), 0.22);
+  border-radius: var(--hbc-kudos-radius-full);
+}
+
+.bucketChipIcon {
+  color: rgba(var(--hbc-kudos-brand-orange-rgb), 0.65);
+  flex-shrink: 0;
+}
+
+.bucketChipIndividualEmails {
+  background: rgba(var(--hbc-kudos-individual-rgb), 0.07);
+  border-color: rgba(var(--hbc-kudos-individual-rgb), 0.18);
+}
+
+.bucketChipIconIndividualEmails {
+  color: rgba(var(--hbc-kudos-individual-rgb), 0.6);
+}
+
+.bucketChipTeamLabels {
+  background: rgba(var(--hbc-kudos-team-rgb), 0.08);
+  border-color: rgba(var(--hbc-kudos-team-rgb), 0.22);
+}
+
+.bucketChipIconTeamLabels {
+  color: rgba(var(--hbc-kudos-team-rgb), 0.65);
+}
+
+.bucketChipDepartmentLabels {
+  background: rgba(var(--hbc-kudos-department-rgb), 0.06);
+  border-color: rgba(var(--hbc-kudos-department-rgb), 0.18);
+}
+
+.bucketChipIconDepartmentLabels {
+  color: rgba(var(--hbc-kudos-department-rgb), 0.6);
+}
+
+.bucketChipProjectGroupLabels {
+  background: rgba(var(--hbc-kudos-project-rgb), 0.06);
+  border-color: rgba(var(--hbc-kudos-project-rgb), 0.18);
+}
+
+.bucketChipIconProjectGroupLabels {
+  color: rgba(var(--hbc-kudos-project-rgb), 0.55);
+}
+
+.bucketChipLabel {
+  display: inline-block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bucketChipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: rgba(var(--hbc-kudos-ink-primary-rgb), 0.08);
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.45);
+  border: none;
+  border-radius: var(--hbc-kudos-radius-full);
+  cursor: pointer;
+  transition: background var(--hbc-kudos-trans-fast) ease,
+    color var(--hbc-kudos-trans-fast) ease;
+}
+
+.bucketChipRemove:hover:not(:disabled) {
+  background: rgba(var(--hbc-kudos-ink-primary-rgb), 0.15);
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.65);
+}
+
+.bucketChipRemove:focus-visible {
+  outline: 2px solid var(--hbc-kudos-brand-blue);
+  outline-offset: 1px;
+}
+
+.bucketChipRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bucketInput {
+  flex: 1 1 140px;
+  min-width: 100px;
+  padding: var(--hbc-kudos-space-xs) var(--hbc-kudos-space-xs);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  color: var(--hbc-kudos-ink-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.bucketInput::placeholder {
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.35);
+}
+
+.bucketInput:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.bucketHint {
+  font-size: 0.6875rem;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.48);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.bucketSecondaryRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hbc-kudos-space-sm);
+  margin-top: var(--hbc-kudos-space-xs);
+}
+
+.bucketAddButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hbc-kudos-space-xs);
+  align-self: flex-start;
+  padding: var(--hbc-kudos-space-xs) var(--hbc-kudos-space-sm) var(--hbc-kudos-space-xs) var(--hbc-kudos-space-sm);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.52);
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.04);
+  border: 1px dashed rgba(var(--hbc-kudos-brand-orange-rgb), 0.20);
+  border-radius: var(--hbc-kudos-radius-lg);
+  cursor: pointer;
+  transition: background var(--hbc-kudos-trans-fast) ease,
+    border-color var(--hbc-kudos-trans-fast) ease,
+    color var(--hbc-kudos-trans-fast) ease;
+}
+
+.bucketAddButton:hover:not(:disabled) {
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.08);
+  border-color: rgba(var(--hbc-kudos-brand-orange-rgb), 0.35);
+  color: var(--hbc-kudos-brand-orange);
+}
+
+.bucketAddButton:focus-visible {
+  outline: 2px solid var(--hbc-kudos-brand-blue);
+  outline-offset: 2px;
+}
+
+.bucketAddButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Form divider (Radix Separator decorative=true) ──── */
+
+.formDivider {
+  height: 1px;
+  width: 100%;
+  border: none;
+  background: rgba(var(--hbc-kudos-brand-orange-rgb), 0.10);
+  margin: var(--hbc-kudos-space-xs) 0;
+}
+
+/* ── Details toggle ──────────────────────────────────── */
+
+.detailsToggle {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: var(--hbc-kudos-space-xs) 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--hbc-kudos-brand-orange);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--hbc-kudos-trans-fast) ease;
+}
+
+.detailsToggle:hover:not(:disabled) {
+  color: var(--hbc-kudos-brand-orange-deep);
+}
+
+.detailsToggle:focus-visible {
+  outline: 2px solid var(--hbc-kudos-brand-blue);
+  outline-offset: 2px;
+}
+
+.detailsToggle:disabled {
+  color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.35);
+  cursor: not-allowed;
+}
+
+/* ── People picker container ─────────────────────────────
+   Positioning context for the shared HbcPeoplePicker dropdown
+   when embedded in bare mode via KudosSharedPickerBridge. */
+
+.pickerContainer {
+  position: relative;
+}
+
+/* ── Chip-remove tooltip (Radix Tooltip.Content) ─────── */
+
+.chipRemoveTooltip {
+  background: var(--hbc-kudos-ink-primary);
+  color: var(--hbc-kudos-surface-0);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: var(--hbc-kudos-space-xs) var(--hbc-kudos-space-sm);
+  border-radius: var(--hbc-kudos-radius-md);
+  z-index: 1101;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .bucketChipRemove,
+  .bucketAddButton,
+  .detailsToggle {
+    transition: none !important;
+  }
+}
