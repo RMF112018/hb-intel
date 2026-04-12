@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { submitKudosGovernanceAction } from '../../../homepage/data/kudosGovernanceWriter.js';
 import { getKudosListHostUrl } from '../../../homepage/data/spContext.js';
-import type { KudosCapabilities, KudosRole } from '../../../homepage/helpers/kudosCapabilities.js';
+import type { KudosRole } from '../../../homepage/helpers/kudosCapabilities.js';
 import type { KudosEntry, KudosPatch } from '../../../homepage/webparts/kudosContracts.js';
 
 export type DetailActionKind =
@@ -69,8 +69,6 @@ export interface UseCompanionActionsInput {
   setDetailEntry: (entry: KudosEntry | undefined) => void;
   identityEmail: string | undefined;
   role: KudosRole;
-  capabilities: KudosCapabilities;
-  queue: KudosEntry[];
   refreshData: () => void;
 }
 
@@ -79,6 +77,7 @@ export interface UseCompanionActionsResult {
   selectedIds: ReadonlySet<string>;
   toggleSelect: (id: string) => void;
   clearSelection: () => void;
+  setSelectedIds: React.Dispatch<React.SetStateAction<ReadonlySet<string>>>;
 
   // Dispatch state
   dispatching: boolean;
@@ -87,7 +86,6 @@ export interface UseCompanionActionsResult {
 
   // Action routing
   handleDetailAction: (kind: DetailActionKind) => void;
-  handleBulkApprove: () => Promise<void>;
 
   // Dialog slots
   inputDialog: InputDialogState | null;
@@ -108,8 +106,6 @@ export function useCompanionActions({
   setDetailEntry,
   identityEmail,
   role,
-  capabilities,
-  queue,
   refreshData,
 }: UseCompanionActionsInput): UseCompanionActionsResult {
   const [selectedIds, setSelectedIds] = React.useState<ReadonlySet<string>>(
@@ -405,49 +401,6 @@ export function useCompanionActions({
     [detailEntry, inputDialog, pendingUpdateHeadline, dispatchGovernancePatch],
   );
 
-  const handleBulkApprove = React.useCallback(async () => {
-    if (!capabilities.canBulkApprove) return;
-    if (selectedIds.size === 0) return;
-    const listHostUrl = getKudosListHostUrl();
-    if (!listHostUrl) {
-      setActionError('SharePoint site context is not available.');
-      return;
-    }
-    setActionError(undefined);
-    setDispatching(true);
-    let failures = 0;
-    try {
-      for (const id of selectedIds) {
-        const entry = queue.find((e) => e.id === id);
-        if (!entry) continue;
-        if (
-          entry.workflowStatus &&
-          entry.workflowStatus !== 'pending' &&
-          entry.workflowStatus !== 'revisionRequested'
-        ) {
-          continue;
-        }
-        const result = await submitKudosGovernanceAction(
-          listHostUrl,
-          { kind: 'approve', kudosId: entry.id },
-          {
-            actorEmail: identityEmail,
-            callerRole: role,
-            headline: entry.headline,
-            isFirstPublish: entry.wasEverPublished !== true,
-          },
-        );
-        if (!result.ok) failures += 1;
-      }
-      if (failures > 0) {
-        setActionError(`${failures} of ${selectedIds.size} bulk approvals failed.`);
-      }
-      clearSelection();
-    } finally {
-      setDispatching(false);
-    }
-  }, [capabilities.canBulkApprove, clearSelection, identityEmail, queue, role, selectedIds]);
-
   const closeInputDialog = React.useCallback(() => {
     setInputDialog(null);
     setPendingUpdateHeadline(undefined);
@@ -465,11 +418,11 @@ export function useCompanionActions({
     selectedIds,
     toggleSelect,
     clearSelection,
+    setSelectedIds,
     dispatching,
     actionError,
     setActionError,
     handleDetailAction,
-    handleBulkApprove,
     inputDialog,
     closeInputDialog,
     handleInputDialogConfirm,

@@ -453,6 +453,209 @@
   font-weight: 600;
 }
 
+/* ── Phase-27 Prompt-07 — bulk approval hardening ─────────────────
+   Bulk approval no longer presents a single "Approving…" button
+   and a generic "N of M failed" string. The bar has three
+   explicit phases: idle (existing), running (progress bar +
+   current item), and summary (per-failure breakdown + retry). */
+
+.bulkBarRunning {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.bulkProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bulkProgressMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--hbk-text-secondary);
+  flex-wrap: wrap;
+}
+
+.bulkProgressCount {
+  font-variant-numeric: tabular-nums;
+  color: var(--hbk-text-primary);
+  font-weight: 800;
+}
+
+.bulkProgressCurrent {
+  font-size: 0.75rem;
+  color: var(--hbk-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.bulkProgressTrack {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hbk-blue-08);
+  overflow: hidden;
+}
+
+.bulkProgressFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
+  transition: width 160ms ease;
+}
+
+.bulkSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--hbk-blue-14);
+  background: var(--hbk-blue-04);
+}
+
+.bulkSummaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bulkSummaryHeading {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--hbk-text-heading);
+  letter-spacing: -0.005em;
+}
+
+.bulkSummaryTallies {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.bulkSummaryTally {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.bulkSummaryTally[data-tone='success'] {
+  color: var(--hbk-brand-blue);
+  background: var(--hbk-blue-08);
+  border-color: var(--hbk-blue-14);
+}
+
+.bulkSummaryTally[data-tone='danger'] {
+  color: var(--hbk-danger);
+  background: var(--hbk-danger-08);
+  border-color: var(--hbk-danger-22);
+}
+
+.bulkSummaryTally[data-tone='muted'] {
+  color: var(--hbk-text-tertiary);
+  background: var(--hbk-blue-04);
+  border-color: var(--hbk-blue-14);
+}
+
+.bulkSummaryRunError {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--hbk-danger);
+  font-weight: 600;
+}
+
+.bulkFailureList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.8125rem;
+  color: var(--hbk-text-primary);
+}
+
+.bulkFailureItem {
+  list-style: disc;
+}
+
+.bulkFailureReason {
+  color: var(--hbk-text-secondary);
+  margin-left: 6px;
+}
+
+.bulkSummaryActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.bulkRetryBtn {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--hbk-brand-blue), var(--hbk-brand-orange));
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.bulkRetryBtn:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
+}
+
+.bulkRetryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.bulkDismissBtn {
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--hbk-text-tertiary);
+  background: transparent;
+  border: 1px solid var(--hbk-blue-14);
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.bulkDismissBtn:hover {
+  background: var(--hbk-blue-06);
+}
+
+.bulkDismissBtn:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
+}
+
 /* ── Phase-27 Prompt-06 — workspace UX redesign ──────────────────
    Adds the structural upgrades that turn the queue from a plain
    card list into an operational moderation product surface:

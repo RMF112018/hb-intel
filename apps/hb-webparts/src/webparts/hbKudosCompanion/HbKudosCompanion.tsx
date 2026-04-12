@@ -54,6 +54,8 @@ import {
   type KudosOverdueThresholds,
 } from './runtime/useCompanionQueue.js';
 import { useCompanionActions } from './runtime/useCompanionActions.js';
+import { useBulkApproval } from './runtime/useBulkApproval.js';
+import { BulkActionBar } from './components/BulkActionBar.js';
 import { QueueRow } from './components/QueueRow.js';
 import { DetailPanel } from './components/DetailPanel.js';
 import {
@@ -244,8 +246,6 @@ export function HbKudosCompanion({
     setDetailEntry,
     identityEmail: identity?.email,
     role,
-    capabilities,
-    queue,
     refreshData,
   });
   const {
@@ -256,7 +256,6 @@ export function HbKudosCompanion({
     actionError,
     setActionError,
     handleDetailAction,
-    handleBulkApprove,
     inputDialog,
     closeInputDialog,
     handleInputDialogConfirm,
@@ -267,6 +266,16 @@ export function HbKudosCompanion({
     closeAssignmentDialog,
     handleAssignmentDialogConfirm,
   } = actions;
+
+  const { bulkState, runBulkApproval, retryFailed, dismissSummary, isRunning: bulkRunning } =
+    useBulkApproval({
+      queue,
+      identityEmail: identity?.email,
+      role,
+      capabilities,
+      refreshData,
+      onRunFinished: clearSelection,
+    });
 
   const selectable =
     capabilities.canBulkApprove &&
@@ -421,28 +430,16 @@ export function HbKudosCompanion({
         onClearScheduled={() => dispatch({ type: 'toggleScheduledOnly' })}
       />
 
-      {selectable && selectedIds.size > 0 ? (
-        <div role="group" aria-label="Bulk actions" className={companionStyles.bulkBar}>
-          <span className={companionStyles.bulkCount}>{selectedIds.size} selected</span>
-          <button
-            type="button"
-            onClick={() => void handleBulkApprove()}
-            disabled={dispatching}
-            aria-busy={dispatching ? 'true' : undefined}
-            data-hbc-testid="hb-kudos-bulk-approve"
-            className={companionStyles.bulkApproveBtn}
-          >
-            {dispatching ? 'Approving…' : 'Approve selected'}
-          </button>
-          <button
-            type="button"
-            onClick={clearSelection}
-            disabled={dispatching}
-            className={companionStyles.bulkClearBtn}
-          >
-            Clear
-          </button>
-        </div>
+      {selectable ? (
+        <BulkActionBar
+          selectionCount={selectedIds.size}
+          bulkState={bulkState}
+          onApprove={() => void runBulkApproval(selectedIds)}
+          onClearSelection={clearSelection}
+          onRetryFailed={() => void retryFailed()}
+          onDismissSummary={dismissSummary}
+          dispatchingOtherAction={dispatching || bulkRunning}
+        />
       ) : null}
 
       {actionError ? <KudosGovernanceErrorAlert message={actionError} /> : null}
