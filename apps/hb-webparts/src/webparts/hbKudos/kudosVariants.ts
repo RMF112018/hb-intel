@@ -22,7 +22,7 @@ import kudosFeedStyles from './kudosFeed.module.css';
 
 /**
  * Tonal governance action button. The tone color is supplied by the
- * consuming element via `--hbk-gov-tone` so the class stays stable.
+ * consuming element via `--hbk-tone` so the class stays stable.
  */
 export const governanceActionButton = cva(governanceStyles.actionButton);
 

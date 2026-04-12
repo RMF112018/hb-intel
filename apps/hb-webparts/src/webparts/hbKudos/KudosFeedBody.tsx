@@ -13,7 +13,7 @@
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ThumbsUp } from './kudosIcons.js';
 import feedStyles from './kudosFeed.module.css';
@@ -38,31 +38,11 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
     );
   }, [entries, search]);
 
-  // Token-var bridge — governed KUDOS_GOV_TOKENS values flow into the
-  // CSS module via `--hbk-*` custom properties. This inline style
-  // record is the approved doctrine seam for token governance.
-  const feedCssVars = {
-    '--hbk-orange-03': KUDOS_GOV_TOKENS.orangeSubtle03,
-    '--hbk-orange-06': KUDOS_GOV_TOKENS.orangeSubtle06,
-    '--hbk-orange-08': KUDOS_GOV_TOKENS.orangeSubtle10,
-    '--hbk-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
-    '--hbk-orange-22': KUDOS_GOV_TOKENS.orangeSubtle22,
-    '--hbk-orange-55': 'rgba(229, 126, 70, 0.55)',
-    '--hbk-orange-shadow': 'rgba(229, 126, 70, 0.08)',
-    '--hbk-surface-0': '#ffffff',
-    '--hbk-surface-warm': 'rgba(255, 250, 246, 0.8)',
-    '--hbk-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
-    '--hbk-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
-    '--hbk-text-primary': KUDOS_GOV_TOKENS.textPrimary,
-    '--hbk-text-secondary': 'rgba(26, 19, 16, 0.68)',
-    '--hbk-text-faint': KUDOS_GOV_TOKENS.textFaint,
-  } as React.CSSProperties;
-
   return (
     <div
       data-hbc-webpart-section="hb-kudos-feed"
       className={feedStyles.feedRoot}
-      style={feedCssVars}
+      style={kudosCSSVars()}
     >
       <input
         type="search"

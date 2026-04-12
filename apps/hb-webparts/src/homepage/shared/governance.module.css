@@ -14,9 +14,9 @@
      a tightly-padded label. */
   min-height: 32px;
   border-radius: 8px;
-  border: 1.5px solid var(--hbk-gov-tone);
+  border: 1.5px solid var(--hbk-tone);
   background: #ffffff;
-  color: var(--hbk-gov-tone);
+  color: var(--hbk-tone);
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -28,7 +28,7 @@
 .actionButton:focus-visible,
 .tabButton:focus-visible,
 .toggleChip:focus-visible {
-  outline: 2px solid var(--hbk-gov-blue);
+  outline: 2px solid var(--hbk-brand-blue);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -45,7 +45,7 @@
 
 .actionButton:disabled {
   background: rgba(128, 128, 128, 0.08);
-  color: var(--hbk-gov-text-disabled);
+  color: var(--hbk-text-disabled);
 }
 
 .tabButton {
@@ -54,7 +54,7 @@
      and keeps the filter row comfortable for keyboard / touch use. */
   min-height: 36px;
   border-radius: 999px;
-  border: 1.5px solid var(--hbk-gov-blue-18);
+  border: 1.5px solid var(--hbk-blue-18);
   background: #ffffff;
   color: rgba(26, 19, 16, 0.68);
   font-size: 0.75rem;
@@ -66,8 +66,8 @@
 }
 
 .tabButtonActive {
-  border-color: var(--hbk-gov-blue);
-  background: var(--hbk-gov-blue);
+  border-color: var(--hbk-brand-blue);
+  background: var(--hbk-brand-blue);
   color: #ffffff;
 }
 
@@ -81,18 +81,18 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   border-radius: 999px;
-  border: 1.5px solid var(--hbk-gov-blue-20);
+  border: 1.5px solid var(--hbk-blue-20);
   background: #ffffff;
-  color: var(--hbk-gov-text-muted);
+  color: var(--hbk-text-muted);
   cursor: pointer;
   font-family: inherit;
   outline: none;
 }
 
 .toggleChipActive {
-  border-color: var(--hbk-gov-blue);
-  background: var(--hbk-gov-blue-12);
-  color: var(--hbk-gov-blue);
+  border-color: var(--hbk-brand-blue);
+  background: var(--hbk-blue-12);
+  color: var(--hbk-brand-blue);
 }
 
 .sectionHeading {
@@ -100,20 +100,20 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--hbk-gov-text-muted);
+  color: var(--hbk-text-muted);
   margin-bottom: 8px;
 }
 
 .infoRow {
   font-size: 0.8125rem;
   line-height: 1.55;
-  color: var(--hbk-gov-text-secondary);
+  color: var(--hbk-text-secondary);
   margin-bottom: 6px;
 }
 
 .infoRowLabel {
   font-weight: 700;
-  color: var(--hbk-gov-text-tertiary);
+  color: var(--hbk-text-tertiary);
 }
 
 .toolbarLabel {
@@ -121,15 +121,15 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--hbk-gov-text-muted);
+  color: var(--hbk-text-muted);
 }
 
 .errorAlert {
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--hbk-gov-danger-08);
-  border: 1px solid var(--hbk-gov-danger-22);
-  color: var(--hbk-gov-danger);
+  background: var(--hbk-danger-08);
+  border: 1px solid var(--hbk-danger-22);
+  color: var(--hbk-danger);
   font-size: 0.8125rem;
   font-weight: 600;
 }
@@ -146,14 +146,14 @@
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.6;
-  color: var(--hbk-gov-text-secondary);
+  color: var(--hbk-text-secondary);
 }
 
 .detailSmallProse {
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.6;
-  color: var(--hbk-gov-text-secondary);
+  color: var(--hbk-text-secondary);
 }
 
 .detailRow {
@@ -164,17 +164,17 @@
 
 .detailRowLabel {
   font-size: 0.8125rem;
-  color: var(--hbk-gov-text-secondary);
+  color: var(--hbk-text-secondary);
   font-weight: 600;
 }
 
 .detailReducedView {
   padding: 10px 12px;
   border-radius: 10px;
-  background: var(--hbk-gov-blue-06, rgba(34, 83, 145, 0.06));
-  border: 1px solid var(--hbk-gov-blue-14);
+  background: var(--hbk-blue-06, rgba(34, 83, 145, 0.06));
+  border: 1px solid var(--hbk-blue-14);
   font-size: 0.75rem;
-  color: var(--hbk-gov-blue-ink, rgba(34, 83, 145, 0.82));
+  color: var(--hbk-blue-ink, rgba(34, 83, 145, 0.82));
   font-weight: 600;
   line-height: 1.5;
 }
@@ -195,29 +195,29 @@
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.55;
-  color: var(--hbk-gov-text-secondary);
+  color: var(--hbk-text-secondary);
 }
 
 .dialogInput {
   padding: 8px 10px;
   font-size: 0.875rem;
   border-radius: 8px;
-  border: 1px solid var(--hbk-gov-orange-28);
+  border: 1px solid var(--hbk-orange-28);
   font-family: inherit;
   outline: none;
 }
 
 .dialogInput:focus-visible {
-  outline: 2px solid var(--hbk-gov-blue);
+  outline: 2px solid var(--hbk-brand-blue);
   outline-offset: 1px;
-  border-color: var(--hbk-gov-orange);
+  border-color: var(--hbk-brand-orange);
 }
 
 /* ── Audit timeline block (KudosAuditTimelineBlock) ──────────────── */
 
 .timelineStatus {
   font-size: 0.75rem;
-  color: var(--hbk-gov-text-muted);
+  color: var(--hbk-text-muted);
 }
 
 .timelineList {
@@ -233,7 +233,7 @@
   font-size: 0.75rem;
   line-height: 1.5;
   padding-bottom: 6px;
-  border-bottom: 1px solid var(--hbk-gov-orange-10);
+  border-bottom: 1px solid var(--hbk-orange-10);
 }
 
 .timelineEventBody {
@@ -242,17 +242,17 @@
 }
 
 .timelineEventActor {
-  color: var(--hbk-gov-text-tertiary);
+  color: var(--hbk-text-tertiary);
   font-weight: 600;
 }
 
 .timelineEventPublic {
-  color: var(--hbk-gov-text-faint);
+  color: var(--hbk-text-faint);
   margin-top: 2px;
 }
 
 .timelineEventInternal {
-  color: var(--hbk-gov-danger-ink-italic);
+  color: var(--hbk-danger-ink-italic);
   margin-top: 2px;
   font-style: italic;
 }

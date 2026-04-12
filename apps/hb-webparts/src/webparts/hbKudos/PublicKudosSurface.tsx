@@ -29,7 +29,7 @@
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { Trophy, Sparkles, ThumbsUp } from './kudosIcons.js';
 import styles from './kudosSurface.module.css';
 import {
@@ -111,23 +111,12 @@ export function PublicKudosSurface({
   const isCompact = useIsCompact(768);
   const featuredBadgeLabel = isCompact ? 'Featured' : 'Featured Recognition';
 
-  const surfaceVars = {
-    '--pks-orange-06': KUDOS_GOV_TOKENS.orangeSubtle06,
-    '--pks-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
-    '--pks-orange-22': KUDOS_GOV_TOKENS.orangeSubtle22,
-    '--pks-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
-    '--pks-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
-    '--pks-text-primary': KUDOS_GOV_TOKENS.textPrimary,
-    '--pks-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
-    '--pks-text-faint': KUDOS_GOV_TOKENS.textFaint,
-  } as React.CSSProperties;
-
   return (
     <section
       className={styles.section}
       data-hbc-webpart-section="hb-kudos-public-surface"
       aria-label={heading}
-      style={surfaceVars}
+      style={kudosCSSVars()}
     >
       {/* Unified hero zone — masthead (upper band) + featured
           (nested content surface) share one gradient atmosphere. */}

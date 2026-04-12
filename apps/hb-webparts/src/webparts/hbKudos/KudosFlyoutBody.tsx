@@ -30,7 +30,7 @@
  * rhythm flow through a single module.
  */
 import * as React from 'react';
-import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import flyoutStyles from './kudosFlyout.module.css';
 
 export interface KudosFlyoutBodyProps {
@@ -50,14 +50,7 @@ export function KudosFlyoutBody({
   as = 'div',
   className,
 }: KudosFlyoutBodyProps): React.JSX.Element {
-  const style = {
-    '--hbk-flyout-border': KUDOS_GOV_TOKENS.orangeSubtle18,
-    '--hbk-flyout-ink-primary': KUDOS_GOV_TOKENS.textPrimary,
-    '--hbk-flyout-ink-secondary': KUDOS_GOV_TOKENS.textSecondary,
-    '--hbk-flyout-ink-muted': KUDOS_GOV_TOKENS.textMuted,
-    '--hbk-flyout-ink-faint': KUDOS_GOV_TOKENS.textFaint,
-  } as React.CSSProperties;
-
+  const style = kudosCSSVars();
   const composed = className ? `${flyoutStyles.body} ${className}` : flyoutStyles.body;
 
   const commonProps = {

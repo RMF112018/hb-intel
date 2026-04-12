@@ -15,7 +15,7 @@
   align-items: center;
   gap: 16px;
   padding: 4px 4px 16px;
-  border-bottom: 1px solid var(--hbk-flyout-border);
+  border-bottom: 1px solid var(--hbk-orange-18);
 }
 
 .headerBody {
@@ -30,21 +30,21 @@
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  color: var(--hbk-flyout-ink-primary);
+  color: var(--hbk-text-primary);
   margin: 0;
 }
 
 .headline {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--hbk-flyout-ink-secondary);
+  color: var(--hbk-text-secondary);
   margin: 0;
 }
 
 .body {
   font-size: 0.9375rem;
   line-height: 1.7;
-  color: var(--hbk-flyout-ink-primary);
+  color: var(--hbk-text-primary);
   white-space: pre-wrap;
   padding: 0 4px;
   max-width: 64ch;
@@ -56,9 +56,9 @@
   justify-content: space-between;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--hbk-flyout-border);
+  border-top: 1px solid var(--hbk-orange-18);
   font-size: 0.75rem;
-  color: var(--hbk-flyout-ink-faint);
+  color: var(--hbk-text-faint);
 }
 
 .celebratePill {
@@ -68,7 +68,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(229, 126, 70, 0.08);
-  border: 1px solid var(--hbk-flyout-border);
-  color: var(--hbk-flyout-ink-primary);
+  border: 1px solid var(--hbk-orange-18);
+  color: var(--hbk-text-primary);
   font-weight: 700;
 }

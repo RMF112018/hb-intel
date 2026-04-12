@@ -4,7 +4,7 @@
  * Owns the Kudos public-surface visual language previously carried by
  * the giant injected <style>{...}</style> block inside
  * PublicKudosSurface.tsx and ArchiveList.tsx. Token-backed CSS custom
- * properties (`--pks-*`) are set on the section root by the component
+ * properties (`--hbk-*`) are set on the section root by the component
  * from KUDOS_GOV_TOKENS so this module stays free of raw hex / rgba
  * and always reflects the governed presentation-lane theme values.
  *
@@ -357,7 +357,7 @@
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--pks-brand-orange);
+  color: var(--hbk-brand-orange);
   margin: 2px 4px 2px;
   padding-top: 4px;
 }
@@ -401,7 +401,7 @@
 
 .recentRow:hover {
   background: linear-gradient(135deg, rgba(255, 250, 244, 0.95) 0%, rgba(255, 241, 228, 0.95) 100%);
-  border-color: var(--pks-orange-22);
+  border-color: var(--hbk-orange-22);
   transform: translateY(-1px);
   box-shadow:
     0 4px 12px rgba(229, 126, 70, 0.1),
@@ -409,9 +409,9 @@
 }
 
 .recentRow:focus-visible {
-  outline: 2px solid var(--pks-brand-blue);
+  outline: 2px solid var(--hbk-brand-blue);
   outline-offset: 2px;
-  border-color: var(--pks-orange-22);
+  border-color: var(--hbk-orange-22);
 }
 
 .recentBody {
@@ -425,7 +425,7 @@
 .recentRecipient {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--pks-text-primary);
+  color: var(--hbk-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -434,7 +434,7 @@
 .recentHeadline {
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--pks-text-secondary);
+  color: var(--hbk-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

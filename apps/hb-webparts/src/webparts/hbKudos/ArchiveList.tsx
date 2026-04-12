@@ -20,7 +20,7 @@
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ChevronDown, ArrowRight } from './kudosIcons.js';
 import styles from './kudosSurface.module.css';
@@ -62,18 +62,6 @@ export function ArchiveList({
     );
   }, [entries, searchText, expanded]);
 
-  const archiveCssVars = {
-    '--hbk-orange-02': KUDOS_GOV_TOKENS.orangeSubtle02,
-    '--hbk-orange-06': KUDOS_GOV_TOKENS.orangeSubtle06,
-    '--hbk-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
-    '--hbk-orange-22': KUDOS_GOV_TOKENS.orangeSubtle22,
-    '--hbk-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
-    '--hbk-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
-    '--hbk-text-primary': KUDOS_GOV_TOKENS.textPrimary,
-    '--hbk-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
-    '--hbk-text-faint': KUDOS_GOV_TOKENS.textFaint,
-  } as React.CSSProperties;
-
   const toggleLabel = expanded ? 'Archive' : 'View archive';
 
   return (
@@ -83,7 +71,7 @@ export function ArchiveList({
       data-hbc-webpart-section="hb-kudos-archive"
       data-hbc-testid="hb-kudos-archive-section"
       data-hbc-archive-expanded={expanded ? 'true' : 'false'}
-      style={archiveCssVars}
+      style={kudosCSSVars()}
     >
       <div className={styles.archiveHeader}>
         <button

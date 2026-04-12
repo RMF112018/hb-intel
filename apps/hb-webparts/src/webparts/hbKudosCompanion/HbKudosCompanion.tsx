@@ -80,6 +80,7 @@ import {
   KudosGovernanceToolbarLabel,
   KudosGovernanceErrorAlert,
   KudosGovernanceInputDialog,
+  kudosCSSVars,
 } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import {
   deriveKudosOverdueStatus,
@@ -1020,20 +1021,7 @@ export function HbKudosCompanion({
       data-hbc-role={role}
       aria-label="HB Kudos Approval Companion"
       className={companionStyles.root}
-      style={{
-        '--hbk-cmp-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
-        '--hbk-cmp-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
-        '--hbk-cmp-text-heading': KUDOS_GOV_TOKENS.textHeading,
-        '--hbk-cmp-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
-        '--hbk-cmp-orange-28': KUDOS_GOV_TOKENS.orangeSubtle28,
-        '--hbk-cmp-blue-04': KUDOS_GOV_TOKENS.blueSubtle04,
-        '--hbk-cmp-blue-06': KUDOS_GOV_TOKENS.blueSubtle06,
-        '--hbk-cmp-blue-14': KUDOS_GOV_TOKENS.blueSubtle14,
-        '--hbk-cmp-orange-10': KUDOS_GOV_TOKENS.orangeSubtle10,
-        '--hbk-cmp-orange-25': KUDOS_GOV_TOKENS.orangeSubtle25,
-        '--hbk-cmp-text-primary': KUDOS_GOV_TOKENS.textPrimary,
-        '--hbk-cmp-text-tertiary': KUDOS_GOV_TOKENS.textTertiary,
-      } as React.CSSProperties}
+      style={kudosCSSVars()}
     >
       <header className={companionStyles.header}>
         <div className={companionStyles.headerLead}>

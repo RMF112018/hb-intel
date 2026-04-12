@@ -33,7 +33,7 @@ import {
 import type { KudosAuditTimelineEntry } from '../data/kudosGovernanceWriter.js';
 import type { KudosRole } from '../helpers/kudosCapabilities.js';
 import {
-  KUDOS_GOV_TOKENS,
+  kudosCSSVars,
   KudosSectionHeading,
   KudosInfoRow,
   KudosAuditTimelineBlock,
@@ -69,20 +69,8 @@ export function KudosDetailPanelContent({
     ? `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}\n${mapAuditEventTypeLabel('approve')} · ${new Date(entry.approvedDate).toLocaleString()}`
     : `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}`;
 
-  // Seed governance custom-property vars so our module classes resolve
-  // to the governed presentation-lane tokens inside the flyout shell.
-  const detailVars = {
-    '--hbk-gov-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
-    '--hbk-gov-blue-06': KUDOS_GOV_TOKENS.blueSubtle06,
-    '--hbk-gov-blue-14': KUDOS_GOV_TOKENS.blueSubtle14,
-    '--hbk-gov-blue-ink': KUDOS_GOV_TOKENS.blueText82,
-    '--hbk-gov-danger-08': KUDOS_GOV_TOKENS.dangerSubtle08,
-    '--hbk-gov-danger-22': KUDOS_GOV_TOKENS.dangerSubtle22,
-    '--hbk-gov-danger': KUDOS_GOV_TOKENS.dangerRed,
-  } as React.CSSProperties;
-
   return (
-    <div className={governanceStyles.detailStack} style={detailVars}>
+    <div className={governanceStyles.detailStack} style={kudosCSSVars()}>
       {/* Status chip */}
       {chip ? (
         <div>
