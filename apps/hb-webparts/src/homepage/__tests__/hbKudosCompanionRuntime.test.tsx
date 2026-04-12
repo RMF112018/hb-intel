@@ -34,6 +34,13 @@ vi.mock('../helpers/kudosRoleResolver.js', () => ({
     const { parseKudosRole } = await import('../helpers/kudosCapabilities.js');
     return parseKudosRole(config.simulatedRole);
   }),
+  resolveKudosRoleStatus: vi.fn(async (config: { simulatedRole?: unknown; siteUrl?: string }) => {
+    const { parseKudosRole } = await import('../helpers/kudosCapabilities.js');
+    return {
+      role: parseKudosRole(config.simulatedRole),
+      status: config.siteUrl ? 'resolved' : 'simulated',
+    };
+  }),
   clearKudosRoleCache: vi.fn(),
 }));
 

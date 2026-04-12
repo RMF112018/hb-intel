@@ -68,7 +68,14 @@ async function resolveRoleFromSiteModel(
     `${siteUrl}/_api/web/currentuser?$expand=Groups`,
     { headers: { Accept: 'application/json;odata=nometadata' } },
   );
-  if (!userRes.ok) return 'viewer';
+  // Non-OK responses are classified as degraded infra failures. The
+  // outer `resolveKudosRole` catches and fails closed to viewer for
+  // backward compatibility; `resolveKudosRoleStatus` reports
+  // `resolution-failed` so the UI can render a dedicated degraded
+  // state instead of a misleading "Access restricted" message.
+  if (!userRes.ok) {
+    throw new Error(`currentuser lookup failed: HTTP ${userRes.status}`);
+  }
 
   const userData = (await userRes.json()) as {
     IsSiteAdmin?: boolean;
@@ -155,4 +162,59 @@ export async function resolveKudosRole(
 /** Clear the cached role (useful for testing). */
 export function clearKudosRoleCache(): void {
   _cachedRole = undefined;
+}
+
+/**
+ * Resolution status — distinguishes a real production permission
+ * resolution from a degraded one so the Companion can render a
+ * dedicated "permission check failed" state instead of misleading
+ * "Access restricted" copy.
+ *
+ * - `resolved`         : live site-model query succeeded (or user is a
+ *                        legitimate viewer). Standard capability flow.
+ * - `resolution-failed`: site-model query threw or returned non-OK in a
+ *                        production context (siteUrl present). Role
+ *                        falls closed to `viewer` but the workspace
+ *                        must NOT claim the user simply lacks access.
+ * - `simulated`        : no siteUrl (local dev / jsdom harness) — the
+ *                        `simulatedRole` property was used. Allowed.
+ */
+export type KudosRoleResolutionStatus =
+  | 'resolved'
+  | 'resolution-failed'
+  | 'simulated';
+
+export interface KudosRoleResolution {
+  role: KudosRole;
+  status: KudosRoleResolutionStatus;
+}
+
+/**
+ * Same resolution as `resolveKudosRole` but returns a richer result
+ * that exposes whether the live site-model query failed. Callers that
+ * need to render a degraded-permission-check state use this; callers
+ * that only need the role continue using `resolveKudosRole`.
+ */
+export async function resolveKudosRoleStatus(
+  config: KudosRoleResolverConfig,
+): Promise<KudosRoleResolution> {
+  const siteUrl = config.siteUrl;
+  const email = config.currentUserEmail ?? '';
+
+  if (!siteUrl) {
+    return { role: parseKudosRole(config.simulatedRole), status: 'simulated' };
+  }
+
+  if (_cachedRole && _cachedRole.siteUrl === siteUrl && _cachedRole.email === email) {
+    return { role: _cachedRole.role, status: 'resolved' };
+  }
+
+  try {
+    const resolved = await resolveRoleFromSiteModel(siteUrl);
+    _cachedRole = { siteUrl, email, role: resolved };
+    return { role: resolved, status: 'resolved' };
+  } catch {
+    // Do NOT cache — the next attempt should retry the live query.
+    return { role: 'viewer', status: 'resolution-failed' };
+  }
 }

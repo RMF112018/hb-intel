@@ -136,7 +136,18 @@ export async function mount(
   // list host, store the explicit list-host URL from webpart properties
   // so data operations target the correct site (e.g. HBCentral).
   if (typeof webPartProperties?.kudosListHostUrl === 'string' && webPartProperties.kudosListHostUrl.trim()) {
-    storeKudosListHostUrl(webPartProperties.kudosListHostUrl.trim());
+    const candidate = webPartProperties.kudosListHostUrl.trim();
+    // Only accept absolute https:// (or http:// for local dev) URLs.
+    // A malformed override would silently point data fetches at a bad
+    // origin — fail explicitly instead, keeping the hardcoded canonical
+    // list host (HBCentral) in place.
+    if (/^https?:\/\//i.test(candidate)) {
+      storeKudosListHostUrl(candidate);
+    } else {
+      console.warn('[hb-webparts mount] Ignoring malformed kudosListHostUrl override; falling back to canonical host.', {
+        candidate,
+      });
+    }
   }
   const assetBaseUrl = typeof config?.assetBaseUrl === 'string' ? config.assetBaseUrl : undefined;
   const siteUrl = spfxContext?.pageContext?.web?.absoluteUrl;

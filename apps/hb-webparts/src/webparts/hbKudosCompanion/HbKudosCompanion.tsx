@@ -71,7 +71,7 @@ import {
   type KudosCapabilities,
   type KudosRole,
 } from '../../homepage/helpers/kudosCapabilities.js';
-import { resolveKudosRole } from '../../homepage/helpers/kudosRoleResolver.js';
+import { resolveKudosRoleStatus, type KudosRoleResolutionStatus } from '../../homepage/helpers/kudosRoleResolver.js';
 import {
   KUDOS_GOV_TOKENS,
   KudosActionButton,
@@ -657,23 +657,34 @@ export function HbKudosCompanion({
   // (local dev / jsdom).
   const [role, setRole] = React.useState<KudosRole>('viewer');
   const [roleResolving, setRoleResolving] = React.useState(true);
+  const [roleStatus, setRoleStatus] = React.useState<KudosRoleResolutionStatus>('simulated');
+  const [roleAttempt, setRoleAttempt] = React.useState(0);
+  const retryRoleResolution = React.useCallback(() => setRoleAttempt((n) => n + 1), []);
   React.useEffect(() => {
     let cancelled = false;
     setRoleResolving(true);
-    resolveKudosRole({
+    resolveKudosRoleStatus({
       siteUrl: getSiteUrl(),
       currentUserEmail: identity?.email,
       simulatedRole: config?.simulatedRole,
-    }).then((resolved) => {
-      if (!cancelled) { setRole(resolved); setRoleResolving(false); }
+    }).then((resolution) => {
+      if (!cancelled) {
+        setRole(resolution.role);
+        setRoleStatus(resolution.status);
+        setRoleResolving(false);
+      }
     }).catch(() => {
-      if (!cancelled) { setRole('viewer'); setRoleResolving(false); }
+      if (!cancelled) {
+        setRole('viewer');
+        setRoleStatus('resolution-failed');
+        setRoleResolving(false);
+      }
     });
     return () => { cancelled = true; };
     // simulatedRole intentionally excluded — dev-only, should not
     // re-trigger production resolution on property pane changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [identity?.email]);
+  }, [identity?.email, roleAttempt]);
   const capabilities = React.useMemo(() => deriveKudosCapabilities(role), [role]);
 
   // Configurable overdue thresholds from webpart properties.
@@ -981,9 +992,71 @@ export function HbKudosCompanion({
     return (
       <section
         data-hbc-webpart="hb-kudos-companion"
+        data-hbc-state="role-resolving"
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
       >
         <HbcSpinner size="md" />
+      </section>
+    );
+  }
+
+  // Degraded state: the live SharePoint permission check threw or
+  // returned a non-OK response. Role falls closed to `viewer`, but we
+  // must NOT present the workspace as a permission denial — that
+  // would misattribute an infra failure to the user's access.
+  if (roleStatus === 'resolution-failed') {
+    return (
+      <section
+        data-hbc-webpart="hb-kudos-companion"
+        data-hbc-state="role-resolution-failed"
+        data-hbc-testid="hb-kudos-companion-role-error"
+        aria-label="HB Kudos Approval Companion"
+        className={companionStyles.root}
+        style={kudosCSSVars()}
+      >
+        <KudosGovernanceErrorAlert
+          message="Unable to verify your HB Kudos governance role. This is a permission-check failure, not an access denial."
+        />
+        <HbcEmptyState
+          title="Permission check unavailable"
+          description="The companion could not reach the SharePoint permission model to confirm your role. Try again; if the problem persists, contact your SharePoint admin."
+          primaryAction={
+            <KudosActionButton
+              label="Retry"
+              tone="info"
+              disabled={false}
+              onClick={retryRoleResolution}
+              testId="hb-kudos-companion-role-error-retry"
+            />
+          }
+        />
+      </section>
+    );
+  }
+
+  // Degraded state: no canonical list-host URL is available in a
+  // production runtime. The runtime hardcodes HBCentral, so this only
+  // fires if the constant has been cleared or a malformed override
+  // was set. Render an explicit "not configured" state rather than
+  // silently attempting a fetch with no target.
+  //
+  // The `simulated` path (dev-harness / jsdom) never needs a live
+  // list-host URL — data is supplied through the harness adapter —
+  // so the guard is scoped to real production resolution.
+  if (roleStatus !== 'simulated' && !getKudosListHostUrl()) {
+    return (
+      <section
+        data-hbc-webpart="hb-kudos-companion"
+        data-hbc-state="host-unconfigured"
+        data-hbc-testid="hb-kudos-companion-host-missing"
+        aria-label="HB Kudos Approval Companion"
+        className={companionStyles.root}
+        style={kudosCSSVars()}
+      >
+        <HbcEmptyState
+          title="Workspace not configured"
+          description="No Kudos list host is available. This webpart must be deployed with a valid kudosListHostUrl (canonical: HBCentral). Contact your SharePoint admin."
+        />
       </section>
     );
   }
