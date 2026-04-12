@@ -299,6 +299,7 @@ function ArchiveList({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search recognition..."
           aria-label="Search recognition archive"
+          data-hbc-testid="hb-kudos-archive-search"
           className="hbk-archive-search"
           style={{
             padding: '7px 14px',
@@ -634,7 +635,7 @@ function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, iden
       secondaryAction={isPublic && onCelebrate ? { label: 'Close', onClick: onClose } : undefined}
     >
       {entry ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div data-hbc-testid="hb-kudos-public-detail" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <KudosDetailPanelContent
             entry={entry}
             role="viewer"
@@ -917,6 +918,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
     <section
       data-hbc-webpart="hb-kudos"
       data-hbc-webpart-phase="phase-14-kudos-phase-05"
+      data-hbc-testid="hb-kudos-public-root"
       aria-label="HB Kudos recognition"
     >
       <HbcPeopleCultureSurface
@@ -959,29 +961,39 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         primaryAction={primaryAction}
         secondaryAction={secondaryAction}
       >
-        {composer.status === 'success' ? <HbcKudosComposerSuccess /> : null}
+        {composer.status === 'success' ? (
+          <div data-hbc-testid="hb-kudos-composer-success">
+            <HbcKudosComposerSuccess />
+          </div>
+        ) : null}
 
         {composer.status === 'error' ? (
-          <HbcKudosComposerError
-            body={composer.submitError || 'An unexpected error occurred. Please try again.'}
-          />
+          <div role="alert" data-hbc-testid="hb-kudos-composer-error">
+            <HbcKudosComposerError
+              body={composer.submitError || 'An unexpected error occurred. Please try again.'}
+            />
+          </div>
         ) : null}
 
         {isEditing ? (
           <>
-            <HbcKudosComposerForm
-              draft={composer.draft}
-              onDraftChange={composerActions.updateDraft}
-              errors={composer.validationErrors}
-              disabled={composer.status === 'submitting'}
-              recipientsMode="typed"
-              searchPeople={searchPeople}
-              fetchPersonPhoto={fetchPersonPhoto}
-            />
-            <HbcKudosComposerPreview
-              draft={composer.draft}
-              submitterName={identity?.displayName ?? ''}
-            />
+            <div data-hbc-testid="hb-kudos-composer-form">
+              <HbcKudosComposerForm
+                draft={composer.draft}
+                onDraftChange={composerActions.updateDraft}
+                errors={composer.validationErrors}
+                disabled={composer.status === 'submitting'}
+                recipientsMode="typed"
+                searchPeople={searchPeople}
+                fetchPersonPhoto={fetchPersonPhoto}
+              />
+            </div>
+            <div data-hbc-testid="hb-kudos-composer-preview">
+              <HbcKudosComposerPreview
+                draft={composer.draft}
+                submitterName={identity?.displayName ?? ''}
+              />
+            </div>
           </>
         ) : null}
       </HbcKudosComposerFlyout>
@@ -993,10 +1005,12 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         subtitle="All recognition across the company"
         primaryAction={{ label: 'Close', onClick: () => setFeedOpen(false) }}
       >
+        <div data-hbc-testid="hb-kudos-view-all-panel">
         <KudosFeedBody
           entries={hydrateRecipientPhotos([...sortByRecency(publicKudos), ...archiveKudos.filter((a) => !publicKudos.some((p) => p.id === a.id))])}
           onOpenDetail={(entry) => { setFeedOpen(false); setDetailEntry(entry); }}
         />
+        </div>
       </HbcKudosComposerFlyout>
 
       <DetailPanel

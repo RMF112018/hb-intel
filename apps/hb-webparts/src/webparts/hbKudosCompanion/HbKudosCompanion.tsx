@@ -322,6 +322,7 @@ function QueueRow({
   return (
     <HbcCard weight="standard">
       <div
+        data-hbc-testid="hb-kudos-queue-row"
         style={{
           display: 'grid',
           gridTemplateColumns: selectable ? 'auto 1fr auto' : '1fr auto',
@@ -547,7 +548,7 @@ function DetailPanel({
       secondaryAction={canApprove ? { label: 'Close', onClick: onClose } : undefined}
     >
       {entry ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div data-hbc-testid="hb-kudos-companion-detail" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <KudosDetailPanelContent
             entry={entry}
             role={role}
@@ -568,46 +569,46 @@ function DetailPanel({
               borderTop: `1px dashed ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
             }}
           >
-            <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" />
-            <KudosActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" />
+            <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" testId="hb-kudos-action-reject" />
+            <KudosActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" testId="hb-kudos-action-request-revision" />
             {capabilities.canSchedule ? (
               entry?.isScheduled
-                ? <KudosActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" />
-                : <KudosActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" />
+                ? <KudosActionButton label="Unschedule" onClick={() => onAction('unschedule')} disabled={dispatching} tone="info" testId="hb-kudos-action-unschedule" />
+                : <KudosActionButton label="Schedule" onClick={() => onAction('schedule')} disabled={dispatching} tone="info" testId="hb-kudos-action-schedule" />
             ) : null}
             {capabilities.canPin ? (
               entry?.isPinned
-                ? <KudosActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" />
-                : <KudosActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" />
+                ? <KudosActionButton label="Unpin" onClick={() => onAction('unpin')} disabled={dispatching} tone="info" testId="hb-kudos-action-unpin" />
+                : <KudosActionButton label="Pin" onClick={() => onAction('pin')} disabled={dispatching} tone="info" testId="hb-kudos-action-pin" />
             ) : null}
             {capabilities.canFeature ? (
               entry?.isFeatured
-                ? <KudosActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" />
-                : <KudosActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" />
+                ? <KudosActionButton label="Unfeature" onClick={() => onAction('unfeature')} disabled={dispatching} tone="info" testId="hb-kudos-action-unfeature" />
+                : <KudosActionButton label="Feature" onClick={() => onAction('feature')} disabled={dispatching} tone="info" testId="hb-kudos-action-feature" />
             ) : null}
             {capabilities.canRemove && entry?.workflowStatus !== 'removedUnpublished' ? (
-              <KudosActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" />
+              <KudosActionButton label="Remove" onClick={() => onAction('remove')} disabled={dispatching} tone="danger" testId="hb-kudos-action-remove" />
             ) : null}
             {capabilities.canRestore && entry?.workflowStatus === 'removedUnpublished' ? (
-              <KudosActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Restore" onClick={() => onAction('restore')} disabled={dispatching} tone="info" testId="hb-kudos-action-restore" />
             ) : null}
             {capabilities.canFlagAdminReview && !needsAdminReview(entry) ? (
-              <KudosActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" />
+              <KudosActionButton label="Flag for admin review" onClick={() => onAction('flagAdminReview')} disabled={dispatching} tone="warning" testId="hb-kudos-action-flag" />
             ) : null}
             {capabilities.canClearAdminReview && needsAdminReview(entry) ? (
-              <KudosActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Clear admin review" onClick={() => onAction('clearAdminReview')} disabled={dispatching} tone="info" testId="hb-kudos-action-clear-flag" />
             ) : null}
             {capabilities.canApprove && entry?.workflowStatus === 'rejected' ? (
-              <KudosActionButton label="Reopen" onClick={() => onAction('reopen')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Reopen" onClick={() => onAction('reopen')} disabled={dispatching} tone="info" testId="hb-kudos-action-reopen" />
             ) : null}
             {capabilities.canEditPublished && entry?.workflowStatus === 'approved' ? (
-              <KudosActionButton label="Edit published" onClick={() => onAction('updateContent')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Edit published" onClick={() => onAction('updateContent')} disabled={dispatching} tone="info" testId="hb-kudos-action-update-content" />
             ) : null}
             {capabilities.canClaim ? (
-              <KudosActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Claim" onClick={() => onAction('claim')} disabled={dispatching} tone="info" testId="hb-kudos-action-claim" />
             ) : null}
             {capabilities.canClaim ? (
-              <KudosActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" />
+              <KudosActionButton label="Reassign" onClick={() => onAction('reassign')} disabled={dispatching} tone="info" testId="hb-kudos-action-assign" />
             ) : null}
             <KudosActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
           </div>
@@ -998,6 +999,7 @@ export function HbKudosCompanion({
     <section
       data-hbc-webpart="hb-kudos-companion"
       data-hbc-webpart-phase="phase-14-kudos-phase-04"
+      data-hbc-testid="hb-kudos-companion-root"
       data-hbc-role={role}
       aria-label="HB Kudos Approval Companion"
       style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
@@ -1062,6 +1064,7 @@ export function HbKudosCompanion({
             label={tab.label}
             active={tab.id === filter.tabId}
             onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
+            testId={`hb-kudos-queue-tab-${tab.id}`}
           />
         ))}
       </div>
@@ -1088,6 +1091,7 @@ export function HbKudosCompanion({
             value={filter.searchText ?? ''}
             onChange={(e) => dispatch({ type: 'setSearch', value: e.target.value })}
             placeholder="Search recognition…"
+            data-hbc-testid="hb-kudos-queue-filter-search"
             style={{
               padding: '6px 10px',
               fontSize: '0.8125rem',
@@ -1108,6 +1112,7 @@ export function HbKudosCompanion({
                 ownership: e.target.value as KudosQueueFilterState['ownership'],
               })
             }
+            data-hbc-testid="hb-kudos-queue-filter-ownership"
             style={{
               padding: '6px 8px',
               fontSize: '0.8125rem',
@@ -1126,11 +1131,13 @@ export function HbKudosCompanion({
           label="Flagged for admin"
           active={filter.adminReviewOnly}
           onToggle={() => dispatch({ type: 'toggleAdminReviewOnly' })}
+          testId="hb-kudos-queue-filter-admin-review"
         />
         <KudosGovernanceToggleChip
           label="Scheduled only"
           active={filter.scheduledOnly}
           onToggle={() => dispatch({ type: 'toggleScheduledOnly' })}
+          testId="hb-kudos-queue-filter-scheduled"
         />
       </div>
 
@@ -1154,6 +1161,7 @@ export function HbKudosCompanion({
             type="button"
             onClick={() => void handleBulkApprove()}
             disabled={dispatching}
+            data-hbc-testid="hb-kudos-bulk-approve"
             style={{
               padding: '6px 14px',
               fontSize: '0.75rem',

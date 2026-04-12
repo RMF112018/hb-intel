@@ -243,13 +243,13 @@ function HeroBanner({
 
       <div className={styles.heroActions}>
         {onGiveKudos ? (
-          <button type="button" onClick={onGiveKudos} className={styles.giveKudosPrimary}>
+          <button type="button" onClick={onGiveKudos} className={styles.giveKudosPrimary} data-hbc-testid="hb-kudos-give-trigger">
             <Sparkles size={14} aria-hidden="true" className={styles.giveKudosPrimaryIcon} />
             Give Kudos
           </button>
         ) : null}
         {onViewAll ? (
-          <button type="button" onClick={onViewAll} className={styles.viewAllButton}>
+          <button type="button" onClick={onViewAll} className={styles.viewAllButton} data-hbc-testid="hb-kudos-view-all">
             View All
             <span className={styles.viewAllArrow} aria-hidden="true">→</span>
           </button>
@@ -355,6 +355,7 @@ function KudosSpotlight({
                 onClick={() => onCelebrate(featured.id)}
                 disabled={celebrateLoading}
                 aria-label={`Celebrate this recognition${typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? ` (${featured.celebrateCount})` : ''}`}
+                data-hbc-testid="hb-kudos-celebrate"
                 className={clsx(
                   styles.metaReaction,
                   celebrateLoading && styles.metaReactionLoading,
@@ -366,14 +367,16 @@ function KudosSpotlight({
                   strokeWidth={2.5}
                   className={styles.metaReactionIcon}
                 />
-                {celebrateLoading
-                  ? '…'
-                  : typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0
-                    ? featured.celebrateCount
-                    : 'Celebrate'}
+                <span data-hbc-testid="hb-kudos-celebrate-count">
+                  {celebrateLoading
+                    ? '…'
+                    : typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0
+                      ? featured.celebrateCount
+                      : 'Celebrate'}
+                </span>
               </button>
             ) : typeof featured.celebrateCount === 'number' && featured.celebrateCount > 0 ? (
-              <span className={styles.metaCount}>
+              <span className={styles.metaCount} data-hbc-testid="hb-kudos-celebrate-count">
                 <Sparkles
                   size={11}
                   aria-hidden="true"
@@ -397,7 +400,7 @@ function KudosSpotlight({
                 />
               ) : null}
               {onGiveKudos && !celebrateHref && !isHomepage ? (
-                <button type="button" onClick={onGiveKudos} className={styles.giveKudosGhostInline}>
+                <button type="button" onClick={onGiveKudos} className={styles.giveKudosGhostInline} data-hbc-testid="hb-kudos-give-trigger">
                   <Sparkles size={13} aria-hidden="true" strokeWidth={2.5} />
                   Give Kudos
                 </button>
@@ -543,7 +546,7 @@ function RecognitionRail({
 
       {onViewAll ? (
         <div className={styles.railFooter}>
-          <button type="button" onClick={onViewAll} className={styles.viewAllButtonGhost}>
+          <button type="button" onClick={onViewAll} className={styles.viewAllButtonGhost} data-hbc-testid="hb-kudos-view-all">
             View all
             <span className={styles.viewAllArrow} aria-hidden="true">→</span>
           </button>
@@ -590,7 +593,7 @@ function SparseInvite({
           Your kudos keeps the whole company noticing the people who make it happen.
         </p>
         {onGiveKudos ? (
-          <button type="button" onClick={onGiveKudos} className={styles.giveKudosSolid}>
+          <button type="button" onClick={onGiveKudos} className={styles.giveKudosSolid} data-hbc-testid="hb-kudos-give-trigger">
             <Sparkles size={16} aria-hidden="true" strokeWidth={2.5} />
             Give Kudos
           </button>

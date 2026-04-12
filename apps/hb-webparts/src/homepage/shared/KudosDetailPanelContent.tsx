@@ -179,7 +179,7 @@ export function KudosDetailPanelContent({
       {/* Audit timeline — governance roles only. Non-governance viewers
           must not see internal workflow history per Decision Lock §103-107. */}
       {isGovernance ? (
-        <div>
+        <div data-hbc-testid="hb-kudos-audit-timeline">
           <KudosSectionHeading>Audit timeline</KudosSectionHeading>
           <KudosAuditTimelineBlock
             events={timeline ?? []}

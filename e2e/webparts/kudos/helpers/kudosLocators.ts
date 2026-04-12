@@ -50,7 +50,7 @@ export const KUDOS_TESTIDS = {
 
 export type QueueBucket =
   | 'pending'
-  | 'revision-requested'
+  | 'revisionRequested'
   | 'flagged'
   | 'approved'
   | 'rejected'

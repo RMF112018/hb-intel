@@ -15,7 +15,7 @@ const tid = (id: string) => `[data-hbc-testid="${id}"]`;
 
 const BUCKETS: QueueBucket[] = [
   'pending',
-  'revision-requested',
+  'revisionRequested',
   'flagged',
   'approved',
   'rejected',

@@ -113,11 +113,13 @@ export function KudosActionButton({
   onClick,
   disabled,
   tone,
+  testId,
 }: {
   label: string;
   onClick: () => void;
   disabled: boolean;
   tone: GovernanceActionTone;
+  testId?: string;
 }): React.JSX.Element {
   const toneColor = TONE_COLORS[tone];
   return (
@@ -125,6 +127,7 @@ export function KudosActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      data-hbc-testid={testId}
       style={{
         padding: '7px 13px',
         borderRadius: 8,
@@ -155,16 +158,19 @@ export function KudosGovernanceTabButton({
   label,
   active,
   onClick,
+  testId,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
+  testId?: string;
 }): React.JSX.Element {
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
+      data-hbc-testid={testId}
       style={{
         padding: '8px 14px',
         borderRadius: 999,
@@ -192,16 +198,19 @@ export function KudosGovernanceToggleChip({
   label,
   active,
   onToggle,
+  testId,
 }: {
   label: string;
   active: boolean;
   onToggle: () => void;
+  testId?: string;
 }): React.JSX.Element {
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-pressed={active}
+      data-hbc-testid={testId}
       style={{
         padding: '5px 12px',
         fontSize: '0.6875rem',
