@@ -79,6 +79,8 @@ import {
   KudosGovernanceToolbarLabel,
   KudosGovernanceErrorAlert,
   KudosGovernanceInputDialog,
+  KudosGovernanceDateTimeDialog,
+  KudosGovernanceAssignmentDialog,
   kudosCSSVars,
 } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import {
@@ -729,6 +731,23 @@ export function HbKudosCompanion({
   // Two-phase updateContent: after headline is confirmed, prompt for excerpt.
   const [pendingUpdateHeadline, setPendingUpdateHeadline] = React.useState<string | undefined>();
 
+  // Task-specific dialog slots (Phase-25 Prompt-03). Schedule /
+  // feature-expiry use a datetime picker; reassign uses an
+  // email-resolving assignee picker. Separate from `inputDialog` so
+  // the generic text/select dialog logic stays uninvolved.
+  type DateTimeDialogKind = 'schedule' | 'feature';
+  const [dateTimeDialog, setDateTimeDialog] = React.useState<{
+    kind: DateTimeDialogKind;
+    title: string;
+    description?: string;
+    fieldLabel?: string;
+    hint?: string;
+    defaultIso?: string;
+    confirmLabel?: string;
+    allowEmpty?: boolean;
+  } | null>(null);
+  const [assignmentDialogOpen, setAssignmentDialogOpen] = React.useState(false);
+
   const now = nowIso ?? new Date().toISOString();
 
   // Resolve the current user's SharePoint ID for ownership filtering.
@@ -856,16 +875,42 @@ export function HbKudosCompanion({
           break;
       }
 
-      // Actions that require dialog input.
+      // Task-specific dialogs — scheduling and reassignment need
+      // structured controls, not free-text entry.
+      if (kind === 'schedule') {
+        setDateTimeDialog({
+          kind: 'schedule',
+          title: 'Scheduled publish',
+          description: 'Pick the date and time when this item should go live. The picker uses your local timezone; the value is stored in UTC.',
+          fieldLabel: 'Publish at',
+          hint: 'Minute precision is enough — the queue reveals items once this moment passes.',
+          confirmLabel: 'Schedule',
+        });
+        return;
+      }
+      if (kind === 'feature') {
+        setDateTimeDialog({
+          kind: 'feature',
+          title: 'Featured expiry',
+          description: 'Choose when featured status should expire. Leave empty to keep the default expiry window.',
+          fieldLabel: 'Expires at',
+          confirmLabel: 'Feature',
+          allowEmpty: true,
+        });
+        return;
+      }
+      if (kind === 'reassign') {
+        setAssignmentDialogOpen(true);
+        return;
+      }
+
+      // Remaining actions use the generic text/select dialog.
       const dialogMap: Record<string, Omit<NonNullable<typeof inputDialog>, 'kind'>> = {
         reject: { title: 'Rejection reason', description: 'Provide a submitter-facing reason for the rejection.', placeholder: 'Enter rejection reason…' },
         requestRevision: { title: 'Revision guidance', description: 'Provide guidance so the submitter knows what to change.', placeholder: 'Enter revision guidance…' },
         flagAdminReview: { title: 'Admin review reason', description: 'Why does this item need admin review?', placeholder: 'Enter reason…' },
-        schedule: { title: 'Scheduled publish date', description: 'Enter the date/time when this item should go live.', placeholder: 'e.g. 2026-05-01T09:00:00Z' },
         pin: { title: 'Pin order', description: 'Select the pin slot (1 is highest).', choices: [{ value: '1', label: '1 — Top' }, { value: '2', label: '2 — Middle' }, { value: '3', label: '3 — Bottom' }] },
-        feature: { title: 'Featured expiry date', description: 'When should the featured status expire? Leave empty for default.', placeholder: 'e.g. 2026-06-01T00:00:00Z', allowEmpty: true },
         remove: { title: 'Removal reason', description: 'Provide a reason for removing this item from public view.', placeholder: 'Enter removal reason…' },
-        reassign: { title: 'Reassign to user', description: 'Enter the SharePoint user ID of the new assignee.', placeholder: 'e.g. 42' },
         reopen: { title: 'Reopen to status', description: 'Choose which status the item should return to.', choices: [{ value: 'pending', label: 'Pending review' }, { value: 'revisionRequested', label: 'Revision requested' }] },
         updateContent: { title: 'Edit headline', description: 'Update the recognition headline.', placeholder: 'Enter updated headline…', defaultValue: detailEntry.headline ?? '', confirmLabel: 'Next: excerpt' },
       };
@@ -874,6 +919,42 @@ export function HbKudosCompanion({
       if (config) {
         setInputDialog({ kind, ...config });
       }
+    },
+    [detailEntry, dispatchGovernancePatch],
+  );
+
+  // Dedicated confirm handlers for the task-specific dialogs.
+  const handleDateTimeDialogConfirm = React.useCallback(
+    (isoUtc: string) => {
+      if (!detailEntry || !dateTimeDialog) return;
+      const kind = dateTimeDialog.kind;
+      setDateTimeDialog(null);
+      if (kind === 'schedule') {
+        void dispatchGovernancePatch({
+          kind: 'schedule',
+          kudosId: detailEntry.id,
+          scheduledPublishAtIso: isoUtc,
+        });
+      } else if (kind === 'feature') {
+        void dispatchGovernancePatch({
+          kind: 'feature',
+          kudosId: detailEntry.id,
+          featuredExpiresAtIso: isoUtc || undefined,
+        });
+      }
+    },
+    [detailEntry, dateTimeDialog, dispatchGovernancePatch],
+  );
+
+  const handleAssignmentDialogConfirm = React.useCallback(
+    (resolved: { userId: number }) => {
+      if (!detailEntry) return;
+      setAssignmentDialogOpen(false);
+      void dispatchGovernancePatch({
+        kind: 'reassign',
+        kudosId: detailEntry.id,
+        assignedUserId: resolved.userId,
+      });
     },
     [detailEntry, dispatchGovernancePatch],
   );
@@ -912,26 +993,14 @@ export function HbKudosCompanion({
         case 'flagAdminReview':
           patch = { kind: 'flagAdminReview', kudosId: detailEntry.id, adminReviewReason: value.trim() };
           break;
-        case 'schedule':
-          patch = { kind: 'schedule', kudosId: detailEntry.id, scheduledPublishAtIso: value.trim() };
-          break;
         case 'pin': {
           const pinOrder = Number(value);
           patch = { kind: 'pin', kudosId: detailEntry.id, pinOrder: Number.isFinite(pinOrder) ? pinOrder : undefined };
           break;
         }
-        case 'feature':
-          patch = { kind: 'feature', kudosId: detailEntry.id, featuredExpiresAtIso: value.trim() || undefined };
-          break;
         case 'remove':
           patch = { kind: 'remove', kudosId: detailEntry.id, removedReason: value.trim() };
           break;
-        case 'reassign': {
-          const assignedUserId = Number(value);
-          if (!Number.isFinite(assignedUserId) || assignedUserId <= 0) return;
-          patch = { kind: 'reassign', kudosId: detailEntry.id, assignedUserId };
-          break;
-        }
         case 'reopen': {
           const targetStatus = value.startsWith('revision') ? 'revisionRequested' as const : 'pending' as const;
           patch = { kind: 'reopen', kudosId: detailEntry.id, targetStatus };
@@ -1393,6 +1462,31 @@ export function HbKudosCompanion({
         confirmLabel={inputDialog?.confirmLabel}
         choices={inputDialog?.choices}
         allowEmpty={inputDialog?.allowEmpty}
+      />
+
+      {/* Task-specific dialogs (Phase-25 Prompt-03) — structured
+          controls for scheduling and reassignment instead of raw
+          text input. Typed patch contracts are preserved. */}
+      <KudosGovernanceDateTimeDialog
+        open={dateTimeDialog !== null}
+        onClose={() => setDateTimeDialog(null)}
+        onConfirm={handleDateTimeDialogConfirm}
+        title={dateTimeDialog?.title ?? ''}
+        description={dateTimeDialog?.description}
+        fieldLabel={dateTimeDialog?.fieldLabel}
+        hint={dateTimeDialog?.hint}
+        defaultIso={dateTimeDialog?.defaultIso}
+        confirmLabel={dateTimeDialog?.confirmLabel}
+        allowEmpty={dateTimeDialog?.allowEmpty}
+      />
+      <KudosGovernanceAssignmentDialog
+        open={assignmentDialogOpen}
+        onClose={() => setAssignmentDialogOpen(false)}
+        onConfirm={handleAssignmentDialogConfirm}
+        title="Reassign kudos"
+        description="Enter the assignee's email. The companion resolves the user against the canonical list-host site and dispatches the typed reassign patch."
+        listHostUrl={getKudosListHostUrl() ?? ''}
+        confirmLabel="Reassign"
       />
     </section>
   );

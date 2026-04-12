@@ -213,6 +213,45 @@
   border-color: var(--hbk-brand-orange);
 }
 
+/* ── Task-specific dialog variants (Phase-25 Prompt-03) ──────────
+   Additional grammar for the datetime and assignment dialogs so
+   the structured inputs read as governed task controls rather than
+   restyled text fields. */
+
+.dialogFieldLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hbk-text-muted);
+}
+
+.dialogHint {
+  font-size: 0.75rem;
+  color: var(--hbk-text-faint);
+  margin: 0;
+}
+
+.dialogResolved {
+  font-size: 0.8125rem;
+  color: var(--hbk-text-secondary);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--hbk-blue-06);
+  border: 1px solid var(--hbk-blue-14);
+}
+
+.dialogResolvedEmphasis {
+  font-weight: 700;
+  color: var(--hbk-text-primary);
+}
+
+.dialogErrorText {
+  font-size: 0.8125rem;
+  color: var(--hbk-danger);
+  margin: 0;
+}
+
 /* ── Audit timeline block (KudosAuditTimelineBlock) ──────────────── */
 
 .timelineStatus {

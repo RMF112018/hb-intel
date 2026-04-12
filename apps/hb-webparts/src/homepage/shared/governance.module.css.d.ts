@@ -19,6 +19,11 @@ declare const styles: {
   readonly dialogBody: string;
   readonly dialogDescription: string;
   readonly dialogInput: string;
+  readonly dialogFieldLabel: string;
+  readonly dialogHint: string;
+  readonly dialogResolved: string;
+  readonly dialogResolvedEmphasis: string;
+  readonly dialogErrorText: string;
   readonly timelineStatus: string;
   readonly timelineList: string;
   readonly timelineEvent: string;

@@ -522,6 +522,250 @@ export function KudosGovernanceInputDialog({
 }
 
 // ---------------------------------------------------------------------------
+// DateTimeDialog — task-specific scheduling / expiry picker
+//
+// Replaces raw ISO free-text entry for schedule / feature-expiry
+// actions. Uses the native `datetime-local` input so operators pick
+// a moment in their own timezone; serializes to an ISO UTC string
+// on confirm so the typed governance patch contract is preserved.
+// ---------------------------------------------------------------------------
+
+export interface KudosGovernanceDateTimeDialogProps {
+  open: boolean;
+  onClose: () => void;
+  /** Called with a full ISO-UTC string (e.g. "2026-05-01T14:00:00.000Z"). */
+  onConfirm: (isoUtc: string) => void;
+  title: string;
+  description?: string;
+  fieldLabel?: string;
+  hint?: string;
+  /** Pre-fill the picker with an existing ISO value. */
+  defaultIso?: string;
+  confirmLabel?: string;
+  /** When true, confirming with an empty picker clears the value. */
+  allowEmpty?: boolean;
+}
+
+/**
+ * Convert an ISO-UTC string to the `yyyy-MM-ddTHH:mm` shape the
+ * `datetime-local` input expects, interpreted in the operator's
+ * local timezone.
+ */
+function isoToLocalInputValue(iso: string | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function KudosGovernanceDateTimeDialog({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  fieldLabel,
+  hint,
+  defaultIso,
+  confirmLabel,
+  allowEmpty,
+}: KudosGovernanceDateTimeDialogProps): React.JSX.Element {
+  const [draft, setDraft] = React.useState(() => isoToLocalInputValue(defaultIso));
+
+  React.useEffect(() => {
+    if (open) setDraft(isoToLocalInputValue(defaultIso));
+  }, [open, defaultIso]);
+
+  const handleConfirm = (): void => {
+    if (!draft.trim()) {
+      if (allowEmpty) {
+        onConfirm('');
+        onClose();
+      }
+      return;
+    }
+    // `datetime-local` values have no timezone suffix — treat them
+    // as wall time in the operator's locale and convert to ISO UTC.
+    const local = new Date(draft);
+    if (Number.isNaN(local.getTime())) return;
+    onConfirm(local.toISOString());
+    onClose();
+  };
+
+  return (
+    <HbcKudosComposerFlyout
+      open={open}
+      onClose={onClose}
+      title={title}
+      primaryAction={{ label: confirmLabel ?? 'Confirm', onClick: handleConfirm }}
+      secondaryAction={{ label: 'Cancel', onClick: onClose }}
+    >
+      <div className={governanceStyles.dialogBody} style={kudosCSSVars()}>
+        {description ? (
+          <p className={governanceStyles.dialogDescription}>{description}</p>
+        ) : null}
+        <label className={governanceStyles.dialogFieldLabel}>
+          {fieldLabel ?? 'Date and time'}
+        </label>
+        <input
+          type="datetime-local"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
+          autoFocus
+          className={governanceStyles.dialogInput}
+        />
+        {hint ? <p className={governanceStyles.dialogHint}>{hint}</p> : null}
+      </div>
+    </HbcKudosComposerFlyout>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AssignmentDialog — email-resolving reassignment picker
+//
+// Replaces raw SharePoint user-id entry with a human-usable email
+// lookup. Resolves the email against `/_api/web/siteusers/getByEmail`
+// on the canonical list-host site and calls `onConfirm(userId)` with
+// the resolved numeric id, preserving the typed `reassign` patch
+// contract. Failures are surfaced inline — no silent fallbacks.
+// ---------------------------------------------------------------------------
+
+export interface KudosGovernanceAssignmentDialogProps {
+  open: boolean;
+  onClose: () => void;
+  /** Called with the resolved SharePoint user id + display context. */
+  onConfirm: (resolved: { userId: number; email: string; displayName?: string }) => void;
+  title: string;
+  description?: string;
+  /** Canonical list-host URL used for the REST lookup. */
+  listHostUrl: string;
+  confirmLabel?: string;
+}
+
+interface ResolvedAssignee {
+  userId: number;
+  email: string;
+  displayName?: string;
+}
+
+export function KudosGovernanceAssignmentDialog({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  listHostUrl,
+  confirmLabel,
+}: KudosGovernanceAssignmentDialogProps): React.JSX.Element {
+  const [email, setEmail] = React.useState('');
+  const [resolved, setResolved] = React.useState<ResolvedAssignee | undefined>();
+  const [resolving, setResolving] = React.useState(false);
+  const [errorText, setErrorText] = React.useState<string | undefined>();
+
+  React.useEffect(() => {
+    if (open) {
+      setEmail('');
+      setResolved(undefined);
+      setResolving(false);
+      setErrorText(undefined);
+    }
+  }, [open]);
+
+  const resolveEmail = React.useCallback(async (): Promise<void> => {
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setErrorText('Enter an email address to resolve.');
+      return;
+    }
+    setResolving(true);
+    setErrorText(undefined);
+    setResolved(undefined);
+    try {
+      const res = await fetch(
+        `${listHostUrl}/_api/web/siteusers/getByEmail('${encodeURIComponent(trimmed)}')`,
+        { headers: { Accept: 'application/json;odata=nometadata' } },
+      );
+      if (!res.ok) {
+        setErrorText(
+          res.status === 404
+            ? 'No SharePoint user matches that email on the list-host site.'
+            : `Lookup failed: HTTP ${res.status}`,
+        );
+        return;
+      }
+      const body = (await res.json()) as { Id?: number; Title?: string; Email?: string };
+      if (typeof body.Id !== 'number' || body.Id <= 0) {
+        setErrorText('Resolved user did not carry a valid SharePoint id.');
+        return;
+      }
+      setResolved({ userId: body.Id, email: body.Email ?? trimmed, displayName: body.Title });
+    } catch (err) {
+      setErrorText(err instanceof Error ? err.message : 'Lookup failed.');
+    } finally {
+      setResolving(false);
+    }
+  }, [email, listHostUrl]);
+
+  const handleConfirm = (): void => {
+    if (!resolved) return;
+    onConfirm(resolved);
+    onClose();
+  };
+
+  return (
+    <HbcKudosComposerFlyout
+      open={open}
+      onClose={onClose}
+      title={title}
+      primaryAction={{
+        label: confirmLabel ?? 'Reassign',
+        onClick: handleConfirm,
+        disabled: !resolved,
+      }}
+      secondaryAction={{ label: 'Cancel', onClick: onClose }}
+    >
+      <div className={governanceStyles.dialogBody} style={kudosCSSVars()}>
+        {description ? (
+          <p className={governanceStyles.dialogDescription}>{description}</p>
+        ) : null}
+        <label className={governanceStyles.dialogFieldLabel}>Assignee email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); setResolved(undefined); setErrorText(undefined); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') void resolveEmail(); }}
+          placeholder="name@hedrickbrothers.com"
+          autoFocus
+          className={governanceStyles.dialogInput}
+        />
+        <KudosActionButton
+          label={resolving ? 'Resolving…' : resolved ? 'Resolved — look up again' : 'Resolve user'}
+          tone="info"
+          disabled={resolving || !email.trim()}
+          onClick={() => void resolveEmail()}
+          testId="hb-kudos-assignment-dialog-resolve"
+        />
+        {errorText ? (
+          <p className={governanceStyles.dialogErrorText}>{errorText}</p>
+        ) : null}
+        {resolved ? (
+          <div className={governanceStyles.dialogResolved}>
+            Will reassign to{' '}
+            <span className={governanceStyles.dialogResolvedEmphasis}>
+              {resolved.displayName ?? resolved.email}
+            </span>
+            {resolved.displayName ? ` (${resolved.email})` : ''} · SharePoint id{' '}
+            <span className={governanceStyles.dialogResolvedEmphasis}>{resolved.userId}</span>
+          </div>
+        ) : null}
+      </div>
+    </HbcKudosComposerFlyout>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // AuditTimelineBlock — shared audit timeline rendering
 // ---------------------------------------------------------------------------
 
