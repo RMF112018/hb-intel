@@ -12,54 +12,136 @@
  * All imports stay within the @hbc/ui-kit/homepage boundary.
  */
 import * as React from 'react';
-import { HbcStatusBadge, HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
+import {
+  HbcStatusBadge,
+  HbcKudosComposerFlyout,
+  HBC_PRESENTATION_BLUE,
+  HBC_PRESENTATION_BLUE_RGB,
+  HBC_PRESENTATION_ORANGE,
+  HBC_PRESENTATION_ORANGE_RGB,
+} from '@hbc/ui-kit/homepage';
 
 // ---------------------------------------------------------------------------
-// Governance design tokens
+// Governance design tokens — theme-derived alias layer
 // ---------------------------------------------------------------------------
+//
+// Phase-18 Wave 1 token discipline: this registry is a thin, disciplined
+// alias layer over the shared presentation-lane theme semantics exported
+// by `@hbc/ui-kit/homepage`. Values are DERIVED from the shared tokens
+// (HBC_PRESENTATION_BLUE / HBC_PRESENTATION_ORANGE and their rgb triplets)
+// rather than authored as a standalone palette, so the Kudos public and
+// companion surfaces cannot drift from the governed presentation-lane
+// brand without touching the shared source.
+//
+// - Brand values route through HBC_PRESENTATION_* so hex and rgba stay
+//   in lockstep with the shared tokens.
+// - Opacity scales (blueSubtle*, orangeSubtle*, dangerSubtle*) use RGB
+//   triplets composed into `rgba()` via a small `alpha()` helper instead
+//   of repeating literal hex/rgba strings across files.
+// - Text hierarchy is expressed as alphas over one ink base (#1a1310) to
+//   collapse the prior raw `rgba(26, 19, 16, X)` sprawl into a single
+//   intent-named scale.
+// - The `dangerRed` / `warningOrange` values are presentation-lane
+//   variants that don't have 1:1 equivalents in the shared tokens today;
+//   they are kept local and clearly marked so future promotion to
+//   shared theme semantics is a visible swap, not a rename.
+//
+// Surface files should continue to consume `KUDOS_GOV_TOKENS.*` rather
+// than raw hex/rgba so this alias layer remains the single place that
+// translates shared theme semantics into Kudos surface grammar.
+// ---------------------------------------------------------------------------
+
+const alpha = (rgbTriplet: string, opacity: number): string =>
+  `rgba(${rgbTriplet}, ${opacity})`;
+
+const BLUE_RGB = HBC_PRESENTATION_BLUE_RGB;
+const ORANGE_RGB = HBC_PRESENTATION_ORANGE_RGB;
+
+// Presentation-lane danger / warning accents. Kept local because the
+// shared theme semantics do not yet expose a presentation-lane danger
+// ramp (the productive-lane `HBC_STATUS_COLORS.error` is the brighter
+// `#FF4D4D`, which reads as app-shell status, not editorial danger).
+const DANGER_RED = '#c4314b';
+const DANGER_RGB = '196, 49, 75';
+const WARNING_ORANGE = '#c26434';
+
+// Ink base for body copy on light editorial surfaces — one value,
+// many alphas, so text hierarchy collapses to a single semantic scale.
+const INK_RGB = '26, 19, 16';
+const INK_BASE = '#1a1310';
+const INK_HEADING = '#0a1b33';
 
 export const KUDOS_GOV_TOKENS = {
-  // Brand
-  brandBlue: '#225391',
-  brandOrange: '#e57e46',
-  dangerRed: '#c4314b',
-  warningOrange: '#c26434',
+  // Brand — derived from shared presentation-lane theme semantics
+  brandBlue: HBC_PRESENTATION_BLUE,
+  brandOrange: HBC_PRESENTATION_ORANGE,
+  dangerRed: DANGER_RED,
+  warningOrange: WARNING_ORANGE,
 
-  // Text hierarchy — rgba(26, 19, 16, X)
-  textPrimary: '#1a1310',
-  textHeading: '#0a1b33',
-  textSecondary: 'rgba(26, 19, 16, 0.72)',
-  textTertiary: 'rgba(26, 19, 16, 0.62)',
-  textMuted: 'rgba(26, 19, 16, 0.55)',
-  textFaint: 'rgba(26, 19, 16, 0.48)',
-  textCaption: 'rgba(26, 19, 16, 0.45)',
-  textDisabled: 'rgba(26, 19, 16, 0.4)',
+  // Text hierarchy — alphas over the editorial ink base
+  textPrimary: INK_BASE,
+  textHeading: INK_HEADING,
+  textSecondary: alpha(INK_RGB, 0.72),
+  textTertiary: alpha(INK_RGB, 0.62),
+  textMuted: alpha(INK_RGB, 0.55),
+  textFaint: alpha(INK_RGB, 0.48),
+  textCaption: alpha(INK_RGB, 0.45),
+  textDisabled: alpha(INK_RGB, 0.4),
 
-  // Blue opacity — rgba(34, 83, 145, X)
-  blueSubtle04: 'rgba(34, 83, 145, 0.04)',
-  blueSubtle06: 'rgba(34, 83, 145, 0.06)',
-  blueSubtle08: 'rgba(34, 83, 145, 0.08)',
-  blueSubtle12: 'rgba(34, 83, 145, 0.12)',
-  blueSubtle14: 'rgba(34, 83, 145, 0.14)',
-  blueSubtle18: 'rgba(34, 83, 145, 0.18)',
-  blueSubtle20: 'rgba(34, 83, 145, 0.2)',
-  blueText82: 'rgba(34, 83, 145, 0.82)',
+  // Presentation-blue opacity ramp — derived from HBC_PRESENTATION_BLUE_RGB
+  blueSubtle04: alpha(BLUE_RGB, 0.04),
+  blueSubtle06: alpha(BLUE_RGB, 0.06),
+  blueSubtle08: alpha(BLUE_RGB, 0.08),
+  blueSubtle12: alpha(BLUE_RGB, 0.12),
+  blueSubtle14: alpha(BLUE_RGB, 0.14),
+  blueSubtle18: alpha(BLUE_RGB, 0.18),
+  blueSubtle20: alpha(BLUE_RGB, 0.2),
+  blueText82: alpha(BLUE_RGB, 0.82),
 
-  // Orange opacity — rgba(229, 126, 70, X)
-  orangeSubtle02: 'rgba(229, 126, 70, 0.02)',
-  orangeSubtle03: 'rgba(229, 126, 70, 0.03)',
-  orangeSubtle06: 'rgba(229, 126, 70, 0.06)',
-  orangeSubtle10: 'rgba(229, 126, 70, 0.10)',
-  orangeSubtle18: 'rgba(229, 126, 70, 0.18)',
-  orangeSubtle22: 'rgba(229, 126, 70, 0.22)',
-  orangeSubtle25: 'rgba(229, 126, 70, 0.25)',
-  orangeSubtle28: 'rgba(229, 126, 70, 0.28)',
+  // Presentation-orange opacity ramp — derived from HBC_PRESENTATION_ORANGE_RGB
+  orangeSubtle02: alpha(ORANGE_RGB, 0.02),
+  orangeSubtle03: alpha(ORANGE_RGB, 0.03),
+  orangeSubtle06: alpha(ORANGE_RGB, 0.06),
+  orangeSubtle10: alpha(ORANGE_RGB, 0.1),
+  orangeSubtle18: alpha(ORANGE_RGB, 0.18),
+  orangeSubtle22: alpha(ORANGE_RGB, 0.22),
+  orangeSubtle25: alpha(ORANGE_RGB, 0.25),
+  orangeSubtle28: alpha(ORANGE_RGB, 0.28),
 
-  // Danger opacity — rgba(196, 49, 75, X)
-  dangerSubtle08: 'rgba(196, 49, 75, 0.08)',
-  dangerSubtle22: 'rgba(196, 49, 75, 0.22)',
-  dangerSubtle55: 'rgba(196, 49, 75, 0.55)',
-  dangerItalic72: 'rgba(196, 49, 75, 0.72)',
+  // Danger opacity ramp — presentation-lane local until shared semantics expose one
+  dangerSubtle08: alpha(DANGER_RGB, 0.08),
+  dangerSubtle22: alpha(DANGER_RGB, 0.22),
+  dangerSubtle55: alpha(DANGER_RGB, 0.55),
+  dangerItalic72: alpha(DANGER_RGB, 0.72),
+} as const;
+
+// ---------------------------------------------------------------------------
+// Kudos surface grammar — spacing + radius aliases
+// ---------------------------------------------------------------------------
+//
+// A light-weight local alias so Kudos public and companion surfaces
+// stop repeating the same magic pixel values. Kept intentionally small:
+// just enough to cover the recurring surface grammar (card padding,
+// row gutters, pill radii) without becoming an over-engineered spacing
+// framework.
+// ---------------------------------------------------------------------------
+
+export const KUDOS_SPACE = {
+  xs: 4,
+  sm: 6,
+  md: 8,
+  lg: 12,
+  xl: 14,
+  xxl: 16,
+} as const;
+
+export const KUDOS_RADIUS = {
+  sm: 8,
+  md: 10,
+  lg: 12,
+  xl: 14,
+  xxl: 18,
+  pill: 999,
 } as const;
 
 // ---------------------------------------------------------------------------
