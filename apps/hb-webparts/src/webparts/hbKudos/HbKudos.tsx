@@ -48,7 +48,7 @@ import {
   useGraphPersonPhotoFn,
 } from './hooks/useRecipientPhotoHydration.js';
 import { useCelebrateAction } from './hooks/useCelebrateAction.js';
-import { useHostSafeLayout } from './hooks/useHostSafeLayout.js';
+import { useHostSafeLayout, SAFE_ZONE_SIZE_PX } from './hooks/useHostSafeLayout.js';
 import { selectFeaturedAndRecent, sortByRecency } from './hooks/kudosFeatured.js';
 
 // ---------------------------------------------------------------------------
@@ -244,8 +244,8 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
             position: 'absolute',
             right: 0,
             bottom: 0,
-            width: 72,
-            height: 72,
+            width: SAFE_ZONE_SIZE_PX,
+            height: SAFE_ZONE_SIZE_PX,
             pointerEvents: 'none',
           }}
         />

@@ -10,5 +10,12 @@ declare const styles: {
   readonly searchCluster: string;
   readonly searchField: string;
   readonly searchInput: string;
+  readonly ownershipField: string;
+  readonly ownershipSelect: string;
+  readonly bulkBar: string;
+  readonly bulkCount: string;
+  readonly bulkApproveBtn: string;
+  readonly bulkClearBtn: string;
+  readonly queueGrid: string;
 };
 export default styles;

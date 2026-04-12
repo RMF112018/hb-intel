@@ -1012,7 +1012,12 @@ export function HbKudosCompanion({
         '--hbk-cmp-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
         '--hbk-cmp-orange-28': KUDOS_GOV_TOKENS.orangeSubtle28,
         '--hbk-cmp-blue-04': KUDOS_GOV_TOKENS.blueSubtle04,
+        '--hbk-cmp-blue-06': KUDOS_GOV_TOKENS.blueSubtle06,
         '--hbk-cmp-blue-14': KUDOS_GOV_TOKENS.blueSubtle14,
+        '--hbk-cmp-orange-10': KUDOS_GOV_TOKENS.orangeSubtle10,
+        '--hbk-cmp-orange-25': KUDOS_GOV_TOKENS.orangeSubtle25,
+        '--hbk-cmp-text-primary': KUDOS_GOV_TOKENS.textPrimary,
+        '--hbk-cmp-text-tertiary': KUDOS_GOV_TOKENS.textTertiary,
       } as React.CSSProperties}
     >
       <header className={companionStyles.header}>
@@ -1077,7 +1082,7 @@ export function HbKudosCompanion({
           />
         </label>
 
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <label className={companionStyles.ownershipField}>
           <KudosGovernanceToolbarLabel>Ownership</KudosGovernanceToolbarLabel>
           <select
             value={filter.ownership}
@@ -1088,12 +1093,7 @@ export function HbKudosCompanion({
               })
             }
             data-hbc-testid="hb-kudos-queue-filter-ownership"
-            style={{
-              padding: '6px 8px',
-              fontSize: '0.8125rem',
-              borderRadius: 8,
-              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-            }}
+            className={companionStyles.ownershipSelect}
           >
             <option value="all">All</option>
             <option value="mine">Assigned to me</option>
@@ -1119,34 +1119,20 @@ export function HbKudosCompanion({
       {/* Bulk-select bar */}
       {selectable && selectedIds.size > 0 ? (
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '10px 14px',
-            borderRadius: 10,
-            background: `linear-gradient(90deg, ${KUDOS_GOV_TOKENS.orangeSubtle10}, ${KUDOS_GOV_TOKENS.blueSubtle06})`,
-            border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle25}`,
-          }}
+          role="group"
+          aria-label="Bulk actions"
+          className={companionStyles.bulkBar}
         >
-          <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: KUDOS_GOV_TOKENS.textPrimary }}>
+          <span className={companionStyles.bulkCount}>
             {selectedIds.size} selected
           </span>
           <button
             type="button"
             onClick={() => void handleBulkApprove()}
             disabled={dispatching}
+            aria-busy={dispatching ? 'true' : undefined}
             data-hbc-testid="hb-kudos-bulk-approve"
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              color: '#ffffff',
-              background: `linear-gradient(135deg, ${KUDOS_GOV_TOKENS.brandOrange} 0%, #d4693a 100%)`,
-              border: 'none',
-              borderRadius: 8,
-              cursor: dispatching ? 'not-allowed' : 'pointer',
-            }}
+            className={companionStyles.bulkApproveBtn}
           >
             {dispatching ? 'Approving…' : 'Approve selected'}
           </button>
@@ -1154,15 +1140,7 @@ export function HbKudosCompanion({
             type="button"
             onClick={clearSelection}
             disabled={dispatching}
-            style={{
-              padding: '6px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: KUDOS_GOV_TOKENS.textTertiary,
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            className={companionStyles.bulkClearBtn}
           >
             Clear
           </button>
@@ -1178,7 +1156,7 @@ export function HbKudosCompanion({
           description="Try a different tab, clear filters, or check back after the next submission."
         />
       ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className={companionStyles.queueGrid}>
           {queue.map((entry) => (
             <QueueRow
               key={entry.id}
