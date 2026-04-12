@@ -308,5 +308,16 @@ describe('HB Kudos doctrine guards', () => {
       expect(src).toMatch(/export function KudosTaskDialogShell/);
       expect(src).toMatch(/export function KudosGovernanceDetailShell/);
     });
+
+    it('Phase-28 Prompt-04: KudosTaskDialogShell does not nest a second role="dialog" inside the flyout', () => {
+      // The outer `HbcKudosComposerFlyout` already owns `role="dialog"`
+      // + `aria-modal="true"` + focus trap + ESC-to-close. Nesting
+      // another `role="dialog"` in the inner task-shell body
+      // produced a "dialog inside dialog" semantic that confused
+      // assistive tech. This guard fails fast if the inner role
+      // ever comes back.
+      const src = read('homepage/shared/kudosShells.tsx');
+      expect(src).not.toMatch(/role=['"]dialog['"]/);
+    });
   });
 });

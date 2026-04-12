@@ -15,7 +15,12 @@
  *     Full-width body with dense scan layout.
  *   - `KudosTaskDialogShell`      — compact operator task dialogs
  *     (reject / revise / schedule / reassign / discard). Narrow
- *     body, task-centric grammar, explicit role="dialog".
+ *     body, task-centric grammar. Phase-28 Prompt-04: the inner
+ *     body no longer carries its own dialog role + aria label;
+ *     the outer `HbcKudosComposerFlyout` already owns dialog
+ *     semantics (dialog role + aria-modal + focus trap + scroll
+ *     lock + ESC-to-close), and nesting another dialog role inside
+ *     it created ambiguous accessibility semantics.
  *   - `KudosGovernanceDetailShell`— moderation detail + action-family
  *     workspace (companion detail flyout). Section landmark body
  *     with governance-grade padding.
@@ -168,12 +173,15 @@ export function KudosTaskDialogShell({
       primaryAction={primaryAction}
       secondaryAction={secondaryAction ?? { label: 'Cancel', onClick: onClose }}
     >
-      <div
-        role="dialog"
-        aria-label={title}
-        className={styles.taskDialogBody}
-        data-hbc-testid={testId}
-      >
+      {/*
+        Phase-28 Prompt-04 closure: this wrapper intentionally carries
+        no nested dialog role and no duplicate aria-label. The outer
+        `HbcKudosComposerFlyout` is the dialog; its title bar already
+        labels this surface. Adding a nested dialog role here
+        confused assistive tech ("dialog inside dialog"), so the
+        inner wrapper is now a plain grouping landmark.
+      */}
+      <div className={styles.taskDialogBody} data-hbc-testid={testId}>
         {description ? (
           <p className={styles.taskDialogDescription}>{description}</p>
         ) : null}
