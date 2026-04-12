@@ -1025,7 +1025,11 @@ export function HbKudosCompanion({
             {heading}
           </h2>
         </div>
-        <div className={companionStyles.headerMeta}>
+        <div
+          className={companionStyles.headerMeta}
+          role="status"
+          aria-live="polite"
+        >
           {reminderTargets.length > 0 ? (
             <HbcStatusBadge
               variant="warning"

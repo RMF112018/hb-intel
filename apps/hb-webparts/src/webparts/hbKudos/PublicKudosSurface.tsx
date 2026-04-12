@@ -308,6 +308,7 @@ function FeaturedCard({
               clamp never hides the action affordance below. */}
           <div
             ref={excerptRef}
+            id={`hb-kudos-featured-excerpt-${entry.id}`}
             className={styles.featuredExcerpt}
             data-hbc-testid="hb-kudos-featured-excerpt"
           >
@@ -319,6 +320,7 @@ function FeaturedCard({
               className={kudosReadmoreBtn()}
               onClick={() => onOpenArticle(entry)}
               aria-label={`Read full recognition for ${recipientDisplay}`}
+              aria-describedby={`hb-kudos-featured-excerpt-${entry.id}`}
               data-hbc-testid="hb-kudos-featured-readmore"
             >
               … Read more
@@ -335,6 +337,7 @@ function FeaturedCard({
             className={kudosCelebrateBtn()}
             onClick={() => onCelebrate(entry.id)}
             disabled={celebrateLoading}
+            aria-busy={celebrateLoading ? 'true' : undefined}
             aria-label="Celebrate this recognition"
             data-hbc-testid="hb-kudos-celebrate"
           >

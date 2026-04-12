@@ -18,12 +18,30 @@
   letter-spacing: 0.02em;
   cursor: pointer;
   font-family: inherit;
+  outline: none;
+}
+
+.actionButton:focus-visible,
+.tabButton:focus-visible,
+.toggleChip:focus-visible {
+  outline: 2px solid var(--hbk-gov-blue);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.actionButton:disabled,
+.tabButton:disabled,
+.toggleChip:disabled,
+.actionButton[aria-disabled='true'],
+.tabButton[aria-disabled='true'],
+.toggleChip[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .actionButton:disabled {
   background: rgba(128, 128, 128, 0.08);
   color: var(--hbk-gov-text-disabled);
-  cursor: not-allowed;
 }
 
 .tabButton {
@@ -37,6 +55,7 @@
   letter-spacing: 0.02em;
   cursor: pointer;
   font-family: inherit;
+  outline: none;
 }
 
 .tabButtonActive {
@@ -57,6 +76,7 @@
   color: var(--hbk-gov-text-muted);
   cursor: pointer;
   font-family: inherit;
+  outline: none;
 }
 
 .toggleChipActive {
