@@ -30,7 +30,6 @@
  * rhythm flow through a single module.
  */
 import * as React from 'react';
-import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import flyoutStyles from './kudosFlyout.module.css';
 
 export interface KudosFlyoutBodyProps {
@@ -50,12 +49,12 @@ export function KudosFlyoutBody({
   as = 'div',
   className,
 }: KudosFlyoutBodyProps): React.JSX.Element {
-  const style = kudosCSSVars();
   const composed = className ? `${flyoutStyles.body} ${className}` : flyoutStyles.body;
 
+  // `--hbk-*` custom properties cascade in from the `HbKudos` webpart
+  // root via `kudosCSSVars()` — no inline style spreading needed here.
   const commonProps = {
     className: composed,
-    style,
     'data-hbc-testid': testId,
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,

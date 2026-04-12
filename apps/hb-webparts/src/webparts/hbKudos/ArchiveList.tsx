@@ -20,7 +20,6 @@
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ChevronDown, ArrowRight } from './kudosIcons.js';
 import styles from './kudosSurface.module.css';
@@ -71,7 +70,6 @@ export function ArchiveList({
       data-hbc-webpart-section="hb-kudos-archive"
       data-hbc-testid="hb-kudos-archive-section"
       data-hbc-archive-expanded={expanded ? 'true' : 'false'}
-      style={kudosCSSVars()}
     >
       <div className={styles.archiveHeader}>
         <button

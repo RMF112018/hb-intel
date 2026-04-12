@@ -139,7 +139,7 @@ each one from coming back. If you are about to do something that
 | Original defect | Never do this | Do this instead |
 |---|---|---|
 | Unicode glyph used as an icon | `<span>🏆</span>` / `<span>▾</span>` | Import from `./kudosIcons.ts`. |
-| Raw hex / rgba in surface JSX | `style={{ color: '#225391' }}` | Use `KUDOS_GOV_TOKENS` / `KUDOS_INTENT`, or seed a CSS custom property and resolve it in a CSS module. |
+| Raw hex / rgba in surface JSX | `style={{ color: '#225391' }}` | Use `KUDOS_GOV_TOKENS` (or the `var(--hbk-*)` custom property the `kudosCSSVars()` bridge seeds at the webpart root) and resolve it in a CSS module. |
 | Giant injected `<style>{...}</style>` | Author CSS inside the component | Add classes to the relevant `*.module.css`. |
 | Inline style object repeated 3+ times | Copy the object to new call sites | Add a `cva` variant in `kudosVariants.ts`. |
 | Orchestration in `HbKudos.tsx` | Add "just one more" effect | Extract to a named hook under `./hooks/`. |

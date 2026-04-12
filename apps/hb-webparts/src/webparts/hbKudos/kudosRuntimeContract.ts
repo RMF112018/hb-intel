@@ -77,7 +77,7 @@ export const KUDOS_RUNTIME_OWNERSHIP: {
     ],
     shares: [
       '@hbc/ui-kit/homepage curated lucide icons via ./kudosIcons',
-      'KUDOS_GOV_TOKENS + KUDOS_INTENT alias layer',
+      'KUDOS_GOV_TOKENS alias layer + kudosCSSVars() bridge',
       'kudosSurface / kudosFlyout / kudosReader CSS modules',
       'kudosVariants.ts (cva) and kudosSurfaceFamily.ts index',
       'governance.module.css and governance primitive variants',
@@ -110,7 +110,7 @@ export const KUDOS_RUNTIME_OWNERSHIP: {
     ],
     shares: [
       '@hbc/ui-kit/homepage curated lucide icons via ./kudosIcons',
-      'KUDOS_GOV_TOKENS + KUDOS_INTENT alias layer',
+      'KUDOS_GOV_TOKENS alias layer + kudosCSSVars() bridge',
       'governance.module.css + governance variants (action-button tone mapping CSS-owned)',
       'shared governance dialog primitives: KudosGovernanceInputDialog + KudosGovernanceDateTimeDialog + KudosGovernanceAssignmentDialog',
       'flyout action-family grammar in kudosFlyout.module.css',

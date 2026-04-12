@@ -48,7 +48,10 @@ import { useKudosComposer } from '../../homepage/data/useKudosComposer.js';
 import { submitKudosDraft } from '../../homepage/data/peopleCultureSubmissionSource.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { KudosGovernanceInputDialog } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import {
+  KudosGovernanceInputDialog,
+  kudosCSSVars,
+} from '../../homepage/shared/KudosGovernancePrimitives.js';
 import kudosSurfaceStyles from './kudosSurface.module.css';
 import { ArchiveList } from './ArchiveList.js';
 import { PublicKudosSurface } from './PublicKudosSurface.js';
@@ -195,6 +198,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       aria-label="HB Kudos recognition"
       className={kudosSurfaceStyles.shellRoot}
       style={{
+        ...kudosCSSVars(),
         ...safeZonePadding,
         '--hbk-safe-zone-size': `${SAFE_ZONE_SIZE_PX}px`,
       } as React.CSSProperties}

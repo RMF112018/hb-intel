@@ -33,7 +33,6 @@ import {
 import type { KudosAuditTimelineEntry } from '../data/kudosGovernanceWriter.js';
 import type { KudosRole } from '../helpers/kudosCapabilities.js';
 import {
-  kudosCSSVars,
   KudosSectionHeading,
   KudosInfoRow,
   KudosAuditTimelineBlock,
@@ -70,7 +69,7 @@ export function KudosDetailPanelContent({
     : `${mapAuditEventTypeLabel('submit')} · ${new Date(entry.submittedDate).toLocaleString()}`;
 
   return (
-    <div className={governanceStyles.detailStack} style={kudosCSSVars()}>
+    <div className={governanceStyles.detailStack}>
       {/* Status chip */}
       {chip ? (
         <div>

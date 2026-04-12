@@ -38,13 +38,16 @@ Everything cross-runtime goes through
 [`./kudosSurfaceFamily.ts`](./kudosSurfaceFamily.ts) — a single
 barrel re-exporting:
 
-- **Tokens** — `KUDOS_GOV_TOKENS`, `KUDOS_INTENT`, `KUDOS_SPACE`,
-  `KUDOS_RADIUS` from
+- **Tokens** — `KUDOS_GOV_TOKENS` + the `kudosCSSVars()` CSS-variable
+  bridge (applied once per webpart root; primitives inherit through
+  the cascade) from
   [`../../homepage/shared/KudosGovernancePrimitives.tsx`](../../homepage/shared/KudosGovernancePrimitives.tsx).
   `KUDOS_GOV_TOKENS` is derived from `HBC_PRESENTATION_BLUE_RGB` /
-  `HBC_PRESENTATION_ORANGE_RGB` via an `alpha()` helper; the
-  brand/ink/governance/danger ramps are authored as alphas over
-  the governed theme semantics, not raw hex.
+  `HBC_PRESENTATION_ORANGE_RGB` / `HBC_SURFACE_PRESENTATION` via an
+  `alpha()` helper; the brand/governance/recognition ramps are
+  authored as alphas over the governed theme semantics, not raw hex.
+  Local exceptions (editorial ink ramp, presentation-lane danger /
+  warning accents) are documented inline and stay narrowly scoped.
 - **Icons** — `Trophy`, `Sparkles`, `ThumbsUp`, `ChevronDown`,
   `ArrowRight` via [`./kudosIcons.ts`](./kudosIcons.ts), which
   re-exports from the curated `@hbc/ui-kit/homepage` lucide set.

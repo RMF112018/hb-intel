@@ -13,8 +13,10 @@
  *
  *   Tokens (shared-theme derived)
  *     - KUDOS_GOV_TOKENS — governed alias layer over
- *       `HBC_PRESENTATION_*` presentation-lane theme semantics.
- *     - KUDOS_SPACE / KUDOS_RADIUS — lightweight surface-grammar scales.
+ *       `HBC_PRESENTATION_*` / `HBC_SURFACE_PRESENTATION` presentation-
+ *       lane theme semantics. `kudosCSSVars()` bridges this record to
+ *       the CSS modules as `--hbk-*` custom properties (applied once
+ *       per webpart root).
  *
  *   Iconography (governed)
  *     - Trophy / Sparkles / ThumbsUp / ChevronDown / ArrowRight —
@@ -46,13 +48,10 @@
  *   token language, and one variant vocabulary.
  */
 
-// Tokens + spacing + semantic intent aliases
+// Tokens + CSS-var bridge
 export {
   KUDOS_GOV_TOKENS,
-  KUDOS_INTENT,
-  KUDOS_SPACE,
-  KUDOS_RADIUS,
-  type KudosIntentToken,
+  kudosCSSVars,
 } from '../../homepage/shared/KudosGovernancePrimitives.js';
 
 // Icon seam

@@ -5,15 +5,13 @@
  * Phase-23 Prompt 03 inline/injected style elimination:
  * the prior runtime-injected `<style>` block and every inline style
  * object have moved into `kudosFeed.module.css` + cva variants
- * (`kudosFeedRow`, `kudosFeedCelebratePill`). Only the
- * `--hbk-*` token-var bridge remains as inline `style={{…}}` — the
- * approved seam for binding `KUDOS_GOV_TOKENS` into CSS-module
- * selectors without hardcoding values in the module.
+ * (`kudosFeedRow`, `kudosFeedCelebratePill`). The `--hbk-*` token
+ * bridge is applied once at the `HbKudos` webpart root and cascades
+ * into this body — no inline style spreading here.
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ThumbsUp } from './kudosIcons.js';
 import feedStyles from './kudosFeed.module.css';
@@ -42,7 +40,6 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
     <div
       data-hbc-webpart-section="hb-kudos-feed"
       className={feedStyles.feedRoot}
-      style={kudosCSSVars()}
     >
       <input
         type="search"

@@ -10,6 +10,28 @@
  * if/when other governance surfaces reuse them.
  *
  * All imports stay within the @hbc/ui-kit/homepage boundary.
+ *
+ * Token-bridge posture (Phase-27 Prompt-01 closure):
+ *
+ *   - `KUDOS_GOV_TOKENS` is a thin alias layer over the governed
+ *     presentation-lane theme semantics exported by
+ *     `@hbc/ui-kit/homepage`. Brand and surface-warm values route
+ *     through `HBC_PRESENTATION_*` / `HBC_SURFACE_PRESENTATION` so
+ *     the Kudos public and companion surfaces cannot drift from the
+ *     shared source without touching the kit.
+ *   - Opacity ramps compose shared RGB triplets through a small
+ *     `alpha()` helper rather than repeating literal rgba strings.
+ *   - Remaining local exceptions — editorial ink ramp, presentation-
+ *     lane danger / warning accents — are explicitly marked below.
+ *     They stay local only because `@hbc/ui-kit/homepage` does not
+ *     yet expose a presentation-lane ink ramp or a presentation-lane
+ *     danger / warning palette; promotion is a visible swap, not a
+ *     rename.
+ *   - `kudosCSSVars()` is the sole CSS-variable bridge and is applied
+ *     ONCE per render-root (each webpart's outermost `<section>`).
+ *     Every governance primitive below inherits those custom
+ *     properties through the normal CSS cascade — we deliberately do
+ *     NOT re-spread `kudosCSSVars()` inline on each primitive.
  */
 import * as React from 'react';
 import {
@@ -19,6 +41,7 @@ import {
   HBC_PRESENTATION_BLUE_RGB,
   HBC_PRESENTATION_ORANGE,
   HBC_PRESENTATION_ORANGE_RGB,
+  HBC_SURFACE_PRESENTATION,
 } from '@hbc/ui-kit/homepage';
 import {
   governanceActionButton,
@@ -32,35 +55,9 @@ import {
 } from '../../webparts/hbKudos/kudosVariants.js';
 import governanceStyles from './governance.module.css';
 
-// ---------------------------------------------------------------------------
-// Governance design tokens — theme-derived alias layer
-// ---------------------------------------------------------------------------
-//
-// Phase-18 Wave 1 token discipline: this registry is a thin, disciplined
-// alias layer over the shared presentation-lane theme semantics exported
-// by `@hbc/ui-kit/homepage`. Values are DERIVED from the shared tokens
-// (HBC_PRESENTATION_BLUE / HBC_PRESENTATION_ORANGE and their rgb triplets)
-// rather than authored as a standalone palette, so the Kudos public and
-// companion surfaces cannot drift from the governed presentation-lane
-// brand without touching the shared source.
-//
-// - Brand values route through HBC_PRESENTATION_* so hex and rgba stay
-//   in lockstep with the shared tokens.
-// - Opacity scales (blueSubtle*, orangeSubtle*, dangerSubtle*) use RGB
-//   triplets composed into `rgba()` via a small `alpha()` helper instead
-//   of repeating literal hex/rgba strings across files.
-// - Text hierarchy is expressed as alphas over one ink base (#1a1310) to
-//   collapse the prior raw `rgba(26, 19, 16, X)` sprawl into a single
-//   intent-named scale.
-// - The `dangerRed` / `warningOrange` values are presentation-lane
-//   variants that don't have 1:1 equivalents in the shared tokens today;
-//   they are kept local and clearly marked so future promotion to
-//   shared theme semantics is a visible swap, not a rename.
-//
-// Surface files should continue to consume `KUDOS_GOV_TOKENS.*` rather
-// than raw hex/rgba so this alias layer remains the single place that
-// translates shared theme semantics into Kudos surface grammar.
-// ---------------------------------------------------------------------------
+
+
+
 
 const alpha = (rgbTriplet: string, opacity: number): string =>
   `rgba(${rgbTriplet}, ${opacity})`;
@@ -127,102 +124,16 @@ export const KUDOS_GOV_TOKENS = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Semantic intent aliases over KUDOS_GOV_TOKENS
-// ---------------------------------------------------------------------------
-//
-// Intent-named wrappers around the opacity-step `KUDOS_GOV_TOKENS`
-// entries. Kept for future JS consumers that want to reason about
-// intent (e.g. `governanceBorderIdle`) rather than opacity-step.
-// Today most surfaces consume tokens through the unified
-// `kudosCSSVars()` CSS-var bridge instead.
-// ---------------------------------------------------------------------------
-
-export const KUDOS_INTENT = {
-  // Brand
-  brandBlue: KUDOS_GOV_TOKENS.brandBlue,
-  brandOrange: KUDOS_GOV_TOKENS.brandOrange,
-
-  // Ink hierarchy (body copy on light editorial surfaces)
-  inkPrimary: KUDOS_GOV_TOKENS.textPrimary,
-  inkHeading: KUDOS_GOV_TOKENS.textHeading,
-  inkSecondary: KUDOS_GOV_TOKENS.textSecondary,
-  inkTertiary: KUDOS_GOV_TOKENS.textTertiary,
-  inkMuted: KUDOS_GOV_TOKENS.textMuted,
-  inkFaint: KUDOS_GOV_TOKENS.textFaint,
-  inkCaption: KUDOS_GOV_TOKENS.textCaption,
-  inkDisabled: KUDOS_GOV_TOKENS.textDisabled,
-
-  // Governance (presentation-blue ramp)
-  governanceSurfaceIdle: KUDOS_GOV_TOKENS.blueSubtle04,
-  governanceSurfaceFocus: KUDOS_GOV_TOKENS.blueSubtle08,
-  governanceSurfaceActive: KUDOS_GOV_TOKENS.blueSubtle12,
-  governanceBorderSubtle: KUDOS_GOV_TOKENS.blueSubtle14,
-  governanceBorderIdle: KUDOS_GOV_TOKENS.blueSubtle18,
-  governanceBorderStrong: KUDOS_GOV_TOKENS.blueSubtle20,
-  governanceAccentInk: KUDOS_GOV_TOKENS.blueText82,
-
-  // Recognition surfaces (presentation-orange ramp)
-  recognitionSurfaceWhisper: KUDOS_GOV_TOKENS.orangeSubtle02,
-  recognitionSurfaceIdle: KUDOS_GOV_TOKENS.orangeSubtle03,
-  recognitionSurfaceHover: KUDOS_GOV_TOKENS.orangeSubtle06,
-  recognitionSurfaceFocus: KUDOS_GOV_TOKENS.orangeSubtle10,
-  recognitionBorderSubtle: KUDOS_GOV_TOKENS.orangeSubtle18,
-  recognitionBorderStrong: KUDOS_GOV_TOKENS.orangeSubtle22,
-  recognitionBorderEmphasis: KUDOS_GOV_TOKENS.orangeSubtle25,
-  recognitionBorderFocus: KUDOS_GOV_TOKENS.orangeSubtle28,
-
-  // Danger surfaces
-  dangerInk: KUDOS_GOV_TOKENS.dangerRed,
-  dangerSurface: KUDOS_GOV_TOKENS.dangerSubtle08,
-  dangerBorder: KUDOS_GOV_TOKENS.dangerSubtle22,
-  dangerAccent: KUDOS_GOV_TOKENS.dangerSubtle55,
-  dangerInkItalic: KUDOS_GOV_TOKENS.dangerItalic72,
-
-  // Warning
-  warningInk: KUDOS_GOV_TOKENS.warningOrange,
-} as const;
-
-export type KudosIntentToken = keyof typeof KUDOS_INTENT;
-
-/**
- * @deprecated Phase-23 Prompt 08 removed the unused KUDOS_SPACE scale
- * from the Kudos surface-family index. Surfaces never consumed it —
- * all spacing flows through CSS modules and the governed
- * `HBC_SPACE_*` tokens. The export is retained as an empty record for
- * one release so any unexpected external consumer gets a clear type
- * error rather than a runtime miss; it will be deleted in the next
- * pass.
- */
-export const KUDOS_SPACE = {} as const;
-
-/**
- * @deprecated Phase-23 Prompt 08 removed the unused KUDOS_RADIUS scale.
- * Same rationale as KUDOS_SPACE.
- */
-export const KUDOS_RADIUS = {} as const;
-
-// ---------------------------------------------------------------------------
 // Unified CSS-var bridge — the one seam between KUDOS_GOV_TOKENS and every
 // Kudos CSS module in `apps/hb-webparts`.
 // ---------------------------------------------------------------------------
 //
-// Phase-23 Prompt 08 token / variant / CSS architecture unification:
-// prior to this pass six different surfaces each shipped their own
-// bespoke inline record mapping `KUDOS_GOV_TOKENS.*` into per-surface
-// custom-property prefixes (`--pks-*`, `--hbk-cmp-*`, `--hbk-gov-*`,
-// `--hbk-flyout-*`, ad-hoc `--hbk-*` snippets). Same values, six names.
-//
-// `kudosCSSVars()` replaces all of them with one record under a single
-// `--hbk-*` prefix. Every kudos surface in `apps/hb-webparts` spreads
-// this at its outer root:
-//
-//     <section style={kudosCSSVars()} className={…}>
-//
-// CSS modules then reference `var(--hbk-text-muted)`, `var(--hbk-blue-18)`,
-// etc. directly — no more per-module naming dialects.
-//
-// The `@hbc/ui-kit` composer uses its own `--hbc-kudos-*` prefix inside
-// the ui-kit package boundary; that stays separate by design.
+// Applied ONCE at each webpart's outermost render-root (the `<section>`
+// for `HbKudos` and `HbKudosCompanion`). CSS modules reference
+// `var(--hbk-*)` directly and primitives inherit through the normal
+// cascade — do not re-spread this helper on individual primitives or
+// dialog bodies. The `@hbc/ui-kit` composer uses its own `--hbc-kudos-*`
+// prefix inside the ui-kit package boundary; that stays separate by design.
 // ---------------------------------------------------------------------------
 
 export function kudosCSSVars(): React.CSSProperties {
@@ -265,7 +176,9 @@ export function kudosCSSVars(): React.CSSProperties {
     '--hbk-orange-55': `rgba(${HBC_PRESENTATION_ORANGE_RGB}, 0.55)`,
     '--hbk-orange-shadow': `rgba(${HBC_PRESENTATION_ORANGE_RGB}, 0.08)`,
     '--hbk-surface-0': '#ffffff',
-    '--hbk-surface-warm': 'rgba(255, 250, 246, 0.8)',
+    // Editorial warm surface — derived from the governed shared warm-tint
+    // so Kudos editorial backdrops cannot drift from the shared palette.
+    '--hbk-surface-warm': HBC_SURFACE_PRESENTATION.warmTint,
 
     // Warning (surface-lane amber — no own ramp; exposed as a single
     // var so tone-driven CSS selectors can resolve --hbk-tone from
@@ -285,13 +198,14 @@ export function kudosCSSVars(): React.CSSProperties {
 // SectionHeading — governance metadata section label
 // ---------------------------------------------------------------------------
 
-// governanceVars() was merged into kudosCSSVars() by Phase-23 Prompt 08.
-// Consumers in this file now spread kudosCSSVars() directly; the dynamic
-// per-button tone color is composed alongside via the `--hbk-tone` slot.
+// Primitives below carry no inline style spread — `--hbk-*` custom
+// properties flow in from the webpart-root `kudosCSSVars()` application
+// and the tone color is composed by the `governance.module.css` selectors
+// that read `data-tone` on the host element.
 
 export function KudosSectionHeading({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <div className={governanceSectionHeading()} style={kudosCSSVars()}>
+    <div className={governanceSectionHeading()}>
       {children}
     </div>
   );
@@ -304,7 +218,7 @@ export function KudosSectionHeading({ children }: { children: React.ReactNode })
 export function KudosInfoRow({ label, value }: { label: string; value?: string }): React.JSX.Element | null {
   if (!value?.trim()) return null;
   return (
-    <div className={governanceInfoRow()} style={kudosCSSVars()}>
+    <div className={governanceInfoRow()}>
       <span className={governanceInfoRowLabel()}>{label}:</span> {value}
     </div>
   );
@@ -343,7 +257,7 @@ export function KudosActionButton({
       data-hbc-testid={testId}
       data-tone={tone}
       className={governanceActionButton()}
-      style={kudosCSSVars()}
+     
     >
       {label}
     </button>
@@ -376,7 +290,7 @@ export function KudosGovernanceTabButton({
       onClick={onClick}
       data-hbc-testid={testId}
       className={governanceTabButton({ active })}
-      style={kudosCSSVars()}
+     
     >
       {label}
     </button>
@@ -405,7 +319,7 @@ export function KudosGovernanceToggleChip({
       aria-pressed={active}
       data-hbc-testid={testId}
       className={governanceToggleChip({ active })}
-      style={kudosCSSVars()}
+     
     >
       {label}
     </button>
@@ -418,7 +332,7 @@ export function KudosGovernanceToggleChip({
 
 export function KudosGovernanceToolbarLabel({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span className={governanceToolbarLabel()} style={kudosCSSVars()}>
+    <span className={governanceToolbarLabel()}>
       {children}
     </span>
   );
@@ -430,7 +344,7 @@ export function KudosGovernanceToolbarLabel({ children }: { children: React.Reac
 
 export function KudosGovernanceErrorAlert({ message }: { message: string }): React.JSX.Element {
   return (
-    <div role="alert" className={governanceErrorAlert()} style={kudosCSSVars()}>
+    <div role="alert" className={governanceErrorAlert()}>
       {message}
     </div>
   );
@@ -493,7 +407,7 @@ export function KudosGovernanceInputDialog({
       }}
       secondaryAction={{ label: 'Cancel', onClick: onClose }}
     >
-      <div className={governanceStyles.dialogBody} style={kudosCSSVars()}>
+      <div className={governanceStyles.dialogBody}>
         {description ? (
           <p className={governanceStyles.dialogDescription}>{description}</p>
         ) : null}
@@ -603,7 +517,7 @@ export function KudosGovernanceDateTimeDialog({
       primaryAction={{ label: confirmLabel ?? 'Confirm', onClick: handleConfirm }}
       secondaryAction={{ label: 'Cancel', onClick: onClose }}
     >
-      <div className={governanceStyles.dialogBody} style={kudosCSSVars()}>
+      <div className={governanceStyles.dialogBody}>
         {description ? (
           <p className={governanceStyles.dialogDescription}>{description}</p>
         ) : null}
@@ -728,7 +642,7 @@ export function KudosGovernanceAssignmentDialog({
       }}
       secondaryAction={{ label: 'Cancel', onClick: onClose }}
     >
-      <div className={governanceStyles.dialogBody} style={kudosCSSVars()}>
+      <div className={governanceStyles.dialogBody}>
         {description ? (
           <p className={governanceStyles.dialogDescription}>{description}</p>
         ) : null}
@@ -804,7 +718,7 @@ export function KudosAuditTimelineBlock({
 
   if (loading) {
     return (
-      <div className={governanceStyles.timelineStatus} style={kudosCSSVars()}>
+      <div className={governanceStyles.timelineStatus}>
         Loading timeline…
       </div>
     );
@@ -812,14 +726,14 @@ export function KudosAuditTimelineBlock({
 
   if (events.length === 0) {
     return (
-      <div className={governanceStyles.timelineStatus} style={kudosCSSVars()}>
+      <div className={governanceStyles.timelineStatus}>
         {fallbackText ?? 'No timeline events.'}
       </div>
     );
   }
 
   return (
-    <div className={governanceStyles.timelineList} style={kudosCSSVars()}>
+    <div className={governanceStyles.timelineList}>
       {events.map((evt) => (
         <div key={evt.id} className={governanceStyles.timelineEvent}>
           <HbcStatusBadge

@@ -29,7 +29,6 @@
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { kudosCSSVars } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { Trophy, Sparkles, ThumbsUp } from './kudosIcons.js';
 import styles from './kudosSurface.module.css';
 import {
@@ -116,7 +115,6 @@ export function PublicKudosSurface({
       className={styles.section}
       data-hbc-webpart-section="hb-kudos-public-surface"
       aria-label={heading}
-      style={kudosCSSVars()}
     >
       {/* Unified hero zone — masthead (upper band) + featured
           (nested content surface) share one gradient atmosphere. */}
