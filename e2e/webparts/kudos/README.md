@@ -42,3 +42,27 @@ Smoke specs under each group are `test.fixme`-guarded until the
 dev-harness Kudos tab + seed hook land (prompt 04). The full contract
 lives in
 `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/phase-16/10-Harness-Architecture.md`.
+
+## Hosted closure coverage (Phase-23 Prompt 09)
+
+The `hosted/` suite now covers ten spec files spanning
+responsive, interaction, workflow, scroll, focus, chrome, zoom,
+dead-control, legacy-mount, and closure-report dimensions:
+
+| Spec | Focus |
+|---|---|
+| `kudos.hosted.chrome-overlap.spec.ts` | host chrome / CTA reachability |
+| `kudos.hosted.dead-control-sweep.spec.ts` | non-interactive sweep |
+| `kudos.hosted.keyboard-and-focus.spec.ts` | tab order, focus-visible, focus restoration, target size |
+| `kudos.hosted.panel-scroll.spec.ts` | flyout body overflow |
+| `kudos.hosted.zoom-regression.spec.ts` | 100% / 90% / reduced-width / safe-zone |
+| `kudos.hosted.responsive.spec.ts` | desktop right-sheet vs mobile bottom-sheet; safe-zone at 720px |
+| `kudos.hosted.interactions.spec.ts` | feed search filter, archive round-trip, celebrate increment |
+| `kudos.hosted.workflow.spec.ts` | companion Approve + Request-revision dispatch |
+| `kudos.hosted.legacy-mount-smoke.spec.ts` | legacy merged mount smoke |
+| `kudos.hosted.closure-report.spec.ts` | emits `test-results/kudos-hosted-closure-report.json` |
+
+The closure-report spec aggregates every hosted `test(...)` title
+and its `matrixTag(...)` coordinates into one JSON artifact so
+Phase-23 closure review can cite a single file instead of
+scanning the Playwright HTML report.
