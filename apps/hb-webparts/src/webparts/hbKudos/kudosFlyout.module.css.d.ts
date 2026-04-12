@@ -4,5 +4,6 @@ declare const styles: {
   readonly prose: string;
   readonly sectionHeading: string;
   readonly metaRow: string;
+  readonly actionZone: string;
 };
 export default styles;

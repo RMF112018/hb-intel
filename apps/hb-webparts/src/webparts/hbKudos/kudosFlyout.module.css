@@ -40,3 +40,20 @@
   font-size: 0.75rem;
   color: var(--hbk-flyout-ink-faint);
 }
+
+/* ── Action zone ─────────────────────────────────────────
+   Shared rhythm for in-body action groups rendered by a
+   flyout consumer (governance action strip, etc.). The
+   primary action-zone responsibility still lives in the
+   shell footer (HbcKudosComposerFlyout primary/secondary
+   actions); this class is for secondary action groups that
+   belong inside the body — the companion's governance
+   action strip being the only current consumer. */
+
+.actionZone {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--hbk-flyout-border);
+}

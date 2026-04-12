@@ -19,6 +19,7 @@ import {
 import type { useKudosComposer } from '../../homepage/data/useKudosComposer.js';
 import type { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import type { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
+import { KudosFlyoutBody } from './KudosFlyoutBody.js';
 
 type ComposerRuntime = ReturnType<typeof useKudosComposer>;
 type PeopleSearchFn = ReturnType<typeof useSharePointPeopleSearch>;
@@ -68,41 +69,43 @@ export function KudosComposerPanel({
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
     >
-      {state.status === 'success' ? (
-        <div data-hbc-testid="hb-kudos-composer-success">
-          <HbcKudosComposerSuccess />
-        </div>
-      ) : null}
+      <KudosFlyoutBody testId="hb-kudos-composer-body" ariaLabel="Give Kudos composer">
+        {state.status === 'success' ? (
+          <div data-hbc-testid="hb-kudos-composer-success">
+            <HbcKudosComposerSuccess />
+          </div>
+        ) : null}
 
-      {state.status === 'error' ? (
-        <div role="alert" data-hbc-testid="hb-kudos-composer-error">
-          <HbcKudosComposerError
-            body={state.submitError || 'An unexpected error occurred. Please try again.'}
-          />
-        </div>
-      ) : null}
-
-      {isEditing ? (
-        <>
-          <div data-hbc-testid="hb-kudos-composer-form">
-            <HbcKudosComposerForm
-              draft={state.draft}
-              onDraftChange={actions.updateDraft}
-              errors={state.validationErrors}
-              disabled={state.status === 'submitting'}
-              recipientsMode="typed"
-              searchPeople={searchPeople}
-              fetchPersonPhoto={fetchPersonPhoto}
+        {state.status === 'error' ? (
+          <div role="alert" data-hbc-testid="hb-kudos-composer-error">
+            <HbcKudosComposerError
+              body={state.submitError || 'An unexpected error occurred. Please try again.'}
             />
           </div>
-          <div data-hbc-testid="hb-kudos-composer-preview">
-            <HbcKudosComposerPreview
-              draft={state.draft}
-              submitterName={submitterName ?? ''}
-            />
-          </div>
-        </>
-      ) : null}
+        ) : null}
+
+        {isEditing ? (
+          <>
+            <div data-hbc-testid="hb-kudos-composer-form">
+              <HbcKudosComposerForm
+                draft={state.draft}
+                onDraftChange={actions.updateDraft}
+                errors={state.validationErrors}
+                disabled={state.status === 'submitting'}
+                recipientsMode="typed"
+                searchPeople={searchPeople}
+                fetchPersonPhoto={fetchPersonPhoto}
+              />
+            </div>
+            <div data-hbc-testid="hb-kudos-composer-preview">
+              <HbcKudosComposerPreview
+                draft={state.draft}
+                submitterName={submitterName ?? ''}
+              />
+            </div>
+          </>
+        ) : null}
+      </KudosFlyoutBody>
     </HbcKudosComposerFlyout>
   );
 }

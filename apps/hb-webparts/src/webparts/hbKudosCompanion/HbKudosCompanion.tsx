@@ -90,6 +90,7 @@ import {
 } from '../../homepage/helpers/kudosNotificationBuilder.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import { Trophy } from '../hbKudos/kudosIcons.js';
+import { KudosFlyoutBody, kudosFlyoutStyles } from '../hbKudos/KudosFlyoutBody.js';
 import companionStyles from './companion.module.css';
 import {
   buildKudosRecipientSummary,
@@ -566,7 +567,11 @@ function DetailPanel({
       secondaryAction={canApprove ? { label: 'Close', onClick: onClose } : undefined}
     >
       {entry ? (
-        <div data-hbc-testid="hb-kudos-companion-detail" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <KudosFlyoutBody
+          as="section"
+          testId="hb-kudos-companion-detail"
+          ariaLabel="Governance detail"
+        >
           <KudosDetailPanelContent
             entry={entry}
             role={role}
@@ -579,13 +584,7 @@ function DetailPanel({
           <div
             role="group"
             aria-label="Governance actions"
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 8,
-              paddingTop: 6,
-              borderTop: `1px dashed ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
-            }}
+            className={kudosFlyoutStyles.actionZone}
           >
             <KudosActionButton label="Reject" onClick={() => onAction('reject')} disabled={!canReject || dispatching} tone="danger" testId="hb-kudos-action-reject" />
             <KudosActionButton label="Request revision" onClick={() => onAction('requestRevision')} disabled={!canRequestRevision || dispatching} tone="warning" testId="hb-kudos-action-request-revision" />
@@ -630,7 +629,7 @@ function DetailPanel({
             ) : null}
             <KudosActionButton label="Celebrate" onClick={() => onAction('celebrate')} disabled={dispatching} tone="info" />
           </div>
-        </div>
+        </KudosFlyoutBody>
       ) : null}
     </HbcKudosComposerFlyout>
   );
