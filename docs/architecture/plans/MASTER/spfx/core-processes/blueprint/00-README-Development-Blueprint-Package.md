@@ -26,6 +26,9 @@ The blueprint assumes:
 6. `06-MVP-Package-Scaffold-and-Content-Mapping.md`
 7. `07-Search-Discovery-and-Trust-Model.md`
 8. `08-Delivery-Waves-Backlog-and-Validation.md`
+9. `09-SharePoint-List-Architecture-and-Storage-Strategy.md`
+10. `10-SharePoint-List-Schemas.md`
+11. `11-SharePoint-Indexes-Views-and-Implementation-Notes.md`
 
 ## How to use this package
 
@@ -46,3 +49,14 @@ This blueprint is intended to be suitable for:
 - SPFx implementation planning
 - backlog decomposition into development epics and stories
 - future prompt generation for code-agent execution
+
+
+## Added backend package extension
+
+The following files extend the blueprint with a SharePoint-list-first backend design for the MVP:
+
+- **09** defines the recommended list architecture and storage strategy
+- **10** defines field-by-field schemas for each required list
+- **11** defines indexing, view, content-type, governance, and implementation notes
+
+These files assume all app-managed backend data flows through SharePoint list storage for the time being.
