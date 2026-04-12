@@ -73,6 +73,8 @@ import {
   type KudosOverdueThresholds,
 } from '../../homepage/helpers/kudosNotificationBuilder.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
+import { Trophy } from '../hbKudos/kudosIcons.js';
+import companionStyles from './companion.module.css';
 import {
   buildKudosRecipientSummary,
   buildWorkflowChipDescriptor,
@@ -1002,44 +1004,28 @@ export function HbKudosCompanion({
       data-hbc-testid="hb-kudos-companion-root"
       data-hbc-role={role}
       aria-label="HB Kudos Approval Companion"
-      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+      className={companionStyles.root}
+      style={{
+        '--hbk-cmp-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
+        '--hbk-cmp-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
+        '--hbk-cmp-text-heading': KUDOS_GOV_TOKENS.textHeading,
+        '--hbk-cmp-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
+        '--hbk-cmp-orange-28': KUDOS_GOV_TOKENS.orangeSubtle28,
+        '--hbk-cmp-blue-04': KUDOS_GOV_TOKENS.blueSubtle04,
+        '--hbk-cmp-blue-14': KUDOS_GOV_TOKENS.blueSubtle14,
+      } as React.CSSProperties}
     >
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          gap: 16,
-          padding: '8px 4px 16px',
-          borderBottom: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle18}`,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontSize: '0.625rem',
-              fontWeight: 800,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: KUDOS_GOV_TOKENS.brandBlue,
-              marginBottom: 4,
-            }}
-          >
+      <header className={companionStyles.header}>
+        <div className={companionStyles.headerLead}>
+          <div className={companionStyles.eyebrow}>
+            <Trophy size={11} strokeWidth={2.5} aria-hidden="true" />
             HB Kudos governance
           </div>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '1.375rem',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              color: KUDOS_GOV_TOKENS.textHeading,
-            }}
-          >
+          <h2 className={companionStyles.title}>
             {heading}
           </h2>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className={companionStyles.headerMeta}>
           {reminderTargets.length > 0 ? (
             <HbcStatusBadge
               variant="warning"
@@ -1057,7 +1043,7 @@ export function HbKudosCompanion({
 
       {/* Queue filter buttons — not WAI-ARIA tabs (no tabpanels; content
            is filtered in-place). Each button uses aria-pressed. */}
-      <div role="group" aria-label="Queue filters" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      <div role="group" aria-label="Queue filters" className={companionStyles.filterBar}>
         {COMPANION_TABS.map((tab) => (
           <KudosGovernanceTabButton
             key={tab.id}
@@ -1073,18 +1059,9 @@ export function HbKudosCompanion({
       <div
         role="group"
         aria-label="Search and filter controls"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          flexWrap: 'wrap',
-          padding: '10px 12px',
-          borderRadius: 10,
-          background: KUDOS_GOV_TOKENS.blueSubtle04,
-          border: `1px solid ${KUDOS_GOV_TOKENS.blueSubtle14}`,
-        }}
+        className={companionStyles.searchCluster}
       >
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <label className={companionStyles.searchField}>
           <KudosGovernanceToolbarLabel>Search</KudosGovernanceToolbarLabel>
           <input
             type="search"
@@ -1092,13 +1069,7 @@ export function HbKudosCompanion({
             onChange={(e) => dispatch({ type: 'setSearch', value: e.target.value })}
             placeholder="Search recognition…"
             data-hbc-testid="hb-kudos-queue-filter-search"
-            style={{
-              padding: '6px 10px',
-              fontSize: '0.8125rem',
-              borderRadius: 8,
-              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              minWidth: 200,
-            }}
+            className={companionStyles.searchInput}
           />
         </label>
 

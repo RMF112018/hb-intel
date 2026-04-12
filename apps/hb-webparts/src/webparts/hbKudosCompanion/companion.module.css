@@ -1,0 +1,97 @@
+/**
+ * companion.module.css — HR Approval Companion surface grammar.
+ *
+ * Phase-18 Wave 1 surface-family alignment: the companion root,
+ * masthead, and filter bar are class-driven here so the companion
+ * visibly belongs to the same Kudos family as the public surface —
+ * same token backbone, same rhythm, same hierarchy. Token values flow
+ * in via `--hbk-cmp-*` CSS custom properties set on the companion
+ * root from KUDOS_GOV_TOKENS.
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 4px 16px;
+  border-bottom: 1px solid var(--hbk-cmp-orange-18);
+}
+
+.headerLead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hbk-cmp-brand-blue);
+  margin: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--hbk-cmp-text-heading);
+}
+
+.headerMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filterBar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.searchCluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--hbk-cmp-blue-04);
+  border: 1px solid var(--hbk-cmp-blue-14);
+}
+
+.searchField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchInput {
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+  border-radius: 8px;
+  border: 1px solid var(--hbk-cmp-orange-28);
+  min-width: 200px;
+  font-family: inherit;
+  outline: none;
+}
+
+.searchInput:focus-visible {
+  outline: 2px solid var(--hbk-cmp-brand-blue);
+  outline-offset: 1px;
+  border-color: var(--hbk-cmp-brand-orange);
+}
