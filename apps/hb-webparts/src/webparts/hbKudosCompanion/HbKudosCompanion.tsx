@@ -1,6 +1,22 @@
 /**
  * HbKudosCompanion — HR Approval Companion webpart.
  *
+ * Split-runtime adjacency (Phase-21 Wave 4 containment contract):
+ *   - Sibling runtime: `apps/hb-webparts/src/webparts/hbKudos/HbKudos.tsx`.
+ *   - Ownership map: `../hbKudos/kudosRuntimeContract.ts` (authoritative).
+ *   - Shared local product layer: `../hbKudos/kudosSurfaceFamily.ts`
+ *     (tokens, icons, variants, style modules). Do NOT reach across
+ *     runtimes; compose from the family index only.
+ *   - Webpart id: `HB_KUDOS_COMPANION_WEBPART_ID` in
+ *     `../hbKudos/kudosRuntimeContract.ts`; mirrored in
+ *     `HbKudosCompanionWebPart.manifest.json` and `mount.tsx`.
+ *   - This runtime OWNS the governance workspace (queue filter
+ *     reducer, patch planning, audit dispatch, bulk approve,
+ *     dialog workflow, role-aware detail panel) and MUST NOT own
+ *     public-facing masthead / featured / archive / reader /
+ *     composer / celebrate — those are the public runtime's
+ *     responsibilities.
+ *
  * Premium homepage-hosted governance workspace for HB Kudos
  * moderation. HR / admin only — renders a filterable queue of kudos
  * entries across the full `KudosWorkflowStatus` union and dispatches

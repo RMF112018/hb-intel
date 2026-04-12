@@ -1,6 +1,19 @@
 /**
  * HbKudos — Employee-facing HB Kudos recognition webpart.
  *
+ * Split-runtime adjacency (Phase-21 Wave 4 containment contract):
+ *   - Sibling runtime: `apps/hb-webparts/src/webparts/hbKudosCompanion/HbKudosCompanion.tsx`.
+ *   - Ownership map: `./kudosRuntimeContract.ts` (authoritative).
+ *   - Shared local product layer: `./kudosSurfaceFamily.ts` (tokens,
+ *     icons, variants, style modules). Do NOT reach across runtimes;
+ *     compose from the family index only.
+ *   - Webpart id: `HB_KUDOS_WEBPART_ID` in `./kudosRuntimeContract.ts`;
+ *     mirrored in `HbKudosWebPart.manifest.json` and `mount.tsx`.
+ *   - This runtime OWNS the viewer experience (featured, recent,
+ *     archive, article reader, composer, celebrate, host-safe zone)
+ *     and MUST NOT own governance queue state, patch planning, or
+ *     audit dispatch — those are the companion's responsibilities.
+ *
  * Premium homepage-hosted recognition surface delivering:
  *
  *   - featured spotlight + recent recognition rail via

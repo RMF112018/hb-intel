@@ -16,6 +16,10 @@ import { PeopleCulturePublic } from './webparts/peopleCulturePublic/PeopleCultur
 import { PeopleCultureCompanion } from './webparts/peopleCultureCompanion/PeopleCultureCompanion.js';
 import { HbKudos } from './webparts/hbKudos/HbKudos.js';
 import { HbKudosCompanion } from './webparts/hbKudosCompanion/HbKudosCompanion.js';
+import {
+  HB_KUDOS_WEBPART_ID,
+  HB_KUDOS_COMPANION_WEBPART_ID,
+} from './webparts/hbKudos/kudosRuntimeContract.js';
 import { ProjectPortfolioSpotlight } from './webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from './webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 import { SmartSearchWayfinding } from './webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
@@ -81,9 +85,13 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // Phase-14 kudos/ Prompt-02: HB Kudos employee recognition webpart.
   // Phase-11 Prompt-01: getGraphToken wired so the shared people picker
   // can resolve directory photos via Graph /users/{upn}/photo/$value.
-  'f14e59a3-4d6b-43b2-952e-ba02dea11dad': ({ config, identity, assetBaseUrl, getGraphToken }) => createElement(HbKudos, { config, identity, assetBaseUrl, getGraphToken }),
+  // Phase-21 Wave 4: id is sourced from `kudosRuntimeContract` so the
+  // mount wiring cannot drift from the manifest id.
+  [HB_KUDOS_WEBPART_ID]: ({ config, identity, assetBaseUrl, getGraphToken }) =>
+    createElement(HbKudos, { config, identity, assetBaseUrl, getGraphToken }),
   // Phase-14 kudos/ Prompt-03: HB Kudos HR Approval Companion webpart.
-  'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97': ({ config, identity, assetBaseUrl }) =>
+  // Phase-21 Wave 4: id from kudosRuntimeContract (single source of truth).
+  [HB_KUDOS_COMPANION_WEBPART_ID]: ({ config, identity, assetBaseUrl }) =>
     createElement(HbKudosCompanion, { config, identity, assetBaseUrl }),
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
