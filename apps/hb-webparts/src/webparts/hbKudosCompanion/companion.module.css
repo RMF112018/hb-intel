@@ -90,10 +90,11 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--hbk-blue-04);
-  border: 1px solid var(--hbk-blue-14);
+  /* Integrated inside .controlZone — no own frame. The zone owns the
+     surface treatment; the refinement row just provides layout. */
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 .searchField {
@@ -342,4 +343,97 @@
   align-items: center;
   justify-content: center;
   padding: clamp(24px, 6vw, 48px);
+}
+
+/* ── Phase-25 Prompt-01: workspace hierarchy rebuild ──────────
+   Restores the queue workspace's layered structure — header band,
+   control zone, queue region, and row body/footer — so the surface
+   reads as a productized governance workspace instead of a flat
+   queue assembly. */
+
+.workspaceSubtitle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 2px;
+  color: var(--hbk-text-tertiary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.workspaceSubtitleDot {
+  color: var(--hbk-text-faint);
+  font-weight: 400;
+}
+
+.controlZone {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--hbk-blue-04);
+  border: 1px solid var(--hbk-blue-14);
+}
+
+.controlZoneTabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--hbk-blue-14);
+}
+
+.controlZoneRefinement {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.queueRegion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.queueRegionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 2px;
+}
+
+.queueRegionLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hbk-text-muted);
+}
+
+.queueRegionCount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--hbk-text-faint);
+}
+
+.queueRowBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.queueRowFooter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px dashed var(--hbk-orange-18);
 }

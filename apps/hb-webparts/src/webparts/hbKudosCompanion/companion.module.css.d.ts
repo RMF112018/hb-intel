@@ -32,5 +32,16 @@ declare const styles: {
   readonly queueRowDateCell: string;
   readonly queueRowDate: string;
   readonly stateCentered: string;
+  readonly workspaceSubtitle: string;
+  readonly workspaceSubtitleDot: string;
+  readonly controlZone: string;
+  readonly controlZoneTabs: string;
+  readonly controlZoneRefinement: string;
+  readonly queueRegion: string;
+  readonly queueRegionHeader: string;
+  readonly queueRegionLabel: string;
+  readonly queueRegionCount: string;
+  readonly queueRowBody: string;
+  readonly queueRowFooter: string;
 };
 export default styles;

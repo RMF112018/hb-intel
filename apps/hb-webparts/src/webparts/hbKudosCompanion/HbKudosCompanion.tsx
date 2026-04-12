@@ -363,42 +363,49 @@ function QueueRow({
           onClick={() => onOpenDetail(entry)}
           className={companionStyles.queueRowButton}
         >
-          <div className={companionStyles.queueRowChipRow}>
-            {workflowChip ? (
-              <HbcStatusBadge
-                variant={
-                  workflowChip.tone === 'success'
-                    ? 'success'
-                    : workflowChip.tone === 'warning'
-                      ? 'warning'
-                      : workflowChip.tone === 'danger'
-                        ? 'critical'
-                        : 'info'
-                }
-                size="small"
-                label={workflowChip.label}
-              />
-            ) : null}
-            <span className={companionStyles.queueRowAgingChip}>
-              {AGING_LABEL[aging]}
-            </span>
-            {flagged ? (
-              <HbcStatusBadge variant="warning" size="small" label="Flagged for admin" />
-            ) : null}
-            {overdueStatus === 'overdue' ? (
-              <HbcStatusBadge variant="critical" size="small" label="Overdue" />
-            ) : overdueStatus === 'approaching' ? (
-              <HbcStatusBadge variant="warning" size="small" label="Approaching due" />
-            ) : null}
+          {/* Row body — state/scan rail on top, headline dominant,
+              excerpt secondary. Kept visually primary for scan order. */}
+          <div className={companionStyles.queueRowBody}>
+            <div className={companionStyles.queueRowChipRow}>
+              {workflowChip ? (
+                <HbcStatusBadge
+                  variant={
+                    workflowChip.tone === 'success'
+                      ? 'success'
+                      : workflowChip.tone === 'warning'
+                        ? 'warning'
+                        : workflowChip.tone === 'danger'
+                          ? 'critical'
+                          : 'info'
+                  }
+                  size="small"
+                  label={workflowChip.label}
+                />
+              ) : null}
+              <span className={companionStyles.queueRowAgingChip}>
+                {AGING_LABEL[aging]}
+              </span>
+              {flagged ? (
+                <HbcStatusBadge variant="warning" size="small" label="Flagged for admin" />
+              ) : null}
+              {overdueStatus === 'overdue' ? (
+                <HbcStatusBadge variant="critical" size="small" label="Overdue" />
+              ) : overdueStatus === 'approaching' ? (
+                <HbcStatusBadge variant="warning" size="small" label="Approaching due" />
+              ) : null}
+            </div>
+            <h4 className={companionStyles.queueRowHeadline}>
+              {entry.headline}
+            </h4>
+            <p className={companionStyles.queueRowExcerpt}>
+              {entry.excerpt}
+            </p>
           </div>
-          <h4 className={companionStyles.queueRowHeadline}>
-            {entry.headline}
-          </h4>
-          <p className={companionStyles.queueRowExcerpt}>
-            {entry.excerpt}
-          </p>
+          {/* Row footer — submission context, separated by a dashed
+              divider so operators parse origin data as a distinct
+              zone from the recognition body. */}
           {entry.recipients.length > 0 ? (
-            <div className={companionStyles.queueRowRecipients}>
+            <div className={companionStyles.queueRowFooter}>
               <HbcAvatarStack
                 people={entry.recipients.slice(0, 4).map((r) => ({
                   id: r.id,
@@ -915,6 +922,21 @@ export function HbKudosCompanion({
   const selectable =
     capabilities.canBulkApprove && (filter.tabId === 'pending' || filter.tabId === 'revisionRequested' || filter.tabId === 'flagged');
 
+  // Active-tab metadata for the workspace subtitle and queue-region
+  // header. Lets operators parse scope + counts without decoding the
+  // filter bar state.
+  const activeTab = COMPANION_TABS.find((t) => t.id === filter.tabId) ?? COMPANION_TABS[0]!;
+  const scopeCount = React.useMemo(
+    () => applyCompanionFilter(
+      allKudos,
+      { ...filter, searchText: '', ownership: 'all', adminReviewOnly: false, scheduledOnly: false, aging: [] },
+      now,
+      currentUserId,
+    ).length,
+    [allKudos, filter, now, currentUserId],
+  );
+  const isRefined = queue.length !== scopeCount;
+
   if (roleResolving) {
     return (
       <section
@@ -1067,6 +1089,20 @@ export function HbKudosCompanion({
           <h2 className={companionStyles.title}>
             {heading}
           </h2>
+          <div className={companionStyles.workspaceSubtitle} aria-live="polite">
+            <span>{activeTab.label}</span>
+            <span className={companionStyles.workspaceSubtitleDot}>·</span>
+            <span>
+              {queue.length} {queue.length === 1 ? 'item' : 'items'}
+              {isRefined ? ` of ${scopeCount}` : ''}
+            </span>
+            {reminderTargets.length > 0 ? (
+              <>
+                <span className={companionStyles.workspaceSubtitleDot}>·</span>
+                <span>{reminderTargets.length} overdue</span>
+              </>
+            ) : null}
+          </div>
         </div>
         <div
           className={companionStyles.headerMeta}
@@ -1088,26 +1124,39 @@ export function HbKudosCompanion({
         </div>
       </header>
 
-      {/* Queue filter buttons — not WAI-ARIA tabs (no tabpanels; content
-           is filtered in-place). Each button uses aria-pressed. */}
-      <div role="group" aria-label="Queue filters" className={companionStyles.filterBar}>
-        {COMPANION_TABS.map((tab) => (
-          <KudosGovernanceTabButton
-            key={tab.id}
-            label={tab.label}
-            active={tab.id === filter.tabId}
-            onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
-            testId={`hb-kudos-queue-tab-${tab.id}`}
-          />
-        ))}
-      </div>
-
-      {/* Search and filter controls */}
-      <div
-        role="group"
-        aria-label="Search and filter controls"
-        className={companionStyles.searchCluster}
+      {/* Control zone — scopes (tabs) on top, in-scope refinement
+           (search, ownership, toggle chips) below. One surface, two
+           clearly distinct rows so operators differentiate "which
+           queue am I looking at" from "how am I narrowing it". */}
+      <section
+        className={companionStyles.controlZone}
+        aria-label="Queue controls"
       >
+        {/* Queue filter buttons — not WAI-ARIA tabs (no tabpanels;
+             content is filtered in-place). Each button uses
+             aria-pressed. */}
+        <div
+          role="group"
+          aria-label="Queue scope"
+          className={`${companionStyles.filterBar} ${companionStyles.controlZoneTabs}`}
+        >
+          {COMPANION_TABS.map((tab) => (
+            <KudosGovernanceTabButton
+              key={tab.id}
+              label={tab.label}
+              active={tab.id === filter.tabId}
+              onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
+              testId={`hb-kudos-queue-tab-${tab.id}`}
+            />
+          ))}
+        </div>
+
+        {/* Search and in-scope refinement controls */}
+        <div
+          role="group"
+          aria-label="Refinement controls"
+          className={`${companionStyles.searchCluster} ${companionStyles.controlZoneRefinement}`}
+        >
         <label className={companionStyles.searchField}>
           <KudosGovernanceToolbarLabel>Search</KudosGovernanceToolbarLabel>
           <input
@@ -1152,7 +1201,8 @@ export function HbKudosCompanion({
           onToggle={() => dispatch({ type: 'toggleScheduledOnly' })}
           testId="hb-kudos-queue-filter-scheduled"
         />
-      </div>
+        </div>
+      </section>
 
       {/* Bulk-select bar */}
       {selectable && selectedIds.size > 0 ? (
@@ -1187,43 +1237,62 @@ export function HbKudosCompanion({
 
       {actionError ? <KudosGovernanceErrorAlert message={actionError} /> : null}
 
-      {/* Queue list — distinct true-empty vs filtered-empty branches so
-          operators can tell a quiet system apart from an over-filtered view. */}
-      {queue.length === 0 ? (
-        allKudos.length === 0 ? (
-          <div data-hbc-state="true-empty">
-            <HbcEmptyState
-              title="No kudos in the system yet"
-              description="The governance workspace is connected and working — there are currently no kudos submissions to review."
-            />
-          </div>
-        ) : (
-          <div data-hbc-state="filtered-empty">
-            <HbcEmptyState
-              title="No kudos match this view"
-              description="Kudos exist outside the current filter. Try a different tab, clear search, or adjust the ownership / flag filters to see them."
-            />
-          </div>
-        )
-      ) : (
-        <div className={companionStyles.queueGrid}>
-          {queue.map((entry) => (
-            <QueueRow
-              key={entry.id}
-              entry={entry}
-              nowIso={now}
-              selected={selectedIds.has(entry.id)}
-              selectable={selectable}
-              overdueStatus={overdueMap.get(entry.id) ?? 'ok'}
-              onToggleSelect={toggleSelect}
-              onOpenDetail={(e) => {
-                setDetailEntry(e);
-                setActionError(undefined);
-              }}
-            />
-          ))}
+      {/* Queue region — distinct browsing layer with a scoped
+          subheader so operators parse the active queue scope and
+          visible count before scanning rows. */}
+      <section
+        className={companionStyles.queueRegion}
+        aria-label="Queue"
+      >
+        <div className={companionStyles.queueRegionHeader}>
+          <span className={companionStyles.queueRegionLabel}>
+            {activeTab.label} queue
+          </span>
+          <span className={companionStyles.queueRegionCount}>
+            {queue.length} {queue.length === 1 ? 'item' : 'items'}
+            {isRefined ? ` · refined from ${scopeCount}` : ''}
+          </span>
         </div>
-      )}
+
+        {/* Distinct true-empty vs filtered-empty branches so
+            operators can tell a quiet system apart from an
+            over-filtered view. */}
+        {queue.length === 0 ? (
+          allKudos.length === 0 ? (
+            <div data-hbc-state="true-empty">
+              <HbcEmptyState
+                title="No kudos in the system yet"
+                description="The governance workspace is connected and working — there are currently no kudos submissions to review."
+              />
+            </div>
+          ) : (
+            <div data-hbc-state="filtered-empty">
+              <HbcEmptyState
+                title="No kudos match this view"
+                description="Kudos exist outside the current filter. Try a different tab, clear search, or adjust the ownership / flag filters to see them."
+              />
+            </div>
+          )
+        ) : (
+          <div className={companionStyles.queueGrid}>
+            {queue.map((entry) => (
+              <QueueRow
+                key={entry.id}
+                entry={entry}
+                nowIso={now}
+                selected={selectedIds.has(entry.id)}
+                selectable={selectable}
+                overdueStatus={overdueMap.get(entry.id) ?? 'ok'}
+                onToggleSelect={toggleSelect}
+                onOpenDetail={(e) => {
+                  setDetailEntry(e);
+                  setActionError(undefined);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       <DetailPanel
         entry={detailEntry}
