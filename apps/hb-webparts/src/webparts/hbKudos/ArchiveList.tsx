@@ -60,6 +60,7 @@ export function ArchiveList({
     '--hbk-orange-02': KUDOS_GOV_TOKENS.orangeSubtle02,
     '--hbk-orange-06': KUDOS_GOV_TOKENS.orangeSubtle06,
     '--hbk-orange-18': KUDOS_GOV_TOKENS.orangeSubtle18,
+    '--hbk-orange-22': KUDOS_GOV_TOKENS.orangeSubtle22,
     '--hbk-brand-blue': KUDOS_GOV_TOKENS.brandBlue,
     '--hbk-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
   } as React.CSSProperties;
@@ -123,16 +124,25 @@ export function ArchiveList({
           border-color: var(--hbk-brand-orange);
         }
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row {
-          display: flex; align-items: center; gap: 10px; width: 100%;
-          text-align: left; background: var(--hbk-orange-02);
-          border: 1px solid var(--hbk-orange-06); border-radius: 10px;
+          display: flex; align-items: center; gap: 12px; width: 100%;
+          text-align: left;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 250, 244, 0.62) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.55);
+          border-radius: 12px;
           padding: 8px 12px; cursor: pointer; color: inherit; font: inherit;
-          transition: background 160ms ease, border-color 160ms ease;
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+          transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
           outline: none;
         }
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:hover {
-          background: var(--hbk-orange-06);
-          border-color: var(--hbk-orange-18);
+          background: linear-gradient(135deg, rgba(255, 250, 244, 0.92) 0%, rgba(255, 241, 228, 0.92) 100%);
+          border-color: var(--hbk-orange-22);
+          transform: translateY(-1px);
+          box-shadow:
+            0 3px 10px rgba(229, 126, 70, 0.08),
+            0 1px 0 rgba(255, 255, 255, 0.55) inset;
         }
         [data-hbc-webpart-section="hb-kudos-archive"] .hbk-archive-row:focus-visible {
           outline: 2px solid var(--hbk-brand-blue);

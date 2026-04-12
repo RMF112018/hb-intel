@@ -72,8 +72,8 @@ export function KudosArticleReader({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 14,
-              paddingBottom: 12,
+              gap: 16,
+              padding: '4px 4px 16px',
               borderBottom: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle18}`,
             }}
           >
@@ -119,9 +119,11 @@ export function KudosArticleReader({
             <div
               style={{
                 fontSize: '0.9375rem',
-                lineHeight: 1.65,
+                lineHeight: 1.7,
                 color: KUDOS_GOV_TOKENS.textPrimary,
                 whiteSpace: 'pre-wrap',
+                padding: '0 4px',
+                maxWidth: '64ch',
               }}
             >
               {body}

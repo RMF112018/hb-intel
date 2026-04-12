@@ -108,13 +108,45 @@ export function PublicKudosSurface({
     >
       {/* eslint-disable-next-line react/no-unknown-property */}
       <style>{`
+        [data-hbc-webpart-section="hb-kudos-public-surface"] {
+          /* Premium atmospheric background — recovered brand panel feel */
+          position: relative;
+          padding: 14px 16px 18px;
+          border-radius: 18px;
+          background:
+            radial-gradient(circle at 8% -10%, rgba(229, 126, 70, 0.12) 0%, rgba(229, 126, 70, 0) 55%),
+            radial-gradient(circle at 100% 0%, rgba(34, 83, 145, 0.10) 0%, rgba(34, 83, 145, 0) 60%),
+            linear-gradient(180deg, #fffaf5 0%, #fdf4ec 100%);
+          box-shadow:
+            0 1px 3px rgba(229, 126, 70, 0.08),
+            0 8px 22px rgba(34, 83, 145, 0.06);
+        }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-masthead {
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          padding: 10px 4px 8px;
-          border-bottom: 1px solid var(--pks-orange-18);
+          padding: 12px 16px;
+          border-radius: 14px;
+          background:
+            radial-gradient(circle at 100% 50%, rgba(229, 126, 70, 0.22) 0%, rgba(229, 126, 70, 0) 62%),
+            linear-gradient(135deg, #274876 0%, #1b3258 60%, #162944 100%);
+          color: #ffffff;
+          overflow: hidden;
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 10px 28px rgba(10, 27, 51, 0.22),
+            0 2px 6px rgba(10, 27, 51, 0.16);
+        }
+        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-masthead::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(circle at 12% 130%, rgba(255, 196, 140, 0.18) 0%, rgba(255, 196, 140, 0) 55%),
+            radial-gradient(circle at 90% -40%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 55%);
+          pointer-events: none;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-title {
           display: inline-flex;
@@ -123,28 +155,35 @@ export function PublicKudosSurface({
           font-size: 1.1875rem;
           font-weight: 800;
           letter-spacing: -0.01em;
-          color: var(--pks-text-primary);
+          color: #ffffff;
           margin: 0;
+          position: relative;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-title-icon {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 28px;
-          height: 28px;
-          border-radius: 8px;
-          background: rgba(229, 126, 70, 0.12);
-          color: var(--pks-brand-orange);
+          width: 30px;
+          height: 30px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, rgba(229, 126, 70, 0.9) 0%, rgba(209, 106, 52, 0.9) 100%);
+          color: #ffffff;
           font-size: 16px;
           line-height: 1;
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.3) inset,
+            0 6px 14px rgba(229, 126, 70, 0.35);
+          border: 1px solid rgba(255, 255, 255, 0.18);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn {
+          position: relative;
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 7px 14px;
-          border-radius: 9px;
-          border: none;
+          padding: 8px 14px;
+          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.22);
           background: linear-gradient(135deg, #e57e46 0%, #d16a34 100%);
           color: #ffffff;
           font: inherit;
@@ -152,34 +191,63 @@ export function PublicKudosSurface({
           font-weight: 700;
           letter-spacing: 0.01em;
           cursor: pointer;
-          box-shadow: 0 2px 6px rgba(229, 126, 70, 0.25);
-          transition: transform 120ms ease, box-shadow 160ms ease;
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.3) inset,
+            0 4px 10px rgba(229, 126, 70, 0.38),
+            0 1px 2px rgba(0, 0, 0, 0.18);
+          transition: transform 120ms ease, box-shadow 160ms ease, background 160ms ease;
           outline: none;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn:hover {
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(229, 126, 70, 0.32);
+          background: linear-gradient(135deg, #ea8c56 0%, #d77139 100%);
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.32) inset,
+            0 6px 16px rgba(229, 126, 70, 0.48),
+            0 2px 4px rgba(0, 0, 0, 0.22);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-give-btn:focus-visible {
-          outline: 2px solid var(--pks-brand-blue);
+          outline: 2px solid #ffffff;
           outline-offset: 2px;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          padding: 16px 18px 14px;
-          border-radius: 14px;
-          background: linear-gradient(135deg, #223d66 0%, #1a2f4f 100%);
+          gap: 12px;
+          padding: 18px 20px 16px;
+          border-radius: 16px;
+          background:
+            radial-gradient(circle at 120% -20%, rgba(229, 126, 70, 0.26) 0%, rgba(229, 126, 70, 0) 55%),
+            radial-gradient(circle at -10% 120%, rgba(34, 83, 145, 0.36) 0%, rgba(34, 83, 145, 0) 50%),
+            linear-gradient(135deg, rgba(39, 72, 118, 0.82) 0%, rgba(27, 50, 88, 0.86) 55%, rgba(22, 41, 68, 0.86) 100%);
           color: #ffffff;
-          box-shadow: 0 8px 24px rgba(10, 27, 51, 0.18);
-          border-left: 3px solid rgba(229, 126, 70, 0.85);
+          backdrop-filter: blur(14px) saturate(120%);
+          -webkit-backdrop-filter: blur(14px) saturate(120%);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-left: 3px solid rgba(229, 126, 70, 0.9);
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.08) inset,
+            0 12px 32px rgba(10, 27, 51, 0.24),
+            0 2px 6px rgba(10, 27, 51, 0.16);
+          overflow: hidden;
+        }
+        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 45%);
+          pointer-events: none;
+        }
+        @supports not (backdrop-filter: blur(14px)) {
+          [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured {
+            background: linear-gradient(135deg, #274876 0%, #1b3258 55%, #162944 100%);
+          }
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-badge {
           position: absolute;
-          top: 10px;
-          right: 12px;
+          top: 12px;
+          right: 14px;
           display: inline-flex;
           align-items: center;
           gap: 5px;
@@ -188,36 +256,44 @@ export function PublicKudosSurface({
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: #ffffff;
-          background: rgba(229, 126, 70, 0.34);
-          padding: 3px 9px;
+          background: linear-gradient(135deg, rgba(229, 126, 70, 0.55) 0%, rgba(209, 106, 52, 0.55) 100%);
+          padding: 4px 10px;
           border-radius: 999px;
-          border: 1px solid rgba(229, 126, 70, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.24) inset,
+            0 2px 6px rgba(0, 0, 0, 0.18);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-top {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding-right: 120px;
+          gap: 14px;
+          padding-right: 130px;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-recipient {
-          font-size: 1.25rem;
+          font-size: 1.3125rem;
           font-weight: 800;
           line-height: 1.2;
-          letter-spacing: -0.01em;
+          letter-spacing: -0.015em;
           color: #ffffff;
           margin: 0;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-headline {
           font-size: 0.9375rem;
           font-weight: 600;
-          line-height: 1.35;
-          color: rgba(255, 255, 255, 0.86);
+          line-height: 1.4;
+          color: rgba(255, 255, 255, 0.82);
           margin: 0;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-excerpt {
-          font-size: 0.875rem;
-          line-height: 1.55;
-          color: rgba(255, 255, 255, 0.86);
+          position: relative;
+          font-size: 0.9375rem;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.9);
           display: -webkit-box;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 3;
@@ -233,12 +309,16 @@ export function PublicKudosSurface({
           font-weight: 700;
           color: #ffd7bf;
           text-decoration: underline;
+          text-decoration-color: rgba(255, 215, 191, 0.55);
+          text-underline-offset: 2px;
           cursor: pointer;
           margin-left: 4px;
           outline: none;
+          transition: color 140ms ease, text-decoration-color 140ms ease;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-readmore-btn:hover {
           color: #ffffff;
+          text-decoration-color: #ffffff;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-readmore-btn:focus-visible {
           outline: 2px solid #ffffff;
@@ -250,29 +330,35 @@ export function PublicKudosSurface({
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          padding-top: 6px;
-          border-top: 1px solid rgba(255, 255, 255, 0.14);
+          padding-top: 10px;
+          margin-top: 2px;
+          border-top: 1px solid rgba(255, 255, 255, 0.16);
           font-size: 0.75rem;
           color: rgba(255, 255, 255, 0.78);
+          letter-spacing: 0.01em;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 5px 10px;
+          padding: 6px 12px;
           border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.26);
-          background: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          background: rgba(255, 255, 255, 0.14);
           color: #ffffff;
           font: inherit;
           font-size: 0.75rem;
           font-weight: 700;
           cursor: pointer;
-          transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background 140ms ease;
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+          transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background 140ms ease, border-color 140ms ease;
           outline: none;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.22);
+          background: rgba(255, 255, 255, 0.24);
+          border-color: rgba(255, 255, 255, 0.42);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-celebrate-btn:active:not(:disabled) {
           transform: scale(1.08);
@@ -296,12 +382,21 @@ export function PublicKudosSurface({
           transform: rotate(-16deg) scale(1.12);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
           font-size: 0.625rem;
           font-weight: 800;
           letter-spacing: 0.16em;
           text-transform: uppercase;
           color: var(--pks-brand-orange);
-          margin: 8px 0 0;
+          margin: 10px 2px 2px;
+        }
+        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-label::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(229, 126, 70, 0.32) 0%, rgba(229, 126, 70, 0) 100%);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-list {
           display: flex;
@@ -309,30 +404,40 @@ export function PublicKudosSurface({
           gap: 6px;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
           width: 100%;
-          padding: 8px 12px;
-          border-radius: 10px;
-          border: 1px solid var(--pks-orange-06);
-          background: rgba(229, 126, 70, 0.03);
+          padding: 10px 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 250, 244, 0.72) 100%);
           color: inherit;
           font: inherit;
           text-align: left;
           cursor: pointer;
-          transition: background 160ms ease, border-color 160ms ease;
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          box-shadow:
+            0 1px 2px rgba(10, 27, 51, 0.04),
+            0 1px 0 rgba(255, 255, 255, 0.5) inset;
+          transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
           outline: none;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row:hover {
-          background: rgba(229, 126, 70, 0.08);
-          border-color: var(--pks-orange-18);
+          background: linear-gradient(135deg, rgba(255, 250, 244, 0.95) 0%, rgba(255, 241, 228, 0.95) 100%);
+          border-color: var(--pks-orange-22);
+          transform: translateY(-1px);
+          box-shadow:
+            0 4px 12px rgba(229, 126, 70, 0.1),
+            0 1px 0 rgba(255, 255, 255, 0.6) inset;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-row:focus-visible {
           outline: 2px solid var(--pks-brand-blue);
           outline-offset: 2px;
-          background: rgba(229, 126, 70, 0.08);
-          border-color: var(--pks-orange-18);
+          border-color: var(--pks-orange-22);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-body {
           flex: 1;
