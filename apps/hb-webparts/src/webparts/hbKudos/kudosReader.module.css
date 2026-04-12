@@ -4,7 +4,7 @@
  * Phase-19 Wave 2 shared-UI hardening + Phase-20 Wave 3 harmonization.
  * Owns reader-specific header / body / footer / celebrate-pill layout.
  * Color tokens flow through the shared `--hbk-flyout-*` custom
- * properties seeded by KudosFlyoutBody, so the reader shares one
+ * properties seeded by the `HbKudos` webpart root, so the reader shares one
  * visual language with the composer and feed flyouts. Two reader-only
  * vars (`--hbk-reader-brand-orange`, `--hbk-reader-celebrate-surface`)
  * are seeded on the article root in KudosArticleReader.tsx.

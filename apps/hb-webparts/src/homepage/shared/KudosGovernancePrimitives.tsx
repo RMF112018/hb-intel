@@ -36,13 +36,13 @@
 import * as React from 'react';
 import {
   HbcStatusBadge,
-  HbcKudosComposerFlyout,
   HBC_PRESENTATION_BLUE,
   HBC_PRESENTATION_BLUE_RGB,
   HBC_PRESENTATION_ORANGE,
   HBC_PRESENTATION_ORANGE_RGB,
   HBC_SURFACE_PRESENTATION,
 } from '@hbc/ui-kit/homepage';
+import { KudosTaskDialogShell, kudosShellStyles } from './kudosShells.js';
 import {
   governanceActionButton,
   governanceTabButton,
@@ -520,43 +520,36 @@ export function KudosGovernanceInputDialog({
   };
 
   return (
-    <HbcKudosComposerFlyout
+    <KudosTaskDialogShell
       open={open}
       onClose={onClose}
       title={title}
-      primaryAction={{
-        label: confirmLabel ?? 'Confirm',
-        onClick: handleConfirm,
-      }}
-      secondaryAction={{ label: 'Cancel', onClick: onClose }}
+      description={description}
+      primaryAction={{ label: confirmLabel ?? 'Confirm', onClick: handleConfirm }}
+      testId="hb-kudos-task-dialog-input"
     >
-      <div className={governanceStyles.dialogBody}>
-        {description ? (
-          <p className={governanceStyles.dialogDescription}>{description}</p>
-        ) : null}
-        {choices ? (
-          <select
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            className={governanceStyles.dialogInput}
-          >
-            {choices.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type="text"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
-            placeholder={placeholder}
-            autoFocus
-            className={governanceStyles.dialogInput}
-          />
-        )}
-      </div>
-    </HbcKudosComposerFlyout>
+      {choices ? (
+        <select
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          className={kudosShellStyles.taskDialogInput}
+        >
+          {choices.map((c) => (
+            <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
+          placeholder={placeholder}
+          autoFocus
+          className={kudosShellStyles.taskDialogInput}
+        />
+      )}
+    </KudosTaskDialogShell>
   );
 }
 
@@ -633,31 +626,27 @@ export function KudosGovernanceDateTimeDialog({
   };
 
   return (
-    <HbcKudosComposerFlyout
+    <KudosTaskDialogShell
       open={open}
       onClose={onClose}
       title={title}
+      description={description}
       primaryAction={{ label: confirmLabel ?? 'Confirm', onClick: handleConfirm }}
-      secondaryAction={{ label: 'Cancel', onClick: onClose }}
+      testId="hb-kudos-task-dialog-datetime"
     >
-      <div className={governanceStyles.dialogBody}>
-        {description ? (
-          <p className={governanceStyles.dialogDescription}>{description}</p>
-        ) : null}
-        <label className={governanceStyles.dialogFieldLabel}>
-          {fieldLabel ?? 'Date and time'}
-        </label>
-        <input
-          type="datetime-local"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
-          autoFocus
-          className={governanceStyles.dialogInput}
-        />
-        {hint ? <p className={governanceStyles.dialogHint}>{hint}</p> : null}
-      </div>
-    </HbcKudosComposerFlyout>
+      <label className={kudosShellStyles.taskDialogFieldLabel}>
+        {fieldLabel ?? 'Date and time'}
+      </label>
+      <input
+        type="datetime-local"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
+        autoFocus
+        className={kudosShellStyles.taskDialogInput}
+      />
+      {hint ? <p className={kudosShellStyles.taskDialogHint}>{hint}</p> : null}
+    </KudosTaskDialogShell>
   );
 }
 
@@ -754,53 +743,49 @@ export function KudosGovernanceAssignmentDialog({
   };
 
   return (
-    <HbcKudosComposerFlyout
+    <KudosTaskDialogShell
       open={open}
       onClose={onClose}
       title={title}
+      description={description}
       primaryAction={{
         label: confirmLabel ?? 'Reassign',
         onClick: handleConfirm,
         disabled: !resolved,
       }}
-      secondaryAction={{ label: 'Cancel', onClick: onClose }}
+      testId="hb-kudos-task-dialog-assignment"
     >
-      <div className={governanceStyles.dialogBody}>
-        {description ? (
-          <p className={governanceStyles.dialogDescription}>{description}</p>
-        ) : null}
-        <label className={governanceStyles.dialogFieldLabel}>Assignee email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => { setEmail(e.target.value); setResolved(undefined); setErrorText(undefined); }}
-          onKeyDown={(e) => { if (e.key === 'Enter') void resolveEmail(); }}
-          placeholder="name@hedrickbrothers.com"
-          autoFocus
-          className={governanceStyles.dialogInput}
-        />
-        <KudosActionButton
-          label={resolving ? 'Resolving…' : resolved ? 'Resolved — look up again' : 'Resolve user'}
-          tone="info"
-          disabled={resolving || !email.trim()}
-          onClick={() => void resolveEmail()}
-          testId="hb-kudos-assignment-dialog-resolve"
-        />
-        {errorText ? (
-          <p className={governanceStyles.dialogErrorText}>{errorText}</p>
-        ) : null}
-        {resolved ? (
-          <div className={governanceStyles.dialogResolved}>
-            Will reassign to{' '}
-            <span className={governanceStyles.dialogResolvedEmphasis}>
-              {resolved.displayName ?? resolved.email}
-            </span>
-            {resolved.displayName ? ` (${resolved.email})` : ''} · SharePoint id{' '}
-            <span className={governanceStyles.dialogResolvedEmphasis}>{resolved.userId}</span>
-          </div>
-        ) : null}
-      </div>
-    </HbcKudosComposerFlyout>
+      <label className={kudosShellStyles.taskDialogFieldLabel}>Assignee email</label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => { setEmail(e.target.value); setResolved(undefined); setErrorText(undefined); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') void resolveEmail(); }}
+        placeholder="name@hedrickbrothers.com"
+        autoFocus
+        className={kudosShellStyles.taskDialogInput}
+      />
+      <KudosActionButton
+        label={resolving ? 'Resolving…' : resolved ? 'Resolved — look up again' : 'Resolve user'}
+        tone="info"
+        disabled={resolving || !email.trim()}
+        onClick={() => void resolveEmail()}
+        testId="hb-kudos-assignment-dialog-resolve"
+      />
+      {errorText ? (
+        <p className={kudosShellStyles.taskDialogErrorText}>{errorText}</p>
+      ) : null}
+      {resolved ? (
+        <div className={kudosShellStyles.taskDialogResolved}>
+          Will reassign to{' '}
+          <span className={kudosShellStyles.taskDialogResolvedEmphasis}>
+            {resolved.displayName ?? resolved.email}
+          </span>
+          {resolved.displayName ? ` (${resolved.email})` : ''} · SharePoint id{' '}
+          <span className={kudosShellStyles.taskDialogResolvedEmphasis}>{resolved.userId}</span>
+        </div>
+      ) : null}
+    </KudosTaskDialogShell>
   );
 }
 

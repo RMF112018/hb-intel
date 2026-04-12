@@ -37,7 +37,7 @@ const KUDOS_SOURCE_FILES: readonly string[] = [
   'webparts/hbKudos/KudosFeedBody.tsx',
   'webparts/hbKudos/KudosFeedPanel.tsx',
   'webparts/hbKudos/KudosComposerPanel.tsx',
-  'webparts/hbKudos/KudosFlyoutBody.tsx',
+  'homepage/shared/kudosShells.tsx',
   'webparts/hbKudos/kudosIcons.ts',
   'webparts/hbKudos/kudosVariants.ts',
   'webparts/hbKudos/kudosSurfaceFamily.ts',

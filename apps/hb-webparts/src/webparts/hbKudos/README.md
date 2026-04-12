@@ -61,9 +61,11 @@ barrel re-exporting:
   `governanceStyles`. Layered grammar:
   - [`./kudosSurface.module.css`](./kudosSurface.module.css) — hero,
     masthead, featured card, recent rail, archive zone.
-  - [`./kudosFlyout.module.css`](./kudosFlyout.module.css) — shared
-    body rhythm for reader / feed / composer-adjacent flyouts via
-    [`./KudosFlyoutBody.tsx`](./KudosFlyoutBody.tsx).
+  - [`./kudosFlyout.module.css`](./kudosFlyout.module.css) — composer
+    flyout body rhythm + action-family grid reused by the companion
+    detail shell.
+  - [`../../homepage/shared/kudosShells.module.css`](../../homepage/shared/kudosShells.module.css)
+    — per-shell body grammar (reader / feed / task-dialog / detail).
   - [`./kudosReader.module.css`](./kudosReader.module.css) — article
     reader specifics (header, body, footer, celebrate pill).
   - [`../../homepage/shared/governance.module.css`](../../homepage/shared/governance.module.css)
@@ -94,11 +96,18 @@ concerns are carved into focused hooks under
 Flyout chrome:
 
 - [`./KudosComposerPanel.tsx`](./KudosComposerPanel.tsx) — composer
-  flyout composition.
+  flyout composition (uses `HbcKudosComposerFlyout` directly; that
+  shell's canonical purpose is the composer).
 - [`./KudosFeedPanel.tsx`](./KudosFeedPanel.tsx) — "View all"
-  flyout.
-- [`./KudosFlyoutBody.tsx`](./KudosFlyoutBody.tsx) — shared body
-  wrapper that gives reader, feed, and composer flyouts one rhythm.
+  flyout (uses `KudosFeedShell`).
+- [`./KudosArticleReader.tsx`](./KudosArticleReader.tsx) — article
+  reader (uses `KudosReaderShell`).
+- [`../../homepage/shared/kudosShells.tsx`](../../homepage/shared/kudosShells.tsx)
+  — semantic shell families (`KudosReaderShell`, `KudosFeedShell`,
+  `KudosTaskDialogShell`, `KudosGovernanceDetailShell`). Each wraps
+  `HbcKudosComposerFlyout` for shared mechanics but supplies a
+  distinct body layout — reading-width article, dense list browse,
+  compact task dialog, or governance workspace.
 
 ## Behavior seams + debug posture
 

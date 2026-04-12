@@ -67,10 +67,10 @@ import {
   HbcAvatarStack,
   HbcCard,
   HbcEmptyState,
-  HbcKudosComposerFlyout,
   HbcSpinner,
   HbcStatusBadge,
 } from '@hbc/ui-kit/homepage';
+import { KudosGovernanceDetailShell } from '../../homepage/shared/kudosShells.js';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
 import { submitKudosGovernanceAction, fetchKudosAuditTimeline, type KudosAuditTimelineEntry } from '../../homepage/data/kudosGovernanceWriter.js';
 import { getSiteUrl, getKudosListHostUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
@@ -102,7 +102,7 @@ import {
 } from '../../homepage/helpers/kudosNotificationBuilder.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import { Trophy } from '../hbKudos/kudosIcons.js';
-import { KudosFlyoutBody, kudosFlyoutStyles } from '../hbKudos/KudosFlyoutBody.js';
+import kudosFlyoutStyles from '../hbKudos/kudosFlyout.module.css';
 import companionStyles from './companion.module.css';
 import {
   buildKudosRecipientSummary,
@@ -508,7 +508,7 @@ function DetailPanel({
   }, [entry?.id]);
 
   return (
-    <HbcKudosComposerFlyout
+    <KudosGovernanceDetailShell
       open={Boolean(entry)}
       onClose={onClose}
       title={entry?.headline ?? 'Governance detail'}
@@ -524,13 +524,11 @@ function DetailPanel({
           : { label: 'Close', onClick: onClose }
       }
       secondaryAction={canApprove ? { label: 'Close', onClick: onClose } : undefined}
+      testId="hb-kudos-companion-detail"
+      ariaLabel="Governance detail"
     >
       {entry ? (
-        <KudosFlyoutBody
-          as="section"
-          testId="hb-kudos-companion-detail"
-          ariaLabel="Governance detail"
-        >
+        <>
           <KudosDetailPanelContent
             entry={entry}
             role={role}
@@ -669,9 +667,9 @@ function DetailPanel({
             ) : null}
 
           </div>
-        </KudosFlyoutBody>
+        </>
       ) : null}
-    </HbcKudosComposerFlyout>
+    </KudosGovernanceDetailShell>
   );
 }
 

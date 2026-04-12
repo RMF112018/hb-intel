@@ -30,8 +30,9 @@ working.
 - `HbKudos.tsx` is a thin composition shell (≤ ~300 LOC). Data,
   user-id resolution, photo hydration, celebrate mutation, host-safe
   layout, and panel chrome live in `./hooks/` and `KudosComposerPanel` /
-  `KudosFeedPanel` / `KudosFlyoutBody`. Do not re-absorb those into
-  the shell.
+  `KudosFeedPanel` / the semantic shell wrappers in
+  `../../homepage/shared/kudosShells.tsx`. Do not re-absorb those
+  into the shell.
 - Public + companion runtimes never reach across the split. Shared
   concerns flow through `./kudosSurfaceFamily.ts` only.
 - `./kudosRuntimeContract.ts` is the single source of truth for
@@ -40,9 +41,13 @@ working.
   or tests.
 
 ### Experience cohesion
-- Every flyout body (composer, feed, article reader) wraps with
-  `KudosFlyoutBody` so rhythm, padding, reading width, and
-  `--hbk-flyout-*` custom properties stay uniform.
+- Each flyout workflow uses the shell family that matches its
+  semantics: composer → `HbcKudosComposerFlyout` directly;
+  article reader → `KudosReaderShell` (reading-width);
+  full-feed browse → `KudosFeedShell` (dense list);
+  operator task dialogs → `KudosTaskDialogShell` (compact);
+  governance detail → `KudosGovernanceDetailShell`.
+  Do not route unrelated workflows back through the composer shell.
 - Focus-visible rings, disabled posture, and `aria-busy`/`role=status`
   wiring remain consistent across public + governance + companion
   controls.

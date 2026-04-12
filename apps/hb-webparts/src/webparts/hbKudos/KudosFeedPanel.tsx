@@ -1,16 +1,18 @@
 /**
  * KudosFeedPanel — "View all recognition" feed flyout.
  *
- * Extracted from HbKudos.tsx (phase-19 Wave 2). Composes the flyout
- * shell (HbcKudosComposerFlyout) over KudosFeedBody so the top-level
- * runtime does not own the shell wiring. Feed entries combine the
- * current public kudos with any archive entries not already in the
- * public list, preserving the prior in-file behavior.
+ * Phase-27 Prompt-04 closure: uses the new `KudosFeedShell` instead
+ * of the composer flyout. The feed shell gives the list a
+ * full-width dense-scan body (no reading-width constraint) so the
+ * browse surface stops borrowing composer-oriented layout rules.
+ *
+ * Feed entries combine the current public kudos with any archive
+ * entries not already in the public list, preserving the prior
+ * in-file behavior.
  */
 import * as React from 'react';
-import { HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
 import { KudosFeedBody } from './KudosFeedBody.js';
-import { KudosFlyoutBody } from './KudosFlyoutBody.js';
+import { KudosFeedShell } from '../../homepage/shared/kudosShells.js';
 import { sortByRecency } from './hooks/kudosFeatured.js';
 import type { KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 
@@ -41,19 +43,15 @@ export function KudosFeedPanel({
   );
 
   return (
-    <HbcKudosComposerFlyout
+    <KudosFeedShell
       open={open}
       onClose={onClose}
       title="HB Kudos"
       subtitle="All recognition across the company"
-      primaryAction={{ label: 'Close', onClick: onClose }}
+      testId="hb-kudos-view-all-panel"
+      ariaLabel="All HB Kudos recognition"
     >
-      <KudosFlyoutBody
-        testId="hb-kudos-view-all-panel"
-        ariaLabel="All HB Kudos recognition"
-      >
-        <KudosFeedBody entries={entries} onOpenDetail={onOpenDetail} />
-      </KudosFlyoutBody>
-    </HbcKudosComposerFlyout>
+      <KudosFeedBody entries={entries} onOpenDetail={onOpenDetail} />
+    </KudosFeedShell>
   );
 }

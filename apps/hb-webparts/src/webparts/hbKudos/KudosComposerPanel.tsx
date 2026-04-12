@@ -19,7 +19,7 @@ import {
 import type { useKudosComposer } from '../../homepage/data/useKudosComposer.js';
 import type { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import type { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
-import { KudosFlyoutBody } from './KudosFlyoutBody.js';
+import flyoutStyles from './kudosFlyout.module.css';
 
 type ComposerRuntime = ReturnType<typeof useKudosComposer>;
 type PeopleSearchFn = ReturnType<typeof useSharePointPeopleSearch>;
@@ -69,7 +69,11 @@ export function KudosComposerPanel({
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
     >
-      <KudosFlyoutBody testId="hb-kudos-composer-body" ariaLabel="Give Kudos composer">
+      <div
+        className={flyoutStyles.body}
+        data-hbc-testid="hb-kudos-composer-body"
+        aria-label="Give Kudos composer"
+      >
         {state.status === 'success' ? (
           <div data-hbc-testid="hb-kudos-composer-success">
             <HbcKudosComposerSuccess />
@@ -105,7 +109,7 @@ export function KudosComposerPanel({
             </div>
           </>
         ) : null}
-      </KudosFlyoutBody>
+      </div>
     </HbcKudosComposerFlyout>
   );
 }

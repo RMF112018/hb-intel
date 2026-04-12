@@ -1,0 +1,125 @@
+/**
+ * kudosShells.module.css — layout grammar for the split Kudos shell
+ * families (Phase-27 Prompt-04 closure).
+ *
+ * Every shell body inherits the `--hbk-*` custom properties from the
+ * webpart-root `kudosCSSVars()` application (no inline style spread).
+ * Layout constraints below express the REAL semantic differences
+ * between the four shell families — reading-first, list-browse,
+ * compact task, and governance detail — so the primitive split is
+ * material, not cosmetic.
+ */
+
+/* ── Reader shell — long-form reading grammar ─────────────────────── */
+.readerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* Reading-width column — keeps article typography scannable on
+     wide shell renders. `auto` horizontal margins recenter the column
+     inside the flyout's scroll viewport. */
+  width: 100%;
+  max-width: 62ch;
+  margin: 0 auto;
+  padding: 20px 20px 32px;
+  color: var(--hbk-text-primary);
+  line-height: 1.65;
+  font-size: 0.9375rem;
+}
+
+/* ── Feed shell — list-browse grammar ─────────────────────────────── */
+.feedBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Full-width scan surface; no reading-width constraint so the feed
+     list can use every available pixel for recipient metadata and
+     date spines. */
+  width: 100%;
+  padding: 14px 16px 24px;
+  color: var(--hbk-text-primary);
+}
+
+/* ── Task dialog shell — compact operator-task grammar ────────────── */
+.taskDialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Compact decision zone. Narrower max-width so the dialog reads as
+     a focused task rather than a full reading or browsing surface. */
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 18px 20px;
+  color: var(--hbk-text-primary);
+}
+
+.taskDialogDescription {
+  margin: 0 0 4px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--hbk-text-secondary);
+}
+
+.taskDialogFieldLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbk-text-muted);
+}
+
+.taskDialogInput {
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  border: 1px solid var(--hbk-blue-18);
+  background: var(--hbk-surface-0);
+  color: var(--hbk-text-primary);
+  outline: none;
+}
+
+.taskDialogInput:focus-visible {
+  border-color: var(--hbk-brand-blue);
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 1px;
+}
+
+.taskDialogHint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--hbk-text-tertiary);
+}
+
+.taskDialogErrorText {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--hbk-danger);
+}
+
+.taskDialogResolved {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--hbk-blue-06);
+  border: 1px solid var(--hbk-blue-14);
+  font-size: 0.8125rem;
+  color: var(--hbk-text-primary);
+}
+
+.taskDialogResolvedEmphasis {
+  font-weight: 700;
+  color: var(--hbk-text-heading);
+}
+
+/* ── Governance detail shell — moderation decision + context ─────── */
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Full-width governance workspace inside the flyout; the detail
+     composition owns its own internal rhythm. */
+  width: 100%;
+  padding: 16px 18px 24px;
+  color: var(--hbk-text-primary);
+}

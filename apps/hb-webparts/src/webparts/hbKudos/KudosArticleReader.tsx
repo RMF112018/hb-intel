@@ -10,22 +10,19 @@
  * headline, full body, celebrate count). Viewer-role safe: never
  * renders audit timeline, governance metadata, or admin-only fields.
  *
- * Reuses HbcKudosComposerFlyout as the slide-in panel shell so the
- * chrome is consistent with the composer and View All panels.
- *
- * Phase-20 Wave 3 harmonization: wrapped in the shared `KudosFlyoutBody`
- * so article reader, composer, and feed flyouts share one rhythm. The
- * reader's recipient display is now an `<h2>` linked to the `<article>`
- * via `aria-labelledby`, giving assistive tech a clear landmark for
- * the recognition content.
+ * Phase-27 Prompt-04 closure: uses the `KudosReaderShell` instead of
+ * the raw composer flyout. The reader shell gives article content a
+ * reading-width body and a close-only footer — primitive semantics
+ * that finally match the workflow instead of piggybacking on the
+ * composer shell grammar.
  */
 import * as React from 'react';
-import { HbcKudosComposerFlyout, HbcAvatarStack } from '@hbc/ui-kit/homepage';
+import { HbcAvatarStack } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ThumbsUp } from './kudosIcons.js';
 import readerStyles from './kudosReader.module.css';
-import { KudosFlyoutBody } from './KudosFlyoutBody.js';
+import { KudosReaderShell } from '../../homepage/shared/kudosShells.js';
 
 export interface KudosArticleReaderProps {
   entry: KudosEntry | undefined;
@@ -58,19 +55,16 @@ export function KudosArticleReader({
   const headingId = 'hb-kudos-article-recipient';
 
   return (
-    <HbcKudosComposerFlyout
+    <KudosReaderShell
       open={open}
       onClose={onClose}
       title={recipientDisplay || 'Recognition'}
       subtitle={entry?.headline || undefined}
-      primaryAction={{ label: 'Close', onClick: onClose }}
+      testId="hb-kudos-article-reader"
+      ariaLabelledBy={headingId}
     >
       {entry ? (
-        <KudosFlyoutBody
-          as="article"
-          testId="hb-kudos-article-reader"
-          ariaLabelledBy={headingId}
-        >
+        <>
           <header className={readerStyles.header}>
             {entry.recipients.length > 0 ? (
               <HbcAvatarStack
@@ -114,8 +108,8 @@ export function KudosArticleReader({
               </span>
             ) : null}
           </footer>
-        </KudosFlyoutBody>
+        </>
       ) : null}
-    </HbcKudosComposerFlyout>
+    </KudosReaderShell>
   );
 }
