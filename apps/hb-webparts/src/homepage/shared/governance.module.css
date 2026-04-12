@@ -8,7 +8,11 @@
  */
 
 .actionButton {
-  padding: 7px 13px;
+  padding: 8px 14px;
+  /* Governance action (approve / request-changes / dismiss). Min
+     32px so keyboard + touch users get a real target rather than
+     a tightly-padded label. */
+  min-height: 32px;
   border-radius: 8px;
   border: 1.5px solid var(--hbk-gov-tone);
   background: #ffffff;
@@ -45,7 +49,10 @@
 }
 
 .tabButton {
-  padding: 8px 14px;
+  padding: 8px 16px;
+  /* Queue-filter button. 36px matches the celebrate-pill density
+     and keeps the filter row comfortable for keyboard / touch use. */
+  min-height: 36px;
   border-radius: 999px;
   border: 1.5px solid var(--hbk-gov-blue-18);
   background: #ffffff;
@@ -65,7 +72,10 @@
 }
 
 .toggleChip {
-  padding: 5px 12px;
+  padding: 7px 14px;
+  /* Toggle chip. 32px satisfies the WCAG 2.2 AA minimum and keeps
+     the toolbar rhythm compact without undersizing the affordance. */
+  min-height: 32px;
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.04em;

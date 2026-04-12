@@ -64,6 +64,33 @@ export function HbcKudosComposerFlyout({
     return () => document.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
+  // Focus restoration — capture the element that had focus when the
+  // flyout opened and return focus to it on close. This is the
+  // explicit contract the `kudos.hosted.keyboard-and-focus` spec
+  // asserts; relying on implicit browser history is fragile in SPFx
+  // because the host can re-render the trigger's ancestor tree
+  // while the flyout is open.
+  const restoreFocusRef = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    const trigger = document.activeElement;
+    restoreFocusRef.current =
+      trigger instanceof HTMLElement && trigger !== document.body ? trigger : null;
+    return () => {
+      const el = restoreFocusRef.current;
+      restoreFocusRef.current = null;
+      if (!el) return;
+      // Confirm the trigger is still attached and focusable before
+      // restoring; otherwise leave focus where the host put it.
+      if (!document.contains(el)) return;
+      try {
+        el.focus({ preventScroll: true });
+      } catch {
+        /* non-focusable element — leave focus alone */
+      }
+    };
+  }, [open]);
+
   // Scroll lock — host-aware. SPFx scrollable container is a
   // workspace div, not <body>.
   React.useEffect(() => {

@@ -220,8 +220,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  /* WCAG 2.2 AA 2.5.8 minimum target size (24×24 CSS pixels) for
+     in-chip secondary controls. Icon stays 10px; the extra area is
+     an invisible hit zone, so the chip visual density is preserved. */
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   padding: 0;
   background: rgba(var(--hbc-kudos-ink-primary-rgb), 0.08);
   color: rgba(var(--hbc-kudos-ink-primary-rgb), 0.45);
@@ -287,7 +292,11 @@
   align-items: center;
   gap: var(--hbc-kudos-space-xs);
   align-self: flex-start;
-  padding: var(--hbc-kudos-space-xs) var(--hbc-kudos-space-sm) var(--hbc-kudos-space-xs) var(--hbc-kudos-space-sm);
+  padding: var(--hbc-kudos-space-sm) var(--hbc-kudos-space-md);
+  /* Secondary "add bucket" affordance. WCAG 2.2 AA minimum 24px
+     hit target; we use 32px so it reads as a real button at the
+     secondary-register density rather than an inline tag. */
+  min-height: 32px;
   font-size: 0.6875rem;
   font-weight: 700;
   font-family: inherit;
@@ -334,7 +343,11 @@
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
-  padding: var(--hbc-kudos-space-xs) 0;
+  padding: var(--hbc-kudos-space-sm) 0;
+  /* "Add details" progressive-disclosure button. Minimum 32px
+     height so keyboard / touch users get a real target rather than
+     an inline link-style control. */
+  min-height: 32px;
   font-size: 0.75rem;
   font-weight: 700;
   font-family: inherit;

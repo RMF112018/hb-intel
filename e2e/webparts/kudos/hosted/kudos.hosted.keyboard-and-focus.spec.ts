@@ -75,4 +75,23 @@ test.describe('kudos.hosted.keyboard-and-focus', () => {
       expect(inForm).toBe(true);
     }
   });
+
+  test(`critical CTAs meet minimum 44px target-size posture ${matrixTag('H5', 'P1')}`, async ({
+    page,
+  }) => {
+    await gotoKudosPublic(page, workflowBaseline());
+    const trigger = page.locator(tid(KUDOS_TESTIDS.giveKudosFlyoutTrigger));
+    const triggerBox = await trigger.boundingBox();
+    expect(triggerBox).not.toBeNull();
+    expect(triggerBox!.height).toBeGreaterThanOrEqual(44);
+
+    // Flyout close button — primary overlay-dismiss control. Must
+    // satisfy the 44px DESIGN_SYSTEM minimum.
+    await trigger.click();
+    const closeBtn = page.getByRole('button', { name: 'Close' });
+    const closeBox = await closeBtn.boundingBox();
+    expect(closeBox).not.toBeNull();
+    expect(closeBox!.width).toBeGreaterThanOrEqual(44);
+    expect(closeBox!.height).toBeGreaterThanOrEqual(44);
+  });
 });

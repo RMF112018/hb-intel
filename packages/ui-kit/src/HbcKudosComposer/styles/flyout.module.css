@@ -144,8 +144,13 @@
   color: var(--hbc-kudos-on-brand);
   font-size: 0.9375rem;
   font-weight: 600;
-  width: var(--hbc-kudos-space-xl);
-  height: var(--hbc-kudos-space-xl);
+  /* WCAG 2.2 target-size compliance + DESIGN_SYSTEM minimum 44px
+     desktop / 56px touch. 44px satisfies both desktop baseline and
+     iOS/Android touch guidance. */
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,6 +273,8 @@
   display: inline-flex;
   align-items: center;
   padding: var(--hbc-kudos-space-sm) var(--hbc-kudos-space-md);
+  /* DESIGN_SYSTEM minimum 44px desktop touch target. */
+  min-height: 44px;
   font-size: 0.8125rem;
   font-weight: 800;
   font-family: inherit;

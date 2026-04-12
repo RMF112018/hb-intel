@@ -101,7 +101,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 10px 16px;
+  /* DESIGN_SYSTEM minimum 44px desktop touch target. */
+  min-height: 44px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: linear-gradient(135deg, #e57e46 0%, #d16a34 100%);
@@ -249,7 +251,8 @@
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  padding: 0;
+  padding: 4px 0;
+  min-height: 24px;
   border: none;
   background: none;
   font: inherit;
@@ -293,7 +296,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 8px 14px;
+  /* Featured-card celebrate pill. 36px satisfies WCAG 2.2 AA
+     (24 minimum) with comfortable density for its footer location. */
+  min-height: 36px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.14);
@@ -458,6 +464,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 0;
+  min-height: 32px;
   border: none;
   background: none;
   font: inherit;
@@ -582,6 +589,7 @@
   align-items: center;
   gap: 4px;
   padding: 6px 0;
+  min-height: 24px;
   border: none;
   background: none;
   font: inherit;
