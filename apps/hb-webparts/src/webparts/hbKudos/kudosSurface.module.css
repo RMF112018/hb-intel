@@ -1,12 +1,13 @@
 /**
  * kudosSurface.module.css — HB Kudos public surface grammar.
  *
- * Owns the Kudos public-surface visual language previously carried by
- * the giant injected <style>{...}</style> block inside
- * PublicKudosSurface.tsx and ArchiveList.tsx. Token-backed CSS custom
- * properties (`--hbk-*`) are set on the section root by the component
- * from KUDOS_GOV_TOKENS so this module stays free of raw hex / rgba
- * and always reflects the governed presentation-lane theme values.
+ * Phase-27 Prompt-02 public-surface CSS doctrine closure: every
+ * decorative color, gradient, shadow, border, and tint in this file
+ * now resolves through a `--hbk-*` custom property seeded by
+ * `kudosCSSVars()` on the webpart root. The module is free of raw
+ * hex, raw rgba, raw pixel-coded shadow inks, and bespoke
+ * presentation hacks — all governed color decisions live in the
+ * shared bridge.
  *
  * Classes are consumed via `import styles from './kudosSurface.module.css'`
  * and composed with `clsx` / `class-variance-authority` where variants
@@ -32,15 +33,19 @@
   border-radius: 18px;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 6% 2%, rgba(255, 196, 140, 0.22) 0%, rgba(255, 196, 140, 0) 55%),
-    radial-gradient(ellipse at 100% 110%, rgba(229, 126, 70, 0.28) 0%, rgba(229, 126, 70, 0) 58%),
-    linear-gradient(135deg, #2b4f80 0%, #1f3a65 35%, #172c4c 70%, #1a3354 100%);
-  color: #ffffff;
+    radial-gradient(ellipse at 6% 2%, var(--hbk-hero-peach-22) 0%, var(--hbk-hero-peach-0) 55%),
+    radial-gradient(ellipse at 100% 110%, var(--hbk-orange-28) 0%, var(--hbk-orange-transparent) 58%),
+    linear-gradient(135deg,
+      var(--hbk-hero-blue-0) 0%,
+      var(--hbk-hero-blue-1) 35%,
+      var(--hbk-hero-blue-2) 70%,
+      var(--hbk-hero-blue-3) 100%);
+  color: var(--hbk-surface-0);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 14px 36px rgba(10, 27, 51, 0.22),
-    0 2px 6px rgba(10, 27, 51, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    0 1px 0 var(--hbk-on-dark-06) inset,
+    0 14px 36px var(--hbk-ink-shadow-22),
+    0 2px 6px var(--hbk-ink-shadow-14);
+  border: 1px solid var(--hbk-on-dark-08);
 }
 
 .hero::before {
@@ -48,8 +53,8 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 45%),
-    radial-gradient(circle at 90% 100%, rgba(255, 196, 140, 0.12) 0%, rgba(255, 196, 140, 0) 48%);
+    radial-gradient(circle at 0% 0%, var(--hbk-on-dark-14) 0%, var(--hbk-on-dark-06) 45%),
+    radial-gradient(circle at 90% 100%, var(--hbk-hero-peach-12) 0%, var(--hbk-hero-peach-0) 48%);
   pointer-events: none;
 }
 
@@ -60,9 +65,9 @@
   justify-content: space-between;
   gap: 12px;
   padding: 4px 6px 6px;
-  color: #ffffff;
+  color: var(--hbk-surface-0);
   background: transparent;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--hbk-on-dark-10);
 }
 
 .title {
@@ -72,10 +77,10 @@
   font-size: 1.1875rem;
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: #ffffff;
+  color: var(--hbk-surface-0);
   margin: 0;
   position: relative;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+  text-shadow: 0 1px 2px var(--hbk-ink-shadow-24);
 }
 
 .titleIcon {
@@ -85,13 +90,13 @@
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  background: linear-gradient(135deg, rgba(229, 126, 70, 0.9) 0%, rgba(209, 106, 52, 0.9) 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--hbk-orange-92) 0%, var(--hbk-orange-deep) 100%);
+  color: var(--hbk-surface-0);
   line-height: 1;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.3) inset,
-    0 6px 14px rgba(229, 126, 70, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+    0 1px 0 var(--hbk-on-dark-30) inset,
+    0 6px 14px var(--hbk-orange-35);
+  border: 1px solid var(--hbk-on-dark-18);
 }
 
 /* ── Give CTA ──────────────────────────────────────────────────────── */
@@ -102,36 +107,36 @@
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  /* DESIGN_SYSTEM minimum 44px desktop touch target. */
+  /* Minimum 44px desktop touch target. */
   min-height: 44px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: linear-gradient(135deg, #e57e46 0%, #d16a34 100%);
-  color: #ffffff;
+  border: 1px solid var(--hbk-on-dark-22);
+  background: linear-gradient(135deg, var(--hbk-brand-orange) 0%, var(--hbk-orange-deep) 100%);
+  color: var(--hbk-surface-0);
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.3) inset,
-    0 4px 10px rgba(229, 126, 70, 0.38),
-    0 1px 2px rgba(0, 0, 0, 0.18);
+    0 1px 0 var(--hbk-on-dark-30) inset,
+    0 4px 10px var(--hbk-orange-38),
+    0 1px 2px var(--hbk-ink-shadow-18);
   transition: transform 120ms ease, box-shadow 160ms ease, background 160ms ease;
   outline: none;
 }
 
 .giveBtn:hover {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, #ea8c56 0%, #d77139 100%);
+  background: linear-gradient(135deg, var(--hbk-orange-hover) 0%, var(--hbk-orange-deep-hover) 100%);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.32) inset,
-    0 6px 16px rgba(229, 126, 70, 0.48),
-    0 2px 4px rgba(0, 0, 0, 0.22);
+    0 1px 0 var(--hbk-on-dark-32) inset,
+    0 6px 16px var(--hbk-orange-48),
+    0 2px 4px var(--hbk-ink-shadow-22);
 }
 
 .giveBtn:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--hbk-surface-0);
   outline-offset: 2px;
 }
 
@@ -145,16 +150,16 @@
   padding: 18px 20px 16px;
   border-radius: 14px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%),
-    linear-gradient(135deg, rgba(15, 30, 55, 0.55) 0%, rgba(15, 30, 55, 0.48) 100%);
-  color: #ffffff;
+    linear-gradient(135deg, var(--hbk-on-dark-12) 0%, var(--hbk-on-dark-06) 100%),
+    linear-gradient(135deg, var(--hbk-glass-ink-55) 0%, var(--hbk-glass-ink-48) 100%);
+  color: var(--hbk-surface-0);
   backdrop-filter: blur(16px) saturate(125%);
   -webkit-backdrop-filter: blur(16px) saturate(125%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-left: 3px solid rgba(229, 126, 70, 0.92);
+  border: 1px solid var(--hbk-on-dark-22);
+  border-left: 3px solid var(--hbk-orange-92);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.18) inset,
-    0 4px 14px rgba(10, 27, 51, 0.18);
+    0 1px 0 var(--hbk-on-dark-18) inset,
+    0 4px 14px var(--hbk-ink-shadow-18);
   overflow: hidden;
 }
 
@@ -162,13 +167,13 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 8% 0%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 45%);
+  background: radial-gradient(circle at 8% 0%, var(--hbk-on-dark-12) 0%, var(--hbk-on-dark-06) 45%);
   pointer-events: none;
 }
 
 @supports not (backdrop-filter: blur(14px)) {
   .featured {
-    background: linear-gradient(135deg, rgba(39, 72, 118, 0.92) 0%, rgba(27, 50, 88, 0.94) 100%);
+    background: linear-gradient(135deg, var(--hbk-glass-solid-0) 0%, var(--hbk-glass-solid-1) 100%);
   }
 }
 
@@ -183,14 +188,14 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #ffffff;
-  background: linear-gradient(135deg, rgba(229, 126, 70, 0.55) 0%, rgba(209, 106, 52, 0.55) 100%);
+  color: var(--hbk-surface-0);
+  background: linear-gradient(135deg, var(--hbk-orange-55) 0%, var(--hbk-orange-deep) 100%);
   padding: 4px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid var(--hbk-on-dark-28);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.24) inset,
-    0 2px 6px rgba(0, 0, 0, 0.18);
+    0 1px 0 var(--hbk-on-dark-24) inset,
+    0 2px 6px var(--hbk-ink-shadow-18);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
@@ -215,16 +220,16 @@
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.015em;
-  color: #ffffff;
+  color: var(--hbk-surface-0);
   margin: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px var(--hbk-ink-shadow-20);
 }
 
 .featuredHeadline {
   font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--hbk-on-dark-82);
   margin: 0;
 }
 
@@ -237,7 +242,7 @@
 .featuredExcerpt {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--hbk-on-dark-90);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -258,9 +263,9 @@
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #ffd7bf;
+  color: var(--hbk-warm-highlight);
   text-decoration: underline;
-  text-decoration-color: rgba(255, 215, 191, 0.55);
+  text-decoration-color: var(--hbk-warm-highlight-55);
   text-underline-offset: 2px;
   cursor: pointer;
   margin: 2px 0 0;
@@ -269,12 +274,12 @@
 }
 
 .readmoreBtn:hover {
-  color: #ffffff;
-  text-decoration-color: #ffffff;
+  color: var(--hbk-surface-0);
+  text-decoration-color: var(--hbk-surface-0);
 }
 
 .readmoreBtn:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--hbk-surface-0);
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -286,9 +291,9 @@
   gap: 10px;
   padding-top: 10px;
   margin-top: 2px;
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid var(--hbk-on-dark-16);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--hbk-on-dark-78);
   letter-spacing: 0.01em;
 }
 
@@ -301,23 +306,23 @@
      (24 minimum) with comfortable density for its footer location. */
   min-height: 36px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
+  border: 1px solid var(--hbk-on-dark-28);
+  background: var(--hbk-on-dark-14);
+  color: var(--hbk-surface-0);
   font: inherit;
   font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+  box-shadow: 0 1px 0 var(--hbk-on-dark-18) inset;
   transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), background 140ms ease, border-color 140ms ease;
   outline: none;
 }
 
 .celebrateBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(255, 255, 255, 0.42);
+  background: var(--hbk-on-dark-24);
+  border-color: var(--hbk-on-dark-42);
 }
 
 .celebrateBtn:active:not(:disabled) {
@@ -325,7 +330,7 @@
 }
 
 .celebrateBtn:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--hbk-surface-0);
   outline-offset: 2px;
 }
 
@@ -366,7 +371,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(229, 126, 70, 0.32) 0%, rgba(229, 126, 70, 0) 100%);
+  background: linear-gradient(90deg, var(--hbk-orange-35) 0%, var(--hbk-orange-transparent) 100%);
 }
 
 .recentList {
@@ -383,9 +388,9 @@
   width: 100%;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--hbk-on-dark-55);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 250, 244, 0.72) 100%);
+    linear-gradient(135deg, var(--hbk-warm-row-white-72) 0%, var(--hbk-warm-row-tint-72) 100%);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -393,19 +398,19 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow:
-    0 1px 2px rgba(10, 27, 51, 0.04),
-    0 1px 0 rgba(255, 255, 255, 0.5) inset;
+    0 1px 2px var(--hbk-ink-shadow-04),
+    0 1px 0 var(--hbk-on-dark-55) inset;
   transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   outline: none;
 }
 
 .recentRow:hover {
-  background: linear-gradient(135deg, rgba(255, 250, 244, 0.95) 0%, rgba(255, 241, 228, 0.95) 100%);
+  background: linear-gradient(135deg, var(--hbk-warm-row-tint-95) 0%, var(--hbk-warm-row-hover-95) 100%);
   border-color: var(--hbk-orange-22);
   transform: translateY(-1px);
   box-shadow:
-    0 4px 12px rgba(229, 126, 70, 0.1),
-    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    0 4px 12px var(--hbk-orange-cast-10),
+    0 1px 0 var(--hbk-on-dark-55) inset;
 }
 
 .recentRow:focus-visible {
@@ -530,8 +535,8 @@
   gap: 12px;
   width: 100%;
   text-align: left;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 250, 244, 0.62) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(135deg, var(--hbk-warm-row-white-62) 0%, var(--hbk-warm-row-tint-62) 100%);
+  border: 1px solid var(--hbk-warm-row-white-55);
   border-radius: 12px;
   padding: 8px 12px;
   cursor: pointer;
@@ -539,18 +544,18 @@
   font: inherit;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  box-shadow: 0 1px 0 var(--hbk-on-dark-55) inset;
   transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   outline: none;
 }
 
 .archiveRow:hover {
-  background: linear-gradient(135deg, rgba(255, 250, 244, 0.92) 0%, rgba(255, 241, 228, 0.92) 100%);
+  background: linear-gradient(135deg, var(--hbk-warm-row-tint-92) 0%, var(--hbk-warm-row-hover-92) 100%);
   border-color: var(--hbk-orange-22);
   transform: translateY(-1px);
   box-shadow:
-    0 3px 10px rgba(229, 126, 70, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.55) inset;
+    0 3px 10px var(--hbk-orange-cast-08),
+    0 1px 0 var(--hbk-on-dark-55) inset;
 }
 
 .archiveRow:focus-visible {

@@ -79,6 +79,49 @@ const INK_RGB = '26, 19, 16';
 const INK_BASE = '#1a1310';
 const INK_HEADING = '#0a1b33';
 
+// RGB triplets for `alpha()` composition in the CSS-var bridge below.
+// The ink-shadow ramp derives from `INK_HEADING` so depth cast on
+// light editorial surfaces stays in lockstep with the heading ink.
+const INK_HEADING_RGB = '10, 27, 51';
+const WHITE_RGB = '255, 255, 255';
+
+// Hero editorial deep-blue stack. Authored locally because the
+// governed `HBC_SURFACE_PRESENTATION` / `HBC_PRESENTATION_BLUE`
+// tokens do not yet expose a multi-stop premium hero gradient; all
+// four stops are collected here so future promotion to shared
+// theme semantics is a visible swap rather than a scattered rename.
+const HERO_BLUE_0 = '#2b4f80';
+const HERO_BLUE_1 = '#1f3a65';
+const HERO_BLUE_2 = '#172c4c';
+const HERO_BLUE_3 = '#1a3354';
+
+// Give-CTA gradient deep-orange + hover stops. Presentation-lane
+// variants of `HBC_PRESENTATION_ORANGE` without a governed equivalent.
+const ORANGE_DEEP = '#d16a34';
+const ORANGE_HOVER = '#ea8c56';
+const ORANGE_DEEP_HOVER = '#d77139';
+
+// Editorial warm highlight — peach text accent reading against the
+// deep-blue hero. No shared equivalent yet.
+const WARM_HIGHLIGHT = '#ffd7bf';
+const WARM_HIGHLIGHT_RGB = '255, 215, 191';
+
+// Hero peach scatter overlay (warm glow above the deep-blue stack).
+const HERO_PEACH_RGB = '255, 196, 140';
+
+// Featured glass / solid-fallback deep-nav tints. Local editorial
+// variants of the deep-blue hero stack at lower luminance.
+const GLASS_INK_RGB = '15, 30, 55';
+const GLASS_INK_SOLID_0 = 'rgba(39, 72, 118, 0.92)';
+const GLASS_INK_SOLID_1 = 'rgba(27, 50, 88, 0.94)';
+
+// Warm-row surface blends — near-white + near-warm-tint gradient
+// stops used by the public recent/archive rows. RGB triplets stay
+// in this one seam so CSS never hardcodes them.
+const WARM_ROW_WHITE_RGB = '255, 255, 255';
+const WARM_ROW_TINT_RGB = '255, 250, 244';
+const WARM_ROW_TINT_HOVER_RGB = '255, 241, 228';
+
 export const KUDOS_GOV_TOKENS = {
   // Brand — derived from shared presentation-lane theme semantics
   brandBlue: HBC_PRESENTATION_BLUE,
@@ -191,6 +234,86 @@ export function kudosCSSVars(): React.CSSProperties {
     '--hbk-danger-22': KUDOS_GOV_TOKENS.dangerSubtle22,
     '--hbk-danger-55': KUDOS_GOV_TOKENS.dangerSubtle55,
     '--hbk-danger-ink-italic': KUDOS_GOV_TOKENS.dangerItalic72,
+
+    // On-dark ramp — white-over-dark alphas used by the hero /
+    // featured / give-CTA editorial surfaces. Exposed as a single
+    // opacity scale so CSS never hardcodes `rgba(255, 255, 255, x)`.
+    '--hbk-on-dark-06': alpha(WHITE_RGB, 0.06),
+    '--hbk-on-dark-08': alpha(WHITE_RGB, 0.08),
+    '--hbk-on-dark-10': alpha(WHITE_RGB, 0.1),
+    '--hbk-on-dark-12': alpha(WHITE_RGB, 0.12),
+    '--hbk-on-dark-14': alpha(WHITE_RGB, 0.14),
+    '--hbk-on-dark-16': alpha(WHITE_RGB, 0.16),
+    '--hbk-on-dark-18': alpha(WHITE_RGB, 0.18),
+    '--hbk-on-dark-22': alpha(WHITE_RGB, 0.22),
+    '--hbk-on-dark-24': alpha(WHITE_RGB, 0.24),
+    '--hbk-on-dark-28': alpha(WHITE_RGB, 0.28),
+    '--hbk-on-dark-30': alpha(WHITE_RGB, 0.3),
+    '--hbk-on-dark-32': alpha(WHITE_RGB, 0.32),
+    '--hbk-on-dark-42': alpha(WHITE_RGB, 0.42),
+    '--hbk-on-dark-55': alpha(WHITE_RGB, 0.55),
+    '--hbk-on-dark-78': alpha(WHITE_RGB, 0.78),
+    '--hbk-on-dark-82': alpha(WHITE_RGB, 0.82),
+    '--hbk-on-dark-90': alpha(WHITE_RGB, 0.9),
+
+    // Ink-shadow ramp — derived from INK_HEADING_RGB (= #0a1b33).
+    // Replaces every `rgba(0, 0, 0, x)` and `rgba(10, 27, 51, x)`
+    // call site with one governable scale.
+    '--hbk-ink-shadow-04': alpha(INK_HEADING_RGB, 0.04),
+    '--hbk-ink-shadow-08': alpha(INK_HEADING_RGB, 0.08),
+    '--hbk-ink-shadow-14': alpha(INK_HEADING_RGB, 0.14),
+    '--hbk-ink-shadow-18': alpha(INK_HEADING_RGB, 0.18),
+    '--hbk-ink-shadow-20': alpha(INK_HEADING_RGB, 0.2),
+    '--hbk-ink-shadow-22': alpha(INK_HEADING_RGB, 0.22),
+    '--hbk-ink-shadow-24': alpha(INK_HEADING_RGB, 0.24),
+
+    // Orange ramp extensions — used by give-CTA + hero accents.
+    '--hbk-orange-35': alpha(ORANGE_RGB, 0.35),
+    '--hbk-orange-38': alpha(ORANGE_RGB, 0.38),
+    '--hbk-orange-48': alpha(ORANGE_RGB, 0.48),
+    '--hbk-orange-92': alpha(ORANGE_RGB, 0.92),
+    '--hbk-orange-transparent': alpha(ORANGE_RGB, 0),
+
+    // Hero editorial gradient — deep-blue stack authored locally.
+    '--hbk-hero-blue-0': HERO_BLUE_0,
+    '--hbk-hero-blue-1': HERO_BLUE_1,
+    '--hbk-hero-blue-2': HERO_BLUE_2,
+    '--hbk-hero-blue-3': HERO_BLUE_3,
+    '--hbk-hero-peach-22': alpha(HERO_PEACH_RGB, 0.22),
+    '--hbk-hero-peach-12': alpha(HERO_PEACH_RGB, 0.12),
+    '--hbk-hero-peach-0': alpha(HERO_PEACH_RGB, 0),
+
+    // Give-CTA gradient — presentation-lane orange stops.
+    '--hbk-orange-deep': ORANGE_DEEP,
+    '--hbk-orange-hover': ORANGE_HOVER,
+    '--hbk-orange-deep-hover': ORANGE_DEEP_HOVER,
+
+    // Featured glass-card fills + solid fallback for browsers without
+    // backdrop-filter support.
+    '--hbk-glass-ink-55': alpha(GLASS_INK_RGB, 0.55),
+    '--hbk-glass-ink-48': alpha(GLASS_INK_RGB, 0.48),
+    '--hbk-glass-solid-0': GLASS_INK_SOLID_0,
+    '--hbk-glass-solid-1': GLASS_INK_SOLID_1,
+
+    // Warm editorial highlight — peach accent readable on deep blue.
+    '--hbk-warm-highlight': WARM_HIGHLIGHT,
+    '--hbk-warm-highlight-55': alpha(WARM_HIGHLIGHT_RGB, 0.55),
+
+    // Warm-row public-surface gradient stops (idle + hover).
+    '--hbk-warm-row-white-72': alpha(WARM_ROW_WHITE_RGB, 0.72),
+    '--hbk-warm-row-tint-72': alpha(WARM_ROW_TINT_RGB, 0.72),
+    '--hbk-warm-row-white-62': alpha(WARM_ROW_WHITE_RGB, 0.62),
+    '--hbk-warm-row-tint-62': alpha(WARM_ROW_TINT_RGB, 0.62),
+    '--hbk-warm-row-white-55': alpha(WARM_ROW_WHITE_RGB, 0.55),
+    '--hbk-warm-row-tint-95': alpha(WARM_ROW_TINT_RGB, 0.95),
+    '--hbk-warm-row-tint-92': alpha(WARM_ROW_TINT_RGB, 0.92),
+    '--hbk-warm-row-hover-95': alpha(WARM_ROW_TINT_HOVER_RGB, 0.95),
+    '--hbk-warm-row-hover-92': alpha(WARM_ROW_TINT_HOVER_RGB, 0.92),
+
+    // Orange cast-shadow for hover depth over warm rows (alpha over
+    // HBC_PRESENTATION_ORANGE_RGB).
+    '--hbk-orange-cast-10': alpha(ORANGE_RGB, 0.1),
+    '--hbk-orange-cast-08': alpha(ORANGE_RGB, 0.08),
   } as React.CSSProperties;
 }
 

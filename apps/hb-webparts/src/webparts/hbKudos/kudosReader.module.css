@@ -67,7 +67,7 @@
   gap: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(229, 126, 70, 0.08);
+  background: var(--hbk-orange-shadow);
   border: 1px solid var(--hbk-orange-18);
   color: var(--hbk-text-primary);
   font-weight: 700;
