@@ -309,6 +309,20 @@ describe('HB Kudos doctrine guards', () => {
       expect(src).toMatch(/export function KudosGovernanceDetailShell/);
     });
 
+    it('Phase-28 Prompt-05: KudosGovernanceAssignmentDialog uses HbcPeoplePicker instead of a raw email textbox', () => {
+      // The Phase-28 Prompt-05 UX upgrade replaced the raw
+      // "email textbox + Resolve user" interaction with the
+      // governed `HbcPeoplePicker` backed by
+      // `useSharePointPeopleSearch`. This guard fails fast if the
+      // assignment dialog ever regresses to a raw textbox or
+      // drops the governed picker.
+      const src = read('homepage/shared/KudosGovernancePrimitives.tsx');
+      expect(src).toMatch(/HbcPeoplePicker/);
+      expect(src).toMatch(/useSharePointPeopleSearch/);
+      expect(src).not.toMatch(/type="email"/);
+      expect(src).not.toMatch(/placeholder="name@hedrickbrothers\.com"/);
+    });
+
     it('Phase-28 Prompt-04: KudosTaskDialogShell does not nest a second role="dialog" inside the flyout', () => {
       // The outer `HbcKudosComposerFlyout` already owns `role="dialog"`
       // + `aria-modal="true"` + focus trap + ESC-to-close. Nesting

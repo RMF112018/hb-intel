@@ -589,7 +589,7 @@ export function HbKudosCompanion({
         onClose={closeAssignmentDialog}
         onConfirm={handleAssignmentDialogConfirm}
         title="Reassign kudos"
-        description="Enter the assignee's email. The companion resolves the user against the canonical list-host site and dispatches the typed reassign patch."
+        description="Start typing a name or email to find the new assignee. The companion resolves the selection against the canonical list-host site before dispatching the typed reassign patch."
         listHostUrl={getKudosListHostUrl() ?? ''}
         confirmLabel="Reassign"
       />

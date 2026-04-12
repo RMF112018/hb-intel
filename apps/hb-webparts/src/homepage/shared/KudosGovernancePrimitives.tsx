@@ -36,13 +36,16 @@
 import * as React from 'react';
 import {
   HbcStatusBadge,
+  HbcPeoplePicker,
   HBC_PRESENTATION_BLUE,
   HBC_PRESENTATION_BLUE_RGB,
   HBC_PRESENTATION_ORANGE,
   HBC_PRESENTATION_ORANGE_RGB,
   HBC_SURFACE_PRESENTATION,
+  type PersonEntry,
 } from '@hbc/ui-kit/homepage';
 import { KudosTaskDialogShell, kudosShellStyles } from './kudosShells.js';
+import { useSharePointPeopleSearch } from '../data/useSharePointPeopleSearch.js';
 import {
   governanceActionButton,
   governanceTabButton,
@@ -767,13 +770,22 @@ export function KudosGovernanceDateTimeDialog({
 }
 
 // ---------------------------------------------------------------------------
-// AssignmentDialog — email-resolving reassignment picker
+// AssignmentDialog — governed people picker for reassignment.
 //
-// Replaces raw SharePoint user-id entry with a human-usable email
-// lookup. Resolves the email against `/_api/web/siteusers/getByEmail`
-// on the canonical list-host site and calls `onConfirm(userId)` with
-// the resolved numeric id, preserving the typed `reassign` patch
-// contract. Failures are surfaced inline — no silent fallbacks.
+// Phase-28 Prompt-05 UX upgrade: the previous raw email textbox +
+// "Resolve user" button is replaced with `HbcPeoplePicker` (the same
+// governed picker the public Kudos composer uses) backed by the
+// tenant-wide `useSharePointPeopleSearch` adapter. The operator
+// searches by name or email, sees display name + email + job title
+// + department + avatar fallback, and picks a single person. The
+// dialog then ensures that selection against the list-host site so
+// the existing `{ userId: number; email: string; displayName? }`
+// resolution contract (and the typed `reassign` patch downstream)
+// stays intact.
+//
+// Failure, zero-match, and multi-match paths are handled by the
+// picker; the ensure-user step surfaces any resolution error inline
+// before the confirm action becomes clickable.
 // ---------------------------------------------------------------------------
 
 export interface KudosGovernanceAssignmentDialogProps {
@@ -794,6 +806,44 @@ interface ResolvedAssignee {
   displayName?: string;
 }
 
+/**
+ * Map a picker `PersonEntry` to a SharePoint list-host numeric user
+ * id by calling `/_api/web/siteusers/getByEmail(...)`. The people
+ * search returns tenant directory entries; the governance writer
+ * requires a list-host-scoped numeric id. This is the same single
+ * REST call the previous implementation used — only the UX upstream
+ * of it has changed.
+ */
+async function ensureSiteUserFromPerson(
+  listHostUrl: string,
+  person: PersonEntry,
+): Promise<ResolvedAssignee> {
+  const email = person.mail ?? person.upn;
+  if (!email) {
+    throw new Error('Selected person has no mail or UPN — cannot resolve SharePoint id.');
+  }
+  const res = await fetch(
+    `${listHostUrl}/_api/web/siteusers/getByEmail('${encodeURIComponent(email)}')`,
+    { headers: { Accept: 'application/json;odata=nometadata' } },
+  );
+  if (!res.ok) {
+    throw new Error(
+      res.status === 404
+        ? 'No SharePoint user matches this person on the list-host site.'
+        : `Lookup failed: HTTP ${res.status}`,
+    );
+  }
+  const body = (await res.json()) as { Id?: number; Title?: string; Email?: string };
+  if (typeof body.Id !== 'number' || body.Id <= 0) {
+    throw new Error('Resolved user did not carry a valid SharePoint id.');
+  }
+  return {
+    userId: body.Id,
+    email: body.Email ?? email,
+    displayName: body.Title ?? person.displayName,
+  };
+}
+
 export function KudosGovernanceAssignmentDialog({
   open,
   onClose,
@@ -803,54 +853,51 @@ export function KudosGovernanceAssignmentDialog({
   listHostUrl,
   confirmLabel,
 }: KudosGovernanceAssignmentDialogProps): React.JSX.Element {
-  const [email, setEmail] = React.useState('');
+  const searchPeople = useSharePointPeopleSearch();
+  const [selected, setSelected] = React.useState<PersonEntry[]>([]);
   const [resolved, setResolved] = React.useState<ResolvedAssignee | undefined>();
   const [resolving, setResolving] = React.useState(false);
   const [errorText, setErrorText] = React.useState<string | undefined>();
 
   React.useEffect(() => {
     if (open) {
-      setEmail('');
+      setSelected([]);
       setResolved(undefined);
       setResolving(false);
       setErrorText(undefined);
     }
   }, [open]);
 
-  const resolveEmail = React.useCallback(async (): Promise<void> => {
-    const trimmed = email.trim();
-    if (!trimmed) {
-      setErrorText('Enter an email address to resolve.');
+  // Whenever the operator picks a single person, ensure them against
+  // the list-host site. If the picker clears, reset resolved state.
+  React.useEffect(() => {
+    if (!open) return;
+    const person = selected[0];
+    if (!person) {
+      setResolved(undefined);
+      setErrorText(undefined);
       return;
     }
+    let cancelled = false;
     setResolving(true);
     setErrorText(undefined);
     setResolved(undefined);
-    try {
-      const res = await fetch(
-        `${listHostUrl}/_api/web/siteusers/getByEmail('${encodeURIComponent(trimmed)}')`,
-        { headers: { Accept: 'application/json;odata=nometadata' } },
-      );
-      if (!res.ok) {
-        setErrorText(
-          res.status === 404
-            ? 'No SharePoint user matches that email on the list-host site.'
-            : `Lookup failed: HTTP ${res.status}`,
-        );
-        return;
-      }
-      const body = (await res.json()) as { Id?: number; Title?: string; Email?: string };
-      if (typeof body.Id !== 'number' || body.Id <= 0) {
-        setErrorText('Resolved user did not carry a valid SharePoint id.');
-        return;
-      }
-      setResolved({ userId: body.Id, email: body.Email ?? trimmed, displayName: body.Title });
-    } catch (err) {
-      setErrorText(err instanceof Error ? err.message : 'Lookup failed.');
-    } finally {
-      setResolving(false);
-    }
-  }, [email, listHostUrl]);
+    ensureSiteUserFromPerson(listHostUrl, person)
+      .then((assignee) => {
+        if (!cancelled) setResolved(assignee);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setErrorText(err instanceof Error ? err.message : 'Lookup failed.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setResolving(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, selected, listHostUrl]);
 
   const handleConfirm = (): void => {
     if (!resolved) return;
@@ -867,32 +914,44 @@ export function KudosGovernanceAssignmentDialog({
       primaryAction={{
         label: confirmLabel ?? 'Reassign',
         onClick: handleConfirm,
-        disabled: !resolved,
+        disabled: !resolved || resolving,
+        loading: resolving,
       }}
       testId="hb-kudos-task-dialog-assignment"
     >
-      <label className={kudosShellStyles.taskDialogFieldLabel}>Assignee email</label>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => { setEmail(e.target.value); setResolved(undefined); setErrorText(undefined); }}
-        onKeyDown={(e) => { if (e.key === 'Enter') void resolveEmail(); }}
-        placeholder="name@hedrickbrothers.com"
-        autoFocus
-        className={kudosShellStyles.taskDialogInput}
-      />
-      <KudosActionButton
-        label={resolving ? 'Resolving…' : resolved ? 'Resolved — look up again' : 'Resolve user'}
-        tone="info"
-        disabled={resolving || !email.trim()}
-        onClick={() => void resolveEmail()}
-        testId="hb-kudos-assignment-dialog-resolve"
-      />
+      <div data-hbc-testid="hb-kudos-assignment-dialog-picker">
+        <HbcPeoplePicker
+          label="Assignee"
+          mode="single"
+          value={selected}
+          onChange={(people) => {
+            setSelected(people);
+          }}
+          searchPeople={searchPeople}
+          placeholder="Start typing a name or email…"
+        />
+      </div>
+      {resolving ? (
+        <p
+          className={kudosShellStyles.taskDialogHint}
+          data-hbc-testid="hb-kudos-assignment-dialog-resolving"
+        >
+          Resolving SharePoint identity…
+        </p>
+      ) : null}
       {errorText ? (
-        <p className={kudosShellStyles.taskDialogErrorText}>{errorText}</p>
+        <p
+          className={kudosShellStyles.taskDialogErrorText}
+          data-hbc-testid="hb-kudos-assignment-dialog-error"
+        >
+          {errorText}
+        </p>
       ) : null}
       {resolved ? (
-        <div className={kudosShellStyles.taskDialogResolved}>
+        <div
+          className={kudosShellStyles.taskDialogResolved}
+          data-hbc-testid="hb-kudos-assignment-dialog-resolved"
+        >
           Will reassign to{' '}
           <span className={kudosShellStyles.taskDialogResolvedEmphasis}>
             {resolved.displayName ?? resolved.email}
