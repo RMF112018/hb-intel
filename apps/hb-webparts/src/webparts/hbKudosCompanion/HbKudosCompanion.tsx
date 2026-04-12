@@ -73,7 +73,6 @@ import {
 } from '../../homepage/helpers/kudosCapabilities.js';
 import { resolveKudosRoleStatus, type KudosRoleResolutionStatus } from '../../homepage/helpers/kudosRoleResolver.js';
 import {
-  KUDOS_GOV_TOKENS,
   KudosActionButton,
   KudosGovernanceTabButton,
   KudosGovernanceToggleChip,
@@ -343,24 +342,18 @@ function QueueRow({
     <HbcCard weight="standard">
       <div
         data-hbc-testid="hb-kudos-queue-row"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: selectable ? 'auto 1fr auto' : '1fr auto',
-          alignItems: 'flex-start',
-          gap: 10,
-          padding: '10px 14px',
-        }}
+        className={`${companionStyles.queueRow} ${selectable ? companionStyles.queueRowSelectable : ''}`}
       >
         {selectable ? (
           <label
-            style={{ display: 'inline-flex', alignItems: 'center', marginTop: 4 }}
+            className={companionStyles.queueRowSelect}
             aria-label={`Select ${entry.headline}`}
           >
             <input
               type="checkbox"
               checked={selected}
               onChange={() => onToggleSelect(entry.id)}
-              style={{ width: 16, height: 16 }}
+              className={companionStyles.queueRowCheckbox}
             />
           </label>
         ) : null}
@@ -368,26 +361,9 @@ function QueueRow({
         <button
           type="button"
           onClick={() => onOpenDetail(entry)}
-          style={{
-            display: 'block',
-            textAlign: 'left',
-            background: 'transparent',
-            border: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            color: 'inherit',
-            font: 'inherit',
-          }}
+          className={companionStyles.queueRowButton}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              marginBottom: 6,
-              flexWrap: 'wrap',
-            }}
-          >
+          <div className={companionStyles.queueRowChipRow}>
             {workflowChip ? (
               <HbcStatusBadge
                 variant={
@@ -403,18 +379,7 @@ function QueueRow({
                 label={workflowChip.label}
               />
             ) : null}
-            <span
-              style={{
-                fontSize: '0.625rem',
-                fontWeight: 800,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                padding: '3px 8px',
-                borderRadius: 999,
-                background: KUDOS_GOV_TOKENS.blueSubtle08,
-                color: KUDOS_GOV_TOKENS.brandBlue,
-              }}
-            >
+            <span className={companionStyles.queueRowAgingChip}>
               {AGING_LABEL[aging]}
             </span>
             {flagged ? (
@@ -426,33 +391,14 @@ function QueueRow({
               <HbcStatusBadge variant="warning" size="small" label="Approaching due" />
             ) : null}
           </div>
-          <h4
-            style={{
-              margin: '0 0 6px',
-              fontSize: '1rem',
-              fontWeight: 800,
-              letterSpacing: '-0.015em',
-              color: KUDOS_GOV_TOKENS.textPrimary,
-            }}
-          >
+          <h4 className={companionStyles.queueRowHeadline}>
             {entry.headline}
           </h4>
-          <p
-            style={{
-              margin: '0 0 10px',
-              fontSize: '0.8125rem',
-              lineHeight: 1.55,
-              color: KUDOS_GOV_TOKENS.textSecondary,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
+          <p className={companionStyles.queueRowExcerpt}>
             {entry.excerpt}
           </p>
           {entry.recipients.length > 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className={companionStyles.queueRowRecipients}>
               <HbcAvatarStack
                 people={entry.recipients.slice(0, 4).map((r) => ({
                   id: r.id,
@@ -462,37 +408,18 @@ function QueueRow({
                 size="sm"
                 max={4}
               />
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  color: KUDOS_GOV_TOKENS.textFaint,
-                  fontWeight: 600,
-                }}
-              >
+              <span className={companionStyles.queueRowRecipientSummary}>
                 {summary.label}
               </span>
-              <span
-                style={{
-                  fontSize: '0.6875rem',
-                  color: KUDOS_GOV_TOKENS.textFaint,
-                  fontWeight: 500,
-                  marginLeft: 'auto',
-                }}
-              >
+              <span className={companionStyles.queueRowSubmittedBy}>
                 Submitted by {entry.submittedBy.displayName}
               </span>
             </div>
           ) : null}
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <span
-            style={{
-              fontSize: '0.6875rem',
-              color: KUDOS_GOV_TOKENS.textCaption,
-              fontWeight: 600,
-            }}
-          >
+        <div className={companionStyles.queueRowDateCell}>
+          <span className={companionStyles.queueRowDate}>
             {new Date(entry.submittedDate).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
@@ -993,7 +920,7 @@ export function HbKudosCompanion({
       <section
         data-hbc-webpart="hb-kudos-companion"
         data-hbc-state="role-resolving"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
+        className={companionStyles.stateCentered}
       >
         <HbcSpinner size="md" />
       </section>
@@ -1080,7 +1007,7 @@ export function HbKudosCompanion({
       <section
         data-hbc-webpart="hb-kudos-companion"
         data-hbc-state="loading"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}
+        className={companionStyles.stateCentered}
       >
         <HbcSpinner size="md" />
       </section>

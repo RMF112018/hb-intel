@@ -224,3 +224,122 @@
 .queueGrid > * {
   min-width: 0;
 }
+
+/* ── Queue row ─────────────────────────────────────────────────
+   Phase-24 Prompt-04: retired from inline styles in
+   HbKudosCompanion.tsx. Ownership now lives here; tokens flow in
+   via `kudosCSSVars()` applied at the companion root. */
+
+.queueRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.queueRowSelectable {
+  grid-template-columns: auto 1fr auto;
+}
+
+.queueRowSelect {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.queueRowCheckbox {
+  width: 16px;
+  height: 16px;
+}
+
+.queueRowButton {
+  display: block;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  min-width: 0;
+}
+
+.queueRowChipRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.queueRowAgingChip {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--hbk-blue-08);
+  color: var(--hbk-brand-blue);
+}
+
+.queueRowHeadline {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--hbk-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.queueRowExcerpt {
+  margin: 0 0 10px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--hbk-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.queueRowRecipients {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.queueRowRecipientSummary {
+  font-size: 0.75rem;
+  color: var(--hbk-text-faint);
+  font-weight: 600;
+}
+
+.queueRowSubmittedBy {
+  font-size: 0.6875rem;
+  color: var(--hbk-text-faint);
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.queueRowDateCell {
+  display: flex;
+  align-items: center;
+}
+
+.queueRowDate {
+  font-size: 0.6875rem;
+  color: var(--hbk-text-caption);
+  font-weight: 600;
+}
+
+/* ── Centered spinner state (loading / role-resolving) ─────── */
+
+.stateCentered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 6vw, 48px);
+}
