@@ -511,8 +511,9 @@ describe('HbKudosCompanion webpart — runtime smoke', () => {
       expect(section?.getAttribute('data-hbc-webpart-phase')).toBe('phase-14-kudos-phase-04');
       expect(section?.getAttribute('data-hbc-role')).toBe('reviewer');
     });
-    // Filter bar should render the Pending filter as active by default.
-    expect(screen.getByRole('button', { name: 'Pending' })).toBeTruthy();
+    // Filter bar should render the Pending tab active by default.
+    // Phase-27 Prompt-06 appends a scope count: "Pending (N)".
+    expect(screen.getByRole('button', { name: /^Pending\s*\(\d+\)$/ })).toBeTruthy();
     // Toolbar search is visible.
     expect(screen.getByPlaceholderText('Search recognition…')).toBeTruthy();
   });
@@ -530,10 +531,12 @@ describe('HbKudosCompanion webpart — runtime smoke', () => {
     await act(async () => {
       render(<HbKudosCompanion config={{ simulatedRole: 'reviewer' }} />);
     });
+    // Phase-27 Prompt-06 appends a scope count to every tab label.
+    const rejectedRe = /^Rejected\s*\(\d+\)$/;
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Rejected' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: rejectedRe })).toBeTruthy();
     });
-    const rejectedBtn = screen.getByRole('button', { name: 'Rejected' });
+    const rejectedBtn = screen.getByRole('button', { name: rejectedRe });
     fireEvent.click(rejectedBtn);
     expect(rejectedBtn.getAttribute('aria-pressed')).toBe('true');
   });
