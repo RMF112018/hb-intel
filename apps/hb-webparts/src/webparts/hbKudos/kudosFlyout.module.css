@@ -1,0 +1,42 @@
+/**
+ * kudosFlyout.module.css — shared HB Kudos flyout-body grammar.
+ *
+ * Owns the one rhythm every Kudos flyout body (article reader,
+ * composer panel, view-all feed) composes with. Normalizes padding,
+ * vertical rhythm, reading width, and metadata treatment so the three
+ * surfaces read as one system-owned language.
+ */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 2px 8px;
+}
+
+.prose {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  max-width: 64ch;
+  white-space: pre-wrap;
+}
+
+.sectionHeading {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbk-flyout-ink-muted);
+  margin: 0;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hbk-flyout-border);
+  font-size: 0.75rem;
+  color: var(--hbk-flyout-ink-faint);
+}

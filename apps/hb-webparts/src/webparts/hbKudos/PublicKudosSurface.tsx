@@ -267,7 +267,11 @@ function FeaturedCard({
   const showReadMore = hasPreview && (isClampTruncated || detailsExceedsPreview);
 
   return (
-    <article className={styles.featured} data-hbc-testid="hb-kudos-featured-card">
+    <article
+      className={styles.featured}
+      data-hbc-testid="hb-kudos-featured-card"
+      aria-labelledby={`hb-kudos-featured-recipient-${entry.id}`}
+    >
       <span className={kudosFeaturedBadge()} aria-label={badgeLabel}>
         <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
         {badgeLabel}
@@ -286,7 +290,12 @@ function FeaturedCard({
           />
         ) : null}
         <div className={styles.featuredHeader}>
-          <h3 className={styles.featuredRecipient}>{recipientDisplay}</h3>
+          <h3
+            id={`hb-kudos-featured-recipient-${entry.id}`}
+            className={styles.featuredRecipient}
+          >
+            {recipientDisplay}
+          </h3>
           {entry.headline ? (
             <p className={styles.featuredHeadline}>{entry.headline}</p>
           ) : null}
@@ -309,7 +318,7 @@ function FeaturedCard({
               type="button"
               className={kudosReadmoreBtn()}
               onClick={() => onOpenArticle(entry)}
-              aria-label="Read full recognition"
+              aria-label={`Read full recognition for ${recipientDisplay}`}
               data-hbc-testid="hb-kudos-featured-readmore"
             >
               … Read more

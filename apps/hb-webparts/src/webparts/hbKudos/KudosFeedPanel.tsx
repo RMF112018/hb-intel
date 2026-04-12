@@ -10,6 +10,7 @@
 import * as React from 'react';
 import { HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
 import { KudosFeedBody } from './KudosFeedBody.js';
+import { KudosFlyoutBody } from './KudosFlyoutBody.js';
 import { sortByRecency } from './hooks/kudosFeatured.js';
 import type { KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 
@@ -47,9 +48,12 @@ export function KudosFeedPanel({
       subtitle="All recognition across the company"
       primaryAction={{ label: 'Close', onClick: onClose }}
     >
-      <div data-hbc-testid="hb-kudos-view-all-panel">
+      <KudosFlyoutBody
+        testId="hb-kudos-view-all-panel"
+        ariaLabel="All HB Kudos recognition"
+      >
         <KudosFeedBody entries={entries} onOpenDetail={onOpenDetail} />
-      </div>
+      </KudosFlyoutBody>
     </HbcKudosComposerFlyout>
   );
 }

@@ -1,26 +1,21 @@
 /**
  * kudosReader.module.css — HB Kudos article reader grammar.
  *
- * Phase-19 Wave 2 shared-UI hardening. Owns the reader-panel visual
- * language (header, body, footer, celebrate-count pill) that was
- * previously inline in KudosArticleReader.tsx. Token-backed via
- * `--hbk-reader-*` CSS custom properties set on the article root
- * from KUDOS_GOV_TOKENS.
+ * Phase-19 Wave 2 shared-UI hardening + Phase-20 Wave 3 harmonization.
+ * Owns reader-specific header / body / footer / celebrate-pill layout.
+ * Color tokens flow through the shared `--hbk-flyout-*` custom
+ * properties seeded by KudosFlyoutBody, so the reader shares one
+ * visual language with the composer and feed flyouts. Two reader-only
+ * vars (`--hbk-reader-brand-orange`, `--hbk-reader-celebrate-surface`)
+ * are seeded on the article root in KudosArticleReader.tsx.
  */
-
-.article {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 4px 2px 8px;
-}
 
 .header {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 4px 4px 16px;
-  border-bottom: 1px solid var(--hbk-reader-border);
+  border-bottom: 1px solid var(--hbk-flyout-border);
 }
 
 .headerBody {
@@ -35,19 +30,21 @@
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  color: var(--hbk-reader-ink-primary);
+  color: var(--hbk-flyout-ink-primary);
+  margin: 0;
 }
 
 .headline {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--hbk-reader-ink-secondary);
+  color: var(--hbk-flyout-ink-secondary);
+  margin: 0;
 }
 
 .body {
   font-size: 0.9375rem;
   line-height: 1.7;
-  color: var(--hbk-reader-ink-primary);
+  color: var(--hbk-flyout-ink-primary);
   white-space: pre-wrap;
   padding: 0 4px;
   max-width: 64ch;
@@ -59,9 +56,9 @@
   justify-content: space-between;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--hbk-reader-border);
+  border-top: 1px solid var(--hbk-flyout-border);
   font-size: 0.75rem;
-  color: var(--hbk-reader-ink-faint);
+  color: var(--hbk-flyout-ink-faint);
 }
 
 .celebratePill {
@@ -70,8 +67,8 @@
   gap: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--hbk-reader-celebrate-surface);
-  border: 1px solid var(--hbk-reader-border);
-  color: var(--hbk-reader-brand-orange);
+  background: rgba(229, 126, 70, 0.08);
+  border: 1px solid var(--hbk-flyout-border);
+  color: var(--hbk-flyout-ink-primary);
   font-weight: 700;
 }

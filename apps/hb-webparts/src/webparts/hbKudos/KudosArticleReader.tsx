@@ -13,17 +13,19 @@
  * Reuses HbcKudosComposerFlyout as the slide-in panel shell so the
  * chrome is consistent with the composer and View All panels.
  *
- * Phase-19 Wave 2: layout grammar moved to `kudosReader.module.css`;
- * token values flow through `--hbk-reader-*` CSS custom properties
- * seeded from KUDOS_GOV_TOKENS.
+ * Phase-20 Wave 3 harmonization: wrapped in the shared `KudosFlyoutBody`
+ * so article reader, composer, and feed flyouts share one rhythm. The
+ * reader's recipient display is now an `<h2>` linked to the `<article>`
+ * via `aria-labelledby`, giving assistive tech a clear landmark for
+ * the recognition content.
  */
 import * as React from 'react';
 import { HbcKudosComposerFlyout, HbcAvatarStack } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
-import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
 import { ThumbsUp } from './kudosIcons.js';
 import readerStyles from './kudosReader.module.css';
+import { KudosFlyoutBody } from './KudosFlyoutBody.js';
 
 export interface KudosArticleReaderProps {
   entry: KudosEntry | undefined;
@@ -53,14 +55,7 @@ export function KudosArticleReader({
       : 'Submitted';
   const body = entry?.details?.trim() || entry?.excerpt?.trim() || '';
 
-  const readerVars = {
-    '--hbk-reader-border': KUDOS_GOV_TOKENS.orangeSubtle18,
-    '--hbk-reader-ink-primary': KUDOS_GOV_TOKENS.textPrimary,
-    '--hbk-reader-ink-secondary': KUDOS_GOV_TOKENS.textSecondary,
-    '--hbk-reader-ink-faint': KUDOS_GOV_TOKENS.textFaint,
-    '--hbk-reader-brand-orange': KUDOS_GOV_TOKENS.brandOrange,
-    '--hbk-reader-celebrate-surface': 'rgba(229, 126, 70, 0.08)',
-  } as React.CSSProperties;
+  const headingId = 'hb-kudos-article-recipient';
 
   return (
     <HbcKudosComposerFlyout
@@ -71,10 +66,10 @@ export function KudosArticleReader({
       primaryAction={{ label: 'Close', onClick: onClose }}
     >
       {entry ? (
-        <article
-          data-hbc-testid="hb-kudos-article-reader"
-          className={readerStyles.article}
-          style={readerVars}
+        <KudosFlyoutBody
+          as="article"
+          testId="hb-kudos-article-reader"
+          ariaLabelledBy={headingId}
         >
           <header className={readerStyles.header}>
             {entry.recipients.length > 0 ? (
@@ -89,14 +84,20 @@ export function KudosArticleReader({
               />
             ) : null}
             <div className={readerStyles.headerBody}>
-              <div className={readerStyles.recipient}>{recipientDisplay}</div>
+              <h2 id={headingId} className={readerStyles.recipient}>
+                {recipientDisplay}
+              </h2>
               {entry.headline ? (
-                <div className={readerStyles.headline}>{entry.headline}</div>
+                <p className={readerStyles.headline}>{entry.headline}</p>
               ) : null}
             </div>
           </header>
 
-          {body ? <div className={readerStyles.body}>{body}</div> : null}
+          {body ? (
+            <div className={readerStyles.body} data-hbc-testid="hb-kudos-article-body">
+              {body}
+            </div>
+          ) : null}
 
           <footer className={readerStyles.footer}>
             <span>
@@ -104,13 +105,16 @@ export function KudosArticleReader({
               {entry.submittedDate ? ` · ${formatLongDate(entry.submittedDate)}` : ''}
             </span>
             {typeof entry.celebrateCount === 'number' && entry.celebrateCount > 0 ? (
-              <span className={readerStyles.celebratePill}>
+              <span
+                className={readerStyles.celebratePill}
+                aria-label={`Celebrated ${entry.celebrateCount} ${entry.celebrateCount === 1 ? 'time' : 'times'}`}
+              >
                 <ThumbsUp size={12} strokeWidth={2.5} aria-hidden="true" />
                 {entry.celebrateCount}
               </span>
             ) : null}
           </footer>
-        </article>
+        </KudosFlyoutBody>
       ) : null}
     </HbcKudosComposerFlyout>
   );
