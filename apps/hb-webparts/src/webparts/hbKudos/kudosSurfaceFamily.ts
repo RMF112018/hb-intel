@@ -86,7 +86,6 @@ export {
   kudosFeaturedBadge,
   kudosArchiveToggle,
   kudosArchiveChevron,
-  kudosArchiveViewAll,
   type KudosRowVariants,
 } from './kudosVariants.js';
 

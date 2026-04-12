@@ -98,6 +98,12 @@ function formatSubmittedBy(entry: KudosEntry): string {
     : 'Submitted';
 }
 
+function formatShortDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 export function PublicKudosSurface({
   heading,
   featured,
@@ -153,15 +159,28 @@ export function PublicKudosSurface({
         )}
       </div>
 
-      {/* Recent */}
+      {/* Recent — productized stream zone with section header + date spines */}
       {recent.length > 0 ? (
-        <>
-          <div className={styles.recentLabel} data-hbc-testid="hb-kudos-recent-section">
-            Recent recognition
+        <section
+          aria-labelledby="hb-kudos-recent-title"
+          data-hbc-webpart-section="hb-kudos-recent"
+          data-hbc-testid="hb-kudos-recent-section"
+        >
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionHeaderTop}>
+              <span className={styles.sectionEyebrow}>Recent recognition</span>
+              <span className={styles.sectionMeta} data-hbc-testid="hb-kudos-recent-count">
+                {recent.length} {recent.length === 1 ? 'entry' : 'entries'}
+              </span>
+            </div>
+            <h3 id="hb-kudos-recent-title" className={styles.sectionTitle}>
+              This week at HB
+            </h3>
           </div>
           <div className={styles.recentList}>
             {recent.map((item) => {
               const recipientDisplay = formatRecipientDisplay(item.recipients);
+              const shortDate = formatShortDate(item.submittedDate);
               return (
                 <button
                   key={item.id}
@@ -185,11 +204,20 @@ export function PublicKudosSurface({
                     <div className={styles.recentRecipient}>{recipientDisplay}</div>
                     <div className={styles.recentHeadline}>{item.headline || 'Recognition'}</div>
                   </div>
+                  {shortDate ? (
+                    <time
+                      className={styles.rowDate}
+                      dateTime={item.submittedDate}
+                      aria-label={`Submitted ${shortDate}`}
+                    >
+                      {shortDate}
+                    </time>
+                  ) : null}
                 </button>
               );
             })}
           </div>
-        </>
+        </section>
       ) : null}
     </section>
   );

@@ -108,12 +108,17 @@ export const kudosReadmoreBtn = cva(kudosSurfaceStyles.readmoreBtn);
 export const kudosFeaturedBadge = cva(kudosSurfaceStyles.featuredBadge);
 
 /**
- * Archive toggle + chevron + view-all link. Public-surface grammar
- * that previously flowed through raw class strings at the call site.
+ * Archive toggle + chevron. Public-surface grammar that previously
+ * flowed through raw class strings at the call site.
+ *
+ * Phase-27 Prompt-03 hierarchy redesign retired the subtle
+ * `kudosArchiveViewAll` text-link variant — the terminal feed entry
+ * point is now a dedicated `.feedCta` block composed directly at the
+ * call site (see `ArchiveList`) so "Browse the full Kudos feed"
+ * reads as a product destination instead of a leftover text link.
  */
 export const kudosArchiveToggle = cva(kudosSurfaceStyles.archiveToggle);
 export const kudosArchiveChevron = cva(kudosSurfaceStyles.archiveChevron);
-export const kudosArchiveViewAll = cva(kudosSurfaceStyles.archiveViewAll);
 
 // ---------------------------------------------------------------------------
 // Feed slide-out: row + celebrate pill

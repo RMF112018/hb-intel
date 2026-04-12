@@ -1,21 +1,31 @@
 /**
- * ArchiveList — collapsed-by-default archive zone for the public
+ * ArchiveList — archive + terminal feed entry zone for the public
  * HB Kudos webpart.
  *
- * Locked UX behavior (phase-17 decision set):
- *   - Collapsed by default.
- *   - The title text is the toggle button.
- *     * Collapsed label: "View archive"
- *     * Expanded label: "Archive"  + chevron indicator
- *   - Search field is only visible while expanded.
- *   - "View all recognition" control is rendered inside the expanded
- *     archive as a visually subordinate entry point (moved off the
- *     masthead).
- *   - Row click opens the article reader via `onOpenEntry`.
+ * Phase-27 Prompt-03 hierarchy redesign:
  *
- * Phase-18 Wave 1 styling rebuild: the archive-zone visual grammar now
- * lives in `kudosSurface.module.css`; token-backed CSS custom properties
- * are injected at the section root from KUDOS_GOV_TOKENS.
+ *   Section header (shared stream grammar):
+ *     - Eyebrow "Archive" + h3 "Past recognition"
+ *     - Right-aligned entry count + expand/collapse pill toggle
+ *
+ *   Archive body (renders when expanded):
+ *     - Full-width search input (no longer inline with the toggle)
+ *     - Rows with right-aligned date spine for scanability
+ *
+ *   Terminal feed CTA:
+ *     - Always visible (independent of archive expanded/collapsed)
+ *     - Proper product-surface card (eyebrow + title + meta + arrow)
+ *       instead of a subtle text link hidden inside the expanded
+ *       archive
+ *
+ *   Preserved behaviors:
+ *     - Collapsed by default
+ *     - Row click opens the article reader via `onOpenEntry`
+ *     - Search text is still lifted to the parent via `onSearchChange`
+ *
+ * Styling: all classes resolve through `kudosSurface.module.css` +
+ * `kudosVariants.ts`; every color flows through `kudosCSSVars()` on
+ * the webpart root (Phase-27 Prompt-02 closure).
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
@@ -27,8 +37,13 @@ import {
   kudosRow,
   kudosArchiveToggle,
   kudosArchiveChevron,
-  kudosArchiveViewAll,
 } from './kudosVariants.js';
+
+function formatArchiveDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
 export interface ArchiveListProps {
   entries: KudosEntry[];
@@ -61,45 +76,55 @@ export function ArchiveList({
     );
   }, [entries, searchText, expanded]);
 
-  const toggleLabel = expanded ? 'Archive' : 'View archive';
+  const toggleLabel = expanded ? 'Collapse archive' : 'Open archive';
 
   return (
     <section
       id="hb-kudos-archive"
-      aria-label="HB Kudos archive"
+      aria-labelledby="hb-kudos-archive-title"
       data-hbc-webpart-section="hb-kudos-archive"
       data-hbc-testid="hb-kudos-archive-section"
       data-hbc-archive-expanded={expanded ? 'true' : 'false'}
     >
-      <div className={styles.archiveHeader}>
-        <button
-          type="button"
-          className={kudosArchiveToggle()}
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          aria-controls="hb-kudos-archive-body"
-          data-hbc-testid="hb-kudos-archive-toggle"
-        >
-          {toggleLabel}
-          <span className={kudosArchiveChevron()} aria-hidden="true">
-            <ChevronDown size={14} strokeWidth={2.5} />
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionHeaderTop}>
+          <span className={styles.sectionEyebrow}>Archive</span>
+          <span className={styles.sectionMeta} data-hbc-testid="hb-kudos-archive-count">
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
           </span>
-        </button>
-        {expanded ? (
-          <input
-            type="search"
-            value={searchText}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search recognition..."
-            aria-label="Search recognition archive"
-            data-hbc-testid="hb-kudos-archive-search"
-            className={styles.archiveSearch}
-          />
-        ) : null}
+        </div>
+        <div className={styles.archiveTitleRow}>
+          <h3 id="hb-kudos-archive-title" className={styles.sectionTitle}>
+            Past recognition
+          </h3>
+          <button
+            type="button"
+            className={kudosArchiveToggle()}
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            aria-controls="hb-kudos-archive-body"
+            data-hbc-testid="hb-kudos-archive-toggle"
+          >
+            {toggleLabel}
+            <span className={kudosArchiveChevron()} aria-hidden="true">
+              <ChevronDown size={13} strokeWidth={2.5} />
+            </span>
+          </button>
+        </div>
       </div>
 
       {expanded ? (
         <div id="hb-kudos-archive-body" className={styles.archiveBody}>
+          <input
+            type="search"
+            value={searchText}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search past recognition…"
+            aria-label="Search recognition archive"
+            data-hbc-testid="hb-kudos-archive-search"
+            className={styles.archiveSearch}
+          />
+
           {filtered.length === 0 ? (
             <HbcEmptyState
               title="No archived recognition yet"
@@ -109,6 +134,7 @@ export function ArchiveList({
             <div className={styles.archiveRows}>
               {filtered.map((entry) => {
                 const recipientDisplay = formatRecipientDisplay(entry.recipients);
+                const shortDate = formatArchiveDate(entry.submittedDate);
                 return (
                   <button
                     key={entry.id}
@@ -132,31 +158,44 @@ export function ArchiveList({
                       <div className={styles.archiveRowRecipient}>{recipientDisplay}</div>
                       <div className={styles.archiveRowMeta}>
                         {entry.headline || 'Recognition'}
-                        {' · '}
-                        {new Date(entry.submittedDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
                       </div>
                     </div>
+                    {shortDate ? (
+                      <time
+                        className={styles.rowDate}
+                        dateTime={entry.submittedDate}
+                        aria-label={`Submitted ${shortDate}`}
+                      >
+                        {shortDate}
+                      </time>
+                    ) : null}
                   </button>
                 );
               })}
             </div>
           )}
-
-          {onViewAll ? (
-            <button
-              type="button"
-              className={kudosArchiveViewAll()}
-              onClick={onViewAll}
-              data-hbc-testid="hb-kudos-view-all"
-            >
-              View all recognition
-              <ArrowRight size={12} strokeWidth={2.5} aria-hidden="true" />
-            </button>
-          ) : null}
         </div>
+      ) : null}
+
+      {onViewAll ? (
+        <button
+          type="button"
+          className={styles.feedCta}
+          onClick={onViewAll}
+          data-hbc-testid="hb-kudos-view-all"
+          aria-label="Browse the full Kudos feed"
+        >
+          <span className={styles.feedCtaBody}>
+            <span className={styles.feedCtaEyebrow}>Browse all</span>
+            <span className={styles.feedCtaTitle}>The full Kudos feed</span>
+            <span className={styles.feedCtaMeta}>
+              Search and explore every approved recognition across HB.
+            </span>
+          </span>
+          <span className={styles.feedCtaArrow} aria-hidden="true">
+            <ArrowRight size={14} strokeWidth={2.5} />
+          </span>
+        </button>
       ) : null}
     </section>
   );

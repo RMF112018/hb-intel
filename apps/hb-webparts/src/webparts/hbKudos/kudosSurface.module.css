@@ -352,26 +352,61 @@
   transform: rotate(-16deg) scale(1.12);
 }
 
-/* ── Recent ────────────────────────────────────────────────────────── */
+/* ── Stream section header — productized "zone" pattern ───────────── */
+/*
+ * Replaces the old loose uppercase `.recentLabel` band. Every Kudos
+ * stream-tier section (recent recognition, archive, terminal feed
+ * CTA) uses this same header shell so the public surface reads as
+ * one product, not a collection of styled cards. Structure:
+ *
+ *     ┌───────────────────────────────────────────┐
+ *     │ EYEBROW                           <meta>  │  ← top row
+ *     │ Section title                             │  ← h3
+ *     └───────────────────────────────────────────┘
+ */
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px 4px;
+  margin: 4px 0 0;
+  border-bottom: 1px solid var(--hbk-orange-18);
+}
 
-.recentLabel {
+.sectionHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 18px;
+}
+
+.sectionEyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 0.625rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--hbk-brand-orange);
-  margin: 2px 4px 2px;
-  padding-top: 4px;
 }
 
-.recentLabel::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--hbk-orange-35) 0%, var(--hbk-orange-transparent) 100%);
+.sectionMeta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--hbk-text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sectionTitle {
+  margin: 0;
+  padding: 2px 0 4px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--hbk-text-heading);
 }
 
 .recentList {
@@ -445,6 +480,18 @@
   white-space: nowrap;
 }
 
+/* Right-aligned date spine for recent + archive rows — upgrades row
+   scanability without adding another column. */
+.rowDate {
+  flex: 0 0 auto;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--hbk-text-faint);
+  font-variant-numeric: tabular-nums;
+  padding-left: 8px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .giveBtn,
   .celebrateBtn,
@@ -456,36 +503,48 @@
 
 /* ── Archive zone (ArchiveList) ────────────────────────────────────── */
 
-.archiveHeader {
+/*
+ * The archive reuses the shared `.sectionHeader` grammar. The header
+ * row anchors the section; the toggle is rendered as an affordance on
+ * the right side of the header, so expand/collapse reads as a
+ * section-level action rather than the section's title itself.
+ */
+/* Title row inside the archive section header — pairs the h3 with the
+   expand/collapse pill toggle on the right. */
+.archiveTitleRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 8px 0 6px;
+  gap: 12px;
 }
 
 .archiveToggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 0;
-  min-height: 32px;
-  border: none;
-  background: none;
+  padding: 4px 8px;
+  min-height: 28px;
+  border: 1px solid var(--hbk-orange-18);
+  background: var(--hbk-orange-02);
+  border-radius: 999px;
   font: inherit;
   font-size: 0.6875rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   color: var(--hbk-brand-orange);
   cursor: pointer;
   outline: none;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.archiveToggle:hover {
+  background: var(--hbk-orange-06);
+  border-color: var(--hbk-orange-22);
 }
 
 .archiveToggle:focus-visible {
   outline: 2px solid var(--hbk-brand-blue);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 .archiveChevron {
@@ -499,16 +558,16 @@
 }
 
 .archiveSearch {
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 0.8125rem;
   border-radius: 8px;
   border: 1px solid var(--hbk-orange-18);
   background: var(--hbk-orange-02);
-  flex: 1 1 auto;
-  max-width: 320px;
+  width: 100%;
   outline: none;
   font-family: inherit;
   color: var(--hbk-text-primary);
+  margin-bottom: 8px;
 }
 
 .archiveSearch:focus-visible {
@@ -589,33 +648,92 @@
   white-space: nowrap;
 }
 
-.archiveViewAll {
-  display: inline-flex;
+/*
+ * Terminal feed CTA — the public surface's zone footer. Upgraded from
+ * a small text link (which read as a leftover affordance) to a full
+ * product surface so "Browse the full Kudos feed" feels like a real
+ * destination and is always visible, independent of the archive's
+ * expand/collapse state.
+ */
+.feedCta {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 0;
-  min-height: 24px;
-  border: none;
-  background: none;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--hbk-orange-18);
+  background:
+    linear-gradient(135deg, var(--hbk-warm-row-white-72) 0%, var(--hbk-warm-row-tint-72) 100%);
+  color: inherit;
   font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--hbk-text-secondary);
+  text-align: left;
   cursor: pointer;
-  text-decoration: underline;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
   outline: none;
-  align-self: flex-end;
-  margin-top: 4px;
+  box-shadow: 0 1px 2px var(--hbk-ink-shadow-04);
 }
 
-.archiveViewAll:hover {
+.feedCta:hover {
+  background:
+    linear-gradient(135deg, var(--hbk-warm-row-tint-95) 0%, var(--hbk-warm-row-hover-95) 100%);
+  border-color: var(--hbk-orange-22);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px var(--hbk-orange-cast-08);
+}
+
+.feedCta:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 2px;
+  border-color: var(--hbk-orange-22);
+}
+
+.feedCtaBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.feedCtaEyebrow {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--hbk-brand-orange);
 }
 
-.archiveViewAll:focus-visible {
-  outline: 2px solid var(--hbk-brand-blue);
-  outline-offset: 2px;
-  border-radius: 3px;
+.feedCtaTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--hbk-text-heading);
+  letter-spacing: -0.005em;
+}
+
+.feedCtaMeta {
+  font-size: 0.75rem;
+  color: var(--hbk-text-muted);
+}
+
+.feedCtaArrow {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--hbk-brand-orange);
+  background: var(--hbk-orange-06);
+  border: 1px solid var(--hbk-orange-18);
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.feedCta:hover .feedCtaArrow {
+  transform: translateX(2px);
+  background: var(--hbk-orange-10);
 }
 
 @media (prefers-reduced-motion: reduce) {

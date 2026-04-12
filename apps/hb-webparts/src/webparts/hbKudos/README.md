@@ -54,7 +54,7 @@ barrel re-exporting:
   No Unicode / pseudo-icons appear in homepage-facing Kudos source.
 - **Variants** — `kudosRow`, `kudosGiveCta`, `kudosCelebrateBtn`,
   `kudosReadmoreBtn`, `kudosFeaturedBadge`, `kudosArchiveToggle`,
-  `kudosArchiveChevron`, `kudosArchiveViewAll`, plus the governance
+  `kudosArchiveChevron`, plus the governance
   section primitives. `class-variance-authority` over CSS-module
   class names (see [`./kudosVariants.ts`](./kudosVariants.ts)).
 - **Style modules** — `kudosSurfaceStyles`, `kudosReaderStyles`,
