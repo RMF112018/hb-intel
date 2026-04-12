@@ -233,14 +233,16 @@
 
 .queueRow {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: flex-start;
+  /* Phase-27 Prompt-06: state rail leads every row for instant
+     workflow parsing, followed by content + right-aligned date. */
+  grid-template-columns: auto 1fr auto;
+  align-items: stretch;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 8px 14px;
 }
 
 .queueRowSelectable {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
 }
 
 .queueRowSelect {
@@ -316,14 +318,13 @@
   .ownershipField {
     flex-basis: 100%;
   }
-  /* Queue row collapses to a single content column; the date spine
-     drops below the body so the headline/excerpt never truncate to
-     accommodate the right-side date. */
+  /* Queue row collapses — state rail stays as a thin leading column,
+     content takes the remaining width, date spine drops below. */
   .queueRow {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
   }
   .queueRowSelectable {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto auto 1fr;
   }
   .queueRowDateCell {
     grid-column: 1 / -1;
@@ -452,6 +453,159 @@
   font-weight: 600;
 }
 
+/* ── Phase-27 Prompt-06 — workspace UX redesign ──────────────────
+   Adds the structural upgrades that turn the queue from a plain
+   card list into an operational moderation product surface:
+     - left-edge state rail on every row (instant workflow parse),
+     - active-filter chip bar below the control zone,
+     - tab count badges,
+     - tighter row density under non-narrow widths. */
+
+.queueRowStateRail {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 2px;
+  background: var(--hbk-text-caption);
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+
+.queueRow[data-workflow-status='pending'] .queueRowStateRail {
+  background: var(--hbk-brand-orange);
+}
+
+.queueRow[data-workflow-status='revisionRequested'] .queueRowStateRail {
+  background: var(--hbk-warning-orange);
+}
+
+.queueRow[data-workflow-status='approved'] .queueRowStateRail,
+.queueRow[data-workflow-status='approvedScheduled'] .queueRowStateRail {
+  background: var(--hbk-brand-blue);
+}
+
+.queueRow[data-workflow-status='rejected'] .queueRowStateRail,
+.queueRow[data-workflow-status='withdrawn'] .queueRowStateRail {
+  background: var(--hbk-danger);
+}
+
+.queueRow[data-workflow-status='removedUnpublished'] .queueRowStateRail {
+  background: var(--hbk-text-faint);
+}
+
+.queueRow[data-admin-flag='true'] .queueRowStateRail {
+  background: var(--hbk-warning-orange);
+}
+
+.queueRow[data-overdue='overdue'] .queueRowStateRail {
+  background: var(--hbk-danger);
+}
+
+/* Tab count badge attached to each scope tab label. */
+.tabCountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--hbk-blue-12);
+  color: var(--hbk-brand-blue);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabCountBadge[data-empty='true'] {
+  opacity: 0.5;
+}
+
+/* Active-filter chip bar — appears only when refinement filters
+   are applied, so the current scope is self-documenting and each
+   refinement can be dismissed without hunting through the control
+   zone. */
+.activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 2px 0;
+  align-items: center;
+  min-height: 0;
+}
+
+.activeFiltersLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hbk-text-muted);
+  margin-right: 4px;
+}
+
+.activeFilterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  background: var(--hbk-orange-06);
+  border: 1px solid var(--hbk-orange-22);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--hbk-text-primary);
+}
+
+.activeFilterChipClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--hbk-text-muted);
+  cursor: pointer;
+  outline: none;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.activeFilterChipClear:hover {
+  background: var(--hbk-orange-10);
+  color: var(--hbk-text-primary);
+}
+
+.activeFilterChipClear:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 1px;
+}
+
+.activeFiltersClearAll {
+  margin-left: auto;
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--hbk-brand-blue);
+  cursor: pointer;
+  outline: none;
+}
+
+.activeFiltersClearAll:hover {
+  border-color: var(--hbk-blue-18);
+  background: var(--hbk-blue-06);
+}
+
+.activeFiltersClearAll:focus-visible {
+  outline: 2px solid var(--hbk-brand-blue);
+  outline-offset: 1px;
+}
+
 /* ── Centered spinner state (loading / role-resolving) ─────── */
 
 .stateCentered {
@@ -491,6 +645,15 @@
   border-radius: 12px;
   background: var(--hbk-blue-04);
   border: 1px solid var(--hbk-blue-14);
+  /* Sticky control zone — Phase-27 Prompt-06 moderation UX upgrade.
+     Keeps scope tabs + refinement controls visible while scrolling
+     long queues, so operators no longer lose filter context while
+     scanning. Host-safe: the SharePoint section can nest scrollers,
+     so stickiness is relative to the nearest scrolling ancestor. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 4px 12px var(--hbk-ink-shadow-04);
 }
 
 .controlZoneTabs {

@@ -55,11 +55,19 @@ export function QueueRow({
     <HbcCard weight="standard">
       <div
         data-hbc-testid="hb-kudos-queue-row"
+        data-workflow-status={entry.workflowStatus ?? ''}
+        data-admin-flag={flagged ? 'true' : undefined}
+        data-overdue={overdueStatus === 'overdue' ? 'overdue' : undefined}
         className={clsx(
           companionStyles.queueRow,
           selectable && companionStyles.queueRowSelectable,
         )}
       >
+        {/* Left-edge state rail — Phase-27 Prompt-06 scan upgrade.
+            Colour derives from workflow-status / admin-flag /
+            overdue via attribute selectors in companion.module.css. */}
+        <span className={companionStyles.queueRowStateRail} aria-hidden="true" />
+
         {selectable ? (
           <label
             className={companionStyles.queueRowSelect}

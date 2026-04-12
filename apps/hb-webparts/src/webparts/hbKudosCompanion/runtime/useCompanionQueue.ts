@@ -21,6 +21,7 @@ import {
   applyCompanionFilter,
   type CompanionFilterState,
 } from './companionFilter.js';
+import { COMPANION_TABS } from './companionTabs.js';
 
 export interface UseCompanionQueueInput {
   allKudos: KudosEntry[];
@@ -36,6 +37,8 @@ export interface UseCompanionQueueResult {
   reminderTargets: KudosReminderTarget[];
   scopeCount: number;
   isRefined: boolean;
+  /** Per-tab item counts (scope-only — refinement filters ignored). */
+  tabCounts: Record<string, number>;
 }
 
 export function useCompanionQueue({
@@ -108,6 +111,32 @@ export function useCompanionQueue({
 
   const isRefined = queue.length !== scopeCount;
 
+  // Per-tab scope counts — queue-only (refinement filters stripped) so
+  // the tab strip can advertise where the work actually sits. This
+  // lets operators pick the next queue by workload instead of
+  // clicking through each tab blindly.
+  const tabCounts = React.useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const tab of COMPANION_TABS) {
+      out[tab.id] = applyCompanionFilter(
+        allKudos,
+        {
+          ...filter,
+          tabId: tab.id,
+          statuses: tab.statuses,
+          adminReviewOnly: tab.id === 'flagged',
+          searchText: '',
+          ownership: 'all',
+          scheduledOnly: false,
+          aging: [],
+        },
+        nowIso,
+        currentUserId,
+      ).length;
+    }
+    return out;
+  }, [allKudos, filter, nowIso, currentUserId]);
+
   return {
     currentUserId,
     queue,
@@ -115,6 +144,7 @@ export function useCompanionQueue({
     reminderTargets,
     scopeCount,
     isRefined,
+    tabCounts,
   };
 }
 

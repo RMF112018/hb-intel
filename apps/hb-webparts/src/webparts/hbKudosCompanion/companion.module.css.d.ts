@@ -44,5 +44,12 @@ declare const styles: {
   readonly queueRegionCount: string;
   readonly queueRowBody: string;
   readonly queueRowFooter: string;
+  readonly queueRowStateRail: string;
+  readonly tabCountBadge: string;
+  readonly activeFilters: string;
+  readonly activeFiltersLabel: string;
+  readonly activeFilterChip: string;
+  readonly activeFilterChipClear: string;
+  readonly activeFiltersClearAll: string;
 };
 export default styles;

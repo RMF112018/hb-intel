@@ -3,7 +3,7 @@
   "id": "a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97",
   "alias": "HbKudosCompanionWebPart",
   "componentType": "WebPart",
-  "version": "0.4.0.0",
+  "version": "0.4.1.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],

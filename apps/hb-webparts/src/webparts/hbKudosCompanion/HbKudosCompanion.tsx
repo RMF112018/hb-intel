@@ -70,6 +70,125 @@ import {
 export { applyCompanionFilter };
 export type { CompanionFilterState };
 
+// ---------------------------------------------------------------------------
+// ActiveFilterBar — dismissible chips for applied refinement filters.
+// Rendered between the sticky control zone and the queue so operators
+// always know which refinements narrow the current view and can revert
+// single filters without returning to the control zone.
+// ---------------------------------------------------------------------------
+
+const OWNERSHIP_LABEL: Record<CompanionFilterState['ownership'], string> = {
+  all: 'All',
+  mine: 'Mine',
+  unassigned: 'Unassigned',
+  others: 'Others',
+};
+
+interface ActiveFilterBarProps {
+  filter: CompanionFilterState;
+  activeTabId: string;
+  onClearSearch: () => void;
+  onClearOwnership: () => void;
+  onClearAdminReview: () => void;
+  onClearScheduled: () => void;
+}
+
+function ActiveFilterBar({
+  filter,
+  activeTabId,
+  onClearSearch,
+  onClearOwnership,
+  onClearAdminReview,
+  onClearScheduled,
+}: ActiveFilterBarProps): React.JSX.Element | null {
+  const searchActive = Boolean(filter.searchText && filter.searchText.trim());
+  const ownershipActive = filter.ownership !== 'all';
+  // The `flagged` tab auto-sets adminReviewOnly; don't show it as a
+  // dismissible chip there — it is the scope itself.
+  const adminActive = filter.adminReviewOnly && activeTabId !== 'flagged';
+  const scheduledActive = filter.scheduledOnly;
+
+  if (!searchActive && !ownershipActive && !adminActive && !scheduledActive) {
+    return null;
+  }
+
+  return (
+    <div
+      className={companionStyles.activeFilters}
+      role="group"
+      aria-label="Active refinement filters"
+      data-hbc-testid="hb-kudos-active-filters"
+    >
+      <span className={companionStyles.activeFiltersLabel}>Filters</span>
+      {searchActive ? (
+        <FilterChip
+          label={`Search: "${filter.searchText}"`}
+          onClear={onClearSearch}
+          testId="hb-kudos-active-filter-search"
+        />
+      ) : null}
+      {ownershipActive ? (
+        <FilterChip
+          label={`Ownership: ${OWNERSHIP_LABEL[filter.ownership]}`}
+          onClear={onClearOwnership}
+          testId="hb-kudos-active-filter-ownership"
+        />
+      ) : null}
+      {adminActive ? (
+        <FilterChip
+          label="Flagged for admin"
+          onClear={onClearAdminReview}
+          testId="hb-kudos-active-filter-admin"
+        />
+      ) : null}
+      {scheduledActive ? (
+        <FilterChip
+          label="Scheduled only"
+          onClear={onClearScheduled}
+          testId="hb-kudos-active-filter-scheduled"
+        />
+      ) : null}
+      <button
+        type="button"
+        className={companionStyles.activeFiltersClearAll}
+        onClick={() => {
+          if (searchActive) onClearSearch();
+          if (ownershipActive) onClearOwnership();
+          if (adminActive) onClearAdminReview();
+          if (scheduledActive) onClearScheduled();
+        }}
+        data-hbc-testid="hb-kudos-active-filters-clear-all"
+      >
+        Clear all
+      </button>
+    </div>
+  );
+}
+
+function FilterChip({
+  label,
+  onClear,
+  testId,
+}: {
+  label: string;
+  onClear: () => void;
+  testId: string;
+}): React.JSX.Element {
+  return (
+    <span className={companionStyles.activeFilterChip} data-hbc-testid={testId}>
+      {label}
+      <button
+        type="button"
+        className={companionStyles.activeFilterChipClear}
+        aria-label={`Clear filter: ${label}`}
+        onClick={onClear}
+      >
+        ×
+      </button>
+    </span>
+  );
+}
+
 export interface HbKudosCompanionProps {
   config?: Record<string, unknown>;
   identity?: HomepageIdentityInput;
@@ -117,7 +236,7 @@ export function HbKudosCompanion({
 
   const now = nowIso ?? new Date().toISOString();
 
-  const { queue, overdueMap, reminderTargets, scopeCount, isRefined } =
+  const { queue, overdueMap, reminderTargets, scopeCount, isRefined, tabCounts } =
     useCompanionQueue({ allKudos, filter, nowIso: now, overdueThresholds });
 
   const actions = useCompanionActions({
@@ -222,15 +341,18 @@ export function HbKudosCompanion({
           aria-label="Queue scope"
           className={clsx(companionStyles.filterBar, companionStyles.controlZoneTabs)}
         >
-          {COMPANION_TABS.map((tab) => (
-            <KudosGovernanceTabButton
-              key={tab.id}
-              label={tab.label}
-              active={tab.id === filter.tabId}
-              onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
-              testId={`hb-kudos-queue-tab-${tab.id}`}
-            />
-          ))}
+          {COMPANION_TABS.map((tab) => {
+            const count = tabCounts[tab.id] ?? 0;
+            return (
+              <KudosGovernanceTabButton
+                key={tab.id}
+                label={`${tab.label} (${count})`}
+                active={tab.id === filter.tabId}
+                onClick={() => dispatch({ type: 'setTab', tabId: tab.id })}
+                testId={`hb-kudos-queue-tab-${tab.id}`}
+              />
+            );
+          })}
         </div>
 
         <div
@@ -284,6 +406,20 @@ export function HbKudosCompanion({
           />
         </div>
       </section>
+
+      {/* Active filter chip bar — Phase-27 Prompt-06 UX upgrade.
+          Each applied refinement becomes a dismissible chip so the
+          operator can see current scope at a glance and revert
+          single filters without hunting through the control zone.
+          Hidden when no refinement is active. */}
+      <ActiveFilterBar
+        filter={filter}
+        activeTabId={filter.tabId}
+        onClearSearch={() => dispatch({ type: 'setSearch', value: '' })}
+        onClearOwnership={() => dispatch({ type: 'setOwnership', ownership: 'all' })}
+        onClearAdminReview={() => dispatch({ type: 'toggleAdminReviewOnly' })}
+        onClearScheduled={() => dispatch({ type: 'toggleScheduledOnly' })}
+      />
 
       {selectable && selectedIds.size > 0 ? (
         <div role="group" aria-label="Bulk actions" className={companionStyles.bulkBar}>
