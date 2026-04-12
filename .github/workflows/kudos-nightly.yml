@@ -1,0 +1,107 @@
+name: HB Kudos Nightly
+
+# Phase-16a/07 stage-3: scheduled Kudos regression pass.
+# Runs the currently-runnable Playwright P0 subset against the
+# dev-harness, and opportunistically runs the live-SharePoint
+# integration lane when tenant secrets are configured.
+#
+# This workflow is non-blocking (continue-on-error on execution steps)
+# until phase-16a's remaining locator instrumentation follow-up lands
+# and the Playwright execution gate is promoted to required. See
+# `docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/phase-16a/04a-Activation-Report.md`.
+
+on:
+  schedule:
+    # 07:30 UTC ≈ 02:30 Central (pre-business-hours nightly pass)
+    - cron: '30 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  kudos-playwright-p0:
+    name: Kudos Playwright P0 subset (dev-harness)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build dev-harness
+        run: pnpm --filter @hbc/dev-harness exec vite build
+
+      - name: Run Kudos P0 subset
+        continue-on-error: true
+        run: |
+          pnpm exec playwright test \
+            --config=playwright.webparts.config.ts \
+            e2e/webparts/kudos \
+            --grep "\[P0\]"
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kudos-playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Playwright traces / screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kudos-playwright-artifacts
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  kudos-live-sharepoint:
+    # Thin live-SharePoint contract lane (phase-16a/06). Only runs
+    # when the repository secrets providing the dev-tenant site are
+    # configured. Without them the job self-skips cleanly.
+    name: Kudos live-SharePoint contract lane
+    runs-on: ubuntu-latest
+    if: ${{ vars.HB_KUDOS_LIVE_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - name: Materialize storage state
+        run: |
+          mkdir -p .secrets
+          printf '%s' "$HB_KUDOS_LIVE_STORAGE_STATE_JSON" > .secrets/sp-auth.json
+        env:
+          HB_KUDOS_LIVE_STORAGE_STATE_JSON: ${{ secrets.HB_KUDOS_LIVE_STORAGE_STATE_JSON }}
+
+      - name: Run live SharePoint lane
+        continue-on-error: true
+        env:
+          HB_KUDOS_LIVE_SITE_URL: ${{ secrets.HB_KUDOS_LIVE_SITE_URL }}
+          HB_KUDOS_LIVE_KUDOS_LIST_ID: ${{ secrets.HB_KUDOS_LIVE_KUDOS_LIST_ID }}
+          HB_KUDOS_LIVE_AUDIT_LIST_ID: ${{ secrets.HB_KUDOS_LIVE_AUDIT_LIST_ID }}
+          HB_KUDOS_LIVE_TEST_USER_EMAIL: ${{ secrets.HB_KUDOS_LIVE_TEST_USER_EMAIL }}
+          HB_KUDOS_LIVE_SEARCH_QUERY: ${{ vars.HB_KUDOS_LIVE_SEARCH_QUERY }}
+          HB_KUDOS_LIVE_STORAGE_STATE: .secrets/sp-auth.json
+        run: |
+          pnpm exec playwright test --config=playwright.kudos-live.config.ts
+
+      - name: Upload live-lane artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kudos-live-artifacts
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7

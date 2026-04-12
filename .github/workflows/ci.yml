@@ -211,6 +211,51 @@ jobs:
       - name: Human Resources app tests
         run: pnpm --filter @hbc/spfx-human-resources test
 
+      - name: HB Webparts Kudos seam + source-hardening tests
+        # Phase-16a/07 stage-1 CI gate: 106 Kudos-owned Vitest cases
+        # covering composer state, people-search adapter, submission
+        # writer, patch planner, detail-panel boundary, shared exports,
+        # companion filter, prominence rules, role resolver, audit
+        # timeline, and cache-invalidation observability.
+        run: |
+          pnpm --filter @hbc/spfx-hb-webparts exec vitest run \
+            --config vitest.config.ts \
+            src/homepage/__tests__/kudosContracts.test.ts \
+            src/homepage/__tests__/useKudosComposer.test.ts \
+            src/homepage/__tests__/useSharePointPeopleSearch.test.ts \
+            src/homepage/__tests__/submitKudosDraft.test.ts \
+            src/homepage/__tests__/buildKudosPatchPlan.test.ts \
+            src/homepage/__tests__/kudosSharedExports.test.ts \
+            src/homepage/__tests__/kudosDetailPanelBoundary.test.tsx \
+            src/homepage/__tests__/applyCompanionFilter.test.ts \
+            src/homepage/__tests__/kudosProminenceRules.test.ts \
+            src/homepage/__tests__/kudosRoleResolver.test.ts \
+            src/homepage/__tests__/fetchKudosAuditTimeline.test.ts \
+            src/homepage/__tests__/cacheInvalidationObservability.test.ts
+
       - name: Role-branch gate
         # G4-T06-002: Verify no hardcoded role === checks in app source.
         run: bash tools/check-no-role-branch.sh
+
+  kudos-playwright-discovery:
+    # Phase-16a/07 stage-1 CI gate: Playwright Kudos lane discovery.
+    # Catches spec compile regressions, fixture-import drift, and
+    # locator-registry drift before the spec ever executes. Does NOT
+    # run the browser subset — execution promotion is gated on the
+    # 03a follow-up locator instrumentation landing (see
+    # docs/architecture/plans/MASTER/spfx/homepage/people/phase-14/kudos/
+    # phase-16a/04a-Activation-Report.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Kudos Playwright spec discovery
+        run: |
+          pnpm exec playwright test \
+            --config=playwright.webparts.config.ts \
+            e2e/webparts/kudos --list
