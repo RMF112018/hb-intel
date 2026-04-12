@@ -30,6 +30,7 @@ import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { Trophy, Sparkles, ThumbsUp } from './kudosIcons.js';
 
 /**
  * formatRecipientDisplay — produce a real honoree-name label for the
@@ -62,8 +63,6 @@ export interface PublicKudosSurfaceProps {
   celebrateLoading?: boolean;
   onOpenArticle: (entry: KudosEntry) => void;
 }
-
-const TROPHY_GLYPH = '🏆';
 
 function useIsCompact(breakpointPx = 768): boolean {
   const [isCompact, setIsCompact] = React.useState<boolean>(() => {
@@ -525,7 +524,9 @@ export function PublicKudosSurface({
       <div className="pks-hero" data-hbc-testid="hb-kudos-hero-zone">
         <div className="pks-masthead">
           <h2 className="pks-title" data-hbc-testid="hb-kudos-hero-band">
-            <span className="pks-title-icon" aria-hidden="true">{TROPHY_GLYPH}</span>
+            <span className="pks-title-icon" aria-hidden="true">
+              <Trophy size={16} strokeWidth={2.25} />
+            </span>
             {heading}
           </h2>
           <button
@@ -534,7 +535,7 @@ export function PublicKudosSurface({
             onClick={onGiveKudos}
             data-hbc-testid="hb-kudos-give-trigger"
           >
-            <span aria-hidden="true">✦</span>
+            <Sparkles size={14} strokeWidth={2.25} aria-hidden="true" />
             Give Kudos
           </button>
         </div>
@@ -658,7 +659,7 @@ function FeaturedCard({
   return (
     <article className="pks-featured" data-hbc-testid="hb-kudos-featured-card">
       <span className="pks-featured-badge" aria-label={badgeLabel}>
-        <span aria-hidden="true">✦</span>
+        <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
         {badgeLabel}
       </span>
 
@@ -718,7 +719,9 @@ function FeaturedCard({
             aria-label="Celebrate this recognition"
             data-hbc-testid="hb-kudos-celebrate"
           >
-            <span className="pks-celebrate-icon" aria-hidden="true">👍</span>
+            <span className="pks-celebrate-icon" aria-hidden="true">
+              <ThumbsUp size={13} strokeWidth={2.25} />
+            </span>
             <span data-hbc-testid="hb-kudos-celebrate-count">{celebrateCount}</span>
           </button>
         ) : null}

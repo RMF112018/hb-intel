@@ -18,6 +18,7 @@ import { HbcKudosComposerFlyout, HbcAvatarStack } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
+import { ThumbsUp } from './kudosIcons.js';
 
 export interface KudosArticleReaderProps {
   entry: KudosEntry | undefined;
@@ -159,7 +160,8 @@ export function KudosArticleReader({
                   fontWeight: 700,
                 }}
               >
-                👍 {entry.celebrateCount}
+                <ThumbsUp size={12} strokeWidth={2.5} aria-hidden="true" />
+                {entry.celebrateCount}
               </span>
             ) : null}
           </footer>

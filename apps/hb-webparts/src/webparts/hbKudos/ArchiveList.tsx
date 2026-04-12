@@ -22,6 +22,7 @@ import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
+import { ChevronDown, ArrowRight } from './kudosIcons.js';
 
 export interface ArchiveListProps {
   entries: KudosEntry[];
@@ -200,7 +201,9 @@ export function ArchiveList({
           data-hbc-testid="hb-kudos-archive-toggle"
         >
           {toggleLabel}
-          <span className="hbk-archive-chevron" aria-hidden="true">▾</span>
+          <span className="hbk-archive-chevron" aria-hidden="true">
+            <ChevronDown size={14} strokeWidth={2.5} />
+          </span>
         </button>
         {expanded ? (
           <input
@@ -291,7 +294,8 @@ export function ArchiveList({
               onClick={onViewAll}
               data-hbc-testid="hb-kudos-view-all"
             >
-              View all recognition →
+              View all recognition
+              <ArrowRight size={12} strokeWidth={2.5} aria-hidden="true" />
             </button>
           ) : null}
         </div>

@@ -11,6 +11,7 @@ import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
 import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { formatRecipientDisplay } from './PublicKudosSurface.js';
+import { ThumbsUp } from './kudosIcons.js';
 
 export interface KudosFeedBodyProps {
   entries: KudosEntry[];
@@ -215,7 +216,8 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
                         fontWeight: 800,
                       }}
                     >
-                      ✦ {entry.celebrateCount}
+                      <ThumbsUp size={12} strokeWidth={2.5} aria-hidden="true" />
+                      {entry.celebrateCount}
                     </span>
                   ) : null}
                 </div>

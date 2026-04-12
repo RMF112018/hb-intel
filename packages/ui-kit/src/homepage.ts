@@ -122,6 +122,10 @@ export {
   Keyboard,
   Mail,
   Link2,
+  Trophy,
+  Sparkles,
+  ThumbsUp,
+  ChevronDown,
   type LucideIcon,
 } from 'lucide-react';
 
