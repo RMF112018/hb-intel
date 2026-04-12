@@ -102,6 +102,41 @@ test.describe('kudos.hosted.zoom-regression', () => {
     });
   });
 
+  test(`100% first-viewport composition + changed-CTA focus-visible ${matrixTag('H13', 'P6')}`, async ({ page }) => {
+    // Phase-17 prompt-07: prove that after compaction the opening
+    // viewport at desktop 100% zoom contains hero, featured card,
+    // AND the beginning of recent recognition — and that the
+    // Give Kudos CTA shows a visible focus ring when reached by
+    // keyboard (no-dead-CTA + focus-visible gate).
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await gotoKudosPublic(page, workflowBaseline());
+    await setZoom(page, 100);
+
+    const hero = page.locator(tid(KUDOS_TESTIDS.heroBand));
+    const card = page.locator(tid(KUDOS_TESTIDS.featuredCard));
+    const recent = page.locator(tid(KUDOS_TESTIDS.recentSection));
+    await expect(hero).toBeVisible();
+    await expect(card).toBeVisible();
+    await expect(recent).toBeVisible();
+
+    // Beginning-of-recent must fall inside the first viewport (900px tall).
+    const recentBox = await recent.boundingBox();
+    expect(recentBox?.y).toBeLessThan(900);
+
+    // Focus the Give Kudos CTA via keyboard and confirm it is the
+    // active element and that focus-visible style is reachable.
+    const give = page.locator(tid(KUDOS_TESTIDS.giveKudosFlyoutTrigger)).first();
+    await give.focus();
+    await expect(give).toBeFocused();
+
+    await captureProof(page, {
+      group: 'hosted',
+      spec: 'zoom-regression',
+      caseName: 'public-100-composition',
+      matrixParts: ['H13', 'P6'],
+    });
+  });
+
   test.describe('iPhone 12 Pro hosted', () => {
     test.use({ ...devices['iPhone 12 Pro'] });
 

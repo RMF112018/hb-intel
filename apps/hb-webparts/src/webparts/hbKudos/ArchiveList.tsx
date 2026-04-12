@@ -53,6 +53,7 @@ export function ArchiveList({
       id="hb-kudos-archive"
       aria-label="HB Kudos archive"
       data-hbc-webpart-section="hb-kudos-archive"
+      data-hbc-testid="hb-kudos-archive-section"
       style={archiveCssVars}
     >
       {/* eslint-disable-next-line react/no-unknown-property */}
@@ -146,6 +147,7 @@ export function ArchiveList({
                 onClick={() => onOpenDetail(entry)}
                 aria-label={`Open recognition: ${entry.headline}`}
                 className="hbk-archive-row"
+                data-hbc-testid="hb-kudos-archive-row"
               >
                 {entry.recipients.length > 0 ? (
                   <HbcAvatarStack

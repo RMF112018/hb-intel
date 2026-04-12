@@ -222,7 +222,7 @@ function HeroBanner({
   onViewAll,
 }: HeroBannerProps): React.JSX.Element {
   return (
-    <div className={styles.hero}>
+    <div className={styles.hero} data-hbc-testid="hb-kudos-hero-band">
       <div className={styles.heroDecorA} aria-hidden="true" />
       <div className={styles.heroDecorB} aria-hidden="true" />
       <div className={styles.heroDots} aria-hidden="true" />
@@ -299,7 +299,7 @@ function KudosSpotlight({
 
   return (
     <motion.div className={styles.spotlight} {...motionProps}>
-      <article className={styles.spotlightCard}>
+      <article className={styles.spotlightCard} data-hbc-testid="hb-kudos-featured-card">
         <span className={styles.spotlightRibbon} aria-hidden="true">
           <Sparkles size={10} className={styles.spotlightRibbonStar} strokeWidth={2.5} />
           Kudos Spotlight
@@ -411,7 +411,7 @@ function KudosSpotlight({
       </article>
 
       {recent.length > 0 ? (
-        <div className={styles.recentList}>
+        <div className={styles.recentList} data-hbc-testid="hb-kudos-recent-section">
           <div className={styles.sectionLabel}>
             <span>Recent recognition</span>
             <span className={styles.sectionLabelRule} aria-hidden="true" />
@@ -424,7 +424,7 @@ function KudosSpotlight({
             ].filter(Boolean).join('  ·  ');
 
             return (
-              <div key={item.id} className={styles.recentRow}>
+              <div key={item.id} className={styles.recentRow} data-hbc-testid="hb-kudos-recent-row">
                 {item.recipients.length > 0 ? (
                   <HbcAvatarStack people={item.recipients.slice(0, 1)} size="md" />
                 ) : null}

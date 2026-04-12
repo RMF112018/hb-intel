@@ -36,6 +36,13 @@ export const KUDOS_TESTIDS = {
   // no-conflict sentinel. Present only when the webpart detects it is
   // rendered inside a host iframe.
   assistantSafeZone: 'kudos-assistant-safezone',
+  // Phase-17 prompt-07 structural hooks for compaction / overflow proof.
+  heroBand: 'hb-kudos-hero-band',
+  featuredCard: 'hb-kudos-featured-card',
+  recentSection: 'hb-kudos-recent-section',
+  recentRow: 'hb-kudos-recent-row',
+  archiveSection: 'hb-kudos-archive-section',
+  archiveRow: 'hb-kudos-archive-row',
 
   // Companion webpart
   companionRoot: 'hb-kudos-companion-root',
