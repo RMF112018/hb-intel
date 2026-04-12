@@ -116,9 +116,9 @@ export function ArchiveList({
           data-hbc-testid="hb-kudos-archive-search"
           className="hbk-archive-search"
           style={{
-            padding: '7px 14px',
+            padding: '6px 12px',
             fontSize: '0.8125rem',
-            borderRadius: 10,
+            borderRadius: 8,
             border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
             background: KUDOS_GOV_TOKENS.orangeSubtle03,
             flex: '1 1 auto',
