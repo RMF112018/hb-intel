@@ -18,6 +18,8 @@ import { QualityControlWarrantyTab } from './tabs/QualityControlWarrantyTab.js';
 import { RiskManagementTab } from './tabs/RiskManagementTab.js';
 import { OperationalExcellenceTab } from './tabs/OperationalExcellenceTab.js';
 import { HumanResourcesTab } from './tabs/HumanResourcesTab.js';
+import { KudosTab } from './tabs/KudosTab.js';
+import { KudosCompanionTab } from './tabs/KudosCompanionTab.js';
 
 type TabId =
   | 'pwa'
@@ -32,7 +34,9 @@ type TabId =
   | 'operational-excellence'
   | 'human-resources'
   | 'admin'
-  | 'site-control';
+  | 'site-control'
+  | 'kudos'
+  | 'kudos-companion';
 
 interface TabDef {
   id: TabId;
@@ -53,6 +57,8 @@ const TABS: TabDef[] = [
   { id: 'human-resources', label: 'Human Resources' },
   { id: 'admin', label: 'Admin' },
   { id: 'site-control', label: 'HB Site Control' },
+  { id: 'kudos', label: 'HB Kudos' },
+  { id: 'kudos-companion', label: 'HB Kudos Companion' },
 ];
 
 /** Map webpart tab IDs to their direct-import tab components (D-PH7-BW-8). */
@@ -68,6 +74,8 @@ const TAB_TO_COMPONENT: Partial<Record<TabId, React.ComponentType>> = {
   'risk-management': RiskManagementTab,
   'operational-excellence': OperationalExcellenceTab,
   'human-resources': HumanResourcesTab,
+  kudos: KudosTab,
+  'kudos-companion': KudosCompanionTab,
 };
 
 const VALID_TAB_IDS = new Set<TabId>(TABS.map((tab) => tab.id));
