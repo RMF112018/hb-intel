@@ -128,44 +128,60 @@ export function PublicKudosSurface({
       {/* eslint-disable-next-line react/no-unknown-property */}
       <style>{`
         [data-hbc-webpart-section="hb-kudos-public-surface"] {
-          /* Premium atmospheric background — recovered brand panel feel */
+          /* Outer layout container — no atmospheric treatment of its
+             own. The hero wrapper owns the branded gradient; recent/
+             archive sit below as subordinate zones in their native
+             page tone. */
           position: relative;
-          padding: 14px 16px 18px;
+          padding: 4px 2px 2px;
+        }
+        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-hero {
+          /* Unified hero zone — masthead (upper band) + featured
+             (nested content surface) live in one shared atmosphere.
+             Shared diagonal gradient flows top-left -> bottom-right;
+             two radial blooms add warm + cool depth. */
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 14px 16px 16px;
           border-radius: 18px;
+          overflow: hidden;
           background:
-            radial-gradient(circle at 8% -10%, rgba(229, 126, 70, 0.12) 0%, rgba(229, 126, 70, 0) 55%),
-            radial-gradient(circle at 100% 0%, rgba(34, 83, 145, 0.10) 0%, rgba(34, 83, 145, 0) 60%),
-            linear-gradient(180deg, #fffaf5 0%, #fdf4ec 100%);
+            radial-gradient(ellipse at 6% 2%, rgba(255, 196, 140, 0.22) 0%, rgba(255, 196, 140, 0) 55%),
+            radial-gradient(ellipse at 100% 110%, rgba(229, 126, 70, 0.28) 0%, rgba(229, 126, 70, 0) 58%),
+            linear-gradient(135deg, #2b4f80 0%, #1f3a65 35%, #172c4c 70%, #1a3354 100%);
+          color: #ffffff;
           box-shadow:
-            0 1px 3px rgba(229, 126, 70, 0.08),
-            0 8px 22px rgba(34, 83, 145, 0.06);
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 14px 36px rgba(10, 27, 51, 0.22),
+            0 2px 6px rgba(10, 27, 51, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-hero::before {
+          /* Diagonal light bloom — reinforces the top-left origin of
+             the hero atmosphere without adding a second gradient. */
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 45%),
+            radial-gradient(circle at 90% 100%, rgba(255, 196, 140, 0.12) 0%, rgba(255, 196, 140, 0) 48%);
+          pointer-events: none;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-masthead {
+          /* Upper band of the unified hero — lighter / more transparent
+             than the featured card so the two zones read as one
+             composition with the featured card as the content surface. */
           position: relative;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          padding: 12px 16px;
-          border-radius: 14px;
-          background:
-            radial-gradient(circle at 100% 50%, rgba(229, 126, 70, 0.22) 0%, rgba(229, 126, 70, 0) 62%),
-            linear-gradient(135deg, #274876 0%, #1b3258 60%, #162944 100%);
+          padding: 4px 6px 6px;
           color: #ffffff;
-          overflow: hidden;
-          box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.06) inset,
-            0 10px 28px rgba(10, 27, 51, 0.22),
-            0 2px 6px rgba(10, 27, 51, 0.16);
-        }
-        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-masthead::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(circle at 12% 130%, rgba(255, 196, 140, 0.18) 0%, rgba(255, 196, 140, 0) 55%),
-            radial-gradient(circle at 90% -40%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 55%);
-          pointer-events: none;
+          background: transparent;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-title {
           display: inline-flex;
@@ -230,37 +246,40 @@ export function PublicKudosSurface({
           outline-offset: 2px;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured {
+          /* Featured card — nested content surface. Reads as slightly
+             more opaque / frosted than the hero so it still feels like
+             the primary content panel, but without its own independent
+             drop-shadow (shadow now comes from the hero wrapper). The
+             hero's diagonal gradient is visible through the frost. */
           position: relative;
           display: flex;
           flex-direction: column;
           gap: 12px;
           padding: 18px 20px 16px;
-          border-radius: 16px;
+          border-radius: 14px;
           background:
-            radial-gradient(circle at 120% -20%, rgba(229, 126, 70, 0.26) 0%, rgba(229, 126, 70, 0) 55%),
-            radial-gradient(circle at -10% 120%, rgba(34, 83, 145, 0.36) 0%, rgba(34, 83, 145, 0) 50%),
-            linear-gradient(135deg, rgba(39, 72, 118, 0.82) 0%, rgba(27, 50, 88, 0.86) 55%, rgba(22, 41, 68, 0.86) 100%);
+            linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%),
+            linear-gradient(135deg, rgba(15, 30, 55, 0.55) 0%, rgba(15, 30, 55, 0.48) 100%);
           color: #ffffff;
-          backdrop-filter: blur(14px) saturate(120%);
-          -webkit-backdrop-filter: blur(14px) saturate(120%);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          border-left: 3px solid rgba(229, 126, 70, 0.9);
+          backdrop-filter: blur(16px) saturate(125%);
+          -webkit-backdrop-filter: blur(16px) saturate(125%);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          border-left: 3px solid rgba(229, 126, 70, 0.92);
           box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.08) inset,
-            0 12px 32px rgba(10, 27, 51, 0.24),
-            0 2px 6px rgba(10, 27, 51, 0.16);
+            0 1px 0 rgba(255, 255, 255, 0.18) inset,
+            0 4px 14px rgba(10, 27, 51, 0.18);
           overflow: hidden;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured::before {
           content: '';
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 45%);
+          background: radial-gradient(circle at 8% 0%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 45%);
           pointer-events: none;
         }
         @supports not (backdrop-filter: blur(14px)) {
           [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured {
-            background: linear-gradient(135deg, #274876 0%, #1b3258 55%, #162944 100%);
+            background: linear-gradient(135deg, rgba(39, 72, 118, 0.92) 0%, rgba(27, 50, 88, 0.94) 100%);
           }
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-badge {
@@ -418,7 +437,8 @@ export function PublicKudosSurface({
           letter-spacing: 0.16em;
           text-transform: uppercase;
           color: var(--pks-brand-orange);
-          margin: 10px 2px 2px;
+          margin: 2px 4px 2px;
+          padding-top: 4px;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-recent-label::after {
           content: '';
@@ -500,38 +520,40 @@ export function PublicKudosSurface({
         }
       `}</style>
 
-      {/* Masthead */}
-      <div className="pks-masthead">
-        <h2 className="pks-title" data-hbc-testid="hb-kudos-hero-band">
-          <span className="pks-title-icon" aria-hidden="true">{TROPHY_GLYPH}</span>
-          {heading}
-        </h2>
-        <button
-          type="button"
-          className="pks-give-btn"
-          onClick={onGiveKudos}
-          data-hbc-testid="hb-kudos-give-trigger"
-        >
-          <span aria-hidden="true">✦</span>
-          Give Kudos
-        </button>
-      </div>
+      {/* Unified hero zone — masthead (upper band) + featured
+          (nested content surface) share one gradient atmosphere. */}
+      <div className="pks-hero" data-hbc-testid="hb-kudos-hero-zone">
+        <div className="pks-masthead">
+          <h2 className="pks-title" data-hbc-testid="hb-kudos-hero-band">
+            <span className="pks-title-icon" aria-hidden="true">{TROPHY_GLYPH}</span>
+            {heading}
+          </h2>
+          <button
+            type="button"
+            className="pks-give-btn"
+            onClick={onGiveKudos}
+            data-hbc-testid="hb-kudos-give-trigger"
+          >
+            <span aria-hidden="true">✦</span>
+            Give Kudos
+          </button>
+        </div>
 
-      {/* Featured */}
-      {featured ? (
-        <FeaturedCard
-          entry={featured}
-          badgeLabel={featuredBadgeLabel}
-          onCelebrate={onCelebrate}
-          celebrateLoading={celebrateLoading}
-          onOpenArticle={onOpenArticle}
-        />
-      ) : (
-        <HbcEmptyState
-          title="No recognition yet"
-          description="Be the first to send kudos this week."
-        />
-      )}
+        {featured ? (
+          <FeaturedCard
+            entry={featured}
+            badgeLabel={featuredBadgeLabel}
+            onCelebrate={onCelebrate}
+            celebrateLoading={celebrateLoading}
+            onOpenArticle={onOpenArticle}
+          />
+        ) : (
+          <HbcEmptyState
+            title="No recognition yet"
+            description="Be the first to send kudos this week."
+          />
+        )}
+      </div>
 
       {/* Recent */}
       {recent.length > 0 ? (
