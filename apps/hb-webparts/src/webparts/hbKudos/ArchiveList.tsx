@@ -19,11 +19,9 @@
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
-import {
-  buildKudosRecipientSummary,
-  type KudosEntry,
-} from '../../homepage/webparts/kudosContracts.js';
+import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { formatRecipientDisplay } from './PublicKudosSurface.js';
 
 export interface ArchiveListProps {
   entries: KudosEntry[];
@@ -228,13 +226,13 @@ export function ArchiveList({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {filtered.map((entry) => {
-                const summary = buildKudosRecipientSummary(entry.recipients);
+                const recipientDisplay = formatRecipientDisplay(entry.recipients);
                 return (
                   <button
                     key={entry.id}
                     type="button"
                     onClick={() => onOpenEntry(entry)}
-                    aria-label={`Open recognition: ${entry.headline || summary.label}`}
+                    aria-label={`Open recognition: ${entry.headline || recipientDisplay}`}
                     className="hbk-archive-row"
                     data-hbc-testid="hb-kudos-archive-row"
                   >
@@ -260,7 +258,7 @@ export function ArchiveList({
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {summary.label}
+                        {recipientDisplay}
                       </div>
                       <div
                         style={{

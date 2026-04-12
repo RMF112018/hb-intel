@@ -8,11 +8,9 @@
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
-import {
-  buildKudosRecipientSummary,
-  type KudosEntry,
-} from '../../homepage/webparts/kudosContracts.js';
+import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { formatRecipientDisplay } from './PublicKudosSurface.js';
 
 export interface KudosFeedBodyProps {
   entries: KudosEntry[];
@@ -98,15 +96,7 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filtered.map((entry) => {
-            const summary = buildKudosRecipientSummary(entry.recipients);
-            const recipientLabel =
-              entry.recipients.length === 1
-                ? entry.recipients[0]!.name
-                : entry.recipients.length === 2
-                  ? `${entry.recipients[0]!.name} and ${entry.recipients[1]!.name}`
-                  : entry.recipients.length > 2
-                    ? `${entry.recipients[0]!.name}, ${entry.recipients[1]!.name}, and ${entry.recipients.length - 2} more`
-                    : '';
+            const recipientLabel = formatRecipientDisplay(entry.recipients);
 
             return (
               <button
@@ -208,8 +198,8 @@ export function KudosFeedBody({ entries, onOpenDetail }: KudosFeedBodyProps): Re
                       year: 'numeric',
                     })}
                   </span>
-                  {summary.total > 0 && entry.recipients.length > 1 ? (
-                    <span>{summary.label}</span>
+                  {entry.recipients.length > 1 ? (
+                    <span>{recipientLabel}</span>
                   ) : null}
                   {typeof entry.celebrateCount === 'number' && entry.celebrateCount > 0 ? (
                     <span

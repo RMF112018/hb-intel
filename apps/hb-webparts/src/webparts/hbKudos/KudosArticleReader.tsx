@@ -15,11 +15,9 @@
  */
 import * as React from 'react';
 import { HbcKudosComposerFlyout, HbcAvatarStack } from '@hbc/ui-kit/homepage';
-import {
-  buildKudosRecipientSummary,
-  type KudosEntry,
-} from '../../homepage/webparts/kudosContracts.js';
+import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+import { formatRecipientDisplay } from './PublicKudosSurface.js';
 
 export interface KudosArticleReaderProps {
   entry: KudosEntry | undefined;
@@ -42,7 +40,7 @@ export function KudosArticleReader({
   onClose,
 }: KudosArticleReaderProps): React.JSX.Element {
   const open = Boolean(entry);
-  const summary = entry ? buildKudosRecipientSummary(entry.recipients) : null;
+  const recipientDisplay = entry ? formatRecipientDisplay(entry.recipients) : '';
   const submittedLine =
     entry?.submittedBy?.displayName
       ? `Submitted by ${entry.submittedBy.displayName}`
@@ -53,7 +51,7 @@ export function KudosArticleReader({
     <HbcKudosComposerFlyout
       open={open}
       onClose={onClose}
-      title={summary?.label || 'Recognition'}
+      title={recipientDisplay || 'Recognition'}
       subtitle={entry?.headline || undefined}
       primaryAction={{ label: 'Close', onClick: onClose }}
     >
@@ -98,7 +96,7 @@ export function KudosArticleReader({
                   color: KUDOS_GOV_TOKENS.textPrimary,
                 }}
               >
-                {summary?.label}
+                {recipientDisplay}
               </div>
               {entry.headline ? (
                 <div

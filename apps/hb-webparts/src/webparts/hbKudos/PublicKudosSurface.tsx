@@ -28,11 +28,30 @@
  */
 import * as React from 'react';
 import { HbcAvatarStack, HbcEmptyState } from '@hbc/ui-kit/homepage';
-import {
-  buildKudosRecipientSummary,
-  type KudosEntry,
-} from '../../homepage/webparts/kudosContracts.js';
+import { type KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import { KUDOS_GOV_TOKENS } from '../../homepage/shared/KudosGovernancePrimitives.js';
+
+/**
+ * formatRecipientDisplay — produce a real honoree-name label for the
+ * featured card, recent rows, archive rows, and reader title. Never
+ * returns aggregate bucket strings like "1 individual".
+ *
+ *   0 recipients   → "Recognition"
+ *   1 recipient    → "Jane Doe"
+ *   2 recipients   → "Jane Doe and John Smith"
+ *   3+ recipients  → "Jane Doe, John Smith, and N more"
+ */
+export function formatRecipientDisplay(
+  recipients: Array<{ name?: string | null }>,
+): string {
+  const named = recipients
+    .map((r) => (typeof r?.name === 'string' ? r.name.trim() : ''))
+    .filter((n) => n.length > 0);
+  if (named.length === 0) return 'Recognition';
+  if (named.length === 1) return named[0]!;
+  if (named.length === 2) return `${named[0]} and ${named[1]}`;
+  return `${named[0]}, ${named[1]}, and ${named.length - 2} more`;
+}
 
 export interface PublicKudosSurfaceProps {
   heading: string;
@@ -289,8 +308,12 @@ export function PublicKudosSurface({
           color: rgba(255, 255, 255, 0.82);
           margin: 0;
         }
+        [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-body {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-featured-excerpt {
-          position: relative;
           font-size: 0.9375rem;
           line-height: 1.6;
           color: rgba(255, 255, 255, 0.9);
@@ -299,20 +322,25 @@ export function PublicKudosSurface({
           -webkit-line-clamp: 3;
           overflow: hidden;
           margin: 0;
+          white-space: pre-wrap;
+          word-break: break-word;
         }
         [data-hbc-webpart-section="hb-kudos-public-surface"] .pks-readmore-btn {
-          display: inline;
+          align-self: flex-start;
+          display: inline-flex;
+          align-items: center;
           padding: 0;
           border: none;
           background: none;
           font: inherit;
+          font-size: 0.8125rem;
           font-weight: 700;
           color: #ffd7bf;
           text-decoration: underline;
           text-decoration-color: rgba(255, 215, 191, 0.55);
           text-underline-offset: 2px;
           cursor: pointer;
-          margin-left: 4px;
+          margin: 2px 0 0;
           outline: none;
           transition: color 140ms ease, text-decoration-color 140ms ease;
         }
@@ -513,14 +541,14 @@ export function PublicKudosSurface({
           </div>
           <div className="pks-recent-list">
             {recent.map((item) => {
-              const summary = buildKudosRecipientSummary(item.recipients);
+              const recipientDisplay = formatRecipientDisplay(item.recipients);
               return (
                 <button
                   key={item.id}
                   type="button"
                   className="pks-recent-row"
                   onClick={() => onOpenArticle(item)}
-                  aria-label={`Open recognition for ${summary.label}`}
+                  aria-label={`Open recognition for ${recipientDisplay}`}
                   data-hbc-testid="hb-kudos-recent-row"
                 >
                   {item.recipients.length > 0 ? (
@@ -534,7 +562,7 @@ export function PublicKudosSurface({
                     />
                   ) : null}
                   <div className="pks-recent-body">
-                    <div className="pks-recent-recipient">{summary.label}</div>
+                    <div className="pks-recent-recipient">{recipientDisplay}</div>
                     <div className="pks-recent-headline">{item.headline || 'Recognition'}</div>
                   </div>
                 </button>
@@ -566,9 +594,44 @@ function FeaturedCard({
   celebrateLoading,
   onOpenArticle,
 }: FeaturedCardProps): React.JSX.Element {
-  const summary = buildKudosRecipientSummary(entry.recipients);
+  const recipientDisplay = formatRecipientDisplay(entry.recipients);
   const celebrateCount = entry.celebrateCount ?? 0;
-  const hasExcerpt = Boolean(entry.excerpt && entry.excerpt.trim().length > 0);
+
+  // Preview body — prefer excerpt, fall back to details so records with
+  // long-form content only in `details` still feed the clamped preview
+  // and still expose a Read more path to the reader.
+  const rawExcerpt = entry.excerpt?.trim() ?? '';
+  const rawDetails = entry.details?.trim() ?? '';
+  const previewBody = rawExcerpt || rawDetails;
+  const hasPreview = previewBody.length > 0;
+
+  // Measured truncation: compare scrollHeight to clientHeight on the
+  // clamped container. Only show Read more when the clamp actually
+  // hides content, OR when `details` carries meaningfully more text
+  // than the preview exposes.
+  const excerptRef = React.useRef<HTMLDivElement | null>(null);
+  const [isClampTruncated, setIsClampTruncated] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const el = excerptRef.current;
+    if (!el) {
+      setIsClampTruncated(false);
+      return;
+    }
+    const check = (): void => {
+      setIsClampTruncated(el.scrollHeight - el.clientHeight > 1);
+    };
+    check();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(check) : null;
+    if (ro) ro.observe(el);
+    window.addEventListener('resize', check);
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', check);
+    };
+  }, [previewBody]);
+
+  const detailsExceedsPreview = rawDetails.length > rawExcerpt.length + 40;
+  const showReadMore = hasPreview && (isClampTruncated || detailsExceedsPreview);
 
   return (
     <article className="pks-featured" data-hbc-testid="hb-kudos-featured-card">
@@ -590,25 +653,36 @@ function FeaturedCard({
           />
         ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-          <h3 className="pks-featured-recipient">{summary.label}</h3>
+          <h3 className="pks-featured-recipient">{recipientDisplay}</h3>
           {entry.headline ? (
             <p className="pks-featured-headline">{entry.headline}</p>
           ) : null}
         </div>
       </div>
 
-      {hasExcerpt ? (
-        <p className="pks-featured-excerpt">
-          {entry.excerpt}
-          <button
-            type="button"
-            className="pks-readmore-btn"
-            onClick={() => onOpenArticle(entry)}
-            aria-label="Read full recognition"
+      {hasPreview ? (
+        <div className="pks-featured-body">
+          {/* Clamped container is markup-only text so the webkit-box
+              clamp never hides the action affordance below. */}
+          <div
+            ref={excerptRef}
+            className="pks-featured-excerpt"
+            data-hbc-testid="hb-kudos-featured-excerpt"
           >
-            … Read more
-          </button>
-        </p>
+            {previewBody}
+          </div>
+          {showReadMore ? (
+            <button
+              type="button"
+              className="pks-readmore-btn"
+              onClick={() => onOpenArticle(entry)}
+              aria-label="Read full recognition"
+              data-hbc-testid="hb-kudos-featured-readmore"
+            >
+              … Read more
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="pks-featured-footer">
