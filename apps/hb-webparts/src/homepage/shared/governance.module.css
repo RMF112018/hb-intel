@@ -168,3 +168,81 @@
   font-weight: 600;
   line-height: 1.5;
 }
+
+/* ── Governance input dialog (KudosGovernanceInputDialog) ───────────
+   Phase-23 Prompt 05 hardening: stable visual grammar for the
+   dialog body, description, and text/select inputs now lives here
+   instead of in inline style literals and a runtime-injected <style>
+   block at the component root. */
+
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialogDescription {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--hbk-gov-text-secondary);
+}
+
+.dialogInput {
+  padding: 8px 10px;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  border: 1px solid var(--hbk-gov-orange-28);
+  font-family: inherit;
+  outline: none;
+}
+
+.dialogInput:focus-visible {
+  outline: 2px solid var(--hbk-gov-blue);
+  outline-offset: 1px;
+  border-color: var(--hbk-gov-orange);
+}
+
+/* ── Audit timeline block (KudosAuditTimelineBlock) ──────────────── */
+
+.timelineStatus {
+  font-size: 0.75rem;
+  color: var(--hbk-gov-text-muted);
+}
+
+.timelineList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timelineEvent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--hbk-gov-orange-10);
+}
+
+.timelineEventBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineEventActor {
+  color: var(--hbk-gov-text-tertiary);
+  font-weight: 600;
+}
+
+.timelineEventPublic {
+  color: var(--hbk-gov-text-faint);
+  margin-top: 2px;
+}
+
+.timelineEventInternal {
+  color: var(--hbk-gov-danger-ink-italic);
+  margin-top: 2px;
+  font-style: italic;
+}

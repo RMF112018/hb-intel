@@ -220,18 +220,39 @@ export const KUDOS_RADIUS = {
 // SectionHeading — governance metadata section label
 // ---------------------------------------------------------------------------
 
+/**
+ * Governance CSS-var bridge. Sets every `--hbk-gov-*` custom property
+ * consumed by `governance.module.css` from governed KUDOS_GOV_TOKENS
+ * values. Every governance primitive spreads this record on its
+ * outermost rendered root so module selectors always resolve against
+ * governed tokens — the single doctrine-approved inline-style seam.
+ */
 function governanceVars(): React.CSSProperties {
   return {
+    // Brand
     '--hbk-gov-blue': KUDOS_GOV_TOKENS.brandBlue,
+    '--hbk-gov-orange': KUDOS_GOV_TOKENS.brandOrange,
+
+    // Blue ramp
     '--hbk-gov-blue-12': KUDOS_GOV_TOKENS.blueSubtle12,
     '--hbk-gov-blue-18': KUDOS_GOV_TOKENS.blueSubtle18,
     '--hbk-gov-blue-20': KUDOS_GOV_TOKENS.blueSubtle20,
+
+    // Orange ramp (dialog input border + timeline event border)
+    '--hbk-gov-orange-10': KUDOS_GOV_TOKENS.orangeSubtle10,
+    '--hbk-gov-orange-28': KUDOS_GOV_TOKENS.orangeSubtle28,
+
+    // Danger
     '--hbk-gov-danger': KUDOS_GOV_TOKENS.dangerRed,
     '--hbk-gov-danger-08': KUDOS_GOV_TOKENS.dangerSubtle08,
     '--hbk-gov-danger-22': KUDOS_GOV_TOKENS.dangerSubtle22,
+    '--hbk-gov-danger-ink-italic': KUDOS_GOV_TOKENS.dangerItalic72,
+
+    // Text hierarchy
     '--hbk-gov-text-muted': KUDOS_GOV_TOKENS.textMuted,
     '--hbk-gov-text-secondary': KUDOS_GOV_TOKENS.textSecondary,
     '--hbk-gov-text-tertiary': KUDOS_GOV_TOKENS.textTertiary,
+    '--hbk-gov-text-faint': KUDOS_GOV_TOKENS.textFaint,
     '--hbk-gov-text-disabled': KUDOS_GOV_TOKENS.textDisabled,
   } as React.CSSProperties;
 }
@@ -443,35 +464,15 @@ export function KudosGovernanceInputDialog({
       }}
       secondaryAction={{ label: 'Cancel', onClick: onClose }}
     >
-      {/* Scoped focus-visible styles for dialog inputs — inline styles
-          cannot express pseudo-classes so keyboard focus is handled here. */}
-      {/* eslint-disable-next-line react/no-unknown-property */}
-      <style>{`
-        [data-hbc-gov-dialog] input:focus-visible,
-        [data-hbc-gov-dialog] select:focus-visible {
-          outline: 2px solid ${KUDOS_GOV_TOKENS.brandBlue};
-          outline-offset: 1px;
-          border-color: ${KUDOS_GOV_TOKENS.brandOrange};
-        }
-      `}</style>
-      <div data-hbc-gov-dialog="" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className={governanceStyles.dialogBody} style={governanceVars()}>
         {description ? (
-          <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.55, color: KUDOS_GOV_TOKENS.textSecondary }}>
-            {description}
-          </p>
+          <p className={governanceStyles.dialogDescription}>{description}</p>
         ) : null}
         {choices ? (
           <select
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            style={{
-              padding: '8px 10px',
-              fontSize: '0.875rem',
-              borderRadius: 8,
-              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              fontFamily: 'inherit',
-              outline: 'none',
-            }}
+            className={governanceStyles.dialogInput}
           >
             {choices.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -485,14 +486,7 @@ export function KudosGovernanceInputDialog({
             onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
             placeholder={placeholder}
             autoFocus
-            style={{
-              padding: '8px 10px',
-              fontSize: '0.875rem',
-              borderRadius: 8,
-              border: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle28}`,
-              fontFamily: 'inherit',
-              outline: 'none',
-            }}
+            className={governanceStyles.dialogInput}
           />
         )}
       </div>
@@ -536,46 +530,39 @@ export function KudosAuditTimelineBlock({
   }
 
   if (loading) {
-    return <div style={{ fontSize: '0.75rem', color: KUDOS_GOV_TOKENS.textMuted }}>Loading timeline…</div>;
+    return (
+      <div className={governanceStyles.timelineStatus} style={governanceVars()}>
+        Loading timeline…
+      </div>
+    );
   }
 
   if (events.length === 0) {
     return (
-      <div style={{ fontSize: '0.75rem', color: KUDOS_GOV_TOKENS.textMuted }}>
+      <div className={governanceStyles.timelineStatus} style={governanceVars()}>
         {fallbackText ?? 'No timeline events.'}
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div className={governanceStyles.timelineList} style={governanceVars()}>
       {events.map((evt) => (
-        <div
-          key={evt.id}
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 10,
-            fontSize: '0.75rem',
-            lineHeight: 1.5,
-            paddingBottom: 6,
-            borderBottom: `1px solid ${KUDOS_GOV_TOKENS.orangeSubtle10}`,
-          }}
-        >
+        <div key={evt.id} className={governanceStyles.timelineEvent}>
           <HbcStatusBadge
             variant={chipVariant(mapTone(evt.eventType))}
             size="small"
             label={mapLabel(evt.eventType)}
           />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: KUDOS_GOV_TOKENS.textTertiary, fontWeight: 600 }}>
+          <div className={governanceStyles.timelineEventBody}>
+            <div className={governanceStyles.timelineEventActor}>
               {evt.actorDisplayName ?? 'System'} · {new Date(evt.eventAt).toLocaleString()}
             </div>
             {evt.publicNote ? (
-              <div style={{ color: KUDOS_GOV_TOKENS.textFaint, marginTop: 2 }}>{evt.publicNote}</div>
+              <div className={governanceStyles.timelineEventPublic}>{evt.publicNote}</div>
             ) : null}
             {showInternalNotes && evt.internalNote ? (
-              <div style={{ color: KUDOS_GOV_TOKENS.dangerItalic72, marginTop: 2, fontStyle: 'italic' }}>
+              <div className={governanceStyles.timelineEventInternal}>
                 Internal: {evt.internalNote}
               </div>
             ) : null}

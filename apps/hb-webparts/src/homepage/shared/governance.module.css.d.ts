@@ -16,5 +16,15 @@ declare const styles: {
   readonly detailRow: string;
   readonly detailRowLabel: string;
   readonly detailReducedView: string;
+  readonly dialogBody: string;
+  readonly dialogDescription: string;
+  readonly dialogInput: string;
+  readonly timelineStatus: string;
+  readonly timelineList: string;
+  readonly timelineEvent: string;
+  readonly timelineEventBody: string;
+  readonly timelineEventActor: string;
+  readonly timelineEventPublic: string;
+  readonly timelineEventInternal: string;
 };
 export default styles;
