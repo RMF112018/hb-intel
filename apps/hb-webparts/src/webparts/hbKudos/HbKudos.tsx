@@ -31,7 +31,6 @@
  */
 import * as React from 'react';
 import {
-  HbcPeopleCultureSurface,
   HbcKudosComposerFlyout,
   HbcKudosComposerForm,
   HbcKudosComposerPreview,
@@ -39,9 +38,6 @@ import {
   HbcKudosComposerError,
   HbcEmptyState,
   HbcSpinner,
-  type PeopleCultureSurfaceModel,
-  type KudosSpotlightItem,
-  type KudosRailItem,
   createGraphPersonPhotoFn,
 } from '@hbc/ui-kit/homepage';
 import { usePeopleCultureData } from '../../homepage/data/usePeopleCultureData.js';
@@ -56,16 +52,15 @@ import {
   isPubliclyVisible,
   type KudosEntry,
 } from '../../homepage/webparts/kudosContracts.js';
-import { KudosDetailPanelContent } from '../../homepage/shared/KudosDetailPanelContent.js';
 import {
-  KUDOS_GOV_TOKENS,
-  KudosActionButton,
   KudosGovernanceInputDialog,
 } from '../../homepage/shared/KudosGovernancePrimitives.js';
 import { submitKudosGovernanceAction } from '../../homepage/data/kudosGovernanceWriter.js';
 import { getKudosListHostUrl, resolveCurrentUserId } from '../../homepage/data/spContext.js';
 import { ArchiveList } from './ArchiveList.js';
 import { KudosFeedBody } from './KudosFeedBody.js';
+import { PublicKudosSurface } from './PublicKudosSurface.js';
+import { KudosArticleReader } from './KudosArticleReader.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -111,169 +106,18 @@ function isFeaturedWorthy(entry: KudosEntry): boolean {
   return hasRecipients && hasText;
 }
 
-/**
- * Map a KudosEntry to the ui-kit KudosSpotlightItem contract.
- * Only employee-facing fields are projected — no governance metadata,
- * no prominence internals, no audit history. When `excerpt` is empty,
- * falls back to `details` (truncated to ~200 chars) so the spotlight
- * card always carries body content.
- */
-function adaptSpotlight(entry: KudosEntry): KudosSpotlightItem {
-  const excerpt =
-    entry.excerpt?.trim() ||
-    (entry.details?.trim()
-      ? entry.details.trim().slice(0, 200) +
-        (entry.details.trim().length > 200 ? '\u2026' : '')
-      : undefined);
-
-  return {
-    id: entry.id,
-    headline: entry.headline || 'Recognition',
-    excerpt,
-    recipients: (entry.recipients ?? []).map((r) => ({
-      id: r.id,
-      name: r.name,
-      src: r.media?.src,
-    })),
-    submittedByName: entry.submittedBy?.displayName,
-    celebrateCount: entry.celebrateCount,
-  };
-}
-
-/**
- * Map KudosEntry[] to the ui-kit KudosRailItem[] contract.
- * Same boundary rules as adaptSpotlight — employee-facing fields only.
- */
-function adaptRail(entries: KudosEntry[]): KudosRailItem[] {
-  return entries.map((entry) => ({
-    id: entry.id,
-    headline: entry.headline || 'Recognition',
-    recipients: (entry.recipients ?? []).map((r) => ({
-      id: r.id,
-      name: r.name,
-      src: r.media?.src,
-    })),
-    submittedByName: entry.submittedBy?.displayName,
-    celebrateCount: entry.celebrateCount,
-  }));
-}
-
-/**
- * Build the surface model with featured-quality selection. The first
- * entry that meets the content-quality threshold becomes featured;
- * remaining entries (including sparse ones) flow to the recent rail
- * where their simpler row layout tolerates minimal content. If no
- * entry meets the threshold, the surface gracefully falls back to
- * the SparseInvite state rather than rendering a hollow spotlight.
- */
-function buildKudosSurfaceModel(
-  heading: string,
-  publicEntries: KudosEntry[],
-): PeopleCultureSurfaceModel {
-  const sorted = sortByRecency(publicEntries);
-
-  // Find the best featured candidate — first entry that passes
-  // the content-quality gate.
-  const featuredIdx = sorted.findIndex(isFeaturedWorthy);
-  const featured = featuredIdx >= 0 ? sorted[featuredIdx] : undefined;
-  const rest = sorted.filter((_, i) => i !== featuredIdx).slice(0, 7);
-
-  return {
-    heading,
-    kudos: {
-      isEmpty: !featured,
-      featured: featured ? adaptSpotlight(featured) : undefined,
-      recent: adaptRail(rest),
-    },
-    // HB Kudos is recognition-only — announcements/celebrations live on
-    // the sibling PeopleCulturePublic webpart. Pass empty arrays so the
-    // shared surface renders only the kudos lane.
-    announcements: [],
-    celebrations: [],
-  };
-}
+// (adaptSpotlight/adaptRail/buildKudosSurfaceModel retired — the new
+// PublicKudosSurface consumes KudosEntry directly, no ui-kit model
+// adapters are required.)
 
 // ---------------------------------------------------------------------------
 // Archive list + Feed body: extracted into sibling modules in phase-17
 // (see ./ArchiveList.tsx and ./KudosFeedBody.tsx).
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
-// Detail panel (shared content via KudosDetailPanelContent)
-// ---------------------------------------------------------------------------
-
-interface DetailPanelProps {
-  entry: KudosEntry | undefined;
-  onClose: () => void;
-  onCelebrate?: () => void;
-  onWithdraw?: () => void;
-  onResubmit?: () => void;
-  identity?: HomepageIdentityInput;
-}
-
-function DetailPanel({ entry, onClose, onCelebrate, onWithdraw, onResubmit, identity }: DetailPanelProps): React.JSX.Element {
-  const isPublic = entry ? isPubliclyVisible(entry) : false;
-
-  // Check if the current user is the submitter of this entry.
-  const isSubmitter = Boolean(
-    identity?.email && entry?.submittedBy?.email &&
-    identity.email.toLowerCase() === entry.submittedBy.email.toLowerCase(),
-  );
-  const canWithdraw = isSubmitter &&
-    (entry?.workflowStatus === 'pending' || entry?.workflowStatus === 'revisionRequested');
-  const canResubmit = isSubmitter && entry?.workflowStatus === 'revisionRequested';
-
-  // No timeline fetch for the employee surface — viewers must not
-  // receive internal workflow history per Decision Lock §103-107.
-  // The detail panel renders a reduced submission-info block instead.
-
-  return (
-    <HbcKudosComposerFlyout
-      open={Boolean(entry)}
-      onClose={onClose}
-      title={entry?.headline ?? 'Recognition detail'}
-      subtitle={entry ? `Nominated by ${entry.submittedBy?.displayName ?? 'Unknown'}` : undefined}
-      primaryAction={
-        isPublic && onCelebrate
-          ? { label: 'Celebrate', onClick: onCelebrate }
-          : { label: 'Close', onClick: onClose }
-      }
-      secondaryAction={isPublic && onCelebrate ? { label: 'Close', onClick: onClose } : undefined}
-    >
-      {entry ? (
-        <div data-hbc-testid="hb-kudos-public-detail" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <KudosDetailPanelContent
-            entry={entry}
-            role="viewer"
-          />
-
-          {(canWithdraw || canResubmit) ? (
-            <div
-              role="group"
-              aria-label="Submitter actions"
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 8,
-                paddingTop: 6,
-                borderTop: `1px dashed ${KUDOS_GOV_TOKENS.orangeSubtle22}`,
-              }}
-            >
-              {canResubmit && onResubmit ? (
-                <KudosActionButton label="Resubmit for review" onClick={onResubmit} disabled={false} tone="info" />
-              ) : null}
-              {canWithdraw && onWithdraw ? (
-                <KudosActionButton label="Withdraw" onClick={onWithdraw} disabled={false} tone="danger" />
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-    </HbcKudosComposerFlyout>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main webpart
+// Main webpart — DetailPanel retired in favor of KudosArticleReader.
+// Submitter withdraw/resubmit flows will be reintroduced via a dedicated
+// "My Submissions" affordance in a follow-up.
 // ---------------------------------------------------------------------------
 
 const DEFAULT_AGE_OFF_DAYS = 14;
@@ -410,64 +254,6 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
 
   const [archiveSearch, setArchiveSearch] = React.useState('');
 
-  // Dialog state for submitter actions (replaces window.prompt/confirm).
-  const [submitterDialog, setSubmitterDialog] = React.useState<{
-    action: 'withdraw' | 'resubmitHeadline' | 'resubmitExcerpt';
-    title: string;
-    description?: string;
-    placeholder?: string;
-    defaultValue?: string;
-    confirmLabel?: string;
-    allowEmpty?: boolean;
-  } | null>(null);
-  const [pendingResubmitHeadline, setPendingResubmitHeadline] = React.useState<string | undefined>();
-
-  const handleSubmitterDialogConfirm = React.useCallback(
-    (value: string) => {
-      if (!detailEntry || !submitterDialog) return;
-      const siteUrl = getKudosListHostUrl();
-      if (!siteUrl) return;
-
-      if (submitterDialog.action === 'withdraw') {
-        setSubmitterDialog(null);
-        void submitKudosGovernanceAction(
-          siteUrl,
-          { kind: 'withdraw', kudosId: detailEntry.id },
-          { actorEmail: identity?.email },
-        ).then((result) => { if (result.ok) { setDetailEntry(undefined); refreshData(); } });
-        return;
-      }
-
-      if (submitterDialog.action === 'resubmitHeadline') {
-        setPendingResubmitHeadline(value);
-        setSubmitterDialog({
-          action: 'resubmitExcerpt',
-          title: 'Edit excerpt',
-          description: 'Update the recognition excerpt before resubmitting.',
-          placeholder: 'Enter updated excerpt…',
-          defaultValue: detailEntry.excerpt ?? '',
-          confirmLabel: 'Resubmit',
-        });
-        return;
-      }
-
-      if (submitterDialog.action === 'resubmitExcerpt') {
-        setSubmitterDialog(null);
-        const hl = (pendingResubmitHeadline ?? '').trim();
-        const updatedHeadline = hl && hl !== (detailEntry.headline ?? '') ? hl : undefined;
-        const ex = value.trim();
-        const updatedExcerpt = ex && ex !== (detailEntry.excerpt ?? '') ? ex : undefined;
-        setPendingResubmitHeadline(undefined);
-        void submitKudosGovernanceAction(
-          siteUrl,
-          { kind: 'resubmit', kudosId: detailEntry.id, updatedHeadline, updatedExcerpt },
-          { actorEmail: identity?.email },
-        ).then((result) => { if (result.ok) { setDetailEntry(undefined); refreshData(); } });
-      }
-    },
-    [detailEntry, submitterDialog, pendingResubmitHeadline, identity?.email, refreshData],
-  );
-
   if (isLoading) {
     return (
       <div
@@ -522,7 +308,34 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       ? { label: 'Send Another', onClick: () => composerActions.reset() }
       : { label: 'Cancel', onClick: handleComposerClose };
 
-  const surfaceModel = buildKudosSurfaceModel(heading, hydrateRecipientPhotos(publicKudos));
+  // Featured selection: first entry that passes the content-quality gate
+  // becomes featured; remaining approved entries (up to 7) flow to the
+  // recent list. If nothing passes the gate the featured slot is empty
+  // and PublicKudosSurface renders the invite empty-state.
+  const hydratedPublic = hydrateRecipientPhotos(publicKudos);
+  const sortedPublic = sortByRecency(hydratedPublic);
+  const featuredIdx = sortedPublic.findIndex(isFeaturedWorthy);
+  const featuredEntry = featuredIdx >= 0 ? sortedPublic[featuredIdx] : undefined;
+  const recentEntries = sortedPublic.filter((_, i) => i !== featuredIdx).slice(0, 7);
+
+  // Unified handler used by featured Read more, recent rows, and archive rows.
+  const handleOpenArticle = (entry: KudosEntry): void => {
+    setDetailEntry(entry);
+  };
+
+  const handleCelebrate = (kudosId: string): void => {
+    const entry = publicKudos.find((e) => e.id === kudosId);
+    if (!entry || celebrating) return;
+    setCelebrating(true);
+    const current = entry.celebrateCount ?? 0;
+    const siteUrl = getKudosListHostUrl();
+    if (!siteUrl) { setCelebrating(false); return; }
+    void submitKudosGovernanceAction(
+      siteUrl,
+      { kind: 'celebrate', kudosId: entry.id, nextCount: current + 1 },
+      { actorEmail: identity?.email },
+    ).then(() => refreshData()).finally(() => setCelebrating(false));
+  };
 
   // Hosted safe zone: when rendered inside the SharePoint iframe the
   // persistent bottom-right assistant overlay can conflict with the
@@ -551,36 +364,29 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       aria-label="HB Kudos recognition"
       style={{ position: 'relative', ...hostedSafeZonePadding }}
     >
-      <HbcPeopleCultureSurface
-        model={surfaceModel}
+      <PublicKudosSurface
+        heading={heading}
+        featured={featuredEntry}
+        recent={recentEntries}
         onGiveKudos={composerActions.open}
-        onViewAll={() => setFeedOpen(true)}
-        celebrateHref={undefined}
+        onCelebrate={handleCelebrate}
         celebrateLoading={celebrating}
-        onCelebrate={(kudosId) => {
-          const entry = publicKudos.find((e) => e.id === kudosId);
-          if (!entry || celebrating) return;
-          setCelebrating(true);
-          const current = entry.celebrateCount ?? 0;
-          const siteUrl = getKudosListHostUrl();
-          if (!siteUrl) { setCelebrating(false); return; }
-          void submitKudosGovernanceAction(
-            siteUrl,
-            { kind: 'celebrate', kudosId: entry.id, nextCount: current + 1 },
-            { actorEmail: identity?.email },
-          ).then(() => refreshData()).finally(() => setCelebrating(false));
-        }}
-        heroEyebrow="HB Kudos"
-        heroSubcaption="Signature recognition across the company"
-        variant="people-culture-homepage"
-        footer={showArchive ? (
-          <ArchiveList
-            entries={hydrateRecipientPhotos(archiveKudos)}
-            searchText={archiveSearch}
-            onSearchChange={setArchiveSearch}
-            onOpenDetail={setDetailEntry}
-          />
-        ) : undefined}
+        onOpenArticle={handleOpenArticle}
+      />
+
+      {showArchive ? (
+        <ArchiveList
+          entries={hydrateRecipientPhotos(archiveKudos)}
+          searchText={archiveSearch}
+          onSearchChange={setArchiveSearch}
+          onOpenEntry={handleOpenArticle}
+          onViewAll={() => setFeedOpen(true)}
+        />
+      ) : null}
+
+      <KudosArticleReader
+        entry={detailEntry}
+        onClose={() => setDetailEntry(undefined)}
       />
 
       <HbcKudosComposerFlyout
@@ -643,53 +449,11 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
         </div>
       </HbcKudosComposerFlyout>
 
-      <DetailPanel
-        entry={detailEntry}
-        onClose={() => setDetailEntry(undefined)}
-        identity={identity}
-        onCelebrate={detailEntry && !celebrating ? () => {
-          setCelebrating(true);
-          const current = detailEntry.celebrateCount ?? 0;
-          const siteUrl = getKudosListHostUrl();
-          if (!siteUrl) { setCelebrating(false); return; }
-          void submitKudosGovernanceAction(
-            siteUrl,
-            { kind: 'celebrate', kudosId: detailEntry.id, nextCount: current + 1 },
-            { actorEmail: identity?.email },
-          ).then(() => refreshData()).finally(() => setCelebrating(false));
-        } : undefined}
-        onWithdraw={detailEntry ? () => {
-          setSubmitterDialog({
-            action: 'withdraw',
-            title: 'Withdraw recognition',
-            description: 'This action is final and cannot be undone. The recognition will be permanently withdrawn from review.',
-            confirmLabel: 'Withdraw',
-            allowEmpty: true,
-          });
-        } : undefined}
-        onResubmit={detailEntry ? () => {
-          setSubmitterDialog({
-            action: 'resubmitHeadline',
-            title: 'Edit headline',
-            description: 'Update the recognition headline before resubmitting for review.',
-            placeholder: 'Enter updated headline…',
-            defaultValue: detailEntry.headline ?? '',
-            confirmLabel: 'Next: excerpt',
-          });
-        } : undefined}
-      />
-
-      <KudosGovernanceInputDialog
-        open={submitterDialog !== null}
-        onClose={() => { setSubmitterDialog(null); setPendingResubmitHeadline(undefined); }}
-        onConfirm={handleSubmitterDialogConfirm}
-        title={submitterDialog?.title ?? ''}
-        description={submitterDialog?.description}
-        placeholder={submitterDialog?.placeholder}
-        defaultValue={submitterDialog?.defaultValue}
-        confirmLabel={submitterDialog?.confirmLabel}
-        allowEmpty={submitterDialog?.allowEmpty}
-      />
+      {/* DetailPanel + submitter withdraw/resubmit flows retired in the
+          locked-decision reader pass. The article reader above is the
+          viewer-only entry point for both featured Read more and recent
+          row clicks. Submitter-side actions will be reintroduced via a
+          dedicated My Submissions affordance in a follow-up. */}
 
       <KudosGovernanceInputDialog
         open={discardDialog}
