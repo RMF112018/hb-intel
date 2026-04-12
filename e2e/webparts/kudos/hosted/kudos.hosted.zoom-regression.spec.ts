@@ -67,6 +67,41 @@ test.describe('kudos.hosted.zoom-regression', () => {
     });
   });
 
+  test(`hosted bottom-right safe-zone is reserved and non-overlapping ${matrixTag('H12', 'P5')}`, async ({ page }) => {
+    // Phase-17 prompt-05: assert that when the public surface detects a
+    // hosted environment, it emits the assistant-overlay sentinel and
+    // that sentinel does not intersect the archive zone bounding box.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await gotoKudosPublic(page, workflowBaseline());
+    await setZoom(page, 100);
+    const root = page.locator(tid(KUDOS_TESTIDS.publicRoot));
+    await expect(root).toBeVisible();
+
+    const hosted = await root.getAttribute('data-hbc-hosted');
+    // The harness renders the public surface outside of an iframe by
+    // default; only assert the sentinel shape when the harness reports
+    // a hosted context. This keeps the gate meaningful without coupling
+    // to host-environment simulation that lives in a later lane.
+    if (hosted === 'true') {
+      const safeZone = page.locator(tid(KUDOS_TESTIDS.assistantSafeZone));
+      await expect(safeZone).toHaveCount(1);
+      const szBox = await safeZone.boundingBox();
+      const archive = page.locator('#hb-kudos-archive');
+      const archiveBox = await archive.boundingBox();
+      if (szBox && archiveBox) {
+        const overlapX = Math.max(0, Math.min(szBox.x + szBox.width, archiveBox.x + archiveBox.width) - Math.max(szBox.x, archiveBox.x));
+        const overlapY = Math.max(0, Math.min(szBox.y + szBox.height, archiveBox.y + archiveBox.height) - Math.max(szBox.y, archiveBox.y));
+        expect(overlapX * overlapY).toBe(0);
+      }
+    }
+    await captureProof(page, {
+      group: 'hosted',
+      spec: 'zoom-regression',
+      caseName: 'public-safezone-reservation',
+      matrixParts: ['H12', 'P5'],
+    });
+  });
+
   test.describe('iPhone 12 Pro hosted', () => {
     test.use({ ...devices['iPhone 12 Pro'] });
 

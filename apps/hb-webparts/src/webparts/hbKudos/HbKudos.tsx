@@ -530,8 +530,16 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
   // and expose a sentinel so the harness can assert non-overlap.
   const isHostedEnvironment =
     typeof window !== 'undefined' && window.self !== window.top;
+  // Top safe spacing uses env(safe-area-inset-top) on devices that
+  // report it (iOS notches, etc.) with a 12px minimum. Bottom-right
+  // safe zone is always 72x72 plus any inset so the assistant overlay
+  // cannot visually conflict with archive rows / footer content.
   const hostedSafeZonePadding: React.CSSProperties = isHostedEnvironment
-    ? { paddingTop: 8, paddingRight: 72, paddingBottom: 72 }
+    ? {
+        paddingTop: 'max(12px, env(safe-area-inset-top, 0px))',
+        paddingRight: 72,
+        paddingBottom: 'max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px))',
+      }
     : {};
 
   return (
@@ -539,6 +547,7 @@ export function HbKudos({ config, identity, getGraphToken }: HbKudosProps): Reac
       data-hbc-webpart="hb-kudos"
       data-hbc-webpart-phase="phase-14-kudos-phase-05"
       data-hbc-testid="hb-kudos-public-root"
+      data-hbc-hosted={isHostedEnvironment ? 'true' : 'false'}
       aria-label="HB Kudos recognition"
       style={{ position: 'relative', ...hostedSafeZonePadding }}
     >
