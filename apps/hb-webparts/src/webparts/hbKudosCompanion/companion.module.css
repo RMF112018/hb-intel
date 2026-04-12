@@ -285,6 +285,92 @@
   }
 }
 
+/* ── Phase-26 Prompt-01: explicit hosted-condition breakpoints ──
+   The `.root` declares `container-type: inline-size`, so all
+   responsive rules below are container-relative and behave
+   predictably when the Companion is placed in 1/2, 1/3, or 1/4
+   SharePoint section columns — independent of viewport width.
+   Two explicit breakpoints cover the realistic constrained cases:
+
+     narrow  — inline-size <= 560px (1/3 column, compact canvas)
+     tight   — inline-size <= 420px (1/4 column, edit-mode gutter)
+*/
+
+/* Narrow: single-column SharePoint section chrome or edit-mode
+   compression. Hierarchy is preserved; the layout collapses from
+   row-to-column, not from premium-to-timid. */
+@container (max-width: 560px) {
+  .header {
+    align-items: flex-start;
+  }
+  .headerMeta {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .controlZone {
+    padding: 10px;
+  }
+  /* Each refinement control takes its own row so none of them get
+     squeezed under a 180px text field. */
+  .searchField,
+  .ownershipField {
+    flex-basis: 100%;
+  }
+  /* Queue row collapses to a single content column; the date spine
+     drops below the body so the headline/excerpt never truncate to
+     accommodate the right-side date. */
+  .queueRow {
+    grid-template-columns: 1fr;
+  }
+  .queueRowSelectable {
+    grid-template-columns: auto 1fr;
+  }
+  .queueRowDateCell {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+  /* Bulk bar stacks so approve/clear never fall off-canvas in edit
+     mode; action buttons stretch to full row width. */
+  .bulkBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .bulkApproveBtn,
+  .bulkClearBtn {
+    width: 100%;
+  }
+  /* Queue region header title + count wrap to their own rows
+     so neither is ellipsised or truncated. */
+  .queueRegionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Tight: very narrow column — the queue scope tabs become a
+   horizontal-scrolling strip instead of wrapping into three rows,
+   preserving scan order and avoiding a timid stacked-button
+   column. Page-canvas-safe: scroll is contained to the tab row. */
+@container (max-width: 420px) {
+  .filterBar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .filterBar > * {
+    flex: 0 0 auto;
+  }
+  /* Header subtitle becomes denser so the scoped line fits in one
+     row even at 280–360px container widths. */
+  .workspaceSubtitle {
+    font-size: 0.75rem;
+  }
+}
+
 .queueRowChipRow {
   display: flex;
   align-items: center;

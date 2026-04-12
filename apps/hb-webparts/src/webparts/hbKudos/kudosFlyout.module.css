@@ -104,3 +104,29 @@
 .actionFamilyDestructive .actionFamilyLabel {
   color: var(--hbk-danger);
 }
+
+/* ── Phase-26 Prompt-01: narrow-viewport hardening ──────────
+   The detail-panel flyout fills ~min(640px, 92vw) of the viewport
+   on SharePoint. On phones and constrained laptops (<= 520px
+   viewport) the action-family rows can squeeze action buttons
+   below their minimum-touch target. At that width each button
+   claims ~half the row so the family remains scannable instead
+   of collapsing into a single-column stack that feels timid. */
+
+@media (max-width: 520px) {
+  .actionFamilyRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .actionFamilyRow > * {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .actionFamilyRow {
+    grid-template-columns: 1fr;
+  }
+}
