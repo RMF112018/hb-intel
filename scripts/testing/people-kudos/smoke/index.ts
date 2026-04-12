@@ -67,12 +67,17 @@ function validateBuildArtifacts(ctx: RunContext): void {
 // 2. Manifest inclusion — every source manifest must be registered
 // ---------------------------------------------------------------------------
 
+// Phase-23 retired the legacy merged People & Culture seam
+// (27ac10f4-4054-4dd2-bd53-3b4ef4379ab4). It is no longer packaged
+// into hb-webparts.sppkg and no longer present in the shell
+// componentIds — consumers use the split surfaces below. Phase-27
+// Prompt-09 removed the stale expectation from this registry so the
+// smoke check reflects repo truth.
 const EXPECTED_SURFACE_GUIDS: Record<string, string> = {
-  'HB Kudos':                  'f14e59a3-4d6b-43b2-952e-ba02dea11dad',
-  'HB Kudos Companion':        'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97',
-  'People Culture (merged)':   '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4',
-  'People Culture Public':     'e39d9662-34c4-43e6-9425-5770f62da626',
-  'People Culture Companion':  '7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e',
+  'HB Kudos':                 'f14e59a3-4d6b-43b2-952e-ba02dea11dad',
+  'HB Kudos Companion':       'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97',
+  'People Culture Public':    'e39d9662-34c4-43e6-9425-5770f62da626',
+  'People Culture Companion': '7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e',
 };
 
 function validateManifestInclusion(ctx: RunContext): void {
@@ -165,10 +170,13 @@ function validateStaleArtifacts(ctx: RunContext): void {
 // ---------------------------------------------------------------------------
 
 function validateRefactoredSurfaces(ctx: RunContext): void {
+  // Phase-23 retired the merged PeopleCultureWebPart source (the
+  // folder was removed). Phase-27 Prompt-09 dropped the stale
+  // expectation so this check stops asserting a path that cannot
+  // exist.
   const surfaces: Array<{ label: string; manifestPath: string }> = [
     { label: 'HbKudos', manifestPath: 'apps/hb-webparts/src/webparts/hbKudos/HbKudosWebPart.manifest.json' },
     { label: 'HbKudosCompanion', manifestPath: 'apps/hb-webparts/src/webparts/hbKudosCompanion/HbKudosCompanionWebPart.manifest.json' },
-    { label: 'PeopleCultureMerged', manifestPath: 'apps/hb-webparts/src/webparts/peopleCulture/PeopleCultureWebPart.manifest.json' },
     { label: 'PeopleCulturePublic', manifestPath: 'apps/hb-webparts/src/webparts/peopleCulturePublic/PeopleCulturePublicWebPart.manifest.json' },
     { label: 'PeopleCultureCompanion', manifestPath: 'apps/hb-webparts/src/webparts/peopleCultureCompanion/PeopleCultureCompanionWebPart.manifest.json' },
   ];

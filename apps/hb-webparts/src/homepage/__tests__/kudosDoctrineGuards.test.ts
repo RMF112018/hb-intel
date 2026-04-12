@@ -49,6 +49,20 @@ const KUDOS_SOURCE_FILES: readonly string[] = [
   'webparts/hbKudos/hooks/useHostSafeLayout.ts',
   'webparts/hbKudos/hooks/kudosFeatured.ts',
   'webparts/hbKudosCompanion/HbKudosCompanion.tsx',
+  // Phase-27 Prompt-05 decomposition — companion runtime seams.
+  'webparts/hbKudosCompanion/runtime/companionTabs.ts',
+  'webparts/hbKudosCompanion/runtime/companionFilter.ts',
+  'webparts/hbKudosCompanion/runtime/useCompanionRole.ts',
+  'webparts/hbKudosCompanion/runtime/useCompanionQueue.ts',
+  'webparts/hbKudosCompanion/runtime/useCompanionActions.ts',
+  // Phase-27 Prompt-07 bulk-approval hardening.
+  'webparts/hbKudosCompanion/runtime/useBulkApproval.ts',
+  // Phase-27 Prompt-05 companion presentation components.
+  'webparts/hbKudosCompanion/components/QueueRow.tsx',
+  'webparts/hbKudosCompanion/components/DetailPanel.tsx',
+  'webparts/hbKudosCompanion/components/CompanionDegradedStates.tsx',
+  // Phase-27 Prompt-07 bulk-approval presentation.
+  'webparts/hbKudosCompanion/components/BulkActionBar.tsx',
   'homepage/shared/KudosGovernancePrimitives.tsx',
   'homepage/shared/KudosDetailPanelContent.tsx',
 ];
@@ -210,6 +224,89 @@ describe('HB Kudos doctrine guards', () => {
       expect(KUDOS_RUNTIME_OWNERSHIP.companion.webpartId).toBe(
         HB_KUDOS_COMPANION_WEBPART_ID,
       );
+    });
+
+    it('manifest alias fields in the ownership map match the packaged manifests', () => {
+      const publicManifest = JSON.parse(
+        read('webparts/hbKudos/HbKudosWebPart.manifest.json'),
+      ) as { alias: string };
+      const companionManifest = JSON.parse(
+        read('webparts/hbKudosCompanion/HbKudosCompanionWebPart.manifest.json'),
+      ) as { alias: string };
+      expect(publicManifest.alias).toBe(KUDOS_RUNTIME_OWNERSHIP.public.manifestAlias);
+      expect(companionManifest.alias).toBe(
+        KUDOS_RUNTIME_OWNERSHIP.companion.manifestAlias,
+      );
+    });
+  });
+
+  describe('Phase-27 closure: packaging / mount / contract invariants', () => {
+    it('mount.tsx uses the runtime-contract constants as literal map keys — no inline GUIDs for Kudos', () => {
+      const src = read('mount.tsx');
+      // The import line must pull both ids from the runtime contract.
+      expect(src).toMatch(
+        /from\s+['"]\.\/webparts\/hbKudos\/kudosRuntimeContract\.js['"]/,
+      );
+      expect(src).toContain('HB_KUDOS_WEBPART_ID');
+      expect(src).toContain('HB_KUDOS_COMPANION_WEBPART_ID');
+      // The two Kudos ids must not appear as inline string keys in
+      // the renderer map (format: `'<guid>': ({` or `"<guid>": ({`).
+      const publicInlineKey = new RegExp(`['"]${HB_KUDOS_WEBPART_ID}['"]\\s*:`);
+      const companionInlineKey = new RegExp(
+        `['"]${HB_KUDOS_COMPANION_WEBPART_ID}['"]\\s*:`,
+      );
+      expect(publicInlineKey.test(src)).toBe(false);
+      expect(companionInlineKey.test(src)).toBe(false);
+    });
+
+    it('packaged solution componentIds include both Kudos webparts (shell-entry linkage)', () => {
+      // APP_ROOT = apps/hb-webparts/src → three levels up reaches repo root.
+      const shellSolPath = resolve(
+        APP_ROOT,
+        '../../..',
+        'tools/spfx-shell/config/package-solution.json',
+      );
+      const shellSol = JSON.parse(readFileSync(shellSolPath, 'utf8')) as {
+        solution: { features: Array<{ componentIds: string[] }> };
+      };
+      const ids = new Set(shellSol.solution.features[0]?.componentIds ?? []);
+      expect(ids.has(HB_KUDOS_WEBPART_ID)).toBe(true);
+      expect(ids.has(HB_KUDOS_COMPANION_WEBPART_ID)).toBe(true);
+    });
+
+    it('HbKudosCompanion.tsx stays a thin orchestration host after Prompt-05 decomposition (<= 600 LOC)', () => {
+      // Baseline before Prompt-05 was 1,518 LOC; post-decomposition the
+      // host composes hooks + components and stays well under this
+      // guard, which still fails fast if the monolith returns.
+      const src = read('webparts/hbKudosCompanion/HbKudosCompanion.tsx');
+      const lineCount = src.split(/\r?\n/).length;
+      expect(lineCount).toBeLessThanOrEqual(600);
+    });
+
+    it('no raw @hbc/ui-kit root-barrel imports in the new companion runtime / component seams', () => {
+      const seams: readonly string[] = [
+        'webparts/hbKudosCompanion/runtime/companionTabs.ts',
+        'webparts/hbKudosCompanion/runtime/companionFilter.ts',
+        'webparts/hbKudosCompanion/runtime/useCompanionRole.ts',
+        'webparts/hbKudosCompanion/runtime/useCompanionQueue.ts',
+        'webparts/hbKudosCompanion/runtime/useCompanionActions.ts',
+        'webparts/hbKudosCompanion/runtime/useBulkApproval.ts',
+        'webparts/hbKudosCompanion/components/QueueRow.tsx',
+        'webparts/hbKudosCompanion/components/DetailPanel.tsx',
+        'webparts/hbKudosCompanion/components/CompanionDegradedStates.tsx',
+        'webparts/hbKudosCompanion/components/BulkActionBar.tsx',
+      ];
+      const BAD_RE = /from\s+['"]@hbc\/ui-kit['"]/;
+      const offenders = seams.filter((rel) => BAD_RE.test(read(rel)));
+      expect(offenders).toEqual([]);
+    });
+
+    it('kudosShells.tsx exports the four Phase-27 Prompt-04 shell families', () => {
+      const src = read('homepage/shared/kudosShells.tsx');
+      expect(src).toMatch(/export function KudosReaderShell/);
+      expect(src).toMatch(/export function KudosFeedShell/);
+      expect(src).toMatch(/export function KudosTaskDialogShell/);
+      expect(src).toMatch(/export function KudosGovernanceDetailShell/);
     });
   });
 });
