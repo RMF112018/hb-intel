@@ -18,6 +18,7 @@
  *   - `docs/architecture/plans/MASTER/spfx/hero/phase-01/06-Implementation-Prompt-02-Introduce-Article-Mode.md`
  */
 import * as React from 'react';
+import type { PersonPhotoFn } from '@hbc/ui-kit/homepage';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import { HbSignatureHeroHomepage } from './HbSignatureHeroHomepage.js';
 import { HbSignatureHeroArticle } from './HbSignatureHeroArticle.js';
@@ -37,6 +38,11 @@ export interface HbSignatureHeroProps {
    * article branch. Ignored on HBCentral.
    */
   article?: HbSignatureHeroArticleContent;
+  /**
+   * Optional person-photo adapter (shared seam). Only consumed in
+   * article mode to resolve the author's Graph photo by UPN.
+   */
+  fetchPersonPhoto?: PersonPhotoFn;
   now?: Date;
 }
 
@@ -46,6 +52,7 @@ export function HbSignatureHero({
   assetBaseUrl,
   siteUrl,
   article,
+  fetchPersonPhoto,
   now,
 }: HbSignatureHeroProps): React.JSX.Element | null {
   const mode = resolveHeroMode(siteUrl);
@@ -70,5 +77,5 @@ export function HbSignatureHero({
     return null;
   }
 
-  return <HbSignatureHeroArticle article={article} />;
+  return <HbSignatureHeroArticle article={article} fetchPersonPhoto={fetchPersonPhoto} />;
 }

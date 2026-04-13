@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { describe, expect, it } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { HbSignatureHeroArticle } from '../../webparts/hbSignatureHero/HbSignatureHeroArticle.js';
 import { HbSignatureHero } from '../../webparts/hbSignatureHero/HbSignatureHero.js';
 
@@ -53,6 +53,86 @@ describe('HbSignatureHeroArticle — Phase-02 article-mode adapter', () => {
     expect(container.querySelector('[data-hbc-article-subheading]')).toBeNull();
     expect(container.querySelector('[data-hbc-article-title-link]')).toBeNull();
     expect(scope.queryByRole('link')).toBeNull();
+  });
+});
+
+describe('HbSignatureHeroArticle — author identity and photo seam (Phase-03)', () => {
+  it('uses an explicit authorPhotoUrl without calling the Graph adapter', () => {
+    const fetchPersonPhoto = vi.fn();
+    const { container } = render(
+      <HbSignatureHeroArticle
+        article={{
+          title: 'Explicit Photo',
+          author: 'Avery Stone',
+          publishedDate: '2026-04-13',
+          authorUpn: 'avery.stone@example.invalid',
+          authorPhotoUrl: 'https://cdn.example.invalid/avery.jpg',
+        }}
+        fetchPersonPhoto={fetchPersonPhoto}
+      />,
+    );
+    const img = container.querySelector('img[alt="Avery Stone"]') as HTMLImageElement | null;
+    expect(img).not.toBeNull();
+    expect(img!.src).toBe('https://cdn.example.invalid/avery.jpg');
+    expect(fetchPersonPhoto).not.toHaveBeenCalled();
+  });
+
+  it('resolves a Graph photo via authorUpn through the shared adapter', async () => {
+    const fetchPersonPhoto = vi
+      .fn<(upn: string) => Promise<string | undefined>>()
+      .mockResolvedValue('blob:mock/graph-photo');
+    const { container } = render(
+      <HbSignatureHeroArticle
+        article={{
+          title: 'Graph Photo',
+          author: 'Pat Field',
+          publishedDate: '2026-04-13',
+          authorUpn: 'pat.field@example.invalid',
+        }}
+        fetchPersonPhoto={fetchPersonPhoto}
+      />,
+    );
+    await waitFor(() => {
+      const img = container.querySelector('img[alt="Pat Field"]') as HTMLImageElement | null;
+      expect(img).not.toBeNull();
+      expect(img!.src).toBe('blob:mock/graph-photo');
+    });
+    expect(fetchPersonPhoto).toHaveBeenCalledWith('pat.field@example.invalid');
+  });
+
+  it('falls back to initials when the adapter returns no photo', async () => {
+    const fetchPersonPhoto = vi
+      .fn<(upn: string) => Promise<string | undefined>>()
+      .mockResolvedValue(undefined);
+    const { container } = render(
+      <HbSignatureHeroArticle
+        article={{
+          title: 'No Photo',
+          author: 'Jordan Miller',
+          publishedDate: '2026-04-13',
+          authorUpn: 'jordan.miller@example.invalid',
+        }}
+        fetchPersonPhoto={fetchPersonPhoto}
+      />,
+    );
+    await waitFor(() => expect(fetchPersonPhoto).toHaveBeenCalledTimes(1));
+    // No image rendered — initials fallback span instead.
+    expect(container.querySelector('img[alt="Jordan Miller"]')).toBeNull();
+    expect(within(container).getByText('JM')).not.toBeNull();
+  });
+
+  it('falls back to initials when neither photo URL nor adapter is supplied', () => {
+    const { container } = render(
+      <HbSignatureHeroArticle
+        article={{
+          title: 'Initials Only',
+          author: 'Sam River',
+          publishedDate: '2026-04-13',
+        }}
+      />,
+    );
+    expect(container.querySelector('img')).toBeNull();
+    expect(within(container).getByText('SR')).not.toBeNull();
   });
 });
 

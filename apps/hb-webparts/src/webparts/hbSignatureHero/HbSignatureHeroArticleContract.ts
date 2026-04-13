@@ -38,4 +38,15 @@ export interface HbSignatureHeroArticleContent {
   labels?: readonly string[];
   /** Optional canonical URL for the article; wraps the title when present. */
   destinationUrl?: string;
+  /**
+   * Optional author UPN/email used to resolve a Graph photo through
+   * the shared `PersonPhotoFn` seam. Ignored when `authorPhotoUrl`
+   * is present.
+   */
+  authorUpn?: string;
+  /**
+   * Optional explicit author avatar URL. When provided, it is used
+   * as-is and no Graph lookup is attempted.
+   */
+  authorPhotoUrl?: string;
 }
