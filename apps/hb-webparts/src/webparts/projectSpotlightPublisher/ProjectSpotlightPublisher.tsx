@@ -62,6 +62,14 @@ import {
   historyActionFor,
   validTransitionsFrom,
 } from '../../homepage/data/publisherAdapter/workflowStateMachine.js';
+import { buildPublisherPreview } from '../../homepage/data/publisherAdapter/preview/previewBuilder.js';
+import type { PreviewOutcome } from '../../homepage/data/publisherAdapter/preview/previewBuilder.js';
+import type {
+  BannerControlPayload,
+  ImageGalleryControlPayload,
+  TeamViewerControlPayload,
+  TextControlPayload,
+} from '../../homepage/data/publisherAdapter/pageGeneration/pageCompositor.js';
 import styles from './project-spotlight-publisher.module.css';
 
 // Convenience aliases so the JSX stays compact.
@@ -131,7 +139,7 @@ function newHistoryRow(
 
 /* ── Component ──────────────────────────────────────────────── */
 
-type Tab = 'metadata' | 'banner' | 'content' | 'team' | 'gallery' | 'status';
+type Tab = 'metadata' | 'banner' | 'content' | 'team' | 'gallery' | 'preview' | 'status';
 
 export function ProjectSpotlightPublisher({
   siteUrl,
@@ -170,6 +178,8 @@ export function ProjectSpotlightPublisher({
   const [tab, setTab] = React.useState<Tab>('metadata');
   const [status, setStatus] = React.useState<string | undefined>();
   const [busy, setBusy] = React.useState(false);
+  const [preview, setPreview] = React.useState<PreviewOutcome | undefined>();
+  const [previewLoading, setPreviewLoading] = React.useState(false);
 
   // Load the post list for the current filter.
   const reloadList = React.useCallback(async () => {
@@ -220,6 +230,32 @@ export function ProjectSpotlightPublisher({
   React.useEffect(() => {
     if (selectedPostId) void reloadSelected(selectedPostId);
   }, [selectedPostId, reloadSelected]);
+
+  const loadPreview = React.useCallback(
+    async (postId: string) => {
+      setPreviewLoading(true);
+      try {
+        const outcome = await buildPublisherPreview(repositories, postId);
+        setPreview(outcome);
+      } catch (err) {
+        setPreview(undefined);
+        setStatus(err instanceof Error ? err.message : 'Preview failed.');
+      } finally {
+        setPreviewLoading(false);
+      }
+    },
+    [repositories],
+  );
+
+  React.useEffect(() => {
+    // Refresh the preview whenever the Preview tab opens or the selected
+    // post changes. `loadPreview` reads the latest repository + post data,
+    // so stale preview content after a Save is cleared on re-entry.
+    if (tab === 'preview' && selectedPostId) {
+      void loadPreview(selectedPostId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, selectedPostId]);
 
   const handleCreateNew = React.useCallback(() => {
     const draft = emptyPost('ps-inprogress-monthly-v1', 'ps-shell-inprogress-oob-banner-team-gallery-v1');
@@ -316,6 +352,18 @@ export function ProjectSpotlightPublisher({
 
   const validNextStates = postDraft ? validTransitionsFrom(postDraft.WorkflowState) : [];
 
+  const latestValidation =
+    preview && preview.ok ? preview.validation : undefined;
+  const publishBlockedByValidation =
+    !!latestValidation && !latestValidation.ok;
+  const firstBlockingError = latestValidation?.errors[0]?.message;
+  const hasDrift =
+    !!preview && preview.ok &&
+    (preview.drift.shellKeyDrift ||
+      preview.drift.shellVersionDrift ||
+      preview.drift.templateKeyDrift ||
+      preview.drift.templateVersionDrift);
+
   /* ── Rendering ──────────────────────────────────────────── */
 
   return (
@@ -389,7 +437,7 @@ export function ProjectSpotlightPublisher({
             </header>
 
             <nav className={styles.tabs}>
-              {(['metadata', 'banner', 'content', 'team', 'gallery', 'status'] as Tab[]).map((t) => (
+              {(['metadata', 'banner', 'content', 'team', 'gallery', 'preview', 'status'] as Tab[]).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -428,6 +476,9 @@ export function ProjectSpotlightPublisher({
                   onChange={setMediaDraft}
                 />
               )}
+              {tab === 'preview' && (
+                <PreviewPanel outcome={preview} loading={previewLoading} />
+              )}
               {tab === 'status' && (
                 <StatusPanel binding={binding} context={resolutionContext} />
               )}
@@ -441,17 +492,43 @@ export function ProjectSpotlightPublisher({
                 <button type="button" className={styles.btn} disabled={busy} onClick={() => handlePublishAction('preview')}>
                   Preview
                 </button>
-                <button type="button" className={styles.btn} disabled={busy || !binding} onClick={() => handlePublishAction('republish')}>
+                <button
+                  type="button"
+                  className={styles.btn}
+                  disabled={busy || !binding || publishBlockedByValidation}
+                  title={
+                    publishBlockedByValidation && firstBlockingError
+                      ? `Blocked by validation: ${firstBlockingError}`
+                      : undefined
+                  }
+                  onClick={() => handlePublishAction('republish')}
+                >
                   Republish
                 </button>
                 <button
                   type="button"
                   className={styles.btn}
-                  disabled={busy || postDraft.WorkflowState !== 'approved'}
+                  disabled={busy || postDraft.WorkflowState !== 'approved' || publishBlockedByValidation}
+                  title={
+                    publishBlockedByValidation && firstBlockingError
+                      ? `Blocked by validation: ${firstBlockingError}`
+                      : undefined
+                  }
                   onClick={() => handlePublishAction('create')}
                 >
                   Publish
                 </button>
+                {hasDrift && (
+                  <span className={styles.driftChip} title="Shell or template drift detected">
+                    ⚠ drift — will regenerate
+                  </span>
+                )}
+                {publishBlockedByValidation && (
+                  <span className={styles.validationChip}>
+                    🛑 {latestValidation?.errors.length} blocking error
+                    {latestValidation!.errors.length === 1 ? '' : 's'}
+                  </span>
+                )}
               </div>
               <div className={styles.actionRow}>
                 {validNextStates.map((to) => (
@@ -1021,6 +1098,158 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className={styles.fieldLabel}>{label}</span>
       {children}
     </label>
+  );
+}
+
+function PreviewPanel({
+  outcome,
+  loading,
+}: {
+  outcome: PreviewOutcome | undefined;
+  loading: boolean;
+}) {
+  if (loading && !outcome) return <HbcSpinner />;
+  if (!outcome) {
+    return (
+      <HbcEmptyState
+        title="Preview not yet built"
+        description="Switch to the Preview tab to generate a structural preview."
+      />
+    );
+  }
+  if (!outcome.ok) {
+    return (
+      <HbcEmptyState
+        title="Preview failed"
+        description={`${outcome.reason}: ${outcome.message}`}
+      />
+    );
+  }
+  const { validation, drift, decision, composedPage } = outcome;
+  const driftLevel = drift.shellKeyDrift || drift.templateKeyDrift
+    ? 'hard'
+    : drift.shellVersionDrift || drift.templateVersionDrift
+      ? 'soft'
+      : 'none';
+  return (
+    <div className={styles.previewRoot}>
+      {driftLevel !== 'none' && (
+        <div
+          className={
+            driftLevel === 'hard' ? styles.driftBannerHard : styles.driftBannerSoft
+          }
+        >
+          {driftLevel === 'hard'
+            ? 'Shell / template identity has changed since the last publish. Publishing will regenerate the destination page.'
+            : 'Shell or template version drift detected. Publishing will update the existing page in place (or regenerate if the template forces it).'}
+        </div>
+      )}
+
+      <section>
+        <h3 className={styles.sectionHeading}>
+          Validation {validation.ok ? '· ok' : `· ${validation.errors.length} error${validation.errors.length === 1 ? '' : 's'}`}
+        </h3>
+        {validation.errors.length === 0 && validation.warnings.length === 0 ? (
+          <div className={styles.findingItemOk}>No findings.</div>
+        ) : (
+          <ul className={styles.findingList}>
+            {validation.errors.map((f, i) => (
+              <li key={`e-${i}`} className={styles.findingItemError}>
+                <div className={styles.findingCategory}>{f.category}</div>
+                <div className={styles.findingMessage}>
+                  {f.field ? <code>{f.field}</code> : null} {f.message}
+                </div>
+                {f.actionHint && <div className={styles.findingHint}>{f.actionHint}</div>}
+              </li>
+            ))}
+            {validation.warnings.map((f, i) => (
+              <li key={`w-${i}`} className={styles.findingItemWarn}>
+                <div className={styles.findingCategory}>{f.category}</div>
+                <div className={styles.findingMessage}>
+                  {f.field ? <code>{f.field}</code> : null} {f.message}
+                </div>
+                {f.actionHint && <div className={styles.findingHint}>{f.actionHint}</div>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h3 className={styles.sectionHeading}>Decision on publish</h3>
+        <div className={styles.findingItemOk}>
+          <strong>action:</strong> {decision.action} · <strong>reason:</strong> {decision.reason}
+          {decision.regenerationCause ? ` · cause: ${decision.regenerationCause}` : ''}
+        </div>
+        {decision.notes.length > 0 && (
+          <ul className={styles.decisionNotes}>
+            {decision.notes.map((n, i) => (
+              <li key={i}>{n}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h3 className={styles.sectionHeading}>Structured page preview</h3>
+        <div className={styles.previewControls}>
+          {composedPage.controls.map((c) => {
+            if (!c.visible) {
+              return (
+                <div key={c.slot} className={styles.previewControlHidden}>
+                  <strong>{c.slot}</strong> · hidden ({(c as { reason?: string }).reason ?? 'suppressed'})
+                </div>
+              );
+            }
+            switch (c.slot) {
+              case 'banner': {
+                const b = c as BannerControlPayload;
+                return (
+                  <div key={c.slot} className={styles.previewControl}>
+                    <strong>banner</strong>
+                    <div>title: {b.title}</div>
+                    <div>image: <code>{b.imageUrl}</code></div>
+                    <div>alt: {b.imageAltText}</div>
+                  </div>
+                );
+              }
+              case 'subhead':
+              case 'body': {
+                const t = c as TextControlPayload;
+                return (
+                  <div key={c.slot} className={styles.previewControl}>
+                    <strong>{c.slot}</strong>
+                    <div className={styles.previewSnippet}>{t.text.slice(0, 200)}{t.text.length > 200 ? '…' : ''}</div>
+                  </div>
+                );
+              }
+              case 'team': {
+                const t = c as TeamViewerControlPayload;
+                return (
+                  <div key={c.slot} className={styles.previewControl}>
+                    <strong>team</strong>
+                    <div>heading: {t.properties.heading}</div>
+                    <div>layout: {t.properties.layout} · density: {t.properties.density}</div>
+                    <div>articleId: <code>{t.properties.articleId}</code></div>
+                  </div>
+                );
+              }
+              case 'gallery': {
+                const g = c as ImageGalleryControlPayload;
+                return (
+                  <div key={c.slot} className={styles.previewControl}>
+                    <strong>gallery</strong>
+                    <div>layout: {g.layoutProfile}</div>
+                    <div>{g.images.length} image{g.images.length === 1 ? '' : 's'}</div>
+                  </div>
+                );
+              }
+            }
+            return null;
+          })}
+        </div>
+      </section>
+    </div>
   );
 }
 

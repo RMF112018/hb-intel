@@ -333,6 +333,31 @@ describe('publishOrchestrator', () => {
     expect(result.page.controls).toHaveLength(5);
   });
 
+  it('blocks publish when validation fails and does not touch the page-creation service or binding writer', async () => {
+    const f = fixture({ post: { Title: '' } });
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({ postId: 'post-ps-001', mode: 'create' });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('validation');
+    expect(result.validation?.ok).toBe(false);
+    expect(f.createOrUpdate).not.toHaveBeenCalled();
+    expect(f.upsertBinding).not.toHaveBeenCalled();
+  });
+
+  it('honors validateBeforePublish=false and publishes through a known-invalid context', async () => {
+    const f = fixture({ post: { Title: '' } });
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      postId: 'post-ps-001',
+      mode: 'create',
+      validateBeforePublish: false,
+    });
+    expect(result.ok).toBe(true);
+    expect(f.createOrUpdate).toHaveBeenCalledTimes(1);
+    expect(f.upsertBinding).toHaveBeenCalledTimes(1);
+  });
+
   it('surfaces page-publish failures without writing the binding', async () => {
     const f = fixture();
     f.createOrUpdate.mockResolvedValueOnce({

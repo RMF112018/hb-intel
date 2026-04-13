@@ -36,6 +36,11 @@ import {
 import type { ComposedPage } from './pageGeneration/pageCompositor';
 import type { PublisherPageBindingRow } from './publisherContracts';
 import type { LastOperation } from './publisherEnums';
+import {
+  validatePublishContext,
+  type ValidationResult,
+} from './validation/validationEngine';
+import { PROJECT_SPOTLIGHT_V1_SHELL, type PageShellManifest } from './pageGeneration/xmlShellManifest';
 
 export type PublishMode = 'create' | 'republish' | 'preview';
 
@@ -48,6 +53,17 @@ export interface PublishRequest {
   readonly now?: () => string;
   /** Caller-supplied BindingId factory for new rows; default = `bnd-${PostId}-${timestamp}`. */
   readonly generateBindingId?: (postId: string, nowIso: string) => string;
+  /**
+   * When `true` (default), the orchestrator runs `validatePublishContext`
+   * between composition and the republish policy for create/republish
+   * modes. Validation failures block the page-creation + binding writes
+   * and return `{ ok: false, stage: 'validation', validation }`. Set
+   * `false` only for automation / admin-bypass paths that accept the
+   * governance risk explicitly.
+   */
+  readonly validateBeforePublish?: boolean;
+  /** Override the shell manifest used for validation + drift checks. */
+  readonly shell?: PageShellManifest;
 }
 
 export interface PublishOrchestratorDeps {
@@ -69,18 +85,21 @@ export type PublishOutcome =
       readonly bindingId: string;
       readonly itemId?: number;
       readonly decision: RepublishDecision;
+      readonly validation?: ValidationResult;
     }
   | {
       readonly ok: false;
       readonly stage:
         | 'resolution'
         | 'composition'
+        | 'validation'
         | 'policy'
         | 'pagePublish'
         | 'bindingWrite';
       readonly message: string;
       readonly decision?: RepublishDecision;
       readonly page?: ComposedPage;
+      readonly validation?: ValidationResult;
     };
 
 export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
@@ -112,7 +131,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const { context } = resolution;
 
-    // Preview never writes.
+    const shell = req.shell ?? PROJECT_SPOTLIGHT_V1_SHELL;
+
+    // Preview never writes; always runs validation for UI surfacing.
     if (req.mode === 'preview') {
       const { page, structuralErrors } = pageShellService.composePage(context);
       if (structuralErrors.length > 0) {
@@ -123,6 +144,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           page,
         };
       }
+      const validation = validatePublishContext(context, { shell });
       return {
         ok: true,
         mode: 'preview',
@@ -136,6 +158,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           reason: 'alreadyInSync',
           notes: ['Preview mode — no page or binding writes performed.'],
         },
+        validation,
       };
     }
 
@@ -147,6 +170,24 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         message: `Composed page failed structural validation: ${structuralErrors.join('; ')}`,
         page,
       };
+    }
+
+    const shouldValidate = req.validateBeforePublish !== false;
+    let validation: ValidationResult | undefined;
+    if (shouldValidate) {
+      validation = validatePublishContext(context, { shell });
+      if (!validation.ok) {
+        const first = validation.errors[0];
+        return {
+          ok: false,
+          stage: 'validation',
+          message: first
+            ? `Validation blocked ${req.mode}: ${first.message}`
+            : `Validation blocked ${req.mode}.`,
+          page,
+          validation,
+        };
+      }
     }
 
     const decision = decideRepublishAction({
@@ -245,6 +286,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       bindingId: bindingRow.BindingId,
       itemId: bindingOutcome.itemId,
       decision,
+      validation,
     };
   }
 

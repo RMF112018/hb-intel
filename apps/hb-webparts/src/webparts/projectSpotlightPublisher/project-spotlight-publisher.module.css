@@ -320,3 +320,141 @@
   color: #1f1f1f;
   word-break: break-all;
 }
+
+.driftChip,
+.validationChip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+
+.driftChip {
+  background: #fff4e5;
+  color: #8a4b00;
+  border: 1px solid #ffd9a8;
+}
+
+.validationChip {
+  background: #fde7e9;
+  color: #8a1f2b;
+  border: 1px solid #f5b2bb;
+}
+
+.previewRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.driftBannerHard,
+.driftBannerSoft {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.driftBannerHard {
+  background: #fde7e9;
+  color: #8a1f2b;
+  border-color: #f5b2bb;
+}
+
+.driftBannerSoft {
+  background: #fff4e5;
+  color: #8a4b00;
+  border-color: #ffd9a8;
+}
+
+.findingList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.findingItemOk {
+  font-size: 13px;
+  color: #1a6a35;
+  padding: 8px 10px;
+  background: #eef8f1;
+  border: 1px solid #bfe1cd;
+  border-radius: 4px;
+}
+
+.findingItemError,
+.findingItemWarn {
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.findingItemError {
+  background: #fde7e9;
+  border-color: #f5b2bb;
+  color: #8a1f2b;
+}
+
+.findingItemWarn {
+  background: #fff4e5;
+  border-color: #ffd9a8;
+  color: #8a4b00;
+}
+
+.findingCategory {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.findingMessage {
+  margin-top: 2px;
+}
+
+.findingHint {
+  margin-top: 4px;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.decisionNotes {
+  margin: 4px 0 0 16px;
+  padding: 0;
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.previewControls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.previewControl,
+.previewControlHidden {
+  border: 1px solid #e3e3e6;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.previewControlHidden {
+  background: #f7f7f8;
+  color: #6a6a6f;
+}
+
+.previewSnippet {
+  color: #4a4a4f;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
