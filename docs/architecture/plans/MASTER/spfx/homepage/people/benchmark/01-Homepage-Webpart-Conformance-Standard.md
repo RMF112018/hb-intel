@@ -1,11 +1,21 @@
 # 01 — Homepage Webpart Conformance Standard
 
+## Governing authority
+
+This standard is subordinate to, and governed by:
+
+1. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+2. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`
+
+If this standard and the doctrine ever conflict, the doctrine governs.
+
 ## Standard statement
 
-All homepage webparts must achieve **homepage-grade implementation maturity** equal to the HB Kudos public-facing webpart, adjusted for the intended purpose of the target webpart.
+All homepage webparts must achieve **homepage-grade implementation maturity** equal to the HB Kudos public-facing webpart, adjusted for the intended purpose, content family, and persona of the target webpart.
 
 This standard governs:
 
+- doctrine compliance
 - UI sophistication
 - architectural discipline
 - component composition
@@ -14,6 +24,7 @@ This standard governs:
 - backend interactions
 - accessibility
 - host behavior
+- persona-fit expression
 - validation and closure
 
 ## What this standard does not require
@@ -23,10 +34,13 @@ This standard does **not** require:
 - identical layouts
 - identical visual treatment
 - identical interaction models
+- identical motion patterns
+- identical panel/detail structures when the content does not warrant them
 - unnecessary write paths on read-only webparts
 - decorative complexity without value
+- “Kudos with different copy”
 
-## What it does require
+## What this standard does require
 
 This standard **does** require:
 
@@ -35,11 +49,39 @@ This standard **does** require:
 - equivalent attention to host/runtime realities
 - equivalent backend/data discipline
 - equivalent closure proof
+- explicit compliance with the two doctrine files
+- brand/design symmetry across `hb-webparts`
+- persona-fit differentiation based on the webpart’s mission and content
+
+## Persona-fit rule
+
+Each homepage webpart must present a refined, deliberate, premium surface appropriate to its content family.
+
+Examples of acceptable persona differences:
+- recognition surfaces may be warm, human, engaging, and celebratory
+- project/portfolio surfaces may be professional, informative, and confidence-building
+- company/news surfaces may be editorial, timely, and scan-friendly
+- launcher/utility surfaces may be operational, compact, and efficiency-driven
+
+These differences are required where content warrants them.
+Failure to differentiate is a conformance problem.
+
+## Design symmetry rule
+
+Persona differences must still maintain clear symmetry with the rest of the homepage system.
+
+Required qualities:
+- consistent HB brand posture
+- consistent quality level
+- coherent spacing and hierarchy logic
+- coherent primitive discipline
+- coherent surface polish
+- clearly related family resemblance across `hb-webparts`
 
 ## Conformance categories
 
 ### A. Purpose-fit surface sophistication
-Each webpart must present a refined, deliberate, premium surface appropriate to its content family.
+Each webpart must present a refined, deliberate, premium surface appropriate to its content family and persona.
 
 Required qualities:
 - clear hierarchy
@@ -47,13 +89,16 @@ Required qualities:
 - visible interaction affordances
 - polished transitions where appropriate
 - coherent detail model
+- tone appropriate to the content
 - no unfinished or generic placeholder behavior
+- no cloned visual identity that ignores the webpart’s actual mission
 
 ### B. Shared primitive discipline
 Homepage webparts must preferentially compose from governed shared primitives and the constrained homepage entrypoint.
 
 Required qualities:
 - use `@hbc/ui-kit/homepage` where appropriate
+- follow doctrine import discipline
 - no unnecessary ad hoc reimplementation of existing primitives
 - local-only composition permitted only when shared promotion would be premature or harmful
 - no primitive bypass that causes governance drift
@@ -122,10 +167,12 @@ Required qualities:
 Every homepage webpart must behave correctly inside the actual SharePoint host.
 
 Required qualities:
+- compliance with the SPFx doctrine and homepage overlay
 - no hidden headers or obstructed critical controls
 - no dependence on unrealistic sandbox conditions only
 - proper accommodation of persistent host controls
 - acceptable behavior at common viewport and zoom conditions
+- page-canvas ownership without fake shell duplication
 
 ### J. Validation and proof
 Every homepage webpart must prove its quality.
@@ -136,6 +183,7 @@ Required qualities:
 - defect logging
 - explicit pass/fail closure
 - test coverage appropriate to the webpart’s interaction and data complexity
+- explicit validation that the final result is purpose-fit and non-cloned
 
 ## Prohibited patterns
 
@@ -148,3 +196,5 @@ The following are prohibited unless explicitly justified and accepted:
 - inconsistent host/runtime handling across homepage webparts
 - inconsistent state semantics across similar interaction families
 - closure based on visual improvement alone
+- visually cloned webparts differentiated only by title, icon, or content copy
+- using Kudos as a mandate for sameness rather than as a benchmark for maturity and quality

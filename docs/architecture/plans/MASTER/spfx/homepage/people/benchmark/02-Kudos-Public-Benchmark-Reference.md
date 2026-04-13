@@ -1,5 +1,15 @@
 # 02 — Kudos Public Benchmark Reference
 
+## Governing context
+
+HB Kudos Public is a benchmark **inside** the authority structure established by:
+
+1. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Governing-Standard.md`
+2. `docs/reference/ui-kit/doctrine/UI-Doctrine-SPFx-Homepage-Overlay.md`
+
+The benchmark does not override doctrine.
+It shows what homepage-grade execution looks like when doctrine is applied well.
+
 ## Benchmark role
 
 The HB Kudos public-facing webpart is the homepage benchmark because it demonstrates a comparatively mature combination of:
@@ -14,6 +24,21 @@ The HB Kudos public-facing webpart is the homepage benchmark because it demonstr
 - public/internal boundary awareness
 - stateful success, error, and discard flows
 - host-aware interaction sophistication
+
+## Critical interpretation rule
+
+HB Kudos Public is a benchmark for:
+
+- implementation seriousness
+- surface intentionality
+- architectural quality
+- explicit seams
+- state maturity
+- completeness
+- host-aware execution
+- closure discipline
+
+It is **not** a mandate to make every homepage webpart look or feel like Kudos.
 
 ## Benchmark qualities to replicate in principle
 
@@ -61,18 +86,31 @@ It organizes complexity into explicit seams.
 
 That is the correct model for other homepage webparts.
 
+### 5. Design symmetry without sameness
+Kudos establishes a high-quality HB homepage design posture, but that posture must be translated differently depending on content family.
+
+Examples:
+- Kudos can be warm, human, engaging, and fun
+- Project Spotlight can be professional, informative, and confidence-building
+- Company Pulse can be editorial, timely, and news-driven
+- Tool Launcher can be compact, operational, and utility-first
+
+The benchmark is therefore **quality symmetry**, not **surface duplication**.
+
 ## Benchmark translation rule
 
 When comparing another homepage webpart to Kudos, ask:
 
 - what is the equivalent of its full user journey?
+- what is the correct persona for this content family?
 - what are its equivalent state classes?
 - what are its equivalent backend/data risks?
 - what are its equivalent host/runtime constraints?
 - what are its equivalent validation expectations?
+- how should it relate to Kudos and the rest of the homepage family without becoming a clone?
 
 Do **not** ask whether the webpart visually resembles Kudos.
-Ask whether it is built with the same seriousness.
+Ask whether it is built with the same seriousness and whether its own persona has been executed with the same level of care.
 
 ## Benchmark categories to score against
 
@@ -93,5 +131,7 @@ If a target homepage webpart materially underperforms Kudos in one or more bench
 
 - remediated, or
 - formally accepted as a deliberate exception with written rationale
+
+If a target webpart achieves benchmark rigor but loses its own persona and reads as a renamed Kudos variant, that is also a gap and must be corrected.
 
 No silent downgrade is allowed.
