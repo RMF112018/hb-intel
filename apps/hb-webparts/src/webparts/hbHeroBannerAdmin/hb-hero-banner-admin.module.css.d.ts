@@ -1,0 +1,25 @@
+declare const styles: {
+  readonly workspace: string;
+  readonly form: string;
+  readonly fieldGroup: string;
+  readonly fieldGroupHeading: string;
+  readonly fieldRow: string;
+  readonly label: string;
+  readonly help: string;
+  readonly input: string;
+  readonly textarea: string;
+  readonly checkboxRow: string;
+  readonly actions: string;
+  readonly primaryButton: string;
+  readonly secondaryButton: string;
+  readonly statusBanner: string;
+  readonly statusSuccess: string;
+  readonly statusError: string;
+  readonly statusInfo: string;
+  readonly previewPane: string;
+  readonly previewHeading: string;
+  readonly previewFrame: string;
+  readonly discardDialog: string;
+  readonly dialogActions: string;
+};
+export default styles;

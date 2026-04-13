@@ -25,6 +25,7 @@ import { SmartSearchWayfinding } from './webparts/smartSearchWayfinding/SmartSea
 import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import { buildHeroArticleContent } from './webparts/hbSignatureHero/articleConfig.js';
 import { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
+import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmin.js';
 import { PnpOps } from './webparts/pnp/PnpOps.js';
 import { PNP_OPS_LEGACY_MODE, resolvePnpOpsExecutionMode } from './webparts/pnp/pnpOpsExecutionModes.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';
@@ -100,6 +101,12 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // Prompt-01 PnP operations shell.
   '9e2dd84a-a121-4fb3-a964-f43a94abf9fd': ({ config, identity, getApiToken }) =>
     createElement(PnpOps, { config, identity, getApiToken }),
+  // Phase-02 Prompt-05: Hero Banner Admin app — authoring surface
+  // hosted on the HBCentral Homepage-Admin page. Reads/writes the
+  // canonical Hero Banner Config list consumed by the public
+  // HbHeroBanner webpart.
+  '23d22f2d-7a15-4031-ab64-2454898bfd44': ({ siteUrl }) =>
+    createElement(HbHeroBannerAdmin, { siteUrl }),
   '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl, siteUrl, getGraphToken }) => {
     const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
       ? config.backgroundImageUrl

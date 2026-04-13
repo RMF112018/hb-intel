@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "23d22f2d-7a15-4031-ab64-2454898bfd44",
+  "alias": "HbHeroBannerAdminWebPart",
+  "componentType": "WebPart",
+  "version": "0.1.0.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Hero Banner Admin" },
+      "description": {
+        "default": "Site-admin authoring surface for the HB Central homepage Hero Banner. Hosted on the HBCentral Homepage-Admin page. Reads and writes the canonical Hero Banner Config list; invalidates the public cache on save. Provides typed draft editing, live preview against the production surface, dirty-state awareness with explicit discard guard, and read-after-write confirmation. Does not expose property-pane controls — the app itself is the authoring path."
+      },
+      "officeFabricIconFontName": "Edit",
+      "hiddenFromToolbox": false,
+      "properties": {}
+    }
+  ]
+}

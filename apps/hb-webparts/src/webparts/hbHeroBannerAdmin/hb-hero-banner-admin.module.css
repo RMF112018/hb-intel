@@ -1,0 +1,198 @@
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  gap: 24px;
+  padding: 20px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+}
+
+.fieldGroupHeading {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+}
+
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.help {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.input,
+.textarea {
+  padding: 8px 10px;
+  font-size: 0.875rem;
+  border: 1px solid #c7c7c7;
+  border-radius: 4px;
+  background: #fff;
+  color: inherit;
+  font-family: inherit;
+}
+
+.input:focus-visible,
+.textarea:focus-visible {
+  outline: 2px solid #2f6fd1;
+  outline-offset: 1px;
+  border-color: #2f6fd1;
+}
+
+.textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.primaryButton {
+  background: #2f6fd1;
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #2558a8;
+}
+
+.primaryButton:disabled {
+  background: #b8c4d5;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background: #fff;
+  color: #333;
+  border-color: #c7c7c7;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.secondaryButton:disabled {
+  color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.statusBanner {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+.statusSuccess {
+  background: #e7f6ec;
+  color: #1e5b34;
+  border: 1px solid #bfe0cb;
+}
+
+.statusError {
+  background: #fde7e9;
+  color: #9c1521;
+  border: 1px solid #f4c0c5;
+}
+
+.statusInfo {
+  background: #eef2fb;
+  color: #1f3d77;
+  border: 1px solid #cbd8f0;
+}
+
+.previewPane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f3f4f6;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+}
+
+.previewHeading {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+}
+
+.previewFrame {
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.discardDialog {
+  padding: 12px;
+  background: #fff8e1;
+  border: 1px solid #f1d38a;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 960px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
