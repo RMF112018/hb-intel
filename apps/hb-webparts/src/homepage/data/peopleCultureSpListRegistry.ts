@@ -30,22 +30,26 @@
  *     here because the legacy merged PC webpart and the Kudos
  *     submission path both reference it.
  *
- * Always bind by `id` when making REST calls. The `title` and
- * `urlSegment` fields are exposed for logging / fallback only.
+ * Phase 01 (synchronous-weaving-thacker): the generic list-descriptor
+ * and endpoint-builder shape is now owned by
+ * `@hbc/sharepoint-platform`. `PeopleCultureListDescriptor` extends
+ * that shape with the People & Culture-specific `key` discriminator;
+ * `buildPcListItemsEndpoint` / `buildPcListFieldsEndpoint` remain as
+ * thin adapters so existing callers that pass a `PeopleCultureListKey`
+ * keep working.
  */
+import {
+  buildListItemsEndpoint,
+  buildListFieldsEndpoint,
+  type SharePointListDescriptor,
+} from '@hbc/sharepoint-platform';
 
 /** A stable key for each known list. Consumers use this, never titles. */
 export type PeopleCultureListKey = 'announcements' | 'celebrations' | 'kudos' | 'kudosAuditEvents';
 
-export interface PeopleCultureListDescriptor {
+export interface PeopleCultureListDescriptor extends SharePointListDescriptor {
   /** Stable app-facing key. Never change. */
   key: PeopleCultureListKey;
-  /** Live SharePoint list GUID. Authoritative binding identifier. */
-  id: string;
-  /** Live list title as of the extraction report. For logging only. */
-  title: string;
-  /** URL segment (the visible folder in the SharePoint URL). For logging only. */
-  urlSegment: string;
   /** Human-readable description of the list's purpose. */
   purpose: string;
   /**
@@ -133,9 +137,10 @@ export const PEOPLE_CULTURE_LIST_REGISTRY: Readonly<
 
 /**
  * Build the REST endpoint for fetching items from a PC list by GUID.
- * Always prefer this over `getbytitle(...)` so that title drift (and
- * the known announcements/celebrations title/URL mismatch) cannot
- * cause the adapter to silently bind to the wrong list.
+ * Thin adapter over `@hbc/sharepoint-platform`'s `buildListItemsEndpoint`
+ * that accepts either a `PeopleCultureListKey` or a descriptor. Always
+ * binds by GUID so title drift cannot cross-bind the adapter to the
+ * wrong list.
  */
 export function buildPcListItemsEndpoint(
   siteUrl: string,
@@ -144,19 +149,12 @@ export function buildPcListItemsEndpoint(
 ): string {
   const descriptor =
     typeof list === 'string' ? PEOPLE_CULTURE_LIST_REGISTRY[list] : list;
-  const params: string[] = [];
-  if (query?.select) params.push(`$select=${query.select}`);
-  if (query?.expand) params.push(`$expand=${query.expand}`);
-  if (query?.filter) params.push(`$filter=${encodeURIComponent(query.filter)}`);
-  if (typeof query?.top === 'number') params.push(`$top=${query.top}`);
-  const qs = params.length > 0 ? `?${params.join('&')}` : '';
-  return `${siteUrl}/_api/web/lists(guid'${descriptor.id}')/items${qs}`;
+  return buildListItemsEndpoint(siteUrl, descriptor, query);
 }
 
 /**
  * Build the REST endpoint for fetching the field metadata of a PC
- * list by GUID. Used by the runtime guardrails to verify a live
- * list still exposes the critical custom fields.
+ * list by GUID. Thin adapter over `buildListFieldsEndpoint`.
  */
 export function buildPcListFieldsEndpoint(
   siteUrl: string,
@@ -165,8 +163,7 @@ export function buildPcListFieldsEndpoint(
 ): string {
   const descriptor =
     typeof list === 'string' ? PEOPLE_CULTURE_LIST_REGISTRY[list] : list;
-  const qs = filter ? `?$filter=${encodeURIComponent(filter)}&$select=InternalName` : '';
-  return `${siteUrl}/_api/web/lists(guid'${descriptor.id}')/fields${qs}`;
+  return buildListFieldsEndpoint(siteUrl, descriptor, filter);
 }
 
 /** Convenience lookup. */

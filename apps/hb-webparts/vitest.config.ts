@@ -14,7 +14,8 @@ export default defineConfig({
       '@hbc/ui-kit/homepage': resolve(__dirname, '../../packages/ui-kit/src/homepage.ts'),
       '@hbc/ui-kit/theme': resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts'),
       '@hbc/ui-kit/icons': resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx'),
-      '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts')
+      '@hbc/ui-kit': resolve(__dirname, '../../packages/ui-kit/src/index.ts'),
+      '@hbc/sharepoint-platform': resolve(__dirname, '../../packages/sharepoint-platform/src/index.ts')
     }
   }
 });

@@ -4,18 +4,27 @@
  * The mount dispatcher stores the WebPartContext on first render.
  * Data-fetching hooks retrieve the site URL without needing the
  * full context object, keeping the coupling narrow.
+ *
+ * Phase 01 (synchronous-weaving-thacker): site-URL host-context is
+ * now owned by `@hbc/sharepoint-platform`. This module re-exports
+ * `storeSiteUrl`/`getSiteUrl` from that package and keeps only the
+ * Kudos-domain facts (canonical list-host URL, session-cached
+ * `resolveCurrentUserId`) app-local.
  */
-
-let _siteAbsoluteUrl: string | undefined;
+import {
+  storeSiteUrl as platformStoreSiteUrl,
+  getSiteUrl as platformGetSiteUrl,
+  resolveCurrentUserId as platformResolveCurrentUserId,
+} from '@hbc/sharepoint-platform';
 
 /** Store the SharePoint site URL extracted from SPFx context. */
 export function storeSiteUrl(absoluteUrl: string | undefined): void {
-  _siteAbsoluteUrl = absoluteUrl?.replace(/\/+$/, '');
+  platformStoreSiteUrl(absoluteUrl);
 }
 
 /** Retrieve the stored site URL, or undefined when running outside SPFx. */
 export function getSiteUrl(): string | undefined {
-  return _siteAbsoluteUrl;
+  return platformGetSiteUrl();
 }
 
 /* ── Kudos list host URL (cross-site data access) ────────────── */
@@ -53,7 +62,7 @@ export function storeKudosListHostUrl(url: string | undefined): void {
  *   3. Hosting site URL (fallback for non-Kudos contexts)
  */
 export function getKudosListHostUrl(): string | undefined {
-  return _kudosListHostUrlOverride ?? KUDOS_LIST_HOST_URL ?? _siteAbsoluteUrl;
+  return _kudosListHostUrlOverride ?? KUDOS_LIST_HOST_URL ?? platformGetSiteUrl();
 }
 
 /* ── Current user ID resolution ───────────────────────────────── */
@@ -68,19 +77,13 @@ let _currentUserIdPromise: Promise<number | undefined> | undefined;
  *
  * Cached for the session so repeated calls do not issue redundant
  * REST requests. Returns `undefined` outside SPFx context.
+ *
+ * The underlying HTTP call is delegated to the platform's pure
+ * `resolveCurrentUserId`; this function adds the session-level cache.
  */
 export function resolveCurrentUserId(): Promise<number | undefined> {
   if (_currentUserIdPromise) return _currentUserIdPromise;
-  const siteUrl = _kudosListHostUrlOverride ?? KUDOS_LIST_HOST_URL ?? _siteAbsoluteUrl;
-  if (!siteUrl) {
-    _currentUserIdPromise = Promise.resolve(undefined);
-    return _currentUserIdPromise;
-  }
-  _currentUserIdPromise = fetch(`${siteUrl}/_api/web/currentuser`, {
-    headers: { Accept: 'application/json;odata=nometadata' },
-  })
-    .then((r) => (r.ok ? r.json() : undefined))
-    .then((body: { Id?: number } | undefined) => body?.Id)
-    .catch(() => undefined);
+  const siteUrl = getKudosListHostUrl();
+  _currentUserIdPromise = platformResolveCurrentUserId(siteUrl);
   return _currentUserIdPromise;
 }

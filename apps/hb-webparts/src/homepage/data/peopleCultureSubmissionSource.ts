@@ -20,6 +20,10 @@ import {
   buildPcListItemsEndpoint,
   PEOPLE_CULTURE_LIST_REGISTRY,
 } from './peopleCultureSpListRegistry.js';
+import {
+  fetchRequestDigest as platformFetchRequestDigest,
+  ensureUserByEmail as platformEnsureUserByEmail,
+} from '@hbc/sharepoint-platform';
 import type { KudosComposerDraft } from './useKudosComposer.js';
 
 /* ── List metadata ──────────────────────────────────────────────── */
@@ -58,52 +62,23 @@ function generateKudosId(): string {
 
 /**
  * Fetch the SharePoint request digest required for write operations.
- * The digest token authenticates POST/PATCH/DELETE requests against
- * the SharePoint REST API.
+ *
+ * Phase 01 (synchronous-weaving-thacker): delegated to the platform
+ * package. Re-exported under the same name so callers are unchanged
+ * until the rename phase.
  */
 export async function fetchRequestDigest(siteUrl: string): Promise<string> {
-  const response = await fetch(`${siteUrl}/_api/contextinfo`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json;odata=nometadata',
-      'Content-Type': 'application/json;odata=nometadata',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to get request digest: ${response.status} ${response.statusText}`);
-  }
-
-  const body = (await response.json()) as { FormDigestValue?: string };
-  if (!body.FormDigestValue) {
-    throw new Error('Request digest not found in contextinfo response');
-  }
-
-  return body.FormDigestValue;
+  return platformFetchRequestDigest(siteUrl);
 }
 
 /**
  * Attempt to resolve a SharePoint user ID from an email address
  * using the ensureUser endpoint. Returns undefined if resolution fails.
+ *
+ * Phase 01: delegated to the platform package's `ensureUserByEmail`.
  */
 export async function resolveUserId(siteUrl: string, email: string, digest: string): Promise<number | undefined> {
-  try {
-    const response = await fetch(`${siteUrl}/_api/web/ensureuser('${encodeURIComponent(email)}')`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json;odata=nometadata',
-        'Content-Type': 'application/json;odata=nometadata',
-        'X-RequestDigest': digest,
-      },
-    });
-
-    if (!response.ok) return undefined;
-
-    const body = (await response.json()) as { Id?: number };
-    return body.Id;
-  } catch {
-    return undefined;
-  }
+  return platformEnsureUserByEmail(siteUrl, email, digest);
 }
 
 /* ── Payload construction ──────────────────────────────────────── */

@@ -28,6 +28,10 @@ import {
   fetchRequestDigest,
   resolveUserId,
 } from './peopleCultureSubmissionSource.js';
+import {
+  fetchItemMetaByFieldValue,
+  mergeItemById,
+} from '@hbc/sharepoint-platform';
 import { KUDOS_FIELDS, KUDOS_AUDIT_FIELDS } from './peopleCultureListSource.js';
 import type {
   KudosAuditEventInput,
@@ -80,6 +84,11 @@ function escapeODataString(value: string): string {
  * app-side `KudosId`. Bound by the kudos list GUID so title drift
  * cannot cross-bind the writer to the wrong list.
  *
+ * Phase 01 (synchronous-weaving-thacker): rebased onto
+ * `fetchItemMetaByFieldValue` from `@hbc/sharepoint-platform`. The
+ * `kudosId` echo is restored app-side so callers that use
+ * `KudosItemMeta` keep the existing return shape.
+ *
  * Returns `undefined` when no item matches (caller decides whether
  * that is an error).
  */
@@ -89,40 +98,14 @@ export async function fetchKudosItemMeta(
 ): Promise<KudosItemMeta | undefined> {
   if (!kudosId.trim()) return undefined;
 
-  const url = buildPcListItemsEndpoint(
+  const meta = await fetchItemMetaByFieldValue(
     siteUrl,
     PEOPLE_CULTURE_LIST_REGISTRY.kudos,
-    {
-      select: `Id,${KUDOS_FIELDS.KudosId}`,
-      filter: `${KUDOS_FIELDS.KudosId} eq '${escapeODataString(kudosId)}'`,
-      top: 1,
-    },
+    KUDOS_FIELDS.KudosId,
+    kudosId,
   );
-
-  // Ask for minimal metadata so the response carries the
-  // `@odata.etag` field that we need for the If-Match write.
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json;odata=minimalmetadata' },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `People Culture Kudos lookup by KudosId failed: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  interface RawItem {
-    Id: number;
-    KudosId: string;
-    '@odata.etag'?: string;
-    'odata.etag'?: string;
-  }
-  const body = (await response.json()) as { value?: RawItem[] };
-  const raw = body.value?.[0];
-  if (!raw) return undefined;
-
-  const etag = raw['@odata.etag'] ?? raw['odata.etag'] ?? '*';
-  return { itemId: raw.Id, etag, kudosId: raw.KudosId };
+  if (!meta) return undefined;
+  return { itemId: meta.itemId, etag: meta.etag, kudosId };
 }
 
 // ---------------------------------------------------------------------------
@@ -178,27 +161,14 @@ export async function patchKudosItem(
   digest: string,
   fields: Record<string, unknown>,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const url = `${buildPcListItemsEndpoint(siteUrl, PEOPLE_CULTURE_LIST_REGISTRY.kudos)}(${itemId})`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json;odata=nometadata',
-      'Content-Type': 'application/json;odata=nometadata',
-      'X-RequestDigest': digest,
-      'X-HTTP-Method': 'MERGE',
-      'If-Match': etag,
-    },
-    body: JSON.stringify(fields),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => '');
-    return {
-      ok: false,
-      error: `SharePoint rejected the kudos PATCH (${response.status}). ${errorBody ? `Details: ${errorBody.slice(0, 240)}` : ''}`.trim(),
-    };
-  }
-  return { ok: true };
+  return mergeItemById(
+    siteUrl,
+    PEOPLE_CULTURE_LIST_REGISTRY.kudos,
+    itemId,
+    etag,
+    digest,
+    fields,
+  );
 }
 
 // ---------------------------------------------------------------------------

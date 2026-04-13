@@ -1,0 +1,33 @@
+{
+  "name": "@hbc/sharepoint-platform",
+  "version": "0.1.0",
+  "description": "Shared SharePoint platform mechanics — host context, list descriptors, request digest, ensure-user, item meta/ETag, MERGE, cache invalidation. UI-free, framework-free.",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --project tsconfig.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check-types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "typescript": "^5.4.0",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "dist"
+  ]
+}
