@@ -1,0 +1,205 @@
+/**
+ * SharePoint write seam for `Project Spotlight Page Bindings`.
+ *
+ * Upserts a binding row keyed by `PostId`. Mirrors the structural
+ * pattern established by `heroBannerListWriter`: a title-bound list
+ * endpoint (`getbytitle(...)`) plus the platform's request-digest
+ * primitive for CSRF. When tenant GUIDs become available the list
+ * binding can be swapped to `buildListItemsEndpoint` without changing
+ * callers.
+ *
+ * Authority:
+ *   architecture doc 03 §E — Project Spotlight Page Bindings field set.
+ *   architecture doc 06 — binding lifecycle.
+ *   operating-charter rule 6 — publish/republish mediated by bindings.
+ */
+
+import { fetchRequestDigest } from '@hbc/sharepoint-platform';
+import type { PublisherPageBindingRow } from './publisherContracts';
+import type { PublisherListDescriptor } from './publisherListDescriptors';
+import { PUBLISHER_LISTS } from './publisherListDescriptors';
+
+export interface PageBindingUpsertInput {
+  readonly row: PublisherPageBindingRow;
+}
+
+export type PageBindingUpsertOutcome =
+  | {
+      readonly ok: true;
+      readonly bindingId: string;
+      readonly wasCreated: boolean;
+      readonly itemId: number;
+    }
+  | {
+      readonly ok: false;
+      readonly reason: 'digestFailed' | 'lookupFailed' | 'writeFailed' | 'unexpectedShape';
+      readonly message: string;
+      readonly status?: number;
+    };
+
+export interface PageBindingWriter {
+  upsert(input: PageBindingUpsertInput): Promise<PageBindingUpsertOutcome>;
+}
+
+export interface SharePointPageBindingWriterDeps {
+  readonly descriptor?: PublisherListDescriptor;
+  readonly fetchImpl?: typeof fetch;
+  readonly fetchRequestDigestImpl?: typeof fetchRequestDigest;
+}
+
+interface LookupRecord {
+  readonly Id: number;
+  readonly PostId?: string;
+}
+
+function listItemsEndpoint(descriptor: PublisherListDescriptor): string {
+  return `${descriptor.hostSiteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(descriptor.displayName)}')/items`;
+}
+
+/**
+ * Project the typed binding row into the raw SP field bag used by both
+ * POST (insert) and MERGE (update). `null` is emitted for optional
+ * fields that are unset so MERGE clears the cell rather than leaving
+ * stale content.
+ */
+export function mapBindingRowToListFields(
+  row: PublisherPageBindingRow,
+): Record<string, unknown> {
+  return {
+    BindingId: row.BindingId,
+    PostId: row.PostId,
+    TargetSiteUrl: row.TargetSiteUrl,
+    TargetSiteKey: row.TargetSiteKey,
+    PageId: row.PageId ?? null,
+    PageName: row.PageName,
+    PageUrl: row.PageUrl ? { Url: row.PageUrl, Description: row.PageUrl } : null,
+    SourceTemplatePath: row.SourceTemplatePath,
+    PageShellKey: row.PageShellKey,
+    PageShellVersion: row.PageShellVersion,
+    TemplateKey: row.TemplateKey,
+    TemplateVersion: row.TemplateVersion,
+    BindingStatus: row.BindingStatus,
+    LastOperation: row.LastOperation ?? null,
+    LastOperationDateUtc: row.LastOperationDateUtc ?? null,
+    LastSuccessfulSyncDateUtc: row.LastSuccessfulSyncDateUtc ?? null,
+  };
+}
+
+export function createSharePointPageBindingWriter(
+  deps: SharePointPageBindingWriterDeps = {},
+): PageBindingWriter {
+  const descriptor = deps.descriptor ?? PUBLISHER_LISTS.pageBindings;
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const digestImpl = deps.fetchRequestDigestImpl ?? fetchRequestDigest;
+
+  async function findExistingItemId(postId: string): Promise<number | undefined> {
+    const url =
+      `${listItemsEndpoint(descriptor)}` +
+      `?$select=Id,PostId&$filter=${encodeURIComponent(`PostId eq '${postId.replace(/'/g, "''")}'`)}&$top=1`;
+    const res = await fetchImpl(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { Accept: 'application/json;odata=nometadata' },
+    });
+    if (!res.ok) return undefined;
+    const body = (await res.json().catch(() => undefined)) as
+      | { value?: LookupRecord[] }
+      | undefined;
+    const match = body?.value?.[0];
+    return match && typeof match.Id === 'number' ? match.Id : undefined;
+  }
+
+  return {
+    async upsert({ row }) {
+      let digest: string;
+      try {
+        digest = await digestImpl(descriptor.hostSiteUrl);
+      } catch (err) {
+        return {
+          ok: false,
+          reason: 'digestFailed',
+          message: err instanceof Error ? err.message : 'Digest fetch failed',
+        };
+      }
+
+      let existingId: number | undefined;
+      try {
+        existingId = await findExistingItemId(row.PostId);
+      } catch (err) {
+        return {
+          ok: false,
+          reason: 'lookupFailed',
+          message: err instanceof Error ? err.message : 'Binding lookup failed',
+        };
+      }
+
+      const body = mapBindingRowToListFields(row);
+
+      if (existingId !== undefined) {
+        const patchUrl = `${listItemsEndpoint(descriptor)}(${existingId})`;
+        const res = await fetchImpl(patchUrl, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            Accept: 'application/json;odata=nometadata',
+            'Content-Type': 'application/json;odata=nometadata',
+            'X-RequestDigest': digest,
+            'If-Match': '*',
+            'X-HTTP-Method': 'MERGE',
+          },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          return {
+            ok: false,
+            reason: 'writeFailed',
+            message: `Binding MERGE failed (status ${res.status}).`,
+            status: res.status,
+          };
+        }
+        return {
+          ok: true,
+          bindingId: row.BindingId,
+          wasCreated: false,
+          itemId: existingId,
+        };
+      }
+
+      const postUrl = listItemsEndpoint(descriptor);
+      const res = await fetchImpl(postUrl, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json;odata=nometadata',
+          'Content-Type': 'application/json;odata=nometadata',
+          'X-RequestDigest': digest,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        return {
+          ok: false,
+          reason: 'writeFailed',
+          message: `Binding POST failed (status ${res.status}).`,
+          status: res.status,
+        };
+      }
+      const created = (await res.json().catch(() => undefined)) as
+        | { Id?: number }
+        | undefined;
+      if (!created || typeof created.Id !== 'number') {
+        return {
+          ok: false,
+          reason: 'unexpectedShape',
+          message: 'Binding POST returned no Id.',
+        };
+      }
+      return {
+        ok: true,
+        bindingId: row.BindingId,
+        wasCreated: true,
+        itemId: created.Id,
+      };
+    },
+  };
+}

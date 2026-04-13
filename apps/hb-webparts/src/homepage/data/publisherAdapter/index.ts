@@ -14,3 +14,6 @@ export * from './publisherRepositories';
 export * from './templateResolver';
 export * from './publishResolutionContext';
 export * from './pageGeneration/index';
+export * from './pageBindingWriter';
+export * from './republishPolicy';
+export * from './publishOrchestrator';

@@ -38,6 +38,10 @@ import {
   mapTemplateRegistryRow,
   mapWorkflowHistoryRow,
 } from './publisherRowMappers';
+import {
+  createSharePointPageBindingWriter,
+  type PageBindingWriter,
+} from './pageBindingWriter';
 
 export class PublisherWriteNotImplementedError extends Error {
   constructor(operation: string, wave: string) {
@@ -139,7 +143,16 @@ export interface TemplateRegistryRepository {
 
 export interface PageBindingRepository {
   getByPostId(postId: string): Promise<PublisherPageBindingRow | undefined>;
-  upsert(row: PublisherPageBindingRow): Promise<never>;
+  /**
+   * Idempotently upserts a `Project Spotlight Page Bindings` row keyed
+   * by `PostId`. In Prompt-05 this delegates to the injected
+   * `PageBindingWriter` (defaults to the SharePoint title-bound writer).
+   */
+  upsert(row: PublisherPageBindingRow): Promise<{
+    readonly bindingId: string;
+    readonly wasCreated: boolean;
+    readonly itemId: number;
+  }>;
 }
 
 export interface WorkflowHistoryRepository {
@@ -167,6 +180,9 @@ export interface PublisherRepositories {
 export function createPublisherRepositories(
   access: PublisherListAccess = createSharePointPublisherListAccess(),
   lists: typeof PUBLISHER_LISTS = PUBLISHER_LISTS,
+  pageBindingWriter: PageBindingWriter = createSharePointPageBindingWriter({
+    descriptor: lists.pageBindings,
+  }),
 ): PublisherRepositories {
   function mapAll<R>(
     rows: readonly Record<string, unknown>[],
@@ -272,11 +288,18 @@ export function createPublisherRepositories(
         }
         return undefined;
       },
-      async upsert() {
-        throw new PublisherWriteNotImplementedError(
-          'pageBindings.upsert',
-          'Wave 5 / Prompt-05',
-        );
+      async upsert(row) {
+        const outcome = await pageBindingWriter.upsert({ row });
+        if (!outcome.ok) {
+          throw new Error(
+            `pageBindings.upsert failed (${outcome.reason}): ${outcome.message}`,
+          );
+        }
+        return {
+          bindingId: outcome.bindingId,
+          wasCreated: outcome.wasCreated,
+          itemId: outcome.itemId,
+        };
       },
     },
 
