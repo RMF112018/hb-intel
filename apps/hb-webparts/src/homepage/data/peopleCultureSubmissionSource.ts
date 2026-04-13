@@ -21,8 +21,8 @@ import {
   PEOPLE_CULTURE_LIST_REGISTRY,
 } from './peopleCultureSpListRegistry.js';
 import {
-  fetchRequestDigest as platformFetchRequestDigest,
-  ensureUserByEmail as platformEnsureUserByEmail,
+  fetchRequestDigest,
+  ensureUserByEmail,
 } from '@hbc/sharepoint-platform';
 import type { KudosComposerDraft } from './useKudosComposer.js';
 
@@ -58,27 +58,6 @@ function generateKudosId(): string {
   const ts = Date.now().toString(36);
   const rand = Math.random().toString(36).slice(2, 8);
   return `kudos-${ts}-${rand}`;
-}
-
-/**
- * Fetch the SharePoint request digest required for write operations.
- *
- * Phase 01 (synchronous-weaving-thacker): delegated to the platform
- * package. Re-exported under the same name so callers are unchanged
- * until the rename phase.
- */
-export async function fetchRequestDigest(siteUrl: string): Promise<string> {
-  return platformFetchRequestDigest(siteUrl);
-}
-
-/**
- * Attempt to resolve a SharePoint user ID from an email address
- * using the ensureUser endpoint. Returns undefined if resolution fails.
- *
- * Phase 01: delegated to the platform package's `ensureUserByEmail`.
- */
-export async function resolveUserId(siteUrl: string, email: string, digest: string): Promise<number | undefined> {
-  return platformEnsureUserByEmail(siteUrl, email, digest);
 }
 
 /* ── Payload construction ──────────────────────────────────────── */
@@ -196,7 +175,7 @@ export async function resolveTypedRecipientBuckets(
   for (const rawEmail of buckets.individualEmails) {
     const email = rawEmail.trim();
     if (!email) continue;
-    const id = await resolveUserId(siteUrl, email, digest);
+    const id = await ensureUserByEmail(siteUrl, email, digest);
     if (typeof id === 'number') {
       resolvedIndividualUserIds.push(id);
     } else {
@@ -361,7 +340,7 @@ export async function submitKudosDraft(
     // Resolve current user ID for SubmittedBy person field
     let submitterUserId: number | undefined;
     if (options.submitterEmail) {
-      submitterUserId = await resolveUserId(siteUrl, options.submitterEmail, digest);
+      submitterUserId = await ensureUserByEmail(siteUrl, options.submitterEmail, digest);
     }
 
     // Resolve typed recipient buckets when the caller used the typed composer mode.

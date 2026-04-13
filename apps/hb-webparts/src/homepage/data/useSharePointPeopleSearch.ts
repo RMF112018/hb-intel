@@ -32,7 +32,7 @@
  */
 import { useCallback, useEffect, useRef } from 'react';
 import { getSiteUrl, getKudosListHostUrl } from './spContext.js';
-import { fetchRequestDigest } from './peopleCultureSubmissionSource.js';
+import { fetchRequestDigest } from '@hbc/sharepoint-platform';
 import { rankPeopleResults } from '@hbc/ui-kit/homepage';
 import type { PersonEntry, PeopleSearchFn } from '@hbc/ui-kit/homepage';
 

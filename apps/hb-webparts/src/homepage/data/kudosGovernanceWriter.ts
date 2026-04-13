@@ -26,9 +26,7 @@ import {
 } from './peopleCultureSpListRegistry.js';
 import {
   fetchRequestDigest,
-  resolveUserId,
-} from './peopleCultureSubmissionSource.js';
-import {
+  ensureUserByEmail,
   fetchItemMetaByFieldValue,
   mergeItemById,
 } from '@hbc/sharepoint-platform';
@@ -937,7 +935,7 @@ export async function submitKudosGovernanceAction(
 
     let enrichedPatch = patch;
     if (typeof patch.actorUserId !== 'number' && options.actorEmail) {
-      const resolvedId = await resolveUserId(siteUrl, options.actorEmail, digest);
+      const resolvedId = await ensureUserByEmail(siteUrl, options.actorEmail, digest);
       if (typeof resolvedId === 'number') {
         enrichedPatch = { ...patch, actorUserId: resolvedId };
       }

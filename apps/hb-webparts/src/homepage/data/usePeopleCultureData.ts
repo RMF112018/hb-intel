@@ -8,6 +8,7 @@
  * Follows the same pattern as useProjectSpotlightData.ts.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createCacheInvalidationBus } from '@hbc/sharepoint-platform';
 import { getKudosListHostUrl } from './spContext.js';
 import { fetchPeopleCultureListData } from './peopleCultureListSource.js';
 import type { PeopleCultureMergedConfig } from '../webparts/communicationsContracts.js';
@@ -26,10 +27,11 @@ let _cache: { config: Partial<PeopleCultureMergedConfig>; fetchedAt: number } | 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Generation counter incremented when `invalidatePeopleCultureCache` is
- * called. Hooks that depend on the generation re-fetch when it bumps.
+ * Cache invalidation bus — generation bumps whenever
+ * `invalidatePeopleCultureCache` is called. Hooks subscribe via the
+ * bus so re-fetch is triggered without polling a module-level counter.
  */
-let _cacheGeneration = 0;
+const _cacheBus = createCacheInvalidationBus();
 
 /**
  * Clear the shared People & Culture data cache so the next render
@@ -39,7 +41,7 @@ let _cacheGeneration = 0;
  */
 export function invalidatePeopleCultureCache(): void {
   _cache = undefined;
-  _cacheGeneration += 1;
+  _cacheBus.invalidate();
 }
 
 export interface PeopleCultureDataResultWithRefresh extends PeopleCultureDataResult {
@@ -49,7 +51,7 @@ export interface PeopleCultureDataResultWithRefresh extends PeopleCultureDataRes
 
 export function usePeopleCultureData(): PeopleCultureDataResultWithRefresh {
   const siteUrl = getKudosListHostUrl();
-  const [generation, setGeneration] = useState(_cacheGeneration);
+  const [generation, setGeneration] = useState(_cacheBus.getGeneration());
   const [result, setResult] = useState<PeopleCultureDataResult>(() => {
     // If cache is still fresh, use it immediately (no loading flash)
     if (_cache && Date.now() - _cache.fetchedAt < CACHE_TTL_MS) {
@@ -64,16 +66,15 @@ export function usePeopleCultureData(): PeopleCultureDataResultWithRefresh {
 
   const abortRef = useRef<AbortController | undefined>();
 
-  // Detect external invalidation via the global generation counter.
+  // Subscribe to external invalidations via the shared cache bus.
   useEffect(() => {
-    if (_cacheGeneration !== generation) {
-      setGeneration(_cacheGeneration);
-    }
-  });
+    return _cacheBus.subscribe(() => {
+      setGeneration(_cacheBus.getGeneration());
+    });
+  }, []);
 
   const refresh = useCallback(() => {
     invalidatePeopleCultureCache();
-    setGeneration(_cacheGeneration);
   }, []);
 
   useEffect(() => {
