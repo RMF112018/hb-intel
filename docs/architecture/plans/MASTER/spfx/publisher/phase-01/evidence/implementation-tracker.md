@@ -12,6 +12,7 @@ Single source of truth for wave-by-wave execution status. Update this file as ea
 |------|--------|-----------|--------|------------------|
 | 1 | 01 | Repo truth + impact map | ✅ **COMPLETE** | `evidence/wave-01-repo-truth-and-impact-map.md` |
 | — | — | Architecture authority + operating-rules adoption (phase-01 doc `02`) | ✅ **COMPLETE** | `evidence/operating-rules-adoption.md` |
+| — | — | Definition-of-Done adoption + closure gate (phase-01 doc `03`) | ✅ **COMPLETE** | `evidence/definition-of-done-adoption.md` |
 | 2 | 02 | List provisioning + domain contracts | ⬜️ Not started | — |
 | 3 | 03 | Service layer + template resolution | ⬜️ Not started | — |
 | 4 | 04 | XML-shell page-generation engine | ⬜️ Not started | — |
