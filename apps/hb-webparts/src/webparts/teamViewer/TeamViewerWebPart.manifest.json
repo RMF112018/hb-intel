@@ -3,7 +3,7 @@
   "id": "c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901",
   "alias": "TeamViewerWebPart",
   "componentType": "WebPart",
-  "version": "0.1.0.0",
+  "version": "0.1.1.0",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
