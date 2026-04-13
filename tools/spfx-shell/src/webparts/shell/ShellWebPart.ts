@@ -44,8 +44,26 @@ const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
 const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 
 interface IShellWebPartProperties {
-  /** Author-configurable background image URL for the Signature Hero. */
+  /** Author-configurable background image URL for the Signature Hero homepage branch. */
   backgroundImageUrl?: string;
+  /**
+   * Signature Hero article-mode inputs. Only consumed on non-HBCentral
+   * sites; the hero's mode resolver hard-locks homepage mode on
+   * HBCentral so these fields are ignored there. All three required
+   * fields (title, author, publishedDate) must be populated before the
+   * article render path engages — partial configuration yields an
+   * empty (author-safe) hero rather than a half-rendered article.
+   */
+  articleTitle?: string;
+  articleSubheading?: string;
+  articleLabels?: string;
+  articleDestinationUrl?: string;
+  articlePrimaryImageUrl?: string;
+  articleAuthor?: string;
+  articleAuthorUpn?: string;
+  articleAuthorPhotoUrl?: string;
+  articlePublishedDate?: string;
+  articlePublishedTime?: string;
   /** Optional display heading override for the Kudos Companion. */
   heading?: string;
   /** Number of days before standard approved kudos age off the homepage. */
@@ -278,21 +296,94 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
     const webPartId = (this.manifest as any).id;
 
     // Show hero-specific property pane fields only for the Signature Hero webpart.
+    // The hero mode resolver is authoritative: HBCentral always renders the
+    // homepage branch (backgroundImageUrl applies), and non-HBCentral sites
+    // render the article branch when all required article fields are set.
+    // There is no editor toggle to force article mode on HBCentral.
     if (webPartId === HERO_WEBPART_ID) {
       return {
         pages: [
           {
-            header: { description: 'Signature Hero Settings' },
+            header: {
+              description:
+                'Signature Hero — homepage locked on HBCentral; article mode on other sites when the required article fields are set.',
+            },
             groups: [
               {
-                groupName: 'Background Image',
+                groupName: 'Homepage background (HBCentral only)',
                 groupFields: [
                   PropertyPaneTextField('backgroundImageUrl', {
                     label: 'Background image URL',
                     description:
-                      'Enter a SharePoint-hosted image URL to override the default hero background. ' +
-                      'Leave blank to use the default banner image.',
+                      'HBCentral-only override for the flagship hero background photograph. Leave blank to use the default banner image. Ignored on non-HBCentral sites.',
                     placeholder: 'https://your-tenant.sharepoint.com/sites/.../image.jpg',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Article content (non-HBCentral)',
+                groupFields: [
+                  PropertyPaneTextField('articleTitle', {
+                    label: 'Title (required)',
+                    description: 'Primary article headline. Required — leave blank to render nothing on non-HBCentral sites.',
+                  }),
+                  PropertyPaneTextField('articleSubheading', {
+                    label: 'Subheading',
+                    description: 'Optional deck / standfirst sentence beneath the title.',
+                    multiline: true,
+                  }),
+                  PropertyPaneTextField('articleLabels', {
+                    label: 'Labels',
+                    description: 'Optional comma- or pipe-separated tags (e.g. "Project, Field").',
+                    placeholder: 'Project, Field',
+                  }),
+                  PropertyPaneTextField('articleDestinationUrl', {
+                    label: 'Destination URL',
+                    description: 'Optional canonical article URL. When set, the title renders as a link.',
+                    placeholder: 'https://intranet.example/articles/...',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Article media',
+                groupFields: [
+                  PropertyPaneTextField('articlePrimaryImageUrl', {
+                    label: 'Primary image URL',
+                    description: 'Optional full-bleed hero image. When empty, the shared surface renders on its brand gradient.',
+                    placeholder: 'https://your-tenant.sharepoint.com/sites/.../article-hero.jpg',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Author',
+                groupFields: [
+                  PropertyPaneTextField('articleAuthor', {
+                    label: 'Display name (required)',
+                    description: 'Byline display name. Required when publishing an article-mode hero.',
+                  }),
+                  PropertyPaneTextField('articleAuthorUpn', {
+                    label: 'UPN / email',
+                    description: 'Optional. Used to resolve a Microsoft Graph profile photo via the shared people seam.',
+                    placeholder: 'author@your-tenant.onmicrosoft.com',
+                  }),
+                  PropertyPaneTextField('articleAuthorPhotoUrl', {
+                    label: 'Explicit photo URL',
+                    description: 'Optional. When set, this image is used as-is and Graph lookup is skipped.',
+                  }),
+                ],
+              },
+              {
+                groupName: 'Publish metadata',
+                groupFields: [
+                  PropertyPaneTextField('articlePublishedDate', {
+                    label: 'Published date (required)',
+                    description: 'Required. ISO date (YYYY-MM-DD) or pre-formatted display string.',
+                    placeholder: '2026-04-13',
+                  }),
+                  PropertyPaneTextField('articlePublishedTime', {
+                    label: 'Published time',
+                    description: 'Optional time-of-day suffix rendered after the date (e.g. 09:15 AM).',
+                    placeholder: '09:15 AM',
                   }),
                 ],
               },

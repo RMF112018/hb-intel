@@ -9,3 +9,4 @@ export { resolveHeroMode, HBCENTRAL_SITE_URL } from './heroModeResolver.js';
 export type { HeroMode } from './heroModeResolver.js';
 export { useArticleAuthorPhoto } from './useArticleAuthorPhoto.js';
 export type { UseArticleAuthorPhotoInput } from './useArticleAuthorPhoto.js';
+export { buildHeroArticleContent } from './articleConfig.js';
