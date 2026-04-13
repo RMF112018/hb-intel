@@ -26,6 +26,8 @@ export { type ItemMeta, fetchItemMetaByFieldValue } from './itemMeta.js';
 
 export { mergeItemById } from './merge.js';
 
+export { type FetchListItemsOptions, fetchListItemsJson } from './listRead.js';
+
 export {
   type FetchResult,
   type WriteResult,

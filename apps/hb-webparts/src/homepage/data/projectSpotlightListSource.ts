@@ -6,6 +6,7 @@
  * ProjectPortfolioSpotlightItem contract so the downstream
  * normalization pipeline works unchanged.
  */
+import { fetchListItemsJson } from '@hbc/sharepoint-platform';
 import type {
   ProjectPortfolioSpotlightItem,
   ProjectMilestone,
@@ -330,18 +331,13 @@ export async function fetchSpotlightListItems(
     `&$filter=${filter}` +
     `&$top=20`;
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: 'application/json;odata=nometadata',
-    },
+  // Narrow mechanics reuse from @hbc/sharepoint-platform: GET with
+  // odata=nometadata, non-OK → exception, value[] unwrap. Endpoint
+  // construction stays title-bound here until a GUID is registered
+  // for the Homepage Project Spotlights list.
+  const rawItems = await fetchListItemsJson<RawSpotlightListItem>(url, {
+    label: 'SharePoint list',
   });
-
-  if (!response.ok) {
-    throw new Error(`SharePoint list request failed: ${response.status} ${response.statusText}`);
-  }
-
-  const body = (await response.json()) as { value?: RawSpotlightListItem[] };
-  const rawItems = body.value ?? [];
 
   // Client-side publish window filter
   const activeItems = rawItems.filter((item) => isWithinPublishWindow(item, now));
