@@ -10,15 +10,13 @@
  * The canonical site URL is a production-infrastructure constant. It is
  * not a property-pane concern and not configurable per webpart instance.
  *
- * Phase-01 scope: only the `homepage` branch is exercised. Phase-02 will
- * introduce the `article` branch for non-HBCentral article rendering. To
- * keep the current behavior byte-identical on non-HBCentral workbench /
- * test hosts until Phase-02 lands, non-HBCentral resolves to `homepage`
- * today. See the marked TODO below.
+ * HBCentral → `'homepage'` (locked).
+ * Anything else → `'article'` (non-HBCentral editorial rendering).
  *
  * Governing source:
  *   - `docs/architecture/plans/MASTER/spfx/hero/phase-01/README.md`
  *   - `docs/architecture/plans/MASTER/spfx/hero/phase-01/05-Implementation-Prompt-01-Lock-HBCentral-Mode.md`
+ *   - `docs/architecture/plans/MASTER/spfx/hero/phase-01/06-Implementation-Prompt-02-Introduce-Article-Mode.md`
  */
 
 export type HeroMode = 'homepage' | 'article';
@@ -46,10 +44,9 @@ export function resolveHeroMode(siteUrl?: string): HeroMode {
     }
   }
 
-  // TODO(phase-02): non-HBCentral contexts resolve to `'article'` once
-  // the article-mode adapter is introduced. Until then, preserving the
-  // current render on non-HBCentral hosts (workbench, tests, future
-  // sites) means we fall through to `'homepage'`. This is the only
-  // reason non-HBCentral still resolves to `'homepage'` today.
-  return 'homepage';
+  // Non-HBCentral contexts are article-mode. The orchestrator is
+  // responsible for rendering nothing when an article payload has not
+  // been wired up yet — the homepage branch must never be reused as a
+  // fallback outside HBCentral.
+  return 'article';
 }

@@ -2,5 +2,8 @@ export { HbSignatureHero } from './HbSignatureHero.js';
 export type { HbSignatureHeroProps } from './HbSignatureHero.js';
 export { HbSignatureHeroHomepage } from './HbSignatureHeroHomepage.js';
 export type { HbSignatureHeroHomepageProps } from './HbSignatureHeroHomepage.js';
+export { HbSignatureHeroArticle } from './HbSignatureHeroArticle.js';
+export type { HbSignatureHeroArticleProps } from './HbSignatureHeroArticle.js';
+export type { HbSignatureHeroArticleContent } from './HbSignatureHeroArticleContract.js';
 export { resolveHeroMode, HBCENTRAL_SITE_URL } from './heroModeResolver.js';
 export type { HeroMode } from './heroModeResolver.js';

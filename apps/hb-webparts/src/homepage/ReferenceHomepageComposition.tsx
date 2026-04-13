@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { HP_SPACE, hpZoneSection } from './tokens.js';
 import { HbSignatureHero } from '../webparts/hbSignatureHero/HbSignatureHero.js';
+import { HBCENTRAL_SITE_URL } from '../webparts/hbSignatureHero/heroModeResolver.js';
 import { PriorityActionsRail } from '../webparts/priorityActionsRail/PriorityActionsRail.js';
 import { ToolLauncherWorkHub } from '../webparts/toolLauncherWorkHub/ToolLauncherWorkHub.js';
 import { CompanyPulse } from '../webparts/companyPulse/CompanyPulse.js';
@@ -60,7 +61,10 @@ export function ReferenceHomepageComposition(): React.JSX.Element {
     <div data-hbc-homepage="composition-reference" style={compositionStyle}>
 
       {/* ── Zone 1: Signature Hero — Premium Identity Surface ──── */}
-      <HbSignatureHero identity={{ preferredName: 'Jordan Miller' }} />
+      <HbSignatureHero
+        identity={{ preferredName: 'Jordan Miller' }}
+        siteUrl={HBCENTRAL_SITE_URL}
+      />
 
       {/* ── Zone 2: Utility — Command Surfaces ──────────────────── */}
       <section aria-label="Quick-use and work zone" style={zoneStyle('utility')}>

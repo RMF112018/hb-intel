@@ -19,19 +19,17 @@ describe('resolveHeroMode — Phase-01 HBCentral homepage lock', () => {
     ).toBe('homepage');
   });
 
-  it('falls through to homepage for non-HBCentral URLs in Phase-01', () => {
-    // Phase-01 preserves current behavior on non-HBCentral hosts. Phase-02
-    // will flip this branch to 'article'.
+  it('routes non-HBCentral URLs to article mode', () => {
     expect(
       resolveHeroMode('https://hedrickbrotherscom.sharepoint.com/sites/OtherSite'),
-    ).toBe('homepage');
+    ).toBe('article');
   });
 
-  it('falls through to homepage when siteUrl is undefined', () => {
-    expect(resolveHeroMode(undefined)).toBe('homepage');
+  it('routes undefined siteUrl to article mode', () => {
+    expect(resolveHeroMode(undefined)).toBe('article');
   });
 
-  it('falls through to homepage when siteUrl is an empty string', () => {
-    expect(resolveHeroMode('')).toBe('homepage');
+  it('routes an empty siteUrl to article mode', () => {
+    expect(resolveHeroMode('')).toBe('article');
   });
 });
