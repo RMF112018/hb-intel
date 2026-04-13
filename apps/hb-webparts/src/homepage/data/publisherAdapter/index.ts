@@ -9,3 +9,7 @@
 export * from './publisherEnums';
 export * from './publisherContracts';
 export * from './publisherListDescriptors';
+export * from './publisherRowMappers';
+export * from './publisherRepositories';
+export * from './templateResolver';
+export * from './publishResolutionContext';

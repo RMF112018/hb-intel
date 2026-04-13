@@ -15,7 +15,7 @@ Single source of truth for wave-by-wave execution status. Update this file as ea
 | — | — | Definition-of-Done adoption + closure gate (phase-01 doc `03`) | ✅ **COMPLETE** | `evidence/definition-of-done-adoption.md` |
 | — | — | Hosted verification runbook registered (phase-01 doc `04`) | ✅ **REGISTERED** (executed in Wave 9) | `evidence/hosted-verification-runbook.md` |
 | 2 | 02 | List provisioning + domain contracts | ✅ **COMPLETE** | `evidence/wave-02-list-schema-and-contracts.md` |
-| 3 | 03 | Service layer + template resolution | ⬜️ Not started | — |
+| 3 | 03 | Service layer + template resolution | ✅ **COMPLETE** | `evidence/wave-03-service-layer-and-resolver.md` |
 | 4 | 04 | XML-shell page-generation engine | ⬜️ Not started | — |
 | 5 | 05 | Content mapping + page binding | ⬜️ Not started | — |
 | 6 | 06 | Authoring UI + workflow | ⬜️ Not started | — |

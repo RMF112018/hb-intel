@@ -1,0 +1,485 @@
+/**
+ * Raw SharePoint row → typed `Publisher*Row` mappers.
+ *
+ * Pure, synchronous, defensive. Returns `undefined` when a required field is
+ * missing or invalid so the caller can decide between skipping the row and
+ * surfacing an error.
+ *
+ * Authority: docs/architecture/plans/MASTER/spfx/publisher/architecture/03-Exact-Field-Definitions.md
+ */
+
+import type {
+  PublisherMediaRow,
+  PublisherPageBindingRow,
+  PublisherPostRow,
+  PublisherPublishingErrorRow,
+  PublisherTeamMemberRow,
+  PublisherTemplateRegistryRow,
+  PublisherWorkflowHistoryRow,
+} from './publisherContracts';
+import type {
+  ArticleSubject,
+  BindingStatus,
+  LastOperation,
+  MediaRole,
+  PostFamily,
+  ProjectStage,
+  PublishingErrorCategory,
+  PublishingErrorOperation,
+  SpotlightType,
+  TargetSiteKey,
+  TemplateStatus,
+  WorkflowHistoryAction,
+  WorkflowState,
+} from './publisherEnums';
+import {
+  ARTICLE_SUBJECT_VALUES,
+  BINDING_STATUS_VALUES,
+  LAST_OPERATION_VALUES,
+  MEDIA_ROLE_VALUES,
+  POST_FAMILY_VALUES,
+  PROJECT_STAGE_VALUES,
+  PUBLISHING_ERROR_CATEGORY_VALUES,
+  PUBLISHING_ERROR_OPERATION_VALUES,
+  SPOTLIGHT_TYPE_VALUES,
+  TARGET_SITE_KEY_VALUES,
+  TEMPLATE_STATUS_VALUES,
+  WORKFLOW_HISTORY_ACTION_VALUES,
+  WORKFLOW_STATE_VALUES,
+} from './publisherEnums';
+
+/* ── Coercion helpers ─────────────────────────────────────────────── */
+
+function str(v: unknown): string | undefined {
+  if (typeof v !== 'string') return undefined;
+  const t = v.trim();
+  return t.length > 0 ? t : undefined;
+}
+
+function requiredStr(v: unknown): string | undefined {
+  return str(v);
+}
+
+function num(v: unknown): number | undefined {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === 'string') {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+function bool(v: unknown): boolean | undefined {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number') return v !== 0;
+  if (typeof v === 'string') {
+    const n = v.trim().toLowerCase();
+    if (n === 'true' || n === '1') return true;
+    if (n === 'false' || n === '0') return false;
+  }
+  return undefined;
+}
+
+function dt(v: unknown): string | undefined {
+  // SharePoint ISO8601 strings round-trip as strings; keep as-is.
+  return str(v);
+}
+
+function url(v: unknown): string | undefined {
+  if (typeof v === 'string') return str(v);
+  if (v && typeof v === 'object') {
+    const rec = v as Record<string, unknown>;
+    // SharePoint hyperlink field shape: { Description, Url }
+    return str(rec['Url']) ?? str(rec['url']);
+  }
+  return undefined;
+}
+
+function one<T extends string>(values: readonly T[]) {
+  return (v: unknown): T | undefined => {
+    const s = str(v);
+    return s && (values as readonly string[]).includes(s) ? (s as T) : undefined;
+  };
+}
+
+function many<T extends string>(values: readonly T[]) {
+  return (v: unknown): readonly T[] | undefined => {
+    if (!Array.isArray(v)) {
+      const single = one(values)(v);
+      return single ? [single] : undefined;
+    }
+    const out: T[] = [];
+    for (const item of v) {
+      const s = str(item);
+      if (s && (values as readonly string[]).includes(s)) out.push(s as T);
+    }
+    return out.length > 0 ? out : undefined;
+  };
+}
+
+const postFamily = one<PostFamily>(POST_FAMILY_VALUES);
+const postFamilyMany = many<PostFamily>(POST_FAMILY_VALUES);
+const spotlight = one<SpotlightType>(SPOTLIGHT_TYPE_VALUES);
+const spotlightMany = many<SpotlightType>(SPOTLIGHT_TYPE_VALUES);
+const stage = one<ProjectStage>(PROJECT_STAGE_VALUES);
+const stageMany = many<ProjectStage>(PROJECT_STAGE_VALUES);
+const subject = one<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
+const subjectMany = many<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
+const workflowState = one<WorkflowState>(WORKFLOW_STATE_VALUES);
+const workflowAction = one<WorkflowHistoryAction>(WORKFLOW_HISTORY_ACTION_VALUES);
+const mediaRole = one<MediaRole>(MEDIA_ROLE_VALUES);
+const bindingStatus = one<BindingStatus>(BINDING_STATUS_VALUES);
+const lastOperation = one<LastOperation>(LAST_OPERATION_VALUES);
+const templateStatus = one<TemplateStatus>(TEMPLATE_STATUS_VALUES);
+const targetSiteKey = one<TargetSiteKey>(TARGET_SITE_KEY_VALUES);
+const errorCategory = one<PublishingErrorCategory>(PUBLISHING_ERROR_CATEGORY_VALUES);
+const errorOperation = one<PublishingErrorOperation>(PUBLISHING_ERROR_OPERATION_VALUES);
+
+/* ── Row mappers ─────────────────────────────────────────────────── */
+
+export function mapPostRow(raw: Record<string, unknown>): PublisherPostRow | undefined {
+  const PostId = requiredStr(raw['PostId']);
+  const Title = requiredStr(raw['Title']);
+  const Subhead = requiredStr(raw['Subhead']);
+  const SummaryExcerpt = requiredStr(raw['SummaryExcerpt']);
+  const BodyRichText = requiredStr(raw['BodyRichText']);
+  const PostFamily = postFamily(raw['PostFamily']);
+  const TemplateKey = requiredStr(raw['TemplateKey']);
+  const PageShellKey = requiredStr(raw['PageShellKey']);
+  const Slug = requiredStr(raw['Slug']);
+  const WorkflowState = workflowState(raw['WorkflowState']);
+  const CreatedDateUtc = dt(raw['CreatedDateUtc']);
+  const UpdatedDateUtc = dt(raw['UpdatedDateUtc']);
+  const ProjectId = requiredStr(raw['ProjectId']);
+  const ProjectName = requiredStr(raw['ProjectName']);
+  const BannerImageUrl = url(raw['BannerImageUrl']);
+  const BannerImageAltText = requiredStr(raw['BannerImageAltText']);
+  const TargetSiteUrl = requiredStr(raw['TargetSiteUrl']);
+  const TargetSiteKey = targetSiteKey(raw['TargetSiteKey']);
+  const SourceTemplatePath = requiredStr(raw['SourceTemplatePath']);
+
+  if (
+    !PostId ||
+    !Title ||
+    !Subhead ||
+    !SummaryExcerpt ||
+    !BodyRichText ||
+    !PostFamily ||
+    !TemplateKey ||
+    !PageShellKey ||
+    !Slug ||
+    !WorkflowState ||
+    !CreatedDateUtc ||
+    !UpdatedDateUtc ||
+    !ProjectId ||
+    !ProjectName ||
+    !BannerImageUrl ||
+    !BannerImageAltText ||
+    !TargetSiteUrl ||
+    !TargetSiteKey ||
+    !SourceTemplatePath
+  ) {
+    return undefined;
+  }
+
+  return {
+    PostId,
+    Title,
+    BannerTitleOverride: str(raw['BannerTitleOverride']),
+    Subhead,
+    SummaryExcerpt,
+    BodyRichText,
+    PostFamily,
+    SpotlightType: spotlight(raw['SpotlightType']),
+    ProjectStage: stage(raw['ProjectStage']),
+    ArticleSubject: subject(raw['ArticleSubject']),
+    TemplateKey,
+    PageShellKey,
+    Slug,
+    WorkflowState,
+    AuthorEmail: str(raw['AuthorEmail']),
+    AuthorDisplayName: str(raw['AuthorDisplayName']),
+    CreatedDateUtc,
+    UpdatedDateUtc,
+    PublishedDateUtc: dt(raw['PublishedDateUtc']),
+    ScheduledPublishDateUtc: dt(raw['ScheduledPublishDateUtc']),
+    ArchiveDateUtc: dt(raw['ArchiveDateUtc']),
+    ProjectId,
+    ProjectName,
+    ProjectLocation: str(raw['ProjectLocation']),
+    ProjectSector: str(raw['ProjectSector']),
+    BannerImageUrl,
+    BannerImageAltText,
+    BannerEyebrow: str(raw['BannerEyebrow']),
+    BannerCategoryLabel: str(raw['BannerCategoryLabel']),
+    BannerThemeVariant: one(['default', 'light', 'dark'] as const)(
+      raw['BannerThemeVariant'],
+    ),
+    BannerShowPublishDate: bool(raw['BannerShowPublishDate']),
+    BannerShowGradient: bool(raw['BannerShowGradient']),
+    HeroRendererKind: one(['oobPageTitle', 'hbSignatureHero'] as const)(
+      raw['HeroRendererKind'],
+    ),
+    ShowTeamViewer: bool(raw['ShowTeamViewer']),
+    TeamSectionHeading: str(raw['TeamSectionHeading']),
+    TeamViewerLayout: one(['grid', 'list'] as const)(raw['TeamViewerLayout']),
+    TeamViewerDensity: one(['standard', 'compact', 'comfortable'] as const)(
+      raw['TeamViewerDensity'],
+    ),
+    TeamViewerEnableProfileDrawer: bool(raw['TeamViewerEnableProfileDrawer']),
+    ShowGallery: bool(raw['ShowGallery']),
+    GalleryLayoutProfile: one(['grid', 'carousel', 'shellDefault'] as const)(
+      raw['GalleryLayoutProfile'],
+    ),
+    IsFeatured: bool(raw['IsFeatured']),
+    FeaturedRank: num(raw['FeaturedRank']),
+    IsPinned: bool(raw['IsPinned']),
+    PinRank: num(raw['PinRank']),
+    IncludeInProjectSpotlightRollups: bool(
+      raw['IncludeInProjectSpotlightRollups'],
+    ),
+    IncludeInArchive: bool(raw['IncludeInArchive']),
+    TargetSiteUrl,
+    TargetSiteKey,
+    GeneratedPageName: str(raw['GeneratedPageName']),
+    PageUrl: url(raw['PageUrl']),
+    PageId: str(raw['PageId']),
+    SourceTemplatePath,
+    AppliedTemplateVersion: str(raw['AppliedTemplateVersion']),
+    AppliedShellVersion: str(raw['AppliedShellVersion']),
+    LastPageSyncDateUtc: dt(raw['LastPageSyncDateUtc']),
+    PageSyncStatus: one([
+      'pending',
+      'inSync',
+      'error',
+      'staleShell',
+      'staleTemplate',
+    ] as const)(raw['PageSyncStatus']),
+    LastSuccessfulPublishDateUtc: dt(raw['LastSuccessfulPublishDateUtc']),
+  };
+}
+
+export function mapTeamMemberRow(
+  raw: Record<string, unknown>,
+): PublisherTeamMemberRow | undefined {
+  const PostId = requiredStr(raw['PostId']);
+  const TeamMemberId = requiredStr(raw['TeamMemberId']);
+  const PersonPrincipal = requiredStr(raw['PersonPrincipal']);
+  const DisplayName = requiredStr(raw['DisplayName']);
+  if (!PostId || !TeamMemberId || !PersonPrincipal || !DisplayName) return undefined;
+  return {
+    PostId,
+    TeamMemberId,
+    PersonPrincipal,
+    DisplayName,
+    JobTitle: str(raw['JobTitle']),
+    PhotoUrl: url(raw['PhotoUrl']),
+    SortOrder: num(raw['SortOrder']),
+    BioSnippet: str(raw['BioSnippet']),
+    ResumeRichText: str(raw['ResumeRichText']),
+    ResumeDocumentUrl: url(raw['ResumeDocumentUrl']),
+    ContactLink: url(raw['ContactLink']),
+    IncludeInViewer: bool(raw['IncludeInViewer']),
+  };
+}
+
+export function mapMediaRow(
+  raw: Record<string, unknown>,
+): PublisherMediaRow | undefined {
+  const PostId = requiredStr(raw['PostId']);
+  const MediaId = requiredStr(raw['MediaId']);
+  const MediaRole = mediaRole(raw['MediaRole']);
+  const ImageAssetUrl = url(raw['ImageAssetUrl']);
+  const AltText = requiredStr(raw['AltText']);
+  if (!PostId || !MediaId || !MediaRole || !ImageAssetUrl || !AltText) return undefined;
+  return {
+    PostId,
+    MediaId,
+    MediaRole,
+    ImageAssetUrl,
+    AltText,
+    Caption: str(raw['Caption']),
+    SortOrder: num(raw['SortOrder']),
+  };
+}
+
+export function mapTemplateRegistryRow(
+  raw: Record<string, unknown>,
+): PublisherTemplateRegistryRow | undefined {
+  const TemplateKey = requiredStr(raw['TemplateKey']);
+  const TemplateDisplayName = requiredStr(raw['TemplateDisplayName']);
+  const TemplateStatus = templateStatus(raw['TemplateStatus']);
+  const TemplateVersion = requiredStr(raw['TemplateVersion']);
+  const PageShellKey = requiredStr(raw['PageShellKey']);
+  const PageShellVersion = requiredStr(raw['PageShellVersion']);
+  const ShellSourceSiteUrl = url(raw['ShellSourceSiteUrl']);
+  const ShellSourcePagePath = requiredStr(raw['ShellSourcePagePath']);
+  const PostFamily = postFamilyMany(raw['PostFamily']);
+  const BannerRendererKind = one(['oobPageTitle', 'hbSignatureHero'] as const)(
+    raw['BannerRendererKind'],
+  );
+  const BodyRendererKind = one(['oobText'] as const)(raw['BodyRendererKind']);
+  const ShowTeamBlock = bool(raw['ShowTeamBlock']);
+  const ShowGalleryBlock = bool(raw['ShowGalleryBlock']);
+  const RequiredFieldSetKey = requiredStr(raw['RequiredFieldSetKey']);
+  const ValidationProfileKey = requiredStr(raw['ValidationProfileKey']);
+  const RenderProfileKey = requiredStr(raw['RenderProfileKey']);
+
+  if (
+    !TemplateKey ||
+    !TemplateDisplayName ||
+    !TemplateStatus ||
+    !TemplateVersion ||
+    !PageShellKey ||
+    !PageShellVersion ||
+    !ShellSourceSiteUrl ||
+    !ShellSourcePagePath ||
+    !PostFamily ||
+    !BannerRendererKind ||
+    !BodyRendererKind ||
+    ShowTeamBlock === undefined ||
+    ShowGalleryBlock === undefined ||
+    !RequiredFieldSetKey ||
+    !ValidationProfileKey ||
+    !RenderProfileKey
+  ) {
+    return undefined;
+  }
+
+  return {
+    TemplateKey,
+    TemplateDisplayName,
+    TemplateStatus,
+    TemplateVersion,
+    PageShellKey,
+    PageShellVersion,
+    ShellSourceSiteUrl,
+    ShellSourcePagePath,
+    PostFamily,
+    SpotlightType: spotlightMany(raw['SpotlightType']),
+    ProjectStage: stageMany(raw['ProjectStage']),
+    ArticleSubject: subjectMany(raw['ArticleSubject']),
+    BannerRendererKind,
+    BodyRendererKind,
+    TeamRendererKind: one(['teamViewer', 'none'] as const)(
+      raw['TeamRendererKind'],
+    ),
+    GalleryRendererKind: one(['oobImageGallery', 'none'] as const)(
+      raw['GalleryRendererKind'],
+    ),
+    ShowTeamBlock,
+    ShowGalleryBlock,
+    RequiredFieldSetKey,
+    ValidationProfileKey,
+    RenderProfileKey,
+    AllowRepublishInPlace: bool(raw['AllowRepublishInPlace']),
+    ForceRegenerationOnShellChange: bool(raw['ForceRegenerationOnShellChange']),
+    ControlMapJson: str(raw['ControlMapJson']),
+  };
+}
+
+export function mapPageBindingRow(
+  raw: Record<string, unknown>,
+): PublisherPageBindingRow | undefined {
+  const BindingId = requiredStr(raw['BindingId']);
+  const PostId = requiredStr(raw['PostId']);
+  const TargetSiteUrl = requiredStr(raw['TargetSiteUrl']);
+  const TargetSiteKey = targetSiteKey(raw['TargetSiteKey']);
+  const PageName = requiredStr(raw['PageName']);
+  const SourceTemplatePath = requiredStr(raw['SourceTemplatePath']);
+  const PageShellKey = requiredStr(raw['PageShellKey']);
+  const PageShellVersion = requiredStr(raw['PageShellVersion']);
+  const TemplateKey = requiredStr(raw['TemplateKey']);
+  const TemplateVersion = requiredStr(raw['TemplateVersion']);
+  const BindingStatus = bindingStatus(raw['BindingStatus']);
+  if (
+    !BindingId ||
+    !PostId ||
+    !TargetSiteUrl ||
+    !TargetSiteKey ||
+    !PageName ||
+    !SourceTemplatePath ||
+    !PageShellKey ||
+    !PageShellVersion ||
+    !TemplateKey ||
+    !TemplateVersion ||
+    !BindingStatus
+  ) {
+    return undefined;
+  }
+  return {
+    BindingId,
+    PostId,
+    TargetSiteUrl,
+    TargetSiteKey,
+    PageId: str(raw['PageId']),
+    PageName,
+    PageUrl: url(raw['PageUrl']),
+    SourceTemplatePath,
+    PageShellKey,
+    PageShellVersion,
+    TemplateKey,
+    TemplateVersion,
+    BindingStatus,
+    LastOperation: lastOperation(raw['LastOperation']),
+    LastOperationDateUtc: dt(raw['LastOperationDateUtc']),
+    LastSuccessfulSyncDateUtc: dt(raw['LastSuccessfulSyncDateUtc']),
+  };
+}
+
+export function mapWorkflowHistoryRow(
+  raw: Record<string, unknown>,
+): PublisherWorkflowHistoryRow | undefined {
+  const HistoryId = requiredStr(raw['HistoryId']);
+  const PostId = requiredStr(raw['PostId']);
+  const ToState = workflowState(raw['ToState']);
+  const Action = workflowAction(raw['Action']);
+  const ActionDateUtc = dt(raw['ActionDateUtc']);
+  if (!HistoryId || !PostId || !ToState || !Action || !ActionDateUtc) return undefined;
+  return {
+    HistoryId,
+    PostId,
+    FromState: workflowState(raw['FromState']),
+    ToState,
+    Action,
+    ActorEmail: str(raw['ActorEmail']),
+    ActionDateUtc,
+    Note: str(raw['Note']),
+  };
+}
+
+export function mapPublishingErrorRow(
+  raw: Record<string, unknown>,
+): PublisherPublishingErrorRow | undefined {
+  const ErrorId = requiredStr(raw['ErrorId']);
+  const PostId = requiredStr(raw['PostId']);
+  const Operation = errorOperation(raw['Operation']);
+  const OccurredDateUtc = dt(raw['OccurredDateUtc']);
+  const ErrorCategory = errorCategory(raw['ErrorCategory']);
+  const ErrorSummary = requiredStr(raw['ErrorSummary']);
+  if (
+    !ErrorId ||
+    !PostId ||
+    !Operation ||
+    !OccurredDateUtc ||
+    !ErrorCategory ||
+    !ErrorSummary
+  ) {
+    return undefined;
+  }
+  return {
+    ErrorId,
+    PostId,
+    BindingId: str(raw['BindingId']),
+    Operation,
+    TemplateKey: str(raw['TemplateKey']),
+    PageShellKey: str(raw['PageShellKey']),
+    OccurredDateUtc,
+    ErrorCategory,
+    ErrorSummary,
+    ErrorDetails: str(raw['ErrorDetails']),
+    RetryStatus: one(['none', 'pending', 'resolved'] as const)(
+      raw['RetryStatus'],
+    ),
+  };
+}
