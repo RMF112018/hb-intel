@@ -51,9 +51,12 @@ export function TeamViewer({ config, pageUrl, getGraphToken }: TeamViewerProps):
     config: { articleId: resolved.articleId, destinationKey: resolved.destinationKey },
     pageUrl,
   });
-  const { people, isLoading, error, refresh } = useTeamViewerData(binding);
+  const { people, isLoading, error, refresh, bindingResolved } = useTeamViewerData(binding);
   const { hydrate } = useTeamViewerPhotoHydration(people, {
-    siteUrl: binding?.articleSiteUrl,
+    // Use the current render host for SP Delve photo URLs; the tenant
+    // resolves profile photos regardless of site, but keeping the URL
+    // on the render host avoids cross-site iframe quirks.
+    siteUrl: binding?.renderSiteUrl ?? binding?.listHostUrl,
     getGraphToken,
   });
   const { isHosted, safeZonePadding } = useTeamViewerHostSafeLayout();
@@ -76,7 +79,6 @@ export function TeamViewer({ config, pageUrl, getGraphToken }: TeamViewerProps):
     ['--team-viewer-safe-zone-size' as string]: `${TEAM_VIEWER_SAFE_ZONE_SIZE_PX}px`,
   };
 
-  const bindingResolved = Boolean(binding?.articleId);
   const bindingAttempted = Boolean(binding);
 
   return (

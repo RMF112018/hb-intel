@@ -1,69 +1,83 @@
 /**
- * useTeamViewerArticleBinding — resolve the active article for TeamViewer.
+ * useTeamViewerArticleBinding — canonical article-binding resolver.
  *
- * Resolution order (Prompt 01 scaffold):
- *   1. explicit `articleId` from config    -> resolutionSource: 'direct-binding'
- *   2. explicit `destinationKey` override  -> resolutionSource: 'property'
- *   3. host site/page context               -> resolutionSource: 'host-context'
- *      (Prompt 02 lands the real `HB Article Destination Pages` lookup.)
+ * The resolver always returns a binding whose `listHostUrl` points at
+ * the canonical HBCentral publisher control plane. The render site +
+ * page URL are carried separately so the data layer can filter the
+ * `HB Article Destination Pages` list **at HBCentral** using the
+ * render host as the match key.
  *
- * Returns `undefined` when no binding can be resolved. The data hook
- * treats missing binding as an empty-state, not an error — the viewer
- * should degrade cleanly on pages with no article mapping.
+ * Canonical resolution order (locked):
+ *
+ *   1. explicit `articleId` on config           → 'direct-binding'
+ *   2. explicit `destinationKey` on config      → 'property'
+ *   3. (renderSiteUrl + renderPageUrl) lookup   → 'host-context'
+ *
+ * When a render host or page URL is missing, the binding still returns
+ * with `articleId = ''`, source = `'host-context'` and the data hook
+ * will refuse to issue a destination-page lookup and render the
+ * article-unresolved empty variant. There is no silent "best guess"
+ * match anywhere in the pipeline.
  */
 import { useMemo } from 'react';
 import type { TeamViewerArticleBinding, TeamViewerConfig } from '../teamViewerContracts.js';
+import { resolveTeamViewerListHostUrl } from '../data/teamViewerHostContext.js';
 import { getSiteUrl } from '../../../homepage/data/spContext.js';
 
 export interface UseTeamViewerArticleBindingInput {
-  config: Pick<TeamViewerConfig, 'articleId' | 'destinationKey'>;
-  /** Current page URL when available (SPFx page context). */
+  config: Pick<TeamViewerConfig, 'articleId' | 'destinationKey' | 'listHostOverride'>;
+  /** Current SharePoint page URL (absolute or server-relative). */
   pageUrl?: string;
 }
 
 export function useTeamViewerArticleBinding(
   input: UseTeamViewerArticleBindingInput,
-): TeamViewerArticleBinding | undefined {
-  const { articleId, destinationKey } = input.config;
+): TeamViewerArticleBinding {
+  const { articleId, destinationKey, listHostOverride } = input.config;
   const pageUrl = input.pageUrl;
 
-  return useMemo<TeamViewerArticleBinding | undefined>(() => {
-    const articleSiteUrl = getSiteUrl() ?? undefined;
+  return useMemo<TeamViewerArticleBinding>(() => {
+    const listHostUrl = resolveTeamViewerListHostUrl(listHostOverride);
+    const renderSiteUrl = getSiteUrl() ?? undefined;
+    const renderPageUrl = pageUrl;
 
     if (articleId) {
       return {
+        listHostUrl,
+        renderSiteUrl,
+        renderPageUrl,
         articleId,
-        articleSiteUrl,
-        articlePageUrl: pageUrl,
         destinationKey,
         resolutionSource: 'direct-binding',
       };
     }
 
     if (destinationKey) {
-      // Scaffold-only: a property-supplied destinationKey is surfaced as
-      // the binding intent. Prompt 02 resolves this key to a real
-      // articleId via `HB Article Destination Pages`.
+      // A destinationKey property is declared intent to resolve via the
+      // destination-page row with this stable key; the data layer
+      // handles the lookup in Prompt-02's fetch layer. articleId stays
+      // empty until the lookup lands.
       return {
+        listHostUrl,
+        renderSiteUrl,
+        renderPageUrl,
         articleId: '',
-        articleSiteUrl,
-        articlePageUrl: pageUrl,
         destinationKey,
         resolutionSource: 'property',
       };
     }
 
-    if (articleSiteUrl && pageUrl) {
-      // Scaffold-only: declare intent to resolve via host context.
-      // Prompt 02 replaces this with a real destination-page list read.
-      return {
-        articleId: '',
-        articleSiteUrl,
-        articlePageUrl: pageUrl,
-        resolutionSource: 'host-context',
-      };
-    }
-
-    return undefined;
-  }, [articleId, destinationKey, pageUrl]);
+    // Host-context: the data layer will filter the destination-pages
+    // list at HBCentral by (renderSiteUrl, renderPageUrl) to recover
+    // the bound articleId. When either is missing we still return a
+    // binding so the orchestrator can render the intentional
+    // article-unresolved empty state.
+    return {
+      listHostUrl,
+      renderSiteUrl,
+      renderPageUrl,
+      articleId: '',
+      resolutionSource: 'host-context',
+    };
+  }, [articleId, destinationKey, listHostOverride, pageUrl]);
 }

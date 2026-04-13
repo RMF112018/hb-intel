@@ -48,8 +48,9 @@ export function resolveTeamViewerConfig(raw: Record<string, unknown> | undefined
   const heading = coerceString(raw?.heading) ?? DEFAULT_HEADING;
   const articleId = coerceString(raw?.articleId);
   const destinationKey = coerceString(raw?.destinationKey);
+  const listHostOverride = coerceString(raw?.listHostOverride);
   const layout = coerceLayout(raw?.layout);
   const density = coerceDensity(raw?.density);
   const flags = coerceFlags(raw?.featureFlags);
-  return { heading, articleId, destinationKey, layout, density, flags };
+  return { heading, articleId, destinationKey, listHostOverride, layout, density, flags };
 }
