@@ -21,3 +21,4 @@ export * from './publisherWriters';
 export * from './workflowStateMachine';
 export * from './validation/validationEngine';
 export * from './preview/previewBuilder';
+export * from './teamViewerAdapter';

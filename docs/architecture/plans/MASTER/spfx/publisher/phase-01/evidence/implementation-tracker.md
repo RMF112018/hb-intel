@@ -20,7 +20,7 @@ Single source of truth for wave-by-wave execution status. Update this file as ea
 | 5 | 05 | Content mapping + page binding | ✅ **COMPLETE** | `evidence/wave-05-content-mapping-and-binding.md` |
 | 6 | 06 | Authoring UI + workflow | ✅ **COMPLETE** | `evidence/wave-06-authoring-ui-and-workflow.md` |
 | 7 | 07 | Validation, preview, governance | ✅ **COMPLETE** | `evidence/wave-07-validation-preview-governance.md` |
-| 8 | 08 | Team Viewer closure | ⏸ Team Viewer webpart itself complete; publisher-side closure pending | Commits `3bb8dd10` → `35b0f38c` (TeamViewer Phase-01) |
+| 8 | 08 | Team Viewer closure | ✅ **COMPLETE** (publisher-side; reader migration tracked) | `evidence/wave-08-teamviewer-closure.md` |
 | 9 | 09 | Testing + hosted vetting + build proof | ⬜️ Not started | — |
 
 Legend: ✅ complete · 🟡 in progress · ⬜️ not started · ⏸ partial / upstream dependency

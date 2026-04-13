@@ -25,6 +25,10 @@
 
 import type { PublisherMediaRow, PublisherPostRow, PublisherTeamMemberRow } from '../publisherContracts';
 import type { PublishResolutionContext } from '../publishResolutionContext';
+import {
+  buildTeamViewerProperties,
+  selectVisibleTeamMembers,
+} from '../teamViewerAdapter';
 import type { PageShellManifest, PageShellSlot } from './xmlShellManifest';
 
 export interface ComposedControlBase {
@@ -131,15 +135,9 @@ export interface ComposedPage {
 function sortedTeamMembers(
   rows: readonly PublisherTeamMemberRow[],
 ): readonly PublisherTeamMemberRow[] {
-  return rows
-    .filter((r) => r.IncludeInViewer !== false)
-    .slice()
-    .sort((a, b) => {
-      const ao = a.SortOrder ?? Number.MAX_SAFE_INTEGER;
-      const bo = b.SortOrder ?? Number.MAX_SAFE_INTEGER;
-      if (ao !== bo) return ao - bo;
-      return a.DisplayName.localeCompare(b.DisplayName);
-    });
+  // Delegates to the single-source-of-truth adapter so publisher +
+  // preview + published TeamViewer cannot drift.
+  return selectVisibleTeamMembers(rows);
 }
 
 function galleryImages(
@@ -277,17 +275,7 @@ function composeTeam(
     sectionOrder: control.sectionOrder,
     orderInSection: control.orderInSection,
     column: control.column,
-    properties: {
-      heading: post.TeamSectionHeading ?? 'Team',
-      articleId: post.PostId,
-      destinationKey: 'projectSpotlight',
-      listHostOverride: undefined,
-      layout: post.TeamViewerLayout ?? 'grid',
-      density: post.TeamViewerDensity ?? 'standard',
-      featureFlags: {
-        profileDetailDrawer: post.TeamViewerEnableProfileDrawer ?? false,
-      },
-    },
+    properties: buildTeamViewerProperties(post),
   };
 }
 
