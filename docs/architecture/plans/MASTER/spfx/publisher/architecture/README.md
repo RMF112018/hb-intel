@@ -1,19 +1,44 @@
-# HB Article Publisher — Product + Data Architecture Package
+# Project Spotlight Post Publishing Architecture Package
 
 ## Purpose
 
-This package defines the full-detail product and content model for a centralized **HB Article Publisher** hosted on the `Marketing` site and publishing branded article pages into:
+This package defines the full-detail product, content, and page-binding architecture for a **Project Spotlight post publishing solution** whose rendered output is a **new page created on**:
 
-- `CompanyPulse`
-- `ProjectSpotlight`
+- `https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight`
 
 The package assumes:
 
-- list records are the authoritative editorial control plane
-- destination pages are branded render shells
-- page shell composition is destination-specific and template-driven
-- `hbSignatureHero` and `teamViewer` are shared rendering components whose contracts may evolve
-- authors should not directly modify SharePoint page layouts except in controlled admin exception cases
+- the solution no longer targets a dual-destination article publisher model
+- **Project Spotlight is the only publish destination**
+- list records remain the authoritative editorial control plane
+- the attached Project Spotlight XML artifact is the **canonical page-shell source** for generated destination pages
+- generated pages are created from that shell and then populated with structured post data
+- authors should not manually compose the SharePoint page canvas except in controlled admin exception scenarios
+
+## Canonical page-shell authority
+
+The attached XML artifact defines a canonical Project Spotlight shell whose current composition is:
+
+1. **Banner / title region**
+   - SharePoint OOB Page Title / banner control
+   - full-width image layout
+   - title + publish-date-capable header treatment
+
+2. **Primary content section**
+   - subheading text block
+   - body text block
+   - custom `teamViewer` slot
+
+3. **Media section**
+   - SharePoint OOB image gallery slot
+
+That shell is the governing structural baseline for generated post pages. The architecture below therefore treats the XML artifact as the source of truth for:
+
+- page section order
+- block presence
+- default block types
+- base composition expectations
+- shell versioning and regeneration rules
 
 ## Package contents
 
@@ -31,35 +56,37 @@ The package assumes:
 
 ## Governing posture
 
-This package is intended to act as a product/data authority for implementation planning. It is intentionally detailed enough to support:
+This package is intended to act as the implementation-planning authority for:
 
-- list schema design
-- page shell generation
-- template resolution
-- rendering contract design
+- Project Spotlight post list schema design
+- XML-template-driven page-shell generation
+- template/profile resolution
+- renderer contract design
 - validation logic
 - workflow implementation
-- future schema evolution
+- controlled evolution of hero/team/gallery behavior
 
 ## Key principles
 
-1. **Lists are authoritative**
-   - article truth, promotion state, team/media relationships, and template-driving metadata live in lists
+1. **Structured posts are authoritative**
+   - post truth, workflow state, team/media relationships, and template-driving metadata live in lists
 
-2. **Pages are render shells**
-   - destination pages provide branded SharePoint-hosted URLs and surface composition
-   - pages should not become the primary source of article truth
+2. **Project Spotlight pages are render shells**
+   - destination pages provide the durable SharePoint-hosted URLs
+   - the page canvas is generated from the canonical XML shell rather than manually composed post-by-post
 
-3. **Templates are rule-driven**
-   - authors provide content and editorial intent
-   - the system selects the correct template and page composition profile
+3. **The XML shell is first-class architectural input**
+   - composition begins from the template shell, not from scattered code assumptions
 
-4. **Custom webparts are renderers, not authoring widgets**
-   - `hbSignatureHero` and `teamViewer` consume structured article data
-   - authors should not manually configure those webparts
+4. **Templates are post-family-driven, not destination-driven**
+   - template selection is based on Project Spotlight post family, project stage, spotlight type, article subject, and shell compatibility
 
-5. **Schema evolution is expected**
-   - fields tied to `hbSignatureHero`, `teamViewer`, or future branded components may need revision as those components mature
+5. **Custom webparts are renderers, not authoring widgets**
+   - `teamViewer` consumes structured post data
+   - `hbSignatureHero` is preserved as a future-compatible evolution path, but the current canonical shell uses the OOB Page Title / banner region
+
+6. **Schema evolution is expected**
+   - fields tied to banner/hero behavior, `teamViewer`, or future shell variants may need revision as implementation matures
 
 ## Intended next use
 
@@ -67,6 +94,7 @@ This package should be used to produce:
 
 - implementation prompts
 - list provisioning plans
-- page shell composition plans
-- shared component contract plans
+- XML-shell generation logic
+- page binding and republish logic
+- shared renderer contract plans
 - phased delivery plans

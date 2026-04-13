@@ -2,186 +2,196 @@
 
 ## Overview
 
-The recommended list architecture uses one authoritative master list and several child/configuration lists.
+The recommended architecture uses one authoritative Project Spotlight post list, two variable-cardinality child lists, and supporting registry/binding/operations lists.
 
 ## List inventory
 
-1. `HB Articles`
-2. `HB Article Team Members`
-3. `HB Article Media`
-4. `HB Article Template Registry`
-5. `HB Article Destination Pages`
-6. `HB Article Promotion Rules` (optional MVP, recommended)
-7. `HB Article Workflow History` (optional MVP, recommended)
-8. `HB Article Publishing Errors` (optional but strongly recommended)
+1. `Project Spotlight Posts`
+2. `Project Spotlight Post Team Members`
+3. `Project Spotlight Post Media`
+4. `Project Spotlight Template Registry`
+5. `Project Spotlight Page Bindings`
+6. `Project Spotlight Workflow History` (recommended)
+7. `Project Spotlight Publishing Errors` (recommended)
+8. `Project Spotlight Rollup Rules` (optional, only if Project Spotlight landing logic becomes complex)
 
 ---
 
-## 1) HB Articles
+## 1) Project Spotlight Posts
 
 ### Purpose
-Primary authoritative article record.
+Primary authoritative post record.
 
 ### Cardinality
-- one row per article
+- one row per post
 
 ### Owns
-- article identity
-- destination
-- content type
-- headline/subhead/summary/body
-- hero-driving values
-- lifecycle/workflow state
-- promotion/feed flags
-- page binding reference pointers
-- template resolution inputs
-- destination-specific metadata
+- post identity
+- project metadata
+- post family and spotlight classification
+- title/subheading/summary/body
+- banner-driving values
+- workflow state
+- Project Spotlight rollup flags
+- template and shell resolution inputs
+- current page-binding summary fields
 
 ### Notes
-This is the core control-plane list and should be treated as the main system of record.
+This is the main control-plane list and the system of record for editorial truth.
 
 ---
 
-## 2) HB Article Team Members
+## 2) Project Spotlight Post Team Members
 
 ### Purpose
-Stores team-member rows related to an article.
+Stores team-member rows related to a Project Spotlight post.
 
 ### Cardinality
-- zero to many rows per article
+- zero to many rows per post
 
 ### Owns
-- article-to-person relationship
+- post-to-person relationships
 - display order
-- role labeling
-- grouping/hierarchy metadata
-- future org-chart structure inputs
+- role / title labeling
+- grouping metadata
+- optional profile-drawer content inputs
 
 ### Notes
-Required for `ProjectSpotlight` article families and optionally reusable elsewhere.
+This list remains justified because team-member count is variable and the XML shell includes a dedicated `teamViewer` slot.
 
 ---
 
-## 3) HB Article Media
+## 3) Project Spotlight Post Media
 
 ### Purpose
-Stores supporting media rows related to an article.
+Stores gallery/media rows related to a Project Spotlight post.
 
 ### Cardinality
-- zero to many rows per article
+- zero to many rows per post
 
 ### Owns
-- gallery images
+- gallery image references
 - captions
 - alt text
 - ordering
-- future media grouping
+- future gallery grouping or role metadata
 
 ### Notes
-Secondary image can either live on `HB Articles` directly or also be represented here with a `mediaRole`. MVP should keep the primary/secondary fields on `HB Articles` and use this list for gallery assets.
+This list remains justified because the canonical shell includes a gallery zone and gallery item count is variable.
 
 ---
 
-## 4) HB Article Template Registry
+## 4) Project Spotlight Template Registry
 
 ### Purpose
-Defines all template families, rules, required fields, visible blocks, and validation profiles.
+Defines all Project Spotlight template families, shell compatibility rules, required fields, visible blocks, renderer profile bindings, and validation profiles.
 
 ### Cardinality
 - one row per template profile
 
 ### Owns
 - template key
-- destination applicability
-- content-type applicability
-- display-block profile
-- webpart profile bindings
-- validation profile
-- template status/version
+- page shell key
+- shell source path
+- post-family applicability
+- spotlight-type applicability
+- project-stage applicability
+- block visibility profile
+- renderer profile bindings
+- validation profile bindings
+- status/version
 
 ### Notes
-This is the authoritative registry for render composition behavior. Template logic should not be scattered in code.
+Template logic should not be scattered through publish code.
 
 ---
 
-## 5) HB Article Destination Pages
+## 5) Project Spotlight Page Bindings
 
 ### Purpose
-Tracks destination page bindings and sync state.
+Tracks page-generation and page-sync state for each published post.
 
 ### Cardinality
-- generally one row per article-page binding
-- supports future rebind/version scenarios
+- generally one active binding per post
+- supports future historical/replacement binding scenarios if shell regeneration needs a replacement page
 
 ### Owns
-- articleId to pageId linkage
+- post-to-page linkage
 - target site
-- page URL
-- page template key
-- shell version
-- sync timestamps/status
-- publish results
+- page URL / page name / page id
+- source shell path
+- page shell key and version
+- template key and version
+- publish / republish operation history summary
+- sync timestamps and sync status
 
 ### Notes
-Keeps page-binding state explicit rather than hidden in the article record alone.
+This keeps page binding explicit instead of hiding it only on the post row.
 
 ---
 
-## 6) HB Article Promotion Rules
+## 6) Project Spotlight Workflow History
 
 ### Purpose
-Optional configuration layer for feed, featured, pinned, and rollup behavior.
+Audit trail of workflow state changes and publish decisions.
 
 ### Cardinality
-- one rule row per scope/type combination, or simplified into system config as needed
-
-### Owns
-- destination-scoped promotion defaults
-- feed window defaults
-- featured-slot rules
-- manual override policies
-
-### Notes
-MVP can inline most promotion state directly on `HB Articles`, but this list is recommended once rule complexity grows.
-
----
-
-## 7) HB Article Workflow History
-
-### Purpose
-Audit trail of article lifecycle changes.
-
-### Cardinality
-- many rows per article
+- many rows per post
 
 ### Owns
 - state transitions
 - actor
 - timestamp
-- note/reason
-- approval decision records
-
-### Notes
-Recommended for governance and supportability.
+- notes / reasons
+- approval decisions
+- archive / withdraw events
 
 ---
 
-## 8) HB Article Publishing Errors
+## 7) Project Spotlight Publishing Errors
 
 ### Purpose
-Operational log for failed page sync/publish actions.
+Operational log for failed generation, update, or sync actions.
 
 ### Cardinality
-- zero to many rows per article
+- zero to many rows per post
 
 ### Owns
-- articleId
-- page binding id if available
-- destination
+- post id
+- binding id if available
 - operation
+- shell/template version in play
 - error summary
-- retry status
-- last attempted timestamp
+- error details
+- retry state
+
+---
+
+## 8) Project Spotlight Rollup Rules (optional)
+
+### Purpose
+Optional configuration layer for Project Spotlight landing-page rollups.
+
+### Cardinality
+- one row per rollup scope/profile combination if needed
+
+### Owns
+- featured-slot policy
+- pinning defaults
+- archive visibility defaults
+- landing-page inclusion defaults
 
 ### Notes
-Strongly recommended for troubleshooting and controlled recovery.
+MVP can inline most rollup state on the post record. Introduce this only when the Project Spotlight landing logic becomes materially more complex.
+
+## XML-template linkage posture
+
+The architecture should store enough linkage to prove which shell generated the page.
+
+At minimum, the system should know:
+
+- which `PageShellKey` applied
+- which source XML template/page path was used
+- which template profile resolved
+- which shell/template version created the current page
+- whether the next republish is an in-place update or a full regeneration

@@ -1,0 +1,39 @@
+<pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2022/09/ProvisioningSchema">
+  <pnp:Preferences Generator="PnP.Framework, Version=1.18.0.0, Culture=neutral, PublicKeyToken=0d501f89f11b748c" />
+  <pnp:Templates ID="CONTAINER-TEMPLATE-99B40729DDF1455C95DD5CA77A418232">
+    <pnp:ProvisioningTemplate ID="TEMPLATE-99B40729DDF1455C95DD5CA77A418232" Version="0" Scope="Undefined">
+      <pnp:ClientSidePages>
+        <pnp:ClientSidePage PromoteAsNewsArticle="false" PromoteAsTemplate="false" Overwrite="true" EnableComments="false" Title="Project Spotlight - In Progress" ThumbnailUrl="" PageName="Templates/Project-Spotlight---In-Progress.aspx">
+          <pnp:Header Type="Default" LayoutType="FullWidthImage" ShowTopicHeader="false" ShowPublishDate="false" ShowBackgroundGradient="false" TopicHeader="" AlternativeText="" Authors="" AuthorByLineId="-1" />
+          <pnp:Sections>
+            <pnp:Section Order="1" Type="OneColumnFullWidth">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="PageTitle" JsonControlData="{&quot;id&quot;: &quot;cbe7b0a9-3504-44dd-a3a3-0e5cacd07788&quot;, &quot;instanceId&quot;: &quot;b922706c-36c1-4ae3-8fa2-5e30f462aa85&quot;, &quot;title&quot;: &quot;Banner&quot;, &quot;description&quot;: &quot;Add a banner with title and author details.&quot;, &quot;dataVersion&quot;: &quot;1.6&quot;, &quot;properties&quot;: {&quot;imageSourceType&quot;:4,&quot;title&quot;:&quot;Project Spotlight - In Progress&quot;,&quot;altText&quot;:&quot;&quot;,&quot;layoutType&quot;:&quot;FullWidthImage&quot;,&quot;textAlignment&quot;:&quot;Left&quot;,&quot;showTopicHeader&quot;:false,&quot;showPublishDate&quot;:true,&quot;topicHeader&quot;:&quot;&quot;,&quot;enableGradientEffect&quot;:true,&quot;authors&quot;:[],&quot;customContentDropSupport&quot;:&quot;externallink&quot;,&quot;htmlTitle&quot;:&quot;&lt;h2 class=\&quot;headingSpacingAbove headingSpacingBelow lineHeight1_4\&quot;&gt;&lt;span class=\&quot;fontSizeXLarge\&quot;&gt;&lt;span style=\&quot;color:#ffffff;\&quot;&gt;Project Spotlight - In Progress&lt;/span&gt;&lt;/span&gt;&lt;/h2&gt;&quot;,&quot;showTimeToRead&quot;:false,&quot;authorByline&quot;:[],&quot;imageSource&quot;:&quot;&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="cbe7b0a9-3504-44dd-a3a3-0e5cacd07788" Order="1" Column="1" />
+              </pnp:Controls>
+            </pnp:Section>
+            <pnp:Section Order="2" Type="OneColumn">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="Text" ControlId="00dbc510-122b-4798-9d90-241e291eedc1" Order="1" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;h3&gt;Article Subheading&lt;/h3&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+                <pnp:CanvasControl WebPartType="Text" ControlId="d4061c71-b2b5-4e25-804d-ae92e8a56832" Order="2" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;span class=&quot;fontSizeMedium&quot;&gt;Article Body&lt;/span&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+                <pnp:CanvasControl WebPartType="Custom" JsonControlData="{&quot;id&quot;: &quot;c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901&quot;, &quot;instanceId&quot;: &quot;660cff2e-9e13-40a8-834a-8536923dabe5&quot;, &quot;title&quot;: &quot;Team Viewer&quot;, &quot;description&quot;: &quot;Article-bound premium team-member viewer. Presents article-linked team members (photo, name, title) with optional grouping, density selection for small/medium/large teams, and a real bio/resume slide-out that ships disabled by default behind an explicit feature flag.&quot;, &quot;dataVersion&quot;: &quot;1.0&quot;, &quot;properties&quot;: {&quot;heading&quot;:&quot;Team&quot;,&quot;articleId&quot;:&quot;&quot;,&quot;destinationKey&quot;:&quot;&quot;,&quot;listHostOverride&quot;:&quot;&quot;,&quot;layout&quot;:&quot;grid&quot;,&quot;density&quot;:&quot;standard&quot;,&quot;featureFlags&quot;:{&quot;profileDetailDrawer&quot;:false}}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901" Order="3" Column="1" />
+              </pnp:Controls>
+            </pnp:Section>
+            <pnp:Section Order="3" Type="OneColumn">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="ImageGallery" JsonControlData="{&quot;id&quot;: &quot;af8be689-990e-492a-81f7-ba3e4cd3ed9c&quot;, &quot;instanceId&quot;: &quot;ec2e34b6-25e5-45cb-bf84-c61630f86311&quot;, &quot;title&quot;: &quot;Image gallery&quot;, &quot;description&quot;: &quot;Display multiple images in a gallery layout.&quot;, &quot;dataVersion&quot;: &quot;1.12&quot;, &quot;properties&quot;: {&quot;layout&quot;:4,&quot;carouselSettings&quot;:{&quot;autoplay&quot;:false,&quot;autoplaySpeed&quot;:5,&quot;dots&quot;:false,&quot;lazyLoad&quot;:true,&quot;metadata&quot;:true,&quot;swipe&quot;:true},&quot;gridSettings&quot;:{&quot;imageSize&quot;:2,&quot;imageCropping&quot;:1,&quot;imageAspectRatio&quot;:1,&quot;lightbox&quot;:false},&quot;imageSourceType&quot;:1,&quot;isRecursive&quot;:false,&quot;isCdnEnabledForList&quot;:false,&quot;hasDynamicModeEnabled&quot;:false,&quot;maxImagesCount&quot;:10,&quot;images&quot;:[],&quot;canAlwaysSelectDocLibAsSource&quot;:false,&quot;isTitleEnabled&quot;:false,&quot;layoutComponentId&quot;:&quot;&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="af8be689-990e-492a-81f7-ba3e4cd3ed9c" Order="1" Column="1" />
+              </pnp:Controls>
+            </pnp:Section>
+          </pnp:Sections>
+        </pnp:ClientSidePage>
+      </pnp:ClientSidePages>
+    </pnp:ProvisioningTemplate>
+  </pnp:Templates>
+</pnp:Provisioning>

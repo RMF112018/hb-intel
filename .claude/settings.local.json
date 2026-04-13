@@ -297,7 +297,9 @@
       "Bash(npm --version)",
       "Bash(export PATH=\"$HOME/.nvm/versions/node/v22.14.0/bin:$HOME/.nvm/versions/node/v18.20.8/bin:/usr/local/bin:/opt/homebrew/bin:$PATH\")",
       "Bash(npm list:*)",
-      "Bash(perl -i -pe 's/^\\\\s*test\\\\.fixme\\\\\\(true, '\\\\''Requires dev-harness.*\\\\n//g' '$f')"
+      "Bash(perl -i -pe 's/^\\\\s*test\\\\.fixme\\\\\\(true, '\\\\''Requires dev-harness.*\\\\n//g' '$f')",
+      "Bash(rm -rf /tmp/sppkg-audit)",
+      "Bash(mkdir /tmp/sppkg-audit)"
     ]
   },
   "enabledPlugins": {

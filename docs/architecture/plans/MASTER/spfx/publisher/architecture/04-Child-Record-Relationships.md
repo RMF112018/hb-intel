@@ -1,136 +1,131 @@
 # 04 — Child-Record Relationships
 
-## Relationship model overview
+## Purpose
 
-The system uses a parent-child structure centered on `HB Articles`.
+This package preserves child records only where they remain justified by the Project Spotlight-only, XML-shell-driven model.
 
-## Primary relationships
+## Relationship summary
 
-### 1. Article → Team Members
-- Parent: `HB Articles`
-- Child: `HB Article Team Members`
-- Relationship key: `ArticleId`
+### Parent
+- `Project Spotlight Posts`
 
-#### Cardinality
-- one article to zero–many team members
+### Child lists that remain necessary
+1. `Project Spotlight Post Team Members`
+2. `Project Spotlight Post Media`
+3. `Project Spotlight Workflow History` (operational child/audit)
+4. `Project Spotlight Publishing Errors` (operational child/log)
 
-#### Purpose
-- supply `teamViewer`
-- preserve display order
-- preserve role/group/hierarchy metadata
+### Supporting configuration/binding lists
+- `Project Spotlight Template Registry`
+- `Project Spotlight Page Bindings`
 
-#### Notes
-- For articles with no team members, `teamViewer` may be hidden automatically depending on template rules.
+## Why team-member child rows remain necessary
 
----
+The canonical XML shell contains a dedicated custom `teamViewer` slot. Team-member count and order are variable, so these values should not be flattened into the post master row.
 
-### 2. Article → Media
-- Parent: `HB Articles`
-- Child: `HB Article Media`
-- Relationship key: `ArticleId`
+Keep child rows because they support:
 
-#### Cardinality
-- one article to zero–many media rows
+- zero-to-many team members per post
+- manual ordering
+- optional grouping
+- future hierarchy modes
+- optional profile-drawer data
+- independent row-level edits without rewriting the entire parent record
 
-#### Purpose
-- supply image gallery
-- support future media groupings
-- preserve ordering and captions
+## Why media child rows remain necessary
 
-#### Notes
-- Hero image and secondary image live on the article master record in MVP because they are singular render anchors.
-- Gallery media should live in child rows.
+The canonical XML shell contains a dedicated gallery zone. Gallery image count and order are variable, so media must remain a child relationship.
 
----
+Keep child rows because they support:
 
-### 3. Article → Destination Page Binding
-- Parent: `HB Articles`
-- Child: `HB Article Destination Pages`
-- Relationship key: `ArticleId`
+- zero-to-many gallery images per post
+- per-image alt text
+- captions
+- credits
+- order control
+- future media grouping
 
-#### Cardinality
-- one article to one active destination binding in normal operation
-- future support for historical bindings or multi-destination scenarios is possible
+## Why body sections do **not** become child rows in MVP
 
-#### Purpose
-- track destination page linkage
-- track shell version and sync status
-- track publish outcomes
+The current XML shell already defines:
 
----
+- one subheading text slot
+- one primary body text slot
 
-### 4. Article → Workflow History
-- Parent: `HB Articles`
-- Child: `HB Article Workflow History`
-- Relationship key: `ArticleId`
+That means MVP body composition can remain on the parent post record as:
 
-#### Cardinality
-- one article to many workflow history rows
+- `Subhead`
+- `BodyRichText`
 
-#### Purpose
-- audit trail
-- governance support
-- support review and publish traceability
+Create structured body child rows only if later shell variants introduce multiple repeatable narrative sections.
 
----
+## Recommended relationship model
 
-### 5. Article → Publishing Errors
-- Parent: `HB Articles`
-- Child: `HB Article Publishing Errors`
-- Relationship key: `ArticleId`
+### 1. Post → Team members
+- one post
+- zero to many team-member rows
+- team rows loaded by `PostId`
 
-#### Cardinality
-- one article to zero–many error rows
+### 2. Post → Media rows
+- one post
+- zero to many media rows
+- media rows loaded by `PostId`
 
-#### Purpose
-- support operational diagnostics and retry handling
+### 3. Post → Page binding
+- one post
+- generally one active page binding
+- future support for historical/replacement bindings is allowed
 
-## Template relationship
+### 4. Post → Workflow history
+- one post
+- many workflow history rows
 
-### Article → Template Registry
-- Article field: `TemplateKey`
-- Registry key: `TemplateKey`
+### 5. Post → Publishing errors
+- one post
+- zero to many error rows
 
-#### Purpose
-- resolve render composition rules
-- determine required fields
-- determine visible blocks
-- determine webpart contract profiles
+## Example relationship map
 
-## Destination page shell relationship
+```text
+Project Spotlight Posts (1)
+ ├── Project Spotlight Post Team Members (0..n)
+ ├── Project Spotlight Post Media (0..n)
+ ├── Project Spotlight Workflow History (0..n)
+ ├── Project Spotlight Publishing Errors (0..n)
+ └── Project Spotlight Page Bindings (0..1 active, 0..n historical if needed)
 
-### Destination Page Binding → Template Registry
-- Binding field: `PageTemplateKey`
-- Registry or shell registry field: `PageShellTemplateKey`
+Project Spotlight Template Registry (1 template profile)
+ └── referenced by Project Spotlight Posts.TemplateKey
+     and Project Spotlight Page Bindings.TemplateKey
+```
 
-#### Purpose
-- keep the applied shell explicit
-- support page regeneration and version tracking
+## Identity rules
 
-## Person / profile handling
+1. `PostId` is the primary parent foreign key used by child rows
+2. `TeamMemberId` and `MediaId` are durable child identities
+3. `BindingId` is the durable page-binding identity
+4. `TemplateKey` and `PageShellKey` are registry identities, not child-row identities
 
-### Team member rows
-The `HB Article Team Members` list should store enough cached display information to render reliably, even if live profile calls are delayed or unavailable.
+## Deletion / archive posture
 
-Recommended approach:
-- store principal reference
-- store display name
-- allow role/group/hierarchy metadata
-- resolve photo/profile information in the render layer or cache it later as needed
+### Team rows
+- should normally be soft-managed through the parent post workflow
+- hard deletion only by administrative action if governance allows
 
-## Future relationships worth planning for
+### Media rows
+- same posture as team rows
+- archive/hide is preferred over silent loss if a post is already published
 
-Not required for MVP, but keep room for them:
-- Article → Related Links
-- Article → Project Facts
-- Article → Milestone Records
-- Article → Related Articles
-- Article → Distribution Targets
+### Binding rows
+- should remain traceable even if the published page is withdrawn or replaced
 
-## Relationship integrity rules
+## Future-proofing notes
 
-1. No child record may exist without a valid `ArticleId`
-2. Deleting or withdrawing an article should define how child rows are preserved or archived
-3. Team/media ordering should always be explicit
-4. Destination page bindings should be unique per active destination/article pairing
-5. Template resolution should be explicit and not inferred only from the page shell
+Child-model expansion is justified only if a future shell introduces new variable-cardinality content zones such as:
+
+- repeatable narrative sections
+- milestone cards
+- quote/callout groups
+- mixed-media story blocks
+
+Until then, the MVP child model should stay intentionally tight and match the actual XML shell.

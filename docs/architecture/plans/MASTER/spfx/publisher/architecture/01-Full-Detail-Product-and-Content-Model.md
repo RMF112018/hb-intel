@@ -2,121 +2,129 @@
 
 ## 1. Product vision
 
-The **HB Article Publisher** is a centralized editorial product that gives the marketing team a controlled, high-quality publishing experience while distributing finished branded articles to multiple destination sites.
+The product is no longer a generalized multi-destination article publisher.
+
+It is now a **Project Spotlight post publishing product** that gives authors a controlled publishing experience while generating a branded Project Spotlight page from a canonical XML page shell.
 
 The product must support:
 
-- centralized authoring
-- structured editorial inputs
-- destination-specific rendering
-- featured article controls
-- controlled lifecycle states
+- centralized structured authoring
+- Project Spotlight-only publishing
+- XML-template-driven page generation
+- project- and spotlight-aware template resolution
 - durable page URLs
-- extensibility for new destination article types and rendering modules
+- explicit post-to-page bindings
+- controlled lifecycle states
+- extensibility for future shell and renderer evolution
 
-## 2. Destination products
+## 2. Destination product
 
-### CompanyPulse
-Purpose:
-- general company news
-- updates
-- announcements
-- feature stories
-
-Likely traits:
-- strong hero presence
-- body-forward storytelling
-- team block usually optional
-- gallery optional
-- more editorial/newsroom tone
-
-### ProjectSpotlight
+### Project Spotlight
 Purpose:
 - recurring project spotlights
 - milestone spotlights
-- project updates
+- progress updates
 - project storytelling
+- project-team and gallery-rich posts
 
-Likely traits:
-- strong hero presence
-- project metadata relevance
-- `teamViewer` often important
-- gallery more common
-- more structured project narrative
+Key traits in the current shell:
+- strong banner presence
+- structured project context
+- a native place for `teamViewer`
+- a native place for an image gallery
+- body-forward narrative using OOB text blocks
+- durable page identity on the Project Spotlight site
 
 ## 3. Author experience
 
 The author should:
 
-1. enter article content
-2. identify destination and content type
-3. supply images and optional team members
-4. preview the resolved template
-5. save draft, submit for review, schedule, or publish
-6. never need to manually compose the destination page canvas
+1. enter structured Project Spotlight post content
+2. classify the post by post family, project stage, spotlight type, and article subject
+3. add team members and gallery assets where applicable
+4. preview the resolved shell and renderer profile
+5. save draft, submit for review, schedule, publish, republish, or archive
+6. never need to manually build the destination page canvas
 
 ## 4. Content model layers
 
-### Layer A — Article master record
-One authoritative record per article.
+### Layer A — Post master record
+One authoritative record per Project Spotlight post.
 
 Contains:
-- article identity
-- destination
-- content type
+- post identity
+- project context
+- post family / spotlight classification
 - core text content
-- hero-driving fields
-- promotion/workflow state
-- page binding fields
-- rendering inputs and flags
+- banner-driving values
+- workflow and publish state
+- page-binding values
+- rendering and validation inputs
 
 ### Layer B — Child relationship records
-Support related content families:
+Support variable-cardinality content:
 
 - team members
-- media
-- future related links / milestones / callouts if needed
+- gallery/media items
+- future structured sections only if later shell variants require them
 
 ### Layer C — Template registry
 Defines:
-- which template applies
-- required and optional fields
-- which blocks are shown
-- which webpart profiles are used
-- template-specific validation
+- which Project Spotlight template applies
+- which page shell applies
+- block visibility
+- renderer profile bindings
+- validation profile bindings
+- shell and template versioning
 
-### Layer D — Destination page shell
-A page on the destination site bound to the article and configured to render the correct composition.
+### Layer D — Canonical page shell
+A Project Spotlight XML artifact that defines the base page structure for generated posts.
 
-## 5. Template-driven rendering model
+### Layer E — Bound destination page
+A generated page on `ProjectSpotlight` that is created from the canonical shell and populated with the structured post record plus child rows.
+
+## 5. Shell-driven rendering model
 
 Template selection should be rule-driven using:
 
-- destination
-- content type
-- article subject
-- project stage
-- spotlight type
-- optional manual override
+- `PostFamily`
+- `SpotlightType`
+- `ProjectStage`
+- `ArticleSubject`
+- optional admin override
+- compatibility with the canonical Project Spotlight XML shell
 
-The author should not choose render composition manually in ordinary workflows.
+The author should not manually choose page blocks in ordinary workflows.
 
-## 6. Core content blocks
+## 6. Current shell block model
 
-### Required conceptual blocks
-- signature hero
-- article body
-- secondary image
-- image gallery
-- optional team viewer
-- optional destination-specific supporting modules
+### Shell-owned blocks from the XML artifact
+- banner / title region
+- subheading text region
+- body text region
+- team viewer region
+- image gallery region
 
-### Current implementation target
-- `hbSignatureHero`
-- `teamViewer`
-- OOB text
-- OOB image
-- OOB image gallery
+### What the shell controls
+- section order
+- which content zones exist
+- whether a zone is OOB or custom
+- initial control properties
+- baseline presentation rules
+
+### What remains list-driven
+- all editorial content
+- post classifications
+- team rows
+- gallery rows
+- workflow state
+- page binding
+- template/profile resolution
+
+### What remains renderer-driven
+- `teamViewer` display behavior
+- any future `hbSignatureHero` behavior
+- how structured post fields are transformed into individual page-control payloads
 
 ## 7. Editorial states
 
@@ -130,23 +138,28 @@ The system should support at least:
 - archived
 - withdrawn
 
-## 8. Promotion model
+## 8. Promotion / rollup model
 
-Articles may independently control:
+Because the system now targets Project Spotlight only, promotion logic should be scoped to Project Spotlight surfaces only.
 
-- featured behavior
-- feed inclusion
-- landing-page inclusion
+Posts may independently control:
+
+- featured behavior within Project Spotlight
+- rollup inclusion
 - pinned behavior
 - manual sort order
 - archive visibility
-- campaign windowing
+- optional campaign-window logic
+
+This architecture intentionally removes destination-branching promotion logic.
 
 ## 9. Evolution rule
 
-Fields tied to `hbSignatureHero`, `teamViewer`, or any future branded rendering component must be treated as **contract-driven but revisable**.
+Fields tied to the banner/hero region, `teamViewer`, OOB gallery behavior, or future shell variants must be treated as **contract-driven but revisable**.
 
-This package intentionally includes notes that:
-- hero-related fields may need to change after `hbSignatureHero` is updated for multi-application use
-- team-related fields may need to change after `teamViewer` is created and validated
-- template-specific required fields may also change when shared component capabilities expand
+This package intentionally preserves explicit evolution notes because:
+
+- the current canonical shell uses the OOB Page Title / banner control
+- a later shell may replace that with `hbSignatureHero`
+- `teamViewer` will likely mature after production validation
+- Project Spotlight shell families may expand beyond the current **In Progress** shell

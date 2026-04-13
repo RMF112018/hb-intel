@@ -4,83 +4,129 @@
 
 This schema is intentionally detailed for MVP planning, but it is **not immutable**.
 
-Fields connected to the following components may need to be revised after those components are updated or created:
+Fields connected to the following areas may need revision after implementation is validated:
 
-- `hbSignatureHero`
+- Project Spotlight banner/hero behavior
 - `teamViewer`
-- any future branded article renderer replacing OOB body/media zones
+- OOB gallery behavior
+- future shell-family expansion
 
-## 2. Hero evolution notes
+## 2. XML shell authority note
 
-Expect possible changes in:
-- metadata rendering controls
-- focal point/crop hints
-- theme/destination variants
-- CTA behavior
-- support for additional layout modes
+The attached Project Spotlight XML artifact is not a throwaway reference.
+
+Treat it as:
+
+- the current canonical page-shell source
+- the baseline composition artifact for generated pages
+- an authority for which blocks currently exist
+- an authority for shell-version tracking
+
+Any change to that source shell should trigger review of:
+
+- template registry rows
+- control-map JSON
+- validation rules
+- page-generation logic
+- page-regeneration rules
+
+## 3. Banner / hero evolution notes
+
+The current shell uses the SharePoint OOB Page Title / banner block.
+
+Expect future changes in:
+
+- whether the banner remains OOB
+- whether `hbSignatureHero` replaces it
+- metadata rendering
+- crop/focal-point handling
+- theme variants
+- richer project metadata display
 
 Therefore:
-- do not hard-code `hbSignatureHero` assumptions too deeply into unrelated systems
-- prefer profile keys and version labels
 
-## 3. TeamViewer evolution notes
+- do not hard-code banner assumptions too deeply
+- prefer `HeroRendererKind` / `BannerRendererKind` + profile keys
+- tie banner requirements to shell compatibility
+
+## 4. Team Viewer evolution notes
 
 Expect possible changes in:
+
 - grouping model
 - hierarchy model
-- default display mode
 - large-team handling
-- featured-member behavior
-- compact vs expanded rendering
+- list vs grid modes
+- profile-detail drawer behavior
+- featured-member emphasis
 
 Therefore:
+
 - preserve flexible child-row metadata
-- avoid prematurely locking org-chart semantics in MVP
+- avoid prematurely locking hierarchy semantics in MVP
 - allow contract revision after the first validated UI pass
 
-## 4. Template field evolution rule
+## 5. Gallery / media evolution notes
+
+The current shell contains a gallery slot but **not** a standalone secondary-image slot.
+
+Therefore:
+
+- keep media modeling focused on gallery rows in MVP
+- do not preserve hidden secondary-image assumptions in validation
+- introduce any future image-slot behavior through a new shell key, not a silent schema drift
+
+## 6. Template field evolution rule
 
 Template-specific required fields may need to be updated following:
-- hero enhancements
-- teamViewer creation and validation
-- page-shell composition changes
-- the introduction of new shared article modules
 
-The template registry and validation engine should be designed to support controlled evolution without breaking prior articles.
+- shell changes
+- banner renderer changes
+- Team Viewer validation updates
+- introduction of new Project Spotlight shell families
+- introduction of structured multi-section body rendering
 
-## 5. Implementation guidance
+The template registry and validation engine should support controlled evolution without breaking older posts.
 
-Recommended implementation order:
+## 7. Recommended implementation order
 
 1. lock list schema
 2. lock template registry
-3. lock article/page binding model
-4. lock initial hero contract
-5. design and lock `teamViewer` MVP contract
-6. implement validation engine
+3. lock page-binding schema
+4. lock shell control-map contract
+5. lock Team Viewer MVP contract
+6. implement template-aware validation
 7. implement preview
-8. implement page shell generation and publish flow
+8. implement page generation from the Project Spotlight shell
+9. implement republish and regeneration logic
+10. implement archive/withdraw behavior
 
-## 6. Change-management rule
+## 8. Change-management rule
 
 Any update to:
-- hero contract
-- teamViewer contract
+
+- the XML shell source
+- banner renderer choice
+- Team Viewer contract
 - template registry behavior
-- page shell structure
+- shell control-map JSON
 
 should trigger review of:
+
 - field definitions
 - validation rules
 - template mappings
-- publishing/sync behavior
+- publish / republish / regenerate logic
+- workflow documentation
 
-## 7. Documentation rule
+## 9. Documentation rule
 
 As implementation proceeds, update:
+
 - field definitions
 - template registry docs
+- binding docs
 - renderer contracts
 - validation rules
 
-to keep this package authoritative and current.
+so this package remains authoritative and aligned with the actual Project Spotlight implementation.
