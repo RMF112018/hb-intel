@@ -7,10 +7,13 @@
  * `peopleCultureListSource` or `kudosGovernanceWriter` directly.
  */
 import { fetchPeopleCultureListData } from '../peopleCultureListSource.js';
-import { fetchKudosAuditTimeline } from '../kudosGovernanceWriter.js';
+import {
+  fetchKudosAuditTimeline,
+  type KudosAuditTimelineEntry,
+} from '../kudosGovernanceWriter.js';
 import type { KudosEntry } from '../../webparts/communicationsContracts.js';
 
-export type { KudosEntry };
+export type { KudosEntry, KudosAuditTimelineEntry };
 
 export interface GetKudosEntriesResult {
   /** Mapped Kudos entries from the live People Culture Kudos list. */

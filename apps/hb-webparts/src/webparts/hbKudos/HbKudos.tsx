@@ -45,7 +45,7 @@ import * as React from 'react';
 import { HbcEmptyState, HbcSpinner } from '@hbc/ui-kit/homepage';
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useKudosComposer } from '../../homepage/data/useKudosComposer.js';
-import { submitKudosDraft } from '../../homepage/data/peopleCultureSubmissionSource.js';
+import { submitKudosDraft } from '../../homepage/data/kudosAdapter/index.js';
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { KudosEntry } from '../../homepage/webparts/kudosContracts.js';
 import {
