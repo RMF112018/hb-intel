@@ -13,3 +13,4 @@ export * from './publisherRowMappers';
 export * from './publisherRepositories';
 export * from './templateResolver';
 export * from './publishResolutionContext';
+export * from './pageGeneration/index';

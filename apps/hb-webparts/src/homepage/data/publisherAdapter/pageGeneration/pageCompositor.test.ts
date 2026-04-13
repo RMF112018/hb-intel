@@ -1,0 +1,273 @@
+import { describe, expect, it } from 'vitest';
+import type {
+  PublisherMediaRow,
+  PublisherPageBindingRow,
+  PublisherPostRow,
+  PublisherTeamMemberRow,
+  PublisherTemplateRegistryRow,
+} from '../publisherContracts';
+import type { PublishResolutionContext } from '../publishResolutionContext';
+import type { TemplateResolutionTrace } from '../templateResolver';
+import {
+  composeProjectSpotlightPage,
+  validateComposedPageStructure,
+  type BannerControlPayload,
+  type TeamViewerControlPayload,
+  type ImageGalleryControlPayload,
+} from './pageCompositor';
+import { PROJECT_SPOTLIGHT_V1_SHELL } from './xmlShellManifest';
+
+function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+  return {
+    PostId: 'post-001',
+    Title: 'Acme Tower — April Spotlight',
+    Subhead: 'Concrete pour wrapped under budget',
+    SummaryExcerpt: 'A short rollup summary.',
+    BodyRichText: '<p>Full body rich text.</p>',
+    PostFamily: 'monthlySpotlight',
+    SpotlightType: 'inProgress',
+    TemplateKey: 'ps-inprogress-monthly-v1',
+    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
+    Slug: 'acme-tower-april',
+    WorkflowState: 'approved',
+    CreatedDateUtc: '2026-04-10T00:00:00Z',
+    UpdatedDateUtc: '2026-04-12T00:00:00Z',
+    ProjectId: 'PRJ-0099',
+    ProjectName: 'Acme Tower',
+    BannerImageUrl: 'https://img.example/banner.jpg',
+    BannerImageAltText: 'Aerial view of Acme Tower',
+    TargetSiteUrl:
+      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    TargetSiteKey: 'projectSpotlight',
+    SourceTemplatePath:
+      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
+    ...over,
+  } as PublisherPostRow;
+}
+
+function template(
+  over: Partial<PublisherTemplateRegistryRow> = {},
+): PublisherTemplateRegistryRow {
+  return {
+    TemplateKey: 'ps-inprogress-monthly-v1',
+    TemplateDisplayName: 'PS In Progress — Monthly',
+    TemplateStatus: 'active',
+    TemplateVersion: '1.0.0',
+    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
+    PageShellVersion: '1.0.0',
+    ShellSourceSiteUrl:
+      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    ShellSourcePagePath:
+      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
+    PostFamily: ['monthlySpotlight'],
+    BannerRendererKind: 'oobPageTitle',
+    BodyRendererKind: 'oobText',
+    TeamRendererKind: 'teamViewer',
+    GalleryRendererKind: 'oobImageGallery',
+    ShowTeamBlock: true,
+    ShowGalleryBlock: true,
+    RequiredFieldSetKey: 'req-default',
+    ValidationProfileKey: 'val-default',
+    RenderProfileKey: 'render-default',
+    ...over,
+  };
+}
+
+function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
+  return {
+    PostId: 'post-001',
+    TeamMemberId: id,
+    PersonPrincipal: `${id}@example.com`,
+    DisplayName: id,
+    ...over,
+  };
+}
+
+function mediaRow(id: string, over: Partial<PublisherMediaRow> = {}): PublisherMediaRow {
+  return {
+    PostId: 'post-001',
+    MediaId: id,
+    MediaRole: 'gallery',
+    ImageAssetUrl: `https://img.example/${id}.jpg`,
+    AltText: `${id} alt`,
+    ...over,
+  };
+}
+
+function context(over: {
+  post?: Partial<PublisherPostRow>;
+  template?: Partial<PublisherTemplateRegistryRow>;
+  teamMembers?: readonly PublisherTeamMemberRow[];
+  media?: readonly PublisherMediaRow[];
+  existingBinding?: PublisherPageBindingRow;
+} = {}): PublishResolutionContext {
+  const trace: TemplateResolutionTrace = {
+    input: { PostFamily: 'monthlySpotlight' },
+    steps: [],
+    selectedKey: 'ps-inprogress-monthly-v1',
+    selectionRule: 'applicability',
+  };
+  return {
+    post: post(over.post),
+    template: template(over.template),
+    teamMembers: over.teamMembers ?? [],
+    media: over.media ?? [],
+    existingBinding: over.existingBinding,
+    decisionTrace: trace,
+  };
+}
+
+describe('composeProjectSpotlightPage', () => {
+  it('emits exactly five slot controls in shell order', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        teamMembers: [member('alice'), member('bob')],
+        media: [mediaRow('img-1'), mediaRow('img-2')],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    expect(page.controls.map((c) => c.slot)).toEqual([
+      'banner',
+      'subhead',
+      'body',
+      'team',
+      'gallery',
+    ]);
+    expect(validateComposedPageStructure(page)).toEqual([]);
+  });
+
+  it('populates the banner from post fields with BannerTitleOverride preference', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        post: { BannerTitleOverride: 'Override Title' },
+        teamMembers: [member('alice')],
+        media: [mediaRow('img-1')],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    const banner = page.controls.find((c) => c.slot === 'banner') as BannerControlPayload;
+    expect(banner.visible).toBe(true);
+    expect(banner.title).toBe('Override Title');
+    expect(banner.imageUrl).toBe('https://img.example/banner.jpg');
+    expect(banner.imageAltText).toBe('Aerial view of Acme Tower');
+    expect(banner.layoutType).toBe('FullWidthImage');
+  });
+
+  it('sets TeamViewer properties from post fields and includes only IncludeInViewer members', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        post: {
+          TeamSectionHeading: 'Project Team',
+          TeamViewerLayout: 'list',
+          TeamViewerDensity: 'compact',
+          TeamViewerEnableProfileDrawer: true,
+        },
+        teamMembers: [
+          member('alice', { SortOrder: 2 }),
+          member('bob', { SortOrder: 1, IncludeInViewer: false }),
+          member('carol', { SortOrder: 3 }),
+        ],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    const team = page.controls.find((c) => c.slot === 'team');
+    expect(team?.visible).toBe(true);
+    if (!team?.visible) return;
+    const tvp = team as TeamViewerControlPayload;
+    expect(tvp.properties.heading).toBe('Project Team');
+    expect(tvp.properties.layout).toBe('list');
+    expect(tvp.properties.density).toBe('compact');
+    expect(tvp.properties.featureFlags.profileDetailDrawer).toBe(true);
+    expect(tvp.properties.articleId).toBe('post-001');
+    expect(tvp.properties.destinationKey).toBe('projectSpotlight');
+  });
+
+  it('hides the team block when the template disables it', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        template: { ShowTeamBlock: false, TeamRendererKind: 'none' },
+        teamMembers: [member('alice')],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    const team = page.controls.find((c) => c.slot === 'team');
+    expect(team?.visible).toBe(false);
+  });
+
+  it('hides the gallery when there are no gallery-role media rows', () => {
+    const page = composeProjectSpotlightPage(
+      context({ media: [mediaRow('img-1', { MediaRole: 'supporting' })] }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    const gallery = page.controls.find((c) => c.slot === 'gallery');
+    expect(gallery?.visible).toBe(false);
+  });
+
+  it('honors post.ShowGallery=false independent of media rows', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        post: { ShowGallery: false },
+        media: [mediaRow('img-1')],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    const gallery = page.controls.find((c) => c.slot === 'gallery');
+    expect(gallery?.visible).toBe(false);
+  });
+
+  it('orders gallery images by SortOrder ascending', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        media: [
+          mediaRow('a', { SortOrder: 3 }),
+          mediaRow('b', { SortOrder: 1 }),
+          mediaRow('c', { SortOrder: 2 }),
+        ],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    const gallery = page.controls.find((c) => c.slot === 'gallery') as ImageGalleryControlPayload;
+    expect(gallery.visible).toBe(true);
+    expect(gallery.images.map((i) => i.imageUrl)).toEqual([
+      'https://img.example/b.jpg',
+      'https://img.example/c.jpg',
+      'https://img.example/a.jpg',
+    ]);
+  });
+
+  it('stamps shell + template identity onto the composed page', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        teamMembers: [member('alice')],
+        media: [mediaRow('img-1')],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    expect(page.identity.shellKey).toBe(PROJECT_SPOTLIGHT_V1_SHELL.shellKey);
+    expect(page.identity.shellVersion).toBe(PROJECT_SPOTLIGHT_V1_SHELL.shellVersion);
+    expect(page.identity.templateKey).toBe('ps-inprogress-monthly-v1');
+    expect(page.identity.templateVersion).toBe('1.0.0');
+    expect(page.identity.pageName).toBe('acme-tower-april.aspx');
+  });
+
+  it('prefers GeneratedPageName when it is set', () => {
+    const page = composeProjectSpotlightPage(
+      context({ post: { GeneratedPageName: 'custom-page.aspx' } }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    expect(page.identity.pageName).toBe('custom-page.aspx');
+  });
+});
+
+describe('validateComposedPageStructure', () => {
+  it('returns empty list when the five slots are all present once', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        teamMembers: [member('alice')],
+        media: [mediaRow('img-1')],
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    expect(validateComposedPageStructure(page)).toEqual([]);
+  });
+});
