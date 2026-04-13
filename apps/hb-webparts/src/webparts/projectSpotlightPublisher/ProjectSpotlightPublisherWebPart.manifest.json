@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10",
+  "alias": "ProjectSpotlightPublisherWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Project Spotlight Publisher" },
+      "description": {
+        "default": "Authoring surface for Project Spotlight posts. Hosted on the HBCentral publisher page; writes the post master + child records and publishes pages on the ProjectSpotlight site."
+      },
+      "officeFabricIconFontName": "PageEdit",
+      "hiddenFromToolbox": true,
+      "properties": {}
+    }
+  ]
+}

@@ -18,7 +18,7 @@ Single source of truth for wave-by-wave execution status. Update this file as ea
 | 3 | 03 | Service layer + template resolution | ✅ **COMPLETE** | `evidence/wave-03-service-layer-and-resolver.md` |
 | 4 | 04 | XML-shell page-generation engine | ✅ **COMPLETE** | `evidence/wave-04-xml-shell-page-generation.md` |
 | 5 | 05 | Content mapping + page binding | ✅ **COMPLETE** | `evidence/wave-05-content-mapping-and-binding.md` |
-| 6 | 06 | Authoring UI + workflow | ⬜️ Not started | — |
+| 6 | 06 | Authoring UI + workflow | ✅ **COMPLETE** | `evidence/wave-06-authoring-ui-and-workflow.md` |
 | 7 | 07 | Validation, preview, governance | ⬜️ Not started | — |
 | 8 | 08 | Team Viewer closure | ⏸ Team Viewer webpart itself complete; publisher-side closure pending | Commits `3bb8dd10` → `35b0f38c` (TeamViewer Phase-01) |
 | 9 | 09 | Testing + hosted vetting + build proof | ⬜️ Not started | — |

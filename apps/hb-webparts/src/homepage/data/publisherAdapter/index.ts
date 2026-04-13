@@ -17,3 +17,5 @@ export * from './pageGeneration/index';
 export * from './pageBindingWriter';
 export * from './republishPolicy';
 export * from './publishOrchestrator';
+export * from './publisherWriters';
+export * from './workflowStateMachine';

@@ -1,0 +1,322 @@
+/* Project Spotlight Publisher — v1 admin surface.
+ * Doctrine: token-disciplined layout using neutral system surfaces.
+ * No premium-authored visual styling; this is operational chrome.
+ */
+
+.shell {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  min-height: 600px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #1f1f1f;
+  background: #f7f7f8;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.listPane {
+  background: #fff;
+  border: 1px solid #e3e3e6;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.listTitle {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.postList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.postRow {
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.postRow:hover {
+  background: #f0f0f3;
+}
+
+.postRowActive {
+  border-color: #0078d4;
+  background: #eff6fc;
+}
+
+.postRowTitle {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.postRowMeta {
+  font-size: 11px;
+  color: #6a6a6f;
+}
+
+.editor {
+  background: #fff;
+  border: 1px solid #e3e3e6;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.meta {
+  display: flex;
+  gap: 6px;
+}
+
+.stateBadge,
+.bindingBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef;
+  color: #334;
+}
+
+.bindingBadge {
+  background: #e6f6ec;
+  color: #1a6a35;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e3e3e6;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  color: #4a4a4f;
+  text-transform: capitalize;
+}
+
+.tab:hover {
+  color: #0078d4;
+}
+
+.tabActive {
+  color: #0078d4;
+  border-bottom-color: #0078d4;
+  font-weight: 600;
+}
+
+.panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.fieldLabel {
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.input,
+.textarea,
+.select {
+  font: inherit;
+  color: inherit;
+  padding: 6px 8px;
+  border: 1px solid #cbcbd0;
+  border-radius: 4px;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.textareaLg {
+  min-height: 180px;
+}
+
+.rowList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rowCard {
+  border: 1px solid #e3e3e6;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rowGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.rowActions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.actionBar {
+  border-top: 1px solid #e3e3e6;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.statusLine {
+  font-size: 12px;
+  color: #4a4a4f;
+  font-style: italic;
+}
+
+.btn,
+.primaryBtn {
+  font: inherit;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #cbcbd0;
+  background: #fff;
+  color: #1f1f1f;
+  font-size: 13px;
+}
+
+.btn:hover,
+.primaryBtn:hover {
+  background: #f0f0f3;
+}
+
+.btn:disabled,
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primaryBtn {
+  background: #0078d4;
+  color: #fff;
+  border-color: #0078d4;
+}
+
+.primaryBtn:hover {
+  background: #106ebe;
+}
+
+.statusPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeading {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 4px 16px;
+}
+
+.dtRow {
+  display: contents;
+}
+
+.dtLabel,
+.dtValue {
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.dtLabel {
+  font-weight: 600;
+  color: #4a4a4f;
+}
+
+.dtValue {
+  color: #1f1f1f;
+  word-break: break-all;
+}

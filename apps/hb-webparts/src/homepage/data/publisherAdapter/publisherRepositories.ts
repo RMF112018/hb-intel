@@ -42,6 +42,16 @@ import {
   createSharePointPageBindingWriter,
   type PageBindingWriter,
 } from './pageBindingWriter';
+import {
+  createSharePointMediaWriter,
+  createSharePointPostWriter,
+  createSharePointTeamMembersWriter,
+  createSharePointWorkflowHistoryWriter,
+  type MediaWriter,
+  type PostWriter,
+  type TeamMembersWriter,
+  type WorkflowHistoryWriter,
+} from './publisherWriters';
 
 export class PublisherWriteNotImplementedError extends Error {
   constructor(operation: string, wave: string) {
@@ -115,7 +125,7 @@ export interface PostRepository {
   listByWorkflowState(
     state: PublisherPostRow['WorkflowState'],
   ): Promise<readonly PublisherPostRow[]>;
-  upsert(row: PublisherPostRow): Promise<never>;
+  upsert(row: PublisherPostRow): Promise<{ readonly wasCreated: boolean; readonly itemId: number }>;
 }
 
 export interface TeamMembersRepository {
@@ -123,7 +133,7 @@ export interface TeamMembersRepository {
   replaceAllForPost(
     postId: string,
     rows: readonly PublisherTeamMemberRow[],
-  ): Promise<never>;
+  ): Promise<{ readonly deleted: number; readonly written: number }>;
 }
 
 export interface MediaRepository {
@@ -131,7 +141,7 @@ export interface MediaRepository {
   replaceAllForPost(
     postId: string,
     rows: readonly PublisherMediaRow[],
-  ): Promise<never>;
+  ): Promise<{ readonly deleted: number; readonly written: number }>;
 }
 
 export interface TemplateRegistryRepository {
@@ -157,7 +167,7 @@ export interface PageBindingRepository {
 
 export interface WorkflowHistoryRepository {
   listByPost(postId: string): Promise<readonly PublisherWorkflowHistoryRow[]>;
-  append(row: PublisherWorkflowHistoryRow): Promise<never>;
+  append(row: PublisherWorkflowHistoryRow): Promise<{ readonly itemId: number }>;
 }
 
 export interface PublishingErrorsRepository {
@@ -177,12 +187,24 @@ export interface PublisherRepositories {
 
 /* ── Factory ─────────────────────────────────────────────────────── */
 
+export interface PublisherRepositoryWriters {
+  readonly posts: PostWriter;
+  readonly teamMembers: TeamMembersWriter;
+  readonly media: MediaWriter;
+  readonly pageBindings: PageBindingWriter;
+  readonly workflowHistory: WorkflowHistoryWriter;
+}
+
 export function createPublisherRepositories(
   access: PublisherListAccess = createSharePointPublisherListAccess(),
   lists: typeof PUBLISHER_LISTS = PUBLISHER_LISTS,
-  pageBindingWriter: PageBindingWriter = createSharePointPageBindingWriter({
-    descriptor: lists.pageBindings,
-  }),
+  writers: PublisherRepositoryWriters = {
+    posts: createSharePointPostWriter({ descriptor: lists.posts }),
+    teamMembers: createSharePointTeamMembersWriter({ descriptor: lists.teamMembers }),
+    media: createSharePointMediaWriter({ descriptor: lists.media }),
+    pageBindings: createSharePointPageBindingWriter({ descriptor: lists.pageBindings }),
+    workflowHistory: createSharePointWorkflowHistoryWriter({ descriptor: lists.workflowHistory }),
+  },
 ): PublisherRepositories {
   function mapAll<R>(
     rows: readonly Record<string, unknown>[],
@@ -216,11 +238,8 @@ export function createPublisherRepositories(
         });
         return mapAll(rows, mapPostRow);
       },
-      async upsert() {
-        throw new PublisherWriteNotImplementedError(
-          'posts.upsert',
-          'Wave 5 / Prompt-05',
-        );
+      async upsert(row) {
+        return writers.posts.upsert(row);
       },
     },
 
@@ -232,11 +251,8 @@ export function createPublisherRepositories(
         });
         return mapAll(rows, mapTeamMemberRow);
       },
-      async replaceAllForPost() {
-        throw new PublisherWriteNotImplementedError(
-          'teamMembers.replaceAllForPost',
-          'Wave 5 / Prompt-05',
-        );
+      async replaceAllForPost(postId, rows) {
+        return writers.teamMembers.replaceAllForPost(postId, rows);
       },
     },
 
@@ -248,11 +264,8 @@ export function createPublisherRepositories(
         });
         return mapAll(rows, mapMediaRow);
       },
-      async replaceAllForPost() {
-        throw new PublisherWriteNotImplementedError(
-          'media.replaceAllForPost',
-          'Wave 5 / Prompt-05',
-        );
+      async replaceAllForPost(postId, rows) {
+        return writers.media.replaceAllForPost(postId, rows);
       },
     },
 
@@ -289,7 +302,7 @@ export function createPublisherRepositories(
         return undefined;
       },
       async upsert(row) {
-        const outcome = await pageBindingWriter.upsert({ row });
+        const outcome = await writers.pageBindings.upsert({ row });
         if (!outcome.ok) {
           throw new Error(
             `pageBindings.upsert failed (${outcome.reason}): ${outcome.message}`,
@@ -311,11 +324,8 @@ export function createPublisherRepositories(
         });
         return mapAll(rows, mapWorkflowHistoryRow);
       },
-      async append() {
-        throw new PublisherWriteNotImplementedError(
-          'workflowHistory.append',
-          'Wave 6 / Prompt-06',
-        );
+      async append(row) {
+        return writers.workflowHistory.append(row);
       },
     },
 

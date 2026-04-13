@@ -28,6 +28,8 @@ import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import { buildHeroArticleContent } from './webparts/hbSignatureHero/articleConfig.js';
 import { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
 import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmin.js';
+import { ProjectSpotlightPublisher } from './webparts/projectSpotlightPublisher/ProjectSpotlightPublisher.js';
+import { PROJECT_SPOTLIGHT_PUBLISHER_WEBPART_ID } from './webparts/projectSpotlightPublisher/runtimeContract.js';
 import { PnpOps } from './webparts/pnp/PnpOps.js';
 import { PNP_OPS_LEGACY_MODE, resolvePnpOpsExecutionMode } from './webparts/pnp/pnpOpsExecutionModes.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';
@@ -113,6 +115,12 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // HbHeroBanner webpart.
   '23d22f2d-7a15-4031-ab64-2454898bfd44': ({ siteUrl }) =>
     createElement(HbHeroBannerAdmin, { siteUrl }),
+  // Phase-01 Prompt-06: Project Spotlight Publisher authoring surface.
+  // Hosted on the HBCentral publisher page. Reads/writes the seven
+  // Project Spotlight lists and orchestrates publish/republish to the
+  // ProjectSpotlight site via the pure compositor + Pages REST.
+  [PROJECT_SPOTLIGHT_PUBLISHER_WEBPART_ID]: ({ siteUrl }) =>
+    createElement(ProjectSpotlightPublisher, { siteUrl }),
   '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl, siteUrl, getGraphToken }) => {
     const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
       ? config.backgroundImageUrl
