@@ -19,6 +19,8 @@ import {
   HB_KUDOS_WEBPART_ID,
   HB_KUDOS_COMPANION_WEBPART_ID,
 } from './webparts/hbKudos/kudosRuntimeContract.js';
+import { TeamViewer } from './webparts/teamViewer/TeamViewer.js';
+import { TEAM_VIEWER_WEBPART_ID } from './webparts/teamViewer/teamViewerRuntimeContract.js';
 import { ProjectPortfolioSpotlight } from './webparts/projectPortfolioSpotlight/ProjectPortfolioSpotlight.js';
 import { SafetyFieldExcellence } from './webparts/safetyFieldExcellence/SafetyFieldExcellence.js';
 import { SmartSearchWayfinding } from './webparts/smartSearchWayfinding/SmartSearchWayfinding.js';
@@ -95,6 +97,9 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // Phase-21 Wave 4: id from kudosRuntimeContract (single source of truth).
   [HB_KUDOS_COMPANION_WEBPART_ID]: ({ config, identity, assetBaseUrl }) =>
     createElement(HbKudosCompanion, { config, identity, assetBaseUrl }),
+  // Phase-01 Prompt-01: TeamViewer (article-bound team-member viewer).
+  [TEAM_VIEWER_WEBPART_ID]: ({ config, identity, assetBaseUrl, getGraphToken }) =>
+    createElement(TeamViewer, { config, identity, assetBaseUrl, getGraphToken }),
   '8370ab0c-b6df-4db0-82f1-24b54750f508': ({ config }) => createElement(ProjectPortfolioSpotlight, { config }),
   '89ca5ff3-21f4-4b23-a953-4b7306ea1029': ({ config }) => createElement(SafetyFieldExcellence, { config }),
   '11d72b36-a92f-4e2d-9918-75df2cb0d11e': ({ config }) => createElement(SmartSearchWayfinding, { config }),
