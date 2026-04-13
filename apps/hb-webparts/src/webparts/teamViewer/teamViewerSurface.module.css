@@ -1,0 +1,235 @@
+/*
+ * teamViewerSurface.module.css — TeamViewer surface grammar.
+ *
+ * Token-backed class set used by the surface, card, and drawer.
+ * Tokens bridge from the presentation-lane theme via the
+ * `teamViewerCSSVars()` helper so the runtime does not hardcode
+ * colors at the component layer.
+ */
+
+.shellRoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tv-space-md, 16px);
+  font-family: var(--tv-font-family, 'Segoe UI', system-ui, sans-serif);
+  color: var(--tv-text-strong, #111827);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tv-space-sm, 12px);
+  padding-bottom: var(--tv-space-sm, 12px);
+  border-bottom: 1px solid var(--tv-border-subtle, rgba(17, 24, 39, 0.08));
+}
+
+.headingGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.headingIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--tv-accent-from, #1e3a8a), var(--tv-accent-to, #3b82f6));
+  color: #ffffff;
+  flex: 0 0 auto;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.18);
+}
+
+.headingTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headingMeta {
+  font-size: 0.8125rem;
+  color: var(--tv-text-muted, #4b5563);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.groupLabel {
+  margin: 0 0 10px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tv-text-muted, #4b5563);
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+
+.gridCompact {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.gridStandard {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.gridExpanded {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+/* Drawer */
+
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 25, 0.45);
+  z-index: 39;
+}
+
+.drawerRoot {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  background: var(--tv-surface-1, #ffffff);
+  box-shadow: -16px 0 40px rgba(10, 14, 25, 0.18);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid var(--tv-border-subtle, rgba(17, 24, 39, 0.08));
+}
+
+.drawerIdentity {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+.drawerTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.drawerSubtitle {
+  color: var(--tv-text-muted, #4b5563);
+  font-size: 0.875rem;
+}
+
+.drawerClose {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--tv-text-muted, #4b5563);
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.drawerClose:hover {
+  background: var(--tv-surface-2, #f3f4f6);
+  color: var(--tv-text-strong, #111827);
+}
+
+.drawerClose:focus-visible {
+  outline: none;
+  border-color: var(--tv-focus-ring, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.drawerBody {
+  padding: 20px 24px 24px 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--tv-text-strong, #111827);
+}
+
+.drawerSectionLabel {
+  margin: 0 0 6px 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tv-text-muted, #4b5563);
+}
+
+.drawerResumeBody {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.drawerResumeBody :global(p) {
+  margin: 0 0 10px 0;
+}
+
+.drawerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--tv-accent-to, #3b82f6);
+  text-decoration: none;
+}
+
+.drawerLink:hover {
+  text-decoration: underline;
+}
+
+.drawerLink:focus-visible {
+  outline: 2px solid var(--tv-focus-ring, #2563eb);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* States */
+
+.stateSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  min-height: 180px;
+}
