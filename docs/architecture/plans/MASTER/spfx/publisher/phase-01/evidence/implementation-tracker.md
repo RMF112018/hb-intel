@@ -21,7 +21,7 @@ Single source of truth for wave-by-wave execution status. Update this file as ea
 | 6 | 06 | Authoring UI + workflow | ✅ **COMPLETE** | `evidence/wave-06-authoring-ui-and-workflow.md` |
 | 7 | 07 | Validation, preview, governance | ✅ **COMPLETE** | `evidence/wave-07-validation-preview-governance.md` |
 | 8 | 08 | Team Viewer closure | ✅ **COMPLETE** (publisher-side; reader migration tracked) | `evidence/wave-08-teamviewer-closure.md` |
-| 9 | 09 | Testing + hosted vetting + build proof | 🟡 **in-session closed; hosted + sppkg repackage open** | `evidence/wave-09-testing-hosted-vetting-build-proof.md` |
+| 9 | 09 | Testing + hosted vetting + build proof | 🟡 **tests + sppkg built (Feature 1.0.0.219 / solution 1.0.0.208); hosted verification open** | `evidence/wave-09-testing-hosted-vetting-build-proof.md` + `evidence/wave-09-build-proof.md` |
 
 Legend: ✅ complete · 🟡 in progress · ⬜️ not started · ⏸ partial / upstream dependency
 

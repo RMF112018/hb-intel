@@ -1,6 +1,6 @@
 {
-  "id": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
-  "alias": "HbHeroBannerWebPart",
+  "id": "c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901",
+  "alias": "TeamViewerWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -9,7 +9,6 @@
     "SharePointWebPart"
   ],
   "supportsThemeVariants": false,
-  "supportsFullBleed": true,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
@@ -17,20 +16,22 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Hero Banner"
+        "default": "Team Viewer"
       },
       "description": {
-        "default": "Standalone editorial hero banner. Not for flagship homepage use — use HB Signature Hero instead."
+        "default": "Article-bound premium team-member viewer. Presents article-linked team members (photo, name, title) with optional grouping, density selection for small/medium/large teams, and a real bio/resume slide-out that ships disabled by default behind an explicit feature flag."
       },
-      "officeFabricIconFontName": "Photo2",
-      "hiddenFromToolbox": true,
+      "officeFabricIconFontName": "People",
+      "hiddenFromToolbox": false,
       "properties": {
-        "headline": "Build with confidence.",
-        "message": "Keep teams aligned on priorities, updates, and field execution from one homepage experience.",
-        "metadata": "Updated weekly by Communications",
-        "cta": {
-          "label": "Read this week’s update",
-          "href": "/sites/hb-central"
+        "heading": "Team",
+        "articleId": "",
+        "destinationKey": "",
+        "listHostOverride": "",
+        "layout": "grid",
+        "density": "standard",
+        "featureFlags": {
+          "profileDetailDrawer": false
         }
       }
     }
@@ -39,7 +40,7 @@
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0",
+    "entryModuleId": "c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901_1.0.0",
     "scriptResources": {
       "@microsoft/sp-property-pane": {
         "type": "component",
@@ -56,9 +57,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "39762a4d-c7fd-44a6-a11e-4f8de9f5778d_1.0.0": {
+      "c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901_1.0.0": {
         "type": "path",
-        "path": "shell-entry-39762a4d-c7fd-44a6-a11e-4f8de9f5778d-57d9d5a7.js"
+        "path": "shell-entry-c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901-84eb65e6.js"
       }
     }
   }

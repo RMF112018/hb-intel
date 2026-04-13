@@ -20,7 +20,7 @@
         "default": "Project Spotlight Publisher"
       },
       "description": {
-        "default": "Authoring surface for Project Spotlight posts. Hosted on the HBCentral publisher page; writes the post master + child records and publishes pages on the ProjectSpotlight site via the canonical XML shell."
+        "default": "Authoring surface for Project Spotlight posts. Hosted on the HBCentral publisher page; writes the post master + child records and publishes pages on the ProjectSpotlight site."
       },
       "officeFabricIconFontName": "PageEdit",
       "hiddenFromToolbox": true,
@@ -29,13 +29,28 @@
   ],
   "loaderConfig": {
     "internalModuleBaseUrls": [
-      "HTTPS://spclientsideassets.akamaihd.net/"
+      "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "ProjectSpotlightPublisherWebPart",
+    "entryModuleId": "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10_1.0.0",
     "scriptResources": {
-      "ProjectSpotlightPublisherWebPart": {
+      "@microsoft/sp-property-pane": {
+        "type": "component",
+        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db",
+        "version": "1.18.0"
+      },
+      "@microsoft/sp-loader": {
+        "type": "component",
+        "id": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
+        "version": "1.18.0"
+      },
+      "@microsoft/sp-webpart-base": {
+        "type": "component",
+        "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
+        "version": "1.18.0"
+      },
+      "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10_1.0.0": {
         "type": "path",
-        "path": "ProjectSpotlightPublisherWebPart.js"
+        "path": "shell-entry-1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10-d1911a26.js"
       }
     }
   }
