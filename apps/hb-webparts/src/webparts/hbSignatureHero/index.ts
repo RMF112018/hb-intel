@@ -10,3 +10,5 @@ export type { HeroMode } from './heroModeResolver.js';
 export { useArticleAuthorPhoto } from './useArticleAuthorPhoto.js';
 export type { UseArticleAuthorPhotoInput } from './useArticleAuthorPhoto.js';
 export { buildHeroArticleContent } from './articleConfig.js';
+export { HbSignatureHeroHarness } from './HbSignatureHero.harness.js';
+export type { HbSignatureHeroHarnessProps } from './HbSignatureHero.harness.js';
