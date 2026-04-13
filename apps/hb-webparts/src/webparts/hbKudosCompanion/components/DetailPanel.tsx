@@ -12,10 +12,8 @@
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
-import {
-  fetchKudosAuditTimeline,
-  type KudosAuditTimelineEntry,
-} from '../../../homepage/data/kudosGovernanceWriter.js';
+import { getKudosAuditTimeline as fetchKudosAuditTimeline } from '../../../homepage/data/kudosAdapter/index.js';
+import type { KudosAuditTimelineEntry } from '../../../homepage/data/kudosGovernanceWriter.js';
 import { getKudosListHostUrl } from '../../../homepage/data/spContext.js';
 import { KudosDetailPanelContent } from '../../../homepage/shared/KudosDetailPanelContent.js';
 import { KudosGovernanceDetailShell } from '../../../homepage/shared/kudosShells.js';

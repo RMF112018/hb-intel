@@ -30,7 +30,7 @@
         "title": "hb-webparts Feature",
         "description": "Deploys HB Central webpart assets including PnP Operations.",
         "id": "1f447e99-a2c7-43e5-83d8-d2ed78ed1a96",
-        "version": "1.0.0.187"
+        "version": "1.0.0.188"
       }
     ]
   },

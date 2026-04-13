@@ -7,7 +7,7 @@
  * while the write is in flight.
  */
 import * as React from 'react';
-import { submitKudosGovernanceAction } from '../../../homepage/data/kudosGovernanceWriter.js';
+import { submitKudosGovernanceAction } from '../../../homepage/data/kudosAdapter/index.js';
 import { getKudosListHostUrl } from '../../../homepage/data/spContext.js';
 import type { KudosEntry } from '../../../homepage/webparts/kudosContracts.js';
 

@@ -15,7 +15,7 @@
  * duplicating dispatch code.
  */
 import * as React from 'react';
-import { submitKudosGovernanceAction } from '../../../homepage/data/kudosGovernanceWriter.js';
+import { submitKudosGovernanceAction } from '../../../homepage/data/kudosAdapter/index.js';
 import { getKudosListHostUrl } from '../../../homepage/data/spContext.js';
 import type { KudosRole } from '../../../homepage/helpers/kudosCapabilities.js';
 import type { KudosEntry, KudosPatch } from '../../../homepage/webparts/kudosContracts.js';

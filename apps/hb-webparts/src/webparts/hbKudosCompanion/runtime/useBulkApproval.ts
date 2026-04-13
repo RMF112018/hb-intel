@@ -20,7 +20,7 @@
  * surface has been hardened.
  */
 import * as React from 'react';
-import { submitKudosGovernanceAction } from '../../../homepage/data/kudosGovernanceWriter.js';
+import { submitKudosGovernanceAction } from '../../../homepage/data/kudosAdapter/index.js';
 import { getKudosListHostUrl } from '../../../homepage/data/spContext.js';
 import type {
   KudosCapabilities,
