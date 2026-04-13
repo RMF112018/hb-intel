@@ -1,6 +1,6 @@
 {
-  "id": "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e",
-  "alias": "PeopleCultureCompanionWebPart",
+  "id": "23d22f2d-7a15-4031-ab64-2454898bfd44",
+  "alias": "HbHeroBannerAdminWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -17,23 +17,21 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "People and Culture HR Companion"
+        "default": "Hero Banner Admin"
       },
       "description": {
-        "default": "HR operating console for the People & Culture public webpart — overview dashboard, announcements / celebrations / culture-program workspaces with full lifecycle views, cross-family approvals inbox with claim and reassignment, lightweight homepage governance, shared quick-edit drawer and full editor, and a calendar planning mode. Scoped strictly to non-recognition content; HB Kudos is a separate webpart boundary."
+        "default": "Site-admin authoring surface for the HB Central homepage Hero Banner. Hosted on the HBCentral Homepage-Admin page. Reads and writes the canonical Hero Banner Config list; invalidates the public cache on save. Provides typed draft editing, live preview against the production surface, dirty-state awareness with explicit discard guard, and read-after-write confirmation. Does not expose property-pane controls — the app itself is the authoring path."
       },
-      "officeFabricIconFontName": "PeopleSettings",
-      "hiddenFromToolbox": true,
-      "properties": {
-        "heading": "People & Culture Operating Console"
-      }
+      "officeFabricIconFontName": "Edit",
+      "hiddenFromToolbox": false,
+      "properties": {}
     }
   ],
   "loaderConfig": {
     "internalModuleBaseUrls": [
       "<!-- PATH TO CDN -->"
     ],
-    "entryModuleId": "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e_1.0.0",
+    "entryModuleId": "23d22f2d-7a15-4031-ab64-2454898bfd44_1.0.0",
     "scriptResources": {
       "@microsoft/sp-property-pane": {
         "type": "component",
@@ -50,9 +48,9 @@
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
         "version": "1.18.0"
       },
-      "7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e_1.0.0": {
+      "23d22f2d-7a15-4031-ab64-2454898bfd44_1.0.0": {
         "type": "path",
-        "path": "shell-entry-7c3f8e24-5a9b-4c1d-b63e-8f2a194d5c7e-4829c957.js"
+        "path": "shell-entry-23d22f2d-7a15-4031-ab64-2454898bfd44-3545e37e.js"
       }
     }
   }

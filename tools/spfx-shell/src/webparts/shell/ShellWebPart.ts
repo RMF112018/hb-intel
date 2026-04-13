@@ -43,6 +43,14 @@ const KUDOS_WEBPART_ID = 'f14e59a3-4d6b-43b2-952e-ba02dea11dad';
 const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
 const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 
+// Hero Banner domain webparts (public 39762a4d-… and admin
+// 23d22f2d-…) deliberately expose no property-pane fields. The
+// authoring path is the Hero Banner Admin app itself, hosted on
+// `/sites/HBCentral/SitePages/Homepage-Admin.aspx`, which writes
+// the canonical `Hero Banner Config` list that the public banner
+// reads. The property-pane switch below intentionally has no cases
+// for those IDs so no misleading pane controls appear.
+
 interface IShellWebPartProperties {
   /** Author-configurable background image URL for the Signature Hero homepage branch. */
   backgroundImageUrl?: string;
