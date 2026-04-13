@@ -1435,6 +1435,43 @@ for (const domain of domains) {
     fs.copyFileSync(path.join(distDir, file), path.join(SHELL_DIR, 'assets', file));
   }
 
+  // ── Step 2b: Content hash the companion CSS for SW cache-busting ─────
+  // Problem this solves:
+  //   Vite extracts a stable-named companion CSS (e.g. spfx-hb-webparts.css).
+  //   The shim loads it via SPComponentLoader.loadCss(URL). Because the URL
+  //   is stable across releases, SharePoint's service worker / CDN / browser
+  //   caches can serve the PREVIOUS build's CSS to a user who already visited
+  //   the page — even after a new .sppkg is uploaded. When the JS bundle is
+  //   freshly hashed but the CSS is stale, every CSS Module class name in the
+  //   new bundle loses its stylesheet, producing the well-known "unstyled
+  //   web part" failure mode.
+  // Fix:
+  //   Hash the CSS filename by content (same 8-char sha-256 prefix used for
+  //   JS) and update the companion reference. The shell webpart picks up
+  //   APP_CSS_NAME from env at gulp-build time and emits the hashed URL
+  //   inside the shim, so every CSS change gets a fresh URL.
+  const cssAssetsDir = path.join(SHELL_DIR, 'assets');
+  const baseCssCandidates = fs
+    .readdirSync(cssAssetsDir)
+    .filter((f) => f.endsWith('.css') && !/-[0-9a-f]{8}\.css$/.test(f));
+  for (const f of fs.readdirSync(cssAssetsDir)) {
+    if (/-[0-9a-f]{8}\.css$/.test(f)) {
+      fs.unlinkSync(path.join(cssAssetsDir, f));
+    }
+  }
+  for (const baseCssName of baseCssCandidates) {
+    const baseCssPath = path.join(cssAssetsDir, baseCssName);
+    const cssBytes = fs.readFileSync(baseCssPath);
+    const cssHash = sha256Hex(cssBytes).slice(0, 8);
+    const hashedCssName = baseCssName.replace(/\.css$/, `-${cssHash}.css`);
+    const hashedCssPath = path.join(cssAssetsDir, hashedCssName);
+    fs.copyFileSync(baseCssPath, hashedCssPath);
+    fs.unlinkSync(baseCssPath);
+    console.log(
+      `  ✓ CSS content hash applied: ${cssHash} → ${hashedCssName} (was ${baseCssName})`,
+    );
+  }
+
   // Write domain-specific package-solution.json
   const domainPkgSolution = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   const sppkgName = domainPkgSolution.paths.zippedPackage.replace('solution/', '');
