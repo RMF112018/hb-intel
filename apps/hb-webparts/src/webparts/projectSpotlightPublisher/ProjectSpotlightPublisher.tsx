@@ -251,11 +251,13 @@ export function ProjectSpotlightPublisher({
     // Refresh the preview whenever the Preview tab opens or the selected
     // post changes. `loadPreview` reads the latest repository + post data,
     // so stale preview content after a Save is cleared on re-entry.
+    // `loadPreview` is intentionally omitted from the dependency list
+    // because it closes over the stable `repositories` memo; including it
+    // would re-run the preview on every render without a state change.
     if (tab === 'preview' && selectedPostId) {
       void loadPreview(selectedPostId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, selectedPostId]);
+  }, [tab, selectedPostId, loadPreview]);
 
   const handleCreateNew = React.useCallback(() => {
     const draft = emptyPost('ps-inprogress-monthly-v1', 'ps-shell-inprogress-oob-banner-team-gallery-v1');

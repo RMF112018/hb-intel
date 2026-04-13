@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-webparts",
     "id": "39b8f2ea-59bd-45b7-b4ec-b590b316833b",
-    "version": "1.0.0.191",
+    "version": "1.0.0.208",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "hb-webparts Feature",
         "description": "Deploys HB Central webpart assets including PnP Operations.",
         "id": "1f447e99-a2c7-43e5-83d8-d2ed78ed1a96",
-        "version": "1.0.0.202",
+        "version": "1.0.0.219",
         "componentIds": [
           "0b53f651-fd92-4f7f-a9da-f7797017f5eb",
           "39762a4d-c7fd-44a6-a11e-4f8de9f5778d",
@@ -47,7 +47,9 @@
           "8370ab0c-b6df-4db0-82f1-24b54750f508",
           "89ca5ff3-21f4-4b23-a953-4b7306ea1029",
           "11d72b36-a92f-4e2d-9918-75df2cb0d11e",
-          "cb7060f5-b852-4600-b912-a5f6f7221ce2"
+          "c2f1b4e7-3a48-4d21-9c5e-7b82d4a6f901",
+          "cb7060f5-b852-4600-b912-a5f6f7221ce2",
+          "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10"
         ]
       }
     ]
