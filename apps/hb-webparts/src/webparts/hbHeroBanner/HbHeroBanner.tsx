@@ -23,17 +23,29 @@ import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGoverna
 import { normalizeHeroBannerConfig } from '../../homepage/helpers/topBandConfig.js';
 import type { HbHeroBannerConfig } from '../../homepage/webparts/topBandContracts.js';
 import { HomepageEmptyState } from '../../homepage/shared/HomepageEmptyState.js';
+import { useHeroBannerData } from '../../homepage/data/useHeroBannerData.js';
 
 export interface HbHeroBannerProps {
   config?: Partial<HbHeroBannerConfig>;
 }
 
 export function HbHeroBanner({ config }: HbHeroBannerProps): React.JSX.Element {
-  const normalized = normalizeHeroBannerConfig(config);
-  const isConfigured = Boolean(config) && Boolean(config?.headline?.trim());
+  // Hosted list is the source of truth when a site URL is available
+  // and an enabled row exists. `listConfig` is undefined when SPFx
+  // context is absent, the list query failed, or no row is enabled —
+  // in all those cases we fall back to the prop/manifest config so
+  // local/dev paths and misconfigured hosts still render.
+  const { listConfig, isLoading } = useHeroBannerData();
+  const effectiveConfig = listConfig ?? config;
+  const normalized = normalizeHeroBannerConfig(effectiveConfig);
+  const isConfigured = Boolean(effectiveConfig) && Boolean(effectiveConfig?.headline?.trim());
 
   if (!isConfigured) {
-    const message = resolveAuthoringMessage('hbHeroBanner', config ? 'invalid' : 'noData');
+    if (isLoading) {
+      // Hosted fetch in flight — avoid flashing the empty state.
+      return <HomepageEmptyState title="Loading hero banner…" description="" />;
+    }
+    const message = resolveAuthoringMessage('hbHeroBanner', effectiveConfig ? 'invalid' : 'noData');
     return <HomepageEmptyState title={message.title} description={message.description} />;
   }
 

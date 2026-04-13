@@ -18,6 +18,13 @@ export interface HbHeroBannerConfig {
   background?: HomepageMediaSlot;
   cta?: HomepageCtaLink;
   secondaryCta?: HomepageCtaLink;
+  /**
+   * Hosted activation flag. Authored rows that are not enabled are
+   * skipped by the read seam, so this field will only appear `false`
+   * on fallback/dev-mode config paths. Absent on the hosted resolved
+   * config because the read seam filters disabled rows upstream.
+   */
+  enabled?: boolean;
 }
 
 export const DEFAULT_WELCOME_HEADER_CONFIG: PersonalizedWelcomeHeaderConfig = {
@@ -36,4 +43,5 @@ export const DEFAULT_HERO_BANNER_CONFIG: HbHeroBannerConfig = {
   background: undefined,
   cta: undefined,
   secondaryCta: undefined,
+  enabled: undefined,
 };
