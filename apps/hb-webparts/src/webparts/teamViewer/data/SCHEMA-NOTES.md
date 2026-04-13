@@ -50,8 +50,9 @@ explicit:
 | `profileUrl` | optional | `ContactLink.Url` | link omitted when absent. |
 | `photoUrl` | optional | Graph photo hydration at runtime. | initials avatar. |
 | `bio` | optional | `BioSnippet` | section omitted in drawer. |
-| `resumeRichText` | optional | **schema gap — see below**. | section omitted. |
-| `resumeDocumentUrl` | optional | **schema gap — see below**. | link omitted. |
+| `resumeRichText` | optional | `ResumeRichText` (rich HTML) | section omitted. |
+| `resumeDocumentUrl` | optional | `ResumeDocumentUrl` | link omitted. |
+| `resumeDocumentLabel` | optional | `ResumeDocumentLabel` | falls back to `Open resume document`. |
 
 ## Fallback rules (encoded in `teamViewerNormalization.ts`)
 
@@ -79,35 +80,28 @@ explicit:
   cache should re-use `createCacheInvalidationBus` from
   `@hbc/sharepoint-platform` (same pattern as `usePeopleCultureData`).
 
-## Bio / resume schema gaps
+## Bio / resume schema — locked and provisioned
 
-The publisher architecture defines the following on
-`HB Article Team Members`:
+Phase-01 closure locks the profile-drawer schema on
+`HB Article Team Members`. All five fields are provisioned by
+`packages/sharepoint-docs/infrastructure/provision-publisher-lists.ps1`:
 
-- `BioSnippet` — Multiple lines plain text  ✓ (maps to `person.bio`)
-- `ContactLink` — Hyperlink  ✓ (maps to `person.profileUrl`)
+| Internal name | Type | Required | Runtime consumer |
+|---|---|:---:|---|
+| `BioSnippet` | Multiple lines plain text | No | `person.bio` — short bio, rendered as `<p>` in the drawer About section. |
+| `ResumeRichText` | Multiple lines rich text (HTML) | No | `person.resumeRichText` — rendered into the drawer Resume section via sanitized `dangerouslySetInnerHTML`. |
+| `ResumeDocumentUrl` | Hyperlink | No | `person.resumeDocumentUrl` — becomes the external-link CTA in the drawer Contact & Links section. |
+| `ResumeDocumentLabel` | Single line text | No | `person.resumeDocumentLabel` — customizes the resume-link label; defaults to `Open resume document` when empty. |
+| `ContactLink` | Hyperlink | No | `person.profileUrl` — generic contact/profile page link. |
 
-**Gaps** for the flag-gated bio/resume drawer:
+All five fields are optional. The drawer renders only the sections
+that have data. The display-name fallback chain is unchanged:
+`DisplayName` → `PersonPrincipal.Title`; rows missing both are
+dropped at normalization (never surfaced as "Unknown").
 
-- `ResumeRichText` — Multiple lines **rich text** — proposed.
-- `ResumeDocumentUrl` — Hyperlink — proposed.
-
-### Minimum required schema additions
-
-Add the following columns to `HB Article Team Members` **before** the
-`profileDetailDrawer` feature flag is enabled in any host:
-
-| Internal name | Type | Required | Description |
-|---|---|---|---|
-| `ResumeRichText` | Multiple lines of text (rich / HTML) | No | Sanitized resume body rendered inside the TeamViewer drawer. |
-| `ResumeDocumentUrl` | Hyperlink | No | Link to a stored resume document; opens in a new tab. |
-
-Both are optional. The drawer renders only the sections it has data
-for. Until the columns exist the normalizer will coerce their values
-to `undefined`, so adding them later is a backwards-compatible change.
-
-The contracts (`teamViewerContracts.ts`) already include the matching
-fields, so no TypeScript migration is required at that point.
+Resume HTML **must be sanitized upstream** at the data boundary
+(publisher authoring or a post-fetch sanitizer) — the renderer does
+not sanitize.
 
 ## Render inputs for Prompt 03
 

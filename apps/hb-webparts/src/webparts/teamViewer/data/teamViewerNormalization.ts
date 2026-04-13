@@ -34,9 +34,10 @@ export interface RawArticleTeamMemberRow {
   ContactLink?: unknown;
   /** Person field is typically expanded to an object with EMail/Title. */
   PersonPrincipal?: { EMail?: string; Title?: string; UserName?: string } | string | null;
-  /** Resume fields are proposed schema additions — see SCHEMA-NOTES.md. */
+  /** Resume fields (provisioned by provision-publisher-lists.ps1). */
   ResumeRichText?: unknown;
   ResumeDocumentUrl?: unknown;
+  ResumeDocumentLabel?: unknown;
 }
 
 function asString(value: unknown): string | undefined {
@@ -127,6 +128,7 @@ export function normalizeArticleTeamMemberRow(
     bio: asString(raw.BioSnippet),
     resumeRichText: asString(raw.ResumeRichText),
     resumeDocumentUrl: asHyperlinkUrl(raw.ResumeDocumentUrl),
+    resumeDocumentLabel: asString(raw.ResumeDocumentLabel),
     photoUrl: undefined,
   };
 }

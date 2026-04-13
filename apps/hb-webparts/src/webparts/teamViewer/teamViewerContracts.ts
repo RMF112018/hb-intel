@@ -37,6 +37,8 @@ export interface TeamViewerPerson {
   resumeRichText?: string;
   /** Link to a resume document (Documents library). */
   resumeDocumentUrl?: string;
+  /** Optional editor-supplied label for the resume-document link. */
+  resumeDocumentLabel?: string;
 }
 
 /** Resolution of the active article for the TeamViewer instance. */

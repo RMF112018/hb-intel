@@ -202,7 +202,7 @@ export function TeamViewerDetailDrawer({
                       className={styles.drawerLink}
                     >
                       <ExternalLink size={14} aria-hidden="true" />
-                      Open resume document
+                      {person.resumeDocumentLabel ?? 'Open resume document'}
                     </a>
                   ) : null}
                   {person.profileUrl ? (

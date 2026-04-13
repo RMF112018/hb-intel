@@ -54,9 +54,12 @@ Stable selectors:
    real `HB Article Destination Pages` list read lands in Prompt 02.
 2. **Keying:** hybrid. A direct `articleId` short-circuits; otherwise
    resolve via destination-page row.
-3. **Bio/resume fields:** `bio`, `resumeRichText`, `resumeDocumentUrl`
-   on `HB Article Team Members`. Schema gap flagged: if these columns
-   don't exist on the live list, Prompt 02 must add them.
+3. **Bio/resume fields:** `BioSnippet`, `ResumeRichText`,
+   `ResumeDocumentUrl`, `ResumeDocumentLabel`, `ContactLink` on
+   `HB Article Team Members`. All five are provisioned by
+   `packages/sharepoint-docs/infrastructure/provision-publisher-lists.ps1`
+   (Phase-01 closure). See `data/SCHEMA-NOTES.md` for the locked
+   field → contract mapping.
 4. **Feature flag posture:** `profileDetailDrawer` default `false`. The
    drawer is a real component; the orchestrator renders it only when
    the flag is true. Disabled-state proof: card has no interactive

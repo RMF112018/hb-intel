@@ -67,11 +67,12 @@ No doctrine violations observed.
 
 1. **Live list GUIDs not provisioned** in
    `teamViewerListRegistry.ts`. Runtime degrades to the empty state.
-2. **Bio/resume schema additions** (`ResumeRichText`,
-   `ResumeDocumentUrl` on `HB Article Team Members`) are proposed but
-   not yet added to the live list. Must be added before the
-   `profileDetailDrawer` flag is enabled on any host. Both columns are
-   backwards-compatible additions; the contracts already include them.
+2. **Bio/resume schema** — CLOSED. `ResumeRichText`,
+   `ResumeDocumentUrl`, and `ResumeDocumentLabel` are now provisioned
+   by `packages/sharepoint-docs/infrastructure/provision-publisher-lists.ps1`
+   alongside the pre-existing `BioSnippet` and `ContactLink`. Drawer
+   renders through the locked contract with no unprovisioned
+   assumptions.
 3. **Focus trap inside the drawer** is not implemented — browser
    default tab order is acceptable for a read-only viewer, but a full
    trap is a nice-to-have for keyboard-only navigation. Held back
@@ -174,10 +175,11 @@ Kudos-for-people**:
    `drawer-disabled` and `drawer-enabled` scenarios, giving provable
    parity.
 5. **Are any article-schema or team-member-schema gaps unresolved?**
-   Two, both documented in `data/SCHEMA-NOTES.md`:
-   (a) live list GUIDs in `teamViewerListRegistry.ts` are empty
-   placeholders pending tenant provisioning; (b) `ResumeRichText` and
-   `ResumeDocumentUrl` columns on `HB Article Team Members` are
-   required before the drawer flag is enabled on any host. Both are
-   backwards-compatible additions; the normalizer already coerces
-   missing fields to `undefined`.
+   Only the tenant-side GUID population is pending. Schema itself is
+   fully locked: `BioSnippet`, `ResumeRichText`, `ResumeDocumentUrl`,
+   `ResumeDocumentLabel`, and `ContactLink` on `HB Article Team Members`
+   are now provisioned by
+   `packages/sharepoint-docs/infrastructure/provision-publisher-lists.ps1`.
+   The live list GUIDs in `teamViewerListRegistry.ts` remain empty
+   placeholders until provisioning runs against the HBCentral tenant;
+   the runtime degrades cleanly to the empty state until they land.

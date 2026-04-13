@@ -76,10 +76,11 @@ be repointed at `TeamViewer` directly.
   `articleTeamMembers` / `articleDestinationPages` GUIDs are empty
   in the registry. Runtime degrades to empty state as documented in
   `data/SCHEMA-NOTES.md`. Populate the GUIDs when the lists go live.
-- **Schema additions for drawer**: `ResumeRichText` and
-  `ResumeDocumentUrl` columns on `HB Article Team Members` are
-  required before the `profileDetailDrawer` flag is enabled on any
-  host. Tracked in `data/SCHEMA-NOTES.md`.
+- **Schema additions for drawer**: RESOLVED. `ResumeRichText`,
+  `ResumeDocumentUrl`, and `ResumeDocumentLabel` are provisioned by
+  `provision-publisher-lists.ps1` alongside the pre-existing
+  `BioSnippet` and `ContactLink`. See `data/SCHEMA-NOTES.md` for the
+  locked field table.
 - **Shared photo hook**: when a second webpart needs the same layered
   photo hydration, promote `hooks/useTeamViewerPhotoHydration.ts` to
   `homepage/shared/usePersonPhotoHydration.ts`.

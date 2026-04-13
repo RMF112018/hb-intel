@@ -93,7 +93,7 @@ export async function fetchArticleTeamMemberRows(
   try {
     const endpoint = buildListItemsEndpoint(siteUrl, list, {
       select:
-        'Id,ArticleId,TeamMemberId,DisplayName,Role,Department,Company,SortOrder,GroupKey,BioSnippet,ContactLink,PersonPrincipal/EMail,PersonPrincipal/Title,PersonPrincipal/UserName,ResumeRichText,ResumeDocumentUrl',
+        'Id,ArticleId,TeamMemberId,DisplayName,Role,Department,Company,SortOrder,GroupKey,BioSnippet,ContactLink,PersonPrincipal/EMail,PersonPrincipal/Title,PersonPrincipal/UserName,ResumeRichText,ResumeDocumentUrl,ResumeDocumentLabel',
       expand: 'PersonPrincipal',
       filter: `ArticleId eq ${odataString(articleId)}`,
       top: options?.top ?? 200,
