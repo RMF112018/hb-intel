@@ -20,6 +20,7 @@ import { OperationalExcellenceTab } from './tabs/OperationalExcellenceTab.js';
 import { HumanResourcesTab } from './tabs/HumanResourcesTab.js';
 import { KudosTab } from './tabs/KudosTab.js';
 import { KudosCompanionTab } from './tabs/KudosCompanionTab.js';
+import { TeamViewerTab } from './tabs/TeamViewerTab.js';
 
 type TabId =
   | 'pwa'
@@ -36,7 +37,8 @@ type TabId =
   | 'admin'
   | 'site-control'
   | 'kudos'
-  | 'kudos-companion';
+  | 'kudos-companion'
+  | 'team-viewer';
 
 interface TabDef {
   id: TabId;
@@ -59,6 +61,7 @@ const TABS: TabDef[] = [
   { id: 'site-control', label: 'HB Site Control' },
   { id: 'kudos', label: 'HB Kudos' },
   { id: 'kudos-companion', label: 'HB Kudos Companion' },
+  { id: 'team-viewer', label: 'Team Viewer' },
 ];
 
 /** Map webpart tab IDs to their direct-import tab components (D-PH7-BW-8). */
@@ -76,6 +79,7 @@ const TAB_TO_COMPONENT: Partial<Record<TabId, React.ComponentType>> = {
   'human-resources': HumanResourcesTab,
   kudos: KudosTab,
   'kudos-companion': KudosCompanionTab,
+  'team-viewer': TeamViewerTab,
 };
 
 const VALID_TAB_IDS = new Set<TabId>(TABS.map((tab) => tab.id));
