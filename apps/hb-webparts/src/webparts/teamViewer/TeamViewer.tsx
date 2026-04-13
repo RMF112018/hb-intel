@@ -52,7 +52,10 @@ export function TeamViewer({ config, pageUrl, getGraphToken }: TeamViewerProps):
     pageUrl,
   });
   const { people, isLoading, error, refresh } = useTeamViewerData(binding);
-  const { hydrate } = useTeamViewerPhotoHydration(people, getGraphToken);
+  const { hydrate } = useTeamViewerPhotoHydration(people, {
+    siteUrl: binding?.articleSiteUrl,
+    getGraphToken,
+  });
   const { isHosted, safeZonePadding } = useTeamViewerHostSafeLayout();
 
   const [detailPerson, setDetailPerson] = React.useState<TeamViewerPerson | undefined>();

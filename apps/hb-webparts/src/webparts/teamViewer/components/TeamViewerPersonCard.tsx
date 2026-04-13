@@ -42,26 +42,7 @@ const AVATAR_SIZE_PX: Record<TeamViewerDensity, number> = {
   expanded: 72,
 };
 
-function Avatar({ person, size }: { person: TeamViewerPerson; size: number }): React.JSX.Element {
-  if (person.photoUrl) {
-    return (
-      <img
-        src={person.photoUrl}
-        alt=""
-        width={size}
-        height={size}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          objectFit: 'cover',
-          display: 'block',
-          boxShadow: '0 0 0 2px var(--tv-surface-1, #ffffff), 0 2px 6px rgba(17,24,39,0.12)',
-          flex: '0 0 auto',
-        }}
-      />
-    );
-  }
+function InitialsAvatar({ name, size }: { name: string; size: number }): React.JSX.Element {
   return (
     <div
       aria-hidden="true"
@@ -82,8 +63,42 @@ function Avatar({ person, size }: { person: TeamViewerPerson; size: number }): R
         boxShadow: '0 0 0 2px var(--tv-surface-1, #ffffff), 0 2px 6px rgba(17,24,39,0.12)',
       }}
     >
-      {initialsOf(person.displayName) || '—'}
+      {initialsOf(name) || '—'}
     </div>
+  );
+}
+
+function Avatar({ person, size }: { person: TeamViewerPerson; size: number }): React.JSX.Element {
+  // Broken-image guard. If the resolved photo URL 404s (common on SP
+  // `userphoto.aspx` for users without a Delve photo) we swap to the
+  // initials avatar rather than showing a broken-image glyph or
+  // distorting the layout.
+  const [errored, setErrored] = React.useState(false);
+  React.useEffect(() => {
+    setErrored(false);
+  }, [person.photoUrl]);
+
+  if (!person.photoUrl || errored) {
+    return <InitialsAvatar name={person.displayName} size={size} />;
+  }
+
+  return (
+    <img
+      src={person.photoUrl}
+      alt=""
+      width={size}
+      height={size}
+      onError={() => setErrored(true)}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        display: 'block',
+        boxShadow: '0 0 0 2px var(--tv-surface-1, #ffffff), 0 2px 6px rgba(17,24,39,0.12)',
+        flex: '0 0 auto',
+      }}
+    />
   );
 }
 

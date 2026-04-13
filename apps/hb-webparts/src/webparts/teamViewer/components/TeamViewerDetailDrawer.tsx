@@ -38,19 +38,7 @@ function initialsOf(name: string): string {
     .join('');
 }
 
-function DrawerAvatar({ person }: { person: TeamViewerPerson }): React.JSX.Element {
-  const size = 56;
-  if (person.photoUrl) {
-    return (
-      <img
-        src={person.photoUrl}
-        alt=""
-        width={size}
-        height={size}
-        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flex: '0 0 auto' }}
-      />
-    );
-  }
+function DrawerInitials({ name, size }: { name: string; size: number }): React.JSX.Element {
   return (
     <div
       aria-hidden="true"
@@ -68,8 +56,27 @@ function DrawerAvatar({ person }: { person: TeamViewerPerson }): React.JSX.Eleme
         flex: '0 0 auto',
       }}
     >
-      {initialsOf(person.displayName) || '—'}
+      {initialsOf(name) || '—'}
     </div>
+  );
+}
+
+function DrawerAvatar({ person }: { person: TeamViewerPerson }): React.JSX.Element {
+  const size = 56;
+  const [errored, setErrored] = React.useState(false);
+  React.useEffect(() => setErrored(false), [person.photoUrl]);
+  if (!person.photoUrl || errored) {
+    return <DrawerInitials name={person.displayName} size={size} />;
+  }
+  return (
+    <img
+      src={person.photoUrl}
+      alt=""
+      width={size}
+      height={size}
+      onError={() => setErrored(true)}
+      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flex: '0 0 auto' }}
+    />
   );
 }
 
