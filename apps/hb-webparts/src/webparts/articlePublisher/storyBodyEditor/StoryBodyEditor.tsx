@@ -13,6 +13,7 @@ import * as React from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { STORY_BODY_EXTENSIONS } from './editorSchema';
 import { EditorToolbar } from './editorToolbar';
+import { sanitizePastedHtml } from './pasteSanitization';
 import styles from './storyBodyEditor.module.css';
 
 export interface StoryBodyEditorProps {
@@ -60,6 +61,12 @@ export function StoryBodyEditor({
         class: styles.editorContent,
         ...(placeholder ? { 'data-placeholder': placeholder } : {}),
       },
+      // Scrub Office / Word / rich-text paste noise before the schema
+      // parser sees it. Defence-in-depth around `STORY_BODY_EXTENSIONS`
+      // — the schema parser still gets to narrow to the allow-list,
+      // but it no longer has to tolerate MSO conditionals, inline
+      // styles, presentational wrappers, or attribute smuggling.
+      transformPastedHTML: (html) => sanitizePastedHtml(html),
     },
     onUpdate: ({ editor: e }) => {
       const next = e.getHTML();
