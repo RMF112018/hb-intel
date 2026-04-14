@@ -20,7 +20,7 @@ import { fetchRequestDigest, storeSiteUrl } from '@hbc/sharepoint-platform';
 import {
   ARTICLE_CONTENT_TYPE_VALUES,
   ARTICLE_SUBJECT_VALUES,
-  DESTINATION_VALUES,
+  SUPPORTED_DESTINATIONS,
   HERO_THEME_VARIANT_VALUES,
   PROJECT_STAGE_VALUES,
   SPOTLIGHT_TYPE_VALUES,
@@ -687,7 +687,16 @@ function MetadataPanel({ draft, onChange }: PanelProps) {
             onChange(update(draft, 'Destination', e.target.value as Destination))
           }
         >
-          {DESTINATION_VALUES.map((v) => (
+          {/*
+           * Only destinations whose publish pipeline is wired end to
+           * end appear in the authoring surface. Current sprint:
+           * `projectSpotlight` only. `companyPulse` remains on the
+           * tenant Choice column + enum (schema-complete) for read
+           * compatibility, but is intentionally hidden from new-
+           * article authoring until its publish path lands. Closes
+           * P2-3.
+           */}
+          {SUPPORTED_DESTINATIONS.map((v) => (
             <option key={v} value={v}>
               {v}
             </option>

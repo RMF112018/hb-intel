@@ -34,6 +34,14 @@ export type ArticleContentType = (typeof ARTICLE_CONTENT_TYPE_VALUES)[number];
  * Project Spotlight destination identity is preserved (destination
  * scope, per the rebranding report); Company Pulse is a declared
  * future destination, not yet implemented by the app.
+ *
+ * This list is SCHEMA-COMPLETE — it matches every Choice value on
+ * the tenant column so adapters can read legacy rows. For
+ * operational scope (which destinations are actually wired for
+ * authoring + publish in the current sprint) use
+ * `SUPPORTED_DESTINATIONS` from `destinationSiteUrls.ts` — authoring
+ * surfaces must gate on that list so operators are not invited
+ * into destinations whose publish pipeline is not implemented.
  */
 export const DESTINATION_VALUES = [
   'companyPulse',

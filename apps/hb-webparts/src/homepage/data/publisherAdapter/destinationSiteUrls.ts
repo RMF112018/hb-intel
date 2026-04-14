@@ -23,7 +23,7 @@
  * error rather than a silent mis-bind.
  */
 
-import type { Destination } from './publisherEnums';
+import { DESTINATION_VALUES, type Destination } from './publisherEnums';
 import { PROJECT_SPOTLIGHT_SHELL_SOURCE_SITE_URL } from './pageGeneration/xmlShellManifest';
 
 export const PROJECT_SPOTLIGHT_DESTINATION_SITE_URL =
@@ -68,3 +68,22 @@ export function resolveDestinationSitePath(
 ): string | undefined {
   return DESTINATION_SITE_PATHS[destination];
 }
+
+/**
+ * Destinations the current sprint's authoring + publish pipeline
+ * actually supports end to end. Derived from `DESTINATION_VALUES`
+ * by keeping only the entries that register a canonical site URL
+ * (i.e. the publish pipeline knows where to put the page).
+ *
+ * `DESTINATION_VALUES` stays schema-complete so adapters can still
+ * read legacy rows for any declared Choice value; `SUPPORTED_DESTINATIONS`
+ * gates the UI + any new-article authoring path so operators are
+ * not invited into destinations whose publish pipeline is not wired.
+ * Closes P2-3.
+ */
+export function isDestinationSupported(destination: Destination): boolean {
+  return resolveDestinationSiteUrl(destination) !== undefined;
+}
+
+export const SUPPORTED_DESTINATIONS: readonly Destination[] =
+  DESTINATION_VALUES.filter(isDestinationSupported);

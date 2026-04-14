@@ -16,6 +16,7 @@
  */
 
 export * from './publisherEnums';
+export * from './destinationSiteUrls';
 export * from './publisherContracts';
 export * from './publisherListDescriptors';
 export * from './publisherRowMappers';
