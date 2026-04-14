@@ -72,6 +72,7 @@ import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
+import { DraftQueue } from './draftQueue/index.js';
 import {
   illegalTransitionMessage,
   inProgressMessage,
@@ -913,67 +914,21 @@ export function ArticlePublisher({
               Try again
             </button>
           </div>
-        ) : groupsLoading && !hasAnyArticles ? (
-          <div className={styles.railLoading}>
-            <HbcSpinner />
-          </div>
-        ) : !hasAnyArticles ? (
+        ) : !hasAnyArticles && !groupsLoading ? (
           <HbcEmptyState
             title="No articles yet"
             description="Start your first Project Spotlight to see it here."
           />
         ) : (
-          <div className={styles.draftGroups}>
-            {DRAFT_GROUP_ORDER.map((state) => {
-              const rows = groups[state];
-              const collapsed = collapsedGroups.has(state);
-              const groupId = `draft-group-${state}`;
-              return (
-                <section key={state} className={styles.draftGroup} aria-labelledby={groupId}>
-                  <button
-                    type="button"
-                    id={groupId}
-                    className={styles.draftGroupHeader}
-                    aria-expanded={!collapsed}
-                    onClick={() => toggleGroupCollapsed(state)}
-                  >
-                    <span className={styles.draftGroupLabel}>
-                      {draftGroupLabel(state)}
-                    </span>
-                    <span className={styles.draftGroupCount}>{rows.length}</span>
-                  </button>
-                  {!collapsed && (
-                    rows.length === 0 ? (
-                      <p className={styles.draftGroupEmpty}>
-                        {draftGroupEmptyCopy(state)}
-                      </p>
-                    ) : (
-                      <ul className={styles.draftList}>
-                        {rows.map((a) => {
-                          const isActive = a.ArticleId === selectedArticleId;
-                          const displayTitle = a.Title?.trim() || 'Untitled draft';
-                          const displayProject = a.ProjectName?.trim() || 'No project linked yet';
-                          return (
-                            <li key={a.ArticleId}>
-                              <button
-                                type="button"
-                                className={`${styles.draftRow} ${isActive ? styles.draftRowActive : ''}`}
-                                aria-current={isActive ? 'true' : undefined}
-                                onClick={() => setSelectedArticleId(a.ArticleId)}
-                              >
-                                <div className={styles.draftRowTitle}>{displayTitle}</div>
-                                <div className={styles.draftRowMeta}>{displayProject}</div>
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )
-                  )}
-                </section>
-              );
-            })}
-          </div>
+          <DraftQueue
+            groupOrder={DRAFT_GROUP_ORDER}
+            groups={groups}
+            selectedArticleId={selectedArticleId}
+            onSelect={setSelectedArticleId}
+            actorEmail={actorEmail}
+            loading={groupsLoading && !hasAnyArticles}
+            defaultCollapsed={COLLAPSED_GROUPS_BY_DEFAULT}
+          />
         )}
       </aside>
 
