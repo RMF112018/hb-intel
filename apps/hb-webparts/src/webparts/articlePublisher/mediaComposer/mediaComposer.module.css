@@ -64,6 +64,41 @@
   font-size: 12px;
 }
 
+.guidanceMuted,
+.guidanceGood,
+.guidanceWarn,
+.guidanceProblem {
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.guidanceMuted {
+  color: #5f5f66;
+  background: #f4f6fa;
+  border-color: #e3e6ed;
+}
+
+.guidanceGood {
+  color: #0b6a0b;
+  background: #e7f3e7;
+  border-color: #b6dab6;
+}
+
+.guidanceWarn {
+  color: #8a4b00;
+  background: #fff4e5;
+  border-color: #ffd9a8;
+}
+
+.guidanceProblem {
+  color: #a4262c;
+  background: #fdecec;
+  border-color: #e5b1b3;
+}
+
 .input,
 .textarea {
   font: inherit;

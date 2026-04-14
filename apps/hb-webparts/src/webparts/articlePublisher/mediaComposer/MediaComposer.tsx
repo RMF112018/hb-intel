@@ -18,6 +18,12 @@ import {
   type MediaComposerDraft,
   type MediaComposerRole,
 } from './buildMediaRow.js';
+import {
+  assessAltText,
+  assessCaption,
+  roleGuidance,
+  type AltTextQuality,
+} from './altTextGuidance.js';
 import styles from './mediaComposer.module.css';
 
 export interface MediaComposerProps {
@@ -35,6 +41,20 @@ const CAPTION_SOFT = 140;
 const CAPTION_MAX = 240;
 
 type ThumbState = 'idle' | 'loading' | 'ready' | 'error';
+
+function guidanceClass(level: AltTextQuality): string {
+  switch (level) {
+    case 'problem':
+      return styles.guidanceProblem;
+    case 'warn':
+      return styles.guidanceWarn;
+    case 'good':
+      return styles.guidanceGood;
+    case 'ok':
+    default:
+      return styles.guidanceMuted;
+  }
+}
 
 export function MediaComposer({
   open,
@@ -65,7 +85,13 @@ export function MediaComposer({
   }, [open, seed]);
 
   const urlValid = isAllowedImageUrl(draft.imageUrl);
-  const altValid = draft.altText.trim().length > 0;
+  const altAssessment = assessAltText(draft.altText);
+  const captionAssessment = assessCaption({
+    caption: draft.caption ?? '',
+    altText: draft.altText,
+  });
+  const altBlocking = altAssessment.level === 'problem';
+  const altValid = draft.altText.trim().length > 0 && !altBlocking;
   const canSave = urlValid && altValid && thumbState !== 'error';
 
   const handleSave = React.useCallback(() => {
@@ -167,6 +193,9 @@ export function MediaComposer({
               </label>
             ))}
           </div>
+          <span className={styles.fieldHelper} aria-live="polite">
+            {roleGuidance(draft.role)}
+          </span>
         </fieldset>
 
         <label className={styles.field}>
@@ -192,8 +221,18 @@ export function MediaComposer({
             value={draft.altText}
             placeholder="e.g. Crew raising the final steel beam at the West Palm Beach jobsite."
             maxLength={ALT_MAX}
+            aria-describedby="media-composer-alt-guidance"
+            aria-invalid={altAssessment.level === 'problem' || undefined}
             onChange={(e) => setDraft((d) => ({ ...d, altText: e.target.value }))}
           />
+          <span
+            id="media-composer-alt-guidance"
+            className={guidanceClass(altAssessment.level)}
+            role={altAssessment.level === 'problem' ? 'alert' : undefined}
+            aria-live="polite"
+          >
+            {altAssessment.message}
+          </span>
         </label>
 
         <label className={styles.field}>
@@ -216,10 +255,20 @@ export function MediaComposer({
             value={draft.caption ?? ''}
             placeholder="e.g. Final beam — April 2026."
             maxLength={CAPTION_MAX}
+            aria-describedby="media-composer-caption-guidance"
             onChange={(e) =>
               setDraft((d) => ({ ...d, caption: e.target.value || undefined }))
             }
           />
+          {(draft.caption ?? '').trim().length > 0 && (
+            <span
+              id="media-composer-caption-guidance"
+              className={guidanceClass(captionAssessment.level)}
+              aria-live="polite"
+            >
+              {captionAssessment.message}
+            </span>
+          )}
         </label>
 
         <label className={styles.toggleRow}>

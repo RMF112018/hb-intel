@@ -9,6 +9,10 @@ declare const styles: {
   readonly fieldCount: string;
   readonly fieldCountWarn: string;
   readonly fieldError: string;
+  readonly guidanceMuted: string;
+  readonly guidanceGood: string;
+  readonly guidanceWarn: string;
+  readonly guidanceProblem: string;
   readonly input: string;
   readonly textarea: string;
   readonly preview: string;

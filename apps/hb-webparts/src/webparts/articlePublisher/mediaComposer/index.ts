@@ -16,3 +16,10 @@ export {
   moveMediaRow,
   restampMediaSortOrder,
 } from './mediaInvariants.js';
+export {
+  assessAltText,
+  assessCaption,
+  roleGuidance,
+  type AltTextAssessment,
+  type AltTextQuality,
+} from './altTextGuidance.js';
