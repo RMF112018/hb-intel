@@ -7,7 +7,7 @@
  *
  * Authority:
  *   architecture doc 03 §§A,B,C,F — MVP=Yes field sets.
- *   architecture doc 04 — child-row relationships (PostId is the parent key).
+ *   architecture doc 04 — child-row relationships (ArticleId is the parent key).
  *   architecture doc 09 — workflow history semantics.
  *   operating-charter rule 5 — structured lists are the editorial source of truth.
  */
@@ -269,13 +269,13 @@ export function createSharePointArticleWriter(deps: {
   };
 }
 
-/* ── Child-row writers (replace-all-by-PostId) ────────────────── */
+/* ── Child-row writers (replace-all-by-ArticleId) ────────────────── */
 
 export function mapTeamMemberRowToListFields(
   row: PublisherTeamMemberRow,
 ): Record<string, unknown> {
   return {
-    PostId: row.PostId,
+    ArticleId: row.ArticleId,
     TeamMemberId: row.TeamMemberId,
     PersonPrincipal: row.PersonPrincipal,
     DisplayName: row.DisplayName,
@@ -300,7 +300,7 @@ export function mapMediaRowToListFields(
   row: PublisherMediaRow,
 ): Record<string, unknown> {
   return {
-    PostId: row.PostId,
+    ArticleId: row.ArticleId,
     MediaId: row.MediaId,
     MediaRole: row.MediaRole,
     ImageAssetUrl: { Url: row.ImageAssetUrl, Description: row.ImageAssetUrl },
@@ -311,15 +311,15 @@ export function mapMediaRowToListFields(
 }
 
 export interface TeamMembersWriter {
-  replaceAllForPost(
-    postId: string,
+  replaceAllForArticle(
+    articleId: string,
     rows: readonly PublisherTeamMemberRow[],
   ): Promise<{ readonly deleted: number; readonly written: number }>;
 }
 
 export interface MediaWriter {
-  replaceAllForPost(
-    postId: string,
+  replaceAllForArticle(
+    articleId: string,
     rows: readonly PublisherMediaRow[],
   ): Promise<{ readonly deleted: number; readonly written: number }>;
 }
@@ -330,15 +330,15 @@ function createReplaceAllWriter<T>(
   fetchImpl: FetchImpl,
   digestImpl: DigestImpl,
 ) {
-  return async function replaceAllForPost(
-    postId: string,
+  return async function replaceAllForArticle(
+    articleId: string,
     rows: readonly T[],
   ): Promise<{ deleted: number; written: number }> {
     const digest = await digestImpl(descriptor.hostSiteUrl);
     const existingIds = await listItemIdsByField(
       descriptor,
-      'PostId',
-      postId,
+      'ArticleId',
+      articleId,
       fetchImpl,
     );
     for (const id of existingIds) {
@@ -360,7 +360,7 @@ export function createSharePointTeamMembersWriter(deps: {
 } = {}): TeamMembersWriter {
   const descriptor = deps.descriptor ?? PUBLISHER_LISTS.teamMembers;
   return {
-    replaceAllForPost: createReplaceAllWriter(
+    replaceAllForArticle: createReplaceAllWriter(
       descriptor,
       mapTeamMemberRowToListFields,
       deps.fetchImpl ?? fetch,
@@ -376,7 +376,7 @@ export function createSharePointMediaWriter(deps: {
 } = {}): MediaWriter {
   const descriptor = deps.descriptor ?? PUBLISHER_LISTS.media;
   return {
-    replaceAllForPost: createReplaceAllWriter(
+    replaceAllForArticle: createReplaceAllWriter(
       descriptor,
       mapMediaRowToListFields,
       deps.fetchImpl ?? fetch,
@@ -392,7 +392,7 @@ export function mapWorkflowHistoryRowToListFields(
 ): Record<string, unknown> {
   return {
     HistoryId: row.HistoryId,
-    PostId: row.PostId,
+    ArticleId: row.ArticleId,
     FromState: nullIfEmpty(row.FromState),
     ToState: row.ToState,
     Action: row.Action,

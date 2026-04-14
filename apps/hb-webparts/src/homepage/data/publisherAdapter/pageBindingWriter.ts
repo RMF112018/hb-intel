@@ -1,7 +1,7 @@
 /**
  * SharePoint write seam for the tenant `HB Article Destination Pages` list.
  *
- * Upserts a binding row keyed by `PostId`. Mirrors the structural
+ * Upserts a binding row keyed by the tenant `ArticleId` FK. Mirrors the structural
  * pattern established by `heroBannerListWriter`: a title-bound list
  * endpoint (`getbytitle(...)`) plus the platform's request-digest
  * primitive for CSRF. When tenant GUIDs become available the list
@@ -49,7 +49,7 @@ export interface SharePointPageBindingWriterDeps {
 
 interface LookupRecord {
   readonly Id: number;
-  readonly PostId?: string;
+  readonly ArticleId?: string;
 }
 
 function listItemsEndpoint(descriptor: PublisherListDescriptor): string {
@@ -67,7 +67,7 @@ export function mapBindingRowToListFields(
 ): Record<string, unknown> {
   return {
     BindingId: row.BindingId,
-    PostId: row.PostId,
+    ArticleId: row.ArticleId,
     TargetSiteUrl: row.TargetSiteUrl,
     TargetSiteKey: row.TargetSiteKey,
     PageId: row.PageId ?? null,
@@ -92,10 +92,10 @@ export function createSharePointPageBindingWriter(
   const fetchImpl = deps.fetchImpl ?? fetch;
   const digestImpl = deps.fetchRequestDigestImpl ?? fetchRequestDigest;
 
-  async function findExistingItemId(postId: string): Promise<number | undefined> {
+  async function findExistingItemId(articleId: string): Promise<number | undefined> {
     const url =
       `${listItemsEndpoint(descriptor)}` +
-      `?$select=Id,PostId&$filter=${encodeURIComponent(`PostId eq '${postId.replace(/'/g, "''")}'`)}&$top=1`;
+      `?$select=Id,ArticleId&$filter=${encodeURIComponent(`ArticleId eq '${articleId.replace(/'/g, "''")}'`)}&$top=1`;
     const res = await fetchImpl(url, {
       method: 'GET',
       credentials: 'include',
@@ -124,7 +124,7 @@ export function createSharePointPageBindingWriter(
 
       let existingId: number | undefined;
       try {
-        existingId = await findExistingItemId(row.PostId);
+        existingId = await findExistingItemId(row.ArticleId);
       } catch (err) {
         return {
           ok: false,

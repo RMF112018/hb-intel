@@ -5,13 +5,13 @@
  *   docs/architecture/plans/MASTER/spfx/publisher/architecture/lists/publisher-list-schema-report.md
  *
  * The master-record contract (`PublisherArticleRow`) is pinned to the
- * tenant `HB Articles` schema and is keyed by `ArticleId`. Non-master
- * contracts (template registry, page bindings, team members, media,
- * workflow history, publishing errors) still carry the pre-tenant-audit
- * shape; those are realigned by subsequent Phase-02 remediation prompts.
- * Child rows still reference the master by a logical `PostId` column
- * pending that realignment — the value carried is the master's
- * `ArticleId` string.
+ * tenant `HB Articles` schema and is keyed by `ArticleId`. Child-row
+ * contracts (team members, media, page bindings, workflow history,
+ * publishing errors) carry `ArticleId` as their foreign key to the
+ * master record, matching the tenant `HB Article*` list schema.
+ * TemplateRegistry is a sibling reference table (keyed by `TemplateKey`,
+ * not by the master) and still carries the pre-tenant-audit shape
+ * pending its own realignment prompt.
  */
 
 import type {
@@ -160,7 +160,7 @@ export interface PublisherArticleRow {
 /* ------------------------------------------------------------------ */
 
 export interface PublisherTeamMemberRow {
-  readonly PostId: string;
+  readonly ArticleId: string;
   readonly TeamMemberId: string;
   readonly PersonPrincipal: string;
   readonly DisplayName: string;
@@ -179,7 +179,7 @@ export interface PublisherTeamMemberRow {
 /* ------------------------------------------------------------------ */
 
 export interface PublisherMediaRow {
-  readonly PostId: string;
+  readonly ArticleId: string;
   readonly MediaId: string;
   readonly MediaRole: MediaRole;
   readonly ImageAssetUrl: UrlString;
@@ -225,7 +225,7 @@ export interface PublisherTemplateRegistryRow {
 
 export interface PublisherPageBindingRow {
   readonly BindingId: string;
-  readonly PostId: string;
+  readonly ArticleId: string;
   readonly TargetSiteUrl: UrlString;
   readonly TargetSiteKey: TargetSiteKey;
   readonly PageId?: string;
@@ -248,7 +248,7 @@ export interface PublisherPageBindingRow {
 
 export interface PublisherWorkflowHistoryRow {
   readonly HistoryId: string;
-  readonly PostId: string;
+  readonly ArticleId: string;
   readonly FromState?: WorkflowState;
   readonly ToState: WorkflowState;
   readonly Action: WorkflowHistoryAction;
@@ -263,7 +263,7 @@ export interface PublisherWorkflowHistoryRow {
 
 export interface PublisherPublishingErrorRow {
   readonly ErrorId: string;
-  readonly PostId: string;
+  readonly ArticleId: string;
   readonly BindingId?: string;
   readonly Operation: PublishingErrorOperation;
   readonly TemplateKey?: string;

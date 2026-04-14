@@ -89,7 +89,7 @@ function tpl(
 
 function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
   return {
-    PostId: 'post-e2e',
+    ArticleId: 'post-e2e',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -99,7 +99,7 @@ function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): Publish
 
 function gallery(id: string, over: Partial<PublisherMediaRow> = {}): PublisherMediaRow {
   return {
-    PostId: 'post-e2e',
+    ArticleId: 'post-e2e',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -147,19 +147,19 @@ function fixture(over: {
       upsert: vi.fn(async () => ({ wasCreated: false, itemId: 42 })),
     },
     teamMembers: {
-      listByPost: vi.fn(async () => team),
-      replaceAllForPost: vi.fn(async () => ({ deleted: 0, written: team.length })),
+      listByArticle: vi.fn(async () => team),
+      replaceAllForArticle: vi.fn(async () => ({ deleted: 0, written: team.length })),
     },
     media: {
-      listByPost: vi.fn(async () => media),
-      replaceAllForPost: vi.fn(async () => ({ deleted: 0, written: media.length })),
+      listByArticle: vi.fn(async () => media),
+      replaceAllForArticle: vi.fn(async () => ({ deleted: 0, written: media.length })),
     },
     templateRegistry: {
       listActive: vi.fn(async () => [t]),
       getByKey: vi.fn(async () => t),
     },
     pageBindings: {
-      getByPostId: vi.fn(async () => over.existingBinding),
+      getByArticleId: vi.fn(async () => over.existingBinding),
       upsert: vi.fn(async () => ({
         bindingId: 'bnd-new',
         wasCreated: true,
@@ -167,11 +167,11 @@ function fixture(over: {
       })),
     },
     workflowHistory: {
-      listByPost: vi.fn(async () => []),
+      listByArticle: vi.fn(async () => []),
       append: vi.fn(async () => ({ itemId: 1 })),
     },
     publishingErrors: {
-      listByPost: vi.fn(async () => []),
+      listByArticle: vi.fn(async () => []),
       append: vi.fn(),
     },
   } as unknown as PublisherRepositories;
@@ -235,7 +235,7 @@ describe('publisher end-to-end', () => {
   it('republish preserves the existing BindingId and stamps LastOperation=republish', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing',
-      PostId: 'post-e2e',
+      ArticleId: 'post-e2e',
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
@@ -299,7 +299,7 @@ describe('publisher end-to-end', () => {
   it('blocks republish on an archived binding (no writes)', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
-      PostId: 'post-e2e',
+      ArticleId: 'post-e2e',
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',

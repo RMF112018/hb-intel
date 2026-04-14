@@ -3,9 +3,10 @@
  * the Article Publisher.
  *
  * The master-record layer (`HB Articles`) is keyed by tenant `ArticleId`
- * and maps through `mapArticleRow`. Non-master child lists still use the
- * logical `PostId` filter column pending their own tenant-realignment
- * prompts; callers pass `article.ArticleId` in the `postId` parameter.
+ * and maps through `mapArticleRow`. Every child list filters and writes
+ * against the tenant `ArticleId` foreign-key column, matching the
+ * `HB Article*` schema on HBCentral. TemplateRegistry is a sibling
+ * reference table (keyed by `TemplateKey`).
  */
 
 import type {
@@ -115,17 +116,17 @@ export interface ArticleRepository {
 }
 
 export interface TeamMembersRepository {
-  listByPost(postId: string): Promise<readonly PublisherTeamMemberRow[]>;
-  replaceAllForPost(
-    postId: string,
+  listByArticle(articleId: string): Promise<readonly PublisherTeamMemberRow[]>;
+  replaceAllForArticle(
+    articleId: string,
     rows: readonly PublisherTeamMemberRow[],
   ): Promise<{ readonly deleted: number; readonly written: number }>;
 }
 
 export interface MediaRepository {
-  listByPost(postId: string): Promise<readonly PublisherMediaRow[]>;
-  replaceAllForPost(
-    postId: string,
+  listByArticle(articleId: string): Promise<readonly PublisherMediaRow[]>;
+  replaceAllForArticle(
+    articleId: string,
     rows: readonly PublisherMediaRow[],
   ): Promise<{ readonly deleted: number; readonly written: number }>;
 }
@@ -138,11 +139,10 @@ export interface TemplateRegistryRepository {
 }
 
 export interface PageBindingRepository {
-  getByPostId(postId: string): Promise<PublisherPageBindingRow | undefined>;
+  getByArticleId(articleId: string): Promise<PublisherPageBindingRow | undefined>;
   /**
    * Idempotently upserts a tenant `HB Article Destination Pages` row
-   * keyed by the logical post/article id. Delegates to the injected
-   * `PageBindingWriter`.
+   * keyed by `ArticleId`. Delegates to the injected `PageBindingWriter`.
    */
   upsert(row: PublisherPageBindingRow): Promise<{
     readonly bindingId: string;
@@ -152,12 +152,12 @@ export interface PageBindingRepository {
 }
 
 export interface WorkflowHistoryRepository {
-  listByPost(postId: string): Promise<readonly PublisherWorkflowHistoryRow[]>;
+  listByArticle(articleId: string): Promise<readonly PublisherWorkflowHistoryRow[]>;
   append(row: PublisherWorkflowHistoryRow): Promise<{ readonly itemId: number }>;
 }
 
 export interface PublishingErrorsRepository {
-  listByPost(postId: string): Promise<readonly PublisherPublishingErrorRow[]>;
+  listByArticle(articleId: string): Promise<readonly PublisherPublishingErrorRow[]>;
   append(row: PublisherPublishingErrorRow): Promise<never>;
 }
 
@@ -230,28 +230,28 @@ export function createPublisherRepositories(
     },
 
     teamMembers: {
-      async listByPost(postId) {
+      async listByArticle(articleId) {
         const rows = await access.readList(lists.teamMembers, {
-          filter: `PostId eq '${postId.replace(/'/g, "''")}'`,
+          filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'SortOrder asc',
         });
         return mapAll(rows, mapTeamMemberRow);
       },
-      async replaceAllForPost(postId, rows) {
-        return writers.teamMembers.replaceAllForPost(postId, rows);
+      async replaceAllForArticle(articleId, rows) {
+        return writers.teamMembers.replaceAllForArticle(articleId, rows);
       },
     },
 
     media: {
-      async listByPost(postId) {
+      async listByArticle(articleId) {
         const rows = await access.readList(lists.media, {
-          filter: `PostId eq '${postId.replace(/'/g, "''")}'`,
+          filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'SortOrder asc',
         });
         return mapAll(rows, mapMediaRow);
       },
-      async replaceAllForPost(postId, rows) {
-        return writers.media.replaceAllForPost(postId, rows);
+      async replaceAllForArticle(articleId, rows) {
+        return writers.media.replaceAllForArticle(articleId, rows);
       },
     },
 
@@ -276,9 +276,9 @@ export function createPublisherRepositories(
     },
 
     pageBindings: {
-      async getByPostId(postId) {
+      async getByArticleId(articleId) {
         const rows = await access.readList(lists.pageBindings, {
-          filter: `PostId eq '${postId.replace(/'/g, "''")}'`,
+          filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           top: 1,
         });
         for (const raw of rows) {
@@ -303,9 +303,9 @@ export function createPublisherRepositories(
     },
 
     workflowHistory: {
-      async listByPost(postId) {
+      async listByArticle(articleId) {
         const rows = await access.readList(lists.workflowHistory, {
-          filter: `PostId eq '${postId.replace(/'/g, "''")}'`,
+          filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'ActionDateUtc desc',
         });
         return mapAll(rows, mapWorkflowHistoryRow);
@@ -316,9 +316,9 @@ export function createPublisherRepositories(
     },
 
     publishingErrors: {
-      async listByPost(postId) {
+      async listByArticle(articleId) {
         const rows = await access.readList(lists.publishingErrors, {
-          filter: `PostId eq '${postId.replace(/'/g, "''")}'`,
+          filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'OccurredDateUtc desc',
         });
         return mapAll(rows, mapPublishingErrorRow);

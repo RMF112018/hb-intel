@@ -268,13 +268,13 @@ export function mapArticleRow(
 export function mapTeamMemberRow(
   raw: Record<string, unknown>,
 ): PublisherTeamMemberRow | undefined {
-  const PostId = requiredStr(raw['PostId']);
+  const ArticleId = requiredStr(raw['ArticleId']);
   const TeamMemberId = requiredStr(raw['TeamMemberId']);
   const PersonPrincipal = requiredStr(raw['PersonPrincipal']);
   const DisplayName = requiredStr(raw['DisplayName']);
-  if (!PostId || !TeamMemberId || !PersonPrincipal || !DisplayName) return undefined;
+  if (!ArticleId || !TeamMemberId || !PersonPrincipal || !DisplayName) return undefined;
   return {
-    PostId,
+    ArticleId,
     TeamMemberId,
     PersonPrincipal,
     DisplayName,
@@ -292,14 +292,14 @@ export function mapTeamMemberRow(
 export function mapMediaRow(
   raw: Record<string, unknown>,
 ): PublisherMediaRow | undefined {
-  const PostId = requiredStr(raw['PostId']);
+  const ArticleId = requiredStr(raw['ArticleId']);
   const MediaId = requiredStr(raw['MediaId']);
   const MediaRole = mediaRole(raw['MediaRole']);
   const ImageAssetUrl = url(raw['ImageAssetUrl']);
   const AltText = requiredStr(raw['AltText']);
-  if (!PostId || !MediaId || !MediaRole || !ImageAssetUrl || !AltText) return undefined;
+  if (!ArticleId || !MediaId || !MediaRole || !ImageAssetUrl || !AltText) return undefined;
   return {
-    PostId,
+    ArticleId,
     MediaId,
     MediaRole,
     ImageAssetUrl,
@@ -388,7 +388,7 @@ export function mapPageBindingRow(
   raw: Record<string, unknown>,
 ): PublisherPageBindingRow | undefined {
   const BindingId = requiredStr(raw['BindingId']);
-  const PostId = requiredStr(raw['PostId']);
+  const ArticleId = requiredStr(raw['ArticleId']);
   const TargetSiteUrl = requiredStr(raw['TargetSiteUrl']);
   const TargetSiteKey = targetSiteKey(raw['TargetSiteKey']);
   const PageName = requiredStr(raw['PageName']);
@@ -400,7 +400,7 @@ export function mapPageBindingRow(
   const BindingStatus = bindingStatus(raw['BindingStatus']);
   if (
     !BindingId ||
-    !PostId ||
+    !ArticleId ||
     !TargetSiteUrl ||
     !TargetSiteKey ||
     !PageName ||
@@ -415,7 +415,7 @@ export function mapPageBindingRow(
   }
   return {
     BindingId,
-    PostId,
+    ArticleId,
     TargetSiteUrl,
     TargetSiteKey,
     PageId: str(raw['PageId']),
@@ -437,14 +437,14 @@ export function mapWorkflowHistoryRow(
   raw: Record<string, unknown>,
 ): PublisherWorkflowHistoryRow | undefined {
   const HistoryId = requiredStr(raw['HistoryId']);
-  const PostId = requiredStr(raw['PostId']);
+  const ArticleId = requiredStr(raw['ArticleId']);
   const ToState = workflowState(raw['ToState']);
   const Action = workflowAction(raw['Action']);
   const ActionDateUtc = dt(raw['ActionDateUtc']);
-  if (!HistoryId || !PostId || !ToState || !Action || !ActionDateUtc) return undefined;
+  if (!HistoryId || !ArticleId || !ToState || !Action || !ActionDateUtc) return undefined;
   return {
     HistoryId,
-    PostId,
+    ArticleId,
     FromState: workflowState(raw['FromState']),
     ToState,
     Action,
@@ -458,14 +458,14 @@ export function mapPublishingErrorRow(
   raw: Record<string, unknown>,
 ): PublisherPublishingErrorRow | undefined {
   const ErrorId = requiredStr(raw['ErrorId']);
-  const PostId = requiredStr(raw['PostId']);
+  const ArticleId = requiredStr(raw['ArticleId']);
   const Operation = errorOperation(raw['Operation']);
   const OccurredDateUtc = dt(raw['OccurredDateUtc']);
   const ErrorCategory = errorCategory(raw['ErrorCategory']);
   const ErrorSummary = requiredStr(raw['ErrorSummary']);
   if (
     !ErrorId ||
-    !PostId ||
+    !ArticleId ||
     !Operation ||
     !OccurredDateUtc ||
     !ErrorCategory ||
@@ -475,7 +475,7 @@ export function mapPublishingErrorRow(
   }
   return {
     ErrorId,
-    PostId,
+    ArticleId,
     BindingId: str(raw['BindingId']),
     Operation,
     TemplateKey: str(raw['TemplateKey']),

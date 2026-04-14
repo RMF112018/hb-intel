@@ -63,7 +63,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
 
 function member(id: string): PublisherTeamMemberRow {
   return {
-    PostId: 'post-ps-001',
+    ArticleId: 'post-ps-001',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -72,7 +72,7 @@ function member(id: string): PublisherTeamMemberRow {
 
 function mediaRow(id: string): PublisherMediaRow {
   return {
-    PostId: 'post-ps-001',
+    ArticleId: 'post-ps-001',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -120,23 +120,23 @@ function fixture(over: {
       }) as unknown as PublisherRepositories['articles']['upsert'],
     },
     teamMembers: {
-      listByPost: vi.fn(async () => [member('alice')]),
-      replaceAllForPost: vi.fn(async () => {
+      listByArticle: vi.fn(async () => [member('alice')]),
+      replaceAllForArticle: vi.fn(async () => {
         throw new Error('unused');
-      }) as unknown as PublisherRepositories['teamMembers']['replaceAllForPost'],
+      }) as unknown as PublisherRepositories['teamMembers']['replaceAllForArticle'],
     },
     media: {
-      listByPost: vi.fn(async () => [mediaRow('img-1')]),
-      replaceAllForPost: vi.fn(async () => {
+      listByArticle: vi.fn(async () => [mediaRow('img-1')]),
+      replaceAllForArticle: vi.fn(async () => {
         throw new Error('unused');
-      }) as unknown as PublisherRepositories['media']['replaceAllForPost'],
+      }) as unknown as PublisherRepositories['media']['replaceAllForArticle'],
     },
     templateRegistry: {
       listActive: vi.fn(async () => [t]),
       getByKey: vi.fn(async () => t),
     },
     pageBindings: {
-      getByPostId: vi.fn(async () => over.existingBinding),
+      getByArticleId: vi.fn(async () => over.existingBinding),
       upsert: vi.fn(async () => ({
         bindingId: 'bnd-new',
         wasCreated: true,
@@ -144,13 +144,13 @@ function fixture(over: {
       })),
     },
     workflowHistory: {
-      listByPost: vi.fn(async () => []),
+      listByArticle: vi.fn(async () => []),
       append: vi.fn(async () => {
         throw new Error('unused');
       }) as unknown as PublisherRepositories['workflowHistory']['append'],
     },
     publishingErrors: {
-      listByPost: vi.fn(async () => []),
+      listByArticle: vi.fn(async () => []),
       append: vi.fn(async () => {
         throw new Error('unused');
       }) as unknown as PublisherRepositories['publishingErrors']['append'],
@@ -202,7 +202,7 @@ describe('publishOrchestrator', () => {
   it('republish preserves existing BindingId when shell + template versions match', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
-      PostId: 'post-ps-001',
+      ArticleId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
       PageShellKey: 'ps-shell-v1',
@@ -234,7 +234,7 @@ describe('publishOrchestrator', () => {
   it('idempotent republish emits noOp when binding is already in sync', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
-      PostId: 'post-ps-001',
+      ArticleId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
       PageShellKey: 'ps-shell-v1',
@@ -264,7 +264,7 @@ describe('publishOrchestrator', () => {
   it('regenerates (new page, new binding) on shell key drift', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
-      PostId: 'post-ps-001',
+      ArticleId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
       PageShellKey: 'ps-shell-v1',
@@ -296,7 +296,7 @@ describe('publishOrchestrator', () => {
   it('blocks republish on archived binding', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
-      PostId: 'post-ps-001',
+      ArticleId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
       PageShellKey: 'ps-shell-v1',

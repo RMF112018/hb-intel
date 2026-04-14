@@ -63,7 +63,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
 
 function member(id: string): PublisherTeamMemberRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -72,7 +72,7 @@ function member(id: string): PublisherTeamMemberRow {
 
 function mediaRow(id: string): PublisherMediaRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -91,32 +91,32 @@ function repos(over: {
   const t = tpl(over.template);
   return {
     posts: {
-      getByPostId: vi.fn(async () => p),
+      getByArticleId: vi.fn(async () => p),
       listByWorkflowState: vi.fn(async () => []),
       upsert: vi.fn(),
     },
     teamMembers: {
-      listByPost: vi.fn(async () => over.teamMembers ?? [member('alice')]),
-      replaceAllForPost: vi.fn(),
+      listByArticle: vi.fn(async () => over.teamMembers ?? [member('alice')]),
+      replaceAllForArticle: vi.fn(),
     },
     media: {
-      listByPost: vi.fn(async () => over.media ?? [mediaRow('m-1')]),
-      replaceAllForPost: vi.fn(),
+      listByArticle: vi.fn(async () => over.media ?? [mediaRow('m-1')]),
+      replaceAllForArticle: vi.fn(),
     },
     templateRegistry: {
       listActive: vi.fn(async () => [t]),
       getByKey: vi.fn(async () => t),
     },
     pageBindings: {
-      getByPostId: vi.fn(async () => over.existingBinding),
+      getByArticleId: vi.fn(async () => over.existingBinding),
       upsert: vi.fn(),
     },
     workflowHistory: {
-      listByPost: vi.fn(async () => []),
+      listByArticle: vi.fn(async () => []),
       append: vi.fn(),
     },
     publishingErrors: {
-      listByPost: vi.fn(async () => []),
+      listByArticle: vi.fn(async () => []),
       append: vi.fn(),
     },
   } as unknown as PublisherRepositories;
@@ -170,7 +170,7 @@ describe('buildPublisherPreview', () => {
   it('sets drift flags when the existing binding has drifted', async () => {
     const binding: PublisherPageBindingRow = {
       BindingId: 'b-1',
-      PostId: 'post-001',
+      ArticleId: 'post-001',
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',

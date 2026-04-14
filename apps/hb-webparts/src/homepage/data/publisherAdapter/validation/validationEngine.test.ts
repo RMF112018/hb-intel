@@ -73,7 +73,7 @@ function context(over: {
     template: tpl(over.template),
     teamMembers: over.teamMembers ?? [
       {
-        PostId: 'post-001',
+        ArticleId: 'post-001',
         TeamMemberId: 'tm-1',
         PersonPrincipal: 'alice@example.com',
         DisplayName: 'Alice',
@@ -81,7 +81,7 @@ function context(over: {
     ],
     media: over.media ?? [
       {
-        PostId: 'post-001',
+        ArticleId: 'post-001',
         MediaId: 'm-1',
         MediaRole: 'gallery',
         ImageAssetUrl: 'https://img.example/g1.jpg',
@@ -119,7 +119,7 @@ describe('validatePublishContext', () => {
         article: { ShowTeamViewer: true },
         teamMembers: [
           {
-            PostId: 'post-001',
+            ArticleId: 'post-001',
             TeamMemberId: 'tm-1',
             PersonPrincipal: 'x',
             DisplayName: 'X',
@@ -143,7 +143,7 @@ describe('validatePublishContext', () => {
       context({
         media: [
           {
-            PostId: 'post-001',
+            ArticleId: 'post-001',
             MediaId: 'm-1',
             MediaRole: 'gallery',
             ImageAssetUrl: 'https://img.example/g1.jpg',
@@ -186,7 +186,7 @@ describe('validatePublishContext', () => {
         template: { ForceRegenerationOnShellChange: true },
         existingBinding: {
           BindingId: 'b-1',
-          PostId: 'post-001',
+          ArticleId: 'post-001',
           TargetSiteUrl:
             'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
           TargetSiteKey: 'projectSpotlight',

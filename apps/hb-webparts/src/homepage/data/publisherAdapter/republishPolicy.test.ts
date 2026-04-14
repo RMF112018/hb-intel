@@ -70,7 +70,7 @@ function binding(
 ): PublisherPageBindingRow {
   return {
     BindingId: 'bnd-001',
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
     TargetSiteKey: 'projectSpotlight',
     PageName: 'post-001.aspx',

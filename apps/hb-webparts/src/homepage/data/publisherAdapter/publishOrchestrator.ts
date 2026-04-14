@@ -10,7 +10,7 @@
  *   3. `decideRepublishAction` — interprets the existing binding to
  *      choose `create | inPlaceUpdate | regenerate | blocked | noOp`.
  *   4. `PageBindingWriter.upsert` — persists the binding row keyed by
- *      `PostId`.
+ *      `ArticleId`.
  *
  * The orchestrator is the caller's single entry point for `publish`
  * and `republish`. It never duplicates a live page for the same post:
@@ -241,17 +241,13 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           ? 'regenerate'
           : 'republish';
 
-    // Child-row `PageBindingRow` still carries its pre-tenant-audit field
-    // shape (PostId/TargetSiteKey/SourceTemplatePath); later Phase-02
-    // prompts realign that list to tenant schema. We carry the
-    // master-record `ArticleId` as the `PostId` FK value, and derive
-    // destination/path from the article until that realignment lands.
+    // PageBindingRow is keyed by the tenant `ArticleId` foreign key.
     const bindingRow: PublisherPageBindingRow = {
       BindingId:
         decision.action === 'inPlaceUpdate' && context.existingBinding
           ? context.existingBinding.BindingId
           : bindingIdFactory(req.articleId, now),
-      PostId: context.article.ArticleId,
+      ArticleId: context.article.ArticleId,
       TargetSiteUrl: context.article.TargetSiteUrl ?? '',
       TargetSiteKey: 'projectSpotlight',
       PageId: publishResult.creation.pageId,

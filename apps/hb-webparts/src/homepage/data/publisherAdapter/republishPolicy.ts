@@ -87,7 +87,7 @@ export function decideRepublishAction(
       action: 'create',
       reason: 'noExistingBinding',
       notes: [
-        'No HB Article Destination Pages row exists for this PostId — creating a new page.',
+        'No HB Article Destination Pages row exists for this ArticleId — creating a new page.',
       ],
     };
   }

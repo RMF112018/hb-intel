@@ -19,7 +19,7 @@ import { PROJECT_SPOTLIGHT_V1_SHELL } from './xmlShellManifest';
 
 function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     Title: 'Acme Tower — April Spotlight',
     Subhead: 'Concrete pour wrapped under budget',
     SummaryExcerpt: 'A short rollup summary.',
@@ -72,7 +72,7 @@ function template(
 
 function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -82,7 +82,7 @@ function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): Publish
 
 function mediaRow(id: string, over: Partial<PublisherMediaRow> = {}): PublisherMediaRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,

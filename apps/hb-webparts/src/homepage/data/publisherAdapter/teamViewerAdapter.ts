@@ -124,7 +124,7 @@ export function mapPublisherRowToTeamViewerPerson(
 ): PublisherTeamViewerPerson {
   return {
     id: row.TeamMemberId,
-    articleId: row.PostId /* child FK still uses logical PostId column; value is article.ArticleId */,
+    articleId: row.ArticleId,
     articleTeamMemberId: row.TeamMemberId,
     displayName: row.DisplayName,
     jobTitle: row.JobTitle,

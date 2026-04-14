@@ -43,7 +43,7 @@ export interface PublisherListDescriptor {
 }
 
 const POSTS_MVP_FIELDS = [
-  'PostId',
+  'ArticleId',
   'Title',
   'BannerTitleOverride',
   'Subhead',
@@ -103,7 +103,7 @@ const POSTS_MVP_FIELDS = [
 ] as const;
 
 const TEAM_MEMBERS_MVP_FIELDS = [
-  'PostId',
+  'ArticleId',
   'TeamMemberId',
   'PersonPrincipal',
   'DisplayName',
@@ -118,7 +118,7 @@ const TEAM_MEMBERS_MVP_FIELDS = [
 ] as const;
 
 const MEDIA_MVP_FIELDS = [
-  'PostId',
+  'ArticleId',
   'MediaId',
   'MediaRole',
   'ImageAssetUrl',
@@ -156,7 +156,7 @@ const TEMPLATE_REGISTRY_MVP_FIELDS = [
 
 const PAGE_BINDINGS_MVP_FIELDS = [
   'BindingId',
-  'PostId',
+  'ArticleId',
   'TargetSiteUrl',
   'TargetSiteKey',
   'PageId',
@@ -175,7 +175,7 @@ const PAGE_BINDINGS_MVP_FIELDS = [
 
 const WORKFLOW_HISTORY_FIELDS = [
   'HistoryId',
-  'PostId',
+  'ArticleId',
   'FromState',
   'ToState',
   'Action',
@@ -186,7 +186,7 @@ const WORKFLOW_HISTORY_FIELDS = [
 
 const PUBLISHING_ERRORS_FIELDS = [
   'ErrorId',
-  'PostId',
+  'ArticleId',
   'BindingId',
   'Operation',
   'TemplateKey',

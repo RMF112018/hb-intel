@@ -115,7 +115,7 @@ function newHistoryRow(
   const action: WorkflowHistoryAction = historyActionFor(from ?? to, to);
   return {
     HistoryId: `hst-${Date.now()}-${Math.floor(Math.random() * 1e6).toString(36)}`,
-    PostId: articleId /* child FK still uses logical PostId column; value is ArticleId */,
+    ArticleId: articleId,
     FromState: from,
     ToState: to,
     Action: action,
@@ -191,9 +191,9 @@ export function ArticlePublisher({
       try {
         const [article, team, media, bindingRow] = await Promise.all([
           repositories.articles.getByArticleId(articleId),
-          repositories.teamMembers.listByPost(articleId),
-          repositories.media.listByPost(articleId),
-          repositories.pageBindings.getByPostId(articleId),
+          repositories.teamMembers.listByArticle(articleId),
+          repositories.media.listByArticle(articleId),
+          repositories.pageBindings.getByArticleId(articleId),
         ]);
         if (article) {
           setArticleDraft(article);
@@ -257,8 +257,8 @@ export function ArticlePublisher({
     try {
       const updated = { ...articleDraft, UpdatedDateUtc: nowIso() };
       await repositories.articles.upsert(updated);
-      await repositories.teamMembers.replaceAllForPost(updated.ArticleId, teamDraft);
-      await repositories.media.replaceAllForPost(updated.ArticleId, mediaDraft);
+      await repositories.teamMembers.replaceAllForArticle(updated.ArticleId, teamDraft);
+      await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
       setStatus('Saved.');
       await reloadList();
       await reloadSelected(updated.ArticleId);
@@ -817,7 +817,7 @@ function TeamPanel({
     onChange([
       ...rows,
       {
-        PostId: articleId /* child FK still uses logical PostId column; value is ArticleId */,
+        ArticleId: articleId,
         TeamMemberId: `tm-${Date.now()}-${rows.length}`,
         PersonPrincipal: '',
         DisplayName: '',
@@ -907,7 +907,7 @@ function GalleryPanel({
     onChange([
       ...rows,
       {
-        PostId: articleId /* child FK still uses logical PostId column; value is ArticleId */,
+        ArticleId: articleId,
         MediaId: `m-${Date.now()}-${rows.length}`,
         MediaRole: 'gallery',
         ImageAssetUrl: '',

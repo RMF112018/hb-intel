@@ -126,9 +126,9 @@ export async function buildPublishResolutionContext(
   }
 
   const [teamMembers, media, existingBinding] = await Promise.all([
-    repositories.teamMembers.listByPost(articleId),
-    repositories.media.listByPost(articleId),
-    repositories.pageBindings.getByPostId(articleId),
+    repositories.teamMembers.listByArticle(articleId),
+    repositories.media.listByArticle(articleId),
+    repositories.pageBindings.getByArticleId(articleId),
   ]);
 
   return {

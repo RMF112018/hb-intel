@@ -39,7 +39,7 @@ function member(
   over: Partial<PublisherTeamMemberRow> = {},
 ): PublisherTeamMemberRow {
   return {
-    PostId: 'post-tv-1',
+    ArticleId: 'post-tv-1',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
