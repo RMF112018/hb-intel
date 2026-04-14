@@ -1,5 +1,5 @@
 /**
- * SharePoint write seam for `Project Spotlight Page Bindings`.
+ * SharePoint write seam for the tenant `HB Article Destination Pages` list.
  *
  * Upserts a binding row keyed by `PostId`. Mirrors the structural
  * pattern established by `heroBannerListWriter`: a title-bound list
@@ -9,7 +9,7 @@
  * callers.
  *
  * Authority:
- *   architecture doc 03 §E — Project Spotlight Page Bindings field set.
+ *   architecture doc 03 §E — binding-row field set (tenant list: HB Article Destination Pages).
  *   architecture doc 06 — binding lifecycle.
  *   operating-charter rule 6 — publish/republish mediated by bindings.
  */

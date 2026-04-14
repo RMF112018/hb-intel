@@ -154,7 +154,7 @@ export interface TemplateRegistryRepository {
 export interface PageBindingRepository {
   getByPostId(postId: string): Promise<PublisherPageBindingRow | undefined>;
   /**
-   * Idempotently upserts a `Project Spotlight Page Bindings` row keyed
+   * Idempotently upserts a tenant `HB Article Destination Pages` row keyed
    * by `PostId`. In Prompt-05 this delegates to the injected
    * `PageBindingWriter` (defaults to the SharePoint title-bound writer).
    */

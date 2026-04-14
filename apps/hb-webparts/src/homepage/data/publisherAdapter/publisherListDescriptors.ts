@@ -1,16 +1,22 @@
 /**
- * Runtime-safe list metadata for the Project Spotlight publisher.
+ * Runtime-safe list metadata for the Article Publisher.
  *
- * Authority:
+ * Authority (tenant truth):
+ *   docs/architecture/plans/MASTER/spfx/publisher/architecture/lists/publisher-list-schema-report.md
+ *
+ * Supporting design context:
  *   docs/architecture/plans/MASTER/spfx/publisher/architecture/02-List-By-List-Architecture.md
  *   docs/architecture/plans/MASTER/spfx/publisher/architecture/03-Exact-Field-Definitions.md
  *
- * This module exposes display names, host-site URL, and the MVP=Yes field
- * set for each architecture-mandated list. Prompt-03 will layer the service
- * layer on top of these descriptors; no list I/O happens here.
+ * Display names below are the **actual tenant list titles** (`HB Article*`
+ * family on the HBCentral host site). They are the source of truth for
+ * every read/write; if these drift back to the obsolete `Project
+ * Spotlight *` names, the publisher will silently bind to non-existent
+ * lists — the descriptor-drift test enforces this invariant.
  *
- * The host site is HBCentral (control-plane). ProjectSpotlight is the
- * destination for generated pages only.
+ * The host site is HBCentral (control-plane). ProjectSpotlight remains
+ * the first-sprint destination for generated pages only (destination-
+ * scoped identity, preserved per the rebranding report).
  */
 
 export const PUBLISHER_LIST_HOST_SITE_URL =
@@ -197,43 +203,43 @@ export const PUBLISHER_LISTS: Readonly<
 > = Object.freeze({
   posts: {
     key: 'posts',
-    displayName: 'Project Spotlight Posts',
+    displayName: 'HB Articles',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: POSTS_MVP_FIELDS,
   },
   teamMembers: {
     key: 'teamMembers',
-    displayName: 'Project Spotlight Post Team Members',
+    displayName: 'HB Article Team Members',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: TEAM_MEMBERS_MVP_FIELDS,
   },
   media: {
     key: 'media',
-    displayName: 'Project Spotlight Post Media',
+    displayName: 'HB Article Media',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: MEDIA_MVP_FIELDS,
   },
   templateRegistry: {
     key: 'templateRegistry',
-    displayName: 'Project Spotlight Template Registry',
+    displayName: 'HB Article Template Registry',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: TEMPLATE_REGISTRY_MVP_FIELDS,
   },
   pageBindings: {
     key: 'pageBindings',
-    displayName: 'Project Spotlight Page Bindings',
+    displayName: 'HB Article Destination Pages',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: PAGE_BINDINGS_MVP_FIELDS,
   },
   workflowHistory: {
     key: 'workflowHistory',
-    displayName: 'Project Spotlight Workflow History',
+    displayName: 'HB Article Workflow History',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: WORKFLOW_HISTORY_FIELDS,
   },
   publishingErrors: {
     key: 'publishingErrors',
-    displayName: 'Project Spotlight Publishing Errors',
+    displayName: 'HB Article Publishing Errors',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: PUBLISHING_ERRORS_FIELDS,
   },

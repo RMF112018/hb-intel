@@ -1,7 +1,7 @@
 /**
  * Publisher → Team Viewer adapter.
  *
- * Maps the structured `Project Spotlight Post Team Members` child-row
+ * Maps the structured `HB Article Team Members` child-row
  * set into the two shapes the Team Viewer webpart consumes:
  *
  *   - `TeamViewerControlPayload.properties` — the JSON bag the XML

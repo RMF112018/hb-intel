@@ -48,7 +48,7 @@ export type IsoDateTimeUtc = string;
 export type UrlString = string;
 
 /* ------------------------------------------------------------------ */
-/* A. Project Spotlight Posts                                          */
+/* A. HB Articles                                                      */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherPostRow {
@@ -112,7 +112,7 @@ export interface PublisherPostRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* B. Project Spotlight Post Team Members                              */
+/* B. HB Article Team Members                                          */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherTeamMemberRow {
@@ -131,7 +131,7 @@ export interface PublisherTeamMemberRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* C. Project Spotlight Post Media                                     */
+/* C. HB Article Media                                                 */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherMediaRow {
@@ -145,7 +145,7 @@ export interface PublisherMediaRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* D. Project Spotlight Template Registry                              */
+/* D. HB Article Template Registry                                     */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherTemplateRegistryRow {
@@ -176,7 +176,7 @@ export interface PublisherTemplateRegistryRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* E. Project Spotlight Page Bindings                                  */
+/* E. HB Article Destination Pages                                     */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherPageBindingRow {
@@ -199,7 +199,7 @@ export interface PublisherPageBindingRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* F. Project Spotlight Workflow History                               */
+/* F. HB Article Workflow History                                      */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherWorkflowHistoryRow {
@@ -214,7 +214,7 @@ export interface PublisherWorkflowHistoryRow {
 }
 
 /* ------------------------------------------------------------------ */
-/* G. Project Spotlight Publishing Errors                              */
+/* G. HB Article Publishing Errors                                     */
 /* ------------------------------------------------------------------ */
 
 export interface PublisherPublishingErrorRow {
