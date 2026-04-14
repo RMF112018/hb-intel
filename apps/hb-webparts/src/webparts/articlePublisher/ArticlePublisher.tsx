@@ -73,7 +73,7 @@ import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
 import { DraftQueue } from './draftQueue/index.js';
-import { PublisherButton } from './sharedChrome/index.js';
+import { PublisherButton, StatusBanner, type StatusBannerTone } from './sharedChrome/index.js';
 import {
   illegalTransitionMessage,
   inProgressMessage,
@@ -472,7 +472,15 @@ export function ArticlePublisher({
   const [mediaDraft, setMediaDraft] = React.useState<PublisherMediaRow[]>([]);
   const [binding, setBinding] = React.useState<PublisherPageBindingRow | undefined>();
   const [resolutionContext, setResolutionContext] = React.useState<PublishResolutionContext | undefined>();
-  const [status, setStatus] = React.useState<string | undefined>();
+  const [status, setStatusRaw] = React.useState<string | undefined>();
+  const [statusTone, setStatusTone] = React.useState<StatusBannerTone>('info');
+  const setStatus = React.useCallback(
+    (message: string | undefined, tone: StatusBannerTone = 'info') => {
+      setStatusRaw(message);
+      setStatusTone(message ? tone : 'info');
+    },
+    [],
+  );
   const [busy, setBusy] = React.useState(false);
   const [preview, setPreview] = React.useState<PreviewOutcome | undefined>();
   const [previewLoading, setPreviewLoading] = React.useState(false);
@@ -548,10 +556,16 @@ export function ArticlePublisher({
           setStatus(
             unsupportedDestinationMessage ??
               (ctx.ok ? undefined : ctx.message),
+            unsupportedDestinationMessage || (ctx.ok ? undefined : ctx.message)
+              ? 'error'
+              : 'info',
           );
         }
       } catch (err) {
-        setStatus(err instanceof Error ? err.message : 'Failed to load article.');
+        setStatus(
+          err instanceof Error ? err.message : 'Failed to load article.',
+          'error',
+        );
       } finally {
         setBusy(false);
       }
@@ -571,7 +585,10 @@ export function ArticlePublisher({
         setPreview(outcome);
       } catch (err) {
         setPreview(undefined);
-        setStatus(err instanceof Error ? err.message : 'Preview failed.');
+        setStatus(
+          err instanceof Error ? err.message : 'Preview failed.',
+          'error',
+        );
       } finally {
         setPreviewLoading(false);
       }
@@ -670,6 +687,7 @@ export function ArticlePublisher({
       if (!resolution.ok) {
         setStatus(
           `Save blocked — could not resolve a template for this article (${resolution.reason}). ${resolution.message}`,
+          'error',
         );
         return;
       }
@@ -712,7 +730,7 @@ export function ArticlePublisher({
       await repositories.teamMembers.replaceAllForArticle(updated.ArticleId, teamDraft);
       await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
       setArticleDraft(policyApplied);
-      setStatus('Draft saved.');
+      setStatus('Draft saved.', 'success');
       await reloadGroups();
       await reloadSelected(policyApplied.ArticleId);
     } catch (err) {
@@ -720,6 +738,7 @@ export function ArticlePublisher({
         err instanceof Error
           ? `Couldn\u2019t save — ${err.message}`
           : 'Couldn\u2019t save the draft.',
+        'error',
       );
     } finally {
       setBusy(false);
@@ -731,7 +750,7 @@ export function ArticlePublisher({
       if (!articleDraft) return;
       const from = articleDraft.WorkflowState;
       if (!canTransition(from, to)) {
-        setStatus(illegalTransitionMessage(from, to));
+        setStatus(illegalTransitionMessage(from, to), 'error');
         return;
       }
       setBusy(true);
@@ -760,10 +779,12 @@ export function ArticlePublisher({
           if (outcome.ok) {
             setStatus(
               lifecycleOutcomeMessage({ to, bindingUpdated: outcome.bindingUpdated }),
+              'success',
             );
           } else {
             setStatus(
               lifecycleFailureMessage({ to, stage: outcome.stage, message: outcome.message }),
+              'error',
             );
           }
         } else {
@@ -777,17 +798,21 @@ export function ArticlePublisher({
             actorEmail: actorEmail ?? articleDraft.AuthorEmail,
           });
           if (outcome.ok) {
-            setStatus(lifecycleOutcomeMessage({ to, bindingUpdated: false }));
+            setStatus(lifecycleOutcomeMessage({ to, bindingUpdated: false }), 'success');
           } else {
             setStatus(
               lifecycleFailureMessage({ to, stage: outcome.stage, message: outcome.message }),
+              'error',
             );
           }
         }
         await reloadGroups();
         await reloadSelected(articleDraft.ArticleId);
       } catch (err) {
-        setStatus(err instanceof Error ? err.message : 'Transition failed.');
+        setStatus(
+          err instanceof Error ? err.message : 'Transition failed.',
+          'error',
+        );
       } finally {
         setBusy(false);
       }
@@ -811,12 +836,15 @@ export function ArticlePublisher({
           actorEmail,
         });
         if (outcome.ok) {
+          const actionTone: StatusBannerTone =
+            outcome.action === 'blocked' ? 'error' : 'success';
           setStatus(
             publishSuccessMessage({
               mode,
               action: outcome.action,
               pageUrl: outcome.pageUrl,
             }),
+            actionTone,
           );
           if (mode !== 'preview') await reloadSelected(articleDraft.ArticleId);
         } else {
@@ -826,6 +854,7 @@ export function ArticlePublisher({
               stage: outcome.stage,
               message: outcome.message,
             }),
+            'error',
           );
         }
       } catch (err) {
@@ -833,6 +862,7 @@ export function ArticlePublisher({
           err instanceof Error
             ? publishFailureMessage({ mode, stage: 'runtime', message: err.message })
             : publishFailureMessage({ mode, stage: 'runtime', message: 'unknown error' }),
+          'error',
         );
       } finally {
         setBusy(false);
@@ -1218,10 +1248,14 @@ export function ArticlePublisher({
             )}
 
             {(status || busy) && (
-              <section className={styles.readinessBlock} aria-label="Last action status" aria-live="polite">
+              <StatusBanner
+                tone={statusTone}
+                busy={busy}
+                aria-label="Last action status"
+              >
                 {busy && <HbcSpinner />}
-                {status && <p className={styles.readinessStatus}>{status}</p>}
-              </section>
+                {status && <span>{status}</span>}
+              </StatusBanner>
             )}
           </>
         )}

@@ -1,0 +1,37 @@
+.base {
+  display: flex;
+  align-items: center;
+  gap: var(--hb-space-sm, 8px);
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  border-radius: var(--hb-radius-lg, 6px);
+  border: 1px solid transparent;
+}
+
+.info {
+  color: var(--hb-status-info-text, #225391);
+  background: var(--hb-status-info-bg, #E8EEF7);
+  border-color: var(--hb-status-info-border, #B5C5DF);
+}
+
+.success {
+  color: var(--hb-status-success-text, #0B6A0B);
+  background: var(--hb-status-success-bg, #E7F3E7);
+  border-color: var(--hb-status-success-border, #B6DAB6);
+}
+
+.error {
+  color: var(--hb-status-danger-text, #A4262C);
+  background: var(--hb-status-danger-bg, #FDECEC);
+  border-color: var(--hb-status-danger-border, #E5B1B3);
+}
+
+@media (forced-colors: active) {
+  .base {
+    forced-color-adjust: none;
+    color: ButtonText;
+    background: ButtonFace;
+    border-color: ButtonBorder;
+  }
+}

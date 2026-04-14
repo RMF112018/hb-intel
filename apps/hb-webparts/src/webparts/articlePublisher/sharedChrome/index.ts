@@ -5,3 +5,5 @@ export type {
 } from './PublisherButton.js';
 export { EditorialChip } from './EditorialChip.js';
 export type { EditorialChipProps, EditorialChipVariant } from './EditorialChip.js';
+export { StatusBanner } from './StatusBanner.js';
+export type { StatusBannerProps, StatusBannerTone } from './StatusBanner.js';
