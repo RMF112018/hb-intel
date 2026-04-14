@@ -12,6 +12,11 @@
   "dependencies": {
     "@hbc/sharepoint-platform": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
+    "@tiptap/core": "^2.27.2",
+    "@tiptap/extension-link": "^2.27.2",
+    "@tiptap/pm": "^2.27.2",
+    "@tiptap/react": "^2.27.2",
+    "@tiptap/starter-kit": "^2.27.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "react": "^18.3.1",

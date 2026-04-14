@@ -70,6 +70,7 @@ import {
 } from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import { resolveSlugForSave } from './slugGovernance.js';
+import { StoryBodyEditor, bodyTextSnippet } from './storyBodyEditor/index.js';
 import {
   defaultTeamHeading,
   intelligentDefaultsForSave,
@@ -1639,11 +1640,11 @@ function StoryPanel({ draft, onChange }: PanelProps) {
         />
       </Field>
       <Field label="Article body">
-        <textarea
-          className={`${styles.textarea} ${styles.textareaLg}`}
+        <StoryBodyEditor
           value={draft.BodyRichText}
-          placeholder="Compose the article. HTML is supported."
-          onChange={(e) => onChange(update(draft, 'BodyRichText', e.target.value))}
+          onChange={(next) => onChange(update(draft, 'BodyRichText', next))}
+          placeholder="Compose the article."
+          ariaLabel="Article body"
         />
       </Field>
       <Field label="Intro (optional)">
@@ -2328,10 +2329,16 @@ function PreviewPanel({
               case 'subhead':
               case 'body': {
                 const t = c as TextControlPayload;
+                // Body emits sanitised HTML through the rich editor;
+                // the preview shows a plain-text projection so the
+                // snippet reads as editorial prose rather than markup.
+                // Subhead remains a plain string, but routing it
+                // through the same projection is harmless (no tags).
+                const snippet = bodyTextSnippet(t.text, 200);
                 return (
                   <div key={c.slot} className={styles.previewControl}>
                     <strong>{c.slot}</strong>
-                    <div className={styles.previewSnippet}>{t.text.slice(0, 200)}{t.text.length > 200 ? '…' : ''}</div>
+                    <div className={styles.previewSnippet}>{snippet}</div>
                   </div>
                 );
               }

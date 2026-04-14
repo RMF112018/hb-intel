@@ -1,0 +1,170 @@
+/* Story body editor surface — token-disciplined editor chrome that
+ * sits inside the workspace's editorial canvas. The editable area is
+ * intentionally generous so authoring feels like writing prose, not
+ * filling a form field.
+ */
+
+.surface {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #cbcbd0;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.surface:focus-within {
+  border-color: #0078d4;
+  box-shadow: 0 0 0 1px #0078d4;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e3e3e6;
+  background: #fafbfc;
+}
+
+.toolbarGroup {
+  display: inline-flex;
+  gap: 2px;
+  padding-right: 6px;
+  margin-right: 2px;
+  border-right: 1px solid #e3e3e6;
+}
+
+.toolbarGroup:last-child {
+  border-right: none;
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.toolbarBtn {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  min-width: 28px;
+  text-align: center;
+}
+
+.toolbarBtn:hover {
+  background: #f0f0f3;
+}
+
+.toolbarBtn:focus-visible {
+  outline: 2px solid #0078d4;
+  outline-offset: 1px;
+}
+
+.toolbarBtnActive {
+  background: #0078d4;
+  color: #fff;
+  border-color: #0078d4;
+}
+
+.toolbarBtnActive:hover {
+  background: #106ebe;
+}
+
+.toolbarBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.editorContent {
+  padding: 14px 16px;
+  min-height: 220px;
+  max-height: 600px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #1f1f1f;
+}
+
+.editorContent:focus {
+  outline: none;
+}
+
+.editorContent p {
+  margin: 0 0 12px 0;
+}
+
+.editorContent p:last-child {
+  margin-bottom: 0;
+}
+
+.editorContent h2 {
+  margin: 18px 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.editorContent h3 {
+  margin: 14px 0 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.editorContent ul,
+.editorContent ol {
+  margin: 0 0 12px 22px;
+  padding: 0;
+}
+
+.editorContent li {
+  margin: 0 0 4px 0;
+}
+
+.editorContent blockquote {
+  margin: 0 0 12px 0;
+  padding: 6px 14px;
+  border-left: 3px solid #0078d4;
+  color: #4a4a4f;
+  font-style: italic;
+}
+
+.editorContent a {
+  color: #0078d4;
+  text-decoration: underline;
+}
+
+.editorContentEmpty:empty::before,
+.editorContent[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #6a6a6f;
+  pointer-events: none;
+}
+
+.linkPromptRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e3e3e6;
+  background: #f0f6fc;
+  font-size: 12px;
+}
+
+.linkPromptInput {
+  flex: 1 1 240px;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid #cbcbd0;
+  border-radius: 4px;
+  background: #fff;
+  min-width: 0;
+}
+
+.linkPromptError {
+  color: #8a1f2b;
+  font-size: 11px;
+}
