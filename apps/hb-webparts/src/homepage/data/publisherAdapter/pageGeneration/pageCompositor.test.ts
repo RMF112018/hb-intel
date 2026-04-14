@@ -134,7 +134,7 @@ describe('composeProjectSpotlightPage', () => {
     expect(validateComposedPageStructure(page)).toEqual([]);
   });
 
-  it('populates the banner from article fields with BannerTitleOverride preference', () => {
+  it('populates the banner from article fields and falls back to Title when HeroTitle is unset', () => {
     const page = composeProjectSpotlightPage(
       context({
         teamMembers: [member('alice')],
@@ -144,16 +144,19 @@ describe('composeProjectSpotlightPage', () => {
     );
     const banner = page.controls.find((c) => c.slot === 'banner') as BannerControlPayload;
     expect(banner.visible).toBe(true);
-    expect(banner.title).toBe('Override Title');
+    expect(banner.title).toBe('Acme Tower — April Spotlight');
     expect(banner.imageUrl).toBe('https://img.example/banner.jpg');
     expect(banner.imageAltText).toBe('Aerial view of Acme Tower');
     expect(banner.layoutType).toBe('FullWidthImage');
   });
 
-  it('sets TeamViewer properties from article fields and orders every authored member', () => {
+  it('sets TeamViewer properties from advanced article fields', () => {
     const page = composeProjectSpotlightPage(
       context({
         article: {
+          TeamViewerTitle: 'Project Team',
+          TeamViewerMode: 'summaryExpand',
+          TeamViewerAllowExpand: true,
         },
         teamMembers: [
           member('alice', { SortOrder: 2 }),
@@ -168,11 +171,26 @@ describe('composeProjectSpotlightPage', () => {
     if (!team?.visible) return;
     const tvp = team as TeamViewerControlPayload;
     expect(tvp.properties.heading).toBe('Project Team');
-    expect(tvp.properties.layout).toBe('list');
-    expect(tvp.properties.density).toBe('compact');
+    expect(tvp.properties.layout).toBe('strip');
+    expect(tvp.properties.density).toBe('expanded');
     expect(tvp.properties.flags.profileDetailDrawer).toBe(true);
     expect(tvp.properties.articleId).toBe('art-001');
-    expect(tvp.properties.destinationKey).toBe('projectSpotlight');
+  });
+
+  it('does not add a secondary-image control slot (field is persisted but composition is deferred)', () => {
+    const page = composeProjectSpotlightPage(
+      context({
+        article: {
+          ShowSecondaryImage: true,
+          SecondaryImage: 'https://img.example/secondary.jpg',
+          SecondaryImageAltText: 'Secondary',
+          SecondaryImageCaption: 'caption',
+        },
+      }),
+      PROJECT_SPOTLIGHT_V1_SHELL,
+    );
+    expect(page.controls.map((c) => c.slot)).not.toContain('secondary');
+    expect(page.controls).toHaveLength(5);
   });
 
   it('hides the team block when the template disables it', () => {
@@ -196,9 +214,10 @@ describe('composeProjectSpotlightPage', () => {
     expect(gallery?.visible).toBe(false);
   });
 
-  it('honors post.ShowGallery=false independent of media rows', () => {
+  it('hides gallery when template ShowGallery=false independent of media rows', () => {
     const page = composeProjectSpotlightPage(
       context({
+        template: { ShowGallery: false, GalleryProfileKey: 'none' },
         media: [mediaRow('img-1')],
       }),
       PROJECT_SPOTLIGHT_V1_SHELL,
@@ -242,9 +261,9 @@ describe('composeProjectSpotlightPage', () => {
     expect(page.identity.pageName).toBe('acme-tower-april.aspx');
   });
 
-  it('prefers GeneratedPageName when it is set', () => {
+  it('prefers PageName when it is set', () => {
     const page = composeProjectSpotlightPage(
-      context({}),
+      context({ article: { PageName: 'custom-page.aspx' } }),
       PROJECT_SPOTLIGHT_V1_SHELL,
     );
     expect(page.identity.pageName).toBe('custom-page.aspx');

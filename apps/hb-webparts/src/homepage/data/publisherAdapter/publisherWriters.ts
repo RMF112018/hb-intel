@@ -266,6 +266,17 @@ export function mapArticleRowToListFields(
     ShowTeamViewer: row.ShowTeamViewer ?? null,
     TeamViewerTitle: nullIfEmpty(row.TeamViewerTitle),
     TeamViewerIntro: nullIfEmpty(row.TeamViewerIntro),
+    TeamViewerMode: nullIfEmpty(row.TeamViewerMode),
+    TeamViewerGroupingMode: nullIfEmpty(row.TeamViewerGroupingMode),
+    TeamViewerSortMode: nullIfEmpty(row.TeamViewerSortMode),
+    TeamViewerMaxInitialVisible: row.TeamViewerMaxInitialVisible ?? null,
+    TeamViewerAllowExpand: row.TeamViewerAllowExpand ?? null,
+    SecondaryImage: row.SecondaryImage
+      ? { Url: row.SecondaryImage, Description: row.SecondaryImage }
+      : null,
+    SecondaryImageAltText: nullIfEmpty(row.SecondaryImageAltText),
+    SecondaryImageCaption: nullIfEmpty(row.SecondaryImageCaption),
+    ShowSecondaryImage: row.ShowSecondaryImage ?? null,
     IsFeatured: row.IsFeatured ?? null,
     FeaturedRank: row.FeaturedRank ?? null,
     IsPinned: row.IsPinned ?? null,

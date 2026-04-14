@@ -74,6 +74,22 @@ describe('buildTeamViewerProperties', () => {
     expect(props.destinationKey).toBe('projectSpotlight');
   });
 
+  it('maps TeamViewerMode to runtime layout/density and TeamViewerAllowExpand to drawer flag', () => {
+    const grouped = buildTeamViewerProperties(
+      article({ TeamViewerMode: 'grouped', TeamViewerAllowExpand: true }),
+    );
+    expect(grouped.layout).toBe('grouped');
+    expect(grouped.density).toBe('standard');
+    expect(grouped.flags.profileDetailDrawer).toBe(true);
+
+    const summaryExpand = buildTeamViewerProperties(
+      article({ TeamViewerMode: 'summaryExpand', TeamViewerAllowExpand: false }),
+    );
+    expect(summaryExpand.layout).toBe('strip');
+    expect(summaryExpand.density).toBe('expanded');
+    expect(summaryExpand.flags.profileDetailDrawer).toBe(false);
+  });
+
   it('mirrors the article Destination as the canvas destinationKey', () => {
     const ps = buildTeamViewerProperties(article({ Destination: 'projectSpotlight' }));
     expect(ps.destinationKey).toBe('projectSpotlight');

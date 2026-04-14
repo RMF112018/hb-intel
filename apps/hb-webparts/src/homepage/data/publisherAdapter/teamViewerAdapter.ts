@@ -83,6 +83,21 @@ export type PublisherTeamViewerPerson = TeamViewerPerson;
 export function buildTeamViewerProperties(
   article: PublisherArticleRow,
 ): PublisherTeamViewerProperties {
+  // TeamViewerGroupingMode/TeamViewerSortMode/TeamViewerMaxInitialVisible
+  // are tenant-schema-backed article fields but have no matching
+  // runtime knobs on TeamViewerConfig yet; they are intentionally
+  // deferred from emitted control JSON in this sprint.
+  const mode = article.TeamViewerMode ?? 'compact';
+  const layout: TeamViewerLayout =
+    mode === 'grouped'
+      ? 'grouped'
+      : mode === 'summaryExpand'
+        ? 'strip'
+        : mode === 'orgChart'
+          ? 'rail'
+          : 'grid';
+  const density: TeamViewerDensity =
+    mode === 'summaryExpand' ? 'expanded' : 'standard';
   return {
     heading:
       article.TeamViewerTitle && article.TeamViewerTitle.trim().length > 0
@@ -91,10 +106,10 @@ export function buildTeamViewerProperties(
     articleId: article.ArticleId,
     destinationKey: article.Destination,
     listHostOverride: undefined,
-    layout: 'grid',
-    density: 'standard',
+    layout,
+    density,
     flags: {
-      profileDetailDrawer: false,
+      profileDetailDrawer: article.TeamViewerAllowExpand ?? false,
     },
   };
 }

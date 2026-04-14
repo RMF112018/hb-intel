@@ -109,6 +109,16 @@ const ARTICLES_MVP_FIELDS = [
   'ShowTeamViewer',
   'TeamViewerTitle',
   'TeamViewerIntro',
+  'TeamViewerMode',
+  'TeamViewerGroupingMode',
+  'TeamViewerSortMode',
+  'TeamViewerMaxInitialVisible',
+  'TeamViewerAllowExpand',
+  // Secondary image.
+  'SecondaryImage',
+  'SecondaryImageAltText',
+  'SecondaryImageCaption',
+  'ShowSecondaryImage',
   // Feature / pin / rollup flags.
   'IsFeatured',
   'FeaturedRank',

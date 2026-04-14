@@ -30,6 +30,9 @@ import type {
   PromotionRuleScope,
   PublishStatus,
   PublishingErrorOperation,
+  TeamViewerGroupingMode,
+  TeamViewerMode,
+  TeamViewerSortMode,
   RetryStatus,
   SpotlightType,
   SyncStatus,
@@ -126,6 +129,17 @@ export interface PublisherArticleRow {
   readonly ShowTeamViewer?: boolean;
   readonly TeamViewerTitle?: string;
   readonly TeamViewerIntro?: string;
+  readonly TeamViewerMode?: TeamViewerMode;
+  readonly TeamViewerGroupingMode?: TeamViewerGroupingMode;
+  readonly TeamViewerSortMode?: TeamViewerSortMode;
+  readonly TeamViewerMaxInitialVisible?: number;
+  readonly TeamViewerAllowExpand?: boolean;
+
+  /* ── Secondary image ─────────────────────────────────────────── */
+  readonly SecondaryImage?: UrlString;
+  readonly SecondaryImageAltText?: string;
+  readonly SecondaryImageCaption?: string;
+  readonly ShowSecondaryImage?: boolean;
 
   /* ── Feature / pin / rollup flags ────────────────────────────── */
   readonly IsFeatured?: boolean;
@@ -149,6 +163,15 @@ export interface PublisherArticleRow {
   readonly PageSyncStatus?: PageSyncStatus;
   readonly LastPageSyncDateUtc?: IsoDateTimeUtc;
   readonly TemplateOverrideAllowed?: boolean;
+
+  /**
+   * Deferred schema-backed fields (not operationally wired in this
+   * sprint): campaign/meta/prominence columns such as
+   * `CampaignWindowStartUtc`, `CampaignWindowEndUtc`,
+   * `ProminenceIntent`, `CanonicalTopic`, `MetaTitleOverride`,
+   * `MetaDescriptionOverride`, `SocialImageUrl`,
+   * `ExcludeFromAutomations`.
+   */
 }
 
 /* ------------------------------------------------------------------ */

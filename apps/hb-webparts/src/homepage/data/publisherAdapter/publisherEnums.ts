@@ -80,6 +80,30 @@ export const PROJECT_STAGE_VALUES = [
 ] as const;
 export type ProjectStage = (typeof PROJECT_STAGE_VALUES)[number];
 
+export const TEAM_VIEWER_MODE_VALUES = [
+  'compact',
+  'grouped',
+  'orgChart',
+  'summaryExpand',
+] as const;
+export type TeamViewerMode = (typeof TEAM_VIEWER_MODE_VALUES)[number];
+
+export const TEAM_VIEWER_GROUPING_MODE_VALUES = [
+  'none',
+  'discipline',
+  'company',
+  'hierarchy',
+] as const;
+export type TeamViewerGroupingMode =
+  (typeof TEAM_VIEWER_GROUPING_MODE_VALUES)[number];
+
+export const TEAM_VIEWER_SORT_MODE_VALUES = [
+  'manual',
+  'role',
+  'hierarchy',
+] as const;
+export type TeamViewerSortMode = (typeof TEAM_VIEWER_SORT_MODE_VALUES)[number];
+
 export const ARTICLE_SUBJECT_VALUES = [
   'general',
   'people',

@@ -23,6 +23,9 @@ import {
   SUPPORTED_DESTINATIONS,
   HERO_THEME_VARIANT_VALUES,
   PROJECT_STAGE_VALUES,
+  TEAM_VIEWER_GROUPING_MODE_VALUES,
+  TEAM_VIEWER_MODE_VALUES,
+  TEAM_VIEWER_SORT_MODE_VALUES,
   SPOTLIGHT_TYPE_VALUES,
   WORKFLOW_STATE_OPERATIONAL_VALUES,
   createPublisherRepositories,
@@ -41,6 +44,9 @@ import {
   type Destination,
   type HeroThemeVariant,
   type SpotlightType,
+  type TeamViewerGroupingMode,
+  type TeamViewerMode,
+  type TeamViewerSortMode,
   type ProjectStage,
   type PublishResolutionContext,
   type PublishOutcome,
@@ -774,7 +780,7 @@ interface PanelProps {
   onChange: (next: PublisherArticleRow) => void;
 }
 
-function update<T extends keyof PublisherArticleRow>(
+export function update<T extends keyof PublisherArticleRow>(
   draft: PublisherArticleRow,
   key: T,
   value: PublisherArticleRow[T],
@@ -838,6 +844,21 @@ function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: Met
           onChange={(e) => onChange(update(draft, 'Slug', e.target.value))}
         />
       </Field>
+      <Field label="Template key override">
+        <input
+          className={styles.input}
+          value={draft.TemplateKey}
+          disabled={draft.TemplateOverrideAllowed === false}
+          placeholder="Leave blank to auto-resolve on save"
+          onChange={(e) => onChange(update(draft, 'TemplateKey', e.target.value))}
+        />
+      </Field>
+      {draft.TemplateOverrideAllowed === false && (
+        <div className={styles.statusLine}>
+          Template override is disabled for this article; publish/save will use the
+          registry-resolved template.
+        </div>
+      )}
       <Field label="Article content type">
         <select
           className={styles.select}
@@ -1093,6 +1114,70 @@ function ContentPanel({ draft, onChange }: PanelProps) {
           onChange={(e) => onChange(update(draft, 'BodyRichText', e.target.value))}
         />
       </Field>
+      <Field label="Body intro">
+        <textarea
+          className={styles.textarea}
+          value={draft.BodyIntro ?? ''}
+          onChange={(e) => onChange(update(draft, 'BodyIntro', e.target.value || undefined))}
+        />
+      </Field>
+      <Field label="Body closing">
+        <textarea
+          className={styles.textarea}
+          value={draft.BodyClosing ?? ''}
+          onChange={(e) => onChange(update(draft, 'BodyClosing', e.target.value || undefined))}
+        />
+      </Field>
+      <Field label="Callout text">
+        <textarea
+          className={styles.textarea}
+          value={draft.CalloutText ?? ''}
+          onChange={(e) => onChange(update(draft, 'CalloutText', e.target.value || undefined))}
+        />
+      </Field>
+      <Field label="Pull quote">
+        <textarea
+          className={styles.textarea}
+          value={draft.PullQuote ?? ''}
+          onChange={(e) => onChange(update(draft, 'PullQuote', e.target.value || undefined))}
+        />
+      </Field>
+      <Field label="Show secondary image">
+        <input
+          type="checkbox"
+          checked={draft.ShowSecondaryImage === true}
+          onChange={(e) => onChange(update(draft, 'ShowSecondaryImage', e.target.checked))}
+        />
+      </Field>
+      <Field label="Secondary image URL">
+        <input
+          className={styles.input}
+          value={draft.SecondaryImage ?? ''}
+          onChange={(e) => onChange(update(draft, 'SecondaryImage', e.target.value || undefined))}
+        />
+      </Field>
+      <Field label="Secondary image alt text">
+        <textarea
+          className={styles.textarea}
+          value={draft.SecondaryImageAltText ?? ''}
+          onChange={(e) =>
+            onChange(update(draft, 'SecondaryImageAltText', e.target.value || undefined))
+          }
+        />
+      </Field>
+      <Field label="Secondary image caption">
+        <textarea
+          className={styles.textarea}
+          value={draft.SecondaryImageCaption ?? ''}
+          onChange={(e) =>
+            onChange(update(draft, 'SecondaryImageCaption', e.target.value || undefined))
+          }
+        />
+      </Field>
+      <div className={styles.statusLine}>
+        Secondary image fields are persisted on HB Articles; page composition support is deferred
+        until a dedicated secondary-image slot exists.
+      </div>
       <Field label="Team viewer title">
         <input
           className={styles.input}
@@ -1116,6 +1201,93 @@ function ContentPanel({ draft, onChange }: PanelProps) {
           type="checkbox"
           checked={draft.ShowTeamViewer !== false}
           onChange={(e) => onChange(update(draft, 'ShowTeamViewer', e.target.checked))}
+        />
+      </Field>
+      <Field label="Team viewer mode">
+        <select
+          className={styles.select}
+          value={draft.TeamViewerMode ?? ''}
+          onChange={(e) =>
+            onChange(
+              update(
+                draft,
+                'TeamViewerMode',
+                (e.target.value || undefined) as TeamViewerMode | undefined,
+              ),
+            )
+          }
+        >
+          <option value="">(default)</option>
+          {TEAM_VIEWER_MODE_VALUES.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Team viewer grouping mode">
+        <select
+          className={styles.select}
+          value={draft.TeamViewerGroupingMode ?? ''}
+          onChange={(e) =>
+            onChange(
+              update(
+                draft,
+                'TeamViewerGroupingMode',
+                (e.target.value || undefined) as TeamViewerGroupingMode | undefined,
+              ),
+            )
+          }
+        >
+          <option value="">(default)</option>
+          {TEAM_VIEWER_GROUPING_MODE_VALUES.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Team viewer sort mode">
+        <select
+          className={styles.select}
+          value={draft.TeamViewerSortMode ?? ''}
+          onChange={(e) =>
+            onChange(
+              update(
+                draft,
+                'TeamViewerSortMode',
+                (e.target.value || undefined) as TeamViewerSortMode | undefined,
+              ),
+            )
+          }
+        >
+          <option value="">(default)</option>
+          {TEAM_VIEWER_SORT_MODE_VALUES.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Team viewer max initial visible">
+        <input
+          className={styles.input}
+          value={draft.TeamViewerMaxInitialVisible ?? ''}
+          onChange={(e) =>
+            onChange(update(draft, 'TeamViewerMaxInitialVisible', (() => {
+              const raw = e.target.value.trim();
+              if (raw.length === 0) return undefined;
+              const parsed = Number(raw);
+              return Number.isFinite(parsed) ? parsed : undefined;
+            })()))
+          }
+        />
+      </Field>
+      <Field label="Team viewer allow expand">
+        <input
+          type="checkbox"
+          checked={draft.TeamViewerAllowExpand === true}
+          onChange={(e) => onChange(update(draft, 'TeamViewerAllowExpand', e.target.checked))}
         />
       </Field>
     </div>

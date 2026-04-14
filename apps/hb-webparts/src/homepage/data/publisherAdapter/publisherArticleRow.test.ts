@@ -43,6 +43,16 @@ const TENANT_RAW_ROW: Record<string, unknown> = {
   IsFeatured: true,
   FeaturedRank: 1,
   HeroThemeVariant: 'default',
+  TeamViewerMode: 'grouped',
+  TeamViewerGroupingMode: 'discipline',
+  TeamViewerSortMode: 'manual',
+  TeamViewerMaxInitialVisible: 8,
+  TeamViewerAllowExpand: true,
+  SecondaryImage: { Url: 'https://img.example/secondary.jpg' },
+  SecondaryImageAltText: 'Team photo',
+  SecondaryImageCaption: 'After the pour',
+  ShowSecondaryImage: true,
+  TemplateOverrideAllowed: false,
 };
 
 describe('PublisherArticleRow — tenant HB Articles round-trip', () => {
@@ -73,6 +83,16 @@ describe('PublisherArticleRow — tenant HB Articles round-trip', () => {
     expect(row!.SpotlightType).toBe('monthly');
     expect(row!.ProjectStage).toBe('active');
     expect(row!.PageSyncStatus).toBe('in-sync');
+    expect(row!.TeamViewerMode).toBe('grouped');
+    expect(row!.TeamViewerGroupingMode).toBe('discipline');
+    expect(row!.TeamViewerSortMode).toBe('manual');
+    expect(row!.TeamViewerMaxInitialVisible).toBe(8);
+    expect(row!.TeamViewerAllowExpand).toBe(true);
+    expect(row!.SecondaryImage).toBe('https://img.example/secondary.jpg');
+    expect(row!.SecondaryImageAltText).toBe('Team photo');
+    expect(row!.SecondaryImageCaption).toBe('After the pour');
+    expect(row!.ShowSecondaryImage).toBe(true);
+    expect(row!.TemplateOverrideAllowed).toBe(false);
   });
 
   it('mapArticleRow returns undefined when a tenant-required column is missing', () => {
@@ -129,6 +149,19 @@ describe('PublisherArticleRow — tenant HB Articles round-trip', () => {
       Url: 'https://img.example/hero.jpg',
       Description: 'https://img.example/hero.jpg',
     });
+    expect(fields['SecondaryImage']).toEqual({
+      Url: 'https://img.example/secondary.jpg',
+      Description: 'https://img.example/secondary.jpg',
+    });
+    expect(fields['SecondaryImageAltText']).toBe('Team photo');
+    expect(fields['SecondaryImageCaption']).toBe('After the pour');
+    expect(fields['ShowSecondaryImage']).toBe(true);
+    expect(fields['TeamViewerMode']).toBe('grouped');
+    expect(fields['TeamViewerGroupingMode']).toBe('discipline');
+    expect(fields['TeamViewerSortMode']).toBe('manual');
+    expect(fields['TeamViewerMaxInitialVisible']).toBe(8);
+    expect(fields['TeamViewerAllowExpand']).toBe(true);
+    expect(fields['TemplateOverrideAllowed']).toBe(false);
     // Obsolete master field names must NOT appear in the write payload.
     expect(fields['PostId']).toBeUndefined();
     expect(fields['PostFamily']).toBeUndefined();

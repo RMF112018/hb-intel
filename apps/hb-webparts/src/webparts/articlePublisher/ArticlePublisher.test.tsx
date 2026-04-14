@@ -3,7 +3,7 @@ import type {
   PublisherArticleRow,
   PublisherPromotionRuleRow,
 } from '../../homepage/data/publisherAdapter/index.js';
-import { applyPromotionPolicyToDraft } from './ArticlePublisher';
+import { applyPromotionPolicyToDraft, update } from './ArticlePublisher';
 
 function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
@@ -85,5 +85,26 @@ describe('applyPromotionPolicyToDraft', () => {
     expect(unlockedSkipped.policy.isLocked).toBe(false);
     expect(unlockedSkipped.draft.IsFeatured).toBe(false);
     expect(unlockedSkipped.draft.IsPinned).toBe(false);
+  });
+
+  it('preserves advanced presentation fields when policy is applied before save', () => {
+    const draft = update(
+      update(
+        update(
+          update(article(), 'SecondaryImage', 'https://img.example/secondary.jpg'),
+          'SecondaryImageAltText',
+          'Secondary alt',
+        ),
+        'TeamViewerMode',
+        'summaryExpand',
+      ),
+      'TeamViewerAllowExpand',
+      true,
+    );
+    const resolved = applyPromotionPolicyToDraft(draft, [rule()]);
+    expect(resolved.draft.SecondaryImage).toBe('https://img.example/secondary.jpg');
+    expect(resolved.draft.SecondaryImageAltText).toBe('Secondary alt');
+    expect(resolved.draft.TeamViewerMode).toBe('summaryExpand');
+    expect(resolved.draft.TeamViewerAllowExpand).toBe(true);
   });
 });

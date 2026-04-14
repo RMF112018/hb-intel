@@ -33,6 +33,9 @@ import type {
   PublishingErrorOperation,
   SpotlightType,
   SyncStatus,
+  TeamViewerGroupingMode,
+  TeamViewerMode,
+  TeamViewerSortMode,
   WorkflowState,
 } from './publisherEnums';
 import {
@@ -50,6 +53,9 @@ import {
   PUBLISHING_ERROR_OPERATION_VALUES,
   SPOTLIGHT_TYPE_VALUES,
   SYNC_STATUS_VALUES,
+  TEAM_VIEWER_GROUPING_MODE_VALUES,
+  TEAM_VIEWER_MODE_VALUES,
+  TEAM_VIEWER_SORT_MODE_VALUES,
   WORKFLOW_STATE_VALUES,
 } from './publisherEnums';
 
@@ -134,6 +140,11 @@ const spotlight = one<SpotlightType>(SPOTLIGHT_TYPE_VALUES);
 const spotlightMany = many<SpotlightType>(SPOTLIGHT_TYPE_VALUES);
 const stage = one<ProjectStage>(PROJECT_STAGE_VALUES);
 const stageMany = many<ProjectStage>(PROJECT_STAGE_VALUES);
+const teamViewerMode = one<TeamViewerMode>(TEAM_VIEWER_MODE_VALUES);
+const teamViewerGroupingMode = one<TeamViewerGroupingMode>(
+  TEAM_VIEWER_GROUPING_MODE_VALUES,
+);
+const teamViewerSortMode = one<TeamViewerSortMode>(TEAM_VIEWER_SORT_MODE_VALUES);
 const subject = one<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
 const subjectMany = many<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
 const workflowState = one<WorkflowState>(WORKFLOW_STATE_VALUES);
@@ -238,6 +249,15 @@ export function mapArticleRow(
     ShowTeamViewer: bool(raw['ShowTeamViewer']),
     TeamViewerTitle: str(raw['TeamViewerTitle']),
     TeamViewerIntro: str(raw['TeamViewerIntro']),
+    TeamViewerMode: teamViewerMode(raw['TeamViewerMode']),
+    TeamViewerGroupingMode: teamViewerGroupingMode(raw['TeamViewerGroupingMode']),
+    TeamViewerSortMode: teamViewerSortMode(raw['TeamViewerSortMode']),
+    TeamViewerMaxInitialVisible: num(raw['TeamViewerMaxInitialVisible']),
+    TeamViewerAllowExpand: bool(raw['TeamViewerAllowExpand']),
+    SecondaryImage: url(raw['SecondaryImage']),
+    SecondaryImageAltText: str(raw['SecondaryImageAltText']),
+    SecondaryImageCaption: str(raw['SecondaryImageCaption']),
+    ShowSecondaryImage: bool(raw['ShowSecondaryImage']),
     IsFeatured: bool(raw['IsFeatured']),
     FeaturedRank: num(raw['FeaturedRank']),
     IsPinned: bool(raw['IsPinned']),
