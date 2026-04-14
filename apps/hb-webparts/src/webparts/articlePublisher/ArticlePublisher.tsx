@@ -48,6 +48,7 @@ import {
   type PublisherWorkflowHistoryRow,
   selectPromotionDefaults,
   type PromotionDefaults,
+  resolveTemplate,
 } from '../../homepage/data/publisherAdapter/index.js';
 import { buildPublishResolutionContext } from '../../homepage/data/publisherAdapter/publishResolutionContext.js';
 import {
@@ -85,15 +86,17 @@ function nowIso(): string {
 /**
  * Build a blank authoring draft for a brand-new article.
  *
- * `TemplateKey` is left intentionally empty — the deterministic
- * template resolver (`resolveTemplate`) treats an empty/whitespace
- * `TemplateKey` as "no admin override" and picks the active registry
- * entry whose Destination + ContentTypes + applicability filters
- * match the article. Seeding a hard-coded key here would short-
- * circuit that logic and make the registry performative (P1-2).
- * Operators who want a specific template can still supply one via
- * the authoring surface's TemplateKey field, which the resolver
- * honors as an explicit admin override.
+ * `TemplateKey` is intentionally blank on the IN-MEMORY draft —
+ * the tenant `HB Articles.TemplateKey` column is required, so the
+ * save path (`handleSave`) runs the deterministic template
+ * resolver against the active registry and stamps a real key
+ * before the first upsert. Blank is therefore a transient
+ * authoring state only; persisted list rows always carry a
+ * non-empty TemplateKey. Seeding a hard-coded key here would
+ * short-circuit resolver selection and make the registry
+ * performative (P1-2 closure). Operators who want a specific
+ * template supply one via the authoring surface's TemplateKey
+ * field, which the resolver honors as an explicit admin override.
  */
 function emptyArticle(promotion: PromotionDefaults): PublisherArticleRow {
   const id = `art-${Date.now()}-${Math.floor(Math.random() * 1e6)
@@ -302,10 +305,45 @@ export function ArticlePublisher({
     setBusy(true);
     setStatus('Saving…');
     try {
-      const updated = { ...articleDraft, UpdatedDateUtc: nowIso() };
+      // Contract: persisted `HB Articles` rows always carry a
+      // non-empty TemplateKey. The editor lets a new draft start
+      // with a blank TemplateKey as a transient authoring state,
+      // and the save path runs the deterministic resolver against
+      // the active template registry to stamp a real key before
+      // upsert. Blank-means-auto-select stays a UI convenience;
+      // the list row never stores blank. Closes the TemplateKey
+      // contract contradiction (Phase-05 Prompt-01).
+      let resolvedTemplateKey = articleDraft.TemplateKey;
+      if (!resolvedTemplateKey || resolvedTemplateKey.trim().length === 0) {
+        const registry = await repositories.templateRegistry.listActive();
+        const resolution = resolveTemplate(
+          {
+            TemplateKey: undefined,
+            ArticleContentType: articleDraft.ArticleContentType,
+            Destination: articleDraft.Destination,
+            SpotlightType: articleDraft.SpotlightType,
+            ProjectStage: articleDraft.ProjectStage,
+            ArticleSubject: articleDraft.ArticleSubject,
+          },
+          registry,
+        );
+        if (!resolution.ok) {
+          setStatus(
+            `Save blocked — could not resolve a template for this article (${resolution.reason}). ${resolution.message}`,
+          );
+          return;
+        }
+        resolvedTemplateKey = resolution.entry.TemplateKey;
+      }
+      const updated: PublisherArticleRow = {
+        ...articleDraft,
+        TemplateKey: resolvedTemplateKey,
+        UpdatedDateUtc: nowIso(),
+      };
       await repositories.articles.upsert(updated);
       await repositories.teamMembers.replaceAllForArticle(updated.ArticleId, teamDraft);
       await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
+      setArticleDraft(updated);
       setStatus('Saved.');
       await reloadList();
       await reloadSelected(updated.ArticleId);
