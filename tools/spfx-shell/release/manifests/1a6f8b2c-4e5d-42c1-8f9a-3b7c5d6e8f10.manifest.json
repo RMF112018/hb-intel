@@ -1,6 +1,6 @@
 {
   "id": "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10",
-  "alias": "ProjectSpotlightPublisherWebPart",
+  "alias": "ArticlePublisherWebPart",
   "componentType": "WebPart",
   "version": "1.0.0",
   "manifestVersion": 2,
@@ -17,10 +17,10 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Project Spotlight Publisher"
+        "default": "Article Publisher"
       },
       "description": {
-        "default": "Authoring surface for Project Spotlight posts. Hosted on the HBCentral publisher page; writes the post master + child records and publishes pages on the ProjectSpotlight site."
+        "default": "Authoring surface for structured article publishing. Current sprint supports Project Spotlight article workflows, hosted on the HBCentral publisher page; future sprints may extend to additional article destinations such as Company Pulse."
       },
       "officeFabricIconFontName": "PageEdit",
       "hiddenFromToolbox": true,

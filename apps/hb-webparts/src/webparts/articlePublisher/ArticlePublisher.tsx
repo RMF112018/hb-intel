@@ -1,5 +1,10 @@
 /**
- * Project Spotlight Publisher — authoring surface (v1).
+ * Article Publisher — authoring surface for structured article publishing.
+ *
+ * The current sprint supports the Project Spotlight article workflow
+ * (monthly spotlight posts, page-bound to the ProjectSpotlight site).
+ * Future sprints may extend this app to additional article destinations
+ * such as Company Pulse; no other destinations are wired today.
  *
  * Hosted on the HBCentral publisher page. Ownership:
  *   - Reads publisher lists from HBCentral through `createPublisherRepositories()`
@@ -70,14 +75,14 @@ import type {
   TeamViewerControlPayload,
   TextControlPayload,
 } from '../../homepage/data/publisherAdapter/pageGeneration/pageCompositor.js';
-import styles from './project-spotlight-publisher.module.css';
+import styles from './article-publisher.module.css';
 
 // Convenience aliases so the JSX stays compact.
 const MEDIA_ROLES: readonly MediaRole[] = ['gallery', 'supporting', 'hero', 'secondary'];
 
 /* ── Props ──────────────────────────────────────────────────── */
 
-export interface ProjectSpotlightPublisherProps {
+export interface ArticlePublisherProps {
   /** HBCentral absolute URL. Platform `storeSiteUrl` is invoked with this. */
   siteUrl?: string;
   /** When set, overrides the default repository factory (tests only). */
@@ -141,10 +146,10 @@ function newHistoryRow(
 
 type Tab = 'metadata' | 'banner' | 'content' | 'team' | 'gallery' | 'preview' | 'status';
 
-export function ProjectSpotlightPublisher({
+export function ArticlePublisher({
   siteUrl,
   repositoriesOverride,
-}: ProjectSpotlightPublisherProps) {
+}: ArticlePublisherProps) {
   React.useEffect(() => {
     if (siteUrl) storeSiteUrl(siteUrl);
   }, [siteUrl]);
