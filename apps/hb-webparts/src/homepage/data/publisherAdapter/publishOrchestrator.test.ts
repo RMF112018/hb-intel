@@ -457,6 +457,110 @@ describe('publishOrchestrator', () => {
     expect(bindingRow.PageShellVersion).toBe('1.0.0');
   });
 
+  it('regenerate supersedes the single-row binding in place and stamps prior identity into the workflow-history ActionNote', async () => {
+    const existing: PublisherPageBindingRow = {
+      BindingId: 'bnd-prior-42',
+      ArticleId: 'art-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
+      TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+      PageId: '999',
+      PageName: 'acme-tower-april.aspx',
+      PageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+      // Force regeneration via templateKey drift — isolates the
+      // supersession behavior from pageName / shell drift paths.
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-old-template-v1',
+      RenderVersion: '1.0.0',
+    };
+    const f = fixture({ existingBinding: existing });
+    f.createOrUpdate.mockResolvedValue({
+      ok: true as const,
+      pageId: '1001',
+      pageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+      pageName: 'acme-tower-april.aspx',
+      wasCreated: true,
+    });
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.workflowHistory.append = historyAppend;
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'republish',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-new-99',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.action).toBe('regenerate');
+
+    // New BindingId + new PageId overwrite the prior row — one-row
+    // authoritative binding model.
+    const bindingRow = (f.upsertBinding.mock.calls[0]![0] as {
+      row: PublisherPageBindingRow;
+    }).row;
+    expect(bindingRow.BindingId).toBe('bnd-new-99');
+    expect(bindingRow.PageId).toBe('1001');
+
+    // Prior identity surfaced on the success outcome.
+    expect(result.supersededBinding).toEqual({
+      bindingId: 'bnd-prior-42',
+      pageId: '999',
+      pageName: 'acme-tower-april.aspx',
+      pageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+    });
+
+    // Prior identity durably persisted on the workflow-history row.
+    expect(historyAppend).toHaveBeenCalledTimes(1);
+    const historyRow = historyAppend.mock.calls[0]![0];
+    expect(historyRow.ActionNote).toContain('supersededBinding=');
+    expect(historyRow.ActionNote).toContain('"bindingId":"bnd-prior-42"');
+    expect(historyRow.ActionNote).toContain('"pageId":"999"');
+    expect(historyRow.ActionNote).toContain('newBinding=');
+    expect(historyRow.ActionNote).toContain('"bindingId":"bnd-new-99"');
+    expect(historyRow.ActionNote).toContain('"pageId":"1001"');
+  });
+
+  it('inPlaceUpdate does NOT emit a supersededBinding — same row is MERGEd without identity change', async () => {
+    const existing: PublisherPageBindingRow = {
+      BindingId: 'bnd-existing-42',
+      ArticleId: 'art-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
+      TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+      PageId: '999',
+      PageName: 'acme-tower-april.aspx',
+      PageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
+    };
+    const f = fixture({ existingBinding: existing });
+    f.createOrUpdate.mockImplementation(async (input) => ({
+      ok: true as const,
+      pageId: input.targetPageId ?? '123',
+      pageUrl: existing.PageUrl!,
+      pageName: existing.PageName!,
+      wasCreated: false,
+    }));
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'republish',
+      now: () => '2026-04-13T10:00:00.000Z',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.action).toBe('inPlaceUpdate');
+    expect(result.supersededBinding).toBeUndefined();
+  });
+
   it('blocks republish on archived binding', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',

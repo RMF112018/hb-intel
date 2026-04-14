@@ -72,6 +72,21 @@ export interface PublishOrchestratorDeps {
   readonly pageShellService: PageShellService;
 }
 
+/**
+ * Prior binding identity captured just before a regenerate write
+ * supersedes the single `HB Article Destination Pages` row. Populated
+ * only when the decision is `regenerate` and the article had a
+ * pre-existing binding row; used to stamp the workflow-history note
+ * and returned on the success outcome so callers can audit the
+ * supersession without re-reading the list.
+ */
+export interface SupersededBindingIdentity {
+  readonly bindingId: string;
+  readonly pageId?: string;
+  readonly pageName?: string;
+  readonly pageUrl?: string;
+}
+
 export type PublishOutcome =
   | {
       readonly ok: true;
@@ -86,6 +101,13 @@ export type PublishOutcome =
       readonly itemId?: number;
       readonly decision: RepublishDecision;
       readonly validation?: ValidationResult;
+      /**
+       * Populated only on `action: 'regenerate'` when a prior binding
+       * row existed. Records the identity the single-row authoritative
+       * binding carried before the MERGE — the durable record of the
+       * supersession lives in `HB Article Workflow History`.
+       */
+      readonly supersededBinding?: SupersededBindingIdentity;
     }
   | {
       readonly ok: false;
@@ -537,12 +559,39 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     // this code path. Best-effort: a history-append failure is
     // logged through recordPublishingError but does not roll back
     // the successful publish.
+    // On `regenerate`, capture the identity of the single
+    // authoritative binding row before it is superseded in place
+    // (new BindingId + new PageId/PageUrl/PageName overwrite the
+    // prior values on the same SharePoint item). The prior identity
+    // is stamped into the workflow-history ActionNote as a
+    // structured `supersededBinding=…` marker — that row IS the
+    // durable lineage record for the one-row binding model, since
+    // the tenant list itself does not preserve prior-binding rows.
+    const supersededBinding: SupersededBindingIdentity | undefined =
+      decision.action === 'regenerate' && context.existingBinding
+        ? {
+            bindingId: context.existingBinding.BindingId,
+            pageId: context.existingBinding.PageId,
+            pageName: context.existingBinding.PageName,
+            pageUrl: context.existingBinding.PageUrl,
+          }
+        : undefined;
+    const supersessionMarker = supersededBinding
+      ? ` [supersededBinding=${JSON.stringify(supersededBinding)}; newBinding=${JSON.stringify(
+          {
+            bindingId: bindingRow.BindingId,
+            pageId: bindingRow.PageId,
+            pageName: bindingRow.PageName,
+            pageUrl: bindingRow.PageUrl,
+          },
+        )}]`
+      : '';
     const historyTitle = workflowStateChanged
       ? `${previousWorkflowState} → published`
       : `republish (${decision.action})`;
     const historyNote = workflowStateChanged
-      ? `Article published via orchestrator (${decision.action}).`
-      : `Article republished via orchestrator (${decision.action}).`;
+      ? `Article published via orchestrator (${decision.action}).${supersessionMarker}`
+      : `Article republished via orchestrator (${decision.action}).${supersessionMarker}`;
     try {
       await repositories.workflowHistory.append({
         HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
@@ -584,6 +633,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       itemId: bindingOutcome.itemId,
       decision,
       validation,
+      supersededBinding,
     };
   }
 

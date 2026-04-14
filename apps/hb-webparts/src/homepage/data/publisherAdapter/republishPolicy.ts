@@ -10,9 +10,22 @@
  *   - `inPlaceUpdate` — binding exists and is compatible; update the
  *                       existing page (preserve `PageId` / `PageUrl`)
  *                       and merge the binding row.
- *   - `regenerate`    — binding exists but shell or template drift
- *                       requires a new page; the orchestrator creates a
- *                       new page and archives the prior binding.
+ *   - `regenerate`    — binding exists but template-key or page-name
+ *                       drift requires a new destination page. The
+ *                       binding model is **one-row authoritative state
+ *                       keyed by `ArticleId`**: the single
+ *                       `HB Article Destination Pages` row is
+ *                       superseded in place (new BindingId, new
+ *                       PageId / PageUrl / PageName overwrite the
+ *                       prior identity). The regenerate event is
+ *                       persisted durably in `HB Article Workflow
+ *                       History`, whose ActionNote carries the prior
+ *                       identity (BindingId / PageId / PageName /
+ *                       PageUrl) so operators can audit the
+ *                       supersession. There is no separate "archived
+ *                       binding" row — the tenant list does not model
+ *                       one, and the workflow-history row IS the
+ *                       lineage record.
  *   - `blocked`       — binding is in a terminal state (archived /
  *                       withdrawn) and the caller must reactivate
  *                       deliberately before republishing.

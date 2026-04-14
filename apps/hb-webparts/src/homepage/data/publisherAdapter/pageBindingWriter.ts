@@ -1,12 +1,21 @@
 /**
  * SharePoint write seam for the tenant `HB Article Destination Pages` list.
  *
- * Upserts a binding row keyed by the tenant `ArticleId` FK. Mirrors the structural
- * pattern established by `heroBannerListWriter`: a title-bound list
- * endpoint (`getbytitle(...)`) plus the platform's request-digest
- * primitive for CSRF. When tenant GUIDs become available the list
- * binding can be swapped to `buildListItemsEndpoint` without changing
- * callers.
+ * **Binding model — one-row authoritative state.** The tenant list
+ * stores exactly one row per `ArticleId`; this writer upserts that
+ * row. There is no prior-binding lineage table. Regeneration
+ * (`decideRepublishAction → 'regenerate'`) supersedes the single row
+ * in place: the new `BindingId` + new `PageId` / `PageUrl` / `PageName`
+ * overwrite the prior identity on the same SharePoint item. The
+ * durable lineage / audit record for the supersession lives in
+ * `HB Article Workflow History`, whose ActionNote the orchestrator
+ * stamps with the prior identity before merging the new row.
+ *
+ * Mirrors the structural pattern established by
+ * `heroBannerListWriter`: a title-bound list endpoint
+ * (`getbytitle(...)`) plus the platform's request-digest primitive
+ * for CSRF. When tenant GUIDs become available the list binding can
+ * be swapped to `buildListItemsEndpoint` without changing callers.
  *
  * Authority:
  *   architecture doc 03 §E — binding-row field set (tenant list: HB Article Destination Pages).
