@@ -354,11 +354,11 @@ function validateGlobalRules(
   });
 
   // Rule 15 — unresolved generation error on the existing binding.
-  if (context.existingBinding?.BindingStatus === 'error') {
+  if (context.existingBinding?.PublishStatus === 'error') {
     findings.push({
       category: 'page-generation-blocker',
       severity: 'warning',
-      field: 'existingBinding.BindingStatus',
+      field: 'existingBinding.PublishStatus',
       message:
         'The previous publish attempt ended in error. Republish will retry.',
       actionHint: 'Review the last operation and republish to retry.',

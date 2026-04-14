@@ -341,8 +341,7 @@ export function ArticlePublisher({
   const firstBlockingError = latestValidation?.errors[0]?.message;
   const hasDrift =
     !!preview && preview.ok &&
-    (preview.drift.shellKeyDrift ||
-      preview.drift.shellVersionDrift ||
+    (preview.drift.shellVersionDrift ||
       preview.drift.templateKeyDrift ||
       preview.drift.templateVersionDrift);
 
@@ -411,7 +410,7 @@ export function ArticlePublisher({
               <div className={styles.meta}>
                 <span className={styles.stateBadge}>{articleDraft.WorkflowState}</span>
                 {binding && (
-                  <span className={styles.bindingBadge}>binding {binding.BindingStatus}</span>
+                  <span className={styles.bindingBadge}>binding {binding.PublishStatus}</span>
                 )}
               </div>
             </header>
@@ -1019,13 +1018,18 @@ function StatusPanel({
         ) : (
           <dl className={styles.dl}>
             <Dt label="Binding ID" value={binding.BindingId} />
-            <Dt label="Status" value={binding.BindingStatus} />
-            <Dt label="Page name" value={binding.PageName} />
+            <Dt label="Publish status" value={binding.PublishStatus} />
+            <Dt label="Sync status" value={binding.SyncStatus ?? '(none)'} />
+            <Dt label="Page name" value={binding.PageName ?? '(none)'} />
             <Dt label="Page URL" value={binding.PageUrl ?? '(not yet set)'} />
-            <Dt label="Shell" value={`${binding.PageShellKey} @ ${binding.PageShellVersion}`} />
-            <Dt label="Template" value={`${binding.TemplateKey} @ ${binding.TemplateVersion}`} />
-            <Dt label="Last operation" value={binding.LastOperation ?? '(none)'} />
-            <Dt label="Last synced" value={binding.LastSuccessfulSyncDateUtc ?? '(none)'} />
+            <Dt
+              label="Page template"
+              value={`${binding.PageTemplateKey} @ ${binding.RenderVersion ?? '(no render version)'}`}
+            />
+            <Dt label="Page shell version" value={binding.PageShellVersion ?? '(none)'} />
+            <Dt label="Last synced" value={binding.LastSyncDateUtc ?? '(none)'} />
+            <Dt label="Last sync message" value={binding.LastSyncMessage ?? '(none)'} />
+            <Dt label="Published" value={binding.PublishedDateUtc ?? '(not yet published)'} />
           </dl>
         )}
       </section>
@@ -1067,7 +1071,7 @@ function PreviewPanel({
     );
   }
   const { validation, drift, decision, composedPage } = outcome;
-  const driftLevel = drift.shellKeyDrift || drift.templateKeyDrift
+  const driftLevel = drift.templateKeyDrift
     ? 'hard'
     : drift.shellVersionDrift || drift.templateVersionDrift
       ? 'soft'

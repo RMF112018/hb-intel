@@ -82,15 +82,10 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
   it('mapPageBindingRow accepts ArticleId FK and rejects PostId', () => {
     const baseFields = {
       BindingId: 'bnd-1',
+      Title: 'Binding title',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageName: 'p.aspx',
-      SourceTemplatePath: 'SitePages/Templates/t.aspx',
-      PageShellKey: 'ps-shell-v1',
-      PageShellVersion: '1.0.0',
-      TemplateKey: 'tmpl-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'tmpl-v1',
+      PublishStatus: 'published',
     };
     expect(mapPageBindingRow({ ...baseFields, ArticleId: ARTICLE_ID })?.ArticleId).toBe(ARTICLE_ID);
     expect(mapPageBindingRow({ ...baseFields, PostId: ARTICLE_ID })).toBeUndefined();
@@ -150,15 +145,13 @@ describe('child-row writers emit ArticleId, never PostId', () => {
     const row: PublisherPageBindingRow = {
       BindingId: 'bnd-1',
       ArticleId: ARTICLE_ID,
+      Title: 'Test',
+      PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
       PageName: 'p.aspx',
-      SourceTemplatePath: 'SitePages/Templates/t.aspx',
-      PageShellKey: 'ps-shell-v1',
       PageShellVersion: '1.0.0',
-      TemplateKey: 'tmpl-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'tmpl-v1',
+      RenderVersion: '1.0.0',
     };
     const fields = mapBindingRowToListFields(row);
     expect(fields['ArticleId']).toBe(ARTICLE_ID);

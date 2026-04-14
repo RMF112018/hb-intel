@@ -135,7 +135,7 @@ describe('buildPublisherPreview', () => {
     ]);
     expect(result.validation.ok).toBe(true);
     expect(result.decision.action).toBe('create');
-    expect(result.drift.shellKeyDrift).toBe(false);
+    expect(result.drift).toBe(false);
     expect(result.drift.shellVersionDrift).toBe(false);
   });
 
@@ -170,16 +170,14 @@ describe('buildPublisherPreview', () => {
     const binding: PublisherPageBindingRow = {
       BindingId: 'b-1',
       ArticleId: 'post-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageName: 'preview-post.aspx',
-      SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '0.9.0',
-      TemplateKey: 'ps-inprogress-monthly-v0',
-      TemplateVersion: '0.9.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'ps-inprogress-monthly-v0',
+      RenderVersion: '0.9.0',
     };
     const result = await buildPublisherPreview(
       repos({ existingBinding: binding }),
@@ -187,7 +185,7 @@ describe('buildPublisherPreview', () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.drift.shellKeyDrift).toBe(true);
+    expect(result.drift).toBe(true);
     expect(result.drift.templateKeyDrift).toBe(true);
     expect(result.drift.shellVersionDrift).toBe(true);
     expect(result.drift.templateVersionDrift).toBe(true);

@@ -69,15 +69,13 @@ function binding(
   return {
     BindingId: 'bnd-001',
     ArticleId: 'post-001',
+    Title: 'Acme Tower — April',
+    PublishStatus: 'published',
     TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
     PageName: 'post-001.aspx',
-    SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     PageShellVersion: '1.0.0',
-    TemplateKey: 'ps-inprogress-monthly-v1',
-    TemplateVersion: '1.0.0',
-    BindingStatus: 'published',
+    PageTemplateKey: 'ps-inprogress-monthly-v1',
+    RenderVersion: '1.0.0',
     ...over,
   };
 }
@@ -158,37 +156,39 @@ describe('decideRepublishAction', () => {
     const d = decideRepublishAction({
       composed: composed({ templateVersion: '2.0.0' }),
       template: template({ }),
-      existingBinding: binding({ TemplateVersion: '1.0.0' }),
+      existingBinding: binding({ RenderVersion: '1.0.0' }),
     });
     expect(d.action).toBe('regenerate');
     expect(d.reason).toBe('templateVersionDrift');
   });
 
-  it('blocks republish when binding is archived', () => {
+  it('blocks republish when the master article is archived', () => {
     const d = decideRepublishAction({
       composed: composed(),
       template: template(),
-      existingBinding: binding({ BindingStatus: 'archived' }),
+      existingBinding: binding(),
+      article: { WorkflowState: 'archived' } as unknown as import('./publisherContracts').PublisherArticleRow,
     });
     expect(d.action).toBe('blocked');
-    expect(d.reason).toBe('bindingArchived');
+    expect(d.reason).toBe('articleArchived');
   });
 
-  it('blocks republish when binding is withdrawn', () => {
+  it('blocks republish when the master article is withdrawn', () => {
     const d = decideRepublishAction({
       composed: composed(),
       template: template(),
-      existingBinding: binding({ BindingStatus: 'withdrawn' }),
+      existingBinding: binding(),
+      article: { WorkflowState: 'withdrawn' } as unknown as import('./publisherContracts').PublisherArticleRow,
     });
     expect(d.action).toBe('blocked');
-    expect(d.reason).toBe('bindingWithdrawn');
+    expect(d.reason).toBe('articleWithdrawn');
   });
 
   it('retries in-place when previous binding was in error state', () => {
     const d = decideRepublishAction({
       composed: composed(),
       template: template(),
-      existingBinding: binding({ BindingStatus: 'error' }),
+      existingBinding: binding({ PublishStatus: 'error' }),
     });
     expect(d.action).toBe('inPlaceUpdate');
     expect(d.reason).toBe('bindingError');

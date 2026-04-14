@@ -93,6 +93,25 @@ export const PAGE_SYNC_STATUS_VALUES = [
 ] as const;
 export type PageSyncStatus = (typeof PAGE_SYNC_STATUS_VALUES)[number];
 
+/**
+ * Publish status on the tenant `HB Article Destination Pages` list
+ * (`PublishStatus` column). Replaces the prior `BindingStatus` enum.
+ */
+export const PUBLISH_STATUS_VALUES = [
+  'draft',
+  'published',
+  'error',
+  'scheduled',
+] as const;
+export type PublishStatus = (typeof PUBLISH_STATUS_VALUES)[number];
+
+/**
+ * Sync status on the tenant `HB Article Destination Pages` list
+ * (`SyncStatus` column).
+ */
+export const SYNC_STATUS_VALUES = ['in-sync', 'pending', 'error'] as const;
+export type SyncStatus = (typeof SYNC_STATUS_VALUES)[number];
+
 /* ── Legacy / non-master-record enums (scope-deferred) ───────────────── */
 /* These remain until later Phase-02 prompts realign the non-master lists
    (template registry, page bindings, publishing errors, etc.) to tenant

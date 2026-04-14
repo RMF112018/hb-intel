@@ -192,9 +192,9 @@ describe('publishOrchestrator', () => {
     const bindingRow = (f.upsertBinding.mock.calls[0]![0] as { row: PublisherPageBindingRow }).row;
     expect(bindingRow.BindingId).toBe('bnd-generated');
     expect(bindingRow.PageId).toBe('123');
-    expect(bindingRow.BindingStatus).toBe('published');
-    expect(bindingRow.LastOperation).toBe('publish');
-    expect(bindingRow.PageShellKey).toBe('ps-shell-inprogress-oob-banner-team-gallery-v1');
+    expect(bindingRow.PublishStatus).toBe('published');
+    expect(bindingRow.SyncStatus).toBe('in-sync');
+    expect(bindingRow.PageShellVersion).toBe('1.0.0');
     expect(bindingRow.PageShellVersion).toBe('1.0.0');
   });
 
@@ -202,17 +202,15 @@ describe('publishOrchestrator', () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
       ArticleId: 'post-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
       PageUrl: 'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
-      SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '1.0.0',
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
@@ -227,23 +225,21 @@ describe('publishOrchestrator', () => {
     expect(result.action).toBe('inPlaceUpdate');
     const bindingRow = (f.upsertBinding.mock.calls[0]![0] as { row: PublisherPageBindingRow }).row;
     expect(bindingRow.BindingId).toBe('bnd-existing-42');
-    expect(bindingRow.LastOperation).toBe('republish');
+    expect(bindingRow.SyncStatus).toBe('in-sync');
   });
 
   it('idempotent republish emits noOp when binding is already in sync', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
       ArticleId: 'post-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
-      SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '1.0.0',
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
@@ -264,16 +260,14 @@ describe('publishOrchestrator', () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
       ArticleId: 'post-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
-      SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '0.9.0',
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
@@ -288,23 +282,21 @@ describe('publishOrchestrator', () => {
     expect(result.action).toBe('regenerate');
     const bindingRow = (f.upsertBinding.mock.calls[0]![0] as { row: PublisherPageBindingRow }).row;
     expect(bindingRow.BindingId).toBe('bnd-regen');
-    expect(bindingRow.LastOperation).toBe('regenerate');
-    expect(bindingRow.PageShellKey).toBe('ps-shell-inprogress-oob-banner-team-gallery-v1');
+    expect(bindingRow.SyncStatus).toBe('in-sync');
+    expect(bindingRow.PageShellVersion).toBe('1.0.0');
   });
 
   it('blocks republish on archived binding', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
       ArticleId: 'post-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageName: 'acme-tower-april.aspx',
-      SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '1.0.0',
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'archived',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);

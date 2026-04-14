@@ -187,16 +187,14 @@ describe('validatePublishContext', () => {
         existingBinding: {
           BindingId: 'b-1',
           ArticleId: 'post-001',
+          Title: 'Acme Tower — April',
+          PublishStatus: 'published',
           TargetSiteUrl:
             'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-          TargetSiteKey: 'projectSpotlight',
-          SourceTemplatePath: '',
-          PageShellKey: 'ps-shell-v1',
           PageName: 'p.aspx',
           PageShellVersion: '0.9.0',
-          TemplateKey: 'ps-inprogress-monthly-v1',
-          TemplateVersion: '1.0.0',
-          BindingStatus: 'published',
+          PageTemplateKey: 'ps-inprogress-monthly-v1',
+          RenderVersion: '1.0.0',
         },
       }),
     );

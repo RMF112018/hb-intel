@@ -17,21 +17,20 @@
 import type {
   ArticleContentType,
   ArticleSubject,
-  BindingStatus,
   Destination,
   GalleryLayoutProfile,
   HeroMetadataMode,
   HeroRendererKind,
   HeroThemeVariant,
-  LastOperation,
   MediaRole,
   PageSyncStatus,
   ProjectStage,
+  PublishStatus,
   PublishingErrorCategory,
   PublishingErrorOperation,
   RetryStatus,
   SpotlightType,
-  TargetSiteKey,
+  SyncStatus,
   TeamViewerDensity,
   TeamViewerLayout,
   WorkflowHistoryAction,
@@ -243,23 +242,38 @@ export interface PublisherTemplateRegistryRow {
 /* E. HB Article Destination Pages                                     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Tenant-aligned `HB Article Destination Pages` row. Keyed by
+ * `BindingId`; foreign-keyed to the master record via `ArticleId`.
+ *
+ * Required tenant columns: ArticleId, BindingId, Title, TargetSiteUrl,
+ * PageTemplateKey, PublishStatus.
+ *
+ * Obsolete pre-tenant-audit columns removed: TargetSiteKey (not on
+ * tenant — Destination is a master-record column), BindingStatus
+ * (replaced by PublishStatus), TemplateKey/TemplateVersion (replaced
+ * by PageTemplateKey/RenderVersion), PageShellKey (not a tenant
+ * column — page template identity collapses into PageTemplateKey),
+ * SourceTemplatePath (not a tenant column), LastOperation /
+ * LastOperationDateUtc / LastSuccessfulSyncDateUtc (replaced by
+ * LastSyncDateUtc + SyncStatus + LastSyncMessage).
+ */
 export interface PublisherPageBindingRow {
   readonly BindingId: string;
   readonly ArticleId: string;
+  readonly Title: string;
   readonly TargetSiteUrl: UrlString;
-  readonly TargetSiteKey: TargetSiteKey;
+  readonly PageTemplateKey: string;
+  readonly PublishStatus: PublishStatus;
   readonly PageId?: string;
-  readonly PageName: string;
+  readonly PageName?: string;
   readonly PageUrl?: UrlString;
-  readonly SourceTemplatePath: string;
-  readonly PageShellKey: string;
-  readonly PageShellVersion: string;
-  readonly TemplateKey: string;
-  readonly TemplateVersion: string;
-  readonly BindingStatus: BindingStatus;
-  readonly LastOperation?: LastOperation;
-  readonly LastOperationDateUtc?: IsoDateTimeUtc;
-  readonly LastSuccessfulSyncDateUtc?: IsoDateTimeUtc;
+  readonly PageShellVersion?: string;
+  readonly RenderVersion?: string;
+  readonly SyncStatus?: SyncStatus;
+  readonly LastSyncDateUtc?: IsoDateTimeUtc;
+  readonly LastSyncMessage?: string;
+  readonly PublishedDateUtc?: IsoDateTimeUtc;
 }
 
 /* ------------------------------------------------------------------ */

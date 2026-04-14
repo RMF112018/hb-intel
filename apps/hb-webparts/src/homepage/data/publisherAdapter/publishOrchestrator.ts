@@ -35,7 +35,6 @@ import {
 } from './republishPolicy';
 import type { ComposedPage } from './pageGeneration/pageCompositor';
 import type { PublisherPageBindingRow } from './publisherContracts';
-import type { LastOperation } from './publisherEnums';
 import {
   validatePublishContext,
   type ValidationResult,
@@ -194,6 +193,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       composed: page,
       template: context.template,
       existingBinding: context.existingBinding,
+      article: context.article,
       idempotent: req.idempotent,
     });
 
@@ -234,34 +234,29 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       };
     }
 
-    const lastOperation: LastOperation =
-      decision.action === 'create'
-        ? 'publish'
-        : decision.action === 'regenerate'
-          ? 'regenerate'
-          : 'republish';
-
-    // PageBindingRow is keyed by the tenant `ArticleId` foreign key.
+    // PageBindingRow follows the tenant `HB Article Destination Pages`
+    // schema. The article-key is the foreign key; PageTemplateKey /
+    // RenderVersion carry the resolved template identity; PublishStatus
+    // and SyncStatus are set to the tenant choice values on successful
+    // publish.
     const bindingRow: PublisherPageBindingRow = {
       BindingId:
         decision.action === 'inPlaceUpdate' && context.existingBinding
           ? context.existingBinding.BindingId
           : bindingIdFactory(req.articleId, now),
       ArticleId: context.article.ArticleId,
+      Title: context.article.Title,
       TargetSiteUrl: context.article.TargetSiteUrl ?? '',
-      TargetSiteKey: 'projectSpotlight',
+      PageTemplateKey: publishResult.page.identity.templateKey,
+      PublishStatus: 'published',
       PageId: publishResult.creation.pageId,
       PageName: publishResult.page.identity.pageName,
       PageUrl: publishResult.creation.pageUrl,
-      SourceTemplatePath: '',
-      PageShellKey: publishResult.page.identity.shellKey,
       PageShellVersion: publishResult.page.identity.shellVersion,
-      TemplateKey: publishResult.page.identity.templateKey,
-      TemplateVersion: publishResult.page.identity.templateVersion,
-      BindingStatus: 'published',
-      LastOperation: lastOperation,
-      LastOperationDateUtc: now,
-      LastSuccessfulSyncDateUtc: now,
+      RenderVersion: publishResult.page.identity.templateVersion,
+      SyncStatus: 'in-sync',
+      LastSyncDateUtc: now,
+      PublishedDateUtc: now,
     };
 
     const bindingOutcome = await pageBindingWriter.upsert({ row: bindingRow });

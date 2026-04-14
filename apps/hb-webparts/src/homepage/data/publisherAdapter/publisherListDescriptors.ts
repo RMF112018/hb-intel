@@ -154,20 +154,19 @@ const TEMPLATE_REGISTRY_MVP_FIELDS = [
 const PAGE_BINDINGS_MVP_FIELDS = [
   'BindingId',
   'ArticleId',
+  'Title',
   'TargetSiteUrl',
-  'TargetSiteKey',
+  'PageTemplateKey',
+  'PublishStatus',
   'PageId',
   'PageName',
   'PageUrl',
-  'SourceTemplatePath',
-  'PageShellKey',
   'PageShellVersion',
-  'TemplateKey',
-  'TemplateVersion',
-  'BindingStatus',
-  'LastOperation',
-  'LastOperationDateUtc',
-  'LastSuccessfulSyncDateUtc',
+  'RenderVersion',
+  'SyncStatus',
+  'LastSyncDateUtc',
+  'LastSyncMessage',
+  'PublishedDateUtc',
 ] as const;
 
 const WORKFLOW_HISTORY_FIELDS = [

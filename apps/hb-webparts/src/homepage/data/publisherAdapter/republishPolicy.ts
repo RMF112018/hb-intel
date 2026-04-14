@@ -32,7 +32,11 @@
  *               same post.
  */
 
-import type { PublisherPageBindingRow, PublisherTemplateRegistryRow } from './publisherContracts';
+import type {
+  PublisherArticleRow,
+  PublisherPageBindingRow,
+  PublisherTemplateRegistryRow,
+} from './publisherContracts';
 import type { ComposedPage } from './pageGeneration/pageCompositor';
 
 export type RepublishAction =
@@ -47,10 +51,9 @@ export type RepublishReason =
   | 'shellVersionMatches'
   | 'shellVersionDrift'
   | 'templateVersionDrift'
-  | 'shellKeyDrift'
   | 'templateKeyDrift'
-  | 'bindingArchived'
-  | 'bindingWithdrawn'
+  | 'articleArchived'
+  | 'articleWithdrawn'
   | 'bindingError'
   | 'contentChanged'
   | 'alreadyInSync';
@@ -59,7 +62,6 @@ export interface RepublishDecision {
   readonly action: RepublishAction;
   readonly reason: RepublishReason;
   readonly regenerationCause?:
-    | 'shellKeyDrift'
     | 'shellVersionDrift'
     | 'templateKeyDrift';
   readonly notes: readonly string[];
@@ -69,6 +71,8 @@ export interface RepublishPolicyInput {
   readonly composed: ComposedPage;
   readonly template: PublisherTemplateRegistryRow;
   readonly existingBinding: PublisherPageBindingRow | undefined;
+  /** The master article; workflow-state gates archival / withdrawal. */
+  readonly article?: PublisherArticleRow;
   /** When true, unchanged-content + version-match produces `noOp`. */
   readonly idempotent?: boolean;
 }
@@ -81,7 +85,30 @@ export interface RepublishPolicyInput {
 export function decideRepublishAction(
   input: RepublishPolicyInput,
 ): RepublishDecision {
-  const { composed, template, existingBinding, idempotent } = input;
+  const { composed, template, existingBinding, article, idempotent } = input;
+
+  // Terminal article-level states — never reactivate implicitly.
+  // The tenant binding row no longer carries `archived`/`withdrawn`
+  // status values; those concerns live on the master article's
+  // `WorkflowState`.
+  if (article?.WorkflowState === 'archived') {
+    return {
+      action: 'blocked',
+      reason: 'articleArchived',
+      notes: [
+        'Article is archived. Reactivation must be an explicit caller decision.',
+      ],
+    };
+  }
+  if (article?.WorkflowState === 'withdrawn') {
+    return {
+      action: 'blocked',
+      reason: 'articleWithdrawn',
+      notes: [
+        'Article is withdrawn. Reactivation must be an explicit caller decision.',
+      ],
+    };
+  }
 
   if (!existingBinding) {
     return {
@@ -93,79 +120,44 @@ export function decideRepublishAction(
     };
   }
 
-  // Terminal states — never reactivate implicitly.
-  if (existingBinding.BindingStatus === 'archived') {
-    return {
-      action: 'blocked',
-      reason: 'bindingArchived',
-      notes: [
-        'Existing binding is archived. Reactivation must be an explicit caller decision.',
-      ],
-    };
-  }
-  if (existingBinding.BindingStatus === 'withdrawn') {
-    return {
-      action: 'blocked',
-      reason: 'bindingWithdrawn',
-      notes: [
-        'Existing binding is withdrawn. Reactivation must be an explicit caller decision.',
-      ],
-    };
-  }
-
   const notes: string[] = [];
 
-  const shellKeyDrift =
-    existingBinding.PageShellKey !== composed.identity.shellKey;
+  const templateKeyDrift =
+    existingBinding.PageTemplateKey !== composed.identity.templateKey;
   const shellVersionDrift =
     existingBinding.PageShellVersion !== composed.identity.shellVersion;
-  const templateKeyDrift =
-    existingBinding.TemplateKey !== composed.identity.templateKey;
   const templateVersionDrift =
-    existingBinding.TemplateVersion !== composed.identity.templateVersion;
+    existingBinding.RenderVersion !== composed.identity.templateVersion;
 
-  // Hard regeneration triggers — they always force a new page even when
-  // the template opts into in-place republish.
-  if (shellKeyDrift) {
-    return {
-      action: 'regenerate',
-      reason: 'shellKeyDrift',
-      regenerationCause: 'shellKeyDrift',
-      notes: [
-        `Shell key changed (${existingBinding.PageShellKey} → ${composed.identity.shellKey}); a new destination page is required.`,
-      ],
-    };
-  }
+  // Hard regeneration trigger — a PageTemplateKey change means the
+  // destination page was composed from a different template and
+  // requires a new page.
   if (templateKeyDrift) {
     return {
       action: 'regenerate',
       reason: 'templateKeyDrift',
       regenerationCause: 'templateKeyDrift',
       notes: [
-        `Template key changed (${existingBinding.TemplateKey} → ${composed.identity.templateKey}); a new destination page is required.`,
+        `PageTemplateKey changed (${existingBinding.PageTemplateKey} → ${composed.identity.templateKey}); a new destination page is required.`,
       ],
     };
   }
 
   // Shell version drift — in-place update is the default for version drift.
-  // The tenant registry no longer carries `ForceRegenerationOnShellChange`;
-  // key drift (above) remains the sole hard-regenerate trigger for the shell.
   if (shellVersionDrift) {
     notes.push(
-      `Shell version drift (${existingBinding.PageShellVersion} → ${composed.identity.shellVersion}); in-place update applied.`,
+      `Shell version drift (${existingBinding.PageShellVersion ?? '(none)'} → ${composed.identity.shellVersion}); in-place update applied.`,
     );
   }
 
-  // Template version drift — always permitted in place; the tenant registry
-  // no longer carries `AllowRepublishInPlace`. Key drift (above) remains
-  // the sole hard-regenerate trigger for the template.
+  // Render version drift — always permitted in place.
   if (templateVersionDrift) {
     notes.push(
-      `Template version drift (${existingBinding.TemplateVersion} → ${composed.identity.templateVersion}); in-place update applied.`,
+      `Render version drift (${existingBinding.RenderVersion ?? '(none)'} → ${composed.identity.templateVersion}); in-place update applied.`,
     );
   }
 
-  if (existingBinding.BindingStatus === 'error') {
+  if (existingBinding.PublishStatus === 'error') {
     return {
       action: 'inPlaceUpdate',
       reason: 'bindingError',

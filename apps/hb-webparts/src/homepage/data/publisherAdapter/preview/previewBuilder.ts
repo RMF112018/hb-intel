@@ -25,7 +25,6 @@ import { decideRepublishAction, type RepublishDecision } from '../republishPolic
 import { validatePublishContext, type ValidationResult } from '../validation/validationEngine';
 
 export interface DriftBanner {
-  readonly shellKeyDrift: boolean;
   readonly shellVersionDrift: boolean;
   readonly templateKeyDrift: boolean;
   readonly templateVersionDrift: boolean;
@@ -64,19 +63,18 @@ function computeDrift(
   const binding = context.existingBinding;
   if (!binding) {
     return {
-      shellKeyDrift: false,
       shellVersionDrift: false,
       templateKeyDrift: false,
       templateVersionDrift: false,
     };
   }
   return {
-    shellKeyDrift: binding.PageShellKey !== composed.identity.shellKey,
     shellVersionDrift:
       binding.PageShellVersion !== composed.identity.shellVersion,
-    templateKeyDrift: binding.TemplateKey !== composed.identity.templateKey,
+    templateKeyDrift:
+      binding.PageTemplateKey !== composed.identity.templateKey,
     templateVersionDrift:
-      binding.TemplateVersion !== composed.identity.templateVersion,
+      binding.RenderVersion !== composed.identity.templateVersion,
   };
 }
 
@@ -106,6 +104,7 @@ export async function buildPublisherPreview(
   }
   const validation = validatePublishContext(resolution.context, { shell });
   const decision = decideRepublishAction({
+    article: resolution.context.article,
     composed: composedPage,
     template: resolution.context.template,
     existingBinding: resolution.context.existingBinding,

@@ -20,40 +20,36 @@ import type {
 import type {
   ArticleContentType,
   ArticleSubject,
-  BindingStatus,
   Destination,
   HeroMetadataMode,
   HeroThemeVariant,
-  LastOperation,
   MediaRole,
   PageSyncStatus,
   PostFamily,
   ProjectStage,
+  PublishStatus,
   PublishingErrorCategory,
   PublishingErrorOperation,
   SpotlightType,
-  TargetSiteKey,
-  TemplateStatus,
+  SyncStatus,
   WorkflowHistoryAction,
   WorkflowState,
 } from './publisherEnums';
 import {
   ARTICLE_CONTENT_TYPE_VALUES,
   ARTICLE_SUBJECT_VALUES,
-  BINDING_STATUS_VALUES,
   DESTINATION_VALUES,
   HERO_METADATA_MODE_VALUES,
   HERO_THEME_VARIANT_VALUES,
-  LAST_OPERATION_VALUES,
   MEDIA_ROLE_VALUES,
   PAGE_SYNC_STATUS_VALUES,
   POST_FAMILY_VALUES,
   PROJECT_STAGE_VALUES,
+  PUBLISH_STATUS_VALUES,
   PUBLISHING_ERROR_CATEGORY_VALUES,
   PUBLISHING_ERROR_OPERATION_VALUES,
   SPOTLIGHT_TYPE_VALUES,
-  TARGET_SITE_KEY_VALUES,
-  TEMPLATE_STATUS_VALUES,
+  SYNC_STATUS_VALUES,
   WORKFLOW_HISTORY_ACTION_VALUES,
   WORKFLOW_STATE_VALUES,
 } from './publisherEnums';
@@ -144,10 +140,8 @@ const subjectMany = many<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
 const workflowState = one<WorkflowState>(WORKFLOW_STATE_VALUES);
 const workflowAction = one<WorkflowHistoryAction>(WORKFLOW_HISTORY_ACTION_VALUES);
 const mediaRole = one<MediaRole>(MEDIA_ROLE_VALUES);
-const bindingStatus = one<BindingStatus>(BINDING_STATUS_VALUES);
-const lastOperation = one<LastOperation>(LAST_OPERATION_VALUES);
-const templateStatus = one<TemplateStatus>(TEMPLATE_STATUS_VALUES);
-const targetSiteKey = one<TargetSiteKey>(TARGET_SITE_KEY_VALUES);
+const publishStatus = one<PublishStatus>(PUBLISH_STATUS_VALUES);
+const syncStatus = one<SyncStatus>(SYNC_STATUS_VALUES);
 const errorCategory = one<PublishingErrorCategory>(PUBLISHING_ERROR_CATEGORY_VALUES);
 const errorOperation = one<PublishingErrorOperation>(PUBLISHING_ERROR_OPERATION_VALUES);
 
@@ -380,47 +374,36 @@ export function mapPageBindingRow(
 ): PublisherPageBindingRow | undefined {
   const BindingId = requiredStr(raw['BindingId']);
   const ArticleId = requiredStr(raw['ArticleId']);
+  const Title = requiredStr(raw['Title']);
   const TargetSiteUrl = requiredStr(raw['TargetSiteUrl']);
-  const TargetSiteKey = targetSiteKey(raw['TargetSiteKey']);
-  const PageName = requiredStr(raw['PageName']);
-  const SourceTemplatePath = requiredStr(raw['SourceTemplatePath']);
-  const PageShellKey = requiredStr(raw['PageShellKey']);
-  const PageShellVersion = requiredStr(raw['PageShellVersion']);
-  const TemplateKey = requiredStr(raw['TemplateKey']);
-  const TemplateVersion = requiredStr(raw['TemplateVersion']);
-  const BindingStatus = bindingStatus(raw['BindingStatus']);
+  const PageTemplateKey = requiredStr(raw['PageTemplateKey']);
+  const PublishStatusValue = publishStatus(raw['PublishStatus']);
   if (
     !BindingId ||
     !ArticleId ||
+    !Title ||
     !TargetSiteUrl ||
-    !TargetSiteKey ||
-    !PageName ||
-    !SourceTemplatePath ||
-    !PageShellKey ||
-    !PageShellVersion ||
-    !TemplateKey ||
-    !TemplateVersion ||
-    !BindingStatus
+    !PageTemplateKey ||
+    !PublishStatusValue
   ) {
     return undefined;
   }
   return {
     BindingId,
     ArticleId,
+    Title,
     TargetSiteUrl,
-    TargetSiteKey,
+    PageTemplateKey,
+    PublishStatus: PublishStatusValue,
     PageId: str(raw['PageId']),
-    PageName,
+    PageName: str(raw['PageName']),
     PageUrl: url(raw['PageUrl']),
-    SourceTemplatePath,
-    PageShellKey,
-    PageShellVersion,
-    TemplateKey,
-    TemplateVersion,
-    BindingStatus,
-    LastOperation: lastOperation(raw['LastOperation']),
-    LastOperationDateUtc: dt(raw['LastOperationDateUtc']),
-    LastSuccessfulSyncDateUtc: dt(raw['LastSuccessfulSyncDateUtc']),
+    PageShellVersion: str(raw['PageShellVersion']),
+    RenderVersion: str(raw['RenderVersion']),
+    SyncStatus: syncStatus(raw['SyncStatus']),
+    LastSyncDateUtc: dt(raw['LastSyncDateUtc']),
+    LastSyncMessage: str(raw['LastSyncMessage']),
+    PublishedDateUtc: dt(raw['PublishedDateUtc']),
   };
 }
 

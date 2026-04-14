@@ -52,8 +52,6 @@ function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
     TargetSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
     Destination: 'projectSpotlight',
-    SourceTemplatePath:
-      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
     ...over,
   } as PublisherArticleRow;
 }
@@ -222,9 +220,9 @@ describe('publisher end-to-end', () => {
     };
     expect(bindingArg.row.BindingId).toBe('bnd-e2e-0001');
     expect(bindingArg.row.PageId).toBe('page-1001');
-    expect(bindingArg.row.BindingStatus).toBe('published');
-    expect(bindingArg.row.LastOperation).toBe('publish');
-    expect(bindingArg.row.PageShellKey).toBe(
+    expect(bindingArg.row.PublishStatus).toBe('published');
+    expect(bindingArg.row.SyncStatus).toBe("in-sync");
+    expect(bindingArg.row.PageShellVersion).toBe(
       'ps-shell-inprogress-oob-banner-team-gallery-v1',
     );
   });
@@ -233,20 +231,17 @@ describe('publisher end-to-end', () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing',
       ArticleId: 'post-e2e',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageId: 'page-1001',
       PageName: 'e2e-post.aspx',
       PageUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight/SitePages/e2e-post.aspx',
-      SourceTemplatePath:
-        'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '1.0.0',
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'published',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
     const result = await orch(f).run({
@@ -260,7 +255,7 @@ describe('publisher end-to-end', () => {
       row: PublisherPageBindingRow;
     };
     expect(bindingArg.row.BindingId).toBe('bnd-existing');
-    expect(bindingArg.row.LastOperation).toBe('republish');
+    expect(bindingArg.row.SyncStatus).toBe("in-sync");
   });
 
   it('blocks publish when content validation fails (missing Title) and writes nothing', async () => {
@@ -297,17 +292,14 @@ describe('publisher end-to-end', () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
       ArticleId: 'post-e2e',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-      TargetSiteKey: 'projectSpotlight',
-      PageShellKey: 'ps-shell-v1',
       PageName: 'e2e-post.aspx',
-      SourceTemplatePath:
-        'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
       PageShellVersion: '1.0.0',
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      TemplateVersion: '1.0.0',
-      BindingStatus: 'archived',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
     const result = await orch(f).run({ articleId: 'post-e2e', mode: 'republish' });
