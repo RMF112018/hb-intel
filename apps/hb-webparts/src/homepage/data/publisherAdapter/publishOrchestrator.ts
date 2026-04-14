@@ -1,8 +1,8 @@
 /**
- * End-to-end publish orchestrator for the Project Spotlight publisher.
+ * End-to-end publish orchestrator for the Article Publisher.
  *
  * Ties together:
- *   1. `buildPublishResolutionContext` — reads post + children + active
+ *   1. `buildPublishResolutionContext` — reads article + children + active
  *      templates, runs the deterministic resolver.
  *   2. `createPageShellService({ pageCreation }).composePage` /
  *      `.publishPage` — composes and (if needed) creates/updates the
@@ -13,7 +13,7 @@
  *      `ArticleId`.
  *
  * The orchestrator is the caller's single entry point for `publish`
- * and `republish`. It never duplicates a live page for the same post:
+ * and `republish`. It never duplicates a live page for the same article:
  * when a binding exists and shell/template identity is compatible,
  * the same `PageId` / `PageUrl` are preserved and the binding row is
  * merged in place.

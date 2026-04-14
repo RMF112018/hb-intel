@@ -1,5 +1,5 @@
 /**
- * Write seams for Project Spotlight publisher lists (Wave 6).
+ * Write seams for Article Publisher lists (Wave 6).
  *
  * Follows the same list-title + request-digest pattern established by
  * `pageBindingWriter.ts` and the hero-banner writer. Each writer is
@@ -247,7 +247,7 @@ export function createSharePointArticleWriter(deps: {
   fetchImpl?: FetchImpl;
   fetchRequestDigestImpl?: DigestImpl;
 } = {}): ArticleWriter {
-  const descriptor = deps.descriptor ?? PUBLISHER_LISTS.posts;
+  const descriptor = deps.descriptor ?? PUBLISHER_LISTS.articles;
   const fetchImpl = deps.fetchImpl ?? fetch;
   const digestImpl = deps.fetchRequestDigestImpl ?? fetchRequestDigest;
   return {

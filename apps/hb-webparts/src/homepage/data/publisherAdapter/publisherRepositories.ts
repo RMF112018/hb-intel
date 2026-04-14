@@ -207,7 +207,7 @@ export function createPublisherRepositories(
   access: PublisherListAccess = createSharePointPublisherListAccess(),
   lists: typeof PUBLISHER_LISTS = PUBLISHER_LISTS,
   writers: PublisherRepositoryWriters = {
-    articles: createSharePointArticleWriter({ descriptor: lists.posts }),
+    articles: createSharePointArticleWriter({ descriptor: lists.articles }),
     teamMembers: createSharePointTeamMembersWriter({ descriptor: lists.teamMembers }),
     media: createSharePointMediaWriter({ descriptor: lists.media }),
     pageBindings: createSharePointPageBindingWriter({ descriptor: lists.pageBindings }),
@@ -230,7 +230,7 @@ export function createPublisherRepositories(
   return {
     articles: {
       async getByArticleId(articleId) {
-        const rows = await access.readList(lists.posts, {
+        const rows = await access.readList(lists.articles, {
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           top: 1,
         });
@@ -241,7 +241,7 @@ export function createPublisherRepositories(
         return undefined;
       },
       async listByWorkflowState(state) {
-        const rows = await access.readList(lists.posts, {
+        const rows = await access.readList(lists.articles, {
           filter: `WorkflowState eq '${state}'`,
           orderBy: 'UpdatedDateUtc desc',
         });

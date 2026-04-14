@@ -1,9 +1,18 @@
 /**
- * Project Spotlight publisher adapter — barrel.
+ * Article Publisher adapter — barrel.
  *
- * Prompt-02 scope: typed contracts + list descriptors only.
- * Prompt-03 and later will add reads, writes, governance, validation, and submission modules
- * adjacent to these files (mirroring the kudosAdapter directory shape).
+ * App identity:        Article Publisher (the SPFx authoring app)
+ * Destination identity: Project Spotlight is the only destination
+ *                       implemented today; Company Pulse is a planned
+ *                       future destination.
+ * Data model identity:  the tenant `HB Article*` lists keyed by
+ *                       `ArticleId`; never `Post*` / `PostId`.
+ *
+ * Re-exports cover typed contracts, list descriptors, mappers,
+ * repositories, the template resolver, the publish/preview/republish
+ * pipelines, the page-shell + page-creation services, the workflow
+ * state machine, validation, the TeamViewer integration, and the
+ * tenant promotion-rule selector.
  */
 
 export * from './publisherEnums';

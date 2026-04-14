@@ -17,7 +17,7 @@ import {
 } from './publisherListDescriptors';
 
 const EXPECTED_TENANT_TITLES: Readonly<Record<PublisherListKey, string>> = {
-  posts: 'HB Articles',
+  articles: 'HB Articles',
   teamMembers: 'HB Article Team Members',
   media: 'HB Article Media',
   templateRegistry: 'HB Article Template Registry',

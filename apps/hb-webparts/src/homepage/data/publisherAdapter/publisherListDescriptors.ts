@@ -23,7 +23,7 @@ export const PUBLISHER_LIST_HOST_SITE_URL =
   'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral' as const;
 
 export type PublisherListKey =
-  | 'posts'
+  | 'articles'
   | 'teamMembers'
   | 'media'
   | 'templateRegistry'
@@ -210,8 +210,8 @@ const PROMOTION_RULES_FIELDS = [
 export const PUBLISHER_LISTS: Readonly<
   Record<PublisherListKey, PublisherListDescriptor>
 > = Object.freeze({
-  posts: {
-    key: 'posts',
+  articles: {
+    key: 'articles',
     displayName: 'HB Articles',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: POSTS_MVP_FIELDS,

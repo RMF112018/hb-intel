@@ -10,8 +10,8 @@
  * Only the fields the v1 generator cares about are parsed: page title,
  * header flags, sections, and canvas controls (webPartType, controlId,
  * section/order/column). JsonControlData payloads inside the XML are
- * intentionally ignored — those are template defaults, not per-post
- * content; the compositor owns per-post control payloads.
+ * intentionally ignored — those are template defaults, not per-article
+ * content; the compositor owns per-article control payloads.
  */
 
 import type {

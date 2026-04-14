@@ -1,5 +1,5 @@
 /**
- * Canonical v1 page-shell manifest for the Project Spotlight publisher.
+ * Canonical v1 page-shell manifest for the Article Publisher.
  *
  * Source of truth:
  *   docs/architecture/plans/MASTER/spfx/publisher/architecture/

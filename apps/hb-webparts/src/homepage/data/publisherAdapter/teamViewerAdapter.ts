@@ -152,7 +152,7 @@ export function buildTeamViewerPersonList(
 /**
  * Informational classification of team size used for hosted
  * verification notes and the authoring-UI preview. Does not change
- * behavior — density still comes from the post.
+ * behavior — density still comes from the article.
  */
 export type TeamSizeBucket = 'empty' | 'small' | 'medium' | 'large';
 
