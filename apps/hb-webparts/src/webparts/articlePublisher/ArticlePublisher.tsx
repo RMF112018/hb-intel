@@ -73,6 +73,7 @@ import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
 import { DraftQueue } from './draftQueue/index.js';
+import { PublisherButton } from './sharedChrome/index.js';
 import {
   illegalTransitionMessage,
   inProgressMessage,
@@ -898,21 +899,20 @@ export function ArticlePublisher({
       <aside className={styles.draftRail} aria-label="Drafts and recent articles">
         <header className={styles.draftRailHeader}>
           <div className={styles.draftRailTitle}>Your articles</div>
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={handleCreateNew}
-          >
-            Start new draft
-          </button>
+          <PublisherButton variant="primary" size="sm" onClick={handleCreateNew}>
+            + New draft
+          </PublisherButton>
         </header>
 
         {groupsError ? (
           <div className={styles.railError} role="alert">
             <div>{groupsError}</div>
-            <button type="button" className={styles.linkBtn} onClick={() => void reloadGroups()}>
+            <PublisherButton
+              size="sm"
+              onClick={() => void reloadGroups()}
+            >
               Try again
-            </button>
+            </PublisherButton>
           </div>
         ) : !hasAnyArticles && !groupsLoading ? (
           <HbcEmptyState
@@ -1129,9 +1129,8 @@ export function ArticlePublisher({
             <section className={styles.readinessBlock} aria-label="Primary actions">
               <p className={styles.readinessHeading}>Actions</p>
               <div className={styles.readinessActionGroup}>
-                <button
-                  type="button"
-                  className={styles.primaryBtn}
+                <PublisherButton
+                  variant="primary"
                   disabled={!publishEnabled}
                   title={publishDisabledReason({
                     hasDraft: !!articleDraft,
@@ -1142,10 +1141,8 @@ export function ArticlePublisher({
                   onClick={() => handlePublishAction('create')}
                 >
                   Publish
-                </button>
-                <button
-                  type="button"
-                  className={styles.btn}
+                </PublisherButton>
+                <PublisherButton
                   disabled={!republishEnabled}
                   title={publishDisabledReason({
                     hasDraft: !!articleDraft,
@@ -1156,23 +1153,16 @@ export function ArticlePublisher({
                   onClick={() => handlePublishAction('republish')}
                 >
                   Republish
-                </button>
-                <button
-                  type="button"
-                  className={styles.btn}
-                  disabled={!saveEnabled}
-                  onClick={handleSave}
-                >
+                </PublisherButton>
+                <PublisherButton disabled={!saveEnabled} onClick={handleSave}>
                   Save draft
-                </button>
-                <button
-                  type="button"
-                  className={styles.btn}
+                </PublisherButton>
+                <PublisherButton
                   disabled={!saveEnabled}
                   onClick={() => handlePublishAction('preview')}
                 >
                   Recompose preview
-                </button>
+                </PublisherButton>
               </div>
             </section>
 
@@ -1183,15 +1173,13 @@ export function ArticlePublisher({
                   {validNextStates
                     .filter((to) => to !== 'archived' && to !== 'withdrawn')
                     .map((to) => (
-                      <button
+                      <PublisherButton
                         key={to}
-                        type="button"
-                        className={styles.btn}
                         disabled={busy || unsupportedDestinationLoaded}
                         onClick={() => handleTransition(to)}
                       >
                         {transitionActionLabel(to)}
-                      </button>
+                      </PublisherButton>
                     ))}
                 </div>
               </section>
@@ -1204,28 +1192,26 @@ export function ArticlePublisher({
                   {validNextStates
                     .filter((to) => to === 'withdrawn')
                     .map((to) => (
-                      <button
+                      <PublisherButton
                         key={to}
-                        type="button"
-                        className={styles.dangerBtn}
+                        variant="danger"
                         disabled={busy || unsupportedDestinationLoaded}
                         onClick={() => handleTransition(to)}
                       >
                         {transitionActionLabel(to)}
-                      </button>
+                      </PublisherButton>
                     ))}
                   {validNextStates
                     .filter((to) => to === 'archived')
                     .map((to) => (
-                      <button
+                      <PublisherButton
                         key={to}
-                        type="button"
-                        className={styles.dangerBtn}
+                        variant="danger"
                         disabled={busy || unsupportedDestinationLoaded}
                         onClick={() => handleTransition(to)}
                       >
                         {transitionActionLabel(to)}
-                      </button>
+                      </PublisherButton>
                     ))}
                 </div>
               </section>
