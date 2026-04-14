@@ -1,11 +1,13 @@
-/* Article Publisher — admin surface.
- * Doctrine: token-disciplined layout using neutral system surfaces.
- * No premium-authored visual styling; this is operational chrome.
+/* Article Publisher — editorial workspace surface.
+ * Doctrine: token-disciplined composition over enterprise admin chrome.
+ * Three-column shell: draft rail · authoring canvas · readiness rail.
  */
 
-.shell {
+/* ── Workspace shell ──────────────────────────────────────── */
+
+.workspace {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
   gap: 16px;
   min-height: 600px;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -15,39 +17,123 @@
   box-sizing: border-box;
 }
 
-.listPane {
+@media (max-width: 1279px) {
+  .workspace {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .readinessRail {
+    grid-column: 1 / -1;
+    position: sticky;
+    bottom: 0;
+  }
+}
+
+@media (max-width: 959px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Draft rail ───────────────────────────────────────────── */
+
+.draftRail {
   background: #fff;
   border: 1px solid #e3e3e6;
   border-radius: 8px;
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   min-height: 0;
   overflow: auto;
 }
 
-.listHeader {
+.draftRailHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.draftRailTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f1f1f;
+}
+
+.railError {
+  padding: 10px 12px;
+  border: 1px solid #f5b2bb;
+  background: #fde7e9;
+  color: #8a1f2b;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.railLoading {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.draftGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.draftGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.draftGroupHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 6px 4px;
+  cursor: pointer;
+  border-bottom: 1px solid #e3e3e6;
+  color: #1f1f1f;
+  font: inherit;
 }
 
-.listTitle {
-  font-weight: 600;
-  font-size: 14px;
+.draftGroupHeader:hover {
+  background: #f0f0f3;
 }
 
-.filterLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.draftGroupLabel {
   font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: #4a4a4f;
 }
 
-.postList {
+.draftGroupCount {
+  font-size: 11px;
+  color: #6a6a6f;
+  background: #f0f0f3;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.draftGroupEmpty {
+  font-size: 12px;
+  color: #6a6a6f;
+  margin: 0;
+  padding: 6px 4px;
+}
+
+.draftList {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -56,7 +142,7 @@
   gap: 4px;
 }
 
-.postRow {
+.draftRow {
   width: 100%;
   text-align: left;
   border: 1px solid transparent;
@@ -64,102 +150,356 @@
   padding: 8px 10px;
   border-radius: 6px;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: inherit;
+  color: inherit;
 }
 
-.postRow:hover {
+.draftRow:hover {
   background: #f0f0f3;
 }
 
-.postRowActive {
+.draftRowActive {
   border-color: #0078d4;
   background: #eff6fc;
 }
 
-.postRowTitle {
+.draftRowTitle {
   font-size: 13px;
   font-weight: 600;
 }
 
-.postRowMeta {
+.draftRowMeta {
   font-size: 11px;
   color: #6a6a6f;
 }
 
-.editor {
+/* ── Canvas ───────────────────────────────────────────────── */
+
+.canvas {
   background: #fff;
   border: 1px solid #e3e3e6;
   border-radius: 8px;
-  padding: 16px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
 }
 
-.editorHeader {
+.canvasEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvasHeader {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.meta {
-  display: flex;
-  gap: 6px;
-}
-
-.stateBadge,
-.bindingBadge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #eef;
-  color: #334;
-}
-
-.bindingBadge {
-  background: #e6f6ec;
-  color: #1a6a35;
-}
-
-.tabs {
-  display: flex;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid #e3e3e6;
 }
 
-.tab {
-  background: transparent;
-  border: none;
-  padding: 8px 14px;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  font-size: 13px;
-  color: #4a4a4f;
-  text-transform: capitalize;
+.canvasHeaderMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.tab:hover {
-  color: #0078d4;
-}
-
-.tabActive {
-  color: #0078d4;
-  border-bottom-color: #0078d4;
+.canvasKicker {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6a6a6f;
   font-weight: 600;
 }
 
-.panel {
-  flex: 1;
+.canvasTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #1f1f1f;
+}
+
+.canvasNotice,
+.canvasNoticeBlocking {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.canvasNotice {
+  background: #fff4e5;
+  border-color: #ffd9a8;
+  color: #8a4b00;
+}
+
+.canvasNoticeBlocking {
+  background: #fde7e9;
+  border-color: #f5b2bb;
+  color: #8a1f2b;
+}
+
+.outcomeChip {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef;
+  color: #334;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sectionIndex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e3e3e6;
+}
+
+.sectionIndexLink {
+  font-size: 12px;
+  color: #0078d4;
+  text-decoration: none;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.sectionIndexLink:hover,
+.sectionIndexLink:focus-visible {
+  background: #eff6fc;
+  outline: none;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f3;
+  scroll-margin-top: 12px;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.sectionIntent {
+  margin: 0;
+  font-size: 12px;
+  color: #6a6a6f;
+}
+
+.sectionBody {
+  min-width: 0;
+}
+
+.sectionCopy {
+  margin: 0;
+  font-size: 13px;
+  color: #1f1f1f;
+  line-height: 1.5;
+}
+
+/* Legacy inline helper text retained for inner workflow panels that
+ * will be rewritten in a later prompt in this workstream. */
+.statusLine {
+  font-size: 12px;
+  color: #4a4a4f;
+  font-style: italic;
+}
+
+/* ── Readiness rail ───────────────────────────────────────── */
+
+.readinessRail {
+  background: #fff;
+  border: 1px solid #e3e3e6;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   min-height: 0;
   overflow: auto;
+  align-self: start;
+  position: sticky;
+  top: 16px;
 }
+
+.readinessEmpty {
+  font-size: 13px;
+  color: #6a6a6f;
+}
+
+.readinessBlock,
+.readinessBlockDanger {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fafbfc;
+  border: 1px solid #eef0f2;
+}
+
+.readinessBlockDanger {
+  background: #fff8f8;
+  border-color: #f5d8dc;
+}
+
+.readinessHeading {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4a4a4f;
+  font-weight: 600;
+}
+
+.readinessSummary {
+  margin: 0;
+  font-size: 13px;
+  color: #1f1f1f;
+  line-height: 1.4;
+}
+
+.readinessBindingSignal {
+  margin: 0;
+  font-size: 12px;
+  color: #4a4a4f;
+  line-height: 1.4;
+}
+
+.readinessList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.readinessIssueError,
+.readinessIssueWarn {
+  margin: 0;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.readinessIssueError {
+  background: #fde7e9;
+  color: #8a1f2b;
+  border: 1px solid #f5b2bb;
+}
+
+.readinessIssueWarn {
+  background: #fff4e5;
+  color: #8a4b00;
+  border: 1px solid #ffd9a8;
+}
+
+.readinessActionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.readinessStatus {
+  margin: 0;
+  font-size: 12px;
+  color: #4a4a4f;
+  font-style: italic;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+
+.btn,
+.primaryBtn,
+.dangerBtn,
+.linkBtn {
+  font: inherit;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #cbcbd0;
+  background: #fff;
+  color: #1f1f1f;
+  font-size: 13px;
+  text-align: center;
+}
+
+.btn:hover,
+.primaryBtn:hover,
+.dangerBtn:hover {
+  background: #f0f0f3;
+}
+
+.btn:disabled,
+.primaryBtn:disabled,
+.dangerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primaryBtn {
+  background: #0078d4;
+  color: #fff;
+  border-color: #0078d4;
+}
+
+.primaryBtn:hover {
+  background: #106ebe;
+}
+
+.dangerBtn {
+  color: #8a1f2b;
+  border-color: #f5b2bb;
+  background: #fff;
+}
+
+.dangerBtn:hover {
+  background: #fde7e9;
+}
+
+.linkBtn {
+  border: none;
+  background: transparent;
+  color: #0078d4;
+  padding: 2px 0;
+  text-align: left;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+/* ── Inner panels (retained, backing existing workflow components) ── */
 
 .form {
   display: grid;
@@ -229,59 +569,6 @@
   justify-content: flex-end;
 }
 
-.actionBar {
-  border-top: 1px solid #e3e3e6;
-  padding-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.actionRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.statusLine {
-  font-size: 12px;
-  color: #4a4a4f;
-  font-style: italic;
-}
-
-.btn,
-.primaryBtn {
-  font: inherit;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid #cbcbd0;
-  background: #fff;
-  color: #1f1f1f;
-  font-size: 13px;
-}
-
-.btn:hover,
-.primaryBtn:hover {
-  background: #f0f0f3;
-}
-
-.btn:disabled,
-.primaryBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.primaryBtn {
-  background: #0078d4;
-  color: #fff;
-  border-color: #0078d4;
-}
-
-.primaryBtn:hover {
-  background: #106ebe;
-}
-
 .statusPanel {
   display: flex;
   flex-direction: column;
@@ -319,27 +606,6 @@
 .dtValue {
   color: #1f1f1f;
   word-break: break-all;
-}
-
-.driftChip,
-.validationChip {
-  display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  margin-left: 6px;
-}
-
-.driftChip {
-  background: #fff4e5;
-  color: #8a4b00;
-  border: 1px solid #ffd9a8;
-}
-
-.validationChip {
-  background: #fde7e9;
-  color: #8a1f2b;
-  border: 1px solid #f5b2bb;
 }
 
 .previewRoot {
@@ -459,7 +725,7 @@
   white-space: pre-wrap;
 }
 
-/* ── Project picker ───────────────────────────────────────────── */
+/* ── Project picker ───────────────────────────────────────── */
 
 .projectPicker {
   position: relative;

@@ -211,7 +211,194 @@ function emptyArticle(): PublisherArticleRow {
 
 /* ── Component ──────────────────────────────────────────────── */
 
-type Tab = 'metadata' | 'hero' | 'content' | 'team' | 'gallery' | 'preview' | 'status';
+/**
+ * Order the left draft rail surfaces groups in. The editorial rail
+ * presents drafts first, then in-review, then approved, then published;
+ * archived and withdrawn follow as collapsed-by-default residual groups.
+ *
+ * Legacy `scheduled` is intentionally omitted from rail groups — no
+ * scheduled executor exists today; legacy rows remain read-compatible
+ * only and surface through `scheduledLegacyStateNotice` on the canvas
+ * when an author opens one.
+ */
+const DRAFT_GROUP_ORDER: readonly WorkflowState[] = [
+  'draft',
+  'review',
+  'approved',
+  'published',
+  'archived',
+  'withdrawn',
+];
+
+/**
+ * Author-facing outcome labels for workflow states. Authors never see
+ * raw enum tokens; these labels carry the same meaning expressed as
+ * editorial outcomes.
+ */
+const WORKFLOW_OUTCOME_LABELS: Record<WorkflowState, string> = {
+  draft: 'Draft',
+  review: 'Awaiting review',
+  approved: 'Approved',
+  scheduled: 'Scheduled (legacy)',
+  published: 'Published',
+  archived: 'Archived',
+  withdrawn: 'Withdrawn',
+};
+
+const DRAFT_GROUP_LABELS: Record<WorkflowState, string> = {
+  draft: 'Drafts',
+  review: 'In review',
+  approved: 'Approved',
+  scheduled: 'Scheduled (legacy)',
+  published: 'Recently published',
+  archived: 'Archived',
+  withdrawn: 'Withdrawn',
+};
+
+const DRAFT_GROUP_EMPTY_COPY: Record<WorkflowState, string> = {
+  draft: 'No drafts yet. Start a new Project Spotlight to see it here.',
+  review: 'No articles are awaiting review.',
+  approved: 'No approved articles waiting to publish.',
+  scheduled: 'No scheduled articles.',
+  published: 'Published articles will appear here as you ship them.',
+  archived: 'No archived articles.',
+  withdrawn: 'No withdrawn articles.',
+};
+
+const COLLAPSED_GROUPS_BY_DEFAULT: ReadonlySet<WorkflowState> = new Set([
+  'archived',
+  'withdrawn',
+]);
+
+/**
+ * Author-facing labels for workflow transitions. The state machine
+ * still authorises transitions by enum identity; the rail simply
+ * presents them as editorial outcomes instead of `→ approved` tokens.
+ */
+export function transitionActionLabel(to: WorkflowState): string {
+  switch (to) {
+    case 'draft':
+      return 'Return to draft';
+    case 'review':
+      return 'Send for review';
+    case 'approved':
+      return 'Mark approved';
+    case 'scheduled':
+      return 'Mark scheduled (legacy)';
+    case 'published':
+      return 'Mark published';
+    case 'archived':
+      return 'Archive';
+    case 'withdrawn':
+      return 'Withdraw';
+  }
+}
+
+interface DraftGroupMap {
+  readonly draft: readonly PublisherArticleRow[];
+  readonly review: readonly PublisherArticleRow[];
+  readonly approved: readonly PublisherArticleRow[];
+  readonly scheduled: readonly PublisherArticleRow[];
+  readonly published: readonly PublisherArticleRow[];
+  readonly archived: readonly PublisherArticleRow[];
+  readonly withdrawn: readonly PublisherArticleRow[];
+}
+
+const EMPTY_DRAFT_GROUPS: DraftGroupMap = {
+  draft: [],
+  review: [],
+  approved: [],
+  scheduled: [],
+  published: [],
+  archived: [],
+  withdrawn: [],
+};
+
+/**
+ * Workspace section model — canonical order the center canvas renders.
+ * The shell renders these as vertical, in-page-anchored sections, not
+ * as tabs. The step-01 lock + step-02 layout are the source of truth.
+ */
+type WorkspaceSectionId =
+  | 'identity'
+  | 'hero'
+  | 'story'
+  | 'media'
+  | 'team'
+  | 'promotion'
+  | 'destination'
+  | 'preview';
+
+interface WorkspaceSectionDefinition {
+  readonly id: WorkspaceSectionId;
+  readonly label: string;
+  readonly intent: string;
+}
+
+const WORKSPACE_SECTIONS: readonly WorkspaceSectionDefinition[] = [
+  { id: 'identity', label: 'Identity', intent: 'Name the article and bind it to a project.' },
+  { id: 'hero', label: 'Hero', intent: 'Set the hero visual and editorial framing.' },
+  { id: 'story', label: 'Story', intent: 'Compose the body of the article.' },
+  { id: 'media', label: 'Media', intent: 'Add supporting media beyond the hero.' },
+  { id: 'team', label: 'Team', intent: 'Spotlight the people behind the work.' },
+  { id: 'promotion', label: 'Promotion', intent: 'Review how promotion policy applies.' },
+  { id: 'destination', label: 'Destination binding', intent: 'Confirm template and destination page binding.' },
+  { id: 'preview', label: 'Preview', intent: 'See how the article will publish.' },
+];
+
+/**
+ * Compose a single author-facing readiness sentence from repo-truth
+ * signals. Never exposes raw enum tokens.
+ */
+function composeReadinessSummary(
+  draft: PublisherArticleRow | undefined,
+  binding: PublisherPageBindingRow | undefined,
+  preview: PreviewOutcome | undefined,
+  validation: { readonly ok: boolean; readonly errors: readonly { readonly message: string }[]; readonly warnings: readonly { readonly message: string }[] } | undefined,
+): string {
+  if (!draft) return 'Pick a draft to see readiness.';
+  const outcome = WORKFLOW_OUTCOME_LABELS[draft.WorkflowState];
+  if (validation && !validation.ok) {
+    const n = validation.errors.length;
+    return `${outcome} — ${n} blocking issue${n === 1 ? '' : 's'} to resolve before publishing.`;
+  }
+  if (!binding) {
+    return `${outcome} — publishing will create the Project Spotlight page.`;
+  }
+  if (preview && preview.ok && preview.drift.templateKeyDrift) {
+    return `${outcome} — republishing will regenerate the destination page.`;
+  }
+  if (
+    preview && preview.ok &&
+    (preview.drift.shellVersionDrift || preview.drift.templateVersionDrift)
+  ) {
+    return `${outcome} — republishing will update the existing page in place.`;
+  }
+  return `${outcome} — binding is healthy.`;
+}
+
+/**
+ * Author-facing binding signal. Replaces the raw `binding <PublishStatus>`
+ * badge with a single editorial sentence.
+ */
+function composeBindingSignal(
+  binding: PublisherPageBindingRow | undefined,
+  preview: PreviewOutcome | undefined,
+): string {
+  if (!binding) {
+    return 'No destination page bound yet. Publishing will create the Project Spotlight page.';
+  }
+  if (preview && preview.ok && preview.drift.templateKeyDrift) {
+    return 'Republishing will regenerate the destination page.';
+  }
+  if (
+    preview && preview.ok &&
+    (preview.drift.shellVersionDrift || preview.drift.templateVersionDrift)
+  ) {
+    return 'Republishing will update the existing page in place.';
+  }
+  return 'Destination page is bound and healthy.';
+}
 
 export function ArticlePublisher({
   siteUrl,
@@ -248,9 +435,12 @@ export function ArticlePublisher({
     [repositories],
   );
 
-  const [filter, setFilter] = React.useState<WorkflowState>('draft');
-  const [articles, setArticles] = React.useState<readonly PublisherArticleRow[]>([]);
-  const [articlesLoading, setArticlesLoading] = React.useState(false);
+  const [groups, setGroups] = React.useState<DraftGroupMap>(EMPTY_DRAFT_GROUPS);
+  const [groupsLoading, setGroupsLoading] = React.useState(false);
+  const [groupsError, setGroupsError] = React.useState<string | undefined>();
+  const [collapsedGroups, setCollapsedGroups] = React.useState<ReadonlySet<WorkflowState>>(
+    () => new Set(COLLAPSED_GROUPS_BY_DEFAULT),
+  );
   const [promotionRules, setPromotionRules] = React.useState<readonly PublisherPromotionRuleRow[]>([]);
   const [promotionPolicy, setPromotionPolicy] = React.useState<PromotionPolicyResult | undefined>();
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | undefined>();
@@ -259,7 +449,6 @@ export function ArticlePublisher({
   const [mediaDraft, setMediaDraft] = React.useState<PublisherMediaRow[]>([]);
   const [binding, setBinding] = React.useState<PublisherPageBindingRow | undefined>();
   const [resolutionContext, setResolutionContext] = React.useState<PublishResolutionContext | undefined>();
-  const [tab, setTab] = React.useState<Tab>('metadata');
   const [status, setStatus] = React.useState<string | undefined>();
   const [busy, setBusy] = React.useState(false);
   const [preview, setPreview] = React.useState<PreviewOutcome | undefined>();
@@ -277,24 +466,34 @@ export function ArticlePublisher({
     [promotionRules],
   );
 
-  const reloadList = React.useCallback(async () => {
-    setArticlesLoading(true);
+  const reloadGroups = React.useCallback(async () => {
+    setGroupsLoading(true);
+    setGroupsError(undefined);
     try {
-      const rows = await repositories.articles.listByWorkflowState(filter, {
-        destinations: SUPPORTED_DESTINATIONS,
-      });
+      const results = await Promise.all(
+        DRAFT_GROUP_ORDER.map((state) =>
+          repositories.articles.listByWorkflowState(state, {
+            destinations: SUPPORTED_DESTINATIONS,
+          }),
+        ),
+      );
       // Defense-in-depth: this surface is project-spotlight scoped.
-      setArticles(rows.filter((row) => isDestinationSupported(row.Destination)));
+      const next: DraftGroupMap = { ...EMPTY_DRAFT_GROUPS };
+      DRAFT_GROUP_ORDER.forEach((state, i) => {
+        const rows = results[i]!.filter((row) => isDestinationSupported(row.Destination));
+        (next as Record<WorkflowState, readonly PublisherArticleRow[]>)[state] = rows;
+      });
+      setGroups(next);
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Failed to load articles.');
+      setGroupsError(err instanceof Error ? err.message : 'Failed to load articles.');
     } finally {
-      setArticlesLoading(false);
+      setGroupsLoading(false);
     }
-  }, [repositories, filter]);
+  }, [repositories]);
 
   React.useEffect(() => {
-    void reloadList();
-  }, [reloadList]);
+    void reloadGroups();
+  }, [reloadGroups]);
 
   const reloadSelected = React.useCallback(
     async (articleId: string) => {
@@ -357,11 +556,17 @@ export function ArticlePublisher({
     [repositories],
   );
 
+  // Preview composition is part of continuous readiness now, not a
+  // tab activation. Recompose whenever the selected article changes
+  // so the preview section and readiness rail stay in sync with the
+  // canvas without the author having to click through.
   React.useEffect(() => {
-    if (tab === 'preview' && selectedArticleId) {
+    if (selectedArticleId) {
       void loadPreview(selectedArticleId);
+    } else {
+      setPreview(undefined);
     }
-  }, [tab, selectedArticleId, loadPreview]);
+  }, [selectedArticleId, loadPreview]);
 
   // Load active promotion rules once at mount.
   //
@@ -398,7 +603,6 @@ export function ArticlePublisher({
     setBinding(undefined);
     setResolutionContext(undefined);
     setSelectedArticleId(seeded.ArticleId);
-    setTab('metadata');
   }, [applyPromotionPolicy]);
 
   const promotionContextRef = React.useRef<string | undefined>(undefined);
@@ -457,14 +661,14 @@ export function ArticlePublisher({
       await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
       setArticleDraft(policyApplied);
       setStatus('Saved.');
-      await reloadList();
+      await reloadGroups();
       await reloadSelected(policyApplied.ArticleId);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Save failed.');
     } finally {
       setBusy(false);
     }
-  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadList, reloadSelected, applyPromotionPolicy]);
+  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadGroups, reloadSelected, applyPromotionPolicy]);
 
   const handleTransition = React.useCallback(
     async (to: WorkflowState) => {
@@ -520,7 +724,7 @@ export function ArticlePublisher({
             setStatus(`Transition to ${to} failed at ${outcome.stage}: ${outcome.message}`);
           }
         }
-        await reloadList();
+        await reloadGroups();
         await reloadSelected(articleDraft.ArticleId);
       } catch (err) {
         setStatus(err instanceof Error ? err.message : 'Transition failed.');
@@ -528,7 +732,7 @@ export function ArticlePublisher({
         setBusy(false);
       }
     },
-    [articleDraft, actorEmail, orchestrator, repositories, reloadList, reloadSelected],
+    [articleDraft, actorEmail, orchestrator, repositories, reloadGroups, reloadSelected],
   );
 
   const handlePublishAction = React.useCallback(
@@ -592,164 +796,340 @@ export function ArticlePublisher({
       preview.drift.templateKeyDrift ||
       preview.drift.templateVersionDrift);
 
+  const toggleGroupCollapsed = (state: WorkflowState) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(state)) next.delete(state);
+      else next.add(state);
+      return next;
+    });
+  };
+
+  const readinessSummary = composeReadinessSummary(
+    articleDraft,
+    binding,
+    preview,
+    latestValidation,
+  );
+  const bindingSignal = articleDraft ? composeBindingSignal(binding, preview) : undefined;
+  const workflowOutcomeLabel = articleDraft
+    ? WORKFLOW_OUTCOME_LABELS[articleDraft.WorkflowState]
+    : undefined;
+  const hasAnyArticles = DRAFT_GROUP_ORDER.some((state) => groups[state].length > 0);
+
+  const publishEnabled =
+    !!articleDraft &&
+    !busy &&
+    !unsupportedDestinationLoaded &&
+    articleDraft.WorkflowState === 'approved' &&
+    !publishBlockedByValidation;
+  const republishEnabled =
+    !!articleDraft &&
+    !busy &&
+    !unsupportedDestinationLoaded &&
+    !!binding &&
+    !publishBlockedByValidation;
+  const saveEnabled = !!articleDraft && !busy && !unsupportedDestinationLoaded;
+
   return (
-    <div className={styles.shell}>
-      <aside className={styles.listPane}>
-        <header className={styles.listHeader}>
-          <div className={styles.listTitle}>HB Articles</div>
-          <button type="button" className={styles.primaryBtn} onClick={handleCreateNew}>
-            New article
+    <div className={styles.workspace} aria-label="Article Publisher workspace">
+      {/* ── Left draft rail ──────────────────────────────────── */}
+      <aside className={styles.draftRail} aria-label="Drafts and recent articles">
+        <header className={styles.draftRailHeader}>
+          <div className={styles.draftRailTitle}>Your articles</div>
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={handleCreateNew}
+          >
+            Start new draft
           </button>
         </header>
-        <label className={styles.filterLabel}>
-          Filter:
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as WorkflowState)}
-            className={styles.select}
-          >
-            {workflowFilterOptions().map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
-        {articlesLoading ? (
-          <HbcSpinner />
-        ) : articles.length === 0 ? (
+
+        {groupsError ? (
+          <div className={styles.railError} role="alert">
+            <div>{groupsError}</div>
+            <button type="button" className={styles.linkBtn} onClick={() => void reloadGroups()}>
+              Try again
+            </button>
+          </div>
+        ) : groupsLoading && !hasAnyArticles ? (
+          <div className={styles.railLoading}>
+            <HbcSpinner />
+          </div>
+        ) : !hasAnyArticles ? (
           <HbcEmptyState
-            title="No articles"
-            description={`No articles in state '${filter}' yet.`}
+            title="No articles yet"
+            description="Start your first Project Spotlight to see it here."
           />
         ) : (
-          <ul className={styles.postList}>
-            {articles.map((a) => (
-              <li key={a.ArticleId}>
-                <button
-                  type="button"
-                  className={`${styles.postRow} ${
-                    a.ArticleId === selectedArticleId ? styles.postRowActive : ''
-                  }`}
-                  onClick={() => setSelectedArticleId(a.ArticleId)}
-                >
-                  <div className={styles.postRowTitle}>{a.Title}</div>
-                  <div className={styles.postRowMeta}>
-                    {a.ArticleContentType} · {a.ProjectName || '(no project)'}
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div className={styles.draftGroups}>
+            {DRAFT_GROUP_ORDER.map((state) => {
+              const rows = groups[state];
+              const collapsed = collapsedGroups.has(state);
+              const groupId = `draft-group-${state}`;
+              return (
+                <section key={state} className={styles.draftGroup} aria-labelledby={groupId}>
+                  <button
+                    type="button"
+                    id={groupId}
+                    className={styles.draftGroupHeader}
+                    aria-expanded={!collapsed}
+                    onClick={() => toggleGroupCollapsed(state)}
+                  >
+                    <span className={styles.draftGroupLabel}>
+                      {DRAFT_GROUP_LABELS[state]}
+                    </span>
+                    <span className={styles.draftGroupCount}>{rows.length}</span>
+                  </button>
+                  {!collapsed && (
+                    rows.length === 0 ? (
+                      <p className={styles.draftGroupEmpty}>
+                        {DRAFT_GROUP_EMPTY_COPY[state]}
+                      </p>
+                    ) : (
+                      <ul className={styles.draftList}>
+                        {rows.map((a) => {
+                          const isActive = a.ArticleId === selectedArticleId;
+                          const displayTitle = a.Title?.trim() || 'Untitled draft';
+                          const displayProject = a.ProjectName?.trim() || 'No project linked yet';
+                          return (
+                            <li key={a.ArticleId}>
+                              <button
+                                type="button"
+                                className={`${styles.draftRow} ${isActive ? styles.draftRowActive : ''}`}
+                                aria-current={isActive ? 'true' : undefined}
+                                onClick={() => setSelectedArticleId(a.ArticleId)}
+                              >
+                                <div className={styles.draftRowTitle}>{displayTitle}</div>
+                                <div className={styles.draftRowMeta}>{displayProject}</div>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )
+                  )}
+                </section>
+              );
+            })}
+          </div>
         )}
       </aside>
 
-      <main className={styles.editor}>
+      {/* ── Center authoring canvas ─────────────────────────── */}
+      <main className={styles.canvas} aria-label="Article authoring canvas">
         {!articleDraft ? (
-          <HbcEmptyState
-            title="Select or create an article"
-            description="Choose a row from the left, or start a new draft."
-          />
+          <div className={styles.canvasEmpty}>
+            <HbcEmptyState
+              title="Start composing"
+              description="Pick a draft from the left, or start a new Project Spotlight article."
+            />
+          </div>
         ) : (
           <>
-            <header className={styles.editorHeader}>
-              <h2 className={styles.title}>{articleDraft.Title || '(Untitled)'}</h2>
-              <div className={styles.meta}>
-                <span className={styles.stateBadge}>{articleDraft.WorkflowState}</span>
-                {binding && (
-                  <span className={styles.bindingBadge}>binding {binding.PublishStatus}</span>
-                )}
+            <header className={styles.canvasHeader}>
+              <div className={styles.canvasHeaderMain}>
+                <p className={styles.canvasKicker}>Project Spotlight article</p>
+                <h2 className={styles.canvasTitle}>
+                  {articleDraft.Title?.trim() || 'Untitled draft'}
+                </h2>
               </div>
+              {workflowOutcomeLabel && (
+                <span className={styles.outcomeChip}>{workflowOutcomeLabel}</span>
+              )}
             </header>
+
             {scheduledLegacyStateNotice(articleDraft.WorkflowState) && (
-              <div className={styles.statusLine}>
+              <p className={styles.canvasNotice}>
                 {scheduledLegacyStateNotice(articleDraft.WorkflowState)}
-              </div>
+              </p>
             )}
             {unsupportedDestinationMessage && (
-              <div className={styles.statusLine}>{unsupportedDestinationMessage}</div>
+              <p className={styles.canvasNoticeBlocking}>
+                {unsupportedDestinationMessage}
+              </p>
             )}
 
-            <nav className={styles.tabs}>
-              {(['metadata', 'hero', 'content', 'team', 'gallery', 'preview', 'status'] as Tab[]).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
-                  onClick={() => setTab(t)}
-                >
-                  {t}
-                </button>
+            <nav className={styles.sectionIndex} aria-label="Workspace sections">
+              {WORKSPACE_SECTIONS.map((s) => (
+                <a key={s.id} href={`#section-${s.id}`} className={styles.sectionIndexLink}>
+                  {s.label}
+                </a>
               ))}
             </nav>
 
-            <div className={styles.panel}>
-              {tab === 'metadata' && (
+            <section id="section-identity" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Identity</h3>
+                <p className={styles.sectionIntent}>Name the article and bind it to a project.</p>
+              </header>
+              <div className={styles.sectionBody}>
                 <MetadataPanel
                   draft={articleDraft}
                   onChange={setArticleDraft}
                   searchProjects={searchProjects}
                   promotionPolicy={promotionPolicy}
                 />
-              )}
-              {tab === 'hero' && (
+              </div>
+            </section>
+
+            <section id="section-hero" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Hero</h3>
+                <p className={styles.sectionIntent}>Set the hero visual and editorial framing.</p>
+              </header>
+              <div className={styles.sectionBody}>
                 <HeroPanel draft={articleDraft} onChange={setArticleDraft} />
-              )}
-              {tab === 'content' && (
+              </div>
+            </section>
+
+            <section id="section-story" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Story</h3>
+                <p className={styles.sectionIntent}>Compose the body of the article.</p>
+              </header>
+              <div className={styles.sectionBody}>
                 <ContentPanel draft={articleDraft} onChange={setArticleDraft} />
-              )}
-              {tab === 'team' && (
-                <TeamPanel
-                  articleId={articleDraft.ArticleId}
-                  rows={teamDraft}
-                  onChange={setTeamDraft}
-                />
-              )}
-              {tab === 'gallery' && (
+              </div>
+            </section>
+
+            <section id="section-media" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Media</h3>
+                <p className={styles.sectionIntent}>Add supporting media beyond the hero.</p>
+              </header>
+              <div className={styles.sectionBody}>
                 <GalleryPanel
                   articleId={articleDraft.ArticleId}
                   rows={mediaDraft}
                   onChange={setMediaDraft}
                 />
-              )}
-              {tab === 'preview' && (
-                <PreviewPanel outcome={preview} loading={previewLoading} />
-              )}
-              {tab === 'status' && (
-                <StatusPanel binding={binding} context={resolutionContext} />
-              )}
-            </div>
+              </div>
+            </section>
 
-            <footer className={styles.actionBar}>
-              <div className={styles.actionRow}>
+            <section id="section-team" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Team</h3>
+                <p className={styles.sectionIntent}>Spotlight the people behind the work.</p>
+              </header>
+              <div className={styles.sectionBody}>
+                <TeamPanel
+                  articleId={articleDraft.ArticleId}
+                  rows={teamDraft}
+                  onChange={setTeamDraft}
+                />
+              </div>
+            </section>
+
+            <section id="section-promotion" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Promotion</h3>
+                <p className={styles.sectionIntent}>Review how promotion policy applies.</p>
+              </header>
+              <div className={styles.sectionBody}>
+                {promotionPolicy ? (
+                  <p className={styles.sectionCopy}>
+                    {promotionLockStatusText(promotionPolicy)}
+                  </p>
+                ) : (
+                  <p className={styles.sectionCopy}>
+                    Promotion policy will be resolved from the article's destination and content type.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <section id="section-destination" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Destination binding</h3>
+                <p className={styles.sectionIntent}>Confirm template and destination page binding.</p>
+              </header>
+              <div className={styles.sectionBody}>
+                <StatusPanel binding={binding} context={resolutionContext} />
+              </div>
+            </section>
+
+            <section id="section-preview" className={styles.section}>
+              <header className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Preview</h3>
+                <p className={styles.sectionIntent}>See how the article will publish.</p>
+              </header>
+              <div className={styles.sectionBody}>
+                <PreviewPanel outcome={preview} loading={previewLoading} />
+              </div>
+            </section>
+          </>
+        )}
+      </main>
+
+      {/* ── Right readiness rail ─────────────────────────────── */}
+      <aside className={styles.readinessRail} aria-label="Publish readiness and lifecycle actions">
+        {!articleDraft ? (
+          <div className={styles.readinessEmpty}>
+            <p>Pick a draft to see readiness.</p>
+          </div>
+        ) : (
+          <>
+            <section className={styles.readinessBlock} aria-label="Readiness summary">
+              <p className={styles.readinessHeading}>Readiness</p>
+              <p className={styles.readinessSummary}>{readinessSummary}</p>
+              {bindingSignal && (
+                <p className={styles.readinessBindingSignal}>{bindingSignal}</p>
+              )}
+            </section>
+
+            {publishBlockedByValidation && latestValidation && (
+              <section className={styles.readinessBlock} aria-label="Blocking issues">
+                <p className={styles.readinessHeading}>
+                  {latestValidation.errors.length} blocking issue
+                  {latestValidation.errors.length === 1 ? '' : 's'}
+                </p>
+                <ul className={styles.readinessList}>
+                  {latestValidation.errors.map((err, idx) => (
+                    <li key={idx} className={styles.readinessIssueError}>{err.message}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {latestValidation && latestValidation.warnings.length > 0 && (
+              <section className={styles.readinessBlock} aria-label="Warnings">
+                <p className={styles.readinessHeading}>
+                  {latestValidation.warnings.length} warning
+                  {latestValidation.warnings.length === 1 ? '' : 's'}
+                </p>
+                <ul className={styles.readinessList}>
+                  {latestValidation.warnings.map((w, idx) => (
+                    <li key={idx} className={styles.readinessIssueWarn}>{w.message}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section className={styles.readinessBlock} aria-label="Primary actions">
+              <p className={styles.readinessHeading}>Actions</p>
+              <div className={styles.readinessActionGroup}>
                 <button
                   type="button"
                   className={styles.primaryBtn}
-                  disabled={busy || unsupportedDestinationLoaded}
-                  onClick={handleSave}
-                >
-                  Save draft
-                </button>
-                <button
-                  type="button"
-                  className={styles.btn}
-                  disabled={busy || unsupportedDestinationLoaded}
-                  onClick={() => handlePublishAction('preview')}
-                >
-                  Preview
-                </button>
-                <button
-                  type="button"
-                  className={styles.btn}
-                  disabled={
-                    busy ||
-                    unsupportedDestinationLoaded ||
-                    !binding ||
-                    publishBlockedByValidation
-                  }
+                  disabled={!publishEnabled}
                   title={
                     publishBlockedByValidation && firstBlockingError
-                      ? `Blocked by validation: ${firstBlockingError}`
+                      ? `Blocked: ${firstBlockingError}`
+                      : undefined
+                  }
+                  onClick={() => handlePublishAction('create')}
+                >
+                  Publish
+                </button>
+                <button
+                  type="button"
+                  className={styles.btn}
+                  disabled={!republishEnabled}
+                  title={
+                    publishBlockedByValidation && firstBlockingError
+                      ? `Blocked: ${firstBlockingError}`
                       : undefined
                   }
                   onClick={() => handlePublishAction('republish')}
@@ -759,64 +1139,86 @@ export function ArticlePublisher({
                 <button
                   type="button"
                   className={styles.btn}
-                  disabled={
-                    busy ||
-                    unsupportedDestinationLoaded ||
-                    articleDraft.WorkflowState !== 'approved' ||
-                    publishBlockedByValidation
-                  }
-                  title={
-                    publishBlockedByValidation && firstBlockingError
-                      ? `Blocked by validation: ${firstBlockingError}`
-                      : undefined
-                  }
-                  onClick={() => handlePublishAction('create')}
+                  disabled={!saveEnabled}
+                  onClick={handleSave}
                 >
-                  Publish
+                  Save draft
                 </button>
-                {hasDrift && preview?.ok && (
-                  preview.drift.templateKeyDrift ? (
-                    <span
-                      className={styles.driftChip}
-                      title="PageTemplateKey differs from the existing binding; publishing will regenerate the destination page."
-                    >
-                      ⚠ drift — will regenerate
-                    </span>
-                  ) : (
-                    <span
-                      className={styles.driftChip}
-                      title="Shell or template version drift; publishing will update the existing page in place."
-                    >
-                      ⚠ drift — will update in place
-                    </span>
-                  )
-                )}
-                {publishBlockedByValidation && (
-                  <span className={styles.validationChip}>
-                    🛑 {latestValidation?.errors.length} blocking error
-                    {latestValidation!.errors.length === 1 ? '' : 's'}
-                  </span>
-                )}
+                <button
+                  type="button"
+                  className={styles.btn}
+                  disabled={!saveEnabled}
+                  onClick={() => handlePublishAction('preview')}
+                >
+                  Recompose preview
+                </button>
               </div>
-              <div className={styles.actionRow}>
-                {validNextStates.map((to) => (
-                  <button
-                    key={to}
-                    type="button"
-                    className={styles.btn}
-                    disabled={busy || unsupportedDestinationLoaded}
-                    onClick={() => handleTransition(to)}
-                  >
-                    → {to}
-                  </button>
-                ))}
-              </div>
-              {status && <div className={styles.statusLine}>{status}</div>}
-              {busy && <HbcSpinner />}
-            </footer>
+            </section>
+
+            {validNextStates.length > 0 && (
+              <section className={styles.readinessBlock} aria-label="Workflow transitions">
+                <p className={styles.readinessHeading}>Move this article</p>
+                <div className={styles.readinessActionGroup}>
+                  {validNextStates
+                    .filter((to) => to !== 'archived' && to !== 'withdrawn')
+                    .map((to) => (
+                      <button
+                        key={to}
+                        type="button"
+                        className={styles.btn}
+                        disabled={busy || unsupportedDestinationLoaded}
+                        onClick={() => handleTransition(to)}
+                      >
+                        {transitionActionLabel(to)}
+                      </button>
+                    ))}
+                </div>
+              </section>
+            )}
+
+            {validNextStates.some((to) => to === 'archived' || to === 'withdrawn') && (
+              <section className={styles.readinessBlockDanger} aria-label="Destructive actions">
+                <p className={styles.readinessHeading}>Remove from circulation</p>
+                <div className={styles.readinessActionGroup}>
+                  {validNextStates
+                    .filter((to) => to === 'withdrawn')
+                    .map((to) => (
+                      <button
+                        key={to}
+                        type="button"
+                        className={styles.dangerBtn}
+                        disabled={busy || unsupportedDestinationLoaded}
+                        onClick={() => handleTransition(to)}
+                      >
+                        {transitionActionLabel(to)}
+                      </button>
+                    ))}
+                  {validNextStates
+                    .filter((to) => to === 'archived')
+                    .map((to) => (
+                      <button
+                        key={to}
+                        type="button"
+                        className={styles.dangerBtn}
+                        disabled={busy || unsupportedDestinationLoaded}
+                        onClick={() => handleTransition(to)}
+                      >
+                        {transitionActionLabel(to)}
+                      </button>
+                    ))}
+                </div>
+              </section>
+            )}
+
+            {(status || busy) && (
+              <section className={styles.readinessBlock} aria-label="Last action status" aria-live="polite">
+                {busy && <HbcSpinner />}
+                {status && <p className={styles.readinessStatus}>{status}</p>}
+              </section>
+            )}
           </>
         )}
-      </main>
+      </aside>
     </div>
   );
 }
@@ -1716,7 +2118,7 @@ function PreviewPanel({
     return (
       <HbcEmptyState
         title="Preview not yet built"
-        description="Switch to the Preview tab to generate a structural preview."
+        description="Add content above to compose a structural preview of the article."
       />
     );
   }
