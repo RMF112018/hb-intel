@@ -1462,12 +1462,17 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
           onChange={(e) => onChange(update(draft, 'Title', e.target.value))}
         />
       </Field>
-      <Field label="Summary excerpt">
+      <Field
+        label="Summary excerpt"
+        helper="Shown in homepage cards, listings, and social previews. Lead with the outcome — one to two crisp sentences."
+        counter={{ value: draft.SummaryExcerpt.length, soft: 200, hard: 280 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.SummaryExcerpt}
-          placeholder="A short summary used in listings and social previews"
+          placeholder="One or two sentences readers will see before they open the article."
           onChange={(e) => onChange(update(draft, 'SummaryExcerpt', e.target.value))}
+          maxLength={320}
         />
       </Field>
 
@@ -1569,11 +1574,15 @@ function HeroPanel({ draft, onChange }: PanelProps) {
           onChange={(e) => onChange(update(draft, 'HeroPrimaryImage', e.target.value))}
         />
       </Field>
-      <Field label="Alt text (for screen readers)">
+      <Field
+        label="Alt text (for screen readers)"
+        helper="Describe what is visible and why it matters — not that it is an image. Skip if the hero is purely decorative."
+        counter={{ value: draft.HeroPrimaryImageAltText.length, soft: 125 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.HeroPrimaryImageAltText}
-          placeholder="Describe the image in a sentence"
+          placeholder="e.g. Crew raising the final steel beam at the West Palm Beach jobsite."
           onChange={(e) => onChange(update(draft, 'HeroPrimaryImageAltText', e.target.value))}
         />
       </Field>
@@ -1631,12 +1640,17 @@ function HeroPanel({ draft, onChange }: PanelProps) {
 function StoryPanel({ draft, onChange }: PanelProps) {
   return (
     <div className={styles.editorialForm}>
-      <Field label="Subhead">
+      <Field
+        label="Subhead"
+        helper="A beat under the headline that frames the story. Concrete, human, and free of jargon."
+        counter={{ value: draft.Subhead.length, soft: 140, hard: 200 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.Subhead}
-          placeholder="One or two sentences that set up the story"
+          placeholder="e.g. How the Atlantic Center team delivered a 120-day schedule pull-in without slowing safety."
           onChange={(e) => onChange(update(draft, 'Subhead', e.target.value))}
+          maxLength={240}
         />
       </Field>
       <Field label="Article body">
@@ -1647,35 +1661,51 @@ function StoryPanel({ draft, onChange }: PanelProps) {
           ariaLabel="Article body"
         />
       </Field>
-      <Field label="Intro (optional)">
+      <Field
+        label="Intro"
+        helper="Optional. A short lead paragraph rendered above the body — use it when the story needs a stronger runway than the subhead."
+        counter={{ value: (draft.BodyIntro ?? '').length, soft: 300 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.BodyIntro ?? ''}
-          placeholder="An optional intro shown above the body"
+          placeholder="Set the scene in a sentence or two. Leave blank if the subhead already carries this weight."
           onChange={(e) => onChange(update(draft, 'BodyIntro', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Closing (optional)">
+      <Field
+        label="Closing"
+        helper="Optional. A final thought shown after the body — usually a forward-looking line or a call to action."
+        counter={{ value: (draft.BodyClosing ?? '').length, soft: 300 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.BodyClosing ?? ''}
-          placeholder="An optional closing shown after the body"
+          placeholder="How should readers leave the story? A closing note, next step, or thank-you."
           onChange={(e) => onChange(update(draft, 'BodyClosing', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Callout">
+      <Field
+        label="Callout"
+        helper="Optional. A short highlight rendered as a pull-out card — use it to surface a single standout fact."
+        counter={{ value: (draft.CalloutText ?? '').length, soft: 140 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.CalloutText ?? ''}
-          placeholder="Short pull-out callout, if any"
+          placeholder="e.g. 38,000 field hours. Zero recordables."
           onChange={(e) => onChange(update(draft, 'CalloutText', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Pull quote">
+      <Field
+        label="Pull quote"
+        helper="Optional. A quote emphasised in the layout. Attribute-less — use the body for speaker context."
+        counter={{ value: (draft.PullQuote ?? '').length, soft: 200 }}
+      >
         <textarea
           className={styles.textarea}
           value={draft.PullQuote ?? ''}
-          placeholder="Attribute-less quote emphasised in the layout"
+          placeholder="e.g. “We did not slow down to deliver this — we rebuilt how the team works.”"
           onChange={(e) => onChange(update(draft, 'PullQuote', e.target.value || undefined))}
         />
       </Field>
@@ -2205,13 +2235,54 @@ function DestinationBindingPanel({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+interface FieldCounter {
+  value: number;
+  soft?: number;
+  hard?: number;
+}
+
+function Field({
+  label,
+  helper,
+  counter,
+  children,
+}: {
+  label: string;
+  helper?: string;
+  counter?: FieldCounter;
+  children: React.ReactNode;
+}) {
+  const counterState = counter ? resolveCounterState(counter) : undefined;
   return (
     <label className={styles.field}>
-      <span className={styles.fieldLabel}>{label}</span>
+      <span className={styles.fieldLabelRow}>
+        <span className={styles.fieldLabel}>{label}</span>
+        {counterState && (
+          <span
+            className={`${styles.fieldCount} ${counterState.className}`}
+            aria-live="polite"
+          >
+            {counterState.text}
+          </span>
+        )}
+      </span>
+      {helper && <span className={styles.fieldHelper}>{helper}</span>}
       {children}
     </label>
   );
+}
+
+function resolveCounterState(counter: FieldCounter): { text: string; className: string } {
+  const { value, soft, hard } = counter;
+  const limit = hard ?? soft;
+  const text = limit ? `${value} / ${limit}` : `${value}`;
+  let className = styles.fieldCountOk;
+  if (hard !== undefined && value > hard) {
+    className = styles.fieldCountOver;
+  } else if (soft !== undefined && value > soft) {
+    className = styles.fieldCountWarn;
+  }
+  return { text, className };
 }
 
 function PreviewPanel({

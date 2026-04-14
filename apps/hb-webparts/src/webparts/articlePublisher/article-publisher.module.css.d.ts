@@ -75,6 +75,12 @@ declare const styles: {
   readonly form: string;
   readonly field: string;
   readonly fieldLabel: string;
+  readonly fieldLabelRow: string;
+  readonly fieldHelper: string;
+  readonly fieldCount: string;
+  readonly fieldCountOk: string;
+  readonly fieldCountWarn: string;
+  readonly fieldCountOver: string;
   readonly input: string;
   readonly textarea: string;
   readonly textareaLg: string;

@@ -699,6 +699,40 @@
   color: #1f1f1f;
 }
 
+.fieldLabelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fieldHelper {
+  color: #5f5f66;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.fieldCount {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.fieldCountOk {
+  color: #7a7a82;
+}
+
+.fieldCountWarn {
+  color: #8a4b00;
+}
+
+.fieldCountOver {
+  color: #a4262c;
+  font-weight: 600;
+}
+
 .input,
 .textarea,
 .select {
