@@ -158,15 +158,32 @@ describe('validatePublishContext', () => {
     expect(finding?.field).toBe('media[0].AltText');
   });
 
-  it('enforces milestone required fields when the template requires them', () => {
+  it('milestone articles are out of sprint scope — no active profile requires MilestoneLabel / MilestoneDateUtc (P1-3 closure)', () => {
+    // Templates still pointing at the removed
+    // `req-ps-inprogress-milestone-v1` profile must NOT surface a
+    // hard error demanding fields the UI cannot produce. The
+    // validation engine's unknown-key fallback takes over: a
+    // warning is emitted and global rules run, but no milestone-
+    // specific error is pushed.
     const result = validatePublishContext(
       context({
         template: { RequiredFieldSetKey: 'req-ps-inprogress-milestone-v1' },
       }),
     );
-    const keys = result.errors.map((e) => e.field);
-    expect(keys).toContain('MilestoneLabel');
-    expect(keys).toContain('MilestoneDateUtc');
+    const errorFields = result.errors.map((e) => e.field);
+    expect(errorFields).not.toContain('MilestoneLabel');
+    expect(errorFields).not.toContain('MilestoneDateUtc');
+    const errorMessages = result.errors.map((e) => e.message).join(' ');
+    expect(errorMessages).not.toMatch(/MilestoneLabel|MilestoneDateUtc/);
+
+    // Unknown-key fallback surfaces as a warning.
+    const unknownWarning = result.warnings.find(
+      (w) => w.field === 'template.RequiredFieldSetKey',
+    );
+    expect(unknownWarning).toBeDefined();
+    expect(unknownWarning?.message).toContain(
+      'req-ps-inprogress-milestone-v1',
+    );
   });
 
   it('warns when template expects hbSignatureHero on the current OOB shell', () => {

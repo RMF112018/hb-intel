@@ -200,6 +200,19 @@ async function mergeItem(
 
 /* ── HB Articles master upsert ────────────────────────────────── */
 
+/**
+ * Project the typed master-record row into the SharePoint REST
+ * field bag for `HB Articles`. Tenant columns only.
+ *
+ * `MilestoneLabel` / `MilestoneDateUtc` are intentionally NOT
+ * emitted here — milestone-article authoring is out of current
+ * sprint scope (P1-3). The tenant columns remain on the list
+ * (descriptor + contract still carry them so existing rows read
+ * cleanly), but the authoring UI does not expose controls for
+ * them, so the writer refuses to fabricate values. To re-enable,
+ * add milestone emission here in lockstep with the UI controls
+ * and the restored `MILESTONE_REQUIRED` validation profile.
+ */
 export function mapArticleRowToListFields(
   row: PublisherArticleRow,
 ): Record<string, unknown> {

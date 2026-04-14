@@ -140,34 +140,33 @@ const MONTHLY_REQUIRED: TemplateRequiredFieldSet = {
   ],
 };
 
-const MILESTONE_REQUIRED: TemplateRequiredFieldSet = {
-  articleFields: [
-    'ProjectId',
-    'ProjectName',
-    'Title',
-    'Subhead',
-    'SummaryExcerpt',
-    'Slug',
-    'HeroPrimaryImage',
-    'HeroPrimaryImageAltText',
-    'BodyRichText',
-  ],
-  extraChecks: [
-    {
-      key: 'MilestoneLabel',
-      predicate: (article) => !str(article.MilestoneLabel),
-      message: 'MilestoneLabel is required for milestone spotlights.',
-      actionHint:
-        'Add a milestone label (e.g. "Topping out", "Substantial completion").',
-    },
-    {
-      key: 'MilestoneDateUtc',
-      predicate: (article) => !str(article.MilestoneDateUtc),
-      message: 'MilestoneDateUtc is required for milestone spotlights.',
-      actionHint: 'Pick the milestone date.',
-    },
-  ],
-};
+// Milestone-article authoring is intentionally **out of sprint
+// scope** (P1-3). The prior `MILESTONE_REQUIRED` profile enforced
+// `MilestoneLabel` / `MilestoneDateUtc` on templates keyed
+// `'req-ps-inprogress-milestone-v1'`, but the authoring UI exposes
+// no controls for those fields and `mapArticleRowToListFields`
+// does not persist them — operators would have failed validation
+// with no way to satisfy it. The profile + its mapping are
+// removed so no active path demands UI-unsupported fields.
+//
+// Tenant alignment is preserved:
+//   - `PublisherArticleRow.MilestoneLabel` / `MilestoneDateUtc`
+//     remain on the contract (read-safe).
+//   - `ARTICLES_MVP_FIELDS` still lists both columns.
+//
+// To re-enable milestone articles:
+//   1. reintroduce `MILESTONE_REQUIRED` + its entry in
+//      `REQUIRED_FIELD_SETS`,
+//   2. add `MilestoneLabel` / `MilestoneDateUtc` writes in
+//      `mapArticleRowToListFields`,
+//   3. expose authoring controls (Label + Date) in
+//      `ArticlePublisher.tsx`,
+//   4. revive the deleted
+//      "enforces milestone required fields" validation test.
+//
+// Legacy templates still referencing the removed key degrade
+// gracefully via the existing unknown-`RequiredFieldSetKey`
+// fallback (warn + run global rules only).
 
 const PROJECT_UPDATE_REQUIRED: TemplateRequiredFieldSet = {
   articleFields: [
@@ -185,7 +184,8 @@ const PROJECT_UPDATE_REQUIRED: TemplateRequiredFieldSet = {
 
 const REQUIRED_FIELD_SETS: Readonly<Record<string, TemplateRequiredFieldSet>> = {
   'req-ps-inprogress-monthly-v1': MONTHLY_REQUIRED,
-  'req-ps-inprogress-milestone-v1': MILESTONE_REQUIRED,
+  // 'req-ps-inprogress-milestone-v1' is intentionally omitted — see
+  // the milestone scope-out comment above.
   'req-ps-inprogress-project-update-v1': PROJECT_UPDATE_REQUIRED,
 };
 
