@@ -21,6 +21,7 @@ import {
   restampSortOrder,
   teamMemberInitials,
 } from './teamInvariants.js';
+import { EditorialChip, PublisherButton } from '../sharedChrome/index.js';
 import styles from './teamPanel.module.css';
 
 export interface TeamPanelProps {
@@ -134,9 +135,9 @@ export function TeamPanel({
                     <span className={styles.chipName}>
                       {displayName}
                       {featured && (
-                        <span className={styles.featuredBadge} aria-hidden="true">
+                        <EditorialChip variant="featured" size="sm">
                           Featured
-                        </span>
+                        </EditorialChip>
                       )}
                     </span>
                     {r.Title && (
@@ -149,10 +150,9 @@ export function TeamPanel({
                       <span className={styles.chipBio}>{r.BioSnippet}</span>
                     )}
                   </button>
-                  <button
-                    type="button"
-                    className={`${styles.iconBtn} ${featured ? styles.iconBtnActive : ''}`}
-                    aria-pressed={featured}
+                  <PublisherButton
+                    iconOnly
+                    pressed={featured}
                     aria-label={
                       featured
                         ? `Unfeature ${displayName}`
@@ -162,51 +162,45 @@ export function TeamPanel({
                     onClick={() => toggleFeatured(r.TeamMemberId)}
                   >
                     <span aria-hidden="true">★</span>
-                  </button>
+                  </PublisherButton>
                 </div>
                 <div className={styles.chipActions}>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
+                  <PublisherButton
+                    size="sm"
                     aria-label={`Move ${displayName} up`}
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
                   >
                     Up
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
+                  </PublisherButton>
+                  <PublisherButton
+                    size="sm"
                     aria-label={`Move ${displayName} down`}
                     onClick={() => move(i, 1)}
                     disabled={i === rows.length - 1}
                   >
                     Down
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    onClick={() => openEdit(r.TeamMemberId)}
-                  >
+                  </PublisherButton>
+                  <PublisherButton size="sm" onClick={() => openEdit(r.TeamMemberId)}>
                     Edit
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionBtnDanger}
+                  </PublisherButton>
+                  <PublisherButton
+                    size="sm"
+                    variant="danger"
                     aria-label={`Remove ${displayName}`}
                     onClick={() => removeAt(i)}
                   >
                     Remove
-                  </button>
+                  </PublisherButton>
                 </div>
               </li>
             );
           })}
         </ol>
       )}
-      <button type="button" className={styles.addBtn} onClick={openAdd}>
+      <PublisherButton variant="primary" onClick={openAdd}>
         + Add teammate
-      </button>
+      </PublisherButton>
 
       <TeamMemberComposer
         open={composerOpen}

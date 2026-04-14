@@ -25,6 +25,7 @@ import {
   rollupGroupCompleteness,
   type DraftCompleteness,
 } from './draftCompleteness.js';
+import { EditorialChip } from '../sharedChrome/index.js';
 import styles from './draftQueue.module.css';
 
 export interface DraftQueueProps {
@@ -352,24 +353,25 @@ function CompletenessChip({
 }: {
   completeness: DraftCompleteness;
 }): React.JSX.Element {
-  const className =
+  const variant =
     completeness.level === 'ready'
-      ? styles.chipReady
+      ? 'success'
       : completeness.level === 'blocked'
-        ? styles.chipBlocked
-        : styles.chipTodo;
+        ? 'danger'
+        : 'warn';
   const tooltip =
     completeness.missingFields.length > 0
       ? completeness.missingFields.join(', ')
       : undefined;
   return (
-    <span
-      className={`${styles.chip} ${className}`}
+    <EditorialChip
+      variant={variant}
+      size="sm"
       aria-label={completeness.ariaLabel}
       title={tooltip}
     >
       {completeness.chipLabel}
-    </span>
+    </EditorialChip>
   );
 }
 
@@ -380,19 +382,26 @@ function GroupCounts({
 }): React.JSX.Element {
   const rollup = rollupGroupCompleteness(rows);
   if (rollup.total === 0) {
-    return <span className={styles.groupCount}>0</span>;
+    return (
+      <EditorialChip variant="neutral" size="sm">
+        0
+      </EditorialChip>
+    );
   }
   return (
     <span className={styles.groupCountGroup}>
-      <span className={styles.groupCount}>{rollup.total}</span>
+      <EditorialChip variant="info" size="sm">
+        {String(rollup.total)}
+      </EditorialChip>
       {rollup.todo > 0 && (
-        <span
-          className={`${styles.groupAttention}`}
+        <EditorialChip
+          variant="warn"
+          size="sm"
           aria-label={`${rollup.todo} need attention`}
           title={`${rollup.todo} need attention`}
         >
           {rollup.todo} TODO
-        </span>
+        </EditorialChip>
       )}
     </span>
   );

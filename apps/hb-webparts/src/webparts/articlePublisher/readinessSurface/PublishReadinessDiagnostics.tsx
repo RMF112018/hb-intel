@@ -17,6 +17,7 @@
 import * as React from 'react';
 import type { PreviewOutcome } from '../../../homepage/data/publisherAdapter/preview/previewBuilder.js';
 import type { PublisherPageBindingRow } from '../../../homepage/data/publisherAdapter/index.js';
+import { EditorialChip } from '../sharedChrome/index.js';
 import styles from './publishReadiness.module.css';
 
 export interface PublishReadinessDiagnosticsProps {
@@ -72,15 +73,12 @@ export function PublishReadinessDiagnostics({
                   <ul className={styles.findingList}>
                     {findings.map((f, i) => (
                       <li key={i} className={styles.findingItem}>
-                        <span
-                          className={
-                            f.severity === 'error'
-                              ? styles.severityError
-                              : styles.severityWarn
-                          }
+                        <EditorialChip
+                          size="sm"
+                          variant={f.severity === 'error' ? 'danger' : 'warn'}
                         >
                           {f.severity}
-                        </span>
+                        </EditorialChip>
                         <span className={styles.findingCategory}>{f.category}</span>
                         {f.field && <code className={styles.findingField}>{f.field}</code>}
                       </li>

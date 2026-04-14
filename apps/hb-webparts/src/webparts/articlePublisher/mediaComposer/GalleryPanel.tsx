@@ -20,6 +20,7 @@ import {
   restampMediaSortOrder,
 } from './mediaInvariants.js';
 import { assessAltText } from './altTextGuidance.js';
+import { EditorialChip, PublisherButton } from '../sharedChrome/index.js';
 import styles from './galleryPanel.module.css';
 
 export interface GalleryPanelProps {
@@ -194,20 +195,22 @@ export function GalleryPanel({
                   </span>
                   <span className={styles.tileMetaRow}>
                     {showRoleBadge && (
-                      <span className={styles.roleBadge}>{r.MediaRole}</span>
+                      <EditorialChip variant="info" size="sm">
+                        {r.MediaRole}
+                      </EditorialChip>
                     )}
                     {featured && (
-                      <span className={styles.featuredBadge} aria-hidden="true">
+                      <EditorialChip variant="featured" size="sm">
                         Featured
-                      </span>
+                      </EditorialChip>
                     )}
                   </span>
                 </button>
                 <div className={styles.tileActions}>
-                  <button
-                    type="button"
-                    className={`${styles.iconBtn} ${featured ? styles.iconBtnActive : ''}`}
-                    aria-pressed={featured}
+                  <PublisherButton
+                    iconOnly
+                    size="sm"
+                    pressed={featured}
                     aria-label={
                       featured ? `Unfeature ${label}` : `Feature ${label} in the gallery`
                     }
@@ -215,42 +218,40 @@ export function GalleryPanel({
                     onClick={() => toggleFeatured(r.MediaId)}
                   >
                     <span aria-hidden="true">★</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
+                  </PublisherButton>
+                  <PublisherButton
+                    size="sm"
                     aria-label={`Move ${label} earlier`}
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
                   >
                     ←
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
+                  </PublisherButton>
+                  <PublisherButton
+                    size="sm"
                     aria-label={`Move ${label} later`}
                     onClick={() => move(i, 1)}
                     disabled={i === rows.length - 1}
                   >
                     →
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.actionBtnDanger}
+                  </PublisherButton>
+                  <PublisherButton
+                    size="sm"
+                    variant="danger"
                     aria-label={`Remove ${label}`}
                     onClick={() => removeAt(i)}
                   >
                     Remove
-                  </button>
+                  </PublisherButton>
                 </div>
               </li>
             );
           })}
         </ol>
       )}
-      <button type="button" className={styles.addBtn} onClick={openAdd}>
+      <PublisherButton variant="primary" onClick={openAdd}>
         + Add image
-      </button>
+      </PublisherButton>
 
       <MediaComposer
         open={composerOpen}
