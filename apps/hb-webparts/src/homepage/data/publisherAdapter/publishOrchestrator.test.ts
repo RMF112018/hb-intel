@@ -114,9 +114,7 @@ function fixture(over: {
     articles: {
       getByArticleId: vi.fn(async () => p),
       listByWorkflowState: vi.fn(async () => []),
-      upsert: vi.fn(async () => {
-        throw new Error('unused in this test');
-      }) as unknown as PublisherRepositories['articles']['upsert'],
+      upsert: vi.fn(async () => ({ wasCreated: false, itemId: 1 })),
     },
     teamMembers: {
       listByArticle: vi.fn(async () => [member('alice')]),

@@ -34,7 +34,7 @@ import {
   type RepublishDecision,
 } from './republishPolicy';
 import type { ComposedPage } from './pageGeneration/pageCompositor';
-import type { PublisherPageBindingRow } from './publisherContracts';
+import type { PublisherArticleRow, PublisherPageBindingRow } from './publisherContracts';
 import {
   validatePublishContext,
   type ValidationResult,
@@ -94,7 +94,8 @@ export type PublishOutcome =
         | 'validation'
         | 'policy'
         | 'pagePublish'
-        | 'bindingWrite';
+        | 'bindingWrite'
+        | 'articleSync';
       readonly message: string;
       readonly decision?: RepublishDecision;
       readonly page?: ComposedPage;
@@ -119,10 +120,10 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
    * sync.
    */
   function operationFor(
-    stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite',
+    stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite' | 'articleSync',
     mode: PublishMode,
   ): import('./publisherEnums').PublishingErrorOperation {
-    if (stage === 'bindingWrite') return 'sync';
+    if (stage === 'bindingWrite' || stage === 'articleSync') return 'sync';
     if (mode === 'create') return 'create';
     return 'publish';
   }
@@ -137,7 +138,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     readonly articleId: string;
     readonly title: string | undefined;
     readonly destination: import('./publisherEnums').Destination | undefined;
-    readonly stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite';
+    readonly stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite' | 'articleSync';
     readonly mode: PublishMode;
     readonly message: string;
     readonly bindingId?: string;
@@ -380,6 +381,59 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         ok: false,
         stage: 'bindingWrite',
         message: bindingOutcome.message,
+        decision,
+        page: publishResult.page,
+      };
+    }
+
+    // Back-sync the master `HB Articles` row with authoritative
+    // post-publish destination metadata. Only runs after a verified
+    // success path (composition + validation + page lifecycle +
+    // binding upsert all green). PublishedDateUtc is stamped on
+    // first publish and on regenerate (a new destination page); on
+    // in-place republish we preserve the existing first-publish
+    // timestamp so callers can still tell when the page first went
+    // live. WorkflowState is intentionally NOT touched here — that
+    // remains the authoring surface's `handleTransition` action.
+    const stampPublished =
+      decision.action === 'create' || decision.action === 'regenerate';
+    const updatedArticle: PublisherArticleRow = {
+      ...context.article,
+      PageId: publishResult.creation.pageId,
+      PageName:
+        publishResult.creation.pageName ?? publishResult.page.identity.pageName,
+      PageUrl: publishResult.creation.pageUrl,
+      PageTemplateKey: publishResult.page.identity.templateKey,
+      PageShellVersion: publishResult.page.identity.shellVersion,
+      RenderVersion: publishResult.page.identity.templateVersion,
+      PageSyncStatus: 'in-sync',
+      LastPageSyncDateUtc: now,
+      UpdatedDateUtc: now,
+      PublishedDateUtc: stampPublished
+        ? publishResult.publish.publishedAtUtc ?? now
+        : context.article.PublishedDateUtc,
+    };
+    try {
+      await repositories.articles.upsert(updatedArticle);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `HB Articles back-sync failed after publish: ${err.message}`
+          : 'HB Articles back-sync failed after publish.';
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'articleSync',
+        mode: req.mode,
+        message,
+        bindingId: bindingRow.BindingId,
+        nowIso: now,
+      });
+      return {
+        ok: false,
+        stage: 'articleSync',
+        message,
         decision,
         page: publishResult.page,
       };

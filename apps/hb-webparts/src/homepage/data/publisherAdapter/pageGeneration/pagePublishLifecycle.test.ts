@@ -196,7 +196,7 @@ describe('createSharePointPageCreationService.publishLive — REST contract', ()
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
     );
     expect(fetchImpl).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchImpl.mock.calls[0]!;
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe(
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight/_api/sitepages/pages(777)/Publish',
     );
