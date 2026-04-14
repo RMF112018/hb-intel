@@ -172,12 +172,12 @@ const PAGE_BINDINGS_MVP_FIELDS = [
 const WORKFLOW_HISTORY_FIELDS = [
   'HistoryId',
   'ArticleId',
-  'FromState',
-  'ToState',
-  'Action',
-  'ActorEmail',
+  'Title',
+  'NewState',
+  'PreviousState',
   'ActionDateUtc',
-  'Note',
+  'ActorEmail',
+  'ActionNote',
 ] as const;
 
 const PUBLISHING_ERRORS_FIELDS = [

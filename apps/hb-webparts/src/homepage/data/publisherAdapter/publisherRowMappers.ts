@@ -32,7 +32,6 @@ import type {
   PublishingErrorOperation,
   SpotlightType,
   SyncStatus,
-  WorkflowHistoryAction,
   WorkflowState,
 } from './publisherEnums';
 import {
@@ -50,7 +49,6 @@ import {
   PUBLISHING_ERROR_OPERATION_VALUES,
   SPOTLIGHT_TYPE_VALUES,
   SYNC_STATUS_VALUES,
-  WORKFLOW_HISTORY_ACTION_VALUES,
   WORKFLOW_STATE_VALUES,
 } from './publisherEnums';
 
@@ -138,7 +136,6 @@ const stageMany = many<ProjectStage>(PROJECT_STAGE_VALUES);
 const subject = one<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
 const subjectMany = many<ArticleSubject>(ARTICLE_SUBJECT_VALUES);
 const workflowState = one<WorkflowState>(WORKFLOW_STATE_VALUES);
-const workflowAction = one<WorkflowHistoryAction>(WORKFLOW_HISTORY_ACTION_VALUES);
 const mediaRole = one<MediaRole>(MEDIA_ROLE_VALUES);
 const publishStatus = one<PublishStatus>(PUBLISH_STATUS_VALUES);
 const syncStatus = one<SyncStatus>(SYNC_STATUS_VALUES);
@@ -412,19 +409,19 @@ export function mapWorkflowHistoryRow(
 ): PublisherWorkflowHistoryRow | undefined {
   const HistoryId = requiredStr(raw['HistoryId']);
   const ArticleId = requiredStr(raw['ArticleId']);
-  const ToState = workflowState(raw['ToState']);
-  const Action = workflowAction(raw['Action']);
+  const Title = requiredStr(raw['Title']);
+  const NewState = workflowState(raw['NewState']);
   const ActionDateUtc = dt(raw['ActionDateUtc']);
-  if (!HistoryId || !ArticleId || !ToState || !Action || !ActionDateUtc) return undefined;
+  if (!HistoryId || !ArticleId || !Title || !NewState || !ActionDateUtc) return undefined;
   return {
     HistoryId,
     ArticleId,
-    FromState: workflowState(raw['FromState']),
-    ToState,
-    Action,
-    ActorEmail: str(raw['ActorEmail']),
+    Title,
+    NewState,
+    PreviousState: workflowState(raw['PreviousState']),
     ActionDateUtc,
-    Note: str(raw['Note']),
+    ActorEmail: str(raw['ActorEmail']),
+    ActionNote: str(raw['ActionNote']),
   };
 }
 

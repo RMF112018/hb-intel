@@ -94,8 +94,8 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
   it('mapWorkflowHistoryRow accepts ArticleId FK and rejects PostId', () => {
     const base = {
       HistoryId: 'hst-1',
-      ToState: 'approved',
-      Action: 'transition',
+      Title: 'transition',
+      NewState: 'approved',
       ActionDateUtc: '2026-04-10T00:00:00Z',
     };
     expect(mapWorkflowHistoryRow({ ...base, ArticleId: ARTICLE_ID })?.ArticleId).toBe(ARTICLE_ID);
@@ -162,8 +162,8 @@ describe('child-row writers emit ArticleId, never PostId', () => {
     const row: PublisherWorkflowHistoryRow = {
       HistoryId: 'hst-1',
       ArticleId: ARTICLE_ID,
-      ToState: 'approved',
-      Action: 'transition',
+      Title: 'Test',
+      NewState: 'approved',
       ActionDateUtc: '2026-04-10T00:00:00Z',
     };
     const fields = mapWorkflowHistoryRowToListFields(row);

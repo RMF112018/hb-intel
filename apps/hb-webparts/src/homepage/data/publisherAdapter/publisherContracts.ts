@@ -33,7 +33,6 @@ import type {
   SyncStatus,
   TeamViewerDensity,
   TeamViewerLayout,
-  WorkflowHistoryAction,
   WorkflowState,
 } from './publisherEnums';
 
@@ -280,15 +279,27 @@ export interface PublisherPageBindingRow {
 /* F. HB Article Workflow History                                      */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Tenant-aligned `HB Article Workflow History` row. Records a single
+ * workflow transition against the master article.
+ *
+ * Tenant schema:
+ *   required — HistoryId, ArticleId, Title, NewState (Choice), ActionDateUtc
+ *   optional — PreviousState (Choice), ActorEmail, ActionNote
+ *
+ * The prior `Action` enum and the `FromState`/`ToState`/`Note` field
+ * names do not exist on the tenant list and are intentionally
+ * removed from this contract.
+ */
 export interface PublisherWorkflowHistoryRow {
   readonly HistoryId: string;
   readonly ArticleId: string;
-  readonly FromState?: WorkflowState;
-  readonly ToState: WorkflowState;
-  readonly Action: WorkflowHistoryAction;
-  readonly ActorEmail?: string;
+  readonly Title: string;
+  readonly NewState: WorkflowState;
+  readonly PreviousState?: WorkflowState;
   readonly ActionDateUtc: IsoDateTimeUtc;
-  readonly Note?: string;
+  readonly ActorEmail?: string;
+  readonly ActionNote?: string;
 }
 
 /* ------------------------------------------------------------------ */

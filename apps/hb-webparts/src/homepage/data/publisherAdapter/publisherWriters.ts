@@ -393,12 +393,12 @@ export function mapWorkflowHistoryRowToListFields(
   return {
     HistoryId: row.HistoryId,
     ArticleId: row.ArticleId,
-    FromState: nullIfEmpty(row.FromState),
-    ToState: row.ToState,
-    Action: row.Action,
-    ActorEmail: nullIfEmpty(row.ActorEmail),
+    Title: row.Title,
+    NewState: row.NewState,
+    PreviousState: nullIfEmpty(row.PreviousState),
     ActionDateUtc: row.ActionDateUtc,
-    Note: nullIfEmpty(row.Note),
+    ActorEmail: nullIfEmpty(row.ActorEmail),
+    ActionNote: nullIfEmpty(row.ActionNote),
   };
 }
 

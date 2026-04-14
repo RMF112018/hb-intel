@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   canTransition,
-  historyActionFor,
   validTransitionsFrom,
 } from './workflowStateMachine';
 
@@ -33,17 +32,13 @@ describe('workflow state machine', () => {
     expect(validTransitionsFrom('withdrawn')).toHaveLength(0);
   });
 
-  it('published cannot return to draft or inReview', () => {
+  it('published cannot return to draft or review', () => {
     expect(canTransition('published', 'draft')).toBe(false);
     expect(canTransition('published', 'review')).toBe(false);
   });
 
-  it('maps transitions to the correct history action', () => {
-    expect(historyActionFor('approved', 'published')).toBe('publish');
-    expect(historyActionFor('published', 'archived')).toBe('archive');
-    expect(historyActionFor('draft', 'withdrawn')).toBe('withdraw');
-    expect(historyActionFor('review', 'approved')).toBe('approvalDecision');
-    expect(historyActionFor('scheduled', 'approved')).toBe('approvalDecision');
-    expect(historyActionFor('draft', 'review')).toBe('transition');
+  it('uses the tenant `review` state value (never legacy `inReview`)', () => {
+    expect(validTransitionsFrom('draft')).toContain('review');
+    expect(validTransitionsFrom('review')).toContain('approved');
   });
 });

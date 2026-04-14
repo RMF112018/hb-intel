@@ -1,10 +1,10 @@
 /**
- * Pure workflow state machine for Project Spotlight publisher posts.
+ * Pure workflow state machine for Article Publisher articles.
  *
- * Authority: architecture doc 09 (Editorial Workflow and Lifecycle).
+ * Uses the tenant `HB Articles.WorkflowState` Choice values directly.
  * Permitted transitions (v1):
  *   draft      → review | archived | withdrawn
- *   review   → approved | draft | withdrawn
+ *   review     → approved | draft | withdrawn
  *   approved   → scheduled | published | draft | withdrawn
  *   scheduled  → published | approved | withdrawn
  *   published  → archived | withdrawn
@@ -12,7 +12,7 @@
  *   withdrawn  → (terminal)
  */
 
-import type { WorkflowState, WorkflowHistoryAction } from './publisherEnums';
+import type { WorkflowState } from './publisherEnums';
 
 const TRANSITIONS: Readonly<Record<WorkflowState, readonly WorkflowState[]>> = {
   draft: ['review', 'archived', 'withdrawn'],
@@ -32,16 +32,4 @@ export function validTransitionsFrom(
   from: WorkflowState,
 ): readonly WorkflowState[] {
   return TRANSITIONS[from];
-}
-
-export function historyActionFor(
-  from: WorkflowState,
-  to: WorkflowState,
-): WorkflowHistoryAction {
-  if (to === 'published') return 'publish';
-  if (to === 'archived') return 'archive';
-  if (to === 'withdrawn') return 'withdraw';
-  if (from === 'scheduled' && to === 'approved') return 'approvalDecision';
-  if (from === 'review' && to === 'approved') return 'approvalDecision';
-  return 'transition';
 }

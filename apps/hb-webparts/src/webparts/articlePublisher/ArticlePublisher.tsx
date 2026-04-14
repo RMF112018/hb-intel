@@ -34,7 +34,6 @@ import {
   type PublisherPageBindingRow,
   type PublisherRepositories,
   type PublisherTeamMemberRow,
-  type WorkflowHistoryAction,
   type WorkflowState,
   type MediaRole,
   type ArticleContentType,
@@ -50,7 +49,6 @@ import {
 import { buildPublishResolutionContext } from '../../homepage/data/publisherAdapter/publishResolutionContext.js';
 import {
   canTransition,
-  historyActionFor,
   validTransitionsFrom,
 } from '../../homepage/data/publisherAdapter/workflowStateMachine.js';
 import { buildPublisherPreview } from '../../homepage/data/publisherAdapter/preview/previewBuilder.js';
@@ -107,21 +105,21 @@ function emptyArticle(templateKey: string): PublisherArticleRow {
 
 function newHistoryRow(
   articleId: string,
+  title: string,
   from: WorkflowState | undefined,
   to: WorkflowState,
   actor: string | undefined,
   note: string | undefined,
 ): PublisherWorkflowHistoryRow {
-  const action: WorkflowHistoryAction = historyActionFor(from ?? to, to);
   return {
     HistoryId: `hst-${Date.now()}-${Math.floor(Math.random() * 1e6).toString(36)}`,
     ArticleId: articleId,
-    FromState: from,
-    ToState: to,
-    Action: action,
+    Title: title,
+    NewState: to,
+    PreviousState: from,
     ActorEmail: actor,
     ActionDateUtc: nowIso(),
-    Note: note && note.trim().length > 0 ? note.trim() : undefined,
+    ActionNote: note && note.trim().length > 0 ? note.trim() : undefined,
   };
 }
 
@@ -289,7 +287,7 @@ export function ArticlePublisher({
         };
         await repositories.articles.upsert(updated);
         await repositories.workflowHistory.append(
-          newHistoryRow(updated.ArticleId, from, to, articleDraft.AuthorEmail, undefined),
+          newHistoryRow(updated.ArticleId, updated.Title, from, to, articleDraft.AuthorEmail, undefined),
         );
         setStatus(`Now in ${to}.`);
         await reloadList();
