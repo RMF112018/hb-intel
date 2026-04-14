@@ -12,9 +12,9 @@ import {
   TEAM_VIEWER_DEFAULT_HEADING,
 } from './teamViewerAdapter';
 
-function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
+function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    ArticleId: 'post-tv-1',
+    ArticleId: 'art-tv-1',
     Title: 'T',
     Subhead: 'S',
     SummaryExcerpt: 'x',
@@ -22,7 +22,7 @@ function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
     ArticleContentType: 'monthlySpotlight',
     Destination: 'projectSpotlight',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    Slug: 'post-tv-1',
+    Slug: 'art-tv-1',
     WorkflowState: 'approved',
     CreatedDateUtc: '2026-04-10T00:00:00Z',
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
@@ -40,7 +40,7 @@ function member(
   over: Partial<PublisherTeamMemberRow> = {},
 ): PublisherTeamMemberRow {
   return {
-    ArticleId: 'post-tv-1',
+    ArticleId: 'art-tv-1',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -51,11 +51,11 @@ function member(
 describe('buildTeamViewerProperties', () => {
   it('uses the article TeamViewerTitle as the heading and propagates the article identity', () => {
     const props = buildTeamViewerProperties(
-      post({ TeamViewerTitle: 'Project Team' }),
+      article({ TeamViewerTitle: 'Project Team' }),
     );
     expect(props).toEqual({
       heading: 'Project Team',
-      articleId: 'post-tv-1',
+      articleId: 'art-tv-1',
       destinationKey: 'projectSpotlight',
       listHostOverride: undefined,
       layout: 'grid',
@@ -65,7 +65,7 @@ describe('buildTeamViewerProperties', () => {
   });
 
   it('falls back to canonical defaults when optional article fields are unset', () => {
-    const props = buildTeamViewerProperties(post());
+    const props = buildTeamViewerProperties(article());
     expect(props.heading).toBe(TEAM_VIEWER_DEFAULT_HEADING);
     expect(props.layout).toBe('grid');
     expect(props.density).toBe('standard');
@@ -74,9 +74,9 @@ describe('buildTeamViewerProperties', () => {
   });
 
   it('mirrors the article Destination as the canvas destinationKey', () => {
-    const ps = buildTeamViewerProperties(post({ Destination: 'projectSpotlight' }));
+    const ps = buildTeamViewerProperties(article({ Destination: 'projectSpotlight' }));
     expect(ps.destinationKey).toBe('projectSpotlight');
-    const cp = buildTeamViewerProperties(post({ Destination: 'companyPulse' }));
+    const cp = buildTeamViewerProperties(article({ Destination: 'companyPulse' }));
     expect(cp.destinationKey).toBe('companyPulse');
   });
 });
@@ -121,7 +121,7 @@ describe('mapPublisherRowToTeamViewerPerson', () => {
     });
     expect(mapPublisherRowToTeamViewerPerson(row)).toEqual({
       id: 'alice',
-      articleId: 'post-tv-1',
+      articleId: 'art-tv-1',
       articleTeamMemberId: 'alice',
       displayName: 'alice',
       jobTitle: 'PM',

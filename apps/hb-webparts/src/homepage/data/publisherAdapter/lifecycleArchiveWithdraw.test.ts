@@ -189,7 +189,7 @@ describe('orchestrator.archive', () => {
     const result = await orch.archive({
       articleId: 'art-001',
       actorEmail: 'editor@example.com',
-      note: 'Retiring the post.',
+      note: 'Retiring the article.',
       now: () => NOW,
     });
     expect(result.ok).toBe(true);
@@ -217,7 +217,7 @@ describe('orchestrator.archive', () => {
     expect(persistedHistory.NewState).toBe('archived');
     expect(persistedHistory.PreviousState).toBe('published');
     expect(persistedHistory.ActorEmail).toBe('editor@example.com');
-    expect(persistedHistory.ActionNote).toBe('Retiring the post.');
+    expect(persistedHistory.ActionNote).toBe('Retiring the article.');
   });
 
   it('refuses an illegal transition (published → published) without mutating any list', async () => {

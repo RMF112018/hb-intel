@@ -11,8 +11,8 @@ import { decideRepublishAction } from './republishPolicy';
 
 function identity(over: Partial<ComposedPageIdentity> = {}): ComposedPageIdentity {
   return {
-    articleId: 'post-001',
-    slug: 'post-001',
+    articleId: 'art-001',
+    slug: 'art-001',
     pageName: 'post-001.aspx',
     pageTitle: 'Post 001',
     targetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
@@ -68,7 +68,7 @@ function binding(
 ): PublisherPageBindingRow {
   return {
     BindingId: 'bnd-001',
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     Title: 'Acme Tower — April',
     PublishStatus: 'published',
     TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',

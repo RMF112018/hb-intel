@@ -17,9 +17,9 @@ import {
 } from './pageCompositor';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from './xmlShellManifest';
 
-function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
+function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     Title: 'Acme Tower — April Spotlight',
     Subhead: 'Concrete pour wrapped under budget',
     SummaryExcerpt: 'A short rollup summary.',
@@ -71,7 +71,7 @@ function template(
 
 function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -81,7 +81,7 @@ function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): Publish
 
 function mediaRow(id: string, over: Partial<PublisherMediaRow> = {}): PublisherMediaRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -104,7 +104,7 @@ function context(over: {
     selectionRule: 'applicability',
   };
   return {
-    article: post(over.article),
+    article: article(over.article),
     template: template(over.template),
     teamMembers: over.teamMembers ?? [],
     media: over.media ?? [],
@@ -132,7 +132,7 @@ describe('composeProjectSpotlightPage', () => {
     expect(validateComposedPageStructure(page)).toEqual([]);
   });
 
-  it('populates the banner from post fields with BannerTitleOverride preference', () => {
+  it('populates the banner from article fields with BannerTitleOverride preference', () => {
     const page = composeProjectSpotlightPage(
       context({
         teamMembers: [member('alice')],
@@ -148,7 +148,7 @@ describe('composeProjectSpotlightPage', () => {
     expect(banner.layoutType).toBe('FullWidthImage');
   });
 
-  it('sets TeamViewer properties from post fields and includes only IncludeInViewer members', () => {
+  it('sets TeamViewer properties from article fields and includes only IncludeInViewer members', () => {
     const page = composeProjectSpotlightPage(
       context({
         article: {
@@ -169,7 +169,7 @@ describe('composeProjectSpotlightPage', () => {
     expect(tvp.properties.layout).toBe('list');
     expect(tvp.properties.density).toBe('compact');
     expect(tvp.properties.flags.profileDetailDrawer).toBe(true);
-    expect(tvp.properties.articleId).toBe('post-001');
+    expect(tvp.properties.articleId).toBe('art-001');
     expect(tvp.properties.destinationKey).toBe('projectSpotlight');
   });
 

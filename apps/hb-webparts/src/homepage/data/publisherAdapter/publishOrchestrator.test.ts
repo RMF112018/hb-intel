@@ -12,9 +12,9 @@ import type { PageCreationService } from './pageGeneration/pageCreationService';
 import { createPageShellService } from './pageGeneration/pageShellService';
 import { createPublishOrchestrator } from './publishOrchestrator';
 
-function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
+function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    ArticleId: 'post-ps-001',
+    ArticleId: 'art-ps-001',
     Title: 'Acme Tower — April',
     Subhead: 'Concrete pour on-schedule',
     SummaryExcerpt: 'Summary.',
@@ -62,7 +62,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
 
 function member(id: string): PublisherTeamMemberRow {
   return {
-    ArticleId: 'post-ps-001',
+    ArticleId: 'art-ps-001',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -71,7 +71,7 @@ function member(id: string): PublisherTeamMemberRow {
 
 function mediaRow(id: string): PublisherMediaRow {
   return {
-    ArticleId: 'post-ps-001',
+    ArticleId: 'art-ps-001',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -89,18 +89,18 @@ interface Fixture {
 }
 
 function fixture(over: {
-  post?: Partial<PublisherArticleRow>;
+  article?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   existingBinding?: PublisherPageBindingRow;
 } = {}): Fixture {
-  const p = post(over.post);
+  const a = article(over.article);
   const t = tpl(over.template);
 
   const createOrUpdate = vi.fn(async () => ({
     ok: true as const,
     pageId: '123',
-    pageUrl: `${p.TargetSiteUrl}/SitePages/${p.Slug}.aspx`,
-    pageName: `${p.Slug}.aspx`,
+    pageUrl: `${a.TargetSiteUrl}/SitePages/${a.Slug}.aspx`,
+    pageName: `${a.Slug}.aspx`,
     wasCreated: true,
   }));
   const upsertBinding = vi.fn(async () => ({
@@ -112,7 +112,7 @@ function fixture(over: {
 
   const repositories: PublisherRepositories = {
     articles: {
-      getByArticleId: vi.fn(async () => p),
+      getByArticleId: vi.fn(async () => a),
       listByWorkflowState: vi.fn(async () => []),
       upsert: vi.fn(async () => ({ wasCreated: false, itemId: 1 })),
     },
@@ -180,7 +180,7 @@ describe('publishOrchestrator', () => {
     const f = fixture();
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      articleId: 'post-ps-001',
+      articleId: 'art-ps-001',
       mode: 'create',
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-generated',
@@ -202,7 +202,7 @@ describe('publishOrchestrator', () => {
   it('republish preserves existing BindingId when shell + template versions match', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
-      ArticleId: 'post-ps-001',
+      ArticleId: 'art-ps-001',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
@@ -216,7 +216,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      articleId: 'post-ps-001',
+      articleId: 'art-ps-001',
       mode: 'republish',
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-should-not-be-used',
@@ -232,7 +232,7 @@ describe('publishOrchestrator', () => {
   it('idempotent republish emits noOp when binding is already in sync', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
-      ArticleId: 'post-ps-001',
+      ArticleId: 'art-ps-001',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
@@ -245,7 +245,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      articleId: 'post-ps-001',
+      articleId: 'art-ps-001',
       mode: 'republish',
       idempotent: true,
       now: () => '2026-04-13T10:00:00.000Z',
@@ -260,7 +260,7 @@ describe('publishOrchestrator', () => {
   it('regenerates (new page, new binding) on shell key drift', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
-      ArticleId: 'post-ps-001',
+      ArticleId: 'art-ps-001',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
@@ -273,7 +273,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      articleId: 'post-ps-001',
+      articleId: 'art-ps-001',
       mode: 'republish',
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-regen',
@@ -290,7 +290,7 @@ describe('publishOrchestrator', () => {
   it('blocks republish on archived binding', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
-      ArticleId: 'post-ps-001',
+      ArticleId: 'art-ps-001',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
@@ -301,7 +301,7 @@ describe('publishOrchestrator', () => {
     };
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ articleId: 'post-ps-001', mode: 'republish' });
+    const result = await orch.run({ articleId: 'art-ps-001', mode: 'republish' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('policy');
@@ -313,7 +313,7 @@ describe('publishOrchestrator', () => {
   it('preview mode composes but never writes', async () => {
     const f = fixture();
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ articleId: 'post-ps-001', mode: 'preview' });
+    const result = await orch.run({ articleId: 'art-ps-001', mode: 'preview' });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.mode).toBe('preview');
@@ -323,9 +323,9 @@ describe('publishOrchestrator', () => {
   });
 
   it('blocks publish when validation fails and does not touch the page-creation service or binding writer', async () => {
-    const f = fixture({ post: { Title: '' } });
+    const f = fixture({ article: { Title: '' } });
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ articleId: 'post-ps-001', mode: 'create' });
+    const result = await orch.run({ articleId: 'art-ps-001', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('validation');
@@ -335,10 +335,10 @@ describe('publishOrchestrator', () => {
   });
 
   it('honors validateBeforePublish=false and publishes through a known-invalid context', async () => {
-    const f = fixture({ post: { Title: '' } });
+    const f = fixture({ article: { Title: '' } });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      articleId: 'post-ps-001',
+      articleId: 'art-ps-001',
       mode: 'create',
       validateBeforePublish: false,
     });
@@ -355,7 +355,7 @@ describe('publishOrchestrator', () => {
       message: 'tenant returned 500',
     });
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ articleId: 'post-ps-001', mode: 'create' });
+    const result = await orch.run({ articleId: 'art-ps-001', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('pagePublish');

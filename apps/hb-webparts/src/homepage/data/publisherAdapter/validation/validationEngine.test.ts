@@ -10,9 +10,9 @@ import type { PublishResolutionContext } from '../publishResolutionContext';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from '../pageGeneration/xmlShellManifest';
 import { validatePublishContext } from './validationEngine';
 
-function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
+function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     Title: 'A Well-Formed Title',
     ArticleContentType: 'monthlySpotlight',
     Subhead: 'A subhead',
@@ -70,11 +70,11 @@ function context(over: {
   existingBinding?: PublisherPageBindingRow;
 } = {}): PublishResolutionContext {
   return {
-    article: post(over.article),
+    article: article(over.article),
     template: tpl(over.template),
     teamMembers: over.teamMembers ?? [
       {
-        ArticleId: 'post-001',
+        ArticleId: 'art-001',
         TeamMemberId: 'tm-1',
         PersonPrincipal: 'alice@example.com',
         DisplayName: 'Alice',
@@ -82,7 +82,7 @@ function context(over: {
     ],
     media: over.media ?? [
       {
-        ArticleId: 'post-001',
+        ArticleId: 'art-001',
         MediaId: 'm-1',
         MediaRole: 'gallery',
         ImageAssetUrl: 'https://img.example/g1.jpg',
@@ -123,7 +123,7 @@ describe('validatePublishContext', () => {
         article: { ShowTeamViewer: true },
         teamMembers: [
           {
-            ArticleId: 'post-001',
+            ArticleId: 'art-001',
             TeamMemberId: 'tm-1',
             PersonPrincipal: 'x',
             DisplayName: 'X',
@@ -147,7 +147,7 @@ describe('validatePublishContext', () => {
       context({
         media: [
           {
-            ArticleId: 'post-001',
+            ArticleId: 'art-001',
             MediaId: 'm-1',
             MediaRole: 'gallery',
             ImageAssetUrl: 'https://img.example/g1.jpg',
@@ -190,7 +190,7 @@ describe('validatePublishContext', () => {
         template: { },
         existingBinding: {
           BindingId: 'b-1',
-          ArticleId: 'post-001',
+          ArticleId: 'art-001',
           Title: 'Acme Tower — April',
           PublishStatus: 'published',
           TargetSiteUrl:

@@ -30,9 +30,9 @@ import type { PageCreationService } from '../pageGeneration/pageCreationService'
 import { createPageShellService } from '../pageGeneration/pageShellService';
 import { createPublishOrchestrator } from '../publishOrchestrator';
 
-function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
+function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    ArticleId: 'post-e2e',
+    ArticleId: 'art-e2e',
     Title: 'E2E Post',
     Subhead: 'End-to-end subhead',
     SummaryExcerpt: 'Short summary.',
@@ -84,7 +84,7 @@ function tpl(
 
 function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
   return {
-    ArticleId: 'post-e2e',
+    ArticleId: 'art-e2e',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -94,7 +94,7 @@ function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): Publish
 
 function gallery(id: string, over: Partial<PublisherMediaRow> = {}): PublisherMediaRow {
   return {
-    ArticleId: 'post-e2e',
+    ArticleId: 'art-e2e',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -112,21 +112,21 @@ interface Fx {
 }
 
 function fixture(over: {
-  post?: Partial<PublisherArticleRow>;
+  article?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   teamMembers?: readonly PublisherTeamMemberRow[];
   media?: readonly PublisherMediaRow[];
   existingBinding?: PublisherPageBindingRow;
 } = {}): Fx {
-  const p = post(over.post);
+  const a = article(over.article);
   const t = tpl(over.template);
   const team = over.teamMembers ?? [member('alice')];
   const media = over.media ?? [gallery('g1')];
   const createOrUpdate = vi.fn(async () => ({
     ok: true as const,
     pageId: 'page-1001',
-    pageUrl: `${p.TargetSiteUrl}/SitePages/${p.Slug}.aspx`,
-    pageName: `${p.Slug}.aspx`,
+    pageUrl: `${a.TargetSiteUrl}/SitePages/${a.Slug}.aspx`,
+    pageName: `${a.Slug}.aspx`,
     wasCreated: true,
   }));
   const upsert = vi.fn(async () => ({
@@ -137,8 +137,8 @@ function fixture(over: {
   }));
   const repositories: PublisherRepositories = {
     articles: {
-      getByArticleId: vi.fn(async () => p),
-      listByWorkflowState: vi.fn(async () => [p]),
+      getByArticleId: vi.fn(async () => a),
+      listByWorkflowState: vi.fn(async () => [a]),
       upsert: vi.fn(async () => ({ wasCreated: false, itemId: 42 })),
     },
     teamMembers: {
@@ -194,7 +194,7 @@ describe('publisher end-to-end', () => {
   it('publishes a valid post and writes a binding row with the composed identity', async () => {
     const f = fixture();
     const result = await orch(f).run({
-      articleId: 'post-e2e',
+      articleId: 'art-e2e',
       mode: 'create',
       now: () => '2026-04-13T12:00:00.000Z',
       generateBindingId: () => 'bnd-e2e-0001',
@@ -233,7 +233,7 @@ describe('publisher end-to-end', () => {
   it('republish preserves the existing BindingId and stamps LastOperation=republish', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing',
-      ArticleId: 'post-e2e',
+      ArticleId: 'art-e2e',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl:
@@ -248,7 +248,7 @@ describe('publisher end-to-end', () => {
     };
     const f = fixture({ existingBinding: existing });
     const result = await orch(f).run({
-      articleId: 'post-e2e',
+      articleId: 'art-e2e',
       mode: 'republish',
       now: () => '2026-04-13T12:05:00.000Z',
     });
@@ -262,8 +262,8 @@ describe('publisher end-to-end', () => {
   });
 
   it('blocks publish when content validation fails (missing Title) and writes nothing', async () => {
-    const f = fixture({ post: { Title: '' } });
-    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'create' });
+    const f = fixture({ article: { Title: '' } });
+    const result = await orch(f).run({ articleId: 'art-e2e', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('validation');
@@ -276,7 +276,7 @@ describe('publisher end-to-end', () => {
     const f = fixture({
       media: [gallery('g1', { AltText: '' })],
     });
-    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'create' });
+    const result = await orch(f).run({ articleId: 'art-e2e', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('validation');
@@ -294,7 +294,7 @@ describe('publisher end-to-end', () => {
   it('blocks republish on an archived binding (no writes)', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
-      ArticleId: 'post-e2e',
+      ArticleId: 'art-e2e',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl:
@@ -305,7 +305,7 @@ describe('publisher end-to-end', () => {
       RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
-    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'republish' });
+    const result = await orch(f).run({ articleId: 'art-e2e', mode: 'republish' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('policy');
@@ -316,7 +316,7 @@ describe('publisher end-to-end', () => {
 
   it('preview returns a structurally complete composition with validation attached, no writes', async () => {
     const f = fixture();
-    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'preview' });
+    const result = await orch(f).run({ articleId: 'art-e2e', mode: 'preview' });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.page.controls.map((c) => c.slot)).toEqual([

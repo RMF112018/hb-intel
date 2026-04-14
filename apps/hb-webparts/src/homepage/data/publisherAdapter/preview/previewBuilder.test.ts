@@ -11,9 +11,9 @@ import { composeProjectSpotlightPage } from '../pageGeneration/pageCompositor';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from '../pageGeneration/xmlShellManifest';
 import { buildPublisherPreview } from './previewBuilder';
 
-function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
+function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     Title: 'Preview Post',
     Subhead: 'Subhead',
     SummaryExcerpt: 'Summary.',
@@ -62,7 +62,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
 
 function member(id: string): PublisherTeamMemberRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     TeamMemberId: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
@@ -71,7 +71,7 @@ function member(id: string): PublisherTeamMemberRow {
 
 function mediaRow(id: string): PublisherMediaRow {
   return {
-    ArticleId: 'post-001',
+    ArticleId: 'art-001',
     MediaId: id,
     MediaRole: 'gallery',
     ImageAssetUrl: `https://img.example/${id}.jpg`,
@@ -80,17 +80,17 @@ function mediaRow(id: string): PublisherMediaRow {
 }
 
 function repos(over: {
-  post?: Partial<PublisherArticleRow>;
+  article?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   teamMembers?: readonly PublisherTeamMemberRow[];
   media?: readonly PublisherMediaRow[];
   existingBinding?: PublisherPageBindingRow;
 } = {}): PublisherRepositories {
-  const p = post(over.post);
+  const a = article(over.article);
   const t = tpl(over.template);
   return {
     posts: {
-      getByArticleId: vi.fn(async () => p),
+      getByArticleId: vi.fn(async () => a),
       listByWorkflowState: vi.fn(async () => []),
       upsert: vi.fn(),
     },
@@ -126,7 +126,7 @@ function repos(over: {
 
 describe('buildPublisherPreview', () => {
   it('produces a valid preview for a well-formed post', async () => {
-    const result = await buildPublisherPreview(repos(), 'post-001');
+    const result = await buildPublisherPreview(repos(), 'art-001');
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.composedPage.controls.map((c) => c.slot)).toEqual([
@@ -144,7 +144,7 @@ describe('buildPublisherPreview', () => {
 
   it('shares compositor output with the publish pipeline', async () => {
     const r = repos();
-    const preview = await buildPublisherPreview(r, 'post-001');
+    const preview = await buildPublisherPreview(r, 'art-001');
     expect(preview.ok).toBe(true);
     if (!preview.ok) return;
     // Compose a page directly from the resolution context and confirm
@@ -160,8 +160,8 @@ describe('buildPublisherPreview', () => {
 
   it('propagates validation failures into the preview without throwing', async () => {
     const result = await buildPublisherPreview(
-      repos({ post: { Title: '' } }),
-      'post-001',
+      repos({ article: { Title: '' } }),
+      'art-001',
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -172,7 +172,7 @@ describe('buildPublisherPreview', () => {
   it('sets drift flags when the existing binding has drifted', async () => {
     const binding: PublisherPageBindingRow = {
       BindingId: 'b-1',
-      ArticleId: 'post-001',
+      ArticleId: 'art-001',
       Title: 'Acme Tower — April',
       PublishStatus: 'published',
       TargetSiteUrl:
@@ -184,7 +184,7 @@ describe('buildPublisherPreview', () => {
     };
     const result = await buildPublisherPreview(
       repos({ existingBinding: binding }),
-      'post-001',
+      'art-001',
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -194,7 +194,7 @@ describe('buildPublisherPreview', () => {
     expect(result.drift.templateVersionDrift).toBe(true);
   });
 
-  it('returns a typed failure when the post is not found', async () => {
+  it('returns a typed failure when the article is not found', async () => {
     const r = repos();
     (r.articles.getByArticleId as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
     const result = await buildPublisherPreview(r, 'post-missing');
