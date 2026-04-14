@@ -70,7 +70,8 @@ import {
 } from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import { TeamPanel } from './teamComposer/index.js';
-import type { PeopleSearchFn, PersonPhotoFn } from '@hbc/ui-kit';
+import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
+import { useGraphPersonPhotoFn } from '../hbKudos/hooks/useRecipientPhotoHydration.js';
 import { resolveSlugForSave } from './slugGovernance.js';
 import { StoryBodyEditor, bodyTextSnippet } from './storyBodyEditor/index.js';
 import {
@@ -121,13 +122,15 @@ export interface ArticlePublisherProps {
   /** When set, overrides the default repository factory (tests only). */
   repositoriesOverride?: PublisherRepositories;
   /**
-   * Directory search adapter used by the teammate composer. Threaded
-   * through from the SPFx mount boundary (workstream-d step-02). When
-   * omitted, the `HbcPeoplePicker` falls back to manual UPN entry.
+   * Graph token provider threaded from the SPFx mount boundary.
+   * When present, the teammate composer renders Graph-backed
+   * directory photos through `createGraphPersonPhotoFn`; when
+   * absent, the picker falls back to initials avatars. The people
+   * search itself uses the tenant SharePoint `/_api/SP.UI.ApplicationPages.ClientPeoplePickerWebServiceInterface.ClientPeoplePickerSearchUser`
+   * endpoint via `useSharePointPeopleSearch`, which does not need a
+   * Graph token.
    */
-  searchPeople?: PeopleSearchFn;
-  /** Graph photo adapter paired with `searchPeople` for avatar rendering. */
-  fetchPersonPhoto?: PersonPhotoFn;
+  getGraphToken?: () => Promise<string>;
 }
 
 /* ── Helpers ────────────────────────────────────────────────── */
@@ -411,9 +414,14 @@ export function ArticlePublisher({
   siteUrl,
   actorEmail,
   repositoriesOverride,
-  searchPeople,
-  fetchPersonPhoto,
+  getGraphToken,
 }: ArticlePublisherProps) {
+  // Teammate composer runtime seams. `searchPeople` uses the tenant
+  // SharePoint people picker endpoint (no Graph token required);
+  // `fetchPersonPhoto` binds to Graph when a token is available and
+  // falls through to the picker's initials fallback when not.
+  const searchPeople = useSharePointPeopleSearch();
+  const fetchPersonPhoto = useGraphPersonPhotoFn(getGraphToken);
   React.useEffect(() => {
     if (siteUrl) storeSiteUrl(siteUrl);
   }, [siteUrl]);
@@ -1355,18 +1363,6 @@ export function update<T extends keyof PublisherArticleRow>(
   value: PublisherArticleRow[T],
 ): PublisherArticleRow {
   return { ...draft, [key]: value };
-}
-
-export function applyTeamMemberPrincipalChange(
-  row: PublisherTeamMemberRow,
-  principal: string,
-): PublisherTeamMemberRow {
-  return {
-    ...row,
-    PersonPrincipal: principal,
-    // Principal changed: force re-resolution of the SharePoint User id.
-    PersonPrincipalId: undefined,
-  };
 }
 
 export function resolveTemplateKeySystemManaged(

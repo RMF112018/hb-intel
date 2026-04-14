@@ -127,13 +127,16 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // is not wired for authoring (see `SUPPORTED_DESTINATIONS`).
   // The GUID is preserved across the rebrand so deployment lineage
   // is unchanged.
-  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity }) =>
+  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity, getGraphToken }) =>
     // Thread the SPFx current-user email through as the acting
     // operator so workflow-history writes (publish / republish /
     // archive / withdraw) attribute each transition to the actual
-    // user clicking the button, not the article author. Closes
-    // Phase-05 Prompt-04.
-    createElement(ArticlePublisher, { siteUrl, actorEmail: identity?.email }),
+    // user clicking the button, not the article author (Phase-05
+    // Prompt-04). `getGraphToken` backs the teammate composer's
+    // directory photo adapter (Workstream-D Step-05); the composer
+    // degrades gracefully to initials avatars when the token is
+    // unavailable.
+    createElement(ArticlePublisher, { siteUrl, actorEmail: identity?.email, getGraphToken }),
   '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl, siteUrl, getGraphToken }) => {
     const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
       ? config.backgroundImageUrl
