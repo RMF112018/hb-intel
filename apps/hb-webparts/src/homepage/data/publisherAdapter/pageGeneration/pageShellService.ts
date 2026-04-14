@@ -27,6 +27,7 @@ import {
 import type {
   PageCreationOutcome,
   PageCreationService,
+  PagePublishOutcome,
 } from './pageCreationService';
 import {
   PROJECT_SPOTLIGHT_V1_SHELL,
@@ -45,17 +46,29 @@ export interface ComposePageResult {
 
 export interface PublishPageFailure {
   readonly ok: false;
-  readonly reason: 'structuralValidationFailed' | 'pageCreationFailed';
+  readonly reason:
+    | 'structuralValidationFailed'
+    | 'pageCreationFailed'
+    | 'pagePublishLifecycleFailed';
   readonly message: string;
   readonly structuralErrors?: readonly string[];
   readonly creationFailure?: Extract<PageCreationOutcome, { ok: false }>;
+  readonly publishFailure?: Extract<PagePublishOutcome, { ok: false }>;
   readonly page?: ComposedPage;
+  readonly creation?: Extract<PageCreationOutcome, { ok: true }>;
 }
 
 export interface PublishPageSuccess {
   readonly ok: true;
   readonly page: ComposedPage;
   readonly creation: Extract<PageCreationOutcome, { ok: true }>;
+  /**
+   * Outcome of the explicit final modern-page publish lifecycle
+   * step (`_api/sitepages/pages({pageId})/Publish`). Always
+   * populated on `ok: true` — the orchestrator never reports
+   * success while skipping this step.
+   */
+  readonly publish: Extract<PagePublishOutcome, { ok: true }>;
 }
 
 export type PublishPageOutcome = PublishPageSuccess | PublishPageFailure;
@@ -98,7 +111,27 @@ export function createPageShellService(
           page,
         };
       }
-      return { ok: true, page, creation };
+
+      // Final modern-page publish lifecycle step. SharePoint Pages
+      // leaves `createOrUpdate` results in draft state; without this
+      // explicit Publish call the destination page never becomes the
+      // live, end-user-visible version. The publish-pipeline must
+      // never report success while skipping this step.
+      const publish = await deps.pageCreation.publishLive({
+        pageId: creation.pageId,
+        siteUrl: page.identity.targetSiteUrl,
+      });
+      if (!publish.ok) {
+        return {
+          ok: false,
+          reason: 'pagePublishLifecycleFailed',
+          message: publish.message,
+          publishFailure: publish,
+          creation,
+          page,
+        };
+      }
+      return { ok: true, page, creation, publish };
     },
   };
 }

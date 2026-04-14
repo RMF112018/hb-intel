@@ -195,6 +195,7 @@ describe('publishOrchestrator — failure-path persistence', () => {
         pageName: `${a.Slug}.aspx`,
         wasCreated: true,
       })),
+      publishLive: vi.fn(async (input) => ({ ok: true as const, pageId: input.pageId, publishedAtUtc: '2026-04-13T10:00:00.000Z' })),
     };
 
     const failingBindingWriter: PageBindingWriter = {

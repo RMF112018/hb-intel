@@ -50,8 +50,49 @@ export interface PageCreationFailure {
 
 export type PageCreationOutcome = PageCreationResult | PageCreationFailure;
 
+/**
+ * Input for the explicit final modern-page publish lifecycle step.
+ * Carries the resolved page id + the site URL so the service can
+ * POST to `_api/sitepages/pages({pageId})/Publish` deterministically
+ * without re-reading the composed page.
+ */
+export interface PagePublishInput {
+  readonly pageId: string;
+  readonly siteUrl: string;
+}
+
+export interface PagePublishResult {
+  readonly ok: true;
+  readonly pageId: string;
+  readonly publishedAtUtc?: string;
+  readonly rawResponse?: unknown;
+}
+
+export interface PagePublishFailure {
+  readonly ok: false;
+  readonly reason: 'publishLifecycleFailed' | 'unexpectedShape';
+  readonly message: string;
+  readonly status?: number;
+  readonly rawResponse?: unknown;
+}
+
+export type PagePublishOutcome = PagePublishResult | PagePublishFailure;
+
 export interface PageCreationService {
+  /**
+   * Idempotently creates or updates the modern page's `CanvasContent1`.
+   * Does NOT make the page live — callers must explicitly invoke
+   * `publishLive` to take a draft-state page out of draft.
+   */
   createOrUpdate(input: PageCreationInput): Promise<PageCreationOutcome>;
+  /**
+   * Final modern-page publish lifecycle step — POSTs to
+   * `_api/sitepages/pages({pageId})/Publish` so the page record's
+   * checked-in version becomes the live published version. This is
+   * the action that promotes a draft page (the state left behind by
+   * `createOrUpdate` alone) to a live, end-user-visible page.
+   */
+  publishLive(input: PagePublishInput): Promise<PagePublishOutcome>;
 }
 
 export interface SharePointPageCreationDeps {
@@ -336,6 +377,52 @@ export function createSharePointPageCreationService(
         pageName,
         wasCreated,
         rawResponse: await parseJsonSafe(patchRes),
+      };
+    },
+
+    async publishLive({ pageId, siteUrl }) {
+      const trimmedSite = siteUrl.replace(/\/+$/, '');
+      let digest: string;
+      try {
+        digest = await fetchRequestDigest(trimmedSite);
+      } catch (err) {
+        return {
+          ok: false,
+          reason: 'publishLifecycleFailed',
+          message:
+            err instanceof Error
+              ? `Request-digest fetch failed before Publish: ${err.message}`
+              : 'Request-digest fetch failed before Publish.',
+        };
+      }
+
+      const publishUrl = `${trimmedSite}/_api/sitepages/pages(${pageId})/Publish`;
+      const res = await fetchImpl(publishUrl, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json;odata=nometadata',
+          'Content-Type': 'application/json;odata=nometadata',
+          'X-RequestDigest': digest,
+        },
+      });
+      if (!res.ok) {
+        return {
+          ok: false,
+          reason: 'publishLifecycleFailed',
+          message: `Page Publish lifecycle failed (status ${res.status}).`,
+          status: res.status,
+          rawResponse: await parseJsonSafe(res),
+        };
+      }
+      const payload = (await parseJsonSafe(res)) as
+        | { Modified?: string }
+        | undefined;
+      return {
+        ok: true,
+        pageId,
+        publishedAtUtc: payload?.Modified,
+        rawResponse: payload,
       };
     },
   };
