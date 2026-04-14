@@ -1,0 +1,217 @@
+/* Teammate management surface — chip stack.
+ * Premium, low-chrome visual treatment that reads as editorial
+ * roster rather than CRUD table.
+ */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chipStack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e3e6ed;
+  border-radius: 8px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.chip:focus-within {
+  border-color: #225391;
+  box-shadow: 0 0 0 1px #225391 inset;
+}
+
+.chipMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eef1f6;
+  color: #1f2129;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.chipBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.chipBody:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.chipName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f1f1f;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.featuredBadge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a5a00;
+  background: #fff3d6;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.chipTitle {
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.chipMeta {
+  font-size: 11px;
+  color: #7a7a82;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.chipBio {
+  font-size: 12px;
+  color: #4a4a4f;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #9a9aa3;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+  flex-shrink: 0;
+}
+
+.iconBtn:hover {
+  color: #d4a017;
+  background: #fff7e0;
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.iconBtnActive {
+  color: #d4a017;
+  border-color: #f4d480;
+  background: #fff7e0;
+}
+
+.chipActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.actionBtn,
+.actionBtnDanger {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #cbcbd0;
+  background: #fff;
+  color: #1f1f1f;
+  cursor: pointer;
+}
+
+.actionBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.actionBtn:hover:not(:disabled) {
+  background: #f4f6fa;
+}
+
+.actionBtn:focus-visible,
+.actionBtnDanger:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 1px;
+}
+
+.actionBtnDanger {
+  border-color: #e5b1b3;
+  color: #a4262c;
+}
+
+.actionBtnDanger:hover {
+  background: #fdecec;
+}
+
+.addBtn {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #225391;
+  background: #225391;
+  color: #fff;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  background: #1a4173;
+  border-color: #1a4173;
+}
+
+.addBtn:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}

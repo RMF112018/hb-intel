@@ -1,0 +1,20 @@
+declare const styles: {
+  readonly panel: string;
+  readonly chipStack: string;
+  readonly chip: string;
+  readonly chipMain: string;
+  readonly avatar: string;
+  readonly chipBody: string;
+  readonly chipName: string;
+  readonly featuredBadge: string;
+  readonly chipTitle: string;
+  readonly chipMeta: string;
+  readonly chipBio: string;
+  readonly iconBtn: string;
+  readonly iconBtnActive: string;
+  readonly chipActions: string;
+  readonly actionBtn: string;
+  readonly actionBtnDanger: string;
+  readonly addBtn: string;
+};
+export default styles;
