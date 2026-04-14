@@ -43,64 +43,93 @@ export interface PublisherListDescriptor {
   readonly mvpFields: readonly string[];
 }
 
-const POSTS_MVP_FIELDS = [
+// Tenant-aligned minimum column set for `HB Articles` (schema report
+// §"HB Articles"). Every name below corresponds to a real internal
+// field on the list — the publisher reads / writes exactly these
+// columns through `PublisherArticleRow`. Pre-tenant names (PostFamily,
+// PageShellKey, Banner*, HeroRendererKind, ShowGallery,
+// GalleryLayoutProfile, TeamSectionHeading, TeamViewer[Layout|Density|
+// EnableProfileDrawer], IncludeInProjectSpotlightRollups,
+// TargetSiteKey, GeneratedPageName, SourceTemplatePath,
+// AppliedTemplateVersion, AppliedShellVersion,
+// LastSuccessfulPublishDateUtc, BannerTitleOverride) are intentionally
+// absent — they do not exist on the tenant list.
+const ARTICLES_MVP_FIELDS = [
+  // Identity / routing.
   'ArticleId',
   'Title',
-  'BannerTitleOverride',
+  'ArticleContentType',
+  'Destination',
+  'Slug',
+  'TemplateKey',
+  'WorkflowState',
+  // Content.
   'Subhead',
   'SummaryExcerpt',
   'BodyRichText',
-  'PostFamily',
+  'BodyIntro',
+  'BodyClosing',
+  'CalloutText',
+  'PullQuote',
+  // Discriminators / subject.
   'SpotlightType',
   'ProjectStage',
   'ArticleSubject',
-  'TemplateKey',
-  'PageShellKey',
-  'Slug',
-  'WorkflowState',
+  // Authoring / publication metadata.
   'AuthorEmail',
   'AuthorDisplayName',
+  'PublishedByEmail',
   'CreatedDateUtc',
   'UpdatedDateUtc',
   'PublishedDateUtc',
   'ScheduledPublishDateUtc',
   'ArchiveDateUtc',
+  // Milestone (milestone-spotlight content type).
+  'MilestoneLabel',
+  'MilestoneDateUtc',
+  // Project context.
   'ProjectId',
   'ProjectName',
   'ProjectLocation',
   'ProjectSector',
-  'BannerImageUrl',
-  'BannerImageAltText',
-  'BannerEyebrow',
-  'BannerCategoryLabel',
-  'BannerThemeVariant',
-  'BannerShowPublishDate',
-  'BannerShowGradient',
-  'HeroRendererKind',
+  'ProjectStatusLabel',
+  // Hero (required image + alt; optional theming).
+  'HeroPrimaryImage',
+  'HeroPrimaryImageAltText',
+  'HeroTitle',
+  'HeroSubhead',
+  'HeroEyebrow',
+  'HeroCategoryLabel',
+  'HeroThemeVariant',
+  'HeroShowMetadata',
+  'HeroMetadataMode',
+  'HeroCtaLabel',
+  'HeroCtaUrl',
+  // Team Viewer.
   'ShowTeamViewer',
-  'TeamSectionHeading',
-  'TeamViewerLayout',
-  'TeamViewerDensity',
-  'TeamViewerEnableProfileDrawer',
-  'ShowGallery',
-  'GalleryLayoutProfile',
+  'TeamViewerTitle',
+  'TeamViewerIntro',
+  // Feature / pin / rollup flags.
   'IsFeatured',
   'FeaturedRank',
   'IsPinned',
   'PinRank',
-  'IncludeInProjectSpotlightRollups',
   'IncludeInArchive',
+  'IncludeInDestinationLanding',
+  'IncludeInHomepageFeed',
+  'SuppressFromRollups',
+  'ManualSortOverride',
+  // Page identity / sync (tenant HB Articles columns).
   'TargetSiteUrl',
-  'TargetSiteKey',
-  'GeneratedPageName',
-  'PageUrl',
+  'PageTemplateKey',
+  'PageShellVersion',
+  'RenderVersion',
   'PageId',
-  'SourceTemplatePath',
-  'AppliedTemplateVersion',
-  'AppliedShellVersion',
-  'LastPageSyncDateUtc',
+  'PageName',
+  'PageUrl',
   'PageSyncStatus',
-  'LastSuccessfulPublishDateUtc',
+  'LastPageSyncDateUtc',
+  'TemplateOverrideAllowed',
 ] as const;
 
 const TEAM_MEMBERS_MVP_FIELDS = [
@@ -219,7 +248,7 @@ export const PUBLISHER_LISTS: Readonly<
     key: 'articles',
     displayName: 'HB Articles',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
-    mvpFields: POSTS_MVP_FIELDS,
+    mvpFields: ARTICLES_MVP_FIELDS,
   },
   teamMembers: {
     key: 'teamMembers',
