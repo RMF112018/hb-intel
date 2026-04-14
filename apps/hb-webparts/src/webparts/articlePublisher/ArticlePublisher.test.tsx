@@ -7,6 +7,8 @@ import type {
 import {
   applyPromotionPolicyToDraft,
   applyTeamMemberPrincipalChange,
+  contentTypeOptionsForDraft,
+  milestoneLegacyNotice,
   resolveTemplateKeySystemManaged,
   update,
 } from './ArticlePublisher';
@@ -189,5 +191,25 @@ describe('resolveTemplateKeySystemManaged', () => {
     if (!resolved.ok) return;
     expect(resolved.entry.TemplateKey).toBe('monthly-template');
     expect(resolved.trace.selectionRule).not.toBe('adminOverride');
+  });
+});
+
+describe('milestone content-type posture', () => {
+  it('excludes milestoneSpotlight from ordinary live-authoring options', () => {
+    const options = contentTypeOptionsForDraft('monthlySpotlight');
+    expect(options).toContain('monthlySpotlight');
+    expect(options).toContain('newsUpdate');
+    expect(options).not.toContain('milestoneSpotlight');
+  });
+
+  it('keeps legacy milestone rows editable toward operational remediation', () => {
+    const options = contentTypeOptionsForDraft('milestoneSpotlight');
+    expect(options).toContain('monthlySpotlight');
+    expect(options).toContain('newsUpdate');
+    expect(options).toContain('milestoneSpotlight');
+    expect(milestoneLegacyNotice('milestoneSpotlight')).toContain(
+      'read-compatible only',
+    );
+    expect(milestoneLegacyNotice('monthlySpotlight')).toBeUndefined();
   });
 });

@@ -797,16 +797,34 @@ export function resolveTemplateKeySystemManaged(
   );
 }
 
+export function contentTypeOptionsForDraft(
+  articleContentType: ArticleContentType,
+): readonly ArticleContentType[] {
+  return articleContentType === 'milestoneSpotlight'
+    ? [...ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES, 'milestoneSpotlight']
+    : ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES;
+}
+
+export function milestoneLegacyNotice(
+  articleContentType: ArticleContentType,
+): string | undefined {
+  if (articleContentType !== 'milestoneSpotlight') {
+    return undefined;
+  }
+  return (
+    'Legacy content-type notice: `milestoneSpotlight` is read-compatible only ' +
+    '(no live milestone executor). Move to an operational content type before publish.'
+  );
+}
+
 interface MetadataPanelProps extends PanelProps {
   searchProjects?: ProjectLookupSearchFn;
   promotionPolicy?: PromotionPolicyResult;
 }
 
 function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: MetadataPanelProps) {
-  const isLegacyMilestone = draft.ArticleContentType === 'milestoneSpotlight';
-  const contentTypeOptions = isLegacyMilestone
-    ? [...ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES, 'milestoneSpotlight']
-    : ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES;
+  const contentTypeOptions = contentTypeOptionsForDraft(draft.ArticleContentType);
+  const legacyMilestoneMessage = milestoneLegacyNotice(draft.ArticleContentType);
   const projectValue: ProjectPickerValue | null =
     draft.ProjectId && draft.ProjectName
       ? {
@@ -881,12 +899,7 @@ function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: Met
           ))}
         </select>
       </Field>
-      {isLegacyMilestone && (
-        <div className={styles.statusLine}>
-          Legacy content-type notice: `milestoneSpotlight` is read-compatible only (no live
-          milestone executor). Move to an operational content type before publish.
-        </div>
-      )}
+      {legacyMilestoneMessage && <div className={styles.statusLine}>{legacyMilestoneMessage}</div>}
       <Field label="Destination">
         <select
           className={styles.select}
