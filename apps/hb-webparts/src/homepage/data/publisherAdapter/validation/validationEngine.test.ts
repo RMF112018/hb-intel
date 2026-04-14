@@ -312,6 +312,69 @@ describe('validatePublishContext', () => {
     ).toBe(true);
   });
 
+  it('emits a non-blocking warning when gallery alt text starts with "image of"', () => {
+    const result = validatePublishContext(
+      context({
+        media: [
+          {
+            ArticleId: 'art-001',
+            MediaId: 'm-1',
+            Title: 'crew',
+            MediaRole: 'gallery',
+            ImageAsset: 'https://img.example.com/crew.jpg',
+            AltText: 'Image of a crew raising a beam',
+            SortOrder: 1,
+          },
+        ],
+      }),
+    );
+    expect(result.warnings.some((w) => w.field === 'media[0].AltText')).toBe(true);
+    expect(result.errors.some((e) => e.field === 'media[0].AltText')).toBe(false);
+  });
+
+  it('emits a non-blocking warning when gallery alt text is past the 250-char ceiling', () => {
+    const result = validatePublishContext(
+      context({
+        media: [
+          {
+            ArticleId: 'art-001',
+            MediaId: 'm-1',
+            Title: 'crew',
+            MediaRole: 'gallery',
+            ImageAsset: 'https://img.example.com/crew.jpg',
+            AltText: 'x'.repeat(260),
+            SortOrder: 1,
+          },
+        ],
+      }),
+    );
+    expect(
+      result.warnings.some(
+        (w) => w.field === 'media[0].AltText' && /longer than/.test(w.message),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not warn when gallery alt text is well-formed', () => {
+    const result = validatePublishContext(
+      context({
+        media: [
+          {
+            ArticleId: 'art-001',
+            MediaId: 'm-1',
+            Title: 'crew',
+            MediaRole: 'gallery',
+            ImageAsset: 'https://img.example.com/crew.jpg',
+            AltText:
+              'Crew raising the final steel beam at the West Palm Beach jobsite.',
+            SortOrder: 1,
+          },
+        ],
+      }),
+    );
+    expect(result.warnings.some((w) => w.field === 'media[0].AltText')).toBe(false);
+  });
+
   it('accepts schema-compliant rich body HTML with headings, lists, and links', () => {
     const richBody =
       '<p>Opening with <strong>emphasis</strong>.</p>' +

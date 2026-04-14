@@ -19,12 +19,52 @@ import {
   moveMediaRow,
   restampMediaSortOrder,
 } from './mediaInvariants.js';
+import { assessAltText } from './altTextGuidance.js';
 import styles from './galleryPanel.module.css';
 
 export interface GalleryPanelProps {
   readonly articleId: string;
   readonly rows: PublisherMediaRow[];
   readonly onChange: (next: PublisherMediaRow[]) => void;
+}
+
+type ReadinessLevel = 'good' | 'warn' | 'problem';
+
+interface ReadinessSummary {
+  readonly level: ReadinessLevel;
+  readonly message: string;
+}
+
+function summariseGalleryReadiness(
+  rows: readonly PublisherMediaRow[],
+): ReadinessSummary {
+  const gallery = rows.filter((r) => r.MediaRole === 'gallery');
+  const featured = gallery.filter((r) => r.FeaturedInGallery === true).length;
+  const problemAlt = gallery.filter(
+    (r) => assessAltText(r.AltText).level === 'problem',
+  ).length;
+  const warnAlt = gallery.filter(
+    (r) => assessAltText(r.AltText).level === 'warn',
+  ).length;
+  const count = gallery.length;
+  const countLabel = `${count} gallery image${count === 1 ? '' : 's'}`;
+  const featuredLabel = featured === 1 ? ' · 1 featured' : '';
+  if (problemAlt > 0) {
+    return {
+      level: 'problem',
+      message: `${countLabel}${featuredLabel}. ${problemAlt} need${problemAlt === 1 ? 's' : ''} alt text before publish.`,
+    };
+  }
+  if (warnAlt > 0) {
+    return {
+      level: 'warn',
+      message: `${countLabel}${featuredLabel}. ${warnAlt} alt-text suggestion${warnAlt === 1 ? '' : 's'} to review.`,
+    };
+  }
+  return {
+    level: 'good',
+    message: `${countLabel}${featuredLabel}. Gallery is ready.`,
+  };
 }
 
 export function GalleryPanel({
@@ -97,8 +137,25 @@ export function GalleryPanel({
     }
   };
 
+  const readiness = summariseGalleryReadiness(rows);
+
   return (
     <div className={styles.panel}>
+      {rows.length > 0 && (
+        <div
+          className={`${styles.readiness} ${
+            readiness.level === 'problem'
+              ? styles.readinessProblem
+              : readiness.level === 'warn'
+                ? styles.readinessWarn
+                : styles.readinessGood
+          }`}
+          role={readiness.level === 'problem' ? 'alert' : undefined}
+          aria-live="polite"
+        >
+          {readiness.message}
+        </div>
+      )}
       {rows.length === 0 ? (
         <HbcEmptyState
           title="No images yet"

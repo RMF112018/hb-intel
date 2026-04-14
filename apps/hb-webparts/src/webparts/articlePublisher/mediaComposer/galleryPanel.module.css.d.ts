@@ -1,5 +1,9 @@
 declare const styles: {
   readonly panel: string;
+  readonly readiness: string;
+  readonly readinessGood: string;
+  readonly readinessWarn: string;
+  readonly readinessProblem: string;
   readonly grid: string;
   readonly tile: string;
   readonly tileBody: string;

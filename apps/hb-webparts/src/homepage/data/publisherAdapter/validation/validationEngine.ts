@@ -74,6 +74,17 @@ export interface ValidatePublishContextOptions {
 }
 
 const TITLE_MAX = 120;
+const GALLERY_ALT_HARD_MAX = 250;
+const GALLERY_ALT_LEADING_PHRASES = [
+  'image of',
+  'picture of',
+  'photo of',
+  'photograph of',
+  'graphic of',
+  'screenshot of',
+  'screen shot of',
+  'illustration of',
+];
 const SUBHEAD_MAX = 200;
 const SUMMARY_MAX = 280;
 
@@ -399,15 +410,44 @@ function validateGlobalRules(
     });
   }
 
-  // Rule 14 — every gallery image must have alt text.
+  // Rule 14 — every gallery image must have alt text (error). A
+  // non-empty alt text past the hard editorial ceiling or starting
+  // with "image of" / "picture of" style phrasing is surfaced as a
+  // non-blocking warning that mirrors the media composer's live
+  // guidance, so the readiness panel at save time is consistent
+  // with what authors saw in the composer.
   context.media.forEach((row, idx) => {
-    if (row.MediaRole === 'gallery' && !str(row.AltText)) {
+    if (row.MediaRole !== 'gallery') return;
+    const alt = row.AltText;
+    if (!str(alt)) {
       findings.push({
         category: 'invalid-image-accessibility',
         severity: 'error',
         field: `media[${idx}].AltText`,
         message: `Gallery image '${row.MediaId}' is missing alt text.`,
         actionHint: 'Add alt text on the Gallery tab.',
+      });
+      return;
+    }
+    const trimmed = alt.trim();
+    if (trimmed.length > GALLERY_ALT_HARD_MAX) {
+      findings.push({
+        category: 'invalid-image-accessibility',
+        severity: 'warning',
+        field: `media[${idx}].AltText`,
+        message: `Gallery image '${row.MediaId}' alt text is ${trimmed.length} chars — longer than a single descriptive line.`,
+        actionHint: 'Move editorial detail to the caption and keep alt text tight.',
+      });
+    }
+    const lower = trimmed.toLowerCase();
+    const leading = GALLERY_ALT_LEADING_PHRASES.find((p) => lower.startsWith(p));
+    if (leading) {
+      findings.push({
+        category: 'invalid-image-accessibility',
+        severity: 'warning',
+        field: `media[${idx}].AltText`,
+        message: `Gallery image '${row.MediaId}' alt text starts with "${leading}…" — screen readers already announce that this is an image.`,
+        actionHint: 'Drop the leading phrase and describe what is visible.',
       });
     }
   });
