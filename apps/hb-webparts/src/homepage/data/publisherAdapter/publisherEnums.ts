@@ -83,6 +83,22 @@ export const WORKFLOW_STATE_VALUES = [
 ] as const;
 export type WorkflowState = (typeof WORKFLOW_STATE_VALUES)[number];
 
+/**
+ * Operational workflow states exposed by live authoring/publish UI.
+ *
+ * `scheduled` remains in `WORKFLOW_STATE_VALUES` for tenant-schema
+ * compatibility and legacy-row readability, but is intentionally
+ * excluded here until a real scheduled-publish executor exists.
+ */
+export const WORKFLOW_STATE_OPERATIONAL_VALUES = [
+  'draft',
+  'review',
+  'approved',
+  'published',
+  'archived',
+  'withdrawn',
+] as const;
+
 export const HERO_THEME_VARIANT_VALUES = [
   'default',
   'light',

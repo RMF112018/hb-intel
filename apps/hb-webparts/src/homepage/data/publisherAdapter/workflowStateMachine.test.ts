@@ -3,6 +3,10 @@ import {
   canTransition,
   validTransitionsFrom,
 } from './workflowStateMachine';
+import {
+  WORKFLOW_STATE_OPERATIONAL_VALUES,
+  WORKFLOW_STATE_VALUES,
+} from './publisherEnums';
 
 describe('workflow state machine', () => {
   it('allows the canonical pre-publish happy path', () => {
@@ -74,5 +78,15 @@ describe('workflow state machine', () => {
   it('uses the tenant `review` state value (never legacy `inReview`)', () => {
     expect(validTransitionsFrom('draft')).toContain('review');
     expect(validTransitionsFrom('review')).toContain('approved');
+  });
+
+  it('operational workflow values exclude `scheduled` while schema values retain it', () => {
+    expect((WORKFLOW_STATE_VALUES as readonly string[])).toContain('scheduled');
+    expect(
+      (WORKFLOW_STATE_OPERATIONAL_VALUES as readonly string[]),
+    ).not.toContain('scheduled');
+    for (const state of WORKFLOW_STATE_OPERATIONAL_VALUES) {
+      expect((WORKFLOW_STATE_VALUES as readonly string[])).toContain(state);
+    }
   });
 });

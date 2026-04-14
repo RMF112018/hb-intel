@@ -24,7 +24,7 @@ import {
   HERO_THEME_VARIANT_VALUES,
   PROJECT_STAGE_VALUES,
   SPOTLIGHT_TYPE_VALUES,
-  WORKFLOW_STATE_VALUES,
+  WORKFLOW_STATE_OPERATIONAL_VALUES,
   createPublisherRepositories,
   createDefaultPublishOrchestrator,
   createSharePointPageBindingWriter,
@@ -502,7 +502,7 @@ export function ArticlePublisher({
             onChange={(e) => setFilter(e.target.value as WorkflowState)}
             className={styles.select}
           >
-            {WORKFLOW_STATE_VALUES.map((s) => (
+            {WORKFLOW_STATE_OPERATIONAL_VALUES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -555,6 +555,12 @@ export function ArticlePublisher({
                 )}
               </div>
             </header>
+            {articleDraft.WorkflowState === 'scheduled' && (
+              <div className={styles.statusLine}>
+                Legacy state notice: `scheduled` is read-compatible only (no executor). Move to
+                `approved` or `withdrawn`.
+              </div>
+            )}
 
             <nav className={styles.tabs}>
               {(['metadata', 'hero', 'content', 'team', 'gallery', 'preview', 'status'] as Tab[]).map((t) => (

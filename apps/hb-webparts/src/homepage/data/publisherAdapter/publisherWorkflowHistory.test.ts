@@ -26,6 +26,7 @@ const TENANT_RAW_HISTORY: Record<string, unknown> = {
 describe('HB Article Workflow History — tenant round-trip', () => {
   it('uses the tenant `review` state value (never legacy `inReview`)', () => {
     expect(WORKFLOW_STATE_VALUES).toContain('review');
+    expect(WORKFLOW_STATE_VALUES).toContain('scheduled');
     expect((WORKFLOW_STATE_VALUES as readonly string[])).not.toContain('inReview');
   });
 
