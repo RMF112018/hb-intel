@@ -276,9 +276,15 @@ export function ArticlePublisher({
     }
   }, [tab, selectedArticleId, loadPreview]);
 
-  // Load active promotion rules once at mount; they seed authoring
-  // defaults (FeaturedDefault / PinnedDefault) on new articles and
-  // gate manual override of the IsFeatured / IsPinned toggles.
+  // Load active promotion rules once at mount. The rules seed the
+  // in-memory `IsFeatured` / `IsPinned` values on NEW articles via
+  // `selectPromotionDefaults` → `emptyArticle`. The editor does not
+  // expose `IsFeatured` / `IsPinned` toggles today, so manual-
+  // override gating (`ManualOverrideAllowed`) is not enforced
+  // here — when those toggles land, bind their `disabled` prop to
+  // `!defaults.manualOverrideAllowed`. See
+  // `promotionRuleSelector.ts` header for the scope boundary.
+  // Closes Phase-05 Prompt-05 (narrative → behavior).
   React.useEffect(() => {
     void (async () => {
       try {

@@ -1,14 +1,28 @@
 /**
  * Pure selectors over tenant `HB Article Promotion Rules`.
  *
- * Application points (Phase-02 Prompt-08, tightly bounded):
- *   1. Authoring defaults — when creating a new article, seed
- *      `IsFeatured` / `IsPinned` from the most-specific active rule
- *      for (Destination, ArticleContentType).
- *   2. Manual-override gating — when a matching rule's
- *      `ManualOverrideAllowed === false`, the authoring surface
- *      must lock the IsFeatured / IsPinned toggles to the
- *      rule-derived defaults.
+ * **Implemented behavior (current sprint):**
+ *   - Authoring defaults only — when creating a new article the
+ *     authoring surface calls `selectPromotionDefaults(...)` once
+ *     and seeds the in-memory `IsFeatured` / `IsPinned` fields
+ *     from the most-specific active rule for
+ *     `(Destination, ArticleContentType)`. The seeded values are
+ *     written through to the upsert like any other authoring
+ *     field; subsequent edits pass through unchanged.
+ *
+ * **NOT enforced in the editor (Phase-05 Prompt-05 scope-down):**
+ *   - The `manualOverrideAllowed` flag and `source` rule are
+ *     returned on `PromotionDefaults` so a future editor can gate
+ *     `IsFeatured` / `IsPinned` toggles, but the current
+ *     authoring UI does not expose those toggles and therefore
+ *     does not enforce manual-override gating. Reading this
+ *     module's output as "the editor locks the toggle when the
+ *     rule disallows override" is a false promise — there is no
+ *     such toggle to lock today. Callers that want real
+ *     enforcement must (a) expose the toggles, and (b) bind
+ *     `disabled` / `readOnly` to
+ *     `!defaults.manualOverrideAllowed`. When that lands, move
+ *     the relevant bullet back into "Implemented behavior" above.
  *
  * Specificity: a rule whose `RuleContentType` matches the article's
  * `ArticleContentType` exactly outranks a rule with no
@@ -58,10 +72,11 @@ export function selectPromotionRule(
 }
 
 /**
- * Derive the promotion defaults that the authoring surface should
- * apply when seeding a new article. When a matching rule disallows
- * manual override, the caller must lock IsFeatured / IsPinned to
- * the returned values.
+ * Derive the promotion defaults that the authoring surface seeds
+ * onto a new article. `manualOverrideAllowed` is populated from
+ * the matching rule so a future editor can choose to lock
+ * `IsFeatured` / `IsPinned` toggles, but the current surface does
+ * not expose those toggles and does not enforce gating.
  */
 export function selectPromotionDefaults(
   rules: readonly PublisherPromotionRuleRow[],
