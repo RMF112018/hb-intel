@@ -13,6 +13,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   resolveTemplate,
+  resolveTemplateSystemManaged,
   compareVersionLabels,
   type TemplateResolverInput,
 } from './templateResolver';
@@ -167,6 +168,32 @@ describe('resolveTemplate — tenant HB Article Template Registry', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.reason).toBe('overrideNotFound');
+  });
+
+  it('system-managed resolution ignores stale non-empty TemplateKey and applies applicability', () => {
+    const registry = [
+      tpl({
+        TemplateKey: 'monthly-winner',
+        ContentTypes: ['monthlySpotlight'],
+        TemplatePriority: 500,
+      }),
+      tpl({
+        TemplateKey: 'stale-news',
+        ContentTypes: ['newsUpdate'],
+        TemplatePriority: 1,
+      }),
+    ];
+    const result = resolveTemplateSystemManaged(
+      {
+        ArticleContentType: 'monthlySpotlight',
+        Destination: 'projectSpotlight',
+      },
+      registry,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.entry.TemplateKey).toBe('monthly-winner');
+    expect(result.trace.selectionRule).not.toBe('adminOverride');
   });
 
   it('prefers more specific applicability (declared SpotlightTypes beats wildcard)', () => {

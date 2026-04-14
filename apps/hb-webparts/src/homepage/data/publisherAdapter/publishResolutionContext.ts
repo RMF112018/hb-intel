@@ -20,7 +20,7 @@ import type {
 } from './publisherContracts';
 import type { PublisherRepositories } from './publisherRepositories';
 import {
-  resolveTemplate,
+  resolveTemplateSystemManaged,
   type TemplateResolutionResult,
   type TemplateResolutionTrace,
 } from './templateResolver';
@@ -68,9 +68,8 @@ export async function buildPublishResolutionContext(
   }
 
   const registry = await repositories.templateRegistry.listActive();
-  const resolution = resolveTemplate(
+  const resolution = resolveTemplateSystemManaged(
     {
-      TemplateKey: article.TemplateKey,
       ArticleContentType: article.ArticleContentType,
       Destination: article.Destination,
       SpotlightType: article.SpotlightType,

@@ -50,6 +50,11 @@ export interface TemplateResolverInput {
   readonly ArticleSubject?: ArticleSubject;
 }
 
+export type SystemManagedTemplateResolverInput = Omit<
+  TemplateResolverInput,
+  'TemplateKey'
+>;
+
 export type TemplateResolutionFailureReason =
   | 'emptyRegistry'
   | 'overrideNotFound'
@@ -346,4 +351,24 @@ export function resolveTemplate(
       selectionRule: 'versionTieBreak',
     },
   };
+}
+
+/**
+ * Ordinary authoring/publish resolution path.
+ *
+ * Intentionally ignores any persisted article `TemplateKey` and
+ * resolves strictly from current discriminators so stale keys cannot
+ * survive metadata changes unless an explicit override flow exists.
+ */
+export function resolveTemplateSystemManaged(
+  input: SystemManagedTemplateResolverInput,
+  registry: readonly PublisherTemplateRegistryRow[],
+): TemplateResolutionResult {
+  return resolveTemplate(
+    {
+      TemplateKey: undefined,
+      ...input,
+    },
+    registry,
+  );
 }

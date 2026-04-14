@@ -53,7 +53,7 @@ import {
   type PublisherPromotionRuleRow,
   selectPromotionPolicy,
   type PromotionPolicyResult,
-  resolveTemplate,
+  resolveTemplateSystemManaged,
 } from '../../homepage/data/publisherAdapter/index.js';
 import { buildPublishResolutionContext } from '../../homepage/data/publisherAdapter/publishResolutionContext.js';
 import {
@@ -134,17 +134,10 @@ export function applyPromotionPolicyToDraft(
 /**
  * Build a blank authoring draft for a brand-new article.
  *
- * `TemplateKey` is intentionally blank on the IN-MEMORY draft —
- * the tenant `HB Articles.TemplateKey` column is required, so the
- * save path (`handleSave`) runs the deterministic template
- * resolver against the active registry and stamps a real key
- * before the first upsert. Blank is therefore a transient
- * authoring state only; persisted list rows always carry a
- * non-empty TemplateKey. Seeding a hard-coded key here would
- * short-circuit resolver selection and make the registry
- * performative (P1-2 closure). Operators who want a specific
- * template supply one via the authoring surface's TemplateKey
- * field, which the resolver honors as an explicit admin override.
+ * `TemplateKey` starts blank in-memory and is system-resolved on
+ * save from current discriminators (destination/content type/etc).
+ * Persisted rows still carry a non-empty key, but ordinary authoring
+ * does not treat a prior key as sticky override.
  */
 function emptyArticle(): PublisherArticleRow {
   const id = `art-${Date.now()}-${Math.floor(Math.random() * 1e6)
@@ -394,39 +387,20 @@ export function ArticlePublisher({
     setBusy(true);
     setStatus('Saving…');
     try {
-      // Contract: persisted `HB Articles` rows always carry a
-      // non-empty TemplateKey. The editor lets a new draft start
-      // with a blank TemplateKey as a transient authoring state,
-      // and the save path runs the deterministic resolver against
-      // the active template registry to stamp a real key before
-      // upsert. Blank-means-auto-select stays a UI convenience;
-      // the list row never stores blank. Closes the TemplateKey
-      // contract contradiction (Phase-05 Prompt-01).
-      let resolvedTemplateKey = articleDraft.TemplateKey;
-      if (!resolvedTemplateKey || resolvedTemplateKey.trim().length === 0) {
-        const registry = await repositories.templateRegistry.listActive();
-        const resolution = resolveTemplate(
-          {
-            TemplateKey: undefined,
-            ArticleContentType: articleDraft.ArticleContentType,
-            Destination: articleDraft.Destination,
-            SpotlightType: articleDraft.SpotlightType,
-            ProjectStage: articleDraft.ProjectStage,
-            ArticleSubject: articleDraft.ArticleSubject,
-          },
-          registry,
+      // Ordinary authoring treats TemplateKey as system-managed.
+      // Always resolve from current discriminators so stale keys
+      // cannot survive Destination/ContentType/etc changes.
+      const registry = await repositories.templateRegistry.listActive();
+      const resolution = resolveTemplateKeySystemManaged(articleDraft, registry);
+      if (!resolution.ok) {
+        setStatus(
+          `Save blocked — could not resolve a template for this article (${resolution.reason}). ${resolution.message}`,
         );
-        if (!resolution.ok) {
-          setStatus(
-            `Save blocked — could not resolve a template for this article (${resolution.reason}). ${resolution.message}`,
-          );
-          return;
-        }
-        resolvedTemplateKey = resolution.entry.TemplateKey;
+        return;
       }
       const updated: PublisherArticleRow = {
         ...articleDraft,
-        TemplateKey: resolvedTemplateKey,
+        TemplateKey: resolution.entry.TemplateKey,
         UpdatedDateUtc: nowIso(),
       };
       const policyApplied = applyPromotionPolicy(updated, { enforceLockOnly: true });
@@ -800,6 +774,29 @@ export function applyTeamMemberPrincipalChange(
   };
 }
 
+export function resolveTemplateKeySystemManaged(
+  article: Pick<
+    PublisherArticleRow,
+    | 'ArticleContentType'
+    | 'Destination'
+    | 'SpotlightType'
+    | 'ProjectStage'
+    | 'ArticleSubject'
+  >,
+  registry: Parameters<typeof resolveTemplateSystemManaged>[1],
+) {
+  return resolveTemplateSystemManaged(
+    {
+      ArticleContentType: article.ArticleContentType,
+      Destination: article.Destination,
+      SpotlightType: article.SpotlightType,
+      ProjectStage: article.ProjectStage,
+      ArticleSubject: article.ArticleSubject,
+    },
+    registry,
+  );
+}
+
 interface MetadataPanelProps extends PanelProps {
   searchProjects?: ProjectLookupSearchFn;
   promotionPolicy?: PromotionPolicyResult;
@@ -856,21 +853,19 @@ function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: Met
           onChange={(e) => onChange(update(draft, 'Slug', e.target.value))}
         />
       </Field>
-      <Field label="Template key override">
+      <Field label="Resolved template key">
         <input
           className={styles.input}
           value={draft.TemplateKey}
-          disabled={draft.TemplateOverrideAllowed === false}
-          placeholder="Leave blank to auto-resolve on save"
-          onChange={(e) => onChange(update(draft, 'TemplateKey', e.target.value))}
+          disabled={true}
+          readOnly
+          placeholder="Resolved on save from current metadata"
         />
       </Field>
-      {draft.TemplateOverrideAllowed === false && (
-        <div className={styles.statusLine}>
-          Template override is disabled for this article; publish/save will use the
-          registry-resolved template.
-        </div>
-      )}
+      <div className={styles.statusLine}>
+        Template is system-managed in ordinary authoring. Save re-resolves from destination,
+        content type, and applicability metadata.
+      </div>
       <Field label="Article content type">
         <select
           className={styles.select}

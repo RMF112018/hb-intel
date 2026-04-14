@@ -7,8 +7,10 @@ import type {
 import {
   applyPromotionPolicyToDraft,
   applyTeamMemberPrincipalChange,
+  resolveTemplateKeySystemManaged,
   update,
 } from './ArticlePublisher';
+import type { PublisherTemplateRegistryRow } from '../../homepage/data/publisherAdapter/index.js';
 
 function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
@@ -135,5 +137,57 @@ describe('applyTeamMemberPrincipalChange', () => {
     expect(next.ParentMemberId).toBe('tm-root');
     expect(next.BioSnippet).toBe('Bio');
     expect(next.ContactLink).toBe('https://profile.example/alice');
+  });
+});
+
+function template(
+  over: Partial<PublisherTemplateRegistryRow> & { TemplateKey: string },
+): PublisherTemplateRegistryRow {
+  return {
+    TemplateKey: over.TemplateKey,
+    TemplateName: over.TemplateKey,
+    IsActive: over.IsActive ?? true,
+    TemplatePriority: over.TemplatePriority ?? 100,
+    VersionLabel: over.VersionLabel ?? '1.0.0',
+    ContentTypes: over.ContentTypes ?? ['monthlySpotlight'],
+    Destination: over.Destination ?? 'projectSpotlight',
+    PageShellTemplateKey: over.PageShellTemplateKey ?? 'ps-shell-v1',
+    HeroProfileKey: over.HeroProfileKey ?? 'hbSignatureHero',
+    BodyProfileKey: over.BodyProfileKey ?? 'oobText',
+    TeamViewerProfileKey: over.TeamViewerProfileKey ?? 'teamViewer',
+    GalleryProfileKey: over.GalleryProfileKey ?? 'oobImageGallery',
+    ShowHero: over.ShowHero ?? true,
+    ShowBody: over.ShowBody ?? true,
+    ShowTeamViewer: over.ShowTeamViewer ?? true,
+    ShowGallery: over.ShowGallery ?? true,
+    ShowSecondaryImage: over.ShowSecondaryImage ?? false,
+    RequiredFieldSetKey: over.RequiredFieldSetKey ?? 'req-default',
+  };
+}
+
+describe('resolveTemplateKeySystemManaged', () => {
+  it('re-resolves from discriminators and ignores stale article TemplateKey', () => {
+    const resolved = resolveTemplateKeySystemManaged(
+      article({
+        TemplateKey: 'stale-news-template',
+        ArticleContentType: 'monthlySpotlight',
+      }),
+      [
+        template({
+          TemplateKey: 'monthly-template',
+          ContentTypes: ['monthlySpotlight'],
+          TemplatePriority: 500,
+        }),
+        template({
+          TemplateKey: 'stale-news-template',
+          ContentTypes: ['newsUpdate'],
+          TemplatePriority: 1,
+        }),
+      ],
+    );
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) return;
+    expect(resolved.entry.TemplateKey).toBe('monthly-template');
+    expect(resolved.trace.selectionRule).not.toBe('adminOverride');
   });
 });
