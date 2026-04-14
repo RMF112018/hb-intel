@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@hbc/ui-kit/homepage": ["../../packages/ui-kit/src/homepage.ts"],
+      "@hbc/ui-kit/theme": ["../../packages/ui-kit/src/theme/index.ts"],
+      "@hbc/ui-kit/icons": ["../../packages/ui-kit/src/icons/index.tsx"],
+      "@hbc/ui-kit/branding": ["../../packages/ui-kit/src/branding/index.ts"],
+      "@hbc/ui-kit": ["../../packages/ui-kit/src/index.ts"],
+      "@hbc/sharepoint-platform": ["../../packages/sharepoint-platform/src/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}

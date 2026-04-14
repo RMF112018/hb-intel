@@ -28,8 +28,6 @@ import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import { buildHeroArticleContent } from './webparts/hbSignatureHero/articleConfig.js';
 import { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
 import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmin.js';
-import { ArticlePublisher } from './webparts/articlePublisher/ArticlePublisher.js';
-import { ARTICLE_PUBLISHER_WEBPART_ID } from './webparts/articlePublisher/runtimeContract.js';
 import { PnpOps } from './webparts/pnp/PnpOps.js';
 import { PNP_OPS_LEGACY_MODE, resolvePnpOpsExecutionMode } from './webparts/pnp/pnpOpsExecutionModes.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';
@@ -115,28 +113,9 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // HbHeroBanner webpart.
   '23d22f2d-7a15-4031-ab64-2454898bfd44': ({ siteUrl }) =>
     createElement(HbHeroBannerAdmin, { siteUrl }),
-  // Article Publisher authoring surface. Current sprint wires the
-  // `projectSpotlight` destination only — hosted on the HBCentral
-  // publisher page, reads/writes the tenant `HB Article*` list
-  // family (HB Articles, HB Article Team Members, HB Article Media,
-  // HB Article Template Registry, HB Article Destination Pages,
-  // HB Article Workflow History, HB Article Publishing Errors,
-  // HB Article Promotion Rules), and orchestrates publish / republish
-  // to the canonical destination site via the pure compositor +
-  // Pages REST. `companyPulse` is declared on the tenant Choice but
-  // is not wired for authoring (see `SUPPORTED_DESTINATIONS`).
-  // The GUID is preserved across the rebrand so deployment lineage
-  // is unchanged.
-  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity, getGraphToken }) =>
-    // Thread the SPFx current-user email through as the acting
-    // operator so workflow-history writes (publish / republish /
-    // archive / withdraw) attribute each transition to the actual
-    // user clicking the button, not the article author (Phase-05
-    // Prompt-04). `getGraphToken` backs the teammate composer's
-    // directory photo adapter (Workstream-D Step-05); the composer
-    // degrades gracefully to initials avatars when the token is
-    // unavailable.
-    createElement(ArticlePublisher, { siteUrl, actorEmail: identity?.email, getGraphToken }),
+  // Article Publisher authoring surface was extracted into its own SPFx
+  // solution `hb-publisher.sppkg`. Its manifest id (1a6f8b2c-…) is now
+  // owned by `apps/hb-publisher` and is no longer dispatched from here.
   '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl, siteUrl, getGraphToken }) => {
     const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
       ? config.backgroundImageUrl

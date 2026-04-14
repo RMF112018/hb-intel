@@ -506,6 +506,76 @@ importers:
         specifier: ^3.2.0
         version: 3.2.4(@types/node@24.12.2)(happy-dom@18.0.1)(jsdom@26.1.0)(msw@2.12.10(@types/node@24.12.2)(typescript@5.9.3))(terser@5.46.0)(tsx@4.21.0)
 
+  apps/hb-publisher:
+    dependencies:
+      '@hbc/sharepoint-platform':
+        specifier: workspace:*
+        version: link:../../packages/sharepoint-platform
+      '@hbc/ui-kit':
+        specifier: workspace:*
+        version: link:../../packages/ui-kit
+      '@tiptap/core':
+        specifier: ^2.27.2
+        version: 2.27.2(@tiptap/pm@2.27.2)
+      '@tiptap/extension-link':
+        specifier: ^2.27.2
+        version: 2.27.2(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))(@tiptap/pm@2.27.2)
+      '@tiptap/pm':
+        specifier: ^2.27.2
+        version: 2.27.2
+      '@tiptap/react':
+        specifier: ^2.27.2
+        version: 2.27.2(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))(@tiptap/pm@2.27.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tiptap/starter-kit':
+        specifier: ^2.27.2
+        version: 2.27.2
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@microsoft/sp-property-pane':
+        specifier: ^1.20.0
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+      '@microsoft/sp-webpart-base':
+        specifier: ^1.20.0
+        version: 1.22.2(@microsoft/microsoft-graph-client@3.0.7)(@types/node@24.12.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)
+      '@testing-library/jest-dom':
+        specifier: ^6.9.1
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^15.0.7
+        version: 15.0.7(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.7(@types/react@18.3.28)
+      '@vitejs/plugin-react':
+        specifier: ^4.4.0
+        version: 4.7.0(vite@6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0))
+      eslint:
+        specifier: ^8.57.1
+        version: 8.57.1
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0)
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.0(@types/node@24.12.2)(happy-dom@18.0.1)(jsdom@26.1.0)(msw@2.12.10(@types/node@24.12.2)(typescript@5.9.3))(vite@6.4.1(@types/node@24.12.2)(terser@5.46.0)(tsx@4.21.0))
+
   apps/hb-shell-extension:
     dependencies:
       '@hbc/ui-kit':

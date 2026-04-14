@@ -30,10 +30,7 @@
         "title": "hb-publisher Feature",
         "description": "Deploys the HB Intel Article Publisher webpart assets.",
         "id": "b41e97f8-3c2d-4a59-9e12-d8a7f2b6c901",
-        "version": "1.0.0.1",
-        "componentIds": [
-          "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10"
-        ]
+        "version": "1.0.0.1"
       }
     ]
   },

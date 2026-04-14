@@ -158,6 +158,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
   { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi' },
+  { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single' },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
 ];
 
@@ -1347,7 +1348,17 @@ for (const domain of domains) {
       global: fakeGlobalThis,
       window: fakeWindow,
       self: fakeWindow,
-      document: { createElement: () => ({}), head: {}, body: {}, addEventListener: () => {} },
+      // `documentElement.style` is touched at module scope by some bundled
+      // dependencies (e.g. prosemirror-view's platform detection), so the
+      // sandbox exposes a minimal stylable element. Keeps the smoke test
+      // tolerant without masking genuine runtime assumptions.
+      document: {
+        createElement: () => ({}),
+        head: {},
+        body: { style: {} },
+        documentElement: { style: {} },
+        addEventListener: () => {},
+      },
       navigator: { userAgent: 'node-vm', onLine: true },
       location: { href: '', protocol: 'https:', hostname: 'localhost' },
       console,
