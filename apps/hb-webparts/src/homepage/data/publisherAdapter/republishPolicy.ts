@@ -52,6 +52,7 @@ export type RepublishReason =
   | 'shellVersionDrift'
   | 'templateVersionDrift'
   | 'templateKeyDrift'
+  | 'pageNameDrift'
   | 'articleArchived'
   | 'articleWithdrawn'
   | 'bindingError'
@@ -63,7 +64,8 @@ export interface RepublishDecision {
   readonly reason: RepublishReason;
   readonly regenerationCause?:
     | 'shellVersionDrift'
-    | 'templateKeyDrift';
+    | 'templateKeyDrift'
+    | 'pageNameDrift';
   readonly notes: readonly string[];
 }
 
@@ -139,6 +141,29 @@ export function decideRepublishAction(
       regenerationCause: 'templateKeyDrift',
       notes: [
         `PageTemplateKey changed (${existingBinding.PageTemplateKey} → ${composed.identity.templateKey}); a new destination page is required.`,
+      ],
+    };
+  }
+
+  // Hard regeneration trigger — the composed page file name no
+  // longer matches the bound page's filename. `inPlaceUpdate`
+  // targets the bound PageId, but SharePoint does not rename a
+  // page file as a side effect of a canvas patch; a real filename
+  // change is therefore an explicit regeneration event, not a
+  // silent rebind to whatever arbitrary page happens to share the
+  // new filename. Closes the P0-2 "filename-based rebinding"
+  // ambiguity for slug / PageName drift.
+  const pageNameDrift =
+    typeof existingBinding.PageName === 'string' &&
+    existingBinding.PageName.length > 0 &&
+    existingBinding.PageName !== composed.identity.pageName;
+  if (pageNameDrift) {
+    return {
+      action: 'regenerate',
+      reason: 'pageNameDrift',
+      regenerationCause: 'pageNameDrift',
+      notes: [
+        `PageName changed (${existingBinding.PageName} → ${composed.identity.pageName}); a new destination page is required to preserve deterministic targeting.`,
       ],
     };
   }

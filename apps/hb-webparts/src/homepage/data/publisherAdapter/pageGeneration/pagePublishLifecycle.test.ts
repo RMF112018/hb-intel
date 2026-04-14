@@ -192,6 +192,101 @@ describe('pageShellService.publishPage — final modern-page publish lifecycle',
   });
 });
 
+describe('createSharePointPageCreationService.createOrUpdate — in-place targetPageId contract', () => {
+  function composedPage() {
+    return {
+      identity: {
+        articleId: 'art',
+        slug: 'renamed-slug',
+        pageName: 'renamed-slug.aspx',
+        pageTitle: 'T',
+        targetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+        shellKey: 'ps-shell-v1',
+        shellVersion: '1.0.0',
+        templateKey: 'tmpl',
+        templateVersion: '1.0.0',
+      },
+      header: {
+        layoutType: 'FullWidthImage' as const,
+        showTopicHeader: false,
+        showPublishDate: false,
+        showBackgroundGradient: false,
+        title: 'T',
+      },
+      controls: [],
+      shell: {} as never,
+    };
+  }
+
+  it('skips create-by-filename, targets the bound PageId, and echoes the bound file name back', async () => {
+    const fetchRequestDigest = vi.fn(async () => 'digest');
+    const calls: Array<{ url: string; method: string }> = [];
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : (input as URL).toString();
+      calls.push({ url, method: init?.method ?? 'GET' });
+      if (init?.method === 'GET' && url.endsWith('/_api/sitepages/pages(999)')) {
+        return new Response(
+          JSON.stringify({
+            Id: 999,
+            FileName: 'original-name.aspx',
+            AbsoluteUrl:
+              'https://example.com/sites/ProjectSpotlight/SitePages/original-name.aspx',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      if (init?.method === 'PATCH') {
+        return new Response('{}', { status: 200 });
+      }
+      return new Response('unexpected', { status: 500 });
+    }) as unknown as typeof fetch;
+    const svc = createSharePointPageCreationService({
+      fetchRequestDigest,
+      fetchImpl,
+    });
+    const outcome = await svc.createOrUpdate({
+      page: composedPage() as never,
+      targetPageId: '999',
+    });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    // Never POSTed to create — filename-based rebinding is gone.
+    const postToCreate = calls.find(
+      (c) => c.method === 'POST' && c.url.endsWith('/_api/sitepages/pages'),
+    );
+    expect(postToCreate).toBeUndefined();
+    // PATCH targeted the bound PageId.
+    const patch = calls.find((c) => c.method === 'PATCH');
+    expect(patch?.url).toBe(
+      'https://example.com/sites/ProjectSpotlight/_api/sitepages/pages(999)',
+    );
+    expect(outcome.pageId).toBe('999');
+    expect(outcome.pageName).toBe('original-name.aspx');
+    expect(outcome.pageUrl).toBe(
+      'https://example.com/sites/ProjectSpotlight/SitePages/original-name.aspx',
+    );
+    expect(outcome.wasCreated).toBe(false);
+  });
+
+  it('returns targetPageNotFound when the bound PageId does not exist on the site', async () => {
+    const fetchRequestDigest = vi.fn(async () => 'digest');
+    const fetchImpl = vi.fn(async () =>
+      new Response('Not Found', { status: 404 }),
+    );
+    const svc = createSharePointPageCreationService({
+      fetchRequestDigest,
+      fetchImpl,
+    });
+    const outcome = await svc.createOrUpdate({
+      page: composedPage() as never,
+      targetPageId: 'missing-id',
+    });
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.reason).toBe('targetPageNotFound');
+  });
+});
+
 describe('createSharePointPageCreationService.publishLive — REST contract', () => {
   it('POSTs to _api/sitepages/pages({pageId})/Publish with a fresh request digest', async () => {
     const fetchRequestDigest = vi.fn(async () => 'digest-token-123');

@@ -29,6 +29,16 @@ import { isVisibleControl } from './pageCompositor';
 
 export interface PageCreationInput {
   readonly page: ComposedPage;
+  /**
+   * When set, the page-creation service targets this SharePoint
+   * Pages `Id` directly and does NOT issue a create-by-filename or
+   * look-up-by-filename. This is how an `inPlaceUpdate` republish
+   * guarantees it writes to the already-bound destination page even
+   * if the authoring slug / filename has drifted. Callers that do
+   * not pass `targetPageId` retain the original create-or-match-by-
+   * filename behavior used for the first publish.
+   */
+  readonly targetPageId?: string;
 }
 
 export interface PageCreationResult {
@@ -42,7 +52,11 @@ export interface PageCreationResult {
 
 export interface PageCreationFailure {
   readonly ok: false;
-  readonly reason: 'ensurePageFailed' | 'patchCanvasFailed' | 'unexpectedShape';
+  readonly reason:
+    | 'ensurePageFailed'
+    | 'patchCanvasFailed'
+    | 'unexpectedShape'
+    | 'targetPageNotFound';
   readonly message: string;
   readonly status?: number;
   readonly rawResponse?: unknown;
@@ -296,10 +310,93 @@ export function createSharePointPageCreationService(
   const { fetchRequestDigest, fetchImpl = fetch } = deps;
 
   return {
-    async createOrUpdate({ page }) {
+    async createOrUpdate({ page, targetPageId }) {
       const siteUrl = page.identity.targetSiteUrl.replace(/\/+$/, '');
       const pageName = page.identity.pageName;
       const digest = await fetchRequestDigest(siteUrl);
+
+      // In-place republish path — target the bound page by `Id`
+      // directly. We deliberately skip the filename-based ensure so
+      // slug/page-name drift CANNOT silently mutate an unrelated
+      // page that happens to share the new filename. The policy
+      // layer is responsible for forcing regeneration when page-name
+      // drift is detected.
+      if (typeof targetPageId === 'string' && targetPageId.length > 0) {
+        const lookupByIdUrl = `${siteUrl}/_api/sitepages/pages(${targetPageId})`;
+        const lookupRes = await fetchImpl(lookupByIdUrl, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { Accept: 'application/json;odata=nometadata' },
+        });
+        if (!lookupRes.ok) {
+          return {
+            ok: false,
+            reason:
+              lookupRes.status === 404 ? 'targetPageNotFound' : 'ensurePageFailed',
+            message:
+              lookupRes.status === 404
+                ? `Bound PageId '${targetPageId}' not found on ${siteUrl} — binding row references a page that no longer exists.`
+                : `Bound-page lookup failed (status ${lookupRes.status}).`,
+            status: lookupRes.status,
+            rawResponse: await parseJsonSafe(lookupRes),
+          };
+        }
+        const record = (await parseJsonSafe(lookupRes)) as
+          | SharePointPageCreateResponse
+          | undefined;
+        if (!record || record.Id === undefined) {
+          return {
+            ok: false,
+            reason: 'unexpectedShape',
+            message: `Bound-page lookup returned no Id for '${targetPageId}'.`,
+            rawResponse: record,
+          };
+        }
+        const resolvedPageName = record.FileName ?? pageName;
+        const resolvedPageUrl =
+          record.AbsoluteUrl ??
+          record.Url ??
+          `${siteUrl}/SitePages/${resolvedPageName}`;
+
+        // PATCH the bound page by id. Title + canvas are the only
+        // in-place mutations we perform — the file name / URL are
+        // preserved exactly so the bound PageId continues to point
+        // at the same end-user-visible page.
+        const canvas = serializeCanvasContent(page);
+        const patchUrl = `${siteUrl}/_api/sitepages/pages(${targetPageId})`;
+        const patchRes = await fetchImpl(patchUrl, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {
+            Accept: 'application/json;odata=nometadata',
+            'Content-Type': 'application/json;odata=nometadata',
+            'X-RequestDigest': digest,
+            'If-Match': '*',
+            'X-HTTP-Method': 'MERGE',
+          },
+          body: JSON.stringify({
+            Title: page.identity.pageTitle,
+            CanvasContent1: canvas,
+          }),
+        });
+        if (!patchRes.ok) {
+          return {
+            ok: false,
+            reason: 'patchCanvasFailed',
+            message: `CanvasContent1 patch failed (status ${patchRes.status}).`,
+            status: patchRes.status,
+            rawResponse: await parseJsonSafe(patchRes),
+          };
+        }
+        return {
+          ok: true,
+          pageId: targetPageId,
+          pageUrl: resolvedPageUrl,
+          pageName: resolvedPageName,
+          wasCreated: false,
+          rawResponse: await parseJsonSafe(patchRes),
+        };
+      }
 
       // Step 1 — ensure the page exists (create if missing).
       const ensureUrl = `${siteUrl}/_api/sitepages/pages`;

@@ -81,9 +81,23 @@ export interface UnpublishPageInput {
 
 export type UnpublishPageOutcome = PageUnpublishOutcome;
 
+export interface PublishPageOptions {
+  /**
+   * When set, the composed page is written to this existing
+   * SharePoint Pages `Id` instead of being created/looked-up by
+   * filename. Used by the `inPlaceUpdate` republish path so the
+   * bound PageId is the authoritative target — slug/page-name
+   * drift cannot silently retarget a different page.
+   */
+  readonly targetPageId?: string;
+}
+
 export interface PageShellService {
   composePage(context: PublishResolutionContext): ComposePageResult;
-  publishPage(context: PublishResolutionContext): Promise<PublishPageOutcome>;
+  publishPage(
+    context: PublishResolutionContext,
+    options?: PublishPageOptions,
+  ): Promise<PublishPageOutcome>;
   /**
    * Thin passthrough to `pageCreation.unpublishLive` — reverts the
    * live destination page to draft without touching the composed
@@ -105,7 +119,7 @@ export function createPageShellService(
       return { page, structuralErrors };
     },
 
-    async publishPage(context) {
+    async publishPage(context, options) {
       const { page, structuralErrors } = this.composePage(context);
       if (structuralErrors.length > 0) {
         return {
@@ -116,7 +130,10 @@ export function createPageShellService(
           page,
         };
       }
-      const creation = await deps.pageCreation.createOrUpdate({ page });
+      const creation = await deps.pageCreation.createOrUpdate({
+        page,
+        targetPageId: options?.targetPageId,
+      });
       if (!creation.ok) {
         return {
           ok: false,

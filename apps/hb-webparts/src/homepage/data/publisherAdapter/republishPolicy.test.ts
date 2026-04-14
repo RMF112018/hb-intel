@@ -182,6 +182,22 @@ describe('decideRepublishAction', () => {
     expect(d.reason).toBe('articleWithdrawn');
   });
 
+  it('forces regenerate on page-name drift — filename change does NOT silently rebind', () => {
+    // Binding pins an existing page named `post-001.aspx`; the
+    // composed page has a new filename (e.g. author renamed the
+    // slug). Policy must force regeneration so the orchestrator
+    // creates a new page rather than letting the filename-based
+    // lookup bind to whatever page happens to share the new name.
+    const d = decideRepublishAction({
+      composed: composed({ pageName: 'post-001-renamed.aspx' }),
+      template: template(),
+      existingBinding: binding({ PageName: 'post-001.aspx' }),
+    });
+    expect(d.action).toBe('regenerate');
+    expect(d.reason).toBe('pageNameDrift');
+    expect(d.regenerationCause).toBe('pageNameDrift');
+  });
+
   it('retries in-place when previous binding was in error state', () => {
     const d = decideRepublishAction({
       composed: composed(),

@@ -219,6 +219,108 @@ describe('publishOrchestrator', () => {
     expect(historyRow.PreviousState).toBe('approved');
   });
 
+  it('inPlaceUpdate targets the bound PageId — not a filename — and preserves PageId/PageUrl on the binding row', async () => {
+    const existing: PublisherPageBindingRow = {
+      BindingId: 'bnd-existing-42',
+      ArticleId: 'art-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
+      TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+      PageId: '999',
+      PageName: 'acme-tower-april.aspx',
+      PageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
+    };
+    const f = fixture({ existingBinding: existing });
+    // Simulate the pages REST contract for targeted PATCH: the
+    // creation service echoes the bound PageId / URL back so the
+    // binding row stays anchored to the same page.
+    f.createOrUpdate.mockImplementation(async (input) => ({
+      ok: true as const,
+      pageId: input.targetPageId ?? '123',
+      pageUrl: existing.PageUrl!,
+      pageName: existing.PageName!,
+      wasCreated: false,
+    }));
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'republish',
+      now: () => '2026-04-13T10:00:00.000Z',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.action).toBe('inPlaceUpdate');
+
+    // createOrUpdate was invoked with the bound PageId — this is
+    // what closes the P0-2 filename-rebinding seam.
+    expect(f.createOrUpdate).toHaveBeenCalledTimes(1);
+    const call = f.createOrUpdate.mock.calls[0]![0] as {
+      page: unknown;
+      targetPageId?: string;
+    };
+    expect(call.targetPageId).toBe('999');
+
+    // Binding row preserves PageId + PageUrl exactly.
+    const bindingRow = (f.upsertBinding.mock.calls[0]![0] as {
+      row: PublisherPageBindingRow;
+    }).row;
+    expect(bindingRow.PageId).toBe('999');
+    expect(bindingRow.PageUrl).toBe(existing.PageUrl);
+  });
+
+  it('does NOT pass targetPageId when creating a new page (no existing binding)', async () => {
+    const f = fixture();
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'create',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-generated',
+    });
+    expect(result.ok).toBe(true);
+    const call = f.createOrUpdate.mock.calls[0]![0] as {
+      targetPageId?: string;
+    };
+    expect(call.targetPageId).toBeUndefined();
+  });
+
+  it('page-name drift triggers regenerate — the filename-based path cannot silently bind an unrelated page', async () => {
+    const existing: PublisherPageBindingRow = {
+      BindingId: 'bnd-existing-42',
+      ArticleId: 'art-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
+      TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+      PageId: '999',
+      // Bound page's filename differs from the article's current
+      // slug-derived page name ('acme-tower-april.aspx').
+      PageName: 'acme-tower-march.aspx',
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
+    };
+    const f = fixture({ existingBinding: existing });
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'republish',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-new',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.action).toBe('regenerate');
+    // New page, not an in-place write.
+    const call = f.createOrUpdate.mock.calls[0]![0] as {
+      targetPageId?: string;
+    };
+    expect(call.targetPageId).toBeUndefined();
+  });
+
   it('republish preserves existing BindingId when shell + template versions match', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',

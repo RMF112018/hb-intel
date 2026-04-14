@@ -382,7 +382,24 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       };
     }
 
-    const publishResult = await pageShellService.publishPage(context);
+    // `inPlaceUpdate` is a true same-page write: we target the
+    // already-bound SharePoint PageId instead of letting the
+    // creation service resolve a page by filename. Without this,
+    // slug / page-name drift could cause the filename-based lookup
+    // to bind a new page or mutate an unrelated page — the exact
+    // guarantee the policy layer advertises. The policy layer is
+    // responsible for forcing `regenerate` when PageName actually
+    // changed, so by the time we reach this branch the bound
+    // PageId IS the authoritative target.
+    const inPlaceTargetPageId =
+      decision.action === 'inPlaceUpdate' &&
+      typeof context.existingBinding?.PageId === 'string' &&
+      context.existingBinding.PageId.length > 0
+        ? context.existingBinding.PageId
+        : undefined;
+    const publishResult = await pageShellService.publishPage(context, {
+      targetPageId: inPlaceTargetPageId,
+    });
     if (!publishResult.ok) {
       await recordPublishingError({
         articleId: context.article.ArticleId,
