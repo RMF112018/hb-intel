@@ -97,13 +97,52 @@ function str(v: unknown): string | undefined {
   return t.length > 0 ? t : undefined;
 }
 
+/**
+ * Rich-body emptiness check for `BodyRichText`.
+ *
+ * The Story body editor (TipTap) serialises an empty document as
+ * `<p></p>` (and a few close variants) rather than an empty string.
+ * A raw `str()` check would treat those as present and let an
+ * empty-body article reach publish. This helper strips the permitted
+ * schema tags and entity noise, then checks whether any readable text
+ * remains. A body that contains only markup / whitespace is treated
+ * as empty for validation purposes.
+ *
+ * Kept local to the adapter (no webpart-layer dependency) and
+ * intentionally conservative: it only looks at text content, not
+ * attributes, so a lone allowed inline (e.g. `<a href="...">`) with
+ * no visible text is still empty.
+ */
+export function isRichBodyEmpty(html: unknown): boolean {
+  if (typeof html !== 'string') return true;
+  const trimmed = html.trim();
+  if (trimmed.length === 0) return true;
+  const withoutTags = trimmed.replace(/<[^>]*>/g, '');
+  const decoded = withoutTags
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'");
+  return decoded.replace(/\s+/g, '').length === 0;
+}
+
+function isFieldEffectivelyEmpty(
+  article: PublisherArticleRow,
+  key: keyof PublisherArticleRow,
+): boolean {
+  if (key === 'BodyRichText') return isRichBodyEmpty(article[key]);
+  return !str(article[key] as unknown);
+}
+
 function requireField(
   article: PublisherArticleRow,
   key: keyof PublisherArticleRow,
   label: string,
   findings: ValidationFinding[],
 ): void {
-  if (!str(article[key] as unknown)) {
+  if (isFieldEffectivelyEmpty(article, key)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
@@ -312,7 +351,7 @@ function validateGlobalRules(
       actionHint: 'Fill the Subhead field on the Content tab.',
     });
   }
-  if (hasBodySlot && !str(article.BodyRichText)) {
+  if (hasBodySlot && isRichBodyEmpty(article.BodyRichText)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',

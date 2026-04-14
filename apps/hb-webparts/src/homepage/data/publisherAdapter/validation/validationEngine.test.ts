@@ -287,4 +287,41 @@ describe('validatePublishContext', () => {
       ),
     ).toBe(true);
   });
+
+  it('treats an empty TipTap body (`<p></p>`) as a missing BodyRichText', () => {
+    const result = validatePublishContext(
+      context({ article: { BodyRichText: '<p></p>' } }),
+    );
+    expect(result.ok).toBe(false);
+    expect(
+      result.errors.some(
+        (e) => e.category === 'missing-required-field' && e.field === 'BodyRichText',
+      ),
+    ).toBe(true);
+  });
+
+  it('treats a whitespace-only TipTap body as missing', () => {
+    const result = validatePublishContext(
+      context({ article: { BodyRichText: '<p>&nbsp;</p><p><br /></p>' } }),
+    );
+    expect(result.ok).toBe(false);
+    expect(
+      result.errors.some(
+        (e) => e.category === 'missing-required-field' && e.field === 'BodyRichText',
+      ),
+    ).toBe(true);
+  });
+
+  it('accepts schema-compliant rich body HTML with headings, lists, and links', () => {
+    const richBody =
+      '<p>Opening with <strong>emphasis</strong>.</p>' +
+      '<h3>A subheading</h3>' +
+      '<ul><li>Point one</li><li><a href="https://example.com">A link</a></li></ul>';
+    const result = validatePublishContext(
+      context({ article: { BodyRichText: richBody } }),
+    );
+    expect(
+      result.errors.some((e) => e.field === 'BodyRichText'),
+    ).toBe(false);
+  });
 });

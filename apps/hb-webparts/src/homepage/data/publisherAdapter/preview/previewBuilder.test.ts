@@ -91,7 +91,7 @@ function repos(over: {
   const a = article(over.article);
   const t = tpl(over.template);
   return {
-    posts: {
+    articles: {
       getByArticleId: vi.fn(async () => a),
       listByWorkflowState: vi.fn(async () => []),
       upsert: vi.fn(),
@@ -140,8 +140,9 @@ describe('buildPublisherPreview', () => {
     ]);
     expect(result.validation.ok).toBe(true);
     expect(result.decision.action).toBe('create');
-    expect(result.drift).toBe(false);
     expect(result.drift.shellVersionDrift).toBe(false);
+    expect(result.drift.templateKeyDrift).toBe(false);
+    expect(result.drift.templateVersionDrift).toBe(false);
   });
 
   it('shares compositor output with the publish pipeline', async () => {
@@ -190,10 +191,42 @@ describe('buildPublisherPreview', () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.drift).toBe(true);
     expect(result.drift.templateKeyDrift).toBe(true);
     expect(result.drift.shellVersionDrift).toBe(true);
     expect(result.drift.templateVersionDrift).toBe(true);
+  });
+
+  it('carries schema-compliant rich body HTML through preview composition unchanged', async () => {
+    const richBody =
+      '<p>Opening paragraph with <strong>bold</strong> and <em>italic</em>.</p>' +
+      '<h2>A subheading</h2>' +
+      '<ul><li>First item</li><li>Second <a href="https://example.com">link</a></li></ul>' +
+      '<blockquote>A pull-worthy line.</blockquote>';
+    const result = await buildPublisherPreview(
+      repos({ article: { BodyRichText: richBody } }),
+      'art-001',
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.validation.ok).toBe(true);
+    const bodyControl = result.composedPage.controls.find((c) => c.slot === 'body');
+    expect(bodyControl).toBeDefined();
+    // Preview must pass the author-facing HTML through to the body
+    // control verbatim — no escaping, tag stripping, or reformatting.
+    expect((bodyControl as { text: string }).text).toBe(richBody);
+  });
+
+  it('flags an empty TipTap body (`<p></p>`) as missing', async () => {
+    const result = await buildPublisherPreview(
+      repos({ article: { BodyRichText: '<p></p>' } }),
+      'art-001',
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.validation.ok).toBe(false);
+    expect(
+      result.validation.errors.some((e) => e.field === 'BodyRichText'),
+    ).toBe(true);
   });
 
   it('returns a typed failure when the article is not found', async () => {
@@ -202,6 +235,6 @@ describe('buildPublisherPreview', () => {
     const result = await buildPublisherPreview(r, 'post-missing');
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.reason).toBe('postNotFound');
+    expect(result.reason).toBe('articleNotFound');
   });
 });
