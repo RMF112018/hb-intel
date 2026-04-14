@@ -9,19 +9,24 @@
  */
 
 import type {
+  PublisherArticleRow,
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
   PublisherPublishingErrorRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
   PublisherWorkflowHistoryRow,
 } from './publisherContracts';
 import type {
+  ArticleContentType,
   ArticleSubject,
   BindingStatus,
+  Destination,
+  HeroMetadataMode,
+  HeroThemeVariant,
   LastOperation,
   MediaRole,
+  PageSyncStatus,
   PostFamily,
   ProjectStage,
   PublishingErrorCategory,
@@ -33,10 +38,15 @@ import type {
   WorkflowState,
 } from './publisherEnums';
 import {
+  ARTICLE_CONTENT_TYPE_VALUES,
   ARTICLE_SUBJECT_VALUES,
   BINDING_STATUS_VALUES,
+  DESTINATION_VALUES,
+  HERO_METADATA_MODE_VALUES,
+  HERO_THEME_VARIANT_VALUES,
   LAST_OPERATION_VALUES,
   MEDIA_ROLE_VALUES,
+  PAGE_SYNC_STATUS_VALUES,
   POST_FAMILY_VALUES,
   PROJECT_STAGE_VALUES,
   PUBLISHING_ERROR_CATEGORY_VALUES,
@@ -117,6 +127,11 @@ function many<T extends string>(values: readonly T[]) {
   };
 }
 
+const articleContentType = one<ArticleContentType>(ARTICLE_CONTENT_TYPE_VALUES);
+const destination = one<Destination>(DESTINATION_VALUES);
+const heroThemeVariant = one<HeroThemeVariant>(HERO_THEME_VARIANT_VALUES);
+const heroMetadataMode = one<HeroMetadataMode>(HERO_METADATA_MODE_VALUES);
+const pageSyncStatus = one<PageSyncStatus>(PAGE_SYNC_STATUS_VALUES);
 const postFamily = one<PostFamily>(POST_FAMILY_VALUES);
 const postFamilyMany = many<PostFamily>(POST_FAMILY_VALUES);
 const spotlight = one<SpotlightType>(SPOTLIGHT_TYPE_VALUES);
@@ -137,125 +152,116 @@ const errorOperation = one<PublishingErrorOperation>(PUBLISHING_ERROR_OPERATION_
 
 /* ── Row mappers ─────────────────────────────────────────────────── */
 
-export function mapPostRow(raw: Record<string, unknown>): PublisherPostRow | undefined {
-  const PostId = requiredStr(raw['PostId']);
+/**
+ * Tenant `HB Articles` row → typed `PublisherArticleRow`.
+ *
+ * Only the tenant-required columns drive rejection: `ArticleId`,
+ * `Title`, `ArticleContentType`, `Destination`, `Slug`, `TemplateKey`,
+ * `WorkflowState`, `Subhead`, `SummaryExcerpt`, `BodyRichText`,
+ * `HeroPrimaryImage`, `HeroPrimaryImageAltText`, `CreatedDateUtc`,
+ * `UpdatedDateUtc`. Everything else is optional.
+ */
+export function mapArticleRow(
+  raw: Record<string, unknown>,
+): PublisherArticleRow | undefined {
+  const ArticleId = requiredStr(raw['ArticleId']);
   const Title = requiredStr(raw['Title']);
+  const ArticleContentType = articleContentType(raw['ArticleContentType']);
+  const DestinationValue = destination(raw['Destination']);
+  const Slug = requiredStr(raw['Slug']);
+  const TemplateKey = requiredStr(raw['TemplateKey']);
+  const WorkflowStateValue = workflowState(raw['WorkflowState']);
   const Subhead = requiredStr(raw['Subhead']);
   const SummaryExcerpt = requiredStr(raw['SummaryExcerpt']);
   const BodyRichText = requiredStr(raw['BodyRichText']);
-  const PostFamily = postFamily(raw['PostFamily']);
-  const TemplateKey = requiredStr(raw['TemplateKey']);
-  const PageShellKey = requiredStr(raw['PageShellKey']);
-  const Slug = requiredStr(raw['Slug']);
-  const WorkflowState = workflowState(raw['WorkflowState']);
+  const HeroPrimaryImage = url(raw['HeroPrimaryImage']);
+  const HeroPrimaryImageAltText = requiredStr(raw['HeroPrimaryImageAltText']);
   const CreatedDateUtc = dt(raw['CreatedDateUtc']);
   const UpdatedDateUtc = dt(raw['UpdatedDateUtc']);
-  const ProjectId = requiredStr(raw['ProjectId']);
-  const ProjectName = requiredStr(raw['ProjectName']);
-  const BannerImageUrl = url(raw['BannerImageUrl']);
-  const BannerImageAltText = requiredStr(raw['BannerImageAltText']);
-  const TargetSiteUrl = requiredStr(raw['TargetSiteUrl']);
-  const TargetSiteKey = targetSiteKey(raw['TargetSiteKey']);
-  const SourceTemplatePath = requiredStr(raw['SourceTemplatePath']);
 
   if (
-    !PostId ||
+    !ArticleId ||
     !Title ||
+    !ArticleContentType ||
+    !DestinationValue ||
+    !Slug ||
+    !TemplateKey ||
+    !WorkflowStateValue ||
     !Subhead ||
     !SummaryExcerpt ||
     !BodyRichText ||
-    !PostFamily ||
-    !TemplateKey ||
-    !PageShellKey ||
-    !Slug ||
-    !WorkflowState ||
+    !HeroPrimaryImage ||
+    !HeroPrimaryImageAltText ||
     !CreatedDateUtc ||
-    !UpdatedDateUtc ||
-    !ProjectId ||
-    !ProjectName ||
-    !BannerImageUrl ||
-    !BannerImageAltText ||
-    !TargetSiteUrl ||
-    !TargetSiteKey ||
-    !SourceTemplatePath
+    !UpdatedDateUtc
   ) {
     return undefined;
   }
 
   return {
-    PostId,
+    ArticleId,
     Title,
-    BannerTitleOverride: str(raw['BannerTitleOverride']),
+    ArticleContentType,
+    Destination: DestinationValue,
+    Slug,
+    TemplateKey,
+    WorkflowState: WorkflowStateValue,
     Subhead,
     SummaryExcerpt,
     BodyRichText,
-    PostFamily,
+    BodyIntro: str(raw['BodyIntro']),
+    BodyClosing: str(raw['BodyClosing']),
+    CalloutText: str(raw['CalloutText']),
+    PullQuote: str(raw['PullQuote']),
     SpotlightType: spotlight(raw['SpotlightType']),
     ProjectStage: stage(raw['ProjectStage']),
     ArticleSubject: subject(raw['ArticleSubject']),
-    TemplateKey,
-    PageShellKey,
-    Slug,
-    WorkflowState,
     AuthorEmail: str(raw['AuthorEmail']),
     AuthorDisplayName: str(raw['AuthorDisplayName']),
     CreatedDateUtc,
     UpdatedDateUtc,
     PublishedDateUtc: dt(raw['PublishedDateUtc']),
+    PublishedByEmail: str(raw['PublishedByEmail']),
     ScheduledPublishDateUtc: dt(raw['ScheduledPublishDateUtc']),
     ArchiveDateUtc: dt(raw['ArchiveDateUtc']),
-    ProjectId,
-    ProjectName,
+    ProjectId: str(raw['ProjectId']),
+    ProjectName: str(raw['ProjectName']),
     ProjectLocation: str(raw['ProjectLocation']),
     ProjectSector: str(raw['ProjectSector']),
-    BannerImageUrl,
-    BannerImageAltText,
-    BannerEyebrow: str(raw['BannerEyebrow']),
-    BannerCategoryLabel: str(raw['BannerCategoryLabel']),
-    BannerThemeVariant: one(['default', 'light', 'dark'] as const)(
-      raw['BannerThemeVariant'],
-    ),
-    BannerShowPublishDate: bool(raw['BannerShowPublishDate']),
-    BannerShowGradient: bool(raw['BannerShowGradient']),
-    HeroRendererKind: one(['oobPageTitle', 'hbSignatureHero'] as const)(
-      raw['HeroRendererKind'],
-    ),
+    ProjectStatusLabel: str(raw['ProjectStatusLabel']),
+    HeroPrimaryImage,
+    HeroPrimaryImageAltText,
+    HeroTitle: str(raw['HeroTitle']),
+    HeroSubhead: str(raw['HeroSubhead']),
+    HeroEyebrow: str(raw['HeroEyebrow']),
+    HeroCategoryLabel: str(raw['HeroCategoryLabel']),
+    HeroThemeVariant: heroThemeVariant(raw['HeroThemeVariant']),
+    HeroShowMetadata: bool(raw['HeroShowMetadata']),
+    HeroMetadataMode: heroMetadataMode(raw['HeroMetadataMode']),
+    HeroCtaLabel: str(raw['HeroCtaLabel']),
+    HeroCtaUrl: url(raw['HeroCtaUrl']),
     ShowTeamViewer: bool(raw['ShowTeamViewer']),
-    TeamSectionHeading: str(raw['TeamSectionHeading']),
-    TeamViewerLayout: one(['grid', 'list'] as const)(raw['TeamViewerLayout']),
-    TeamViewerDensity: one(['standard', 'compact', 'comfortable'] as const)(
-      raw['TeamViewerDensity'],
-    ),
-    TeamViewerEnableProfileDrawer: bool(raw['TeamViewerEnableProfileDrawer']),
-    ShowGallery: bool(raw['ShowGallery']),
-    GalleryLayoutProfile: one(['grid', 'carousel', 'shellDefault'] as const)(
-      raw['GalleryLayoutProfile'],
-    ),
+    TeamViewerTitle: str(raw['TeamViewerTitle']),
+    TeamViewerIntro: str(raw['TeamViewerIntro']),
     IsFeatured: bool(raw['IsFeatured']),
     FeaturedRank: num(raw['FeaturedRank']),
     IsPinned: bool(raw['IsPinned']),
     PinRank: num(raw['PinRank']),
-    IncludeInProjectSpotlightRollups: bool(
-      raw['IncludeInProjectSpotlightRollups'],
-    ),
     IncludeInArchive: bool(raw['IncludeInArchive']),
-    TargetSiteUrl,
-    TargetSiteKey,
-    GeneratedPageName: str(raw['GeneratedPageName']),
-    PageUrl: url(raw['PageUrl']),
+    IncludeInDestinationLanding: bool(raw['IncludeInDestinationLanding']),
+    IncludeInHomepageFeed: bool(raw['IncludeInHomepageFeed']),
+    SuppressFromRollups: bool(raw['SuppressFromRollups']),
+    ManualSortOverride: num(raw['ManualSortOverride']),
+    TargetSiteUrl: str(raw['TargetSiteUrl']),
+    PageTemplateKey: str(raw['PageTemplateKey']),
+    PageShellVersion: str(raw['PageShellVersion']),
+    RenderVersion: str(raw['RenderVersion']),
     PageId: str(raw['PageId']),
-    SourceTemplatePath,
-    AppliedTemplateVersion: str(raw['AppliedTemplateVersion']),
-    AppliedShellVersion: str(raw['AppliedShellVersion']),
+    PageName: str(raw['PageName']),
+    PageUrl: url(raw['PageUrl']),
+    PageSyncStatus: pageSyncStatus(raw['PageSyncStatus']),
     LastPageSyncDateUtc: dt(raw['LastPageSyncDateUtc']),
-    PageSyncStatus: one([
-      'pending',
-      'inSync',
-      'error',
-      'staleShell',
-      'staleTemplate',
-    ] as const)(raw['PageSyncStatus']),
-    LastSuccessfulPublishDateUtc: dt(raw['LastSuccessfulPublishDateUtc']),
+    TemplateOverrideAllowed: bool(raw['TemplateOverrideAllowed']),
   };
 }
 

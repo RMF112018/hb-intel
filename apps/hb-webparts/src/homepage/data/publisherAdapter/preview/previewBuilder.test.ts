@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type {
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
+  PublisherArticleRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from '../publisherContracts';
@@ -11,31 +11,29 @@ import { composeProjectSpotlightPage } from '../pageGeneration/pageCompositor';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from '../pageGeneration/xmlShellManifest';
 import { buildPublisherPreview } from './previewBuilder';
 
-function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     Title: 'Preview Post',
     Subhead: 'Subhead',
     SummaryExcerpt: 'Summary.',
     BodyRichText: '<p>Body.</p>',
-    PostFamily: 'monthlySpotlight',
-    SpotlightType: 'inProgress',
-    ProjectStage: 'inProgress',
+    ArticleContentType: 'monthlySpotlight',
+    SpotlightType: 'monthly',
+    ProjectStage: 'active',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     Slug: 'preview-post',
     WorkflowState: 'draft',
     CreatedDateUtc: '2026-04-10T00:00:00Z',
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
     ProjectId: 'PRJ-1',
     ProjectName: 'Project One',
-    BannerImageUrl: 'https://img.example/banner.jpg',
-    BannerImageAltText: 'alt',
+    HeroPrimaryImage: 'https://img.example/banner.jpg',
+    HeroPrimaryImageAltText: 'alt',
     TargetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
-    SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
+    Destination: 'projectSpotlight',
     ...over,
-  };
+  } as PublisherArticleRow;
 }
 
 function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplateRegistryRow {
@@ -44,7 +42,6 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
     TemplateDisplayName: 'PS Monthly',
     TemplateStatus: 'active',
     TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     PageShellVersion: '1.0.0',
     ShellSourceSiteUrl: 'https://example.com',
     ShellSourcePagePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
@@ -61,7 +58,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
     AllowRepublishInPlace: true,
     ForceRegenerationOnShellChange: false,
     ...over,
-  };
+  } as PublisherTemplateRegistryRow;
 }
 
 function member(id: string): PublisherTeamMemberRow {
@@ -84,7 +81,7 @@ function mediaRow(id: string): PublisherMediaRow {
 }
 
 function repos(over: {
-  post?: Partial<PublisherPostRow>;
+  post?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   teamMembers?: readonly PublisherTeamMemberRow[];
   media?: readonly PublisherMediaRow[];
@@ -177,9 +174,9 @@ describe('buildPublisherPreview', () => {
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageName: 'preview-post.aspx',
       SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-old-v1',
       PageShellVersion: '0.9.0',
       TemplateKey: 'ps-inprogress-monthly-v0',
       TemplateVersion: '0.9.0',
@@ -199,7 +196,7 @@ describe('buildPublisherPreview', () => {
 
   it('returns a typed failure when the post is not found', async () => {
     const r = repos();
-    (r.posts.getByPostId as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
+    (r.articles.getByArticleId as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
     const result = await buildPublisherPreview(r, 'post-missing');
     expect(result.ok).toBe(false);
     if (result.ok) return;

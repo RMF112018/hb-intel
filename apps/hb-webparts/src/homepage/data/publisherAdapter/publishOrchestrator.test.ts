@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type {
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
+  PublisherArticleRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from './publisherContracts';
@@ -12,30 +12,28 @@ import type { PageCreationService } from './pageGeneration/pageCreationService';
 import { createPageShellService } from './pageGeneration/pageShellService';
 import { createPublishOrchestrator } from './publishOrchestrator';
 
-function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    PostId: 'post-ps-001',
+    ArticleId: 'post-ps-001',
     Title: 'Acme Tower — April',
     Subhead: 'Concrete pour on-schedule',
     SummaryExcerpt: 'Summary.',
     BodyRichText: '<p>Body.</p>',
-    PostFamily: 'monthlySpotlight',
-    SpotlightType: 'inProgress',
+    ArticleContentType: 'monthlySpotlight',
+    SpotlightType: 'monthly',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     Slug: 'acme-tower-april',
     WorkflowState: 'approved',
     CreatedDateUtc: '2026-04-10T00:00:00Z',
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
     ProjectId: 'PRJ-1',
     ProjectName: 'Acme Tower',
-    BannerImageUrl: 'https://img.example/banner.jpg',
-    BannerImageAltText: 'Banner alt',
+    HeroPrimaryImage: 'https://img.example/banner.jpg',
+    HeroPrimaryImageAltText: 'Banner alt',
     TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
-    SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
+    Destination: 'projectSpotlight',
     ...over,
-  };
+  } as PublisherArticleRow;
 }
 
 function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplateRegistryRow {
@@ -44,7 +42,6 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
     TemplateDisplayName: 'PS Monthly',
     TemplateStatus: 'active',
     TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     PageShellVersion: '1.0.0',
     ShellSourceSiteUrl: 'https://example.com/sites/ProjectSpotlight',
     ShellSourcePagePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
@@ -61,7 +58,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
     AllowRepublishInPlace: true,
     ForceRegenerationOnShellChange: false,
     ...over,
-  };
+  } as PublisherTemplateRegistryRow;
 }
 
 function member(id: string): PublisherTeamMemberRow {
@@ -93,7 +90,7 @@ interface Fixture {
 }
 
 function fixture(over: {
-  post?: Partial<PublisherPostRow>;
+  post?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   existingBinding?: PublisherPageBindingRow;
 } = {}): Fixture {
@@ -115,12 +112,12 @@ function fixture(over: {
   }));
 
   const repositories: PublisherRepositories = {
-    posts: {
-      getByPostId: vi.fn(async () => p),
+    articles: {
+      getByArticleId: vi.fn(async () => p),
       listByWorkflowState: vi.fn(async () => []),
       upsert: vi.fn(async () => {
         throw new Error('unused in this test');
-      }) as unknown as PublisherRepositories['posts']['upsert'],
+      }) as unknown as PublisherRepositories['articles']['upsert'],
     },
     teamMembers: {
       listByPost: vi.fn(async () => [member('alice')]),
@@ -183,7 +180,7 @@ describe('publishOrchestrator', () => {
     const f = fixture();
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      postId: 'post-ps-001',
+      articleId: 'post-ps-001',
       mode: 'create',
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-generated',
@@ -208,11 +205,11 @@ describe('publishOrchestrator', () => {
       PostId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
       PageUrl: 'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
       SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
       PageShellVersion: '1.0.0',
       TemplateKey: 'ps-inprogress-monthly-v1',
       TemplateVersion: '1.0.0',
@@ -221,7 +218,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      postId: 'post-ps-001',
+      articleId: 'post-ps-001',
       mode: 'republish',
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-should-not-be-used',
@@ -240,10 +237,10 @@ describe('publishOrchestrator', () => {
       PostId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
       SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
       PageShellVersion: '1.0.0',
       TemplateKey: 'ps-inprogress-monthly-v1',
       TemplateVersion: '1.0.0',
@@ -252,7 +249,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      postId: 'post-ps-001',
+      articleId: 'post-ps-001',
       mode: 'republish',
       idempotent: true,
       now: () => '2026-04-13T10:00:00.000Z',
@@ -270,10 +267,10 @@ describe('publishOrchestrator', () => {
       PostId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
       SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-old-v1',
       PageShellVersion: '0.9.0',
       TemplateKey: 'ps-inprogress-monthly-v1',
       TemplateVersion: '1.0.0',
@@ -282,7 +279,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      postId: 'post-ps-001',
+      articleId: 'post-ps-001',
       mode: 'republish',
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-regen',
@@ -302,9 +299,9 @@ describe('publishOrchestrator', () => {
       PostId: 'post-ps-001',
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageName: 'acme-tower-april.aspx',
       SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
       PageShellVersion: '1.0.0',
       TemplateKey: 'ps-inprogress-monthly-v1',
       TemplateVersion: '1.0.0',
@@ -312,7 +309,7 @@ describe('publishOrchestrator', () => {
     };
     const f = fixture({ existingBinding: existing });
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ postId: 'post-ps-001', mode: 'republish' });
+    const result = await orch.run({ articleId: 'post-ps-001', mode: 'republish' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('policy');
@@ -324,7 +321,7 @@ describe('publishOrchestrator', () => {
   it('preview mode composes but never writes', async () => {
     const f = fixture();
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ postId: 'post-ps-001', mode: 'preview' });
+    const result = await orch.run({ articleId: 'post-ps-001', mode: 'preview' });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.mode).toBe('preview');
@@ -336,7 +333,7 @@ describe('publishOrchestrator', () => {
   it('blocks publish when validation fails and does not touch the page-creation service or binding writer', async () => {
     const f = fixture({ post: { Title: '' } });
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ postId: 'post-ps-001', mode: 'create' });
+    const result = await orch.run({ articleId: 'post-ps-001', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('validation');
@@ -349,7 +346,7 @@ describe('publishOrchestrator', () => {
     const f = fixture({ post: { Title: '' } });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
-      postId: 'post-ps-001',
+      articleId: 'post-ps-001',
       mode: 'create',
       validateBeforePublish: false,
     });
@@ -366,7 +363,7 @@ describe('publishOrchestrator', () => {
       message: 'tenant returned 500',
     });
     const orch = makeOrchestrator(f);
-    const result = await orch.run({ postId: 'post-ps-001', mode: 'create' });
+    const result = await orch.run({ articleId: 'post-ps-001', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('pagePublish');

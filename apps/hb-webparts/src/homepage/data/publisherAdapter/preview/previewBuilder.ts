@@ -44,7 +44,7 @@ export interface PreviewOutcomeOk {
 export interface PreviewOutcomeFailure {
   readonly ok: false;
   readonly reason:
-    | 'postNotFound'
+    | 'articleNotFound'
     | 'templateResolutionFailed'
     | 'compositionFailed';
   readonly message: string;
@@ -82,10 +82,10 @@ function computeDrift(
 
 export async function buildPublisherPreview(
   repositories: PublisherRepositories,
-  postId: string,
+  articleId: string,
   options: BuildPublisherPreviewOptions = {},
 ): Promise<PreviewOutcome> {
-  const resolution = await buildPublishResolutionContext(repositories, postId);
+  const resolution = await buildPublishResolutionContext(repositories, articleId);
   if (!resolution.ok) {
     return {
       ok: false,

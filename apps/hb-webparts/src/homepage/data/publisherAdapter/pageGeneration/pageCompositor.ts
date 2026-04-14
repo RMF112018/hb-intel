@@ -23,7 +23,7 @@
  * (SharePoint Pages REST accepts either).
  */
 
-import type { PublisherMediaRow, PublisherPostRow, PublisherTeamMemberRow } from '../publisherContracts';
+import type { PublisherMediaRow, PublisherArticleRow, PublisherTeamMemberRow } from '../publisherContracts';
 import type { PublishResolutionContext } from '../publishResolutionContext';
 import {
   buildTeamViewerProperties,
@@ -111,7 +111,7 @@ export function isVisibleControl(
 }
 
 export interface ComposedPageIdentity {
-  readonly postId: string;
+  readonly articleId: string;
   readonly slug: string;
   readonly pageName: string;
   readonly pageTitle: string;
@@ -120,7 +120,6 @@ export interface ComposedPageIdentity {
   readonly shellVersion: string;
   readonly templateKey: string;
   readonly templateVersion: string;
-  readonly sourceTemplatePath: string;
 }
 
 export interface ComposedPage {
@@ -153,11 +152,11 @@ function galleryImages(
     });
 }
 
-function resolvePageName(post: PublisherPostRow): string {
-  if (post.GeneratedPageName && post.GeneratedPageName.trim().length > 0) {
-    return post.GeneratedPageName.trim();
+function resolvePageName(article: PublisherArticleRow): string {
+  if (article.PageName && article.PageName.trim().length > 0) {
+    return article.PageName.trim();
   }
-  return `${post.Slug}.aspx`;
+  return `${article.Slug}.aspx`;
 }
 
 /* ── Per-slot composers ─────────────────────────────────────────── */
@@ -166,12 +165,12 @@ function composeBanner(
   context: PublishResolutionContext,
   shell: PageShellManifest,
 ): BannerControlPayload {
-  const { post } = context;
+  const { article } = context;
   const control = shell.controlsBySlot.banner;
   const title =
-    (post.BannerTitleOverride && post.BannerTitleOverride.trim().length > 0
-      ? post.BannerTitleOverride
-      : post.Title) ?? post.Title;
+    article.HeroTitle && article.HeroTitle.trim().length > 0
+      ? article.HeroTitle
+      : article.Title;
   return {
     slot: 'banner',
     visible: true,
@@ -180,14 +179,14 @@ function composeBanner(
     orderInSection: control.orderInSection,
     column: control.column,
     title,
-    imageUrl: post.BannerImageUrl,
-    imageAltText: post.BannerImageAltText,
-    eyebrow: post.BannerEyebrow,
-    categoryLabel: post.BannerCategoryLabel,
-    showPublishDate: post.BannerShowPublishDate ?? false,
-    showBackgroundGradient: post.BannerShowGradient ?? false,
+    imageUrl: article.HeroPrimaryImage,
+    imageAltText: article.HeroPrimaryImageAltText,
+    eyebrow: article.HeroEyebrow,
+    categoryLabel: article.HeroCategoryLabel,
+    showPublishDate: article.HeroShowMetadata ?? false,
+    showBackgroundGradient: false,
     layoutType: 'FullWidthImage',
-    themeVariant: post.BannerThemeVariant ?? 'default',
+    themeVariant: article.HeroThemeVariant ?? 'default',
   };
 }
 
@@ -203,7 +202,7 @@ function composeSubhead(
     sectionOrder: control.sectionOrder,
     orderInSection: control.orderInSection,
     column: control.column,
-    text: `<h3>${context.post.Subhead}</h3>`,
+    text: `<h3>${context.article.Subhead}</h3>`,
   };
 }
 
@@ -219,7 +218,7 @@ function composeBody(
     sectionOrder: control.sectionOrder,
     orderInSection: control.orderInSection,
     column: control.column,
-    text: context.post.BodyRichText,
+    text: context.article.BodyRichText,
   };
 }
 
@@ -228,7 +227,7 @@ function composeTeam(
   shell: PageShellManifest,
 ): TeamViewerControlPayload | HiddenControlPayload {
   const control = shell.controlsBySlot.team;
-  const { post, template } = context;
+  const { article, template } = context;
 
   if (!template.ShowTeamBlock || template.TeamRendererKind === 'none') {
     return {
@@ -242,7 +241,7 @@ function composeTeam(
     };
   }
 
-  if (post.ShowTeamViewer === false) {
+  if (article.ShowTeamViewer === false) {
     return {
       slot: 'team',
       visible: false,
@@ -275,7 +274,7 @@ function composeTeam(
     sectionOrder: control.sectionOrder,
     orderInSection: control.orderInSection,
     column: control.column,
-    properties: buildTeamViewerProperties(post),
+    properties: buildTeamViewerProperties(article),
   };
 }
 
@@ -284,21 +283,9 @@ function composeGallery(
   shell: PageShellManifest,
 ): ImageGalleryControlPayload | HiddenControlPayload {
   const control = shell.controlsBySlot.gallery;
-  const { post, template } = context;
+  const { template } = context;
 
   if (!template.ShowGalleryBlock || template.GalleryRendererKind === 'none') {
-    return {
-      slot: 'gallery',
-      visible: false,
-      controlId: control.controlId,
-      sectionOrder: control.sectionOrder,
-      orderInSection: control.orderInSection,
-      column: control.column,
-      reason: 'templateDisabled',
-    };
-  }
-
-  if (post.ShowGallery === false) {
     return {
       slot: 'gallery',
       visible: false,
@@ -336,7 +323,7 @@ function composeGallery(
     orderInSection: control.orderInSection,
     column: control.column,
     images,
-    layoutProfile: post.GalleryLayoutProfile ?? 'shellDefault',
+    layoutProfile: 'shellDefault',
     maxImagesCount: 10,
   };
 }
@@ -347,18 +334,17 @@ export function composeProjectSpotlightPage(
   context: PublishResolutionContext,
   shell: PageShellManifest,
 ): ComposedPage {
-  const { post, template } = context;
+  const { article, template } = context;
   const identity: ComposedPageIdentity = {
-    postId: post.PostId,
-    slug: post.Slug,
-    pageName: resolvePageName(post),
-    pageTitle: post.Title,
-    targetSiteUrl: post.TargetSiteUrl,
+    articleId: article.ArticleId,
+    slug: article.Slug,
+    pageName: resolvePageName(article),
+    pageTitle: article.Title,
+    targetSiteUrl: article.TargetSiteUrl ?? '',
     shellKey: shell.shellKey,
     shellVersion: shell.shellVersion,
     templateKey: template.TemplateKey,
     templateVersion: template.TemplateVersion,
-    sourceTemplatePath: post.SourceTemplatePath,
   };
 
   const controls: ComposedControl[] = [
@@ -373,7 +359,7 @@ export function composeProjectSpotlightPage(
     identity,
     header: {
       ...shell.header,
-      title: post.Title,
+      title: article.Title,
     },
     controls,
     shell,

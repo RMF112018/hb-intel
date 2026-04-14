@@ -3,8 +3,8 @@
  *
  * Authority: architecture doc 09 (Editorial Workflow and Lifecycle).
  * Permitted transitions (v1):
- *   draft      → inReview | archived | withdrawn
- *   inReview   → approved | draft | withdrawn
+ *   draft      → review | archived | withdrawn
+ *   review   → approved | draft | withdrawn
  *   approved   → scheduled | published | draft | withdrawn
  *   scheduled  → published | approved | withdrawn
  *   published  → archived | withdrawn
@@ -15,8 +15,8 @@
 import type { WorkflowState, WorkflowHistoryAction } from './publisherEnums';
 
 const TRANSITIONS: Readonly<Record<WorkflowState, readonly WorkflowState[]>> = {
-  draft: ['inReview', 'archived', 'withdrawn'],
-  inReview: ['approved', 'draft', 'withdrawn'],
+  draft: ['review', 'archived', 'withdrawn'],
+  review: ['approved', 'draft', 'withdrawn'],
   approved: ['scheduled', 'published', 'draft', 'withdrawn'],
   scheduled: ['published', 'approved', 'withdrawn'],
   published: ['archived', 'withdrawn'],
@@ -42,6 +42,6 @@ export function historyActionFor(
   if (to === 'archived') return 'archive';
   if (to === 'withdrawn') return 'withdraw';
   if (from === 'scheduled' && to === 'approved') return 'approvalDecision';
-  if (from === 'inReview' && to === 'approved') return 'approvalDecision';
+  if (from === 'review' && to === 'approved') return 'approvalDecision';
   return 'transition';
 }

@@ -1,28 +1,31 @@
 /**
- * Typed domain contracts for the Project Spotlight publisher.
+ * Typed domain contracts for the Article Publisher.
  *
- * Authority: docs/architecture/plans/MASTER/spfx/publisher/architecture/03-Exact-Field-Definitions.md
+ * Master-record authority (tenant truth):
+ *   docs/architecture/plans/MASTER/spfx/publisher/architecture/lists/publisher-list-schema-report.md
  *
- * Two shapes per list:
- *   - `*Row` types mirror the SharePoint field shape (optional where arch 03 MVP=Yes is false,
- *     primitives aligned to SP types — strings for DateTime; number/boolean for numeric/Yes-No).
- *   - Normalized domain types (where they diverge) will be added in Prompt-03 alongside the
- *     service/repository layer. Prompt-02 is schema-and-enum scope only.
- *
- * Only MVP=Yes fields from arch doc 03 are included; post-MVP fields land behind an explicit
- * field-set extension in a later prompt. Consumers should not widen this file casually — any
- * new field must trace to an architecture-doc line.
+ * The master-record contract (`PublisherArticleRow`) is pinned to the
+ * tenant `HB Articles` schema and is keyed by `ArticleId`. Non-master
+ * contracts (template registry, page bindings, team members, media,
+ * workflow history, publishing errors) still carry the pre-tenant-audit
+ * shape; those are realigned by subsequent Phase-02 remediation prompts.
+ * Child rows still reference the master by a logical `PostId` column
+ * pending that realignment — the value carried is the master's
+ * `ArticleId` string.
  */
 
 import type {
+  ArticleContentType,
   ArticleSubject,
   BannerRendererKind,
-  BannerThemeVariant,
   BindingStatus,
   BodyRendererKind,
+  Destination,
   GalleryLayoutProfile,
   GalleryRendererKind,
+  HeroMetadataMode,
   HeroRendererKind,
+  HeroThemeVariant,
   LastOperation,
   MediaRole,
   PageSyncStatus,
@@ -51,64 +54,105 @@ export type UrlString = string;
 /* A. HB Articles                                                      */
 /* ------------------------------------------------------------------ */
 
-export interface PublisherPostRow {
-  readonly PostId: string;
+/**
+ * Tenant-aligned master-record row for `HB Articles`.
+ *
+ * Primary key is the tenant `ArticleId` column. Legacy master fields
+ * that do not exist on the tenant list (`PostId`, `PostFamily`,
+ * `PageShellKey`, `TargetSiteKey`, `SourceTemplatePath`,
+ * `GeneratedPageName`, `AppliedTemplateVersion`, `AppliedShellVersion`,
+ * `LastSuccessfulPublishDateUtc`, `IncludeInProjectSpotlightRollups`,
+ * `BannerImageUrl`, `BannerImageAltText`, `BannerEyebrow`,
+ * `BannerCategoryLabel`, `BannerThemeVariant`, `BannerShowPublishDate`,
+ * `BannerShowGradient`, `HeroRendererKind`, `TeamSectionHeading`,
+ * `TeamViewerLayout`, `TeamViewerDensity`, `TeamViewerEnableProfileDrawer`,
+ * `ShowGallery`, `GalleryLayoutProfile`) are intentionally removed; the
+ * tenant `Hero*`, `Destination`, `PageTemplateKey`, `PageShellVersion`,
+ * `PageName`, `PageId`, `PageUrl`, `PageSyncStatus`,
+ * `LastPageSyncDateUtc`, and `PublishedDateUtc` columns now carry the
+ * semantically-equivalent state on the master record.
+ */
+export interface PublisherArticleRow {
+  /* ── Identity / routing ───────────────────────────────────────── */
+  readonly ArticleId: string;
   readonly Title: string;
-  readonly BannerTitleOverride?: string;
+  readonly ArticleContentType: ArticleContentType;
+  readonly Destination: Destination;
+  readonly Slug: string;
+  readonly TemplateKey: string;
+  readonly WorkflowState: WorkflowState;
+
+  /* ── Content ─────────────────────────────────────────────────── */
   readonly Subhead: string;
   readonly SummaryExcerpt: string;
   readonly BodyRichText: string;
-  readonly PostFamily: PostFamily;
+  readonly BodyIntro?: string;
+  readonly BodyClosing?: string;
+  readonly CalloutText?: string;
+  readonly PullQuote?: string;
+
+  /* ── Discriminators / subject ────────────────────────────────── */
   readonly SpotlightType?: SpotlightType;
   readonly ProjectStage?: ProjectStage;
   readonly ArticleSubject?: ArticleSubject;
-  readonly TemplateKey: string;
-  readonly PageShellKey: string;
-  readonly Slug: string;
-  readonly WorkflowState: WorkflowState;
+
+  /* ── Authoring / publication metadata ────────────────────────── */
   readonly AuthorEmail?: string;
   readonly AuthorDisplayName?: string;
   readonly CreatedDateUtc: IsoDateTimeUtc;
   readonly UpdatedDateUtc: IsoDateTimeUtc;
   readonly PublishedDateUtc?: IsoDateTimeUtc;
+  readonly PublishedByEmail?: string;
   readonly ScheduledPublishDateUtc?: IsoDateTimeUtc;
   readonly ArchiveDateUtc?: IsoDateTimeUtc;
-  readonly ProjectId: string;
-  readonly ProjectName: string;
+
+  /* ── Project context ─────────────────────────────────────────── */
+  readonly ProjectId?: string;
+  readonly ProjectName?: string;
   readonly ProjectLocation?: string;
   readonly ProjectSector?: string;
-  readonly BannerImageUrl: UrlString;
-  readonly BannerImageAltText: string;
-  readonly BannerEyebrow?: string;
-  readonly BannerCategoryLabel?: string;
-  readonly BannerThemeVariant?: BannerThemeVariant;
-  readonly BannerShowPublishDate?: boolean;
-  readonly BannerShowGradient?: boolean;
-  readonly HeroRendererKind?: HeroRendererKind;
+  readonly ProjectStatusLabel?: string;
+
+  /* ── Hero (required image + alt; optional theming) ───────────── */
+  readonly HeroPrimaryImage: UrlString;
+  readonly HeroPrimaryImageAltText: string;
+  readonly HeroTitle?: string;
+  readonly HeroSubhead?: string;
+  readonly HeroEyebrow?: string;
+  readonly HeroCategoryLabel?: string;
+  readonly HeroThemeVariant?: HeroThemeVariant;
+  readonly HeroShowMetadata?: boolean;
+  readonly HeroMetadataMode?: HeroMetadataMode;
+  readonly HeroCtaLabel?: string;
+  readonly HeroCtaUrl?: UrlString;
+
+  /* ── Team Viewer ─────────────────────────────────────────────── */
   readonly ShowTeamViewer?: boolean;
-  readonly TeamSectionHeading?: string;
-  readonly TeamViewerLayout?: TeamViewerLayout;
-  readonly TeamViewerDensity?: TeamViewerDensity;
-  readonly TeamViewerEnableProfileDrawer?: boolean;
-  readonly ShowGallery?: boolean;
-  readonly GalleryLayoutProfile?: GalleryLayoutProfile;
+  readonly TeamViewerTitle?: string;
+  readonly TeamViewerIntro?: string;
+
+  /* ── Feature / pin / rollup flags ────────────────────────────── */
   readonly IsFeatured?: boolean;
   readonly FeaturedRank?: number;
   readonly IsPinned?: boolean;
   readonly PinRank?: number;
-  readonly IncludeInProjectSpotlightRollups?: boolean;
   readonly IncludeInArchive?: boolean;
-  readonly TargetSiteUrl: UrlString;
-  readonly TargetSiteKey: TargetSiteKey;
-  readonly GeneratedPageName?: string;
-  readonly PageUrl?: UrlString;
+  readonly IncludeInDestinationLanding?: boolean;
+  readonly IncludeInHomepageFeed?: boolean;
+  readonly SuppressFromRollups?: boolean;
+  readonly ManualSortOverride?: number;
+
+  /* ── Page identity / sync (tenant HB Articles columns) ───────── */
+  readonly TargetSiteUrl?: UrlString;
+  readonly PageTemplateKey?: string;
+  readonly PageShellVersion?: string;
+  readonly RenderVersion?: string;
   readonly PageId?: string;
-  readonly SourceTemplatePath: string;
-  readonly AppliedTemplateVersion?: string;
-  readonly AppliedShellVersion?: string;
-  readonly LastPageSyncDateUtc?: IsoDateTimeUtc;
+  readonly PageName?: string;
+  readonly PageUrl?: UrlString;
   readonly PageSyncStatus?: PageSyncStatus;
-  readonly LastSuccessfulPublishDateUtc?: IsoDateTimeUtc;
+  readonly LastPageSyncDateUtc?: IsoDateTimeUtc;
+  readonly TemplateOverrideAllowed?: boolean;
 }
 
 /* ------------------------------------------------------------------ */

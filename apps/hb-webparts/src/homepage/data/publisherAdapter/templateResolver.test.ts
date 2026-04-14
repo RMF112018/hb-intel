@@ -37,7 +37,7 @@ function entry(
 const monthly = entry({
   TemplateKey: 'ps-inprogress-monthly-v1',
   PostFamily: ['monthlySpotlight'],
-  SpotlightType: ['inProgress'],
+  SpotlightType: ['monthly'],
 });
 
 const milestone = entry({
@@ -49,7 +49,7 @@ const milestone = entry({
 const projectUpdate = entry({
   TemplateKey: 'ps-inprogress-project-update-v1',
   PostFamily: ['projectUpdate'],
-  SpotlightType: ['inProgress', 'update'],
+  SpotlightType: ['monthly', 'other'],
 });
 
 const genericWildcard = entry({
@@ -125,7 +125,7 @@ describe('resolveTemplate', () => {
 
   it('prefers the most specific candidate over a wildcard entry', () => {
     const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight', SpotlightType: 'inProgress' },
+      { PostFamily: 'monthlySpotlight', SpotlightType: 'monthly' },
       [genericWildcard, monthly],
     );
     expect(result.ok).toBe(true);
@@ -139,12 +139,12 @@ describe('resolveTemplate', () => {
     const inactive = entry({
       TemplateKey: 'ps-inprogress-monthly-v0',
       PostFamily: ['monthlySpotlight'],
-      SpotlightType: ['inProgress'],
+      SpotlightType: ['monthly'],
       TemplateStatus: 'inactive',
       TemplateVersion: '0.9.0',
     });
     const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight', SpotlightType: 'inProgress' },
+      { PostFamily: 'monthlySpotlight', SpotlightType: 'monthly' },
       [inactive, monthly],
     );
     expect(result.ok).toBe(true);
@@ -155,17 +155,17 @@ describe('resolveTemplate', () => {
     const v1 = entry({
       TemplateKey: 'ps-inprogress-monthly-v1',
       PostFamily: ['monthlySpotlight'],
-      SpotlightType: ['inProgress'],
+      SpotlightType: ['monthly'],
       TemplateVersion: '1.0.0',
     });
     const v2 = entry({
       TemplateKey: 'ps-inprogress-monthly-v2',
       PostFamily: ['monthlySpotlight'],
-      SpotlightType: ['inProgress'],
+      SpotlightType: ['monthly'],
       TemplateVersion: '2.1.0',
     });
     const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight', SpotlightType: 'inProgress' },
+      { PostFamily: 'monthlySpotlight', SpotlightType: 'monthly' },
       [v1, v2],
     );
     expect(result.ok).toBe(true);
@@ -176,7 +176,7 @@ describe('resolveTemplate', () => {
   });
 
   it('projectUpdate matches both inProgress and update spotlight types', () => {
-    for (const st of ['inProgress', 'update'] as const) {
+    for (const st of ['monthly', 'other'] as const) {
       const result = resolveTemplate(
         { PostFamily: 'projectUpdate', SpotlightType: st },
         [monthly, milestone, projectUpdate],

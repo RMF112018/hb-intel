@@ -26,7 +26,7 @@
  */
 
 import type { PublishResolutionContext } from '../publishResolutionContext';
-import type { PublisherPostRow, PublisherTemplateRegistryRow } from '../publisherContracts';
+import type { PublisherArticleRow, PublisherTemplateRegistryRow } from '../publisherContracts';
 import {
   PROJECT_SPOTLIGHT_V1_SHELL,
   type PageShellManifest,
@@ -93,12 +93,12 @@ function str(v: unknown): string | undefined {
 }
 
 function requireField(
-  post: PublisherPostRow,
-  key: keyof PublisherPostRow,
+  article: PublisherArticleRow,
+  key: keyof PublisherArticleRow,
   label: string,
   findings: ValidationFinding[],
 ): void {
-  if (!str(post[key] as unknown)) {
+  if (!str(article[key] as unknown)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
@@ -112,18 +112,18 @@ function requireField(
 /* ── Template-profile required-field sets ─────────────────────────── */
 
 interface TemplateRequiredFieldSet {
-  readonly postFields: readonly (keyof PublisherPostRow)[];
-  /** Extra keys that aren't fields on PublisherPostRow (checked separately). */
+  readonly articleFields: readonly (keyof PublisherArticleRow)[];
+  /** Extra keys that aren't fields on PublisherArticleRow (checked separately). */
   readonly extraChecks?: readonly {
     readonly key: string;
-    readonly predicate: (post: PublisherPostRow) => boolean;
+    readonly predicate: (post: PublisherArticleRow) => boolean;
     readonly message: string;
     readonly actionHint: string;
   }[];
 }
 
 const MONTHLY_REQUIRED: TemplateRequiredFieldSet = {
-  postFields: [
+  articleFields: [
     'ProjectId',
     'ProjectName',
     'ProjectStage',
@@ -131,22 +131,22 @@ const MONTHLY_REQUIRED: TemplateRequiredFieldSet = {
     'Subhead',
     'SummaryExcerpt',
     'Slug',
-    'BannerImageUrl',
-    'BannerImageAltText',
+    'HeroPrimaryImage',
+    'HeroPrimaryImageAltText',
     'BodyRichText',
   ],
 };
 
 const MILESTONE_REQUIRED: TemplateRequiredFieldSet = {
-  postFields: [
+  articleFields: [
     'ProjectId',
     'ProjectName',
     'Title',
     'Subhead',
     'SummaryExcerpt',
     'Slug',
-    'BannerImageUrl',
-    'BannerImageAltText',
+    'HeroPrimaryImage',
+    'HeroPrimaryImageAltText',
     'BodyRichText',
   ],
   extraChecks: [
@@ -169,15 +169,15 @@ const MILESTONE_REQUIRED: TemplateRequiredFieldSet = {
 };
 
 const PROJECT_UPDATE_REQUIRED: TemplateRequiredFieldSet = {
-  postFields: [
+  articleFields: [
     'ProjectId',
     'ProjectName',
     'Title',
     'Subhead',
     'SummaryExcerpt',
     'Slug',
-    'BannerImageUrl',
-    'BannerImageAltText',
+    'HeroPrimaryImage',
+    'HeroPrimaryImageAltText',
     'BodyRichText',
   ],
 };
@@ -188,7 +188,7 @@ const REQUIRED_FIELD_SETS: Readonly<Record<string, TemplateRequiredFieldSet>> = 
   'req-ps-inprogress-project-update-v1': PROJECT_UPDATE_REQUIRED,
 };
 
-function labelFor(key: keyof PublisherPostRow): string {
+function labelFor(key: keyof PublisherArticleRow): string {
   return String(key);
 }
 
@@ -199,61 +199,61 @@ function validateGlobalRules(
   shell: PageShellManifest,
   findings: ValidationFinding[],
 ): void {
-  const { post } = context;
+  const { article } = context;
 
   // Rule 1
-  if (!str(post.PostId)) {
+  if (!str(article.ArticleId)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
-      field: 'PostId',
-      message: 'PostId is required.',
-      actionHint: 'PostId is assigned by the authoring surface; reload the post.',
+      field: 'ArticleId',
+      message: 'ArticleId is required.',
+      actionHint: 'ArticleId is assigned by the authoring surface; reload the article.',
     });
   }
 
   // Rule 2
-  if (post.TargetSiteKey !== 'projectSpotlight') {
+  if (article.Destination !== 'projectSpotlight') {
     findings.push({
       category: 'invalid-template-match',
       severity: 'error',
-      field: 'TargetSiteKey',
-      message: `TargetSiteKey must be 'projectSpotlight' (found '${post.TargetSiteKey}').`,
+      field: 'Destination',
+      message: `Destination must be 'projectSpotlight' in the current sprint (found '${article.Destination}').`,
       actionHint:
-        'Project Spotlight is the only approved destination for the v1 publisher.',
+        'Project Spotlight is the only destination implemented by this sprint; Company Pulse support is planned.',
     });
   }
 
   // Rule 3
-  if (!post.TargetSiteUrl || !post.TargetSiteUrl.includes(PROJECT_SPOTLIGHT_HOST)) {
+  if (!article.TargetSiteUrl || !article.TargetSiteUrl.includes(PROJECT_SPOTLIGHT_HOST)) {
     findings.push({
       category: 'invalid-template-match',
       severity: 'error',
       field: 'TargetSiteUrl',
-      message: `TargetSiteUrl must point at the Project Spotlight site (found '${post.TargetSiteUrl}').`,
+      message: `TargetSiteUrl must point at the Project Spotlight site (found '${article.TargetSiteUrl ?? ''}').`,
       actionHint: 'Restore the default Project Spotlight site URL.',
     });
   }
 
   // Rule 4
-  if (!str(post.PostFamily)) {
+  if (!str(article.ArticleContentType)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
-      field: 'PostFamily',
-      message: 'PostFamily is required.',
-      actionHint: 'Pick a post family on the Metadata tab.',
+      field: 'ArticleContentType',
+      message: 'ArticleContentType is required.',
+      actionHint: 'Pick an article content type on the Metadata tab.',
     });
   }
 
   // Rule 5 / 6 — resolver already picked these; check they still line up.
-  if (!str(post.TemplateKey)) {
+  if (!str(article.TemplateKey)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
       field: 'TemplateKey',
       message: 'TemplateKey is required.',
-      actionHint: 'Save the post once so the resolver can assign a template.',
+      actionHint: 'Save the article once so the resolver can assign a template.',
     });
   } else if (context.template.TemplateStatus !== 'active') {
     findings.push({
@@ -264,42 +264,22 @@ function validateGlobalRules(
       actionHint: 'Select an active template or request the registry be updated.',
     });
   }
-  if (!str(post.PageShellKey)) {
-    findings.push({
-      category: 'missing-required-field',
-      severity: 'error',
-      field: 'PageShellKey',
-      message: 'PageShellKey is required.',
-      actionHint: 'Save the post once so the resolver can assign a shell.',
-    });
-  }
-
-  // Rule 7
-  if (!str(post.SourceTemplatePath)) {
-    findings.push({
-      category: 'missing-required-field',
-      severity: 'error',
-      field: 'SourceTemplatePath',
-      message: 'SourceTemplatePath is required.',
-      actionHint: 'Restore the default XML template path.',
-    });
-  }
 
   // Rule 8
-  if (!str(post.Title)) {
+  if (!str(article.Title)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
       field: 'Title',
       message: 'Title is required.',
-      actionHint: 'Give the post a title on the Metadata tab.',
+      actionHint: 'Give the article a title on the Metadata tab.',
     });
   }
 
   // Rules 9 + 10 — Subhead / Body required when the shell exposes those slots.
   const hasSubheadSlot = !!shell.controlsBySlot.subhead;
   const hasBodySlot = !!shell.controlsBySlot.body;
-  if (hasSubheadSlot && !str(post.Subhead)) {
+  if (hasSubheadSlot && !str(article.Subhead)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
@@ -308,18 +288,18 @@ function validateGlobalRules(
       actionHint: 'Fill the Subhead field on the Content tab.',
     });
   }
-  if (hasBodySlot && !str(post.BodyRichText)) {
+  if (hasBodySlot && !str(article.BodyRichText)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
       field: 'BodyRichText',
       message: 'Body is required for this shell.',
-      actionHint: 'Write the post body on the Content tab.',
+      actionHint: 'Write the article body on the Content tab.',
     });
   }
 
   // Rule 11 — Slug required; uniqueness is a hosted concern.
-  if (!str(post.Slug)) {
+  if (!str(article.Slug)) {
     findings.push({
       category: 'invalid-slug',
       severity: 'error',
@@ -333,30 +313,30 @@ function validateGlobalRules(
       severity: 'warning',
       field: 'Slug',
       message: 'Slug uniqueness within Project Spotlight has not been verified in this session.',
-      actionHint: 'Hosted verification (Wave 9) confirms uniqueness.',
+      actionHint: 'Hosted verification confirms uniqueness.',
     });
   }
 
   // Rule 12 — banner image required when banner slot is present.
   const hasBannerSlot = !!shell.controlsBySlot.banner;
-  if (hasBannerSlot && !str(post.BannerImageUrl)) {
+  if (hasBannerSlot && !str(article.HeroPrimaryImage)) {
     findings.push({
       category: 'missing-required-field',
       severity: 'error',
-      field: 'BannerImageUrl',
-      message: 'BannerImageUrl is required for the current shell.',
-      actionHint: 'Add a banner image URL on the Banner tab.',
+      field: 'HeroPrimaryImage',
+      message: 'HeroPrimaryImage is required for the current shell.',
+      actionHint: 'Add a hero image URL on the Hero tab.',
     });
   }
 
-  // Rule 13 — alt text when banner image exists.
-  if (str(post.BannerImageUrl) && !str(post.BannerImageAltText)) {
+  // Rule 13 — alt text when hero image exists.
+  if (str(article.HeroPrimaryImage) && !str(article.HeroPrimaryImageAltText)) {
     findings.push({
       category: 'invalid-image-accessibility',
       severity: 'error',
-      field: 'BannerImageAltText',
-      message: 'BannerImageAltText is required whenever a banner image is set.',
-      actionHint: 'Provide alt text describing the banner image.',
+      field: 'HeroPrimaryImageAltText',
+      message: 'HeroPrimaryImageAltText is required whenever a hero image is set.',
+      actionHint: 'Provide alt text describing the hero image.',
     });
   }
 
@@ -422,11 +402,11 @@ function validateTemplateRequiredFieldSet(
     });
     return;
   }
-  for (const key of set.postFields) {
-    requireField(context.post, key, labelFor(key), findings);
+  for (const key of set.articleFields) {
+    requireField(context.article, key, labelFor(key), findings);
   }
   for (const extra of set.extraChecks ?? []) {
-    if (extra.predicate(context.post)) {
+    if (extra.predicate(context.article)) {
       findings.push({
         category: 'missing-required-field',
         severity: 'error',
@@ -442,9 +422,9 @@ function validateConditionalBlocks(
   context: PublishResolutionContext,
   findings: ValidationFinding[],
 ): void {
-  const { post, template, teamMembers, media } = context;
+  const { article, template, teamMembers, media } = context;
 
-  if (post.ShowTeamViewer !== false && template.ShowTeamBlock) {
+  if (article.ShowTeamViewer !== false && template.ShowTeamBlock) {
     const includedTeam = teamMembers.filter((r) => r.IncludeInViewer !== false);
     if (includedTeam.length === 0) {
       findings.push({
@@ -459,7 +439,7 @@ function validateConditionalBlocks(
     }
   }
 
-  if (post.ShowGallery !== false && template.ShowGalleryBlock) {
+  if (template.ShowGalleryBlock) {
     const galleryImages = media.filter((r) => r.MediaRole === 'gallery');
     if (galleryImages.length === 0) {
       findings.push({
@@ -514,33 +494,33 @@ function validateShellCompatibility(
 }
 
 function validateLengthHints(
-  post: PublisherPostRow,
+  article: PublisherArticleRow,
   findings: ValidationFinding[],
 ): void {
-  if (post.Title && post.Title.length > TITLE_MAX) {
+  if (article.Title && article.Title.length > TITLE_MAX) {
     findings.push({
       category: 'missing-required-field',
       severity: 'warning',
       field: 'Title',
-      message: `Title is ${post.Title.length} chars; recommended ≤ ${TITLE_MAX}.`,
+      message: `Title is ${article.Title.length} chars; recommended ≤ ${TITLE_MAX}.`,
       actionHint: 'Shorten the title for rollup / SEO fit.',
     });
   }
-  if (post.Subhead && post.Subhead.length > SUBHEAD_MAX) {
+  if (article.Subhead && article.Subhead.length > SUBHEAD_MAX) {
     findings.push({
       category: 'missing-required-field',
       severity: 'warning',
       field: 'Subhead',
-      message: `Subhead is ${post.Subhead.length} chars; recommended ≤ ${SUBHEAD_MAX}.`,
+      message: `Subhead is ${article.Subhead.length} chars; recommended ≤ ${SUBHEAD_MAX}.`,
       actionHint: 'Tighten the subhead to keep banner treatment consistent.',
     });
   }
-  if (post.SummaryExcerpt && post.SummaryExcerpt.length > SUMMARY_MAX) {
+  if (article.SummaryExcerpt && article.SummaryExcerpt.length > SUMMARY_MAX) {
     findings.push({
       category: 'missing-required-field',
       severity: 'warning',
       field: 'SummaryExcerpt',
-      message: `SummaryExcerpt is ${post.SummaryExcerpt.length} chars; recommended ≤ ${SUMMARY_MAX}.`,
+      message: `SummaryExcerpt is ${article.SummaryExcerpt.length} chars; recommended ≤ ${SUMMARY_MAX}.`,
       actionHint: 'Tighten the excerpt for rollup fit.',
     });
   }
@@ -581,7 +561,7 @@ export function validatePublishContext(
   validateTemplateRequiredFieldSet(context, findings);
   validateConditionalBlocks(context, findings);
   validateShellCompatibility(context.template, shell, findings);
-  validateLengthHints(context.post, findings);
+  validateLengthHints(context.article, findings);
   validateBindingDrift(context, shell, findings);
 
   const errors = findings.filter((f) => f.severity === 'error');

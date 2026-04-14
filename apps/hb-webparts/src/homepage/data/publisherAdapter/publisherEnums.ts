@@ -1,34 +1,52 @@
 /**
- * Canonical enum values for the Project Spotlight publisher data model.
+ * Canonical enum values for the Article Publisher data model.
  *
- * Authority: docs/architecture/plans/MASTER/spfx/publisher/architecture/03-Exact-Field-Definitions.md
+ * Authority (tenant truth):
+ *   docs/architecture/plans/MASTER/spfx/publisher/architecture/lists/publisher-list-schema-report.md
  *
- * Keep this file in lockstep with the choice-default table in
- * packages/sharepoint-docs/infrastructure/provision-project-spotlight-publisher-lists.ps1.
+ * Master-record (HB Articles) enum values are pinned to the tenant list
+ * schema. Non-master enums (TemplateRegistry, PageBinding, etc.) still
+ * carry their pre-tenant-audit values; those layers are realigned by
+ * later Phase-02 remediation prompts.
  *
  * All tuples are declared `as const` so consumers can derive literal-union
  * types directly; no runtime object mutation is required.
  */
 
-export const POST_FAMILY_VALUES = [
+/* ── Master-record (HB Articles) enums — tenant-aligned ──────────────── */
+
+/**
+ * Article content type (tenant column `ArticleContentType`, Choice).
+ * Replaces the prior `PostFamily` master-record enum.
+ */
+export const ARTICLE_CONTENT_TYPE_VALUES = [
+  'newsUpdate',
   'monthlySpotlight',
   'milestoneSpotlight',
   'projectUpdate',
-  'projectStory',
+  'announcement',
 ] as const;
-export type PostFamily = (typeof POST_FAMILY_VALUES)[number];
+export type ArticleContentType = (typeof ARTICLE_CONTENT_TYPE_VALUES)[number];
 
-export const SPOTLIGHT_TYPE_VALUES = [
-  'inProgress',
-  'milestone',
-  'update',
-  'feature',
+/**
+ * Destination (tenant column `Destination`, Choice).
+ * Replaces the prior single-valued `TargetSiteKey` master enum. The
+ * Project Spotlight destination identity is preserved (destination
+ * scope, per the rebranding report); Company Pulse is a declared
+ * future destination, not yet implemented by the app.
+ */
+export const DESTINATION_VALUES = [
+  'companyPulse',
+  'projectSpotlight',
 ] as const;
+export type Destination = (typeof DESTINATION_VALUES)[number];
+
+export const SPOTLIGHT_TYPE_VALUES = ['monthly', 'milestone', 'other'] as const;
 export type SpotlightType = (typeof SPOTLIGHT_TYPE_VALUES)[number];
 
 export const PROJECT_STAGE_VALUES = [
-  'preconstruction',
-  'inProgress',
+  'precon',
+  'active',
   'closeout',
   'completed',
 ] as const;
@@ -45,7 +63,7 @@ export type ArticleSubject = (typeof ARTICLE_SUBJECT_VALUES)[number];
 
 export const WORKFLOW_STATE_VALUES = [
   'draft',
-  'inReview',
+  'review',
   'approved',
   'scheduled',
   'published',
@@ -54,12 +72,41 @@ export const WORKFLOW_STATE_VALUES = [
 ] as const;
 export type WorkflowState = (typeof WORKFLOW_STATE_VALUES)[number];
 
-export const BANNER_THEME_VARIANT_VALUES = [
+export const HERO_THEME_VARIANT_VALUES = [
   'default',
   'light',
   'dark',
 ] as const;
-export type BannerThemeVariant = (typeof BANNER_THEME_VARIANT_VALUES)[number];
+export type HeroThemeVariant = (typeof HERO_THEME_VARIANT_VALUES)[number];
+
+export const HERO_METADATA_MODE_VALUES = [
+  'standard',
+  'compact',
+  'hidden',
+] as const;
+export type HeroMetadataMode = (typeof HERO_METADATA_MODE_VALUES)[number];
+
+export const PAGE_SYNC_STATUS_VALUES = [
+  'in-sync',
+  'pending',
+  'error',
+] as const;
+export type PageSyncStatus = (typeof PAGE_SYNC_STATUS_VALUES)[number];
+
+/* ── Legacy / non-master-record enums (scope-deferred) ───────────────── */
+/* These remain until later Phase-02 prompts realign the non-master lists
+   (template registry, page bindings, publishing errors, etc.) to tenant
+   schema. Consumers of master-record state must use the tenant-aligned
+   enums above. */
+
+/**
+ * Banner theme variant is retained as a legacy alias of the tenant
+ * `HeroThemeVariant` enum so pre-tenant renderer identifiers in
+ * `publisherContracts.PublisherTemplateRegistryRow` and the shell XML
+ * compositor continue to compile. Do not use on master-record state.
+ */
+export const BANNER_THEME_VARIANT_VALUES = HERO_THEME_VARIANT_VALUES;
+export type BannerThemeVariant = HeroThemeVariant;
 
 export const HERO_RENDERER_KIND_VALUES = [
   'oobPageTitle',
@@ -99,15 +146,6 @@ export const GALLERY_LAYOUT_PROFILE_VALUES = [
 ] as const;
 export type GalleryLayoutProfile =
   (typeof GALLERY_LAYOUT_PROFILE_VALUES)[number];
-
-export const PAGE_SYNC_STATUS_VALUES = [
-  'pending',
-  'inSync',
-  'error',
-  'staleShell',
-  'staleTemplate',
-] as const;
-export type PageSyncStatus = (typeof PAGE_SYNC_STATUS_VALUES)[number];
 
 export const TEMPLATE_STATUS_VALUES = [
   'active',
@@ -182,9 +220,23 @@ export const RETRY_STATUS_VALUES = ['none', 'pending', 'resolved'] as const;
 export type RetryStatus = (typeof RETRY_STATUS_VALUES)[number];
 
 /**
- * Destination key is architecturally locked to a single value in v1.
- * Exported as a tuple for symmetry and to support future multi-destination
- * extensions without changing the call-site shape.
+ * PostFamily is a pre-tenant-audit enum still referenced by the
+ * TemplateRegistry child-row contract (not yet realigned to tenant
+ * schema). Do not use on master-record state — use
+ * `ArticleContentType` instead.
+ */
+export const POST_FAMILY_VALUES = [
+  'monthlySpotlight',
+  'milestoneSpotlight',
+  'projectUpdate',
+  'projectStory',
+] as const;
+export type PostFamily = (typeof POST_FAMILY_VALUES)[number];
+
+/**
+ * TargetSiteKey is a pre-tenant-audit enum still referenced by the
+ * PageBinding child-row contract. Do not use on master-record state —
+ * use `Destination` instead.
  */
 export const TARGET_SITE_KEY_VALUES = ['projectSpotlight'] as const;
 export type TargetSiteKey = (typeof TARGET_SITE_KEY_VALUES)[number];

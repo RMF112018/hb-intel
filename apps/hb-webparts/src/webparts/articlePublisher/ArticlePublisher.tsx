@@ -2,61 +2,47 @@
  * Article Publisher — authoring surface for structured article publishing.
  *
  * The current sprint supports the Project Spotlight article workflow
- * (monthly spotlight posts, page-bound to the ProjectSpotlight site).
- * Future sprints may extend this app to additional article destinations
- * such as Company Pulse; no other destinations are wired today.
+ * (HB Articles master-record with Destination='projectSpotlight',
+ * page-bound to the ProjectSpotlight site). Future sprints may extend
+ * this app to additional article destinations such as Company Pulse;
+ * no other destinations are wired today.
  *
  * Hosted on the HBCentral publisher page. Ownership:
- *   - Reads publisher lists from HBCentral through `createPublisherRepositories()`
- *   - Writes master / child records + workflow history through the same repository factory
- *   - Orchestrates publish / republish / preview through `createPublishOrchestrator`
- *
- * Scope (v1, prompt-06 discipline: "avoid over-designing"):
- *   - Post list (filter by workflow state) → select → load detail.
- *   - Post detail form: master fields the architecture marks MVP=Yes.
- *   - Team + media tabs: add / remove / reorder rows; save = replaceAllForPost.
- *   - Template + binding status panel: read-only, driven by the service layer.
- *   - Workflow action bar: transitions guarded by the pure state machine,
- *     publish / republish / preview delegated to the orchestrator.
- *
- * Deliberately out of v1:
- *   - Rich-text editors (plain <textarea> for body/subhead; authors can paste
- *     HTML knowing the compositor passes it through unchanged).
- *   - Inline scheduled-publish UI (blocking unknown #6).
- *   - Visual preview of the final rendered page (preview returns the composed
- *     control payloads; full page-canvas rendering is Wave 7).
+ *   - Reads `HB Articles` through `createPublisherRepositories()`
+ *   - Writes master / child records + workflow history through the same
+ *     repository factory
+ *   - Orchestrates publish / republish / preview through
+ *     `createPublishOrchestrator`
  */
 import * as React from 'react';
 import { HbcEmptyState, HbcSpinner } from '@hbc/ui-kit/homepage';
 import { fetchRequestDigest, storeSiteUrl } from '@hbc/sharepoint-platform';
 import {
+  ARTICLE_CONTENT_TYPE_VALUES,
   ARTICLE_SUBJECT_VALUES,
-  BANNER_THEME_VARIANT_VALUES,
+  DESTINATION_VALUES,
+  HERO_THEME_VARIANT_VALUES,
+  PROJECT_STAGE_VALUES,
+  SPOTLIGHT_TYPE_VALUES,
+  WORKFLOW_STATE_VALUES,
   createPublisherRepositories,
   createDefaultPublishOrchestrator,
   createSharePointPageBindingWriter,
-  POST_FAMILY_VALUES,
-  PROJECT_STAGE_VALUES,
-  SPOTLIGHT_TYPE_VALUES,
-  TEAM_VIEWER_DENSITY_VALUES,
-  TEAM_VIEWER_LAYOUT_VALUES,
-  WORKFLOW_STATE_VALUES,
   createSharePointPageCreationService,
+  type PublisherArticleRow,
   type PublisherMediaRow,
   type PublisherPageBindingRow,
-  type PublisherPostRow,
   type PublisherRepositories,
   type PublisherTeamMemberRow,
   type WorkflowHistoryAction,
   type WorkflowState,
   type MediaRole,
-  type PostFamily,
+  type ArticleContentType,
+  type ArticleSubject,
+  type Destination,
+  type HeroThemeVariant,
   type SpotlightType,
   type ProjectStage,
-  type ArticleSubject,
-  type BannerThemeVariant,
-  type TeamViewerLayout,
-  type TeamViewerDensity,
   type PublishResolutionContext,
   type PublishOutcome,
   type PublisherWorkflowHistoryRow,
@@ -95,35 +81,32 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function emptyPost(templateKey: string, pageShellKey: string): PublisherPostRow {
-  const id = `post-${Date.now()}-${Math.floor(Math.random() * 1e6)
+function emptyArticle(templateKey: string): PublisherArticleRow {
+  const id = `art-${Date.now()}-${Math.floor(Math.random() * 1e6)
     .toString(36)
     .padStart(4, '0')}`;
   return {
-    PostId: id,
-    Title: 'Untitled spotlight',
+    ArticleId: id,
+    Title: 'Untitled article',
+    ArticleContentType: 'monthlySpotlight',
+    Destination: 'projectSpotlight',
+    Slug: id,
+    TemplateKey: templateKey,
+    WorkflowState: 'draft',
     Subhead: '',
     SummaryExcerpt: '',
     BodyRichText: '',
-    PostFamily: 'monthlySpotlight',
-    TemplateKey: templateKey,
-    PageShellKey: pageShellKey,
-    Slug: id,
-    WorkflowState: 'draft',
+    HeroPrimaryImage: '',
+    HeroPrimaryImageAltText: '',
     CreatedDateUtc: nowIso(),
     UpdatedDateUtc: nowIso(),
-    ProjectId: '',
-    ProjectName: '',
-    BannerImageUrl: '',
-    BannerImageAltText: '',
-    TargetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
-    SourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
+    TargetSiteUrl:
+      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
   };
 }
 
 function newHistoryRow(
-  postId: string,
+  articleId: string,
   from: WorkflowState | undefined,
   to: WorkflowState,
   actor: string | undefined,
@@ -132,7 +115,7 @@ function newHistoryRow(
   const action: WorkflowHistoryAction = historyActionFor(from ?? to, to);
   return {
     HistoryId: `hst-${Date.now()}-${Math.floor(Math.random() * 1e6).toString(36)}`,
-    PostId: postId,
+    PostId: articleId /* child FK still uses logical PostId column; value is ArticleId */,
     FromState: from,
     ToState: to,
     Action: action,
@@ -144,7 +127,7 @@ function newHistoryRow(
 
 /* ── Component ──────────────────────────────────────────────── */
 
-type Tab = 'metadata' | 'banner' | 'content' | 'team' | 'gallery' | 'preview' | 'status';
+type Tab = 'metadata' | 'hero' | 'content' | 'team' | 'gallery' | 'preview' | 'status';
 
 export function ArticlePublisher({
   siteUrl,
@@ -172,10 +155,10 @@ export function ArticlePublisher({
   );
 
   const [filter, setFilter] = React.useState<WorkflowState>('draft');
-  const [posts, setPosts] = React.useState<readonly PublisherPostRow[]>([]);
-  const [postsLoading, setPostsLoading] = React.useState(false);
-  const [selectedPostId, setSelectedPostId] = React.useState<string | undefined>();
-  const [postDraft, setPostDraft] = React.useState<PublisherPostRow | undefined>();
+  const [articles, setArticles] = React.useState<readonly PublisherArticleRow[]>([]);
+  const [articlesLoading, setArticlesLoading] = React.useState(false);
+  const [selectedArticleId, setSelectedArticleId] = React.useState<string | undefined>();
+  const [articleDraft, setArticleDraft] = React.useState<PublisherArticleRow | undefined>();
   const [teamDraft, setTeamDraft] = React.useState<PublisherTeamMemberRow[]>([]);
   const [mediaDraft, setMediaDraft] = React.useState<PublisherMediaRow[]>([]);
   const [binding, setBinding] = React.useState<PublisherPageBindingRow | undefined>();
@@ -186,16 +169,15 @@ export function ArticlePublisher({
   const [preview, setPreview] = React.useState<PreviewOutcome | undefined>();
   const [previewLoading, setPreviewLoading] = React.useState(false);
 
-  // Load the post list for the current filter.
   const reloadList = React.useCallback(async () => {
-    setPostsLoading(true);
+    setArticlesLoading(true);
     try {
-      const rows = await repositories.posts.listByWorkflowState(filter);
-      setPosts(rows);
+      const rows = await repositories.articles.listByWorkflowState(filter);
+      setArticles(rows);
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Failed to load posts.');
+      setStatus(err instanceof Error ? err.message : 'Failed to load articles.');
     } finally {
-      setPostsLoading(false);
+      setArticlesLoading(false);
     }
   }, [repositories, filter]);
 
@@ -203,28 +185,27 @@ export function ArticlePublisher({
     void reloadList();
   }, [reloadList]);
 
-  // Load the selected post + child rows + binding + resolution context.
   const reloadSelected = React.useCallback(
-    async (postId: string) => {
+    async (articleId: string) => {
       setBusy(true);
       try {
-        const [post, team, media, bindingRow] = await Promise.all([
-          repositories.posts.getByPostId(postId),
-          repositories.teamMembers.listByPost(postId),
-          repositories.media.listByPost(postId),
-          repositories.pageBindings.getByPostId(postId),
+        const [article, team, media, bindingRow] = await Promise.all([
+          repositories.articles.getByArticleId(articleId),
+          repositories.teamMembers.listByPost(articleId),
+          repositories.media.listByPost(articleId),
+          repositories.pageBindings.getByPostId(articleId),
         ]);
-        if (post) {
-          setPostDraft(post);
+        if (article) {
+          setArticleDraft(article);
           setTeamDraft(team.slice());
           setMediaDraft(media.slice());
           setBinding(bindingRow);
-          const ctx = await buildPublishResolutionContext(repositories, postId);
+          const ctx = await buildPublishResolutionContext(repositories, articleId);
           setResolutionContext(ctx.ok ? ctx.context : undefined);
           setStatus(ctx.ok ? undefined : ctx.message);
         }
       } catch (err) {
-        setStatus(err instanceof Error ? err.message : 'Failed to load post.');
+        setStatus(err instanceof Error ? err.message : 'Failed to load article.');
       } finally {
         setBusy(false);
       }
@@ -233,14 +214,14 @@ export function ArticlePublisher({
   );
 
   React.useEffect(() => {
-    if (selectedPostId) void reloadSelected(selectedPostId);
-  }, [selectedPostId, reloadSelected]);
+    if (selectedArticleId) void reloadSelected(selectedArticleId);
+  }, [selectedArticleId, reloadSelected]);
 
   const loadPreview = React.useCallback(
-    async (postId: string) => {
+    async (articleId: string) => {
       setPreviewLoading(true);
       try {
-        const outcome = await buildPublisherPreview(repositories, postId);
+        const outcome = await buildPublisherPreview(repositories, articleId);
         setPreview(outcome);
       } catch (err) {
         setPreview(undefined);
@@ -253,51 +234,45 @@ export function ArticlePublisher({
   );
 
   React.useEffect(() => {
-    // Refresh the preview whenever the Preview tab opens or the selected
-    // post changes. `loadPreview` reads the latest repository + post data,
-    // so stale preview content after a Save is cleared on re-entry.
-    // `loadPreview` is intentionally omitted from the dependency list
-    // because it closes over the stable `repositories` memo; including it
-    // would re-run the preview on every render without a state change.
-    if (tab === 'preview' && selectedPostId) {
-      void loadPreview(selectedPostId);
+    if (tab === 'preview' && selectedArticleId) {
+      void loadPreview(selectedArticleId);
     }
-  }, [tab, selectedPostId, loadPreview]);
+  }, [tab, selectedArticleId, loadPreview]);
 
   const handleCreateNew = React.useCallback(() => {
-    const draft = emptyPost('ps-inprogress-monthly-v1', 'ps-shell-inprogress-oob-banner-team-gallery-v1');
-    setPostDraft(draft);
+    const draft = emptyArticle('ps-inprogress-monthly-v1');
+    setArticleDraft(draft);
     setTeamDraft([]);
     setMediaDraft([]);
     setBinding(undefined);
     setResolutionContext(undefined);
-    setSelectedPostId(draft.PostId);
+    setSelectedArticleId(draft.ArticleId);
     setTab('metadata');
   }, []);
 
   const handleSave = React.useCallback(async () => {
-    if (!postDraft) return;
+    if (!articleDraft) return;
     setBusy(true);
     setStatus('Saving…');
     try {
-      const updated = { ...postDraft, UpdatedDateUtc: nowIso() };
-      await repositories.posts.upsert(updated);
-      await repositories.teamMembers.replaceAllForPost(updated.PostId, teamDraft);
-      await repositories.media.replaceAllForPost(updated.PostId, mediaDraft);
+      const updated = { ...articleDraft, UpdatedDateUtc: nowIso() };
+      await repositories.articles.upsert(updated);
+      await repositories.teamMembers.replaceAllForPost(updated.ArticleId, teamDraft);
+      await repositories.media.replaceAllForPost(updated.ArticleId, mediaDraft);
       setStatus('Saved.');
       await reloadList();
-      await reloadSelected(updated.PostId);
+      await reloadSelected(updated.ArticleId);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Save failed.');
     } finally {
       setBusy(false);
     }
-  }, [postDraft, teamDraft, mediaDraft, repositories, reloadList, reloadSelected]);
+  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadList, reloadSelected]);
 
   const handleTransition = React.useCallback(
     async (to: WorkflowState) => {
-      if (!postDraft) return;
-      const from = postDraft.WorkflowState;
+      if (!articleDraft) return;
+      const from = articleDraft.WorkflowState;
       if (!canTransition(from, to)) {
         setStatus(`Cannot transition from ${from} to ${to}.`);
         return;
@@ -305,37 +280,37 @@ export function ArticlePublisher({
       setBusy(true);
       setStatus(`Transitioning to ${to}…`);
       try {
-        const updated: PublisherPostRow = {
-          ...postDraft,
+        const updated: PublisherArticleRow = {
+          ...articleDraft,
           WorkflowState: to,
           UpdatedDateUtc: nowIso(),
-          PublishedDateUtc: to === 'published' ? nowIso() : postDraft.PublishedDateUtc,
-          ArchiveDateUtc: to === 'archived' ? nowIso() : postDraft.ArchiveDateUtc,
+          PublishedDateUtc: to === 'published' ? nowIso() : articleDraft.PublishedDateUtc,
+          ArchiveDateUtc: to === 'archived' ? nowIso() : articleDraft.ArchiveDateUtc,
         };
-        await repositories.posts.upsert(updated);
+        await repositories.articles.upsert(updated);
         await repositories.workflowHistory.append(
-          newHistoryRow(updated.PostId, from, to, postDraft.AuthorEmail, undefined),
+          newHistoryRow(updated.ArticleId, from, to, articleDraft.AuthorEmail, undefined),
         );
         setStatus(`Now in ${to}.`);
         await reloadList();
-        await reloadSelected(updated.PostId);
+        await reloadSelected(updated.ArticleId);
       } catch (err) {
         setStatus(err instanceof Error ? err.message : 'Transition failed.');
       } finally {
         setBusy(false);
       }
     },
-    [postDraft, repositories, reloadList, reloadSelected],
+    [articleDraft, repositories, reloadList, reloadSelected],
   );
 
   const handlePublishAction = React.useCallback(
     async (mode: 'create' | 'republish' | 'preview') => {
-      if (!postDraft) return;
+      if (!articleDraft) return;
       setBusy(true);
       setStatus(`${mode === 'preview' ? 'Composing preview' : mode === 'create' ? 'Publishing' : 'Republishing'}…`);
       try {
         const outcome: PublishOutcome = await orchestrator.run({
-          postId: postDraft.PostId,
+          articleId: articleDraft.ArticleId,
           mode,
         });
         if (outcome.ok) {
@@ -344,7 +319,7 @@ export function ArticlePublisher({
               outcome.pageUrl ? ` · ${outcome.pageUrl}` : ''
             }`,
           );
-          if (mode !== 'preview') await reloadSelected(postDraft.PostId);
+          if (mode !== 'preview') await reloadSelected(articleDraft.ArticleId);
         } else {
           setStatus(`${mode} failed at ${outcome.stage}: ${outcome.message}`);
         }
@@ -354,10 +329,10 @@ export function ArticlePublisher({
         setBusy(false);
       }
     },
-    [postDraft, orchestrator, reloadSelected],
+    [articleDraft, orchestrator, reloadSelected],
   );
 
-  const validNextStates = postDraft ? validTransitionsFrom(postDraft.WorkflowState) : [];
+  const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
 
   const latestValidation =
     preview && preview.ok ? preview.validation : undefined;
@@ -371,15 +346,13 @@ export function ArticlePublisher({
       preview.drift.templateKeyDrift ||
       preview.drift.templateVersionDrift);
 
-  /* ── Rendering ──────────────────────────────────────────── */
-
   return (
     <div className={styles.shell}>
       <aside className={styles.listPane}>
         <header className={styles.listHeader}>
-          <div className={styles.listTitle}>Project Spotlight posts</div>
+          <div className={styles.listTitle}>HB Articles</div>
           <button type="button" className={styles.primaryBtn} onClick={handleCreateNew}>
-            New post
+            New article
           </button>
         </header>
         <label className={styles.filterLabel}>
@@ -396,27 +369,27 @@ export function ArticlePublisher({
             ))}
           </select>
         </label>
-        {postsLoading ? (
+        {articlesLoading ? (
           <HbcSpinner />
-        ) : posts.length === 0 ? (
+        ) : articles.length === 0 ? (
           <HbcEmptyState
-            title="No posts"
-            description={`No posts in state '${filter}' yet.`}
+            title="No articles"
+            description={`No articles in state '${filter}' yet.`}
           />
         ) : (
           <ul className={styles.postList}>
-            {posts.map((p) => (
-              <li key={p.PostId}>
+            {articles.map((a) => (
+              <li key={a.ArticleId}>
                 <button
                   type="button"
                   className={`${styles.postRow} ${
-                    p.PostId === selectedPostId ? styles.postRowActive : ''
+                    a.ArticleId === selectedArticleId ? styles.postRowActive : ''
                   }`}
-                  onClick={() => setSelectedPostId(p.PostId)}
+                  onClick={() => setSelectedArticleId(a.ArticleId)}
                 >
-                  <div className={styles.postRowTitle}>{p.Title}</div>
+                  <div className={styles.postRowTitle}>{a.Title}</div>
                   <div className={styles.postRowMeta}>
-                    {p.PostFamily} · {p.ProjectName || '(no project)'}
+                    {a.ArticleContentType} · {a.ProjectName || '(no project)'}
                   </div>
                 </button>
               </li>
@@ -426,17 +399,17 @@ export function ArticlePublisher({
       </aside>
 
       <main className={styles.editor}>
-        {!postDraft ? (
+        {!articleDraft ? (
           <HbcEmptyState
-            title="Select or create a post"
+            title="Select or create an article"
             description="Choose a row from the left, or start a new draft."
           />
         ) : (
           <>
             <header className={styles.editorHeader}>
-              <h2 className={styles.title}>{postDraft.Title || '(Untitled)'}</h2>
+              <h2 className={styles.title}>{articleDraft.Title || '(Untitled)'}</h2>
               <div className={styles.meta}>
-                <span className={styles.stateBadge}>{postDraft.WorkflowState}</span>
+                <span className={styles.stateBadge}>{articleDraft.WorkflowState}</span>
                 {binding && (
                   <span className={styles.bindingBadge}>binding {binding.BindingStatus}</span>
                 )}
@@ -444,7 +417,7 @@ export function ArticlePublisher({
             </header>
 
             <nav className={styles.tabs}>
-              {(['metadata', 'banner', 'content', 'team', 'gallery', 'preview', 'status'] as Tab[]).map((t) => (
+              {(['metadata', 'hero', 'content', 'team', 'gallery', 'preview', 'status'] as Tab[]).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -458,27 +431,24 @@ export function ArticlePublisher({
 
             <div className={styles.panel}>
               {tab === 'metadata' && (
-                <MetadataPanel
-                  draft={postDraft}
-                  onChange={setPostDraft}
-                />
+                <MetadataPanel draft={articleDraft} onChange={setArticleDraft} />
               )}
-              {tab === 'banner' && (
-                <BannerPanel draft={postDraft} onChange={setPostDraft} />
+              {tab === 'hero' && (
+                <HeroPanel draft={articleDraft} onChange={setArticleDraft} />
               )}
               {tab === 'content' && (
-                <ContentPanel draft={postDraft} onChange={setPostDraft} />
+                <ContentPanel draft={articleDraft} onChange={setArticleDraft} />
               )}
               {tab === 'team' && (
                 <TeamPanel
-                  postId={postDraft.PostId}
+                  articleId={articleDraft.ArticleId}
                   rows={teamDraft}
                   onChange={setTeamDraft}
                 />
               )}
               {tab === 'gallery' && (
                 <GalleryPanel
-                  postId={postDraft.PostId}
+                  articleId={articleDraft.ArticleId}
                   rows={mediaDraft}
                   onChange={setMediaDraft}
                 />
@@ -515,7 +485,7 @@ export function ArticlePublisher({
                 <button
                   type="button"
                   className={styles.btn}
-                  disabled={busy || postDraft.WorkflowState !== 'approved' || publishBlockedByValidation}
+                  disabled={busy || articleDraft.WorkflowState !== 'approved' || publishBlockedByValidation}
                   title={
                     publishBlockedByValidation && firstBlockingError
                       ? `Blocked by validation: ${firstBlockingError}`
@@ -563,15 +533,15 @@ export function ArticlePublisher({
 /* ── Sub-panels ──────────────────────────────────────────── */
 
 interface PanelProps {
-  draft: PublisherPostRow;
-  onChange: (next: PublisherPostRow) => void;
+  draft: PublisherArticleRow;
+  onChange: (next: PublisherArticleRow) => void;
 }
 
-function update<T extends keyof PublisherPostRow>(
-  draft: PublisherPostRow,
+function update<T extends keyof PublisherArticleRow>(
+  draft: PublisherArticleRow,
   key: T,
-  value: PublisherPostRow[T],
-): PublisherPostRow {
+  value: PublisherArticleRow[T],
+): PublisherArticleRow {
   return { ...draft, [key]: value };
 }
 
@@ -592,15 +562,30 @@ function MetadataPanel({ draft, onChange }: PanelProps) {
           onChange={(e) => onChange(update(draft, 'Slug', e.target.value))}
         />
       </Field>
-      <Field label="Post family">
+      <Field label="Article content type">
         <select
           className={styles.select}
-          value={draft.PostFamily}
+          value={draft.ArticleContentType}
           onChange={(e) =>
-            onChange(update(draft, 'PostFamily', e.target.value as PostFamily))
+            onChange(update(draft, 'ArticleContentType', e.target.value as ArticleContentType))
           }
         >
-          {POST_FAMILY_VALUES.map((v) => (
+          {ARTICLE_CONTENT_TYPE_VALUES.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Destination">
+        <select
+          className={styles.select}
+          value={draft.Destination}
+          onChange={(e) =>
+            onChange(update(draft, 'Destination', e.target.value as Destination))
+          }
+        >
+          {DESTINATION_VALUES.map((v) => (
             <option key={v} value={v}>
               {v}
             </option>
@@ -676,15 +661,15 @@ function MetadataPanel({ draft, onChange }: PanelProps) {
       <Field label="Project ID">
         <input
           className={styles.input}
-          value={draft.ProjectId}
-          onChange={(e) => onChange(update(draft, 'ProjectId', e.target.value))}
+          value={draft.ProjectId ?? ''}
+          onChange={(e) => onChange(update(draft, 'ProjectId', e.target.value || undefined))}
         />
       </Field>
       <Field label="Project name">
         <input
           className={styles.input}
-          value={draft.ProjectName}
-          onChange={(e) => onChange(update(draft, 'ProjectName', e.target.value))}
+          value={draft.ProjectName ?? ''}
+          onChange={(e) => onChange(update(draft, 'ProjectName', e.target.value || undefined))}
         />
       </Field>
       <Field label="Summary excerpt">
@@ -698,73 +683,75 @@ function MetadataPanel({ draft, onChange }: PanelProps) {
   );
 }
 
-function BannerPanel({ draft, onChange }: PanelProps) {
+function HeroPanel({ draft, onChange }: PanelProps) {
   return (
     <div className={styles.form}>
-      <Field label="Banner image URL (required)">
+      <Field label="Hero primary image URL (required)">
         <input
           className={styles.input}
-          value={draft.BannerImageUrl}
-          onChange={(e) => onChange(update(draft, 'BannerImageUrl', e.target.value))}
+          value={draft.HeroPrimaryImage}
+          onChange={(e) => onChange(update(draft, 'HeroPrimaryImage', e.target.value))}
         />
       </Field>
-      <Field label="Banner alt text (required)">
+      <Field label="Hero primary image alt text (required)">
         <textarea
           className={styles.textarea}
-          value={draft.BannerImageAltText}
-          onChange={(e) => onChange(update(draft, 'BannerImageAltText', e.target.value))}
+          value={draft.HeroPrimaryImageAltText}
+          onChange={(e) => onChange(update(draft, 'HeroPrimaryImageAltText', e.target.value))}
         />
       </Field>
-      <Field label="Banner title override">
+      <Field label="Hero title override">
         <input
           className={styles.input}
-          value={draft.BannerTitleOverride ?? ''}
+          value={draft.HeroTitle ?? ''}
           onChange={(e) =>
-            onChange(update(draft, 'BannerTitleOverride', e.target.value || undefined))
+            onChange(update(draft, 'HeroTitle', e.target.value || undefined))
           }
         />
       </Field>
-      <Field label="Eyebrow">
+      <Field label="Hero eyebrow">
         <input
           className={styles.input}
-          value={draft.BannerEyebrow ?? ''}
-          onChange={(e) => onChange(update(draft, 'BannerEyebrow', e.target.value || undefined))}
+          value={draft.HeroEyebrow ?? ''}
+          onChange={(e) => onChange(update(draft, 'HeroEyebrow', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Theme variant">
+      <Field label="Hero category label">
+        <input
+          className={styles.input}
+          value={draft.HeroCategoryLabel ?? ''}
+          onChange={(e) =>
+            onChange(update(draft, 'HeroCategoryLabel', e.target.value || undefined))
+          }
+        />
+      </Field>
+      <Field label="Hero theme variant">
         <select
           className={styles.select}
-          value={draft.BannerThemeVariant ?? ''}
+          value={draft.HeroThemeVariant ?? ''}
           onChange={(e) =>
             onChange(
               update(
                 draft,
-                'BannerThemeVariant',
-                (e.target.value || undefined) as BannerThemeVariant | undefined,
+                'HeroThemeVariant',
+                (e.target.value || undefined) as HeroThemeVariant | undefined,
               ),
             )
           }
         >
           <option value="">(default)</option>
-          {BANNER_THEME_VARIANT_VALUES.map((v) => (
+          {HERO_THEME_VARIANT_VALUES.map((v) => (
             <option key={v} value={v}>
               {v}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Show publish date">
+      <Field label="Show hero metadata">
         <input
           type="checkbox"
-          checked={!!draft.BannerShowPublishDate}
-          onChange={(e) => onChange(update(draft, 'BannerShowPublishDate', e.target.checked))}
-        />
-      </Field>
-      <Field label="Show gradient">
-        <input
-          type="checkbox"
-          checked={!!draft.BannerShowGradient}
-          onChange={(e) => onChange(update(draft, 'BannerShowGradient', e.target.checked))}
+          checked={!!draft.HeroShowMetadata}
+          onChange={(e) => onChange(update(draft, 'HeroShowMetadata', e.target.checked))}
         />
       </Field>
     </div>
@@ -788,64 +775,29 @@ function ContentPanel({ draft, onChange }: PanelProps) {
           onChange={(e) => onChange(update(draft, 'BodyRichText', e.target.value))}
         />
       </Field>
-      <Field label="Team section heading">
+      <Field label="Team viewer title">
         <input
           className={styles.input}
-          value={draft.TeamSectionHeading ?? ''}
+          value={draft.TeamViewerTitle ?? ''}
           onChange={(e) =>
-            onChange(update(draft, 'TeamSectionHeading', e.target.value || undefined))
+            onChange(update(draft, 'TeamViewerTitle', e.target.value || undefined))
           }
         />
       </Field>
-      <Field label="Team layout">
-        <select
-          className={styles.select}
-          value={draft.TeamViewerLayout ?? ''}
+      <Field label="Team viewer intro">
+        <textarea
+          className={styles.textarea}
+          value={draft.TeamViewerIntro ?? ''}
           onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'TeamViewerLayout',
-                (e.target.value || undefined) as TeamViewerLayout | undefined,
-              ),
-            )
+            onChange(update(draft, 'TeamViewerIntro', e.target.value || undefined))
           }
-        >
-          <option value="">(default)</option>
-          {TEAM_VIEWER_LAYOUT_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
+        />
       </Field>
-      <Field label="Team density">
-        <select
-          className={styles.select}
-          value={draft.TeamViewerDensity ?? ''}
-          onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'TeamViewerDensity',
-                (e.target.value || undefined) as TeamViewerDensity | undefined,
-              ),
-            )
-          }
-        >
-          <option value="">(default)</option>
-          {TEAM_VIEWER_DENSITY_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Show gallery">
+      <Field label="Show team viewer">
         <input
           type="checkbox"
-          checked={draft.ShowGallery !== false}
-          onChange={(e) => onChange(update(draft, 'ShowGallery', e.target.checked))}
+          checked={draft.ShowTeamViewer !== false}
+          onChange={(e) => onChange(update(draft, 'ShowTeamViewer', e.target.checked))}
         />
       </Field>
     </div>
@@ -853,11 +805,11 @@ function ContentPanel({ draft, onChange }: PanelProps) {
 }
 
 function TeamPanel({
-  postId,
+  articleId,
   rows,
   onChange,
 }: {
-  postId: string;
+  articleId: string;
   rows: PublisherTeamMemberRow[];
   onChange: (next: PublisherTeamMemberRow[]) => void;
 }) {
@@ -865,7 +817,7 @@ function TeamPanel({
     onChange([
       ...rows,
       {
-        PostId: postId,
+        PostId: articleId /* child FK still uses logical PostId column; value is ArticleId */,
         TeamMemberId: `tm-${Date.now()}-${rows.length}`,
         PersonPrincipal: '',
         DisplayName: '',
@@ -931,15 +883,9 @@ function TeamPanel({
               </Field>
             </div>
             <div className={styles.rowActions}>
-              <button type="button" className={styles.btn} onClick={() => move(i, -1)}>
-                ↑
-              </button>
-              <button type="button" className={styles.btn} onClick={() => move(i, 1)}>
-                ↓
-              </button>
-              <button type="button" className={styles.btn} onClick={() => removeAt(i)}>
-                Remove
-              </button>
+              <button type="button" className={styles.btn} onClick={() => move(i, -1)}>↑</button>
+              <button type="button" className={styles.btn} onClick={() => move(i, 1)}>↓</button>
+              <button type="button" className={styles.btn} onClick={() => removeAt(i)}>Remove</button>
             </div>
           </div>
         ))
@@ -949,11 +895,11 @@ function TeamPanel({
 }
 
 function GalleryPanel({
-  postId,
+  articleId,
   rows,
   onChange,
 }: {
-  postId: string;
+  articleId: string;
   rows: PublisherMediaRow[];
   onChange: (next: PublisherMediaRow[]) => void;
 }) {
@@ -961,7 +907,7 @@ function GalleryPanel({
     onChange([
       ...rows,
       {
-        PostId: postId,
+        PostId: articleId /* child FK still uses logical PostId column; value is ArticleId */,
         MediaId: `m-${Date.now()}-${rows.length}`,
         MediaRole: 'gallery',
         ImageAssetUrl: '',
@@ -1026,15 +972,9 @@ function GalleryPanel({
               </Field>
             </div>
             <div className={styles.rowActions}>
-              <button type="button" className={styles.btn} onClick={() => move(i, -1)}>
-                ↑
-              </button>
-              <button type="button" className={styles.btn} onClick={() => move(i, 1)}>
-                ↓
-              </button>
-              <button type="button" className={styles.btn} onClick={() => removeAt(i)}>
-                Remove
-              </button>
+              <button type="button" className={styles.btn} onClick={() => move(i, -1)}>↑</button>
+              <button type="button" className={styles.btn} onClick={() => move(i, 1)}>↓</button>
+              <button type="button" className={styles.btn} onClick={() => removeAt(i)}>Remove</button>
             </div>
           </div>
         ))
@@ -1057,7 +997,7 @@ function StatusPanel({
         {!context ? (
           <HbcEmptyState
             title="Not yet resolved"
-            description="Save the post so the template registry can resolve it."
+            description="Save the article so the template registry can resolve it."
           />
         ) : (
           <dl className={styles.dl}>
@@ -1080,7 +1020,7 @@ function StatusPanel({
         {!binding ? (
           <HbcEmptyState
             title="No binding yet"
-            description="Publish this post to create a durable page binding."
+            description="Publish this article to create a durable page binding."
           />
         ) : (
           <dl className={styles.dl}>

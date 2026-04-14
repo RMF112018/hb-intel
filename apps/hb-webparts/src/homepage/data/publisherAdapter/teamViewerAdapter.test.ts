@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type {
-  PublisherPostRow,
+  PublisherArticleRow,
   PublisherTeamMemberRow,
 } from './publisherContracts';
 import {
@@ -12,30 +12,26 @@ import {
   TEAM_VIEWER_DEFAULT_HEADING,
 } from './teamViewerAdapter';
 
-function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    PostId: 'post-tv-1',
+    ArticleId: 'post-tv-1',
     Title: 'T',
     Subhead: 'S',
     SummaryExcerpt: 'x',
     BodyRichText: 'y',
-    PostFamily: 'monthlySpotlight',
+    ArticleContentType: 'monthlySpotlight',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     Slug: 'post-tv-1',
     WorkflowState: 'approved',
     CreatedDateUtc: '2026-04-10T00:00:00Z',
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
     ProjectId: 'PRJ-1',
     ProjectName: 'Project',
-    BannerImageUrl: 'https://img/x.jpg',
-    BannerImageAltText: 'alt',
+    HeroPrimaryImage: 'https://img/x.jpg',
+    HeroPrimaryImageAltText: 'alt',
     TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
-    SourceTemplatePath:
-      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
     ...over,
-  };
+  } as PublisherArticleRow;
 }
 
 function member(
@@ -55,10 +51,6 @@ describe('buildTeamViewerProperties', () => {
   it('emits the exact property contract the Project Spotlight shell expects', () => {
     const props = buildTeamViewerProperties(
       post({
-        TeamSectionHeading: 'Project Team',
-        TeamViewerLayout: 'list',
-        TeamViewerDensity: 'compact',
-        TeamViewerEnableProfileDrawer: true,
       }),
     );
     expect(props).toEqual({

@@ -14,8 +14,8 @@
 
 import { fetchRequestDigest } from '@hbc/sharepoint-platform';
 import type {
+  PublisherArticleRow,
   PublisherMediaRow,
-  PublisherPostRow,
   PublisherTeamMemberRow,
   PublisherWorkflowHistoryRow,
 } from './publisherContracts';
@@ -158,92 +158,105 @@ async function mergeItem(
   }
 }
 
-/* ── Post upsert ──────────────────────────────────────────────── */
+/* ── HB Articles master upsert ────────────────────────────────── */
 
-export function mapPostRowToListFields(
-  row: PublisherPostRow,
+export function mapArticleRowToListFields(
+  row: PublisherArticleRow,
 ): Record<string, unknown> {
   return {
-    PostId: row.PostId,
+    ArticleId: row.ArticleId,
     Title: row.Title,
-    BannerTitleOverride: nullIfEmpty(row.BannerTitleOverride),
+    ArticleContentType: row.ArticleContentType,
+    Destination: row.Destination,
+    Slug: row.Slug,
+    TemplateKey: row.TemplateKey,
+    WorkflowState: row.WorkflowState,
     Subhead: row.Subhead,
     SummaryExcerpt: row.SummaryExcerpt,
     BodyRichText: row.BodyRichText,
-    PostFamily: row.PostFamily,
+    BodyIntro: nullIfEmpty(row.BodyIntro),
+    BodyClosing: nullIfEmpty(row.BodyClosing),
+    CalloutText: nullIfEmpty(row.CalloutText),
+    PullQuote: nullIfEmpty(row.PullQuote),
     SpotlightType: nullIfEmpty(row.SpotlightType),
     ProjectStage: nullIfEmpty(row.ProjectStage),
     ArticleSubject: nullIfEmpty(row.ArticleSubject),
-    TemplateKey: row.TemplateKey,
-    PageShellKey: row.PageShellKey,
-    Slug: row.Slug,
-    WorkflowState: row.WorkflowState,
     AuthorEmail: nullIfEmpty(row.AuthorEmail),
     AuthorDisplayName: nullIfEmpty(row.AuthorDisplayName),
     CreatedDateUtc: row.CreatedDateUtc,
     UpdatedDateUtc: row.UpdatedDateUtc,
     PublishedDateUtc: nullIfEmpty(row.PublishedDateUtc),
+    PublishedByEmail: nullIfEmpty(row.PublishedByEmail),
     ScheduledPublishDateUtc: nullIfEmpty(row.ScheduledPublishDateUtc),
     ArchiveDateUtc: nullIfEmpty(row.ArchiveDateUtc),
-    ProjectId: row.ProjectId,
-    ProjectName: row.ProjectName,
+    ProjectId: nullIfEmpty(row.ProjectId),
+    ProjectName: nullIfEmpty(row.ProjectName),
     ProjectLocation: nullIfEmpty(row.ProjectLocation),
     ProjectSector: nullIfEmpty(row.ProjectSector),
-    BannerImageUrl: { Url: row.BannerImageUrl, Description: row.BannerImageUrl },
-    BannerImageAltText: row.BannerImageAltText,
-    BannerEyebrow: nullIfEmpty(row.BannerEyebrow),
-    BannerCategoryLabel: nullIfEmpty(row.BannerCategoryLabel),
-    BannerThemeVariant: nullIfEmpty(row.BannerThemeVariant),
-    BannerShowPublishDate: row.BannerShowPublishDate ?? null,
-    BannerShowGradient: row.BannerShowGradient ?? null,
-    HeroRendererKind: nullIfEmpty(row.HeroRendererKind),
+    ProjectStatusLabel: nullIfEmpty(row.ProjectStatusLabel),
+    HeroPrimaryImage: {
+      Url: row.HeroPrimaryImage,
+      Description: row.HeroPrimaryImage,
+    },
+    HeroPrimaryImageAltText: row.HeroPrimaryImageAltText,
+    HeroTitle: nullIfEmpty(row.HeroTitle),
+    HeroSubhead: nullIfEmpty(row.HeroSubhead),
+    HeroEyebrow: nullIfEmpty(row.HeroEyebrow),
+    HeroCategoryLabel: nullIfEmpty(row.HeroCategoryLabel),
+    HeroThemeVariant: nullIfEmpty(row.HeroThemeVariant),
+    HeroShowMetadata: row.HeroShowMetadata ?? null,
+    HeroMetadataMode: nullIfEmpty(row.HeroMetadataMode),
+    HeroCtaLabel: nullIfEmpty(row.HeroCtaLabel),
+    HeroCtaUrl: row.HeroCtaUrl
+      ? { Url: row.HeroCtaUrl, Description: row.HeroCtaUrl }
+      : null,
     ShowTeamViewer: row.ShowTeamViewer ?? null,
-    TeamSectionHeading: nullIfEmpty(row.TeamSectionHeading),
-    TeamViewerLayout: nullIfEmpty(row.TeamViewerLayout),
-    TeamViewerDensity: nullIfEmpty(row.TeamViewerDensity),
-    TeamViewerEnableProfileDrawer: row.TeamViewerEnableProfileDrawer ?? null,
-    ShowGallery: row.ShowGallery ?? null,
-    GalleryLayoutProfile: nullIfEmpty(row.GalleryLayoutProfile),
+    TeamViewerTitle: nullIfEmpty(row.TeamViewerTitle),
+    TeamViewerIntro: nullIfEmpty(row.TeamViewerIntro),
     IsFeatured: row.IsFeatured ?? null,
     FeaturedRank: row.FeaturedRank ?? null,
     IsPinned: row.IsPinned ?? null,
     PinRank: row.PinRank ?? null,
-    IncludeInProjectSpotlightRollups: row.IncludeInProjectSpotlightRollups ?? null,
     IncludeInArchive: row.IncludeInArchive ?? null,
-    TargetSiteUrl: row.TargetSiteUrl,
-    TargetSiteKey: row.TargetSiteKey,
-    GeneratedPageName: nullIfEmpty(row.GeneratedPageName),
-    PageUrl: row.PageUrl ? { Url: row.PageUrl, Description: row.PageUrl } : null,
+    IncludeInDestinationLanding: row.IncludeInDestinationLanding ?? null,
+    IncludeInHomepageFeed: row.IncludeInHomepageFeed ?? null,
+    SuppressFromRollups: row.SuppressFromRollups ?? null,
+    ManualSortOverride: row.ManualSortOverride ?? null,
+    TargetSiteUrl: nullIfEmpty(row.TargetSiteUrl),
+    PageTemplateKey: nullIfEmpty(row.PageTemplateKey),
+    PageShellVersion: nullIfEmpty(row.PageShellVersion),
+    RenderVersion: nullIfEmpty(row.RenderVersion),
     PageId: nullIfEmpty(row.PageId),
-    SourceTemplatePath: row.SourceTemplatePath,
-    AppliedTemplateVersion: nullIfEmpty(row.AppliedTemplateVersion),
-    AppliedShellVersion: nullIfEmpty(row.AppliedShellVersion),
-    LastPageSyncDateUtc: nullIfEmpty(row.LastPageSyncDateUtc),
+    PageName: nullIfEmpty(row.PageName),
+    PageUrl: row.PageUrl ? { Url: row.PageUrl, Description: row.PageUrl } : null,
     PageSyncStatus: nullIfEmpty(row.PageSyncStatus),
-    LastSuccessfulPublishDateUtc: nullIfEmpty(row.LastSuccessfulPublishDateUtc),
+    LastPageSyncDateUtc: nullIfEmpty(row.LastPageSyncDateUtc),
+    TemplateOverrideAllowed: row.TemplateOverrideAllowed ?? null,
   };
 }
 
-export interface PostWriter {
-  upsert(row: PublisherPostRow): Promise<{ readonly wasCreated: boolean; readonly itemId: number }>;
+export interface ArticleWriter {
+  upsert(
+    row: PublisherArticleRow,
+  ): Promise<{ readonly wasCreated: boolean; readonly itemId: number }>;
 }
 
-export function createSharePointPostWriter(deps: {
+export function createSharePointArticleWriter(deps: {
   descriptor?: PublisherListDescriptor;
   fetchImpl?: FetchImpl;
   fetchRequestDigestImpl?: DigestImpl;
-} = {}): PostWriter {
+} = {}): ArticleWriter {
   const descriptor = deps.descriptor ?? PUBLISHER_LISTS.posts;
   const fetchImpl = deps.fetchImpl ?? fetch;
   const digestImpl = deps.fetchRequestDigestImpl ?? fetchRequestDigest;
   return {
     async upsert(row) {
       const digest = await digestImpl(descriptor.hostSiteUrl);
-      const body = mapPostRowToListFields(row);
+      const body = mapArticleRowToListFields(row);
       const existing = await findItemIdByField(
         descriptor,
-        'PostId',
-        row.PostId,
+        'ArticleId',
+        row.ArticleId,
         fetchImpl,
       );
       if (existing !== undefined) {

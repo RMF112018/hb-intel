@@ -20,7 +20,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type {
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
+  PublisherArticleRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from '../publisherContracts';
@@ -30,33 +30,32 @@ import type { PageCreationService } from '../pageGeneration/pageCreationService'
 import { createPageShellService } from '../pageGeneration/pageShellService';
 import { createPublishOrchestrator } from '../publishOrchestrator';
 
-function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    PostId: 'post-e2e',
+    ArticleId: 'post-e2e',
     Title: 'E2E Post',
     Subhead: 'End-to-end subhead',
     SummaryExcerpt: 'Short summary.',
     BodyRichText: '<p>Full body.</p>',
     PostFamily: 'monthlySpotlight',
-    SpotlightType: 'inProgress',
-    ProjectStage: 'inProgress',
+    SpotlightType: 'monthly',
+    ProjectStage: 'active',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     Slug: 'e2e-post',
     WorkflowState: 'approved',
     CreatedDateUtc: '2026-04-13T00:00:00Z',
     UpdatedDateUtc: '2026-04-13T00:00:00Z',
     ProjectId: 'PRJ-42',
     ProjectName: 'Project Forty-Two',
-    BannerImageUrl: 'https://img.example/banner.jpg',
-    BannerImageAltText: 'Aerial shot',
+    HeroPrimaryImage: 'https://img.example/banner.jpg',
+    HeroPrimaryImageAltText: 'Aerial shot',
     TargetSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
+    Destination: 'projectSpotlight',
     SourceTemplatePath:
       'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
     ...over,
-  };
+  } as PublisherArticleRow;
 }
 
 function tpl(
@@ -67,7 +66,6 @@ function tpl(
     TemplateDisplayName: 'PS Monthly',
     TemplateStatus: 'active',
     TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     PageShellVersion: '1.0.0',
     ShellSourceSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
@@ -86,7 +84,7 @@ function tpl(
     AllowRepublishInPlace: true,
     ForceRegenerationOnShellChange: false,
     ...over,
-  };
+  } as PublisherTemplateRegistryRow;
 }
 
 function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
@@ -119,7 +117,7 @@ interface Fx {
 }
 
 function fixture(over: {
-  post?: Partial<PublisherPostRow>;
+  post?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   teamMembers?: readonly PublisherTeamMemberRow[];
   media?: readonly PublisherMediaRow[];
@@ -143,8 +141,8 @@ function fixture(over: {
     itemId: 77,
   }));
   const repositories: PublisherRepositories = {
-    posts: {
-      getByPostId: vi.fn(async () => p),
+    articles: {
+      getByArticleId: vi.fn(async () => p),
       listByWorkflowState: vi.fn(async () => [p]),
       upsert: vi.fn(async () => ({ wasCreated: false, itemId: 42 })),
     },
@@ -198,7 +196,7 @@ describe('publisher end-to-end', () => {
   it('publishes a valid post and writes a binding row with the composed identity', async () => {
     const f = fixture();
     const result = await orch(f).run({
-      postId: 'post-e2e',
+      articleId: 'post-e2e',
       mode: 'create',
       now: () => '2026-04-13T12:00:00.000Z',
       generateBindingId: () => 'bnd-e2e-0001',
@@ -241,13 +239,13 @@ describe('publisher end-to-end', () => {
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageId: 'page-1001',
       PageName: 'e2e-post.aspx',
       PageUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight/SitePages/e2e-post.aspx',
       SourceTemplatePath:
         'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
       PageShellVersion: '1.0.0',
       TemplateKey: 'ps-inprogress-monthly-v1',
       TemplateVersion: '1.0.0',
@@ -255,7 +253,7 @@ describe('publisher end-to-end', () => {
     };
     const f = fixture({ existingBinding: existing });
     const result = await orch(f).run({
-      postId: 'post-e2e',
+      articleId: 'post-e2e',
       mode: 'republish',
       now: () => '2026-04-13T12:05:00.000Z',
     });
@@ -270,7 +268,7 @@ describe('publisher end-to-end', () => {
 
   it('blocks publish when content validation fails (missing Title) and writes nothing', async () => {
     const f = fixture({ post: { Title: '' } });
-    const result = await orch(f).run({ postId: 'post-e2e', mode: 'create' });
+    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('validation');
@@ -283,7 +281,7 @@ describe('publisher end-to-end', () => {
     const f = fixture({
       media: [gallery('g1', { AltText: '' })],
     });
-    const result = await orch(f).run({ postId: 'post-e2e', mode: 'create' });
+    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'create' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('validation');
@@ -305,17 +303,17 @@ describe('publisher end-to-end', () => {
       TargetSiteUrl:
         'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
       TargetSiteKey: 'projectSpotlight',
+      PageShellKey: 'ps-shell-v1',
       PageName: 'e2e-post.aspx',
       SourceTemplatePath:
         'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-      PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
       PageShellVersion: '1.0.0',
       TemplateKey: 'ps-inprogress-monthly-v1',
       TemplateVersion: '1.0.0',
       BindingStatus: 'archived',
     };
     const f = fixture({ existingBinding: existing });
-    const result = await orch(f).run({ postId: 'post-e2e', mode: 'republish' });
+    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'republish' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('policy');
@@ -326,7 +324,7 @@ describe('publisher end-to-end', () => {
 
   it('preview returns a structurally complete composition with validation attached, no writes', async () => {
     const f = fixture();
-    const result = await orch(f).run({ postId: 'post-e2e', mode: 'preview' });
+    const result = await orch(f).run({ articleId: 'post-e2e', mode: 'preview' });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.page.controls.map((c) => c.slot)).toEqual([

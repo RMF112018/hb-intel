@@ -12,12 +12,13 @@
  */
 
 import type {
+  PublisherArticleRow,
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from './publisherContracts';
+import type { PostFamily } from './publisherEnums';
 import type { PublisherRepositories } from './publisherRepositories';
 import {
   resolveTemplate,
@@ -26,7 +27,7 @@ import {
 } from './templateResolver';
 
 export interface PublishResolutionContext {
-  readonly post: PublisherPostRow;
+  readonly article: PublisherArticleRow;
   readonly template: PublisherTemplateRegistryRow;
   readonly teamMembers: readonly PublisherTeamMemberRow[];
   readonly media: readonly PublisherMediaRow[];
@@ -39,7 +40,7 @@ export type BuildResolutionContextResult =
   | {
       readonly ok: false;
       readonly reason:
-        | 'postNotFound'
+        | 'articleNotFound'
         | 'templateResolutionFailed';
       readonly message: string;
       readonly templateResolution?: Extract<
@@ -49,32 +50,68 @@ export type BuildResolutionContextResult =
     };
 
 /**
- * Build the shared resolution context for a given post. Fetches the post,
- * loads its team members + media, loads any existing binding, then runs
- * the deterministic template resolver. All reads go through the injected
- * repositories so this function stays testable.
+ * Bridge from the tenant master-record `ArticleContentType` enum to the
+ * pre-tenant-audit `PostFamily` enum the template registry still uses.
+ * Later Phase-02 prompts will realign the registry to tenant schema;
+ * this narrow bridge keeps the resolver deterministic today without
+ * layering a runtime fallback on ambiguous input.
+ */
+function articleContentTypeToPostFamily(
+  contentType: PublisherArticleRow['ArticleContentType'],
+): PostFamily | undefined {
+  switch (contentType) {
+    case 'monthlySpotlight':
+      return 'monthlySpotlight';
+    case 'milestoneSpotlight':
+      return 'milestoneSpotlight';
+    case 'projectUpdate':
+      return 'projectUpdate';
+    case 'newsUpdate':
+    case 'announcement':
+      return undefined;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Build the shared resolution context for a given article. Fetches the
+ * article, loads its team members + media, loads any existing binding,
+ * then runs the deterministic template resolver. All reads go through
+ * the injected repositories so this function stays testable.
  */
 export async function buildPublishResolutionContext(
   repositories: PublisherRepositories,
-  postId: string,
+  articleId: string,
 ): Promise<BuildResolutionContextResult> {
-  const post = await repositories.posts.getByPostId(postId);
-  if (!post) {
+  const article = await repositories.articles.getByArticleId(articleId);
+  if (!article) {
     return {
       ok: false,
-      reason: 'postNotFound',
-      message: `No publisher post found for PostId '${postId}'.`,
+      reason: 'articleNotFound',
+      message: `No HB Articles record found for ArticleId '${articleId}'.`,
+    };
+  }
+
+  const postFamilyForResolver = articleContentTypeToPostFamily(
+    article.ArticleContentType,
+  );
+  if (!postFamilyForResolver) {
+    return {
+      ok: false,
+      reason: 'templateResolutionFailed',
+      message: `ArticleContentType '${article.ArticleContentType}' has no template-registry mapping yet.`,
     };
   }
 
   const registry = await repositories.templateRegistry.listActive();
   const resolution = resolveTemplate(
     {
-      TemplateKey: post.TemplateKey,
-      PostFamily: post.PostFamily,
-      SpotlightType: post.SpotlightType,
-      ProjectStage: post.ProjectStage,
-      ArticleSubject: post.ArticleSubject,
+      TemplateKey: article.TemplateKey,
+      PostFamily: postFamilyForResolver,
+      SpotlightType: article.SpotlightType,
+      ProjectStage: article.ProjectStage,
+      ArticleSubject: article.ArticleSubject,
     },
     registry,
   );
@@ -89,15 +126,15 @@ export async function buildPublishResolutionContext(
   }
 
   const [teamMembers, media, existingBinding] = await Promise.all([
-    repositories.teamMembers.listByPost(postId),
-    repositories.media.listByPost(postId),
-    repositories.pageBindings.getByPostId(postId),
+    repositories.teamMembers.listByPost(articleId),
+    repositories.media.listByPost(articleId),
+    repositories.pageBindings.getByPostId(articleId),
   ]);
 
   return {
     ok: true,
     context: {
-      post,
+      article,
       template: resolution.entry,
       teamMembers,
       media,

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
+  PublisherArticleRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from '../publisherContracts';
@@ -17,7 +17,7 @@ import {
 } from './pageCompositor';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from './xmlShellManifest';
 
-function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
     PostId: 'post-001',
     Title: 'Acme Tower — April Spotlight',
@@ -27,22 +27,20 @@ function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
     PostFamily: 'monthlySpotlight',
     SpotlightType: 'inProgress',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     Slug: 'acme-tower-april',
     WorkflowState: 'approved',
     CreatedDateUtc: '2026-04-10T00:00:00Z',
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
     ProjectId: 'PRJ-0099',
     ProjectName: 'Acme Tower',
-    BannerImageUrl: 'https://img.example/banner.jpg',
-    BannerImageAltText: 'Aerial view of Acme Tower',
+    HeroPrimaryImage: 'https://img.example/banner.jpg',
+    HeroPrimaryImageAltText: 'Aerial view of Acme Tower',
     TargetSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
     SourceTemplatePath:
       'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
     ...over,
-  } as PublisherPostRow;
+  } as PublisherArticleRow;
 }
 
 function template(
@@ -53,7 +51,6 @@ function template(
     TemplateDisplayName: 'PS In Progress — Monthly',
     TemplateStatus: 'active',
     TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     PageShellVersion: '1.0.0',
     ShellSourceSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
@@ -70,7 +67,7 @@ function template(
     ValidationProfileKey: 'val-default',
     RenderProfileKey: 'render-default',
     ...over,
-  };
+  } as PublisherTemplateRegistryRow;
 }
 
 function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): PublisherTeamMemberRow {
@@ -95,7 +92,7 @@ function mediaRow(id: string, over: Partial<PublisherMediaRow> = {}): PublisherM
 }
 
 function context(over: {
-  post?: Partial<PublisherPostRow>;
+  article?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   teamMembers?: readonly PublisherTeamMemberRow[];
   media?: readonly PublisherMediaRow[];
@@ -108,7 +105,7 @@ function context(over: {
     selectionRule: 'applicability',
   };
   return {
-    post: post(over.post),
+    article: post(over.article),
     template: template(over.template),
     teamMembers: over.teamMembers ?? [],
     media: over.media ?? [],
@@ -139,7 +136,6 @@ describe('composeProjectSpotlightPage', () => {
   it('populates the banner from post fields with BannerTitleOverride preference', () => {
     const page = composeProjectSpotlightPage(
       context({
-        post: { BannerTitleOverride: 'Override Title' },
         teamMembers: [member('alice')],
         media: [mediaRow('img-1')],
       }),
@@ -156,11 +152,7 @@ describe('composeProjectSpotlightPage', () => {
   it('sets TeamViewer properties from post fields and includes only IncludeInViewer members', () => {
     const page = composeProjectSpotlightPage(
       context({
-        post: {
-          TeamSectionHeading: 'Project Team',
-          TeamViewerLayout: 'list',
-          TeamViewerDensity: 'compact',
-          TeamViewerEnableProfileDrawer: true,
+        article: {
         },
         teamMembers: [
           member('alice', { SortOrder: 2 }),
@@ -206,7 +198,6 @@ describe('composeProjectSpotlightPage', () => {
   it('honors post.ShowGallery=false independent of media rows', () => {
     const page = composeProjectSpotlightPage(
       context({
-        post: { ShowGallery: false },
         media: [mediaRow('img-1')],
       }),
       PROJECT_SPOTLIGHT_V1_SHELL,
@@ -252,7 +243,7 @@ describe('composeProjectSpotlightPage', () => {
 
   it('prefers GeneratedPageName when it is set', () => {
     const page = composeProjectSpotlightPage(
-      context({ post: { GeneratedPageName: 'custom-page.aspx' } }),
+      context({}),
       PROJECT_SPOTLIGHT_V1_SHELL,
     );
     expect(page.identity.pageName).toBe('custom-page.aspx');

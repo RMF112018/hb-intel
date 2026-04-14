@@ -45,14 +45,14 @@ import { PROJECT_SPOTLIGHT_V1_SHELL, type PageShellManifest } from './pageGenera
 export type PublishMode = 'create' | 'republish' | 'preview';
 
 export interface PublishRequest {
-  readonly postId: string;
+  readonly articleId: string;
   readonly mode: PublishMode;
   /** Optional: when true, unchanged content + versions short-circuits to `noOp`. */
   readonly idempotent?: boolean;
   /** Caller-controlled clock; deterministic for tests. */
   readonly now?: () => string;
-  /** Caller-supplied BindingId factory for new rows; default = `bnd-${PostId}-${timestamp}`. */
-  readonly generateBindingId?: (postId: string, nowIso: string) => string;
+  /** Caller-supplied BindingId factory for new rows; default = `bnd-${ArticleId}-${timestamp}`. */
+  readonly generateBindingId?: (articleId: string, nowIso: string) => string;
   /**
    * When `true` (default), the orchestrator runs `validatePublishContext`
    * between composition and the republish policy for create/republish
@@ -109,8 +109,8 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     return new Date().toISOString();
   }
 
-  function defaultBindingId(postId: string, nowIso: string): string {
-    return `bnd-${postId}-${nowIso.replace(/[^0-9]/g, '').slice(0, 14)}`;
+  function defaultBindingId(articleId: string, nowIso: string): string {
+    return `bnd-${articleId}-${nowIso.replace(/[^0-9]/g, '').slice(0, 14)}`;
   }
 
   async function run(req: PublishRequest): Promise<PublishOutcome> {
@@ -119,7 +119,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const resolution = await buildPublishResolutionContext(
       repositories,
-      req.postId,
+      req.articleId,
     );
     if (!resolution.ok) {
       return {
@@ -208,7 +208,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     }
 
     if (decision.action === 'noOp') {
-      const bindingId = context.existingBinding?.BindingId ?? bindingIdFactory(req.postId, now);
+      const bindingId = context.existingBinding?.BindingId ?? bindingIdFactory(req.articleId, now);
       return {
         ok: true,
         mode: req.mode,
@@ -241,18 +241,23 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           ? 'regenerate'
           : 'republish';
 
+    // Child-row `PageBindingRow` still carries its pre-tenant-audit field
+    // shape (PostId/TargetSiteKey/SourceTemplatePath); later Phase-02
+    // prompts realign that list to tenant schema. We carry the
+    // master-record `ArticleId` as the `PostId` FK value, and derive
+    // destination/path from the article until that realignment lands.
     const bindingRow: PublisherPageBindingRow = {
       BindingId:
         decision.action === 'inPlaceUpdate' && context.existingBinding
           ? context.existingBinding.BindingId
-          : bindingIdFactory(req.postId, now),
-      PostId: context.post.PostId,
-      TargetSiteUrl: context.post.TargetSiteUrl,
-      TargetSiteKey: context.post.TargetSiteKey,
+          : bindingIdFactory(req.articleId, now),
+      PostId: context.article.ArticleId,
+      TargetSiteUrl: context.article.TargetSiteUrl ?? '',
+      TargetSiteKey: 'projectSpotlight',
       PageId: publishResult.creation.pageId,
       PageName: publishResult.page.identity.pageName,
       PageUrl: publishResult.creation.pageUrl,
-      SourceTemplatePath: publishResult.page.identity.sourceTemplatePath,
+      SourceTemplatePath: '',
       PageShellKey: publishResult.page.identity.shellKey,
       PageShellVersion: publishResult.page.identity.shellVersion,
       TemplateKey: publishResult.page.identity.templateKey,

@@ -1,27 +1,17 @@
 /**
  * Typed repository interfaces + SharePoint-backed read implementation for
- * the Project Spotlight publisher.
+ * the Article Publisher.
  *
- * Authority: docs/architecture/plans/MASTER/spfx/publisher/architecture/
- *
- * Scope (Prompt-03 / Wave 3):
- *   - read-oriented repository interfaces + concrete SharePoint-backed
- *     readers that use the HBCentral list-title binding pattern (matches
- *     apps/hb-webparts/src/homepage/data/heroBannerListSource.ts
- *     precedent). Prompt-02 established GUID-free list descriptors; when
- *     GUIDs become available, the access layer can be swapped without
- *     changing repository consumers.
- *   - Writers (create / update / delete) are intentionally not
- *     implemented here. Page-generation + binding writes are Wave 5
- *     scope; authoring-UI writes are Wave 6 scope. Each write method on
- *     the interfaces throws `PublisherWriteNotImplementedError` with a
- *     clear wave reference so callers surface the right follow-up.
+ * The master-record layer (`HB Articles`) is keyed by tenant `ArticleId`
+ * and maps through `mapArticleRow`. Non-master child lists still use the
+ * logical `PostId` filter column pending their own tenant-realignment
+ * prompts; callers pass `article.ArticleId` in the `postId` parameter.
  */
 
 import type {
+  PublisherArticleRow,
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
   PublisherPublishingErrorRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
@@ -30,9 +20,9 @@ import type {
 import type { PublisherListDescriptor } from './publisherListDescriptors';
 import { PUBLISHER_LISTS } from './publisherListDescriptors';
 import {
+  mapArticleRow,
   mapMediaRow,
   mapPageBindingRow,
-  mapPostRow,
   mapPublishingErrorRow,
   mapTeamMemberRow,
   mapTemplateRegistryRow,
@@ -43,12 +33,12 @@ import {
   type PageBindingWriter,
 } from './pageBindingWriter';
 import {
+  createSharePointArticleWriter,
   createSharePointMediaWriter,
-  createSharePointPostWriter,
   createSharePointTeamMembersWriter,
   createSharePointWorkflowHistoryWriter,
+  type ArticleWriter,
   type MediaWriter,
-  type PostWriter,
   type TeamMembersWriter,
   type WorkflowHistoryWriter,
 } from './publisherWriters';
@@ -56,7 +46,7 @@ import {
 export class PublisherWriteNotImplementedError extends Error {
   constructor(operation: string, wave: string) {
     super(
-      `Publisher write '${operation}' is not implemented in Prompt-03; scheduled for ${wave}.`,
+      `Publisher write '${operation}' is not implemented yet; scheduled for ${wave}.`,
     );
     this.name = 'PublisherWriteNotImplementedError';
   }
@@ -64,12 +54,6 @@ export class PublisherWriteNotImplementedError extends Error {
 
 /* ── Access seam ─────────────────────────────────────────────────── */
 
-/**
- * List-access function. Consumers can swap the default HBCentral
- * title-based fetcher for a GUID-based or mocked implementation.
- * The signature intentionally stays minimal: it takes a descriptor and
- * a SharePoint `$filter`/`$select`/`$top` spec, returns raw rows.
- */
 export interface PublisherListAccess {
   readList(
     descriptor: PublisherListDescriptor,
@@ -120,12 +104,14 @@ export function createSharePointPublisherListAccess(): PublisherListAccess {
 
 /* ── Repository interfaces ───────────────────────────────────────── */
 
-export interface PostRepository {
-  getByPostId(postId: string): Promise<PublisherPostRow | undefined>;
+export interface ArticleRepository {
+  getByArticleId(articleId: string): Promise<PublisherArticleRow | undefined>;
   listByWorkflowState(
-    state: PublisherPostRow['WorkflowState'],
-  ): Promise<readonly PublisherPostRow[]>;
-  upsert(row: PublisherPostRow): Promise<{ readonly wasCreated: boolean; readonly itemId: number }>;
+    state: PublisherArticleRow['WorkflowState'],
+  ): Promise<readonly PublisherArticleRow[]>;
+  upsert(
+    row: PublisherArticleRow,
+  ): Promise<{ readonly wasCreated: boolean; readonly itemId: number }>;
 }
 
 export interface TeamMembersRepository {
@@ -154,9 +140,9 @@ export interface TemplateRegistryRepository {
 export interface PageBindingRepository {
   getByPostId(postId: string): Promise<PublisherPageBindingRow | undefined>;
   /**
-   * Idempotently upserts a tenant `HB Article Destination Pages` row keyed
-   * by `PostId`. In Prompt-05 this delegates to the injected
-   * `PageBindingWriter` (defaults to the SharePoint title-bound writer).
+   * Idempotently upserts a tenant `HB Article Destination Pages` row
+   * keyed by the logical post/article id. Delegates to the injected
+   * `PageBindingWriter`.
    */
   upsert(row: PublisherPageBindingRow): Promise<{
     readonly bindingId: string;
@@ -176,7 +162,7 @@ export interface PublishingErrorsRepository {
 }
 
 export interface PublisherRepositories {
-  readonly posts: PostRepository;
+  readonly articles: ArticleRepository;
   readonly teamMembers: TeamMembersRepository;
   readonly media: MediaRepository;
   readonly templateRegistry: TemplateRegistryRepository;
@@ -188,7 +174,7 @@ export interface PublisherRepositories {
 /* ── Factory ─────────────────────────────────────────────────────── */
 
 export interface PublisherRepositoryWriters {
-  readonly posts: PostWriter;
+  readonly articles: ArticleWriter;
   readonly teamMembers: TeamMembersWriter;
   readonly media: MediaWriter;
   readonly pageBindings: PageBindingWriter;
@@ -199,7 +185,7 @@ export function createPublisherRepositories(
   access: PublisherListAccess = createSharePointPublisherListAccess(),
   lists: typeof PUBLISHER_LISTS = PUBLISHER_LISTS,
   writers: PublisherRepositoryWriters = {
-    posts: createSharePointPostWriter({ descriptor: lists.posts }),
+    articles: createSharePointArticleWriter({ descriptor: lists.posts }),
     teamMembers: createSharePointTeamMembersWriter({ descriptor: lists.teamMembers }),
     media: createSharePointMediaWriter({ descriptor: lists.media }),
     pageBindings: createSharePointPageBindingWriter({ descriptor: lists.pageBindings }),
@@ -219,14 +205,14 @@ export function createPublisherRepositories(
   }
 
   return {
-    posts: {
-      async getByPostId(postId) {
+    articles: {
+      async getByArticleId(articleId) {
         const rows = await access.readList(lists.posts, {
-          filter: `PostId eq '${postId.replace(/'/g, "''")}'`,
+          filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           top: 1,
         });
         for (const raw of rows) {
-          const mapped = mapPostRow(raw);
+          const mapped = mapArticleRow(raw);
           if (mapped) return mapped;
         }
         return undefined;
@@ -236,10 +222,10 @@ export function createPublisherRepositories(
           filter: `WorkflowState eq '${state}'`,
           orderBy: 'UpdatedDateUtc desc',
         });
-        return mapAll(rows, mapPostRow);
+        return mapAll(rows, mapArticleRow);
       },
       async upsert(row) {
-        return writers.posts.upsert(row);
+        return writers.articles.upsert(row);
       },
     },
 
@@ -340,7 +326,7 @@ export function createPublisherRepositories(
       async append() {
         throw new PublisherWriteNotImplementedError(
           'publishingErrors.append',
-          'Wave 5 / Prompt-05',
+          'a later Phase-02 prompt',
         );
       },
     },

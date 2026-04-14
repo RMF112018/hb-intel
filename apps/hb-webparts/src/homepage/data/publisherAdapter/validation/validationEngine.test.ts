@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   PublisherMediaRow,
   PublisherPageBindingRow,
-  PublisherPostRow,
+  PublisherArticleRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from '../publisherContracts';
@@ -10,33 +10,29 @@ import type { PublishResolutionContext } from '../publishResolutionContext';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from '../pageGeneration/xmlShellManifest';
 import { validatePublishContext } from './validationEngine';
 
-function post(over: Partial<PublisherPostRow> = {}): PublisherPostRow {
+function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
-    PostId: 'post-001',
+    ArticleId: 'post-001',
     Title: 'A Well-Formed Title',
+    ArticleContentType: 'monthlySpotlight',
     Subhead: 'A subhead',
     SummaryExcerpt: 'A summary.',
     BodyRichText: '<p>Body content.</p>',
-    PostFamily: 'monthlySpotlight',
-    SpotlightType: 'inProgress',
-    ProjectStage: 'inProgress',
+    SpotlightType: 'monthly',
+    ProjectStage: 'active',
     TemplateKey: 'ps-inprogress-monthly-v1',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     Slug: 'a-well-formed-slug',
     WorkflowState: 'approved',
     CreatedDateUtc: '2026-04-10T00:00:00Z',
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
     ProjectId: 'PRJ-1',
     ProjectName: 'Project One',
-    BannerImageUrl: 'https://img.example/banner.jpg',
-    BannerImageAltText: 'Banner alt',
+    HeroPrimaryImage: 'https://img.example/banner.jpg',
+    HeroPrimaryImageAltText: 'Banner alt',
     TargetSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    TargetSiteKey: 'projectSpotlight',
-    SourceTemplatePath:
-      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
     ...over,
-  };
+  } as PublisherArticleRow;
 }
 
 function tpl(
@@ -47,11 +43,9 @@ function tpl(
     TemplateDisplayName: 'PS Monthly',
     TemplateStatus: 'active',
     TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
     PageShellVersion: '1.0.0',
     ShellSourceSiteUrl: 'https://example.com/sites/ProjectSpotlight',
     ShellSourcePagePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-    PostFamily: ['monthlySpotlight'],
     BannerRendererKind: 'oobPageTitle',
     BodyRendererKind: 'oobText',
     TeamRendererKind: 'teamViewer',
@@ -64,18 +58,18 @@ function tpl(
     AllowRepublishInPlace: true,
     ForceRegenerationOnShellChange: false,
     ...over,
-  };
+  } as PublisherTemplateRegistryRow;
 }
 
 function context(over: {
-  post?: Partial<PublisherPostRow>;
+  article?: Partial<PublisherArticleRow>;
   template?: Partial<PublisherTemplateRegistryRow>;
   teamMembers?: readonly PublisherTeamMemberRow[];
   media?: readonly PublisherMediaRow[];
   existingBinding?: PublisherPageBindingRow;
 } = {}): PublishResolutionContext {
   return {
-    post: post(over.post),
+    article: post(over.article),
     template: tpl(over.template),
     teamMembers: over.teamMembers ?? [
       {
@@ -114,7 +108,7 @@ describe('validatePublishContext', () => {
   });
 
   it('flags missing Title as missing-required-field error', () => {
-    const result = validatePublishContext(context({ post: { Title: '' } }));
+    const result = validatePublishContext(context({ article: { Title: '' } }));
     expect(result.ok).toBe(false);
     expect(result.errors.some((e) => e.field === 'Title')).toBe(true);
   });
@@ -122,7 +116,7 @@ describe('validatePublishContext', () => {
   it('flags ShowTeamViewer=true with no included team members', () => {
     const result = validatePublishContext(
       context({
-        post: { ShowTeamViewer: true },
+        article: { ShowTeamViewer: true },
         teamMembers: [
           {
             PostId: 'post-001',
@@ -139,7 +133,7 @@ describe('validatePublishContext', () => {
 
   it('flags ShowGallery with no gallery-role media', () => {
     const result = validatePublishContext(
-      context({ post: { ShowGallery: true }, media: [] }),
+      context({ media: [] }),
     );
     expect(result.errors.some((e) => e.category === 'invalid-gallery-configuration')).toBe(true);
   });
@@ -196,10 +190,9 @@ describe('validatePublishContext', () => {
           TargetSiteUrl:
             'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
           TargetSiteKey: 'projectSpotlight',
+          SourceTemplatePath: '',
+          PageShellKey: 'ps-shell-v1',
           PageName: 'p.aspx',
-          SourceTemplatePath:
-            'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-          PageShellKey: PROJECT_SPOTLIGHT_V1_SHELL.shellKey,
           PageShellVersion: '0.9.0',
           TemplateKey: 'ps-inprogress-monthly-v1',
           TemplateVersion: '1.0.0',
@@ -234,8 +227,7 @@ describe('validatePublishContext', () => {
   it('flags invalid TargetSiteKey', () => {
     const result = validatePublishContext(
       context({
-        post: {
-          TargetSiteKey: 'projectSpotlight',
+        article: {
         },
       }),
     );

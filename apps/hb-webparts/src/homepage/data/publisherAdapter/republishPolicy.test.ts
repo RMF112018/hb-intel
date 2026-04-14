@@ -11,7 +11,7 @@ import { decideRepublishAction } from './republishPolicy';
 
 function identity(over: Partial<ComposedPageIdentity> = {}): ComposedPageIdentity {
   return {
-    postId: 'post-001',
+    articleId: 'post-001',
     slug: 'post-001',
     pageName: 'post-001.aspx',
     pageTitle: 'Post 001',
@@ -20,7 +20,6 @@ function identity(over: Partial<ComposedPageIdentity> = {}): ComposedPageIdentit
     shellVersion: '1.0.0',
     templateKey: 'ps-inprogress-monthly-v1',
     templateVersion: '1.0.0',
-    sourceTemplatePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
     ...over,
   };
 }

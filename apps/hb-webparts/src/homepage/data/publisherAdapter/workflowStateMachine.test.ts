@@ -7,8 +7,8 @@ import {
 
 describe('workflow state machine', () => {
   it('allows the canonical happy path', () => {
-    expect(canTransition('draft', 'inReview')).toBe(true);
-    expect(canTransition('inReview', 'approved')).toBe(true);
+    expect(canTransition('draft', 'review')).toBe(true);
+    expect(canTransition('review', 'approved')).toBe(true);
     expect(canTransition('approved', 'published')).toBe(true);
     expect(canTransition('published', 'archived')).toBe(true);
   });
@@ -20,11 +20,11 @@ describe('workflow state machine', () => {
 
   it('forbids skipping steps', () => {
     expect(canTransition('draft', 'published')).toBe(false);
-    expect(canTransition('inReview', 'published')).toBe(false);
+    expect(canTransition('review', 'published')).toBe(false);
   });
 
   it('any pre-terminal state can withdraw', () => {
-    for (const from of ['draft', 'inReview', 'approved', 'scheduled', 'published', 'archived'] as const) {
+    for (const from of ['draft', 'review', 'approved', 'scheduled', 'published', 'archived'] as const) {
       expect(canTransition(from, 'withdrawn')).toBe(true);
     }
   });
@@ -35,15 +35,15 @@ describe('workflow state machine', () => {
 
   it('published cannot return to draft or inReview', () => {
     expect(canTransition('published', 'draft')).toBe(false);
-    expect(canTransition('published', 'inReview')).toBe(false);
+    expect(canTransition('published', 'review')).toBe(false);
   });
 
   it('maps transitions to the correct history action', () => {
     expect(historyActionFor('approved', 'published')).toBe('publish');
     expect(historyActionFor('published', 'archived')).toBe('archive');
     expect(historyActionFor('draft', 'withdrawn')).toBe('withdraw');
-    expect(historyActionFor('inReview', 'approved')).toBe('approvalDecision');
+    expect(historyActionFor('review', 'approved')).toBe('approvalDecision');
     expect(historyActionFor('scheduled', 'approved')).toBe('approvalDecision');
-    expect(historyActionFor('draft', 'inReview')).toBe('transition');
+    expect(historyActionFor('draft', 'review')).toBe('transition');
   });
 });

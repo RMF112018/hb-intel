@@ -35,7 +35,7 @@
  * team surface itself.
  */
 
-import type { PublisherPostRow, PublisherTeamMemberRow } from './publisherContracts';
+import type { PublisherArticleRow, PublisherTeamMemberRow } from './publisherContracts';
 import type { TeamViewerDensity, TeamViewerLayout } from './publisherEnums';
 
 /** Default heading applied when the post did not supply one. */
@@ -78,22 +78,22 @@ export interface PublisherTeamViewerPerson {
   readonly profileUrl?: string;
 }
 
-/** Build the structured TeamViewer properties bag from a post. */
+/** Build the structured TeamViewer properties bag from an article. */
 export function buildTeamViewerProperties(
-  post: PublisherPostRow,
+  article: PublisherArticleRow,
 ): PublisherTeamViewerProperties {
   return {
     heading:
-      post.TeamSectionHeading && post.TeamSectionHeading.trim().length > 0
-        ? post.TeamSectionHeading
+      article.TeamViewerTitle && article.TeamViewerTitle.trim().length > 0
+        ? article.TeamViewerTitle
         : TEAM_VIEWER_DEFAULT_HEADING,
-    articleId: post.PostId,
+    articleId: article.ArticleId,
     destinationKey: 'projectSpotlight',
     listHostOverride: undefined,
-    layout: post.TeamViewerLayout ?? 'grid',
-    density: post.TeamViewerDensity ?? 'standard',
+    layout: 'grid',
+    density: 'standard',
     featureFlags: {
-      profileDetailDrawer: post.TeamViewerEnableProfileDrawer ?? false,
+      profileDetailDrawer: false,
     },
   };
 }
@@ -124,7 +124,7 @@ export function mapPublisherRowToTeamViewerPerson(
 ): PublisherTeamViewerPerson {
   return {
     id: row.TeamMemberId,
-    articleId: row.PostId,
+    articleId: row.PostId /* child FK still uses logical PostId column; value is article.ArticleId */,
     articleTeamMemberId: row.TeamMemberId,
     displayName: row.DisplayName,
     jobTitle: row.JobTitle,
