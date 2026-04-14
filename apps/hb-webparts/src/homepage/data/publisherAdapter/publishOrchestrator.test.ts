@@ -176,6 +176,36 @@ function makeOrchestrator(f: Fixture) {
 }
 
 describe('publishOrchestrator', () => {
+  it('blocks manual transition INTO scheduled and leaves article/history untouched', async () => {
+    const f = fixture({
+      article: { WorkflowState: 'approved' },
+    });
+    const articlesUpsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.articles.upsert = articlesUpsert;
+    f.repositories.workflowHistory.append = historyAppend;
+
+    const orch = makeOrchestrator(f);
+    const outcome = await orch.transitionManual({
+      articleId: 'art-ps-001',
+      to: 'scheduled',
+      actorEmail: 'operator@example.com',
+      note: 'attempt schedule',
+      now: () => '2026-04-14T12:00:00.000Z',
+    });
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.stage).toBe('transition');
+    expect(outcome.previousState).toBe('approved');
+    expect(outcome.message).toContain('Cannot transition from approved to scheduled');
+    expect(articlesUpsert).not.toHaveBeenCalled();
+    expect(historyAppend).not.toHaveBeenCalled();
+  });
+
   it('creates page and binding when no existing binding', async () => {
     const f = fixture();
     const historyAppend = vi.fn<

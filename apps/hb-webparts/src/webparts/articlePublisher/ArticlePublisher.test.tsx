@@ -11,7 +11,9 @@ import {
   milestoneLegacyNotice,
   promotionLockStatusText,
   resolveTemplateKeySystemManaged,
+  scheduledLegacyStateNotice,
   update,
+  workflowFilterOptions,
 } from './ArticlePublisher';
 import type { PublisherTemplateRegistryRow } from '../../homepage/data/publisherAdapter/index.js';
 
@@ -230,5 +232,25 @@ describe('milestone content-type posture', () => {
       'read-compatible only',
     );
     expect(milestoneLegacyNotice('monthlySpotlight')).toBeUndefined();
+  });
+});
+
+describe('scheduled workflow posture', () => {
+  it('keeps scheduled out of operator-facing workflow filter options', () => {
+    const options = workflowFilterOptions();
+    expect(options).toContain('draft');
+    expect(options).toContain('review');
+    expect(options).toContain('published');
+    expect(options).not.toContain('scheduled');
+  });
+
+  it('shows legacy remediation notice only for scheduled rows', () => {
+    expect(scheduledLegacyStateNotice('scheduled')).toContain(
+      'read-compatible only',
+    );
+    expect(scheduledLegacyStateNotice('scheduled')).toContain(
+      '`approved` or `withdrawn`',
+    );
+    expect(scheduledLegacyStateNotice('draft')).toBeUndefined();
   });
 });

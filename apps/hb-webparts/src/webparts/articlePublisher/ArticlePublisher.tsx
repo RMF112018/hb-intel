@@ -141,6 +141,22 @@ export function promotionLockStatusText(policy: PromotionPolicyResult): string {
   );
 }
 
+export function workflowFilterOptions(): readonly WorkflowState[] {
+  return WORKFLOW_STATE_OPERATIONAL_VALUES;
+}
+
+export function scheduledLegacyStateNotice(
+  workflowState: WorkflowState,
+): string | undefined {
+  if (workflowState !== 'scheduled') {
+    return undefined;
+  }
+  return (
+    'Legacy state notice: `scheduled` is read-compatible only (no executor). Move to ' +
+    '`approved` or `withdrawn`.'
+  );
+}
+
 /**
  * Build a blank authoring draft for a brand-new article.
  *
@@ -566,7 +582,7 @@ export function ArticlePublisher({
             onChange={(e) => setFilter(e.target.value as WorkflowState)}
             className={styles.select}
           >
-            {WORKFLOW_STATE_OPERATIONAL_VALUES.map((s) => (
+            {workflowFilterOptions().map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -619,10 +635,9 @@ export function ArticlePublisher({
                 )}
               </div>
             </header>
-            {articleDraft.WorkflowState === 'scheduled' && (
+            {scheduledLegacyStateNotice(articleDraft.WorkflowState) && (
               <div className={styles.statusLine}>
-                Legacy state notice: `scheduled` is read-compatible only (no executor). Move to
-                `approved` or `withdrawn`.
+                {scheduledLegacyStateNotice(articleDraft.WorkflowState)}
               </div>
             )}
 
