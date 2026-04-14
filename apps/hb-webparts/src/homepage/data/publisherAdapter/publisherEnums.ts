@@ -32,6 +32,23 @@ export const ARTICLE_CONTENT_TYPE_VALUES = [
 export type ArticleContentType = (typeof ARTICLE_CONTENT_TYPE_VALUES)[number];
 
 /**
+ * Operational article content types exposed by live authoring flows.
+ *
+ * `milestoneSpotlight` remains in `ARTICLE_CONTENT_TYPE_VALUES` for
+ * tenant-schema and legacy-row read compatibility, but is
+ * intentionally excluded here until an end-to-end milestone
+ * executor (authoring + validation + persistence) exists.
+ */
+export const ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES = [
+  'newsUpdate',
+  'monthlySpotlight',
+  'projectUpdate',
+  'announcement',
+] as const;
+export type ArticleContentTypeOperational =
+  (typeof ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES)[number];
+
+/**
  * Destination (tenant column `Destination`, Choice).
  * Replaces the prior single-valued `TargetSiteKey` master enum. The
  * Project Spotlight destination identity is preserved (destination

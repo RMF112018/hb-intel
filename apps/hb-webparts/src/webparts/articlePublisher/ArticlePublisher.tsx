@@ -18,7 +18,7 @@ import * as React from 'react';
 import { HbcEmptyState, HbcSpinner } from '@hbc/ui-kit/homepage';
 import { fetchRequestDigest, storeSiteUrl } from '@hbc/sharepoint-platform';
 import {
-  ARTICLE_CONTENT_TYPE_VALUES,
+  ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES,
   ARTICLE_SUBJECT_VALUES,
   SUPPORTED_DESTINATIONS,
   HERO_THEME_VARIANT_VALUES,
@@ -712,6 +712,10 @@ interface MetadataPanelProps extends PanelProps {
 }
 
 function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) {
+  const isLegacyMilestone = draft.ArticleContentType === 'milestoneSpotlight';
+  const contentTypeOptions = isLegacyMilestone
+    ? [...ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES, 'milestoneSpotlight']
+    : ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES;
   const projectValue: ProjectPickerValue | null =
     draft.ProjectId && draft.ProjectName
       ? {
@@ -766,13 +770,19 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
             onChange(update(draft, 'ArticleContentType', e.target.value as ArticleContentType))
           }
         >
-          {ARTICLE_CONTENT_TYPE_VALUES.map((v) => (
+          {contentTypeOptions.map((v) => (
             <option key={v} value={v}>
               {v}
             </option>
           ))}
         </select>
       </Field>
+      {isLegacyMilestone && (
+        <div className={styles.statusLine}>
+          Legacy content-type notice: `milestoneSpotlight` is read-compatible only (no live
+          milestone executor). Move to an operational content type before publish.
+        </div>
+      )}
       <Field label="Destination">
         <select
           className={styles.select}

@@ -205,13 +205,13 @@ async function mergeItem(
  * field bag for `HB Articles`. Tenant columns only.
  *
  * `MilestoneLabel` / `MilestoneDateUtc` are intentionally NOT
- * emitted here — milestone-article authoring is out of current
- * sprint scope (P1-3). The tenant columns remain on the list
- * (descriptor + contract still carry them so existing rows read
- * cleanly), but the authoring UI does not expose controls for
- * them, so the writer refuses to fabricate values. To re-enable,
- * add milestone emission here in lockstep with the UI controls
- * and the restored `MILESTONE_REQUIRED` validation profile.
+ * emitted here — milestone articles are legacy read-compatible only
+ * and not an operational publish path yet. The tenant columns remain
+ * on the list (descriptor + contract still carry them so existing rows
+ * read cleanly), but the live authoring UI does not expose milestone
+ * controls, so the writer refuses to fabricate values. To re-enable,
+ * add milestone emission here in lockstep with UI controls and a
+ * restored `MILESTONE_REQUIRED` validation profile.
  */
 export function mapArticleRowToListFields(
   row: PublisherArticleRow,

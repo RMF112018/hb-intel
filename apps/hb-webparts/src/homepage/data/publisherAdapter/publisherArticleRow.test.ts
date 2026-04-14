@@ -46,6 +46,21 @@ const TENANT_RAW_ROW: Record<string, unknown> = {
 };
 
 describe('PublisherArticleRow — tenant HB Articles round-trip', () => {
+  it('keeps legacy-read compatibility for milestoneSpotlight rows', () => {
+    const milestoneRaw = {
+      ...TENANT_RAW_ROW,
+      ArticleContentType: 'milestoneSpotlight',
+      WorkflowState: 'approved',
+      MilestoneLabel: 'Topping out',
+      MilestoneDateUtc: '2026-04-20T00:00:00Z',
+    };
+    const row = mapArticleRow(milestoneRaw);
+    expect(row).toBeDefined();
+    expect(row!.ArticleContentType).toBe('milestoneSpotlight');
+    expect(row!.MilestoneLabel).toBe('Topping out');
+    expect(row!.MilestoneDateUtc).toBe('2026-04-20T00:00:00Z');
+  });
+
   it('mapArticleRow reads the tenant required columns and keys by ArticleId', () => {
     const row = mapArticleRow(TENANT_RAW_ROW);
     expect(row).toBeDefined();

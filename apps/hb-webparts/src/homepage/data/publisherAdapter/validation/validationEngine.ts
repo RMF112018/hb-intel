@@ -142,8 +142,9 @@ const MONTHLY_REQUIRED: TemplateRequiredFieldSet = {
   ],
 };
 
-// Milestone-article authoring is intentionally **out of sprint
-// scope** (P1-3). The prior `MILESTONE_REQUIRED` profile enforced
+// Milestone-article authoring is intentionally **legacy read-
+// compatible only** and not an operational live flow. The prior
+// `MILESTONE_REQUIRED` profile enforced
 // `MilestoneLabel` / `MilestoneDateUtc` on templates keyed
 // `'req-ps-inprogress-milestone-v1'`, but the authoring UI exposes
 // no controls for those fields and `mapArticleRowToListFields`
