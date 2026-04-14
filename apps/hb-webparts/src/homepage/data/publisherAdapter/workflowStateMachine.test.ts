@@ -8,8 +8,35 @@ describe('workflow state machine', () => {
   it('allows the canonical pre-publish happy path', () => {
     expect(canTransition('draft', 'review')).toBe(true);
     expect(canTransition('review', 'approved')).toBe(true);
-    expect(canTransition('approved', 'scheduled')).toBe(true);
+    // `approved → scheduled` is intentionally forbidden in this
+    // sprint (P1-1): there is no scheduled-publish executor, so
+    // scheduled is inbound-forbidden to prevent dead-end states.
     expect(canTransition('published', 'archived')).toBe(true);
+  });
+
+  it('no state can transition INTO `scheduled` — the executor does not exist (P1-1)', () => {
+    // Every state except `scheduled` itself must be unable to move
+    // an article into `scheduled`. Legacy rows already in
+    // `scheduled` can still be read and exited via outbound edges,
+    // but operators cannot strand a new article there.
+    for (const from of [
+      'draft',
+      'review',
+      'approved',
+      'published',
+      'archived',
+      'withdrawn',
+    ] as const) {
+      expect(canTransition(from, 'scheduled')).toBe(false);
+      expect(validTransitionsFrom(from)).not.toContain('scheduled');
+    }
+  });
+
+  it('legacy `scheduled` rows can still exit via approved or withdrawn', () => {
+    // Preserves the ability to unwind data that was written before
+    // the inbound edge was removed.
+    expect(canTransition('scheduled', 'approved')).toBe(true);
+    expect(canTransition('scheduled', 'withdrawn')).toBe(true);
   });
 
   it('forbids any generic manual promotion to `published`', () => {

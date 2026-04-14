@@ -5,8 +5,8 @@
  * Permitted transitions (v1):
  *   draft      → review | archived | withdrawn
  *   review     → approved | draft | withdrawn
- *   approved   → scheduled | draft | withdrawn
- *   scheduled  → approved | withdrawn
+ *   approved   → draft | withdrawn
+ *   scheduled  → approved | withdrawn       (inbound-forbidden; see below)
  *   published  → archived | withdrawn
  *   archived   → withdrawn
  *   withdrawn  → (terminal)
@@ -17,6 +17,16 @@
  * binding closure before stamping the state. Any generic UI or state-
  * machine path that appears to promote an article directly to
  * `published` is a bypass and must be rejected here.
+ *
+ * `scheduled` is **inbound-forbidden** in this sprint (P1-1). The
+ * tenant `WorkflowState` Choice still carries the value so existing
+ * `scheduled` rows remain readable, but no transition targets it —
+ * there is no scheduled-publish executor in the publisher, so
+ * letting operators move an article INTO `scheduled` would create a
+ * dead-end state with no follow-through. Existing rows already in
+ * `scheduled` (legacy data) can still exit via the outbound edges
+ * below. When a real scheduler is added, re-admit `scheduled` as an
+ * outbound target from `approved`.
  */
 
 import type { WorkflowState } from './publisherEnums';
@@ -24,7 +34,7 @@ import type { WorkflowState } from './publisherEnums';
 const TRANSITIONS: Readonly<Record<WorkflowState, readonly WorkflowState[]>> = {
   draft: ['review', 'archived', 'withdrawn'],
   review: ['approved', 'draft', 'withdrawn'],
-  approved: ['scheduled', 'draft', 'withdrawn'],
+  approved: ['draft', 'withdrawn'],
   scheduled: ['approved', 'withdrawn'],
   published: ['archived', 'withdrawn'],
   archived: ['withdrawn'],
