@@ -325,12 +325,191 @@
   line-height: 1.5;
 }
 
-/* Legacy inline helper text retained for inner workflow panels that
- * will be rewritten in a later prompt in this workstream. */
+/* Legacy inline helper text retained for inner workflow panels. */
 .statusLine {
   font-size: 12px;
   color: #4a4a4f;
   font-style: italic;
+}
+
+.sectionSubheading {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4a4a4f;
+}
+
+/* ── Editorial panels ─────────────────────────────────────── */
+
+.editorialForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.editorialNotice {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  background: #fff4e5;
+  color: #8a4b00;
+  border: 1px solid #ffd9a8;
+}
+
+.editorialReadout {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0f6fc;
+  border: 1px solid #cfe4f7;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.editorialReadoutLabel {
+  color: #4a4a4f;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.editorialReadoutValue {
+  color: #1f1f1f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.toggleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #1f1f1f;
+  cursor: pointer;
+}
+
+/* ── Chooser groups ───────────────────────────────────────── */
+
+.chooser {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chooserLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.chooserGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chooserChip {
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #cbcbd0;
+  background: #fff;
+  color: #1f1f1f;
+  cursor: pointer;
+}
+
+.chooserChip:hover {
+  background: #f0f6fc;
+}
+
+.chooserChipActive {
+  background: #0078d4;
+  border-color: #0078d4;
+  color: #fff;
+}
+
+.chooserChipActive:hover {
+  background: #106ebe;
+}
+
+.chooserHelp {
+  font-size: 11px;
+  color: #6a6a6f;
+}
+
+/* ── Row card header / destination binding ────────────────── */
+
+.rowCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowCardIndex {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a4a4f;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rowCardBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef8f1;
+  color: #1a6a35;
+  border: 1px solid #bfe1cd;
+}
+
+.bindingPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bindingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bindingHeading {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: #4a4a4f;
+}
+
+.bindingSentence {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1f1f1f;
+}
+
+.bindingDetail {
+  margin: 0;
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.bindingLink {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.bindingLink:hover {
+  text-decoration: underline;
 }
 
 /* ── Readiness rail ───────────────────────────────────────── */

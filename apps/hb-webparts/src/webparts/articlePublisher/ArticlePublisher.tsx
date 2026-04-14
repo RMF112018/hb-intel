@@ -378,6 +378,37 @@ function composeReadinessSummary(
 }
 
 /**
+ * Editorial promotion summary. Renders promotion policy state in
+ * author language, replacing the admin-worded
+ * `promotionLockStatusText` output inside the workspace canvas.
+ * The admin wording remains exported for operational traces.
+ */
+function composePromotionSummary(
+  policy: PromotionPolicyResult | undefined,
+): readonly string[] {
+  if (!policy) {
+    return [
+      'Promotion placement will be set automatically when the article type and destination are chosen.',
+    ];
+  }
+  const feature = policy.featured
+    ? 'be featured'
+    : 'not be featured';
+  const pin = policy.pinned ? 'pinned to the top of listings' : 'surface in the normal listing order';
+  const lead = `This article will ${feature} and will ${pin}.`;
+  if (policy.isLocked) {
+    return [
+      lead,
+      'Promotion is locked by the current policy and applies automatically on save.',
+    ];
+  }
+  return [
+    lead,
+    'Promotion defaults come from the current policy; they can be re-applied on save.',
+  ];
+}
+
+/**
  * Author-facing binding signal. Replaces the raw `binding <PublishStatus>`
  * badge with a single editorial sentence.
  */
@@ -990,7 +1021,7 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>Compose the body of the article.</p>
               </header>
               <div className={styles.sectionBody}>
-                <ContentPanel draft={articleDraft} onChange={setArticleDraft} />
+                <StoryPanel draft={articleDraft} onChange={setArticleDraft} />
               </div>
             </section>
 
@@ -1000,6 +1031,9 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>Add supporting media beyond the hero.</p>
               </header>
               <div className={styles.sectionBody}>
+                <div className={styles.sectionSubheading}>Secondary hero image</div>
+                <SecondaryImagePanel draft={articleDraft} onChange={setArticleDraft} />
+                <div className={styles.sectionSubheading}>Supporting images</div>
                 <GalleryPanel
                   articleId={articleDraft.ArticleId}
                   rows={mediaDraft}
@@ -1014,6 +1048,9 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>Spotlight the people behind the work.</p>
               </header>
               <div className={styles.sectionBody}>
+                <div className={styles.sectionSubheading}>How the team section is presented</div>
+                <TeamPresentationPanel draft={articleDraft} onChange={setArticleDraft} />
+                <div className={styles.sectionSubheading}>Members</div>
                 <TeamPanel
                   articleId={articleDraft.ArticleId}
                   rows={teamDraft}
@@ -1028,15 +1065,9 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>Review how promotion policy applies.</p>
               </header>
               <div className={styles.sectionBody}>
-                {promotionPolicy ? (
-                  <p className={styles.sectionCopy}>
-                    {promotionLockStatusText(promotionPolicy)}
-                  </p>
-                ) : (
-                  <p className={styles.sectionCopy}>
-                    Promotion policy will be resolved from the article's destination and content type.
-                  </p>
-                )}
+                {composePromotionSummary(promotionPolicy).map((line, i) => (
+                  <p key={i} className={styles.sectionCopy}>{line}</p>
+                ))}
               </div>
             </section>
 
@@ -1046,7 +1077,7 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>Confirm template and destination page binding.</p>
               </header>
               <div className={styles.sectionBody}>
-                <StatusPanel binding={binding} context={resolutionContext} />
+                <DestinationBindingPanel binding={binding} context={resolutionContext} />
               </div>
             </section>
 
@@ -1230,6 +1261,115 @@ interface PanelProps {
   onChange: (next: PublisherArticleRow) => void;
 }
 
+/* ── Editorial labels & chooser primitive ─────────────────── */
+
+function friendlyEnumLabel(value: string): string {
+  const spaced = value
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .trim();
+  return spaced.length === 0
+    ? value
+    : spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
+const CONTENT_TYPE_LABELS: Partial<Record<ArticleContentType, string>> = {
+  monthlySpotlight: 'Monthly Spotlight',
+  newsUpdate: 'News Update',
+  milestoneSpotlight: 'Milestone (legacy)',
+};
+
+const MEDIA_ROLE_LABELS: Record<MediaRole, string> = {
+  hero: 'Hero (primary)',
+  secondary: 'Secondary',
+  gallery: 'Gallery',
+  supporting: 'Supporting',
+};
+
+const DESTINATION_LABELS: Partial<Record<Destination, string>> = {
+  projectSpotlight: 'Project Spotlight',
+};
+
+interface ChooserOption<T extends string> {
+  readonly value: T;
+  readonly label: string;
+}
+
+interface ChooserGroupProps<T extends string> {
+  readonly label: string;
+  readonly value: T | undefined;
+  readonly options: readonly T[];
+  readonly onChange: (next: T | undefined) => void;
+  readonly getLabel?: (value: T) => string;
+  readonly allowClear?: boolean;
+  readonly clearLabel?: string;
+  readonly helpText?: string;
+  readonly ariaLabel?: string;
+}
+
+/**
+ * Editorial chooser group. Renders a labeled set of radio-style
+ * buttons over an enum. Authors see friendly labels (via
+ * `getLabel`) while the underlying enum values remain the source
+ * of truth carried to the adapter.
+ */
+function ChooserGroup<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  getLabel,
+  allowClear,
+  clearLabel,
+  helpText,
+  ariaLabel,
+}: ChooserGroupProps<T>) {
+  const resolveLabel = (v: T): string =>
+    getLabel ? getLabel(v) : friendlyEnumLabel(v);
+  const showCleared = allowClear && value === undefined;
+  return (
+    <div className={styles.chooser}>
+      <span className={styles.chooserLabel}>{label}</span>
+      <div
+        className={styles.chooserGroup}
+        role="radiogroup"
+        aria-label={ariaLabel ?? label}
+      >
+        {allowClear && (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={showCleared}
+            className={`${styles.chooserChip} ${showCleared ? styles.chooserChipActive : ''}`}
+            onClick={() => onChange(undefined)}
+          >
+            {clearLabel ?? 'Default'}
+          </button>
+        )}
+        {options.map((opt) => {
+          const active = value === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              className={`${styles.chooserChip} ${active ? styles.chooserChipActive : ''}`}
+              onClick={() => onChange(opt)}
+            >
+              {resolveLabel(opt)}
+            </button>
+          );
+        })}
+      </div>
+      {helpText && <span className={styles.chooserHelp}>{helpText}</span>}
+    </div>
+  );
+}
+
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+type _ChooserOption<T extends string> = ChooserOption<T>;
+
 export function update<T extends keyof PublisherArticleRow>(
   draft: PublisherArticleRow,
   key: T,
@@ -1298,9 +1438,11 @@ interface MetadataPanelProps extends PanelProps {
   promotionPolicy?: PromotionPolicyResult;
 }
 
-function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: MetadataPanelProps) {
+function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) {
   const contentTypeOptions = contentTypeOptionsForDraft(draft.ArticleContentType);
   const legacyMilestoneMessage = milestoneLegacyNotice(draft.ArticleContentType);
+  const destinationLabel =
+    DESTINATION_LABELS[draft.Destination] ?? friendlyEnumLabel(draft.Destination);
   const projectValue: ProjectPickerValue | null =
     draft.ProjectId && draft.ProjectName
       ? {
@@ -1331,144 +1473,79 @@ function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: Met
     [draft, onChange],
   );
 
+  // Slug, TemplateKey, TargetSiteUrl are intentionally hidden from the
+  // author. Slug is seeded and preserved by the adapter; TemplateKey is
+  // system-resolved on save via `resolveTemplateKeySystemManaged`;
+  // TargetSiteUrl is derived from Destination at publish time.
   return (
-    <div className={styles.form}>
-      <Field label="Title">
+    <div className={styles.editorialForm}>
+      <Field label="Headline">
         <input
           className={styles.input}
           value={draft.Title}
+          placeholder="Give this article a headline"
           onChange={(e) => onChange(update(draft, 'Title', e.target.value))}
         />
       </Field>
-      <Field label="Slug">
-        <input
-          className={styles.input}
-          value={draft.Slug}
-          onChange={(e) => onChange(update(draft, 'Slug', e.target.value))}
+      <Field label="Summary excerpt">
+        <textarea
+          className={styles.textarea}
+          value={draft.SummaryExcerpt}
+          placeholder="A short summary used in listings and social previews"
+          onChange={(e) => onChange(update(draft, 'SummaryExcerpt', e.target.value))}
         />
       </Field>
-      <Field label="Resolved template key">
-        <input
-          className={styles.input}
-          value={draft.TemplateKey}
-          disabled={true}
-          readOnly
-          placeholder="Resolved on save from current metadata"
-        />
-      </Field>
-      <div className={styles.statusLine}>
-        Template is system-managed in ordinary authoring. Save re-resolves from destination,
-        content type, and applicability metadata.
-      </div>
-      <Field label="Article content type">
-        <select
-          className={styles.select}
-          value={draft.ArticleContentType}
-          onChange={(e) =>
-            onChange(update(draft, 'ArticleContentType', e.target.value as ArticleContentType))
-          }
-        >
-          {contentTypeOptions.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      {legacyMilestoneMessage && <div className={styles.statusLine}>{legacyMilestoneMessage}</div>}
-      <Field label="Destination">
-        <select
-          className={styles.select}
-          value={draft.Destination}
-          onChange={(e) =>
-            onChange(update(draft, 'Destination', e.target.value as Destination))
-          }
-        >
-          {/*
-           * Only destinations whose publish pipeline is wired end to
-           * end appear in the authoring surface. Current sprint:
-           * `projectSpotlight` only. `companyPulse` remains on the
-           * tenant Choice column + enum (schema-complete) for read
-           * compatibility, but is intentionally hidden from new-
-           * article authoring until its publish path lands. Closes
-           * P2-3.
-           */}
-          {SUPPORTED_DESTINATIONS.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      {promotionPolicy?.isLocked && (
-        <div className={styles.statusLine}>{promotionLockStatusText(promotionPolicy)}</div>
+
+      <ChooserGroup
+        label="Article type"
+        value={draft.ArticleContentType}
+        options={contentTypeOptions}
+        getLabel={(v) => CONTENT_TYPE_LABELS[v] ?? friendlyEnumLabel(v)}
+        onChange={(next) => {
+          if (!next) return;
+          onChange(update(draft, 'ArticleContentType', next));
+        }}
+      />
+      {legacyMilestoneMessage && (
+        <p className={styles.editorialNotice}>{legacyMilestoneMessage}</p>
       )}
-      <Field label="Spotlight type">
-        <select
-          className={styles.select}
-          value={draft.SpotlightType ?? ''}
-          onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'SpotlightType',
-                (e.target.value || undefined) as SpotlightType | undefined,
-              ),
-            )
-          }
-        >
-          <option value="">(none)</option>
-          {SPOTLIGHT_TYPE_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Project stage">
-        <select
-          className={styles.select}
-          value={draft.ProjectStage ?? ''}
-          onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'ProjectStage',
-                (e.target.value || undefined) as ProjectStage | undefined,
-              ),
-            )
-          }
-        >
-          <option value="">(none)</option>
-          {PROJECT_STAGE_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Article subject">
-        <select
-          className={styles.select}
-          value={draft.ArticleSubject ?? ''}
-          onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'ArticleSubject',
-                (e.target.value || undefined) as ArticleSubject | undefined,
-              ),
-            )
-          }
-        >
-          <option value="">(none)</option>
-          {ARTICLE_SUBJECT_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
+
+      <div className={styles.editorialReadout}>
+        <span className={styles.editorialReadoutLabel}>Publishes to</span>
+        <span className={styles.editorialReadoutValue}>{destinationLabel}</span>
+      </div>
+
+      <ChooserGroup
+        label="Spotlight type"
+        value={draft.SpotlightType}
+        options={SPOTLIGHT_TYPE_VALUES}
+        onChange={(next) =>
+          onChange(update(draft, 'SpotlightType', next as SpotlightType | undefined))
+        }
+        allowClear
+        clearLabel="No spotlight"
+      />
+      <ChooserGroup
+        label="Project stage"
+        value={draft.ProjectStage}
+        options={PROJECT_STAGE_VALUES}
+        onChange={(next) =>
+          onChange(update(draft, 'ProjectStage', next as ProjectStage | undefined))
+        }
+        allowClear
+        clearLabel="Unspecified"
+      />
+      <ChooserGroup
+        label="Subject"
+        value={draft.ArticleSubject}
+        options={ARTICLE_SUBJECT_VALUES}
+        onChange={(next) =>
+          onChange(update(draft, 'ArticleSubject', next as ArticleSubject | undefined))
+        }
+        allowClear
+        clearLabel="Unspecified"
+      />
+
       <Field label="Project">
         {searchProjects ? (
           <ProjectPicker
@@ -1502,127 +1579,119 @@ function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: Met
           </>
         )}
       </Field>
-      <Field label="Summary excerpt">
-        <textarea
-          className={styles.textarea}
-          value={draft.SummaryExcerpt}
-          onChange={(e) => onChange(update(draft, 'SummaryExcerpt', e.target.value))}
-        />
-      </Field>
     </div>
   );
 }
 
 function HeroPanel({ draft, onChange }: PanelProps) {
   return (
-    <div className={styles.form}>
-      <Field label="Hero primary image URL (required)">
+    <div className={styles.editorialForm}>
+      <Field label="Hero image URL">
         <input
           className={styles.input}
           value={draft.HeroPrimaryImage}
+          placeholder="https://…"
           onChange={(e) => onChange(update(draft, 'HeroPrimaryImage', e.target.value))}
         />
       </Field>
-      <Field label="Hero primary image alt text (required)">
+      <Field label="Alt text (for screen readers)">
         <textarea
           className={styles.textarea}
           value={draft.HeroPrimaryImageAltText}
+          placeholder="Describe the image in a sentence"
           onChange={(e) => onChange(update(draft, 'HeroPrimaryImageAltText', e.target.value))}
         />
       </Field>
-      <Field label="Hero title override">
+      <Field label="Hero headline (optional override)">
         <input
           className={styles.input}
           value={draft.HeroTitle ?? ''}
+          placeholder="Falls back to the article headline when blank"
           onChange={(e) =>
             onChange(update(draft, 'HeroTitle', e.target.value || undefined))
           }
         />
       </Field>
-      <Field label="Hero eyebrow">
+      <Field label="Eyebrow">
         <input
           className={styles.input}
           value={draft.HeroEyebrow ?? ''}
+          placeholder="Short label above the headline"
           onChange={(e) => onChange(update(draft, 'HeroEyebrow', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Hero category label">
+      <Field label="Category label">
         <input
           className={styles.input}
           value={draft.HeroCategoryLabel ?? ''}
+          placeholder="Category displayed on the hero"
           onChange={(e) =>
             onChange(update(draft, 'HeroCategoryLabel', e.target.value || undefined))
           }
         />
       </Field>
-      <Field label="Hero theme variant">
-        <select
-          className={styles.select}
-          value={draft.HeroThemeVariant ?? ''}
-          onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'HeroThemeVariant',
-                (e.target.value || undefined) as HeroThemeVariant | undefined,
-              ),
-            )
-          }
-        >
-          <option value="">(default)</option>
-          {HERO_THEME_VARIANT_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Show hero metadata">
+      <ChooserGroup
+        label="Hero theme"
+        value={draft.HeroThemeVariant}
+        options={HERO_THEME_VARIANT_VALUES}
+        onChange={(next) =>
+          onChange(update(draft, 'HeroThemeVariant', next as HeroThemeVariant | undefined))
+        }
+        allowClear
+        clearLabel="Default"
+      />
+      <label className={styles.toggleRow}>
         <input
           type="checkbox"
           checked={!!draft.HeroShowMetadata}
           onChange={(e) => onChange(update(draft, 'HeroShowMetadata', e.target.checked))}
         />
-      </Field>
+        <span>Show article metadata on the hero</span>
+      </label>
     </div>
   );
 }
 
-function ContentPanel({ draft, onChange }: PanelProps) {
+function StoryPanel({ draft, onChange }: PanelProps) {
   return (
-    <div className={styles.form}>
+    <div className={styles.editorialForm}>
       <Field label="Subhead">
         <textarea
           className={styles.textarea}
           value={draft.Subhead}
+          placeholder="One or two sentences that set up the story"
           onChange={(e) => onChange(update(draft, 'Subhead', e.target.value))}
         />
       </Field>
-      <Field label="Body (HTML accepted)">
+      <Field label="Article body">
         <textarea
           className={`${styles.textarea} ${styles.textareaLg}`}
           value={draft.BodyRichText}
+          placeholder="Compose the article. HTML is supported."
           onChange={(e) => onChange(update(draft, 'BodyRichText', e.target.value))}
         />
       </Field>
-      <Field label="Body intro">
+      <Field label="Intro (optional)">
         <textarea
           className={styles.textarea}
           value={draft.BodyIntro ?? ''}
+          placeholder="An optional intro shown above the body"
           onChange={(e) => onChange(update(draft, 'BodyIntro', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Body closing">
+      <Field label="Closing (optional)">
         <textarea
           className={styles.textarea}
           value={draft.BodyClosing ?? ''}
+          placeholder="An optional closing shown after the body"
           onChange={(e) => onChange(update(draft, 'BodyClosing', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Callout text">
+      <Field label="Callout">
         <textarea
           className={styles.textarea}
           value={draft.CalloutText ?? ''}
+          placeholder="Short pull-out callout, if any"
           onChange={(e) => onChange(update(draft, 'CalloutText', e.target.value || undefined))}
         />
       </Field>
@@ -1630,140 +1699,125 @@ function ContentPanel({ draft, onChange }: PanelProps) {
         <textarea
           className={styles.textarea}
           value={draft.PullQuote ?? ''}
+          placeholder="Attribute-less quote emphasised in the layout"
           onChange={(e) => onChange(update(draft, 'PullQuote', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Show secondary image">
+    </div>
+  );
+}
+
+function SecondaryImagePanel({ draft, onChange }: PanelProps) {
+  return (
+    <div className={styles.editorialForm}>
+      <label className={styles.toggleRow}>
         <input
           type="checkbox"
           checked={draft.ShowSecondaryImage === true}
           onChange={(e) => onChange(update(draft, 'ShowSecondaryImage', e.target.checked))}
         />
-      </Field>
+        <span>Show a secondary image alongside the body</span>
+      </label>
       <Field label="Secondary image URL">
         <input
           className={styles.input}
           value={draft.SecondaryImage ?? ''}
+          placeholder="https://…"
           onChange={(e) => onChange(update(draft, 'SecondaryImage', e.target.value || undefined))}
         />
       </Field>
-      <Field label="Secondary image alt text">
+      <Field label="Alt text">
         <textarea
           className={styles.textarea}
           value={draft.SecondaryImageAltText ?? ''}
+          placeholder="Describe the image"
           onChange={(e) =>
             onChange(update(draft, 'SecondaryImageAltText', e.target.value || undefined))
           }
         />
       </Field>
-      <Field label="Secondary image caption">
+      <Field label="Caption">
         <textarea
           className={styles.textarea}
           value={draft.SecondaryImageCaption ?? ''}
+          placeholder="Optional caption shown under the image"
           onChange={(e) =>
             onChange(update(draft, 'SecondaryImageCaption', e.target.value || undefined))
           }
         />
       </Field>
-      <div className={styles.statusLine}>
-        Secondary image fields are persisted on HB Articles; page composition support is deferred
-        until a dedicated secondary-image slot exists.
-      </div>
-      <Field label="Team viewer title">
-        <input
-          className={styles.input}
-          value={draft.TeamViewerTitle ?? ''}
-          onChange={(e) =>
-            onChange(update(draft, 'TeamViewerTitle', e.target.value || undefined))
-          }
-        />
-      </Field>
-      <Field label="Team viewer intro">
-        <textarea
-          className={styles.textarea}
-          value={draft.TeamViewerIntro ?? ''}
-          onChange={(e) =>
-            onChange(update(draft, 'TeamViewerIntro', e.target.value || undefined))
-          }
-        />
-      </Field>
-      <Field label="Show team viewer">
+    </div>
+  );
+}
+
+function TeamPresentationPanel({ draft, onChange }: PanelProps) {
+  return (
+    <div className={styles.editorialForm}>
+      <label className={styles.toggleRow}>
         <input
           type="checkbox"
           checked={draft.ShowTeamViewer !== false}
           onChange={(e) => onChange(update(draft, 'ShowTeamViewer', e.target.checked))}
         />
-      </Field>
-      <Field label="Team viewer mode">
-        <select
-          className={styles.select}
-          value={draft.TeamViewerMode ?? ''}
+        <span>Include a team section on the published page</span>
+      </label>
+      <Field label="Team heading">
+        <input
+          className={styles.input}
+          value={draft.TeamViewerTitle ?? ''}
+          placeholder="e.g. Project team"
           onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'TeamViewerMode',
-                (e.target.value || undefined) as TeamViewerMode | undefined,
-              ),
-            )
+            onChange(update(draft, 'TeamViewerTitle', e.target.value || undefined))
           }
-        >
-          <option value="">(default)</option>
-          {TEAM_VIEWER_MODE_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
+        />
       </Field>
-      <Field label="Team viewer grouping mode">
-        <select
-          className={styles.select}
-          value={draft.TeamViewerGroupingMode ?? ''}
+      <Field label="Team intro (optional)">
+        <textarea
+          className={styles.textarea}
+          value={draft.TeamViewerIntro ?? ''}
+          placeholder="A short intro shown above the team"
           onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'TeamViewerGroupingMode',
-                (e.target.value || undefined) as TeamViewerGroupingMode | undefined,
-              ),
-            )
+            onChange(update(draft, 'TeamViewerIntro', e.target.value || undefined))
           }
-        >
-          <option value="">(default)</option>
-          {TEAM_VIEWER_GROUPING_MODE_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
+        />
       </Field>
-      <Field label="Team viewer sort mode">
-        <select
-          className={styles.select}
-          value={draft.TeamViewerSortMode ?? ''}
-          onChange={(e) =>
-            onChange(
-              update(
-                draft,
-                'TeamViewerSortMode',
-                (e.target.value || undefined) as TeamViewerSortMode | undefined,
-              ),
-            )
-          }
-        >
-          <option value="">(default)</option>
-          {TEAM_VIEWER_SORT_MODE_VALUES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Team viewer max initial visible">
+      <ChooserGroup
+        label="Team layout"
+        value={draft.TeamViewerMode}
+        options={TEAM_VIEWER_MODE_VALUES}
+        onChange={(next) =>
+          onChange(update(draft, 'TeamViewerMode', next as TeamViewerMode | undefined))
+        }
+        allowClear
+        clearLabel="Default"
+      />
+      <ChooserGroup
+        label="Grouping"
+        value={draft.TeamViewerGroupingMode}
+        options={TEAM_VIEWER_GROUPING_MODE_VALUES}
+        onChange={(next) =>
+          onChange(
+            update(draft, 'TeamViewerGroupingMode', next as TeamViewerGroupingMode | undefined),
+          )
+        }
+        allowClear
+        clearLabel="No grouping"
+      />
+      <ChooserGroup
+        label="Sort order"
+        value={draft.TeamViewerSortMode}
+        options={TEAM_VIEWER_SORT_MODE_VALUES}
+        onChange={(next) =>
+          onChange(update(draft, 'TeamViewerSortMode', next as TeamViewerSortMode | undefined))
+        }
+        allowClear
+        clearLabel="Default"
+      />
+      <Field label="How many members visible before expanding">
         <input
           className={styles.input}
           value={draft.TeamViewerMaxInitialVisible ?? ''}
+          placeholder="e.g. 6"
           onChange={(e) =>
             onChange(update(draft, 'TeamViewerMaxInitialVisible', (() => {
               const raw = e.target.value.trim();
@@ -1774,13 +1828,14 @@ function ContentPanel({ draft, onChange }: PanelProps) {
           }
         />
       </Field>
-      <Field label="Team viewer allow expand">
+      <label className={styles.toggleRow}>
         <input
           type="checkbox"
           checked={draft.TeamViewerAllowExpand === true}
           onChange={(e) => onChange(update(draft, 'TeamViewerAllowExpand', e.target.checked))}
         />
-      </Field>
+        <span>Allow readers to expand the full team list</span>
+      </label>
     </div>
   );
 }
@@ -1822,44 +1877,49 @@ function TeamPanel({
         Add team member
       </button>
       {rows.length === 0 ? (
-        <HbcEmptyState title="No team members" description="Add a member to show in the Team Viewer." />
+        <HbcEmptyState
+          title="No team members yet"
+          description="Add a colleague to spotlight them on the published article."
+        />
       ) : (
         rows.map((r, i) => (
           <div key={r.TeamMemberId} className={styles.rowCard}>
+            <div className={styles.rowCardHeader}>
+              <span className={styles.rowCardIndex}>Member {i + 1}</span>
+              {r.IsFeaturedMember && <span className={styles.rowCardBadge}>Featured</span>}
+            </div>
             <div className={styles.rowGrid}>
-              <Field label="Title">
-                <input
-                  className={styles.input}
-                  value={r.Title}
-                  onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
-                />
-              </Field>
               <Field label="Display name">
                 <input
                   className={styles.input}
                   value={r.DisplayName}
+                  placeholder="Name shown on the card"
                   onChange={(e) => replaceAt(i, { ...r, DisplayName: e.target.value })}
                 />
               </Field>
-              <Field label="Email / principal">
+              <Field label="Role title">
+                <input
+                  className={styles.input}
+                  value={r.Title}
+                  placeholder="e.g. Project Executive"
+                  onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
+                />
+              </Field>
+              <Field label="Email">
                 <input
                   className={styles.input}
                   value={r.PersonPrincipal}
+                  placeholder="name@hedrickbrothers.com"
                   onChange={(e) =>
-                    replaceAt(
-                      i,
-                      applyTeamMemberPrincipalChange(
-                        r,
-                        e.target.value,
-                      ),
-                    )
+                    replaceAt(i, applyTeamMemberPrincipalChange(r, e.target.value))
                   }
                 />
               </Field>
-              <Field label="Role">
+              <Field label="Role detail">
                 <input
                   className={styles.input}
                   value={r.Role ?? ''}
+                  placeholder="Secondary role description, if any"
                   onChange={(e) => replaceAt(i, { ...r, Role: e.target.value || undefined })}
                 />
               </Field>
@@ -1877,26 +1937,29 @@ function TeamPanel({
                   onChange={(e) => replaceAt(i, { ...r, Department: e.target.value || undefined })}
                 />
               </Field>
-              <Field label="Group key">
+              <Field label="Group">
                 <input
                   className={styles.input}
                   value={r.GroupKey ?? ''}
+                  placeholder="Group this member into e.g. 'leadership'"
                   onChange={(e) => replaceAt(i, { ...r, GroupKey: e.target.value || undefined })}
                 />
               </Field>
-              <Field label="Parent member id">
+              <Field label="Reports to (member)">
                 <input
                   className={styles.input}
                   value={r.ParentMemberId ?? ''}
+                  placeholder="Optional parent member id"
                   onChange={(e) =>
                     replaceAt(i, { ...r, ParentMemberId: e.target.value || undefined })
                   }
                 />
               </Field>
-              <Field label="Bio snippet">
+              <Field label="Bio">
                 <textarea
                   className={styles.textarea}
                   value={r.BioSnippet ?? ''}
+                  placeholder="One- or two-sentence bio"
                   onChange={(e) =>
                     replaceAt(i, { ...r, BioSnippet: e.target.value || undefined })
                   }
@@ -1906,23 +1969,46 @@ function TeamPanel({
                 <input
                   className={styles.input}
                   value={r.ContactLink ?? ''}
+                  placeholder="Profile or contact URL"
                   onChange={(e) =>
                     replaceAt(i, { ...r, ContactLink: e.target.value || undefined })
                   }
                 />
               </Field>
-              <Field label="Featured member">
-                <input
-                  type="checkbox"
-                  checked={r.IsFeaturedMember === true}
-                  onChange={(e) => replaceAt(i, { ...r, IsFeaturedMember: e.target.checked })}
-                />
-              </Field>
             </div>
+            <label className={styles.toggleRow}>
+              <input
+                type="checkbox"
+                checked={r.IsFeaturedMember === true}
+                onChange={(e) => replaceAt(i, { ...r, IsFeaturedMember: e.target.checked })}
+              />
+              <span>Feature this member in the team section</span>
+            </label>
             <div className={styles.rowActions}>
-              <button type="button" className={styles.btn} onClick={() => move(i, -1)}>↑</button>
-              <button type="button" className={styles.btn} onClick={() => move(i, 1)}>↓</button>
-              <button type="button" className={styles.btn} onClick={() => removeAt(i)}>Remove</button>
+              <button
+                type="button"
+                className={styles.btn}
+                aria-label={`Move member ${i + 1} up`}
+                onClick={() => move(i, -1)}
+              >
+                Move up
+              </button>
+              <button
+                type="button"
+                className={styles.btn}
+                aria-label={`Move member ${i + 1} down`}
+                onClick={() => move(i, 1)}
+              >
+                Move down
+              </button>
+              <button
+                type="button"
+                className={styles.dangerBtn}
+                aria-label={`Remove member ${i + 1}`}
+                onClick={() => removeAt(i)}
+              >
+                Remove
+              </button>
             </div>
           </div>
         ))
@@ -1966,38 +2052,34 @@ function GalleryPanel({
   return (
     <div className={styles.rowList}>
       <button type="button" className={styles.primaryBtn} onClick={add}>
-        Add gallery image
+        Add image
       </button>
       {rows.length === 0 ? (
-        <HbcEmptyState title="No media" description="Add an image to populate the gallery." />
+        <HbcEmptyState
+          title="No supporting media yet"
+          description="Add images to show alongside the article."
+        />
       ) : (
         rows.map((r, i) => (
           <div key={r.MediaId} className={styles.rowCard}>
+            <div className={styles.rowCardHeader}>
+              <span className={styles.rowCardIndex}>Image {i + 1}</span>
+              {r.FeaturedInGallery && <span className={styles.rowCardBadge}>Featured</span>}
+            </div>
             <div className={styles.rowGrid}>
-              <Field label="Title">
+              <Field label="Image title">
                 <input
                   className={styles.input}
                   value={r.Title}
+                  placeholder="Internal title for this image"
                   onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
                 />
               </Field>
-              <Field label="Role">
-                <select
-                  className={styles.select}
-                  value={r.MediaRole}
-                  onChange={(e) => replaceAt(i, { ...r, MediaRole: e.target.value as MediaRole })}
-                >
-                  {MEDIA_ROLES.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Image asset URL">
+              <Field label="Image URL">
                 <input
                   className={styles.input}
                   value={r.ImageAsset}
+                  placeholder="https://…"
                   onChange={(e) => replaceAt(i, { ...r, ImageAsset: e.target.value })}
                 />
               </Field>
@@ -2005,6 +2087,7 @@ function GalleryPanel({
                 <textarea
                   className={styles.textarea}
                   value={r.AltText}
+                  placeholder="Describe the image in a sentence"
                   onChange={(e) => replaceAt(i, { ...r, AltText: e.target.value })}
                 />
               </Field>
@@ -2012,28 +2095,62 @@ function GalleryPanel({
                 <input
                   className={styles.input}
                   value={r.Caption ?? ''}
+                  placeholder="Optional caption shown under the image"
                   onChange={(e) => replaceAt(i, { ...r, Caption: e.target.value || undefined })}
                 />
               </Field>
-              <Field label="Gallery group">
+              <Field label="Group">
                 <input
                   className={styles.input}
                   value={r.GalleryGroup ?? ''}
+                  placeholder="Group name (optional)"
                   onChange={(e) => replaceAt(i, { ...r, GalleryGroup: e.target.value || undefined })}
                 />
               </Field>
-              <Field label="Featured in gallery">
-                <input
-                  type="checkbox"
-                  checked={r.FeaturedInGallery === true}
-                  onChange={(e) => replaceAt(i, { ...r, FeaturedInGallery: e.target.checked })}
-                />
-              </Field>
             </div>
+            <ChooserGroup
+              label="Used as"
+              value={r.MediaRole}
+              options={MEDIA_ROLES}
+              getLabel={(role) => MEDIA_ROLE_LABELS[role]}
+              onChange={(next) => {
+                if (!next) return;
+                replaceAt(i, { ...r, MediaRole: next });
+              }}
+            />
+            <label className={styles.toggleRow}>
+              <input
+                type="checkbox"
+                checked={r.FeaturedInGallery === true}
+                onChange={(e) => replaceAt(i, { ...r, FeaturedInGallery: e.target.checked })}
+              />
+              <span>Feature this image in the gallery</span>
+            </label>
             <div className={styles.rowActions}>
-              <button type="button" className={styles.btn} onClick={() => move(i, -1)}>↑</button>
-              <button type="button" className={styles.btn} onClick={() => move(i, 1)}>↓</button>
-              <button type="button" className={styles.btn} onClick={() => removeAt(i)}>Remove</button>
+              <button
+                type="button"
+                className={styles.btn}
+                aria-label={`Move image ${i + 1} up`}
+                onClick={() => move(i, -1)}
+              >
+                Move up
+              </button>
+              <button
+                type="button"
+                className={styles.btn}
+                aria-label={`Move image ${i + 1} down`}
+                onClick={() => move(i, 1)}
+              >
+                Move down
+              </button>
+              <button
+                type="button"
+                className={styles.dangerBtn}
+                aria-label={`Remove image ${i + 1}`}
+                onClick={() => removeAt(i)}
+              >
+                Remove
+              </button>
             </div>
           </div>
         ))
@@ -2042,7 +2159,7 @@ function GalleryPanel({
   );
 }
 
-function StatusPanel({
+function DestinationBindingPanel({
   binding,
   context,
 }: {
@@ -2050,49 +2167,61 @@ function StatusPanel({
   context: PublishResolutionContext | undefined;
 }) {
   return (
-    <div className={styles.statusPanel}>
-      <section>
-        <h3 className={styles.sectionHeading}>Template resolution</h3>
+    <div className={styles.bindingPanel}>
+      <div className={styles.bindingBlock}>
+        <p className={styles.bindingHeading}>Template</p>
         {!context ? (
-          <HbcEmptyState
-            title="Not yet resolved"
-            description="Save the article so the template registry can resolve it."
-          />
+          <p className={styles.bindingSentence}>
+            Save the article so the publishing template can be resolved.
+          </p>
         ) : (
-          <dl className={styles.dl}>
-            <Dt label="Template" value={`${context.template.TemplateKey} @ ${context.template.VersionLabel ?? '(no version label)'}`} />
-            <Dt label="Page shell template" value={context.template.PageShellTemplateKey} />
-            <Dt label="Destination" value={context.template.Destination} />
-            <Dt label="Priority" value={String(context.template.TemplatePriority)} />
-            <Dt label="Selection rule" value={context.decisionTrace.selectionRule ?? '(unknown)'} />
-          </dl>
+          <p className={styles.bindingSentence}>
+            This article will publish with the{' '}
+            <strong>{context.template.TemplateName ?? context.template.TemplateKey}</strong>{' '}
+            template
+            {context.template.VersionLabel
+              ? ` (version ${context.template.VersionLabel})`
+              : ''}
+            .
+          </p>
         )}
-      </section>
-      <section>
-        <h3 className={styles.sectionHeading}>Page binding</h3>
+      </div>
+      <div className={styles.bindingBlock}>
+        <p className={styles.bindingHeading}>Destination page</p>
         {!binding ? (
-          <HbcEmptyState
-            title="No binding yet"
-            description="Publish this article to create a durable page binding."
-          />
+          <p className={styles.bindingSentence}>
+            No destination page is bound yet. Publishing this article will create the Project
+            Spotlight page.
+          </p>
         ) : (
-          <dl className={styles.dl}>
-            <Dt label="Binding ID" value={binding.BindingId} />
-            <Dt label="Publish status" value={binding.PublishStatus} />
-            <Dt label="Sync status" value={binding.SyncStatus ?? '(none)'} />
-            <Dt label="Page name" value={binding.PageName ?? '(none)'} />
-            <Dt label="Page URL" value={binding.PageUrl ?? '(not yet set)'} />
-            <Dt
-              label="Page template"
-              value={`${binding.PageTemplateKey} @ ${binding.RenderVersion ?? '(no render version)'}`}
-            />
-            <Dt label="Page shell version" value={binding.PageShellVersion ?? '(none)'} />
-            <Dt label="Last synced" value={binding.LastSyncDateUtc ?? '(none)'} />
-            <Dt label="Last sync message" value={binding.LastSyncMessage ?? '(none)'} />
-            <Dt label="Published" value={binding.PublishedDateUtc ?? '(not yet published)'} />
-          </dl>
+          <>
+            <p className={styles.bindingSentence}>
+              The destination page <strong>{binding.PageName ?? 'is named on publish'}</strong>{' '}
+              is bound to this article
+              {binding.PublishedDateUtc
+                ? ` and was last published ${binding.PublishedDateUtc}.`
+                : ' and has not been published yet.'}
+            </p>
+            {binding.PageUrl && (
+              <p className={styles.bindingSentence}>
+                <a
+                  className={styles.bindingLink}
+                  href={binding.PageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open the destination page
+                </a>
+              </p>
+            )}
+            {binding.LastSyncMessage && (
+              <p className={styles.bindingDetail}>
+                Last sync: {binding.LastSyncMessage}
+              </p>
+            )}
+          </>
         )}
-      </section>
+      </div>
     </div>
   );
 }
