@@ -70,6 +70,7 @@ import {
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
+import { ArticlePreview } from './previewSurface/index.js';
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../hbKudos/hooks/useRecipientPhotoHydration.js';
 import { resolveSlugForSave } from './slugGovernance.js';
@@ -1102,7 +1103,7 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>See how the article will publish.</p>
               </header>
               <div className={styles.sectionBody}>
-                <PreviewPanel outcome={preview} loading={previewLoading} />
+                <ArticlePreview outcome={preview} loading={previewLoading} />
               </div>
             </section>
           </>
