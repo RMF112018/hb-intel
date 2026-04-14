@@ -25,6 +25,7 @@
 
 import type { PublisherMediaRow, PublisherArticleRow, PublisherTeamMemberRow } from '../publisherContracts';
 import type { PublishResolutionContext } from '../publishResolutionContext';
+import type { PublisherTeamViewerProperties } from '../teamViewerAdapter';
 import {
   buildTeamViewerProperties,
   selectVisibleTeamMembers,
@@ -63,15 +64,14 @@ export interface TextControlPayload extends ComposedControlBase {
 export interface TeamViewerControlPayload extends ComposedControlBase {
   readonly slot: 'team';
   readonly webPartType: 'Custom';
-  readonly properties: {
-    readonly heading: string;
-    readonly articleId: string;
-    readonly destinationKey: 'projectSpotlight';
-    readonly listHostOverride?: string;
-    readonly layout: 'grid' | 'list';
-    readonly density: 'standard' | 'compact' | 'comfortable';
-    readonly featureFlags: { readonly profileDetailDrawer: boolean };
-  };
+  /**
+   * Canonical `TeamViewerConfig` shape as defined by the TeamViewer
+   * webpart's `teamViewerContracts.ts`. The publisher and the
+   * webpart share this exact contract — there is no parallel
+   * `featureFlags` / `flags` translation, no enum drift, and no
+   * field-name divergence between the two surfaces.
+   */
+  readonly properties: PublisherTeamViewerProperties;
 }
 
 export interface ImageGalleryControlPayload extends ComposedControlBase {

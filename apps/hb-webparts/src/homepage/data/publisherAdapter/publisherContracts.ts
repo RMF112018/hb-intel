@@ -31,8 +31,6 @@ import type {
   RetryStatus,
   SpotlightType,
   SyncStatus,
-  TeamViewerDensity,
-  TeamViewerLayout,
   WorkflowState,
 } from './publisherEnums';
 

@@ -148,15 +148,16 @@ export const GALLERY_RENDERER_KIND_VALUES = [
 ] as const;
 export type GalleryRendererKind = (typeof GALLERY_RENDERER_KIND_VALUES)[number];
 
-export const TEAM_VIEWER_LAYOUT_VALUES = ['grid', 'list'] as const;
-export type TeamViewerLayout = (typeof TEAM_VIEWER_LAYOUT_VALUES)[number];
-
-export const TEAM_VIEWER_DENSITY_VALUES = [
-  'standard',
-  'compact',
-  'comfortable',
-] as const;
-export type TeamViewerDensity = (typeof TEAM_VIEWER_DENSITY_VALUES)[number];
+/**
+ * Team Viewer enum values are now owned by the TeamViewer webpart's
+ * canonical contracts (`apps/hb-webparts/src/webparts/teamViewer/
+ * teamViewerContracts.ts`). The publisher adapter re-exports the
+ * webpart types so both surfaces speak the same enum set
+ * (Phase-02 Prompt-13). The pre-tenant publisher-local sets
+ * (`['grid','list']` / `['standard','compact','comfortable']`) are
+ * intentionally removed; consume `TeamViewerLayout` /
+ * `TeamViewerDensity` from `./teamViewerAdapter` instead.
+ */
 
 export const GALLERY_LAYOUT_PROFILE_VALUES = [
   'grid',

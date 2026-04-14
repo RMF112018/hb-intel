@@ -36,49 +36,50 @@
  */
 
 import type { PublisherArticleRow, PublisherTeamMemberRow } from './publisherContracts';
-import type { TeamViewerDensity, TeamViewerLayout } from './publisherEnums';
+import type {
+  TeamViewerConfig,
+  TeamViewerDensity,
+  TeamViewerFeatureFlags,
+  TeamViewerLayout,
+  TeamViewerPerson,
+} from '../../../webparts/teamViewer/teamViewerContracts';
 
-/** Default heading applied when the post did not supply one. */
+// Re-export the canonical TeamViewer contracts so consumers of the
+// publisher adapter can speak the exact same shapes the TeamViewer
+// webpart consumes — no parallel domain types live on the publisher
+// side.
+export type {
+  TeamViewerConfig,
+  TeamViewerDensity,
+  TeamViewerFeatureFlags,
+  TeamViewerLayout,
+  TeamViewerPerson,
+};
+
+/** Default heading applied when the article did not supply one. */
 export const TEAM_VIEWER_DEFAULT_HEADING = 'Team';
 
 /**
- * The exact JSON shape written into the TeamViewer control's
- * `webPartData.properties` on the canvas. Structural equal-by-value
- * match for `teamViewerConfig.TeamViewerConfig` raw input.
+ * The publisher writes the canonical `TeamViewerConfig` shape into the
+ * TeamViewer canvas control's `webPartData.properties`. By aliasing
+ * the webpart contract directly, the publisher and the webpart cannot
+ * drift on field names (`flags` vs `featureFlags`), enum values
+ * (layout/density), or required-vs-optional shape — the type system
+ * enforces the same JSON on both sides of the integration seam.
  */
-export interface PublisherTeamViewerProperties {
-  readonly heading: string;
-  readonly articleId: string;
-  readonly destinationKey: 'projectSpotlight';
-  readonly listHostOverride: string | undefined;
-  readonly layout: TeamViewerLayout;
-  readonly density: TeamViewerDensity;
-  readonly featureFlags: {
-    readonly profileDetailDrawer: boolean;
-  };
-}
+export type PublisherTeamViewerProperties = TeamViewerConfig;
 
 /**
  * Subset of `TeamViewerPerson` the publisher can populate from its
- * own row shape. Full `TeamViewerPerson` shape (with
- * `upn/email/department/...`) is reconstructed by the TeamViewer
- * reader when it fetches additional Graph data at render time.
+ * own row shape. Aliased to the canonical `TeamViewerPerson` so
+ * downstream callers, harnesses, and renderers all consume one
+ * contract; the publisher leaves the Graph-enriched fields
+ * (`upn`/`email`/`department`/...) undefined and the webpart's
+ * reader fills them in at render time.
  */
-export interface PublisherTeamViewerPerson {
-  readonly id: string;
-  readonly articleId: string;
-  readonly articleTeamMemberId: string;
-  readonly displayName: string;
-  readonly jobTitle?: string;
-  readonly photoUrl?: string;
-  readonly sortOrder?: number;
-  readonly bio?: string;
-  readonly resumeRichText?: string;
-  readonly resumeDocumentUrl?: string;
-  readonly profileUrl?: string;
-}
+export type PublisherTeamViewerPerson = TeamViewerPerson;
 
-/** Build the structured TeamViewer properties bag from an article. */
+/** Build the canonical `TeamViewerConfig` JSON bag from an article. */
 export function buildTeamViewerProperties(
   article: PublisherArticleRow,
 ): PublisherTeamViewerProperties {
@@ -88,11 +89,11 @@ export function buildTeamViewerProperties(
         ? article.TeamViewerTitle
         : TEAM_VIEWER_DEFAULT_HEADING,
     articleId: article.ArticleId,
-    destinationKey: 'projectSpotlight',
+    destinationKey: article.Destination,
     listHostOverride: undefined,
     layout: 'grid',
     density: 'standard',
-    featureFlags: {
+    flags: {
       profileDetailDrawer: false,
     },
   };

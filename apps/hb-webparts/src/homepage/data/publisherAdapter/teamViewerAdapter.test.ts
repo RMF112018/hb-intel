@@ -20,6 +20,7 @@ function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
     SummaryExcerpt: 'x',
     BodyRichText: 'y',
     ArticleContentType: 'monthlySpotlight',
+    Destination: 'projectSpotlight',
     TemplateKey: 'ps-inprogress-monthly-v1',
     Slug: 'post-tv-1',
     WorkflowState: 'approved',
@@ -48,35 +49,35 @@ function member(
 }
 
 describe('buildTeamViewerProperties', () => {
-  it('emits the exact property contract the Project Spotlight shell expects', () => {
+  it('uses the article TeamViewerTitle as the heading and propagates the article identity', () => {
     const props = buildTeamViewerProperties(
-      post({
-      }),
+      post({ TeamViewerTitle: 'Project Team' }),
     );
     expect(props).toEqual({
       heading: 'Project Team',
       articleId: 'post-tv-1',
       destinationKey: 'projectSpotlight',
       listHostOverride: undefined,
-      layout: 'list',
-      density: 'compact',
-      featureFlags: { profileDetailDrawer: true },
+      layout: 'grid',
+      density: 'standard',
+      flags: { profileDetailDrawer: false },
     });
   });
 
-  it('falls back to canonical defaults when optional post fields are unset', () => {
+  it('falls back to canonical defaults when optional article fields are unset', () => {
     const props = buildTeamViewerProperties(post());
     expect(props.heading).toBe(TEAM_VIEWER_DEFAULT_HEADING);
     expect(props.layout).toBe('grid');
     expect(props.density).toBe('standard');
-    expect(props.featureFlags.profileDetailDrawer).toBe(false);
+    expect(props.flags.profileDetailDrawer).toBe(false);
     expect(props.destinationKey).toBe('projectSpotlight');
   });
 
-  it('locks destinationKey to projectSpotlight regardless of post input', () => {
-    // Operating-charter rule 1: single destination.
-    const props = buildTeamViewerProperties(post());
-    expect(props.destinationKey).toBe('projectSpotlight');
+  it('mirrors the article Destination as the canvas destinationKey', () => {
+    const ps = buildTeamViewerProperties(post({ Destination: 'projectSpotlight' }));
+    expect(ps.destinationKey).toBe('projectSpotlight');
+    const cp = buildTeamViewerProperties(post({ Destination: 'companyPulse' }));
+    expect(cp.destinationKey).toBe('companyPulse');
   });
 });
 

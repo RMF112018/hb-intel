@@ -168,7 +168,7 @@ describe('composeProjectSpotlightPage', () => {
     expect(tvp.properties.heading).toBe('Project Team');
     expect(tvp.properties.layout).toBe('list');
     expect(tvp.properties.density).toBe('compact');
-    expect(tvp.properties.featureFlags.profileDetailDrawer).toBe(true);
+    expect(tvp.properties.flags.profileDetailDrawer).toBe(true);
     expect(tvp.properties.articleId).toBe('post-001');
     expect(tvp.properties.destinationKey).toBe('projectSpotlight');
   });
