@@ -71,6 +71,13 @@ export interface PublisherListQueryOptions {
   readonly filter?: string;
   readonly top?: number;
   readonly orderBy?: string;
+  /**
+   * Navigation properties to `$expand`. Required for SharePoint User
+   * fields (e.g. `PersonPrincipal`) so the response carries the
+   * `{ EMail, Title, Id }` payload instead of only the flattened
+   * lookup id column.
+   */
+  readonly expand?: readonly string[];
 }
 
 export function createSharePointPublisherListAccess(): PublisherListAccess {
@@ -87,7 +94,10 @@ export function createSharePointPublisherListAccess(): PublisherListAccess {
       const orderBy = options?.orderBy
         ? `$orderby=${encodeURIComponent(options.orderBy)}`
         : '';
-      const qs = [select, filter, top, orderBy].filter(Boolean).join('&');
+      const expand = options?.expand?.length
+        ? `$expand=${options.expand.join(',')}`
+        : '';
+      const qs = [select, filter, top, orderBy, expand].filter(Boolean).join('&');
       const url =
         `${descriptor.hostSiteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(descriptor.displayName)}')/items` +
         (qs.length > 0 ? `?${qs}` : '');
@@ -254,9 +264,36 @@ export function createPublisherRepositories(
 
     teamMembers: {
       async listByArticle(articleId) {
+        // `PersonPrincipal` is a SharePoint User field. Without an
+        // explicit `$select`/`$expand` the REST response omits the
+        // expanded `{ EMail, Title }` payload and the mapper cannot
+        // hydrate the display identity. Selecting the expanded fields
+        // alongside the flat `PersonPrincipalId` closes the read side
+        // of the user-field seam deterministically.
         const rows = await access.readList(lists.teamMembers, {
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'SortOrder asc',
+          select: [
+            'Id',
+            'ArticleId',
+            'TeamMemberId',
+            'Title',
+            'DisplayName',
+            'Role',
+            'Company',
+            'Department',
+            'GroupKey',
+            'ParentMemberId',
+            'IsFeaturedMember',
+            'SortOrder',
+            'BioSnippet',
+            'ContactLink',
+            'PersonPrincipalId',
+            'PersonPrincipal/EMail',
+            'PersonPrincipal/Title',
+            'PersonPrincipal/Id',
+          ],
+          expand: ['PersonPrincipal'],
         });
         return mapAll(rows, mapTeamMemberRow);
       },

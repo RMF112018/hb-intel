@@ -950,7 +950,17 @@ function TeamPanel({
                 <input
                   className={styles.input}
                   value={r.PersonPrincipal}
-                  onChange={(e) => replaceAt(i, { ...r, PersonPrincipal: e.target.value })}
+                  onChange={(e) =>
+                    replaceAt(i, {
+                      ...r,
+                      PersonPrincipal: e.target.value,
+                      // Drop any previously-resolved user id — the
+                      // principal has changed, so the writer must
+                      // re-resolve via ensureUser before the next
+                      // save instead of carrying a stale id forward.
+                      PersonPrincipalId: undefined,
+                    })
+                  }
                 />
               </Field>
               <Field label="Role">

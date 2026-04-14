@@ -63,13 +63,21 @@ const HOST = 'https://example.com/sites/HBCentral';
 
 const ARTICLE_ID = 'art-001';
 
-function teamRow(id: string): PublisherTeamMemberRow {
+function teamRow(
+  id: string,
+  over: Partial<PublisherTeamMemberRow> = {},
+): PublisherTeamMemberRow {
   return {
     ArticleId: ARTICLE_ID,
     TeamMemberId: id,
     Title: id,
     PersonPrincipal: `${id}@example.com`,
+    // Default to a pre-resolved id so the keyed-sync / mid-write tests
+    // can focus on transport semantics; user-resolution behavior has
+    // its own dedicated describe block below.
+    PersonPrincipalId: 42,
     DisplayName: id,
+    ...over,
   };
 }
 
@@ -183,6 +191,127 @@ describe('createSharePointTeamMembersWriter — keyed-sync semantics', () => {
       (c) => c.method === 'POST' && c.httpMethodHeader === 'DELETE',
     );
     expect(deleteCalls).toHaveLength(0);
+  });
+});
+
+describe('createSharePointTeamMembersWriter — PersonPrincipal user-field resolution', () => {
+  const descriptor = {
+    key: 'teamMembers' as const,
+    displayName: 'HB Article Team Members',
+    hostSiteUrl: HOST as never,
+    mvpFields: [],
+  };
+
+  it('resolves missing PersonPrincipalId via ensureUserId before POST and emits the id on the wire', async () => {
+    const { impl, calls } = makeFetch(async ({ url, init }) => {
+      if (init.method === 'GET' && url.includes('/items?')) {
+        return ok({ value: [] });
+      }
+      if (init.method === 'POST') return ok({ Id: 77 });
+      return ok({});
+    });
+    const ensureUserId = vi.fn(async (email: string) =>
+      email === 'alice@example.com' ? 501 : undefined,
+    );
+    const writer = createSharePointTeamMembersWriter({
+      descriptor,
+      fetchImpl: impl,
+      fetchRequestDigestImpl: vi.fn(async () => 'digest'),
+      ensureUserId,
+    });
+
+    await writer.replaceAllForArticle(ARTICLE_ID, [
+      {
+        ArticleId: ARTICLE_ID,
+        TeamMemberId: 'tm-unresolved',
+        Title: 'Alice',
+        DisplayName: 'Alice',
+        PersonPrincipal: 'alice@example.com',
+        // No PersonPrincipalId — must be resolved by the writer.
+      },
+    ]);
+
+    expect(ensureUserId).toHaveBeenCalledWith('alice@example.com', 'digest');
+    const postBodies = calls
+      .filter((c) => c.method === 'POST' && c.httpMethodHeader === undefined)
+      .map((c) => c.body as Record<string, unknown>);
+    expect(postBodies).toHaveLength(1);
+    expect(postBodies[0]!['PersonPrincipalId']).toBe(501);
+    expect(postBodies[0]!['PersonPrincipal']).toBeUndefined();
+  });
+
+  it('does NOT call ensureUserId when PersonPrincipalId is already resolved', async () => {
+    const { impl } = makeFetch(async ({ url, init }) => {
+      if (init.method === 'GET' && url.includes('/items?')) {
+        return ok({ value: [] });
+      }
+      if (init.method === 'POST') return ok({ Id: 1 });
+      return ok({});
+    });
+    const ensureUserId = vi.fn(async () => 999);
+    const writer = createSharePointTeamMembersWriter({
+      descriptor,
+      fetchImpl: impl,
+      fetchRequestDigestImpl: vi.fn(async () => 'digest'),
+      ensureUserId,
+    });
+    await writer.replaceAllForArticle(ARTICLE_ID, [teamRow('tm-pre')]);
+    expect(ensureUserId).not.toHaveBeenCalled();
+  });
+
+  it('throws and issues NO write when ensureUserId cannot resolve the principal', async () => {
+    const { impl, calls } = makeFetch(async ({ url, init }) => {
+      if (init.method === 'GET' && url.includes('/items?')) {
+        return ok({ value: [] });
+      }
+      return ok({ Id: 1 });
+    });
+    const writer = createSharePointTeamMembersWriter({
+      descriptor,
+      fetchImpl: impl,
+      fetchRequestDigestImpl: vi.fn(async () => 'digest'),
+      ensureUserId: vi.fn(async () => undefined),
+    });
+    await expect(
+      writer.replaceAllForArticle(ARTICLE_ID, [
+        {
+          ArticleId: ARTICLE_ID,
+          TeamMemberId: 'tm-bad',
+          Title: 'Nobody',
+          DisplayName: 'Nobody',
+          PersonPrincipal: 'nobody@example.com',
+        },
+      ]),
+    ).rejects.toThrow(/Could not resolve SharePoint user id/);
+    // No item POST/MERGE/DELETE was issued.
+    const writeCalls = calls.filter((c) => c.method === 'POST');
+    expect(writeCalls).toHaveLength(0);
+  });
+
+  it('throws when PersonPrincipal is empty — the tenant User field is required', async () => {
+    const { impl } = makeFetch(async ({ url, init }) => {
+      if (init.method === 'GET' && url.includes('/items?')) {
+        return ok({ value: [] });
+      }
+      return ok({ Id: 1 });
+    });
+    const writer = createSharePointTeamMembersWriter({
+      descriptor,
+      fetchImpl: impl,
+      fetchRequestDigestImpl: vi.fn(async () => 'digest'),
+      ensureUserId: vi.fn(async () => 1),
+    });
+    await expect(
+      writer.replaceAllForArticle(ARTICLE_ID, [
+        {
+          ArticleId: ARTICLE_ID,
+          TeamMemberId: 'tm-empty',
+          Title: 'x',
+          DisplayName: 'x',
+          PersonPrincipal: '   ',
+        },
+      ]),
+    ).rejects.toThrow(/no PersonPrincipal/);
   });
 });
 

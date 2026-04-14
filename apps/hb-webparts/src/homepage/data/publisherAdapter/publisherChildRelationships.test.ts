@@ -126,11 +126,24 @@ describe('child-row writers emit ArticleId, never PostId', () => {
       TeamMemberId: 'tm-1',
       Title: 'Alice',
       PersonPrincipal: 'alice@example.com',
+      PersonPrincipalId: 17,
       DisplayName: 'Alice',
     };
     const fields = mapTeamMemberRowToListFields(row);
     expect(fields['ArticleId']).toBe(ARTICLE_ID);
     expect(fields['PostId']).toBeUndefined();
+  });
+
+  it('team-member write mapper REFUSES to encode a row whose User field is unresolved', () => {
+    expect(() =>
+      mapTeamMemberRowToListFields({
+        ArticleId: ARTICLE_ID,
+        TeamMemberId: 'tm-1',
+        Title: 'Alice',
+        PersonPrincipal: 'alice@example.com',
+        DisplayName: 'Alice',
+      }),
+    ).toThrow(/PersonPrincipalId is required/);
   });
 
   it('team-member write payload emits tenant columns only and no removed legacy fields', () => {

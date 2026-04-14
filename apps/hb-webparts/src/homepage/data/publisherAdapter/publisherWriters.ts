@@ -12,7 +12,7 @@
  *   operating-charter rule 5 — structured lists are the editorial source of truth.
  */
 
-import { fetchRequestDigest } from '@hbc/sharepoint-platform';
+import { ensureUserByEmail, fetchRequestDigest } from '@hbc/sharepoint-platform';
 import type {
   PublisherArticleRow,
   PublisherMediaRow,
@@ -314,22 +314,32 @@ export function createSharePointArticleWriter(deps: {
 /**
  * Map a `PublisherTeamMemberRow` to the SharePoint REST field bag for
  * `HB Article Team Members`. Emits only tenant-supported columns
- * (schema report §B). `PersonPrincipal` is a User field, so the
- * writer emits `PersonPrincipalId` (integer user id) — callers must
- * resolve the principal email/login to a user id (e.g. via
- * `ensureUserByEmail`) before invoking this mapper. When no id is
- * present the User column is sent as `null`, which SharePoint treats
- * as "clear" — the caller is responsible for not persisting rows
- * that require the user field to be set.
+ * (schema report §B).
+ *
+ * Tenant→transport distinction: the tenant column is the User field
+ * `PersonPrincipal`; the REST write alias is `PersonPrincipalId`
+ * (integer user id). The team-members writer resolves the principal
+ * via `ensureUserByEmail` before calling this mapper, so by the time
+ * we encode the row the id MUST already be present. We refuse to emit
+ * a `null` for this required User field — silently persisting `null`
+ * breaks the row on the tenant list and is the exact failure mode
+ * this seam exists to prevent.
  */
 export function mapTeamMemberRowToListFields(
   row: PublisherTeamMemberRow,
 ): Record<string, unknown> {
+  if (typeof row.PersonPrincipalId !== 'number') {
+    throw new Error(
+      `mapTeamMemberRowToListFields: PersonPrincipalId is required (tenant User field). ` +
+        `Resolve the principal '${row.PersonPrincipal}' to a SharePoint user id before write ` +
+        `(team member '${row.TeamMemberId}' on article '${row.ArticleId}').`,
+    );
+  }
   return {
     ArticleId: row.ArticleId,
     TeamMemberId: row.TeamMemberId,
     Title: row.Title,
-    PersonPrincipalId: row.PersonPrincipalId ?? null,
+    PersonPrincipalId: row.PersonPrincipalId,
     DisplayName: row.DisplayName,
     Role: nullIfEmpty(row.Role),
     Company: nullIfEmpty(row.Company),
@@ -420,6 +430,7 @@ function createKeyedSyncWriter<T>(
   mapFn: (row: T) => Record<string, unknown>,
   fetchImpl: FetchImpl,
   digestImpl: DigestImpl,
+  preWrite?: (row: T, digest: string) => Promise<T>,
 ) {
   return async function replaceAllForArticle(
     articleId: string,
@@ -439,7 +450,8 @@ function createKeyedSyncWriter<T>(
     let created = 0;
     let updated = 0;
     const incomingKeys = new Set<string>();
-    for (const row of rows) {
+    for (const source of rows) {
+      const row = preWrite ? await preWrite(source, digest) : source;
       const key = childKeyOf(row);
       incomingKeys.add(key);
       const body = mapFn(row);
@@ -467,12 +479,53 @@ function createKeyedSyncWriter<T>(
   };
 }
 
+/**
+ * Resolver seam: email/login → SharePoint numeric user id. Defaults to
+ * `ensureUserByEmail` against the descriptor's host site; tests inject
+ * a deterministic stub. The writer calls this for every team-member
+ * row whose `PersonPrincipalId` is missing, BEFORE the transport
+ * payload is encoded. Unresolved or empty principals throw — the
+ * tenant `PersonPrincipal` User field is required and cannot be
+ * persisted as `null`.
+ */
+export type EnsureUserIdImpl = (
+  email: string,
+  digest: string,
+) => Promise<number | undefined>;
+
 export function createSharePointTeamMembersWriter(deps: {
   descriptor?: PublisherListDescriptor;
   fetchImpl?: FetchImpl;
   fetchRequestDigestImpl?: DigestImpl;
+  ensureUserId?: EnsureUserIdImpl;
 } = {}): TeamMembersWriter {
   const descriptor = deps.descriptor ?? PUBLISHER_LISTS.teamMembers;
+  const ensureUserId: EnsureUserIdImpl =
+    deps.ensureUserId ??
+    ((email, digest) => ensureUserByEmail(descriptor.hostSiteUrl, email, digest));
+
+  async function resolvePrincipal(
+    row: PublisherTeamMemberRow,
+    digest: string,
+  ): Promise<PublisherTeamMemberRow> {
+    if (typeof row.PersonPrincipalId === 'number') return row;
+    const principal = row.PersonPrincipal?.trim() ?? '';
+    if (principal.length === 0) {
+      throw new Error(
+        `Team member '${row.TeamMemberId}' on article '${row.ArticleId}' ` +
+          `has no PersonPrincipal — the tenant User field is required.`,
+      );
+    }
+    const resolvedId = await ensureUserId(principal, digest);
+    if (typeof resolvedId !== 'number') {
+      throw new Error(
+        `Could not resolve SharePoint user id for PersonPrincipal '${principal}' ` +
+          `(team member '${row.TeamMemberId}' on article '${row.ArticleId}').`,
+      );
+    }
+    return { ...row, PersonPrincipalId: resolvedId };
+  }
+
   return {
     replaceAllForArticle: createKeyedSyncWriter<PublisherTeamMemberRow>(
       descriptor,
@@ -481,6 +534,7 @@ export function createSharePointTeamMembersWriter(deps: {
       mapTeamMemberRowToListFields,
       deps.fetchImpl ?? fetch,
       deps.fetchRequestDigestImpl ?? fetchRequestDigest,
+      resolvePrincipal,
     ),
   };
 }
