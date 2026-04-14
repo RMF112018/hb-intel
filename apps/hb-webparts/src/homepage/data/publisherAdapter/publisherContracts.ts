@@ -365,8 +365,9 @@ export interface PublisherWorkflowHistoryRow {
  *   FeaturedDefault, PinnedDefault, ManualOverrideAllowed,
  *   FeedWindowDays, Notes.
  *
- * Drives authoring defaults (FeaturedDefault / PinnedDefault) and
- * authoring-surface manual-override gating (ManualOverrideAllowed).
+ * Drives authoring promotion policy resolution:
+ * defaults (FeaturedDefault / PinnedDefault) and lock semantics
+ * (ManualOverrideAllowed=false).
  */
 export interface PublisherPromotionRuleRow {
   readonly RuleId: string;

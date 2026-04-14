@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { mapPromotionRuleRow } from './publisherRowMappers';
 import {
   selectPromotionDefaults,
+  selectPromotionPolicy,
   selectPromotionRule,
 } from './promotionRuleSelector';
 import type { PublisherPromotionRuleRow } from './publisherContracts';
@@ -86,6 +87,24 @@ describe('selectPromotionDefaults', () => {
     RuleId: 'rule-other-dest',
     Destination: 'companyPulse',
   };
+  const homepageFallback: PublisherPromotionRuleRow = {
+    RuleId: 'rule-homepage',
+    Title: 'Homepage fallback',
+    Destination: 'projectSpotlight',
+    Scope: 'homepage',
+    IsActive: true,
+    FeaturedDefault: true,
+    PinnedDefault: true,
+  };
+  const globalFallback: PublisherPromotionRuleRow = {
+    RuleId: 'rule-global',
+    Title: 'Global fallback',
+    Destination: 'projectSpotlight',
+    Scope: 'global',
+    IsActive: true,
+    FeaturedDefault: true,
+    PinnedDefault: false,
+  };
 
   it('returns publisher defaults when no rule matches', () => {
     const defaults = selectPromotionDefaults([], 'projectSpotlight', 'monthlySpotlight');
@@ -130,5 +149,39 @@ describe('selectPromotionDefaults', () => {
     expect(
       selectPromotionRule([otherDestination], 'projectSpotlight', 'monthlySpotlight'),
     ).toBeUndefined();
+  });
+
+  it('falls back to homepage scope when no destination scope rule exists', () => {
+    const policy = selectPromotionPolicy(
+      [homepageFallback],
+      'projectSpotlight',
+      'monthlySpotlight',
+    );
+    expect(policy.matchedScope).toBe('homepage');
+    expect(policy.sourceRuleId).toBe('rule-homepage');
+    expect(policy.featured).toBe(true);
+    expect(policy.pinned).toBe(true);
+  });
+
+  it('falls back to global scope when destination/homepage rules are absent', () => {
+    const policy = selectPromotionPolicy(
+      [globalFallback],
+      'projectSpotlight',
+      'monthlySpotlight',
+    );
+    expect(policy.matchedScope).toBe('global');
+    expect(policy.sourceRuleId).toBe('rule-global');
+    expect(policy.featured).toBe(true);
+    expect(policy.pinned).toBe(false);
+  });
+
+  it('marks policy as locked when manual override is disallowed', () => {
+    const policy = selectPromotionPolicy(
+      [monthly],
+      'projectSpotlight',
+      'monthlySpotlight',
+    );
+    expect(policy.manualOverrideAllowed).toBe(false);
+    expect(policy.isLocked).toBe(true);
   });
 });

@@ -45,8 +45,8 @@ import {
   type PublishResolutionContext,
   type PublishOutcome,
   type PublisherPromotionRuleRow,
-  selectPromotionDefaults,
-  type PromotionDefaults,
+  selectPromotionPolicy,
+  type PromotionPolicyResult,
   resolveTemplate,
 } from '../../homepage/data/publisherAdapter/index.js';
 import { buildPublishResolutionContext } from '../../homepage/data/publisherAdapter/publishResolutionContext.js';
@@ -97,6 +97,34 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+export interface PromotionPolicyApplyResult {
+  readonly draft: PublisherArticleRow;
+  readonly policy: PromotionPolicyResult;
+}
+
+export function applyPromotionPolicyToDraft(
+  draft: PublisherArticleRow,
+  rules: readonly PublisherPromotionRuleRow[],
+  options?: { readonly enforceLockOnly?: boolean },
+): PromotionPolicyApplyResult {
+  const policy = selectPromotionPolicy(
+    rules,
+    draft.Destination,
+    draft.ArticleContentType,
+  );
+  if (options?.enforceLockOnly && !policy.isLocked) {
+    return { draft, policy };
+  }
+  return {
+    draft: {
+      ...draft,
+      IsFeatured: policy.featured,
+      IsPinned: policy.pinned,
+    },
+    policy,
+  };
+}
+
 /**
  * Build a blank authoring draft for a brand-new article.
  *
@@ -112,7 +140,7 @@ function nowIso(): string {
  * template supply one via the authoring surface's TemplateKey
  * field, which the resolver honors as an explicit admin override.
  */
-function emptyArticle(promotion: PromotionDefaults): PublisherArticleRow {
+function emptyArticle(): PublisherArticleRow {
   const id = `art-${Date.now()}-${Math.floor(Math.random() * 1e6)
     .toString(36)
     .padStart(4, '0')}`;
@@ -136,12 +164,10 @@ function emptyArticle(promotion: PromotionDefaults): PublisherArticleRow {
     // seed a hard-coded URL on new drafts — authors are not expected
     // to carry a per-destination constant (P2-2).
     TargetSiteUrl: undefined,
-    // Promotion-rule effect (Phase-02 Prompt-08): a tenant rule
-    // matching (Destination, ArticleContentType) seeds these
-    // defaults; when the rule disallows manual override the
-    // authoring surface locks the toggles below.
-    IsFeatured: promotion.featured,
-    IsPinned: promotion.pinned,
+    // Promotion values are resolved from the current draft's
+    // destination/content-type policy by the editor before save.
+    IsFeatured: false,
+    IsPinned: false,
   };
 }
 
@@ -188,6 +214,7 @@ export function ArticlePublisher({
   const [articles, setArticles] = React.useState<readonly PublisherArticleRow[]>([]);
   const [articlesLoading, setArticlesLoading] = React.useState(false);
   const [promotionRules, setPromotionRules] = React.useState<readonly PublisherPromotionRuleRow[]>([]);
+  const [promotionPolicy, setPromotionPolicy] = React.useState<PromotionPolicyResult | undefined>();
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | undefined>();
   const [articleDraft, setArticleDraft] = React.useState<PublisherArticleRow | undefined>();
   const [teamDraft, setTeamDraft] = React.useState<PublisherTeamMemberRow[]>([]);
@@ -199,6 +226,18 @@ export function ArticlePublisher({
   const [busy, setBusy] = React.useState(false);
   const [preview, setPreview] = React.useState<PreviewOutcome | undefined>();
   const [previewLoading, setPreviewLoading] = React.useState(false);
+
+  const applyPromotionPolicy = React.useCallback(
+    (
+      draft: PublisherArticleRow,
+      options?: { readonly enforceLockOnly?: boolean },
+    ): PublisherArticleRow => {
+      const resolved = applyPromotionPolicyToDraft(draft, promotionRules, options);
+      setPromotionPolicy(resolved.policy);
+      return resolved.draft;
+    },
+    [promotionRules],
+  );
 
   const reloadList = React.useCallback(async () => {
     setArticlesLoading(true);
@@ -228,6 +267,13 @@ export function ArticlePublisher({
         ]);
         if (article) {
           setArticleDraft(article);
+          setPromotionPolicy(
+            selectPromotionPolicy(
+              promotionRules,
+              article.Destination,
+              article.ArticleContentType,
+            ),
+          );
           setTeamDraft(team.slice());
           setMediaDraft(media.slice());
           setBinding(bindingRow);
@@ -241,7 +287,7 @@ export function ArticlePublisher({
         setBusy(false);
       }
     },
-    [repositories],
+    [repositories, promotionRules],
   );
 
   React.useEffect(() => {
@@ -270,15 +316,18 @@ export function ArticlePublisher({
     }
   }, [tab, selectedArticleId, loadPreview]);
 
-  // Load active promotion rules once at mount. The rules seed the
-  // in-memory `IsFeatured` / `IsPinned` values on NEW articles via
-  // `selectPromotionDefaults` → `emptyArticle`. The editor does not
-  // expose `IsFeatured` / `IsPinned` toggles today, so manual-
-  // override gating (`ManualOverrideAllowed`) is not enforced
-  // here — when those toggles land, bind their `disabled` prop to
-  // `!defaults.manualOverrideAllowed`. See
-  // `promotionRuleSelector.ts` header for the scope boundary.
-  // Closes Phase-05 Prompt-05 (narrative → behavior).
+  // Load active promotion rules once at mount.
+  //
+  // Current behavior:
+  //   - resolve policy from the draft's actual
+  //     (Destination, ArticleContentType),
+  //   - seed/re-seed IsFeatured/IsPinned on draft creation and
+  //     destination/content-type changes,
+  //   - enforce lock semantics on save when
+  //     ManualOverrideAllowed=false.
+  //
+  // The editor still has no explicit IsFeatured/IsPinned toggles;
+  // this prompt enforces policy closure without inventing controls.
   React.useEffect(() => {
     void (async () => {
       try {
@@ -292,23 +341,47 @@ export function ArticlePublisher({
   }, [repositories]);
 
   const handleCreateNew = React.useCallback(() => {
-    const promotion = selectPromotionDefaults(
-      promotionRules,
-      'projectSpotlight',
-      'monthlySpotlight',
-    );
     // No hard-coded TemplateKey — the resolver selects based on the
     // article's Destination + ContentType + applicability when the
     // operator leaves the override blank. Closes P1-2.
-    const draft = emptyArticle(promotion);
-    setArticleDraft(draft);
+    const seeded = applyPromotionPolicy(emptyArticle());
+    setArticleDraft(seeded);
     setTeamDraft([]);
     setMediaDraft([]);
     setBinding(undefined);
     setResolutionContext(undefined);
-    setSelectedArticleId(draft.ArticleId);
+    setSelectedArticleId(seeded.ArticleId);
     setTab('metadata');
-  }, []);
+  }, [applyPromotionPolicy]);
+
+  const promotionContextRef = React.useRef<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    if (!articleDraft) {
+      promotionContextRef.current = undefined;
+      setPromotionPolicy(undefined);
+      return;
+    }
+    const contextKey = `${articleDraft.Destination}::${articleDraft.ArticleContentType}`;
+    if (promotionContextRef.current === contextKey) {
+      setPromotionPolicy(
+        selectPromotionPolicy(
+          promotionRules,
+          articleDraft.Destination,
+          articleDraft.ArticleContentType,
+        ),
+      );
+      return;
+    }
+    promotionContextRef.current = contextKey;
+    const next = applyPromotionPolicy(articleDraft);
+    if (
+      next.IsFeatured !== articleDraft.IsFeatured ||
+      next.IsPinned !== articleDraft.IsPinned
+    ) {
+      setArticleDraft(next);
+    }
+  }, [articleDraft, promotionRules, applyPromotionPolicy]);
 
   const handleSave = React.useCallback(async () => {
     if (!articleDraft) return;
@@ -350,19 +423,20 @@ export function ArticlePublisher({
         TemplateKey: resolvedTemplateKey,
         UpdatedDateUtc: nowIso(),
       };
-      await repositories.articles.upsert(updated);
+      const policyApplied = applyPromotionPolicy(updated, { enforceLockOnly: true });
+      await repositories.articles.upsert(policyApplied);
       await repositories.teamMembers.replaceAllForArticle(updated.ArticleId, teamDraft);
       await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
-      setArticleDraft(updated);
+      setArticleDraft(policyApplied);
       setStatus('Saved.');
       await reloadList();
-      await reloadSelected(updated.ArticleId);
+      await reloadSelected(policyApplied.ArticleId);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Save failed.');
     } finally {
       setBusy(false);
     }
-  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadList, reloadSelected]);
+  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadList, reloadSelected, applyPromotionPolicy]);
 
   const handleTransition = React.useCallback(
     async (to: WorkflowState) => {
@@ -581,6 +655,7 @@ export function ArticlePublisher({
                   draft={articleDraft}
                   onChange={setArticleDraft}
                   searchProjects={searchProjects}
+                  promotionPolicy={promotionPolicy}
                 />
               )}
               {tab === 'hero' && (
@@ -709,9 +784,10 @@ function update<T extends keyof PublisherArticleRow>(
 
 interface MetadataPanelProps extends PanelProps {
   searchProjects?: ProjectLookupSearchFn;
+  promotionPolicy?: PromotionPolicyResult;
 }
 
-function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) {
+function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: MetadataPanelProps) {
   const isLegacyMilestone = draft.ArticleContentType === 'milestoneSpotlight';
   const contentTypeOptions = isLegacyMilestone
     ? [...ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES, 'milestoneSpotlight']
@@ -807,6 +883,14 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
           ))}
         </select>
       </Field>
+      {promotionPolicy?.isLocked && (
+        <div className={styles.statusLine}>
+          Promotion rule lock: IsFeatured={String(promotionPolicy.featured)} and
+          IsPinned={String(promotionPolicy.pinned)} are enforced by the
+          {` ${promotionPolicy.matchedScope} `}scope rule
+          {` ${promotionPolicy.sourceRuleId ?? '(unknown)'}`}.
+        </div>
+      )}
       <Field label="Spotlight type">
         <select
           className={styles.select}

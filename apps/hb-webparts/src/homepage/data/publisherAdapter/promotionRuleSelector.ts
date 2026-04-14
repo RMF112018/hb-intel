@@ -2,13 +2,12 @@
  * Pure selectors over tenant `HB Article Promotion Rules`.
  *
  * **Implemented behavior (current sprint):**
- *   - Authoring defaults only — when creating a new article the
- *     authoring surface calls `selectPromotionDefaults(...)` once
- *     and seeds the in-memory `IsFeatured` / `IsPinned` fields
- *     from the most-specific active rule for
- *     `(Destination, ArticleContentType)`. The seeded values are
- *     written through to the upsert like any other authoring
- *     field; subsequent edits pass through unchanged.
+ *   - The selector resolves an explicit policy for
+ *     `(Destination, ArticleContentType)` with deterministic scope
+ *     precedence: destination > homepage > global.
+ *   - The authoring surface can consume that policy to seed and
+ *     re-apply `IsFeatured` / `IsPinned`, including lock semantics
+ *     when `ManualOverrideAllowed=false`.
  *
  * **NOT enforced in the editor (Phase-05 Prompt-05 scope-down):**
  *   - The `manualOverrideAllowed` flag and `source` rule are
@@ -32,9 +31,8 @@
  * registry order).
  *
  * Scope precedence (high → low): destination > homepage > global.
- * The publisher cares about destination-scoped defaults during
- * authoring; homepage / global rules are recorded by the tenant for
- * downstream surfaces but never override a destination-scoped match.
+ * Homepage/global are no longer implicit no-ops: they participate as
+ * deterministic fallbacks when a destination-scoped rule is absent.
  */
 import type { PublisherPromotionRuleRow } from './publisherContracts';
 import type { ArticleContentType, Destination } from './publisherEnums';
@@ -46,10 +44,28 @@ export interface PromotionDefaults {
   readonly source?: PublisherPromotionRuleRow;
 }
 
+export type PromotionRuleMatchScope = 'destination' | 'homepage' | 'global' | 'none';
+
+export interface PromotionPolicyResult {
+  readonly featured: boolean;
+  readonly pinned: boolean;
+  readonly manualOverrideAllowed: boolean;
+  readonly isLocked: boolean;
+  readonly matchedScope: PromotionRuleMatchScope;
+  readonly source?: PublisherPromotionRuleRow;
+  readonly sourceRuleId?: string;
+}
+
 const DEFAULT_DEFAULTS: PromotionDefaults = {
   featured: false,
   pinned: false,
   manualOverrideAllowed: true,
+};
+
+const DEFAULT_POLICY: PromotionPolicyResult = {
+  ...DEFAULT_DEFAULTS,
+  isLocked: false,
+  matchedScope: 'none',
 };
 
 /**
@@ -62,13 +78,52 @@ export function selectPromotionRule(
   destination: Destination,
   contentType: ArticleContentType,
 ): PublisherPromotionRuleRow | undefined {
+  return selectPromotionPolicy(rules, destination, contentType).source;
+}
+
+function findInScope(
+  rules: readonly PublisherPromotionRuleRow[],
+  destination: Destination,
+  contentType: ArticleContentType,
+  scope: 'destination' | 'homepage' | 'global',
+): PublisherPromotionRuleRow | undefined {
   const candidates = rules.filter(
-    (r) => r.IsActive && r.Destination === destination && r.Scope === 'destination',
+    (r) => r.IsActive && r.Destination === destination && r.Scope === scope,
   );
-  // Exact RuleContentType match outranks the wildcard.
   const exact = candidates.find((r) => r.RuleContentType === contentType);
   if (exact) return exact;
   return candidates.find((r) => !r.RuleContentType);
+}
+
+/**
+ * Resolve effective promotion policy for an article draft.
+ *
+ * Scope precedence is deterministic and explicit:
+ *   destination > homepage > global
+ *
+ * Within a scope, exact RuleContentType matches outrank wildcard
+ * (missing RuleContentType) rules.
+ */
+export function selectPromotionPolicy(
+  rules: readonly PublisherPromotionRuleRow[],
+  destination: Destination,
+  contentType: ArticleContentType,
+): PromotionPolicyResult {
+  for (const scope of ['destination', 'homepage', 'global'] as const) {
+    const rule = findInScope(rules, destination, contentType, scope);
+    if (!rule) continue;
+    const manualOverrideAllowed = rule.ManualOverrideAllowed ?? true;
+    return {
+      featured: rule.FeaturedDefault ?? false,
+      pinned: rule.PinnedDefault ?? false,
+      manualOverrideAllowed,
+      isLocked: !manualOverrideAllowed,
+      matchedScope: scope,
+      source: rule,
+      sourceRuleId: rule.RuleId,
+    };
+  }
+  return DEFAULT_POLICY;
 }
 
 /**
@@ -83,12 +138,12 @@ export function selectPromotionDefaults(
   destination: Destination,
   contentType: ArticleContentType,
 ): PromotionDefaults {
-  const rule = selectPromotionRule(rules, destination, contentType);
-  if (!rule) return DEFAULT_DEFAULTS;
+  const policy = selectPromotionPolicy(rules, destination, contentType);
+  if (!policy.source) return DEFAULT_DEFAULTS;
   return {
-    featured: rule.FeaturedDefault ?? false,
-    pinned: rule.PinnedDefault ?? false,
-    manualOverrideAllowed: rule.ManualOverrideAllowed ?? true,
-    source: rule,
+    featured: policy.featured,
+    pinned: policy.pinned,
+    manualOverrideAllowed: policy.manualOverrideAllowed,
+    source: policy.source,
   };
 }
