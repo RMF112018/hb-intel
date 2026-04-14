@@ -25,6 +25,7 @@
 
 import type { PublisherMediaRow, PublisherArticleRow, PublisherTeamMemberRow } from '../publisherContracts';
 import type { PublishResolutionContext } from '../publishResolutionContext';
+import { resolveDestinationSiteUrl } from '../destinationSiteUrls';
 import type { PublisherTeamViewerProperties } from '../teamViewerAdapter';
 import {
   buildTeamViewerProperties,
@@ -340,7 +341,13 @@ export function composeProjectSpotlightPage(
     slug: article.Slug,
     pageName: resolvePageName(article),
     pageTitle: article.Title,
-    targetSiteUrl: article.TargetSiteUrl ?? '',
+    // TargetSiteUrl is tenant-optional on HB Articles — derive the
+    // canonical site URL from the destination when the author did
+    // not supply one (P2-2).
+    targetSiteUrl:
+      article.TargetSiteUrl ??
+      resolveDestinationSiteUrl(article.Destination) ??
+      '',
     shellKey: shell.shellKey,
     shellVersion: shell.shellVersion,
     templateKey: template.TemplateKey,

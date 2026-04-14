@@ -41,6 +41,7 @@ import {
   type ValidationResult,
 } from './validation/validationEngine';
 import { PROJECT_SPOTLIGHT_V1_SHELL, type PageShellManifest } from './pageGeneration/xmlShellManifest';
+import { resolveDestinationSiteUrl } from './destinationSiteUrls';
 
 export type PublishMode = 'create' | 'republish' | 'preview';
 
@@ -454,7 +455,17 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           : bindingIdFactory(req.articleId, now),
       ArticleId: context.article.ArticleId,
       Title: context.article.Title,
-      TargetSiteUrl: context.article.TargetSiteUrl ?? '',
+      // HB Articles.TargetSiteUrl is tenant-optional; the binding
+      // column is required (tenant schema). Fill from the article
+      // when the author supplied one (validation has already
+      // pinned it to the canonical URL), otherwise derive from the
+      // destination — closes the P2-2 policy/schema mismatch so
+      // authors aren't carrying a field that is effectively a
+      // constant per destination.
+      TargetSiteUrl:
+        context.article.TargetSiteUrl ??
+        resolveDestinationSiteUrl(context.article.Destination) ??
+        '',
       PageTemplateKey: publishResult.page.identity.templateKey,
       PublishStatus: 'published',
       PageId: publishResult.creation.pageId,

@@ -113,6 +113,36 @@ describe('validatePublishContext', () => {
     ).toBe(false);
   });
 
+  it('tolerates a blank TargetSiteUrl — derived at publish time (P2-2 closure)', () => {
+    // Tenant schema makes HB Articles.TargetSiteUrl optional. The
+    // app now derives the canonical URL from Destination at write
+    // time, so a blank value on the author side MUST NOT produce
+    // a validation error.
+    const result = validatePublishContext(
+      context({ article: { TargetSiteUrl: undefined } }),
+    );
+    expect(
+      result.errors.some((e) => e.field === 'TargetSiteUrl'),
+    ).toBe(false);
+  });
+
+  it('rejects a TargetSiteUrl override that does not match the canonical destination URL', () => {
+    // Authors may still supply a value, but any override MUST match
+    // the canonical destination URL exactly — otherwise publishing
+    // would silently retarget the page at an unauthorized site.
+    const result = validatePublishContext(
+      context({
+        article: {
+          TargetSiteUrl: 'https://evil.example.com/sites/NotHere',
+        },
+      }),
+    );
+    expect(result.ok).toBe(false);
+    const finding = result.errors.find((e) => e.field === 'TargetSiteUrl');
+    expect(finding).toBeDefined();
+    expect(finding?.message).toContain('does not target the canonical');
+  });
+
   it('flags missing Title as missing-required-field error', () => {
     const result = validatePublishContext(context({ article: { Title: '' } }));
     expect(result.ok).toBe(false);

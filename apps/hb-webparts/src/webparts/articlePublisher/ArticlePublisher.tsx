@@ -114,8 +114,11 @@ function emptyArticle(promotion: PromotionDefaults): PublisherArticleRow {
     HeroPrimaryImageAltText: '',
     CreatedDateUtc: nowIso(),
     UpdatedDateUtc: nowIso(),
-    TargetSiteUrl:
-      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    // TargetSiteUrl is tenant-optional and derived from Destination
+    // at publish time (`resolveDestinationSiteUrl`). We no longer
+    // seed a hard-coded URL on new drafts — authors are not expected
+    // to carry a per-destination constant (P2-2).
+    TargetSiteUrl: undefined,
     // Promotion-rule effect (Phase-02 Prompt-08): a tenant rule
     // matching (Destination, ArticleContentType) seeds these
     // defaults; when the rule disallows manual override the

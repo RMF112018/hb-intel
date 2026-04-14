@@ -34,6 +34,10 @@ import {
   PROJECT_SPOTLIGHT_V1_SHELL,
   type PageShellManifest,
 } from '../pageGeneration/xmlShellManifest';
+import {
+  resolveDestinationSiteUrl,
+  resolveDestinationSitePath,
+} from '../destinationSiteUrls';
 
 export type ValidationCategory =
   | 'missing-required-field'
@@ -68,8 +72,6 @@ export interface ValidationResult {
 export interface ValidatePublishContextOptions {
   readonly shell?: PageShellManifest;
 }
-
-const PROJECT_SPOTLIGHT_HOST = 'sites/ProjectSpotlight';
 
 const TITLE_MAX = 120;
 const SUBHEAD_MAX = 200;
@@ -225,14 +227,34 @@ function validateGlobalRules(
     });
   }
 
-  // Rule 3
-  if (!article.TargetSiteUrl || !article.TargetSiteUrl.includes(PROJECT_SPOTLIGHT_HOST)) {
+  // Rule 3 — TargetSiteUrl is tenant-optional (P2-2). The app
+  // no longer requires the author to carry a value: when blank,
+  // the orchestrator derives the canonical destination URL via
+  // `resolveDestinationSiteUrl` at publish time. When the author
+  // DOES supply a value, it must match the canonical URL exactly
+  // — an arbitrary override would silently retarget the page at
+  // an unauthorized site. If the destination has no canonical
+  // URL registered, fail closed.
+  const canonicalSiteUrl = resolveDestinationSiteUrl(article.Destination);
+  const canonicalSitePath = resolveDestinationSitePath(article.Destination);
+  if (!canonicalSiteUrl || !canonicalSitePath) {
     findings.push({
       category: 'invalid-template-match',
       severity: 'error',
       field: 'TargetSiteUrl',
-      message: `TargetSiteUrl must point at the Project Spotlight site (found '${article.TargetSiteUrl ?? ''}').`,
-      actionHint: 'Restore the default Project Spotlight site URL.',
+      message: `Destination '${article.Destination}' has no canonical site URL registered; publishing is not wired for this destination yet.`,
+      actionHint: 'Pick a supported destination or register the destination site URL in destinationSiteUrls.ts.',
+    });
+  } else if (article.TargetSiteUrl && !article.TargetSiteUrl.includes(canonicalSitePath)) {
+    // Path-based check (not full-URL equality): accepts tenant-host
+    // variation (prod vs. test) while rejecting a retarget to a
+    // completely unrelated site path.
+    findings.push({
+      category: 'invalid-template-match',
+      severity: 'error',
+      field: 'TargetSiteUrl',
+      message: `TargetSiteUrl override '${article.TargetSiteUrl}' does not target the canonical '${article.Destination}' site path ('${canonicalSitePath}').`,
+      actionHint: 'Clear TargetSiteUrl to accept the canonical destination URL, or correct the path.',
     });
   }
 
