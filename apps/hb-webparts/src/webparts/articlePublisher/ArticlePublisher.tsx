@@ -1446,10 +1446,11 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
     [draft, onChange],
   );
 
-  // Slug, TemplateKey, TargetSiteUrl are intentionally hidden from the
-  // author. Slug is seeded and preserved by the adapter; TemplateKey is
-  // system-resolved on save via `resolveTemplateKeySystemManaged`;
-  // TargetSiteUrl is derived from Destination at publish time.
+  // Slug, TemplateKey, TargetSiteUrl are intentionally hidden from
+  // the author. Slug is system-managed at save via `resolveSlugForSave`
+  // (workstream-b step-03); TemplateKey is system-resolved on save via
+  // `resolveTemplateKeySystemManaged`; TargetSiteUrl is derived from
+  // Destination at publish time.
   return (
     <div className={styles.editorialForm}>
       <Field label="Headline">
