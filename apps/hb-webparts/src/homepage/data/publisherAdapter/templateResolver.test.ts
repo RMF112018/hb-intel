@@ -102,6 +102,33 @@ describe('resolveTemplate — tenant HB Article Template Registry', () => {
     expect(result.reason).toBe('noCandidate');
   });
 
+  it('treats empty/whitespace TemplateKey as NO override — resolver falls through to applicability (P1-2 closure)', () => {
+    // New-article creation now seeds `TemplateKey = ''`; the
+    // resolver MUST ignore the empty string and pick via
+    // applicability rules. If this regresses, new articles
+    // silently bypass the template registry.
+    const registry = [
+      tpl({ TemplateKey: 'auto-winner', TemplatePriority: 999 }),
+      tpl({ TemplateKey: 'manual', TemplatePriority: 1 }),
+    ];
+    const blank = resolveTemplate(
+      { ...INPUT_MONTHLY, TemplateKey: '' },
+      registry,
+    );
+    expect(blank.ok).toBe(true);
+    if (!blank.ok) return;
+    expect(blank.entry.TemplateKey).toBe('auto-winner');
+    expect(blank.trace.selectionRule).not.toBe('adminOverride');
+
+    const ws = resolveTemplate(
+      { ...INPUT_MONTHLY, TemplateKey: '   ' },
+      registry,
+    );
+    expect(ws.ok).toBe(true);
+    if (!ws.ok) return;
+    expect(ws.trace.selectionRule).not.toBe('adminOverride');
+  });
+
   it('respects admin override when the override is active', () => {
     const registry = [
       tpl({ TemplateKey: 'auto-winner', TemplatePriority: 999 }),

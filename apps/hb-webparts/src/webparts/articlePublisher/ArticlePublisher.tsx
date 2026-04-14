@@ -82,10 +82,20 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function emptyArticle(
-  templateKey: string,
-  promotion: PromotionDefaults,
-): PublisherArticleRow {
+/**
+ * Build a blank authoring draft for a brand-new article.
+ *
+ * `TemplateKey` is left intentionally empty — the deterministic
+ * template resolver (`resolveTemplate`) treats an empty/whitespace
+ * `TemplateKey` as "no admin override" and picks the active registry
+ * entry whose Destination + ContentTypes + applicability filters
+ * match the article. Seeding a hard-coded key here would short-
+ * circuit that logic and make the registry performative (P1-2).
+ * Operators who want a specific template can still supply one via
+ * the authoring surface's TemplateKey field, which the resolver
+ * honors as an explicit admin override.
+ */
+function emptyArticle(promotion: PromotionDefaults): PublisherArticleRow {
   const id = `art-${Date.now()}-${Math.floor(Math.random() * 1e6)
     .toString(36)
     .padStart(4, '0')}`;
@@ -95,7 +105,7 @@ function emptyArticle(
     ArticleContentType: 'monthlySpotlight',
     Destination: 'projectSpotlight',
     Slug: id,
-    TemplateKey: templateKey,
+    TemplateKey: '',
     WorkflowState: 'draft',
     Subhead: '',
     SummaryExcerpt: '',
@@ -271,7 +281,10 @@ export function ArticlePublisher({
       'projectSpotlight',
       'monthlySpotlight',
     );
-    const draft = emptyArticle('ps-inprogress-monthly-v1', promotion);
+    // No hard-coded TemplateKey — the resolver selects based on the
+    // article's Destination + ContentType + applicability when the
+    // operator leaves the override blank. Closes P1-2.
+    const draft = emptyArticle(promotion);
     setArticleDraft(draft);
     setTeamDraft([]);
     setMediaDraft([]);
