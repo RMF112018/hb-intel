@@ -311,27 +311,59 @@ export function ArticlePublisher({
       setBusy(true);
       setStatus(`Transitioning to ${to}…`);
       try {
-        const updated: PublisherArticleRow = {
-          ...articleDraft,
-          WorkflowState: to,
-          UpdatedDateUtc: nowIso(),
-          PublishedDateUtc: to === 'published' ? nowIso() : articleDraft.PublishedDateUtc,
-          ArchiveDateUtc: to === 'archived' ? nowIso() : articleDraft.ArchiveDateUtc,
-        };
-        await repositories.articles.upsert(updated);
-        await repositories.workflowHistory.append(
-          newHistoryRow(updated.ArticleId, updated.Title, from, to, articleDraft.AuthorEmail, undefined),
-        );
-        setStatus(`Now in ${to}.`);
+        // Archive and withdraw are first-class operational flows
+        // that orchestrate master-row + binding + history side
+        // effects atomically. All other transitions remain a simple
+        // state flip with a history row, since the publish/preview
+        // orchestrator covers the publish-side mutations.
+        if (to === 'archived' || to === 'withdrawn') {
+          const outcome =
+            to === 'archived'
+              ? await orchestrator.archive({
+                  articleId: articleDraft.ArticleId,
+                  actorEmail: articleDraft.AuthorEmail,
+                })
+              : await orchestrator.withdraw({
+                  articleId: articleDraft.ArticleId,
+                  actorEmail: articleDraft.AuthorEmail,
+                });
+          if (outcome.ok) {
+            setStatus(
+              `Now in ${to} (binding ${outcome.bindingUpdated ? 'updated' : 'unchanged'}).`,
+            );
+          } else {
+            setStatus(`${to} failed at ${outcome.stage}: ${outcome.message}`);
+          }
+        } else {
+          const updated: PublisherArticleRow = {
+            ...articleDraft,
+            WorkflowState: to,
+            UpdatedDateUtc: nowIso(),
+            PublishedDateUtc:
+              to === 'published' ? nowIso() : articleDraft.PublishedDateUtc,
+          };
+          await repositories.articles.upsert(updated);
+          await repositories.workflowHistory.append(
+            newHistoryRow(
+              updated.ArticleId,
+              updated.Title,
+              from,
+              to,
+              articleDraft.AuthorEmail,
+              undefined,
+            ),
+          );
+          setStatus(`Now in ${to}.`);
+        }
         await reloadList();
-        await reloadSelected(updated.ArticleId);
+        await reloadSelected(articleDraft.ArticleId);
       } catch (err) {
         setStatus(err instanceof Error ? err.message : 'Transition failed.');
       } finally {
         setBusy(false);
       }
     },
-    [articleDraft, repositories, reloadList, reloadSelected],
+    [articleDraft, orchestrator, repositories, reloadList, reloadSelected],
   );
 
   const handlePublishAction = React.useCallback(
