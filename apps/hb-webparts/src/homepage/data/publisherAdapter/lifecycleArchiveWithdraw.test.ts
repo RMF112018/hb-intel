@@ -13,9 +13,8 @@
  *     with the operator's ActorEmail / ActionNote)
  *
  * Failure isolation is also pinned: a refused state transition
- * never mutates any list; an article-update failure never reaches
- * the binding/history seams; a binding-update failure never reaches
- * the history seam.
+ * never mutates any list; page-unpublish/binding/history failures
+ * do not silently stamp the final article state.
  */
 import { describe, expect, it, vi } from 'vitest';
 import { createPublishOrchestrator } from './publishOrchestrator';
@@ -87,7 +86,7 @@ interface Fixture {
 function buildFixture(input: {
   art?: PublisherArticleRow;
   binding?: PublisherPageBindingRow | null;
-  articleUpsertImpl?: () => Promise<{ wasCreated: boolean; itemId: number }>;
+  articleUpsertImpl?: (row: PublisherArticleRow) => Promise<{ wasCreated: boolean; itemId: number }>;
   bindingUpsertImpl?: (row: PublisherPageBindingRow) => Promise<{
     bindingId: string;
     wasCreated: boolean;
@@ -230,6 +229,8 @@ describe('orchestrator.archive', () => {
     expect(result.previousState).toBe('published');
     expect(result.newState).toBe('archived');
     expect(result.bindingUpdated).toBe(true);
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.historyAppended).toBe(true);
 
     const persistedArticle = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
     expect(persistedArticle.WorkflowState).toBe('archived');
@@ -302,8 +303,12 @@ describe('orchestrator.archive', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('articleUpdate');
-    expect(f.bindingUpsert).not.toHaveBeenCalled();
-    expect(f.historyAppend).not.toHaveBeenCalled();
+    expect(result.articleUpdated).toBe(false);
+    expect(result.bindingUpdated).toBe(true);
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.historyAppended).toBe(true);
+    expect(f.bindingUpsert).toHaveBeenCalledTimes(1);
+    expect(f.historyAppend).toHaveBeenCalledTimes(1);
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
 
@@ -358,14 +363,18 @@ describe('orchestrator.archive', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('pageUnpublish');
-    expect(result.articleUpdated).toBe(true);
+    expect(result.articleUpdated).toBe(false);
+    expect(result.bindingUpdated).toBe(false);
+    expect(result.pageUnpublished).toBe(false);
+    expect(result.historyAppended).toBe(false);
     expect(unpublishLive).toHaveBeenCalledTimes(1);
     expect(f.bindingUpsert).not.toHaveBeenCalled();
     expect(f.historyAppend).not.toHaveBeenCalled();
+    expect(f.articleUpsert).not.toHaveBeenCalled();
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
 
-  it('returns bindingUpdate failure (article already updated, history not yet appended) when binding upsert throws', async () => {
+  it('returns bindingUpdate failure (article not yet updated, history not yet appended) when binding upsert throws', async () => {
     const f = buildFixture({
       bindingUpsertImpl: async () => {
         throw new Error('binding write failed');
@@ -376,8 +385,11 @@ describe('orchestrator.archive', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('bindingUpdate');
-    expect(result.articleUpdated).toBe(true);
-    expect(f.articleUpsert).toHaveBeenCalledTimes(1);
+    expect(result.articleUpdated).toBe(false);
+    expect(result.bindingUpdated).toBe(false);
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.historyAppended).toBe(false);
+    expect(f.articleUpsert).not.toHaveBeenCalled();
     expect(f.historyAppend).not.toHaveBeenCalled();
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
@@ -396,6 +408,8 @@ describe('orchestrator.withdraw', () => {
     if (!result.ok) return;
     expect(result.newState).toBe('withdrawn');
     expect(result.bindingUpdated).toBe(true);
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.historyAppended).toBe(true);
 
     const persistedArticle = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
     expect(persistedArticle.WorkflowState).toBe('withdrawn');
@@ -421,7 +435,7 @@ describe('orchestrator.withdraw', () => {
     expect(persistedHistory.PreviousState).toBe('published');
   });
 
-  it('returns historyAppend failure (article + binding already updated) when history append throws', async () => {
+  it('returns historyAppend failure (article not yet updated, binding already updated) when history append throws', async () => {
     const f = buildFixture({
       historyAppendImpl: async () => {
         throw new Error('history list down');
@@ -432,9 +446,111 @@ describe('orchestrator.withdraw', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('historyAppend');
-    expect(result.articleUpdated).toBe(true);
+    expect(result.articleUpdated).toBe(false);
     expect(result.bindingUpdated).toBe(true);
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.historyAppended).toBe(false);
+    expect(f.articleUpsert).not.toHaveBeenCalled();
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('orchestrator.transitionManual', () => {
+  it('updates article state and appends workflow history on success', async () => {
+    const f = buildFixture({
+      art: article({ WorkflowState: 'draft' }),
+      binding: null,
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.transitionManual({
+      articleId: 'art-001',
+      to: 'review',
+      actorEmail: 'editor@example.com',
+      now: () => NOW,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.previousState).toBe('draft');
+    expect(result.newState).toBe('review');
+    expect(result.articleUpdated).toBe(true);
+    expect(result.historyAppended).toBe(true);
+
+    expect(f.articleUpsert).toHaveBeenCalledTimes(1);
+    const persistedArticle = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
+    expect(persistedArticle.WorkflowState).toBe('review');
+    expect(f.historyAppend).toHaveBeenCalledTimes(1);
+    const persistedHistory = f.historyAppend.mock.calls[0]![0] as PublisherWorkflowHistoryRow;
+    expect(persistedHistory.PreviousState).toBe('draft');
+    expect(persistedHistory.NewState).toBe('review');
+    expect(persistedHistory.ActorEmail).toBe('editor@example.com');
+  });
+
+  it('rolls article state back when history append fails', async () => {
+    const f = buildFixture({
+      art: article({ WorkflowState: 'draft' }),
+      binding: null,
+      historyAppendImpl: async () => {
+        throw new Error('history list down');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.transitionManual({
+      articleId: 'art-001',
+      to: 'review',
+      actorEmail: 'editor@example.com',
+      now: () => NOW,
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('historyAppend');
+    expect(result.articleUpdated).toBe(false);
+    expect(result.historyAppended).toBe(false);
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: true,
+      message: 'Article state rollback succeeded (review -> draft).',
+    });
+
+    expect(f.articleUpsert).toHaveBeenCalledTimes(2);
+    const first = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
+    const rollback = f.articleUpsert.mock.calls[1]![0] as PublisherArticleRow;
+    expect(first.WorkflowState).toBe('review');
+    expect(rollback.WorkflowState).toBe('draft');
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces rollback failure when history append fails and state cannot be reverted', async () => {
+    let writes = 0;
+    const f = buildFixture({
+      art: article({ WorkflowState: 'draft' }),
+      binding: null,
+      articleUpsertImpl: async () => {
+        writes += 1;
+        if (writes === 1) return { wasCreated: false, itemId: 1 };
+        throw new Error('rollback MERGE failed');
+      },
+      historyAppendImpl: async () => {
+        throw new Error('history list down');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.transitionManual({
+      articleId: 'art-001',
+      to: 'review',
+      actorEmail: 'editor@example.com',
+      now: () => NOW,
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('historyAppend');
+    expect(result.articleUpdated).toBe(true);
+    expect(result.historyAppended).toBe(false);
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: false,
+      message: 'Article rollback after history failure failed: rollback MERGE failed',
+    });
+    expect(f.errorAppend).toHaveBeenCalledTimes(2);
   });
 });
 

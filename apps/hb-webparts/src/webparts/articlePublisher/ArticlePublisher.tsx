@@ -45,7 +45,6 @@ import {
   type PublishResolutionContext,
   type PublishOutcome,
   type PublisherPromotionRuleRow,
-  type PublisherWorkflowHistoryRow,
   selectPromotionDefaults,
   type PromotionDefaults,
   resolveTemplate,
@@ -57,6 +56,12 @@ import {
 } from '../../homepage/data/publisherAdapter/workflowStateMachine.js';
 import { buildPublisherPreview } from '../../homepage/data/publisherAdapter/preview/previewBuilder.js';
 import type { PreviewOutcome } from '../../homepage/data/publisherAdapter/preview/previewBuilder.js';
+import {
+  createProjectsLookupSearch,
+  type ProjectLookupEntry,
+  type ProjectLookupSearchFn,
+} from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
+import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import type {
   BannerControlPayload,
   ImageGalleryControlPayload,
@@ -140,26 +145,6 @@ function emptyArticle(promotion: PromotionDefaults): PublisherArticleRow {
   };
 }
 
-function newHistoryRow(
-  articleId: string,
-  title: string,
-  from: WorkflowState | undefined,
-  to: WorkflowState,
-  actor: string | undefined,
-  note: string | undefined,
-): PublisherWorkflowHistoryRow {
-  return {
-    HistoryId: `hst-${Date.now()}-${Math.floor(Math.random() * 1e6).toString(36)}`,
-    ArticleId: articleId,
-    Title: title,
-    NewState: to,
-    PreviousState: from,
-    ActorEmail: actor,
-    ActionDateUtc: nowIso(),
-    ActionNote: note && note.trim().length > 0 ? note.trim() : undefined,
-  };
-}
-
 /* ── Component ──────────────────────────────────────────────── */
 
 type Tab = 'metadata' | 'hero' | 'content' | 'team' | 'gallery' | 'preview' | 'status';
@@ -176,6 +161,15 @@ export function ArticlePublisher({
   const repositories = React.useMemo<PublisherRepositories>(
     () => repositoriesOverride ?? createPublisherRepositories(),
     [repositoriesOverride],
+  );
+
+  // Project lookup is bound to the HBCentral site URL threaded in from
+  // `mount.tsx`. Creating the adapter at this scope keeps the search
+  // function identity stable across draft mutations so the picker's
+  // debounced effect does not re-fire on every keystroke.
+  const searchProjects = React.useMemo<ProjectLookupSearchFn | undefined>(
+    () => (siteUrl ? createProjectsLookupSearch({ hostSiteUrl: siteUrl }) : undefined),
+    [siteUrl],
   );
 
   const orchestrator = React.useMemo(
@@ -409,27 +403,20 @@ export function ArticlePublisher({
             setStatus(`${to} failed at ${outcome.stage}: ${outcome.message}`);
           }
         } else {
-          // `published` is intentionally unreachable here — it is
-          // produced exclusively by the publish orchestrator after
-          // page creation + binding closure. Generic transitions
-          // never stamp `PublishedDateUtc` themselves.
-          const updated: PublisherArticleRow = {
-            ...articleDraft,
-            WorkflowState: to,
-            UpdatedDateUtc: nowIso(),
-          };
-          await repositories.articles.upsert(updated);
-          await repositories.workflowHistory.append(
-            newHistoryRow(
-              updated.ArticleId,
-              updated.Title,
-              from,
-              to,
-              actorEmail ?? articleDraft.AuthorEmail,
-              undefined,
-            ),
-          );
-          setStatus(`Now in ${to}.`);
+          // Generic transitions are now orchestrated to prevent
+          // silent article-state changes without auditable history
+          // closure. On history failure the orchestrator attempts
+          // a compensating rollback of the article state.
+          const outcome = await orchestrator.transitionManual({
+            articleId: articleDraft.ArticleId,
+            to,
+            actorEmail: actorEmail ?? articleDraft.AuthorEmail,
+          });
+          if (outcome.ok) {
+            setStatus(`Now in ${to}.`);
+          } else {
+            setStatus(`Transition to ${to} failed at ${outcome.stage}: ${outcome.message}`);
+          }
         }
         await reloadList();
         await reloadSelected(articleDraft.ArticleId);
@@ -584,7 +571,11 @@ export function ArticlePublisher({
 
             <div className={styles.panel}>
               {tab === 'metadata' && (
-                <MetadataPanel draft={articleDraft} onChange={setArticleDraft} />
+                <MetadataPanel
+                  draft={articleDraft}
+                  onChange={setArticleDraft}
+                  searchProjects={searchProjects}
+                />
               )}
               {tab === 'hero' && (
                 <HeroPanel draft={articleDraft} onChange={setArticleDraft} />
@@ -710,7 +701,41 @@ function update<T extends keyof PublisherArticleRow>(
   return { ...draft, [key]: value };
 }
 
-function MetadataPanel({ draft, onChange }: PanelProps) {
+interface MetadataPanelProps extends PanelProps {
+  searchProjects?: ProjectLookupSearchFn;
+}
+
+function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) {
+  const projectValue: ProjectPickerValue | null =
+    draft.ProjectId && draft.ProjectName
+      ? {
+          projectId: draft.ProjectId,
+          projectName: draft.ProjectName,
+          projectLocation: draft.ProjectLocation,
+        }
+      : null;
+
+  const handleProjectChange = React.useCallback(
+    (entry: ProjectLookupEntry | null) => {
+      if (!entry) {
+        onChange({
+          ...draft,
+          ProjectId: undefined,
+          ProjectName: undefined,
+          ProjectLocation: undefined,
+        });
+        return;
+      }
+      onChange({
+        ...draft,
+        ProjectId: entry.projectId,
+        ProjectName: entry.projectName,
+        ProjectLocation: entry.projectLocation ?? draft.ProjectLocation,
+      });
+    },
+    [draft, onChange],
+  );
+
   return (
     <div className={styles.form}>
       <Field label="Title">
@@ -832,19 +857,38 @@ function MetadataPanel({ draft, onChange }: PanelProps) {
           ))}
         </select>
       </Field>
-      <Field label="Project ID">
-        <input
-          className={styles.input}
-          value={draft.ProjectId ?? ''}
-          onChange={(e) => onChange(update(draft, 'ProjectId', e.target.value || undefined))}
-        />
-      </Field>
-      <Field label="Project name">
-        <input
-          className={styles.input}
-          value={draft.ProjectName ?? ''}
-          onChange={(e) => onChange(update(draft, 'ProjectName', e.target.value || undefined))}
-        />
+      <Field label="Project">
+        {searchProjects ? (
+          <ProjectPicker
+            value={projectValue}
+            onChange={handleProjectChange}
+            searchProjects={searchProjects}
+          />
+        ) : (
+          // Fallback for test / offline contexts where `siteUrl` has
+          // not been threaded through. Preserves manual entry so
+          // existing unit tests that render MetadataPanel without a
+          // live SharePoint host continue to work; this branch is
+          // never hit on the hosted authoring surface.
+          <>
+            <input
+              className={styles.input}
+              value={draft.ProjectId ?? ''}
+              placeholder="Project ID"
+              onChange={(e) =>
+                onChange(update(draft, 'ProjectId', e.target.value || undefined))
+              }
+            />
+            <input
+              className={styles.input}
+              value={draft.ProjectName ?? ''}
+              placeholder="Project name"
+              onChange={(e) =>
+                onChange(update(draft, 'ProjectName', e.target.value || undefined))
+              }
+            />
+          </>
+        )}
       </Field>
       <Field label="Summary excerpt">
         <textarea

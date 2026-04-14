@@ -201,7 +201,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
   function operationFor(
     stage: FailureStage,
     mode: PublishMode,
-    lifecycleAction: 'archive' | 'withdraw' | undefined,
+    lifecycleAction: 'archive' | 'withdraw' | 'manualTransition' | undefined,
   ): import('./publisherEnums').PublishingErrorOperation {
     if (stage === 'pageUnpublish') return 'publish';
     if (lifecycleAction !== undefined) {
@@ -246,7 +246,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
      * failures from publish failures even though the tenant
      * `Operation` Choice cannot.
      */
-    readonly lifecycleAction?: 'archive' | 'withdraw';
+    readonly lifecycleAction?: 'archive' | 'withdraw' | 'manualTransition';
     readonly message: string;
     readonly bindingId?: string;
     readonly nowIso: string;
@@ -808,6 +808,140 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     }
 
     const previousState = article.WorkflowState;
+    // Page-unpublish closes the public-visibility loop on archive /
+    // withdraw. SharePoint's `SavePageAsDraft` demotes the live
+    // page back to draft so the end-user-visible version goes away
+    // while the page record (and its history) is preserved for a
+    // potential future republish. If the binding has no PageId
+    // there is nothing to unpublish, and we skip straight to the
+    // binding / history writes.
+    let bindingUpdated = false;
+    let pageUnpublished = false;
+    let historyAppended = false;
+    const existingBinding = await repositories.pageBindings
+      .getByArticleId(article.ArticleId)
+      .catch(() => undefined);
+    if (existingBinding && existingBinding.PageId) {
+      const unpublishOutcome = await pageShellService.unpublishPage({
+        pageId: existingBinding.PageId,
+        siteUrl:
+          existingBinding.TargetSiteUrl ??
+          article.TargetSiteUrl ??
+          '',
+      });
+      if (!unpublishOutcome.ok) {
+        await recordPublishingError({
+          articleId: article.ArticleId,
+          title: article.Title,
+          destination: article.Destination,
+          stage: 'pageUnpublish',
+          mode: 'create',
+          lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
+          message: `SavePageAsDraft failed during ${target}: ${unpublishOutcome.message}`,
+          bindingId: existingBinding.BindingId,
+          nowIso: now,
+        });
+        return {
+          ok: false,
+          stage: 'pageUnpublish',
+          message: unpublishOutcome.message,
+          previousState,
+          articleUpdated: false,
+          bindingUpdated: false,
+          pageUnpublished: false,
+          historyAppended: false,
+        };
+      }
+      pageUnpublished = true;
+    }
+
+    // Binding update mirrors the now-unpublished page: PublishStatus
+    // moves to 'draft', SyncStatus to 'pending', and the sync
+    // message records the lifecycle action so operators can audit
+    // why the binding flipped state. When there is no existing
+    // binding we skip cleanly — there is nothing to update.
+    if (existingBinding) {
+      const updatedBinding: PublisherPageBindingRow = {
+        ...existingBinding,
+        PublishStatus: 'draft',
+        SyncStatus: 'pending',
+        LastSyncDateUtc: now,
+        LastSyncMessage:
+          target === 'archived'
+            ? `Article archived; destination page reverted to draft via SavePageAsDraft.`
+            : `Article withdrawn; destination page reverted to draft via SavePageAsDraft.`,
+      };
+      try {
+        await repositories.pageBindings.upsert(updatedBinding);
+        bindingUpdated = true;
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? `HB Article Destination Pages ${target} update failed: ${err.message}`
+            : `HB Article Destination Pages ${target} update failed.`;
+        await recordPublishingError({
+          articleId: article.ArticleId,
+          title: article.Title,
+          destination: article.Destination,
+          stage: 'bindingUpdate',
+          mode: 'create',
+          lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
+          message,
+          bindingId: existingBinding.BindingId,
+          nowIso: now,
+        });
+        return {
+          ok: false,
+          stage: 'bindingUpdate',
+          message,
+          previousState,
+          articleUpdated: false,
+          bindingUpdated: false,
+          pageUnpublished,
+          historyAppended: false,
+        };
+      }
+    }
+
+    try {
+      await repositories.workflowHistory.append({
+        HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
+        ArticleId: article.ArticleId,
+        Title: `${previousState} → ${target}`,
+        NewState: target,
+        PreviousState: previousState,
+        ActionDateUtc: now,
+        ActorEmail: req.actorEmail,
+        ActionNote: req.note,
+      });
+      historyAppended = true;
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `HB Article Workflow History append failed for ${target}: ${err.message}`
+          : `HB Article Workflow History append failed for ${target}.`;
+      await recordPublishingError({
+        articleId: article.ArticleId,
+        title: article.Title,
+        destination: article.Destination,
+        stage: 'historyAppend',
+        mode: 'create',
+        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
+        message,
+        nowIso: now,
+      });
+      return {
+        ok: false,
+        stage: 'historyAppend',
+        message,
+        previousState,
+        articleUpdated: false,
+        bindingUpdated,
+        pageUnpublished,
+        historyAppended: false,
+      };
+    }
+
     const updatedArticle: PublisherArticleRow = {
       ...article,
       WorkflowState: target,
@@ -854,130 +988,10 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         stage: 'articleUpdate',
         message,
         previousState,
-      };
-    }
-
-    // Page-unpublish closes the public-visibility loop on archive /
-    // withdraw. SharePoint's `SavePageAsDraft` demotes the live
-    // page back to draft so the end-user-visible version goes away
-    // while the page record (and its history) is preserved for a
-    // potential future republish. If the binding has no PageId
-    // there is nothing to unpublish, and we skip straight to the
-    // binding / history writes.
-    let bindingUpdated = false;
-    let pageUnpublished = false;
-    const existingBinding = await repositories.pageBindings
-      .getByArticleId(article.ArticleId)
-      .catch(() => undefined);
-    if (existingBinding && existingBinding.PageId) {
-      const unpublishOutcome = await pageShellService.unpublishPage({
-        pageId: existingBinding.PageId,
-        siteUrl:
-          existingBinding.TargetSiteUrl ??
-          article.TargetSiteUrl ??
-          '',
-      });
-      if (!unpublishOutcome.ok) {
-        await recordPublishingError({
-          articleId: article.ArticleId,
-          title: article.Title,
-          destination: article.Destination,
-          stage: 'pageUnpublish',
-          mode: 'create',
-          lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
-          message: `SavePageAsDraft failed during ${target}: ${unpublishOutcome.message}`,
-          bindingId: existingBinding.BindingId,
-          nowIso: now,
-        });
-        return {
-          ok: false,
-          stage: 'pageUnpublish',
-          message: unpublishOutcome.message,
-          previousState,
-          articleUpdated: true,
-        };
-      }
-      pageUnpublished = true;
-    }
-
-    // Binding update mirrors the now-unpublished page: PublishStatus
-    // moves to 'draft', SyncStatus to 'pending', and the sync
-    // message records the lifecycle action so operators can audit
-    // why the binding flipped state. When there is no existing
-    // binding we skip cleanly — there is nothing to update.
-    if (existingBinding) {
-      const updatedBinding: PublisherPageBindingRow = {
-        ...existingBinding,
-        PublishStatus: 'draft',
-        SyncStatus: 'pending',
-        LastSyncDateUtc: now,
-        LastSyncMessage:
-          target === 'archived'
-            ? `Article archived; destination page reverted to draft via SavePageAsDraft.`
-            : `Article withdrawn; destination page reverted to draft via SavePageAsDraft.`,
-      };
-      try {
-        await repositories.pageBindings.upsert(updatedBinding);
-        bindingUpdated = true;
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? `HB Article Destination Pages ${target} update failed: ${err.message}`
-            : `HB Article Destination Pages ${target} update failed.`;
-        await recordPublishingError({
-          articleId: article.ArticleId,
-          title: article.Title,
-          destination: article.Destination,
-          stage: 'bindingUpdate',
-          mode: 'create',
-          lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
-          message,
-          bindingId: existingBinding.BindingId,
-          nowIso: now,
-        });
-        return {
-          ok: false,
-          stage: 'bindingUpdate',
-          message,
-          previousState,
-          articleUpdated: true,
-        };
-      }
-    }
-
-    try {
-      await repositories.workflowHistory.append({
-        HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
-        ArticleId: article.ArticleId,
-        Title: `${previousState} → ${target}`,
-        NewState: target,
-        PreviousState: previousState,
-        ActionDateUtc: now,
-        ActorEmail: req.actorEmail,
-        ActionNote: req.note,
-      });
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? `HB Article Workflow History append failed for ${target}: ${err.message}`
-          : `HB Article Workflow History append failed for ${target}.`;
-      await recordPublishingError({
-        articleId: article.ArticleId,
-        title: article.Title,
-        destination: article.Destination,
-        stage: 'historyAppend',
-        mode: 'create',
-        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
-        message,
-        nowIso: now,
-      });
-      return {
-        ok: false,
-        stage: 'historyAppend',
-        message,
-        previousState,
-        articleUpdated: true,
+        articleUpdated: false,
         bindingUpdated,
+        pageUnpublished,
+        historyAppended,
       };
     }
 
@@ -988,13 +1002,158 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       articleUpdated: true,
       bindingUpdated,
       pageUnpublished,
+      historyAppended,
     };
+  }
+
+  async function transitionManual(
+    req: ManualTransitionRequest,
+  ): Promise<ManualTransitionOutcome> {
+    const now = (req.now ?? defaultNow)();
+    const article = await repositories.articles.getByArticleId(req.articleId);
+    if (!article) {
+      return {
+        ok: false,
+        stage: 'load',
+        message: `No HB Articles record found for ArticleId '${req.articleId}'.`,
+        articleUpdated: false,
+        historyAppended: false,
+      };
+    }
+    if (!canTransition(article.WorkflowState, req.to)) {
+      return {
+        ok: false,
+        stage: 'transition',
+        message: `Cannot transition from ${article.WorkflowState} to ${req.to}.`,
+        previousState: article.WorkflowState,
+        articleUpdated: false,
+        historyAppended: false,
+      };
+    }
+
+    const previousState = article.WorkflowState;
+    const updatedArticle: PublisherArticleRow = {
+      ...article,
+      WorkflowState: req.to,
+      UpdatedDateUtc: now,
+    };
+    try {
+      await repositories.articles.upsert(updatedArticle);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `HB Articles manual transition update failed: ${err.message}`
+          : 'HB Articles manual transition update failed.';
+      await recordPublishingError({
+        articleId: article.ArticleId,
+        title: article.Title,
+        destination: article.Destination,
+        stage: 'articleUpdate',
+        mode: 'create',
+        lifecycleAction: 'manualTransition',
+        message,
+        nowIso: now,
+      });
+      return {
+        ok: false,
+        stage: 'articleUpdate',
+        message,
+        previousState,
+        articleUpdated: false,
+        historyAppended: false,
+      };
+    }
+
+    try {
+      await repositories.workflowHistory.append({
+        HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
+        ArticleId: article.ArticleId,
+        Title: `${previousState} → ${req.to}`,
+        NewState: req.to,
+        PreviousState: previousState,
+        ActionDateUtc: now,
+        ActorEmail: req.actorEmail,
+        ActionNote: req.note,
+      });
+      return {
+        ok: true,
+        previousState,
+        newState: req.to,
+        articleUpdated: true,
+        historyAppended: true,
+      };
+    } catch (err) {
+      const baseMessage =
+        err instanceof Error
+          ? `HB Article Workflow History append failed for ${req.to}: ${err.message}`
+          : `HB Article Workflow History append failed for ${req.to}.`;
+      await recordPublishingError({
+        articleId: article.ArticleId,
+        title: article.Title,
+        destination: article.Destination,
+        stage: 'historyAppend',
+        mode: 'create',
+        lifecycleAction: 'manualTransition',
+        message: baseMessage,
+        nowIso: now,
+      });
+
+      const rollbackArticle: PublisherArticleRow = {
+        ...article,
+        UpdatedDateUtc: now,
+      };
+      try {
+        await repositories.articles.upsert(rollbackArticle);
+        return {
+          ok: false,
+          stage: 'historyAppend',
+          message: `${baseMessage} Rolled back article state to ${previousState}.`,
+          previousState,
+          articleUpdated: false,
+          historyAppended: false,
+          rollback: {
+            attempted: true,
+            succeeded: true,
+            message: `Article state rollback succeeded (${req.to} -> ${previousState}).`,
+          },
+        };
+      } catch (rollbackErr) {
+        const rollbackMessage =
+          rollbackErr instanceof Error
+            ? `Article rollback after history failure failed: ${rollbackErr.message}`
+            : 'Article rollback after history failure failed.';
+        await recordPublishingError({
+          articleId: article.ArticleId,
+          title: article.Title,
+          destination: article.Destination,
+          stage: 'articleUpdate',
+          mode: 'create',
+          lifecycleAction: 'manualTransition',
+          message: `${rollbackMessage}. Original failure: ${baseMessage}`,
+          nowIso: now,
+        });
+        return {
+          ok: false,
+          stage: 'historyAppend',
+          message: `${baseMessage} ${rollbackMessage}`,
+          previousState,
+          articleUpdated: true,
+          historyAppended: false,
+          rollback: {
+            attempted: true,
+            succeeded: false,
+            message: rollbackMessage,
+          },
+        };
+      }
+    }
   }
 
   return {
     run,
     archive: (req: LifecycleRequest) => runLifecycleTransition(req, 'archived'),
     withdraw: (req: LifecycleRequest) => runLifecycleTransition(req, 'withdrawn'),
+    transitionManual,
   };
 }
 
@@ -1005,6 +1164,14 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
  */
 export interface LifecycleRequest {
   readonly articleId: string;
+  readonly actorEmail?: string;
+  readonly note?: string;
+  readonly now?: () => string;
+}
+
+export interface ManualTransitionRequest {
+  readonly articleId: string;
+  readonly to: import('./publisherEnums').WorkflowState;
   readonly actorEmail?: string;
   readonly note?: string;
   readonly now?: () => string;
@@ -1025,6 +1192,7 @@ export type LifecycleOutcome =
        * silent failure.
        */
       readonly pageUnpublished: boolean;
+      readonly historyAppended: true;
     }
   | {
       readonly ok: false;
@@ -1039,6 +1207,30 @@ export type LifecycleOutcome =
       readonly previousState?: import('./publisherEnums').WorkflowState;
       readonly articleUpdated?: boolean;
       readonly bindingUpdated?: boolean;
+      readonly pageUnpublished?: boolean;
+      readonly historyAppended?: boolean;
+    };
+
+export type ManualTransitionOutcome =
+  | {
+      readonly ok: true;
+      readonly previousState: import('./publisherEnums').WorkflowState;
+      readonly newState: import('./publisherEnums').WorkflowState;
+      readonly articleUpdated: true;
+      readonly historyAppended: true;
+    }
+  | {
+      readonly ok: false;
+      readonly stage: 'load' | 'transition' | 'articleUpdate' | 'historyAppend';
+      readonly message: string;
+      readonly previousState?: import('./publisherEnums').WorkflowState;
+      readonly articleUpdated: boolean;
+      readonly historyAppended: boolean;
+      readonly rollback?: {
+        readonly attempted: boolean;
+        readonly succeeded: boolean;
+        readonly message: string;
+      };
     };
 
 /**
