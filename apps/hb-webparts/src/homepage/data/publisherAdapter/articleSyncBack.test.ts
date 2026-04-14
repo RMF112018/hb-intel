@@ -208,8 +208,7 @@ describe('publishOrchestrator — HB Articles back-sync', () => {
     expect(persisted.LastPageSyncDateUtc).toBe(NOW);
     expect(persisted.UpdatedDateUtc).toBe(NOW);
     expect(persisted.PublishedDateUtc).toBe(PUBLISHED_AT);
-    // WorkflowState is NOT touched by the orchestrator.
-    expect(persisted.WorkflowState).toBe(art.WorkflowState);
+    expect(persisted.WorkflowState).toBe('published');
   });
 
   it('on inPlaceUpdate (republish), preserves the original PublishedDateUtc', async () => {
@@ -278,6 +277,13 @@ describe('publishOrchestrator — HB Articles back-sync', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('bindingWrite');
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: true,
+      message:
+        'Compensating SavePageAsDraft succeeded after bindingWrite (pageId=123).',
+    });
+    expect(successfulPageCreation.unpublishLive).toHaveBeenCalled();
     expect(articleUpsert).not.toHaveBeenCalled();
   });
 
@@ -346,7 +352,14 @@ describe('publishOrchestrator — HB Articles back-sync', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('articleSync');
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: true,
+      message:
+        'Compensating SavePageAsDraft succeeded after articleSync (pageId=123).',
+    });
     expect(articleUpsert).toHaveBeenCalledTimes(1);
+    expect(successfulPageCreation.unpublishLive).toHaveBeenCalled();
     expect(errorAppend).toHaveBeenCalledTimes(1);
     const errorRow = errorAppend.mock.calls[0]![0] as PublisherPublishingErrorRow;
     expect(errorRow.Operation).toBe('sync');

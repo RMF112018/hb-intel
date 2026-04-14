@@ -224,6 +224,17 @@ describe('publishOrchestrator — failure-path persistence', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('bindingWrite');
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: true,
+      message:
+        'Compensating SavePageAsDraft succeeded after bindingWrite (pageId=123).',
+    });
+    expect(pageCreation.unpublishLive).toHaveBeenCalledWith({
+      pageId: '123',
+      siteUrl:
+        'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    });
     expect(repositories.publishingErrors.append).toHaveBeenCalledTimes(1);
     const errorAppendMock = repositories.publishingErrors.append as ReturnType<typeof vi.fn>;
     const persisted = errorAppendMock.mock.calls[0]![0] as PublisherPublishingErrorRow;
@@ -232,5 +243,120 @@ describe('publishOrchestrator — failure-path persistence', () => {
     expect(persisted.Operation).toBe('sync');
     expect(persisted.ErrorSummary).toContain('Binding MERGE failed');
     expect(persisted.RetryStatus).toBe('pending');
+  });
+
+  it('writes a second pageUnpublish publishing-error row when compensating SavePageAsDraft fails', async () => {
+    const a = article();
+    const t = template();
+
+    const repositories: PublisherRepositories = {
+      articles: {
+        getByArticleId: vi.fn(async () => a),
+        listByWorkflowState: vi.fn(async () => []),
+        upsert: vi.fn(async () => {
+          throw new Error('unused');
+        }) as unknown as PublisherRepositories['articles']['upsert'],
+      },
+      teamMembers: {
+        listByArticle: vi.fn(async () => []),
+        replaceAllForArticle: vi.fn(async () => ({ deleted: 0, written: 0 })),
+      },
+      media: {
+        listByArticle: vi.fn(async () => []),
+        replaceAllForArticle: vi.fn(async () => ({ deleted: 0, written: 0 })),
+      },
+      templateRegistry: {
+        listActive: vi.fn(async () => [t]),
+        getByKey: vi.fn(async () => t),
+      },
+      pageBindings: {
+        getByArticleId: vi.fn(async () => undefined),
+        upsert: vi.fn(async () => ({
+          bindingId: 'bnd-x',
+          wasCreated: true,
+          itemId: 1,
+        })),
+      },
+      workflowHistory: {
+        listByArticle: vi.fn(async () => []),
+        append: vi.fn(async () => ({ itemId: 1 })),
+      },
+      publishingErrors: {
+        listByArticle: vi.fn(async () => []),
+        append: vi.fn(async () => ({ itemId: 99 })),
+      },
+      promotionRules: {
+        listActive: vi.fn(async () => []),
+      },
+    };
+
+    const pageCreation: PageCreationService = {
+      createOrUpdate: vi.fn(async () => ({
+        ok: true as const,
+        pageId: '123',
+        pageUrl: `${a.TargetSiteUrl}/SitePages/${a.Slug}.aspx`,
+        pageName: `${a.Slug}.aspx`,
+        wasCreated: true,
+      })),
+      publishLive: vi.fn(async (input) => ({ ok: true as const, pageId: input.pageId, publishedAtUtc: '2026-04-13T10:00:00.000Z' })),
+      unpublishLive: vi.fn(async () => ({
+        ok: false as const,
+        reason: 'unpublishLifecycleFailed' as const,
+        message: 'SavePageAsDraft failed (status 500).',
+        status: 500,
+      })),
+    };
+
+    const failingBindingWriter: PageBindingWriter = {
+      upsert: vi.fn(async () => ({
+        ok: false as const,
+        reason: 'writeFailed' as const,
+        message: 'Binding MERGE failed (status 500).',
+        status: 500,
+      })),
+    };
+
+    const orch = createPublishOrchestrator({
+      repositories,
+      pageBindingWriter: failingBindingWriter,
+      pageShellService: createPageShellService({ pageCreation }),
+    });
+
+    const result = await orch.run({
+      articleId: a.ArticleId,
+      mode: 'create',
+      now: () => '2026-04-13T10:00:00.000Z',
+      validateBeforePublish: false,
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('bindingWrite');
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: false,
+      message:
+        'Compensating SavePageAsDraft failed after bindingWrite: SavePageAsDraft failed (status 500).',
+    });
+
+    const errorAppendMock = repositories.publishingErrors.append as ReturnType<typeof vi.fn>;
+    expect(errorAppendMock).toHaveBeenCalledTimes(2);
+    const rows = errorAppendMock.mock.calls.map(
+      (call) => call[0] as PublisherPublishingErrorRow,
+    );
+    const primary = rows.find((row) =>
+      /^create\.bindingWrite:/.test(row.Title),
+    );
+    const rollback = rows.find((row) =>
+      /^create\.pageUnpublish:/.test(row.Title),
+    );
+    expect(primary).toBeDefined();
+    expect(primary?.ErrorSummary).toContain('Binding MERGE failed');
+    expect(rollback).toBeDefined();
+    expect(rollback?.Operation).toBe('publish');
+    expect(rollback?.ErrorSummary).toContain(
+      'Compensating SavePageAsDraft failed after bindingWrite',
+    );
+    expect(rollback?.ErrorSummary).toContain('Original failure:');
   });
 });

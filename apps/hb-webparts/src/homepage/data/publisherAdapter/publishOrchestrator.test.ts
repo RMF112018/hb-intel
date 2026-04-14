@@ -144,9 +144,7 @@ function fixture(over: {
     },
     workflowHistory: {
       listByArticle: vi.fn(async () => []),
-      append: vi.fn(async () => {
-        throw new Error('unused');
-      }) as unknown as PublisherRepositories['workflowHistory']['append'],
+      append: vi.fn(async () => ({ itemId: 1 })),
     },
     publishingErrors: {
       listByArticle: vi.fn(async () => []),
@@ -331,10 +329,23 @@ describe('publishOrchestrator', () => {
       now: () => '2026-04-13T10:00:00.000Z',
       generateBindingId: () => 'bnd-generated',
     });
-    // Publish itself still reports success — history append is
-    // best-effort. The failure surfaces via HB Article Publishing
-    // Errors only.
-    expect(result.ok).toBe(true);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('historyAppend');
+    expect(result.rollback).toEqual({
+      attempted: true,
+      succeeded: true,
+      message:
+        'Compensating SavePageAsDraft succeeded after historyAppend (pageId=123).',
+    });
+    expect(
+      (
+        f.pageCreation.unpublishLive as unknown as ReturnType<typeof vi.fn>
+      ).mock.calls[0]?.[0],
+    ).toEqual({
+      pageId: '123',
+      siteUrl: 'https://example.com/sites/ProjectSpotlight',
+    });
 
     expect(errorAppend).toHaveBeenCalledTimes(1);
     const errorRow = errorAppend.mock.calls[0]![0];
@@ -552,7 +563,7 @@ describe('publishOrchestrator', () => {
     expect(f.upsertBinding).not.toHaveBeenCalled();
   });
 
-  it('regenerates (new page, new binding) on shell key drift', async () => {
+  it('regenerates (new page, new binding) on template-key drift', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',
       ArticleId: 'art-ps-001',
@@ -561,8 +572,8 @@ describe('publishOrchestrator', () => {
       TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
       PageId: '999',
       PageName: 'acme-tower-april.aspx',
-      PageShellVersion: '0.9.0',
-      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-old-template-v1',
       RenderVersion: '1.0.0',
     };
     const f = fixture({ existingBinding: existing });
@@ -686,7 +697,7 @@ describe('publishOrchestrator', () => {
     expect(result.supersededBinding).toBeUndefined();
   });
 
-  it('blocks republish on archived binding', async () => {
+  it('blocks republish when the master article is archived', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-archived',
       ArticleId: 'art-ps-001',
@@ -698,7 +709,10 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-inprogress-monthly-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({
+      article: { WorkflowState: 'archived' },
+      existingBinding: existing,
+    });
     const orch = makeOrchestrator(f);
     const result = await orch.run({ articleId: 'art-ps-001', mode: 'republish' });
     expect(result.ok).toBe(false);

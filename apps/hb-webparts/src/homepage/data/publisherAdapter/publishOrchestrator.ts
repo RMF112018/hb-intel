@@ -104,6 +104,12 @@ export interface SupersededBindingIdentity {
   readonly pageUrl?: string;
 }
 
+export interface PublishRollbackResult {
+  readonly attempted: boolean;
+  readonly succeeded?: boolean;
+  readonly message: string;
+}
+
 export type PublishOutcome =
   | {
       readonly ok: true;
@@ -135,11 +141,13 @@ export type PublishOutcome =
         | 'policy'
         | 'pagePublish'
         | 'bindingWrite'
-        | 'articleSync';
+        | 'articleSync'
+        | 'historyAppend';
       readonly message: string;
       readonly decision?: RepublishDecision;
       readonly page?: ComposedPage;
       readonly validation?: ValidationResult;
+      readonly rollback?: PublishRollbackResult;
     };
 
 export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
@@ -195,8 +203,8 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     mode: PublishMode,
     lifecycleAction: 'archive' | 'withdraw' | undefined,
   ): import('./publisherEnums').PublishingErrorOperation {
+    if (stage === 'pageUnpublish') return 'publish';
     if (lifecycleAction !== undefined) {
-      if (stage === 'pageUnpublish') return 'publish';
       return 'sync';
     }
     if (
@@ -458,6 +466,56 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         page: publishResult.page ?? page,
       };
     }
+    const publishedPage = publishResult.page;
+    const publishedCreation = publishResult.creation;
+
+    async function rollbackPublishedPage(input: {
+      readonly reasonStage: 'bindingWrite' | 'articleSync' | 'historyAppend';
+      readonly reasonMessage: string;
+      readonly bindingId?: string;
+    }): Promise<PublishRollbackResult> {
+      const siteUrl = publishedPage.identity.targetSiteUrl;
+      const pageId = publishedCreation.pageId;
+      if (!siteUrl || siteUrl.trim().length === 0 || !pageId || pageId.trim().length === 0) {
+        return {
+          attempted: false,
+          message:
+            `Compensating SavePageAsDraft skipped after ${input.reasonStage}: missing page identity ` +
+            `(siteUrl='${siteUrl ?? ''}', pageId='${pageId ?? ''}').`,
+        };
+      }
+      const rollback = await pageShellService.unpublishPage({
+        pageId,
+        siteUrl,
+      });
+      if (rollback.ok) {
+        return {
+          attempted: true,
+          succeeded: true,
+          message:
+            `Compensating SavePageAsDraft succeeded after ${input.reasonStage} ` +
+            `(pageId=${pageId}).`,
+        };
+      }
+      const rollbackMessage =
+        `Compensating SavePageAsDraft failed after ${input.reasonStage}: ${rollback.message}`;
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'pageUnpublish',
+        mode: req.mode,
+        message:
+          `${rollbackMessage}. Original failure: ${input.reasonMessage}`,
+        bindingId: input.bindingId,
+        nowIso: now,
+      });
+      return {
+        attempted: true,
+        succeeded: false,
+        message: rollbackMessage,
+      };
+    }
 
     // PageBindingRow follows the tenant `HB Article Destination Pages`
     // schema. The article-key is the foreign key; PageTemplateKey /
@@ -496,22 +554,29 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const bindingOutcome = await pageBindingWriter.upsert({ row: bindingRow });
     if (!bindingOutcome.ok) {
+      const rollback = await rollbackPublishedPage({
+        reasonStage: 'bindingWrite',
+        reasonMessage: bindingOutcome.message,
+        bindingId: bindingRow.BindingId,
+      });
+      const message = `${bindingOutcome.message} ${rollback.message}`;
       await recordPublishingError({
         articleId: context.article.ArticleId,
         title: context.article.Title,
         destination: context.article.Destination,
         stage: 'bindingWrite',
         mode: req.mode,
-        message: bindingOutcome.message,
+        message,
         bindingId: bindingRow.BindingId,
         nowIso: now,
       });
       return {
         ok: false,
         stage: 'bindingWrite',
-        message: bindingOutcome.message,
+        message,
         decision,
         page: publishResult.page,
+        rollback,
       };
     }
 
@@ -563,10 +628,16 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     try {
       await repositories.articles.upsert(updatedArticle);
     } catch (err) {
-      const message =
+      const baseMessage =
         err instanceof Error
           ? `HB Articles back-sync failed after publish: ${err.message}`
           : 'HB Articles back-sync failed after publish.';
+      const rollback = await rollbackPublishedPage({
+        reasonStage: 'articleSync',
+        reasonMessage: baseMessage,
+        bindingId: bindingRow.BindingId,
+      });
+      const message = `${baseMessage} ${rollback.message}`;
       await recordPublishingError({
         articleId: context.article.ArticleId,
         title: context.article.Title,
@@ -583,6 +654,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         message,
         decision,
         page: publishResult.page,
+        rollback,
       };
     }
 
@@ -593,9 +665,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     // `published → published` event tagged with the republish action
     // (inPlaceUpdate / regenerate) so the audit trail reflects page
     // identity changes. `noOp` returned earlier and never reaches
-    // this code path. Best-effort: a history-append failure is
-    // logged through recordPublishingError but does not roll back
-    // the successful publish.
+    // this code path. History append is a REQUIRED publish-closure
+    // step: if this append fails, a compensating SavePageAsDraft
+    // is attempted and the publish returns `ok: false`.
     // On `regenerate`, capture the identity of the single
     // authoritative binding row before it is superseded in place
     // (new BindingId + new PageId/PageUrl/PageName overwrite the
@@ -647,7 +719,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         ActionNote: historyNote,
       });
     } catch (err) {
-      const message =
+      const baseMessage =
         err instanceof Error
           ? `HB Article Workflow History append failed after ${workflowStateChanged ? 'publish' : 'republish'}: ${err.message}`
           : `HB Article Workflow History append failed after ${workflowStateChanged ? 'publish' : 'republish'}.`;
@@ -659,6 +731,12 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       // indistinguishable between "article back-sync failed" and
       // "history append failed" — operators could not tell which
       // subsystem to inspect. Closes P1-4.
+      const rollback = await rollbackPublishedPage({
+        reasonStage: 'historyAppend',
+        reasonMessage: baseMessage,
+        bindingId: bindingRow.BindingId,
+      });
+      const message = `${baseMessage} ${rollback.message}`;
       await recordPublishingError({
         articleId: context.article.ArticleId,
         title: context.article.Title,
@@ -669,6 +747,14 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         bindingId: bindingRow.BindingId,
         nowIso: now,
       });
+      return {
+        ok: false,
+        stage: 'historyAppend',
+        message,
+        decision,
+        page: publishResult.page,
+        rollback,
+      };
     }
 
     return {
