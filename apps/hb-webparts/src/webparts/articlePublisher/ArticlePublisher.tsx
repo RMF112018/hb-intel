@@ -1482,30 +1482,27 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
             onChange={handleProjectChange}
             searchProjects={searchProjects}
           />
+        ) : projectValue ? (
+          // The picker is unavailable in this runtime context, but a
+          // prior selection is on the row — render it read-only so
+          // the author can still see what is bound. Manual ProjectId /
+          // ProjectName text entry is intentionally not offered:
+          // authoritative project identity belongs to the picker.
+          <div className={styles.projectPickerChip} data-testid="project-picker-readonly">
+            <div className={styles.projectPickerChipMain}>
+              <span className={styles.projectPickerChipName}>{projectValue.projectName}</span>
+              <span className={styles.projectPickerChipMeta}>
+                ID {projectValue.projectId}
+                {projectValue.projectLocation ? ` · ${projectValue.projectLocation}` : ''}
+              </span>
+            </div>
+            <span className={styles.projectPickerHint}>Lookup unavailable</span>
+          </div>
         ) : (
-          // Fallback for test / offline contexts where `siteUrl` has
-          // not been threaded through. Preserves manual entry so
-          // existing unit tests that render MetadataPanel without a
-          // live SharePoint host continue to work; this branch is
-          // never hit on the hosted authoring surface.
-          <>
-            <input
-              className={styles.input}
-              value={draft.ProjectId ?? ''}
-              placeholder="Project ID"
-              onChange={(e) =>
-                onChange(update(draft, 'ProjectId', e.target.value || undefined))
-              }
-            />
-            <input
-              className={styles.input}
-              value={draft.ProjectName ?? ''}
-              placeholder="Project name"
-              onChange={(e) =>
-                onChange(update(draft, 'ProjectName', e.target.value || undefined))
-              }
-            />
-          </>
+          <p className={styles.editorialNotice} role="status">
+            Project lookup is unavailable in this context. Reload the Publisher in its hosted
+            page so the HBCentral Projects list can be searched.
+          </p>
         )}
       </Field>
     </div>
