@@ -71,6 +71,10 @@ import {
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import { resolveSlugForSave } from './slugGovernance.js';
 import {
+  defaultTeamHeading,
+  intelligentDefaultsForSave,
+} from './metadataDefaults.js';
+import {
   articleContentTypeLabel,
   articleSubjectLabel,
   destinationLabel,
@@ -665,8 +669,13 @@ export function ArticlePublisher({
         },
         takenSlugs,
       );
+      // Intelligent metadata defaults: fill empty fields like
+      // `TeamViewerTitle` and `HeroCategoryLabel` from current
+      // article context. Author-typed values are preserved.
+      // Closes workstream-b step-04.
+      const { draft: defaulted } = intelligentDefaultsForSave(articleDraft);
       const updated: PublisherArticleRow = {
-        ...articleDraft,
+        ...defaulted,
         TemplateKey: resolution.entry.TemplateKey,
         Slug: resolvedSlug,
         UpdatedDateUtc: nowIso(),
@@ -1417,11 +1426,21 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
         });
         return;
       }
+      // Opportunistically fill the team heading default the moment a
+      // project is picked, so the author sees the resolved heading
+      // immediately. Only fills when the heading is currently blank
+      // — author-typed values are preserved.
+      const headingIsBlank =
+        !draft.TeamViewerTitle || draft.TeamViewerTitle.trim().length === 0;
+      const nextTeamViewerTitle = headingIsBlank
+        ? defaultTeamHeading(entry.projectName)
+        : draft.TeamViewerTitle;
       onChange({
         ...draft,
         ProjectId: entry.projectId,
         ProjectName: entry.projectName,
         ProjectLocation: entry.projectLocation ?? draft.ProjectLocation,
+        TeamViewerTitle: nextTeamViewerTitle,
       });
     },
     [draft, onChange],
@@ -1720,7 +1739,7 @@ function TeamPresentationPanel({ draft, onChange }: PanelProps) {
         <input
           className={styles.input}
           value={draft.TeamViewerTitle ?? ''}
-          placeholder="e.g. Project team"
+          placeholder={defaultTeamHeading(draft.ProjectName)}
           onChange={(e) =>
             onChange(update(draft, 'TeamViewerTitle', e.target.value || undefined))
           }
