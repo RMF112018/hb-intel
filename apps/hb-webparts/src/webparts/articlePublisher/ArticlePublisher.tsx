@@ -20,7 +20,6 @@ import { fetchRequestDigest, storeSiteUrl } from '@hbc/sharepoint-platform';
 import {
   ARTICLE_CONTENT_TYPE_OPERATIONAL_VALUES,
   ARTICLE_SUBJECT_VALUES,
-  SUPPORTED_DESTINATIONS,
   HERO_THEME_VARIANT_VALUES,
   PROJECT_STAGE_VALUES,
   TEAM_VIEWER_GROUPING_MODE_VALUES,
@@ -72,8 +71,12 @@ import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
-import { DraftQueue } from './draftQueue/index.js';
 import { PublisherButton, StatusBanner, type StatusBannerTone } from './sharedChrome/index.js';
+import {
+  DRAFT_GROUP_ORDER,
+  QueueRail,
+  useDraftWorkspace,
+} from './workspace/index.js';
 import {
   illegalTransitionMessage,
   inProgressMessage,
@@ -256,50 +259,6 @@ function emptyArticle(): PublisherArticleRow {
 /* ── Component ──────────────────────────────────────────────── */
 
 /**
- * Order the left draft rail surfaces groups in. The editorial rail
- * presents drafts first, then in-review, then approved, then published;
- * archived and withdrawn follow as collapsed-by-default residual groups.
- *
- * Legacy `scheduled` is intentionally omitted from rail groups — no
- * scheduled executor exists today; legacy rows remain read-compatible
- * only and surface through `scheduledLegacyStateNotice` on the canvas
- * when an author opens one.
- */
-const DRAFT_GROUP_ORDER: readonly WorkflowState[] = [
-  'draft',
-  'review',
-  'approved',
-  'published',
-  'archived',
-  'withdrawn',
-];
-
-const COLLAPSED_GROUPS_BY_DEFAULT: ReadonlySet<WorkflowState> = new Set([
-  'archived',
-  'withdrawn',
-]);
-
-interface DraftGroupMap {
-  readonly draft: readonly PublisherArticleRow[];
-  readonly review: readonly PublisherArticleRow[];
-  readonly approved: readonly PublisherArticleRow[];
-  readonly scheduled: readonly PublisherArticleRow[];
-  readonly published: readonly PublisherArticleRow[];
-  readonly archived: readonly PublisherArticleRow[];
-  readonly withdrawn: readonly PublisherArticleRow[];
-}
-
-const EMPTY_DRAFT_GROUPS: DraftGroupMap = {
-  draft: [],
-  review: [],
-  approved: [],
-  scheduled: [],
-  published: [],
-  archived: [],
-  withdrawn: [],
-};
-
-/**
  * Workspace section model — canonical order the center canvas renders.
  * The shell renders these as vertical, in-page-anchored sections, not
  * as tabs. The step-01 lock + step-02 layout are the source of truth.
@@ -458,15 +417,18 @@ export function ArticlePublisher({
     [repositories],
   );
 
-  const [groups, setGroups] = React.useState<DraftGroupMap>(EMPTY_DRAFT_GROUPS);
-  const [groupsLoading, setGroupsLoading] = React.useState(false);
-  const [groupsError, setGroupsError] = React.useState<string | undefined>();
-  const [collapsedGroups, setCollapsedGroups] = React.useState<ReadonlySet<WorkflowState>>(
-    () => new Set(COLLAPSED_GROUPS_BY_DEFAULT),
-  );
-  const [promotionRules, setPromotionRules] = React.useState<readonly PublisherPromotionRuleRow[]>([]);
+  const workspace = useDraftWorkspace(repositories);
+  const {
+    groups,
+    groupsLoading,
+    groupsError,
+    hasAnyArticles,
+    promotionRules,
+    selectedArticleId,
+    setSelectedArticleId,
+    reloadGroups,
+  } = workspace;
   const [promotionPolicy, setPromotionPolicy] = React.useState<PromotionPolicyResult | undefined>();
-  const [selectedArticleId, setSelectedArticleId] = React.useState<string | undefined>();
   const [articleDraft, setArticleDraft] = React.useState<PublisherArticleRow | undefined>();
   const [teamDraft, setTeamDraft] = React.useState<PublisherTeamMemberRow[]>([]);
   const [mediaDraft, setMediaDraft] = React.useState<PublisherMediaRow[]>([]);
@@ -496,35 +458,6 @@ export function ArticlePublisher({
     },
     [promotionRules],
   );
-
-  const reloadGroups = React.useCallback(async () => {
-    setGroupsLoading(true);
-    setGroupsError(undefined);
-    try {
-      const results = await Promise.all(
-        DRAFT_GROUP_ORDER.map((state) =>
-          repositories.articles.listByWorkflowState(state, {
-            destinations: SUPPORTED_DESTINATIONS,
-          }),
-        ),
-      );
-      // Defense-in-depth: this surface is project-spotlight scoped.
-      const next: DraftGroupMap = { ...EMPTY_DRAFT_GROUPS };
-      DRAFT_GROUP_ORDER.forEach((state, i) => {
-        const rows = results[i]!.filter((row) => isDestinationSupported(row.Destination));
-        (next as Record<WorkflowState, readonly PublisherArticleRow[]>)[state] = rows;
-      });
-      setGroups(next);
-    } catch (err) {
-      setGroupsError(err instanceof Error ? err.message : 'Failed to load articles.');
-    } finally {
-      setGroupsLoading(false);
-    }
-  }, [repositories]);
-
-  React.useEffect(() => {
-    void reloadGroups();
-  }, [reloadGroups]);
 
   const reloadSelected = React.useCallback(
     async (articleId: string) => {
@@ -608,29 +541,16 @@ export function ArticlePublisher({
     }
   }, [selectedArticleId, loadPreview]);
 
-  // Load active promotion rules once at mount.
-  //
-  // Current behavior:
+  // Promotion rules are loaded once per repositories identity inside
+  // `useDraftWorkspace`. Current behavior in this shell:
   //   - resolve policy from the draft's actual
   //     (Destination, ArticleContentType),
   //   - seed/re-seed IsFeatured/IsPinned on draft creation and
   //     destination/content-type changes,
   //   - enforce lock semantics on save when
   //     ManualOverrideAllowed=false.
-  //
   // The editor still has no explicit IsFeatured/IsPinned toggles;
-  // this prompt enforces policy closure without inventing controls.
-  React.useEffect(() => {
-    void (async () => {
-      try {
-        const rules = await repositories.promotionRules.listActive();
-        setPromotionRules(rules);
-      } catch {
-        // Best-effort — fall back to publisher defaults.
-        setPromotionRules([]);
-      }
-    })();
-  }, [repositories]);
+  // policy closure is enforced without inventing controls.
 
   const handleCreateNew = React.useCallback(() => {
     // No hard-coded TemplateKey — the resolver selects based on the
@@ -888,15 +808,6 @@ export function ArticlePublisher({
       preview.drift.templateKeyDrift ||
       preview.drift.templateVersionDrift);
 
-  const toggleGroupCollapsed = (state: WorkflowState) => {
-    setCollapsedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(state)) next.delete(state);
-      else next.add(state);
-      return next;
-    });
-  };
-
   const readinessSummary = composeReadinessSummary(
     articleDraft,
     binding,
@@ -907,7 +818,6 @@ export function ArticlePublisher({
   const workflowOutcomeChipLabel = articleDraft
     ? workflowOutcomeLabel(articleDraft.WorkflowState)
     : undefined;
-  const hasAnyArticles = DRAFT_GROUP_ORDER.some((state) => groups[state].length > 0);
 
   const publishEnabled =
     !!articleDraft &&
@@ -926,41 +836,17 @@ export function ArticlePublisher({
   return (
     <div className={styles.workspace} aria-label="Article Publisher workspace">
       {/* ── Left draft rail ──────────────────────────────────── */}
-      <aside className={styles.draftRail} aria-label="Drafts and recent articles">
-        <header className={styles.draftRailHeader}>
-          <div className={styles.draftRailTitle}>Your articles</div>
-          <PublisherButton variant="primary" size="sm" onClick={handleCreateNew}>
-            + New draft
-          </PublisherButton>
-        </header>
-
-        {groupsError ? (
-          <div className={styles.railError} role="alert">
-            <div>{groupsError}</div>
-            <PublisherButton
-              size="sm"
-              onClick={() => void reloadGroups()}
-            >
-              Try again
-            </PublisherButton>
-          </div>
-        ) : !hasAnyArticles && !groupsLoading ? (
-          <HbcEmptyState
-            title="No articles yet"
-            description="Start your first Project Spotlight to see it here."
-          />
-        ) : (
-          <DraftQueue
-            groupOrder={DRAFT_GROUP_ORDER}
-            groups={groups}
-            selectedArticleId={selectedArticleId}
-            onSelect={setSelectedArticleId}
-            actorEmail={actorEmail}
-            loading={groupsLoading && !hasAnyArticles}
-            defaultCollapsed={COLLAPSED_GROUPS_BY_DEFAULT}
-          />
-        )}
-      </aside>
+      <QueueRail
+        groups={groups}
+        groupsLoading={groupsLoading}
+        groupsError={groupsError}
+        hasAnyArticles={hasAnyArticles}
+        selectedArticleId={selectedArticleId}
+        onSelect={setSelectedArticleId}
+        onReload={() => void reloadGroups()}
+        onCreateNew={handleCreateNew}
+        actorEmail={actorEmail}
+      />
 
       {/* ── Center authoring canvas ─────────────────────────── */}
       <main className={styles.canvas} aria-label="Article authoring canvas">
