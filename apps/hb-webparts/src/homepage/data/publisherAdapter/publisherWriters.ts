@@ -85,6 +85,45 @@ async function listItemIdsByField(
     .filter((id): id is number => typeof id === 'number');
 }
 
+/**
+ * List existing child-list items for one parent article, returning
+ * both the SharePoint `Id` and the tenant child-key (`TeamMemberId`
+ * or `MediaId`). Powers the non-destructive keyed-sync writer so
+ * the caller can MERGE existing rows in place instead of
+ * delete-all / recreate-all.
+ */
+async function listItemsByParentKey(
+  descriptor: PublisherListDescriptor,
+  parentField: string,
+  parentValue: string,
+  childKeyField: string,
+  fetchImpl: FetchImpl,
+): Promise<ReadonlyArray<{ readonly Id: number; readonly childKey: string }>> {
+  const url =
+    `${listItemsEndpoint(descriptor)}` +
+    `?$select=${encodeURIComponent(`Id,${childKeyField}`)}` +
+    `&$filter=${encodeURIComponent(`${parentField} eq '${parentValue.replace(/'/g, "''")}'`)}` +
+    `&$top=500`;
+  const res = await fetchImpl(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: { Accept: 'application/json;odata=nometadata' },
+  });
+  if (!res.ok) return [];
+  const body = (await res.json().catch(() => undefined)) as
+    | { value?: ReadonlyArray<Record<string, unknown>> }
+    | undefined;
+  return (body?.value ?? [])
+    .map((r) => {
+      const Id = r['Id'];
+      const childKey = r[childKeyField];
+      if (typeof Id !== 'number') return undefined;
+      if (typeof childKey !== 'string' || childKey.length === 0) return undefined;
+      return { Id, childKey };
+    })
+    .filter((r): r is { Id: number; childKey: string } => r !== undefined);
+}
+
 async function deleteItem(
   descriptor: PublisherListDescriptor,
   itemId: number,
@@ -331,22 +370,53 @@ export function mapMediaRowToListFields(
   };
 }
 
+export interface ChildSyncOutcome {
+  /** New rows POSTed (no existing match on the child key). */
+  readonly created: number;
+  /** Existing rows merged in place by child key. */
+  readonly updated: number;
+  /** Existing rows removed because the caller did not include them. */
+  readonly deleted: number;
+  /** `created + updated`, kept for back-compat with older callers. */
+  readonly written: number;
+}
+
 export interface TeamMembersWriter {
   replaceAllForArticle(
     articleId: string,
     rows: readonly PublisherTeamMemberRow[],
-  ): Promise<{ readonly deleted: number; readonly written: number }>;
+  ): Promise<ChildSyncOutcome>;
 }
 
 export interface MediaWriter {
   replaceAllForArticle(
     articleId: string,
     rows: readonly PublisherMediaRow[],
-  ): Promise<{ readonly deleted: number; readonly written: number }>;
+  ): Promise<ChildSyncOutcome>;
 }
 
-function createReplaceAllWriter<T>(
+/**
+ * Non-destructive keyed-sync writer for child rows.
+ *
+ * Strategy (replaces the previous delete-all → recreate-all pattern):
+ *   1. List existing tenant rows for `ArticleId`, returning `{Id, childKey}`.
+ *   2. For each incoming row:
+ *        - matching `childKey` → MERGE the existing item (preserves
+ *          tenant Id, version history, and any tenant-side fields the
+ *          caller did not author).
+ *        - no match              → POST a new item.
+ *   3. ONLY after every MERGE/POST has succeeded, delete the
+ *      existing rows whose `childKey` was not in the incoming set.
+ *
+ * The deletion phase runs after writes, not before, so a mid-write
+ * failure cannot leave the article with zero children. Throws on any
+ * failure; the caller surfaces a partial-write error instead of
+ * silent data loss.
+ */
+function createKeyedSyncWriter<T>(
   descriptor: PublisherListDescriptor,
+  childKeyField: string,
+  childKeyOf: (row: T) => string,
   mapFn: (row: T) => Record<string, unknown>,
   fetchImpl: FetchImpl,
   digestImpl: DigestImpl,
@@ -354,23 +424,46 @@ function createReplaceAllWriter<T>(
   return async function replaceAllForArticle(
     articleId: string,
     rows: readonly T[],
-  ): Promise<{ deleted: number; written: number }> {
+  ): Promise<ChildSyncOutcome> {
     const digest = await digestImpl(descriptor.hostSiteUrl);
-    const existingIds = await listItemIdsByField(
+    const existing = await listItemsByParentKey(
       descriptor,
       'ArticleId',
       articleId,
+      childKeyField,
       fetchImpl,
     );
-    for (const id of existingIds) {
-      await deleteItem(descriptor, id, digest, fetchImpl);
-    }
-    let written = 0;
+    const existingByKey = new Map<string, number>();
+    for (const e of existing) existingByKey.set(e.childKey, e.Id);
+
+    let created = 0;
+    let updated = 0;
+    const incomingKeys = new Set<string>();
     for (const row of rows) {
-      await postItem(descriptor, mapFn(row), digest, fetchImpl);
-      written += 1;
+      const key = childKeyOf(row);
+      incomingKeys.add(key);
+      const body = mapFn(row);
+      const existingId = existingByKey.get(key);
+      if (existingId !== undefined) {
+        await mergeItem(descriptor, existingId, body, digest, fetchImpl);
+        updated += 1;
+      } else {
+        await postItem(descriptor, body, digest, fetchImpl);
+        created += 1;
+      }
     }
-    return { deleted: existingIds.length, written };
+
+    // Deletion runs LAST. If any MERGE/POST above threw, we never
+    // reach this block and the prior server rows remain intact.
+    let deleted = 0;
+    for (const e of existing) {
+      if (!incomingKeys.has(e.childKey)) {
+        await deleteItem(descriptor, e.Id, digest, fetchImpl);
+        deleted += 1;
+      }
+    }
+
+    return { created, updated, deleted, written: created + updated };
   };
 }
 
@@ -381,8 +474,10 @@ export function createSharePointTeamMembersWriter(deps: {
 } = {}): TeamMembersWriter {
   const descriptor = deps.descriptor ?? PUBLISHER_LISTS.teamMembers;
   return {
-    replaceAllForArticle: createReplaceAllWriter(
+    replaceAllForArticle: createKeyedSyncWriter<PublisherTeamMemberRow>(
       descriptor,
+      'TeamMemberId',
+      (row) => row.TeamMemberId,
       mapTeamMemberRowToListFields,
       deps.fetchImpl ?? fetch,
       deps.fetchRequestDigestImpl ?? fetchRequestDigest,
@@ -397,8 +492,10 @@ export function createSharePointMediaWriter(deps: {
 } = {}): MediaWriter {
   const descriptor = deps.descriptor ?? PUBLISHER_LISTS.media;
   return {
-    replaceAllForArticle: createReplaceAllWriter(
+    replaceAllForArticle: createKeyedSyncWriter<PublisherMediaRow>(
       descriptor,
+      'MediaId',
+      (row) => row.MediaId,
       mapMediaRowToListFields,
       deps.fetchImpl ?? fetch,
       deps.fetchRequestDigestImpl ?? fetchRequestDigest,
