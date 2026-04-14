@@ -72,6 +72,16 @@ import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
+import {
+  illegalTransitionMessage,
+  inProgressMessage,
+  lifecycleFailureMessage,
+  lifecycleOutcomeMessage,
+  publishDisabledReason,
+  publishFailureMessage,
+  publishSuccessMessage,
+  transitionInProgressMessage,
+} from './lifecycleMessaging.js';
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../hbKudos/hooks/useRecipientPhotoHydration.js';
 import { resolveSlugForSave } from './slugGovernance.js';
@@ -654,7 +664,7 @@ export function ArticlePublisher({
   const handleSave = React.useCallback(async () => {
     if (!articleDraft) return;
     setBusy(true);
-    setStatus('Saving…');
+    setStatus('Saving the draft…');
     try {
       // Ordinary authoring treats TemplateKey as system-managed.
       // Always resolve from current discriminators so stale keys
@@ -706,11 +716,15 @@ export function ArticlePublisher({
       await repositories.teamMembers.replaceAllForArticle(updated.ArticleId, teamDraft);
       await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
       setArticleDraft(policyApplied);
-      setStatus('Saved.');
+      setStatus('Draft saved.');
       await reloadGroups();
       await reloadSelected(policyApplied.ArticleId);
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Save failed.');
+      setStatus(
+        err instanceof Error
+          ? `Couldn\u2019t save — ${err.message}`
+          : 'Couldn\u2019t save the draft.',
+      );
     } finally {
       setBusy(false);
     }
@@ -721,11 +735,11 @@ export function ArticlePublisher({
       if (!articleDraft) return;
       const from = articleDraft.WorkflowState;
       if (!canTransition(from, to)) {
-        setStatus(`Cannot transition from ${from} to ${to}.`);
+        setStatus(illegalTransitionMessage(from, to));
         return;
       }
       setBusy(true);
-      setStatus(`Transitioning to ${to}…`);
+      setStatus(transitionInProgressMessage(to));
       try {
         // Archive and withdraw are first-class operational flows
         // that orchestrate master-row + binding + history side
@@ -749,10 +763,12 @@ export function ArticlePublisher({
                 });
           if (outcome.ok) {
             setStatus(
-              `Now in ${to} (binding ${outcome.bindingUpdated ? 'updated' : 'unchanged'}).`,
+              lifecycleOutcomeMessage({ to, bindingUpdated: outcome.bindingUpdated }),
             );
           } else {
-            setStatus(`${to} failed at ${outcome.stage}: ${outcome.message}`);
+            setStatus(
+              lifecycleFailureMessage({ to, stage: outcome.stage, message: outcome.message }),
+            );
           }
         } else {
           // Generic transitions are now orchestrated to prevent
@@ -765,9 +781,11 @@ export function ArticlePublisher({
             actorEmail: actorEmail ?? articleDraft.AuthorEmail,
           });
           if (outcome.ok) {
-            setStatus(`Now in ${to}.`);
+            setStatus(lifecycleOutcomeMessage({ to, bindingUpdated: false }));
           } else {
-            setStatus(`Transition to ${to} failed at ${outcome.stage}: ${outcome.message}`);
+            setStatus(
+              lifecycleFailureMessage({ to, stage: outcome.stage, message: outcome.message }),
+            );
           }
         }
         await reloadGroups();
@@ -785,7 +803,7 @@ export function ArticlePublisher({
     async (mode: 'create' | 'republish' | 'preview') => {
       if (!articleDraft) return;
       setBusy(true);
-      setStatus(`${mode === 'preview' ? 'Composing preview' : mode === 'create' ? 'Publishing' : 'Republishing'}…`);
+      setStatus(inProgressMessage(mode));
       try {
         const outcome: PublishOutcome = await orchestrator.run({
           articleId: articleDraft.ArticleId,
@@ -797,27 +815,29 @@ export function ArticlePublisher({
           actorEmail,
         });
         if (outcome.ok) {
-          // When the orchestrator actually wrote a page + binding
-          // (create / inPlaceUpdate / regenerate) it also stamped
-          // WorkflowState='published' and appended a workflow-history
-          // row. Reflect that in the status line so the operator
-          // sees the closed lifecycle and not just the page-side
-          // action. `noOp` and `preview` never mutate state, so we
-          // keep the original description for those.
-          const lifecycleClosed =
-            mode !== 'preview' && outcome.action !== 'noOp';
-          const suffix = outcome.pageUrl ? ` · ${outcome.pageUrl}` : '';
           setStatus(
-            lifecycleClosed
-              ? `${mode} ok — action=${outcome.action}, state=published${suffix}`
-              : `${mode} ok — action=${outcome.action}, reason=${outcome.reason}${suffix}`,
+            publishSuccessMessage({
+              mode,
+              action: outcome.action,
+              pageUrl: outcome.pageUrl,
+            }),
           );
           if (mode !== 'preview') await reloadSelected(articleDraft.ArticleId);
         } else {
-          setStatus(`${mode} failed at ${outcome.stage}: ${outcome.message}`);
+          setStatus(
+            publishFailureMessage({
+              mode,
+              stage: outcome.stage,
+              message: outcome.message,
+            }),
+          );
         }
       } catch (err) {
-        setStatus(err instanceof Error ? err.message : `${mode} failed.`);
+        setStatus(
+          err instanceof Error
+            ? publishFailureMessage({ mode, stage: 'runtime', message: err.message })
+            : publishFailureMessage({ mode, stage: 'runtime', message: 'unknown error' }),
+        );
       } finally {
         setBusy(false);
       }
@@ -1164,11 +1184,12 @@ export function ArticlePublisher({
                   type="button"
                   className={styles.primaryBtn}
                   disabled={!publishEnabled}
-                  title={
-                    publishBlockedByValidation && firstBlockingError
-                      ? `Blocked: ${firstBlockingError}`
-                      : undefined
-                  }
+                  title={publishDisabledReason({
+                    hasDraft: !!articleDraft,
+                    destinationSupported: !unsupportedDestinationLoaded,
+                    validationBlocked: publishBlockedByValidation,
+                    busy,
+                  })}
                   onClick={() => handlePublishAction('create')}
                 >
                   Publish
@@ -1177,11 +1198,12 @@ export function ArticlePublisher({
                   type="button"
                   className={styles.btn}
                   disabled={!republishEnabled}
-                  title={
-                    publishBlockedByValidation && firstBlockingError
-                      ? `Blocked: ${firstBlockingError}`
-                      : undefined
-                  }
+                  title={publishDisabledReason({
+                    hasDraft: !!articleDraft,
+                    destinationSupported: !unsupportedDestinationLoaded,
+                    validationBlocked: publishBlockedByValidation,
+                    busy,
+                  })}
                   onClick={() => handlePublishAction('republish')}
                 >
                   Republish
@@ -1977,163 +1999,5 @@ function resolveCounterState(counter: FieldCounter): { text: string; className: 
     className = styles.fieldCountWarn;
   }
   return { text, className };
-}
-
-function PreviewPanel({
-  outcome,
-  loading,
-}: {
-  outcome: PreviewOutcome | undefined;
-  loading: boolean;
-}) {
-  if (loading && !outcome) return <HbcSpinner />;
-  if (!outcome) {
-    return (
-      <HbcEmptyState
-        title="Preview not yet built"
-        description="Add content above to compose a structural preview of the article."
-      />
-    );
-  }
-  if (!outcome.ok) {
-    return (
-      <HbcEmptyState
-        title="Preview failed"
-        description={`${outcome.reason}: ${outcome.message}`}
-      />
-    );
-  }
-  const { validation, drift, decision, composedPage } = outcome;
-  const driftLevel = drift.templateKeyDrift
-    ? 'hard'
-    : drift.shellVersionDrift || drift.templateVersionDrift
-      ? 'soft'
-      : 'none';
-  return (
-    <div className={styles.previewRoot}>
-      {driftLevel !== 'none' && (
-        <div
-          className={
-            driftLevel === 'hard' ? styles.driftBannerHard : styles.driftBannerSoft
-          }
-        >
-          {driftLevel === 'hard'
-            ? 'PageTemplateKey has changed since the last publish. Publishing will regenerate the destination page (new PageId, new PageUrl); the prior binding is superseded.'
-            : 'Shell or template version drift detected. Publishing will update the existing page in place — the same PageId and PageUrl are preserved.'}
-        </div>
-      )}
-
-      <section>
-        <h3 className={styles.sectionHeading}>
-          Validation {validation.ok ? '· ok' : `· ${validation.errors.length} error${validation.errors.length === 1 ? '' : 's'}`}
-        </h3>
-        {validation.errors.length === 0 && validation.warnings.length === 0 ? (
-          <div className={styles.findingItemOk}>No findings.</div>
-        ) : (
-          <ul className={styles.findingList}>
-            {validation.errors.map((f, i) => (
-              <li key={`e-${i}`} className={styles.findingItemError}>
-                <div className={styles.findingCategory}>{f.category}</div>
-                <div className={styles.findingMessage}>
-                  {f.field ? <code>{f.field}</code> : null} {f.message}
-                </div>
-                {f.actionHint && <div className={styles.findingHint}>{f.actionHint}</div>}
-              </li>
-            ))}
-            {validation.warnings.map((f, i) => (
-              <li key={`w-${i}`} className={styles.findingItemWarn}>
-                <div className={styles.findingCategory}>{f.category}</div>
-                <div className={styles.findingMessage}>
-                  {f.field ? <code>{f.field}</code> : null} {f.message}
-                </div>
-                {f.actionHint && <div className={styles.findingHint}>{f.actionHint}</div>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h3 className={styles.sectionHeading}>Decision on publish</h3>
-        <div className={styles.findingItemOk}>
-          <strong>action:</strong> {decision.action} · <strong>reason:</strong> {decision.reason}
-          {decision.regenerationCause ? ` · cause: ${decision.regenerationCause}` : ''}
-        </div>
-        {decision.notes.length > 0 && (
-          <ul className={styles.decisionNotes}>
-            {decision.notes.map((n, i) => (
-              <li key={i}>{n}</li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h3 className={styles.sectionHeading}>Structured page preview</h3>
-        <div className={styles.previewControls}>
-          {composedPage.controls.map((c) => {
-            if (!c.visible) {
-              return (
-                <div key={c.slot} className={styles.previewControlHidden}>
-                  <strong>{c.slot}</strong> · hidden ({(c as { reason?: string }).reason ?? 'suppressed'})
-                </div>
-              );
-            }
-            switch (c.slot) {
-              case 'banner': {
-                const b = c as BannerControlPayload;
-                return (
-                  <div key={c.slot} className={styles.previewControl}>
-                    <strong>banner</strong>
-                    <div>title: {b.title}</div>
-                    <div>image: <code>{b.imageUrl}</code></div>
-                    <div>alt: {b.imageAltText}</div>
-                  </div>
-                );
-              }
-              case 'subhead':
-              case 'body': {
-                const t = c as TextControlPayload;
-                // Body emits sanitised HTML through the rich editor;
-                // the preview shows a plain-text projection so the
-                // snippet reads as editorial prose rather than markup.
-                // Subhead remains a plain string, but routing it
-                // through the same projection is harmless (no tags).
-                const snippet = bodyTextSnippet(t.text, 200);
-                return (
-                  <div key={c.slot} className={styles.previewControl}>
-                    <strong>{c.slot}</strong>
-                    <div className={styles.previewSnippet}>{snippet}</div>
-                  </div>
-                );
-              }
-              case 'team': {
-                const t = c as TeamViewerControlPayload;
-                return (
-                  <div key={c.slot} className={styles.previewControl}>
-                    <strong>team</strong>
-                    <div>heading: {t.properties.heading}</div>
-                    <div>layout: {t.properties.layout} · density: {t.properties.density}</div>
-                    <div>articleId: <code>{t.properties.articleId}</code></div>
-                  </div>
-                );
-              }
-              case 'gallery': {
-                const g = c as ImageGalleryControlPayload;
-                return (
-                  <div key={c.slot} className={styles.previewControl}>
-                    <strong>gallery</strong>
-                    <div>layout: {g.layoutProfile}</div>
-                    <div>{g.images.length} image{g.images.length === 1 ? '' : 's'}</div>
-                  </div>
-                );
-              }
-            }
-            return null;
-          })}
-        </div>
-      </section>
-    </div>
-  );
 }
 
