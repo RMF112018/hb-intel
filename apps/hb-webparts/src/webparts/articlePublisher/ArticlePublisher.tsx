@@ -69,6 +69,7 @@ import {
   type ProjectLookupSearchFn,
 } from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
+import { resolveSlugForSave } from './slugGovernance.js';
 import {
   articleContentTypeLabel,
   articleSubjectLabel,
@@ -203,7 +204,10 @@ function emptyArticle(): PublisherArticleRow {
     Title: 'Untitled article',
     ArticleContentType: 'monthlySpotlight',
     Destination: 'projectSpotlight',
-    Slug: id,
+    // Slug is system-managed: it is regenerated from the title on
+    // save via `resolveSlugForSave`. Seeding empty here keeps the
+    // pre-save authoring shape honest about the system-owned field.
+    Slug: '',
     TemplateKey: '',
     WorkflowState: 'draft',
     Subhead: '',
@@ -638,9 +642,33 @@ export function ArticlePublisher({
         );
         return;
       }
+      // Slug is system-managed. Collect every other article's slug
+      // from the draft-rail groups (which are loaded on mount and
+      // refreshed after every save / transition) and resolve a
+      // collision-free slug for this save. While the article is in
+      // `draft`, the slug tracks the headline; once it leaves draft
+      // the persisted slug is preserved so external links remain
+      // stable. Closes workstream-b step-03.
+      const takenSlugs = new Set<string>();
+      for (const state of DRAFT_GROUP_ORDER) {
+        for (const row of groups[state]) {
+          if (row.ArticleId === articleDraft.ArticleId) continue;
+          if (row.Slug && row.Slug.trim().length > 0) takenSlugs.add(row.Slug);
+        }
+      }
+      const resolvedSlug = resolveSlugForSave(
+        {
+          ArticleId: articleDraft.ArticleId,
+          Title: articleDraft.Title,
+          Slug: articleDraft.Slug,
+          WorkflowState: articleDraft.WorkflowState,
+        },
+        takenSlugs,
+      );
       const updated: PublisherArticleRow = {
         ...articleDraft,
         TemplateKey: resolution.entry.TemplateKey,
+        Slug: resolvedSlug,
         UpdatedDateUtc: nowIso(),
       };
       const policyApplied = applyPromotionPolicy(updated, { enforceLockOnly: true });
@@ -656,7 +684,7 @@ export function ArticlePublisher({
     } finally {
       setBusy(false);
     }
-  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadGroups, reloadSelected, applyPromotionPolicy]);
+  }, [articleDraft, teamDraft, mediaDraft, repositories, reloadGroups, reloadSelected, applyPromotionPolicy, groups]);
 
   const handleTransition = React.useCallback(
     async (to: WorkflowState) => {
