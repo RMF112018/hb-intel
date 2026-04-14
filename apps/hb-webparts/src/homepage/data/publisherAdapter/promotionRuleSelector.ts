@@ -9,19 +9,17 @@
  *     re-apply `IsFeatured` / `IsPinned`, including lock semantics
  *     when `ManualOverrideAllowed=false`.
  *
- * **NOT enforced in the editor (Phase-05 Prompt-05 scope-down):**
- *   - The `manualOverrideAllowed` flag and `source` rule are
- *     returned on `PromotionDefaults` so a future editor can gate
- *     `IsFeatured` / `IsPinned` toggles, but the current
- *     authoring UI does not expose those toggles and therefore
- *     does not enforce manual-override gating. Reading this
- *     module's output as "the editor locks the toggle when the
- *     rule disallows override" is a false promise — there is no
- *     such toggle to lock today. Callers that want real
- *     enforcement must (a) expose the toggles, and (b) bind
+ * **UI-toggle gating still deferred in the editor:**
+ *   - The current surface has no direct `IsFeatured` / `IsPinned`
+ *     controls, so there is no toggle-level lock behavior to bind.
+ *   - Current enforcement is save-time normalization:
+ *     callers apply resolved defaults when
+ *     `ManualOverrideAllowed=false` so persisted values cannot
+ *     drift from locked rule policy.
+ *   - If/when toggle controls are introduced, bind
  *     `disabled` / `readOnly` to
- *     `!defaults.manualOverrideAllowed`. When that lands, move
- *     the relevant bullet back into "Implemented behavior" above.
+ *     `!defaults.manualOverrideAllowed` and keep save-time
+ *     normalization as a backstop.
  *
  * Specificity: a rule whose `RuleContentType` matches the article's
  * `ArticleContentType` exactly outranks a rule with no
@@ -127,11 +125,11 @@ export function selectPromotionPolicy(
 }
 
 /**
- * Derive the promotion defaults that the authoring surface seeds
- * onto a new article. `manualOverrideAllowed` is populated from
- * the matching rule so a future editor can choose to lock
- * `IsFeatured` / `IsPinned` toggles, but the current surface does
- * not expose those toggles and does not enforce gating.
+ * Derive promotion defaults for current authoring policy
+ * application. `manualOverrideAllowed` is returned so callers can
+ * (a) normalize locked values on save today, and (b) wire
+ * toggle-level disablement in a future UI that exposes direct
+ * `IsFeatured` / `IsPinned` controls.
  */
 export function selectPromotionDefaults(
   rules: readonly PublisherPromotionRuleRow[],

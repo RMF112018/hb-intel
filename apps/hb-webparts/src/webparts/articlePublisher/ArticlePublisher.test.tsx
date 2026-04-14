@@ -9,6 +9,7 @@ import {
   applyTeamMemberPrincipalChange,
   contentTypeOptionsForDraft,
   milestoneLegacyNotice,
+  promotionLockStatusText,
   resolveTemplateKeySystemManaged,
   update,
 } from './ArticlePublisher';
@@ -115,6 +116,24 @@ describe('applyPromotionPolicyToDraft', () => {
     expect(resolved.draft.SecondaryImageAltText).toBe('Secondary alt');
     expect(resolved.draft.TeamViewerMode).toBe('summaryExpand');
     expect(resolved.draft.TeamViewerAllowExpand).toBe(true);
+  });
+});
+
+describe('promotionLockStatusText', () => {
+  it('describes save-time lock enforcement without implying toggle controls', () => {
+    const text = promotionLockStatusText({
+      featured: true,
+      pinned: false,
+      manualOverrideAllowed: false,
+      isLocked: true,
+      matchedScope: 'destination',
+      sourceRuleId: 'rule-1',
+    });
+    expect(text).toContain('IsFeatured=true');
+    expect(text).toContain('IsPinned=false');
+    expect(text).toContain('destination scope rule rule-1');
+    expect(text).toContain('No direct IsFeatured/IsPinned toggle controls');
+    expect(text).toContain('save-time normalization');
   });
 });
 

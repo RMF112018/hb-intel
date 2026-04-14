@@ -131,6 +131,16 @@ export function applyPromotionPolicyToDraft(
   };
 }
 
+export function promotionLockStatusText(policy: PromotionPolicyResult): string {
+  return (
+    `Promotion rule lock: IsFeatured=${String(policy.featured)} and ` +
+    `IsPinned=${String(policy.pinned)} are enforced by the ` +
+    `${policy.matchedScope} scope rule ${policy.sourceRuleId ?? '(unknown)'}. ` +
+    'No direct IsFeatured/IsPinned toggle controls are exposed in this sprint UI; ' +
+    'locked policy is enforced through policy re-application and save-time normalization.'
+  );
+}
+
 /**
  * Build a blank authoring draft for a brand-new article.
  *
@@ -925,12 +935,7 @@ function MetadataPanel({ draft, onChange, searchProjects, promotionPolicy }: Met
         </select>
       </Field>
       {promotionPolicy?.isLocked && (
-        <div className={styles.statusLine}>
-          Promotion rule lock: IsFeatured={String(promotionPolicy.featured)} and
-          IsPinned={String(promotionPolicy.pinned)} are enforced by the
-          {` ${promotionPolicy.matchedScope} `}scope rule
-          {` ${promotionPolicy.sourceRuleId ?? '(unknown)'}`}.
-        </div>
+        <div className={styles.statusLine}>{promotionLockStatusText(promotionPolicy)}</div>
       )}
       <Field label="Spotlight type">
         <select
