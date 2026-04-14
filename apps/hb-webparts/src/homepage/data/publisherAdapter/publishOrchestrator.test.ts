@@ -219,6 +219,47 @@ describe('publishOrchestrator', () => {
     expect(historyRow.PreviousState).toBe('approved');
   });
 
+  it('classifies a post-publish workflow-history append failure as `historyAppend`, not `articleSync` (P1-4 closure)', async () => {
+    const f = fixture();
+    // Articles back-sync succeeds; workflow-history append is the
+    // step that fails. The recorded publishing-error stage must
+    // point at the workflow-history subsystem so operators know
+    // which list to inspect — previously this was misclassified
+    // as `articleSync` and indistinguishable from a back-sync
+    // failure.
+    f.repositories.articles.upsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+    f.repositories.workflowHistory.append = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => {
+      throw new Error('workflow-history list is offline');
+    });
+    const errorAppend = vi.fn<
+      PublisherRepositories['publishingErrors']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.publishingErrors.append = errorAppend;
+
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'create',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-generated',
+    });
+    // Publish itself still reports success — history append is
+    // best-effort. The failure surfaces via HB Article Publishing
+    // Errors only.
+    expect(result.ok).toBe(true);
+
+    expect(errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = errorAppend.mock.calls[0]![0];
+    expect(errorRow.Title).toMatch(/^create\.historyAppend:/);
+    expect(errorRow.ErrorSummary).toContain(
+      'HB Article Workflow History append failed',
+    );
+  });
+
   it('inPlaceUpdate targets the bound PageId — not a filename — and preserves PageId/PageUrl on the binding row', async () => {
     const existing: PublisherPageBindingRow = {
       BindingId: 'bnd-existing-42',

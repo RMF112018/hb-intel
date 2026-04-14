@@ -608,11 +608,19 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         err instanceof Error
           ? `HB Article Workflow History append failed after ${workflowStateChanged ? 'publish' : 'republish'}: ${err.message}`
           : `HB Article Workflow History append failed after ${workflowStateChanged ? 'publish' : 'republish'}.`;
+      // The workflow-history append is the LAST step of the
+      // publish path, and it has its own failing subsystem
+      // (`HB Article Workflow History`, not `HB Articles`).
+      // Classifying the error as `articleSync` (the prior failure
+      // mode for the back-sync upsert) made publishing-error rows
+      // indistinguishable between "article back-sync failed" and
+      // "history append failed" — operators could not tell which
+      // subsystem to inspect. Closes P1-4.
       await recordPublishingError({
         articleId: context.article.ArticleId,
         title: context.article.Title,
         destination: context.article.Destination,
-        stage: 'articleSync',
+        stage: 'historyAppend',
         mode: req.mode,
         message,
         bindingId: bindingRow.BindingId,
