@@ -123,11 +123,14 @@ const TEAM_MEMBERS_MVP_FIELDS = [
 const MEDIA_MVP_FIELDS = [
   'ArticleId',
   'MediaId',
+  'Title',
   'MediaRole',
-  'ImageAssetUrl',
+  'ImageAsset',
   'AltText',
   'Caption',
   'SortOrder',
+  'GalleryGroup',
+  'FeaturedInGallery',
 ] as const;
 
 const TEMPLATE_REGISTRY_MVP_FIELDS = [

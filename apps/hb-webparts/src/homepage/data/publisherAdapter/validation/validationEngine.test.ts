@@ -85,8 +85,9 @@ function context(over: {
       {
         ArticleId: 'art-001',
         MediaId: 'm-1',
+        Title: 'gallery 1',
         MediaRole: 'gallery',
-        ImageAssetUrl: 'https://img.example/g1.jpg',
+        ImageAsset: 'https://img.example/g1.jpg',
         AltText: 'gallery 1',
       },
     ],
@@ -142,8 +143,9 @@ describe('validatePublishContext', () => {
           {
             ArticleId: 'art-001',
             MediaId: 'm-1',
+            Title: 'gallery 1',
             MediaRole: 'gallery',
-            ImageAssetUrl: 'https://img.example/g1.jpg',
+            ImageAsset: 'https://img.example/g1.jpg',
             AltText: '',
           },
         ],

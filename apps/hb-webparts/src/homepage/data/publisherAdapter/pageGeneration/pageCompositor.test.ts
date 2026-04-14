@@ -84,8 +84,9 @@ function mediaRow(id: string, over: Partial<PublisherMediaRow> = {}): PublisherM
   return {
     ArticleId: 'art-001',
     MediaId: id,
+    Title: id,
     MediaRole: 'gallery',
-    ImageAssetUrl: `https://img.example/${id}.jpg`,
+    ImageAsset: `https://img.example/${id}.jpg`,
     AltText: `${id} alt`,
     ...over,
   };

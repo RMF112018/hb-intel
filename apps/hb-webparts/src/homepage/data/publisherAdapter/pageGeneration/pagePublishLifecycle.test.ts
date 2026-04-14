@@ -88,8 +88,9 @@ function context(): PublishResolutionContext {
       {
         ArticleId: 'art-life-001',
         MediaId: 'm-1',
+        Title: 'g',
         MediaRole: 'gallery',
-        ImageAssetUrl: 'https://img.example/g.jpg',
+        ImageAsset: 'https://img.example/g.jpg',
         AltText: 'g',
       },
     ],

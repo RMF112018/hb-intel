@@ -200,14 +200,28 @@ export interface PublisherTeamMemberRow {
 /* C. HB Article Media                                                 */
 /* ------------------------------------------------------------------ */
 
+/**
+ * `HB Article Media` row shape aligned to the tenant list schema
+ * (publisher-list-schema-report.md §C).
+ *
+ * Required tenant fields: ArticleId, MediaId, MediaRole, ImageAsset
+ * (URL), AltText (Note), Title. Optional tenant fields: Caption,
+ * SortOrder, GalleryGroup, FeaturedInGallery. The asset URL column is
+ * `ImageAsset` on the tenant list — NOT `ImageAssetUrl`. Earlier code
+ * hand-renamed the URL column; callers must use the tenant internal
+ * name or every media POST/GET misses the column.
+ */
 export interface PublisherMediaRow {
   readonly ArticleId: string;
   readonly MediaId: string;
+  readonly Title: string;
   readonly MediaRole: MediaRole;
-  readonly ImageAssetUrl: UrlString;
+  readonly ImageAsset: UrlString;
   readonly AltText: string;
   readonly Caption?: string;
   readonly SortOrder?: number;
+  readonly GalleryGroup?: string;
+  readonly FeaturedInGallery?: boolean;
 }
 
 /* ------------------------------------------------------------------ */

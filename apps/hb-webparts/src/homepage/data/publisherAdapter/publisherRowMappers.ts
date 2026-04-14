@@ -313,18 +313,26 @@ export function mapMediaRow(
 ): PublisherMediaRow | undefined {
   const ArticleId = requiredStr(raw['ArticleId']);
   const MediaId = requiredStr(raw['MediaId']);
+  const Title = requiredStr(raw['Title']);
   const MediaRole = mediaRole(raw['MediaRole']);
-  const ImageAssetUrl = url(raw['ImageAssetUrl']);
+  // Tenant internal field name is `ImageAsset` (URL). Older code
+  // wrote `ImageAssetUrl`; reads would miss the column entirely on
+  // a tenant-aligned list, so require the real name here.
+  const ImageAsset = url(raw['ImageAsset']);
   const AltText = requiredStr(raw['AltText']);
-  if (!ArticleId || !MediaId || !MediaRole || !ImageAssetUrl || !AltText) return undefined;
+  if (!ArticleId || !MediaId || !Title || !MediaRole || !ImageAsset || !AltText)
+    return undefined;
   return {
     ArticleId,
     MediaId,
+    Title,
     MediaRole,
-    ImageAssetUrl,
+    ImageAsset,
     AltText,
     Caption: str(raw['Caption']),
     SortOrder: num(raw['SortOrder']),
+    GalleryGroup: str(raw['GalleryGroup']),
+    FeaturedInGallery: bool(raw['FeaturedInGallery']),
   };
 }
 

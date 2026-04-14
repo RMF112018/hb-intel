@@ -65,8 +65,9 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
       mapMediaRow({
         ArticleId: ARTICLE_ID,
         MediaId: 'm-1',
+        Title: 'a',
         MediaRole: 'gallery',
-        ImageAssetUrl: 'https://img.example/a.jpg',
+        ImageAsset: 'https://img.example/a.jpg',
         AltText: 'alt',
       })?.ArticleId,
     ).toBe(ARTICLE_ID);
@@ -74,8 +75,9 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
       mapMediaRow({
         PostId: ARTICLE_ID,
         MediaId: 'm-1',
+        Title: 'a',
         MediaRole: 'gallery',
-        ImageAssetUrl: 'https://img.example/a.jpg',
+        ImageAsset: 'https://img.example/a.jpg',
         AltText: 'alt',
       }),
     ).toBeUndefined();
@@ -206,13 +208,68 @@ describe('child-row writers emit ArticleId, never PostId', () => {
     const row: PublisherMediaRow = {
       ArticleId: ARTICLE_ID,
       MediaId: 'm-1',
+      Title: 'a',
       MediaRole: 'gallery',
-      ImageAssetUrl: 'https://img.example/a.jpg',
+      ImageAsset: 'https://img.example/a.jpg',
       AltText: 'alt',
     };
     const fields = mapMediaRowToListFields(row);
     expect(fields['ArticleId']).toBe(ARTICLE_ID);
     expect(fields['PostId']).toBeUndefined();
+  });
+
+  it('media write payload emits tenant internal names with no legacy aliases', () => {
+    const row: PublisherMediaRow = {
+      ArticleId: ARTICLE_ID,
+      MediaId: 'm-1',
+      Title: 'Hero shot',
+      MediaRole: 'gallery',
+      ImageAsset: 'https://img.example/a.jpg',
+      AltText: 'alt',
+      Caption: 'cap',
+      SortOrder: 2,
+      GalleryGroup: 'lobby',
+      FeaturedInGallery: true,
+    };
+    const fields = mapMediaRowToListFields(row);
+    // Required tenant columns.
+    expect(fields['Title']).toBe('Hero shot');
+    expect(fields['MediaId']).toBe('m-1');
+    expect(fields['MediaRole']).toBe('gallery');
+    expect(fields['AltText']).toBe('alt');
+    // Asset URL uses the tenant column name and URL field shape.
+    expect(fields['ImageAsset']).toEqual({
+      Url: 'https://img.example/a.jpg',
+      Description: 'https://img.example/a.jpg',
+    });
+    expect(fields['ImageAssetUrl']).toBeUndefined();
+    // Optional tenant columns surfaced.
+    expect(fields['Caption']).toBe('cap');
+    expect(fields['SortOrder']).toBe(2);
+    expect(fields['GalleryGroup']).toBe('lobby');
+    expect(fields['FeaturedInGallery']).toBe(true);
+  });
+
+  it('media read mapper rejects rows missing tenant Title or using the legacy ImageAssetUrl column', () => {
+    expect(
+      mapMediaRow({
+        ArticleId: ARTICLE_ID,
+        MediaId: 'm-1',
+        MediaRole: 'gallery',
+        ImageAsset: 'https://img.example/a.jpg',
+        AltText: 'alt',
+      }),
+    ).toBeUndefined();
+    expect(
+      mapMediaRow({
+        ArticleId: ARTICLE_ID,
+        MediaId: 'm-1',
+        Title: 'a',
+        MediaRole: 'gallery',
+        ImageAssetUrl: 'https://img.example/a.jpg',
+        AltText: 'alt',
+      }),
+    ).toBeUndefined();
   });
 
   it('page-binding write payload carries ArticleId FK', () => {

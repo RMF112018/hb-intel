@@ -306,17 +306,28 @@ export function mapTeamMemberRowToListFields(
   };
 }
 
+/**
+ * Map a `PublisherMediaRow` to the SharePoint REST field bag for
+ * `HB Article Media`. Emits only tenant-supported columns
+ * (schema report §C). The asset URL column is `ImageAsset` (URL
+ * field) — NOT `ImageAssetUrl`; SharePoint serializes URL fields as
+ * `{ Url, Description }`. `Title` is a required tenant column and is
+ * written unconditionally.
+ */
 export function mapMediaRowToListFields(
   row: PublisherMediaRow,
 ): Record<string, unknown> {
   return {
     ArticleId: row.ArticleId,
     MediaId: row.MediaId,
+    Title: row.Title,
     MediaRole: row.MediaRole,
-    ImageAssetUrl: { Url: row.ImageAssetUrl, Description: row.ImageAssetUrl },
+    ImageAsset: { Url: row.ImageAsset, Description: row.ImageAsset },
     AltText: row.AltText,
     Caption: nullIfEmpty(row.Caption),
     SortOrder: row.SortOrder ?? null,
+    GalleryGroup: nullIfEmpty(row.GalleryGroup),
+    FeaturedInGallery: row.FeaturedInGallery ?? null,
   };
 }
 

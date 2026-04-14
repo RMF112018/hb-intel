@@ -110,8 +110,9 @@ function buildRepositories(
         {
           ArticleId: art.ArticleId,
           MediaId: 'm-1',
+          Title: 'g',
           MediaRole: 'gallery' as const,
-          ImageAssetUrl: 'https://img.example/g.jpg',
+          ImageAsset: 'https://img.example/g.jpg',
           AltText: 'g',
         },
       ]),

@@ -74,8 +74,9 @@ function mediaRow(id: string): PublisherMediaRow {
   return {
     ArticleId: 'art-ps-001',
     MediaId: id,
+    Title: id,
     MediaRole: 'gallery',
-    ImageAssetUrl: `https://img.example/${id}.jpg`,
+    ImageAsset: `https://img.example/${id}.jpg`,
     AltText: `${id} alt`,
   };
 }

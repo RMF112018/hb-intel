@@ -97,8 +97,9 @@ function gallery(id: string, over: Partial<PublisherMediaRow> = {}): PublisherMe
   return {
     ArticleId: 'art-e2e',
     MediaId: id,
+    Title: id,
     MediaRole: 'gallery',
-    ImageAssetUrl: `https://img.example/${id}.jpg`,
+    ImageAsset: `https://img.example/${id}.jpg`,
     AltText: `${id} alt text`,
     ...over,
   };

@@ -298,7 +298,7 @@ function composeGallery(
   }
 
   const images = galleryImages(context.media).map((r) => ({
-    imageUrl: r.ImageAssetUrl,
+    imageUrl: r.ImageAsset,
     altText: r.AltText,
     caption: r.Caption,
   }));

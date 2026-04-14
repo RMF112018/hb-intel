@@ -997,8 +997,9 @@ function GalleryPanel({
       {
         ArticleId: articleId,
         MediaId: `m-${Date.now()}-${rows.length}`,
+        Title: '',
         MediaRole: 'gallery',
-        ImageAssetUrl: '',
+        ImageAsset: '',
         AltText: '',
         SortOrder: rows.length + 1,
       },
@@ -1024,6 +1025,13 @@ function GalleryPanel({
         rows.map((r, i) => (
           <div key={r.MediaId} className={styles.rowCard}>
             <div className={styles.rowGrid}>
+              <Field label="Title">
+                <input
+                  className={styles.input}
+                  value={r.Title}
+                  onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
+                />
+              </Field>
               <Field label="Role">
                 <select
                   className={styles.select}
@@ -1037,11 +1045,11 @@ function GalleryPanel({
                   ))}
                 </select>
               </Field>
-              <Field label="Image URL">
+              <Field label="Image asset URL">
                 <input
                   className={styles.input}
-                  value={r.ImageAssetUrl}
-                  onChange={(e) => replaceAt(i, { ...r, ImageAssetUrl: e.target.value })}
+                  value={r.ImageAsset}
+                  onChange={(e) => replaceAt(i, { ...r, ImageAsset: e.target.value })}
                 />
               </Field>
               <Field label="Alt text">
@@ -1056,6 +1064,20 @@ function GalleryPanel({
                   className={styles.input}
                   value={r.Caption ?? ''}
                   onChange={(e) => replaceAt(i, { ...r, Caption: e.target.value || undefined })}
+                />
+              </Field>
+              <Field label="Gallery group">
+                <input
+                  className={styles.input}
+                  value={r.GalleryGroup ?? ''}
+                  onChange={(e) => replaceAt(i, { ...r, GalleryGroup: e.target.value || undefined })}
+                />
+              </Field>
+              <Field label="Featured in gallery">
+                <input
+                  type="checkbox"
+                  checked={r.FeaturedInGallery === true}
+                  onChange={(e) => replaceAt(i, { ...r, FeaturedInGallery: e.target.checked })}
                 />
               </Field>
             </div>
