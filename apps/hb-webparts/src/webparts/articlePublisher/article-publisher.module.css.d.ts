@@ -76,6 +76,11 @@ declare const styles: {
   readonly field: string;
   readonly fieldLabel: string;
   readonly fieldLabelRow: string;
+  readonly teamChipButton: string;
+  readonly teamChipName: string;
+  readonly teamChipTitle: string;
+  readonly teamChipMeta: string;
+  readonly teamChipBio: string;
   readonly fieldHelper: string;
   readonly fieldCount: string;
   readonly fieldCountOk: string;

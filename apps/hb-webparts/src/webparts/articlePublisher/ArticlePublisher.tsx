@@ -69,6 +69,8 @@ import {
   type ProjectLookupSearchFn,
 } from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
+import { TeamMemberComposer } from './teamComposer/index.js';
+import type { PeopleSearchFn, PersonPhotoFn } from '@hbc/ui-kit';
 import { resolveSlugForSave } from './slugGovernance.js';
 import { StoryBodyEditor, bodyTextSnippet } from './storyBodyEditor/index.js';
 import {
@@ -118,6 +120,14 @@ export interface ArticlePublisherProps {
   actorEmail?: string;
   /** When set, overrides the default repository factory (tests only). */
   repositoriesOverride?: PublisherRepositories;
+  /**
+   * Directory search adapter used by the teammate composer. Threaded
+   * through from the SPFx mount boundary (workstream-d step-02). When
+   * omitted, the `HbcPeoplePicker` falls back to manual UPN entry.
+   */
+  searchPeople?: PeopleSearchFn;
+  /** Graph photo adapter paired with `searchPeople` for avatar rendering. */
+  fetchPersonPhoto?: PersonPhotoFn;
 }
 
 /* ── Helpers ────────────────────────────────────────────────── */
@@ -401,6 +411,8 @@ export function ArticlePublisher({
   siteUrl,
   actorEmail,
   repositoriesOverride,
+  searchPeople,
+  fetchPersonPhoto,
 }: ArticlePublisherProps) {
   React.useEffect(() => {
     if (siteUrl) storeSiteUrl(siteUrl);
@@ -1050,6 +1062,8 @@ export function ArticlePublisher({
                   articleId={articleDraft.ArticleId}
                   rows={teamDraft}
                   onChange={setTeamDraft}
+                  searchPeople={searchPeople}
+                  fetchPersonPhoto={fetchPersonPhoto}
                 />
               </div>
             </section>
@@ -1853,26 +1867,51 @@ function TeamPanel({
   articleId,
   rows,
   onChange,
+  searchPeople,
+  fetchPersonPhoto,
 }: {
   articleId: string;
   rows: PublisherTeamMemberRow[];
   onChange: (next: PublisherTeamMemberRow[]) => void;
+  searchPeople?: PeopleSearchFn;
+  fetchPersonPhoto?: PersonPhotoFn;
 }) {
-  const add = () =>
-    onChange([
-      ...rows,
-      {
-        ArticleId: articleId,
-        TeamMemberId: `tm-${Date.now()}-${rows.length}`,
-        Title: '',
-        PersonPrincipal: '',
-        DisplayName: '',
-        SortOrder: rows.length + 1,
-      },
-    ]);
-  const replaceAt = (idx: number, next: PublisherTeamMemberRow) =>
-    onChange(rows.map((r, i) => (i === idx ? next : r)));
-  const removeAt = (idx: number) => onChange(rows.filter((_, i) => i !== idx));
+  const [composerOpen, setComposerOpen] = React.useState(false);
+  const [editingId, setEditingId] = React.useState<string | undefined>();
+
+  const editingRow = React.useMemo(
+    () => rows.find((r) => r.TeamMemberId === editingId),
+    [rows, editingId],
+  );
+
+  const openAdd = () => {
+    setEditingId(undefined);
+    setComposerOpen(true);
+  };
+  const openEdit = (id: string) => {
+    setEditingId(id);
+    setComposerOpen(true);
+  };
+  const close = () => {
+    setComposerOpen(false);
+    setEditingId(undefined);
+  };
+
+  const handleSave = (saved: PublisherTeamMemberRow) => {
+    const exists = rows.some((r) => r.TeamMemberId === saved.TeamMemberId);
+    const next = exists
+      ? rows.map((r) => (r.TeamMemberId === saved.TeamMemberId ? saved : r))
+      : [...rows, saved];
+    // Re-stamp SortOrder from stack position so persisted order
+    // tracks what the author sees in the list.
+    onChange(next.map((r, i) => ({ ...r, SortOrder: i + 1 })));
+    close();
+  };
+
+  const removeAt = (idx: number) =>
+    onChange(
+      rows.filter((_, i) => i !== idx).map((r, i) => ({ ...r, SortOrder: i + 1 })),
+    );
   const move = (idx: number, dir: -1 | 1) => {
     const j = idx + dir;
     if (j < 0 || j >= rows.length) return;
@@ -1880,140 +1919,69 @@ function TeamPanel({
     [next[idx]!, next[j]!] = [next[j]!, next[idx]!];
     onChange(next.map((r, i) => ({ ...r, SortOrder: i + 1 })));
   };
+
   return (
     <div className={styles.rowList}>
-      <button type="button" className={styles.primaryBtn} onClick={add}>
-        Add team member
-      </button>
       {rows.length === 0 ? (
         <HbcEmptyState
-          title="No team members yet"
-          description="Add a colleague to spotlight them on the published article."
+          title="No teammates yet"
+          description="Pull colleagues from the directory to spotlight them on the published article."
         />
       ) : (
         rows.map((r, i) => (
           <div key={r.TeamMemberId} className={styles.rowCard}>
             <div className={styles.rowCardHeader}>
-              <span className={styles.rowCardIndex}>Member {i + 1}</span>
-              {r.IsFeaturedMember && <span className={styles.rowCardBadge}>Featured</span>}
+              <button
+                type="button"
+                className={styles.teamChipButton}
+                onClick={() => openEdit(r.TeamMemberId)}
+                aria-label={`Edit ${r.DisplayName || r.PersonPrincipal}`}
+              >
+                <span className={styles.teamChipName}>
+                  {r.DisplayName || r.PersonPrincipal || `Member ${i + 1}`}
+                </span>
+                {r.Title && <span className={styles.teamChipTitle}>{r.Title}</span>}
+                {r.Department && (
+                  <span className={styles.teamChipMeta}>{r.Department}</span>
+                )}
+              </button>
+              {r.IsFeaturedMember && (
+                <span className={styles.rowCardBadge}>Featured</span>
+              )}
             </div>
-            <div className={styles.rowGrid}>
-              <Field label="Display name">
-                <input
-                  className={styles.input}
-                  value={r.DisplayName}
-                  placeholder="Name shown on the card"
-                  onChange={(e) => replaceAt(i, { ...r, DisplayName: e.target.value })}
-                />
-              </Field>
-              <Field label="Role title">
-                <input
-                  className={styles.input}
-                  value={r.Title}
-                  placeholder="e.g. Project Executive"
-                  onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
-                />
-              </Field>
-              <Field label="Email">
-                <input
-                  className={styles.input}
-                  value={r.PersonPrincipal}
-                  placeholder="name@hedrickbrothers.com"
-                  onChange={(e) =>
-                    replaceAt(i, applyTeamMemberPrincipalChange(r, e.target.value))
-                  }
-                />
-              </Field>
-              <Field label="Role detail">
-                <input
-                  className={styles.input}
-                  value={r.Role ?? ''}
-                  placeholder="Secondary role description, if any"
-                  onChange={(e) => replaceAt(i, { ...r, Role: e.target.value || undefined })}
-                />
-              </Field>
-              <Field label="Company">
-                <input
-                  className={styles.input}
-                  value={r.Company ?? ''}
-                  onChange={(e) => replaceAt(i, { ...r, Company: e.target.value || undefined })}
-                />
-              </Field>
-              <Field label="Department">
-                <input
-                  className={styles.input}
-                  value={r.Department ?? ''}
-                  onChange={(e) => replaceAt(i, { ...r, Department: e.target.value || undefined })}
-                />
-              </Field>
-              <Field label="Group">
-                <input
-                  className={styles.input}
-                  value={r.GroupKey ?? ''}
-                  placeholder="Group this member into e.g. 'leadership'"
-                  onChange={(e) => replaceAt(i, { ...r, GroupKey: e.target.value || undefined })}
-                />
-              </Field>
-              <Field label="Reports to (member)">
-                <input
-                  className={styles.input}
-                  value={r.ParentMemberId ?? ''}
-                  placeholder="Optional parent member id"
-                  onChange={(e) =>
-                    replaceAt(i, { ...r, ParentMemberId: e.target.value || undefined })
-                  }
-                />
-              </Field>
-              <Field label="Bio">
-                <textarea
-                  className={styles.textarea}
-                  value={r.BioSnippet ?? ''}
-                  placeholder="One- or two-sentence bio"
-                  onChange={(e) =>
-                    replaceAt(i, { ...r, BioSnippet: e.target.value || undefined })
-                  }
-                />
-              </Field>
-              <Field label="Contact link">
-                <input
-                  className={styles.input}
-                  value={r.ContactLink ?? ''}
-                  placeholder="Profile or contact URL"
-                  onChange={(e) =>
-                    replaceAt(i, { ...r, ContactLink: e.target.value || undefined })
-                  }
-                />
-              </Field>
-            </div>
-            <label className={styles.toggleRow}>
-              <input
-                type="checkbox"
-                checked={r.IsFeaturedMember === true}
-                onChange={(e) => replaceAt(i, { ...r, IsFeaturedMember: e.target.checked })}
-              />
-              <span>Feature this member in the team section</span>
-            </label>
+            {r.BioSnippet && (
+              <p className={styles.teamChipBio}>{r.BioSnippet}</p>
+            )}
             <div className={styles.rowActions}>
               <button
                 type="button"
                 className={styles.btn}
-                aria-label={`Move member ${i + 1} up`}
+                aria-label={`Move ${r.DisplayName || `member ${i + 1}`} up`}
                 onClick={() => move(i, -1)}
+                disabled={i === 0}
               >
                 Move up
               </button>
               <button
                 type="button"
                 className={styles.btn}
-                aria-label={`Move member ${i + 1} down`}
+                aria-label={`Move ${r.DisplayName || `member ${i + 1}`} down`}
                 onClick={() => move(i, 1)}
+                disabled={i === rows.length - 1}
               >
                 Move down
               </button>
               <button
                 type="button"
+                className={styles.btn}
+                onClick={() => openEdit(r.TeamMemberId)}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
                 className={styles.dangerBtn}
-                aria-label={`Remove member ${i + 1}`}
+                aria-label={`Remove ${r.DisplayName || `member ${i + 1}`}`}
                 onClick={() => removeAt(i)}
               >
                 Remove
@@ -2022,6 +1990,20 @@ function TeamPanel({
           </div>
         ))
       )}
+      <button type="button" className={styles.primaryBtn} onClick={openAdd}>
+        + Add teammate
+      </button>
+
+      <TeamMemberComposer
+        open={composerOpen}
+        articleId={articleId}
+        editingRow={editingRow}
+        nextSortOrder={rows.length + 1}
+        searchPeople={searchPeople}
+        fetchPersonPhoto={fetchPersonPhoto}
+        onSave={handleSave}
+        onRequestClose={close}
+      />
     </div>
   );
 }

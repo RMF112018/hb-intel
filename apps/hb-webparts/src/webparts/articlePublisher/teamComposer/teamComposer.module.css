@@ -1,0 +1,98 @@
+/* Teammate composer — flyout body layout, reusing the Publisher
+ * Field primitive tokens in a local stylesheet so the composer
+ * stays visually coherent with the rest of the authoring surface.
+ */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 4px 24px;
+}
+
+.directoryReadout {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: #f4f6fa;
+  border-radius: 6px;
+  border: 1px solid #e3e6ed;
+}
+
+.directoryReadoutLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5f6370;
+}
+
+.directoryReadoutValue {
+  font-size: 13px;
+  color: #1f2129;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.fieldLabelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.fieldHelper {
+  color: #5f5f66;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.fieldCount {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #7a7a82;
+}
+
+.fieldCountOver {
+  color: #a4262c;
+  font-weight: 600;
+}
+
+.input,
+.textarea {
+  font: inherit;
+  color: inherit;
+  padding: 6px 8px;
+  border: 1px solid #cbcbd0;
+  border-radius: 4px;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.toggleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #1f1f1f;
+  cursor: pointer;
+}
