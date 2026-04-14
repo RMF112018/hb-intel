@@ -219,6 +219,55 @@ describe('publishOrchestrator', () => {
     expect(historyRow.PreviousState).toBe('approved');
   });
 
+  it('stamps workflow-history ActorEmail with the acting operator, not the article author (Phase-05 Prompt-04)', async () => {
+    const f = fixture({
+      article: { AuthorEmail: 'alice.author@example.com' },
+    });
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.workflowHistory.append = historyAppend;
+    f.repositories.articles.upsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'create',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-1',
+      actorEmail: 'bob.operator@example.com',
+    });
+    expect(result.ok).toBe(true);
+    const history = historyAppend.mock.calls[0]![0];
+    expect(history.ActorEmail).toBe('bob.operator@example.com');
+    expect(history.ActorEmail).not.toBe('alice.author@example.com');
+  });
+
+  it('falls back to article AuthorEmail when the caller did not thread an operator (back-compat)', async () => {
+    const f = fixture({
+      article: { AuthorEmail: 'alice.author@example.com' },
+    });
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.workflowHistory.append = historyAppend;
+    f.repositories.articles.upsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+
+    const orch = makeOrchestrator(f);
+    await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'create',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-1',
+    });
+    const history = historyAppend.mock.calls[0]![0];
+    expect(history.ActorEmail).toBe('alice.author@example.com');
+  });
+
   it('back-syncs the authoritative TargetSiteUrl onto HB Articles after successful publish (Phase-05 Prompt-02)', async () => {
     // Article column is blank (tenant-optional); orchestrator
     // derives the canonical destination URL for the binding row,

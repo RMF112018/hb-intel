@@ -72,6 +72,15 @@ export interface PublishRequest {
   readonly validateBeforePublish?: boolean;
   /** Override the shell manifest used for validation + drift checks. */
   readonly shell?: PageShellManifest;
+  /**
+   * Actual operator identity performing the publish / republish.
+   * Stamped onto the workflow-history row's `ActorEmail`. When
+   * omitted the orchestrator falls back to `article.AuthorEmail`
+   * for back-compat, but every UI caller is expected to pass the
+   * current SPFx user's email so audit rows reflect the acting
+   * user rather than the article author. Closes Phase-05 Prompt-04.
+   */
+  readonly actorEmail?: string;
 }
 
 export interface PublishOrchestratorDeps {
@@ -628,7 +637,13 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         NewState: 'published',
         PreviousState: previousWorkflowState,
         ActionDateUtc: now,
-        ActorEmail: context.article.AuthorEmail,
+        // Prefer the acting operator's email (threaded in from the
+        // UI's SPFx current-user context); fall back to the article
+        // author only when the caller did not supply one. Prior to
+        // Phase-05 Prompt-04 this path always wrote the author,
+        // which misattributed publishes performed by editors who
+        // didn't author the article.
+        ActorEmail: req.actorEmail ?? context.article.AuthorEmail,
         ActionNote: historyNote,
       });
     } catch (err) {

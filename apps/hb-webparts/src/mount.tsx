@@ -122,8 +122,13 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // pure compositor + Pages REST. Future sprints may extend this app
   // to additional article destinations (e.g. Company Pulse); the GUID
   // is preserved across the rebrand so deployment lineage is unchanged.
-  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl }) =>
-    createElement(ArticlePublisher, { siteUrl }),
+  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity }) =>
+    // Thread the SPFx current-user email through as the acting
+    // operator so workflow-history writes (publish / republish /
+    // archive / withdraw) attribute each transition to the actual
+    // user clicking the button, not the article author. Closes
+    // Phase-05 Prompt-04.
+    createElement(ArticlePublisher, { siteUrl, actorEmail: identity?.email }),
   '28acd6a7-2582-4d8a-86d4-b52bfbeb375c': ({ config, identity, assetBaseUrl, siteUrl, getGraphToken }) => {
     const backgroundImage = typeof config?.backgroundImageUrl === 'string' && config.backgroundImageUrl
       ? config.backgroundImageUrl

@@ -73,6 +73,15 @@ const MEDIA_ROLES: readonly MediaRole[] = ['gallery', 'supporting', 'hero', 'sec
 export interface ArticlePublisherProps {
   /** HBCentral absolute URL. Platform `storeSiteUrl` is invoked with this. */
   siteUrl?: string;
+  /**
+   * Current SPFx operator email, threaded in from `mount.tsx` via
+   * the host's `identity.email`. Used as `ActorEmail` on every
+   * workflow-history write (publish / republish / archive /
+   * withdraw / generic state transitions) so the audit trail
+   * reflects the acting user rather than the article author.
+   * Closes Phase-05 Prompt-04.
+   */
+  actorEmail?: string;
   /** When set, overrides the default repository factory (tests only). */
   repositoriesOverride?: PublisherRepositories;
 }
@@ -157,6 +166,7 @@ type Tab = 'metadata' | 'hero' | 'content' | 'team' | 'gallery' | 'preview' | 's
 
 export function ArticlePublisher({
   siteUrl,
+  actorEmail,
   repositoriesOverride,
 }: ArticlePublisherProps) {
   React.useEffect(() => {
@@ -371,15 +381,19 @@ export function ArticlePublisher({
         // state flip with a history row, since the publish/preview
         // orchestrator covers the publish-side mutations.
         if (to === 'archived' || to === 'withdrawn') {
+          // Acting operator's email (SPFx current user) drives the
+          // audit row, not the article author. Closes Phase-05
+          // Prompt-04.
+          const resolvedActor = actorEmail ?? articleDraft.AuthorEmail;
           const outcome =
             to === 'archived'
               ? await orchestrator.archive({
                   articleId: articleDraft.ArticleId,
-                  actorEmail: articleDraft.AuthorEmail,
+                  actorEmail: resolvedActor,
                 })
               : await orchestrator.withdraw({
                   articleId: articleDraft.ArticleId,
-                  actorEmail: articleDraft.AuthorEmail,
+                  actorEmail: resolvedActor,
                 });
           if (outcome.ok) {
             setStatus(
@@ -405,7 +419,7 @@ export function ArticlePublisher({
               updated.Title,
               from,
               to,
-              articleDraft.AuthorEmail,
+              actorEmail ?? articleDraft.AuthorEmail,
               undefined,
             ),
           );
@@ -419,7 +433,7 @@ export function ArticlePublisher({
         setBusy(false);
       }
     },
-    [articleDraft, orchestrator, repositories, reloadList, reloadSelected],
+    [articleDraft, actorEmail, orchestrator, repositories, reloadList, reloadSelected],
   );
 
   const handlePublishAction = React.useCallback(
@@ -431,6 +445,11 @@ export function ArticlePublisher({
         const outcome: PublishOutcome = await orchestrator.run({
           articleId: articleDraft.ArticleId,
           mode,
+          // Acting operator identity — the orchestrator stamps this
+          // onto the workflow-history row's ActorEmail so audit
+          // rows reflect who actually clicked Publish / Republish,
+          // not the article author. Closes Phase-05 Prompt-04.
+          actorEmail,
         });
         if (outcome.ok) {
           // When the orchestrator actually wrote a page + binding
@@ -458,7 +477,7 @@ export function ArticlePublisher({
         setBusy(false);
       }
     },
-    [articleDraft, orchestrator, reloadSelected],
+    [articleDraft, actorEmail, orchestrator, reloadSelected],
   );
 
   const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
