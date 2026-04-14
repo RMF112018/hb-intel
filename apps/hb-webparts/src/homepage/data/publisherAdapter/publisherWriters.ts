@@ -16,6 +16,7 @@ import { fetchRequestDigest } from '@hbc/sharepoint-platform';
 import type {
   PublisherArticleRow,
   PublisherMediaRow,
+  PublisherPublishingErrorRow,
   PublisherTeamMemberRow,
   PublisherWorkflowHistoryRow,
 } from './publisherContracts';
@@ -420,6 +421,50 @@ export function createSharePointWorkflowHistoryWriter(deps: {
       const itemId = await postItem(
         descriptor,
         mapWorkflowHistoryRowToListFields(row),
+        digest,
+        fetchImpl,
+      );
+      return { itemId };
+    },
+  };
+}
+
+/* ── Publishing-errors append ─────────────────────────────────── */
+
+export function mapPublishingErrorRowToListFields(
+  row: PublisherPublishingErrorRow,
+): Record<string, unknown> {
+  return {
+    ErrorId: row.ErrorId,
+    ArticleId: row.ArticleId,
+    Title: row.Title,
+    Destination: row.Destination,
+    Operation: row.Operation,
+    ErrorSummary: row.ErrorSummary,
+    BindingId: nullIfEmpty(row.BindingId),
+    LastAttemptDateUtc: nullIfEmpty(row.LastAttemptDateUtc),
+    RetryStatus: nullIfEmpty(row.RetryStatus),
+  };
+}
+
+export interface PublishingErrorsWriter {
+  append(row: PublisherPublishingErrorRow): Promise<{ readonly itemId: number }>;
+}
+
+export function createSharePointPublishingErrorsWriter(deps: {
+  descriptor?: PublisherListDescriptor;
+  fetchImpl?: FetchImpl;
+  fetchRequestDigestImpl?: DigestImpl;
+} = {}): PublishingErrorsWriter {
+  const descriptor = deps.descriptor ?? PUBLISHER_LISTS.publishingErrors;
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const digestImpl = deps.fetchRequestDigestImpl ?? fetchRequestDigest;
+  return {
+    async append(row) {
+      const digest = await digestImpl(descriptor.hostSiteUrl);
+      const itemId = await postItem(
+        descriptor,
+        mapPublishingErrorRowToListFields(row),
         digest,
         fetchImpl,
       );

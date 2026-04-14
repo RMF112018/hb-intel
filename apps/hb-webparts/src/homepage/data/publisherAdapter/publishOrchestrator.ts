@@ -112,6 +112,59 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     return `bnd-${articleId}-${nowIso.replace(/[^0-9]/g, '').slice(0, 14)}`;
   }
 
+  /**
+   * Map an internal failure stage + caller mode to the coarse tenant
+   * `Operation` Choice on `HB Article Publishing Errors`. Stages
+   * collapse onto the four tenant choices: create / update / publish /
+   * sync.
+   */
+  function operationFor(
+    stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite',
+    mode: PublishMode,
+  ): import('./publisherEnums').PublishingErrorOperation {
+    if (stage === 'bindingWrite') return 'sync';
+    if (mode === 'create') return 'create';
+    return 'publish';
+  }
+
+  /**
+   * Append a tenant `HB Article Publishing Errors` row for the failure.
+   * Best-effort: a failing error-list write is logged to the console
+   * but never re-thrown — the orchestrator's own typed failure result
+   * is the authoritative caller signal.
+   */
+  async function recordPublishingError(input: {
+    readonly articleId: string;
+    readonly title: string | undefined;
+    readonly destination: import('./publisherEnums').Destination | undefined;
+    readonly stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite';
+    readonly mode: PublishMode;
+    readonly message: string;
+    readonly bindingId?: string;
+    readonly nowIso: string;
+  }): Promise<void> {
+    try {
+      await repositories.publishingErrors.append({
+        ErrorId: `err-${input.nowIso.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
+        ArticleId: input.articleId,
+        Title: input.title && input.title.trim().length > 0
+          ? `${input.stage}: ${input.title}`
+          : `${input.stage} failure for ArticleId ${input.articleId}`,
+        Destination: input.destination ?? 'projectSpotlight',
+        Operation: operationFor(input.stage, input.mode),
+        ErrorSummary: input.message,
+        BindingId: input.bindingId,
+        LastAttemptDateUtc: input.nowIso,
+        RetryStatus: 'pending',
+      });
+    } catch (err) {
+      // Swallow — never let error-log persistence mask the real
+      // failure that the caller is already receiving.
+      // eslint-disable-next-line no-console
+      console.warn('[publishOrchestrator] publishingErrors.append failed', err);
+    }
+  }
+
   async function run(req: PublishRequest): Promise<PublishOutcome> {
     const now = (req.now ?? defaultNow)();
     const bindingIdFactory = req.generateBindingId ?? defaultBindingId;
@@ -121,6 +174,17 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       req.articleId,
     );
     if (!resolution.ok) {
+      if (req.mode !== 'preview') {
+        await recordPublishingError({
+          articleId: req.articleId,
+          title: undefined,
+          destination: undefined,
+          stage: 'resolution',
+          mode: req.mode,
+          message: resolution.message,
+          nowIso: now,
+        });
+      }
       return {
         ok: false,
         stage: 'resolution',
@@ -163,10 +227,20 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const { page, structuralErrors } = pageShellService.composePage(context);
     if (structuralErrors.length > 0) {
+      const message = `Composed page failed structural validation: ${structuralErrors.join('; ')}`;
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'composition',
+        mode: req.mode,
+        message,
+        nowIso: now,
+      });
       return {
         ok: false,
         stage: 'composition',
-        message: `Composed page failed structural validation: ${structuralErrors.join('; ')}`,
+        message,
         page,
       };
     }
@@ -177,12 +251,22 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       validation = validatePublishContext(context, { shell });
       if (!validation.ok) {
         const first = validation.errors[0];
+        const message = first
+          ? `Validation blocked ${req.mode}: ${first.message}`
+          : `Validation blocked ${req.mode}.`;
+        await recordPublishingError({
+          articleId: context.article.ArticleId,
+          title: context.article.Title,
+          destination: context.article.Destination,
+          stage: 'validation',
+          mode: req.mode,
+          message,
+          nowIso: now,
+        });
         return {
           ok: false,
           stage: 'validation',
-          message: first
-            ? `Validation blocked ${req.mode}: ${first.message}`
-            : `Validation blocked ${req.mode}.`,
+          message,
           page,
           validation,
         };
@@ -198,10 +282,21 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     });
 
     if (decision.action === 'blocked') {
+      const message = `Republish blocked: ${decision.reason}. ${decision.notes.join(' ')}`;
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'policy',
+        mode: req.mode,
+        message,
+        bindingId: context.existingBinding?.BindingId,
+        nowIso: now,
+      });
       return {
         ok: false,
         stage: 'policy',
-        message: `Republish blocked: ${decision.reason}. ${decision.notes.join(' ')}`,
+        message,
         decision,
         page,
       };
@@ -225,6 +320,16 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const publishResult = await pageShellService.publishPage(context);
     if (!publishResult.ok) {
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'pagePublish',
+        mode: req.mode,
+        message: publishResult.message,
+        bindingId: context.existingBinding?.BindingId,
+        nowIso: now,
+      });
       return {
         ok: false,
         stage: 'pagePublish',
@@ -261,6 +366,16 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const bindingOutcome = await pageBindingWriter.upsert({ row: bindingRow });
     if (!bindingOutcome.ok) {
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'bindingWrite',
+        mode: req.mode,
+        message: bindingOutcome.message,
+        bindingId: bindingRow.BindingId,
+        nowIso: now,
+      });
       return {
         ok: false,
         stage: 'bindingWrite',

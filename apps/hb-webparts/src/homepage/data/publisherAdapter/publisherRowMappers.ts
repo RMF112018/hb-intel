@@ -28,7 +28,6 @@ import type {
   PostFamily,
   ProjectStage,
   PublishStatus,
-  PublishingErrorCategory,
   PublishingErrorOperation,
   SpotlightType,
   SyncStatus,
@@ -45,7 +44,6 @@ import {
   POST_FAMILY_VALUES,
   PROJECT_STAGE_VALUES,
   PUBLISH_STATUS_VALUES,
-  PUBLISHING_ERROR_CATEGORY_VALUES,
   PUBLISHING_ERROR_OPERATION_VALUES,
   SPOTLIGHT_TYPE_VALUES,
   SYNC_STATUS_VALUES,
@@ -139,7 +137,6 @@ const workflowState = one<WorkflowState>(WORKFLOW_STATE_VALUES);
 const mediaRole = one<MediaRole>(MEDIA_ROLE_VALUES);
 const publishStatus = one<PublishStatus>(PUBLISH_STATUS_VALUES);
 const syncStatus = one<SyncStatus>(SYNC_STATUS_VALUES);
-const errorCategory = one<PublishingErrorCategory>(PUBLISHING_ERROR_CATEGORY_VALUES);
 const errorOperation = one<PublishingErrorOperation>(PUBLISHING_ERROR_OPERATION_VALUES);
 
 /* ── Row mappers ─────────────────────────────────────────────────── */
@@ -430,16 +427,16 @@ export function mapPublishingErrorRow(
 ): PublisherPublishingErrorRow | undefined {
   const ErrorId = requiredStr(raw['ErrorId']);
   const ArticleId = requiredStr(raw['ArticleId']);
+  const Title = requiredStr(raw['Title']);
+  const Destination = destination(raw['Destination']);
   const Operation = errorOperation(raw['Operation']);
-  const OccurredDateUtc = dt(raw['OccurredDateUtc']);
-  const ErrorCategory = errorCategory(raw['ErrorCategory']);
   const ErrorSummary = requiredStr(raw['ErrorSummary']);
   if (
     !ErrorId ||
     !ArticleId ||
+    !Title ||
+    !Destination ||
     !Operation ||
-    !OccurredDateUtc ||
-    !ErrorCategory ||
     !ErrorSummary
   ) {
     return undefined;
@@ -447,14 +444,12 @@ export function mapPublishingErrorRow(
   return {
     ErrorId,
     ArticleId,
-    BindingId: str(raw['BindingId']),
+    Title,
+    Destination,
     Operation,
-    TemplateKey: str(raw['TemplateKey']),
-    PageShellKey: str(raw['PageShellKey']),
-    OccurredDateUtc,
-    ErrorCategory,
     ErrorSummary,
-    ErrorDetails: str(raw['ErrorDetails']),
+    BindingId: str(raw['BindingId']),
+    LastAttemptDateUtc: dt(raw['LastAttemptDateUtc']),
     RetryStatus: one(['none', 'pending', 'resolved'] as const)(
       raw['RetryStatus'],
     ),

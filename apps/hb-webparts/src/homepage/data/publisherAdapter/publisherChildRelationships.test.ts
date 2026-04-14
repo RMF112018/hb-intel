@@ -105,9 +105,9 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
   it('mapPublishingErrorRow accepts ArticleId FK and rejects PostId', () => {
     const base = {
       ErrorId: 'err-1',
+      Title: 'pageGeneration failure',
+      Destination: 'projectSpotlight',
       Operation: 'publish',
-      OccurredDateUtc: '2026-04-10T00:00:00Z',
-      ErrorCategory: 'pageGeneration',
       ErrorSummary: 'boom',
     };
     expect(mapPublishingErrorRow({ ...base, ArticleId: ARTICLE_ID })?.ArticleId).toBe(ARTICLE_ID);
@@ -178,9 +178,9 @@ describe('child-row writers emit ArticleId, never PostId', () => {
     const row: PublisherPublishingErrorRow = {
       ErrorId: 'err-1',
       ArticleId: ARTICLE_ID,
+      Title: 'pageGeneration failure',
+      Destination: 'projectSpotlight',
       Operation: 'publish',
-      OccurredDateUtc: '2026-04-10T00:00:00Z',
-      ErrorCategory: 'pageGeneration',
       ErrorSummary: 'boom',
     };
     expect(row.ArticleId).toBe(ARTICLE_ID);

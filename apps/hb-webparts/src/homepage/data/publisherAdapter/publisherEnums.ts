@@ -213,24 +213,17 @@ export const WORKFLOW_HISTORY_ACTION_VALUES = [
 export type WorkflowHistoryAction =
   (typeof WORKFLOW_HISTORY_ACTION_VALUES)[number];
 
-export const PUBLISHING_ERROR_CATEGORY_VALUES = [
-  'templateResolution',
-  'validation',
-  'pageGeneration',
-  'pageSync',
-  'binding',
-  'unknown',
-] as const;
-export type PublishingErrorCategory =
-  (typeof PUBLISHING_ERROR_CATEGORY_VALUES)[number];
-
+/**
+ * Operation classifier on the tenant `HB Article Publishing Errors`
+ * list (`Operation` Choice column). Tenant choices are intentionally
+ * coarser than the orchestrator's internal failure stages — those
+ * stages collapse to one of these tenant values when persisted.
+ */
 export const PUBLISHING_ERROR_OPERATION_VALUES = [
-  'preview',
+  'create',
+  'update',
   'publish',
-  'republish',
-  'regenerate',
-  'archive',
-  'withdraw',
+  'sync',
 ] as const;
 export type PublishingErrorOperation =
   (typeof PUBLISHING_ERROR_OPERATION_VALUES)[number];

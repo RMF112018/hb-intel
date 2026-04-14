@@ -36,10 +36,12 @@ import {
 import {
   createSharePointArticleWriter,
   createSharePointMediaWriter,
+  createSharePointPublishingErrorsWriter,
   createSharePointTeamMembersWriter,
   createSharePointWorkflowHistoryWriter,
   type ArticleWriter,
   type MediaWriter,
+  type PublishingErrorsWriter,
   type TeamMembersWriter,
   type WorkflowHistoryWriter,
 } from './publisherWriters';
@@ -158,7 +160,11 @@ export interface WorkflowHistoryRepository {
 
 export interface PublishingErrorsRepository {
   listByArticle(articleId: string): Promise<readonly PublisherPublishingErrorRow[]>;
-  append(row: PublisherPublishingErrorRow): Promise<never>;
+  /**
+   * Appends a tenant `HB Article Publishing Errors` row. Delegates to
+   * the injected `PublishingErrorsWriter`.
+   */
+  append(row: PublisherPublishingErrorRow): Promise<{ readonly itemId: number }>;
 }
 
 export interface PublisherRepositories {
@@ -179,6 +185,7 @@ export interface PublisherRepositoryWriters {
   readonly media: MediaWriter;
   readonly pageBindings: PageBindingWriter;
   readonly workflowHistory: WorkflowHistoryWriter;
+  readonly publishingErrors: PublishingErrorsWriter;
 }
 
 export function createPublisherRepositories(
@@ -190,6 +197,7 @@ export function createPublisherRepositories(
     media: createSharePointMediaWriter({ descriptor: lists.media }),
     pageBindings: createSharePointPageBindingWriter({ descriptor: lists.pageBindings }),
     workflowHistory: createSharePointWorkflowHistoryWriter({ descriptor: lists.workflowHistory }),
+    publishingErrors: createSharePointPublishingErrorsWriter({ descriptor: lists.publishingErrors }),
   },
 ): PublisherRepositories {
   function mapAll<R>(
@@ -319,15 +327,12 @@ export function createPublisherRepositories(
       async listByArticle(articleId) {
         const rows = await access.readList(lists.publishingErrors, {
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
-          orderBy: 'OccurredDateUtc desc',
+          orderBy: 'LastAttemptDateUtc desc',
         });
         return mapAll(rows, mapPublishingErrorRow);
       },
-      async append() {
-        throw new PublisherWriteNotImplementedError(
-          'publishingErrors.append',
-          'a later Phase-02 prompt',
-        );
+      async append(row) {
+        return writers.publishingErrors.append(row);
       },
     },
   };

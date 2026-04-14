@@ -26,7 +26,6 @@ import type {
   PageSyncStatus,
   ProjectStage,
   PublishStatus,
-  PublishingErrorCategory,
   PublishingErrorOperation,
   RetryStatus,
   SpotlightType,
@@ -306,16 +305,26 @@ export interface PublisherWorkflowHistoryRow {
 /* G. HB Article Publishing Errors                                     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Tenant-aligned `HB Article Publishing Errors` row.
+ *
+ * Tenant-required: ErrorId, ArticleId, Title, Destination,
+ *   Operation (Choice: create|update|publish|sync), ErrorSummary.
+ * Optional: BindingId, LastAttemptDateUtc, RetryStatus
+ *   (Choice: none|pending|resolved).
+ *
+ * The pre-tenant-audit `TemplateKey`/`PageShellKey`/`OccurredDateUtc`
+ * /`ErrorCategory`/`ErrorDetails` fields do not exist on the tenant
+ * list and are intentionally removed.
+ */
 export interface PublisherPublishingErrorRow {
   readonly ErrorId: string;
   readonly ArticleId: string;
-  readonly BindingId?: string;
+  readonly Title: string;
+  readonly Destination: Destination;
   readonly Operation: PublishingErrorOperation;
-  readonly TemplateKey?: string;
-  readonly PageShellKey?: string;
-  readonly OccurredDateUtc: IsoDateTimeUtc;
-  readonly ErrorCategory: PublishingErrorCategory;
   readonly ErrorSummary: string;
-  readonly ErrorDetails?: string;
+  readonly BindingId?: string;
+  readonly LastAttemptDateUtc?: IsoDateTimeUtc;
   readonly RetryStatus?: RetryStatus;
 }

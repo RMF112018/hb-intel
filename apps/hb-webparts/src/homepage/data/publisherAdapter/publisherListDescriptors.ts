@@ -183,14 +183,12 @@ const WORKFLOW_HISTORY_FIELDS = [
 const PUBLISHING_ERRORS_FIELDS = [
   'ErrorId',
   'ArticleId',
-  'BindingId',
+  'Title',
+  'Destination',
   'Operation',
-  'TemplateKey',
-  'PageShellKey',
-  'OccurredDateUtc',
-  'ErrorCategory',
   'ErrorSummary',
-  'ErrorDetails',
+  'BindingId',
+  'LastAttemptDateUtc',
   'RetryStatus',
 ] as const;
 
