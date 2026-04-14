@@ -132,11 +132,19 @@ const ARTICLES_MVP_FIELDS = [
   'TemplateOverrideAllowed',
 ] as const;
 
+// Tenant-aligned minimum column set for `HB Article Team Members`
+// (schema report §B). Descriptor authority reflects the tenant
+// field names — the `PersonPrincipal` column IS the SharePoint User
+// field on the list. The REST write alias `PersonPrincipalId`
+// (integer user id) is a transport concern emitted only by
+// `mapTeamMemberRowToListFields`; it is intentionally absent here
+// so tenant schema truth and descriptor authority cannot drift
+// apart. Closes P2-1.
 const TEAM_MEMBERS_MVP_FIELDS = [
   'ArticleId',
   'TeamMemberId',
   'Title',
-  'PersonPrincipalId',
+  'PersonPrincipal',
   'DisplayName',
   'Role',
   'Company',

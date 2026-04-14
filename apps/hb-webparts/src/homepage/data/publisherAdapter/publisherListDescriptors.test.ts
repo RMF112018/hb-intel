@@ -91,7 +91,10 @@ const EXPECTED_MVP_FIELDS: Readonly<Record<PublisherListKey, readonly string[]>>
     'PageSyncStatus', 'LastPageSyncDateUtc', 'TemplateOverrideAllowed',
   ],
   teamMembers: [
-    'ArticleId', 'TeamMemberId', 'Title', 'PersonPrincipalId',
+    // Tenant truth: the User field is `PersonPrincipal`. The REST
+    // write alias `PersonPrincipalId` stays inside the writer and
+    // must NOT appear on descriptor authority (P2-1).
+    'ArticleId', 'TeamMemberId', 'Title', 'PersonPrincipal',
     'DisplayName', 'Role', 'Company', 'Department', 'GroupKey',
     'ParentMemberId', 'IsFeaturedMember', 'SortOrder', 'BioSnippet',
     'ContactLink',
@@ -148,7 +151,10 @@ const OBSOLETE_FIELDS = [
   'ImageAssetUrl',
   'JobTitle', 'PhotoUrl', 'IncludeInViewer',
   'ResumeRichText', 'ResumeDocumentUrl',
-  'PersonPrincipal', // User fields are written as `PersonPrincipalId`
+  // `PersonPrincipalId` is the REST write alias for the tenant
+  // `PersonPrincipal` User field. Descriptor authority carries
+  // tenant names only; the alias lives inside the writer.
+  'PersonPrincipalId',
 ] as const;
 
 describe('publisherListDescriptors — tenant mvpFields drift', () => {
