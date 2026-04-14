@@ -788,6 +788,18 @@ export function update<T extends keyof PublisherArticleRow>(
   return { ...draft, [key]: value };
 }
 
+export function applyTeamMemberPrincipalChange(
+  row: PublisherTeamMemberRow,
+  principal: string,
+): PublisherTeamMemberRow {
+  return {
+    ...row,
+    PersonPrincipal: principal,
+    // Principal changed: force re-resolution of the SharePoint User id.
+    PersonPrincipalId: undefined,
+  };
+}
+
 interface MetadataPanelProps extends PanelProps {
   searchProjects?: ProjectLookupSearchFn;
   promotionPolicy?: PromotionPolicyResult;
@@ -1355,15 +1367,13 @@ function TeamPanel({
                   className={styles.input}
                   value={r.PersonPrincipal}
                   onChange={(e) =>
-                    replaceAt(i, {
-                      ...r,
-                      PersonPrincipal: e.target.value,
-                      // Drop any previously-resolved user id — the
-                      // principal has changed, so the writer must
-                      // re-resolve via ensureUser before the next
-                      // save instead of carrying a stale id forward.
-                      PersonPrincipalId: undefined,
-                    })
+                    replaceAt(
+                      i,
+                      applyTeamMemberPrincipalChange(
+                        r,
+                        e.target.value,
+                      ),
+                    )
                   }
                 />
               </Field>
@@ -1386,6 +1396,40 @@ function TeamPanel({
                   className={styles.input}
                   value={r.Department ?? ''}
                   onChange={(e) => replaceAt(i, { ...r, Department: e.target.value || undefined })}
+                />
+              </Field>
+              <Field label="Group key">
+                <input
+                  className={styles.input}
+                  value={r.GroupKey ?? ''}
+                  onChange={(e) => replaceAt(i, { ...r, GroupKey: e.target.value || undefined })}
+                />
+              </Field>
+              <Field label="Parent member id">
+                <input
+                  className={styles.input}
+                  value={r.ParentMemberId ?? ''}
+                  onChange={(e) =>
+                    replaceAt(i, { ...r, ParentMemberId: e.target.value || undefined })
+                  }
+                />
+              </Field>
+              <Field label="Bio snippet">
+                <textarea
+                  className={styles.textarea}
+                  value={r.BioSnippet ?? ''}
+                  onChange={(e) =>
+                    replaceAt(i, { ...r, BioSnippet: e.target.value || undefined })
+                  }
+                />
+              </Field>
+              <Field label="Contact link">
+                <input
+                  className={styles.input}
+                  value={r.ContactLink ?? ''}
+                  onChange={(e) =>
+                    replaceAt(i, { ...r, ContactLink: e.target.value || undefined })
+                  }
                 />
               </Field>
               <Field label="Featured member">

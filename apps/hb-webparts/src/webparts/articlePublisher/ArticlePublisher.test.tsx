@@ -2,8 +2,13 @@ import { describe, expect, it } from 'vitest';
 import type {
   PublisherArticleRow,
   PublisherPromotionRuleRow,
+  PublisherTeamMemberRow,
 } from '../../homepage/data/publisherAdapter/index.js';
-import { applyPromotionPolicyToDraft, update } from './ArticlePublisher';
+import {
+  applyPromotionPolicyToDraft,
+  applyTeamMemberPrincipalChange,
+  update,
+} from './ArticlePublisher';
 
 function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
@@ -106,5 +111,29 @@ describe('applyPromotionPolicyToDraft', () => {
     expect(resolved.draft.SecondaryImageAltText).toBe('Secondary alt');
     expect(resolved.draft.TeamViewerMode).toBe('summaryExpand');
     expect(resolved.draft.TeamViewerAllowExpand).toBe(true);
+  });
+});
+
+describe('applyTeamMemberPrincipalChange', () => {
+  it('clears PersonPrincipalId when principal changes and keeps authored schema fields', () => {
+    const row: PublisherTeamMemberRow = {
+      ArticleId: 'art-1',
+      TeamMemberId: 'tm-1',
+      Title: 'Alice',
+      PersonPrincipal: 'alice@example.com',
+      PersonPrincipalId: 42,
+      DisplayName: 'Alice',
+      GroupKey: 'leaders',
+      ParentMemberId: 'tm-root',
+      BioSnippet: 'Bio',
+      ContactLink: 'https://profile.example/alice',
+    };
+    const next = applyTeamMemberPrincipalChange(row, 'alice2@example.com');
+    expect(next.PersonPrincipal).toBe('alice2@example.com');
+    expect(next.PersonPrincipalId).toBeUndefined();
+    expect(next.GroupKey).toBe('leaders');
+    expect(next.ParentMemberId).toBe('tm-root');
+    expect(next.BioSnippet).toBe('Bio');
+    expect(next.ContactLink).toBe('https://profile.example/alice');
   });
 });

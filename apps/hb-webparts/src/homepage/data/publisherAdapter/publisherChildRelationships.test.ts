@@ -236,6 +236,38 @@ describe('child-row writers emit ArticleId, never PostId', () => {
     expect(row?.PersonPrincipalId).toBe(17);
   });
 
+  it('team-member schema-backed optional fields round-trip through write/read shapes', () => {
+    const authored: PublisherTeamMemberRow = {
+      ArticleId: ARTICLE_ID,
+      TeamMemberId: 'tm-77',
+      Title: 'Alice',
+      DisplayName: 'Alice',
+      PersonPrincipal: 'alice@example.com',
+      PersonPrincipalId: 17,
+      GroupKey: 'north',
+      ParentMemberId: 'tm-root',
+      BioSnippet: 'Senior PM',
+      ContactLink: 'https://people.example/alice',
+    };
+    const writeFields = mapTeamMemberRowToListFields(authored);
+    expect(writeFields['GroupKey']).toBe('north');
+    expect(writeFields['ParentMemberId']).toBe('tm-root');
+    expect(writeFields['BioSnippet']).toBe('Senior PM');
+    expect(writeFields['ContactLink']).toEqual({
+      Url: 'https://people.example/alice',
+      Description: 'https://people.example/alice',
+    });
+
+    const reread = mapTeamMemberRow({
+      ...writeFields,
+      PersonPrincipal: { EMail: 'alice@example.com', Title: 'Alice' },
+    });
+    expect(reread?.GroupKey).toBe('north');
+    expect(reread?.ParentMemberId).toBe('tm-root');
+    expect(reread?.BioSnippet).toBe('Senior PM');
+    expect(reread?.ContactLink).toBe('https://people.example/alice');
+  });
+
   it('media write payload carries ArticleId FK', () => {
     const row: PublisherMediaRow = {
       ArticleId: ARTICLE_ID,
