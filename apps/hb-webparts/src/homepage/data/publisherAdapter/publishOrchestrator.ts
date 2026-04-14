@@ -527,6 +527,16 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     const updatedArticle: PublisherArticleRow = {
       ...context.article,
       WorkflowState: 'published',
+      // Back-sync the authoritative destination site URL that the
+      // publish path actually used. When the article column was
+      // blank (tenant-optional), the orchestrator derived a
+      // canonical URL from `Destination` and wrote it to the
+      // binding row; stamp the same value on the master record so
+      // `HB Articles.TargetSiteUrl` and
+      // `HB Article Destination Pages.TargetSiteUrl` agree after
+      // every successful publish / regenerate / in-place update.
+      // Closes the Phase-05 Prompt-02 back-sync gap.
+      TargetSiteUrl: bindingRow.TargetSiteUrl,
       PageId: publishResult.creation.pageId,
       PageName:
         publishResult.creation.pageName ?? publishResult.page.identity.pageName,

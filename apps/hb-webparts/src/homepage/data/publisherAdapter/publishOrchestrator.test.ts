@@ -219,6 +219,41 @@ describe('publishOrchestrator', () => {
     expect(historyRow.PreviousState).toBe('approved');
   });
 
+  it('back-syncs the authoritative TargetSiteUrl onto HB Articles after successful publish (Phase-05 Prompt-02)', async () => {
+    // Article column is blank (tenant-optional); orchestrator
+    // derives the canonical destination URL for the binding row,
+    // and the master-row back-sync must carry the same string so
+    // `HB Articles.TargetSiteUrl` and
+    // `HB Article Destination Pages.TargetSiteUrl` agree.
+    const f = fixture({ article: { TargetSiteUrl: undefined } });
+    const articlesUpsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+    f.repositories.articles.upsert = articlesUpsert;
+    f.repositories.workflowHistory.append = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'create',
+      now: () => '2026-04-13T10:00:00.000Z',
+      generateBindingId: () => 'bnd-generated',
+    });
+    expect(result.ok).toBe(true);
+
+    const bindingRow = (f.upsertBinding.mock.calls[0]![0] as {
+      row: PublisherPageBindingRow;
+    }).row;
+    expect(bindingRow.TargetSiteUrl).toBe(
+      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    );
+
+    const upsertedArticle = articlesUpsert.mock.calls[0]![0];
+    expect(upsertedArticle.TargetSiteUrl).toBe(bindingRow.TargetSiteUrl);
+  });
+
   it('classifies a post-publish workflow-history append failure as `historyAppend`, not `articleSync` (P1-4 closure)', async () => {
     const f = fixture();
     // Articles back-sync succeeds; workflow-history append is the
