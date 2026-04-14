@@ -616,67 +616,12 @@
   font-style: italic;
 }
 
-/* ── Buttons ──────────────────────────────────────────────── */
-
-.btn,
-.primaryBtn,
-.dangerBtn,
-.linkBtn {
-  font: inherit;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid #cbcbd0;
-  background: #fff;
-  color: #1f1f1f;
-  font-size: 13px;
-  text-align: center;
-}
-
-.btn:hover,
-.primaryBtn:hover,
-.dangerBtn:hover {
-  background: #f0f0f3;
-}
-
-.btn:disabled,
-.primaryBtn:disabled,
-.dangerBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.primaryBtn {
-  background: #0078d4;
-  color: #fff;
-  border-color: #0078d4;
-}
-
-.primaryBtn:hover {
-  background: #106ebe;
-}
-
-.dangerBtn {
-  color: #8a1f2b;
-  border-color: #f5b2bb;
-  background: #fff;
-}
-
-.dangerBtn:hover {
-  background: #fde7e9;
-}
-
-.linkBtn {
-  border: none;
-  background: transparent;
-  color: #0078d4;
-  padding: 2px 0;
-  text-align: left;
-}
-
-.linkBtn:hover {
-  text-decoration: underline;
-}
+/* ── Buttons ──────────────────────────────────────────────── *
+ * Local .btn / .primaryBtn / .dangerBtn / .linkBtn declarations
+ * were removed in workstream-h step-05 after every callsite
+ * migrated to the governed PublisherButton primitive in
+ * ../sharedChrome/. Keep this comment as a waypoint for anyone
+ * grepping for the old class names. */
 
 /* ── Inner panels (retained, backing existing workflow components) ── */
 

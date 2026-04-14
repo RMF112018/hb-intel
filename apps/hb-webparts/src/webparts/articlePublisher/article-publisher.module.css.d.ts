@@ -68,10 +68,6 @@ declare const styles: {
   readonly readinessIssueWarn: string;
   readonly readinessActionGroup: string;
   readonly readinessStatus: string;
-  readonly btn: string;
-  readonly primaryBtn: string;
-  readonly dangerBtn: string;
-  readonly linkBtn: string;
   readonly form: string;
   readonly field: string;
   readonly fieldLabel: string;
