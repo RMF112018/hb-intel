@@ -85,7 +85,7 @@ import {
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../hbKudos/hooks/useRecipientPhotoHydration.js';
 import { resolveSlugForSave } from './slugGovernance.js';
-import { StoryBodyEditor, bodyTextSnippet } from './storyBodyEditor/index.js';
+import { StoryBodyEditor } from './storyBodyEditor/index.js';
 import {
   defaultTeamHeading,
   intelligentDefaultsForSave,
@@ -105,12 +105,6 @@ import {
   transitionActionLabel,
   workflowOutcomeLabel,
 } from './authorLabels.js';
-import type {
-  BannerControlPayload,
-  ImageGalleryControlPayload,
-  TeamViewerControlPayload,
-  TextControlPayload,
-} from '../../homepage/data/publisherAdapter/pageGeneration/pageCompositor.js';
 import styles from './article-publisher.module.css';
 
 // Convenience aliases so the JSX stays compact.
