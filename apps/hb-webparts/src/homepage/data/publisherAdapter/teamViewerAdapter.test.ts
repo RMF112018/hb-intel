@@ -42,6 +42,7 @@ function member(
   return {
     ArticleId: 'art-tv-1',
     TeamMemberId: id,
+    Title: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
     ...over,
@@ -82,14 +83,11 @@ describe('buildTeamViewerProperties', () => {
 });
 
 describe('selectVisibleTeamMembers', () => {
-  it('drops members explicitly excluded from the viewer', () => {
-    const rows = [
-      member('alice'),
-      member('bob', { IncludeInViewer: false }),
-      member('carol'),
-    ];
+  it('keeps every authored row (tenant schema has no IncludeInViewer column)', () => {
+    const rows = [member('alice'), member('bob'), member('carol')];
     expect(selectVisibleTeamMembers(rows).map((r) => r.TeamMemberId)).toEqual([
       'alice',
+      'bob',
       'carol',
     ]);
   });
@@ -111,12 +109,11 @@ describe('selectVisibleTeamMembers', () => {
 describe('mapPublisherRowToTeamViewerPerson', () => {
   it('maps every render-visible field and preserves the child-row id', () => {
     const row = member('alice', {
-      JobTitle: 'PM',
-      PhotoUrl: 'https://img/a.jpg',
+      Role: 'PM',
+      Department: 'Delivery',
+      GroupKey: 'leads',
       SortOrder: 3,
       BioSnippet: 'bio',
-      ResumeRichText: '<p>resume</p>',
-      ResumeDocumentUrl: 'https://doc/a.pdf',
       ContactLink: 'https://contact/a',
     });
     expect(mapPublisherRowToTeamViewerPerson(row)).toEqual({
@@ -125,24 +122,24 @@ describe('mapPublisherRowToTeamViewerPerson', () => {
       articleTeamMemberId: 'alice',
       displayName: 'alice',
       jobTitle: 'PM',
-      photoUrl: 'https://img/a.jpg',
+      projectRole: 'PM',
+      department: 'Delivery',
+      groupKey: 'leads',
       sortOrder: 3,
       bio: 'bio',
-      resumeRichText: '<p>resume</p>',
-      resumeDocumentUrl: 'https://doc/a.pdf',
       profileUrl: 'https://contact/a',
     });
   });
 });
 
 describe('buildTeamViewerPersonList', () => {
-  it('applies visibility filter + ordering + row mapping in one pass', () => {
+  it('orders + maps every authored row', () => {
     const out = buildTeamViewerPersonList([
       member('alice', { SortOrder: 2 }),
-      member('bob', { IncludeInViewer: false }),
+      member('bob', { SortOrder: 3 }),
       member('carol', { SortOrder: 1 }),
     ]);
-    expect(out.map((p) => p.id)).toEqual(['carol', 'alice']);
+    expect(out.map((p) => p.id)).toEqual(['carol', 'alice', 'bob']);
   });
 });
 

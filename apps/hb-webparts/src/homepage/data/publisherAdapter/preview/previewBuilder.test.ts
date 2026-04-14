@@ -64,6 +64,7 @@ function member(id: string): PublisherTeamMemberRow {
   return {
     ArticleId: 'art-001',
     TeamMemberId: id,
+    Title: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
   };

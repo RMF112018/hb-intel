@@ -98,6 +98,7 @@ function buildRepositories(
         {
           ArticleId: art.ArticleId,
           TeamMemberId: 'tm-1',
+          Title: 'A',
           PersonPrincipal: 'a@example.com',
           DisplayName: 'A',
         },

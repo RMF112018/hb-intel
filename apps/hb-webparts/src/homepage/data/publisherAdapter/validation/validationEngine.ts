@@ -422,14 +422,17 @@ function validateConditionalBlocks(
   const { article, template, teamMembers, media } = context;
 
   if (article.ShowTeamViewer !== false && template.ShowTeamViewer) {
-    const includedTeam = teamMembers.filter((r) => r.IncludeInViewer !== false);
-    if (includedTeam.length === 0) {
+    // The tenant `HB Article Team Members` schema has no
+    // `IncludeInViewer` column — every authored row is visible.
+    // A missing team is therefore a presence check on the child
+    // list itself.
+    if (teamMembers.length === 0) {
       findings.push({
         category: 'invalid-team-configuration',
         severity: 'error',
         field: 'teamMembers',
         message:
-          'Team Viewer is enabled but no team members are marked IncludeInViewer.',
+          'Team Viewer is enabled but no team members are authored on this article.',
         actionHint:
           'Add at least one team member, or turn off Show Team Viewer on the Content tab.',
       });

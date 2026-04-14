@@ -106,16 +106,13 @@ describe('publisher ↔ TeamViewer integration uses one shared contract', () => 
     const childRow: PublisherTeamMemberRow = {
       ArticleId: ARTICLE_ID,
       TeamMemberId: 'tm-1',
+      Title: 'Alice',
       PersonPrincipal: 'alice@example.com',
       DisplayName: 'Alice',
-      JobTitle: 'PM',
-      PhotoUrl: 'https://img.example/alice.jpg',
+      Role: 'PM',
       SortOrder: 1,
       BioSnippet: 'Bio.',
-      ResumeRichText: '<p>Resume.</p>',
-      ResumeDocumentUrl: 'https://docs.example/alice.pdf',
       ContactLink: 'https://ppl.example/alice',
-      IncludeInViewer: true,
     };
     const person: TeamViewerPerson = mapPublisherRowToTeamViewerPerson(childRow);
     expect(person.id).toBe('tm-1');
@@ -127,19 +124,12 @@ describe('publisher ↔ TeamViewer integration uses one shared contract', () => 
     expect((person as unknown as Record<string, unknown>)['PostId']).toBeUndefined();
   });
 
-  it('selectVisibleTeamMembers drops opted-out rows and stable-sorts by SortOrder + DisplayName', () => {
+  it('selectVisibleTeamMembers stable-sorts every authored row by SortOrder + DisplayName', () => {
     const rows: PublisherTeamMemberRow[] = [
       {
         ArticleId: ARTICLE_ID,
-        TeamMemberId: 'tm-skip',
-        PersonPrincipal: 'a',
-        DisplayName: 'Skip me',
-        SortOrder: 1,
-        IncludeInViewer: false,
-      },
-      {
-        ArticleId: ARTICLE_ID,
         TeamMemberId: 'tm-2',
+        Title: 'Bob',
         PersonPrincipal: 'b',
         DisplayName: 'Bob',
         SortOrder: 2,
@@ -147,6 +137,7 @@ describe('publisher ↔ TeamViewer integration uses one shared contract', () => 
       {
         ArticleId: ARTICLE_ID,
         TeamMemberId: 'tm-1',
+        Title: 'Alice',
         PersonPrincipal: 'a',
         DisplayName: 'Alice',
         SortOrder: 1,

@@ -893,10 +893,10 @@ function TeamPanel({
       {
         ArticleId: articleId,
         TeamMemberId: `tm-${Date.now()}-${rows.length}`,
+        Title: '',
         PersonPrincipal: '',
         DisplayName: '',
         SortOrder: rows.length + 1,
-        IncludeInViewer: true,
       },
     ]);
   const replaceAt = (idx: number, next: PublisherTeamMemberRow) =>
@@ -920,6 +920,13 @@ function TeamPanel({
         rows.map((r, i) => (
           <div key={r.TeamMemberId} className={styles.rowCard}>
             <div className={styles.rowGrid}>
+              <Field label="Title">
+                <input
+                  className={styles.input}
+                  value={r.Title}
+                  onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
+                />
+              </Field>
               <Field label="Display name">
                 <input
                   className={styles.input}
@@ -934,25 +941,32 @@ function TeamPanel({
                   onChange={(e) => replaceAt(i, { ...r, PersonPrincipal: e.target.value })}
                 />
               </Field>
-              <Field label="Job title">
+              <Field label="Role">
                 <input
                   className={styles.input}
-                  value={r.JobTitle ?? ''}
-                  onChange={(e) => replaceAt(i, { ...r, JobTitle: e.target.value || undefined })}
+                  value={r.Role ?? ''}
+                  onChange={(e) => replaceAt(i, { ...r, Role: e.target.value || undefined })}
                 />
               </Field>
-              <Field label="Photo URL">
+              <Field label="Company">
                 <input
                   className={styles.input}
-                  value={r.PhotoUrl ?? ''}
-                  onChange={(e) => replaceAt(i, { ...r, PhotoUrl: e.target.value || undefined })}
+                  value={r.Company ?? ''}
+                  onChange={(e) => replaceAt(i, { ...r, Company: e.target.value || undefined })}
                 />
               </Field>
-              <Field label="Include in viewer">
+              <Field label="Department">
+                <input
+                  className={styles.input}
+                  value={r.Department ?? ''}
+                  onChange={(e) => replaceAt(i, { ...r, Department: e.target.value || undefined })}
+                />
+              </Field>
+              <Field label="Featured member">
                 <input
                   type="checkbox"
-                  checked={r.IncludeInViewer !== false}
-                  onChange={(e) => replaceAt(i, { ...r, IncludeInViewer: e.target.checked })}
+                  checked={r.IsFeaturedMember === true}
+                  onChange={(e) => replaceAt(i, { ...r, IsFeaturedMember: e.target.checked })}
                 />
               </Field>
             </div>

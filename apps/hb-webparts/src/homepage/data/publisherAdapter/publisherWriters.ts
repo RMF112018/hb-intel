@@ -272,28 +272,37 @@ export function createSharePointArticleWriter(deps: {
 
 /* ── Child-row writers (replace-all-by-ArticleId) ────────────────── */
 
+/**
+ * Map a `PublisherTeamMemberRow` to the SharePoint REST field bag for
+ * `HB Article Team Members`. Emits only tenant-supported columns
+ * (schema report §B). `PersonPrincipal` is a User field, so the
+ * writer emits `PersonPrincipalId` (integer user id) — callers must
+ * resolve the principal email/login to a user id (e.g. via
+ * `ensureUserByEmail`) before invoking this mapper. When no id is
+ * present the User column is sent as `null`, which SharePoint treats
+ * as "clear" — the caller is responsible for not persisting rows
+ * that require the user field to be set.
+ */
 export function mapTeamMemberRowToListFields(
   row: PublisherTeamMemberRow,
 ): Record<string, unknown> {
   return {
     ArticleId: row.ArticleId,
     TeamMemberId: row.TeamMemberId,
-    PersonPrincipal: row.PersonPrincipal,
+    Title: row.Title,
+    PersonPrincipalId: row.PersonPrincipalId ?? null,
     DisplayName: row.DisplayName,
-    JobTitle: nullIfEmpty(row.JobTitle),
-    PhotoUrl: row.PhotoUrl
-      ? { Url: row.PhotoUrl, Description: row.PhotoUrl }
-      : null,
+    Role: nullIfEmpty(row.Role),
+    Company: nullIfEmpty(row.Company),
+    Department: nullIfEmpty(row.Department),
+    GroupKey: nullIfEmpty(row.GroupKey),
+    ParentMemberId: nullIfEmpty(row.ParentMemberId),
+    IsFeaturedMember: row.IsFeaturedMember ?? null,
     SortOrder: row.SortOrder ?? null,
     BioSnippet: nullIfEmpty(row.BioSnippet),
-    ResumeRichText: nullIfEmpty(row.ResumeRichText),
-    ResumeDocumentUrl: row.ResumeDocumentUrl
-      ? { Url: row.ResumeDocumentUrl, Description: row.ResumeDocumentUrl }
-      : null,
     ContactLink: row.ContactLink
       ? { Url: row.ContactLink, Description: row.ContactLink }
       : null,
-    IncludeInViewer: row.IncludeInViewer ?? null,
   };
 }
 

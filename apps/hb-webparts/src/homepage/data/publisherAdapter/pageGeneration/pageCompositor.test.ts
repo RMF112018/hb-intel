@@ -73,6 +73,7 @@ function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): Publish
   return {
     ArticleId: 'art-001',
     TeamMemberId: id,
+    Title: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
     ...over,
@@ -148,14 +149,14 @@ describe('composeProjectSpotlightPage', () => {
     expect(banner.layoutType).toBe('FullWidthImage');
   });
 
-  it('sets TeamViewer properties from article fields and includes only IncludeInViewer members', () => {
+  it('sets TeamViewer properties from article fields and orders every authored member', () => {
     const page = composeProjectSpotlightPage(
       context({
         article: {
         },
         teamMembers: [
           member('alice', { SortOrder: 2 }),
-          member('bob', { SortOrder: 1, IncludeInViewer: false }),
+          member('bob', { SortOrder: 1 }),
           member('carol', { SortOrder: 3 }),
         ],
       }),

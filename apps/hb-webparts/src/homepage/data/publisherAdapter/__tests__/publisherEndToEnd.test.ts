@@ -86,6 +86,7 @@ function member(id: string, over: Partial<PublisherTeamMemberRow> = {}): Publish
   return {
     ArticleId: 'art-e2e',
     TeamMemberId: id,
+    Title: id,
     PersonPrincipal: `${id}@example.com`,
     DisplayName: id,
     ...over,

@@ -79,6 +79,7 @@ function context(): PublishResolutionContext {
       {
         ArticleId: 'art-life-001',
         TeamMemberId: 'tm-1',
+        Title: 'A',
         PersonPrincipal: 'a@example.com',
         DisplayName: 'A',
       },

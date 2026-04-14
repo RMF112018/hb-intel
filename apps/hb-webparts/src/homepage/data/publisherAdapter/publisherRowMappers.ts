@@ -265,22 +265,46 @@ export function mapTeamMemberRow(
 ): PublisherTeamMemberRow | undefined {
   const ArticleId = requiredStr(raw['ArticleId']);
   const TeamMemberId = requiredStr(raw['TeamMemberId']);
-  const PersonPrincipal = requiredStr(raw['PersonPrincipal']);
+  const Title = requiredStr(raw['Title']);
   const DisplayName = requiredStr(raw['DisplayName']);
-  if (!ArticleId || !TeamMemberId || !PersonPrincipal || !DisplayName) return undefined;
+  // `PersonPrincipal` is a SharePoint User field. The REST shape can
+  // arrive either flattened (`PersonPrincipal: 'user@tenant'`) or
+  // expanded (`PersonPrincipal: { Title, EMail }`) depending on the
+  // caller's $select/$expand. Accept both and fall back to the
+  // resolved id's email when only `PersonPrincipalId` is present.
+  const PersonPrincipal =
+    requiredStr(raw['PersonPrincipal']) ??
+    (() => {
+      const expanded = raw['PersonPrincipal'] as
+        | { EMail?: unknown; Email?: unknown; Title?: unknown }
+        | undefined;
+      if (expanded && typeof expanded === 'object') {
+        return (
+          str(expanded.EMail) ??
+          str(expanded.Email) ??
+          str(expanded.Title)
+        );
+      }
+      return undefined;
+    })();
+  if (!ArticleId || !TeamMemberId || !Title || !DisplayName || !PersonPrincipal)
+    return undefined;
   return {
     ArticleId,
     TeamMemberId,
+    Title,
     PersonPrincipal,
+    PersonPrincipalId: num(raw['PersonPrincipalId']),
     DisplayName,
-    JobTitle: str(raw['JobTitle']),
-    PhotoUrl: url(raw['PhotoUrl']),
+    Role: str(raw['Role']),
+    Company: str(raw['Company']),
+    Department: str(raw['Department']),
+    GroupKey: str(raw['GroupKey']),
+    ParentMemberId: str(raw['ParentMemberId']),
+    IsFeaturedMember: bool(raw['IsFeaturedMember']),
     SortOrder: num(raw['SortOrder']),
     BioSnippet: str(raw['BioSnippet']),
-    ResumeRichText: str(raw['ResumeRichText']),
-    ResumeDocumentUrl: url(raw['ResumeDocumentUrl']),
     ContactLink: url(raw['ContactLink']),
-    IncludeInViewer: bool(raw['IncludeInViewer']),
   };
 }
 

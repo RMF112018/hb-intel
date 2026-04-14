@@ -153,19 +153,47 @@ export interface PublisherArticleRow {
 /* B. HB Article Team Members                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * `HB Article Team Members` row shape aligned to the tenant list
+ * schema (publisher-list-schema-report.md §B).
+ *
+ * Required tenant fields: ArticleId, DisplayName, PersonPrincipal
+ * (User), TeamMemberId, Title. Optional tenant fields: BioSnippet,
+ * Company, ContactLink, Department, GroupKey, IsFeaturedMember,
+ * ParentMemberId, Role, SortOrder.
+ *
+ * `PersonPrincipal` is a SharePoint User field (Lookup→User
+ * Information List). The authoring UI carries the principal as an
+ * email/login string for display and resolution; the SharePoint
+ * writer emits the resolved `PersonPrincipalId` (integer User id).
+ * `PersonPrincipalId` is therefore optional on the contract: it is
+ * populated after tenant resolution on read, and required by the
+ * writer before a successful POST (callers must resolve the principal
+ * to an id before calling the writer — the writer surfaces an error
+ * if it is missing).
+ *
+ * The legacy pre-tenant fields `JobTitle`, `PhotoUrl`,
+ * `ResumeRichText`, `ResumeDocumentUrl`, and `IncludeInViewer` are
+ * intentionally removed: they do not exist on the tenant list. Use
+ * `Role` for the person's project role, and rely on the Team Viewer
+ * webpart's Graph-enriched reader for photo/department enrichment.
+ */
 export interface PublisherTeamMemberRow {
   readonly ArticleId: string;
   readonly TeamMemberId: string;
+  readonly Title: string;
   readonly PersonPrincipal: string;
+  readonly PersonPrincipalId?: number;
   readonly DisplayName: string;
-  readonly JobTitle?: string;
-  readonly PhotoUrl?: UrlString;
+  readonly Role?: string;
+  readonly Company?: string;
+  readonly Department?: string;
+  readonly GroupKey?: string;
+  readonly ParentMemberId?: string;
+  readonly IsFeaturedMember?: boolean;
   readonly SortOrder?: number;
   readonly BioSnippet?: string;
-  readonly ResumeRichText?: string;
-  readonly ResumeDocumentUrl?: UrlString;
   readonly ContactLink?: UrlString;
-  readonly IncludeInViewer?: boolean;
 }
 
 /* ------------------------------------------------------------------ */

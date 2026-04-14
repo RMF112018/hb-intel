@@ -41,6 +41,7 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
     const row = mapTeamMemberRow({
       ArticleId: ARTICLE_ID,
       TeamMemberId: 'tm-1',
+      Title: 'Alice',
       PersonPrincipal: 'alice@example.com',
       DisplayName: 'Alice',
     });
@@ -52,6 +53,7 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
       mapTeamMemberRow({
         PostId: ARTICLE_ID,
         TeamMemberId: 'tm-1',
+        Title: 'Alice',
         PersonPrincipal: 'alice@example.com',
         DisplayName: 'Alice',
       }),
@@ -120,12 +122,84 @@ describe('child-row writers emit ArticleId, never PostId', () => {
     const row: PublisherTeamMemberRow = {
       ArticleId: ARTICLE_ID,
       TeamMemberId: 'tm-1',
+      Title: 'Alice',
       PersonPrincipal: 'alice@example.com',
       DisplayName: 'Alice',
     };
     const fields = mapTeamMemberRowToListFields(row);
     expect(fields['ArticleId']).toBe(ARTICLE_ID);
     expect(fields['PostId']).toBeUndefined();
+  });
+
+  it('team-member write payload emits tenant columns only and no removed legacy fields', () => {
+    const row: PublisherTeamMemberRow = {
+      ArticleId: ARTICLE_ID,
+      TeamMemberId: 'tm-1',
+      Title: 'Alice',
+      PersonPrincipal: 'alice@example.com',
+      PersonPrincipalId: 17,
+      DisplayName: 'Alice',
+      Role: 'PM',
+      Company: 'HB',
+      Department: 'Delivery',
+      GroupKey: 'leads',
+      ParentMemberId: 'tm-parent',
+      IsFeaturedMember: true,
+      SortOrder: 1,
+      BioSnippet: 'Bio',
+      ContactLink: 'https://p.example/alice',
+    };
+    const fields = mapTeamMemberRowToListFields(row);
+    // Required tenant fields.
+    expect(fields['Title']).toBe('Alice');
+    expect(fields['DisplayName']).toBe('Alice');
+    expect(fields['TeamMemberId']).toBe('tm-1');
+    // User field written as resolved id, not as a bare string.
+    expect(fields['PersonPrincipalId']).toBe(17);
+    expect(fields['PersonPrincipal']).toBeUndefined();
+    // Optional tenant fields.
+    expect(fields['Role']).toBe('PM');
+    expect(fields['Company']).toBe('HB');
+    expect(fields['Department']).toBe('Delivery');
+    expect(fields['GroupKey']).toBe('leads');
+    expect(fields['ParentMemberId']).toBe('tm-parent');
+    expect(fields['IsFeaturedMember']).toBe(true);
+    expect(fields['SortOrder']).toBe(1);
+    expect(fields['BioSnippet']).toBe('Bio');
+    expect(fields['ContactLink']).toEqual({
+      Url: 'https://p.example/alice',
+      Description: 'https://p.example/alice',
+    });
+    // Legacy pre-tenant fields no longer written.
+    expect(fields['JobTitle']).toBeUndefined();
+    expect(fields['PhotoUrl']).toBeUndefined();
+    expect(fields['ResumeRichText']).toBeUndefined();
+    expect(fields['ResumeDocumentUrl']).toBeUndefined();
+    expect(fields['IncludeInViewer']).toBeUndefined();
+  });
+
+  it('team-member read mapper rejects rows missing required tenant Title', () => {
+    expect(
+      mapTeamMemberRow({
+        ArticleId: ARTICLE_ID,
+        TeamMemberId: 'tm-1',
+        PersonPrincipal: 'alice@example.com',
+        DisplayName: 'Alice',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('team-member read mapper resolves the expanded PersonPrincipal User shape', () => {
+    const row = mapTeamMemberRow({
+      ArticleId: ARTICLE_ID,
+      TeamMemberId: 'tm-1',
+      Title: 'Alice',
+      DisplayName: 'Alice',
+      PersonPrincipal: { EMail: 'alice@example.com', Title: 'Alice' },
+      PersonPrincipalId: 17,
+    });
+    expect(row?.PersonPrincipal).toBe('alice@example.com');
+    expect(row?.PersonPrincipalId).toBe(17);
   });
 
   it('media write payload carries ArticleId FK', () => {

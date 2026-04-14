@@ -106,16 +106,18 @@ const POSTS_MVP_FIELDS = [
 const TEAM_MEMBERS_MVP_FIELDS = [
   'ArticleId',
   'TeamMemberId',
-  'PersonPrincipal',
+  'Title',
+  'PersonPrincipalId',
   'DisplayName',
-  'JobTitle',
-  'PhotoUrl',
+  'Role',
+  'Company',
+  'Department',
+  'GroupKey',
+  'ParentMemberId',
+  'IsFeaturedMember',
   'SortOrder',
   'BioSnippet',
-  'ResumeRichText',
-  'ResumeDocumentUrl',
   'ContactLink',
-  'IncludeInViewer',
 ] as const;
 
 const MEDIA_MVP_FIELDS = [

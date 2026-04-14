@@ -100,16 +100,18 @@ export function buildTeamViewerProperties(
 }
 
 /**
- * Filter + sort the raw publisher rows the way the Team Viewer
- * renderer expects them. Rows with `IncludeInViewer === false` are
- * dropped; the remainder are sorted by `SortOrder` ascending with a
- * stable `DisplayName` tiebreaker.
+ * Sort the publisher rows the way the Team Viewer renderer expects:
+ * by `SortOrder` ascending with a stable `DisplayName` tiebreaker.
+ *
+ * The tenant `HB Article Team Members` schema does not define an
+ * `IncludeInViewer` column, so every row authored on an article is
+ * visible on the rendered page. If hosts need to hide a row they
+ * should remove it from the child list.
  */
 export function selectVisibleTeamMembers(
   rows: readonly PublisherTeamMemberRow[],
 ): readonly PublisherTeamMemberRow[] {
   return rows
-    .filter((r) => r.IncludeInViewer !== false)
     .slice()
     .sort((a, b) => {
       const ao = a.SortOrder ?? Number.MAX_SAFE_INTEGER;
@@ -119,7 +121,14 @@ export function selectVisibleTeamMembers(
     });
 }
 
-/** Map a single publisher row into the TeamViewer render row subset. */
+/**
+ * Map a single publisher row into the TeamViewer render row subset.
+ * Photo/department enrichment is left undefined on purpose — the
+ * Team Viewer webpart's Graph-enriched reader fills those at render
+ * time from the resolved `PersonPrincipal`. `jobTitle` is sourced
+ * from the tenant `Role` column; `projectRole` mirrors it so
+ * layout-level `projectRole` groupers continue to work.
+ */
 export function mapPublisherRowToTeamViewerPerson(
   row: PublisherTeamMemberRow,
 ): PublisherTeamViewerPerson {
@@ -128,12 +137,12 @@ export function mapPublisherRowToTeamViewerPerson(
     articleId: row.ArticleId,
     articleTeamMemberId: row.TeamMemberId,
     displayName: row.DisplayName,
-    jobTitle: row.JobTitle,
-    photoUrl: row.PhotoUrl,
+    jobTitle: row.Role,
+    projectRole: row.Role,
+    department: row.Department,
+    groupKey: row.GroupKey,
     sortOrder: row.SortOrder,
     bio: row.BioSnippet,
-    resumeRichText: row.ResumeRichText,
-    resumeDocumentUrl: row.ResumeDocumentUrl,
     profileUrl: row.ContactLink,
   };
 }

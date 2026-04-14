@@ -76,6 +76,7 @@ function context(over: {
       {
         ArticleId: 'art-001',
         TeamMemberId: 'tm-1',
+        Title: 'Alice',
         PersonPrincipal: 'alice@example.com',
         DisplayName: 'Alice',
       },
@@ -117,19 +118,11 @@ describe('validatePublishContext', () => {
     expect(result.errors.some((e) => e.field === 'Title')).toBe(true);
   });
 
-  it('flags ShowTeamViewer=true with no included team members', () => {
+  it('flags ShowTeamViewer=true with no authored team members', () => {
     const result = validatePublishContext(
       context({
         article: { ShowTeamViewer: true },
-        teamMembers: [
-          {
-            ArticleId: 'art-001',
-            TeamMemberId: 'tm-1',
-            PersonPrincipal: 'x',
-            DisplayName: 'X',
-            IncludeInViewer: false,
-          },
-        ],
+        teamMembers: [],
       }),
     );
     expect(result.errors.some((e) => e.category === 'invalid-team-configuration')).toBe(true);
