@@ -4,10 +4,13 @@
  * Authority (tenant truth):
  *   docs/architecture/plans/MASTER/spfx/publisher/architecture/lists/publisher-list-schema-report.md
  *
- * Master-record (HB Articles) enum values are pinned to the tenant list
- * schema. Non-master enums (TemplateRegistry, PageBinding, etc.) still
- * carry their pre-tenant-audit values; those layers are realigned by
- * later Phase-02 remediation prompts.
+ * Master-record (HB Articles) enum values are pinned to the tenant
+ * list schema. Non-master enums at the bottom of this file
+ * (`HeroRendererKind`, `PostFamily`, `TargetSiteKey`, `BindingStatus`,
+ * `LastOperation`, `TemplateStatus`, etc.) are retained because the
+ * pure compositor / row-mapper plumbing still reads their shapes;
+ * they are NOT used on master-record state. Consumers of
+ * master-record state must use the tenant-aligned enums above.
  *
  * All tuples are declared `as const` so consumers can derive literal-union
  * types directly; no runtime object mutation is required.
@@ -120,11 +123,15 @@ export type PublishStatus = (typeof PUBLISH_STATUS_VALUES)[number];
 export const SYNC_STATUS_VALUES = ['in-sync', 'pending', 'error'] as const;
 export type SyncStatus = (typeof SYNC_STATUS_VALUES)[number];
 
-/* ── Legacy / non-master-record enums (scope-deferred) ───────────────── */
-/* These remain until later Phase-02 prompts realign the non-master lists
-   (template registry, page bindings, publishing errors, etc.) to tenant
-   schema. Consumers of master-record state must use the tenant-aligned
-   enums above. */
+/* ── Legacy / non-master-record enums (retained for compositor plumbing) ── */
+/* The tenant realignment of `TemplateRegistry`, `PageBinding`,
+   `PublishingErrors`, `WorkflowHistory`, and `PromotionRules` is
+   complete; the master-record contracts above are the source of
+   truth for list writes. The enums in this section are retained
+   because the pure compositor + row-mapper plumbing still reads
+   their literal shapes (e.g. `HeroRendererKind` in template-registry
+   rendering, `PostFamily` in legacy row-mapper parsers). They must
+   not be used on master-record state. */
 
 /**
  * Banner theme variant is retained as a legacy alias of the tenant
@@ -253,10 +260,11 @@ export const RETRY_STATUS_VALUES = ['none', 'pending', 'resolved'] as const;
 export type RetryStatus = (typeof RETRY_STATUS_VALUES)[number];
 
 /**
- * PostFamily is a pre-tenant-audit enum still referenced by the
- * TemplateRegistry child-row contract (not yet realigned to tenant
- * schema). Do not use on master-record state — use
- * `ArticleContentType` instead.
+ * `PostFamily` is a pre-tenant-audit enum retained because the
+ * row-mapper parser plumbing still reads its literal set. The
+ * tenant `HB Article Template Registry` row contract uses
+ * `ContentTypes` (MultiChoice of `ArticleContentType`) instead.
+ * Do not use on master-record state — use `ArticleContentType`.
  */
 export const POST_FAMILY_VALUES = [
   'monthlySpotlight',
@@ -267,9 +275,12 @@ export const POST_FAMILY_VALUES = [
 export type PostFamily = (typeof POST_FAMILY_VALUES)[number];
 
 /**
- * TargetSiteKey is a pre-tenant-audit enum still referenced by the
- * PageBinding child-row contract. Do not use on master-record state —
- * use `Destination` instead.
+ * `TargetSiteKey` is a pre-tenant-audit enum retained for backward
+ * compatibility with older callers. The tenant `HB Articles` +
+ * `HB Article Destination Pages` rows use `Destination` (Choice);
+ * authoritative destination site URLs are resolved via
+ * `destinationSiteUrls.resolveDestinationSiteUrl`. Do not use on
+ * master-record state — use `Destination`.
  */
 export const TARGET_SITE_KEY_VALUES = ['projectSpotlight'] as const;
 export type TargetSiteKey = (typeof TARGET_SITE_KEY_VALUES)[number];

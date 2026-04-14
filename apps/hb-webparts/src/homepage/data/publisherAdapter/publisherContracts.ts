@@ -9,9 +9,11 @@
  * contracts (team members, media, page bindings, workflow history,
  * publishing errors) carry `ArticleId` as their foreign key to the
  * master record, matching the tenant `HB Article*` list schema.
- * TemplateRegistry is a sibling reference table (keyed by `TemplateKey`,
- * not by the master) and still carries the pre-tenant-audit shape
- * pending its own realignment prompt.
+ * `PublisherTemplateRegistryRow` is a sibling reference table
+ * keyed by `TemplateKey` (not by the master) and is pinned to the
+ * tenant `HB Article Template Registry` schema
+ * (`IsActive` / `VersionLabel` / `ContentTypes` / `Destination` /
+ * `PageShellTemplateKey` / profile keys / block toggles).
  */
 
 import type {

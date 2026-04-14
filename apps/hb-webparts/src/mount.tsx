@@ -115,13 +115,18 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // HbHeroBanner webpart.
   '23d22f2d-7a15-4031-ab64-2454898bfd44': ({ siteUrl }) =>
     createElement(HbHeroBannerAdmin, { siteUrl }),
-  // Article Publisher authoring surface. Current sprint supports the
-  // Project Spotlight article workflow — hosted on the HBCentral
-  // publisher page, reads/writes the seven Project Spotlight lists, and
-  // orchestrates publish/republish to the ProjectSpotlight site via the
-  // pure compositor + Pages REST. Future sprints may extend this app
-  // to additional article destinations (e.g. Company Pulse); the GUID
-  // is preserved across the rebrand so deployment lineage is unchanged.
+  // Article Publisher authoring surface. Current sprint wires the
+  // `projectSpotlight` destination only — hosted on the HBCentral
+  // publisher page, reads/writes the tenant `HB Article*` list
+  // family (HB Articles, HB Article Team Members, HB Article Media,
+  // HB Article Template Registry, HB Article Destination Pages,
+  // HB Article Workflow History, HB Article Publishing Errors,
+  // HB Article Promotion Rules), and orchestrates publish / republish
+  // to the canonical destination site via the pure compositor +
+  // Pages REST. `companyPulse` is declared on the tenant Choice but
+  // is not wired for authoring (see `SUPPORTED_DESTINATIONS`).
+  // The GUID is preserved across the rebrand so deployment lineage
+  // is unchanged.
   [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity }) =>
     // Thread the SPFx current-user email through as the acting
     // operator so workflow-history writes (publish / republish /
