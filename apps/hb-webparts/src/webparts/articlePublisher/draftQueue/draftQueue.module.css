@@ -216,3 +216,54 @@
   padding: 0 1px;
   border-radius: 2px;
 }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.chipReady {
+  color: #0b6a0b;
+  background: #e7f3e7;
+  border-color: #b6dab6;
+}
+
+.chipTodo {
+  color: #8a4b00;
+  background: #fff4e5;
+  border-color: #ffd9a8;
+}
+
+.chipBlocked {
+  color: #a4262c;
+  background: #fdecec;
+  border-color: #e5b1b3;
+}
+
+.groupCountGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.groupAttention {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: #8a4b00;
+  background: #fff4e5;
+  border: 1px solid #ffd9a8;
+}

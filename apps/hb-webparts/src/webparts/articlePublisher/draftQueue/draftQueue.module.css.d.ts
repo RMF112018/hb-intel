@@ -24,5 +24,11 @@ declare const styles: {
   readonly rowTertiary: string;
   readonly rowAttribution: string;
   readonly highlight: string;
+  readonly chip: string;
+  readonly chipReady: string;
+  readonly chipTodo: string;
+  readonly chipBlocked: string;
+  readonly groupCountGroup: string;
+  readonly groupAttention: string;
 };
 export default styles;

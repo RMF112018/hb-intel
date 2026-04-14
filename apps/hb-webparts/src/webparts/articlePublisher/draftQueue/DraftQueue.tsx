@@ -20,6 +20,11 @@ import {
 import { authorAttribution } from './authorAttribution.js';
 import { humaniseAge } from './humaniseAge.js';
 import { highlightMatches, matchesDraftQuery } from './draftFilter.js';
+import {
+  assessDraftCompleteness,
+  rollupGroupCompleteness,
+  type DraftCompleteness,
+} from './draftCompleteness.js';
 import styles from './draftQueue.module.css';
 
 export interface DraftQueueProps {
@@ -163,7 +168,7 @@ export function DraftQueue({
                   onClick={() => toggleCollapsed(state)}
                 >
                   <span className={styles.groupLabel}>{draftGroupLabel(state)}</span>
-                  <span className={styles.groupCount}>{rows.length}</span>
+                  <GroupCounts rows={rows} />
                 </button>
                 {!isCollapsed && (
                   <div id={groupListId}>
@@ -219,6 +224,7 @@ function DraftRow({
     : undefined;
   const updatedLabel = humaniseAge(row.UpdatedDateUtc, now);
   const attribution = authorAttribution(row.AuthorEmail, actorEmail);
+  const completeness = assessDraftCompleteness(row);
 
   return (
     <li>
@@ -252,9 +258,62 @@ function DraftRow({
         </div>
         <div className={styles.rowTertiary}>
           <span className={styles.rowAttribution}>{attribution}</span>
+          <span className={styles.rowSeparator} aria-hidden="true">·</span>
+          <CompletenessChip completeness={completeness} />
         </div>
       </button>
     </li>
+  );
+}
+
+function CompletenessChip({
+  completeness,
+}: {
+  completeness: DraftCompleteness;
+}): React.JSX.Element {
+  const className =
+    completeness.level === 'ready'
+      ? styles.chipReady
+      : completeness.level === 'blocked'
+        ? styles.chipBlocked
+        : styles.chipTodo;
+  const tooltip =
+    completeness.missingFields.length > 0
+      ? completeness.missingFields.join(', ')
+      : undefined;
+  return (
+    <span
+      className={`${styles.chip} ${className}`}
+      aria-label={completeness.ariaLabel}
+      title={tooltip}
+    >
+      {completeness.chipLabel}
+    </span>
+  );
+}
+
+function GroupCounts({
+  rows,
+}: {
+  rows: readonly PublisherArticleRow[];
+}): React.JSX.Element {
+  const rollup = rollupGroupCompleteness(rows);
+  if (rollup.total === 0) {
+    return <span className={styles.groupCount}>0</span>;
+  }
+  return (
+    <span className={styles.groupCountGroup}>
+      <span className={styles.groupCount}>{rollup.total}</span>
+      {rollup.todo > 0 && (
+        <span
+          className={`${styles.groupAttention}`}
+          aria-label={`${rollup.todo} need attention`}
+          title={`${rollup.todo} need attention`}
+        >
+          {rollup.todo} TODO
+        </span>
+      )}
+    </span>
   );
 }
 
