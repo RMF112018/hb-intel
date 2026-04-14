@@ -1,27 +1,27 @@
 /**
  * SharePoint Pages REST page-creation service.
  *
- * Wraps the Modern Pages API (`/_api/sitepages/pages`) used to create
- * or update a client-side page on the Project Spotlight site. Consumes
- * the structured `ComposedPage` produced by `pageCompositor` and walks
- * a two-step workflow:
+ * Wraps the Modern Pages API (`/_api/sitepages/pages`) for every
+ * write the publisher issues against a destination site. Consumes
+ * the structured `ComposedPage` produced by `pageCompositor`. The
+ * service targets pages by one of two explicit paths:
  *
- *   1. Ensure a page record exists with the target file name under
- *      `SitePages/` (POST to `_api/sitepages/pages` if missing).
- *   2. PATCH the page's `CanvasContent1` with the composed controls.
+ *   - `createOrUpdate({ page })` (create / regenerate) — POSTs to
+ *     `_api/sitepages/pages` with `FileName = page.identity.pageName`
+ *     to ensure the page exists, then PATCHes `CanvasContent1`.
+ *   - `createOrUpdate({ page, targetPageId })` (in-place republish)
+ *     — GETs the page by `Id`, echoes its existing `FileName` /
+ *     `AbsoluteUrl`, and PATCHes `CanvasContent1` on that `Id`.
+ *     Filename-based rebinding is deliberately NOT attempted on
+ *     this path so slug / page-name drift cannot retarget the
+ *     page (policy layer forces `regenerate` when PageName
+ *     actually changed — see `republishPolicy.pageNameDrift`).
  *
- * Write behavior is intentionally narrow: we create-or-update by page
- * name, and we never publish from this service (publish is separate
- * behavior on the Pages API that Wave 5 orchestrates alongside page-
- * binding writes).
- *
- * Blocking unknowns carried forward into Wave 9 hosted verification:
- *   - Exact `CanvasContent1` serialization for a TeamViewer (Custom)
- *     control; the provisional payload shape here mirrors the
- *     JsonControlData structure observed in the canonical XML, which
- *     is the shape SharePoint preserves on page save.
- *   - Authoring principal / permissions on `/sites/ProjectSpotlight`
- *     (blocking unknown #4 from Wave 1).
+ * The service also owns the explicit publish lifecycle:
+ *   - `publishLive({ pageId })` promotes the draft-state page
+ *     returned by `createOrUpdate` to the live version.
+ *   - `unpublishLive({ pageId })` reverts a live page to draft
+ *     (archive / withdraw lifecycles).
  */
 
 import type { ComposedPage } from './pageCompositor';

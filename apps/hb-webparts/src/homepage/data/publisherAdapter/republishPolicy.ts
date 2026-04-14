@@ -7,9 +7,17 @@
  *
  *   - `create`        — no binding exists; create the destination page
  *                       and write a new binding row.
- *   - `inPlaceUpdate` — binding exists and is compatible; update the
- *                       existing page (preserve `PageId` / `PageUrl`)
- *                       and merge the binding row.
+ *   - `inPlaceUpdate` — binding exists and is compatible; the
+ *                       orchestrator targets the bound `PageId`
+ *                       directly (filename-based rebinding is
+ *                       deliberately not used), PATCHes canvas on
+ *                       that `Id`, and MERGEs the same binding
+ *                       row. `PageId`, `PageUrl`, and `PageName`
+ *                       are preserved verbatim from the existing
+ *                       binding — a composed page-name that no
+ *                       longer matches the bound file is treated
+ *                       as a `pageNameDrift` regeneration, not a
+ *                       silent rename.
  *   - `regenerate`    — binding exists but template-key or page-name
  *                       drift requires a new destination page. The
  *                       binding model is **one-row authoritative state

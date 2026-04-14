@@ -13,10 +13,17 @@
  *      `ArticleId`.
  *
  * The orchestrator is the caller's single entry point for `publish`
- * and `republish`. It never duplicates a live page for the same article:
- * when a binding exists and shell/template identity is compatible,
- * the same `PageId` / `PageUrl` are preserved and the binding row is
- * merged in place.
+ * and `republish`. It never duplicates a live page for the same
+ * article: when the decision is `inPlaceUpdate`, the orchestrator
+ * passes the bound `PageId` as `targetPageId` into the page-creation
+ * service, which PATCHes canvas on that exact id so `PageId` /
+ * `PageUrl` / `PageName` are preserved verbatim from the existing
+ * binding row. When the decision is `regenerate` (template-key
+ * drift or page-name drift), the single `HB Article Destination
+ * Pages` row is MERGEd with the new identity in place — the
+ * superseded identity is stamped into the workflow-history
+ * ActionNote as the durable lineage record (the tenant list is
+ * one-row authoritative per `ArticleId`).
  */
 
 import {
