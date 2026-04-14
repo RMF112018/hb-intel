@@ -335,12 +335,14 @@ export function ArticlePublisher({
             setStatus(`${to} failed at ${outcome.stage}: ${outcome.message}`);
           }
         } else {
+          // `published` is intentionally unreachable here — it is
+          // produced exclusively by the publish orchestrator after
+          // page creation + binding closure. Generic transitions
+          // never stamp `PublishedDateUtc` themselves.
           const updated: PublisherArticleRow = {
             ...articleDraft,
             WorkflowState: to,
             UpdatedDateUtc: nowIso(),
-            PublishedDateUtc:
-              to === 'published' ? nowIso() : articleDraft.PublishedDateUtc,
           };
           await repositories.articles.upsert(updated);
           await repositories.workflowHistory.append(

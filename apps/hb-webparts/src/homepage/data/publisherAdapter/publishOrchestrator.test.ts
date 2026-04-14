@@ -178,6 +178,14 @@ function makeOrchestrator(f: Fixture) {
 describe('publishOrchestrator', () => {
   it('creates page and binding when no existing binding', async () => {
     const f = fixture();
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 77 }));
+    f.repositories.workflowHistory.append = historyAppend;
+    const articlesUpsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+    f.repositories.articles.upsert = articlesUpsert;
     const orch = makeOrchestrator(f);
     const result = await orch.run({
       articleId: 'art-ps-001',
@@ -196,7 +204,17 @@ describe('publishOrchestrator', () => {
     expect(bindingRow.PublishStatus).toBe('published');
     expect(bindingRow.SyncStatus).toBe('in-sync');
     expect(bindingRow.PageShellVersion).toBe('1.0.0');
-    expect(bindingRow.PageShellVersion).toBe('1.0.0');
+
+    // Orchestrator is the sole producer of WorkflowState='published':
+    // the master HB Articles row is stamped here, and a
+    // `previous → published` history row is appended.
+    expect(articlesUpsert).toHaveBeenCalledTimes(1);
+    const upsertedArticle = articlesUpsert.mock.calls[0]![0];
+    expect(upsertedArticle.WorkflowState).toBe('published');
+    expect(historyAppend).toHaveBeenCalledTimes(1);
+    const historyRow = historyAppend.mock.calls[0]![0];
+    expect(historyRow.NewState).toBe('published');
+    expect(historyRow.PreviousState).toBe('approved');
   });
 
   it('republish preserves existing BindingId when shell + template versions match', async () => {

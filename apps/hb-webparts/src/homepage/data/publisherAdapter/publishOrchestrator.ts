@@ -394,12 +394,20 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     // first publish and on regenerate (a new destination page); on
     // in-place republish we preserve the existing first-publish
     // timestamp so callers can still tell when the page first went
-    // live. WorkflowState is intentionally NOT touched here — that
-    // remains the authoring surface's `handleTransition` action.
+    // live.
+    //
+    // `WorkflowState` is stamped to `'published'` here. The publish
+    // orchestrator is the single producer of `WorkflowState='published'`;
+    // the generic state machine intentionally excludes it from any
+    // manual transition path so no UI button can bypass page
+    // creation + binding closure.
     const stampPublished =
       decision.action === 'create' || decision.action === 'regenerate';
+    const previousWorkflowState = context.article.WorkflowState;
+    const workflowStateChanged = previousWorkflowState !== 'published';
     const updatedArticle: PublisherArticleRow = {
       ...context.article,
+      WorkflowState: 'published',
       PageId: publishResult.creation.pageId,
       PageName:
         publishResult.creation.pageName ?? publishResult.page.identity.pageName,
@@ -438,6 +446,43 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         decision,
         page: publishResult.page,
       };
+    }
+
+    // Append a workflow-history row for the `previous → published`
+    // transition when the master row actually changed state. This
+    // keeps the publish pipeline as the sole WorkflowState='published'
+    // producer while preserving the audit trail that the generic
+    // state-machine path used to emit. Best-effort: a history-append
+    // failure is logged through recordPublishingError but does not
+    // roll back the successful publish.
+    if (workflowStateChanged) {
+      try {
+        await repositories.workflowHistory.append({
+          HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
+          ArticleId: context.article.ArticleId,
+          Title: `${previousWorkflowState} → published`,
+          NewState: 'published',
+          PreviousState: previousWorkflowState,
+          ActionDateUtc: now,
+          ActorEmail: context.article.AuthorEmail,
+          ActionNote: `Published via orchestrator (${decision.action}).`,
+        });
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? `HB Article Workflow History append failed after publish: ${err.message}`
+            : 'HB Article Workflow History append failed after publish.';
+        await recordPublishingError({
+          articleId: context.article.ArticleId,
+          title: context.article.Title,
+          destination: context.article.Destination,
+          stage: 'articleSync',
+          mode: req.mode,
+          message,
+          bindingId: bindingRow.BindingId,
+          nowIso: now,
+        });
+      }
     }
 
     return {

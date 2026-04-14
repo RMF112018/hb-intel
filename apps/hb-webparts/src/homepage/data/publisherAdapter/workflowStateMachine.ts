@@ -5,11 +5,18 @@
  * Permitted transitions (v1):
  *   draft      → review | archived | withdrawn
  *   review     → approved | draft | withdrawn
- *   approved   → scheduled | published | draft | withdrawn
- *   scheduled  → published | approved | withdrawn
+ *   approved   → scheduled | draft | withdrawn
+ *   scheduled  → approved | withdrawn
  *   published  → archived | withdrawn
  *   archived   → withdrawn
  *   withdrawn  → (terminal)
+ *
+ * `published` is intentionally NOT reachable from any manual transition.
+ * The publish orchestrator is the single producer of
+ * `WorkflowState='published'`; it runs page creation, page publish, and
+ * binding closure before stamping the state. Any generic UI or state-
+ * machine path that appears to promote an article directly to
+ * `published` is a bypass and must be rejected here.
  */
 
 import type { WorkflowState } from './publisherEnums';
@@ -17,8 +24,8 @@ import type { WorkflowState } from './publisherEnums';
 const TRANSITIONS: Readonly<Record<WorkflowState, readonly WorkflowState[]>> = {
   draft: ['review', 'archived', 'withdrawn'],
   review: ['approved', 'draft', 'withdrawn'],
-  approved: ['scheduled', 'published', 'draft', 'withdrawn'],
-  scheduled: ['published', 'approved', 'withdrawn'],
+  approved: ['scheduled', 'draft', 'withdrawn'],
+  scheduled: ['approved', 'withdrawn'],
   published: ['archived', 'withdrawn'],
   archived: ['withdrawn'],
   withdrawn: [],
