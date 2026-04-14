@@ -1290,11 +1290,6 @@ const DESTINATION_LABELS: Partial<Record<Destination, string>> = {
   projectSpotlight: 'Project Spotlight',
 };
 
-interface ChooserOption<T extends string> {
-  readonly value: T;
-  readonly label: string;
-}
-
 interface ChooserGroupProps<T extends string> {
   readonly label: string;
   readonly value: T | undefined;
@@ -1367,8 +1362,6 @@ function ChooserGroup<T extends string>({
   );
 }
 
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-type _ChooserOption<T extends string> = ChooserOption<T>;
 
 export function update<T extends keyof PublisherArticleRow>(
   draft: PublisherArticleRow,
@@ -2387,11 +2380,3 @@ function PreviewPanel({
   );
 }
 
-function Dt({ label, value }: { label: string; value: string }) {
-  return (
-    <div className={styles.dtRow}>
-      <dt className={styles.dtLabel}>{label}</dt>
-      <dd className={styles.dtValue}>{value}</dd>
-    </div>
-  );
-}

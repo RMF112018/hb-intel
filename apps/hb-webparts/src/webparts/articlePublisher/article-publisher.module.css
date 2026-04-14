@@ -748,43 +748,10 @@
   justify-content: flex-end;
 }
 
-.statusPanel {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .sectionHeading {
   margin: 0 0 8px 0;
   font-size: 14px;
   font-weight: 600;
-}
-
-.dl {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 4px 16px;
-}
-
-.dtRow {
-  display: contents;
-}
-
-.dtLabel,
-.dtValue {
-  font-size: 12px;
-  padding: 2px 0;
-}
-
-.dtLabel {
-  font-weight: 600;
-  color: #4a4a4f;
-}
-
-.dtValue {
-  color: #1f1f1f;
-  word-break: break-all;
 }
 
 .previewRoot {

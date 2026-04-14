@@ -83,12 +83,7 @@ declare const styles: {
   readonly rowCard: string;
   readonly rowGrid: string;
   readonly rowActions: string;
-  readonly statusPanel: string;
   readonly sectionHeading: string;
-  readonly dl: string;
-  readonly dtRow: string;
-  readonly dtLabel: string;
-  readonly dtValue: string;
   readonly previewRoot: string;
   readonly driftBannerHard: string;
   readonly driftBannerSoft: string;
