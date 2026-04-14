@@ -264,12 +264,16 @@ export function createPublisherRepositories(
 
     teamMembers: {
       async listByArticle(articleId) {
-        // `PersonPrincipal` is a SharePoint User field. Without an
-        // explicit `$select`/`$expand` the REST response omits the
-        // expanded `{ EMail, Title }` payload and the mapper cannot
-        // hydrate the display identity. Selecting the expanded fields
-        // alongside the flat `PersonPrincipalId` closes the read side
-        // of the user-field seam deterministically.
+        // `PersonPrincipal` is a SharePoint User field. This read is
+        // the single producer of team-member rows in the app; it
+        // MUST `$expand=PersonPrincipal` + `$select` the expanded
+        // sub-properties, because `mapTeamMemberRow` requires the
+        // expanded `{ EMail, Title, Id }` shape and rejects any row
+        // that arrives with a flat or missing principal (P0-1 +
+        // P2-4). Dropping `$expand` here would not "degrade
+        // gracefully" — rows would be dropped by the mapper and
+        // the edit/preview flow would silently lose the team
+        // member.
         const rows = await access.readList(lists.teamMembers, {
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'SortOrder asc',

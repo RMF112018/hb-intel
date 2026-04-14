@@ -42,7 +42,9 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
       ArticleId: ARTICLE_ID,
       TeamMemberId: 'tm-1',
       Title: 'Alice',
-      PersonPrincipal: 'alice@example.com',
+      // Reader always expands PersonPrincipal — fixtures mirror the
+      // expanded shape the repository's $select/$expand produces.
+      PersonPrincipal: { EMail: 'alice@example.com', Title: 'Alice' },
       DisplayName: 'Alice',
     });
     expect(row?.ArticleId).toBe(ARTICLE_ID);
@@ -52,6 +54,23 @@ describe('child-row mappers read ArticleId, reject legacy PostId', () => {
     expect(
       mapTeamMemberRow({
         PostId: ARTICLE_ID,
+        TeamMemberId: 'tm-1',
+        Title: 'Alice',
+        PersonPrincipal: { EMail: 'alice@example.com' },
+        DisplayName: 'Alice',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('mapTeamMemberRow rejects a flat-string PersonPrincipal — reader must always $expand (P2-4)', () => {
+    // The team-member read path issues `$expand=PersonPrincipal` + a
+    // select of the expanded sub-properties. If a consumer bypasses
+    // the repository and hits SharePoint without $expand, the raw
+    // value arrives as a flat lookup string; the mapper rejects it
+    // loudly instead of silently hydrating the display identity.
+    expect(
+      mapTeamMemberRow({
+        ArticleId: ARTICLE_ID,
         TeamMemberId: 'tm-1',
         Title: 'Alice',
         PersonPrincipal: 'alice@example.com',

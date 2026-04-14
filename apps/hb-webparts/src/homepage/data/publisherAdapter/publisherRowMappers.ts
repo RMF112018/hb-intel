@@ -267,26 +267,26 @@ export function mapTeamMemberRow(
   const TeamMemberId = requiredStr(raw['TeamMemberId']);
   const Title = requiredStr(raw['Title']);
   const DisplayName = requiredStr(raw['DisplayName']);
-  // `PersonPrincipal` is a SharePoint User field. The REST shape can
-  // arrive either flattened (`PersonPrincipal: 'user@tenant'`) or
-  // expanded (`PersonPrincipal: { Title, EMail }`) depending on the
-  // caller's $select/$expand. Accept both and fall back to the
-  // resolved id's email when only `PersonPrincipalId` is present.
+  // `PersonPrincipal` is a SharePoint User field. The one producer
+  // of team-member reads — `teamMembers.listByArticle` in
+  // publisherRepositories.ts — always issues
+  // `$expand=PersonPrincipal` + `$select=PersonPrincipal/EMail,/Title,/Id`,
+  // so the raw value arrives as an expanded object here. The mapper
+  // requires the expanded shape and does NOT fall back to a flat
+  // string: if the reader accidentally drops `$expand`, we reject
+  // the row loudly instead of hydrating a guess. Closes P2-4.
+  const expandedPrincipal = raw['PersonPrincipal'];
   const PersonPrincipal =
-    requiredStr(raw['PersonPrincipal']) ??
-    (() => {
-      const expanded = raw['PersonPrincipal'] as
-        | { EMail?: unknown; Email?: unknown; Title?: unknown }
-        | undefined;
-      if (expanded && typeof expanded === 'object') {
-        return (
-          str(expanded.EMail) ??
-          str(expanded.Email) ??
-          str(expanded.Title)
-        );
-      }
-      return undefined;
-    })();
+    expandedPrincipal && typeof expandedPrincipal === 'object'
+      ? (() => {
+          const exp = expandedPrincipal as {
+            EMail?: unknown;
+            Email?: unknown;
+            Title?: unknown;
+          };
+          return str(exp.EMail) ?? str(exp.Email) ?? str(exp.Title);
+        })()
+      : undefined;
   if (!ArticleId || !TeamMemberId || !Title || !DisplayName || !PersonPrincipal)
     return undefined;
   return {
