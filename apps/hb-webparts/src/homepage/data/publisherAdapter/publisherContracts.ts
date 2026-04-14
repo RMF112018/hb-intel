@@ -25,6 +25,7 @@ import type {
   MediaRole,
   PageSyncStatus,
   ProjectStage,
+  PromotionRuleScope,
   PublishStatus,
   PublishingErrorOperation,
   RetryStatus,
@@ -304,6 +305,36 @@ export interface PublisherWorkflowHistoryRow {
 /* ------------------------------------------------------------------ */
 /* G. HB Article Publishing Errors                                     */
 /* ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ */
+/* H. HB Article Promotion Rules                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Tenant-aligned `HB Article Promotion Rules` row.
+ *
+ * Tenant-required: RuleId, Title, Destination (Choice), Scope
+ *   (Choice), IsActive.
+ * Optional: RuleContentType (Choice — ArticleContentType values),
+ *   FeaturedDefault, PinnedDefault, ManualOverrideAllowed,
+ *   FeedWindowDays, Notes.
+ *
+ * Drives authoring defaults (FeaturedDefault / PinnedDefault) and
+ * authoring-surface manual-override gating (ManualOverrideAllowed).
+ */
+export interface PublisherPromotionRuleRow {
+  readonly RuleId: string;
+  readonly Title: string;
+  readonly Destination: Destination;
+  readonly Scope: PromotionRuleScope;
+  readonly IsActive: boolean;
+  readonly RuleContentType?: ArticleContentType;
+  readonly FeaturedDefault?: boolean;
+  readonly PinnedDefault?: boolean;
+  readonly ManualOverrideAllowed?: boolean;
+  readonly FeedWindowDays?: number;
+  readonly Notes?: string;
+}
 
 /**
  * Tenant-aligned `HB Article Publishing Errors` row.

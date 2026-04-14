@@ -182,6 +182,9 @@ describe('publishOrchestrator — failure-path persistence', () => {
         listByArticle: vi.fn(async () => []),
         append: vi.fn(async () => ({ itemId: 99 })),
       },
+      promotionRules: {
+        listActive: vi.fn(async () => []),
+      },
     };
 
     const pageCreation: PageCreationService = {
@@ -197,7 +200,7 @@ describe('publishOrchestrator — failure-path persistence', () => {
     const failingBindingWriter: PageBindingWriter = {
       upsert: vi.fn(async () => ({
         ok: false as const,
-        reason: 'writeFailed',
+        reason: 'writeFailed' as const,
         message: 'Binding MERGE failed (status 500).',
         status: 500,
       })),

@@ -24,6 +24,7 @@ const EXPECTED_TENANT_TITLES: Readonly<Record<PublisherListKey, string>> = {
   pageBindings: 'HB Article Destination Pages',
   workflowHistory: 'HB Article Workflow History',
   publishingErrors: 'HB Article Publishing Errors',
+  promotionRules: 'HB Article Promotion Rules',
 };
 
 describe('publisherListDescriptors — tenant title binding', () => {

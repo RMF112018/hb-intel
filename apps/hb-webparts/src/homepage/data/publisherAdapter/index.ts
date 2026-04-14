@@ -22,3 +22,4 @@ export * from './workflowStateMachine';
 export * from './validation/validationEngine';
 export * from './preview/previewBuilder';
 export * from './teamViewerAdapter';
+export * from './promotionRuleSelector';

@@ -29,7 +29,8 @@ export type PublisherListKey =
   | 'templateRegistry'
   | 'pageBindings'
   | 'workflowHistory'
-  | 'publishingErrors';
+  | 'publishingErrors'
+  | 'promotionRules';
 
 export interface PublisherListDescriptor {
   /** The list key used across publisherAdapter code. */
@@ -192,6 +193,20 @@ const PUBLISHING_ERRORS_FIELDS = [
   'RetryStatus',
 ] as const;
 
+const PROMOTION_RULES_FIELDS = [
+  'RuleId',
+  'Title',
+  'Destination',
+  'Scope',
+  'IsActive',
+  'RuleContentType',
+  'FeaturedDefault',
+  'PinnedDefault',
+  'ManualOverrideAllowed',
+  'FeedWindowDays',
+  'Notes',
+] as const;
+
 export const PUBLISHER_LISTS: Readonly<
   Record<PublisherListKey, PublisherListDescriptor>
 > = Object.freeze({
@@ -236,5 +251,11 @@ export const PUBLISHER_LISTS: Readonly<
     displayName: 'HB Article Publishing Errors',
     hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
     mvpFields: PUBLISHING_ERRORS_FIELDS,
+  },
+  promotionRules: {
+    key: 'promotionRules',
+    displayName: 'HB Article Promotion Rules',
+    hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL,
+    mvpFields: PROMOTION_RULES_FIELDS,
   },
 });

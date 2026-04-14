@@ -228,6 +228,18 @@ export const PUBLISHING_ERROR_OPERATION_VALUES = [
 export type PublishingErrorOperation =
   (typeof PUBLISHING_ERROR_OPERATION_VALUES)[number];
 
+/**
+ * Scope on the tenant `HB Article Promotion Rules` list (`Scope`
+ * Choice column). Determines whether a rule applies destination-wide,
+ * to the homepage feed, or globally.
+ */
+export const PROMOTION_RULE_SCOPE_VALUES = [
+  'destination',
+  'homepage',
+  'global',
+] as const;
+export type PromotionRuleScope = (typeof PROMOTION_RULE_SCOPE_VALUES)[number];
+
 export const RETRY_STATUS_VALUES = ['none', 'pending', 'resolved'] as const;
 export type RetryStatus = (typeof RETRY_STATUS_VALUES)[number];
 

@@ -169,6 +169,9 @@ function fixture(over: {
       listByArticle: vi.fn(async () => []),
       append: vi.fn(),
     },
+    promotionRules: {
+      listActive: vi.fn(async () => []),
+    },
   } as unknown as PublisherRepositories;
   return {
     repositories,

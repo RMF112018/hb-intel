@@ -154,6 +154,9 @@ function fixture(over: {
         throw new Error('unused');
       }) as unknown as PublisherRepositories['publishingErrors']['append'],
     },
+    promotionRules: {
+      listActive: vi.fn(async () => []),
+    },
   };
 
   return {

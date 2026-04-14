@@ -12,6 +12,7 @@ import type {
   PublisherArticleRow,
   PublisherMediaRow,
   PublisherPageBindingRow,
+  PublisherPromotionRuleRow,
   PublisherPublishingErrorRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
@@ -27,6 +28,7 @@ import type {
   PageSyncStatus,
   PostFamily,
   ProjectStage,
+  PromotionRuleScope,
   PublishStatus,
   PublishingErrorOperation,
   SpotlightType,
@@ -43,6 +45,7 @@ import {
   PAGE_SYNC_STATUS_VALUES,
   POST_FAMILY_VALUES,
   PROJECT_STAGE_VALUES,
+  PROMOTION_RULE_SCOPE_VALUES,
   PUBLISH_STATUS_VALUES,
   PUBLISHING_ERROR_OPERATION_VALUES,
   SPOTLIGHT_TYPE_VALUES,
@@ -138,6 +141,7 @@ const mediaRole = one<MediaRole>(MEDIA_ROLE_VALUES);
 const publishStatus = one<PublishStatus>(PUBLISH_STATUS_VALUES);
 const syncStatus = one<SyncStatus>(SYNC_STATUS_VALUES);
 const errorOperation = one<PublishingErrorOperation>(PUBLISHING_ERROR_OPERATION_VALUES);
+const promotionRuleScope = one<PromotionRuleScope>(PROMOTION_RULE_SCOPE_VALUES);
 
 /* ── Row mappers ─────────────────────────────────────────────────── */
 
@@ -453,5 +457,31 @@ export function mapPublishingErrorRow(
     RetryStatus: one(['none', 'pending', 'resolved'] as const)(
       raw['RetryStatus'],
     ),
+  };
+}
+
+export function mapPromotionRuleRow(
+  raw: Record<string, unknown>,
+): PublisherPromotionRuleRow | undefined {
+  const RuleId = requiredStr(raw['RuleId']);
+  const Title = requiredStr(raw['Title']);
+  const DestinationValue = destination(raw['Destination']);
+  const Scope = promotionRuleScope(raw['Scope']);
+  const IsActive = bool(raw['IsActive']);
+  if (!RuleId || !Title || !DestinationValue || !Scope || IsActive === undefined) {
+    return undefined;
+  }
+  return {
+    RuleId,
+    Title,
+    Destination: DestinationValue,
+    Scope,
+    IsActive,
+    RuleContentType: articleContentType(raw['RuleContentType']),
+    FeaturedDefault: bool(raw['FeaturedDefault']),
+    PinnedDefault: bool(raw['PinnedDefault']),
+    ManualOverrideAllowed: bool(raw['ManualOverrideAllowed']),
+    FeedWindowDays: num(raw['FeedWindowDays']),
+    Notes: str(raw['Notes']),
   };
 }

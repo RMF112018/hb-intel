@@ -118,6 +118,9 @@ function repos(over: {
       listByArticle: vi.fn(async () => []),
       append: vi.fn(),
     },
+    promotionRules: {
+      listActive: vi.fn(async () => []),
+    },
   } as unknown as PublisherRepositories;
 }
 

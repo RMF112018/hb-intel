@@ -13,6 +13,7 @@ import type {
   PublisherArticleRow,
   PublisherMediaRow,
   PublisherPageBindingRow,
+  PublisherPromotionRuleRow,
   PublisherPublishingErrorRow,
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
@@ -24,6 +25,7 @@ import {
   mapArticleRow,
   mapMediaRow,
   mapPageBindingRow,
+  mapPromotionRuleRow,
   mapPublishingErrorRow,
   mapTeamMemberRow,
   mapTemplateRegistryRow,
@@ -158,6 +160,18 @@ export interface WorkflowHistoryRepository {
   append(row: PublisherWorkflowHistoryRow): Promise<{ readonly itemId: number }>;
 }
 
+/**
+ * Read-only repository for tenant `HB Article Promotion Rules`.
+ *
+ * Returns active rules only (`IsActive eq 1`); applied at the
+ * authoring surface to seed promotion defaults (FeaturedDefault,
+ * PinnedDefault) on new articles and to gate manual override of
+ * IsFeatured / IsPinned when ManualOverrideAllowed=false.
+ */
+export interface PromotionRulesRepository {
+  listActive(): Promise<readonly PublisherPromotionRuleRow[]>;
+}
+
 export interface PublishingErrorsRepository {
   listByArticle(articleId: string): Promise<readonly PublisherPublishingErrorRow[]>;
   /**
@@ -175,6 +189,7 @@ export interface PublisherRepositories {
   readonly pageBindings: PageBindingRepository;
   readonly workflowHistory: WorkflowHistoryRepository;
   readonly publishingErrors: PublishingErrorsRepository;
+  readonly promotionRules: PromotionRulesRepository;
 }
 
 /* ── Factory ─────────────────────────────────────────────────────── */
@@ -333,6 +348,15 @@ export function createPublisherRepositories(
       },
       async append(row) {
         return writers.publishingErrors.append(row);
+      },
+    },
+
+    promotionRules: {
+      async listActive() {
+        const rows = await access.readList(lists.promotionRules, {
+          filter: 'IsActive eq 1',
+        });
+        return mapAll(rows, mapPromotionRuleRow);
       },
     },
   };

@@ -44,7 +44,10 @@ import {
   type ProjectStage,
   type PublishResolutionContext,
   type PublishOutcome,
+  type PublisherPromotionRuleRow,
   type PublisherWorkflowHistoryRow,
+  selectPromotionDefaults,
+  type PromotionDefaults,
 } from '../../homepage/data/publisherAdapter/index.js';
 import { buildPublishResolutionContext } from '../../homepage/data/publisherAdapter/publishResolutionContext.js';
 import {
@@ -79,7 +82,10 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function emptyArticle(templateKey: string): PublisherArticleRow {
+function emptyArticle(
+  templateKey: string,
+  promotion: PromotionDefaults,
+): PublisherArticleRow {
   const id = `art-${Date.now()}-${Math.floor(Math.random() * 1e6)
     .toString(36)
     .padStart(4, '0')}`;
@@ -100,6 +106,12 @@ function emptyArticle(templateKey: string): PublisherArticleRow {
     UpdatedDateUtc: nowIso(),
     TargetSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    // Promotion-rule effect (Phase-02 Prompt-08): a tenant rule
+    // matching (Destination, ArticleContentType) seeds these
+    // defaults; when the rule disallows manual override the
+    // authoring surface locks the toggles below.
+    IsFeatured: promotion.featured,
+    IsPinned: promotion.pinned,
   };
 }
 
@@ -155,6 +167,7 @@ export function ArticlePublisher({
   const [filter, setFilter] = React.useState<WorkflowState>('draft');
   const [articles, setArticles] = React.useState<readonly PublisherArticleRow[]>([]);
   const [articlesLoading, setArticlesLoading] = React.useState(false);
+  const [promotionRules, setPromotionRules] = React.useState<readonly PublisherPromotionRuleRow[]>([]);
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | undefined>();
   const [articleDraft, setArticleDraft] = React.useState<PublisherArticleRow | undefined>();
   const [teamDraft, setTeamDraft] = React.useState<PublisherTeamMemberRow[]>([]);
@@ -237,8 +250,28 @@ export function ArticlePublisher({
     }
   }, [tab, selectedArticleId, loadPreview]);
 
+  // Load active promotion rules once at mount; they seed authoring
+  // defaults (FeaturedDefault / PinnedDefault) on new articles and
+  // gate manual override of the IsFeatured / IsPinned toggles.
+  React.useEffect(() => {
+    void (async () => {
+      try {
+        const rules = await repositories.promotionRules.listActive();
+        setPromotionRules(rules);
+      } catch {
+        // Best-effort — fall back to publisher defaults.
+        setPromotionRules([]);
+      }
+    })();
+  }, [repositories]);
+
   const handleCreateNew = React.useCallback(() => {
-    const draft = emptyArticle('ps-inprogress-monthly-v1');
+    const promotion = selectPromotionDefaults(
+      promotionRules,
+      'projectSpotlight',
+      'monthlySpotlight',
+    );
+    const draft = emptyArticle('ps-inprogress-monthly-v1', promotion);
     setArticleDraft(draft);
     setTeamDraft([]);
     setMediaDraft([]);
