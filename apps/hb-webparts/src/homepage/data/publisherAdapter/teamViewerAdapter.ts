@@ -140,26 +140,47 @@ export function selectVisibleTeamMembers(
  * Map a single publisher row into the TeamViewer render row subset.
  * Photo/department enrichment is left undefined on purpose — the
  * Team Viewer webpart's Graph-enriched reader fills those at render
- * time from the resolved `PersonPrincipal`. `jobTitle` is sourced
- * from the tenant `Role` column; `projectRole` mirrors it so
- * layout-level `projectRole` groupers continue to work.
+ * time from the resolved `PersonPrincipal`.
+ *
+ * `jobTitle` / `projectRole` source: the tenant `Role` column when
+ * an author has set a secondary role descriptor; otherwise the
+ * tenant `Title` column, which the redesigned teammate composer
+ * (workstream-d step-02) populates with the role caption or
+ * directory job title. Historically the adapter read only `Role`,
+ * but the composer no longer surfaces `Role` as a free-text field —
+ * falling back to `Title` keeps the downstream render consistent
+ * with what the author sees in the composer and the article card,
+ * and remains backwards-compatible with legacy rows that only
+ * carry a `Role` value.
  */
 export function mapPublisherRowToTeamViewerPerson(
   row: PublisherTeamMemberRow,
 ): PublisherTeamViewerPerson {
+  const jobTitle = firstNonEmpty(row.Role, row.Title);
   return {
     id: row.TeamMemberId,
     articleId: row.ArticleId,
     articleTeamMemberId: row.TeamMemberId,
     displayName: row.DisplayName,
-    jobTitle: row.Role,
-    projectRole: row.Role,
+    jobTitle,
+    projectRole: jobTitle,
     department: row.Department,
     groupKey: row.GroupKey,
     sortOrder: row.SortOrder,
     bio: row.BioSnippet,
     profileUrl: row.ContactLink,
   };
+}
+
+function firstNonEmpty(
+  ...values: readonly (string | undefined)[]
+): string | undefined {
+  for (const v of values) {
+    if (typeof v !== 'string') continue;
+    const t = v.trim();
+    if (t.length > 0) return t;
+  }
+  return undefined;
 }
 
 /**
