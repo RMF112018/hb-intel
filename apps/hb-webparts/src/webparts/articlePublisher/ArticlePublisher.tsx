@@ -39,7 +39,6 @@ import {
   type PublisherRepositories,
   type PublisherTeamMemberRow,
   type WorkflowState,
-  type MediaRole,
   type ArticleContentType,
   type ArticleSubject,
   type Destination,
