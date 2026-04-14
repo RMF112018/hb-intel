@@ -1,0 +1,217 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e3e6ed;
+  border-radius: 8px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.tile:focus-within {
+  border-color: #225391;
+  box-shadow: 0 0 0 1px #225391 inset;
+}
+
+.tileBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.tileBody:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.thumbFrame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #eef1f6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbBroken {
+  object-fit: contain;
+  background: repeating-linear-gradient(
+    45deg,
+    #fdecec,
+    #fdecec 8px,
+    #f8d7d7 8px,
+    #f8d7d7 16px
+  );
+}
+
+.tileCaption {
+  font-size: 12px;
+  color: #4a4a4f;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tileCaption em {
+  color: #9a9aa3;
+  font-style: italic;
+}
+
+.tileMetaRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.roleBadge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1f2129;
+  background: #eef1f6;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.featuredBadge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a5a00;
+  background: #fff3d6;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.tileActions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #9a9aa3;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.iconBtn:hover {
+  color: #d4a017;
+  background: #fff7e0;
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.iconBtnActive {
+  color: #d4a017;
+  border-color: #f4d480;
+  background: #fff7e0;
+}
+
+.actionBtn,
+.actionBtnDanger {
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #cbcbd0;
+  background: #fff;
+  color: #1f1f1f;
+  cursor: pointer;
+}
+
+.actionBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.actionBtn:hover:not(:disabled) {
+  background: #f4f6fa;
+}
+
+.actionBtn:focus-visible,
+.actionBtnDanger:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 1px;
+}
+
+.actionBtnDanger {
+  border-color: #e5b1b3;
+  color: #a4262c;
+}
+
+.actionBtnDanger:hover {
+  background: #fdecec;
+}
+
+.addBtn {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #225391;
+  background: #225391;
+  color: #fff;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  background: #1a4173;
+  border-color: #1a4173;
+}
+
+.addBtn:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}

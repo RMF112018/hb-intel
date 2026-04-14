@@ -70,6 +70,7 @@ import {
 } from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import { TeamPanel } from './teamComposer/index.js';
+import { GalleryPanel } from './mediaComposer/index.js';
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../hbKudos/hooks/useRecipientPhotoHydration.js';
 import { resolveSlugForSave } from './slugGovernance.js';
@@ -85,7 +86,6 @@ import {
   draftGroupEmptyCopy,
   draftGroupLabel,
   heroThemeVariantLabel,
-  mediaRoleLabel,
   projectStageLabel,
   spotlightTypeLabel,
   teamViewerGroupingModeLabel,
@@ -103,7 +103,6 @@ import type {
 import styles from './article-publisher.module.css';
 
 // Convenience aliases so the JSX stays compact.
-const MEDIA_ROLES: readonly MediaRole[] = ['gallery', 'supporting', 'hero', 'secondary'];
 
 /* ── Props ──────────────────────────────────────────────────── */
 
@@ -1859,148 +1858,6 @@ function TeamPresentationPanel({ draft, onChange }: PanelProps) {
   );
 }
 
-
-function GalleryPanel({
-  articleId,
-  rows,
-  onChange,
-}: {
-  articleId: string;
-  rows: PublisherMediaRow[];
-  onChange: (next: PublisherMediaRow[]) => void;
-}) {
-  const add = () =>
-    onChange([
-      ...rows,
-      {
-        ArticleId: articleId,
-        MediaId: `m-${Date.now()}-${rows.length}`,
-        Title: '',
-        MediaRole: 'gallery',
-        ImageAsset: '',
-        AltText: '',
-        SortOrder: rows.length + 1,
-      },
-    ]);
-  const replaceAt = (idx: number, next: PublisherMediaRow) =>
-    onChange(rows.map((r, i) => (i === idx ? next : r)));
-  const removeAt = (idx: number) => onChange(rows.filter((_, i) => i !== idx));
-  const move = (idx: number, dir: -1 | 1) => {
-    const j = idx + dir;
-    if (j < 0 || j >= rows.length) return;
-    const next = rows.slice();
-    [next[idx]!, next[j]!] = [next[j]!, next[idx]!];
-    onChange(next.map((r, i) => ({ ...r, SortOrder: i + 1 })));
-  };
-  return (
-    <div className={styles.rowList}>
-      <button type="button" className={styles.primaryBtn} onClick={add}>
-        Add image
-      </button>
-      {rows.length === 0 ? (
-        <HbcEmptyState
-          title="No supporting media yet"
-          description="Add images to show alongside the article."
-        />
-      ) : (
-        rows.map((r, i) => (
-          <div key={r.MediaId} className={styles.rowCard}>
-            <div className={styles.rowCardHeader}>
-              <span className={styles.rowCardIndex}>Image {i + 1}</span>
-              {r.FeaturedInGallery && <span className={styles.rowCardBadge}>Featured</span>}
-            </div>
-            <div className={styles.rowGrid}>
-              <Field label="Image title">
-                <input
-                  className={styles.input}
-                  value={r.Title}
-                  placeholder="Internal title for this image"
-                  onChange={(e) => replaceAt(i, { ...r, Title: e.target.value })}
-                />
-              </Field>
-              <Field label="Image URL">
-                <input
-                  className={styles.input}
-                  value={r.ImageAsset}
-                  placeholder="https://…"
-                  onChange={(e) => replaceAt(i, { ...r, ImageAsset: e.target.value })}
-                />
-              </Field>
-              <Field label="Alt text">
-                <textarea
-                  className={styles.textarea}
-                  value={r.AltText}
-                  placeholder="Describe the image in a sentence"
-                  onChange={(e) => replaceAt(i, { ...r, AltText: e.target.value })}
-                />
-              </Field>
-              <Field label="Caption">
-                <input
-                  className={styles.input}
-                  value={r.Caption ?? ''}
-                  placeholder="Optional caption shown under the image"
-                  onChange={(e) => replaceAt(i, { ...r, Caption: e.target.value || undefined })}
-                />
-              </Field>
-              <Field label="Group">
-                <input
-                  className={styles.input}
-                  value={r.GalleryGroup ?? ''}
-                  placeholder="Group name (optional)"
-                  onChange={(e) => replaceAt(i, { ...r, GalleryGroup: e.target.value || undefined })}
-                />
-              </Field>
-            </div>
-            <ChooserGroup
-              label="Used as"
-              value={r.MediaRole}
-              options={MEDIA_ROLES}
-              getLabel={mediaRoleLabel}
-              onChange={(next) => {
-                if (!next) return;
-                replaceAt(i, { ...r, MediaRole: next });
-              }}
-            />
-            <label className={styles.toggleRow}>
-              <input
-                type="checkbox"
-                checked={r.FeaturedInGallery === true}
-                onChange={(e) => replaceAt(i, { ...r, FeaturedInGallery: e.target.checked })}
-              />
-              <span>Feature this image in the gallery</span>
-            </label>
-            <div className={styles.rowActions}>
-              <button
-                type="button"
-                className={styles.btn}
-                aria-label={`Move image ${i + 1} up`}
-                onClick={() => move(i, -1)}
-              >
-                Move up
-              </button>
-              <button
-                type="button"
-                className={styles.btn}
-                aria-label={`Move image ${i + 1} down`}
-                onClick={() => move(i, 1)}
-              >
-                Move down
-              </button>
-              <button
-                type="button"
-                className={styles.dangerBtn}
-                aria-label={`Remove image ${i + 1}`}
-                onClick={() => removeAt(i)}
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-}
 
 function DestinationBindingPanel({
   binding,

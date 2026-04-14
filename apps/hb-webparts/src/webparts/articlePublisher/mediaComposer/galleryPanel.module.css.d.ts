@@ -1,0 +1,20 @@
+declare const styles: {
+  readonly panel: string;
+  readonly grid: string;
+  readonly tile: string;
+  readonly tileBody: string;
+  readonly thumbFrame: string;
+  readonly thumb: string;
+  readonly thumbBroken: string;
+  readonly tileCaption: string;
+  readonly tileMetaRow: string;
+  readonly roleBadge: string;
+  readonly featuredBadge: string;
+  readonly tileActions: string;
+  readonly iconBtn: string;
+  readonly iconBtnActive: string;
+  readonly actionBtn: string;
+  readonly actionBtnDanger: string;
+  readonly addBtn: string;
+};
+export default styles;

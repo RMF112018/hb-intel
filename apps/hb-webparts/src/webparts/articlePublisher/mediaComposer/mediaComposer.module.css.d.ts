@@ -1,0 +1,23 @@
+declare const styles: {
+  readonly body: string;
+  readonly field: string;
+  readonly fieldset: string;
+  readonly fieldLabelRow: string;
+  readonly fieldLabel: string;
+  readonly required: string;
+  readonly fieldHelper: string;
+  readonly fieldCount: string;
+  readonly fieldCountWarn: string;
+  readonly fieldError: string;
+  readonly input: string;
+  readonly textarea: string;
+  readonly preview: string;
+  readonly previewImage: string;
+  readonly previewPlaceholder: string;
+  readonly previewStatus: string;
+  readonly previewError: string;
+  readonly roleChooser: string;
+  readonly roleOption: string;
+  readonly toggleRow: string;
+};
+export default styles;
