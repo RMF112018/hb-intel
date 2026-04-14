@@ -69,6 +69,22 @@ import {
   type ProjectLookupSearchFn,
 } from '../../homepage/data/publisherAdapter/projectsLookupSource.js';
 import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
+import {
+  articleContentTypeLabel,
+  articleSubjectLabel,
+  destinationLabel,
+  draftGroupEmptyCopy,
+  draftGroupLabel,
+  heroThemeVariantLabel,
+  mediaRoleLabel,
+  projectStageLabel,
+  spotlightTypeLabel,
+  teamViewerGroupingModeLabel,
+  teamViewerModeLabel,
+  teamViewerSortModeLabel,
+  transitionActionLabel,
+  workflowOutcomeLabel,
+} from './authorLabels.js';
 import type {
   BannerControlPayload,
   ImageGalleryControlPayload,
@@ -230,69 +246,10 @@ const DRAFT_GROUP_ORDER: readonly WorkflowState[] = [
   'withdrawn',
 ];
 
-/**
- * Author-facing outcome labels for workflow states. Authors never see
- * raw enum tokens; these labels carry the same meaning expressed as
- * editorial outcomes.
- */
-const WORKFLOW_OUTCOME_LABELS: Record<WorkflowState, string> = {
-  draft: 'Draft',
-  review: 'Awaiting review',
-  approved: 'Approved',
-  scheduled: 'Scheduled (legacy)',
-  published: 'Published',
-  archived: 'Archived',
-  withdrawn: 'Withdrawn',
-};
-
-const DRAFT_GROUP_LABELS: Record<WorkflowState, string> = {
-  draft: 'Drafts',
-  review: 'In review',
-  approved: 'Approved',
-  scheduled: 'Scheduled (legacy)',
-  published: 'Recently published',
-  archived: 'Archived',
-  withdrawn: 'Withdrawn',
-};
-
-const DRAFT_GROUP_EMPTY_COPY: Record<WorkflowState, string> = {
-  draft: 'No drafts yet. Start a new Project Spotlight to see it here.',
-  review: 'No articles are awaiting review.',
-  approved: 'No approved articles waiting to publish.',
-  scheduled: 'No scheduled articles.',
-  published: 'Published articles will appear here as you ship them.',
-  archived: 'No archived articles.',
-  withdrawn: 'No withdrawn articles.',
-};
-
 const COLLAPSED_GROUPS_BY_DEFAULT: ReadonlySet<WorkflowState> = new Set([
   'archived',
   'withdrawn',
 ]);
-
-/**
- * Author-facing labels for workflow transitions. The state machine
- * still authorises transitions by enum identity; the rail simply
- * presents them as editorial outcomes instead of `→ approved` tokens.
- */
-export function transitionActionLabel(to: WorkflowState): string {
-  switch (to) {
-    case 'draft':
-      return 'Return to draft';
-    case 'review':
-      return 'Send for review';
-    case 'approved':
-      return 'Mark approved';
-    case 'scheduled':
-      return 'Mark scheduled (legacy)';
-    case 'published':
-      return 'Mark published';
-    case 'archived':
-      return 'Archive';
-    case 'withdrawn':
-      return 'Withdraw';
-  }
-}
 
 interface DraftGroupMap {
   readonly draft: readonly PublisherArticleRow[];
@@ -357,7 +314,7 @@ function composeReadinessSummary(
   validation: { readonly ok: boolean; readonly errors: readonly { readonly message: string }[]; readonly warnings: readonly { readonly message: string }[] } | undefined,
 ): string {
   if (!draft) return 'Pick a draft to see readiness.';
-  const outcome = WORKFLOW_OUTCOME_LABELS[draft.WorkflowState];
+  const outcome = workflowOutcomeLabel(draft.WorkflowState);
   if (validation && !validation.ok) {
     const n = validation.errors.length;
     return `${outcome} — ${n} blocking issue${n === 1 ? '' : 's'} to resolve before publishing.`;
@@ -843,8 +800,8 @@ export function ArticlePublisher({
     latestValidation,
   );
   const bindingSignal = articleDraft ? composeBindingSignal(binding, preview) : undefined;
-  const workflowOutcomeLabel = articleDraft
-    ? WORKFLOW_OUTCOME_LABELS[articleDraft.WorkflowState]
+  const workflowOutcomeChipLabel = articleDraft
+    ? workflowOutcomeLabel(articleDraft.WorkflowState)
     : undefined;
   const hasAnyArticles = DRAFT_GROUP_ORDER.some((state) => groups[state].length > 0);
 
@@ -909,14 +866,14 @@ export function ArticlePublisher({
                     onClick={() => toggleGroupCollapsed(state)}
                   >
                     <span className={styles.draftGroupLabel}>
-                      {DRAFT_GROUP_LABELS[state]}
+                      {draftGroupLabel(state)}
                     </span>
                     <span className={styles.draftGroupCount}>{rows.length}</span>
                   </button>
                   {!collapsed && (
                     rows.length === 0 ? (
                       <p className={styles.draftGroupEmpty}>
-                        {DRAFT_GROUP_EMPTY_COPY[state]}
+                        {draftGroupEmptyCopy(state)}
                       </p>
                     ) : (
                       <ul className={styles.draftList}>
@@ -966,8 +923,8 @@ export function ArticlePublisher({
                   {articleDraft.Title?.trim() || 'Untitled draft'}
                 </h2>
               </div>
-              {workflowOutcomeLabel && (
-                <span className={styles.outcomeChip}>{workflowOutcomeLabel}</span>
+              {workflowOutcomeChipLabel && (
+                <span className={styles.outcomeChip}>{workflowOutcomeChipLabel}</span>
               )}
             </header>
 
@@ -1261,41 +1218,19 @@ interface PanelProps {
   onChange: (next: PublisherArticleRow) => void;
 }
 
-/* ── Editorial labels & chooser primitive ─────────────────── */
-
-function friendlyEnumLabel(value: string): string {
-  const spaced = value
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_-]+/g, ' ')
-    .trim();
-  return spaced.length === 0
-    ? value
-    : spaced.charAt(0).toUpperCase() + spaced.slice(1);
-}
-
-const CONTENT_TYPE_LABELS: Partial<Record<ArticleContentType, string>> = {
-  monthlySpotlight: 'Monthly Spotlight',
-  newsUpdate: 'News Update',
-  milestoneSpotlight: 'Milestone (legacy)',
-};
-
-const MEDIA_ROLE_LABELS: Record<MediaRole, string> = {
-  hero: 'Hero (primary)',
-  secondary: 'Secondary',
-  gallery: 'Gallery',
-  supporting: 'Supporting',
-};
-
-const DESTINATION_LABELS: Partial<Record<Destination, string>> = {
-  projectSpotlight: 'Project Spotlight',
-};
+/* ── Chooser primitive ────────────────────────────────────── */
 
 interface ChooserGroupProps<T extends string> {
   readonly label: string;
   readonly value: T | undefined;
   readonly options: readonly T[];
   readonly onChange: (next: T | undefined) => void;
-  readonly getLabel?: (value: T) => string;
+  /**
+   * Author-facing label resolver. Required: every chooser must
+   * route through a governed label function from `authorLabels.ts`
+   * so no raw enum token reaches the author.
+   */
+  readonly getLabel: (value: T) => string;
   readonly allowClear?: boolean;
   readonly clearLabel?: string;
   readonly helpText?: string;
@@ -1304,7 +1239,7 @@ interface ChooserGroupProps<T extends string> {
 
 /**
  * Editorial chooser group. Renders a labeled set of radio-style
- * buttons over an enum. Authors see friendly labels (via
+ * buttons over an enum. Authors see governed labels (via
  * `getLabel`) while the underlying enum values remain the source
  * of truth carried to the adapter.
  */
@@ -1319,8 +1254,7 @@ function ChooserGroup<T extends string>({
   helpText,
   ariaLabel,
 }: ChooserGroupProps<T>) {
-  const resolveLabel = (v: T): string =>
-    getLabel ? getLabel(v) : friendlyEnumLabel(v);
+  const resolveLabel = (v: T): string => getLabel(v);
   const showCleared = allowClear && value === undefined;
   return (
     <div className={styles.chooser}>
@@ -1434,8 +1368,7 @@ interface MetadataPanelProps extends PanelProps {
 function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) {
   const contentTypeOptions = contentTypeOptionsForDraft(draft.ArticleContentType);
   const legacyMilestoneMessage = milestoneLegacyNotice(draft.ArticleContentType);
-  const destinationLabel =
-    DESTINATION_LABELS[draft.Destination] ?? friendlyEnumLabel(draft.Destination);
+  const destinationReadout = destinationLabel(draft.Destination);
   const projectValue: ProjectPickerValue | null =
     draft.ProjectId && draft.ProjectName
       ? {
@@ -1493,7 +1426,7 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
         label="Article type"
         value={draft.ArticleContentType}
         options={contentTypeOptions}
-        getLabel={(v) => CONTENT_TYPE_LABELS[v] ?? friendlyEnumLabel(v)}
+        getLabel={articleContentTypeLabel}
         onChange={(next) => {
           if (!next) return;
           onChange(update(draft, 'ArticleContentType', next));
@@ -1505,13 +1438,14 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
 
       <div className={styles.editorialReadout}>
         <span className={styles.editorialReadoutLabel}>Publishes to</span>
-        <span className={styles.editorialReadoutValue}>{destinationLabel}</span>
+        <span className={styles.editorialReadoutValue}>{destinationReadout}</span>
       </div>
 
       <ChooserGroup
         label="Spotlight type"
         value={draft.SpotlightType}
         options={SPOTLIGHT_TYPE_VALUES}
+        getLabel={spotlightTypeLabel}
         onChange={(next) =>
           onChange(update(draft, 'SpotlightType', next as SpotlightType | undefined))
         }
@@ -1522,6 +1456,7 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
         label="Project stage"
         value={draft.ProjectStage}
         options={PROJECT_STAGE_VALUES}
+        getLabel={projectStageLabel}
         onChange={(next) =>
           onChange(update(draft, 'ProjectStage', next as ProjectStage | undefined))
         }
@@ -1532,6 +1467,7 @@ function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanelProps) 
         label="Subject"
         value={draft.ArticleSubject}
         options={ARTICLE_SUBJECT_VALUES}
+        getLabel={articleSubjectLabel}
         onChange={(next) =>
           onChange(update(draft, 'ArticleSubject', next as ArticleSubject | undefined))
         }
@@ -1627,6 +1563,7 @@ function HeroPanel({ draft, onChange }: PanelProps) {
         label="Hero theme"
         value={draft.HeroThemeVariant}
         options={HERO_THEME_VARIANT_VALUES}
+        getLabel={heroThemeVariantLabel}
         onChange={(next) =>
           onChange(update(draft, 'HeroThemeVariant', next as HeroThemeVariant | undefined))
         }
@@ -1778,6 +1715,7 @@ function TeamPresentationPanel({ draft, onChange }: PanelProps) {
         label="Team layout"
         value={draft.TeamViewerMode}
         options={TEAM_VIEWER_MODE_VALUES}
+        getLabel={teamViewerModeLabel}
         onChange={(next) =>
           onChange(update(draft, 'TeamViewerMode', next as TeamViewerMode | undefined))
         }
@@ -1788,6 +1726,7 @@ function TeamPresentationPanel({ draft, onChange }: PanelProps) {
         label="Grouping"
         value={draft.TeamViewerGroupingMode}
         options={TEAM_VIEWER_GROUPING_MODE_VALUES}
+        getLabel={teamViewerGroupingModeLabel}
         onChange={(next) =>
           onChange(
             update(draft, 'TeamViewerGroupingMode', next as TeamViewerGroupingMode | undefined),
@@ -1800,6 +1739,7 @@ function TeamPresentationPanel({ draft, onChange }: PanelProps) {
         label="Sort order"
         value={draft.TeamViewerSortMode}
         options={TEAM_VIEWER_SORT_MODE_VALUES}
+        getLabel={teamViewerSortModeLabel}
         onChange={(next) =>
           onChange(update(draft, 'TeamViewerSortMode', next as TeamViewerSortMode | undefined))
         }
@@ -2105,7 +2045,7 @@ function GalleryPanel({
               label="Used as"
               value={r.MediaRole}
               options={MEDIA_ROLES}
-              getLabel={(role) => MEDIA_ROLE_LABELS[role]}
+              getLabel={mediaRoleLabel}
               onChange={(next) => {
                 if (!next) return;
                 replaceAt(i, { ...r, MediaRole: next });
