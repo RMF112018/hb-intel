@@ -71,6 +71,7 @@ import { ProjectPicker, type ProjectPickerValue } from './ProjectPicker.js';
 import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
+import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
 import { useSharePointPeopleSearch } from '../../homepage/data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../hbKudos/hooks/useRecipientPhotoHydration.js';
 import { resolveSlugForSave } from './slugGovernance.js';
@@ -1153,6 +1154,8 @@ export function ArticlePublisher({
                 </ul>
               </section>
             )}
+
+            <PublishReadinessDiagnostics outcome={preview} binding={binding} />
 
             <section className={styles.readinessBlock} aria-label="Primary actions">
               <p className={styles.readinessHeading}>Actions</p>

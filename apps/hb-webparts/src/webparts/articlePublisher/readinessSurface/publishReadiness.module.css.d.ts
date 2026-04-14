@@ -1,0 +1,20 @@
+declare const styles: {
+  readonly block: string;
+  readonly heading: string;
+  readonly decisionSentence: string;
+  readonly decisionDetail: string;
+  readonly details: string;
+  readonly summary: string;
+  readonly detailsBody: string;
+  readonly detailsGroup: string;
+  readonly detailsHeading: string;
+  readonly driftList: string;
+  readonly driftItem: string;
+  readonly findingList: string;
+  readonly findingItem: string;
+  readonly severityError: string;
+  readonly severityWarn: string;
+  readonly findingCategory: string;
+  readonly findingField: string;
+};
+export default styles;
