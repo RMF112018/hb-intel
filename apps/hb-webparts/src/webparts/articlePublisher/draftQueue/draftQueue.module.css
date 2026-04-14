@@ -204,6 +204,22 @@
   gap: 6px;
   font-size: 11px;
   color: #7a7a82;
+  flex-wrap: wrap;
+}
+
+/* High browser zoom or a narrow rail should not squeeze the
+ * primary line. Let the age chip fall below the title instead
+ * of clipping the title mid-word. */
+@media (max-width: 320px) {
+  .rowPrimary {
+    flex-wrap: wrap;
+  }
+
+  .rowAge {
+    order: 3;
+    width: 100%;
+    text-align: left;
+  }
 }
 
 .rowAttribution {
