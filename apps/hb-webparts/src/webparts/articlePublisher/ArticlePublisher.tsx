@@ -379,10 +379,20 @@ export function ArticlePublisher({
           mode,
         });
         if (outcome.ok) {
+          // When the orchestrator actually wrote a page + binding
+          // (create / inPlaceUpdate / regenerate) it also stamped
+          // WorkflowState='published' and appended a workflow-history
+          // row. Reflect that in the status line so the operator
+          // sees the closed lifecycle and not just the page-side
+          // action. `noOp` and `preview` never mutate state, so we
+          // keep the original description for those.
+          const lifecycleClosed =
+            mode !== 'preview' && outcome.action !== 'noOp';
+          const suffix = outcome.pageUrl ? ` · ${outcome.pageUrl}` : '';
           setStatus(
-            `${mode} ok — action=${outcome.action}, reason=${outcome.reason}${
-              outcome.pageUrl ? ` · ${outcome.pageUrl}` : ''
-            }`,
+            lifecycleClosed
+              ? `${mode} ok — action=${outcome.action}, state=published${suffix}`
+              : `${mode} ok — action=${outcome.action}, reason=${outcome.reason}${suffix}`,
           );
           if (mode !== 'preview') await reloadSelected(articleDraft.ArticleId);
         } else {

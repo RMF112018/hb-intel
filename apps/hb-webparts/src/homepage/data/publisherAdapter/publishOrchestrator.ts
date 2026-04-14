@@ -448,41 +448,48 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       };
     }
 
-    // Append a workflow-history row for the `previous → published`
-    // transition when the master row actually changed state. This
-    // keeps the publish pipeline as the sole WorkflowState='published'
-    // producer while preserving the audit trail that the generic
-    // state-machine path used to emit. Best-effort: a history-append
-    // failure is logged through recordPublishingError but does not
-    // roll back the successful publish.
-    if (workflowStateChanged) {
-      try {
-        await repositories.workflowHistory.append({
-          HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
-          ArticleId: context.article.ArticleId,
-          Title: `${previousWorkflowState} → published`,
-          NewState: 'published',
-          PreviousState: previousWorkflowState,
-          ActionDateUtc: now,
-          ActorEmail: context.article.AuthorEmail,
-          ActionNote: `Published via orchestrator (${decision.action}).`,
-        });
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? `HB Article Workflow History append failed after publish: ${err.message}`
-            : 'HB Article Workflow History append failed after publish.';
-        await recordPublishingError({
-          articleId: context.article.ArticleId,
-          title: context.article.Title,
-          destination: context.article.Destination,
-          stage: 'articleSync',
-          mode: req.mode,
-          message,
-          bindingId: bindingRow.BindingId,
-          nowIso: now,
-        });
-      }
+    // Append a workflow-history row for every successful publish or
+    // republish that actually wrote a page and binding. This closes
+    // the control-plane lifecycle: first publish records the
+    // `previous → published` transition, republish records a
+    // `published → published` event tagged with the republish action
+    // (inPlaceUpdate / regenerate) so the audit trail reflects page
+    // identity changes. `noOp` returned earlier and never reaches
+    // this code path. Best-effort: a history-append failure is
+    // logged through recordPublishingError but does not roll back
+    // the successful publish.
+    const historyTitle = workflowStateChanged
+      ? `${previousWorkflowState} → published`
+      : `republish (${decision.action})`;
+    const historyNote = workflowStateChanged
+      ? `Article published via orchestrator (${decision.action}).`
+      : `Article republished via orchestrator (${decision.action}).`;
+    try {
+      await repositories.workflowHistory.append({
+        HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
+        ArticleId: context.article.ArticleId,
+        Title: historyTitle,
+        NewState: 'published',
+        PreviousState: previousWorkflowState,
+        ActionDateUtc: now,
+        ActorEmail: context.article.AuthorEmail,
+        ActionNote: historyNote,
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `HB Article Workflow History append failed after ${workflowStateChanged ? 'publish' : 'republish'}: ${err.message}`
+          : `HB Article Workflow History append failed after ${workflowStateChanged ? 'publish' : 'republish'}.`;
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'articleSync',
+        mode: req.mode,
+        message,
+        bindingId: bindingRow.BindingId,
+        nowIso: now,
+      });
     }
 
     return {
