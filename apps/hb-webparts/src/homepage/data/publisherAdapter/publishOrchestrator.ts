@@ -720,6 +720,16 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       IncludeInHomepageFeed: false,
       IncludeInArchive: target === 'archived' ? true : article.IncludeInArchive,
       SuppressFromRollups: true,
+      // Mirror the demoted destination on the master's page-sync
+      // metadata so the two rows tell the same lifecycle story.
+      // `PageSyncStatus` flips to `'pending'` to match the binding
+      // row's `SyncStatus: 'pending'` (set further down) and
+      // `LastPageSyncDateUtc` uses the same `now` the binding write
+      // records. PageId / PageName / PageUrl are preserved — the
+      // page record still exists as a draft and is needed for a
+      // future republish. Closes the Phase-05 Prompt-03 drift.
+      PageSyncStatus: 'pending',
+      LastPageSyncDateUtc: now,
     };
     try {
       await repositories.articles.upsert(updatedArticle);

@@ -246,6 +246,15 @@ describe('orchestrator.archive', () => {
     expect(persistedBinding.LastSyncDateUtc).toBe(NOW);
     expect(persistedBinding.LastSyncMessage).toContain('archived');
 
+    // Master page-sync metadata mirrors the demoted binding
+    // (Phase-05 Prompt-03): PageSyncStatus flips to 'pending' and
+    // LastPageSyncDateUtc uses the same `now` the binding write
+    // records, so the two rows tell the same lifecycle story.
+    expect(persistedArticle.PageSyncStatus).toBe('pending');
+    expect(persistedArticle.LastPageSyncDateUtc).toBe(NOW);
+    expect(persistedArticle.PageSyncStatus).toBe(persistedBinding.SyncStatus);
+    expect(persistedArticle.LastPageSyncDateUtc).toBe(persistedBinding.LastSyncDateUtc);
+
     const persistedHistory = f.historyAppend.mock.calls[0]![0] as PublisherWorkflowHistoryRow;
     expect(persistedHistory.NewState).toBe('archived');
     expect(persistedHistory.PreviousState).toBe('published');
@@ -399,6 +408,13 @@ describe('orchestrator.withdraw', () => {
     const persistedBinding = f.bindingUpsert.mock.calls[0]![0] as PublisherPageBindingRow;
     expect(persistedBinding.PublishStatus).toBe('draft');
     expect(persistedBinding.LastSyncMessage).toContain('withdrawn');
+
+    // Master page-sync metadata mirrors the demoted binding
+    // (Phase-05 Prompt-03) for withdraw as well as archive.
+    expect(persistedArticle.PageSyncStatus).toBe('pending');
+    expect(persistedArticle.LastPageSyncDateUtc).toBe(NOW);
+    expect(persistedArticle.PageSyncStatus).toBe(persistedBinding.SyncStatus);
+    expect(persistedArticle.LastPageSyncDateUtc).toBe(persistedBinding.LastSyncDateUtc);
 
     const persistedHistory = f.historyAppend.mock.calls[0]![0] as PublisherWorkflowHistoryRow;
     expect(persistedHistory.NewState).toBe('withdrawn');
