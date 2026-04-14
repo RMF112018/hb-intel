@@ -111,15 +111,21 @@ describe('decideRepublishAction', () => {
     expect(d.reason).toBe('alreadyInSync');
   });
 
-  it('forces regenerate on shell key drift regardless of template flags', () => {
+  // Canonical policy (one truth): PageTemplateKey drift is the only
+  // hard regeneration trigger. Shell-identity and version drift
+  // (shell version, render/template version) are always handled as
+  // in-place updates on the same PageId / PageUrl. Tenant templates
+  // no longer expose AllowRepublishInPlace /
+  // ForceRegenerationOnShellChange flags, so there is no
+  // template-flag escape hatch.
+
+  it('updates in place on shell-identity drift because the binding cannot detect PageShellKey drift', () => {
     const d = decideRepublishAction({
       composed: composed({ shellKey: 'ps-shell-new-v1' }),
       template: template({ }),
       existingBinding: binding(),
     });
-    expect(d.action).toBe('regenerate');
-    expect(d.reason).toBe('shellKeyDrift');
-    expect(d.regenerationCause).toBe('shellKeyDrift');
+    expect(d.action).toBe('inPlaceUpdate');
   });
 
   it('forces regenerate on template key drift', () => {
@@ -130,35 +136,27 @@ describe('decideRepublishAction', () => {
     });
     expect(d.action).toBe('regenerate');
     expect(d.reason).toBe('templateKeyDrift');
+    expect(d.regenerationCause).toBe('templateKeyDrift');
   });
 
-  it('regenerates on shell version drift when template demands regeneration', () => {
+  it('updates in place on shell version drift (no template-flag escape hatch)', () => {
     const d = decideRepublishAction({
       composed: composed({ shellVersion: '2.0.0' }),
       template: template({ }),
       existingBinding: binding({ PageShellVersion: '1.0.0' }),
     });
-    expect(d.action).toBe('regenerate');
-    expect(d.regenerationCause).toBe('shellVersionDrift');
-  });
-
-  it('in-place updates on shell version drift when template allows it', () => {
-    const d = decideRepublishAction({
-      composed: composed({ shellVersion: '1.1.0' }),
-      template: template({ }),
-      existingBinding: binding({ PageShellVersion: '1.0.0' }),
-    });
     expect(d.action).toBe('inPlaceUpdate');
+    expect(d.reason).toBe('shellVersionDrift');
     expect(d.notes.join(' ')).toMatch(/shell version drift/i);
   });
 
-  it('regenerates on template version drift when republish-in-place is disallowed', () => {
+  it('updates in place on template/render version drift', () => {
     const d = decideRepublishAction({
       composed: composed({ templateVersion: '2.0.0' }),
       template: template({ }),
       existingBinding: binding({ RenderVersion: '1.0.0' }),
     });
-    expect(d.action).toBe('regenerate');
+    expect(d.action).toBe('inPlaceUpdate');
     expect(d.reason).toBe('templateVersionDrift');
   });
 

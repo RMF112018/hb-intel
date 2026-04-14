@@ -179,7 +179,7 @@ describe('validatePublishContext', () => {
     expect(match).toBeDefined();
   });
 
-  it('warns on shell version drift when the template forces regeneration', () => {
+  it('warns on shell version drift with tenant-accurate in-place messaging', () => {
     const result = validatePublishContext(
       context({
         template: { },
@@ -197,13 +197,19 @@ describe('validatePublishContext', () => {
         },
       }),
     );
-    expect(
-      result.warnings.some(
-        (w) =>
-          w.category === 'page-generation-blocker' &&
-          w.field === 'existingBinding.PageShellVersion',
-      ),
-    ).toBe(true);
+    const driftWarning = result.warnings.find(
+      (w) =>
+        w.category === 'page-generation-blocker' &&
+        w.field === 'existingBinding.PageShellVersion',
+    );
+    expect(driftWarning).toBeDefined();
+    // The warning + action-hint must tell the operator the canonical
+    // truth: shell-version drift is an in-place update, not a
+    // regeneration. Only PageTemplateKey drift regenerates.
+    expect(driftWarning!.message).toMatch(/in place/i);
+    expect(driftWarning!.message).not.toMatch(/regenerat/i);
+    expect(driftWarning!.actionHint).toMatch(/PageTemplateKey/);
+    expect(driftWarning!.actionHint).not.toMatch(/\(or regenerate if the template forces it\)/i);
   });
 
   it('tolerates an unknown RequiredFieldSetKey with an invalid-template-match warning', () => {

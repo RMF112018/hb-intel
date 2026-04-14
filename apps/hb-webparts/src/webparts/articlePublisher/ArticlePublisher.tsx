@@ -569,10 +569,22 @@ export function ArticlePublisher({
                 >
                   Publish
                 </button>
-                {hasDrift && (
-                  <span className={styles.driftChip} title="Shell or template drift detected">
-                    ⚠ drift — will regenerate
-                  </span>
+                {hasDrift && preview?.ok && (
+                  preview.drift.templateKeyDrift ? (
+                    <span
+                      className={styles.driftChip}
+                      title="PageTemplateKey differs from the existing binding; publishing will regenerate the destination page."
+                    >
+                      ⚠ drift — will regenerate
+                    </span>
+                  ) : (
+                    <span
+                      className={styles.driftChip}
+                      title="Shell or template version drift; publishing will update the existing page in place."
+                    >
+                      ⚠ drift — will update in place
+                    </span>
+                  )
                 )}
                 {publishBlockedByValidation && (
                   <span className={styles.validationChip}>
@@ -1196,8 +1208,8 @@ function PreviewPanel({
           }
         >
           {driftLevel === 'hard'
-            ? 'Shell / template identity has changed since the last publish. Publishing will regenerate the destination page.'
-            : 'Shell or template version drift detected. Publishing will update the existing page in place (or regenerate if the template forces it).'}
+            ? 'PageTemplateKey has changed since the last publish. Publishing will regenerate the destination page (new PageId, new PageUrl); the prior binding is superseded.'
+            : 'Shell or template version drift detected. Publishing will update the existing page in place — the same PageId and PageUrl are preserved.'}
         </div>
       )}
 

@@ -545,9 +545,9 @@ function validateBindingDrift(
       category: 'page-generation-blocker',
       severity: 'warning',
       field: 'existingBinding.PageShellVersion',
-      message: `Shell version drift (${binding.PageShellVersion} → ${shell.shellVersion}); publishing will apply an in-place update.`,
+      message: `Shell version drift (${binding.PageShellVersion} → ${shell.shellVersion}); publishing will update the existing page in place (same PageId + PageUrl).`,
       actionHint:
-        'In-place update is the default for shell version drift; PageTemplateKey drift still triggers regeneration.',
+        'Shell and render version drift always update in place. Only a PageTemplateKey change triggers regeneration (new PageId + PageUrl).',
     });
   }
 }
