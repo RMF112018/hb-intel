@@ -1,0 +1,78 @@
+/**
+ * Publisher-scoped CSS custom properties derived from @hbc/ui-kit
+ * tokens. Workstream-h step-02 foundation.
+ *
+ * Exposed on :root so every Publisher CSS module can `var(--hb-*)`
+ * rather than copy hex. This is the single visual-token seam for
+ * the Publisher surface. The values mirror the TypeScript tokens
+ * in packages/ui-kit/src/theme/*.ts verbatim; if the token file
+ * changes, update this file too (the test suite guards against
+ * drift by referencing specific names).
+ */
+
+:root {
+  /* Brand + editorial blues (from packages/ui-kit/src/theme/tokens.ts) */
+  --hb-color-primary-blue: #004B87;       /* HBC_PRIMARY_BLUE */
+  --hb-color-brand-action: #337AAB;       /* HBC_BRAND_ACTION */
+  --hb-color-brand-action-hover: #1A6399; /* HBC_BRAND_ACTION_HOVER */
+  --hb-color-brand-action-pressed: #004B87; /* HBC_BRAND_ACTION_PRESSED */
+  --hb-color-presentation-blue: #225391;  /* HBC_PRESENTATION_BLUE — editorial accent */
+  --hb-color-accent-orange: #F37021;      /* HBC_ACCENT_ORANGE */
+
+  /* Surface + text (HBC_SURFACE_LIGHT). Sampled for Publisher use.  */
+  --hb-surface-0: #F7F7F8;                /* workspace background */
+  --hb-surface-1: #FFFFFF;                /* cards / rails / sections */
+  --hb-surface-2: #F4F6FA;                /* nested callouts */
+  --hb-surface-3: #EEF1F6;                /* initials avatars, readouts */
+  --hb-text-primary: #1F1F1F;
+  --hb-text-secondary: #4A4A4F;
+  --hb-text-muted: #7A7A82;
+  --hb-text-on-brand: #FFFFFF;
+  --hb-border-subtle: #E3E6ED;
+  --hb-border-strong: #CBCBD0;
+
+  /* Status ramps (HBC_STATUS_RAMP_*). Subsets used by chips + banners. */
+  --hb-status-success-text: #0B6A0B;
+  --hb-status-success-bg: #E7F3E7;
+  --hb-status-success-border: #B6DAB6;
+  --hb-status-warn-text: #8A4B00;
+  --hb-status-warn-bg: #FFF4E5;
+  --hb-status-warn-border: #FFD9A8;
+  --hb-status-danger-text: #A4262C;
+  --hb-status-danger-bg: #FDECEC;
+  --hb-status-danger-border: #E5B1B3;
+  --hb-status-info-text: #225391;
+  --hb-status-info-bg: #E8EEF7;
+  --hb-status-info-border: #B5C5DF;
+  --hb-status-featured-text: #8A5A00;
+  --hb-status-featured-bg: #FFF3D6;
+  --hb-status-featured-border: #F4D480;
+
+  /* Spacing (HBC_SPACE_*). Publisher uses XS through XL. */
+  --hb-space-xs: 4px;
+  --hb-space-sm: 8px;
+  --hb-space-md: 16px;
+  --hb-space-lg: 24px;
+  --hb-space-xl: 32px;
+
+  /* Radii (HBC_RADIUS_*). */
+  --hb-radius-sm: 2px;
+  --hb-radius-md: 4px;
+  --hb-radius-lg: 6px;
+  --hb-radius-xl: 8px;
+  --hb-radius-pill: 999px;
+  --hb-radius-full: 50%;
+
+  /* Elevation (elevationLevel1 / 2). Approximated for CSS module use. */
+  --hb-elevation-1: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --hb-elevation-2: 0 4px 8px rgba(16, 24, 40, 0.08), 0 2px 4px rgba(16, 24, 40, 0.04);
+
+  /* Motion (TRANSITION_FAST). */
+  --hb-transition-fast: 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hb-transition-fast: 0ms linear;
+  }
+}

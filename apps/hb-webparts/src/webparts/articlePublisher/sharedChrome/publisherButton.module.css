@@ -1,0 +1,106 @@
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hb-space-xs, 4px);
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: var(--hb-radius-lg, 6px);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background var(--hb-transition-fast, 150ms ease),
+    border-color var(--hb-transition-fast, 150ms ease),
+    color var(--hb-transition-fast, 150ms ease),
+    box-shadow var(--hb-transition-fast, 150ms ease);
+  white-space: nowrap;
+}
+
+.base:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.base:focus-visible {
+  outline: 2px solid var(--hb-color-presentation-blue, #225391);
+  outline-offset: 2px;
+}
+
+/* ── Sizes ─────────────────────────────────────────── */
+
+.sizeMd {
+  font-size: 13px;
+  padding: 8px 14px;
+  min-height: 32px;
+}
+
+.sizeSm {
+  font-size: 12px;
+  padding: 4px 10px;
+  min-height: 24px;
+}
+
+/* ── Variants ──────────────────────────────────────── */
+
+.primary {
+  background: var(--hb-color-brand-action, #337AAB);
+  border-color: var(--hb-color-brand-action, #337AAB);
+  color: var(--hb-text-on-brand, #fff);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--hb-color-brand-action-hover, #1A6399);
+  border-color: var(--hb-color-brand-action-hover, #1A6399);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--hb-color-brand-action-pressed, #004B87);
+  border-color: var(--hb-color-brand-action-pressed, #004B87);
+}
+
+.secondary {
+  background: var(--hb-surface-1, #fff);
+  border-color: var(--hb-border-strong, #CBCBD0);
+  color: var(--hb-text-primary, #1F1F1F);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--hb-surface-2, #F4F6FA);
+  border-color: var(--hb-border-strong, #CBCBD0);
+}
+
+.secondary:active:not(:disabled) {
+  background: var(--hb-surface-3, #EEF1F6);
+}
+
+.danger {
+  background: var(--hb-surface-1, #fff);
+  border-color: var(--hb-status-danger-border, #E5B1B3);
+  color: var(--hb-status-danger-text, #A4262C);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--hb-status-danger-bg, #FDECEC);
+}
+
+/* ── Modifiers ─────────────────────────────────────── */
+
+.iconOnly {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  min-height: 0;
+  border-radius: var(--hb-radius-full, 50%);
+}
+
+.iconOnly.sizeSm {
+  width: 24px;
+  height: 24px;
+}
+
+.pressed {
+  background: var(--hb-status-featured-bg, #FFF3D6);
+  border-color: var(--hb-status-featured-border, #F4D480);
+  color: var(--hb-status-featured-text, #8A5A00);
+}
