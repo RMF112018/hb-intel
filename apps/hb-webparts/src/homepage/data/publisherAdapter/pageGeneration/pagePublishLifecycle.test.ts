@@ -113,7 +113,14 @@ describe('pageShellService.publishPage — final modern-page publish lifecycle',
       pageId,
       publishedAtUtc: '2026-04-13T10:00:00.000Z',
     }));
-    const pageCreation: PageCreationService = { createOrUpdate, publishLive };
+    const pageCreation: PageCreationService = {
+      createOrUpdate,
+      publishLive,
+      unpublishLive: vi.fn(async ({ pageId }) => ({
+        ok: true as const,
+        pageId,
+      })),
+    };
     const svc = createPageShellService({ pageCreation });
 
     const outcome = await svc.publishPage(context());
@@ -140,6 +147,10 @@ describe('pageShellService.publishPage — final modern-page publish lifecycle',
     const pageCreation: PageCreationService = {
       createOrUpdate,
       publishLive: publishLive as unknown as PageCreationService['publishLive'],
+      unpublishLive: vi.fn(async ({ pageId }) => ({
+        ok: true as const,
+        pageId,
+      })),
     };
     const svc = createPageShellService({ pageCreation });
     const outcome = await svc.publishPage(context());
@@ -163,7 +174,14 @@ describe('pageShellService.publishPage — final modern-page publish lifecycle',
       message: 'Page Publish lifecycle failed (status 500).',
       status: 500,
     }));
-    const pageCreation: PageCreationService = { createOrUpdate, publishLive };
+    const pageCreation: PageCreationService = {
+      createOrUpdate,
+      publishLive,
+      unpublishLive: vi.fn(async ({ pageId }) => ({
+        ok: true as const,
+        pageId,
+      })),
+    };
     const svc = createPageShellService({ pageCreation });
     const outcome = await svc.publishPage(context());
     expect(outcome.ok).toBe(false);

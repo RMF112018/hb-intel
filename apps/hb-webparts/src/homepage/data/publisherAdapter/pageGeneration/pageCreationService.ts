@@ -78,6 +78,35 @@ export interface PagePublishFailure {
 
 export type PagePublishOutcome = PagePublishResult | PagePublishFailure;
 
+/**
+ * Input for the inverse of `publishLive` — SharePoint's
+ * `_api/sitepages/pages({pageId})/SavePageAsDraft` action, which
+ * reverts a live/published page back to draft so it is no longer
+ * the end-user-visible version. Archive and withdraw lifecycles
+ * use this to take the destination page out of public view while
+ * leaving the page record (and its draft version history) intact.
+ */
+export interface PageUnpublishInput {
+  readonly pageId: string;
+  readonly siteUrl: string;
+}
+
+export interface PageUnpublishResult {
+  readonly ok: true;
+  readonly pageId: string;
+  readonly rawResponse?: unknown;
+}
+
+export interface PageUnpublishFailure {
+  readonly ok: false;
+  readonly reason: 'unpublishLifecycleFailed' | 'unexpectedShape';
+  readonly message: string;
+  readonly status?: number;
+  readonly rawResponse?: unknown;
+}
+
+export type PageUnpublishOutcome = PageUnpublishResult | PageUnpublishFailure;
+
 export interface PageCreationService {
   /**
    * Idempotently creates or updates the modern page's `CanvasContent1`.
@@ -93,6 +122,14 @@ export interface PageCreationService {
    * `createOrUpdate` alone) to a live, end-user-visible page.
    */
   publishLive(input: PagePublishInput): Promise<PagePublishOutcome>;
+  /**
+   * Inverse of `publishLive` — POSTs to
+   * `_api/sitepages/pages({pageId})/SavePageAsDraft` so the live
+   * version is demoted back to draft. Archive and withdraw
+   * lifecycles call this to take the destination page out of
+   * public view while preserving the page record itself.
+   */
+  unpublishLive(input: PageUnpublishInput): Promise<PageUnpublishOutcome>;
 }
 
 export interface SharePointPageCreationDeps {
@@ -423,6 +460,48 @@ export function createSharePointPageCreationService(
         pageId,
         publishedAtUtc: payload?.Modified,
         rawResponse: payload,
+      };
+    },
+
+    async unpublishLive({ pageId, siteUrl }) {
+      const trimmedSite = siteUrl.replace(/\/+$/, '');
+      let digest: string;
+      try {
+        digest = await fetchRequestDigest(trimmedSite);
+      } catch (err) {
+        return {
+          ok: false,
+          reason: 'unpublishLifecycleFailed',
+          message:
+            err instanceof Error
+              ? `Request-digest fetch failed before SavePageAsDraft: ${err.message}`
+              : 'Request-digest fetch failed before SavePageAsDraft.',
+        };
+      }
+
+      const unpublishUrl = `${trimmedSite}/_api/sitepages/pages(${pageId})/SavePageAsDraft`;
+      const res = await fetchImpl(unpublishUrl, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json;odata=nometadata',
+          'Content-Type': 'application/json;odata=nometadata',
+          'X-RequestDigest': digest,
+        },
+      });
+      if (!res.ok) {
+        return {
+          ok: false,
+          reason: 'unpublishLifecycleFailed',
+          message: `Page SavePageAsDraft lifecycle failed (status ${res.status}).`,
+          status: res.status,
+          rawResponse: await parseJsonSafe(res),
+        };
+      }
+      return {
+        ok: true,
+        pageId,
+        rawResponse: await parseJsonSafe(res),
       };
     },
   };

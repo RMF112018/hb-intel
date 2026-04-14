@@ -161,7 +161,7 @@ function fixture(over: {
 
   return {
     repositories,
-    pageCreation: { createOrUpdate, publishLive: vi.fn(async (input) => ({ ok: true as const, pageId: input.pageId, publishedAtUtc: '2026-04-13T10:00:00.000Z' })) },
+    pageCreation: { createOrUpdate, publishLive: vi.fn(async (input) => ({ ok: true as const, pageId: input.pageId, publishedAtUtc: '2026-04-13T10:00:00.000Z' })), unpublishLive: vi.fn(async (input) => ({ ok: true as const, pageId: input.pageId })) },
     pageBindingWriter: { upsert: upsertBinding },
     createOrUpdate,
     upsertBinding,

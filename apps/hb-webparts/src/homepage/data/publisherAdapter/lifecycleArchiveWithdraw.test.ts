@@ -163,6 +163,10 @@ const noopPageShell = createPageShellService({
       ok: true as const,
       pageId,
     })),
+    unpublishLive: vi.fn(async ({ pageId }) => ({
+      ok: true as const,
+      pageId,
+    })),
   } satisfies PageCreationService,
 });
 const noopBindingWriter: PageBindingWriter = {
@@ -180,6 +184,35 @@ function makeOrch(repositories: PublisherRepositories) {
     pageBindingWriter: noopBindingWriter,
     pageShellService: noopPageShell,
   });
+}
+
+function makeOrchWithUnpublish(
+  repositories: PublisherRepositories,
+  unpublishImpl: PageCreationService['unpublishLive'],
+) {
+  const unpublishLive = vi.fn(unpublishImpl);
+  const pageShell = createPageShellService({
+    pageCreation: {
+      createOrUpdate: vi.fn(async () => ({
+        ok: true as const,
+        pageId: 'unused',
+        pageUrl: 'unused',
+        pageName: 'unused',
+        wasCreated: false,
+      })),
+      publishLive: vi.fn(async ({ pageId }) => ({
+        ok: true as const,
+        pageId,
+      })),
+      unpublishLive,
+    } satisfies PageCreationService,
+  });
+  const orch = createPublishOrchestrator({
+    repositories,
+    pageBindingWriter: noopBindingWriter,
+    pageShellService: pageShell,
+  });
+  return { orch, unpublishLive };
 }
 
 describe('orchestrator.archive', () => {
@@ -260,6 +293,64 @@ describe('orchestrator.archive', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('articleUpdate');
+    expect(f.bindingUpsert).not.toHaveBeenCalled();
+    expect(f.historyAppend).not.toHaveBeenCalled();
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+  });
+
+  it('reverts the live destination page to draft via SavePageAsDraft and reports pageUnpublished=true', async () => {
+    const f = buildFixture();
+    const { orch, unpublishLive } = makeOrchWithUnpublish(
+      f.repositories,
+      async ({ pageId }) => ({ ok: true as const, pageId }),
+    );
+    const result = await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.pageUnpublished).toBe(true);
+    expect(unpublishLive).toHaveBeenCalledTimes(1);
+    expect(unpublishLive).toHaveBeenCalledWith({
+      pageId: '123',
+      siteUrl:
+        'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    });
+    // Binding + history both proceed after a successful unpublish.
+    expect(f.bindingUpsert).toHaveBeenCalledTimes(1);
+    expect(f.historyAppend).toHaveBeenCalledTimes(1);
+    const persistedBinding = f.bindingUpsert.mock.calls[0]![0] as PublisherPageBindingRow;
+    expect(persistedBinding.LastSyncMessage).toContain('SavePageAsDraft');
+  });
+
+  it('skips page-unpublish and reports pageUnpublished=false when the article has no binding', async () => {
+    const f = buildFixture({ binding: null });
+    const { orch, unpublishLive } = makeOrchWithUnpublish(
+      f.repositories,
+      async ({ pageId }) => ({ ok: true as const, pageId }),
+    );
+    const result = await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.pageUnpublished).toBe(false);
+    expect(unpublishLive).not.toHaveBeenCalled();
+  });
+
+  it('fails at pageUnpublish stage when SavePageAsDraft fails; binding and history are not touched', async () => {
+    const f = buildFixture();
+    const { orch, unpublishLive } = makeOrchWithUnpublish(
+      f.repositories,
+      async () => ({
+        ok: false as const,
+        reason: 'unpublishLifecycleFailed' as const,
+        message: 'Page SavePageAsDraft lifecycle failed (status 500).',
+        status: 500,
+      }),
+    );
+    const result = await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('pageUnpublish');
+    expect(result.articleUpdated).toBe(true);
+    expect(unpublishLive).toHaveBeenCalledTimes(1);
     expect(f.bindingUpsert).not.toHaveBeenCalled();
     expect(f.historyAppend).not.toHaveBeenCalled();
     expect(f.errorAppend).toHaveBeenCalledTimes(1);

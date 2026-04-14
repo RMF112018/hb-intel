@@ -28,6 +28,7 @@ import type {
   PageCreationOutcome,
   PageCreationService,
   PagePublishOutcome,
+  PageUnpublishOutcome,
 } from './pageCreationService';
 import {
   PROJECT_SPOTLIGHT_V1_SHELL,
@@ -73,9 +74,23 @@ export interface PublishPageSuccess {
 
 export type PublishPageOutcome = PublishPageSuccess | PublishPageFailure;
 
+export interface UnpublishPageInput {
+  readonly pageId: string;
+  readonly siteUrl: string;
+}
+
+export type UnpublishPageOutcome = PageUnpublishOutcome;
+
 export interface PageShellService {
   composePage(context: PublishResolutionContext): ComposePageResult;
   publishPage(context: PublishResolutionContext): Promise<PublishPageOutcome>;
+  /**
+   * Thin passthrough to `pageCreation.unpublishLive` — reverts the
+   * live destination page to draft without touching the composed
+   * canvas. Used by archive / withdraw lifecycles to close the
+   * public-visibility loop on the page record itself.
+   */
+  unpublishPage(input: UnpublishPageInput): Promise<UnpublishPageOutcome>;
 }
 
 export function createPageShellService(
@@ -132,6 +147,10 @@ export function createPageShellService(
         };
       }
       return { ok: true, page, creation, publish };
+    },
+
+    async unpublishPage(input) {
+      return deps.pageCreation.unpublishLive(input);
     },
   };
 }

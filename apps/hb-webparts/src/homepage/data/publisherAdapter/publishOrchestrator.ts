@@ -580,17 +580,53 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       };
     }
 
-    // Binding update is best-effort but typed: if the article had an
-    // existing binding, mark its PublishStatus='draft' (no longer the
-    // live published row) and SyncStatus='pending' so the next
-    // republish refreshes it. The destination page itself is left
-    // alone — operators can take it down via a separate hosted
-    // action; the data layer's responsibility is to mark the
-    // binding/article as no longer the active record.
+    // Page-unpublish closes the public-visibility loop on archive /
+    // withdraw. SharePoint's `SavePageAsDraft` demotes the live
+    // page back to draft so the end-user-visible version goes away
+    // while the page record (and its history) is preserved for a
+    // potential future republish. If the binding has no PageId
+    // there is nothing to unpublish, and we skip straight to the
+    // binding / history writes.
     let bindingUpdated = false;
+    let pageUnpublished = false;
     const existingBinding = await repositories.pageBindings
       .getByArticleId(article.ArticleId)
       .catch(() => undefined);
+    if (existingBinding && existingBinding.PageId) {
+      const unpublishOutcome = await pageShellService.unpublishPage({
+        pageId: existingBinding.PageId,
+        siteUrl:
+          existingBinding.TargetSiteUrl ??
+          article.TargetSiteUrl ??
+          '',
+      });
+      if (!unpublishOutcome.ok) {
+        await recordPublishingError({
+          articleId: article.ArticleId,
+          title: article.Title,
+          destination: article.Destination,
+          stage: 'pagePublish',
+          mode: 'create',
+          message: `SavePageAsDraft failed during ${target}: ${unpublishOutcome.message}`,
+          bindingId: existingBinding.BindingId,
+          nowIso: now,
+        });
+        return {
+          ok: false,
+          stage: 'pageUnpublish',
+          message: unpublishOutcome.message,
+          previousState,
+          articleUpdated: true,
+        };
+      }
+      pageUnpublished = true;
+    }
+
+    // Binding update mirrors the now-unpublished page: PublishStatus
+    // moves to 'draft', SyncStatus to 'pending', and the sync
+    // message records the lifecycle action so operators can audit
+    // why the binding flipped state. When there is no existing
+    // binding we skip cleanly — there is nothing to update.
     if (existingBinding) {
       const updatedBinding: PublisherPageBindingRow = {
         ...existingBinding,
@@ -599,8 +635,8 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         LastSyncDateUtc: now,
         LastSyncMessage:
           target === 'archived'
-            ? 'Article archived; binding marked draft.'
-            : 'Article withdrawn; binding marked draft.',
+            ? `Article archived; destination page reverted to draft via SavePageAsDraft.`
+            : `Article withdrawn; destination page reverted to draft via SavePageAsDraft.`,
       };
       try {
         await repositories.pageBindings.upsert(updatedBinding);
@@ -671,6 +707,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       newState: target,
       articleUpdated: true,
       bindingUpdated,
+      pageUnpublished,
     };
   }
 
@@ -700,6 +737,14 @@ export type LifecycleOutcome =
       readonly newState: 'archived' | 'withdrawn';
       readonly articleUpdated: true;
       readonly bindingUpdated: boolean;
+      /**
+       * True when the destination page existed and was successfully
+       * reverted to draft via `SavePageAsDraft`. False when the
+       * article had no existing binding / PageId (nothing to
+       * unpublish) — this is a legitimate success shape, not a
+       * silent failure.
+       */
+      readonly pageUnpublished: boolean;
     }
   | {
       readonly ok: false;
@@ -707,6 +752,7 @@ export type LifecycleOutcome =
         | 'load'
         | 'transition'
         | 'articleUpdate'
+        | 'pageUnpublish'
         | 'bindingUpdate'
         | 'historyAppend';
       readonly message: string;

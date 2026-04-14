@@ -159,6 +159,10 @@ const successfulPageCreation: PageCreationService = {
     pageId,
     publishedAtUtc: PUBLISHED_AT,
   })),
+  unpublishLive: vi.fn(async ({ pageId }) => ({
+    ok: true as const,
+    pageId,
+  })),
 };
 
 const successfulBindingWriter: PageBindingWriter = {
@@ -293,6 +297,10 @@ describe('publishOrchestrator — HB Articles back-sync', () => {
         reason: 'publishLifecycleFailed' as const,
         message: 'Publish failed (status 500).',
         status: 500,
+      })),
+      unpublishLive: vi.fn(async ({ pageId }) => ({
+        ok: true as const,
+        pageId,
       })),
     };
     const orch = createPublishOrchestrator({
