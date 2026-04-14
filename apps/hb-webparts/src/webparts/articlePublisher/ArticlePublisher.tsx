@@ -28,6 +28,7 @@ import {
   TEAM_VIEWER_SORT_MODE_VALUES,
   SPOTLIGHT_TYPE_VALUES,
   WORKFLOW_STATE_OPERATIONAL_VALUES,
+  isDestinationSupported,
   createPublisherRepositories,
   createDefaultPublishOrchestrator,
   createSharePointPageBindingWriter,
@@ -157,6 +158,18 @@ export function scheduledLegacyStateNotice(
   );
 }
 
+export function unsupportedDestinationNotice(
+  destination: Destination,
+): string | undefined {
+  if (isDestinationSupported(destination)) {
+    return undefined;
+  }
+  return (
+    `Unsupported destination notice: '${destination}' is read-compatible only in this surface. ` +
+    'Editing and publish actions are disabled here until that destination pipeline is implemented.'
+  );
+}
+
 /**
  * Build a blank authoring draft for a brand-new article.
  *
@@ -267,8 +280,11 @@ export function ArticlePublisher({
   const reloadList = React.useCallback(async () => {
     setArticlesLoading(true);
     try {
-      const rows = await repositories.articles.listByWorkflowState(filter);
-      setArticles(rows);
+      const rows = await repositories.articles.listByWorkflowState(filter, {
+        destinations: SUPPORTED_DESTINATIONS,
+      });
+      // Defense-in-depth: this surface is project-spotlight scoped.
+      setArticles(rows.filter((row) => isDestinationSupported(row.Destination)));
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed to load articles.');
     } finally {
@@ -291,6 +307,9 @@ export function ArticlePublisher({
           repositories.pageBindings.getByArticleId(articleId),
         ]);
         if (article) {
+          const unsupportedDestinationMessage = unsupportedDestinationNotice(
+            article.Destination,
+          );
           setArticleDraft(article);
           setPromotionPolicy(
             selectPromotionPolicy(
@@ -304,7 +323,10 @@ export function ArticlePublisher({
           setBinding(bindingRow);
           const ctx = await buildPublishResolutionContext(repositories, articleId);
           setResolutionContext(ctx.ok ? ctx.context : undefined);
-          setStatus(ctx.ok ? undefined : ctx.message);
+          setStatus(
+            unsupportedDestinationMessage ??
+              (ctx.ok ? undefined : ctx.message),
+          );
         }
       } catch (err) {
         setStatus(err instanceof Error ? err.message : 'Failed to load article.');
@@ -554,6 +576,10 @@ export function ArticlePublisher({
   );
 
   const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
+  const unsupportedDestinationMessage = articleDraft
+    ? unsupportedDestinationNotice(articleDraft.Destination)
+    : undefined;
+  const unsupportedDestinationLoaded = !!unsupportedDestinationMessage;
 
   const latestValidation =
     preview && preview.ok ? preview.validation : undefined;
@@ -640,6 +666,9 @@ export function ArticlePublisher({
                 {scheduledLegacyStateNotice(articleDraft.WorkflowState)}
               </div>
             )}
+            {unsupportedDestinationMessage && (
+              <div className={styles.statusLine}>{unsupportedDestinationMessage}</div>
+            )}
 
             <nav className={styles.tabs}>
               {(['metadata', 'hero', 'content', 'team', 'gallery', 'preview', 'status'] as Tab[]).map((t) => (
@@ -693,16 +722,31 @@ export function ArticlePublisher({
 
             <footer className={styles.actionBar}>
               <div className={styles.actionRow}>
-                <button type="button" className={styles.primaryBtn} disabled={busy} onClick={handleSave}>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  disabled={busy || unsupportedDestinationLoaded}
+                  onClick={handleSave}
+                >
                   Save draft
                 </button>
-                <button type="button" className={styles.btn} disabled={busy} onClick={() => handlePublishAction('preview')}>
+                <button
+                  type="button"
+                  className={styles.btn}
+                  disabled={busy || unsupportedDestinationLoaded}
+                  onClick={() => handlePublishAction('preview')}
+                >
                   Preview
                 </button>
                 <button
                   type="button"
                   className={styles.btn}
-                  disabled={busy || !binding || publishBlockedByValidation}
+                  disabled={
+                    busy ||
+                    unsupportedDestinationLoaded ||
+                    !binding ||
+                    publishBlockedByValidation
+                  }
                   title={
                     publishBlockedByValidation && firstBlockingError
                       ? `Blocked by validation: ${firstBlockingError}`
@@ -715,7 +759,12 @@ export function ArticlePublisher({
                 <button
                   type="button"
                   className={styles.btn}
-                  disabled={busy || articleDraft.WorkflowState !== 'approved' || publishBlockedByValidation}
+                  disabled={
+                    busy ||
+                    unsupportedDestinationLoaded ||
+                    articleDraft.WorkflowState !== 'approved' ||
+                    publishBlockedByValidation
+                  }
                   title={
                     publishBlockedByValidation && firstBlockingError
                       ? `Blocked by validation: ${firstBlockingError}`
@@ -755,7 +804,7 @@ export function ArticlePublisher({
                     key={to}
                     type="button"
                     className={styles.btn}
-                    disabled={busy}
+                    disabled={busy || unsupportedDestinationLoaded}
                     onClick={() => handleTransition(to)}
                   >
                     → {to}

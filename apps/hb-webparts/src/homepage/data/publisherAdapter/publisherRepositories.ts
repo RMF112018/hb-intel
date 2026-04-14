@@ -19,6 +19,7 @@ import type {
   PublisherTemplateRegistryRow,
   PublisherWorkflowHistoryRow,
 } from './publisherContracts';
+import type { Destination } from './publisherEnums';
 import type { PublisherListDescriptor } from './publisherListDescriptors';
 import { PUBLISHER_LISTS } from './publisherListDescriptors';
 import {
@@ -123,10 +124,15 @@ export interface ArticleRepository {
   getByArticleId(articleId: string): Promise<PublisherArticleRow | undefined>;
   listByWorkflowState(
     state: PublisherArticleRow['WorkflowState'],
+    scope?: ArticleListScope,
   ): Promise<readonly PublisherArticleRow[]>;
   upsert(
     row: PublisherArticleRow,
   ): Promise<{ readonly wasCreated: boolean; readonly itemId: number }>;
+}
+
+export interface ArticleListScope {
+  readonly destinations?: readonly Destination[];
 }
 
 export interface TeamMembersRepository {
@@ -250,9 +256,15 @@ export function createPublisherRepositories(
         }
         return undefined;
       },
-      async listByWorkflowState(state) {
+      async listByWorkflowState(state, scope) {
+        const destinationFilter =
+          scope?.destinations && scope.destinations.length > 0
+            ? ` and (${scope.destinations
+                .map((destination) => `Destination eq '${destination.replace(/'/g, "''")}'`)
+                .join(' or ')})`
+            : '';
         const rows = await access.readList(lists.articles, {
-          filter: `WorkflowState eq '${state}'`,
+          filter: `WorkflowState eq '${state}'${destinationFilter}`,
           orderBy: 'UpdatedDateUtc desc',
         });
         return mapAll(rows, mapArticleRow);

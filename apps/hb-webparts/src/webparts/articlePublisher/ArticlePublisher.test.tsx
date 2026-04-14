@@ -12,6 +12,7 @@ import {
   promotionLockStatusText,
   resolveTemplateKeySystemManaged,
   scheduledLegacyStateNotice,
+  unsupportedDestinationNotice,
   update,
   workflowFilterOptions,
 } from './ArticlePublisher';
@@ -252,5 +253,17 @@ describe('scheduled workflow posture', () => {
       '`approved` or `withdrawn`',
     );
     expect(scheduledLegacyStateNotice('draft')).toBeUndefined();
+  });
+});
+
+describe('destination surface posture', () => {
+  it('returns an explicit unsupported notice for non-operational destinations', () => {
+    expect(unsupportedDestinationNotice('companyPulse')).toContain(
+      'read-compatible only',
+    );
+    expect(unsupportedDestinationNotice('companyPulse')).toContain(
+      'Editing and publish actions are disabled',
+    );
+    expect(unsupportedDestinationNotice('projectSpotlight')).toBeUndefined();
   });
 });
