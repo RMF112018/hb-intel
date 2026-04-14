@@ -217,6 +217,8 @@ export function mapArticleRow(
     PublishedByEmail: str(raw['PublishedByEmail']),
     ScheduledPublishDateUtc: dt(raw['ScheduledPublishDateUtc']),
     ArchiveDateUtc: dt(raw['ArchiveDateUtc']),
+    MilestoneLabel: str(raw['MilestoneLabel']),
+    MilestoneDateUtc: dt(raw['MilestoneDateUtc']),
     ProjectId: str(raw['ProjectId']),
     ProjectName: str(raw['ProjectName']),
     ProjectLocation: str(raw['ProjectLocation']),

@@ -1,24 +1,27 @@
 /**
- * Template-aware validation engine for the Project Spotlight publisher.
+ * Template-aware validation engine for the Article Publisher.
  *
- * Pure. Consumes a `PublishResolutionContext` plus the active
- * `PageShellManifest` and returns a typed `ValidationResult`. Every
- * finding carries one of the categories enumerated in architecture
- * doc 08 §"Validation error categories" so downstream surfaces
- * (authoring UI, orchestrator guardrail) can filter without string
- * matching.
+ * Pure. Consumes a `PublishResolutionContext` (tenant `HB Articles` +
+ * `HB Article Template Registry` + `HB Article Destination Pages`
+ * resolved seam) plus the active `PageShellManifest` and returns a
+ * typed `ValidationResult`. Every finding references real tenant
+ * fields only — no pre-tenant-audit `PostId` / `PostFamily` /
+ * `BannerImageUrl` / `BindingStatus` / `TargetSiteKey` aliases survive.
  *
- * Authority: docs/architecture/plans/MASTER/spfx/publisher/
- *   architecture/08-Validation-Rules-by-Template.md
+ * Authority (tenant truth):
+ *   docs/architecture/plans/MASTER/spfx/publisher/architecture/lists/publisher-list-schema-report.md
  *
  * The engine runs:
- *   1. Global rules (arch doc 08 §1–§16).
- *   2. Template-profile-specific required fields (arch doc 08 §§A,B,C)
- *      routed by `Template.RequiredFieldSetKey`.
- *   3. Conditional rules (ShowTeamViewer / ShowGallery).
- *   4. Shell-compatibility rules.
- *   5. Length-recommendation warnings.
- *   6. Page-generation / binding drift warnings.
+ *   1. Global rules — tenant-required HB Articles columns + tenant
+ *      Destination scoping + active-template enforcement.
+ *   2. Template-profile-specific required fields routed by the tenant
+ *      `Template.RequiredFieldSetKey`.
+ *   3. Conditional block rules (ShowTeamViewer / ShowGallery on the
+ *      tenant template).
+ *   4. Shell-compatibility rules (template profile keys vs. shell).
+ *   5. Length-recommendation warnings (Title / Subhead / SummaryExcerpt).
+ *   6. Page-generation / binding drift warnings against the tenant
+ *      `HB Article Destination Pages` row.
  *
  * Unknown `RequiredFieldSetKey` values are tolerated with an
  * `invalid-template-match` *warning* so a misconfigured registry
@@ -104,7 +107,7 @@ function requireField(
       severity: 'error',
       field: String(key),
       message: `${label} is required.`,
-      actionHint: `Fill in "${label}" on the post record.`,
+      actionHint: `Fill in "${label}" on the article record.`,
     });
   }
 }
@@ -113,10 +116,10 @@ function requireField(
 
 interface TemplateRequiredFieldSet {
   readonly articleFields: readonly (keyof PublisherArticleRow)[];
-  /** Extra keys that aren't fields on PublisherArticleRow (checked separately). */
+  /** Tenant-typed conditional checks beyond simple required-field presence. */
   readonly extraChecks?: readonly {
-    readonly key: string;
-    readonly predicate: (post: PublisherArticleRow) => boolean;
+    readonly key: keyof PublisherArticleRow;
+    readonly predicate: (article: PublisherArticleRow) => boolean;
     readonly message: string;
     readonly actionHint: string;
   }[];
@@ -152,16 +155,14 @@ const MILESTONE_REQUIRED: TemplateRequiredFieldSet = {
   extraChecks: [
     {
       key: 'MilestoneLabel',
-      predicate: (post) =>
-        !str((post as unknown as Record<string, unknown>)['MilestoneLabel']),
+      predicate: (article) => !str(article.MilestoneLabel),
       message: 'MilestoneLabel is required for milestone spotlights.',
       actionHint:
         'Add a milestone label (e.g. "Topping out", "Substantial completion").',
     },
     {
       key: 'MilestoneDateUtc',
-      predicate: (post) =>
-        !str((post as unknown as Record<string, unknown>)['MilestoneDateUtc']),
+      predicate: (article) => !str(article.MilestoneDateUtc),
       message: 'MilestoneDateUtc is required for milestone spotlights.',
       actionHint: 'Pick the milestone date.',
     },
@@ -298,7 +299,11 @@ function validateGlobalRules(
     });
   }
 
-  // Rule 11 — Slug required; uniqueness is a hosted concern.
+  // Rule 11 — Slug required; uniqueness within the destination is
+  // enforced at hosted publish time (SharePoint Pages REST refuses
+  // duplicate FileNames). The validation engine only enforces the
+  // tenant-required presence here; uniqueness is not a client-side
+  // findable invariant.
   if (!str(article.Slug)) {
     findings.push({
       category: 'invalid-slug',
@@ -306,14 +311,6 @@ function validateGlobalRules(
       field: 'Slug',
       message: 'Slug is required.',
       actionHint: 'Enter a URL-safe slug on the Metadata tab.',
-    });
-  } else {
-    findings.push({
-      category: 'invalid-slug',
-      severity: 'warning',
-      field: 'Slug',
-      message: 'Slug uniqueness within Project Spotlight has not been verified in this session.',
-      actionHint: 'Hosted verification confirms uniqueness.',
     });
   }
 
@@ -410,7 +407,7 @@ function validateTemplateRequiredFieldSet(
       findings.push({
         category: 'missing-required-field',
         severity: 'error',
-        field: extra.key,
+        field: String(extra.key),
         message: extra.message,
         actionHint: extra.actionHint,
       });
@@ -533,14 +530,21 @@ function validateBindingDrift(
 ): void {
   const binding = context.existingBinding;
   if (!binding) return;
-  if (binding.PageShellVersion !== shell.shellVersion) {
+  // Skip the warning when the binding has not yet recorded a shell
+  // version (PageShellVersion is optional on the tenant
+  // `HB Article Destination Pages` row); the next publish will
+  // populate it.
+  if (
+    binding.PageShellVersion &&
+    binding.PageShellVersion !== shell.shellVersion
+  ) {
     findings.push({
       category: 'page-generation-blocker',
       severity: 'warning',
       field: 'existingBinding.PageShellVersion',
       message: `Shell version drift (${binding.PageShellVersion} → ${shell.shellVersion}); publishing will apply an in-place update.`,
       actionHint:
-        'In-place update is the default for shell version drift; shell key drift still triggers regeneration.',
+        'In-place update is the default for shell version drift; PageTemplateKey drift still triggers regeneration.',
     });
   }
 }

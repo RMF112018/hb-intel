@@ -31,6 +31,7 @@ function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
     HeroPrimaryImageAltText: 'Banner alt',
     TargetSiteUrl:
       'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
+    Destination: 'projectSpotlight',
     ...over,
   } as PublisherArticleRow;
 }
@@ -103,8 +104,11 @@ describe('validatePublishContext', () => {
     const result = validatePublishContext(context());
     expect(result.ok).toBe(true);
     expect(result.errors).toHaveLength(0);
-    // Slug-uniqueness is a warning, not an error, in-session.
-    expect(result.warnings.some((w) => w.category === 'invalid-slug')).toBe(true);
+    // Slug presence is enforced as an error; uniqueness is enforced
+    // at hosted publish time, not in-session.
+    expect(
+      result.warnings.some((w) => w.category === 'invalid-slug'),
+    ).toBe(false);
   });
 
   it('flags missing Title as missing-required-field error', () => {
@@ -222,14 +226,17 @@ describe('validatePublishContext', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('flags invalid TargetSiteKey', () => {
+  it('flags an invalid Destination (companyPulse not yet implemented)', () => {
     const result = validatePublishContext(
       context({
-        article: {
-        },
+        article: { Destination: 'companyPulse' },
       }),
     );
-    // sanity: happy path still ok.
-    expect(result.ok).toBe(true);
+    expect(result.ok).toBe(false);
+    expect(
+      result.errors.some(
+        (e) => e.category === 'invalid-template-match' && e.field === 'Destination',
+      ),
+    ).toBe(true);
   });
 });

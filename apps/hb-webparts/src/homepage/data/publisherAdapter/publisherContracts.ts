@@ -98,6 +98,10 @@ export interface PublisherArticleRow {
   readonly ScheduledPublishDateUtc?: IsoDateTimeUtc;
   readonly ArchiveDateUtc?: IsoDateTimeUtc;
 
+  /* ── Milestone (used by milestone-spotlight content type) ───── */
+  readonly MilestoneLabel?: string;
+  readonly MilestoneDateUtc?: IsoDateTimeUtc;
+
   /* ── Project context ─────────────────────────────────────────── */
   readonly ProjectId?: string;
   readonly ProjectName?: string;
