@@ -24,7 +24,7 @@ function post(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
     Subhead: 'Concrete pour wrapped under budget',
     SummaryExcerpt: 'A short rollup summary.',
     BodyRichText: '<p>Full body rich text.</p>',
-    PostFamily: 'monthlySpotlight',
+    ArticleContentType: 'monthlySpotlight',
     SpotlightType: 'inProgress',
     TemplateKey: 'ps-inprogress-monthly-v1',
     Slug: 'acme-tower-april',
@@ -48,24 +48,23 @@ function template(
 ): PublisherTemplateRegistryRow {
   return {
     TemplateKey: 'ps-inprogress-monthly-v1',
-    TemplateDisplayName: 'PS In Progress — Monthly',
-    TemplateStatus: 'active',
-    TemplateVersion: '1.0.0',
-    PageShellVersion: '1.0.0',
-    ShellSourceSiteUrl:
-      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    ShellSourcePagePath:
-      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-    PostFamily: ['monthlySpotlight'],
-    BannerRendererKind: 'oobPageTitle',
-    BodyRendererKind: 'oobText',
-    TeamRendererKind: 'teamViewer',
-    GalleryRendererKind: 'oobImageGallery',
-    ShowTeamBlock: true,
-    ShowGalleryBlock: true,
-    RequiredFieldSetKey: 'req-default',
-    ValidationProfileKey: 'val-default',
-    RenderProfileKey: 'render-default',
+    TemplateName: "Test Template",
+    IsActive: true,
+    TemplatePriority: 100,
+    VersionLabel: "1.0.0",
+    ContentTypes: ["monthlySpotlight"],
+    Destination: "projectSpotlight",
+    PageShellTemplateKey: "ps-shell-inprogress-oob-banner-team-gallery-v1",
+    HeroProfileKey: "hbSignatureHero",
+    BodyProfileKey: "oobText",
+    TeamViewerProfileKey: "teamViewer",
+    GalleryProfileKey: "oobImageGallery",
+    ShowHero: true,
+    ShowBody: true,
+    ShowTeamViewer: true,
+    ShowGallery: true,
+    ShowSecondaryImage: false,
+    RequiredFieldSetKey: "req-default",
     ...over,
   } as PublisherTemplateRegistryRow;
 }
@@ -99,7 +98,7 @@ function context(over: {
   existingBinding?: PublisherPageBindingRow;
 } = {}): PublishResolutionContext {
   const trace: TemplateResolutionTrace = {
-    input: { PostFamily: 'monthlySpotlight' },
+    input: { ArticleContentType: 'monthlySpotlight', Destination: 'projectSpotlight' },
     steps: [],
     selectedKey: 'ps-inprogress-monthly-v1',
     selectionRule: 'applicability',
@@ -177,7 +176,7 @@ describe('composeProjectSpotlightPage', () => {
   it('hides the team block when the template disables it', () => {
     const page = composeProjectSpotlightPage(
       context({
-        template: { ShowTeamBlock: false, TeamRendererKind: 'none' },
+        template: { ShowTeamViewer: false, TeamViewerProfileKey: 'none' },
         teamMembers: [member('alice')],
       }),
       PROJECT_SPOTLIGHT_V1_SHELL,

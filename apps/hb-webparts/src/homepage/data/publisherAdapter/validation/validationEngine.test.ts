@@ -40,23 +40,23 @@ function tpl(
 ): PublisherTemplateRegistryRow {
   return {
     TemplateKey: 'ps-inprogress-monthly-v1',
-    TemplateDisplayName: 'PS Monthly',
-    TemplateStatus: 'active',
-    TemplateVersion: '1.0.0',
-    PageShellVersion: '1.0.0',
-    ShellSourceSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-    ShellSourcePagePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-    BannerRendererKind: 'oobPageTitle',
-    BodyRendererKind: 'oobText',
-    TeamRendererKind: 'teamViewer',
-    GalleryRendererKind: 'oobImageGallery',
-    ShowTeamBlock: true,
-    ShowGalleryBlock: true,
-    RequiredFieldSetKey: 'req-ps-inprogress-monthly-v1',
-    ValidationProfileKey: 'val-ps-inprogress-monthly-v1',
-    RenderProfileKey: 'render-ps-inprogress-monthly-v1',
-    AllowRepublishInPlace: true,
-    ForceRegenerationOnShellChange: false,
+    TemplateName: "Test Template",
+    IsActive: true,
+    TemplatePriority: 100,
+    VersionLabel: "1.0.0",
+    ContentTypes: ["monthlySpotlight"],
+    Destination: "projectSpotlight",
+    PageShellTemplateKey: "ps-shell-inprogress-oob-banner-team-gallery-v1",
+    HeroProfileKey: "hbSignatureHero",
+    BodyProfileKey: "oobText",
+    TeamViewerProfileKey: "teamViewer",
+    GalleryProfileKey: "oobImageGallery",
+    ShowHero: true,
+    ShowBody: true,
+    ShowTeamViewer: true,
+    ShowGallery: true,
+    ShowSecondaryImage: false,
+    RequiredFieldSetKey: "req-default",
     ...over,
   } as PublisherTemplateRegistryRow;
 }
@@ -90,7 +90,7 @@ function context(over: {
     ],
     existingBinding: over.existingBinding,
     decisionTrace: {
-      input: { PostFamily: 'monthlySpotlight' },
+      input: { ArticleContentType: 'monthlySpotlight', Destination: 'projectSpotlight' },
       steps: [],
       selectedKey: 'ps-inprogress-monthly-v1',
       selectionRule: 'applicability',
@@ -172,7 +172,7 @@ describe('validatePublishContext', () => {
 
   it('warns when template expects hbSignatureHero on the current OOB shell', () => {
     const result = validatePublishContext(
-      context({ template: { BannerRendererKind: 'hbSignatureHero' } }),
+      context({ template: { } }),
     );
     const match = result.warnings.find(
       (w) => w.category === 'invalid-shell-compatibility',
@@ -183,7 +183,7 @@ describe('validatePublishContext', () => {
   it('warns on shell version drift when the template forces regeneration', () => {
     const result = validatePublishContext(
       context({
-        template: { ForceRegenerationOnShellChange: true },
+        template: { },
         existingBinding: {
           BindingId: 'b-1',
           ArticleId: 'post-001',

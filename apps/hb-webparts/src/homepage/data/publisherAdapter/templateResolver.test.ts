@@ -1,201 +1,200 @@
+/**
+ * Tenant-aligned resolver tests for the `HB Article Template Registry`.
+ *
+ * Exercises the new tenant-shape matching rules:
+ *   - IsActive filter
+ *   - Destination scoping
+ *   - ContentTypes / SpotlightTypes / ProjectStages / ArticleSubjects
+ *     applicability (wildcard when empty)
+ *   - TemplatePriority tie-break
+ *   - VersionLabel loose-semver tie-break
+ *   - Admin override (TemplateKey) respects IsActive
+ */
 import { describe, expect, it } from 'vitest';
-import type { PublisherTemplateRegistryRow } from './publisherContracts';
 import {
-  compareTemplateVersions,
   resolveTemplate,
+  compareVersionLabels,
+  type TemplateResolverInput,
 } from './templateResolver';
+import type { PublisherTemplateRegistryRow } from './publisherContracts';
 
-function entry(
-  overrides: Partial<PublisherTemplateRegistryRow> & {
-    TemplateKey: string;
-    PostFamily: PublisherTemplateRegistryRow['PostFamily'];
-  },
+function tpl(
+  over: Partial<PublisherTemplateRegistryRow> & { TemplateKey: string },
 ): PublisherTemplateRegistryRow {
   return {
-    TemplateDisplayName: overrides.TemplateDisplayName ?? overrides.TemplateKey,
-    TemplateStatus: 'active',
-    TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
-    PageShellVersion: '1.0.0',
-    ShellSourceSiteUrl:
-      'https://hedrickbrotherscom.sharepoint.com/sites/ProjectSpotlight',
-    ShellSourcePagePath:
-      'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-    BannerRendererKind: 'oobPageTitle',
-    BodyRendererKind: 'oobText',
-    TeamRendererKind: 'teamViewer',
-    GalleryRendererKind: 'oobImageGallery',
-    ShowTeamBlock: true,
-    ShowGalleryBlock: true,
-    RequiredFieldSetKey: 'req-default',
-    ValidationProfileKey: `val-${overrides.TemplateKey}`,
-    RenderProfileKey: `render-${overrides.TemplateKey}`,
-    ...overrides,
+    TemplateKey: over.TemplateKey,
+    TemplateName: over.TemplateName ?? over.TemplateKey,
+    IsActive: over.IsActive ?? true,
+    TemplatePriority: over.TemplatePriority ?? 100,
+    VersionLabel: over.VersionLabel,
+    ContentTypes: over.ContentTypes ?? ['monthlySpotlight'],
+    Destination: over.Destination ?? 'projectSpotlight',
+    SpotlightTypes: over.SpotlightTypes,
+    ProjectStages: over.ProjectStages,
+    ArticleSubjects: over.ArticleSubjects,
+    PageShellTemplateKey: over.PageShellTemplateKey ?? 'ps-shell-v1',
+    HeroProfileKey: over.HeroProfileKey ?? 'hbSignatureHero',
+    BodyProfileKey: over.BodyProfileKey ?? 'oobText',
+    TeamViewerProfileKey: over.TeamViewerProfileKey ?? 'teamViewer',
+    GalleryProfileKey: over.GalleryProfileKey ?? 'oobImageGallery',
+    ShowHero: over.ShowHero ?? true,
+    ShowBody: over.ShowBody ?? true,
+    ShowTeamViewer: over.ShowTeamViewer ?? true,
+    ShowGallery: over.ShowGallery ?? true,
+    ShowSecondaryImage: over.ShowSecondaryImage ?? false,
+    RequiredFieldSetKey: over.RequiredFieldSetKey ?? 'req-default',
+    Notes: over.Notes,
   };
 }
 
-const monthly = entry({
-  TemplateKey: 'ps-inprogress-monthly-v1',
-  PostFamily: ['monthlySpotlight'],
-  SpotlightType: ['monthly'],
-});
+const INPUT_MONTHLY: TemplateResolverInput = {
+  ArticleContentType: 'monthlySpotlight',
+  Destination: 'projectSpotlight',
+};
 
-const milestone = entry({
-  TemplateKey: 'ps-inprogress-milestone-v1',
-  PostFamily: ['milestoneSpotlight'],
-  SpotlightType: ['milestone'],
-});
+describe('resolveTemplate — tenant HB Article Template Registry', () => {
+  it('returns emptyRegistry when registry is empty', () => {
+    const result = resolveTemplate(INPUT_MONTHLY, []);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('emptyRegistry');
+  });
 
-const projectUpdate = entry({
-  TemplateKey: 'ps-inprogress-project-update-v1',
-  PostFamily: ['projectUpdate'],
-  SpotlightType: ['monthly', 'other'],
-});
+  it('selects the only matching active row', () => {
+    const registry = [tpl({ TemplateKey: 'only-v1' })];
+    const result = resolveTemplate(INPUT_MONTHLY, registry);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.entry.TemplateKey).toBe('only-v1');
+    expect(result.trace.selectionRule).toBe('applicability');
+  });
 
-const genericWildcard = entry({
-  TemplateKey: 'ps-generic-v1',
-  PostFamily: ['monthlySpotlight', 'milestoneSpotlight', 'projectUpdate', 'projectStory'],
-});
+  it('rejects rows where IsActive=false', () => {
+    const registry = [
+      tpl({ TemplateKey: 'inactive', IsActive: false }),
+    ];
+    const result = resolveTemplate(INPUT_MONTHLY, registry);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('noCandidate');
+  });
 
-describe('resolveTemplate', () => {
-  it('returns emptyRegistry failure when registry is empty', () => {
+  it('rejects rows whose Destination does not match the article', () => {
+    const registry = [
+      tpl({ TemplateKey: 'pulse-only', Destination: 'companyPulse' }),
+    ];
+    const result = resolveTemplate(INPUT_MONTHLY, registry);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('noCandidate');
+  });
+
+  it('rejects rows whose ContentTypes do not include the article content type', () => {
+    const registry = [
+      tpl({
+        TemplateKey: 'news-only',
+        ContentTypes: ['newsUpdate'],
+      }),
+    ];
+    const result = resolveTemplate(INPUT_MONTHLY, registry);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('noCandidate');
+  });
+
+  it('respects admin override when the override is active', () => {
+    const registry = [
+      tpl({ TemplateKey: 'auto-winner', TemplatePriority: 999 }),
+      tpl({ TemplateKey: 'manual', TemplatePriority: 1 }),
+    ];
     const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight' },
-      [],
+      { ...INPUT_MONTHLY, TemplateKey: 'manual' },
+      registry,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.entry.TemplateKey).toBe('manual');
+    expect(result.trace.selectionRule).toBe('adminOverride');
+  });
+
+  it('rejects an inactive admin override with overrideInactive', () => {
+    const registry = [
+      tpl({ TemplateKey: 'auto' }),
+      tpl({ TemplateKey: 'manual', IsActive: false }),
+    ];
+    const result = resolveTemplate(
+      { ...INPUT_MONTHLY, TemplateKey: 'manual' },
+      registry,
     );
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toBe('emptyRegistry');
+    if (result.ok) return;
+    expect(result.reason).toBe('overrideInactive');
   });
 
-  it('honors admin TemplateKey override', () => {
+  it('reports overrideNotFound for missing override keys', () => {
+    const registry = [tpl({ TemplateKey: 'auto' })];
     const result = resolveTemplate(
-      { TemplateKey: 'ps-inprogress-milestone-v1', PostFamily: 'monthlySpotlight' },
-      [monthly, milestone],
-    );
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.entry.TemplateKey).toBe('ps-inprogress-milestone-v1');
-      expect(result.trace.selectionRule).toBe('adminOverride');
-    }
-  });
-
-  it('fails overrideNotFound when the admin key is absent', () => {
-    const result = resolveTemplate(
-      { TemplateKey: 'ps-does-not-exist', PostFamily: 'monthlySpotlight' },
-      [monthly, milestone],
+      { ...INPUT_MONTHLY, TemplateKey: 'ghost' },
+      registry,
     );
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toBe('overrideNotFound');
+    if (result.ok) return;
+    expect(result.reason).toBe('overrideNotFound');
   });
 
-  it('fails overrideInactive when the admin key exists but is not active', () => {
-    const deprecated = entry({
-      TemplateKey: 'ps-deprecated-v0',
-      PostFamily: ['monthlySpotlight'],
-      TemplateStatus: 'deprecated',
-    });
+  it('prefers more specific applicability (declared SpotlightTypes beats wildcard)', () => {
+    const registry = [
+      tpl({ TemplateKey: 'wildcard' }),
+      tpl({ TemplateKey: 'narrow', SpotlightTypes: ['monthly'] }),
+    ];
     const result = resolveTemplate(
-      { TemplateKey: 'ps-deprecated-v0', PostFamily: 'monthlySpotlight' },
-      [deprecated, monthly],
-    );
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toBe('overrideInactive');
-  });
-
-  it('matches a single candidate by PostFamily + SpotlightType', () => {
-    const result = resolveTemplate(
-      { PostFamily: 'milestoneSpotlight', SpotlightType: 'milestone' },
-      [monthly, milestone, projectUpdate],
+      { ...INPUT_MONTHLY, SpotlightType: 'monthly' },
+      registry,
     );
     expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.entry.TemplateKey).toBe('ps-inprogress-milestone-v1');
-      expect(result.trace.selectionRule).toBe('applicability');
-    }
+    if (!result.ok) return;
+    expect(result.entry.TemplateKey).toBe('narrow');
+    expect(result.trace.selectionRule).toBe('specificityTieBreak');
   });
 
-  it('noCandidate when nothing matches', () => {
-    const result = resolveTemplate(
-      { PostFamily: 'projectStory' },
-      [monthly, milestone, projectUpdate],
-    );
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toBe('noCandidate');
-  });
-
-  it('prefers the most specific candidate over a wildcard entry', () => {
-    const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight', SpotlightType: 'monthly' },
-      [genericWildcard, monthly],
-    );
+  it('breaks specificity ties by highest TemplatePriority', () => {
+    const registry = [
+      tpl({ TemplateKey: 'lowpri', TemplatePriority: 10 }),
+      tpl({ TemplateKey: 'hipri', TemplatePriority: 200 }),
+    ];
+    const result = resolveTemplate(INPUT_MONTHLY, registry);
     expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.entry.TemplateKey).toBe('ps-inprogress-monthly-v1');
-      expect(result.trace.selectionRule).toBe('specificityTieBreak');
-    }
+    if (!result.ok) return;
+    expect(result.entry.TemplateKey).toBe('hipri');
+    expect(result.trace.selectionRule).toBe('priorityTieBreak');
   });
 
-  it('rejects inactive entries even when they would otherwise match', () => {
-    const inactive = entry({
-      TemplateKey: 'ps-inprogress-monthly-v0',
-      PostFamily: ['monthlySpotlight'],
-      SpotlightType: ['monthly'],
-      TemplateStatus: 'inactive',
-      TemplateVersion: '0.9.0',
-    });
-    const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight', SpotlightType: 'monthly' },
-      [inactive, monthly],
-    );
+  it('breaks priority ties by highest VersionLabel', () => {
+    const registry = [
+      tpl({ TemplateKey: 'old', TemplatePriority: 100, VersionLabel: '1.0.0' }),
+      tpl({ TemplateKey: 'new', TemplatePriority: 100, VersionLabel: '1.2.0' }),
+    ];
+    const result = resolveTemplate(INPUT_MONTHLY, registry);
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.entry.TemplateKey).toBe('ps-inprogress-monthly-v1');
-  });
-
-  it('breaks a specificity tie by preferring the higher TemplateVersion', () => {
-    const v1 = entry({
-      TemplateKey: 'ps-inprogress-monthly-v1',
-      PostFamily: ['monthlySpotlight'],
-      SpotlightType: ['monthly'],
-      TemplateVersion: '1.0.0',
-    });
-    const v2 = entry({
-      TemplateKey: 'ps-inprogress-monthly-v2',
-      PostFamily: ['monthlySpotlight'],
-      SpotlightType: ['monthly'],
-      TemplateVersion: '2.1.0',
-    });
-    const result = resolveTemplate(
-      { PostFamily: 'monthlySpotlight', SpotlightType: 'monthly' },
-      [v1, v2],
-    );
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.entry.TemplateKey).toBe('ps-inprogress-monthly-v2');
-      expect(result.trace.selectionRule).toBe('versionTieBreak');
-    }
-  });
-
-  it('projectUpdate matches both inProgress and update spotlight types', () => {
-    for (const st of ['monthly', 'other'] as const) {
-      const result = resolveTemplate(
-        { PostFamily: 'projectUpdate', SpotlightType: st },
-        [monthly, milestone, projectUpdate],
-      );
-      expect(result.ok).toBe(true);
-      if (result.ok)
-        expect(result.entry.TemplateKey).toBe('ps-inprogress-project-update-v1');
-    }
+    if (!result.ok) return;
+    expect(result.entry.TemplateKey).toBe('new');
+    expect(result.trace.selectionRule).toBe('versionTieBreak');
   });
 });
 
-describe('compareTemplateVersions', () => {
+describe('compareVersionLabels', () => {
+  it('orders missing label below any labelled value', () => {
+    expect(compareVersionLabels(undefined, '1.0.0')).toBeLessThan(0);
+    expect(compareVersionLabels('1.0.0', undefined)).toBeGreaterThan(0);
+    expect(compareVersionLabels(undefined, undefined)).toBe(0);
+  });
+
   it('compares numeric segments numerically', () => {
-    expect(compareTemplateVersions('1.2.0', '1.10.0')).toBeLessThan(0);
-    expect(compareTemplateVersions('2.0.0', '1.99.0')).toBeGreaterThan(0);
+    expect(compareVersionLabels('1.10.0', '1.2.0')).toBeGreaterThan(0);
+    expect(compareVersionLabels('1.2.0', '1.2.0')).toBe(0);
   });
 
-  it('treats non-numeric suffixes as lexicographic', () => {
-    expect(compareTemplateVersions('1.0.0', '1.0.0-beta')).toBeGreaterThan(0);
-    expect(compareTemplateVersions('1.0.0-beta', '1.0.0-alpha')).toBeGreaterThan(0);
+  it('treats pre-release suffixes as older than release', () => {
+    expect(compareVersionLabels('1.2.0', '1.2.0-beta')).toBeGreaterThan(0);
   });
 });

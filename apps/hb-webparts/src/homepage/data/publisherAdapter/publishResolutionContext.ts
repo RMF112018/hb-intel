@@ -18,7 +18,6 @@ import type {
   PublisherTeamMemberRow,
   PublisherTemplateRegistryRow,
 } from './publisherContracts';
-import type { PostFamily } from './publisherEnums';
 import type { PublisherRepositories } from './publisherRepositories';
 import {
   resolveTemplate,
@@ -50,31 +49,6 @@ export type BuildResolutionContextResult =
     };
 
 /**
- * Bridge from the tenant master-record `ArticleContentType` enum to the
- * pre-tenant-audit `PostFamily` enum the template registry still uses.
- * Later Phase-02 prompts will realign the registry to tenant schema;
- * this narrow bridge keeps the resolver deterministic today without
- * layering a runtime fallback on ambiguous input.
- */
-function articleContentTypeToPostFamily(
-  contentType: PublisherArticleRow['ArticleContentType'],
-): PostFamily | undefined {
-  switch (contentType) {
-    case 'monthlySpotlight':
-      return 'monthlySpotlight';
-    case 'milestoneSpotlight':
-      return 'milestoneSpotlight';
-    case 'projectUpdate':
-      return 'projectUpdate';
-    case 'newsUpdate':
-    case 'announcement':
-      return undefined;
-    default:
-      return undefined;
-  }
-}
-
-/**
  * Build the shared resolution context for a given article. Fetches the
  * article, loads its team members + media, loads any existing binding,
  * then runs the deterministic template resolver. All reads go through
@@ -93,22 +67,12 @@ export async function buildPublishResolutionContext(
     };
   }
 
-  const postFamilyForResolver = articleContentTypeToPostFamily(
-    article.ArticleContentType,
-  );
-  if (!postFamilyForResolver) {
-    return {
-      ok: false,
-      reason: 'templateResolutionFailed',
-      message: `ArticleContentType '${article.ArticleContentType}' has no template-registry mapping yet.`,
-    };
-  }
-
   const registry = await repositories.templateRegistry.listActive();
   const resolution = resolveTemplate(
     {
       TemplateKey: article.TemplateKey,
-      PostFamily: postFamilyForResolver,
+      ArticleContentType: article.ArticleContentType,
+      Destination: article.Destination,
       SpotlightType: article.SpotlightType,
       ProjectStage: article.ProjectStage,
       ArticleSubject: article.ArticleSubject,

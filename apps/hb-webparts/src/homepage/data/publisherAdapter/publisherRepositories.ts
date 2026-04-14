@@ -258,7 +258,7 @@ export function createPublisherRepositories(
     templateRegistry: {
       async listActive() {
         const rows = await access.readList(lists.templateRegistry, {
-          filter: "TemplateStatus eq 'active'",
+          filter: 'IsActive eq 1',
         });
         return mapAll(rows, mapTemplateRegistryRow);
       },

@@ -1001,17 +1001,11 @@ function StatusPanel({
           />
         ) : (
           <dl className={styles.dl}>
-            <Dt label="Template" value={`${context.template.TemplateKey} @ ${context.template.TemplateVersion}`} />
-            <Dt label="Shell" value={`${context.template.PageShellKey} @ ${context.template.PageShellVersion}`} />
+            <Dt label="Template" value={`${context.template.TemplateKey} @ ${context.template.VersionLabel ?? '(no version label)'}`} />
+            <Dt label="Page shell template" value={context.template.PageShellTemplateKey} />
+            <Dt label="Destination" value={context.template.Destination} />
+            <Dt label="Priority" value={String(context.template.TemplatePriority)} />
             <Dt label="Selection rule" value={context.decisionTrace.selectionRule ?? '(unknown)'} />
-            <Dt
-              label="Allow in-place republish"
-              value={context.template.AllowRepublishInPlace === false ? 'no' : 'yes'}
-            />
-            <Dt
-              label="Force regeneration on shell change"
-              value={context.template.ForceRegenerationOnShellChange ? 'yes' : 'no'}
-            />
           </dl>
         )}
       </section>

@@ -17,29 +17,23 @@
 import type {
   ArticleContentType,
   ArticleSubject,
-  BannerRendererKind,
   BindingStatus,
-  BodyRendererKind,
   Destination,
   GalleryLayoutProfile,
-  GalleryRendererKind,
   HeroMetadataMode,
   HeroRendererKind,
   HeroThemeVariant,
   LastOperation,
   MediaRole,
   PageSyncStatus,
-  PostFamily,
   ProjectStage,
   PublishingErrorCategory,
   PublishingErrorOperation,
   RetryStatus,
   SpotlightType,
   TargetSiteKey,
-  TeamRendererKind,
   TeamViewerDensity,
   TeamViewerLayout,
-  TemplateStatus,
   WorkflowHistoryAction,
   WorkflowState,
 } from './publisherEnums';
@@ -192,31 +186,57 @@ export interface PublisherMediaRow {
 /* D. HB Article Template Registry                                     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Tenant-aligned `HB Article Template Registry` row.
+ *
+ * The template registry is a sibling reference table (keyed by
+ * `TemplateKey`) that drives render composition and visibility
+ * toggles for the Article Publisher. Active / version / applicability
+ * semantics now come from tenant columns:
+ *   - `IsActive` boolean replaces the prior `TemplateStatus` enum.
+ *   - `VersionLabel` text replaces the prior `TemplateVersion` field.
+ *   - `ContentTypes` (MultiChoice) replaces `PostFamily`.
+ *   - `Destination` (Choice) scopes the template to a destination.
+ *   - `SpotlightTypes` / `ProjectStages` / `ArticleSubjects`
+ *     (MultiChoice, wildcard when empty) replace their singular
+ *     counterparts.
+ *   - `PageShellTemplateKey` replaces `PageShellKey` +
+ *     `ShellSourceSiteUrl` + `ShellSourcePagePath`.
+ *   - `HeroProfileKey` / `BodyProfileKey` / `TeamViewerProfileKey` /
+ *     `GalleryProfileKey` replace the prior renderer-kind enums.
+ *   - `ShowHero` / `ShowBody` / `ShowTeamViewer` / `ShowGallery` /
+ *     `ShowSecondaryImage` are explicit block toggles.
+ *   - `TemplatePriority` number drives tie-break ordering when
+ *     multiple templates match.
+ *   - `RequiredFieldSetKey` remains as a pointer to the validation
+ *     profile. The prior `ValidationProfileKey` / `RenderProfileKey`
+ *     / `AllowRepublishInPlace` / `ForceRegenerationOnShellChange` /
+ *     `ControlMapJson` fields do not exist on the tenant list; their
+ *     behaviors collapse to publisher defaults.
+ */
 export interface PublisherTemplateRegistryRow {
   readonly TemplateKey: string;
-  readonly TemplateDisplayName: string;
-  readonly TemplateStatus: TemplateStatus;
-  readonly TemplateVersion: string;
-  readonly PageShellKey: string;
-  readonly PageShellVersion: string;
-  readonly ShellSourceSiteUrl: UrlString;
-  readonly ShellSourcePagePath: string;
-  readonly PostFamily: readonly PostFamily[];
-  readonly SpotlightType?: readonly SpotlightType[];
-  readonly ProjectStage?: readonly ProjectStage[];
-  readonly ArticleSubject?: readonly ArticleSubject[];
-  readonly BannerRendererKind: BannerRendererKind;
-  readonly BodyRendererKind: BodyRendererKind;
-  readonly TeamRendererKind?: TeamRendererKind;
-  readonly GalleryRendererKind?: GalleryRendererKind;
-  readonly ShowTeamBlock: boolean;
-  readonly ShowGalleryBlock: boolean;
+  readonly TemplateName: string;
+  readonly IsActive: boolean;
+  readonly TemplatePriority: number;
+  readonly VersionLabel?: string;
+  readonly ContentTypes: readonly ArticleContentType[];
+  readonly Destination: Destination;
+  readonly SpotlightTypes?: readonly SpotlightType[];
+  readonly ProjectStages?: readonly ProjectStage[];
+  readonly ArticleSubjects?: readonly ArticleSubject[];
+  readonly PageShellTemplateKey: string;
+  readonly HeroProfileKey: string;
+  readonly BodyProfileKey: string;
+  readonly TeamViewerProfileKey?: string;
+  readonly GalleryProfileKey?: string;
+  readonly ShowHero: boolean;
+  readonly ShowBody: boolean;
+  readonly ShowTeamViewer: boolean;
+  readonly ShowGallery: boolean;
+  readonly ShowSecondaryImage: boolean;
   readonly RequiredFieldSetKey: string;
-  readonly ValidationProfileKey: string;
-  readonly RenderProfileKey: string;
-  readonly AllowRepublishInPlace?: boolean;
-  readonly ForceRegenerationOnShellChange?: boolean;
-  readonly ControlMapJson?: string;
+  readonly Notes?: string;
 }
 
 /* ------------------------------------------------------------------ */

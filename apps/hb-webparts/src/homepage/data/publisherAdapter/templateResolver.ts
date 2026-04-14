@@ -1,36 +1,41 @@
 /**
- * Deterministic template resolver for the Project Spotlight publisher.
+ * Deterministic template resolver for the Article Publisher.
  *
- * Authority: docs/architecture/plans/MASTER/spfx/publisher/architecture/05-Template-Registry-Schema.md
+ * Authority (tenant truth): `HB Article Template Registry`
+ * columns documented in the publisher list schema report.
  *
  * Rules (ordered):
- *   1. Admin override — if the post carries a non-empty `TemplateKey`, prefer
- *      the registry entry with that exact key. The override must still be
- *      `TemplateStatus === 'active'`; an inactive override resolves to a
- *      hard failure with reason `'overrideInactive'`.
- *   2. Applicability filter — an entry is a candidate when every applicability
- *      array the entry declares (PostFamily, SpotlightType, ProjectStage,
- *      ArticleSubject) contains the post's corresponding value. An empty or
- *      missing applicability array is treated as a wildcard.
- *   3. Status filter — only `TemplateStatus === 'active'` entries are
- *      candidates.
- *   4. Specificity tie-break — among candidates, prefer the entry whose
- *      applicability filters match most narrowly (highest sum of declared,
- *      matching filters beyond PostFamily). PostFamily is required and
- *      contributes 1 to every candidate.
- *   5. Version tie-break — if specificity ties, prefer the entry with the
- *      highest `TemplateVersion` using a semver-loose compare (numeric parts
- *      compared left-to-right; non-numeric suffixes compared lexicographically
- *      last).
- *   6. Stable ordering — if versions tie, preserve the input registry order.
+ *   1. Admin override — when the article carries a non-empty
+ *      `TemplateKey`, prefer the registry entry with that exact key.
+ *      The override must still be `IsActive === true`; an inactive
+ *      override resolves to a hard failure with `overrideInactive`.
+ *   2. Active filter — only `IsActive === true` rows are candidates.
+ *   3. Destination filter — the row's `Destination` must equal the
+ *      article's destination.
+ *   4. Applicability filter — `ContentTypes` must contain the
+ *      article's `ArticleContentType`; `SpotlightTypes`,
+ *      `ProjectStages`, and `ArticleSubjects` are each wildcarded
+ *      when empty/undefined and must otherwise contain the article's
+ *      value.
+ *   5. Specificity tie-break — prefer rows with the most declared
+ *      applicability arrays (beyond `ContentTypes`, which is always
+ *      declared).
+ *   6. Priority tie-break — among equally-specific candidates, prefer
+ *      the row with the highest tenant `TemplatePriority`.
+ *   7. Version tie-break — prefer the highest `VersionLabel` by a
+ *      loose semver comparison; missing labels compare as lower.
+ *   8. Stable ordering — if everything above ties, preserve input
+ *      registry order.
  *
- * The resolver is pure. It never reads SharePoint, never touches the DOM,
- * and never throws on unmatched input — failures surface as a typed result.
+ * The resolver is pure. It never reads SharePoint, never touches the
+ * DOM, and never throws on unmatched input — failures surface as a
+ * typed result.
  */
 
 import type {
+  ArticleContentType,
   ArticleSubject,
-  PostFamily,
+  Destination,
   ProjectStage,
   SpotlightType,
 } from './publisherEnums';
@@ -38,7 +43,8 @@ import type { PublisherTemplateRegistryRow } from './publisherContracts';
 
 export interface TemplateResolverInput {
   readonly TemplateKey?: string;
-  readonly PostFamily: PostFamily;
+  readonly ArticleContentType: ArticleContentType;
+  readonly Destination: Destination;
   readonly SpotlightType?: SpotlightType;
   readonly ProjectStage?: ProjectStage;
   readonly ArticleSubject?: ArticleSubject;
@@ -56,6 +62,7 @@ export interface TemplateResolutionTraceStep {
   readonly status: 'candidate' | 'rejected';
   readonly reason?: string;
   readonly specificityScore?: number;
+  readonly priority?: number;
 }
 
 export interface TemplateResolutionTrace {
@@ -66,6 +73,7 @@ export interface TemplateResolutionTrace {
     | 'adminOverride'
     | 'applicability'
     | 'specificityTieBreak'
+    | 'priorityTieBreak'
     | 'versionTieBreak';
 }
 
@@ -83,11 +91,15 @@ export type TemplateResolutionResult =
     };
 
 /**
- * Loose semver-style comparator for `TemplateVersion`.
- * Splits on `.` and compares numeric segments numerically; non-numeric
- * suffixes compare lexicographically so `1.2.0` > `1.2.0-beta`.
+ * Loose semver-style comparator for tenant `VersionLabel`.
+ * Splits on `.`/`+`/`-` and compares numeric segments numerically;
+ * non-numeric suffixes compare lexicographically so `1.2.0` > `1.2.0-beta`.
+ * Missing labels compare as lower than any labelled entry.
  */
-export function compareTemplateVersions(a: string, b: string): number {
+export function compareVersionLabels(a: string | undefined, b: string | undefined): number {
+  if (!a && !b) return 0;
+  if (!a) return -1;
+  if (!b) return 1;
   const split = (v: string): Array<number | string> =>
     v.split(/[.+-]/).map((seg) => {
       const n = Number(seg);
@@ -100,7 +112,6 @@ export function compareTemplateVersions(a: string, b: string): number {
     const av = aa[i];
     const bv = bb[i];
     if (av === undefined && bv !== undefined) {
-      // Missing segment vs. non-numeric trailing ⇒ release > pre-release.
       return typeof bv === 'string' ? 1 : -1;
     }
     if (av !== undefined && bv === undefined) {
@@ -122,7 +133,6 @@ function applicabilityMatches<T>(
   value: T | undefined,
 ): { matches: boolean; declared: boolean } {
   if (!declared || declared.length === 0) {
-    // Wildcard — treated as a match but does not add to specificity.
     return { matches: true, declared: false };
   }
   if (value === undefined) return { matches: false, declared: true };
@@ -133,35 +143,33 @@ function scoreCandidate(
   entry: PublisherTemplateRegistryRow,
   input: TemplateResolverInput,
 ): { matches: boolean; score: number; reason?: string } {
-  // PostFamily is mandatory per arch doc 05; registry rows always declare it.
-  const postFamily = applicabilityMatches(entry.PostFamily, input.PostFamily);
-  if (!postFamily.matches) {
-    return { matches: false, score: 0, reason: 'postFamilyMismatch' };
+  if (entry.Destination !== input.Destination) {
+    return { matches: false, score: 0, reason: 'destinationMismatch' };
   }
 
-  const spotlight = applicabilityMatches(
-    entry.SpotlightType,
-    input.SpotlightType,
-  );
+  // ContentTypes is mandatory per tenant schema; registry rows always declare it.
+  const contentTypes = applicabilityMatches(entry.ContentTypes, input.ArticleContentType);
+  if (!contentTypes.matches) {
+    return { matches: false, score: 0, reason: 'contentTypeMismatch' };
+  }
+
+  const spotlight = applicabilityMatches(entry.SpotlightTypes, input.SpotlightType);
   if (!spotlight.matches) {
     return { matches: false, score: 0, reason: 'spotlightTypeMismatch' };
   }
 
-  const stage = applicabilityMatches(entry.ProjectStage, input.ProjectStage);
+  const stage = applicabilityMatches(entry.ProjectStages, input.ProjectStage);
   if (!stage.matches) {
     return { matches: false, score: 0, reason: 'projectStageMismatch' };
   }
 
-  const subject = applicabilityMatches(
-    entry.ArticleSubject,
-    input.ArticleSubject,
-  );
+  const subject = applicabilityMatches(entry.ArticleSubjects, input.ArticleSubject);
   if (!subject.matches) {
     return { matches: false, score: 0, reason: 'articleSubjectMismatch' };
   }
 
   const declaredCount =
-    (postFamily.declared ? 1 : 0) +
+    (contentTypes.declared ? 1 : 0) +
     (spotlight.declared ? 1 : 0) +
     (stage.declared ? 1 : 0) +
     (subject.declared ? 1 : 0);
@@ -201,16 +209,16 @@ export function resolveTemplate(
         trace: { input, steps },
       };
     }
-    if (overrideEntry.TemplateStatus !== 'active') {
+    if (!overrideEntry.IsActive) {
       steps.push({
         entryKey: overrideKey,
         status: 'rejected',
-        reason: `overrideStatus:${overrideEntry.TemplateStatus}`,
+        reason: 'overrideInactive',
       });
       return {
         ok: false,
         reason: 'overrideInactive',
-        message: `Admin override '${overrideKey}' is not active (status=${overrideEntry.TemplateStatus}).`,
+        message: `Admin override '${overrideKey}' is not active (IsActive=false).`,
         trace: { input, steps },
       };
     }
@@ -231,7 +239,7 @@ export function resolveTemplate(
     };
   }
 
-  // Rules 2-3 — applicability + status filter.
+  // Rules 2-4 — active + destination + applicability.
   const candidates: Array<{
     entry: PublisherTemplateRegistryRow;
     score: number;
@@ -239,11 +247,11 @@ export function resolveTemplate(
   }> = [];
 
   registry.forEach((entry, index) => {
-    if (entry.TemplateStatus !== 'active') {
+    if (!entry.IsActive) {
       steps.push({
         entryKey: entry.TemplateKey,
         status: 'rejected',
-        reason: `status:${entry.TemplateStatus}`,
+        reason: 'inactive',
       });
       return;
     }
@@ -260,6 +268,7 @@ export function resolveTemplate(
       entryKey: entry.TemplateKey,
       status: 'candidate',
       specificityScore: score,
+      priority: entry.TemplatePriority,
     });
     candidates.push({ entry, score, index });
   });
@@ -268,12 +277,12 @@ export function resolveTemplate(
     return {
       ok: false,
       reason: 'noCandidate',
-      message: 'No active template registry entry matched the post.',
+      message: 'No active template registry entry matched the article.',
       trace: { input, steps },
     };
   }
 
-  // Rule 4 — specificity tie-break.
+  // Rule 5 — specificity tie-break.
   const maxScore = candidates.reduce(
     (max, c) => (c.score > max ? c.score : max),
     0,
@@ -295,16 +304,34 @@ export function resolveTemplate(
     };
   }
 
-  // Rule 5 — version tie-break.
-  const sortedByVersion = mostSpecific
+  // Rule 6 — priority tie-break (higher wins).
+  const maxPriority = mostSpecific.reduce(
+    (max, c) => (c.entry.TemplatePriority > max ? c.entry.TemplatePriority : max),
+    Number.NEGATIVE_INFINITY,
+  );
+  const topPriority = mostSpecific.filter((c) => c.entry.TemplatePriority === maxPriority);
+
+  if (topPriority.length === 1) {
+    const winner = topPriority[0]!.entry;
+    return {
+      ok: true,
+      entry: winner,
+      trace: {
+        input,
+        steps,
+        selectedKey: winner.TemplateKey,
+        selectionRule: 'priorityTieBreak',
+      },
+    };
+  }
+
+  // Rule 7 — version tie-break (by VersionLabel).
+  const sortedByVersion = topPriority
     .slice()
     .sort((a, b) => {
-      const cmp = compareTemplateVersions(
-        b.entry.TemplateVersion,
-        a.entry.TemplateVersion,
-      );
+      const cmp = compareVersionLabels(b.entry.VersionLabel, a.entry.VersionLabel);
       if (cmp !== 0) return cmp;
-      // Rule 6 — stable order.
+      // Rule 8 — stable order.
       return a.index - b.index;
     });
 

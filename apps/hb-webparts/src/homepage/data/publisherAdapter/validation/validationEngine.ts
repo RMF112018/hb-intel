@@ -255,12 +255,12 @@ function validateGlobalRules(
       message: 'TemplateKey is required.',
       actionHint: 'Save the article once so the resolver can assign a template.',
     });
-  } else if (context.template.TemplateStatus !== 'active') {
+  } else if (!context.template.IsActive) {
     findings.push({
       category: 'invalid-template-match',
       severity: 'error',
       field: 'TemplateKey',
-      message: `Template '${context.template.TemplateKey}' is not active (status=${context.template.TemplateStatus}).`,
+      message: `Template '${context.template.TemplateKey}' is not active (IsActive=false).`,
       actionHint: 'Select an active template or request the registry be updated.',
     });
   }
@@ -424,7 +424,7 @@ function validateConditionalBlocks(
 ): void {
   const { article, template, teamMembers, media } = context;
 
-  if (article.ShowTeamViewer !== false && template.ShowTeamBlock) {
+  if (article.ShowTeamViewer !== false && template.ShowTeamViewer) {
     const includedTeam = teamMembers.filter((r) => r.IncludeInViewer !== false);
     if (includedTeam.length === 0) {
       findings.push({
@@ -439,7 +439,7 @@ function validateConditionalBlocks(
     }
   }
 
-  if (template.ShowGalleryBlock) {
+  if (template.ShowGallery) {
     const galleryImages = media.filter((r) => r.MediaRole === 'gallery');
     if (galleryImages.length === 0) {
       findings.push({
@@ -459,34 +459,34 @@ function validateShellCompatibility(
   shell: PageShellManifest,
   findings: ValidationFinding[],
 ): void {
-  if (template.ShowTeamBlock && !shell.controlsBySlot.team) {
+  if (template.ShowTeamViewer && !shell.controlsBySlot.team) {
     findings.push({
       category: 'invalid-shell-compatibility',
       severity: 'error',
-      field: 'template.ShowTeamBlock',
+      field: 'template.ShowTeamViewer',
       message: `Template requires the team block but shell '${shell.shellKey}' has no team slot.`,
       actionHint: 'Switch templates, or request a shell variant that exposes teamViewer.',
     });
   }
-  if (template.ShowGalleryBlock && !shell.controlsBySlot.gallery) {
+  if (template.ShowGallery && !shell.controlsBySlot.gallery) {
     findings.push({
       category: 'invalid-shell-compatibility',
       severity: 'error',
-      field: 'template.ShowGalleryBlock',
+      field: 'template.ShowGallery',
       message: `Template requires the gallery block but shell '${shell.shellKey}' has no gallery slot.`,
       actionHint: 'Switch templates, or request a shell variant with a gallery zone.',
     });
   }
   if (
-    template.BannerRendererKind === 'hbSignatureHero' &&
+    template.HeroProfileKey === 'hbSignatureHero' &&
     shell.controlsBySlot.banner?.webPartType !== 'Custom'
   ) {
     findings.push({
       category: 'invalid-shell-compatibility',
       severity: 'warning',
-      field: 'template.BannerRendererKind',
+      field: 'template.HeroProfileKey',
       message:
-        'Template expects hbSignatureHero but current shell uses OOB Page Title. Banner will render with OOB treatment.',
+        'Template hero profile expects hbSignatureHero but current shell uses OOB Page Title. Banner will render with OOB treatment.',
       actionHint:
         'Swap to the approved hbSignatureHero shell variant, or change the banner renderer.',
     });
@@ -533,17 +533,14 @@ function validateBindingDrift(
 ): void {
   const binding = context.existingBinding;
   if (!binding) return;
-  if (
-    binding.PageShellVersion !== shell.shellVersion &&
-    context.template.ForceRegenerationOnShellChange
-  ) {
+  if (binding.PageShellVersion !== shell.shellVersion) {
     findings.push({
       category: 'page-generation-blocker',
       severity: 'warning',
       field: 'existingBinding.PageShellVersion',
-      message: `Shell version drift (${binding.PageShellVersion} → ${shell.shellVersion}); template forces regeneration on shell change.`,
+      message: `Shell version drift (${binding.PageShellVersion} → ${shell.shellVersion}); publishing will apply an in-place update.`,
       actionHint:
-        'Publishing will create a new page and write a fresh binding row. Expected; plan accordingly.',
+        'In-place update is the default for shell version drift; shell key drift still triggers regeneration.',
     });
   }
 }

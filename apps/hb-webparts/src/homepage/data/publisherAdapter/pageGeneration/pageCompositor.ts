@@ -16,8 +16,8 @@
  *   team    → TeamViewerControlPayload (matches the teamViewer JsonControlData shape)
  *   gallery → ImageGalleryControlPayload
  *
- * The compositor respects the template entry's ShowTeamBlock /
- * ShowGalleryBlock flags and the renderer-kind / renderer-none markers —
+ * The compositor respects the template entry's ShowTeamViewer /
+ * ShowGallery flags and the profile-key markers —
  * suppressed blocks produce `{ slot, visible:false }` entries so downstream
  * services can either drop the control or render an empty placeholder
  * (SharePoint Pages REST accepts either).
@@ -229,7 +229,7 @@ function composeTeam(
   const control = shell.controlsBySlot.team;
   const { article, template } = context;
 
-  if (!template.ShowTeamBlock || template.TeamRendererKind === 'none') {
+  if (!template.ShowTeamViewer || !template.TeamViewerProfileKey) {
     return {
       slot: 'team',
       visible: false,
@@ -285,7 +285,7 @@ function composeGallery(
   const control = shell.controlsBySlot.gallery;
   const { template } = context;
 
-  if (!template.ShowGalleryBlock || template.GalleryRendererKind === 'none') {
+  if (!template.ShowGallery || !template.GalleryProfileKey) {
     return {
       slot: 'gallery',
       visible: false,
@@ -344,7 +344,7 @@ export function composeProjectSpotlightPage(
     shellKey: shell.shellKey,
     shellVersion: shell.shellVersion,
     templateKey: template.TemplateKey,
-    templateVersion: template.TemplateVersion,
+    templateVersion: template.VersionLabel ?? '',
   };
 
   const controls: ComposedControl[] = [

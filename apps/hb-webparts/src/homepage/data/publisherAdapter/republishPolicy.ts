@@ -21,8 +21,9 @@
  *                       explicitly asked for idempotent-only.
  *
  * Authority:
- *   architecture doc 05 §"Registry behavior rules" — AllowRepublishInPlace,
- *                                                    ForceRegenerationOnShellChange.
+ *   tenant `HB Article Template Registry` (no longer exposes
+ *     AllowRepublishInPlace/ForceRegenerationOnShellChange; key drift
+ *     alone forces regeneration).
  *   architecture doc 06 — shell/template version comparison drives
  *                         regeneration.
  *   operating-charter rule 6 — publish/republish mediated by bindings.
@@ -146,37 +147,21 @@ export function decideRepublishAction(
     };
   }
 
-  // Shell version drift — template flag governs behavior.
+  // Shell version drift — in-place update is the default for version drift.
+  // The tenant registry no longer carries `ForceRegenerationOnShellChange`;
+  // key drift (above) remains the sole hard-regenerate trigger for the shell.
   if (shellVersionDrift) {
-    if (template.ForceRegenerationOnShellChange) {
-      return {
-        action: 'regenerate',
-        reason: 'shellVersionDrift',
-        regenerationCause: 'shellVersionDrift',
-        notes: [
-          `Shell version drift (${existingBinding.PageShellVersion} → ${composed.identity.shellVersion}) and template.ForceRegenerationOnShellChange=true.`,
-        ],
-      };
-    }
     notes.push(
-      `Shell version drift (${existingBinding.PageShellVersion} → ${composed.identity.shellVersion}); in-place update permitted by template.`,
+      `Shell version drift (${existingBinding.PageShellVersion} → ${composed.identity.shellVersion}); in-place update applied.`,
     );
   }
 
-  // Template version drift — allowed only if the template opts in.
+  // Template version drift — always permitted in place; the tenant registry
+  // no longer carries `AllowRepublishInPlace`. Key drift (above) remains
+  // the sole hard-regenerate trigger for the template.
   if (templateVersionDrift) {
-    if (!template.AllowRepublishInPlace) {
-      return {
-        action: 'regenerate',
-        reason: 'templateVersionDrift',
-        regenerationCause: 'templateKeyDrift',
-        notes: [
-          `Template version drift (${existingBinding.TemplateVersion} → ${composed.identity.templateVersion}) and template.AllowRepublishInPlace=false.`,
-        ],
-      };
-    }
     notes.push(
-      `Template version drift (${existingBinding.TemplateVersion} → ${composed.identity.templateVersion}); in-place update permitted by template.`,
+      `Template version drift (${existingBinding.TemplateVersion} → ${composed.identity.templateVersion}); in-place update applied.`,
     );
   }
 

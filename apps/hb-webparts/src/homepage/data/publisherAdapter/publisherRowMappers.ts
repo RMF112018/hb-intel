@@ -128,6 +128,7 @@ function many<T extends string>(values: readonly T[]) {
 }
 
 const articleContentType = one<ArticleContentType>(ARTICLE_CONTENT_TYPE_VALUES);
+const articleContentTypeMany = many<ArticleContentType>(ARTICLE_CONTENT_TYPE_VALUES);
 const destination = one<Destination>(DESTINATION_VALUES);
 const heroThemeVariant = one<HeroThemeVariant>(HERO_THEME_VARIANT_VALUES);
 const heroMetadataMode = one<HeroMetadataMode>(HERO_METADATA_MODE_VALUES);
@@ -313,74 +314,64 @@ export function mapTemplateRegistryRow(
   raw: Record<string, unknown>,
 ): PublisherTemplateRegistryRow | undefined {
   const TemplateKey = requiredStr(raw['TemplateKey']);
-  const TemplateDisplayName = requiredStr(raw['TemplateDisplayName']);
-  const TemplateStatus = templateStatus(raw['TemplateStatus']);
-  const TemplateVersion = requiredStr(raw['TemplateVersion']);
-  const PageShellKey = requiredStr(raw['PageShellKey']);
-  const PageShellVersion = requiredStr(raw['PageShellVersion']);
-  const ShellSourceSiteUrl = url(raw['ShellSourceSiteUrl']);
-  const ShellSourcePagePath = requiredStr(raw['ShellSourcePagePath']);
-  const PostFamily = postFamilyMany(raw['PostFamily']);
-  const BannerRendererKind = one(['oobPageTitle', 'hbSignatureHero'] as const)(
-    raw['BannerRendererKind'],
-  );
-  const BodyRendererKind = one(['oobText'] as const)(raw['BodyRendererKind']);
-  const ShowTeamBlock = bool(raw['ShowTeamBlock']);
-  const ShowGalleryBlock = bool(raw['ShowGalleryBlock']);
+  const TemplateName = requiredStr(raw['TemplateName']);
+  const IsActive = bool(raw['IsActive']);
+  const TemplatePriority = num(raw['TemplatePriority']);
+  const ContentTypes = articleContentTypeMany(raw['ContentTypes']);
+  const Destination = destination(raw['Destination']);
+  const PageShellTemplateKey = requiredStr(raw['PageShellTemplateKey']);
+  const HeroProfileKey = requiredStr(raw['HeroProfileKey']);
+  const BodyProfileKey = requiredStr(raw['BodyProfileKey']);
+  const ShowHero = bool(raw['ShowHero']);
+  const ShowBody = bool(raw['ShowBody']);
+  const ShowTeamViewer = bool(raw['ShowTeamViewer']);
+  const ShowGallery = bool(raw['ShowGallery']);
+  const ShowSecondaryImage = bool(raw['ShowSecondaryImage']);
   const RequiredFieldSetKey = requiredStr(raw['RequiredFieldSetKey']);
-  const ValidationProfileKey = requiredStr(raw['ValidationProfileKey']);
-  const RenderProfileKey = requiredStr(raw['RenderProfileKey']);
 
   if (
     !TemplateKey ||
-    !TemplateDisplayName ||
-    !TemplateStatus ||
-    !TemplateVersion ||
-    !PageShellKey ||
-    !PageShellVersion ||
-    !ShellSourceSiteUrl ||
-    !ShellSourcePagePath ||
-    !PostFamily ||
-    !BannerRendererKind ||
-    !BodyRendererKind ||
-    ShowTeamBlock === undefined ||
-    ShowGalleryBlock === undefined ||
-    !RequiredFieldSetKey ||
-    !ValidationProfileKey ||
-    !RenderProfileKey
+    !TemplateName ||
+    IsActive === undefined ||
+    TemplatePriority === undefined ||
+    !ContentTypes ||
+    !Destination ||
+    !PageShellTemplateKey ||
+    !HeroProfileKey ||
+    !BodyProfileKey ||
+    ShowHero === undefined ||
+    ShowBody === undefined ||
+    ShowTeamViewer === undefined ||
+    ShowGallery === undefined ||
+    ShowSecondaryImage === undefined ||
+    !RequiredFieldSetKey
   ) {
     return undefined;
   }
 
   return {
     TemplateKey,
-    TemplateDisplayName,
-    TemplateStatus,
-    TemplateVersion,
-    PageShellKey,
-    PageShellVersion,
-    ShellSourceSiteUrl,
-    ShellSourcePagePath,
-    PostFamily,
-    SpotlightType: spotlightMany(raw['SpotlightType']),
-    ProjectStage: stageMany(raw['ProjectStage']),
-    ArticleSubject: subjectMany(raw['ArticleSubject']),
-    BannerRendererKind,
-    BodyRendererKind,
-    TeamRendererKind: one(['teamViewer', 'none'] as const)(
-      raw['TeamRendererKind'],
-    ),
-    GalleryRendererKind: one(['oobImageGallery', 'none'] as const)(
-      raw['GalleryRendererKind'],
-    ),
-    ShowTeamBlock,
-    ShowGalleryBlock,
+    TemplateName,
+    IsActive,
+    TemplatePriority,
+    VersionLabel: str(raw['VersionLabel']),
+    ContentTypes,
+    Destination,
+    SpotlightTypes: spotlightMany(raw['SpotlightTypes']),
+    ProjectStages: stageMany(raw['ProjectStages']),
+    ArticleSubjects: subjectMany(raw['ArticleSubjects']),
+    PageShellTemplateKey,
+    HeroProfileKey,
+    BodyProfileKey,
+    TeamViewerProfileKey: str(raw['TeamViewerProfileKey']),
+    GalleryProfileKey: str(raw['GalleryProfileKey']),
+    ShowHero,
+    ShowBody,
+    ShowTeamViewer,
+    ShowGallery,
+    ShowSecondaryImage,
     RequiredFieldSetKey,
-    ValidationProfileKey,
-    RenderProfileKey,
-    AllowRepublishInPlace: bool(raw['AllowRepublishInPlace']),
-    ForceRegenerationOnShellChange: bool(raw['ForceRegenerationOnShellChange']),
-    ControlMapJson: str(raw['ControlMapJson']),
+    Notes: str(raw['Notes']),
   };
 }
 

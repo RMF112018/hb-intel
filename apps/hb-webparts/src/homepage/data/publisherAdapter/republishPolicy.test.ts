@@ -44,23 +44,21 @@ function template(
 ): PublisherTemplateRegistryRow {
   return {
     TemplateKey: 'ps-inprogress-monthly-v1',
-    TemplateDisplayName: 'PS Monthly',
-    TemplateStatus: 'active',
-    TemplateVersion: '1.0.0',
-    PageShellKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
-    PageShellVersion: '1.0.0',
-    ShellSourceSiteUrl: 'https://example.com/sites/ProjectSpotlight',
-    ShellSourcePagePath: 'SitePages/Templates/Project-Spotlight---In-Progress.aspx',
-    PostFamily: ['monthlySpotlight'],
-    BannerRendererKind: 'oobPageTitle',
-    BodyRendererKind: 'oobText',
-    ShowTeamBlock: true,
-    ShowGalleryBlock: true,
+    TemplateName: 'PS Monthly',
+    IsActive: true,
+    TemplatePriority: 100,
+    VersionLabel: '1.0.0',
+    ContentTypes: ['monthlySpotlight'],
+    Destination: 'projectSpotlight',
+    PageShellTemplateKey: 'ps-shell-inprogress-oob-banner-team-gallery-v1',
+    HeroProfileKey: 'hbSignatureHero',
+    BodyProfileKey: 'oobText',
+    ShowHero: true,
+    ShowBody: true,
+    ShowTeamViewer: true,
+    ShowGallery: true,
+    ShowSecondaryImage: false,
     RequiredFieldSetKey: 'req',
-    ValidationProfileKey: 'val',
-    RenderProfileKey: 'render',
-    AllowRepublishInPlace: true,
-    ForceRegenerationOnShellChange: false,
     ...over,
   };
 }
@@ -118,7 +116,7 @@ describe('decideRepublishAction', () => {
   it('forces regenerate on shell key drift regardless of template flags', () => {
     const d = decideRepublishAction({
       composed: composed({ shellKey: 'ps-shell-new-v1' }),
-      template: template({ AllowRepublishInPlace: true, ForceRegenerationOnShellChange: false }),
+      template: template({ }),
       existingBinding: binding(),
     });
     expect(d.action).toBe('regenerate');
@@ -139,7 +137,7 @@ describe('decideRepublishAction', () => {
   it('regenerates on shell version drift when template demands regeneration', () => {
     const d = decideRepublishAction({
       composed: composed({ shellVersion: '2.0.0' }),
-      template: template({ ForceRegenerationOnShellChange: true }),
+      template: template({ }),
       existingBinding: binding({ PageShellVersion: '1.0.0' }),
     });
     expect(d.action).toBe('regenerate');
@@ -149,7 +147,7 @@ describe('decideRepublishAction', () => {
   it('in-place updates on shell version drift when template allows it', () => {
     const d = decideRepublishAction({
       composed: composed({ shellVersion: '1.1.0' }),
-      template: template({ ForceRegenerationOnShellChange: false }),
+      template: template({ }),
       existingBinding: binding({ PageShellVersion: '1.0.0' }),
     });
     expect(d.action).toBe('inPlaceUpdate');
@@ -159,7 +157,7 @@ describe('decideRepublishAction', () => {
   it('regenerates on template version drift when republish-in-place is disallowed', () => {
     const d = decideRepublishAction({
       composed: composed({ templateVersion: '2.0.0' }),
-      template: template({ AllowRepublishInPlace: false }),
+      template: template({ }),
       existingBinding: binding({ TemplateVersion: '1.0.0' }),
     });
     expect(d.action).toBe('regenerate');
