@@ -458,3 +458,117 @@
   word-break: break-word;
   white-space: pre-wrap;
 }
+
+/* ── Project picker ───────────────────────────────────────────── */
+
+.projectPicker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.projectPickerDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin-top: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #c8c8cc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.projectPickerHint,
+.projectPickerError {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #4a4a4f;
+}
+
+.projectPickerError {
+  color: #a4262c;
+}
+
+.projectPickerOption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f3;
+}
+
+.projectPickerOption:last-child {
+  border-bottom: none;
+}
+
+.projectPickerOptionActive,
+.projectPickerOption:hover {
+  background: #f0f6fc;
+}
+
+.projectPickerOptionName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.projectPickerOptionMeta {
+  font-size: 11px;
+  color: #5c5c60;
+}
+
+.projectPickerChip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid #c8c8cc;
+  border-radius: 6px;
+  background: #fafbff;
+}
+
+.projectPickerChipMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.projectPickerChipName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.projectPickerChipMeta {
+  font-size: 11px;
+  color: #5c5c60;
+}
+
+.projectPickerClear {
+  border: 1px solid #c8c8cc;
+  background: #fff;
+  color: #0078d4;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.projectPickerClear:hover {
+  background: #f0f6fc;
+}

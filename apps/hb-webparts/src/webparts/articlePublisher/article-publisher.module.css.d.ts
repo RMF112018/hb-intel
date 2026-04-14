@@ -1,4 +1,17 @@
 declare const styles: {
+  readonly projectPicker: string;
+  readonly projectPickerDropdown: string;
+  readonly projectPickerHint: string;
+  readonly projectPickerError: string;
+  readonly projectPickerOption: string;
+  readonly projectPickerOptionActive: string;
+  readonly projectPickerOptionName: string;
+  readonly projectPickerOptionMeta: string;
+  readonly projectPickerChip: string;
+  readonly projectPickerChipMain: string;
+  readonly projectPickerChipName: string;
+  readonly projectPickerChipMeta: string;
+  readonly projectPickerClear: string;
   readonly shell: string;
   readonly listPane: string;
   readonly listHeader: string;

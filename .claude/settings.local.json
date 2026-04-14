@@ -356,7 +356,8 @@
       "Bash(perl -i -pe 's/fixture\\\\\\(\\\\{\\\\s*post:/fixture\\({ article:/g' publishOrchestrator.test.ts preview/previewBuilder.test.ts __tests__/publisherEndToEnd.test.ts)",
       "Bash(perl -i -pe 's/=> \\\\[p\\\\]\\\\\\)/=> [a]\\)/g' /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/homepage/data/publisherAdapter/__tests__/publisherEndToEnd.test.ts)",
       "Bash(perl -i -pe 's/repos\\\\\\(\\\\{ post:/repos\\({ article:/g' /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/homepage/data/publisherAdapter/preview/previewBuilder.test.ts)",
-      "Bash(perl -i -pe \"s/'post-001'/'art-001'/g\" /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/homepage/data/publisherAdapter/republishPolicy.test.ts)"
+      "Bash(perl -i -pe \"s/'post-001'/'art-001'/g\" /Users/bobbyfetting/hb-intel/apps/hb-webparts/src/homepage/data/publisherAdapter/republishPolicy.test.ts)",
+      "Bash(tsx tools/build-spfx-package.ts --domain hb-webparts)"
     ]
   },
   "enabledPlugins": {
