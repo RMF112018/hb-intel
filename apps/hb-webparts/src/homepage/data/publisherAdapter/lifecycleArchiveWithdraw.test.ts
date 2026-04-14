@@ -421,3 +421,87 @@ describe('orchestrator.withdraw', () => {
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('lifecycle error classification — persisted error rows tag the lifecycle action and stage', () => {
+  it('archive failure at articleUpdate is tagged "archive.articleUpdate" with Operation=sync', async () => {
+    const f = buildFixture({
+      articleUpsertImpl: async () => {
+        throw new Error('SP MERGE failed');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    await orch.archive({
+      articleId: 'art-001',
+      actorEmail: 'editor@example.com',
+      now: () => NOW,
+    });
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = f.errorAppend.mock.calls[0]![0] as {
+      Title: string;
+      Operation: string;
+      ErrorSummary: string;
+    };
+    expect(errorRow.Title).toMatch(/^archive\.articleUpdate:/);
+    expect(errorRow.Operation).toBe('sync');
+    expect(errorRow.ErrorSummary).toContain('archived update failed');
+  });
+
+  it('archive failure at pageUnpublish is tagged "archive.pageUnpublish" with Operation=publish', async () => {
+    const f = buildFixture();
+    const { orch } = makeOrchWithUnpublish(
+      f.repositories,
+      async () => ({
+        ok: false as const,
+        reason: 'unpublishLifecycleFailed' as const,
+        message: 'Page SavePageAsDraft lifecycle failed (status 500).',
+        status: 500,
+      }),
+    );
+    await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = f.errorAppend.mock.calls[0]![0] as {
+      Title: string;
+      Operation: string;
+      ErrorSummary: string;
+      BindingId?: string;
+    };
+    expect(errorRow.Title).toMatch(/^archive\.pageUnpublish:/);
+    expect(errorRow.Operation).toBe('publish');
+    expect(errorRow.ErrorSummary).toContain('SavePageAsDraft failed during archived');
+    expect(errorRow.BindingId).toBe('bnd-existing');
+  });
+
+  it('withdraw failure at bindingUpdate is tagged "withdraw.bindingUpdate" with Operation=sync', async () => {
+    const f = buildFixture({
+      bindingUpsertImpl: async () => {
+        throw new Error('binding write failed');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = f.errorAppend.mock.calls[0]![0] as {
+      Title: string;
+      Operation: string;
+    };
+    expect(errorRow.Title).toMatch(/^withdraw\.bindingUpdate:/);
+    expect(errorRow.Operation).toBe('sync');
+  });
+
+  it('withdraw failure at historyAppend is tagged "withdraw.historyAppend" with Operation=sync', async () => {
+    const f = buildFixture({
+      historyAppendImpl: async () => {
+        throw new Error('history list down');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = f.errorAppend.mock.calls[0]![0] as {
+      Title: string;
+      Operation: string;
+    };
+    expect(errorRow.Title).toMatch(/^withdraw\.historyAppend:/);
+    expect(errorRow.Operation).toBe('sync');
+  });
+});

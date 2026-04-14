@@ -115,16 +115,60 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
   }
 
   /**
-   * Map an internal failure stage + caller mode to the coarse tenant
-   * `Operation` Choice on `HB Article Publishing Errors`. Stages
-   * collapse onto the four tenant choices: create / update / publish /
-   * sync.
+   * Internal failure-stage union used by the orchestrator's two
+   * callers — `run` (publish / republish / preview) and
+   * `runLifecycleTransition` (archive / withdraw). Lifecycle-only
+   * stages are listed alongside publish stages so the error
+   * recorder can classify both consistently.
+   */
+  type FailureStage =
+    | 'resolution'
+    | 'composition'
+    | 'validation'
+    | 'policy'
+    | 'pagePublish'
+    | 'pageUnpublish'
+    | 'bindingWrite'
+    | 'bindingUpdate'
+    | 'articleSync'
+    | 'articleUpdate'
+    | 'historyAppend';
+
+  /**
+   * Map an internal failure stage + caller context to the coarse
+   * tenant `Operation` Choice on `HB Article Publishing Errors`
+   * (create / update / publish / sync). The tenant column is
+   * intentionally narrow; the orchestrator's stage + lifecycle
+   * action carry the real precision and surface in the Title /
+   * ErrorSummary text.
+   *
+   * Mapping:
+   *   - publish-side resolution/composition/validation/policy/
+   *     pagePublish: `publish` for republish, `create` for create,
+   *     `publish` otherwise.
+   *   - lifecycle pageUnpublish: `publish` (it is a page-side
+   *     action against `_api/sitepages/pages(...)`).
+   *   - any *Sync / *Update / *Write / historyAppend stage: `sync`
+   *     (these are list-row reconciliation failures).
    */
   function operationFor(
-    stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite' | 'articleSync',
+    stage: FailureStage,
     mode: PublishMode,
+    lifecycleAction: 'archive' | 'withdraw' | undefined,
   ): import('./publisherEnums').PublishingErrorOperation {
-    if (stage === 'bindingWrite' || stage === 'articleSync') return 'sync';
+    if (lifecycleAction !== undefined) {
+      if (stage === 'pageUnpublish') return 'publish';
+      return 'sync';
+    }
+    if (
+      stage === 'bindingWrite' ||
+      stage === 'bindingUpdate' ||
+      stage === 'articleSync' ||
+      stage === 'articleUpdate' ||
+      stage === 'historyAppend'
+    ) {
+      return 'sync';
+    }
     if (mode === 'create') return 'create';
     return 'publish';
   }
@@ -134,26 +178,44 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
    * Best-effort: a failing error-list write is logged to the console
    * but never re-thrown — the orchestrator's own typed failure result
    * is the authoritative caller signal.
+   *
+   * The persisted `Title` is prefixed with `${context}.${stage}` so
+   * an operator scanning the error list can see at a glance whether
+   * the failure was a publish, republish, archive, or withdraw, and
+   * which step inside that lifecycle blew up. The tenant `Operation`
+   * Choice still maps onto the four coarse buckets the column
+   * accepts; precision lives in `Title` and `ErrorSummary`.
    */
   async function recordPublishingError(input: {
     readonly articleId: string;
     readonly title: string | undefined;
     readonly destination: import('./publisherEnums').Destination | undefined;
-    readonly stage: 'resolution' | 'composition' | 'validation' | 'policy' | 'pagePublish' | 'bindingWrite' | 'articleSync';
+    readonly stage: FailureStage;
     readonly mode: PublishMode;
+    /**
+     * When set, the failure was raised by archive / withdraw rather
+     * than by the publish/republish path. The recorder uses this to
+     * tag the persisted Title so operators can distinguish lifecycle
+     * failures from publish failures even though the tenant
+     * `Operation` Choice cannot.
+     */
+    readonly lifecycleAction?: 'archive' | 'withdraw';
     readonly message: string;
     readonly bindingId?: string;
     readonly nowIso: string;
   }): Promise<void> {
+    const context = input.lifecycleAction ?? input.mode;
+    const prefix = `${context}.${input.stage}`;
     try {
       await repositories.publishingErrors.append({
         ErrorId: `err-${input.nowIso.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
         ArticleId: input.articleId,
-        Title: input.title && input.title.trim().length > 0
-          ? `${input.stage}: ${input.title}`
-          : `${input.stage} failure for ArticleId ${input.articleId}`,
+        Title:
+          input.title && input.title.trim().length > 0
+            ? `${prefix}: ${input.title}`
+            : `${prefix} failure for ArticleId ${input.articleId}`,
         Destination: input.destination ?? 'projectSpotlight',
-        Operation: operationFor(input.stage, input.mode),
+        Operation: operationFor(input.stage, input.mode, input.lifecycleAction),
         ErrorSummary: input.message,
         BindingId: input.bindingId,
         LastAttemptDateUtc: input.nowIso,
@@ -567,8 +629,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         articleId: article.ArticleId,
         title: article.Title,
         destination: article.Destination,
-        stage: 'articleSync',
-        mode: target === 'archived' ? 'create' : 'create',
+        stage: 'articleUpdate',
+        mode: 'create',
+        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
         message,
         nowIso: now,
       });
@@ -605,8 +668,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           articleId: article.ArticleId,
           title: article.Title,
           destination: article.Destination,
-          stage: 'pagePublish',
+          stage: 'pageUnpublish',
           mode: 'create',
+          lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
           message: `SavePageAsDraft failed during ${target}: ${unpublishOutcome.message}`,
           bindingId: existingBinding.BindingId,
           nowIso: now,
@@ -650,8 +714,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           articleId: article.ArticleId,
           title: article.Title,
           destination: article.Destination,
-          stage: 'bindingWrite',
+          stage: 'bindingUpdate',
           mode: 'create',
+          lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
           message,
           bindingId: existingBinding.BindingId,
           nowIso: now,
@@ -686,8 +751,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         articleId: article.ArticleId,
         title: article.Title,
         destination: article.Destination,
-        stage: 'articleSync',
+        stage: 'historyAppend',
         mode: 'create',
+        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
         message,
         nowIso: now,
       });
