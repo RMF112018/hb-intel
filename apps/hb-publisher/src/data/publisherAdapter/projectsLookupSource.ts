@@ -102,10 +102,11 @@ export function escapeODataString(value: string): string {
 /**
  * Build a `ProjectLookupSearchFn` bound to the given host site URL.
  *
- * Matches are case-insensitive substring hits against either the
- * project name (`field_3`) or the project number (`field_2`), which
- * are the two identifiers authors actually recognize. Results are
- * sorted by project name for a stable visual order.
+ * Matches are case-insensitive substring hits against the project
+ * name (`field_3`), project number (`field_2`), or project location
+ * (`field_4`) — the three identifiers the picker surface promises
+ * and that authors actually recognize. Results are sorted by project
+ * name for a stable visual order.
  */
 export function createProjectsLookupSearch(
   options: ProjectsLookupSearchOptions,
@@ -122,7 +123,9 @@ export function createProjectsLookupSearch(
 
     const escaped = escapeODataString(trimmed);
     const filter =
-      `substringof('${escaped}',field_3) or substringof('${escaped}',field_2)`;
+      `substringof('${escaped}',field_3)` +
+      ` or substringof('${escaped}',field_2)` +
+      ` or substringof('${escaped}',field_4)`;
     const url =
       `${endpointRoot}?${select}` +
       `&$filter=${encodeURIComponent(filter)}` +

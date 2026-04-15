@@ -1,9 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
+  createProjectsLookupSearch,
   escapeODataString,
   mapRawProjectRow,
   type RawProjectsListItem,
 } from './projectsLookupSource.js';
+
+vi.mock('@hbc/sharepoint-platform', () => ({
+  fetchListItemsJson: vi.fn(async () => []),
+}));
 
 describe('mapRawProjectRow', () => {
   it('maps a well-formed row to a ProjectLookupEntry', () => {
@@ -73,6 +78,35 @@ describe('mapRawProjectRow', () => {
       field_4: '   ',
     });
     expect(entry?.projectLocation).toBeUndefined();
+  });
+});
+
+describe('createProjectsLookupSearch', () => {
+  it('filters by project name, number, and location so the UI promise holds', async () => {
+    const { fetchListItemsJson } = await import('@hbc/sharepoint-platform');
+    const fetchMock = fetchListItemsJson as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockClear();
+    const search = createProjectsLookupSearch({
+      hostSiteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+    });
+    await search('Tampa');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const url = fetchMock.mock.calls[0][0] as string;
+    const decoded = decodeURIComponent(url);
+    expect(decoded).toContain("substringof('Tampa',field_3)");
+    expect(decoded).toContain("substringof('Tampa',field_2)");
+    expect(decoded).toContain("substringof('Tampa',field_4)");
+  });
+
+  it('returns an empty array without calling the network for blank queries', async () => {
+    const { fetchListItemsJson } = await import('@hbc/sharepoint-platform');
+    const fetchMock = fetchListItemsJson as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockClear();
+    const search = createProjectsLookupSearch({
+      hostSiteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+    });
+    expect(await search('   ')).toEqual([]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 
