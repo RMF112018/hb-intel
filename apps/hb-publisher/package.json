@@ -10,6 +10,7 @@
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
+    "@hbc/session-state": "workspace:*",
     "@hbc/sharepoint-platform": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "@tiptap/core": "^2.27.2",

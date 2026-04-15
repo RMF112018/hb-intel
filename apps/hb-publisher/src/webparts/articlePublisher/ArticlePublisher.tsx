@@ -68,9 +68,11 @@ import {
   describePublishIntent,
   sectionAnchorForFindingField,
   useDraftLifecycle,
+  useLocalDraftResilience,
   usePreviewController,
   useReadinessController,
   useStatusChannel,
+  type LocalWorkingCopy,
 } from './controllers/index.js';
 import { publishDisabledReason } from './lifecycleMessaging.js';
 import { useActiveSection } from './useActiveSection.js';
@@ -253,6 +255,78 @@ export function ArticlePublisher({
     handleTransition,
     handlePublishAction,
   } = lifecycle;
+
+  /* ── Local draft resilience ────────────────────────────────────
+   * Layer 1 of a deliberate two-layer truth model: a debounced
+   * IndexedDB cache of the in-memory working copy, keyed on the
+   * selected articleId. Never substitutes for the durable save
+   * orchestrator — only protects against tab-close / reload during
+   * active composition. Cleared on every successful durable save
+   * and on every successful publish so stale caches are not later
+   * offered as recovery candidates. */
+  const resilience = useLocalDraftResilience(workspace.selectedArticleId);
+  const [recoveryDismissed, setRecoveryDismissed] = React.useState(false);
+  const draftServerUpdatedAt = articleDraft?.UpdatedDateUtc;
+  const resilienceSnapshot = React.useMemo<LocalWorkingCopy | null>(
+    () =>
+      articleDraft
+        ? {
+            cachedAtIso: new Date().toISOString(),
+            articleDraft,
+            teamDraft,
+            mediaDraft,
+          }
+        : null,
+    [articleDraft, teamDraft, mediaDraft],
+  );
+  React.useEffect(() => {
+    if (!resilienceSnapshot || !workspace.selectedArticleId) return;
+    resilience.queueCache(resilienceSnapshot);
+  }, [resilienceSnapshot, resilience, workspace.selectedArticleId]);
+  React.useEffect(() => {
+    setRecoveryDismissed(false);
+  }, [workspace.selectedArticleId]);
+
+  const hasNewerLocalCopy = React.useMemo(() => {
+    if (!resilience.workingCopy || !articleDraft) return false;
+    if (recoveryDismissed) return false;
+    if (resilience.workingCopy.articleDraft.ArticleId !== articleDraft.ArticleId) {
+      return false;
+    }
+    if (!draftServerUpdatedAt) return true;
+    return resilience.workingCopy.cachedAtIso > draftServerUpdatedAt;
+  }, [resilience.workingCopy, articleDraft, draftServerUpdatedAt, recoveryDismissed]);
+
+  const acceptRecovery = React.useCallback(() => {
+    const cached = resilience.workingCopy;
+    if (!cached) return;
+    setArticleDraft(cached.articleDraft);
+    setTeamDraft(cached.teamDraft);
+    setMediaDraft(cached.mediaDraft);
+    setRecoveryDismissed(true);
+    setStatus(
+      'Working copy restored from local cache. Save to commit.',
+      'info',
+    );
+  }, [resilience.workingCopy, setArticleDraft, setTeamDraft, setMediaDraft, setStatus]);
+
+  const discardRecovery = React.useCallback(() => {
+    resilience.clear();
+    setRecoveryDismissed(true);
+  }, [resilience]);
+
+  const handleSaveWithCacheClear = React.useCallback(async () => {
+    await handleSave();
+    resilience.clear();
+  }, [handleSave, resilience]);
+
+  const handlePublishWithCacheClear = React.useCallback<typeof handlePublishAction>(
+    async (kind) => {
+      await handlePublishAction(kind);
+      if (kind !== 'preview') resilience.clear();
+    },
+    [handlePublishAction, resilience],
+  );
 
   const previewController = usePreviewController({
     repositories,
@@ -534,7 +608,34 @@ export function ArticlePublisher({
                 <p className={styles.readinessBindingSignal}>{bindingSignal}</p>
               )}
               <PublishIntentCue intent={publishIntent} />
+              <LocalCacheStatus
+                lastCachedAtIso={resilience.lastCachedAtIso}
+                isCachePending={resilience.isCachePending}
+              />
             </section>
+
+            {hasNewerLocalCopy && (
+              <ExceptionalNotice
+                tone="info"
+                headline="Unsaved working copy found"
+                hint="A more recent working copy is cached locally for this draft. Nothing has been saved yet."
+                detailsLabel="Cache details"
+                details={`Cache key: ${resilience.draftKey}`}
+              />
+            )}
+            {hasNewerLocalCopy && (
+              <section className={styles.readinessBlock} aria-label="Recovery actions">
+                <p className={styles.readinessHeading}>Recovery</p>
+                <div className={styles.readinessActionGroup}>
+                  <PublisherButton variant="primary" size="sm" onClick={acceptRecovery}>
+                    Restore working copy
+                  </PublisherButton>
+                  <PublisherButton variant="danger" size="sm" onClick={discardRecovery}>
+                    Discard cached copy
+                  </PublisherButton>
+                </div>
+              </section>
+            )}
 
             {saveHealth.kind === 'missingFirstPersistenceFields' && (
               <section
@@ -611,7 +712,7 @@ export function ArticlePublisher({
                     validationBlocked: publishBlockedByValidation,
                     busy,
                   })}
-                  onClick={() => handlePublishAction('create')}
+                  onClick={() => handlePublishWithCacheClear('create')}
                 >
                   Publish
                 </PublisherButton>
@@ -624,7 +725,7 @@ export function ArticlePublisher({
                     validationBlocked: publishBlockedByValidation,
                     busy,
                   })}
-                  onClick={() => handlePublishAction('republish')}
+                  onClick={() => handlePublishWithCacheClear('republish')}
                 >
                   Republish
                 </PublisherButton>
@@ -636,7 +737,7 @@ export function ArticlePublisher({
                       ? 'save-readiness-block'
                       : undefined
                   }
-                  onClick={handleSave}
+                  onClick={handleSaveWithCacheClear}
                 >
                   Save draft
                 </PublisherButton>
@@ -855,6 +956,39 @@ function PublishIntentCue({
       )}
     </div>
   );
+}
+
+function LocalCacheStatus({
+  lastCachedAtIso,
+  isCachePending,
+}: {
+  lastCachedAtIso: string | null;
+  isCachePending: boolean;
+}): React.JSX.Element | null {
+  if (!lastCachedAtIso && !isCachePending) return null;
+  const relative = lastCachedAtIso ? relativeFromNow(lastCachedAtIso) : null;
+  return (
+    <p className={styles.localCacheStatus} aria-live="polite">
+      {isCachePending ? (
+        <>Caching working copy locally…</>
+      ) : (
+        <>
+          Working copy cached locally{relative ? ` · ${relative}` : ''} — not yet
+          saved to SharePoint.
+        </>
+      )}
+    </p>
+  );
+}
+
+function relativeFromNow(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return '';
+  const deltaSec = Math.max(0, Math.round((Date.now() - then) / 1000));
+  if (deltaSec < 10) return 'just now';
+  if (deltaSec < 60) return `${deltaSec}s ago`;
+  if (deltaSec < 3600) return `${Math.round(deltaSec / 60)}m ago`;
+  return `${Math.round(deltaSec / 3600)}h ago`;
 }
 
 function ValidationIssueItem({

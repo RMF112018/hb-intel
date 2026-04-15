@@ -13,6 +13,7 @@
 | 1 | `project-setup-form-draft` | New-request wizard | `ISetupFormDraft` | 48 h | On first field edit | On successful submit or user discard |
 | 2 | `project-setup-clarification-{requestId}` | Clarification-return wizard | `IClarificationDraft` | 168 h (7 days) | On clarification re-entry | On successful resubmission |
 | 3 | `project-setup-controller-review-{requestId}` | Controller review surface | `IControllerReviewDraft` | 24 h | On first annotation or field edit | On successful review submission |
+| 4 | `publisher-article-working-draft-{articleId}` | HB Intel Publisher — article authoring workspace | `LocalWorkingCopy` (article + team + media snapshot) | 48 h | On any in-memory draft mutation | On successful durable save, successful publish, or explicit "Discard cached copy" action |
 
 ## 2. Auto-Save Specification
 

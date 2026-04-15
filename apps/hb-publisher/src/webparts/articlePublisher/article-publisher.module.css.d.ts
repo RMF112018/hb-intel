@@ -67,6 +67,7 @@ declare const styles: {
   readonly readinessHeading: string;
   readonly readinessSummary: string;
   readonly readinessBindingSignal: string;
+  readonly localCacheStatus: string;
   readonly publishIntentCue: string;
   readonly publishIntentDetail: string;
   readonly readinessIssueHint: string;

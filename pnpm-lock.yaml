@@ -508,6 +508,9 @@ importers:
 
   apps/hb-publisher:
     dependencies:
+      '@hbc/session-state':
+        specifier: workspace:*
+        version: link:../../packages/session-state
       '@hbc/sharepoint-platform':
         specifier: workspace:*
         version: link:../../packages/sharepoint-platform

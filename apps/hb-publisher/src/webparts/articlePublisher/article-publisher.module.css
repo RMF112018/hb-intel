@@ -773,6 +773,14 @@
   line-height: 1.4;
 }
 
+.localCacheStatus {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: var(--hb-text-tertiary);
+  font-style: italic;
+  line-height: 1.45;
+}
+
 .publishIntentCue {
   display: flex;
   flex-direction: column;

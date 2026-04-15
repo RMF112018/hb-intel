@@ -1,5 +1,10 @@
 export { useStatusChannel } from './useStatusChannel.js';
 export type { SetStatus, StatusChannel } from './useStatusChannel.js';
+export { useLocalDraftResilience } from './useLocalDraftResilience.js';
+export type {
+  LocalDraftResilienceHandle,
+  LocalWorkingCopy,
+} from './useLocalDraftResilience.js';
 export { usePreviewController } from './usePreviewController.js';
 export type {
   PreviewController,
