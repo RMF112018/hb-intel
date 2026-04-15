@@ -134,6 +134,16 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
       } else if (ev.key === 'ArrowUp') {
         ev.preventDefault();
         setActiveIndex((i) => Math.max(i - 1, 0));
+      } else if (ev.key === 'Home') {
+        if (results.length > 0) {
+          ev.preventDefault();
+          setActiveIndex(0);
+        }
+      } else if (ev.key === 'End') {
+        if (results.length > 0) {
+          ev.preventDefault();
+          setActiveIndex(results.length - 1);
+        }
       } else if (ev.key === 'Enter') {
         if (results.length > 0 && activeIndex < results.length) {
           ev.preventDefault();
@@ -145,6 +155,17 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
     },
     [open, results, activeIndex, handleSelect],
   );
+
+  // Keep the active option scrolled into view so keyboard-only users
+  // never chase it off the dropdown. Only the active option scrolls;
+  // the input stays put.
+  const activeOptionRef = React.useRef<HTMLDivElement | null>(null);
+  React.useEffect(() => {
+    const node = activeOptionRef.current;
+    if (node && typeof node.scrollIntoView === 'function') {
+      node.scrollIntoView({ block: 'nearest' });
+    }
+  }, [activeIndex, results.length]);
 
   const showDropdown = open && !disabled && query.trim().length > 0;
   const LISTBOX_ID = 'project-picker-listbox';
@@ -220,10 +241,18 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
                   partial name.
                 </div>
               )}
+              {results.length > 0 && (
+                <div className={styles.projectPickerResultCount} aria-live="polite">
+                  {results.length === 1
+                    ? '1 project matches.'
+                    : `${results.length} projects match.`}
+                </div>
+              )}
               {results.map((entry, index) => (
                 <div
                   key={entry.projectId}
                   id={optionId(index)}
+                  ref={index === activeIndex ? activeOptionRef : undefined}
                   role="option"
                   aria-selected={index === activeIndex}
                   className={

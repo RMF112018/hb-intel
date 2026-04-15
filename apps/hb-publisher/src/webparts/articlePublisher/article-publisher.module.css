@@ -943,6 +943,16 @@
   flex-direction: column;
 }
 
+.projectPickerResultCount {
+  padding: 8px 14px 4px 14px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hb-text-tertiary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--hb-border-faint);
+}
+
 .projectPickerHint,
 .projectPickerError {
   padding: 12px 14px;

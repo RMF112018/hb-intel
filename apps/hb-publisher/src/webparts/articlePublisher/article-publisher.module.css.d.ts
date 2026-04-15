@@ -107,5 +107,6 @@ declare const styles: {
   readonly projectPickerEmptyHint: string;
   readonly projectPickerUnavailableHint: string;
   readonly projectPickerSpinner: string;
+  readonly projectPickerResultCount: string;
 };
 export default styles;

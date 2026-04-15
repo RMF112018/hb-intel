@@ -20,6 +20,7 @@
 import * as React from 'react';
 import type { Editor } from '@tiptap/react';
 import { isAllowedHref, normaliseHref } from './linkValidation';
+import { PublisherButton } from '../sharedChrome/index.js';
 import {
   BoldGlyph,
   BulletListGlyph,
@@ -292,24 +293,23 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
             aria-label="Link URL"
             autoFocus
           />
-          <button type="button" className={styles.toolbarBtn} onClick={applyLink}>
-            Apply
-          </button>
+          <PublisherButton variant="primary" size="sm" onClick={applyLink}>
+            Apply link
+          </PublisherButton>
           {editor.isActive('link') && (
-            <button type="button" className={styles.toolbarBtn} onClick={removeLink}>
+            <PublisherButton variant="danger" size="sm" onClick={removeLink}>
               Remove link
-            </button>
+            </PublisherButton>
           )}
-          <button
-            type="button"
-            className={styles.toolbarBtn}
+          <PublisherButton
+            size="sm"
             onClick={() => {
               setLinkPromptOpen(false);
               editor.commands.focus();
             }}
           >
             Cancel
-          </button>
+          </PublisherButton>
           {linkError && (
             <span className={styles.linkPromptError} role="alert">{linkError}</span>
           )}
