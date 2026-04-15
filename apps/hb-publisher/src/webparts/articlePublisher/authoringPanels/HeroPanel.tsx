@@ -4,11 +4,26 @@ import {
   type HeroThemeVariant,
 } from '../../../data/publisherAdapter/index.js';
 import { heroThemeVariantLabel } from '../authorLabels.js';
-import { ChooserGroup, Field } from '../sharedChrome/index.js';
+import { ChooserGroup, DisclosureSection, Field } from '../sharedChrome/index.js';
 import styles from '../article-publisher.module.css';
 import { update, type PanelProps } from './draftHelpers.js';
 
+function hasAdvancedHeroOverrides(draft: PanelProps['draft']): boolean {
+  return (
+    Boolean(draft.HeroTitle && draft.HeroTitle.trim().length > 0) ||
+    Boolean(draft.HeroEyebrow && draft.HeroEyebrow.trim().length > 0) ||
+    Boolean(draft.HeroCategoryLabel && draft.HeroCategoryLabel.trim().length > 0) ||
+    Boolean(draft.HeroThemeVariant && draft.HeroThemeVariant !== 'default') ||
+    draft.HeroShowMetadata === true
+  );
+}
+
 export function HeroPanel({ draft, onChange }: PanelProps) {
+  // Compute once on mount — the section tracks its own open state
+  // after that via the native <details> element, so re-evaluating on
+  // every keystroke would fight the author by re-closing the section.
+  const initialAdvancedOpen = React.useRef(hasAdvancedHeroOverrides(draft)).current;
+
   return (
     <div className={styles.editorialForm}>
       <Field label="Hero image URL">
@@ -31,53 +46,63 @@ export function HeroPanel({ draft, onChange }: PanelProps) {
           onChange={(e) => onChange(update(draft, 'HeroPrimaryImageAltText', e.target.value))}
         />
       </Field>
-      <Field label="Hero headline (optional override)">
-        <input
-          className={styles.input}
-          value={draft.HeroTitle ?? ''}
-          placeholder="Falls back to the article headline when blank"
-          onChange={(e) =>
-            onChange(update(draft, 'HeroTitle', e.target.value || undefined))
+      <DisclosureSection
+        label="Advanced hero options"
+        summaryHint="Override hero headline, eyebrow, category, theme, or hero metadata."
+        defaultOpen={initialAdvancedOpen}
+        testId="hero-advanced-section"
+      >
+        <Field label="Hero headline (optional override)">
+          <input
+            className={styles.input}
+            value={draft.HeroTitle ?? ''}
+            placeholder="Falls back to the article headline when blank"
+            onChange={(e) =>
+              onChange(update(draft, 'HeroTitle', e.target.value || undefined))
+            }
+          />
+        </Field>
+        <Field label="Eyebrow">
+          <input
+            className={styles.input}
+            value={draft.HeroEyebrow ?? ''}
+            placeholder="Short label above the headline"
+            onChange={(e) => onChange(update(draft, 'HeroEyebrow', e.target.value || undefined))}
+          />
+        </Field>
+        <Field
+          label="Category label"
+          helper="Leave blank to use the project name."
+        >
+          <input
+            className={styles.input}
+            value={draft.HeroCategoryLabel ?? ''}
+            placeholder={draft.ProjectName ?? 'Category displayed on the hero'}
+            onChange={(e) =>
+              onChange(update(draft, 'HeroCategoryLabel', e.target.value || undefined))
+            }
+          />
+        </Field>
+        <ChooserGroup
+          label="Hero theme"
+          value={draft.HeroThemeVariant}
+          options={HERO_THEME_VARIANT_VALUES}
+          getLabel={heroThemeVariantLabel}
+          onChange={(next) =>
+            onChange(update(draft, 'HeroThemeVariant', next as HeroThemeVariant | undefined))
           }
+          allowClear
+          clearLabel="Default"
         />
-      </Field>
-      <Field label="Eyebrow">
-        <input
-          className={styles.input}
-          value={draft.HeroEyebrow ?? ''}
-          placeholder="Short label above the headline"
-          onChange={(e) => onChange(update(draft, 'HeroEyebrow', e.target.value || undefined))}
-        />
-      </Field>
-      <Field label="Category label">
-        <input
-          className={styles.input}
-          value={draft.HeroCategoryLabel ?? ''}
-          placeholder="Category displayed on the hero"
-          onChange={(e) =>
-            onChange(update(draft, 'HeroCategoryLabel', e.target.value || undefined))
-          }
-        />
-      </Field>
-      <ChooserGroup
-        label="Hero theme"
-        value={draft.HeroThemeVariant}
-        options={HERO_THEME_VARIANT_VALUES}
-        getLabel={heroThemeVariantLabel}
-        onChange={(next) =>
-          onChange(update(draft, 'HeroThemeVariant', next as HeroThemeVariant | undefined))
-        }
-        allowClear
-        clearLabel="Default"
-      />
-      <label className={styles.toggleRow}>
-        <input
-          type="checkbox"
-          checked={!!draft.HeroShowMetadata}
-          onChange={(e) => onChange(update(draft, 'HeroShowMetadata', e.target.checked))}
-        />
-        <span>Show article metadata on the hero</span>
-      </label>
+        <label className={styles.toggleRow}>
+          <input
+            type="checkbox"
+            checked={!!draft.HeroShowMetadata}
+            onChange={(e) => onChange(update(draft, 'HeroShowMetadata', e.target.checked))}
+          />
+          <span>Show article metadata on the hero</span>
+        </label>
+      </DisclosureSection>
     </div>
   );
 }

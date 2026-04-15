@@ -11,3 +11,5 @@ export { Field, resolveCounterState } from './Field.js';
 export type { FieldCounter, FieldProps } from './Field.js';
 export { ChooserGroup } from './ChooserGroup.js';
 export type { ChooserGroupProps } from './ChooserGroup.js';
+export { DisclosureSection } from './DisclosureSection.js';
+export type { DisclosureSectionProps } from './DisclosureSection.js';

@@ -28,6 +28,11 @@ declare const styles: {
   readonly editorialReadoutLabel: string;
   readonly editorialReadoutValue: string;
   readonly toggleRow: string;
+  readonly disclosureSection: string;
+  readonly disclosureSummary: string;
+  readonly disclosureLabel: string;
+  readonly disclosureHint: string;
+  readonly disclosureBody: string;
   readonly chooser: string;
   readonly chooserLabel: string;
   readonly chooserGroup: string;
