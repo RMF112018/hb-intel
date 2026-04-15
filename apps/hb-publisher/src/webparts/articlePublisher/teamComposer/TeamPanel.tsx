@@ -109,6 +109,93 @@ export function TeamPanel({
     }
   };
 
+  const featuredIndex = rows.findIndex((r) => r.IsFeaturedMember === true);
+  const featuredRow = featuredIndex >= 0 ? rows[featuredIndex] : undefined;
+  const rosterEntries = rows
+    .map((row, index) => ({ row, index }))
+    .filter(({ index }) => index !== featuredIndex);
+
+  const renderChip = (r: PublisherTeamMemberRow, i: number, isFeatured: boolean) => {
+    const displayName = r.DisplayName || r.PersonPrincipal || `Member ${i + 1}`;
+    return (
+      <li
+        key={r.TeamMemberId}
+        className={`${styles.chip} ${isFeatured ? styles.chipFeatured : ''}`}
+      >
+        <div className={styles.chipMain}>
+          <TeammateAvatar row={r} fetchPersonPhoto={fetchPersonPhoto} />
+          <button
+            type="button"
+            className={styles.chipBody}
+            onClick={() => openEdit(r.TeamMemberId)}
+            onKeyDown={chipKeyHandler(i)}
+            aria-label={`Edit ${displayName}${isFeatured ? ' — featured' : ''}`}
+          >
+            <span className={styles.chipName}>
+              {displayName}
+              {isFeatured && (
+                <EditorialChip variant="featured" size="sm">
+                  Featured
+                </EditorialChip>
+              )}
+            </span>
+            {r.Title && <span className={styles.chipTitle}>{r.Title}</span>}
+            {r.Department && (
+              <span className={styles.chipMeta}>{r.Department}</span>
+            )}
+            {r.BioSnippet && <span className={styles.chipBio}>{r.BioSnippet}</span>}
+          </button>
+          <PublisherButton
+            iconOnly
+            pressed={isFeatured}
+            aria-label={
+              isFeatured
+                ? `Unfeature ${displayName}`
+                : `Feature ${displayName} on the article card`
+            }
+            title={isFeatured ? 'Unfeature' : 'Feature teammate'}
+            onClick={() => toggleFeatured(r.TeamMemberId)}
+          >
+            {isFeatured ? <StarFilled size="sm" /> : <Star size="sm" />}
+          </PublisherButton>
+        </div>
+        <div className={styles.chipActions}>
+          <PublisherButton
+            iconOnly
+            size="sm"
+            aria-label={`Move ${displayName} up`}
+            title="Move up (Alt+Up)"
+            onClick={() => move(i, -1)}
+            disabled={i === 0}
+          >
+            <ChevronUp size="sm" />
+          </PublisherButton>
+          <PublisherButton
+            iconOnly
+            size="sm"
+            aria-label={`Move ${displayName} down`}
+            title="Move down (Alt+Down)"
+            onClick={() => move(i, 1)}
+            disabled={i === rows.length - 1}
+          >
+            <ChevronDown size="sm" />
+          </PublisherButton>
+          <PublisherButton size="sm" onClick={() => openEdit(r.TeamMemberId)}>
+            Edit
+          </PublisherButton>
+          <PublisherButton
+            size="sm"
+            variant="danger"
+            aria-label={`Remove ${displayName}`}
+            onClick={() => removeAt(i)}
+          >
+            Remove
+          </PublisherButton>
+        </div>
+      </li>
+    );
+  };
+
   return (
     <div className={styles.panel}>
       {rows.length === 0 ? (
@@ -117,94 +204,31 @@ export function TeamPanel({
           description="Pull colleagues from the directory to spotlight them on the published article."
         />
       ) : (
-        <ol
-          className={styles.chipStack}
-          aria-label="Article teammates — use Alt+Up or Alt+Down to reorder"
-        >
-          {rows.map((r, i) => {
-            const displayName =
-              r.DisplayName || r.PersonPrincipal || `Member ${i + 1}`;
-            const featured = r.IsFeaturedMember === true;
-            return (
-              <li key={r.TeamMemberId} className={styles.chip}>
-                <div className={styles.chipMain}>
-                  <TeammateAvatar row={r} fetchPersonPhoto={fetchPersonPhoto} />
-                  <button
-                    type="button"
-                    className={styles.chipBody}
-                    onClick={() => openEdit(r.TeamMemberId)}
-                    onKeyDown={chipKeyHandler(i)}
-                    aria-label={`Edit ${displayName}${featured ? ' — featured' : ''}`}
-                  >
-                    <span className={styles.chipName}>
-                      {displayName}
-                      {featured && (
-                        <EditorialChip variant="featured" size="sm">
-                          Featured
-                        </EditorialChip>
-                      )}
-                    </span>
-                    {r.Title && (
-                      <span className={styles.chipTitle}>{r.Title}</span>
-                    )}
-                    {r.Department && (
-                      <span className={styles.chipMeta}>{r.Department}</span>
-                    )}
-                    {r.BioSnippet && (
-                      <span className={styles.chipBio}>{r.BioSnippet}</span>
-                    )}
-                  </button>
-                  <PublisherButton
-                    iconOnly
-                    pressed={featured}
-                    aria-label={
-                      featured
-                        ? `Unfeature ${displayName}`
-                        : `Feature ${displayName} on the article card`
-                    }
-                    title={featured ? 'Unfeature' : 'Feature teammate'}
-                    onClick={() => toggleFeatured(r.TeamMemberId)}
-                  >
-                    {featured ? <StarFilled size="sm" /> : <Star size="sm" />}
-                  </PublisherButton>
-                </div>
-                <div className={styles.chipActions}>
-                  <PublisherButton
-                    iconOnly
-                    size="sm"
-                    aria-label={`Move ${displayName} up`}
-                    title="Move up (Alt+Up)"
-                    onClick={() => move(i, -1)}
-                    disabled={i === 0}
-                  >
-                    <ChevronUp size="sm" />
-                  </PublisherButton>
-                  <PublisherButton
-                    iconOnly
-                    size="sm"
-                    aria-label={`Move ${displayName} down`}
-                    title="Move down (Alt+Down)"
-                    onClick={() => move(i, 1)}
-                    disabled={i === rows.length - 1}
-                  >
-                    <ChevronDown size="sm" />
-                  </PublisherButton>
-                  <PublisherButton size="sm" onClick={() => openEdit(r.TeamMemberId)}>
-                    Edit
-                  </PublisherButton>
-                  <PublisherButton
-                    size="sm"
-                    variant="danger"
-                    aria-label={`Remove ${displayName}`}
-                    onClick={() => removeAt(i)}
-                  >
-                    Remove
-                  </PublisherButton>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+        <>
+          {featuredRow && (
+            <div className={styles.rosterGroup} aria-label="Article card lead">
+              <p className={styles.rosterHeading}>Article card lead</p>
+              <ol className={styles.chipStack}>
+                {renderChip(featuredRow, featuredIndex, true)}
+              </ol>
+            </div>
+          )}
+          {rosterEntries.length > 0 && (
+            <div
+              className={styles.rosterGroup}
+              aria-label="Article teammates — use Alt+Up or Alt+Down to reorder"
+            >
+              <p className={styles.rosterHeading}>
+                {featuredRow ? 'Roster' : 'Team'}
+              </p>
+              <ol className={styles.chipStack}>
+                {rosterEntries.map(({ row, index }) =>
+                  renderChip(row, index, false),
+                )}
+              </ol>
+            </div>
+          )}
+        </>
       )}
       <PublisherButton variant="primary" onClick={openAdd}>
         + Add teammate

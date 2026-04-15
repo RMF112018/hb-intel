@@ -19,6 +19,7 @@ import {
   StarFilled,
 } from '@hbc/ui-kit';
 import type { PublisherMediaRow } from '../../../data/publisherAdapter/index.js';
+import { mediaRoleLabel } from '../authorLabels.js';
 import { MediaComposer } from './MediaComposer.js';
 import {
   applyFeaturedGalleryInvariant,
@@ -169,22 +170,31 @@ export function GalleryPanel({
           description="Add supporting visuals to show alongside the article — alt text keeps the story accessible."
         />
       ) : (
-        <ol
-          className={styles.grid}
-          aria-label="Article images — use Alt+ArrowLeft or Alt+ArrowRight to reorder"
-        >
-          {rows.map((r, i) => {
-            const featured = r.FeaturedInGallery === true;
+        (() => {
+          const featuredIndex = rows.findIndex((r) => r.FeaturedInGallery === true);
+          const featuredRow = featuredIndex >= 0 ? rows[featuredIndex] : undefined;
+          const galleryEntries = rows
+            .map((row, index) => ({ row, index }))
+            .filter(({ index }) => index !== featuredIndex);
+
+          const renderTile = (
+            r: PublisherMediaRow,
+            i: number,
+            isFeatured: boolean,
+          ) => {
             const label = r.Title || r.AltText || `Image ${i + 1}`;
             const showRoleBadge = r.MediaRole !== 'gallery';
             return (
-              <li key={r.MediaId} className={styles.tile}>
+              <li
+                key={r.MediaId}
+                className={`${styles.tile} ${isFeatured ? styles.tileFeatured : ''}`}
+              >
                 <button
                   type="button"
                   className={styles.tileBody}
                   onClick={() => openEdit(r.MediaId)}
                   onKeyDown={tileKeyHandler(i)}
-                  aria-label={`Edit ${label}${featured ? ' — featured' : ''}`}
+                  aria-label={`Edit ${label}${isFeatured ? ' — featured' : ''}`}
                 >
                   <span className={styles.thumbFrame}>
                     <img
@@ -202,12 +212,12 @@ export function GalleryPanel({
                   <span className={styles.tileMetaRow}>
                     {showRoleBadge && (
                       <EditorialChip variant="info" size="sm">
-                        {r.MediaRole}
+                        {mediaRoleLabel(r.MediaRole)}
                       </EditorialChip>
                     )}
-                    {featured && (
+                    {isFeatured && (
                       <EditorialChip variant="featured" size="sm">
-                        Featured
+                        Card thumbnail
                       </EditorialChip>
                     )}
                   </span>
@@ -216,14 +226,16 @@ export function GalleryPanel({
                   <PublisherButton
                     iconOnly
                     size="sm"
-                    pressed={featured}
+                    pressed={isFeatured}
                     aria-label={
-                      featured ? `Unfeature ${label}` : `Feature ${label} in the gallery`
+                      isFeatured
+                        ? `Unfeature ${label}`
+                        : `Feature ${label} in the gallery`
                     }
-                    title={featured ? 'Unfeature' : 'Feature in gallery'}
+                    title={isFeatured ? 'Unfeature' : 'Feature in gallery'}
                     onClick={() => toggleFeatured(r.MediaId)}
                   >
-                    {featured ? <StarFilled size="sm" /> : <Star size="sm" />}
+                    {isFeatured ? <StarFilled size="sm" /> : <Star size="sm" />}
                   </PublisherButton>
                   <PublisherButton
                     iconOnly
@@ -256,8 +268,39 @@ export function GalleryPanel({
                 </div>
               </li>
             );
-          })}
-        </ol>
+          };
+
+          return (
+            <>
+              {featuredRow && (
+                <div
+                  className={styles.galleryCluster}
+                  aria-label="Card thumbnail"
+                >
+                  <p className={styles.galleryHeading}>Card thumbnail</p>
+                  <ol className={styles.leadGrid}>
+                    {renderTile(featuredRow, featuredIndex, true)}
+                  </ol>
+                </div>
+              )}
+              {galleryEntries.length > 0 && (
+                <div
+                  className={styles.galleryCluster}
+                  aria-label="Article images — use Alt+ArrowLeft or Alt+ArrowRight to reorder"
+                >
+                  <p className={styles.galleryHeading}>
+                    {featuredRow ? 'Gallery' : 'Images'}
+                  </p>
+                  <ol className={styles.grid}>
+                    {galleryEntries.map(({ row, index }) =>
+                      renderTile(row, index, false),
+                    )}
+                  </ol>
+                </div>
+              )}
+            </>
+          );
+        })()
       )}
       <PublisherButton variant="primary" onClick={openAdd}>
         + Add image

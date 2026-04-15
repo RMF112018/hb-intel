@@ -1,14 +1,24 @@
+/* Gallery management surface — editorial visual manager.
+ *
+ * Foreshadows the published layout: the featured gallery image reads
+ * as the card thumbnail (larger, accented), and the rest read as a
+ * supporting grid. Control affordances route exclusively through the
+ * governed `PublisherButton` primitive; the local .iconBtn /
+ * .actionBtn / .addBtn classes were removed after migration and have
+ * been dropped from this module.
+ */
+
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--hb-space-md, 16px);
 }
 
 .readiness {
   font-size: 12px;
   line-height: 1.4;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: var(--hb-radius-lg, 6px);
   border: 1px solid transparent;
 }
 
@@ -30,13 +40,37 @@
   border-color: var(--hb-status-danger-border, #e5b1b3);
 }
 
+.galleryCluster {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hb-space-sm, 8px);
+}
+
+.galleryHeading {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hb-text-tertiary, #6a6a6f);
+}
+
 .grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
+  gap: var(--hb-space-md, 12px);
+}
+
+.leadGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--hb-space-md, 12px);
 }
 
 .tile {
@@ -46,13 +80,28 @@
   padding: 8px;
   background: var(--hb-surface-1, #fff);
   border: 1px solid var(--hb-border-subtle, #e3e6ed);
-  border-radius: 8px;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  border-radius: var(--hb-radius-xl, 8px);
+  transition:
+    border-color var(--hb-transition-fast, 150ms ease),
+    box-shadow var(--hb-transition-fast, 150ms ease);
 }
 
 .tile:focus-within {
   border-color: var(--hb-color-presentation-blue, #225391);
   box-shadow: 0 0 0 1px var(--hb-color-presentation-blue, #225391) inset;
+}
+
+/* Featured tile reads as the published card thumbnail — wider
+ * aspect, stronger surface, featured-ramp accent. */
+.tileFeatured {
+  background: linear-gradient(
+    135deg,
+    var(--hb-status-featured-bg, #fff3d6) 0%,
+    var(--hb-surface-1, #fff) 55%
+  );
+  border-color: var(--hb-status-featured-border, #f4d480);
+  box-shadow: inset 0 3px 0 var(--hb-status-featured-text, #8a5a00);
+  padding: 12px;
 }
 
 .tileBody {
@@ -71,7 +120,7 @@
 .tileBody:focus-visible {
   outline: 2px solid var(--hb-color-presentation-blue, #225391);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--hb-radius-md, 4px);
 }
 
 .thumbFrame {
@@ -79,8 +128,13 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   background: var(--hb-surface-3, #eef1f6);
-  border-radius: 6px;
+  border-radius: var(--hb-radius-lg, 6px);
   overflow: hidden;
+}
+
+.tileFeatured .thumbFrame {
+  aspect-ratio: 16 / 9;
+  box-shadow: var(--hb-elevation-1, 0 1px 3px rgba(16, 24, 40, 0.08));
 }
 
 .thumb {
@@ -111,6 +165,11 @@
   overflow: hidden;
 }
 
+.tileFeatured .tileCaption {
+  font-size: 13px;
+  -webkit-line-clamp: 3;
+}
+
 .tileCaption em {
   color: var(--hb-text-muted, #7a7a82);
   font-style: italic;
@@ -122,122 +181,9 @@
   gap: 6px;
 }
 
-.roleBadge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--hb-text-primary, #1f1f1f);
-  background: var(--hb-surface-3, #eef1f6);
-  padding: 2px 6px;
-  border-radius: 999px;
-}
-
-.featuredBadge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--hb-status-featured-text, #8a5a00);
-  background: var(--hb-status-featured-bg, #fff3d6);
-  padding: 2px 6px;
-  border-radius: 999px;
-}
-
 .tileActions {
   display: flex;
-  gap: 4px;
+  gap: var(--hb-space-xs, 4px);
   flex-wrap: wrap;
   justify-content: flex-end;
-}
-
-.iconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--hb-text-muted, #7a7a82);
-  font-size: 15px;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
-}
-
-.iconBtn:hover {
-  color: var(--hb-status-featured-text, #8a5a00);
-  background: var(--hb-status-featured-bg, #fff3d6);
-}
-
-.iconBtn:focus-visible {
-  outline: 2px solid var(--hb-color-presentation-blue, #225391);
-  outline-offset: 2px;
-}
-
-.iconBtnActive {
-  color: var(--hb-status-featured-text, #8a5a00);
-  border-color: var(--hb-status-featured-border, #f4d480);
-  background: var(--hb-status-featured-bg, #fff3d6);
-}
-
-.actionBtn,
-.actionBtnDanger {
-  font: inherit;
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--hb-border-strong, #cbcbd0);
-  background: var(--hb-surface-1, #fff);
-  color: var(--hb-text-primary, #1f1f1f);
-  cursor: pointer;
-}
-
-.actionBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.actionBtn:hover:not(:disabled) {
-  background: var(--hb-surface-2, #f4f6fa);
-}
-
-.actionBtn:focus-visible,
-.actionBtnDanger:focus-visible {
-  outline: 2px solid var(--hb-color-presentation-blue, #225391);
-  outline-offset: 1px;
-}
-
-.actionBtnDanger {
-  border-color: var(--hb-status-danger-border, #e5b1b3);
-  color: var(--hb-status-danger-text, #a4262c);
-}
-
-.actionBtnDanger:hover {
-  background: var(--hb-status-danger-bg, #fdecec);
-}
-
-.addBtn {
-  align-self: flex-start;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--hb-color-presentation-blue, #225391);
-  background: var(--hb-color-presentation-blue, #225391);
-  color: var(--hb-surface-1, #fff);
-  cursor: pointer;
-}
-
-.addBtn:hover {
-  background: var(--hb-color-presentation-blue, #225391);
-  border-color: var(--hb-color-presentation-blue, #225391);
-}
-
-.addBtn:focus-visible {
-  outline: 2px solid var(--hb-color-presentation-blue, #225391);
-  outline-offset: 2px;
 }

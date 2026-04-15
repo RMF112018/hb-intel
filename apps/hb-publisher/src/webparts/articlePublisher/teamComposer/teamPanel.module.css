@@ -1,12 +1,32 @@
-/* Teammate management surface — chip stack.
- * Premium, low-chrome visual treatment that reads as editorial
- * roster rather than CRUD table.
+/* Teammate management surface — editorial roster.
+ *
+ * Premium, low-chrome visual treatment that foreshadows the published
+ * layout: the featured teammate reads as the article-card lead and the
+ * rest read as the supporting roster. Control affordances now route
+ * exclusively through the governed `PublisherButton` primitive; the
+ * local .iconBtn / .actionBtn / .addBtn classes were removed after
+ * migration and have been dropped from this module.
  */
 
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--hb-space-md, 16px);
+}
+
+.rosterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hb-space-sm, 8px);
+}
+
+.rosterHeading {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hb-text-tertiary, #6a6a6f);
 }
 
 .chipStack {
@@ -15,23 +35,38 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--hb-space-sm, 8px);
 }
 
 .chip {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--hb-space-sm, 8px);
   padding: 10px 12px;
   background: var(--hb-surface-1, #fff);
   border: 1px solid var(--hb-border-subtle, #e3e6ed);
-  border-radius: 8px;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  border-radius: var(--hb-radius-xl, 8px);
+  transition:
+    border-color var(--hb-transition-fast, 150ms ease),
+    box-shadow var(--hb-transition-fast, 150ms ease);
 }
 
 .chip:focus-within {
   border-color: var(--hb-color-presentation-blue, #225391);
   box-shadow: 0 0 0 1px var(--hb-color-presentation-blue, #225391) inset;
+}
+
+/* Featured teammate reads as the article-card lead — a subtle gold
+ * wash + left accent makes the editorial role scannable without
+ * shouting. */
+.chipFeatured {
+  background: linear-gradient(
+    135deg,
+    var(--hb-status-featured-bg, #fff3d6) 0%,
+    var(--hb-surface-1, #fff) 60%
+  );
+  border-color: var(--hb-status-featured-border, #f4d480);
+  box-shadow: inset 3px 0 0 var(--hb-status-featured-text, #8a5a00);
 }
 
 .chipMain {
@@ -46,13 +81,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--hb-radius-full, 50%);
   flex-shrink: 0;
   user-select: none;
   overflow: hidden;
   box-shadow: var(--hb-elevation-1, 0 1px 2px rgba(16, 24, 40, 0.06));
+}
+
+.chipFeatured .avatar,
+.chipFeatured .avatarPhoto {
+  width: 48px;
+  height: 48px;
+  box-shadow:
+    0 0 0 2px var(--hb-status-featured-bg, #fff3d6),
+    var(--hb-elevation-2, 0 4px 8px rgba(16, 24, 40, 0.08));
 }
 
 .avatar {
@@ -97,7 +141,7 @@
 .chipBody:focus-visible {
   outline: 2px solid var(--hb-color-presentation-blue, #225391);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--hb-radius-md, 4px);
 }
 
 .chipName {
@@ -109,15 +153,8 @@
   gap: 8px;
 }
 
-.featuredBadge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--hb-status-featured-text, #8a5a00);
-  background: var(--hb-status-featured-bg, #fff3d6);
-  padding: 2px 6px;
-  border-radius: 999px;
+.chipFeatured .chipName {
+  font-size: 15px;
 }
 
 .chipTitle {
@@ -139,101 +176,9 @@
   margin-top: 2px;
 }
 
-.iconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--hb-text-muted, #7a7a82);
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
-  flex-shrink: 0;
-}
-
-.iconBtn:hover {
-  color: var(--hb-status-featured-text, #8a5a00);
-  background: var(--hb-status-featured-bg, #fff3d6);
-}
-
-.iconBtn:focus-visible {
-  outline: 2px solid var(--hb-color-presentation-blue, #225391);
-  outline-offset: 2px;
-}
-
-.iconBtnActive {
-  color: var(--hb-status-featured-text, #8a5a00);
-  border-color: var(--hb-status-featured-border, #f4d480);
-  background: var(--hb-status-featured-bg, #fff3d6);
-}
-
 .chipActions {
   display: flex;
-  gap: 6px;
+  gap: var(--hb-space-xs, 4px);
   flex-wrap: wrap;
   justify-content: flex-end;
-}
-
-.actionBtn,
-.actionBtnDanger {
-  font: inherit;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--hb-border-strong, #cbcbd0);
-  background: var(--hb-surface-1, #fff);
-  color: var(--hb-text-primary, #1f1f1f);
-  cursor: pointer;
-}
-
-.actionBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.actionBtn:hover:not(:disabled) {
-  background: var(--hb-surface-2, #f4f6fa);
-}
-
-.actionBtn:focus-visible,
-.actionBtnDanger:focus-visible {
-  outline: 2px solid var(--hb-color-presentation-blue, #225391);
-  outline-offset: 1px;
-}
-
-.actionBtnDanger {
-  border-color: var(--hb-status-danger-border, #e5b1b3);
-  color: var(--hb-status-danger-text, #a4262c);
-}
-
-.actionBtnDanger:hover {
-  background: var(--hb-status-danger-bg, #fdecec);
-}
-
-.addBtn {
-  align-self: flex-start;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--hb-color-presentation-blue, #225391);
-  background: var(--hb-color-presentation-blue, #225391);
-  color: var(--hb-surface-1, #fff);
-  cursor: pointer;
-}
-
-.addBtn:hover {
-  background: var(--hb-color-presentation-blue, #225391);
-  border-color: var(--hb-color-presentation-blue, #225391);
-}
-
-.addBtn:focus-visible {
-  outline: 2px solid var(--hb-color-presentation-blue, #225391);
-  outline-offset: 2px;
 }
