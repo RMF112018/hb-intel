@@ -6,6 +6,8 @@ declare const styles: {
   readonly readinessProblem: string;
   readonly galleryCluster: string;
   readonly galleryHeading: string;
+  readonly galleryHeadingRow: string;
+  readonly galleryHeadingHint: string;
   readonly grid: string;
   readonly leadGrid: string;
   readonly tile: string;

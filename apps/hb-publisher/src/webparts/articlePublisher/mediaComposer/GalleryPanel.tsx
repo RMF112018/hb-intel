@@ -173,12 +173,17 @@ export function GalleryPanel({
       {rows.length === 0 ? (
         <HbcEmptyState
           title="No images yet"
-          description="Add supporting visuals to show alongside the article — alt text keeps the story accessible."
+          description="Add visuals that ride with the article. Feature one to use as the homepage card thumbnail. Every image needs alt text before publish — captions are optional but help readers."
         />
       ) : (
         (() => {
           const featuredIndex = rows.findIndex((r) => r.FeaturedInGallery === true);
           const featuredRow = featuredIndex >= 0 ? rows[featuredIndex] : undefined;
+          const featuredLabel = featuredRow
+            ? featuredRow.Title ||
+              featuredRow.AltText ||
+              'the current card thumbnail'
+            : undefined;
           const galleryEntries = rows
             .map((row, index) => ({ row, index }))
             .filter(({ index }) => index !== featuredIndex);
@@ -235,10 +240,18 @@ export function GalleryPanel({
                     pressed={isFeatured}
                     aria-label={
                       isFeatured
-                        ? `Unfeature ${label}`
-                        : `Feature ${label} in the gallery`
+                        ? `Unfeature ${label} — no image will lead the homepage card`
+                        : featuredLabel
+                          ? `Use ${label} as the card thumbnail — replaces ${featuredLabel}`
+                          : `Use ${label} as the card thumbnail`
                     }
-                    title={isFeatured ? 'Unfeature' : 'Feature in gallery'}
+                    title={
+                      isFeatured
+                        ? 'Unfeature (no card thumbnail)'
+                        : featuredLabel
+                          ? `Use as card thumbnail (replaces ${featuredLabel})`
+                          : 'Use as card thumbnail'
+                    }
                     onClick={() => toggleFeatured(r.MediaId)}
                   >
                     {isFeatured ? <StarFilled size="sm" /> : <Star size="sm" />}
@@ -283,7 +296,12 @@ export function GalleryPanel({
                   className={styles.galleryCluster}
                   aria-label="Card thumbnail"
                 >
-                  <p className={styles.galleryHeading}>Card thumbnail</p>
+                  <div className={styles.galleryHeadingRow}>
+                    <p className={styles.galleryHeading}>Card thumbnail</p>
+                    <span className={styles.galleryHeadingHint}>
+                      Leads the homepage card. Use the star on any image to move it.
+                    </span>
+                  </div>
                   <ol className={styles.leadGrid}>
                     {renderTile(featuredRow, featuredIndex, true)}
                   </ol>
@@ -294,9 +312,14 @@ export function GalleryPanel({
                   className={styles.galleryCluster}
                   aria-label="Article images — use Alt+ArrowLeft or Alt+ArrowRight to reorder"
                 >
-                  <p className={styles.galleryHeading}>
-                    {featuredRow ? 'Gallery' : 'Images'}
-                  </p>
+                  <div className={styles.galleryHeadingRow}>
+                    <p className={styles.galleryHeading}>
+                      {featuredRow ? 'Gallery' : 'Images'} ({galleryEntries.length})
+                    </p>
+                    <span className={styles.galleryHeadingHint}>
+                      Tip: Alt+← / Alt+→ to reorder while focused on an image.
+                    </span>
+                  </div>
                   <ol className={styles.grid}>
                     {galleryEntries.map(({ row, index }) =>
                       renderTile(row, index, false),
