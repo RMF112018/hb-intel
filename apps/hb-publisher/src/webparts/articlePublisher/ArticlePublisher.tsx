@@ -1,12 +1,15 @@
 /**
  * Article Publisher — authoring surface for structured article publishing.
  *
- * Supports the Project Spotlight article workflow: HB Articles
- * master-record entries with `Destination='projectSpotlight'`,
- * page-bound to the ProjectSpotlight site. Additional destinations
- * (e.g. Company Pulse) are not wired in the current implementation;
- * the adapter and validation layers treat `projectSpotlight` as the
- * only supported destination until another one is explicitly added.
+ * Current release scope: the live runtime supports the Project Spotlight
+ * article workflow only — HB Articles master-record entries with
+ * `Destination='projectSpotlight'`, page-bound to the ProjectSpotlight
+ * site. Other destinations (e.g. Company Pulse) are not wired; the
+ * adapter, validation, and readiness layers treat every other value as
+ * an explicitly blocked unsupported destination, and the author-facing
+ * surface narrates that truth. The product identity is broad
+ * ("Article Publisher") but the runtime scope is narrower and must be
+ * kept truthful until additional destinations are fully implemented.
  *
  * Hosted on the HBCentral publisher page. Ownership is split between:
  *   - `useDraftWorkspace`   — queue / promotion-rules / selection identity
@@ -507,8 +510,8 @@ export function ArticlePublisher({
         {!articleDraft ? (
           <div className={styles.canvasEmpty}>
             <HbcEmptyState
-              title="Start composing"
-              description="Pick a draft from the apron on the left, or start a new Project Spotlight article."
+              title="Start a Project Spotlight article"
+              description="Pick a draft from the apron on the left, or start a new one. This release publishes Project Spotlight articles only — other destinations are not wired yet and are blocked."
             />
           </div>
         ) : (
