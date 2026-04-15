@@ -49,6 +49,13 @@
     bottom: 0;
     max-height: 40vh;
     overflow: auto;
+    /*
+     * Contain the scroll so authors scrolling inside the pinned
+     * readiness rail don't accidentally scroll the SharePoint host
+     * page behind it. Matters specifically on the collapsed (<1080px)
+     * breakpoint where the rail becomes a pinned bottom panel.
+     */
+    overscroll-behavior: contain;
     border-top: 1px solid var(--hb-border-subtle, #e3e6ed);
     border-left: none;
     background: var(--hb-surface-1, #fff);
@@ -252,6 +259,15 @@
 .section:first-of-type {
   border-top: none;
   padding-top: var(--hb-space-sm, 8px);
+}
+
+.section:focus {
+  outline: none;
+}
+
+.section:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline-offset: 2px;
 }
 
 .sectionHeader {

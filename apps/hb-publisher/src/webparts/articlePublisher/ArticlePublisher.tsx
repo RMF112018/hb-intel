@@ -62,6 +62,7 @@ import { publishDisabledReason } from './lifecycleMessaging.js';
 import { useSharePointPeopleSearch } from '../../data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../../data/useRecipientPhotoHydration.js';
 import { transitionActionLabel } from './authorLabels.js';
+import { handleSectionIndexClick } from './sectionFocus.js';
 import styles from './article-publisher.module.css';
 
 // Re-exports for existing test-surface imports (`./ArticlePublisher`).
@@ -347,7 +348,11 @@ export function ArticlePublisher({
               </p>
             )}
 
-            <nav className={styles.sectionIndex} aria-label="Workspace sections">
+            <nav
+              className={styles.sectionIndex}
+              aria-label="Workspace sections"
+              onClick={handleSectionIndexClick}
+            >
               {WORKSPACE_SECTIONS.map((s) => (
                 <a key={s.id} href={`#section-${s.id}`} className={styles.sectionIndexLink}>
                   {s.label}
@@ -355,7 +360,7 @@ export function ArticlePublisher({
               ))}
             </nav>
 
-            <section id="section-identity" className={styles.section}>
+            <section id="section-identity" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Identity</h3>
                 <p className={styles.sectionIntent}>Name the article and bind it to a project.</p>
@@ -370,7 +375,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-hero" className={styles.section}>
+            <section id="section-hero" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Hero</h3>
                 <p className={styles.sectionIntent}>Set the hero visual and editorial framing.</p>
@@ -380,7 +385,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-story" className={styles.section}>
+            <section id="section-story" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Story</h3>
                 <p className={styles.sectionIntent}>Compose the body of the article.</p>
@@ -390,7 +395,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-media" className={styles.section}>
+            <section id="section-media" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Media</h3>
                 <p className={styles.sectionIntent}>Add supporting media beyond the hero.</p>
@@ -407,7 +412,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-team" className={styles.section}>
+            <section id="section-team" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Team</h3>
                 <p className={styles.sectionIntent}>Spotlight the people behind the work.</p>
@@ -426,7 +431,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-promotion" className={styles.section}>
+            <section id="section-promotion" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Promotion</h3>
                 <p className={styles.sectionIntent}>Review how promotion policy applies.</p>
@@ -453,7 +458,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-destination" className={styles.section}>
+            <section id="section-destination" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Destination binding</h3>
                 <p className={styles.sectionIntent}>Confirm template and destination page binding.</p>
@@ -463,7 +468,7 @@ export function ArticlePublisher({
               </div>
             </section>
 
-            <section id="section-preview" className={styles.section}>
+            <section id="section-preview" className={styles.section} tabIndex={-1}>
               <header className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>Preview</h3>
                 <p className={styles.sectionIntent}>See how the article will publish.</p>
