@@ -104,6 +104,65 @@ describe('buildPublishResolutionContext', () => {
     expect(result.context.decisionTrace.selectionRule).not.toBe('adminOverride');
   });
 
+  it('returns repositoryReadFailed when the articles seam throws', async () => {
+    const r = repos();
+    r.articles.getByArticleId = vi.fn(async () => {
+      throw new Error('sp 500');
+    });
+    const result = await buildPublishResolutionContext(r, 'art-1');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.reason).toBe('repositoryReadFailed');
+    if (result.reason !== 'repositoryReadFailed') return;
+    expect(result.failedRead).toBe('articles');
+    expect(result.message).toContain('articles');
+    expect(result.message).toContain('sp 500');
+  });
+
+  it('returns repositoryReadFailed when the templateRegistry seam throws', async () => {
+    const r = repos();
+    r.templateRegistry.listActive = vi.fn(async () => {
+      throw new Error('reg down');
+    });
+    const result = await buildPublishResolutionContext(r, 'art-1');
+    expect(result.ok).toBe(false);
+    if (result.ok || result.reason !== 'repositoryReadFailed') return;
+    expect(result.failedRead).toBe('templateRegistry');
+  });
+
+  it('returns repositoryReadFailed when the teamMembers seam throws', async () => {
+    const r = repos();
+    r.teamMembers.listByArticle = vi.fn(async () => {
+      throw new Error('team down');
+    });
+    const result = await buildPublishResolutionContext(r, 'art-1');
+    expect(result.ok).toBe(false);
+    if (result.ok || result.reason !== 'repositoryReadFailed') return;
+    expect(result.failedRead).toBe('teamMembers');
+  });
+
+  it('returns repositoryReadFailed when the media seam throws', async () => {
+    const r = repos();
+    r.media.listByArticle = vi.fn(async () => {
+      throw new Error('media down');
+    });
+    const result = await buildPublishResolutionContext(r, 'art-1');
+    expect(result.ok).toBe(false);
+    if (result.ok || result.reason !== 'repositoryReadFailed') return;
+    expect(result.failedRead).toBe('media');
+  });
+
+  it('returns repositoryReadFailed when the pageBindings seam throws', async () => {
+    const r = repos();
+    r.pageBindings.getByArticleId = vi.fn(async () => {
+      throw new Error('bindings down');
+    });
+    const result = await buildPublishResolutionContext(r, 'art-1');
+    expect(result.ok).toBe(false);
+    if (result.ok || result.reason !== 'repositoryReadFailed') return;
+    expect(result.failedRead).toBe('pageBindings');
+  });
+
   it('returns templateResolutionFailed when no active template matches discriminators', async () => {
     const result = await buildPublishResolutionContext(
       repos({

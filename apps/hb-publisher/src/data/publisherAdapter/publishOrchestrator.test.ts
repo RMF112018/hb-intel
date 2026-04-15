@@ -979,6 +979,60 @@ describe('publishOrchestrator', () => {
     });
   });
 
+  describe('resolution-stage repository-read normalization (phase-10 prompt-01)', () => {
+    it('non-preview resolution read failure returns stage=resolution and appends HB Article Publishing Errors', async () => {
+      const f = fixture();
+      f.repositories.templateRegistry.listActive = vi.fn(async () => {
+        throw new Error('reg 500');
+      });
+      const errorAppend = vi.fn<
+        PublisherRepositories['publishingErrors']['append']
+      >(async () => ({ itemId: 9 }));
+      f.repositories.publishingErrors.append = errorAppend;
+
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'create',
+        now: () => '2026-04-13T10:00:00.000Z',
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('resolution');
+      expect(result.message).toContain('templateRegistry');
+      expect(errorAppend).toHaveBeenCalledTimes(1);
+      const row = errorAppend.mock.calls[0]![0];
+      expect(row.ArticleId).toBe('art-ps-001');
+      expect(row.Title).toContain('resolution');
+      expect(row.Title).toContain('Acme Tower — April');
+      expect(row.Destination).toBe('projectSpotlight');
+      expect(row.ErrorSummary).toContain('templateRegistry');
+    });
+
+    it('preview mode does not write the error log when a resolution read fails', async () => {
+      const f = fixture();
+      f.repositories.media.listByArticle = vi.fn(async () => {
+        throw new Error('media down');
+      });
+      const errorAppend = vi.fn<
+        PublisherRepositories['publishingErrors']['append']
+      >(async () => ({ itemId: 1 }));
+      f.repositories.publishingErrors.append = errorAppend;
+
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'preview',
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('resolution');
+      expect(errorAppend).not.toHaveBeenCalled();
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+  });
+
   it('surfaces page-publish failures without writing the binding', async () => {
     const f = fixture();
     f.createOrUpdate.mockResolvedValueOnce({

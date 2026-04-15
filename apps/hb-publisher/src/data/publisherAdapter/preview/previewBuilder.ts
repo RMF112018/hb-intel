@@ -45,6 +45,7 @@ export interface PreviewOutcomeFailure {
   readonly reason:
     | 'articleNotFound'
     | 'templateResolutionFailed'
+    | 'repositoryReadFailed'
     | 'compositionFailed';
   readonly message: string;
   readonly composedPage?: ComposedPage;

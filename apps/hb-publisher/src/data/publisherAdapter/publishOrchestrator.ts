@@ -289,8 +289,9 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     // the article; only non-preview modes are blocked here. The
     // orchestrator reads the master row directly so the gate does not
     // depend on a successful resolution.
+    let preArticle: PublisherArticleRow | undefined;
     if (req.mode !== 'preview') {
-      const preArticle = await repositories.articles.getByArticleId(req.articleId);
+      preArticle = await repositories.articles.getByArticleId(req.articleId);
       if (
         preArticle &&
         preArticle.ArticleContentType === 'milestoneSpotlight'
@@ -329,8 +330,8 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       if (req.mode !== 'preview') {
         await recordPublishingError({
           articleId: req.articleId,
-          title: undefined,
-          destination: undefined,
+          title: preArticle?.Title,
+          destination: preArticle?.Destination,
           stage: 'resolution',
           mode: req.mode,
           message: resolution.message,

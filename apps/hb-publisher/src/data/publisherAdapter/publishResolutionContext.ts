@@ -34,19 +34,62 @@ export interface PublishResolutionContext {
   readonly decisionTrace: TemplateResolutionTrace;
 }
 
+export type ResolutionReadSeam =
+  | 'articles'
+  | 'templateRegistry'
+  | 'teamMembers'
+  | 'media'
+  | 'pageBindings';
+
 export type BuildResolutionContextResult =
   | { readonly ok: true; readonly context: PublishResolutionContext }
   | {
       readonly ok: false;
-      readonly reason:
-        | 'articleNotFound'
-        | 'templateResolutionFailed';
+      readonly reason: 'articleNotFound' | 'templateResolutionFailed';
       readonly message: string;
       readonly templateResolution?: Extract<
         TemplateResolutionResult,
         { ok: false }
       >;
+    }
+  | {
+      readonly ok: false;
+      readonly reason: 'repositoryReadFailed';
+      readonly failedRead: ResolutionReadSeam;
+      readonly message: string;
+      readonly cause?: unknown;
     };
+
+function extractMessage(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === 'string' && err) return err;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return 'unknown error';
+  }
+}
+
+async function safeRead<T>(
+  seam: ResolutionReadSeam,
+  read: () => Promise<T>,
+): Promise<
+  | { readonly ok: true; readonly value: T }
+  | Extract<BuildResolutionContextResult, { reason: 'repositoryReadFailed' }>
+> {
+  try {
+    const value = await read();
+    return { ok: true, value };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: 'repositoryReadFailed',
+      failedRead: seam,
+      message: `Resolution read '${seam}' failed: ${extractMessage(err)}`,
+      cause: err,
+    };
+  }
+}
 
 /**
  * Build the shared resolution context for a given article. Fetches the
@@ -58,7 +101,11 @@ export async function buildPublishResolutionContext(
   repositories: PublisherRepositories,
   articleId: string,
 ): Promise<BuildResolutionContextResult> {
-  const article = await repositories.articles.getByArticleId(articleId);
+  const articleRead = await safeRead('articles', () =>
+    repositories.articles.getByArticleId(articleId),
+  );
+  if (!articleRead.ok) return articleRead;
+  const article = articleRead.value;
   if (!article) {
     return {
       ok: false,
@@ -67,7 +114,12 @@ export async function buildPublishResolutionContext(
     };
   }
 
-  const registry = await repositories.templateRegistry.listActive();
+  const registryRead = await safeRead('templateRegistry', () =>
+    repositories.templateRegistry.listActive(),
+  );
+  if (!registryRead.ok) return registryRead;
+  const registry = registryRead.value;
+
   const resolution = resolveTemplateSystemManaged(
     {
       ArticleContentType: article.ArticleContentType,
@@ -88,20 +140,23 @@ export async function buildPublishResolutionContext(
     };
   }
 
-  const [teamMembers, media, existingBinding] = await Promise.all([
-    repositories.teamMembers.listByArticle(articleId),
-    repositories.media.listByArticle(articleId),
-    repositories.pageBindings.getByArticleId(articleId),
+  const [teamMembersRead, mediaRead, existingBindingRead] = await Promise.all([
+    safeRead('teamMembers', () => repositories.teamMembers.listByArticle(articleId)),
+    safeRead('media', () => repositories.media.listByArticle(articleId)),
+    safeRead('pageBindings', () => repositories.pageBindings.getByArticleId(articleId)),
   ]);
+  if (!teamMembersRead.ok) return teamMembersRead;
+  if (!mediaRead.ok) return mediaRead;
+  if (!existingBindingRead.ok) return existingBindingRead;
 
   return {
     ok: true,
     context: {
       article,
       template: resolution.entry,
-      teamMembers,
-      media,
-      existingBinding,
+      teamMembers: teamMembersRead.value,
+      media: mediaRead.value,
+      existingBinding: existingBindingRead.value,
       decisionTrace: resolution.trace,
     },
   };
