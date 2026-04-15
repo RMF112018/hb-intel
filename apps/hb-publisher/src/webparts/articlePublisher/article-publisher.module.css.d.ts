@@ -27,6 +27,15 @@ declare const styles: {
   readonly canvasNotice: string;
   readonly canvasNoticeBlocking: string;
   readonly outcomeChip: string;
+  readonly canvasLane: string;
+  readonly canvasLaneCollapsed: string;
+  readonly canvasLaneHeader: string;
+  readonly canvasLaneStatic: string;
+  readonly canvasLaneToggle: string;
+  readonly canvasLaneChevron: string;
+  readonly canvasLaneLabel: string;
+  readonly canvasLaneHint: string;
+  readonly canvasLaneBody: string;
   readonly section: string;
   readonly sectionGovernance: string;
   readonly sectionHeader: string;

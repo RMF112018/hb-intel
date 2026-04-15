@@ -543,104 +543,125 @@ export function ArticlePublisher({
               />
             )}
 
-            <EditorialSection id="identity" index={1} label="Identity">
-              <MetadataPanel
-                draft={articleDraft}
-                onChange={setArticleDraft}
-                searchProjects={searchProjects}
-                promotionPolicy={promotionPolicy}
-              />
-            </EditorialSection>
-
-            <EditorialSection id="hero" index={2} label="Hero">
-              <HeroPanel
-                draft={articleDraft}
-                onChange={setArticleDraft}
-                searchAssets={searchAssets}
-              />
-            </EditorialSection>
-
-            <EditorialSection id="story" index={3} label="Story">
-              <StoryPanel draft={articleDraft} onChange={setArticleDraft} />
-            </EditorialSection>
-
-            <EditorialSection id="media" index={4} label="Media">
-              <SecondaryImagePanel
-                draft={articleDraft}
-                onChange={setArticleDraft}
-                searchAssets={searchAssets}
-              />
-              <GalleryPanel
-                articleId={articleDraft.ArticleId}
-                rows={mediaDraft}
-                onChange={setMediaDraft}
-                searchAssets={searchAssets}
-              />
-            </EditorialSection>
-
-            <EditorialSection id="team" index={5} label="Team">
-              <TeamPresentationPanel draft={articleDraft} onChange={setArticleDraft} />
-              <TeamPanel
-                articleId={articleDraft.ArticleId}
-                rows={teamDraft}
-                onChange={setTeamDraft}
-                searchPeople={searchPeople}
-                fetchPersonPhoto={fetchPersonPhoto}
-              />
-            </EditorialSection>
-
-            <EditorialSection id="promotion" index={6} label="Promotion">
-              {promotionRuleHealth &&
-                promotionRuleHealth.kind !== 'ready' &&
-                promotionRuleHealthHeadline && (
-                  <ExceptionalNotice
-                    tone={
-                      promotionRuleHealth.kind === 'loadFailure'
-                        ? 'danger'
-                        : 'warn'
-                    }
-                    headline={
-                      promotionRuleHealth.kind === 'loadFailure'
-                        ? 'Promotion rules unavailable'
-                        : 'Promotion rule guidance'
-                    }
-                    details={promotionRuleHealthHeadline}
-                    detailsLabel="Rule details"
-                  />
-                )}
-              {promotionSummary.length > 0 && (
-                <>
-                  <p className={styles.sectionCopy}>
-                    Promotion is governed by the destination's rule set. Save
-                    to re-apply; lock semantics are enforced automatically.
-                  </p>
-                  <DisclosureSection
-                    label="Promotion policy details"
-                    summaryHint="Rule identifiers, scope, and lock semantics used at save time."
-                    testId="promotion-operator-details"
-                  >
-                    {promotionSummary.map((line, i) => (
-                      <p key={i} className={styles.sectionCopy}>
-                        {line}
-                      </p>
-                    ))}
-                  </DisclosureSection>
-                </>
-              )}
-            </EditorialSection>
-
-            <EditorialSection
-              id="destination"
-              index={7}
-              label="Destination binding"
-              governance
+            <CanvasLane
+              id="compose"
+              label="Compose"
+              hint="Project, headline, hero, story — the fields every draft needs first."
+              collapsible={false}
             >
-              <DestinationBindingPanel binding={binding} context={resolutionContext} />
-            </EditorialSection>
+              <EditorialSection id="identity" index={1} label="Identity">
+                <MetadataPanel
+                  draft={articleDraft}
+                  onChange={setArticleDraft}
+                  searchProjects={searchProjects}
+                  promotionPolicy={promotionPolicy}
+                />
+              </EditorialSection>
 
-            <EditorialSection id="preview" index={8} label="Preview" governance>
-              <ArticlePreview outcome={preview} loading={previewLoading} />
-            </EditorialSection>
+              <EditorialSection id="hero" index={2} label="Hero">
+                <HeroPanel
+                  draft={articleDraft}
+                  onChange={setArticleDraft}
+                  searchAssets={searchAssets}
+                />
+              </EditorialSection>
+
+              <EditorialSection id="story" index={3} label="Story">
+                <StoryPanel draft={articleDraft} onChange={setArticleDraft} />
+              </EditorialSection>
+            </CanvasLane>
+
+            <CanvasLane
+              id="depth"
+              label="Editorial depth"
+              hint="Optional media and team spotlighting. Reveal when ready."
+              sectionIds={['media', 'team']}
+            >
+              <EditorialSection id="media" index={4} label="Media">
+                <SecondaryImagePanel
+                  draft={articleDraft}
+                  onChange={setArticleDraft}
+                  searchAssets={searchAssets}
+                />
+                <GalleryPanel
+                  articleId={articleDraft.ArticleId}
+                  rows={mediaDraft}
+                  onChange={setMediaDraft}
+                  searchAssets={searchAssets}
+                />
+              </EditorialSection>
+
+              <EditorialSection id="team" index={5} label="Team">
+                <TeamPresentationPanel draft={articleDraft} onChange={setArticleDraft} />
+                <TeamPanel
+                  articleId={articleDraft.ArticleId}
+                  rows={teamDraft}
+                  onChange={setTeamDraft}
+                  searchPeople={searchPeople}
+                  fetchPersonPhoto={fetchPersonPhoto}
+                />
+              </EditorialSection>
+            </CanvasLane>
+
+            <CanvasLane
+              id="governance"
+              label="Governance & preview"
+              hint="Promotion, destination binding, and preview. Readiness jump links will open these automatically."
+              sectionIds={['promotion', 'destination', 'preview']}
+            >
+              <EditorialSection id="promotion" index={6} label="Promotion">
+                {promotionRuleHealth &&
+                  promotionRuleHealth.kind !== 'ready' &&
+                  promotionRuleHealthHeadline && (
+                    <ExceptionalNotice
+                      tone={
+                        promotionRuleHealth.kind === 'loadFailure'
+                          ? 'danger'
+                          : 'warn'
+                      }
+                      headline={
+                        promotionRuleHealth.kind === 'loadFailure'
+                          ? 'Promotion rules unavailable'
+                          : 'Promotion rule guidance'
+                      }
+                      details={promotionRuleHealthHeadline}
+                      detailsLabel="Rule details"
+                    />
+                  )}
+                {promotionSummary.length > 0 && (
+                  <>
+                    <p className={styles.sectionCopy}>
+                      Promotion is governed by the destination's rule set. Save
+                      to re-apply; lock semantics are enforced automatically.
+                    </p>
+                    <DisclosureSection
+                      label="Promotion policy details"
+                      summaryHint="Rule identifiers, scope, and lock semantics used at save time."
+                      testId="promotion-operator-details"
+                    >
+                      {promotionSummary.map((line, i) => (
+                        <p key={i} className={styles.sectionCopy}>
+                          {line}
+                        </p>
+                      ))}
+                    </DisclosureSection>
+                  </>
+                )}
+              </EditorialSection>
+
+              <EditorialSection
+                id="destination"
+                index={7}
+                label="Destination binding"
+                governance
+              >
+                <DestinationBindingPanel binding={binding} context={resolutionContext} />
+              </EditorialSection>
+
+              <EditorialSection id="preview" index={8} label="Preview" governance>
+                <ArticlePreview outcome={preview} loading={previewLoading} />
+              </EditorialSection>
+            </CanvasLane>
           </>
         )}
       </main>
@@ -867,6 +888,102 @@ export function ArticlePublisher({
         )}
       </aside>
     </div>
+  );
+}
+
+/* ── Canvas lane primitive ───────────────────────────────────────
+ * Groups editorial sections into lanes that demote secondary work
+ * behind a single user-controlled toggle while keeping every
+ * `<section id="section-X">` element mounted in the DOM so anchor
+ * navigation from the readiness rail (and `sectionAnchorForFindingField`
+ * findings) still scrolls correctly. When a lane is collapsed, each
+ * section's header row remains visible; only the section body hides.
+ *
+ * The lane auto-expands when the URL hash (or a click on an in-page
+ * anchor) targets any section id it owns, so validation jump-to-fix
+ * behavior is preserved even when the author has not yet revealed the
+ * lane manually.
+ */
+function CanvasLane({
+  id,
+  label,
+  hint,
+  sectionIds,
+  collapsible = true,
+  children,
+}: {
+  id: string;
+  label: string;
+  hint: string;
+  sectionIds?: readonly string[];
+  collapsible?: boolean;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  const ownedIds = React.useMemo(
+    () => new Set(sectionIds ?? []),
+    [sectionIds],
+  );
+  const [open, setOpen] = React.useState(!collapsible);
+
+  React.useEffect(() => {
+    if (!collapsible) return undefined;
+    const syncFromHash = () => {
+      const hash = typeof window !== 'undefined' ? window.location.hash : '';
+      const target = hash.startsWith('#section-') ? hash.slice('#section-'.length) : '';
+      if (target && ownedIds.has(target)) setOpen(true);
+    };
+    syncFromHash();
+    const onAnchorClick = (ev: MouseEvent) => {
+      const el = ev.target instanceof Element ? ev.target.closest('a[href^="#section-"]') : null;
+      if (!el) return;
+      const href = el.getAttribute('href') ?? '';
+      const target = href.slice('#section-'.length);
+      if (ownedIds.has(target)) setOpen(true);
+    };
+    window.addEventListener('hashchange', syncFromHash);
+    document.addEventListener('click', onAnchorClick, true);
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash);
+      document.removeEventListener('click', onAnchorClick, true);
+    };
+  }, [collapsible, ownedIds]);
+
+  const headerId = `lane-${id}-header`;
+  const bodyId = `lane-${id}-body`;
+  const collapsed = collapsible && !open;
+  const className = collapsed
+    ? `${styles.canvasLane} ${styles.canvasLaneCollapsed}`
+    : styles.canvasLane;
+
+  return (
+    <section className={className} aria-labelledby={headerId}>
+      <header className={styles.canvasLaneHeader}>
+        {collapsible ? (
+          <button
+            type="button"
+            id={headerId}
+            className={styles.canvasLaneToggle}
+            aria-expanded={open}
+            aria-controls={bodyId}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className={styles.canvasLaneChevron} aria-hidden="true">
+              {open ? '▾' : '▸'}
+            </span>
+            <span className={styles.canvasLaneLabel}>{label}</span>
+            <span className={styles.canvasLaneHint}>{hint}</span>
+          </button>
+        ) : (
+          <div id={headerId} className={styles.canvasLaneStatic}>
+            <span className={styles.canvasLaneLabel}>{label}</span>
+            <span className={styles.canvasLaneHint}>{hint}</span>
+          </div>
+        )}
+      </header>
+      <div id={bodyId} className={styles.canvasLaneBody}>
+        {children}
+      </div>
+    </section>
   );
 }
 

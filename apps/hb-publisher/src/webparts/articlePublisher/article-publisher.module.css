@@ -385,6 +385,88 @@
   align-self: flex-start;
 }
 
+/* Canvas lanes group sections into first-pass / depth / governance
+ * clusters. Each lane has a visible header that doubles as a
+ * collapse toggle for the non-first-pass lanes. Section bodies
+ * inside a collapsed lane hide, but each `<section id="section-X">`
+ * stays mounted so anchor navigation (readiness jump links,
+ * sectionAnchorForFindingField) still scrolls correctly. */
+.canvasLane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hb-space-md, 16px);
+  padding-top: var(--hb-space-xl, 32px);
+}
+
+.canvasLane + .canvasLane {
+  margin-top: var(--hb-space-md, 16px);
+  border-top: 1px solid var(--hb-border-faint, #f0f0f3);
+}
+
+.canvasLaneHeader {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvasLaneStatic,
+.canvasLaneToggle {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.canvasLaneToggle {
+  appearance: none;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  border-radius: var(--hb-radius-md, 4px);
+}
+
+.canvasLaneToggle:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring);
+  outline-offset: 4px;
+}
+
+.canvasLaneChevron {
+  font-size: 12px;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  width: 12px;
+  display: inline-block;
+}
+
+.canvasLaneLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hb-text-secondary, #4a4a4f);
+}
+
+.canvasLaneHint {
+  font-size: 12px;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  line-height: 1.45;
+}
+
+.canvasLaneBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvasLaneCollapsed .sectionBody {
+  display: none;
+}
+
+.canvasLaneCollapsed .section {
+  padding-top: var(--hb-space-md, 16px);
+}
+
 .section {
   display: flex;
   flex-direction: column;
