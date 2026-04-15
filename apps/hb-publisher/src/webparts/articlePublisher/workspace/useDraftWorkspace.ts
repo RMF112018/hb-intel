@@ -18,6 +18,11 @@ import {
   type WorkflowState,
 } from '../../../data/publisherAdapter/index.js';
 import type { TemplateRegistryState } from '../controllers/authoringHealthModel.js';
+import {
+  derivePromotionRuleHealth,
+  promotionRulesFor,
+  type PromotionRuleHealth,
+} from '../controllers/promotionRuleHealthModel.js';
 
 /**
  * Order the left draft rail groups surfaces in. The editorial rail
@@ -81,6 +86,13 @@ export interface DraftWorkspaceHandle {
   readonly toggleGroupCollapsed: (state: WorkflowState) => void;
   readonly promotionRules: readonly PublisherPromotionRuleRow[];
   /**
+   * Typed health state for the promotion-rule repository read. The
+   * shell consumes this to narrate the difference between a genuine
+   * empty configuration and a failed load, instead of collapsing both
+   * into `promotionRules === []`.
+   */
+  readonly promotionRuleHealth: PromotionRuleHealth;
+  /**
    * Active-template registry load state. Drives the authoring-health
    * preflight model so the shell can distinguish "registry still
    * loading" from "registry returned zero rows" from "registry read
@@ -101,7 +113,14 @@ export function useDraftWorkspace(
   const [collapsedGroups, setCollapsedGroups] = React.useState<ReadonlySet<WorkflowState>>(
     () => new Set(COLLAPSED_GROUPS_BY_DEFAULT),
   );
-  const [promotionRules, setPromotionRules] = React.useState<readonly PublisherPromotionRuleRow[]>([]);
+  const [promotionRulesRaw, setPromotionRulesRaw] = React.useState<
+    readonly PublisherPromotionRuleRow[] | undefined
+  >(undefined);
+  const [promotionRulesLoading, setPromotionRulesLoading] =
+    React.useState<boolean>(true);
+  const [promotionRulesError, setPromotionRulesError] = React.useState<
+    string | undefined
+  >(undefined);
   const [templateRegistryRows, setTemplateRegistryRows] = React.useState<
     readonly PublisherTemplateRegistryRow[] | undefined
   >(undefined);
@@ -142,17 +161,48 @@ export function useDraftWorkspace(
   }, [reloadGroups]);
 
   // Load active promotion rules once per repositories identity.
+  // A failed read is no longer silently collapsed into an empty
+  // ruleset — the shell consumes `promotionRuleHealth` to tell
+  // operators the difference between a genuine empty configuration
+  // and a dependency failure. Selection and save-time normalization
+  // still receive an empty array on failure so their behavior remains
+  // deterministic and safe.
   React.useEffect(() => {
+    let cancelled = false;
+    setPromotionRulesLoading(true);
+    setPromotionRulesError(undefined);
     void (async () => {
       try {
         const rules = await repositories.promotionRules.listActive();
-        setPromotionRules(rules);
-      } catch {
-        // Best-effort — fall back to publisher defaults.
-        setPromotionRules([]);
+        if (cancelled) return;
+        setPromotionRulesRaw(rules);
+        setPromotionRulesError(undefined);
+      } catch (err) {
+        if (cancelled) return;
+        setPromotionRulesRaw(undefined);
+        setPromotionRulesError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load active promotion rules.',
+        );
+      } finally {
+        if (!cancelled) setPromotionRulesLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [repositories]);
+
+  const promotionRuleHealth = derivePromotionRuleHealth({
+    loading: promotionRulesLoading,
+    rules: promotionRulesRaw,
+    error: promotionRulesError,
+  });
+  // Selector input — always concretely typed; non-ready states
+  // degrade to an empty array so policy application stays safe and
+  // deterministic even when the read is still in flight or failed.
+  const promotionRules = promotionRulesFor(promotionRuleHealth);
 
   // Preflight the active-template registry once per repositories
   // identity. The shell's authoring-health model reads this state so
@@ -205,6 +255,7 @@ export function useDraftWorkspace(
     collapsedGroups,
     toggleGroupCollapsed,
     promotionRules,
+    promotionRuleHealth,
     templateRegistry: {
       loading: templateRegistryLoading,
       rows: templateRegistryRows,

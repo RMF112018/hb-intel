@@ -50,3 +50,13 @@ export type {
   TemplateRegistryState,
   DeriveAuthoringHealthInputs,
 } from './authoringHealthModel.js';
+export {
+  derivePromotionRuleHealth,
+  promotionRulesFor,
+  isPromotionRuleLoadFailure,
+  promotionRuleHealthHeadline,
+} from './promotionRuleHealthModel.js';
+export type {
+  PromotionRuleHealth,
+  PromotionRuleHealthInputs,
+} from './promotionRuleHealthModel.js';

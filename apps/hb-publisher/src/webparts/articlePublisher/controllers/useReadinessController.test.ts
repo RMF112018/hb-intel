@@ -280,6 +280,57 @@ describe('useReadinessController — authoring-health preflight gating', () => {
   });
 });
 
+describe('useReadinessController — promotion-rule health passthrough', () => {
+  it('surfaces a failure headline distinct from an empty-config headline', () => {
+    const { result: fail } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article(),
+          isPersisted: true,
+          promotionRuleHealth: {
+            kind: 'loadFailure',
+            message: 'network timeout',
+          },
+        }),
+      ),
+    );
+    expect(fail.current.promotionRuleHealth?.kind).toBe('loadFailure');
+    expect(fail.current.promotionRuleHealthHeadline).toMatch(/failed to load/i);
+
+    const { result: empty } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article(),
+          isPersisted: true,
+          promotionRuleHealth: { kind: 'readyEmpty' },
+        }),
+      ),
+    );
+    expect(empty.current.promotionRuleHealthHeadline).toMatch(
+      /No active promotion rules/i,
+    );
+    expect(fail.current.promotionRuleHealthHeadline).not.toBe(
+      empty.current.promotionRuleHealthHeadline,
+    );
+  });
+
+  it('emits no promotion-health headline when the ruleset is healthy', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article(),
+          isPersisted: true,
+          promotionRuleHealth: {
+            kind: 'ready',
+            rules: [],
+          },
+        }),
+      ),
+    );
+    expect(result.current.promotionRuleHealthHeadline).toBeUndefined();
+  });
+});
+
 describe('useReadinessController — milestone legacy hard-block', () => {
   it('exposes unsupportedContentTypeMessage and disables Publish on milestoneSpotlight drafts', () => {
     const { result } = renderHook(() =>

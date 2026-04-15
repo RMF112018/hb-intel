@@ -26,6 +26,10 @@ import {
   type AuthoringHealth,
   type TemplateRegistryState,
 } from './authoringHealthModel.js';
+import {
+  promotionRuleHealthHeadline,
+  type PromotionRuleHealth,
+} from './promotionRuleHealthModel.js';
 
 export interface ReadinessControllerInputs {
   readonly articleDraft: PublisherArticleRow | undefined;
@@ -51,6 +55,13 @@ export interface ReadinessControllerInputs {
    * omitted so existing callers / tests are not forced to rewire.
    */
   readonly templateRegistry?: TemplateRegistryState;
+  /**
+   * Typed health state for the promotion-rule repository read from
+   * `useDraftWorkspace`. Optional so existing callers/tests continue
+   * to work; when omitted the controller assumes a healthy load and
+   * does not narrate a promotion-health headline.
+   */
+  readonly promotionRuleHealth?: PromotionRuleHealth;
 }
 
 export function useReadinessController(inputs: ReadinessControllerInputs) {
@@ -182,6 +193,10 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     authoringHealth,
     authoringHealthy,
     authoringGlobalFailure,
+    promotionRuleHealth: inputs.promotionRuleHealth,
+    promotionRuleHealthHeadline: inputs.promotionRuleHealth
+      ? promotionRuleHealthHeadline(inputs.promotionRuleHealth)
+      : undefined,
   };
 }
 

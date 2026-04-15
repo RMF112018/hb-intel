@@ -242,6 +242,7 @@ export function ArticlePublisher({
     busy,
     isPersisted,
     templateRegistry: workspace.templateRegistry,
+    promotionRuleHealth: workspace.promotionRuleHealth,
   });
   const {
     readinessSummary,
@@ -260,6 +261,8 @@ export function ArticlePublisher({
     saveHealth,
     saveBlockedReason,
     authoringHealth,
+    promotionRuleHealth,
+    promotionRuleHealthHeadline,
   } = readiness;
 
   const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
@@ -426,6 +429,21 @@ export function ArticlePublisher({
                 <p className={styles.sectionIntent}>Review how promotion policy applies.</p>
               </header>
               <div className={styles.sectionBody}>
+                {promotionRuleHealth &&
+                  promotionRuleHealth.kind !== 'ready' &&
+                  promotionRuleHealthHeadline && (
+                    <p
+                      className={
+                        promotionRuleHealth.kind === 'loadFailure'
+                          ? styles.canvasNoticeBlocking
+                          : styles.canvasNotice
+                      }
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {promotionRuleHealthHeadline}
+                    </p>
+                  )}
                 {promotionSummary.map((line, i) => (
                   <p key={i} className={styles.sectionCopy}>{line}</p>
                 ))}
