@@ -20,6 +20,13 @@
   gap: var(--hb-space-sm, 8px);
 }
 
+.rosterHeadingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
+
 .rosterHeading {
   margin: 0;
   font-size: 11px;
@@ -27,6 +34,13 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--hb-text-tertiary, #6a6a6f);
+}
+
+.rosterHeadingHint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  line-height: 1.4;
 }
 
 .chipStack {

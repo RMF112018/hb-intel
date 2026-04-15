@@ -2,6 +2,8 @@ declare const styles: {
   readonly panel: string;
   readonly rosterGroup: string;
   readonly rosterHeading: string;
+  readonly rosterHeadingRow: string;
+  readonly rosterHeadingHint: string;
   readonly chipStack: string;
   readonly chip: string;
   readonly chipFeatured: string;

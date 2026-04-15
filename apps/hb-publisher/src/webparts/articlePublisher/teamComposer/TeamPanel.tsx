@@ -111,6 +111,11 @@ export function TeamPanel({
 
   const featuredIndex = rows.findIndex((r) => r.IsFeaturedMember === true);
   const featuredRow = featuredIndex >= 0 ? rows[featuredIndex] : undefined;
+  const featuredDisplayName = featuredRow
+    ? featuredRow.DisplayName ||
+      featuredRow.PersonPrincipal ||
+      'the current featured teammate'
+    : undefined;
   const rosterEntries = rows
     .map((row, index) => ({ row, index }))
     .filter(({ index }) => index !== featuredIndex);
@@ -150,10 +155,18 @@ export function TeamPanel({
             pressed={isFeatured}
             aria-label={
               isFeatured
-                ? `Unfeature ${displayName}`
-                : `Feature ${displayName} on the article card`
+                ? `Unfeature ${displayName} — no teammate will lead the article card`
+                : featuredDisplayName
+                  ? `Feature ${displayName} on the article card — replaces ${featuredDisplayName}`
+                  : `Feature ${displayName} on the article card`
             }
-            title={isFeatured ? 'Unfeature' : 'Feature teammate'}
+            title={
+              isFeatured
+                ? 'Unfeature teammate'
+                : featuredDisplayName
+                  ? `Feature teammate (replaces ${featuredDisplayName})`
+                  : 'Feature teammate'
+            }
             onClick={() => toggleFeatured(r.TeamMemberId)}
           >
             {isFeatured ? <StarFilled size="sm" /> : <Star size="sm" />}
@@ -201,13 +214,18 @@ export function TeamPanel({
       {rows.length === 0 ? (
         <HbcEmptyState
           title="No teammates yet"
-          description="Pull colleagues from the directory to spotlight them on the published article."
+          description="Pull colleagues from the directory to spotlight them. The first teammate you feature leads the article card; everyone else appears in the roster below."
         />
       ) : (
         <>
           {featuredRow && (
             <div className={styles.rosterGroup} aria-label="Article card lead">
-              <p className={styles.rosterHeading}>Article card lead</p>
+              <div className={styles.rosterHeadingRow}>
+                <p className={styles.rosterHeading}>Article card lead</p>
+                <span className={styles.rosterHeadingHint}>
+                  Leads the homepage card. Use the star on any teammate to move the lead.
+                </span>
+              </div>
               <ol className={styles.chipStack}>
                 {renderChip(featuredRow, featuredIndex, true)}
               </ol>
@@ -218,9 +236,14 @@ export function TeamPanel({
               className={styles.rosterGroup}
               aria-label="Article teammates — use Alt+Up or Alt+Down to reorder"
             >
-              <p className={styles.rosterHeading}>
-                {featuredRow ? 'Roster' : 'Team'}
-              </p>
+              <div className={styles.rosterHeadingRow}>
+                <p className={styles.rosterHeading}>
+                  {featuredRow ? 'Roster' : 'Team'} ({rosterEntries.length})
+                </p>
+                <span className={styles.rosterHeadingHint}>
+                  Tip: Alt+↑ / Alt+↓ to reorder while focused on a teammate.
+                </span>
+              </div>
               <ol className={styles.chipStack}>
                 {rosterEntries.map(({ row, index }) =>
                   renderChip(row, index, false),
