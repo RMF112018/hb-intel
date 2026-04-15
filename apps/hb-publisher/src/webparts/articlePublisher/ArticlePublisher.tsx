@@ -33,6 +33,7 @@ import {
   createProjectsLookupSearch,
   type ProjectLookupSearchFn,
 } from '../../data/publisherAdapter/projectsLookupSource.js';
+import { PUBLISHER_LIST_HOST_SITE_URL } from '../../data/publisherAdapter/publisherListDescriptors.js';
 import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
@@ -171,9 +172,13 @@ export function ArticlePublisher({
     [repositoriesOverride],
   );
 
-  const searchProjects = React.useMemo<ProjectLookupSearchFn | undefined>(
-    () => (siteUrl ? createProjectsLookupSearch({ hostSiteUrl: siteUrl }) : undefined),
-    [siteUrl],
+  // Projects lookup is authoritatively owned by HBCentral (control-plane),
+  // independent of the mounted page host. Binding to the canonical constant
+  // here keeps hosted pages (e.g. Marketing-New) pointed at the correct
+  // Projects list instead of querying the current page site.
+  const searchProjects = React.useMemo<ProjectLookupSearchFn>(
+    () => createProjectsLookupSearch({ hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL }),
+    [],
   );
 
   const orchestrator = React.useMemo(
