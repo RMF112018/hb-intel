@@ -3,6 +3,28 @@
  * validation, drift, or publish-decision content.
  */
 
+.trustBridgeBlocking,
+.trustBridgeWarn {
+  margin: 0 0 var(--hb-space-md, 16px) 0;
+  padding: 8px 12px;
+  border-radius: var(--hb-radius-lg, 6px);
+  font-size: 12px;
+  line-height: 1.4;
+  border: 1px solid transparent;
+}
+
+.trustBridgeBlocking {
+  background: var(--hb-status-danger-bg, #fdecec);
+  color: var(--hb-status-danger-text, #a4262c);
+  border-color: var(--hb-status-danger-border, #e5b1b3);
+}
+
+.trustBridgeWarn {
+  background: var(--hb-status-warn-bg, #fff4e5);
+  color: var(--hb-status-warn-text, #8a4b00);
+  border-color: var(--hb-status-warn-border, #ffd9a8);
+}
+
 .root {
   display: flex;
   flex-direction: column;

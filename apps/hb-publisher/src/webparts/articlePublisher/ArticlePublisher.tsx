@@ -38,7 +38,7 @@ import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
-import { PublisherButton, StatusBanner } from './sharedChrome/index.js';
+import { EditorialChip, PublisherButton, StatusBanner } from './sharedChrome/index.js';
 import { QueueRail, useDraftWorkspace } from './workspace/index.js';
 import {
   DestinationBindingPanel,
@@ -51,6 +51,8 @@ import {
 import {
   authoringHealthActionHint,
   authoringHealthHeadline,
+  describePublishIntent,
+  sectionAnchorForFindingField,
   useDraftLifecycle,
   usePreviewController,
   useReadinessController,
@@ -250,6 +252,7 @@ export function ArticlePublisher({
     promotionSummary,
     latestValidation,
     publishBlockedByValidation,
+    publishIntent,
     unsupportedDestinationMessage,
     unsupportedDestinationLoaded,
     unsupportedContentTypeMessage,
@@ -487,6 +490,7 @@ export function ArticlePublisher({
               {bindingSignal && (
                 <p className={styles.readinessBindingSignal}>{bindingSignal}</p>
               )}
+              <PublishIntentCue intent={publishIntent} />
             </section>
 
             {saveHealth.kind === 'missingFirstPersistenceFields' && (
@@ -514,11 +518,15 @@ export function ArticlePublisher({
               <section className={styles.readinessBlock} aria-label="Blocking issues">
                 <p className={styles.readinessHeading}>
                   {latestValidation.errors.length} blocking issue
-                  {latestValidation.errors.length === 1 ? '' : 's'}
+                  {latestValidation.errors.length === 1 ? '' : 's'} — fix next
                 </p>
                 <ul className={styles.readinessList}>
                   {latestValidation.errors.map((err, idx) => (
-                    <li key={idx} className={styles.readinessIssueError}>{err.message}</li>
+                    <ValidationIssueItem
+                      key={idx}
+                      finding={err}
+                      tone="error"
+                    />
                   ))}
                 </ul>
               </section>
@@ -532,7 +540,11 @@ export function ArticlePublisher({
                 </p>
                 <ul className={styles.readinessList}>
                   {latestValidation.warnings.map((w, idx) => (
-                    <li key={idx} className={styles.readinessIssueWarn}>{w.message}</li>
+                    <ValidationIssueItem
+                      key={idx}
+                      finding={w}
+                      tone="warn"
+                    />
                   ))}
                 </ul>
               </section>
@@ -657,5 +669,80 @@ export function ArticlePublisher({
         )}
       </aside>
     </div>
+  );
+}
+
+/* ── Readiness helpers (local compositions) ───────────────────────
+ * Kept inline because they compose shell-owned classes plus controller
+ * outputs that already flow through `ArticlePublisher`. Moving them
+ * into `sharedChrome/` would require passing the class map in, which
+ * is more coupling than it saves. */
+
+function PublishIntentCue({
+  intent,
+}: {
+  intent: import('./controllers/index.js').PublishIntent;
+}): React.JSX.Element | null {
+  const described = describePublishIntent(intent);
+  if (intent.kind === 'noDraft') return null;
+  const variant =
+    described.tone === 'danger'
+      ? 'danger'
+      : described.tone === 'warn'
+        ? 'warn'
+        : described.tone === 'success'
+          ? 'success'
+          : described.tone === 'info'
+            ? 'info'
+            : 'neutral';
+  return (
+    <div className={styles.publishIntentCue} role="status" aria-live="polite">
+      <EditorialChip variant={variant} size="sm">
+        {described.label}
+      </EditorialChip>
+      {described.detail && (
+        <span className={styles.publishIntentDetail}>{described.detail}</span>
+      )}
+    </div>
+  );
+}
+
+function ValidationIssueItem({
+  finding,
+  tone,
+}: {
+  finding: {
+    readonly message: string;
+    readonly field?: string;
+    readonly actionHint?: string;
+  };
+  tone: 'error' | 'warn';
+}): React.JSX.Element {
+  const anchor = sectionAnchorForFindingField(finding.field);
+  const className =
+    tone === 'error' ? styles.readinessIssueError : styles.readinessIssueWarn;
+  return (
+    <li className={className}>
+      <span>{finding.message}</span>
+      {finding.actionHint && (
+        <>
+          {' '}
+          <span className={styles.readinessIssueHint}>
+            {finding.actionHint}
+          </span>
+        </>
+      )}
+      {anchor && (
+        <>
+          {' '}
+          <a
+            href={`#${anchor.sectionId}`}
+            className={styles.readinessIssueAnchor}
+          >
+            Go to {anchor.label} →
+          </a>
+        </>
+      )}
+    </li>
   );
 }

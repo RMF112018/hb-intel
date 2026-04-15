@@ -46,6 +46,8 @@ export function ArticlePreview({ outcome, loading }: ArticlePreviewProps): React
 
   const { resolution } = outcome;
   const { article, teamMembers, media } = resolution;
+  const errorCount = outcome.validation.errors.length;
+  const warningCount = outcome.validation.warnings.length;
 
   const heroImage = article.HeroPrimaryImage;
   const heroAlt = article.HeroPrimaryImageAltText;
@@ -75,6 +77,26 @@ export function ArticlePreview({ outcome, loading }: ArticlePreviewProps): React
 
   return (
     <article className={styles.root} aria-label="Article preview">
+      {(errorCount > 0 || warningCount > 0) && (
+        <p
+          className={
+            errorCount > 0
+              ? styles.trustBridgeBlocking
+              : styles.trustBridgeWarn
+          }
+          role="status"
+          aria-live="polite"
+        >
+          {errorCount > 0
+            ? `Preview shows the current draft — ${errorCount} blocking issue${
+                errorCount === 1 ? '' : 's'
+              } still to fix. See the Readiness rail.`
+            : `Preview shows the current draft — ${warningCount} warning${
+                warningCount === 1 ? '' : 's'
+              } to review in the Readiness rail.`}
+        </p>
+      )}
+
       <HomepageCardPreview article={article} heroImage={heroImage} heroAlt={heroAlt} />
 
       <header className={styles.hero}>

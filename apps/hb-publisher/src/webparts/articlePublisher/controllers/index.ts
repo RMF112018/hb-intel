@@ -16,8 +16,15 @@ export {
   composeReadinessSummary,
   composePromotionSummary,
   composeBindingSignal,
+  derivePublishIntent,
+  describePublishIntent,
 } from './useReadinessController.js';
-export type { ReadinessControllerInputs } from './useReadinessController.js';
+export type {
+  PublishIntent,
+  ReadinessControllerInputs,
+} from './useReadinessController.js';
+export { sectionAnchorForFindingField } from './findingAnchor.js';
+export type { FindingAnchor } from './findingAnchor.js';
 export {
   applyPromotionPolicyToDraft,
   emptyArticle,

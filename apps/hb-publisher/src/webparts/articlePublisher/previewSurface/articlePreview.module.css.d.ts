@@ -1,4 +1,6 @@
 declare const styles: {
+  readonly trustBridgeBlocking: string;
+  readonly trustBridgeWarn: string;
   readonly root: string;
   readonly cardPreview: string;
   readonly cardPreviewLabel: string;

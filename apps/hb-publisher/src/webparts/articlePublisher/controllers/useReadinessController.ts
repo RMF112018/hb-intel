@@ -94,6 +94,12 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
 
   const latestValidation = preview && preview.ok ? preview.validation : undefined;
   const publishBlockedByValidation = !!latestValidation && !latestValidation.ok;
+  const publishIntent = derivePublishIntent({
+    articleDraft,
+    binding,
+    preview,
+    publishBlockedByValidation,
+  });
 
   const readinessSummary = composeReadinessSummary(
     articleDraft,
@@ -180,6 +186,7 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     promotionSummary,
     latestValidation,
     publishBlockedByValidation,
+    publishIntent,
     unsupportedDestinationMessage,
     unsupportedDestinationLoaded,
     unsupportedContentTypeMessage,
@@ -198,6 +205,109 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
       ? promotionRuleHealthHeadline(inputs.promotionRuleHealth)
       : undefined,
   };
+}
+
+/**
+ * Publish-intent classification used by the readiness rail for a
+ * short, scannable chip next to the primary actions. Mirrors the
+ * orchestrator decision without exposing raw enum tokens to UI.
+ */
+export type PublishIntent =
+  | { readonly kind: 'noDraft' }
+  | { readonly kind: 'blocked'; readonly count: number }
+  | { readonly kind: 'createPage' }
+  | { readonly kind: 'updateInPlace' }
+  | { readonly kind: 'regeneratePage'; readonly cause?: string }
+  | { readonly kind: 'noChange' }
+  | { readonly kind: 'pending' };
+
+export function derivePublishIntent(args: {
+  readonly articleDraft: PublisherArticleRow | undefined;
+  readonly binding: PublisherPageBindingRow | undefined;
+  readonly preview: PreviewOutcome | undefined;
+  readonly publishBlockedByValidation: boolean;
+}): PublishIntent {
+  const { articleDraft, binding, preview, publishBlockedByValidation } = args;
+  if (!articleDraft) return { kind: 'noDraft' };
+  if (publishBlockedByValidation && preview && preview.ok) {
+    return { kind: 'blocked', count: preview.validation.errors.length };
+  }
+  if (!preview) return { kind: 'pending' };
+  if (!preview.ok) return { kind: 'pending' };
+  switch (preview.decision.action) {
+    case 'create':
+      return { kind: 'createPage' };
+    case 'regenerate':
+      return {
+        kind: 'regeneratePage',
+        cause: preview.decision.regenerationCause,
+      };
+    case 'inPlaceUpdate':
+      return { kind: 'updateInPlace' };
+    case 'noOp':
+      return { kind: 'noChange' };
+    case 'blocked':
+      return {
+        kind: 'blocked',
+        count: preview.validation.errors.length,
+      };
+    default:
+      return binding ? { kind: 'updateInPlace' } : { kind: 'createPage' };
+  }
+}
+
+/**
+ * Author-facing headline + short detail for a `PublishIntent`. Keeps
+ * the intent-to-language mapping in one place so the readiness rail
+ * and diagnostics block agree.
+ */
+export function describePublishIntent(intent: PublishIntent): {
+  readonly tone: 'info' | 'success' | 'warn' | 'danger' | 'neutral';
+  readonly label: string;
+  readonly detail?: string;
+} {
+  switch (intent.kind) {
+    case 'noDraft':
+      return { tone: 'neutral', label: 'No draft selected' };
+    case 'pending':
+      return {
+        tone: 'neutral',
+        label: 'Composing preview…',
+        detail: 'Publish intent will resolve once the preview is ready.',
+      };
+    case 'blocked':
+      return {
+        tone: 'danger',
+        label: `Publish blocked — ${intent.count} issue${intent.count === 1 ? '' : 's'}`,
+        detail: 'Resolve the blocking issues below to unblock publish.',
+      };
+    case 'createPage':
+      return {
+        tone: 'info',
+        label: 'Will create a new page',
+        detail: 'Publishing creates a new destination page and binds it to this article.',
+      };
+    case 'updateInPlace':
+      return {
+        tone: 'success',
+        label: 'Will update in place',
+        detail: 'PageId and URL are preserved.',
+      };
+    case 'regeneratePage':
+      return {
+        tone: 'warn',
+        label: 'Will regenerate the page',
+        detail: intent.cause
+          ? `Cause: ${intent.cause}. A new PageId and URL will replace the current binding.`
+          : 'A new PageId and URL will replace the current binding.',
+      };
+    case 'noChange':
+      return {
+        tone: 'neutral',
+        label: 'No change on publish',
+        detail: 'The destination page already matches this draft.',
+      };
+  }
 }
 
 /**

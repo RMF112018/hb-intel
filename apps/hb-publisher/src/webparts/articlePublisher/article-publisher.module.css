@@ -511,6 +511,44 @@
   line-height: 1.4;
 }
 
+.publishIntentCue {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.publishIntentDetail {
+  font-size: 12px;
+  color: var(--hb-text-secondary, #4a4a4f);
+  line-height: 1.4;
+}
+
+.readinessIssueHint {
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.readinessIssueAnchor {
+  font-weight: 600;
+  color: var(--hb-color-presentation-blue, #225391);
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--hb-radius-sm, 2px);
+}
+
+.readinessIssueAnchor:hover,
+.readinessIssueAnchor:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.readinessIssueAnchor:focus-visible {
+  outline: 2px solid var(--hb-color-brand-action, #337aab);
+  outline-offset: 2px;
+}
+
 .readinessList {
   list-style: none;
   margin: 0;
