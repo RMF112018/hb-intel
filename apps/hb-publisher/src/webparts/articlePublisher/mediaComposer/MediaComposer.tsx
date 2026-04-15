@@ -24,6 +24,7 @@ import {
   roleGuidance,
   type AltTextQuality,
 } from './altTextGuidance.js';
+import { mediaRoleLabel } from '../authorLabels.js';
 import styles from './mediaComposer.module.css';
 
 export interface MediaComposerProps {
@@ -189,7 +190,7 @@ export function MediaComposer({
                   checked={draft.role === role}
                   onChange={() => setDraft((d) => ({ ...d, role }))}
                 />
-                <span>{role === 'gallery' ? 'Gallery image' : 'Supporting image'}</span>
+                <span>{`${mediaRoleLabel(role)} image`}</span>
               </label>
             ))}
           </div>
