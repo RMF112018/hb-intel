@@ -1,0 +1,29 @@
+/* hb-publisher mount fallback — host-safe, token-disciplined surface
+ * rendered when the SPFx shell requests an unknown webPartId. Uses
+ * the Publisher token seam's status-danger ramp so the surface
+ * matches the rest of the app rather than inlining raw hex values.
+ */
+
+.unknownWebpartFallback {
+  border: 1px solid var(--hb-status-danger-border, #e5b1b3);
+  background: var(--hb-status-danger-bg, #fdecec);
+  color: var(--hb-status-danger-text, #a4262c);
+  padding: var(--hb-space-md, 16px);
+  border-radius: var(--hb-radius-lg, 6px);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.unknownWebpartHeadline {
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.unknownWebpartDetail {
+  margin: 0;
+  font-family: var(--hb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  opacity: 0.9;
+  word-break: break-word;
+}

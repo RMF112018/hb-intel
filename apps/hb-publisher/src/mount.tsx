@@ -12,6 +12,10 @@ import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import { storeSiteUrl } from '@hbc/sharepoint-platform';
 import { ArticlePublisher } from './webparts/articlePublisher/ArticlePublisher.js';
 import { ARTICLE_PUBLISHER_WEBPART_ID } from './webparts/articlePublisher/runtimeContract.js';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- side-effect import injects Publisher tokens at :root
+import publisherTokens from './webparts/articlePublisher/sharedChrome/tokens.module.css';
+void publisherTokens;
+import mountStyles from './mount.module.css';
 
 interface HomepageIdentityInput {
   displayName?: string;
@@ -91,17 +95,24 @@ export async function mount(
       knownWebPartIds: Object.keys(WEBPART_RENDERERS),
     });
     root.render(
-      createElement('section', {
-        role: 'alert',
-        style: {
-          border: '1px solid #d13438',
-          background: '#fdf3f4',
-          color: '#242424',
-          padding: '12px',
-          borderRadius: '4px',
-          fontFamily: 'Segoe UI, Arial, sans-serif',
+      createElement(
+        'section',
+        {
+          role: 'alert',
+          'aria-live': 'assertive',
+          className: mountStyles.unknownWebpartFallback,
         },
-      }, `Unsupported webPartId "${webPartId}" in hb-publisher mount map. Check packaged manifest linkage and shell-entry mapping.`),
+        createElement(
+          'p',
+          { className: mountStyles.unknownWebpartHeadline },
+          'Unsupported web part',
+        ),
+        createElement(
+          'p',
+          { className: mountStyles.unknownWebpartDetail },
+          `webPartId "${webPartId}" is not mapped in the hb-publisher mount. Check packaged manifest linkage and shell-entry mapping.`,
+        ),
+      ),
     );
     return;
   }

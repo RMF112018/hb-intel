@@ -168,7 +168,9 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
   }, [activeIndex, results.length]);
 
   const showDropdown = open && !disabled && query.trim().length > 0;
-  const LISTBOX_ID = 'project-picker-listbox';
+  // Instance-safe listbox id so multiple ProjectPicker instances
+  // never collide on `aria-controls` / `aria-activedescendant`.
+  const LISTBOX_ID = `project-picker-listbox-${React.useId()}`;
   const optionId = (index: number) => `${LISTBOX_ID}-option-${index}`;
   const activeOptionId =
     showDropdown && status === 'ready' && results.length > 0 && activeIndex < results.length

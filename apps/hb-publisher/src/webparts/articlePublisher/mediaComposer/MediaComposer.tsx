@@ -81,6 +81,12 @@ export function MediaComposer({
   searchAssets,
 }: MediaComposerProps): React.JSX.Element {
   const [browserOpen, setBrowserOpen] = React.useState(false);
+  // Instance-safe ids for the alt-text and caption aria-describedby
+  // links. MediaComposer is a flyout so typically one is open at a
+  // time, but a concurrent panel render (storybook / dev tools)
+  // would collide on the prior static ids.
+  const altGuidanceId = `media-composer-alt-guidance-${React.useId()}`;
+  const captionGuidanceId = `media-composer-caption-guidance-${React.useId()}`;
   const isEdit = !!editingRow;
   const seed = React.useMemo<MediaComposerDraft>(
     () =>
@@ -292,12 +298,12 @@ export function MediaComposer({
             value={draft.altText}
             placeholder="e.g. Crew raising the final steel beam at the West Palm Beach jobsite."
             maxLength={ALT_MAX}
-            aria-describedby="media-composer-alt-guidance"
+            aria-describedby={altGuidanceId}
             aria-invalid={altAssessment.level === 'problem' || undefined}
             onChange={(e) => setDraft((d) => ({ ...d, altText: e.target.value }))}
           />
           <span
-            id="media-composer-alt-guidance"
+            id={altGuidanceId}
             className={guidanceClass(altAssessment.level)}
             role={altAssessment.level === 'problem' ? 'alert' : undefined}
             aria-live="polite"
@@ -326,14 +332,14 @@ export function MediaComposer({
             value={draft.caption ?? ''}
             placeholder="e.g. Final beam — April 2026."
             maxLength={CAPTION_MAX}
-            aria-describedby="media-composer-caption-guidance"
+            aria-describedby={captionGuidanceId}
             onChange={(e) =>
               setDraft((d) => ({ ...d, caption: e.target.value || undefined }))
             }
           />
           {(draft.caption ?? '').trim().length > 0 && (
             <span
-              id="media-composer-caption-guidance"
+              id={captionGuidanceId}
               className={guidanceClass(captionAssessment.level)}
               aria-live="polite"
             >
