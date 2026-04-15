@@ -13,6 +13,11 @@ export { ChooserGroup } from './ChooserGroup.js';
 export type { ChooserGroupProps } from './ChooserGroup.js';
 export { DisclosureSection } from './DisclosureSection.js';
 export type { DisclosureSectionProps } from './DisclosureSection.js';
+export { ExceptionalNotice } from './ExceptionalNotice.js';
+export type {
+  ExceptionalNoticeProps,
+  ExceptionalNoticeTone,
+} from './ExceptionalNotice.js';
 export { ImageAssetField } from './ImageAssetField.js';
 export type {
   ImageAssetFieldProps,

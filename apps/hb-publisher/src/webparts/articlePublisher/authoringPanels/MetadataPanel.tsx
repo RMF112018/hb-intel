@@ -25,7 +25,12 @@ import {
   spotlightTypeLabel,
 } from '../authorLabels.js';
 import { defaultTeamHeading } from '../metadataDefaults.js';
-import { ChooserGroup, DisclosureSection, Field } from '../sharedChrome/index.js';
+import {
+  ChooserGroup,
+  DisclosureSection,
+  ExceptionalNotice,
+  Field,
+} from '../sharedChrome/index.js';
 import styles from '../article-publisher.module.css';
 import {
   contentTypeOptionsForDraft,
@@ -175,7 +180,13 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
         }}
       />
       {legacyMilestoneMessage && (
-        <p className={styles.editorialNotice}>{legacyMilestoneMessage}</p>
+        <ExceptionalNotice
+          tone="warn"
+          headline="Legacy milestone content type"
+          hint="Pick a supported content type above to move this article off the legacy milestone posture."
+          detailsLabel="Legacy-state details"
+          details={legacyMilestoneMessage}
+        />
       )}
 
       <div className={styles.editorialReadout}>

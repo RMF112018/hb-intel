@@ -39,7 +39,13 @@ import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
-import { EditorialChip, PublisherButton, StatusBanner } from './sharedChrome/index.js';
+import {
+  DisclosureSection,
+  EditorialChip,
+  ExceptionalNotice,
+  PublisherButton,
+  StatusBanner,
+} from './sharedChrome/index.js';
 import {
   EditorialSpine,
   QueueRail,
@@ -335,26 +341,19 @@ export function ArticlePublisher({
       <main className={styles.canvas} aria-label="Article authoring canvas">
         {authoringHealth.kind !== 'healthy' &&
           authoringHealth.kind !== 'loading' && (
-            <section
-              className={styles.canvasNoticeBlocking}
-              role="status"
-              aria-live="polite"
-              aria-label="Authoring environment health"
-            >
-              <strong>{authoringHealthHeadline(authoringHealth)}</strong>
-              {authoringHealth.kind === 'registryReadFailure' && (
-                <> {' '}<span>({authoringHealth.message})</span></>
-              )}
-              {authoringHealth.kind === 'draftNoTemplateMatch' && (
-                <> {' '}<span>({authoringHealth.message})</span></>
-              )}
-              {authoringHealthActionHint(authoringHealth) && (
-                <>
-                  {' '}
-                  <span>{authoringHealthActionHint(authoringHealth)}</span>
-                </>
-              )}
-            </section>
+            <ExceptionalNotice
+              tone="danger"
+              blocking
+              headline={authoringHealthHeadline(authoringHealth)}
+              hint={authoringHealthActionHint(authoringHealth)}
+              detailsLabel="Environment details"
+              details={
+                authoringHealth.kind === 'registryReadFailure' ||
+                authoringHealth.kind === 'draftNoTemplateMatch'
+                  ? authoringHealth.message
+                  : undefined
+              }
+            />
           )}
         {!articleDraft ? (
           <div className={styles.canvasEmpty}>
@@ -378,19 +377,33 @@ export function ArticlePublisher({
             </header>
 
             {scheduledLegacyStateNotice(articleDraft.WorkflowState) && (
-              <p className={styles.canvasNotice}>
-                {scheduledLegacyStateNotice(articleDraft.WorkflowState)}
-              </p>
+              <ExceptionalNotice
+                tone="warn"
+                headline="Legacy scheduled state"
+                hint="Move this article to approved or withdrawn when you're ready."
+                detailsLabel="Legacy-state details"
+                details={scheduledLegacyStateNotice(articleDraft.WorkflowState)}
+              />
             )}
             {unsupportedContentTypeMessage && (
-              <p className={styles.canvasNoticeBlocking}>
-                {unsupportedContentTypeMessage}
-              </p>
+              <ExceptionalNotice
+                tone="danger"
+                blocking
+                headline="Unsupported content type"
+                hint="Editing and publish actions are disabled on this article."
+                detailsLabel="Support details"
+                details={unsupportedContentTypeMessage}
+              />
             )}
             {unsupportedDestinationMessage && (
-              <p className={styles.canvasNoticeBlocking}>
-                {unsupportedDestinationMessage}
-              </p>
+              <ExceptionalNotice
+                tone="danger"
+                blocking
+                headline="Unsupported destination"
+                hint="Editing and publish actions are disabled on this article."
+                detailsLabel="Support details"
+                details={unsupportedDestinationMessage}
+              />
             )}
 
             <EditorialSection id="identity" index={1} label="Identity">
@@ -434,21 +447,40 @@ export function ArticlePublisher({
               {promotionRuleHealth &&
                 promotionRuleHealth.kind !== 'ready' &&
                 promotionRuleHealthHeadline && (
-                  <p
-                    className={
+                  <ExceptionalNotice
+                    tone={
                       promotionRuleHealth.kind === 'loadFailure'
-                        ? styles.canvasNoticeBlocking
-                        : styles.canvasNotice
+                        ? 'danger'
+                        : 'warn'
                     }
-                    role="status"
-                    aria-live="polite"
-                  >
-                    {promotionRuleHealthHeadline}
-                  </p>
+                    headline={
+                      promotionRuleHealth.kind === 'loadFailure'
+                        ? 'Promotion rules unavailable'
+                        : 'Promotion rule guidance'
+                    }
+                    details={promotionRuleHealthHeadline}
+                    detailsLabel="Rule details"
+                  />
                 )}
-              {promotionSummary.map((line, i) => (
-                <p key={i} className={styles.sectionCopy}>{line}</p>
-              ))}
+              {promotionSummary.length > 0 && (
+                <>
+                  <p className={styles.sectionCopy}>
+                    Promotion is governed by the destination's rule set. Save
+                    to re-apply; lock semantics are enforced automatically.
+                  </p>
+                  <DisclosureSection
+                    label="Promotion policy details"
+                    summaryHint="Rule identifiers, scope, and lock semantics used at save time."
+                    testId="promotion-operator-details"
+                  >
+                    {promotionSummary.map((line, i) => (
+                      <p key={i} className={styles.sectionCopy}>
+                        {line}
+                      </p>
+                    ))}
+                  </DisclosureSection>
+                </>
+              )}
             </EditorialSection>
 
             <EditorialSection

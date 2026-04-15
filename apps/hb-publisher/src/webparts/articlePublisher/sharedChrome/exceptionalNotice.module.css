@@ -1,0 +1,142 @@
+/* ExceptionalNotice — compact alert primitive for legacy / operator /
+ * unsupported-state narration. Consumed by the Publisher shell and
+ * MetadataPanel to quarantine maintenance-grade information behind
+ * a progressive-disclosure surface while keeping it truthful and
+ * accessible.
+ */
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: var(--hb-radius-lg, 6px);
+  border: 1px solid transparent;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.headlineRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.headline {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0 0 0 26px;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.detailsDisclosure {
+  margin: 0 0 0 26px;
+}
+
+.detailsSummary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detailsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.detailsSummary::marker {
+  content: '';
+}
+
+.detailsSummary::before {
+  content: '▸';
+  font-size: 9px;
+  transition: transform 120ms ease-in-out;
+}
+
+.detailsDisclosure[open] .detailsSummary::before {
+  transform: rotate(90deg);
+}
+
+.detailsSummary:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.detailsBody {
+  margin-top: 6px;
+  font-size: 11px;
+  font-family: var(--hb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+/* ── Tones ─────────────────────────────────────────────────────── */
+
+.toneWarn {
+  background: var(--hb-status-warn-bg, #fff4e5);
+  border-color: var(--hb-status-warn-border, #ffd9a8);
+  color: var(--hb-status-warn-text, #8a4b00);
+}
+
+.toneWarn .badge {
+  background: var(--hb-status-warn-text, #8a4b00);
+  color: var(--hb-status-warn-bg, #fff4e5);
+}
+
+.toneDanger {
+  background: var(--hb-status-danger-bg, #fdecec);
+  border-color: var(--hb-status-danger-border, #e5b1b3);
+  color: var(--hb-status-danger-text, #a4262c);
+}
+
+.toneDanger .badge {
+  background: var(--hb-status-danger-text, #a4262c);
+  color: var(--hb-status-danger-bg, #fdecec);
+}
+
+.toneInfo {
+  background: var(--hb-status-info-bg, #e8eef7);
+  border-color: var(--hb-status-info-border, #b5c5df);
+  color: var(--hb-status-info-text, #225391);
+}
+
+.toneInfo .badge {
+  background: var(--hb-status-info-text, #225391);
+  color: var(--hb-status-info-bg, #e8eef7);
+}
+
+.toneNeutral {
+  background: var(--hb-surface-2, #f4f6fa);
+  border-color: var(--hb-border-subtle, #e3e6ed);
+  color: var(--hb-text-secondary, #4a4a4f);
+}
+
+.toneNeutral .badge {
+  background: var(--hb-text-tertiary, #6a6a6f);
+  color: var(--hb-surface-1, #fff);
+}
