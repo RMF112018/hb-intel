@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-publisher",
     "id": "c7b2a144-9d3e-4a71-8e2a-6f9d3c1b7e42",
-    "version": "1.0.0.40",
+    "version": "1.0.0.41",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "hb-publisher Feature",
         "description": "Deploys the HB Intel Article Publisher webpart assets.",
         "id": "b41e97f8-3c2d-4a59-9e12-d8a7f2b6c901",
-        "version": "1.0.0.40"
+        "version": "1.0.0.41"
       }
     ]
   },

@@ -18,7 +18,11 @@ import type {
 } from '../../../data/publisherAdapter/index.js';
 import { bodyTextSnippet } from '../storyBodyEditor/index.js';
 import { teamMemberInitials } from '../teamComposer/index.js';
+import { sectionAnchorForFindingField } from '../controllers/findingAnchor.js';
+import { handleSectionIndexClick } from '../sectionFocus.js';
 import styles from './articlePreview.module.css';
+
+const INLINE_FINDING_LIMIT = 3;
 
 export interface ArticlePreviewProps {
   readonly outcome: PreviewOutcome | undefined;
@@ -77,23 +81,14 @@ export function ArticlePreview({ outcome, loading }: ArticlePreviewProps): React
 
   return (
     <article className={styles.root} aria-label="Article preview">
-      {(errorCount > 0 || warningCount > 0) && (
-        <p
-          className={
-            errorCount > 0
-              ? styles.trustBridgeBlocking
-              : styles.trustBridgeWarn
-          }
-          role="status"
-          aria-live="polite"
-        >
-          {errorCount > 0
-            ? `Preview shows the current draft — ${errorCount} blocking issue${
-                errorCount === 1 ? '' : 's'
-              } still to fix. See the Readiness rail.`
-            : `Preview shows the current draft — ${warningCount} warning${
-                warningCount === 1 ? '' : 's'
-              } to review in the Readiness rail.`}
+      <TrustBridge
+        errors={outcome.validation.errors}
+        warnings={outcome.validation.warnings}
+      />
+      {!errorCount && !warningCount && (
+        <p className={styles.trustBridgeClean} role="status" aria-live="polite">
+          Preview is faithful to the saved draft — no blocking issues and no
+          warnings.
         </p>
       )}
 
@@ -265,6 +260,99 @@ function firstNonEmpty(...values: readonly (string | undefined)[]): string | und
     if (t.length > 0) return t;
   }
   return undefined;
+}
+
+/* ── Trust bridge ────────────────────────────────────────────────
+ * Structured remediation panel rendered at the top of the preview.
+ * Replaces the prior one-line "see the Readiness rail" pointer with
+ * an actionable surface: every inline finding carries its own jump
+ * link to the authoring section that owns the field, so the author
+ * can act from where they're reading the preview. Overflow beyond
+ * INLINE_FINDING_LIMIT is summarised back to the readiness rail so
+ * the rail stays the authoritative index and we don't duplicate
+ * every finding in three places.
+ */
+
+interface TrustBridgeFinding {
+  readonly message: string;
+  readonly actionHint?: string;
+  readonly field?: string;
+}
+
+function TrustBridge({
+  errors,
+  warnings,
+}: {
+  errors: readonly TrustBridgeFinding[];
+  warnings: readonly TrustBridgeFinding[];
+}): React.JSX.Element | null {
+  const errorCount = errors.length;
+  const warningCount = warnings.length;
+  if (errorCount === 0 && warningCount === 0) return null;
+  const blocking = errorCount > 0;
+  const shown = blocking
+    ? errors.slice(0, INLINE_FINDING_LIMIT)
+    : warnings.slice(0, INLINE_FINDING_LIMIT);
+  const remaining = Math.max(
+    (blocking ? errorCount : warningCount) - shown.length,
+    0,
+  );
+
+  return (
+    <aside
+      className={blocking ? styles.trustBridgeBlocking : styles.trustBridgeWarn}
+      role="status"
+      aria-live="polite"
+      aria-label={blocking ? 'Preview blocking issues' : 'Preview warnings'}
+    >
+      <p className={styles.trustBridgeHeadline}>
+        {blocking
+          ? `Preview is faithful to the saved draft — ${errorCount} blocking issue${
+              errorCount === 1 ? '' : 's'
+            } to fix before publish.`
+          : `Preview is faithful to the saved draft — ${warningCount} warning${
+              warningCount === 1 ? '' : 's'
+            } to review before publish.`}
+      </p>
+      <ul
+        className={styles.trustBridgeList}
+        onClick={handleSectionIndexClick}
+      >
+        {shown.map((finding, idx) => {
+          const anchor = sectionAnchorForFindingField(finding.field);
+          return (
+            <li key={idx} className={styles.trustBridgeItem}>
+              <span>{finding.message}</span>
+              {finding.actionHint && (
+                <>
+                  {' '}
+                  <span className={styles.trustBridgeHint}>
+                    {finding.actionHint}
+                  </span>
+                </>
+              )}
+              {anchor && (
+                <>
+                  {' '}
+                  <a
+                    href={`#${anchor.sectionId}`}
+                    className={styles.trustBridgeAnchor}
+                  >
+                    Go to {anchor.label} →
+                  </a>
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {remaining > 0 && (
+        <p className={styles.trustBridgeOverflow}>
+          + {remaining} more in the Readiness rail.
+        </p>
+      )}
+    </aside>
+  );
 }
 
 function bySortOrderThenAsset(a: PublisherMediaRow, b: PublisherMediaRow): number {
