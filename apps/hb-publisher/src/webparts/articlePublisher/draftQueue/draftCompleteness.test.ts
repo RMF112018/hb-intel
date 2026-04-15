@@ -74,17 +74,26 @@ describe('assessDraftCompleteness', () => {
     expect(out.missingCount).toBe(0);
   });
 
-  it('todo(n) when fields are missing — chip label is plural-safe', () => {
+  it('todo(n) narrates the most blocking field and flags nearly-ready drafts', () => {
     const one = assessDraftCompleteness(row({ Title: '' }));
     expect(one.level).toBe('todo');
-    expect(one.chipLabel).toBe('1 TODO');
+    expect(one.chipLabel).toBe('1 fix away');
+    expect(one.nearlyReady).toBe(true);
+    expect(one.nextBlockerLabel).toBe('headline');
     expect(one.ariaLabel).toMatch(/1 thing to do/);
     expect(one.missingFields).toEqual(['Title']);
+
+    const two = assessDraftCompleteness(row({ Subhead: '', Slug: '' }));
+    expect(two.chipLabel).toBe('2 fixes away');
+    expect(two.nearlyReady).toBe(true);
+    expect(two.nextBlockerLabel).toBe('subhead');
 
     const many = assessDraftCompleteness(
       row({ Title: '', Subhead: '', Slug: '' }),
     );
     expect(many.chipLabel).toBe('3 TODO');
+    expect(many.nearlyReady).toBe(false);
+    expect(many.nextBlockerLabel).toBe('headline');
     expect(many.ariaLabel).toMatch(/3 things to do/);
     expect(many.ariaLabel).toMatch(/Title/);
   });
@@ -116,7 +125,7 @@ describe('rollupGroupCompleteness', () => {
       row({ ArticleId: 'a-3', WorkflowState: 'archived' }),
       row({ ArticleId: 'a-4', Slug: '', SummaryExcerpt: '' }),
     ]);
-    expect(rollup).toEqual({ ready: 1, todo: 2, blocked: 1, total: 4 });
+    expect(rollup).toEqual({ ready: 1, todo: 2, blocked: 1, nearlyReady: 2, total: 4 });
   });
 
   it('returns zero counts for an empty group', () => {
@@ -124,6 +133,7 @@ describe('rollupGroupCompleteness', () => {
       ready: 0,
       todo: 0,
       blocked: 0,
+      nearlyReady: 0,
       total: 0,
     });
   });

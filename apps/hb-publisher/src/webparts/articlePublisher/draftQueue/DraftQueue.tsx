@@ -343,6 +343,20 @@ function DraftRow({
           <span className={styles.rowSeparator} aria-hidden="true">·</span>
           <CompletenessChip completeness={completeness} />
         </div>
+        {completeness.level === 'todo' && completeness.nextBlockerLabel && (
+          <div
+            className={
+              completeness.nearlyReady
+                ? `${styles.rowBlocker} ${styles.rowBlockerNearly}`
+                : styles.rowBlocker
+            }
+          >
+            <span className={styles.rowBlockerKicker}>Next:</span>{' '}
+            {completeness.nearlyReady
+              ? `finish ${completeness.nextBlockerLabel}`
+              : `start with ${completeness.nextBlockerLabel}`}
+          </div>
+        )}
       </button>
     </li>
   );
@@ -393,14 +407,24 @@ function GroupCounts({
       <EditorialChip variant="info" size="sm">
         {String(rollup.total)}
       </EditorialChip>
-      {rollup.todo > 0 && (
+      {rollup.nearlyReady > 0 && (
+        <EditorialChip
+          variant="success"
+          size="sm"
+          aria-label={`${rollup.nearlyReady} nearly ready`}
+          title={`${rollup.nearlyReady} draft${rollup.nearlyReady === 1 ? '' : 's'} within 1–2 fixes of ready`}
+        >
+          {rollup.nearlyReady} nearly ready
+        </EditorialChip>
+      )}
+      {rollup.todo - rollup.nearlyReady > 0 && (
         <EditorialChip
           variant="warn"
           size="sm"
-          aria-label={`${rollup.todo} need attention`}
-          title={`${rollup.todo} need attention`}
+          aria-label={`${rollup.todo - rollup.nearlyReady} need more work`}
+          title={`${rollup.todo - rollup.nearlyReady} need more work`}
         >
-          {rollup.todo} TODO
+          {rollup.todo - rollup.nearlyReady} TODO
         </EditorialChip>
       )}
     </span>

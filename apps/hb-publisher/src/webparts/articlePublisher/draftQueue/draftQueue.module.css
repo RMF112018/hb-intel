@@ -226,6 +226,37 @@
   letter-spacing: 0.02em;
 }
 
+/* Momentum hint — "Next: finish hero image" on rows that still have
+ * missing required fields. Uses a warn tone for the generic TODO
+ * case and a success tone when the draft is within 1–2 fixes of
+ * ready, so the queue can surface closest-to-publish rows without
+ * a dense diagnostics block. */
+.rowBlocker {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 4px 8px;
+  border-radius: var(--hb-radius-md, 4px);
+  background: var(--hb-status-warn-bg, #fff4e5);
+  color: var(--hb-status-warn-text, #8a4b00);
+  border: 1px solid var(--hb-status-warn-border, #ffd9a8);
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.rowBlockerNearly {
+  background: var(--hb-status-success-bg);
+  color: var(--hb-status-success-text);
+  border-color: var(--hb-status-success-border);
+}
+
+.rowBlockerKicker {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10px;
+}
+
 .highlight {
   background: var(--hb-status-featured-bg, #fff3d6);
   color: inherit;

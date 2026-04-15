@@ -24,10 +24,41 @@ export interface DraftCompleteness {
   readonly missingCount: number;
   /** Internal field keys that are missing — for tooltips + aria-label. */
   readonly missingFields: readonly string[];
-  /** Short chip label ("Ready", "3 TODO", "Blocked"). */
+  /** Short chip label ("Ready", "1 fix away", "3 TODO", "Blocked"). */
   readonly chipLabel: string;
   /** Full-sentence screen-reader description. */
   readonly ariaLabel: string;
+  /**
+   * True when the draft has one or two remaining blockers — the
+   * queue surfaces these as momentum-oriented "nearly ready" rows so
+   * authors can decide what to finish next instead of scanning an
+   * undifferentiated TODO list.
+   */
+  readonly nearlyReady: boolean;
+  /**
+   * Author-facing label for the single most blocking missing field
+   * (e.g. "hero image"). `undefined` when nothing is missing or the
+   * draft is already ready/blocked.
+   */
+  readonly nextBlockerLabel?: string;
+}
+
+const NEXT_BLOCKER_LABELS: Readonly<Record<string, string>> = {
+  Title: 'headline',
+  Subhead: 'subhead',
+  SummaryExcerpt: 'summary',
+  BodyRichText: 'body',
+  HeroPrimaryImage: 'hero image',
+  HeroPrimaryImageAltText: 'hero alt text',
+  Slug: 'slug',
+  ArticleContentType: 'content type',
+  Destination: 'destination',
+};
+
+function nextBlockerLabelFor(fields: readonly string[]): string | undefined {
+  const first = fields[0];
+  if (!first) return undefined;
+  return NEXT_BLOCKER_LABELS[first] ?? first;
 }
 
 const BLOCKED_STATES: ReadonlySet<WorkflowState> = new Set<WorkflowState>([
@@ -79,6 +110,7 @@ export function assessDraftCompleteness(
         row.WorkflowState === 'archived'
           ? 'Blocked — archived'
           : 'Blocked — withdrawn',
+      nearlyReady: false,
     };
   }
   if (missingFields.length === 0 && READY_STATES.has(row.WorkflowState)) {
@@ -88,6 +120,7 @@ export function assessDraftCompleteness(
       missingFields,
       chipLabel: 'Ready',
       ariaLabel: 'Ready — all required fields present',
+      nearlyReady: false,
     };
   }
   if (missingFields.length === 0) {
@@ -97,16 +130,26 @@ export function assessDraftCompleteness(
       missingFields,
       chipLabel: 'Ready',
       ariaLabel: 'Ready — all required fields present',
+      nearlyReady: false,
     };
   }
   const count = missingFields.length;
+  const nearlyReady = count <= 2;
+  const nextBlockerLabel = nextBlockerLabelFor(missingFields);
+  const chipLabel = nearlyReady
+    ? count === 1
+      ? '1 fix away'
+      : '2 fixes away'
+    : `${count} TODO`;
   const noun = count === 1 ? 'thing to do' : 'things to do';
   return {
     level: 'todo',
     missingCount: count,
     missingFields,
-    chipLabel: `${count} TODO`,
+    chipLabel,
     ariaLabel: `${count} ${noun}: ${missingFields.join(', ')}`,
+    nearlyReady,
+    nextBlockerLabel,
   };
 }
 
@@ -119,6 +162,7 @@ export interface GroupCompletenessRollup {
   readonly ready: number;
   readonly todo: number;
   readonly blocked: number;
+  readonly nearlyReady: number;
   readonly total: number;
 }
 
@@ -128,11 +172,14 @@ export function rollupGroupCompleteness(
   let ready = 0;
   let todo = 0;
   let blocked = 0;
+  let nearlyReady = 0;
   for (const r of rows) {
-    const level = assessDraftCompleteness(r).level;
-    if (level === 'ready') ready += 1;
-    else if (level === 'todo') todo += 1;
-    else blocked += 1;
+    const c = assessDraftCompleteness(r);
+    if (c.level === 'ready') ready += 1;
+    else if (c.level === 'todo') {
+      todo += 1;
+      if (c.nearlyReady) nearlyReady += 1;
+    } else blocked += 1;
   }
-  return { ready, todo, blocked, total: rows.length };
+  return { ready, todo, blocked, nearlyReady, total: rows.length };
 }

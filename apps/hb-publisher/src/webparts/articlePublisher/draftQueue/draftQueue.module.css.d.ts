@@ -23,6 +23,9 @@ declare const styles: {
   readonly rowContentType: string;
   readonly rowTertiary: string;
   readonly rowAttribution: string;
+  readonly rowBlocker: string;
+  readonly rowBlockerNearly: string;
+  readonly rowBlockerKicker: string;
   readonly highlight: string;
   readonly chip: string;
   readonly chipReady: string;
