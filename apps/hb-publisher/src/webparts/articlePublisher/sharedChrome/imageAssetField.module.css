@@ -319,3 +319,63 @@
   outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
+
+/* ── Advanced URL disclosure (empty state, governed mode) ───── */
+
+.advancedUrlDisclosure {
+  margin-top: 2px;
+  border-left: 2px solid var(--hb-border-strong);
+  border-radius: 0 var(--hb-radius-md) var(--hb-radius-md) 0;
+  background: var(--hb-surface-tile);
+  padding: 10px 14px;
+}
+
+.advancedUrlDisclosure[open] {
+  border-left-color: var(--hb-color-presentation-blue);
+  background: var(--hb-surface-1);
+}
+
+.advancedUrlSummary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--hb-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.advancedUrlSummary::-webkit-details-marker {
+  display: none;
+}
+
+.advancedUrlSummary::marker {
+  content: '';
+}
+
+.advancedUrlSummary::before {
+  content: '▸';
+  font-size: 9px;
+  color: var(--hb-text-tertiary);
+  transition: transform 120ms ease-in-out;
+}
+
+.advancedUrlDisclosure[open] .advancedUrlSummary::before {
+  transform: rotate(90deg);
+}
+
+.advancedUrlSummary:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.advancedUrlHint {
+  margin: 6px 0 6px 0;
+  font-size: 11px;
+  color: var(--hb-text-secondary);
+  line-height: 1.45;
+}

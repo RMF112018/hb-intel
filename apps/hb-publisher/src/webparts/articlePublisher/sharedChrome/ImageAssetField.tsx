@@ -1,31 +1,32 @@
 /**
  * ImageAssetField — preview-first editorial asset picker used by
  * single-image surfaces on the Article Publisher (hero primary,
- * secondary). Replaces the previous pattern of raw URL + alt + caption
- * inputs rendered as peer fields on a blank canvas, which pushed
- * authors into infrastructural data entry as the front-door
- * interaction.
+ * secondary).
  *
- * Posture:
- *   - **Empty state** — a dominant dashed preview plate with an
- *     inline paste-URL control, framed as "Choose an image" rather
- *     than "enter a URL". The author sees the asset slot first and
- *     the URL contract second.
- *   - **Populated state** — an editorial asset card: real preview on
- *     the left, alt text + caption composed inline on the right,
- *     Replace / Remove affordances anchored at the top of the card.
- *   - **Broken preview** — an explicit reassurance panel so the
- *     author knows the asset will not render for readers.
+ * Phase-15 Wave-02 Prompt-01: the acquisition model is now governed
+ * asset-library browse as the primary path. The author clicks
+ * "Browse library" and selects from a tenant-safe source wired in
+ * through `searchAssets`. Raw URL editing is demoted behind an
+ * explicit "Advanced: paste a custom URL" disclosure; it is no
+ * longer the front-door interaction.
  *
- * Persistence is unchanged: the component is a controlled facade
- * over the same `imageUrl`, `altText`, `caption` string fields the
- * existing article row already persists. SPFx hosts may one day
- * surface a tenant-safe file picker — when that seam lands, only the
- * acquisition affordance here needs to change; the caller contract
- * stays put.
+ * When `searchAssets` is not provided, the field falls back to the
+ * URL-first acquisition affordance so unwired callsites (tests,
+ * storybook) still function. Production SPFx mounts always supply
+ * a real search function.
+ *
+ * Persistence is unchanged: the component remains a controlled
+ * facade over the same `imageUrl`, `altText`, `caption` string
+ * fields the existing article row already persists.
  */
 
 import * as React from 'react';
+import { AssetLibraryBrowser } from './AssetLibraryBrowser.js';
+import type {
+  AssetLibrarySearchFn,
+  AssetLookupEntry,
+} from './assetLibrarySource.js';
+import { PublisherButton } from './PublisherButton.js';
 import styles from './imageAssetField.module.css';
 
 export type ImageAssetRole = 'hero' | 'secondary';
@@ -46,6 +47,14 @@ export interface ImageAssetFieldProps {
   readonly withCaption?: boolean;
   /** Optional id hook for automation/tests. */
   readonly testId?: string;
+  /**
+   * Governed asset-library search function. When provided, the
+   * empty state leads with "Browse library" and opens the asset
+   * browser; raw URL entry is demoted behind an Advanced disclosure.
+   * When omitted, the field falls back to URL-first entry (tests,
+   * storybook, environments without a tenant library wired yet).
+   */
+  readonly searchAssets?: AssetLibrarySearchFn;
 }
 
 type PreviewState = 'idle' | 'loading' | 'ready' | 'broken';
@@ -64,7 +73,9 @@ export function ImageAssetField({
   helper,
   withCaption = false,
   testId,
+  searchAssets,
 }: ImageAssetFieldProps): JSX.Element {
+  const [browserOpen, setBrowserOpen] = React.useState(false);
   const trimmedUrl = value.imageUrl.trim();
   const hasImage = trimmedUrl.length > 0;
   const urlLooksValid = isLikelyHttpsUrl(trimmedUrl);
@@ -102,8 +113,20 @@ export function ImageAssetField({
   const handleReplace = () => {
     // Keep alt and caption — authors rarely want to retype them when
     // they're swapping a jpg for a better crop of the same shot.
+    if (searchAssets) {
+      setBrowserOpen(true);
+      return;
+    }
     onChange({ ...value, imageUrl: '' });
     window.setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleLibrarySelect = (entry: AssetLookupEntry) => {
+    onChange({
+      ...value,
+      imageUrl: entry.imageUrl,
+      altText: value.altText || entry.suggestedAltText || '',
+    });
   };
 
   return (
@@ -237,18 +260,28 @@ export function ImageAssetField({
             </svg>
             <p className={styles.plateTitle}>Choose an image</p>
             <p className={styles.plateSub}>
-              Paste an https:// URL from the tenant image library or an approved
-              CDN. A tenant-safe file picker will land here in a later wave.
+              {searchAssets
+                ? 'Browse the governed asset library and pick a tenant-approved image. Alt text can be drafted before or after you pick.'
+                : 'Paste an https:// URL from the tenant image library or an approved CDN.'}
             </p>
-            <input
-              ref={inputRef}
-              className={styles.urlInputPrimary}
-              value={value.imageUrl}
-              placeholder="https://…"
-              inputMode="url"
-              onChange={(e) => handleUrl(e.target.value)}
-              aria-label={`${label} source URL`}
-            />
+            {searchAssets ? (
+              <PublisherButton
+                variant="primary"
+                onClick={() => setBrowserOpen(true)}
+              >
+                Browse library
+              </PublisherButton>
+            ) : (
+              <input
+                ref={inputRef}
+                className={styles.urlInputPrimary}
+                value={value.imageUrl}
+                placeholder="https://…"
+                inputMode="url"
+                onChange={(e) => handleUrl(e.target.value)}
+                aria-label={`${label} source URL`}
+              />
+            )}
           </div>
 
           <label className={styles.metaField}>
@@ -258,7 +291,7 @@ export function ImageAssetField({
             </span>
             <span className={styles.metaHelper}>
               Describe what is visible and why it matters. Alt text can be
-              drafted before the image URL is pasted.
+              drafted before the image is chosen.
             </span>
             <textarea
               className={styles.metaTextarea}
@@ -267,7 +300,38 @@ export function ImageAssetField({
               onChange={(e) => handleAlt(e.target.value)}
             />
           </label>
+
+          {searchAssets && (
+            <details className={styles.advancedUrlDisclosure}>
+              <summary className={styles.advancedUrlSummary}>
+                Advanced: paste a custom URL
+              </summary>
+              <p className={styles.advancedUrlHint}>
+                For non-library assets. Must be an https:// URL on a tenant-
+                approved host.
+              </p>
+              <input
+                ref={inputRef}
+                className={styles.urlInput}
+                value={value.imageUrl}
+                placeholder="https://…"
+                inputMode="url"
+                onChange={(e) => handleUrl(e.target.value)}
+                aria-label={`${label} source URL`}
+              />
+            </details>
+          )}
         </div>
+      )}
+
+      {searchAssets && (
+        <AssetLibraryBrowser
+          open={browserOpen}
+          searchAssets={searchAssets}
+          onSelect={handleLibrarySelect}
+          onRequestClose={() => setBrowserOpen(false)}
+          title={`Choose a ${role === 'hero' ? 'hero' : 'secondary'} image`}
+        />
       )}
     </div>
   );

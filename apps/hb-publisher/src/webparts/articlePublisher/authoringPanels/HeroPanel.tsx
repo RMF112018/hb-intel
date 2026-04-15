@@ -9,6 +9,7 @@ import {
   DisclosureSection,
   Field,
   ImageAssetField,
+  type AssetLibrarySearchFn,
 } from '../sharedChrome/index.js';
 import styles from '../article-publisher.module.css';
 import { update, type PanelProps } from './draftHelpers.js';
@@ -23,7 +24,11 @@ function hasAdvancedHeroOverrides(draft: PanelProps['draft']): boolean {
   );
 }
 
-export function HeroPanel({ draft, onChange }: PanelProps) {
+export interface HeroPanelProps extends PanelProps {
+  readonly searchAssets?: AssetLibrarySearchFn;
+}
+
+export function HeroPanel({ draft, onChange, searchAssets }: HeroPanelProps) {
   // Compute once on mount — the section tracks its own open state
   // after that via the native <details> element, so re-evaluating on
   // every keystroke would fight the author by re-closing the section.
@@ -34,8 +39,13 @@ export function HeroPanel({ draft, onChange }: PanelProps) {
       <ImageAssetField
         role="hero"
         label="Hero image"
-        helper="The lead visual readers see at the top of the article. Paste an https:// URL from the tenant image library or an approved CDN."
+        helper={
+          searchAssets
+            ? 'The lead visual readers see at the top of the article. Choose a tenant-approved asset from the library.'
+            : 'The lead visual readers see at the top of the article. Paste an https:// URL from the tenant image library or an approved CDN.'
+        }
         testId="hero-asset-field"
+        searchAssets={searchAssets}
         value={{
           imageUrl: draft.HeroPrimaryImage,
           altText: draft.HeroPrimaryImageAltText,

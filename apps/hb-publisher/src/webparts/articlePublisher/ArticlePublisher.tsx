@@ -45,6 +45,7 @@ import {
   ExceptionalNotice,
   PublisherButton,
   StatusBanner,
+  type AssetLibrarySearchFn,
 } from './sharedChrome/index.js';
 import {
   EditorialSpine,
@@ -111,6 +112,15 @@ export interface ArticlePublisherProps {
    * the picker falls back to initials avatars.
    */
   getGraphToken?: () => Promise<string>;
+  /**
+   * Governed asset-library search function threaded from the SPFx
+   * mount boundary. When supplied, hero + secondary image authoring
+   * lead with a "Browse library" action and the modal AssetLibraryBrowser;
+   * raw URL entry is demoted behind an Advanced disclosure. When
+   * omitted, authoring falls back to URL-first entry so unwired hosts
+   * still function.
+   */
+  searchAssets?: AssetLibrarySearchFn;
 }
 
 /* ── Pure public helpers (shell-owned, operational) ────────── */
@@ -177,6 +187,7 @@ export function ArticlePublisher({
   actorEmail,
   repositoriesOverride,
   getGraphToken,
+  searchAssets,
 }: ArticlePublisherProps) {
   const searchPeople = useSharePointPeopleSearch();
   const fetchPersonPhoto = useGraphPersonPhotoFn(getGraphToken);
@@ -416,7 +427,11 @@ export function ArticlePublisher({
             </EditorialSection>
 
             <EditorialSection id="hero" index={2} label="Hero">
-              <HeroPanel draft={articleDraft} onChange={setArticleDraft} />
+              <HeroPanel
+                draft={articleDraft}
+                onChange={setArticleDraft}
+                searchAssets={searchAssets}
+              />
             </EditorialSection>
 
             <EditorialSection id="story" index={3} label="Story">
@@ -424,7 +439,11 @@ export function ArticlePublisher({
             </EditorialSection>
 
             <EditorialSection id="media" index={4} label="Media">
-              <SecondaryImagePanel draft={articleDraft} onChange={setArticleDraft} />
+              <SecondaryImagePanel
+                draft={articleDraft}
+                onChange={setArticleDraft}
+                searchAssets={searchAssets}
+              />
               <GalleryPanel
                 articleId={articleDraft.ArticleId}
                 rows={mediaDraft}

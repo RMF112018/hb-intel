@@ -32,5 +32,8 @@ declare const styles: {
   readonly urlDisclosure: string;
   readonly urlDisclosureSummary: string;
   readonly urlInput: string;
+  readonly advancedUrlDisclosure: string;
+  readonly advancedUrlSummary: string;
+  readonly advancedUrlHint: string;
 };
 export default styles;

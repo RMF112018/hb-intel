@@ -1,9 +1,20 @@
 import * as React from 'react';
-import { ImageAssetField } from '../sharedChrome/index.js';
+import {
+  ImageAssetField,
+  type AssetLibrarySearchFn,
+} from '../sharedChrome/index.js';
 import styles from '../article-publisher.module.css';
 import { update, type PanelProps } from './draftHelpers.js';
 
-export function SecondaryImagePanel({ draft, onChange }: PanelProps) {
+export interface SecondaryImagePanelProps extends PanelProps {
+  readonly searchAssets?: AssetLibrarySearchFn;
+}
+
+export function SecondaryImagePanel({
+  draft,
+  onChange,
+  searchAssets,
+}: SecondaryImagePanelProps) {
   const hasSecondaryAsset = !!draft.SecondaryImage?.trim();
 
   return (
@@ -23,6 +34,7 @@ export function SecondaryImagePanel({ draft, onChange }: PanelProps) {
           helper="A single supporting visual rendered alongside the article body when the template exposes it."
           withCaption
           testId="secondary-asset-field"
+          searchAssets={searchAssets}
           value={{
             imageUrl: draft.SecondaryImage ?? '',
             altText: draft.SecondaryImageAltText ?? '',

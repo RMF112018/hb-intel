@@ -24,3 +24,9 @@ export type {
   ImageAssetRole,
   ImageAssetValue,
 } from './ImageAssetField.js';
+export { AssetLibraryBrowser } from './AssetLibraryBrowser.js';
+export type { AssetLibraryBrowserProps } from './AssetLibraryBrowser.js';
+export type {
+  AssetLibrarySearchFn,
+  AssetLookupEntry,
+} from './assetLibrarySource.js';

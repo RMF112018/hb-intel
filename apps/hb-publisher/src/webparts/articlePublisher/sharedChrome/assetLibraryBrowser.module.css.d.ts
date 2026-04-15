@@ -1,0 +1,22 @@
+declare const styles: {
+  readonly backdrop: string;
+  readonly dialog: string;
+  readonly header: string;
+  readonly kicker: string;
+  readonly title: string;
+  readonly searchField: string;
+  readonly searchLabel: string;
+  readonly searchInput: string;
+  readonly statusRow: string;
+  readonly spinner: string;
+  readonly error: string;
+  readonly errorDetail: string;
+  readonly grid: string;
+  readonly tile: string;
+  readonly tileActive: string;
+  readonly thumb: string;
+  readonly thumbImg: string;
+  readonly tileName: string;
+  readonly tileSource: string;
+};
+export default styles;
