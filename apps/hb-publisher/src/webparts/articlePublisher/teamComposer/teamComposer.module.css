@@ -15,9 +15,9 @@
   flex-direction: column;
   gap: 2px;
   padding: 10px 12px;
-  background: #f4f6fa;
+  background: var(--hb-surface-2, #f4f6fa);
   border-radius: 6px;
-  border: 1px solid #e3e6ed;
+  border: 1px solid var(--hb-border-subtle, #e3e6ed);
 }
 
 .directoryReadoutLabel {
@@ -25,12 +25,12 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #5f6370;
+  color: var(--hb-text-tertiary, #6a6a6f);
 }
 
 .directoryReadoutValue {
   font-size: 13px;
-  color: #1f2129;
+  color: var(--hb-text-primary, #1f1f1f);
 }
 
 .field {
@@ -38,7 +38,7 @@
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: #4a4a4f;
+  color: var(--hb-text-secondary, #4a4a4f);
 }
 
 .fieldLabelRow {
@@ -50,11 +50,11 @@
 
 .fieldLabel {
   font-weight: 600;
-  color: #1f1f1f;
+  color: var(--hb-text-primary, #1f1f1f);
 }
 
 .fieldHelper {
-  color: #5f5f66;
+  color: var(--hb-text-tertiary, #6a6a6f);
   font-size: 12px;
   line-height: 1.4;
   font-weight: 400;
@@ -63,11 +63,11 @@
 .fieldCount {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: #7a7a82;
+  color: var(--hb-text-muted, #7a7a82);
 }
 
 .fieldCountOver {
-  color: #a4262c;
+  color: var(--hb-status-danger-text, #a4262c);
   font-weight: 600;
 }
 
@@ -76,9 +76,9 @@
   font: inherit;
   color: inherit;
   padding: 6px 8px;
-  border: 1px solid #cbcbd0;
+  border: 1px solid var(--hb-border-strong, #cbcbd0);
   border-radius: 4px;
-  background: #fff;
+  background: var(--hb-surface-1, #fff);
   width: 100%;
   box-sizing: border-box;
 }
@@ -93,6 +93,6 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #1f1f1f;
+  color: var(--hb-text-primary, #1f1f1f);
   cursor: pointer;
 }

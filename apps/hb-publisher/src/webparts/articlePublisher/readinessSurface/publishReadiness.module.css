@@ -1,6 +1,6 @@
 .block {
-  background: #fff;
-  border: 1px solid #e3e6ed;
+  background: var(--hb-surface-1, #fff);
+  border: 1px solid var(--hb-border-subtle, #e3e6ed);
   border-radius: 8px;
   padding: 10px 12px;
   display: flex;
@@ -14,14 +14,14 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #5f6370;
+  color: var(--hb-text-tertiary, #6a6a6f);
 }
 
 .decisionSentence {
   margin: 0;
   font-size: 13px;
   line-height: 1.4;
-  color: #1f1f1f;
+  color: var(--hb-text-primary, #1f1f1f);
   font-weight: 500;
 }
 
@@ -29,28 +29,28 @@
   margin: 0;
   font-size: 12px;
   line-height: 1.4;
-  color: #4a4a4f;
+  color: var(--hb-text-secondary, #4a4a4f);
 }
 
 .details {
   font-size: 12px;
-  color: #4a4a4f;
+  color: var(--hb-text-secondary, #4a4a4f);
 }
 
 .summary {
   cursor: pointer;
   font-weight: 600;
-  color: #225391;
+  color: var(--hb-color-presentation-blue, #225391);
   padding: 4px 0;
   list-style-position: outside;
 }
 
 .summary::marker {
-  color: #225391;
+  color: var(--hb-color-presentation-blue, #225391);
 }
 
 .summary:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hb-color-presentation-blue, #225391);
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -74,7 +74,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #7a7a82;
+  color: var(--hb-text-muted, #7a7a82);
 }
 
 .driftList,
@@ -90,11 +90,11 @@
 .driftItem {
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 11px;
-  color: #2a2a32;
-  background: #f4f6fa;
+  color: var(--hb-text-primary, #1f1f1f);
+  background: var(--hb-surface-2, #f4f6fa);
   padding: 4px 6px;
   border-radius: 4px;
-  border: 1px solid #e3e6ed;
+  border: 1px solid var(--hb-border-subtle, #e3e6ed);
   word-break: break-all;
 }
 
@@ -117,26 +117,26 @@
 }
 
 .severityError {
-  color: #a4262c;
-  background: #fdecec;
-  border: 1px solid #e5b1b3;
+  color: var(--hb-status-danger-text, #a4262c);
+  background: var(--hb-status-danger-bg, #fdecec);
+  border: 1px solid var(--hb-status-danger-border, #e5b1b3);
 }
 
 .severityWarn {
-  color: #8a4b00;
-  background: #fff4e5;
-  border: 1px solid #ffd9a8;
+  color: var(--hb-status-warn-text, #8a4b00);
+  background: var(--hb-status-warn-bg, #fff4e5);
+  border: 1px solid var(--hb-status-warn-border, #ffd9a8);
 }
 
 .findingCategory {
-  color: #4a4a4f;
+  color: var(--hb-text-secondary, #4a4a4f);
 }
 
 .findingField {
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 11px;
-  color: #225391;
-  background: #f4f6fa;
+  color: var(--hb-color-presentation-blue, #225391);
+  background: var(--hb-surface-2, #f4f6fa);
   padding: 1px 4px;
   border-radius: 3px;
 }

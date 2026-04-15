@@ -14,9 +14,9 @@
 .searchInput {
   font: inherit;
   font-size: 13px;
-  color: #1f1f1f;
-  background: #fff;
-  border: 1px solid #cbcbd0;
+  color: var(--hb-text-primary, #1f1f1f);
+  background: var(--hb-surface-1, #fff);
+  border: 1px solid var(--hb-border-strong, #cbcbd0);
   border-radius: 6px;
   padding: 6px 10px;
   width: 100%;
@@ -24,9 +24,9 @@
 }
 
 .searchInput:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hb-color-presentation-blue, #225391);
   outline-offset: 1px;
-  border-color: #225391;
+  border-color: var(--hb-color-presentation-blue, #225391);
 }
 
 .loading,
@@ -34,11 +34,11 @@
 .empty {
   margin: 0;
   font-size: 12px;
-  color: #4a4a4f;
+  color: var(--hb-text-secondary, #4a4a4f);
 }
 
 .error {
-  color: #a4262c;
+  color: var(--hb-status-danger-text, #a4262c);
 }
 
 .groupList {
@@ -65,7 +65,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #5f6370;
+  color: var(--hb-text-tertiary, #6a6a6f);
   background: transparent;
   border: none;
   padding: 4px 2px;
@@ -75,7 +75,7 @@
 }
 
 .groupHeader:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hb-color-presentation-blue, #225391);
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -94,8 +94,8 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: #225391;
-  background: #e8eef7;
+  color: var(--hb-color-presentation-blue, #225391);
+  background: var(--hb-status-info-bg, #e8eef7);
   border-radius: 999px;
   text-transform: none;
 }
@@ -103,7 +103,7 @@
 .groupEmpty {
   margin: 0 0 0 4px;
   font-size: 12px;
-  color: #9a9aa3;
+  color: var(--hb-text-muted, #7a7a82);
   font-style: italic;
 }
 
@@ -128,25 +128,25 @@
   border-radius: 6px;
   padding: 8px 10px;
   cursor: pointer;
-  color: #1f1f1f;
+  color: var(--hb-text-primary, #1f1f1f);
 }
 
 .row:hover {
-  background: #f4f6fa;
+  background: var(--hb-surface-2, #f4f6fa);
 }
 
 .row:focus-visible {
-  outline: 2px solid #225391;
+  outline: 2px solid var(--hb-color-presentation-blue, #225391);
   outline-offset: 1px;
 }
 
 .rowActive {
-  background: #e8eef7;
-  border-color: #b5c5df;
+  background: var(--hb-status-info-bg, #e8eef7);
+  border-color: var(--hb-status-info-border, #b5c5df);
 }
 
 .rowActive:hover {
-  background: #dae4f3;
+  background: var(--hb-status-info-border, #b5c5df);
 }
 
 .rowPrimary {
@@ -160,7 +160,7 @@
   flex: 1;
   font-size: 13px;
   font-weight: 600;
-  color: #1f1f1f;
+  color: var(--hb-text-primary, #1f1f1f);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -170,7 +170,7 @@
 .rowAge {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: #7a7a82;
+  color: var(--hb-text-muted, #7a7a82);
   flex-shrink: 0;
 }
 
@@ -180,7 +180,7 @@
   gap: 6px;
   flex-wrap: wrap;
   font-size: 12px;
-  color: #4a4a4f;
+  color: var(--hb-text-secondary, #4a4a4f);
 }
 
 .rowProject {
@@ -191,11 +191,11 @@
 }
 
 .rowSeparator {
-  color: #b5b9c2;
+  color: var(--hb-border-strong, #cbcbd0);
 }
 
 .rowContentType {
-  color: #5f6370;
+  color: var(--hb-text-tertiary, #6a6a6f);
 }
 
 .rowTertiary {
@@ -203,7 +203,7 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #7a7a82;
+  color: var(--hb-text-muted, #7a7a82);
   flex-wrap: wrap;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .highlight {
-  background: #fff3b0;
+  background: var(--hb-status-featured-bg, #fff3d6);
   color: inherit;
   padding: 0 1px;
   border-radius: 2px;
@@ -247,21 +247,21 @@
 }
 
 .chipReady {
-  color: #0b6a0b;
-  background: #e7f3e7;
-  border-color: #b6dab6;
+  color: var(--hb-status-success-text, #0b6a0b);
+  background: var(--hb-status-success-bg, #e7f3e7);
+  border-color: var(--hb-status-success-border, #b6dab6);
 }
 
 .chipTodo {
-  color: #8a4b00;
-  background: #fff4e5;
-  border-color: #ffd9a8;
+  color: var(--hb-status-warn-text, #8a4b00);
+  background: var(--hb-status-warn-bg, #fff4e5);
+  border-color: var(--hb-status-warn-border, #ffd9a8);
 }
 
 .chipBlocked {
-  color: #a4262c;
-  background: #fdecec;
-  border-color: #e5b1b3;
+  color: var(--hb-status-danger-text, #a4262c);
+  background: var(--hb-status-danger-bg, #fdecec);
+  border-color: var(--hb-status-danger-border, #e5b1b3);
 }
 
 .groupCountGroup {
@@ -279,7 +279,7 @@
   text-transform: none;
   padding: 1px 6px;
   border-radius: 999px;
-  color: #8a4b00;
-  background: #fff4e5;
-  border: 1px solid #ffd9a8;
+  color: var(--hb-status-warn-text, #8a4b00);
+  background: var(--hb-status-warn-bg, #fff4e5);
+  border: 1px solid var(--hb-status-warn-border, #ffd9a8);
 }

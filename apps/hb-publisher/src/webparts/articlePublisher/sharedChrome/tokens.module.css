@@ -26,10 +26,13 @@
   --hb-surface-3: #EEF1F6;                /* initials avatars, readouts */
   --hb-text-primary: #1F1F1F;
   --hb-text-secondary: #4A4A4F;
+  --hb-text-tertiary: #6A6A6F;            /* between secondary + muted, for helper/meta copy */
   --hb-text-muted: #7A7A82;
   --hb-text-on-brand: #FFFFFF;
   --hb-border-subtle: #E3E6ED;
+  --hb-border-faint: #F0F0F3;              /* inner hairlines within tokenized surfaces */
   --hb-border-strong: #CBCBD0;
+  --hb-surface-tint-selected: #F0F6FC;     /* hover/selection tint aligned with status-info */
 
   /* Status ramps (HBC_STATUS_RAMP_*). Subsets used by chips + banners. */
   --hb-status-success-text: #0B6A0B;
