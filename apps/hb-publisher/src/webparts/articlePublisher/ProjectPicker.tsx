@@ -4,12 +4,18 @@
  * text inputs with a single authoritative selector backed by the
  * HBCentral `Projects` list.
  *
- * This is a feature-local composition — it is only consumed from
- * `ArticlePublisher.tsx` and deliberately uses the operational
- * admin-surface styling already defined in `article-publisher.module.css`
- * rather than inventing a new reusable visual primitive. If a second
- * consumer ever needs the picker, the component can be promoted to
- * `@hbc/ui-kit` without changing its contract.
+ * Phase-14 Wave-01 Prompt-03 redesign: the selected, search-result,
+ * empty, loading, no-results, and error states are now rebuilt as
+ * an editorial selection surface. Project name leads; project number
+ * and location form the editorial subtitle. Raw internal project
+ * identifiers are demoted into a collapsed `System identifiers`
+ * `<details>` block on the selected chip — they remain available for
+ * debugging but never lead the author-facing surface.
+ *
+ * Feature-local composition; only consumed from `ArticlePublisher.tsx`.
+ * The combobox keeps WAI-ARIA editable-combobox semantics
+ * (`role="combobox"`, `aria-autocomplete="list"`, `aria-haspopup`,
+ * `aria-expanded`, `aria-controls`, `aria-activedescendant`).
  */
 import * as React from 'react';
 import type {
@@ -56,7 +62,6 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Debounced remote search
   React.useEffect(() => {
     const trimmed = query.trim();
     if (trimmed.length === 0) {
@@ -88,7 +93,6 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
     };
   }, [query, searchProjects]);
 
-  // Close the dropdown on outside click
   React.useEffect(() => {
     if (!open) return undefined;
     function handleDocumentClick(ev: MouseEvent) {
@@ -153,26 +157,10 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
   return (
     <div className={styles.projectPicker} ref={containerRef}>
       {value ? (
-        <div className={styles.projectPickerChip} data-testid="project-picker-chip">
-          <div className={styles.projectPickerChipMain}>
-            <span className={styles.projectPickerChipName}>{value.projectName}</span>
-            <span className={styles.projectPickerChipMeta}>
-              {value.projectNumber ? `${value.projectNumber} · ` : ''}
-              ID {value.projectId}
-              {value.projectLocation ? ` · ${value.projectLocation}` : ''}
-            </span>
-          </div>
-          {!disabled && (
-            <button
-              type="button"
-              className={styles.projectPickerClear}
-              onClick={handleClear}
-              aria-label="Clear selected project"
-            >
-              Change
-            </button>
-          )}
-        </div>
+        <SelectedProjectChip
+          value={value}
+          onChange={!disabled ? handleClear : undefined}
+        />
       ) : (
         <>
           <input
@@ -181,7 +169,7 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
             className={styles.input}
             value={query}
             disabled={disabled}
-            placeholder={placeholder ?? 'Search projects by name or number…'}
+            placeholder={placeholder ?? 'Search by project number, name, or location…'}
             onChange={(e) => {
               setQuery(e.target.value);
               setOpen(true);
@@ -195,6 +183,13 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
             aria-controls={LISTBOX_ID}
             aria-activedescendant={activeOptionId}
           />
+          {!query.trim() && open && !disabled && (
+            <p className={styles.projectPickerEmptyHint}>
+              Bind this article to a project — search by number, name, or
+              location. The selection drives the team heading, the hero
+              category, and promotion eligibility.
+            </p>
+          )}
           {showDropdown && (
             <div
               id={LISTBOX_ID}
@@ -204,14 +199,19 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
             >
               {status === 'loading' && (
                 <div className={styles.projectPickerHint} role="status" aria-live="polite">
-                  Searching…
+                  <span className={styles.projectPickerSpinner} aria-hidden="true" />
+                  <span>Searching HBCentral for “{query.trim()}”…</span>
                 </div>
               )}
               {status === 'error' && (
                 <div className={styles.projectPickerError} role="alert">
-                  Project lookup is temporarily unavailable. Check your connection
-                  to HBCentral and try again.
-                  {error ? <span className={styles.projectPickerErrorDetail}> ({error})</span> : null}
+                  <strong>Project lookup is temporarily unavailable.</strong>
+                  <span>
+                    Check your connection to HBCentral and try again.
+                    {error ? (
+                      <span className={styles.projectPickerErrorDetail}> ({error})</span>
+                    ) : null}
+                  </span>
                 </div>
               )}
               {status === 'ready' && results.length === 0 && (
@@ -233,7 +233,6 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
                   }
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseDown={(e) => {
-                    // Prevent input blur before click fires selection.
                     e.preventDefault();
                   }}
                   onClick={() => handleSelect(entry)}
@@ -242,15 +241,67 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
                     {entry.projectName}
                   </span>
                   <span className={styles.projectPickerOptionMeta}>
-                    {entry.projectNumber ? `${entry.projectNumber} · ` : ''}
-                    ID {entry.projectId}
-                    {entry.projectLocation ? ` · ${entry.projectLocation}` : ''}
+                    {[
+                      entry.projectNumber,
+                      entry.projectLocation,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ') || 'No number or location on file'}
                   </span>
                 </div>
               ))}
             </div>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+/* ── Selected chip ────────────────────────────────────────────────
+ *
+ * Two-tier editorial presentation: project name leads, then a meta
+ * line for project number and location. Raw internal `projectId`
+ * sits behind a collapsed `<details>` "System identifiers" block so
+ * it never competes with the editorial framing but is still available
+ * for diagnostics.
+ */
+
+export function SelectedProjectChip({
+  value,
+  onChange,
+}: {
+  value: ProjectPickerValue;
+  onChange?: () => void;
+}): JSX.Element {
+  const metaParts = [value.projectNumber, value.projectLocation].filter(Boolean);
+  return (
+    <div className={styles.projectPickerChip} data-testid="project-picker-chip">
+      <div className={styles.projectPickerChipMain}>
+        <span className={styles.projectPickerChipName}>{value.projectName}</span>
+        {metaParts.length > 0 && (
+          <span className={styles.projectPickerChipMeta}>
+            {metaParts.join(' · ')}
+          </span>
+        )}
+        <details className={styles.projectPickerChipDetails}>
+          <summary className={styles.projectPickerChipDetailsSummary}>
+            System identifiers
+          </summary>
+          <span className={styles.projectPickerChipDetailsRow}>
+            ID {value.projectId}
+          </span>
+        </details>
+      </div>
+      {onChange && (
+        <button
+          type="button"
+          className={styles.projectPickerClear}
+          onClick={onChange}
+          aria-label="Change selected project"
+        >
+          Change
+        </button>
       )}
     </div>
   );

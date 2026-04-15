@@ -12,7 +12,11 @@ import {
   type ProjectLookupEntry,
   type ProjectLookupSearchFn,
 } from '../../../data/publisherAdapter/projectsLookupSource.js';
-import { ProjectPicker, type ProjectPickerValue } from '../ProjectPicker.js';
+import {
+  ProjectPicker,
+  SelectedProjectChip,
+  type ProjectPickerValue,
+} from '../ProjectPicker.js';
 import {
   articleContentTypeLabel,
   articleSubjectLabel,
@@ -123,16 +127,12 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
           // the author can still see what is bound. Manual ProjectId /
           // ProjectName text entry is intentionally not offered:
           // authoritative project identity belongs to the picker.
-          <div className={styles.projectPickerChip} data-testid="project-picker-readonly">
-            <div className={styles.projectPickerChipMain}>
-              <span className={styles.projectPickerChipName}>{projectValue.projectName}</span>
-              <span className={styles.projectPickerChipMeta}>
-                {projectValue.projectNumber ? `${projectValue.projectNumber} · ` : ''}
-                ID {projectValue.projectId}
-                {projectValue.projectLocation ? ` · ${projectValue.projectLocation}` : ''}
-              </span>
-            </div>
-            <span className={styles.projectPickerHint}>Lookup unavailable</span>
+          <div data-testid="project-picker-readonly">
+            <SelectedProjectChip value={projectValue} />
+            <p className={styles.projectPickerUnavailableHint} role="status">
+              Lookup unavailable. Reload the Publisher in its hosted page to change
+              the binding.
+            </p>
           </div>
         ) : (
           <p className={styles.editorialNotice} role="status">

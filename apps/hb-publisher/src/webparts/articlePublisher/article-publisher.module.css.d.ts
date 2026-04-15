@@ -103,5 +103,11 @@ declare const styles: {
   readonly projectPickerChipName: string;
   readonly projectPickerChipMeta: string;
   readonly projectPickerClear: string;
+  readonly projectPickerChipDetails: string;
+  readonly projectPickerChipDetailsSummary: string;
+  readonly projectPickerChipDetailsRow: string;
+  readonly projectPickerEmptyHint: string;
+  readonly projectPickerUnavailableHint: string;
+  readonly projectPickerSpinner: string;
 };
 export default styles;
