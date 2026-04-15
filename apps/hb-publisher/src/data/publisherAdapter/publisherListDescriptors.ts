@@ -14,8 +14,8 @@
  * Spotlight *` names, the publisher will silently bind to non-existent
  * lists — the descriptor-drift test enforces this invariant.
  *
- * The host site is HBCentral (control-plane). ProjectSpotlight remains
- * the first-sprint destination for generated pages only (destination-
+ * The host site is HBCentral (control-plane). Generated pages are
+ * written to the ProjectSpotlight destination site (destination-
  * scoped identity, preserved per the rebranding report).
  */
 

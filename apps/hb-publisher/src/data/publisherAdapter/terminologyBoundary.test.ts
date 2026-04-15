@@ -3,9 +3,10 @@
  *
  * Pins the three identities the codebase must keep separate:
  *   - App identity:        Article Publisher
- *   - Destination identity: Project Spotlight (current sprint's only
- *                           destination; preserved per the rebranding
- *                           report). Company Pulse is a planned future
+ *   - Destination identity: Project Spotlight (the only destination
+ *                           the current implementation wires end to
+ *                           end; preserved per the rebranding report).
+ *                           Company Pulse is a declared future
  *                           destination, not yet implemented.
  *   - Data-model identity:  the tenant `HB Article*` lists keyed by
  *                           `ArticleId`; never `Post*`/`PostId`.

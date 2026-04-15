@@ -15,7 +15,7 @@ import {
 } from './destinationSiteUrls';
 
 describe('SUPPORTED_DESTINATIONS vs. DESTINATION_VALUES', () => {
-  it('includes projectSpotlight (wired end to end in current sprint)', () => {
+  it('includes projectSpotlight (wired end to end in the current implementation)', () => {
     expect(SUPPORTED_DESTINATIONS).toContain('projectSpotlight');
     expect(isDestinationSupported('projectSpotlight')).toBe(true);
     expect(resolveDestinationSiteUrl('projectSpotlight')).toBeDefined();

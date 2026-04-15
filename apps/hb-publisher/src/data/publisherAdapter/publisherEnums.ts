@@ -58,7 +58,7 @@ export type ArticleContentTypeOperational =
  * This list is SCHEMA-COMPLETE — it matches every Choice value on
  * the tenant column so adapters can read legacy rows. For
  * operational scope (which destinations are actually wired for
- * authoring + publish in the current sprint) use
+ * authoring + publish in the current implementation) use
  * `SUPPORTED_DESTINATIONS` from `destinationSiteUrls.ts` — authoring
  * surfaces must gate on that list so operators are not invited
  * into destinations whose publish pipeline is not implemented.

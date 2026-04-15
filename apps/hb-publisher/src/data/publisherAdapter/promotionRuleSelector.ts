@@ -1,7 +1,7 @@
 /**
  * Pure selectors over tenant `HB Article Promotion Rules`.
  *
- * **Implemented behavior (current sprint):**
+ * **Implemented behavior:**
  *   - The selector resolves an explicit policy for
  *     `(Destination, ArticleContentType)` with deterministic scope
  *     precedence: destination > homepage > global.

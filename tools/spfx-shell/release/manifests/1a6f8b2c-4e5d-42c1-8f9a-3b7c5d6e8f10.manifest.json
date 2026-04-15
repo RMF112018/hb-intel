@@ -20,7 +20,7 @@
         "default": "Article Publisher"
       },
       "description": {
-        "default": "Authoring surface for structured article publishing. Current sprint supports Project Spotlight article workflows, hosted on the HBCentral publisher page; future sprints may extend to additional article destinations such as Company Pulse."
+        "default": "Authoring surface for structured article publishing on HBCentral. Supports Project Spotlight article workflows; additional destinations are not wired in the current implementation."
       },
       "officeFabricIconFontName": "PageEdit",
       "hiddenFromToolbox": true,

@@ -1,11 +1,12 @@
 /**
  * Article Publisher — authoring surface for structured article publishing.
  *
- * The current sprint supports the Project Spotlight article workflow
- * (HB Articles master-record with Destination='projectSpotlight',
- * page-bound to the ProjectSpotlight site). Future sprints may extend
- * this app to additional article destinations such as Company Pulse;
- * no other destinations are wired today.
+ * Supports the Project Spotlight article workflow: HB Articles
+ * master-record entries with `Destination='projectSpotlight'`,
+ * page-bound to the ProjectSpotlight site. Additional destinations
+ * (e.g. Company Pulse) are not wired in the current implementation;
+ * the adapter and validation layers treat `projectSpotlight` as the
+ * only supported destination until another one is explicitly added.
  *
  * Hosted on the HBCentral publisher page. Ownership is split between:
  *   - `useDraftWorkspace`   — queue / promotion-rules / selection identity

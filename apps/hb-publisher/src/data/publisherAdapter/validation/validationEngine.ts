@@ -272,9 +272,9 @@ function validateGlobalRules(
       category: 'invalid-template-match',
       severity: 'error',
       field: 'Destination',
-      message: `Destination must be 'projectSpotlight' in the current sprint (found '${article.Destination}').`,
+      message: `Destination must be 'projectSpotlight' (found '${article.Destination}').`,
       actionHint:
-        'Project Spotlight is the only destination implemented by this sprint; Company Pulse support is planned.',
+        'Project Spotlight is the only destination the Article Publisher currently implements.',
     });
   }
 
