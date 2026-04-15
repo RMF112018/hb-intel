@@ -21,6 +21,7 @@ import {
   type WorkflowState,
 } from '../../../data/publisherAdapter/index.js';
 import { buildPublishResolutionContext } from '../../../data/publisherAdapter/publishResolutionContext.js';
+import { createDraftSaveOrchestrator } from '../../../data/publisherAdapter/draftSaveOrchestrator.js';
 import { canTransition } from '../../../data/publisherAdapter/workflowStateMachine.js';
 import {
   illegalTransitionMessage,
@@ -267,13 +268,37 @@ export function useDraftLifecycle({
         UpdatedDateUtc: nowIso(),
       };
       const policyApplied = applyPromotionPolicy(updated, { enforceLockOnly: true });
-      await repositories.articles.upsert(policyApplied);
-      await repositories.teamMembers.replaceAllForArticle(updated.ArticleId, teamDraft);
-      await repositories.media.replaceAllForArticle(updated.ArticleId, mediaDraft);
-      setArticleDraft(policyApplied);
-      setStatus('Draft saved.', 'success');
-      await reloadGroups();
-      await reloadSelected(policyApplied.ArticleId);
+      const saveOrchestrator = createDraftSaveOrchestrator(repositories);
+      const outcome = await saveOrchestrator.save({
+        article: policyApplied,
+        teamMembers: teamDraft,
+        media: mediaDraft,
+      });
+      if (outcome.ok) {
+        setArticleDraft(policyApplied);
+        setStatus('Draft saved.', 'success');
+        await reloadGroups();
+        await reloadSelected(policyApplied.ArticleId);
+      } else {
+        // Truthful staged save: partial persistence is surfaced
+        // stage-by-stage. If the master committed before the failing
+        // child write, trust the server as the authoritative master
+        // and reload from it so local draft state and persisted
+        // state stop diverging.
+        const committedSummary = [
+          outcome.persisted.article ? 'master saved' : 'master not saved',
+          outcome.persisted.teamMembers ? 'team saved' : 'team not saved',
+          outcome.persisted.media ? 'media saved' : 'media not saved',
+        ].join('; ');
+        setStatus(
+          `Save partially failed at ${outcome.stage}: ${outcome.message} Persistence: ${committedSummary}.`,
+          'error',
+        );
+        if (outcome.persisted.article) {
+          await reloadGroups();
+          await reloadSelected(policyApplied.ArticleId);
+        }
+      }
     } catch (err) {
       setStatus(
         err instanceof Error
