@@ -307,6 +307,42 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
 
     const shell = req.shell ?? PROJECT_SPOTLIGHT_V1_SHELL;
 
+    // Republish approval gate — defense-in-depth with the UI. A republish
+    // keeps the article stamped at `published`, so the only legitimate
+    // source state for republish is `published`. Articles in draft /
+    // review / approved must go through the ordinary Publish path so the
+    // approval workflow is honored; this rejects any UI drift (or
+    // automation) that would otherwise re-enter the publish pipeline
+    // from an ineligible lifecycle state. `archived` / `withdrawn` are
+    // already blocked by `decideRepublishAction`; those cases are kept
+    // there for backward-compat test coverage.
+    if (req.mode === 'republish' && context.article.WorkflowState !== 'published') {
+      const decision: RepublishDecision = {
+        action: 'blocked',
+        reason: 'articleNotPublished',
+        notes: [
+          `Republish requires the article to be in 'published' state; current state is '${context.article.WorkflowState}'. Use the Publish action from 'approved' instead.`,
+        ],
+      };
+      const message = `Republish blocked: ${decision.reason}. ${decision.notes.join(' ')}`;
+      await recordPublishingError({
+        articleId: context.article.ArticleId,
+        title: context.article.Title,
+        destination: context.article.Destination,
+        stage: 'policy',
+        mode: req.mode,
+        message,
+        bindingId: context.existingBinding?.BindingId,
+        nowIso: (req.now ?? defaultNow)(),
+      });
+      return {
+        ok: false,
+        stage: 'policy',
+        message,
+        decision,
+      };
+    }
+
     // Preview never writes; always runs validation for UI surfacing.
     if (req.mode === 'preview') {
       const { page, structuralErrors } = pageShellService.composePage(context);

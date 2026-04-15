@@ -76,6 +76,7 @@ export type RepublishReason =
   | 'pageNameDrift'
   | 'articleArchived'
   | 'articleWithdrawn'
+  | 'articleNotPublished'
   | 'bindingError'
   | 'contentChanged'
   | 'alreadyInSync';

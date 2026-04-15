@@ -213,7 +213,10 @@ describe('publishOrchestrator — HB Articles back-sync', () => {
 
   it('on inPlaceUpdate (republish), preserves the original PublishedDateUtc', async () => {
     const originalPublishedAt = '2026-04-01T00:00:00Z';
-    const art = article({ PublishedDateUtc: originalPublishedAt });
+    const art = article({
+      WorkflowState: 'published',
+      PublishedDateUtc: originalPublishedAt,
+    });
     const existingBinding: PublisherPageBindingRow = {
       BindingId: 'bnd-existing',
       ArticleId: art.ArticleId,

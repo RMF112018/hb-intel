@@ -50,11 +50,18 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     !unsupportedDestinationLoaded &&
     articleDraft.WorkflowState === 'approved' &&
     !publishBlockedByValidation;
+  // Republish is the in-place update path for content that is already
+  // live. Enabling it from any non-`published` state (draft / review /
+  // approved) would bypass the approval gate and re-stamp the article
+  // back to `published` without the intended control flow. Keep the
+  // Publish action as the single route for `approved` content; the
+  // orchestrator enforces the same invariant server-side.
   const republishEnabled =
     !!articleDraft &&
     !busy &&
     !unsupportedDestinationLoaded &&
     !!binding &&
+    articleDraft.WorkflowState === 'published' &&
     !publishBlockedByValidation;
   const saveEnabled = !!articleDraft && !busy && !unsupportedDestinationLoaded;
 

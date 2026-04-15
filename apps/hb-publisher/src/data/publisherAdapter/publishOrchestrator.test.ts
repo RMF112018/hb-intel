@@ -400,7 +400,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-inprogress-monthly-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     // Simulate the pages REST contract for targeted PATCH: the
     // creation service echoes the bound PageId / URL back so the
     // binding row stays anchored to the same page.
@@ -469,7 +469,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-inprogress-monthly-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
       articleId: 'art-ps-001',
@@ -501,7 +501,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-inprogress-monthly-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
       articleId: 'art-ps-001',
@@ -578,7 +578,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-inprogress-monthly-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
       articleId: 'art-ps-001',
@@ -606,7 +606,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-old-template-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     const orch = makeOrchestrator(f);
     const result = await orch.run({
       articleId: 'art-ps-001',
@@ -640,7 +640,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-old-template-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     f.createOrUpdate.mockResolvedValue({
       ok: true as const,
       pageId: '1001',
@@ -707,7 +707,7 @@ describe('publishOrchestrator', () => {
       PageTemplateKey: 'ps-inprogress-monthly-v1',
       RenderVersion: '1.0.0',
     };
-    const f = fixture({ existingBinding: existing });
+    const f = fixture({ article: { WorkflowState: 'published' }, existingBinding: existing });
     f.createOrUpdate.mockImplementation(async (input) => ({
       ok: true as const,
       pageId: input.targetPageId ?? '123',
@@ -788,6 +788,114 @@ describe('publishOrchestrator', () => {
     expect(result.ok).toBe(true);
     expect(f.createOrUpdate).toHaveBeenCalledTimes(1);
     expect(f.upsertBinding).toHaveBeenCalledTimes(1);
+  });
+
+  // Phase-09 Prompt-02: republish approval gate. A bound article in a
+  // non-`published` lifecycle state must not be able to re-enter the
+  // publish pipeline via Republish. The Publish action remains the
+  // single route for `approved` content; Republish is reserved for
+  // already-live content.
+  describe('republish approval gate (phase-09 prompt-02)', () => {
+    const bound: PublisherPageBindingRow = {
+      BindingId: 'bnd-existing-42',
+      ArticleId: 'art-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
+      TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+      PageId: '999',
+      PageName: 'acme-tower-april.aspx',
+      PageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
+    };
+
+    it('blocks republish when the master article is in draft (bound but not published)', async () => {
+      const f = fixture({
+        article: { WorkflowState: 'draft' },
+        existingBinding: bound,
+      });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({ articleId: 'art-ps-001', mode: 'republish' });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('policy');
+      expect(result.decision?.action).toBe('blocked');
+      expect(result.decision?.reason).toBe('articleNotPublished');
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+
+    it('blocks republish when the master article is in review (bound but not published)', async () => {
+      const f = fixture({
+        article: { WorkflowState: 'review' },
+        existingBinding: bound,
+      });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({ articleId: 'art-ps-001', mode: 'republish' });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('policy');
+      expect(result.decision?.reason).toBe('articleNotPublished');
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+
+    it('blocks republish when the master article is in approved (must go through Publish, not Republish)', async () => {
+      const f = fixture({
+        article: { WorkflowState: 'approved' },
+        existingBinding: bound,
+      });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({ articleId: 'art-ps-001', mode: 'republish' });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('policy');
+      expect(result.decision?.reason).toBe('articleNotPublished');
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+
+    it('allows the ordinary Publish path from approved (control flow preserved)', async () => {
+      const f = fixture({ article: { WorkflowState: 'approved' } });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'create',
+        now: () => '2026-04-13T10:00:00.000Z',
+        generateBindingId: () => 'bnd-generated',
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.action).toBe('create');
+      expect(f.createOrUpdate).toHaveBeenCalledTimes(1);
+      expect(f.upsertBinding).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows republish from published (legitimately live content)', async () => {
+      const f = fixture({
+        article: { WorkflowState: 'published' },
+        existingBinding: bound,
+      });
+      f.createOrUpdate.mockImplementation(async (input) => ({
+        ok: true as const,
+        pageId: input.targetPageId ?? '999',
+        pageUrl: bound.PageUrl!,
+        pageName: bound.PageName!,
+        wasCreated: false,
+      }));
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'republish',
+        now: () => '2026-04-13T10:00:00.000Z',
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.action).toBe('inPlaceUpdate');
+      expect(f.upsertBinding).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('surfaces page-publish failures without writing the binding', async () => {
