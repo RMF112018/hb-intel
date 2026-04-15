@@ -69,6 +69,89 @@ function inputs(
   };
 }
 
+describe('useReadinessController — save-health first-persistence gate', () => {
+  it('blocks Save draft on a fresh (not-yet-persisted) draft with missing tenant fields', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({
+            Title: 'Untitled article',
+            Subhead: '',
+            SummaryExcerpt: '',
+            BodyRichText: '',
+            HeroPrimaryImage: '',
+            HeroPrimaryImageAltText: '',
+          }),
+          isPersisted: false,
+        }),
+      ),
+    );
+    expect(result.current.saveEnabled).toBe(false);
+    expect(result.current.saveHealth.kind).toBe('missingFirstPersistenceFields');
+    if (result.current.saveHealth.kind === 'missingFirstPersistenceFields') {
+      const fields = result.current.saveHealth.missing.map((m) => m.field);
+      expect(fields).toEqual(
+        expect.arrayContaining([
+          'Title',
+          'Subhead',
+          'SummaryExcerpt',
+          'BodyRichText',
+          'HeroPrimaryImage',
+        ]),
+      );
+    }
+    expect(result.current.saveBlockedReason).toMatch(
+      /Finish .* required field/,
+    );
+  });
+
+  it('enables Save draft once first-persistence fields are satisfied', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({
+            // article() already fills tenant fields; add project
+            // binding required by the first-persistence rule set.
+            ProjectId: 'proj-1',
+            ProjectName: 'Proj 1',
+          } as Partial<PublisherArticleRow>),
+          isPersisted: false,
+        }),
+      ),
+    );
+    expect(result.current.saveHealth.kind).toBe('readyFirstPersistence');
+    expect(result.current.saveEnabled).toBe(true);
+    expect(result.current.saveBlockedReason).toBeUndefined();
+  });
+
+  it('short-circuits to readySubsequentPersistence once the master row has been persisted', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ Title: 'Untitled article', Subhead: '' }),
+          isPersisted: true,
+        }),
+      ),
+    );
+    expect(result.current.saveHealth.kind).toBe('readySubsequentPersistence');
+    expect(result.current.saveEnabled).toBe(true);
+  });
+
+  it('busy outranks missing-first-persistence fields', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ Title: 'Untitled article' }),
+          isPersisted: false,
+          busy: true,
+        }),
+      ),
+    );
+    expect(result.current.saveHealth.kind).toBe('busy');
+    expect(result.current.saveEnabled).toBe(false);
+  });
+});
+
 describe('useReadinessController — milestone legacy hard-block', () => {
   it('exposes unsupportedContentTypeMessage and disables Publish on milestoneSpotlight drafts', () => {
     const { result } = renderHook(() =>

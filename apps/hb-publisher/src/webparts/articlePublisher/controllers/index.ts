@@ -25,3 +25,16 @@ export {
   unsupportedDestinationNotice,
 } from './draftPolicyHelpers.js';
 export type { PromotionPolicyApplyResult } from './draftPolicyHelpers.js';
+export {
+  deriveSaveHealth,
+  isSaveReady,
+  missingFirstPersistenceFields,
+  saveDisabledReason,
+  DEFAULT_NEW_DRAFT_TITLE,
+} from './saveHealthModel.js';
+export type {
+  SaveBlockField,
+  SaveBlockFieldKey,
+  SaveHealth,
+  DeriveSaveHealthInputs,
+} from './saveHealthModel.js';

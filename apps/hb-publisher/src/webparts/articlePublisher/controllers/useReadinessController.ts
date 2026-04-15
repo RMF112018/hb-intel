@@ -13,6 +13,12 @@ import type { PreviewOutcome } from '../../../data/publisherAdapter/preview/prev
 import { workflowOutcomeLabel } from '../authorLabels.js';
 import { unsupportedDestinationNotice } from './draftPolicyHelpers.js';
 import { milestoneLegacyNotice } from '../authoringPanels/draftHelpers.js';
+import {
+  deriveSaveHealth,
+  isSaveReady,
+  saveDisabledReason,
+  type SaveHealth,
+} from './saveHealthModel.js';
 
 export interface ReadinessControllerInputs {
   readonly articleDraft: PublisherArticleRow | undefined;
@@ -20,10 +26,21 @@ export interface ReadinessControllerInputs {
   readonly preview: PreviewOutcome | undefined;
   readonly promotionPolicy: PromotionPolicyResult | undefined;
   readonly busy: boolean;
+  /**
+   * Whether the master `HB Articles` row for the active draft has
+   * committed to the list at least once. When false, the first-save
+   * gate in the derived save-health model blocks Save draft until
+   * tenant-required fields are satisfied.
+   *
+   * Defaults to `true` when undefined so existing callers keep
+   * subsequent-save semantics until they opt in.
+   */
+  readonly isPersisted?: boolean;
 }
 
 export function useReadinessController(inputs: ReadinessControllerInputs) {
   const { articleDraft, binding, preview, promotionPolicy, busy } = inputs;
+  const isPersisted = inputs.isPersisted ?? true;
 
   const unsupportedDestinationMessage = articleDraft
     ? unsupportedDestinationNotice(articleDraft.Destination)
@@ -77,7 +94,20 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     !!binding &&
     articleDraft.WorkflowState === 'published' &&
     !publishBlockedByValidation;
-  const saveEnabled = !!articleDraft && !busy && !unsupportedDestinationLoaded;
+  // Save readiness is modeled explicitly so the shell can both gate
+  // the button truthfully and tell the author what is blocking a
+  // first persistence. Subsequent saves short-circuit the
+  // first-persistence field gate to preserve partial-persistence
+  // recovery and normal editing.
+  const saveHealth: SaveHealth = deriveSaveHealth({
+    articleDraft,
+    busy,
+    unsupportedDestinationMessage,
+    unsupportedContentTypeMessage,
+    isPersisted,
+  });
+  const saveEnabled = isSaveReady(saveHealth);
+  const saveBlockedReason = saveDisabledReason(saveHealth);
 
   return {
     readinessSummary,
@@ -93,6 +123,8 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     publishEnabled,
     republishEnabled,
     saveEnabled,
+    saveHealth,
+    saveBlockedReason,
   };
 }
 

@@ -81,6 +81,13 @@ export interface DraftLifecycleHandle {
   readonly resolutionContext: PublishResolutionContext | undefined;
   readonly promotionPolicy: PromotionPolicyResult | undefined;
   readonly busy: boolean;
+  /**
+   * Whether the master `HB Articles` row for the active draft has
+   * committed to the list at least once (either loaded from the
+   * server, or successfully upserted by a prior save). Drives the
+   * first-persistence save-health gate in `useReadinessController`.
+   */
+  readonly isPersisted: boolean;
   readonly reloadSelected: (articleId: string) => Promise<void>;
   readonly handleCreateNew: () => void;
   readonly handleSave: () => Promise<void>;
@@ -118,6 +125,7 @@ export function useDraftLifecycle({
     PromotionPolicyResult | undefined
   >();
   const [busy, setBusy] = React.useState(false);
+  const [isPersisted, setIsPersisted] = React.useState(false);
 
   const applyPromotionPolicy = React.useCallback(
     (
@@ -146,6 +154,8 @@ export function useDraftLifecycle({
             article.Destination,
           );
           setArticleDraft(article);
+          // Loaded from the server → master row is committed.
+          setIsPersisted(true);
           setPromotionPolicy(
             selectPromotionPolicy(
               promotionRules,
@@ -189,6 +199,9 @@ export function useDraftLifecycle({
     setMediaDraft([]);
     setBinding(undefined);
     setResolutionContext(undefined);
+    // Brand-new draft → never persisted yet; gates the first-save
+    // health model until handleSave commits the master row.
+    setIsPersisted(false);
     setSelectedArticleId(seeded.ArticleId);
   }, [applyPromotionPolicy, setSelectedArticleId]);
 
@@ -276,6 +289,9 @@ export function useDraftLifecycle({
       });
       if (outcome.ok) {
         setArticleDraft(policyApplied);
+        // Master row committed → subsequent saves flow through the
+        // readySubsequentPersistence branch of the save-health model.
+        setIsPersisted(true);
         setStatus('Draft saved.', 'success');
         await reloadGroups();
         await reloadSelected(policyApplied.ArticleId);
@@ -295,6 +311,9 @@ export function useDraftLifecycle({
           'error',
         );
         if (outcome.persisted.article) {
+          // Master committed before a child write failed — retries
+          // are subsequent saves, not first-persistence attempts.
+          setIsPersisted(true);
           await reloadGroups();
           await reloadSelected(policyApplied.ArticleId);
         }
@@ -442,6 +461,7 @@ export function useDraftLifecycle({
     resolutionContext,
     promotionPolicy,
     busy,
+    isPersisted,
     reloadSelected,
     handleCreateNew,
     handleSave,

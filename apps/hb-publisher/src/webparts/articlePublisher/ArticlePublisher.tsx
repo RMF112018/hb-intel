@@ -218,6 +218,7 @@ export function ArticlePublisher({
     resolutionContext,
     promotionPolicy,
     busy,
+    isPersisted,
     handleCreateNew,
     handleSave,
     handleTransition,
@@ -237,6 +238,7 @@ export function ArticlePublisher({
     preview,
     promotionPolicy,
     busy,
+    isPersisted,
   });
   const {
     readinessSummary,
@@ -252,6 +254,8 @@ export function ArticlePublisher({
     publishEnabled,
     republishEnabled,
     saveEnabled,
+    saveHealth,
+    saveBlockedReason,
   } = readiness;
 
   const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
@@ -440,6 +444,27 @@ export function ArticlePublisher({
               )}
             </section>
 
+            {saveHealth.kind === 'missingFirstPersistenceFields' && (
+              <section
+                id="save-readiness-block"
+                className={styles.readinessBlock}
+                aria-label="Save readiness"
+                aria-live="polite"
+              >
+                <p className={styles.readinessHeading}>
+                  Finish these before saving
+                </p>
+                <ul className={styles.readinessList}>
+                  {saveHealth.missing.map((m) => (
+                    <li key={m.field} className={styles.readinessIssueError}>
+                      <strong>{m.label}:</strong> {m.message}{' '}
+                      <span>{m.actionHint}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {publishBlockedByValidation && latestValidation && (
               <section className={styles.readinessBlock} aria-label="Blocking issues">
                 <p className={styles.readinessHeading}>
@@ -500,11 +525,21 @@ export function ArticlePublisher({
                 >
                   Republish
                 </PublisherButton>
-                <PublisherButton disabled={!saveEnabled} onClick={handleSave}>
+                <PublisherButton
+                  disabled={!saveEnabled}
+                  title={saveBlockedReason}
+                  aria-describedby={
+                    saveHealth.kind === 'missingFirstPersistenceFields'
+                      ? 'save-readiness-block'
+                      : undefined
+                  }
+                  onClick={handleSave}
+                >
                   Save draft
                 </PublisherButton>
                 <PublisherButton
                   disabled={!saveEnabled}
+                  title={saveBlockedReason}
                   onClick={() => handlePublishAction('preview')}
                 >
                   Recompose preview
