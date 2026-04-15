@@ -798,6 +798,93 @@
   color: var(--hb-text-muted, #7a7a82);
 }
 
+/* Next-action cue — primary recommendation at the top of the rail.
+ * Lifted visually above the readiness summary and finding lists so
+ * the author reads one explicit recommendation first and can treat
+ * the rest of the rail as technical truth in support of it. */
+.nextActionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  margin-bottom: var(--hb-space-md, 16px);
+  border-radius: var(--hb-radius-lg, 6px);
+  border: 1px solid transparent;
+}
+
+.nextActionKicker {
+  margin: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.nextActionHeadline {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.nextActionDetail {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.88;
+}
+
+.nextActionRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.nextActionAnchor {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hb-color-presentation-blue, #225391);
+  text-decoration: none;
+}
+
+.nextActionAnchor:hover,
+.nextActionAnchor:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.nextActionToneNeutral {
+  background: var(--hb-surface-1, #fafafa);
+  border-color: var(--hb-border-faint, #e8e8ea);
+  color: var(--hb-text-primary, #1f1f1f);
+}
+
+.nextActionToneInfo {
+  background: var(--hb-status-info-bg, #e8eef7);
+  border-color: var(--hb-status-info-border, #bcd5f1);
+  color: var(--hb-status-info-text, #225391);
+}
+
+.nextActionToneWarn {
+  background: var(--hb-status-warn-bg, #fff4e5);
+  border-color: var(--hb-status-warn-border, #ffd9a8);
+  color: var(--hb-status-warn-text, #8a4b00);
+}
+
+.nextActionToneDanger {
+  background: var(--hb-status-danger-bg, #fdecec);
+  border-color: var(--hb-status-danger-border, #e5b1b3);
+  color: var(--hb-status-danger-text, #a4262c);
+}
+
+.nextActionToneSuccess {
+  background: var(--hb-status-success-bg);
+  border-color: var(--hb-status-success-border);
+  color: var(--hb-status-success-text);
+}
+
 .readinessBlock,
 .readinessBlockDanger {
   display: flex;

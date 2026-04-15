@@ -36,6 +36,17 @@ declare const styles: {
   readonly canvasLaneLabel: string;
   readonly canvasLaneHint: string;
   readonly canvasLaneBody: string;
+  readonly nextActionBlock: string;
+  readonly nextActionKicker: string;
+  readonly nextActionHeadline: string;
+  readonly nextActionDetail: string;
+  readonly nextActionRow: string;
+  readonly nextActionAnchor: string;
+  readonly nextActionToneNeutral: string;
+  readonly nextActionToneInfo: string;
+  readonly nextActionToneWarn: string;
+  readonly nextActionToneDanger: string;
+  readonly nextActionToneSuccess: string;
   readonly section: string;
   readonly sectionGovernance: string;
   readonly sectionHeader: string;

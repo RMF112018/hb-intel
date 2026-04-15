@@ -692,6 +692,20 @@ export function ArticlePublisher({
           </div>
         ) : (
           <>
+            <NextActionCue
+              next={deriveNextAction({
+                busy,
+                saveHealth,
+                isDirty,
+                publishBlockedByValidation,
+                publishEnabled,
+                latestValidation,
+                trust,
+              })}
+              onSave={handleSaveWithCacheClear}
+              onSaveAndRefreshPreview={handleSaveAndRefreshPreview}
+              onPublish={() => handlePublishWithCacheClear('create')}
+            />
             <section className={styles.readinessBlock} aria-label="Readiness summary">
               <p className={styles.readinessHeading}>Readiness</p>
               <p className={styles.readinessSummary}>{readinessSummary}</p>
@@ -1116,6 +1130,196 @@ function computeSpineStatus(
  * outputs that already flow through `ArticlePublisher`. Moving them
  * into `sharedChrome/` would require passing the class map in, which
  * is more coupling than it saves. */
+
+/* ── Next-action cue ─────────────────────────────────────────────
+ * Coalesces the separate readiness signals (save health, blocking
+ * issues, warnings, preview freshness, publish intent) into a single
+ * explicit recommendation at the top of the rail. Subordinate
+ * signals (the existing readiness summary, blocking list, warnings,
+ * diagnostics) remain below so technical truth is preserved; this
+ * cue just answers "what should I do next?" so the author does not
+ * have to reconcile several mostly-good cues to decide.
+ */
+type NextActionKind =
+  | 'working'
+  | 'completeRequired'
+  | 'fixBlocking'
+  | 'saveAndRefreshPreview'
+  | 'save'
+  | 'publish'
+  | 'reviewWarnings'
+  | 'ready';
+
+interface NextAction {
+  readonly kind: NextActionKind;
+  readonly tone: 'neutral' | 'info' | 'warn' | 'danger' | 'success';
+  readonly headline: string;
+  readonly detail?: string;
+  readonly primaryLabel?: string;
+  readonly primaryAnchor?: string;
+}
+
+function deriveNextAction(input: {
+  busy: boolean;
+  saveHealth: ReturnType<typeof useReadinessController>['saveHealth'];
+  isDirty: boolean;
+  publishBlockedByValidation: boolean;
+  publishEnabled: boolean;
+  latestValidation: ReturnType<typeof useReadinessController>['latestValidation'];
+  trust: SaveStateTrust;
+}): NextAction {
+  const {
+    busy,
+    saveHealth,
+    isDirty,
+    publishBlockedByValidation,
+    publishEnabled,
+    latestValidation,
+    trust,
+  } = input;
+  if (busy) {
+    return {
+      kind: 'working',
+      tone: 'info',
+      headline: 'Working…',
+      detail: 'The last action is still running.',
+    };
+  }
+  if (saveHealth.kind === 'missingFirstPersistenceFields') {
+    return {
+      kind: 'completeRequired',
+      tone: 'warn',
+      headline: `Complete ${saveHealth.missing.length} required field${
+        saveHealth.missing.length === 1 ? '' : 's'
+      } to save.`,
+      detail: 'The first save writes to the HB Articles list — required columns must be filled.',
+      primaryAnchor: 'save-readiness-block',
+    };
+  }
+  if (publishBlockedByValidation && latestValidation) {
+    const count = latestValidation.errors.length;
+    const first = latestValidation.errors[0];
+    const anchor = first ? sectionAnchorForFindingField(first.field) : undefined;
+    return {
+      kind: 'fixBlocking',
+      tone: 'danger',
+      headline: `Fix ${count} blocking issue${count === 1 ? '' : 's'} before publish.`,
+      detail: first ? first.message : undefined,
+      primaryLabel: anchor ? `Go to ${anchor.label}` : undefined,
+      primaryAnchor: anchor?.sectionId,
+    };
+  }
+  if (isDirty) {
+    const failed = trust.phase === 'failed';
+    return {
+      kind: 'saveAndRefreshPreview',
+      tone: failed ? 'danger' : 'warn',
+      headline: failed
+        ? 'Last save failed — save again to bring preview current.'
+        : 'Save your edits to bring preview current.',
+      detail: 'Preview always composes from the last saved draft, so saving brings preview forward in one step.',
+      primaryLabel: 'Save and refresh preview',
+    };
+  }
+  if (publishEnabled) {
+    const warnCount = latestValidation?.warnings.length ?? 0;
+    return {
+      kind: 'publish',
+      tone: 'success',
+      headline: 'Ready to publish.',
+      detail:
+        warnCount > 0
+          ? `${warnCount} warning${warnCount === 1 ? '' : 's'} will ride with publish — review below if needed.`
+          : 'Publish will create the destination page and record history.',
+      primaryLabel: 'Publish',
+    };
+  }
+  if (latestValidation && latestValidation.warnings.length > 0) {
+    return {
+      kind: 'reviewWarnings',
+      tone: 'warn',
+      headline: `${latestValidation.warnings.length} warning${
+        latestValidation.warnings.length === 1 ? '' : 's'
+      } to review.`,
+      detail: 'Warnings do not block publish, but review each before shipping.',
+    };
+  }
+  return {
+    kind: 'ready',
+    tone: 'neutral',
+    headline: 'No action needed right now.',
+    detail: 'Preview is current and there are no blocking issues.',
+  };
+}
+
+function NextActionCue({
+  next,
+  onSave,
+  onSaveAndRefreshPreview,
+  onPublish,
+}: {
+  next: NextAction;
+  onSave: () => void | Promise<void>;
+  onSaveAndRefreshPreview: () => void | Promise<void>;
+  onPublish: () => void | Promise<void>;
+}): React.JSX.Element {
+  const toneClass = (() => {
+    switch (next.tone) {
+      case 'danger':
+        return styles.nextActionToneDanger;
+      case 'warn':
+        return styles.nextActionToneWarn;
+      case 'info':
+        return styles.nextActionToneInfo;
+      case 'success':
+        return styles.nextActionToneSuccess;
+      case 'neutral':
+      default:
+        return styles.nextActionToneNeutral;
+    }
+  })();
+  const onPrimary = (() => {
+    switch (next.kind) {
+      case 'saveAndRefreshPreview':
+        return () => void onSaveAndRefreshPreview();
+      case 'publish':
+        return () => void onPublish();
+      case 'save':
+        return () => void onSave();
+      default:
+        return undefined;
+    }
+  })();
+  return (
+    <section
+      className={`${styles.nextActionBlock} ${toneClass}`}
+      role="status"
+      aria-live="polite"
+      aria-label="Recommended next action"
+    >
+      <p className={styles.nextActionKicker}>Next action</p>
+      <p className={styles.nextActionHeadline}>{next.headline}</p>
+      {next.detail && <p className={styles.nextActionDetail}>{next.detail}</p>}
+      {(onPrimary || next.primaryAnchor) && (
+        <div className={styles.nextActionRow}>
+          {onPrimary && next.primaryLabel && (
+            <PublisherButton variant="primary" size="sm" onClick={onPrimary}>
+              {next.primaryLabel}
+            </PublisherButton>
+          )}
+          {!onPrimary && next.primaryAnchor && next.primaryLabel && (
+            <a
+              href={`#${next.primaryAnchor}`}
+              className={styles.nextActionAnchor}
+            >
+              {next.primaryLabel} →
+            </a>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
 
 function PublishIntentCue({
   intent,
