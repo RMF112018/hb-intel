@@ -20,11 +20,19 @@ import {
 /**
  * Order the left draft rail groups surfaces in. The editorial rail
  * presents drafts first, then in-review, then approved, then published;
- * archived and withdrawn follow as collapsed-by-default residual groups.
+ * archived, withdrawn, and legacy `scheduled` follow as collapsed-by-
+ * default residual groups.
  *
- * Legacy `scheduled` is intentionally omitted from rail groups — no
- * scheduled executor exists today; legacy rows remain read-compatible
- * only.
+ * Phase-09 Prompt-05: `scheduled` is included here (Option B —
+ * quarantine) rather than silently omitted. There is still no
+ * scheduled-publish executor and no inbound transition targets
+ * `scheduled` (see `workflowStateMachine.ts`), so legacy rows are
+ * read-compatible only — but operators can see them in the rail,
+ * move them to `approved` or `withdrawn`, and slug governance scans
+ * include their slugs. Silent omission previously made these rows
+ * invisible to authoring safeguards; that is the defect this prompt
+ * closes. Rail group label is "Scheduled (legacy)" so the
+ * quarantine is visually explicit.
  */
 export const DRAFT_GROUP_ORDER: readonly WorkflowState[] = [
   'draft',
@@ -33,11 +41,13 @@ export const DRAFT_GROUP_ORDER: readonly WorkflowState[] = [
   'published',
   'archived',
   'withdrawn',
+  'scheduled',
 ];
 
 export const COLLAPSED_GROUPS_BY_DEFAULT: ReadonlySet<WorkflowState> = new Set([
   'archived',
   'withdrawn',
+  'scheduled',
 ]);
 
 export interface DraftGroupMap {
