@@ -81,6 +81,55 @@
   outline-offset: 2px;
 }
 
+.stalenessBanner {
+  margin: 0 0 var(--hb-space-md, 16px) 0;
+  padding: 10px 12px;
+  border-radius: var(--hb-radius-lg, 6px);
+  font-size: 12px;
+  line-height: 1.45;
+  border: 1px solid var(--hb-status-info-border, #bcd5f1);
+  background: var(--hb-status-info-bg, #e8eef7);
+  color: var(--hb-status-info-text, #225391);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stalenessHeadline {
+  margin: 0;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.stalenessDetail {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.stalenessAction {
+  align-self: flex-start;
+  appearance: none;
+  background: var(--hb-color-presentation-blue, #225391);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--hb-radius-md, 4px);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stalenessAction:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.stalenessAction:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .trustBridgeOverflow {
   margin: 6px 0 0 0;
   font-size: 11px;

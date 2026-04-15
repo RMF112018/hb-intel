@@ -385,7 +385,19 @@ export function ArticlePublisher({
     selectedArticleId: workspace.selectedArticleId,
     setStatus,
   });
-  const { preview, previewLoading } = previewController;
+  const { preview, previewLoading, loadPreview } = previewController;
+
+  // "Save and refresh preview" — single-action bridge that closes
+  // the saved-vs-working-copy ambiguity on the preview surface.
+  // Persists the working copy through the standard save path, then
+  // recomposes preview from the now-current saved draft through the
+  // shared publish/preview contract (no forked composition rules).
+  const handleSaveAndRefreshPreview = React.useCallback(async () => {
+    await handleSaveWithCacheClear();
+    if (workspace.selectedArticleId) {
+      await loadPreview(workspace.selectedArticleId);
+    }
+  }, [handleSaveWithCacheClear, loadPreview, workspace.selectedArticleId]);
 
   const readiness = useReadinessController({
     articleDraft,
@@ -659,7 +671,13 @@ export function ArticlePublisher({
               </EditorialSection>
 
               <EditorialSection id="preview" index={8} label="Preview" governance>
-                <ArticlePreview outcome={preview} loading={previewLoading} />
+                <ArticlePreview
+                  outcome={preview}
+                  loading={previewLoading}
+                  isDirty={isDirty}
+                  onSaveAndRefresh={handleSaveAndRefreshPreview}
+                  saveAndRefreshDisabled={!saveEnabled}
+                />
               </EditorialSection>
             </CanvasLane>
           </>
@@ -817,9 +835,13 @@ export function ArticlePublisher({
                 size="sm"
                 disabled={!saveEnabled}
                 title={saveBlockedReason}
-                onClick={() => handlePublishAction('preview')}
+                onClick={() =>
+                  isDirty
+                    ? void handleSaveAndRefreshPreview()
+                    : void handlePublishAction('preview')
+                }
               >
-                Recompose preview
+                {isDirty ? 'Save and refresh preview' : 'Refresh preview from saved draft'}
               </PublisherButton>
             </section>
 

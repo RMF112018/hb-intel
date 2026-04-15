@@ -27,24 +27,56 @@ const INLINE_FINDING_LIMIT = 3;
 export interface ArticlePreviewProps {
   readonly outcome: PreviewOutcome | undefined;
   readonly loading: boolean;
+  /**
+   * Truth model: preview is always composed from the last saved draft
+   * through the shared publish/preview contract. When the author has
+   * unsaved edits, `isDirty` flips on and the surface renders a
+   * staleness banner with a one-click save-and-refresh action so
+   * the author is never left to infer that preview is behind.
+   */
+  readonly isDirty?: boolean;
+  readonly onSaveAndRefresh?: () => void;
+  readonly saveAndRefreshDisabled?: boolean;
 }
 
-export function ArticlePreview({ outcome, loading }: ArticlePreviewProps): React.JSX.Element {
+export function ArticlePreview({
+  outcome,
+  loading,
+  isDirty = false,
+  onSaveAndRefresh,
+  saveAndRefreshDisabled = false,
+}: ArticlePreviewProps): React.JSX.Element {
   if (loading && !outcome) return <HbcSpinner />;
   if (!outcome) {
     return (
-      <HbcEmptyState
-        title="Preview not yet built"
-        description="Add content above — your article appears here the way it will on the published page."
-      />
+      <>
+        {isDirty && (
+          <PreviewStalenessBanner
+            onSaveAndRefresh={onSaveAndRefresh}
+            disabled={saveAndRefreshDisabled}
+          />
+        )}
+        <HbcEmptyState
+          title="Preview not yet built"
+          description="Preview composes from the last saved draft. Save the draft to build the first preview."
+        />
+      </>
     );
   }
   if (!outcome.ok) {
     return (
-      <HbcEmptyState
-        title="Preview unavailable"
-        description="We couldn't compose a preview from the current draft. Publish Readiness has the details."
-      />
+      <>
+        {isDirty && (
+          <PreviewStalenessBanner
+            onSaveAndRefresh={onSaveAndRefresh}
+            disabled={saveAndRefreshDisabled}
+          />
+        )}
+        <HbcEmptyState
+          title="Preview unavailable"
+          description="We couldn't compose a preview from the last saved draft. Publish Readiness has the details."
+        />
+      </>
     );
   }
 
@@ -81,13 +113,19 @@ export function ArticlePreview({ outcome, loading }: ArticlePreviewProps): React
 
   return (
     <article className={styles.root} aria-label="Article preview">
+      {isDirty && (
+        <PreviewStalenessBanner
+          onSaveAndRefresh={onSaveAndRefresh}
+          disabled={saveAndRefreshDisabled}
+        />
+      )}
       <TrustBridge
         errors={outcome.validation.errors}
         warnings={outcome.validation.warnings}
       />
       {!errorCount && !warningCount && (
         <p className={styles.trustBridgeClean} role="status" aria-live="polite">
-          Preview is faithful to the saved draft — no blocking issues and no
+          Preview reflects the last saved draft — no blocking issues and no
           warnings.
         </p>
       )}
@@ -262,6 +300,50 @@ function firstNonEmpty(...values: readonly (string | undefined)[]): string | und
   return undefined;
 }
 
+/* ── Preview staleness banner ────────────────────────────────────
+ * The preview surface composes exclusively from the last saved
+ * draft through the shared publish/preview contract — that is the
+ * product's coherent preview truth model. When the author has
+ * unsaved edits in the in-memory working copy, the preview is
+ * therefore behind by definition. The banner makes that explicit
+ * and offers a direct save-and-refresh path so the author never
+ * has to infer a hidden save/recompose sequence.
+ */
+function PreviewStalenessBanner({
+  onSaveAndRefresh,
+  disabled = false,
+}: {
+  onSaveAndRefresh?: () => void;
+  disabled?: boolean;
+}): React.JSX.Element {
+  return (
+    <aside
+      className={styles.stalenessBanner}
+      role="status"
+      aria-live="polite"
+      aria-label="Preview is behind unsaved edits"
+    >
+      <p className={styles.stalenessHeadline}>
+        Preview is behind your unsaved edits.
+      </p>
+      <p className={styles.stalenessDetail}>
+        Preview always composes from the last saved draft so it matches what
+        publish will ship. Save to bring preview current.
+      </p>
+      {onSaveAndRefresh && (
+        <button
+          type="button"
+          className={styles.stalenessAction}
+          onClick={onSaveAndRefresh}
+          disabled={disabled}
+        >
+          Save and refresh preview
+        </button>
+      )}
+    </aside>
+  );
+}
+
 /* ── Trust bridge ────────────────────────────────────────────────
  * Structured remediation panel rendered at the top of the preview.
  * Replaces the prior one-line "see the Readiness rail" pointer with
@@ -307,10 +389,10 @@ function TrustBridge({
     >
       <p className={styles.trustBridgeHeadline}>
         {blocking
-          ? `Preview is faithful to the saved draft — ${errorCount} blocking issue${
+          ? `Preview reflects the last saved draft — ${errorCount} blocking issue${
               errorCount === 1 ? '' : 's'
             } to fix before publish.`
-          : `Preview is faithful to the saved draft — ${warningCount} warning${
+          : `Preview reflects the last saved draft — ${warningCount} warning${
               warningCount === 1 ? '' : 's'
             } to review before publish.`}
       </p>

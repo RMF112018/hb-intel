@@ -8,6 +8,10 @@ declare const styles: {
   readonly trustBridgeHint: string;
   readonly trustBridgeAnchor: string;
   readonly trustBridgeOverflow: string;
+  readonly stalenessBanner: string;
+  readonly stalenessHeadline: string;
+  readonly stalenessDetail: string;
+  readonly stalenessAction: string;
   readonly root: string;
   readonly cardPreview: string;
   readonly cardPreviewLabel: string;
