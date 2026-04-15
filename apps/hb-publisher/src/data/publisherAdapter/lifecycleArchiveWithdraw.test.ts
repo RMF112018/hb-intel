@@ -377,7 +377,7 @@ describe('orchestrator.archive', () => {
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
 
-  it('returns bindingUpdate failure (article not yet updated, history not yet appended) when binding upsert throws', async () => {
+  it('returns bindingUpdate failure and still reconciles the master to the lifecycle target so master matches the demoted page (phase-10 prompt-03)', async () => {
     const f = buildFixture({
       bindingUpsertImpl: async () => {
         throw new Error('binding write failed');
@@ -388,11 +388,17 @@ describe('orchestrator.archive', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('bindingUpdate');
-    expect(result.articleUpdated).toBe(false);
+    // Page was demoted, binding update failed. Master is reconciled to
+    // target so master matches the now-draft page; binding remains
+    // stale and is surfaced via the bindingUpdate error row.
+    expect(result.articleUpdated).toBe(true);
     expect(result.bindingUpdated).toBe(false);
     expect(result.pageUnpublished).toBe(true);
     expect(result.historyAppended).toBe(false);
-    expect(f.articleUpsert).not.toHaveBeenCalled();
+    expect(f.articleUpsert).toHaveBeenCalledTimes(1);
+    const reconciled = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
+    expect(reconciled.WorkflowState).toBe('archived');
+    expect(reconciled.PageSyncStatus).toBe('error');
     expect(f.historyAppend).not.toHaveBeenCalled();
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
@@ -438,7 +444,7 @@ describe('orchestrator.withdraw', () => {
     expect(persistedHistory.PreviousState).toBe('published');
   });
 
-  it('returns historyAppend failure and compensates by rolling the master article back (phase-09 prompt-04)', async () => {
+  it('returns historyAppend failure and leaves the non-live master/binding/page in place — no false-live revert (phase-10 prompt-03)', async () => {
     const f = buildFixture({
       historyAppendImpl: async () => {
         throw new Error('history list down');
@@ -449,52 +455,23 @@ describe('orchestrator.withdraw', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('historyAppend');
-    // Master was stamped but then reverted — `articleUpdated` reports
-    // the final committed state, which is the pre-transition value.
-    expect(result.articleUpdated).toBe(false);
+    // Fail-truthful non-live: page demoted, binding at draft/pending,
+    // master stays at the lifecycle target. We do NOT revert the
+    // master to 'published' because that would contradict the
+    // now-draft page. History append failure is an audit/logging
+    // failure on top of a truthful non-live lifecycle state.
+    expect(result.articleUpdated).toBe(true);
     expect(result.bindingUpdated).toBe(true);
     expect(result.pageUnpublished).toBe(true);
     expect(result.historyAppended).toBe(false);
-    // Compensation surfaced explicitly on the outcome.
-    expect(result.rollback?.attempted).toBe(true);
-    expect(result.rollback?.succeeded).toBe(true);
-    expect(result.rollback?.message).toContain("reverted to 'published'");
-    // Two article writes: forward stamp + rollback.
-    expect(f.articleUpsert).toHaveBeenCalledTimes(2);
+    expect(result.rollback).toBeUndefined();
+    // Only the forward master stamp — no revert write.
+    expect(f.articleUpsert).toHaveBeenCalledTimes(1);
     const forward = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
-    const reverted = f.articleUpsert.mock.calls[1]![0] as PublisherArticleRow;
     expect(forward.WorkflowState).toBe('withdrawn');
-    expect(reverted.WorkflowState).toBe('published');
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
-  });
-
-  it('surfaces rollback failure when history append fails and master rollback also fails (phase-09 prompt-04)', async () => {
-    let writes = 0;
-    const f = buildFixture({
-      articleUpsertImpl: async () => {
-        writes += 1;
-        if (writes === 1) return { wasCreated: false, itemId: 1 };
-        throw new Error('rollback MERGE failed');
-      },
-      historyAppendImpl: async () => {
-        throw new Error('history list down');
-      },
-    });
-    const orch = makeOrch(f.repositories);
-    const result = await orch.withdraw({ articleId: 'art-001', now: () => NOW });
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.stage).toBe('historyAppend');
-    // Forward write succeeded; rollback threw. The master is split —
-    // surface that explicitly rather than silently claim success.
-    expect(result.articleUpdated).toBe(true);
-    expect(result.historyAppended).toBe(false);
-    expect(result.rollback?.attempted).toBe(true);
-    expect(result.rollback?.succeeded).toBe(false);
-    expect(result.rollback?.message).toContain('rollback');
-    expect(result.rollback?.message).toContain('failed');
-    expect(f.articleUpsert).toHaveBeenCalledTimes(2);
-    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errRow = f.errorAppend.mock.calls[0]![0];
+    expect(errRow.Title).toMatch(/^withdraw\.historyAppend:/);
   });
 });
 
@@ -773,5 +750,94 @@ describe('lifecycle binding-lookup fail-closed (phase-09 prompt-03)', () => {
     expect(outcome.bindingUpdated).toBe(false);
     expect(outcome.articleUpdated).toBe(true);
     expect(outcome.historyAppended).toBe(true);
+  });
+});
+
+describe('lifecycle fail-truthful non-live matrix (phase-10 prompt-03)', () => {
+  it('archive + historyAppend failure: no master revert, all four surfaces non-live, history not fabricated', async () => {
+    const f = buildFixture({
+      historyAppendImpl: async () => {
+        throw new Error('history list down');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('historyAppend');
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.bindingUpdated).toBe(true);
+    expect(result.articleUpdated).toBe(true);
+    expect(result.historyAppended).toBe(false);
+    expect(result.rollback).toBeUndefined();
+    expect(f.articleUpsert).toHaveBeenCalledTimes(1);
+    expect((f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow).WorkflowState).toBe('archived');
+    const errRow = f.errorAppend.mock.calls[0]![0];
+    expect(errRow.Title).toMatch(/^archive\.historyAppend:/);
+    expect(errRow.ErrorSummary).toContain('non-live lifecycle state');
+  });
+
+  it('withdraw + pageUnpublish failure: nothing else mutated; page still live error-tagged', async () => {
+    const f = buildFixture();
+    const { orch, unpublishLive } = makeOrchWithUnpublish(
+      f.repositories,
+      async () => ({ ok: false as const, reason: 'unpublishLifecycleFailed' as const, message: 'SP 500' }),
+    );
+    const result = await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('pageUnpublish');
+    expect(result.pageUnpublished).toBe(false);
+    expect(result.bindingUpdated).toBe(false);
+    expect(result.articleUpdated).toBe(false);
+    expect(result.historyAppended).toBe(false);
+    expect(unpublishLive).toHaveBeenCalledTimes(1);
+    expect(f.bindingUpsert).not.toHaveBeenCalled();
+    expect(f.articleUpsert).not.toHaveBeenCalled();
+    expect(f.historyAppend).not.toHaveBeenCalled();
+    const errRow = f.errorAppend.mock.calls[0]![0];
+    expect(errRow.Title).toMatch(/^withdraw\.pageUnpublish:/);
+  });
+
+  it('withdraw + bindingUpdate failure: master reconciled to withdrawn with PageSyncStatus=error', async () => {
+    const f = buildFixture({
+      bindingUpsertImpl: async () => {
+        throw new Error('binding write failed');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('bindingUpdate');
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.bindingUpdated).toBe(false);
+    expect(result.articleUpdated).toBe(true);
+    expect(result.historyAppended).toBe(false);
+    expect(f.articleUpsert).toHaveBeenCalledTimes(1);
+    const reconciled = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
+    expect(reconciled.WorkflowState).toBe('withdrawn');
+    expect(reconciled.PageSyncStatus).toBe('error');
+    expect(f.historyAppend).not.toHaveBeenCalled();
+  });
+
+  it('withdraw + articleUpdate failure: page demoted, binding updated, master left at previous state with typed failure surfacing', async () => {
+    const f = buildFixture({
+      articleUpsertImpl: async () => {
+        throw new Error('SP MERGE failed');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('articleUpdate');
+    expect(result.pageUnpublished).toBe(true);
+    expect(result.bindingUpdated).toBe(true);
+    expect(result.articleUpdated).toBe(false);
+    expect(result.historyAppended).toBe(false);
+    expect(f.historyAppend).not.toHaveBeenCalled();
+    const errRow = f.errorAppend.mock.calls[0]![0];
+    expect(errRow.Title).toMatch(/^withdraw\.articleUpdate:/);
   });
 });

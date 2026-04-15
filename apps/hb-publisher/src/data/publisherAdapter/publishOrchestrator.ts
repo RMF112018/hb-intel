@@ -1110,10 +1110,52 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         await repositories.pageBindings.upsert(updatedBinding);
         bindingUpdated = true;
       } catch (err) {
-        const message =
+        const baseMessage =
           err instanceof Error
             ? `HB Article Destination Pages ${target} update failed: ${err.message}`
             : `HB Article Destination Pages ${target} update failed.`;
+        // Page was already demoted; the binding update failed. In a
+        // fail-truthful non-live model the master should still be
+        // stamped to the lifecycle target so at least master + page
+        // agree that this content is no longer live. Best-effort: on
+        // master failure too, record it and return with both
+        // `bindingUpdated` and `articleUpdated` = false. No history
+        // row is fabricated — closure did not succeed.
+        let articleReconciled = false;
+        let reconcileNote = '';
+        try {
+          await repositories.articles.upsert({
+            ...article,
+            WorkflowState: target,
+            UpdatedDateUtc: now,
+            ArchiveDateUtc: target === 'archived' ? now : article.ArchiveDateUtc,
+            IncludeInDestinationLanding: false,
+            IncludeInHomepageFeed: false,
+            IncludeInArchive:
+              target === 'archived' ? true : article.IncludeInArchive,
+            SuppressFromRollups: true,
+            PageSyncStatus: 'error',
+            LastPageSyncDateUtc: now,
+          });
+          articleReconciled = true;
+          reconcileNote = ` Master reconciled to WorkflowState='${target}' with PageSyncStatus='error'.`;
+        } catch (articleErr) {
+          reconcileNote =
+            articleErr instanceof Error
+              ? ` Master reconcile to '${target}' also failed: ${articleErr.message}.`
+              : ` Master reconcile to '${target}' also failed.`;
+          await recordPublishingError({
+            articleId: article.ArticleId,
+            title: article.Title,
+            destination: article.Destination,
+            stage: 'articleUpdate',
+            mode: 'create',
+            lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
+            message: `${reconcileNote.trim()} Original failure: ${baseMessage}`,
+            nowIso: now,
+          });
+        }
+        const message = `${baseMessage}${reconcileNote}`;
         await recordPublishingError({
           articleId: article.ArticleId,
           title: article.Title,
@@ -1130,7 +1172,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
           stage: 'bindingUpdate',
           message,
           previousState,
-          articleUpdated: false,
+          articleUpdated: articleReconciled,
           bindingUpdated: false,
           pageUnpublished,
           historyAppended: false,
@@ -1215,39 +1257,21 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       });
       historyAppended = true;
     } catch (err) {
-      // History append failed AFTER the master row was stamped.
-      // Compensate by reverting the master back to `previousState` so
-      // the lifecycle ends up fully rolled back rather than split.
-      const baseMessage =
+      // History append failed AFTER the page was demoted, the binding
+      // was flipped to draft, and the master was stamped to the
+      // lifecycle target. In a fail-truthful non-live model we do NOT
+      // revert the master back to `previousState`: the public page is
+      // already demoted and the binding already says draft/pending, so
+      // reverting the master would reintroduce false-live state
+      // (master='published' while page is a draft). Leave all three
+      // surfaces at their truthful non-live values, classify this as
+      // a workflow-history audit failure, and surface
+      // `historyAppended=false` to the caller. No history row is
+      // fabricated.
+      const message =
         err instanceof Error
-          ? `HB Article Workflow History append failed for ${target}: ${err.message}`
-          : `HB Article Workflow History append failed for ${target}.`;
-      let rollback: { attempted: boolean; succeeded: boolean; message: string } = {
-        attempted: false,
-        succeeded: false,
-        message: 'No rollback attempted — master was not stamped.',
-      };
-      try {
-        await repositories.articles.upsert(article);
-        rollback = {
-          attempted: true,
-          succeeded: true,
-          message: `Master article reverted to '${previousState}'.`,
-        };
-        articleUpdated = false;
-      } catch (rollbackErr) {
-        rollback = {
-          attempted: true,
-          succeeded: false,
-          message:
-            rollbackErr instanceof Error
-              ? `Master rollback to '${previousState}' failed: ${rollbackErr.message}`
-              : `Master rollback to '${previousState}' failed.`,
-        };
-      }
-      const message = rollback.attempted
-        ? `${baseMessage} (${rollback.message})`
-        : baseMessage;
+          ? `HB Article Workflow History append failed for ${target}: ${err.message}. Page/binding/master remain at non-live lifecycle state; history row was not written.`
+          : `HB Article Workflow History append failed for ${target}. Page/binding/master remain at non-live lifecycle state; history row was not written.`;
       await recordPublishingError({
         articleId: article.ArticleId,
         title: article.Title,
@@ -1267,7 +1291,6 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         bindingUpdated,
         pageUnpublished,
         historyAppended: false,
-        rollback,
       };
     }
 
