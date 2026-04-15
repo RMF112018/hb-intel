@@ -23,5 +23,7 @@ declare const styles: {
   readonly roleChooser: string;
   readonly roleOption: string;
   readonly toggleRow: string;
+  readonly advancedSource: string;
+  readonly advancedSourceSummary: string;
 };
 export default styles;

@@ -27,13 +27,18 @@ import {
   restampMediaSortOrder,
 } from './mediaInvariants.js';
 import { assessAltText } from './altTextGuidance.js';
-import { EditorialChip, PublisherButton } from '../sharedChrome/index.js';
+import {
+  EditorialChip,
+  PublisherButton,
+  type AssetLibrarySearchFn,
+} from '../sharedChrome/index.js';
 import styles from './galleryPanel.module.css';
 
 export interface GalleryPanelProps {
   readonly articleId: string;
   readonly rows: PublisherMediaRow[];
   readonly onChange: (next: PublisherMediaRow[]) => void;
+  readonly searchAssets?: AssetLibrarySearchFn;
 }
 
 type ReadinessLevel = 'good' | 'warn' | 'problem';
@@ -79,6 +84,7 @@ export function GalleryPanel({
   articleId,
   rows,
   onChange,
+  searchAssets,
 }: GalleryPanelProps): React.JSX.Element {
   const [composerOpen, setComposerOpen] = React.useState(false);
   const [editingId, setEditingId] = React.useState<string | undefined>();
@@ -313,6 +319,7 @@ export function GalleryPanel({
         nextSortOrder={rows.length + 1}
         onSave={handleSave}
         onRequestClose={close}
+        searchAssets={searchAssets}
       />
     </div>
   );

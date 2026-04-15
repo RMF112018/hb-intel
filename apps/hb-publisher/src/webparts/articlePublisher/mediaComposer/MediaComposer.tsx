@@ -11,6 +11,12 @@ import * as React from 'react';
 import { HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
 import type { PublisherMediaRow } from '../../../data/publisherAdapter/index.js';
 import {
+  AssetLibraryBrowser,
+  PublisherButton,
+  type AssetLibrarySearchFn,
+  type AssetLookupEntry,
+} from '../sharedChrome/index.js';
+import {
   createMediaRowFromDraft,
   draftFromRow,
   isAllowedImageUrl,
@@ -34,6 +40,14 @@ export interface MediaComposerProps {
   readonly nextSortOrder: number;
   readonly onSave: (row: PublisherMediaRow) => void;
   readonly onRequestClose: () => void;
+  /**
+   * Governed asset-library search function. When supplied, the
+   * composer leads with a "Browse library" primary action and opens
+   * the shared AssetLibraryBrowser; raw URL entry is demoted behind
+   * an "Advanced: paste a custom URL" disclosure. When omitted, URL
+   * entry remains the front-door (test + storybook fallback).
+   */
+  readonly searchAssets?: AssetLibrarySearchFn;
 }
 
 const ALT_SOFT = 125;
@@ -64,7 +78,9 @@ export function MediaComposer({
   nextSortOrder,
   onSave,
   onRequestClose,
+  searchAssets,
 }: MediaComposerProps): React.JSX.Element {
+  const [browserOpen, setBrowserOpen] = React.useState(false);
   const isEdit = !!editingRow;
   const seed = React.useMemo<MediaComposerDraft>(
     () =>
@@ -94,6 +110,18 @@ export function MediaComposer({
   const altBlocking = altAssessment.level === 'problem';
   const altValid = draft.altText.trim().length > 0 && !altBlocking;
   const canSave = urlValid && altValid && thumbState !== 'error';
+
+  const handleLibrarySelect = React.useCallback(
+    (entry: AssetLookupEntry) => {
+      setDraft((d) => ({
+        ...d,
+        imageUrl: entry.imageUrl,
+        altText: d.altText || entry.suggestedAltText || '',
+      }));
+      setThumbState('loading');
+    },
+    [],
+  );
 
   const handleSave = React.useCallback(() => {
     if (!canSave) return;
@@ -152,32 +180,69 @@ export function MediaComposer({
           )}
         </div>
 
-        <label className={styles.field}>
-          <span className={styles.fieldLabel}>Source</span>
-          <span className={styles.fieldHelper}>
-            https:// only. Paste a link from the tenant image library or an
-            approved CDN. A tenant-safe file picker will land here in a later
-            wave.
-          </span>
-          <input
-            className={styles.input}
-            value={draft.imageUrl}
-            placeholder="https://…"
-            inputMode="url"
-            autoFocus
-            aria-label="Image source URL"
-            onChange={(e) => {
-              const nextUrl = e.target.value;
-              setDraft((d) => ({ ...d, imageUrl: nextUrl }));
-              setThumbState(nextUrl.trim().length === 0 ? 'idle' : 'loading');
-            }}
-          />
-          {trimmedUrl.length > 0 && !urlValid && (
-            <span className={styles.fieldError} role="alert">
-              Use an https:// URL. Other schemes are not allowed.
+        {searchAssets ? (
+          <div className={styles.field}>
+            <span className={styles.fieldLabel}>Source</span>
+            <span className={styles.fieldHelper}>
+              Choose from the governed asset library. Picking an asset hydrates
+              the preview and seeds alt text when the library has a suggestion.
             </span>
-          )}
-        </label>
+            <PublisherButton
+              variant="primary"
+              onClick={() => setBrowserOpen(true)}
+            >
+              {trimmedUrl.length > 0 ? 'Replace from library' : 'Browse library'}
+            </PublisherButton>
+            <details className={styles.advancedSource}>
+              <summary className={styles.advancedSourceSummary}>
+                Advanced: paste a custom URL
+              </summary>
+              <input
+                className={styles.input}
+                value={draft.imageUrl}
+                placeholder="https://…"
+                inputMode="url"
+                aria-label="Image source URL"
+                onChange={(e) => {
+                  const nextUrl = e.target.value;
+                  setDraft((d) => ({ ...d, imageUrl: nextUrl }));
+                  setThumbState(nextUrl.trim().length === 0 ? 'idle' : 'loading');
+                }}
+              />
+              {trimmedUrl.length > 0 && !urlValid && (
+                <span className={styles.fieldError} role="alert">
+                  Use an https:// URL. Other schemes are not allowed.
+                </span>
+              )}
+            </details>
+          </div>
+        ) : (
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Source</span>
+            <span className={styles.fieldHelper}>
+              https:// only. Paste a link from the tenant image library or an
+              approved CDN.
+            </span>
+            <input
+              className={styles.input}
+              value={draft.imageUrl}
+              placeholder="https://…"
+              inputMode="url"
+              autoFocus
+              aria-label="Image source URL"
+              onChange={(e) => {
+                const nextUrl = e.target.value;
+                setDraft((d) => ({ ...d, imageUrl: nextUrl }));
+                setThumbState(nextUrl.trim().length === 0 ? 'idle' : 'loading');
+              }}
+            />
+            {trimmedUrl.length > 0 && !urlValid && (
+              <span className={styles.fieldError} role="alert">
+                Use an https:// URL. Other schemes are not allowed.
+              </span>
+            )}
+          </label>
+        )}
 
         <fieldset className={styles.fieldset}>
           <legend className={styles.fieldLabel}>Used as</legend>
@@ -287,6 +352,20 @@ export function MediaComposer({
           />
           <span>Feature this image in the gallery</span>
         </label>
+
+        {searchAssets && (
+          <AssetLibraryBrowser
+            open={browserOpen}
+            searchAssets={searchAssets}
+            onSelect={handleLibrarySelect}
+            onRequestClose={() => setBrowserOpen(false)}
+            title={
+              draft.role === 'supporting'
+                ? 'Choose a supporting image'
+                : 'Choose a gallery image'
+            }
+          />
+        )}
       </div>
     </HbcKudosComposerFlyout>
   );

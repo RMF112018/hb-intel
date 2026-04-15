@@ -448,6 +448,7 @@ export function ArticlePublisher({
                 articleId={articleDraft.ArticleId}
                 rows={mediaDraft}
                 onChange={setMediaDraft}
+                searchAssets={searchAssets}
               />
             </EditorialSection>
 
