@@ -1047,4 +1047,216 @@ describe('publishOrchestrator', () => {
     expect(result.stage).toBe('pagePublish');
     expect(f.upsertBinding).not.toHaveBeenCalled();
   });
+
+  describe('late-publish fail-truthful reconciliation (phase-10 prompt-02)', () => {
+    it('create + articleSync failure: page demoted, binding reconciled to error, master never stamped published', async () => {
+      const f = fixture();
+      const articlesUpsert = vi.fn<
+        PublisherRepositories['articles']['upsert']
+      >(async () => {
+        throw new Error('HB Articles offline');
+      });
+      f.repositories.articles.upsert = articlesUpsert;
+      const historyAppend = vi.fn<
+        PublisherRepositories['workflowHistory']['append']
+      >(async () => ({ itemId: 1 }));
+      f.repositories.workflowHistory.append = historyAppend;
+      const errorAppend = vi.fn<
+        PublisherRepositories['publishingErrors']['append']
+      >(async () => ({ itemId: 1 }));
+      f.repositories.publishingErrors.append = errorAppend;
+
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'create',
+        now: () => '2026-04-13T10:00:00.000Z',
+        generateBindingId: () => 'bnd-1',
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('articleSync');
+      expect(result.rollback?.succeeded).toBe(true);
+
+      // Binding: first upsert is the initial success write, second is the reconcile.
+      expect(f.upsertBinding).toHaveBeenCalledTimes(2);
+      const reconciledBinding = (
+        f.upsertBinding.mock.calls[1]![0] as { row: PublisherPageBindingRow }
+      ).row;
+      expect(reconciledBinding.PublishStatus).toBe('error');
+      expect(reconciledBinding.SyncStatus).toBe('error');
+      expect(reconciledBinding.BindingId).toBe('bnd-1');
+
+      // Master: only the throwing call, no successful reconcile call
+      // (articleSync means master was never written).
+      expect(articlesUpsert).toHaveBeenCalledTimes(1);
+      // No history row on late-failure closure.
+      expect(historyAppend).not.toHaveBeenCalled();
+      // Error row classification
+      const errorRow = errorAppend.mock.calls[0]![0];
+      expect(errorRow.Title).toMatch(/^create\.articleSync:/);
+      expect(errorRow.ErrorSummary).toContain(
+        'Binding reconciled to PublishStatus=error',
+      );
+    });
+
+    it('create + historyAppend failure: page demoted, binding reconciled to error, master reverted to previous WorkflowState with PageSyncStatus=error', async () => {
+      const f = fixture({ article: { WorkflowState: 'approved' } });
+      const articlesUpsert = vi.fn<
+        PublisherRepositories['articles']['upsert']
+      >(async () => ({ wasCreated: false, itemId: 1 }));
+      f.repositories.articles.upsert = articlesUpsert;
+      f.repositories.workflowHistory.append = vi.fn<
+        PublisherRepositories['workflowHistory']['append']
+      >(async () => {
+        throw new Error('workflow history offline');
+      });
+      const errorAppend = vi.fn<
+        PublisherRepositories['publishingErrors']['append']
+      >(async () => ({ itemId: 1 }));
+      f.repositories.publishingErrors.append = errorAppend;
+
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'create',
+        now: () => '2026-04-13T10:00:00.000Z',
+        generateBindingId: () => 'bnd-1',
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('historyAppend');
+      expect(result.rollback?.succeeded).toBe(true);
+
+      // Binding reconciled
+      expect(f.upsertBinding).toHaveBeenCalledTimes(2);
+      const reconciledBinding = (
+        f.upsertBinding.mock.calls[1]![0] as { row: PublisherPageBindingRow }
+      ).row;
+      expect(reconciledBinding.PublishStatus).toBe('error');
+      expect(reconciledBinding.SyncStatus).toBe('error');
+
+      // Master: 1st call was the WorkflowState='published' write,
+      // 2nd call is the revert (WorkflowState='approved', PageSyncStatus='error').
+      expect(articlesUpsert).toHaveBeenCalledTimes(2);
+      const firstWrite = articlesUpsert.mock.calls[0]![0];
+      expect(firstWrite.WorkflowState).toBe('published');
+      const revert = articlesUpsert.mock.calls[1]![0];
+      expect(revert.WorkflowState).toBe('approved');
+      expect(revert.PageSyncStatus).toBe('error');
+
+      const errorRow = errorAppend.mock.calls[0]![0];
+      expect(errorRow.Title).toMatch(/^create\.historyAppend:/);
+      expect(errorRow.ErrorSummary).toContain(
+        "Master article reverted to WorkflowState='approved'",
+      );
+    });
+
+    it('in-place republish + historyAppend failure: page demoted, binding reconciled; master stays at previous published state with PageSyncStatus=error', async () => {
+      const existing: PublisherPageBindingRow = {
+        BindingId: 'bnd-existing-42',
+        ArticleId: 'art-ps-001',
+        Title: 'Acme Tower — April',
+        PublishStatus: 'published',
+        TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+        PageId: '999',
+        PageName: 'acme-tower-april.aspx',
+        PageUrl:
+          'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+        PageShellVersion: '1.0.0',
+        PageTemplateKey: 'ps-inprogress-monthly-v1',
+        RenderVersion: '1.0.0',
+      };
+      const f = fixture({
+        article: { WorkflowState: 'published' },
+        existingBinding: existing,
+      });
+      const articlesUpsert = vi.fn<
+        PublisherRepositories['articles']['upsert']
+      >(async () => ({ wasCreated: false, itemId: 1 }));
+      f.repositories.articles.upsert = articlesUpsert;
+      f.repositories.workflowHistory.append = vi.fn<
+        PublisherRepositories['workflowHistory']['append']
+      >(async () => {
+        throw new Error('workflow history offline');
+      });
+      f.repositories.publishingErrors.append = vi.fn<
+        PublisherRepositories['publishingErrors']['append']
+      >(async () => ({ itemId: 1 }));
+
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'republish',
+        now: () => '2026-04-13T10:00:00.000Z',
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('historyAppend');
+
+      // Master reconcile: WorkflowState was already 'published' and stays
+      // 'published' (that is the previous state), but PageSyncStatus flips
+      // to 'error' so the master no longer falsely advertises healthy closure.
+      expect(articlesUpsert).toHaveBeenCalledTimes(2);
+      const revert = articlesUpsert.mock.calls[1]![0];
+      expect(revert.WorkflowState).toBe('published');
+      expect(revert.PageSyncStatus).toBe('error');
+
+      // Binding: first call is the in-place success write, second is reconcile.
+      const reconciledBinding = (
+        f.upsertBinding.mock.calls[1]![0] as { row: PublisherPageBindingRow }
+      ).row;
+      expect(reconciledBinding.BindingId).toBe('bnd-existing-42');
+      expect(reconciledBinding.PublishStatus).toBe('error');
+      expect(reconciledBinding.SyncStatus).toBe('error');
+    });
+
+    it('regenerate + articleSync failure: page demoted, binding reconciled to error, master never written', async () => {
+      const existing: PublisherPageBindingRow = {
+        BindingId: 'bnd-old',
+        ArticleId: 'art-ps-001',
+        Title: 'Acme Tower — April',
+        PublishStatus: 'published',
+        TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+        PageId: '777',
+        PageName: 'old-name.aspx',
+        PageUrl:
+          'https://example.com/sites/ProjectSpotlight/SitePages/old-name.aspx',
+        PageShellVersion: '1.0.0',
+        PageTemplateKey: 'ps-inprogress-monthly-v1',
+        RenderVersion: '0.9.0',
+      };
+      const f = fixture({
+        article: { WorkflowState: 'published' },
+        existingBinding: existing,
+      });
+      f.repositories.articles.upsert = vi.fn<
+        PublisherRepositories['articles']['upsert']
+      >(async () => {
+        throw new Error('HB Articles offline');
+      });
+      f.repositories.publishingErrors.append = vi.fn<
+        PublisherRepositories['publishingErrors']['append']
+      >(async () => ({ itemId: 1 }));
+
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'republish',
+        now: () => '2026-04-13T10:00:00.000Z',
+        generateBindingId: () => 'bnd-new',
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('articleSync');
+
+      // Second upsert on binding is the reconcile.
+      expect(f.upsertBinding).toHaveBeenCalledTimes(2);
+      const reconciledBinding = (
+        f.upsertBinding.mock.calls[1]![0] as { row: PublisherPageBindingRow }
+      ).row;
+      expect(reconciledBinding.PublishStatus).toBe('error');
+      expect(reconciledBinding.SyncStatus).toBe('error');
+    });
+  });
 });

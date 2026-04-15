@@ -547,6 +547,103 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     const publishedPage = publishResult.page;
     const publishedCreation = publishResult.creation;
 
+    /**
+     * Fail-truthful late-publish reconciliation. Called when the page
+     * was successfully demoted (SavePageAsDraft) after a post-publish
+     * late failure (`articleSync` or `historyAppend`). Keeps the four
+     * persistence surfaces (page, binding, master article, workflow
+     * history) internally consistent with one another:
+     *
+     *  - page: already demoted to draft by `rollbackPublishedPage`
+     *  - binding: marked `PublishStatus='error'`, `SyncStatus='error'`
+     *    so the one-row binding no longer claims a live healthy page
+     *  - master article: on `historyAppend` failure the master was
+     *    already stamped to `WorkflowState='published'`; revert that
+     *    to the previous workflow state and mark `PageSyncStatus='error'`
+     *    so the master does not falsely advertise published closure.
+     *    On `articleSync` failure the master was never written, so no
+     *    revert is needed (it stays at its prior truthful state).
+     *  - workflow history: we never fabricate a history row; closure
+     *    did not succeed.
+     *
+     * Each reconciliation write is best-effort. A failing reconcile
+     * emits its own `HB Article Publishing Errors` row tagged
+     * `bindingUpdate` or `articleUpdate` so operators can see the
+     * full persistence trail without masking the primary failure.
+     */
+    async function reconcileLateFailureTruth(input: {
+      readonly failedStage: 'articleSync' | 'historyAppend';
+      readonly bindingRow: PublisherPageBindingRow;
+      readonly previousWorkflowState: PublisherArticleRow['WorkflowState'];
+      readonly articleAsWritten: PublisherArticleRow | undefined;
+      readonly primaryMessage: string;
+    }): Promise<string> {
+      const notes: string[] = [];
+      // Binding reconcile
+      try {
+        const reconciledBinding: PublisherPageBindingRow = {
+          ...input.bindingRow,
+          PublishStatus: 'error',
+          SyncStatus: 'error',
+          LastSyncDateUtc: now,
+        };
+        await pageBindingWriter.upsert({ row: reconciledBinding });
+        notes.push('Binding reconciled to PublishStatus=error/SyncStatus=error.');
+      } catch (err) {
+        const msg =
+          err instanceof Error
+            ? `Binding reconcile failed: ${err.message}`
+            : 'Binding reconcile failed.';
+        notes.push(msg);
+        await recordPublishingError({
+          articleId: context.article.ArticleId,
+          title: context.article.Title,
+          destination: context.article.Destination,
+          stage: 'bindingUpdate',
+          mode: req.mode,
+          message: `${msg} Original failure: ${input.primaryMessage}`,
+          bindingId: input.bindingRow.BindingId,
+          nowIso: now,
+        });
+      }
+
+      // Master reconcile — only needed when the master was already
+      // stamped `WorkflowState='published'` (historyAppend failure).
+      if (input.failedStage === 'historyAppend' && input.articleAsWritten) {
+        try {
+          const revertedArticle: PublisherArticleRow = {
+            ...input.articleAsWritten,
+            WorkflowState: input.previousWorkflowState,
+            PageSyncStatus: 'error',
+            LastPageSyncDateUtc: now,
+            UpdatedDateUtc: now,
+          };
+          await repositories.articles.upsert(revertedArticle);
+          notes.push(
+            `Master article reverted to WorkflowState='${input.previousWorkflowState}' with PageSyncStatus=error.`,
+          );
+        } catch (err) {
+          const msg =
+            err instanceof Error
+              ? `Master article reconcile failed: ${err.message}`
+              : 'Master article reconcile failed.';
+          notes.push(msg);
+          await recordPublishingError({
+            articleId: context.article.ArticleId,
+            title: context.article.Title,
+            destination: context.article.Destination,
+            stage: 'articleUpdate',
+            mode: req.mode,
+            message: `${msg} Original failure: ${input.primaryMessage}`,
+            bindingId: input.bindingRow.BindingId,
+            nowIso: now,
+          });
+        }
+      }
+
+      return notes.join(' ');
+    }
+
     async function rollbackPublishedPage(input: {
       readonly reasonStage: 'bindingWrite' | 'articleSync' | 'historyAppend';
       readonly reasonMessage: string;
@@ -715,7 +812,19 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         reasonMessage: baseMessage,
         bindingId: bindingRow.BindingId,
       });
-      const message = `${baseMessage} ${rollback.message}`;
+      const reconcileNote =
+        rollback.attempted && rollback.succeeded
+          ? await reconcileLateFailureTruth({
+              failedStage: 'articleSync',
+              bindingRow,
+              previousWorkflowState,
+              articleAsWritten: undefined,
+              primaryMessage: baseMessage,
+            })
+          : '';
+      const message =
+        `${baseMessage} ${rollback.message}` +
+        (reconcileNote ? ` ${reconcileNote}` : '');
       await recordPublishingError({
         articleId: context.article.ArticleId,
         title: context.article.Title,
@@ -814,7 +923,19 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         reasonMessage: baseMessage,
         bindingId: bindingRow.BindingId,
       });
-      const message = `${baseMessage} ${rollback.message}`;
+      const reconcileNote =
+        rollback.attempted && rollback.succeeded
+          ? await reconcileLateFailureTruth({
+              failedStage: 'historyAppend',
+              bindingRow,
+              previousWorkflowState,
+              articleAsWritten: updatedArticle,
+              primaryMessage: baseMessage,
+            })
+          : '';
+      const message =
+        `${baseMessage} ${rollback.message}` +
+        (reconcileNote ? ` ${reconcileNote}` : '');
       await recordPublishingError({
         articleId: context.article.ArticleId,
         title: context.article.Title,
