@@ -5,6 +5,7 @@
  */
 
 .surface {
+  position: relative;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--hb-border-strong, #cbcbd0);
@@ -163,11 +164,30 @@
   text-decoration: underline;
 }
 
-.editorContentEmpty:empty::before,
-.editorContent[data-placeholder]:empty::before {
-  content: attr(data-placeholder);
-  color: var(--hb-text-tertiary, #6a6a6f);
+/*
+ * Placeholder is driven by a React-state `data-empty` attribute on
+ * the editor surface, not by the fragile `:empty` pseudo-class. The
+ * ProseMirror document keeps a `<p></p>` shell even when nothing has
+ * been typed, so `:empty` would never match there. Gating on
+ * `data-empty="true"` avoids that whole category of brittleness and
+ * remains editor-native: the flag is driven by `editor.isEmpty` via
+ * TipTap's onCreate / onUpdate listeners. Rendered as a sibling DOM
+ * node so the ProseMirror contenteditable tree is never touched.
+ */
+.editorArea {
+  position: relative;
+}
+
+.placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 14px 16px;
   pointer-events: none;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-size: 14px;
+  line-height: 1.55;
+  user-select: none;
 }
 
 .linkPromptRow {

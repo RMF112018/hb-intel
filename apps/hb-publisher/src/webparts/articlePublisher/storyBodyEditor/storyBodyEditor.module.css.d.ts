@@ -7,6 +7,8 @@ declare const styles: {
   readonly toolbarIcon: string;
   readonly editorContent: string;
   readonly editorContentEmpty: string;
+  readonly placeholder: string;
+  readonly editorArea: string;
   readonly linkPromptRow: string;
   readonly linkPromptInput: string;
   readonly linkPromptError: string;

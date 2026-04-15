@@ -49,6 +49,9 @@ export function StoryBodyEditor({
   ariaLabel = 'Article body',
   ariaDescribedBy,
 }: StoryBodyEditorProps): JSX.Element {
+  const [isEmpty, setIsEmpty] = React.useState<boolean>(() =>
+    isEditorHtmlEmpty(value || ''),
+  );
   const editor = useEditor({
     extensions: STORY_BODY_EXTENSIONS,
     content: value || '',
@@ -68,7 +71,11 @@ export function StoryBodyEditor({
       // styles, presentational wrappers, or attribute smuggling.
       transformPastedHTML: (html) => sanitizePastedHtml(html),
     },
+    onCreate: ({ editor: e }) => {
+      setIsEmpty(e.isEmpty);
+    },
     onUpdate: ({ editor: e }) => {
+      setIsEmpty(e.isEmpty);
       const next = e.getHTML();
       // Normalise empty-document forms to '' so consumers see a
       // single canonical "no body" value rather than '<p></p>'.
@@ -86,6 +93,7 @@ export function StoryBodyEditor({
     if (current === incoming) return;
     if (isEditorHtmlEmpty(current) && isEditorHtmlEmpty(incoming)) return;
     editor.commands.setContent(incoming, false);
+    setIsEmpty(editor.isEmpty);
   }, [editor, value]);
 
   // Cleanly destroy the editor on unmount to release the
@@ -96,10 +104,27 @@ export function StoryBodyEditor({
     };
   }, [editor]);
 
+  const showPlaceholder = isEmpty && Boolean(placeholder);
+
   return (
-    <div className={styles.surface}>
+    <div
+      className={styles.surface}
+      data-empty={isEmpty ? 'true' : undefined}
+      data-testid="story-body-editor"
+    >
       <EditorToolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <div className={styles.editorArea}>
+        {showPlaceholder && (
+          <div
+            className={styles.placeholder}
+            aria-hidden="true"
+            data-testid="story-body-editor-placeholder"
+          >
+            {placeholder}
+          </div>
+        )}
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }
