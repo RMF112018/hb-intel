@@ -216,3 +216,101 @@
   color: var(--hb-status-danger-text, #a4262c);
   font-size: 11px;
 }
+
+/* ── Footer ──────────────────────────────────────────────── */
+
+.editorFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 10px 12px;
+  border-top: 1px solid var(--hb-border-subtle);
+  background: var(--hb-surface-2);
+  font-size: 11px;
+  color: var(--hb-text-secondary);
+}
+
+.editorCounts {
+  display: flex;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--hb-text-tertiary);
+}
+
+.editorSupportHint {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--hb-text-tertiary);
+}
+
+.editorShortcuts {
+  margin-top: 2px;
+  border-left: 2px solid var(--hb-border-strong);
+  border-radius: 0 var(--hb-radius-md) var(--hb-radius-md) 0;
+  background: var(--hb-surface-1);
+  padding: 6px 10px;
+}
+
+.editorShortcuts[open] {
+  border-left-color: var(--hb-color-presentation-blue);
+}
+
+.editorShortcutsSummary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hb-text-tertiary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editorShortcutsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.editorShortcutsSummary::marker {
+  content: '';
+}
+
+.editorShortcutsSummary::before {
+  content: '▸';
+  font-size: 9px;
+  transition: transform 120ms ease-in-out;
+}
+
+.editorShortcuts[open] .editorShortcutsSummary::before {
+  transform: rotate(90deg);
+}
+
+.editorShortcutsSummary:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.editorShortcutsList {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 8px 0 2px 0;
+  padding: 0;
+  font-size: 11px;
+}
+
+.editorShortcutsTerm {
+  font-weight: 600;
+  color: var(--hb-text-primary);
+  margin: 0;
+}
+
+.editorShortcutsKeys {
+  margin: 0;
+  font-family: var(--hb-font-mono);
+  font-size: 10.5px;
+  color: var(--hb-text-secondary);
+}

@@ -63,9 +63,29 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
 
   const openLinkPrompt = () => {
     if (editor.state.selection.empty) {
-      setLinkError('Select the text you want to link first.');
-      setLinkPromptOpen(true);
-      return;
+      // Expand the selection to the word at the cursor so authors
+      // don't have to double-click to link. When the cursor is in
+      // whitespace (no word boundary) keep the prior behaviour and
+      // surface the "select text first" hint.
+      const expanded = editor.chain().focus().extendMarkRange('link').run();
+      const { $from } = editor.state.selection;
+      // Walk backwards/forwards from cursor to find word boundaries.
+      const text = $from.parent.textContent;
+      const offset = $from.parentOffset;
+      const boundary = /\W/;
+      let start = offset;
+      let end = offset;
+      while (start > 0 && !boundary.test(text.charAt(start - 1))) start--;
+      while (end < text.length && !boundary.test(text.charAt(end))) end++;
+      if (end > start) {
+        const from = $from.start() + start;
+        const to = $from.start() + end;
+        editor.chain().focus().setTextSelection({ from, to }).run();
+      } else if (!expanded || editor.state.selection.empty) {
+        setLinkError('Select the text you want to link first.');
+        setLinkPromptOpen(true);
+        return;
+      }
     }
     const existing = (editor.getAttributes('link').href as string | undefined) ?? '';
     setLinkDraft(existing);

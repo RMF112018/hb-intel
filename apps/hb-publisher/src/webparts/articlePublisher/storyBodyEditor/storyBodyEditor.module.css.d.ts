@@ -12,5 +12,13 @@ declare const styles: {
   readonly linkPromptRow: string;
   readonly linkPromptInput: string;
   readonly linkPromptError: string;
+  readonly editorFooter: string;
+  readonly editorCounts: string;
+  readonly editorSupportHint: string;
+  readonly editorShortcuts: string;
+  readonly editorShortcutsSummary: string;
+  readonly editorShortcutsList: string;
+  readonly editorShortcutsTerm: string;
+  readonly editorShortcutsKeys: string;
 };
 export default styles;

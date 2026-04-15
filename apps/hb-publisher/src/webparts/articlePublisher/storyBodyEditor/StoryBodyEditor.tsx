@@ -106,6 +106,14 @@ export function StoryBodyEditor({
 
   const showPlaceholder = isEmpty && Boolean(placeholder);
 
+  const { charCount, wordCount } = React.useMemo(
+    () => measureBodyText(editor?.getText() ?? ''),
+    // Retrigger on every editor update — editor-state changes flow
+    // through the onUpdate handler above which bumps isEmpty.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editor, isEmpty, value],
+  );
+
   return (
     <div
       className={styles.surface}
@@ -125,6 +133,83 @@ export function StoryBodyEditor({
         )}
         <EditorContent editor={editor} />
       </div>
+      <EditorFooter charCount={charCount} wordCount={wordCount} />
     </div>
   );
+}
+
+/* ── Footer ────────────────────────────────────────────────────
+ * Editorial trust bridge rendered beneath the edit area:
+ *   - live char + word counts for compose ergonomics
+ *   - a supported-formatting hint that names the governed schema
+ *   - a Keyboard shortcuts disclosure that lists every shortcut
+ *     the toolbar exposes (matching the aria-labels on each button)
+ */
+
+function EditorFooter({
+  charCount,
+  wordCount,
+}: {
+  charCount: number;
+  wordCount: number;
+}): JSX.Element {
+  return (
+    <footer className={styles.editorFooter}>
+      <div className={styles.editorCounts} aria-live="polite">
+        <span>
+          {wordCount.toLocaleString()} word{wordCount === 1 ? '' : 's'}
+        </span>
+        <span aria-hidden="true">·</span>
+        <span>
+          {charCount.toLocaleString()} character{charCount === 1 ? '' : 's'}
+        </span>
+      </div>
+      <p className={styles.editorSupportHint}>
+        Supports headings (H2, H3), bold, italic, bullet + numbered lists,
+        block quote, and links. Inline styles, colors, images, tables, and
+        pasted Word formatting are scrubbed to match the published page.
+      </p>
+      <details className={styles.editorShortcuts}>
+        <summary className={styles.editorShortcutsSummary}>
+          Keyboard shortcuts
+        </summary>
+        <dl className={styles.editorShortcutsList}>
+          <ShortcutRow label="Bold" keys="Ctrl + B" />
+          <ShortcutRow label="Italic" keys="Ctrl + I" />
+          <ShortcutRow label="Link" keys="Ctrl + K" />
+          <ShortcutRow label="Undo" keys="Ctrl + Z" />
+          <ShortcutRow label="Redo" keys="Ctrl + Shift + Z" />
+          <ShortcutRow label="Focus toolbar" keys="Tab into toolbar, then Arrow keys" />
+        </dl>
+      </details>
+    </footer>
+  );
+}
+
+function ShortcutRow({
+  label,
+  keys,
+}: {
+  label: string;
+  keys: string;
+}): JSX.Element {
+  return (
+    <>
+      <dt className={styles.editorShortcutsTerm}>{label}</dt>
+      <dd className={styles.editorShortcutsKeys}>{keys}</dd>
+    </>
+  );
+}
+
+/* ── Compose metrics ──────────────────────────────────────────── */
+
+export function measureBodyText(text: string): {
+  charCount: number;
+  wordCount: number;
+} {
+  const plain = text ?? '';
+  const charCount = plain.length;
+  const trimmed = plain.trim();
+  const wordCount = trimmed.length === 0 ? 0 : trimmed.split(/\s+/).length;
+  return { charCount, wordCount };
 }

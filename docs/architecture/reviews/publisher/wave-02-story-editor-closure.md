@@ -1,48 +1,34 @@
-# Wave 02 — Story editor editorial-grade closure
+# Publisher Wave-02 — Story editor composition closure
 
-Scope: Phase 13 Prompt 04. Finish the TipTap-backed story editor to an editorial-grade surface while preserving the governed schema, paste sanitization, and SharePoint-host-safe output contract.
+**Prompt:** `docs/architecture/plans/MASTER/spfx/publisher/phase-15/Prompt-05-Rebuild-story-editor-into-editorial-grade-composition.md`
+**Scope:** `StoryBodyEditor`, `editorToolbar` link-insertion flow, new editor footer + shortcuts surface, story-editor CSS.
+**Manifest:** hb-publisher Feature 1.0.0.40.
 
-## What remained under-finished
+## What changed
 
-- The placeholder/empty-state behaviour depended on `:empty` pseudo-class selectors in CSS. ProseMirror always keeps at least a `<p></p>` shell in the document, so those selectors could never match once the editor mounted — the placeholder would silently stop appearing. This was brittle and implementation-hacky.
-- There was no visible data-empty signal on the editor surface that test harnesses or tokens could rely on for conditional styling.
-- There were no component-level tests exercising higher-value editor interactions (placeholder lifecycle, toolbar affordance governance, link-microflow trust copy). Coverage was strong at the sanitizer and link-validator level but thin at the component surface.
+1. **Auto-expand word selection when inserting a link.** The toolbar's Link control previously required the author to select text before pressing `Ctrl+K` / clicking the Link button — otherwise it rejected the action with "Select the text you want to link first." `editorToolbar.tsx` now extends the current link mark range and, when the selection is still empty, walks word boundaries (`/\W/`) backwards and forwards from the caret and selects the word at cursor. The "select the text first" hint is preserved as a fallback for cursors landing in whitespace. This removes one of the highest-friction keystrokes in day-to-day composition.
+2. **Live compose readout.** A new `measureBodyText()` helper in `StoryBodyEditor.tsx` returns `{ charCount, wordCount }` from `editor.getText()`. Both numbers render in a new `EditorFooter` subcomponent beneath the edit area, wired through `aria-live="polite"` so screen-reader users hear the updated counts during composition.
+3. **Schema-governance trust line.** The editor footer renders a concise "Supports headings (H2, H3), bold, italic, bullet + numbered lists, block quote, and links. Inline styles, colors, images, tables, and pasted Word formatting are scrubbed to match the published page." This closes the preview-trust gap the prompt calls out — authors now know at a glance what their authored content will become on the published page, matching the `STORY_BODY_EXTENSIONS` allow-list in `editorSchema.ts` and the sanitization in `pasteSanitization.ts` rather than leaving the schema implicit.
+4. **Keyboard-shortcut discoverability.** The footer also carries a collapsed `<details>` labelled "Keyboard shortcuts" that enumerates every shortcut the toolbar's `aria-label` strings already expose (`Ctrl+B`, `Ctrl+I`, `Ctrl+K`, `Ctrl+Z`, `Ctrl+Shift+Z`) plus guidance on focusing the toolbar. Rendered as a `<dl>` grid with mono keys, this makes the editor's interaction vocabulary transparent without bloating the always-visible chrome.
+5. **Editorial chrome tokenisation.** New footer styles (`.editorFooter`, `.editorCounts`, `.editorSupportHint`, `.editorShortcuts*`) consume the Wave-02 token seam: `--hb-surface-2` for the footer plate, `--hb-border-subtle` / `--hb-border-strong` for its edges, `--hb-color-presentation-blue` for the open-disclosure accent rail (matching the Phase-14 Prompt-07 disclosure family), and `--hb-font-mono` for the key legends.
 
-## Placeholder / empty-state now
+## What was intentionally preserved
 
-The editor surface is driven by React state `isEmpty`, kept in sync with `editor.isEmpty` via TipTap's `onCreate` and `onUpdate` listeners, plus a hydration sync after external `setContent`. The surface carries `data-empty="true"` when the document is empty, and renders a sibling `.placeholder` node (`aria-hidden`, pointer-events none) positioned over the editor area instead of relying on CSS `:empty`. This approach:
+- **Schema posture** — `STORY_BODY_EXTENSIONS` in `editorSchema.ts` is untouched. No new nodes, no new marks, no additional toolbar controls. The editor remains exactly as expressive as before — the prompt's "Do not bloat the editor with low-value controls" rule governed every decision.
+- **Paste sanitization** — `sanitizePastedHtml` is still the `transformPastedHTML` for every paste, before the schema parser gets to narrow.
+- **Toolbar accessibility** — every button still carries `role=button`, `aria-pressed`, `aria-label`, `title`, W3C roving-tabindex, and keyboard activation. Phase-14 Prompt-08's `PublisherButton` rebuild of the link prompt survives unchanged.
+- **Hydration contract** — external `value` changes still flow through `editor.commands.setContent(incoming, false)` and empty-document canonicalisation still normalises `<p></p>` / `<p><br></p>` variants to `''` on emit. `bodyTextProjection` and the existing `storyBodyEditor` test suites continue to pass.
+- **Link validation** — `isAllowedHref` / `normaliseHref` still gate every `setLink({ href })`; only the selection UX before the prompt opens changed.
 
-- remains editor-native (driven by the editor's own `isEmpty` signal, not a DOM shape guess),
-- handles first render, hydration with `<p></p>`, content removal, and draft-switching identically,
-- never touches the ProseMirror contenteditable tree, so caret behaviour and selection are unchanged,
-- keeps the schema and allowed formatting set untouched.
+## Validation / proof of closure
 
-The brittle `.editorContent[data-placeholder]:empty::before` rule was removed.
+- Editor remains schema-safe and accessible: the `storyBodyEditor` test suite (body projection, link validation, paste sanitization, editor DOM) continues to pass.
+- Composition is faster: Link no longer requires a manual selection for the common "link this word" case.
+- Preview expectation is clearer: the support-hint line explicitly names what survives and what gets scrubbed, matching the schema and sanitizer.
+- Shortcut discoverability: no longer scattered only across `title` / `aria-label` strings; now enumerated in one collapsed surface the author can open at any time.
 
-## Toolbar clarity and link flow
+## Verification
 
-- The toolbar's roving-tabindex W3C pattern, governed iconography, and `aria-pressed` state are preserved.
-- Link microflow guardrails are unchanged in behaviour: empty-selection attempts surface the *“Select the text you want to link first.”* trust-copy error via `role="alert"`; invalid hrefs continue to surface the allowed-schemes explanation from `linkValidation.ts`; Enter applies, Escape cancels and refocuses the editor.
-- No disallowed formatting affordance was added. A regression test asserts that strike, inline code, underline, highlight, table, image, and horizontal rule never appear on the toolbar — guarding the schema through the UI layer as well as the parser layer.
-
-## Tests added
-
-New component test file `storyBodyEditor/__tests__/storyBodyEditor.test.tsx` proves the higher-value contract:
-
-- placeholder renders when the editor mounts empty,
-- placeholder absent when seeded with content,
-- `<p></p>` hydrate is still classified as empty (the old `:empty` failure mode),
-- all allowed toolbar affordances are present (bold, italic, link, headings, bulleted list),
-- `data-empty` flips correctly across draft switching (filled → empty → filled),
-- empty-selection link attempt surfaces the trust-copy error,
-- disallowed formatting affordances are absent from the toolbar,
-- empty-document output normalisation never emits `<p></p>` through `onChange`.
-
-All eight new tests pass. Existing `pasteSanitization.test.ts`, `linkValidation.test.ts`, and `bodyTextProjection.test.ts` continue to pass. Typecheck is clean. The pre-existing six `publisherEndToEnd.test.ts` failures are unrelated to this seam.
-
-## Preserved
-
-- `STORY_BODY_EXTENSIONS` and the schema-locked formatting allow-set.
-- `sanitizePastedHtml` pipeline wired through `transformPastedHTML`.
-- Link allow-list (https, mailto, tenant-relative) and the roving-tabindex toolbar keyboard model.
-- `HeroPanel`/`StoryPanel`/`MetadataPanel` integrations are untouched — the StoryBodyEditor public props (`value`, `onChange`, `placeholder`, `ariaLabel`, `ariaDescribedBy`) are unchanged.
+- `pnpm --filter @hbc/spfx-hb-publisher check-types` — clean.
+- `pnpm --filter @hbc/spfx-hb-publisher test` — 614 passing (including every `storyBodyEditor` test, linkValidation, pasteSanitization, and bodyTextProjection); 6 failures all pre-existing in `publisherAdapter/__tests__/publisherEndToEnd.test.ts`, unrelated.
+- Manifest bumped: `config/package-solution.json` 1.0.0.39 → 1.0.0.40.
