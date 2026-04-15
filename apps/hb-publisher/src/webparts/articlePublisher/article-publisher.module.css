@@ -382,6 +382,11 @@
   background: var(--hb-surface-tint-selected, #f0f6fc);
 }
 
+.chooserChip:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline-offset: 2px;
+}
+
 .chooserChipActive {
   background: var(--hb-color-brand-action, #337aab);
   border-color: var(--hb-color-brand-action, #337aab);
