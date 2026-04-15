@@ -1,6 +1,9 @@
-/* Article Publisher — editorial workspace surface.
- * Doctrine: token-disciplined composition over enterprise admin chrome.
- * Three-column shell: draft rail · authoring canvas · readiness rail.
+/* Article Publisher — editorial workspace surface (Phase 14 Wave 01).
+ *
+ * Structural redesign: the center canvas is the editorial plane;
+ * the left draft apron and right readiness dock are intentionally
+ * subordinate. Card chrome is removed from the canvas so the surface
+ * reads as one authored workspace rather than three adjacent panels.
  *
  * All visual values flow through Publisher tokens declared in
  * sharedChrome/tokens.module.css. Surface/color hex is retained only
@@ -8,23 +11,30 @@
  */
 
 /* ── Workspace shell ──────────────────────────────────────────────
- * Three regions read as one authored editorial surface: queue apron,
- * elevated canvas, readiness apron. Rails are supporting columns,
- * not peer cards; the canvas carries the editorial weight.
- * Breakpoint ladder: ≥1280 full, 1080–1279 compressed, 720–1079
- * readiness drops to pinned elevated panel, <720 stacks intentionally.
+ * Asymmetric three-region composition: slim draft apron · dominant
+ * editorial canvas · readiness dock. The canvas carries the product
+ * weight; the two rails recede. Breakpoint ladder is authored, not
+ * stacked: ≥1280 full, 1080–1279 compressed, 720–1079 canvas + apron
+ * with readiness docked to bottom, <720 canvas full-bleed with apron
+ * collapsed.
  */
 
 .workspace {
   display: grid;
   grid-template-columns:
-    minmax(280px, 320px) minmax(0, 1fr) minmax(300px, 360px);
+    minmax(240px, 260px) minmax(0, 1fr) minmax(288px, 320px);
   column-gap: 0;
   min-height: 600px;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: var(--hb-text-primary, #1f1f1f);
-  background: var(--hb-surface-0, #f7f7f8);
-  padding: var(--hb-space-lg, 24px);
+  background:
+    radial-gradient(
+      circle at 20% 0%,
+      var(--hb-surface-tint-selected, #f0f6fc) 0%,
+      transparent 55%
+    ),
+    var(--hb-surface-0, #f7f7f8);
+  padding: 0;
   box-sizing: border-box;
   align-items: stretch;
 }
@@ -32,84 +42,91 @@
 @media (max-width: 1279px) {
   .workspace {
     grid-template-columns:
-      minmax(240px, 280px) minmax(0, 1fr) minmax(280px, 320px);
-    padding: var(--hb-space-md, 16px);
+      minmax(220px, 232px) minmax(0, 1fr) minmax(272px, 296px);
   }
 }
 
 @media (max-width: 1079px) {
   .workspace {
-    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
-    padding: var(--hb-space-md, 16px);
+    grid-template-columns: minmax(220px, 248px) minmax(0, 1fr);
   }
 
   .readinessRail {
     grid-column: 1 / -1;
     position: sticky;
     bottom: 0;
-    max-height: 40vh;
+    max-height: 44vh;
     overflow: auto;
-    /*
-     * Contain the scroll so authors scrolling inside the pinned
-     * readiness rail don't accidentally scroll the SharePoint host
-     * page behind it. Matters specifically on the collapsed (<1080px)
-     * breakpoint where the rail becomes a pinned bottom panel.
-     */
     overscroll-behavior: contain;
     border-top: 1px solid var(--hb-border-subtle, #e3e6ed);
     border-left: none;
     background: var(--hb-surface-1, #fff);
     box-shadow: var(--hb-elevation-2, 0 -4px 12px rgba(16, 24, 40, 0.08));
-    margin-top: var(--hb-space-md, 16px);
     padding: var(--hb-space-md, 16px) var(--hb-space-lg, 24px);
+    align-self: auto;
+    top: auto;
   }
 }
 
 @media (max-width: 719px) {
   .workspace {
     grid-template-columns: 1fr;
-    padding: var(--hb-space-sm, 8px);
   }
 
   .draftRail {
     border-right: none;
     border-bottom: 1px solid var(--hb-border-subtle, #e3e6ed);
-    max-height: 32vh;
+    max-height: 40vh;
+    padding: var(--hb-space-md, 16px);
   }
 
   .canvas {
-    padding: var(--hb-space-md, 16px);
+    padding: var(--hb-space-lg, 24px) var(--hb-space-md, 16px);
   }
 }
 
-/* ── Draft rail ─────────────────────────────────────────────────── */
+/* ── Draft apron (left rail) ───────────────────────────────────── */
 
 .draftRail {
   background: transparent;
   border: none;
   border-right: 1px solid var(--hb-border-subtle, #e3e6ed);
   border-radius: 0;
-  padding: var(--hb-space-md, 16px) var(--hb-space-lg, 24px)
-    var(--hb-space-md, 16px) 0;
+  padding: var(--hb-space-xl, 32px) var(--hb-space-lg, 24px)
+    var(--hb-space-xl, 32px) var(--hb-space-lg, 24px);
   display: flex;
   flex-direction: column;
-  gap: var(--hb-space-md, 16px);
+  gap: var(--hb-space-lg, 24px);
   min-height: 0;
   overflow: auto;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
 }
 
 .draftRailHeader {
   display: flex;
   flex-direction: column;
   gap: var(--hb-space-sm, 8px);
+  padding-bottom: var(--hb-space-md, 16px);
+  border-bottom: 1px solid var(--hb-border-faint, #f0f0f3);
+}
+
+.draftRailKicker {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-weight: 600;
 }
 
 .draftRailTitle {
   font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--hb-text-secondary, #4a4a4f);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--hb-text-primary, #1f1f1f);
+  margin-bottom: 4px;
 }
 
 .railError {
@@ -124,25 +141,167 @@
   gap: 6px;
 }
 
+/* ── Editorial spine ───────────────────────────────────────────── */
+
+.editorialSpine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hb-space-sm, 8px);
+  padding-top: var(--hb-space-sm, 8px);
+  border-top: 1px solid var(--hb-border-faint, #f0f0f3);
+}
+
+.editorialSpineHeading {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-weight: 600;
+}
+
+.editorialSpineList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.editorialSpineItem,
+.editorialSpineItemActive {
+  display: block;
+}
+
+.editorialSpineLink {
+  display: grid;
+  grid-template-columns: 12px 22px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 8px 2px;
+  border-radius: var(--hb-radius-md, 4px);
+  text-decoration: none;
+  color: var(--hb-text-primary, #1f1f1f);
+  position: relative;
+}
+
+.editorialSpineLink::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--hb-border-faint, #f0f0f3);
+}
+
+.editorialSpineList > li:first-child .editorialSpineLink::before {
+  top: 50%;
+}
+
+.editorialSpineList > li:last-child .editorialSpineLink::before {
+  bottom: 50%;
+}
+
+.editorialSpineLink:hover,
+.editorialSpineLink:focus-visible {
+  background: var(--hb-surface-tint-selected, #f0f6fc);
+  outline: none;
+}
+
+.editorialSpineItemActive .editorialSpineLink {
+  background: var(--hb-surface-tint-selected, #f0f6fc);
+  color: var(--hb-color-presentation-blue, #225391);
+}
+
+.editorialSpineDotComplete,
+.editorialSpineDotPartial,
+.editorialSpineDotEmpty,
+.editorialSpineDotOptional {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  background: var(--hb-surface-0, #f7f7f8);
+  border: 1px solid var(--hb-border-strong, #cbcbd0);
+}
+
+.editorialSpineDotComplete {
+  background: var(--hb-color-brand-action, #337aab);
+  border-color: var(--hb-color-brand-action, #337aab);
+}
+
+.editorialSpineDotPartial {
+  background:
+    radial-gradient(
+      circle,
+      var(--hb-color-brand-action, #337aab) 0 40%,
+      var(--hb-surface-1, #fff) 42% 100%
+    );
+  border-color: var(--hb-color-brand-action, #337aab);
+}
+
+.editorialSpineDotOptional {
+  border-style: dashed;
+  border-color: var(--hb-border-strong, #cbcbd0);
+  background: transparent;
+}
+
+.editorialSpineIndex {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-weight: 600;
+}
+
+.editorialSpineLabel {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.editorialSpineItemActive .editorialSpineLabel {
+  font-weight: 600;
+}
+
+.editorialSpineStatus {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-weight: 600;
+}
+
 /* ── Canvas (editorial focal plane) ────────────────────────────── */
 
 .canvas {
-  background: var(--hb-surface-1, #fff);
-  border: 1px solid var(--hb-border-subtle, #e3e6ed);
-  border-radius: var(--hb-radius-xl, 8px);
-  box-shadow: var(--hb-elevation-1, 0 1px 3px rgba(16, 24, 40, 0.06));
-  padding: var(--hb-space-lg, 24px) var(--hb-space-xl, 32px);
-  margin: 0 var(--hb-space-md, 16px);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--hb-space-xxl, 48px) var(--hb-space-xxl, 48px)
+    var(--hb-space-xl, 32px) var(--hb-space-xxl, 48px);
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--hb-space-lg, 24px);
+  gap: var(--hb-space-xl, 32px);
   min-width: 0;
+  max-width: 880px;
+  width: 100%;
+  justify-self: center;
+}
+
+@media (max-width: 1279px) {
+  .canvas {
+    padding: var(--hb-space-xl, 32px) var(--hb-space-xl, 32px)
+      var(--hb-space-xl, 32px) var(--hb-space-xl, 32px);
+  }
 }
 
 @media (max-width: 1079px) {
   .canvas {
-    margin: 0 var(--hb-space-sm, 8px);
-    padding: var(--hb-space-md, 16px) var(--hb-space-lg, 24px);
+    padding: var(--hb-space-xl, 32px) var(--hb-space-lg, 24px);
   }
 }
 
@@ -151,22 +310,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--hb-space-xl, 32px);
+  padding: var(--hb-space-xxl, 48px);
 }
 
 .canvasHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--hb-space-md, 16px);
-  padding-bottom: var(--hb-space-md, 16px);
-  border-bottom: 1px solid var(--hb-border-subtle, #e3e6ed);
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .canvasHeaderMain {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -174,18 +333,24 @@
   margin: 0;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   color: var(--hb-color-presentation-blue, #225391);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .canvasTitle {
   margin: 0;
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  line-height: 1.1;
+  letter-spacing: -0.018em;
   color: var(--hb-text-primary, #1f1f1f);
+}
+
+@media (max-width: 1079px) {
+  .canvasTitle {
+    font-size: 30px;
+  }
 }
 
 .canvasNotice,
@@ -217,48 +382,26 @@
   color: var(--hb-status-info-text, #225391);
   white-space: nowrap;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
+/* Legacy section-index class retained for backwards compatibility
+ * with imports; unused in the Wave-01 redesign, hidden defensively. */
 .sectionIndex {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--hb-space-xs, 4px) var(--hb-space-sm, 8px);
-  padding: var(--hb-space-sm, 8px) 0 var(--hb-space-md, 16px) 0;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--hb-surface-1, #fff);
-  border-bottom: 1px solid var(--hb-border-subtle, #e3e6ed);
+  display: none;
 }
 
 .sectionIndexLink {
-  font-size: 12px;
-  color: var(--hb-color-presentation-blue, #225391);
-  text-decoration: none;
-  padding: 4px 10px;
-  border-radius: var(--hb-radius-pill, 999px);
-  font-weight: 500;
-  transition: background var(--hb-transition-fast, 150ms ease);
-}
-
-.sectionIndexLink:hover,
-.sectionIndexLink:focus-visible {
-  background: var(--hb-status-info-bg, #e8eef7);
-  outline: none;
+  display: none;
 }
 
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--hb-space-md, 16px);
-  padding: var(--hb-space-lg, 24px) 0 var(--hb-space-md, 16px) 0;
-  border-top: 1px solid var(--hb-border-subtle, #e3e6ed);
-  scroll-margin-top: 64px;
-}
-
-.section:first-of-type {
+  padding: var(--hb-space-lg, 24px) 0 0 0;
   border-top: none;
-  padding-top: var(--hb-space-sm, 8px);
+  scroll-margin-top: 32px;
 }
 
 .section:focus {
@@ -267,7 +410,16 @@
 
 .section:focus-visible {
   outline: 2px solid var(--hb-color-focus-ring, #337aab);
-  outline-offset: 2px;
+  outline-offset: 4px;
+  border-radius: var(--hb-radius-md, 4px);
+}
+
+/* Destination and preview are governance/proof regions — give them
+ * a subtle hairline so they read as distinct from editorial sections. */
+.sectionGovernance {
+  margin-top: var(--hb-space-md, 16px);
+  padding-top: var(--hb-space-xl, 32px);
+  border-top: 1px solid var(--hb-border-faint, #f0f0f3);
 }
 
 .sectionHeader {
@@ -276,18 +428,32 @@
   gap: 4px;
 }
 
+.sectionHeaderRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.sectionNumeral {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  letter-spacing: 0.06em;
+}
+
 .sectionTitle {
   margin: 0;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 600;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
   color: var(--hb-text-primary, #1f1f1f);
 }
 
 .sectionIntent {
   margin: 0;
-  font-size: 13px;
-  color: var(--hb-text-secondary, #4a4a4f);
+  font-size: 12px;
+  color: var(--hb-text-tertiary, #6a6a6f);
   line-height: 1.45;
 }
 
@@ -303,12 +469,12 @@
 }
 
 .sectionSubheading {
-  margin: 4px 0 0 0;
-  font-size: 12px;
+  margin: 8px 0 0 0;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--hb-text-secondary, #4a4a4f);
+  letter-spacing: 0.06em;
+  color: var(--hb-text-tertiary, #6a6a6f);
 }
 
 /* ── Editorial panels ─────────────────────────────────────── */
@@ -527,23 +693,24 @@
   text-decoration: underline;
 }
 
-/* ── Readiness rail ───────────────────────────────────────── */
+/* ── Readiness dock (right rail) ──────────────────────────── */
 
 .readinessRail {
   background: transparent;
   border: none;
   border-left: 1px solid var(--hb-border-subtle, #e3e6ed);
   border-radius: 0;
-  padding: var(--hb-space-md, 16px) 0 var(--hb-space-md, 16px)
-    var(--hb-space-lg, 24px);
+  padding: var(--hb-space-xl, 32px) var(--hb-space-lg, 24px)
+    var(--hb-space-xl, 32px) var(--hb-space-lg, 24px);
   display: flex;
   flex-direction: column;
-  gap: var(--hb-space-lg, 24px);
+  gap: var(--hb-space-md, 16px);
   min-height: 0;
   overflow: auto;
   align-self: start;
   position: sticky;
-  top: var(--hb-space-lg, 24px);
+  top: 0;
+  max-height: 100vh;
 }
 
 .readinessEmpty {
@@ -555,12 +722,12 @@
 .readinessBlockDanger {
   display: flex;
   flex-direction: column;
-  gap: var(--hb-space-sm, 8px);
+  gap: 6px;
   padding: 0 0 var(--hb-space-md, 16px) 0;
   border-radius: 0;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--hb-border-subtle, #e3e6ed);
+  border-bottom: 1px solid var(--hb-border-faint, #f0f0f3);
 }
 
 .readinessBlock:last-child,
@@ -573,20 +740,32 @@
   color: var(--hb-status-danger-text, #a4262c);
 }
 
+.readinessActions {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0,
+    var(--hb-surface-0, #f7f7f8) 12px
+  );
+  padding-top: var(--hb-space-sm, 8px);
+}
+
 .readinessHeading {
   margin: 0;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--hb-text-secondary, #4a4a4f);
+  letter-spacing: 0.12em;
+  color: var(--hb-text-tertiary, #6a6a6f);
   font-weight: 600;
 }
 
 .readinessSummary {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--hb-text-primary, #1f1f1f);
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .readinessBindingSignal {
@@ -600,7 +779,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .publishIntentDetail {
@@ -670,11 +849,11 @@
   gap: 6px;
 }
 
-/* ── Field / input primitives ─────────────────────────────── *
- * Backs MetadataPanel, HeroPanel, StoryPanel etc. Local-exception
- * note: these remain here (instead of moving to sharedChrome/) because
- * authoringPanels reach into article-publisher.module.css today.
- * Future consolidation is out of scope for this closure. */
+.readinessSecondaryAction {
+  margin-top: 4px;
+}
+
+/* ── Field / input primitives ─────────────────────────────── */
 
 .field {
   display: flex;

@@ -25,6 +25,7 @@ export interface QueueRailProps {
   readonly onReload: () => void;
   readonly onCreateNew: () => void;
   readonly actorEmail?: string;
+  readonly spineSlot?: React.ReactNode;
 }
 
 export function QueueRail({
@@ -37,11 +38,13 @@ export function QueueRail({
   onReload,
   onCreateNew,
   actorEmail,
+  spineSlot,
 }: QueueRailProps) {
   return (
     <aside className={styles.draftRail} aria-label="Drafts and recent articles">
       <header className={styles.draftRailHeader}>
-        <div className={styles.draftRailTitle}>Your articles</div>
+        <div className={styles.draftRailKicker}>Publisher</div>
+        <div className={styles.draftRailTitle}>Drafts</div>
         <PublisherButton variant="primary" size="sm" onClick={onCreateNew}>
           + New draft
         </PublisherButton>
@@ -70,6 +73,8 @@ export function QueueRail({
           defaultCollapsed={COLLAPSED_GROUPS_BY_DEFAULT}
         />
       )}
+
+      {spineSlot}
     </aside>
   );
 }

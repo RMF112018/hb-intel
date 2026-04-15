@@ -40,7 +40,13 @@ import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
 import { EditorialChip, PublisherButton, StatusBanner } from './sharedChrome/index.js';
-import { QueueRail, useDraftWorkspace } from './workspace/index.js';
+import {
+  EditorialSpine,
+  QueueRail,
+  useDraftWorkspace,
+  type SpineEntry,
+  type SpineStatus,
+} from './workspace/index.js';
 import {
   DestinationBindingPanel,
   HeroPanel,
@@ -60,10 +66,10 @@ import {
   useStatusChannel,
 } from './controllers/index.js';
 import { publishDisabledReason } from './lifecycleMessaging.js';
+import { useActiveSection } from './useActiveSection.js';
 import { useSharePointPeopleSearch } from '../../data/useSharePointPeopleSearch.js';
 import { useGraphPersonPhotoFn } from '../../data/useRecipientPhotoHydration.js';
 import { transitionActionLabel } from './authorLabels.js';
-import { handleSectionIndexClick } from './sectionFocus.js';
 import styles from './article-publisher.module.css';
 
 // Re-exports for existing test-surface imports (`./ArticlePublisher`).
@@ -272,9 +278,39 @@ export function ArticlePublisher({
 
   const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
 
+  const spineEntries = React.useMemo<readonly SpineEntry[]>(
+    () =>
+      WORKSPACE_SECTIONS.map((s) => ({
+        id: s.id,
+        label: s.label,
+        status: computeSpineStatus(s.id, {
+          draft: articleDraft,
+          teamCount: teamDraft.length,
+          mediaCount: mediaDraft.length,
+          bindingOk: !unsupportedContentTypeLoaded && !unsupportedDestinationLoaded,
+          previewReady: !!preview && !previewLoading,
+        }),
+      })),
+    [
+      articleDraft,
+      teamDraft.length,
+      mediaDraft.length,
+      unsupportedContentTypeLoaded,
+      unsupportedDestinationLoaded,
+      preview,
+      previewLoading,
+    ],
+  );
+
+  const sectionIds = React.useMemo(
+    () => WORKSPACE_SECTIONS.map((s) => s.id),
+    [],
+  );
+  const activeSectionId = useActiveSection(articleDraft ? sectionIds : []);
+
   return (
     <div className={styles.workspace} aria-label="Article Publisher workspace">
-      {/* ── Left draft rail ──────────────────────────────────── */}
+      {/* ── Left draft apron ─────────────────────────────────── */}
       <QueueRail
         groups={workspace.groups}
         groupsLoading={workspace.groupsLoading}
@@ -285,9 +321,17 @@ export function ArticlePublisher({
         onReload={() => void workspace.reloadGroups()}
         onCreateNew={handleCreateNew}
         actorEmail={actorEmail}
+        spineSlot={
+          articleDraft ? (
+            <EditorialSpine
+              entries={spineEntries}
+              activeId={activeSectionId}
+            />
+          ) : null
+        }
       />
 
-      {/* ── Center authoring canvas ─────────────────────────── */}
+      {/* ── Center editorial canvas ─────────────────────────── */}
       <main className={styles.canvas} aria-label="Article authoring canvas">
         {authoringHealth.kind !== 'healthy' &&
           authoringHealth.kind !== 'loading' && (
@@ -316,17 +360,17 @@ export function ArticlePublisher({
           <div className={styles.canvasEmpty}>
             <HbcEmptyState
               title="Start composing"
-              description="Pick a draft from the left, or start a new Project Spotlight article."
+              description="Pick a draft from the apron on the left, or start a new Project Spotlight article."
             />
           </div>
         ) : (
           <>
             <header className={styles.canvasHeader}>
               <div className={styles.canvasHeaderMain}>
-                <p className={styles.canvasKicker}>Project Spotlight article</p>
-                <h2 className={styles.canvasTitle}>
+                <p className={styles.canvasKicker}>Project Spotlight</p>
+                <h1 className={styles.canvasTitle}>
                   {articleDraft.Title?.trim() || 'Untitled draft'}
-                </h2>
+                </h1>
               </div>
               {workflowOutcomeChipLabel && (
                 <span className={styles.outcomeChip}>{workflowOutcomeChipLabel}</span>
@@ -349,135 +393,76 @@ export function ArticlePublisher({
               </p>
             )}
 
-            <nav
-              className={styles.sectionIndex}
-              aria-label="Workspace sections"
-              onClick={handleSectionIndexClick}
-            >
-              {WORKSPACE_SECTIONS.map((s) => (
-                <a key={s.id} href={`#section-${s.id}`} className={styles.sectionIndexLink}>
-                  {s.label}
-                </a>
+            <EditorialSection id="identity" index={1} label="Identity">
+              <MetadataPanel
+                draft={articleDraft}
+                onChange={setArticleDraft}
+                searchProjects={searchProjects}
+                promotionPolicy={promotionPolicy}
+              />
+            </EditorialSection>
+
+            <EditorialSection id="hero" index={2} label="Hero">
+              <HeroPanel draft={articleDraft} onChange={setArticleDraft} />
+            </EditorialSection>
+
+            <EditorialSection id="story" index={3} label="Story">
+              <StoryPanel draft={articleDraft} onChange={setArticleDraft} />
+            </EditorialSection>
+
+            <EditorialSection id="media" index={4} label="Media">
+              <SecondaryImagePanel draft={articleDraft} onChange={setArticleDraft} />
+              <GalleryPanel
+                articleId={articleDraft.ArticleId}
+                rows={mediaDraft}
+                onChange={setMediaDraft}
+              />
+            </EditorialSection>
+
+            <EditorialSection id="team" index={5} label="Team">
+              <TeamPresentationPanel draft={articleDraft} onChange={setArticleDraft} />
+              <TeamPanel
+                articleId={articleDraft.ArticleId}
+                rows={teamDraft}
+                onChange={setTeamDraft}
+                searchPeople={searchPeople}
+                fetchPersonPhoto={fetchPersonPhoto}
+              />
+            </EditorialSection>
+
+            <EditorialSection id="promotion" index={6} label="Promotion">
+              {promotionRuleHealth &&
+                promotionRuleHealth.kind !== 'ready' &&
+                promotionRuleHealthHeadline && (
+                  <p
+                    className={
+                      promotionRuleHealth.kind === 'loadFailure'
+                        ? styles.canvasNoticeBlocking
+                        : styles.canvasNotice
+                    }
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {promotionRuleHealthHeadline}
+                  </p>
+                )}
+              {promotionSummary.map((line, i) => (
+                <p key={i} className={styles.sectionCopy}>{line}</p>
               ))}
-            </nav>
+            </EditorialSection>
 
-            <section id="section-identity" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Identity</h3>
-                <p className={styles.sectionIntent}>Name the article and bind it to a project.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <MetadataPanel
-                  draft={articleDraft}
-                  onChange={setArticleDraft}
-                  searchProjects={searchProjects}
-                  promotionPolicy={promotionPolicy}
-                />
-              </div>
-            </section>
+            <EditorialSection
+              id="destination"
+              index={7}
+              label="Destination binding"
+              governance
+            >
+              <DestinationBindingPanel binding={binding} context={resolutionContext} />
+            </EditorialSection>
 
-            <section id="section-hero" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Hero</h3>
-                <p className={styles.sectionIntent}>Set the hero visual and editorial framing.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <HeroPanel draft={articleDraft} onChange={setArticleDraft} />
-              </div>
-            </section>
-
-            <section id="section-story" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Story</h3>
-                <p className={styles.sectionIntent}>Compose the body of the article.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <StoryPanel draft={articleDraft} onChange={setArticleDraft} />
-              </div>
-            </section>
-
-            <section id="section-media" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Media</h3>
-                <p className={styles.sectionIntent}>Add supporting media beyond the hero.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <div className={styles.sectionSubheading}>Secondary hero image</div>
-                <SecondaryImagePanel draft={articleDraft} onChange={setArticleDraft} />
-                <div className={styles.sectionSubheading}>Supporting images</div>
-                <GalleryPanel
-                  articleId={articleDraft.ArticleId}
-                  rows={mediaDraft}
-                  onChange={setMediaDraft}
-                />
-              </div>
-            </section>
-
-            <section id="section-team" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Team</h3>
-                <p className={styles.sectionIntent}>Spotlight the people behind the work.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <div className={styles.sectionSubheading}>How the team section is presented</div>
-                <TeamPresentationPanel draft={articleDraft} onChange={setArticleDraft} />
-                <div className={styles.sectionSubheading}>Members</div>
-                <TeamPanel
-                  articleId={articleDraft.ArticleId}
-                  rows={teamDraft}
-                  onChange={setTeamDraft}
-                  searchPeople={searchPeople}
-                  fetchPersonPhoto={fetchPersonPhoto}
-                />
-              </div>
-            </section>
-
-            <section id="section-promotion" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Promotion</h3>
-                <p className={styles.sectionIntent}>Review how promotion policy applies.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                {promotionRuleHealth &&
-                  promotionRuleHealth.kind !== 'ready' &&
-                  promotionRuleHealthHeadline && (
-                    <p
-                      className={
-                        promotionRuleHealth.kind === 'loadFailure'
-                          ? styles.canvasNoticeBlocking
-                          : styles.canvasNotice
-                      }
-                      role="status"
-                      aria-live="polite"
-                    >
-                      {promotionRuleHealthHeadline}
-                    </p>
-                  )}
-                {promotionSummary.map((line, i) => (
-                  <p key={i} className={styles.sectionCopy}>{line}</p>
-                ))}
-              </div>
-            </section>
-
-            <section id="section-destination" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Destination binding</h3>
-                <p className={styles.sectionIntent}>Confirm template and destination page binding.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <DestinationBindingPanel binding={binding} context={resolutionContext} />
-              </div>
-            </section>
-
-            <section id="section-preview" className={styles.section} tabIndex={-1}>
-              <header className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Preview</h3>
-                <p className={styles.sectionIntent}>See how the article will publish.</p>
-              </header>
-              <div className={styles.sectionBody}>
-                <ArticlePreview outcome={preview} loading={previewLoading} />
-              </div>
-            </section>
+            <EditorialSection id="preview" index={8} label="Preview" governance>
+              <ArticlePreview outcome={preview} loading={previewLoading} />
+            </EditorialSection>
           </>
         )}
       </main>
@@ -558,8 +543,11 @@ export function ArticlePublisher({
 
             <PublishReadinessDiagnostics outcome={preview} binding={binding} />
 
-            <section className={styles.readinessBlock} aria-label="Primary actions">
-              <p className={styles.readinessHeading}>Actions</p>
+            <section
+              className={`${styles.readinessBlock} ${styles.readinessActions}`}
+              aria-label="Primary actions"
+            >
+              <p className={styles.readinessHeading}>Ship</p>
               <div className={styles.readinessActionGroup}>
                 <PublisherButton
                   variant="primary"
@@ -600,14 +588,16 @@ export function ArticlePublisher({
                 >
                   Save draft
                 </PublisherButton>
-                <PublisherButton
-                  disabled={!saveEnabled}
-                  title={saveBlockedReason}
-                  onClick={() => handlePublishAction('preview')}
-                >
-                  Recompose preview
-                </PublisherButton>
               </div>
+              <PublisherButton
+                className={styles.readinessSecondaryAction}
+                size="sm"
+                disabled={!saveEnabled}
+                title={saveBlockedReason}
+                onClick={() => handlePublishAction('preview')}
+              >
+                Recompose preview
+              </PublisherButton>
             </section>
 
             {validNextStates.length > 0 && (
@@ -676,6 +666,108 @@ export function ArticlePublisher({
       </aside>
     </div>
   );
+}
+
+/* ── Editorial section primitive ─────────────────────────────────
+ * Numbered editorial marker + body. Demotes the old always-visible
+ * per-section intent prose into a subordinate role (hidden at shell
+ * level; still owned by each panel for inline guidance).
+ */
+
+function EditorialSection({
+  id,
+  index,
+  label,
+  governance = false,
+  children,
+}: {
+  id: string;
+  index: number;
+  label: string;
+  governance?: boolean;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  const className = governance
+    ? `${styles.section} ${styles.sectionGovernance}`
+    : styles.section;
+  return (
+    <section id={`section-${id}`} className={className} tabIndex={-1}>
+      <header className={styles.sectionHeader}>
+        <div className={styles.sectionHeaderRow}>
+          <span className={styles.sectionNumeral}>
+            {String(index).padStart(2, '0')}
+          </span>
+          <h2 className={styles.sectionTitle}>{label}</h2>
+        </div>
+      </header>
+      <div className={styles.sectionBody}>{children}</div>
+    </section>
+  );
+}
+
+/* ── Spine status derivation ────────────────────────────────── */
+
+const OPTIONAL_SECTIONS: ReadonlySet<WorkspaceSectionId> = new Set([
+  'media',
+  'team',
+  'promotion',
+]);
+
+function computeSpineStatus(
+  id: WorkspaceSectionId,
+  ctx: {
+    draft: ReturnType<typeof useDraftLifecycle>['articleDraft'];
+    teamCount: number;
+    mediaCount: number;
+    bindingOk: boolean;
+    previewReady: boolean;
+  },
+): SpineStatus {
+  const { draft } = ctx;
+  if (!draft) return 'empty';
+  const isOptional = OPTIONAL_SECTIONS.has(id);
+  switch (id) {
+    case 'identity': {
+      const titled = !!draft.Title?.trim();
+      const projectBound = !!draft.ProjectId?.trim();
+      if (titled && projectBound) return 'complete';
+      if (titled || projectBound) return 'partial';
+      return 'empty';
+    }
+    case 'hero': {
+      const hasImage = !!draft.HeroPrimaryImage?.trim();
+      const hasAlt = !!draft.HeroPrimaryImageAltText?.trim();
+      if (hasImage && hasAlt) return 'complete';
+      if (hasImage || hasAlt) return 'partial';
+      return 'empty';
+    }
+    case 'story': {
+      const hasSummary = !!draft.SummaryExcerpt?.trim();
+      const hasBody = !!draft.BodyRichText?.trim();
+      if (hasSummary && hasBody) return 'complete';
+      if (hasSummary || hasBody) return 'partial';
+      return 'empty';
+    }
+    case 'media': {
+      if (ctx.mediaCount > 0 || draft.SecondaryImage?.trim()) return 'complete';
+      return isOptional ? 'optional' : 'empty';
+    }
+    case 'team': {
+      if (ctx.teamCount > 0) return 'complete';
+      return isOptional ? 'optional' : 'empty';
+    }
+    case 'promotion': {
+      return isOptional ? 'optional' : 'empty';
+    }
+    case 'destination': {
+      return ctx.bindingOk ? 'complete' : 'partial';
+    }
+    case 'preview': {
+      return ctx.previewReady ? 'complete' : 'partial';
+    }
+    default:
+      return 'empty';
+  }
 }
 
 /* ── Readiness helpers (local compositions) ───────────────────────
