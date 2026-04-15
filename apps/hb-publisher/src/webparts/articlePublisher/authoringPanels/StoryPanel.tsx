@@ -24,6 +24,12 @@ export function StoryPanel({ draft, onChange }: PanelProps) {
 
   return (
     <div className={styles.editorialForm}>
+      <p className={styles.editorialArcIntro}>
+        The Story section carries the article's voice. Write the{' '}
+        <strong>subhead</strong> and the <strong>body</strong> first — together
+        they are the core of the piece. Optional flourishes (intro, closing,
+        callout, pull quote) sit below and only appear when you add them.
+      </p>
       <Field
         label="Subhead"
         helper="A beat under the headline that frames the story. Concrete, human, and free of jargon."
@@ -41,7 +47,7 @@ export function StoryPanel({ draft, onChange }: PanelProps) {
         <StoryBodyEditor
           value={draft.BodyRichText}
           onChange={(next) => onChange(update(draft, 'BodyRichText', next))}
-          placeholder="Compose the article."
+          placeholder="Start with the lede — what happened, who it served, and why it mattered. Use H2/H3 for beats, bullets or numbers for steps, and links for sources. Pasted Word formatting is cleaned to match the published page."
           ariaLabel="Article body"
         />
       </Field>

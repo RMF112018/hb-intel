@@ -557,6 +557,22 @@
   gap: 14px;
 }
 
+.editorialArcIntro {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--hb-text-secondary, #4a4a4f);
+  background: var(--hb-surface-1, #fafafa);
+  border-left: 2px solid var(--hb-border-strong, #cfcfd3);
+  border-radius: var(--hb-radius-md, 4px);
+}
+
+.editorialArcIntro strong {
+  color: var(--hb-text-primary, #1f1f1f);
+  font-weight: 600;
+}
+
 .editorialNotice {
   margin: 0;
   padding: 8px 10px;

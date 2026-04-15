@@ -47,6 +47,7 @@ declare const styles: {
   readonly nextActionToneWarn: string;
   readonly nextActionToneDanger: string;
   readonly nextActionToneSuccess: string;
+  readonly editorialArcIntro: string;
   readonly section: string;
   readonly sectionGovernance: string;
   readonly sectionHeader: string;

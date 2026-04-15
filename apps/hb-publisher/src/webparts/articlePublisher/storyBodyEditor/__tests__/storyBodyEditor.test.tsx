@@ -104,13 +104,15 @@ describe('StoryBodyEditor — placeholder + empty-state', () => {
 });
 
 describe('StoryBodyEditor — toolbar link microflow', () => {
-  it('rejects an invalid URL with a trust-copy error and keeps the link input open', async () => {
+  it('opens a link-text slot when there is no selection so the author can write both text and URL', async () => {
     render(<Harness />);
     await editorRoot();
     fireEvent.click(screen.getByRole('button', { name: /Link/ }));
-    // With empty selection the toolbar surfaces a clarifying error
-    // rather than silently opening the prompt against nothing.
-    expect(screen.getByRole('alert').textContent).toMatch(/Select the text/i);
+    // With no selection the toolbar now offers an inline "Link text"
+    // input next to the URL input instead of a dead-end error — the
+    // author can author the whole link in one pass.
+    expect(screen.getByLabelText('Visible link text')).toBeTruthy();
+    expect(screen.getByLabelText('Link URL')).toBeTruthy();
   });
 
   it('does not expose an unsafe-scheme toggle — only the schema-allowed affordances', async () => {

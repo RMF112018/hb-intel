@@ -55,6 +55,8 @@ interface ToolbarControl {
 export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | null {
   const [linkPromptOpen, setLinkPromptOpen] = React.useState(false);
   const [linkDraft, setLinkDraft] = React.useState('');
+  const [linkTextDraft, setLinkTextDraft] = React.useState('');
+  const [needsLinkText, setNeedsLinkText] = React.useState(false);
   const [linkError, setLinkError] = React.useState<string | undefined>(undefined);
   const [focusIndex, setFocusIndex] = React.useState(0);
   const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
@@ -62,14 +64,14 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
   if (!editor) return null;
 
   const openLinkPrompt = () => {
+    let textSlotOpen = false;
     if (editor.state.selection.empty) {
       // Expand the selection to the word at the cursor so authors
-      // don't have to double-click to link. When the cursor is in
-      // whitespace (no word boundary) keep the prior behaviour and
-      // surface the "select text first" hint.
+      // don't have to double-click to link. If no word boundary is
+      // available, open the prompt with a link-text input so authors
+      // can type both the link text and the URL in one pass.
       const expanded = editor.chain().focus().extendMarkRange('link').run();
       const { $from } = editor.state.selection;
-      // Walk backwards/forwards from cursor to find word boundaries.
       const text = $from.parent.textContent;
       const offset = $from.parentOffset;
       const boundary = /\W/;
@@ -82,13 +84,13 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
         const to = $from.start() + end;
         editor.chain().focus().setTextSelection({ from, to }).run();
       } else if (!expanded || editor.state.selection.empty) {
-        setLinkError('Select the text you want to link first.');
-        setLinkPromptOpen(true);
-        return;
+        textSlotOpen = true;
       }
     }
     const existing = (editor.getAttributes('link').href as string | undefined) ?? '';
     setLinkDraft(existing);
+    setLinkTextDraft('');
+    setNeedsLinkText(textSlotOpen);
     setLinkError(undefined);
     setLinkPromptOpen(true);
   };
@@ -99,14 +101,33 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
       setLinkError('Use https://, mailto:, or a tenant-relative path starting with /.');
       return;
     }
-    editor
-      .chain()
-      .focus()
-      .extendMarkRange('link')
-      .setLink({ href: normalised })
-      .run();
+    if (needsLinkText) {
+      const text = linkTextDraft.trim();
+      if (text.length === 0) {
+        setLinkError('Enter the visible link text.');
+        return;
+      }
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'text',
+          text,
+          marks: [{ type: 'link', attrs: { href: normalised } }],
+        })
+        .run();
+    } else {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange('link')
+        .setLink({ href: normalised })
+        .run();
+    }
     setLinkPromptOpen(false);
     setLinkDraft('');
+    setLinkTextDraft('');
+    setNeedsLinkText(false);
     setLinkError(undefined);
   };
 
@@ -288,6 +309,24 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
 
       {linkPromptOpen && (
         <div className={styles.linkPromptRow} role="group" aria-label="Insert link">
+          {needsLinkText && (
+            <input
+              type="text"
+              className={styles.linkPromptInput}
+              placeholder="Link text"
+              value={linkTextDraft}
+              onChange={(e) => setLinkTextDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  setLinkPromptOpen(false);
+                  editor.commands.focus();
+                }
+              }}
+              aria-label="Visible link text"
+              autoFocus
+            />
+          )}
           <input
             type="text"
             className={styles.linkPromptInput}
@@ -311,7 +350,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
               }
             }}
             aria-label="Link URL"
-            autoFocus
+            autoFocus={!needsLinkText}
           />
           <PublisherButton variant="primary" size="sm" onClick={applyLink}>
             Apply link
@@ -325,6 +364,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
             size="sm"
             onClick={() => {
               setLinkPromptOpen(false);
+              setLinkDraft('');
+              setLinkTextDraft('');
+              setNeedsLinkText(false);
+              setLinkError(undefined);
               editor.commands.focus();
             }}
           >
@@ -360,8 +403,20 @@ function renderGroups(
     cursor += 1;
   }
   return groups.map((g) => (
-    <div className={styles.toolbarGroup} key={g.id}>
+    <div
+      className={styles.toolbarGroup}
+      key={g.id}
+      role="group"
+      aria-label={TOOLBAR_GROUP_LABELS[g.id] ?? 'Formatting'}
+    >
       {g.items.map((item, i) => renderControl(item, g.start + i))}
     </div>
   ));
 }
+
+const TOOLBAR_GROUP_LABELS: Readonly<Record<number, string>> = {
+  0: 'Inline formatting',
+  1: 'Block structure',
+  2: 'Lists and quotes',
+  3: 'History',
+};
