@@ -773,12 +773,66 @@
   line-height: 1.4;
 }
 
-.localCacheStatus {
-  margin: 4px 0 0 0;
+.saveStateChip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: var(--hb-radius-pill);
   font-size: 11px;
+  line-height: 1.3;
+  border: 1px solid transparent;
+  background: var(--hb-surface-2);
+  color: var(--hb-text-secondary);
+}
+
+.saveStateDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.saveStateHeadline {
+  font-weight: 600;
+}
+
+.saveStateDetail {
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.saveStateToneNeutral {
+  background: var(--hb-surface-2);
   color: var(--hb-text-tertiary);
-  font-style: italic;
-  line-height: 1.45;
+  border-color: var(--hb-border-subtle);
+}
+
+.saveStateToneInfo {
+  background: var(--hb-status-info-bg);
+  color: var(--hb-status-info-text);
+  border-color: var(--hb-status-info-border);
+}
+
+.saveStateToneSuccess {
+  background: var(--hb-status-success-bg);
+  color: var(--hb-status-success-text);
+  border-color: var(--hb-status-success-border);
+}
+
+.saveStateToneWarn {
+  background: var(--hb-status-warn-bg);
+  color: var(--hb-status-warn-text);
+  border-color: var(--hb-status-warn-border);
+}
+
+.saveStateToneDanger {
+  background: var(--hb-status-danger-bg);
+  color: var(--hb-status-danger-text);
+  border-color: var(--hb-status-danger-border);
 }
 
 .publishIntentCue {

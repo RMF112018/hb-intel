@@ -5,6 +5,12 @@ export type {
   LocalDraftResilienceHandle,
   LocalWorkingCopy,
 } from './useLocalDraftResilience.js';
+export { useSaveStateTrust } from './useSaveStateTrust.js';
+export type {
+  SaveStatePhase,
+  SaveStateTrust,
+  SaveStateTrustInputs,
+} from './useSaveStateTrust.js';
 export { usePreviewController } from './usePreviewController.js';
 export type {
   PreviewController,

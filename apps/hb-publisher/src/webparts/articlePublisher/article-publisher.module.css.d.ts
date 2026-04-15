@@ -67,7 +67,15 @@ declare const styles: {
   readonly readinessHeading: string;
   readonly readinessSummary: string;
   readonly readinessBindingSignal: string;
-  readonly localCacheStatus: string;
+  readonly saveStateChip: string;
+  readonly saveStateDot: string;
+  readonly saveStateHeadline: string;
+  readonly saveStateDetail: string;
+  readonly saveStateToneNeutral: string;
+  readonly saveStateToneInfo: string;
+  readonly saveStateToneSuccess: string;
+  readonly saveStateToneWarn: string;
+  readonly saveStateToneDanger: string;
   readonly publishIntentCue: string;
   readonly publishIntentDetail: string;
   readonly readinessIssueHint: string;

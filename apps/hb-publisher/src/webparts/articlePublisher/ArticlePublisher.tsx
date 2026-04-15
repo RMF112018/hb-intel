@@ -18,6 +18,7 @@
  */
 import * as React from 'react';
 import { HbcEmptyState, HbcSpinner } from '@hbc/ui-kit/homepage';
+import { useUnsavedChangesBlocker } from '@hbc/ui-kit';
 import { fetchRequestDigest, storeSiteUrl } from '@hbc/sharepoint-platform';
 import {
   WORKFLOW_STATE_OPERATIONAL_VALUES,
@@ -71,8 +72,11 @@ import {
   useLocalDraftResilience,
   usePreviewController,
   useReadinessController,
+  useSaveStateTrust,
   useStatusChannel,
   type LocalWorkingCopy,
+  type SaveStatePhase,
+  type SaveStateTrust,
 } from './controllers/index.js';
 import { publishDisabledReason } from './lifecycleMessaging.js';
 import { useActiveSection } from './useActiveSection.js';
@@ -256,6 +260,33 @@ export function ArticlePublisher({
     handlePublishAction,
   } = lifecycle;
 
+  /* ── Dirty-state detection ─────────────────────────────────────
+   * Baseline snapshots the last known-clean in-memory state:
+   *   - captured when a draft first loads (articleId + first truthy
+   *     articleDraft pair)
+   *   - reset after every successful durable save/publish
+   * `isDirty` is a shallow JSON compare against the baseline. This
+   * is the single source of truth for tab-close protection and the
+   * save-state trust chip. */
+  const baselineRef = React.useRef<string | null>(null);
+  const currentSignature = React.useMemo(
+    () => JSON.stringify({ articleDraft, teamDraft, mediaDraft }),
+    [articleDraft, teamDraft, mediaDraft],
+  );
+  React.useEffect(() => {
+    // Reset baseline whenever the selected draft changes so switching
+    // between queue items does not falsely report the new row dirty.
+    baselineRef.current = articleDraft ? currentSignature : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: reset only on identity change
+  }, [workspace.selectedArticleId, articleDraft?.ArticleId]);
+  const isDirty =
+    !!articleDraft &&
+    baselineRef.current !== null &&
+    currentSignature !== baselineRef.current;
+  const markBaselineClean = React.useCallback(() => {
+    baselineRef.current = currentSignature;
+  }, [currentSignature]);
+
   /* ── Local draft resilience ────────────────────────────────────
    * Layer 1 of a deliberate two-layer truth model: a debounced
    * IndexedDB cache of the in-memory working copy, keyed on the
@@ -318,15 +349,36 @@ export function ArticlePublisher({
   const handleSaveWithCacheClear = React.useCallback(async () => {
     await handleSave();
     resilience.clear();
-  }, [handleSave, resilience]);
+    markBaselineClean();
+  }, [handleSave, resilience, markBaselineClean]);
 
   const handlePublishWithCacheClear = React.useCallback<typeof handlePublishAction>(
     async (kind) => {
       await handlePublishAction(kind);
-      if (kind !== 'preview') resilience.clear();
+      if (kind !== 'preview') {
+        resilience.clear();
+        markBaselineClean();
+      }
     },
-    [handlePublishAction, resilience],
+    [handlePublishAction, resilience, markBaselineClean],
   );
+
+  // Browser tab close / refresh protection when the in-memory draft
+  // diverges from the last committed baseline. The hook attaches a
+  // beforeunload listener only while `isDirty` is true. In-app router
+  // blocking is NOT wired: SPFx hosts own routing and the Publisher
+  // does not own a router surface to integrate with.
+  useUnsavedChangesBlocker({ isDirty });
+
+  const trust = useSaveStateTrust({
+    hasDraft: !!articleDraft,
+    isDirty,
+    hasLocalCache: !!resilience.workingCopy,
+    isCachePending: resilience.isCachePending,
+    busy,
+    lastStatusTone: statusTone,
+    lastCachedAtIso: resilience.lastCachedAtIso,
+  });
 
   const previewController = usePreviewController({
     repositories,
@@ -608,10 +660,7 @@ export function ArticlePublisher({
                 <p className={styles.readinessBindingSignal}>{bindingSignal}</p>
               )}
               <PublishIntentCue intent={publishIntent} />
-              <LocalCacheStatus
-                lastCachedAtIso={resilience.lastCachedAtIso}
-                isCachePending={resilience.isCachePending}
-              />
+              <SaveStateChip trust={trust} />
             </section>
 
             {hasNewerLocalCopy && (
@@ -958,37 +1007,40 @@ function PublishIntentCue({
   );
 }
 
-function LocalCacheStatus({
-  lastCachedAtIso,
-  isCachePending,
-}: {
-  lastCachedAtIso: string | null;
-  isCachePending: boolean;
-}): React.JSX.Element | null {
-  if (!lastCachedAtIso && !isCachePending) return null;
-  const relative = lastCachedAtIso ? relativeFromNow(lastCachedAtIso) : null;
+function SaveStateChip({ trust }: { trust: SaveStateTrust }): React.JSX.Element {
+  const toneClass = phaseToneClass(trust.phase);
   return (
-    <p className={styles.localCacheStatus} aria-live="polite">
-      {isCachePending ? (
-        <>Caching working copy locally…</>
-      ) : (
-        <>
-          Working copy cached locally{relative ? ` · ${relative}` : ''} — not yet
-          saved to SharePoint.
-        </>
+    <div
+      className={`${styles.saveStateChip} ${toneClass}`}
+      role="status"
+      aria-live="polite"
+      data-phase={trust.phase}
+    >
+      <span className={styles.saveStateDot} aria-hidden="true" />
+      <span className={styles.saveStateHeadline}>{trust.headline}</span>
+      {trust.detail && (
+        <span className={styles.saveStateDetail}>{trust.detail}</span>
       )}
-    </p>
+    </div>
   );
 }
 
-function relativeFromNow(iso: string): string {
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return '';
-  const deltaSec = Math.max(0, Math.round((Date.now() - then) / 1000));
-  if (deltaSec < 10) return 'just now';
-  if (deltaSec < 60) return `${deltaSec}s ago`;
-  if (deltaSec < 3600) return `${Math.round(deltaSec / 60)}m ago`;
-  return `${Math.round(deltaSec / 3600)}h ago`;
+function phaseToneClass(phase: SaveStatePhase): string {
+  switch (phase) {
+    case 'saving':
+      return styles.saveStateToneInfo;
+    case 'saved':
+      return styles.saveStateToneSuccess;
+    case 'cached':
+    case 'caching':
+    case 'dirty':
+      return styles.saveStateToneWarn;
+    case 'failed':
+      return styles.saveStateToneDanger;
+    case 'clean':
+    default:
+      return styles.saveStateToneNeutral;
+  }
 }
 
 function ValidationIssueItem({
