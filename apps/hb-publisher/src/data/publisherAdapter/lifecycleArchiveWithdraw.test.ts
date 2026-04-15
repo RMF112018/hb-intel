@@ -292,7 +292,7 @@ describe('orchestrator.archive', () => {
     expect(f.historyAppend).toHaveBeenCalledTimes(1);
   });
 
-  it('returns articleUpdate failure and writes a publishing-error row when articles.upsert throws', async () => {
+  it('returns articleUpdate failure BEFORE history is appended when articles.upsert throws (phase-09 prompt-04 ordering)', async () => {
     const f = buildFixture({
       articleUpsertImpl: async () => {
         throw new Error('SP MERGE failed');
@@ -306,9 +306,12 @@ describe('orchestrator.archive', () => {
     expect(result.articleUpdated).toBe(false);
     expect(result.bindingUpdated).toBe(true);
     expect(result.pageUnpublished).toBe(true);
-    expect(result.historyAppended).toBe(true);
+    // Phase-09 Prompt-04: master-state closure precedes history append,
+    // so a failed articleUpdate cannot leave a false-forward "previous
+    // → target" workflow-history row behind.
+    expect(result.historyAppended).toBe(false);
     expect(f.bindingUpsert).toHaveBeenCalledTimes(1);
-    expect(f.historyAppend).toHaveBeenCalledTimes(1);
+    expect(f.historyAppend).not.toHaveBeenCalled();
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
 
@@ -435,7 +438,7 @@ describe('orchestrator.withdraw', () => {
     expect(persistedHistory.PreviousState).toBe('published');
   });
 
-  it('returns historyAppend failure (article not yet updated, binding already updated) when history append throws', async () => {
+  it('returns historyAppend failure and compensates by rolling the master article back (phase-09 prompt-04)', async () => {
     const f = buildFixture({
       historyAppendImpl: async () => {
         throw new Error('history list down');
@@ -446,11 +449,51 @@ describe('orchestrator.withdraw', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.stage).toBe('historyAppend');
+    // Master was stamped but then reverted — `articleUpdated` reports
+    // the final committed state, which is the pre-transition value.
     expect(result.articleUpdated).toBe(false);
     expect(result.bindingUpdated).toBe(true);
     expect(result.pageUnpublished).toBe(true);
     expect(result.historyAppended).toBe(false);
-    expect(f.articleUpsert).not.toHaveBeenCalled();
+    // Compensation surfaced explicitly on the outcome.
+    expect(result.rollback?.attempted).toBe(true);
+    expect(result.rollback?.succeeded).toBe(true);
+    expect(result.rollback?.message).toContain("reverted to 'published'");
+    // Two article writes: forward stamp + rollback.
+    expect(f.articleUpsert).toHaveBeenCalledTimes(2);
+    const forward = f.articleUpsert.mock.calls[0]![0] as PublisherArticleRow;
+    const reverted = f.articleUpsert.mock.calls[1]![0] as PublisherArticleRow;
+    expect(forward.WorkflowState).toBe('withdrawn');
+    expect(reverted.WorkflowState).toBe('published');
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces rollback failure when history append fails and master rollback also fails (phase-09 prompt-04)', async () => {
+    let writes = 0;
+    const f = buildFixture({
+      articleUpsertImpl: async () => {
+        writes += 1;
+        if (writes === 1) return { wasCreated: false, itemId: 1 };
+        throw new Error('rollback MERGE failed');
+      },
+      historyAppendImpl: async () => {
+        throw new Error('history list down');
+      },
+    });
+    const orch = makeOrch(f.repositories);
+    const result = await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.stage).toBe('historyAppend');
+    // Forward write succeeded; rollback threw. The master is split —
+    // surface that explicitly rather than silently claim success.
+    expect(result.articleUpdated).toBe(true);
+    expect(result.historyAppended).toBe(false);
+    expect(result.rollback?.attempted).toBe(true);
+    expect(result.rollback?.succeeded).toBe(false);
+    expect(result.rollback?.message).toContain('rollback');
+    expect(result.rollback?.message).toContain('failed');
+    expect(f.articleUpsert).toHaveBeenCalledTimes(2);
     expect(f.errorAppend).toHaveBeenCalledTimes(1);
   });
 });

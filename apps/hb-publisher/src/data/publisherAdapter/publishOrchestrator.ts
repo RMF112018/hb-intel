@@ -976,45 +976,15 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       }
     }
 
-    try {
-      await repositories.workflowHistory.append({
-        HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
-        ArticleId: article.ArticleId,
-        Title: `${previousState} → ${target}`,
-        NewState: target,
-        PreviousState: previousState,
-        ActionDateUtc: now,
-        ActorEmail: req.actorEmail,
-        ActionNote: req.note,
-      });
-      historyAppended = true;
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? `HB Article Workflow History append failed for ${target}: ${err.message}`
-          : `HB Article Workflow History append failed for ${target}.`;
-      await recordPublishingError({
-        articleId: article.ArticleId,
-        title: article.Title,
-        destination: article.Destination,
-        stage: 'historyAppend',
-        mode: 'create',
-        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
-        message,
-        nowIso: now,
-      });
-      return {
-        ok: false,
-        stage: 'historyAppend',
-        message,
-        previousState,
-        articleUpdated: false,
-        bindingUpdated,
-        pageUnpublished,
-        historyAppended: false,
-      };
-    }
-
+    // Phase-09 Prompt-04: master-state closure BEFORE history append.
+    // Previously the workflow-history row was written first, so an
+    // articleUpdate failure left a false-forward "previous → target"
+    // history trail while the master row was still in `previousState`.
+    // Reorder so the authoritative master is moved first; only after a
+    // successful master stamp do we append the durable audit row. If
+    // the history append then fails, compensate by reverting the
+    // master row back to `previousState` and surface the rollback
+    // outcome on the typed failure result.
     const updatedArticle: PublisherArticleRow = {
       ...article,
       WorkflowState: target,
@@ -1031,16 +1001,18 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
       // Mirror the demoted destination on the master's page-sync
       // metadata so the two rows tell the same lifecycle story.
       // `PageSyncStatus` flips to `'pending'` to match the binding
-      // row's `SyncStatus: 'pending'` (set further down) and
+      // row's `SyncStatus: 'pending'` (set above) and
       // `LastPageSyncDateUtc` uses the same `now` the binding write
-      // records. PageId / PageName / PageUrl are preserved — the
+      // recorded. PageId / PageName / PageUrl are preserved — the
       // page record still exists as a draft and is needed for a
       // future republish. Closes the Phase-05 Prompt-03 drift.
       PageSyncStatus: 'pending',
       LastPageSyncDateUtc: now,
     };
+    let articleUpdated = false;
     try {
       await repositories.articles.upsert(updatedArticle);
+      articleUpdated = true;
     } catch (err) {
       const message =
         err instanceof Error
@@ -1064,7 +1036,76 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         articleUpdated: false,
         bindingUpdated,
         pageUnpublished,
-        historyAppended,
+        historyAppended: false,
+      };
+    }
+
+    try {
+      await repositories.workflowHistory.append({
+        HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
+        ArticleId: article.ArticleId,
+        Title: `${previousState} → ${target}`,
+        NewState: target,
+        PreviousState: previousState,
+        ActionDateUtc: now,
+        ActorEmail: req.actorEmail,
+        ActionNote: req.note,
+      });
+      historyAppended = true;
+    } catch (err) {
+      // History append failed AFTER the master row was stamped.
+      // Compensate by reverting the master back to `previousState` so
+      // the lifecycle ends up fully rolled back rather than split.
+      const baseMessage =
+        err instanceof Error
+          ? `HB Article Workflow History append failed for ${target}: ${err.message}`
+          : `HB Article Workflow History append failed for ${target}.`;
+      let rollback: { attempted: boolean; succeeded: boolean; message: string } = {
+        attempted: false,
+        succeeded: false,
+        message: 'No rollback attempted — master was not stamped.',
+      };
+      try {
+        await repositories.articles.upsert(article);
+        rollback = {
+          attempted: true,
+          succeeded: true,
+          message: `Master article reverted to '${previousState}'.`,
+        };
+        articleUpdated = false;
+      } catch (rollbackErr) {
+        rollback = {
+          attempted: true,
+          succeeded: false,
+          message:
+            rollbackErr instanceof Error
+              ? `Master rollback to '${previousState}' failed: ${rollbackErr.message}`
+              : `Master rollback to '${previousState}' failed.`,
+        };
+      }
+      const message = rollback.attempted
+        ? `${baseMessage} (${rollback.message})`
+        : baseMessage;
+      await recordPublishingError({
+        articleId: article.ArticleId,
+        title: article.Title,
+        destination: article.Destination,
+        stage: 'historyAppend',
+        mode: 'create',
+        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
+        message,
+        nowIso: now,
+      });
+      return {
+        ok: false,
+        stage: 'historyAppend',
+        message,
+        previousState,
+        articleUpdated,
+        bindingUpdated,
+        pageUnpublished,
+        historyAppended: false,
+        rollback,
       };
     }
 
@@ -1283,6 +1324,19 @@ export type LifecycleOutcome =
       readonly bindingUpdated?: boolean;
       readonly pageUnpublished?: boolean;
       readonly historyAppended?: boolean;
+      /**
+       * Populated when a late-stage failure triggered compensating
+       * master-state rollback (e.g. history-append failure after the
+       * master article was already stamped). Makes it explicit whether
+       * the orchestrator attempted to undo prior work and whether the
+       * compensation succeeded, so callers never have to guess which
+       * side of a split-state failure they are looking at.
+       */
+      readonly rollback?: {
+        readonly attempted: boolean;
+        readonly succeeded: boolean;
+        readonly message: string;
+      };
     };
 
 export type ManualTransitionOutcome =
