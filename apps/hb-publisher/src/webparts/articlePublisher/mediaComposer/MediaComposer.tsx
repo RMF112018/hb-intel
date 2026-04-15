@@ -125,31 +125,6 @@ export function MediaComposer({
       secondaryAction={{ label: 'Cancel', onClick: onRequestClose }}
     >
       <div className={styles.body} aria-label="Image composer">
-        <label className={styles.field}>
-          <span className={styles.fieldLabel}>Image URL</span>
-          <span className={styles.fieldHelper}>
-            https:// only. Paste a link from the tenant image library or an
-            approved CDN.
-          </span>
-          <input
-            className={styles.input}
-            value={draft.imageUrl}
-            placeholder="https://…"
-            inputMode="url"
-            autoFocus
-            onChange={(e) => {
-              const nextUrl = e.target.value;
-              setDraft((d) => ({ ...d, imageUrl: nextUrl }));
-              setThumbState(nextUrl.trim().length === 0 ? 'idle' : 'loading');
-            }}
-          />
-          {trimmedUrl.length > 0 && !urlValid && (
-            <span className={styles.fieldError} role="alert">
-              Use an https:// URL. Other schemes are not allowed.
-            </span>
-          )}
-        </label>
-
         <div className={styles.preview} aria-label="Image preview">
           {previewUrl ? (
             <>
@@ -170,9 +145,39 @@ export function MediaComposer({
               )}
             </>
           ) : (
-            <span className={styles.previewPlaceholder}>Preview appears here</span>
+            <span className={styles.previewPlaceholder}>
+              Choose an image — paste an https:// URL below to see a preview
+              here.
+            </span>
           )}
         </div>
+
+        <label className={styles.field}>
+          <span className={styles.fieldLabel}>Source</span>
+          <span className={styles.fieldHelper}>
+            https:// only. Paste a link from the tenant image library or an
+            approved CDN. A tenant-safe file picker will land here in a later
+            wave.
+          </span>
+          <input
+            className={styles.input}
+            value={draft.imageUrl}
+            placeholder="https://…"
+            inputMode="url"
+            autoFocus
+            aria-label="Image source URL"
+            onChange={(e) => {
+              const nextUrl = e.target.value;
+              setDraft((d) => ({ ...d, imageUrl: nextUrl }));
+              setThumbState(nextUrl.trim().length === 0 ? 'idle' : 'loading');
+            }}
+          />
+          {trimmedUrl.length > 0 && !urlValid && (
+            <span className={styles.fieldError} role="alert">
+              Use an https:// URL. Other schemes are not allowed.
+            </span>
+          )}
+        </label>
 
         <fieldset className={styles.fieldset}>
           <legend className={styles.fieldLabel}>Used as</legend>

@@ -4,7 +4,12 @@ import {
   type HeroThemeVariant,
 } from '../../../data/publisherAdapter/index.js';
 import { heroThemeVariantLabel } from '../authorLabels.js';
-import { ChooserGroup, DisclosureSection, Field } from '../sharedChrome/index.js';
+import {
+  ChooserGroup,
+  DisclosureSection,
+  Field,
+  ImageAssetField,
+} from '../sharedChrome/index.js';
 import styles from '../article-publisher.module.css';
 import { update, type PanelProps } from './draftHelpers.js';
 
@@ -26,26 +31,23 @@ export function HeroPanel({ draft, onChange }: PanelProps) {
 
   return (
     <div className={styles.editorialForm}>
-      <Field label="Hero image URL">
-        <input
-          className={styles.input}
-          value={draft.HeroPrimaryImage}
-          placeholder="https://…"
-          onChange={(e) => onChange(update(draft, 'HeroPrimaryImage', e.target.value))}
-        />
-      </Field>
-      <Field
-        label="Alt text (for screen readers)"
-        helper="Describe what is visible and why it matters — not that it is an image. Skip if the hero is purely decorative."
-        counter={{ value: draft.HeroPrimaryImageAltText.length, soft: 125 }}
-      >
-        <textarea
-          className={styles.textarea}
-          value={draft.HeroPrimaryImageAltText}
-          placeholder="e.g. Crew raising the final steel beam at the West Palm Beach jobsite."
-          onChange={(e) => onChange(update(draft, 'HeroPrimaryImageAltText', e.target.value))}
-        />
-      </Field>
+      <ImageAssetField
+        role="hero"
+        label="Hero image"
+        helper="The lead visual readers see at the top of the article. Paste an https:// URL from the tenant image library or an approved CDN."
+        testId="hero-asset-field"
+        value={{
+          imageUrl: draft.HeroPrimaryImage,
+          altText: draft.HeroPrimaryImageAltText,
+        }}
+        onChange={(next) =>
+          onChange({
+            ...draft,
+            HeroPrimaryImage: next.imageUrl,
+            HeroPrimaryImageAltText: next.altText,
+          })
+        }
+      />
       <DisclosureSection
         label="Advanced hero options"
         summaryHint="Override hero headline, eyebrow, category, theme, or hero metadata."

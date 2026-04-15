@@ -27,9 +27,9 @@ function baseDraft(overrides: Partial<PublisherArticleRow> = {}): PublisherArtic
 }
 
 describe('HeroPanel progressive disclosure', () => {
-  it('keeps the hero image URL and alt text on the primary path', () => {
+  it('keeps the hero image picker and alt text on the primary path', () => {
     render(<HeroPanel draft={baseDraft()} onChange={vi.fn()} />);
-    expect(screen.getByLabelText(/Hero image URL/i)).toBeTruthy();
+    expect(screen.getByLabelText(/Hero image source URL/i)).toBeTruthy();
     expect(screen.getByLabelText(/Alt text/i)).toBeTruthy();
   });
 
@@ -73,7 +73,7 @@ describe('HeroPanel progressive disclosure', () => {
   it('edits to the hero image still flow through onChange on the primary path', () => {
     const onChange = vi.fn();
     render(<HeroPanel draft={baseDraft()} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText(/Hero image URL/i), {
+    fireEvent.change(screen.getByLabelText(/Hero image source URL/i), {
       target: { value: 'https://img.example/new.jpg' },
     });
     expect(onChange).toHaveBeenCalledWith(
