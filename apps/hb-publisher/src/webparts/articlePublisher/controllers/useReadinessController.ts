@@ -19,6 +19,13 @@ import {
   saveDisabledReason,
   type SaveHealth,
 } from './saveHealthModel.js';
+import {
+  deriveAuthoringHealth,
+  isAuthoringHealthy,
+  isGlobalAuthoringFailure,
+  type AuthoringHealth,
+  type TemplateRegistryState,
+} from './authoringHealthModel.js';
 
 export interface ReadinessControllerInputs {
   readonly articleDraft: PublisherArticleRow | undefined;
@@ -36,11 +43,27 @@ export interface ReadinessControllerInputs {
    * subsequent-save semantics until they opt in.
    */
   readonly isPersisted?: boolean;
+  /**
+   * Active-template registry state from `useDraftWorkspace`. Drives
+   * the authoring-health preflight that gates save / preview /
+   * publish / republish when the template environment is not usable.
+   * Defaults to a healthy (non-loading, non-empty) placeholder when
+   * omitted so existing callers / tests are not forced to rewire.
+   */
+  readonly templateRegistry?: TemplateRegistryState;
 }
 
 export function useReadinessController(inputs: ReadinessControllerInputs) {
   const { articleDraft, binding, preview, promotionPolicy, busy } = inputs;
   const isPersisted = inputs.isPersisted ?? true;
+  // When callers do not thread template-registry state, default to a
+  // "registry is fine" shape so tests and legacy callers keep working
+  // without forcing them to stub the preflight seam.
+  const templateRegistry: TemplateRegistryState = inputs.templateRegistry ?? {
+    loading: false,
+    rows: undefined,
+    error: undefined,
+  };
 
   const unsupportedDestinationMessage = articleDraft
     ? unsupportedDestinationNotice(articleDraft.Destination)
@@ -73,11 +96,26 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     ? workflowOutcomeLabel(articleDraft.WorkflowState)
     : undefined;
 
+  // Compute authoring-health early so publish / republish / save
+  // gating can all factor the preflight state consistently. Callers
+  // that do not pass `templateRegistry` opt out of preflight-based
+  // gating (authoringHealth stays `healthy` and acts as a no-op).
+  const authoringHealthEarly: AuthoringHealth = inputs.templateRegistry
+    ? deriveAuthoringHealth({ registry: templateRegistry, articleDraft })
+    : { kind: 'healthy' };
+  const preflightBlocksWrites =
+    authoringHealthEarly.kind === 'emptyRegistry' ||
+    authoringHealthEarly.kind === 'registryReadFailure' ||
+    authoringHealthEarly.kind === 'loading';
+  const preflightBlocksPublish =
+    preflightBlocksWrites || authoringHealthEarly.kind === 'draftNoTemplateMatch';
+
   const publishEnabled =
     !!articleDraft &&
     !busy &&
     !unsupportedDestinationLoaded &&
     !unsupportedContentTypeLoaded &&
+    !preflightBlocksPublish &&
     articleDraft.WorkflowState === 'approved' &&
     !publishBlockedByValidation;
   // Republish is the in-place update path for content that is already
@@ -91,6 +129,7 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     !busy &&
     !unsupportedDestinationLoaded &&
     !unsupportedContentTypeLoaded &&
+    !preflightBlocksPublish &&
     !!binding &&
     articleDraft.WorkflowState === 'published' &&
     !publishBlockedByValidation;
@@ -106,8 +145,23 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     unsupportedContentTypeMessage,
     isPersisted,
   });
-  const saveEnabled = isSaveReady(saveHealth);
-  const saveBlockedReason = saveDisabledReason(saveHealth);
+  // Save is additionally blocked by a global preflight failure —
+  // attempting the master upsert cannot succeed when no active
+  // template can resolve at save time. Draft-specific no-match is
+  // left to `resolveTemplateKeySystemManaged` inside `handleSave`,
+  // which already refuses to commit and surfaces a targeted message.
+  const saveEnabled = isSaveReady(saveHealth) && !preflightBlocksWrites;
+  const saveBlockedReason = preflightBlocksWrites
+    ? (authoringHealthEarly.kind === 'registryReadFailure'
+        ? `Authoring paused — ${authoringHealthEarly.message}`
+        : authoringHealthEarly.kind === 'emptyRegistry'
+          ? 'Authoring paused — no active article templates are available.'
+          : 'Checking the authoring environment…')
+    : saveDisabledReason(saveHealth);
+
+  const authoringHealth: AuthoringHealth = authoringHealthEarly;
+  const authoringHealthy = isAuthoringHealthy(authoringHealth);
+  const authoringGlobalFailure = isGlobalAuthoringFailure(authoringHealth);
 
   return {
     readinessSummary,
@@ -125,6 +179,9 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     saveEnabled,
     saveHealth,
     saveBlockedReason,
+    authoringHealth,
+    authoringHealthy,
+    authoringGlobalFailure,
   };
 }
 

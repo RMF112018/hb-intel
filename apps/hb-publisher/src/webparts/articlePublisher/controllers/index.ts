@@ -38,3 +38,15 @@ export type {
   SaveHealth,
   DeriveSaveHealthInputs,
 } from './saveHealthModel.js';
+export {
+  deriveAuthoringHealth,
+  isAuthoringHealthy,
+  isGlobalAuthoringFailure,
+  authoringHealthHeadline,
+  authoringHealthActionHint,
+} from './authoringHealthModel.js';
+export type {
+  AuthoringHealth,
+  TemplateRegistryState,
+  DeriveAuthoringHealthInputs,
+} from './authoringHealthModel.js';

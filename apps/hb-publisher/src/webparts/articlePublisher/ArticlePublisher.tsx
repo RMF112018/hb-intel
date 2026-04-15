@@ -49,6 +49,8 @@ import {
   TeamPresentationPanel,
 } from './authoringPanels/index.js';
 import {
+  authoringHealthActionHint,
+  authoringHealthHeadline,
   useDraftLifecycle,
   usePreviewController,
   useReadinessController,
@@ -239,6 +241,7 @@ export function ArticlePublisher({
     promotionPolicy,
     busy,
     isPersisted,
+    templateRegistry: workspace.templateRegistry,
   });
   const {
     readinessSummary,
@@ -256,6 +259,7 @@ export function ArticlePublisher({
     saveEnabled,
     saveHealth,
     saveBlockedReason,
+    authoringHealth,
   } = readiness;
 
   const validNextStates = articleDraft ? validTransitionsFrom(articleDraft.WorkflowState) : [];
@@ -277,6 +281,29 @@ export function ArticlePublisher({
 
       {/* ── Center authoring canvas ─────────────────────────── */}
       <main className={styles.canvas} aria-label="Article authoring canvas">
+        {authoringHealth.kind !== 'healthy' &&
+          authoringHealth.kind !== 'loading' && (
+            <section
+              className={styles.canvasNoticeBlocking}
+              role="status"
+              aria-live="polite"
+              aria-label="Authoring environment health"
+            >
+              <strong>{authoringHealthHeadline(authoringHealth)}</strong>
+              {authoringHealth.kind === 'registryReadFailure' && (
+                <> {' '}<span>({authoringHealth.message})</span></>
+              )}
+              {authoringHealth.kind === 'draftNoTemplateMatch' && (
+                <> {' '}<span>({authoringHealth.message})</span></>
+              )}
+              {authoringHealthActionHint(authoringHealth) && (
+                <>
+                  {' '}
+                  <span>{authoringHealthActionHint(authoringHealth)}</span>
+                </>
+              )}
+            </section>
+          )}
         {!articleDraft ? (
           <div className={styles.canvasEmpty}>
             <HbcEmptyState

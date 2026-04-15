@@ -14,8 +14,10 @@ import {
   type PublisherArticleRow,
   type PublisherPromotionRuleRow,
   type PublisherRepositories,
+  type PublisherTemplateRegistryRow,
   type WorkflowState,
 } from '../../../data/publisherAdapter/index.js';
+import type { TemplateRegistryState } from '../controllers/authoringHealthModel.js';
 
 /**
  * Order the left draft rail groups surfaces in. The editorial rail
@@ -78,6 +80,13 @@ export interface DraftWorkspaceHandle {
   readonly collapsedGroups: ReadonlySet<WorkflowState>;
   readonly toggleGroupCollapsed: (state: WorkflowState) => void;
   readonly promotionRules: readonly PublisherPromotionRuleRow[];
+  /**
+   * Active-template registry load state. Drives the authoring-health
+   * preflight model so the shell can distinguish "registry still
+   * loading" from "registry returned zero rows" from "registry read
+   * threw" without wiring those signals ad-hoc through the shell.
+   */
+  readonly templateRegistry: TemplateRegistryState;
   readonly selectedArticleId: string | undefined;
   readonly setSelectedArticleId: React.Dispatch<React.SetStateAction<string | undefined>>;
   readonly reloadGroups: () => Promise<void>;
@@ -93,6 +102,14 @@ export function useDraftWorkspace(
     () => new Set(COLLAPSED_GROUPS_BY_DEFAULT),
   );
   const [promotionRules, setPromotionRules] = React.useState<readonly PublisherPromotionRuleRow[]>([]);
+  const [templateRegistryRows, setTemplateRegistryRows] = React.useState<
+    readonly PublisherTemplateRegistryRow[] | undefined
+  >(undefined);
+  const [templateRegistryLoading, setTemplateRegistryLoading] =
+    React.useState<boolean>(true);
+  const [templateRegistryError, setTemplateRegistryError] = React.useState<
+    string | undefined
+  >(undefined);
   const [selectedArticleId, setSelectedArticleId] = React.useState<string | undefined>();
 
   const reloadGroups = React.useCallback(async () => {
@@ -137,6 +154,38 @@ export function useDraftWorkspace(
     })();
   }, [repositories]);
 
+  // Preflight the active-template registry once per repositories
+  // identity. The shell's authoring-health model reads this state so
+  // operators see registry-unusable conditions (empty / read failure)
+  // before attempting a save or publish, instead of discovering them
+  // reactively through a later action-specific error.
+  React.useEffect(() => {
+    let cancelled = false;
+    setTemplateRegistryLoading(true);
+    setTemplateRegistryError(undefined);
+    void (async () => {
+      try {
+        const rows = await repositories.templateRegistry.listActive();
+        if (cancelled) return;
+        setTemplateRegistryRows(rows);
+        setTemplateRegistryError(undefined);
+      } catch (err) {
+        if (cancelled) return;
+        setTemplateRegistryRows(undefined);
+        setTemplateRegistryError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load the article template registry.',
+        );
+      } finally {
+        if (!cancelled) setTemplateRegistryLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [repositories]);
+
   const toggleGroupCollapsed = React.useCallback((state: WorkflowState) => {
     setCollapsedGroups((prev) => {
       const next = new Set(prev);
@@ -156,6 +205,11 @@ export function useDraftWorkspace(
     collapsedGroups,
     toggleGroupCollapsed,
     promotionRules,
+    templateRegistry: {
+      loading: templateRegistryLoading,
+      rows: templateRegistryRows,
+      error: templateRegistryError,
+    },
     selectedArticleId,
     setSelectedArticleId,
     reloadGroups,

@@ -152,6 +152,134 @@ describe('useReadinessController — save-health first-persistence gate', () => 
   });
 });
 
+describe('useReadinessController — authoring-health preflight gating', () => {
+  const healthyRegistry = {
+    loading: false,
+    rows: [
+      {
+        TemplateKey: 'tmpl-ps-monthly-v1',
+        TemplateName: 'Project Spotlight Monthly v1',
+        IsActive: true,
+        TemplatePriority: 100,
+        VersionLabel: '1.0.0',
+        ContentTypes: ['monthlySpotlight'],
+        Destination: 'projectSpotlight',
+        PageShellTemplateKey: 'hbSignaturePageShell',
+        HeroProfileKey: 'hbSignatureHero',
+        BodyProfileKey: 'hbSignatureBody',
+        ShowHero: true,
+        ShowBody: true,
+        ShowTeamViewer: true,
+        ShowGallery: true,
+        ShowSecondaryImage: false,
+        RequiredFieldSetKey: 'req-ps-inprogress-monthly-v1',
+      },
+    ],
+    error: undefined,
+  } as unknown as {
+    loading: boolean;
+    rows: readonly never[];
+    error: string | undefined;
+  };
+
+  it('blocks publish/republish/save when the registry is empty', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'approved' }),
+          isPersisted: true,
+          templateRegistry: { loading: false, rows: [], error: undefined },
+        }),
+      ),
+    );
+    expect(result.current.authoringHealth.kind).toBe('emptyRegistry');
+    expect(result.current.publishEnabled).toBe(false);
+    expect(result.current.saveEnabled).toBe(false);
+    expect(result.current.saveBlockedReason).toMatch(/no active.*template/i);
+  });
+
+  it('blocks writes when the registry read failed', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'approved' }),
+          isPersisted: true,
+          templateRegistry: {
+            loading: false,
+            rows: undefined,
+            error: 'network timeout',
+          },
+        }),
+      ),
+    );
+    expect(result.current.authoringHealth.kind).toBe('registryReadFailure');
+    expect(result.current.publishEnabled).toBe(false);
+    expect(result.current.saveEnabled).toBe(false);
+    expect(result.current.saveBlockedReason).toMatch(/network timeout/);
+  });
+
+  it('reports draftNoTemplateMatch without classifying it as a global failure', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({
+            // Supported destination (no destination hard-block) but the
+            // registry's lone row only declares `monthlySpotlight`, so
+            // a `projectUpdate` draft fails resolution on content-type
+            // applicability rather than destination or milestone legacy.
+            ArticleContentType: 'projectUpdate',
+            WorkflowState: 'approved',
+          } as Partial<PublisherArticleRow>),
+          isPersisted: true,
+          templateRegistry: healthyRegistry as unknown as typeof healthyRegistry,
+        }),
+      ),
+    );
+    expect(result.current.authoringHealth.kind).toBe('draftNoTemplateMatch');
+    expect(result.current.authoringGlobalFailure).toBe(false);
+    // Publish is blocked by the resolution gap …
+    expect(result.current.publishEnabled).toBe(false);
+    // … but save is not blocked by the preflight (the save-time
+    // resolver owns that refusal, with its own targeted copy).
+    expect(result.current.saveEnabled).toBe(true);
+  });
+
+  it('clears the preflight block once the registry becomes healthy', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'approved' }),
+          isPersisted: true,
+          templateRegistry: healthyRegistry as unknown as typeof healthyRegistry,
+        }),
+      ),
+    );
+    expect(result.current.authoringHealth.kind).toBe('healthy');
+    expect(result.current.saveEnabled).toBe(true);
+    expect(result.current.publishEnabled).toBe(true);
+  });
+
+  it('treats the loading state as a soft write-block without scary copy', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'approved' }),
+          isPersisted: true,
+          templateRegistry: {
+            loading: true,
+            rows: undefined,
+            error: undefined,
+          },
+        }),
+      ),
+    );
+    expect(result.current.authoringHealth.kind).toBe('loading');
+    expect(result.current.saveEnabled).toBe(false);
+    expect(result.current.publishEnabled).toBe(false);
+    expect(result.current.saveBlockedReason).toMatch(/Checking/);
+  });
+});
+
 describe('useReadinessController — milestone legacy hard-block', () => {
   it('exposes unsupportedContentTypeMessage and disables Publish on milestoneSpotlight drafts', () => {
     const { result } = renderHook(() =>
