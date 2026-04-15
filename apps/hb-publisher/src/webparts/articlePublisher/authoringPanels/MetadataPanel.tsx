@@ -21,7 +21,7 @@ import {
   spotlightTypeLabel,
 } from '../authorLabels.js';
 import { defaultTeamHeading } from '../metadataDefaults.js';
-import { ChooserGroup, Field } from '../sharedChrome/index.js';
+import { ChooserGroup, DisclosureSection, Field } from '../sharedChrome/index.js';
 import styles from '../article-publisher.module.css';
 import {
   contentTypeOptionsForDraft,
@@ -97,8 +97,51 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
   // TemplateKey is system-resolved on save via
   // `resolveTemplateKeySystemManaged`; TargetSiteUrl is derived from
   // Destination at publish time.
+  //
+  // Primary path carries the four first-pass decisions: bind the
+  // project, name the article, write the summary, pick the article
+  // type. Spotlight type, project stage, and subject are editorial
+  // metadata — useful, but not default-path decisions — so they live
+  // behind a disclosure that opens automatically when any of them are
+  // already populated.
+  const hasEditorialMetadata =
+    !!draft.SpotlightType || !!draft.ProjectStage || !!draft.ArticleSubject;
+  const initialMetadataOpen = React.useRef(hasEditorialMetadata).current;
+
   return (
     <div className={styles.editorialForm}>
+      <Field label="Project">
+        {searchProjects ? (
+          <ProjectPicker
+            value={projectValue}
+            onChange={handleProjectChange}
+            searchProjects={searchProjects}
+          />
+        ) : projectValue ? (
+          // The picker is unavailable in this runtime context, but a
+          // prior selection is on the row — render it read-only so
+          // the author can still see what is bound. Manual ProjectId /
+          // ProjectName text entry is intentionally not offered:
+          // authoritative project identity belongs to the picker.
+          <div className={styles.projectPickerChip} data-testid="project-picker-readonly">
+            <div className={styles.projectPickerChipMain}>
+              <span className={styles.projectPickerChipName}>{projectValue.projectName}</span>
+              <span className={styles.projectPickerChipMeta}>
+                {projectValue.projectNumber ? `${projectValue.projectNumber} · ` : ''}
+                ID {projectValue.projectId}
+                {projectValue.projectLocation ? ` · ${projectValue.projectLocation}` : ''}
+              </span>
+            </div>
+            <span className={styles.projectPickerHint}>Lookup unavailable</span>
+          </div>
+        ) : (
+          <p className={styles.editorialNotice} role="status">
+            Project lookup is unavailable in this context. Reload the Publisher in its hosted
+            page so the HBCentral Projects list can be searched.
+          </p>
+        )}
+      </Field>
+
       <Field label="Headline">
         <input
           className={styles.input}
@@ -140,71 +183,46 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
         <span className={styles.editorialReadoutValue}>{destinationReadout}</span>
       </div>
 
-      <ChooserGroup
-        label="Spotlight type"
-        value={draft.SpotlightType}
-        options={SPOTLIGHT_TYPE_VALUES}
-        getLabel={spotlightTypeLabel}
-        onChange={(next) =>
-          onChange(update(draft, 'SpotlightType', next as SpotlightType | undefined))
-        }
-        allowClear
-        clearLabel="No spotlight"
-      />
-      <ChooserGroup
-        label="Project stage"
-        value={draft.ProjectStage}
-        options={PROJECT_STAGE_VALUES}
-        getLabel={projectStageLabel}
-        onChange={(next) =>
-          onChange(update(draft, 'ProjectStage', next as ProjectStage | undefined))
-        }
-        allowClear
-        clearLabel="Unspecified"
-      />
-      <ChooserGroup
-        label="Subject"
-        value={draft.ArticleSubject}
-        options={ARTICLE_SUBJECT_VALUES}
-        getLabel={articleSubjectLabel}
-        onChange={(next) =>
-          onChange(update(draft, 'ArticleSubject', next as ArticleSubject | undefined))
-        }
-        allowClear
-        clearLabel="Unspecified"
-      />
-
-      <Field label="Project">
-        {searchProjects ? (
-          <ProjectPicker
-            value={projectValue}
-            onChange={handleProjectChange}
-            searchProjects={searchProjects}
-          />
-        ) : projectValue ? (
-          // The picker is unavailable in this runtime context, but a
-          // prior selection is on the row — render it read-only so
-          // the author can still see what is bound. Manual ProjectId /
-          // ProjectName text entry is intentionally not offered:
-          // authoritative project identity belongs to the picker.
-          <div className={styles.projectPickerChip} data-testid="project-picker-readonly">
-            <div className={styles.projectPickerChipMain}>
-              <span className={styles.projectPickerChipName}>{projectValue.projectName}</span>
-              <span className={styles.projectPickerChipMeta}>
-                {projectValue.projectNumber ? `${projectValue.projectNumber} · ` : ''}
-                ID {projectValue.projectId}
-                {projectValue.projectLocation ? ` · ${projectValue.projectLocation}` : ''}
-              </span>
-            </div>
-            <span className={styles.projectPickerHint}>Lookup unavailable</span>
-          </div>
-        ) : (
-          <p className={styles.editorialNotice} role="status">
-            Project lookup is unavailable in this context. Reload the Publisher in its hosted
-            page so the HBCentral Projects list can be searched.
-          </p>
-        )}
-      </Field>
+      <DisclosureSection
+        label="Editorial metadata"
+        summaryHint="Spotlight type, project stage, and subject — shown in listings and filters. Optional."
+        defaultOpen={initialMetadataOpen}
+        testId="metadata-advanced-section"
+      >
+        <ChooserGroup
+          label="Spotlight type"
+          value={draft.SpotlightType}
+          options={SPOTLIGHT_TYPE_VALUES}
+          getLabel={spotlightTypeLabel}
+          onChange={(next) =>
+            onChange(update(draft, 'SpotlightType', next as SpotlightType | undefined))
+          }
+          allowClear
+          clearLabel="No spotlight"
+        />
+        <ChooserGroup
+          label="Project stage"
+          value={draft.ProjectStage}
+          options={PROJECT_STAGE_VALUES}
+          getLabel={projectStageLabel}
+          onChange={(next) =>
+            onChange(update(draft, 'ProjectStage', next as ProjectStage | undefined))
+          }
+          allowClear
+          clearLabel="Unspecified"
+        />
+        <ChooserGroup
+          label="Subject"
+          value={draft.ArticleSubject}
+          options={ARTICLE_SUBJECT_VALUES}
+          getLabel={articleSubjectLabel}
+          onChange={(next) =>
+            onChange(update(draft, 'ArticleSubject', next as ArticleSubject | undefined))
+          }
+          allowClear
+          clearLabel="Unspecified"
+        />
+      </DisclosureSection>
     </div>
   );
 }
