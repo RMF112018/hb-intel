@@ -51,12 +51,27 @@
   --hb-status-featured-bg: #FFF3D6;
   --hb-status-featured-border: #F4D480;
 
-  /* Spacing (HBC_SPACE_*). Publisher uses XS through XL. */
+  /* Spacing (HBC_SPACE_*). Publisher uses XS through XXL. */
   --hb-space-xs: 4px;
   --hb-space-sm: 8px;
   --hb-space-md: 16px;
   --hb-space-lg: 24px;
   --hb-space-xl: 32px;
+  --hb-space-xxl: 48px;                    /* canvas outer rhythm */
+
+  /* Surface-family aliases — authored callsites read these as intent
+   * rather than numbered palette entries. Shell and rails consume
+   * these; disclosure/optional tiles consume --hb-surface-tile. */
+  --hb-surface-plane: var(--hb-surface-0);
+  --hb-surface-rail: transparent;
+  --hb-surface-tile: var(--hb-surface-2);
+
+  /* Focus ring — single source of truth. Matches --hb-color-brand-action. */
+  --hb-color-focus-ring: #337AAB;
+
+  /* Mono stack — used by operator details + URL disclosure rows. */
+  --hb-font-mono: ui-monospace, SFMono-Regular, Menlo, "Segoe UI Mono",
+    Consolas, monospace;
 
   /* Radii (HBC_RADIUS_*). */
   --hb-radius-sm: 2px;

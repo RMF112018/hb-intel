@@ -82,7 +82,7 @@
 }
 
 .detailsSummary:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
   border-radius: 2px;
 }

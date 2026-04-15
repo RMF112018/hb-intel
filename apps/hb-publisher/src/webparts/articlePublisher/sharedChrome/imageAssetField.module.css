@@ -82,7 +82,7 @@
 }
 
 .urlInputPrimary:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -177,7 +177,7 @@
 
 .actionButton:focus-visible,
 .actionButtonDanger:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -253,7 +253,7 @@
 
 .metaInput:focus-visible,
 .metaTextarea:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -297,7 +297,7 @@
 }
 
 .urlDisclosureSummary:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -316,6 +316,6 @@
 }
 
 .urlInput:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }

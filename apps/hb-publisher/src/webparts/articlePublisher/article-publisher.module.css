@@ -385,16 +385,6 @@
   align-self: flex-start;
 }
 
-/* Legacy section-index class retained for backwards compatibility
- * with imports; unused in the Wave-01 redesign, hidden defensively. */
-.sectionIndex {
-  display: none;
-}
-
-.sectionIndexLink {
-  display: none;
-}
-
 .section {
   display: flex;
   flex-direction: column;
@@ -409,7 +399,7 @@
 }
 
 .section:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 4px;
   border-radius: var(--hb-radius-md, 4px);
 }
@@ -529,19 +519,27 @@
   cursor: pointer;
 }
 
+/* Accent-rail tile: disclosed/optional content reads as an editorial
+ * sidebar rather than a bordered admin card. The left rail is the
+ * only persistent chrome; it intensifies to editorial blue on [open]
+ * so the author can see at a glance which tiles they've expanded. */
 .disclosureSection {
-  border: 1px solid var(--hb-border-subtle, #e3e6ed);
-  border-radius: var(--hb-radius-lg, 6px);
-  background: var(--hb-surface-1, #fff);
+  border: none;
+  border-left: 2px solid var(--hb-border-strong);
+  border-radius: 0 var(--hb-radius-md) var(--hb-radius-md) 0;
+  background: var(--hb-surface-tile);
+  transition: border-color var(--hb-transition-fast),
+    background var(--hb-transition-fast);
 }
 
 .disclosureSection[open] {
-  border-color: var(--hb-border-strong, #cbcbd0);
+  border-left-color: var(--hb-color-presentation-blue);
+  background: var(--hb-surface-1);
 }
 
 .disclosureSummary {
   list-style: none;
-  padding: 10px 12px;
+  padding: 10px 14px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -558,7 +556,7 @@
 }
 
 .disclosureSummary:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -590,7 +588,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 0 12px 12px 12px;
+  padding: 0 14px 14px 14px;
 }
 
 /* ── Chooser groups ───────────────────────────────────────── */
@@ -629,7 +627,7 @@
 }
 
 .chooserChip:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -1091,7 +1089,7 @@
 }
 
 .projectPickerChipDetailsSummary:focus-visible {
-  outline: 2px solid var(--hb-color-focus-ring, #337aab);
+  outline: 2px solid var(--hb-color-focus-ring);
   outline-offset: 2px;
   border-radius: var(--hb-radius-sm, 2px);
 }

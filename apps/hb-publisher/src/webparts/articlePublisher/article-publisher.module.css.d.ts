@@ -27,8 +27,6 @@ declare const styles: {
   readonly canvasNotice: string;
   readonly canvasNoticeBlocking: string;
   readonly outcomeChip: string;
-  readonly sectionIndex: string;
-  readonly sectionIndexLink: string;
   readonly section: string;
   readonly sectionGovernance: string;
   readonly sectionHeader: string;
