@@ -4,6 +4,7 @@ declare const styles: {
   readonly toolbarGroup: string;
   readonly toolbarBtn: string;
   readonly toolbarBtnActive: string;
+  readonly toolbarIcon: string;
   readonly editorContent: string;
   readonly editorContentEmpty: string;
   readonly linkPromptRow: string;

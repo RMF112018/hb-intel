@@ -4,6 +4,8 @@ declare const styles: {
   readonly chip: string;
   readonly chipMain: string;
   readonly avatar: string;
+  readonly avatarPhoto: string;
+  readonly avatarPhotoImg: string;
   readonly chipBody: string;
   readonly chipName: string;
   readonly featuredBadge: string;

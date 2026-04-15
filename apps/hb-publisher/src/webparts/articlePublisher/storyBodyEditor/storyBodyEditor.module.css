@@ -44,38 +44,66 @@
 .toolbarBtn {
   font: inherit;
   font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0;
+  border-radius: var(--hb-radius-md, 4px);
   border: 1px solid transparent;
   background: transparent;
-  color: var(--hb-text-primary, #1f1f1f);
+  color: var(--hb-text-secondary, #4a4a4f);
   cursor: pointer;
-  min-width: 28px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  transition:
+    background var(--hb-transition-fast, 150ms ease),
+    color var(--hb-transition-fast, 150ms ease),
+    border-color var(--hb-transition-fast, 150ms ease),
+    box-shadow var(--hb-transition-fast, 150ms ease);
 }
 
-.toolbarBtn:hover {
+.toolbarBtn:hover:not(:disabled) {
   background: var(--hb-border-faint, #f0f0f3);
+  color: var(--hb-text-primary, #1f1f1f);
+}
+
+.toolbarBtn:active:not(:disabled) {
+  background: var(--hb-surface-tint-selected, #f0f6fc);
+  color: var(--hb-color-brand-action-pressed, #004b87);
 }
 
 .toolbarBtn:focus-visible {
   outline: 2px solid var(--hb-color-brand-action, #337aab);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .toolbarBtnActive {
   background: var(--hb-color-brand-action, #337aab);
-  color: var(--hb-surface-1, #fff);
+  color: var(--hb-text-on-brand, #fff);
   border-color: var(--hb-color-brand-action, #337aab);
+  box-shadow: var(--hb-elevation-1, 0 1px 2px rgba(16, 24, 40, 0.08));
 }
 
-.toolbarBtnActive:hover {
+.toolbarBtnActive:hover:not(:disabled) {
   background: var(--hb-color-brand-action-hover, #1a6399);
+  color: var(--hb-text-on-brand, #fff);
 }
 
 .toolbarBtn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
+}
+
+.toolbarIcon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+
+.toolbarIcon > svg {
+  width: 100%;
+  height: 100%;
 }
 
 .editorContent {

@@ -12,6 +12,12 @@
 
 import * as React from 'react';
 import { HbcEmptyState } from '@hbc/ui-kit/homepage';
+import {
+  ChevronBack,
+  ChevronForward,
+  Star,
+  StarFilled,
+} from '@hbc/ui-kit';
 import type { PublisherMediaRow } from '../../../data/publisherAdapter/index.js';
 import { MediaComposer } from './MediaComposer.js';
 import {
@@ -217,23 +223,27 @@ export function GalleryPanel({
                     title={featured ? 'Unfeature' : 'Feature in gallery'}
                     onClick={() => toggleFeatured(r.MediaId)}
                   >
-                    <span aria-hidden="true">★</span>
+                    {featured ? <StarFilled size="sm" /> : <Star size="sm" />}
                   </PublisherButton>
                   <PublisherButton
+                    iconOnly
                     size="sm"
                     aria-label={`Move ${label} earlier`}
+                    title="Move earlier (Alt+Left)"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
                   >
-                    ←
+                    <ChevronBack size="sm" />
                   </PublisherButton>
                   <PublisherButton
+                    iconOnly
                     size="sm"
                     aria-label={`Move ${label} later`}
+                    title="Move later (Alt+Right)"
                     onClick={() => move(i, 1)}
                     disabled={i === rows.length - 1}
                   >
-                    →
+                    <ChevronForward size="sm" />
                   </PublisherButton>
                   <PublisherButton
                     size="sm"

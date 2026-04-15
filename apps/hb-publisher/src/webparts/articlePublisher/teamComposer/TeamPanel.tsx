@@ -12,6 +12,12 @@
 
 import * as React from 'react';
 import { HbcEmptyState } from '@hbc/ui-kit/homepage';
+import {
+  ChevronDown,
+  ChevronUp,
+  Star,
+  StarFilled,
+} from '@hbc/ui-kit';
 import type { PeopleSearchFn, PersonPhotoFn } from '@hbc/ui-kit';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 import { TeamMemberComposer } from './TeamMemberComposer.js';
@@ -19,8 +25,8 @@ import {
   applyFeaturedInvariant,
   moveRow,
   restampSortOrder,
-  teamMemberInitials,
 } from './teamInvariants.js';
+import { TeammateAvatar } from './TeammateAvatar.js';
 import { EditorialChip, PublisherButton } from '../sharedChrome/index.js';
 import styles from './teamPanel.module.css';
 
@@ -122,9 +128,7 @@ export function TeamPanel({
             return (
               <li key={r.TeamMemberId} className={styles.chip}>
                 <div className={styles.chipMain}>
-                  <span className={styles.avatar} aria-hidden="true">
-                    {teamMemberInitials(r)}
-                  </span>
+                  <TeammateAvatar row={r} fetchPersonPhoto={fetchPersonPhoto} />
                   <button
                     type="button"
                     className={styles.chipBody}
@@ -161,25 +165,29 @@ export function TeamPanel({
                     title={featured ? 'Unfeature' : 'Feature teammate'}
                     onClick={() => toggleFeatured(r.TeamMemberId)}
                   >
-                    <span aria-hidden="true">★</span>
+                    {featured ? <StarFilled size="sm" /> : <Star size="sm" />}
                   </PublisherButton>
                 </div>
                 <div className={styles.chipActions}>
                   <PublisherButton
+                    iconOnly
                     size="sm"
                     aria-label={`Move ${displayName} up`}
+                    title="Move up (Alt+Up)"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
                   >
-                    Up
+                    <ChevronUp size="sm" />
                   </PublisherButton>
                   <PublisherButton
+                    iconOnly
                     size="sm"
                     aria-label={`Move ${displayName} down`}
+                    title="Move down (Alt+Down)"
                     onClick={() => move(i, 1)}
                     disabled={i === rows.length - 1}
                   >
-                    Down
+                    <ChevronDown size="sm" />
                   </PublisherButton>
                   <PublisherButton size="sm" onClick={() => openEdit(r.TeamMemberId)}>
                     Edit
