@@ -143,6 +143,12 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
   );
 
   const showDropdown = open && !disabled && query.trim().length > 0;
+  const LISTBOX_ID = 'project-picker-listbox';
+  const optionId = (index: number) => `${LISTBOX_ID}-option-${index}`;
+  const activeOptionId =
+    showDropdown && status === 'ready' && results.length > 0 && activeIndex < results.length
+      ? optionId(activeIndex)
+      : undefined;
 
   return (
     <div className={styles.projectPicker} ref={containerRef}>
@@ -182,33 +188,39 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
             }}
             onFocus={() => setOpen(true)}
             onKeyDown={handleKeyDown}
+            role="combobox"
             aria-autocomplete="list"
+            aria-haspopup="listbox"
             aria-expanded={showDropdown}
-            aria-controls="project-picker-listbox"
+            aria-controls={LISTBOX_ID}
+            aria-activedescendant={activeOptionId}
           />
           {showDropdown && (
             <div
-              id="project-picker-listbox"
+              id={LISTBOX_ID}
               role="listbox"
+              aria-label="Project search results"
               className={styles.projectPickerDropdown}
             >
               {status === 'loading' && (
-                <div className={styles.projectPickerHint}>Searching…</div>
+                <div className={styles.projectPickerHint} role="status" aria-live="polite">
+                  Searching…
+                </div>
               )}
               {status === 'error' && (
-                <div className={styles.projectPickerError}>
+                <div className={styles.projectPickerError} role="alert">
                   {error ?? 'Project search failed'}
                 </div>
               )}
               {status === 'ready' && results.length === 0 && (
-                <div className={styles.projectPickerHint}>
+                <div className={styles.projectPickerHint} role="status" aria-live="polite">
                   No projects match “{query.trim()}”.
                 </div>
               )}
               {results.map((entry, index) => (
-                <button
+                <div
                   key={entry.projectId}
-                  type="button"
+                  id={optionId(index)}
                   role="option"
                   aria-selected={index === activeIndex}
                   className={
@@ -217,6 +229,10 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
                       : styles.projectPickerOption
                   }
                   onMouseEnter={() => setActiveIndex(index)}
+                  onMouseDown={(e) => {
+                    // Prevent input blur before click fires selection.
+                    e.preventDefault();
+                  }}
                   onClick={() => handleSelect(entry)}
                 >
                   <span className={styles.projectPickerOptionName}>
@@ -227,7 +243,7 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
                     ID {entry.projectId}
                     {entry.projectLocation ? ` · ${entry.projectLocation}` : ''}
                   </span>
-                </button>
+                </div>
               ))}
             </div>
           )}
