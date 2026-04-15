@@ -69,6 +69,7 @@ declare const styles: {
   readonly projectPickerDropdown: string;
   readonly projectPickerHint: string;
   readonly projectPickerError: string;
+  readonly projectPickerErrorDetail: string;
   readonly projectPickerOption: string;
   readonly projectPickerOptionActive: string;
   readonly projectPickerOptionName: string;

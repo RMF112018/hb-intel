@@ -209,12 +209,15 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
               )}
               {status === 'error' && (
                 <div className={styles.projectPickerError} role="alert">
-                  {error ?? 'Project search failed'}
+                  Project lookup is temporarily unavailable. Check your connection
+                  to HBCentral and try again.
+                  {error ? <span className={styles.projectPickerErrorDetail}> ({error})</span> : null}
                 </div>
               )}
               {status === 'ready' && results.length === 0 && (
                 <div className={styles.projectPickerHint} role="status" aria-live="polite">
-                  No projects match “{query.trim()}”.
+                  No projects match “{query.trim()}”. Try a project number or a
+                  partial name.
                 </div>
               )}
               {results.map((entry, index) => (

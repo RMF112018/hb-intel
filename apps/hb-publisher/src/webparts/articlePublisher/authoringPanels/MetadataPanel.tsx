@@ -39,12 +39,21 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
   const contentTypeOptions = contentTypeOptionsForDraft(draft.ArticleContentType);
   const legacyMilestoneMessage = milestoneLegacyNotice(draft.ArticleContentType);
   const destinationReadout = destinationLabel(draft.Destination);
+  // Session cache for the richer project-identity fields that the
+  // lookup returns but the article row does not persist today (notably
+  // ProjectNumber). Keyed by ProjectId so the chip display stays in
+  // sync with the currently-bound project.
+  const [lookupCache, setLookupCache] = React.useState<
+    Record<string, { readonly projectNumber?: string }>
+  >({});
+  const cachedForDraft = draft.ProjectId ? lookupCache[draft.ProjectId] : undefined;
   const projectValue: ProjectPickerValue | null =
     draft.ProjectId && draft.ProjectName
       ? {
           projectId: draft.ProjectId,
           projectName: draft.ProjectName,
           projectLocation: draft.ProjectLocation,
+          projectNumber: cachedForDraft?.projectNumber,
         }
       : null;
 
@@ -59,6 +68,10 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
         });
         return;
       }
+      setLookupCache((prev) => ({
+        ...prev,
+        [entry.projectId]: { projectNumber: entry.projectNumber || undefined },
+      }));
       // Opportunistically fill the team heading default the moment a
       // project is picked, so the author sees the resolved heading
       // immediately. Only fills when the heading is currently blank
@@ -178,6 +191,7 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
             <div className={styles.projectPickerChipMain}>
               <span className={styles.projectPickerChipName}>{projectValue.projectName}</span>
               <span className={styles.projectPickerChipMeta}>
+                {projectValue.projectNumber ? `${projectValue.projectNumber} · ` : ''}
                 ID {projectValue.projectId}
                 {projectValue.projectLocation ? ` · ${projectValue.projectLocation}` : ''}
               </span>

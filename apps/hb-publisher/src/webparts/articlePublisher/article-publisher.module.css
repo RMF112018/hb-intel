@@ -697,6 +697,11 @@
   color: var(--hb-status-danger-text, #a4262c);
 }
 
+.projectPickerErrorDetail {
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-size: 11px;
+}
+
 .projectPickerOption {
   display: flex;
   flex-direction: column;

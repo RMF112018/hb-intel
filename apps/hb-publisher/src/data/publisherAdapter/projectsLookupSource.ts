@@ -45,12 +45,32 @@ export interface ProjectLookupEntry {
 }
 
 /** Raw SharePoint shape returned from the REST query. */
-interface RawProjectsListItem {
+export interface RawProjectsListItem {
   readonly Title?: string;
   readonly field_1?: string;
   readonly field_2?: string;
   readonly field_3?: string;
   readonly field_4?: string;
+}
+
+/**
+ * Map a raw Projects-list row to a `ProjectLookupEntry`.
+ *
+ * Returns `null` when the row lacks either the primary identity
+ * (`field_1 → ProjectId`) or a visible name (`field_3 → ProjectName`),
+ * so a selection cannot be built that would pass downstream validation.
+ * Exported for unit testing of the title-bound list mapping contract.
+ */
+export function mapRawProjectRow(row: RawProjectsListItem): ProjectLookupEntry | null {
+  const projectId = row.field_1?.trim();
+  const projectName = row.field_3?.trim();
+  if (!projectId || !projectName) return null;
+  const projectNumber = row.field_2?.trim() ?? '';
+  const projectLocation = row.field_4?.trim() || undefined;
+  const displayTitle =
+    row.Title?.trim() ||
+    (projectNumber ? `${projectNumber} — ${projectName}` : projectName);
+  return { projectId, projectNumber, projectName, projectLocation, displayTitle };
 }
 
 export interface ProjectsLookupSearchOptions {
@@ -75,7 +95,7 @@ export type ProjectLookupSearchFn = (
  * doubled; newlines are collapsed defensively so a paste of multi-line
  * text cannot break the filter expression.
  */
-function escapeODataString(value: string): string {
+export function escapeODataString(value: string): string {
   return value.replace(/'/g, "''").replace(/[\r\n]+/g, ' ');
 }
 
@@ -116,25 +136,8 @@ export function createProjectsLookupSearch(
 
     const entries: ProjectLookupEntry[] = [];
     for (const row of rows) {
-      const projectId = row.field_1?.trim();
-      const projectName = row.field_3?.trim();
-      if (!projectId || !projectName) {
-        // Skip rows that lack the two fields the authoring UI binds
-        // to; a selection without them would fail validation.
-        continue;
-      }
-      const projectNumber = row.field_2?.trim() ?? '';
-      const projectLocation = row.field_4?.trim() || undefined;
-      const displayTitle =
-        row.Title?.trim() ||
-        (projectNumber ? `${projectNumber} — ${projectName}` : projectName);
-      entries.push({
-        projectId,
-        projectNumber,
-        projectName,
-        projectLocation,
-        displayTitle,
-      });
+      const entry = mapRawProjectRow(row);
+      if (entry) entries.push(entry);
     }
     return entries;
   };
