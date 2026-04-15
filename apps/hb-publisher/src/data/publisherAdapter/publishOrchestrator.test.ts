@@ -898,6 +898,87 @@ describe('publishOrchestrator', () => {
     });
   });
 
+  // Phase-09 Prompt-06: milestone legacy hard-block. `milestoneSpotlight`
+  // has no authoring UI, no persistence, and no validation profile, so
+  // publish/republish must be rejected before any page or binding
+  // writes. Preview remains allowed so operators can see the article.
+  describe('milestone legacy hard-block (phase-09 prompt-06)', () => {
+    it('blocks create when ArticleContentType is milestoneSpotlight', async () => {
+      const f = fixture({ article: { ArticleContentType: 'milestoneSpotlight' } });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({ articleId: 'art-ps-001', mode: 'create' });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('policy');
+      expect(result.decision?.action).toBe('blocked');
+      expect(result.decision?.reason).toBe('legacyContentType');
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+
+    it('blocks republish when ArticleContentType is milestoneSpotlight (even from a valid published+bound state)', async () => {
+      const existing: PublisherPageBindingRow = {
+        BindingId: 'bnd-existing-42',
+        ArticleId: 'art-ps-001',
+        Title: 'Legacy milestone',
+        PublishStatus: 'published',
+        TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+        PageId: '999',
+        PageName: 'legacy-milestone.aspx',
+        PageUrl:
+          'https://example.com/sites/ProjectSpotlight/SitePages/legacy-milestone.aspx',
+        PageShellVersion: '1.0.0',
+        PageTemplateKey: 'ps-inprogress-monthly-v1',
+        RenderVersion: '1.0.0',
+      };
+      const f = fixture({
+        article: {
+          ArticleContentType: 'milestoneSpotlight',
+          WorkflowState: 'published',
+        },
+        existingBinding: existing,
+      });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({ articleId: 'art-ps-001', mode: 'republish' });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.stage).toBe('policy');
+      expect(result.decision?.reason).toBe('legacyContentType');
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+
+    it('does NOT apply the milestone policy block to preview mode (preview bypasses the gate)', async () => {
+      const f = fixture({ article: { ArticleContentType: 'milestoneSpotlight' } });
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({ articleId: 'art-ps-001', mode: 'preview' });
+      // The milestone gate only fires for non-preview modes. Preview
+      // may still fail at template resolution (no operational
+      // milestone template exists), but it must not be blocked with
+      // stage 'policy' / reason 'legacyContentType'.
+      if (!result.ok) {
+        expect(result.stage).not.toBe('policy');
+      }
+      // No writes regardless of preview outcome.
+      expect(f.createOrUpdate).not.toHaveBeenCalled();
+      expect(f.upsertBinding).not.toHaveBeenCalled();
+    });
+
+    it('does NOT block operational content types (monthlySpotlight publish still works)', async () => {
+      const f = fixture();
+      const orch = makeOrchestrator(f);
+      const result = await orch.run({
+        articleId: 'art-ps-001',
+        mode: 'create',
+        now: () => '2026-04-13T10:00:00.000Z',
+        generateBindingId: () => 'bnd-generated',
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.action).toBe('create');
+    });
+  });
+
   it('surfaces page-publish failures without writing the binding', async () => {
     const f = fixture();
     f.createOrUpdate.mockResolvedValueOnce({

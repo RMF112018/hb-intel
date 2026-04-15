@@ -66,6 +66,7 @@ export function milestoneLegacyNotice(
   }
   return (
     'Legacy content-type notice: `milestoneSpotlight` is read-compatible only ' +
-    '(no live milestone executor). Move to an operational content type before publish.'
+    '(no live milestone executor). Publish and Republish are blocked for this ' +
+    'content type. Move to an operational content type before publishing.'
   );
 }

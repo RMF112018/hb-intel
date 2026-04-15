@@ -12,6 +12,7 @@ import type {
 import type { PreviewOutcome } from '../../../data/publisherAdapter/preview/previewBuilder.js';
 import { workflowOutcomeLabel } from '../authorLabels.js';
 import { unsupportedDestinationNotice } from './draftPolicyHelpers.js';
+import { milestoneLegacyNotice } from '../authoringPanels/draftHelpers.js';
 
 export interface ReadinessControllerInputs {
   readonly articleDraft: PublisherArticleRow | undefined;
@@ -28,6 +29,17 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     ? unsupportedDestinationNotice(articleDraft.Destination)
     : undefined;
   const unsupportedDestinationLoaded = !!unsupportedDestinationMessage;
+
+  // Phase-09 Prompt-06: milestone legacy hard-block. Mirrors the
+  // destination gate above — `milestoneSpotlight` has no authoring
+  // controls, no persistence, and no validation profile, so it must
+  // not reach publish/republish. The orchestrator enforces the same
+  // invariant server-side; this gate keeps the UI honest so the
+  // action never becomes clickable from milestone drafts.
+  const unsupportedContentTypeMessage = articleDraft
+    ? milestoneLegacyNotice(articleDraft.ArticleContentType)
+    : undefined;
+  const unsupportedContentTypeLoaded = !!unsupportedContentTypeMessage;
 
   const latestValidation = preview && preview.ok ? preview.validation : undefined;
   const publishBlockedByValidation = !!latestValidation && !latestValidation.ok;
@@ -48,6 +60,7 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     !!articleDraft &&
     !busy &&
     !unsupportedDestinationLoaded &&
+    !unsupportedContentTypeLoaded &&
     articleDraft.WorkflowState === 'approved' &&
     !publishBlockedByValidation;
   // Republish is the in-place update path for content that is already
@@ -60,6 +73,7 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     !!articleDraft &&
     !busy &&
     !unsupportedDestinationLoaded &&
+    !unsupportedContentTypeLoaded &&
     !!binding &&
     articleDraft.WorkflowState === 'published' &&
     !publishBlockedByValidation;
@@ -73,6 +87,8 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     publishBlockedByValidation,
     unsupportedDestinationMessage,
     unsupportedDestinationLoaded,
+    unsupportedContentTypeMessage,
+    unsupportedContentTypeLoaded,
     workflowOutcomeChipLabel,
     publishEnabled,
     republishEnabled,

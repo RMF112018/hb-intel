@@ -281,6 +281,46 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     const now = (req.now ?? defaultNow)();
     const bindingIdFactory = req.generateBindingId ?? defaultBindingId;
 
+    // Milestone legacy hard-block (phase-09 prompt-06). This runs BEFORE
+    // resolution so the block is a typed `policy` rejection rather than
+    // the noisy `resolution` failure the template resolver would raise
+    // when it cannot find an operational template for milestone
+    // content. Preview stays fully allowed so operators can still see
+    // the article; only non-preview modes are blocked here. The
+    // orchestrator reads the master row directly so the gate does not
+    // depend on a successful resolution.
+    if (req.mode !== 'preview') {
+      const preArticle = await repositories.articles.getByArticleId(req.articleId);
+      if (
+        preArticle &&
+        preArticle.ArticleContentType === 'milestoneSpotlight'
+      ) {
+        const decision: RepublishDecision = {
+          action: 'blocked',
+          reason: 'legacyContentType',
+          notes: [
+            "ArticleContentType 'milestoneSpotlight' is read-compatible only; publish and republish are blocked. Move to an operational content type before publishing.",
+          ],
+        };
+        const message = `Publish blocked: ${decision.reason}. ${decision.notes.join(' ')}`;
+        await recordPublishingError({
+          articleId: preArticle.ArticleId,
+          title: preArticle.Title,
+          destination: preArticle.Destination,
+          stage: 'policy',
+          mode: req.mode,
+          message,
+          nowIso: now,
+        });
+        return {
+          ok: false,
+          stage: 'policy',
+          message,
+          decision,
+        };
+      }
+    }
+
     const resolution = await buildPublishResolutionContext(
       repositories,
       req.articleId,

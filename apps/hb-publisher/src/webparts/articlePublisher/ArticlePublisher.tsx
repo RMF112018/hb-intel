@@ -246,6 +246,8 @@ export function ArticlePublisher({
     publishBlockedByValidation,
     unsupportedDestinationMessage,
     unsupportedDestinationLoaded,
+    unsupportedContentTypeMessage,
+    unsupportedContentTypeLoaded,
     workflowOutcomeChipLabel,
     publishEnabled,
     republishEnabled,
@@ -295,6 +297,11 @@ export function ArticlePublisher({
             {scheduledLegacyStateNotice(articleDraft.WorkflowState) && (
               <p className={styles.canvasNotice}>
                 {scheduledLegacyStateNotice(articleDraft.WorkflowState)}
+              </p>
+            )}
+            {unsupportedContentTypeMessage && (
+              <p className={styles.canvasNoticeBlocking}>
+                {unsupportedContentTypeMessage}
               </p>
             )}
             {unsupportedDestinationMessage && (
@@ -471,7 +478,8 @@ export function ArticlePublisher({
                   disabled={!publishEnabled}
                   title={publishDisabledReason({
                     hasDraft: !!articleDraft,
-                    destinationSupported: !unsupportedDestinationLoaded,
+                    destinationSupported:
+                      !unsupportedDestinationLoaded && !unsupportedContentTypeLoaded,
                     validationBlocked: publishBlockedByValidation,
                     busy,
                   })}
@@ -483,7 +491,8 @@ export function ArticlePublisher({
                   disabled={!republishEnabled}
                   title={publishDisabledReason({
                     hasDraft: !!articleDraft,
-                    destinationSupported: !unsupportedDestinationLoaded,
+                    destinationSupported:
+                      !unsupportedDestinationLoaded && !unsupportedContentTypeLoaded,
                     validationBlocked: publishBlockedByValidation,
                     busy,
                   })}
