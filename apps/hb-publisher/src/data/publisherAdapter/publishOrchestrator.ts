@@ -175,6 +175,7 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     | 'policy'
     | 'pagePublish'
     | 'pageUnpublish'
+    | 'bindingLookup'
     | 'bindingWrite'
     | 'bindingUpdate'
     | 'articleSync'
@@ -854,9 +855,45 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     let bindingUpdated = false;
     let pageUnpublished = false;
     let historyAppended = false;
-    const existingBinding = await repositories.pageBindings
-      .getByArticleId(article.ArticleId)
-      .catch(() => undefined);
+    // Fail-closed binding lookup. Previously this used
+    // `.catch(() => undefined)`, which swallowed a failed read and
+    // let the lifecycle continue as if no binding existed — so a
+    // transient SharePoint failure could archive/withdraw the master
+    // article while the live destination page remained visible. Treat
+    // a throw as an explicit `bindingLookup` failure; only a positive
+    // `undefined` return means "no binding exists" and is safe to
+    // proceed past page-unpublish.
+    let existingBinding: PublisherPageBindingRow | undefined;
+    try {
+      existingBinding = await repositories.pageBindings.getByArticleId(
+        article.ArticleId,
+      );
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `Binding lookup failed during ${target}: ${err.message}`
+          : `Binding lookup failed during ${target}.`;
+      await recordPublishingError({
+        articleId: article.ArticleId,
+        title: article.Title,
+        destination: article.Destination,
+        stage: 'bindingLookup',
+        mode: 'create',
+        lifecycleAction: target === 'archived' ? 'archive' : 'withdraw',
+        message,
+        nowIso: now,
+      });
+      return {
+        ok: false,
+        stage: 'bindingLookup',
+        message,
+        previousState,
+        articleUpdated: false,
+        bindingUpdated: false,
+        pageUnpublished: false,
+        historyAppended: false,
+      };
+    }
     if (existingBinding && existingBinding.PageId) {
       const unpublishOutcome = await pageShellService.unpublishPage({
         pageId: existingBinding.PageId,
@@ -1236,6 +1273,7 @@ export type LifecycleOutcome =
         | 'load'
         | 'transition'
         | 'articleUpdate'
+        | 'bindingLookup'
         | 'pageUnpublish'
         | 'bindingUpdate'
         | 'historyAppend';

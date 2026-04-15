@@ -637,3 +637,98 @@ describe('lifecycle error classification — persisted error rows tag the lifecy
     expect(errorRow.Operation).toBe('sync');
   });
 });
+
+// Phase-09 Prompt-03: archive/withdraw must fail closed when the
+// binding lookup throws. The previous `.catch(() => undefined)`
+// swallowed a failed read and let the lifecycle proceed as if no
+// binding existed, silently skipping page-unpublish.
+describe('lifecycle binding-lookup fail-closed (phase-09 prompt-03)', () => {
+  it('archive fails with stage=bindingLookup when pageBindings.getByArticleId throws', async () => {
+    const f = buildFixture();
+    (f.repositories.pageBindings.getByArticleId as ReturnType<typeof vi.fn>).mockImplementation(
+      async () => {
+        throw new Error('SharePoint 503');
+      },
+    );
+    const unpublishLive = vi.fn(async ({ pageId }: { pageId: string }) => ({
+      ok: true as const,
+      pageId,
+    }));
+    const pageShell = createPageShellService({
+      pageCreation: {
+        createOrUpdate: vi.fn(async () => ({
+          ok: true as const,
+          pageId: 'unused',
+          pageUrl: 'unused',
+          pageName: 'unused',
+          wasCreated: false,
+        })),
+        publishLive: vi.fn(async ({ pageId }) => ({ ok: true as const, pageId })),
+        unpublishLive,
+      } satisfies PageCreationService,
+    });
+    const orch = createPublishOrchestrator({
+      repositories: f.repositories,
+      pageBindingWriter: noopBindingWriter,
+      pageShellService: pageShell,
+    });
+    const outcome = await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.stage).toBe('bindingLookup');
+    expect(outcome.message).toContain('Binding lookup failed during archived');
+    expect(outcome.previousState).toBe('published');
+    expect(outcome.articleUpdated).toBe(false);
+    expect(outcome.bindingUpdated).toBe(false);
+    expect(outcome.pageUnpublished).toBe(false);
+    expect(outcome.historyAppended).toBe(false);
+    // Page demotion must NOT be attempted when the binding lookup failed.
+    expect(unpublishLive).not.toHaveBeenCalled();
+    // Master article must NOT be stamped to archived.
+    expect(f.articleUpsert).not.toHaveBeenCalled();
+    expect(f.historyAppend).not.toHaveBeenCalled();
+    // A publishing-errors row is recorded with Operation=sync.
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = f.errorAppend.mock.calls[0]![0] as {
+      Title: string;
+      Operation: string;
+    };
+    expect(errorRow.Title).toMatch(/^archive\.bindingLookup:/);
+    expect(errorRow.Operation).toBe('sync');
+  });
+
+  it('withdraw fails with stage=bindingLookup when pageBindings.getByArticleId throws', async () => {
+    const f = buildFixture();
+    (f.repositories.pageBindings.getByArticleId as ReturnType<typeof vi.fn>).mockImplementation(
+      async () => {
+        throw new Error('transient network error');
+      },
+    );
+    const orch = makeOrch(f.repositories);
+    const outcome = await orch.withdraw({ articleId: 'art-001', now: () => NOW });
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.stage).toBe('bindingLookup');
+    expect(outcome.message).toContain('Binding lookup failed during withdrawn');
+    expect(f.articleUpsert).not.toHaveBeenCalled();
+    expect(f.historyAppend).not.toHaveBeenCalled();
+    expect(f.errorAppend).toHaveBeenCalledTimes(1);
+    const errorRow = f.errorAppend.mock.calls[0]![0] as {
+      Title: string;
+      Operation: string;
+    };
+    expect(errorRow.Title).toMatch(/^withdraw\.bindingLookup:/);
+  });
+
+  it('archive proceeds as "no binding" when getByArticleId returns undefined cleanly (positive absence)', async () => {
+    const f = buildFixture({ binding: null });
+    const orch = makeOrch(f.repositories);
+    const outcome = await orch.archive({ articleId: 'art-001', now: () => NOW });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    expect(outcome.pageUnpublished).toBe(false);
+    expect(outcome.bindingUpdated).toBe(false);
+    expect(outcome.articleUpdated).toBe(true);
+    expect(outcome.historyAppended).toBe(true);
+  });
+});
