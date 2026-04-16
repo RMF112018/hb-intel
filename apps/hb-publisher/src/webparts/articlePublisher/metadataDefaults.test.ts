@@ -3,6 +3,7 @@ import {
   defaultHeroCategoryLabel,
   defaultTeamHeading,
   intelligentDefaultsForSave,
+  resolveProjectChangeDefaults,
 } from './metadataDefaults';
 
 describe('defaultTeamHeading', () => {
@@ -101,5 +102,118 @@ describe('intelligentDefaultsForSave', () => {
     });
     expect(result.draft.TeamViewerTitle).toBe('The Team at Riverside Tower');
     expect(result.draft.HeroCategoryLabel).toBe('Riverside Tower');
+  });
+});
+
+describe('resolveProjectChangeDefaults', () => {
+  it('fills both fields when binding a project onto a blank draft', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: undefined,
+      nextProjectName: 'Riverside Tower',
+      current: { TeamViewerTitle: '', HeroCategoryLabel: undefined },
+    });
+    expect(result.TeamViewerTitle).toBe('The Team at Riverside Tower');
+    expect(result.HeroCategoryLabel).toBe('Riverside Tower');
+    expect([...result.applied].sort()).toEqual(['HeroCategoryLabel', 'TeamViewerTitle']);
+  });
+
+  it('refreshes a stale Team Viewer heading that matches the previous project default', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: 'Bravo',
+      current: {
+        TeamViewerTitle: 'The Team at Alpha',
+        HeroCategoryLabel: 'Alpha',
+      },
+    });
+    expect(result.TeamViewerTitle).toBe('The Team at Bravo');
+    expect(result.HeroCategoryLabel).toBe('Bravo');
+    expect([...result.applied].sort()).toEqual(['HeroCategoryLabel', 'TeamViewerTitle']);
+  });
+
+  it('preserves author-typed values even when the project changes', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: 'Bravo',
+      current: {
+        TeamViewerTitle: 'Meet the people who built it',
+        HeroCategoryLabel: 'Field Story',
+      },
+    });
+    expect(result.TeamViewerTitle).toBe('Meet the people who built it');
+    expect(result.HeroCategoryLabel).toBe('Field Story');
+    expect(result.applied).toEqual([]);
+  });
+
+  it('fills blanks even when the previous project had a default (first time author picks any project)', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: undefined,
+      nextProjectName: 'Bravo',
+      current: { TeamViewerTitle: '', HeroCategoryLabel: '' },
+    });
+    expect(result.TeamViewerTitle).toBe('The Team at Bravo');
+    expect(result.HeroCategoryLabel).toBe('Bravo');
+  });
+
+  it('collapses stale defaults when the author clears the bound project', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: null,
+      current: {
+        TeamViewerTitle: 'The Team at Alpha',
+        HeroCategoryLabel: 'Alpha',
+      },
+    });
+    expect(result.TeamViewerTitle).toBe('The Team');
+    expect(result.HeroCategoryLabel).toBeUndefined();
+    expect([...result.applied].sort()).toEqual(['HeroCategoryLabel', 'TeamViewerTitle']);
+  });
+
+  it('does not reintroduce a hero category when no project is bound and the field is already blank', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: undefined,
+      nextProjectName: null,
+      current: { TeamViewerTitle: '', HeroCategoryLabel: undefined },
+    });
+    expect(result.HeroCategoryLabel).toBeUndefined();
+    expect(result.applied).not.toContain('HeroCategoryLabel');
+  });
+
+  it('preserves an author-typed value when the project is cleared', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: null,
+      current: {
+        TeamViewerTitle: 'The Dream Team',
+        HeroCategoryLabel: 'Infrastructure',
+      },
+    });
+    expect(result.TeamViewerTitle).toBe('The Dream Team');
+    expect(result.HeroCategoryLabel).toBe('Infrastructure');
+    expect(result.applied).toEqual([]);
+  });
+
+  it('treats whitespace-only field values as blank and fills them', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: undefined,
+      nextProjectName: 'Bravo',
+      current: { TeamViewerTitle: '   ', HeroCategoryLabel: '  ' },
+    });
+    expect(result.TeamViewerTitle).toBe('The Team at Bravo');
+    expect(result.HeroCategoryLabel).toBe('Bravo');
+  });
+
+  it('does not treat a value equal to the new default as a change', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: 'Alpha',
+      current: {
+        TeamViewerTitle: 'The Team at Alpha',
+        HeroCategoryLabel: 'Alpha',
+      },
+    });
+    expect(result.TeamViewerTitle).toBe('The Team at Alpha');
+    expect(result.HeroCategoryLabel).toBe('Alpha');
+    expect(result.applied).toEqual([]);
   });
 });

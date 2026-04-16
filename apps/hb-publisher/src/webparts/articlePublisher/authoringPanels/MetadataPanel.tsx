@@ -24,7 +24,7 @@ import {
   projectStageLabel,
   spotlightTypeLabel,
 } from '../authorLabels.js';
-import { defaultTeamHeading } from '../metadataDefaults.js';
+import { resolveProjectChangeDefaults } from '../metadataDefaults.js';
 import {
   ChooserGroup,
   DisclosureSection,
@@ -68,12 +68,27 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
 
   const handleProjectChange = React.useCallback(
     (entry: ProjectLookupEntry | null) => {
+      // Apply project-aware defaults opportunistically the moment
+      // the project binding changes. Both TeamViewerTitle and
+      // HeroCategoryLabel fill when blank, and refresh automatically
+      // when they still carry the previous project's system default
+      // (stale-default cleanup). Author-edited values are preserved.
+      const nextDefaults = resolveProjectChangeDefaults({
+        previousProjectName: draft.ProjectName,
+        nextProjectName: entry?.projectName,
+        current: {
+          TeamViewerTitle: draft.TeamViewerTitle,
+          HeroCategoryLabel: draft.HeroCategoryLabel,
+        },
+      });
       if (!entry) {
         onChange({
           ...draft,
           ProjectId: undefined,
           ProjectName: undefined,
           ProjectLocation: undefined,
+          TeamViewerTitle: nextDefaults.TeamViewerTitle,
+          HeroCategoryLabel: nextDefaults.HeroCategoryLabel,
         });
         return;
       }
@@ -81,21 +96,13 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
         ...prev,
         [entry.projectId]: { projectNumber: entry.projectNumber || undefined },
       }));
-      // Opportunistically fill the team heading default the moment a
-      // project is picked, so the author sees the resolved heading
-      // immediately. Only fills when the heading is currently blank
-      // — author-typed values are preserved.
-      const headingIsBlank =
-        !draft.TeamViewerTitle || draft.TeamViewerTitle.trim().length === 0;
-      const nextTeamViewerTitle = headingIsBlank
-        ? defaultTeamHeading(entry.projectName)
-        : draft.TeamViewerTitle;
       onChange({
         ...draft,
         ProjectId: entry.projectId,
         ProjectName: entry.projectName,
         ProjectLocation: entry.projectLocation ?? draft.ProjectLocation,
-        TeamViewerTitle: nextTeamViewerTitle,
+        TeamViewerTitle: nextDefaults.TeamViewerTitle,
+        HeroCategoryLabel: nextDefaults.HeroCategoryLabel,
       });
     },
     [draft, onChange],

@@ -1,20 +1,30 @@
 /**
  * Intelligent metadata defaults for the Article Publisher.
  *
- * Workstream B, step-04: removes repetitive author busywork by
- * computing sensible defaults from current article context and
- * applying them only when the relevant field is empty or whitespace.
- * Author-typed values are never overwritten.
+ * Reduces repetitive author busywork by computing sensible defaults
+ * from current article context and applying them under two rules
+ * that keep editorial ownership with the author:
+ *
+ *   1. **Blank fill** — when a field is empty or whitespace, fill
+ *      it with the computed default. Author-typed values are
+ *      never overwritten.
+ *   2. **Stale system-default refresh** — on project change, if a
+ *      field still carries the exact system default computed from
+ *      the *previous* project, refresh it to the *new* project's
+ *      default. Any value that does not match the previous
+ *      system default is treated as author-owned and preserved.
  *
  * Today's defaults:
  *
- *   - `TeamViewerTitle`  ← `"The Team at {ProjectName}"` (or `"The Team"`
- *     when no project is bound).
+ *   - `TeamViewerTitle`  ← `"The Team at {ProjectName}"` (or
+ *     `"The Team"` when no project is bound).
  *   - `HeroCategoryLabel` ← `ProjectName` when the field is empty.
  *
- * Defaults are applied at save-time. The Team section's heading
- * input also surfaces the resolved default as an HTML `placeholder`
- * so authors can see what will be filled if they leave it blank.
+ * Blank fill runs at save-time (`intelligentDefaultsForSave`).
+ * Blank fill + stale refresh run on project-change in
+ * `MetadataPanel` (`resolveProjectChangeDefaults`) so the resolved
+ * heading and category appear immediately and stay coherent when
+ * the author picks a different project.
  */
 
 export interface IntelligentDefaultsArticleSlice {
@@ -87,4 +97,94 @@ export function intelligentDefaultsForSave<T extends IntelligentDefaultsArticleS
   }
 
   return { draft: next, applied };
+}
+
+/** Slice of the draft that the project-change helper reads. */
+export interface ProjectChangeDefaultsSlice {
+  readonly TeamViewerTitle?: string;
+  readonly HeroCategoryLabel?: string;
+}
+
+export interface ResolveProjectChangeDefaultsOptions {
+  /** Project name bound to the draft before this change (if any). */
+  readonly previousProjectName: string | undefined | null;
+  /** Project name bound to the draft after this change (if any). */
+  readonly nextProjectName: string | undefined | null;
+  /** Current values of the fields the helper may refresh. */
+  readonly current: ProjectChangeDefaultsSlice;
+}
+
+export interface ResolveProjectChangeDefaultsResult {
+  /** Heading to persist onto the draft (always a string). */
+  readonly TeamViewerTitle: string;
+  /** Category label to persist; `undefined` when no project is bound. */
+  readonly HeroCategoryLabel: string | undefined;
+  /** Fields whose value actually changed — caller may surface for diagnostics. */
+  readonly applied: readonly ('TeamViewerTitle' | 'HeroCategoryLabel')[];
+}
+
+/**
+ * Resolve the TeamViewerTitle and HeroCategoryLabel values that
+ * should land on the draft when the bound project changes.
+ *
+ * For each field:
+ *   - if the current value is blank, fill it with the new
+ *     project's default;
+ *   - else if the current value exactly equals the *previous*
+ *     project's system default (i.e. it was never author-edited),
+ *     refresh it to the new project's default;
+ *   - else preserve the current value (author has taken control).
+ *
+ * When the project is cleared (`nextProjectName` blank), stale
+ * TeamViewerTitle collapses back to `"The Team"` and stale
+ * HeroCategoryLabel collapses to `undefined`. Author-authored
+ * values are preserved in both cases.
+ */
+export function resolveProjectChangeDefaults(
+  options: ResolveProjectChangeDefaultsOptions,
+): ResolveProjectChangeDefaultsResult {
+  const applied: ('TeamViewerTitle' | 'HeroCategoryLabel')[] = [];
+
+  const currentHeading = options.current.TeamViewerTitle;
+  const previousHeadingDefault = defaultTeamHeading(options.previousProjectName);
+  const nextHeadingDefault = defaultTeamHeading(options.nextProjectName);
+  let resolvedHeading: string;
+  if (isBlank(currentHeading)) {
+    resolvedHeading = nextHeadingDefault;
+    if (currentHeading !== nextHeadingDefault) applied.push('TeamViewerTitle');
+  } else if (
+    currentHeading === previousHeadingDefault &&
+    currentHeading !== nextHeadingDefault
+  ) {
+    resolvedHeading = nextHeadingDefault;
+    applied.push('TeamViewerTitle');
+  } else {
+    resolvedHeading = currentHeading as string;
+  }
+
+  const currentCategory = options.current.HeroCategoryLabel;
+  const previousCategoryDefault = defaultHeroCategoryLabel(options.previousProjectName);
+  const nextCategoryDefault = defaultHeroCategoryLabel(options.nextProjectName);
+  let resolvedCategory: string | undefined;
+  if (isBlank(currentCategory)) {
+    resolvedCategory = nextCategoryDefault;
+    if (nextCategoryDefault !== undefined && currentCategory !== nextCategoryDefault) {
+      applied.push('HeroCategoryLabel');
+    }
+  } else if (
+    previousCategoryDefault !== undefined &&
+    currentCategory === previousCategoryDefault &&
+    currentCategory !== nextCategoryDefault
+  ) {
+    resolvedCategory = nextCategoryDefault;
+    applied.push('HeroCategoryLabel');
+  } else {
+    resolvedCategory = currentCategory;
+  }
+
+  return {
+    TeamViewerTitle: resolvedHeading,
+    HeroCategoryLabel: resolvedCategory,
+    applied,
+  };
 }
