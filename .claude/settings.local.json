@@ -365,7 +365,14 @@
       "Bash(perl /tmp/tokenize-publisher-css.pl article-publisher.module.css mediaComposer/galleryPanel.module.css mediaComposer/mediaComposer.module.css teamComposer/teamComposer.module.css teamComposer/teamPanel.module.css previewSurface/articlePreview.module.css draftQueue/draftQueue.module.css storyBodyEditor/storyBodyEditor.module.css readinessSurface/publishReadiness.module.css)",
       "Bash(perl -i -pe 's/var\\\\\\(\\(--hb-[a-z0-9-]+\\), var\\\\\\(\\\\1, \\(#[0-9a-f]+\\)\\\\\\)\\\\\\)/var\\($1, $2\\)/gi' article-publisher.module.css mediaComposer/galleryPanel.module.css mediaComposer/mediaComposer.module.css teamComposer/teamComposer.module.css teamComposer/teamPanel.module.css previewSurface/articlePreview.module.css draftQueue/draftQueue.module.css storyBodyEditor/storyBodyEditor.module.css readinessSurface/publishReadiness.module.css)",
       "Bash(perl -i -pe 's|color: #334;|color: var\\(--hb-status-info-text, #225391\\);|' article-publisher.module.css)",
-      "Bash(perl -i -pe 's|color: #3a3a40;|color: var\\(--hb-text-secondary, #4a4a4f\\);|' previewSurface/articlePreview.module.css)"
+      "Bash(perl -i -pe 's|color: #3a3a40;|color: var\\(--hb-text-secondary, #4a4a4f\\);|' previewSurface/articlePreview.module.css)",
+      "Bash(mkdir -p /tmp/hb-pub-inspect)",
+      "Bash(shasum -a 256 ClientSideAssets/shell-*.js)",
+      "Bash(HB_INTEL_NODE18_BIN=/nonexistent/node npx tsx tools/build-spfx-package.ts --domain hb-publisher)",
+      "Bash(mkdir -p /tmp/wp-verify)",
+      "Bash(rm -rf ./*)",
+      "Bash(rm -rf /tmp/hb-pub-post)",
+      "Bash(mkdir /tmp/hb-pub-post)"
     ]
   },
   "enabledPlugins": {
