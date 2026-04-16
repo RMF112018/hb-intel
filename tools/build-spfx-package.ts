@@ -727,10 +727,17 @@ function buildHbPackageTruthProof(
  * webpart's entryModuleId.
  *
  * SPFx's AMD loader requires the define() name inside the JS file to match
- * the manifest's entryModuleId.  The neutral shell compiles as
- * define("9a2f7f61-..._1.0.0", ...) but each webpart manifest expects
- * define("{webpartId}_1.0.0", ...).  This function creates a dedicated copy
- * for each webpart with the correct module name.
+ * the manifest's entryModuleId. For multi-manifest domains (hb-webparts) the
+ * neutral shell compiles as define("9a2f7f61-..._1.0.0", ...) but each
+ * webpart manifest expects define("{webpartId}_1.0.0", ...), so each
+ * webpart gets a dedicated patched copy.
+ *
+ * For single-manifest domains (hb-publisher) the shell is compiled directly
+ * against the one target manifest, so the webpack output already carries
+ * define("{targetModuleId}") and no byte-level patching is needed. In that
+ * identity case this function renames the source asset into the versioned
+ * shell-entry slot instead of emitting a byte-identical duplicate, which
+ * eliminates the redundant shell-web-part_<hash>.js asset from the .sppkg.
  */
 function generatePerWebpartShellCopy(
   sourceShellPath: string,
@@ -740,28 +747,45 @@ function generatePerWebpartShellCopy(
   outputDir: string,
 ): { fileName: string; contentHash: string } {
   const sourceJs = fs.readFileSync(sourceShellPath, 'utf8');
-
-  const definePattern = `define("${neutralModuleId}"`;
-  if (!sourceJs.includes(definePattern)) {
-    throw new Error(
-      `[generatePerWebpartShellCopy] Source shell JS does not contain expected ` +
-      `define("${neutralModuleId}"). Cannot generate per-webpart copy for ${targetManifestId}.`,
-    );
-  }
+  const isIdentity = neutralModuleId === targetModuleId;
 
   const defineReplacement = `define("${targetModuleId}"`;
-  const patchedJs = sourceJs.replace(definePattern, defineReplacement);
-
-  if (!patchedJs.includes(defineReplacement)) {
-    throw new Error(
-      `[generatePerWebpartShellCopy] Post-patch verification failed: ` +
-      `define("${targetModuleId}") not found after replacement for ${targetManifestId}.`,
-    );
+  let shimJs: string;
+  if (isIdentity) {
+    if (!sourceJs.includes(defineReplacement)) {
+      throw new Error(
+        `[generatePerWebpartShellCopy] Identity shim for ${targetManifestId}: ` +
+        `source shell JS does not contain expected ${defineReplacement}.`,
+      );
+    }
+    shimJs = sourceJs;
+  } else {
+    const definePattern = `define("${neutralModuleId}"`;
+    if (!sourceJs.includes(definePattern)) {
+      throw new Error(
+        `[generatePerWebpartShellCopy] Source shell JS does not contain expected ` +
+        `${definePattern}. Cannot generate per-webpart copy for ${targetManifestId}.`,
+      );
+    }
+    shimJs = sourceJs.replace(definePattern, defineReplacement);
+    if (!shimJs.includes(defineReplacement)) {
+      throw new Error(
+        `[generatePerWebpartShellCopy] Post-patch verification failed: ` +
+        `${defineReplacement} not found after replacement for ${targetManifestId}.`,
+      );
+    }
   }
 
-  const contentHash = createHash('sha256').update(patchedJs).digest('hex').slice(0, 8);
+  const contentHash = createHash('sha256').update(shimJs).digest('hex').slice(0, 8);
   const fileName = `shell-entry-${targetManifestId}-${contentHash}.js`;
-  fs.writeFileSync(path.join(outputDir, fileName), patchedJs, 'utf8');
+  const outputPath = path.join(outputDir, fileName);
+  if (isIdentity) {
+    // Move the webpack output into the shell-entry slot so only the
+    // versioned per-webpart asset survives in release/assets/.
+    fs.renameSync(sourceShellPath, outputPath);
+  } else {
+    fs.writeFileSync(outputPath, shimJs, 'utf8');
+  }
 
   return { fileName, contentHash };
 }
@@ -825,10 +849,16 @@ function inspectPackagedShellAsset(
 ): boolean {
   try {
     const listOutput = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' });
+    // For single-manifest identity domains the webpack shell output is
+    // renamed into the shell-entry-<id>-<hash>.js slot, so accept that
+    // naming as the packaged shell asset in addition to the legacy names.
     const shellAssetPath = listOutput
       .split('\n')
       .map((entry) => entry.trim())
-      .find((entry) => /^ClientSideAssets\/shell-(web-part|extension-customizer).*\.js$/.test(entry));
+      .find((entry) =>
+        /^ClientSideAssets\/shell-(web-part|extension-customizer).*\.js$/.test(entry) ||
+        /^ClientSideAssets\/shell-entry-[0-9a-f-]{36}-[a-f0-9]{8}\.js$/i.test(entry),
+      );
 
     if (!shellAssetPath) {
       console.error(`  ❌ ${domainDir}: .sppkg missing packaged shell asset`);
@@ -922,10 +952,14 @@ function verifySppkg(
       }
     }
 
-    // Check for shell JS (webpart or extension)
+    // Check for shell JS (webpart, extension, or per-webpart shell entry).
+    // For single-manifest identity domains (hb-publisher) the webpack
+    // output is renamed into the shell-entry-<id>-<hash>.js slot instead
+    // of being duplicated, so that naming is also a valid compiled shell.
     const hasShellJs = entries.some((e) =>
       /shell-web-part.*\.js/.test(e) || /ShellWebPart.*\.js/.test(e) ||
-      /shell-extension-customizer.*\.js/.test(e) || /ShellExtensionCustomizer.*\.js/.test(e));
+      /shell-extension-customizer.*\.js/.test(e) || /ShellExtensionCustomizer.*\.js/.test(e) ||
+      /shell-entry-[0-9a-f-]{36}-[a-f0-9]{8}\.js/i.test(e));
     if (!hasShellJs) {
       console.error(`  ❌ ${domainDir}: .sppkg missing compiled shell JS`);
       ok = false;
