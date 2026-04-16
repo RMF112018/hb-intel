@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   defaultHeroCategoryLabel,
+  defaultProjectLocation,
   defaultTeamHeading,
   intelligentDefaultsForSave,
   resolveProjectChangeDefaults,
@@ -215,5 +216,103 @@ describe('resolveProjectChangeDefaults', () => {
     expect(result.TeamViewerTitle).toBe('The Team at Alpha');
     expect(result.HeroCategoryLabel).toBe('Alpha');
     expect(result.applied).toEqual([]);
+  });
+});
+
+describe('defaultProjectLocation', () => {
+  it('returns the trimmed project location when set', () => {
+    expect(defaultProjectLocation('Tampa, FL')).toBe('Tampa, FL');
+    expect(defaultProjectLocation('  Orlando, FL  ')).toBe('Orlando, FL');
+  });
+
+  it('returns undefined when the value is missing or whitespace-only', () => {
+    expect(defaultProjectLocation(undefined)).toBeUndefined();
+    expect(defaultProjectLocation(null)).toBeUndefined();
+    expect(defaultProjectLocation('')).toBeUndefined();
+    expect(defaultProjectLocation('   ')).toBeUndefined();
+  });
+});
+
+describe('resolveProjectChangeDefaults — ProjectLocation', () => {
+  it('fills ProjectLocation when binding a project onto a draft with no location', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: undefined,
+      nextProjectName: 'Bravo',
+      previousProjectLocation: undefined,
+      nextProjectLocation: 'Orlando, FL',
+      current: { ProjectLocation: '' },
+    });
+    expect(result.ProjectLocation).toBe('Orlando, FL');
+    expect(result.applied).toContain('ProjectLocation');
+  });
+
+  it('refreshes a stale ProjectLocation that still matches the previous project entry', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: 'Bravo',
+      previousProjectLocation: 'Tampa, FL',
+      nextProjectLocation: 'Orlando, FL',
+      current: { ProjectLocation: 'Tampa, FL' },
+    });
+    expect(result.ProjectLocation).toBe('Orlando, FL');
+    expect(result.applied).toContain('ProjectLocation');
+  });
+
+  it('preserves an author-overridden ProjectLocation across a project change', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: 'Bravo',
+      previousProjectLocation: 'Tampa, FL',
+      nextProjectLocation: 'Orlando, FL',
+      current: { ProjectLocation: 'Tampa Bay area' },
+    });
+    expect(result.ProjectLocation).toBe('Tampa Bay area');
+    expect(result.applied).not.toContain('ProjectLocation');
+  });
+
+  it('collapses a stale ProjectLocation to undefined when the project is cleared', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: null,
+      previousProjectLocation: 'Tampa, FL',
+      nextProjectLocation: null,
+      current: { ProjectLocation: 'Tampa, FL' },
+    });
+    expect(result.ProjectLocation).toBeUndefined();
+    expect(result.applied).toContain('ProjectLocation');
+  });
+
+  it('collapses ProjectLocation to undefined when the new project has no location', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: 'Bravo',
+      previousProjectLocation: 'Tampa, FL',
+      nextProjectLocation: undefined,
+      current: { ProjectLocation: 'Tampa, FL' },
+    });
+    expect(result.ProjectLocation).toBeUndefined();
+  });
+
+  it('preserves an author value when the project is cleared', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: 'Alpha',
+      nextProjectName: null,
+      previousProjectLocation: 'Tampa, FL',
+      nextProjectLocation: null,
+      current: { ProjectLocation: 'Tampa Bay area' },
+    });
+    expect(result.ProjectLocation).toBe('Tampa Bay area');
+  });
+
+  it('does not reintroduce a location when the draft starts blank and no project is bound', () => {
+    const result = resolveProjectChangeDefaults({
+      previousProjectName: undefined,
+      nextProjectName: null,
+      previousProjectLocation: undefined,
+      nextProjectLocation: null,
+      current: { ProjectLocation: undefined },
+    });
+    expect(result.ProjectLocation).toBeUndefined();
+    expect(result.applied).not.toContain('ProjectLocation');
   });
 });

@@ -69,16 +69,26 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
   const handleProjectChange = React.useCallback(
     (entry: ProjectLookupEntry | null) => {
       // Apply project-aware defaults opportunistically the moment
-      // the project binding changes. Both TeamViewerTitle and
-      // HeroCategoryLabel fill when blank, and refresh automatically
-      // when they still carry the previous project's system default
-      // (stale-default cleanup). Author-edited values are preserved.
+      // the project binding changes. TeamViewerTitle and
+      // HeroCategoryLabel fill when blank and refresh when they
+      // still carry the previous project's system default. The
+      // same rules govern ProjectLocation, which today is entirely
+      // system-managed (no author-editable input surfaces it) —
+      // passing `draft.ProjectLocation` as the previous value
+      // makes the common case always refresh to the new project's
+      // location, and the "preserve author override" branch stays
+      // in place so a future editable surface would behave
+      // consistently with the other two fields. Author-edited
+      // values on any of these fields are preserved.
       const nextDefaults = resolveProjectChangeDefaults({
         previousProjectName: draft.ProjectName,
         nextProjectName: entry?.projectName,
+        previousProjectLocation: draft.ProjectLocation,
+        nextProjectLocation: entry?.projectLocation,
         current: {
           TeamViewerTitle: draft.TeamViewerTitle,
           HeroCategoryLabel: draft.HeroCategoryLabel,
+          ProjectLocation: draft.ProjectLocation,
         },
       });
       if (!entry) {
@@ -86,7 +96,7 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
           ...draft,
           ProjectId: undefined,
           ProjectName: undefined,
-          ProjectLocation: undefined,
+          ProjectLocation: nextDefaults.ProjectLocation,
           TeamViewerTitle: nextDefaults.TeamViewerTitle,
           HeroCategoryLabel: nextDefaults.HeroCategoryLabel,
         });
@@ -100,7 +110,7 @@ export function MetadataPanel({ draft, onChange, searchProjects }: MetadataPanel
         ...draft,
         ProjectId: entry.projectId,
         ProjectName: entry.projectName,
-        ProjectLocation: entry.projectLocation ?? draft.ProjectLocation,
+        ProjectLocation: nextDefaults.ProjectLocation,
         TeamViewerTitle: nextDefaults.TeamViewerTitle,
         HeroCategoryLabel: nextDefaults.HeroCategoryLabel,
       });

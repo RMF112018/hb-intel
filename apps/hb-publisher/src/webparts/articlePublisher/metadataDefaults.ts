@@ -19,12 +19,18 @@
  *   - `TeamViewerTitle`  ← `"The Team at {ProjectName}"` (or
  *     `"The Team"` when no project is bound).
  *   - `HeroCategoryLabel` ← `ProjectName` when the field is empty.
+ *   - `ProjectLocation`  ← the bound project's location as
+ *     reported by the Projects list entry (same field the picker
+ *     already writes). Obeys the same blank-fill + stale-refresh
+ *     rules so a location that matches the previous project's
+ *     value refreshes on project change, and an author-typed
+ *     value is preserved across project changes and clears.
  *
  * Blank fill runs at save-time (`intelligentDefaultsForSave`).
  * Blank fill + stale refresh run on project-change in
  * `MetadataPanel` (`resolveProjectChangeDefaults`) so the resolved
- * heading and category appear immediately and stay coherent when
- * the author picks a different project.
+ * heading, category, and location appear immediately and stay
+ * coherent when the author picks a different project.
  */
 
 export interface IntelligentDefaultsArticleSlice {
@@ -103,6 +109,7 @@ export function intelligentDefaultsForSave<T extends IntelligentDefaultsArticleS
 export interface ProjectChangeDefaultsSlice {
   readonly TeamViewerTitle?: string;
   readonly HeroCategoryLabel?: string;
+  readonly ProjectLocation?: string;
 }
 
 export interface ResolveProjectChangeDefaultsOptions {
@@ -110,26 +117,48 @@ export interface ResolveProjectChangeDefaultsOptions {
   readonly previousProjectName: string | undefined | null;
   /** Project name bound to the draft after this change (if any). */
   readonly nextProjectName: string | undefined | null;
+  /** Project location reported by the previous project entry (if any). */
+  readonly previousProjectLocation?: string | undefined | null;
+  /** Project location reported by the next project entry (if any). */
+  readonly nextProjectLocation?: string | undefined | null;
   /** Current values of the fields the helper may refresh. */
   readonly current: ProjectChangeDefaultsSlice;
 }
+
+export type ProjectChangeManagedField =
+  | 'TeamViewerTitle'
+  | 'HeroCategoryLabel'
+  | 'ProjectLocation';
 
 export interface ResolveProjectChangeDefaultsResult {
   /** Heading to persist onto the draft (always a string). */
   readonly TeamViewerTitle: string;
   /** Category label to persist; `undefined` when no project is bound. */
   readonly HeroCategoryLabel: string | undefined;
+  /** Location to persist; `undefined` when no project is bound and no author value is present. */
+  readonly ProjectLocation: string | undefined;
   /** Fields whose value actually changed — caller may surface for diagnostics. */
-  readonly applied: readonly ('TeamViewerTitle' | 'HeroCategoryLabel')[];
+  readonly applied: readonly ProjectChangeManagedField[];
 }
 
 /**
- * Resolve the TeamViewerTitle and HeroCategoryLabel values that
- * should land on the draft when the bound project changes.
+ * Default project-location value derived from the picker entry.
+ * Returns the trimmed location verbatim when present; otherwise
+ * `undefined` — the field is optional on the tenant Projects list.
+ */
+export function defaultProjectLocation(
+  projectLocation: string | undefined | null,
+): string | undefined {
+  return trimmedOrUndefined(projectLocation ?? undefined);
+}
+
+/**
+ * Resolve the TeamViewerTitle, HeroCategoryLabel, and ProjectLocation
+ * values that should land on the draft when the bound project changes.
  *
  * For each field:
- *   - if the current value is blank, fill it with the new
- *     project's default;
+ *   - if the current value is blank, fill it with the new project's
+ *     default;
  *   - else if the current value exactly equals the *previous*
  *     project's system default (i.e. it was never author-edited),
  *     refresh it to the new project's default;
@@ -137,13 +166,13 @@ export interface ResolveProjectChangeDefaultsResult {
  *
  * When the project is cleared (`nextProjectName` blank), stale
  * TeamViewerTitle collapses back to `"The Team"` and stale
- * HeroCategoryLabel collapses to `undefined`. Author-authored
- * values are preserved in both cases.
+ * HeroCategoryLabel / ProjectLocation collapse to `undefined`.
+ * Author-authored values are preserved in every case.
  */
 export function resolveProjectChangeDefaults(
   options: ResolveProjectChangeDefaultsOptions,
 ): ResolveProjectChangeDefaultsResult {
-  const applied: ('TeamViewerTitle' | 'HeroCategoryLabel')[] = [];
+  const applied: ProjectChangeManagedField[] = [];
 
   const currentHeading = options.current.TeamViewerTitle;
   const previousHeadingDefault = defaultTeamHeading(options.previousProjectName);
@@ -182,9 +211,30 @@ export function resolveProjectChangeDefaults(
     resolvedCategory = currentCategory;
   }
 
+  const currentLocation = options.current.ProjectLocation;
+  const previousLocationDefault = defaultProjectLocation(options.previousProjectLocation);
+  const nextLocationDefault = defaultProjectLocation(options.nextProjectLocation);
+  let resolvedLocation: string | undefined;
+  if (isBlank(currentLocation)) {
+    resolvedLocation = nextLocationDefault;
+    if (nextLocationDefault !== undefined && currentLocation !== nextLocationDefault) {
+      applied.push('ProjectLocation');
+    }
+  } else if (
+    previousLocationDefault !== undefined &&
+    currentLocation === previousLocationDefault &&
+    currentLocation !== nextLocationDefault
+  ) {
+    resolvedLocation = nextLocationDefault;
+    applied.push('ProjectLocation');
+  } else {
+    resolvedLocation = currentLocation;
+  }
+
   return {
     TeamViewerTitle: resolvedHeading,
     HeroCategoryLabel: resolvedCategory,
+    ProjectLocation: resolvedLocation,
     applied,
   };
 }
