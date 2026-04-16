@@ -125,6 +125,15 @@ interface HbPackageTruthProof {
     shimEntries: PackagedAssetFingerprint[];
   };
   manifestLinkage: ManifestSemanticComparison[];
+  deploymentPosture?: {
+    kind: HbPublisherDeploymentModelKind;
+    skipFeatureDeployment: boolean;
+    hiddenFromToolbox: boolean;
+    solutionVersion: string;
+    solutionId: string;
+    featureId: string;
+    webPartId: string;
+  };
   checks: {
     structuralValidity: {
       pass: boolean;
@@ -142,7 +151,18 @@ interface HbPackageTruthProof {
       pass: boolean;
       details: string[];
     };
+    deploymentPostureAlignment?: {
+      pass: boolean;
+      details: string[];
+    };
   };
+}
+
+interface HbPublisherPostureInputs {
+  sourcePackageSolution: any;
+  sourceManifest: any;
+  emittedDeploymentModelKind: HbPublisherDeploymentModelKind;
+  emittedHiddenFromToolbox: boolean;
 }
 
 interface BuildHbPackageTruthProofResult {
@@ -496,6 +516,46 @@ function parsePackagedComponentManifestById(
   return { xmlPath, manifest: JSON.parse(manifestRaw) };
 }
 
+interface PackagedAppManifestAttrs {
+  name: string;
+  productId: string;
+  version: string;
+  isDomainIsolated: string;
+}
+
+function extractPackagedAppManifestAttrs(sppkgPath: string): PackagedAppManifestAttrs {
+  const xml = execSync(`unzip -p "${sppkgPath}" AppManifest.xml`, { encoding: 'utf8' });
+  const attr = (name: string): string => {
+    // Word-boundary anchor prevents false matches where the attribute name
+    // is a suffix of another attribute (e.g. "Version" inside "SharePointMinVersion").
+    const match = xml.match(new RegExp(`\\b${name}="([^"]+)"`));
+    if (!match) {
+      throw new Error(`AppManifest.xml is missing required attribute ${name}`);
+    }
+    return match[1];
+  };
+  return {
+    name: attr('Name'),
+    productId: attr('ProductID'),
+    version: attr('Version'),
+    isDomainIsolated: attr('IsDomainIsolated'),
+  };
+}
+
+type HbPublisherDeploymentModelKind = 'site-scoped-webpart' | 'tenant-scoped-webpart';
+
+function deriveDeploymentModelKind(sourcePackageSolution: any): HbPublisherDeploymentModelKind {
+  return sourcePackageSolution?.solution?.skipFeatureDeployment === true
+    ? 'tenant-scoped-webpart'
+    : 'site-scoped-webpart';
+}
+
+function derivePublisherDiscoveryPosture(sourceManifest: any): { hiddenFromToolbox: boolean } {
+  const preconfigured = sourceManifest?.preconfiguredEntries;
+  const first = Array.isArray(preconfigured) ? preconfigured[0] : undefined;
+  return { hiddenFromToolbox: first?.hiddenFromToolbox === true };
+}
+
 function buildHbPackageTruthProof(
   root: string,
   sppkgPath: string,
@@ -509,6 +569,7 @@ function buildHbPackageTruthProof(
   domain: string,
   runtimeMarker: PackageRuntimeMarker,
   criticalRuntimePaths: readonly string[],
+  hbPublisherInputs?: HbPublisherPostureInputs,
 ): BuildHbPackageTruthProofResult {
   const structuralDetails: string[] = [];
   const freshnessDetails: string[] = [];
@@ -719,6 +780,114 @@ function buildHbPackageTruthProof(
     semanticDetails.push('No critical runtime source fingerprints were captured');
   }
 
+  let deploymentPosture: HbPackageTruthProof['deploymentPosture'] | undefined;
+  let deploymentPostureAlignment: HbPackageTruthProof['checks']['deploymentPostureAlignment'];
+  let deploymentPosturePass = true;
+
+  if (hbPublisherInputs) {
+    const {
+      sourcePackageSolution,
+      sourceManifest,
+      emittedDeploymentModelKind,
+      emittedHiddenFromToolbox,
+    } = hbPublisherInputs;
+    const postureDetails: string[] = [];
+    const solutionVersion = String(sourcePackageSolution?.solution?.version ?? '');
+    const solutionId = String(sourcePackageSolution?.solution?.id ?? '');
+    const featureId = String(sourcePackageSolution?.solution?.features?.[0]?.id ?? '');
+    const webPartId = String(sourceManifest?.id ?? '');
+    const skipFeatureDeployment = sourcePackageSolution?.solution?.skipFeatureDeployment === true;
+    const sourceDiscovery = derivePublisherDiscoveryPosture(sourceManifest);
+
+    let appManifestAttrs: PackagedAppManifestAttrs | null = null;
+    try {
+      appManifestAttrs = extractPackagedAppManifestAttrs(sppkgPath);
+    } catch (err) {
+      deploymentPosturePass = false;
+      postureDetails.push(`A1/A2: cannot read packaged AppManifest.xml — ${(err as Error).message}`);
+    }
+
+    // A1: solution version (source package-solution.json) vs packaged AppManifest.xml Version attribute
+    if (appManifestAttrs) {
+      if (appManifestAttrs.version === solutionVersion) {
+        postureDetails.push(`A1: packaged AppManifest Version matches source (${solutionVersion})`);
+      } else {
+        deploymentPosturePass = false;
+        postureDetails.push(
+          `A1: packaged AppManifest Version ${appManifestAttrs.version} does not match source ${solutionVersion}`,
+        );
+      }
+    }
+
+    // A2: solution ID (source) vs packaged AppManifest.xml ProductID attribute (case-insensitive)
+    if (appManifestAttrs) {
+      if (appManifestAttrs.productId.toLowerCase() === solutionId.toLowerCase()) {
+        postureDetails.push(`A2: packaged AppManifest ProductID matches source solution.id (${solutionId})`);
+      } else {
+        deploymentPosturePass = false;
+        postureDetails.push(
+          `A2: packaged AppManifest ProductID ${appManifestAttrs.productId} does not match source solution.id ${solutionId}`,
+        );
+      }
+    }
+
+    // A3: feature ID — archive must contain feature_<sourceFeatureId>.xml
+    const expectedFeatureXml = `feature_${featureId}.xml`;
+    const hasFeatureXml = archivePaths.some((entry) => entry.endsWith(expectedFeatureXml));
+    if (featureId && hasFeatureXml) {
+      postureDetails.push(`A3: packaged archive contains ${expectedFeatureXml} for source feature ID`);
+    } else {
+      deploymentPosturePass = false;
+      postureDetails.push(
+        `A3: packaged archive missing ${expectedFeatureXml} (source feature ID ${featureId || '<missing>'} not preserved)`,
+      );
+    }
+
+    // A4: emitted deployment model kind matches source-derived kind
+    const derivedKind = deriveDeploymentModelKind(sourcePackageSolution);
+    if (emittedDeploymentModelKind === derivedKind) {
+      postureDetails.push(
+        `A4: emitted deploymentModel.kind (${emittedDeploymentModelKind}) matches source-derived kind from skipFeatureDeployment=${skipFeatureDeployment}`,
+      );
+    } else {
+      deploymentPosturePass = false;
+      postureDetails.push(
+        `A4: emitted deploymentModel.kind ${emittedDeploymentModelKind} does not match source-derived kind ${derivedKind} (skipFeatureDeployment=${skipFeatureDeployment})`,
+      );
+    }
+
+    // A5: source preconfiguredEntries[0].hiddenFromToolbox matches packaged preconfiguredEntries[0].hiddenFromToolbox
+    const packagedWebpart = manifestComparisons.find((c) => c.manifestId === webPartId);
+    const packagedPreconfigured = packagedWebpart?.fields?.preconfiguredEntries?.actual as unknown;
+    const packagedFirstEntry = Array.isArray(packagedPreconfigured) ? packagedPreconfigured[0] : undefined;
+    const packagedHidden =
+      (packagedFirstEntry as { hiddenFromToolbox?: unknown } | undefined)?.hiddenFromToolbox === true;
+    if (sourceDiscovery.hiddenFromToolbox === packagedHidden && emittedHiddenFromToolbox === sourceDiscovery.hiddenFromToolbox) {
+      postureDetails.push(
+        `A5: discovery posture aligned (source=${sourceDiscovery.hiddenFromToolbox}, packaged=${packagedHidden}, emitted-plan=${emittedHiddenFromToolbox})`,
+      );
+    } else {
+      deploymentPosturePass = false;
+      postureDetails.push(
+        `A5: discovery posture drift (source=${sourceDiscovery.hiddenFromToolbox}, packaged=${packagedHidden}, emitted-plan=${emittedHiddenFromToolbox})`,
+      );
+    }
+
+    deploymentPosture = {
+      kind: emittedDeploymentModelKind,
+      skipFeatureDeployment,
+      hiddenFromToolbox: sourceDiscovery.hiddenFromToolbox,
+      solutionVersion,
+      solutionId,
+      featureId,
+      webPartId,
+    };
+    deploymentPostureAlignment = {
+      pass: deploymentPosturePass,
+      details: postureDetails,
+    };
+  }
+
   const proof: HbPackageTruthProof = {
     domain,
     generatedAt: new Date().toISOString(),
@@ -742,6 +911,7 @@ function buildHbPackageTruthProof(
       shimEntries: packagedShimEntries.sort((a, b) => a.fileName.localeCompare(b.fileName)),
     },
     manifestLinkage: manifestComparisons.sort((a, b) => a.manifestId.localeCompare(b.manifestId)),
+    ...(deploymentPosture ? { deploymentPosture } : {}),
     checks: {
       structuralValidity: {
         pass: structuralPass,
@@ -761,10 +931,12 @@ function buildHbPackageTruthProof(
           ? runtimeDetails
           : ['Static runtime guards passed; SharePoint page-hosted runtime still requires live validation'],
       },
+      ...(deploymentPostureAlignment ? { deploymentPostureAlignment } : {}),
     },
   };
 
-  const ok = structuralPass && freshnessPass && semanticPass && runtimePass;
+  const ok =
+    structuralPass && freshnessPass && semanticPass && runtimePass && deploymentPosturePass;
   return { ok, proof };
 }
 
@@ -2280,6 +2452,85 @@ for (const domain of domains) {
       allPassed = false;
       continue;
     }
+    // For hb-publisher, build the deployment plan object and posture inputs
+    // BEFORE computing the package-truth proof, so A4/A5 can compare the
+    // exact emitted plan values against source-derived expectations.
+    let hbPublisherInputs: HbPublisherPostureInputs | undefined;
+    let hbPublisherDeploymentPlan: Record<string, unknown> | undefined;
+    if (domain.dir === 'hb-publisher') {
+      const targetManifest = targetManifests[0]?.json;
+      const publisherShim = generatedShimExpectations[0];
+      if (!targetManifest || !publisherShim) {
+        console.error(`  ❌ ${domain.dir}: missing target manifest or shim expectation for deployment plan`);
+        allPassed = false;
+        continue;
+      }
+      const deploymentModelKind = deriveDeploymentModelKind(domainPkgSolution);
+      const discoveryPosture = derivePublisherDiscoveryPosture(targetManifest);
+      const installBlock = deploymentModelKind === 'site-scoped-webpart'
+        ? {
+          scope: 'Site',
+          command:
+            'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Site -Overwrite -Publish',
+        }
+        : {
+          scope: 'Tenant',
+          command:
+            'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Tenant -Overwrite -Publish',
+        };
+      const discoveryBlock = deploymentModelKind === 'site-scoped-webpart'
+        ? {
+          path: 'modern-page-webpart-picker',
+          note:
+            'After site-scoped install, page authors insert the Article Publisher via the ' +
+            'standard modern page web part picker (Edit page → + → search "Article Publisher").',
+        }
+        : {
+          path: 'tenant-toolbox-discovery',
+          note:
+            'Tenant-scoped deployment: the Article Publisher is available to every site in the ' +
+            'tenant without per-site install. Page authors insert it via the standard modern page ' +
+            'web part picker on any modern page.',
+        };
+      hbPublisherDeploymentPlan = {
+        domain: domain.dir,
+        generatedAt: new Date().toISOString(),
+        packagingRunId: freshnessEvidence.runId,
+        sppkgFile: path.basename(sppkgDest),
+        solution: {
+          name: String(domainPkgSolution?.solution?.name ?? 'hb-publisher'),
+          id: String(domainPkgSolution?.solution?.id ?? ''),
+          version: String(domainPkgSolution?.solution?.version ?? ''),
+        },
+        webpart: {
+          manifestId: targetManifest.id,
+          alias: targetManifest.alias ?? null,
+          entryModuleId: publisherShim.entryModuleId,
+          supportedHosts: targetManifest.supportedHosts ?? DEFAULT_SUPPORTED_HOSTS,
+          hiddenFromToolbox: discoveryPosture.hiddenFromToolbox,
+        },
+        runtime: {
+          globalName: `__hbIntel_${domain.camel}`,
+          appBundleName: bundleName,
+          appBaseBundleName: baseBundleName,
+          shellEntryFileName: publisherShim.shimFileName,
+          shellEntryHash: publisherShim.shimFileHash,
+        },
+        deploymentModel: {
+          kind: deploymentModelKind,
+          runbook: 'apps/hb-publisher/deployment/README.md',
+          install: installBlock,
+          discovery: discoveryBlock,
+        },
+      };
+      hbPublisherInputs = {
+        sourcePackageSolution: domainPkgSolution,
+        sourceManifest: targetManifest,
+        emittedDeploymentModelKind: deploymentModelKind,
+        emittedHiddenFromToolbox: discoveryPosture.hiddenFromToolbox,
+      };
+    }
+
     const packageTruth = buildHbPackageTruthProof(
       ROOT,
       sppkgDest,
@@ -2293,6 +2544,7 @@ for (const domain of domains) {
       domain.dir,
       runtimeMarker,
       criticalRuntimePaths,
+      hbPublisherInputs,
     );
     const packageTruthPath = path.join(OUTPUT_DIR, `${domain.dir}-package-truth-proof.json`);
     fs.writeFileSync(packageTruthPath, `${JSON.stringify(packageTruth.proof, null, 2)}\n`);
@@ -2303,55 +2555,10 @@ for (const domain of domains) {
       continue;
     }
 
-    if (domain.dir === 'hb-publisher') {
+    if (domain.dir === 'hb-publisher' && hbPublisherDeploymentPlan) {
       const targetManifest = targetManifests[0]?.json;
-      const publisherShim = generatedShimExpectations[0];
-      if (!targetManifest || !publisherShim) {
-        console.error(`  ❌ ${domain.dir}: missing target manifest or shim expectation for deployment plan`);
-        allPassed = false;
-        continue;
-      }
-      const deploymentPlan = {
-        domain: domain.dir,
-        generatedAt: new Date().toISOString(),
-        packagingRunId: freshnessEvidence.runId,
-        sppkgFile: path.basename(sppkgDest),
-        solution: {
-          name: 'hb-publisher',
-          id: 'c7b2a144-9d3e-4a71-8e2a-6f9d3c1b7e42',
-        },
-        webpart: {
-          manifestId: targetManifest.id,
-          alias: targetManifest.alias ?? null,
-          entryModuleId: publisherShim.entryModuleId,
-          supportedHosts: targetManifest.supportedHosts ?? DEFAULT_SUPPORTED_HOSTS,
-          hiddenFromToolbox: targetManifest.hiddenFromToolbox === true,
-        },
-        runtime: {
-          globalName: `__hbIntel_${domain.camel}`,
-          appBundleName: bundleName,
-          appBaseBundleName: baseBundleName,
-          shellEntryFileName: publisherShim.shimFileName,
-          shellEntryHash: publisherShim.shimFileHash,
-        },
-        deploymentModel: {
-          kind: 'site-scoped-webpart',
-          runbook: 'apps/hb-publisher/deployment/README.md',
-          install: {
-            scope: 'Site',
-            command:
-              'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Site -Overwrite -Publish',
-          },
-          discovery: {
-            path: 'modern-page-webpart-picker',
-            note:
-              'After site-scoped install, page authors insert the Article Publisher via the ' +
-              'standard modern page web part picker (Edit page → + → search "Article Publisher").',
-          },
-        },
-      };
       const deploymentPlanPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-deployment-plan.json`);
-      fs.writeFileSync(deploymentPlanPath, `${JSON.stringify(deploymentPlan, null, 2)}\n`);
+      fs.writeFileSync(deploymentPlanPath, `${JSON.stringify(hbPublisherDeploymentPlan, null, 2)}\n`);
       console.log(`  ✓ Hosted deployment plan written: ${deploymentPlanPath}`);
 
       const hostedLoadProofPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-load-proof.json`);
