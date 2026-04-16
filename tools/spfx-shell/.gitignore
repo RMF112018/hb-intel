@@ -3,6 +3,16 @@ lib/
 dist/
 temp/
 sharepoint/
+# SPFx gulp/webpack toolchain output (compiled shell asset, per-webpart
+# shell-entry copies, compiled manifests, component-dependency audit).
+# Reproduced on every packaging run by tools/build-spfx-package.ts — must
+# not enter version control.
+release/
+# Vite-propagated domain bundles, stylesheets, and static assets staged
+# into assets/ by the orchestrator before gulp package-solution runs.
 assets/*.js
 assets/*.css
+assets/*.png
+assets/*.jpg
+assets/*.svg
 package-lock.json
