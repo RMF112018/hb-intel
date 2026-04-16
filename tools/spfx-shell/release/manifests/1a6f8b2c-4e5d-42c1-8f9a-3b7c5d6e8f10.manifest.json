@@ -20,7 +20,7 @@
         "default": "Article Publisher"
       },
       "description": {
-        "default": "Authoring surface for structured article publishing on HBCentral. Supports Project Spotlight article workflows; additional destinations are not wired in the current implementation."
+        "default": "Authoring surface for structured article publishing on HBCentral. Current release scope: Project Spotlight articles — additional destinations are explicitly blocked until they are wired in a later release."
       },
       "officeFabricIconFontName": "PageEdit",
       "hiddenFromToolbox": true,
@@ -50,7 +50,7 @@
       },
       "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10_1.0.0": {
         "type": "path",
-        "path": "shell-entry-1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10-2c9cad34.js"
+        "path": "shell-entry-1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10-3fd81f9c.js"
       }
     }
   }

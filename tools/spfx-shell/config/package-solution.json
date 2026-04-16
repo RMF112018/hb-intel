@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-publisher",
     "id": "c7b2a144-9d3e-4a71-8e2a-6f9d3c1b7e42",
-    "version": "1.0.0.1",
+    "version": "1.0.0.60",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -19,7 +19,7 @@
         "default": "HB Intel Article Publisher"
       },
       "longDescription": {
-        "default": "HB Intel Article Publisher — authoring surface for structured article publishing (Project Spotlight and future destinations). Previously bundled inside hb-webparts.sppkg; extracted to its own solution so it can be versioned and deployed independently."
+        "default": "HB Intel Article Publisher — authoring surface for structured article publishing on HBCentral. Current live publishing scope: Project Spotlight articles. Other destinations declared in the data model are explicitly blocked at the adapter, validation, and readiness layers until they are wired in a later release."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,10 +27,10 @@
     },
     "features": [
       {
-        "title": "hb-publisher Feature",
-        "description": "Deploys the HB Intel Article Publisher webpart assets.",
+        "title": "Article Publisher",
+        "description": "Deploys the Article Publisher webpart assets to HBCentral.",
         "id": "b41e97f8-3c2d-4a59-9e12-d8a7f2b6c901",
-        "version": "1.0.0.1",
+        "version": "1.0.0.60",
         "componentIds": [
           "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10"
         ]

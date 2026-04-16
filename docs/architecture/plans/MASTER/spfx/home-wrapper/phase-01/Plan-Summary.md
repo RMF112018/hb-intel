@@ -1,117 +1,119 @@
-# Plan Summary — HB Homepage Orchestrator
+# Plan Summary — Upgraded Phase 01 Package for HB Homepage
 
 ## Objective
 
-Create a new `hb-homepage` SPFx component inside `apps/hb-webparts` that becomes the single composed homepage surface for selected public homepage modules while keeping `hbSignatureHero` as an independent flagship top-band webpart.
+Deliver an execution-grade prompt package for adding a new `hb-homepage` SPFx webpart inside `apps/hb-webparts` that becomes a composed homepage operating layer for selected public homepage modules while keeping `hbSignatureHero` independent.
 
 ## Locked target outcome
 
-The final homepage composition should be:
+When the package is fully executed:
 
-1. `hbSignatureHero` rendered as its own independent full-width flagship hero
-2. `hb-homepage` rendered as the single composed homepage operating layer beneath or adjacent to the hero, depending on the final page composition
-3. `hb-homepage` responsible for rendering and orchestrating:
-   - `HbKudos`
+1. `hbSignatureHero` remains its own independent flagship top-band webpart.
+2. A new `hb-homepage` webpart exists as a first-class packaged SPFx component.
+3. `hb-homepage` orchestrates the following public modules inside a governed homepage shell:
+   - `CompanyPulse`
    - `LeadershipMessage`
    - `ProjectPortfolioSpotlight`
    - `PeopleCulturePublic`
-   - `CompanyPulse`
+   - `HbKudos`
+4. The existing standalone public webparts remain operational unless this package explicitly and safely changes them.
+5. The runtime and packaging pipeline continue to work without regression.
 
-## Repo-truth basis
+## Repo-truth posture
 
-This plan is based on the live `apps/hb-webparts` implementation pattern in which:
+This package is written against the live repo reality, not a greenfield assumption.
 
-- `src/mount.tsx` currently dispatches many homepage-facing webparts by GUID
-- `src/homepage/ReferenceHomepageComposition.tsx` already demonstrates a composed homepage pattern, but not as the production host
-- several target homepage modules are already thin consumers over shared `@hbc/ui-kit/homepage` surface families
-- `tools/build-spfx-package.ts` already handles complex hb-webparts packaging, manifest cloning, shim generation, and preservation of `supportsFullBleed` where declared
-- `HbKudos` is materially more workflow-heavy than the other candidate absorbed modules, so it should be integrated after the shell and simpler modules are in place
+The live repo already contains:
 
-## Core architectural recommendation
+- a rich `mount.tsx` dispatcher in `apps/hb-webparts/src/mount.tsx`
+- a canonical reference homepage composition in `apps/hb-webparts/src/homepage/ReferenceHomepageComposition.tsx`
+- target modules that are already mature runtimes, with several already acting as thin consumers over `@hbc/ui-kit/homepage`
+- a split People/Kudos runtime model that must be preserved
+- a custom `tools/build-spfx-package.ts` pipeline that performs Vite build, SPFx shell packaging, manifest/shim handling, and package verification
+- a governed premium stack already present centrally in `packages/ui-kit`
 
-### Create a new orchestrator
+## Governing doctrine
 
-Create a first-class homepage host webpart named `hb-homepage` under `apps/hb-webparts/src/webparts/`.
+This package is controlled by:
 
-This new host should:
+- `UI-Doctrine-SPFx-Governing-Standard`
+- `UI-Doctrine-SPFx-Homepage-Overlay`
 
-- own page-canvas layout for the absorbed modules
-- define the zone order and composition rhythm
-- consume the embedded homepage modules as feature blocks, not as independent page composition units
-- establish shared host context where useful
-- standardize outer spacing, density, loading, and empty/error behavior
-- keep module internals modular and reusable
+Those doctrine files are binding for:
 
-### Keep the signature hero separate
+- host-aware composition
+- import discipline
+- full-width posture
+- reduced-motion/accessibility requirements
+- premium stack usage
+- anti-generic-card-grid posture
+- manifest adjacency and packaging intent
 
-`hbSignatureHero` remains independent and continues to own the flagship hero role. The new homepage host must not duplicate or compete with that top-band authority.
+## Research-backed technical posture
 
-### Prefer communication-site full-width posture
+The package assumes and enforces the following:
 
-The composed homepage should target a supported SharePoint hosting posture rather than shell hacks or DOM stitching.
+- full-width-capable webparts must explicitly declare `supportsFullBleed: true` if they are intended to be placeable in a SharePoint full-width column
+- full-width behavior must be validated on a deployed communication site, not the workbench
+- the live repo’s React 18 + Vite + custom SPFx shell model must be preserved unless a prompt explicitly broadens scope to refactor it
+- doctrine-mandated premium-stack behavior should preferentially be consumed from `@hbc/ui-kit/homepage` and existing shared dependencies, not duplicated casually in `apps/hb-webparts`
 
-## Scope by module
+## Structural implementation recommendation
 
-### Lowest integration effort
-- `CompanyPulse`
-- `LeadershipMessage`
-- `ProjectPortfolioSpotlight`
+### Additive orchestrator, not destructive replacement
 
-These already behave close to embedded feature consumers and should require mostly shell contract adaptation.
+Phase 01 should add `hb-homepage` as a new homepage webpart. It should not delete, silently break, or ambiguously retire the existing standalone public webparts.
 
-### Moderate integration effort
-- `PeopleCulturePublic`
+### Shell owns page-canvas composition
 
-This should be absorbed after shell contract definition because it still carries split/legacy config bridging that may need tightening for orchestrator use.
+`hb-homepage` owns:
 
-### Highest integration effort
-- `HbKudos`
+- zone order
+- outer layout
+- shell rhythm
+- section-aware spacing
+- sparse/loading/error posture
+- shell-level responsiveness
+- shell-level reduced-motion and host-safe behavior
 
-This is the most sophisticated absorbed module and should be integrated after the shell is proven. It needs an explicit embedded-mode posture so it remains premium without leaking standalone layout assumptions.
+### Embedded modules keep product logic
 
-## Sequencing logic
+The embedded modules continue to own:
 
-### Phase 1 — authority, architecture, and host creation
-- lock governing files and repo-truth seams
-- define the `hb-homepage` architecture and contracts
-- create the new SPFx host component and manifest
-- wire a shell composition path
+- their internal feature logic
+- their internal view-model shaping
+- their internal product-level interactions
+- their internal content interpretation
 
-### Phase 2 — absorb simpler public modules
-- embed Company Pulse
-- embed Leadership Message
-- embed Project Portfolio Spotlight
+The shell does **not** become a rewrite of each feature.
 
-### Phase 3 — absorb People & Culture
-- embed `PeopleCulturePublic`
-- tighten config and presentation boundaries as needed
+### Keep hero independent
 
-### Phase 4 — absorb Kudos
-- embed `HbKudos`
-- add any embedded-host contract needed for layout and spacing safety
+`hbSignatureHero` remains independent and must not be absorbed, visually competed with, or redundantly recreated inside `hb-homepage`.
 
-### Phase 5 — mount, packaging, and hosted validation
-- wire `mount.tsx`
-- update packaging seams in `tools/build-spfx-package.ts`
-- validate manifest/package/runtime behavior
-- perform hosted vetting and closure
+## Package structure
 
-## Deliverable expectations for each prompt
-
-Every prompt in this package must produce:
-
-- a clear summary of repo-truth findings relevant to the assigned scope
-- exact files changed
-- exact architectural effect of those changes
-- explicit statement of what remains open for the next prompt
-- no hidden carryover scope
+1. Prompt 01 — authority and repo-truth lock
+2. Prompt 02 — SharePoint/SPFx host reality, compatibility, dependency, and accessibility lock
+3. Prompt 03 — architecture and shell/embedded contract
+4. Prompt 04 — create `hb-homepage` host and manifest
+5. Prompt 05 — embed `CompanyPulse`, `LeadershipMessage`, `ProjectPortfolioSpotlight`
+6. Prompt 06 — embed `PeopleCulturePublic`
+7. Prompt 07 — embed `HbKudos`
+8. Prompt 08 — mount/runtime/manifest/packaging integration
+9. Prompt 09 — hosted validation and hard closure
 
 ## Non-negotiable guardrails
 
-- Do not collapse this into CSS-only layout wrapping
-- Do not preserve weak standalone page-placement assumptions
-- Do not let absorbed modules continue to own outer page layout
-- Do not let the shell duplicate SharePoint chrome
-- Do not let the shell compete with the flagship hero
-- Do not skip packaging-proof work
-- Do not close the sequence without hosted validation
+- Do not collapse the initiative into CSS-only layout wrapping.
+- Do not let `hb-homepage` duplicate SharePoint shell chrome.
+- Do not let embedded modules continue to own outer page composition once they are shell-rendered.
+- Do not break or silently remove existing standalone webparts during this phase.
+- Do not treat workbench rendering as proof of full-width SharePoint behavior.
+- Do not casually add local dependencies already governed and available through `@hbc/ui-kit`.
+- Do not close the package without package/runtime proof.
+- Do not leave meaningful “follow-up later” work inside Phase 01 scope.
+
+## Definition of package success
+
+This upgraded package succeeds when a serious local code agent can execute it without rediscovering missing context, without inventing key decisions, and without weakening runtime, doctrine, packaging, or accessibility discipline.
