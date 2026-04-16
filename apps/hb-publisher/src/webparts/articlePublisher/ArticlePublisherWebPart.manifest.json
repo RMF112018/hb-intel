@@ -18,7 +18,7 @@
         "default": "Authoring surface for structured article publishing on HBCentral. Current release scope: Project Spotlight articles — additional destinations are explicitly blocked until they are wired in a later release."
       },
       "officeFabricIconFontName": "PageEdit",
-      "hiddenFromToolbox": true,
+      "hiddenFromToolbox": false,
       "properties": {}
     }
   ]
