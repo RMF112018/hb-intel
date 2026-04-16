@@ -15,6 +15,14 @@
  * border-right on the group wrapper, so the hierarchy is announced
  * correctly and respects the shared token language.
  *
+ * Phase-17 wave-02 prompt-02: the link authoring affordance is now a
+ * proper anchored popover rather than an in-flow banner. It is anchored
+ * to the Link toolbar button via `useAnchoredOverlay`, rendered through
+ * `FloatingPortal` + `FloatingFocusManager` for focus trap + outside
+ * press dismissal, and animated with `motion/react` on open / close.
+ * Focus returns to the editor on apply, remove, cancel, and dismiss so
+ * the authoring flow stays continuous.
+ *
  * Keyboard model: W3C toolbar pattern with roving tabindex. Only the
  * currently-focused control is in the tab order; ArrowLeft /
  * ArrowRight / Home / End move focus inside the toolbar and do not
@@ -23,6 +31,11 @@
 
 import * as React from 'react';
 import type { Editor } from '@tiptap/react';
+import {
+  FloatingFocusManager,
+  FloatingPortal,
+} from '@floating-ui/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   Bold,
   Heading2,
@@ -44,6 +57,7 @@ import {
   PublisherSeparator,
   PublisherTooltip,
   PublisherTooltipProvider,
+  useAnchoredOverlay,
 } from '../sharedChrome/index.js';
 import styles from './storyBodyEditor.module.css';
 
@@ -71,6 +85,30 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
   const [linkError, setLinkError] = React.useState<string | undefined>(undefined);
   const [focusIndex, setFocusIndex] = React.useState(0);
   const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+
+  const closeLinkPrompt = React.useCallback(
+    (opts?: { returnToEditor?: boolean }) => {
+      setLinkPromptOpen(false);
+      setLinkDraft('');
+      setLinkTextDraft('');
+      setNeedsLinkText(false);
+      setLinkError(undefined);
+      if (opts?.returnToEditor !== false) {
+        editor?.commands.focus();
+      }
+    },
+    [editor],
+  );
+
+  const linkOverlay = useAnchoredOverlay({
+    open: linkPromptOpen,
+    onOpenChange: (next) => {
+      if (!next) closeLinkPrompt();
+    },
+    placement: 'bottom-start',
+    offsetPx: 8,
+    role: 'dialog',
+  });
 
   if (!editor) return null;
 
@@ -135,18 +173,12 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
         .setLink({ href: normalised })
         .run();
     }
-    setLinkPromptOpen(false);
-    setLinkDraft('');
-    setLinkTextDraft('');
-    setNeedsLinkText(false);
-    setLinkError(undefined);
+    closeLinkPrompt();
   };
 
   const removeLink = () => {
     editor.chain().focus().extendMarkRange('link').unsetLink().run();
-    setLinkPromptOpen(false);
-    setLinkDraft('');
-    setLinkError(undefined);
+    closeLinkPrompt();
   };
 
   const controls: readonly ToolbarControl[] = [
@@ -294,11 +326,15 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
           const accessible = control.keyboardHint
             ? `${control.label} (${control.keyboardHint})`
             : control.label;
+          const isLinkControl = control.key === 'link';
           return (
             <PublisherTooltip key={control.key} label={accessible}>
               <button
                 ref={(el) => {
                   buttonRefs.current[flatIndex] = el;
+                  if (isLinkControl) {
+                    linkOverlay.refs.setReference(el);
+                  }
                 }}
                 type="button"
                 className={`${styles.toolbarBtn} ${
@@ -309,6 +345,8 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
                 disabled={control.isDisabled}
                 aria-pressed={control.isActive ? 'true' : 'false'}
                 aria-label={accessible}
+                aria-haspopup={isLinkControl ? 'dialog' : undefined}
+                aria-expanded={isLinkControl ? linkPromptOpen : undefined}
                 tabIndex={flatIndex === safeFocusIndex ? 0 : -1}
               >
                 <span className={styles.toolbarIcon}>
@@ -320,77 +358,91 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
         })}
       </div>
 
-      {linkPromptOpen && (
-        <div className={styles.linkPromptRow} role="group" aria-label="Insert link">
-          {needsLinkText && (
-            <input
-              type="text"
-              className={styles.linkPromptInput}
-              placeholder="Link text"
-              value={linkTextDraft}
-              onChange={(e) => setLinkTextDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  setLinkPromptOpen(false);
-                  editor.commands.focus();
-                }
-              }}
-              aria-label="Visible link text"
-              autoFocus
-            />
+      <FloatingPortal>
+        <AnimatePresence>
+          {linkPromptOpen && (
+            <FloatingFocusManager
+              context={linkOverlay.context}
+              initialFocus={0}
+              returnFocus={false}
+              modal={false}
+            >
+              <motion.div
+                {...linkOverlay.getFloatingProps({
+                  ref: linkOverlay.refs.setFloating,
+                  className: styles.linkPromptPopover,
+                  style: linkOverlay.floatingStyles,
+                  role: 'dialog',
+                  'aria-label': 'Insert link',
+                })}
+                initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                transition={{ type: 'tween', duration: 0.14, ease: 'easeOut' }}
+              >
+                {needsLinkText && (
+                  <label className={styles.linkPromptField}>
+                    <span className={styles.linkPromptFieldLabel}>Link text</span>
+                    <input
+                      type="text"
+                      className={styles.linkPromptInput}
+                      placeholder="Link text"
+                      value={linkTextDraft}
+                      onChange={(e) => setLinkTextDraft(e.target.value)}
+                      aria-label="Visible link text"
+                    />
+                  </label>
+                )}
+                <label className={styles.linkPromptField}>
+                  <span className={styles.linkPromptFieldLabel}>URL</span>
+                  <input
+                    type="text"
+                    className={styles.linkPromptInput}
+                    placeholder="https://… or mailto: or /tenant-path"
+                    value={linkDraft}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setLinkDraft(next);
+                      if (linkError && (next.length === 0 || isAllowedHref(next.trim()))) {
+                        setLinkError(undefined);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyLink();
+                      }
+                    }}
+                    aria-label="Link URL"
+                  />
+                </label>
+                {linkError && (
+                  <span className={styles.linkPromptError} role="alert">
+                    {linkError}
+                  </span>
+                )}
+                <div className={styles.linkPromptActions}>
+                  <PublisherButton variant="primary" size="sm" onClick={applyLink}>
+                    Apply link
+                  </PublisherButton>
+                  {editor.isActive('link') && (
+                    <PublisherButton
+                      variant="danger"
+                      size="sm"
+                      onClick={removeLink}
+                    >
+                      Remove link
+                    </PublisherButton>
+                  )}
+                  <PublisherButton size="sm" onClick={() => closeLinkPrompt()}>
+                    Cancel
+                  </PublisherButton>
+                </div>
+              </motion.div>
+            </FloatingFocusManager>
           )}
-          <input
-            type="text"
-            className={styles.linkPromptInput}
-            placeholder="https://… or mailto: or /tenant-path"
-            value={linkDraft}
-            onChange={(e) => {
-              const next = e.target.value;
-              setLinkDraft(next);
-              if (linkError && (next.length === 0 || isAllowedHref(next.trim()))) {
-                setLinkError(undefined);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                applyLink();
-              } else if (e.key === 'Escape') {
-                e.preventDefault();
-                setLinkPromptOpen(false);
-                editor.commands.focus();
-              }
-            }}
-            aria-label="Link URL"
-            autoFocus={!needsLinkText}
-          />
-          <PublisherButton variant="primary" size="sm" onClick={applyLink}>
-            Apply link
-          </PublisherButton>
-          {editor.isActive('link') && (
-            <PublisherButton variant="danger" size="sm" onClick={removeLink}>
-              Remove link
-            </PublisherButton>
-          )}
-          <PublisherButton
-            size="sm"
-            onClick={() => {
-              setLinkPromptOpen(false);
-              setLinkDraft('');
-              setLinkTextDraft('');
-              setNeedsLinkText(false);
-              setLinkError(undefined);
-              editor.commands.focus();
-            }}
-          >
-            Cancel
-          </PublisherButton>
-          {linkError && (
-            <span className={styles.linkPromptError} role="alert">{linkError}</span>
-          )}
-        </div>
-      )}
+        </AnimatePresence>
+      </FloatingPortal>
     </PublisherTooltipProvider>
   );
 }

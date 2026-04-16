@@ -1,10 +1,14 @@
 /* AssetLibraryBrowser — tenant-safe image selection modal.
+ *
+ * Prompt-02 rebuild: overlay, backdrop, and dialog are split so the
+ * floating-ui modal stack can layer motion cleanly — the overlay owns
+ * fixed positioning + centering, the backdrop owns the darken tint
+ * (animated independently), and the dialog owns the premium surface.
  */
 
-.backdrop {
+.overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 40, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,8 +16,17 @@
   z-index: 1000;
 }
 
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.45);
+  backdrop-filter: blur(2px);
+}
+
 .dialog {
+  position: relative;
   background: var(--hb-surface-1);
+  border: 1px solid var(--hb-border-subtle);
   border-radius: var(--hb-radius-xl);
   box-shadow: var(--hb-elevation-2);
   width: min(860px, 100%);
@@ -21,7 +34,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--hb-space-md);
-  padding: var(--hb-space-lg) var(--hb-space-lg) var(--hb-space-lg) var(--hb-space-lg);
+  padding: var(--hb-space-lg);
 }
 
 .header {

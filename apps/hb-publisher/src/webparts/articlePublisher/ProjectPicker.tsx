@@ -21,8 +21,16 @@
  * dismissal are handled by the governed `useAnchoredOverlay` hook
  * (`@floating-ui/react`) so later overlay seams share one anchored
  * positioning contract.
+ *
+ * Phase-17 wave-02 prompt-02: the dropdown surface is now rendered
+ * through a `FloatingPortal` so it cannot be clipped by parent
+ * overflow containers, and open/close choreography is supplied by
+ * `motion/react` (AnimatePresence) so the surface reads as a governed
+ * product overlay rather than a raw absolute-positioned panel.
  */
 import * as React from 'react';
+import { FloatingPortal } from '@floating-ui/react';
+import { AnimatePresence, motion } from 'motion/react';
 import type {
   ProjectLookupEntry,
   ProjectLookupSearchFn,
@@ -230,80 +238,88 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
               category, and promotion eligibility.
             </p>
           )}
-          {showDropdown && (
-            <div
-              {...getFloatingProps({
-                ref: overlayRefs.setFloating,
-                id: LISTBOX_ID,
-                role: 'listbox',
-                'aria-label': 'Project search results',
-                className: styles.projectPickerDropdown,
-                style: floatingStyles,
-              })}
-            >
-              {status === 'loading' && (
-                <div className={styles.projectPickerHint} role="status" aria-live="polite">
-                  <span className={styles.projectPickerSpinner} aria-hidden="true" />
-                  <span>Searching HBCentral for “{query.trim()}”…</span>
-                </div>
-              )}
-              {status === 'error' && (
-                <div className={styles.projectPickerError} role="alert">
-                  <strong>Project lookup is temporarily unavailable.</strong>
-                  <span>
-                    Check your connection to HBCentral and try again.
-                    {error ? (
-                      <span className={styles.projectPickerErrorDetail}> ({error})</span>
-                    ) : null}
-                  </span>
-                </div>
-              )}
-              {status === 'ready' && results.length === 0 && (
-                <div className={styles.projectPickerHint} role="status" aria-live="polite">
-                  No projects match “{query.trim()}”. Try a project number or a
-                  partial name.
-                </div>
-              )}
-              {results.length > 0 && (
-                <div className={styles.projectPickerResultCount} aria-live="polite">
-                  {results.length === 1
-                    ? '1 project matches.'
-                    : `${results.length} projects match.`}
-                </div>
-              )}
-              {results.map((entry, index) => (
-                <div
-                  key={entry.projectId}
-                  id={optionId(index)}
-                  ref={index === activeIndex ? activeOptionRef : undefined}
-                  role="option"
-                  aria-selected={index === activeIndex}
-                  className={
-                    index === activeIndex
-                      ? `${styles.projectPickerOption} ${styles.projectPickerOptionActive}`
-                      : styles.projectPickerOption
-                  }
-                  onMouseEnter={() => setActiveIndex(index)}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                  }}
-                  onClick={() => handleSelect(entry)}
+          <FloatingPortal>
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  {...getFloatingProps({
+                    ref: overlayRefs.setFloating,
+                    id: LISTBOX_ID,
+                    role: 'listbox',
+                    'aria-label': 'Project search results',
+                    className: styles.projectPickerDropdown,
+                    style: floatingStyles,
+                  })}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ type: 'tween', duration: 0.12, ease: 'easeOut' }}
                 >
-                  <span className={styles.projectPickerOptionName}>
-                    {entry.projectName}
-                  </span>
-                  <span className={styles.projectPickerOptionMeta}>
-                    {[
-                      entry.projectNumber,
-                      entry.projectLocation,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ') || 'No number or location on file'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+                  {status === 'loading' && (
+                    <div className={styles.projectPickerHint} role="status" aria-live="polite">
+                      <span className={styles.projectPickerSpinner} aria-hidden="true" />
+                      <span>Searching HBCentral for “{query.trim()}”…</span>
+                    </div>
+                  )}
+                  {status === 'error' && (
+                    <div className={styles.projectPickerError} role="alert">
+                      <strong>Project lookup is temporarily unavailable.</strong>
+                      <span>
+                        Check your connection to HBCentral and try again.
+                        {error ? (
+                          <span className={styles.projectPickerErrorDetail}> ({error})</span>
+                        ) : null}
+                      </span>
+                    </div>
+                  )}
+                  {status === 'ready' && results.length === 0 && (
+                    <div className={styles.projectPickerHint} role="status" aria-live="polite">
+                      No projects match “{query.trim()}”. Try a project number or a
+                      partial name.
+                    </div>
+                  )}
+                  {results.length > 0 && (
+                    <div className={styles.projectPickerResultCount} aria-live="polite">
+                      {results.length === 1
+                        ? '1 project matches.'
+                        : `${results.length} projects match.`}
+                    </div>
+                  )}
+                  {results.map((entry, index) => (
+                    <div
+                      key={entry.projectId}
+                      id={optionId(index)}
+                      ref={index === activeIndex ? activeOptionRef : undefined}
+                      role="option"
+                      aria-selected={index === activeIndex}
+                      className={
+                        index === activeIndex
+                          ? `${styles.projectPickerOption} ${styles.projectPickerOptionActive}`
+                          : styles.projectPickerOption
+                      }
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                      }}
+                      onClick={() => handleSelect(entry)}
+                    >
+                      <span className={styles.projectPickerOptionName}>
+                        {entry.projectName}
+                      </span>
+                      <span className={styles.projectPickerOptionMeta}>
+                        {[
+                          entry.projectNumber,
+                          entry.projectLocation,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ') || 'No number or location on file'}
+                      </span>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </FloatingPortal>
         </>
       )}
     </div>

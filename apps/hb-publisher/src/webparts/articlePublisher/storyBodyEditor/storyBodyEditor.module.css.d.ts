@@ -9,9 +9,12 @@ declare const styles: {
   readonly editorContentEmpty: string;
   readonly placeholder: string;
   readonly editorArea: string;
-  readonly linkPromptRow: string;
+  readonly linkPromptPopover: string;
+  readonly linkPromptField: string;
+  readonly linkPromptFieldLabel: string;
   readonly linkPromptInput: string;
   readonly linkPromptError: string;
+  readonly linkPromptActions: string;
   readonly editorFooter: string;
   readonly editorCounts: string;
   readonly editorSupportHint: string;

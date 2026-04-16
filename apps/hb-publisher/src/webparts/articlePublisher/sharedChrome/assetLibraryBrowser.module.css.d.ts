@@ -1,4 +1,5 @@
 declare const styles: {
+  readonly overlay: string;
   readonly backdrop: string;
   readonly dialog: string;
   readonly header: string;

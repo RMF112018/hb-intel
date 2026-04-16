@@ -6,13 +6,33 @@
  * `AssetLibrarySearchFn` the host wires in (SharePoint SiteAssets,
  * a curated HBCentral Images list, or any other bounded source).
  *
+ * Phase-17 wave-02 prompt-02 rebuild: the hand-rolled backdrop /
+ * focus-trap / escape-key handling has been replaced by the governed
+ * `@floating-ui/react` modal stack (FloatingPortal + FloatingOverlay
+ * + FloatingFocusManager) so dismiss semantics, focus return, and
+ * stacking are consistent with the rest of the Publisher overlay
+ * system. Open/close choreography is supplied by `motion/react` with
+ * a restrained fade + lift so the modal reads as a deliberate product
+ * surface without becoming theatrical.
+ *
  * Keyboard: native <input type="search"> for the query; arrow keys
- * move focus across result tiles; Enter commits; Escape dismisses.
- * The dialog is rendered with `role="dialog"`, `aria-modal`, and a
- * focus trap anchored to the search input on open.
+ * move focus across result tiles; Enter commits; Escape dismisses via
+ * floating-ui's dismiss layer. The dialog is rendered with
+ * `role="dialog"`, `aria-modal`, and the focus trap is anchored to the
+ * search input on open.
  */
 
 import * as React from 'react';
+import {
+  FloatingFocusManager,
+  FloatingOverlay,
+  FloatingPortal,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useRole,
+} from '@floating-ui/react';
+import { AnimatePresence, motion } from 'motion/react';
 import type {
   AssetLibrarySearchFn,
   AssetLookupEntry,
@@ -49,13 +69,25 @@ export function AssetLibraryBrowser({
   const searchRef = React.useRef<HTMLInputElement | null>(null);
   const tileRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
 
+  const { refs, context } = useFloating({
+    open,
+    onOpenChange: (next) => {
+      if (!next) onRequestClose();
+    },
+  });
+  const dismiss = useDismiss(context, {
+    outsidePressEvent: 'mousedown',
+    escapeKey: true,
+  });
+  const role = useRole(context, { role: 'dialog' });
+  const { getFloatingProps } = useInteractions([dismiss, role]);
+
   React.useEffect(() => {
     if (open) {
       setQuery('');
       setEntries([]);
       setStatus('idle');
       setActiveIndex(0);
-      window.setTimeout(() => searchRef.current?.focus(), 0);
     }
   }, [open]);
 
@@ -121,121 +153,147 @@ export function AssetLibraryBrowser({
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div
-      className={styles.backdrop}
-      role="presentation"
-      onMouseDown={(ev) => {
-        if (ev.target === ev.currentTarget) onRequestClose();
-      }}
-    >
-      <div
-        className={styles.dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onKeyDown={(ev) => {
-          if (ev.key === 'Escape') {
-            ev.preventDefault();
-            onRequestClose();
-          }
-        }}
-      >
-        <header className={styles.header}>
-          <div>
-            <p className={styles.kicker}>Asset library</p>
-            <h2 className={styles.title}>{title}</h2>
-          </div>
-          <PublisherButton size="sm" onClick={onRequestClose} aria-label="Close asset library">
-            Close
-          </PublisherButton>
-        </header>
-
-        <label className={styles.searchField}>
-          <span className={styles.searchLabel}>Search</span>
-          <input
-            ref={searchRef}
-            type="search"
-            className={styles.searchInput}
-            value={query}
-            placeholder="Search by title, subject, or project…"
-            onChange={(ev) => setQuery(ev.target.value)}
-            aria-label="Search the asset library"
-          />
-        </label>
-
-        <div className={styles.statusRow} aria-live="polite">
-          {status === 'loading' && (
-            <>
-              <span className={styles.spinner} aria-hidden="true" />
-              <span>Searching assets…</span>
-            </>
-          )}
-          {status === 'ready' && (
-            <span>
-              {entries.length === 0
-                ? query.trim()
-                  ? `No assets match “${query.trim()}”. Try a different query.`
-                  : 'Browse recent assets or narrow the results with a search.'
-                : entries.length === 1
-                  ? '1 asset available.'
-                  : `${entries.length} assets available.`}
-            </span>
-          )}
-          {status === 'error' && (
-            <span className={styles.error} role="alert">
-              Asset lookup is temporarily unavailable.
-              {error ? <span className={styles.errorDetail}> ({error})</span> : null}
-            </span>
-          )}
-        </div>
-
-        {status === 'ready' && entries.length > 0 && (
-          <PublisherScrollArea className={styles.gridScroll} orientation="vertical">
-            <div
-              className={styles.grid}
-              role="listbox"
-              aria-label="Asset results"
-              onKeyDown={handleGridKey}
+    <AnimatePresence>
+      {open && (
+        <FloatingPortal>
+          <FloatingOverlay
+            lockScroll
+            className={styles.overlay}
+            data-testid="asset-library-overlay"
+          >
+            <motion.div
+              className={styles.backdrop}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.14, ease: 'easeOut' }}
+            />
+            <FloatingFocusManager
+              context={context}
+              initialFocus={searchRef}
+              returnFocus
+              modal
             >
-              {entries.map((entry, index) => (
-                <button
-                  key={entry.assetId}
-                  ref={(el) => {
-                    tileRefs.current[index] = el;
-                  }}
-                  type="button"
-                  role="option"
-                  aria-selected={index === activeIndex}
-                  className={
-                    index === activeIndex
-                      ? `${styles.tile} ${styles.tileActive}`
-                      : styles.tile
-                  }
-                  tabIndex={index === activeIndex ? 0 : -1}
-                  onFocus={() => setActiveIndex(index)}
-                  onClick={() => commit(entry)}
-                >
-                  <span className={styles.thumb}>
-                    <img
-                      src={entry.imageUrl}
-                      alt=""
-                      className={styles.thumbImg}
-                      loading="lazy"
-                    />
-                  </span>
-                  <span className={styles.tileName}>{entry.title}</span>
-                  {entry.source && (
-                    <span className={styles.tileSource}>{entry.source}</span>
+              <motion.div
+                ref={refs.setFloating}
+                {...getFloatingProps({
+                  className: styles.dialog,
+                  'aria-label': title,
+                })}
+                role="dialog"
+                aria-modal="true"
+                initial={{ opacity: 0, scale: 0.97, y: 6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.97, y: 6 }}
+                transition={{ type: 'tween', duration: 0.16, ease: 'easeOut' }}
+              >
+                <header className={styles.header}>
+                  <div>
+                    <p className={styles.kicker}>Asset library</p>
+                    <h2 className={styles.title}>{title}</h2>
+                  </div>
+                  <PublisherButton
+                    size="sm"
+                    onClick={onRequestClose}
+                    aria-label="Close asset library"
+                  >
+                    Close
+                  </PublisherButton>
+                </header>
+
+                <label className={styles.searchField}>
+                  <span className={styles.searchLabel}>Search</span>
+                  <input
+                    ref={searchRef}
+                    type="search"
+                    className={styles.searchInput}
+                    value={query}
+                    placeholder="Search by title, subject, or project…"
+                    onChange={(ev) => setQuery(ev.target.value)}
+                    aria-label="Search the asset library"
+                  />
+                </label>
+
+                <div className={styles.statusRow} aria-live="polite">
+                  {status === 'loading' && (
+                    <>
+                      <span className={styles.spinner} aria-hidden="true" />
+                      <span>Searching assets…</span>
+                    </>
                   )}
-                </button>
-              ))}
-            </div>
-          </PublisherScrollArea>
-        )}
-      </div>
-    </div>
+                  {status === 'ready' && (
+                    <span>
+                      {entries.length === 0
+                        ? query.trim()
+                          ? `No assets match “${query.trim()}”. Try a different query.`
+                          : 'Browse recent assets or narrow the results with a search.'
+                        : entries.length === 1
+                          ? '1 asset available.'
+                          : `${entries.length} assets available.`}
+                    </span>
+                  )}
+                  {status === 'error' && (
+                    <span className={styles.error} role="alert">
+                      Asset lookup is temporarily unavailable.
+                      {error ? (
+                        <span className={styles.errorDetail}> ({error})</span>
+                      ) : null}
+                    </span>
+                  )}
+                </div>
+
+                {status === 'ready' && entries.length > 0 && (
+                  <PublisherScrollArea
+                    className={styles.gridScroll}
+                    orientation="vertical"
+                  >
+                    <div
+                      className={styles.grid}
+                      role="listbox"
+                      aria-label="Asset results"
+                      onKeyDown={handleGridKey}
+                    >
+                      {entries.map((entry, index) => (
+                        <button
+                          key={entry.assetId}
+                          ref={(el) => {
+                            tileRefs.current[index] = el;
+                          }}
+                          type="button"
+                          role="option"
+                          aria-selected={index === activeIndex}
+                          className={
+                            index === activeIndex
+                              ? `${styles.tile} ${styles.tileActive}`
+                              : styles.tile
+                          }
+                          tabIndex={index === activeIndex ? 0 : -1}
+                          onFocus={() => setActiveIndex(index)}
+                          onClick={() => commit(entry)}
+                        >
+                          <span className={styles.thumb}>
+                            <img
+                              src={entry.imageUrl}
+                              alt=""
+                              className={styles.thumbImg}
+                              loading="lazy"
+                            />
+                          </span>
+                          <span className={styles.tileName}>{entry.title}</span>
+                          {entry.source && (
+                            <span className={styles.tileSource}>{entry.source}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </PublisherScrollArea>
+                )}
+              </motion.div>
+            </FloatingFocusManager>
+          </FloatingOverlay>
+        </FloatingPortal>
+      )}
+    </AnimatePresence>
   );
 }
