@@ -11,9 +11,11 @@
 
 import * as React from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
+import { ChevronRight } from 'lucide-react';
 import { STORY_BODY_EXTENSIONS } from './editorSchema';
 import { EditorToolbar } from './editorToolbar';
 import { sanitizePastedHtml } from './pasteSanitization';
+import { PublisherIcon } from '../sharedChrome/PublisherIcon.js';
 import styles from './storyBodyEditor.module.css';
 
 export interface StoryBodyEditorProps {
@@ -171,6 +173,12 @@ function EditorFooter({
       </p>
       <details className={styles.editorShortcuts}>
         <summary className={styles.editorShortcutsSummary}>
+          <PublisherIcon
+            icon={ChevronRight}
+            size="sm"
+            tint="inherit"
+            className={styles.editorShortcutsChevron}
+          />
           Keyboard shortcuts
         </summary>
         <dl className={styles.editorShortcutsList}>

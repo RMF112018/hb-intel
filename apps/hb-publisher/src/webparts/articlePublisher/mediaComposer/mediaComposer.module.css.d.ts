@@ -25,5 +25,6 @@ declare const styles: {
   readonly toggleRow: string;
   readonly advancedSource: string;
   readonly advancedSourceSummary: string;
+  readonly advancedSourceChevron: string;
 };
 export default styles;

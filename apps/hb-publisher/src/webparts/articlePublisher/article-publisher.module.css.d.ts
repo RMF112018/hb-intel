@@ -33,6 +33,7 @@ declare const styles: {
   readonly canvasLaneStatic: string;
   readonly canvasLaneToggle: string;
   readonly canvasLaneChevron: string;
+  readonly canvasLaneChevronOpen: string;
   readonly canvasLaneLabel: string;
   readonly canvasLaneHint: string;
   readonly canvasLaneBody: string;
@@ -67,6 +68,7 @@ declare const styles: {
   readonly disclosureSection: string;
   readonly disclosureSummary: string;
   readonly disclosureLabel: string;
+  readonly disclosureChevron: string;
   readonly disclosureHint: string;
   readonly disclosureBody: string;
   readonly chooser: string;
@@ -133,6 +135,7 @@ declare const styles: {
   readonly projectPickerClear: string;
   readonly projectPickerChipDetails: string;
   readonly projectPickerChipDetailsSummary: string;
+  readonly projectPickerChipDetailsChevron: string;
   readonly projectPickerChipDetailsRow: string;
   readonly projectPickerEmptyHint: string;
   readonly projectPickerUnavailableHint: string;

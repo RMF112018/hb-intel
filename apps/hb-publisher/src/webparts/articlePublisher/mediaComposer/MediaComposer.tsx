@@ -9,10 +9,12 @@
 
 import * as React from 'react';
 import { HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
+import { ChevronRight } from 'lucide-react';
 import type { PublisherMediaRow } from '../../../data/publisherAdapter/index.js';
 import {
   AssetLibraryBrowser,
   PublisherButton,
+  PublisherIcon,
   type AssetLibrarySearchFn,
   type AssetLookupEntry,
 } from '../sharedChrome/index.js';
@@ -201,6 +203,12 @@ export function MediaComposer({
             </PublisherButton>
             <details className={styles.advancedSource}>
               <summary className={styles.advancedSourceSummary}>
+                <PublisherIcon
+                  icon={ChevronRight}
+                  size="sm"
+                  tint="inherit"
+                  className={styles.advancedSourceChevron}
+                />
                 Advanced: paste a custom URL
               </summary>
               <input

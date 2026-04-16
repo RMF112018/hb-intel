@@ -31,9 +31,11 @@ declare const styles: {
   readonly metaTextarea: string;
   readonly urlDisclosure: string;
   readonly urlDisclosureSummary: string;
+  readonly urlDisclosureChevron: string;
   readonly urlInput: string;
   readonly advancedUrlDisclosure: string;
   readonly advancedUrlSummary: string;
+  readonly advancedUrlChevron: string;
   readonly advancedUrlHint: string;
 };
 export default styles;

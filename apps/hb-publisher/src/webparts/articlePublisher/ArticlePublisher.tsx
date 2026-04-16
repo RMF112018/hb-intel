@@ -43,11 +43,13 @@ import { TeamPanel } from './teamComposer/index.js';
 import { GalleryPanel } from './mediaComposer/index.js';
 import { ArticlePreview } from './previewSurface/index.js';
 import { PublishReadinessDiagnostics } from './readinessSurface/index.js';
+import { ChevronRight } from 'lucide-react';
 import {
   DisclosureSection,
   EditorialChip,
   ExceptionalNotice,
   PublisherButton,
+  PublisherIcon,
   StatusBanner,
   type AssetLibrarySearchFn,
 } from './sharedChrome/index.js';
@@ -1006,8 +1008,13 @@ function CanvasLane({
             aria-controls={bodyId}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className={styles.canvasLaneChevron} aria-hidden="true">
-              {open ? '▾' : '▸'}
+            <span
+              className={`${styles.canvasLaneChevron} ${
+                open ? styles.canvasLaneChevronOpen : ''
+              }`}
+              aria-hidden="true"
+            >
+              <PublisherIcon icon={ChevronRight} size="sm" tint="inherit" />
             </span>
             <span className={styles.canvasLaneLabel}>{label}</span>
             <span className={styles.canvasLaneHint}>{hint}</span>

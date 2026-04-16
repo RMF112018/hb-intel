@@ -20,6 +20,8 @@
  * paragraph.
  */
 import * as React from 'react';
+import { ChevronRight } from 'lucide-react';
+import { PublisherIcon } from './PublisherIcon.js';
 import styles from './exceptionalNotice.module.css';
 
 export type ExceptionalNoticeTone = 'info' | 'warn' | 'danger' | 'neutral';
@@ -61,7 +63,15 @@ export function ExceptionalNotice({
       {hint && <p className={styles.hint}>{hint}</p>}
       {details && (
         <details className={styles.detailsDisclosure}>
-          <summary className={styles.detailsSummary}>{detailsLabel}</summary>
+          <summary className={styles.detailsSummary}>
+            <PublisherIcon
+              icon={ChevronRight}
+              size="sm"
+              tint="inherit"
+              className={styles.detailsChevron}
+            />
+            {detailsLabel}
+          </summary>
           <div className={styles.detailsBody}>{details}</div>
         </details>
       )}

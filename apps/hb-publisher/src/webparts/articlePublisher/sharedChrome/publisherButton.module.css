@@ -104,3 +104,20 @@
   border-color: var(--hb-status-featured-border, #F4D480);
   color: var(--hb-status-featured-text, #8A5A00);
 }
+
+/* ── Icon slots (phase-17 wave-02 prompt-03) ─────────────────────
+ * `leadingIcon` / `trailingIcon` inject a lucide icon into the
+ * governed button family. The label span keeps the text inline-block
+ * so the gap between icon and label reads as a single control rather
+ * than two adjacent tokens.
+ */
+
+.leadingIcon,
+.trailingIcon {
+  flex-shrink: 0;
+}
+
+.label {
+  display: inline-block;
+  line-height: 1;
+}

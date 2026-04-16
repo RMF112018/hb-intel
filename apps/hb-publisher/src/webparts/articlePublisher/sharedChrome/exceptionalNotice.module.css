@@ -71,13 +71,12 @@
   content: '';
 }
 
-.detailsSummary::before {
-  content: '▸';
-  font-size: 9px;
+.detailsChevron {
   transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
 }
 
-.detailsDisclosure[open] .detailsSummary::before {
+.detailsDisclosure[open] .detailsChevron {
   transform: rotate(90deg);
 }
 

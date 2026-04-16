@@ -19,6 +19,7 @@ import {
   StarFilled,
 } from '@hbc/ui-kit';
 import type { PeopleSearchFn, PersonPhotoFn } from '@hbc/ui-kit';
+import { UserPlus } from 'lucide-react';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 import { TeamMemberComposer } from './TeamMemberComposer.js';
 import {
@@ -253,8 +254,8 @@ export function TeamPanel({
           )}
         </>
       )}
-      <PublisherButton variant="primary" onClick={openAdd}>
-        + Add teammate
+      <PublisherButton variant="primary" leadingIcon={UserPlus} onClick={openAdd}>
+        Add teammate
       </PublisherButton>
 
       <TeamMemberComposer

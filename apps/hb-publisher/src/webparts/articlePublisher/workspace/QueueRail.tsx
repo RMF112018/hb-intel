@@ -8,6 +8,7 @@
  */
 import * as React from 'react';
 import { HbcEmptyState } from '@hbc/ui-kit/homepage';
+import { Plus } from 'lucide-react';
 import type { WorkflowState } from '../../../data/publisherAdapter/index.js';
 import { DraftQueue } from '../draftQueue/index.js';
 import { PublisherButton } from '../sharedChrome/index.js';
@@ -45,8 +46,13 @@ export function QueueRail({
       <header className={styles.draftRailHeader}>
         <div className={styles.draftRailKicker}>Publisher</div>
         <div className={styles.draftRailTitle}>Drafts</div>
-        <PublisherButton variant="primary" size="sm" onClick={onCreateNew}>
-          + New draft
+        <PublisherButton
+          variant="primary"
+          size="sm"
+          leadingIcon={Plus}
+          onClick={onCreateNew}
+        >
+          New draft
         </PublisherButton>
       </header>
 

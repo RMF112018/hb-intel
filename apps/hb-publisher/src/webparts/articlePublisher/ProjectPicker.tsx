@@ -31,10 +31,12 @@
 import * as React from 'react';
 import { FloatingPortal } from '@floating-ui/react';
 import { AnimatePresence, motion } from 'motion/react';
+import { ChevronRight } from 'lucide-react';
 import type {
   ProjectLookupEntry,
   ProjectLookupSearchFn,
 } from '../../data/publisherAdapter/projectsLookupSource.js';
+import { PublisherIcon } from './sharedChrome/PublisherIcon.js';
 import { useAnchoredOverlay } from './sharedChrome/useAnchoredOverlay.js';
 import styles from './article-publisher.module.css';
 
@@ -354,6 +356,12 @@ export function SelectedProjectChip({
         )}
         <details className={styles.projectPickerChipDetails}>
           <summary className={styles.projectPickerChipDetailsSummary}>
+            <PublisherIcon
+              icon={ChevronRight}
+              size="sm"
+              tint="inherit"
+              className={styles.projectPickerChipDetailsChevron}
+            />
             System identifiers
           </summary>
           <span className={styles.projectPickerChipDetailsRow}>

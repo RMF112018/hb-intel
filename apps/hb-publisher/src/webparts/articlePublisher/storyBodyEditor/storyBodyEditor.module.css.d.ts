@@ -20,6 +20,7 @@ declare const styles: {
   readonly editorSupportHint: string;
   readonly editorShortcuts: string;
   readonly editorShortcutsSummary: string;
+  readonly editorShortcutsChevron: string;
   readonly editorShortcutsList: string;
   readonly editorShortcutsTerm: string;
   readonly editorShortcutsKeys: string;

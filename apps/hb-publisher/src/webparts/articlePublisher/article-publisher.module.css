@@ -434,10 +434,17 @@
 }
 
 .canvasLaneChevron {
-  font-size: 12px;
   color: var(--hb-text-tertiary, #6a6a6f);
-  width: 12px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
+}
+
+.canvasLaneChevronOpen {
+  transform: rotate(90deg);
 }
 
 .canvasLaneLabel {
@@ -659,20 +666,21 @@
 }
 
 .disclosureLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   font-weight: 600;
   color: var(--hb-text-primary, #1f1f1f);
 }
 
-.disclosureLabel::before {
-  content: '▸';
-  display: inline-block;
-  margin-right: 6px;
+.disclosureChevron {
   color: var(--hb-text-tertiary, #6a6a6f);
   transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
 }
 
-.disclosureSection[open] .disclosureLabel::before {
+.disclosureSection[open] .disclosureChevron {
   transform: rotate(90deg);
 }
 
@@ -1310,7 +1318,7 @@
   margin-top: 6px;
 }
 
-.projectPickerChipDetails[open] .projectPickerChipDetailsSummary::before {
+.projectPickerChipDetails[open] .projectPickerChipDetailsChevron {
   transform: rotate(90deg);
 }
 
@@ -1335,11 +1343,10 @@
   content: '';
 }
 
-.projectPickerChipDetailsSummary::before {
-  content: '▸';
+.projectPickerChipDetailsChevron {
   color: var(--hb-text-tertiary, #6a6a6f);
   transition: transform 120ms ease-in-out;
-  font-size: 9px;
+  flex-shrink: 0;
 }
 
 .projectPickerChipDetailsSummary:focus-visible {

@@ -6,6 +6,7 @@ declare const styles: {
   readonly hint: string;
   readonly detailsDisclosure: string;
   readonly detailsSummary: string;
+  readonly detailsChevron: string;
   readonly detailsBody: string;
   readonly toneWarn: string;
   readonly toneDanger: string;

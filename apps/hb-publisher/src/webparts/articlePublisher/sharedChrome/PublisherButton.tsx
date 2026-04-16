@@ -19,11 +19,20 @@
  *     that the Governing SPFx Standard §6.2 requires: lighter than
  *     PWA, but still visibly premium. Disabled + pressed states skip
  *     the motion so the chrome reads as static commitment.
+ *
+ * Phase-17 wave-02 prompt-03: `leadingIcon` / `trailingIcon` props
+ * project a single governed `lucide-react` icon into the button without
+ * callers having to reach for the icon primitive manually. This is the
+ * first step in retiring text-symbol CTAs ("+ New draft" etc.) across
+ * queue / team / media action surfaces in favor of a coherent editorial
+ * action family.
  */
 
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
+import type { LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion, type HTMLMotionProps } from 'motion/react';
+import { PublisherIcon } from './PublisherIcon.js';
 import styles from './publisherButton.module.css';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- side-effect import to inject :root tokens
 import tokens from './tokens.module.css';
@@ -43,6 +52,15 @@ export interface PublisherButtonProps
    * an anchor or a router link with governed button styling.
    */
   readonly asChild?: boolean;
+  /**
+   * Optional leading `lucide-react` icon rendered inside the button
+   * before the label. Use for action CTAs that would otherwise rely on
+   * a text-symbol prefix (e.g. "+ New draft"). Ignored when `iconOnly`
+   * is true; in that mode place the icon directly in `children`.
+   */
+  readonly leadingIcon?: LucideIcon;
+  /** Optional trailing `lucide-react` icon rendered after the label. */
+  readonly trailingIcon?: LucideIcon;
 }
 
 export const PublisherButton = React.forwardRef<
@@ -55,6 +73,8 @@ export const PublisherButton = React.forwardRef<
     pressed,
     size = 'md',
     asChild = false,
+    leadingIcon,
+    trailingIcon,
     className,
     type,
     children,
@@ -74,6 +94,31 @@ export const PublisherButton = React.forwardRef<
     .filter(Boolean)
     .join(' ');
 
+  const iconSize = size === 'sm' ? 'sm' : 'md';
+  const content = iconOnly ? (
+    children
+  ) : (
+    <>
+      {leadingIcon && (
+        <PublisherIcon
+          icon={leadingIcon}
+          size={iconSize}
+          tint="inherit"
+          className={styles.leadingIcon}
+        />
+      )}
+      {children != null && <span className={styles.label}>{children}</span>}
+      {trailingIcon && (
+        <PublisherIcon
+          icon={trailingIcon}
+          size={iconSize}
+          tint="inherit"
+          className={styles.trailingIcon}
+        />
+      )}
+    </>
+  );
+
   if (asChild) {
     return (
       <Slot
@@ -83,7 +128,7 @@ export const PublisherButton = React.forwardRef<
         data-disabled={disabled ? 'true' : undefined}
         {...rest}
       >
-        {children}
+        {content as React.ReactElement}
       </Slot>
     );
   }
@@ -97,7 +142,7 @@ export const PublisherButton = React.forwardRef<
       disabled={disabled}
       rest={rest}
     >
-      {children}
+      {content}
     </MotionPublisherButton>
   );
 });

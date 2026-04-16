@@ -198,14 +198,13 @@
   content: '';
 }
 
-.advancedSourceSummary::before {
-  content: '▸';
-  font-size: 9px;
+.advancedSourceChevron {
   color: var(--hb-text-tertiary);
   transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
 }
 
-.advancedSource[open] .advancedSourceSummary::before {
+.advancedSource[open] .advancedSourceChevron {
   transform: rotate(90deg);
 }
 

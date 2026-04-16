@@ -10,6 +10,8 @@
  * authors never lose sight of values they (or a prior save) set.
  */
 import * as React from 'react';
+import { ChevronRight } from 'lucide-react';
+import { PublisherIcon } from './PublisherIcon.js';
 import styles from '../article-publisher.module.css';
 
 export interface DisclosureSectionProps {
@@ -34,7 +36,15 @@ export function DisclosureSection({
       data-testid={testId}
     >
       <summary className={styles.disclosureSummary}>
-        <span className={styles.disclosureLabel}>{label}</span>
+        <span className={styles.disclosureLabel}>
+          <PublisherIcon
+            icon={ChevronRight}
+            size="sm"
+            tint="inherit"
+            className={styles.disclosureChevron}
+          />
+          {label}
+        </span>
         {summaryHint && (
           <span className={styles.disclosureHint}>{summaryHint}</span>
         )}

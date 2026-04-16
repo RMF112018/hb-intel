@@ -285,14 +285,13 @@
   content: '';
 }
 
-.urlDisclosureSummary::before {
-  content: '▸';
-  font-size: 9px;
+.urlDisclosureChevron {
   color: var(--hb-text-tertiary, #6a6a6f);
   transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
 }
 
-.urlDisclosure[open] .urlDisclosureSummary::before {
+.urlDisclosure[open] .urlDisclosureChevron {
   transform: rotate(90deg);
 }
 
@@ -356,14 +355,13 @@
   content: '';
 }
 
-.advancedUrlSummary::before {
-  content: '▸';
-  font-size: 9px;
+.advancedUrlChevron {
   color: var(--hb-text-tertiary);
   transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
 }
 
-.advancedUrlDisclosure[open] .advancedUrlSummary::before {
+.advancedUrlDisclosure[open] .advancedUrlChevron {
   transform: rotate(90deg);
 }
 

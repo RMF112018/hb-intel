@@ -308,13 +308,13 @@
   content: '';
 }
 
-.editorShortcutsSummary::before {
-  content: '▸';
-  font-size: 9px;
+.editorShortcutsChevron {
+  color: var(--hb-text-tertiary, #6a6a6f);
   transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
 }
 
-.editorShortcuts[open] .editorShortcutsSummary::before {
+.editorShortcuts[open] .editorShortcutsChevron {
   transform: rotate(90deg);
 }
 

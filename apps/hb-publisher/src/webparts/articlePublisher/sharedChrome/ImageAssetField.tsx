@@ -21,7 +21,9 @@
  */
 
 import * as React from 'react';
+import { ChevronRight } from 'lucide-react';
 import { AssetLibraryBrowser } from './AssetLibraryBrowser.js';
+import { PublisherIcon } from './PublisherIcon.js';
 import type {
   AssetLibrarySearchFn,
   AssetLookupEntry,
@@ -222,6 +224,12 @@ export function ImageAssetField({
 
             <details className={styles.urlDisclosure}>
               <summary className={styles.urlDisclosureSummary}>
+                <PublisherIcon
+                  icon={ChevronRight}
+                  size="sm"
+                  tint="inherit"
+                  className={styles.urlDisclosureChevron}
+                />
                 Asset URL
               </summary>
               <input
@@ -304,6 +312,12 @@ export function ImageAssetField({
           {searchAssets && (
             <details className={styles.advancedUrlDisclosure}>
               <summary className={styles.advancedUrlSummary}>
+                <PublisherIcon
+                  icon={ChevronRight}
+                  size="sm"
+                  tint="inherit"
+                  className={styles.advancedUrlChevron}
+                />
                 Advanced: paste a custom URL
               </summary>
               <p className={styles.advancedUrlHint}>

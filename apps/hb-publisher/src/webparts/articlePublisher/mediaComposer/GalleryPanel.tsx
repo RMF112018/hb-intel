@@ -18,6 +18,7 @@ import {
   Star,
   StarFilled,
 } from '@hbc/ui-kit';
+import { ImagePlus } from 'lucide-react';
 import type { PublisherMediaRow } from '../../../data/publisherAdapter/index.js';
 import { mediaRoleLabel } from '../authorLabels.js';
 import { MediaComposer } from './MediaComposer.js';
@@ -331,8 +332,8 @@ export function GalleryPanel({
           );
         })()
       )}
-      <PublisherButton variant="primary" onClick={openAdd}>
-        + Add image
+      <PublisherButton variant="primary" leadingIcon={ImagePlus} onClick={openAdd}>
+        Add image
       </PublisherButton>
 
       <MediaComposer
