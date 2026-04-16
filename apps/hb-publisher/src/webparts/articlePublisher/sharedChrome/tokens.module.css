@@ -1,13 +1,43 @@
 /**
- * Publisher-scoped CSS custom properties derived from @hbc/ui-kit
- * tokens. Workstream-h step-02 foundation.
+ * Publisher token provenance — single CSS-variable entry seam.
  *
- * Exposed on :root so every Publisher CSS module can `var(--hb-*)`
- * rather than copy hex. This is the single visual-token seam for
- * the Publisher surface. The values mirror the TypeScript tokens
- * in packages/ui-kit/src/theme/*.ts verbatim; if the token file
- * changes, update this file too (the test suite guards against
- * drift by referencing specific names).
+ * PROVENANCE CONTRACT
+ *   This file is the *only* source of `--hb-*` custom properties for
+ *   the Publisher app. It mirrors the governed TypeScript tokens in
+ *   `packages/ui-kit/src/theme/*.ts` into a `:root` scope so every
+ *   Publisher CSS module can reference `var(--hb-*)` without reaching
+ *   outside its own module boundary.
+ *
+ * AUTHORITY
+ *   - The TypeScript token exports in `@hbc/ui-kit/theme` are the
+ *     authoritative value source for HB Intel.
+ *   - The values in this file are a *mirror* of those TS tokens.
+ *   - When the TS tokens change, update the matching value here.
+ *   - When introducing a new Publisher CSS variable, add it here and
+ *     only here. Do not inline new `--hb-*` declarations in individual
+ *     component CSS modules.
+ *
+ * USAGE RULES
+ *   - Import this module once per webpart mount via
+ *     `sharedChrome/PublisherButton.tsx` (the side-effect re-export
+ *     chain). Do not re-import it in downstream CSS modules.
+ *   - Downstream CSS modules reference tokens via `var(--hb-*)` with
+ *     literal hex fallbacks (e.g. `var(--hb-surface-1, #fff)`) so the
+ *     surface degrades gracefully if this mirror fails to mount first.
+ *   - Do not duplicate the palette or overwrite `--hb-*` at a nested
+ *     scope. Token overrides belong in this file under a media query
+ *     or in a future SPFx theme mount adapter.
+ *
+ * SURFACE-FAMILY ALIASES
+ *   - `--hb-surface-plane` / `--hb-surface-rail` / `--hb-surface-tile`
+ *     are authored aliases. Callsites should prefer the alias over the
+ *     numbered palette entry so the role of the surface stays
+ *     expressive at the consumer site.
+ *
+ * REDUCED MOTION
+ *   - `--hb-transition-fast` is squashed to `0ms linear` under
+ *     `prefers-reduced-motion: reduce` so any CSS consumer participates
+ *     in the accessibility override without restating the media query.
  */
 
 :root {

@@ -1,0 +1,78 @@
+/* DisclosureSection — progressive-disclosure primitive for low-frequency
+ * / advanced authoring controls.
+ *
+ * Phase-17 wave-02 prompt-04: extracted from the shell
+ * `article-publisher.module.css` so the primitive's styling is owned
+ * next to `DisclosureSection.tsx`. The accent-rail tile intensifies
+ * to editorial blue on [open] so the author can see at a glance which
+ * sections they've expanded.
+ */
+
+.disclosureSection {
+  border: none;
+  border-left: 2px solid var(--hb-border-strong);
+  border-radius: 0 var(--hb-radius-md) var(--hb-radius-md) 0;
+  background: var(--hb-surface-tile);
+  transition: border-color var(--hb-transition-fast),
+    background var(--hb-transition-fast);
+}
+
+.disclosureSection[open] {
+  border-left-color: var(--hb-color-presentation-blue);
+  background: var(--hb-surface-1);
+}
+
+.disclosureSummary {
+  list-style: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: inherit;
+}
+
+.disclosureSummary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosureSummary::marker {
+  content: '';
+}
+
+.disclosureSummary:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.disclosureLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hb-text-primary, #1f1f1f);
+}
+
+.disclosureChevron {
+  color: var(--hb-text-tertiary, #6a6a6f);
+  transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
+}
+
+.disclosureSection[open] .disclosureChevron {
+  transform: rotate(90deg);
+}
+
+.disclosureHint {
+  font-size: 11px;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  padding-left: 16px;
+}
+
+.disclosureBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 14px 14px 14px;
+}

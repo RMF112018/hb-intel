@@ -1,0 +1,24 @@
+declare const styles: {
+  readonly projectPicker: string;
+  readonly projectPickerDropdown: string;
+  readonly projectPickerResultCount: string;
+  readonly projectPickerHint: string;
+  readonly projectPickerError: string;
+  readonly projectPickerErrorDetail: string;
+  readonly projectPickerOption: string;
+  readonly projectPickerOptionActive: string;
+  readonly projectPickerOptionName: string;
+  readonly projectPickerOptionMeta: string;
+  readonly projectPickerChip: string;
+  readonly projectPickerChipMain: string;
+  readonly projectPickerChipName: string;
+  readonly projectPickerChipMeta: string;
+  readonly projectPickerClear: string;
+  readonly projectPickerChipDetails: string;
+  readonly projectPickerChipDetailsSummary: string;
+  readonly projectPickerChipDetailsChevron: string;
+  readonly projectPickerChipDetailsRow: string;
+  readonly projectPickerEmptyHint: string;
+  readonly projectPickerSpinner: string;
+};
+export default styles;

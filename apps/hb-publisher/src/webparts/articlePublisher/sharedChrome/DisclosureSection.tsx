@@ -12,7 +12,7 @@
 import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { PublisherIcon } from './PublisherIcon.js';
-import styles from '../article-publisher.module.css';
+import styles from './disclosureSection.module.css';
 
 export interface DisclosureSectionProps {
   readonly label: string;

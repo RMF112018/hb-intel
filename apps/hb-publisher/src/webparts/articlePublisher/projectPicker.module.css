@@ -1,0 +1,228 @@
+/* ProjectPicker — feature-local styling.
+ *
+ * Phase-17 wave-02 prompt-04: extracted from the shell
+ * `article-publisher.module.css` so the search flow, dropdown,
+ * selected chip, and chip disclosure are all owned by one file next
+ * to `ProjectPicker.tsx`. Positioning for the dropdown is still
+ * supplied by `useAnchoredOverlay` (@floating-ui/react); this module
+ * owns visual surface and rhythm only.
+ *
+ * The shell module retains `.projectPickerUnavailableHint` because it
+ * is rendered by `MetadataPanel` adjacent to the picker when the
+ * picker is not wired, not by this component.
+ */
+
+.projectPicker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.projectPickerDropdown {
+  /* Position + width are supplied by `useAnchoredOverlay`
+   * (@floating-ui/react). This class owns visual styling only. */
+  z-index: 10;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--hb-surface-1, #fff);
+  border: 1px solid var(--hb-border-strong, #cbcbd0);
+  border-radius: var(--hb-radius-lg, 6px);
+  box-shadow: var(--hb-elevation-2, 0 4px 12px rgba(16, 24, 40, 0.08));
+  display: flex;
+  flex-direction: column;
+}
+
+.projectPickerResultCount {
+  padding: 8px 14px 4px 14px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hb-text-tertiary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--hb-border-faint);
+}
+
+.projectPickerHint,
+.projectPickerError {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--hb-text-secondary, #4a4a4f);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  line-height: 1.45;
+}
+
+.projectPickerError {
+  color: var(--hb-status-danger-text, #a4262c);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background: var(--hb-status-danger-bg, #fdecec);
+  border-top: 1px solid var(--hb-status-danger-border, #e5b1b3);
+  border-bottom: 1px solid var(--hb-status-danger-border, #e5b1b3);
+}
+
+.projectPickerErrorDetail {
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-size: 11px;
+}
+
+.projectPickerOption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-bottom: 1px solid var(--hb-border-faint, #f0f0f3);
+}
+
+.projectPickerOption:last-child {
+  border-bottom: none;
+}
+
+.projectPickerOptionActive,
+.projectPickerOption:hover {
+  background: var(--hb-surface-tint-selected, #f0f6fc);
+}
+
+.projectPickerOptionName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hb-text-primary, #1f1f1f);
+}
+
+.projectPickerOptionMeta {
+  font-size: 11px;
+  color: var(--hb-text-tertiary, #6a6a6f);
+}
+
+.projectPickerChip {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 14px 12px 16px;
+  border: 1px solid var(--hb-border-subtle, #e3e6ed);
+  border-left: 3px solid var(--hb-color-presentation-blue, #225391);
+  border-radius: var(--hb-radius-lg, 6px);
+  background: var(--hb-surface-1, #fff);
+}
+
+.projectPickerChipMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.projectPickerChipName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--hb-text-primary, #1f1f1f);
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+
+.projectPickerChipMeta {
+  font-size: 12px;
+  color: var(--hb-text-secondary, #4a4a4f);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.projectPickerClear {
+  border: 1px solid var(--hb-border-strong, #cbcbd0);
+  background: var(--hb-surface-1, #fff);
+  color: var(--hb-color-brand-action, #337aab);
+  border-radius: var(--hb-radius-md, 4px);
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.projectPickerClear:hover {
+  background: var(--hb-surface-tint-selected, #f0f6fc);
+}
+
+.projectPickerChipDetails {
+  margin-top: 6px;
+}
+
+.projectPickerChipDetails[open] .projectPickerChipDetailsChevron {
+  transform: rotate(90deg);
+}
+
+.projectPickerChipDetailsSummary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.projectPickerChipDetailsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.projectPickerChipDetailsSummary::marker {
+  content: '';
+}
+
+.projectPickerChipDetailsChevron {
+  color: var(--hb-text-tertiary, #6a6a6f);
+  transition: transform 120ms ease-in-out;
+  flex-shrink: 0;
+}
+
+.projectPickerChipDetailsSummary:focus-visible {
+  outline: 2px solid var(--hb-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--hb-radius-sm, 2px);
+}
+
+.projectPickerChipDetailsRow {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  font-family: var(--hb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
+.projectPickerEmptyHint {
+  margin: 6px 2px 0 2px;
+  font-size: 12px;
+  color: var(--hb-text-tertiary, #6a6a6f);
+  line-height: 1.45;
+}
+
+.projectPickerSpinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hb-border-strong, #cbcbd0);
+  border-top-color: var(--hb-color-brand-action, #337aab);
+  margin-right: 8px;
+  vertical-align: -1px;
+  animation: projectPickerSpin 700ms linear infinite;
+}
+
+@keyframes projectPickerSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

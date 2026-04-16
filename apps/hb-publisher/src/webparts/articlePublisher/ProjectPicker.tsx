@@ -38,7 +38,8 @@ import type {
 } from '../../data/publisherAdapter/projectsLookupSource.js';
 import { PublisherIcon } from './sharedChrome/PublisherIcon.js';
 import { useAnchoredOverlay } from './sharedChrome/useAnchoredOverlay.js';
-import styles from './article-publisher.module.css';
+import shellStyles from './article-publisher.module.css';
+import styles from './projectPicker.module.css';
 
 export interface ProjectPickerProps {
   readonly value: ProjectPickerValue | null;
@@ -215,7 +216,7 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
             {...getReferenceProps({
               ref: mergedInputRef,
               type: 'text',
-              className: styles.input,
+              className: shellStyles.input,
               value: query,
               disabled,
               placeholder: placeholder ?? 'Search by project number, name, or location…',
