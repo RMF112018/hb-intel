@@ -1025,9 +1025,11 @@ function buildHbPackageTruthProof(
  * For single-manifest domains (hb-publisher) the shell is compiled directly
  * against the one target manifest, so the webpack output already carries
  * define("{targetModuleId}") and no byte-level patching is needed. In that
- * identity case this function renames the source asset into the versioned
- * shell-entry slot instead of emitting a byte-identical duplicate, which
- * eliminates the redundant shell-web-part_<hash>.js asset from the .sppkg.
+ * identity case this function emits a byte-identical copy of the source
+ * asset into the versioned shell-entry slot while leaving the canonical
+ * compiled shell-web-part_<hash>.js in place in release/assets/, so the
+ * final .sppkg preserves both the canonical shell asset and the
+ * per-webpart shell-entry shim — matching the working hb-webparts shape.
  */
 function generatePerWebpartShellCopy(
   sourceShellPath: string,
@@ -1070,9 +1072,12 @@ function generatePerWebpartShellCopy(
   const fileName = `shell-entry-${targetManifestId}-${contentHash}.js`;
   const outputPath = path.join(outputDir, fileName);
   if (isIdentity) {
-    // Move the webpack output into the shell-entry slot so only the
-    // versioned per-webpart asset survives in release/assets/.
-    fs.renameSync(sourceShellPath, outputPath);
+    // Copy (do not move) the webpack output into the shell-entry slot so
+    // both the canonical shell-web-part_<hash>.js and the versioned
+    // per-webpart shell-entry-<manifestId>-<hash>.js survive in
+    // release/assets/. The canonical asset must be preserved so the final
+    // .sppkg carries the same shell shape as hb-webparts.
+    fs.copyFileSync(sourceShellPath, outputPath);
   } else {
     fs.writeFileSync(outputPath, shimJs, 'utf8');
   }
@@ -1242,16 +1247,21 @@ function verifySppkg(
       }
     }
 
-    // Check for shell JS (webpart, extension, or per-webpart shell entry).
-    // For single-manifest identity domains (hb-publisher) the webpack
-    // output is renamed into the shell-entry-<id>-<hash>.js slot instead
-    // of being duplicated, so that naming is also a valid compiled shell.
-    const hasShellJs = entries.some((e) =>
+    // Check for the canonical compiled shell JS. Webpart domains must carry
+    // the webpack-emitted shell-web-part_*.js (or the legacy hashed
+    // ShellWebPart.*.js). Extension domains must carry the
+    // shell-extension-customizer bundle. Per-webpart shell-entry-*.js shims
+    // are manifest linkage assets and DO NOT satisfy this requirement — a
+    // shell-entry-only package is not a valid SPFx shell package shape.
+    const hasCanonicalShellJs = entries.some((e) =>
       /shell-web-part.*\.js/.test(e) || /ShellWebPart.*\.js/.test(e) ||
-      /shell-extension-customizer.*\.js/.test(e) || /ShellExtensionCustomizer.*\.js/.test(e) ||
-      /shell-entry-[0-9a-f-]{36}-[a-f0-9]{8}\.js/i.test(e));
-    if (!hasShellJs) {
-      console.error(`  ❌ ${domainDir}: .sppkg missing compiled shell JS`);
+      /shell-extension-customizer.*\.js/.test(e) || /ShellExtensionCustomizer.*\.js/.test(e));
+    if (!hasCanonicalShellJs) {
+      console.error(
+        `  ❌ ${domainDir}: .sppkg missing canonical compiled shell JS ` +
+        `(expected shell-web-part_*.js / ShellWebPart.*.js / shell-extension-customizer.*.js). ` +
+        `shell-entry-*.js shims alone are not sufficient.`,
+      );
       ok = false;
     }
 
@@ -2488,6 +2498,43 @@ for (const domain of domains) {
         baseModuleId: expectation.baseModuleId,
       }))
       .sort((a, b) => a.manifestId.localeCompare(b.manifestId));
+
+    // Capture the canonical shell, shell-entry, and app-bundle filenames
+    // actually present in the rebuilt .sppkg so the shim-proof records the
+    // corrected package shape. Any domain under hbExpectations (hb-webparts,
+    // hb-publisher) must carry all three asset classes — a missing canonical
+    // shell, missing shim, or missing app bundle is a hard failure here even
+    // though verifySppkg should already have caught it.
+    const shimArchivePaths = execSync(`unzip -Z1 "${sppkgDest}"`, { encoding: 'utf8' })
+      .split('\n')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    const shimArchiveBasenames = shimArchivePaths.map((p) => path.basename(p));
+    const canonicalShellAsset = shimArchiveBasenames.find((name) =>
+      /^shell-web-part.*\.js$/i.test(name) || /^ShellWebPart.*\.js$/i.test(name),
+    ) ?? null;
+    const expectedShellEntryNames = new Set(
+      hbExpectations.shimExpectations.map((expectation) => expectation.shimFileName),
+    );
+    const shellEntryAssets = shimArchiveBasenames
+      .filter((name) => expectedShellEntryNames.has(name))
+      .sort();
+    const appBundleAsset = shimArchiveBasenames.find((name) => name === bundleName) ?? null;
+    const allRequiredAssetsPresent =
+      canonicalShellAsset !== null &&
+      shellEntryAssets.length === hbExpectations.shimExpectations.length &&
+      appBundleAsset !== null;
+    if (!allRequiredAssetsPresent) {
+      console.error(
+        `  ❌ ${domain.dir}: package-truth trio incomplete — ` +
+        `canonicalShellAsset=${canonicalShellAsset ?? 'MISSING'}, ` +
+        `shellEntryAssets=${shellEntryAssets.length}/${hbExpectations.shimExpectations.length}, ` +
+        `appBundle=${appBundleAsset ?? 'MISSING'}`,
+      );
+      allPassed = false;
+      continue;
+    }
+
     const proofOutputPath = path.join(OUTPUT_DIR, `${domain.dir}-shim-proof.json`);
     fs.writeFileSync(
       proofOutputPath,
@@ -2507,6 +2554,12 @@ for (const domain of domains) {
         baseModuleId: hbExpectations.baseModuleId,
         emittedLocalShimFiles: hbExpectations.emittedLocalShimFiles,
         packagedShimMappings: packagedShimSummary,
+        packageShapeAssets: {
+          canonicalShellAsset,
+          shellEntryAssets,
+          appBundle: appBundleAsset,
+          allRequiredAssetsPresent,
+        },
       }, null, 2)}\n`,
     );
     console.log(`  ✓ Shim proof written: ${proofOutputPath}`);

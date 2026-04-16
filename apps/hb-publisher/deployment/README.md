@@ -91,6 +91,24 @@ runtime globals below rather than copy-pasting.
 The current packaging run's hashed `app`, `shell-entry`, and CSS paths
 live in the deployment plan artifact. Do not hand-edit them.
 
+### Required `.sppkg` asset shape
+
+Every `hb-publisher.sppkg` must carry all three of the following inside
+`ClientSideAssets/`, or packaging fails hard:
+
+| Asset                                  | Role                                                                                     |
+|----------------------------------------|------------------------------------------------------------------------------------------|
+| `shell-web-part_<hash>.js`             | Canonical compiled SPFx shell asset — the webpack-emitted shell bundle                    |
+| `shell-entry-<webpartId>-<hash>.js`    | Per-webpart manifest linkage shim referenced by `scriptResources[entryModuleId]`          |
+| `hb-publisher-app-<hash>.js`           | Vite-emitted IIFE app bundle exposing `window.__hbIntel_hbPublisher`                      |
+
+A shell-entry-only shape (no canonical `shell-web-part_*.js`) is **not**
+a valid SPFx shell package and will be rejected by `verifySppkg` plus
+the package-truth trio check in `tools/build-spfx-package.ts`. The
+corrected trio is recorded in
+`dist/sppkg/hb-publisher-shim-proof.json` under
+`packageShapeAssets.allRequiredAssetsPresent`.
+
 ## Prerequisites for building the package
 
 Running `tools/build-spfx-package.ts --domain hb-publisher` requires

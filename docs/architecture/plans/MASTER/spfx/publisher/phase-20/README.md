@@ -1,29 +1,45 @@
-# HB Publisher Site-Availability Remediation Prompt Package
+# HB Publisher Packaging Prompt Package
 
-## Purpose
-This package is for a local code agent. Its scope is **only** the post-upload SharePoint site-availability problem for `hb-publisher`.
+## Objective
 
-The package is designed to close the issue identified in the audit:
+This package contains a sequenced set of implementation prompts for a local code agent to correct the `hb-publisher.sppkg` packaging shape so it more closely aligns with the working `hb-webparts.sppkg` shell asset structure.
 
-- deployment-model mismatch (`skipFeatureDeployment` semantics versus validation workflow)
-- contradictory repo doctrine about whether Publisher is:
-  - an admin-managed governed host-page surface, or
-  - a normal site-installed / picker-visible web part
-- incorrect / incomplete toolbox-visibility authoring and proof coverage
-- repo-to-artifact drift that prevents confidence that the shipped `.sppkg` matches `main`
+The specific focus is to:
 
-## Required posture
-- No unrelated cleanup.
-- No UI/UX broadening.
-- No business-logic work outside deployment/discovery seams.
-- No deferrals.
-- Do not re-read files already in active context unless needed to confirm drift, dependencies, or uncertainty after changes.
+- preserve the canonical compiled `shell-web-part_*.js` asset in the final `hb-publisher.sppkg`
+- keep the publisher-specific `shell-entry-*.js` asset and manifest linkage intact
+- harden verification/proof logic so the package cannot regress back to a shell-entry-only shape
+- rebuild and validate the corrected publisher package with proof artifacts
 
-## Package contents
-- `Plan-Summary.md`
-- `Prompt-01-Lock-Deployment-Model-and-Reconcile-Doctrine.md`
-- `Prompt-02-Restore-Manifest-and-Package-Semantic-Alignment.md`
-- `Prompt-03-Implement-Closure-Grade-Validation-and-Rebuild-Proof.md`
+## Files Included
 
-## Expected result
-At completion, the repo should unambiguously support **one** deployment model, the emitted `.sppkg` should match that model, package-truth checks should fail on semantic drift, and SharePoint validation should be run against the correct workflow for the chosen model.
+1. `Prompt-01-Canonicalize-hb-publisher-shell-packaging-shape.md`
+2. `Prompt-02-Tighten-hb-publisher-package-verifier.md`
+3. `Prompt-03-Rebuild-prove-and-package-hb-publisher.md`
+
+## Recommended Execution Order
+
+Run the prompts in this order, in the same local code-agent thread:
+
+1. Prompt 01
+2. Prompt 02
+3. Prompt 03
+
+Keeping them in the same thread helps the agent preserve context and reduces unnecessary file re-reading.
+
+## Expected End State
+
+A successful completion should result in:
+
+- a rebuilt `dist/sppkg/hb-publisher.sppkg`
+- canonical `shell-web-part_*.js` present in the package
+- publisher `shell-entry-*.js` present in the package
+- publisher app bundle present in the package
+- verification/proof logic that hard-fails if the canonical shell asset is missing
+- proof artifacts clearly showing the corrected package shape
+
+## Notes
+
+- These prompts are intentionally implementation-grade and do not allow deferral of known work.
+- They are narrowly focused on the shell packaging shape issue and the related proof/validation path.
+- They do not instruct metadata churn or unnecessary ID changes.
