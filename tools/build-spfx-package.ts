@@ -2335,15 +2335,19 @@ for (const domain of domains) {
           shellEntryHash: publisherShim.shimFileHash,
         },
         deploymentModel: {
-          kind: 'admin-managed-host-page',
+          kind: 'site-scoped-webpart',
           runbook: 'apps/hb-publisher/deployment/README.md',
-          insertionScript: 'apps/hb-publisher/deployment/Add-ArticlePublisherWebPart.ps1',
-          governedHostPage:
-            'https://hedrickbrotherscom.sharepoint.com/sites/Marketing-New/SitePages/Article-Publisher.aspx',
-          note:
-            'Webpart is hiddenFromToolbox. Insertion is performed by stable GUID via the ' +
-            'supplied PnP PowerShell script on a governed host page. See runbook for the ' +
-            'full deployment + validation checklist.',
+          install: {
+            scope: 'Site',
+            command:
+              'Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Site -Overwrite -Publish',
+          },
+          discovery: {
+            path: 'modern-page-webpart-picker',
+            note:
+              'After site-scoped install, page authors insert the Article Publisher via the ' +
+              'standard modern page web part picker (Edit page → + → search "Article Publisher").',
+          },
         },
       };
       const deploymentPlanPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-deployment-plan.json`);

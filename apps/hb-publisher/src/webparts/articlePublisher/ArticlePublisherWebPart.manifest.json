@@ -3,19 +3,24 @@
   "id": "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10",
   "alias": "ArticlePublisherWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "0.3.3.1",
   "manifestVersion": 2,
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart"],
-  "supportsFullBleed": true,
+  "supportedHosts": [
+    "SharePointWebPart"
+  ],
   "supportsThemeVariants": false,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": { "default": "HB Intel" },
-      "title": { "default": "Article Publisher" },
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "Article Publisher"
+      },
       "description": {
-        "default": "Authoring surface for structured article publishing on HBCentral. Current release scope: Project Spotlight articles — additional destinations are explicitly blocked until they are wired in a later release."
+        "default": "Authoring surface for structured article publishing on HBCentral. Current release scope: Project Spotlight articles \u2014 additional destinations are explicitly blocked until they are wired in a later release."
       },
       "officeFabricIconFontName": "PageEdit",
       "hiddenFromToolbox": false,
