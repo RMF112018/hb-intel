@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   createProjectsLookupSearch,
-  escapeODataString,
   mapRawProjectRow,
   type RawProjectsListItem,
 } from './projectsLookupSource.js';
+import { escapeODataString } from './odataEscape.js';
 
 vi.mock('@hbc/sharepoint-platform', async () => {
   const actual = await vi.importActual<typeof import('@hbc/sharepoint-platform')>(

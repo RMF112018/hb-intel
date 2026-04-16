@@ -18,20 +18,12 @@ import { fetchListItemsJson } from '@hbc/sharepoint-platform';
 import { escapeODataString } from './odataEscape.js';
 import {
   PROJECTS_LIST_FIELDS,
-  PROJECTS_LIST_TITLE,
   buildProjectsListItemsUrl,
   projectsListFetchLabel,
   type RawProjectsListItem,
 } from './projectsListContract.js';
 
-export { escapeODataString };
 export type { RawProjectsListItem } from './projectsListContract.js';
-
-/**
- * Backwards-compatible alias. Prefer `PROJECTS_LIST_TITLE` from
- * `projectsListContract` in new code.
- */
-export const PROJECTS_LOOKUP_LIST_TITLE = PROJECTS_LIST_TITLE;
 
 /** Maximum number of results returned from a single search query. */
 export const DEFAULT_PROJECTS_LOOKUP_LIMIT = 20;
