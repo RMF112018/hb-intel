@@ -4,6 +4,7 @@ import {
   type HeroThemeVariant,
 } from '../../../data/publisherAdapter/index.js';
 import { heroThemeVariantLabel } from '../authorLabels.js';
+import { defaultHeroCategoryLabel } from '../metadataDefaults.js';
 import {
   ChooserGroup,
   DisclosureSection,
@@ -14,11 +15,29 @@ import {
 import styles from '../article-publisher.module.css';
 import { update, type PanelProps } from './draftHelpers.js';
 
-function hasAdvancedHeroOverrides(draft: PanelProps['draft']): boolean {
+/**
+ * Does the draft carry any hero value the author has taken control
+ * of? Used by the panel to decide whether the "Advanced hero options"
+ * disclosure should start open so the author is not surprised by a
+ * hidden non-default value.
+ *
+ * `HeroCategoryLabel` is treated as author-owned only when its value
+ * differs from the system default (`defaultHeroCategoryLabel`) for
+ * the bound project — the project-change helper in
+ * `metadataDefaults.ts` fills this field automatically, so matching
+ * the project name is a system-set value, not an override.
+ */
+export function hasAdvancedHeroOverrides(draft: PanelProps['draft']): boolean {
+  const categoryIsAuthored = (() => {
+    const value = draft.HeroCategoryLabel?.trim();
+    if (!value) return false;
+    const systemDefault = defaultHeroCategoryLabel(draft.ProjectName);
+    return systemDefault === undefined || value !== systemDefault;
+  })();
   return (
     Boolean(draft.HeroTitle && draft.HeroTitle.trim().length > 0) ||
     Boolean(draft.HeroEyebrow && draft.HeroEyebrow.trim().length > 0) ||
-    Boolean(draft.HeroCategoryLabel && draft.HeroCategoryLabel.trim().length > 0) ||
+    categoryIsAuthored ||
     Boolean(draft.HeroThemeVariant && draft.HeroThemeVariant !== 'default') ||
     draft.HeroShowMetadata === true
   );
@@ -82,10 +101,7 @@ export function HeroPanel({ draft, onChange, searchAssets }: HeroPanelProps) {
             onChange={(e) => onChange(update(draft, 'HeroEyebrow', e.target.value || undefined))}
           />
         </Field>
-        <Field
-          label="Category label"
-          helper="Leave blank to use the project name."
-        >
+        <Field label="Category label">
           <input
             className={styles.input}
             value={draft.HeroCategoryLabel ?? ''}
