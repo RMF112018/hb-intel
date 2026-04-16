@@ -20,6 +20,7 @@ import { bodyTextSnippet } from '../storyBodyEditor/index.js';
 import { teamMemberInitials } from '../teamComposer/index.js';
 import { sectionAnchorForFindingField } from '../controllers/findingAnchor.js';
 import { handleSectionIndexClick } from '../sectionFocus.js';
+import { selectVisibleTeamMembers } from '../../../data/publisherAdapter/teamViewerAdapter.js';
 import styles from './articlePreview.module.css';
 
 const INLINE_FINDING_LIMIT = 3;
@@ -102,14 +103,12 @@ export function ArticlePreview({
     .sort(bySortOrderThenAsset);
 
   const featuredTeammate = teamMembers.find((t) => t.IsFeaturedMember === true);
-  const orderedTeam = teamMembers
-    .slice()
-    .sort((a, b) => {
-      const ao = a.SortOrder ?? Number.MAX_SAFE_INTEGER;
-      const bo = b.SortOrder ?? Number.MAX_SAFE_INTEGER;
-      if (ao !== bo) return ao - bo;
-      return a.DisplayName.localeCompare(b.DisplayName);
-    });
+  // Delegate ordering to the shared publisher-adapter selector so the
+  // preview renders team members in the exact same order the page
+  // compositor (`pageCompositor.ts`) ships to the published page.
+  // Intrinsic fidelity — no room for a local-sort drift to appear
+  // only once the article is live.
+  const orderedTeam = selectVisibleTeamMembers(teamMembers);
 
   return (
     <article className={styles.root} aria-label="Article preview">
