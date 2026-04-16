@@ -575,11 +575,24 @@ const HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT = {
   kind: 'page-picker-discoverable',
   hiddenFromToolbox: false,
   reason:
-    'Phase 19 Prompt-01 locked in site-scoped install + modern page web part ' +
-    'picker discovery. A flip to hiddenFromToolbox: true requires re-deciding ' +
-    'the deployment model and updating the runbook.',
+    'Phase 19 Prompt-01 and Phase 20 Prompt-01 both lock tenant-wide ' +
+    'enablement + modern page web part picker discovery as the single ' +
+    'supported deployment model. A flip to hiddenFromToolbox: true unwinds ' +
+    'both locks and requires re-deciding the deployment model, rewriting ' +
+    'the runbook, and reintroducing a governed-host-page insertion path.',
 } as const;
 
+// HB Publisher package-truth assertions enforced in `deploymentPostureAlignment`
+// below. All seven must PASS or packaging fails the proof. See
+// `docs/architecture/plans/MASTER/spfx/publisher/phase-20/Closure-Note.md` for
+// the model they enforce.
+//   A1 packaged AppManifest.Version === source package-solution.json solution.version
+//   A2 packaged AppManifest.ProductID === source solution.id (case-insensitive)
+//   A3 packaged archive contains feature_<source feature id>.xml
+//   A4 emitted deploymentModel.kind === kind derived from source skipFeatureDeployment
+//   A5 source preconfiguredEntries[0].hiddenFromToolbox === packaged + emitted plan
+//   A6 declared HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT matches source posture
+//   A7 packaged AppManifest.SkipFeatureDeployment attribute === source skipFeatureDeployment
 function buildHbPackageTruthProof(
   root: string,
   sppkgPath: string,

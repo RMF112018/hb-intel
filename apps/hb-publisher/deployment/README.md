@@ -4,6 +4,36 @@
 Publisher package to the tenant app catalog, and page authors
 inserting the Article Publisher webpart on a modern page.
 
+## Phase 20 lock — chosen deployment model
+
+The Article Publisher ships as a **tenant-wide-enabled + page-picker
+discoverable** SPFx webpart. This is the one and only supported
+deployment model in `main`.
+
+- `config/package-solution.json` sets `skipFeatureDeployment: true`,
+  which causes SPFx to emit `SkipFeatureDeployment="true"` on the
+  packaged `AppManifest.xml`. SharePoint reads that attribute and
+  offers the two-path enablement modal on upload; admins select
+  *"Enable this app and add it to all sites"* to deploy the webpart
+  tenant-wide.
+- `ArticlePublisherWebPart.manifest.json` sets
+  `preconfiguredEntries[0].hiddenFromToolbox: false`, which makes the
+  preconfigured entry visible in the modern page web part picker on
+  any site in the tenant.
+- There is no governed host page, no GUID insertion script, and no
+  per-site install.
+- SharePoint validation path:
+  tenant app-catalog upload → tenant-wide enablement modal → any-site
+  modern page edit → web-part picker → insert → render.
+
+This model is enforced by package-truth assertions A1–A7 in
+`tools/build-spfx-package.ts` and by the frozen
+`HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT` constant. Phase 19 Prompt-01
+and Phase 20 Prompt-01 are the governing locks. Any flip to
+`hiddenFromToolbox: true` or `skipFeatureDeployment: false` unwinds
+both locks and requires a new deployment-model decision plus a
+rewritten runbook before packaging will pass.
+
 ## Operating model
 
 The Article Publisher ships as a **tenant-wide SPFx solution**. It is
@@ -179,3 +209,35 @@ packaging + runtime-load integrity using the emitted JSON artifacts:
 Tenant click-through validation (step 4 above) remains the final
 human gate for a real deployment and is not replaced by the synthetic
 proof.
+
+## Phase 20 closure
+
+At solution version `1.0.0.74` (packaging run
+`2026-04-16T15:12:31.493Z-90cfd912`), `hb-publisher.sppkg` was
+rebuilt from clean `main` and inspected directly:
+
+- packaged `AppManifest.xml` carries `Version="1.0.0.74"`,
+  `ProductID="c7b2a144-9d3e-4a71-8e2a-6f9d3c1b7e42"`,
+  `SkipFeatureDeployment="true"`, `IsDomainIsolated="false"`;
+- `feature_b41e97f8-3c2d-4a59-9e12-d8a7f2b6c901.xml` is present with
+  `Version="1.0.0.74"` and `Scope="Web"`;
+- the packaged component manifest for
+  `1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10` carries
+  `preconfiguredEntries[0].hiddenFromToolbox: false` and
+  `supportedHosts: ["SharePointWebPart"]`.
+
+Package-truth proof
+(`dist/sppkg/hb-publisher-package-truth-proof.json`) reports
+`deploymentPostureAlignment.pass = true` with A1–A7 all PASS. The
+emitted deployment plan
+(`dist/sppkg/hb-publisher-hosted-deployment-plan.json`) carries
+`deploymentModel.kind = "tenant-scoped-webpart"` and
+`deploymentModel.toolboxVisibility.hiddenFromToolbox = false`.
+
+SharePoint validation path is the one documented above in Deployment
+steps 1–4 (upload → tenant-wide enablement → modern page edit →
+picker insertion → render). No governed host-page resolution, no
+GUID insertion script, no per-site install.
+
+See `docs/architecture/plans/MASTER/spfx/publisher/phase-20/Closure-Note.md`
+for the full Phase 20 lock rationale.
