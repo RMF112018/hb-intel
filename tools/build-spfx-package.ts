@@ -292,8 +292,11 @@ if (targetDomain && domains.length === 0) {
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SHELL_DIR = path.join(ROOT, 'tools', 'spfx-shell');
 const OUTPUT_DIR = path.join(ROOT, 'dist', 'sppkg');
-const NODE18_BIN = process.env.HB_INTEL_NODE18_BIN
-  ?? path.join(process.env.HOME ?? '', '.nvm', 'versions', 'node', 'v18.20.8', 'bin', 'node');
+// Populated by resolveNode18Binary() at preflight time — see the docs at
+// docs/reference/developer/spfx-packaging-toolchain.md. Reads of this
+// variable must happen after preflight (all run(..., { useNode18: true })
+// call sites are inside the per-domain packaging loop, so this is safe).
+let NODE18_BIN = '';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -302,6 +305,9 @@ function run(cmd: string, opts?: { cwd?: string; env?: Record<string, string>; u
   // SPFx 1.18 requires Node 18. Invoke the Node 18 binary directly instead
   // of relying on shell-local nvm state, which can silently fall back to the
   // wrong Node version in CI or desktop-agent environments.
+  if (opts?.useNode18 && !NODE18_BIN) {
+    throw new Error('useNode18 requested but Node 18 resolver did not run');
+  }
   const finalCmd = opts?.useNode18
     ? cmd.replace(/^node\b/, `"${NODE18_BIN}"`)
     : cmd;
@@ -1270,6 +1276,174 @@ function verifyPackagedBundleFreshness(
   }
 }
 
+// ── SPFx packaging toolchain preflight (Node 18) ───────────────────────────
+
+interface Node18Candidate {
+  strategy: string;
+  binary: string | null;
+  rejection?: string;
+  version?: string;
+}
+
+function probeNode18Candidate(binary: string | null | undefined, strategy: string): Node18Candidate {
+  if (!binary) {
+    return { strategy, binary: null, rejection: 'not found' };
+  }
+  if (!fs.existsSync(binary)) {
+    return { strategy, binary, rejection: `missing: ${binary}` };
+  }
+  let versionOut: string;
+  try {
+    versionOut = execSync(`"${binary}" --version`, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+  } catch (err) {
+    return { strategy, binary, rejection: `execution failed: ${(err as Error).message}` };
+  }
+  const match = versionOut.match(/^v(\d+)\.(\d+)\.(\d+)$/);
+  if (!match) {
+    return { strategy, binary, rejection: `unparseable version output: ${versionOut}` };
+  }
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  if (major !== 18 || minor < 17) {
+    return { strategy, binary, version: versionOut, rejection: `reports ${versionOut}, need v18.17.x..<v19` };
+  }
+  return { strategy, binary, version: versionOut };
+}
+
+function findNvmNode18(home: string | undefined): string | null {
+  if (!home) return null;
+  const nvmNodeDir = path.join(home, '.nvm', 'versions', 'node');
+  if (!fs.existsSync(nvmNodeDir)) return null;
+  let entries: string[];
+  try {
+    entries = fs.readdirSync(nvmNodeDir);
+  } catch {
+    return null;
+  }
+  const v18Entries = entries
+    .filter((entry) => /^v18\.\d+\.\d+$/.test(entry))
+    .sort((a, b) => {
+      const [, aMinor, aPatch] = a.match(/^v18\.(\d+)\.(\d+)$/)!.map(Number);
+      const [, bMinor, bPatch] = b.match(/^v18\.(\d+)\.(\d+)$/)!.map(Number);
+      if (aMinor !== bMinor) return bMinor - aMinor;
+      return bPatch - aPatch;
+    });
+  for (const entry of v18Entries) {
+    const candidate = path.join(nvmNodeDir, entry, 'bin', 'node');
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function findGlobNode18(globDir: string, subdirPattern: RegExp): string | null {
+  if (!fs.existsSync(globDir)) return null;
+  let entries: string[];
+  try {
+    entries = fs.readdirSync(globDir);
+  } catch {
+    return null;
+  }
+  for (const entry of entries) {
+    if (!subdirPattern.test(entry)) continue;
+    const candidate = path.join(globDir, entry, 'bin', 'node');
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function whichBinary(name: string): string | null {
+  try {
+    const out = execSync(`command -v "${name}"`, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: '/bin/sh',
+    }).trim();
+    return out || null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveNode18Binary(): Node18Candidate {
+  const attempts: Node18Candidate[] = [];
+  const home = process.env.HOME;
+
+  const envOverride = process.env.HB_INTEL_NODE18_BIN;
+  if (envOverride) {
+    // HB_INTEL_NODE18_BIN is an explicit operator override. If it is set but
+    // rejected, fail immediately rather than silently falling back to another
+    // Node 18 the operator did not ask for — the whole point of the override
+    // is determinism. Other strategies are skipped.
+    const result = probeNode18Candidate(envOverride, 'HB_INTEL_NODE18_BIN env var');
+    if (!result.rejection) return result;
+    console.error('\n❌ SPFx packaging preflight: HB_INTEL_NODE18_BIN is set but rejected.\n');
+    console.error(
+      `  - HB_INTEL_NODE18_BIN env var: ${envOverride} — ${result.rejection}\n\n` +
+      'Because HB_INTEL_NODE18_BIN is an explicit operator override, other\n' +
+      'resolution strategies were skipped. Fix the path (it must be a Node\n' +
+      '18.17.x..<19 binary) or unset the variable to let the resolver search.\n' +
+      '\nSee docs/reference/developer/spfx-packaging-toolchain.md for details.',
+    );
+    process.exit(1);
+  }
+  attempts.push({ strategy: 'HB_INTEL_NODE18_BIN env var', binary: null, rejection: 'unset' });
+
+  const node18OnPath = whichBinary('node18');
+  const node18Result = probeNode18Candidate(node18OnPath, 'PATH lookup for `node18`');
+  attempts.push(node18Result);
+  if (!node18Result.rejection) return node18Result;
+
+  const nodeOnPath = whichBinary('node');
+  const nodeResult = probeNode18Candidate(nodeOnPath, 'PATH lookup for `node`');
+  attempts.push(nodeResult);
+  if (!nodeResult.rejection) return nodeResult;
+
+  const nvmBin = findNvmNode18(home);
+  const nvmResult = probeNode18Candidate(nvmBin, '~/.nvm/versions/node/v18.*/bin/node');
+  attempts.push(nvmResult);
+  if (!nvmResult.rejection) return nvmResult;
+
+  const homebrewPaths = [
+    '/opt/homebrew/opt/node@18/bin/node',
+    '/usr/local/opt/node@18/bin/node',
+  ];
+  for (const candidate of homebrewPaths) {
+    const result = probeNode18Candidate(candidate, candidate);
+    attempts.push(result);
+    if (!result.rejection) return result;
+  }
+
+  const nGlob = findGlobNode18('/usr/local/n/versions/node', /^18\./);
+  const nResult = probeNode18Candidate(nGlob, '/usr/local/n/versions/node/18.*/bin/node');
+  attempts.push(nResult);
+  if (!nResult.rejection) return nResult;
+
+  console.error('\n❌ SPFx packaging preflight: Node 18 binary not found.\n');
+  console.error(
+    'The SPFx shell toolchain (@microsoft/sp-build-web@1.18.0) requires\n' +
+    'Node 18.17.1 <19. The orchestrator searched the following locations:\n',
+  );
+  for (const attempt of attempts) {
+    const label = attempt.binary ?? '(unset)';
+    console.error(`  - ${attempt.strategy}: ${label} — ${attempt.rejection}`);
+  }
+  console.error(
+    '\nRemediation:\n' +
+    '  • `nvm install 18 && nvm use 18` then re-run.\n' +
+    '  • Or `brew install node@18` then re-run.\n' +
+    '  • Or set HB_INTEL_NODE18_BIN=/path/to/node (must report v18.x).\n' +
+    '\nSee docs/reference/developer/spfx-packaging-toolchain.md for details.',
+  );
+  process.exit(1);
+}
+
 // ── SPFx baseline preflight ────────────────────────────────────────────────
 
 function readJsonFile(absPath: string): any {
@@ -1338,6 +1512,13 @@ function assertSpfxBaselines(root: string): void {
 // ── Main loop ──────────────────────────────────────────────────────────────
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+const node18 = resolveNode18Binary();
+NODE18_BIN = node18.binary!;
+console.log(
+  `✓ SPFx packaging toolchain: Node ${node18.version} at ${node18.binary} ` +
+  `(source: ${node18.strategy})`,
+);
 
 assertSpfxBaselines(ROOT);
 

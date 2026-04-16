@@ -39,6 +39,13 @@ at every packaging run by `tools/build-spfx-package.ts`.
    loader contract. The app-layer types baseline is not part of that
    negotiation because nothing from it ships.
 
+#### Node runtime prerequisite
+
+Producing the `.sppkg` requires Node 18.17.x..<19 reachable by the
+orchestrator's preflight resolver. See
+[SPFx Packaging Toolchain](./spfx-packaging-toolchain.md) for the
+resolution strategies and remediation.
+
 #### Changing either baseline
 
 - Raising the **shell baseline** requires: (a) an ADR explaining the

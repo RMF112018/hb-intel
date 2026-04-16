@@ -41,6 +41,16 @@ runtime globals below rather than copy-pasting.
 The current packaging run's hashed `app`, `shell-entry`, and CSS paths
 live in the deployment plan artifact. Do not hand-edit them.
 
+## Prerequisites for building the package
+
+Running `tools/build-spfx-package.ts --domain hb-publisher` requires
+both Node 20+ (for the orchestrator) and Node 18.17.x..<19 (for the
+SPFx gulp toolchain). The orchestrator resolves Node 18 via a
+preflight — see
+[`docs/reference/developer/spfx-packaging-toolchain.md`](../../../docs/reference/developer/spfx-packaging-toolchain.md)
+for resolution strategies, the `HB_INTEL_NODE18_BIN` override, and
+remediation if preflight cannot find a compatible Node 18.
+
 ## Deployment steps
 
 ### 1. Install the package
