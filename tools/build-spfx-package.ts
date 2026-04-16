@@ -221,6 +221,47 @@ const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
   'hb-webparts': { id: HB_PNP_OPS_WEBPART_ID, label: 'PnP Ops webpart' },
   'hb-publisher': { id: HB_PUBLISHER_ARTICLE_WEBPART_ID, label: 'Article Publisher webpart' },
 };
+// ── SPFx version baselines (governed, see docs/reference/developer/spfx-baseline.md) ──
+//
+// The repo intentionally maintains two distinct SPFx baselines:
+//
+//   1. Shell toolchain baseline (`tools/spfx-shell`) — pinned to exactly
+//      1.18.0 for every @microsoft/sp-* package. The shell is outside the
+//      root pnpm workspace (see `pnpm-workspace.yaml`: `!tools/spfx-shell`)
+//      and installs its own node_modules via npm under Node 18.20.8. The
+//      gulp toolchain (`@microsoft/sp-build-web`) and the webpack-bundled
+//      runtime identity (`@microsoft/sp-webpart-base`) that ship inside the
+//      .sppkg both come from this install.
+//
+//   2. App-layer types baseline (`apps/hb-publisher`, `apps/hb-webparts`) —
+//      declared as `^1.20.0` devDependency for `@microsoft/sp-property-pane`
+//      and `@microsoft/sp-webpart-base`. These are type-only imports; the
+//      Vite bundle externalizes every `@microsoft/*` symbol (see each app's
+//      `vite.config.ts` `rollupOptions.external`), so no app-layer SPFx
+//      version ever ships into the .sppkg.
+//
+// These baselines do not interact at runtime: the apps externalize all
+// SPFx symbols at bundle time, and the SharePoint host resolves them
+// against whatever the tenant is running. Drift is guarded by the
+// preflight below; raising either baseline is an explicit decision, not
+// an accidental dependency bump.
+const SHELL_SPFX_EXACT_VERSION = '1.18.0';
+const SHELL_SPFX_PACKAGES: readonly string[] = [
+  '@microsoft/sp-application-base',
+  '@microsoft/sp-build-web',
+  '@microsoft/sp-core-library',
+  '@microsoft/sp-loader',
+  '@microsoft/sp-module-interfaces',
+  '@microsoft/sp-property-pane',
+  '@microsoft/sp-webpart-base',
+];
+const APP_SPFX_EXPECTED_RANGE = '^1.20.0';
+const APP_SPFX_PACKAGES: readonly string[] = [
+  '@microsoft/sp-property-pane',
+  '@microsoft/sp-webpart-base',
+];
+const APP_SPFX_GOVERNED_APP_DIRS: readonly string[] = ['hb-publisher', 'hb-webparts'];
+
 const HB_WEBPARTS_PROOF_CASE_IDS = new Set<string>([
   // Cumulative full-package mode: all webparts are included.
   // Proof-case IDs validated in Phase 2-3: HbHeroBanner, PriorityActionsRail.
@@ -1229,9 +1270,76 @@ function verifyPackagedBundleFreshness(
   }
 }
 
+// ── SPFx baseline preflight ────────────────────────────────────────────────
+
+function readJsonFile(absPath: string): any {
+  return JSON.parse(fs.readFileSync(absPath, 'utf8'));
+}
+
+function assertSpfxBaselines(root: string): void {
+  const violations: string[] = [];
+
+  // 1. Shell toolchain baseline: exact 1.18.0 for every governed sp-* package.
+  const shellPkgPath = path.join(root, 'tools', 'spfx-shell', 'package.json');
+  const shellPkg = readJsonFile(shellPkgPath);
+  const shellDeps: Record<string, string> = {
+    ...(shellPkg.dependencies ?? {}),
+    ...(shellPkg.devDependencies ?? {}),
+  };
+  for (const name of SHELL_SPFX_PACKAGES) {
+    const declared = shellDeps[name];
+    if (declared !== SHELL_SPFX_EXACT_VERSION) {
+      violations.push(
+        `tools/spfx-shell/package.json: ${name} declared as "${declared ?? '(missing)'}" — ` +
+        `governed baseline is "${SHELL_SPFX_EXACT_VERSION}" exact.`,
+      );
+    }
+  }
+
+  // 2. App-layer types baseline: ^1.20.0 for every governed app.
+  for (const appDir of APP_SPFX_GOVERNED_APP_DIRS) {
+    const appPkgPath = path.join(root, 'apps', appDir, 'package.json');
+    if (!fs.existsSync(appPkgPath)) {
+      continue;
+    }
+    const appPkg = readJsonFile(appPkgPath);
+    const appDeps: Record<string, string> = {
+      ...(appPkg.dependencies ?? {}),
+      ...(appPkg.devDependencies ?? {}),
+    };
+    for (const name of APP_SPFX_PACKAGES) {
+      const declared = appDeps[name];
+      if (declared !== APP_SPFX_EXPECTED_RANGE) {
+        violations.push(
+          `apps/${appDir}/package.json: ${name} declared as "${declared ?? '(missing)'}" — ` +
+          `governed baseline is "${APP_SPFX_EXPECTED_RANGE}".`,
+        );
+      }
+    }
+  }
+
+  if (violations.length > 0) {
+    console.error('\n❌ SPFx baseline preflight failed:');
+    for (const v of violations) {
+      console.error(`   - ${v}`);
+    }
+    console.error(
+      '\nSee docs/reference/developer/spfx-baseline.md for the governed shell ' +
+      'toolchain + app-layer types baselines. Raising either is an explicit ADR decision.',
+    );
+    process.exit(1);
+  }
+  console.log(
+    `✓ SPFx baselines: shell=${SHELL_SPFX_EXACT_VERSION} exact (${SHELL_SPFX_PACKAGES.length} pkgs), ` +
+    `apps=${APP_SPFX_EXPECTED_RANGE} (${APP_SPFX_GOVERNED_APP_DIRS.join(', ')})`,
+  );
+}
+
 // ── Main loop ──────────────────────────────────────────────────────────────
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+assertSpfxBaselines(ROOT);
 
 let allPassed = true;
 
