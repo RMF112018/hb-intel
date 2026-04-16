@@ -17,7 +17,7 @@ import {
   ChevronForward,
   Star,
   StarFilled,
-} from '@hbc/ui-kit';
+} from '@hbc/ui-kit/icons';
 import { ImagePlus } from 'lucide-react';
 import type { PublisherMediaRow } from '../../../data/publisherAdapter/index.js';
 import { mediaRoleLabel } from '../authorLabels.js';

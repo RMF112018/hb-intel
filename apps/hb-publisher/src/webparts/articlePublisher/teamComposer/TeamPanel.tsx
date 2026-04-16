@@ -17,8 +17,8 @@ import {
   ChevronUp,
   Star,
   StarFilled,
-} from '@hbc/ui-kit';
-import type { PeopleSearchFn, PersonPhotoFn } from '@hbc/ui-kit';
+} from '@hbc/ui-kit/icons';
+import type { PeopleSearchFn, PersonPhotoFn } from '@hbc/ui-kit/homepage';
 import { UserPlus } from 'lucide-react';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 import { TeamMemberComposer } from './TeamMemberComposer.js';

@@ -228,6 +228,17 @@ export type { HbcPeoplePickerProps, PersonEntry, PeopleSearchFn, PersonPhotoFn, 
 export { useGraphPeopleSearch, createStaticPeopleSearch, rankPeopleResults } from './HbcPeoplePicker/useGraphPeopleSearch.js';
 export { usePersonPhotoCache, createGraphPersonPhotoFn } from './HbcPeoplePicker/usePersonPhotoCache.js';
 
+// Authoring-safety hook re-export so homepage-family consumers
+// (e.g., the HB Publisher webpart) can reach it without touching the
+// ui-kit root barrel. Canonical implementation still lives at
+// `./hooks/useUnsavedChangesBlocker.js` and is re-exported from the
+// root package for non-subpath consumers.
+export { useUnsavedChangesBlocker } from './hooks/useUnsavedChangesBlocker.js';
+export type {
+  UseUnsavedChangesBlockerOptions,
+  UseUnsavedChangesBlockerReturn,
+} from './hooks/useUnsavedChangesBlocker.js';
+
 export { HbcAvatarStack } from './HbcAvatarStack/index.js';
 export type {
   HbcAvatarStackProps,

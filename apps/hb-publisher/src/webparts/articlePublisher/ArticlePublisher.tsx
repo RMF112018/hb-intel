@@ -20,8 +20,11 @@
  *   - authoring panels, QueueRail, and feature surfaces compose the render.
  */
 import * as React from 'react';
-import { HbcEmptyState, HbcSpinner } from '@hbc/ui-kit/homepage';
-import { useUnsavedChangesBlocker } from '@hbc/ui-kit';
+import {
+  HbcEmptyState,
+  HbcSpinner,
+  useUnsavedChangesBlocker,
+} from '@hbc/ui-kit/homepage';
 import { fetchRequestDigest, storeSiteUrl } from '@hbc/sharepoint-platform';
 import {
   WORKFLOW_STATE_OPERATIONAL_VALUES,

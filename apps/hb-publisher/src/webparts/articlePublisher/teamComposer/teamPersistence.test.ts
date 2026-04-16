@@ -11,7 +11,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { PersonEntry } from '@hbc/ui-kit';
+import type { PersonEntry } from '@hbc/ui-kit/homepage';
 import { mapTeamMemberRowToListFields } from '../../../data/publisherAdapter/publisherWriters.js';
 import {
   buildTeamViewerPersonList,

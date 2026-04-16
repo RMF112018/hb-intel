@@ -15,8 +15,8 @@
  */
 
 import * as React from 'react';
-import { usePersonPhotoCache } from '@hbc/ui-kit';
-import type { PersonPhotoFn } from '@hbc/ui-kit';
+import { usePersonPhotoCache } from '@hbc/ui-kit/homepage';
+import type { PersonPhotoFn } from '@hbc/ui-kit/homepage';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 import { teamMemberInitials } from './teamInvariants.js';
 import styles from './teamPanel.module.css';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PersonEntry } from '@hbc/ui-kit';
+import type { PersonEntry } from '@hbc/ui-kit/homepage';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 import {
   createTeamMemberFromPerson,

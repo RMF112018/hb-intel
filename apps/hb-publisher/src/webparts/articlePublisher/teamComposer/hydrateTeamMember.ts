@@ -8,7 +8,7 @@
  * composer UI and tests share a single deterministic rule set.
  */
 
-import type { PersonEntry } from '@hbc/ui-kit';
+import type { PersonEntry } from '@hbc/ui-kit/homepage';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 
 export interface TeamMemberEditorials {

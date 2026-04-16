@@ -13,9 +13,15 @@
  */
 
 import * as React from 'react';
-import { HbcPeoplePicker } from '@hbc/ui-kit';
-import type { PeopleSearchFn, PersonEntry, PersonPhotoFn } from '@hbc/ui-kit';
-import { HbcKudosComposerFlyout } from '@hbc/ui-kit/homepage';
+import {
+  HbcKudosComposerFlyout,
+  HbcPeoplePicker,
+} from '@hbc/ui-kit/homepage';
+import type {
+  PeopleSearchFn,
+  PersonEntry,
+  PersonPhotoFn,
+} from '@hbc/ui-kit/homepage';
 import type { PublisherTeamMemberRow } from '../../../data/publisherAdapter/index.js';
 import {
   createTeamMemberFromPerson,
