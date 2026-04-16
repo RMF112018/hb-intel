@@ -36,6 +36,12 @@ interface DomainConfig {
   pascal: string;     // PascalCase for manifest lookups
   packagingModel?: 'single' | 'multi';
   extensionType?: 'ApplicationCustomizer';  // set for SPFx extension domains (Lane B)
+  // When true, the orchestrator hard-cleans the app's dist/ directory and
+  // forces a fresh Vite build before packaging, then captures SHA-256
+  // evidence of the source bundle and verifies the packaged bundle matches
+  // byte-for-byte. Reserved for domains that are under audit and must be
+  // provably fresh on every packaging run.
+  freshBuildRequired?: boolean;
 }
 
 interface HbShimExpectation {
@@ -157,8 +163,8 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
-  { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi' },
-  { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single' },
+  { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi', freshBuildRequired: true },
+  { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
 ];
 
@@ -1103,12 +1109,18 @@ function verifySppkg(
   }
 }
 
+interface PackagedFreshnessResult {
+  ok: boolean;
+  packagedSha: string | null;
+  details: string[];
+}
+
 function verifyPackagedBundleFreshness(
   sppkgPath: string,
   bundleName: string,
   evidence: FreshnessEvidence,
   domainDir: string,
-): boolean {
+): PackagedFreshnessResult {
   try {
     const archivePaths = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' })
       .split('\n')
@@ -1119,8 +1131,9 @@ function verifyPackagedBundleFreshness(
       (entry) => entry === expectedBundlePath || entry.endsWith(`/${expectedBundlePath}`),
     );
     if (!bundleArchivePath) {
-      console.error(`  ❌ ${domainDir}: packaged bundle ${bundleName} not found for freshness verification`);
-      return false;
+      const detail = `Packaged bundle ${bundleName} not found in ${path.basename(sppkgPath)}`;
+      console.error(`  ❌ ${domainDir}: ${detail}`);
+      return { ok: false, packagedSha: null, details: [detail] };
     }
 
     const packagedBytes = execSync(`unzip -p "${sppkgPath}" "${bundleArchivePath}"`, {
@@ -1128,19 +1141,62 @@ function verifyPackagedBundleFreshness(
     });
     const packagedSha = sha256Hex(packagedBytes);
     if (packagedSha !== evidence.sourceBundleSha256) {
+      const detail = `Packaged bundle hash mismatch for ${bundleName} (source=${evidence.sourceBundleSha256}, packaged=${packagedSha})`;
       console.error(
         `  ❌ ${domainDir}: packaged bundle hash mismatch for ${bundleName}\n` +
         `     source:   ${evidence.sourceBundleSha256}\n` +
         `     packaged: ${packagedSha}`,
       );
-      return false;
+      return { ok: false, packagedSha, details: [detail] };
     }
     console.log(`  ✓ Packaged bundle freshness verified (${bundleName}, sha256:${packagedSha.slice(0, 12)}...)`);
-    return true;
+    return {
+      ok: true,
+      packagedSha,
+      details: [`Packaged bundle ${bundleName} hash matches freshly built source bundle`],
+    };
   } catch (err) {
-    console.error(`  ❌ ${domainDir}: failed packaged freshness verification — ${(err as Error).message}`);
-    return false;
+    const detail = `Failed packaged freshness verification — ${(err as Error).message}`;
+    console.error(`  ❌ ${domainDir}: ${detail}`);
+    return { ok: false, packagedSha: null, details: [detail] };
   }
+}
+
+interface FreshnessProofInputs {
+  outputDir: string;
+  domainDir: string;
+  sppkgFile: string;
+  baseBundleName: string;
+  packagedBundleName: string;
+  evidence: FreshnessEvidence;
+  packagedSha: string | null;
+  verification: PackagedFreshnessResult;
+}
+
+function writeFreshnessProof(inputs: FreshnessProofInputs): string {
+  const proof = {
+    domain: inputs.domainDir,
+    generatedAt: new Date().toISOString(),
+    packagingRunId: inputs.evidence.runId,
+    sppkgFile: inputs.sppkgFile,
+    sourceBundle: {
+      fileName: inputs.baseBundleName,
+      sha256: inputs.evidence.sourceBundleSha256,
+      sizeBytes: inputs.evidence.sourceBundleSizeBytes,
+      mtimeIso: inputs.evidence.sourceBundleMtimeIso,
+    },
+    packagedBundle: {
+      fileName: inputs.packagedBundleName,
+      sha256: inputs.packagedSha,
+    },
+    freshness: {
+      pass: inputs.verification.ok,
+      details: inputs.verification.details,
+    },
+  };
+  const proofPath = path.join(inputs.outputDir, `${inputs.domainDir}-freshness-proof.json`);
+  fs.writeFileSync(proofPath, `${JSON.stringify(proof, null, 2)}\n`);
+  return proofPath;
 }
 
 // ── Main loop ──────────────────────────────────────────────────────────────
@@ -1249,7 +1305,7 @@ for (const domain of domains) {
     proofCaseBuildEnv.HB_WEBPARTS_ENTRY = proofCaseEntry;
   }
 
-  const enforceFreshBuild = domain.dir === 'hb-webparts';
+  const enforceFreshBuild = domain.freshBuildRequired === true;
   if (enforceFreshBuild) {
     if (fs.existsSync(distDir)) {
       fs.rmSync(distDir, { recursive: true, force: true });
@@ -1837,9 +1893,27 @@ for (const domain of domains) {
     allPassed = false;
     continue;
   }
-  if (domain.dir === 'hb-webparts' && freshnessEvidence) {
-    if (!verifyPackagedBundleFreshness(sppkgDest, bundleName, freshnessEvidence, domain.dir)) {
+  let packagedFreshness: PackagedFreshnessResult | null = null;
+  if (enforceFreshBuild && freshnessEvidence) {
+    packagedFreshness = verifyPackagedBundleFreshness(sppkgDest, bundleName, freshnessEvidence, domain.dir);
+    if (!packagedFreshness.ok) {
       allPassed = false;
+      // Publisher uses a standalone freshness proof (no shim/package-truth
+      // proof in this prompt scope), so emit the failure artifact before
+      // continuing so the run is still auditable.
+      if (domain.dir === 'hb-publisher') {
+        const proofPath = writeFreshnessProof({
+          outputDir: OUTPUT_DIR,
+          domainDir: domain.dir,
+          sppkgFile: path.basename(sppkgDest),
+          baseBundleName,
+          packagedBundleName: bundleName,
+          evidence: freshnessEvidence,
+          packagedSha: packagedFreshness.packagedSha,
+          verification: packagedFreshness,
+        });
+        console.log(`  ✓ Freshness proof written: ${proofPath}`);
+      }
       continue;
     }
   }
@@ -1912,6 +1986,24 @@ for (const domain of domains) {
       allPassed = false;
       continue;
     }
+  }
+
+  // Publisher is under audit and must emit a standalone freshness proof on
+  // every successful run. Prompt-02 later generalizes the richer package-
+  // truth proof; until then this artifact is the auditable Publisher
+  // freshness record in dist/sppkg/.
+  if (domain.dir === 'hb-publisher' && enforceFreshBuild && freshnessEvidence && packagedFreshness) {
+    const proofPath = writeFreshnessProof({
+      outputDir: OUTPUT_DIR,
+      domainDir: domain.dir,
+      sppkgFile: path.basename(sppkgDest),
+      baseBundleName,
+      packagedBundleName: bundleName,
+      evidence: freshnessEvidence,
+      packagedSha: packagedFreshness.packagedSha,
+      verification: packagedFreshness,
+    });
+    console.log(`  ✓ Freshness proof written: ${proofPath}`);
   }
 
   const stats = fs.statSync(sppkgDest);
