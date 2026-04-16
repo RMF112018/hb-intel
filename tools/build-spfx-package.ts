@@ -133,6 +133,11 @@ interface HbPackageTruthProof {
     solutionId: string;
     featureId: string;
     webPartId: string;
+    toolboxVisibilityIntent: {
+      kind: string;
+      hiddenFromToolbox: boolean;
+      reason: string;
+    };
   };
   checks: {
     structuralValidity: {
@@ -556,6 +561,15 @@ function derivePublisherDiscoveryPosture(sourceManifest: any): { hiddenFromToolb
   return { hiddenFromToolbox: first?.hiddenFromToolbox === true };
 }
 
+const HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT = {
+  kind: 'page-picker-discoverable',
+  hiddenFromToolbox: false,
+  reason:
+    'Phase 19 Prompt-01 locked in site-scoped install + modern page web part ' +
+    'picker discovery. A flip to hiddenFromToolbox: true requires re-deciding ' +
+    'the deployment model and updating the runbook.',
+} as const;
+
 function buildHbPackageTruthProof(
   root: string,
   sppkgPath: string,
@@ -873,6 +887,19 @@ function buildHbPackageTruthProof(
       );
     }
 
+    // A6: declared toolbox visibility intent matches source posture
+    const intent = HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT;
+    if (intent.hiddenFromToolbox === sourceDiscovery.hiddenFromToolbox) {
+      postureDetails.push(
+        `A6: declared toolbox visibility intent (${intent.kind}, hiddenFromToolbox=${intent.hiddenFromToolbox}) matches source`,
+      );
+    } else {
+      deploymentPosturePass = false;
+      postureDetails.push(
+        `A6: declared toolbox visibility intent (${intent.kind}, hiddenFromToolbox=${intent.hiddenFromToolbox}) does not match source (hiddenFromToolbox=${sourceDiscovery.hiddenFromToolbox})`,
+      );
+    }
+
     deploymentPosture = {
       kind: emittedDeploymentModelKind,
       skipFeatureDeployment,
@@ -881,6 +908,11 @@ function buildHbPackageTruthProof(
       solutionId,
       featureId,
       webPartId,
+      toolboxVisibilityIntent: {
+        kind: intent.kind,
+        hiddenFromToolbox: intent.hiddenFromToolbox,
+        reason: intent.reason,
+      },
     };
     deploymentPostureAlignment = {
       pass: deploymentPosturePass,
@@ -2521,6 +2553,11 @@ for (const domain of domains) {
           runbook: 'apps/hb-publisher/deployment/README.md',
           install: installBlock,
           discovery: discoveryBlock,
+          toolboxVisibility: {
+            kind: HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT.kind,
+            hiddenFromToolbox: HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT.hiddenFromToolbox,
+            reason: HB_PUBLISHER_TOOLBOX_VISIBILITY_INTENT.reason,
+          },
         },
       };
       hbPublisherInputs = {

@@ -1,5 +1,21 @@
 # Phase 18 Wave 01 — Prompt 04 Closure
 
+> **SUPERSEDED BY PHASE 19.** The `admin-managed-host-page` /
+> `hiddenFromToolbox: true` operating model described in the rest of
+> this document was not fully carried through into the source manifest
+> or the packaging orchestrator. Phase 19 (audit in
+> `docs/architecture/plans/MASTER/spfx/publisher/phase-19/HB-Publisher-SPFx-Packaging-Audit.md`)
+> confirmed the emitted package shipped as page-picker discoverable
+> rather than admin-managed hidden, and reversed the decision. The
+> current operating model is **site-scoped install + modern page web
+> part picker discovery** (`hiddenFromToolbox: false`,
+> `skipFeatureDeployment: false`). Reversing commits: `b9f3bd29`
+> (Prompt 01, runbook + plan alignment), `f7a238fe` (Prompt 02,
+> package-truth assertions A1–A5), and the Prompt 03 commit landing
+> the declared toolbox-visibility intent + A6 assertion. Treat the
+> content below as historical record only — the authoritative current
+> runbook lives at `apps/hb-publisher/deployment/README.md`.
+
 **Status:** Closed
 **Closure date:** 2026-04-16
 **Manifest bump:** `hb-publisher` `1.0.0.63` → `1.0.0.64`

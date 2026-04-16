@@ -21,6 +21,17 @@ tenant-wide deployment and no GUID-based insertion script is required.
 - **One instance per authoring page**: a page only needs one Article
   Publisher instance — it renders the whole authoring surface.
 
+### Declared toolbox visibility intent
+
+The Article Publisher is **intentionally page-picker discoverable**
+(`hiddenFromToolbox: false`). Phase 19 Prompt-01 locked in site-scoped
+install + modern page web part picker discovery as the final
+deployment model; any flip back to `hiddenFromToolbox: true` requires
+re-deciding the deployment model and updating this runbook. The same
+intent is emitted into `dist/sppkg/hb-publisher-hosted-deployment-plan.json`
+under `deploymentModel.toolboxVisibility` and asserted by the
+package-truth proof (check A6).
+
 Machine-readable deployment specs for this release are emitted at
 packaging time to `dist/sppkg/hb-publisher-hosted-deployment-plan.json`
 — use that file as the source of truth for the IDs, paths, and
