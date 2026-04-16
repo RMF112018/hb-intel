@@ -1,21 +1,30 @@
-# hb-publisher — Site-Scoped Deployment Runbook
+# hb-publisher — Tenant-Wide Deployment Runbook
 
-**Audience:** SharePoint administrators installing the Article Publisher
-package at the site level, and page authors inserting the Article
-Publisher webpart on a modern page.
+**Audience:** SharePoint tenant administrators uploading the Article
+Publisher package to the tenant app catalog, and page authors
+inserting the Article Publisher webpart on a modern page.
 
 ## Operating model
 
-The Article Publisher ships as a **site-scoped SPFx solution**. It is
-installed into a single SharePoint site's App Catalog, and page authors
-discover it through the **standard modern page web part picker**. No
-tenant-wide deployment and no GUID-based insertion script is required.
+The Article Publisher ships as a **tenant-wide SPFx solution**. It is
+uploaded once to the tenant app catalog and enabled with the "Enable
+this app and add it to all sites" option so SharePoint automatically
+deploys it to every site in the tenant. Page authors then discover it
+through the **standard modern page web part picker**. No per-site
+install is required.
 
-- **Site-scoped install**: the `.sppkg` is added to the target site's
-  App Catalog and deployed there. Each site that needs the Article
-  Publisher installs its own copy.
-- **Page-picker discovery**: once the app is deployed to a site, any
-  modern page on that site can insert the Article Publisher via
+- **Tenant-wide enablement**: the `.sppkg` is uploaded to the tenant
+  app catalog. On upload, SharePoint presents a two-path enablement
+  modal:
+  - *Enable this app* — makes it available to enable per-site later.
+  - *Enable this app and add it to all sites* — deploys automatically
+    to every site in the tenant (recommended).
+  This two-path modal is gated on the `SkipFeatureDeployment="true"`
+  attribute in the emitted `AppManifest.xml`, which is set from
+  `skipFeatureDeployment: true` in `config/package-solution.json` and
+  asserted by the package-truth proof (check A7).
+- **Page-picker discovery**: once the app is tenant-wide enabled, any
+  modern page on any site can insert the Article Publisher via
   *Edit → + → search "Article Publisher"*. The webpart is visible in
   the toolbox (`hiddenFromToolbox: false`).
 - **One instance per authoring page**: a page only needs one Article
@@ -47,7 +56,7 @@ runtime globals below rather than copy-pasting.
 | Webpart alias        | `ArticlePublisherWebPart`                      |
 | Supported hosts      | `SharePointWebPart`                            |
 | Runtime global       | `__hbIntel_hbPublisher` on `window`/`globalThis` |
-| Deployment model     | `site-scoped-webpart`                          |
+| Deployment model     | `tenant-scoped-webpart`                        |
 
 The current packaging run's hashed `app`, `shell-entry`, and CSS paths
 live in the deployment plan artifact. Do not hand-edit them.
@@ -64,23 +73,44 @@ remediation if preflight cannot find a compatible Node 18.
 
 ## Deployment steps
 
-### 1. Install the package on the target site
+### 1. Upload the package to the tenant app catalog
 
 ```powershell
-Connect-PnPOnline -Url "https://<tenant>.sharepoint.com/sites/<target-site>" -Interactive
-Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Site -Overwrite -Publish
+Connect-PnPOnline -Url "https://hedrickbrotherscom.sharepoint.com/sites/apps" -Interactive
+Add-PnPApp -Path "./dist/sppkg/hb-publisher.sppkg" -Scope Tenant -Overwrite
 ```
 
-Post-install, verify with `Get-PnPApp -Scope Site` that `hb-publisher`
-is listed and `Deployed = True` on the target site.
+The `Add-PnPApp` command uploads the package but does not yet trust or
+enable it. SharePoint will surface the enablement modal either
+immediately or on the next manual review of the app catalog UI.
 
-The package can also be uploaded through the site's **Site Contents →
-Apps for SharePoint** UI if PowerShell is not preferred. Either path
-produces the same result.
+### 2. Select the tenant-wide enablement option in the modal
 
-### 2. Add the Article Publisher to a modern page
+SharePoint displays an enablement modal with two options:
 
-On the target site:
+- **Enable this app** — the app is trusted but only made available for
+  per-site install.
+- **Enable this app and add it to all sites** — the app is trusted
+  and automatically deployed to every existing site plus any new
+  site in the tenant. **Select this option.**
+
+If only a reduced dialog appears without the second option, the
+packaged `AppManifest.xml` is missing `SkipFeatureDeployment="true"`.
+Stop and inspect — this is the Phase 20 failure mode; see diagnostics
+below.
+
+Alternately from PowerShell, after the modal is approved:
+
+```powershell
+Publish-PnPApp -Identity "hb-publisher" -Scope Tenant -SkipFeatureDeployment
+```
+
+Verify with `Get-PnPApp -Scope Tenant` that `hb-publisher` is listed
+with `Deployed = True`.
+
+### 3. Add the Article Publisher to a modern page
+
+On any site in the tenant:
 
 1. Create or open a modern page where the Article Publisher should
    live.
@@ -94,7 +124,7 @@ No GUID-based insertion script is required — the webpart is
 `hiddenFromToolbox: false` and is discoverable through the standard
 modern page picker.
 
-### 3. Validate successful runtime load
+### 4. Validate successful runtime load
 
 1. Navigate to the page.
 2. Confirm the Publisher authoring surface renders (hero "Article
@@ -111,13 +141,14 @@ A repeatable local-synthetic equivalent of step 2 is captured in
 
 ## Failure diagnostics
 
-| Symptom                                                              | Diagnosis                                                                          | Fix                                                                                               |
-|----------------------------------------------------------------------|------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| `Get-PnPApp -Scope Site` shows `Deployed = False`                    | Site-scoped app install incomplete.                                                | Re-run `Add-PnPApp … -Scope Site -Publish` and wait for provisioning to finish.                   |
-| Article Publisher is not listed in the modern page web part picker   | App not deployed to the current site, or browser cached a stale picker listing.    | Confirm `Get-PnPApp -Scope Site` shows `Deployed = True`; hard refresh (Ctrl-Shift-R) the page.   |
-| Page renders a `role="alert"` box with "webPartId … is not mapped"   | Shell invoked `mount()` with a webPartId that is not `ARTICLE_PUBLISHER_WEBPART_ID`. | Remove the stale webpart from the page and re-insert the Article Publisher via the picker.        |
-| `window.__hbIntel_hbPublisher` is `undefined` at runtime             | Bundle did not load (service-worker cached a prior release, or sppkg is stale).    | Hard refresh (Ctrl-Shift-R). Confirm bundle path in the deployment plan matches App Catalog CDN.  |
-| Page shows blank / no authoring surface, no alert box                | `mount()` was never called — the page does not have the Article Publisher inserted. | Edit the page and add the Article Publisher through the modern page web part picker.              |
+| Symptom                                                              | Diagnosis                                                                                                        | Fix                                                                                                                                     |
+|----------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| Upload modal shows only the reduced (single-option) enablement dialog | Emitted `AppManifest.xml` is missing `SkipFeatureDeployment="true"`. Source `skipFeatureDeployment` is not `true`. | Inspect `config/package-solution.json`; confirm `skipFeatureDeployment: true`; rebuild. Package-truth proof A7 must pass.                |
+| `Get-PnPApp -Scope Tenant` shows `Deployed = False`                  | Tenant-wide enablement not completed.                                                                            | Re-open the enablement modal; select "Enable this app and add it to all sites"; or `Publish-PnPApp -SkipFeatureDeployment`.             |
+| Article Publisher is not listed in the modern page web part picker   | Tenant-wide deployment still propagating, or browser cached a stale picker listing.                              | Wait 15–30 minutes for propagation; hard refresh (Ctrl-Shift-R) the page.                                                               |
+| Page renders a `role="alert"` box with "webPartId … is not mapped"   | Shell invoked `mount()` with a webPartId that is not `ARTICLE_PUBLISHER_WEBPART_ID`.                             | Remove the stale webpart from the page and re-insert the Article Publisher via the picker.                                              |
+| `window.__hbIntel_hbPublisher` is `undefined` at runtime             | Bundle did not load (service-worker cached a prior release, or sppkg is stale).                                  | Hard refresh (Ctrl-Shift-R). Confirm bundle path in the deployment plan matches App Catalog CDN.                                        |
+| Page shows blank / no authoring surface, no alert box                | `mount()` was never called — the page does not have the Article Publisher inserted.                              | Edit the page and add the Article Publisher through the modern page web part picker.                                                    |
 
 ## Offline runtime proof
 
@@ -145,6 +176,6 @@ packaging + runtime-load integrity using the emitted JSON artifacts:
 | `hb-publisher-hosted-deployment-plan.json`  | Machine-readable deployment inputs       |
 | `hb-publisher-hosted-load-proof.json`       | Synthetic runtime mount/unmount proof    |
 
-Tenant click-through validation (step 3 above) remains the final
+Tenant click-through validation (step 4 above) remains the final
 human gate for a real deployment and is not replaced by the synthetic
 proof.

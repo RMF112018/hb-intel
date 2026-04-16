@@ -526,11 +526,12 @@ interface PackagedAppManifestAttrs {
   productId: string;
   version: string;
   isDomainIsolated: string;
+  skipFeatureDeployment: boolean;
 }
 
 function extractPackagedAppManifestAttrs(sppkgPath: string): PackagedAppManifestAttrs {
   const xml = execSync(`unzip -p "${sppkgPath}" AppManifest.xml`, { encoding: 'utf8' });
-  const attr = (name: string): string => {
+  const requiredAttr = (name: string): string => {
     // Word-boundary anchor prevents false matches where the attribute name
     // is a suffix of another attribute (e.g. "Version" inside "SharePointMinVersion").
     const match = xml.match(new RegExp(`\\b${name}="([^"]+)"`));
@@ -539,11 +540,20 @@ function extractPackagedAppManifestAttrs(sppkgPath: string): PackagedAppManifest
     }
     return match[1];
   };
+  const optionalAttr = (name: string): string | undefined => {
+    const match = xml.match(new RegExp(`\\b${name}="([^"]+)"`));
+    return match ? match[1] : undefined;
+  };
+  // SkipFeatureDeployment is an optional attribute emitted by SPFx gulp only
+  // when source skipFeatureDeployment is true. Absence is equivalent to false
+  // and suppresses the tenant-wide enablement modal path in SharePoint.
+  const skipFeatureDeploymentRaw = optionalAttr('SkipFeatureDeployment');
   return {
-    name: attr('Name'),
-    productId: attr('ProductID'),
-    version: attr('Version'),
-    isDomainIsolated: attr('IsDomainIsolated'),
+    name: requiredAttr('Name'),
+    productId: requiredAttr('ProductID'),
+    version: requiredAttr('Version'),
+    isDomainIsolated: requiredAttr('IsDomainIsolated'),
+    skipFeatureDeployment: skipFeatureDeploymentRaw === 'true',
   };
 }
 
@@ -898,6 +908,22 @@ function buildHbPackageTruthProof(
       postureDetails.push(
         `A6: declared toolbox visibility intent (${intent.kind}, hiddenFromToolbox=${intent.hiddenFromToolbox}) does not match source (hiddenFromToolbox=${sourceDiscovery.hiddenFromToolbox})`,
       );
+    }
+
+    // A7: emitted AppManifest.xml SkipFeatureDeployment attribute matches source
+    // skipFeatureDeployment. This is the single attribute SharePoint reads to
+    // decide whether to render the tenant-wide enablement modal on upload.
+    if (appManifestAttrs) {
+      if (appManifestAttrs.skipFeatureDeployment === skipFeatureDeployment) {
+        postureDetails.push(
+          `A7: emitted AppManifest SkipFeatureDeployment attribute (${appManifestAttrs.skipFeatureDeployment}) matches source skipFeatureDeployment (${skipFeatureDeployment}); tenant-wide enablement ${skipFeatureDeployment ? 'will' : 'will NOT'} be offered by SharePoint on upload`,
+        );
+      } else {
+        deploymentPosturePass = false;
+        postureDetails.push(
+          `A7: emitted AppManifest SkipFeatureDeployment attribute (${appManifestAttrs.skipFeatureDeployment}) does not match source skipFeatureDeployment (${skipFeatureDeployment})`,
+        );
+      }
     }
 
     deploymentPosture = {
