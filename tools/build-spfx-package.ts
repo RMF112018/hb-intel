@@ -107,7 +107,7 @@ interface HbPackageTruthProof {
   generatedAt: string;
   packagingRunId: string;
   sppkgFile: string;
-  pnpOpsWebpartId: string;
+  runtimeMarkerId: string;
   sourceFingerprints: {
     criticalRuntimeFiles: FileFingerprint[];
   };
@@ -181,7 +181,46 @@ const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
 ]);
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
 const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
+const HB_PUBLISHER_ARTICLE_WEBPART_ID = '1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10';
 const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
+
+// Critical runtime source files whose SHA-256 fingerprints anchor the
+// package-truth proof to a specific repo state. These are chosen per
+// domain to cover the entry point, the contract that identifies the
+// runtime, the primary feature surface, and the data path that governs
+// what the package can do at runtime.
+const HB_WEBPARTS_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/hb-webparts/src/mount.tsx',
+  'apps/hb-webparts/src/webparts/pnp/PnpOps.tsx',
+  'apps/hb-webparts/src/webparts/pnp/pnpOpsClient.ts',
+  'apps/hb-webparts/src/webparts/pnp/pnpOpsRunnerClient.ts',
+  'apps/hb-webparts/src/webparts/pnp/pnpOpsActionCatalog.ts',
+  'apps/hb-webparts/src/webparts/pnp/pnpOpsValidation.ts',
+  'apps/hb-webparts/src/webparts/pnp/pnpOpsExecutionModes.ts',
+  'apps/hb-webparts/src/webparts/pnp/PnpOpsWebPart.manifest.json',
+];
+const HB_PUBLISHER_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/hb-publisher/src/mount.tsx',
+  'apps/hb-publisher/src/webparts/articlePublisher/runtimeContract.ts',
+  'apps/hb-publisher/src/webparts/articlePublisher/ArticlePublisher.tsx',
+  'apps/hb-publisher/src/webparts/articlePublisher/ArticlePublisherWebPart.manifest.json',
+  'apps/hb-publisher/src/data/publisherAdapter/index.ts',
+  'apps/hb-publisher/src/data/publisherAdapter/publishOrchestrator.ts',
+  'apps/hb-publisher/src/data/publisherAdapter/publisherRepositories.ts',
+];
+const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
+  'hb-webparts': HB_WEBPARTS_CRITICAL_RUNTIME_PATHS,
+  'hb-publisher': HB_PUBLISHER_CRITICAL_RUNTIME_PATHS,
+};
+
+interface PackageRuntimeMarker {
+  id: string;
+  label: string;
+}
+const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
+  'hb-webparts': { id: HB_PNP_OPS_WEBPART_ID, label: 'PnP Ops webpart' },
+  'hb-publisher': { id: HB_PUBLISHER_ARTICLE_WEBPART_ID, label: 'Article Publisher webpart' },
+};
 const HB_WEBPARTS_PROOF_CASE_IDS = new Set<string>([
   // Cumulative full-package mode: all webparts are included.
   // Proof-case IDs validated in Phase 2-3: HbHeroBanner, PriorityActionsRail.
@@ -370,18 +409,10 @@ function normalizePackagedManifestField(field: string, packagedManifest: any): u
   }
 }
 
-function collectRuntimeSourceFingerprints(root: string): FileFingerprint[] {
-  const criticalPaths = [
-    'apps/hb-webparts/src/mount.tsx',
-    'apps/hb-webparts/src/webparts/pnp/PnpOps.tsx',
-    'apps/hb-webparts/src/webparts/pnp/pnpOpsClient.ts',
-    'apps/hb-webparts/src/webparts/pnp/pnpOpsRunnerClient.ts',
-    'apps/hb-webparts/src/webparts/pnp/pnpOpsActionCatalog.ts',
-    'apps/hb-webparts/src/webparts/pnp/pnpOpsValidation.ts',
-    'apps/hb-webparts/src/webparts/pnp/pnpOpsExecutionModes.ts',
-    'apps/hb-webparts/src/webparts/pnp/PnpOpsWebPart.manifest.json',
-  ];
-
+function collectRuntimeSourceFingerprints(
+  root: string,
+  criticalPaths: readonly string[],
+): FileFingerprint[] {
   const fingerprints: FileFingerprint[] = [];
   for (const relPath of criticalPaths) {
     const absPath = path.join(root, relPath);
@@ -424,9 +455,13 @@ function buildHbPackageTruthProof(
   sppkgFile: string,
   packagingRunId: string,
   bundleName: string,
+  baseBundleName: string,
   freshnessEvidence: FreshnessEvidence,
   targetManifests: Array<{ file: string; json: any }>,
   generatedShimExpectations: HbShimExpectation[],
+  domain: string,
+  runtimeMarker: PackageRuntimeMarker,
+  criticalRuntimePaths: readonly string[],
 ): BuildHbPackageTruthProofResult {
   const structuralDetails: string[] = [];
   const freshnessDetails: string[] = [];
@@ -473,13 +508,19 @@ function buildHbPackageTruthProof(
       freshnessDetails.push(`App bundle hash matches current build (${bundleName})`);
     }
 
-    if (!appBytes.toString('utf8').includes(HB_PNP_OPS_WEBPART_ID)) {
+    if (!appBytes.toString('utf8').includes(runtimeMarker.id)) {
       runtimePass = false;
       semanticPass = false;
-      runtimeDetails.push(`Packaged app bundle ${bundleName} does not contain PnP webpart ID ${HB_PNP_OPS_WEBPART_ID}`);
-      semanticDetails.push(`Missing PnP component ID marker in packaged runtime bundle (${bundleName})`);
+      runtimeDetails.push(
+        `Packaged app bundle ${bundleName} does not contain ${runtimeMarker.label} ID ${runtimeMarker.id}`,
+      );
+      semanticDetails.push(
+        `Missing ${runtimeMarker.label} ID marker in packaged runtime bundle (${bundleName})`,
+      );
     } else {
-      runtimeDetails.push(`Packaged app bundle contains PnP webpart ID marker ${HB_PNP_OPS_WEBPART_ID}`);
+      runtimeDetails.push(
+        `Packaged app bundle contains ${runtimeMarker.label} ID marker ${runtimeMarker.id}`,
+      );
     }
   }
 
@@ -604,45 +645,45 @@ function buildHbPackageTruthProof(
     }
   }
 
-  const pnpManifest = manifestComparisons.find((comparison) => comparison.manifestId === HB_PNP_OPS_WEBPART_ID);
-  if (!pnpManifest) {
+  const markerManifest = manifestComparisons.find((comparison) => comparison.manifestId === runtimeMarker.id);
+  if (!markerManifest) {
     structuralPass = false;
     semanticPass = false;
     runtimePass = false;
-    structuralDetails.push(`PnP webpart manifest ${HB_PNP_OPS_WEBPART_ID} not found in packaged XML`);
-    semanticDetails.push(`PnP webpart linkage missing for ${HB_PNP_OPS_WEBPART_ID}`);
-    runtimeDetails.push(`Cannot prove PnP manifest linkage without packaged XML for ${HB_PNP_OPS_WEBPART_ID}`);
+    structuralDetails.push(`${runtimeMarker.label} manifest ${runtimeMarker.id} not found in packaged XML`);
+    semanticDetails.push(`${runtimeMarker.label} linkage missing for ${runtimeMarker.id}`);
+    runtimeDetails.push(`Cannot prove ${runtimeMarker.label} manifest linkage without packaged XML for ${runtimeMarker.id}`);
   } else {
-    const pnpShim = shimByManifestId.get(HB_PNP_OPS_WEBPART_ID);
-    const pnpScriptPath = pnpManifest.fields.scriptResourcePath;
-    if (!pnpShim || !pnpScriptPath?.matches) {
+    const markerShim = shimByManifestId.get(runtimeMarker.id);
+    const markerScriptPath = markerManifest.fields.scriptResourcePath;
+    if (!markerShim || !markerScriptPath?.matches) {
       semanticPass = false;
       runtimePass = false;
-      semanticDetails.push(`PnP webpart shim linkage mismatch for ${HB_PNP_OPS_WEBPART_ID}`);
-      runtimeDetails.push(`PnP webpart entry mapping does not resolve to expected shell-entry shim`);
+      semanticDetails.push(`${runtimeMarker.label} shim linkage mismatch for ${runtimeMarker.id}`);
+      runtimeDetails.push(`${runtimeMarker.label} entry mapping does not resolve to expected shell-entry shim`);
     } else {
-      runtimeDetails.push(`PnP webpart linkage verified: ${HB_PNP_OPS_WEBPART_ID} -> ${pnpShim.fileName}`);
+      runtimeDetails.push(`${runtimeMarker.label} linkage verified: ${runtimeMarker.id} -> ${markerShim.fileName}`);
     }
   }
 
-  const sourceFingerprints = collectRuntimeSourceFingerprints(root);
+  const sourceFingerprints = collectRuntimeSourceFingerprints(root, criticalRuntimePaths);
   if (sourceFingerprints.length === 0) {
     semanticPass = false;
     semanticDetails.push('No critical runtime source fingerprints were captured');
   }
 
   const proof: HbPackageTruthProof = {
-    domain: 'hb-webparts',
+    domain,
     generatedAt: new Date().toISOString(),
     packagingRunId,
     sppkgFile,
-    pnpOpsWebpartId: HB_PNP_OPS_WEBPART_ID,
+    runtimeMarkerId: runtimeMarker.id,
     sourceFingerprints: {
       criticalRuntimeFiles: sourceFingerprints,
     },
     expectedAssets: {
       appBundle: {
-        fileName: 'hb-webparts-app.js',
+        fileName: baseBundleName,
         sha256: freshnessEvidence.sourceBundleSha256,
         sizeBytes: freshnessEvidence.sourceBundleSizeBytes,
         mtimeIso: freshnessEvidence.sourceBundleMtimeIso,
@@ -1037,6 +1078,7 @@ function verifySppkg(
         );
         const expectedDefine = `define("${shimExpectation.entryModuleId}"`;
         const neutralDefine = `define("${shimExpectation.baseModuleId}"`;
+        const isIdentityShim = shimExpectation.baseModuleId === shimExpectation.entryModuleId;
 
         if (!shimSource.includes(expectedDefine)) {
           console.error(
@@ -1044,7 +1086,11 @@ function verifySppkg(
           );
           ok = false;
         }
-        if (shimSource.includes(neutralDefine)) {
+        // Single-manifest domains (e.g. hb-publisher) compile the shell
+        // directly against the single webpart's manifest, so baseModuleId and
+        // entryModuleId are identical and no define() patching is required.
+        // Only assert patching occurred when the base and entry IDs differ.
+        if (!isIdentityShim && shimSource.includes(neutralDefine)) {
           console.error(
             `  ❌ ${domainDir}: shell entry ${scriptResource.path} still contains neutral define ` +
             `${shimExpectation.baseModuleId} — patching failed`,
@@ -1109,18 +1155,12 @@ function verifySppkg(
   }
 }
 
-interface PackagedFreshnessResult {
-  ok: boolean;
-  packagedSha: string | null;
-  details: string[];
-}
-
 function verifyPackagedBundleFreshness(
   sppkgPath: string,
   bundleName: string,
   evidence: FreshnessEvidence,
   domainDir: string,
-): PackagedFreshnessResult {
+): boolean {
   try {
     const archivePaths = execSync(`unzip -Z1 "${sppkgPath}"`, { encoding: 'utf8' })
       .split('\n')
@@ -1131,9 +1171,8 @@ function verifyPackagedBundleFreshness(
       (entry) => entry === expectedBundlePath || entry.endsWith(`/${expectedBundlePath}`),
     );
     if (!bundleArchivePath) {
-      const detail = `Packaged bundle ${bundleName} not found in ${path.basename(sppkgPath)}`;
-      console.error(`  ❌ ${domainDir}: ${detail}`);
-      return { ok: false, packagedSha: null, details: [detail] };
+      console.error(`  ❌ ${domainDir}: packaged bundle ${bundleName} not found for freshness verification`);
+      return false;
     }
 
     const packagedBytes = execSync(`unzip -p "${sppkgPath}" "${bundleArchivePath}"`, {
@@ -1141,62 +1180,19 @@ function verifyPackagedBundleFreshness(
     });
     const packagedSha = sha256Hex(packagedBytes);
     if (packagedSha !== evidence.sourceBundleSha256) {
-      const detail = `Packaged bundle hash mismatch for ${bundleName} (source=${evidence.sourceBundleSha256}, packaged=${packagedSha})`;
       console.error(
         `  ❌ ${domainDir}: packaged bundle hash mismatch for ${bundleName}\n` +
         `     source:   ${evidence.sourceBundleSha256}\n` +
         `     packaged: ${packagedSha}`,
       );
-      return { ok: false, packagedSha, details: [detail] };
+      return false;
     }
     console.log(`  ✓ Packaged bundle freshness verified (${bundleName}, sha256:${packagedSha.slice(0, 12)}...)`);
-    return {
-      ok: true,
-      packagedSha,
-      details: [`Packaged bundle ${bundleName} hash matches freshly built source bundle`],
-    };
+    return true;
   } catch (err) {
-    const detail = `Failed packaged freshness verification — ${(err as Error).message}`;
-    console.error(`  ❌ ${domainDir}: ${detail}`);
-    return { ok: false, packagedSha: null, details: [detail] };
+    console.error(`  ❌ ${domainDir}: failed packaged freshness verification — ${(err as Error).message}`);
+    return false;
   }
-}
-
-interface FreshnessProofInputs {
-  outputDir: string;
-  domainDir: string;
-  sppkgFile: string;
-  baseBundleName: string;
-  packagedBundleName: string;
-  evidence: FreshnessEvidence;
-  packagedSha: string | null;
-  verification: PackagedFreshnessResult;
-}
-
-function writeFreshnessProof(inputs: FreshnessProofInputs): string {
-  const proof = {
-    domain: inputs.domainDir,
-    generatedAt: new Date().toISOString(),
-    packagingRunId: inputs.evidence.runId,
-    sppkgFile: inputs.sppkgFile,
-    sourceBundle: {
-      fileName: inputs.baseBundleName,
-      sha256: inputs.evidence.sourceBundleSha256,
-      sizeBytes: inputs.evidence.sourceBundleSizeBytes,
-      mtimeIso: inputs.evidence.sourceBundleMtimeIso,
-    },
-    packagedBundle: {
-      fileName: inputs.packagedBundleName,
-      sha256: inputs.packagedSha,
-    },
-    freshness: {
-      pass: inputs.verification.ok,
-      details: inputs.verification.details,
-    },
-  };
-  const proofPath = path.join(inputs.outputDir, `${inputs.domainDir}-freshness-proof.json`);
-  fs.writeFileSync(proofPath, `${JSON.stringify(proof, null, 2)}\n`);
-  return proofPath;
 }
 
 // ── Main loop ──────────────────────────────────────────────────────────────
@@ -1878,7 +1874,11 @@ for (const domain of domains) {
 
   // Post-packaging verification: inspect .sppkg contents (OPC/ZIP archive)
   const emittedLocalShimFiles = generatedShimExpectations.map((expectation) => expectation.shimFileName).sort();
-  const hbExpectations = domain.dir === 'hb-webparts'
+  // Any domain that generated per-webpart shell-entry shims gets structural
+  // shim verification and, when under the freshness gate, the full package-
+  // truth proof. This covers hb-webparts today and hb-publisher (which also
+  // produces a shell-entry shim per single-manifest webpart).
+  const hbExpectations: HbVerificationExpectations | undefined = generatedShimExpectations.length > 0
     ? {
       baseModuleId: compiledEntryModuleId,
       shimExpectations: generatedShimExpectations,
@@ -1893,27 +1893,9 @@ for (const domain of domains) {
     allPassed = false;
     continue;
   }
-  let packagedFreshness: PackagedFreshnessResult | null = null;
   if (enforceFreshBuild && freshnessEvidence) {
-    packagedFreshness = verifyPackagedBundleFreshness(sppkgDest, bundleName, freshnessEvidence, domain.dir);
-    if (!packagedFreshness.ok) {
+    if (!verifyPackagedBundleFreshness(sppkgDest, bundleName, freshnessEvidence, domain.dir)) {
       allPassed = false;
-      // Publisher uses a standalone freshness proof (no shim/package-truth
-      // proof in this prompt scope), so emit the failure artifact before
-      // continuing so the run is still auditable.
-      if (domain.dir === 'hb-publisher') {
-        const proofPath = writeFreshnessProof({
-          outputDir: OUTPUT_DIR,
-          domainDir: domain.dir,
-          sppkgFile: path.basename(sppkgDest),
-          baseBundleName,
-          packagedBundleName: bundleName,
-          evidence: freshnessEvidence,
-          packagedSha: packagedFreshness.packagedSha,
-          verification: packagedFreshness,
-        });
-        console.log(`  ✓ Freshness proof written: ${proofPath}`);
-      }
       continue;
     }
   }
@@ -1968,15 +1950,26 @@ for (const domain of domains) {
       allPassed = false;
       continue;
     }
+    const runtimeMarker = RUNTIME_MARKERS_BY_DOMAIN[domain.dir];
+    const criticalRuntimePaths = CRITICAL_RUNTIME_PATHS_BY_DOMAIN[domain.dir] ?? [];
+    if (!runtimeMarker) {
+      console.error(`  ❌ ${domain.dir}: no RUNTIME_MARKERS_BY_DOMAIN entry — cannot build package-truth proof`);
+      allPassed = false;
+      continue;
+    }
     const packageTruth = buildHbPackageTruthProof(
       ROOT,
       sppkgDest,
       path.basename(sppkgDest),
       freshnessEvidence.runId,
       bundleName,
+      baseBundleName,
       freshnessEvidence,
       targetManifests,
       generatedShimExpectations,
+      domain.dir,
+      runtimeMarker,
+      criticalRuntimePaths,
     );
     const packageTruthPath = path.join(OUTPUT_DIR, `${domain.dir}-package-truth-proof.json`);
     fs.writeFileSync(packageTruthPath, `${JSON.stringify(packageTruth.proof, null, 2)}\n`);
@@ -1986,24 +1979,6 @@ for (const domain of domains) {
       allPassed = false;
       continue;
     }
-  }
-
-  // Publisher is under audit and must emit a standalone freshness proof on
-  // every successful run. Prompt-02 later generalizes the richer package-
-  // truth proof; until then this artifact is the auditable Publisher
-  // freshness record in dist/sppkg/.
-  if (domain.dir === 'hb-publisher' && enforceFreshBuild && freshnessEvidence && packagedFreshness) {
-    const proofPath = writeFreshnessProof({
-      outputDir: OUTPUT_DIR,
-      domainDir: domain.dir,
-      sppkgFile: path.basename(sppkgDest),
-      baseBundleName,
-      packagedBundleName: bundleName,
-      evidence: freshnessEvidence,
-      packagedSha: packagedFreshness.packagedSha,
-      verification: packagedFreshness,
-    });
-    console.log(`  ✓ Freshness proof written: ${proofPath}`);
   }
 
   const stats = fs.statSync(sppkgDest);
