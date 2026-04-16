@@ -21,6 +21,9 @@
  * already used by `projectSpotlightListSource.ts`.
  */
 import { fetchListItemsJson } from '@hbc/sharepoint-platform';
+import { escapeODataString } from './odataEscape.js';
+
+export { escapeODataString };
 
 /** SharePoint list title used by the Projects list on HBCentral. */
 export const PROJECTS_LOOKUP_LIST_TITLE = 'Projects';
@@ -89,15 +92,6 @@ export type ProjectLookupSearchFn = (
   query: string,
   signal?: AbortSignal,
 ) => Promise<ProjectLookupEntry[]>;
-
-/**
- * Escape an OData string literal. Single quotes inside `'...'` must be
- * doubled; newlines are collapsed defensively so a paste of multi-line
- * text cannot break the filter expression.
- */
-export function escapeODataString(value: string): string {
-  return value.replace(/'/g, "''").replace(/[\r\n]+/g, ' ');
-}
 
 /**
  * Build a `ProjectLookupSearchFn` bound to the given host site URL.
