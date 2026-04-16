@@ -3,7 +3,7 @@
   "id": "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10",
   "alias": "ArticlePublisherWebPart",
   "componentType": "WebPart",
-  "version": "0.3.3.2",
+  "version": "0.3.3.3",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": [

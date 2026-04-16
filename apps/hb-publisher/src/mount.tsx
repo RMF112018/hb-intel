@@ -12,6 +12,9 @@ import { HbcThemeProvider } from '@hbc/ui-kit/homepage';
 import { storeSiteUrl } from '@hbc/sharepoint-platform';
 import { ArticlePublisher } from './webparts/articlePublisher/ArticlePublisher.js';
 import { ARTICLE_PUBLISHER_WEBPART_ID } from './webparts/articlePublisher/runtimeContract.js';
+import type { AssetLibrarySearchFn } from './webparts/articlePublisher/sharedChrome/index.js';
+import { createAssetLibrarySearch } from './data/publisherAdapter/assetLibrarySource.js';
+import { PUBLISHER_LIST_HOST_SITE_URL } from './data/publisherAdapter/publisherListDescriptors.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- side-effect import injects Publisher tokens at :root
 import publisherTokens from './webparts/articlePublisher/sharedChrome/tokens.module.css';
 void publisherTokens;
@@ -34,14 +37,23 @@ interface WebPartRendererContext {
   identity: HomepageIdentityInput;
   siteUrl?: string;
   getGraphToken?: () => Promise<string>;
+  /**
+   * Governed asset-library search function constructed by
+   * {@link buildHostedSearchAssets} when SPFx context is present.
+   * `undefined` in dev-preview / hostless paths so the authoring UI
+   * honestly falls back to URL-first entry rather than pretending to
+   * have production governance it does not have.
+   */
+  searchAssets?: AssetLibrarySearchFn;
 }
 
 const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => ReactNode> = {
-  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity, getGraphToken }) =>
+  [ARTICLE_PUBLISHER_WEBPART_ID]: ({ siteUrl, identity, getGraphToken, searchAssets }) =>
     createElement(ArticlePublisher, {
       siteUrl,
       actorEmail: identity?.email,
       getGraphToken,
+      searchAssets,
     }),
 };
 
@@ -58,6 +70,27 @@ function createApiTokenProvider(
   };
 }
 
+/**
+ * Build the governed asset-library search function for the hosted
+ * runtime. Returns `undefined` when no SPFx context is available
+ * (dev preview, storybook, hostless test harnesses) so the UI falls
+ * back to URL-first entry without pretending to have a live library.
+ *
+ * The provider binds to `PUBLISHER_LIST_HOST_SITE_URL` — the
+ * HBCentral absolute URL — matching the Projects lookup anchor so
+ * hosted pages outside HBCentral still resolve assets against the
+ * correct tenant library instead of the page site.
+ *
+ * Exported for `mount.test.ts`; runtime callers should go through
+ * {@link mount}.
+ */
+export function buildHostedSearchAssets(
+  spfxContext: WebPartContext | undefined,
+): AssetLibrarySearchFn | undefined {
+  if (!spfxContext) return undefined;
+  return createAssetLibrarySearch({ hostSiteUrl: PUBLISHER_LIST_HOST_SITE_URL });
+}
+
 export async function mount(
   el: HTMLElement,
   spfxContext?: WebPartContext,
@@ -72,6 +105,7 @@ export async function mount(
     email: spfxContext?.pageContext?.user?.email,
   };
   const getGraphToken = createApiTokenProvider(spfxContext, 'https://graph.microsoft.com');
+  const searchAssets = buildHostedSearchAssets(spfxContext);
   const renderWebPart = WEBPART_RENDERERS[webPartId];
   const withThemeProvider = (node: ReactNode): ReactNode =>
     createElement(HbcThemeProvider, { forceTheme: 'light' as const, children: node });
@@ -84,6 +118,7 @@ export async function mount(
           identity,
           siteUrl,
           getGraphToken,
+          searchAssets,
         }),
       ),
     );
