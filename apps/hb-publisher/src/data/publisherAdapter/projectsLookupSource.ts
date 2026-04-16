@@ -2,31 +2,36 @@
  * Read-only lookup adapter for the HBCentral `Projects` SharePoint list.
  *
  * Exposes a debounced-friendly async search function that the Article
- * Publisher authoring UI can plug into its project picker to replace
+ * Publisher authoring UI plugs into its project picker to replace
  * manual `ProjectId` / `ProjectName` text entry with authoritative
  * selections from the tenant projects master list.
  *
- * The Projects list was created via CSV import and uses generic
- * `field_N` internal names. Mapping to domain property names matches
- * `backend/functions/src/services/projects-list-contract.ts`:
- *
- *   - field_1 → ProjectId   (primary lookup key)
- *   - field_2 → ProjectNumber (format `##-###-##`)
- *   - field_3 → ProjectName
- *   - field_4 → ProjectLocation
- *
- * The list is title-bound here because no GUID is registered for it
- * under `@hbc/sharepoint-platform`. Title drift on the tenant list
- * would therefore surface as a read failure — matching the pattern
- * already used by `projectSpotlightListSource.ts`.
+ * Identity & field contract. Both the list identity (GUID or
+ * title fallback) and the field-name mapping (`field_N` → domain
+ * names) are owned by `projectsListContract.ts`. This file composes
+ * the picker-specific search semantics (which fields to
+ * `substringof()` against, sort order, truthful failure label) on
+ * top of that contract; when a Projects list GUID is registered
+ * the same call path upgrades to GUID binding automatically.
  */
 import { fetchListItemsJson } from '@hbc/sharepoint-platform';
 import { escapeODataString } from './odataEscape.js';
+import {
+  PROJECTS_LIST_FIELDS,
+  PROJECTS_LIST_TITLE,
+  buildProjectsListItemsUrl,
+  projectsListFetchLabel,
+  type RawProjectsListItem,
+} from './projectsListContract.js';
 
 export { escapeODataString };
+export type { RawProjectsListItem } from './projectsListContract.js';
 
-/** SharePoint list title used by the Projects list on HBCentral. */
-export const PROJECTS_LOOKUP_LIST_TITLE = 'Projects';
+/**
+ * Backwards-compatible alias. Prefer `PROJECTS_LIST_TITLE` from
+ * `projectsListContract` in new code.
+ */
+export const PROJECTS_LOOKUP_LIST_TITLE = PROJECTS_LIST_TITLE;
 
 /** Maximum number of results returned from a single search query. */
 export const DEFAULT_PROJECTS_LOOKUP_LIMIT = 20;
@@ -47,31 +52,25 @@ export interface ProjectLookupEntry {
   readonly displayTitle: string;
 }
 
-/** Raw SharePoint shape returned from the REST query. */
-export interface RawProjectsListItem {
-  readonly Title?: string;
-  readonly field_1?: string;
-  readonly field_2?: string;
-  readonly field_3?: string;
-  readonly field_4?: string;
-}
-
 /**
  * Map a raw Projects-list row to a `ProjectLookupEntry`.
  *
  * Returns `null` when the row lacks either the primary identity
- * (`field_1 → ProjectId`) or a visible name (`field_3 → ProjectName`),
- * so a selection cannot be built that would pass downstream validation.
- * Exported for unit testing of the title-bound list mapping contract.
+ * (`projectId`) or a visible name (`projectName`), so a selection
+ * cannot be built that would pass downstream validation. Exported
+ * for unit testing of the tenant field contract.
  */
-export function mapRawProjectRow(row: RawProjectsListItem): ProjectLookupEntry | null {
-  const projectId = row.field_1?.trim();
-  const projectName = row.field_3?.trim();
+export function mapRawProjectRow(
+  row: RawProjectsListItem,
+): ProjectLookupEntry | null {
+  const projectId = row[PROJECTS_LIST_FIELDS.projectId]?.trim();
+  const projectName = row[PROJECTS_LIST_FIELDS.projectName]?.trim();
   if (!projectId || !projectName) return null;
-  const projectNumber = row.field_2?.trim() ?? '';
-  const projectLocation = row.field_4?.trim() || undefined;
+  const projectNumber = row[PROJECTS_LIST_FIELDS.projectNumber]?.trim() ?? '';
+  const projectLocation =
+    row[PROJECTS_LIST_FIELDS.projectLocation]?.trim() || undefined;
   const displayTitle =
-    row.Title?.trim() ||
+    row[PROJECTS_LIST_FIELDS.displayTitle]?.trim() ||
     (projectNumber ? `${projectNumber} — ${projectName}` : projectName);
   return { projectId, projectNumber, projectName, projectLocation, displayTitle };
 }
@@ -81,6 +80,12 @@ export interface ProjectsLookupSearchOptions {
   readonly hostSiteUrl: string;
   /** Upper bound on results returned from a single query. Defaults to 20. */
   readonly maxResults?: number;
+  /**
+   * Projects list GUID override. When supplied (or when the module-level
+   * `PROJECTS_LIST_ID` is set) the lookup binds by GUID; otherwise it
+   * falls back to the title-bound REST root.
+   */
+  readonly listId?: string;
 }
 
 /**
@@ -97,19 +102,16 @@ export type ProjectLookupSearchFn = (
  * Build a `ProjectLookupSearchFn` bound to the given host site URL.
  *
  * Matches are case-insensitive substring hits against the project
- * name (`field_3`), project number (`field_2`), or project location
- * (`field_4`) — the three identifiers the picker surface promises
- * and that authors actually recognize. Results are sorted by project
- * name for a stable visual order.
+ * name, project number, or project location — the three identifiers
+ * the picker surface promises and that authors actually recognize.
+ * Results are sorted by project name for a stable visual order.
  */
 export function createProjectsLookupSearch(
   options: ProjectsLookupSearchOptions,
 ): ProjectLookupSearchFn {
   const maxResults = options.maxResults ?? DEFAULT_PROJECTS_LOOKUP_LIMIT;
-  const base = options.hostSiteUrl.replace(/\/$/, '');
-  const endpointRoot =
-    `${base}/_api/web/lists/getbytitle('${encodeURIComponent(PROJECTS_LOOKUP_LIST_TITLE)}')/items`;
-  const select = '$select=Title,field_1,field_2,field_3,field_4';
+  const listIdOverride = options.listId;
+  const F = PROJECTS_LIST_FIELDS;
 
   return async (query, signal) => {
     const trimmed = query.trim();
@@ -117,18 +119,21 @@ export function createProjectsLookupSearch(
 
     const escaped = escapeODataString(trimmed);
     const filter =
-      `substringof('${escaped}',field_3)` +
-      ` or substringof('${escaped}',field_2)` +
-      ` or substringof('${escaped}',field_4)`;
-    const url =
-      `${endpointRoot}?${select}` +
-      `&$filter=${encodeURIComponent(filter)}` +
-      `&$orderby=field_3` +
-      `&$top=${maxResults}`;
+      `substringof('${escaped}',${F.projectName})` +
+      ` or substringof('${escaped}',${F.projectNumber})` +
+      ` or substringof('${escaped}',${F.projectLocation})`;
 
-    const rows = await fetchListItemsJson<RawProjectsListItem>(url, {
+    const binding = buildProjectsListItemsUrl({
+      hostSiteUrl: options.hostSiteUrl,
+      filter,
+      orderBy: F.projectName,
+      top: maxResults,
+      listId: listIdOverride,
+    });
+
+    const rows = await fetchListItemsJson<RawProjectsListItem>(binding.url, {
       signal,
-      label: `${PROJECTS_LOOKUP_LIST_TITLE} list`,
+      label: projectsListFetchLabel(binding.kind),
     });
 
     const entries: ProjectLookupEntry[] = [];

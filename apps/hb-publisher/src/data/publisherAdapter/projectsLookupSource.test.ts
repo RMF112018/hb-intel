@@ -6,9 +6,15 @@ import {
   type RawProjectsListItem,
 } from './projectsLookupSource.js';
 
-vi.mock('@hbc/sharepoint-platform', () => ({
-  fetchListItemsJson: vi.fn(async () => []),
-}));
+vi.mock('@hbc/sharepoint-platform', async () => {
+  const actual = await vi.importActual<typeof import('@hbc/sharepoint-platform')>(
+    '@hbc/sharepoint-platform',
+  );
+  return {
+    ...actual,
+    fetchListItemsJson: vi.fn(async () => []),
+  };
+});
 
 describe('mapRawProjectRow', () => {
   it('maps a well-formed row to a ProjectLookupEntry', () => {
@@ -107,6 +113,35 @@ describe('createProjectsLookupSearch', () => {
     });
     expect(await search('   ')).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('labels the fetch `(title-bound)` when no Projects list GUID is available', async () => {
+    const { fetchListItemsJson } = await import('@hbc/sharepoint-platform');
+    const fetchMock = fetchListItemsJson as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockClear();
+    const search = createProjectsLookupSearch({
+      hostSiteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+    });
+    await search('Alpha');
+    const options = fetchMock.mock.calls[0][1] as { label?: string };
+    expect(options.label).toBe('Projects list (title-bound)');
+  });
+
+  it('upgrades to GUID binding and labels `(guid-bound)` when listId is supplied', async () => {
+    const { fetchListItemsJson } = await import('@hbc/sharepoint-platform');
+    const fetchMock = fetchListItemsJson as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockClear();
+    const guid = '2c1dbf2e-4f37-4fb0-b1ab-55a1c9f5a111';
+    const search = createProjectsLookupSearch({
+      hostSiteUrl: 'https://tenant.sharepoint.com/sites/HBCentral',
+      listId: guid,
+    });
+    await search('Alpha');
+    const url = fetchMock.mock.calls[0][0] as string;
+    expect(url).toContain(`/_api/web/lists(guid'${guid}')/items`);
+    expect(url).not.toContain('getbytitle');
+    const options = fetchMock.mock.calls[0][1] as { label?: string };
+    expect(options.label).toBe('Projects list (guid-bound)');
   });
 });
 
