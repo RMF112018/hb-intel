@@ -11,6 +11,7 @@ declare const styles: {
   readonly spinner: string;
   readonly error: string;
   readonly errorDetail: string;
+  readonly gridScroll: string;
   readonly grid: string;
   readonly tile: string;
   readonly tileActive: string;

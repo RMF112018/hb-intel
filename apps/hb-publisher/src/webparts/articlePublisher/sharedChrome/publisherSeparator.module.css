@@ -1,0 +1,33 @@
+/* PublisherSeparator — decorative or semantic divider driven by
+ * @radix-ui/react-separator. Tone controls hairline strength.
+ */
+
+.base {
+  flex-shrink: 0;
+  background: var(--hb-border-subtle, #e3e6ed);
+}
+
+.horizontal {
+  height: 1px;
+  width: 100%;
+  margin: 0;
+}
+
+.vertical {
+  width: 1px;
+  align-self: stretch;
+  min-height: 1em;
+  margin: 0 2px;
+}
+
+.tone_default {
+  background: var(--hb-border-subtle, #e3e6ed);
+}
+
+.tone_faint {
+  background: var(--hb-border-faint, #f0f0f3);
+}
+
+.tone_strong {
+  background: var(--hb-border-strong, #cbcbd0);
+}

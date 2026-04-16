@@ -30,3 +30,21 @@ export type {
   AssetLibrarySearchFn,
   AssetLookupEntry,
 } from './assetLibrarySource.js';
+
+// Premium-stack primitives (phase-17 wave-02 prompt-01).
+export { PublisherIcon } from './PublisherIcon.js';
+export type { PublisherIconProps, LucideIcon } from './PublisherIcon.js';
+export {
+  PublisherTooltip,
+  PublisherTooltipProvider,
+} from './PublisherTooltip.js';
+export type {
+  PublisherTooltipProps,
+  PublisherTooltipProviderProps,
+} from './PublisherTooltip.js';
+export { PublisherSeparator } from './PublisherSeparator.js';
+export type { PublisherSeparatorProps } from './PublisherSeparator.js';
+export { PublisherScrollArea } from './PublisherScrollArea.js';
+export type { PublisherScrollAreaProps } from './PublisherScrollArea.js';
+export { useAnchoredOverlay } from './useAnchoredOverlay.js';
+export type { AnchoredOverlayOptions } from './useAnchoredOverlay.js';

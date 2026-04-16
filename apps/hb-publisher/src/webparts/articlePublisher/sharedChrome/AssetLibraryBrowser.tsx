@@ -18,6 +18,7 @@ import type {
   AssetLookupEntry,
 } from './assetLibrarySource.js';
 import { PublisherButton } from './PublisherButton.js';
+import { PublisherScrollArea } from './PublisherScrollArea.js';
 import styles from './assetLibraryBrowser.module.css';
 
 export interface AssetLibraryBrowserProps {
@@ -192,45 +193,47 @@ export function AssetLibraryBrowser({
         </div>
 
         {status === 'ready' && entries.length > 0 && (
-          <div
-            className={styles.grid}
-            role="listbox"
-            aria-label="Asset results"
-            onKeyDown={handleGridKey}
-          >
-            {entries.map((entry, index) => (
-              <button
-                key={entry.assetId}
-                ref={(el) => {
-                  tileRefs.current[index] = el;
-                }}
-                type="button"
-                role="option"
-                aria-selected={index === activeIndex}
-                className={
-                  index === activeIndex
-                    ? `${styles.tile} ${styles.tileActive}`
-                    : styles.tile
-                }
-                tabIndex={index === activeIndex ? 0 : -1}
-                onFocus={() => setActiveIndex(index)}
-                onClick={() => commit(entry)}
-              >
-                <span className={styles.thumb}>
-                  <img
-                    src={entry.imageUrl}
-                    alt=""
-                    className={styles.thumbImg}
-                    loading="lazy"
-                  />
-                </span>
-                <span className={styles.tileName}>{entry.title}</span>
-                {entry.source && (
-                  <span className={styles.tileSource}>{entry.source}</span>
-                )}
-              </button>
-            ))}
-          </div>
+          <PublisherScrollArea className={styles.gridScroll} orientation="vertical">
+            <div
+              className={styles.grid}
+              role="listbox"
+              aria-label="Asset results"
+              onKeyDown={handleGridKey}
+            >
+              {entries.map((entry, index) => (
+                <button
+                  key={entry.assetId}
+                  ref={(el) => {
+                    tileRefs.current[index] = el;
+                  }}
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  className={
+                    index === activeIndex
+                      ? `${styles.tile} ${styles.tileActive}`
+                      : styles.tile
+                  }
+                  tabIndex={index === activeIndex ? 0 : -1}
+                  onFocus={() => setActiveIndex(index)}
+                  onClick={() => commit(entry)}
+                >
+                  <span className={styles.thumb}>
+                    <img
+                      src={entry.imageUrl}
+                      alt=""
+                      className={styles.thumbImg}
+                      loading="lazy"
+                    />
+                  </span>
+                  <span className={styles.tileName}>{entry.title}</span>
+                  {entry.source && (
+                    <span className={styles.tileSource}>{entry.source}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </PublisherScrollArea>
         )}
       </div>
     </div>

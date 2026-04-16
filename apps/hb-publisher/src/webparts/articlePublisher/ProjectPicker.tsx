@@ -4,24 +4,30 @@
  * text inputs with a single authoritative selector backed by the
  * HBCentral `Projects` list.
  *
- * Phase-14 Wave-01 Prompt-03 redesign: the selected, search-result,
- * empty, loading, no-results, and error states are now rebuilt as
- * an editorial selection surface. Project name leads; project number
- * and location form the editorial subtitle. Raw internal project
- * identifiers are demoted into a collapsed `System identifiers`
- * `<details>` block on the selected chip — they remain available for
- * debugging but never lead the author-facing surface.
+ * The selected, search-result, empty, loading, no-results, and error
+ * states are rebuilt as an editorial selection surface. Project name
+ * leads; project number and location form the editorial subtitle.
+ * Raw internal project identifiers are demoted into a collapsed
+ * `System identifiers` `<details>` block on the selected chip — they
+ * remain available for debugging but never lead the author-facing
+ * surface.
  *
  * Feature-local composition; only consumed from `ArticlePublisher.tsx`.
  * The combobox keeps WAI-ARIA editable-combobox semantics
  * (`role="combobox"`, `aria-autocomplete="list"`, `aria-haspopup`,
  * `aria-expanded`, `aria-controls`, `aria-activedescendant`).
+ *
+ * Phase-17 wave-02 prompt-01: dropdown positioning and outside-press
+ * dismissal are handled by the governed `useAnchoredOverlay` hook
+ * (`@floating-ui/react`) so later overlay seams share one anchored
+ * positioning contract.
  */
 import * as React from 'react';
 import type {
   ProjectLookupEntry,
   ProjectLookupSearchFn,
 } from '../../data/publisherAdapter/projectsLookupSource.js';
+import { useAnchoredOverlay } from './sharedChrome/useAnchoredOverlay.js';
 import styles from './article-publisher.module.css';
 
 export interface ProjectPickerProps {
@@ -60,7 +66,21 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
   const [open, setOpen] = React.useState(false);
 
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  const showDropdown = open && !disabled && query.trim().length > 0 && value === null;
+
+  const {
+    refs: overlayRefs,
+    floatingStyles,
+    getReferenceProps,
+    getFloatingProps,
+  } = useAnchoredOverlay({
+    open: showDropdown,
+    onOpenChange: setOpen,
+    placement: 'bottom-start',
+    offsetPx: 4,
+    matchReferenceWidth: true,
+  });
 
   React.useEffect(() => {
     const trimmed = query.trim();
@@ -92,18 +112,6 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
       window.clearTimeout(handle);
     };
   }, [query, searchProjects]);
-
-  React.useEffect(() => {
-    if (!open) return undefined;
-    function handleDocumentClick(ev: MouseEvent) {
-      const node = containerRef.current;
-      if (node && ev.target instanceof Node && !node.contains(ev.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleDocumentClick);
-    return () => document.removeEventListener('mousedown', handleDocumentClick);
-  }, [open]);
 
   const handleSelect = React.useCallback(
     (entry: ProjectLookupEntry) => {
@@ -167,7 +175,6 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
     }
   }, [activeIndex, results.length]);
 
-  const showDropdown = open && !disabled && query.trim().length > 0;
   // Instance-safe listbox id so multiple ProjectPicker instances
   // never collide on `aria-controls` / `aria-activedescendant`.
   const LISTBOX_ID = `project-picker-listbox-${React.useId()}`;
@@ -177,8 +184,16 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
       ? optionId(activeIndex)
       : undefined;
 
+  const mergedInputRef = React.useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      overlayRefs.setReference(node);
+    },
+    [overlayRefs],
+  );
+
   return (
-    <div className={styles.projectPicker} ref={containerRef}>
+    <div className={styles.projectPicker}>
       {value ? (
         <SelectedProjectChip
           value={value}
@@ -187,24 +202,26 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
       ) : (
         <>
           <input
-            ref={inputRef}
-            type="text"
-            className={styles.input}
-            value={query}
-            disabled={disabled}
-            placeholder={placeholder ?? 'Search by project number, name, or location…'}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
-            onKeyDown={handleKeyDown}
-            role="combobox"
-            aria-autocomplete="list"
-            aria-haspopup="listbox"
-            aria-expanded={showDropdown}
-            aria-controls={LISTBOX_ID}
-            aria-activedescendant={activeOptionId}
+            {...getReferenceProps({
+              ref: mergedInputRef,
+              type: 'text',
+              className: styles.input,
+              value: query,
+              disabled,
+              placeholder: placeholder ?? 'Search by project number, name, or location…',
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                setQuery(e.target.value);
+                setOpen(true);
+              },
+              onFocus: () => setOpen(true),
+              onKeyDown: handleKeyDown,
+              role: 'combobox',
+              'aria-autocomplete': 'list',
+              'aria-haspopup': 'listbox',
+              'aria-expanded': showDropdown,
+              'aria-controls': LISTBOX_ID,
+              'aria-activedescendant': activeOptionId,
+            })}
           />
           {!query.trim() && open && !disabled && (
             <p className={styles.projectPickerEmptyHint}>
@@ -215,10 +232,14 @@ export function ProjectPicker(props: ProjectPickerProps): JSX.Element {
           )}
           {showDropdown && (
             <div
-              id={LISTBOX_ID}
-              role="listbox"
-              aria-label="Project search results"
-              className={styles.projectPickerDropdown}
+              {...getFloatingProps({
+                ref: overlayRefs.setFloating,
+                id: LISTBOX_ID,
+                role: 'listbox',
+                'aria-label': 'Project search results',
+                className: styles.projectPickerDropdown,
+                style: floatingStyles,
+              })}
             >
               {status === 'loading' && (
                 <div className={styles.projectPickerHint} role="status" aria-live="polite">

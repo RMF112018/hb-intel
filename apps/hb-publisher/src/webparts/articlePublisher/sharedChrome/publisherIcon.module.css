@@ -1,0 +1,40 @@
+/* PublisherIcon — normalised icon sizing + tint for lucide-react.
+ * Stroke width is set via prop; this file owns visual geometry only.
+ */
+
+.base {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.sizeSm {
+  width: 14px;
+  height: 14px;
+}
+
+.sizeMd {
+  width: 16px;
+  height: 16px;
+}
+
+.sizeLg {
+  width: 20px;
+  height: 20px;
+}
+
+.tintInherit {
+  color: inherit;
+}
+
+.tintDefault {
+  color: var(--hb-text-primary, #1f1f1f);
+}
+
+.tintMuted {
+  color: var(--hb-text-tertiary, #6a6a6f);
+}
+
+.tintBrand {
+  color: var(--hb-color-brand-action, #337aab);
+}

@@ -1,6 +1,6 @@
 /**
  * PublisherButton — governed button primitive for the Article
- * Publisher. Workstream-h step-02 foundation.
+ * Publisher.
  *
  * Three variants:
  *   - `primary`   HBC_BRAND_ACTION ramp. CTAs (Publish, Save teammate).
@@ -10,9 +10,20 @@
  * Plus an `iconOnly` mode for star toggles, kebab menus, etc.
  * Replaces six+ duplicated button styles across the Publisher
  * modules.
+ *
+ * Premium-stack wiring (phase-17 wave-02 prompt-01):
+ *   - `@radix-ui/react-slot` powers the `asChild` prop so callers can
+ *     project the button semantics onto an anchor, router link, or
+ *     custom trigger without re-implementing the variant system.
+ *   - `motion/react` supplies the restrained hover/press choreography
+ *     that the Governing SPFx Standard §6.2 requires: lighter than
+ *     PWA, but still visibly premium. Disabled + pressed states skip
+ *     the motion so the chrome reads as static commitment.
  */
 
 import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { motion, useReducedMotion, type HTMLMotionProps } from 'motion/react';
 import styles from './publisherButton.module.css';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- side-effect import to inject :root tokens
 import tokens from './tokens.module.css';
@@ -26,6 +37,12 @@ export interface PublisherButtonProps
   readonly iconOnly?: boolean;
   readonly pressed?: boolean;
   readonly size?: 'md' | 'sm';
+  /**
+   * When true, render as a `Slot` so the single child element adopts
+   * the button's class, aria, and event contract. Useful for wrapping
+   * an anchor or a router link with governed button styling.
+   */
+  readonly asChild?: boolean;
 }
 
 export const PublisherButton = React.forwardRef<
@@ -37,9 +54,11 @@ export const PublisherButton = React.forwardRef<
     iconOnly = false,
     pressed,
     size = 'md',
+    asChild = false,
     className,
     type,
     children,
+    disabled,
     ...rest
   },
   ref,
@@ -54,15 +73,73 @@ export const PublisherButton = React.forwardRef<
   ]
     .filter(Boolean)
     .join(' ');
+
+  if (asChild) {
+    return (
+      <Slot
+        ref={ref as React.Ref<HTMLElement>}
+        className={cls}
+        aria-pressed={pressed}
+        data-disabled={disabled ? 'true' : undefined}
+        {...rest}
+      >
+        {children}
+      </Slot>
+    );
+  }
+
   return (
-    <button
+    <MotionPublisherButton
       ref={ref}
       type={type ?? 'button'}
       className={cls}
       aria-pressed={pressed}
-      {...rest}
+      disabled={disabled}
+      rest={rest}
     >
       {children}
-    </button>
+    </MotionPublisherButton>
+  );
+});
+
+interface MotionPublisherButtonProps
+  extends Pick<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    'type' | 'className' | 'aria-pressed' | 'disabled'
+  > {
+  readonly rest: Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    'ref' | 'type' | 'className' | 'aria-pressed' | 'disabled'
+  >;
+  readonly children?: React.ReactNode;
+}
+
+const MotionPublisherButton = React.forwardRef<
+  HTMLButtonElement,
+  MotionPublisherButtonProps
+>(function MotionPublisherButton(
+  { type, className, disabled, rest, children, ...aria },
+  ref,
+) {
+  const reduced = useReducedMotion();
+  const interactive = !disabled && !reduced;
+  // `rest` carries arbitrary `React.ButtonHTMLAttributes<HTMLButtonElement>`
+  // handlers that overlap motion's own drag/animation hooks. We do not
+  // opt into motion's pan/drag surface here, so the cast forwards the
+  // native React handlers to the underlying DOM button untouched.
+  const motionProps: HTMLMotionProps<'button'> = {
+    ...(rest as unknown as HTMLMotionProps<'button'>),
+    type: type ?? 'button',
+    className,
+    disabled,
+    ...aria,
+    whileHover: interactive ? { scale: 1.015 } : undefined,
+    whileTap: interactive ? { scale: 0.97 } : undefined,
+    transition: { type: 'tween', duration: 0.12, ease: 'easeOut' },
+  };
+  return (
+    <motion.button ref={ref} {...motionProps}>
+      {children}
+    </motion.button>
   );
 });

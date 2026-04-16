@@ -3,13 +3,17 @@
  *
  * Each control is a real <button type="button"> with `aria-pressed`
  * reflecting the current selection state, and the wrapper carries
- * `role="toolbar"` + `aria-label` for screen-reader announcement
- * (workstream-c step-01 §6).
+ * `role="toolbar"` + `aria-label` for screen-reader announcement.
  *
- * Iconography: governed inline SVG glyphs in `./editorIcons.tsx` —
- * replaces the prior text-label pseudo-iconography (`• List`,
- * `1. List`, `"`) with a real formatting-icon language. Each
- * icon-only button remains accessibly named via `aria-label`/`title`.
+ * Iconography: governed `PublisherIcon` wrapper over `lucide-react`
+ * per Governing SPFx Standard §5.2. Replaces the prior text-label
+ * pseudo-iconography (`• List`, `1. List`, `"`) and the inline SVG
+ * glyph set that preceded it. Each icon-only button remains accessibly
+ * named via `aria-label` + a `PublisherTooltip` hint.
+ *
+ * Group separation uses a semantic `PublisherSeparator` rather than a
+ * border-right on the group wrapper, so the hierarchy is announced
+ * correctly and respects the shared token language.
  *
  * Keyboard model: W3C toolbar pattern with roving tabindex. Only the
  * currently-focused control is in the tab order; ArrowLeft /
@@ -19,21 +23,28 @@
 
 import * as React from 'react';
 import type { Editor } from '@tiptap/react';
-import { isAllowedHref, normaliseHref } from './linkValidation';
-import { PublisherButton } from '../sharedChrome/index.js';
 import {
-  BoldGlyph,
-  BulletListGlyph,
-  HeadingThreeGlyph,
-  HeadingTwoGlyph,
-  ItalicGlyph,
-  LinkGlyph,
-  OrderedListGlyph,
-  ParagraphGlyph,
-  QuoteGlyph,
-  RedoGlyph,
-  UndoGlyph,
-} from './editorIcons';
+  Bold,
+  Heading2,
+  Heading3,
+  Italic,
+  Link as LinkIcon,
+  List,
+  ListOrdered,
+  Pilcrow,
+  Quote,
+  Redo2,
+  Undo2,
+  type LucideIcon,
+} from 'lucide-react';
+import { isAllowedHref, normaliseHref } from './linkValidation';
+import {
+  PublisherButton,
+  PublisherIcon,
+  PublisherSeparator,
+  PublisherTooltip,
+  PublisherTooltipProvider,
+} from '../sharedChrome/index.js';
 import styles from './storyBodyEditor.module.css';
 
 export interface EditorToolbarProps {
@@ -44,7 +55,7 @@ interface ToolbarControl {
   readonly key: string;
   readonly label: string;
   readonly keyboardHint?: string;
-  readonly glyph: React.ReactNode;
+  readonly icon: LucideIcon;
   readonly isActive: boolean;
   readonly isDisabled?: boolean;
   readonly onInvoke: () => void;
@@ -143,7 +154,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
       key: 'bold',
       label: 'Bold',
       keyboardHint: 'Ctrl+B',
-      glyph: <BoldGlyph />,
+      icon: Bold,
       isActive: editor.isActive('bold'),
       onInvoke: () => editor.chain().focus().toggleBold().run(),
       group: 0,
@@ -152,7 +163,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
       key: 'italic',
       label: 'Italic',
       keyboardHint: 'Ctrl+I',
-      glyph: <ItalicGlyph />,
+      icon: Italic,
       isActive: editor.isActive('italic'),
       onInvoke: () => editor.chain().focus().toggleItalic().run(),
       group: 0,
@@ -161,7 +172,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
       key: 'link',
       label: 'Link',
       keyboardHint: 'Ctrl+K',
-      glyph: <LinkGlyph />,
+      icon: LinkIcon,
       isActive: editor.isActive('link'),
       onInvoke: openLinkPrompt,
       group: 0,
@@ -169,7 +180,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
     {
       key: 'h2',
       label: 'Heading 2',
-      glyph: <HeadingTwoGlyph />,
+      icon: Heading2,
       isActive: editor.isActive('heading', { level: 2 }),
       onInvoke: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       group: 1,
@@ -177,7 +188,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
     {
       key: 'h3',
       label: 'Heading 3',
-      glyph: <HeadingThreeGlyph />,
+      icon: Heading3,
       isActive: editor.isActive('heading', { level: 3 }),
       onInvoke: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       group: 1,
@@ -185,7 +196,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
     {
       key: 'paragraph',
       label: 'Paragraph',
-      glyph: <ParagraphGlyph />,
+      icon: Pilcrow,
       isActive: editor.isActive('paragraph'),
       onInvoke: () => editor.chain().focus().setParagraph().run(),
       group: 1,
@@ -193,7 +204,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
     {
       key: 'bullet-list',
       label: 'Bulleted list',
-      glyph: <BulletListGlyph />,
+      icon: List,
       isActive: editor.isActive('bulletList'),
       onInvoke: () => editor.chain().focus().toggleBulletList().run(),
       group: 2,
@@ -201,7 +212,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
     {
       key: 'ordered-list',
       label: 'Numbered list',
-      glyph: <OrderedListGlyph />,
+      icon: ListOrdered,
       isActive: editor.isActive('orderedList'),
       onInvoke: () => editor.chain().focus().toggleOrderedList().run(),
       group: 2,
@@ -209,7 +220,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
     {
       key: 'blockquote',
       label: 'Block quote',
-      glyph: <QuoteGlyph />,
+      icon: Quote,
       isActive: editor.isActive('blockquote'),
       onInvoke: () => editor.chain().focus().toggleBlockquote().run(),
       group: 2,
@@ -218,7 +229,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
       key: 'undo',
       label: 'Undo',
       keyboardHint: 'Ctrl+Z',
-      glyph: <UndoGlyph />,
+      icon: Undo2,
       isActive: false,
       isDisabled: !editor.can().undo(),
       onInvoke: () => editor.chain().focus().undo().run(),
@@ -228,7 +239,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
       key: 'redo',
       label: 'Redo',
       keyboardHint: 'Ctrl+Shift+Z',
-      glyph: <RedoGlyph />,
+      icon: Redo2,
       isActive: false,
       isDisabled: !editor.can().redo(),
       onInvoke: () => editor.chain().focus().redo().run(),
@@ -272,7 +283,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
   };
 
   return (
-    <>
+    <PublisherTooltipProvider>
       <div
         className={styles.toolbar}
         role="toolbar"
@@ -284,25 +295,27 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
             ? `${control.label} (${control.keyboardHint})`
             : control.label;
           return (
-            <button
-              key={control.key}
-              ref={(el) => {
-                buttonRefs.current[flatIndex] = el;
-              }}
-              type="button"
-              className={`${styles.toolbarBtn} ${
-                control.isActive ? styles.toolbarBtnActive : ''
-              }`}
-              onClick={control.onInvoke}
-              onFocus={() => setFocusIndex(flatIndex)}
-              disabled={control.isDisabled}
-              aria-pressed={control.isActive ? 'true' : 'false'}
-              aria-label={accessible}
-              title={accessible}
-              tabIndex={flatIndex === safeFocusIndex ? 0 : -1}
-            >
-              <span className={styles.toolbarIcon}>{control.glyph}</span>
-            </button>
+            <PublisherTooltip key={control.key} label={accessible}>
+              <button
+                ref={(el) => {
+                  buttonRefs.current[flatIndex] = el;
+                }}
+                type="button"
+                className={`${styles.toolbarBtn} ${
+                  control.isActive ? styles.toolbarBtnActive : ''
+                }`}
+                onClick={control.onInvoke}
+                onFocus={() => setFocusIndex(flatIndex)}
+                disabled={control.isDisabled}
+                aria-pressed={control.isActive ? 'true' : 'false'}
+                aria-label={accessible}
+                tabIndex={flatIndex === safeFocusIndex ? 0 : -1}
+              >
+                <span className={styles.toolbarIcon}>
+                  <PublisherIcon icon={control.icon} size="md" tint="inherit" />
+                </span>
+              </button>
+            </PublisherTooltip>
           );
         })}
       </div>
@@ -378,14 +391,15 @@ export function EditorToolbar({ editor }: EditorToolbarProps): JSX.Element | nul
           )}
         </div>
       )}
-    </>
+    </PublisherTooltipProvider>
   );
 }
 
 /**
  * Renders controls sliced by group, wrapping each run inside a
- * `.toolbarGroup` container. Flat index is threaded through so the
- * roving-tabindex refs stay stable across groups.
+ * `.toolbarGroup` container with a semantic separator between groups.
+ * Flat index is threaded through so the roving-tabindex refs stay
+ * stable across groups.
  */
 function renderGroups(
   controls: readonly ToolbarControl[],
@@ -402,15 +416,17 @@ function renderGroups(
     bucket.items.push(c);
     cursor += 1;
   }
-  return groups.map((g) => (
-    <div
-      className={styles.toolbarGroup}
-      key={g.id}
-      role="group"
-      aria-label={TOOLBAR_GROUP_LABELS[g.id] ?? 'Formatting'}
-    >
-      {g.items.map((item, i) => renderControl(item, g.start + i))}
-    </div>
+  return groups.map((g, index) => (
+    <React.Fragment key={g.id}>
+      {index > 0 && <PublisherSeparator orientation="vertical" tone="faint" />}
+      <div
+        className={styles.toolbarGroup}
+        role="group"
+        aria-label={TOOLBAR_GROUP_LABELS[g.id] ?? 'Formatting'}
+      >
+        {g.items.map((item, i) => renderControl(item, g.start + i))}
+      </div>
+    </React.Fragment>
   ));
 }
 

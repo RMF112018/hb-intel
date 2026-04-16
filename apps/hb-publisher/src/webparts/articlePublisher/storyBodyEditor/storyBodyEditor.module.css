@@ -30,16 +30,8 @@
 
 .toolbarGroup {
   display: inline-flex;
+  align-items: center;
   gap: 2px;
-  padding-right: 6px;
-  margin-right: 2px;
-  border-right: 1px solid var(--hb-border-subtle, #e3e6ed);
-}
-
-.toolbarGroup:last-child {
-  border-right: none;
-  padding-right: 0;
-  margin-right: 0;
 }
 
 .toolbarBtn {

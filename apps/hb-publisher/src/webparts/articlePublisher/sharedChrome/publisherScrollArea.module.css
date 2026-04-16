@@ -1,0 +1,63 @@
+/* PublisherScrollArea — token-driven wrapper around radix scroll area.
+ * Host-safe inside SPFx: no sticky chrome, thumbs only appear when
+ * needed, and everything scales with the surrounding element box.
+ */
+
+.root {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 0;
+  --publisher-scroll-thumb: var(--hb-border-strong, #cbcbd0);
+  --publisher-scroll-thumb-hover: var(--hb-text-tertiary, #6a6a6f);
+}
+
+.viewport {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.scrollbar {
+  display: flex;
+  user-select: none;
+  touch-action: none;
+  padding: 2px;
+  background: transparent;
+  transition: background 160ms ease;
+}
+
+.scrollbar:hover {
+  background: var(--hb-surface-2, #f4f6fa);
+}
+
+.scrollbarVertical {
+  width: 10px;
+}
+
+.scrollbarHorizontal {
+  flex-direction: column;
+  height: 10px;
+}
+
+.thumb {
+  flex: 1;
+  position: relative;
+  background: var(--publisher-scroll-thumb);
+  border-radius: 999px;
+  transition: background 160ms ease;
+}
+
+.thumb::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.thumb:hover {
+  background: var(--publisher-scroll-thumb-hover);
+}
+
+.corner {
+  background: transparent;
+}
