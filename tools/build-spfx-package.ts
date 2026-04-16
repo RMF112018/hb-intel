@@ -2013,6 +2013,78 @@ for (const domain of domains) {
       allPassed = false;
       continue;
     }
+
+    if (domain.dir === 'hb-publisher') {
+      const targetManifest = targetManifests[0]?.json;
+      const publisherShim = generatedShimExpectations[0];
+      if (!targetManifest || !publisherShim) {
+        console.error(`  ❌ ${domain.dir}: missing target manifest or shim expectation for deployment plan`);
+        allPassed = false;
+        continue;
+      }
+      const deploymentPlan = {
+        domain: domain.dir,
+        generatedAt: new Date().toISOString(),
+        packagingRunId: freshnessEvidence.runId,
+        sppkgFile: path.basename(sppkgDest),
+        solution: {
+          name: 'hb-publisher',
+          id: 'c7b2a144-9d3e-4a71-8e2a-6f9d3c1b7e42',
+        },
+        webpart: {
+          manifestId: targetManifest.id,
+          alias: targetManifest.alias ?? null,
+          entryModuleId: publisherShim.entryModuleId,
+          supportedHosts: targetManifest.supportedHosts ?? DEFAULT_SUPPORTED_HOSTS,
+          hiddenFromToolbox: targetManifest.hiddenFromToolbox === true,
+        },
+        runtime: {
+          globalName: `__hbIntel_${domain.camel}`,
+          appBundleName: bundleName,
+          appBaseBundleName: baseBundleName,
+          shellEntryFileName: publisherShim.shimFileName,
+          shellEntryHash: publisherShim.shimFileHash,
+        },
+        deploymentModel: {
+          kind: 'admin-managed-host-page',
+          runbook: 'apps/hb-publisher/deployment/README.md',
+          insertionScript: 'apps/hb-publisher/deployment/Add-ArticlePublisherWebPart.ps1',
+          governedHostPage:
+            'https://hedrickbrotherscom.sharepoint.com/sites/Marketing-New/SitePages/Article-Publisher.aspx',
+          note:
+            'Webpart is hiddenFromToolbox. Insertion is performed by stable GUID via the ' +
+            'supplied PnP PowerShell script on a governed host page. See runbook for the ' +
+            'full deployment + validation checklist.',
+        },
+      };
+      const deploymentPlanPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-deployment-plan.json`);
+      fs.writeFileSync(deploymentPlanPath, `${JSON.stringify(deploymentPlan, null, 2)}\n`);
+      console.log(`  ✓ Hosted deployment plan written: ${deploymentPlanPath}`);
+
+      const hostedLoadProofPath = path.join(OUTPUT_DIR, `${domain.dir}-hosted-load-proof.json`);
+      const proofScriptPath = path.join(ROOT, 'tools', 'hb-publisher-hosted-load-proof.mjs');
+      const proofArgs = [
+        '--bundle', bundlePath,
+        '--output', hostedLoadProofPath,
+        '--globalName', `__hbIntel_${domain.camel}`,
+        '--runId', freshnessEvidence.runId,
+        '--bundleName', bundleName,
+        '--manifestId', targetManifest.id,
+      ];
+      try {
+        execSync(`node "${proofScriptPath}" ${proofArgs.map((a) => `"${a}"`).join(' ')}`, {
+          cwd: ROOT,
+          stdio: 'inherit',
+        });
+        console.log(`  ✓ Hosted-load proof passed: ${hostedLoadProofPath}`);
+      } catch (err) {
+        console.error(
+          `  ❌ ${domain.dir}: hosted-load proof failed — see ${hostedLoadProofPath} (${(err as Error).message})`,
+        );
+        allPassed = false;
+        continue;
+      }
+    }
   }
 
   const stats = fs.statSync(sppkgDest);
