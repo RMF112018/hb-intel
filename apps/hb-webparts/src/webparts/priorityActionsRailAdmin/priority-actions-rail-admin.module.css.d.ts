@@ -49,6 +49,7 @@ declare const styles: {
   readonly previewPane: string;
   readonly previewHeading: string;
   readonly previewDeviceBar: string;
+  readonly previewDeviceButton: string;
   readonly previewDiagnostics: string;
   readonly previewFrame: string;
   readonly discardDialog: string;

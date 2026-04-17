@@ -137,8 +137,8 @@ describe('entryStackContract', () => {
     it('returns the budget for a known device class', () => {
       const budget = getEntryStackBudget('standard-laptop');
       expect(budget).toBeDefined();
-      expect(budget!.heroHeight.min).toBe(340);
-      expect(budget!.heroHeight.max).toBe(380);
+      expect(budget!.heroHeight.min).toBe(300);
+      expect(budget!.heroHeight.max).toBe(340);
     });
 
     it('returns undefined for an unknown device class', () => {
@@ -152,9 +152,9 @@ describe('entryStackContract', () => {
       expect(b.heroHeight).toEqual({ min: 420, max: 460 });
     });
 
-    it('standard-laptop hero height matches spec (340–380)', () => {
+    it('standard-laptop hero height matches re-budgeted spec (300–340)', () => {
       const b = getEntryStackBudget('standard-laptop')!;
-      expect(b.heroHeight).toEqual({ min: 340, max: 380 });
+      expect(b.heroHeight).toEqual({ min: 300, max: 340 });
     });
 
     it('tablet-landscape hero height matches spec (280–320)', () => {

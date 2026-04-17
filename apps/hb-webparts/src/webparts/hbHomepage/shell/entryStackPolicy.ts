@@ -160,11 +160,15 @@ const ULTRAWIDE_DESKTOP_POLICY: EntryStackPolicy = {
 const STANDARD_LAPTOP_POLICY: EntryStackPolicy = {
   entryStateId: 'standard-laptop',
   label: 'Compressed flagship desktop (primary baseline)',
-  heroHeightBudgetPx: { min: 340, max: 380 },
+  heroHeightBudgetPx: { min: 300, max: 340 },
   visiblePrimaryActionsBudget: { min: 5, max: 5 },
   overflowPosture: 'more-tools',
-  firstLaneFirstView: 'top-portion-visible',
+  firstLaneFirstView: 'begin-on-first-view',
   shortHeightPosture: 'not-applicable',
+  spacing: {
+    heroToActionsGap: { min: 20, max: 20 },
+    actionsToFirstLaneGap: { min: 20, max: 24 },
+  },
   firstLaneSingleColumnOnly: false,
 };
 

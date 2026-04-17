@@ -951,9 +951,8 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
                     <button
                       key={d}
                       type="button"
-                      className={d === previewDevice ? styles.primaryButton : styles.smallButton}
+                      className={`${d === previewDevice ? styles.primaryButton : styles.smallButton} ${styles.previewDeviceButton}`}
                       onClick={() => setPreviewDevice(d)}
-                      style={{ padding: '2px 10px', fontSize: '0.6875rem' }}
                     >
                       {PREVIEW_DEVICE_LABELS[d]}
                     </button>

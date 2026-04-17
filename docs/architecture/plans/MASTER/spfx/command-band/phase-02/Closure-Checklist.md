@@ -46,16 +46,17 @@
 - [x] Reduced motion: CSS media query disables transitions and animations
 
 ## H. Validation Evidence
-- [x] 69 unit tests passing (42 normalization + 27 admin state)
-- [x] TypeScript clean: both hb-webparts and ui-kit
-- [x] Conformance scorecard completed
-- [ ] Hosted screenshots: pending deployment
-- [ ] Runtime console behavior: pending hosted validation
+- [x] Prompt-06 focused Priority Actions tests passing (`HbcPriorityRail.test.tsx`; admin/runtime/permissions/writer rail tests)
+- [x] TypeScript clean: both `@hbc/spfx-hb-webparts` and `@hbc/ui-kit`
+- [x] Fresh package-truth artifacts generated (`dist/sppkg/hb-webparts-package-truth-proof.json`, `dist/sppkg/hb-webparts-shim-proof.json`)
+- [x] Conformance scorecard refreshed to match current truth
+- [ ] Hosted screenshots: still missing for required public/admin scenario matrix
+- [ ] Runtime console behavior in hosted SharePoint page-canvas: still unverified
 
 ## I. Final Acceptance
 - [x] No category scored below 2
 - [x] Overall scores (35/40 each) meet 32+ threshold
-- [x] Remaining issues are genuinely non-blocking
+- [ ] Remaining closure blockers resolved (hosted proof still open)
 - [x] Webparts are credibly homepage-grade
 - [x] Webparts are visually distinct from other homepage surfaces
 
@@ -75,13 +76,16 @@
 ## Final Code Verification
 
 ```
-hb-webparts tsc --noEmit: PASS
-ui-kit tsc --noEmit: PASS
-Normalization tests (42): PASS
-Admin state tests (27): PASS
-Total tests: 69 PASS
+pnpm --filter @hbc/ui-kit lint: FAIL (pre-existing unrelated repo findings)
+pnpm --filter @hbc/ui-kit check-types: PASS
+pnpm --filter @hbc/ui-kit test: FAIL (pre-existing unrelated suite failures)
+pnpm --filter @hbc/spfx-hb-webparts lint: FAIL (pre-existing unrelated repo findings)
+pnpm --filter @hbc/spfx-hb-webparts check-types: PASS
+pnpm --filter @hbc/spfx-hb-webparts test: FAIL (pre-existing unrelated suite failures)
+Focused Prompt-06 Priority Actions tests: PASS
+SPFx packaging + package-truth proof (hb-webparts): PASS
 ```
 
 ## Closure Decision
 
-**PASS — Code-side closure achieved.** Both surfaces meet benchmark thresholds. Hosted deployment validation will finalize screenshot evidence and runtime console review.
+**NOT YET PASS — hosted closure gate remains open.** Code-path and packaging proof are current, but hosted SharePoint screenshots and runtime console validation are still required for full closure.

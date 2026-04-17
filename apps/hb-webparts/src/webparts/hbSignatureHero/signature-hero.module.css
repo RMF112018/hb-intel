@@ -30,7 +30,7 @@
 
 .surface {
   position: relative;
-  min-height: 288px;
+  min-height: 256px;
   display: grid;
   grid-template-rows: 1fr;
   border-radius: 0 0 10px 10px;
@@ -203,7 +203,7 @@
    Layered text shadow reads as premium print, not web default. */
 .tagline {
   margin: 0.875rem 0 0 0;
-  font-size: clamp(2.625rem, 4.25vw + 0.75rem, 4.75rem);
+  font-size: clamp(2.625rem, 4.25vw + 0.75rem, 3.75rem);
   font-weight: 800;
   line-height: 1.0;
   letter-spacing: -0.035em;
@@ -237,9 +237,33 @@
   opacity: 0.92;
 }
 
-/* ── Wide desktop ──────────────────────────────────────── */
+/* ── Standard-laptop entry-stack budget ─────────────────── */
+/*
+   Enforces the shell-owned standard-laptop hero height budget
+   (300..340px — see shell/entryStackPolicy.ts / homepage/entryStack/
+   entryStackContract.ts). Scoped to the laptop band so tablet and phone
+   reflow rules are untouched and ultrawide (≥1600px) retains its own
+   larger budget (420..460px) without a ceiling here.
+*/
+@media (min-width: 1180px) and (max-width: 1599px) {
+  .surface {
+    max-height: 340px;
+  }
+  .content {
+    padding: 1.375rem 3.5rem;
+  }
+}
 
-@media (min-width: 1280px) {
+/* ── Ultrawide desktop ─────────────────────────────────── */
+/*
+   Ultrawide (≥1600px) retains the premium horizontal margin and the
+   larger hero height budget (420..460px per entryStackPolicy). No
+   ceiling here — the standard-laptop max-height does not apply.
+*/
+@media (min-width: 1600px) {
+  .surface {
+    max-height: none;
+  }
   .content {
     padding: 1.75rem 4.5rem;
   }

@@ -47,7 +47,7 @@ describe('shellConformance — entry-stack policy integration (Prompt-04 link)',
   it('exposes the entry-stack policy matching the active entry state', () => {
     const report = buildReport('standard-laptop', 1300);
     expect(report.entryStackPolicy.entryStateId).toBe('standard-laptop');
-    expect(report.entryStackPolicy.heroHeightBudgetPx).toEqual({ min: 340, max: 380 });
+    expect(report.entryStackPolicy.heroHeightBudgetPx).toEqual({ min: 300, max: 340 });
   });
 
   it('tablet-portrait policy enforces single-column first lane', () => {

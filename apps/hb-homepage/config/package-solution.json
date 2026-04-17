@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-homepage",
     "id": "b7d3f8a1-4c62-4e9b-a851-2d6f0e3c7a49",
-    "version": "1.1.6.0",
+    "version": "1.1.7.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "hb-intel-homepage Feature",
         "description": "Deploys HB Intel Homepage webpart assets.",
         "id": "c4e91f7d-8a23-4b56-9d0e-1f3c5a7b2d84",
-        "version": "1.1.6.0"
+        "version": "1.1.7.0"
       }
     ]
   },

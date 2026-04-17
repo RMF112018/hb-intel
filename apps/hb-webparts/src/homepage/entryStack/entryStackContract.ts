@@ -47,7 +47,7 @@ export const ENTRY_STACK_BUDGETS: readonly EntryStackBudget[] = [
   },
   {
     deviceClass: 'standard-laptop',
-    heroHeight: { min: 340, max: 380 },
+    heroHeight: { min: 300, max: 340 },
     heroToActionsGap: 20,
     actionsToFirstLaneGap: 24,
     maxVisibleActions: 5,

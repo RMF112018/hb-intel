@@ -34,4 +34,9 @@
 - [ ] Benchmark scorecard completed
 - [ ] No category below 2 without explicit exception
 - [ ] Remaining issues are genuinely non-blocking
-- [ ] Packaged `.sppkg` result validated
+- [x] Packaged `.sppkg` result validated (`dist/sppkg/hb-webparts.sppkg`)
+
+## Prompt-06 evidence notes (2026-04-17)
+- [x] Fresh package-truth proof regenerated: `dist/sppkg/hb-webparts-package-truth-proof.json`
+- [x] Fresh shim proof regenerated: `dist/sppkg/hb-webparts-shim-proof.json`
+- [ ] Hosted SharePoint screenshot capture remains open (no authenticated hosted runtime capture in this execution)

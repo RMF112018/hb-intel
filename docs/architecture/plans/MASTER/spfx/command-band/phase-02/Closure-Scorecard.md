@@ -13,9 +13,9 @@
 | 7 | UX completeness | 4 | Skeleton loading, empty state with authored messaging, error state with retry, breakpoint-aware overflow, badge visibility toggle. |
 | 8 | Identity / media / attribution | 3 | Not directly applicable (no person identity). Icon-driven action classification. External-link vs internal distinction. |
 | 9 | Accessibility / host behavior | 3 | Focus-visible outlines, reduced-motion CSS, keyboard-navigable items, ARIA roles/labels, min touch targets 44px. SharePoint page-canvas compatible. |
-| 10 | Validation / closure proof | 3 | 69 unit tests passing. TypeScript clean. Hosted validation pending deployment. |
+| 10 | Validation / closure proof | 3 | Prompt-06 focused tests pass for Priority Actions seams; package-truth proof regenerated at `dist/sppkg/hb-webparts-package-truth-proof.json`; hosted SharePoint screenshot validation still pending. |
 
-**Total: 35/40** — Passes 32+ threshold. Target 36+ achievable with hosted screenshot evidence.
+**Total: 35/40 (code-path only)** — Hosted SharePoint screenshot closure remains open.
 
 ---
 
@@ -32,9 +32,9 @@
 | 7 | UX completeness | 3 | Loading skeleton, load-error with retry, save-error banner, save-success banner, discard dialog, validation issue list. No dead controls. |
 | 8 | Identity / media / attribution | 3 | Not directly applicable. Admin notes field for maintainer context. |
 | 9 | Accessibility / host behavior | 3 | Keyboard-navigable item list with up/down/archive buttons. Focus-visible outlines. Reduced-motion CSS. ARIA roles on dialogs. SharePoint page-canvas compatible. |
-| 10 | Validation / closure proof | 3 | 27 admin-specific tests + 42 normalization tests passing. TypeScript clean. Hosted validation pending deployment. |
+| 10 | Validation / closure proof | 3 | Prompt-06 focused admin/runtime tests pass; `@hbc/spfx-hb-webparts` typecheck passes; hosted SharePoint screenshot validation and console capture still pending. |
 
-**Total: 35/40** — Passes 32+ threshold. Target 36+ achievable with hosted evidence.
+**Total: 35/40 (code-path only)** — Hosted SharePoint screenshot closure remains open.
 
 ---
 
@@ -49,11 +49,12 @@
 
 | Item | Severity | Status |
 |------|----------|--------|
-| Hosted SharePoint screenshots | Non-blocking | Requires deployment to capture |
+| Hosted SharePoint screenshots (public + admin scenario matrix) | High | Still open — not captured in this execution environment |
+| Hosted runtime console capture in SharePoint page canvas | High | Still open — no authenticated hosted runtime session available |
 | Drag-to-reorder (keyboard alternative exists) | Non-blocking | Button reorder implemented |
 | Audience gating live validation | Non-blocking | Unit-tested; live test requires audience setup |
 | Permission-aware read-only mode | Non-blocking | Permission model exists; SP group check requires hosted context |
 
 ## Closure Statement
 
-Phase-02 command-band implementation passes code-side closure. Both PriorityActionsRail (35/40) and PriorityActionsRailAdmin (35/40) exceed the 32+ minimum threshold. No category scores below 2. No material doctrine violations. Hosted validation with screenshots is deferred to deployment and will finalize scores toward 36+ target.
+Prompt-06 refreshed packaging and code-path evidence, but full closure is **not complete** because hosted SharePoint screenshot/runtime proof is still missing. The package-truth artifacts are current (`dist/sppkg/hb-webparts-package-truth-proof.json`, `dist/sppkg/hb-webparts-shim-proof.json`), and hosted UI validation remains an explicit open gate.

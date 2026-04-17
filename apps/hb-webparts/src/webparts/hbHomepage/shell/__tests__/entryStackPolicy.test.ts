@@ -30,7 +30,7 @@ describe('entryStackPolicy — coverage', () => {
 describe('entryStackPolicy — encoded hero height budgets', () => {
   const cases: Array<[ShellEntryStateId, number, number]> = [
     ['ultrawide-desktop', 420, 460],
-    ['standard-laptop', 340, 380],
+    ['standard-laptop', 300, 340],
     ['tablet-landscape', 280, 320],
     ['tablet-portrait-large', 240, 280],
     ['tablet-portrait', 240, 280],
@@ -104,9 +104,7 @@ describe('entryStackPolicy — postures', () => {
     for (const id of Object.keys(
       ENTRY_STACK_POLICY_BY_ENTRY_STATE,
     ) as ShellEntryStateId[]) {
-      const expected =
-        id === 'standard-laptop' ? 'top-portion-visible' : 'begin-on-first-view';
-      expect(getEntryStackPolicy(id).firstLaneFirstView).toBe(expected);
+      expect(getEntryStackPolicy(id).firstLaneFirstView).toBe('begin-on-first-view');
     }
   });
 
@@ -115,11 +113,17 @@ describe('entryStackPolicy — postures', () => {
     expect(policy.spacing?.heroToActionsGap).toEqual({ min: 24, max: 24 });
     expect(policy.spacing?.actionsToFirstLaneGap).toEqual({ min: 28, max: 32 });
   });
+
+  it('standard-laptop encodes spacing budgets aligned to the production-adjacent mirror', () => {
+    const policy = getEntryStackPolicy('standard-laptop');
+    expect(policy.spacing?.heroToActionsGap).toEqual({ min: 20, max: 20 });
+    expect(policy.spacing?.actionsToFirstLaneGap).toEqual({ min: 20, max: 24 });
+  });
 });
 
 describe('entryStackPolicy — validation helpers', () => {
   it('isHeroHeightWithinBudget honors the per-class range', () => {
-    expect(isHeroHeightWithinBudget('standard-laptop', 360)).toBe(true);
+    expect(isHeroHeightWithinBudget('standard-laptop', 320)).toBe(true);
     expect(isHeroHeightWithinBudget('standard-laptop', 500)).toBe(false);
     expect(isHeroHeightWithinBudget('phone-landscape', 140)).toBe(true);
     expect(isHeroHeightWithinBudget('phone-landscape', 260)).toBe(false);
