@@ -22,7 +22,7 @@
   - `sharepoint-control:provisioning:priority-actions-band-seed-items`
   - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
 - Public runtime seam intent: `PriorityActionsRail` consumes normalized config row for active band rendering policy.
-- Current repo status: list is provisioned and schema-governed; direct public list-read adapter is still pending in this phase.
+- Current repo status: list is provisioned, schema-governed, and the public list-read adapter is live. `fetchPriorityActionsConfig` (see `apps/hb-webparts/src/homepage/data/priorityActionsConfigListSource.ts`) is consumed by `usePriorityActionsData` to resolve the active band config row.
 
 ## 4. Active Row Resolution Rule
 Runtime/admin resolution order is expected to remain:

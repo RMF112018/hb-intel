@@ -154,6 +154,20 @@ const ACTIONS: readonly ActionDescriptor[] = [
     expectedArtifacts: EXTRACTION_ARTIFACTS,
     allowedExecutionIntents: ['sharepoint-provision-and-seed'],
   },
+  {
+    actionKey: 'sharepoint-control:provisioning:flagship-action-layer-cutover',
+    label: 'Flagship Action Layer Cutover (Quick Links → PriorityActionsRail)',
+    description:
+      'Captures the flagship page Quick Links inventory, removes the OOB Quick Links webpart from the target page, and places the governed PriorityActionsRail client-side webpart in its slot. Idempotent.',
+    riskLevel: 'low-impact',
+    executionMode: 'apply',
+    supportsPreview: false,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['sharepoint-provision-and-seed'],
+  },
 ] as const;
 
 const ALIASES: Record<string, CanonicalPnpActionKey> = {
@@ -167,6 +181,7 @@ const ALIASES: Record<string, CanonicalPnpActionKey> = {
   'sharepoint:pnp:homepage-quick-links-extract': 'sharepoint-control:extraction:homepage-quick-links',
   'sharepoint:pnp:priority-actions-band-seed': 'sharepoint-control:provisioning:priority-actions-band-seed-items',
   'sharepoint:pnp:priority-actions-band-provision-and-seed': 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
+  'sharepoint:pnp:flagship-action-layer-cutover': 'sharepoint-control:provisioning:flagship-action-layer-cutover',
 };
 
 export function getActions(): readonly ActionDescriptor[] {

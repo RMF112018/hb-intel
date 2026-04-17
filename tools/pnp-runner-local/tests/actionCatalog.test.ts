@@ -21,4 +21,13 @@ describe('actionCatalog', () => {
     expect(descriptor.executionMode).toBe('apply');
     expect(descriptor.allowedExecutionIntents).toContain('sharepoint-provision-and-seed');
   });
+
+  it('registers the flagship action-layer cutover action and its alias', () => {
+    expect(resolveActionKey('sharepoint:pnp:flagship-action-layer-cutover')).toBe(
+      'sharepoint-control:provisioning:flagship-action-layer-cutover',
+    );
+    const descriptor = getActionDescriptor('sharepoint-control:provisioning:flagship-action-layer-cutover');
+    expect(descriptor.executionMode).toBe('apply');
+    expect(descriptor.allowedExecutionIntents).toContain('sharepoint-provision-and-seed');
+  });
 });

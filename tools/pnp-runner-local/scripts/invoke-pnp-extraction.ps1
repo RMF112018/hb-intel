@@ -1109,6 +1109,115 @@ switch ($ActionKey) {
 
     $summaryLines += "- Provisioned command-band lists and seeded from quick links. Extracted=$($seedResult.extractedCount), Processed=$($seedResult.processedCount), Inserted=$($seedResult.inserted), Updated=$($seedResult.updated), Archived=$($seedResult.archived)."
   }
+  'sharepoint-control:provisioning:flagship-action-layer-cutover' {
+    # Flagship page action-layer cutover: remove OOB Quick Links webpart(s)
+    # from the target page and place the governed PriorityActionsRail
+    # client-side webpart. Idempotent: if PriorityActionsRail is already on
+    # the page, no new instance is added; if no Quick Links webpart is
+    # present, removal is a no-op.
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
+    $priorityActionsRailWebPartId = 'b3f07190-79cf-437d-a1d6-ecbf3f77e616'
+    $oobQuickLinksWebPartId = 'c70391ea-0b10-4ee9-b2b4-006d3fcad0cd'
+
+    # Capture the live pre-cutover inventory so the action-layer migration
+    # has a reviewable record.
+    $quickLinksInventory = Extract-QuickLinksFromPage -PageName $pageName
+
+    $pageComposition = [ordered]@{
+      pageName = $pageName
+      priorityActionsRailWebPartId = $priorityActionsRailWebPartId
+      oobQuickLinksWebPartId = $oobQuickLinksWebPartId
+      preCutover = [ordered]@{
+        extractedQuickLinksCount = $quickLinksInventory.count
+        extractedQuickLinks = $quickLinksInventory.items
+        warnings = $quickLinksInventory.warnings
+      }
+      removedWebPartInstances = @()
+      addedWebPartInstance = $null
+      alreadyPresent = $false
+      errors = @()
+    }
+
+    try {
+      $page = Get-PnPPage -Identity $pageName -ErrorAction Stop
+      $controls = @($page.Controls)
+
+      # Remove every OOB Quick Links control currently on the page.
+      foreach ($control in $controls) {
+        $controlWebPartId = $null
+        try { $controlWebPartId = [string]$control.WebPartId } catch { $controlWebPartId = $null }
+        if ($controlWebPartId -and ($controlWebPartId.Trim().ToLower() -eq $oobQuickLinksWebPartId)) {
+          try {
+            Remove-PnPPageWebPart -Page $pageName -Identity $control.InstanceId -ErrorAction Stop
+            $pageComposition.removedWebPartInstances += [ordered]@{
+              instanceId = [string]$control.InstanceId
+              order = $control.Order
+            }
+          }
+          catch {
+            $pageComposition.errors += "remove-quick-links-failed: instanceId=$($control.InstanceId); $($_.Exception.Message)"
+          }
+        }
+      }
+
+      # Refresh the page after removal so we test against current composition.
+      $page = Get-PnPPage -Identity $pageName -ErrorAction Stop
+      $alreadyPresent = $false
+      foreach ($control in @($page.Controls)) {
+        $controlWebPartId = $null
+        try { $controlWebPartId = [string]$control.WebPartId } catch { $controlWebPartId = $null }
+        if ($controlWebPartId -and ($controlWebPartId.Trim().ToLower() -eq $priorityActionsRailWebPartId)) {
+          $alreadyPresent = $true
+          $pageComposition.addedWebPartInstance = [ordered]@{
+            instanceId = [string]$control.InstanceId
+            reused = $true
+          }
+          break
+        }
+      }
+      $pageComposition.alreadyPresent = $alreadyPresent
+
+      if (-not $alreadyPresent) {
+        try {
+          $added = Add-PnPPageWebPart -Page $pageName -Component $priorityActionsRailWebPartId -ErrorAction Stop
+          $pageComposition.addedWebPartInstance = [ordered]@{
+            instanceId = if ($added) { [string]$added.InstanceId } else { $null }
+            reused = $false
+          }
+        }
+        catch {
+          $pageComposition.errors += "add-priority-actions-rail-failed: $($_.Exception.Message)"
+        }
+      }
+
+      try { Set-PnPPage -Identity $pageName -Publish -ErrorAction SilentlyContinue | Out-Null } catch { }
+    }
+    catch {
+      $pageComposition.errors += "page-load-failed: $($_.Exception.Message)"
+    }
+
+    $raw.quickLinks = $quickLinksInventory
+    $raw.pageComposition = $pageComposition
+    $normalized.quickLinks = [ordered]@{
+      count = $quickLinksInventory.count
+      items = $quickLinksInventory.items
+      warnings = $quickLinksInventory.warnings
+    }
+    $normalized.pageComposition = $pageComposition
+
+    $summaryLines += "- Flagship action-layer cutover on page '$pageName'."
+    $summaryLines += "- Pre-cutover Quick Links extracted: $($quickLinksInventory.count)."
+    $summaryLines += "- OOB Quick Links instances removed: $(@($pageComposition.removedWebPartInstances).Count)."
+    if ($pageComposition.alreadyPresent) {
+      $summaryLines += "- PriorityActionsRail already present on page; no new instance added."
+    }
+    elseif ($pageComposition.addedWebPartInstance) {
+      $summaryLines += "- PriorityActionsRail placed on page (instanceId=$($pageComposition.addedWebPartInstance.instanceId))."
+    }
+    if (@($pageComposition.errors).Count -gt 0) {
+      $summaryLines += "- Cutover errors: $([string]::Join('; ', $pageComposition.errors))"
+    }
+  }
   default {
     throw "Unsupported action key: $ActionKey"
   }

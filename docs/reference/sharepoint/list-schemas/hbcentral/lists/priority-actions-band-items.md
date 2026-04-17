@@ -23,7 +23,7 @@
   - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
 - Source provenance intent: homepage Quick Links payload (`HBCentral.aspx`) extracted then normalized into command-band item rows.
 - Public runtime seam intent: `PriorityActionsRail` consumes normalized enabled rows for rendering and overflow behavior.
-- Current repo status: list contract and seed pipeline are in place; direct public list-read adapter remains pending in this phase.
+- Current repo status: list contract, seed pipeline, and public list-read adapter are all live. `fetchPriorityActionsItems` (see `apps/hb-webparts/src/homepage/data/priorityActionsItemsListSource.ts`) is consumed by `usePriorityActionsData` and feeds the live `PriorityActionsRail`.
 
 ## 4. Field Schema
 
