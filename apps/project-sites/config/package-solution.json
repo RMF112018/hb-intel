@@ -19,7 +19,7 @@
         "default": "HB Intel Project Sites"
       },
       "longDescription": {
-        "default": "Displays project-site link cards filtered by the hosting page Year property."
+        "default": "Displays project-site link cards using authoritative scope resolution: yearOverride, host-page Year context, then default fallback."
       },
       "screenshotPaths": [],
       "videoUrl": "",

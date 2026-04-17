@@ -18,4 +18,13 @@ export type {
   IAvailableYearsResult,
   ProjectSitesStatus,
   AvailableYearsStatus,
+  IProjectSitesMountRuntimeConfig,
+  IProjectSitesRuntimeContext,
+  IResolvedProjectSitesScope,
+  ProjectSitesScopeSource,
+} from './types.js';
+
+export {
+  normalizeProjectSitesRuntimeConfig,
+  resolveInitialProjectSitesScope,
 } from './types.js';

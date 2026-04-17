@@ -1,5 +1,11 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { isValidYear, resolveDefaultYear } from './types.js';
+import {
+  isValidYear,
+  normalizeProjectSitesRuntimeConfig,
+  parseProjectSitesRuntimeYear,
+  resolveDefaultYear,
+  resolveInitialProjectSitesScope,
+} from './types.js';
 
 describe('isValidYear', () => {
   it('accepts typical 4-digit years', () => {
@@ -54,5 +60,92 @@ describe('resolveDefaultYear', () => {
 
   it('returns the only year if list has one element', () => {
     expect(resolveDefaultYear([2025])).toBe(2025);
+  });
+});
+
+describe('parseProjectSitesRuntimeYear', () => {
+  it('accepts valid numeric and string year values', () => {
+    expect(parseProjectSitesRuntimeYear(2026)).toBe(2026);
+    expect(parseProjectSitesRuntimeYear('2026')).toBe(2026);
+    expect(parseProjectSitesRuntimeYear(' 2026 ')).toBe(2026);
+  });
+
+  it('rejects invalid values', () => {
+    expect(parseProjectSitesRuntimeYear('abc')).toBeNull();
+    expect(parseProjectSitesRuntimeYear('2026.4')).toBeNull();
+    expect(parseProjectSitesRuntimeYear(1899)).toBeNull();
+    expect(parseProjectSitesRuntimeYear(2101)).toBeNull();
+    expect(parseProjectSitesRuntimeYear(undefined)).toBeNull();
+  });
+});
+
+describe('normalizeProjectSitesRuntimeConfig', () => {
+  it('parses yearOverride and hostPageYear with strict validation', () => {
+    const result = normalizeProjectSitesRuntimeConfig({
+      webPartId: 'abc',
+      hostPageYear: '2024',
+      webPartProperties: { yearOverride: '2026' },
+      functionAppUrl: 'https://example.com',
+      backendMode: 'production',
+      allowBackendModeSwitch: true,
+      apiAudience: 'api://aud',
+      assetBaseUrl: 'https://cdn/',
+    });
+
+    expect(result.yearOverride).toBe(2026);
+    expect(result.hostPageYear).toBe(2024);
+    expect(result.webPartId).toBe('abc');
+    expect(result.functionAppUrl).toBe('https://example.com');
+    expect(result.allowBackendModeSwitch).toBe(true);
+  });
+
+  it('treats 0 as no year override', () => {
+    expect(
+      normalizeProjectSitesRuntimeConfig({
+        webPartProperties: { yearOverride: 0 },
+      }).yearOverride,
+    ).toBeNull();
+  });
+});
+
+describe('resolveInitialProjectSitesScope', () => {
+  it('prefers author override over host year and default', () => {
+    const result = resolveInitialProjectSitesScope(
+      [2025, 2024],
+      normalizeProjectSitesRuntimeConfig({
+        webPartProperties: { yearOverride: 2026 },
+        hostPageYear: 2025,
+      }),
+    );
+    expect(result.scope).toEqual({ kind: 'year', year: 2026 });
+    expect(result.source).toBe('author-override');
+  });
+
+  it('falls back to host page year when no valid override', () => {
+    const result = resolveInitialProjectSitesScope(
+      [2025, 2024],
+      normalizeProjectSitesRuntimeConfig({
+        webPartProperties: { yearOverride: 'invalid' },
+        hostPageYear: 2024,
+      }),
+    );
+    expect(result.scope).toEqual({ kind: 'year', year: 2024 });
+    expect(result.source).toBe('host-page-year');
+  });
+
+  it('falls back to default year and finally all-projects', () => {
+    const withDefault = resolveInitialProjectSitesScope(
+      [2025, 2024],
+      normalizeProjectSitesRuntimeConfig({}),
+    );
+    expect(withDefault.scope).toEqual({ kind: 'year', year: 2025 });
+    expect(withDefault.source).toBe('default-year');
+
+    const allFallback = resolveInitialProjectSitesScope(
+      [],
+      normalizeProjectSitesRuntimeConfig({}),
+    );
+    expect(allFallback.scope).toEqual({ kind: 'all' });
+    expect(allFallback.source).toBe('all-projects-fallback');
   });
 });

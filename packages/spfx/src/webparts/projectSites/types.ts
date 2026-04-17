@@ -161,6 +161,140 @@ export function scopesEqual(a: ProjectSitesScope, b: ProjectSitesScope): boolean
   return true;
 }
 
+// ── Runtime config and scope-authority contract ───────────────────────────
+
+/**
+ * Shell-injected runtime configuration for the Project Sites mount boundary.
+ * Unknown fields are tolerated; the normalizer below extracts only the
+ * fields that matter to Project Sites year-context authority.
+ */
+export interface IProjectSitesMountRuntimeConfig {
+  webPartId?: unknown;
+  webPartProperties?: unknown;
+  hostPageYear?: unknown;
+  functionAppUrl?: unknown;
+  backendMode?: unknown;
+  allowBackendModeSwitch?: unknown;
+  apiAudience?: unknown;
+  assetBaseUrl?: unknown;
+}
+
+export interface IProjectSitesRuntimeContext {
+  webPartId: string | null;
+  yearOverride: number | null;
+  hostPageYear: number | null;
+  functionAppUrl: string | null;
+  backendMode: string | null;
+  allowBackendModeSwitch: boolean | null;
+  apiAudience: string | null;
+  assetBaseUrl: string | null;
+}
+
+export type ProjectSitesScopeSource =
+  | 'author-override'
+  | 'host-page-year'
+  | 'default-year'
+  | 'all-projects-fallback'
+  | 'user-selected';
+
+export interface IResolvedProjectSitesScope {
+  scope: ProjectSitesScope;
+  source: ProjectSitesScopeSource;
+  resolvedYear: number | null;
+}
+
+export function parseProjectSitesRuntimeYear(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return isValidYear(value) ? value : null;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!/^-?\d+$/.test(trimmed)) return null;
+    const parsed = Number.parseInt(trimmed, 10);
+    return isValidYear(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function parseOptionalString(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function parseOptionalBoolean(value: unknown): boolean | null {
+  return typeof value === 'boolean' ? value : null;
+}
+
+function parseYearOverride(value: unknown): number | null {
+  // Authoring semantics: 0 or blank means "no override".
+  if (value === 0 || value === '0' || value === '' || value === null || value === undefined) {
+    return null;
+  }
+  return parseProjectSitesRuntimeYear(value);
+}
+
+export function normalizeProjectSitesRuntimeConfig(
+  config?: IProjectSitesMountRuntimeConfig,
+): IProjectSitesRuntimeContext {
+  const rawWebPartProperties =
+    typeof config?.webPartProperties === 'object' && config.webPartProperties !== null
+      ? (config.webPartProperties as Record<string, unknown>)
+      : null;
+
+  return {
+    webPartId: parseOptionalString(config?.webPartId),
+    yearOverride: parseYearOverride(rawWebPartProperties?.yearOverride),
+    hostPageYear: parseProjectSitesRuntimeYear(config?.hostPageYear),
+    functionAppUrl: parseOptionalString(config?.functionAppUrl),
+    backendMode: parseOptionalString(config?.backendMode),
+    allowBackendModeSwitch: parseOptionalBoolean(config?.allowBackendModeSwitch),
+    apiAudience: parseOptionalString(config?.apiAudience),
+    assetBaseUrl: parseOptionalString(config?.assetBaseUrl),
+  };
+}
+
+export function resolveInitialProjectSitesScope(
+  availableYears: number[],
+  runtimeContext: IProjectSitesRuntimeContext | null,
+): IResolvedProjectSitesScope {
+  // Authoritative resolution order:
+  // 1) valid author override
+  // 2) valid host page year context
+  // 3) fallback default year (current year if present, else newest)
+  // 4) explicit All Projects fallback only when no year can be resolved
+  if (runtimeContext?.yearOverride !== null && runtimeContext?.yearOverride !== undefined) {
+    return {
+      scope: scopeFromYear(runtimeContext.yearOverride),
+      source: 'author-override',
+      resolvedYear: runtimeContext.yearOverride,
+    };
+  }
+
+  if (runtimeContext?.hostPageYear !== null && runtimeContext?.hostPageYear !== undefined) {
+    return {
+      scope: scopeFromYear(runtimeContext.hostPageYear),
+      source: 'host-page-year',
+      resolvedYear: runtimeContext.hostPageYear,
+    };
+  }
+
+  const defaultYear = resolveDefaultYear(availableYears);
+  if (defaultYear !== null) {
+    return {
+      scope: scopeFromYear(defaultYear),
+      source: 'default-year',
+      resolvedYear: defaultYear,
+    };
+  }
+
+  return {
+    scope: SCOPE_ALL,
+    source: 'all-projects-fallback',
+    resolvedYear: null,
+  };
+}
+
 // ── Project sites query result ─────────────────────────────────────────────
 
 export type ProjectSitesStatus = 'loading' | 'error' | 'empty' | 'success';

@@ -6,7 +6,7 @@ import type {
   IProjectSiteEntry,
   ProjectSitesScope,
 } from './types.js';
-import { scopeFromYear, SCOPE_ALL } from './types.js';
+import { normalizeProjectSitesRuntimeConfig, scopeFromYear, SCOPE_ALL } from './types.js';
 
 // ── Mock hooks ────────────────────────────────────────────────────────────
 
@@ -100,6 +100,84 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText('All Projects')).toBeInTheDocument();
     expect(screen.getByText('2026')).toBeInTheDocument();
     expect(screen.getByText('2025')).toBeInTheDocument();
+  });
+
+  it('initializes scope from valid yearOverride and shows source-of-truth messaging', async () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025, 2024], errorMessage: null });
+    mockUseProjectSites.mockImplementation((scope) => {
+      if (!scope) return null;
+      return {
+        status: 'success',
+        scope,
+        entries: [createEntry({ id: 1, year: scope.kind === 'year' ? scope.year : 2025 })],
+        errorMessage: null,
+      };
+    });
+
+    render(
+      <ProjectSitesRoot
+        runtimeContext={normalizeProjectSitesRuntimeConfig({
+          webPartProperties: { yearOverride: 2026 },
+          hostPageYear: 2025,
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2026));
+    });
+    expect(screen.getByText(/scope source: author override/i)).toBeInTheDocument();
+  });
+
+  it('falls back to host page year when override is invalid', async () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025, 2024], errorMessage: null });
+    mockUseProjectSites.mockImplementation((scope) => {
+      if (!scope) return null;
+      return {
+        status: 'success',
+        scope,
+        entries: [createEntry({ id: 1, year: scope.kind === 'year' ? scope.year : 2025 })],
+        errorMessage: null,
+      };
+    });
+
+    render(
+      <ProjectSitesRoot
+        runtimeContext={normalizeProjectSitesRuntimeConfig({
+          webPartProperties: { yearOverride: 'invalid' },
+          hostPageYear: 2024,
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2024));
+    });
+    expect(screen.getByText(/scope source: host page year context/i)).toBeInTheDocument();
+  });
+
+  it('uses default-year fallback and switches source to user-selected after scope change', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025, 2024], errorMessage: null });
+    mockUseProjectSites.mockImplementation((scope) => {
+      if (!scope) return null;
+      return {
+        status: 'success',
+        scope,
+        entries: [createEntry({ id: 1, year: scope.kind === 'year' ? scope.year : 2025 })],
+        errorMessage: null,
+      };
+    });
+
+    render(
+      <ProjectSitesRoot
+        runtimeContext={normalizeProjectSitesRuntimeConfig({})}
+      />,
+    );
+
+    expect(screen.getByText(/scope source: default year fallback/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('All Projects'));
+    expect(screen.getByText(/scope source: user-selected/i)).toBeInTheDocument();
   });
 
   it('renders project cards on success', () => {

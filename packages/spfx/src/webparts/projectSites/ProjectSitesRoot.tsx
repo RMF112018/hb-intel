@@ -58,7 +58,7 @@ import { Search, AlertTriangle, Filter, Cancel } from '@hbc/ui-kit/icons';
 import { useAvailableYears } from './hooks/useAvailableYears.js';
 import { useProjectSites } from './hooks/useProjectSites.js';
 import {
-  resolveDefaultYear,
+  resolveInitialProjectSitesScope,
   scopeFromYear,
   SCOPE_ALL,
   scopesEqual,
@@ -70,6 +70,9 @@ import {
   type ProjectSitesScope,
   type ProjectSitesSortKey,
   type ProjectSitesFilters,
+  type IProjectSitesRuntimeContext,
+  type IResolvedProjectSitesScope,
+  type ProjectSitesScopeSource,
 } from './types.js';
 import {
   applyProjectSitesPipeline,
@@ -157,6 +160,20 @@ const useStyles = makeStyles({
     ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
     whiteSpace: 'nowrap',
     fontVariantNumeric: 'tabular-nums',
+  },
+  scopeContextPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_XS}px`,
+    fontSize: bodySmall.fontSize,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    borderRadius: HBC_RADIUS_SM,
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
   },
 
   // ── Control bar (search / scope / sort / filters) ──────────────────
@@ -623,9 +640,21 @@ function scopeChoiceValue(scope: ProjectSitesScope): string {
   return scope.kind === 'all' ? 'all' : `year:${scope.year}`;
 }
 
+function describeScopeSource(source: ProjectSitesScopeSource): string {
+  if (source === 'author-override') return 'Scope source: author override (yearOverride)';
+  if (source === 'host-page-year') return 'Scope source: host page Year context';
+  if (source === 'default-year') return 'Scope source: default year fallback';
+  if (source === 'all-projects-fallback') return 'Scope source: all-projects fallback';
+  return 'Scope source: user-selected';
+}
+
 // ── Component ────────────────────────────────────────────────────────────
 
-export const ProjectSitesRoot: FC = () => {
+interface ProjectSitesRootProps {
+  runtimeContext?: IProjectSitesRuntimeContext | null;
+}
+
+export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = null }) => {
   const classes = useStyles();
   const yearsResult = useAvailableYears();
 
@@ -636,15 +665,16 @@ export const ProjectSitesRoot: FC = () => {
   const [sortKey, setSortKey] = useState<ProjectSitesSortKey>(DEFAULT_SORT_KEY);
   const [filters, setFilters] = useState<ProjectSitesFilters>(EMPTY_FILTERS);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [resolvedScope, setResolvedScope] = useState<IResolvedProjectSitesScope | null>(null);
 
-  // Default scope when years first arrive: prefer current year if available,
-  // otherwise the newest available year, otherwise All Projects.
+  // Resolve initial scope from authoritative context when years first arrive.
   useEffect(() => {
     if (yearsResult.status === 'success' && scope === null) {
-      const defaultYear = resolveDefaultYear(yearsResult.years);
-      setScope(defaultYear !== null ? scopeFromYear(defaultYear) : SCOPE_ALL);
+      const next = resolveInitialProjectSitesScope(yearsResult.years, runtimeContext);
+      setScope(next.scope);
+      setResolvedScope(next);
     }
-  }, [yearsResult.status, yearsResult.years, scope]);
+  }, [yearsResult.status, yearsResult.years, scope, runtimeContext]);
 
   const projectsResult = useProjectSites(scope);
 
@@ -732,6 +762,11 @@ export const ProjectSitesRoot: FC = () => {
       <div className={classes.headerLead}>
         <span className={classes.eyebrow}>HB Central · Projects</span>
         <h2 className={classes.title}>Project Sites</h2>
+        {showControls && resolvedScope && (
+          <span className={classes.scopeContextPill}>
+            {describeScopeSource(resolvedScope.source)}
+          </span>
+        )}
       </div>
       {showControls && projectsResult?.status === 'success' && (
         <span
@@ -774,6 +809,11 @@ export const ProjectSitesRoot: FC = () => {
                 const chosen = scopeChoices.find((c) => c.value === next);
                 if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
                   setScope(chosen.scope);
+                  setResolvedScope({
+                    scope: chosen.scope,
+                    source: 'user-selected',
+                    resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
+                  });
                 }
               }}
               size="sm"

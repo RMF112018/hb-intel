@@ -42,6 +42,7 @@ const HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c';
 const KUDOS_WEBPART_ID = 'f14e59a3-4d6b-43b2-952e-ba02dea11dad';
 const KUDOS_COMPANION_WEBPART_ID = 'a8c5d9e2-7f14-4b3a-9c82-1e6f5d8a4b97';
 const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
+const PROJECT_SITES_WEBPART_ID = 'e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b';
 
 // Hero Banner domain webparts (public 39762a4d-… and admin
 // 23d22f2d-…) deliberately expose no property-pane fields. The
@@ -52,6 +53,8 @@ const PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 // for those IDs so no misleading pane controls appear.
 
 interface IShellWebPartProperties {
+  /** Optional project-year override for the Project Sites webpart. */
+  yearOverride?: number;
   /** Author-configurable background image URL for the Signature Hero homepage branch. */
   backgroundImageUrl?: string;
   /**
@@ -128,6 +131,41 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
       hasRunnerApiKey: Boolean(this.properties.runnerApiKey?.trim()),
       hasBackendAudience: Boolean(this.properties.backendAudience?.trim()),
     };
+  }
+
+  private parseYearCandidate(value: unknown): number | undefined {
+    const minYear = 1900;
+    const maxYear = 2100;
+    if (typeof value === 'number' && Number.isInteger(value) && value >= minYear && value <= maxYear) {
+      return value;
+    }
+    if (typeof value === 'string' && /^-?\d+$/.test(value.trim())) {
+      const parsed = Number.parseInt(value.trim(), 10);
+      if (parsed >= minYear && parsed <= maxYear) {
+        return parsed;
+      }
+    }
+    return undefined;
+  }
+
+  private resolveHostPageYear(): number | undefined {
+    const pageContext = this.context?.pageContext as any;
+    const candidates: unknown[] = [
+      pageContext?.listItem?.getValueByName?.('Year'),
+      pageContext?.listItem?.fieldValues?.Year,
+      pageContext?.listItem?.fieldValuesAsText?.Year,
+      pageContext?.listItem?.Year,
+      pageContext?.legacyPageContext?.Year,
+      pageContext?.legacyPageContext?.year,
+    ];
+
+    for (const candidate of candidates) {
+      const parsed = this.parseYearCandidate(candidate);
+      if (parsed !== undefined) {
+        return parsed;
+      }
+    }
+    return undefined;
   }
 
   private renderErrorState(title: string, detail: string, diagnostics: Record<string, unknown>): void {
@@ -264,6 +302,10 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
         runtimeConfig.webPartId = (this.manifest as any).id;
         runtimeConfig.webPartProperties = this.properties as Record<string, unknown>;
         runtimeConfig.assetBaseUrl = this._assetBaseUrl;
+        const hostPageYear = this.resolveHostPageYear();
+        if (hostPageYear !== undefined) {
+          runtimeConfig.hostPageYear = hostPageYear;
+        }
       } catch {
         // Runtime constants not defined — app will fall back to Vite env or defaults
       }
@@ -461,6 +503,29 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
                     label: 'Webpart heading',
                     description: 'Override the default heading displayed above the governance workspace.',
                     placeholder: 'HB Kudos Approval Companion',
+                  }),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (webPartId === PROJECT_SITES_WEBPART_ID) {
+      return {
+        pages: [
+          {
+            header: { description: 'Project Sites scope settings' },
+            groups: [
+              {
+                groupName: 'Year context',
+                groupFields: [
+                  PropertyPaneTextField('yearOverride', {
+                    label: 'Year override',
+                    description:
+                      'Optional explicit year scope. Leave blank or set 0 to follow the host page Year context.',
+                    placeholder: '0',
                   }),
                 ],
               },
