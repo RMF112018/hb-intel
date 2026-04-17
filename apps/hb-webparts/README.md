@@ -12,7 +12,7 @@ This package is **Lane A** (Homepage / Page-Canvas Product) in the [three-lane S
 - Generic SPFx domain-app composition patterns
 - Shared UI primitives (owned by `@hbc/ui-kit`)
 
-## Homepage Webparts (10)
+## Homepage Webparts (12)
 
 | Zone | Webpart | Manifest ID | Folder |
 |------|---------|-------------|--------|
@@ -26,6 +26,8 @@ This package is **Lane A** (Homepage / Page-Canvas Product) in the [three-lane S
 | Operational | Project / Portfolio Spotlight | `8370ab0c-...` | `src/webparts/projectPortfolioSpotlight/` |
 | Operational | Safety & Field Excellence | `89ca5ff3-...` | `src/webparts/safetyFieldExcellence/` |
 | Discovery | Smart Search / Wayfinding | `11d72b36-...` | `src/webparts/smartSearchWayfinding/` |
+| Admin | Hero Banner Admin | `23d22f2d-...` | `src/webparts/hbHeroBannerAdmin/` |
+| Admin | Priority Actions Rail Admin | `a7c91e34-...` | `src/webparts/priorityActionsRailAdmin/` |
 
 Each webpart folder contains a manifest file, an `index.ts` barrel, and a React component.
 
