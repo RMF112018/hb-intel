@@ -28,6 +28,7 @@ import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import { buildHeroArticleContent } from './webparts/hbSignatureHero/articleConfig.js';
 import { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
 import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmin.js';
+import { PriorityActionsRailAdmin } from './webparts/priorityActionsRailAdmin/PriorityActionsRailAdmin.js';
 import { HbHomepage } from './webparts/hbHomepage/HbHomepage.js';
 import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract.js';
 import { PnpOps } from './webparts/pnp/PnpOps.js';
@@ -115,6 +116,11 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // HbHeroBanner webpart.
   '23d22f2d-7a15-4031-ab64-2454898bfd44': ({ siteUrl }) =>
     createElement(HbHeroBannerAdmin, { siteUrl }),
+  // Phase-02 Prompt-06: Priority Actions Rail Admin — authoring surface
+  // for the Priority Actions command band. Reads/writes both config and
+  // items lists consumed by the public PriorityActionsRail webpart.
+  'a7c91e34-5f28-4d3b-b6e0-8d1f42a9c7b5': ({ siteUrl }) =>
+    createElement(PriorityActionsRailAdmin, { siteUrl }),
   // HB Homepage — composed orchestrator rendering CompanyPulse,
   // LeadershipMessage, ProjectPortfolioSpotlight, PeopleCulturePublic,
   // and HbKudos in a single shell. hbSignatureHero remains independent.

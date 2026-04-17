@@ -1,0 +1,361 @@
+/**
+ * PriorityActionsRailAdmin — Admin authoring surface styles
+ * Phase 02 — Command-band admin webpart
+ */
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  max-width: 960px;
+  padding: 16px 0;
+}
+
+/* ── Section ──────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid rgba(34, 83, 145, 0.10);
+  border-radius: 8px;
+}
+
+.sectionHeading {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #225391;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(34, 83, 145, 0.08);
+}
+
+/* ── Form fields ──────────────────────────────────────── */
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldRowInline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.help {
+  font-size: 0.75rem;
+  color: rgba(26, 26, 26, 0.55);
+}
+
+.input {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 6px 10px;
+  border: 1px solid rgba(34, 83, 145, 0.18);
+  border-radius: 4px;
+  background: #fff;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.input:focus {
+  border-color: #225391;
+  box-shadow: 0 0 0 1px rgba(34, 83, 145, 0.15);
+}
+
+.inputSmall {
+  width: 80px;
+}
+
+.select {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 6px 10px;
+  border: 1px solid rgba(34, 83, 145, 0.18);
+  border-radius: 4px;
+  background: #fff;
+  color: #1a1a1a;
+  outline: none;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+
+/* ── Item list ────────────────────────────────────────── */
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(34, 83, 145, 0.02);
+  border: 1px solid rgba(34, 83, 145, 0.08);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.itemCard:hover {
+  background: rgba(34, 83, 145, 0.05);
+}
+
+.itemCardSelected {
+  border-color: #225391;
+  background: rgba(34, 83, 145, 0.06);
+}
+
+.itemCardTitle {
+  flex: 1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #225391;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.itemCardMeta {
+  font-size: 0.6875rem;
+  color: rgba(26, 26, 26, 0.5);
+  flex-shrink: 0;
+}
+
+.itemCardActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.primaryButton {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #225391;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #1a4070;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primaryButton:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.secondaryButton {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid rgba(34, 83, 145, 0.2);
+  border-radius: 6px;
+  background: none;
+  color: #225391;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: rgba(34, 83, 145, 0.05);
+}
+
+.secondaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryButton:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+.dangerButton {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 1px solid rgba(196, 54, 42, 0.2);
+  border-radius: 4px;
+  background: none;
+  color: #c4362a;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: rgba(196, 54, 42, 0.06);
+}
+
+.smallButton {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 1px solid rgba(34, 83, 145, 0.15);
+  border-radius: 4px;
+  background: none;
+  color: #225391;
+  cursor: pointer;
+}
+
+.smallButton:hover:not(:disabled) {
+  background: rgba(34, 83, 145, 0.05);
+}
+
+/* ── Status banners ───────────────────────────────────── */
+.statusBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.statusSuccess {
+  background: rgba(22, 128, 72, 0.06);
+  border: 1px solid rgba(22, 128, 72, 0.2);
+  color: #168048;
+}
+
+.statusError {
+  background: rgba(196, 54, 42, 0.05);
+  border: 1px solid rgba(196, 54, 42, 0.2);
+  color: #c4362a;
+}
+
+.statusInfo {
+  background: rgba(34, 83, 145, 0.04);
+  border: 1px solid rgba(34, 83, 145, 0.12);
+  color: #225391;
+}
+
+.statusWarning {
+  background: rgba(229, 126, 70, 0.06);
+  border: 1px solid rgba(229, 126, 70, 0.2);
+  color: #b5622e;
+}
+
+/* ── Validation summary ───────────────────────────────── */
+.validationSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.validationIssue {
+  font-size: 0.8125rem;
+  color: #c4362a;
+  padding: 4px 0;
+}
+
+/* ── Preview pane ─────────────────────────────────────── */
+.previewPane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewHeading {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #225391;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.previewDeviceBar {
+  display: flex;
+  gap: 4px;
+}
+
+.previewFrame {
+  border: 1px solid rgba(34, 83, 145, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(34, 83, 145, 0.015);
+}
+
+/* ── Discard dialog ───────────────────────────────────── */
+.discardDialog {
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid rgba(196, 54, 42, 0.15);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Permission banner ────────────────────────────────── */
+.permissionBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: rgba(229, 126, 70, 0.06);
+  border: 1px solid rgba(229, 126, 70, 0.15);
+  color: #b5622e;
+}
+
+/* ── Reduced motion ───────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .primaryButton,
+  .secondaryButton,
+  .dangerButton,
+  .itemCard {
+    transition: none !important;
+  }
+}

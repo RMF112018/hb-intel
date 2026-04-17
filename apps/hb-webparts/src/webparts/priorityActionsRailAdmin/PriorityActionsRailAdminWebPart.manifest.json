@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/entry.schema.json",
+  "id": "a7c91e34-5f28-4d3b-b6e0-8d1f42a9c7b5",
+  "alias": "PriorityActionsRailAdminWebPart",
+  "componentType": "WebPart",
+  "version": "0.1.0.0",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart"],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "HB Intel" },
+      "title": { "default": "Priority Actions Rail Admin" },
+      "description": {
+        "default": "Site-admin authoring surface for the HB Central homepage Priority Actions Rail. Hosted on the HBCentral Homepage-Admin page. Reads and writes the canonical Priority Actions Band Config and Priority Actions Band Items lists; invalidates the public cache on save. Provides structured draft editing, live preview against the production surface, validation, reorder, archive, dirty-state awareness with explicit discard guard, and read-after-write confirmation."
+      },
+      "officeFabricIconFontName": "TaskList",
+      "hiddenFromToolbox": false,
+      "properties": {}
+    }
+  ]
+}
