@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { getPresetOrDefault, APPROVED_PRESETS } from './presetLibrary.js';
+import { APPROVED_PRESETS } from './presetLibrary.js';
 import { parseShellLayout } from './shellValidation.js';
+import { OCCUPANT_REGISTRY } from './occupantRegistry.js';
 import {
   SHELL_PROTECTED_DECISIONS,
   PROTECTED_ENTRY_STATE_RULES,
@@ -8,7 +9,60 @@ import {
 } from './protectedDecisions.js';
 import type { OccupantId, ShellDiagnostic, ShellLayoutState } from './shellTypes.js';
 
+// =============================================================================
+// Versioned shell layout policy — persisted boundary contract
+// -----------------------------------------------------------------------------
+// This module is the authoritative persisted-input boundary for the HB
+// Homepage shell. Any future maintainer control panel must write through
+// this contract, and the shell will only ever read through this contract.
+//
+// Versioning:
+//   - PERSISTED_STATE_VERSION is the current canonical schema version.
+//   - Any payload not matching the current version must go through
+//     `migratePersistedState` first. Today there is only v1; the migration
+//     seam exists so a v2 schema may be introduced without re-plumbing
+//     every call site.
+//
+// What MAY be persisted (bounded-configurable surface):
+//   - presetId (must be in APPROVED_PRESETS)
+//   - occupantVisibility (keyed by known OccupantId; gated by the
+//     occupant's visibilityEligibility metadata from occupantRegistry.ts)
+//   - bandOverrides (reorder/reassign within each occupant's reorderDomain)
+//   - compactPreferences (per-occupant compact/standard hint)
+//
+// What MUST NOT be persisted (code-governed):
+//   - any key in SHELL_PROTECTED_DECISIONS
+//   - any key in PROTECTED_ENTRY_STATE_RULES
+//   - breakpoint thresholds, column-rule state, entry-stack budgets
+//   - occupant prominence ceilings, comfort ranges, allowed slot roles
+//   - preset library membership (presets are code-authored)
+//
+// Rejection taxonomy:
+//   See PERSISTED_REJECTION_CODES below. Every rejection returned by
+//   sanitization / preview carries a stable code consumable by tooling.
+// =============================================================================
+
 export const PERSISTED_STATE_VERSION = 1 as const;
+export type PersistedStateVersion = typeof PERSISTED_STATE_VERSION;
+
+export const PERSISTED_REJECTION_CODES = {
+  SCHEMA_REJECTED: 'PERSISTED_STATE_SCHEMA_REJECTED',
+  UNSUPPORTED_VERSION: 'PERSISTED_UNSUPPORTED_VERSION',
+  UNKNOWN_PRESET: 'PERSISTED_UNKNOWN_PRESET',
+  UNKNOWN_OCCUPANT: 'PERSISTED_UNKNOWN_OCCUPANT',
+  PROHIBITED_PAIRING: 'PERSISTED_PROHIBITED_PAIRING',
+  VISIBILITY_NOT_ELIGIBLE: 'PERSISTED_VISIBILITY_NOT_ELIGIBLE',
+  REORDER_DOMAIN_VIOLATION: 'PERSISTED_REORDER_DOMAIN_VIOLATION',
+  PROTECTED_KEY_PRESENT: 'PERSISTED_PROTECTED_KEY_PRESENT',
+} as const;
+
+export type PersistedRejectionCode =
+  (typeof PERSISTED_REJECTION_CODES)[keyof typeof PERSISTED_REJECTION_CODES];
+
+export interface PersistedRejection {
+  readonly code: PersistedRejectionCode;
+  readonly message: string;
+}
 
 export const PersistedShellStateSchema = z.object({
   version: z.literal(PERSISTED_STATE_VERSION),
@@ -43,6 +97,43 @@ export type PersistedShellState = z.infer<typeof PersistedShellStateSchema>;
 export interface SanitizationResult {
   readonly sanitized: PersistedShellState;
   readonly violations: readonly string[];
+  readonly rejections: readonly PersistedRejection[];
+}
+
+function reject(code: PersistedRejectionCode, message: string): PersistedRejection {
+  return { code, message };
+}
+
+/**
+ * Migration seam. Accepts a raw value and normalizes it toward the current
+ * `PERSISTED_STATE_VERSION`. Today, the only valid input version is 1 so
+ * the function is a pass-through guard. When a v2 schema is introduced,
+ * add a branch here that rewrites v1 payloads into the v2 shape.
+ */
+export function migratePersistedState(
+  raw: unknown,
+): { readonly migrated: unknown; readonly rejection?: PersistedRejection } {
+  if (raw === null || raw === undefined || typeof raw !== 'object') {
+    return { migrated: raw };
+  }
+
+  const version = (raw as { version?: unknown }).version;
+  if (version === undefined || version === PERSISTED_STATE_VERSION) {
+    return { migrated: raw };
+  }
+
+  if (typeof version === 'number' && version < PERSISTED_STATE_VERSION) {
+    // No prior versions exist yet. When one does, migrate here.
+    return { migrated: raw };
+  }
+
+  return {
+    migrated: raw,
+    rejection: reject(
+      PERSISTED_REJECTION_CODES.UNSUPPORTED_VERSION,
+      `Persisted state version ${String(version)} is newer than the supported version ${PERSISTED_STATE_VERSION}. Payload will be rejected.`,
+    ),
+  };
 }
 
 export function createDefaultPersistedState(): PersistedShellState {
@@ -53,19 +144,63 @@ export function createDefaultPersistedState(): PersistedShellState {
 }
 
 export function sanitizePersistedState(input: PersistedShellState): SanitizationResult {
-  const violations: string[] = [];
+  const rejections: PersistedRejection[] = [];
   let sanitized = { ...input };
 
   if (!APPROVED_PRESETS.has(sanitized.presetId)) {
-    violations.push(`preset "${sanitized.presetId}" is not in the approved preset library`);
+    rejections.push(
+      reject(
+        PERSISTED_REJECTION_CODES.UNKNOWN_PRESET,
+        `preset "${sanitized.presetId}" is not in the approved preset library`,
+      ),
+    );
     sanitized = { ...sanitized, presetId: 'default-v2' };
   }
 
-  // Prohibited-pairing enforcement: persisted payloads MUST NOT be able
-  // to force a pairing that shell policy forbids. Detect each violation
-  // and strip the second offending occupantId (set to empty string so
-  // `parseShellLayout`'s override-merge nulls it out) so the shell still
-  // renders rather than failing closed.
+  if (sanitized.occupantVisibility) {
+    const sanitizedVisibility: Record<string, 'visible' | 'hidden'> = {};
+    for (const [id, state] of Object.entries(sanitized.occupantVisibility)) {
+      const descriptor = OCCUPANT_REGISTRY.get(id as OccupantId);
+      if (!descriptor) {
+        rejections.push(
+          reject(
+            PERSISTED_REJECTION_CODES.UNKNOWN_OCCUPANT,
+            `occupantVisibility references unknown occupant "${id}"; dropping entry.`,
+          ),
+        );
+        continue;
+      }
+      if (state === 'hidden' && !descriptor.visibilityEligibility.hideableByMaintainer) {
+        rejections.push(
+          reject(
+            PERSISTED_REJECTION_CODES.VISIBILITY_NOT_ELIGIBLE,
+            `occupant "${id}" is not hideable by maintainers; visibility entry ignored.`,
+          ),
+        );
+        continue;
+      }
+      sanitizedVisibility[id] = state;
+    }
+    sanitized = { ...sanitized, occupantVisibility: sanitizedVisibility };
+  }
+
+  if (sanitized.compactPreferences) {
+    const sanitizedCompact: Record<string, 'compact' | 'standard'> = {};
+    for (const [id, pref] of Object.entries(sanitized.compactPreferences)) {
+      if (!OCCUPANT_REGISTRY.has(id as OccupantId)) {
+        rejections.push(
+          reject(
+            PERSISTED_REJECTION_CODES.UNKNOWN_OCCUPANT,
+            `compactPreferences references unknown occupant "${id}"; dropping entry.`,
+          ),
+        );
+        continue;
+      }
+      sanitizedCompact[id] = pref;
+    }
+    sanitized = { ...sanitized, compactPreferences: sanitizedCompact };
+  }
+
   const prohibitedPairings = SHELL_PROTECTED_DECISIONS.prohibitedPairings;
   if (sanitized.bandOverrides?.length) {
     sanitized = {
@@ -78,10 +213,14 @@ export function sanitizePersistedState(input: PersistedShellState): Sanitization
           .filter((id): id is string => id !== undefined && id !== '');
 
         let slotsCopy = override.slots;
+
         for (const [a, b] of prohibitedPairings) {
           if (occupantIds.includes(a) && occupantIds.includes(b)) {
-            violations.push(
-              `override for band "${override.bandId}" contains prohibited pairing ${a} + ${b}; stripping "${b}" to honor PROTECTED shell pairing rule.`,
+            rejections.push(
+              reject(
+                PERSISTED_REJECTION_CODES.PROHIBITED_PAIRING,
+                `override for band "${override.bandId}" contains prohibited pairing ${a} + ${b}; stripping "${b}".`,
+              ),
             );
             slotsCopy = slotsCopy.map((s) =>
               s.occupantId === b ? { ...s, occupantId: '' } : s,
@@ -94,7 +233,11 @@ export function sanitizePersistedState(input: PersistedShellState): Sanitization
     };
   }
 
-  return { sanitized, violations };
+  return {
+    sanitized,
+    rejections,
+    violations: rejections.map((r) => `[${r.code}] ${r.message}`),
+  };
 }
 
 export function serializeShellState(
@@ -117,12 +260,28 @@ export function hydratePersistedState(raw: unknown): ShellLayoutState {
     return parseShellLayout(undefined);
   }
 
-  const parseResult = PersistedShellStateSchema.safeParse(raw);
+  const { migrated, rejection: migrationRejection } = migratePersistedState(raw);
+  if (migrationRejection) {
+    const fallback = parseShellLayout(undefined);
+    return {
+      ...fallback,
+      diagnostics: [
+        ...fallback.diagnostics,
+        {
+          severity: 'error',
+          code: migrationRejection.code,
+          message: migrationRejection.message,
+        },
+      ],
+    };
+  }
+
+  const parseResult = PersistedShellStateSchema.safeParse(migrated);
   if (!parseResult.success) {
     const fallback = parseShellLayout(undefined);
     const injected: ShellDiagnostic = {
       severity: 'error',
-      code: 'PERSISTED_STATE_SCHEMA_REJECTED',
+      code: PERSISTED_REJECTION_CODES.SCHEMA_REJECTED,
       message: `Persisted shell state failed schema validation: ${parseResult.error.message}. Using default preset.`,
     };
     return { ...fallback, diagnostics: [...fallback.diagnostics, injected] };
@@ -209,6 +368,122 @@ type _PersistedStateCannotNameProtectedEntryStateRule = Extract<
     };
 const _persistedStateInvariantCheck: _PersistedStateCannotNameProtectedEntryStateRule = true;
 void _persistedStateInvariantCheck;
+
+export interface PersistedPreviewResult {
+  readonly accepted: boolean;
+  readonly rejections: readonly PersistedRejection[];
+  readonly normalized?: PersistedShellState;
+  readonly layoutState?: ShellLayoutState;
+}
+
+/**
+ * Dry-run the persisted policy pipeline against a raw payload. Returns a
+ * structured preview a future control panel can display before writing.
+ * No side effects; safe to call with any input.
+ */
+export function previewPersistedState(raw: unknown): PersistedPreviewResult {
+  if (raw === null || raw === undefined) {
+    return { accepted: true, rejections: [], normalized: createDefaultPersistedState() };
+  }
+
+  const { rejection: migrationRejection, migrated } = migratePersistedState(raw);
+  if (migrationRejection) {
+    return { accepted: false, rejections: [migrationRejection] };
+  }
+
+  const parseResult = PersistedShellStateSchema.safeParse(migrated);
+  if (!parseResult.success) {
+    return {
+      accepted: false,
+      rejections: [
+        reject(
+          PERSISTED_REJECTION_CODES.SCHEMA_REJECTED,
+          `Persisted shell state failed schema validation: ${parseResult.error.message}.`,
+        ),
+      ],
+    };
+  }
+
+  const { sanitized, rejections: sanitizeRejections } = sanitizePersistedState(parseResult.data);
+  const layoutState = parseShellLayout({
+    presetId: sanitized.presetId,
+    bandOverrides: sanitized.bandOverrides,
+  });
+
+  const layoutErrorRejections: PersistedRejection[] = layoutState.diagnostics
+    .filter((d) => d.severity === 'error')
+    .map((d) => {
+      if (d.code === 'REORDER_DOMAIN_VIOLATION') {
+        return reject(PERSISTED_REJECTION_CODES.REORDER_DOMAIN_VIOLATION, d.message);
+      }
+      if (d.code === 'OCCUPANT_BAND_INCOMPATIBLE') {
+        return reject(PERSISTED_REJECTION_CODES.PROTECTED_KEY_PRESENT, d.message);
+      }
+      return reject(PERSISTED_REJECTION_CODES.SCHEMA_REJECTED, `[${d.code}] ${d.message}`);
+    });
+
+  const rejections = [...sanitizeRejections, ...layoutErrorRejections];
+
+  return {
+    accepted: rejections.length === 0,
+    rejections,
+    normalized: sanitized,
+    layoutState,
+  };
+}
+
+/**
+ * Canonical persisted-state examples. These are the authoritative
+ * allowed / normalized / rejected shapes a future control panel and any
+ * documentation must refer to.
+ */
+export const PERSISTED_POLICY_EXAMPLES = {
+  allowed: {
+    version: PERSISTED_STATE_VERSION,
+    presetId: 'editorial-focus-v1',
+    bandOverrides: [
+      {
+        bandId: 'band-operational-spotlight',
+        slots: [{ slotId: 'slot-company-pulse', role: 'secondary' }],
+      },
+    ],
+    compactPreferences: { 'company-pulse': 'standard' },
+  } satisfies PersistedShellState,
+
+  normalized: {
+    version: PERSISTED_STATE_VERSION,
+    presetId: 'default-v2',
+  } satisfies PersistedShellState,
+
+  rejectedExamples: {
+    unknownPreset: {
+      version: PERSISTED_STATE_VERSION,
+      presetId: 'not-a-real-preset',
+    } satisfies PersistedShellState,
+
+    prohibitedPairing: {
+      version: PERSISTED_STATE_VERSION,
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-people-culture',
+          slots: [
+            { slotId: 's1', occupantId: 'people-culture-public' },
+            { slotId: 's2', occupantId: 'hb-kudos' },
+          ],
+        },
+      ],
+    } satisfies PersistedShellState,
+
+    hidingNonHideable: {
+      version: PERSISTED_STATE_VERSION,
+      presetId: 'default-v2',
+      occupantVisibility: { 'project-portfolio-spotlight': 'hidden' },
+    } satisfies PersistedShellState,
+
+    unsupportedVersion: { version: 99, presetId: 'default-v2' },
+  },
+} as const;
 
 export const GOVERNANCE_BOUNDARY = {
   systemAuthored: {

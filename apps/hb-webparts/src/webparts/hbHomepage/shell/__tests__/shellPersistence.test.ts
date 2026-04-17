@@ -5,7 +5,11 @@ import {
   serializeShellState,
   sanitizePersistedState,
   applyOccupantVisibility,
+  migratePersistedState,
+  previewPersistedState,
   PERSISTED_STATE_VERSION,
+  PERSISTED_REJECTION_CODES,
+  PERSISTED_POLICY_EXAMPLES,
   GOVERNANCE_BOUNDARY,
 } from '../shellPersistence.js';
 import { parseShellLayout } from '../shellValidation.js';
@@ -63,7 +67,7 @@ describe('hydratePersistedState', () => {
     expect(result.diagnostics.filter((d) => d.severity === 'error')).toHaveLength(0);
   });
 
-  it('applies occupant visibility during hydration', () => {
+  it('rejects hiding non-hideable occupants during hydration (surfaced as sanitization diagnostic)', () => {
     const result = hydratePersistedState({
       version: 1,
       presetId: 'default-v2',
@@ -72,7 +76,12 @@ describe('hydratePersistedState', () => {
     const kudosSlot = result.preset.bands
       .flatMap((b) => b.slots)
       .find((s) => s.id === 'slot-hb-kudos');
-    expect(kudosSlot?.occupantId).toBeNull();
+    expect(kudosSlot?.occupantId).toBe('hb-kudos');
+    expect(
+      result.diagnostics.some(
+        (d) => d.code === 'PERSISTED_STATE_SANITIZED' && d.message.includes('hb-kudos'),
+      ),
+    ).toBe(true);
   });
 
   it('sanitizes unknown preset to default', () => {
@@ -181,9 +190,18 @@ describe('hydratePersistedState — diagnostic surfacing', () => {
   });
 
   it('surfaces schema-rejection as a PERSISTED_STATE_SCHEMA_REJECTED error diagnostic', () => {
-    const result = hydratePersistedState({ version: 2, presetId: 123 });
+    const result = hydratePersistedState({ version: 1, presetId: 123 });
     const rejection = result.diagnostics.find(
       (d) => d.code === 'PERSISTED_STATE_SCHEMA_REJECTED',
+    );
+    expect(rejection).toBeDefined();
+    expect(rejection?.severity).toBe('error');
+  });
+
+  it('surfaces unsupported-version as a PERSISTED_UNSUPPORTED_VERSION error diagnostic', () => {
+    const result = hydratePersistedState({ version: 2, presetId: 'default-v2' });
+    const rejection = result.diagnostics.find(
+      (d) => d.code === 'PERSISTED_UNSUPPORTED_VERSION',
     );
     expect(rejection).toBeDefined();
     expect(rejection?.severity).toBe('error');
@@ -247,6 +265,132 @@ describe('shellValidation — override rejection diagnostics', () => {
     expect(
       result.diagnostics.some((d) => d.code === 'INVALID_OVERRIDE_COLUMN_SPAN'),
     ).toBe(true);
+  });
+});
+
+describe('migratePersistedState', () => {
+  it('passes through v1 payloads unchanged', () => {
+    const { migrated, rejection } = migratePersistedState({
+      version: 1,
+      presetId: 'default-v2',
+    });
+    expect(rejection).toBeUndefined();
+    expect((migrated as { version: number }).version).toBe(1);
+  });
+
+  it('rejects newer-than-supported version with a typed rejection', () => {
+    const { rejection } = migratePersistedState({ version: 99, presetId: 'default-v2' });
+    expect(rejection?.code).toBe(PERSISTED_REJECTION_CODES.UNSUPPORTED_VERSION);
+  });
+
+  it('passes through non-object input (schema layer catches it later)', () => {
+    const { migrated, rejection } = migratePersistedState('garbage');
+    expect(migrated).toBe('garbage');
+    expect(rejection).toBeUndefined();
+  });
+});
+
+describe('previewPersistedState (dry-run)', () => {
+  it('accepts the canonical allowed example', () => {
+    const result = previewPersistedState(PERSISTED_POLICY_EXAMPLES.allowed);
+    expect(result.accepted).toBe(true);
+    expect(result.rejections).toHaveLength(0);
+    expect(result.layoutState).toBeDefined();
+  });
+
+  it('rejects unknown-preset example with UNKNOWN_PRESET code', () => {
+    const result = previewPersistedState(PERSISTED_POLICY_EXAMPLES.rejectedExamples.unknownPreset);
+    expect(result.accepted).toBe(false);
+    expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.UNKNOWN_PRESET)).toBe(true);
+  });
+
+  it('rejects prohibited-pairing example with PROHIBITED_PAIRING code', () => {
+    const result = previewPersistedState(PERSISTED_POLICY_EXAMPLES.rejectedExamples.prohibitedPairing);
+    expect(result.accepted).toBe(false);
+    expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.PROHIBITED_PAIRING)).toBe(true);
+  });
+
+  it('rejects hiding a non-hideable occupant with VISIBILITY_NOT_ELIGIBLE', () => {
+    const result = previewPersistedState(PERSISTED_POLICY_EXAMPLES.rejectedExamples.hidingNonHideable);
+    expect(result.accepted).toBe(false);
+    expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.VISIBILITY_NOT_ELIGIBLE)).toBe(true);
+  });
+
+  it('rejects unsupported-version example with UNSUPPORTED_VERSION', () => {
+    const result = previewPersistedState(PERSISTED_POLICY_EXAMPLES.rejectedExamples.unsupportedVersion);
+    expect(result.accepted).toBe(false);
+    expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.UNSUPPORTED_VERSION)).toBe(true);
+  });
+
+  it('accepts undefined/null as no-op (default state)', () => {
+    expect(previewPersistedState(undefined).accepted).toBe(true);
+    expect(previewPersistedState(null).accepted).toBe(true);
+  });
+
+  it('is side-effect-free: calling it twice with the same input yields identical result', () => {
+    const a = previewPersistedState(PERSISTED_POLICY_EXAMPLES.allowed);
+    const b = previewPersistedState(PERSISTED_POLICY_EXAMPLES.allowed);
+    expect(a.accepted).toBe(b.accepted);
+    expect(a.rejections.length).toBe(b.rejections.length);
+  });
+});
+
+describe('persisted rejection taxonomy coverage', () => {
+  it('drops unknown occupant IDs in occupantVisibility with UNKNOWN_OCCUPANT code', () => {
+    const { sanitized, rejections } = sanitizePersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      occupantVisibility: { 'not-a-real-occupant': 'hidden' },
+    });
+    expect(rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.UNKNOWN_OCCUPANT)).toBe(true);
+    expect(sanitized.occupantVisibility).toEqual({});
+  });
+
+  it('drops unknown occupant IDs in compactPreferences with UNKNOWN_OCCUPANT code', () => {
+    const { rejections } = sanitizePersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      compactPreferences: { 'mystery-id': 'compact' },
+    });
+    expect(rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.UNKNOWN_OCCUPANT)).toBe(true);
+  });
+
+  it('rejects visibility changes for non-hideable occupants', () => {
+    const { sanitized, rejections } = sanitizePersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      occupantVisibility: { 'company-pulse': 'hidden' },
+    });
+    expect(rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.VISIBILITY_NOT_ELIGIBLE)).toBe(true);
+    expect(sanitized.occupantVisibility).toEqual({});
+  });
+
+  it('surfaces REORDER_DOMAIN_VIOLATION through previewPersistedState when applying the override', () => {
+    const result = previewPersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-operational-spotlight',
+          slots: [
+            {
+              slotId: 'slot-project-portfolio-spotlight',
+              occupantId: 'safety-field-excellence',
+            },
+          ],
+        },
+      ],
+    });
+    expect(result.accepted).toBe(false);
+    expect(
+      result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.REORDER_DOMAIN_VIOLATION),
+    ).toBe(true);
+  });
+
+  it('ensures all rejection codes are distinct and string-valued', () => {
+    const values = Object.values(PERSISTED_REJECTION_CODES);
+    expect(new Set(values).size).toBe(values.length);
+    for (const v of values) expect(typeof v).toBe('string');
   });
 });
 
