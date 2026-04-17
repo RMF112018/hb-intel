@@ -40,9 +40,32 @@ export {
 } from './breakpointPolicy.js';
 export type { ContainerDimensions } from './breakpointPolicy.js';
 
-export { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
+export {
+  CONFIGURABLE_DECISIONS,
+  PROTECTED_ENTRY_STATE_RULES,
+  SHELL_PROTECTED_DECISIONS,
+  isConfigurableDecision,
+  isProtectedEntryStateRule,
+} from './protectedDecisions.js';
+export type { ConfigurableDecision, ProtectedEntryStateRule } from './protectedDecisions.js';
 
 export { DEFAULT_PRESET } from './defaultPreset.js';
+
+export {
+  APPROVED_PRESETS,
+  EDITORIAL_FOCUS_PRESET,
+  getPreset,
+  getPresetOrDefault,
+} from './presetLibrary.js';
+
+export {
+  PersistedShellStateSchema,
+  applyOccupantVisibility,
+  createDefaultPersistedState,
+  hydratePersistedState,
+  serializeShellState,
+} from './shellPersistence.js';
+export type { PersistedShellState } from './shellPersistence.js';
 
 export {
   extractModuleConfigSlices,

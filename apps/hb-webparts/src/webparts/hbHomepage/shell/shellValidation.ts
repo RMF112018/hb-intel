@@ -1,4 +1,5 @@
 import { DEFAULT_PRESET } from './defaultPreset.js';
+import { getPresetOrDefault } from './presetLibrary.js';
 import { OCCUPANT_REGISTRY, areOccupantsPairableInBand } from './occupantRegistry.js';
 import { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
 import { ModuleConfigSlicesSchema, ShellLayoutInputSchema, ShellPresetSchema } from './shellSchema.js';
@@ -216,18 +217,15 @@ export function parseShellLayout(input: unknown): ShellLayoutState {
 
   const layoutInput = layoutResult.data;
 
-  let basePreset: ShellPreset;
-  if (!layoutInput.presetId || layoutInput.presetId === DEFAULT_PRESET.id) {
-    basePreset = DEFAULT_PRESET;
-  } else {
+  const basePreset = getPresetOrDefault(layoutInput.presetId);
+  if (layoutInput.presetId && basePreset.id !== layoutInput.presetId) {
     diagnostics.push(
       diagnostic(
         'warning',
         'UNKNOWN_PRESET',
-        `Preset "${layoutInput.presetId}" is not recognized. Falling back to default.`,
+        `Preset "${layoutInput.presetId}" is not recognized. Falling back to "${basePreset.id}".`,
       ),
     );
-    basePreset = DEFAULT_PRESET;
   }
 
   const withOverrides = applyOverrides(basePreset, layoutInput, diagnostics);
