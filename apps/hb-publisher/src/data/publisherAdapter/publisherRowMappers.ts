@@ -6,6 +6,14 @@
  * surfacing an error.
  *
  * Authority: docs/architecture/plans/MASTER/spfx/publisher/architecture/03-Exact-Field-Definitions.md
+ *
+ * Wave-03 Prompt-03 — read-diagnostics pattern:
+ *   Each mapper also exposes a companion `describeXxxRowRejection(raw)`
+ *   function that returns a short, deterministic reason string listing
+ *   which tenant-required columns were missing on a rejected row. The
+ *   reason is consumed by the repositories' `ReadDiagnosticsSink` so
+ *   callers can distinguish "no rows existed" from "rows existed but
+ *   were rejected" without silent data loss.
  */
 
 import type {
@@ -153,6 +161,246 @@ const publishStatus = one<PublishStatus>(PUBLISH_STATUS_VALUES);
 const syncStatus = one<SyncStatus>(SYNC_STATUS_VALUES);
 const errorOperation = one<PublishingErrorOperation>(PUBLISHING_ERROR_OPERATION_VALUES);
 const promotionRuleScope = one<PromotionRuleScope>(PROMOTION_RULE_SCOPE_VALUES);
+
+/* ── Read diagnostics ────────────────────────────────────────────── */
+
+/**
+ * Canonical read-list keys covered by the publisher row-mappers. Used
+ * as the `list` discriminator on `ReadRejection` so diagnostics are
+ * joinable across repositories.
+ */
+export type PublisherReadList =
+  | 'articles'
+  | 'teamMembers'
+  | 'media'
+  | 'templateRegistry'
+  | 'pageBindings'
+  | 'workflowHistory'
+  | 'publishingErrors'
+  | 'promotionRules';
+
+/**
+ * Structured rejection record produced when a mapper refuses a raw
+ * SharePoint row. Carries enough identity to locate the row in the
+ * tenant list and a short reason listing the missing / invalid
+ * tenant-required columns.
+ */
+export interface ReadRejection {
+  readonly list: PublisherReadList;
+  readonly reason: string;
+  readonly rawItemId?: number;
+  readonly articleId?: string;
+  readonly occurredAtIso: string;
+}
+
+export interface ReadDiagnosticsSink {
+  push(rejection: Omit<ReadRejection, 'occurredAtIso'> & { occurredAtIso?: string }): void;
+  drain(): readonly ReadRejection[];
+  snapshot(): readonly ReadRejection[];
+  readonly size: () => number;
+}
+
+export function createReadDiagnosticsSink(
+  clock: () => string = () => new Date().toISOString(),
+  capacity: number = 100,
+): ReadDiagnosticsSink {
+  const entries: ReadRejection[] = [];
+  return {
+    push(rejection) {
+      const occurredAtIso = rejection.occurredAtIso ?? clock();
+      if (entries.length >= capacity) {
+        entries.shift();
+      }
+      entries.push({ ...rejection, occurredAtIso });
+    },
+    drain() {
+      const snap = entries.slice();
+      entries.length = 0;
+      return snap;
+    },
+    snapshot() {
+      return entries.slice();
+    },
+    size() {
+      return entries.length;
+    },
+  };
+}
+
+/**
+ * Best-effort identity probe on a raw row. Returns the numeric list
+ * `Id` column when present so support staff can locate the row in
+ * the tenant list. Never throws.
+ */
+function probeRawItemId(raw: Record<string, unknown>): number | undefined {
+  const id = raw['Id'] ?? raw['ID'] ?? raw['id'];
+  if (typeof id === 'number' && Number.isFinite(id)) return id;
+  if (typeof id === 'string') {
+    const n = Number(id);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+function probeArticleId(raw: Record<string, unknown>): string | undefined {
+  return str(raw['ArticleId']);
+}
+
+function missing(
+  raw: Record<string, unknown>,
+  keys: readonly string[],
+): readonly string[] {
+  const out: string[] = [];
+  for (const k of keys) {
+    if (!str(raw[k])) out.push(k);
+  }
+  return out;
+}
+
+function formatRejection(
+  prefix: string,
+  missingKeys: readonly string[],
+  extra: readonly string[] = [],
+): string {
+  const parts: string[] = [];
+  if (missingKeys.length > 0) {
+    parts.push(`missing or empty: ${missingKeys.join(', ')}`);
+  }
+  for (const e of extra) parts.push(e);
+  if (parts.length === 0) parts.push('required columns did not satisfy the tenant contract');
+  return `${prefix} — ${parts.join('; ')}`;
+}
+
+export function describeArticleRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const required = [
+    'ArticleId',
+    'Title',
+    'ArticleContentType',
+    'Destination',
+    'Slug',
+    'TemplateKey',
+    'WorkflowState',
+    'Subhead',
+    'SummaryExcerpt',
+    'BodyRichText',
+    'HeroPrimaryImageAltText',
+    'CreatedDateUtc',
+    'UpdatedDateUtc',
+  ];
+  const missingKeys = missing(raw, required);
+  const extra: string[] = [];
+  if (!url(raw['HeroPrimaryImage'])) extra.push('HeroPrimaryImage invalid or missing');
+  return formatRejection('Article row rejected', missingKeys, extra);
+}
+
+export function describeTeamMemberRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, [
+    'ArticleId',
+    'TeamMemberId',
+    'Title',
+    'DisplayName',
+  ]);
+  const extra: string[] = [];
+  const expandedPrincipal = raw['PersonPrincipal'];
+  if (!expandedPrincipal || typeof expandedPrincipal !== 'object') {
+    extra.push('PersonPrincipal not expanded (reader must $expand=PersonPrincipal)');
+  } else {
+    const exp = expandedPrincipal as { EMail?: unknown; Email?: unknown; Title?: unknown };
+    if (!str(exp.EMail) && !str(exp.Email) && !str(exp.Title)) {
+      extra.push('PersonPrincipal expanded but empty (no EMail/Title)');
+    }
+  }
+  return formatRejection('Team member row rejected', missingKeys, extra);
+}
+
+export function describeMediaRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, ['ArticleId', 'MediaId', 'Title', 'AltText']);
+  const extra: string[] = [];
+  if (!mediaRole(raw['MediaRole'])) extra.push('MediaRole invalid or missing');
+  if (!url(raw['ImageAsset'])) extra.push('ImageAsset invalid or missing');
+  return formatRejection('Media row rejected', missingKeys, extra);
+}
+
+export function describeTemplateRegistryRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, [
+    'TemplateKey',
+    'TemplateName',
+    'PageShellTemplateKey',
+    'HeroProfileKey',
+    'BodyProfileKey',
+    'RequiredFieldSetKey',
+  ]);
+  const extra: string[] = [];
+  if (bool(raw['IsActive']) === undefined) extra.push('IsActive is not boolean');
+  if (num(raw['TemplatePriority']) === undefined) extra.push('TemplatePriority is not numeric');
+  if (!articleContentTypeMany(raw['ContentTypes'])) extra.push('ContentTypes empty or invalid');
+  if (!destination(raw['Destination'])) extra.push('Destination invalid');
+  return formatRejection('Template registry row rejected', missingKeys, extra);
+}
+
+export function describePageBindingRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, [
+    'BindingId',
+    'ArticleId',
+    'Title',
+    'TargetSiteUrl',
+    'PageTemplateKey',
+  ]);
+  const extra: string[] = [];
+  if (!publishStatus(raw['PublishStatus'])) extra.push('PublishStatus invalid or missing');
+  return formatRejection('Page binding row rejected', missingKeys, extra);
+}
+
+export function describeWorkflowHistoryRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, ['HistoryId', 'ArticleId', 'Title', 'ActionDateUtc']);
+  const extra: string[] = [];
+  if (!workflowState(raw['NewState'])) extra.push('NewState invalid or missing');
+  return formatRejection('Workflow history row rejected', missingKeys, extra);
+}
+
+export function describePublishingErrorRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, ['ErrorId', 'ArticleId', 'Title', 'ErrorSummary']);
+  const extra: string[] = [];
+  if (!destination(raw['Destination'])) extra.push('Destination invalid or missing');
+  if (!errorOperation(raw['Operation'])) extra.push('Operation invalid or missing');
+  return formatRejection('Publishing error row rejected', missingKeys, extra);
+}
+
+export function describePromotionRuleRowRejection(
+  raw: Record<string, unknown>,
+): string {
+  const missingKeys = missing(raw, ['RuleId', 'Title']);
+  const extra: string[] = [];
+  if (!destination(raw['Destination'])) extra.push('Destination invalid or missing');
+  if (!promotionRuleScope(raw['Scope'])) extra.push('Scope invalid or missing');
+  if (bool(raw['IsActive']) === undefined) extra.push('IsActive is not boolean');
+  return formatRejection('Promotion rule row rejected', missingKeys, extra);
+}
+
+/** Probe a raw row for its tenant item-id and ArticleId (for diagnostics). */
+export function probeReadIdentity(raw: Record<string, unknown>): {
+  readonly rawItemId?: number;
+  readonly articleId?: string;
+} {
+  return {
+    rawItemId: probeRawItemId(raw),
+    articleId: probeArticleId(raw),
+  };
+}
 
 /* ── Row mappers ─────────────────────────────────────────────────── */
 
@@ -477,6 +725,15 @@ export function mapWorkflowHistoryRow(
     ActionDateUtc,
     ActorEmail: str(raw['ActorEmail']),
     ActionNote: str(raw['ActionNote']),
+    // Wave-03 Prompt-05 structured supersession lineage.
+    SupersededBindingId: str(raw['SupersededBindingId']),
+    SupersededPageId: str(raw['SupersededPageId']),
+    SupersededPageName: str(raw['SupersededPageName']),
+    SupersededPageUrl: url(raw['SupersededPageUrl']),
+    NewBindingId: str(raw['NewBindingId']),
+    NewPageId: str(raw['NewPageId']),
+    NewPageName: str(raw['NewPageName']),
+    NewPageUrl: url(raw['NewPageUrl']),
   };
 }
 
@@ -499,6 +756,38 @@ export function mapPublishingErrorRow(
   ) {
     return undefined;
   }
+  const FailureStage = one([
+    'resolution',
+    'composition',
+    'validation',
+    'policy',
+    'pagePublish',
+    'bindingWrite',
+    'articleSync',
+    'historyAppend',
+    'bindingLookup',
+    'pageUnpublish',
+    'bindingUpdate',
+    'articleUpdate',
+    'transition',
+  ] as const)(raw['FailureStage']);
+  const FailureContext = one([
+    'create',
+    'republish',
+    'preview',
+    'archive',
+    'withdraw',
+    'manualTransition',
+  ] as const)(raw['FailureContext']);
+  const FailureSubsystem = one([
+    'articles',
+    'pageBinding',
+    'pageLifecycle',
+    'templateRegistry',
+    'workflowHistory',
+    'readModel',
+    'orchestrator',
+  ] as const)(raw['FailureSubsystem']);
   return {
     ErrorId,
     ArticleId,
@@ -511,6 +800,10 @@ export function mapPublishingErrorRow(
     RetryStatus: one(['none', 'pending', 'resolved'] as const)(
       raw['RetryStatus'],
     ),
+    FailureStage,
+    FailureContext,
+    FailureSubsystem,
+    ActorEmail: str(raw['ActorEmail']),
   };
 }
 

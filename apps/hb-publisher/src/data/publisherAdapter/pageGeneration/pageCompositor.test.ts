@@ -64,7 +64,7 @@ function template(
     ShowTeamViewer: true,
     ShowGallery: true,
     ShowSecondaryImage: false,
-    RequiredFieldSetKey: "req-default",
+    RequiredFieldSetKey: "req-ps-inprogress-monthly-v1",
     ...over,
   } as PublisherTemplateRegistryRow;
 }

@@ -231,6 +231,15 @@ const WORKFLOW_HISTORY_FIELDS = [
   'ActionDateUtc',
   'ActorEmail',
   'ActionNote',
+  // Wave-03 Prompt-05 structured supersession lineage.
+  'SupersededBindingId',
+  'SupersededPageId',
+  'SupersededPageName',
+  'SupersededPageUrl',
+  'NewBindingId',
+  'NewPageId',
+  'NewPageName',
+  'NewPageUrl',
 ] as const;
 
 const PUBLISHING_ERRORS_FIELDS = [
@@ -243,6 +252,11 @@ const PUBLISHING_ERRORS_FIELDS = [
   'BindingId',
   'LastAttemptDateUtc',
   'RetryStatus',
+  // Wave-03 Prompt-06 structured classification.
+  'FailureStage',
+  'FailureContext',
+  'FailureSubsystem',
+  'ActorEmail',
 ] as const;
 
 const PROMOTION_RULES_FIELDS = [

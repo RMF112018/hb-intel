@@ -62,6 +62,16 @@ export interface ReadinessControllerInputs {
    * does not narrate a promotion-health headline.
    */
   readonly promotionRuleHealth?: PromotionRuleHealth;
+  /**
+   * Whether the in-memory working copy has drifted from the last
+   * saved baseline. Publish / republish resolve from saved repository
+   * state by `ArticleId`, so a dirty working copy must not publish —
+   * doing so would ship stale saved content as if it were the visible
+   * canvas. When true, Publish and Republish are gated closed and the
+   * shell routes the author to Save first. Defaults to `false` when
+   * omitted so existing callers / tests keep their current semantics.
+   */
+  readonly isDirty?: boolean;
 }
 
 export function useReadinessController(inputs: ReadinessControllerInputs) {
@@ -127,12 +137,23 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
   const preflightBlocksPublish =
     preflightBlocksWrites || authoringHealthEarly.kind === 'draftNoTemplateMatch';
 
+  // Dirty-state publish gate (Wave-03 Prompt-01 closure). The orchestrator
+  // always resolves from saved repository state by `ArticleId`. If the
+  // in-memory working copy has drifted from the saved baseline, allowing
+  // Publish or Republish would ship stale saved content while the author
+  // sees the edited canvas. Gate closed instead and route through Save.
+  // Preview is intentionally not gated — the save-and-refresh-preview
+  // path already exists for authors to bring preview forward truthfully.
+  const isDirty = !!inputs.isDirty;
+  const publishBlockedByDirty = !!articleDraft && isDirty;
+
   const publishEnabled =
     !!articleDraft &&
     !busy &&
     !unsupportedDestinationLoaded &&
     !unsupportedContentTypeLoaded &&
     !preflightBlocksPublish &&
+    !publishBlockedByDirty &&
     articleDraft.WorkflowState === 'approved' &&
     !publishBlockedByValidation;
   // Republish is the in-place update path for content that is already
@@ -147,6 +168,7 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     !unsupportedDestinationLoaded &&
     !unsupportedContentTypeLoaded &&
     !preflightBlocksPublish &&
+    !publishBlockedByDirty &&
     !!binding &&
     articleDraft.WorkflowState === 'published' &&
     !publishBlockedByValidation;
@@ -186,6 +208,7 @@ export function useReadinessController(inputs: ReadinessControllerInputs) {
     promotionSummary,
     latestValidation,
     publishBlockedByValidation,
+    publishBlockedByDirty,
     publishIntent,
     unsupportedDestinationMessage,
     unsupportedDestinationLoaded,

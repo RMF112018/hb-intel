@@ -23,6 +23,15 @@ import type { Destination } from './publisherEnums';
 import type { PublisherListDescriptor } from './publisherListDescriptors';
 import { PUBLISHER_LISTS } from './publisherListDescriptors';
 import {
+  createReadDiagnosticsSink,
+  describeArticleRowRejection,
+  describeMediaRowRejection,
+  describePageBindingRowRejection,
+  describePromotionRuleRowRejection,
+  describePublishingErrorRowRejection,
+  describeTeamMemberRowRejection,
+  describeTemplateRegistryRowRejection,
+  describeWorkflowHistoryRowRejection,
   mapArticleRow,
   mapMediaRow,
   mapPageBindingRow,
@@ -31,6 +40,14 @@ import {
   mapTeamMemberRow,
   mapTemplateRegistryRow,
   mapWorkflowHistoryRow,
+  probeReadIdentity,
+  type PublisherReadList,
+  type ReadDiagnosticsSink,
+} from './publisherRowMappers';
+export type {
+  ReadRejection,
+  ReadDiagnosticsSink,
+  PublisherReadList,
 } from './publisherRowMappers';
 import {
   createSharePointPageBindingWriter,
@@ -197,6 +214,15 @@ export interface PublishingErrorsRepository {
   append(row: PublisherPublishingErrorRow): Promise<{ readonly itemId: number }>;
 }
 
+/**
+ * Structured read-diagnostics surface shared across every repository
+ * read path. Wave-03 Prompt-03 closure: malformed SharePoint rows are
+ * no longer silently dropped by the `mapAll`-style helpers — each
+ * rejection is pushed here with its list of origin, a probed
+ * identifier, and a deterministic reason. Callers can `drain()` after
+ * each load cycle to surface rejections as operator-facing status and
+ * distinguish "no rows existed" from "rows existed but were rejected".
+ */
 export interface PublisherRepositories {
   readonly articles: ArticleRepository;
   readonly teamMembers: TeamMembersRepository;
@@ -206,6 +232,7 @@ export interface PublisherRepositories {
   readonly workflowHistory: WorkflowHistoryRepository;
   readonly publishingErrors: PublishingErrorsRepository;
   readonly promotionRules: PromotionRulesRepository;
+  readonly readDiagnostics: ReadDiagnosticsSink;
 }
 
 /* ── Factory ─────────────────────────────────────────────────────── */
@@ -230,29 +257,78 @@ export function createPublisherRepositories(
     workflowHistory: createSharePointWorkflowHistoryWriter({ descriptor: lists.workflowHistory }),
     publishingErrors: createSharePointPublishingErrorsWriter({ descriptor: lists.publishingErrors }),
   },
+  readDiagnostics: ReadDiagnosticsSink = createReadDiagnosticsSink(),
 ): PublisherRepositories {
+  // Wave-03 Prompt-03: `mapAll` now pushes a structured rejection
+  // entry into the diagnostics sink for every row the mapper
+  // refuses. The surviving rows are returned unchanged so callers
+  // that do not care about rejections (writers, straightforward
+  // projections) keep working; callers that need to distinguish
+  // "no rows existed" from "rows existed but were rejected" drain
+  // the sink after the load cycle.
   function mapAll<R>(
+    list: PublisherReadList,
     rows: readonly Record<string, unknown>[],
     mapper: (raw: Record<string, unknown>) => R | undefined,
+    describe: (raw: Record<string, unknown>) => string,
   ): readonly R[] {
     const out: R[] = [];
     for (const raw of rows) {
       const mapped = mapper(raw);
-      if (mapped) out.push(mapped);
+      if (mapped) {
+        out.push(mapped);
+        continue;
+      }
+      const identity = probeReadIdentity(raw);
+      readDiagnostics.push({
+        list,
+        reason: describe(raw),
+        rawItemId: identity.rawItemId,
+        articleId: identity.articleId,
+      });
     }
     return out;
   }
 
   return {
+    readDiagnostics,
     articles: {
       async getByArticleId(articleId) {
+        // Wave-03 Prompt-04: request up to 2 rows so duplicate
+        // ArticleId values in the master list are detected rather
+        // than silently collapsing to whichever row SharePoint
+        // happened to return first.
         const rows = await access.readList(lists.articles, {
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
-          top: 1,
+          top: 2,
         });
+        if (rows.length > 1) {
+          const ids = rows
+            .map((r) => probeReadIdentity(r).rawItemId)
+            .filter((id): id is number => typeof id === 'number');
+          readDiagnostics.push({
+            list: 'articles',
+            reason:
+              `Duplicate master rows for ArticleId='${articleId}' ` +
+              `(${rows.length} matches${ids.length > 0 ? `, item ids ${ids.join(', ')}` : ''}). ` +
+              'Refusing to pick one — repair the list before continuing.',
+            articleId,
+          });
+          return undefined;
+        }
+        // Primary-identity read: if SharePoint returned rows but none
+        // mapped, emit a diagnostic so callers can distinguish a
+        // genuine "no such article" from a "malformed article row".
         for (const raw of rows) {
           const mapped = mapArticleRow(raw);
           if (mapped) return mapped;
+          const identity = probeReadIdentity(raw);
+          readDiagnostics.push({
+            list: 'articles',
+            reason: describeArticleRowRejection(raw),
+            rawItemId: identity.rawItemId,
+            articleId: identity.articleId ?? articleId,
+          });
         }
         return undefined;
       },
@@ -267,7 +343,7 @@ export function createPublisherRepositories(
           filter: `WorkflowState eq '${state}'${destinationFilter}`,
           orderBy: 'UpdatedDateUtc desc',
         });
-        return mapAll(rows, mapArticleRow);
+        return mapAll('articles', rows, mapArticleRow, describeArticleRowRejection);
       },
       async upsert(row) {
         return writers.articles.upsert(row);
@@ -311,7 +387,7 @@ export function createPublisherRepositories(
           ],
           expand: ['PersonPrincipal'],
         });
-        return mapAll(rows, mapTeamMemberRow);
+        return mapAll('teamMembers', rows, mapTeamMemberRow, describeTeamMemberRowRejection);
       },
       async replaceAllForArticle(articleId, rows) {
         return writers.teamMembers.replaceAllForArticle(articleId, rows);
@@ -324,7 +400,7 @@ export function createPublisherRepositories(
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'SortOrder asc',
         });
-        return mapAll(rows, mapMediaRow);
+        return mapAll('media', rows, mapMediaRow, describeMediaRowRejection);
       },
       async replaceAllForArticle(articleId, rows) {
         return writers.media.replaceAllForArticle(articleId, rows);
@@ -336,16 +412,44 @@ export function createPublisherRepositories(
         const rows = await access.readList(lists.templateRegistry, {
           filter: 'IsActive eq 1',
         });
-        return mapAll(rows, mapTemplateRegistryRow);
+        return mapAll(
+          'templateRegistry',
+          rows,
+          mapTemplateRegistryRow,
+          describeTemplateRegistryRowRejection,
+        );
       },
       async getByKey(templateKey) {
+        // Wave-03 Prompt-04: detect duplicate TemplateKey rows rather
+        // than silently binding to the first match. Active templates
+        // are control-plane authority — a duplicate must be repaired,
+        // not hidden.
         const rows = await access.readList(lists.templateRegistry, {
           filter: `TemplateKey eq '${templateKey.replace(/'/g, "''")}'`,
-          top: 1,
+          top: 2,
         });
+        if (rows.length > 1) {
+          const ids = rows
+            .map((r) => probeReadIdentity(r).rawItemId)
+            .filter((id): id is number => typeof id === 'number');
+          readDiagnostics.push({
+            list: 'templateRegistry',
+            reason:
+              `Duplicate template registry rows for TemplateKey='${templateKey}' ` +
+              `(${rows.length} matches${ids.length > 0 ? `, item ids ${ids.join(', ')}` : ''}). ` +
+              'Refusing to pick one — repair the list before continuing.',
+          });
+          return undefined;
+        }
         for (const raw of rows) {
           const mapped = mapTemplateRegistryRow(raw);
           if (mapped) return mapped;
+          const identity = probeReadIdentity(raw);
+          readDiagnostics.push({
+            list: 'templateRegistry',
+            reason: describeTemplateRegistryRowRejection(raw),
+            rawItemId: identity.rawItemId,
+          });
         }
         return undefined;
       },
@@ -353,13 +457,42 @@ export function createPublisherRepositories(
 
     pageBindings: {
       async getByArticleId(articleId) {
+        // Wave-03 Prompt-04: the binding list is modelled as
+        // one-row-per-ArticleId. Detect duplicates instead of picking
+        // the first match — a duplicate is a control-plane defect that
+        // must surface to the operator rather than silently publishing
+        // against an arbitrary row.
         const rows = await access.readList(lists.pageBindings, {
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
-          top: 1,
+          top: 2,
         });
+        if (rows.length > 1) {
+          const ids = rows
+            .map((r) => probeReadIdentity(r).rawItemId)
+            .filter((id): id is number => typeof id === 'number');
+          readDiagnostics.push({
+            list: 'pageBindings',
+            reason:
+              `Duplicate binding rows for ArticleId='${articleId}' ` +
+              `(${rows.length} matches${ids.length > 0 ? `, item ids ${ids.join(', ')}` : ''}). ` +
+              'Refusing to pick one — repair the list before republishing.',
+            articleId,
+          });
+          return undefined;
+        }
+        // Primary-identity read: if a binding exists but does not map,
+        // emit a diagnostic so the control-plane defect is not hidden
+        // behind a silent "no binding" result.
         for (const raw of rows) {
           const mapped = mapPageBindingRow(raw);
           if (mapped) return mapped;
+          const identity = probeReadIdentity(raw);
+          readDiagnostics.push({
+            list: 'pageBindings',
+            reason: describePageBindingRowRejection(raw),
+            rawItemId: identity.rawItemId,
+            articleId: identity.articleId ?? articleId,
+          });
         }
         return undefined;
       },
@@ -384,7 +517,12 @@ export function createPublisherRepositories(
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'ActionDateUtc desc',
         });
-        return mapAll(rows, mapWorkflowHistoryRow);
+        return mapAll(
+          'workflowHistory',
+          rows,
+          mapWorkflowHistoryRow,
+          describeWorkflowHistoryRowRejection,
+        );
       },
       async append(row) {
         return writers.workflowHistory.append(row);
@@ -397,7 +535,12 @@ export function createPublisherRepositories(
           filter: `ArticleId eq '${articleId.replace(/'/g, "''")}'`,
           orderBy: 'LastAttemptDateUtc desc',
         });
-        return mapAll(rows, mapPublishingErrorRow);
+        return mapAll(
+          'publishingErrors',
+          rows,
+          mapPublishingErrorRow,
+          describePublishingErrorRowRejection,
+        );
       },
       async append(row) {
         return writers.publishingErrors.append(row);
@@ -409,7 +552,12 @@ export function createPublisherRepositories(
         const rows = await access.readList(lists.promotionRules, {
           filter: 'IsActive eq 1',
         });
-        return mapAll(rows, mapPromotionRuleRow);
+        return mapAll(
+          'promotionRules',
+          rows,
+          mapPromotionRuleRow,
+          describePromotionRuleRowRejection,
+        );
       },
     },
   };

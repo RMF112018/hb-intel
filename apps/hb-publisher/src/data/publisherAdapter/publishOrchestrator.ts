@@ -164,9 +164,10 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
   /**
    * Internal failure-stage union used by the orchestrator's two
    * callers — `run` (publish / republish / preview) and
-   * `runLifecycleTransition` (archive / withdraw). Lifecycle-only
-   * stages are listed alongside publish stages so the error
-   * recorder can classify both consistently.
+   * `runLifecycleTransition` (archive / withdraw). Mirrors the
+   * contract's `PublishingFailureStage` so the structured column on
+   * `HB Article Publishing Errors` stays joined with the typed
+   * outcome union.
    */
   type FailureStage =
     | 'resolution'
@@ -180,7 +181,47 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     | 'bindingUpdate'
     | 'articleSync'
     | 'articleUpdate'
-    | 'historyAppend';
+    | 'historyAppend'
+    | 'transition';
+
+  /**
+   * Map a stage to its owning subsystem for the structured
+   * `FailureSubsystem` column. Wave-03 Prompt-06 closure: operators
+   * can filter by subsystem ("which list is failing?") without
+   * parsing ErrorSummary prose.
+   */
+  function subsystemFor(
+    stage: FailureStage,
+  ): import('./publisherContracts').PublishingFailureSubsystem {
+    switch (stage) {
+      case 'resolution':
+      case 'composition':
+      case 'validation':
+      case 'policy':
+        return 'orchestrator';
+      case 'pagePublish':
+      case 'pageUnpublish':
+        return 'pageLifecycle';
+      case 'bindingLookup':
+      case 'bindingWrite':
+      case 'bindingUpdate':
+        return 'pageBinding';
+      case 'articleSync':
+      case 'articleUpdate':
+        return 'articles';
+      case 'historyAppend':
+      case 'transition':
+        return 'workflowHistory';
+    }
+  }
+
+  function failureContextFor(
+    mode: PublishMode,
+    lifecycleAction: 'archive' | 'withdraw' | 'manualTransition' | undefined,
+  ): import('./publisherContracts').PublishingFailureContext {
+    if (lifecycleAction) return lifecycleAction;
+    return mode;
+  }
 
   /**
    * Map an internal failure stage + caller context to the coarse
@@ -242,17 +283,28 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     readonly mode: PublishMode;
     /**
      * When set, the failure was raised by archive / withdraw rather
-     * than by the publish/republish path. The recorder uses this to
-     * tag the persisted Title so operators can distinguish lifecycle
-     * failures from publish failures even though the tenant
-     * `Operation` Choice cannot.
+     * than by the publish/republish path. Wave-03 Prompt-06 — this
+     * is now also the structured `FailureContext` column on the
+     * tenant error row, not only a Title-prefix convention.
      */
     readonly lifecycleAction?: 'archive' | 'withdraw' | 'manualTransition';
     readonly message: string;
     readonly bindingId?: string;
     readonly nowIso: string;
+    /**
+     * Acting operator email when available (threaded in from the
+     * authoring shell via `PublishRequest.actorEmail` /
+     * `TransitionManualRequest.actorEmail`). Persisted on the error
+     * row as the structured `ActorEmail` column so operator
+     * attribution no longer lives only on the workflow-history row.
+     */
+    readonly actorEmail?: string;
   }): Promise<void> {
     const context = input.lifecycleAction ?? input.mode;
+    // Title prefix is preserved as a short human-readable signal, but
+    // structured filtering now flows through the FailureStage /
+    // FailureContext / FailureSubsystem columns — operators no longer
+    // need to parse Title prose to triage.
     const prefix = `${context}.${input.stage}`;
     try {
       await repositories.publishingErrors.append({
@@ -268,6 +320,10 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         BindingId: input.bindingId,
         LastAttemptDateUtc: input.nowIso,
         RetryStatus: 'pending',
+        FailureStage: input.stage,
+        FailureContext: failureContextFor(input.mode, input.lifecycleAction),
+        FailureSubsystem: subsystemFor(input.stage),
+        ActorEmail: input.actorEmail,
       });
     } catch (err) {
       // Swallow — never let error-log persistence mask the real
@@ -858,11 +914,12 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
     // On `regenerate`, capture the identity of the single
     // authoritative binding row before it is superseded in place
     // (new BindingId + new PageId/PageUrl/PageName overwrite the
-    // prior values on the same SharePoint item). The prior identity
-    // is stamped into the workflow-history ActionNote as a
-    // structured `supersededBinding=…` marker — that row IS the
-    // durable lineage record for the one-row binding model, since
-    // the tenant list itself does not preserve prior-binding rows.
+    // prior values on the same SharePoint item). Wave-03 Prompt-05
+    // closure: the prior/new identity is written as STRUCTURED
+    // `Superseded*` + `New*` columns on the workflow-history row,
+    // not as JSON embedded in `ActionNote`. `ActionNote` retains a
+    // short human-readable narrative; machine-readable lineage
+    // lives in the structured columns.
     const supersededBinding: SupersededBindingIdentity | undefined =
       decision.action === 'regenerate' && context.existingBinding
         ? {
@@ -872,22 +929,17 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
             pageUrl: context.existingBinding.PageUrl,
           }
         : undefined;
-    const supersessionMarker = supersededBinding
-      ? ` [supersededBinding=${JSON.stringify(supersededBinding)}; newBinding=${JSON.stringify(
-          {
-            bindingId: bindingRow.BindingId,
-            pageId: bindingRow.PageId,
-            pageName: bindingRow.PageName,
-            pageUrl: bindingRow.PageUrl,
-          },
-        )}]`
-      : '';
     const historyTitle = workflowStateChanged
       ? `${previousWorkflowState} → published`
       : `republish (${decision.action})`;
+    const supersessionSummary = supersededBinding
+      ? ` Replaces prior binding '${supersededBinding.bindingId}'` +
+        (supersededBinding.pageName ? ` (page '${supersededBinding.pageName}')` : '') +
+        '.'
+      : '';
     const historyNote = workflowStateChanged
-      ? `Article published via orchestrator (${decision.action}).${supersessionMarker}`
-      : `Article republished via orchestrator (${decision.action}).${supersessionMarker}`;
+      ? `Article published via orchestrator (${decision.action}).${supersessionSummary}`
+      : `Article republished via orchestrator (${decision.action}).${supersessionSummary}`;
     try {
       await repositories.workflowHistory.append({
         HistoryId: `hst-${now.replace(/[^0-9]/g, '').slice(0, 14)}-${Math.floor(Math.random() * 1e6).toString(36)}`,
@@ -904,6 +956,22 @@ export function createPublishOrchestrator(deps: PublishOrchestratorDeps) {
         // didn't author the article.
         ActorEmail: req.actorEmail ?? context.article.AuthorEmail,
         ActionNote: historyNote,
+        // Wave-03 Prompt-05 structured supersession lineage. The
+        // columns are populated only when regenerate replaced a
+        // prior binding; otherwise they stay undefined so create /
+        // in-place republish never emits false supersession markers.
+        ...(supersededBinding
+          ? {
+              SupersededBindingId: supersededBinding.bindingId,
+              SupersededPageId: supersededBinding.pageId,
+              SupersededPageName: supersededBinding.pageName,
+              SupersededPageUrl: supersededBinding.pageUrl,
+              NewBindingId: bindingRow.BindingId,
+              NewPageId: bindingRow.PageId,
+              NewPageName: bindingRow.PageName,
+              NewPageUrl: bindingRow.PageUrl,
+            }
+          : {}),
       });
     } catch (err) {
       const baseMessage =

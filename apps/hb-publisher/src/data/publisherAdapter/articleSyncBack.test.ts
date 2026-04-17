@@ -70,7 +70,7 @@ function template(): PublisherTemplateRegistryRow {
     ShowTeamViewer: true,
     ShowGallery: true,
     ShowSecondaryImage: false,
-    RequiredFieldSetKey: 'req-default',
+    RequiredFieldSetKey: 'req-ps-inprogress-monthly-v1',
   };
 }
 

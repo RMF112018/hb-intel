@@ -137,13 +137,19 @@ export function illegalTransitionMessage(
 /**
  * Copy for the Publish button disabled tooltip.
  * Consolidates: draft unloaded, destination unsupported, binding /
- * validation block, busy state.
+ * validation block, dirty working copy, busy state.
+ *
+ * `dirty` is surfaced ahead of `busy` because publish / republish
+ * resolve from saved repository state by ArticleId — shipping while
+ * the in-memory working copy has drifted would publish stale saved
+ * content, not the visible canvas. Authors must save first.
  */
 export function publishDisabledReason(args: {
   readonly hasDraft: boolean;
   readonly destinationSupported: boolean;
   readonly validationBlocked: boolean;
   readonly busy: boolean;
+  readonly dirty?: boolean;
 }): string | undefined {
   if (!args.hasDraft) return 'Pick a draft first.';
   if (!args.destinationSupported) {
@@ -151,6 +157,9 @@ export function publishDisabledReason(args: {
   }
   if (args.validationBlocked) {
     return 'Resolve the blocking issues above before publishing.';
+  }
+  if (args.dirty) {
+    return 'Save your edits first — publish ships the saved draft, not the in-memory working copy.';
   }
   if (args.busy) return 'A run is already in flight.';
   return undefined;

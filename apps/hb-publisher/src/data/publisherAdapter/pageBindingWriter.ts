@@ -41,7 +41,16 @@ export type PageBindingUpsertOutcome =
     }
   | {
       readonly ok: false;
-      readonly reason: 'digestFailed' | 'lookupFailed' | 'writeFailed' | 'unexpectedShape';
+      readonly reason:
+        | 'digestFailed'
+        | 'lookupFailed'
+        | 'writeFailed'
+        | 'unexpectedShape'
+        // Wave-03 Prompt-04 — duplicate ArticleId rows in the binding
+        // list violate the one-row-per-article invariant. The writer
+        // refuses to merge, rather than silently patching whichever
+        // row `$top=1` happened to return first.
+        | 'duplicateBindings';
       readonly message: string;
       readonly status?: number;
     };
@@ -100,21 +109,41 @@ export function createSharePointPageBindingWriter(
   const fetchImpl = deps.fetchImpl ?? fetch;
   const digestImpl = deps.fetchRequestDigestImpl ?? fetchRequestDigest;
 
-  async function findExistingItemId(articleId: string): Promise<number | undefined> {
+  /**
+   * Lookup result: either a deterministic single match, no match, or
+   * a duplicate-ambiguity failure. Wave-03 Prompt-04 closure — the
+   * writer must not silently pick the first matching row when the
+   * tenant list contains more than one ArticleId collision.
+   */
+  type LookupOutcome =
+    | { readonly kind: 'found'; readonly itemId: number }
+    | { readonly kind: 'none' }
+    | { readonly kind: 'duplicate'; readonly itemIds: readonly number[] };
+
+  async function findExistingItemId(articleId: string): Promise<LookupOutcome> {
+    // `$top=2` — enough to detect a duplicate without enumerating the
+    // entire list. Uniqueness is the tenant invariant; any count > 1
+    // is a control-plane defect the writer must refuse to merge.
     const url =
       `${listItemsEndpoint(descriptor)}` +
-      `?$select=Id,ArticleId&$filter=${encodeURIComponent(`ArticleId eq '${articleId.replace(/'/g, "''")}'`)}&$top=1`;
+      `?$select=Id,ArticleId&$filter=${encodeURIComponent(`ArticleId eq '${articleId.replace(/'/g, "''")}'`)}&$top=2`;
     const res = await fetchImpl(url, {
       method: 'GET',
       credentials: 'include',
       headers: { Accept: 'application/json;odata=nometadata' },
     });
-    if (!res.ok) return undefined;
+    if (!res.ok) return { kind: 'none' };
     const body = (await res.json().catch(() => undefined)) as
       | { value?: LookupRecord[] }
       | undefined;
-    const match = body?.value?.[0];
-    return match && typeof match.Id === 'number' ? match.Id : undefined;
+    const matches = (body?.value ?? []).filter(
+      (m): m is LookupRecord & { Id: number } => typeof m.Id === 'number',
+    );
+    if (matches.length === 0) return { kind: 'none' };
+    if (matches.length > 1) {
+      return { kind: 'duplicate', itemIds: matches.map((m) => m.Id) };
+    }
+    return { kind: 'found', itemId: matches[0]!.Id };
   }
 
   return {
@@ -130,9 +159,9 @@ export function createSharePointPageBindingWriter(
         };
       }
 
-      let existingId: number | undefined;
+      let lookup: LookupOutcome;
       try {
-        existingId = await findExistingItemId(row.ArticleId);
+        lookup = await findExistingItemId(row.ArticleId);
       } catch (err) {
         return {
           ok: false,
@@ -140,6 +169,24 @@ export function createSharePointPageBindingWriter(
           message: err instanceof Error ? err.message : 'Binding lookup failed',
         };
       }
+
+      if (lookup.kind === 'duplicate') {
+        // Refuse to merge — every binding write against a duplicate
+        // list would overwrite a different row on each run, hiding
+        // the data-integrity problem. The caller surfaces this
+        // failure via the orchestrator's structured outcome path.
+        return {
+          ok: false,
+          reason: 'duplicateBindings',
+          message:
+            `Refusing to upsert: tenant list contains ${lookup.itemIds.length} rows for ` +
+            `ArticleId='${row.ArticleId}' (item ids ${lookup.itemIds.join(', ')}). ` +
+            'Repair the duplicate rows before republishing.',
+        };
+      }
+
+      const existingId: number | undefined =
+        lookup.kind === 'found' ? lookup.itemId : undefined;
 
       const body = mapBindingRowToListFields(row);
 

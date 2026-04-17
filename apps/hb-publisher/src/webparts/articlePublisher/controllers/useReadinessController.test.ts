@@ -368,3 +368,65 @@ describe('useReadinessController — milestone legacy hard-block', () => {
     expect(result.current.publishEnabled).toBe(true);
   });
 });
+
+describe('useReadinessController — dirty working-copy gate (Wave-03 Prompt-01)', () => {
+  it('disables Publish when the working copy has drifted from the saved baseline', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'approved' }),
+          isDirty: true,
+        }),
+      ),
+    );
+    expect(result.current.publishEnabled).toBe(false);
+    expect(result.current.publishBlockedByDirty).toBe(true);
+  });
+
+  it('disables Republish when the working copy is dirty even with a healthy binding', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'published' }),
+          binding: binding(),
+          isDirty: true,
+        }),
+      ),
+    );
+    expect(result.current.republishEnabled).toBe(false);
+    expect(result.current.publishBlockedByDirty).toBe(true);
+  });
+
+  it('keeps Publish enabled on a clean approved draft (regression guard)', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'approved' }),
+          isDirty: false,
+        }),
+      ),
+    );
+    expect(result.current.publishEnabled).toBe(true);
+    expect(result.current.publishBlockedByDirty).toBe(false);
+  });
+
+  it('keeps Republish enabled on a clean published + bound draft (regression guard)', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(
+        inputs({
+          articleDraft: article({ WorkflowState: 'published' }),
+          binding: binding(),
+          isDirty: false,
+        }),
+      ),
+    );
+    expect(result.current.republishEnabled).toBe(true);
+  });
+
+  it('reports publishBlockedByDirty=false when no draft is selected', () => {
+    const { result } = renderHook(() =>
+      useReadinessController(inputs({ articleDraft: undefined, isDirty: true })),
+    );
+    expect(result.current.publishBlockedByDirty).toBe(false);
+  });
+});

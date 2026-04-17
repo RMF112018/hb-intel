@@ -595,6 +595,23 @@ export function mapWorkflowHistoryRowToListFields(
     ActionDateUtc: row.ActionDateUtc,
     ActorEmail: nullIfEmpty(row.ActorEmail),
     ActionNote: nullIfEmpty(row.ActionNote),
+    // Wave-03 Prompt-05 structured supersession lineage. Emitted only
+    // on regenerate events; undefined/empty on all other workflow
+    // transitions. Uses the same `{ Url, Description }` hyperlink
+    // shape SharePoint expects for URL columns (mirrors the binding
+    // writer's PageUrl projection).
+    SupersededBindingId: nullIfEmpty(row.SupersededBindingId),
+    SupersededPageId: nullIfEmpty(row.SupersededPageId),
+    SupersededPageName: nullIfEmpty(row.SupersededPageName),
+    SupersededPageUrl: row.SupersededPageUrl
+      ? { Url: row.SupersededPageUrl, Description: row.SupersededPageUrl }
+      : null,
+    NewBindingId: nullIfEmpty(row.NewBindingId),
+    NewPageId: nullIfEmpty(row.NewPageId),
+    NewPageName: nullIfEmpty(row.NewPageName),
+    NewPageUrl: row.NewPageUrl
+      ? { Url: row.NewPageUrl, Description: row.NewPageUrl }
+      : null,
   };
 }
 
@@ -639,6 +656,11 @@ export function mapPublishingErrorRowToListFields(
     BindingId: nullIfEmpty(row.BindingId),
     LastAttemptDateUtc: nullIfEmpty(row.LastAttemptDateUtc),
     RetryStatus: nullIfEmpty(row.RetryStatus),
+    // Wave-03 Prompt-06 structured classification columns.
+    FailureStage: nullIfEmpty(row.FailureStage),
+    FailureContext: nullIfEmpty(row.FailureContext),
+    FailureSubsystem: nullIfEmpty(row.FailureSubsystem),
+    ActorEmail: nullIfEmpty(row.ActorEmail),
   };
 }
 

@@ -28,6 +28,7 @@ function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
     UpdatedDateUtc: '2026-04-12T00:00:00Z',
     ProjectId: 'PRJ-1',
     ProjectName: 'Acme Tower',
+    ProjectStage: 'active',
     HeroPrimaryImage: 'https://img.example/banner.jpg',
     HeroPrimaryImageAltText: 'Banner alt',
     TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
@@ -55,7 +56,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
     ShowTeamViewer: true,
     ShowGallery: true,
     ShowSecondaryImage: false,
-    RequiredFieldSetKey: 'req',
+    RequiredFieldSetKey: 'req-ps-inprogress-monthly-v1',
     ...over,
   } as PublisherTemplateRegistryRow;
 }
@@ -681,15 +682,100 @@ describe('publishOrchestrator', () => {
         'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
     });
 
-    // Prior identity durably persisted on the workflow-history row.
+    // Wave-03 Prompt-05: durable lineage lives in STRUCTURED workflow-history
+    // columns, not in freeform JSON-in-ActionNote. ActionNote retains a short
+    // human-readable narrative but is no longer the machine-readable record.
     expect(historyAppend).toHaveBeenCalledTimes(1);
     const historyRow = historyAppend.mock.calls[0]![0];
-    expect(historyRow.ActionNote).toContain('supersededBinding=');
-    expect(historyRow.ActionNote).toContain('"bindingId":"bnd-prior-42"');
-    expect(historyRow.ActionNote).toContain('"pageId":"999"');
-    expect(historyRow.ActionNote).toContain('newBinding=');
-    expect(historyRow.ActionNote).toContain('"bindingId":"bnd-new-99"');
-    expect(historyRow.ActionNote).toContain('"pageId":"1001"');
+    expect(historyRow.SupersededBindingId).toBe('bnd-prior-42');
+    expect(historyRow.SupersededPageId).toBe('999');
+    expect(historyRow.SupersededPageName).toBe('acme-tower-april.aspx');
+    expect(historyRow.SupersededPageUrl).toBe(
+      'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+    );
+    expect(historyRow.NewBindingId).toBe('bnd-new-99');
+    expect(historyRow.NewPageId).toBe('1001');
+    // Secondary narrative — short and deterministic, not a JSON blob.
+    expect(historyRow.ActionNote).toMatch(/Replaces prior binding 'bnd-prior-42'/);
+    expect(historyRow.ActionNote).not.toContain('supersededBinding=');
+  });
+
+  it('inPlaceUpdate does not populate supersession lineage columns on the history row (Wave-03 Prompt-05)', async () => {
+    const existing: PublisherPageBindingRow = {
+      BindingId: 'bnd-inplace-1',
+      ArticleId: 'art-ps-001',
+      Title: 'Acme Tower — April',
+      PublishStatus: 'published',
+      TargetSiteUrl: 'https://example.com/sites/ProjectSpotlight',
+      PageId: '500',
+      PageName: 'acme-tower-april.aspx',
+      PageUrl:
+        'https://example.com/sites/ProjectSpotlight/SitePages/acme-tower-april.aspx',
+      PageShellVersion: '1.0.0',
+      PageTemplateKey: 'ps-inprogress-monthly-v1',
+      RenderVersion: '1.0.0',
+    };
+    const f = fixture({
+      article: { WorkflowState: 'published' },
+      existingBinding: existing,
+    });
+    f.createOrUpdate.mockImplementation(async (input) => ({
+      ok: true as const,
+      pageId: input.targetPageId ?? '500',
+      pageUrl: existing.PageUrl!,
+      pageName: existing.PageName!,
+      wasCreated: false,
+    }));
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.workflowHistory.append = historyAppend;
+    f.repositories.articles.upsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'republish',
+      now: () => '2026-04-13T11:00:00.000Z',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.action).toBe('inPlaceUpdate');
+
+    const historyRow = historyAppend.mock.calls[0]?.[0];
+    expect(historyRow?.SupersededBindingId).toBeUndefined();
+    expect(historyRow?.SupersededPageId).toBeUndefined();
+    expect(historyRow?.NewBindingId).toBeUndefined();
+    expect(historyRow?.NewPageId).toBeUndefined();
+  });
+
+  it('create (no prior binding) does not populate supersession lineage columns on the history row (Wave-03 Prompt-05)', async () => {
+    const f = fixture();
+    const historyAppend = vi.fn<
+      PublisherRepositories['workflowHistory']['append']
+    >(async () => ({ itemId: 1 }));
+    f.repositories.workflowHistory.append = historyAppend;
+    f.repositories.articles.upsert = vi.fn<
+      PublisherRepositories['articles']['upsert']
+    >(async () => ({ wasCreated: false, itemId: 1 }));
+    const orch = makeOrchestrator(f);
+    const result = await orch.run({
+      articleId: 'art-ps-001',
+      mode: 'create',
+      now: () => '2026-04-13T12:00:00.000Z',
+      generateBindingId: () => 'bnd-first',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.action).toBe('create');
+
+    const historyRow = historyAppend.mock.calls[0]?.[0];
+    expect(historyRow?.SupersededBindingId).toBeUndefined();
+    expect(historyRow?.NewBindingId).toBeUndefined();
+    // ActionNote is narrative-only, no JSON-embedded lineage blob.
+    expect(historyRow?.ActionNote).not.toContain('supersededBinding=');
   });
 
   it('inPlaceUpdate does NOT emit a supersededBinding — same row is MERGEd without identity change', async () => {

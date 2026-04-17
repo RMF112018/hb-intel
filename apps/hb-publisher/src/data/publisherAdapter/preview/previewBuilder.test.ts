@@ -55,7 +55,7 @@ function tpl(over: Partial<PublisherTemplateRegistryRow> = {}): PublisherTemplat
     ShowTeamViewer: true,
     ShowGallery: true,
     ShowSecondaryImage: false,
-    RequiredFieldSetKey: "req-default",
+    RequiredFieldSetKey: "req-ps-inprogress-monthly-v1",
     ...over,
   } as PublisherTemplateRegistryRow;
 }

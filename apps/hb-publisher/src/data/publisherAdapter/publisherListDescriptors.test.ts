@@ -125,10 +125,16 @@ const EXPECTED_MVP_FIELDS: Readonly<Record<PublisherListKey, readonly string[]>>
   workflowHistory: [
     'HistoryId', 'ArticleId', 'Title', 'NewState', 'PreviousState',
     'ActionDateUtc', 'ActorEmail', 'ActionNote',
+    // Wave-03 Prompt-05 structured supersession lineage.
+    'SupersededBindingId', 'SupersededPageId', 'SupersededPageName',
+    'SupersededPageUrl', 'NewBindingId', 'NewPageId', 'NewPageName',
+    'NewPageUrl',
   ],
   publishingErrors: [
     'ErrorId', 'ArticleId', 'Title', 'Destination', 'Operation',
     'ErrorSummary', 'BindingId', 'LastAttemptDateUtc', 'RetryStatus',
+    // Wave-03 Prompt-06 structured classification.
+    'FailureStage', 'FailureContext', 'FailureSubsystem', 'ActorEmail',
   ],
   promotionRules: [
     'RuleId', 'Title', 'Destination', 'Scope', 'IsActive',

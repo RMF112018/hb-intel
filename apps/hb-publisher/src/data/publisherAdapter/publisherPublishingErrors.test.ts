@@ -137,7 +137,7 @@ function template(): PublisherTemplateRegistryRow {
     ShowTeamViewer: true,
     ShowGallery: true,
     ShowSecondaryImage: false,
-    RequiredFieldSetKey: 'req-default',
+    RequiredFieldSetKey: 'req-ps-inprogress-monthly-v1',
   };
 }
 
@@ -243,6 +243,12 @@ describe('publishOrchestrator — failure-path persistence', () => {
     expect(persisted.Operation).toBe('sync');
     expect(persisted.ErrorSummary).toContain('Binding MERGE failed');
     expect(persisted.RetryStatus).toBe('pending');
+    // Wave-03 Prompt-06 structured classification columns must be
+    // populated so support filtering can select by stage / context /
+    // subsystem without parsing Title or ErrorSummary prose.
+    expect(persisted.FailureStage).toBe('bindingWrite');
+    expect(persisted.FailureContext).toBe('create');
+    expect(persisted.FailureSubsystem).toBe('pageBinding');
   });
 
   it('writes a second pageUnpublish publishing-error row when compensating SavePageAsDraft fails', async () => {

@@ -239,6 +239,13 @@ export function ArticlePublisher({
   const workspace = useDraftWorkspace(repositories);
   const { setStatus, status, statusTone } = useStatusChannel();
 
+  // Wave-03 Prompt-01: thread the shell-computed dirty-state into the
+  // lifecycle handler via a ref-backed getter so `handlePublishAction`
+  // reads the latest value at click-time without re-memoizing on every
+  // keystroke. The ref is assigned after `isDirty` is computed below.
+  const isDirtyRef = React.useRef(false);
+  const getIsDirty = React.useCallback(() => isDirtyRef.current, []);
+
   const lifecycle = useDraftLifecycle({
     repositories,
     orchestrator,
@@ -249,6 +256,7 @@ export function ArticlePublisher({
     selectedArticleId: workspace.selectedArticleId,
     setSelectedArticleId: workspace.setSelectedArticleId,
     setStatus,
+    getIsDirty,
   });
   const {
     articleDraft,
@@ -291,6 +299,11 @@ export function ArticlePublisher({
     !!articleDraft &&
     baselineRef.current !== null &&
     currentSignature !== baselineRef.current;
+  // Mirror the render-time value into the ref so lifecycle handlers
+  // can read the latest dirty-state at click-time. Writing a ref
+  // during render is safe because it is not consumed during this
+  // render's commit — only by later event-phase callbacks.
+  isDirtyRef.current = isDirty;
   const markBaselineClean = React.useCallback(() => {
     baselineRef.current = currentSignature;
   }, [currentSignature]);
@@ -414,6 +427,7 @@ export function ArticlePublisher({
     promotionPolicy,
     busy,
     isPersisted,
+    isDirty,
     templateRegistry: workspace.templateRegistry,
     promotionRuleHealth: workspace.promotionRuleHealth,
   });
@@ -821,6 +835,7 @@ export function ArticlePublisher({
                       !unsupportedDestinationLoaded && !unsupportedContentTypeLoaded,
                     validationBlocked: publishBlockedByValidation,
                     busy,
+                    dirty: isDirty,
                   })}
                   onClick={() => handlePublishWithCacheClear('create')}
                 >
@@ -834,6 +849,7 @@ export function ArticlePublisher({
                       !unsupportedDestinationLoaded && !unsupportedContentTypeLoaded,
                     validationBlocked: publishBlockedByValidation,
                     busy,
+                    dirty: isDirty,
                   })}
                   onClick={() => handlePublishWithCacheClear('republish')}
                 >

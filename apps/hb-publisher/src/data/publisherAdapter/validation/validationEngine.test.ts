@@ -8,7 +8,7 @@ import type {
 } from '../publisherContracts';
 import type { PublishResolutionContext } from '../publishResolutionContext';
 import { PROJECT_SPOTLIGHT_V1_SHELL } from '../pageGeneration/xmlShellManifest';
-import { validatePublishContext } from './validationEngine';
+import { classifyRequiredFieldSet, validatePublishContext } from './validationEngine';
 
 function article(over: Partial<PublisherArticleRow> = {}): PublisherArticleRow {
   return {
@@ -57,7 +57,10 @@ function tpl(
     ShowTeamViewer: true,
     ShowGallery: true,
     ShowSecondaryImage: false,
-    RequiredFieldSetKey: "req-default",
+    // Wave-03 Prompt-02: default fixture now uses a registered
+    // operational contract so tests exercise the operational-valid
+    // classification unless they explicitly override.
+    RequiredFieldSetKey: "req-ps-inprogress-monthly-v1",
     ...over,
   } as PublisherTemplateRegistryRow;
 }
@@ -188,13 +191,14 @@ describe('validatePublishContext', () => {
     expect(finding?.field).toBe('media[0].AltText');
   });
 
-  it('milestone articles are out of sprint scope — no active profile requires MilestoneLabel / MilestoneDateUtc (P1-3 closure)', () => {
-    // Templates still pointing at the removed
-    // `req-ps-inprogress-milestone-v1` profile must NOT surface a
-    // hard error demanding fields the UI cannot produce. The
-    // validation engine's unknown-key fallback takes over: a
-    // warning is emitted and global rules run, but no milestone-
-    // specific error is pushed.
+  it('legacy milestone required-field-set is classified non-operational and surfaces a diagnostic warning — not a hard error demanding UI-unsupported fields (P1-3 closure preserved; Wave-03 Prompt-02 classification)', () => {
+    // Milestone-style templates still referencing the removed
+    // `req-ps-inprogress-milestone-v1` contract must NOT surface a
+    // hard error demanding MilestoneLabel / MilestoneDateUtc — the
+    // UI has no controls for those fields. Publish is blocked at
+    // the content-type + orchestrator gates; the validation engine
+    // classifies the key as legacy-non-operational and emits a
+    // diagnostic warning so the classification stays explicit.
     const result = validatePublishContext(
       context({
         template: { RequiredFieldSetKey: 'req-ps-inprogress-milestone-v1' },
@@ -206,14 +210,24 @@ describe('validatePublishContext', () => {
     const errorMessages = result.errors.map((e) => e.message).join(' ');
     expect(errorMessages).not.toMatch(/MilestoneLabel|MilestoneDateUtc/);
 
-    // Unknown-key fallback surfaces as a warning.
-    const unknownWarning = result.warnings.find(
-      (w) => w.field === 'template.RequiredFieldSetKey',
+    // Legacy scope-out surfaces as a warning distinct from the
+    // operational-invalid error path.
+    const legacyWarning = result.warnings.find(
+      (w) =>
+        w.category === 'invalid-template-match' &&
+        w.field === 'template.RequiredFieldSetKey',
     );
-    expect(unknownWarning).toBeDefined();
-    expect(unknownWarning?.message).toContain(
-      'req-ps-inprogress-milestone-v1',
+    expect(legacyWarning).toBeDefined();
+    expect(legacyWarning?.message).toMatch(/legacy non-operational/i);
+    expect(legacyWarning?.message).toContain('req-ps-inprogress-milestone-v1');
+
+    // Must not also emit the operational-invalid error for the same key.
+    const doubleError = result.errors.find(
+      (e) =>
+        e.category === 'invalid-template-match' &&
+        e.field === 'template.RequiredFieldSetKey',
     );
+    expect(doubleError).toBeUndefined();
   });
 
   it('warns when template expects hbSignatureHero on the current OOB shell', () => {
@@ -259,18 +273,48 @@ describe('validatePublishContext', () => {
     expect(driftWarning!.actionHint).not.toMatch(/\(or regenerate if the template forces it\)/i);
   });
 
-  it('tolerates an unknown RequiredFieldSetKey with an invalid-template-match warning', () => {
+  it('fails closed on an unregistered operational RequiredFieldSetKey — classifies as operational-invalid and blocks publish (Wave-03 Prompt-02 closure)', () => {
     const result = validatePublishContext(
       context({ template: { RequiredFieldSetKey: 'req-unknown' } }),
     );
-    expect(
-      result.warnings.some(
-        (w) =>
-          w.category === 'invalid-template-match' &&
-          w.field === 'template.RequiredFieldSetKey',
-      ),
-    ).toBe(true);
-    // Still ok because global rules pass on a well-formed post.
+    // Unregistered operational contract is a hard error, not a
+    // warning — global-rule-only fallback is no longer acceptable
+    // for an operational template.
+    const contractError = result.errors.find(
+      (e) =>
+        e.category === 'invalid-template-match' &&
+        e.field === 'template.RequiredFieldSetKey',
+    );
+    expect(contractError).toBeDefined();
+    expect(contractError?.severity).toBe('error');
+    expect(contractError?.message).toMatch(/not registered/i);
+    expect(contractError?.message).toContain('req-unknown');
+    expect(result.ok).toBe(false);
+
+    // And it must not also appear on the warning channel — the
+    // classification is operational-invalid, not legacy.
+    const legacyWarning = result.warnings.find(
+      (w) =>
+        w.category === 'invalid-template-match' &&
+        w.field === 'template.RequiredFieldSetKey',
+    );
+    expect(legacyWarning).toBeUndefined();
+  });
+
+  it('preserves known operational required-field enforcement (regression guard)', () => {
+    const result = validatePublishContext(
+      context({
+        template: { RequiredFieldSetKey: 'req-ps-inprogress-monthly-v1' },
+      }),
+    );
+    // Fixture context is well-formed for the known operational
+    // contract, so no contract-level error fires and publish is allowed.
+    const contractError = result.errors.find(
+      (e) =>
+        e.category === 'invalid-template-match' &&
+        e.field === 'template.RequiredFieldSetKey',
+    );
+    expect(contractError).toBeUndefined();
     expect(result.ok).toBe(true);
   });
 
@@ -386,5 +430,28 @@ describe('validatePublishContext', () => {
     expect(
       result.errors.some((e) => e.field === 'BodyRichText'),
     ).toBe(false);
+  });
+});
+
+describe('classifyRequiredFieldSet — explicit template contract classification (Wave-03 Prompt-02)', () => {
+  it('classifies a registered operational key as operational-valid with its set', () => {
+    const result = classifyRequiredFieldSet('req-ps-inprogress-monthly-v1');
+    expect(result.kind).toBe('operational-valid');
+    if (result.kind === 'operational-valid') {
+      expect(result.set.articleFields).toEqual(
+        expect.arrayContaining(['Title', 'Subhead', 'SummaryExcerpt', 'HeroPrimaryImage']),
+      );
+    }
+  });
+
+  it('classifies the milestone legacy key as legacy-non-operational', () => {
+    const result = classifyRequiredFieldSet('req-ps-inprogress-milestone-v1');
+    expect(result.kind).toBe('legacy-non-operational');
+  });
+
+  it('classifies unregistered keys as operational-invalid', () => {
+    expect(classifyRequiredFieldSet('req-unknown').kind).toBe('operational-invalid');
+    expect(classifyRequiredFieldSet('').kind).toBe('operational-invalid');
+    expect(classifyRequiredFieldSet(undefined).kind).toBe('operational-invalid');
   });
 });

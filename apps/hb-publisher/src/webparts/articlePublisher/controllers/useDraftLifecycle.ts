@@ -62,6 +62,14 @@ export interface DraftLifecycleDeps {
     React.SetStateAction<string | undefined>
   >;
   readonly setStatus: SetStatus;
+  /**
+   * Reader for the shell-computed dirty-state. Provided as a getter so
+   * the lifecycle handlers can read the latest value at invocation time
+   * without re-memoizing on every edit. When omitted, the lifecycle
+   * assumes the working copy is clean (preserves legacy test call
+   * sites that do not model an in-memory working copy).
+   */
+  readonly getIsDirty?: () => boolean;
 }
 
 export interface DraftLifecycleHandle {
@@ -107,6 +115,7 @@ export function useDraftLifecycle({
   selectedArticleId,
   setSelectedArticleId,
   setStatus,
+  getIsDirty,
 }: DraftLifecycleDeps): DraftLifecycleHandle {
   const [articleDraft, setArticleDraft] = React.useState<
     PublisherArticleRow | undefined
@@ -142,6 +151,10 @@ export function useDraftLifecycle({
   const reloadSelected = React.useCallback(
     async (articleId: string) => {
       setBusy(true);
+      // Wave-03 Prompt-03: drain any stale diagnostics before this
+      // load cycle so surfaced rejections are scoped to the current
+      // reload.
+      repositories.readDiagnostics?.drain();
       try {
         const [article, team, media, bindingRow] = await Promise.all([
           repositories.articles.getByArticleId(articleId),
@@ -168,13 +181,47 @@ export function useDraftLifecycle({
           setBinding(bindingRow);
           const ctx = await buildPublishResolutionContext(repositories, articleId);
           setResolutionContext(ctx.ok ? ctx.context : undefined);
-          setStatus(
+
+          // Wave-03 Prompt-03: surface any mapper rejections so
+          // silently dropped team / media / binding rows are no
+          // longer invisible to the author.
+          const rejections = repositories.readDiagnostics?.drain() ?? [];
+          const loadMessage =
             unsupportedDestinationMessage ??
-              (ctx.ok ? undefined : ctx.message),
-            unsupportedDestinationMessage || (ctx.ok ? undefined : ctx.message)
+            (ctx.ok ? undefined : ctx.message);
+          const loadTone: 'error' | 'info' =
+            unsupportedDestinationMessage || (!ctx.ok && ctx.message)
               ? 'error'
-              : 'info',
-          );
+              : 'info';
+          if (rejections.length > 0) {
+            const buckets = new Map<string, number>();
+            for (const r of rejections) {
+              buckets.set(r.list, (buckets.get(r.list) ?? 0) + 1);
+            }
+            const summary = Array.from(buckets.entries())
+              .map(([list, count]) => `${count} ${list}`)
+              .join(', ');
+            const firstReason = rejections[0]?.reason ?? '';
+            const rejectMessage = `Some rows failed to load cleanly — ${summary}. ${firstReason}`.trim();
+            setStatus(
+              loadMessage ? `${loadMessage} ${rejectMessage}` : rejectMessage,
+              'error',
+            );
+          } else {
+            setStatus(loadMessage, loadTone);
+          }
+        } else {
+          // Article row not returned — if rows existed but were
+          // rejected, surface the control-plane read error rather
+          // than letting the master article silently vanish.
+          const rejections = repositories.readDiagnostics?.drain() ?? [];
+          const articleRejection = rejections.find((r) => r.list === 'articles');
+          if (articleRejection) {
+            setStatus(
+              `Article record failed to load — ${articleRejection.reason}`,
+              'error',
+            );
+          }
         }
       } catch (err) {
         setStatus(
@@ -406,6 +453,20 @@ export function useDraftLifecycle({
   const handlePublishAction = React.useCallback(
     async (mode: 'create' | 'republish' | 'preview') => {
       if (!articleDraft) return;
+      // Wave-03 Prompt-01 defense-in-depth: the orchestrator always
+      // resolves from saved repository state by `ArticleId`. Refuse
+      // to run publish / republish against a dirty working copy so a
+      // stale-state publish cannot be reached from any code path —
+      // even if the readiness gate is mis-threaded by a caller. The
+      // preview mode is intentionally still allowed so the
+      // save-and-refresh-preview handshake remains truthful.
+      if ((mode === 'create' || mode === 'republish') && getIsDirty && getIsDirty()) {
+        setStatus(
+          'Save your edits before publishing — publish ships the saved draft, not the in-memory working copy.',
+          'error',
+        );
+        return;
+      }
       setBusy(true);
       setStatus(inProgressMessage(mode));
       try {
@@ -447,7 +508,7 @@ export function useDraftLifecycle({
         setBusy(false);
       }
     },
-    [articleDraft, actorEmail, orchestrator, reloadSelected, setStatus],
+    [articleDraft, actorEmail, orchestrator, reloadSelected, setStatus, getIsDirty],
   );
 
   return {

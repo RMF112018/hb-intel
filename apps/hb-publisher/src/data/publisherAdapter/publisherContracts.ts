@@ -352,9 +352,19 @@ export interface PublisherPageBindingRow {
  * Tenant-aligned `HB Article Workflow History` row. Records a single
  * workflow transition against the master article.
  *
- * Tenant schema:
+ * Tenant schema (Wave-03 Prompt-05 extension):
  *   required — HistoryId, ArticleId, Title, NewState (Choice), ActionDateUtc
  *   optional — PreviousState (Choice), ActorEmail, ActionNote
+ *   optional (lineage, structured) — SupersededBindingId, SupersededPageId,
+ *     SupersededPageName, SupersededPageUrl, NewBindingId, NewPageId,
+ *     NewPageName, NewPageUrl
+ *
+ * The structured lineage columns are populated ONLY on a regenerate
+ * supersession (when a new binding + page replaces a prior one on the
+ * one-row authoritative `HB Article Destination Pages` list). They
+ * replace the earlier JSON-in-`ActionNote` convention as the durable
+ * machine-readable lineage record; the narrative `ActionNote` remains
+ * as a secondary human-readable summary.
  *
  * The prior `Action` enum and the `FromState`/`ToState`/`Note` field
  * names do not exist on the tenant list and are intentionally
@@ -369,6 +379,19 @@ export interface PublisherWorkflowHistoryRow {
   readonly ActionDateUtc: IsoDateTimeUtc;
   readonly ActorEmail?: string;
   readonly ActionNote?: string;
+  // Wave-03 Prompt-05 structured supersession lineage. Populated only
+  // when a regenerate run replaces a prior binding; all fields stay
+  // undefined for ordinary create / in-place republish / archive /
+  // withdraw events so callers can treat presence-of-lineage as a
+  // deterministic regenerate signal.
+  readonly SupersededBindingId?: string;
+  readonly SupersededPageId?: string;
+  readonly SupersededPageName?: string;
+  readonly SupersededPageUrl?: UrlString;
+  readonly NewBindingId?: string;
+  readonly NewPageId?: string;
+  readonly NewPageName?: string;
+  readonly NewPageUrl?: UrlString;
 }
 
 /* ------------------------------------------------------------------ */
@@ -407,12 +430,72 @@ export interface PublisherPromotionRuleRow {
 }
 
 /**
+ * Failure-stage classifier for the publisher orchestrator path.
+ * Mirrors the `PublishOutcome.stage` union plus the lifecycle stages
+ * archive / withdraw emit. Wave-03 Prompt-06 closure: stored as a
+ * structured `FailureStage` column on `HB Article Publishing Errors`
+ * so support filtering stops depending on Title-prefix prose.
+ */
+export type PublishingFailureStage =
+  | 'resolution'
+  | 'composition'
+  | 'validation'
+  | 'policy'
+  | 'pagePublish'
+  | 'bindingWrite'
+  | 'articleSync'
+  | 'historyAppend'
+  | 'bindingLookup'
+  | 'pageUnpublish'
+  | 'bindingUpdate'
+  | 'articleUpdate'
+  | 'transition';
+
+/**
+ * Lifecycle-level context for a publishing-error row. Distinguishes a
+ * publish / republish / preview run from archive / withdraw / manual
+ * transitions at the structured level, so operators can filter
+ * without parsing the prior `${context}.${stage}` Title prefix.
+ */
+export type PublishingFailureContext =
+  | 'create'
+  | 'republish'
+  | 'preview'
+  | 'archive'
+  | 'withdraw'
+  | 'manualTransition';
+
+/**
+ * Subsystem the failure originated from. Intentionally a small
+ * bounded set of tenant-list / service areas — not a catch-all for
+ * every internal module. Supports triage routing ("which list is
+ * failing?") without depending on `ErrorSummary` prose.
+ */
+export type PublishingFailureSubsystem =
+  | 'articles'
+  | 'pageBinding'
+  | 'pageLifecycle'
+  | 'templateRegistry'
+  | 'workflowHistory'
+  | 'readModel'
+  | 'orchestrator';
+
+/**
  * Tenant-aligned `HB Article Publishing Errors` row.
  *
  * Tenant-required: ErrorId, ArticleId, Title, Destination,
  *   Operation (Choice: create|update|publish|sync), ErrorSummary.
  * Optional: BindingId, LastAttemptDateUtc, RetryStatus
  *   (Choice: none|pending|resolved).
+ *
+ * Wave-03 Prompt-06 extension (structured classification columns):
+ *   optional — FailureStage (Choice), FailureContext (Choice),
+ *   FailureSubsystem (Choice), ActorEmail. Populated by the
+ *   orchestrator on every error append so support operators can
+ *   filter by stage / context / subsystem without parsing Title or
+ *   ErrorSummary prose. `Operation` is preserved for compatibility
+ *   and high-level grouping but is no longer the only structured
+ *   dimension.
  *
  * The pre-tenant-audit `TemplateKey`/`PageShellKey`/`OccurredDateUtc`
  * /`ErrorCategory`/`ErrorDetails` fields do not exist on the tenant
@@ -428,4 +511,9 @@ export interface PublisherPublishingErrorRow {
   readonly BindingId?: string;
   readonly LastAttemptDateUtc?: IsoDateTimeUtc;
   readonly RetryStatus?: RetryStatus;
+  // Wave-03 Prompt-06 structured classification.
+  readonly FailureStage?: PublishingFailureStage;
+  readonly FailureContext?: PublishingFailureContext;
+  readonly FailureSubsystem?: PublishingFailureSubsystem;
+  readonly ActorEmail?: string;
 }

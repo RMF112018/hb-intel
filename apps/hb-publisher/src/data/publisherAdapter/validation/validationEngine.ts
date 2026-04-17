@@ -23,9 +23,18 @@
  *   6. Page-generation / binding drift warnings against the tenant
  *      `HB Article Destination Pages` row.
  *
- * Unknown `RequiredFieldSetKey` values are tolerated with an
- * `invalid-template-match` *warning* so a misconfigured registry
- * doesn't silently drop author-facing validation guidance.
+ * `RequiredFieldSetKey` values are classified into three explicit
+ * buckets (Wave-03 Prompt-02 closure):
+ *   - `operational-valid`: the key resolves to a registered field-set
+ *     and that set's required fields are enforced.
+ *   - `legacy-non-operational`: the key is a known legacy scope-out
+ *     (e.g. milestone-style content) that is already blocked upstream
+ *     at the content-type gate. A warning is surfaced for diagnostic
+ *     clarity; this layer never treats it as operationally valid.
+ *   - `operational-invalid`: any other unregistered key on an
+ *     otherwise-operational template. This is a fail-closed ERROR,
+ *     not a warning — a misconfigured control-plane row must not
+ *     silently downgrade to global-rule-only enforcement.
  */
 
 import type { PublishResolutionContext } from '../publishResolutionContext';
@@ -241,6 +250,48 @@ const REQUIRED_FIELD_SETS: Readonly<Record<string, TemplateRequiredFieldSet>> = 
   // the milestone scope-out comment above.
   'req-ps-inprogress-project-update-v1': PROJECT_UPDATE_REQUIRED,
 };
+
+/**
+ * Explicit allow-list of `RequiredFieldSetKey` values that are
+ * non-operational by design — milestone-style content authored prior
+ * to the Phase-09 scope-out. These templates are blocked from publish
+ * at the content-type gate (`milestoneLegacyNotice` in the authoring
+ * layer, and the milestone-legacy hard-block in the publish
+ * orchestrator), so validation never emits a hard contract error for
+ * them; instead it emits a diagnostic warning so the classification
+ * remains visible.
+ *
+ * Keeping this explicit (rather than implicit via "unknown key") is
+ * required by Wave-03 Prompt-02: an unregistered operational key must
+ * not share the same fail-open path as an intentional legacy scope-out.
+ */
+const LEGACY_NON_OPERATIONAL_REQUIRED_FIELD_SET_KEYS: ReadonlySet<string> =
+  new Set([
+    'req-ps-inprogress-milestone-v1',
+  ]);
+
+export type RequiredFieldSetClassification =
+  | { readonly kind: 'operational-valid'; readonly set: TemplateRequiredFieldSet }
+  | { readonly kind: 'legacy-non-operational'; readonly key: string }
+  | { readonly kind: 'operational-invalid'; readonly key: string };
+
+/**
+ * Deterministic classifier for a template's `RequiredFieldSetKey`.
+ * Exported so the authoring-health / readiness layers can reason about
+ * the same classification without re-reading the private field-set
+ * tables.
+ */
+export function classifyRequiredFieldSet(
+  key: string | undefined,
+): RequiredFieldSetClassification {
+  const k = typeof key === 'string' ? key : '';
+  const set = REQUIRED_FIELD_SETS[k];
+  if (set) return { kind: 'operational-valid', set };
+  if (LEGACY_NON_OPERATIONAL_REQUIRED_FIELD_SET_KEYS.has(k)) {
+    return { kind: 'legacy-non-operational', key: k };
+  }
+  return { kind: 'operational-invalid', key: k };
+}
 
 function labelFor(key: keyof PublisherArticleRow): string {
   return String(key);
@@ -489,30 +540,58 @@ function validateTemplateRequiredFieldSet(
   context: PublishResolutionContext,
   findings: ValidationFinding[],
 ): void {
-  const set = REQUIRED_FIELD_SETS[context.template.RequiredFieldSetKey];
-  if (!set) {
-    findings.push({
-      category: 'invalid-template-match',
-      severity: 'warning',
-      field: 'template.RequiredFieldSetKey',
-      message: `Unknown RequiredFieldSetKey '${context.template.RequiredFieldSetKey}'. Running global rules only.`,
-      actionHint:
-        'Register a field-set entry for this template, or map it to an existing set.',
-    });
-    return;
-  }
-  for (const key of set.articleFields) {
-    requireField(context.article, key, labelFor(key), findings);
-  }
-  for (const extra of set.extraChecks ?? []) {
-    if (extra.predicate(context.article)) {
+  const classification = classifyRequiredFieldSet(
+    context.template.RequiredFieldSetKey,
+  );
+  switch (classification.kind) {
+    case 'operational-valid': {
+      const set = classification.set;
+      for (const key of set.articleFields) {
+        requireField(context.article, key, labelFor(key), findings);
+      }
+      for (const extra of set.extraChecks ?? []) {
+        if (extra.predicate(context.article)) {
+          findings.push({
+            category: 'missing-required-field',
+            severity: 'error',
+            field: String(extra.key),
+            message: extra.message,
+            actionHint: extra.actionHint,
+          });
+        }
+      }
+      return;
+    }
+    case 'legacy-non-operational': {
+      // Template is an explicit legacy scope-out (e.g. milestone).
+      // Publish is already blocked upstream at the content-type gate
+      // and the orchestrator milestone-legacy guard; emitting a hard
+      // error here would both double-block and conflate legacy scope
+      // with an operational contract defect. Surface a diagnostic
+      // warning instead so the classification stays visible.
       findings.push({
-        category: 'missing-required-field',
-        severity: 'error',
-        field: String(extra.key),
-        message: extra.message,
-        actionHint: extra.actionHint,
+        category: 'invalid-template-match',
+        severity: 'warning',
+        field: 'template.RequiredFieldSetKey',
+        message: `RequiredFieldSetKey '${classification.key}' is a legacy non-operational contract. Publish is gated at the content-type level.`,
+        actionHint:
+          'This template is read-compatible only. Re-enable the field-set and authoring controls to restore publish support.',
       });
+      return;
+    }
+    case 'operational-invalid': {
+      // Wave-03 Prompt-02 fail-closed: an unregistered operational
+      // contract is a control-plane defect. Refuse publish rather
+      // than silently downgrade to global-rule-only enforcement.
+      findings.push({
+        category: 'invalid-template-match',
+        severity: 'error',
+        field: 'template.RequiredFieldSetKey',
+        message: `Operational template required-field-set contract '${classification.key}' is not registered. Publish is blocked until the registry is corrected.`,
+        actionHint:
+          'Register a field-set entry for this key, or map the template to a supported required-field-set.',
+      });
+      return;
     }
   }
 }

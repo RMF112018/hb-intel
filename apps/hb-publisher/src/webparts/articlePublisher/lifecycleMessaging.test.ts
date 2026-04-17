@@ -174,4 +174,28 @@ describe('publishDisabledReason', () => {
       }),
     ).toBeUndefined();
   });
+
+  it('reports dirty working copy ahead of busy', () => {
+    expect(
+      publishDisabledReason({
+        hasDraft: true,
+        destinationSupported: true,
+        validationBlocked: false,
+        busy: true,
+        dirty: true,
+      }),
+    ).toMatch(/Save your edits first/);
+  });
+
+  it('reports dirty working copy after validation block (validation is the higher-signal problem)', () => {
+    expect(
+      publishDisabledReason({
+        hasDraft: true,
+        destinationSupported: true,
+        validationBlocked: true,
+        busy: false,
+        dirty: true,
+      }),
+    ).toMatch(/blocking issues/);
+  });
 });
