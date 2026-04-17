@@ -175,6 +175,24 @@ const useStyles = makeStyles({
     borderRadius: HBC_RADIUS_SM,
     ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
   },
+  contextSummary: {
+    marginTop: `${HBC_SPACE_SM}px`,
+    marginBottom: `${HBC_SPACE_MD}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_MD}px`,
+    paddingRight: `${HBC_SPACE_MD}px`,
+    borderRadius: HBC_RADIUS_SM,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+    fontSize: bodySmall.fontSize,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    lineHeight: 1.35,
+  },
+  contextSummaryWarning: {
+    ...shorthands.borderColor(HBC_STATUS_COLORS.warning),
+    color: HBC_SURFACE_LIGHT['text-primary'],
+  },
 
   // ── Control bar (search / scope / sort / filters) ──────────────────
   controlBar: {
@@ -648,6 +666,23 @@ function describeScopeSource(source: ProjectSitesScopeSource): string {
   return 'Scope source: user-selected';
 }
 
+function buildContextSummary(resolvedScope: IResolvedProjectSitesScope | null): string | null {
+  if (!resolvedScope) return null;
+  if (resolvedScope.source === 'author-override') {
+    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all projects'} from author override.`;
+  }
+  if (resolvedScope.source === 'host-page-year') {
+    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all projects'} from host page Year context.`;
+  }
+  if (resolvedScope.source === 'default-year') {
+    return `No authoritative year context was provided; showing default year ${resolvedScope.resolvedYear ?? ''}.`;
+  }
+  if (resolvedScope.source === 'all-projects-fallback') {
+    return 'No authoritative year context or valid Year values were available; showing All Projects.';
+  }
+  return 'Scope was set directly in this session.';
+}
+
 // ── Component ────────────────────────────────────────────────────────────
 
 interface ProjectSitesRootProps {
@@ -708,6 +743,15 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   const isFiltered = debouncedSearch.trim().length > 0 || !filtersAreEmpty(filters);
   const isSparse = visibleCount > 0 && visibleCount <= 2;
   const activeFilterCount = countActiveFilters(filters);
+  const attentionNeededCount = projectsResult?.status === 'success'
+    ? projectsResult.entries.filter((e) => e.launchStatus.state === 'attention-needed').length
+    : 0;
+  const provisioningCount = projectsResult?.status === 'success'
+    ? projectsResult.entries.filter((e) => e.launchStatus.state === 'provisioning').length
+    : 0;
+  const contextSummary = buildContextSummary(resolvedScope);
+  const showContextWarning = resolvedScope?.source === 'all-projects-fallback'
+    || resolvedScope?.source === 'default-year';
 
   // Live-region announcement text
   const announcement = useMemo(() => {
@@ -1061,6 +1105,26 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       </div>
 
       {renderHeader(true)}
+      {contextSummary && (
+        <div
+          className={mergeClasses(
+            classes.contextSummary,
+            showContextWarning && classes.contextSummaryWarning,
+          )}
+          role="status"
+        >
+          {contextSummary}
+          {projectsResult?.status === 'success' && (
+            <> {attentionNeededCount > 0
+              ? `${attentionNeededCount} record${attentionNeededCount !== 1 ? 's' : ''} ${attentionNeededCount === 1 ? 'needs' : 'need'} data correction.`
+              : ''}
+              {provisioningCount > 0
+                ? ` ${provisioningCount} record${provisioningCount !== 1 ? 's' : ''} ${provisioningCount === 1 ? 'is' : 'are'} not yet launchable because sites are still provisioning.`
+                : ''}
+            </>
+          )}
+        </div>
+      )}
       {renderControlBar()}
 
       {/* Projects loading */}
@@ -1082,7 +1146,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
         <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
             title="No Project Sites"
-            description={`No projects were found for ${scopeLabelShort}. Projects will appear here once they are added to the Projects list.`}
+            description={`No projects matched the current scope (${scopeLabelShort}). This means no records were returned for that scope from the Projects list.`}
             icon={<EmptySearchIcon />}
           />
         </div>

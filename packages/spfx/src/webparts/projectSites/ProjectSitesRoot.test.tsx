@@ -221,7 +221,7 @@ describe('ProjectSitesRoot', () => {
 
     render(<ProjectSitesRoot />);
     expect(screen.getByText('No Project Sites')).toBeInTheDocument();
-    expect(screen.getByText(/No projects were found for 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/No projects matched the current scope/i)).toBeInTheDocument();
   });
 
   it('renders error with role="alert" when project query fails', () => {
@@ -249,6 +249,47 @@ describe('ProjectSitesRoot', () => {
 
     render(<ProjectSitesRoot />);
     expect(screen.getByRole('region', { name: 'Project Sites' })).toBeInTheDocument();
+  });
+
+  it('shows truthful context summary and partial-data messaging', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({
+          id: 1,
+          launchStatus: {
+            state: 'attention-needed',
+            reasonCode: 'critical-data-issue',
+            isLaunchable: false,
+            userMessage: 'Record needs data correction before launch confidence can be established.',
+          },
+        }),
+        createEntry({
+          id: 2,
+          launchStatus: {
+            state: 'provisioning',
+            reasonCode: 'site-not-provisioned',
+            isLaunchable: false,
+            userMessage: 'Site has not been provisioned yet.',
+          },
+          hasSiteUrl: false,
+          siteUrl: '',
+        }),
+      ],
+      errorMessage: null,
+    });
+
+    render(
+      <ProjectSitesRoot
+        runtimeContext={normalizeProjectSitesRuntimeConfig({})}
+      />,
+    );
+
+    expect(screen.getByText(/No authoritative year context was provided/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 record needs data correction/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 record is not yet launchable because sites are still provisioning/i)).toBeInTheDocument();
   });
 
   // ── W01r-P12: search / filter / sort ─────────────────────────────────
