@@ -52,6 +52,19 @@ export const DEFAULT_PRESET: ShellPreset = {
       maxDominantOccupants: 1,
     },
     {
+      id: 'band-safety-field',
+      semanticRole: 'operational-spotlight',
+      slots: [
+        {
+          id: 'slot-safety-field-excellence',
+          occupantId: 'safety-field-excellence',
+          role: 'primary',
+          columnSpan: 'full',
+        },
+      ],
+      maxDominantOccupants: 1,
+    },
+    {
       id: 'band-people-culture',
       semanticRole: 'people-culture',
       slots: [

@@ -14,14 +14,14 @@ describe('OCCUPANT_REGISTRY', () => {
     expect(OCCUPANT_REGISTRY.size).toBe(6);
   });
 
-  it('has five active occupants', () => {
-    expect(getActiveOccupants()).toHaveLength(5);
+  it('has six active occupants', () => {
+    expect(getActiveOccupants()).toHaveLength(6);
   });
 
-  it('has safety-field-excellence as inactive-candidate', () => {
+  it('has safety-field-excellence as active', () => {
     const sfe = getOccupant('safety-field-excellence');
     expect(sfe).toBeDefined();
-    expect(sfe!.status).toBe('inactive-candidate');
+    expect(sfe!.status).toBe('active');
   });
 });
 

@@ -90,7 +90,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
   },
   {
     id: 'safety-field-excellence',
-    status: 'inactive-candidate',
+    status: 'active',
     displayName: 'Safety Field Excellence',
     renderKey: 'SafetyFieldExcellenceZone',
     allowedSlotRoles: ['primary', 'secondary'],

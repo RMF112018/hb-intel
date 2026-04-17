@@ -72,5 +72,6 @@ export const ModuleConfigSlicesSchema = z.object({
   projectPortfolioSpotlight: z.record(z.unknown()).optional(),
   peopleCulturePublic: z.record(z.unknown()).optional(),
   hbKudos: z.record(z.unknown()).optional(),
+  safetyFieldExcellence: z.record(z.unknown()).optional(),
   activeAudience: z.string().optional(),
 });

@@ -13,6 +13,7 @@ import { LeadershipMessageZone } from './zones/LeadershipMessageZone.js';
 import { ProjectPortfolioSpotlightZone } from './zones/ProjectPortfolioSpotlightZone.js';
 import { PeopleCulturePublicZone } from './zones/PeopleCulturePublicZone.js';
 import { HbKudosZone } from './zones/HbKudosZone.js';
+import { SafetyFieldExcellenceZone } from './zones/SafetyFieldExcellenceZone.js';
 import styles from './HbHomepageShell.module.css';
 
 // ---------------------------------------------------------------------------
@@ -26,6 +27,7 @@ const ZONE_COMPONENTS: Readonly<Partial<Record<OccupantId, React.ComponentType<H
   'project-portfolio-spotlight': ProjectPortfolioSpotlightZone,
   'people-culture-public': PeopleCulturePublicZone,
   'hb-kudos': HbKudosZone,
+  'safety-field-excellence': SafetyFieldExcellenceZone,
 };
 
 // ---------------------------------------------------------------------------

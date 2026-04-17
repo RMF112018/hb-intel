@@ -156,6 +156,7 @@ export interface ModuleConfigSlices {
   readonly projectPortfolioSpotlight?: Record<string, unknown>;
   readonly peopleCulturePublic?: Record<string, unknown>;
   readonly hbKudos?: Record<string, unknown>;
+  readonly safetyFieldExcellence?: Record<string, unknown>;
   readonly activeAudience?: string;
 }
 
