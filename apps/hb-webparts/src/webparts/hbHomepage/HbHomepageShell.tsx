@@ -5,8 +5,9 @@ import { parseShellLayout, extractModuleConfigSlices } from './shell/shellValida
 import { getOccupant } from './shell/occupantRegistry.js';
 import { useShellContainer } from './shell/useShellContainer.js';
 import { resolveBandLayout } from './shell/slotComfortResolver.js';
-import type { OccupantId, ShellBand as ShellBandType, ShellEntryState } from './shell/shellTypes.js';
+import type { OccupantId, ShellBand as ShellBandType, ShellLayoutState } from './shell/shellTypes.js';
 import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
+import { ShellFallbackSurface } from './ShellFallbackSurface.js';
 import { CompanyPulseZone } from './zones/CompanyPulseZone.js';
 import { LeadershipMessageZone } from './zones/LeadershipMessageZone.js';
 import { ProjectPortfolioSpotlightZone } from './zones/ProjectPortfolioSpotlightZone.js';
@@ -41,21 +42,59 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
   if (!slot.occupantId) return null;
 
   const descriptor = getOccupant(slot.occupantId);
-  if (!descriptor || descriptor.status !== 'active') return null;
+  const effectiveSpan = comfort.effectiveColumnSpan;
+
+  const slotClassName = `${styles.slot} ${styles[`slot_${slot.role}`]} ${styles[`span_${effectiveSpan}`]}`;
+
+  if (!descriptor) {
+    return (
+      <div
+        className={slotClassName}
+        data-shell-slot={slot.id}
+        data-shell-occupant={slot.occupantId}
+        data-shell-slot-state="unknown"
+      >
+        <ShellFallbackSurface zoneName={slot.occupantId} reason="unknown-occupant" />
+      </div>
+    );
+  }
+
+  if (descriptor.status !== 'active') {
+    return (
+      <div
+        className={slotClassName}
+        data-shell-slot={slot.id}
+        data-shell-occupant={slot.occupantId}
+        data-shell-slot-state="inactive"
+      >
+        <ShellFallbackSurface zoneName={slot.occupantId} reason="inactive-candidate" />
+      </div>
+    );
+  }
 
   const ZoneComponent = ZONE_COMPONENTS[slot.occupantId];
-  if (!ZoneComponent) return null;
-
-  const effectiveSpan = comfort.effectiveColumnSpan;
+  if (!ZoneComponent) {
+    return (
+      <div
+        className={slotClassName}
+        data-shell-slot={slot.id}
+        data-shell-occupant={slot.occupantId}
+        data-shell-slot-state="invalid"
+      >
+        <ShellFallbackSurface zoneName={slot.occupantId} reason="invalid-assignment" />
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`${styles.slot} ${styles[`slot_${slot.role}`]} ${styles[`span_${effectiveSpan}`]}`}
+      className={slotClassName}
       data-shell-slot={slot.id}
       data-shell-occupant={slot.occupantId}
       data-shell-slot-role={slot.role}
       data-shell-column-span={effectiveSpan}
       data-shell-comfort-reason={comfort.reason}
+      data-shell-slot-state="active"
     >
       <ZoneComponent {...zoneProps} />
     </div>
@@ -109,6 +148,23 @@ function formatBandLabel(semanticRole: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Shell diagnostics — log validation issues for engineering visibility
+// ---------------------------------------------------------------------------
+
+function useShellDiagnostics(layoutState: ShellLayoutState): void {
+  React.useEffect(() => {
+    for (const d of layoutState.diagnostics) {
+      const prefix = `[hb-homepage:shell]`;
+      if (d.severity === 'error') {
+        console.error(`${prefix} ${d.code}: ${d.message}`);
+      } else if (d.severity === 'warning') {
+        console.warn(`${prefix} ${d.code}: ${d.message}`);
+      }
+    }
+  }, [layoutState.diagnostics]);
+}
+
+// ---------------------------------------------------------------------------
 // Shell orchestrator — post-hero operating layer
 // ---------------------------------------------------------------------------
 
@@ -137,6 +193,8 @@ export function HbHomepageShell({
     [config],
   );
 
+  useShellDiagnostics(layoutState);
+
   const zoneProps: HbHomepageZoneProps = {
     moduleConfig,
     identity,
@@ -162,6 +220,8 @@ export function HbHomepageShell({
       data-shell-post-hero="true"
       data-shell-entry-state={container.entryState.id}
       data-shell-width={Math.round(container.width)}
+      data-shell-diagnostics-count={layoutState.diagnostics.length}
+      data-shell-normalized-from-default={layoutState.normalizedFromDefault}
     >
       {layoutState.preset.bands.map((band, index) => (
         <ShellBandRenderer

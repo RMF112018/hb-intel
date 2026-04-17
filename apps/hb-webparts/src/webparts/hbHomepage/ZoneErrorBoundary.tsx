@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ShellFallbackSurface } from './ShellFallbackSurface.js';
 
 interface ZoneErrorBoundaryProps {
   zoneName: string;
@@ -7,16 +8,17 @@ interface ZoneErrorBoundaryProps {
 
 interface ZoneErrorBoundaryState {
   hasError: boolean;
+  error: Error | null;
 }
 
 export class ZoneErrorBoundary extends React.Component<ZoneErrorBoundaryProps, ZoneErrorBoundaryState> {
   constructor(props: ZoneErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(): ZoneErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): ZoneErrorBoundaryState {
+    return { hasError: true, error };
   }
 
   override componentDidCatch(error: Error): void {
@@ -25,7 +27,13 @@ export class ZoneErrorBoundary extends React.Component<ZoneErrorBoundaryProps, Z
 
   override render(): React.ReactNode {
     if (this.state.hasError) {
-      return null;
+      return (
+        <ShellFallbackSurface
+          zoneName={this.props.zoneName}
+          reason="render-failure"
+          message="This section is temporarily unavailable."
+        />
+      );
     }
     return this.props.children;
   }

@@ -1,0 +1,22 @@
+/* ---------------------------------------------------------------------------
+   Shell fallback surface — calm, rhythm-preserving placeholder
+   --------------------------------------------------------------------------- */
+
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--hb-surface-subtle, hsl(220, 14%, 96%));
+  border: 1px solid var(--hb-border-subtle, hsl(220, 13%, 91%));
+}
+
+.fallbackMessage {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--hb-text-muted, hsl(220, 9%, 46%));
+  text-align: center;
+}
