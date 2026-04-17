@@ -193,6 +193,39 @@ const useStyles = makeStyles({
     WebkitBoxOrient: 'vertical' as const,
     wordBreak: 'break-word' as const,
   },
+  identityRow: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: `${HBC_SPACE_XS}px`,
+  },
+  identityChip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: bodySmall.fontSize,
+    fontWeight: 600,
+    lineHeight: 1.25,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+    borderRadius: HBC_RADIUS_SM,
+    paddingTop: '2px',
+    paddingBottom: '2px',
+    paddingLeft: `${HBC_SPACE_XS}px`,
+    paddingRight: `${HBC_SPACE_XS}px`,
+    maxWidth: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  accessConfidence: {
+    fontSize: bodySmall.fontSize,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    lineHeight: 1.35,
+  },
+  accessConfidenceMuted: {
+    color: HBC_SURFACE_LIGHT['text-muted'],
+  },
 
   // ── Footer ─────────────────────────────────────────────────────────
   footer: {
@@ -309,6 +342,32 @@ function formatDepartment(raw: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function formatOfficeDivision(raw: string): string {
+  if (!raw) return '';
+  return raw
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function resolveIdentityLocation(entry: IProjectSiteEntry): string {
+  const cityState = [entry.projectCity.trim(), entry.projectState.trim()].filter(Boolean).join(', ');
+  if (cityState) return cityState;
+  return entry.projectLocation;
+}
+
+function resolveLaunchConfidenceMessage(entry: IProjectSiteEntry): string {
+  if (entry.launchStatus.state === 'live') {
+    return 'Launch confidence: Site link is available. Access depends on your SharePoint permissions.';
+  }
+  if (entry.launchStatus.state === 'archived') {
+    return 'Launch confidence: Archived site link is available. Access depends on your SharePoint permissions.';
+  }
+  if (entry.launchStatus.state === 'attention-needed') {
+    return 'Launch confidence: blocked until launch-critical data issues are corrected.';
+  }
+  return 'Launch confidence: site is still provisioning and not launchable yet.';
+}
+
 function resolveStageVariant(stage: string): StatusVariant {
   const lower = stage.toLowerCase();
   if (lower === 'active') return 'onTrack';
@@ -340,12 +399,15 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry, layoutMode = 
   const metadataItems = useMemo<DescriptionListItem[]>(() => {
     const items: DescriptionListItem[] = [];
     if (entry.clientName) items.push({ label: 'Client', value: entry.clientName });
-    if (entry.projectLocation) items.push({ label: 'Location', value: entry.projectLocation });
+    const location = resolveIdentityLocation(entry);
+    if (location) items.push({ label: 'Location', value: location });
     if (entry.projectType) items.push({ label: 'Type', value: entry.projectType });
     return items;
-  }, [entry.clientName, entry.projectLocation, entry.projectType]);
+  }, [entry.clientName, entry.projectCity, entry.projectLocation, entry.projectState, entry.projectType]);
 
   const deptLabel = formatDepartment(entry.department);
+  const officeDivisionLabel = formatOfficeDivision(entry.officeDivision);
+  const launchConfidenceMessage = resolveLaunchConfidenceMessage(entry);
 
   const headerContent = (
     <div className={classes.header}>
@@ -395,6 +457,19 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry, layoutMode = 
   const bodyContent = (
     <div className={classes.body}>
       <h3 className={classes.projectName}>{entry.projectName}</h3>
+      <div className={classes.identityRow}>
+        <span className={classes.identityChip}>{entry.year}</span>
+        {officeDivisionLabel && <span className={classes.identityChip}>{officeDivisionLabel}</span>}
+        {deptLabel && <span className={classes.identityChip}>{deptLabel}</span>}
+      </div>
+      <span
+        className={mergeClasses(
+          classes.accessConfidence,
+          !entry.launchStatus.isLaunchable && classes.accessConfidenceMuted,
+        )}
+      >
+        {launchConfidenceMessage}
+      </span>
       {!entry.launchStatus.isLaunchable && (
         <span
           className={mergeClasses(

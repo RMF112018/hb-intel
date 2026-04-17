@@ -95,7 +95,7 @@ describe('ProjectSiteCard', () => {
       />,
     );
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(screen.getByText(/provisioning/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Provisioning$/)).toBeInTheDocument();
     expect(container.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
   });
 
@@ -143,6 +143,21 @@ describe('ProjectSiteCard', () => {
     expect(screen.getByText('Healthcare')).toBeInTheDocument();
   });
 
+  it('prefers structured city/state for location metadata when available', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          projectCity: 'Orlando',
+          projectState: 'FL',
+          projectLocation: 'Legacy Location Text',
+        })}
+      />,
+    );
+
+    expect(screen.getByText('Orlando, FL')).toBeInTheDocument();
+    expect(screen.queryByText('Legacy Location Text')).not.toBeInTheDocument();
+  });
+
   it('omits metadata grid when all optional fields are empty', () => {
     render(
       <ProjectSiteCard
@@ -160,7 +175,7 @@ describe('ProjectSiteCard', () => {
 
   it('renders formatted department in footer', () => {
     render(<ProjectSiteCard entry={createEntry({ department: 'luxury-residential' })} />);
-    expect(screen.getByText('Luxury Residential')).toBeInTheDocument();
+    expect(screen.getAllByText('Luxury Residential').length).toBeGreaterThan(0);
   });
 
   it('does not render project number badge when empty', () => {
@@ -182,5 +197,35 @@ describe('ProjectSiteCard', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('data-project-sites-card-layout', 'compact');
     expect(screen.getByText('Open Site')).toBeInTheDocument();
+  });
+
+  it('shows identity chips and truthful launch confidence for live records', () => {
+    render(<ProjectSiteCard entry={createEntry()} />);
+    expect(screen.getByText('2024')).toBeInTheDocument();
+    expect(screen.getByText('South Florida')).toBeInTheDocument();
+    expect(
+      screen.getByText(/launch confidence: site link is available\. access depends on your sharepoint permissions\./i),
+    ).toBeInTheDocument();
+  });
+
+  it('shows non-speculative blocked launch-confidence message for provisioning records', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          hasSiteUrl: false,
+          siteUrl: '',
+          launchStatus: {
+            state: 'provisioning',
+            reasonCode: 'site-not-provisioned',
+            isLaunchable: false,
+            userMessage: 'Site has not been provisioned yet.',
+          },
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByText(/launch confidence: site is still provisioning and not launchable yet\./i),
+    ).toBeInTheDocument();
   });
 });

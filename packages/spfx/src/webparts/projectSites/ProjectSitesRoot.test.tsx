@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import type {
   IAvailableYearsResult,
   IProjectSitesResult,
@@ -122,10 +122,11 @@ describe('ProjectSitesRoot', () => {
     });
 
     render(<ProjectSitesRoot />);
-    expect(screen.getByRole('radiogroup', { name: 'Scope' })).toBeInTheDocument();
-    expect(screen.getByText('All Projects')).toBeInTheDocument();
-    expect(screen.getByText('2026')).toBeInTheDocument();
-    expect(screen.getByText('2025')).toBeInTheDocument();
+    const scopeGroup = screen.getByRole('radiogroup', { name: 'Scope' });
+    expect(scopeGroup).toBeInTheDocument();
+    expect(within(scopeGroup).getByText('All Projects')).toBeInTheDocument();
+    expect(within(scopeGroup).getByText('2026')).toBeInTheDocument();
+    expect(within(scopeGroup).getByText('2025')).toBeInTheDocument();
   });
 
   it('renders compact scope selector instead of segmented control in compact mode', () => {
