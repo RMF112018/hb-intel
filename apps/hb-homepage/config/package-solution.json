@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "hb-intel-homepage",
+    "id": "b7d3f8a1-4c62-4e9b-a851-2d6f0e3c7a49",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "HB Caldwell",
+      "websiteUrl": "https://hbcaldwell.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": ""
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "HB Intel Homepage"
+      },
+      "longDescription": {
+        "default": "Governed homepage shell orchestrating Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos with entry-stack contract, preset-driven layout, and occupant capability metadata."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "hb-intel-homepage Feature",
+        "description": "Deploys HB Intel Homepage webpart assets.",
+        "id": "c4e91f7d-8a23-4b56-9d0e-1f3c5a7b2d84",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/hb-intel-homepage.sppkg"
+  }
+}

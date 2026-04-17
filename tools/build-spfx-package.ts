@@ -188,6 +188,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
+  { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage' },
   { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi', freshBuildRequired: true },
   { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
@@ -203,6 +204,10 @@ const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
   // SharePoint pages still using this GUID must migrate to the
   // split seams.
   '27ac10f4-4054-4dd2-bd53-3b4ef4379ab4',
+  // HB Homepage is now packaged as its own standalone solution
+  // (hb-intel-homepage.sppkg) via apps/hb-homepage. Excluded from
+  // hb-webparts packaging to prevent duplicate manifest ownership.
+  'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf',
 ]);
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
 const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
