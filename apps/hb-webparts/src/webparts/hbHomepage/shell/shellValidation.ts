@@ -293,3 +293,42 @@ export function validatePresetStructure(preset: unknown): ShellLayoutState {
   const validated = validatePreset(result.data as ShellPreset, diagnostics);
   return { preset: validated, diagnostics, normalizedFromDefault: false };
 }
+
+export interface PreviewValidationResult {
+  readonly valid: boolean;
+  readonly errors: readonly ShellDiagnostic[];
+  readonly warnings: readonly ShellDiagnostic[];
+  readonly info: readonly ShellDiagnostic[];
+  readonly summary: string;
+}
+
+export function previewShellLayout(input: unknown): PreviewValidationResult {
+  const layoutState = parseShellLayout(input);
+  const errors = layoutState.diagnostics.filter((d) => d.severity === 'error');
+  const warnings = layoutState.diagnostics.filter((d) => d.severity === 'warning');
+  const info = layoutState.diagnostics.filter((d) => d.severity === 'info');
+
+  const valid = errors.length === 0;
+
+  let summary: string;
+  if (!valid) {
+    summary = `Invalid: ${errors.length} error(s) — ${errors.map((e) => e.code).join(', ')}`;
+  } else if (warnings.length > 0) {
+    summary = `Valid with ${warnings.length} warning(s) — ${warnings.map((w) => w.code).join(', ')}`;
+  } else {
+    summary = `Valid: preset "${layoutState.preset.id}" with ${layoutState.preset.bands.length} bands`;
+  }
+
+  return { valid, errors, warnings, info, summary };
+}
+
+export function previewBandOverride(
+  presetId: string | undefined,
+  bandId: string,
+  slotChanges: ReadonlyArray<{ slotId: string; occupantId?: string; role?: string; columnSpan?: string }>,
+): PreviewValidationResult {
+  return previewShellLayout({
+    presetId,
+    bandOverrides: [{ bandId, slots: slotChanges }],
+  });
+}
