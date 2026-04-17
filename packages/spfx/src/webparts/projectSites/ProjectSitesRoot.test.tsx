@@ -55,6 +55,12 @@ function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry 
       hasAnyIssue: false,
       hasLaunchCriticalIssue: false,
     },
+    launchStatus: {
+      state: 'live',
+      reasonCode: 'live-site-ready',
+      isLaunchable: true,
+      userMessage: 'Live site is available and launch-ready.',
+    },
     ...overrides,
   };
 }

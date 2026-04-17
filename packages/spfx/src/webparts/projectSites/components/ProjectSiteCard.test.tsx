@@ -35,6 +35,12 @@ function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry 
       hasAnyIssue: false,
       hasLaunchCriticalIssue: false,
     },
+    launchStatus: {
+      state: 'live',
+      reasonCode: 'live-site-ready',
+      isLaunchable: true,
+      userMessage: 'Live site is available and launch-ready.',
+    },
     ...overrides,
   };
 }
@@ -76,11 +82,39 @@ describe('ProjectSiteCard', () => {
 
   it('renders as disabled div when hasSiteUrl is false', () => {
     const { container } = render(
-      <ProjectSiteCard entry={createEntry({ hasSiteUrl: false, siteUrl: '' })} />,
+      <ProjectSiteCard entry={createEntry({
+        hasSiteUrl: false,
+        siteUrl: '',
+        launchStatus: {
+          state: 'provisioning',
+          reasonCode: 'site-not-provisioned',
+          isLaunchable: false,
+          userMessage: 'Site has not been provisioned yet.',
+        },
+      })}
+      />,
     );
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText(/provisioning/i)).toBeInTheDocument();
     expect(container.querySelector('[aria-disabled="true"]')).toBeInTheDocument();
+  });
+
+  it('renders attention-needed state with explicit guidance', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          launchStatus: {
+            state: 'attention-needed',
+            reasonCode: 'critical-data-issue',
+            isLaunchable: false,
+            userMessage: 'Record needs data correction before launch confidence can be established.',
+          },
+        })}
+      />,
+    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText(/attention needed/i)).toBeInTheDocument();
+    expect(screen.getByText(/data correction/i)).toBeInTheDocument();
   });
 
   it('renders stage badge for Active', () => {

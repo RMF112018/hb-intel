@@ -34,6 +34,7 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     expect(result.hasSiteUrl).toBe(true);
     expect(result.dataQuality.classification).toBe('complete');
     expect(result.dataQuality.issues).toEqual([]);
+    expect(result.launchStatus.state).toBe('live');
   });
 
   it('extracts URL from SharePoint Hyperlink object { Url }', () => {
@@ -58,6 +59,7 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     expect(result.hasSiteUrl).toBe(false);
     expect(result.dataQuality.classification).toBe('partial');
     expect(result.dataQuality.issues).toContain('missing-site-url');
+    expect(result.launchStatus.state).toBe('provisioning');
   });
 
   it('returns empty when field_23 is missing', () => {
@@ -82,6 +84,7 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     expect(result.hasSiteUrl).toBe(false);
     expect(result.dataQuality.classification).toBe('malformed');
     expect(result.dataQuality.issues).toContain('malformed-site-url');
+    expect(result.launchStatus.state).toBe('attention-needed');
   });
 });
 
@@ -155,6 +158,13 @@ describe('normalizeProjectSiteEntry — standard fields', () => {
     const result = normalizeProjectSiteEntry(createItem({ Year: 2200 }));
     expect(result.dataQuality.classification).toBe('malformed');
     expect(result.dataQuality.issues).toContain('invalid-year');
+    expect(result.launchStatus.state).toBe('attention-needed');
+  });
+
+  it('classifies inactive stage with live site as archived', () => {
+    const result = normalizeProjectSiteEntry(createItem({ field_6: 'Archived' }));
+    expect(result.launchStatus.state).toBe('archived');
+    expect(result.launchStatus.isLaunchable).toBe(true);
   });
 });
 

@@ -1,14 +1,15 @@
 /**
  * ProjectSiteCard — Governed project-site link card with state differentiation.
  *
- * Three visual states:
- * - **Active** (hasSiteUrl + active/pursuit stage): HBC blue top accent,
+ * Four visual states:
+ * - **Live** (launch-ready): HBC blue top accent,
  *   full elevation, hover lift, and a brand-tinted action chip for the
  *   "Open Site" affordance.
- * - **Archived/Other** (hasSiteUrl + non-active stage): muted top accent,
+ * - **Archived/Inactive**: muted top accent,
  *   reduced elevation, neutral action chip.
- * - **Provisioning** (!hasSiteUrl): HBC orange top accent, dashed border,
+ * - **Provisioning** (not yet launchable): HBC orange top accent, dashed border,
  *   pulsing indicator dot, non-interactive.
+ * - **Attention-needed** (data issue): error accent and explicit guidance.
  *
  * Light-theme only, governed by `@hbc/ui-kit/theme` tokens.
  *
@@ -31,6 +32,7 @@ import {
   HBC_PRIMARY_BLUE,
   HBC_ACCENT_ORANGE,
   HBC_BRAND_ACTION,
+  HBC_STATUS_COLORS,
   HBC_SURFACE_LIGHT,
   HBC_RADIUS_SM,
   HBC_RADIUS_XL,
@@ -125,6 +127,18 @@ const useStyles = makeStyles({
     ...shorthands.borderTop('3px', 'solid', HBC_ACCENT_ORANGE),
     ':hover': {
       boxShadow: 'none',
+      transform: 'none',
+    },
+  },
+  // ── Attention-needed state (malformed launch-critical data) ────────
+  attentionWrapper: {
+    cursor: 'default',
+    boxShadow: elevationLevel0,
+    backgroundColor: '#fff5f5',
+    ...shorthands.border('1px', 'solid', HBC_STATUS_COLORS.error),
+    ...shorthands.borderTop('3px', 'solid', HBC_STATUS_COLORS.error),
+    ':hover': {
+      boxShadow: elevationLevel0,
       transform: 'none',
     },
   },
@@ -235,6 +249,15 @@ const useStyles = makeStyles({
     color: HBC_ACCENT_ORANGE,
     flexShrink: 0,
   },
+  statusMessage: {
+    fontSize: bodySmall.fontSize,
+    color: HBC_SURFACE_LIGHT['text-muted'],
+    lineHeight: 1.35,
+  },
+  statusMessageWarning: {
+    color: HBC_STATUS_COLORS.error,
+    fontWeight: 600,
+  },
   provisioningDot: {
     display: 'inline-block',
     width: `${HBC_SPACE_XS + 2}px`,
@@ -278,11 +301,13 @@ function resolveStageVariant(stage: string): StatusVariant {
   return 'neutral';
 }
 
-function resolveCardState(entry: IProjectSiteEntry): 'active' | 'provisioning' | 'archived' {
-  if (!entry.hasSiteUrl) return 'provisioning';
-  const lower = entry.projectStage?.toLowerCase() ?? '';
-  if (lower === 'active' || lower === 'pursuit') return 'active';
-  return 'archived';
+type CardVisualState = 'active' | 'provisioning' | 'archived' | 'attention';
+
+function resolveVisualState(entry: IProjectSiteEntry): CardVisualState {
+  if (entry.launchStatus.state === 'live') return 'active';
+  if (entry.launchStatus.state === 'provisioning') return 'provisioning';
+  if (entry.launchStatus.state === 'archived') return 'archived';
+  return 'attention';
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -293,7 +318,7 @@ export interface ProjectSiteCardProps {
 
 export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const classes = useStyles();
-  const cardState = resolveCardState(entry);
+  const cardState = resolveVisualState(entry);
 
   const metadataItems = useMemo<DescriptionListItem[]>(() => {
     const items: DescriptionListItem[] = [];
@@ -330,10 +355,12 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const footerContent = (
     <div className={classes.footer}>
       <span className={classes.department}>{deptLabel}</span>
-      {entry.hasSiteUrl ? (
+      {entry.launchStatus.isLaunchable ? (
         <span className={openSiteActionClass} aria-hidden="true">
-          Open Site <ExternalLink size="sm" />
+          {entry.launchStatus.state === 'archived' ? 'View Archived Site' : 'Open Site'} <ExternalLink size="sm" />
         </span>
+      ) : entry.launchStatus.state === 'attention-needed' ? (
+        <span className={classes.provisioningLabel}>Attention Needed</span>
       ) : (
         <span className={classes.provisioningLabel}>
           <span className={classes.provisioningDot} aria-hidden="true" />
@@ -346,6 +373,16 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
   const bodyContent = (
     <div className={classes.body}>
       <h3 className={classes.projectName}>{entry.projectName}</h3>
+      {!entry.launchStatus.isLaunchable && (
+        <span
+          className={mergeClasses(
+            classes.statusMessage,
+            entry.launchStatus.state === 'attention-needed' && classes.statusMessageWarning,
+          )}
+        >
+          {entry.launchStatus.userMessage}
+        </span>
+      )}
       {metadataItems.length > 0 && (
         <div className={classes.metaList}>
           <HbcDescriptionList items={metadataItems} dense />
@@ -362,9 +399,10 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     cardState === 'archived' && classes.archivedWrapper,
     cardState === 'archived' && classes.archivedAccent,
     cardState === 'provisioning' && classes.provisioningWrapper,
+    cardState === 'attention' && classes.attentionWrapper,
   );
 
-  if (entry.hasSiteUrl) {
+  if (entry.launchStatus.isLaunchable && entry.hasSiteUrl) {
     return (
       <a
         href={entry.siteUrl}
@@ -384,7 +422,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     <div
       className={wrapperClass}
       aria-disabled="true"
-      aria-label={`${entry.projectName} — site provisioning in progress`}
+      aria-label={`${entry.projectName} — ${entry.launchStatus.userMessage}`}
     >
       <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
         {bodyContent}

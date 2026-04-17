@@ -161,6 +161,7 @@ export interface IProjectSiteEntry {
   siteUrl: string;
   hasSiteUrl: boolean;
   dataQuality: IProjectSiteDataQuality;
+  launchStatus: IProjectSiteLaunchStatus;
 }
 
 export type ProjectSiteDataIssueCode =
@@ -175,6 +176,26 @@ export interface IProjectSiteDataQuality {
   issues: ProjectSiteDataIssueCode[];
   hasAnyIssue: boolean;
   hasLaunchCriticalIssue: boolean;
+}
+
+export type ProjectSiteLaunchState =
+  | 'live'
+  | 'provisioning'
+  | 'archived'
+  | 'attention-needed';
+
+export type ProjectSiteLaunchReasonCode =
+  | 'live-site-ready'
+  | 'inactive-stage-live-site'
+  | 'inactive-stage-no-site'
+  | 'site-not-provisioned'
+  | 'critical-data-issue';
+
+export interface IProjectSiteLaunchStatus {
+  state: ProjectSiteLaunchState;
+  reasonCode: ProjectSiteLaunchReasonCode;
+  isLaunchable: boolean;
+  userMessage: string;
 }
 
 // ── Year validation ────────────────────────────────────────────────────────

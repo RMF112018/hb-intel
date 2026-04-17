@@ -18,6 +18,7 @@ import type {
   ProjectSiteDataIssueCode,
 } from './types.js';
 import { SP_PROJECTS_FIELDS, isValidYear } from './types.js';
+import { deriveProjectSiteLaunchStatus } from './projectSiteLaunchState.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -192,6 +193,11 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
       issues.includes('missing-site-url') ||
       issues.includes('malformed-site-url'),
   };
+  const launchStatus = deriveProjectSiteLaunchStatus({
+    hasSiteUrl: siteUrl.length > 0,
+    projectStage: safeString(stageRaw),
+    dataQuality,
+  });
 
   return {
     id,
@@ -217,6 +223,7 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
     siteUrl,
     hasSiteUrl: siteUrl.length > 0,
     dataQuality,
+    launchStatus,
   };
 }
 
