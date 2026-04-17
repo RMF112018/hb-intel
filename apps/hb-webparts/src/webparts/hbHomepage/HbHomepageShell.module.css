@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------
+   Shell — post-hero operating layer
+   --------------------------------------------------------------------------- */
+
 .shell {
   display: flex;
   flex-direction: column;
@@ -21,6 +25,77 @@
     padding: 2.5rem 2rem;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Band — semantic horizontal grouping within the shell
+   --------------------------------------------------------------------------- */
+
+.band {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.entryBand {
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .band {
+    gap: 2rem;
+  }
+
+  .entryBand {
+    gap: 2.5rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Slot — occupant container within a band
+   --------------------------------------------------------------------------- */
+
+.slot {
+  min-width: 0;
+}
+
+.slot_primary {
+  order: 0;
+}
+
+.slot_secondary {
+  order: 1;
+}
+
+.slot_compact {
+  order: 2;
+}
+
+.span_full {
+  grid-column: 1 / -1;
+}
+
+.span_major {
+  grid-column: 1 / -1;
+}
+
+.span_minor {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1180px) {
+  .span_major {
+    grid-column: span 1;
+  }
+
+  .span_minor {
+    grid-column: span 1;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion
+   --------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .shell * {
