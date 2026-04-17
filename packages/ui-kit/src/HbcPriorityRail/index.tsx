@@ -24,8 +24,10 @@ export type {
   HbcPriorityRailPreviewSurfaceProps,
   PriorityRailActionModel,
   PriorityRailGroupModel,
+  PriorityRailSectionModel,
   PriorityRailUrgency,
   PriorityRailBadgeVariant,
   PriorityRailLayoutMode,
+  PriorityRailOverflowStrategy,
   PriorityRailState,
 } from './types.js';

@@ -1,10 +1,6 @@
 /**
  * HbcPriorityRail — Priority Actions command band surface
- * Phase 02 — Command-band surface family
- *
- * Dense, operational command band for priority actions.
- * Distinct from HbcCommandSurface: breakpoint-aware overflow,
- * grouped actions, layout mode variants, and preview support.
+ * Phase 03 — Shared command-band family rebuild
  */
 
 /* ── Surface root ─────────────────────────────────────────── */
@@ -34,7 +30,7 @@
   background: linear-gradient(180deg, rgba(196, 54, 42, 0.035) 0%, rgba(34, 83, 145, 0.025) 24%);
 }
 
-/* ���─ Layout variants ──────────────────────────────────────── */
+/* ── Layout variants ──────────────────────────────────────── */
 .layoutRail {}
 
 .layoutGrid .items {
@@ -94,6 +90,43 @@
   background: rgba(34, 83, 145, 0.08);
   border: none;
   margin: 0;
+}
+
+/* ── Sections ─────────────────────────────────────────────── */
+.sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px 6px;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(26, 26, 26, 0.56);
+}
+
+.sectionTitle {
+  font-weight: 700;
+}
+
+.sectionCount {
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(34, 83, 145, 0.08);
+  color: #225391;
+  min-width: 22px;
+  text-align: center;
+  padding: 1px 7px;
 }
 
 /* ── Item list ────────────────────────────────────────────── */
@@ -241,6 +274,59 @@
 /* ── Overflow panel ───────────────────────────────────────── */
 .overflowPanel {
   overflow: hidden;
+}
+
+.overflowPanelInline {
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+}
+
+.overflowPanelMenu {
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.overflowPanelSheet {
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  background: linear-gradient(180deg, rgba(34, 83, 145, 0.04) 0%, rgba(255, 255, 255, 0.9) 24%);
+}
+
+.overflowSheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.overflowSheetTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #225391;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.overflowSheetBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.overflowClose {
+  border: 1px solid rgba(34, 83, 145, 0.2);
+  background: none;
+  color: #225391;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.overflowClose:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
 }
 
 /* ── Skeleton ─────────────────────────────────────────────── */

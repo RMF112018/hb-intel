@@ -2,8 +2,8 @@
  * HbcPriorityRailSurface — Primary priority actions command band.
  *
  * Dense, operational command band surface for urgent actions, approvals,
- * and task queues. Supports urgency variants, layout modes, and
- * breakpoint-driven overflow.
+ * and task queues. Supports urgency variants, layout modes, grouped
+ * composition, and strategy-based overflow behavior.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -12,25 +12,74 @@ import * as Separator from '@radix-ui/react-separator';
 import { priorityRailSurface } from './variants.js';
 import { HbcPriorityRailAction } from './HbcPriorityRailAction.js';
 import { HbcPriorityRailOverflow } from './HbcPriorityRailOverflow.js';
-import type { HbcPriorityRailSurfaceProps } from './types.js';
+import type {
+  HbcPriorityRailSurfaceProps,
+  PriorityRailActionModel,
+  PriorityRailSectionModel,
+} from './types.js';
 import styles from './priority-rail.module.css';
+
+function inferSectionsFromItems(items: PriorityRailActionModel[]): PriorityRailSectionModel[] {
+  if (items.length === 0) return [];
+
+  const hasGroupMetadata = items.some((item) => item.groupKey || item.groupTitle);
+  if (!hasGroupMetadata) {
+    return [{ key: '__default', actions: items }];
+  }
+
+  const map = new Map<string, PriorityRailSectionModel>();
+
+  for (const item of items) {
+    const key = (item.groupKey || item.groupTitle || '__ungrouped').trim() || '__ungrouped';
+    const existing = map.get(key);
+    if (existing) {
+      existing.actions.push(item);
+      continue;
+    }
+
+    map.set(key, {
+      key,
+      title: item.groupTitle || (item.groupKey ? item.groupKey : undefined),
+      actions: [item],
+    });
+  }
+
+  return Array.from(map.values());
+}
+
+function resolveSections(
+  items: PriorityRailActionModel[],
+  sections: PriorityRailSectionModel[] | undefined,
+): PriorityRailSectionModel[] {
+  if (sections && sections.length > 0) {
+    return sections.filter((section) => section.actions.length > 0);
+  }
+
+  return inferSectionsFromItems(items);
+}
 
 export function HbcPriorityRailSurface({
   title = 'Priority Actions',
   urgency = 'default',
   layout = 'rail',
   items,
+  sections,
   overflowItems,
   overflowLabel = 'More tools',
+  overflowStrategy = 'inline-disclosure',
   showBadges = true,
   className,
   'aria-label': ariaLabel,
 }: HbcPriorityRailSurfaceProps): React.JSX.Element {
+  const resolvedSections = resolveSections(items, sections);
+  const showSectionHeaders = resolvedSections.length > 1;
+
   return (
     <section
       aria-label={ariaLabel ?? title}
       className={clsx(priorityRailSurface({ urgency, layout }), className)}
       data-hbc-premium="priority-rail"
+      data-hbc-ui="priority-rail"
     >
       <div className={styles.header}>
         <div className={styles.headerTitle}>
@@ -43,18 +92,38 @@ export function HbcPriorityRailSurface({
 
       <Separator.Root className={styles.separator} decorative />
 
-      <div className={styles.items} role="list">
-        {items.map((action, i) => (
-          <React.Fragment key={action.id}>
-            {i > 0 ? <Separator.Root className={styles.itemSeparator} decorative /> : null}
-            <div role="listitem">
-              <HbcPriorityRailAction
-                action={action}
-                showBadge={showBadges}
-                compact={layout === 'compact'}
-              />
+      <div className={styles.sections}>
+        {resolvedSections.map((section, sectionIndex) => (
+          <div
+            key={section.key}
+            className={styles.section}
+            data-hbc-section={section.key}
+            data-testid={`section-${section.key}`}
+          >
+            {showSectionHeaders || section.title ? (
+              <div className={styles.sectionHeader}>
+                <span className={styles.sectionTitle}>{section.title ?? 'Actions'}</span>
+                <span className={styles.sectionCount}>{section.actions.length}</span>
+              </div>
+            ) : null}
+
+            <div className={styles.items} role="list">
+              {section.actions.map((action, actionIndex) => (
+                <React.Fragment key={action.id}>
+                  {sectionIndex > 0 || actionIndex > 0 ? (
+                    <Separator.Root className={styles.itemSeparator} decorative />
+                  ) : null}
+                  <div role="listitem">
+                    <HbcPriorityRailAction
+                      action={action}
+                      showBadge={showBadges}
+                      compact={layout === 'compact'}
+                    />
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
-          </React.Fragment>
+          </div>
         ))}
       </div>
 
@@ -62,6 +131,7 @@ export function HbcPriorityRailSurface({
         <HbcPriorityRailOverflow
           items={overflowItems}
           label={overflowLabel}
+          strategy={overflowStrategy}
           showBadges={showBadges}
         />
       ) : null}

@@ -24,7 +24,8 @@ export function HbcPriorityRailAction({
   className,
 }: HbcPriorityRailActionProps): React.JSX.Element {
   const IconComponent = action.icon;
-  const linkProps = action.external
+  const isExternal = Boolean(action.external);
+  const linkProps = isExternal
     ? { href: action.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: action.href };
 
@@ -32,6 +33,7 @@ export function HbcPriorityRailAction({
     <motion.div whileHover={{ x: 2 }} transition={{ duration: 0.12 }}>
       <a
         className={clsx(styles.item, compact && styles.itemCompact, className)}
+        data-hbc-ui="priority-rail-action"
         {...linkProps}
       >
         {IconComponent ? (
@@ -54,7 +56,7 @@ export function HbcPriorityRailAction({
             />
           </span>
         ) : null}
-        {action.external ? (
+        {isExternal ? (
           <ExternalLink size={12} className={styles.itemExternal} aria-label="Opens in new tab" />
         ) : (
           <ArrowRight size={12} className={styles.itemArrow} aria-hidden="true" />

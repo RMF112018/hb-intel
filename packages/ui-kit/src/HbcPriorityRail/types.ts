@@ -6,7 +6,6 @@
  * data-layer contracts into these shapes before rendering.
  */
 import type { LucideIcon } from 'lucide-react';
-import type React from 'react';
 
 /* ── Enumerations ────────────────────────────────────────────────── */
 
@@ -14,6 +13,7 @@ export type PriorityRailUrgency = 'default' | 'high' | 'critical';
 export type PriorityRailBadgeVariant = 'neutral' | 'info' | 'warning' | 'success' | 'critical';
 export type PriorityRailLayoutMode = 'rail' | 'grid' | 'compact';
 export type PriorityRailState = 'idle' | 'loading' | 'empty' | 'error' | 'ready';
+export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'menu' | 'sheet';
 
 /* ── Action item model ───────────────────────────────────────────── */
 
@@ -41,6 +41,12 @@ export interface PriorityRailGroupModel {
   actions: PriorityRailActionModel[];
 }
 
+export interface PriorityRailSectionModel {
+  key: string;
+  title?: string;
+  actions: PriorityRailActionModel[];
+}
+
 /* ── Surface props ───────────────────────────────────────────────── */
 
 export interface HbcPriorityRailSurfaceProps {
@@ -48,8 +54,10 @@ export interface HbcPriorityRailSurfaceProps {
   urgency?: PriorityRailUrgency;
   layout?: PriorityRailLayoutMode;
   items: PriorityRailActionModel[];
+  sections?: PriorityRailSectionModel[];
   overflowItems?: PriorityRailActionModel[];
   overflowLabel?: string;
+  overflowStrategy?: PriorityRailOverflowStrategy;
   showBadges?: boolean;
   className?: string;
   'aria-label'?: string;
@@ -69,6 +77,7 @@ export interface HbcPriorityRailActionProps {
 export interface HbcPriorityRailOverflowProps {
   items: PriorityRailActionModel[];
   label?: string;
+  strategy?: PriorityRailOverflowStrategy;
   showBadges?: boolean;
   className?: string;
 }
@@ -105,8 +114,10 @@ export interface HbcPriorityRailPreviewSurfaceProps {
   urgency?: PriorityRailUrgency;
   layout?: PriorityRailLayoutMode;
   items: PriorityRailActionModel[];
+  sections?: PriorityRailSectionModel[];
   overflowItems?: PriorityRailActionModel[];
   overflowLabel?: string;
+  overflowStrategy?: PriorityRailOverflowStrategy;
   showBadges?: boolean;
   previewLabel?: string;
   className?: string;
