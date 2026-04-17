@@ -168,6 +168,20 @@ const ACTIONS: readonly ActionDescriptor[] = [
     expectedArtifacts: EXTRACTION_ARTIFACTS,
     allowedExecutionIntents: ['sharepoint-provision-and-seed'],
   },
+  {
+    actionKey: 'sharepoint-control:proof:homepage-action-layer',
+    label: 'Homepage Action-Layer Cutover Proof',
+    description:
+      'Authoritative read-only proof that inspects the live homepage canvas and verifies hero -> PriorityActionsRail -> hbHomepage order with no OOB Quick Links in the action layer.',
+    riskLevel: 'read-only',
+    executionMode: 'advisory',
+    supportsPreview: true,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
+  },
 ] as const;
 
 const ALIASES: Record<string, CanonicalPnpActionKey> = {
@@ -182,6 +196,7 @@ const ALIASES: Record<string, CanonicalPnpActionKey> = {
   'sharepoint:pnp:priority-actions-band-seed': 'sharepoint-control:provisioning:priority-actions-band-seed-items',
   'sharepoint:pnp:priority-actions-band-provision-and-seed': 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
   'sharepoint:pnp:flagship-action-layer-cutover': 'sharepoint-control:provisioning:flagship-action-layer-cutover',
+  'sharepoint:pnp:homepage-action-layer-proof': 'sharepoint-control:proof:homepage-action-layer',
 };
 
 export function getActions(): readonly ActionDescriptor[] {

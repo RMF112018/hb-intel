@@ -30,4 +30,14 @@ describe('actionCatalog', () => {
     expect(descriptor.executionMode).toBe('apply');
     expect(descriptor.allowedExecutionIntents).toContain('sharepoint-provision-and-seed');
   });
+
+  it('registers the homepage action-layer proof action as authoritative read-only proof', () => {
+    expect(resolveActionKey('sharepoint:pnp:homepage-action-layer-proof')).toBe(
+      'sharepoint-control:proof:homepage-action-layer',
+    );
+    const descriptor = getActionDescriptor('sharepoint-control:proof:homepage-action-layer');
+    expect(descriptor.executionMode).toBe('advisory');
+    expect(descriptor.riskLevel).toBe('read-only');
+    expect(descriptor.allowedExecutionIntents).toContain('read-only-export');
+  });
 });

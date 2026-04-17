@@ -12,7 +12,8 @@ param(
   [Parameter(Mandatory = $true)] [string]$ClientId,
   [Parameter(Mandatory = $true)] [string]$Tenant,
   [string]$ListFiltersCsv = '',
-  [string]$PageFiltersCsv = ''
+  [string]$PageFiltersCsv = '',
+  [switch]$StrictProof
 )
 
 Set-StrictMode -Version Latest
@@ -21,6 +22,9 @@ $ErrorActionPreference = 'Stop'
 $CONFIG_LIST_TITLE = 'Priority Actions Band Config'
 $ITEMS_LIST_TITLE = 'Priority Actions Band Items'
 $QUICK_LINKS_WEBPART_ID = 'c70391ea-0b10-4ee9-b2b4-006d3fcad0cd'
+$PRIORITY_ACTIONS_RAIL_WEBPART_ID = 'b3f07190-79cf-437d-a1d6-ecbf3f77e616'
+$HB_SIGNATURE_HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c'
+$HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf'
 
 $CONFIG_DEFAULT_ROW = [ordered]@{
   Title = 'Homepage Priority Actions'
@@ -644,6 +648,143 @@ function Extract-QuickLinksFromPage([string]$PageName) {
   }
 }
 
+function Get-HomepageCanvasComposition([string]$PageName) {
+  # Returns ordered page controls with identity + derived action-layer state.
+  # This is the authoritative inspector backing the homepage cutover proof.
+  $result = [ordered]@{
+    pageName = $PageName
+    controls = @()
+    hasHero = $false
+    hasPriorityActionsRail = $false
+    hasQuickLinks = $false
+    hasHbHomepage = $false
+    heroOrder = $null
+    priorityActionsRailOrder = $null
+    hbHomepageOrder = $null
+    quickLinksOrders = @()
+    actionLayerState = 'unknown'
+    orderValid = $false
+    errors = @()
+  }
+
+  $page = Get-PnPPage -Identity $PageName -ErrorAction SilentlyContinue
+  if ($null -eq $page) {
+    $result.errors += "page-not-found: $PageName"
+    $result.actionLayerState = 'page-missing'
+    return $result
+  }
+
+  $controls = @($page.Controls)
+  $ordered = @($controls | Sort-Object -Property @{ Expression = { [int]$_.Order } })
+
+  $controlSummaries = @()
+  $index = 0
+  foreach ($control in $ordered) {
+    $index += 1
+    $wpId = $null
+    try { $wpId = [string]$control.WebPartId } catch { $wpId = $null }
+    $wpIdLower = if ($wpId) { $wpId.Trim().ToLower() } else { '' }
+    $instanceId = $null
+    try { $instanceId = [string]$control.InstanceId } catch { $instanceId = $null }
+    $title = $null
+    try { $title = [string]$control.Title } catch { $title = $null }
+    $order = $null
+    try { $order = [int]$control.Order } catch { $order = $null }
+    $sectionOrder = $null
+    try { if ($null -ne $control.Section) { $sectionOrder = [int]$control.Section.Order } } catch { $sectionOrder = $null }
+    $columnOrder = $null
+    try { if ($null -ne $control.Column) { $columnOrder = [int]$control.Column.Order } } catch { $columnOrder = $null }
+
+    $controlSummaries += [ordered]@{
+      positionIndex = $index
+      webPartId = $wpIdLower
+      instanceId = $instanceId
+      title = $title
+      order = $order
+      sectionOrder = $sectionOrder
+      columnOrder = $columnOrder
+    }
+
+    switch ($wpIdLower) {
+      $QUICK_LINKS_WEBPART_ID {
+        $result.hasQuickLinks = $true
+        $result.quickLinksOrders += $index
+      }
+      $PRIORITY_ACTIONS_RAIL_WEBPART_ID {
+        $result.hasPriorityActionsRail = $true
+        if ($null -eq $result.priorityActionsRailOrder) { $result.priorityActionsRailOrder = $index }
+      }
+      $HB_SIGNATURE_HERO_WEBPART_ID {
+        $result.hasHero = $true
+        if ($null -eq $result.heroOrder) { $result.heroOrder = $index }
+      }
+      $HB_HOMEPAGE_WEBPART_ID {
+        $result.hasHbHomepage = $true
+        if ($null -eq $result.hbHomepageOrder) { $result.hbHomepageOrder = $index }
+      }
+    }
+  }
+
+  $result.controls = $controlSummaries
+
+  $orderValid = $false
+  if ($result.hasHero -and $result.hasPriorityActionsRail -and $result.hasHbHomepage) {
+    if (($result.heroOrder -lt $result.priorityActionsRailOrder) -and `
+        ($result.priorityActionsRailOrder -lt $result.hbHomepageOrder)) {
+      $orderValid = $true
+    }
+  }
+  $result.orderValid = $orderValid
+
+  if ($result.hasQuickLinks) {
+    $result.actionLayerState = 'requires-cutover'
+  } elseif ($result.hasPriorityActionsRail -and $orderValid) {
+    $result.actionLayerState = 'already-cutover'
+  } elseif ($result.hasPriorityActionsRail -and -not $orderValid) {
+    $result.actionLayerState = 'present-wrong-order'
+  } else {
+    $result.actionLayerState = 'ambiguous'
+  }
+
+  return $result
+}
+
+function Invoke-HomepageActionLayerProof([string]$PageName, [bool]$Strict) {
+  $composition = Get-HomepageCanvasComposition -PageName $PageName
+  $issues = @()
+  if ($composition.hasQuickLinks) {
+    $issues += 'OOB Quick Links webpart is still present on the homepage canvas.'
+  }
+  if (-not $composition.hasPriorityActionsRail) {
+    $issues += 'PriorityActionsRail webpart is absent from the homepage canvas.'
+  }
+  if (-not $composition.hasHero) {
+    $issues += 'HB Signature Hero webpart is absent from the homepage canvas.'
+  }
+  if (-not $composition.hasHbHomepage) {
+    $issues += 'hbHomepage webpart is absent from the homepage canvas.'
+  }
+  if ($composition.hasHero -and $composition.hasPriorityActionsRail -and $composition.hasHbHomepage -and -not $composition.orderValid) {
+    $issues += 'Homepage order is not hero -> PriorityActionsRail -> hbHomepage.'
+  }
+  $passed = (@($issues).Count -eq 0) -and ($composition.actionLayerState -eq 'already-cutover')
+
+  $report = [ordered]@{
+    pageName = $composition.pageName
+    actionLayerState = $composition.actionLayerState
+    orderValid = $composition.orderValid
+    passed = $passed
+    issues = $issues
+    composition = $composition
+  }
+
+  if ($Strict -and -not $passed) {
+    Write-Error ("Homepage action-layer proof failed: " + [string]::Join('; ', $issues))
+  }
+
+  return $report
+}
+
 function Ensure-ConfigRow() {
   $items = Get-PnPListItem -List $CONFIG_LIST_TITLE -PageSize 500
   $matching = @($items | Where-Object { ([string]$_.FieldValues.BandKey) -eq 'homepage-primary' })
@@ -1196,6 +1337,9 @@ switch ($ActionKey) {
       $pageComposition.errors += "page-load-failed: $($_.Exception.Message)"
     }
 
+    $postComposition = Get-HomepageCanvasComposition -PageName $pageName
+    $pageComposition.postCutover = $postComposition
+
     $raw.quickLinks = $quickLinksInventory
     $raw.pageComposition = $pageComposition
     $normalized.quickLinks = [ordered]@{
@@ -1216,6 +1360,32 @@ switch ($ActionKey) {
     }
     if (@($pageComposition.errors).Count -gt 0) {
       $summaryLines += "- Cutover errors: $([string]::Join('; ', $pageComposition.errors))"
+    }
+    $summaryLines += "- Post-cutover actionLayerState: $($postComposition.actionLayerState); orderValid=$($postComposition.orderValid)."
+  }
+  'sharepoint-control:proof:homepage-action-layer' {
+    # Authoritative read-only proof of the homepage action-layer state.
+    # When -StrictProof is supplied, a failing proof emits a PowerShell
+    # Write-Error so the local runner surfaces the regression loudly.
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
+    $proof = Invoke-HomepageActionLayerProof -PageName $pageName -Strict:$StrictProof.IsPresent
+
+    $raw.homepageActionLayerProof = $proof
+    $normalized.homepageActionLayerProof = [ordered]@{
+      pageName = $proof.pageName
+      actionLayerState = $proof.actionLayerState
+      orderValid = $proof.orderValid
+      passed = $proof.passed
+      issues = $proof.issues
+      controls = $proof.composition.controls
+    }
+
+    $summaryLines += "- Homepage action-layer proof on page '$pageName'."
+    $summaryLines += "- Proof state: $($proof.actionLayerState); passed=$($proof.passed); orderValid=$($proof.orderValid)."
+    if (@($proof.issues).Count -gt 0) {
+      $summaryLines += "- Proof issues: $([string]::Join('; ', $proof.issues))"
+    } else {
+      $summaryLines += '- Proof issues: none.'
     }
   }
   default {

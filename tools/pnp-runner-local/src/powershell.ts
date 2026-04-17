@@ -110,6 +110,10 @@ export async function runExtractionScript(params: {
     '-PageFiltersCsv', pageCsv,
   ];
 
+  if (params.actionKey === 'sharepoint-control:proof:homepage-action-layer') {
+    args.push('-StrictProof');
+  }
+
   await new Promise<void>((resolve, reject) => {
     const child = spawn(params.powerShellCommand, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
