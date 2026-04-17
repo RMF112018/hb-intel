@@ -135,6 +135,19 @@ function validatePreset(
           ),
         );
       }
+
+      if (
+        occupant.allowedBandSemantics.length > 0 &&
+        !occupant.allowedBandSemantics.includes(validated.semanticRole)
+      ) {
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'OCCUPANT_BAND_INCOMPATIBLE',
+            `Occupant "${slot.occupantId}" is not permitted in band "${band.id}" (semanticRole: ${validated.semanticRole}). Allowed: ${occupant.allowedBandSemantics.join(', ')}.`,
+          ),
+        );
+      }
     }
 
     return validated;
@@ -174,9 +187,88 @@ function applyOverrides(
       let updated = { ...slot };
 
       if (slotOverride.occupantId !== undefined) {
-        if (slotOverride.occupantId === '') {
+        const originalOccupantId = slot.occupantId;
+        const clearing = slotOverride.occupantId === '';
+        const replacing =
+          !clearing &&
+          isValidOccupantId(slotOverride.occupantId) &&
+          slotOverride.occupantId !== originalOccupantId;
+
+        if (originalOccupantId && (clearing || replacing)) {
+          const current = OCCUPANT_REGISTRY.get(originalOccupantId);
+          if (current) {
+            if (clearing && !current.visibilityEligibility.hideableByMaintainer) {
+              diagnostics.push(
+                diagnostic(
+                  'error',
+                  'VISIBILITY_NOT_ELIGIBLE',
+                  `Occupant "${originalOccupantId}" in slot "${slot.id}" is not hideable by maintainers. Override ignored.`,
+                ),
+              );
+              return slot;
+            }
+            if (clearing && !current.visibilityEligibility.removable) {
+              diagnostics.push(
+                diagnostic(
+                  'error',
+                  'VISIBILITY_NOT_ELIGIBLE',
+                  `Occupant "${originalOccupantId}" in slot "${slot.id}" is not removable. Override ignored.`,
+                ),
+              );
+              return slot;
+            }
+            if (replacing && current.reorderDomain === 'locked') {
+              diagnostics.push(
+                diagnostic(
+                  'error',
+                  'REORDER_DOMAIN_VIOLATION',
+                  `Occupant "${originalOccupantId}" is locked and cannot be replaced via override in slot "${slot.id}".`,
+                ),
+              );
+              return slot;
+            }
+          }
+        }
+
+        if (clearing) {
           updated = { ...updated, occupantId: null };
         } else if (isValidOccupantId(slotOverride.occupantId)) {
+          const incoming = OCCUPANT_REGISTRY.get(slotOverride.occupantId as OccupantId);
+          if (
+            incoming &&
+            incoming.allowedBandSemantics.length > 0 &&
+            !incoming.allowedBandSemantics.includes(band.semanticRole)
+          ) {
+            diagnostics.push(
+              diagnostic(
+                'error',
+                'OCCUPANT_BAND_INCOMPATIBLE',
+                `Override cannot place "${slotOverride.occupantId}" into band "${band.id}" (semanticRole: ${band.semanticRole}). Allowed: ${incoming.allowedBandSemantics.join(', ')}.`,
+              ),
+            );
+            return slot;
+          }
+          if (
+            incoming &&
+            incoming.reorderDomain === 'within-band' &&
+            originalOccupantId !== slotOverride.occupantId
+          ) {
+            // within-band reorder is allowed only if the occupant is already
+            // present in this band in some other slot. Otherwise reject.
+            const alreadyInBand = band.slots.some(
+              (s) => s.occupantId === slotOverride.occupantId,
+            );
+            if (!alreadyInBand) {
+              diagnostics.push(
+                diagnostic(
+                  'error',
+                  'REORDER_DOMAIN_VIOLATION',
+                  `Occupant "${slotOverride.occupantId}" may only be reordered within its current band.`,
+                ),
+              );
+              return slot;
+            }
+          }
           updated = { ...updated, occupantId: slotOverride.occupantId as OccupantId };
         } else {
           diagnostics.push(

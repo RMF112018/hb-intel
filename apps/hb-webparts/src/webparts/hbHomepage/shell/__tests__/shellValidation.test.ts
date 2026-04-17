@@ -15,6 +15,12 @@ import {
   describePreset,
   listApprovedPresets,
 } from '../presetLibrary.js';
+import {
+  getGovernanceCategory,
+  isBoundedConfigurable,
+  SHELL_GOVERNANCE_MODEL,
+} from '../protectedDecisions.js';
+import { getOccupantGovernance } from '../occupantRegistry.js';
 
 describe('parseShellLayout', () => {
   it('returns default preset when input is undefined', () => {
@@ -200,6 +206,102 @@ describe('previewBandOverride', () => {
       [{ slotId: 'slot-company-pulse', occupantId: 'nonexistent' }],
     );
     expect(result.warnings.some((w) => w.code === 'INVALID_OVERRIDE_OCCUPANT')).toBe(true);
+  });
+});
+
+describe('governance model', () => {
+  it('exposes SHELL_GOVERNANCE_MODEL with four discriminated buckets', () => {
+    expect(SHELL_GOVERNANCE_MODEL.protected).toBeDefined();
+    expect(SHELL_GOVERNANCE_MODEL.entryStateRules).toBeDefined();
+    expect(SHELL_GOVERNANCE_MODEL.configurable).toBeDefined();
+    expect(SHELL_GOVERNANCE_MODEL.descriptors.shellFit.length).toBeGreaterThan(0);
+    expect(SHELL_GOVERNANCE_MODEL.descriptors.descriptive.length).toBeGreaterThan(0);
+  });
+
+  it('classifies protected decision keys as protected', () => {
+    expect(getGovernanceCategory('postHeroBoundary')).toBe('protected');
+    expect(getGovernanceCategory('maxDominantPerBand')).toBe('protected');
+    expect(getGovernanceCategory('tabletPortraitForceSingleColumn')).toBe('protected');
+  });
+
+  it('classifies configurable keys as bounded-configurable', () => {
+    expect(getGovernanceCategory('presetSelection')).toBe('bounded-configurable');
+    expect(getGovernanceCategory('optionalOccupantVisibility')).toBe('bounded-configurable');
+    expect(isBoundedConfigurable('limitedReorderWithinCompatibleBands')).toBe(true);
+    expect(isBoundedConfigurable('postHeroBoundary')).toBe(false);
+  });
+
+  it('classifies shell-fit and descriptive descriptor keys', () => {
+    expect(getGovernanceCategory('allowedBandSemantics')).toBe('shell-fit');
+    expect(getGovernanceCategory('reorderDomain')).toBe('shell-fit');
+    expect(getGovernanceCategory('visibilityEligibility')).toBe('shell-fit');
+    expect(getGovernanceCategory('displayName')).toBe('descriptive');
+  });
+
+  it('returns undefined for unknown keys', () => {
+    expect(getGovernanceCategory('not-a-shell-key')).toBeUndefined();
+  });
+
+  it('exposes occupant governance view with reorder + visibility metadata', () => {
+    const view = getOccupantGovernance('project-portfolio-spotlight');
+    expect(view?.reorderDomain).toBe('locked');
+    expect(view?.visibilityEligibility.removable).toBe(false);
+    expect(view?.allowedBandSemantics).toContain('operational-spotlight');
+  });
+});
+
+describe('governance enforcement in overrides', () => {
+  it('rejects placing hb-kudos into a non-recognition band', () => {
+    const result = previewBandOverride(
+      'default-v2',
+      'band-operational-spotlight',
+      [{ slotId: 'slot-company-pulse', occupantId: 'hb-kudos' }],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'OCCUPANT_BAND_INCOMPATIBLE')).toBe(true);
+  });
+
+  it('rejects replacing a locked occupant via override', () => {
+    const result = previewBandOverride(
+      'default-v2',
+      'band-operational-spotlight',
+      [{ slotId: 'slot-project-portfolio-spotlight', occupantId: 'company-pulse' }],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'REORDER_DOMAIN_VIOLATION')).toBe(true);
+  });
+
+  it('rejects clearing a non-removable occupant via override', () => {
+    const result = previewBandOverride(
+      'default-v2',
+      'band-recognition',
+      [{ slotId: 'slot-hb-kudos', occupantId: '' }],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'VISIBILITY_NOT_ELIGIBLE')).toBe(true);
+  });
+
+  it('accepts role-only override on a non-locked slot', () => {
+    const result = previewBandOverride(
+      'default-v2',
+      'band-operational-spotlight',
+      [{ slotId: 'slot-company-pulse', role: 'secondary' }],
+    );
+    expect(result.valid).toBe(true);
+  });
+
+  it('produces no governance errors on any approved preset', () => {
+    for (const [id, preset] of APPROVED_PRESETS) {
+      const result = validatePresetStructure(preset);
+      const governanceErrors = result.diagnostics.filter(
+        (d) =>
+          d.severity === 'error' &&
+          (d.code === 'OCCUPANT_BAND_INCOMPATIBLE' ||
+            d.code === 'REORDER_DOMAIN_VIOLATION' ||
+            d.code === 'VISIBILITY_NOT_ELIGIBLE'),
+      );
+      expect(governanceErrors, `preset "${id}" produced governance errors`).toHaveLength(0);
+    }
   });
 });
 

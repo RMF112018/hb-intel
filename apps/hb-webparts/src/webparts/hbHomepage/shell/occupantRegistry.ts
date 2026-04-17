@@ -1,4 +1,16 @@
-import type { OccupantDescriptor, OccupantId, SlotRole } from './shellTypes.js';
+import type {
+  GovernanceCategory,
+  OccupantDescriptor,
+  OccupantId,
+  ReorderDomain,
+  SlotRole,
+  VisibilityEligibility,
+} from './shellTypes.js';
+
+const LOCKED_VISIBILITY: VisibilityEligibility = {
+  removable: false,
+  hideableByMaintainer: false,
+};
 
 const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
   {
@@ -17,6 +29,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    allowedBandSemantics: ['communications-newsroom', 'operational-spotlight'],
+    reorderDomain: 'within-compatible-bands',
+    visibilityEligibility: LOCKED_VISIBILITY,
+    persistedPolicyKeys: ['limitedReorderWithinCompatibleBands'],
   },
   {
     id: 'leadership-message',
@@ -34,6 +50,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    allowedBandSemantics: ['communications-editorial', 'communications-newsroom'],
+    reorderDomain: 'within-compatible-bands',
+    visibilityEligibility: LOCKED_VISIBILITY,
+    persistedPolicyKeys: ['limitedReorderWithinCompatibleBands'],
   },
   {
     id: 'project-portfolio-spotlight',
@@ -51,6 +71,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    allowedBandSemantics: ['operational-spotlight'],
+    reorderDomain: 'locked',
+    visibilityEligibility: LOCKED_VISIBILITY,
+    persistedPolicyKeys: [],
   },
   {
     id: 'people-culture-public',
@@ -69,6 +93,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsSummaryCollapse: false,
     },
     pairingRestrictions: ['hb-kudos'],
+    allowedBandSemantics: ['people-culture'],
+    reorderDomain: 'locked',
+    visibilityEligibility: LOCKED_VISIBILITY,
+    persistedPolicyKeys: [],
   },
   {
     id: 'hb-kudos',
@@ -87,6 +115,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsSummaryCollapse: false,
     },
     pairingRestrictions: ['people-culture-public'],
+    allowedBandSemantics: ['recognition'],
+    reorderDomain: 'locked',
+    visibilityEligibility: LOCKED_VISIBILITY,
+    persistedPolicyKeys: [],
   },
   {
     id: 'safety-field-excellence',
@@ -104,6 +136,10 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
       supportsStandard: true,
       supportsSummaryCollapse: false,
     },
+    allowedBandSemantics: ['operational-spotlight'],
+    reorderDomain: 'within-band',
+    visibilityEligibility: LOCKED_VISIBILITY,
+    persistedPolicyKeys: [],
   },
 ] as const;
 
@@ -142,4 +178,26 @@ export function canOccupantPairAtWidth(id: OccupantId, slotWidth: number): boole
   const occupant = OCCUPANT_REGISTRY.get(id);
   if (!occupant) return false;
   return slotWidth >= occupant.comfort.narrowestStablePairedWidth;
+}
+
+export interface OccupantGovernanceView {
+  readonly id: OccupantId;
+  readonly category: GovernanceCategory;
+  readonly reorderDomain: ReorderDomain;
+  readonly visibilityEligibility: VisibilityEligibility;
+  readonly allowedBandSemantics: readonly OccupantDescriptor['allowedBandSemantics'][number][];
+  readonly persistedPolicyKeys: readonly string[];
+}
+
+export function getOccupantGovernance(id: OccupantId): OccupantGovernanceView | undefined {
+  const occupant = OCCUPANT_REGISTRY.get(id);
+  if (!occupant) return undefined;
+  return {
+    id: occupant.id,
+    category: 'shell-fit',
+    reorderDomain: occupant.reorderDomain,
+    visibilityEligibility: occupant.visibilityEligibility,
+    allowedBandSemantics: occupant.allowedBandSemantics,
+    persistedPolicyKeys: occupant.persistedPolicyKeys,
+  };
 }

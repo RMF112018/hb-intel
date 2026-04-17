@@ -66,6 +66,13 @@ export interface OccupantComfort {
   readonly supportsSummaryCollapse: boolean;
 }
 
+export type ReorderDomain = 'locked' | 'within-band' | 'within-compatible-bands';
+
+export interface VisibilityEligibility {
+  readonly removable: boolean;
+  readonly hideableByMaintainer: boolean;
+}
+
 export interface OccupantDescriptor {
   readonly id: OccupantId;
   readonly status: OccupantStatus;
@@ -76,7 +83,21 @@ export interface OccupantDescriptor {
   readonly firstLaneEligible: boolean;
   readonly comfort: OccupantComfort;
   readonly pairingRestrictions?: readonly OccupantId[];
+  readonly allowedBandSemantics: readonly BandSemanticRole[];
+  readonly reorderDomain: ReorderDomain;
+  readonly visibilityEligibility: VisibilityEligibility;
+  readonly persistedPolicyKeys: readonly string[];
 }
+
+// ---------------------------------------------------------------------------
+// Governance taxonomy
+// ---------------------------------------------------------------------------
+
+export type GovernanceCategory =
+  | 'protected'
+  | 'bounded-configurable'
+  | 'descriptive'
+  | 'shell-fit';
 
 // ---------------------------------------------------------------------------
 // Entry-state breakpoint policy
