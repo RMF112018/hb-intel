@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { CanonicalPnpActionKey, ExtractionResultFileSet, PnpCommandInput, RunnerConfig } from './types.js';
+import type { ActionResultFileSet, CanonicalPnpActionKey, PnpCommandInput, RunnerConfig } from './types.js';
 
 export interface CommandCheckResult {
   readonly available: boolean;
@@ -80,7 +80,7 @@ export async function runExtractionScript(params: {
   readonly runId: string;
   readonly actionKey: CanonicalPnpActionKey;
   readonly commandInput: PnpCommandInput;
-  readonly files: ExtractionResultFileSet;
+  readonly files: ActionResultFileSet;
   readonly config: RunnerConfig;
   readonly powerShellCommand: string;
 }): Promise<void> {
@@ -89,6 +89,7 @@ export async function runExtractionScript(params: {
 
   const listCsv = (params.commandInput.listFilters ?? []).join(',');
   const pageCsv = (params.commandInput.pageFilters ?? []).join(',');
+  const intentMode = params.commandInput.executionIntent?.mode ?? '';
 
   const args = [
     '-NoProfile',
@@ -99,6 +100,9 @@ export async function runExtractionScript(params: {
     '-OutputRawPath', params.files.rawPath,
     '-OutputNormalizedPath', params.files.normalizedPath,
     '-OutputSummaryPath', params.files.summaryPath,
+    '-OutputProvisionSummaryPath', params.files.provisionSummaryPath,
+    '-OutputSeedSummaryPath', params.files.seedSummaryPath,
+    '-ExecutionIntentMode', intentMode,
     '-AuthMode', params.config.authMode,
     '-ClientId', params.config.clientId,
     '-Tenant', params.config.tenant,

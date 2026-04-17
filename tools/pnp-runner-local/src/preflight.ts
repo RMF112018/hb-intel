@@ -57,18 +57,21 @@ function validateInput(actionKeyRaw: string, commandInput: PnpCommandInput): Pre
         blocking: true,
       });
     }
-  }
 
-  const readOnlyIntent = commandInput.executionIntent?.mode ?? 'read-only-export';
-  checks.push({
-    checkId: 'read-only-intent',
-    label: 'Read-only execution intent',
-    passed: readOnlyIntent === 'read-only-export',
-    message: readOnlyIntent === 'read-only-export'
-      ? 'Read-only intent confirmed.'
-      : `Execution intent must be read-only-export (received: ${readOnlyIntent}).`,
-    blocking: true,
-  });
+    const intentMode = commandInput.executionIntent?.mode
+      ?? (descriptor.executionMode === 'advisory' ? 'read-only-export' : 'sharepoint-provision-and-seed');
+    const allowed = descriptor.allowedExecutionIntents;
+    const passedIntent = allowed.includes(intentMode as typeof allowed[number]);
+    checks.push({
+      checkId: 'execution-intent',
+      label: 'Execution intent',
+      passed: passedIntent,
+      message: passedIntent
+        ? `Execution intent confirmed: ${intentMode}.`
+        : `Execution intent ${intentMode} is invalid for ${actionKey}. Allowed: ${allowed.join(', ')}.`,
+      blocking: true,
+    });
+  }
 
   return checks;
 }

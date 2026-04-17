@@ -16,6 +16,8 @@ vi.mock('../src/powershell.js', () => ({
     await fs.writeFile(files.rawPath, JSON.stringify({ ok: true }, null, 2), 'utf-8');
     await fs.writeFile(files.normalizedPath, JSON.stringify({ ok: true }, null, 2), 'utf-8');
     await fs.writeFile(files.summaryPath, '# Summary\n', 'utf-8');
+    await fs.writeFile(files.provisionSummaryPath, JSON.stringify({ executed: true }, null, 2), 'utf-8');
+    await fs.writeFile(files.seedSummaryPath, JSON.stringify({ executed: true }, null, 2), 'utf-8');
   }),
 }));
 
@@ -63,17 +65,19 @@ describe('LocalRunnerService', () => {
     await service.initialize();
 
     const launched = await service.launch({
-      actionKey: 'sharepoint-control:extraction:site-template',
+      actionKey: 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
       commandInput: {
         targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
-        executionIntent: { mode: 'read-only-export' },
+        executionIntent: { mode: 'sharepoint-provision-and-seed' },
       },
     });
     const status = await waitForTerminal(service, launched.runId);
     expect(status).toBe('Completed');
 
     const evidence = service.getEvidence(launched.runId);
-    expect(evidence.total).toBeGreaterThanOrEqual(5);
+    expect(evidence.total).toBeGreaterThanOrEqual(7);
     expect(evidence.evidenceRefs[0]?.fileName).toBe('artifact-bundle.zip');
+    expect(evidence.evidenceRefs.some((entry) => entry.fileName === 'provision-summary.json')).toBe(true);
+    expect(evidence.evidenceRefs.some((entry) => entry.fileName === 'seed-summary.json')).toBe(true);
   });
 });

@@ -5,10 +5,20 @@ export type CanonicalPnpActionKey =
   | 'sharepoint-control:extraction:site-inventory'
   | 'sharepoint-control:extraction:library-folder-tree'
   | 'sharepoint-control:extraction:site-groups-summary'
-  | 'sharepoint-control:extraction:page-webpart-inventory';
+  | 'sharepoint-control:extraction:page-webpart-inventory'
+  | 'sharepoint-control:provisioning:priority-actions-band-lists'
+  | 'sharepoint-control:extraction:homepage-quick-links'
+  | 'sharepoint-control:provisioning:priority-actions-band-seed-items'
+  | 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed';
+
+export type PnpExecutionIntentMode =
+  | 'read-only-export'
+  | 'sharepoint-provision'
+  | 'sharepoint-seed'
+  | 'sharepoint-provision-and-seed';
 
 export interface PnpExecutionIntent {
-  readonly mode?: string;
+  readonly mode?: PnpExecutionIntentMode | string;
   readonly source?: string;
   readonly requestedAt?: string;
 }
@@ -85,17 +95,21 @@ export interface RunEvidence {
   readonly total: number;
 }
 
+export type ActionRiskLevel = 'read-only' | 'low-impact';
+export type ActionExecutionMode = 'advisory' | 'apply';
+
 export interface ActionDescriptor {
   readonly actionKey: CanonicalPnpActionKey;
   readonly label: string;
   readonly description: string;
-  readonly riskLevel: 'read-only';
-  readonly executionMode: 'advisory';
+  readonly riskLevel: ActionRiskLevel;
+  readonly executionMode: ActionExecutionMode;
   readonly supportsPreview: boolean;
   readonly available: boolean;
   readonly unavailableReason: string | null;
   readonly requiredInput: 'site-only' | 'site-and-list-filter' | 'site-and-page-filter';
   readonly expectedArtifacts: readonly string[];
+  readonly allowedExecutionIntents: readonly PnpExecutionIntentMode[];
 }
 
 export interface RunnerConfig {
@@ -114,8 +128,10 @@ export interface RunnerConfig {
   readonly apiKey: string | null;
 }
 
-export interface ExtractionResultFileSet {
+export interface ActionResultFileSet {
   readonly rawPath: string;
   readonly normalizedPath: string;
   readonly summaryPath: string;
+  readonly provisionSummaryPath: string;
+  readonly seedSummaryPath: string;
 }

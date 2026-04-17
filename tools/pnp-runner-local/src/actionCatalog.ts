@@ -1,5 +1,15 @@
 import type { ActionDescriptor, CanonicalPnpActionKey } from './types.js';
 
+const EXTRACTION_ARTIFACTS = [
+  'raw.json',
+  'normalized.json',
+  'summary.md',
+  'provision-summary.json',
+  'seed-summary.json',
+  'artifact-manifest.json',
+  'artifact-bundle.zip',
+] as const;
+
 const ACTIONS: readonly ActionDescriptor[] = [
   {
     actionKey: 'sharepoint-control:extraction:site-template',
@@ -11,7 +21,8 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-only',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
   },
   {
     actionKey: 'sharepoint-control:extraction:list-schema',
@@ -23,7 +34,8 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-and-list-filter',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
   },
   {
     actionKey: 'sharepoint-control:extraction:page-layout',
@@ -35,7 +47,8 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-and-page-filter',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
   },
   {
     actionKey: 'sharepoint-control:extraction:site-inventory',
@@ -47,7 +60,8 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-only',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
   },
   {
     actionKey: 'sharepoint-control:extraction:library-folder-tree',
@@ -59,7 +73,8 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-and-list-filter',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
   },
   {
     actionKey: 'sharepoint-control:extraction:site-groups-summary',
@@ -71,7 +86,8 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-only',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
   },
   {
     actionKey: 'sharepoint-control:extraction:page-webpart-inventory',
@@ -83,7 +99,60 @@ const ACTIONS: readonly ActionDescriptor[] = [
     available: true,
     unavailableReason: null,
     requiredInput: 'site-and-page-filter',
-    expectedArtifacts: ['raw.json', 'normalized.json', 'summary.md', 'artifact-manifest.json', 'artifact-bundle.zip'],
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
+  },
+  {
+    actionKey: 'sharepoint-control:provisioning:priority-actions-band-lists',
+    label: 'Provision Priority Actions Band Lists',
+    description: 'Creates or normalizes Priority Actions Band Config and Items lists against the schema contract.',
+    riskLevel: 'low-impact',
+    executionMode: 'apply',
+    supportsPreview: false,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['sharepoint-provision', 'sharepoint-provision-and-seed'],
+  },
+  {
+    actionKey: 'sharepoint-control:extraction:homepage-quick-links',
+    label: 'Extract Homepage Quick Links',
+    description: 'Extracts and normalizes live homepage Quick Links payload for command-band seeding.',
+    riskLevel: 'read-only',
+    executionMode: 'advisory',
+    supportsPreview: true,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export', 'sharepoint-seed', 'sharepoint-provision-and-seed'],
+  },
+  {
+    actionKey: 'sharepoint-control:provisioning:priority-actions-band-seed-items',
+    label: 'Seed Priority Actions Band Items From Quick Links',
+    description: 'Seeds command-band config/items from extracted homepage Quick Links with deterministic defaults.',
+    riskLevel: 'low-impact',
+    executionMode: 'apply',
+    supportsPreview: false,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['sharepoint-seed', 'sharepoint-provision-and-seed'],
+  },
+  {
+    actionKey: 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
+    label: 'Provision And Seed Priority Actions Band',
+    description: 'Runs list provisioning, homepage Quick Links extraction, and idempotent item seeding in one workflow.',
+    riskLevel: 'low-impact',
+    executionMode: 'apply',
+    supportsPreview: false,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['sharepoint-provision-and-seed'],
   },
 ] as const;
 
@@ -94,6 +163,10 @@ const ALIASES: Record<string, CanonicalPnpActionKey> = {
   'sharepoint:pnp:library-folder-tree-export': 'sharepoint-control:extraction:library-folder-tree',
   'sharepoint:pnp:site-groups-summary-export': 'sharepoint-control:extraction:site-groups-summary',
   'sharepoint:pnp:page-webpart-inventory-export': 'sharepoint-control:extraction:page-webpart-inventory',
+  'sharepoint:pnp:priority-actions-band-provision': 'sharepoint-control:provisioning:priority-actions-band-lists',
+  'sharepoint:pnp:homepage-quick-links-extract': 'sharepoint-control:extraction:homepage-quick-links',
+  'sharepoint:pnp:priority-actions-band-seed': 'sharepoint-control:provisioning:priority-actions-band-seed-items',
+  'sharepoint:pnp:priority-actions-band-provision-and-seed': 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
 };
 
 export function getActions(): readonly ActionDescriptor[] {

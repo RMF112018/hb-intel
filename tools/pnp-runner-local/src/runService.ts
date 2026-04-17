@@ -10,7 +10,6 @@ import {
   ensureStorageDir,
   fileSha256,
   fileSizeBytes,
-  readText,
   type RunPaths,
 } from './storage.js';
 import { buildZipFromFiles } from './zip.js';
@@ -35,7 +34,7 @@ interface StoredRun {
 const STEP_LABELS = [
   'Resolve action contract',
   'Preflight readiness',
-  'Execute extraction',
+  'Execute action workflow',
   'Normalize artifacts',
   'Write artifacts',
   'Finalize run',
@@ -195,6 +194,8 @@ export class LocalRunnerService {
           rawPath: record.paths.rawPath,
           normalizedPath: record.paths.normalizedPath,
           summaryPath: record.paths.summaryPath,
+          provisionSummaryPath: record.paths.provisionSummaryPath,
+          seedSummaryPath: record.paths.seedSummaryPath,
         },
         config: this.config,
         powerShellCommand: ps.command,
@@ -213,6 +214,8 @@ export class LocalRunnerService {
           { fileName: 'raw.json', filePath: record.paths.rawPath },
           { fileName: 'normalized.json', filePath: record.paths.normalizedPath },
           { fileName: 'summary.md', filePath: record.paths.summaryPath },
+          { fileName: 'provision-summary.json', filePath: record.paths.provisionSummaryPath },
+          { fileName: 'seed-summary.json', filePath: record.paths.seedSummaryPath },
           { fileName: 'artifact-manifest.json', filePath: record.paths.manifestPath },
         ],
         record.paths.bundlePath,
@@ -230,6 +233,18 @@ export class LocalRunnerService {
         { fileName: 'raw.json', filePath: record.paths.rawPath, contentType: 'application/json', label: 'raw.json' },
         { fileName: 'normalized.json', filePath: record.paths.normalizedPath, contentType: 'application/json', label: 'normalized.json' },
         { fileName: 'summary.md', filePath: record.paths.summaryPath, contentType: 'text/markdown', label: 'summary.md' },
+        {
+          fileName: 'provision-summary.json',
+          filePath: record.paths.provisionSummaryPath,
+          contentType: 'application/json',
+          label: 'provision-summary.json',
+        },
+        {
+          fileName: 'seed-summary.json',
+          filePath: record.paths.seedSummaryPath,
+          contentType: 'application/json',
+          label: 'seed-summary.json',
+        },
         { fileName: 'artifact-manifest.json', filePath: record.paths.manifestPath, contentType: 'application/json', label: 'artifact-manifest.json' },
       ]);
       record.evidence = { runId, evidenceRefs, total: evidenceRefs.length };
@@ -253,6 +268,8 @@ export class LocalRunnerService {
       { fileName: 'raw.json', path: paths.rawPath, contentType: 'application/json' },
       { fileName: 'normalized.json', path: paths.normalizedPath, contentType: 'application/json' },
       { fileName: 'summary.md', path: paths.summaryPath, contentType: 'text/markdown' },
+      { fileName: 'provision-summary.json', path: paths.provisionSummaryPath, contentType: 'application/json' },
+      { fileName: 'seed-summary.json', path: paths.seedSummaryPath, contentType: 'application/json' },
     ];
     const files = [];
     for (const entry of entries) {

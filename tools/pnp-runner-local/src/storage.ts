@@ -9,6 +9,8 @@ export interface RunPaths {
   readonly rawPath: string;
   readonly normalizedPath: string;
   readonly summaryPath: string;
+  readonly provisionSummaryPath: string;
+  readonly seedSummaryPath: string;
   readonly manifestPath: string;
   readonly bundlePath: string;
 }
@@ -34,6 +36,8 @@ export async function createRunPaths(storageDir: string, runId: string): Promise
     rawPath: path.join(artifactsDir, 'raw.json'),
     normalizedPath: path.join(artifactsDir, 'normalized.json'),
     summaryPath: path.join(artifactsDir, 'summary.md'),
+    provisionSummaryPath: path.join(artifactsDir, 'provision-summary.json'),
+    seedSummaryPath: path.join(artifactsDir, 'seed-summary.json'),
     manifestPath: path.join(artifactsDir, 'artifact-manifest.json'),
     bundlePath: path.join(artifactsDir, 'artifact-bundle.zip'),
   };
