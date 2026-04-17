@@ -22,9 +22,15 @@ export type {
   IProjectSitesRuntimeContext,
   IResolvedProjectSitesScope,
   ProjectSitesScopeSource,
+  IProjectSiteDataQuality,
+  ProjectSiteDataIssueCode,
 } from './types.js';
 
 export {
   normalizeProjectSitesRuntimeConfig,
   resolveInitialProjectSitesScope,
+  PROJECT_SITES_SELECT_FIELDS,
+  PROJECT_SITES_ALL_SCOPE_LIMIT,
 } from './types.js';
+
+export { getProjectSitesRepository } from './repository/projectSitesRepository.js';

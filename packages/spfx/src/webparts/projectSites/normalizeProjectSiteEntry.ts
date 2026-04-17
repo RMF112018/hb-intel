@@ -12,8 +12,12 @@
  * dedicated ProjectName (`field_3`) or ProjectNumber (`field_2`) fields are
  * empty.
  */
-import type { IProjectSiteEntry } from './types.js';
-import { SP_PROJECTS_FIELDS } from './types.js';
+import type {
+  IProjectSiteEntry,
+  IProjectSiteDataQuality,
+  ProjectSiteDataIssueCode,
+} from './types.js';
+import { SP_PROJECTS_FIELDS, isValidYear } from './types.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -54,6 +58,16 @@ function extractUrl(value: unknown): string {
     if (typeof obj.uri === 'string') return obj.uri.trim();
   }
   return '';
+}
+
+function isHttpUrl(value: string): boolean {
+  if (!value) return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -123,7 +137,7 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
   const title = safeString(raw[SP_PROJECTS_FIELDS.TITLE]);
   const year = typeof raw[SP_PROJECTS_FIELDS.YEAR] === 'number'
     ? (raw[SP_PROJECTS_FIELDS.YEAR] as number)
-    : 0;
+    : Number.NaN;
 
   // Parse Title for fallback name/number
   const [parsedNumber, parsedName] = title ? parseTitle(title) : ['', ''];
@@ -153,7 +167,31 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
 
   const projectName = safeString(projectNameRaw) || parsedName || '(Untitled Project)';
   const projectNumber = safeString(projectNumberRaw) || parsedNumber;
-  const siteUrl = extractUrl(siteUrlRaw);
+  const rawSiteUrl = extractUrl(siteUrlRaw);
+  const siteUrl = isHttpUrl(rawSiteUrl) ? rawSiteUrl : '';
+
+  const issues: ProjectSiteDataIssueCode[] = [];
+  if (!(safeString(projectNameRaw) || parsedName)) issues.push('missing-project-name');
+  if (!(safeString(projectNumberRaw) || parsedNumber)) issues.push('missing-project-number');
+  if (!isValidYear(year)) issues.push('invalid-year');
+  if (!rawSiteUrl) {
+    issues.push('missing-site-url');
+  } else if (!isHttpUrl(rawSiteUrl)) {
+    issues.push('malformed-site-url');
+  }
+
+  const hasMalformedIssue = issues.includes('invalid-year') || issues.includes('malformed-site-url');
+  const dataQuality: IProjectSiteDataQuality = {
+    classification: issues.length === 0 ? 'complete' : (hasMalformedIssue ? 'malformed' : 'partial'),
+    issues,
+    hasAnyIssue: issues.length > 0,
+    hasLaunchCriticalIssue:
+      issues.includes('missing-project-name') ||
+      issues.includes('missing-project-number') ||
+      issues.includes('invalid-year') ||
+      issues.includes('missing-site-url') ||
+      issues.includes('malformed-site-url'),
+  };
 
   return {
     id,
@@ -178,6 +216,7 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
     procoreProject: safeString(procoreProjectRaw),
     siteUrl,
     hasSiteUrl: siteUrl.length > 0,
+    dataQuality,
   };
 }
 

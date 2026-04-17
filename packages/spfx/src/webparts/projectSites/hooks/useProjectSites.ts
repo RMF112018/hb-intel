@@ -9,33 +9,19 @@
  * The hook does NOT apply search/sort/filter — those are composed on top
  * of the normalized entries by the consumer via `projectSitesFilter.ts`.
  *
- * Does NOT use `$select` — SharePoint returns all fields. This eliminates
- * field-name mismatch issues between the legacy `field_N` columns and the
- * W01r-P12 display-name columns. The normalizer reads whichever fields are
- * present and falls back to Title parsing for missing custom fields.
+ * Uses the canonical repository adapter which enforces an explicit `$select`
+ * field contract and bounded all-projects strategy.
  */
 import { useQuery } from '@tanstack/react-query';
-import { spfi, SPFx } from '@pnp/sp';
-import '@pnp/sp/webs';
-import '@pnp/sp/lists';
-import '@pnp/sp/items';
-import { getSpfxContext } from '@hbc/auth/spfx';
 import type {
-  IRawProjectSiteItem,
   IProjectSitesResult,
   ProjectSitesScope,
 } from '../types.js';
-import { SP_PROJECTS_FIELDS } from '../types.js';
 import { normalizeProjectSiteEntries } from '../normalizeProjectSiteEntry.js';
-
-/** SharePoint list title on HBCentral. */
-const PROJECTS_LIST_TITLE = 'Projects';
+import { getProjectSitesRepository } from '../repository/projectSitesRepository.js';
 
 /** Stale time: 5 minutes — project list data changes infrequently. */
 const STALE_TIME_MS = 5 * 60 * 1000;
-
-/** Hard cap on `All Projects` scope fetches to keep the client set bounded. */
-const ALL_PROJECTS_TOP = 5000;
 
 /**
  * Build a stable query-key suffix for the scope. Used by React Query so
@@ -43,27 +29,6 @@ const ALL_PROJECTS_TOP = 5000;
  */
 function scopeCacheKey(scope: ProjectSitesScope): string {
   return scope.kind === 'year' ? `year:${scope.year}` : 'all';
-}
-
-/**
- * Fetch project site entries from the HBCentral Projects list for the
- * given scope. No `$select` — returns all fields to avoid internal-name
- * mismatches.
- */
-async function fetchProjectSites(scope: ProjectSitesScope): Promise<IRawProjectSiteItem[]> {
-  const context = getSpfxContext();
-  const sp = spfi().using(SPFx(context));
-
-  const list = sp.web.lists.getByTitle(PROJECTS_LIST_TITLE);
-
-  if (scope.kind === 'year') {
-    const items = await list.items.filter(`${SP_PROJECTS_FIELDS.YEAR} eq ${scope.year}`)();
-    return items as IRawProjectSiteItem[];
-  }
-
-  // All Projects scope — bounded fetch, no year filter.
-  const items = await list.items.top(ALL_PROJECTS_TOP)();
-  return items as IRawProjectSiteItem[];
 }
 
 /**
@@ -76,11 +41,12 @@ async function fetchProjectSites(scope: ProjectSitesScope): Promise<IRawProjectS
 export function useProjectSites(
   scope: ProjectSitesScope | null,
 ): IProjectSitesResult | null {
+  const repository = getProjectSitesRepository();
   const enabled = scope !== null && (scope.kind === 'all' || (scope.kind === 'year' && scope.year > 0));
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['project-sites', scope ? scopeCacheKey(scope) : 'none'],
-    queryFn: () => fetchProjectSites(scope!),
+    queryFn: () => repository.fetchProjectSites(scope!),
     enabled,
     staleTime: STALE_TIME_MS,
     retry: 1,

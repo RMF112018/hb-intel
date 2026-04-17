@@ -32,6 +32,8 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     const result = normalizeProjectSiteEntry(createItem());
     expect(result.siteUrl).toBe('https://hedrickbrotherscom.sharepoint.com/sites/25-244-01TheWellingtonEstateHomes');
     expect(result.hasSiteUrl).toBe(true);
+    expect(result.dataQuality.classification).toBe('complete');
+    expect(result.dataQuality.issues).toEqual([]);
   });
 
   it('extracts URL from SharePoint Hyperlink object { Url }', () => {
@@ -54,6 +56,8 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     const result = normalizeProjectSiteEntry(createItem({ field_23: null }));
     expect(result.siteUrl).toBe('');
     expect(result.hasSiteUrl).toBe(false);
+    expect(result.dataQuality.classification).toBe('partial');
+    expect(result.dataQuality.issues).toContain('missing-site-url');
   });
 
   it('returns empty when field_23 is missing', () => {
@@ -70,6 +74,14 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     const result = normalizeProjectSiteEntry(item);
     expect(result.siteUrl).toBe('https://fallback.com');
     expect(result.hasSiteUrl).toBe(true);
+  });
+
+  it('classifies malformed site URL explicitly', () => {
+    const result = normalizeProjectSiteEntry(createItem({ field_23: 'not-a-url' }));
+    expect(result.siteUrl).toBe('');
+    expect(result.hasSiteUrl).toBe(false);
+    expect(result.dataQuality.classification).toBe('malformed');
+    expect(result.dataQuality.issues).toContain('malformed-site-url');
   });
 });
 
@@ -137,6 +149,12 @@ describe('normalizeProjectSiteEntry — standard fields', () => {
     const result = normalizeProjectSiteEntry(createItem());
     expect(result.id).toBe(1);
     expect(result.year).toBe(2025);
+  });
+
+  it('classifies invalid year explicitly', () => {
+    const result = normalizeProjectSiteEntry(createItem({ Year: 2200 }));
+    expect(result.dataQuality.classification).toBe('malformed');
+    expect(result.dataQuality.issues).toContain('invalid-year');
   });
 });
 

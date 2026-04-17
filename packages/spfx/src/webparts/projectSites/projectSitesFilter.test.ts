@@ -39,6 +39,12 @@ function makeEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
     procoreProject: '',
     siteUrl: 'https://example.com/sample',
     hasSiteUrl: true,
+    dataQuality: {
+      classification: 'complete',
+      issues: [],
+      hasAnyIssue: false,
+      hasLaunchCriticalIssue: false,
+    },
     ...overrides,
   };
 }

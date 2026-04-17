@@ -3,6 +3,9 @@ import {
   isValidYear,
   normalizeProjectSitesRuntimeConfig,
   parseProjectSitesRuntimeYear,
+  PROJECT_SITES_ALL_SCOPE_LIMIT,
+  PROJECT_SITES_SELECT_FIELDS,
+  SP_PROJECTS_FIELDS,
   resolveDefaultYear,
   resolveInitialProjectSitesScope,
 } from './types.js';
@@ -147,5 +150,21 @@ describe('resolveInitialProjectSitesScope', () => {
     );
     expect(allFallback.scope).toEqual({ kind: 'all' });
     expect(allFallback.source).toBe('all-projects-fallback');
+  });
+});
+
+describe('repository field contract', () => {
+  it('declares explicit selected fields for Project Sites adapter', () => {
+    expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.ID);
+    expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.TITLE);
+    expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.YEAR);
+    expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.PROJECT_NUMBER);
+    expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.PROJECT_NAME);
+    expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.SITE_URL);
+  });
+
+  it('keeps all-projects reads explicitly bounded', () => {
+    expect(PROJECT_SITES_ALL_SCOPE_LIMIT).toBeGreaterThan(0);
+    expect(PROJECT_SITES_ALL_SCOPE_LIMIT).toBeLessThanOrEqual(5000);
   });
 });

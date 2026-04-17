@@ -68,6 +68,48 @@ export const SP_PROJECTS_FIELDS = {
  */
 export type IRawProjectSiteItem = Record<string, unknown>;
 
+/**
+ * Explicit selected-field contract for Projects list reads.
+ * This is the canonical adapter field list for Project Sites queries.
+ */
+export const PROJECT_SITES_SELECT_FIELDS = [
+  SP_PROJECTS_FIELDS.ID,
+  SP_PROJECTS_FIELDS.TITLE,
+  SP_PROJECTS_FIELDS.YEAR,
+  SP_PROJECTS_FIELDS.PROJECT_ID,
+  SP_PROJECTS_FIELDS.PROJECT_NUMBER,
+  SP_PROJECTS_FIELDS.PROJECT_NAME,
+  SP_PROJECTS_FIELDS.PROJECT_LOCATION,
+  SP_PROJECTS_FIELDS.PROJECT_TYPE,
+  SP_PROJECTS_FIELDS.PROJECT_STAGE,
+  SP_PROJECTS_FIELDS.DEPARTMENT,
+  SP_PROJECTS_FIELDS.CLIENT_NAME,
+  SP_PROJECTS_FIELDS.SITE_URL,
+  SP_PROJECTS_FIELDS.OFFICE_DIVISION,
+  SP_PROJECTS_FIELDS.PROCORE_PROJECT,
+  SP_PROJECTS_FIELDS.PROJECT_STREET_ADDRESS,
+  SP_PROJECTS_FIELDS.PROJECT_CITY,
+  SP_PROJECTS_FIELDS.PROJECT_COUNTY,
+  SP_PROJECTS_FIELDS.PROJECT_STATE,
+  SP_PROJECTS_FIELDS.PROJECT_ZIP,
+  SP_PROJECTS_FIELDS.PROJECT_EXECUTIVE_UPN,
+  SP_PROJECTS_FIELDS.PROJECT_MANAGER_UPN,
+  SP_PROJECTS_FIELDS.LEAD_ESTIMATOR_UPN,
+  SP_PROJECTS_FIELDS.SUPPORTING_ESTIMATOR_UPNS,
+  // Backward-compatible display-name fallbacks for real schema drift cases.
+  'ProjectNumber',
+  'ProjectName',
+  'ProjectLocation',
+  'ProjectType',
+  'ProjectStage',
+  'Department',
+  'ClientName',
+  'SiteUrl',
+] as const;
+
+/** Bounded All Projects cap for repository reads. */
+export const PROJECT_SITES_ALL_SCOPE_LIMIT = 2000;
+
 // ── Normalized UI-ready record ─────────────────────────────────────────────
 
 /**
@@ -118,6 +160,21 @@ export interface IProjectSiteEntry {
   // Site state
   siteUrl: string;
   hasSiteUrl: boolean;
+  dataQuality: IProjectSiteDataQuality;
+}
+
+export type ProjectSiteDataIssueCode =
+  | 'missing-project-name'
+  | 'missing-project-number'
+  | 'invalid-year'
+  | 'missing-site-url'
+  | 'malformed-site-url';
+
+export interface IProjectSiteDataQuality {
+  classification: 'complete' | 'partial' | 'malformed';
+  issues: ProjectSiteDataIssueCode[];
+  hasAnyIssue: boolean;
+  hasLaunchCriticalIssue: boolean;
 }
 
 // ── Year validation ────────────────────────────────────────────────────────

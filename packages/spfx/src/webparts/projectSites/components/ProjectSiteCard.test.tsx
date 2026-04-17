@@ -29,6 +29,12 @@ function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry 
     supportingEstimatorUpns: [],
     procoreProject: '',
     hasSiteUrl: true,
+    dataQuality: {
+      classification: 'complete',
+      issues: [],
+      hasAnyIssue: false,
+      hasLaunchCriticalIssue: false,
+    },
     ...overrides,
   };
 }
