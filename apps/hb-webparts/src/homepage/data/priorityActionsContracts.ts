@@ -138,6 +138,36 @@ export interface PriorityActionsItemDraft {
   endsAtUtc: string;
 }
 
+export interface PriorityActionsAdminRowPersistedIdentity {
+  itemId: number;
+  actionKey: string;
+  sortOrder: number;
+}
+
+export interface PriorityActionsAdminRow {
+  rowKey: string;
+  persisted?: PriorityActionsAdminRowPersistedIdentity;
+  draft: PriorityActionsItemDraft;
+  markedForArchive: boolean;
+  saveError?: string;
+}
+
+export type PriorityActionsAdminRowLifecycle =
+  | 'persisted-unchanged'
+  | 'persisted-edited'
+  | 'new'
+  | 'marked-for-archive'
+  | 'pending-reorder'
+  | 'save-error';
+
+export interface PriorityActionsItemOperationPlan {
+  create: Array<{ rowKey: string; draft: PriorityActionsItemDraft }>;
+  update: Array<{ rowKey: string; itemId: number; draft: PriorityActionsItemDraft }>;
+  archive: Array<{ rowKey: string; itemId: number }>;
+  reorder: Array<{ itemId: number; sortOrder: number }>;
+  lifecycleByRowKey: Record<string, PriorityActionsAdminRowLifecycle>;
+}
+
 // ---------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------

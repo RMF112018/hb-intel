@@ -3,9 +3,12 @@ import {
   createConfigDraftFromResolved,
   createItemDraftFromNormalized,
   createEmptyItemDraft,
+  createAdminRowsFromNormalized,
+  cloneAdminRows,
+  resequenceAdminRows,
   isConfigDirty,
-  isItemDirty,
   isAnyItemDirty,
+  planItemOperations,
 } from '../data/priorityActionsAdminState.js';
 import {
   validateConfig,
@@ -17,7 +20,7 @@ import {
   mapConfigDraftToFields,
   mapItemDraftToFields,
 } from '../data/priorityActionsListWriter.js';
-import type { PriorityActionsConfigResolved, PriorityActionsItemNormalized, PriorityActionsConfigDraft, PriorityActionsItemDraft } from '../data/priorityActionsContracts.js';
+import type { PriorityActionsConfigResolved, PriorityActionsItemNormalized } from '../data/priorityActionsContracts.js';
 
 /* ── Fixtures ────────────────────────────────────────────────────── */
 
@@ -138,22 +141,70 @@ describe('isConfigDirty', () => {
 
 describe('isAnyItemDirty', () => {
   it('returns false for identical item arrays', () => {
-    const drafts = [createItemDraftFromNormalized(ITEM)];
-    const baselines = [createItemDraftFromNormalized(ITEM)];
+    const drafts = createAdminRowsFromNormalized([ITEM]);
+    const baselines = cloneAdminRows(drafts);
     expect(isAnyItemDirty(drafts, baselines)).toBe(false);
   });
 
   it('returns true when an item is added', () => {
-    const drafts = [createItemDraftFromNormalized(ITEM), createEmptyItemDraft('x')];
-    const baselines = [createItemDraftFromNormalized(ITEM)];
+    const drafts = createAdminRowsFromNormalized([ITEM]);
+    drafts.push({
+      rowKey: 'new-1',
+      draft: createEmptyItemDraft('x'),
+      markedForArchive: false,
+    });
+    const baselines = createAdminRowsFromNormalized([ITEM]);
     expect(isAnyItemDirty(drafts, baselines)).toBe(true);
   });
 
   it('returns true when an item field changes', () => {
-    const drafts = [createItemDraftFromNormalized(ITEM)];
-    const baselines = [createItemDraftFromNormalized(ITEM)];
-    drafts[0].title = 'Changed';
+    const drafts = createAdminRowsFromNormalized([ITEM]);
+    const baselines = createAdminRowsFromNormalized([ITEM]);
+    drafts[0].draft.title = 'Changed';
     expect(isAnyItemDirty(drafts, baselines)).toBe(true);
+  });
+});
+
+describe('planItemOperations', () => {
+  it('does not rely on draft array index for persisted identity', () => {
+    const a = { ...ITEM, id: 101, actionKey: 'a-1', sortOrder: 10, title: 'A' };
+    const b = { ...ITEM, id: 202, actionKey: 'b-1', sortOrder: 20, title: 'B' };
+    const baseline = createAdminRowsFromNormalized([a, b]);
+    const current = resequenceAdminRows([baseline[1], baseline[0]]);
+    current[0].draft.title = 'B-updated';
+
+    const plan = planItemOperations(current, baseline);
+    const updatedB = plan.update.find((entry) => entry.itemId === 202);
+    expect(updatedB).toBeDefined();
+    expect(updatedB?.draft.title).toBe('B-updated');
+  });
+
+  it('supports add + reorder + save planning without identity corruption', () => {
+    const a = { ...ITEM, id: 1, actionKey: 'a', sortOrder: 10 };
+    const b = { ...ITEM, id: 2, actionKey: 'b', sortOrder: 20 };
+    const baseline = createAdminRowsFromNormalized([a, b]);
+    const added = {
+      rowKey: 'new-99',
+      draft: { ...createItemDraftFromNormalized(ITEM), actionKey: 'new-action', sortOrder: 15, title: 'New row' },
+      markedForArchive: false,
+    };
+    const current = resequenceAdminRows([baseline[1], added, baseline[0]]);
+
+    const plan = planItemOperations(current, baseline);
+    expect(plan.create).toHaveLength(1);
+    expect(plan.create[0].draft.actionKey).toBe('new-action');
+    expect(plan.reorder.map((entry) => entry.itemId)).toEqual([2, 1]);
+  });
+
+  it('models archive as save/discard intent until save executes', () => {
+    const baseline = createAdminRowsFromNormalized([ITEM]);
+    const current = cloneAdminRows(baseline);
+    current[0].markedForArchive = true;
+
+    const plan = planItemOperations(current, baseline);
+    expect(plan.archive).toEqual([{ rowKey: current[0].rowKey, itemId: ITEM.id }]);
+    expect(plan.update).toHaveLength(0);
+    expect(plan.create).toHaveLength(0);
   });
 });
 

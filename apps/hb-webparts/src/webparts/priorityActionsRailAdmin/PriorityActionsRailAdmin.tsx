@@ -8,7 +8,6 @@
  */
 import * as React from 'react';
 import {
-  HbcPriorityRailSurface,
   HbcPriorityRailPreviewSurface,
   HbcPriorityRailSkeleton,
   AlertCircle,
@@ -23,10 +22,14 @@ import { normalizeItemRows } from '../../homepage/data/priorityActionsNormalizat
 import { invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import {
   createConfigDraftFromResolved,
-  createItemDraftFromNormalized,
-  createEmptyItemDraft,
+  createAdminRowsFromNormalized,
+  createNewAdminRow,
+  getActiveItemDrafts,
+  cloneAdminRows,
+  resequenceAdminRows,
   isConfigDirty,
   isAnyItemDirty,
+  planItemOperations,
   type AdminLoadState,
   type AdminSaveState,
 } from '../../homepage/data/priorityActionsAdminState.js';
@@ -39,10 +42,10 @@ import {
 } from '../../homepage/data/priorityActionsListWriter.js';
 import type {
   PriorityActionsConfigResolved,
-  PriorityActionsItemNormalized,
   PriorityActionsConfigDraft,
-  PriorityActionsItemDraft,
   PriorityActionsValidationIssue,
+  PriorityActionsAdminRow,
+  PriorityActionsItemDraft,
 } from '../../homepage/data/priorityActionsContracts.js';
 import styles from './priority-actions-rail-admin.module.css';
 
@@ -51,6 +54,11 @@ export interface PriorityActionsRailAdminProps {
 }
 
 type PreviewDevice = 'desktop' | 'tablet' | 'phone';
+
+function firstFailure(results: Array<{ ok: boolean; error?: string }>): string | undefined {
+  const failed = results.find((result) => !result.ok);
+  return failed?.error;
+}
 
 export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActionsRailAdminProps): React.JSX.Element {
   const siteUrl = siteUrlProp ?? getSiteUrl();
@@ -61,26 +69,43 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
   const [saveError, setSaveError] = React.useState<string>();
 
   const [resolvedConfig, setResolvedConfig] = React.useState<PriorityActionsConfigResolved>();
-  const [resolvedItems, setResolvedItems] = React.useState<PriorityActionsItemNormalized[]>([]);
 
   const [configDraft, setConfigDraft] = React.useState<PriorityActionsConfigDraft>();
-  const [itemDrafts, setItemDrafts] = React.useState<PriorityActionsItemDraft[]>([]);
+  const [itemRows, setItemRows] = React.useState<PriorityActionsAdminRow[]>([]);
   const [baselineConfig, setBaselineConfig] = React.useState<PriorityActionsConfigDraft>();
-  const [baselineItems, setBaselineItems] = React.useState<PriorityActionsItemDraft[]>([]);
+  const [baselineRows, setBaselineRows] = React.useState<PriorityActionsAdminRow[]>([]);
 
-  const [selectedItemIndex, setSelectedItemIndex] = React.useState<number>(-1);
+  const [selectedRowKey, setSelectedRowKey] = React.useState<string>();
   const [showDiscardDialog, setShowDiscardDialog] = React.useState(false);
   const [previewDevice, setPreviewDevice] = React.useState<PreviewDevice>('desktop');
 
+  const activeItemRows = React.useMemo(
+    () => itemRows.filter((row) => !row.markedForArchive),
+    [itemRows],
+  );
+
+  const activePositionByRowKey = React.useMemo(() => {
+    const positions = new Map<string, number>();
+    for (let index = 0; index < activeItemRows.length; index += 1) {
+      positions.set(activeItemRows[index].rowKey, index);
+    }
+    return positions;
+  }, [activeItemRows]);
+
   const isDirty = React.useMemo(() => {
     if (!configDraft || !baselineConfig) return false;
-    return isConfigDirty(configDraft, baselineConfig) || isAnyItemDirty(itemDrafts, baselineItems);
-  }, [configDraft, baselineConfig, itemDrafts, baselineItems]);
+    return isConfigDirty(configDraft, baselineConfig) || isAnyItemDirty(itemRows, baselineRows);
+  }, [configDraft, baselineConfig, itemRows, baselineRows]);
 
   const validation = React.useMemo(() => {
     if (!configDraft) return { valid: true, issues: [] as PriorityActionsValidationIssue[] };
-    return validatePriorityRailDraft(configDraft, itemDrafts);
-  }, [configDraft, itemDrafts]);
+    return validatePriorityRailDraft(configDraft, getActiveItemDrafts(itemRows));
+  }, [configDraft, itemRows]);
+
+  const selectedItem = React.useMemo(
+    () => itemRows.find((row) => row.rowKey === selectedRowKey),
+    [itemRows, selectedRowKey],
+  );
 
   /* ── Load ──────────────────────────────────────────────────────── */
 
@@ -97,19 +122,20 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         fetchPriorityActionsConfig(siteUrl),
         fetchPriorityActionsItems(siteUrl),
       ]);
-      const items = normalizeItemRows(rawItems);
+      const normalizedItems = normalizeItemRows(rawItems);
+
       setResolvedConfig(config);
-      setResolvedItems(items);
 
       if (config) {
-        const cd = createConfigDraftFromResolved(config);
-        setConfigDraft(cd);
-        setBaselineConfig(JSON.parse(JSON.stringify(cd)));
+        const nextConfigDraft = createConfigDraftFromResolved(config);
+        setConfigDraft(nextConfigDraft);
+        setBaselineConfig(JSON.parse(JSON.stringify(nextConfigDraft)));
       }
-      const ids = items.map(createItemDraftFromNormalized);
-      setItemDrafts(ids);
-      setBaselineItems(JSON.parse(JSON.stringify(ids)));
-      setSelectedItemIndex(-1);
+
+      const nextRows = resequenceAdminRows(createAdminRowsFromNormalized(normalizedItems));
+      setItemRows(nextRows);
+      setBaselineRows(cloneAdminRows(nextRows));
+      setSelectedRowKey(undefined);
       setLoadState('loaded');
     } catch (err) {
       setLoadState('load-error');
@@ -136,16 +162,40 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         return;
       }
 
-      const itemsPayload = itemDrafts.map((draft, i) => ({
-        itemId: resolvedItems[i]?.id,
-        draft,
-      }));
-      const itemResults = await savePriorityRailItems(siteUrl, itemsPayload, configDraft.bandKey);
-      const failed = itemResults.find((r) => !r.ok);
-      if (failed && !failed.ok) {
+      const plan = planItemOperations(itemRows, baselineRows);
+
+      const itemWriteResults = await savePriorityRailItems(
+        siteUrl,
+        [
+          ...plan.update.map((entry) => ({ itemId: entry.itemId, draft: entry.draft })),
+          ...plan.create.map((entry) => ({ itemId: undefined, draft: entry.draft })),
+        ],
+        configDraft.bandKey,
+      );
+      const writeFailure = firstFailure(itemWriteResults);
+      if (writeFailure) {
         setSaveState('save-error');
-        setSaveError(failed.error);
+        setSaveError(writeFailure);
         return;
+      }
+
+      for (const archiveOp of plan.archive) {
+        const result = await archivePriorityRailItem(siteUrl, archiveOp.itemId);
+        if (!result.ok) {
+          setSaveState('save-error');
+          setSaveError(result.error);
+          return;
+        }
+      }
+
+      if (plan.reorder.length > 0) {
+        const reorderResults = await reorderPriorityRailItems(siteUrl, plan.reorder);
+        const reorderFailure = firstFailure(reorderResults);
+        if (reorderFailure) {
+          setSaveState('save-error');
+          setSaveError(reorderFailure);
+          return;
+        }
       }
 
       invalidatePriorityActionsCache();
@@ -155,55 +205,67 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
       setSaveState('save-error');
       setSaveError(err instanceof Error ? err.message : 'Save failed.');
     }
-  }, [siteUrl, configDraft, itemDrafts, resolvedConfig, resolvedItems, validation, loadData]);
+  }, [siteUrl, configDraft, resolvedConfig, validation, itemRows, baselineRows, loadData]);
 
   /* ── Discard ───────────────────────────────────────────────────── */
 
   const handleDiscard = React.useCallback(() => {
-    if (baselineConfig && baselineItems) {
+    if (baselineConfig) {
       setConfigDraft(JSON.parse(JSON.stringify(baselineConfig)));
-      setItemDrafts(JSON.parse(JSON.stringify(baselineItems)));
-      setSelectedItemIndex(-1);
+      setItemRows(cloneAdminRows(baselineRows));
+      setSelectedRowKey(undefined);
     }
     setShowDiscardDialog(false);
     setSaveState('idle');
     setSaveError(undefined);
-  }, [baselineConfig, baselineItems]);
+  }, [baselineConfig, baselineRows]);
 
   /* ── Item operations ───────────────────────────────────────────── */
 
   const handleAddItem = React.useCallback(() => {
     const bandKey = configDraft?.bandKey ?? 'homepage-primary';
-    const newDraft = createEmptyItemDraft(bandKey);
-    newDraft.sortOrder = (itemDrafts.length + 1) * 10;
-    newDraft.actionKey = `action-${Date.now()}`;
-    setItemDrafts((prev) => [...prev, newDraft]);
-    setSelectedItemIndex(itemDrafts.length);
-  }, [configDraft, itemDrafts]);
+    const newRow = createNewAdminRow(bandKey);
 
-  const handleArchiveItem = React.useCallback(async (index: number) => {
-    const item = resolvedItems[index];
-    if (item && siteUrl) {
-      await archivePriorityRailItem(siteUrl, item.id);
-    }
-    setItemDrafts((prev) => prev.filter((_, i) => i !== index));
-    setSelectedItemIndex(-1);
-    invalidatePriorityActionsCache();
-  }, [resolvedItems, siteUrl]);
-
-  const handleMoveItem = React.useCallback((index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= itemDrafts.length) return;
-    setItemDrafts((prev) => {
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next.map((d, i) => ({ ...d, sortOrder: (i + 1) * 10 }));
+    setItemRows((prev) => {
+      const next = resequenceAdminRows([...prev, newRow]);
+      return next;
     });
-    setSelectedItemIndex(target);
-  }, [itemDrafts.length]);
+    setSelectedRowKey(newRow.rowKey);
+  }, [configDraft]);
 
-  const updateItemDraft = React.useCallback((index: number, patch: Partial<PriorityActionsItemDraft>) => {
-    setItemDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, ...patch } : d)));
+  const handleToggleArchiveItem = React.useCallback((rowKey: string) => {
+    setItemRows((prev) => {
+      const next = prev.map((row) => (row.rowKey === rowKey ? { ...row, markedForArchive: !row.markedForArchive } : row));
+      return resequenceAdminRows(next);
+    });
+    if (selectedRowKey === rowKey) {
+      setSelectedRowKey(undefined);
+    }
+  }, [selectedRowKey]);
+
+  const handleMoveItem = React.useCallback((rowKey: string, direction: -1 | 1) => {
+    setItemRows((prev) => {
+      const next = [...prev];
+      const activeIndexes = next
+        .map((row, index) => ({ row, index }))
+        .filter((entry) => !entry.row.markedForArchive);
+
+      const fromActiveIndex = activeIndexes.findIndex((entry) => entry.row.rowKey === rowKey);
+      const toActiveIndex = fromActiveIndex + direction;
+      if (fromActiveIndex < 0 || toActiveIndex < 0 || toActiveIndex >= activeIndexes.length) {
+        return prev;
+      }
+
+      const fromIndex = activeIndexes[fromActiveIndex].index;
+      const toIndex = activeIndexes[toActiveIndex].index;
+      [next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]];
+      return resequenceAdminRows(next);
+    });
+    setSelectedRowKey(rowKey);
+  }, []);
+
+  const updateItemDraft = React.useCallback((rowKey: string, patch: Partial<PriorityActionsItemDraft>) => {
+    setItemRows((prev) => prev.map((row) => (row.rowKey === rowKey ? { ...row, draft: { ...row.draft, ...patch } } : row)));
   }, []);
 
   const updateConfigDraft = React.useCallback((patch: Partial<PriorityActionsConfigDraft>) => {
@@ -213,7 +275,7 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
   /* ── Preview model ─────────────────────────────────────────────── */
 
   const previewItems: PriorityRailActionModel[] = React.useMemo(() => {
-    return itemDrafts
+    return getActiveItemDrafts(itemRows)
       .filter((d) => d.title.trim() && d.href.trim())
       .map((d) => ({
         id: d.actionKey,
@@ -223,13 +285,13 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         badge: d.badgeLabel ? { label: d.badgeLabel, variant: d.badgeVariant } : undefined,
         external: d.isExternal,
       }));
-  }, [itemDrafts]);
+  }, [itemRows]);
 
   const previewUrgency: PriorityRailUrgency = React.useMemo(() => {
-    if (itemDrafts.some((d) => d.badgeVariant === 'critical')) return 'critical';
-    if (itemDrafts.some((d) => d.badgeVariant === 'warning')) return 'high';
+    if (previewItems.some((item) => item.badge?.variant === 'critical')) return 'critical';
+    if (previewItems.some((item) => item.badge?.variant === 'warning')) return 'high';
     return 'default';
-  }, [itemDrafts]);
+  }, [previewItems]);
 
   const previewMaxVisible = React.useMemo(() => {
     if (!configDraft) return 5;
@@ -278,11 +340,8 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
     );
   }
 
-  const selectedItem = selectedItemIndex >= 0 ? itemDrafts[selectedItemIndex] : undefined;
-
   return (
     <div className={styles.workspace}>
-      {/* Status banners */}
       {saveState === 'saved' && (
         <div className={`${styles.statusBanner} ${styles.statusSuccess}`}>
           <CheckCircle2 size={16} /> Changes saved successfully.
@@ -294,7 +353,6 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         </div>
       )}
 
-      {/* Band Settings */}
       <div className={styles.section}>
         <h2 className={styles.sectionHeading}>Band Settings</h2>
         <div className={styles.fieldRow}>
@@ -371,63 +429,92 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         </div>
       </div>
 
-      {/* Action Library */}
       <div className={styles.section}>
-        <h2 className={styles.sectionHeading}>Action Library ({itemDrafts.length})</h2>
+        <h2 className={styles.sectionHeading}>Action Library ({activeItemRows.length} active)</h2>
         <div className={styles.itemList}>
-          {itemDrafts.map((item, i) => (
-            <div
-              key={item.actionKey || i}
-              className={`${styles.itemCard} ${i === selectedItemIndex ? styles.itemCardSelected : ''}`}
-              onClick={() => setSelectedItemIndex(i === selectedItemIndex ? -1 : i)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedItemIndex(i === selectedItemIndex ? -1 : i); } }}
-            >
-              <span className={styles.itemCardTitle}>{item.title || '(untitled)'}</span>
-              <span className={styles.itemCardMeta}>#{i + 1} · {item.priority}</span>
-              <div className={styles.itemCardActions}>
-                <button type="button" className={styles.smallButton} disabled={i === 0} onClick={(e) => { e.stopPropagation(); handleMoveItem(i, -1); }} aria-label="Move up">↑</button>
-                <button type="button" className={styles.smallButton} disabled={i === itemDrafts.length - 1} onClick={(e) => { e.stopPropagation(); handleMoveItem(i, 1); }} aria-label="Move down">↓</button>
-                <button type="button" className={styles.dangerButton} onClick={(e) => { e.stopPropagation(); void handleArchiveItem(i); }} aria-label="Archive">✕</button>
+          {itemRows.map((row) => {
+            const item = row.draft;
+            const activePosition = activePositionByRowKey.get(row.rowKey) ?? -1;
+            const isArchived = row.markedForArchive;
+            return (
+              <div
+                key={row.rowKey}
+                className={`${styles.itemCard} ${row.rowKey === selectedRowKey ? styles.itemCardSelected : ''}`}
+                onClick={() => setSelectedRowKey(row.rowKey === selectedRowKey ? undefined : row.rowKey)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedRowKey(row.rowKey === selectedRowKey ? undefined : row.rowKey);
+                  }
+                }}
+              >
+                <span className={styles.itemCardTitle}>
+                  {item.title || '(untitled)'}{isArchived ? ' (archived on save)' : ''}
+                </span>
+                <span className={styles.itemCardMeta}>
+                  {activePosition >= 0 ? `#${activePosition + 1}` : '#—'} · {item.priority}
+                </span>
+                <div className={styles.itemCardActions}>
+                  <button
+                    type="button"
+                    className={styles.smallButton}
+                    disabled={isArchived || activePosition <= 0}
+                    onClick={(e) => { e.stopPropagation(); handleMoveItem(row.rowKey, -1); }}
+                    aria-label="Move up"
+                  >↑</button>
+                  <button
+                    type="button"
+                    className={styles.smallButton}
+                    disabled={isArchived || activePosition < 0 || activePosition >= activeItemRows.length - 1}
+                    onClick={(e) => { e.stopPropagation(); handleMoveItem(row.rowKey, 1); }}
+                    aria-label="Move down"
+                  >↓</button>
+                  <button
+                    type="button"
+                    className={isArchived ? styles.smallButton : styles.dangerButton}
+                    onClick={(e) => { e.stopPropagation(); handleToggleArchiveItem(row.rowKey); }}
+                    aria-label={isArchived ? 'Restore' : 'Archive'}
+                  >{isArchived ? '↺' : '✕'}</button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className={styles.actions}>
           <button type="button" className={styles.secondaryButton} onClick={handleAddItem}>+ Add Action</button>
         </div>
       </div>
 
-      {/* Item Editor */}
-      {selectedItem && (
+      {selectedItem && !selectedItem.markedForArchive && (
         <div className={styles.section}>
-          <h2 className={styles.sectionHeading}>Edit Action: {selectedItem.title || '(new)'}</h2>
+          <h2 className={styles.sectionHeading}>Edit Action: {selectedItem.draft.title || '(new)'}</h2>
           <div className={styles.fieldRow}>
             <label className={styles.label}>Action Key</label>
-            <input className={styles.input} value={selectedItem.actionKey} onChange={(e) => updateItemDraft(selectedItemIndex, { actionKey: e.target.value })} />
+            <input className={styles.input} value={selectedItem.draft.actionKey} onChange={(e) => updateItemDraft(selectedItem.rowKey, { actionKey: e.target.value })} />
             <span className={styles.help}>Stable identifier for idempotent operations</span>
           </div>
           <div className={styles.fieldRow}>
             <label className={styles.label}>Title *</label>
-            <input className={styles.input} value={selectedItem.title} onChange={(e) => updateItemDraft(selectedItemIndex, { title: e.target.value })} />
+            <input className={styles.input} value={selectedItem.draft.title} onChange={(e) => updateItemDraft(selectedItem.rowKey, { title: e.target.value })} />
           </div>
           <div className={styles.fieldRow}>
             <label className={styles.label}>URL *</label>
-            <input className={styles.input} value={selectedItem.href} onChange={(e) => updateItemDraft(selectedItemIndex, { href: e.target.value })} />
+            <input className={styles.input} value={selectedItem.draft.href} onChange={(e) => updateItemDraft(selectedItem.rowKey, { href: e.target.value })} />
           </div>
           <div className={styles.fieldRow}>
             <label className={styles.label}>Description</label>
-            <input className={styles.input} value={selectedItem.description} onChange={(e) => updateItemDraft(selectedItemIndex, { description: e.target.value })} />
+            <input className={styles.input} value={selectedItem.draft.description} onChange={(e) => updateItemDraft(selectedItem.rowKey, { description: e.target.value })} />
           </div>
           <div className={styles.fieldRowInline}>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Badge Label</label>
-              <input className={styles.input} value={selectedItem.badgeLabel} onChange={(e) => updateItemDraft(selectedItemIndex, { badgeLabel: e.target.value })} />
+              <input className={styles.input} value={selectedItem.draft.badgeLabel} onChange={(e) => updateItemDraft(selectedItem.rowKey, { badgeLabel: e.target.value })} />
             </div>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Badge Variant</label>
-              <select className={styles.select} value={selectedItem.badgeVariant} onChange={(e) => updateItemDraft(selectedItemIndex, { badgeVariant: e.target.value as PriorityActionsItemDraft['badgeVariant'] })}>
+              <select className={styles.select} value={selectedItem.draft.badgeVariant} onChange={(e) => updateItemDraft(selectedItem.rowKey, { badgeVariant: e.target.value as PriorityActionsItemDraft['badgeVariant'] })}>
                 <option value="neutral">Neutral</option>
                 <option value="info">Info</option>
                 <option value="warning">Warning</option>
@@ -437,7 +524,7 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
             </div>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Priority</label>
-              <select className={styles.select} value={selectedItem.priority} onChange={(e) => updateItemDraft(selectedItemIndex, { priority: e.target.value as PriorityActionsItemDraft['priority'] })}>
+              <select className={styles.select} value={selectedItem.draft.priority} onChange={(e) => updateItemDraft(selectedItem.rowKey, { priority: e.target.value as PriorityActionsItemDraft['priority'] })}>
                 <option value="primary">Primary</option>
                 <option value="secondary">Secondary</option>
                 <option value="overflow">Overflow</option>
@@ -447,46 +534,46 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
           <div className={styles.fieldRowInline}>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Icon Key</label>
-              <input className={styles.input} value={selectedItem.iconKey} onChange={(e) => updateItemDraft(selectedItemIndex, { iconKey: e.target.value })} />
+              <input className={styles.input} value={selectedItem.draft.iconKey} onChange={(e) => updateItemDraft(selectedItem.rowKey, { iconKey: e.target.value })} />
             </div>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Group Key</label>
-              <input className={styles.input} value={selectedItem.groupKey} onChange={(e) => updateItemDraft(selectedItemIndex, { groupKey: e.target.value })} />
+              <input className={styles.input} value={selectedItem.draft.groupKey} onChange={(e) => updateItemDraft(selectedItem.rowKey, { groupKey: e.target.value })} />
             </div>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Group Title</label>
-              <input className={styles.input} value={selectedItem.groupTitle} onChange={(e) => updateItemDraft(selectedItemIndex, { groupTitle: e.target.value })} />
+              <input className={styles.input} value={selectedItem.draft.groupTitle} onChange={(e) => updateItemDraft(selectedItem.rowKey, { groupTitle: e.target.value })} />
             </div>
           </div>
           <div className={styles.fieldRowInline}>
             <div className={styles.checkboxRow}>
-              <input type="checkbox" checked={selectedItem.isExternal} onChange={(e) => updateItemDraft(selectedItemIndex, { isExternal: e.target.checked })} />
+              <input type="checkbox" checked={selectedItem.draft.isExternal} onChange={(e) => updateItemDraft(selectedItem.rowKey, { isExternal: e.target.checked })} />
               <span className={styles.label}>External link</span>
             </div>
             <div className={styles.checkboxRow}>
-              <input type="checkbox" checked={selectedItem.openInNewTab} onChange={(e) => updateItemDraft(selectedItemIndex, { openInNewTab: e.target.checked })} />
+              <input type="checkbox" checked={selectedItem.draft.openInNewTab} onChange={(e) => updateItemDraft(selectedItem.rowKey, { openInNewTab: e.target.checked })} />
               <span className={styles.label}>Open in new tab</span>
             </div>
             <div className={styles.checkboxRow}>
-              <input type="checkbox" checked={selectedItem.overflowOnly} onChange={(e) => updateItemDraft(selectedItemIndex, { overflowOnly: e.target.checked })} />
+              <input type="checkbox" checked={selectedItem.draft.overflowOnly} onChange={(e) => updateItemDraft(selectedItem.rowKey, { overflowOnly: e.target.checked })} />
               <span className={styles.label}>Overflow only</span>
             </div>
           </div>
           <div className={styles.fieldRowInline}>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Schedule Start</label>
-              <input type="datetime-local" className={styles.input} value={selectedItem.startsAtUtc ? selectedItem.startsAtUtc.slice(0, 16) : ''} onChange={(e) => updateItemDraft(selectedItemIndex, { startsAtUtc: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
+              <input type="datetime-local" className={styles.input} value={selectedItem.draft.startsAtUtc ? selectedItem.draft.startsAtUtc.slice(0, 16) : ''} onChange={(e) => updateItemDraft(selectedItem.rowKey, { startsAtUtc: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
             </div>
             <div className={styles.fieldRow}>
               <label className={styles.label}>Schedule End</label>
-              <input type="datetime-local" className={styles.input} value={selectedItem.endsAtUtc ? selectedItem.endsAtUtc.slice(0, 16) : ''} onChange={(e) => updateItemDraft(selectedItemIndex, { endsAtUtc: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
+              <input type="datetime-local" className={styles.input} value={selectedItem.draft.endsAtUtc ? selectedItem.draft.endsAtUtc.slice(0, 16) : ''} onChange={(e) => updateItemDraft(selectedItem.rowKey, { endsAtUtc: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
             </div>
           </div>
           <h3 className={styles.label} style={{ marginTop: 8 }}>Device Visibility</h3>
           <div className={styles.fieldRowInline}>
             {(['visibleDesktop', 'visibleLaptop', 'visibleTabletLandscape', 'visibleTabletPortrait', 'visiblePhone'] as const).map((field) => (
               <div key={field} className={styles.checkboxRow}>
-                <input type="checkbox" checked={selectedItem[field]} onChange={(e) => updateItemDraft(selectedItemIndex, { [field]: e.target.checked })} />
+                <input type="checkbox" checked={selectedItem.draft[field]} onChange={(e) => updateItemDraft(selectedItem.rowKey, { [field]: e.target.checked } as Partial<PriorityActionsItemDraft>)} />
                 <span className={styles.label}>{field.replace('visible', '')}</span>
               </div>
             ))}
@@ -494,7 +581,6 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         </div>
       )}
 
-      {/* Validation Summary */}
       {!validation.valid && (
         <div className={styles.section}>
           <h2 className={styles.sectionHeading}>Validation Issues ({validation.issues.length})</h2>
@@ -508,7 +594,6 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         </div>
       )}
 
-      {/* Preview */}
       <div className={styles.section}>
         <div className={styles.previewPane}>
           <div className={styles.previewHeading}>
@@ -542,7 +627,6 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         </div>
       </div>
 
-      {/* Discard dialog */}
       {showDiscardDialog && (
         <div className={styles.discardDialog} role="alertdialog" aria-label="Discard changes">
           <p>Discard all unsaved changes and revert to the last saved state?</p>
@@ -553,7 +637,6 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
         </div>
       )}
 
-      {/* Actions */}
       <div className={styles.actions}>
         <button
           type="button"

@@ -9,6 +9,9 @@ import type {
   PriorityActionsItemNormalized,
   PriorityActionsConfigDraft,
   PriorityActionsItemDraft,
+  PriorityActionsAdminRow,
+  PriorityActionsAdminRowLifecycle,
+  PriorityActionsItemOperationPlan,
 } from './priorityActionsContracts.js';
 
 /* ── Permission model ────────────────────────────────────────────── */
@@ -55,6 +58,17 @@ export interface PriorityActionsPersistedSnapshot {
 }
 
 /* ── Draft factories ─────────────────────────────────────────────── */
+
+let rowKeyCounter = 0;
+
+function nextRowKey(prefix: string): string {
+  rowKeyCounter += 1;
+  return `${prefix}-${rowKeyCounter}`;
+}
+
+function cloneDraft<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
 
 export function createConfigDraftFromResolved(
   config: PriorityActionsConfigResolved,
@@ -113,7 +127,7 @@ export function createItemDraftFromNormalized(
   };
 }
 
-export function createEmptyItemDraft(bandKey: string): PriorityActionsItemDraft {
+export function createEmptyItemDraft(_: string): PriorityActionsItemDraft {
   return {
     actionKey: '',
     title: '',
@@ -142,7 +156,77 @@ export function createEmptyItemDraft(bandKey: string): PriorityActionsItemDraft 
   };
 }
 
+export function createAdminRowsFromNormalized(
+  items: PriorityActionsItemNormalized[],
+): PriorityActionsAdminRow[] {
+  return items.map((item) => ({
+    rowKey: `persisted-${item.id}`,
+    persisted: {
+      itemId: item.id,
+      actionKey: item.actionKey,
+      sortOrder: item.sortOrder,
+    },
+    draft: createItemDraftFromNormalized(item),
+    markedForArchive: false,
+  }));
+}
+
+export function createNewAdminRow(
+  bandKey: string,
+  explicitActionKey?: string,
+): PriorityActionsAdminRow {
+  const draft = createEmptyItemDraft(bandKey);
+  draft.actionKey = explicitActionKey ?? `action-${Date.now()}`;
+  return {
+    rowKey: nextRowKey('new'),
+    draft,
+    markedForArchive: false,
+  };
+}
+
+export function cloneAdminRows(rows: PriorityActionsAdminRow[]): PriorityActionsAdminRow[] {
+  return cloneDraft(rows);
+}
+
+export function resequenceAdminRows(rows: PriorityActionsAdminRow[]): PriorityActionsAdminRow[] {
+  let order = 10;
+  return rows.map((row) => {
+    if (row.markedForArchive) {
+      return row;
+    }
+    const next = {
+      ...row,
+      draft: {
+        ...row.draft,
+        sortOrder: order,
+      },
+    };
+    order += 10;
+    return next;
+  });
+}
+
+export function getActiveItemDrafts(rows: PriorityActionsAdminRow[]): PriorityActionsItemDraft[] {
+  return rows
+    .filter((row) => !row.markedForArchive)
+    .map((row) => row.draft);
+}
+
 /* ── Dirty-state detection ───────────────────────────────────────── */
+
+function stripForDirtyCompare(rows: PriorityActionsAdminRow[]): Array<{
+  rowKey: string;
+  persistedItemId?: number;
+  markedForArchive: boolean;
+  draft: PriorityActionsItemDraft;
+}> {
+  return rows.map((row) => ({
+    rowKey: row.rowKey,
+    persistedItemId: row.persisted?.itemId,
+    markedForArchive: row.markedForArchive,
+    draft: row.draft,
+  }));
+}
 
 export function isConfigDirty(
   draft: PriorityActionsConfigDraft,
@@ -159,9 +243,115 @@ export function isItemDirty(
 }
 
 export function isAnyItemDirty(
-  drafts: PriorityActionsItemDraft[],
-  baselines: PriorityActionsItemDraft[],
+  drafts: PriorityActionsAdminRow[],
+  baselines: PriorityActionsAdminRow[],
 ): boolean {
-  if (drafts.length !== baselines.length) return true;
-  return drafts.some((draft, i) => isItemDirty(draft, baselines[i]));
+  return JSON.stringify(stripForDirtyCompare(drafts)) !== JSON.stringify(stripForDirtyCompare(baselines));
+}
+
+/* ── Operation planning ──────────────────────────────────────────── */
+
+function buildBaselineById(rows: PriorityActionsAdminRow[]): Map<number, PriorityActionsAdminRow> {
+  const result = new Map<number, PriorityActionsAdminRow>();
+  for (const row of rows) {
+    if (row.persisted?.itemId !== undefined) {
+      result.set(row.persisted.itemId, row);
+    }
+  }
+  return result;
+}
+
+function isOrderChanged(
+  current: PriorityActionsAdminRow[],
+  baseline: PriorityActionsAdminRow[],
+): boolean {
+  const currentPersisted = current
+    .filter((row) => row.persisted && !row.markedForArchive)
+    .map((row) => row.persisted!.itemId);
+
+  const baselinePersisted = baseline
+    .filter((row) => row.persisted)
+    .map((row) => row.persisted!.itemId)
+    .filter((id) => currentPersisted.includes(id));
+
+  if (currentPersisted.length !== baselinePersisted.length) {
+    return true;
+  }
+
+  return currentPersisted.some((id, index) => id !== baselinePersisted[index]);
+}
+
+export function planItemOperations(
+  rows: PriorityActionsAdminRow[],
+  baselineRows: PriorityActionsAdminRow[],
+): PriorityActionsItemOperationPlan {
+  const baselineById = buildBaselineById(baselineRows);
+  const lifecycleByRowKey: Record<string, PriorityActionsAdminRowLifecycle> = {};
+
+  const create: Array<{ rowKey: string; draft: PriorityActionsItemDraft }> = [];
+  const update: Array<{ rowKey: string; itemId: number; draft: PriorityActionsItemDraft }> = [];
+  const archive: Array<{ rowKey: string; itemId: number }> = [];
+
+  for (const row of rows) {
+    if (row.saveError) {
+      lifecycleByRowKey[row.rowKey] = 'save-error';
+      continue;
+    }
+
+    if (!row.persisted) {
+      if (row.markedForArchive) {
+        lifecycleByRowKey[row.rowKey] = 'persisted-unchanged';
+        continue;
+      }
+      create.push({ rowKey: row.rowKey, draft: row.draft });
+      lifecycleByRowKey[row.rowKey] = 'new';
+      continue;
+    }
+
+    if (row.markedForArchive) {
+      archive.push({ rowKey: row.rowKey, itemId: row.persisted.itemId });
+      lifecycleByRowKey[row.rowKey] = 'marked-for-archive';
+      continue;
+    }
+
+    const baseline = baselineById.get(row.persisted.itemId);
+    const draftChanged = baseline ? JSON.stringify(row.draft) !== JSON.stringify(baseline.draft) : true;
+
+    if (draftChanged) {
+      update.push({ rowKey: row.rowKey, itemId: row.persisted.itemId, draft: row.draft });
+      lifecycleByRowKey[row.rowKey] = 'persisted-edited';
+    } else {
+      lifecycleByRowKey[row.rowKey] = 'persisted-unchanged';
+    }
+  }
+
+  const currentPersistedRows = rows.filter((row) => row.persisted && !row.markedForArchive);
+  const reorderChanged = isOrderChanged(rows, baselineRows)
+    || currentPersistedRows.some((row) => {
+      const baseline = baselineById.get(row.persisted!.itemId);
+      return !baseline || baseline.draft.sortOrder !== row.draft.sortOrder;
+    });
+
+  const reorder = reorderChanged
+    ? currentPersistedRows.map((row) => ({
+        itemId: row.persisted!.itemId,
+        sortOrder: row.draft.sortOrder,
+      }))
+    : [];
+
+  if (reorder.length > 0) {
+    for (const row of currentPersistedRows) {
+      if (lifecycleByRowKey[row.rowKey] === 'persisted-unchanged') {
+        lifecycleByRowKey[row.rowKey] = 'pending-reorder';
+      }
+    }
+  }
+
+  return {
+    create,
+    update,
+    archive,
+    reorder,
+    lifecycleByRowKey,
+  };
 }
