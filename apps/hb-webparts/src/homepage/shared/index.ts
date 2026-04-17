@@ -13,3 +13,16 @@ export { HomepageUtilityDenseGroup } from './HomepageUtilityDenseGroup.js';
 
 export { useResponsiveTier } from './useResponsiveTier.js';
 export type { ResponsiveTier } from './useResponsiveTier.js';
+
+export {
+  ENTRY_STACK_BUDGETS,
+  ENTRY_STACK_SEQUENCE,
+  resolveEntryStackBudget,
+  getEntryStackBudget,
+} from '../entryStack/index.js';
+export type {
+  EntryStackDeviceClass,
+  EntryStackHeightRange,
+  EntryStackBudget,
+  EntryStackPosition,
+} from '../entryStack/index.js';
