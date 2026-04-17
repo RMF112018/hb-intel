@@ -7,11 +7,15 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     displayName: 'Company Pulse',
     renderKey: 'CompanyPulseZone',
     allowedSlotRoles: ['primary', 'secondary'],
+    prominenceCeiling: 'anchor',
+    firstLaneEligible: true,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
+      narrowestStablePairedWidth: 520,
       supportsCompact: false,
       supportsStandard: true,
+      supportsSummaryCollapse: false,
     },
   },
   {
@@ -20,11 +24,15 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     displayName: 'Leadership Message',
     renderKey: 'LeadershipMessageZone',
     allowedSlotRoles: ['primary', 'secondary'],
+    prominenceCeiling: 'anchor',
+    firstLaneEligible: true,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
+      narrowestStablePairedWidth: 520,
       supportsCompact: false,
       supportsStandard: true,
+      supportsSummaryCollapse: false,
     },
   },
   {
@@ -33,11 +41,15 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     displayName: 'Project Portfolio Spotlight',
     renderKey: 'ProjectPortfolioSpotlightZone',
     allowedSlotRoles: ['primary', 'secondary'],
+    prominenceCeiling: 'supporting',
+    firstLaneEligible: false,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
+      narrowestStablePairedWidth: 520,
       supportsCompact: false,
       supportsStandard: true,
+      supportsSummaryCollapse: false,
     },
   },
   {
@@ -46,11 +58,15 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     displayName: 'People & Culture Public',
     renderKey: 'PeopleCulturePublicZone',
     allowedSlotRoles: ['primary'],
+    prominenceCeiling: 'anchor',
+    firstLaneEligible: false,
     comfort: {
-      minWidth: 720,
-      preferredWidth: 1040,
+      minWidth: 600,
+      preferredWidth: 960,
+      narrowestStablePairedWidth: 640,
       supportsCompact: false,
       supportsStandard: true,
+      supportsSummaryCollapse: false,
     },
     pairingRestrictions: ['hb-kudos'],
   },
@@ -60,13 +76,34 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     displayName: 'HB Kudos',
     renderKey: 'HbKudosZone',
     allowedSlotRoles: ['primary', 'secondary'],
+    prominenceCeiling: 'contextual',
+    firstLaneEligible: false,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
+      narrowestStablePairedWidth: 520,
       supportsCompact: false,
       supportsStandard: true,
+      supportsSummaryCollapse: false,
     },
     pairingRestrictions: ['people-culture-public'],
+  },
+  {
+    id: 'safety-field-excellence',
+    status: 'inactive-candidate',
+    displayName: 'Safety Field Excellence',
+    renderKey: 'SafetyFieldExcellenceZone',
+    allowedSlotRoles: ['primary', 'secondary'],
+    prominenceCeiling: 'supporting',
+    firstLaneEligible: false,
+    comfort: {
+      minWidth: 480,
+      preferredWidth: 720,
+      narrowestStablePairedWidth: 520,
+      supportsCompact: false,
+      supportsStandard: true,
+      supportsSummaryCollapse: false,
+    },
   },
 ] as const;
 
@@ -82,6 +119,10 @@ export function getActiveOccupants(): OccupantDescriptor[] {
   return [...OCCUPANT_REGISTRY.values()].filter((o) => o.status === 'active');
 }
 
+export function getFirstLaneEligibleOccupants(): OccupantDescriptor[] {
+  return getActiveOccupants().filter((o) => o.firstLaneEligible);
+}
+
 export function isOccupantAllowedInSlot(id: OccupantId, role: SlotRole): boolean {
   const occupant = OCCUPANT_REGISTRY.get(id);
   if (!occupant) return false;
@@ -95,4 +136,10 @@ export function areOccupantsPairableInBand(a: OccupantId, b: OccupantId): boolea
   if (occupantA.pairingRestrictions?.includes(b)) return false;
   if (occupantB.pairingRestrictions?.includes(a)) return false;
   return true;
+}
+
+export function canOccupantPairAtWidth(id: OccupantId, slotWidth: number): boolean {
+  const occupant = OCCUPANT_REGISTRY.get(id);
+  if (!occupant) return false;
+  return slotWidth >= occupant.comfort.narrowestStablePairedWidth;
 }

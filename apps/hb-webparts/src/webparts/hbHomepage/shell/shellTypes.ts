@@ -10,7 +10,8 @@ export type OccupantId =
   | 'leadership-message'
   | 'project-portfolio-spotlight'
   | 'people-culture-public'
-  | 'hb-kudos';
+  | 'hb-kudos'
+  | 'safety-field-excellence';
 
 export type OccupantStatus = 'active' | 'inactive-candidate';
 
@@ -54,11 +55,15 @@ export interface ShellPreset {
 // Occupant descriptor
 // ---------------------------------------------------------------------------
 
+export type ProminenceCeiling = 'anchor' | 'supporting' | 'contextual';
+
 export interface OccupantComfort {
   readonly minWidth: number;
   readonly preferredWidth: number;
+  readonly narrowestStablePairedWidth: number;
   readonly supportsCompact: boolean;
   readonly supportsStandard: boolean;
+  readonly supportsSummaryCollapse: boolean;
 }
 
 export interface OccupantDescriptor {
@@ -67,6 +72,8 @@ export interface OccupantDescriptor {
   readonly displayName: string;
   readonly renderKey: string;
   readonly allowedSlotRoles: readonly SlotRole[];
+  readonly prominenceCeiling: ProminenceCeiling;
+  readonly firstLaneEligible: boolean;
   readonly comfort: OccupantComfort;
   readonly pairingRestrictions?: readonly OccupantId[];
 }

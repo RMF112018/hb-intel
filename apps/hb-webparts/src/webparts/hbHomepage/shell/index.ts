@@ -8,6 +8,7 @@ export type {
   OccupantDescriptor,
   OccupantId,
   OccupantStatus,
+  ProminenceCeiling,
   RendererContext,
   ShellBand,
   ShellDiagnostic,
@@ -24,7 +25,9 @@ export type {
 export {
   OCCUPANT_REGISTRY,
   areOccupantsPairableInBand,
+  canOccupantPairAtWidth,
   getActiveOccupants,
+  getFirstLaneEligibleOccupants,
   getOccupant,
   isOccupantAllowedInSlot,
 } from './occupantRegistry.js';

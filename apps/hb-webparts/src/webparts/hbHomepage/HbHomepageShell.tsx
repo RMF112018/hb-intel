@@ -20,7 +20,7 @@ import styles from './HbHomepageShell.module.css';
 // Zone wrappers own how the child is mounted; the shell owns where.
 // ---------------------------------------------------------------------------
 
-const ZONE_COMPONENTS: Readonly<Record<OccupantId, React.ComponentType<HbHomepageZoneProps>>> = {
+const ZONE_COMPONENTS: Readonly<Partial<Record<OccupantId, React.ComponentType<HbHomepageZoneProps>>>> = {
   'company-pulse': CompanyPulseZone,
   'leadership-message': LeadershipMessageZone,
   'project-portfolio-spotlight': ProjectPortfolioSpotlightZone,

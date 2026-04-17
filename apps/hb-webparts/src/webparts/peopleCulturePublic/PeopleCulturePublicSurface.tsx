@@ -44,7 +44,7 @@ const SECTION_STYLE: React.CSSProperties = {
   background: '#ffffff',
   borderRadius: 14,
   padding: '24px 28px',
-  maxWidth: 1040,
+  maxWidth: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: 20,

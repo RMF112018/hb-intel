@@ -6,6 +6,7 @@ const OCCUPANT_IDS = [
   'project-portfolio-spotlight',
   'people-culture-public',
   'hb-kudos',
+  'safety-field-excellence',
 ] as const;
 
 const SLOT_ROLES = ['primary', 'secondary', 'compact'] as const;

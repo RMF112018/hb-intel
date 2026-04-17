@@ -1,4 +1,4 @@
-import { getOccupant, areOccupantsPairableInBand } from './occupantRegistry.js';
+import { getOccupant, areOccupantsPairableInBand, canOccupantPairAtWidth } from './occupantRegistry.js';
 import type {
   ColumnSpan,
   OccupantId,
@@ -72,6 +72,7 @@ function canBandPair(
     const slotWidth = resolveSlotWidth(containerWidth, slot.columnSpan, 2);
     const comfort = checkOccupantComfort(slot.occupantId!, slotWidth);
     if (comfort.shouldStack) return false;
+    if (!canOccupantPairAtWidth(slot.occupantId!, slotWidth)) return false;
   }
 
   return true;
