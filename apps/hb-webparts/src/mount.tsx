@@ -28,6 +28,8 @@ import { HbSignatureHero } from './webparts/hbSignatureHero/HbSignatureHero.js';
 import { buildHeroArticleContent } from './webparts/hbSignatureHero/articleConfig.js';
 import { createGraphPersonPhotoFn } from '@hbc/ui-kit/homepage';
 import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmin.js';
+import { HbHomepage } from './webparts/hbHomepage/HbHomepage.js';
+import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract.js';
 import { PnpOps } from './webparts/pnp/PnpOps.js';
 import { PNP_OPS_LEGACY_MODE, resolvePnpOpsExecutionMode } from './webparts/pnp/pnpOpsExecutionModes.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';
@@ -113,6 +115,11 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // HbHeroBanner webpart.
   '23d22f2d-7a15-4031-ab64-2454898bfd44': ({ siteUrl }) =>
     createElement(HbHeroBannerAdmin, { siteUrl }),
+  // HB Homepage — composed orchestrator rendering CompanyPulse,
+  // LeadershipMessage, ProjectPortfolioSpotlight, PeopleCulturePublic,
+  // and HbKudos in a single shell. hbSignatureHero remains independent.
+  [HB_HOMEPAGE_WEBPART_ID]: ({ config, identity, assetBaseUrl, siteUrl, getGraphToken, getApiToken }) =>
+    createElement(HbHomepage, { config, identity, assetBaseUrl, siteUrl, getGraphToken, getApiToken }),
   // Article Publisher authoring surface was extracted into its own SPFx
   // solution `hb-publisher.sppkg`. Its manifest id (1a6f8b2c-…) is now
   // owned by `apps/hb-publisher` and is no longer dispatched from here.
