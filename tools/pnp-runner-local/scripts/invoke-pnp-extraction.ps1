@@ -153,6 +153,22 @@ function Resolve-IsExternal([string]$Href) {
   return $false
 }
 
+function Resolve-DefaultPageName() {
+  $web = Get-PnPWeb -Includes RootFolder
+  $ctx = Get-PnPContext
+  $ctx.Load($web.RootFolder)
+  $ctx.ExecuteQuery()
+  $welcome = [string]$web.RootFolder.WelcomePage
+  if (-not [string]::IsNullOrWhiteSpace($welcome)) {
+    $segments = $welcome -split '/'
+    $candidate = $segments[-1]
+    if (-not [string]::IsNullOrWhiteSpace($candidate)) {
+      return $candidate
+    }
+  }
+  return 'Home.aspx'
+}
+
 function Ensure-ListSettings([string]$ListTitle) {
   try {
     Set-PnPList -Identity $ListTitle -EnableVersioning:$true -EnableAttachments:$false -EnableFolderCreation:$false -EnableContentTypes:$false | Out-Null
@@ -267,6 +283,183 @@ function Read-JsonSafe([string]$Text) {
   }
 }
 
+function Decode-HtmlText([string]$Text) {
+  if ([string]::IsNullOrWhiteSpace($Text)) { return '' }
+  $decoded = [string]$Text
+  for ($idx = 0; $idx -lt 3; $idx += 1) {
+    $next = [System.Net.WebUtility]::HtmlDecode($decoded)
+    if ($next -eq $decoded) { break }
+    $decoded = $next
+  }
+  return $decoded
+}
+
+function Parse-QuickLinksWebPartDataFromCanvas([string]$CanvasContent) {
+  $results = [System.Collections.Generic.List[object]]::new()
+  if ([string]::IsNullOrWhiteSpace($CanvasContent)) { return @($results) }
+
+  $attributePatterns = @(
+    'data-sp-webpartdata="([^"]+)"',
+    "data-sp-webpartdata='([^']+)'"
+  )
+
+  foreach ($pattern in $attributePatterns) {
+    $matches = [System.Text.RegularExpressions.Regex]::Matches(
+      $CanvasContent,
+      $pattern,
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+
+    foreach ($match in $matches) {
+      $encoded = [string]$match.Groups[1].Value
+      $decoded = Decode-HtmlText $encoded
+      $parsed = Read-JsonSafe $decoded
+      if ($null -eq $parsed) { continue }
+      $id = Normalize-Text (Get-PropertyValue -Object $parsed -Names @('id'))
+      if ($id -eq $QUICK_LINKS_WEBPART_ID) {
+        $results.Add($parsed)
+      }
+    }
+  }
+
+  return @($results)
+}
+
+function Parse-QuickLinksWebPartDataFromJsonText([string]$JsonText) {
+  $results = [System.Collections.Generic.List[object]]::new()
+  if ([string]::IsNullOrWhiteSpace($JsonText)) { return @($results) }
+
+  $decoded = Decode-HtmlText $JsonText
+  $parsed = Read-JsonSafe $decoded
+  if ($null -eq $parsed) { return @($results) }
+
+  $queue = [System.Collections.Generic.List[object]]::new()
+  $queue.Add($parsed)
+  while ($queue.Count -gt 0) {
+    $node = $queue[0]
+    $queue.RemoveAt(0)
+    if ($null -eq $node) { continue }
+
+    if ($node -is [System.Collections.IDictionary] -or $node -is [pscustomobject]) {
+      $webPartData = Get-PropertyValue -Object $node -Names @('webPartData', 'WebPartData')
+      if ($null -ne $webPartData) {
+        $id = Normalize-Text (Get-PropertyValue -Object $webPartData -Names @('id', 'Id'))
+        if ($id -eq $QUICK_LINKS_WEBPART_ID) {
+          $results.Add($webPartData)
+        }
+      }
+
+      $idNode = Normalize-Text (Get-PropertyValue -Object $node -Names @('id', 'Id'))
+      if ($idNode -eq $QUICK_LINKS_WEBPART_ID) {
+        $results.Add($node)
+      }
+
+      foreach ($prop in $node.PSObject.Properties) {
+        if ($null -eq $prop.Value) { continue }
+        if ($prop.Value -is [string]) { continue }
+        $queue.Add($prop.Value)
+      }
+      continue
+    }
+
+    if ($node -is [System.Collections.IEnumerable] -and -not ($node -is [string])) {
+      foreach ($entry in $node) {
+        if ($null -ne $entry) {
+          $queue.Add($entry)
+        }
+      }
+    }
+  }
+
+  return @($results)
+}
+
+function Get-NodeEntries([object]$Node) {
+  $entries = [System.Collections.Generic.List[object]]::new()
+  if ($null -eq $Node) { return @($entries) }
+
+  if ($Node -is [System.Collections.IDictionary]) {
+    foreach ($key in $Node.Keys) {
+      $entries.Add([ordered]@{
+          name = [string]$key
+          value = $Node[$key]
+        })
+    }
+    return @($entries)
+  }
+
+  foreach ($prop in $Node.PSObject.Properties) {
+    $entries.Add([ordered]@{
+        name = [string]$prop.Name
+        value = $prop.Value
+      })
+  }
+  return @($entries)
+}
+
+function Get-SitePagePayload([string]$PageName) {
+  if ([string]::IsNullOrWhiteSpace($PageName)) { return $null }
+  $relativePath = "SitePages/$PageName"
+  $escaped = $relativePath.Replace("'", "''")
+  $endpoint = "/_api/sitepages/pages/GetByUrl('$escaped')"
+  try {
+    $response = Invoke-PnPSPRestMethod -Method Get -Url $endpoint
+    if ($null -eq $response) { return $null }
+    if ($response -is [string]) {
+      return (Read-JsonSafe $response)
+    }
+    return $response
+  } catch {
+    return $null
+  }
+}
+
+function Extract-QuickLinksFromWebPartData([object]$WebPartData, [string]$SourceLabel, [System.Collections.Generic.List[object]]$Target, [hashtable]$Seen) {
+  if ($null -eq $WebPartData) { return }
+
+  $serverProcessedContent = Get-PropertyValue -Object $WebPartData -Names @('serverProcessedContent')
+  $searchablePlainTexts = Get-PropertyValue -Object $serverProcessedContent -Names @('searchablePlainTexts')
+  $linksNode = Get-PropertyValue -Object $serverProcessedContent -Names @('links')
+  $propsNode = Get-PropertyValue -Object $WebPartData -Names @('properties')
+
+  $titleByIndex = @{}
+  if ($null -ne $searchablePlainTexts) {
+    foreach ($entry in (Get-NodeEntries -Node $searchablePlainTexts)) {
+      $name = [string]$entry.name
+      if ($name -match '^items\[(\d+)\]\.title$') {
+        $idx = [int]$Matches[1]
+        $titleByIndex[$idx] = Normalize-Text $entry.value
+      }
+    }
+  }
+
+  if ($null -ne $linksNode) {
+    foreach ($entry in (Get-NodeEntries -Node $linksNode)) {
+      $name = [string]$entry.name
+      if ($name -match '^items\[(\d+)\]\.sourceItem\.url$') {
+        $idx = [int]$Matches[1]
+        $title = if ($titleByIndex.ContainsKey($idx)) { $titleByIndex[$idx] } else { '' }
+        Add-LinkCandidate -Candidate ([ordered]@{
+            title = $title
+            url = (Normalize-Text $entry.value)
+            openInNewTab = $false
+          }) -SourceLabel "$SourceLabel:serverProcessedContent.links" -DefaultOrder ($idx + 1) -Target $Target -Seen $Seen
+      }
+    }
+  }
+
+  if ($null -ne $propsNode) {
+    $items = Get-PropertyValue -Object $propsNode -Names @('items')
+    if ($null -ne $items) {
+      $idx = 0
+      foreach ($entry in @($items)) {
+        Add-LinkCandidate -Candidate $entry -SourceLabel "$SourceLabel:properties.items" -DefaultOrder ($idx + 1) -Target $Target -Seen $Seen
+        $idx += 1
+      }
+    }
+  }
+}
+
 function Add-LinkCandidate([object]$Candidate, [string]$SourceLabel, [int]$DefaultOrder, [System.Collections.Generic.List[object]]$Target, [hashtable]$Seen) {
   if ($null -eq $Candidate) { return }
 
@@ -324,15 +517,33 @@ function Extract-QuickLinksFromPage([string]$PageName) {
   if ($null -ne $page -and $null -ne $page.Controls) {
     foreach ($control in $page.Controls) {
       $webPartId = Normalize-Text (Get-PropertyValue -Object $control -Names @('WebPartId', 'webPartId'))
+      $webPartData = Get-PropertyValue -Object $control -Names @('WebPartData', 'webPartData')
       $jsonPayload = Normalize-Text (Get-PropertyValue -Object $control -Names @('PropertiesJson', 'JsonControlData'))
+      if ($null -eq $webPartData -and -not [string]::IsNullOrWhiteSpace($jsonPayload)) {
+        $parsedPayload = Read-JsonSafe $jsonPayload
+        if ($null -ne $parsedPayload) {
+          $webPartData = Get-PropertyValue -Object $parsedPayload -Names @('webPartData', 'WebPartData')
+          if ([string]::IsNullOrWhiteSpace($webPartId)) {
+            $webPartId = Normalize-Text (Get-PropertyValue -Object $parsedPayload -Names @('webPartId', 'WebPartId'))
+          }
+        }
+      }
+      if ([string]::IsNullOrWhiteSpace($webPartId) -and $null -ne $webPartData) {
+        $webPartId = Normalize-Text (Get-PropertyValue -Object $webPartData -Names @('id', 'Id'))
+      }
       if ($webPartId -eq $QUICK_LINKS_WEBPART_ID -or $jsonPayload -match $QUICK_LINKS_WEBPART_ID) {
+        if ($null -ne $webPartData) {
+          Extract-QuickLinksFromWebPartData -WebPartData $webPartData -SourceLabel "Get-PnPPage:$PageName" -Target $results -Seen $seen
+        }
         $parsed = Read-JsonSafe $jsonPayload
-        Collect-LinksRecursive -Node $parsed -SourceLabel "Get-PnPPage:$PageName" -Target $results -Seen $seen
+        if ($null -ne $parsed) {
+          Collect-LinksRecursive -Node $parsed -SourceLabel "Get-PnPPage:$PageName" -Target $results -Seen $seen
+        }
       }
     }
   }
 
-  $items = Get-PnPListItem -List 'Site Pages' -Fields FileLeafRef,CanvasContent1,Title -PageSize 200
+  $items = Get-PnPListItem -List 'Site Pages' -Fields FileLeafRef,CanvasContent1,LayoutWebpartsContent,Title -PageSize 200
   $targetPage = $items | Where-Object { $_['FileLeafRef'] -eq $PageName } | Select-Object -First 1
   if ($null -eq $targetPage -and $PageName -ne 'Home.aspx') {
     $targetPage = $items | Where-Object { $_['FileLeafRef'] -eq 'Home.aspx' } | Select-Object -First 1
@@ -342,26 +553,69 @@ function Extract-QuickLinksFromPage([string]$PageName) {
     $warnings.Add("Could not locate Site Pages item for page $PageName.")
   } else {
     $canvas = [string]$targetPage['CanvasContent1']
-    if ($canvas -notmatch $QUICK_LINKS_WEBPART_ID) {
-      $warnings.Add('Quick Links webpart id was not found in CanvasContent1; extraction used generic link parsing fallback.')
-    }
+    $layoutWebpartsContent = [string]$targetPage['LayoutWebpartsContent']
 
-    $jsonFragments = [System.Text.RegularExpressions.Regex]::Matches($canvas, '\{[^\{\}]*"(url|href|Url|Href)"[^\{\}]*\}')
-    foreach ($fragment in $jsonFragments) {
-      $candidate = Read-JsonSafe $fragment.Value
-      if ($null -ne $candidate) {
-        Add-LinkCandidate -Candidate $candidate -SourceLabel "CanvasContent1:$PageName" -DefaultOrder $script:QuickLinkOrderCounter -Target $results -Seen $seen
-        $script:QuickLinkOrderCounter += 1
+    $canvasJsonQuickWebparts = @(Parse-QuickLinksWebPartDataFromJsonText -JsonText $canvas)
+    if (@($canvasJsonQuickWebparts).Count -gt 0) {
+      foreach ($wp in $canvasJsonQuickWebparts) {
+        Extract-QuickLinksFromWebPartData -WebPartData $wp -SourceLabel "CanvasContent1Json:$PageName" -Target $results -Seen $seen
       }
     }
 
-    $urlMatches = [System.Text.RegularExpressions.Regex]::Matches($canvas, '(https?:\\/\\/[^\"\s,}]+|\/sites\/[^\"\s,}]+)')
-    foreach ($match in $urlMatches) {
-      $rawUrl = [string]$match.Value
-      $url = $rawUrl -replace '\\/', '/'
-      if (-not [string]::IsNullOrWhiteSpace($url)) {
-        Add-LinkCandidate -Candidate ([ordered]@{ title = $url; url = $url }) -SourceLabel "CanvasUrlFallback:$PageName" -DefaultOrder $script:QuickLinkOrderCounter -Target $results -Seen $seen
-        $script:QuickLinkOrderCounter += 1
+    $jsonQuickWebparts = @(Parse-QuickLinksWebPartDataFromJsonText -JsonText $layoutWebpartsContent)
+    if (@($jsonQuickWebparts).Count -gt 0) {
+      foreach ($wp in $jsonQuickWebparts) {
+        Extract-QuickLinksFromWebPartData -WebPartData $wp -SourceLabel "LayoutWebpartsContent:$PageName" -Target $results -Seen $seen
+      }
+    }
+
+    $quickWebparts = @(Parse-QuickLinksWebPartDataFromCanvas -CanvasContent $canvas)
+    if (@($quickWebparts).Count -eq 0) {
+      $warnings.Add('Quick Links webpart id was not found in CanvasContent1 webpartdata attributes; extraction used generic link parsing fallback.')
+    } else {
+      foreach ($wp in $quickWebparts) {
+        Extract-QuickLinksFromWebPartData -WebPartData $wp -SourceLabel "CanvasWebPartData:$PageName" -Target $results -Seen $seen
+      }
+    }
+
+    if (@($results).Count -eq 0) {
+      $pagePayload = Get-SitePagePayload -PageName $PageName
+      if ($null -ne $pagePayload) {
+        $apiCanvas = Normalize-Text (Get-PropertyValue -Object $pagePayload -Names @('CanvasContent1', 'canvasContent1', 'canvasContentJson'))
+        $apiLayout = Normalize-Text (Get-PropertyValue -Object $pagePayload -Names @('LayoutWebpartsContent', 'layoutWebpartsContent'))
+        $apiQuickWebparts = @()
+        if (-not [string]::IsNullOrWhiteSpace($apiCanvas)) {
+          $apiQuickWebparts += @(Parse-QuickLinksWebPartDataFromJsonText -JsonText $apiCanvas)
+          $apiQuickWebparts += @(Parse-QuickLinksWebPartDataFromCanvas -CanvasContent $apiCanvas)
+        }
+        if (-not [string]::IsNullOrWhiteSpace($apiLayout)) {
+          $apiQuickWebparts += @(Parse-QuickLinksWebPartDataFromJsonText -JsonText $apiLayout)
+          $apiQuickWebparts += @(Parse-QuickLinksWebPartDataFromCanvas -CanvasContent $apiLayout)
+        }
+        foreach ($wp in @($apiQuickWebparts)) {
+          Extract-QuickLinksFromWebPartData -WebPartData $wp -SourceLabel "SitePagesApi:$PageName" -Target $results -Seen $seen
+        }
+      }
+    }
+
+    if (@($results).Count -eq 0) {
+      $jsonFragments = [System.Text.RegularExpressions.Regex]::Matches($canvas, '\{[^\{\}]*"(url|href|Url|Href)"[^\{\}]*\}')
+      foreach ($fragment in $jsonFragments) {
+        $candidate = Read-JsonSafe $fragment.Value
+        if ($null -ne $candidate) {
+          Add-LinkCandidate -Candidate $candidate -SourceLabel "CanvasContent1:$PageName" -DefaultOrder $script:QuickLinkOrderCounter -Target $results -Seen $seen
+          $script:QuickLinkOrderCounter += 1
+        }
+      }
+
+      $urlMatches = [System.Text.RegularExpressions.Regex]::Matches($canvas, '(https?:\\/\\/[^\"\s,}]+|\/sites\/[^\"\s,}]+)')
+      foreach ($match in $urlMatches) {
+        $rawUrl = [string]$match.Value
+        $url = $rawUrl -replace '\\/', '/'
+        if (-not [string]::IsNullOrWhiteSpace($url)) {
+          Add-LinkCandidate -Candidate ([ordered]@{ title = $url; url = $url }) -SourceLabel "CanvasUrlFallback:$PageName" -DefaultOrder $script:QuickLinkOrderCounter -Target $results -Seen $seen
+          $script:QuickLinkOrderCounter += 1
+        }
       }
     }
   }
@@ -788,7 +1042,7 @@ switch ($ActionKey) {
     $summaryLines += "- Provisioned/normalized command-band lists: $(@($provisionResult.lists).Count)."
   }
   'sharepoint-control:extraction:homepage-quick-links' {
-    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { 'Home.aspx' }
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
     $quickLinks = Extract-QuickLinksFromPage -PageName $pageName
     $raw.quickLinks = $quickLinks
     $normalized.quickLinks = [ordered]@{
@@ -806,7 +1060,7 @@ switch ($ActionKey) {
     $null = Ensure-CommandBandLists
     $provisionSummary.executed = $true
 
-    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { 'Home.aspx' }
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
     $quickLinks = Extract-QuickLinksFromPage -PageName $pageName
     $seedResult = Seed-ItemsFromQuickLinks -QuickLinks $quickLinks.items
 
@@ -832,7 +1086,7 @@ switch ($ActionKey) {
     $provisionSummary.lists = $provisionResult.lists
     $provisionSummary.driftWarnings = $provisionResult.driftWarnings
 
-    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { 'Home.aspx' }
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
     $quickLinks = Extract-QuickLinksFromPage -PageName $pageName
     $seedResult = Seed-ItemsFromQuickLinks -QuickLinks $quickLinks.items
 
