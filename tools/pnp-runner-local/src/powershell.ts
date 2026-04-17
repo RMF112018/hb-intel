@@ -120,10 +120,14 @@ export async function runExtractionScript(params: {
     let stdout = '';
 
     child.stdout.on('data', (chunk) => {
-      stdout += chunk.toString();
+      const text = chunk.toString();
+      stdout += text;
+      process.stdout.write(`[runner-ps:${params.runId}] ${text}`);
     });
     child.stderr.on('data', (chunk) => {
-      stderr += chunk.toString();
+      const text = chunk.toString();
+      stderr += text;
+      process.stderr.write(`[runner-ps:${params.runId}] ${text}`);
     });
 
     child.on('error', (error) => {

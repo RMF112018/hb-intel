@@ -217,7 +217,7 @@ function Ensure-CommandBandLists() {
     $existing = Get-PnPList -Identity $listTarget.Title -ErrorAction SilentlyContinue
     $created = $false
     if ($null -eq $existing) {
-      Add-PnPList -Title $listTarget.Title -Template GenericList -OnQuickLaunch:$false | Out-Null
+      New-PnPList -Title $listTarget.Title -Template GenericList -OnQuickLaunch:$false | Out-Null
       $created = $true
     }
 
@@ -539,8 +539,8 @@ if ($AuthMode -eq 'DeviceLogin') {
   Connect-PnPOnline -Url $TargetSiteUrl -ClientId $ClientId -Tenant $Tenant -Interactive
 }
 
-$listFilters = Split-Csv $ListFiltersCsv
-$pageFilters = Split-Csv $PageFiltersCsv
+$listFilters = @(Split-Csv $ListFiltersCsv)
+$pageFilters = @(Split-Csv $PageFiltersCsv)
 $timestamp = (Get-Date).ToString('o')
 
 $provisionSummary = [ordered]@{
