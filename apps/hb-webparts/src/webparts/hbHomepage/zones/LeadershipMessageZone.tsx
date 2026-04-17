@@ -3,13 +3,11 @@ import { LeadershipMessage } from '../../leadershipMessage/LeadershipMessage.js'
 import { ZoneErrorBoundary } from '../ZoneErrorBoundary.js';
 import type { HbHomepageZoneProps } from '../hbHomepageContract.js';
 
-export function LeadershipMessageZone({ config }: HbHomepageZoneProps): React.JSX.Element {
-  const zoneConfig = config?.leadershipMessage as Record<string, unknown> | undefined;
-
+export function LeadershipMessageZone({ moduleConfig }: HbHomepageZoneProps): React.JSX.Element {
   return (
     <ZoneErrorBoundary zoneName="leadership-message">
       <section aria-label="Leadership Message">
-        <LeadershipMessage config={zoneConfig} />
+        <LeadershipMessage config={moduleConfig.leadershipMessage} />
       </section>
     </ZoneErrorBoundary>
   );

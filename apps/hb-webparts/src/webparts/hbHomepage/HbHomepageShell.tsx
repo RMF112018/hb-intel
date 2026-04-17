@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { createSharePointUserPhotoResolver } from '../../homepage/helpers/peopleCultureProfilePhotoResolver.js';
 import type { HbHomepageProps, HbHomepageZoneProps } from './hbHomepageContract.js';
+import { extractModuleConfigSlices } from './shell/shellValidation.js';
 import { CompanyPulseZone } from './zones/CompanyPulseZone.js';
 import { LeadershipMessageZone } from './zones/LeadershipMessageZone.js';
 import { ProjectPortfolioSpotlightZone } from './zones/ProjectPortfolioSpotlightZone.js';
@@ -20,8 +21,13 @@ export function HbHomepageShell({
     [siteUrl],
   );
 
+  const moduleConfig = React.useMemo(
+    () => extractModuleConfigSlices(config),
+    [config],
+  );
+
   const zoneProps: HbHomepageZoneProps = {
-    config,
+    moduleConfig,
     identity,
     assetBaseUrl,
     siteUrl,

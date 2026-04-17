@@ -3,14 +3,14 @@ import { ProjectPortfolioSpotlight } from '../../projectPortfolioSpotlight/Proje
 import { ZoneErrorBoundary } from '../ZoneErrorBoundary.js';
 import type { HbHomepageZoneProps } from '../hbHomepageContract.js';
 
-export function ProjectPortfolioSpotlightZone({ config }: HbHomepageZoneProps): React.JSX.Element {
-  const zoneConfig = config?.projectPortfolioSpotlight as Record<string, unknown> | undefined;
-  const activeAudience = typeof config?.activeAudience === 'string' ? config.activeAudience : undefined;
-
+export function ProjectPortfolioSpotlightZone({ moduleConfig }: HbHomepageZoneProps): React.JSX.Element {
   return (
     <ZoneErrorBoundary zoneName="project-portfolio-spotlight">
       <section aria-label="Project Portfolio Spotlight">
-        <ProjectPortfolioSpotlight config={zoneConfig} activeAudience={activeAudience} />
+        <ProjectPortfolioSpotlight
+          config={moduleConfig.projectPortfolioSpotlight}
+          activeAudience={moduleConfig.activeAudience}
+        />
       </section>
     </ZoneErrorBoundary>
   );

@@ -5,14 +5,12 @@ import { ZoneErrorBoundary } from '../ZoneErrorBoundary.js';
 import type { HbHomepageZoneProps } from '../hbHomepageContract.js';
 
 export function PeopleCulturePublicZone({
-  config,
+  moduleConfig,
   identity,
   assetBaseUrl,
   siteUrl,
   profilePhotoResolver,
 }: HbHomepageZoneProps): React.JSX.Element {
-  const zoneConfig = config?.peopleCulturePublic as Record<string, unknown> | undefined;
-
   const resolver = React.useMemo(
     () => profilePhotoResolver ?? (siteUrl ? createSharePointUserPhotoResolver({ siteUrl }) : undefined),
     [profilePhotoResolver, siteUrl],
@@ -22,7 +20,7 @@ export function PeopleCulturePublicZone({
     <ZoneErrorBoundary zoneName="people-culture-public">
       <section aria-label="People and Culture">
         <PeopleCulturePublic
-          config={zoneConfig}
+          config={moduleConfig.peopleCulturePublic}
           identity={identity}
           assetBaseUrl={assetBaseUrl}
           profilePhotoResolver={resolver}
