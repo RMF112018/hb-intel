@@ -1,0 +1,400 @@
+/**
+ * HbcPriorityRail — Priority Actions command band surface
+ * Phase 02 — Command-band surface family
+ *
+ * Dense, operational command band for priority actions.
+ * Distinct from HbcCommandSurface: breakpoint-aware overflow,
+ * grouped actions, layout mode variants, and preview support.
+ */
+
+/* ── Surface root ─────────────────────────────────────────── */
+.root {
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  background: rgba(34, 83, 145, 0.025);
+  border-radius: 10px;
+  border: 1px solid rgba(34, 83, 145, 0.10);
+  overflow: hidden;
+}
+
+/* ── Urgency variants ─────────────────────────────────────── */
+.urgencyDefault {
+  border-top: 2px solid rgba(34, 83, 145, 0.22);
+}
+
+.urgencyHigh {
+  border-top: 3px solid rgba(229, 126, 70, 0.65);
+  background: linear-gradient(180deg, rgba(229, 126, 70, 0.04) 0%, rgba(34, 83, 145, 0.025) 24%);
+}
+
+.urgencyCritical {
+  border-top: 3px solid #c4362a;
+  background: linear-gradient(180deg, rgba(196, 54, 42, 0.035) 0%, rgba(34, 83, 145, 0.025) 24%);
+}
+
+/* ���─ Layout variants ──────────────────────────────────────── */
+.layoutRail {}
+
+.layoutGrid .items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.layoutCompact .header {
+  padding: 10px 14px 6px;
+}
+
+.layoutCompact .item {
+  padding: 6px 14px;
+  min-height: 36px;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  gap: 10px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(34, 83, 145, 0.08);
+  color: #225391;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Separator ────────────────────────────────────────────── */
+.separator {
+  height: 1px;
+  background: rgba(34, 83, 145, 0.08);
+  border: none;
+  margin: 0;
+}
+
+/* ── Item list ────────────────────────────────────────────── */
+.items {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Individual action item ───────────────────────────────── */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 150ms ease;
+  min-height: 44px;
+}
+
+.item:hover {
+  background: rgba(34, 83, 145, 0.05);
+}
+
+.item:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+}
+
+.itemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(34, 83, 145, 0.07);
+  color: #225391;
+  flex-shrink: 0;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #225391;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemDescription {
+  font-size: 0.75rem;
+  color: rgba(26, 26, 26, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemBadge {
+  flex-shrink: 0;
+}
+
+.itemArrow {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 150ms ease, transform 150ms ease;
+  color: rgba(34, 83, 145, 0.4);
+}
+
+.item:hover .itemArrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.itemExternal {
+  color: rgba(34, 83, 145, 0.35);
+  flex-shrink: 0;
+}
+
+.itemCompact {
+  padding: 6px 14px;
+  min-height: 36px;
+  gap: 8px;
+}
+
+.itemCompact .itemIcon {
+  width: 24px;
+  height: 24px;
+}
+
+/* ── Item separator ───────────────────────────────────────── */
+.itemSeparator {
+  height: 1px;
+  background: rgba(34, 83, 145, 0.06);
+  border: none;
+  margin: 0 18px;
+}
+
+/* ── Overflow trigger ─────────────────────────────────────── */
+.overflowTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(34, 83, 145, 0.08);
+  color: #225391;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background-color 150ms ease;
+  min-height: 40px;
+  width: 100%;
+}
+
+.overflowTrigger:hover {
+  background: rgba(34, 83, 145, 0.04);
+}
+
+.overflowTrigger:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: -2px;
+}
+
+.overflowChevron {
+  transition: transform 200ms ease;
+}
+
+.overflowChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ── Overflow panel ───────────────────────────────────────── */
+.overflowPanel {
+  overflow: hidden;
+}
+
+/* ── Skeleton ─────────────────────────────────────────────── */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skeletonHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px 10px;
+}
+
+.skeletonBar {
+  border-radius: 4px;
+  background: rgba(34, 83, 145, 0.06);
+  animation: shimmer 1.5s ease-in-out infinite alternate;
+}
+
+.skeletonItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  min-height: 44px;
+}
+
+.skeletonIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(34, 83, 145, 0.06);
+  flex-shrink: 0;
+  animation: shimmer 1.5s ease-in-out infinite alternate;
+}
+
+.skeletonText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@keyframes shimmer {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px;
+  text-align: center;
+  gap: 6px;
+}
+
+.emptyStateIcon {
+  color: rgba(34, 83, 145, 0.25);
+  margin-bottom: 4px;
+}
+
+.emptyStateTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.emptyStateDescription {
+  font-size: 0.8125rem;
+  color: rgba(26, 26, 26, 0.6);
+  max-width: 280px;
+}
+
+/* ── Error state ──────────────────────────────────────────── */
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px;
+  text-align: center;
+  gap: 6px;
+}
+
+.errorStateIcon {
+  color: #c4362a;
+  margin-bottom: 4px;
+}
+
+.errorStateTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.errorStateDescription {
+  font-size: 0.8125rem;
+  color: rgba(26, 26, 26, 0.6);
+  max-width: 280px;
+}
+
+.retryButton {
+  margin-top: 8px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(34, 83, 145, 0.2);
+  background: none;
+  color: #225391;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.retryButton:hover {
+  background: rgba(34, 83, 145, 0.06);
+}
+
+.retryButton:focus-visible {
+  outline: 2px solid #225391;
+  outline-offset: 2px;
+}
+
+/* ── Preview surface ──────────────────────────────────────── */
+.previewBanner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  background: rgba(34, 83, 145, 0.06);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(34, 83, 145, 0.6);
+}
+
+/* ── Reduced motion ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .itemArrow,
+  .overflowTrigger,
+  .overflowChevron,
+  .retryButton,
+  .skeletonBar,
+  .skeletonIcon {
+    transition: none !important;
+    animation: none !important;
+  }
+}

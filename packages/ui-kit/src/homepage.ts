@@ -126,6 +126,7 @@ export {
   Sparkles,
   ThumbsUp,
   ChevronDown,
+  Eye,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -286,6 +287,35 @@ export type {
   HbcNewsroomLayoutMode,
 } from './HbcNewsroomSurface/index.js';
 
+// ── Phase 02 — Priority Rail surface family ─────────────────────────
+// Governed command band for the homepage Priority Actions zone.
+// Shared by the public runtime rail and admin preview surface.
+
+export {
+  HbcPriorityRailSurface,
+  HbcPriorityRailAction,
+  HbcPriorityRailOverflow,
+  HbcPriorityRailSkeleton,
+  HbcPriorityRailEmptyState,
+  HbcPriorityRailErrorState,
+  HbcPriorityRailPreviewSurface,
+} from './HbcPriorityRail/index.js';
+export type {
+  HbcPriorityRailSurfaceProps,
+  HbcPriorityRailActionProps,
+  HbcPriorityRailOverflowProps,
+  HbcPriorityRailSkeletonProps,
+  HbcPriorityRailEmptyStateProps,
+  HbcPriorityRailErrorStateProps,
+  HbcPriorityRailPreviewSurfaceProps,
+  PriorityRailActionModel,
+  PriorityRailGroupModel,
+  PriorityRailUrgency,
+  PriorityRailBadgeVariant,
+  PriorityRailLayoutMode,
+  PriorityRailState,
+} from './HbcPriorityRail/index.js';
+
 export type HomepageSurfaceClass =
   | 'hero'
   | 'welcome'
@@ -317,6 +347,7 @@ export type HomepagePrimitiveName =
   | 'HbcKudosComposerPreview'
   | 'HbcLauncherSurface'
   | 'HbcPeoplePicker'
+  | 'HbcPriorityRailSurface'
   | 'HbcNewsroomSurface'
   | 'HbcOperationalSurface'
   | 'HbcPeopleCultureSurface'
