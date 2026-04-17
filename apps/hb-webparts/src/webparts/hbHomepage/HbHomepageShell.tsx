@@ -9,6 +9,11 @@ import {
   resolveShellConformance,
   toShellConformanceDataAttributes,
 } from './shell/shellConformance.js';
+import {
+  OccupantContentStateProvider,
+  toOccupantContentStateDataAttributes,
+  useOccupantContentStateReports,
+} from './shell/occupantContentState.js';
 import type { OccupantId, ShellBand as ShellBandType, ShellLayoutState } from './shell/shellTypes.js';
 import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
 import { ShellFallbackSurface } from './ShellFallbackSurface.js';
@@ -45,10 +50,12 @@ interface ShellSlotRendererProps {
 
 function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): React.JSX.Element | null {
   const { slot, comfort } = resolved;
+  const reports = useOccupantContentStateReports();
   if (!slot.occupantId) return null;
 
   const descriptor = getOccupant(slot.occupantId);
   const effectiveSpan = comfort.effectiveColumnSpan;
+  const contentStateAttrs = toOccupantContentStateDataAttributes(reports.get(slot.occupantId));
 
   const slotClassName = `${styles.slot} ${styles[`slot_${slot.role}`]} ${styles[`span_${effectiveSpan}`]}`;
 
@@ -102,6 +109,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
       data-shell-comfort-reason={comfort.reason}
       data-shell-render-mode={comfort.renderMode}
       data-shell-slot-state="active"
+      {...contentStateAttrs}
     >
       <ZoneComponent {...zoneProps} />
     </div>
@@ -249,29 +257,31 @@ export function HbHomepageShell({
   const conformanceAttrs = toShellConformanceDataAttributes(conformance);
 
   return (
-    <div
-      ref={shellRef}
-      className={styles.shell}
-      data-shell-preset={layoutState.preset.id}
-      data-shell-post-hero="true"
-      data-shell-entry-state={container.entryState.id}
-      data-shell-entry-state-reason={container.entryStateReason}
-      data-shell-width={Math.round(container.width)}
-      data-shell-height={Math.round(container.height)}
-      data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
-      data-shell-diagnostics-count={layoutState.diagnostics.length}
-      data-shell-normalized-from-default={layoutState.normalizedFromDefault}
-      {...conformanceAttrs}
-    >
-      {layoutState.preset.bands.map((band, index) => (
-        <ShellBandRenderer
-          key={band.id}
-          band={band}
-          layout={bandLayouts[index]}
-          isEntryBand={index === 0}
-          zoneProps={zoneProps}
-        />
-      ))}
-    </div>
+    <OccupantContentStateProvider>
+      <div
+        ref={shellRef}
+        className={styles.shell}
+        data-shell-preset={layoutState.preset.id}
+        data-shell-post-hero="true"
+        data-shell-entry-state={container.entryState.id}
+        data-shell-entry-state-reason={container.entryStateReason}
+        data-shell-width={Math.round(container.width)}
+        data-shell-height={Math.round(container.height)}
+        data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
+        data-shell-diagnostics-count={layoutState.diagnostics.length}
+        data-shell-normalized-from-default={layoutState.normalizedFromDefault}
+        {...conformanceAttrs}
+      >
+        {layoutState.preset.bands.map((band, index) => (
+          <ShellBandRenderer
+            key={band.id}
+            band={band}
+            layout={bandLayouts[index]}
+            isEntryBand={index === 0}
+            zoneProps={zoneProps}
+          />
+        ))}
+      </div>
+    </OccupantContentStateProvider>
   );
 }

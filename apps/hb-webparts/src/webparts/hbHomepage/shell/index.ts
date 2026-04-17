@@ -153,6 +153,19 @@ export type {
   SlotConformanceState,
 } from './shellConformance.js';
 
+export {
+  OccupantContentStateProvider,
+  toOccupantContentStateDataAttributes,
+  useOccupantContentStateReport,
+  useOccupantContentStateReports,
+  useReportOccupantContentState,
+} from './occupantContentState.js';
+export type {
+  OccupantContentStateKind,
+  OccupantContentStateMap,
+  OccupantContentStateReport,
+} from './occupantContentState.js';
+
 export { resolveBandLayout } from './slotComfortResolver.js';
 export type {
   BandLayoutResult,
