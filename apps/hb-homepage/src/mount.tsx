@@ -15,6 +15,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { HbcThemeProvider } from '@hbc/ui-kit/app-shell';
 import { HbHomepage } from '@hb-homepage/runtime';
+
+export const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
 import { createSharePointUserPhotoResolver } from '@hb-homepage/helpers/peopleCultureProfilePhotoResolver';
 import { storeSiteUrl, storeKudosListHostUrl } from '@hb-homepage/data/spContext';
 import type { HomepageIdentityInput } from '@hb-homepage/helpers/identity';
