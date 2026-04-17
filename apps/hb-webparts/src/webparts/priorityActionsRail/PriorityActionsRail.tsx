@@ -16,12 +16,10 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowRight,
-  Briefcase,
   type LucideIcon,
   type PriorityRailActionModel,
   type PriorityRailUrgency,
   type PriorityRailBadgeVariant,
-  type PriorityRailLayoutMode,
 } from '@hbc/ui-kit/homepage';
 import { usePriorityActionsData, invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import { resolveByBreakpoint, filterByDevice, type DeviceClass } from '../../homepage/data/priorityActionsNormalization.js';
@@ -31,10 +29,16 @@ import {
 } from '../../homepage/entryStack/entryStackOrchestration.js';
 import type { ShellEntryStateId } from '../hbHomepage/shell/shellTypes.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
-import type { PriorityActionsItemNormalized, PriorityActionsConfigResolved, BadgeVariant as SchemaBadgeVariant } from '../../homepage/data/priorityActionsContracts.js';
+import type { PriorityActionsItemNormalized, BadgeVariant as SchemaBadgeVariant } from '../../homepage/data/priorityActionsContracts.js';
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
 import { normalizePriorityActionsRailConfig } from '../../homepage/helpers/utilityConfig.js';
 import { getSiteUrl } from '../../homepage/data/spContext.js';
+import {
+  buildPriorityRailSections,
+  resolvePriorityRailDeviceForContainer,
+  resolvePriorityRailPresentationForDevice,
+  type PriorityRailContainerDimensions,
+} from '../../homepage/data/priorityActionsPresentation.js';
 
 export interface PriorityActionsRailProps {
   config?: Partial<PriorityActionsRailConfig>;
@@ -91,27 +95,50 @@ function mapToRailAction(item: PriorityActionsItemNormalized): PriorityRailActio
 
 /* ── Device class resolution ────────────────────────────────────── */
 
-function useDeviceClass(): DeviceClass {
-  const [device, setDevice] = React.useState<DeviceClass>(() => resolveDeviceClass());
+const DEFAULT_CONTAINER_DIMENSIONS: PriorityRailContainerDimensions = { width: 1200, height: 800 };
 
-  React.useEffect(() => {
-    function handleResize(): void {
-      setDevice(resolveDeviceClass());
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return device;
+function extractDimensions(entry: ResizeObserverEntry, el: HTMLElement): PriorityRailContainerDimensions {
+  const contentBox = Array.isArray(entry.contentBoxSize) ? entry.contentBoxSize[0] : entry.contentBoxSize;
+  if (contentBox && typeof contentBox.inlineSize === 'number' && typeof contentBox.blockSize === 'number') {
+    return { width: contentBox.inlineSize, height: contentBox.blockSize };
+  }
+  if (entry.contentRect) {
+    return { width: entry.contentRect.width, height: entry.contentRect.height };
+  }
+  return { width: el.clientWidth || DEFAULT_CONTAINER_DIMENSIONS.width, height: el.clientHeight || DEFAULT_CONTAINER_DIMENSIONS.height };
 }
 
-function resolveDeviceClass(): DeviceClass {
-  const w = typeof window !== 'undefined' ? window.innerWidth : 1280;
-  if (w >= 1440) return 'desktop';
-  if (w >= 1024) return 'laptop';
-  if (w >= 768) return 'tabletLandscape';
-  if (w >= 600) return 'tabletPortrait';
-  return 'phone';
+function useRailContainerDimensions(ref: React.RefObject<HTMLElement | null>): PriorityRailContainerDimensions {
+  const [dimensions, setDimensions] = React.useState<PriorityRailContainerDimensions>(DEFAULT_CONTAINER_DIMENSIONS);
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const syncFromElement = (): void => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setDimensions({ width: rect.width, height: rect.height });
+      }
+    };
+
+    syncFromElement();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver((entries) => {
+        const entry = entries.find((candidate) => candidate.target === el) ?? entries[0];
+        if (!entry) return;
+        setDimensions(extractDimensions(entry, el));
+      });
+      observer.observe(el);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener('resize', syncFromElement);
+    return () => window.removeEventListener('resize', syncFromElement);
+  }, [ref]);
+
+  return dimensions;
 }
 
 // Governance alignment (Prompt-04): the rail's author-facing DeviceClass is
@@ -126,21 +153,6 @@ export function getShellEntryStateForRailDevice(
   return mapPriorityActionsDeviceClassToShellState(device as PriorityActionsDeviceClass);
 }
 
-function mapLayoutMode(config: PriorityActionsConfigResolved, device: DeviceClass): PriorityRailLayoutMode {
-  switch (device) {
-    case 'desktop':
-    case 'laptop':
-      return config.desktopLayoutMode === 'rail' ? 'rail' : 'grid';
-    case 'tabletLandscape':
-    case 'tabletPortrait':
-      return config.tabletLayoutMode === 'grid' ? 'grid' : 'rail';
-    case 'phone':
-      return 'compact';
-    default:
-      return 'rail';
-  }
-}
-
 /* ── List-sourced rail ──────────────────────────────────────────── */
 
 function ListSourcedRail({
@@ -148,15 +160,16 @@ function ListSourcedRail({
 }: {
   activeAudience: string | undefined;
 }): React.JSX.Element {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const dimensions = useRailContainerDimensions(containerRef);
   const { config, items, isLoading, error } = usePriorityActionsData({ activeAudience });
-  const device = useDeviceClass();
+
+  let content: React.JSX.Element;
 
   if (isLoading) {
-    return <HbcPriorityRailSkeleton count={4} />;
-  }
-
-  if (error) {
-    return (
+    content = <HbcPriorityRailSkeleton count={4} />;
+  } else if (error) {
+    content = (
       <HbcPriorityRailErrorState
         title="Unable to load actions"
         description="Priority actions could not be loaded from the list."
@@ -166,31 +179,42 @@ function ListSourcedRail({
         }}
       />
     );
-  }
-
-  if (!config) {
+  } else if (!config) {
     const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
-    return <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
-  }
+    content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
+  } else {
+    const deviceResolution = resolvePriorityRailDeviceForContainer(dimensions);
+    const presentation = resolvePriorityRailPresentationForDevice(config, deviceResolution.deviceClass);
+    const deviceItems = filterByDevice(items, deviceResolution.deviceClass);
+    const breakpoint = resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
 
-  const deviceItems = filterByDevice(items, device);
-  const breakpoint = resolveByBreakpoint(deviceItems, config, device);
-
-  if (breakpoint.primaryItems.length === 0 && breakpoint.overflowItems.length === 0) {
-    const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
-    return <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
+    if (breakpoint.primaryItems.length === 0 && breakpoint.overflowItems.length === 0) {
+      const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
+      content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
+    } else {
+      const primaryActions = breakpoint.primaryItems.map(mapToRailAction);
+      const groupedSections = buildPriorityRailSections(primaryActions);
+      const surfaceProps = {
+        title: config.showHeading ? config.headingText || 'Priority Actions' : undefined,
+        urgency: resolveUrgency(deviceItems),
+        layout: presentation.layout,
+        items: primaryActions,
+        overflowItems: breakpoint.overflowItems.map(mapToRailAction),
+        overflowLabel: config.overflowLabel,
+        overflowStrategy: presentation.overflowStrategy,
+        showBadges: config.showBadges,
+        ...(groupedSections ? ({ sections: groupedSections } as Record<string, unknown>) : {}),
+      };
+      content = (
+        <HbcPriorityRailSurface {...(surfaceProps as React.ComponentProps<typeof HbcPriorityRailSurface>)} />
+      );
+    }
   }
 
   return (
-    <HbcPriorityRailSurface
-      title={config.showHeading ? config.headingText || 'Priority Actions' : undefined}
-      urgency={resolveUrgency(deviceItems)}
-      layout={mapLayoutMode(config, device)}
-      items={breakpoint.primaryItems.map(mapToRailAction)}
-      overflowItems={breakpoint.overflowItems.map(mapToRailAction)}
-      overflowLabel={config.overflowLabel}
-      showBadges={config.showBadges}
-    />
+    <div ref={containerRef} data-hbc-rail-shell-state={getShellEntryStateForRailDevice(resolvePriorityRailDeviceForContainer(dimensions).deviceClass)}>
+      {content}
+    </div>
   );
 }
 
@@ -232,13 +256,17 @@ function ManifestFallbackRail({
       ? 'high'
       : 'default';
 
+  const groupedSections = buildPriorityRailSections(allActions);
+  const surfaceProps = {
+    title: normalized.heading,
+    urgency,
+    items: allActions,
+    showBadges: true,
+    ...(groupedSections ? ({ sections: groupedSections } as Record<string, unknown>) : {}),
+  };
+
   return (
-    <HbcPriorityRailSurface
-      title={normalized.heading}
-      urgency={urgency}
-      items={allActions}
-      showBadges
-    />
+    <HbcPriorityRailSurface {...(surfaceProps as React.ComponentProps<typeof HbcPriorityRailSurface>)} />
   );
 }
 

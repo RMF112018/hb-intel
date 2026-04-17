@@ -18,8 +18,12 @@ import {
 import { getSiteUrl } from '../../homepage/data/spContext.js';
 import { fetchPriorityActionsConfigWithDiagnostics } from '../../homepage/data/priorityActionsConfigListSource.js';
 import { fetchPriorityActionsItems } from '../../homepage/data/priorityActionsItemsListSource.js';
-import { normalizeItemRows } from '../../homepage/data/priorityActionsNormalization.js';
+import { normalizeItemRows, type DeviceClass } from '../../homepage/data/priorityActionsNormalization.js';
 import { invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
+import {
+  buildPriorityRailSections,
+  resolvePriorityRailPresentationForDevice,
+} from '../../homepage/data/priorityActionsPresentation.js';
 import {
   createConfigDraftFromResolved,
   createAdminRowsFromNormalized,
@@ -54,7 +58,14 @@ export interface PriorityActionsRailAdminProps {
   siteUrl?: string;
 }
 
-type PreviewDevice = 'desktop' | 'tablet' | 'phone';
+type PreviewDevice = DeviceClass;
+const PREVIEW_DEVICE_LABELS: Readonly<Record<PreviewDevice, string>> = Object.freeze({
+  desktop: 'Desktop',
+  laptop: 'Laptop',
+  tabletLandscape: 'Tablet Landscape',
+  tabletPortrait: 'Tablet Portrait',
+  phone: 'Phone',
+});
 
 function firstFailure(results: Array<{ ok: boolean; error?: string }>): string | undefined {
   const failed = results.find((result) => !result.ok);
@@ -277,18 +288,33 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
 
   /* ── Preview model ─────────────────────────────────────────────── */
 
-  const previewItems: PriorityRailActionModel[] = React.useMemo(() => {
+  const previewDrafts = React.useMemo(() => {
     return getActiveItemDrafts(itemRows)
       .filter((d) => d.title.trim() && d.href.trim())
-      .map((d) => ({
+      .filter((d) => {
+        switch (previewDevice) {
+          case 'desktop': return d.visibleDesktop;
+          case 'laptop': return d.visibleLaptop;
+          case 'tabletLandscape': return d.visibleTabletLandscape;
+          case 'tabletPortrait': return d.visibleTabletPortrait;
+          case 'phone': return d.visiblePhone;
+          default: return true;
+        }
+      });
+  }, [itemRows, previewDevice]);
+
+  const previewItems: PriorityRailActionModel[] = React.useMemo(() => {
+    return previewDrafts.map((d) => ({
         id: d.actionKey,
         title: d.title,
         href: d.href,
         description: d.description || undefined,
         badge: d.badgeLabel ? { label: d.badgeLabel, variant: d.badgeVariant } : undefined,
         external: d.isExternal,
+        groupKey: d.groupKey || undefined,
+        groupTitle: d.groupTitle || undefined,
       }));
-  }, [itemRows]);
+  }, [previewDrafts]);
 
   const previewUrgency: PriorityRailUrgency = React.useMemo(() => {
     if (previewItems.some((item) => item.badge?.variant === 'critical')) return 'critical';
@@ -300,11 +326,71 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
     if (!configDraft) return 5;
     switch (previewDevice) {
       case 'desktop': return configDraft.maxVisibleDesktop;
-      case 'tablet': return configDraft.maxVisibleTabletPortrait;
+      case 'laptop': return configDraft.maxVisibleLaptop;
+      case 'tabletLandscape': return configDraft.maxVisibleTabletLandscape;
+      case 'tabletPortrait': return configDraft.maxVisibleTabletPortrait;
       case 'phone': return configDraft.maxVisiblePhone;
       default: return configDraft.maxVisibleDesktop;
     }
   }, [configDraft, previewDevice]);
+
+  const previewPresentation = React.useMemo(() => {
+    if (!configDraft) {
+      return {
+        deviceClass: previewDevice,
+        shellState: 'standard-laptop' as const,
+        layout: previewDevice === 'phone' ? 'compact' : 'rail',
+        overflowStrategy: 'inline-disclosure' as const,
+        authoredLayoutMode: previewDevice === 'phone' ? 'scroll' : 'rail',
+        normalizations: [],
+      };
+    }
+    return resolvePriorityRailPresentationForDevice(configDraft, previewDevice);
+  }, [configDraft, previewDevice]) as ReturnType<typeof resolvePriorityRailPresentationForDevice>;
+
+  const previewPrimaryItems = React.useMemo(() => {
+    const forced: PriorityRailActionModel[] = [];
+    const eligible: PriorityRailActionModel[] = [];
+
+    for (let index = 0; index < previewDrafts.length; index += 1) {
+      const draft = previewDrafts[index];
+      const action = previewItems[index];
+      if (!action) continue;
+      if (draft.overflowOnly) {
+        forced.push(action);
+      } else {
+        eligible.push(action);
+      }
+    }
+
+    return {
+      primary: eligible.slice(0, previewMaxVisible),
+      overflow: [...eligible.slice(previewMaxVisible), ...forced],
+    };
+  }, [previewDrafts, previewItems, previewMaxVisible]);
+
+  const previewNormalizationLabel = React.useMemo(() => {
+    if (previewPresentation.normalizations.length === 0) {
+      return `${previewPresentation.authoredLayoutMode} -> ${previewPresentation.layout}`;
+    }
+    return `${previewPresentation.authoredLayoutMode} -> ${previewPresentation.layout} (${previewPresentation.normalizations.join(', ')})`;
+  }, [previewPresentation]);
+
+  const previewSurfaceProps = React.useMemo(
+    () => ({
+      title: configDraft?.showHeading ? configDraft.headingText || 'Priority Actions' : undefined,
+      urgency: previewUrgency,
+      layout: previewPresentation.layout,
+      items: previewPrimaryItems.primary,
+      sections: buildPriorityRailSections(previewPrimaryItems.primary),
+      overflowItems: previewPrimaryItems.overflow,
+      overflowLabel: configDraft?.overflowLabel ?? 'More',
+      overflowStrategy: previewPresentation.overflowStrategy,
+      showBadges: Boolean(configDraft?.showBadges),
+      previewLabel: `Admin Preview - ${PREVIEW_DEVICE_LABELS[previewDevice]}`,
+    }),
+    [configDraft, previewDevice, previewPresentation.layout, previewPresentation.overflowStrategy, previewPrimaryItems.overflow, previewPrimaryItems.primary, previewUrgency],
+  );
 
   /* ── Render ────────────────────────────────────────────────────── */
 
@@ -602,7 +688,7 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
           <div className={styles.previewHeading}>
             <span>Live Preview</span>
             <div className={styles.previewDeviceBar}>
-              {(['desktop', 'tablet', 'phone'] as const).map((d) => (
+              {(['desktop', 'laptop', 'tabletLandscape', 'tabletPortrait', 'phone'] as const).map((d) => (
                 <button
                   key={d}
                   type="button"
@@ -610,22 +696,16 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
                   onClick={() => setPreviewDevice(d)}
                   style={{ padding: '2px 10px', fontSize: '0.6875rem' }}
                 >
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
+                  {PREVIEW_DEVICE_LABELS[d]}
                 </button>
               ))}
             </div>
           </div>
+          <div className={styles.help}>
+            Preview mapping: {previewNormalizationLabel}
+          </div>
           <div className={styles.previewFrame}>
-            <HbcPriorityRailPreviewSurface
-              title={configDraft.showHeading ? configDraft.headingText || 'Priority Actions' : undefined}
-              urgency={previewUrgency}
-              layout={previewDevice === 'phone' ? 'compact' : 'rail'}
-              items={previewItems.slice(0, previewMaxVisible)}
-              overflowItems={previewItems.slice(previewMaxVisible)}
-              overflowLabel={configDraft.overflowLabel}
-              showBadges={configDraft.showBadges}
-              previewLabel={`Admin Preview — ${previewDevice}`}
-            />
+            <HbcPriorityRailPreviewSurface {...(previewSurfaceProps as React.ComponentProps<typeof HbcPriorityRailPreviewSurface>)} />
           </div>
         </div>
       </div>

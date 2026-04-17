@@ -176,4 +176,19 @@ describe('PriorityActionsRailAdmin identity + lifecycle seams', () => {
     fireEvent.click(saveButtons[0]);
     await waitFor(() => expect(mockedArchive).toHaveBeenCalledTimes(0));
   });
+
+  it('preview exposes five device classes and shows mapping normalization state', async () => {
+    render(<PriorityActionsRailAdmin siteUrl={SITE_URL} />);
+
+    await waitFor(() => expect(mockedFetchConfig).toHaveBeenCalledWith(SITE_URL));
+
+    expect(screen.getByRole('button', { name: 'Desktop' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Laptop' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Tablet Landscape' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Tablet Portrait' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Phone' })).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Phone' }));
+    expect(screen.getByText(/Preview mapping:/i).textContent).toContain('sheet-trigger -> compact');
+  });
 });

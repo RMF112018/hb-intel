@@ -1,0 +1,57 @@
+import { describe, expect, it } from 'vitest';
+import {
+  buildPriorityRailSections,
+  resolvePriorityRailDeviceForContainer,
+  resolvePriorityRailPresentationForDevice,
+} from '../data/priorityActionsPresentation.js';
+
+const CONFIG = {
+  desktopLayoutMode: 'segmented',
+  tabletLayoutMode: 'hybrid',
+  mobileLayoutMode: 'grid',
+} as const;
+
+describe('priorityActionsPresentation', () => {
+  it('maps container dimensions to rail device classes via shell policy', () => {
+    expect(resolvePriorityRailDeviceForContainer({ width: 1700, height: 900 }).deviceClass).toBe('desktop');
+    expect(resolvePriorityRailDeviceForContainer({ width: 1300, height: 900 }).deviceClass).toBe('laptop');
+    expect(resolvePriorityRailDeviceForContainer({ width: 1000, height: 900 }).deviceClass).toBe('tabletLandscape');
+    expect(resolvePriorityRailDeviceForContainer({ width: 860, height: 900 }).deviceClass).toBe('tabletPortrait');
+    expect(resolvePriorityRailDeviceForContainer({ width: 700, height: 900 }).deviceClass).toBe('phone');
+  });
+
+  it('applies short-height override mapping through shell policy', () => {
+    const result = resolvePriorityRailDeviceForContainer({ width: 1000, height: 420 });
+    expect(result.deviceClass).toBe('phone');
+    expect(result.shortHeightConstrained).toBe(true);
+    expect(result.entryStateReason).toBe('short-height-override');
+  });
+
+  it('resolves authored layout modes into explicit runtime behavior with normalization flags', () => {
+    const desktop = resolvePriorityRailPresentationForDevice(CONFIG, 'desktop');
+    expect(desktop.layout).toBe('grid');
+    expect(desktop.overflowStrategy).toBe('inline-disclosure');
+    expect(desktop.normalizations).toEqual(['desktop-segmented-to-grid']);
+
+    const tablet = resolvePriorityRailPresentationForDevice(CONFIG, 'tabletPortrait');
+    expect(tablet.layout).toBe('rail');
+    expect(tablet.overflowStrategy).toBe('inline-disclosure');
+    expect(tablet.normalizations).toEqual(['tablet-hybrid-to-rail']);
+
+    const phone = resolvePriorityRailPresentationForDevice(CONFIG, 'phone');
+    expect(phone.layout).toBe('compact');
+    expect(phone.overflowStrategy).toBe('menu');
+    expect(phone.normalizations).toEqual(['mobile-grid-to-compact-menu']);
+  });
+
+  it('builds deterministic grouped sections from first-seen group order', () => {
+    const sections = buildPriorityRailSections([
+      { id: 'a', title: 'A', href: '/a', groupKey: 'approvals', groupTitle: 'Approvals' },
+      { id: 'b', title: 'B', href: '/b', groupKey: 'safety', groupTitle: 'Safety' },
+      { id: 'c', title: 'C', href: '/c', groupKey: 'approvals', groupTitle: 'Approvals' },
+    ]);
+
+    expect(sections?.map((section) => section.key)).toEqual(['approvals', 'safety']);
+    expect(sections?.[0]?.actions.map((action: { id: string }) => action.id)).toEqual(['a', 'c']);
+  });
+});
