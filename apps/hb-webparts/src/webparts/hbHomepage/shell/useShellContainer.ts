@@ -1,11 +1,18 @@
 import * as React from 'react';
-import { resolveEntryState } from './breakpointPolicy.js';
+import {
+  resolveEntryStateWithReason,
+  type EntryStateSelectionReason,
+} from './breakpointPolicy.js';
 import type { ShellEntryState } from './shellTypes.js';
 
 export interface ShellContainerState {
   readonly width: number;
   readonly height: number;
   readonly entryState: ShellEntryState;
+  /** Why `entryState` was selected; inspectable via shell diagnostics. */
+  readonly entryStateReason: EntryStateSelectionReason;
+  /** True when the phone-landscape short-height branch was taken. */
+  readonly shortHeightConstrained: boolean;
 }
 
 const DEFAULT_WIDTH = 1200;
@@ -34,10 +41,16 @@ export function useShellContainer(
     return () => observer.disconnect();
   }, [ref]);
 
-  const entryState = React.useMemo(
-    () => resolveEntryState({ width: dimensions.width, height: dimensions.height }),
+  const resolved = React.useMemo(
+    () => resolveEntryStateWithReason({ width: dimensions.width, height: dimensions.height }),
     [dimensions.width, dimensions.height],
   );
 
-  return { width: dimensions.width, height: dimensions.height, entryState };
+  return {
+    width: dimensions.width,
+    height: dimensions.height,
+    entryState: resolved.state,
+    entryStateReason: resolved.reason,
+    shortHeightConstrained: resolved.shortHeightConstrained,
+  };
 }

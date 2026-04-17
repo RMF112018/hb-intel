@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import { getPresetOrDefault, APPROVED_PRESETS } from './presetLibrary.js';
 import { parseShellLayout } from './shellValidation.js';
-import { SHELL_PROTECTED_DECISIONS, PROTECTED_ENTRY_STATE_RULES } from './protectedDecisions.js';
+import {
+  SHELL_PROTECTED_DECISIONS,
+  PROTECTED_ENTRY_STATE_RULES,
+  type ProtectedEntryStateRule,
+} from './protectedDecisions.js';
 import type { OccupantId, ShellDiagnostic, ShellLayoutState } from './shellTypes.js';
 
 export const PERSISTED_STATE_VERSION = 1 as const;
@@ -57,43 +61,37 @@ export function sanitizePersistedState(input: PersistedShellState): Sanitization
     sanitized = { ...sanitized, presetId: 'default-v2' };
   }
 
-  if (sanitized.bandOverrides) {
-    const protectedSemantics = new Set(SHELL_PROTECTED_DECISIONS.protectedBandSemantics);
-    const preset = getPresetOrDefault(sanitized.presetId);
-
-    const filteredOverrides = sanitized.bandOverrides.map((override) => {
-      const matchedBand = preset.bands.find((b) => b.id === override.bandId);
-      if (!matchedBand) return override;
-
-      if (!override.slots?.length) return override;
-
-      const filteredSlots = override.slots.filter((slotOverride) => {
-        if (slotOverride.role === 'primary' || slotOverride.role === 'secondary') {
-          return true;
-        }
-        return true;
-      });
-
-      return { ...override, slots: filteredSlots };
-    });
-
-    sanitized = { ...sanitized, bandOverrides: filteredOverrides };
-  }
-
+  // Prohibited-pairing enforcement: persisted payloads MUST NOT be able
+  // to force a pairing that shell policy forbids. Detect each violation
+  // and strip the second offending occupantId (set to empty string so
+  // `parseShellLayout`'s override-merge nulls it out) so the shell still
+  // renders rather than failing closed.
   const prohibitedPairings = SHELL_PROTECTED_DECISIONS.prohibitedPairings;
-  if (sanitized.bandOverrides) {
-    for (const override of sanitized.bandOverrides) {
-      if (!override.slots) continue;
-      const occupantIds = override.slots
-        .map((s) => s.occupantId)
-        .filter((id): id is string => id !== undefined && id !== '');
+  if (sanitized.bandOverrides?.length) {
+    sanitized = {
+      ...sanitized,
+      bandOverrides: sanitized.bandOverrides.map((override) => {
+        if (!override.slots?.length) return override;
 
-      for (const [a, b] of prohibitedPairings) {
-        if (occupantIds.includes(a) && occupantIds.includes(b)) {
-          violations.push(`override for band "${override.bandId}" contains prohibited pairing: ${a} + ${b}`);
+        const occupantIds = override.slots
+          .map((s) => s.occupantId)
+          .filter((id): id is string => id !== undefined && id !== '');
+
+        let slotsCopy = override.slots;
+        for (const [a, b] of prohibitedPairings) {
+          if (occupantIds.includes(a) && occupantIds.includes(b)) {
+            violations.push(
+              `override for band "${override.bandId}" contains prohibited pairing ${a} + ${b}; stripping "${b}" to honor PROTECTED shell pairing rule.`,
+            );
+            slotsCopy = slotsCopy.map((s) =>
+              s.occupantId === b ? { ...s, occupantId: '' } : s,
+            );
+          }
         }
-      }
-    }
+
+        return { ...override, slots: slotsCopy };
+      }),
+    };
   }
 
   return { sanitized, violations };
@@ -121,32 +119,48 @@ export function hydratePersistedState(raw: unknown): ShellLayoutState {
 
   const parseResult = PersistedShellStateSchema.safeParse(raw);
   if (!parseResult.success) {
-    console.warn(
-      '[hb-homepage:shell] Persisted shell state failed validation. Using default.',
-      parseResult.error.message,
-    );
-    return parseShellLayout(undefined);
+    const fallback = parseShellLayout(undefined);
+    const injected: ShellDiagnostic = {
+      severity: 'error',
+      code: 'PERSISTED_STATE_SCHEMA_REJECTED',
+      message: `Persisted shell state failed schema validation: ${parseResult.error.message}. Using default preset.`,
+    };
+    return { ...fallback, diagnostics: [...fallback.diagnostics, injected] };
   }
 
   const { sanitized, violations } = sanitizePersistedState(parseResult.data);
-
-  if (violations.length > 0) {
-    console.warn(
-      '[hb-homepage:shell] Persisted state sanitized. Violations:',
-      violations,
-    );
-  }
 
   const layoutState = parseShellLayout({
     presetId: sanitized.presetId,
     bandOverrides: sanitized.bandOverrides,
   });
 
+  // Surface sanitization violations into runtime diagnostics so
+  // harnesses, previewers, and a future control panel can see every
+  // attempted bypass of a protected shell rule without relying on
+  // console output.
+  const withSanitizationDiagnostics: ShellLayoutState =
+    violations.length === 0
+      ? layoutState
+      : {
+          ...layoutState,
+          diagnostics: [
+            ...layoutState.diagnostics,
+            ...violations.map(
+              (message): ShellDiagnostic => ({
+                severity: 'warning',
+                code: 'PERSISTED_STATE_SANITIZED',
+                message,
+              }),
+            ),
+          ],
+        };
+
   if (sanitized.occupantVisibility) {
-    return applyOccupantVisibility(layoutState, sanitized.occupantVisibility);
+    return applyOccupantVisibility(withSanitizationDiagnostics, sanitized.occupantVisibility);
   }
 
-  return layoutState;
+  return withSanitizationDiagnostics;
 }
 
 export function applyOccupantVisibility(
@@ -178,6 +192,24 @@ export function applyOccupantVisibility(
   };
 }
 
+// -----------------------------------------------------------------------------
+// Compile-time invariant: persisted shell state MUST NOT carry entry-state
+// protected rule keys. If anyone adds (e.g.) `firstLaneColumns` to the
+// persistence schema, this alias will fail to resolve and TypeScript will
+// reject the build, preventing a silent bypass of protected shell rules.
+// -----------------------------------------------------------------------------
+type _PersistedStateCannotNameProtectedEntryStateRule = Extract<
+  keyof PersistedShellState,
+  ProtectedEntryStateRule
+> extends never
+  ? true
+  : {
+      readonly BUG: 'PersistedShellState must not carry keys that share names with PROTECTED_ENTRY_STATE_RULES';
+      readonly offendingKeys: Extract<keyof PersistedShellState, ProtectedEntryStateRule>;
+    };
+const _persistedStateInvariantCheck: _PersistedStateCannotNameProtectedEntryStateRule = true;
+void _persistedStateInvariantCheck;
+
 export const GOVERNANCE_BOUNDARY = {
   systemAuthored: {
     entryStateBreakpoints: 'Shell entry-state thresholds and column rules are code-governed by breakpointPolicy.ts',
@@ -186,8 +218,12 @@ export const GOVERNANCE_BOUNDARY = {
     protectedBandSemantics: SHELL_PROTECTED_DECISIONS.protectedBandSemantics,
     maxDominantPerBand: SHELL_PROTECTED_DECISIONS.maxDominantPerBand,
     prominenceCeilings: 'Occupant prominence ceilings are code-governed by the occupant registry',
-    heroHeightBudgets: 'Entry-stack hero height budgets are code-governed by entryStackContract.ts',
-    spacingBudgets: 'Entry-stack spacing gaps are code-governed by entryStackContract.ts',
+    heroHeightBudgets: 'Entry-stack hero height budgets are code-governed by entryStackPolicy.ts',
+    spacingBudgets: 'Entry-stack spacing gaps are code-governed by entryStackPolicy.ts',
+    visiblePrimaryActionsBudgets: 'Visible primary-actions budgets are code-governed by entryStackPolicy.ts',
+    overflowPosture: 'Overflow posture is code-governed by entryStackPolicy.ts',
+    shortHeightPosture: 'Short-height fallback posture is code-governed by entryStackPolicy.ts',
+    firstLaneFirstView: 'First-lane-first-view expectation is code-governed by entryStackPolicy.ts',
   },
   configurableByFutureControlPanel: {
     presetSelection: 'Choose from approved preset library',

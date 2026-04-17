@@ -1,5 +1,16 @@
 /* ---------------------------------------------------------------------------
    Shell — post-hero operating layer (container-aware)
+   ---------------------------------------------------------------------------
+   CSS density breakpoints vs runtime state thresholds:
+     The container-query breakpoints below (768 / 1180 / 1600 / 1900) control
+     gap + padding density only. Runtime state transitions and first-lane
+     pairing decisions are owned by `shell/breakpointPolicy.ts`. Keep the two
+     aligned:
+       runtime tablet-portrait-large min → 820 (CSS 768 is an earlier density
+         step that covers the tablet-portrait band)
+       runtime standard-laptop min       → 1180 (matches CSS)
+       runtime ultrawide-desktop min     → 1600 (matches CSS)
+       CSS 1900                          → extra ultrawide padding only
    --------------------------------------------------------------------------- */
 
 .shell {

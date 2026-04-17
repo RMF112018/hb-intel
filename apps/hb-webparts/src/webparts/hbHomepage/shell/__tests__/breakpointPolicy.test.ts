@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { resolveEntryState, isFirstLanePairingAllowed, SHELL_ENTRY_STATES } from '../breakpointPolicy.js';
+import {
+  SHELL_ENTRY_STATES,
+  SHORT_HEIGHT_THRESHOLD_PX,
+  isFirstLanePairingAllowed,
+  resolveEntryState,
+  resolveEntryStateWithReason,
+} from '../breakpointPolicy.js';
 
 describe('resolveEntryState', () => {
   it('resolves ultrawide-desktop at 1800px', () => {
@@ -65,6 +71,55 @@ describe('resolveEntryState', () => {
       expect(state.firstLaneColumns).toBe(1);
       expect(state.firstLanePairingAllowed).toBe(false);
     }
+  });
+});
+
+describe('resolveEntryStateWithReason', () => {
+  it('returns width-match for ordinary desktop widths', () => {
+    const resolved = resolveEntryStateWithReason({ width: 1300, height: 900 });
+    expect(resolved.state.id).toBe('standard-laptop');
+    expect(resolved.reason).toBe('width-match');
+    expect(resolved.shortHeightConstrained).toBe(false);
+  });
+
+  it('marks short-height-override when height is below threshold and width is wide enough', () => {
+    const resolved = resolveEntryStateWithReason({ width: 700, height: 400 });
+    expect(resolved.state.id).toBe('phone-landscape');
+    expect(resolved.reason).toBe('short-height-override');
+    expect(resolved.shortHeightConstrained).toBe(true);
+  });
+
+  it('does not trigger short-height-override when height is exactly threshold', () => {
+    const resolved = resolveEntryStateWithReason({
+      width: 700,
+      height: SHORT_HEIGHT_THRESHOLD_PX,
+    });
+    expect(resolved.reason).toBe('width-match');
+    expect(resolved.shortHeightConstrained).toBe(false);
+  });
+
+  it('does not trigger short-height-override when width is below phone-landscape minimum', () => {
+    const resolved = resolveEntryStateWithReason({ width: 400, height: 400 });
+    expect(resolved.state.id).toBe('phone-portrait');
+    expect(resolved.reason).toBe('width-match');
+    expect(resolved.shortHeightConstrained).toBe(false);
+  });
+
+  it('uses fallback-below-narrowest when width is below every declared state', () => {
+    const resolved = resolveEntryStateWithReason({ width: 100 });
+    expect(resolved.state.id).toBe('phone-portrait');
+    expect(resolved.reason).toBe('fallback-below-narrowest');
+    expect(resolved.shortHeightConstrained).toBe(false);
+  });
+
+  it('exposes SHORT_HEIGHT_THRESHOLD_PX as the governing constant', () => {
+    expect(SHORT_HEIGHT_THRESHOLD_PX).toBe(500);
+  });
+
+  it('resolveEntryState back-compat wrapper returns only the state', () => {
+    const state = resolveEntryState({ width: 1300 });
+    const resolved = resolveEntryStateWithReason({ width: 1300 });
+    expect(state).toBe(resolved.state);
   });
 });
 

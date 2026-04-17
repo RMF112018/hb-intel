@@ -80,9 +80,21 @@ describe('resolveBandLayout — single occupant', () => {
 
 describe('resolveBandLayout — comfort-forced stacking', () => {
   it('stacks when container width forces occupant below minWidth in paired mode', () => {
+    // At 600px container, major slot is 360px which is below the
+    // company-pulse minWidth (480), so comfort forces stack before the
+    // narrowest-stable-paired check fires.
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 600);
+    expect(result.columns).toBe(1);
+    expect(result.slots.every((s) => s.comfort.reason === 'comfort-forced-stack')).toBe(true);
+  });
+
+  it('stacks with narrowest-stable-paired reason between minWidth and narrowestStablePairedWidth', () => {
+    // At 800px container, major slot is 480px (== minWidth, not below)
+    // but below narrowestStablePairedWidth (520), so the narrowest-stable
+    // check fires first.
     const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 800);
     expect(result.columns).toBe(1);
-    expect(result.slots.some((s) => s.comfort.reason.includes('comfort') || s.comfort.reason.includes('entry-state'))).toBe(true);
+    expect(result.pairingDecision.reason).toBe('below-narrowest-stable-paired-width');
   });
 });
 
@@ -120,6 +132,68 @@ describe('resolveBandLayout — renderMode', () => {
     const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
     const minor = result.slots.find((s) => s.slot.columnSpan === 'minor');
     expect(minor!.comfort.reason).toContain('constrained');
+  });
+});
+
+describe('resolveBandLayout — pairing decision diagnostics', () => {
+  it('reports "paired" reason when pairing succeeds on desktop', () => {
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    expect(result.pairingDecision).toEqual({ allowed: true, reason: 'paired' });
+  });
+
+  it('reports "single-occupant" for single-slot bands', () => {
+    const result = resolveBandLayout(singleBand, DESKTOP_STATE, false, 1300);
+    expect(result.pairingDecision).toEqual({
+      allowed: false,
+      reason: 'single-occupant',
+    });
+  });
+
+  it('reports "state-denies-pairing" on tablet-portrait entry band', () => {
+    const result = resolveBandLayout(pairedBand, TABLET_PORTRAIT_STATE, true, 900);
+    expect(result.pairingDecision).toEqual({
+      allowed: false,
+      reason: 'state-denies-pairing',
+    });
+  });
+
+  it('reports "state-denies-pairing" on phone entry band', () => {
+    const result = resolveBandLayout(pairedBand, PHONE_STATE, true, 400);
+    expect(result.pairingDecision).toEqual({
+      allowed: false,
+      reason: 'state-denies-pairing',
+    });
+  });
+
+  it('reports "comfort-forced-stack" when desktop paired width falls below minimum', () => {
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 600);
+    expect(result.pairingDecision.allowed).toBe(false);
+    expect(result.pairingDecision.reason).toBe('comfort-forced-stack');
+  });
+
+  it('reports "prohibited-pairing" for occupants on each other\'s restriction list', () => {
+    const prohibitedBand: ShellBand = {
+      id: 'band-prohibited',
+      semanticRole: 'people-culture',
+      slots: [
+        { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
+        { id: 's2', occupantId: 'hb-kudos', role: 'secondary', columnSpan: 'minor' },
+      ],
+      maxDominantOccupants: 1,
+    };
+    const result = resolveBandLayout(prohibitedBand, DESKTOP_STATE, false, 1300);
+    expect(result.pairingDecision).toEqual({
+      allowed: false,
+      reason: 'prohibited-pairing',
+    });
+  });
+
+  it('slot comfort.reason mirrors the band-level pairing reason when stacked', () => {
+    const result = resolveBandLayout(pairedBand, TABLET_PORTRAIT_STATE, true, 900);
+    expect(result.pairingDecision.reason).toBe('state-denies-pairing');
+    for (const slot of result.slots) {
+      expect(slot.comfort.reason).toBe('state-denies-pairing');
+    }
   });
 });
 

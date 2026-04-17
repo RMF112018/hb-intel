@@ -18,9 +18,35 @@ export interface SlotComfortResult {
   readonly reason: string;
 }
 
+/**
+ * Inspectable reason for a band's pairing outcome. Emitted into shell
+ * diagnostics so harnesses and tests can prove *why* a band paired or
+ * stacked at a given entry state without re-running the resolver.
+ */
+export type PairingDecisionReason =
+  /** Band has fewer than two active occupants; nothing to pair. */
+  | 'single-occupant'
+  /** Entry state denies first-lane pairing (tablet/phone/short-height). */
+  | 'state-denies-pairing'
+  /** Active occupants are on each other's prohibited-pairings list. */
+  | 'prohibited-pairing'
+  /** Slot widths fall below an occupant's comfort minimum at 2-col layout. */
+  | 'comfort-forced-stack'
+  /** Slot widths fall below the narrowest stable paired width for an occupant. */
+  | 'below-narrowest-stable-paired-width'
+  /** All checks passed and the band is paired. */
+  | 'paired';
+
+export interface PairingDecision {
+  readonly allowed: boolean;
+  readonly reason: PairingDecisionReason;
+}
+
 export interface BandLayoutResult {
   readonly columns: 1 | 2;
   readonly slots: readonly ResolvedSlot[];
+  /** Why this band paired or stacked at the current entry state. */
+  readonly pairingDecision: PairingDecision;
 }
 
 export interface ResolvedSlot {
@@ -114,33 +140,46 @@ export function isProminenceAllowed(
   return PROMINENCE_RANK[prominenceCeiling] >= PROMINENCE_RANK[floor];
 }
 
-function canBandPair(
+function decideBandPairing(
   band: ShellBand,
   entryState: ShellEntryState,
   isEntryBand: boolean,
   containerWidth: number,
-): boolean {
-  if (isEntryBand && !entryState.firstLanePairingAllowed) return false;
-
+): PairingDecision {
   const activeSlots = band.slots.filter((s) => s.occupantId !== null);
-  if (activeSlots.length < 2) return false;
+  if (activeSlots.length < 2) {
+    return { allowed: false, reason: 'single-occupant' };
+  }
+
+  // Entry band is additionally gated by the entry-state rule. Non-entry
+  // bands are not gated by `firstLanePairingAllowed`, so they may still
+  // pair at narrower states if comfort permits.
+  if (isEntryBand && !entryState.firstLanePairingAllowed) {
+    return { allowed: false, reason: 'state-denies-pairing' };
+  }
 
   for (let i = 0; i < activeSlots.length; i++) {
     for (let j = i + 1; j < activeSlots.length; j++) {
       const a = activeSlots[i].occupantId!;
       const b = activeSlots[j].occupantId!;
-      if (!areOccupantsPairableInBand(a, b)) return false;
+      if (!areOccupantsPairableInBand(a, b)) {
+        return { allowed: false, reason: 'prohibited-pairing' };
+      }
     }
   }
 
   for (const slot of activeSlots) {
     const slotWidth = resolveSlotWidth(containerWidth, slot.columnSpan, 2);
     const comfort = checkOccupantComfort(slot.occupantId!, slotWidth, entryState);
-    if (comfort.shouldStack) return false;
-    if (!canOccupantPairAtWidth(slot.occupantId!, slotWidth)) return false;
+    if (comfort.shouldStack) {
+      return { allowed: false, reason: 'comfort-forced-stack' };
+    }
+    if (!canOccupantPairAtWidth(slot.occupantId!, slotWidth)) {
+      return { allowed: false, reason: 'below-narrowest-stable-paired-width' };
+    }
   }
 
-  return true;
+  return { allowed: true, reason: 'paired' };
 }
 
 export function resolveBandLayout(
@@ -167,12 +206,13 @@ export function resolveBandLayout(
           reason: 'single-occupant',
         },
       })),
+      pairingDecision: { allowed: false, reason: 'single-occupant' },
     };
   }
 
-  const paired = canBandPair(band, entryState, isEntryBand, containerWidth);
+  const pairingDecision = decideBandPairing(band, entryState, isEntryBand, containerWidth);
 
-  if (paired) {
+  if (pairingDecision.allowed) {
     return {
       columns: 2,
       slots: activeSlots.map((slot) => ({
@@ -183,6 +223,7 @@ export function resolveBandLayout(
           entryState,
         ),
       })),
+      pairingDecision,
     };
   }
 
@@ -194,8 +235,9 @@ export function resolveBandLayout(
         effectiveColumnSpan: 'full' as const,
         shouldStack: false,
         renderMode: resolveRenderMode(slot.occupantId!, containerWidth, entryState),
-        reason: entryState.firstLanePairingAllowed ? 'comfort-forced-stack' : 'entry-state-single-column',
+        reason: pairingDecision.reason,
       },
     })),
+    pairingDecision,
   };
 }

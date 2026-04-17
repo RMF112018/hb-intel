@@ -31,6 +31,16 @@ import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmi
 import { PriorityActionsRailAdmin } from './webparts/priorityActionsRailAdmin/PriorityActionsRailAdmin.js';
 import { HbHomepage } from './webparts/hbHomepage/HbHomepage.js';
 import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract.js';
+// Shared entry-stack orchestration seam. The three homepage entry surfaces
+// (hero, priority actions, shell) remain SEPARATE SPFx webparts dispatched
+// through `WEBPART_RENDERERS` below. This import does not merge them; it is
+// the governance reference so production, the reference composition, and any
+// future unified entry-stack governance layer all point at the same seam.
+// See `src/homepage/entryStack/entryStackOrchestration.ts`.
+import {
+  ENTRY_STACK_SURFACES as _HOMEPAGE_ENTRY_STACK_SURFACES,
+} from './homepage/entryStack/index.js';
+void _HOMEPAGE_ENTRY_STACK_SURFACES;
 import { PnpOps } from './webparts/pnp/PnpOps.js';
 import { PNP_OPS_LEGACY_MODE, resolvePnpOpsExecutionMode } from './webparts/pnp/pnpOpsExecutionModes.js';
 import type { HomepageIdentityInput } from './homepage/helpers/identity.js';

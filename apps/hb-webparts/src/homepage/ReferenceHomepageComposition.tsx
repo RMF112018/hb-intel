@@ -13,6 +13,15 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
 /**
  * Governed Homepage Composition Reference
  *
+ * This composition is a REFERENCE ONLY. Production mounts hero,
+ * priority actions, and the shell as three independent SPFx webparts
+ * through `mount.tsx`. This file demonstrates the intended entry
+ * sequence so designers, reviewers, and tests can see the full stack
+ * without needing an SPFx page. Both paths — production and this
+ * reference — read the same shared entry-stack orchestration seam at
+ * `src/homepage/entryStack/entryStackOrchestration.ts`, so any drift
+ * between the two is detectable and recoverable.
+ *
  * Phase 16-03 — Unified signature hero with design breakout.
  * Phase 18 (01–04) — Signature hero canonicalized, rebuilt as minimal
  *   premium identity surface, gradient replaced with charcoal background

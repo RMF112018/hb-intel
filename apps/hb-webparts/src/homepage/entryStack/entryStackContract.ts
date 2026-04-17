@@ -1,3 +1,16 @@
+// =============================================================================
+// Entry-stack budget contract — production-adjacent
+// -----------------------------------------------------------------------------
+// This module defines the canonical numeric budgets (hero height, visible
+// actions, gaps, first-lane columns) for every entry-stack device class.
+// It is consumed from the shared orchestration seam at
+// `./entryStackOrchestration.ts`, which both `mount.tsx` and
+// `ReferenceHomepageComposition.tsx` import. The shell-facing mirror lives
+// at `apps/hb-webparts/src/webparts/hbHomepage/shell/entryStackPolicy.ts`.
+// Keep the two in sync when spec values change; the state-id ↔ device-class
+// alignment map lives in `entryStackOrchestration.ts`.
+// =============================================================================
+
 export type EntryStackDeviceClass =
   | 'ultrawide-desktop'
   | 'standard-laptop'

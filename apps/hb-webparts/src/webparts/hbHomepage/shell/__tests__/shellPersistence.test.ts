@@ -102,8 +102,8 @@ describe('sanitizePersistedState', () => {
     expect(sanitized.presetId).toBe('default-v2');
   });
 
-  it('detects prohibited pairing in band overrides', () => {
-    const { violations } = sanitizePersistedState({
+  it('detects AND strips prohibited-pairing overrides rather than passing them through', () => {
+    const { sanitized, violations } = sanitizePersistedState({
       version: 1,
       presetId: 'default-v2',
       bandOverrides: [
@@ -117,6 +117,11 @@ describe('sanitizePersistedState', () => {
       ],
     });
     expect(violations.some((v) => v.includes('prohibited pairing'))).toBe(true);
+    const people = sanitized.bandOverrides?.[0]?.slots?.find((s) => s.slotId === 's1');
+    const kudos = sanitized.bandOverrides?.[0]?.slots?.find((s) => s.slotId === 's2');
+    // First offender kept; second stripped to '' so parseShellLayout nulls it out.
+    expect(people?.occupantId).toBe('people-culture-public');
+    expect(kudos?.occupantId).toBe('');
   });
 
   it('does not flag valid overrides', () => {
@@ -159,6 +164,89 @@ describe('applyOccupantVisibility', () => {
     const layout = parseShellLayout(undefined);
     const result = applyOccupantVisibility(layout, undefined);
     expect(result).toBe(layout);
+  });
+});
+
+describe('hydratePersistedState — diagnostic surfacing', () => {
+  it('surfaces sanitization violations as ShellLayoutState diagnostics', () => {
+    const result = hydratePersistedState({
+      version: 1,
+      presetId: 'rogue-preset',
+    });
+    const sanitizationDiagnostics = result.diagnostics.filter(
+      (d) => d.code === 'PERSISTED_STATE_SANITIZED',
+    );
+    expect(sanitizationDiagnostics.length).toBeGreaterThan(0);
+    expect(sanitizationDiagnostics[0].message).toContain('rogue-preset');
+  });
+
+  it('surfaces schema-rejection as a PERSISTED_STATE_SCHEMA_REJECTED error diagnostic', () => {
+    const result = hydratePersistedState({ version: 2, presetId: 123 });
+    const rejection = result.diagnostics.find(
+      (d) => d.code === 'PERSISTED_STATE_SCHEMA_REJECTED',
+    );
+    expect(rejection).toBeDefined();
+    expect(rejection?.severity).toBe('error');
+  });
+
+  it('hydration strips prohibited pairings so runtime layout cannot hold the forbidden combo', () => {
+    const result = hydratePersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-people-culture',
+          slots: [
+            { slotId: 'slot-people-culture-public', occupantId: 'people-culture-public' },
+            { slotId: 'slot-hb-kudos', occupantId: 'hb-kudos' },
+          ],
+        },
+      ],
+    });
+    // Band `band-people-culture` does not exist in default preset, but
+    // the proof is that sanitization violations surfaced and the
+    // parsed layout does not contain a band with both occupants.
+    expect(
+      result.diagnostics.some((d) => d.code === 'PERSISTED_STATE_SANITIZED'),
+    ).toBe(true);
+    for (const band of result.preset.bands) {
+      const occupants = band.slots.map((s) => s.occupantId).filter(Boolean);
+      expect(
+        occupants.includes('people-culture-public') && occupants.includes('hb-kudos'),
+      ).toBe(false);
+    }
+  });
+});
+
+describe('shellValidation — override rejection diagnostics', () => {
+  it('emits INVALID_OVERRIDE_ROLE for an unknown role override', async () => {
+    const { parseShellLayout } = await import('../shellValidation.js');
+    const result = parseShellLayout({
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-operational-spotlight',
+          slots: [{ slotId: 'slot-company-pulse', role: 'garbage-role' }],
+        },
+      ],
+    });
+    expect(result.diagnostics.some((d) => d.code === 'INVALID_OVERRIDE_ROLE')).toBe(true);
+  });
+
+  it('emits INVALID_OVERRIDE_COLUMN_SPAN for an unknown columnSpan override', async () => {
+    const { parseShellLayout } = await import('../shellValidation.js');
+    const result = parseShellLayout({
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-operational-spotlight',
+          slots: [{ slotId: 'slot-company-pulse', columnSpan: 'giant' }],
+        },
+      ],
+    });
+    expect(
+      result.diagnostics.some((d) => d.code === 'INVALID_OVERRIDE_COLUMN_SPAN'),
+    ).toBe(true);
   });
 });
 

@@ -133,6 +133,8 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps }: ShellBandRe
       data-shell-semantic-role={band.semanticRole}
       data-shell-entry-band={isEntryBand || undefined}
       data-shell-columns={layout.columns}
+      data-shell-band-pairing-allowed={layout.pairingDecision.allowed}
+      data-shell-band-pairing-reason={layout.pairingDecision.reason}
       role="region"
       aria-label={formatBandLabel(band.semanticRole)}
     >
@@ -169,6 +171,21 @@ function useShellDiagnostics(layoutState: ShellLayoutState): void {
 
 // ---------------------------------------------------------------------------
 // Shell orchestrator — post-hero operating layer
+// ---------------------------------------------------------------------------
+// This component is the HB Homepage shell. Its job is orchestration, not
+// module implementation. See `hbHomepageContract.ts` for the authoritative
+// shell-ownership boundary.
+//
+// This component owns: placement, layout governance, breakpoint governance,
+// pairing/stacking decisions, preset governance, normalization and
+// diagnostics, and shell-facing entry-stack integration with the hero and
+// priority actions.
+//
+// This component MUST NOT: mutate child-zone internals, redesign child UI
+// to solve fit, or reach across the zone boundary to fix a module maturity
+// issue. When a zone cannot render comfortably the shell stacks, reflows,
+// falls back (`ShellFallbackSurface`), or demotes — it never edits the
+// child module to make it fit.
 // ---------------------------------------------------------------------------
 
 export function HbHomepageShell({
@@ -222,7 +239,10 @@ export function HbHomepageShell({
       data-shell-preset={layoutState.preset.id}
       data-shell-post-hero="true"
       data-shell-entry-state={container.entryState.id}
+      data-shell-entry-state-reason={container.entryStateReason}
       data-shell-width={Math.round(container.width)}
+      data-shell-height={Math.round(container.height)}
+      data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
       data-shell-diagnostics-count={layoutState.diagnostics.length}
       data-shell-normalized-from-default={layoutState.normalizedFromDefault}
     >

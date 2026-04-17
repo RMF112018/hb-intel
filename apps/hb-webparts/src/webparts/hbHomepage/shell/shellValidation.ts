@@ -193,6 +193,14 @@ function applyOverrides(
         const validRoles = ['primary', 'secondary', 'compact'] as const;
         if (validRoles.includes(slotOverride.role as (typeof validRoles)[number])) {
           updated = { ...updated, role: slotOverride.role as ShellSlot['role'] };
+        } else {
+          diagnostics.push(
+            diagnostic(
+              'warning',
+              'INVALID_OVERRIDE_ROLE',
+              `Override role "${slotOverride.role}" for slot "${slot.id}" is not a valid SlotRole. Ignored.`,
+            ),
+          );
         }
       }
 
@@ -200,6 +208,14 @@ function applyOverrides(
         const validSpans = ['full', 'major', 'minor'] as const;
         if (validSpans.includes(slotOverride.columnSpan as (typeof validSpans)[number])) {
           updated = { ...updated, columnSpan: slotOverride.columnSpan as ShellSlot['columnSpan'] };
+        } else {
+          diagnostics.push(
+            diagnostic(
+              'warning',
+              'INVALID_OVERRIDE_COLUMN_SPAN',
+              `Override columnSpan "${slotOverride.columnSpan}" for slot "${slot.id}" is not a valid ColumnSpan. Ignored.`,
+            ),
+          );
         }
       }
 
