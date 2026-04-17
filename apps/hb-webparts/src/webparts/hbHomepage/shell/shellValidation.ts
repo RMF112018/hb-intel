@@ -2,6 +2,7 @@ import { DEFAULT_PRESET } from './defaultPreset.js';
 import { getPresetOrDefault } from './presetLibrary.js';
 import { OCCUPANT_REGISTRY, areOccupantsPairableInBand } from './occupantRegistry.js';
 import { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
+import { isProminenceAllowed } from './slotComfortResolver.js';
 import { ModuleConfigSlicesSchema, ShellLayoutInputSchema, ShellPresetSchema } from './shellSchema.js';
 import type {
   ModuleConfigSlices,
@@ -116,9 +117,28 @@ function validatePreset(
   preset: ShellPreset,
   diagnostics: ShellDiagnostic[],
 ): ShellPreset {
-  const validatedBands = preset.bands.map((band) =>
-    validateBandConstraints(band, diagnostics),
-  );
+  const validatedBands = preset.bands.map((band, bandIndex) => {
+    const validated = validateBandConstraints(band, diagnostics);
+    const isEntryBand = bandIndex === 0;
+
+    for (const slot of validated.slots) {
+      if (!slot.occupantId) continue;
+      const occupant = OCCUPANT_REGISTRY.get(slot.occupantId);
+      if (!occupant) continue;
+
+      if (!isProminenceAllowed(occupant.prominenceCeiling, slot.role, isEntryBand)) {
+        diagnostics.push(
+          diagnostic(
+            'warning',
+            'PROMINENCE_CEILING_EXCEEDED',
+            `Occupant "${slot.occupantId}" (ceiling: ${occupant.prominenceCeiling}) placed as ${slot.role} in ${isEntryBand ? 'entry ' : ''}band "${band.id}" exceeds its prominence ceiling.`,
+          ),
+        );
+      }
+    }
+
+    return validated;
+  });
 
   const protectedRoles = SHELL_PROTECTED_DECISIONS.protectedBandSemantics;
   for (const role of protectedRoles) {

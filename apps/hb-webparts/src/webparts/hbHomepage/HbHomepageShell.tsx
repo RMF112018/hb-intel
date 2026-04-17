@@ -94,6 +94,7 @@ function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): Rea
       data-shell-slot-role={slot.role}
       data-shell-column-span={effectiveSpan}
       data-shell-comfort-reason={comfort.reason}
+      data-shell-render-mode={comfort.renderMode}
       data-shell-slot-state="active"
     >
       <ZoneComponent {...zoneProps} />

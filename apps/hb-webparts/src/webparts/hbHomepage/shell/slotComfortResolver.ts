@@ -2,14 +2,19 @@ import { getOccupant, areOccupantsPairableInBand, canOccupantPairAtWidth } from 
 import type {
   ColumnSpan,
   OccupantId,
+  ProminenceCeiling,
   ShellBand,
   ShellEntryState,
   ShellSlot,
+  SlotRole,
 } from './shellTypes.js';
+
+export type OccupantRenderMode = 'standard' | 'compact' | 'summary-collapsed';
 
 export interface SlotComfortResult {
   readonly effectiveColumnSpan: ColumnSpan;
   readonly shouldStack: boolean;
+  readonly renderMode: OccupantRenderMode;
   readonly reason: string;
 }
 
@@ -29,24 +34,84 @@ function resolveSlotWidth(containerWidth: number, columnSpan: ColumnSpan, bandCo
   return containerWidth * 0.4;
 }
 
+function resolveRenderMode(
+  occupantId: OccupantId,
+  availableWidth: number,
+  entryState: ShellEntryState,
+): OccupantRenderMode {
+  const descriptor = getOccupant(occupantId);
+  if (!descriptor) return 'standard';
+
+  const isSingleColumn = entryState.firstLaneColumns === 1;
+  const isNarrow = availableWidth < descriptor.comfort.preferredWidth;
+
+  if (
+    isSingleColumn &&
+    descriptor.comfort.supportsSummaryCollapse &&
+    availableWidth < descriptor.comfort.minWidth * 1.2
+  ) {
+    return 'summary-collapsed';
+  }
+
+  if (isNarrow && descriptor.comfort.supportsCompact) {
+    return 'compact';
+  }
+
+  return 'standard';
+}
+
 function checkOccupantComfort(
   occupantId: OccupantId,
   availableWidth: number,
+  entryState: ShellEntryState,
 ): SlotComfortResult {
   const descriptor = getOccupant(occupantId);
   if (!descriptor) {
-    return { effectiveColumnSpan: 'full', shouldStack: false, reason: 'unknown-occupant' };
+    return { effectiveColumnSpan: 'full', shouldStack: false, renderMode: 'standard', reason: 'unknown-occupant' };
   }
 
   if (availableWidth < descriptor.comfort.minWidth) {
     return {
       effectiveColumnSpan: 'full',
       shouldStack: true,
+      renderMode: 'standard',
       reason: `width ${availableWidth}px below minimum ${descriptor.comfort.minWidth}px`,
     };
   }
 
-  return { effectiveColumnSpan: 'full', shouldStack: false, reason: 'comfortable' };
+  const renderMode = resolveRenderMode(occupantId, availableWidth, entryState);
+
+  if (availableWidth < descriptor.comfort.preferredWidth) {
+    return {
+      effectiveColumnSpan: 'full',
+      shouldStack: false,
+      renderMode,
+      reason: `constrained: ${availableWidth}px below preferred ${descriptor.comfort.preferredWidth}px`,
+    };
+  }
+
+  return { effectiveColumnSpan: 'full', shouldStack: false, renderMode, reason: 'comfortable' };
+}
+
+const PROMINENCE_RANK: Record<ProminenceCeiling, number> = {
+  anchor: 3,
+  supporting: 2,
+  contextual: 1,
+};
+
+const ROLE_PROMINENCE_FLOOR: Record<SlotRole, ProminenceCeiling> = {
+  primary: 'supporting',
+  secondary: 'contextual',
+  compact: 'contextual',
+};
+
+export function isProminenceAllowed(
+  prominenceCeiling: ProminenceCeiling,
+  slotRole: SlotRole,
+  isEntryBand: boolean,
+): boolean {
+  const floor = isEntryBand && slotRole === 'primary' ? 'anchor' : ROLE_PROMINENCE_FLOOR[slotRole];
+  return PROMINENCE_RANK[prominenceCeiling] >= PROMINENCE_RANK[floor];
 }
 
 function canBandPair(
@@ -70,7 +135,7 @@ function canBandPair(
 
   for (const slot of activeSlots) {
     const slotWidth = resolveSlotWidth(containerWidth, slot.columnSpan, 2);
-    const comfort = checkOccupantComfort(slot.occupantId!, slotWidth);
+    const comfort = checkOccupantComfort(slot.occupantId!, slotWidth, entryState);
     if (comfort.shouldStack) return false;
     if (!canOccupantPairAtWidth(slot.occupantId!, slotWidth)) return false;
   }
@@ -87,11 +152,20 @@ export function resolveBandLayout(
   const activeSlots = band.slots.filter((s) => s.occupantId !== null);
 
   if (activeSlots.length <= 1) {
+    const slot = activeSlots[0];
+    const renderMode = slot?.occupantId
+      ? resolveRenderMode(slot.occupantId, containerWidth, entryState)
+      : 'standard' as OccupantRenderMode;
     return {
       columns: 1,
-      slots: activeSlots.map((slot) => ({
-        slot,
-        comfort: { effectiveColumnSpan: 'full' as const, shouldStack: false, reason: 'single-occupant' },
+      slots: activeSlots.map((s) => ({
+        slot: s,
+        comfort: {
+          effectiveColumnSpan: 'full' as const,
+          shouldStack: false,
+          renderMode,
+          reason: 'single-occupant',
+        },
       })),
     };
   }
@@ -106,6 +180,7 @@ export function resolveBandLayout(
         comfort: checkOccupantComfort(
           slot.occupantId!,
           resolveSlotWidth(containerWidth, slot.columnSpan, 2),
+          entryState,
         ),
       })),
     };
@@ -118,6 +193,7 @@ export function resolveBandLayout(
       comfort: {
         effectiveColumnSpan: 'full' as const,
         shouldStack: false,
+        renderMode: resolveRenderMode(slot.occupantId!, containerWidth, entryState),
         reason: entryState.firstLanePairingAllowed ? 'comfort-forced-stack' : 'entry-state-single-column',
       },
     })),

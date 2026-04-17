@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveBandLayout } from '../slotComfortResolver.js';
+import { resolveBandLayout, isProminenceAllowed } from '../slotComfortResolver.js';
 import type { ShellBand, ShellEntryState } from '../shellTypes.js';
 
 const DESKTOP_STATE: ShellEntryState = {
@@ -93,5 +93,61 @@ describe('resolveBandLayout — hierarchy preservation', () => {
     const secondary = result.slots.find((s) => s.slot.role === 'secondary');
     expect(primary).toBeDefined();
     expect(secondary).toBeDefined();
+  });
+});
+
+describe('resolveBandLayout — renderMode', () => {
+  it('returns standard renderMode at comfortable width', () => {
+    const result = resolveBandLayout(singleBand, DESKTOP_STATE, false, 1300);
+    expect(result.slots[0].comfort.renderMode).toBe('standard');
+  });
+
+  it('returns standard renderMode for paired slots at comfortable width', () => {
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    for (const slot of result.slots) {
+      expect(slot.comfort.renderMode).toBe('standard');
+    }
+  });
+
+  it('includes renderMode on stacked slots', () => {
+    const result = resolveBandLayout(pairedBand, PHONE_STATE, true, 400);
+    for (const slot of result.slots) {
+      expect(slot.comfort.renderMode).toBeDefined();
+    }
+  });
+
+  it('reports constrained reason when below preferredWidth', () => {
+    const result = resolveBandLayout(pairedBand, DESKTOP_STATE, true, 1300);
+    const minor = result.slots.find((s) => s.slot.columnSpan === 'minor');
+    expect(minor!.comfort.reason).toContain('constrained');
+  });
+});
+
+describe('isProminenceAllowed', () => {
+  it('allows anchor in primary entry band', () => {
+    expect(isProminenceAllowed('anchor', 'primary', true)).toBe(true);
+  });
+
+  it('rejects contextual in primary entry band', () => {
+    expect(isProminenceAllowed('contextual', 'primary', true)).toBe(false);
+  });
+
+  it('rejects supporting in primary entry band', () => {
+    expect(isProminenceAllowed('supporting', 'primary', true)).toBe(false);
+  });
+
+  it('allows supporting in primary non-entry band', () => {
+    expect(isProminenceAllowed('supporting', 'primary', false)).toBe(true);
+  });
+
+  it('allows contextual in secondary any band', () => {
+    expect(isProminenceAllowed('contextual', 'secondary', false)).toBe(true);
+    expect(isProminenceAllowed('contextual', 'secondary', true)).toBe(true);
+  });
+
+  it('allows anchor in any role', () => {
+    expect(isProminenceAllowed('anchor', 'primary', false)).toBe(true);
+    expect(isProminenceAllowed('anchor', 'secondary', false)).toBe(true);
+    expect(isProminenceAllowed('anchor', 'compact', false)).toBe(true);
   });
 });
