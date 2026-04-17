@@ -16,7 +16,7 @@ import {
   type PriorityRailUrgency,
 } from '@hbc/ui-kit/homepage';
 import { getSiteUrl } from '../../homepage/data/spContext.js';
-import { fetchPriorityActionsConfig } from '../../homepage/data/priorityActionsConfigListSource.js';
+import { fetchPriorityActionsConfigWithDiagnostics } from '../../homepage/data/priorityActionsConfigListSource.js';
 import { fetchPriorityActionsItems } from '../../homepage/data/priorityActionsItemsListSource.js';
 import { normalizeItemRows } from '../../homepage/data/priorityActionsNormalization.js';
 import { invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
@@ -46,6 +46,7 @@ import type {
   PriorityActionsValidationIssue,
   PriorityActionsAdminRow,
   PriorityActionsItemDraft,
+  PriorityActionsValidationContext,
 } from '../../homepage/data/priorityActionsContracts.js';
 import styles from './priority-actions-rail-admin.module.css';
 
@@ -69,6 +70,7 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
   const [saveError, setSaveError] = React.useState<string>();
 
   const [resolvedConfig, setResolvedConfig] = React.useState<PriorityActionsConfigResolved>();
+  const [validationContext, setValidationContext] = React.useState<PriorityActionsValidationContext>({});
 
   const [configDraft, setConfigDraft] = React.useState<PriorityActionsConfigDraft>();
   const [itemRows, setItemRows] = React.useState<PriorityActionsAdminRow[]>([]);
@@ -99,8 +101,8 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
 
   const validation = React.useMemo(() => {
     if (!configDraft) return { valid: true, issues: [] as PriorityActionsValidationIssue[] };
-    return validatePriorityRailDraft(configDraft, getActiveItemDrafts(itemRows));
-  }, [configDraft, itemRows]);
+    return validatePriorityRailDraft(configDraft, getActiveItemDrafts(itemRows), validationContext);
+  }, [configDraft, itemRows, validationContext]);
 
   const selectedItem = React.useMemo(
     () => itemRows.find((row) => row.rowKey === selectedRowKey),
@@ -118,13 +120,14 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
     setLoadState('loading');
     setLoadError(undefined);
     try {
-      const [config, rawItems] = await Promise.all([
-        fetchPriorityActionsConfig(siteUrl),
+      const [{ config, activeConfigCountForBand }, rawItems] = await Promise.all([
+        fetchPriorityActionsConfigWithDiagnostics(siteUrl),
         fetchPriorityActionsItems(siteUrl),
       ]);
       const normalizedItems = normalizeItemRows(rawItems);
 
       setResolvedConfig(config);
+      setValidationContext({ activeConfigCountForBand });
 
       if (config) {
         const nextConfigDraft = createConfigDraftFromResolved(config);

@@ -19,6 +19,14 @@ import {
   type RawPriorityActionsConfigRow,
 } from './priorityActionsConfigListDescriptor.js';
 
+export interface PriorityActionsConfigFetchDiagnostics {
+  activeConfigCountForBand: number;
+}
+
+export interface PriorityActionsConfigWithDiagnostics extends PriorityActionsConfigFetchDiagnostics {
+  config: PriorityActionsConfigResolved | undefined;
+}
+
 /* ── Typed helpers ───────────────────────────────────────────────── */
 
 function readString(value: unknown, fallback: string = ''): string {
@@ -44,6 +52,10 @@ function readInt(value: unknown, fallback: number): number {
     if (Number.isFinite(parsed)) return parsed;
   }
   return fallback;
+}
+
+function escapeODataString(value: string): string {
+  return value.replace(/'/g, "''");
 }
 
 const VALID_DESKTOP_LAYOUTS = new Set<DesktopLayoutMode>(['rail', 'segmented', 'hybrid']);
@@ -124,16 +136,17 @@ export function resolveActiveConfig(
 
 const SELECT_FIELDS = Object.values(F).join(',');
 
-export async function fetchPriorityActionsConfig(
+export async function fetchPriorityActionsConfigWithDiagnostics(
   siteUrl: string,
   bandKey: string = 'homepage-primary',
-): Promise<PriorityActionsConfigResolved | undefined> {
+): Promise<PriorityActionsConfigWithDiagnostics> {
+  const escapedBandKey = escapeODataString(bandKey);
   const url =
     `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(PRIORITY_ACTIONS_CONFIG_LIST_TITLE)}')/items` +
     `?$select=${SELECT_FIELDS}` +
-    `&$filter=${F.Enabled} eq 1 and ${F.IsActive} eq 1` +
+    `&$filter=${F.BandKey} eq '${escapedBandKey}' and ${F.Enabled} eq 1 and ${F.IsActive} eq 1` +
     `&$orderby=${F.Modified} desc` +
-    `&$top=10`;
+    `&$top=25`;
 
   const response = await fetch(url, {
     headers: { Accept: 'application/json;odata=nometadata' },
@@ -156,5 +169,16 @@ export async function fetchPriorityActionsConfig(
     ? (body.value as RawPriorityActionsConfigRow[])
     : [];
 
-  return resolveActiveConfig(rows, bandKey);
+  return {
+    config: resolveActiveConfig(rows, bandKey),
+    activeConfigCountForBand: rows.length,
+  };
+}
+
+export async function fetchPriorityActionsConfig(
+  siteUrl: string,
+  bandKey: string = 'homepage-primary',
+): Promise<PriorityActionsConfigResolved | undefined> {
+  const result = await fetchPriorityActionsConfigWithDiagnostics(siteUrl, bandKey);
+  return result.config;
 }

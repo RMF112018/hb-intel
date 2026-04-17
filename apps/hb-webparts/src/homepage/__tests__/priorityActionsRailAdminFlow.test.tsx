@@ -7,7 +7,7 @@ vi.mock('../data/spContext.js', () => ({
 }));
 
 vi.mock('../data/priorityActionsConfigListSource.js', () => ({
-  fetchPriorityActionsConfig: vi.fn(),
+  fetchPriorityActionsConfigWithDiagnostics: vi.fn(),
 }));
 
 vi.mock('../data/priorityActionsItemsListSource.js', () => ({
@@ -34,7 +34,7 @@ vi.mock('../data/usePriorityActionsData.js', () => ({
 }));
 
 import { PriorityActionsRailAdmin } from '../../webparts/priorityActionsRailAdmin/PriorityActionsRailAdmin.js';
-import { fetchPriorityActionsConfig } from '../data/priorityActionsConfigListSource.js';
+import { fetchPriorityActionsConfigWithDiagnostics } from '../data/priorityActionsConfigListSource.js';
 import { fetchPriorityActionsItems } from '../data/priorityActionsItemsListSource.js';
 import { normalizeItemRows } from '../data/priorityActionsNormalization.js';
 import {
@@ -44,7 +44,7 @@ import {
   reorderPriorityRailItems,
 } from '../data/priorityActionsListWriter.js';
 
-const mockedFetchConfig = fetchPriorityActionsConfig as unknown as ReturnType<typeof vi.fn>;
+const mockedFetchConfig = fetchPriorityActionsConfigWithDiagnostics as unknown as ReturnType<typeof vi.fn>;
 const mockedFetchItems = fetchPriorityActionsItems as unknown as ReturnType<typeof vi.fn>;
 const mockedNormalize = normalizeItemRows as unknown as ReturnType<typeof vi.fn>;
 const mockedSaveConfig = savePriorityRailBandConfig as unknown as ReturnType<typeof vi.fn>;
@@ -125,7 +125,7 @@ beforeEach(() => {
   mockedArchive.mockReset();
   mockedReorder.mockReset();
 
-  mockedFetchConfig.mockResolvedValue(CONFIG);
+  mockedFetchConfig.mockResolvedValue({ config: CONFIG, activeConfigCountForBand: 1 });
   mockedFetchItems.mockResolvedValue([]);
   mockedNormalize.mockReturnValue([ITEM_A, ITEM_B]);
 

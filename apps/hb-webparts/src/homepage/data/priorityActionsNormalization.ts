@@ -19,6 +19,12 @@ import type {
   AudienceMode,
 } from './priorityActionsContracts.js';
 import type { RawPriorityActionsItemRow } from './priorityActionsItemsListDescriptor.js';
+import {
+  normalizeActionKey,
+  normalizeAudienceKeysFromRaw,
+  normalizeGroupFields,
+  normalizeIconKey,
+} from './priorityActionsGovernance.js';
 
 /* ── Typed helpers ───────────────────────────────────────────────── */
 
@@ -66,12 +72,6 @@ function readAudienceMode(value: unknown): AudienceMode {
   return VALID_AUDIENCE_MODES.has(s) ? s : 'all';
 }
 
-function parseAudienceKeys(value: unknown): string[] {
-  const raw = readString(value);
-  if (!raw) return [];
-  return raw.split(/\r?\n/).map((k) => k.trim()).filter((k) => k.length > 0);
-}
-
 function readDateOrNull(value: unknown): string | null {
   if (typeof value !== 'string' || value.trim().length === 0) return null;
   const d = new Date(value.trim());
@@ -81,11 +81,13 @@ function readDateOrNull(value: unknown): string | null {
 /* ── Row mapping ────────────────────────────────────────────────── */
 
 export function mapItemRow(row: RawPriorityActionsItemRow): PriorityActionsItemNormalized | undefined {
-  const actionKey = readString(row.ActionKey);
+  const actionKey = normalizeActionKey(readString(row.ActionKey));
   const title = readString(row.Title);
   const href = readString(row.Href);
 
   if (!actionKey || !title || !href) return undefined;
+
+  const group = normalizeGroupFields(readString(row.GroupKey), readString(row.GroupTitle));
 
   return {
     id: readInt(row.ID, 0),
@@ -93,17 +95,17 @@ export function mapItemRow(row: RawPriorityActionsItemRow): PriorityActionsItemN
     title,
     href,
     description: readString(row.ActionDescription),
-    iconKey: readString(row.IconKey),
+    iconKey: normalizeIconKey(readString(row.IconKey)),
     badgeLabel: readString(row.BadgeLabel),
     badgeVariant: readBadgeVariant(row.BadgeVariant),
     priority: readPriority(row.Priority),
-    groupKey: readString(row.GroupKey),
-    groupTitle: readString(row.GroupTitle),
+    groupKey: group.groupKey,
+    groupTitle: group.groupTitle,
     sortOrder: readInt(row.SortOrder, 100),
     overflowOnly: readBool(row.OverflowOnly),
     mobilePriority: readInt(row.MobilePriority, 100),
     audienceMode: readAudienceMode(row.AudienceMode),
-    audienceKeys: parseAudienceKeys(row.AudienceKeys),
+    audienceKeys: normalizeAudienceKeysFromRaw(row.AudienceKeys),
     isExternal: readBool(row.IsExternal),
     openInNewTab: readBool(row.OpenInNewTab),
     visibleDesktop: readBool(row.VisibleDesktop, true),
@@ -125,8 +127,9 @@ export function normalizeItemRows(
   for (const row of rows) {
     const item = mapItemRow(row);
     if (!item) continue;
-    if (seen.has(item.actionKey)) continue;
-    seen.add(item.actionKey);
+    const dedupeKey = item.actionKey.toLowerCase();
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
     items.push(item);
   }
 

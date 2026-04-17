@@ -18,14 +18,19 @@ import {
 
 const SELECT_FIELDS = Object.values(F).join(',');
 
+function escapeODataString(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
 export async function fetchPriorityActionsItems(
   siteUrl: string,
   bandKey: string = 'homepage-primary',
 ): Promise<RawPriorityActionsItemRow[]> {
+  const escapedBandKey = escapeODataString(bandKey);
   const url =
     `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(PRIORITY_ACTIONS_ITEMS_LIST_TITLE)}')/items` +
     `?$select=${SELECT_FIELDS}` +
-    `&$filter=${F.BandKey} eq '${bandKey}' and ${F.ItemStatus} eq 'Enabled'` +
+    `&$filter=${F.BandKey} eq '${escapedBandKey}' and ${F.ItemStatus} eq 'Enabled'` +
     `&$orderby=${F.SortOrder} asc` +
     `&$top=500`;
 

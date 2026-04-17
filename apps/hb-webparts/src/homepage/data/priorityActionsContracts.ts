@@ -175,10 +175,17 @@ export interface PriorityActionsItemOperationPlan {
 export type PriorityActionsValidationIssueKind =
   | 'duplicate-active-config'
   | 'missing-band-key'
+  | 'missing-action-key'
+  | 'missing-overflow-label'
   | 'invalid-schedule-window'
+  | 'invalid-date-format'
   | 'duplicate-action-key'
   | 'missing-href'
   | 'invalid-icon-key'
+  | 'invalid-breakpoint-cap'
+  | 'inconsistent-breakpoint-caps'
+  | 'inconsistent-group-metadata'
+  | 'all-devices-hidden'
   | 'empty-title'
   | 'inconsistent-audience-mode';
 
@@ -192,6 +199,10 @@ export interface PriorityActionsValidationIssue {
 export interface PriorityActionsValidationResult {
   valid: boolean;
   issues: PriorityActionsValidationIssue[];
+}
+
+export interface PriorityActionsValidationContext {
+  activeConfigCountForBand?: number;
 }
 
 // ---------------------------------------------------------------------------

@@ -23,6 +23,20 @@ import {
   PRIORITY_ACTIONS_ITEMS_LIST_TITLE,
 } from './priorityActionsItemsListDescriptor.js';
 import { invalidatePriorityActionsCache } from './usePriorityActionsData.js';
+import {
+  isGovernedPriorityIconKey,
+  isNonIncreasingCaps,
+  isValidBreakpointCap,
+  normalizeActionKey,
+  normalizeAudienceKeys,
+  normalizeAudienceMode,
+  normalizeBreakpointCap,
+  normalizeGroupFields,
+  normalizeIconKey,
+  normalizeOptionalText,
+  normalizeRequiredText,
+  parseUtcDate,
+} from './priorityActionsGovernance.js';
 import type {
   PriorityActionsConfigDraft,
   PriorityActionsItemDraft,
@@ -50,29 +64,180 @@ function itemsListEndpoint(siteUrl: string): string {
   return `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(PRIORITY_ACTIONS_ITEMS_LIST_TITLE)}')/items`;
 }
 
+function escapeODataString(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+interface NormalizedConfigDraft extends PriorityActionsConfigDraft {}
+interface NormalizedItemDraft extends PriorityActionsItemDraft {}
+
+function normalizeConfigDraftForWrite(draft: PriorityActionsConfigDraft): NormalizedConfigDraft {
+  return {
+    ...draft,
+    title: normalizeRequiredText(draft.title),
+    bandKey: normalizeRequiredText(draft.bandKey),
+    headingText: normalizeOptionalText(draft.headingText),
+    overflowLabel: normalizeRequiredText(draft.overflowLabel),
+    adminNotes: normalizeOptionalText(draft.adminNotes),
+    maxVisibleDesktop: normalizeBreakpointCap(draft.maxVisibleDesktop, 5),
+    maxVisibleLaptop: normalizeBreakpointCap(draft.maxVisibleLaptop, 5),
+    maxVisibleTabletLandscape: normalizeBreakpointCap(draft.maxVisibleTabletLandscape, 4),
+    maxVisibleTabletPortrait: normalizeBreakpointCap(draft.maxVisibleTabletPortrait, 4),
+    maxVisiblePhone: normalizeBreakpointCap(draft.maxVisiblePhone, 4),
+  };
+}
+
+function validateConfigWriteCandidate(draft: PriorityActionsConfigDraft): string | undefined {
+  if (!draft.title.trim()) {
+    return 'Config name is required.';
+  }
+
+  if (!draft.bandKey.trim()) {
+    return 'Band key is required.';
+  }
+
+  if (!draft.overflowLabel.trim()) {
+    return 'Overflow label is required.';
+  }
+
+  const caps = [
+    draft.maxVisibleDesktop,
+    draft.maxVisibleLaptop,
+    draft.maxVisibleTabletLandscape,
+    draft.maxVisibleTabletPortrait,
+    draft.maxVisiblePhone,
+  ];
+
+  if (!caps.every(isValidBreakpointCap)) {
+    return 'All breakpoint caps must be integers from 1 to 20.';
+  }
+
+  if (!isNonIncreasingCaps(caps)) {
+    return 'Breakpoint caps must be non-increasing from desktop to phone.';
+  }
+
+  return undefined;
+}
+
+function normalizeItemDraftForWrite(draft: PriorityActionsItemDraft): { draft?: NormalizedItemDraft; error?: string } {
+  const title = normalizeRequiredText(draft.title);
+  const href = normalizeRequiredText(draft.href);
+  const actionKey = normalizeActionKey(draft.actionKey);
+
+  if (!title || !href) {
+    return { error: 'Title and URL are required.' };
+  }
+
+  if (!actionKey) {
+    return { error: 'Action key is required for stable identity.' };
+  }
+
+  if (!isGovernedPriorityIconKey(draft.iconKey)) {
+    return { error: 'Icon key must use a governed Priority Actions icon value.' };
+  }
+
+  const start = parseUtcDate(draft.startsAtUtc);
+  const end = parseUtcDate(draft.endsAtUtc);
+  if (draft.startsAtUtc.trim().length > 0 && !start) {
+    return { error: 'Start date must be a valid date/time.' };
+  }
+  if (draft.endsAtUtc.trim().length > 0 && !end) {
+    return { error: 'End date must be a valid date/time.' };
+  }
+  if (start && end && start >= end) {
+    return { error: 'Start date must be before end date.' };
+  }
+
+  const normalizedAudienceKeys = normalizeAudienceKeys(draft.audienceKeys);
+  const normalizedAudience = normalizeAudienceMode(draft.audienceMode, normalizedAudienceKeys);
+  if (normalizedAudience.mode !== 'all' && normalizedAudience.audienceKeys.length === 0) {
+    return { error: `Audience mode "${normalizedAudience.mode}" requires at least one audience key.` };
+  }
+
+  const group = normalizeGroupFields(draft.groupKey, draft.groupTitle);
+  if ((Boolean(draft.groupKey.trim()) || Boolean(draft.groupTitle.trim())) && (!group.groupKey || !group.groupTitle)) {
+    return { error: 'Group key and group title must be set together or both left blank.' };
+  }
+
+  if (!draft.visibleDesktop
+    && !draft.visibleLaptop
+    && !draft.visibleTabletLandscape
+    && !draft.visibleTabletPortrait
+    && !draft.visiblePhone) {
+    return { error: 'At least one device visibility flag must be enabled.' };
+  }
+
+  return {
+    draft: {
+      ...draft,
+      title,
+      href,
+      actionKey,
+      description: normalizeOptionalText(draft.description),
+      iconKey: normalizeIconKey(draft.iconKey),
+      badgeLabel: normalizeOptionalText(draft.badgeLabel),
+      groupKey: group.groupKey,
+      groupTitle: group.groupTitle,
+      sortOrder: Math.max(0, Math.round(draft.sortOrder)),
+      mobilePriority: Math.max(0, Math.round(draft.mobilePriority)),
+      audienceMode: normalizedAudience.mode,
+      audienceKeys: normalizedAudience.audienceKeys,
+      startsAtUtc: start ? start.toISOString() : '',
+      endsAtUtc: end ? end.toISOString() : '',
+    },
+  };
+}
+
+async function fetchActiveConfigRowIdsForBand(siteUrl: string, bandKey: string): Promise<number[]> {
+  const escapedBandKey = escapeODataString(bandKey);
+  const url =
+    `${configListEndpoint(siteUrl)}` +
+    `?$select=${CF.ID}` +
+    `&$filter=${CF.BandKey} eq '${escapedBandKey}' and ${CF.Enabled} eq 1 and ${CF.IsActive} eq 1` +
+    '&$top=25';
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/json;odata=nometadata',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Active-config check failed (${response.status}).`);
+  }
+
+  const body = (await response.json()) as { value?: Array<{ ID?: unknown }> };
+  const rows = Array.isArray(body.value) ? body.value : [];
+  return rows
+    .map((row) => (typeof row.ID === 'number' ? row.ID : -1))
+    .filter((id) => id >= 0);
+}
+
 /* ── Field mapping: config ───────────────────────────────────────── */
 
 export function mapConfigDraftToFields(draft: PriorityActionsConfigDraft): Record<string, unknown> {
+  const normalized = normalizeConfigDraftForWrite(draft);
+
   return {
-    [CF.Title]: draft.title.trim(),
-    [CF.BandKey]: draft.bandKey.trim(),
-    [CF.Enabled]: draft.enabled,
-    [CF.IsActive]: draft.isActive,
-    [CF.HeadingText]: optionalString(draft.headingText),
-    [CF.OverflowLabel]: draft.overflowLabel.trim() || 'More tools',
-    [CF.ShowHeading]: draft.showHeading,
-    [CF.StickyAfterHero]: draft.stickyAfterHero,
-    [CF.ShowBadges]: draft.showBadges,
-    [CF.DesktopLayoutMode]: draft.desktopLayoutMode,
-    [CF.TabletLayoutMode]: draft.tabletLayoutMode,
-    [CF.MobileLayoutMode]: draft.mobileLayoutMode,
-    [CF.MaxVisibleDesktop]: draft.maxVisibleDesktop,
-    [CF.MaxVisibleLaptop]: draft.maxVisibleLaptop,
-    [CF.MaxVisibleTabletLandscape]: draft.maxVisibleTabletLandscape,
-    [CF.MaxVisibleTabletPortrait]: draft.maxVisibleTabletPortrait,
-    [CF.MaxVisiblePhone]: draft.maxVisiblePhone,
-    [CF.OpenExternalInNewTabByDefault]: draft.openExternalInNewTabByDefault,
-    [CF.AdminNotes]: optionalString(draft.adminNotes),
+    [CF.Title]: normalized.title,
+    [CF.BandKey]: normalized.bandKey,
+    [CF.Enabled]: normalized.enabled,
+    [CF.IsActive]: normalized.isActive,
+    [CF.HeadingText]: optionalString(normalized.headingText),
+    [CF.OverflowLabel]: normalized.overflowLabel,
+    [CF.ShowHeading]: normalized.showHeading,
+    [CF.StickyAfterHero]: normalized.stickyAfterHero,
+    [CF.ShowBadges]: normalized.showBadges,
+    [CF.DesktopLayoutMode]: normalized.desktopLayoutMode,
+    [CF.TabletLayoutMode]: normalized.tabletLayoutMode,
+    [CF.MobileLayoutMode]: normalized.mobileLayoutMode,
+    [CF.MaxVisibleDesktop]: normalized.maxVisibleDesktop,
+    [CF.MaxVisibleLaptop]: normalized.maxVisibleLaptop,
+    [CF.MaxVisibleTabletLandscape]: normalized.maxVisibleTabletLandscape,
+    [CF.MaxVisibleTabletPortrait]: normalized.maxVisibleTabletPortrait,
+    [CF.MaxVisiblePhone]: normalized.maxVisiblePhone,
+    [CF.OpenExternalInNewTabByDefault]: normalized.openExternalInNewTabByDefault,
+    [CF.AdminNotes]: optionalString(normalized.adminNotes),
   };
 }
 
@@ -82,24 +247,31 @@ export function mapItemDraftToFields(
   draft: PriorityActionsItemDraft,
   bandKey: string,
 ): Record<string, unknown> {
+  const normalizedAudienceKeys = normalizeAudienceKeys(draft.audienceKeys);
+  const normalizedAudience = normalizeAudienceMode(draft.audienceMode, normalizedAudienceKeys);
+  const normalizedGroup = normalizeGroupFields(draft.groupKey, draft.groupTitle);
+  const normalizedIcon = normalizeIconKey(draft.iconKey);
+  const normalizedStartsAt = parseUtcDate(draft.startsAtUtc);
+  const normalizedEndsAt = parseUtcDate(draft.endsAtUtc);
+
   return {
-    [IF.Title]: draft.title.trim(),
+    [IF.Title]: normalizeRequiredText(draft.title),
     [IF.BandKey]: bandKey.trim(),
-    [IF.ActionKey]: draft.actionKey.trim(),
+    [IF.ActionKey]: normalizeActionKey(draft.actionKey),
     [IF.ItemStatus]: 'Enabled',
-    [IF.ActionDescription]: optionalString(draft.description),
-    [IF.Href]: draft.href.trim(),
-    [IF.IconKey]: optionalString(draft.iconKey),
-    [IF.BadgeLabel]: optionalString(draft.badgeLabel),
+    [IF.ActionDescription]: optionalString(normalizeOptionalText(draft.description)),
+    [IF.Href]: normalizeRequiredText(draft.href),
+    [IF.IconKey]: optionalString(normalizedIcon),
+    [IF.BadgeLabel]: optionalString(normalizeOptionalText(draft.badgeLabel)),
     [IF.BadgeVariant]: draft.badgeVariant,
     [IF.Priority]: draft.priority,
-    [IF.GroupKey]: optionalString(draft.groupKey),
-    [IF.GroupTitle]: optionalString(draft.groupTitle),
-    [IF.SortOrder]: draft.sortOrder,
+    [IF.GroupKey]: optionalString(normalizedGroup.groupKey),
+    [IF.GroupTitle]: optionalString(normalizedGroup.groupTitle),
+    [IF.SortOrder]: Math.max(0, Math.round(draft.sortOrder)),
     [IF.OverflowOnly]: draft.overflowOnly,
-    [IF.MobilePriority]: draft.mobilePriority,
-    [IF.AudienceMode]: draft.audienceMode,
-    [IF.AudienceKeys]: draft.audienceKeys.length > 0 ? draft.audienceKeys.join('\n') : null,
+    [IF.MobilePriority]: Math.max(0, Math.round(draft.mobilePriority)),
+    [IF.AudienceMode]: normalizedAudience.mode,
+    [IF.AudienceKeys]: normalizedAudience.audienceKeys.length > 0 ? normalizedAudience.audienceKeys.join('\n') : null,
     [IF.IsExternal]: draft.isExternal,
     [IF.OpenInNewTab]: draft.openInNewTab,
     [IF.VisibleDesktop]: draft.visibleDesktop,
@@ -107,8 +279,8 @@ export function mapItemDraftToFields(
     [IF.VisibleTabletLandscape]: draft.visibleTabletLandscape,
     [IF.VisibleTabletPortrait]: draft.visibleTabletPortrait,
     [IF.VisiblePhone]: draft.visiblePhone,
-    [IF.StartsAtUtc]: optionalString(draft.startsAtUtc),
-    [IF.EndsAtUtc]: optionalString(draft.endsAtUtc),
+    [IF.StartsAtUtc]: normalizedStartsAt ? normalizedStartsAt.toISOString() : null,
+    [IF.EndsAtUtc]: normalizedEndsAt ? normalizedEndsAt.toISOString() : null,
     [IF.AdminNotes]: null,
   };
 }
@@ -123,13 +295,25 @@ export async function savePriorityRailBandConfig(
   if (!siteUrl) {
     return { ok: false, error: 'No SharePoint site URL available for write.' };
   }
-  if (!draft.title.trim()) {
-    return { ok: false, error: 'Config name is required.' };
+
+  const normalized = normalizeConfigDraftForWrite(draft);
+  const validationError = validateConfigWriteCandidate(normalized);
+  if (validationError) {
+    return { ok: false, error: validationError };
   }
 
-  const fields = mapConfigDraftToFields(draft);
-
   try {
+    if (normalized.enabled && normalized.isActive) {
+      const activeConfigIds = await fetchActiveConfigRowIdsForBand(siteUrl, normalized.bandKey);
+      const conflicts = typeof configId === 'number'
+        ? activeConfigIds.filter((id) => id !== configId)
+        : activeConfigIds;
+      if (conflicts.length > 0) {
+        return { ok: false, error: 'Multiple active config rows exist for this band. Resolve duplicates before saving.' };
+      }
+    }
+
+    const fields = mapConfigDraftToFields(normalized);
     const digest = await fetchRequestDigest(siteUrl);
 
     if (typeof configId === 'number') {
@@ -185,11 +369,17 @@ export async function savePriorityRailItem(
   if (!siteUrl) {
     return { ok: false, error: 'No SharePoint site URL available for write.' };
   }
-  if (!draft.title.trim() || !draft.href.trim()) {
-    return { ok: false, error: 'Title and URL are required.' };
+
+  const normalizedResult = normalizeItemDraftForWrite(draft);
+  if (!normalizedResult.draft) {
+    return { ok: false, error: normalizedResult.error ?? 'Invalid action draft.' };
   }
 
-  const fields = mapItemDraftToFields(draft, bandKey);
+  if (!bandKey.trim()) {
+    return { ok: false, error: 'Band key is required.' };
+  }
+
+  const fields = mapItemDraftToFields(normalizedResult.draft, bandKey);
 
   try {
     const digest = await fetchRequestDigest(siteUrl);
@@ -276,7 +466,7 @@ export async function reorderPriorityRailItems(
           'X-HTTP-Method': 'MERGE',
           'If-Match': '*',
         },
-        body: JSON.stringify({ [IF.SortOrder]: sortOrder }),
+        body: JSON.stringify({ [IF.SortOrder]: Math.max(0, Math.round(sortOrder)) }),
       });
       if (!response.ok) {
         const detail = await response.text().catch(() => '');

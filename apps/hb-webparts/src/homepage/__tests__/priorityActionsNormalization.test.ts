@@ -107,9 +107,25 @@ describe('mapItemRow', () => {
     expect(item!.priority).toBe('primary');
   });
 
+  it('drops invalid icon keys to empty string', () => {
+    const item = mapItemRow(makeRawItem({ IconKey: 'invalid-icon' }));
+    expect(item!.iconKey).toBe('');
+  });
+
   it('parses newline-delimited AudienceKeys', () => {
     const item = mapItemRow(makeRawItem({ AudienceKeys: 'ops\nfield\nadmin' }));
     expect(item!.audienceKeys).toEqual(['ops', 'field', 'admin']);
+  });
+
+  it('normalizes audience keys by trim + dedupe', () => {
+    const item = mapItemRow(makeRawItem({ AudienceKeys: 'ops\n OPS \n field ' }));
+    expect(item!.audienceKeys).toEqual(['ops', 'field']);
+  });
+
+  it('resets partial group metadata to empty pair', () => {
+    const item = mapItemRow(makeRawItem({ GroupKey: 'ops', GroupTitle: '' }));
+    expect(item!.groupKey).toBe('');
+    expect(item!.groupTitle).toBe('');
   });
 
   it('returns null for empty date fields', () => {
@@ -136,6 +152,14 @@ describe('normalizeItemRows', () => {
     expect(items).toHaveLength(2);
     expect(items[0].actionKey).toBe('a');
     expect(items[1].actionKey).toBe('b');
+  });
+
+  it('deduplicates by ActionKey case-insensitively', () => {
+    const items = normalizeItemRows([
+      makeRawItem({ ActionKey: 'A', SortOrder: 1 }),
+      makeRawItem({ ActionKey: 'a', SortOrder: 2 }),
+    ]);
+    expect(items).toHaveLength(1);
   });
 
   it('sorts by SortOrder then ActionKey', () => {

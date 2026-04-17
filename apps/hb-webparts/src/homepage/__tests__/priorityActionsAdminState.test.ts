@@ -229,6 +229,34 @@ describe('validateConfig', () => {
     const issues = validateConfig(draft);
     expect(issues.some((i) => i.kind === 'empty-title')).toBe(true);
   });
+
+  it('flags missing overflow label', () => {
+    const draft = createConfigDraftFromResolved(CONFIG);
+    draft.overflowLabel = '   ';
+    const issues = validateConfig(draft);
+    expect(issues.some((i) => i.kind === 'missing-overflow-label')).toBe(true);
+  });
+
+  it('flags duplicate active config context', () => {
+    const draft = createConfigDraftFromResolved(CONFIG);
+    const issues = validateConfig(draft, { activeConfigCountForBand: 2 });
+    expect(issues.some((i) => i.kind === 'duplicate-active-config')).toBe(true);
+  });
+
+  it('flags invalid breakpoint caps', () => {
+    const draft = createConfigDraftFromResolved(CONFIG);
+    draft.maxVisibleDesktop = 0;
+    const issues = validateConfig(draft);
+    expect(issues.some((i) => i.kind === 'invalid-breakpoint-cap')).toBe(true);
+  });
+
+  it('flags inconsistent breakpoint ordering', () => {
+    const draft = createConfigDraftFromResolved(CONFIG);
+    draft.maxVisibleDesktop = 3;
+    draft.maxVisibleLaptop = 4;
+    const issues = validateConfig(draft);
+    expect(issues.some((i) => i.kind === 'inconsistent-breakpoint-caps')).toBe(true);
+  });
 });
 
 describe('validateItem', () => {
@@ -249,11 +277,23 @@ describe('validateItem', () => {
     expect(validateItem(draft).some((i) => i.kind === 'missing-href')).toBe(true);
   });
 
+  it('flags missing action key', () => {
+    const draft = createItemDraftFromNormalized(ITEM);
+    draft.actionKey = '';
+    expect(validateItem(draft).some((i) => i.kind === 'missing-action-key')).toBe(true);
+  });
+
   it('flags invalid schedule window (start >= end)', () => {
     const draft = createItemDraftFromNormalized(ITEM);
     draft.startsAtUtc = '2026-07-01T00:00:00Z';
     draft.endsAtUtc = '2026-06-01T00:00:00Z';
     expect(validateItem(draft).some((i) => i.kind === 'invalid-schedule-window')).toBe(true);
+  });
+
+  it('flags invalid schedule format', () => {
+    const draft = createItemDraftFromNormalized(ITEM);
+    draft.startsAtUtc = 'not-a-date';
+    expect(validateItem(draft).some((i) => i.kind === 'invalid-date-format')).toBe(true);
   });
 
   it('flags inconsistent audience mode without keys', () => {
@@ -268,6 +308,36 @@ describe('validateItem', () => {
     draft.audienceMode = 'all';
     draft.audienceKeys = [];
     expect(validateItem(draft).some((i) => i.kind === 'inconsistent-audience-mode')).toBe(false);
+  });
+
+  it('flags audience mode "all" with keys', () => {
+    const draft = createItemDraftFromNormalized(ITEM);
+    draft.audienceMode = 'all';
+    draft.audienceKeys = ['ops'];
+    expect(validateItem(draft).some((i) => i.kind === 'inconsistent-audience-mode')).toBe(true);
+  });
+
+  it('flags invalid icon keys', () => {
+    const draft = createItemDraftFromNormalized(ITEM);
+    draft.iconKey = 'not-governed';
+    expect(validateItem(draft).some((i) => i.kind === 'invalid-icon-key')).toBe(true);
+  });
+
+  it('flags inconsistent group metadata', () => {
+    const draft = createItemDraftFromNormalized(ITEM);
+    draft.groupKey = 'ops';
+    draft.groupTitle = '';
+    expect(validateItem(draft).some((i) => i.kind === 'inconsistent-group-metadata')).toBe(true);
+  });
+
+  it('flags all devices hidden', () => {
+    const draft = createItemDraftFromNormalized(ITEM);
+    draft.visibleDesktop = false;
+    draft.visibleLaptop = false;
+    draft.visibleTabletLandscape = false;
+    draft.visibleTabletPortrait = false;
+    draft.visiblePhone = false;
+    expect(validateItem(draft).some((i) => i.kind === 'all-devices-hidden')).toBe(true);
   });
 });
 
@@ -284,6 +354,13 @@ describe('validateItemBatch', () => {
     const b = createItemDraftFromNormalized({ ...ITEM, actionKey: 'other' });
     const issues = validateItemBatch([a, b]);
     expect(issues.some((i) => i.kind === 'duplicate-action-key')).toBe(false);
+  });
+
+  it('detects duplicate action keys case-insensitively', () => {
+    const a = createItemDraftFromNormalized({ ...ITEM, actionKey: 'Case-Key' });
+    const b = createItemDraftFromNormalized({ ...ITEM, actionKey: 'case-key' });
+    const issues = validateItemBatch([a, b]);
+    expect(issues.some((i) => i.kind === 'duplicate-action-key')).toBe(true);
   });
 });
 
@@ -334,7 +411,7 @@ describe('mapItemDraftToFields', () => {
   });
 
   it('serializes audience keys as newline-delimited', () => {
-    const draft = createItemDraftFromNormalized({ ...ITEM, audienceKeys: ['ops', 'field'] });
+    const draft = createItemDraftFromNormalized({ ...ITEM, audienceMode: 'include-only', audienceKeys: ['ops', 'field'] });
     const fields = mapItemDraftToFields(draft, 'test');
     expect(fields['AudienceKeys']).toBe('ops\nfield');
   });
