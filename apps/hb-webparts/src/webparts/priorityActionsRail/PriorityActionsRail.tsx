@@ -25,6 +25,11 @@ import {
 } from '@hbc/ui-kit/homepage';
 import { usePriorityActionsData, invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import { resolveByBreakpoint, filterByDevice, type DeviceClass } from '../../homepage/data/priorityActionsNormalization.js';
+import {
+  mapPriorityActionsDeviceClassToShellState,
+  type PriorityActionsDeviceClass,
+} from '../../homepage/entryStack/entryStackOrchestration.js';
+import type { ShellEntryStateId } from '../hbHomepage/shell/shellTypes.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import type { PriorityActionsItemNormalized, PriorityActionsConfigResolved, BadgeVariant as SchemaBadgeVariant } from '../../homepage/data/priorityActionsContracts.js';
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
@@ -107,6 +112,18 @@ function resolveDeviceClass(): DeviceClass {
   if (w >= 768) return 'tabletLandscape';
   if (w >= 600) return 'tabletPortrait';
   return 'phone';
+}
+
+// Governance alignment (Prompt-04): the rail's author-facing DeviceClass is
+// anchored to the shell entry-state vocabulary. Width thresholds above are
+// intentionally author-budget scoped; shell-layout thresholds live in
+// `shell/breakpointPolicy.ts`. This helper is the governance seam that lets
+// downstream inspectors (harness, control-panel preview) name the rail's
+// active state in shell vocabulary.
+export function getShellEntryStateForRailDevice(
+  device: DeviceClass,
+): ShellEntryStateId {
+  return mapPriorityActionsDeviceClassToShellState(device as PriorityActionsDeviceClass);
 }
 
 function mapLayoutMode(config: PriorityActionsConfigResolved, device: DeviceClass): PriorityRailLayoutMode {

@@ -165,6 +165,80 @@ function deviceClassApproxWidth(dc: EntryStackDeviceClass): number {
   }
 }
 
+// -----------------------------------------------------------------------------
+// PriorityActionsRail device-class alignment
+// -----------------------------------------------------------------------------
+// The rail carries its own coarse DeviceClass vocabulary
+// ('desktop' | 'laptop' | 'tabletLandscape' | 'tabletPortrait' | 'phone')
+// in `homepage/data/priorityActionsNormalization.ts`. That vocabulary is
+// author-facing (visibility flags + maxVisible<Device> counts on each item)
+// and must remain stable for content authoring. To close the Prompt-04
+// gap — no independent breakpoint vocabulary on any entry surface — the
+// rail's DeviceClass is explicitly aligned to the shell entry-state id
+// set here. Width thresholds on either side are intentionally allowed to
+// differ (author budgets vs shell layout); the shared vocabulary is the
+// governance anchor.
+//
+// Type duplicated (not imported) to avoid a feature→shell-adjacent cycle.
+// A test in `shell/__tests__/entryStackPolicy.test.ts` guarantees this
+// string union matches the rail's exported `DeviceClass`.
+// -----------------------------------------------------------------------------
+
+export type PriorityActionsDeviceClass =
+  | 'desktop'
+  | 'laptop'
+  | 'tabletLandscape'
+  | 'tabletPortrait'
+  | 'phone';
+
+/**
+ * Governance alignment: rail `DeviceClass` → shell entry-state id.
+ * When multiple shell states collapse onto one device class, the
+ * inverse map picks the closest equivalent (see
+ * {@link SHELL_ENTRY_STATE_TO_PRIORITY_ACTIONS_DEVICE_CLASS}).
+ */
+export const PRIORITY_ACTIONS_DEVICE_CLASS_TO_SHELL_STATE: Readonly<
+  Record<PriorityActionsDeviceClass, ShellEntryStateId>
+> = Object.freeze({
+  desktop: 'ultrawide-desktop',
+  laptop: 'standard-laptop',
+  tabletLandscape: 'tablet-landscape',
+  tabletPortrait: 'tablet-portrait',
+  phone: 'phone-portrait',
+});
+
+/**
+ * Governance alignment: shell entry-state id → rail `DeviceClass`.
+ * Several shell states collapse onto the same rail class because the
+ * rail does not distinguish portrait-large vs portrait, nor ultrawide
+ * vs landscape beyond 'desktop'/'laptop'. Phone-landscape is treated
+ * as `phone` at the author-facing layer; shell-owned short-height
+ * posture is still governed by `entryStackPolicy.shortHeightPosture`.
+ */
+export const SHELL_ENTRY_STATE_TO_PRIORITY_ACTIONS_DEVICE_CLASS: Readonly<
+  Record<ShellEntryStateId, PriorityActionsDeviceClass>
+> = Object.freeze({
+  'ultrawide-desktop': 'desktop',
+  'standard-laptop': 'laptop',
+  'tablet-landscape': 'tabletLandscape',
+  'tablet-portrait-large': 'tabletPortrait',
+  'tablet-portrait': 'tabletPortrait',
+  'phone-portrait': 'phone',
+  'phone-landscape': 'phone',
+});
+
+export function mapPriorityActionsDeviceClassToShellState(
+  dc: PriorityActionsDeviceClass,
+): ShellEntryStateId {
+  return PRIORITY_ACTIONS_DEVICE_CLASS_TO_SHELL_STATE[dc];
+}
+
+export function mapShellEntryStateToPriorityActionsDeviceClass(
+  id: ShellEntryStateId,
+): PriorityActionsDeviceClass {
+  return SHELL_ENTRY_STATE_TO_PRIORITY_ACTIONS_DEVICE_CLASS[id];
+}
+
 // Re-export sequence so consumers can import everything from a single seam.
 export { ENTRY_STACK_SEQUENCE };
 export type { EntryStackBudget, EntryStackDeviceClass, EntryStackPosition };

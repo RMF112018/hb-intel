@@ -34,6 +34,16 @@
  *   brand tokens via CSS custom properties exposed on the root section,
  *   sourced from @hbc/ui-kit/homepage.
  *
+ * Entry-stack governance alignment (Prompt-04):
+ *   Hero height, hero→actions spacing, and short-height constrained
+ *   behavior are governed by the shell-owned entry-stack policy at
+ *   `src/webparts/hbHomepage/shell/entryStackPolicy.ts` (mirrored by
+ *   `src/homepage/entryStack/entryStackContract.ts`). This component does
+ *   not maintain an independent breakpoint vocabulary; its rendered
+ *   height budgets must stay within `heroHeightBudgetPx` for the active
+ *   shell entry state. The hero remains a separate webpart by design
+ *   (see `entryStackOrchestration.ENTRY_STACK_SURFACES`).
+ *
  * Accessibility:
  *   - WCAG 2.1 AA contrast verified against the darkest fallback base
  *   - Fluid typography uses rem + clamp() for zoom resilience
