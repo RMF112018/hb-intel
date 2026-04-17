@@ -41,8 +41,8 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     displayName: 'Project Portfolio Spotlight',
     renderKey: 'ProjectPortfolioSpotlightZone',
     allowedSlotRoles: ['primary', 'secondary'],
-    prominenceCeiling: 'supporting',
-    firstLaneEligible: false,
+    prominenceCeiling: 'anchor',
+    firstLaneEligible: true,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,

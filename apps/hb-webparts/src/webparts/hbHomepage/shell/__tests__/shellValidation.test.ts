@@ -37,10 +37,10 @@ describe('parseShellLayout', () => {
 
   it('normalizes band override with unknown occupant', () => {
     const result = parseShellLayout({
-      presetId: 'default-v1',
+      presetId: 'default-v2',
       bandOverrides: [
         {
-          bandId: 'band-communications-newsroom',
+          bandId: 'band-operational-spotlight',
           slots: [{ slotId: 'slot-company-pulse', occupantId: 'fake-occupant' }],
         },
       ],

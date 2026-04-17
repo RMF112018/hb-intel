@@ -41,7 +41,7 @@ export type PersistedShellState = z.infer<typeof PersistedShellStateSchema>;
 export function createDefaultPersistedState(): PersistedShellState {
   return {
     version: 1,
-    presetId: 'default-v1',
+    presetId: 'default-v2',
   };
 }
 

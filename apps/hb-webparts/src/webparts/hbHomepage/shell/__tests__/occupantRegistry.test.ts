@@ -36,9 +36,9 @@ describe('capability metadata', () => {
     expect(kudos.prominenceCeiling).toBe('contextual');
   });
 
-  it('project-portfolio-spotlight has supporting prominence ceiling', () => {
+  it('project-portfolio-spotlight has anchor prominence ceiling', () => {
     const pps = getOccupant('project-portfolio-spotlight')!;
-    expect(pps.prominenceCeiling).toBe('supporting');
+    expect(pps.prominenceCeiling).toBe('anchor');
   });
 
   it('people-culture-public is not first-lane eligible', () => {
@@ -58,6 +58,7 @@ describe('first-lane eligibility', () => {
     const ids = eligible.map((o) => o.id);
     expect(ids).toContain('company-pulse');
     expect(ids).toContain('leadership-message');
+    expect(ids).toContain('project-portfolio-spotlight');
     expect(ids).not.toContain('hb-kudos');
     expect(ids).not.toContain('people-culture-public');
   });

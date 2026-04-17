@@ -12,7 +12,7 @@ describe('createDefaultPersistedState', () => {
   it('produces a version-1 state with default preset', () => {
     const state = createDefaultPersistedState();
     expect(state.version).toBe(1);
-    expect(state.presetId).toBe('default-v1');
+    expect(state.presetId).toBe('default-v2');
   });
 });
 
@@ -44,9 +44,9 @@ describe('hydratePersistedState', () => {
   it('hydrates valid persisted state', () => {
     const result = hydratePersistedState({
       version: 1,
-      presetId: 'default-v1',
+      presetId: 'default-v2',
     });
-    expect(result.preset.id).toBe('default-v1');
+    expect(result.preset.id).toBe('default-v2');
     expect(result.diagnostics.filter((d) => d.severity === 'error')).toHaveLength(0);
   });
 });
