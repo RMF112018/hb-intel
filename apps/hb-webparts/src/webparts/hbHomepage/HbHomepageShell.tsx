@@ -14,6 +14,11 @@ import {
   toOccupantContentStateDataAttributes,
   useOccupantContentStateReports,
 } from './shell/occupantContentState.js';
+import {
+  resolveFirstLaneBand,
+  toFirstLaneDecisionDataAttributes,
+  type FirstLaneDecision,
+} from './shell/firstLaneResolver.js';
 import type { OccupantId, ShellBand as ShellBandType, ShellLayoutState } from './shell/shellTypes.js';
 import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
 import { ShellFallbackSurface } from './ShellFallbackSurface.js';
@@ -125,9 +130,10 @@ interface ShellBandRendererProps {
   layout: BandLayoutResult;
   isEntryBand: boolean;
   zoneProps: HbHomepageZoneProps;
+  firstLaneDecision?: FirstLaneDecision;
 }
 
-function ShellBandRenderer({ band, layout, isEntryBand, zoneProps }: ShellBandRendererProps): React.JSX.Element | null {
+function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDecision }: ShellBandRendererProps): React.JSX.Element | null {
   if (layout.slots.length === 0) return null;
 
   const bandClassName = [
@@ -137,6 +143,9 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps }: ShellBandRe
   ]
     .filter(Boolean)
     .join(' ');
+
+  const firstLaneAttrs =
+    isEntryBand && firstLaneDecision ? toFirstLaneDecisionDataAttributes(firstLaneDecision) : {};
 
   return (
     <div
@@ -149,6 +158,7 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps }: ShellBandRe
       data-shell-band-pairing-reason={layout.pairingDecision.reason}
       role="region"
       aria-label={formatBandLabel(band.semanticRole)}
+      {...firstLaneAttrs}
     >
       {layout.slots.map((resolved) => (
         <ShellSlotRenderer key={resolved.slot.id} resolved={resolved} zoneProps={zoneProps} />
@@ -236,52 +246,89 @@ export function HbHomepageShell({
     profilePhotoResolver,
   };
 
+  return (
+    <OccupantContentStateProvider>
+      <ShellBody
+        shellRef={shellRef}
+        container={container}
+        layoutState={layoutState}
+        zoneProps={zoneProps}
+      />
+    </OccupantContentStateProvider>
+  );
+}
+
+interface ShellBodyProps {
+  shellRef: React.RefObject<HTMLDivElement>;
+  container: ReturnType<typeof useShellContainer>;
+  layoutState: ShellLayoutState;
+  zoneProps: HbHomepageZoneProps;
+}
+
+function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyProps): React.JSX.Element {
+  const reports = useOccupantContentStateReports();
+
+  const firstLaneResolution = React.useMemo(
+    () =>
+      resolveFirstLaneBand({
+        band: layoutState.preset.bands[0],
+        reports,
+        entryState: container.entryState,
+      }),
+    [layoutState.preset.bands, reports, container.entryState],
+  );
+
+  const resolvedBands = React.useMemo(
+    () => [firstLaneResolution.band, ...layoutState.preset.bands.slice(1)],
+    [firstLaneResolution.band, layoutState.preset.bands],
+  );
+
   const bandLayouts = React.useMemo(
     () =>
-      layoutState.preset.bands.map((band, index) =>
+      resolvedBands.map((band, index) =>
         resolveBandLayout(band, container.entryState, index === 0, container.width),
       ),
-    [layoutState.preset.bands, container.entryState, container.width],
+    [resolvedBands, container.entryState, container.width],
   );
 
   const conformance = React.useMemo(
     () =>
       resolveShellConformance({
-        bands: layoutState.preset.bands,
+        bands: resolvedBands,
         bandLayouts,
         entryState: container.entryState,
         shortHeightConstrained: container.shortHeightConstrained,
       }),
-    [layoutState.preset.bands, bandLayouts, container.entryState, container.shortHeightConstrained],
+    [resolvedBands, bandLayouts, container.entryState, container.shortHeightConstrained],
   );
   const conformanceAttrs = toShellConformanceDataAttributes(conformance);
 
   return (
-    <OccupantContentStateProvider>
-      <div
-        ref={shellRef}
-        className={styles.shell}
-        data-shell-preset={layoutState.preset.id}
-        data-shell-post-hero="true"
-        data-shell-entry-state={container.entryState.id}
-        data-shell-entry-state-reason={container.entryStateReason}
-        data-shell-width={Math.round(container.width)}
-        data-shell-height={Math.round(container.height)}
-        data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
-        data-shell-diagnostics-count={layoutState.diagnostics.length}
-        data-shell-normalized-from-default={layoutState.normalizedFromDefault}
-        {...conformanceAttrs}
-      >
-        {layoutState.preset.bands.map((band, index) => (
-          <ShellBandRenderer
-            key={band.id}
-            band={band}
-            layout={bandLayouts[index]}
-            isEntryBand={index === 0}
-            zoneProps={zoneProps}
-          />
-        ))}
-      </div>
-    </OccupantContentStateProvider>
+    <div
+      ref={shellRef}
+      className={styles.shell}
+      data-shell-preset={layoutState.preset.id}
+      data-shell-post-hero="true"
+      data-shell-entry-state={container.entryState.id}
+      data-shell-entry-state-reason={container.entryStateReason}
+      data-shell-width={Math.round(container.width)}
+      data-shell-height={Math.round(container.height)}
+      data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
+      data-shell-diagnostics-count={layoutState.diagnostics.length}
+      data-shell-normalized-from-default={layoutState.normalizedFromDefault}
+      data-shell-first-lane-action={firstLaneResolution.decision.action}
+      {...conformanceAttrs}
+    >
+      {resolvedBands.map((band, index) => (
+        <ShellBandRenderer
+          key={band.id}
+          band={band}
+          layout={bandLayouts[index]}
+          isEntryBand={index === 0}
+          zoneProps={zoneProps}
+          firstLaneDecision={index === 0 ? firstLaneResolution.decision : undefined}
+        />
+      ))}
+    </div>
   );
 }

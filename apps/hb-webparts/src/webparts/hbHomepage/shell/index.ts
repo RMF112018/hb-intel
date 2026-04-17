@@ -154,6 +154,18 @@ export type {
 } from './shellConformance.js';
 
 export {
+  resolveFirstLaneBand,
+  toFirstLaneDecisionDataAttributes,
+} from './firstLaneResolver.js';
+export type {
+  FirstLaneAction,
+  FirstLaneDecision,
+  FirstLaneResolverInput,
+  FirstLaneResolverResult,
+  FirstLaneSlotDecision,
+} from './firstLaneResolver.js';
+
+export {
   OccupantContentStateProvider,
   toOccupantContentStateDataAttributes,
   useOccupantContentStateReport,
