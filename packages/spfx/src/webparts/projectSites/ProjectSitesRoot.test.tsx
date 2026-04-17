@@ -7,11 +7,13 @@ import type {
   ProjectSitesScope,
 } from './types.js';
 import { normalizeProjectSitesRuntimeConfig, scopeFromYear, SCOPE_ALL } from './types.js';
+import type { ProjectSitesContainerState } from './projectSitesLayoutMode.js';
 
 // ── Mock hooks ────────────────────────────────────────────────────────────
 
 const mockUseAvailableYears = vi.fn<() => IAvailableYearsResult>();
 const mockUseProjectSites = vi.fn<(scope: ProjectSitesScope | null) => IProjectSitesResult | null>();
+const mockUseProjectSitesContainerState = vi.fn<() => ProjectSitesContainerState>();
 
 vi.mock('./hooks/useAvailableYears.js', () => ({
   useAvailableYears: () => mockUseAvailableYears(),
@@ -19,6 +21,10 @@ vi.mock('./hooks/useAvailableYears.js', () => ({
 
 vi.mock('./hooks/useProjectSites.js', () => ({
   useProjectSites: (scope: ProjectSitesScope | null) => mockUseProjectSites(scope),
+}));
+
+vi.mock('./projectSitesLayoutMode.js', () => ({
+  useProjectSitesContainerState: () => mockUseProjectSitesContainerState(),
 }));
 
 import { ProjectSitesRoot } from './ProjectSitesRoot.js';
@@ -71,6 +77,13 @@ describe('ProjectSitesRoot', () => {
   beforeEach(() => {
     mockUseAvailableYears.mockReset();
     mockUseProjectSites.mockReset();
+    mockUseProjectSitesContainerState.mockReset();
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 1280,
+      height: 900,
+      mode: 'wide',
+      isShortHeight: false,
+    });
   });
 
   it('renders shimmer loading state when years are loading', () => {
@@ -99,7 +112,7 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText('No Project Sites')).toBeInTheDocument();
   });
 
-  it('renders scope segmented control with All Projects + year options', () => {
+  it('renders scope segmented control with All Projects + year options in wide mode', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
       status: 'success',
@@ -109,9 +122,57 @@ describe('ProjectSitesRoot', () => {
     });
 
     render(<ProjectSitesRoot />);
+    expect(screen.getByRole('radiogroup', { name: 'Scope' })).toBeInTheDocument();
     expect(screen.getByText('All Projects')).toBeInTheDocument();
     expect(screen.getByText('2026')).toBeInTheDocument();
     expect(screen.getByText('2025')).toBeInTheDocument();
+  });
+
+  it('renders compact scope selector instead of segmented control in compact mode', () => {
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 700,
+      height: 900,
+      mode: 'compact',
+      isShortHeight: false,
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Test', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+
+    expect(screen.queryByRole('radiogroup', { name: 'Scope' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Scope (compact)')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/search by name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('Sort project sites')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
+  });
+
+  it('marks short-height state and uses compact controls under width pressure override', () => {
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 1320,
+      height: 540,
+      mode: 'compact',
+      isShortHeight: true,
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Short Height', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    expect(screen.getByLabelText('Scope (compact)')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Project Sites' })).toHaveAttribute(
+      'data-project-sites-short-height',
+      'true',
+    );
   });
 
   it('initializes scope from valid yearOverride and shows source-of-truth messaging', async () => {

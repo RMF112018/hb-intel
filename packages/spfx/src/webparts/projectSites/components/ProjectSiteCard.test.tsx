@@ -176,4 +176,11 @@ describe('ProjectSiteCard', () => {
       'Open Riverside Medical Center project site',
     );
   });
+
+  it('supports compact layout mode while preserving launch action visibility', () => {
+    render(<ProjectSiteCard entry={createEntry()} layoutMode="compact" />);
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('data-project-sites-card-layout', 'compact');
+    expect(screen.getByText('Open Site')).toBeInTheDocument();
+  });
 });

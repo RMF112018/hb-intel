@@ -51,6 +51,7 @@ import {
 } from '@hbc/ui-kit/theme';
 import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
+import type { ProjectSitesLayoutMode } from '../projectSitesLayoutMode.js';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
@@ -201,6 +202,11 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     minHeight: '24px',
   },
+  footerCompact: {
+    alignItems: 'flex-start',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
   department: {
     fontSize: bodySmall.fontSize,
     fontWeight: labelType.fontWeight,
@@ -212,6 +218,9 @@ const useStyles = makeStyles({
     whiteSpace: 'nowrap',
     flexShrink: 1,
     minWidth: 0,
+  },
+  departmentCompact: {
+    whiteSpace: 'normal',
   },
   // Premium productive action chip for "Open Site": brand-tinted
   // background, tighter horizontal padding, disciplined hover treatment.
@@ -239,6 +248,9 @@ const useStyles = makeStyles({
     backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
     color: HBC_SURFACE_LIGHT['text-muted'],
   },
+  openSiteActionCompact: {
+    marginTop: `${HBC_SPACE_XS}px`,
+  },
   provisioningLabel: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -248,6 +260,9 @@ const useStyles = makeStyles({
     fontStyle: 'italic',
     color: HBC_ACCENT_ORANGE,
     flexShrink: 0,
+  },
+  provisioningLabelCompact: {
+    marginTop: `${HBC_SPACE_XS}px`,
   },
   statusMessage: {
     fontSize: bodySmall.fontSize,
@@ -314,11 +329,13 @@ function resolveVisualState(entry: IProjectSiteEntry): CardVisualState {
 
 export interface ProjectSiteCardProps {
   entry: IProjectSiteEntry;
+  layoutMode?: ProjectSitesLayoutMode;
 }
 
-export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
+export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry, layoutMode = 'wide' }) => {
   const classes = useStyles();
   const cardState = resolveVisualState(entry);
+  const isCompactLayout = layoutMode === 'compact';
 
   const metadataItems = useMemo<DescriptionListItem[]>(() => {
     const items: DescriptionListItem[] = [];
@@ -349,20 +366,25 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
 
   const openSiteActionClass = mergeClasses(
     classes.openSiteAction,
+    isCompactLayout && classes.openSiteActionCompact,
     cardState === 'archived' && classes.openSiteActionArchived,
   );
 
   const footerContent = (
-    <div className={classes.footer}>
-      <span className={classes.department}>{deptLabel}</span>
+    <div className={mergeClasses(classes.footer, isCompactLayout && classes.footerCompact)}>
+      <span className={mergeClasses(classes.department, isCompactLayout && classes.departmentCompact)}>
+        {deptLabel}
+      </span>
       {entry.launchStatus.isLaunchable ? (
         <span className={openSiteActionClass} aria-hidden="true">
           {entry.launchStatus.state === 'archived' ? 'View Archived Site' : 'Open Site'} <ExternalLink size="sm" />
         </span>
       ) : entry.launchStatus.state === 'attention-needed' ? (
-        <span className={classes.provisioningLabel}>Attention Needed</span>
+        <span className={mergeClasses(classes.provisioningLabel, isCompactLayout && classes.provisioningLabelCompact)}>
+          Attention Needed
+        </span>
       ) : (
-        <span className={classes.provisioningLabel}>
+        <span className={mergeClasses(classes.provisioningLabel, isCompactLayout && classes.provisioningLabelCompact)}>
           <span className={classes.provisioningDot} aria-hidden="true" />
           Provisioning
         </span>
@@ -409,6 +431,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
         target="_blank"
         rel="noopener noreferrer"
         className={wrapperClass}
+        data-project-sites-card-layout={layoutMode}
         aria-label={`Open ${entry.projectName} project site${entry.projectNumber ? ` (${entry.projectNumber})` : ''}`}
       >
         <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
@@ -422,6 +445,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry }) => {
     <div
       className={wrapperClass}
       aria-disabled="true"
+      data-project-sites-card-layout={layoutMode}
       aria-label={`${entry.projectName} — ${entry.launchStatus.userMessage}`}
     >
       <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>

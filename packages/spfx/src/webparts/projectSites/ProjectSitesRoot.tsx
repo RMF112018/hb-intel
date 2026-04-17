@@ -23,7 +23,7 @@
  *     scope, native styled sort select, ghost filter toggle, active
  *     filter chips, text reset.
  */
-import React, { useState, useEffect, useMemo, useCallback, type FC } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, type FC } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import {
   HbcEmptyState,
@@ -80,6 +80,10 @@ import {
   humanizeUpn,
 } from './projectSitesFilter.js';
 import { ProjectSiteCard } from './components/ProjectSiteCard.js';
+import {
+  useProjectSitesContainerState,
+  type ProjectSitesLayoutMode,
+} from './projectSitesLayoutMode.js';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
@@ -202,16 +206,37 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     marginBottom: `${HBC_SPACE_MD}px`,
   },
+  controlBarMedium: {
+    alignItems: 'stretch',
+  },
+  controlBarCompact: {
+    alignItems: 'stretch',
+    flexDirection: 'column',
+  },
   searchSlot: {
     flex: '1 1 260px',
     minWidth: '220px',
     maxWidth: '480px',
+  },
+  searchSlotStacked: {
+    flexBasis: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
   },
   controlCluster: {
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: `${HBC_SPACE_SM}px`,
+  },
+  controlClusterStacked: {
+    flex: '1 1 100%',
+    minWidth: 0,
+  },
+  controlClusterCompact: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    gap: `${HBC_SPACE_XS}px`,
   },
   controlLabel: {
     fontSize: labelType.fontSize,
@@ -224,6 +249,31 @@ const useStyles = makeStyles({
   sortSelect: {
     height: '36px',
     minWidth: '200px',
+    fontSize: '0.875rem',
+    fontFamily: 'inherit',
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    backgroundColor: HBC_SURFACE_LIGHT['surface-0'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['border-default']),
+    borderRadius: HBC_RADIUS_MD,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    cursor: 'pointer',
+    transitionProperty: 'border-color',
+    transitionDuration: TRANSITION_FAST,
+    ':focus-visible': {
+      ...shorthands.borderColor(HBC_PRIMARY_BLUE),
+      outlineWidth: '2px',
+      outlineStyle: 'solid',
+      outlineColor: HBC_PRIMARY_BLUE,
+      outlineOffset: '1px',
+    },
+  },
+  compactScopeSelect: {
+    height: '36px',
+    width: '100%',
+    minWidth: 0,
     fontSize: '0.875rem',
     fontFamily: 'inherit',
     color: HBC_SURFACE_LIGHT['text-primary'],
@@ -470,6 +520,15 @@ const useStyles = makeStyles({
       animationDuration: '0.01ms',
     },
   },
+  gridModeWide: {
+    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+  },
+  gridModeMedium: {
+    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+  },
+  gridModeCompact: {
+    gridTemplateColumns: '1fr',
+  },
   gridSparse: {
     [hbcMediaQuery('tablet')]: {
       gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 380px))',
@@ -666,6 +725,12 @@ function describeScopeSource(source: ProjectSitesScopeSource): string {
   return 'Scope source: user-selected';
 }
 
+function describeLayoutMode(mode: ProjectSitesLayoutMode): string {
+  if (mode === 'compact') return 'compact';
+  if (mode === 'medium') return 'medium';
+  return 'wide';
+}
+
 function buildContextSummary(resolvedScope: IResolvedProjectSitesScope | null): string | null {
   if (!resolvedScope) return null;
   if (resolvedScope.source === 'author-override') {
@@ -691,6 +756,11 @@ interface ProjectSitesRootProps {
 
 export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = null }) => {
   const classes = useStyles();
+  const rootRef = useRef<HTMLElement | null>(null);
+  const containerState = useProjectSitesContainerState(rootRef);
+  const layoutMode = containerState.mode;
+  const isCompactMode = layoutMode === 'compact';
+  const isMediumMode = layoutMode === 'medium';
   const yearsResult = useAvailableYears();
 
   // Control-bar state
@@ -834,8 +904,22 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     const currentScopeValue = scopeChoiceValue(scope);
     return (
       <>
-        <div className={classes.controlBar} role="search" aria-label="Project Sites controls">
-          <div className={classes.searchSlot}>
+        <div
+          className={mergeClasses(
+            classes.controlBar,
+            isMediumMode && classes.controlBarMedium,
+            isCompactMode && classes.controlBarCompact,
+          )}
+          role="search"
+          aria-label="Project Sites controls"
+          data-project-sites-control-layout={describeLayoutMode(layoutMode)}
+        >
+          <div
+            className={mergeClasses(
+              classes.searchSlot,
+              (isCompactMode || isMediumMode) && classes.searchSlotStacked,
+            )}
+          >
             <HbcSearch
               variant="local"
               value={searchInput}
@@ -843,27 +927,63 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
               placeholder="Search by name, number, client, location, or team…"
             />
           </div>
-          <div className={classes.controlCluster}>
+          <div
+            className={mergeClasses(
+              classes.controlCluster,
+              (isCompactMode || isMediumMode) && classes.controlClusterStacked,
+              isCompactMode && classes.controlClusterCompact,
+            )}
+          >
             <span className={classes.controlLabel} aria-hidden="true">Scope:</span>
-            <HbcSegmentedControl
-              label="Scope"
-              options={scopeChoices.map((c) => ({ value: c.value, label: c.label }))}
-              value={currentScopeValue}
-              onChange={(next) => {
-                const chosen = scopeChoices.find((c) => c.value === next);
-                if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
-                  setScope(chosen.scope);
-                  setResolvedScope({
-                    scope: chosen.scope,
-                    source: 'user-selected',
-                    resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
-                  });
-                }
-              }}
-              size="sm"
-            />
+            {isCompactMode ? (
+              <select
+                aria-label="Scope (compact)"
+                className={classes.compactScopeSelect}
+                data-project-sites-compact-scope-control="true"
+                value={currentScopeValue}
+                onChange={(e) => {
+                  const chosen = scopeChoices.find((c) => c.value === e.target.value);
+                  if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
+                    setScope(chosen.scope);
+                    setResolvedScope({
+                      scope: chosen.scope,
+                      source: 'user-selected',
+                      resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
+                    });
+                  }
+                }}
+              >
+                {scopeChoices.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            ) : (
+              <HbcSegmentedControl
+                label="Scope"
+                options={scopeChoices.map((c) => ({ value: c.value, label: c.label }))}
+                value={currentScopeValue}
+                onChange={(next) => {
+                  const chosen = scopeChoices.find((c) => c.value === next);
+                  if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
+                    setScope(chosen.scope);
+                    setResolvedScope({
+                      scope: chosen.scope,
+                      source: 'user-selected',
+                      resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
+                    });
+                  }
+                }}
+                size="sm"
+              />
+            )}
           </div>
-          <div className={classes.controlCluster}>
+          <div
+            className={mergeClasses(
+              classes.controlCluster,
+              (isCompactMode || isMediumMode) && classes.controlClusterStacked,
+              isCompactMode && classes.controlClusterCompact,
+            )}
+          >
             <span className={classes.controlLabel} aria-hidden="true">Sort:</span>
             <select
               aria-label="Sort project sites"
@@ -876,26 +996,33 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
               ))}
             </select>
           </div>
-          <HbcButton
-            variant="ghost"
-            size="sm"
-            pressed={isFilterPanelOpen}
-            icon={<Filter size="sm" />}
-            iconPosition="before"
-            onClick={() => setIsFilterPanelOpen((prev) => !prev)}
-            aria-expanded={isFilterPanelOpen}
-            aria-controls="project-sites-filter-panel"
-          >
-            Filters
-            {activeFilterCount > 0 && (
-              <span className={classes.filterToggleBadge}>{activeFilterCount}</span>
+          <div
+            className={mergeClasses(
+              classes.controlCluster,
+              (isCompactMode || isMediumMode) && classes.controlClusterStacked,
             )}
-          </HbcButton>
-          {(isFiltered || sortKey !== DEFAULT_SORT_KEY) && (
-            <HbcButton variant="ghost" size="sm" onClick={clearAll}>
-              Reset
+          >
+            <HbcButton
+              variant="ghost"
+              size="sm"
+              pressed={isFilterPanelOpen}
+              icon={<Filter size="sm" />}
+              iconPosition="before"
+              onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              aria-expanded={isFilterPanelOpen}
+              aria-controls="project-sites-filter-panel"
+            >
+              Filters
+              {activeFilterCount > 0 && (
+                <span className={classes.filterToggleBadge}>{activeFilterCount}</span>
+              )}
             </HbcButton>
-          )}
+            {(isFiltered || sortKey !== DEFAULT_SORT_KEY) && (
+              <HbcButton variant="ghost" size="sm" onClick={clearAll}>
+                Reset
+              </HbcButton>
+            )}
+          </div>
         </div>
         {isFilterPanelOpen && facets && (
           <div
@@ -1054,7 +1181,13 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   // ── Years loading ─────────────────────────────────────────────────
   if (yearsResult.status === 'loading') {
     return (
-      <section className={classes.root} aria-label="Project Sites">
+      <section
+        ref={rootRef}
+        className={classes.root}
+        aria-label="Project Sites"
+        data-project-sites-layout-mode={layoutMode}
+        data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+      >
         {renderHeader(false)}
         <LoadingShimmer />
       </section>
@@ -1064,7 +1197,13 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   // ── Years error ───────────────────────────────────────────────────
   if (yearsResult.status === 'error') {
     return (
-      <section className={classes.root} aria-label="Project Sites">
+      <section
+        ref={rootRef}
+        className={classes.root}
+        aria-label="Project Sites"
+        data-project-sites-layout-mode={layoutMode}
+        data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+      >
         {renderHeader(false)}
         <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
@@ -1080,7 +1219,13 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   // ── No years in list ──────────────────────────────────────────────
   if (yearsResult.status === 'empty') {
     return (
-      <section className={classes.root} aria-label="Project Sites">
+      <section
+        ref={rootRef}
+        className={classes.root}
+        aria-label="Project Sites"
+        data-project-sites-layout-mode={layoutMode}
+        data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+      >
         {renderHeader(false)}
         <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
@@ -1098,7 +1243,13 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     scope?.kind === 'all' ? 'All Projects' : String(scope?.year ?? '');
 
   return (
-    <section className={classes.root} aria-label="Project Sites">
+    <section
+      ref={rootRef}
+      className={classes.root}
+      aria-label="Project Sites"
+      data-project-sites-layout-mode={layoutMode}
+      data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+    >
       {/* Persistent live region for screen reader announcements */}
       <div className={classes.liveRegion} aria-live="polite" aria-atomic="true">
         {announcement}
@@ -1171,13 +1322,19 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       {projectsResult?.status === 'success' && visibleCount > 0 && (
         <div
           key={`${scope?.kind === 'all' ? 'all' : scope?.year}-${sortKey}`}
-          className={mergeClasses(classes.grid, isSparse && classes.gridSparse)}
+          className={mergeClasses(
+            classes.grid,
+            layoutMode === 'wide' && classes.gridModeWide,
+            layoutMode === 'medium' && classes.gridModeMedium,
+            layoutMode === 'compact' && classes.gridModeCompact,
+            isSparse && classes.gridSparse,
+          )}
           role="list"
           aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort}`}
         >
           {visibleEntries.map((entry) => (
             <div key={entry.id} role="listitem" className={classes.gridItem}>
-              <ProjectSiteCard entry={entry} />
+              <ProjectSiteCard entry={entry} layoutMode={layoutMode} />
             </div>
           ))}
         </div>
