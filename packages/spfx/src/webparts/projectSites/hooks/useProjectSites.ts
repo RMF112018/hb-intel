@@ -47,6 +47,7 @@ export function useProjectSites(
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['project-sites', scope ? scopeCacheKey(scope) : 'none'],
     queryFn: () => repository.fetchProjectSites(scope!),
+    select: normalizeProjectSiteEntries,
     enabled,
     staleTime: STALE_TIME_MS,
     retry: 1,
@@ -78,7 +79,7 @@ export function useProjectSites(
     };
   }
 
-  const entries = normalizeProjectSiteEntries(data ?? []);
+  const entries = data ?? [];
 
   if (entries.length === 0) {
     return {

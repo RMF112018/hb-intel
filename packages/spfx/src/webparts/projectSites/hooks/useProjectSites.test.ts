@@ -109,6 +109,7 @@ describe('useProjectSites', () => {
     const config = mockUseQuery.mock.calls[0][0] as any;
     expect(config.queryKey).toEqual(['project-sites', 'year:2025']);
     expect(config.enabled).toBe(true);
+    expect(typeof config.select).toBe('function');
   });
 
   it('passes correct cache key for All Projects scope', () => {
@@ -120,6 +121,7 @@ describe('useProjectSites', () => {
     const config = mockUseQuery.mock.calls[0][0] as any;
     expect(config.queryKey).toEqual(['project-sites', 'all']);
     expect(config.enabled).toBe(true);
+    expect(typeof config.select).toBe('function');
   });
 
   it('disables query when scope is null', () => {
@@ -130,5 +132,82 @@ describe('useProjectSites', () => {
     useProjectSites(null);
     const config = mockUseQuery.mock.calls[0][0] as any;
     expect(config.enabled).toBe(false);
+  });
+
+  it('normalizes repository rows through query select', () => {
+    mockUseQuery.mockReturnValue({
+      data: [], isLoading: false, isError: false, error: null,
+    } as any);
+
+    useProjectSites(scopeFromYear(2025));
+    const config = mockUseQuery.mock.calls[0][0] as any;
+    const rawRows = [{
+      Id: 1,
+      Title: '25-001-01 - Alpha',
+      Year: 2025,
+      field_2: '25-001-01',
+      field_3: 'Alpha',
+      field_23: 'https://example.com/sites/alpha',
+      field_6: 'Active',
+    }];
+    const normalized = config.select(rawRows);
+
+    expect(normalized).toHaveLength(1);
+    expect(normalized[0].id).toBe(1);
+    expect(normalized[0].projectName).toBe('Alpha');
+    expect(normalized[0].projectNumber).toBe('25-001-01');
+    expect(normalized[0].siteUrl).toBe('https://example.com/sites/alpha');
+  });
+
+  it('preserves normalized entry identity when query data identity is unchanged', () => {
+    const stableEntries = [{
+      id: 1,
+      projectName: 'Stable',
+      projectNumber: '25-001-01',
+      siteUrl: 'https://example.com',
+      year: 2025,
+      department: '',
+      officeDivision: '',
+      projectLocation: '',
+      projectType: '',
+      projectStage: 'Active',
+      clientName: '',
+      projectStreetAddress: '',
+      projectCity: '',
+      projectCounty: '',
+      projectState: '',
+      projectZip: '',
+      projectExecutiveUpn: '',
+      projectManagerUpn: '',
+      leadEstimatorUpn: '',
+      supportingEstimatorUpns: [],
+      procoreProject: '',
+      hasSiteUrl: true,
+      dataQuality: {
+        classification: 'complete',
+        issues: [],
+        hasAnyIssue: false,
+        hasLaunchCriticalIssue: false,
+      },
+      launchStatus: {
+        state: 'live',
+        reasonCode: 'live-site-ready',
+        isLaunchable: true,
+        userMessage: 'Live site is available and launch-ready.',
+      },
+    }];
+
+    mockUseQuery.mockReturnValue({
+      data: stableEntries, isLoading: false, isError: false, error: null,
+    } as any);
+
+    const first = useProjectSites(scopeFromYear(2025));
+    const second = useProjectSites(scopeFromYear(2025));
+
+    expect(first?.status).toBe('success');
+    expect(second?.status).toBe('success');
+    expect(first?.entries).toBe(stableEntries);
+    expect(second?.entries).toBe(stableEntries);
+    expect(second?.entries).toBe(first?.entries);
   });
 });

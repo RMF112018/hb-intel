@@ -96,15 +96,6 @@ export const PROJECT_SITES_SELECT_FIELDS = [
   SP_PROJECTS_FIELDS.PROJECT_MANAGER_UPN,
   SP_PROJECTS_FIELDS.LEAD_ESTIMATOR_UPN,
   SP_PROJECTS_FIELDS.SUPPORTING_ESTIMATOR_UPNS,
-  // Backward-compatible display-name fallbacks for real schema drift cases.
-  'ProjectNumber',
-  'ProjectName',
-  'ProjectLocation',
-  'ProjectType',
-  'ProjectStage',
-  'Department',
-  'ClientName',
-  'SiteUrl',
 ] as const;
 
 /** Bounded All Projects cap for repository reads. */

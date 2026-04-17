@@ -45,7 +45,6 @@ import {
   HBC_SPACE_XL,
   HBC_SPACE_2XL,
   TRANSITION_FAST,
-  TRANSITION_NORMAL,
   TRANSITION_SLOW,
   elevationLevel0,
   elevationLevel1,
@@ -70,6 +69,7 @@ import {
   type ProjectSitesScope,
   type ProjectSitesSortKey,
   type ProjectSitesFilters,
+  type IProjectSiteEntry,
   type IProjectSitesRuntimeContext,
   type IResolvedProjectSitesScope,
   type ProjectSitesScopeSource,
@@ -510,16 +510,6 @@ const useStyles = makeStyles({
     [hbcMediaQuery('desktop')]: {
       gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
     },
-    animationName: {
-      from: { opacity: 0, transform: 'translateY(6px)' },
-      to: { opacity: 1, transform: 'translateY(0)' },
-    },
-    animationDuration: TRANSITION_NORMAL,
-    animationFillMode: 'forwards',
-    animationTimingFunction: 'ease-out',
-    '@media (prefers-reduced-motion: reduce)': {
-      animationDuration: '0.01ms',
-    },
   },
   gridModeWide: {
     gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
@@ -703,6 +693,30 @@ interface ScopeChoice {
   label: string;
   scope: ProjectSitesScope;
 }
+
+interface ProjectSiteCardListItemProps {
+  entry: IProjectSiteEntry;
+  layoutMode: ProjectSitesLayoutMode;
+  peopleDisplayLabels: Record<string, string>;
+  className: string;
+}
+
+const ProjectSiteCardListItem = React.memo(function ProjectSiteCardListItem({
+  entry,
+  layoutMode,
+  peopleDisplayLabels,
+  className,
+}: ProjectSiteCardListItemProps) {
+  return (
+    <div role="listitem" className={className}>
+      <ProjectSiteCard
+        entry={entry}
+        layoutMode={layoutMode}
+        peopleDisplayLabels={peopleDisplayLabels}
+      />
+    </div>
+  );
+});
 
 function buildScopeChoices(years: number[]): ScopeChoice[] {
   const choices: ScopeChoice[] = [
@@ -1331,7 +1345,6 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       {/* Success with visible entries */}
       {projectsResult?.status === 'success' && visibleCount > 0 && (
         <div
-          key={`${scope?.kind === 'all' ? 'all' : scope?.year}-${sortKey}`}
           className={mergeClasses(
             classes.grid,
             layoutMode === 'wide' && classes.gridModeWide,
@@ -1343,13 +1356,13 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
           aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort}`}
         >
           {visibleEntries.map((entry) => (
-            <div key={entry.id} role="listitem" className={classes.gridItem}>
-              <ProjectSiteCard
-                entry={entry}
-                layoutMode={layoutMode}
-                peopleDisplayLabels={peopleDisplayLabels}
-              />
-            </div>
+            <ProjectSiteCardListItem
+              key={entry.id}
+              entry={entry}
+              layoutMode={layoutMode}
+              peopleDisplayLabels={peopleDisplayLabels}
+              className={classes.gridItem}
+            />
           ))}
         </div>
       )}

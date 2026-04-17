@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10",
+  "id": "e7b3c4a2-8f1d-4e6a-b952-1d0a7f3e8c5b",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
@@ -18,14 +18,15 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "Article Publisher"
+        "default": "Project Sites"
       },
       "description": {
-        "default": "Authoring surface for structured article publishing on HBCentral. Current release scope: Project Spotlight articles — additional destinations are explicitly blocked until they are wired in a later release."
+        "default": "Displays project-site link cards using authoritative scope resolution: yearOverride, host-page Year context, or default fallback."
       },
-      "officeFabricIconFontName": "PageEdit",
-      "hiddenFromToolbox": false,
-      "properties": {}
+      "officeFabricIconFontName": "Globe",
+      "properties": {
+        "yearOverride": 0
+      }
     }
   ]
 }

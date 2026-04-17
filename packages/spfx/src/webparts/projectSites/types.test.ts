@@ -163,6 +163,17 @@ describe('repository field contract', () => {
     expect(PROJECT_SITES_SELECT_FIELDS).toContain(SP_PROJECTS_FIELDS.SITE_URL);
   });
 
+  it('does not include display-name fallback fields in repository $select', () => {
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('ProjectNumber');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('ProjectName');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('ProjectLocation');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('ProjectType');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('ProjectStage');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('Department');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('ClientName');
+    expect(PROJECT_SITES_SELECT_FIELDS).not.toContain('SiteUrl');
+  });
+
   it('keeps all-projects reads explicitly bounded', () => {
     expect(PROJECT_SITES_ALL_SCOPE_LIMIT).toBeGreaterThan(0);
     expect(PROJECT_SITES_ALL_SCOPE_LIMIT).toBeLessThanOrEqual(5000);

@@ -439,6 +439,29 @@ describe('ProjectSitesRoot', () => {
     expect(linksAfter[0]).toHaveAttribute('aria-label', expect.stringContaining('Zulu'));
   });
 
+  it('keeps the grid subtree mounted when sort changes', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Zulu', projectNumber: '25-999-01' }),
+        createEntry({ id: 2, projectName: 'Alpha', projectNumber: '25-001-01' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    const gridBefore = screen.getByRole('list', { name: /project site/i });
+
+    fireEvent.change(screen.getByLabelText('Sort project sites'), {
+      target: { value: 'name-desc' },
+    });
+
+    const gridAfter = screen.getByRole('list', { name: /project site/i });
+    expect(gridAfter).toBe(gridBefore);
+  });
+
   it('opens the filter panel and filters by project stage', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
@@ -594,5 +617,50 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText('Project 2026')).toBeInTheDocument();
     expect(screen.getByText('Project 2025')).toBeInTheDocument();
     expect(screen.getByText('2 projects')).toBeInTheDocument();
+  });
+
+  it('keeps the grid subtree mounted when scope changes', async () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
+    mockUseProjectSites.mockImplementation((scope) => {
+      if (!scope) return null;
+      if (scope.kind === 'all') {
+        return {
+          status: 'success',
+          scope,
+          entries: [
+            createEntry({ id: 1, projectName: 'Project 2026', year: 2026, projectNumber: '26-001-01' }),
+            createEntry({ id: 2, projectName: 'Project 2025', year: 2025, projectNumber: '25-001-01' }),
+          ],
+          errorMessage: null,
+        };
+      }
+      return {
+        status: 'success',
+        scope,
+        entries: [createEntry({ id: 1, projectName: 'Project 2026', year: 2026, projectNumber: '26-001-01' })],
+        errorMessage: null,
+      };
+    });
+
+    render(
+      <ProjectSitesRoot
+        runtimeContext={normalizeProjectSitesRuntimeConfig({
+          webPartProperties: { yearOverride: 2026 },
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Project 2026')).toBeInTheDocument();
+    });
+    const gridBefore = screen.getByRole('list', { name: /project site/i });
+
+    fireEvent.click(screen.getByText('All Projects'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Project 2025')).toBeInTheDocument();
+    });
+    const gridAfter = screen.getByRole('list', { name: /project site/i });
+    expect(gridAfter).toBe(gridBefore);
   });
 });

@@ -1,0 +1,7 @@
+# Project Sites End-State Executive Summary
+
+- The implementation is materially better than a thin launcher. It already has a typed normalization layer, a pure client-side search/filter/sort pipeline, differentiated card states, light-theme host discipline, and a clean Vite-to-shell packaging path.
+- The single biggest gap is year authority. The manifests still promise host-page Year behavior and a yearOverride, but the live app defaults to current/newest year inside React, the shell does not expose Project Sites property-pane controls, and the app mount ignores the shell’s third runtime-config argument.
+- The second major gap is data trust. The surface fetches full raw list items with no $select in order to survive schema drift, then infers site state and project identity client-side. That is resilient in the short term but not strong enough for a product whose value depends on authoritative project discovery.
+- The current card surface is polished but still too thin for confident choice at portfolio scale. It does not expose enough distinguishing metadata or truthful launch-state explanation when records are incomplete, ambiguous, or non-launchable.
+- Responsive behavior is directionally good but not end-state ready under the updated breakpoint doctrine. The implementation uses viewport breakpoints and wrapping controls, but it does not define explicit container-aware modes, short-height behavior, or a breakpoint contract for constrained nested states.

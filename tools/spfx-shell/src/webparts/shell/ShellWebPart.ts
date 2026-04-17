@@ -273,6 +273,9 @@ export default class ShellWebPart extends BaseClientSideWebPart<IShellWebPartPro
   public render(): void {
     if (this._appModule?.mount) {
       // Inject runtime configuration into the loaded app.
+      // The app-host mount contract is intentionally idempotent: repeated
+      // SharePoint render() calls should update the existing tree instead of
+      // recreating root/query runtime state.
       // __FUNCTION_APP_URL__ is provided at build time via webpack DefinePlugin
       // (set by build-spfx-package.ts from the FUNCTION_APP_URL env var).
       const runtimeConfig: Record<string, unknown> = {};

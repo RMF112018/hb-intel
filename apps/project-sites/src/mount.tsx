@@ -27,8 +27,52 @@ import {
   type IProjectSitesMountRuntimeConfig,
 } from '@hbc/spfx/project-sites';
 
-let root: Root | undefined;
-let queryClient: QueryClient | undefined;
+interface IMountedProjectSitesInstance {
+  root: Root | null;
+  queryClient: QueryClient | null;
+  hostElement: HTMLElement | null;
+  authContext: WebPartContext | null;
+  authBootstrapPromise: Promise<void> | null;
+  authBootstrapped: boolean;
+}
+
+const mountedInstance: IMountedProjectSitesInstance = {
+  root: null,
+  queryClient: null,
+  hostElement: null,
+  authContext: null,
+  authBootstrapPromise: null,
+  authBootstrapped: false,
+};
+
+function teardownMountedInstance(): void {
+  mountedInstance.root?.unmount();
+  mountedInstance.root = null;
+  mountedInstance.queryClient?.clear();
+  mountedInstance.queryClient = null;
+  mountedInstance.hostElement = null;
+  mountedInstance.authContext = null;
+  mountedInstance.authBootstrapPromise = null;
+  mountedInstance.authBootstrapped = false;
+}
+
+async function ensureAuthBootstrapped(spfxContext?: WebPartContext): Promise<void> {
+  if (!spfxContext) {
+    return;
+  }
+  if (mountedInstance.authBootstrapped && mountedInstance.authContext === spfxContext) {
+    return;
+  }
+  if (!mountedInstance.authBootstrapPromise || mountedInstance.authContext !== spfxContext) {
+    mountedInstance.authContext = spfxContext;
+    mountedInstance.authBootstrapPromise = (async () => {
+      const permissionKeys = await resolveSpfxPermissions(spfxContext);
+      await bootstrapSpfxAuth(spfxContext, permissionKeys);
+    })();
+  }
+  await mountedInstance.authBootstrapPromise;
+  mountedInstance.authBootstrapped = true;
+}
 
 /**
  * Mount the Project Sites web part into the given DOM element.
@@ -43,28 +87,36 @@ export async function mount(
   spfxContext?: WebPartContext,
   config?: IProjectSitesMountRuntimeConfig,
 ): Promise<void> {
-  if (spfxContext) {
-    const permissionKeys = await resolveSpfxPermissions(spfxContext);
-    await bootstrapSpfxAuth(spfxContext, permissionKeys);
+  // Defensive host swap handling: if SharePoint rebinds this app to a
+  // different host element without calling unmount first, fully tear down the
+  // previous instance before creating the next one.
+  if (mountedInstance.hostElement && mountedInstance.hostElement !== el) {
+    teardownMountedInstance();
   }
-
-  queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { refetchOnWindowFocus: false },
-    },
-  });
-
-  root = createRoot(el);
+  if (!mountedInstance.hostElement) {
+    mountedInstance.hostElement = el;
+  }
+  if (!mountedInstance.queryClient) {
+    mountedInstance.queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { refetchOnWindowFocus: false },
+      },
+    });
+  }
+  if (!mountedInstance.root) {
+    mountedInstance.root = createRoot(el);
+  }
+  await ensureAuthBootstrapped(spfxContext);
   // SPFx-hosted surfaces run inside SharePoint's always-light chrome.
   // Force light theme to prevent OS dark-mode from creating visual incoherence.
   const appTree = createElement(
     QueryClientProvider,
-    { client: queryClient },
+    { client: mountedInstance.queryClient },
     createElement(ProjectSitesRoot, {
       runtimeContext: normalizeProjectSitesRuntimeConfig(config),
     }),
   );
-  root.render(
+  mountedInstance.root.render(
     createElement(
       HbcThemeProvider,
       { forceTheme: 'light' as const, children: appTree },
@@ -76,10 +128,7 @@ export async function mount(
  * Unmount the React tree. Called by the SPFx shell webpart's onDispose().
  */
 export function unmount(): void {
-  root?.unmount();
-  root = undefined;
-  queryClient?.clear();
-  queryClient = undefined;
+  teardownMountedInstance();
 }
 
 // ── Global publication (belt-and-suspenders) ──────────────────────────────
