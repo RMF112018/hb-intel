@@ -188,7 +188,7 @@ const ALL_DOMAINS: DomainConfig[] = [
   { dir: 'operational-excellence', camel: 'operationalExcellence', pascal: 'OperationalExcellence' },
   { dir: 'human-resources', camel: 'humanResources', pascal: 'HumanResources' },
   { dir: 'project-sites', camel: 'projectSites', pascal: 'ProjectSites' },
-  { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage' },
+  { dir: 'hb-homepage', camel: 'hbHomepage', pascal: 'HbHomepage', freshBuildRequired: true },
   { dir: 'hb-webparts', camel: 'hbWebparts', pascal: 'HbWebparts', packagingModel: 'multi', freshBuildRequired: true },
   { dir: 'hb-publisher', camel: 'hbPublisher', pascal: 'HbPublisher', packagingModel: 'single', freshBuildRequired: true },
   { dir: 'hb-shell-extension', camel: 'hbShellExtension', pascal: 'HbShellExtension', extensionType: 'ApplicationCustomizer' },
@@ -212,6 +212,7 @@ const HB_WEBPARTS_EXCLUDED_MANIFEST_IDS = new Set([
 const HB_WEBPARTS_NEUTRAL_SHELL_MANIFEST_ID = '9a2f7f61-6f4d-4fdb-8f54-9a857f8b3d4e';
 const HB_PNP_OPS_WEBPART_ID = '9e2dd84a-a121-4fb3-a964-f43a94abf9fd';
 const HB_PUBLISHER_ARTICLE_WEBPART_ID = '1a6f8b2c-4e5d-42c1-8f9a-3b7c5d6e8f10';
+const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
 const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
 
 // Critical runtime source files whose SHA-256 fingerprints anchor the
@@ -238,9 +239,19 @@ const HB_PUBLISHER_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   'apps/hb-publisher/src/data/publisherAdapter/publishOrchestrator.ts',
   'apps/hb-publisher/src/data/publisherAdapter/publisherRepositories.ts',
 ];
+const HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/hb-homepage/src/mount.tsx',
+  'apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json',
+  'apps/hb-webparts/src/webparts/hbHomepage/HbHomepage.tsx',
+  'apps/hb-webparts/src/webparts/hbHomepage/HbHomepageShell.tsx',
+  'apps/hb-webparts/src/webparts/hbHomepage/shell/shellTypes.ts',
+  'apps/hb-webparts/src/webparts/hbHomepage/shell/defaultPreset.ts',
+];
+
 const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   'hb-webparts': HB_WEBPARTS_CRITICAL_RUNTIME_PATHS,
   'hb-publisher': HB_PUBLISHER_CRITICAL_RUNTIME_PATHS,
+  'hb-homepage': HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
 };
 
 interface PackageRuntimeMarker {
@@ -250,6 +261,7 @@ interface PackageRuntimeMarker {
 const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
   'hb-webparts': { id: HB_PNP_OPS_WEBPART_ID, label: 'PnP Ops webpart' },
   'hb-publisher': { id: HB_PUBLISHER_ARTICLE_WEBPART_ID, label: 'Article Publisher webpart' },
+  'hb-homepage': { id: HB_HOMEPAGE_WEBPART_ID, label: 'HB Homepage webpart' },
 };
 // ── SPFx version baselines (governed, see docs/reference/developer/spfx-baseline.md) ──
 //
