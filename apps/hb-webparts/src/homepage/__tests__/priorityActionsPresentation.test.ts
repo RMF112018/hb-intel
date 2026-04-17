@@ -27,6 +27,15 @@ describe('priorityActionsPresentation', () => {
     expect(result.entryStateReason).toBe('short-height-override');
   });
 
+  it('returns a full inspectable resolution (device, shell state, reason, short-height) for standard-laptop', () => {
+    const result = resolvePriorityRailDeviceForContainer({ width: 1300, height: 900 });
+    expect(result.deviceClass).toBe('laptop');
+    expect(result.shellState).toBe('standard-laptop');
+    expect(result.shortHeightConstrained).toBe(false);
+    expect(typeof result.entryStateReason).toBe('string');
+    expect(result.entryStateReason.length).toBeGreaterThan(0);
+  });
+
   it('resolves authored layout modes into explicit runtime behavior with normalization flags', () => {
     const desktop = resolvePriorityRailPresentationForDevice(CONFIG, 'desktop');
     expect(desktop.layout).toBe('grid');

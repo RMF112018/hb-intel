@@ -22,12 +22,7 @@ import {
   type PriorityRailBadgeVariant,
 } from '@hbc/ui-kit/homepage';
 import { usePriorityActionsData, invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
-import { resolveByBreakpoint, filterByDevice, type DeviceClass } from '../../homepage/data/priorityActionsNormalization.js';
-import {
-  mapPriorityActionsDeviceClassToShellState,
-  type PriorityActionsDeviceClass,
-} from '../../homepage/entryStack/entryStackOrchestration.js';
-import type { ShellEntryStateId } from '../hbHomepage/shell/shellTypes.js';
+import { resolveByBreakpoint, filterByDevice } from '../../homepage/data/priorityActionsNormalization.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import type { PriorityActionsItemNormalized, BadgeVariant as SchemaBadgeVariant } from '../../homepage/data/priorityActionsContracts.js';
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
@@ -141,18 +136,6 @@ function useRailContainerDimensions(ref: React.RefObject<HTMLElement | null>): P
   return dimensions;
 }
 
-// Governance alignment (Prompt-04): the rail's author-facing DeviceClass is
-// anchored to the shell entry-state vocabulary. Width thresholds above are
-// intentionally author-budget scoped; shell-layout thresholds live in
-// `shell/breakpointPolicy.ts`. This helper is the governance seam that lets
-// downstream inspectors (harness, control-panel preview) name the rail's
-// active state in shell vocabulary.
-export function getShellEntryStateForRailDevice(
-  device: DeviceClass,
-): ShellEntryStateId {
-  return mapPriorityActionsDeviceClassToShellState(device as PriorityActionsDeviceClass);
-}
-
 /* ── List-sourced rail ──────────────────────────────────────────── */
 
 function ListSourcedRail({
@@ -162,6 +145,7 @@ function ListSourcedRail({
 }): React.JSX.Element {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dimensions = useRailContainerDimensions(containerRef);
+  const deviceResolution = resolvePriorityRailDeviceForContainer(dimensions);
   const { config, items, isLoading, error } = usePriorityActionsData({ activeAudience });
 
   let content: React.JSX.Element;
@@ -183,7 +167,6 @@ function ListSourcedRail({
     const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
     content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
   } else {
-    const deviceResolution = resolvePriorityRailDeviceForContainer(dimensions);
     const presentation = resolvePriorityRailPresentationForDevice(config, deviceResolution.deviceClass);
     const deviceItems = filterByDevice(items, deviceResolution.deviceClass);
     const breakpoint = resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
@@ -212,7 +195,13 @@ function ListSourcedRail({
   }
 
   return (
-    <div ref={containerRef} data-hbc-rail-shell-state={getShellEntryStateForRailDevice(resolvePriorityRailDeviceForContainer(dimensions).deviceClass)}>
+    <div
+      ref={containerRef}
+      data-hbc-rail-device-class={deviceResolution.deviceClass}
+      data-hbc-rail-shell-state={deviceResolution.shellState}
+      data-hbc-rail-entry-reason={deviceResolution.entryStateReason}
+      data-hbc-rail-short-height={deviceResolution.shortHeightConstrained ? 'true' : 'false'}
+    >
       {content}
     </div>
   );
