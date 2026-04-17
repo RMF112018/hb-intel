@@ -234,7 +234,7 @@ All 101 tests pass. No pre-existing failures reintroduced. No new failures.
 
 | Item | Notes |
 |---|---|
-| Resolve UPN → People display name via the SPFx People API | Current implementation uses a local `humanizeUpn` heuristic that title-cases the local part of the UPN. The filter model and chip render path are already decoupled from the label, so swapping in a resolved display name is a narrow follow-up that does not require rebuilding the filter model. Follow-up may also cache People lookups via React Query. |
+| Resolve UPN → People display name via the SPFx People API | **Completed in Wave 02 Prompt-03.** Project Sites now uses an authoritative-first people-display seam with bounded caching and heuristic fallback. See `project-sites-authoritative-people-display-closure.md`. |
 | Optional `hasSiteOnly` UI control | The `ProjectSitesFilters.hasSiteOnly` field is supported by the pipeline and tested, but not wired to a dedicated toggle in the current control bar. If user feedback shows high demand for a "Provisioning only / Live sites only" toggle, a small `HbcButton pressed` toggle can be added to the control cluster with no changes to the filter model. |
 | Optional persist-to-URL (or to SharePoint user state) | Search / scope / sort / filter state currently lives in React state only; refreshing the page resets it. A future enhancement could sync state into the URL hash or a SharePoint user-property bag so users can bookmark filtered views. |
 | Optional advanced sort by `EstimatedValue` | The `EstimatedValue` (`field_13`) column exists in the list schema but is not exposed in the current surface. Adding value-based sort / filter is a purely additive follow-up. |
