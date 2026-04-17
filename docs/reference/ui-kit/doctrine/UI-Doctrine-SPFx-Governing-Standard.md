@@ -40,6 +40,18 @@ This standard now also locks a higher bar:
 - deliberate escape from the default enterprise card grid
 - stronger webpart-specific product thinking
 - a top-of-class stack for premium SPFx surfaces where justified
+- exceptionally dynamic adaptation across multiple display conditions
+
+This doctrine assumes that future SPFx work must be designed to perform credibly on:
+- ultrawide external displays
+- standard laptop and desktop browsers
+- large and medium tablets in landscape and portrait
+- phones in portrait and landscape
+- constrained browser windows, split-screen states, and higher zoom conditions
+
+The objective is not merely “responsive enough.”
+
+The objective is an **exceptionally dynamic, compositionally stable, positive experience** across realistic display conditions.
 
 ---
 
@@ -227,7 +239,7 @@ This allowance does **not** override §4.1.
 
 ---
 
-## 6. Token, motion, and layout doctrine
+## 6. Token, motion, layout, and breakpoint doctrine
 
 ### 6.1 Token discipline remains strong, with host-aware overlays — BINDING (base), DIRECTIONAL (overlays)
 Use shared semantic tokens by default.
@@ -267,6 +279,120 @@ Preferred patterns:
 - deliberately authored negative space
 - hierarchy that survives zoomed-out viewing
 
+### 6.4 Practical-usable-space doctrine — BINDING
+Raw hardware resolution is **not** the governing layout input.
+
+SPFx design and implementation must prioritize:
+- practical usable content width
+- practical usable content height
+- SharePoint chrome
+- browser chrome
+- zoom and reflow conditions
+- section width constraints
+- nested slot width
+- split-screen and constrained-window states
+- safe-area and input ergonomics on touch devices
+
+A layout decision justified only by raw device resolution is non-compliant if the rendered result fails in real browser conditions.
+
+### 6.5 Breakpoint governance is mandatory — BINDING
+All serious SPFx shells and premium SPFx applications must have explicit breakpoint behavior.
+
+At minimum, implementation and validation must account for:
+- ultrawide desktop
+- standard laptop / desktop
+- tablet landscape
+- tablet portrait
+- phone portrait
+- phone landscape / short-height constrained state
+
+Every surface does **not** need identical layouts at all breakpoints.
+
+Every surface **does** need:
+- deliberate breakpoint behavior
+- meaningful degradation
+- retained task clarity
+- no accidental compression
+- no reliance on “it technically still renders”
+
+### 6.6 Shell-level breakpoint doctrine — BINDING
+Any SPFx page shell, composed page section, or multi-surface operating layer must define shell-level breakpoint behavior.
+
+That shell-level behavior must govern:
+- first-screen priorities
+- hero or entry-band height control
+- action-layer density
+- lane visibility above the fold where relevant
+- row-sharing versus stacking decisions
+- spacing compression
+- overflow and “more tools” rules
+- short-height fallback behavior
+
+Shells must be **container-aware** and must not place surfaces side-by-side simply because the viewport is nominally wide enough.
+
+If the actual slot width cannot support a premium nested experience, the shell must:
+- stack,
+- widen,
+- reorder,
+- or move the occupant into a more appropriate layout mode.
+
+### 6.7 Application-level breakpoint doctrine — BINDING
+Every premium SPFx application or webpart must define its own narrowest stable behavior.
+
+That includes:
+- the smallest supported nested width
+- the layout modes it supports (for example: wide, medium, compact, minimal, or single-column)
+- what content compresses, reflows, hides, or overflows at each mode
+- whether metadata must reduce or collapse
+- whether panels, toolbars, summary bars, or side companions must stack or suppress
+- how tap targets and focus affordances remain credible on touch-sized layouts
+- how the experience behaves in higher zoom and constrained-height conditions
+
+Applications must not rely only on viewport-wide media queries when they can be nested inside shells or variable page sections.
+
+Where nesting materially affects stability, the application must support **container-aware** layout behavior.
+
+### 6.8 Conditional multi-column rule — BINDING
+Two-column or multi-column layouts are allowed only when they remain:
+- readable
+- balanced
+- premium-looking
+- interaction-safe
+- free from awkward internal compression
+- reflow-safe
+
+If not, the correct response is:
+- single-column fallback,
+- altered layout mode,
+- or shell-level reordering.
+
+Single-column fallback is not failure.
+Forced multi-column fragility is failure.
+
+### 6.9 Reflow and zoom safety — BINDING
+SPFx surfaces must remain usable under constrained conditions.
+
+Prohibited outcomes:
+- horizontal scrolling required to access primary content or critical actions
+- awkward two-dimensional scrolling for ordinary use
+- hidden critical controls at common zoom levels
+- hover-dependent access to primary actions or meaning
+- dense action clusters that become untappable on touch devices
+
+### 6.10 Breakpoint specs are now a required design artifact — BINDING
+When a shell or application materially depends on layout behavior, its implementation package must include a breakpoint spec or equivalent breakpoint contract.
+
+That artifact must define:
+- target device/display classes
+- practical usable-space targets when relevant
+- entry-state or first-screen priorities when relevant
+- supported layout modes
+- stacking and overflow rules
+- narrowest stable nested state
+- acceptance criteria for closure
+
+Do not treat breakpoint behavior as implicit.
+
 ---
 
 ## 7. Recommended layout families — DIRECTIONAL
@@ -280,12 +406,14 @@ SPFx surfaces should favor:
 - compact operational cards
 - elegant section stacks
 - full-width communication-site compositions where supported
+- container-aware shell lanes
+- application modes that can transition cleanly from wide to compact states
 
 These are the safest and most effective places to create visually distinguished HB experiences.
 
 ---
 
-## 8. Webpart quality doctrine — BINDING
+## 8. Webpart and application quality doctrine — BINDING
 
 Every premium webpart must behave well when:
 - minimally configured
@@ -294,6 +422,8 @@ Every premium webpart must behave well when:
 - used in full-width and non-full-width contexts
 - viewed in edit mode
 - loaded with missing or stale data
+- nested inside a composed shell
+- rendered in constrained-width and constrained-height states
 
 Every webpart should have:
 - clear empty states
@@ -301,12 +431,15 @@ Every webpart should have:
 - predictable section behavior
 - author-safe defaults
 - host-safe responsive behavior
+- explicit compact-state behavior where needed
 
-Premium webparts must also have:
+Premium webparts and applications must also have:
 - real internal hierarchy
 - credible iconography
 - premium CTA behavior
 - visibly distinct surface logic relative to their role
+- shell-fit awareness where they may be nested
+- no fragile “desktop-only” assumptions in early or critical entry states
 
 ---
 
@@ -328,6 +461,8 @@ Premium design work is not complete until:
 - the `.sppkg` validates
 - the rendered SharePoint-hosted output matches the intended structural upgrade
 
+Breakpoint behavior that depends on manifest or host placement assumptions must also be validated in the packaged result.
+
 ---
 
 ## 10. Exception standard
@@ -340,12 +475,14 @@ A doctrinal exception is acceptable when it materially improves:
 - readability
 - perceived polish
 - host-safe tenant experience quality
+- dynamic adaptation across important display conditions
 
 An exception is not acceptable when it:
 - fights the host
 - duplicates chrome
 - relies on brittle shell behavior
 - creates maintenance risk for cosmetic gain
+- preserves a fragile breakpoint outcome for convenience
 
 ---
 
@@ -361,3 +498,6 @@ This doctrine succeeds when SPFx surfaces feel:
 - visibly non-generic
 - structurally productized rather than merely restyled
 - compatible with SharePoint’s operating reality
+- exceptionally dynamic across multiple display conditions
+- compositionally stable when nested or constrained
+- intentionally adapted rather than accidentally compressed

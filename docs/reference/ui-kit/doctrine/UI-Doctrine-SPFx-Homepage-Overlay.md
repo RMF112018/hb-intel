@@ -1,7 +1,7 @@
 # UI Doctrine — SPFx Homepage Overlay
 
 > **Governing Status:** Homepage-specific overlay on the [SPFx Governing Standard](./UI-Doctrine-SPFx-Governing-Standard.md).
-> **Scope:** HB Central homepage webparts (`apps/hb-webparts`), homepage shared primitives, homepage editorial compositions.
+> **Scope:** HB Central homepage webparts (`apps/hb-webparts`), homepage shared primitives, homepage editorial compositions, homepage shells, and hosted homepage application surfaces.
 > **Relationship:** Inherits all binding rules from the SPFx Governing Standard. Adds homepage-specific constraints and freedoms that do not apply to generic SPFx domain apps.
 > **Supersedes:** Any older UI-kit guidance that assumes homepage webparts should follow the same composition patterns as domain-app SPFx surfaces.
 
@@ -12,7 +12,7 @@
 This overlay does not replace the SPFx Governing Standard. It sits on top of it.
 
 **Reading order for homepage work:**
-1. SPFx Governing Standard — binding shared rules (accessibility, token discipline, host awareness, stack standard, anti-safety-zone posture)
+1. SPFx Governing Standard — binding shared rules (accessibility, token discipline, host awareness, stack standard, anti-safety-zone posture, breakpoint doctrine)
 2. This homepage overlay — homepage-specific rules, freedoms, and constraints
 3. SharePoint Homepage & Shell Boundaries — lane boundaries and supported customization posture
 4. Homepage Import Policy — entry-point and import rules (in `entry-points.md`)
@@ -59,6 +59,7 @@ All homepage webparts must meet:
 - `prefers-reduced-motion` support
 - No hover-only critical information
 - Light theme first
+- credible behavior in touch-sized and constrained-height states
 
 ### 3.4 Authoring safety — BINDING
 Every homepage webpart must behave well when:
@@ -67,6 +68,7 @@ Every homepage webpart must behave well when:
 - moved between page sections
 - viewed in SharePoint edit mode
 - loaded with missing, stale, or empty data
+- nested in a shell lane or section width narrower than the author expected
 
 A webpart that looks good only when fully configured is not production-ready.
 
@@ -82,6 +84,19 @@ Use shared semantic tokens from `@hbc/ui-kit/theme` by default.
 Homepage-specific aliases are allowed and expected where they materially support the premium homepage posture.
 
 Direct hex/rgb values and hardcoded pixel spacing are prohibited in ordinary homepage webpart source unless documented as a deliberate local exception for flagship work.
+
+### 3.7 Breakpoint doctrine applies at both shell and application level — BINDING
+Homepage work must explicitly govern:
+- shell-level breakpoint behavior
+- application-level breakpoint behavior
+
+The homepage shell and each hosted homepage application must be deliberately dynamic across multiple display conditions.
+
+Homepage work is non-compliant when:
+- the shell adapts but hosted surfaces do not
+- hosted surfaces technically shrink but become stressed or low-value
+- a composition works only at desktop widths
+- a first-screen state delays meaningful homepage value behind branding or utilities
 
 ---
 
@@ -173,9 +188,32 @@ If the homepage still reads as a cautious enterprise card grid, the correct resp
 
 ---
 
-## 6. Homepage-specific top-band doctrine
+## 6. Homepage-specific shell and top-band doctrine
 
-### 6.1 Signature hero standard — BINDING
+### 6.1 Entry stack must deliver brand + action + value — BINDING
+The homepage entry stack must be governed as a composed experience.
+
+The recommended entry sequence remains:
+
+1. flagship hero
+2. top actions / utility band
+3. first shell lane
+
+The first screen must deliver:
+- the full hero message,
+- at least the primary actions,
+- and the beginning of the first shell lane.
+
+The first shell lane must not feel buried beneath the hero and utilities.
+
+### 6.2 The hero is not the homepage — BINDING
+The hero is a flagship brand and welcome surface.
+
+It must not consume so much vertical space that the user cannot see meaningful shell content on first load.
+
+No homepage implementation may treat “branding first, homepage later” as acceptable.
+
+### 6.3 Signature hero standard — BINDING
 The homepage top band must behave as a **single flagship product surface**.
 
 It must not read as:
@@ -183,12 +221,12 @@ It must not read as:
 - a greeting card beside the hero
 - a greeting block below the hero that still feels separate
 
-### 6.2 Greeting integration — BINDING
+### 6.4 Greeting integration — BINDING
 The personalized greeting must be integrated into the signature hero experience in rendered output.
 
 Internal logic may be modular, but the rendered result must be one authored top-band object.
 
-### 6.3 Full-width support — BINDING
+### 6.5 Full-width support — BINDING
 The signature hero banner manifest must explicitly include:
 
 ```json
@@ -197,7 +235,7 @@ The signature hero banner manifest must explicitly include:
 
 This is locked.
 
-### 6.4 Visual authority — BINDING
+### 6.6 Visual authority — BINDING
 The top band must establish the page’s quality standard immediately through:
 - stronger hierarchy
 - stronger scale
@@ -205,7 +243,7 @@ The top band must establish the page’s quality standard immediately through:
 - stronger brand expression
 - materially better use of available width
 
-### 6.5 Locked hero content — BINDING (Phase 18)
+### 6.7 Locked hero content — BINDING (Phase 18)
 The flagship homepage hero contains exactly three identity elements:
 
 1. **Company logo / brand lockup** (Hedrick Brothers + "HB Central")
@@ -214,7 +252,7 @@ The flagship homepage hero contains exactly three identity elements:
 
 No editorial headline, CTA, metadata row, alert chip, context line, eyebrow, or other furniture. Premium presence is achieved through composition, scale, spacing, typography, and materiality — not content volume.
 
-### 6.6 Hero background standard — BINDING (Phase 18)
+### 6.8 Hero background standard — BINDING (Phase 18)
 The hero background must not use a gradient wash (no blue/orange enterprise banner treatment).
 
 Approved background system:
@@ -223,11 +261,132 @@ Approved background system:
 
 The background must support text readability without heavy overlay bands.
 
+### 6.9 Quick links must become prioritized actions — BINDING
+The utility band must be treated as a **priority actions system**, not a flat directory of equal-weight destinations.
+
+Required behavior:
+- highest-frequency actions first
+- visible primary actions limited by breakpoint
+- lower-priority tools moved behind a governed `More tools` or equivalent overflow affordance
+- no long flat directory rows presented as the premium answer
+
+### 6.10 Shell must be container-aware — BINDING
+Hosted surfaces should not be placed side-by-side simply because the viewport is technically wide enough.
+
+They may share a row only when the **actual slot width** supports a premium, stable nested layout.
+
+The shell must make row-sharing decisions based on shell-fit reality, not optimism.
+
+### 6.11 Single-column fallback is not failure — BINDING
+Tablet portrait and all handheld states should default to a disciplined single-column shell sequence unless a specific exception is proven stable.
+
+The shell must not force compressed multi-column compositions in portrait or handheld states.
+
+### 6.12 Reflow safety is mandatory — BINDING
+The homepage entry stack must not require awkward two-dimensional scrolling, and critical actions must remain reachable at higher zoom or in constrained width and height states.
+
 ---
 
-## 7. Directional homepage guidance
+## 7. Homepage breakpoint spec — shell level
 
-### 7.1 Editorial hierarchy — DIRECTIONAL
+### 7.1 Breakpoint matrix — BINDING
+Homepage shell work must validate against the following practical shell design targets:
+
+| Display Type | Practical Shell Design Target | Required Entry Model |
+|---|---:|---|
+| Ultrawide desktop | 1600–2200 px usable content width | Premium wide composition |
+| Standard laptop / desktop | ~1180–1400 px usable shell width | Compressed flagship desktop |
+| Tablet landscape large | ~1100–1250 px usable width | Simplified desktop-like |
+| Tablet landscape medium | ~980–1120 px usable width | Tablet landscape guided layout |
+| Tablet portrait large | ~820–950 px usable width | Guided single-column entry |
+| Tablet portrait medium | ~720–850 px usable width | Large-mobile style entry |
+| Phone portrait large | ~390–430 px usable width | Immediate mobile entry |
+| Phone portrait standard | ~375–410 px usable width | Immediate mobile entry |
+| Phone landscape / short-height | short-height constrained state | Compact banner + fast actions |
+
+Raw device resolution is informative, but practical usable space governs implementation.
+
+### 7.2 Action visibility rules — BINDING
+The shell must cap visible primary actions by breakpoint:
+
+| Device Class | Visible Primary Actions | Overflow Behavior |
+|---|---:|---|
+| Ultrawide desktop | 6 | `More tools` |
+| Standard laptop / desktop | 5 | `More tools` |
+| Tablet landscape | 4–6 | `More tools` |
+| Tablet portrait | 4 | `More tools` |
+| Phone portrait large | 4 | Sheet / `More tools` |
+| Phone portrait standard | 3–4 | Sheet / `More tools` |
+| Phone landscape | 0–4 depending on strip mode | Action sheet / overflow strip |
+
+### 7.3 Hero height rules — BINDING
+The shell must control hero height by breakpoint:
+
+| Device Class | Recommended Hero Height |
+|---|---:|
+| Ultrawide desktop | 420–460 px |
+| Standard laptop / desktop | 340–380 px |
+| Tablet landscape | 280–320 px |
+| Tablet portrait | 240–280 px |
+| Phone portrait large | 200–220 px |
+| Phone portrait standard | 190–210 px |
+| Phone landscape | 120–160 px |
+
+### 7.4 First shell lane rules — BINDING
+The shell must enforce the following:
+
+- the first shell lane must begin on first view
+- two-column first lanes are conditional, not assumed
+- tablet portrait and phones default to single-column first-lane behavior
+- hosted surface compatibility is judged by shell fit, not by whether it technically renders
+
+If a hosted surface cannot remain stable in its assigned slot width, the shell must:
+- widen it,
+- stack it,
+- move it,
+- or force an alternate hosted layout mode.
+
+---
+
+## 8. Homepage breakpoint spec — application level
+
+### 8.1 Every hosted homepage application must define narrowest stable nested mode — BINDING
+Every homepage application or webpart intended to live inside a shell lane must define:
+
+- its narrowest stable nested width
+- the layout modes it supports
+- whether it can participate in a two-column first lane
+- what changes in compact and minimal states
+- which metadata, summary bars, actions, companions, or sidecars collapse or hide
+- whether it has a required single-column mode
+- whether hover-dependent behavior is eliminated in handheld or touch-first states
+
+### 8.2 Application-level shell fit governs composition — BINDING
+The homepage shell must not guess application stability.
+
+Hosted surfaces intended for important or early shell placement must expose enough guidance for the shell to determine:
+- row-sharing eligibility
+- preferred slot width
+- preferred dominance or secondary role
+- compact-state suitability
+- whether a different hosted layout mode must be forced at narrower widths
+
+### 8.3 Application-level breakpoint failure is a homepage failure — BINDING
+A homepage implementation is not acceptable if the shell behaves well but the hosted applications become:
+- crowded
+- visually brittle
+- metadata-heavy to the point of stress
+- interaction-fragile
+- unreadable
+- dependent on desktop-only affordances
+
+The homepage is judged as a complete composed product.
+
+---
+
+## 9. Directional homepage guidance
+
+### 9.1 Editorial hierarchy — DIRECTIONAL
 Homepage compositions should establish clear visual hierarchy:
 - the signature hero is visually dominant
 - section headers establish rhythm between zones
@@ -235,7 +394,7 @@ Homepage compositions should establish clear visual hierarchy:
 - utility and command surfaces are compact but forceful
 - discovery surfaces feel active and premium, not passive
 
-### 7.2 Width and scale — DIRECTIONAL
+### 9.2 Width and scale — DIRECTIONAL
 Homepage work should use the available canvas with confidence.
 
 Avoid:
@@ -248,7 +407,7 @@ Prefer:
 - asymmetric balance where appropriate
 - focal sequencing that still reads well when zoomed out
 
-### 7.3 Motion with discipline — DIRECTIONAL
+### 9.3 Motion with discipline — DIRECTIONAL
 Homepage motion should be:
 - lighter than PWA motion
 - purposeful
@@ -257,14 +416,14 @@ Homepage motion should be:
 
 Avoid theatrical motion, but do not collapse into lifeless hover states.
 
-### 7.4 Media treatment — DIRECTIONAL
+### 9.4 Media treatment — DIRECTIONAL
 When homepage webparts include media:
 - images should have defined aspect ratios
 - placeholders should be visually clean
 - hero imagery should support responsive full-width treatment
 - alt text should be authoring-governed
 
-### 7.5 Command and discovery expectations — DIRECTIONAL
+### 9.5 Command and discovery expectations — DIRECTIONAL
 Utility and discovery zone webparts should favor:
 - compact, premium command layouts
 - real iconography
@@ -272,29 +431,39 @@ Utility and discovery zone webparts should favor:
 - richer search/discovery behavior
 - anchored overlays where genuinely useful
 
-### 7.6 Content freshness guardrails — DIRECTIONAL
+### 9.6 Content freshness guardrails — DIRECTIONAL
 Webparts that display time-sensitive content should:
 - communicate recency clearly
 - degrade gracefully when stale
 - support author-governed freshness treatment
 
+### 9.7 Dynamic adaptation should feel positive, not merely safe — DIRECTIONAL
+Breakpoint behavior should not read as reluctant compression.
+
+Preferred outcomes:
+- faster clarity on smaller screens
+- stronger prioritization under constraint
+- cleaner lane sequencing
+- more decisive action visibility rules
+- better nested fit inside shell lanes
+
 ---
 
-## 8. Homepage freedoms
+## 10. Homepage freedoms
 
-### 8.1 Full-width composition
+### 10.1 Full-width composition
 Homepage webparts may use full-width section layouts when the page section supports it. This is standard and expected for the signature hero.
 
-### 8.2 Zone-specific visual treatment
+### 10.2 Zone-specific visual treatment
 Different homepage zones may have different visual density, card styles, and spacing. Strong zone differentiation is allowed and often desirable.
 
-### 8.3 Local homepage primitives
+### 10.3 Local homepage primitives
 Homepage-local shared components are allowed and encouraged when specific to homepage composition and not yet proven for broader reuse.
 
-### 8.4 Brand expression
+### 10.4 Brand expression
 Homepage webparts may express HB brand identity more strongly than generic operational SPFx surfaces. The result should feel premium and established, not flashy or startup-like.
 
-### 8.5 Stronger stack adoption
+### 10.5 Stronger stack adoption
 Homepage work is explicitly allowed to adopt the approved premium stack when it materially improves:
 - iconography
 - motion
@@ -305,23 +474,23 @@ Homepage work is explicitly allowed to adopt the approved premium stack when it 
 
 ---
 
-## 9. Shared UI-kit vs local homepage territory
+## 11. Shared UI-kit vs local homepage territory
 
 | Territory | Owned By | Examples |
 |-----------|----------|---------|
 | Reusable visual primitives | `@hbc/ui-kit` (via `/homepage` entry) | homepage primitives, CTA shells, icon frames, search primitives, premium surface families |
-| Homepage governance constants | `@hbc/ui-kit/homepage` | brand foundation, typography aliases, spacing aliases, accessibility policy, density policy, import guardrails |
+| Homepage governance constants | `@hbc/ui-kit/homepage` | brand foundation, typography aliases, spacing aliases, accessibility policy, density policy, import guardrails, breakpoint policies |
 | Semantic tokens | `@hbc/ui-kit/theme` | shared tokens and homepage-aware aliases |
 | Homepage composition shells | `apps/hb-webparts/src/homepage/shared/` | composition shells only when they materially support homepage structure |
 | Webpart components | `apps/hb-webparts/src/webparts/` | each homepage webpart folder |
-| Homepage helpers | `apps/hb-webparts/src/homepage/helpers/` | config normalization, identity resolution, greeting logic, overlay helpers |
-| Homepage contracts | `apps/hb-webparts/src/homepage/webparts/` | per-zone configuration contracts |
+| Homepage helpers | `apps/hb-webparts/src/homepage/helpers/` | config normalization, identity resolution, greeting logic, overlay helpers, shell-fit helpers |
+| Homepage contracts | `apps/hb-webparts/src/homepage/webparts/` | per-zone configuration contracts, shell-fit contracts, breakpoint contracts |
 
 **Promotion rule:** Promote local homepage components to `@hbc/ui-kit` only when reuse beyond homepage is justified and the pattern is aligned with the shared premium design language.
 
 ---
 
-## 10. What homepage surfaces must NOT do
+## 12. What homepage surfaces must NOT do
 
 - import from `@hbc/ui-kit` root or `@hbc/ui-kit/app-shell`
 - create shell chrome, navigation, or footer elements
@@ -331,10 +500,12 @@ Homepage work is explicitly allowed to adopt the approved premium stack when it 
 - use Unicode icons in place of a real icon system
 - leave the hero without full-bleed support when it is intended to be flagship
 - assume the page author’s SharePoint section layout will rescue weak structural design
+- treat “it technically fits” as proof of shell compatibility
+- force multi-column early-lane layouts in portrait or handheld states without proof
 
 ---
 
-## 11. Locked assumptions for future homepage work
+## 13. Locked assumptions for future homepage work
 
 Future implementation phases should treat the following as locked:
 
@@ -350,3 +521,7 @@ Future implementation phases should treat the following as locked:
 10. the flagship hero contains only logo, tagline "Build with GRIT.", and personalized greeting (Phase 18)
 11. the hero background must not use a gradient wash — charcoal base or authored photography only (Phase 18)
 12. the split-path hero pattern (separate greeting + editorial hero) is retired for flagship use (Phase 18)
+13. breakpoint specs are required at both shell and application level for serious homepage work
+14. the first shell lane must begin on first load across major device classes
+15. tablet portrait and phone states default to single-column unless an exception is proven stable
+16. the shell must be exceptionally dynamic and positive across multiple display conditions, not merely “responsive”
