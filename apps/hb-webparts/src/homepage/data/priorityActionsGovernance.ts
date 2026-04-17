@@ -10,7 +10,7 @@ import type { AudienceMode } from './priorityActionsContracts.js';
 export const PRIORITY_ACTIONS_MAX_VISIBLE_MIN = 1;
 export const PRIORITY_ACTIONS_MAX_VISIBLE_MAX = 20;
 
-const GOVERNED_ICON_KEYS = [
+export const PRIORITY_ACTIONS_GOVERNED_ICON_KEYS = [
   'finance',
   'field',
   'hr',
@@ -34,7 +34,7 @@ const GOVERNED_ICON_KEYS = [
   'clipboard',
 ] as const;
 
-const GOVERNED_ICON_KEY_SET = new Set<string>(GOVERNED_ICON_KEYS);
+const GOVERNED_ICON_KEY_SET = new Set<string>(PRIORITY_ACTIONS_GOVERNED_ICON_KEYS);
 
 export function normalizeOptionalText(value: string | undefined): string {
   return value?.trim() ?? '';

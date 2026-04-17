@@ -20,6 +20,11 @@ vi.mock('../data/priorityActionsNormalization.js', () => ({
 
 vi.mock('../data/priorityActionsValidation.js', () => ({
   validatePriorityRailDraft: vi.fn(() => ({ valid: true, issues: [] })),
+  validateItem: vi.fn(() => []),
+}));
+
+vi.mock('../data/priorityActionsAdminPermissions.js', () => ({
+  resolvePriorityActionsAdminPermissions: vi.fn(),
 }));
 
 vi.mock('../data/priorityActionsListWriter.js', () => ({
@@ -37,6 +42,8 @@ import { PriorityActionsRailAdmin } from '../../webparts/priorityActionsRailAdmi
 import { fetchPriorityActionsConfigWithDiagnostics } from '../data/priorityActionsConfigListSource.js';
 import { fetchPriorityActionsItems } from '../data/priorityActionsItemsListSource.js';
 import { normalizeItemRows } from '../data/priorityActionsNormalization.js';
+import { resolvePriorityActionsAdminPermissions } from '../data/priorityActionsAdminPermissions.js';
+import { validateItem } from '../data/priorityActionsValidation.js';
 import {
   savePriorityRailBandConfig,
   savePriorityRailItems,
@@ -47,6 +54,8 @@ import {
 const mockedFetchConfig = fetchPriorityActionsConfigWithDiagnostics as unknown as ReturnType<typeof vi.fn>;
 const mockedFetchItems = fetchPriorityActionsItems as unknown as ReturnType<typeof vi.fn>;
 const mockedNormalize = normalizeItemRows as unknown as ReturnType<typeof vi.fn>;
+const mockedResolvePermissions = resolvePriorityActionsAdminPermissions as unknown as ReturnType<typeof vi.fn>;
+const mockedValidateItem = validateItem as unknown as ReturnType<typeof vi.fn>;
 const mockedSaveConfig = savePriorityRailBandConfig as unknown as ReturnType<typeof vi.fn>;
 const mockedSaveItems = savePriorityRailItems as unknown as ReturnType<typeof vi.fn>;
 const mockedArchive = archivePriorityRailItem as unknown as ReturnType<typeof vi.fn>;
@@ -120,6 +129,8 @@ beforeEach(() => {
   mockedFetchConfig.mockReset();
   mockedFetchItems.mockReset();
   mockedNormalize.mockReset();
+  mockedResolvePermissions.mockReset();
+  mockedValidateItem.mockReset();
   mockedSaveConfig.mockReset();
   mockedSaveItems.mockReset();
   mockedArchive.mockReset();
@@ -128,6 +139,19 @@ beforeEach(() => {
   mockedFetchConfig.mockResolvedValue({ config: CONFIG, activeConfigCountForBand: 1 });
   mockedFetchItems.mockResolvedValue([]);
   mockedNormalize.mockReturnValue([ITEM_A, ITEM_B]);
+  mockedValidateItem.mockReturnValue([]);
+  mockedResolvePermissions.mockResolvedValue({
+    status: 'resolved',
+    posture: 'editable',
+    permissions: {
+      canView: true,
+      canEdit: true,
+      canPublish: true,
+      canArchive: true,
+      canReorder: true,
+    },
+    user: { isSiteAdmin: false, title: 'Maintainer' },
+  });
 
   mockedSaveConfig.mockResolvedValue({ ok: true, itemId: CONFIG.id });
   mockedSaveItems.mockImplementation(async (_site: string, items: Array<{ itemId?: number }>) => items.map((i) => ({ ok: true, itemId: i.itemId ?? 999 })));
@@ -144,8 +168,7 @@ describe('PriorityActionsRailAdmin identity + lifecycle seams', () => {
     const moveUpButtons = await screen.findAllByRole('button', { name: 'Move up' });
     fireEvent.click(moveUpButtons[1]);
 
-    const saveButtons = screen.getAllByRole('button', { name: 'Save' });
-    fireEvent.click(saveButtons[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
 
     await waitFor(() => expect(mockedSaveItems).toHaveBeenCalledTimes(1));
     const payload = mockedSaveItems.mock.calls[0][1] as Array<{ itemId?: number }>;
@@ -172,8 +195,7 @@ describe('PriorityActionsRailAdmin identity + lifecycle seams', () => {
 
     expect(screen.queryByText(/archived on save/i)).toBeNull();
 
-    const saveButtons = screen.getAllByRole('button', { name: 'Save' });
-    fireEvent.click(saveButtons[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }));
     await waitFor(() => expect(mockedArchive).toHaveBeenCalledTimes(0));
   });
 
@@ -189,6 +211,64 @@ describe('PriorityActionsRailAdmin identity + lifecycle seams', () => {
     expect(screen.getByRole('button', { name: 'Phone' })).not.toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Phone' }));
-    expect(screen.getByText(/Preview mapping:/i).textContent).toContain('sheet-trigger -> compact');
+    expect(screen.getByText(/Authored -> Resolved:/i).textContent).toContain('sheet-trigger -> compact');
+  });
+
+  it('library filters segment rows by invalid status', async () => {
+    mockedValidateItem.mockImplementation((_draft: unknown, index?: number) => (
+      index === 1 ? [{ kind: 'missing-href', message: 'Missing href', field: 'href', rowId: 1 }] : []
+    ));
+
+    render(<PriorityActionsRailAdmin siteUrl={SITE_URL} />);
+    await waitFor(() => expect(mockedFetchConfig).toHaveBeenCalledWith(SITE_URL));
+
+    expect((await screen.findAllByRole('button', { name: 'Archive' })).length).toBe(2);
+    fireEvent.click(screen.getByRole('button', { name: /Invalid \(1\)/i }));
+    expect((await screen.findAllByRole('button', { name: 'Archive' })).length).toBe(1);
+  });
+
+  it('read-only posture blocks mutating controls but preserves preview navigation', async () => {
+    mockedResolvePermissions.mockResolvedValueOnce({
+      status: 'resolved',
+      posture: 'read-only',
+      permissions: {
+        canView: true,
+        canEdit: false,
+        canPublish: false,
+        canArchive: false,
+        canReorder: false,
+      },
+      user: { isSiteAdmin: false, title: 'Viewer' },
+    });
+
+    render(<PriorityActionsRailAdmin siteUrl={SITE_URL} />);
+    await waitFor(() => expect(mockedFetchConfig).toHaveBeenCalledWith(SITE_URL));
+
+    expect(screen.getByRole('button', { name: 'Publish' }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByRole('button', { name: '+ Add Action' }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByRole('button', { name: 'Phone' })).not.toBeNull();
+  });
+
+  it('insufficient permission posture blocks authoring workspace load', async () => {
+    mockedResolvePermissions.mockResolvedValueOnce({
+      status: 'resolved',
+      posture: 'insufficient-permission',
+      permissions: {
+        canView: false,
+        canEdit: false,
+        canPublish: false,
+        canArchive: false,
+        canReorder: false,
+      },
+      user: { isSiteAdmin: false, title: 'Denied' },
+    });
+
+    render(<PriorityActionsRailAdmin siteUrl={SITE_URL} />);
+    await waitFor(() => expect(mockedResolvePermissions).toHaveBeenCalledWith(SITE_URL));
+
+    expect(screen.queryByText('Band Settings')).toBeNull();
+    expect(screen.getByText(/Insufficient permission:/i)).not.toBeNull();
+    expect(mockedFetchConfig).not.toHaveBeenCalled();
   });
 });

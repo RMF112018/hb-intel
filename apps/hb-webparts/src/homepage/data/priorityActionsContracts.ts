@@ -152,6 +152,41 @@ export interface PriorityActionsAdminRow {
   saveError?: string;
 }
 
+export interface PriorityActionsPermissionMaskParts {
+  High?: string;
+  Low?: string;
+}
+
+export interface PriorityActionsAdminPermissions {
+  canView: boolean;
+  canEdit: boolean;
+  canReorder: boolean;
+  canArchive: boolean;
+  canPublish: boolean;
+}
+
+export type PriorityActionsAdminPermissionResolutionStatus =
+  | 'resolved'
+  | 'resolution-failed'
+  | 'simulated';
+
+export type PriorityActionsAdminPosture =
+  | 'editable'
+  | 'read-only'
+  | 'insufficient-permission';
+
+export interface PriorityActionsAdminPermissionResolution {
+  status: PriorityActionsAdminPermissionResolutionStatus;
+  posture: PriorityActionsAdminPosture;
+  permissions: PriorityActionsAdminPermissions;
+  reason?: string;
+  user?: {
+    title?: string;
+    email?: string;
+    isSiteAdmin: boolean;
+  };
+}
+
 export type PriorityActionsAdminRowLifecycle =
   | 'persisted-unchanged'
   | 'persisted-edited'
@@ -159,6 +194,14 @@ export type PriorityActionsAdminRowLifecycle =
   | 'marked-for-archive'
   | 'pending-reorder'
   | 'save-error';
+
+export type PriorityActionsAdminRowStatusChip =
+  | 'persisted'
+  | 'new'
+  | 'edited'
+  | 'reordered'
+  | 'archive-intent'
+  | 'invalid';
 
 export interface PriorityActionsItemOperationPlan {
   create: Array<{ rowKey: string; draft: PriorityActionsItemDraft }>;
