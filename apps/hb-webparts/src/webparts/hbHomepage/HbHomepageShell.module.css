@@ -1,8 +1,10 @@
 /* ---------------------------------------------------------------------------
-   Shell — post-hero operating layer
+   Shell — post-hero operating layer (container-aware)
    --------------------------------------------------------------------------- */
 
 .shell {
+  container-type: inline-size;
+  container-name: homepage-shell;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -12,14 +14,14 @@
   padding: 1.5rem 1rem;
 }
 
-@media (min-width: 768px) {
+@container homepage-shell (min-width: 768px) {
   .shell {
     gap: 2.5rem;
     padding: 2rem 1.5rem;
   }
 }
 
-@media (min-width: 1200px) {
+@container homepage-shell (min-width: 1180px) {
   .shell {
     gap: 3rem;
     padding: 2.5rem 2rem;
@@ -32,22 +34,46 @@
 
 .band {
   display: grid;
-  grid-template-columns: 1fr;
   gap: 1.5rem;
   width: 100%;
 }
+
+.bandStacked {
+  grid-template-columns: 1fr;
+}
+
+.bandPaired {
+  grid-template-columns: 1fr;
+}
+
+@container homepage-shell (min-width: 1180px) {
+  .bandPaired {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+@container homepage-shell (min-width: 1600px) {
+  .bandPaired {
+    grid-template-columns: 3fr 2fr;
+    gap: 2rem;
+  }
+}
+
+/* Entry band — first shell lane with stronger presence */
 
 .entryBand {
   gap: 2rem;
 }
 
-@media (min-width: 768px) {
-  .band {
-    gap: 2rem;
-  }
-
+@container homepage-shell (min-width: 768px) {
   .entryBand {
     gap: 2.5rem;
+  }
+}
+
+@container homepage-shell (min-width: 768px) {
+  .band {
+    gap: 2rem;
   }
 }
 
@@ -75,21 +101,18 @@
   grid-column: 1 / -1;
 }
 
-.span_major {
-  grid-column: 1 / -1;
-}
-
+.span_major,
 .span_minor {
   grid-column: 1 / -1;
 }
 
-@media (min-width: 1180px) {
-  .span_major {
-    grid-column: span 1;
+@container homepage-shell (min-width: 1180px) {
+  .bandPaired .span_major {
+    grid-column: 1 / 2;
   }
 
-  .span_minor {
-    grid-column: span 1;
+  .bandPaired .span_minor {
+    grid-column: 2 / 3;
   }
 }
 

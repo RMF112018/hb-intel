@@ -47,6 +47,12 @@ export {
   validatePresetStructure,
 } from './shellValidation.js';
 
+export { useShellContainer } from './useShellContainer.js';
+export type { ShellContainerState } from './useShellContainer.js';
+
+export { resolveBandLayout } from './slotComfortResolver.js';
+export type { SlotComfortResult, BandLayoutResult, ResolvedSlot } from './slotComfortResolver.js';
+
 export {
   BandSemanticRoleSchema,
   ColumnSpanSchema,

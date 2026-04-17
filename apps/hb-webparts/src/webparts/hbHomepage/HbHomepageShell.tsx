@@ -3,7 +3,10 @@ import { createSharePointUserPhotoResolver } from '../../homepage/helpers/people
 import type { HbHomepageProps, HbHomepageZoneProps } from './hbHomepageContract.js';
 import { parseShellLayout, extractModuleConfigSlices } from './shell/shellValidation.js';
 import { getOccupant } from './shell/occupantRegistry.js';
-import type { OccupantId, ShellBand as ShellBandType, ShellSlot as ShellSlotType } from './shell/shellTypes.js';
+import { useShellContainer } from './shell/useShellContainer.js';
+import { resolveBandLayout } from './shell/slotComfortResolver.js';
+import type { OccupantId, ShellBand as ShellBandType, ShellEntryState } from './shell/shellTypes.js';
+import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
 import { CompanyPulseZone } from './zones/CompanyPulseZone.js';
 import { LeadershipMessageZone } from './zones/LeadershipMessageZone.js';
 import { ProjectPortfolioSpotlightZone } from './zones/ProjectPortfolioSpotlightZone.js';
@@ -29,11 +32,12 @@ const ZONE_COMPONENTS: Readonly<Record<OccupantId, React.ComponentType<HbHomepag
 // ---------------------------------------------------------------------------
 
 interface ShellSlotRendererProps {
-  slot: ShellSlotType;
+  resolved: ResolvedSlot;
   zoneProps: HbHomepageZoneProps;
 }
 
-function ShellSlotRenderer({ slot, zoneProps }: ShellSlotRendererProps): React.JSX.Element | null {
+function ShellSlotRenderer({ resolved, zoneProps }: ShellSlotRendererProps): React.JSX.Element | null {
+  const { slot, comfort } = resolved;
   if (!slot.occupantId) return null;
 
   const descriptor = getOccupant(slot.occupantId);
@@ -42,13 +46,16 @@ function ShellSlotRenderer({ slot, zoneProps }: ShellSlotRendererProps): React.J
   const ZoneComponent = ZONE_COMPONENTS[slot.occupantId];
   if (!ZoneComponent) return null;
 
+  const effectiveSpan = comfort.effectiveColumnSpan;
+
   return (
     <div
-      className={`${styles.slot} ${styles[`slot_${slot.role}`]} ${styles[`span_${slot.columnSpan}`]}`}
+      className={`${styles.slot} ${styles[`slot_${slot.role}`]} ${styles[`span_${effectiveSpan}`]}`}
       data-shell-slot={slot.id}
       data-shell-occupant={slot.occupantId}
       data-shell-slot-role={slot.role}
-      data-shell-column-span={slot.columnSpan}
+      data-shell-column-span={effectiveSpan}
+      data-shell-comfort-reason={comfort.reason}
     >
       <ZoneComponent {...zoneProps} />
     </div>
@@ -61,17 +68,18 @@ function ShellSlotRenderer({ slot, zoneProps }: ShellSlotRendererProps): React.J
 
 interface ShellBandRendererProps {
   band: ShellBandType;
+  layout: BandLayoutResult;
   isEntryBand: boolean;
   zoneProps: HbHomepageZoneProps;
 }
 
-function ShellBandRenderer({ band, isEntryBand, zoneProps }: ShellBandRendererProps): React.JSX.Element | null {
-  const activeSlots = band.slots.filter((s) => s.occupantId !== null);
-  if (activeSlots.length === 0) return null;
+function ShellBandRenderer({ band, layout, isEntryBand, zoneProps }: ShellBandRendererProps): React.JSX.Element | null {
+  if (layout.slots.length === 0) return null;
 
   const bandClassName = [
     styles.band,
     isEntryBand ? styles.entryBand : '',
+    layout.columns === 2 ? styles.bandPaired : styles.bandStacked,
   ]
     .filter(Boolean)
     .join(' ');
@@ -82,11 +90,12 @@ function ShellBandRenderer({ band, isEntryBand, zoneProps }: ShellBandRendererPr
       data-shell-band={band.id}
       data-shell-semantic-role={band.semanticRole}
       data-shell-entry-band={isEntryBand || undefined}
+      data-shell-columns={layout.columns}
       role="region"
       aria-label={formatBandLabel(band.semanticRole)}
     >
-      {activeSlots.map((slot) => (
-        <ShellSlotRenderer key={slot.id} slot={slot} zoneProps={zoneProps} />
+      {layout.slots.map((resolved) => (
+        <ShellSlotRenderer key={resolved.slot.id} resolved={resolved} zoneProps={zoneProps} />
       ))}
     </div>
   );
@@ -110,6 +119,9 @@ export function HbHomepageShell({
   siteUrl,
   getGraphToken,
 }: HbHomepageProps): React.JSX.Element {
+  const shellRef = React.useRef<HTMLDivElement>(null);
+  const container = useShellContainer(shellRef);
+
   const profilePhotoResolver = React.useMemo(
     () => (siteUrl ? createSharePointUserPhotoResolver({ siteUrl }) : undefined),
     [siteUrl],
@@ -134,16 +146,28 @@ export function HbHomepageShell({
     profilePhotoResolver,
   };
 
+  const bandLayouts = React.useMemo(
+    () =>
+      layoutState.preset.bands.map((band, index) =>
+        resolveBandLayout(band, container.entryState, index === 0, container.width),
+      ),
+    [layoutState.preset.bands, container.entryState, container.width],
+  );
+
   return (
     <div
+      ref={shellRef}
       className={styles.shell}
       data-shell-preset={layoutState.preset.id}
       data-shell-post-hero="true"
+      data-shell-entry-state={container.entryState.id}
+      data-shell-width={Math.round(container.width)}
     >
       {layoutState.preset.bands.map((band, index) => (
         <ShellBandRenderer
           key={band.id}
           band={band}
+          layout={bandLayouts[index]}
           isEntryBand={index === 0}
           zoneProps={zoneProps}
         />

@@ -2,6 +2,8 @@
 declare const styles: {
   readonly shell: string;
   readonly band: string;
+  readonly bandStacked: string;
+  readonly bandPaired: string;
   readonly entryBand: string;
   readonly slot: string;
   readonly slot_primary: string;
