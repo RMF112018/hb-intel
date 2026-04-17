@@ -228,4 +228,38 @@ describe('ProjectSiteCard', () => {
       screen.getByText(/launch confidence: site is still provisioning and not launchable yet\./i),
     ).toBeInTheDocument();
   });
+
+  it('uses authoritative people labels in card metadata when provided', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          projectManagerUpn: 'manager@contoso.com',
+          leadEstimatorUpn: 'lead@contoso.com',
+          projectExecutiveUpn: 'exec@contoso.com',
+        })}
+        peopleDisplayLabels={{
+          'manager@contoso.com': 'Manager Name',
+          'lead@contoso.com': 'Lead Name',
+          'exec@contoso.com': 'Exec Name',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Project Manager')).toBeInTheDocument();
+    expect(screen.getByText('Manager Name')).toBeInTheDocument();
+    expect(screen.getByText('Lead Name')).toBeInTheDocument();
+    expect(screen.getByText('Exec Name')).toBeInTheDocument();
+  });
+
+  it('falls back to humanized people labels in card metadata', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          projectManagerUpn: 'jane.doe@contoso.com',
+        })}
+      />,
+    );
+
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+  });
 });

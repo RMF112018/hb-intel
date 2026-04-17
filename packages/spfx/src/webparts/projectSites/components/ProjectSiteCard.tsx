@@ -52,6 +52,7 @@ import {
 import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
 import type { ProjectSitesLayoutMode } from '../projectSitesLayoutMode.js';
+import { formatProjectSitesPersonLabel } from '../projectSitesPeopleDisplay.js';
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
@@ -389,9 +390,14 @@ function resolveVisualState(entry: IProjectSiteEntry): CardVisualState {
 export interface ProjectSiteCardProps {
   entry: IProjectSiteEntry;
   layoutMode?: ProjectSitesLayoutMode;
+  peopleDisplayLabels?: Record<string, string>;
 }
 
-export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry, layoutMode = 'wide' }) => {
+export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
+  entry,
+  layoutMode = 'wide',
+  peopleDisplayLabels = {},
+}) => {
   const classes = useStyles();
   const cardState = resolveVisualState(entry);
   const isCompactLayout = layoutMode === 'compact';
@@ -402,8 +408,36 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({ entry, layoutMode = 
     const location = resolveIdentityLocation(entry);
     if (location) items.push({ label: 'Location', value: location });
     if (entry.projectType) items.push({ label: 'Type', value: entry.projectType });
+    if (entry.projectManagerUpn) {
+      items.push({
+        label: 'Project Manager',
+        value: formatProjectSitesPersonLabel(entry.projectManagerUpn, peopleDisplayLabels),
+      });
+    }
+    if (entry.leadEstimatorUpn) {
+      items.push({
+        label: 'Lead Estimator',
+        value: formatProjectSitesPersonLabel(entry.leadEstimatorUpn, peopleDisplayLabels),
+      });
+    }
+    if (entry.projectExecutiveUpn) {
+      items.push({
+        label: 'Project Executive',
+        value: formatProjectSitesPersonLabel(entry.projectExecutiveUpn, peopleDisplayLabels),
+      });
+    }
     return items;
-  }, [entry.clientName, entry.projectCity, entry.projectLocation, entry.projectState, entry.projectType]);
+  }, [
+    entry.clientName,
+    entry.projectCity,
+    entry.projectLocation,
+    entry.projectState,
+    entry.projectType,
+    entry.projectManagerUpn,
+    entry.leadEstimatorUpn,
+    entry.projectExecutiveUpn,
+    peopleDisplayLabels,
+  ]);
 
   const deptLabel = formatDepartment(entry.department);
   const officeDivisionLabel = formatOfficeDivision(entry.officeDivision);

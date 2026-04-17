@@ -14,6 +14,7 @@ import type { ProjectSitesContainerState } from './projectSitesLayoutMode.js';
 const mockUseAvailableYears = vi.fn<() => IAvailableYearsResult>();
 const mockUseProjectSites = vi.fn<(scope: ProjectSitesScope | null) => IProjectSitesResult | null>();
 const mockUseProjectSitesContainerState = vi.fn<() => ProjectSitesContainerState>();
+const mockUseProjectSitesPeopleDisplayLabels = vi.fn<() => Record<string, string>>();
 
 vi.mock('./hooks/useAvailableYears.js', () => ({
   useAvailableYears: () => mockUseAvailableYears(),
@@ -25,6 +26,10 @@ vi.mock('./hooks/useProjectSites.js', () => ({
 
 vi.mock('./projectSitesLayoutMode.js', () => ({
   useProjectSitesContainerState: () => mockUseProjectSitesContainerState(),
+}));
+
+vi.mock('./hooks/useProjectSitesPeopleDisplayLabels.js', () => ({
+  useProjectSitesPeopleDisplayLabels: () => mockUseProjectSitesPeopleDisplayLabels(),
 }));
 
 import { ProjectSitesRoot } from './ProjectSitesRoot.js';
@@ -78,12 +83,14 @@ describe('ProjectSitesRoot', () => {
     mockUseAvailableYears.mockReset();
     mockUseProjectSites.mockReset();
     mockUseProjectSitesContainerState.mockReset();
+    mockUseProjectSitesPeopleDisplayLabels.mockReset();
     mockUseProjectSitesContainerState.mockReturnValue({
       width: 1280,
       height: 900,
       mode: 'wide',
       isShortHeight: false,
     });
+    mockUseProjectSitesPeopleDisplayLabels.mockReturnValue({});
   });
 
   it('renders shimmer loading state when years are loading', () => {
@@ -492,6 +499,53 @@ describe('ProjectSitesRoot', () => {
     // Both projects should be visible again
     expect(screen.getByText('Active Project')).toBeInTheDocument();
     expect(screen.getByText('Pursuit Project')).toBeInTheDocument();
+  });
+
+  it('uses authoritative people labels for facets and chips when resolved', () => {
+    mockUseProjectSitesPeopleDisplayLabels.mockReturnValue({
+      'jane.doe@contoso.com': 'Jane Doe',
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({
+          id: 1,
+          projectName: 'People Project',
+          projectManagerUpn: 'jane.doe@contoso.com',
+        }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    const peopleOptions = screen.getAllByLabelText('Jane Doe');
+    const checkbox = peopleOptions.find((el) => (el as HTMLInputElement).type === 'checkbox') as HTMLInputElement;
+    fireEvent.click(checkbox);
+    expect(screen.getAllByText('Jane Doe').length).toBeGreaterThan(0);
+  });
+
+  it('falls back to heuristic people labels when authoritative mapping is unavailable', () => {
+    mockUseProjectSitesPeopleDisplayLabels.mockReturnValue({});
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({
+          id: 1,
+          projectName: 'Fallback Project',
+          projectManagerUpn: 'john_smith@contoso.com',
+        }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    expect(screen.getByLabelText('John Smith')).toBeInTheDocument();
   });
 
   it('clears search, sort, and filters when Reset is clicked', async () => {

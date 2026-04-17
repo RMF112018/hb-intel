@@ -77,8 +77,9 @@ import {
 import {
   applyProjectSitesPipeline,
   extractProjectSitesFacets,
-  humanizeUpn,
 } from './projectSitesFilter.js';
+import { useProjectSitesPeopleDisplayLabels } from './hooks/useProjectSitesPeopleDisplayLabels.js';
+import { formatProjectSitesPersonLabel } from './projectSitesPeopleDisplay.js';
 import { ProjectSiteCard } from './components/ProjectSiteCard.js';
 import {
   useProjectSitesContainerState,
@@ -796,6 +797,15 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     () => (projectsResult?.status === 'success' ? extractProjectSitesFacets(projectsResult.entries) : null),
     [projectsResult],
   );
+  const peopleUpns = useMemo(() => {
+    if (!facets) return [];
+    return [
+      ...facets.projectManagerUpns,
+      ...facets.leadEstimatorUpns,
+      ...facets.projectExecutiveUpns,
+    ];
+  }, [facets]);
+  const peopleDisplayLabels = useProjectSitesPeopleDisplayLabels(peopleUpns);
 
   // Visible entries after client-side search / filter / sort.
   const visibleEntries = useMemo(() => {
@@ -1054,21 +1064,21 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
                 values={facets.projectManagerUpns}
                 selected={filters.projectManagerUpns}
                 onToggle={(v) => toggleMultiSelect('projectManagerUpns', v)}
-                labelFor={humanizeUpn}
+                labelFor={(v) => formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
               />
               <FacetGroup
                 heading="Lead Estimator"
                 values={facets.leadEstimatorUpns}
                 selected={filters.leadEstimatorUpns}
                 onToggle={(v) => toggleMultiSelect('leadEstimatorUpns', v)}
-                labelFor={humanizeUpn}
+                labelFor={(v) => formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
               />
               <FacetGroup
                 heading="Project Executive"
                 values={facets.projectExecutiveUpns}
                 selected={filters.projectExecutiveUpns}
                 onToggle={(v) => toggleMultiSelect('projectExecutiveUpns', v)}
-                labelFor={humanizeUpn}
+                labelFor={(v) => formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
               />
               <FacetGroup
                 heading="Department"
@@ -1105,7 +1115,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
             {filters.projectManagerUpns.map((v) => (
               <span key={`pm-${v}`} className={classes.chip}>
                 <span className={classes.chipLabel}>PM:</span>
-                {humanizeUpn(v)}
+                {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
                 <button
                   type="button"
                   className={classes.chipRemove}
@@ -1119,7 +1129,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
             {filters.leadEstimatorUpns.map((v) => (
               <span key={`est-${v}`} className={classes.chip}>
                 <span className={classes.chipLabel}>Estimator:</span>
-                {humanizeUpn(v)}
+                {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
                 <button
                   type="button"
                   className={classes.chipRemove}
@@ -1133,7 +1143,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
             {filters.projectExecutiveUpns.map((v) => (
               <span key={`pe-${v}`} className={classes.chip}>
                 <span className={classes.chipLabel}>Exec:</span>
-                {humanizeUpn(v)}
+                {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
                 <button
                   type="button"
                   className={classes.chipRemove}
@@ -1334,7 +1344,11 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
         >
           {visibleEntries.map((entry) => (
             <div key={entry.id} role="listitem" className={classes.gridItem}>
-              <ProjectSiteCard entry={entry} layoutMode={layoutMode} />
+              <ProjectSiteCard
+                entry={entry}
+                layoutMode={layoutMode}
+                peopleDisplayLabels={peopleDisplayLabels}
+              />
             </div>
           ))}
         </div>
