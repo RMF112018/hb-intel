@@ -137,6 +137,20 @@ export type {
   ShellHarnessSlotProof,
 } from './shellHarness.js';
 
+export {
+  resolveShellConformance,
+  toShellConformanceDataAttributes,
+} from './shellConformance.js';
+export type {
+  BandConformance,
+  ShellConformanceDataAttributes,
+  ShellConformanceInput,
+  ShellConformanceReport,
+  ShellLayoutMode,
+  SlotConformance,
+  SlotConformanceState,
+} from './shellConformance.js';
+
 export { resolveBandLayout } from './slotComfortResolver.js';
 export type {
   BandLayoutResult,

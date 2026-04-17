@@ -5,6 +5,10 @@ import { parseShellLayout, extractModuleConfigSlices } from './shell/shellValida
 import { getOccupant } from './shell/occupantRegistry.js';
 import { useShellContainer } from './shell/useShellContainer.js';
 import { resolveBandLayout } from './shell/slotComfortResolver.js';
+import {
+  resolveShellConformance,
+  toShellConformanceDataAttributes,
+} from './shell/shellConformance.js';
 import type { OccupantId, ShellBand as ShellBandType, ShellLayoutState } from './shell/shellTypes.js';
 import type { BandLayoutResult, ResolvedSlot } from './shell/slotComfortResolver.js';
 import { ShellFallbackSurface } from './ShellFallbackSurface.js';
@@ -232,6 +236,18 @@ export function HbHomepageShell({
     [layoutState.preset.bands, container.entryState, container.width],
   );
 
+  const conformance = React.useMemo(
+    () =>
+      resolveShellConformance({
+        bands: layoutState.preset.bands,
+        bandLayouts,
+        entryState: container.entryState,
+        shortHeightConstrained: container.shortHeightConstrained,
+      }),
+    [layoutState.preset.bands, bandLayouts, container.entryState, container.shortHeightConstrained],
+  );
+  const conformanceAttrs = toShellConformanceDataAttributes(conformance);
+
   return (
     <div
       ref={shellRef}
@@ -245,6 +261,7 @@ export function HbHomepageShell({
       data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
       data-shell-diagnostics-count={layoutState.diagnostics.length}
       data-shell-normalized-from-default={layoutState.normalizedFromDefault}
+      {...conformanceAttrs}
     >
       {layoutState.preset.bands.map((band, index) => (
         <ShellBandRenderer
