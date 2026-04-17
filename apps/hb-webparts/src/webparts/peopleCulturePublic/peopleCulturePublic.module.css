@@ -1,0 +1,244 @@
+/* ---------------------------------------------------------------------------
+   People & Culture Public — governed surface styles.
+   All color/spacing/radius values flow through --pc-* custom properties
+   seeded by pcCSSVars() in tokens.ts.
+   --------------------------------------------------------------------------- */
+
+.section {
+  color: var(--pc-heading);
+  background: var(--pc-surface-bg);
+  border-radius: var(--pc-radius-signature);
+  padding: var(--pc-space-3xl) var(--pc-space-4xl);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pc-space-3xl);
+}
+
+.headerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pc-space-xl);
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pc-brand-blue);
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--pc-heading);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Featured grid
+   --------------------------------------------------------------------------- */
+
+.featuredGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--pc-space-2xl);
+}
+
+.featuredCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pc-space-lg);
+  padding: var(--pc-space-3xl) var(--pc-space-3xl);
+  border-radius: var(--pc-radius-signature);
+  border: var(--pc-border-brand);
+  background: linear-gradient(
+    180deg,
+    var(--pc-card-gradient-start) 0%,
+    var(--pc-card-gradient-end) 100%
+  );
+}
+
+.featuredMedia {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--pc-radius-editorial);
+  object-fit: cover;
+  background: var(--pc-placeholder-bg);
+}
+
+.featuredTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--pc-heading);
+  margin: 0;
+}
+
+.featuredBody {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--pc-body-text);
+  margin: 0;
+}
+
+.featuredFooter {
+  display: flex;
+  align-items: center;
+  gap: var(--pc-space-lg);
+  margin-top: var(--pc-space-xs);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pc-brand-blue);
+}
+
+/* ---------------------------------------------------------------------------
+   Badges
+   --------------------------------------------------------------------------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pc-space-sm);
+  padding: 2px var(--pc-space-md);
+  border-radius: var(--pc-radius-pill);
+  background: var(--pc-badge-bg);
+  color: var(--pc-brand-blue);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badgePinned {
+  composes: badge;
+  background: var(--pc-pinned-badge-bg);
+  color: var(--pc-warm-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   CTA links
+   --------------------------------------------------------------------------- */
+
+.ctaLink {
+  color: var(--pc-cta-color);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.ctaLink:focus-visible {
+  outline: var(--pc-focus-outline);
+  outline-offset: 2px;
+  border-radius: var(--pc-space-xs);
+}
+
+/* ---------------------------------------------------------------------------
+   Supporting list
+   --------------------------------------------------------------------------- */
+
+.supportingList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pc-space-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.supportingRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--pc-space-xl);
+  padding: var(--pc-space-xl) var(--pc-space-xl);
+  border-radius: var(--pc-radius-editorial);
+  border: var(--pc-border-subtle);
+  background: var(--pc-surface-bg);
+}
+
+.supportingMedia {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--pc-radius-editorial);
+  object-fit: cover;
+  background: var(--pc-placeholder-bg);
+  flex-shrink: 0;
+}
+
+.mediaPlaceholder {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--pc-radius-editorial);
+  background: var(--pc-placeholder-bg);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pc-brand-blue);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.supportingTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.supportingTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--pc-heading);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.supportingBody {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--pc-supporting-body);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Empty state
+   --------------------------------------------------------------------------- */
+
+.emptyState {
+  padding: var(--pc-space-4xl) var(--pc-space-3xl);
+  border-radius: var(--pc-radius-signature);
+  border: 1px dashed var(--pc-empty-border);
+  background: var(--pc-empty-bg);
+  color: var(--pc-empty-text);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility
+   --------------------------------------------------------------------------- */
+
+.section a:focus-visible,
+.section button:focus-visible {
+  outline: var(--pc-focus-outline);
+  outline-offset: 2px;
+  border-radius: var(--pc-space-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

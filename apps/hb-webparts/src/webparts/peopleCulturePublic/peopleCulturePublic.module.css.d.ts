@@ -1,0 +1,24 @@
+declare const styles: {
+  readonly section: string;
+  readonly headerRow: string;
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly featuredGrid: string;
+  readonly featuredCard: string;
+  readonly featuredMedia: string;
+  readonly featuredTitle: string;
+  readonly featuredBody: string;
+  readonly featuredFooter: string;
+  readonly badge: string;
+  readonly badgePinned: string;
+  readonly ctaLink: string;
+  readonly supportingList: string;
+  readonly supportingRow: string;
+  readonly supportingMedia: string;
+  readonly mediaPlaceholder: string;
+  readonly supportingTextGroup: string;
+  readonly supportingTitle: string;
+  readonly supportingBody: string;
+  readonly emptyState: string;
+};
+export default styles;
