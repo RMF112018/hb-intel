@@ -28,6 +28,10 @@ import {
   type EntryStateSelectionReason,
 } from './breakpointPolicy.js';
 import { resolveBandLayout, type PairingDecision } from './slotComfortResolver.js';
+import {
+  resolveShellConformance,
+  type ShellConformanceReport,
+} from './shellConformance.js';
 import { parseShellLayout } from './shellValidation.js';
 import type {
   ColumnSpan,
@@ -292,6 +296,61 @@ export function summarizeHarnessProof(proof: ShellHarnessProof): string {
     `diagnostics=${proof.diagnostics.total} ` +
     `bands=[${bandSummary}]`
   );
+}
+
+// -----------------------------------------------------------------------------
+// Closure-proof matrix: harness outcome + shell conformance report per case
+// -----------------------------------------------------------------------------
+
+export interface ShellConformanceMatrixOutcome {
+  readonly matrixCase: ShellBreakpointMatrixCase;
+  readonly proof: ShellHarnessProof;
+  readonly conformance: ShellConformanceReport;
+  readonly entryStateMatches: boolean;
+  readonly firstLanePairingMatches: boolean;
+}
+
+/**
+ * Run the canonical breakpoint matrix and synthesize the Prompt-05
+ * {@link ShellConformanceReport} for each case. This is the closure-proof
+ * primitive: every matrix case carries the raw harness proof plus the
+ * shell-owned conformance report (layout mode, per-band decisions,
+ * per-slot state, entry-stack policy linkage), so reviewers can inspect
+ * the complete shell-fit outcome per entry class in one pass.
+ */
+export function runShellConformanceMatrix(
+  layout?: ShellLayoutInput,
+): readonly ShellConformanceMatrixOutcome[] {
+  return SHELL_BREAKPOINT_MATRIX.map((matrixCase) => {
+    const proof = runShellHarnessCase({
+      width: matrixCase.width,
+      height: matrixCase.height,
+      layout,
+      label: matrixCase.label,
+    });
+    const layoutState = parseShellLayout(layout);
+    const resolved = resolveEntryStateWithReason({
+      width: matrixCase.width,
+      height: matrixCase.height,
+    });
+    const bandLayouts = layoutState.preset.bands.map((band, index) =>
+      resolveBandLayout(band, resolved.state, index === 0, matrixCase.width),
+    );
+    const conformance = resolveShellConformance({
+      bands: layoutState.preset.bands,
+      bandLayouts,
+      entryState: resolved.state,
+      shortHeightConstrained: resolved.shortHeightConstrained,
+    });
+    return {
+      matrixCase,
+      proof,
+      conformance,
+      entryStateMatches: proof.entryState.id === matrixCase.expectedEntryStateId,
+      firstLanePairingMatches:
+        proof.entryState.firstLanePairingAllowed === matrixCase.expectedFirstLanePairing,
+    };
+  });
 }
 
 // Re-export the short-height threshold for convenience in harness consumers.

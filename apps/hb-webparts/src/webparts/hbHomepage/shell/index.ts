@@ -124,6 +124,7 @@ export type { ShellContainerState } from './useShellContainer.js';
 
 export {
   SHELL_BREAKPOINT_MATRIX,
+  runShellConformanceMatrix,
   runShellHarnessCase,
   runShellHarnessMatrix,
   summarizeHarnessProof,
@@ -131,6 +132,7 @@ export {
 export type {
   ShellBreakpointMatrixCase,
   ShellBreakpointMatrixOutcome,
+  ShellConformanceMatrixOutcome,
   ShellHarnessBandProof,
   ShellHarnessInput,
   ShellHarnessProof,
