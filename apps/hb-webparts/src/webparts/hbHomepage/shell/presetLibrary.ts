@@ -318,3 +318,120 @@ export function describePreset(preset: ShellPreset): PresetDescription {
 export function listApprovedPresets(): readonly PresetDescription[] {
   return [...APPROVED_PRESETS.values()].map(describePreset);
 }
+
+// =============================================================================
+// Canonical preset policy — shell-governed semantics and override permissions
+// -----------------------------------------------------------------------------
+// A shell preset is canonical when it obeys every rule below. Non-canonical
+// presets still parse and render, but validation emits stable diagnostics so
+// reviewers and a future maintainer control panel can see drift.
+// =============================================================================
+
+export const PRESET_CANONICAL_POLICY = {
+  /**
+   * Bands with no active occupant are non-canonical. They are tolerated for
+   * back-compat (e.g., DEFAULT_PRESET still keeps an empty newsroom band to
+   * satisfy historical `protectedBandSemantics`), but validation surfaces
+   * NON_CANONICAL_EMPTY_BAND info-diagnostics so future authoring can
+   * eliminate them.
+   */
+  allowEmptyBands: false,
+
+  /**
+   * Semantic roles that MAY repeat across bands in a single preset. Every
+   * other BandSemanticRole must appear at most once.
+   */
+  semanticRolesAllowedToRepeat: ['operational-spotlight'] as const,
+
+  /**
+   * Canonical band ordering expectations.
+   *   - The 'recognition' semantic role, if present, must be the last band.
+   *   - The entry band (first band) is implicitly the preset's anchor and
+   *     must contain at least one active occupant.
+   */
+  recognitionMustBeLast: true,
+  entryBandMustBeNonEmpty: true,
+} as const;
+
+/**
+ * Which preset-derived decisions a future maintainer control panel may
+ * mutate through the persisted-policy contract, and which remain code-
+ * governed. See Prompt-02's `PERSISTED_POLICY_EXAMPLES` and Prompt-01's
+ * `SHELL_GOVERNANCE_MODEL` for the authoritative enforcement seams.
+ */
+export const PRESET_MUTATION_PERMISSIONS = {
+  mutable: {
+    presetSelection: 'Choose any preset from APPROVED_PRESETS.',
+    slotRoleWithinBand: 'Swap primary/secondary/compact within a band, subject to occupant.allowedSlotRoles.',
+    columnSpanWithinBand: 'Swap major/minor/full within a band, subject to pairing comfort.',
+    optionalOccupantVisibility: 'Hide occupants whose visibilityEligibility.hideableByMaintainer is true.',
+    limitedReorderWithinCompatibleBands: 'Move occupants whose reorderDomain permits it (within-band or within-compatible-bands).',
+    compactVsStandardTreatment: 'Prefer compact or standard rendering where the occupant supports both.',
+  },
+  immutable: {
+    presetLibraryMembership: 'New presets are code-authored only.',
+    bandSemanticRole: 'A band\'s semanticRole is fixed at preset-author time.',
+    bandOrder: 'Band order is fixed at preset-author time (subject to recognition-last rule).',
+    prohibitedPairings: 'Prohibited pairings from SHELL_PROTECTED_DECISIONS cannot be introduced.',
+    protectedBandSemantics: 'Protected semantic roles cannot be removed from a preset.',
+    entryStateRules: 'All PROTECTED_ENTRY_STATE_RULES are code-governed.',
+    maxDominantPerBand: 'Dominance ceiling is code-governed.',
+    reorderDomainLocked: 'Locked occupants cannot be moved by any maintainer action.',
+    visibilityEligibilityLocked: 'Non-hideable occupants cannot be hidden by any maintainer action.',
+  },
+} as const;
+
+export interface CanonicalDiagnostic {
+  readonly severity: 'info' | 'warning' | 'error';
+  readonly code: string;
+  readonly message: string;
+}
+
+/**
+ * Evaluate a preset against the canonical policy and return diagnostics.
+ * Does not mutate. Callers merge results into their own diagnostic streams.
+ */
+export function validatePresetCanonicalSemantics(preset: ShellPreset): readonly CanonicalDiagnostic[] {
+  const diagnostics: CanonicalDiagnostic[] = [];
+
+  preset.bands.forEach((band, index) => {
+    const hasActive = band.slots.some((s) => s.occupantId !== null);
+    if (!hasActive) {
+      const severity: CanonicalDiagnostic['severity'] =
+        index === 0 && PRESET_CANONICAL_POLICY.entryBandMustBeNonEmpty ? 'error' : 'info';
+      diagnostics.push({
+        severity,
+        code: index === 0 ? 'NON_CANONICAL_EMPTY_ENTRY_BAND' : 'NON_CANONICAL_EMPTY_BAND',
+        message: `Band "${band.id}" (semanticRole: ${band.semanticRole}) has no active occupant.`,
+      });
+    }
+  });
+
+  const seen = new Map<string, number>();
+  for (const band of preset.bands) {
+    seen.set(band.semanticRole, (seen.get(band.semanticRole) ?? 0) + 1);
+  }
+  const allowedToRepeat = new Set<string>(PRESET_CANONICAL_POLICY.semanticRolesAllowedToRepeat);
+  for (const [role, count] of seen) {
+    if (count > 1 && !allowedToRepeat.has(role)) {
+      diagnostics.push({
+        severity: 'warning',
+        code: 'NON_CANONICAL_SEMANTIC_REUSE',
+        message: `SemanticRole "${role}" appears ${count} times in preset "${preset.id}"; only ${[...allowedToRepeat].join(', ')} may repeat.`,
+      });
+    }
+  }
+
+  if (PRESET_CANONICAL_POLICY.recognitionMustBeLast) {
+    const recognitionIndex = preset.bands.findIndex((b) => b.semanticRole === 'recognition');
+    if (recognitionIndex !== -1 && recognitionIndex !== preset.bands.length - 1) {
+      diagnostics.push({
+        severity: 'warning',
+        code: 'NON_CANONICAL_BAND_ORDER',
+        message: `Band with semanticRole "recognition" must be the last band in preset "${preset.id}".`,
+      });
+    }
+  }
+
+  return diagnostics;
+}

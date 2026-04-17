@@ -1,5 +1,5 @@
 import { DEFAULT_PRESET } from './defaultPreset.js';
-import { getPresetOrDefault } from './presetLibrary.js';
+import { getPresetOrDefault, validatePresetCanonicalSemantics } from './presetLibrary.js';
 import { OCCUPANT_REGISTRY, areOccupantsPairableInBand } from './occupantRegistry.js';
 import { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
 import { isProminenceAllowed } from './slotComfortResolver.js';
@@ -164,6 +164,14 @@ function validatePreset(
         ),
       );
     }
+  }
+
+  const canonicalDiagnostics = validatePresetCanonicalSemantics({
+    ...preset,
+    bands: validatedBands,
+  });
+  for (const d of canonicalDiagnostics) {
+    diagnostics.push(diagnostic(d.severity, d.code, d.message));
   }
 
   return { ...preset, bands: validatedBands };

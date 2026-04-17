@@ -14,7 +14,11 @@ import {
   APPROVED_PRESETS,
   describePreset,
   listApprovedPresets,
+  validatePresetCanonicalSemantics,
+  PRESET_CANONICAL_POLICY,
+  PRESET_MUTATION_PERMISSIONS,
 } from '../presetLibrary.js';
+import type { ShellPreset } from '../shellTypes.js';
 import {
   getGovernanceCategory,
   isBoundedConfigurable,
@@ -302,6 +306,107 @@ describe('governance enforcement in overrides', () => {
       );
       expect(governanceErrors, `preset "${id}" produced governance errors`).toHaveLength(0);
     }
+  });
+});
+
+describe('canonical preset policy', () => {
+  it('exposes the canonical policy constant with expected rules', () => {
+    expect(PRESET_CANONICAL_POLICY.allowEmptyBands).toBe(false);
+    expect(PRESET_CANONICAL_POLICY.semanticRolesAllowedToRepeat).toContain('operational-spotlight');
+    expect(PRESET_CANONICAL_POLICY.recognitionMustBeLast).toBe(true);
+    expect(PRESET_CANONICAL_POLICY.entryBandMustBeNonEmpty).toBe(true);
+  });
+
+  it('produces no warnings or errors for EDITORIAL, OPS-SAFETY, and COMPACT-LINEAR presets', () => {
+    for (const preset of [EDITORIAL_FOCUS_PRESET, OPERATIONS_SAFETY_PRESET, COMPACT_LINEAR_PRESET]) {
+      const diags = validatePresetCanonicalSemantics(preset);
+      const serious = diags.filter((d) => d.severity !== 'info');
+      expect(serious, `preset "${preset.id}" canonical issues: ${JSON.stringify(serious)}`).toHaveLength(0);
+    }
+  });
+
+  it('surfaces NON_CANONICAL_EMPTY_BAND on DEFAULT_PRESET (historical empty newsroom band)', () => {
+    const diags = validatePresetCanonicalSemantics(DEFAULT_PRESET);
+    expect(diags.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(true);
+  });
+
+  it('emits NON_CANONICAL_EMPTY_ENTRY_BAND as error when entry band has no active occupant', () => {
+    const bad: ShellPreset = {
+      id: 'bad-entry',
+      title: 'bad',
+      bands: [
+        {
+          id: 'b1',
+          semanticRole: 'communications-editorial',
+          slots: [{ id: 's1', occupantId: null, role: 'primary', columnSpan: 'full' }],
+          maxDominantOccupants: 1,
+        },
+        ...COMPACT_LINEAR_PRESET.bands.slice(1),
+      ],
+    };
+    const diags = validatePresetCanonicalSemantics(bad);
+    expect(diags.some((d) => d.code === 'NON_CANONICAL_EMPTY_ENTRY_BAND' && d.severity === 'error')).toBe(true);
+  });
+
+  it('emits NON_CANONICAL_SEMANTIC_REUSE when a non-repeatable role repeats', () => {
+    const bad: ShellPreset = {
+      ...COMPACT_LINEAR_PRESET,
+      id: 'bad-semantic-reuse',
+      bands: [
+        ...COMPACT_LINEAR_PRESET.bands,
+        {
+          id: 'dup-people-culture',
+          semanticRole: 'people-culture',
+          slots: [{ id: 's-dup', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'full' }],
+          maxDominantOccupants: 1,
+        },
+      ],
+    };
+    const diags = validatePresetCanonicalSemantics(bad);
+    expect(diags.some((d) => d.code === 'NON_CANONICAL_SEMANTIC_REUSE')).toBe(true);
+  });
+
+  it('permits operational-spotlight to repeat without diagnostic', () => {
+    const diags = validatePresetCanonicalSemantics(COMPACT_LINEAR_PRESET);
+    expect(diags.some((d) => d.code === 'NON_CANONICAL_SEMANTIC_REUSE')).toBe(false);
+  });
+
+  it('emits NON_CANONICAL_BAND_ORDER when recognition is not last', () => {
+    const bad: ShellPreset = {
+      ...COMPACT_LINEAR_PRESET,
+      id: 'bad-recognition-position',
+      bands: [COMPACT_LINEAR_PRESET.bands[COMPACT_LINEAR_PRESET.bands.length - 1], ...COMPACT_LINEAR_PRESET.bands.slice(0, -1)],
+    };
+    const diags = validatePresetCanonicalSemantics(bad);
+    expect(diags.some((d) => d.code === 'NON_CANONICAL_BAND_ORDER')).toBe(true);
+  });
+
+  it('parseShellLayout surfaces canonical diagnostics for DEFAULT_PRESET', () => {
+    const result = parseShellLayout({ presetId: 'default-v2' });
+    expect(result.diagnostics.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(true);
+  });
+});
+
+describe('preset mutation permissions', () => {
+  it('exposes mutable and immutable keys', () => {
+    expect(Object.keys(PRESET_MUTATION_PERMISSIONS.mutable).length).toBeGreaterThan(0);
+    expect(Object.keys(PRESET_MUTATION_PERMISSIONS.immutable).length).toBeGreaterThan(0);
+  });
+
+  it('immutable set explicitly lists protected shell rules', () => {
+    const keys = Object.keys(PRESET_MUTATION_PERMISSIONS.immutable);
+    expect(keys).toContain('prohibitedPairings');
+    expect(keys).toContain('entryStateRules');
+    expect(keys).toContain('reorderDomainLocked');
+    expect(keys).toContain('visibilityEligibilityLocked');
+  });
+
+  it('mutable set aligns with persisted-policy configurable decisions', () => {
+    const mutableKeys = Object.keys(PRESET_MUTATION_PERMISSIONS.mutable);
+    expect(mutableKeys).toContain('presetSelection');
+    expect(mutableKeys).toContain('optionalOccupantVisibility');
+    expect(mutableKeys).toContain('limitedReorderWithinCompatibleBands');
+    expect(mutableKeys).toContain('compactVsStandardTreatment');
   });
 });
 
