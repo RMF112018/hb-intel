@@ -66,6 +66,11 @@ function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry 
     leadEstimatorUpn: '',
     supportingEstimatorUpns: [],
     procoreProject: '',
+    primarySiteUrl: 'https://example.com',
+    legacyFallbackFolderUrl: '',
+    legacyFallbackSourceYear: null,
+    legacyFallbackMatchStatus: '',
+    launchTargetKind: 'primary-site',
     hasSiteUrl: true,
     dataQuality: {
       classification: 'complete',

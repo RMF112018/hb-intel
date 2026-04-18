@@ -26,6 +26,7 @@ export type {
   ProjectSiteDataIssueCode,
   IProjectSiteLaunchStatus,
   ProjectSiteLaunchState,
+  ProjectSiteLaunchTargetKind,
   ProjectSiteLaunchReasonCode,
 } from './types.js';
 

@@ -1,10 +1,13 @@
 import type {
   IProjectSiteDataQuality,
   IProjectSiteLaunchStatus,
+  ProjectSiteLaunchTargetKind,
 } from './types.js';
 
 export interface ProjectSiteLaunchInput {
-  hasSiteUrl: boolean;
+  hasPrimarySiteUrl: boolean;
+  hasLegacyFallbackFolderUrl: boolean;
+  launchTargetKind: ProjectSiteLaunchTargetKind;
   projectStage: string;
   dataQuality: IProjectSiteDataQuality;
 }
@@ -30,6 +33,7 @@ function isInactiveStage(stage: string): boolean {
 
 export function deriveProjectSiteLaunchStatus(input: ProjectSiteLaunchInput): IProjectSiteLaunchStatus {
   const inactiveStage = isInactiveStage(input.projectStage);
+  const hasLaunchUrl = input.hasPrimarySiteUrl || input.hasLegacyFallbackFolderUrl;
 
   if (hasCriticalDataIssueBeyondProvisioning(input.dataQuality)) {
     return {
@@ -40,7 +44,25 @@ export function deriveProjectSiteLaunchStatus(input: ProjectSiteLaunchInput): IP
     };
   }
 
-  if (input.hasSiteUrl) {
+  if (hasLaunchUrl) {
+    if (input.launchTargetKind === 'legacy-fallback') {
+      if (inactiveStage) {
+        return {
+          state: 'archived',
+          reasonCode: 'inactive-stage-legacy-fallback',
+          isLaunchable: true,
+          userMessage: 'Project is marked inactive/archived; legacy project files remain available for reference.',
+        };
+      }
+
+      return {
+        state: 'live',
+        reasonCode: 'legacy-fallback-ready',
+        isLaunchable: true,
+        userMessage: 'Legacy project files are available from the fallback registry.',
+      };
+    }
+
     if (inactiveStage) {
       return {
         state: 'archived',

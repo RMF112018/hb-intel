@@ -15,7 +15,9 @@ function quality(issues: IProjectSiteDataQuality['issues'] = []): IProjectSiteDa
 describe('deriveProjectSiteLaunchStatus', () => {
   it('classifies launch-ready live records', () => {
     const result = deriveProjectSiteLaunchStatus({
-      hasSiteUrl: true,
+      hasPrimarySiteUrl: true,
+      hasLegacyFallbackFolderUrl: false,
+      launchTargetKind: 'primary-site',
       projectStage: 'Active',
       dataQuality: quality([]),
     });
@@ -25,7 +27,9 @@ describe('deriveProjectSiteLaunchStatus', () => {
 
   it('classifies provisioning when site is not yet available', () => {
     const result = deriveProjectSiteLaunchStatus({
-      hasSiteUrl: false,
+      hasPrimarySiteUrl: false,
+      hasLegacyFallbackFolderUrl: false,
+      launchTargetKind: 'none',
       projectStage: 'Preconstruction',
       dataQuality: quality(['missing-site-url']),
     });
@@ -35,7 +39,9 @@ describe('deriveProjectSiteLaunchStatus', () => {
 
   it('classifies archived/inactive records', () => {
     const withSite = deriveProjectSiteLaunchStatus({
-      hasSiteUrl: true,
+      hasPrimarySiteUrl: true,
+      hasLegacyFallbackFolderUrl: false,
+      launchTargetKind: 'primary-site',
       projectStage: 'Archived',
       dataQuality: quality([]),
     });
@@ -43,7 +49,9 @@ describe('deriveProjectSiteLaunchStatus', () => {
     expect(withSite.isLaunchable).toBe(true);
 
     const withoutSite = deriveProjectSiteLaunchStatus({
-      hasSiteUrl: false,
+      hasPrimarySiteUrl: false,
+      hasLegacyFallbackFolderUrl: false,
+      launchTargetKind: 'none',
       projectStage: 'Closed',
       dataQuality: quality(['missing-site-url']),
     });
@@ -53,11 +61,26 @@ describe('deriveProjectSiteLaunchStatus', () => {
 
   it('classifies attention-needed when critical non-provisioning issues exist', () => {
     const result = deriveProjectSiteLaunchStatus({
-      hasSiteUrl: true,
+      hasPrimarySiteUrl: true,
+      hasLegacyFallbackFolderUrl: false,
+      launchTargetKind: 'primary-site',
       projectStage: 'Active',
       dataQuality: quality(['invalid-year']),
     });
     expect(result.state).toBe('attention-needed');
     expect(result.isLaunchable).toBe(false);
+  });
+
+  it('classifies launch-ready legacy fallback records', () => {
+    const result = deriveProjectSiteLaunchStatus({
+      hasPrimarySiteUrl: false,
+      hasLegacyFallbackFolderUrl: true,
+      launchTargetKind: 'legacy-fallback',
+      projectStage: 'Active',
+      dataQuality: quality([]),
+    });
+    expect(result.state).toBe('live');
+    expect(result.reasonCode).toBe('legacy-fallback-ready');
+    expect(result.isLaunchable).toBe(true);
   });
 });

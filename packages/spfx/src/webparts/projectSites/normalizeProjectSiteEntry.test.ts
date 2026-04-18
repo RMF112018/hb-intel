@@ -30,8 +30,10 @@ function createItem(overrides?: Record<string, unknown>): Record<string, unknown
 describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
   it('extracts plain string URL from field_23', () => {
     const result = normalizeProjectSiteEntry(createItem());
+    expect(result.primarySiteUrl).toBe('https://hedrickbrotherscom.sharepoint.com/sites/25-244-01TheWellingtonEstateHomes');
     expect(result.siteUrl).toBe('https://hedrickbrotherscom.sharepoint.com/sites/25-244-01TheWellingtonEstateHomes');
     expect(result.hasSiteUrl).toBe(true);
+    expect(result.launchTargetKind).toBe('primary-site');
     expect(result.dataQuality.classification).toBe('complete');
     expect(result.dataQuality.issues).toEqual([]);
     expect(result.launchStatus.state).toBe('live');
@@ -55,8 +57,10 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
 
   it('returns empty and hasSiteUrl=false when field_23 is null', () => {
     const result = normalizeProjectSiteEntry(createItem({ field_23: null }));
+    expect(result.primarySiteUrl).toBe('');
     expect(result.siteUrl).toBe('');
     expect(result.hasSiteUrl).toBe(false);
+    expect(result.launchTargetKind).toBe('none');
     expect(result.dataQuality.classification).toBe('partial');
     expect(result.dataQuality.issues).toContain('missing-site-url');
     expect(result.launchStatus.state).toBe('provisioning');
@@ -85,6 +89,36 @@ describe('normalizeProjectSiteEntry — SiteUrl (field_23)', () => {
     expect(result.dataQuality.classification).toBe('malformed');
     expect(result.dataQuality.issues).toContain('malformed-site-url');
     expect(result.launchStatus.state).toBe('attention-needed');
+  });
+
+  it('uses legacy fallback folder when primary site is missing', () => {
+    const result = normalizeProjectSiteEntry(createItem({
+      field_23: '',
+      __legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2F2025Projects%2FShared%20Documents%2F25%2D244%2D01',
+      __legacyFallbackSourceYear: 2025,
+      __legacyFallbackMatchStatus: 'matched',
+    }));
+
+    expect(result.primarySiteUrl).toBe('');
+    expect(result.legacyFallbackFolderUrl).toContain('/sites/2025Projects/');
+    expect(result.siteUrl).toBe(result.legacyFallbackFolderUrl);
+    expect(result.launchTargetKind).toBe('legacy-fallback');
+    expect(result.launchStatus.isLaunchable).toBe(true);
+    expect(result.launchStatus.reasonCode).toBe('legacy-fallback-ready');
+  });
+
+  it('keeps primary site precedence when both primary and fallback are present', () => {
+    const result = normalizeProjectSiteEntry(createItem({
+      field_23: 'https://hedrickbrotherscom.sharepoint.com/sites/25-244-01TheWellingtonEstateHomes',
+      __legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2025Projects/Shared%20Documents',
+      __legacyFallbackSourceYear: 2025,
+      __legacyFallbackMatchStatus: 'matched',
+    }));
+
+    expect(result.launchTargetKind).toBe('primary-site');
+    expect(result.primarySiteUrl).toContain('/sites/25-244-01TheWellingtonEstateHomes');
+    expect(result.siteUrl).toBe(result.primarySiteUrl);
+    expect(result.legacyFallbackFolderUrl).toContain('/sites/2025Projects/');
   });
 });
 

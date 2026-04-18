@@ -16,8 +16,9 @@ import type {
   IProjectSiteEntry,
   IProjectSiteDataQuality,
   ProjectSiteDataIssueCode,
+  ProjectSiteLaunchTargetKind,
 } from './types.js';
-import { SP_PROJECTS_FIELDS, isValidYear } from './types.js';
+import { PROJECT_SITES_FALLBACK_FIELDS, SP_PROJECTS_FIELDS, isValidYear } from './types.js';
 import { deriveProjectSiteLaunchStatus } from './projectSiteLaunchState.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -168,17 +169,36 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
 
   const projectName = safeString(projectNameRaw) || parsedName || '(Untitled Project)';
   const projectNumber = safeString(projectNumberRaw) || parsedNumber;
-  const rawSiteUrl = extractUrl(siteUrlRaw);
-  const siteUrl = isHttpUrl(rawSiteUrl) ? rawSiteUrl : '';
+  const rawPrimarySiteUrl = extractUrl(siteUrlRaw);
+  const primarySiteUrl = isHttpUrl(rawPrimarySiteUrl) ? rawPrimarySiteUrl : '';
+
+  const rawLegacyFallbackFolderUrl = extractUrl(raw[PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_FOLDER_URL]);
+  const legacyFallbackFolderUrl = isHttpUrl(rawLegacyFallbackFolderUrl) ? rawLegacyFallbackFolderUrl : '';
+  const legacyFallbackSourceYearRaw = raw[PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_SOURCE_YEAR];
+  const legacyFallbackSourceYear =
+    typeof legacyFallbackSourceYearRaw === 'number' && Number.isInteger(legacyFallbackSourceYearRaw)
+      ? legacyFallbackSourceYearRaw
+      : null;
+  const legacyFallbackMatchStatusRaw = safeString(raw[PROJECT_SITES_FALLBACK_FIELDS.LEGACY_FALLBACK_MATCH_STATUS]);
+  const legacyFallbackMatchStatus: IProjectSiteEntry['legacyFallbackMatchStatus'] =
+    legacyFallbackMatchStatusRaw === 'matched' ? 'matched' : '';
+
+  const launchTargetKind: ProjectSiteLaunchTargetKind = primarySiteUrl
+    ? 'primary-site'
+    : legacyFallbackFolderUrl
+      ? 'legacy-fallback'
+      : 'none';
+  const siteUrl = launchTargetKind === 'primary-site' ? primarySiteUrl : legacyFallbackFolderUrl;
 
   const issues: ProjectSiteDataIssueCode[] = [];
   if (!(safeString(projectNameRaw) || parsedName)) issues.push('missing-project-name');
   if (!(safeString(projectNumberRaw) || parsedNumber)) issues.push('missing-project-number');
   if (!isValidYear(year)) issues.push('invalid-year');
-  if (!rawSiteUrl) {
+  if (!siteUrl) {
     issues.push('missing-site-url');
-  } else if (!isHttpUrl(rawSiteUrl)) {
-    issues.push('malformed-site-url');
+    if (rawPrimarySiteUrl && !primarySiteUrl && !legacyFallbackFolderUrl) {
+      issues.push('malformed-site-url');
+    }
   }
 
   const hasMalformedIssue = issues.includes('invalid-year') || issues.includes('malformed-site-url');
@@ -194,7 +214,9 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
       issues.includes('malformed-site-url'),
   };
   const launchStatus = deriveProjectSiteLaunchStatus({
-    hasSiteUrl: siteUrl.length > 0,
+    hasPrimarySiteUrl: primarySiteUrl.length > 0,
+    hasLegacyFallbackFolderUrl: legacyFallbackFolderUrl.length > 0,
+    launchTargetKind,
     projectStage: safeString(stageRaw),
     dataQuality,
   });
@@ -220,6 +242,11 @@ export function normalizeProjectSiteEntry(raw: Record<string, unknown>): IProjec
     leadEstimatorUpn: safeString(leadEstimatorUpnRaw),
     supportingEstimatorUpns: parseUpnList(supportingEstimatorUpnsRaw),
     procoreProject: safeString(procoreProjectRaw),
+    primarySiteUrl,
+    legacyFallbackFolderUrl,
+    legacyFallbackSourceYear,
+    legacyFallbackMatchStatus,
+    launchTargetKind,
     siteUrl,
     hasSiteUrl: siteUrl.length > 0,
     dataQuality,

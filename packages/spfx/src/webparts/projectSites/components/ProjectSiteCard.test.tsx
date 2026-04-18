@@ -28,6 +28,11 @@ function createEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry 
     leadEstimatorUpn: '',
     supportingEstimatorUpns: [],
     procoreProject: '',
+    primarySiteUrl: 'https://example.sharepoint.com/sites/RMC',
+    legacyFallbackFolderUrl: '',
+    legacyFallbackSourceYear: null,
+    legacyFallbackMatchStatus: '',
+    launchTargetKind: 'primary-site',
     hasSiteUrl: true,
     dataQuality: {
       classification: 'complete',
@@ -71,13 +76,44 @@ describe('ProjectSiteCard', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute(
       'aria-label',
-      'Open Riverside Medical Center project site (24-001-01)',
+      'Open Site: Riverside Medical Center (24-001-01)',
     );
   });
 
   it('renders "Open Site" action text when hasSiteUrl', () => {
     render(<ProjectSiteCard entry={createEntry()} />);
     expect(screen.getByText('Open Site')).toBeInTheDocument();
+  });
+
+  it('renders fallback action and aria label for legacy fallback launch targets', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2024Projects/Shared%20Documents',
+          primarySiteUrl: '',
+          legacyFallbackFolderUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/2024Projects/Shared%20Documents',
+          legacyFallbackSourceYear: 2024,
+          legacyFallbackMatchStatus: 'matched',
+          launchTargetKind: 'legacy-fallback',
+          launchStatus: {
+            state: 'live',
+            reasonCode: 'legacy-fallback-ready',
+            isLaunchable: true,
+            userMessage: 'Legacy project files are available from the fallback registry.',
+          },
+        })}
+      />,
+    );
+
+    const link = screen.getByRole('link');
+    expect(screen.getByText('Open Legacy Project Files')).toBeInTheDocument();
+    expect(link).toHaveAttribute(
+      'aria-label',
+      'Open Legacy Project Files: Riverside Medical Center (24-001-01)',
+    );
+    expect(
+      screen.getByText(/launch confidence: legacy fallback folder is available\./i),
+    ).toBeInTheDocument();
   });
 
   it('renders as disabled div when hasSiteUrl is false', () => {
@@ -188,7 +224,7 @@ describe('ProjectSiteCard', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute(
       'aria-label',
-      'Open Riverside Medical Center project site',
+      'Open Site: Riverside Medical Center',
     );
   });
 

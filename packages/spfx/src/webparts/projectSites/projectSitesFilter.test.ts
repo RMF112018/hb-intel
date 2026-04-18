@@ -37,6 +37,11 @@ function makeEntry(overrides?: Partial<IProjectSiteEntry>): IProjectSiteEntry {
     leadEstimatorUpn: 'lead.estimator@hedrickbrothers.com',
     supportingEstimatorUpns: ['supp1@hedrickbrothers.com'],
     procoreProject: '',
+    primarySiteUrl: 'https://example.com/sample',
+    legacyFallbackFolderUrl: '',
+    legacyFallbackSourceYear: null,
+    legacyFallbackMatchStatus: '',
+    launchTargetKind: 'primary-site',
     siteUrl: 'https://example.com/sample',
     hasSiteUrl: true,
     dataQuality: {

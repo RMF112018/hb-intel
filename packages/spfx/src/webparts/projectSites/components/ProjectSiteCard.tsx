@@ -378,6 +378,9 @@ function resolveIdentityLocation(entry: IProjectSiteEntry): string {
 }
 
 function resolveLaunchConfidenceMessage(entry: IProjectSiteEntry): string {
+  if (entry.launchTargetKind === 'legacy-fallback' && entry.launchStatus.isLaunchable) {
+    return 'Launch confidence: Legacy fallback folder is available. Access depends on your SharePoint permissions.';
+  }
   if (entry.launchStatus.state === 'live') {
     return 'Launch confidence: Site link is available. Access depends on your SharePoint permissions.';
   }
@@ -388,6 +391,16 @@ function resolveLaunchConfidenceMessage(entry: IProjectSiteEntry): string {
     return 'Launch confidence: blocked until launch-critical data issues are corrected.';
   }
   return 'Launch confidence: site is still provisioning and not launchable yet.';
+}
+
+function resolveLaunchActionLabel(entry: IProjectSiteEntry): string {
+  if (entry.launchTargetKind === 'legacy-fallback') {
+    return 'Open Legacy Project Files';
+  }
+  if (entry.launchStatus.state === 'archived') {
+    return 'View Archived Site';
+  }
+  return 'Open Site';
 }
 
 function resolveStageVariant(stage: string): StatusVariant {
@@ -527,7 +540,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
       )}
       {entry.launchStatus.isLaunchable ? (
         <span className={openSiteActionClass} aria-hidden="true">
-          {entry.launchStatus.state === 'archived' ? 'View Archived Site' : 'Open Site'} <ExternalLink size="sm" />
+          {resolveLaunchActionLabel(entry)} <ExternalLink size="sm" />
         </span>
       ) : entry.launchStatus.state === 'attention-needed' ? (
         <span className={mergeClasses(classes.provisioningLabel, isCompactLayout && classes.provisioningLabelCompact)}>
@@ -619,7 +632,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
         className={wrapperClass}
         data-project-sites-card-layout={layoutMode}
         data-project-sites-card-density={effectiveDensity}
-        aria-label={`Open ${entry.projectName} project site${entry.projectNumber ? ` (${entry.projectNumber})` : ''}`}
+        aria-label={`${resolveLaunchActionLabel(entry)}: ${entry.projectName}${entry.projectNumber ? ` (${entry.projectNumber})` : ''}`}
       >
         <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
           {bodyContent}

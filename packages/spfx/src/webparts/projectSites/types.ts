@@ -149,6 +149,11 @@ export interface IProjectSiteEntry {
   procoreProject: string;
 
   // Site state
+  primarySiteUrl: string;
+  legacyFallbackFolderUrl: string;
+  legacyFallbackSourceYear: number | null;
+  legacyFallbackMatchStatus: 'matched' | '';
+  launchTargetKind: ProjectSiteLaunchTargetKind;
   siteUrl: string;
   hasSiteUrl: boolean;
   dataQuality: IProjectSiteDataQuality;
@@ -175,12 +180,25 @@ export type ProjectSiteLaunchState =
   | 'archived'
   | 'attention-needed';
 
+export type ProjectSiteLaunchTargetKind =
+  | 'primary-site'
+  | 'legacy-fallback'
+  | 'none';
+
 export type ProjectSiteLaunchReasonCode =
   | 'live-site-ready'
+  | 'legacy-fallback-ready'
+  | 'inactive-stage-legacy-fallback'
   | 'inactive-stage-live-site'
   | 'inactive-stage-no-site'
   | 'site-not-provisioned'
   | 'critical-data-issue';
+
+export const PROJECT_SITES_FALLBACK_FIELDS = {
+  LEGACY_FALLBACK_FOLDER_URL: '__legacyFallbackFolderUrl',
+  LEGACY_FALLBACK_SOURCE_YEAR: '__legacyFallbackSourceYear',
+  LEGACY_FALLBACK_MATCH_STATUS: '__legacyFallbackMatchStatus',
+} as const;
 
 export interface IProjectSiteLaunchStatus {
   state: ProjectSiteLaunchState;
