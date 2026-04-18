@@ -1,0 +1,141 @@
+{
+	"id": "0d581040-e410-48c0-9360-356686cd9f97",
+	"deletedDateTime": null,
+	"appId": "08c399eb-a394-4087-b859-659d493f8dc7",
+	"applicationTemplateId": null,
+	"disabledByMicrosoftStatus": null,
+	"createdByAppId": "18ed3507-a475-4ccb-b669-d66bc9f2a36e",
+	"createdDateTime": "2025-12-12T15:22:24Z",
+	"displayName": "HB SharePoint Creator",
+	"description": null,
+	"groupMembershipClaims": null,
+	"identifierUris": [],
+	"isDeviceOnlyAuthSupported": null,
+	"isDisabled": null,
+	"isFallbackPublicClient": null,
+	"nativeAuthenticationApisEnabled": null,
+	"notes": null,
+	"publisherDomain": "hedrickbrothers.com",
+	"serviceManagementReference": null,
+	"signInAudience": "AzureADMyOrg",
+	"tags": [],
+	"tokenEncryptionKeyId": null,
+	"samlMetadataUrl": null,
+	"defaultRedirectUri": null,
+	"certification": null,
+	"optionalClaims": null,
+	"requestSignatureVerification": null,
+	"addIns": [],
+	"api": {
+		"acceptMappedClaims": null,
+		"knownClientApplications": [],
+		"requestedAccessTokenVersion": null,
+		"oauth2PermissionScopes": [],
+		"preAuthorizedApplications": []
+	},
+	"appRoles": [],
+	"info": {
+		"logoUrl": null,
+		"marketingUrl": null,
+		"privacyStatementUrl": null,
+		"supportUrl": null,
+		"termsOfServiceUrl": null
+	},
+	"keyCredentials": [],
+	"parentalControlSettings": {
+		"countriesBlockedForMinors": [],
+		"legalAgeGroupRule": "Allow"
+	},
+	"passwordCredentials": [
+		{
+			"customKeyIdentifier": null,
+			"displayName": "TestingPhase",
+			"endDateTime": "2026-10-10T12:50:11.252Z",
+			"hint": "kwv",
+			"keyId": "1b85903a-947f-4e23-ba50-b136c9e598d7",
+			"secretText": null,
+			"startDateTime": "2026-04-13T12:50:11.252Z"
+		}
+	],
+	"publicClient": {
+		"redirectUris": []
+	},
+	"requiredResourceAccess": [
+		{
+			"resourceAppId": "00000003-0000-0ff1-ce00-000000000000",
+			"resourceAccess": [
+				{
+					"id": "56680e0d-d2a3-4ae1-80d8-3c4f2100e3d0",
+					"type": "Scope"
+				}
+			]
+		},
+		{
+			"resourceAppId": "00000003-0000-0000-c000-000000000000",
+			"resourceAccess": [
+				{
+					"id": "4e46008b-f24c-477d-8fff-7bb4ec7aafe0",
+					"type": "Scope"
+				},
+				{
+					"id": "5a54b8b3-347c-476d-8f8e-42d5c7424d29",
+					"type": "Scope"
+				},
+				{
+					"id": "65e50fdc-43b7-4915-933e-e8138f11f40a",
+					"type": "Scope"
+				},
+				{
+					"id": "89fe6a52-be36-487e-b7d8-d061c450a026",
+					"type": "Scope"
+				},
+				{
+					"id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d",
+					"type": "Scope"
+				},
+				{
+					"id": "62a82d76-70ea-41e2-9197-370581804d09",
+					"type": "Role"
+				},
+				{
+					"id": "a82116e5-55eb-4c41-a434-62fe8a61c773",
+					"type": "Role"
+				},
+				{
+					"id": "0c0bf378-bf22-4481-8f81-9e89a9b4960a",
+					"type": "Role"
+				},
+				{
+					"id": "9492366f-7969-46a4-8d15-ed1a20078fff",
+					"type": "Role"
+				}
+			]
+		}
+	],
+	"verifiedPublisher": {
+		"displayName": null,
+		"verifiedPublisherId": null,
+		"addedDateTime": null
+	},
+	"web": {
+		"homePageUrl": null,
+		"logoutUrl": null,
+		"redirectUris": [],
+		"implicitGrantSettings": {
+			"enableAccessTokenIssuance": false,
+			"enableIdTokenIssuance": false
+		},
+		"redirectUriSettings": []
+	},
+	"servicePrincipalLockConfiguration": {
+		"isEnabled": true,
+		"allProperties": true,
+		"credentialsWithUsageVerify": true,
+		"credentialsWithUsageSign": true,
+		"identifierUris": false,
+		"tokenEncryptionKeyId": true
+	},
+	"spa": {
+		"redirectUris": []
+	}
+}

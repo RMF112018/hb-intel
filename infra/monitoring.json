@@ -1,0 +1,330 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.42.1.51946",
+      "templateHash": "16791405621447651291"
+    }
+  },
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "metadata": {
+        "description": "Environment suffix for resource naming"
+      }
+    },
+    "appInsightsResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Full resource ID of the Application Insights instance"
+      }
+    },
+    "actionGroupEmail": {
+      "type": "string",
+      "metadata": {
+        "description": "Email address for alert notifications"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region; defaults to the resource group location"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/actionGroups",
+      "apiVersion": "2023-01-01",
+      "name": "[format('ag-hbintel-{0}', parameters('environmentName'))]",
+      "location": "global",
+      "properties": {
+        "groupShortName": "HBIntel",
+        "enabled": true,
+        "emailReceivers": [
+          {
+            "name": "PlatformOps",
+            "emailAddress": "[parameters('actionGroupEmail')]",
+            "useCommonAlertSchema": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-auth-failure-burst-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Auth Failure Burst",
+        "description": "More than 3 auth.bearer.error events in 1 minute — possible auth misconfiguration or attack.",
+        "severity": 1,
+        "enabled": true,
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT1M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where message has \"auth.bearer.error\" or customDimensions._telemetryType == \"customEvent\" and name == \"auth.bearer.error\" | summarize count() by bin(timestamp, 1m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 3,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-handler-error-rate-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Handler Error Rate Elevated",
+        "description": "More than 10 handler.error events in 5 minutes — elevated backend failure rate.",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT5M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where customDimensions._telemetryType == \"customEvent\" and name == \"handler.error\" | summarize count() by bin(timestamp, 5m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 10,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-provisioning-saga-failure-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Provisioning Saga Failure",
+        "description": "A provisioning saga entered the failure/compensation path — project site setup did not complete.",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT1M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where customDimensions._telemetryType == \"customEvent\" and name == \"ProvisioningSagaFailed\" | summarize count() by bin(timestamp, 1m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-timer-function-failure-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Timer Function Failure",
+        "description": "Nightly Step 5 provisioning timer or idempotency cleanup encountered an error.",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT5M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where customDimensions._telemetryType == \"customEvent\" and (name == \"ProvisioningTimerJobFailed\" or name == \"idempotency.cleanup.error\") | summarize count() by bin(timestamp, 5m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-legacy-fallback-discovery-failure-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Legacy Fallback Discovery Failure Burst",
+        "description": "Legacy fallback discovery experienced repeated failures within 10 minutes.",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT10M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where message has \"Discovery failed for year=\" or message has \"Legacy fallback discovery timer failed.\" or message has \"LEGACY_FALLBACK_DISCOVERY_FAILED\" | summarize count() by bin(timestamp, 10m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 2,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-legacy-fallback-write-failure-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Legacy Fallback Registry/Sync Write Failure",
+        "description": "Legacy fallback persistence path failed to write registry or sync-run state.",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT5M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where message has \"legacy-fallback.registry-write-failed\" or message has \"legacy-fallback.sync-run-write-failed\" | summarize count() by bin(timestamp, 5m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2023-03-15-preview",
+      "name": "[format('alert-legacy-fallback-match-anomaly-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "Legacy Fallback Match Anomaly Warning",
+        "description": "Legacy fallback run exceeded configured unmatched/review-required threshold.",
+        "severity": 3,
+        "enabled": true,
+        "evaluationFrequency": "PT10M",
+        "windowSize": "PT10M",
+        "scopes": [
+          "[parameters('appInsightsResourceId')]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where message has \"legacy-fallback.match-anomaly threshold exceeded\" | summarize count() by bin(timestamp, 10m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', format('ag-hbintel-{0}', parameters('environmentName')))]"
+      ]
+    }
+  ]
+}
