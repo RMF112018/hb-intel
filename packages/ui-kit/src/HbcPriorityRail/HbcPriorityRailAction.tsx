@@ -1,20 +1,21 @@
 /**
- * HbcPriorityRailAction — Quick-launch tile.
+ * HbcPriorityRailAction — Launcher tile (flagship) / action row (default).
  *
- * Renders a single action as a premium branded launcher tile with one
- * dominant click target: icon frame + title. External links carry a
- * small corner cue; internal links render nothing else. No trailing
- * launch chip, no description line, no badge in the tile body — the
- * flagship homepage surface is a quick-launch grid, not a command band.
+ * Flagship context (homepage-flagship): a premium HB-branded launcher
+ * tile. Vertical stack — icon-on-top, title below. Brand-tinted filled
+ * background (not a white card). One dominant click target. No
+ * description, no badge, no trailing launch chip.
  *
- * Default (non-flagship) consumers still get description + badge via
- * the CSS layer so admin-preview and non-homepage embeds keep the
- * richer row treatment.
+ * Default context: stacked action row for admin preview and non-
+ * homepage embeds. Horizontal layout with icon + title + optional
+ * description + optional badge.
+ *
+ * A single component serves both contexts; the launcher-vs-row layout
+ * is carried by CSS module class selectors on the surface root.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowUpRight } from 'lucide-react';
 import { HbcPremiumBadge } from '../HbcPremiumBadge/index.js';
 import type { HbcPriorityRailActionProps, PriorityRailBadgeVariant } from './types.js';
 import styles from './priority-rail.module.css';
@@ -42,8 +43,8 @@ export function HbcPriorityRailAction({
 
   return (
     <motion.a
-      whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.12 }}
       className={clsx(styles.item, compact && styles.itemCompact, className)}
       data-hbc-ui="priority-rail-action"
@@ -52,7 +53,7 @@ export function HbcPriorityRailAction({
     >
       {IconComponent ? (
         <span className={styles.itemIcon} aria-hidden="true">
-          <IconComponent size={compact ? 16 : 20} strokeWidth={2} />
+          <IconComponent size={compact ? 16 : 24} strokeWidth={2} />
         </span>
       ) : null}
       <span className={styles.itemContent}>
@@ -68,11 +69,6 @@ export function HbcPriorityRailAction({
             status={BADGE_MAP[action.badge.variant]}
             size="sm"
           />
-        </span>
-      ) : null}
-      {isExternal ? (
-        <span className={clsx(styles.itemLaunch, styles.itemLaunchExternal)} aria-hidden="true">
-          <ArrowUpRight size={12} strokeWidth={2.25} className={styles.itemExternal} />
         </span>
       ) : null}
       {isExternal ? (

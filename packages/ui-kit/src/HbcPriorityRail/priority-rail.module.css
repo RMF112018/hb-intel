@@ -2,17 +2,16 @@
  * HbcPriorityRail — Priority Actions surface styles.
  *
  * Two presentation contexts:
- *   - homepage-flagship: a flat launcher band rendered beneath the hero.
- *     A single responsive grid of icon+title tiles. No masthead, no
- *     section headers, no numbering, no eyebrow, no featured slot, no
- *     persistent launch chip. Each tile is one click target.
+ *   - homepage-flagship: a premium HB-branded launcher band beneath
+ *     the hero. Vertical tile anatomy — icon on top, title below.
+ *     Brand-tinted filled background (not a white card). Flat,
+ *     responsive grid. This is the Quick-Links-derived launcher.
  *   - default: stacked action list for admin preview and non-homepage
- *     embeds. Still renders section headers, separators, and richer row
- *     chrome (description + badge), via the same action component.
+ *     embeds. Horizontal rows with icon + title + description + badge.
  *
  * Tokens: all color/geometry read from HB semantic tokens; no hex
- * literals in governing surfaces. Brand gradient values fall back to
- * doctrine defaults when tokens are unavailable (e.g. in test envs).
+ * literals in governing surfaces. Brand values fall back to doctrine
+ * defaults when tokens are unavailable (test environments).
  */
 
 /* ── Surface root ─────────────────────────────────────────── */
@@ -23,6 +22,8 @@
   --hbc-pr-text-rgb: var(--hb-text-primary-rgb, 26, 26, 26);
   --hbc-pr-brand: var(--hb-brand-primary, #225391);
   --hbc-pr-brand-rgb: var(--hb-brand-primary-rgb, 34, 83, 145);
+  --hbc-pr-brand-deep-rgb: var(--hb-brand-primary-deep-rgb, 20, 52, 96);
+  --hbc-pr-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
   --hbc-pr-warning-rgb: var(--hb-warning-rgb, 229, 126, 70);
   --hbc-pr-danger: var(--hb-danger, #c4362a);
   --hbc-pr-danger-rgb: var(--hb-danger-rgb, 196, 54, 42);
@@ -40,21 +41,14 @@
   border: 1px solid rgba(var(--hbc-pr-brand-rgb), 0.1);
   overflow: hidden;
 }
-
 .contextDefault.urgencyDefault {
   border-top: 2px solid rgba(var(--hbc-pr-brand-rgb), 0.22);
 }
 .contextDefault.urgencyHigh {
   border-top: 3px solid rgba(var(--hbc-pr-warning-rgb), 0.65);
-  background: linear-gradient(180deg,
-    rgba(var(--hbc-pr-warning-rgb), 0.04) 0%,
-    rgba(var(--hbc-pr-brand-rgb), 0.025) 24%);
 }
 .contextDefault.urgencyCritical {
   border-top: 3px solid var(--hbc-pr-danger);
-  background: linear-gradient(180deg,
-    rgba(var(--hbc-pr-danger-rgb), 0.035) 0%,
-    rgba(var(--hbc-pr-brand-rgb), 0.025) 24%);
 }
 
 /* Flagship is a frameless band — tiles carry all visual authority. */
@@ -67,10 +61,23 @@
   padding: 0;
 }
 
-/* ── Flagship launcher grid (base: laptop band 900–1179px) ── */
+/* ══════════════════════════════════════════════════════════════════
+   Flagship launcher band — vertical tile anatomy
+   ══════════════════════════════════════════════════════════════════
+   This is the HB premium Quick-Links derivative:
+     • tiles stack icon-on-top, title-below (vertical)
+     • brand-tinted gradient background (no white card frame)
+     • compact height, dense grid, container-query breakpoints
+     • single click target, premium motion, corner chrome absent
+
+   The previous horizontal "white card + icon-left + title-right +
+   corner arrow" model is gone. Tiles now read as branded launcher
+   chips, not cards.
+   ══════════════════════════════════════════════════════════════════ */
+
 .launcherGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
   gap: 10px;
   padding: 0;
   list-style: none;
@@ -81,102 +88,105 @@
   min-width: 0;
 }
 
-/* Flagship tile anatomy — single anchor, icon + title, corner cue. */
 .contextHomepageFlagship .launcherTileWrap .item {
-  display: grid;
-  grid-template-columns: 40px 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  column-gap: 12px;
-  padding: 14px 16px;
-  min-height: 72px;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 16px 12px;
+  min-height: 108px;
   height: 100%;
-  border-radius: 12px;
-  background: #ffffff;
+  border-radius: 14px;
+  background: linear-gradient(
+    160deg,
+    rgba(var(--hbc-pr-brand-rgb), 0.12) 0%,
+    rgba(var(--hbc-pr-brand-rgb), 0.04) 100%
+  );
   box-shadow:
-    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.14),
-    0 1px 2px rgba(var(--hbc-pr-brand-rgb), 0.05);
+    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.18),
+    0 1px 2px rgba(var(--hbc-pr-brand-rgb), 0.06);
   color: var(--hbc-pr-text-primary);
   text-decoration: none;
   cursor: pointer;
-  transition: box-shadow 160ms ease, background-color 160ms ease, transform 160ms ease;
+  transition: box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
   position: relative;
   min-width: 0;
 }
+
 .contextHomepageFlagship .launcherTileWrap .item:hover {
-  background: linear-gradient(180deg,
-    rgba(var(--hbc-pr-brand-rgb), 0.05) 0%,
-    rgba(var(--hbc-pr-brand-rgb), 0.02) 100%);
+  background: linear-gradient(
+    160deg,
+    rgba(var(--hbc-pr-brand-rgb), 0.98) 0%,
+    rgba(var(--hbc-pr-brand-deep-rgb), 0.92) 100%
+  );
+  color: #ffffff;
   box-shadow:
-    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.34),
-    0 6px 14px rgba(var(--hbc-pr-brand-rgb), 0.14);
+    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.6),
+    0 10px 22px rgba(var(--hbc-pr-brand-rgb), 0.26);
 }
+
 .contextHomepageFlagship .launcherTileWrap .item:focus-visible {
   outline: 2px solid var(--hbc-pr-brand);
   outline-offset: 2px;
 }
 
 .contextHomepageFlagship .launcherTileWrap .itemIcon {
-  grid-column: 1;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(140deg,
-    rgba(var(--hbc-pr-brand-rgb), 0.14) 0%,
-    rgba(var(--hbc-pr-brand-rgb), 0.06) 100%);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(var(--hbc-pr-surface-rgb), 0.9);
   color: var(--hbc-pr-brand);
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.18);
-  transition: background 180ms ease, color 180ms ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.18),
+    0 1px 2px rgba(var(--hbc-pr-brand-rgb), 0.08);
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
   flex-shrink: 0;
 }
 .contextHomepageFlagship .launcherTileWrap .item:hover .itemIcon {
-  background: linear-gradient(140deg,
-    rgba(var(--hbc-pr-brand-rgb), 0.98) 0%,
-    rgba(var(--hbc-pr-brand-rgb), 0.82) 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--hbc-pr-brand);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb), 0.2),
+    0 4px 10px rgba(var(--hbc-pr-brand-deep-rgb, 20, 52, 96), 0.32);
 }
 
 .contextHomepageFlagship .launcherTileWrap .itemContent {
-  grid-column: 2;
   display: flex;
   flex-direction: column;
+  align-items: center;
   min-width: 0;
-}
-.contextHomepageFlagship .launcherTileWrap .itemTitle {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.005em;
-  color: var(--hbc-pr-text-primary);
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 100%;
 }
 
-/* Flagship tile body: title only. Description + badge are suppressed
- * at the component level (showBadge=false, no compact path). */
+.contextHomepageFlagship .launcherTileWrap .itemTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+  color: var(--hbc-pr-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+  text-align: center;
+  transition: color 180ms ease;
+}
+.contextHomepageFlagship .launcherTileWrap .item:hover .itemTitle {
+  color: #ffffff;
+}
+
+/* Launcher posture: title is the only content; description + badge
+ * live in the model but are suppressed in the tile body. */
 .contextHomepageFlagship .launcherTileWrap .itemDescription,
 .contextHomepageFlagship .launcherTileWrap .itemBadge {
   display: none;
-}
-
-/* External-link corner cue only. */
-.contextHomepageFlagship .launcherTileWrap .itemLaunchExternal {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(var(--hbc-pr-brand-rgb), 0.45);
-  transition: color 160ms ease;
-}
-.contextHomepageFlagship .launcherTileWrap .item:hover .itemLaunchExternal {
-  color: var(--hbc-pr-brand);
 }
 
 /* ── Flagship overflow — discrete trailing trigger ─────────── */
@@ -209,17 +219,21 @@
 }
 
 /* ── Breakpoint cadence (container-driven) ──────────────────
- * Phone ≤ 719      → 1 col
- * Tablet portrait  → 2 cols (720–979)
- * Tablet landscape → 3 cols (980–1179)
- * Laptop           → auto-fit 168px floor (base rule)
- * Desktop          → auto-fit 180px floor, larger gap (1180–1599)
- * Ultrawide        → auto-fit 208px floor, roomy tiles (≥1600)
- * Short-height     → compact tile height (@media) */
+ * Governs column count per display class. Tile minimums stay stable
+ * within a band so the launcher reads as a governed system, not an
+ * accidental responsive soup.
+ *   Phone              ≤719   → 2 cols
+ *   Tablet portrait    720-979 → 3 cols
+ *   Tablet landscape   980-1179 → 4 cols
+ *   Laptop             (base: auto-fit 128px)
+ *   Desktop            1180-1599 → auto-fit 132px floor
+ *   Ultrawide          ≥1600  → auto-fit 140px floor
+ *   Short-height       (media) → tighter height + smaller icon
+ */
 
 @container hbc-priority-rail (max-width: 719px) {
   .launcherGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
   .contextHomepageFlagship .overflowRegion {
@@ -232,50 +246,55 @@
 }
 @container hbc-priority-rail (min-width: 720px) and (max-width: 979px) {
   .launcherGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
   }
 }
 @container hbc-priority-rail (min-width: 980px) and (max-width: 1179px) {
   .launcherGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
   }
 }
 @container hbc-priority-rail (min-width: 1180px) and (max-width: 1599px) {
   .launcherGrid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 12px;
   }
   .contextHomepageFlagship .launcherTileWrap .item {
-    min-height: 76px;
+    min-height: 112px;
   }
 }
 @container hbc-priority-rail (min-width: 1600px) {
   .launcherGrid {
-    grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
   }
   .contextHomepageFlagship .launcherTileWrap .item {
-    min-height: 80px;
-    padding: 16px 18px;
+    min-height: 120px;
+    padding: 18px 14px;
   }
   .contextHomepageFlagship .launcherTileWrap .itemIcon {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 }
 
-/* Short-height guard — keep launcher compact when viewport height is
- * constrained (phone landscape, split panels, short projectors). */
+/* Short-height guard — compact tile height + icon when viewport is
+ * vertically constrained (phone landscape, split panels, short
+ * projectors). */
 @media (max-height: 640px) {
   .contextHomepageFlagship .launcherTileWrap .item {
-    min-height: 60px;
-    padding: 10px 14px;
+    min-height: 84px;
+    padding: 10px 10px;
+    gap: 6px;
   }
   .contextHomepageFlagship .launcherTileWrap .itemIcon {
     width: 36px;
     height: 36px;
+  }
+  .contextHomepageFlagship .launcherTileWrap .itemTitle {
+    font-size: 0.75rem;
   }
 }
 
@@ -292,7 +311,10 @@
   min-height: 52px;
 }
 
-/* ── Default-context layout variants ──────────────────────── */
+/* ══════════════════════════════════════════════════════════════════
+   Default-context (admin preview / non-homepage) — horizontal rows
+   ══════════════════════════════════════════════════════════════════ */
+
 .layoutRail {}
 .layoutGrid .items {
   display: grid;
@@ -306,7 +328,6 @@
   min-height: 36px;
 }
 
-/* ── Default-context header ───────────────────────────────── */
 .header {
   display: flex;
   align-items: center;
@@ -378,7 +399,7 @@
   flex-direction: column;
 }
 
-/* ── Action tile anatomy (shared; flagship overrides above) ── */
+/* Default-context action row — shared base; flagship overrides above. */
 .item {
   display: flex;
   align-items: center;
@@ -433,21 +454,6 @@
 .itemBadge {
   flex-shrink: 0;
 }
-.itemExternal {
-  color: rgba(var(--hbc-pr-brand-rgb), 0.35);
-  flex-shrink: 0;
-}
-.itemLaunch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-}
-.itemLaunchExternal {
-  opacity: 0.9;
-}
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -467,10 +473,6 @@
 .itemCompact .itemIcon {
   width: 24px;
   height: 24px;
-}
-.itemCompact .itemLaunch {
-  width: 18px;
-  height: 18px;
 }
 .itemSeparator {
   height: 1px;
@@ -738,7 +740,6 @@
   outline-offset: 2px;
 }
 
-/* ── Preview banner ───────────────────────────────────────── */
 .previewBanner {
   display: flex;
   align-items: center;
@@ -752,7 +753,6 @@
   color: rgba(var(--hbc-pr-brand-rgb), 0.6);
 }
 
-/* ── Reduced motion ───────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .item,
   .overflowTrigger,
@@ -765,5 +765,4 @@
   }
 }
 
-/* Context variant anchors (CVA wiring). */
 .contextDefault {}

@@ -120,12 +120,19 @@ describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
     expect(CSS_SOURCE).toMatch(/\.launcherGrid\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/);
   });
 
-  it('renders each flagship tile as a compact single-click-target row (icon + title)', () => {
+  it('renders each flagship tile as a vertical launcher chip (icon on top, title below)', () => {
     const tileBlock = CSS_SOURCE.match(
       /\.contextHomepageFlagship\s+\.launcherTileWrap\s+\.item\s*\{[^}]*\}/,
     );
     expect(tileBlock).not.toBeNull();
-    expect(tileBlock![0]).toMatch(/grid-template-columns:\s*40px\s+1fr/);
+    // Vertical anatomy: flex column, centered.
+    expect(tileBlock![0]).toMatch(/display:\s*flex/);
+    expect(tileBlock![0]).toMatch(/flex-direction:\s*column/);
+    expect(tileBlock![0]).toMatch(/align-items:\s*center/);
+    // Launcher tile is brand-tinted, not a white card.
+    expect(tileBlock![0]).toMatch(/background:\s*linear-gradient/);
+    // The old white-card background must be gone.
+    expect(tileBlock![0]).not.toMatch(/background:\s*#ffffff/);
   });
 
   it('flagship surface has no legacy command-band chrome — not even hidden (the chrome is gone, not suppressed)', () => {
