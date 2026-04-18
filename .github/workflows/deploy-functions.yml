@@ -56,8 +56,9 @@ jobs:
 
       - name: Package Functions artifact
         run: |
-          cd backend/functions
-          zip -r ../../functions-artifact.zip dist/ host.json package.json
+          pnpm exec tsx scripts/package-functions-artifact.ts \
+            --output "$GITHUB_WORKSPACE/functions-artifact.zip" \
+            --staging "$RUNNER_TEMP/functions-deploy"
 
       - uses: actions/upload-artifact@v4
         with:

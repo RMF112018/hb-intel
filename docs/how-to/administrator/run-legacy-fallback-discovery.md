@@ -6,6 +6,54 @@ This runbook covers hosted execution of the legacy fallback discovery pipeline f
 
 Prompt 04 closure target is the existing hosted Function App lane (`hb-intel-function-app`) while dedicated Prompt 03 hosting constraints are remediated.
 
+## Deployment model gate (required before publish)
+
+Capture hosting/runtime truth first and select the deployment command only after this gate:
+
+```bash
+az functionapp show -g hb-intel -n hb-intel-function-app \
+  --query "{name:name,kind:kind,sku:properties.sku,functionAppConfig:properties.functionAppConfig}" -o json
+```
+
+Then validate command support:
+
+```bash
+az functionapp deploy -h
+az functionapp deployment source config-zip -h
+func azure functionapp publish --help
+```
+
+Use the command path that is confirmed to be supported by the discovered hosting model.
+
+## Build and package artifact
+
+Build and stage the deterministic Functions deploy artifact:
+
+```bash
+pnpm exec tsx scripts/package-functions-artifact.ts \
+  --output "$PWD/functions-artifact.zip" \
+  --staging "/tmp/functions-deploy"
+```
+
+The artifact includes:
+- compiled runtime output (`dist/`)
+- host metadata (`host.json`)
+- runtime package metadata (`package.json`)
+- production dependencies required by runtime imports (`node_modules`, including `@hbc/*` runtime packages)
+
+## Deploy hosted artifact
+
+For Flex Consumption closure, deploy the packaged zip via Azure CLI:
+
+```bash
+az functionapp deploy \
+  -g hb-intel \
+  -n hb-intel-function-app \
+  --src-path "$PWD/functions-artifact.zip" \
+  --type zip \
+  --restart true
+```
+
 ## Discovery endpoints
 
 - HTTP trigger: `POST /api/admin/legacy-fallback/discovery/run`
@@ -34,7 +82,7 @@ Optional discovery controls:
 ## Run discovery manually
 
 ```bash
-FUNCTION_BASE_URL="https://hb-intel-function-app.azurewebsites.net"
+FUNCTION_BASE_URL="https://$(az functionapp show -g hb-intel -n hb-intel-function-app --query properties.defaultHostName -o tsv)"
 FUNCTION_TOKEN="<delegated-admin-bearer-token>"
 
 curl -sS -X POST "${FUNCTION_BASE_URL}/api/admin/legacy-fallback/discovery/run" \
@@ -64,6 +112,9 @@ Each registry upsert is normalized to at least:
 
 After a hosted run:
 
+1. `az functionapp function list -g hb-intel -n hb-intel-function-app` shows:
+   - `legacyFallbackDiscoveryRun`
+   - `legacyFallbackDiscoveryTimer`
 1. HBCentral list **Legacy Project Fallback Registry** contains upserted folder records.
 2. HBCentral list **Legacy Project Fallback Sync Runs** contains a run entry with counters and `SummaryJson`.
 3. Function logs include source-resolution and error telemetry for any failed year/site/drive resolution.

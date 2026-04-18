@@ -3,7 +3,7 @@
   "version": "00.000.135",
   "private": true,
   "type": "module",
-  "main": "./dist/src/index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check-types": "tsc --noEmit",
@@ -36,6 +36,7 @@
     "vitest": "^3.2.4"
   },
   "files": [
-    "dist"
+    "dist",
+    "host.json"
   ]
 }
