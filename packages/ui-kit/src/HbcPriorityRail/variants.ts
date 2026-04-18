@@ -16,9 +16,14 @@ export const priorityRailSurface = cva(styles.root, {
       grid: styles.layoutGrid,
       compact: styles.layoutCompact,
     },
+    context: {
+      default: styles.contextDefault,
+      'homepage-flagship': styles.contextHomepageFlagship,
+    },
   },
   defaultVariants: {
     urgency: 'default',
     layout: 'rail',
+    context: 'default',
   },
 });

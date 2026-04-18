@@ -314,6 +314,7 @@ export type {
   PriorityRailBadgeVariant,
   PriorityRailLayoutMode,
   PriorityRailState,
+  PriorityRailContext,
 } from './HbcPriorityRail/index.js';
 
 export type HomepageSurfaceClass =

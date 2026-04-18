@@ -20,6 +20,7 @@ vi.mock('../../priorityActionsRail/PriorityActionsRail.js', () => ({
       'data-test-mock': 'priority-actions-rail',
       'data-test-rail-band-key': (props.bandKey as string | undefined) ?? '',
       'data-test-rail-audience': (props.activeAudience as string | undefined) ?? '',
+      'data-test-rail-surface-context': (props.surfaceContext as string | undefined) ?? '',
     }),
 }));
 
@@ -71,6 +72,18 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
     expect(railNode?.getAttribute('data-test-rail-band-key')).toBe('homepage-primary');
     expect(railNode?.getAttribute('data-test-rail-audience')).toBe('field');
+  });
+
+  it('opts the embedded rail into the homepage-flagship surface context explicitly', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const actionsRegion = container.querySelector(
+      '[data-hb-homepage-entry-stack-region="priority-actions"]',
+    );
+    expect(actionsRegion?.getAttribute('data-hb-homepage-entry-stack-rail-context')).toBe(
+      'homepage-flagship',
+    );
+    const railNode = actionsRegion?.querySelector('[data-test-mock="priority-actions-rail"]');
+    expect(railNode?.getAttribute('data-test-rail-surface-context')).toBe('homepage-flagship');
   });
 
   it('omits the actions region when wrapper config disables the rail', () => {

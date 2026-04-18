@@ -169,4 +169,50 @@ describe('PriorityActionsRail runtime mapping', () => {
       expect(latest.sections?.map((section) => section.key)).toEqual(['approvals']);
     });
   });
+
+  it('defaults surfaceContext to "default" for standalone / non-homepage mounts', async () => {
+    render(<PriorityActionsRail />);
+    await waitFor(() => {
+      expect(mockSurface).toHaveBeenCalled();
+    });
+    const latest = mockSurface.mock.calls.at(-1)?.[0] as { context?: string };
+    expect(latest.context).toBe('default');
+  });
+
+  it('threads surfaceContext="homepage-flagship" into the shared surface when the wrapper opts in', async () => {
+    render(<PriorityActionsRail surfaceContext="homepage-flagship" />);
+    await waitFor(() => {
+      expect(mockSurface).toHaveBeenCalled();
+    });
+    const latest = mockSurface.mock.calls.at(-1)?.[0] as { context?: string };
+    expect(latest.context).toBe('homepage-flagship');
+  });
+
+  it('preserves compact layout + menu overflow under short-height breakpoint (regression guard)', async () => {
+    render(<PriorityActionsRail surfaceContext="homepage-flagship" />);
+    await waitFor(() => {
+      expect(mockSurface).toHaveBeenCalled();
+    });
+    act(() => {
+      resizeCallback?.(
+        [
+          {
+            contentRect: { width: 1000, height: 420 },
+            contentBoxSize: [{ inlineSize: 1000, blockSize: 420 }],
+          } as unknown as ResizeObserverEntry,
+        ],
+        {} as ResizeObserver,
+      );
+    });
+    await waitFor(() => {
+      const latest = mockSurface.mock.calls.at(-1)?.[0] as {
+        layout: string;
+        overflowStrategy: string;
+        context?: string;
+      };
+      expect(latest.layout).toBe('compact');
+      expect(latest.overflowStrategy).toBe('menu');
+      expect(latest.context).toBe('homepage-flagship');
+    });
+  });
 });

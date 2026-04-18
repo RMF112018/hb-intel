@@ -46,12 +46,14 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
           data-hb-homepage-entry-stack-order="1"
           data-hb-homepage-entry-stack-rail-band-key={rail.bandKey}
           data-hb-homepage-entry-stack-rail-audience={rail.activeAudience || undefined}
+          data-hb-homepage-entry-stack-rail-context="homepage-flagship"
           aria-label="Priority actions"
         >
           <PriorityActionsRail
             bandKey={rail.bandKey}
             activeAudience={rail.activeAudience}
             config={rail.fallbackConfig}
+            surfaceContext="homepage-flagship"
           />
         </section>
       ) : null}

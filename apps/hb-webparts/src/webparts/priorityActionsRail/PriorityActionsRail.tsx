@@ -20,6 +20,7 @@ import {
   type PriorityRailActionModel,
   type PriorityRailUrgency,
   type PriorityRailBadgeVariant,
+  type PriorityRailContext,
 } from '@hbc/ui-kit/homepage';
 import { usePriorityActionsData, invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import { resolveByBreakpoint, filterByDevice } from '../../homepage/data/priorityActionsNormalization.js';
@@ -45,6 +46,14 @@ export interface PriorityActionsRailProps {
    * owned band key without duplicating rail data-seam logic.
    */
   bandKey?: string;
+  /**
+   * Named presentation context threaded into the shared surface. Defaults
+   * to `default` for standalone / non-homepage mounts. The wrapper-owned
+   * homepage embed (`HbHomepageEntryStack`) explicitly opts into
+   * `homepage-flagship` so the homepage path cannot regress to a generic
+   * shared-surface outcome. See `HbcPriorityRailSurface`.
+   */
+  surfaceContext?: PriorityRailContext;
   isLoading?: boolean;
 }
 
@@ -148,9 +157,11 @@ function useRailContainerDimensions(ref: React.RefObject<HTMLElement | null>): P
 function ListSourcedRail({
   activeAudience,
   bandKey,
+  surfaceContext,
 }: {
   activeAudience: string | undefined;
   bandKey: string | undefined;
+  surfaceContext: PriorityRailContext;
 }): React.JSX.Element {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dimensions = useRailContainerDimensions(containerRef);
@@ -190,6 +201,7 @@ function ListSourcedRail({
         title: config.showHeading ? config.headingText || 'Priority Actions' : undefined,
         urgency: resolveUrgency(deviceItems),
         layout: presentation.layout,
+        context: surfaceContext,
         items: primaryActions,
         overflowItems: breakpoint.overflowItems.map(mapToRailAction),
         overflowLabel: config.overflowLabel,
@@ -221,9 +233,11 @@ function ListSourcedRail({
 function ManifestFallbackRail({
   config,
   activeAudience,
+  surfaceContext,
 }: {
   config: Partial<PriorityActionsRailConfig> | undefined;
   activeAudience: string | undefined;
+  surfaceContext: PriorityRailContext;
 }): React.JSX.Element {
   const normalized = normalizePriorityActionsRailConfig(config, activeAudience);
 
@@ -258,6 +272,7 @@ function ManifestFallbackRail({
   const surfaceProps = {
     title: normalized.heading,
     urgency,
+    context: surfaceContext,
     items: allActions,
     showBadges: true,
     ...(groupedSections ? ({ sections: groupedSections } as Record<string, unknown>) : {}),
@@ -274,6 +289,7 @@ export function PriorityActionsRail({
   config,
   activeAudience,
   bandKey,
+  surfaceContext = 'default',
   isLoading = false,
 }: PriorityActionsRailProps): React.JSX.Element {
   if (isLoading) {
@@ -283,8 +299,20 @@ export function PriorityActionsRail({
   const hasSiteUrl = Boolean(getSiteUrl());
 
   if (hasSiteUrl) {
-    return <ListSourcedRail activeAudience={activeAudience} bandKey={bandKey} />;
+    return (
+      <ListSourcedRail
+        activeAudience={activeAudience}
+        bandKey={bandKey}
+        surfaceContext={surfaceContext}
+      />
+    );
   }
 
-  return <ManifestFallbackRail config={config} activeAudience={activeAudience} />;
+  return (
+    <ManifestFallbackRail
+      config={config}
+      activeAudience={activeAudience}
+      surfaceContext={surfaceContext}
+    />
+  );
 }

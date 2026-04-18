@@ -30,4 +30,5 @@ export type {
   PriorityRailLayoutMode,
   PriorityRailOverflowStrategy,
   PriorityRailState,
+  PriorityRailContext,
 } from './types.js';

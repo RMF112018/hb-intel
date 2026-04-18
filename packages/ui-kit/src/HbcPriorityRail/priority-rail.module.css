@@ -38,6 +38,197 @@
   background: linear-gradient(180deg, rgba(var(--hbc-pr-danger-rgb, 196, 54, 42), 0.035) 0%, rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.025) 24%);
 }
 
+/* ── Context variants ─────────────────────────────────────── */
+/* The default context carries the generic shared-surface presentation
+ * (used by admin preview and non-homepage embeds).  The
+ * homepage-flagship context is the explicit opt-in for the
+ * wrapper-owned homepage embed (see HbHomepageEntryStack).  Flagship
+ * presentation is a structural rebuild — not a color tweak — so the
+ * homepage path reads first as a command band, not as a bordered card. */
+.contextDefault {}
+
+.contextHomepageFlagship {
+  /* Flush, edge-to-edge command band — no bordered card silhouette. */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  /* Structural top authority: a strong brand rule replaces the card top-
+   * border used by the generic surface and reads as a command-band masthead
+   * edge rather than a module outline. */
+  border-top: 3px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.85);
+  padding-top: 2px;
+}
+
+/* Neutralize urgency-variant border-top styling so flagship keeps one
+ * clean structural edge and moves urgency into the masthead wash instead. */
+.contextHomepageFlagship.urgencyDefault {
+  border-top: 3px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.85);
+  background: transparent;
+}
+.contextHomepageFlagship.urgencyHigh {
+  border-top: 3px solid rgba(var(--hbc-pr-warning-rgb, 229, 126, 70), 0.9);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--hbc-pr-warning-rgb, 229, 126, 70), 0.05) 0%,
+    transparent 88px
+  );
+}
+.contextHomepageFlagship.urgencyCritical {
+  border-top: 3px solid var(--hbc-pr-danger, #c4362a);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--hbc-pr-danger-rgb, 196, 54, 42), 0.05) 0%,
+    transparent 88px
+  );
+}
+
+/* Flagship header — masthead weight and scale. */
+.contextHomepageFlagship .header {
+  padding: 18px 20px 12px;
+  align-items: flex-end;
+}
+.contextHomepageFlagship .headerTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship .headerIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: linear-gradient(
+    140deg,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.95) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.78) 100%
+  );
+  color: #ffffff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 2px 6px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.22);
+}
+
+/* Separator becomes a subtler hairline — the masthead edge already owns
+ * the primary structural line. */
+.contextHomepageFlagship .separator {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  margin: 0 20px;
+}
+
+/* Sections — stronger rhythm and taller breathing room between groups. */
+.contextHomepageFlagship .sections {
+  gap: 10px;
+  padding-bottom: 4px;
+}
+.contextHomepageFlagship .sectionHeader {
+  padding: 14px 20px 6px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.68);
+}
+.contextHomepageFlagship .sectionTitle {
+  font-weight: 800;
+}
+.contextHomepageFlagship .sectionCount {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.12);
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  font-weight: 700;
+  font-size: 0.6875rem;
+  padding: 2px 8px;
+}
+
+/* Rows — decisive, taller, always-present arrow, edge-to-edge feel. */
+.contextHomepageFlagship .item {
+  padding: 12px 20px;
+  min-height: 52px;
+  gap: 14px;
+  border-radius: 0;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+.contextHomepageFlagship .item:hover {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
+  box-shadow: inset 3px 0 0 var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship .item:focus-visible {
+  outline: 2px solid var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  outline-offset: -2px;
+}
+.contextHomepageFlagship .itemIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship .itemTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--hbc-pr-text-primary, var(--hb-text-primary, #1a1a1a));
+}
+.contextHomepageFlagship .itemDescription {
+  font-size: 0.8125rem;
+  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.62);
+}
+.contextHomepageFlagship .itemArrow {
+  opacity: 0.55;
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship .item:hover .itemArrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+.contextHomepageFlagship .itemSeparator {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08);
+  margin: 0 20px;
+}
+
+/* Compact flagship rows — slimmer padding but still decisive. */
+.contextHomepageFlagship .itemCompact {
+  padding: 8px 20px;
+  min-height: 40px;
+  gap: 10px;
+}
+.contextHomepageFlagship .itemCompact .itemIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+.contextHomepageFlagship .itemCompact .itemTitle {
+  font-size: 0.875rem;
+}
+
+/* Overflow — flush with the masthead rhythm; no extra module chrome. */
+.contextHomepageFlagship .overflowTrigger {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+.contextHomepageFlagship .overflowPanelInline,
+.contextHomepageFlagship .overflowPanelMenu,
+.contextHomepageFlagship .overflowPanelSheet {
+  border-top: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  background: transparent;
+}
+.contextHomepageFlagship .overflowSheetHeader {
+  padding: 12px 20px;
+}
+
+/* Empty / error / skeleton — keep the flagship rhythm, lose the card look. */
+.contextHomepageFlagship .emptyState,
+.contextHomepageFlagship .errorState {
+  padding: 32px 20px;
+}
+.contextHomepageFlagship .skeletonHeader {
+  padding: 18px 20px 12px;
+}
+.contextHomepageFlagship .skeletonItem {
+  padding: 12px 20px;
+  min-height: 52px;
+}
+
 /* ── Layout variants ──────────────────────────────────────── */
 .layoutRail {}
 
@@ -317,6 +508,75 @@
 .overflowSheetBody {
   display: flex;
   flex-direction: column;
+}
+
+/* ── Floating menu overflow ───────────────────────────────── */
+.overflowFloatingMenu {
+  min-width: 240px;
+  background: #ffffff;
+  border: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* ── Modal sheet overflow ─────────────────────────────────── */
+.overflowSheetBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.32);
+  z-index: 999;
+}
+
+.overflowSheetSurface {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.22);
+  z-index: 1000;
+}
+
+/* ── Scroll area primitives ───────────────────────────────── */
+.overflowScrollRoot {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.overflowScrollViewport {
+  width: 100%;
+  height: 100%;
+  max-height: inherit;
+  overflow-y: auto;
+}
+
+.overflowScrollbar {
+  display: flex;
+  user-select: none;
+  touch-action: none;
+  padding: 2px;
+  background: transparent;
+  transition: background 150ms ease;
+  width: 8px;
+}
+
+.overflowScrollbar:hover {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
+}
+
+.overflowScrollbarThumb {
+  flex: 1;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.28);
+  border-radius: 999px;
+  position: relative;
 }
 
 .overflowClose {

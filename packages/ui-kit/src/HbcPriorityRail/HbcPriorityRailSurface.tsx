@@ -62,6 +62,7 @@ export function HbcPriorityRailSurface({
   title = 'Priority Actions',
   urgency = 'default',
   layout = 'rail',
+  context = 'default',
   items,
   sections,
   overflowItems,
@@ -77,9 +78,10 @@ export function HbcPriorityRailSurface({
   return (
     <section
       aria-label={ariaLabel ?? title}
-      className={clsx(priorityRailSurface({ urgency, layout }), className)}
+      className={clsx(priorityRailSurface({ urgency, layout, context }), className)}
       data-hbc-premium="priority-rail"
       data-hbc-ui="priority-rail"
+      data-hbc-priority-rail-context={context}
     >
       <div className={styles.header}>
         <div className={styles.headerTitle}>

@@ -2,12 +2,24 @@
    Homepage entry-stack — wrapper-owned pre-shell composition layer
    ---------------------------------------------------------------------------
    Owns composition order for the flagship homepage runtime:
-     1. wrapper-owned priority-actions region
+     1. wrapper-owned priority-actions region (flagship command band)
      2. HbHomepageShell
-   Envelope width and horizontal padding mirror `HbHomepageShell.module.css`
-   (max-width 2200px; density steps at 768 / 1180 / 1600 / 1900) so the
-   embedded rail aligns visually with the shell beneath it without the
-   shell owning rail placement.
+
+   Envelope width still mirrors `HbHomepageShell.module.css` (max-width
+   2200px; density steps at 768 / 1180 / 1600 / 1900) so the embedded
+   rail lives in the same page-canvas envelope as the shell below.
+
+   Horizontal authority: the actions region intentionally uses a
+   *narrower* inline gutter than the shell modules so the flagship
+   command band reads as a top-band layer spanning the page, not a
+   padded module duplicating shell chrome. The shell region keeps its
+   own density-aware padding inside `HbHomepageShell.module.css` — this
+   file does not redecide shell gutters.
+
+   Vertical authority: the stack is tuned to keep the hero → actions →
+   first-shell-lane transition intentional while protecting the first
+   shell lane on first view. Gaps and top-padding are scoped to keep
+   the actions band as a bridging strip, not an over-padded module.
    --------------------------------------------------------------------------- */
 
 .entryStack {
@@ -15,7 +27,7 @@
   container-name: homepage-entry-stack;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
   max-width: 2200px;
   margin: 0 auto;
@@ -23,36 +35,38 @@
 
 .actionsRegion {
   width: 100%;
-  padding: 1.5rem 1rem 0;
+  /* Narrow inline gutter on small viewports lets the flagship top rule
+     span the page canvas and signal a band instead of a nested panel. */
+  padding: 1rem 0.5rem 0;
 }
 
 @container homepage-entry-stack (min-width: 768px) {
   .entryStack {
-    gap: 2rem;
+    gap: 1.5rem;
   }
   .actionsRegion {
-    padding: 2rem 1.5rem 0;
+    padding: 1.25rem 1rem 0;
   }
 }
 
 @container homepage-entry-stack (min-width: 1180px) {
   .entryStack {
-    gap: 2.5rem;
+    gap: 1.75rem;
   }
   .actionsRegion {
-    padding: 2.5rem 2rem 0;
+    padding: 1.5rem 1.5rem 0;
   }
 }
 
 @container homepage-entry-stack (min-width: 1600px) {
   .actionsRegion {
-    padding: 2.5rem 3.5rem 0;
+    padding: 1.75rem 2.5rem 0;
   }
 }
 
 @container homepage-entry-stack (min-width: 1900px) {
   .actionsRegion {
-    padding: 2.5rem 5rem 0;
+    padding: 1.75rem 3.5rem 0;
   }
 }
 
