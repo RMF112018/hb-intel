@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getLegacyFallbackDiscoveryConfig,
   getLegacyFallbackHostingConfig,
   LEGACY_FALLBACK_PILOT_APP_REGISTRATION,
   validateLegacyFallbackHostingConfig,
@@ -63,5 +64,24 @@ describe('legacy-fallback hosting config', () => {
     expect(LEGACY_FALLBACK_PILOT_APP_REGISTRATION.displayName).toBe('HB SharePoint Creator');
     expect(LEGACY_FALLBACK_PILOT_APP_REGISTRATION.appId).toBe('08c399eb-a394-4087-b859-659d493f8dc7');
     expect(LEGACY_FALLBACK_PILOT_APP_REGISTRATION.productionReady).toBe(false);
+  });
+
+  it('resolves discovery defaults when optional values are absent', () => {
+    const discovery = getLegacyFallbackDiscoveryConfig(makeEnv());
+    expect(discovery.enabled).toBe(true);
+    expect(discovery.timerEnabled).toBe(false);
+    expect(discovery.defaultYears).toEqual([2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]);
+    expect(discovery.maxFoldersPerRun).toBe(5000);
+  });
+
+  it('supports explicit discovery years and run limits', () => {
+    const discovery = getLegacyFallbackDiscoveryConfig(makeEnv({
+      HBC_LEGACY_FALLBACK_DISCOVERY_YEARS: '2024,2025',
+      HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN: '50',
+      HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED: 'true',
+    }));
+    expect(discovery.defaultYears).toEqual([2024, 2025]);
+    expect(discovery.maxFoldersPerRun).toBe(50);
+    expect(discovery.timerEnabled).toBe(true);
   });
 });

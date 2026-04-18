@@ -85,6 +85,7 @@ describe('P5-02 Unsupported scope regression guard', () => {
       'contracts', 'estimating', 'health', 'leads', 'notifications',
       'pmp', 'projectRequests', 'projects', 'provisioningSaga',
       'proxy', 'risk', 'schedule', 'scorecards', 'signalr', 'timerFullSpec',
+      'legacyFallbackDiscovery',
     ]);
 
     const functionsDir = resolve(FUNCTIONS_SRC, 'functions');

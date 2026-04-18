@@ -8,6 +8,7 @@ import './functions/signalr/index.js';
 import './functions/projectRequests/index.js';
 import './functions/acknowledgments/index.js';
 import './functions/notifications/index.js';
+import './functions/legacyFallbackDiscovery/index.js';
 
 // Health probe (P1-C3 §2.2.1)
 import './functions/health/index.js';

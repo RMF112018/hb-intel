@@ -1,7 +1,9 @@
 const PILOT_SHAREPOINT_CREATOR_APP_ID = '08c399eb-a394-4087-b859-659d493f8dc7';
 const ENVIRONMENT_VALUES = ['staging', 'prod'] as const;
+const LEGACY_DISCOVERY_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] as const;
 
 export type LegacyFallbackHostingEnvironment = (typeof ENVIRONMENT_VALUES)[number];
+export type LegacyFallbackDiscoveryYear = (typeof LEGACY_DISCOVERY_YEARS)[number];
 
 export interface ILegacyFallbackHostingConfig {
   readonly environment: LegacyFallbackHostingEnvironment;
@@ -15,6 +17,13 @@ export interface ILegacyFallbackHostingConfig {
   readonly graphScope: string;
   readonly authPosture: 'pilot-interim';
   readonly managedAppClientId: string;
+}
+
+export interface ILegacyFallbackDiscoveryConfig {
+  readonly enabled: boolean;
+  readonly timerEnabled: boolean;
+  readonly defaultYears: readonly LegacyFallbackDiscoveryYear[];
+  readonly maxFoldersPerRun: number;
 }
 
 export interface ILegacyFallbackHostingValidationIssue {
@@ -49,6 +58,16 @@ function parseBoolean(value: string, fallback: boolean): boolean {
   return value.toLowerCase() === 'true';
 }
 
+function parseYearList(value: string): LegacyFallbackDiscoveryYear[] {
+  if (value.trim().length === 0) {
+    return [];
+  }
+  return value
+    .split(',')
+    .map((part) => Number(part.trim()))
+    .filter((year) => Number.isInteger(year) && year >= 2019 && year <= 2026) as LegacyFallbackDiscoveryYear[];
+}
+
 export function validateLegacyFallbackHostingConfig(
   env: EnvReader = (key) => process.env[key],
 ): ILegacyFallbackHostingValidationResult {
@@ -63,6 +82,8 @@ export function validateLegacyFallbackHostingConfig(
   const graphScope = readTrimmed(env, 'HBC_LEGACY_FALLBACK_GRAPH_SCOPE');
   const authPosture = readTrimmed(env, 'HBC_LEGACY_FALLBACK_AUTH_POSTURE');
   const managedAppClientId = readTrimmed(env, 'HBC_LEGACY_FALLBACK_MANAGED_APP_CLIENT_ID');
+  const configuredYears = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_YEARS');
+  const maxFoldersPerRunRaw = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN');
 
   if (!ENVIRONMENT_VALUES.includes(environment as LegacyFallbackHostingEnvironment)) {
     issues.push({
@@ -124,6 +145,21 @@ export function validateLegacyFallbackHostingConfig(
       message: `Must equal pilot app registration ${PILOT_SHAREPOINT_CREATOR_APP_ID}.`,
     });
   }
+  if (configuredYears.length > 0 && parseYearList(configuredYears).length === 0) {
+    issues.push({
+      key: 'HBC_LEGACY_FALLBACK_DISCOVERY_YEARS',
+      message: 'If set, must be a comma-separated list within 2019..2026.',
+    });
+  }
+  if (maxFoldersPerRunRaw.length > 0) {
+    const parsed = Number(maxFoldersPerRunRaw);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      issues.push({
+        key: 'HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN',
+        message: 'If set, must be a positive integer.',
+      });
+    }
+  }
 
   return {
     ok: issues.length === 0,
@@ -161,3 +197,25 @@ export const LEGACY_FALLBACK_PILOT_APP_REGISTRATION = Object.freeze({
   posture: 'pilot-interim' as const,
   productionReady: false,
 });
+
+export function getLegacyFallbackDiscoveryConfig(
+  env: EnvReader = (key) => process.env[key],
+): ILegacyFallbackDiscoveryConfig {
+  // Reuse hosting validation so discovery config cannot diverge from auth posture.
+  const hostingValidation = validateLegacyFallbackHostingConfig(env);
+  if (!hostingValidation.ok) {
+    const message = hostingValidation.issues.map((issue) => `${issue.key}: ${issue.message}`).join('; ');
+    throw new Error(`Legacy fallback discovery configuration invalid. ${message}`);
+  }
+
+  const years = parseYearList(readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_YEARS'));
+  const configuredMaxFolders = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN');
+  const maxFoldersPerRun = configuredMaxFolders.length > 0 ? Number(configuredMaxFolders) : 5000;
+
+  return {
+    enabled: parseBoolean(readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_ENABLED'), true),
+    timerEnabled: parseBoolean(readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED'), false),
+    defaultYears: years.length > 0 ? years : [...LEGACY_DISCOVERY_YEARS],
+    maxFoldersPerRun,
+  };
+}
