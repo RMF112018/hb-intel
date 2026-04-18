@@ -218,6 +218,45 @@ describe('HbcPriorityRail shared family', () => {
     expect(internalLink?.textContent).not.toContain('(opens in new tab)');
   });
 
+  it('default-context surface tags the rail root with context="default" and omits the flagship class', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        items={[ACTIONS[0]!]}
+      />,
+    );
+    const root = container.querySelector('[data-hbc-ui="priority-rail"]') as HTMLElement | null;
+    expect(root).not.toBeNull();
+    expect(root?.getAttribute('data-hbc-priority-rail-context')).toBe('default');
+    expect(root?.className).not.toContain('contextHomepageFlagship');
+  });
+
+  it('admin preview surface defaults to the default context (no flagship styling) when consumer does not opt in', () => {
+    const { container } = render(
+      <HbcPriorityRailPreviewSurface
+        previewLabel="Admin Preview"
+        title="Priority Actions"
+        items={[ACTIONS[0]!]}
+      />,
+    );
+    const root = container.querySelector('[data-hbc-ui="priority-rail"]') as HTMLElement | null;
+    expect(root?.getAttribute('data-hbc-priority-rail-context')).toBe('default');
+    expect(root?.className).not.toContain('contextHomepageFlagship');
+  });
+
+  it('flagship-context surface tags the rail root with context="homepage-flagship" and applies the flagship class', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[ACTIONS[0]!]}
+      />,
+    );
+    const root = container.querySelector('[data-hbc-ui="priority-rail"]') as HTMLElement | null;
+    expect(root?.getAttribute('data-hbc-priority-rail-context')).toBe('homepage-flagship');
+    expect(root?.className).toMatch(/contextHomepageFlagship/);
+  });
+
   it('preview surface reuses shared rendering path with grouped content', () => {
     render(
       <HbcPriorityRailPreviewSurface
