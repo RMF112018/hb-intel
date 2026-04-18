@@ -1,41 +1,29 @@
 /* ---------------------------------------------------------------------------
    Homepage entry-stack — wrapper-owned pre-shell composition layer
    ---------------------------------------------------------------------------
-   Owns composition order for the flagship homepage runtime:
-     1. wrapper-owned priority-actions region (flagship command band)
+   Vertical stack:
+     1. wrapper-owned priority-actions launcher band
      2. HbHomepageShell
 
-   Envelope width still mirrors `HbHomepageShell.module.css` (max-width
-   2200px; density steps at 768 / 1180 / 1600 / 1900) so the embedded
-   rail lives in the same page-canvas envelope as the shell below.
+   Envelope width mirrors `HbHomepageShell.module.css` (max-width 2200px;
+   density steps at 768 / 1180 / 1600 / 1900) so the launcher band lives
+   in the same page-canvas envelope as the shell below.
 
-   Horizontal authority: the actions region intentionally uses a
-   *narrower* inline gutter than the shell modules so the flagship
-   command band reads as a top-band layer spanning the page, not a
-   padded module duplicating shell chrome. The shell region keeps its
-   own density-aware padding inside `HbHomepageShell.module.css` — this
-   file does not redecide shell gutters.
-
-   Vertical authority: the stack is tuned to keep the hero → actions →
-   first-shell-lane transition intentional while protecting the first
-   shell lane on first view. Gaps and top-padding are scoped to keep
-   the actions band as a bridging strip, not an over-padded module.
+   Horizontal authority: the launcher band uses the same inline gutter as
+   the shell modules so it reads as flush with the hero and body below,
+   not as an indented "bridging strip". Vertical gap above the launcher
+   is modest so it sits tight under the hero.
    --------------------------------------------------------------------------- */
 
 .entryStack {
   container-type: inline-size;
   container-name: homepage-entry-stack;
-  /* Wrapper-owned outer page-canvas envelope contract.
-     Value is injected from HbHomepageEntryStack.tsx. */
   --hb-homepage-outer-envelope-max-width: 2200px;
-  /* Wrapper-owned actions-strip inner inset policy.
-     These values are region styling inside the outer envelope, not
-     outer page-canvas fit authority. */
-  --hb-homepage-actions-inset-block-start: 1rem;
-  --hb-homepage-actions-inset-inline: 0.5rem;
+  --hb-homepage-actions-inset-block-start: 0.75rem;
+  --hb-homepage-actions-inset-inline: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   width: 100%;
   max-width: var(--hb-homepage-outer-envelope-max-width);
   margin: 0 auto;
@@ -43,8 +31,6 @@
 
 .actionsRegion {
   width: 100%;
-  /* Narrow inline gutter lets the flagship strip read as a bridging band,
-     while remaining explicitly separate from shell-body inset policy. */
   padding: var(--hb-homepage-actions-inset-block-start)
     var(--hb-homepage-actions-inset-inline)
     0;
@@ -52,23 +38,23 @@
 
 @container homepage-entry-stack (min-width: 768px) {
   .entryStack {
-    gap: 1.5rem;
-    --hb-homepage-actions-inset-block-start: 1.25rem;
-    --hb-homepage-actions-inset-inline: 1rem;
+    gap: 1.25rem;
+    --hb-homepage-actions-inset-block-start: 1rem;
+    --hb-homepage-actions-inset-inline: 1.25rem;
   }
 }
 
 @container homepage-entry-stack (min-width: 1180px) {
   .entryStack {
-    gap: 1.75rem;
-    --hb-homepage-actions-inset-block-start: 1.5rem;
-    --hb-homepage-actions-inset-inline: 1.5rem;
+    gap: 1.5rem;
+    --hb-homepage-actions-inset-block-start: 1.25rem;
+    --hb-homepage-actions-inset-inline: 1.75rem;
   }
 }
 
 @container homepage-entry-stack (min-width: 1600px) {
   .entryStack {
-    --hb-homepage-actions-inset-block-start: 1.75rem;
+    --hb-homepage-actions-inset-block-start: 1.5rem;
     --hb-homepage-actions-inset-inline: 2.5rem;
   }
 }
@@ -83,8 +69,6 @@
   width: 100%;
 }
 
-/* Wrapper-owned regions participating in one outer containment contract.
-   Region-specific inset policy may differ; containment authority does not. */
 .actionsRegion,
 .shellRegion {
   max-width: 100%;

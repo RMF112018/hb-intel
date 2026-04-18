@@ -3,19 +3,16 @@
  *
  * Two presentation contexts:
  *
- * - `homepage-flagship` — a premium HB-branded quick-launch tile grid
- *   embedded by the wrapper-owned homepage entry stack. The surface
- *   reads as an evolution of OOB SharePoint Quick Links: compact,
- *   scannable, obviously clickable, one dominant interaction per tile,
- *   list-driven, branded. No masthead, no featured-gradient slot, no
- *   sequence index chips, no eyebrow labels, no stacked section
- *   headers, no persistent launch-chip chrome. Section / featured
- *   props on the input contract are no-ops in this context and only
- *   contribute to item ordering — the tile grid is the product.
+ * - `homepage-flagship` — a premium HB-branded quick-launch tile band
+ *   rendered flat beneath the homepage hero. One flat grid, one click
+ *   target per tile, no masthead, no section headers, no featured slot,
+ *   no numbering, no eyebrow — the tile grid is the product. Sections
+ *   and `featured` fields on the input contract are ignored here; the
+ *   surface renders `items` in order.
  *
- * - `default` — generic stacked action list for admin preview and
- *   non-homepage embeds. Sections, headers, and row separators still
- *   render. The public API contract is unchanged for this path.
+ * - `default` — stacked action list for admin preview and non-homepage
+ *   embeds. Sections and row separators still render; public contract
+ *   is unchanged for that path.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -32,16 +29,37 @@ import type {
 } from './types.js';
 import styles from './priority-rail.module.css';
 
-function inferSectionsFromItems(items: PriorityRailActionModel[]): PriorityRailSectionModel[] {
-  if (items.length === 0) return [];
+function flattenItemsOrSections(
+  items: PriorityRailActionModel[],
+  sections: PriorityRailSectionModel[] | undefined,
+): PriorityRailActionModel[] {
+  if (items && items.length > 0) return items;
+  if (!sections || sections.length === 0) return [];
+  const seen = new Set<string>();
+  const out: PriorityRailActionModel[] = [];
+  for (const section of sections) {
+    for (const action of section.actions) {
+      if (seen.has(action.id)) continue;
+      seen.add(action.id);
+      out.push(action);
+    }
+  }
+  return out;
+}
 
+function resolveDefaultSections(
+  items: PriorityRailActionModel[],
+  sections: PriorityRailSectionModel[] | undefined,
+): PriorityRailSectionModel[] {
+  if (sections && sections.length > 0) {
+    return sections.filter((section) => section.actions.length > 0);
+  }
+  if (items.length === 0) return [];
   const hasGroupMetadata = items.some((item) => item.groupKey || item.groupTitle);
   if (!hasGroupMetadata) {
     return [{ key: '__default', actions: items }];
   }
-
   const map = new Map<string, PriorityRailSectionModel>();
-
   for (const item of items) {
     const key = (item.groupKey || item.groupTitle || '__ungrouped').trim() || '__ungrouped';
     const existing = map.get(key);
@@ -49,44 +67,13 @@ function inferSectionsFromItems(items: PriorityRailActionModel[]): PriorityRailS
       existing.actions.push(item);
       continue;
     }
-
     map.set(key, {
       key,
       title: item.groupTitle || (item.groupKey ? item.groupKey : undefined),
       actions: [item],
     });
   }
-
   return Array.from(map.values());
-}
-
-function resolveSections(
-  items: PriorityRailActionModel[],
-  sections: PriorityRailSectionModel[] | undefined,
-): PriorityRailSectionModel[] {
-  if (sections && sections.length > 0) {
-    return sections.filter((section) => section.actions.length > 0);
-  }
-
-  return inferSectionsFromItems(items);
-}
-
-function flattenToTiles(
-  items: PriorityRailActionModel[],
-  sections: PriorityRailSectionModel[] | undefined,
-): PriorityRailActionModel[] {
-  if (items && items.length > 0) return items;
-  if (!sections || sections.length === 0) return [];
-  const flat: PriorityRailActionModel[] = [];
-  const seen = new Set<string>();
-  for (const section of sections) {
-    for (const action of section.actions) {
-      if (seen.has(action.id)) continue;
-      seen.add(action.id);
-      flat.push(action);
-    }
-  }
-  return flat;
 }
 
 export function HbcPriorityRailSurface({
@@ -106,22 +93,8 @@ export function HbcPriorityRailSurface({
   const isFlagship = context === 'homepage-flagship';
   const hasOverflow = Boolean(overflowItems && overflowItems.length > 0);
 
-  const renderOverflow = (
-    strategy: PriorityRailOverflowStrategy = overflowStrategy,
-  ): React.JSX.Element | null => {
-    if (!hasOverflow) return null;
-    return (
-      <HbcPriorityRailOverflow
-        items={overflowItems!}
-        label={overflowLabel}
-        strategy={strategy}
-        showBadges={showBadges}
-      />
-    );
-  };
-
   if (isFlagship) {
-    const tiles = flattenToTiles(items, sections);
+    const tiles = flattenItemsOrSections(items, sections);
     const flagshipOverflowStrategy: PriorityRailOverflowStrategy =
       overflowStrategy === 'inline-disclosure' ? 'menu' : overflowStrategy;
 
@@ -148,21 +121,26 @@ export function HbcPriorityRailSurface({
               data-hbc-flagship-tile="true"
               data-hbc-tile-action={action.id}
             >
-              <HbcPriorityRailAction action={action} showBadge={showBadges} compact={false} />
+              <HbcPriorityRailAction action={action} showBadge={false} compact={false} />
             </div>
           ))}
         </div>
 
         {hasOverflow ? (
           <div className={styles.overflowRegion} data-hbc-flagship-overflow="true">
-            {renderOverflow(flagshipOverflowStrategy)}
+            <HbcPriorityRailOverflow
+              items={overflowItems!}
+              label={overflowLabel}
+              strategy={flagshipOverflowStrategy}
+              showBadges={false}
+            />
           </div>
         ) : null}
       </section>
     );
   }
 
-  const resolvedSections = resolveSections(items, sections);
+  const resolvedSections = resolveDefaultSections(items, sections);
   const showSectionHeaders = resolvedSections.length > 1;
 
   return (
@@ -185,45 +163,48 @@ export function HbcPriorityRailSurface({
       <Separator.Root className={styles.separator} decorative />
 
       <div className={styles.sections}>
-        {resolvedSections.map((section, sectionIndex) => {
-          const supportingActions = section.actions;
-
-          return (
-            <div
-              key={section.key}
-              className={styles.section}
-              data-hbc-section={section.key}
-              data-testid={`section-${section.key}`}
-            >
-              {showSectionHeaders || section.title ? (
-                <div className={styles.sectionHeader}>
-                  <span className={styles.sectionTitle}>{section.title ?? 'Actions'}</span>
-                  <span className={styles.sectionCount}>{section.actions.length}</span>
-                </div>
-              ) : null}
-
-              <div className={styles.items} role="list">
-                {supportingActions.map((action, actionIndex) => (
-                  <React.Fragment key={action.id}>
-                    {sectionIndex > 0 || actionIndex > 0 ? (
-                      <Separator.Root className={styles.itemSeparator} decorative />
-                    ) : null}
-                    <div role="listitem">
-                      <HbcPriorityRailAction
-                        action={action}
-                        showBadge={showBadges}
-                        compact={layout === 'compact'}
-                      />
-                    </div>
-                  </React.Fragment>
-                ))}
+        {resolvedSections.map((section, sectionIndex) => (
+          <div
+            key={section.key}
+            className={styles.section}
+            data-hbc-section={section.key}
+            data-testid={`section-${section.key}`}
+          >
+            {showSectionHeaders || section.title ? (
+              <div className={styles.sectionHeader}>
+                <span className={styles.sectionTitle}>{section.title ?? 'Actions'}</span>
+                <span className={styles.sectionCount}>{section.actions.length}</span>
               </div>
+            ) : null}
+
+            <div className={styles.items} role="list">
+              {section.actions.map((action, actionIndex) => (
+                <React.Fragment key={action.id}>
+                  {sectionIndex > 0 || actionIndex > 0 ? (
+                    <Separator.Root className={styles.itemSeparator} decorative />
+                  ) : null}
+                  <div role="listitem">
+                    <HbcPriorityRailAction
+                      action={action}
+                      showBadge={showBadges}
+                      compact={layout === 'compact'}
+                    />
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
-      {renderOverflow()}
+      {hasOverflow ? (
+        <HbcPriorityRailOverflow
+          items={overflowItems!}
+          label={overflowLabel}
+          strategy={overflowStrategy}
+          showBadges={showBadges}
+        />
+      ) : null}
     </section>
   );
 }

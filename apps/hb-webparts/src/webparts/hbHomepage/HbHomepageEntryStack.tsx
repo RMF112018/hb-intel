@@ -67,7 +67,6 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
             activeAudience={rail.activeAudience}
             config={rail.fallbackConfig}
             surfaceContext="homepage-flagship"
-            featuredActionKeys={rail.featuredActionKeys}
           />
         </section>
       ) : null}

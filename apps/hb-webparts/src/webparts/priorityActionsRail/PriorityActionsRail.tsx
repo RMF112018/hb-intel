@@ -1,10 +1,12 @@
 /**
- * PriorityActionsRail — Public homepage command band webpart.
+ * PriorityActionsRail — Public homepage launcher band webpart.
  *
- * Consumes the canonical Priority Actions read model (Prompt 02) and
- * renders through the shared HbcPriorityRail surface family (Prompt 03).
- * Supports breakpoint-aware overflow, audience/schedule/device filtering,
- * and governed loading/empty/error states.
+ * Renders a flat, responsive launcher-tile grid through the shared
+ * HbcPriorityRail surface. Supports audience / schedule / device
+ * filtering via the canonical HBCentral data seam. Breakpoint cadence
+ * is container-query driven in CSS; the webpart only resolves
+ * device-class + short-height so overflow strategy (menu vs. sheet)
+ * can be chosen at render time.
  */
 import * as React from 'react';
 import {
@@ -31,55 +33,28 @@ import { normalizePriorityActionsRailConfig } from '../../homepage/helpers/utili
 import { getSiteUrl } from '../../homepage/data/spContext.js';
 import {
   resolvePriorityRailDeviceForContainer,
-  resolvePriorityRailPresentationForDevice,
+  resolveLauncherPresentation,
   type PriorityRailContainerDimensions,
 } from '../../homepage/data/priorityActionsPresentation.js';
-
-function applyFeaturedOrdering(
-  actions: readonly PriorityRailActionModel[],
-  featuredActionKeys: readonly string[] | undefined,
-): PriorityRailActionModel[] {
-  if (!featuredActionKeys || featuredActionKeys.length === 0) return [...actions];
-  const featuredSet = new Set(featuredActionKeys.filter((k) => typeof k === 'string' && k.length > 0));
-  if (featuredSet.size === 0) return [...actions];
-  const featured: PriorityRailActionModel[] = [];
-  const rest: PriorityRailActionModel[] = [];
-  for (const action of actions) {
-    if (featuredSet.has(action.id)) featured.push(action);
-    else rest.push(action);
-  }
-  return [...featured, ...rest];
-}
 
 export interface PriorityActionsRailProps {
   config?: Partial<PriorityActionsRailConfig>;
   activeAudience?: string;
   /**
    * Optional list-source band key override. When omitted, the rail's data
-   * seam uses its built-in default (`homepage-primary`). Exposed here so
-   * wrapper integrations (e.g. `HbHomepageEntryStack`) can pass a wrapper-
-   * owned band key without duplicating rail data-seam logic.
+   * seam uses its built-in default (`homepage-primary`).
    */
   bandKey?: string;
   /**
-   * Named presentation context threaded into the shared surface. Defaults
-   * to `default` for standalone / non-homepage mounts. The wrapper-owned
-   * homepage embed (`HbHomepageEntryStack`) explicitly opts into
-   * `homepage-flagship` so the homepage path cannot regress to a generic
-   * shared-surface outcome. See `HbcPriorityRailSurface`.
+   * Named presentation context. Defaults to `default` for standalone /
+   * non-homepage mounts. The homepage wrapper explicitly opts into
+   * `homepage-flagship`.
    */
   surfaceContext?: PriorityRailContext;
-  /**
-   * Wrapper-declared action IDs that should sort to the front of the
-   * visible tile list. Advisory ordering hint only — the flagship
-   * launcher grid has no featured masthead slot in the new quick-launch
-   * presentation model. Default context ignores this field.
-   */
-  featuredActionKeys?: readonly string[];
   isLoading?: boolean;
 }
 
-/* ── Urgency resolution ─────────────────────────────────────────── */
+/* ── Urgency / icon resolution ──────────────────────────────────── */
 
 const URGENCY_ICON_MAP: Record<string, LucideIcon> = {
   critical: AlertCircle,
@@ -126,7 +101,7 @@ function mapToRailAction(item: PriorityActionsItemNormalized): PriorityRailActio
   };
 }
 
-/* ── Device class resolution ────────────────────────────────────── */
+/* ── Container-driven device resolution ─────────────────────────── */
 
 const DEFAULT_CONTAINER_DIMENSIONS: PriorityRailContainerDimensions = { width: 1200, height: 800 };
 
@@ -174,18 +149,16 @@ function useRailContainerDimensions(ref: React.RefObject<HTMLElement | null>): P
   return dimensions;
 }
 
-/* ── List-sourced rail ──────────────────────────────────────────── */
+/* ── List-sourced launcher ──────────────────────────────────────── */
 
 function ListSourcedRail({
   activeAudience,
   bandKey,
   surfaceContext,
-  featuredActionKeys,
 }: {
   activeAudience: string | undefined;
   bandKey: string | undefined;
   surfaceContext: PriorityRailContext;
-  featuredActionKeys: readonly string[] | undefined;
 }): React.JSX.Element {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dimensions = useRailContainerDimensions(containerRef);
@@ -211,7 +184,7 @@ function ListSourcedRail({
     const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
     content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
   } else {
-    const presentation = resolvePriorityRailPresentationForDevice(config, deviceResolution.deviceClass);
+    const presentation = resolveLauncherPresentation(deviceResolution);
     const deviceItems = filterByDevice(items, deviceResolution.deviceClass);
     const breakpoint = resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
 
@@ -219,17 +192,13 @@ function ListSourcedRail({
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
       content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
     } else {
-      const primaryActions = applyFeaturedOrdering(
-        breakpoint.primaryItems.map(mapToRailAction),
-        featuredActionKeys,
-      );
       content = (
         <HbcPriorityRailSurface
           title={config.showHeading ? config.headingText || 'Priority Actions' : undefined}
           urgency={resolveUrgency(deviceItems)}
           layout={presentation.layout}
           context={surfaceContext}
-          items={primaryActions}
+          items={breakpoint.primaryItems.map(mapToRailAction)}
           overflowItems={breakpoint.overflowItems.map(mapToRailAction)}
           overflowLabel={config.overflowLabel}
           overflowStrategy={presentation.overflowStrategy}
@@ -252,18 +221,16 @@ function ListSourcedRail({
   );
 }
 
-/* ── Manifest-config fallback rail ──────────────────────────────── */
+/* ── Manifest-config fallback launcher ──────────────────────────── */
 
 function ManifestFallbackRail({
   config,
   activeAudience,
   surfaceContext,
-  featuredActionKeys,
 }: {
   config: Partial<PriorityActionsRailConfig> | undefined;
   activeAudience: string | undefined;
   surfaceContext: PriorityRailContext;
-  featuredActionKeys: readonly string[] | undefined;
 }): React.JSX.Element {
   const normalized = normalizePriorityActionsRailConfig(config, activeAudience);
 
@@ -294,14 +261,12 @@ function ManifestFallbackRail({
       ? 'high'
       : 'default';
 
-  const ordered = applyFeaturedOrdering(allActions, featuredActionKeys);
-
   return (
     <HbcPriorityRailSurface
       title={normalized.heading}
       urgency={urgency}
       context={surfaceContext}
-      items={ordered}
+      items={allActions}
       showBadges
     />
   );
@@ -314,22 +279,18 @@ export function PriorityActionsRail({
   activeAudience,
   bandKey,
   surfaceContext = 'default',
-  featuredActionKeys,
   isLoading = false,
 }: PriorityActionsRailProps): React.JSX.Element {
   if (isLoading) {
     return <HbcPriorityRailSkeleton count={4} />;
   }
 
-  const hasSiteUrl = Boolean(getSiteUrl());
-
-  if (hasSiteUrl) {
+  if (getSiteUrl()) {
     return (
       <ListSourcedRail
         activeAudience={activeAudience}
         bandKey={bandKey}
         surfaceContext={surfaceContext}
-        featuredActionKeys={featuredActionKeys}
       />
     );
   }
@@ -339,7 +300,6 @@ export function PriorityActionsRail({
       config={config}
       activeAudience={activeAudience}
       surfaceContext={surfaceContext}
-      featuredActionKeys={featuredActionKeys}
     />
   );
 }

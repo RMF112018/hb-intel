@@ -20,13 +20,13 @@ vi.mock('../HbHomepageShell.js', () => ({
 
 vi.mock('../../priorityActionsRail/PriorityActionsRail.js', () => ({
   PriorityActionsRail: (props: Record<string, unknown>): React.JSX.Element => {
-    const featured = props.featuredActionKeys as readonly string[] | undefined;
+    const hasFeaturedKeys = 'featuredActionKeys' in props;
     return React.createElement('div', {
       'data-test-mock': 'priority-actions-rail',
       'data-test-rail-band-key': (props.bandKey as string | undefined) ?? '',
       'data-test-rail-audience': (props.activeAudience as string | undefined) ?? '',
       'data-test-rail-surface-context': (props.surfaceContext as string | undefined) ?? '',
-      'data-test-rail-featured-keys': featured && featured.length > 0 ? featured.join(',') : '',
+      'data-test-rail-has-featured-keys-prop': hasFeaturedKeys ? 'true' : 'false',
     });
   },
 }));
@@ -173,28 +173,21 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(disabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBeNull();
   });
 
-  it('threads wrapper-owned featuredActionKeys into the embedded rail', () => {
+  it('does not thread any featuredActionKeys prop to the embedded rail (launcher has no featured slot)', () => {
     const { container } = render(
       <HbHomepageEntryStack
         config={{
           hbHomepageWrapper: {
             rail: {
+              // legacy config shape — must be ignored by the launcher band.
               featuredActionKeys: ['submit-timesheet', 'approve-po'],
-            },
+            } as unknown as Record<string, unknown>,
           },
         }}
       />,
     );
     const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
-    expect(railNode?.getAttribute('data-test-rail-featured-keys')).toBe(
-      'submit-timesheet,approve-po',
-    );
-  });
-
-  it('omits featured-keys threading when wrapper config does not declare them', () => {
-    const { container } = render(<HbHomepageEntryStack />);
-    const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
-    expect(railNode?.getAttribute('data-test-rail-featured-keys')).toBe('');
+    expect(railNode?.getAttribute('data-test-rail-has-featured-keys-prop')).toBe('false');
   });
 
   it('renders the shell region immediately after the actions region with no interleaved siblings', () => {

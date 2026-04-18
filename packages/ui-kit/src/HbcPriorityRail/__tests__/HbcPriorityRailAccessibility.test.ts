@@ -101,10 +101,10 @@ describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
     expect(CSS_SOURCE).toMatch(/container-name:\s*hbc-priority-rail/);
   });
 
-  it('ships explicit container-query bands for every display class (phone, tablet portrait, tablet landscape, desktop, ultrawide)', () => {
-    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(max-width:\s*519px\)/);
-    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*520px\)\s*and\s*\(max-width:\s*699px\)/);
-    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*700px\)\s*and\s*\(max-width:\s*899px\)/);
+  it('ships explicit container-query bands for every display class per Homepage Overlay §7.1 (phone / tablet portrait / tablet landscape / desktop / ultrawide)', () => {
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(max-width:\s*719px\)/);
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*720px\)\s*and\s*\(max-width:\s*979px\)/);
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*980px\)\s*and\s*\(max-width:\s*1179px\)/);
     expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*1180px\)/);
     expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*1600px\)/);
   });
@@ -114,12 +114,10 @@ describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
   });
 
   it('renders flagship primary actions as a responsive launcher-tile grid', () => {
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.launcherGrid\s*\{[^}]*display:\s*grid/,
-    );
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.launcherGrid\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/,
-    );
+    // Base launcherGrid rule is unscoped (flagship-only consumer); flat grid
+    // with auto-fit density floor.
+    expect(CSS_SOURCE).toMatch(/\.launcherGrid\s*\{[^}]*display:\s*grid/);
+    expect(CSS_SOURCE).toMatch(/\.launcherGrid\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/);
   });
 
   it('renders each flagship tile as a compact single-click-target row (icon + title)', () => {
@@ -130,15 +128,21 @@ describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
     expect(tileBlock![0]).toMatch(/grid-template-columns:\s*40px\s+1fr/);
   });
 
-  it('flagship surface removes the legacy command-band chrome (masthead, featured gradient, sequence chip, eyebrow, persistent launch chip)', () => {
-    // These selectors must all resolve to display: none in the flagship
-    // context — encoding the product-reset away from the command-band model.
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.header[,\s]/);
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.featuredBand[,\s]/);
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.commandStrip[,\s]/);
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.commandTile[,\s]/);
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.tileIndex[,\s]/);
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.tileEyebrow[\s{]/);
+  it('flagship surface has no legacy command-band chrome — not even hidden (the chrome is gone, not suppressed)', () => {
+    // The launcher tear-down (phase-08) requires the legacy masthead /
+    // featured-band / command-strip / command-tile / tile-index /
+    // tile-eyebrow classes to be fully gone from the stylesheet — not
+    // merely hidden with display:none. If any of these class names
+    // reappear, the command-band model is drifting back into the CSS.
+    expect(CSS_SOURCE).not.toMatch(/\.featuredBand\b/);
+    expect(CSS_SOURCE).not.toMatch(/\.commandStrip\b/);
+    expect(CSS_SOURCE).not.toMatch(/\.commandTile\b/);
+    expect(CSS_SOURCE).not.toMatch(/\.tileIndex\b/);
+    expect(CSS_SOURCE).not.toMatch(/\.tileEyebrow\b/);
+    // The default-context .header rule may remain (used by admin preview
+    // and non-homepage embeds) but the flagship context must not render or
+    // style it.
+    expect(CSS_SOURCE).not.toMatch(/\.contextHomepageFlagship\s+\.header\b/);
   });
 
   it('anchors the flagship overflow trigger as a right-edge chip', () => {

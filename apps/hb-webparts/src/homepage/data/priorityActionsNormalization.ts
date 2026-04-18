@@ -210,18 +210,25 @@ export interface PriorityActionsBreakpointResult {
   overflowLabel: string;
 }
 
+/**
+ * Launcher breakpoint caps (Homepage Overlay §7.1). Data layer uses a
+ * fixed table rather than per-config caps so the launcher presents
+ * uniform density across pages; authored config still controls which
+ * items are enabled / visible / overflow-gated.
+ */
+const LAUNCHER_VISIBLE_CAP: Record<DeviceClass, number> = {
+  desktop: 6,
+  laptop: 5,
+  tabletLandscape: 4,
+  tabletPortrait: 4,
+  phone: 4,
+};
+
 function getMaxVisibleForDevice(
-  config: PriorityActionsConfigResolved,
+  _config: PriorityActionsConfigResolved,
   device: DeviceClass,
 ): number {
-  switch (device) {
-    case 'desktop': return config.maxVisibleDesktop;
-    case 'laptop': return config.maxVisibleLaptop;
-    case 'tabletLandscape': return config.maxVisibleTabletLandscape;
-    case 'tabletPortrait': return config.maxVisibleTabletPortrait;
-    case 'phone': return config.maxVisiblePhone;
-    default: return config.maxVisibleDesktop;
-  }
+  return LAUNCHER_VISIBLE_CAP[device] ?? LAUNCHER_VISIBLE_CAP.desktop;
 }
 
 export function resolveByBreakpoint(
