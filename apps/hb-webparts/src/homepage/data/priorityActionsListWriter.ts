@@ -226,7 +226,6 @@ export function mapConfigDraftToFields(draft: PriorityActionsConfigDraft): Recor
     [CF.HeadingText]: optionalString(normalized.headingText),
     [CF.OverflowLabel]: normalized.overflowLabel,
     [CF.ShowHeading]: normalized.showHeading,
-    [CF.StickyAfterHero]: normalized.stickyAfterHero,
     [CF.ShowBadges]: normalized.showBadges,
     [CF.DesktopLayoutMode]: normalized.desktopLayoutMode,
     [CF.TabletLayoutMode]: normalized.tabletLayoutMode,

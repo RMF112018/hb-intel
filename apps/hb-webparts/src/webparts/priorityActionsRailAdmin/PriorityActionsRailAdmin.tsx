@@ -651,10 +651,6 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
                 <input type="checkbox" checked={Boolean(configDraft?.showBadges)} onChange={(e) => updateConfigDraft({ showBadges: e.target.checked })} disabled={!canEdit} />
                 <span className={styles.label}>Show badges</span>
               </div>
-              <div className={styles.checkboxRow}>
-                <input type="checkbox" checked={Boolean(configDraft?.stickyAfterHero)} onChange={(e) => updateConfigDraft({ stickyAfterHero: e.target.checked })} disabled={!canEdit} />
-                <span className={styles.label}>Sticky after hero</span>
-              </div>
             </div>
             {configDraft?.showHeading && (
               <div className={styles.fieldRow}>

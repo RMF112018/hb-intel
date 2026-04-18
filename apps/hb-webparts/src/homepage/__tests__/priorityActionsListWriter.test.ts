@@ -24,7 +24,6 @@ const CONFIG_DRAFT: PriorityActionsConfigDraft = {
   headingText: 'Priority Actions',
   overflowLabel: 'More tools',
   showHeading: true,
-  stickyAfterHero: false,
   showBadges: true,
   desktopLayoutMode: 'rail',
   tabletLayoutMode: 'grid',

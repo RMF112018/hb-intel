@@ -36,7 +36,6 @@ vi.mock('../data/usePriorityActionsData.js', () => ({
       headingText: 'Priority Actions',
       overflowLabel: 'More tools',
       showHeading: true,
-      stickyAfterHero: false,
       showBadges: true,
       desktopLayoutMode: 'segmented',
       tabletLayoutMode: 'hybrid',

@@ -25,7 +25,6 @@ export const PRIORITY_ACTIONS_CONFIG_FIELDS = {
   HeadingText: 'HeadingText',
   OverflowLabel: 'OverflowLabel',
   ShowHeading: 'ShowHeading',
-  StickyAfterHero: 'StickyAfterHero',
   ShowBadges: 'ShowBadges',
   DesktopLayoutMode: 'DesktopLayoutMode',
   TabletLayoutMode: 'TabletLayoutMode',
@@ -55,7 +54,6 @@ export interface RawPriorityActionsConfigRow {
   HeadingText?: unknown;
   OverflowLabel?: unknown;
   ShowHeading?: unknown;
-  StickyAfterHero?: unknown;
   ShowBadges?: unknown;
   DesktopLayoutMode?: unknown;
   TabletLayoutMode?: unknown;

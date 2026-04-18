@@ -38,7 +38,6 @@ export interface PriorityActionsConfigResolved {
   headingText: string;
   overflowLabel: string;
   showHeading: boolean;
-  stickyAfterHero: boolean;
   showBadges: boolean;
   desktopLayoutMode: DesktopLayoutMode;
   tabletLayoutMode: TabletLayoutMode;
@@ -97,7 +96,6 @@ export interface PriorityActionsConfigDraft {
   headingText: string;
   overflowLabel: string;
   showHeading: boolean;
-  stickyAfterHero: boolean;
   showBadges: boolean;
   desktopLayoutMode: DesktopLayoutMode;
   tabletLayoutMode: TabletLayoutMode;

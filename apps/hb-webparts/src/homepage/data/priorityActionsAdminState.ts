@@ -81,7 +81,6 @@ export function createConfigDraftFromResolved(
     headingText: config.headingText,
     overflowLabel: config.overflowLabel,
     showHeading: config.showHeading,
-    stickyAfterHero: config.stickyAfterHero,
     showBadges: config.showBadges,
     desktopLayoutMode: config.desktopLayoutMode,
     tabletLayoutMode: config.tabletLayoutMode,

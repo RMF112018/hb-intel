@@ -89,7 +89,6 @@ export function mapConfigRow(row: RawPriorityActionsConfigRow): PriorityActionsC
     headingText: readString(row.HeadingText),
     overflowLabel: readString(row.OverflowLabel, 'More tools'),
     showHeading: readBool(row.ShowHeading),
-    stickyAfterHero: readBool(row.StickyAfterHero),
     showBadges: readBool(row.ShowBadges, true),
     desktopLayoutMode: readDesktopLayout(row.DesktopLayoutMode),
     tabletLayoutMode: readTabletLayout(row.TabletLayoutMode),

@@ -47,7 +47,6 @@ function makeConfig(overrides: Partial<PriorityActionsConfigResolved> = {}): Pri
     headingText: '',
     overflowLabel: 'More tools',
     showHeading: false,
-    stickyAfterHero: false,
     showBadges: true,
     desktopLayoutMode: 'rail',
     tabletLayoutMode: 'grid',
