@@ -73,6 +73,60 @@ describe('HbcPriorityRail shared family', () => {
     expect(screen.getByRole('button', { name: /More tools/ })).toBeInTheDocument();
   });
 
+  it('renders section featured slot only under homepage-flagship context and excludes it from supporting row list', () => {
+    const { container, rerender } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          {
+            key: 'approvals',
+            title: 'Approvals',
+            actions: [ACTIONS[0]!, ACTIONS[1]!],
+            featured: ACTIONS[0]!,
+          },
+        ]}
+      />,
+    );
+
+    const featuredSlot = container.querySelector('[data-hbc-featured-slot="true"]');
+    expect(featuredSlot).not.toBeNull();
+    expect(featuredSlot?.getAttribute('data-hbc-featured-action')).toBe('a-1');
+
+    const section = container.querySelector('[data-testid="section-approvals"]');
+    expect(section?.getAttribute('data-hbc-section-has-featured')).toBe('true');
+
+    const supportingItems = section?.querySelector('[role="list"]:not([data-hbc-featured-slot])');
+    const supportingLinks = supportingItems?.querySelectorAll('a') ?? [];
+    const supportingTitles = Array.from(supportingLinks).map((node) => node.textContent?.trim());
+    expect(supportingTitles).not.toContain('Approve RFI');
+    expect(supportingTitles.some((t) => t?.includes('Sign CO #22'))).toBe(true);
+
+    rerender(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="default"
+        items={[]}
+        sections={[
+          {
+            key: 'approvals',
+            title: 'Approvals',
+            actions: [ACTIONS[0]!, ACTIONS[1]!],
+            featured: ACTIONS[0]!,
+          },
+        ]}
+      />,
+    );
+
+    expect(container.querySelector('[data-hbc-featured-slot]')).toBeNull();
+    expect(
+      container
+        .querySelector('[data-testid="section-approvals"]')
+        ?.getAttribute('data-hbc-section-has-featured'),
+    ).toBeNull();
+  });
+
   it('preview surface reuses shared rendering path with grouped content', () => {
     render(
       <HbcPriorityRailPreviewSurface
