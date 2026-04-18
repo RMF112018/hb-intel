@@ -73,10 +73,10 @@ describe('HbcPriorityRail — target size credibility', () => {
 
   it('flagship featured row commits to a clearly larger primary target', () => {
     const featuredBlock = CSS_SOURCE.match(
-      /\.contextHomepageFlagship\s+\.featured\s+\.item\s*\{[^}]*\}/,
+      /\.contextHomepageFlagship\s+\.featuredTile\s+\.item\s*\{[^}]*\}/,
     );
     expect(featuredBlock).not.toBeNull();
-    expect(featuredBlock![0]).toMatch(/min-height:\s*(?:5[2-9]|[6-9]\d)px/);
+    expect(featuredBlock![0]).toMatch(/min-height:\s*(?:5[2-9]|[6-9]\d|1\d{2})px/);
   });
 });
 
@@ -118,36 +118,46 @@ describe('HbcPriorityRail — flagship anti-collapse structural locks', () => {
     );
   });
 
-  it('keeps the flagship featured slot visually distinct from the tile grid', () => {
+  it('renders flagship primary actions as a width-filling command strip grid', () => {
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.featured\s+\.item\s*\{[^}]*background:[^}]*linear-gradient/,
+      /\.contextHomepageFlagship\s+\.commandStrip\s*\{[^}]*display:\s*grid/,
+    );
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.commandStrip\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/,
     );
   });
 
-  it('renders flagship supporting actions as a tile grid, not a row list', () => {
+  it('gives each flagship command tile a tall card silhouette with persistent launch chip', () => {
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.items\[data-hbc-flagship-grid="true"\]\s*\{[^}]*display:\s*grid/,
+      /\.contextHomepageFlagship\s+\.commandTile\s+\.item\s*\{[^}]*display:\s*grid/,
+    );
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.commandTile\s+\.itemLaunch\s*\{/,
     );
   });
 
-  it('gives each flagship tile a discrete card silhouette with persistent launch chip', () => {
+  it('keeps the featured band authoritative with a brand-gradient fill and white launch pill', () => {
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\[data-hbc-flagship-tile="true"\]\s+\.item\s*\{[^}]*display:\s*grid/,
+      /\.contextHomepageFlagship\s+\.featuredTile\s+\.item\s*\{[^}]*linear-gradient/,
     );
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\[data-hbc-flagship-tile="true"\]\s+\.itemLaunch\s*\{/,
-    );
-  });
-
-  it('promotes the featured launch chip to a high-contrast primary target', () => {
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.featured\s+\.itemLaunch\s*\{[^}]*background:\s*#ffffff/,
+      /\.contextHomepageFlagship\s+\.featuredTile\s+\.itemLaunch\s*\{[^}]*background:\s*#ffffff/,
     );
   });
 
-  it('anchors the flagship overflow trigger as a discrete command object, not a footer row', () => {
+  it('carries group identity as a tile eyebrow, not a stacked section header', () => {
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.tileEyebrow\s*\{/);
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.overflowTrigger\s*\{[^}]*border-radius:/,
+      /\.contextHomepageFlagship\s+\.sectionHeader[^{]*\{[^}]*display:\s*none/,
+    );
+  });
+
+  it('anchors the flagship overflow trigger as a right-edge discrete chip', () => {
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.overflowRegion\s*\{[^}]*justify-content:\s*flex-end/,
+    );
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.overflowTrigger\s*\{[^}]*border-radius:\s*999px/,
     );
   });
 });

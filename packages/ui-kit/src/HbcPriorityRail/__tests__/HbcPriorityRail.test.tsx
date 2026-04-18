@@ -120,7 +120,7 @@ describe('HbcPriorityRail shared family', () => {
     expect(screen.getByRole('button', { name: /More tools/ })).toBeInTheDocument();
   });
 
-  it('renders section featured slot only under homepage-flagship context and excludes it from supporting row list', () => {
+  it('flagship context promotes featured actions into a dedicated band and keeps them out of the supporting command strip', () => {
     const { container, rerender } = render(
       <HbcPriorityRailSurface
         title="Priority Actions"
@@ -139,15 +139,17 @@ describe('HbcPriorityRail shared family', () => {
 
     const featuredSlot = container.querySelector('[data-hbc-featured-slot="true"]');
     expect(featuredSlot).not.toBeNull();
-    expect(featuredSlot?.getAttribute('data-hbc-featured-action')).toBe('a-1');
+    const featuredTileEl = featuredSlot?.querySelector('[data-hbc-featured-action="a-1"]');
+    expect(featuredTileEl).not.toBeNull();
 
-    const section = container.querySelector('[data-testid="section-approvals"]');
-    expect(section?.getAttribute('data-hbc-section-has-featured')).toBe('true');
+    const sectionMarker = container.querySelector('[data-testid="section-approvals"]');
+    expect(sectionMarker?.getAttribute('data-hbc-section-has-featured')).toBe('true');
 
-    const supportingItems = section?.querySelector('[role="list"]:not([data-hbc-featured-slot])');
-    const supportingLinks = supportingItems?.querySelectorAll('a') ?? [];
+    const commandStrip = container.querySelector('[data-hbc-flagship-grid="true"]');
+    expect(commandStrip).not.toBeNull();
+    const supportingLinks = commandStrip?.querySelectorAll('a') ?? [];
     const supportingTitles = Array.from(supportingLinks).map((node) => node.textContent?.trim());
-    expect(supportingTitles).not.toContain('Approve RFI');
+    expect(supportingTitles.some((t) => t?.includes('Approve RFI'))).toBe(false);
     expect(supportingTitles.some((t) => t?.includes('Sign CO #22'))).toBe(true);
 
     rerender(
@@ -257,19 +259,35 @@ describe('HbcPriorityRail shared family', () => {
     expect(root?.className).toMatch(/contextHomepageFlagship/);
   });
 
-  it('flagship context renders supporting actions as tile-grid objects and default context does not', () => {
+  it('flagship context renders a horizontal command strip with flattened tiles and default context does not', () => {
     const { container, rerender } = render(
       <HbcPriorityRailSurface
         title="Priority Actions"
         context="homepage-flagship"
-        items={[ACTIONS[0]!, ACTIONS[1]!, ACTIONS[2]!]}
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
+        ]}
       />,
     );
 
-    const flagshipGrid = container.querySelector('[data-hbc-flagship-grid="true"]');
-    expect(flagshipGrid).not.toBeNull();
+    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
+    expect(surface?.getAttribute('data-hbc-flagship-layout')).toBe('command-strip');
+
+    const strip = container.querySelector('[data-hbc-flagship-grid="true"]');
+    expect(strip).not.toBeNull();
+    // All three actions render in the single flattened strip, not in
+    // per-section sub-grids.
     const flagshipTiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
     expect(flagshipTiles.length).toBe(3);
+    // Every tile carries its group eyebrow so the flattened strip preserves
+    // group identity without stacked section headers.
+    const eyebrows = Array.from(flagshipTiles)
+      .map((node) => node.getAttribute('data-hbc-tile-eyebrow'))
+      .filter(Boolean);
+    expect(eyebrows).toContain('Approvals');
+    expect(eyebrows).toContain('Safety');
 
     rerender(
       <HbcPriorityRailSurface
@@ -281,6 +299,7 @@ describe('HbcPriorityRail shared family', () => {
 
     expect(container.querySelector('[data-hbc-flagship-grid="true"]')).toBeNull();
     expect(container.querySelectorAll('[data-hbc-flagship-tile="true"]').length).toBe(0);
+    expect(container.querySelector('[data-hbc-flagship-layout]')).toBeNull();
   });
 
   it('preview surface reuses shared rendering path with grouped content', () => {
