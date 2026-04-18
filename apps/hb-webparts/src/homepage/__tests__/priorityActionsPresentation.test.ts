@@ -44,10 +44,17 @@ describe('priorityActionsPresentation', () => {
     expect(desktop.overflowStrategy).toBe('menu');
     expect(desktop.normalizations).toEqual(['desktop-segmented-to-grid']);
 
+    // Prompt-05: tabletPortrait decisively steps into `compact` rather
+    // than sharing tabletLandscape's rail, so the narrow-tablet state is
+    // a materially different mode, not a compressed rail.
     const tablet = resolvePriorityRailPresentationForDevice(CONFIG, 'tabletPortrait');
-    expect(tablet.layout).toBe('rail');
+    expect(tablet.layout).toBe('compact');
     expect(tablet.overflowStrategy).toBe('menu');
-    expect(tablet.normalizations).toEqual(['tablet-hybrid-to-rail']);
+    expect(tablet.normalizations).toEqual(['tablet-portrait-to-compact']);
+
+    const tabletLandscape = resolvePriorityRailPresentationForDevice(CONFIG, 'tabletLandscape');
+    expect(tabletLandscape.layout).toBe('rail');
+    expect(tabletLandscape.normalizations).toEqual(['tablet-hybrid-to-rail']);
 
     const phone = resolvePriorityRailPresentationForDevice(CONFIG, 'phone');
     expect(phone.layout).toBe('compact');
@@ -91,6 +98,58 @@ describe('priorityActionsPresentation', () => {
       'phone',
     );
     expect(phoneScroll.overflowStrategy).toBe('inline-disclosure');
+  });
+
+  it('Prompt-05 layout-divergence matrix produces materially different layouts across device classes', () => {
+    // Desktop hybrid → grid (wide confident flagship field)
+    const desktopHybrid = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'hybrid', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'desktop',
+    );
+    expect(desktopHybrid.layout).toBe('grid');
+    expect(desktopHybrid.normalizations).toEqual(['desktop-hybrid-to-grid']);
+
+    // Laptop hybrid → rail (narrower, stays a rail)
+    const laptopHybrid = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'hybrid', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'laptop',
+    );
+    expect(laptopHybrid.layout).toBe('rail');
+    expect(laptopHybrid.normalizations).toEqual(['desktop-hybrid-to-rail']);
+
+    // TabletLandscape keeps authored mode (rail stays rail, grid stays grid)
+    const tabletLandscapeRail = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'tabletLandscape',
+    );
+    expect(tabletLandscapeRail.layout).toBe('rail');
+    const tabletLandscapeGrid = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'grid', mobileLayoutMode: 'scroll' },
+      'tabletLandscape',
+    );
+    expect(tabletLandscapeGrid.layout).toBe('grid');
+
+    // TabletPortrait collapses to `compact` across ALL tablet modes —
+    // decisive step away from landscape, so the narrow-tablet state is a
+    // genuinely different mode (not a squeezed rail).
+    for (const tabletLayoutMode of ['rail', 'grid', 'hybrid'] as const) {
+      const result = resolvePriorityRailPresentationForDevice(
+        { desktopLayoutMode: 'rail', tabletLayoutMode, mobileLayoutMode: 'scroll' },
+        'tabletPortrait',
+      );
+      expect(result.layout).toBe('compact');
+      expect(result.normalizations).toEqual(['tablet-portrait-to-compact']);
+    }
+
+    // Phone always simplifies decisively to `compact` and diverges only
+    // via overflow strategy.
+    for (const mobileLayoutMode of ['scroll', 'grid', 'sheet-trigger'] as const) {
+      const result = resolvePriorityRailPresentationForDevice(
+        { desktopLayoutMode: 'rail', tabletLayoutMode: 'rail', mobileLayoutMode },
+        'phone',
+      );
+      expect(result.layout).toBe('compact');
+    }
   });
 
   it('builds deterministic grouped sections from first-seen group order', () => {

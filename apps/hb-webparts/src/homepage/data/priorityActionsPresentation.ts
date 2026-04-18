@@ -22,8 +22,10 @@ export interface PriorityRailContainerDimensions {
 
 export type PriorityRailPresentationNormalization =
   | 'desktop-segmented-to-grid'
+  | 'desktop-hybrid-to-grid'
   | 'desktop-hybrid-to-rail'
   | 'tablet-hybrid-to-rail'
+  | 'tablet-portrait-to-compact'
   | 'mobile-grid-to-compact-menu'
   | 'mobile-scroll-to-compact-inline';
 
@@ -93,6 +95,25 @@ export function resolvePriorityRailPresentationForDevice(
   // footers the primary strip. Sheet remains for small handheld cases
   // below; inline-disclosure is reserved for the mobile scroll fallback
   // where an in-flow disclosure is still the best fit.
+  //
+  // ── Mode divergence matrix (Prompt-05) ────────────────────────────────
+  // The prior matrix collapsed `rail` and `hybrid` into identical 'rail'
+  // outcomes across desktop + tablet, and always gave tabletPortrait the
+  // same layout as tabletLandscape. The matrix below makes each step
+  // materially different:
+  //
+  //   device          | rail      | segmented/grid | hybrid
+  //   ----------------+-----------+----------------+----------
+  //   desktop         | rail      | grid           | grid   ← wide, confident
+  //   laptop          | rail      | grid           | rail   ← narrower
+  //   tabletLandscape | rail      | grid           | rail
+  //   tabletPortrait  | compact   | compact        | compact ← decisive step
+  //   phone           | compact   | compact        | compact
+  //
+  // tabletPortrait is promoted to `compact` across all authored tablet
+  // modes so the narrow-tablet band no longer reads as a squeezed rail.
+  // It still diverges from phone via overflowStrategy (menu vs. sheet /
+  // inline-disclosure) as governed in the mobile branch below.
   if (deviceClass === 'desktop' || deviceClass === 'laptop') {
     if (config.desktopLayoutMode === 'segmented') {
       return {
@@ -105,13 +126,19 @@ export function resolvePriorityRailPresentationForDevice(
       };
     }
     if (config.desktopLayoutMode === 'hybrid') {
+      // Desktop leans into `grid` for hybrid; laptop keeps `rail` so the
+      // two widths express materially different flagship fields.
+      const hybridLayout: PriorityRailLayoutMode = deviceClass === 'desktop' ? 'grid' : 'rail';
       return {
         deviceClass,
         shellState,
-        layout: 'rail',
+        layout: hybridLayout,
         overflowStrategy: 'menu',
         authoredLayoutMode: 'hybrid',
-        normalizations: ['desktop-hybrid-to-rail'],
+        normalizations:
+          deviceClass === 'desktop'
+            ? ['desktop-hybrid-to-grid']
+            : ['desktop-hybrid-to-rail'],
       };
     }
     return {
@@ -125,6 +152,19 @@ export function resolvePriorityRailPresentationForDevice(
   }
 
   if (deviceClass === 'tabletLandscape' || deviceClass === 'tabletPortrait') {
+    // tabletPortrait always compacts — decisive step away from the
+    // tabletLandscape rail/grid so the narrow-tablet band reads as a
+    // compact command menu, not a compressed rail.
+    if (deviceClass === 'tabletPortrait') {
+      return {
+        deviceClass,
+        shellState,
+        layout: 'compact',
+        overflowStrategy: 'menu',
+        authoredLayoutMode: config.tabletLayoutMode,
+        normalizations: ['tablet-portrait-to-compact'],
+      };
+    }
     if (config.tabletLayoutMode === 'grid') {
       return {
         deviceClass,
