@@ -3,7 +3,7 @@
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { HbcPremiumBadge } from '../HbcPremiumBadge/index.js';
 import type { HbcPriorityRailActionProps, PriorityRailBadgeVariant } from './types.js';
@@ -25,12 +25,16 @@ export function HbcPriorityRailAction({
 }: HbcPriorityRailActionProps): React.JSX.Element {
   const IconComponent = action.icon;
   const isExternal = Boolean(action.external);
+  const prefersReducedMotion = useReducedMotion();
   const linkProps = isExternal
     ? { href: action.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: action.href };
 
   return (
-    <motion.div whileHover={{ x: 2 }} transition={{ duration: 0.12 }}>
+    <motion.div
+      whileHover={prefersReducedMotion ? undefined : { x: 2 }}
+      transition={{ duration: 0.12 }}
+    >
       <a
         className={clsx(styles.item, compact && styles.itemCompact, className)}
         data-hbc-ui="priority-rail-action"
