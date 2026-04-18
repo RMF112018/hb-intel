@@ -4,7 +4,13 @@
  */
 
 /* ── Surface root ─────────────────────────────────────────── */
+/* The rail declares its own container so flagship degradation can react
+ * to its real rendered width inside the homepage wrapper, not to the
+ * browser viewport. Pairs with container-query rules below to provide
+ * a stable narrowest flagship state. */
 .root {
+  container-type: inline-size;
+  container-name: hbc-priority-rail;
   --hbc-pr-text-primary: var(--hb-text-primary, #1a1a1a);
   --hbc-pr-text-rgb: var(--hb-text-primary-rgb, 26, 26, 26);
   --hbc-pr-brand: var(--hb-brand-primary, #225391);
@@ -960,5 +966,99 @@
   .skeletonIcon {
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* ── Container-driven flagship degradation ────────────────────
+ * Stability under real container widths, not viewport assumptions.
+ * The rail's own `hbc-priority-rail` inline-size container governs
+ * narrowest behavior so a nested SharePoint zone cannot compress the
+ * flagship band into a cramped fallback.
+ */
+
+/* Narrowest stable flagship state: ≤ 520px container width.
+ * Keep primary recognition (icon + title + launch chip) and hide only
+ * secondary content that costs vertical rhythm. Description hides;
+ * featured stays but loses the supplemental description line. Launch
+ * chip remains visible so the activation anchor never disappears. */
+@container hbc-priority-rail (max-width: 520px) {
+  .contextHomepageFlagship .header {
+    padding: 14px 16px 10px;
+  }
+  .contextHomepageFlagship .sectionHeader {
+    padding: 12px 16px 4px;
+  }
+  .contextHomepageFlagship .item {
+    padding: 10px 16px;
+    min-height: 48px;
+    gap: 12px;
+  }
+  .contextHomepageFlagship .itemDescription {
+    display: none;
+  }
+  .contextHomepageFlagship .itemSeparator,
+  .contextHomepageFlagship .separator {
+    margin: 0 16px;
+  }
+  .contextHomepageFlagship .featured {
+    margin: 0 4px;
+    padding: 8px 10px 10px;
+  }
+  .contextHomepageFlagship .featured .item {
+    padding: 12px 14px;
+    min-height: 56px;
+  }
+  .contextHomepageFlagship .featured .itemIcon {
+    width: 38px;
+    height: 38px;
+  }
+  .contextHomepageFlagship .featured .itemTitle {
+    font-size: 0.9375rem;
+  }
+  .contextHomepageFlagship .overflowTrigger {
+    padding: 10px 16px 12px;
+  }
+}
+
+/* Ultra-narrow guard: ≤ 360px container width. Prevents fragile
+ * multi-column layouts from attempting to render inside a compressed
+ * host zone (e.g. SharePoint two-column page with a narrow right rail).
+ * Forces single-column items and keeps launch chip always visible. */
+@container hbc-priority-rail (max-width: 360px) {
+  .layoutGrid .items {
+    grid-template-columns: 1fr;
+  }
+  .contextHomepageFlagship .item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .contextHomepageFlagship .itemIcon {
+    width: 30px;
+    height: 30px;
+  }
+  .contextHomepageFlagship .itemBadge {
+    display: none;
+  }
+}
+
+/* Wide state anchoring: ≥ 1180px container width.
+ * Protect left-authoritative composition — increase horizontal breathing
+ * inside the masthead and row gutters without re-centering. */
+@container hbc-priority-rail (min-width: 1180px) {
+  .contextHomepageFlagship .header {
+    padding: 20px 28px 12px;
+  }
+  .contextHomepageFlagship .sectionHeader {
+    padding: 16px 28px 6px;
+  }
+  .contextHomepageFlagship .item {
+    padding: 14px 28px;
+  }
+  .contextHomepageFlagship .itemSeparator,
+  .contextHomepageFlagship .separator {
+    margin: 0 28px;
+  }
+  .contextHomepageFlagship .featured {
+    margin: 0 12px;
   }
 }

@@ -63,4 +63,53 @@ describe('priorityActionsPresentation', () => {
     expect(sections?.map((section) => section.key)).toEqual(['approvals', 'safety']);
     expect(sections?.[0]?.actions.map((action: { id: string }) => action.id)).toEqual(['a', 'c']);
   });
+
+  it('promotes wrapper-declared featuredActionKeys into section.featured', () => {
+    const sections = buildPriorityRailSections(
+      [
+        { id: 'a', title: 'A', href: '/a', groupKey: 'approvals', groupTitle: 'Approvals' },
+        { id: 'b', title: 'B', href: '/b', groupKey: 'approvals', groupTitle: 'Approvals' },
+        { id: 'c', title: 'C', href: '/c', groupKey: 'safety', groupTitle: 'Safety' },
+      ],
+      { featuredActionKeys: ['b'] },
+    );
+    const approvals = sections?.find((section) => section.key === 'approvals');
+    expect(approvals?.featured?.id).toBe('b');
+    const safety = sections?.find((section) => section.key === 'safety');
+    expect(safety?.featured).toBeUndefined();
+  });
+
+  it('falls back to critical > warning badge variant when no featuredActionKeys match', () => {
+    const sections = buildPriorityRailSections([
+      {
+        id: 'x',
+        title: 'X',
+        href: '/x',
+        groupKey: 'approvals',
+        groupTitle: 'Approvals',
+        badge: { label: 'Warn', variant: 'warning' },
+      },
+      {
+        id: 'y',
+        title: 'Y',
+        href: '/y',
+        groupKey: 'approvals',
+        groupTitle: 'Approvals',
+        badge: { label: 'Crit', variant: 'critical' },
+      },
+    ]);
+    const approvals = sections?.[0];
+    expect(approvals?.featured?.id).toBe('y');
+  });
+
+  it('returns no featured assignment when no keys match and no critical/warning badge exists', () => {
+    const sections = buildPriorityRailSections(
+      [
+        { id: 'a', title: 'A', href: '/a', groupKey: 'approvals', groupTitle: 'Approvals' },
+        { id: 'b', title: 'B', href: '/b', groupKey: 'approvals', groupTitle: 'Approvals' },
+      ],
+      { featuredActionKeys: ['does-not-exist'] },
+    );
+    expect(sections?.[0]?.featured).toBeUndefined();
+  });
 });
