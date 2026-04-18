@@ -82,6 +82,20 @@ export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
 // =============================================================================
 
 export const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
+/**
+ * Wrapper-owned outer page-canvas envelope budget for the flagship homepage.
+ * This numeric contract is consumed by `HbHomepageEntryStack` and surfaced as
+ * an inspectable data attribute/CSS variable seam so outer-envelope authority
+ * is explicit in code.
+ */
+export const HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX = 2200;
+/**
+ * Stable id for the wrapper-owned outer-envelope containment contract.
+ * Both wrapper actions strip and shell region must reference this id so the
+ * shared page-canvas containment relationship is inspectable at runtime.
+ */
+export const HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID =
+  'hb-homepage-wrapper-outer-envelope-v1' as const;
 
 // ---------------------------------------------------------------------------
 // External props — what mount.tsx passes in.

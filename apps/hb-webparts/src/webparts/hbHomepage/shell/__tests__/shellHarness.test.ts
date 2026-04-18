@@ -2,9 +2,11 @@ import { describe, it, expect } from 'vitest';
 import {
   SHELL_BREAKPOINT_MATRIX,
   runShellHarnessCase,
+  runShellConformanceMatrix,
   runShellHarnessMatrix,
   summarizeHarnessProof,
 } from '../shellHarness.js';
+import { toShellConformanceDataAttributes } from '../shellConformance.js';
 import type { ShellEntryStateId } from '../shellTypes.js';
 
 describe('shellHarness — matrix coverage', () => {
@@ -55,6 +57,37 @@ describe('shellHarness — matrix coverage', () => {
     expect(constrained).toBeDefined();
     expect(constrained!.proof.entryState.id).toBe('phone-landscape');
     expect(constrained!.proof.entryState.shortHeightConstrained).toBe(true);
+  });
+
+  it('conformance fit-path attribute matches width-vs-short-height route per case', () => {
+    const outcomes = runShellConformanceMatrix();
+    for (const outcome of outcomes) {
+      const attrs = toShellConformanceDataAttributes(outcome.conformance);
+      const expectedPath = outcome.proof.entryState.shortHeightConstrained
+        ? 'short-height-override'
+        : 'usable-width-accounted';
+      expect(attrs['data-shell-fit-path']).toBe(expectedPath);
+    }
+  });
+
+  it('standard-laptop stays paired while tablet-landscape degrades to stacked first lane', () => {
+    const outcomes = runShellConformanceMatrix();
+    const laptop = outcomes.find(
+      (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
+    );
+    const tabletLandscape = outcomes.find(
+      (o) => o.matrixCase.label === 'tablet-landscape-large',
+    );
+
+    expect(laptop?.conformance.entryState.id).toBe('standard-laptop');
+    expect(laptop?.conformance.bands[0].columns).toBe(2);
+    expect(laptop?.conformance.bands[0].pairingDecision.reason).toBe('paired');
+
+    expect(tabletLandscape?.conformance.entryState.id).toBe('tablet-landscape');
+    expect(tabletLandscape?.conformance.bands[0].columns).toBe(1);
+    expect(tabletLandscape?.conformance.bands[0].pairingDecision.reason).toBe(
+      'state-denies-pairing',
+    );
   });
 });
 

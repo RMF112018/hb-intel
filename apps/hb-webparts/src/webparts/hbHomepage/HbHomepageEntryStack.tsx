@@ -1,5 +1,9 @@
 import * as React from 'react';
-import type { HbHomepageProps } from './hbHomepageContract.js';
+import {
+  HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID,
+  HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX,
+  type HbHomepageProps,
+} from './hbHomepageContract.js';
 import { HbHomepageShell } from './HbHomepageShell.js';
 import { PriorityActionsRail } from '../priorityActionsRail/PriorityActionsRail.js';
 import { extractHbHomepageWrapperConfig } from './hbHomepageWrapperConfig.js';
@@ -31,18 +35,27 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
     [props.config],
   );
   const { rail } = wrapperConfig;
+  const rootStyle = {
+    '--hb-homepage-outer-envelope-max-width': `${HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}px`,
+  } as React.CSSProperties;
 
   return (
     <div
       className={styles.entryStack}
       data-hb-homepage-entry-stack="root"
       data-hb-homepage-entry-stack-owner="hb-homepage-wrapper"
+      data-hb-homepage-outer-envelope-owner="hb-homepage-wrapper"
+      data-hb-homepage-outer-envelope-max-width={HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}
+      data-hb-homepage-outer-envelope-contract={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
       data-hb-homepage-entry-stack-rail-enabled={rail.enabled || undefined}
+      style={rootStyle}
     >
       {rail.enabled ? (
         <section
           className={styles.actionsRegion}
           data-hb-homepage-entry-stack-region="priority-actions"
+          data-hb-homepage-region-inset-policy="actions-strip-inner-inset"
+          data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
           data-hb-homepage-entry-stack-order="1"
           data-hb-homepage-entry-stack-rail-band-key={rail.bandKey}
           data-hb-homepage-entry-stack-rail-audience={rail.activeAudience || undefined}
@@ -61,6 +74,8 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       <div
         className={styles.shellRegion}
         data-hb-homepage-entry-stack-region="shell"
+        data-hb-homepage-region-inset-policy="shell-body-inner-inset"
+        data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
         data-hb-homepage-entry-stack-order={rail.enabled ? '2' : '1'}
       >
         <HbHomepageShell {...props} />

@@ -77,6 +77,7 @@ describe('shellConformance — data-attribute surface', () => {
   it('emits the canonical attribute set for harness/CSS inspection', () => {
     const report = buildReport('standard-laptop', 1300);
     const attrs = toShellConformanceDataAttributes(report);
+    expect(attrs['data-shell-fit-path']).toBe('usable-width-accounted');
     expect(attrs['data-shell-entry-class']).toBe('standard-laptop');
     expect(attrs['data-shell-layout-mode']).toBeDefined();
     expect(attrs['data-shell-first-lane-columns']).toBe(report.bands[0].columns);
@@ -87,6 +88,7 @@ describe('shellConformance — data-attribute surface', () => {
   it('flags short-height when the constraint applies', () => {
     const report = buildReport('phone-landscape', 720, { shortHeight: true });
     const attrs = toShellConformanceDataAttributes(report);
+    expect(attrs['data-shell-fit-path']).toBe('short-height-override');
     expect(attrs['data-shell-short-height']).toBe('true');
     expect(attrs['data-shell-layout-mode']).toBe('short-height-compact');
   });

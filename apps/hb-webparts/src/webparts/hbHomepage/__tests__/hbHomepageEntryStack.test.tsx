@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
+import {
+  HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID,
+  HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX,
+} from '../hbHomepageContract.js';
 
 // Mock the shell and rail so this test stays tightly scoped to the
 // wrapper composition contract (order, attributes, enable toggle)
@@ -37,6 +41,46 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(root).not.toBeNull();
     expect(root?.getAttribute('data-hb-homepage-entry-stack-owner')).toBe(
       'hb-homepage-wrapper',
+    );
+  });
+
+  it('exposes wrapper-owned outer envelope authority explicitly', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const root = container.querySelector('[data-hb-homepage-entry-stack="root"]');
+    expect(root?.getAttribute('data-hb-homepage-outer-envelope-owner')).toBe(
+      'hb-homepage-wrapper',
+    );
+    expect(root?.getAttribute('data-hb-homepage-outer-envelope-max-width')).toBe(
+      String(HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX),
+    );
+    expect(root?.getAttribute('data-hb-homepage-outer-envelope-contract')).toBe(
+      HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID,
+    );
+    expect(root?.getAttribute('style')).toContain(
+      `--hb-homepage-outer-envelope-max-width: ${HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}px`,
+    );
+  });
+
+  it('distinguishes actions-strip and shell-body inset policies by region', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const actionsRegion = container.querySelector(
+      '[data-hb-homepage-entry-stack-region="priority-actions"]',
+    );
+    const shellRegion = container.querySelector(
+      '[data-hb-homepage-entry-stack-region="shell"]',
+    );
+
+    expect(actionsRegion?.getAttribute('data-hb-homepage-region-inset-policy')).toBe(
+      'actions-strip-inner-inset',
+    );
+    expect(actionsRegion?.getAttribute('data-hb-homepage-region-contained-by')).toBe(
+      HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID,
+    );
+    expect(shellRegion?.getAttribute('data-hb-homepage-region-inset-policy')).toBe(
+      'shell-body-inner-inset',
+    );
+    expect(shellRegion?.getAttribute('data-hb-homepage-region-contained-by')).toBe(
+      HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID,
     );
   });
 

@@ -25,51 +25,67 @@
 .entryStack {
   container-type: inline-size;
   container-name: homepage-entry-stack;
+  /* Wrapper-owned outer page-canvas envelope contract.
+     Value is injected from HbHomepageEntryStack.tsx. */
+  --hb-homepage-outer-envelope-max-width: 2200px;
+  /* Wrapper-owned actions-strip inner inset policy.
+     These values are region styling inside the outer envelope, not
+     outer page-canvas fit authority. */
+  --hb-homepage-actions-inset-block-start: 1rem;
+  --hb-homepage-actions-inset-inline: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   width: 100%;
-  max-width: 2200px;
+  max-width: var(--hb-homepage-outer-envelope-max-width);
   margin: 0 auto;
 }
 
 .actionsRegion {
   width: 100%;
-  /* Narrow inline gutter on small viewports lets the flagship top rule
-     span the page canvas and signal a band instead of a nested panel. */
-  padding: 1rem 0.5rem 0;
+  /* Narrow inline gutter lets the flagship strip read as a bridging band,
+     while remaining explicitly separate from shell-body inset policy. */
+  padding: var(--hb-homepage-actions-inset-block-start)
+    var(--hb-homepage-actions-inset-inline)
+    0;
 }
 
 @container homepage-entry-stack (min-width: 768px) {
   .entryStack {
     gap: 1.5rem;
-  }
-  .actionsRegion {
-    padding: 1.25rem 1rem 0;
+    --hb-homepage-actions-inset-block-start: 1.25rem;
+    --hb-homepage-actions-inset-inline: 1rem;
   }
 }
 
 @container homepage-entry-stack (min-width: 1180px) {
   .entryStack {
     gap: 1.75rem;
-  }
-  .actionsRegion {
-    padding: 1.5rem 1.5rem 0;
+    --hb-homepage-actions-inset-block-start: 1.5rem;
+    --hb-homepage-actions-inset-inline: 1.5rem;
   }
 }
 
 @container homepage-entry-stack (min-width: 1600px) {
-  .actionsRegion {
-    padding: 1.75rem 2.5rem 0;
+  .entryStack {
+    --hb-homepage-actions-inset-block-start: 1.75rem;
+    --hb-homepage-actions-inset-inline: 2.5rem;
   }
 }
 
 @container homepage-entry-stack (min-width: 1900px) {
-  .actionsRegion {
-    padding: 1.75rem 3.5rem 0;
+  .entryStack {
+    --hb-homepage-actions-inset-inline: 3.5rem;
   }
 }
 
 .shellRegion {
   width: 100%;
+}
+
+/* Wrapper-owned regions participating in one outer containment contract.
+   Region-specific inset policy may differ; containment authority does not. */
+.actionsRegion,
+.shellRegion {
+  max-width: 100%;
 }

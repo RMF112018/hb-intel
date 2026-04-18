@@ -3,7 +3,11 @@ import { createSharePointUserPhotoResolver } from '../../homepage/helpers/people
 import type { HbHomepageProps, HbHomepageZoneProps } from './hbHomepageContract.js';
 import { parseShellLayout, extractModuleConfigSlices } from './shell/shellValidation.js';
 import { getOccupant } from './shell/occupantRegistry.js';
-import { useShellContainer } from './shell/useShellContainer.js';
+import {
+  SHELL_WIDTH_ACCOUNTING_RULE,
+  SHELL_WIDTH_SOURCE,
+  useShellContainer,
+} from './shell/useShellContainer.js';
 import { resolveBandLayout } from './shell/slotComfortResolver.js';
 import {
   resolveShellConformance,
@@ -309,9 +313,14 @@ function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyPro
       className={styles.shell}
       data-shell-preset={layoutState.preset.id}
       data-shell-post-hero="true"
+      data-hb-homepage-shell-inset-policy="shell-body-inner-inset"
       data-shell-entry-state={container.entryState.id}
       data-shell-entry-state-reason={container.entryStateReason}
       data-shell-width={Math.round(container.width)}
+      data-shell-width-authoritative={Math.round(container.authoritativeWidth)}
+      data-shell-width-inline-inset-total={Math.round(container.shellInlineInsetTotal)}
+      data-shell-width-source={SHELL_WIDTH_SOURCE}
+      data-shell-width-accounting={SHELL_WIDTH_ACCOUNTING_RULE}
       data-shell-height={Math.round(container.height)}
       data-shell-short-height-constrained={container.shortHeightConstrained || undefined}
       data-shell-diagnostics-count={layoutState.diagnostics.length}

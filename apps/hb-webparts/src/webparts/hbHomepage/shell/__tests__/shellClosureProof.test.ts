@@ -39,6 +39,11 @@ import {
   SHELL_ENTRY_STATE_TO_DEVICE_CLASS,
   SHELL_ENTRY_STATE_TO_PRIORITY_ACTIONS_DEVICE_CLASS,
 } from '../../../../homepage/entryStack/entryStackOrchestration.js';
+import {
+  SHELL_WIDTH_ACCOUNTING_RULE,
+  SHELL_WIDTH_SOURCE,
+  resolveUsableShellWidth,
+} from '../useShellContainer.js';
 
 describe('Phase-05 closure — Prompt-01 governance model', () => {
   it('exposes a unified governance surface with four categories', () => {
@@ -213,6 +218,26 @@ describe('Phase-05 closure — Prompt-05 + Prompt-06 harness + conformance proof
       expect(line).toContain('state=');
       expect(line).toContain('bands=[');
     }
+  });
+
+  it('standard-laptop baseline keeps a no-overflow width-accounting invariant', () => {
+    // Prompt-06 overflow guard: authoritative width must remain the upper bound,
+    // and shell usable width must be deductive from inline inset accounting.
+    const authoritativeWidth = 1300;
+    const inlineInsetTotal = 64; // 2rem + 2rem at 16px base
+    const usableWidth = resolveUsableShellWidth(authoritativeWidth, inlineInsetTotal);
+    expect(SHELL_WIDTH_SOURCE).toBe('entry-stack-outer-envelope');
+    expect(SHELL_WIDTH_ACCOUNTING_RULE).toBe(
+      'authoritative-minus-shell-inline-inset',
+    );
+    expect(usableWidth).toBe(1236);
+    expect(usableWidth).toBeLessThan(authoritativeWidth);
+    expect(usableWidth).toBeGreaterThan(0);
+
+    const laptop = outcomes.find(
+      (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
+    );
+    expect(laptop?.conformance.entryState.id).toBe('standard-laptop');
   });
 });
 

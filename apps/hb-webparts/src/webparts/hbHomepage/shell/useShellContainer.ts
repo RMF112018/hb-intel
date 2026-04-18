@@ -5,8 +5,23 @@ import {
 } from './breakpointPolicy.js';
 import type { ShellEntryState } from './shellTypes.js';
 
+/**
+ * Inspectable measurement-source marker for shell width truth.
+ */
+export const SHELL_WIDTH_SOURCE = 'entry-stack-outer-envelope' as const;
+/**
+ * Inspectable accounting rule marker for usable shell width.
+ */
+export const SHELL_WIDTH_ACCOUNTING_RULE =
+  'authoritative-minus-shell-inline-inset' as const;
+
 export interface ShellContainerState {
+  /** Authoritative usable width (authoritative outer width minus shell insets). */
   readonly width: number;
+  /** Wrapper-owned outer envelope width before shell-body inset deduction. */
+  readonly authoritativeWidth: number;
+  /** Total inline inset deducted from authoritative width. */
+  readonly shellInlineInsetTotal: number;
   readonly height: number;
   readonly entryState: ShellEntryState;
   /** Why `entryState` was selected; inspectable via shell diagnostics. */
@@ -18,37 +33,93 @@ export interface ShellContainerState {
 const DEFAULT_WIDTH = 1200;
 const DEFAULT_HEIGHT = 800;
 
+interface ShellMeasurements {
+  readonly authoritativeWidth: number;
+  readonly shellInlineInsetTotal: number;
+  readonly height: number;
+}
+
+function parsePixelValue(value: string): number {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function resolveUsableShellWidth(
+  authoritativeWidth: number,
+  shellInlineInsetTotal: number,
+): number {
+  return Math.max(0, authoritativeWidth - shellInlineInsetTotal);
+}
+
+function measureShell(
+  shellElement: HTMLElement,
+  authoritativeElement: HTMLElement,
+): ShellMeasurements {
+  const shellStyle = window.getComputedStyle(shellElement);
+  const shellInlineInsetTotal =
+    parsePixelValue(shellStyle.paddingLeft) + parsePixelValue(shellStyle.paddingRight);
+  const authoritativeWidth = authoritativeElement.getBoundingClientRect().width;
+  const height = shellElement.getBoundingClientRect().height;
+  return {
+    authoritativeWidth,
+    shellInlineInsetTotal,
+    height,
+  };
+}
+
 export function useShellContainer(
   ref: React.RefObject<HTMLElement | null>,
 ): ShellContainerState {
-  const [dimensions, setDimensions] = React.useState<{ width: number; height: number }>({
-    width: DEFAULT_WIDTH,
+  const [measurements, setMeasurements] = React.useState<ShellMeasurements>({
+    authoritativeWidth: DEFAULT_WIDTH,
+    shellInlineInsetTotal: 0,
     height: DEFAULT_HEIGHT,
   });
 
   React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const shellElement = ref.current;
+    if (!shellElement) return;
+    const authoritativeElement =
+      (shellElement.closest('[data-hb-homepage-entry-stack="root"]') as HTMLElement | null) ??
+      shellElement;
+
+    const update = () => {
+      setMeasurements(measureShell(shellElement, authoritativeElement));
+    };
 
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { inlineSize, blockSize } = entry.contentBoxSize[0];
-        setDimensions({ width: inlineSize, height: blockSize });
+      for (const _entry of entries) {
+        update();
       }
     });
 
-    observer.observe(el);
+    update();
+    observer.observe(shellElement);
+    if (authoritativeElement !== shellElement) {
+      observer.observe(authoritativeElement);
+    }
     return () => observer.disconnect();
   }, [ref]);
 
+  const usableWidth = React.useMemo(
+    () =>
+      resolveUsableShellWidth(
+        measurements.authoritativeWidth,
+        measurements.shellInlineInsetTotal,
+      ),
+    [measurements.authoritativeWidth, measurements.shellInlineInsetTotal],
+  );
+
   const resolved = React.useMemo(
-    () => resolveEntryStateWithReason({ width: dimensions.width, height: dimensions.height }),
-    [dimensions.width, dimensions.height],
+    () => resolveEntryStateWithReason({ width: usableWidth, height: measurements.height }),
+    [usableWidth, measurements.height],
   );
 
   return {
-    width: dimensions.width,
-    height: dimensions.height,
+    width: usableWidth,
+    authoritativeWidth: measurements.authoritativeWidth,
+    shellInlineInsetTotal: measurements.shellInlineInsetTotal,
+    height: measurements.height,
     entryState: resolved.state,
     entryStateReason: resolved.reason,
     shortHeightConstrained: resolved.shortHeightConstrained,

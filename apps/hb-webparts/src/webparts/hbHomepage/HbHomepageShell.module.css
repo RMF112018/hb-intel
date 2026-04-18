@@ -16,38 +16,45 @@
 .shell {
   container-type: inline-size;
   container-name: homepage-shell;
+  /* Shell-owned inner inset policy for post-actions shell body.
+     This region-level inset contract is distinct from wrapper-owned
+     outer envelope authority. */
+  --hb-homepage-shell-body-inset-block: 1.5rem;
+  --hb-homepage-shell-body-inset-inline: 1rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
   width: 100%;
-  max-width: 2200px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
+  /* Outer envelope authority is wrapper-owned (HbHomepageEntryStack). */
+  padding: var(--hb-homepage-shell-body-inset-block)
+    var(--hb-homepage-shell-body-inset-inline);
 }
 
 @container homepage-shell (min-width: 768px) {
   .shell {
+    --hb-homepage-shell-body-inset-block: 2rem;
+    --hb-homepage-shell-body-inset-inline: 1.5rem;
     gap: 2.5rem;
-    padding: 2rem 1.5rem;
   }
 }
 
 @container homepage-shell (min-width: 1180px) {
   .shell {
+    --hb-homepage-shell-body-inset-block: 2.5rem;
+    --hb-homepage-shell-body-inset-inline: 2rem;
     gap: 3rem;
-    padding: 2.5rem 2rem;
   }
 }
 
 @container homepage-shell (min-width: 1600px) {
   .shell {
-    padding: 2.5rem 3.5rem;
+    --hb-homepage-shell-body-inset-inline: 3.5rem;
   }
 }
 
 @container homepage-shell (min-width: 1900px) {
   .shell {
-    padding: 2.5rem 5rem;
+    --hb-homepage-shell-body-inset-inline: 5rem;
   }
 }
 

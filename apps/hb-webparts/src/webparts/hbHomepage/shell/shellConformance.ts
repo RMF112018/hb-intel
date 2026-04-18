@@ -199,6 +199,7 @@ export function resolveShellConformance(
 
 export interface ShellConformanceDataAttributes {
   readonly 'data-shell-layout-mode': ShellLayoutMode;
+  readonly 'data-shell-fit-path': 'usable-width-accounted' | 'short-height-override';
   readonly 'data-shell-entry-class': string;
   readonly 'data-shell-first-lane-columns': 1 | 2;
   readonly 'data-shell-short-height': 'true' | undefined;
@@ -212,6 +213,9 @@ export function toShellConformanceDataAttributes(
   const pairedCount = report.bands.filter((b) => b.columns === 2).length;
   return {
     'data-shell-layout-mode': report.layoutMode,
+    'data-shell-fit-path': report.shortHeightConstrained
+      ? 'short-height-override'
+      : 'usable-width-accounted',
     'data-shell-entry-class': report.entryState.id,
     'data-shell-first-lane-columns': report.bands[0]?.columns ?? 1,
     'data-shell-short-height': report.shortHeightConstrained ? 'true' : undefined,
