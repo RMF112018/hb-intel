@@ -61,6 +61,20 @@ export {
 export {
   LegacyFallbackDiscoveryService,
   type ILegacyFallbackDiscoveryRunOptions,
+  type ILegacyFallbackDiscoverySampleRecord,
   type ILegacyFallbackDiscoveryRunSummary,
   type ILegacyFallbackDiscoverySourceSummary,
 } from './discovery-service.js';
+
+export {
+  LegacyFallbackMatchingEngine,
+  type ILegacyFallbackMatchingEngine,
+  type ILegacyFallbackProjectIndexRecord,
+  type ILegacyFallbackMatchInput,
+  type ILegacyFallbackMatchDecision,
+} from './matching-engine.js';
+
+export {
+  LegacyFallbackProjectIndexProvider,
+  type ILegacyFallbackProjectIndexProvider,
+} from './project-index-provider.js';

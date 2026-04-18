@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LegacyFallbackDiscoveryService } from '../legacy-fallback/discovery-service.js';
+import { LegacyFallbackMatchingEngine } from '../legacy-fallback/matching-engine.js';
+import type { ILegacyFallbackProjectIndexProvider } from '../legacy-fallback/project-index-provider.js';
 import type {
   ILegacyFallbackDiscoveryGraphClient,
   ILegacyGraphDrive,
@@ -49,6 +51,8 @@ class FakeGraphClient implements ILegacyFallbackDiscoveryGraphClient {
 class FakeRepository implements ILegacyFallbackDiscoveryRepository {
   readonly upserts: ILegacyFallbackRegistryUpsertInput[] = [];
   readonly completions: ILegacyFallbackSyncRunCompletion[] = [];
+  readonly activeByYear: Record<number, Array<{ itemId: number; driveId: string; driveItemId: string }>> = {};
+  readonly markedInactive: number[] = [];
 
   async startSyncRun(): Promise<ILegacyFallbackSyncRunStart> {
     return {
@@ -64,6 +68,41 @@ class FakeRepository implements ILegacyFallbackDiscoveryRepository {
   async upsertRegistryRecord(input: ILegacyFallbackRegistryUpsertInput): Promise<'created' | 'updated'> {
     this.upserts.push(input);
     return this.upserts.length % 2 === 0 ? 'updated' : 'created';
+  }
+
+  async listActiveRegistryRecordsByYear(year: number): Promise<readonly { itemId: number; legacyYear: number; driveId: string; driveItemId: string }[]> {
+    return (this.activeByYear[year] ?? []).map((entry) => ({
+      itemId: entry.itemId,
+      legacyYear: year,
+      driveId: entry.driveId,
+      driveItemId: entry.driveItemId,
+    }));
+  }
+
+  async markRegistryRecordsInactive(
+    _runId: string,
+    itemIds: readonly number[],
+    _validatedAtUtc: string,
+    _reason: string,
+  ): Promise<number> {
+    this.markedInactive.push(...itemIds);
+    return itemIds.length;
+  }
+}
+
+class FakeProjectIndexProvider implements ILegacyFallbackProjectIndexProvider {
+  constructor(
+    private readonly rows: Array<{
+      projectListItemId: number;
+      projectNumber: string;
+      projectTitle: string;
+      normalizedProjectTitle: string;
+      year: number | null;
+    }>,
+  ) {}
+
+  async loadIndex() {
+    return this.rows;
   }
 }
 
@@ -88,8 +127,17 @@ describe('LegacyFallbackDiscoveryService', () => {
       ],
     });
 
-    const service = new LegacyFallbackDiscoveryService(graph, repo, noopLogger);
-    const summary = await service.run({ years: [2024], dryRun: false });
+    const matching = new LegacyFallbackMatchingEngine();
+    const projectIndex = new FakeProjectIndexProvider([
+      {
+        projectListItemId: 10,
+        projectNumber: '24-100-01',
+        projectTitle: 'Test Project',
+        normalizedProjectTitle: 'test project',
+        year: 2024,
+      },
+    ]);
+    const summary = await new LegacyFallbackDiscoveryService(graph, repo, matching, projectIndex, noopLogger).run({ years: [2024], dryRun: false });
 
     expect(summary.status).toBe('completed');
     expect(summary.foldersScanned).toBe(1);
@@ -99,6 +147,8 @@ describe('LegacyFallbackDiscoveryService', () => {
     expect(repo.upserts).toHaveLength(1);
     expect(repo.upserts[0].legacyYear).toBe(2024);
     expect(repo.upserts[0].projectNumber).toBe('24-100-01');
+    expect(repo.upserts[0].matching.matchStatus).toBe('matched');
+    expect(summary.recordsMatched).toBe(1);
   });
 
   it('supports dry run without registry writes', async () => {
@@ -115,8 +165,9 @@ describe('LegacyFallbackDiscoveryService', () => {
       ],
     });
 
-    const service = new LegacyFallbackDiscoveryService(graph, repo, noopLogger);
-    const summary = await service.run({ years: [2025], dryRun: true });
+    const matching = new LegacyFallbackMatchingEngine();
+    const projectIndex = new FakeProjectIndexProvider([]);
+    const summary = await new LegacyFallbackDiscoveryService(graph, repo, matching, projectIndex, noopLogger).run({ years: [2025], dryRun: true });
 
     expect(summary.status).toBe('completed');
     expect(summary.foldersScanned).toBe(1);
@@ -129,13 +180,53 @@ describe('LegacyFallbackDiscoveryService', () => {
     const repo = new FakeRepository();
     const graph = new FakeGraphClient({ 2024: [] }, 2024);
 
-    const service = new LegacyFallbackDiscoveryService(graph, repo, noopLogger);
-    const summary = await service.run({ years: [2024], dryRun: false });
+    const matching = new LegacyFallbackMatchingEngine();
+    const projectIndex = new FakeProjectIndexProvider([]);
+    const summary = await new LegacyFallbackDiscoveryService(graph, repo, matching, projectIndex, noopLogger).run({ years: [2024], dryRun: false });
 
     expect(summary.status).toBe('failed');
     expect(summary.errorCount).toBe(1);
     expect(summary.errors[0]).toContain('year=2024');
     expect(repo.completions).toHaveLength(1);
     expect(repo.completions[0].status).toBe('failed');
+  });
+
+  it('marks unseen active records as inactive during stale pass', async () => {
+    const repo = new FakeRepository();
+    repo.activeByYear[2024] = [
+      { itemId: 10, driveId: 'drive-site-2024', driveItemId: 'item-a' },
+      { itemId: 11, driveId: 'drive-site-2024', driveItemId: 'item-stale' },
+    ];
+    const graph = new FakeGraphClient({
+      2024: [
+        {
+          driveId: 'drive-site-2024',
+          driveItemId: 'item-a',
+          folderName: '24-100-01 Test Project',
+          folderPath: '/24-100-01 Test Project',
+          folderWebUrl: 'https://example.invalid/folder-a',
+        },
+      ],
+    });
+
+    const matching = new LegacyFallbackMatchingEngine();
+    const projectIndex = new FakeProjectIndexProvider([
+      {
+        projectListItemId: 10,
+        projectNumber: '24-100-01',
+        projectTitle: 'Test Project',
+        normalizedProjectTitle: 'test project',
+        year: 2024,
+      },
+    ]);
+    const summary = await new LegacyFallbackDiscoveryService(graph, repo, matching, projectIndex, noopLogger).run({
+      years: [2024],
+      dryRun: false,
+    });
+
+    expect(summary.recordsMarkedInactive).toBe(1);
+    expect(repo.markedInactive).toEqual([11]);
+    expect(repo.upserts[0].driveId).toBe('drive-site-2024');
+    expect(repo.upserts[0].driveItemId).toBe('item-a');
   });
 });

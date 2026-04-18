@@ -13,6 +13,8 @@ import type { LegacyProjectSourceYear } from '../../services/legacy-fallback/sou
 import { LegacyFallbackDiscoveryGraphClient } from '../../services/legacy-fallback/discovery-graph-client.js';
 import { LegacyFallbackDiscoveryRepository } from '../../services/legacy-fallback/discovery-repository.js';
 import { LegacyFallbackDiscoveryService } from '../../services/legacy-fallback/discovery-service.js';
+import { LegacyFallbackMatchingEngine } from '../../services/legacy-fallback/matching-engine.js';
+import { LegacyFallbackProjectIndexProvider } from '../../services/legacy-fallback/project-index-provider.js';
 
 const TIMER_SCHEDULE = '0 0 2 * * *';
 
@@ -35,7 +37,9 @@ function createService(context: InvocationContext): LegacyFallbackDiscoveryServi
   const logger = createLogger(context);
   const graphClient = new LegacyFallbackDiscoveryGraphClient(hosting.graphScope);
   const repository = new LegacyFallbackDiscoveryRepository();
-  return new LegacyFallbackDiscoveryService(graphClient, repository, logger);
+  const matchingEngine = new LegacyFallbackMatchingEngine();
+  const projectIndexProvider = new LegacyFallbackProjectIndexProvider();
+  return new LegacyFallbackDiscoveryService(graphClient, repository, matchingEngine, projectIndexProvider, logger);
 }
 
 app.http('legacyFallbackDiscoveryRun', {

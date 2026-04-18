@@ -16,6 +16,7 @@ import {
   LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE,
   getLegacyFallbackListHostSiteUrl,
 } from './list-descriptors.js';
+import type { ILegacyFallbackMatchDecision } from './matching-engine.js';
 
 export interface ILegacyFallbackRegistryUpsertInput {
   readonly runId: string;
@@ -32,6 +33,7 @@ export interface ILegacyFallbackRegistryUpsertInput {
   readonly folderName: string;
   readonly folderPath: string;
   readonly folderWebUrl: string;
+  readonly matching: ILegacyFallbackMatchDecision;
 }
 
 export interface ILegacyFallbackSyncRunStart {
@@ -45,16 +47,33 @@ export interface ILegacyFallbackSyncRunCompletion {
   readonly foldersScanned: number;
   readonly recordsCreated: number;
   readonly recordsUpdated: number;
+  readonly recordsMatched: number;
+  readonly recordsReviewRequired: number;
   readonly recordsUnmatched: number;
+  readonly recordsMarkedInactive: number;
   readonly errorCount: number;
   readonly yearsProcessed: readonly number[];
   readonly summaryJson: string;
+}
+
+export interface ILegacyFallbackRegistryIdentity {
+  readonly itemId: number;
+  readonly legacyYear: number;
+  readonly driveId: string;
+  readonly driveItemId: string;
 }
 
 export interface ILegacyFallbackDiscoveryRepository {
   startSyncRun(years: readonly number[]): Promise<ILegacyFallbackSyncRunStart>;
   completeSyncRun(start: ILegacyFallbackSyncRunStart, completion: ILegacyFallbackSyncRunCompletion): Promise<void>;
   upsertRegistryRecord(input: ILegacyFallbackRegistryUpsertInput): Promise<'created' | 'updated'>;
+  listActiveRegistryRecordsByYear(year: number): Promise<readonly ILegacyFallbackRegistryIdentity[]>;
+  markRegistryRecordsInactive(
+    runId: string,
+    itemIds: readonly number[],
+    validatedAtUtc: string,
+    reason: string,
+  ): Promise<number>;
 }
 
 function toTitle(years: readonly number[]): string {
@@ -171,15 +190,15 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
         folderName: input.folderName,
         folderPath: input.folderPath,
         folderWebUrl: input.folderWebUrl,
-        matchStatus: 'unmatched',
-        matchConfidence: 'none',
-        matchedProjectListItemId: null,
-        matchedProjectTitle: '',
-        matchMethod: 'no-match',
+        matchStatus: input.matching.matchStatus,
+        matchConfidence: input.matching.matchConfidence,
+        matchedProjectListItemId: input.matching.matchedProjectListItemId,
+        matchedProjectTitle: input.matching.matchedProjectTitle,
+        matchMethod: input.matching.matchMethod,
         lastSeenUtc: input.discoveredAtUtc,
         lastValidatedUtc: input.discoveredAtUtc,
         discoveryRunId: input.runId,
-        notes: `recordKey=${recordKey}`,
+        notes: `recordKey=${recordKey};${input.matching.notes}`,
         isActive: true,
       };
 
@@ -217,6 +236,53 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
       await list.items.getById(existing[0].Id).update(listPayload);
       return 'updated';
     });
+  }
+
+  async listActiveRegistryRecordsByYear(year: number): Promise<readonly ILegacyFallbackRegistryIdentity[]> {
+    return withRetry(async () => {
+      const sp: any = await this.getSP();
+      const yearValue = Number(year);
+      const rows = await sp.web.lists
+        .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
+        .items.filter(`LegacyYear eq ${yearValue} and IsActive eq 1`)
+        .select('Id', 'LegacyYear', 'DriveId', 'DriveItemId')
+        .top(5000)();
+
+      return (rows as Array<Record<string, unknown>>)
+        .map((row) => ({
+          itemId: Number(row.Id ?? 0),
+          legacyYear: Number(row.LegacyYear ?? yearValue),
+          driveId: String(row.DriveId ?? ''),
+          driveItemId: String(row.DriveItemId ?? ''),
+        }))
+        .filter((row) => row.itemId > 0 && row.driveId.length > 0 && row.driveItemId.length > 0);
+    });
+  }
+
+  async markRegistryRecordsInactive(
+    runId: string,
+    itemIds: readonly number[],
+    validatedAtUtc: string,
+    reason: string,
+  ): Promise<number> {
+    if (!itemIds.length) {
+      return 0;
+    }
+
+    await withRetry(async () => {
+      const sp: any = await this.getSP();
+      const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
+      for (const itemId of itemIds) {
+        await list.items.getById(itemId).update({
+          IsActive: false,
+          LastValidatedUtc: validatedAtUtc,
+          DiscoveryRunId: runId,
+          Notes: reason.slice(0, 1024),
+        });
+      }
+    });
+
+    return itemIds.length;
   }
 
   private async getSP(): Promise<any> {
