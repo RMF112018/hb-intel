@@ -239,13 +239,35 @@ const HB_PUBLISHER_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   'apps/hb-publisher/src/data/publisherAdapter/publishOrchestrator.ts',
   'apps/hb-publisher/src/data/publisherAdapter/publisherRepositories.ts',
 ];
+// hb-intel-homepage package effectiveness (2026-04-18): the disputed
+// seam for this domain is the wrapper-owned flagship Priority Actions
+// Rail embedded in the HB Homepage entry stack. The critical runtime
+// paths below must cover every file that changes the rail's runtime
+// behavior so the package-truth proof can answer the question
+// "did the rebuilt .sppkg actually include the flagship rail path?"
+// without requiring a browser-side comparison. Adding or removing
+// entries here is a deliberate contract change — update the
+// accompanying runbook at docs/how-to/verify-hb-intel-homepage-sppkg.md
+// when you change this list.
 const HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  // Mount + webpart manifest — entry identity
   'apps/hb-homepage/src/mount.tsx',
   'apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json',
+  // Wrapper composition path
   'apps/hb-webparts/src/webparts/hbHomepage/HbHomepage.tsx',
+  'apps/hb-webparts/src/webparts/hbHomepage/HbHomepageEntryStack.tsx',
+  'apps/hb-webparts/src/webparts/hbHomepage/hbHomepageWrapperConfig.ts',
   'apps/hb-webparts/src/webparts/hbHomepage/HbHomepageShell.tsx',
   'apps/hb-webparts/src/webparts/hbHomepage/shell/shellTypes.ts',
   'apps/hb-webparts/src/webparts/hbHomepage/shell/defaultPreset.ts',
+  // Public rail + presentation / normalization seams
+  'apps/hb-webparts/src/webparts/priorityActionsRail/PriorityActionsRail.tsx',
+  'apps/hb-webparts/src/homepage/data/priorityActionsPresentation.ts',
+  'apps/hb-webparts/src/homepage/data/priorityActionsNormalization.ts',
+  'apps/hb-webparts/src/homepage/data/priorityActionsCuration.ts',
+  // Shared flagship surface family
+  'packages/ui-kit/src/HbcPriorityRail/HbcPriorityRailSurface.tsx',
+  'packages/ui-kit/src/HbcPriorityRail/priority-rail.module.css',
 ];
 
 const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
@@ -1864,6 +1886,55 @@ for (const domain of domains) {
   const primarySourceManifest = targetManifests[0].json;
   const targetManifestIds = targetManifests.map((m) => m.json.id);
 
+  // ── Version authority enforcement (hb-intel-homepage) ─────────────────
+  // The hb-intel-homepage package has three version fields that must move
+  // together for SharePoint to trust an update:
+  //
+  //   1. apps/hb-homepage/config/package-solution.json → solution.version
+  //   2. apps/hb-homepage/config/package-solution.json → features[0].version
+  //   3. apps/hb-homepage/src/webparts/hbHomepage/HbHomepageWebPart.manifest.json → version
+  //
+  // (1) is the authoritative source. (2) must equal (1). (3) must equal
+  // (1). This guard fails the build if any of them diverge so a homepage
+  // rebuild cannot silently ship a stale component version alongside a
+  // bumped solution version. See docs/how-to/verify-hb-intel-homepage-sppkg.md
+  // for the authority model.
+  if (domain.dir === 'hb-homepage') {
+    const homepagePkgSolution = JSON.parse(fs.readFileSync(configPath, 'utf8')) as {
+      solution?: { version?: unknown; features?: Array<{ version?: unknown }> };
+    };
+    const solutionVersion = String(homepagePkgSolution?.solution?.version ?? '');
+    const featureVersion = String(
+      homepagePkgSolution?.solution?.features?.[0]?.version ?? '',
+    );
+    const webpartManifestVersion = String(primarySourceManifest.version ?? '');
+    const versionMismatches: string[] = [];
+    if (!solutionVersion) {
+      versionMismatches.push('solution.version is empty in package-solution.json');
+    }
+    if (featureVersion && featureVersion !== solutionVersion) {
+      versionMismatches.push(
+        `features[0].version (${featureVersion}) does not match solution.version (${solutionVersion})`,
+      );
+    }
+    if (webpartManifestVersion && webpartManifestVersion !== solutionVersion) {
+      versionMismatches.push(
+        `HbHomepageWebPart.manifest.json version (${webpartManifestVersion}) does not match solution.version (${solutionVersion})`,
+      );
+    }
+    if (versionMismatches.length > 0) {
+      console.error(
+        `  ❌ hb-intel-homepage version-authority violation:\n` +
+          versionMismatches.map((m) => `     - ${m}`).join('\n'),
+      );
+      allPassed = false;
+      continue;
+    }
+    console.log(
+      `  ✓ hb-intel-homepage version authority aligned (${solutionVersion} across solution, feature, and webpart manifest)`,
+    );
+  }
+
   // ── Step 1: Enforce fresh build output ───────────────────────────────
   // baseBundleName is the fixed name Vite always outputs.
   // After content hashing (Step 1c), bundleName is updated to the hashed
@@ -2699,6 +2770,93 @@ for (const domain of domains) {
       console.error(`  ❌ ${domain.dir}: package-truth verification failed; see ${packageTruthPath}`);
       allPassed = false;
       continue;
+    }
+
+    // ── hb-intel-homepage effectiveness proof ───────────────────────────
+    // The package-truth proof answers "is the .sppkg structurally sound
+    // and does the packaged bundle match the source bundle?" It does not
+    // directly answer "is the wrapper-owned flagship rail path included
+    // in the deployed artifact?" — which is the question that governs
+    // whether the hosted homepage will actually render flagship-grade
+    // Priority Actions. This block emits a focused effectiveness proof
+    // that checks for distinctive runtime markers of the flagship path
+    // inside the packaged bundle. Failing markers indicate the wrapper/
+    // rail path was not actually compiled into the deployed artifact.
+    if (domain.dir === 'hb-homepage') {
+      const appBundleFingerprint = packageTruth.proof.packagedAssets.appBundle;
+      const bundleArchivePathForMarkers = appBundleFingerprint.archivePath;
+      const bundleText = bundleArchivePathForMarkers
+        ? readArchiveBytes(sppkgDest, bundleArchivePathForMarkers).toString('utf8')
+        : '';
+      const flagshipMarkers = [
+        { key: 'homepage-flagship surface context', needle: 'homepage-flagship' },
+        { key: 'entry-stack wrapper root marker', needle: 'data-hb-homepage-entry-stack' },
+        { key: 'flagship command-strip layout marker', needle: 'data-hbc-flagship-layout' },
+        { key: 'priority-rail UI marker', needle: 'data-hbc-ui' },
+      ];
+      const markerResults = flagshipMarkers.map((m) => ({
+        marker: m.key,
+        needle: m.needle,
+        present: bundleText.includes(m.needle),
+      }));
+      const missingMarkers = markerResults.filter((r) => !r.present);
+      const versionAuthority = {
+        solutionVersion: String(domainPkgSolution?.solution?.version ?? ''),
+        featureVersion: String(domainPkgSolution?.solution?.features?.[0]?.version ?? ''),
+        webpartManifestVersion: String(primarySourceManifest.version ?? ''),
+        aligned:
+          String(domainPkgSolution?.solution?.version ?? '') ===
+            String(domainPkgSolution?.solution?.features?.[0]?.version ?? '') &&
+          String(domainPkgSolution?.solution?.version ?? '') ===
+            String(primarySourceManifest.version ?? ''),
+      };
+      const effectivenessProof = {
+        domain: 'hb-homepage',
+        generatedAt: new Date().toISOString(),
+        packagingRunId: freshnessEvidence.runId,
+        sppkgFile: path.basename(sppkgDest),
+        solutionId: String(domainPkgSolution?.solution?.id ?? ''),
+        featureId: String(domainPkgSolution?.solution?.features?.[0]?.id ?? ''),
+        webpartId: String(primarySourceManifest.id ?? ''),
+        versionAuthority,
+        packagedAppBundle: appBundleFingerprint,
+        packagedShimEntries: packageTruth.proof.packagedAssets.shimEntries,
+        criticalRuntimePaths: HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
+        flagshipMarkerChecks: markerResults,
+        checks: {
+          versionAuthorityAligned: {
+            pass: versionAuthority.aligned,
+            details: versionAuthority.aligned
+              ? ['solution.version, features[0].version, and webpart manifest version all match']
+              : ['Version authority misalignment — refuse to close on this package'],
+          },
+          flagshipMarkersPresent: {
+            pass: missingMarkers.length === 0,
+            details:
+              missingMarkers.length === 0
+                ? ['All distinctive flagship runtime markers present in packaged bundle']
+                : missingMarkers.map(
+                    (m) => `Missing marker "${m.marker}" (needle="${m.needle}") in packaged bundle`,
+                  ),
+          },
+        },
+      };
+      const effectivenessProofPath = path.join(
+        OUTPUT_DIR,
+        'hb-intel-homepage-effectiveness-proof.json',
+      );
+      fs.writeFileSync(
+        effectivenessProofPath,
+        `${JSON.stringify(effectivenessProof, null, 2)}\n`,
+      );
+      console.log(`  ✓ Homepage effectiveness proof written: ${effectivenessProofPath}`);
+      if (!versionAuthority.aligned || missingMarkers.length > 0) {
+        console.error(
+          `  ❌ hb-intel-homepage effectiveness proof failed; see ${effectivenessProofPath}`,
+        );
+        allPassed = false;
+        continue;
+      }
     }
 
     if (domain.dir === 'hb-publisher' && hbPublisherDeploymentPlan) {
