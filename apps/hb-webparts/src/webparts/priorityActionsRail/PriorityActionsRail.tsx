@@ -24,6 +24,7 @@ import {
 } from '@hbc/ui-kit/homepage';
 import { usePriorityActionsData, invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import { resolveByBreakpoint, filterByDevice } from '../../homepage/data/priorityActionsNormalization.js';
+import { curatePrimaryForFlagship } from '../../homepage/data/priorityActionsCuration.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import type { PriorityActionsItemNormalized, BadgeVariant as SchemaBadgeVariant } from '../../homepage/data/priorityActionsContracts.js';
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
@@ -198,7 +199,9 @@ function ListSourcedRail({
   } else {
     const presentation = resolvePriorityRailPresentationForDevice(config, deviceResolution.deviceClass);
     const deviceItems = filterByDevice(items, deviceResolution.deviceClass);
-    const breakpoint = resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
+    const breakpoint = surfaceContext === 'homepage-flagship'
+      ? curatePrimaryForFlagship(deviceItems, config, deviceResolution.deviceClass, { featuredActionKeys })
+      : resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
 
     if (breakpoint.primaryItems.length === 0 && breakpoint.overflowItems.length === 0) {
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
