@@ -34,11 +34,12 @@ export function HbcPriorityRailAction({
       <a
         className={clsx(styles.item, compact && styles.itemCompact, className)}
         data-hbc-ui="priority-rail-action"
+        data-hbc-action-external={isExternal ? 'true' : undefined}
         {...linkProps}
       >
         {IconComponent ? (
           <span className={styles.itemIcon} aria-hidden="true">
-            <IconComponent size={compact ? 14 : 16} strokeWidth={2} />
+            <IconComponent size={compact ? 14 : 18} strokeWidth={2} />
           </span>
         ) : null}
         <div className={styles.itemContent}>
@@ -56,11 +57,19 @@ export function HbcPriorityRailAction({
             />
           </span>
         ) : null}
+        <span
+          className={clsx(styles.itemLaunch, isExternal && styles.itemLaunchExternal)}
+          aria-hidden="true"
+        >
+          {isExternal ? (
+            <ExternalLink size={14} strokeWidth={2} className={styles.itemExternal} />
+          ) : (
+            <ArrowRight size={14} strokeWidth={2} className={styles.itemArrow} />
+          )}
+        </span>
         {isExternal ? (
-          <ExternalLink size={12} className={styles.itemExternal} aria-label="Opens in new tab" />
-        ) : (
-          <ArrowRight size={12} className={styles.itemArrow} aria-hidden="true" />
-        )}
+          <span className={styles.visuallyHidden}>(opens in new tab)</span>
+        ) : null}
       </a>
     </motion.div>
   );

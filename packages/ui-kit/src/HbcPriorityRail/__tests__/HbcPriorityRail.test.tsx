@@ -127,6 +127,50 @@ describe('HbcPriorityRail shared family', () => {
     ).toBeNull();
   });
 
+  it('renders a launch chip and surfaces the external-link cue via screen-reader text', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[
+          { id: 'ext-1', title: 'Open policy', href: 'https://policy.example', external: true },
+          { id: 'int-1', title: 'Approve RFI', href: '/rfi/1' },
+        ]}
+      />,
+    );
+
+    const links = container.querySelectorAll('a[data-hbc-ui="priority-rail-action"]');
+    expect(links.length).toBe(2);
+
+    // Every action renders a launch chip (persistent activation anchor).
+    for (const link of links) {
+      const chip = link.querySelector(':scope > span');
+      // First span may be the icon, so we look for any child span that
+      // hosts either the arrow or external-link svg.
+      const hasArrow = !!link.querySelector('svg.lucide-arrow-right, svg[class*="arrow"]');
+      const hasExternal = !!link.querySelector('svg.lucide-external-link, svg[class*="external"]');
+      expect(hasArrow || hasExternal).toBe(true);
+      expect(chip).not.toBeNull();
+    }
+
+    // External link is tagged structurally and carries a visible-to-SR
+    // "(opens in new tab)" affordance.
+    const externalLink = container.querySelector(
+      'a[data-hbc-action-external="true"]',
+    ) as HTMLElement | null;
+    expect(externalLink).not.toBeNull();
+    expect(externalLink?.getAttribute('target')).toBe('_blank');
+    expect(externalLink?.getAttribute('rel')).toContain('noopener');
+    expect(externalLink?.textContent).toContain('(opens in new tab)');
+
+    // Internal link does not carry the external marker.
+    const internalLink = container.querySelector(
+      'a[href="/rfi/1"]',
+    ) as HTMLElement | null;
+    expect(internalLink?.getAttribute('data-hbc-action-external')).toBeNull();
+    expect(internalLink?.textContent).not.toContain('(opens in new tab)');
+  });
+
   it('preview surface reuses shared rendering path with grouped content', () => {
     render(
       <HbcPriorityRailPreviewSurface

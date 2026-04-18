@@ -172,12 +172,59 @@
   color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.62);
 }
 .contextHomepageFlagship .itemArrow {
-  opacity: 0.55;
+  opacity: 0.9;
   color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
 }
 .contextHomepageFlagship .item:hover .itemArrow {
   opacity: 1;
   transform: translateX(3px);
+}
+/* Flagship launch chip — persistent circular affordance so the
+ * launch target is visible without hover. Separates the recognition
+ * anchor (icon on the left) from the activation anchor (chip on the
+ * right) so the eye does not have to re-verify that a row is
+ * clickable on every scan. */
+.contextHomepageFlagship .itemLaunch {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
+  transition: background-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.contextHomepageFlagship .item:hover .itemLaunch {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.32);
+}
+.contextHomepageFlagship .itemLaunchExternal {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.04);
+}
+.contextHomepageFlagship .itemExternal {
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  opacity: 0.85;
+}
+
+/* Featured launch chip — brand-filled, reads as the primary action. */
+.contextHomepageFlagship .featured .itemLaunch {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(
+    140deg,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.95) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.78) 100%
+  );
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 2px 6px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.25);
+}
+.contextHomepageFlagship .featured .itemLaunch .itemArrow,
+.contextHomepageFlagship .featured .itemLaunch .itemExternal {
+  color: #ffffff;
+  opacity: 1;
+}
+.contextHomepageFlagship .featured .item:hover .itemLaunch {
+  transform: translateX(2px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 4px 10px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.35);
 }
 .contextHomepageFlagship .itemSeparator {
   background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08);
@@ -501,6 +548,32 @@
   flex-shrink: 0;
 }
 
+/* Default launch chip — invisible container; the arrow fades in on hover. */
+.itemLaunch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.itemLaunchExternal {
+  opacity: 0.9;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .itemCompact {
   padding: 6px 14px;
   min-height: 36px;
@@ -510,6 +583,11 @@
 .itemCompact .itemIcon {
   width: 24px;
   height: 24px;
+}
+
+.itemCompact .itemLaunch {
+  width: 18px;
+  height: 18px;
 }
 
 /* ── Item separator ───────────────────────────────────────── */
