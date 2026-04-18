@@ -101,16 +101,16 @@ describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
     expect(CSS_SOURCE).toMatch(/container-name:\s*hbc-priority-rail/);
   });
 
-  it('ships a narrow flagship container-query collapse (≤ 520px)', () => {
-    expect(CSS_SOURCE).toMatch(
-      /@container\s+hbc-priority-rail\s*\(max-width:\s*520px\)/,
-    );
+  it('ships explicit container-query bands for every display class (phone, tablet portrait, tablet landscape, desktop, ultrawide)', () => {
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(max-width:\s*519px\)/);
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*520px\)\s*and\s*\(max-width:\s*699px\)/);
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*700px\)\s*and\s*\(max-width:\s*899px\)/);
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*1180px\)/);
+    expect(CSS_SOURCE).toMatch(/@container\s+hbc-priority-rail\s*\(min-width:\s*1600px\)/);
   });
 
-  it('ships a wide-anchored flagship container-query band (≥ 1180px)', () => {
-    expect(CSS_SOURCE).toMatch(
-      /@container\s+hbc-priority-rail\s*\(min-width:\s*1180px\)/,
-    );
+  it('ships a short-height guard so vertically constrained viewports stay compact', () => {
+    expect(CSS_SOURCE).toMatch(/@media\s*\(max-height:\s*640px\)/);
   });
 
   it('renders flagship primary actions as a responsive launcher-tile grid', () => {
@@ -127,7 +127,7 @@ describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
       /\.contextHomepageFlagship\s+\.launcherTileWrap\s+\.item\s*\{[^}]*\}/,
     );
     expect(tileBlock).not.toBeNull();
-    expect(tileBlock![0]).toMatch(/grid-template-columns:\s*36px\s+1fr/);
+    expect(tileBlock![0]).toMatch(/grid-template-columns:\s*40px\s+1fr/);
   });
 
   it('flagship surface removes the legacy command-band chrome (masthead, featured gradient, sequence chip, eyebrow, persistent launch chip)', () => {

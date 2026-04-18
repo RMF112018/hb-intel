@@ -18,7 +18,11 @@ import { HbHomepage } from '@hb-homepage/runtime';
 
 export const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
 import { createSharePointUserPhotoResolver } from '@hb-homepage/helpers/peopleCultureProfilePhotoResolver';
-import { storeSiteUrl, storeKudosListHostUrl } from '@hb-homepage/data/spContext';
+import {
+  storeSiteUrl,
+  storeKudosListHostUrl,
+  storePriorityActionsListHostUrl,
+} from '@hb-homepage/data/spContext';
 import type { HomepageIdentityInput } from '@hb-homepage/helpers/identity';
 
 let root: Root | undefined;
@@ -46,6 +50,13 @@ export async function mount(
     const candidate = webPartProperties.kudosListHostUrl.trim();
     if (/^https?:\/\//i.test(candidate)) {
       storeKudosListHostUrl(candidate);
+    }
+  }
+
+  if (typeof webPartProperties?.priorityActionsListHostUrl === 'string' && webPartProperties.priorityActionsListHostUrl.trim()) {
+    const candidate = webPartProperties.priorityActionsListHostUrl.trim();
+    if (/^https?:\/\//i.test(candidate)) {
+      storePriorityActionsListHostUrl(candidate);
     }
   }
 

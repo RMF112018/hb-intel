@@ -90,21 +90,21 @@
 
 .contextHomepageFlagship .launcherTileWrap .item {
   display: grid;
-  grid-template-columns: 36px 1fr;
+  grid-template-columns: 40px 1fr;
   align-items: center;
   column-gap: 12px;
-  padding: 12px 14px;
-  min-height: 64px;
+  padding: 14px 16px;
+  min-height: 72px;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #ffffff;
   box-shadow:
     inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14),
-    0 1px 2px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.04);
+    0 1px 2px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.05);
   color: var(--hbc-pr-text-primary, var(--hb-text-primary, #1a1a1a));
   text-decoration: none;
   cursor: pointer;
-  transition: box-shadow 160ms ease, background-color 160ms ease;
+  transition: box-shadow 160ms ease, background-color 160ms ease, transform 160ms ease;
   position: relative;
   min-width: 0;
 }
@@ -124,9 +124,9 @@
 }
 .contextHomepageFlagship .launcherTileWrap .itemIcon {
   grid-column: 1;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
   background: linear-gradient(
     140deg,
     rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14) 0%,
@@ -869,11 +869,15 @@
   }
 }
 
-/* ── Container-driven launcher-grid degradation ─────────────────
- * Stability under real container widths. Narrow → single column.
- * Wide → slightly larger tile minmax so the grid fills confidently. */
+/* ── Container-driven launcher-grid density governance ──────────
+ * Deliberate breakpoint bands per repo doctrine: the launcher must
+ * behave intentionally across ultrawide, desktop, laptop, tablet
+ * landscape, tablet portrait, phone, and short-height states — not
+ * degrade by accident. Each band picks a density + gap tuned for
+ * scan speed at that width. */
 
-@container hbc-priority-rail (max-width: 520px) {
+/* Phone portrait — single column, full-width tiles, tight gap. */
+@container hbc-priority-rail (max-width: 519px) {
   .contextHomepageFlagship .launcherGrid {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -887,17 +891,63 @@
   }
 }
 
-@container hbc-priority-rail (min-width: 1180px) {
+/* Tablet portrait — 2 columns, balanced. */
+@container hbc-priority-rail (min-width: 520px) and (max-width: 699px) {
   .contextHomepageFlagship .launcherGrid {
-    grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 }
 
+/* Tablet landscape — 3 columns, still compact. */
+@container hbc-priority-rail (min-width: 700px) and (max-width: 899px) {
+  .contextHomepageFlagship .launcherGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+/* Laptop — auto-fit with 160-ish tile floor (default band 900-1179).
+ * Handled by the base rule at the top; no override required. */
+
+/* Desktop — auto-fit with a confident 180px tile floor, slightly more gap. */
+@container hbc-priority-rail (min-width: 1180px) and (max-width: 1599px) {
+  .contextHomepageFlagship .launcherGrid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .contextHomepageFlagship .launcherTileWrap .item {
+    min-height: 76px;
+  }
+}
+
+/* Ultrawide — the band has room to breathe; larger minmax + gap. */
 @container hbc-priority-rail (min-width: 1600px) {
   .contextHomepageFlagship .launcherGrid {
     grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));
     gap: 12px;
+  }
+  .contextHomepageFlagship .launcherTileWrap .item {
+    min-height: 80px;
+    padding: 16px 18px;
+  }
+  .contextHomepageFlagship .launcherTileWrap .itemIcon {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Short-height guard — when the homepage viewport is vertically
+ * constrained, keep the rail compact so it does not consume the
+ * scarce pixels above the fold. Evaluated on the document root. */
+@media (max-height: 640px) {
+  .contextHomepageFlagship .launcherTileWrap .item {
+    min-height: 64px;
+    padding: 10px 14px;
+  }
+  .contextHomepageFlagship .launcherTileWrap .itemIcon {
+    width: 36px;
+    height: 36px;
   }
 }
 

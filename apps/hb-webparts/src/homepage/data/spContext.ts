@@ -27,6 +27,35 @@ export function getSiteUrl(): string | undefined {
   return platformGetSiteUrl();
 }
 
+/* ── Priority Actions list host URL (canonical HBCentral) ────────
+ *
+ * Priority Actions Band Config + Items lists are authored on
+ * HBCentral (see docs/reference/sharepoint/list-schemas/hbcentral/).
+ * Mirroring Kudos, the rail's read seam resolves against this
+ * canonical host regardless of which site the homepage webpart is
+ * hosted on. This prevents the rail from rendering empty when the
+ * homepage is deployed to a non-HBCentral site (the prior behavior
+ * when the rail resolved against `getSiteUrl()` only). */
+
+const PRIORITY_ACTIONS_LIST_HOST_URL = 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
+
+let _priorityActionsListHostUrlOverride: string | undefined;
+
+/** Store an explicit Priority Actions list-host URL override from webpart properties. */
+export function storePriorityActionsListHostUrl(url: string | undefined): void {
+  _priorityActionsListHostUrlOverride = url?.replace(/\/+$/, '');
+}
+
+/**
+ * Retrieve the Priority Actions list-host URL. Resolution order:
+ *   1. Explicit override from webpart properties (if set)
+ *   2. Hardcoded canonical constant (HBCentral)
+ *   3. Hosting site URL (fallback when neither is available)
+ */
+export function getPriorityActionsListHostUrl(): string | undefined {
+  return _priorityActionsListHostUrlOverride ?? PRIORITY_ACTIONS_LIST_HOST_URL ?? platformGetSiteUrl();
+}
+
 /* ── Kudos list host URL (cross-site data access) ────────────── */
 
 /**

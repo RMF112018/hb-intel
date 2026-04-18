@@ -8,7 +8,7 @@
  * homepage data seams.
  */
 import { useEffect, useRef, useState } from 'react';
-import { getSiteUrl } from './spContext.js';
+import { getSiteUrl, getPriorityActionsListHostUrl } from './spContext.js';
 import { fetchPriorityActionsConfig } from './priorityActionsConfigListSource.js';
 import { fetchPriorityActionsItems } from './priorityActionsItemsListSource.js';
 import type { PriorityActionsConfigResolved, PriorityActionsItemNormalized } from './priorityActionsContracts.js';
@@ -63,7 +63,12 @@ export function usePriorityActionsData(
   options: UsePriorityActionsDataOptions = {},
 ): PriorityActionsDataResult {
   const { bandKey = 'homepage-primary', activeAudience } = options;
-  const siteUrl = getSiteUrl();
+  // Gate on SPFx presence via `getSiteUrl()` (the rail should not try to
+  // fetch lists outside SPFx), but resolve lookups against the canonical
+  // Priority Actions list host (HBCentral) so the homepage can be deployed
+  // to any site and still see the canonical action library.
+  const hasSpfxContext = Boolean(getSiteUrl());
+  const siteUrl = hasSpfxContext ? getPriorityActionsListHostUrl() : undefined;
 
   const [result, setResult] = useState<PriorityActionsDataResult>(() => {
     if (siteUrl) {
