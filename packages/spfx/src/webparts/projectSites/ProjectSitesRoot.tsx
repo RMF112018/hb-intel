@@ -92,7 +92,11 @@ const useStyles = makeStyles({
   root: {
     color: HBC_SURFACE_LIGHT['text-primary'],
     paddingTop: `${HBC_SPACE_LG}px`,
-    paddingBottom: `${HBC_SPACE_XL}px`,
+    // Host-fit resilience: honor safe-area insets at the bottom so
+    // SharePoint mobile / iframe hosts with bottom chrome do not crowd
+    // the last card row. `max(...)` keeps the desktop padding intact
+    // when there is no inset.
+    paddingBottom: `max(${HBC_SPACE_XL}px, calc(${HBC_SPACE_MD}px + env(safe-area-inset-bottom, 0px)))`,
     // W01r-P14: responsive horizontal inset so the full-bleed
     // SharePoint-section rendering has comfortable breathing room
     // at the left/right edges without collapsing the full-width
@@ -100,8 +104,8 @@ const useStyles = makeStyles({
     // a modest 16 px gutter; tablet widens to 32 px; desktop opens
     // to 64 px so the header / control bar / card grid never feel
     // pressed against the section edges.
-    paddingLeft: `${HBC_SPACE_MD}px`,
-    paddingRight: `${HBC_SPACE_MD}px`,
+    paddingLeft: `max(${HBC_SPACE_MD}px, env(safe-area-inset-left, 0px))`,
+    paddingRight: `max(${HBC_SPACE_MD}px, env(safe-area-inset-right, 0px))`,
     [hbcMediaQuery('tablet')]: {
       paddingLeft: `${HBC_SPACE_XL}px`,
       paddingRight: `${HBC_SPACE_XL}px`,
@@ -110,6 +114,12 @@ const useStyles = makeStyles({
       paddingLeft: `${HBC_SPACE_2XL}px`,
       paddingRight: `${HBC_SPACE_2XL}px`,
     },
+  },
+  rootCompact: {
+    paddingTop: `${HBC_SPACE_MD}px`,
+  },
+  rootMedium: {
+    paddingTop: `${HBC_SPACE_MD}px`,
   },
 
   // ── Header bar ──────────────────────────────────────────────────────
@@ -123,6 +133,15 @@ const useStyles = makeStyles({
     paddingBottom: `${HBC_SPACE_MD}px`,
     marginBottom: `${HBC_SPACE_LG}px`,
     ...shorthands.borderBottom('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+  },
+  // Compact/tight: drop the paddingBottom+marginBottom to a combined
+  // single-space rhythm so the first card row arrives sooner on
+  // constrained first screens. Eyebrow is suppressed via render
+  // branching in compact mode.
+  headerTight: {
+    rowGap: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    marginBottom: `${HBC_SPACE_MD}px`,
   },
   headerLead: {
     display: 'flex',
@@ -194,6 +213,14 @@ const useStyles = makeStyles({
     color: HBC_SURFACE_LIGHT['text-muted'],
     lineHeight: 1.35,
   },
+  contextSummaryCompact: {
+    marginTop: `${HBC_SPACE_XS}px`,
+    marginBottom: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+  },
   contextSummaryWarning: {
     ...shorthands.borderColor(HBC_STATUS_COLORS.warning),
     color: HBC_SURFACE_LIGHT['text-primary'],
@@ -207,8 +234,13 @@ const useStyles = makeStyles({
     gap: `${HBC_SPACE_SM}px`,
     marginBottom: `${HBC_SPACE_MD}px`,
   },
+  // Medium/tablet: deliberate two-lane composition. Lane 1 = search
+  // (full width). Lane 2 = scope + sort + filters grouped in a single
+  // inline row with a subtle top divider that reads as a designed
+  // secondary surface rather than wrapped overflow.
   controlBarMedium: {
     alignItems: 'stretch',
+    rowGap: `${HBC_SPACE_SM}px`,
   },
   controlBarCompact: {
     alignItems: 'stretch',
@@ -223,6 +255,23 @@ const useStyles = makeStyles({
     flexBasis: '100%',
     maxWidth: '100%',
     minWidth: 0,
+  },
+  // Dedicated lane-2 container for medium mode. Groups scope, sort,
+  // and filter clusters as a single horizontal row under the search
+  // lane, with a subtle divider that signals "this is a second
+  // operating row" rather than "search wrapped to a new line".
+  secondaryControlLane: {
+    display: 'flex',
+    flexBasis: '100%',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: `${HBC_SPACE_MD}px`,
+    paddingTop: `${HBC_SPACE_SM}px`,
+    ...shorthands.borderTop('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+  },
+  secondaryControlLaneActions: {
+    marginLeft: 'auto',
   },
   controlCluster: {
     display: 'flex',
@@ -246,6 +295,15 @@ const useStyles = makeStyles({
     textTransform: 'uppercase',
     color: HBC_SURFACE_LIGHT['text-muted'],
     whiteSpace: 'nowrap',
+  },
+  controlLabelCompactHidden: {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    overflow: 'hidden',
+    clipPath: 'inset(50%)',
+    whiteSpace: 'nowrap',
+    ...shorthands.borderWidth(0),
   },
   sortSelect: {
     height: '36px',
@@ -378,6 +436,70 @@ const useStyles = makeStyles({
       outlineOffset: '1px',
     },
   },
+  chipRemoveCompact: {
+    width: '28px',
+    height: '28px',
+    borderRadius: '14px',
+  },
+  chipCompact: {
+    paddingTop: '5px',
+    paddingBottom: '5px',
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: '3px',
+    maxWidth: '100%',
+  },
+  // Compact progressive-disclosure summary: `N filters active · Show`.
+  // Keeps state awareness truthful without paying the full chip-row
+  // height cost in narrow/short containers.
+  compactFiltersSummary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: `${HBC_SPACE_SM}px`,
+    marginBottom: `${HBC_SPACE_SM}px`,
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    borderRadius: HBC_RADIUS_SM,
+    backgroundColor: HBC_SURFACE_LIGHT['surface-1'],
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+    fontSize: bodySmall.fontSize,
+  },
+  compactFiltersSummaryText: {
+    color: HBC_SURFACE_LIGHT['text-primary'],
+    fontWeight: 600,
+  },
+  compactFiltersSummaryToggle: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: '32px',
+    paddingTop: `${HBC_SPACE_XS}px`,
+    paddingBottom: `${HBC_SPACE_XS}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
+    fontSize: bodySmall.fontSize,
+    fontWeight: 600,
+    color: HBC_PRIMARY_BLUE,
+    backgroundColor: 'transparent',
+    ...shorthands.border('1px', 'solid', HBC_SURFACE_LIGHT['surface-3']),
+    borderRadius: HBC_RADIUS_SM,
+    cursor: 'pointer',
+    transitionProperty: 'background-color',
+    transitionDuration: TRANSITION_FAST,
+    ':hover': {
+      backgroundColor: HBC_SURFACE_LIGHT['surface-2'],
+    },
+    ':focus-visible': {
+      outlineWidth: '2px',
+      outlineStyle: 'solid',
+      outlineColor: HBC_PRIMARY_BLUE,
+      outlineOffset: '1px',
+    },
+  },
+  activeChipsRowCompact: {
+    marginBottom: `${HBC_SPACE_SM}px`,
+  },
 
   // ── Advanced filter panel ──────────────────────────────────────────
   filterPanel: {
@@ -399,6 +521,12 @@ const useStyles = makeStyles({
     '@media (prefers-reduced-motion: reduce)': {
       animationDuration: '0.01ms',
     },
+  },
+  filterPanelCompact: {
+    paddingTop: `${HBC_SPACE_SM}px`,
+    paddingBottom: `${HBC_SPACE_SM}px`,
+    paddingLeft: `${HBC_SPACE_SM}px`,
+    paddingRight: `${HBC_SPACE_SM}px`,
   },
   filterPanelHeader: {
     display: 'flex',
@@ -524,6 +652,26 @@ const useStyles = makeStyles({
     [hbcMediaQuery('tablet')]: {
       gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 380px))',
     },
+  },
+  // Wide/ultrawide sparse cluster (1–2 results). The cluster is centered
+  // and bounded so one or two cards no longer read as a small left-
+  // anchored island when the container is 1600–2400px wide. Cards keep
+  // a credible max-width so they do not stretch into oversized panels,
+  // and the bounded cluster itself centers via auto margins.
+  gridSparseCluster: {
+    justifyContent: 'center',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 420px))',
+    maxWidth: '880px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '100%',
+  },
+  // Single-card sparse featured width. A lone card is allowed to grow
+  // slightly wider so it reads as the intended focal record rather than
+  // a stranded tile.
+  gridSparseFeatured: {
+    gridTemplateColumns: 'minmax(320px, 520px)',
+    maxWidth: '520px',
   },
   gridItem: {
     minWidth: 0,
@@ -785,6 +933,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   const [sortKey, setSortKey] = useState<ProjectSitesSortKey>(DEFAULT_SORT_KEY);
   const [filters, setFilters] = useState<ProjectSitesFilters>(EMPTY_FILTERS);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [isCompactChipsExpanded, setIsCompactChipsExpanded] = useState(false);
   const [resolvedScope, setResolvedScope] = useState<IResolvedProjectSitesScope | null>(null);
 
   // Resolve initial scope from authoritative context when years first arrive.
@@ -894,13 +1043,23 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     });
   }, []);
 
-  // Render the header + control bar block (shared between all render states)
+  // Render the header + control bar block (shared between all render states).
+  //
+  // First-screen compression:
+  // - eyebrow `HB Central · Projects` is suppressed on compact (the host
+  //   SharePoint page already signals site/context; eyebrow is redundant).
+  // - scope-source pill is suppressed on compact + medium (the scope
+  //   selector itself already communicates the current scope). It
+  //   remains on wide/ultrawide where vertical space is not at a premium.
+  const tightHeader = isCompactMode || isMediumMode;
   const renderHeader = (showControls: boolean) => (
-    <div className={classes.header}>
+    <div className={mergeClasses(classes.header, tightHeader && classes.headerTight)}>
       <div className={classes.headerLead}>
-        <span className={classes.eyebrow}>HB Central · Projects</span>
+        {!isCompactMode && (
+          <span className={classes.eyebrow}>HB Central · Projects</span>
+        )}
         <h2 className={classes.title}>Project Sites</h2>
-        {showControls && resolvedScope && (
+        {showControls && resolvedScope && !tightHeader && (
           <span className={classes.scopeContextPill}>
             {describeScopeSource(resolvedScope.source)}
           </span>
@@ -926,6 +1085,129 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   const renderControlBar = () => {
     if (yearsResult.status !== 'success' || scope === null) return null;
     const currentScopeValue = scopeChoiceValue(scope);
+
+    const scopeCluster = (
+      <div
+        className={mergeClasses(
+          classes.controlCluster,
+          isCompactMode && classes.controlClusterStacked,
+          isCompactMode && classes.controlClusterCompact,
+        )}
+      >
+        <span
+          className={mergeClasses(
+            classes.controlLabel,
+            isCompactMode && classes.controlLabelCompactHidden,
+          )}
+          aria-hidden="true"
+        >
+          Scope:
+        </span>
+        {isCompactMode ? (
+          <select
+            aria-label="Scope (compact)"
+            className={classes.compactScopeSelect}
+            data-project-sites-compact-scope-control="true"
+            value={currentScopeValue}
+            onChange={(e) => {
+              const chosen = scopeChoices.find((c) => c.value === e.target.value);
+              if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
+                setScope(chosen.scope);
+                setResolvedScope({
+                  scope: chosen.scope,
+                  source: 'user-selected',
+                  resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
+                });
+              }
+            }}
+          >
+            {scopeChoices.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        ) : (
+          <HbcSegmentedControl
+            label="Scope"
+            options={scopeChoices.map((c) => ({ value: c.value, label: c.label }))}
+            value={currentScopeValue}
+            onChange={(next) => {
+              const chosen = scopeChoices.find((c) => c.value === next);
+              if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
+                setScope(chosen.scope);
+                setResolvedScope({
+                  scope: chosen.scope,
+                  source: 'user-selected',
+                  resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
+                });
+              }
+            }}
+            size="sm"
+          />
+        )}
+      </div>
+    );
+
+    const sortCluster = (
+      <div
+        className={mergeClasses(
+          classes.controlCluster,
+          isCompactMode && classes.controlClusterStacked,
+          isCompactMode && classes.controlClusterCompact,
+        )}
+      >
+        <span
+          className={mergeClasses(
+            classes.controlLabel,
+            isCompactMode && classes.controlLabelCompactHidden,
+          )}
+          aria-hidden="true"
+        >
+          Sort:
+        </span>
+        <select
+          aria-label="Sort project sites"
+          className={classes.sortSelect}
+          value={sortKey}
+          onChange={(e) => setSortKey(e.target.value as ProjectSitesSortKey)}
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+    );
+
+    const actionsCluster = (
+      <div
+        className={mergeClasses(
+          classes.controlCluster,
+          isCompactMode && classes.controlClusterStacked,
+          isMediumMode && classes.secondaryControlLaneActions,
+        )}
+      >
+        <HbcButton
+          variant="ghost"
+          size="sm"
+          pressed={isFilterPanelOpen}
+          icon={<Filter size="sm" />}
+          iconPosition="before"
+          onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+          aria-expanded={isFilterPanelOpen}
+          aria-controls="project-sites-filter-panel"
+        >
+          Filters
+          {activeFilterCount > 0 && (
+            <span className={classes.filterToggleBadge}>{activeFilterCount}</span>
+          )}
+        </HbcButton>
+        {(isFiltered || sortKey !== DEFAULT_SORT_KEY) && (
+          <HbcButton variant="ghost" size="sm" onClick={clearAll}>
+            Reset
+          </HbcButton>
+        )}
+      </div>
+    );
+
     return (
       <>
         <div
@@ -951,107 +1233,30 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
               placeholder="Search by name, number, client, location, or team…"
             />
           </div>
-          <div
-            className={mergeClasses(
-              classes.controlCluster,
-              (isCompactMode || isMediumMode) && classes.controlClusterStacked,
-              isCompactMode && classes.controlClusterCompact,
-            )}
-          >
-            <span className={classes.controlLabel} aria-hidden="true">Scope:</span>
-            {isCompactMode ? (
-              <select
-                aria-label="Scope (compact)"
-                className={classes.compactScopeSelect}
-                data-project-sites-compact-scope-control="true"
-                value={currentScopeValue}
-                onChange={(e) => {
-                  const chosen = scopeChoices.find((c) => c.value === e.target.value);
-                  if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
-                    setScope(chosen.scope);
-                    setResolvedScope({
-                      scope: chosen.scope,
-                      source: 'user-selected',
-                      resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
-                    });
-                  }
-                }}
-              >
-                {scopeChoices.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
-            ) : (
-              <HbcSegmentedControl
-                label="Scope"
-                options={scopeChoices.map((c) => ({ value: c.value, label: c.label }))}
-                value={currentScopeValue}
-                onChange={(next) => {
-                  const chosen = scopeChoices.find((c) => c.value === next);
-                  if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
-                    setScope(chosen.scope);
-                    setResolvedScope({
-                      scope: chosen.scope,
-                      source: 'user-selected',
-                      resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
-                    });
-                  }
-                }}
-                size="sm"
-              />
-            )}
-          </div>
-          <div
-            className={mergeClasses(
-              classes.controlCluster,
-              (isCompactMode || isMediumMode) && classes.controlClusterStacked,
-              isCompactMode && classes.controlClusterCompact,
-            )}
-          >
-            <span className={classes.controlLabel} aria-hidden="true">Sort:</span>
-            <select
-              aria-label="Sort project sites"
-              className={classes.sortSelect}
-              value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as ProjectSitesSortKey)}
+          {isMediumMode ? (
+            <div
+              className={classes.secondaryControlLane}
+              data-project-sites-secondary-lane="medium"
             >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          <div
-            className={mergeClasses(
-              classes.controlCluster,
-              (isCompactMode || isMediumMode) && classes.controlClusterStacked,
-            )}
-          >
-            <HbcButton
-              variant="ghost"
-              size="sm"
-              pressed={isFilterPanelOpen}
-              icon={<Filter size="sm" />}
-              iconPosition="before"
-              onClick={() => setIsFilterPanelOpen((prev) => !prev)}
-              aria-expanded={isFilterPanelOpen}
-              aria-controls="project-sites-filter-panel"
-            >
-              Filters
-              {activeFilterCount > 0 && (
-                <span className={classes.filterToggleBadge}>{activeFilterCount}</span>
-              )}
-            </HbcButton>
-            {(isFiltered || sortKey !== DEFAULT_SORT_KEY) && (
-              <HbcButton variant="ghost" size="sm" onClick={clearAll}>
-                Reset
-              </HbcButton>
-            )}
-          </div>
+              {scopeCluster}
+              {sortCluster}
+              {actionsCluster}
+            </div>
+          ) : (
+            <>
+              {scopeCluster}
+              {sortCluster}
+              {actionsCluster}
+            </>
+          )}
         </div>
         {isFilterPanelOpen && facets && (
           <div
             id="project-sites-filter-panel"
-            className={classes.filterPanel}
+            className={mergeClasses(
+              classes.filterPanel,
+              isCompactMode && classes.filterPanelCompact,
+            )}
             role="region"
             aria-label="Advanced filters"
           >
@@ -1109,95 +1314,154 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
             </div>
           </div>
         )}
-        {!filtersAreEmpty(filters) && (
-          <div className={classes.activeChipsRow} role="status" aria-label="Active filters">
-            <span className={classes.activeChipsLabel}>Filters:</span>
-            {filters.stages.map((v) => (
-              <span key={`stage-${v}`} className={classes.chip}>
-                <span className={classes.chipLabel}>Stage:</span>
-                {v}
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  aria-label={`Remove stage filter ${v}`}
-                  onClick={() => removeChip('stages', v)}
+        {!filtersAreEmpty(filters) && (() => {
+          const chipClass = mergeClasses(
+            classes.chip,
+            isCompactMode && classes.chipCompact,
+          );
+          const removeClass = mergeClasses(
+            classes.chipRemove,
+            isCompactMode && classes.chipRemoveCompact,
+          );
+          const chipsContent = (
+            <>
+              {filters.stages.map((v) => (
+                <span key={`stage-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>Stage:</span>
+                  {v}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove stage filter ${v}`}
+                    onClick={() => removeChip('stages', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+              {filters.projectManagerUpns.map((v) => (
+                <span key={`pm-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>PM:</span>
+                  {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove project manager filter ${v}`}
+                    onClick={() => removeChip('projectManagerUpns', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+              {filters.leadEstimatorUpns.map((v) => (
+                <span key={`est-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>Estimator:</span>
+                  {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove lead estimator filter ${v}`}
+                    onClick={() => removeChip('leadEstimatorUpns', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+              {filters.projectExecutiveUpns.map((v) => (
+                <span key={`pe-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>Exec:</span>
+                  {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove project executive filter ${v}`}
+                    onClick={() => removeChip('projectExecutiveUpns', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+              {filters.departments.map((v) => (
+                <span key={`dept-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>Dept:</span>
+                  {v}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove department filter ${v}`}
+                    onClick={() => removeChip('departments', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+              {filters.officeDivisions.map((v) => (
+                <span key={`div-${v}`} className={chipClass}>
+                  <span className={classes.chipLabel}>Division:</span>
+                  {v}
+                  <button
+                    type="button"
+                    className={removeClass}
+                    aria-label={`Remove office division filter ${v}`}
+                    onClick={() => removeChip('officeDivisions', v)}
+                  >
+                    <Cancel size="sm" />
+                  </button>
+                </span>
+              ))}
+            </>
+          );
+
+          if (isCompactMode) {
+            return (
+              <>
+                <div
+                  className={classes.compactFiltersSummary}
+                  role="status"
+                  aria-label="Active filters"
+                  data-project-sites-compact-filters-summary="true"
                 >
-                  <Cancel size="sm" />
-                </button>
-              </span>
-            ))}
-            {filters.projectManagerUpns.map((v) => (
-              <span key={`pm-${v}`} className={classes.chip}>
-                <span className={classes.chipLabel}>PM:</span>
-                {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  aria-label={`Remove project manager filter ${v}`}
-                  onClick={() => removeChip('projectManagerUpns', v)}
-                >
-                  <Cancel size="sm" />
-                </button>
-              </span>
-            ))}
-            {filters.leadEstimatorUpns.map((v) => (
-              <span key={`est-${v}`} className={classes.chip}>
-                <span className={classes.chipLabel}>Estimator:</span>
-                {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  aria-label={`Remove lead estimator filter ${v}`}
-                  onClick={() => removeChip('leadEstimatorUpns', v)}
-                >
-                  <Cancel size="sm" />
-                </button>
-              </span>
-            ))}
-            {filters.projectExecutiveUpns.map((v) => (
-              <span key={`pe-${v}`} className={classes.chip}>
-                <span className={classes.chipLabel}>Exec:</span>
-                {formatProjectSitesPersonLabel(v, peopleDisplayLabels)}
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  aria-label={`Remove project executive filter ${v}`}
-                  onClick={() => removeChip('projectExecutiveUpns', v)}
-                >
-                  <Cancel size="sm" />
-                </button>
-              </span>
-            ))}
-            {filters.departments.map((v) => (
-              <span key={`dept-${v}`} className={classes.chip}>
-                <span className={classes.chipLabel}>Dept:</span>
-                {v}
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  aria-label={`Remove department filter ${v}`}
-                  onClick={() => removeChip('departments', v)}
-                >
-                  <Cancel size="sm" />
-                </button>
-              </span>
-            ))}
-            {filters.officeDivisions.map((v) => (
-              <span key={`div-${v}`} className={classes.chip}>
-                <span className={classes.chipLabel}>Division:</span>
-                {v}
-                <button
-                  type="button"
-                  className={classes.chipRemove}
-                  aria-label={`Remove office division filter ${v}`}
-                  onClick={() => removeChip('officeDivisions', v)}
-                >
-                  <Cancel size="sm" />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+                  <span className={classes.compactFiltersSummaryText}>
+                    {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active
+                  </span>
+                  <button
+                    type="button"
+                    className={classes.compactFiltersSummaryToggle}
+                    aria-expanded={isCompactChipsExpanded}
+                    aria-controls="project-sites-compact-chips"
+                    onClick={() => setIsCompactChipsExpanded((prev) => !prev)}
+                  >
+                    {isCompactChipsExpanded ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {isCompactChipsExpanded && (
+                  <div
+                    id="project-sites-compact-chips"
+                    className={mergeClasses(
+                      classes.activeChipsRow,
+                      classes.activeChipsRowCompact,
+                    )}
+                    role="group"
+                    aria-label="Active filter chips"
+                  >
+                    {chipsContent}
+                  </div>
+                )}
+              </>
+            );
+          }
+
+          return (
+            <div
+              className={classes.activeChipsRow}
+              role="status"
+              aria-label="Active filters"
+            >
+              <span className={classes.activeChipsLabel}>Filters:</span>
+              {chipsContent}
+            </div>
+          );
+        })()}
       </>
     );
   };
@@ -1207,10 +1471,16 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     return (
       <section
         ref={rootRef}
-        className={classes.root}
+        className={mergeClasses(
+          classes.root,
+          isMediumMode && classes.rootMedium,
+          isCompactMode && classes.rootCompact,
+        )}
         aria-label="Project Sites"
         data-project-sites-layout-mode={layoutMode}
         data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+        data-project-sites-display-class={containerState.displayClass}
+        data-project-sites-height-class={containerState.heightClass}
       >
         {renderHeader(false)}
         <LoadingShimmer />
@@ -1223,10 +1493,16 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     return (
       <section
         ref={rootRef}
-        className={classes.root}
+        className={mergeClasses(
+          classes.root,
+          isMediumMode && classes.rootMedium,
+          isCompactMode && classes.rootCompact,
+        )}
         aria-label="Project Sites"
         data-project-sites-layout-mode={layoutMode}
         data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+        data-project-sites-display-class={containerState.displayClass}
+        data-project-sites-height-class={containerState.heightClass}
       >
         {renderHeader(false)}
         <div className={classes.emptyContainer} role="status">
@@ -1245,10 +1521,16 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     return (
       <section
         ref={rootRef}
-        className={classes.root}
+        className={mergeClasses(
+          classes.root,
+          isMediumMode && classes.rootMedium,
+          isCompactMode && classes.rootCompact,
+        )}
         aria-label="Project Sites"
         data-project-sites-layout-mode={layoutMode}
         data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
+        data-project-sites-display-class={containerState.displayClass}
+        data-project-sites-height-class={containerState.heightClass}
       >
         {renderHeader(false)}
         <div className={classes.emptyContainer} role="status">
@@ -1269,7 +1551,11 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
   return (
     <section
       ref={rootRef}
-      className={classes.root}
+      className={mergeClasses(
+        classes.root,
+        isMediumMode && classes.rootMedium,
+        isCompactMode && classes.rootCompact,
+      )}
       aria-label="Project Sites"
       data-project-sites-layout-mode={layoutMode}
       data-project-sites-short-height={containerState.isShortHeight ? 'true' : 'false'}
@@ -1280,26 +1566,45 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       </div>
 
       {renderHeader(true)}
-      {contextSummary && (
-        <div
-          className={mergeClasses(
-            classes.contextSummary,
-            showContextWarning && classes.contextSummaryWarning,
-          )}
-          role="status"
-        >
-          {contextSummary}
-          {projectsResult?.status === 'success' && (
-            <> {attentionNeededCount > 0
-              ? `${attentionNeededCount} record${attentionNeededCount !== 1 ? 's' : ''} ${attentionNeededCount === 1 ? 'needs' : 'need'} data correction.`
-              : ''}
-              {provisioningCount > 0
-                ? ` ${provisioningCount} record${provisioningCount !== 1 ? 's' : ''} ${provisioningCount === 1 ? 'is' : 'are'} not yet launchable because sites are still provisioning.`
-                : ''}
-            </>
-          )}
-        </div>
-      )}
+      {(() => {
+        // First-screen compression: in compact mode the scope-source
+        // narration is suppressed (the scope selector already conveys
+        // the current scope). The warning state (all-projects-fallback
+        // / default-year) is preserved because it carries trust
+        // meaning, and attention/provisioning counts are always
+        // preserved because they are truthful system state.
+        const showScopeSourceText =
+          contextSummary !== null && (!isCompactMode || showContextWarning);
+        const stateCountsFragment =
+          projectsResult?.status === 'success'
+          && (attentionNeededCount > 0 || provisioningCount > 0)
+            ? (
+              <>
+                {attentionNeededCount > 0
+                  ? `${attentionNeededCount} record${attentionNeededCount !== 1 ? 's' : ''} ${attentionNeededCount === 1 ? 'needs' : 'need'} data correction.`
+                  : ''}
+                {provisioningCount > 0
+                  ? ` ${provisioningCount} record${provisioningCount !== 1 ? 's' : ''} ${provisioningCount === 1 ? 'is' : 'are'} not yet launchable because sites are still provisioning.`
+                  : ''}
+              </>
+            )
+            : null;
+        if (!showScopeSourceText && !stateCountsFragment) return null;
+        return (
+          <div
+            className={mergeClasses(
+              classes.contextSummary,
+              isCompactMode && classes.contextSummaryCompact,
+              showContextWarning && classes.contextSummaryWarning,
+            )}
+            role="status"
+          >
+            {showScopeSourceText && contextSummary}
+            {showScopeSourceText && stateCountsFragment && ' '}
+            {stateCountsFragment}
+          </div>
+        );
+      })()}
       {renderControlBar()}
 
       {/* Projects loading */}
@@ -1343,29 +1648,43 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       )}
 
       {/* Success with visible entries */}
-      {projectsResult?.status === 'success' && visibleCount > 0 && (
-        <div
-          className={mergeClasses(
-            classes.grid,
-            layoutMode === 'wide' && classes.gridModeWide,
-            layoutMode === 'medium' && classes.gridModeMedium,
-            layoutMode === 'compact' && classes.gridModeCompact,
-            isSparse && classes.gridSparse,
-          )}
-          role="list"
-          aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort}`}
-        >
-          {visibleEntries.map((entry) => (
-            <ProjectSiteCardListItem
-              key={entry.id}
-              entry={entry}
-              layoutMode={layoutMode}
-              peopleDisplayLabels={peopleDisplayLabels}
-              className={classes.gridItem}
-            />
-          ))}
-        </div>
-      )}
+      {projectsResult?.status === 'success' && visibleCount > 0 && (() => {
+        const sparseCluster = isSparse && layoutMode !== 'compact';
+        const sparseFeatured = sparseCluster && visibleCount === 1;
+        const sparseVariant = sparseFeatured
+          ? 'featured'
+          : sparseCluster
+          ? 'cluster'
+          : isSparse
+          ? 'bounded'
+          : 'dense';
+        return (
+          <div
+            className={mergeClasses(
+              classes.grid,
+              layoutMode === 'wide' && classes.gridModeWide,
+              layoutMode === 'medium' && classes.gridModeMedium,
+              layoutMode === 'compact' && classes.gridModeCompact,
+              isSparse && classes.gridSparse,
+              sparseCluster && classes.gridSparseCluster,
+              sparseFeatured && classes.gridSparseFeatured,
+            )}
+            role="list"
+            aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort}`}
+            data-project-sites-grid-sparse={sparseVariant}
+          >
+            {visibleEntries.map((entry) => (
+              <ProjectSiteCardListItem
+                key={entry.id}
+                entry={entry}
+                layoutMode={layoutMode}
+                peopleDisplayLabels={peopleDisplayLabels}
+                className={classes.gridItem}
+              />
+            ))}
+          </div>
+        );
+      })()}
     </section>
   );
 };

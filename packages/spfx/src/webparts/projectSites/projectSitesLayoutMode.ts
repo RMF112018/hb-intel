@@ -1,6 +1,63 @@
 import React from 'react';
 
+/**
+ * Project Sites responsive contract.
+ *
+ * The public mode names (`wide` | `medium` | `compact`) are preserved, but
+ * the contract is factored along two orthogonal axes so later responsive
+ * work can reason about *why* a mode was chosen:
+ *
+ *   - `ProjectSitesDisplayClass` — width-class authority (`phone`, `tablet`,
+ *     `desktop`, `wide-desktop`).
+ *   - `ProjectSitesHeightClass` — viewport-height authority (`short`,
+ *     `standard`). A short height collapses the surface to `compact` even
+ *     when the container is otherwise wide, because host-embedded SPFx
+ *     renders frequently expose short iframe heights.
+ *
+ * `PROJECT_SITES_MODE_RESPONSIBILITIES` is the authoritative responsibility
+ * record consumed by the root, control-band, and card surfaces. Later
+ * Wave-01 prompts (03–07) refine individual responsibility fields; they do
+ * not invent new mode names.
+ */
 export type ProjectSitesLayoutMode = 'compact' | 'medium' | 'wide';
+
+export type ProjectSitesDisplayClass =
+  | 'phone'
+  | 'tablet'
+  | 'desktop'
+  | 'wide-desktop';
+
+export type ProjectSitesHeightClass = 'short' | 'standard';
+
+export type ProjectSitesControlBandStrategy =
+  | 'inline-row'
+  | 'two-lane'
+  | 'stacked-disclosure';
+
+export type ProjectSitesCardDensity = 'comfortable' | 'regular' | 'condensed';
+
+export type ProjectSitesGridStrategy =
+  | 'multi-column-auto-fill'
+  | 'balanced-auto-fill'
+  | 'single-column';
+
+export type ProjectSitesSparseStrategy =
+  | 'bounded-card-width'
+  | 'natural-flow'
+  | 'single-column';
+
+export interface ProjectSitesModeResponsibility {
+  /** How the search / scope / sort / filter band composes. */
+  readonly controlBand: ProjectSitesControlBandStrategy;
+  /** Default card density for this mode. */
+  readonly cardDensity: ProjectSitesCardDensity;
+  /** Grid column strategy for the normal (non-sparse) result set. */
+  readonly grid: ProjectSitesGridStrategy;
+  /** Grid column strategy when only 1–2 results are visible. */
+  readonly sparse: ProjectSitesSparseStrategy;
+  /** One-line description used in docs/diagnostics, not UX copy. */
+  readonly summary: string;
+}
 
 export interface ProjectSitesLayoutDimensions {
   width: number;
@@ -11,17 +68,67 @@ export interface ProjectSitesContainerState {
   width: number;
   height: number;
   mode: ProjectSitesLayoutMode;
+  displayClass: ProjectSitesDisplayClass;
+  heightClass: ProjectSitesHeightClass;
   isShortHeight: boolean;
 }
 
 export const PROJECT_SITES_WIDE_MIN_WIDTH = 1180;
 export const PROJECT_SITES_MEDIUM_MIN_WIDTH = 820;
+export const PROJECT_SITES_WIDE_DESKTOP_MIN_WIDTH = 1600;
 export const PROJECT_SITES_SHORT_HEIGHT_MAX = 559;
+
+export const PROJECT_SITES_MODE_RESPONSIBILITIES: Record<
+  ProjectSitesLayoutMode,
+  ProjectSitesModeResponsibility
+> = {
+  wide: {
+    controlBand: 'inline-row',
+    cardDensity: 'comfortable',
+    grid: 'multi-column-auto-fill',
+    sparse: 'bounded-card-width',
+    summary:
+      'Desktop and wide-desktop containers: inline control band, multi-column auto-fill grid, bounded sparse width.',
+  },
+  medium: {
+    controlBand: 'two-lane',
+    cardDensity: 'regular',
+    grid: 'balanced-auto-fill',
+    sparse: 'natural-flow',
+    summary:
+      'Tablet / transitional containers: two-lane control band (search primary, scope+sort+filters secondary), balanced grid.',
+  },
+  compact: {
+    controlBand: 'stacked-disclosure',
+    cardDensity: 'condensed',
+    grid: 'single-column',
+    sparse: 'single-column',
+    summary:
+      'Narrow width or short-height containers: stacked controls with filter disclosure, single-column grid, condensed card density.',
+  },
+};
+
+export function resolveProjectSitesDisplayClass(
+  width: number,
+): ProjectSitesDisplayClass {
+  if (width >= PROJECT_SITES_WIDE_DESKTOP_MIN_WIDTH) return 'wide-desktop';
+  if (width >= PROJECT_SITES_WIDE_MIN_WIDTH) return 'desktop';
+  if (width >= PROJECT_SITES_MEDIUM_MIN_WIDTH) return 'tablet';
+  return 'phone';
+}
+
+export function resolveProjectSitesHeightClass(
+  height: number,
+): ProjectSitesHeightClass {
+  return height <= PROJECT_SITES_SHORT_HEIGHT_MAX ? 'short' : 'standard';
+}
 
 const DEFAULT_STATE: ProjectSitesContainerState = {
   width: 1280,
   height: 900,
   mode: 'wide',
+  displayClass: 'desktop',
+  heightClass: 'standard',
   isShortHeight: false,
 };
 
@@ -58,12 +165,14 @@ export function resolveProjectSitesContainerState(
 ): ProjectSitesContainerState {
   const width = normalizePositiveDimension(dimensions.width, DEFAULT_STATE.width);
   const height = normalizePositiveDimension(dimensions.height, DEFAULT_STATE.height);
-  const isShortHeight = height <= PROJECT_SITES_SHORT_HEIGHT_MAX;
+  const heightClass = resolveProjectSitesHeightClass(height);
   return {
     width,
     height,
     mode: resolveProjectSitesLayoutMode({ width, height }),
-    isShortHeight,
+    displayClass: resolveProjectSitesDisplayClass(width),
+    heightClass,
+    isShortHeight: heightClass === 'short',
   };
 }
 
@@ -88,6 +197,8 @@ export function useProjectSitesContainerState(
           prev.width === next.width &&
           prev.height === next.height &&
           prev.mode === next.mode &&
+          prev.displayClass === next.displayClass &&
+          prev.heightClass === next.heightClass &&
           prev.isShortHeight === next.isShortHeight
         ) {
           return prev;
@@ -96,19 +207,37 @@ export function useProjectSitesContainerState(
       });
     };
 
+    const updateFromMeasuredWidth = (): void => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0) update(rect.width);
+    };
+
     const rect = el.getBoundingClientRect();
     if (rect.width > 0) {
       update(rect.width);
     }
 
-    if (typeof ResizeObserver === 'undefined') {
-      const onWindowResize = (): void => update(el.getBoundingClientRect().width);
-      window.addEventListener('resize', onWindowResize);
-      return () => window.removeEventListener('resize', onWindowResize);
+    const onWindowResize = updateFromMeasuredWidth;
+    window.addEventListener('resize', onWindowResize);
+
+    // Propagate viewport-height changes (on-screen keyboard, iframe
+    // resize, SharePoint host split-view) to the short-height axis
+    // without waiting for a container-width ResizeObserver tick. Width
+    // authority still comes from the measured container.
+    const visualViewport =
+      typeof window !== 'undefined' ? window.visualViewport : undefined;
+    if (visualViewport) {
+      visualViewport.addEventListener('resize', updateFromMeasuredWidth);
     }
 
-    const onWindowResize = (): void => update(el.getBoundingClientRect().width);
-    window.addEventListener('resize', onWindowResize);
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        window.removeEventListener('resize', onWindowResize);
+        if (visualViewport) {
+          visualViewport.removeEventListener('resize', updateFromMeasuredWidth);
+        }
+      };
+    }
 
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -123,6 +252,9 @@ export function useProjectSitesContainerState(
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', onWindowResize);
+      if (visualViewport) {
+        visualViewport.removeEventListener('resize', updateFromMeasuredWidth);
+      }
     };
   }, [ref]);
 

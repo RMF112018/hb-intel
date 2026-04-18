@@ -8,6 +8,7 @@ import type {
 } from './types.js';
 import { normalizeProjectSitesRuntimeConfig, scopeFromYear, SCOPE_ALL } from './types.js';
 import type { ProjectSitesContainerState } from './projectSitesLayoutMode.js';
+import type * as LayoutModeModule from './projectSitesLayoutMode.js';
 
 // ── Mock hooks ────────────────────────────────────────────────────────────
 
@@ -24,9 +25,15 @@ vi.mock('./hooks/useProjectSites.js', () => ({
   useProjectSites: (scope: ProjectSitesScope | null) => mockUseProjectSites(scope),
 }));
 
-vi.mock('./projectSitesLayoutMode.js', () => ({
-  useProjectSitesContainerState: () => mockUseProjectSitesContainerState(),
-}));
+vi.mock('./projectSitesLayoutMode.js', async () => {
+  const actual = await vi.importActual<typeof LayoutModeModule>(
+    './projectSitesLayoutMode.js',
+  );
+  return {
+    ...actual,
+    useProjectSitesContainerState: () => mockUseProjectSitesContainerState(),
+  };
+});
 
 vi.mock('./hooks/useProjectSitesPeopleDisplayLabels.js', () => ({
   useProjectSitesPeopleDisplayLabels: () => mockUseProjectSitesPeopleDisplayLabels(),
@@ -88,6 +95,8 @@ describe('ProjectSitesRoot', () => {
       width: 1280,
       height: 900,
       mode: 'wide',
+      displayClass: 'desktop',
+      heightClass: 'standard',
       isShortHeight: false,
     });
     mockUseProjectSitesPeopleDisplayLabels.mockReturnValue({});
@@ -136,11 +145,147 @@ describe('ProjectSitesRoot', () => {
     expect(within(scopeGroup).getByText('2025')).toBeInTheDocument();
   });
 
+  it('composes medium mode as a two-lane control band with scope, sort, and actions grouped in the secondary lane', () => {
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 1000,
+      height: 900,
+      mode: 'medium',
+      displayClass: 'tablet',
+      heightClass: 'standard',
+      isShortHeight: false,
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Medium Test', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    const { container } = render(<ProjectSitesRoot />);
+
+    // Medium mode keeps the segmented scope control (not the compact <select>).
+    expect(screen.queryByLabelText('Scope (compact)')).not.toBeInTheDocument();
+    const scopeGroup = screen.getByRole('radiogroup', { name: 'Scope' });
+    expect(scopeGroup).toBeInTheDocument();
+
+    // Secondary lane exists, carries the medium marker, and groups the
+    // scope / sort / filter clusters into one deliberate row.
+    const secondaryLane = container.querySelector(
+      '[data-project-sites-secondary-lane="medium"]',
+    );
+    expect(secondaryLane).not.toBeNull();
+    expect(secondaryLane).toContainElement(scopeGroup);
+    expect(secondaryLane).toContainElement(screen.getByLabelText('Sort project sites'));
+    expect(secondaryLane).toContainElement(
+      screen.getByRole('button', { name: /filters/i }),
+    );
+
+    // Control-layout diagnostic reflects medium.
+    expect(screen.getByRole('search')).toHaveAttribute(
+      'data-project-sites-control-layout',
+      'medium',
+    );
+  });
+
+  it('applies the featured sparse grid variant for a single wide-mode result', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Sole Project', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    const grid = screen.getByRole('list');
+    expect(grid).toHaveAttribute('data-project-sites-grid-sparse', 'featured');
+  });
+
+  it('applies the cluster sparse grid variant for two wide-mode results', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [
+        createEntry({ id: 1, projectName: 'Alpha', projectNumber: '', year: 2026 }),
+        createEntry({ id: 2, projectName: 'Beta', projectNumber: '', year: 2026 }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    const grid = screen.getByRole('list');
+    expect(grid).toHaveAttribute('data-project-sites-grid-sparse', 'cluster');
+  });
+
+  it('uses the dense grid variant when three or more results are visible', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [
+        createEntry({ id: 1, projectName: 'One', projectNumber: '', year: 2026 }),
+        createEntry({ id: 2, projectName: 'Two', projectNumber: '', year: 2026 }),
+        createEntry({ id: 3, projectName: 'Three', projectNumber: '', year: 2026 }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    const grid = screen.getByRole('list');
+    expect(grid).toHaveAttribute('data-project-sites-grid-sparse', 'dense');
+  });
+
+  it('uses the bounded sparse grid variant in compact mode so single-column stacking is preserved', () => {
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 700,
+      height: 900,
+      mode: 'compact',
+      displayClass: 'phone',
+      heightClass: 'standard',
+      isShortHeight: false,
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Sole Compact', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+    const grid = screen.getByRole('list');
+    expect(grid).toHaveAttribute('data-project-sites-grid-sparse', 'bounded');
+  });
+
+  it('keeps wide mode control band inline without a medium secondary lane', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Wide Test', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    const { container } = render(<ProjectSitesRoot />);
+
+    expect(
+      container.querySelector('[data-project-sites-secondary-lane]'),
+    ).toBeNull();
+    expect(screen.getByRole('search')).toHaveAttribute(
+      'data-project-sites-control-layout',
+      'wide',
+    );
+  });
+
   it('renders compact scope selector instead of segmented control in compact mode', () => {
     mockUseProjectSitesContainerState.mockReturnValue({
       width: 700,
       height: 900,
       mode: 'compact',
+      displayClass: 'phone',
+      heightClass: 'standard',
       isShortHeight: false,
     });
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
@@ -160,11 +305,106 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
   });
 
+  it('suppresses the eyebrow and scope-source pill in compact mode to reduce first-screen overhead', () => {
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 700,
+      height: 900,
+      mode: 'compact',
+      displayClass: 'phone',
+      heightClass: 'standard',
+      isShortHeight: false,
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Compact', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+
+    // Title still present.
+    expect(screen.getByText('Project Sites')).toBeInTheDocument();
+    // Eyebrow suppressed in compact.
+    expect(screen.queryByText('HB Central · Projects')).not.toBeInTheDocument();
+    // Scope-source pill is suppressed on compact (the scope select
+    // already communicates the scope).
+    expect(screen.queryByText(/scope source:/i)).not.toBeInTheDocument();
+  });
+
+  it('keeps the scope-source pill visible on wide mode', () => {
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2026),
+      entries: [createEntry({ id: 1, projectName: 'Wide', projectNumber: '', year: 2026 })],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+
+    // Eyebrow + scope-source pill still present in wide mode.
+    expect(screen.getByText('HB Central · Projects')).toBeInTheDocument();
+    expect(screen.getByText(/scope source:/i)).toBeInTheDocument();
+  });
+
+  it('renders a progressive-disclosure filter summary (not inline chips) in compact mode', () => {
+    mockUseProjectSitesContainerState.mockReturnValue({
+      width: 700,
+      height: 900,
+      mode: 'compact',
+      displayClass: 'phone',
+      heightClass: 'standard',
+      isShortHeight: false,
+    });
+    mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025], errorMessage: null });
+    mockUseProjectSites.mockReturnValue({
+      status: 'success',
+      scope: scopeFromYear(2025),
+      entries: [
+        createEntry({ id: 1, projectName: 'Active Project', projectStage: 'Active' }),
+        createEntry({ id: 2, projectName: 'Pursuit Project', projectStage: 'Pursuit' }),
+      ],
+      errorMessage: null,
+    });
+
+    render(<ProjectSitesRoot />);
+
+    // Activate a stage filter
+    fireEvent.click(screen.getByRole('button', { name: /filters/i }));
+    const activeCheckboxes = screen.getAllByLabelText('Active');
+    const checkbox = activeCheckboxes.find(
+      (el) => (el as HTMLInputElement).type === 'checkbox',
+    ) as HTMLInputElement;
+    fireEvent.click(checkbox);
+
+    // Compact summary replaces the inline chip row in the initial entry
+    // state. The chip itself is not rendered until the user expands.
+    expect(
+      screen.getByText(/1 filter active/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /remove stage filter active/i }),
+    ).not.toBeInTheDocument();
+
+    // Expand the summary and the remove-chip affordance becomes reachable.
+    const toggle = screen.getByRole('button', { name: /^show$/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('button', { name: /remove stage filter active/i }),
+    ).toBeInTheDocument();
+  });
+
   it('marks short-height state and uses compact controls under width pressure override', () => {
     mockUseProjectSitesContainerState.mockReturnValue({
       width: 1320,
       height: 540,
       mode: 'compact',
+      displayClass: 'desktop',
+      heightClass: 'short',
       isShortHeight: true,
     });
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });

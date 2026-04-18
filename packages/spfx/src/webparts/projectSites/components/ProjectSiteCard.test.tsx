@@ -262,4 +262,146 @@ describe('ProjectSiteCard', () => {
 
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
   });
+
+  // ── Density variants ─────────────────────────────────────────────
+
+  it('renders comfortable density (wide layout) with full identity chips, launch-confidence message, and all metadata fields', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          projectManagerUpn: 'pm@contoso.com',
+          leadEstimatorUpn: 'est@contoso.com',
+          projectExecutiveUpn: 'exec@contoso.com',
+        })}
+        layoutMode="wide"
+      />,
+    );
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('data-project-sites-card-density', 'comfortable');
+    // All three identity chips
+    expect(screen.getByText('2024')).toBeInTheDocument();
+    expect(screen.getByText('South Florida')).toBeInTheDocument();
+    // "Commercial" appears both as an identity chip and the footer department label
+    expect(screen.getAllByText('Commercial').length).toBeGreaterThanOrEqual(2);
+    // Launch confidence message is on
+    expect(
+      screen.getByText(/launch confidence: site link is available/i),
+    ).toBeInTheDocument();
+    // Full metadata set
+    expect(screen.getByText('Type')).toBeInTheDocument();
+    expect(screen.getByText('Project Manager')).toBeInTheDocument();
+    expect(screen.getByText('Lead Estimator')).toBeInTheDocument();
+    expect(screen.getByText('Project Executive')).toBeInTheDocument();
+  });
+
+  it('renders regular density (medium layout) with trimmed identity chips and a metadata policy that drops Type and Lead Estimator', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          projectManagerUpn: 'pm@contoso.com',
+          leadEstimatorUpn: 'est@contoso.com',
+          projectExecutiveUpn: 'exec@contoso.com',
+        })}
+        layoutMode="medium"
+      />,
+    );
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('data-project-sites-card-density', 'regular');
+    // Year + office division chips present, department chip dropped from identity row
+    expect(screen.getByText('2024')).toBeInTheDocument();
+    expect(screen.getByText('South Florida')).toBeInTheDocument();
+    // Department still appears in the footer label (commercial) but the
+    // identity chip duplication is gone. We assert the chip count:
+    const commercialMatches = screen.getAllByText('Commercial');
+    expect(commercialMatches.length).toBe(1);
+    // Launch confidence message is suppressed for launchable cards at regular density
+    expect(
+      screen.queryByText(/launch confidence: site link is available/i),
+    ).not.toBeInTheDocument();
+    // Metadata trimmed: Type and Lead Estimator dropped, PM + Exec kept
+    expect(screen.queryByText('Type')).not.toBeInTheDocument();
+    expect(screen.queryByText('Lead Estimator')).not.toBeInTheDocument();
+    expect(screen.getByText('Project Manager')).toBeInTheDocument();
+    expect(screen.getByText('Project Executive')).toBeInTheDocument();
+  });
+
+  it('renders condensed density (compact layout) with single year chip, no footer department, and minimal metadata', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          projectManagerUpn: 'pm@contoso.com',
+          leadEstimatorUpn: 'est@contoso.com',
+          projectExecutiveUpn: 'exec@contoso.com',
+        })}
+        layoutMode="compact"
+      />,
+    );
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('data-project-sites-card-density', 'condensed');
+    expect(link).toHaveAttribute('data-project-sites-card-layout', 'compact');
+    // Only the year identity chip is present
+    expect(screen.getByText('2024')).toBeInTheDocument();
+    expect(screen.queryByText('South Florida')).not.toBeInTheDocument();
+    expect(screen.queryByText('Commercial')).not.toBeInTheDocument();
+    // Launch-confidence message suppressed for launchable at condensed density
+    expect(
+      screen.queryByText(/launch confidence: site link is available/i),
+    ).not.toBeInTheDocument();
+    // All people metadata dropped; Client + Location kept (if present)
+    expect(screen.queryByText('Project Manager')).not.toBeInTheDocument();
+    expect(screen.queryByText('Lead Estimator')).not.toBeInTheDocument();
+    expect(screen.queryByText('Project Executive')).not.toBeInTheDocument();
+    expect(screen.queryByText('Type')).not.toBeInTheDocument();
+    expect(screen.getByText('Client')).toBeInTheDocument();
+    expect(screen.getByText('HCA Healthcare')).toBeInTheDocument();
+    // Primary action preserved in launchable state
+    expect(screen.getByText('Open Site')).toBeInTheDocument();
+  });
+
+  it('preserves blocked launch-state messaging in condensed density (provisioning)', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry({
+          hasSiteUrl: false,
+          siteUrl: '',
+          launchStatus: {
+            state: 'provisioning',
+            reasonCode: 'site-not-provisioned',
+            isLaunchable: false,
+            userMessage: 'Site has not been provisioned yet.',
+          },
+        })}
+        layoutMode="compact"
+      />,
+    );
+    // Truthful blocked messaging must still be present at condensed density
+    expect(
+      screen.getByText(/launch confidence: site is still provisioning/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Site has not been provisioned yet.')).toBeInTheDocument();
+    expect(screen.getByText('Provisioning')).toBeInTheDocument();
+  });
+
+  it('accepts an explicit density override that wins over layoutMode-derived density', () => {
+    render(
+      <ProjectSiteCard
+        entry={createEntry()}
+        layoutMode="compact"
+        density="comfortable"
+      />,
+    );
+    // Layout remains compact (affects footer stacking), but the density
+    // diagnostic confirms the override and launch-confidence comes back.
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'data-project-sites-card-density',
+      'comfortable',
+    );
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'data-project-sites-card-layout',
+      'compact',
+    );
+    expect(
+      screen.getByText(/launch confidence: site link is available/i),
+    ).toBeInTheDocument();
+  });
 });

@@ -9,6 +9,7 @@ import type {
 } from './types.js';
 import { scopeFromYear } from './types.js';
 import type { ProjectSitesContainerState } from './projectSitesLayoutMode.js';
+import type * as LayoutModeModule from './projectSitesLayoutMode.js';
 
 const mockUseAvailableYears = vi.fn<() => IAvailableYearsResult>();
 const mockUseProjectSites = vi.fn<(scope: ProjectSitesScope | null) => IProjectSitesResult | null>();
@@ -26,9 +27,15 @@ vi.mock('./hooks/useProjectSites.js', () => ({
   useProjectSites: (scope: ProjectSitesScope | null) => mockUseProjectSites(scope),
 }));
 
-vi.mock('./projectSitesLayoutMode.js', () => ({
-  useProjectSitesContainerState: () => mockUseProjectSitesContainerState(),
-}));
+vi.mock('./projectSitesLayoutMode.js', async () => {
+  const actual = await vi.importActual<typeof LayoutModeModule>(
+    './projectSitesLayoutMode.js',
+  );
+  return {
+    ...actual,
+    useProjectSitesContainerState: () => mockUseProjectSitesContainerState(),
+  };
+});
 
 vi.mock('./hooks/useProjectSitesPeopleDisplayLabels.js', () => ({
   useProjectSitesPeopleDisplayLabels: () => mockUseProjectSitesPeopleDisplayLabels(),
@@ -93,6 +100,8 @@ describe('ProjectSitesRoot rerender churn', () => {
       width: 1280,
       height: 900,
       mode: 'wide',
+      displayClass: 'desktop',
+      heightClass: 'standard',
       isShortHeight: false,
     });
     mockUseProjectSitesPeopleDisplayLabels.mockReturnValue({});

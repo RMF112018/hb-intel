@@ -2,7 +2,10 @@ import React from 'react';
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { render, act, waitFor } from '@testing-library/react';
 import {
+  PROJECT_SITES_MODE_RESPONSIBILITIES,
   resolveProjectSitesContainerState,
+  resolveProjectSitesDisplayClass,
+  resolveProjectSitesHeightClass,
   resolveProjectSitesLayoutMode,
   useProjectSitesContainerState,
 } from './projectSitesLayoutMode.js';
@@ -30,6 +33,67 @@ describe('projectSitesLayoutMode', () => {
     const state = resolveProjectSitesContainerState({ width: 1600, height: 559 });
     expect(state.mode).toBe('compact');
     expect(state.isShortHeight).toBe(true);
+    expect(state.heightClass).toBe('short');
+    // Short-height preserves the underlying display class so later
+    // work can distinguish "compact-because-narrow" from
+    // "compact-because-short".
+    expect(state.displayClass).toBe('wide-desktop');
+  });
+
+  it('derives display classes from width thresholds', () => {
+    expect(resolveProjectSitesDisplayClass(375)).toBe('phone');
+    expect(resolveProjectSitesDisplayClass(819)).toBe('phone');
+    expect(resolveProjectSitesDisplayClass(820)).toBe('tablet');
+    expect(resolveProjectSitesDisplayClass(1179)).toBe('tablet');
+    expect(resolveProjectSitesDisplayClass(1180)).toBe('desktop');
+    expect(resolveProjectSitesDisplayClass(1599)).toBe('desktop');
+    expect(resolveProjectSitesDisplayClass(1600)).toBe('wide-desktop');
+    expect(resolveProjectSitesDisplayClass(2400)).toBe('wide-desktop');
+  });
+
+  it('derives height classes from the short-height threshold', () => {
+    expect(resolveProjectSitesHeightClass(400)).toBe('short');
+    expect(resolveProjectSitesHeightClass(559)).toBe('short');
+    expect(resolveProjectSitesHeightClass(560)).toBe('standard');
+    expect(resolveProjectSitesHeightClass(1080)).toBe('standard');
+  });
+
+  it('resolveProjectSitesContainerState exposes orthogonal display/height axes', () => {
+    const state = resolveProjectSitesContainerState({ width: 1320, height: 900 });
+    expect(state.mode).toBe('wide');
+    expect(state.displayClass).toBe('desktop');
+    expect(state.heightClass).toBe('standard');
+    expect(state.isShortHeight).toBe(false);
+  });
+});
+
+describe('PROJECT_SITES_MODE_RESPONSIBILITIES', () => {
+  it('defines a responsibility entry for every public mode', () => {
+    expect(Object.keys(PROJECT_SITES_MODE_RESPONSIBILITIES).sort()).toEqual([
+      'compact',
+      'medium',
+      'wide',
+    ]);
+  });
+
+  it('pins control-band, card-density, grid, and sparse strategies per mode', () => {
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.wide.controlBand).toBe('inline-row');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.medium.controlBand).toBe('two-lane');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.compact.controlBand).toBe(
+      'stacked-disclosure',
+    );
+
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.wide.cardDensity).toBe('comfortable');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.medium.cardDensity).toBe('regular');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.compact.cardDensity).toBe('condensed');
+
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.wide.grid).toBe('multi-column-auto-fill');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.medium.grid).toBe('balanced-auto-fill');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.compact.grid).toBe('single-column');
+
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.wide.sparse).toBe('bounded-card-width');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.medium.sparse).toBe('natural-flow');
+    expect(PROJECT_SITES_MODE_RESPONSIBILITIES.compact.sparse).toBe('single-column');
   });
 });
 
@@ -143,6 +207,57 @@ describe('useProjectSitesContainerState', () => {
       observer.emit(1320, 700);
       observer.emit(1320, 500);
       observer.emit(1320, 300);
+    });
+
+    expect(onRender.mock.calls.length).toBe(baselineRenderCount);
+  });
+
+  it('propagates viewport short-height to compact mode without a container-width tick', async () => {
+    const onRender = vi.fn();
+    const { getByTestId } = render(React.createElement(Harness, { onRender }));
+
+    await waitFor(() => {
+      expect(getByTestId('project-sites-root')).toHaveAttribute('data-mode', 'wide');
+    });
+
+    // Viewport becomes short (e.g. SharePoint host iframe shrinks or an
+    // on-screen keyboard opens). No ResizeObserver tick is emitted — the
+    // hook must still pick up the height change from a window resize
+    // event using the measured container width.
+    act(() => {
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: 480,
+      });
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('project-sites-root')).toHaveAttribute('data-mode', 'compact');
+    });
+  });
+
+  it('suppresses rerenders when width and viewport height are unchanged', async () => {
+    measuredWidth = 600;
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 480 });
+
+    const onRender = vi.fn();
+    const { getByTestId } = render(React.createElement(Harness, { onRender }));
+
+    await waitFor(() => {
+      expect(getByTestId('project-sites-root')).toHaveAttribute('data-mode', 'compact');
+    });
+
+    const observer = ResizeObserverMock.instances[0];
+    const baselineRenderCount = onRender.mock.calls.length;
+
+    // Repeated narrow short-height observer ticks (feature prompts can
+    // emit frequent content-height churn in this state) must not cause
+    // additional rerenders.
+    act(() => {
+      observer.emit(600, 200);
+      observer.emit(600, 180);
+      observer.emit(600, 160);
     });
 
     expect(onRender.mock.calls.length).toBe(baselineRenderCount);

@@ -52,7 +52,28 @@ import {
 import { ExternalLink } from '@hbc/ui-kit/icons';
 import type { IProjectSiteEntry } from '../types.js';
 import type { ProjectSitesLayoutMode } from '../projectSitesLayoutMode.js';
+import { PROJECT_SITES_MODE_RESPONSIBILITIES } from '../projectSitesLayoutMode.js';
 import { formatProjectSitesPersonLabel } from '../projectSitesPeopleDisplay.js';
+
+/**
+ * Card density variant. Mirrors the `cardDensity` field of the Project
+ * Sites mode responsibilities contract (see `projectSitesLayoutMode.ts`).
+ *
+ * - `comfortable` — full metadata, all identity chips, launch-confidence
+ *   message always on (wide / desktop+).
+ * - `regular` — trimmed metadata, 2 identity chips, launch-confidence
+ *   message only on non-launchable states (medium / tablet).
+ * - `condensed` — minimal metadata, single year chip, launch-confidence
+ *   message only on non-launchable states, footer department hidden
+ *   (compact / phone or short-height).
+ */
+export type ProjectSitesCardDensity = 'comfortable' | 'regular' | 'condensed';
+
+function densityFromLayoutMode(
+  mode: ProjectSitesLayoutMode,
+): ProjectSitesCardDensity {
+  return PROJECT_SITES_MODE_RESPONSIBILITIES[mode].cardDensity;
+}
 
 // ── Styles ────────────────────────────────────────────────────────────────
 
@@ -390,31 +411,51 @@ function resolveVisualState(entry: IProjectSiteEntry): CardVisualState {
 export interface ProjectSiteCardProps {
   entry: IProjectSiteEntry;
   layoutMode?: ProjectSitesLayoutMode;
+  /**
+   * Explicit density override. When omitted, density is derived from
+   * `layoutMode` via `PROJECT_SITES_MODE_RESPONSIBILITIES`.
+   */
+  density?: ProjectSitesCardDensity;
   peopleDisplayLabels?: Record<string, string>;
 }
 
 export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
   entry,
   layoutMode = 'wide',
+  density,
   peopleDisplayLabels = {},
 }) => {
   const classes = useStyles();
   const cardState = resolveVisualState(entry);
+  const effectiveDensity: ProjectSitesCardDensity =
+    density ?? densityFromLayoutMode(layoutMode);
+  const isCondensed = effectiveDensity === 'condensed';
+  const isRegular = effectiveDensity === 'regular';
   const isCompactLayout = layoutMode === 'compact';
 
+  // Metadata policy by density — materially different information
+  // strategy, not just a className change.
+  //   comfortable: Client, Location, Type, PM, Lead Estimator, Exec
+  //   regular:     Client, Location, PM, Exec           (drops Type + Lead Estimator)
+  //   condensed:   Client, Location                      (drops all people)
   const metadataItems = useMemo<DescriptionListItem[]>(() => {
     const items: DescriptionListItem[] = [];
     if (entry.clientName) items.push({ label: 'Client', value: entry.clientName });
     const location = resolveIdentityLocation(entry);
     if (location) items.push({ label: 'Location', value: location });
-    if (entry.projectType) items.push({ label: 'Type', value: entry.projectType });
+
+    if (isCondensed) return items;
+
+    if (!isRegular && entry.projectType) {
+      items.push({ label: 'Type', value: entry.projectType });
+    }
     if (entry.projectManagerUpn) {
       items.push({
         label: 'Project Manager',
         value: formatProjectSitesPersonLabel(entry.projectManagerUpn, peopleDisplayLabels),
       });
     }
-    if (entry.leadEstimatorUpn) {
+    if (!isRegular && entry.leadEstimatorUpn) {
       items.push({
         label: 'Lead Estimator',
         value: formatProjectSitesPersonLabel(entry.leadEstimatorUpn, peopleDisplayLabels),
@@ -428,6 +469,8 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
     }
     return items;
   }, [
+    isCondensed,
+    isRegular,
     entry.clientName,
     entry.projectCity,
     entry.projectLocation,
@@ -466,11 +509,22 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
     cardState === 'archived' && classes.openSiteActionArchived,
   );
 
+  // Condensed density drops the footer department label entirely. At
+  // regular/comfortable the department chip still appears in the identity
+  // row, so dropping the footer echo is information-preserving and
+  // meaningfully shorter vertically when the launch affordance stacks.
+  const showFooterDepartment = !isCondensed && Boolean(deptLabel);
   const footerContent = (
     <div className={mergeClasses(classes.footer, isCompactLayout && classes.footerCompact)}>
-      <span className={mergeClasses(classes.department, isCompactLayout && classes.departmentCompact)}>
-        {deptLabel}
-      </span>
+      {showFooterDepartment ? (
+        <span className={mergeClasses(classes.department, isCompactLayout && classes.departmentCompact)}>
+          {deptLabel}
+        </span>
+      ) : (
+        // Keep a flex anchor so the action still right-aligns in non-compact
+        // footer modes even when the label is dropped.
+        <span aria-hidden="true" />
+      )}
       {entry.launchStatus.isLaunchable ? (
         <span className={openSiteActionClass} aria-hidden="true">
           {entry.launchStatus.state === 'archived' ? 'View Archived Site' : 'Open Site'} <ExternalLink size="sm" />
@@ -488,22 +542,45 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
     </div>
   );
 
+  // Identity chips policy by density:
+  //   comfortable: year + office division + department
+  //   regular:     year + office division
+  //   condensed:   year only
+  const showOfficeDivisionChip =
+    !isCondensed && Boolean(officeDivisionLabel);
+  const showDepartmentChip =
+    !isCondensed && !isRegular && Boolean(deptLabel);
+
+  // Access-confidence copy is launch-state *reassurance* for launchable
+  // cards. At regular/condensed density the Open Site affordance itself
+  // already signals launchability, so suppress the always-on message for
+  // launchable entries. Non-launchable states always show the message so
+  // provisioning/attention meaning stays truthful.
+  const showAccessConfidence =
+    effectiveDensity === 'comfortable' || !entry.launchStatus.isLaunchable;
+
   const bodyContent = (
     <div className={classes.body}>
       <h3 className={classes.projectName}>{entry.projectName}</h3>
       <div className={classes.identityRow}>
         <span className={classes.identityChip}>{entry.year}</span>
-        {officeDivisionLabel && <span className={classes.identityChip}>{officeDivisionLabel}</span>}
-        {deptLabel && <span className={classes.identityChip}>{deptLabel}</span>}
-      </div>
-      <span
-        className={mergeClasses(
-          classes.accessConfidence,
-          !entry.launchStatus.isLaunchable && classes.accessConfidenceMuted,
+        {showOfficeDivisionChip && (
+          <span className={classes.identityChip}>{officeDivisionLabel}</span>
         )}
-      >
-        {launchConfidenceMessage}
-      </span>
+        {showDepartmentChip && (
+          <span className={classes.identityChip}>{deptLabel}</span>
+        )}
+      </div>
+      {showAccessConfidence && (
+        <span
+          className={mergeClasses(
+            classes.accessConfidence,
+            !entry.launchStatus.isLaunchable && classes.accessConfidenceMuted,
+          )}
+        >
+          {launchConfidenceMessage}
+        </span>
+      )}
       {!entry.launchStatus.isLaunchable && (
         <span
           className={mergeClasses(
@@ -541,6 +618,7 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
         rel="noopener noreferrer"
         className={wrapperClass}
         data-project-sites-card-layout={layoutMode}
+        data-project-sites-card-density={effectiveDensity}
         aria-label={`Open ${entry.projectName} project site${entry.projectNumber ? ` (${entry.projectNumber})` : ''}`}
       >
         <HbcCard weight="standard" header={headerContent} footer={footerContent} className={classes.cardFull}>
