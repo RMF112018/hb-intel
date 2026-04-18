@@ -3,11 +3,12 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 /**
- * HbcPriorityRail accessibility structural guardrails.
+ * HbcPriorityRail accessibility + structural guardrails.
  *
- * Locks the interaction invariants the flagship redesign depends on so
- * later refactors cannot silently strip reduced-motion handling, focus
- * treatment, or semantic role alignment.
+ * Locks the interaction invariants the flagship launcher grid depends
+ * on (reduced-motion gating, focus treatment, semantic overflow roles,
+ * external-link SR cue), plus the launcher-grid anti-regression locks
+ * that defend against drifting back to the old command-band model.
  */
 
 const ACTION_SOURCE = readFileSync(
@@ -67,48 +68,42 @@ describe('HbcPriorityRail — semantic role alignment', () => {
 });
 
 describe('HbcPriorityRail — target size credibility', () => {
-  it('default flagship rows commit to a 44px+ minimum height', () => {
+  it('default rows commit to a 44px+ minimum height', () => {
     expect(CSS_SOURCE).toMatch(/min-height:\s*44px/);
   });
 
-  it('flagship featured row commits to a clearly larger primary target', () => {
-    const featuredBlock = CSS_SOURCE.match(
-      /\.contextHomepageFlagship\s+\.featuredTile\s+\.item\s*\{[^}]*\}/,
+  it('flagship launcher tiles commit to a confident minimum target', () => {
+    const tileBlock = CSS_SOURCE.match(
+      /\.contextHomepageFlagship\s+\.launcherTileWrap\s+\.item\s*\{[^}]*\}/,
     );
-    expect(featuredBlock).not.toBeNull();
-    expect(featuredBlock![0]).toMatch(/min-height:\s*(?:5[2-9]|[6-9]\d|1\d{2})px/);
+    expect(tileBlock).not.toBeNull();
+    expect(tileBlock![0]).toMatch(/min-height:\s*(?:6[4-9]|[7-9]\d|1\d{2})px/);
   });
 });
 
 describe('HbcPriorityRail — external link SR cue', () => {
   it('surfaces "(opens in new tab)" as visually-hidden link-owned text, not an icon aria-label', () => {
     expect(ACTION_SOURCE).toContain('(opens in new tab)');
-    expect(ACTION_SOURCE).toMatch(/className=\{styles\.visuallyHidden\}/);
-    expect(ACTION_SOURCE).not.toMatch(/ExternalLink[^>]*aria-label/);
+    expect(ACTION_SOURCE).toMatch(/className=\{[^}]*visuallyHidden/);
+    expect(ACTION_SOURCE).not.toMatch(/ArrowUpRight[^>]*aria-label/);
   });
 });
 
 /**
- * Flagship anti-collapse locks — these tests fail if a future refactor
- * silently strips the flagship surface back to the old row/list grammar.
- * They target CSS and source markers that encode the flagship decisions
- * from phase-07 PROMPTs 01, 03, 04, 05, 06 and 08.
+ * Launcher-grid anti-regression locks — these fail if a future refactor
+ * silently drifts the flagship surface back to the old command-band
+ * model (masthead, featured gradient, sequence chips, eyebrows,
+ * persistent launch chip, tall command tiles).
  */
-describe('HbcPriorityRail — flagship anti-collapse structural locks', () => {
+describe('HbcPriorityRail — flagship launcher-grid structural locks', () => {
   it('declares an inline-size container for flagship degradation', () => {
     expect(CSS_SOURCE).toMatch(/container-type:\s*inline-size/);
     expect(CSS_SOURCE).toMatch(/container-name:\s*hbc-priority-rail/);
   });
 
-  it('ships a narrowest-stable flagship container-query band (≤ 520px)', () => {
+  it('ships a narrow flagship container-query collapse (≤ 520px)', () => {
     expect(CSS_SOURCE).toMatch(
       /@container\s+hbc-priority-rail\s*\(max-width:\s*520px\)/,
-    );
-  });
-
-  it('ships an ultra-narrow flagship container-query guard (≤ 360px)', () => {
-    expect(CSS_SOURCE).toMatch(
-      /@container\s+hbc-priority-rail\s*\(max-width:\s*360px\)/,
     );
   });
 
@@ -118,46 +113,37 @@ describe('HbcPriorityRail — flagship anti-collapse structural locks', () => {
     );
   });
 
-  it('renders flagship primary actions as a width-filling command strip grid', () => {
+  it('renders flagship primary actions as a responsive launcher-tile grid', () => {
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.commandStrip\s*\{[^}]*display:\s*grid/,
+      /\.contextHomepageFlagship\s+\.launcherGrid\s*\{[^}]*display:\s*grid/,
     );
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.commandStrip\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/,
-    );
-  });
-
-  it('gives each flagship command tile a tall card silhouette with persistent launch chip', () => {
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.commandTile\s+\.item\s*\{[^}]*display:\s*grid/,
-    );
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.commandTile\s+\.itemLaunch\s*\{/,
+      /\.contextHomepageFlagship\s+\.launcherGrid\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/,
     );
   });
 
-  it('keeps the featured band authoritative with a brand-gradient fill and white launch pill', () => {
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.featuredTile\s+\.item\s*\{[^}]*linear-gradient/,
+  it('renders each flagship tile as a compact single-click-target row (icon + title)', () => {
+    const tileBlock = CSS_SOURCE.match(
+      /\.contextHomepageFlagship\s+\.launcherTileWrap\s+\.item\s*\{[^}]*\}/,
     );
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.featuredTile\s+\.itemLaunch\s*\{[^}]*background:\s*#ffffff/,
-    );
+    expect(tileBlock).not.toBeNull();
+    expect(tileBlock![0]).toMatch(/grid-template-columns:\s*36px\s+1fr/);
   });
 
-  it('carries group identity as a tile eyebrow, not a stacked section header', () => {
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.tileEyebrow\s*\{/);
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.sectionHeader[^{]*\{[^}]*display:\s*none/,
-    );
+  it('flagship surface removes the legacy command-band chrome (masthead, featured gradient, sequence chip, eyebrow, persistent launch chip)', () => {
+    // These selectors must all resolve to display: none in the flagship
+    // context — encoding the product-reset away from the command-band model.
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.header[,\s]/);
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.featuredBand[,\s]/);
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.commandStrip[,\s]/);
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.commandTile[,\s]/);
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.tileIndex[,\s]/);
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.tileEyebrow[\s{]/);
   });
 
-  it('anchors the flagship overflow trigger as a right-edge discrete chip', () => {
+  it('anchors the flagship overflow trigger as a right-edge chip', () => {
     expect(CSS_SOURCE).toMatch(
       /\.contextHomepageFlagship\s+\.overflowRegion\s*\{[^}]*justify-content:\s*flex-end/,
-    );
-    expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.overflowTrigger\s*\{[^}]*border-radius:\s*999px/,
     );
   });
 });

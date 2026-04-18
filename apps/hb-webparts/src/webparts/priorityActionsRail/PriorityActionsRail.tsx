@@ -24,18 +24,32 @@ import {
 } from '@hbc/ui-kit/homepage';
 import { usePriorityActionsData, invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import { resolveByBreakpoint, filterByDevice } from '../../homepage/data/priorityActionsNormalization.js';
-import { curatePrimaryForFlagship } from '../../homepage/data/priorityActionsCuration.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
 import type { PriorityActionsItemNormalized, BadgeVariant as SchemaBadgeVariant } from '../../homepage/data/priorityActionsContracts.js';
 import type { PriorityActionsRailConfig } from '../../homepage/webparts/utilityContracts.js';
 import { normalizePriorityActionsRailConfig } from '../../homepage/helpers/utilityConfig.js';
 import { getSiteUrl } from '../../homepage/data/spContext.js';
 import {
-  buildPriorityRailSections,
   resolvePriorityRailDeviceForContainer,
   resolvePriorityRailPresentationForDevice,
   type PriorityRailContainerDimensions,
 } from '../../homepage/data/priorityActionsPresentation.js';
+
+function applyFeaturedOrdering(
+  actions: readonly PriorityRailActionModel[],
+  featuredActionKeys: readonly string[] | undefined,
+): PriorityRailActionModel[] {
+  if (!featuredActionKeys || featuredActionKeys.length === 0) return [...actions];
+  const featuredSet = new Set(featuredActionKeys.filter((k) => typeof k === 'string' && k.length > 0));
+  if (featuredSet.size === 0) return [...actions];
+  const featured: PriorityRailActionModel[] = [];
+  const rest: PriorityRailActionModel[] = [];
+  for (const action of actions) {
+    if (featuredSet.has(action.id)) featured.push(action);
+    else rest.push(action);
+  }
+  return [...featured, ...rest];
+}
 
 export interface PriorityActionsRailProps {
   config?: Partial<PriorityActionsRailConfig>;
@@ -56,10 +70,10 @@ export interface PriorityActionsRailProps {
    */
   surfaceContext?: PriorityRailContext;
   /**
-   * Wrapper-declared action IDs promoted into the flagship featured slot
-   * per section. Forwarded to `buildPriorityRailSections` unchanged. Only
-   * meaningful when `surfaceContext === 'homepage-flagship'`; the default
-   * surface context ignores featured assignment.
+   * Wrapper-declared action IDs that should sort to the front of the
+   * visible tile list. Advisory ordering hint only — the flagship
+   * launcher grid has no featured masthead slot in the new quick-launch
+   * presentation model. Default context ignores this field.
    */
   featuredActionKeys?: readonly string[];
   isLoading?: boolean;
@@ -199,30 +213,28 @@ function ListSourcedRail({
   } else {
     const presentation = resolvePriorityRailPresentationForDevice(config, deviceResolution.deviceClass);
     const deviceItems = filterByDevice(items, deviceResolution.deviceClass);
-    const breakpoint = surfaceContext === 'homepage-flagship'
-      ? curatePrimaryForFlagship(deviceItems, config, deviceResolution.deviceClass, { featuredActionKeys })
-      : resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
+    const breakpoint = resolveByBreakpoint(deviceItems, config, deviceResolution.deviceClass);
 
     if (breakpoint.primaryItems.length === 0 && breakpoint.overflowItems.length === 0) {
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
       content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
     } else {
-      const primaryActions = breakpoint.primaryItems.map(mapToRailAction);
-      const groupedSections = buildPriorityRailSections(primaryActions, { featuredActionKeys });
-      const surfaceProps = {
-        title: config.showHeading ? config.headingText || 'Priority Actions' : undefined,
-        urgency: resolveUrgency(deviceItems),
-        layout: presentation.layout,
-        context: surfaceContext,
-        items: primaryActions,
-        overflowItems: breakpoint.overflowItems.map(mapToRailAction),
-        overflowLabel: config.overflowLabel,
-        overflowStrategy: presentation.overflowStrategy,
-        showBadges: config.showBadges,
-        ...(groupedSections ? ({ sections: groupedSections } as Record<string, unknown>) : {}),
-      };
+      const primaryActions = applyFeaturedOrdering(
+        breakpoint.primaryItems.map(mapToRailAction),
+        featuredActionKeys,
+      );
       content = (
-        <HbcPriorityRailSurface {...(surfaceProps as React.ComponentProps<typeof HbcPriorityRailSurface>)} />
+        <HbcPriorityRailSurface
+          title={config.showHeading ? config.headingText || 'Priority Actions' : undefined}
+          urgency={resolveUrgency(deviceItems)}
+          layout={presentation.layout}
+          context={surfaceContext}
+          items={primaryActions}
+          overflowItems={breakpoint.overflowItems.map(mapToRailAction)}
+          overflowLabel={config.overflowLabel}
+          overflowStrategy={presentation.overflowStrategy}
+          showBadges={config.showBadges}
+        />
       );
     }
   }
@@ -282,18 +294,16 @@ function ManifestFallbackRail({
       ? 'high'
       : 'default';
 
-  const groupedSections = buildPriorityRailSections(allActions, { featuredActionKeys });
-  const surfaceProps = {
-    title: normalized.heading,
-    urgency,
-    context: surfaceContext,
-    items: allActions,
-    showBadges: true,
-    ...(groupedSections ? ({ sections: groupedSections } as Record<string, unknown>) : {}),
-  };
+  const ordered = applyFeaturedOrdering(allActions, featuredActionKeys);
 
   return (
-    <HbcPriorityRailSurface {...(surfaceProps as React.ComponentProps<typeof HbcPriorityRailSurface>)} />
+    <HbcPriorityRailSurface
+      title={normalized.heading}
+      urgency={urgency}
+      context={surfaceContext}
+      items={ordered}
+      showBadges
+    />
   );
 }
 

@@ -1,18 +1,21 @@
 /**
- * HbcPriorityRailSurface — Primary priority actions command band.
+ * HbcPriorityRailSurface — Priority Actions surface.
  *
- * Dense, operational command band surface for urgent actions, approvals,
- * and task queues. Supports urgency variants, layout modes, grouped
- * composition, and strategy-based overflow behavior.
+ * Two presentation contexts:
  *
- * Flagship behavior (context === 'homepage-flagship'):
- *   Sections are flattened into a single horizontal command strip so the
- *   band uses the full available width with confident, evenly distributed
- *   command tiles. Group identity is carried as a per-tile eyebrow label,
- *   not a stacked section header, because the homepage overlay doctrine
- *   requires the utility band to read as a priority-actions launcher
- *   rather than a grouped directory (see UI-Doctrine-SPFx-Homepage-Overlay
- *   §6.9, §9.2, §9.5, and §5.1).
+ * - `homepage-flagship` — a premium HB-branded quick-launch tile grid
+ *   embedded by the wrapper-owned homepage entry stack. The surface
+ *   reads as an evolution of OOB SharePoint Quick Links: compact,
+ *   scannable, obviously clickable, one dominant interaction per tile,
+ *   list-driven, branded. No masthead, no featured-gradient slot, no
+ *   sequence index chips, no eyebrow labels, no stacked section
+ *   headers, no persistent launch-chip chrome. Section / featured
+ *   props on the input contract are no-ops in this context and only
+ *   contribute to item ordering — the tile grid is the product.
+ *
+ * - `default` — generic stacked action list for admin preview and
+ *   non-homepage embeds. Sections, headers, and row separators still
+ *   render. The public API contract is unchanged for this path.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';
@@ -25,6 +28,7 @@ import type {
   HbcPriorityRailSurfaceProps,
   PriorityRailActionModel,
   PriorityRailSectionModel,
+  PriorityRailOverflowStrategy,
 } from './types.js';
 import styles from './priority-rail.module.css';
 
@@ -67,38 +71,22 @@ function resolveSections(
   return inferSectionsFromItems(items);
 }
 
-interface FlagshipTile {
-  sectionKey: string;
-  sectionTitle?: string;
-  action: PriorityRailActionModel;
-}
-
-function collectFlagshipTiles(sections: PriorityRailSectionModel[]): {
-  featured: FlagshipTile[];
-  supporting: FlagshipTile[];
-} {
-  const featured: FlagshipTile[] = [];
-  const supporting: FlagshipTile[] = [];
+function flattenToTiles(
+  items: PriorityRailActionModel[],
+  sections: PriorityRailSectionModel[] | undefined,
+): PriorityRailActionModel[] {
+  if (items && items.length > 0) return items;
+  if (!sections || sections.length === 0) return [];
+  const flat: PriorityRailActionModel[] = [];
+  const seen = new Set<string>();
   for (const section of sections) {
-    if (section.featured) {
-      featured.push({
-        sectionKey: section.key,
-        sectionTitle: section.title,
-        action: section.featured,
-      });
-    }
-    const rest = section.featured
-      ? section.actions.filter((action) => action.id !== section.featured!.id)
-      : section.actions;
-    for (const action of rest) {
-      supporting.push({
-        sectionKey: section.key,
-        sectionTitle: section.title,
-        action,
-      });
+    for (const action of section.actions) {
+      if (seen.has(action.id)) continue;
+      seen.add(action.id);
+      flat.push(action);
     }
   }
-  return { featured, supporting };
+  return flat;
 }
 
 export function HbcPriorityRailSurface({
@@ -115,60 +103,27 @@ export function HbcPriorityRailSurface({
   className,
   'aria-label': ariaLabel,
 }: HbcPriorityRailSurfaceProps): React.JSX.Element {
-  const resolvedSections = resolveSections(items, sections);
   const isFlagship = context === 'homepage-flagship';
-
   const hasOverflow = Boolean(overflowItems && overflowItems.length > 0);
-  const totalVisible = resolvedSections.reduce(
-    (acc, section) => acc + section.actions.length,
-    0,
-  );
 
-  const renderOverflow = (): React.JSX.Element | null => {
+  const renderOverflow = (
+    strategy: PriorityRailOverflowStrategy = overflowStrategy,
+  ): React.JSX.Element | null => {
     if (!hasOverflow) return null;
     return (
       <HbcPriorityRailOverflow
         items={overflowItems!}
         label={overflowLabel}
-        strategy={overflowStrategy}
+        strategy={strategy}
         showBadges={showBadges}
       />
     );
   };
 
   if (isFlagship) {
-    const { featured, supporting } = collectFlagshipTiles(resolvedSections);
-
-    // ── Flagship compaction rules (Prompt-03) ───────────────────────────
-    // 1. Collapse the featured band when it conveys no additional hierarchy:
-    //    * every tile is "featured" (supporting.length === 0), or
-    //    * only one action total (featured promotion is noise, not a lift).
-    //    In those cases we render a single unified command strip.
-    // 2. Suppress redundant tile eyebrows:
-    //    * when only one section contributes to the band, the band title
-    //      already carries the group identity,
-    //    * when an adjacent previous tile already displayed the same
-    //      eyebrow, repeating it is heading waste.
-    // Default (non-flagship) rendering is untouched.
-    const collapseFeatured = supporting.length === 0 || totalVisible === 1;
-    const effectiveFeatured = collapseFeatured ? [] : featured;
-    const effectiveSupporting = collapseFeatured
-      ? [...featured, ...supporting]
-      : supporting;
-
-    const isSingleSection = resolvedSections.length <= 1;
-    const resolveEyebrow = (
-      tile: FlagshipTile,
-      prev: string | undefined,
-    ): string | undefined => {
-      if (isSingleSection) return undefined;
-      if (!tile.sectionTitle) return undefined;
-      if (tile.sectionTitle === prev) return undefined;
-      return tile.sectionTitle;
-    };
-
-    let lastFeaturedEyebrow: string | undefined;
-    let lastSupportingEyebrow: string | undefined;
+    const tiles = flattenToTiles(items, sections);
+    const flagshipOverflowStrategy: PriorityRailOverflowStrategy =
+      overflowStrategy === 'inline-disclosure' ? 'menu' : overflowStrategy;
 
     return (
       <section
@@ -177,126 +132,37 @@ export function HbcPriorityRailSurface({
         data-hbc-premium="priority-rail"
         data-hbc-ui="priority-rail"
         data-hbc-priority-rail-context={context}
-        data-hbc-flagship-layout="command-strip"
-        data-hbc-flagship-compacted={collapseFeatured ? 'true' : undefined}
-        data-hbc-flagship-single-section={isSingleSection ? 'true' : undefined}
+        data-hbc-flagship-layout="launcher-grid"
       >
-        <div className={styles.header}>
-          <div className={styles.headerTitle}>
-            <span className={styles.headerIcon} aria-hidden="true">
-              <Briefcase size={15} strokeWidth={2.25} />
-            </span>
-            <span>{title}</span>
-          </div>
-          <div className={styles.headerMeta} aria-hidden="true">
-            <span className={styles.headerCount}>{totalVisible}</span>
-            <span className={styles.headerCountLabel}>primary actions</span>
-          </div>
+        <div
+          className={styles.launcherGrid}
+          role="list"
+          data-hbc-flagship-grid="true"
+          data-hbc-flagship-tile-count={tiles.length}
+        >
+          {tiles.map((action) => (
+            <div
+              key={action.id}
+              role="listitem"
+              className={styles.launcherTileWrap}
+              data-hbc-flagship-tile="true"
+              data-hbc-tile-action={action.id}
+            >
+              <HbcPriorityRailAction action={action} showBadge={showBadges} compact={false} />
+            </div>
+          ))}
         </div>
-
-        {effectiveFeatured.length > 0 ? (
-          <div
-            className={styles.featuredBand}
-            data-hbc-featured-slot="true"
-            data-hbc-featured-count={effectiveFeatured.length}
-            role="list"
-          >
-            {effectiveFeatured.map((tile) => {
-              const eyebrow = resolveEyebrow(tile, lastFeaturedEyebrow);
-              lastFeaturedEyebrow = tile.sectionTitle;
-              return (
-                <div
-                  key={tile.action.id}
-                  role="listitem"
-                  className={styles.featuredTile}
-                  data-hbc-featured-action={tile.action.id}
-                  data-hbc-tile-eyebrow={eyebrow || undefined}
-                >
-                  {eyebrow ? (
-                    <span className={styles.tileEyebrow} aria-hidden="true">
-                      {eyebrow}
-                    </span>
-                  ) : null}
-                  <HbcPriorityRailAction
-                    action={tile.action}
-                    showBadge={showBadges}
-                    compact={false}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
-
-        {effectiveSupporting.length > 0 ? (
-          <div
-            className={styles.commandStrip}
-            role="list"
-            data-hbc-flagship-grid="true"
-            data-hbc-flagship-strip-count={effectiveSupporting.length}
-            data-hbc-flagship-strip-density={
-              effectiveSupporting.length <= 2 ? 'sparse' : effectiveSupporting.length <= 4 ? 'standard' : 'dense'
-            }
-          >
-            {effectiveSupporting.map((tile, tileIndex) => {
-              const eyebrow = resolveEyebrow(tile, lastSupportingEyebrow);
-              lastSupportingEyebrow = tile.sectionTitle;
-              const indexLabel = (tileIndex + 1).toString().padStart(2, '0');
-              return (
-                <div
-                  key={tile.action.id}
-                  role="listitem"
-                  className={styles.commandTile}
-                  data-hbc-flagship-tile="true"
-                  data-hbc-flagship-tile-index={indexLabel}
-                  data-hbc-tile-section={tile.sectionKey}
-                  data-hbc-tile-eyebrow={eyebrow || undefined}
-                >
-                  <span className={styles.tileIndex} aria-hidden="true">{indexLabel}</span>
-                  {eyebrow ? (
-                    <span className={styles.tileEyebrow} aria-hidden="true">
-                      {eyebrow}
-                    </span>
-                  ) : null}
-                  <HbcPriorityRailAction
-                    action={tile.action}
-                    showBadge={showBadges}
-                    compact={layout === 'compact'}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
 
         {hasOverflow ? (
           <div className={styles.overflowRegion} data-hbc-flagship-overflow="true">
-            {renderOverflow()}
+            {renderOverflow(flagshipOverflowStrategy)}
           </div>
         ) : null}
-
-        {/* Hidden per-section structural markers kept for default-context
-         * tests and for consumers that inspect section layout. The flagship
-         * command-strip rendering flattens the grouped structure, but the
-         * grouping contract is preserved through section-level data
-         * attributes on the inline markers below so downstream assertions
-         * that rely on `data-testid="section-*"` continue to resolve. */}
-        <div className={styles.sectionMarkers} aria-hidden="true">
-          {resolvedSections.map((section) => (
-            <div
-              key={section.key}
-              data-testid={`section-${section.key}`}
-              data-hbc-section={section.key}
-              data-hbc-section-has-featured={
-                section.featured ? 'true' : undefined
-              }
-            />
-          ))}
-        </div>
       </section>
     );
   }
 
+  const resolvedSections = resolveSections(items, sections);
   const showSectionHeaders = resolvedSections.length > 1;
 
   return (

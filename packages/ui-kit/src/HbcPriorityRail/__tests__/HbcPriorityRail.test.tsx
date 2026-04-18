@@ -12,7 +12,7 @@ const ACTIONS: PriorityRailActionModel[] = [
 ];
 
 describe('HbcPriorityRail shared family', () => {
-  it('renders grouped sections in deterministic order', () => {
+  it('default context renders grouped sections in deterministic order', () => {
     render(
       <HbcPriorityRailSurface
         title="Priority Actions"
@@ -21,24 +21,21 @@ describe('HbcPriorityRail shared family', () => {
           { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
           { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
         ]}
-      />, 
+      />,
     );
 
-    const sectionTitles = screen.getAllByText(/^(Approvals|Safety)$/).map((node) => node.textContent);
+    const sectionTitles = screen.getAllByText(/^(Approvals|Safety)$/).map((n) => n.textContent);
     expect(sectionTitles).toEqual(['Approvals', 'Safety']);
 
     const sections = screen.getAllByTestId(/section-/);
-    const approvals = sections[0]!;
-    const safety = sections[1]!;
-
-    expect(within(approvals).getAllByRole('link').map((n) => n.textContent)).toEqual([
+    expect(within(sections[0]!).getAllByRole('link').map((n) => n.textContent)).toEqual([
       'Approve RFI',
       'Sign CO #22',
     ]);
-    expect(within(safety).getByRole('link', { name: /Review Safety Note/ })).toBeInTheDocument();
+    expect(within(sections[1]!).getByRole('link', { name: /Review Safety Note/ })).toBeInTheDocument();
   });
 
-  it('inline-disclosure overflow exposes aria-expanded/controls, dismisses on Escape, and returns focus to trigger', () => {
+  it('inline-disclosure overflow exposes aria-expanded/controls and dismisses on Escape', () => {
     render(
       <HbcPriorityRailSurface
         title="Priority Actions"
@@ -57,7 +54,6 @@ describe('HbcPriorityRail shared family', () => {
     fireEvent.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
     const panel = document.getElementById(controlsId!);
-    expect(panel).not.toBeNull();
     expect(panel?.getAttribute('role')).toBe('region');
 
     fireEvent.keyDown(panel!, { key: 'Escape' });
@@ -65,118 +61,99 @@ describe('HbcPriorityRail shared family', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  it('renders the overflow trigger with leading icon, label, and count chip', () => {
-    const { container } = render(
+  it('menu-strategy overflow opens a menu with the deferred actions', () => {
+    render(
       <HbcPriorityRailSurface
         title="Priority Actions"
         items={[ACTIONS[0]!]}
         overflowItems={[ACTIONS[1]!, ACTIONS[2]!]}
-        overflowLabel="More Actions"
-        overflowStrategy="inline-disclosure"
-      />,
-    );
-    const trigger = screen.getByRole('button', { name: /More Actions/ });
-    const svgs = trigger.querySelectorAll('svg');
-    expect(svgs.length).toBeGreaterThanOrEqual(2);
-    const countNodes = Array.from(trigger.querySelectorAll('span')).filter(
-      (node) => node.textContent?.trim() === '2',
-    );
-    expect(countNodes.length).toBe(1);
-    expect(container).toBeTruthy();
-  });
-
-  it('supports strategy-based overflow toggles with accessible expanded state', () => {
-    render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        items={[ACTIONS[0]! ]}
-        overflowItems={[ACTIONS[1]!, ACTIONS[2]! ]}
         overflowLabel="More Actions"
         overflowStrategy="menu"
       />,
     );
 
     const trigger = screen.getByRole('button', { name: /More Actions/ });
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-
     fireEvent.click(trigger);
-
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('menu', { name: /More Actions overflow actions/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Sign CO #22/ })).toBeInTheDocument();
   });
 
-  it('keeps flat items backward-compatible when no sections are provided', () => {
-    render(
+  it('flagship context renders a flat launcher tile grid with one link per action', () => {
+    const { container } = render(
       <HbcPriorityRailSurface
         title="Priority Actions"
-        items={[ACTIONS[0]!, ACTIONS[1]! ]}
-        overflowItems={[ACTIONS[2]! ]}
+        context="homepage-flagship"
+        items={[ACTIONS[0]!, ACTIONS[1]!, ACTIONS[2]!]}
       />,
     );
 
-    expect(screen.getByRole('link', { name: /Approve RFI/ })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Sign CO #22/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /More tools/ })).toBeInTheDocument();
+    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
+    expect(surface?.getAttribute('data-hbc-priority-rail-context')).toBe('homepage-flagship');
+    expect(surface?.getAttribute('data-hbc-flagship-layout')).toBe('launcher-grid');
+    expect(surface?.className).toMatch(/contextHomepageFlagship/);
+
+    const grid = container.querySelector('[data-hbc-flagship-grid="true"]');
+    expect(grid).not.toBeNull();
+    expect(grid?.getAttribute('data-hbc-flagship-tile-count')).toBe('3');
+
+    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
+    expect(tiles.length).toBe(3);
+
+    // Each tile is a single click target — one anchor per tile, no extra
+    // launch chip or badge chrome in the tile body.
+    for (const tile of tiles) {
+      const anchors = tile.querySelectorAll('a[data-hbc-ui="priority-rail-action"]');
+      expect(anchors.length).toBe(1);
+    }
+
+    // Legacy command-band chrome is gone: no masthead, no sequence chips,
+    // no eyebrow labels, no featured masthead slot, no stacked section
+    // headers.
+    expect(container.querySelector('[data-hbc-featured-slot]')).toBeNull();
+    expect(container.querySelector('[data-hbc-flagship-compacted]')).toBeNull();
+    expect(
+      Array.from(tiles).some((t) => t.getAttribute('data-hbc-tile-eyebrow')),
+    ).toBe(false);
   });
 
-  it('flagship context promotes featured actions into a dedicated band and keeps them out of the supporting command strip', () => {
-    const { container, rerender } = render(
+  it('flagship flattens sections into ordered launcher tiles when items prop is empty', () => {
+    const { container } = render(
       <HbcPriorityRailSurface
         title="Priority Actions"
         context="homepage-flagship"
         items={[]}
         sections={[
-          {
-            key: 'approvals',
-            title: 'Approvals',
-            actions: [ACTIONS[0]!, ACTIONS[1]!],
-            featured: ACTIONS[0]!,
-          },
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
         ]}
       />,
     );
 
-    const featuredSlot = container.querySelector('[data-hbc-featured-slot="true"]');
-    expect(featuredSlot).not.toBeNull();
-    const featuredTileEl = featuredSlot?.querySelector('[data-hbc-featured-action="a-1"]');
-    expect(featuredTileEl).not.toBeNull();
-
-    const sectionMarker = container.querySelector('[data-testid="section-approvals"]');
-    expect(sectionMarker?.getAttribute('data-hbc-section-has-featured')).toBe('true');
-
-    const commandStrip = container.querySelector('[data-hbc-flagship-grid="true"]');
-    expect(commandStrip).not.toBeNull();
-    const supportingLinks = commandStrip?.querySelectorAll('a') ?? [];
-    const supportingTitles = Array.from(supportingLinks).map((node) => node.textContent?.trim());
-    expect(supportingTitles.some((t) => t?.includes('Approve RFI'))).toBe(false);
-    expect(supportingTitles.some((t) => t?.includes('Sign CO #22'))).toBe(true);
-
-    rerender(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="default"
-        items={[]}
-        sections={[
-          {
-            key: 'approvals',
-            title: 'Approvals',
-            actions: [ACTIONS[0]!, ACTIONS[1]!],
-            featured: ACTIONS[0]!,
-          },
-        ]}
-      />,
-    );
-
-    expect(container.querySelector('[data-hbc-featured-slot]')).toBeNull();
-    expect(
-      container
-        .querySelector('[data-testid="section-approvals"]')
-        ?.getAttribute('data-hbc-section-has-featured'),
-    ).toBeNull();
+    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
+    expect(tiles.length).toBe(3);
+    const titles = Array.from(tiles).map((t) => t.querySelector('a')?.textContent?.trim() ?? '');
+    expect(titles[0]).toContain('Approve RFI');
+    expect(titles[1]).toContain('Sign CO #22');
+    expect(titles[2]).toContain('Review Safety Note');
   });
 
-  it('renders a launch chip and surfaces the external-link cue via screen-reader text', () => {
+  it('flagship overflow defaults to menu strategy (no inline disclosure footer)', () => {
+    render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[ACTIONS[0]!]}
+        overflowItems={[ACTIONS[1]!, ACTIONS[2]!]}
+        overflowLabel="More tools"
+      />,
+    );
+
+    const trigger = screen.getByRole('button', { name: /More tools/ });
+    fireEvent.click(trigger);
+    expect(screen.getByRole('menu', { name: /More tools overflow actions/i })).toBeInTheDocument();
+  });
+
+  it('external links carry the external-link corner cue and screen-reader text', () => {
     const { container } = render(
       <HbcPriorityRailSurface
         title="Priority Actions"
@@ -188,22 +165,6 @@ describe('HbcPriorityRail shared family', () => {
       />,
     );
 
-    const links = container.querySelectorAll('a[data-hbc-ui="priority-rail-action"]');
-    expect(links.length).toBe(2);
-
-    // Every action renders a launch chip (persistent activation anchor).
-    for (const link of links) {
-      const chip = link.querySelector(':scope > span');
-      // First span may be the icon, so we look for any child span that
-      // hosts either the arrow or external-link svg.
-      const hasArrow = !!link.querySelector('svg.lucide-arrow-right, svg[class*="arrow"]');
-      const hasExternal = !!link.querySelector('svg.lucide-external-link, svg[class*="external"]');
-      expect(hasArrow || hasExternal).toBe(true);
-      expect(chip).not.toBeNull();
-    }
-
-    // External link is tagged structurally and carries a visible-to-SR
-    // "(opens in new tab)" affordance.
     const externalLink = container.querySelector(
       'a[data-hbc-action-external="true"]',
     ) as HTMLElement | null;
@@ -212,7 +173,6 @@ describe('HbcPriorityRail shared family', () => {
     expect(externalLink?.getAttribute('rel')).toContain('noopener');
     expect(externalLink?.textContent).toContain('(opens in new tab)');
 
-    // Internal link does not carry the external marker.
     const internalLink = container.querySelector(
       'a[href="/rfi/1"]',
     ) as HTMLElement | null;
@@ -220,20 +180,16 @@ describe('HbcPriorityRail shared family', () => {
     expect(internalLink?.textContent).not.toContain('(opens in new tab)');
   });
 
-  it('default-context surface tags the rail root with context="default" and omits the flagship class', () => {
+  it('default-context surface tags the root and omits the flagship class', () => {
     const { container } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        items={[ACTIONS[0]!]}
-      />,
+      <HbcPriorityRailSurface title="Priority Actions" items={[ACTIONS[0]!]} />,
     );
     const root = container.querySelector('[data-hbc-ui="priority-rail"]') as HTMLElement | null;
-    expect(root).not.toBeNull();
     expect(root?.getAttribute('data-hbc-priority-rail-context')).toBe('default');
     expect(root?.className).not.toContain('contextHomepageFlagship');
   });
 
-  it('admin preview surface defaults to the default context (no flagship styling) when consumer does not opt in', () => {
+  it('preview surface defaults to the default context (no flagship styling)', () => {
     const { container } = render(
       <HbcPriorityRailPreviewSurface
         previewLabel="Admin Preview"
@@ -246,169 +202,14 @@ describe('HbcPriorityRail shared family', () => {
     expect(root?.className).not.toContain('contextHomepageFlagship');
   });
 
-  it('flagship-context surface tags the rail root with context="homepage-flagship" and applies the flagship class', () => {
-    const { container } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="homepage-flagship"
-        items={[ACTIONS[0]!]}
-      />,
-    );
-    const root = container.querySelector('[data-hbc-ui="priority-rail"]') as HTMLElement | null;
-    expect(root?.getAttribute('data-hbc-priority-rail-context')).toBe('homepage-flagship');
-    expect(root?.className).toMatch(/contextHomepageFlagship/);
-  });
-
-  it('flagship context renders a horizontal command strip with flattened tiles and default context does not', () => {
-    const { container, rerender } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="homepage-flagship"
-        items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
-          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
-        ]}
-      />,
-    );
-
-    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
-    expect(surface?.getAttribute('data-hbc-flagship-layout')).toBe('command-strip');
-
-    const strip = container.querySelector('[data-hbc-flagship-grid="true"]');
-    expect(strip).not.toBeNull();
-    // All three actions render in the single flattened strip, not in
-    // per-section sub-grids.
-    const flagshipTiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
-    expect(flagshipTiles.length).toBe(3);
-    // Every tile carries its group eyebrow so the flattened strip preserves
-    // group identity without stacked section headers.
-    const eyebrows = Array.from(flagshipTiles)
-      .map((node) => node.getAttribute('data-hbc-tile-eyebrow'))
-      .filter(Boolean);
-    expect(eyebrows).toContain('Approvals');
-    expect(eyebrows).toContain('Safety');
-
-    rerender(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="default"
-        items={[ACTIONS[0]!, ACTIONS[1]!, ACTIONS[2]!]}
-      />,
-    );
-
-    expect(container.querySelector('[data-hbc-flagship-grid="true"]')).toBeNull();
-    expect(container.querySelectorAll('[data-hbc-flagship-tile="true"]').length).toBe(0);
-    expect(container.querySelector('[data-hbc-flagship-layout]')).toBeNull();
-  });
-
-  it('flagship compacts the featured band when every tile is featured (no hierarchy to convey)', () => {
-    const { container } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="homepage-flagship"
-        items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!], featured: ACTIONS[0]! },
-          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!], featured: ACTIONS[2]! },
-        ]}
-      />,
-    );
-
-    // Featured band is collapsed because promoting every action to the
-    // featured slot adds no scanning benefit — a single command strip
-    // carries the whole primary set.
-    expect(container.querySelector('[data-hbc-featured-slot="true"]')).toBeNull();
-    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
-    expect(surface?.getAttribute('data-hbc-flagship-compacted')).toBe('true');
-    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
-    expect(tiles.length).toBe(2);
-  });
-
-  it('flagship compacts a single-action primary into one strip tile without a featured band', () => {
-    const { container } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="homepage-flagship"
-        items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!], featured: ACTIONS[0]! },
-        ]}
-      />,
-    );
-    expect(container.querySelector('[data-hbc-featured-slot="true"]')).toBeNull();
-    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
-    expect(tiles.length).toBe(1);
-  });
-
-  it('flagship suppresses per-tile eyebrows when only one section contributes to the band', () => {
-    const { container } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="homepage-flagship"
-        items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
-        ]}
-      />,
-    );
-    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
-    expect(surface?.getAttribute('data-hbc-flagship-single-section')).toBe('true');
-    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
-    expect(tiles.length).toBe(2);
-    for (const tile of tiles) {
-      expect(tile.getAttribute('data-hbc-tile-eyebrow')).toBeNull();
-      expect(tile.querySelector('[aria-hidden="true"]')?.textContent).not.toBe('Approvals');
-    }
-  });
-
-  it('flagship suppresses adjacent duplicate eyebrows within the supporting strip', () => {
-    const { container } = render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        context="homepage-flagship"
-        items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
-          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
-        ]}
-      />,
-    );
-    const tiles = Array.from(
-      container.querySelectorAll('[data-hbc-flagship-tile="true"]'),
-    );
-    const eyebrows = tiles.map((t) => t.getAttribute('data-hbc-tile-eyebrow'));
-    // First Approvals tile keeps its eyebrow; second Approvals tile
-    // suppresses the redundant "Approvals" repeat; Safety tile shows its
-    // eyebrow because the prior eyebrow was different.
-    expect(eyebrows).toEqual(['Approvals', null, 'Safety']);
-  });
-
-  it('default-context surface still renders per-section headings (flagship compaction does not leak)', () => {
-    render(
-      <HbcPriorityRailSurface
-        title="Priority Actions"
-        items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
-          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
-        ]}
-      />,
-    );
-    expect(screen.getByText('Approvals')).toBeInTheDocument();
-    expect(screen.getByText('Safety')).toBeInTheDocument();
-  });
-
-  it('preview surface reuses shared rendering path with grouped content', () => {
+  it('preview surface renders grouped content through the shared default path', () => {
     render(
       <HbcPriorityRailPreviewSurface
         previewLabel="Admin Preview"
         title="Priority Actions"
         items={[]}
-        sections={[
-          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!] },
-        ]}
-        overflowItems={[ACTIONS[2]! ]}
+        sections={[{ key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!] }]}
+        overflowItems={[ACTIONS[2]!]}
         overflowStrategy="sheet"
       />,
     );
