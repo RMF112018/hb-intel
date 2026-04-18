@@ -139,6 +139,37 @@ export function HbcPriorityRailSurface({
   if (isFlagship) {
     const { featured, supporting } = collectFlagshipTiles(resolvedSections);
 
+    // ── Flagship compaction rules (Prompt-03) ───────────────────────────
+    // 1. Collapse the featured band when it conveys no additional hierarchy:
+    //    * every tile is "featured" (supporting.length === 0), or
+    //    * only one action total (featured promotion is noise, not a lift).
+    //    In those cases we render a single unified command strip.
+    // 2. Suppress redundant tile eyebrows:
+    //    * when only one section contributes to the band, the band title
+    //      already carries the group identity,
+    //    * when an adjacent previous tile already displayed the same
+    //      eyebrow, repeating it is heading waste.
+    // Default (non-flagship) rendering is untouched.
+    const collapseFeatured = supporting.length === 0 || totalVisible === 1;
+    const effectiveFeatured = collapseFeatured ? [] : featured;
+    const effectiveSupporting = collapseFeatured
+      ? [...featured, ...supporting]
+      : supporting;
+
+    const isSingleSection = resolvedSections.length <= 1;
+    const resolveEyebrow = (
+      tile: FlagshipTile,
+      prev: string | undefined,
+    ): string | undefined => {
+      if (isSingleSection) return undefined;
+      if (!tile.sectionTitle) return undefined;
+      if (tile.sectionTitle === prev) return undefined;
+      return tile.sectionTitle;
+    };
+
+    let lastFeaturedEyebrow: string | undefined;
+    let lastSupportingEyebrow: string | undefined;
+
     return (
       <section
         aria-label={ariaLabel ?? title}
@@ -147,6 +178,8 @@ export function HbcPriorityRailSurface({
         data-hbc-ui="priority-rail"
         data-hbc-priority-rail-context={context}
         data-hbc-flagship-layout="command-strip"
+        data-hbc-flagship-compacted={collapseFeatured ? 'true' : undefined}
+        data-hbc-flagship-single-section={isSingleSection ? 'true' : undefined}
       >
         <div className={styles.header}>
           <div className={styles.headerTitle}>
@@ -161,64 +194,72 @@ export function HbcPriorityRailSurface({
           </div>
         </div>
 
-        {featured.length > 0 ? (
+        {effectiveFeatured.length > 0 ? (
           <div
             className={styles.featuredBand}
             data-hbc-featured-slot="true"
-            data-hbc-featured-count={featured.length}
+            data-hbc-featured-count={effectiveFeatured.length}
             role="list"
           >
-            {featured.map((tile) => (
-              <div
-                key={tile.action.id}
-                role="listitem"
-                className={styles.featuredTile}
-                data-hbc-featured-action={tile.action.id}
-                data-hbc-tile-eyebrow={tile.sectionTitle || undefined}
-              >
-                {tile.sectionTitle ? (
-                  <span className={styles.tileEyebrow} aria-hidden="true">
-                    {tile.sectionTitle}
-                  </span>
-                ) : null}
-                <HbcPriorityRailAction
-                  action={tile.action}
-                  showBadge={showBadges}
-                  compact={false}
-                />
-              </div>
-            ))}
+            {effectiveFeatured.map((tile) => {
+              const eyebrow = resolveEyebrow(tile, lastFeaturedEyebrow);
+              lastFeaturedEyebrow = tile.sectionTitle;
+              return (
+                <div
+                  key={tile.action.id}
+                  role="listitem"
+                  className={styles.featuredTile}
+                  data-hbc-featured-action={tile.action.id}
+                  data-hbc-tile-eyebrow={eyebrow || undefined}
+                >
+                  {eyebrow ? (
+                    <span className={styles.tileEyebrow} aria-hidden="true">
+                      {eyebrow}
+                    </span>
+                  ) : null}
+                  <HbcPriorityRailAction
+                    action={tile.action}
+                    showBadge={showBadges}
+                    compact={false}
+                  />
+                </div>
+              );
+            })}
           </div>
         ) : null}
 
-        {supporting.length > 0 ? (
+        {effectiveSupporting.length > 0 ? (
           <div
             className={styles.commandStrip}
             role="list"
             data-hbc-flagship-grid="true"
-            data-hbc-flagship-strip-count={supporting.length}
+            data-hbc-flagship-strip-count={effectiveSupporting.length}
           >
-            {supporting.map((tile) => (
-              <div
-                key={tile.action.id}
-                role="listitem"
-                className={styles.commandTile}
-                data-hbc-flagship-tile="true"
-                data-hbc-tile-section={tile.sectionKey}
-                data-hbc-tile-eyebrow={tile.sectionTitle || undefined}
-              >
-                {tile.sectionTitle ? (
-                  <span className={styles.tileEyebrow} aria-hidden="true">
-                    {tile.sectionTitle}
-                  </span>
-                ) : null}
-                <HbcPriorityRailAction
-                  action={tile.action}
-                  showBadge={showBadges}
-                  compact={layout === 'compact'}
-                />
-              </div>
-            ))}
+            {effectiveSupporting.map((tile) => {
+              const eyebrow = resolveEyebrow(tile, lastSupportingEyebrow);
+              lastSupportingEyebrow = tile.sectionTitle;
+              return (
+                <div
+                  key={tile.action.id}
+                  role="listitem"
+                  className={styles.commandTile}
+                  data-hbc-flagship-tile="true"
+                  data-hbc-tile-section={tile.sectionKey}
+                  data-hbc-tile-eyebrow={eyebrow || undefined}
+                >
+                  {eyebrow ? (
+                    <span className={styles.tileEyebrow} aria-hidden="true">
+                      {eyebrow}
+                    </span>
+                  ) : null}
+                  <HbcPriorityRailAction
+                    action={tile.action}
+                    showBadge={showBadges}
+                    compact={layout === 'compact'}
+                  />
+                </div>
+              );
+            })}
           </div>
         ) : null}
 

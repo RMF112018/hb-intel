@@ -302,6 +302,103 @@ describe('HbcPriorityRail shared family', () => {
     expect(container.querySelector('[data-hbc-flagship-layout]')).toBeNull();
   });
 
+  it('flagship compacts the featured band when every tile is featured (no hierarchy to convey)', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!], featured: ACTIONS[0]! },
+          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!], featured: ACTIONS[2]! },
+        ]}
+      />,
+    );
+
+    // Featured band is collapsed because promoting every action to the
+    // featured slot adds no scanning benefit — a single command strip
+    // carries the whole primary set.
+    expect(container.querySelector('[data-hbc-featured-slot="true"]')).toBeNull();
+    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
+    expect(surface?.getAttribute('data-hbc-flagship-compacted')).toBe('true');
+    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
+    expect(tiles.length).toBe(2);
+  });
+
+  it('flagship compacts a single-action primary into one strip tile without a featured band', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!], featured: ACTIONS[0]! },
+        ]}
+      />,
+    );
+    expect(container.querySelector('[data-hbc-featured-slot="true"]')).toBeNull();
+    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
+    expect(tiles.length).toBe(1);
+  });
+
+  it('flagship suppresses per-tile eyebrows when only one section contributes to the band', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+        ]}
+      />,
+    );
+    const surface = container.querySelector('[data-hbc-ui="priority-rail"]');
+    expect(surface?.getAttribute('data-hbc-flagship-single-section')).toBe('true');
+    const tiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
+    expect(tiles.length).toBe(2);
+    for (const tile of tiles) {
+      expect(tile.getAttribute('data-hbc-tile-eyebrow')).toBeNull();
+      expect(tile.querySelector('[aria-hidden="true"]')?.textContent).not.toBe('Approvals');
+    }
+  });
+
+  it('flagship suppresses adjacent duplicate eyebrows within the supporting strip', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
+        ]}
+      />,
+    );
+    const tiles = Array.from(
+      container.querySelectorAll('[data-hbc-flagship-tile="true"]'),
+    );
+    const eyebrows = tiles.map((t) => t.getAttribute('data-hbc-tile-eyebrow'));
+    // First Approvals tile keeps its eyebrow; second Approvals tile
+    // suppresses the redundant "Approvals" repeat; Safety tile shows its
+    // eyebrow because the prior eyebrow was different.
+    expect(eyebrows).toEqual(['Approvals', null, 'Safety']);
+  });
+
+  it('default-context surface still renders per-section headings (flagship compaction does not leak)', () => {
+    render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
+        ]}
+      />,
+    );
+    expect(screen.getByText('Approvals')).toBeInTheDocument();
+    expect(screen.getByText('Safety')).toBeInTheDocument();
+  });
+
   it('preview surface reuses shared rendering path with grouped content', () => {
     render(
       <HbcPriorityRailPreviewSurface
