@@ -1,0 +1,213 @@
+# Seed Data Appendix
+
+## Purpose
+This appendix gives the local code agent exact proposed seed values so the seeding implementation is deterministic and reviewable.
+
+## Recommended curated config payload
+```json
+{
+  "configs": [
+    {
+      "title": "Homepage Priority Actions",
+      "bandKey": "homepage-primary",
+      "enabled": true,
+      "isActive": true,
+      "headingText": "",
+      "overflowLabel": "More tools",
+      "showHeading": false,
+      "stickyAfterHero": false,
+      "showBadges": true,
+      "desktopLayoutMode": "rail",
+      "tabletLayoutMode": "grid",
+      "mobileLayoutMode": "sheet-trigger",
+      "maxVisibleDesktop": 5,
+      "maxVisibleLaptop": 5,
+      "maxVisibleTabletLandscape": 4,
+      "maxVisibleTabletPortrait": 4,
+      "maxVisiblePhone": 4,
+      "openExternalInNewTabByDefault": true,
+      "adminNotes": "Live default profile for the mixed internal/external workplace shortcut set."
+    },
+    {
+      "title": "Homepage Priority Actions - Compact",
+      "bandKey": "homepage-primary",
+      "enabled": false,
+      "isActive": false,
+      "headingText": "",
+      "overflowLabel": "More tools",
+      "showHeading": false,
+      "stickyAfterHero": true,
+      "showBadges": false,
+      "desktopLayoutMode": "hybrid",
+      "tabletLayoutMode": "rail",
+      "mobileLayoutMode": "scroll",
+      "maxVisibleDesktop": 7,
+      "maxVisibleLaptop": 6,
+      "maxVisibleTabletLandscape": 5,
+      "maxVisibleTabletPortrait": 4,
+      "maxVisiblePhone": 4,
+      "openExternalInNewTabByDefault": true,
+      "adminNotes": "Alternate compact preset. Activate only after deactivating the live standard row."
+    },
+    {
+      "title": "Homepage Priority Actions - Guided",
+      "bandKey": "homepage-primary",
+      "enabled": false,
+      "isActive": false,
+      "headingText": "Priority Actions",
+      "overflowLabel": "All tools",
+      "showHeading": true,
+      "stickyAfterHero": false,
+      "showBadges": false,
+      "desktopLayoutMode": "segmented",
+      "tabletLayoutMode": "hybrid",
+      "mobileLayoutMode": "sheet-trigger",
+      "maxVisibleDesktop": 4,
+      "maxVisibleLaptop": 4,
+      "maxVisibleTabletLandscape": 4,
+      "maxVisibleTabletPortrait": 3,
+      "maxVisiblePhone": 3,
+      "openExternalInNewTabByDefault": true,
+      "adminNotes": "Alternate grouped preset. Activate only after deactivating the live standard row."
+    }
+  ]
+}
+```
+
+## Recommended curated item payload
+```json
+{
+  "items": [
+    {
+      "actionKey": "hb-projects",
+      "title": "HB Projects",
+      "href": "https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/SitePages/HB-Projects.aspx",
+      "actionDescription": "Open the HB Projects page in HBCentral.",
+      "groupKey": "project-delivery",
+      "groupTitle": "Project Delivery",
+      "sortOrder": 100,
+      "isExternal": false,
+      "openInNewTab": false
+    },
+    {
+      "actionKey": "bamboohr",
+      "title": "BambooHR",
+      "href": "https://hedrickbrothers.bamboohr.com/login.php?r=/home/",
+      "actionDescription": "Open BambooHR for HR self-service, time off, and employee information.",
+      "groupKey": "people-benefits",
+      "groupTitle": "People & Benefits",
+      "sortOrder": 200,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "hh2",
+      "title": "hh2",
+      "href": "https://hedrickbrothers.hh2.com/#login",
+      "actionDescription": "Open hh2 for construction payroll, time tracking, HR, and AP workflows.",
+      "groupKey": "finance-payroll",
+      "groupTitle": "Finance & Payroll",
+      "sortOrder": 300,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "my-adp",
+      "title": "My ADP",
+      "href": "https://online.adp.com/signin/v1/?APPID=RDBX&productId=80e309c3-70c6-bae1-e053-3505430b5495&returnURL=https://my.adp.com/&callingAppId=RDBX&TARGET=-SM-https://my.adp.com/",
+      "actionDescription": "Open My ADP to access pay statements, tax forms, and employer-provided employee self-service features.",
+      "groupKey": "finance-payroll",
+      "groupTitle": "Finance & Payroll",
+      "sortOrder": 400,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "procore",
+      "title": "Procore",
+      "href": "https://login.procore.com/",
+      "actionDescription": "Open Procore for project management and office-to-field construction workflows.",
+      "groupKey": "project-delivery",
+      "groupTitle": "Project Delivery",
+      "sortOrder": 500,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "employee-navigator",
+      "title": "Employee Navigator",
+      "href": "https://www.employeenavigator.com/benefits/account/login",
+      "actionDescription": "Open Employee Navigator to review benefits and employee self-service resources.",
+      "groupKey": "people-benefits",
+      "groupTitle": "People & Benefits",
+      "sortOrder": 600,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "concur",
+      "title": "Concur",
+      "href": "https://www.concursolutions.com/",
+      "actionDescription": "Open SAP Concur for travel, expense, and invoice management.",
+      "groupKey": "finance-payroll",
+      "groupTitle": "Finance & Payroll",
+      "sortOrder": 700,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "document-crunch",
+      "title": "Document Crunch",
+      "href": "https://app.documentcrunch.com/login/",
+      "actionDescription": "Open Document Crunch for construction contract and risk review workflows.",
+      "groupKey": "project-delivery",
+      "groupTitle": "Project Delivery",
+      "sortOrder": 800,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "compass",
+      "title": "Compass",
+      "href": "https://compass-app.com/",
+      "actionDescription": "Open Compass for contractor prequalification and risk analytics workflows.",
+      "groupKey": "project-delivery",
+      "groupTitle": "Project Delivery",
+      "sortOrder": 900,
+      "isExternal": true,
+      "openInNewTab": true
+    },
+    {
+      "actionKey": "hb-university",
+      "title": "HB University",
+      "href": "https://hedricklearn.csod.com/",
+      "actionDescription": "Open HB University, the company learning portal hosted on Cornerstone/CSOD.",
+      "groupKey": "people-benefits",
+      "groupTitle": "People & Benefits",
+      "sortOrder": 1000,
+      "isExternal": true,
+      "openInNewTab": true
+    }
+  ]
+}
+```
+
+## Item-level defaults to apply during implementation
+The code agent should explicitly or implicitly apply these values to every curated item row unless later evidence changes them:
+- `ItemStatus = Enabled`
+- `BadgeVariant = neutral`
+- `Priority = primary`
+- `OverflowOnly = false`
+- `MobilePriority = 100`
+- `AudienceMode = all`
+- all device visibility flags = `true`
+- `IconKey = null`
+- `BadgeLabel = null`
+- `AudienceKeys = null`
+- `StartsAtUtc = null`
+- `EndsAtUtc = null`
+- `AdminNotes = null`
+
+## Config-level defaults to preserve
+- `OpenExternalInNewTabByDefault = true`
+- use only one active live row for `homepage-primary`
