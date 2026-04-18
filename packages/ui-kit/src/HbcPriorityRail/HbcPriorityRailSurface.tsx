@@ -134,13 +134,17 @@ export function HbcPriorityRailSurface({
                 </div>
               ) : null}
 
-              <div className={styles.items} role="list">
+              <div
+                className={styles.items}
+                role="list"
+                data-hbc-flagship-grid={isFlagship ? 'true' : undefined}
+              >
                 {supportingActions.map((action, actionIndex) => (
                   <React.Fragment key={action.id}>
-                    {sectionIndex > 0 || actionIndex > 0 ? (
+                    {!isFlagship && (sectionIndex > 0 || actionIndex > 0) ? (
                       <Separator.Root className={styles.itemSeparator} decorative />
                     ) : null}
-                    <div role="listitem">
+                    <div role="listitem" data-hbc-flagship-tile={isFlagship ? 'true' : undefined}>
                       <HbcPriorityRailAction
                         action={action}
                         showBadge={showBadges}

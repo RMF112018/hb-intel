@@ -54,87 +54,127 @@
 .contextDefault {}
 
 .contextHomepageFlagship {
-  /* Flush, edge-to-edge command band — no bordered card silhouette. */
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  overflow: visible;
-  /* Structural top authority: a strong brand rule replaces the card top-
-   * border used by the generic surface and reads as a command-band masthead
-   * edge rather than a module outline. */
-  border-top: 3px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.85);
-  padding-top: 2px;
+  /* Structured command-band surface: a distinct authored product object,
+   * not a transparent list. Subtle layered wash + soft elevation read as
+   * a signature utility band on first glance. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.55) 100%),
+    linear-gradient(
+      135deg,
+      rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08) 0%,
+      rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.02) 45%,
+      rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.05) 100%
+    );
+  border: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
+  border-top: 3px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.9);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 6px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08),
+    0 12px 32px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
 }
 
-/* Neutralize urgency-variant border-top styling so flagship keeps one
- * clean structural edge and moves urgency into the masthead wash instead. */
 .contextHomepageFlagship.urgencyDefault {
-  border-top: 3px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.85);
-  background: transparent;
+  border-top-color: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.9);
 }
 .contextHomepageFlagship.urgencyHigh {
-  border-top: 3px solid rgba(var(--hbc-pr-warning-rgb, 229, 126, 70), 0.9);
-  background: linear-gradient(
-    180deg,
-    rgba(var(--hbc-pr-warning-rgb, 229, 126, 70), 0.05) 0%,
-    transparent 88px
-  );
+  border-top-color: rgba(var(--hbc-pr-warning-rgb, 229, 126, 70), 0.95);
 }
 .contextHomepageFlagship.urgencyCritical {
-  border-top: 3px solid var(--hbc-pr-danger, #c4362a);
-  background: linear-gradient(
-    180deg,
-    rgba(var(--hbc-pr-danger-rgb, 196, 54, 42), 0.05) 0%,
-    transparent 88px
-  );
+  border-top-color: var(--hbc-pr-danger, #c4362a);
 }
 
-/* Flagship header — masthead weight and scale. */
+/* ── Flagship command band — tile launcher grammar ─────────────────
+ * The homepage-flagship context replaces the shared row-list with a
+ * tile grid of discrete action objects. Each tile is a self-contained
+ * command with its own silhouette (icon plaque, title, description,
+ * badge, persistent launch chip) so the eye registers each action as
+ * a launch target, not as a list row. The band is structurally
+ * different from the default surface — it does not inherit, extend,
+ * or re-skin the row-list grammar.
+ */
+
 .contextHomepageFlagship .header {
-  padding: 18px 20px 12px;
-  align-items: flex-end;
+  padding: 18px 22px 12px;
+  align-items: center;
+  position: relative;
+}
+.contextHomepageFlagship .header::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.22) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.04) 100%
+  );
 }
 .contextHomepageFlagship .headerTitle {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
 }
 .contextHomepageFlagship .headerIcon {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   background: linear-gradient(
     140deg,
-    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.95) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.96) 0%,
     rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.78) 100%
   );
   color: #ffffff;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 2px 6px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.22);
+    0 3px 8px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.28);
 }
 
-/* Separator becomes a subtler hairline — the masthead edge already owns
- * the primary structural line. */
+/* Flagship hides the native separator — masthead edge + gradient rule own
+ * the structural divide between header and tile field. */
 .contextHomepageFlagship .separator {
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
-  margin: 0 20px;
+  display: none;
 }
 
-/* Sections — stronger rhythm and taller breathing room between groups. */
+/* Section rhythm — ribbon-style category bar above each tile cluster. */
 .contextHomepageFlagship .sections {
-  gap: 10px;
-  padding-bottom: 4px;
+  gap: 6px;
+  padding: 10px 0 14px;
+}
+.contextHomepageFlagship .section {
+  padding: 0;
 }
 .contextHomepageFlagship .sectionHeader {
-  padding: 14px 20px 6px;
+  padding: 14px 22px 8px;
   font-size: 0.6875rem;
-  letter-spacing: 0.1em;
-  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.68);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.72);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .contextHomepageFlagship .sectionTitle {
+  position: relative;
+  padding-left: 14px;
   font-weight: 800;
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship .sectionTitle::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  box-shadow: 0 0 0 2px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.18);
 }
 .contextHomepageFlagship .sectionCount {
   background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.12);
@@ -144,190 +184,287 @@
   padding: 2px 8px;
 }
 
-/* Rows — decisive, taller, always-present arrow, edge-to-edge feel. */
-.contextHomepageFlagship .item {
-  padding: 12px 20px;
-  min-height: 52px;
-  gap: 14px;
-  border-radius: 0;
-  transition: background-color 140ms ease, box-shadow 140ms ease;
-}
-.contextHomepageFlagship .item:hover {
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
-  box-shadow: inset 3px 0 0 var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
-}
-.contextHomepageFlagship .item:focus-visible {
-  outline: 2px solid var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
-  outline-offset: -2px;
-}
-.contextHomepageFlagship .itemIcon {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
-  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
-}
-.contextHomepageFlagship .itemTitle {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-  color: var(--hbc-pr-text-primary, var(--hb-text-primary, #1a1a1a));
-}
-.contextHomepageFlagship .itemDescription {
-  font-size: 0.8125rem;
-  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.62);
-}
-.contextHomepageFlagship .itemArrow {
-  opacity: 0.9;
-  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
-}
-.contextHomepageFlagship .item:hover .itemArrow {
-  opacity: 1;
-  transform: translateX(3px);
-}
-/* Flagship launch chip — persistent circular affordance so the
- * launch target is visible without hover. Separates the recognition
- * anchor (icon on the left) from the activation anchor (chip on the
- * right) so the eye does not have to re-verify that a row is
- * clickable on every scan. */
-.contextHomepageFlagship .itemLaunch {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08);
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
-  transition: background-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
-}
-.contextHomepageFlagship .item:hover .itemLaunch {
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.32);
-}
-.contextHomepageFlagship .itemLaunchExternal {
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.04);
-}
-.contextHomepageFlagship .itemExternal {
-  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
-  opacity: 0.85;
+/* ── Tile grid ───────────────────────────────────────────────────── */
+.contextHomepageFlagship .items[data-hbc-flagship-grid="true"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  padding: 2px 14px 6px;
 }
 
-/* Featured launch chip — brand-filled, reads as the primary action. */
-.contextHomepageFlagship .featured .itemLaunch {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(
-    140deg,
-    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.95) 0%,
-    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.78) 100%
-  );
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 2px 6px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.25);
-}
-.contextHomepageFlagship .featured .itemLaunch .itemArrow,
-.contextHomepageFlagship .featured .itemLaunch .itemExternal {
-  color: #ffffff;
-  opacity: 1;
-}
-.contextHomepageFlagship .featured .item:hover .itemLaunch {
-  transform: translateX(2px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 4px 10px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.35);
-}
+/* Suppress list separators — tiles carry their own silhouettes. */
 .contextHomepageFlagship .itemSeparator {
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08);
-  margin: 0 20px;
+  display: none;
 }
 
-/* Flagship featured slot — one decisive primary action per section.
- * The featured row is visually authoritative so the eye finds the
- * section's primary destination without parsing every row. Supporting
- * rows beneath receive a subtle de-emphasis under the same section so
- * they read as "also available" rather than "equal peers". */
-.contextHomepageFlagship .featured {
-  padding: 10px 14px 12px;
-  margin: 0 6px;
-}
-.contextHomepageFlagship .featured .item {
-  padding: 14px 16px;
-  min-height: 64px;
-  gap: 16px;
+/* Individual tile — rectangular card with layered structure.
+ * Row of icon plaque + title + description + launch chip, but rendered
+ * as a discrete object, not a row in a list. */
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 4px;
+  padding: 14px 14px 14px 14px;
+  min-height: 72px;
   border-radius: 10px;
   background: linear-gradient(
-    140deg,
-    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.08) 0%,
-    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.02) 100%
+    180deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 0.82) 100%
   );
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.18),
-    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 1px 2px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.05);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+  position: relative;
+  isolation: isolate;
 }
-.contextHomepageFlagship .featured .item:hover {
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.22);
+  transition: background-color 160ms ease, width 160ms ease;
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:hover {
+  transform: translateY(-2px);
   background: linear-gradient(
-    140deg,
-    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14) 0%,
+    180deg,
+    #ffffff 0%,
     rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.04) 100%
   );
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.32),
-    inset 4px 0 0 var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.28),
+    0 6px 16px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14);
 }
-.contextHomepageFlagship .featured .itemIcon {
-  width: 44px;
-  height: 44px;
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:hover::before {
+  width: 4px;
+  background: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:focus-visible {
+  outline: 2px solid var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  outline-offset: 2px;
+}
+
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemIcon {
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
+  background: linear-gradient(
+    140deg,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.12) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.05) 100%
+  );
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.18);
+  transition: background 160ms ease, color 160ms ease;
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:hover .itemIcon {
   background: linear-gradient(
     140deg,
     rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.95) 0%,
     rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.78) 100%
   );
   color: #ffffff;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 2px 6px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.22);
+}
+
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemContent {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--hbc-pr-text-primary, var(--hb-text-primary, #1a1a1a));
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1.25;
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemDescription {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.62);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: unset;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+}
+
+/* Persistent launch chip — always visible at tile corner. */
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemLaunch {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.2);
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  align-self: center;
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:hover .itemLaunch {
+  background: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  box-shadow: 0 4px 10px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.35);
+  transform: translateX(2px);
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:hover .itemArrow,
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .item:hover .itemExternal {
+  color: #ffffff;
+  opacity: 1;
+}
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemArrow {
+  opacity: 1;
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+
+.contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemBadge {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  z-index: 1;
+}
+
+/* Featured tile — authoritative primary. Spans two tile columns when
+ * the grid can accommodate it, carries a brand wash, and promotes the
+ * launch chip to a filled brand pill. */
+.contextHomepageFlagship .featured {
+  padding: 6px 14px 4px;
+}
+.contextHomepageFlagship .featured .item {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 6px;
+  padding: 18px 20px;
+  min-height: 96px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.96) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.78) 55%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.92) 100%
+  );
+  color: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 10px 24px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.28);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  position: relative;
+  overflow: hidden;
+}
+.contextHomepageFlagship .featured .item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(255, 255, 255, 0.18) 0%,
+      transparent 45%
+    );
+  pointer-events: none;
+}
+.contextHomepageFlagship .featured .item:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.3) inset,
+    0 16px 36px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.4);
+}
+.contextHomepageFlagship .featured .itemIcon {
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+.contextHomepageFlagship .featured .itemContent {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  min-width: 0;
 }
 .contextHomepageFlagship .featured .itemTitle {
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  line-height: 1.2;
 }
 .contextHomepageFlagship .featured .itemDescription {
   font-size: 0.875rem;
-  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.72);
-}
-.contextHomepageFlagship .featured .itemArrow {
-  opacity: 0.8;
-}
-.contextHomepageFlagship .featured .item:hover .itemArrow {
-  opacity: 1;
-  transform: translateX(4px);
-}
-
-/* Sections that host a featured slot: de-emphasize supporting rows so
- * the featured action remains the clear primary. Iconography subtly
- * recedes; titles stay readable but lose font weight competition. */
-.contextHomepageFlagship [data-hbc-section-has-featured="true"] .items .item {
-  min-height: 46px;
-  padding: 10px 20px;
-}
-.contextHomepageFlagship [data-hbc-section-has-featured="true"] .items .itemIcon {
-  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
-  opacity: 0.85;
-}
-.contextHomepageFlagship [data-hbc-section-has-featured="true"] .items .itemTitle {
-  font-size: 0.875rem;
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
 }
-.contextHomepageFlagship [data-hbc-section-has-featured="true"] .items .itemDescription {
-  font-size: 0.75rem;
-  color: rgba(var(--hbc-pr-text-rgb, 26, 26, 26), 0.56);
+.contextHomepageFlagship .featured .itemLaunch {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  align-self: center;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.contextHomepageFlagship .featured .itemLaunch .itemArrow,
+.contextHomepageFlagship .featured .itemLaunch .itemExternal {
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  opacity: 1;
+}
+.contextHomepageFlagship .featured .item:hover .itemLaunch {
+  transform: translateX(2px) scale(1.04);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+.contextHomepageFlagship .featured .itemBadge {
+  position: absolute;
+  top: 12px;
+  right: 72px;
 }
 
-/* Compact flagship rows — slimmer padding but still decisive. */
+/* When a section has a featured slot, let it span the full tile row
+ * above the supporting tile grid. */
+.contextHomepageFlagship [data-hbc-section-has-featured="true"] .featured {
+  padding: 4px 14px 8px;
+}
+
+/* Compact flagship (mobile/compact layout) — tile field collapses to a
+ * single column with trimmed density. */
 .contextHomepageFlagship .itemCompact {
-  padding: 8px 20px;
-  min-height: 40px;
-  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
 }
 .contextHomepageFlagship .itemCompact .itemIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 .contextHomepageFlagship .itemCompact .itemTitle {
   font-size: 0.875rem;
@@ -339,12 +476,23 @@
  * right so the trigger anchors the end of the primary band, echoing
  * the featured launch chip on the left of featured rows. */
 .contextHomepageFlagship .overflowTrigger {
-  padding: 10px 20px 12px;
-  border-top: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  margin: 6px 14px 14px;
+  padding: 12px 16px;
+  border-top: none;
+  border-radius: 10px;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.18);
   font-size: 0.8125rem;
   letter-spacing: 0.02em;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 10px;
+  width: calc(100% - 28px);
+  transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+.contextHomepageFlagship .overflowTrigger:hover {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.12);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.3);
+  transform: translateY(-1px);
 }
 .contextHomepageFlagship .overflowLeadingIcon {
   opacity: 0.9;
@@ -986,37 +1134,37 @@
     padding: 14px 16px 10px;
   }
   .contextHomepageFlagship .sectionHeader {
-    padding: 12px 16px 4px;
+    padding: 12px 16px 6px;
   }
-  .contextHomepageFlagship .item {
-    padding: 10px 16px;
-    min-height: 48px;
-    gap: 12px;
+  .contextHomepageFlagship .items[data-hbc-flagship-grid="true"] {
+    grid-template-columns: 1fr;
+    padding: 2px 10px 6px;
   }
-  .contextHomepageFlagship .itemDescription {
-    display: none;
+  .contextHomepageFlagship [data-hbc-flagship-tile="true"] .item {
+    min-height: 64px;
+    padding: 12px 14px;
   }
-  .contextHomepageFlagship .itemSeparator,
-  .contextHomepageFlagship .separator {
-    margin: 0 16px;
+  .contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemDescription {
+    -webkit-line-clamp: 1;
   }
   .contextHomepageFlagship .featured {
-    margin: 0 4px;
-    padding: 8px 10px 10px;
+    padding: 6px 10px 8px;
   }
   .contextHomepageFlagship .featured .item {
-    padding: 12px 14px;
-    min-height: 56px;
+    grid-template-columns: 48px 1fr auto;
+    padding: 14px 16px;
+    min-height: 80px;
   }
   .contextHomepageFlagship .featured .itemIcon {
-    width: 38px;
-    height: 38px;
+    width: 48px;
+    height: 48px;
   }
   .contextHomepageFlagship .featured .itemTitle {
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
   .contextHomepageFlagship .overflowTrigger {
-    padding: 10px 16px 12px;
+    margin: 6px 10px 10px;
+    width: calc(100% - 20px);
   }
 }
 
@@ -1028,16 +1176,24 @@
   .layoutGrid .items {
     grid-template-columns: 1fr;
   }
-  .contextHomepageFlagship .item {
+  .contextHomepageFlagship [data-hbc-flagship-tile="true"] .item {
+    grid-template-columns: 36px 1fr auto;
+    column-gap: 10px;
     padding: 10px 12px;
-    gap: 10px;
   }
-  .contextHomepageFlagship .itemIcon {
-    width: 30px;
-    height: 30px;
+  .contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemIcon {
+    width: 36px;
+    height: 36px;
   }
-  .contextHomepageFlagship .itemBadge {
+  .contextHomepageFlagship [data-hbc-flagship-tile="true"] .itemBadge {
     display: none;
+  }
+  .contextHomepageFlagship .featured .item {
+    grid-template-columns: 44px 1fr auto;
+  }
+  .contextHomepageFlagship .featured .itemIcon {
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -1046,19 +1202,17 @@
  * inside the masthead and row gutters without re-centering. */
 @container hbc-priority-rail (min-width: 1180px) {
   .contextHomepageFlagship .header {
-    padding: 20px 28px 12px;
+    padding: 22px 28px 14px;
   }
   .contextHomepageFlagship .sectionHeader {
-    padding: 16px 28px 6px;
+    padding: 16px 28px 8px;
   }
-  .contextHomepageFlagship .item {
-    padding: 14px 28px;
-  }
-  .contextHomepageFlagship .itemSeparator,
-  .contextHomepageFlagship .separator {
-    margin: 0 28px;
+  .contextHomepageFlagship .items[data-hbc-flagship-grid="true"] {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    padding: 4px 20px 8px;
+    gap: 12px;
   }
   .contextHomepageFlagship .featured {
-    margin: 0 12px;
+    padding: 8px 20px 8px;
   }
 }

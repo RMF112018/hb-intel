@@ -257,6 +257,32 @@ describe('HbcPriorityRail shared family', () => {
     expect(root?.className).toMatch(/contextHomepageFlagship/);
   });
 
+  it('flagship context renders supporting actions as tile-grid objects and default context does not', () => {
+    const { container, rerender } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[ACTIONS[0]!, ACTIONS[1]!, ACTIONS[2]!]}
+      />,
+    );
+
+    const flagshipGrid = container.querySelector('[data-hbc-flagship-grid="true"]');
+    expect(flagshipGrid).not.toBeNull();
+    const flagshipTiles = container.querySelectorAll('[data-hbc-flagship-tile="true"]');
+    expect(flagshipTiles.length).toBe(3);
+
+    rerender(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="default"
+        items={[ACTIONS[0]!, ACTIONS[1]!, ACTIONS[2]!]}
+      />,
+    );
+
+    expect(container.querySelector('[data-hbc-flagship-grid="true"]')).toBeNull();
+    expect(container.querySelectorAll('[data-hbc-flagship-tile="true"]').length).toBe(0);
+  });
+
   it('preview surface reuses shared rendering path with grouped content', () => {
     render(
       <HbcPriorityRailPreviewSurface

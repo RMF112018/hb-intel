@@ -118,25 +118,36 @@ describe('HbcPriorityRail — flagship anti-collapse structural locks', () => {
     );
   });
 
-  it('keeps the flagship featured slot visually distinct from the row list', () => {
+  it('keeps the flagship featured slot visually distinct from the tile grid', () => {
     expect(CSS_SOURCE).toMatch(
       /\.contextHomepageFlagship\s+\.featured\s+\.item\s*\{[^}]*background:[^}]*linear-gradient/,
     );
   });
 
-  it('keeps the persistent launch chip as a flagship activation anchor', () => {
-    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.itemLaunch\s*\{/);
-  });
-
-  it('keeps the featured launch chip as a brand-filled primary target', () => {
+  it('renders flagship supporting actions as a tile grid, not a row list', () => {
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.featured\s+\.itemLaunch\s*\{[^}]*linear-gradient/,
+      /\.contextHomepageFlagship\s+\.items\[data-hbc-flagship-grid="true"\]\s*\{[^}]*display:\s*grid/,
     );
   });
 
-  it('keeps the secondary command layer trigger right-anchored in flagship', () => {
+  it('gives each flagship tile a discrete card silhouette with persistent launch chip', () => {
     expect(CSS_SOURCE).toMatch(
-      /\.contextHomepageFlagship\s+\.overflowTrigger\s*\{[^}]*justify-content:\s*flex-end/,
+      /\.contextHomepageFlagship\s+\[data-hbc-flagship-tile="true"\]\s+\.item\s*\{[^}]*display:\s*grid/,
+    );
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\[data-hbc-flagship-tile="true"\]\s+\.itemLaunch\s*\{/,
+    );
+  });
+
+  it('promotes the featured launch chip to a high-contrast primary target', () => {
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.featured\s+\.itemLaunch\s*\{[^}]*background:\s*#ffffff/,
+    );
+  });
+
+  it('anchors the flagship overflow trigger as a discrete command object, not a footer row', () => {
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.overflowTrigger\s*\{[^}]*border-radius:/,
     );
   });
 });
