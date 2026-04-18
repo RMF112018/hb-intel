@@ -50,6 +50,15 @@ export interface HbHomepageWrapperRailConfig {
   readonly bandKey: string;
   readonly activeAudience?: string;
   readonly fallbackConfig?: Partial<PriorityActionsRailConfig>;
+  /**
+   * Wrapper-declared action IDs promoted into the flagship featured slot
+   * per section. Only consulted when the rail surface runs under
+   * `homepage-flagship` context. Extra IDs that do not match any rendered
+   * action are ignored; sections with no match fall back to an
+   * urgency-based featured action. Empty or omitted disables explicit
+   * wrapper promotion entirely.
+   */
+  readonly featuredActionKeys?: readonly string[];
 }
 
 /**
@@ -66,7 +75,14 @@ const DEFAULT_RAIL_CONFIG: HbHomepageWrapperRailConfig = {
   bandKey: HB_HOMEPAGE_WRAPPER_DEFAULT_BAND_KEY,
   activeAudience: undefined,
   fallbackConfig: undefined,
+  featuredActionKeys: undefined,
 };
+
+function readFeaturedActionKeys(value: unknown): readonly string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const keys = value.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0);
+  return keys.length > 0 ? keys : undefined;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -127,6 +143,7 @@ export function extractHbHomepageWrapperConfig(
     bandKey: readString(railNode?.bandKey) ?? DEFAULT_RAIL_CONFIG.bandKey,
     activeAudience: topAudience,
     fallbackConfig: readFallbackRailConfig(railNode?.fallbackConfig),
+    featuredActionKeys: readFeaturedActionKeys(railNode?.featuredActionKeys),
   };
 
   return { rail };

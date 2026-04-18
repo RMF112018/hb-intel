@@ -54,6 +54,13 @@ export interface PriorityActionsRailProps {
    * shared-surface outcome. See `HbcPriorityRailSurface`.
    */
   surfaceContext?: PriorityRailContext;
+  /**
+   * Wrapper-declared action IDs promoted into the flagship featured slot
+   * per section. Forwarded to `buildPriorityRailSections` unchanged. Only
+   * meaningful when `surfaceContext === 'homepage-flagship'`; the default
+   * surface context ignores featured assignment.
+   */
+  featuredActionKeys?: readonly string[];
   isLoading?: boolean;
 }
 
@@ -158,10 +165,12 @@ function ListSourcedRail({
   activeAudience,
   bandKey,
   surfaceContext,
+  featuredActionKeys,
 }: {
   activeAudience: string | undefined;
   bandKey: string | undefined;
   surfaceContext: PriorityRailContext;
+  featuredActionKeys: readonly string[] | undefined;
 }): React.JSX.Element {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dimensions = useRailContainerDimensions(containerRef);
@@ -196,7 +205,7 @@ function ListSourcedRail({
       content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
     } else {
       const primaryActions = breakpoint.primaryItems.map(mapToRailAction);
-      const groupedSections = buildPriorityRailSections(primaryActions);
+      const groupedSections = buildPriorityRailSections(primaryActions, { featuredActionKeys });
       const surfaceProps = {
         title: config.showHeading ? config.headingText || 'Priority Actions' : undefined,
         urgency: resolveUrgency(deviceItems),
@@ -234,10 +243,12 @@ function ManifestFallbackRail({
   config,
   activeAudience,
   surfaceContext,
+  featuredActionKeys,
 }: {
   config: Partial<PriorityActionsRailConfig> | undefined;
   activeAudience: string | undefined;
   surfaceContext: PriorityRailContext;
+  featuredActionKeys: readonly string[] | undefined;
 }): React.JSX.Element {
   const normalized = normalizePriorityActionsRailConfig(config, activeAudience);
 
@@ -268,7 +279,7 @@ function ManifestFallbackRail({
       ? 'high'
       : 'default';
 
-  const groupedSections = buildPriorityRailSections(allActions);
+  const groupedSections = buildPriorityRailSections(allActions, { featuredActionKeys });
   const surfaceProps = {
     title: normalized.heading,
     urgency,
@@ -290,6 +301,7 @@ export function PriorityActionsRail({
   activeAudience,
   bandKey,
   surfaceContext = 'default',
+  featuredActionKeys,
   isLoading = false,
 }: PriorityActionsRailProps): React.JSX.Element {
   if (isLoading) {
@@ -304,6 +316,7 @@ export function PriorityActionsRail({
         activeAudience={activeAudience}
         bandKey={bandKey}
         surfaceContext={surfaceContext}
+        featuredActionKeys={featuredActionKeys}
       />
     );
   }
@@ -313,6 +326,7 @@ export function PriorityActionsRail({
       config={config}
       activeAudience={activeAudience}
       surfaceContext={surfaceContext}
+      featuredActionKeys={featuredActionKeys}
     />
   );
 }

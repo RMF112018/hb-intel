@@ -74,6 +74,7 @@ export function HbcPriorityRailSurface({
 }: HbcPriorityRailSurfaceProps): React.JSX.Element {
   const resolvedSections = resolveSections(items, sections);
   const showSectionHeaders = resolvedSections.length > 1;
+  const isFlagship = context === 'homepage-flagship';
 
   return (
     <section
@@ -95,38 +96,63 @@ export function HbcPriorityRailSurface({
       <Separator.Root className={styles.separator} decorative />
 
       <div className={styles.sections}>
-        {resolvedSections.map((section, sectionIndex) => (
-          <div
-            key={section.key}
-            className={styles.section}
-            data-hbc-section={section.key}
-            data-testid={`section-${section.key}`}
-          >
-            {showSectionHeaders || section.title ? (
-              <div className={styles.sectionHeader}>
-                <span className={styles.sectionTitle}>{section.title ?? 'Actions'}</span>
-                <span className={styles.sectionCount}>{section.actions.length}</span>
-              </div>
-            ) : null}
+        {resolvedSections.map((section, sectionIndex) => {
+          const flagshipFeatured = isFlagship ? section.featured : undefined;
+          const supportingActions = flagshipFeatured
+            ? section.actions.filter((action) => action.id !== flagshipFeatured.id)
+            : section.actions;
 
-            <div className={styles.items} role="list">
-              {section.actions.map((action, actionIndex) => (
-                <React.Fragment key={action.id}>
-                  {sectionIndex > 0 || actionIndex > 0 ? (
-                    <Separator.Root className={styles.itemSeparator} decorative />
-                  ) : null}
+          return (
+            <div
+              key={section.key}
+              className={styles.section}
+              data-hbc-section={section.key}
+              data-hbc-section-has-featured={flagshipFeatured ? 'true' : undefined}
+              data-testid={`section-${section.key}`}
+            >
+              {showSectionHeaders || section.title ? (
+                <div className={styles.sectionHeader}>
+                  <span className={styles.sectionTitle}>{section.title ?? 'Actions'}</span>
+                  <span className={styles.sectionCount}>{section.actions.length}</span>
+                </div>
+              ) : null}
+
+              {flagshipFeatured ? (
+                <div
+                  className={styles.featured}
+                  data-hbc-featured-slot="true"
+                  data-hbc-featured-action={flagshipFeatured.id}
+                  role="list"
+                >
                   <div role="listitem">
                     <HbcPriorityRailAction
-                      action={action}
+                      action={flagshipFeatured}
                       showBadge={showBadges}
-                      compact={layout === 'compact'}
+                      compact={false}
                     />
                   </div>
-                </React.Fragment>
-              ))}
+                </div>
+              ) : null}
+
+              <div className={styles.items} role="list">
+                {supportingActions.map((action, actionIndex) => (
+                  <React.Fragment key={action.id}>
+                    {sectionIndex > 0 || actionIndex > 0 ? (
+                      <Separator.Root className={styles.itemSeparator} decorative />
+                    ) : null}
+                    <div role="listitem">
+                      <HbcPriorityRailAction
+                        action={action}
+                        showBadge={showBadges}
+                        compact={layout === 'compact'}
+                      />
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {overflowItems && overflowItems.length > 0 ? (

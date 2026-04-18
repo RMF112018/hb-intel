@@ -33,6 +33,19 @@ export interface PriorityRailSectionModel {
   key: string;
   title?: string;
   actions: PriorityRailActionModel[];
+  /**
+   * Optional flagship-featured action promoted ahead of the section row
+   * list when the consumer surface opts into `homepage-flagship` context.
+   * Selected by `buildPriorityRailSections` based on wrapper-declared
+   * featured keys (preferred) or the first badge-variant `critical` /
+   * `warning` action in the section (fallback). Absent when the section
+   * has no viable candidate; default-context consumers ignore this field.
+   */
+  featured?: PriorityRailActionModel;
+}
+
+export interface BuildPriorityRailSectionsOptions {
+  readonly featuredActionKeys?: readonly string[];
 }
 
 export interface PriorityRailDeviceResolution {
@@ -170,6 +183,7 @@ export function resolvePriorityRailPresentationForDevice(
 
 export function buildPriorityRailSections(
   actions: readonly PriorityRailActionModel[],
+  options?: BuildPriorityRailSectionsOptions,
 ): PriorityRailSectionModel[] | undefined {
   if (actions.length === 0) {
     return undefined;
@@ -179,6 +193,10 @@ export function buildPriorityRailSections(
   if (!hasGrouping) {
     return undefined;
   }
+
+  const featuredKeySet = new Set(
+    (options?.featuredActionKeys ?? []).filter((key) => typeof key === 'string' && key.length > 0),
+  );
 
   const sectionsByKey = new Map<string, PriorityRailSectionModel>();
   for (const action of actions) {
@@ -195,5 +213,35 @@ export function buildPriorityRailSections(
     });
   }
 
-  return Array.from(sectionsByKey.values());
+  const sections = Array.from(sectionsByKey.values());
+
+  for (const section of sections) {
+    const featured = resolveSectionFeaturedAction(section.actions, featuredKeySet);
+    if (featured) {
+      section.featured = featured;
+    }
+  }
+
+  return sections;
+}
+
+function resolveSectionFeaturedAction(
+  actions: readonly PriorityRailActionModel[],
+  featuredKeySet: ReadonlySet<string>,
+): PriorityRailActionModel | undefined {
+  if (featuredKeySet.size > 0) {
+    const explicit = actions.find((action) => featuredKeySet.has(action.id));
+    if (explicit) return explicit;
+  }
+
+  const explicitFlag = actions.find((action) => action.featured === true);
+  if (explicitFlag) return explicitFlag;
+
+  const critical = actions.find((action) => action.badge?.variant === 'critical');
+  if (critical) return critical;
+
+  const warning = actions.find((action) => action.badge?.variant === 'warning');
+  if (warning) return warning;
+
+  return undefined;
 }

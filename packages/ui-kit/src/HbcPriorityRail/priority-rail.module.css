@@ -328,6 +328,12 @@
   padding: 1px 7px;
 }
 
+/* ── Flagship featured slot (structural container only) ───── */
+.featured {
+  display: flex;
+  flex-direction: column;
+}
+
 /* ── Item list ────────────────────────────────────────────── */
 .items {
   display: flex;

@@ -44,6 +44,13 @@ export interface PriorityRailActionModel {
   external?: boolean;
   groupKey?: string;
   groupTitle?: string;
+  /**
+   * Flagship tier marker. When `true` and the consumer opts into the
+   * `homepage-flagship` context, the action may be promoted to a featured
+   * masthead slot ahead of the section row list. The default context
+   * ignores this flag and renders the action as an ordinary row.
+   */
+  featured?: boolean;
 }
 
 /* ── Group model ─────────────────────────────────────────────────── */
@@ -59,6 +66,16 @@ export interface PriorityRailSectionModel {
   key: string;
   title?: string;
   actions: PriorityRailActionModel[];
+  /**
+   * Optional flagship-only featured action for this section. When present
+   * and the surface is rendering under `context === 'homepage-flagship'`,
+   * the featured action is promoted to a masthead slot ahead of the
+   * section row list. When absent, or under the `default` context, the
+   * section renders as a flat row list. Populated by
+   * `buildPriorityRailSections` based on wrapper-declared featured keys
+   * or an urgency-based fallback.
+   */
+  featured?: PriorityRailActionModel;
 }
 
 /* ── Surface props ───────────────────────────────────────────────── */
