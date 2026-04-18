@@ -290,10 +290,16 @@
  * on the left of a wide empty container called out in this remediation.)
  */
 .contextHomepageFlagship .commandStrip {
+  /* Prompt-06: tighter minmax + narrower gap spend available page width
+   * on command density instead of dead gutters. On a ~1040px band this
+   * now comfortably fits 5 tiles instead of 4 without sacrificing tile
+   * legibility. The wide-state override below lifts the minmax so wider
+   * surfaces still get confident tile widths — this default targets the
+   * under-spent mid-desktop range specifically. */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
-  padding: 0 0 16px;
+  grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
+  gap: 8px;
+  padding: 0 0 12px;
   list-style: none;
 }
 .contextHomepageFlagship .commandTile {
@@ -1213,16 +1219,19 @@
 }
 
 /* Wide state anchoring: ≥ 1180px container width.
- * Protect left-authoritative composition — increase horizontal breathing
- * inside the masthead and row gutters without re-centering. */
+ * Prompt-06: reassert wide-state authority. The band is allowed a
+ * slightly more confident tile width (minmax 208) but gap stays tight
+ * so the strip reads as a packed command layer, not a padded card
+ * group. Header and featured-band vertical rhythm expand, not the
+ * command-strip gutters. */
 @container hbc-priority-rail (min-width: 1180px) {
   .contextHomepageFlagship .header {
     padding: 14px 6px 16px;
   }
   .contextHomepageFlagship .commandStrip {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-    padding-bottom: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));
+    gap: 10px;
+    padding-bottom: 16px;
   }
   .contextHomepageFlagship .commandTile .item {
     min-height: 130px;
@@ -1246,8 +1255,8 @@
 /* Ultrawide — distribute 5-6 tiles confidently with bigger breathing room. */
 @container hbc-priority-rail (min-width: 1600px) {
   .contextHomepageFlagship .commandStrip {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+    gap: 12px;
   }
   .contextHomepageFlagship .commandTile .item {
     min-height: 140px;
