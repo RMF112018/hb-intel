@@ -1,9 +1,13 @@
 const PILOT_SHAREPOINT_CREATOR_APP_ID = '08c399eb-a394-4087-b859-659d493f8dc7';
 const ENVIRONMENT_VALUES = ['staging', 'prod'] as const;
 const LEGACY_DISCOVERY_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026] as const;
+const DEFAULT_TIMER_SCHEDULE = '0 0 2 * * *';
+const DEFAULT_RERUN_MIN_INTERVAL_MINUTES = 30;
+const DEFAULT_MATCH_ANOMALY_THRESHOLD = 25;
 
 export type LegacyFallbackHostingEnvironment = (typeof ENVIRONMENT_VALUES)[number];
 export type LegacyFallbackDiscoveryYear = (typeof LEGACY_DISCOVERY_YEARS)[number];
+export type LegacyFallbackTargetAuthModel = 'least-privilege-sites-selected';
 
 export interface ILegacyFallbackHostingConfig {
   readonly environment: LegacyFallbackHostingEnvironment;
@@ -17,13 +21,19 @@ export interface ILegacyFallbackHostingConfig {
   readonly graphScope: string;
   readonly authPosture: 'pilot-interim';
   readonly managedAppClientId: string;
+  readonly targetAuthModel: LegacyFallbackTargetAuthModel;
+  readonly targetAuthModelNotes: string;
 }
 
 export interface ILegacyFallbackDiscoveryConfig {
   readonly enabled: boolean;
   readonly timerEnabled: boolean;
+  readonly timerSchedule: string;
   readonly defaultYears: readonly LegacyFallbackDiscoveryYear[];
   readonly maxFoldersPerRun: number;
+  readonly manualRerunEnabled: boolean;
+  readonly rerunMinIntervalMinutes: number;
+  readonly matchAnomalyThreshold: number;
 }
 
 export interface ILegacyFallbackHostingValidationIssue {
@@ -58,6 +68,22 @@ function parseBoolean(value: string, fallback: boolean): boolean {
   return value.toLowerCase() === 'true';
 }
 
+function parsePositiveInteger(value: string): number | null {
+  if (value.trim().length === 0) {
+    return null;
+  }
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    return null;
+  }
+  return parsed;
+}
+
+function isValidSixFieldCron(value: string): boolean {
+  const parts = value.trim().split(/\s+/);
+  return parts.length === 6;
+}
+
 function parseYearList(value: string): LegacyFallbackDiscoveryYear[] {
   if (value.trim().length === 0) {
     return [];
@@ -82,8 +108,13 @@ export function validateLegacyFallbackHostingConfig(
   const graphScope = readTrimmed(env, 'HBC_LEGACY_FALLBACK_GRAPH_SCOPE');
   const authPosture = readTrimmed(env, 'HBC_LEGACY_FALLBACK_AUTH_POSTURE');
   const managedAppClientId = readTrimmed(env, 'HBC_LEGACY_FALLBACK_MANAGED_APP_CLIENT_ID');
+  const targetAuthModel = readTrimmed(env, 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL');
+  const targetAuthModelNotes = readTrimmed(env, 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL_NOTES');
   const configuredYears = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_YEARS');
   const maxFoldersPerRunRaw = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN');
+  const timerSchedule = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE');
+  const rerunMinIntervalMinutesRaw = readTrimmed(env, 'HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES');
+  const matchAnomalyThresholdRaw = readTrimmed(env, 'HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD');
 
   if (!ENVIRONMENT_VALUES.includes(environment as LegacyFallbackHostingEnvironment)) {
     issues.push({
@@ -145,6 +176,21 @@ export function validateLegacyFallbackHostingConfig(
       message: `Must equal pilot app registration ${PILOT_SHAREPOINT_CREATOR_APP_ID}.`,
     });
   }
+  if (
+    targetAuthModel.length > 0
+    && targetAuthModel !== 'least-privilege-sites-selected'
+  ) {
+    issues.push({
+      key: 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL',
+      message: 'If set, must be "least-privilege-sites-selected".',
+    });
+  }
+  if (targetAuthModelNotes.length > 512) {
+    issues.push({
+      key: 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL_NOTES',
+      message: 'If set, must be 512 characters or fewer.',
+    });
+  }
   if (configuredYears.length > 0 && parseYearList(configuredYears).length === 0) {
     issues.push({
       key: 'HBC_LEGACY_FALLBACK_DISCOVERY_YEARS',
@@ -152,13 +198,30 @@ export function validateLegacyFallbackHostingConfig(
     });
   }
   if (maxFoldersPerRunRaw.length > 0) {
-    const parsed = Number(maxFoldersPerRunRaw);
-    if (!Number.isInteger(parsed) || parsed <= 0) {
+    if (parsePositiveInteger(maxFoldersPerRunRaw) === null) {
       issues.push({
         key: 'HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN',
         message: 'If set, must be a positive integer.',
       });
     }
+  }
+  if (timerSchedule.length > 0 && !isValidSixFieldCron(timerSchedule)) {
+    issues.push({
+      key: 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE',
+      message: 'If set, must be a six-field cron expression.',
+    });
+  }
+  if (rerunMinIntervalMinutesRaw.length > 0 && parsePositiveInteger(rerunMinIntervalMinutesRaw) === null) {
+    issues.push({
+      key: 'HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES',
+      message: 'If set, must be a positive integer.',
+    });
+  }
+  if (matchAnomalyThresholdRaw.length > 0 && parsePositiveInteger(matchAnomalyThresholdRaw) === null) {
+    issues.push({
+      key: 'HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD',
+      message: 'If set, must be a positive integer.',
+    });
   }
 
   return {
@@ -188,6 +251,10 @@ export function getLegacyFallbackHostingConfig(
     graphScope: readTrimmed(env, 'HBC_LEGACY_FALLBACK_GRAPH_SCOPE'),
     authPosture: 'pilot-interim',
     managedAppClientId: PILOT_SHAREPOINT_CREATOR_APP_ID,
+    targetAuthModel: 'least-privilege-sites-selected',
+    targetAuthModelNotes:
+      readTrimmed(env, 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL_NOTES')
+      || 'Target production posture: least-privilege Sites.Selected + explicit app-role scoping per source and HBCentral hosts.',
   };
 }
 
@@ -210,12 +277,63 @@ export function getLegacyFallbackDiscoveryConfig(
 
   const years = parseYearList(readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_YEARS'));
   const configuredMaxFolders = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN');
-  const maxFoldersPerRun = configuredMaxFolders.length > 0 ? Number(configuredMaxFolders) : 5000;
+  const maxFoldersPerRun = parsePositiveInteger(configuredMaxFolders) ?? 5000;
+  const timerSchedule = readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE') || DEFAULT_TIMER_SCHEDULE;
+  const rerunMinIntervalMinutes =
+    parsePositiveInteger(readTrimmed(env, 'HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES'))
+    ?? DEFAULT_RERUN_MIN_INTERVAL_MINUTES;
+  const matchAnomalyThreshold =
+    parsePositiveInteger(readTrimmed(env, 'HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD'))
+    ?? DEFAULT_MATCH_ANOMALY_THRESHOLD;
 
   return {
     enabled: parseBoolean(readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_ENABLED'), true),
     timerEnabled: parseBoolean(readTrimmed(env, 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED'), false),
+    timerSchedule,
     defaultYears: years.length > 0 ? years : [...LEGACY_DISCOVERY_YEARS],
     maxFoldersPerRun,
+    manualRerunEnabled: parseBoolean(readTrimmed(env, 'HBC_LEGACY_FALLBACK_MANUAL_RERUN_ENABLED'), true),
+    rerunMinIntervalMinutes,
+    matchAnomalyThreshold,
   };
+}
+
+export interface ILegacyFallbackManualRerunPolicyResult {
+  readonly allowed: boolean;
+  readonly reason?: string;
+  readonly nextAllowedUtc?: string;
+}
+
+export function evaluateLegacyFallbackManualRerunPolicy(
+  config: ILegacyFallbackDiscoveryConfig,
+  lastRunCompletedUtc: string | null,
+  now: Date = new Date(),
+): ILegacyFallbackManualRerunPolicyResult {
+  if (!config.manualRerunEnabled) {
+    return {
+      allowed: false,
+      reason: 'Manual reruns are disabled by configuration.',
+    };
+  }
+
+  if (!lastRunCompletedUtc) {
+    return { allowed: true };
+  }
+
+  const completedAtMs = Date.parse(lastRunCompletedUtc);
+  if (Number.isNaN(completedAtMs)) {
+    return { allowed: true };
+  }
+
+  const minIntervalMs = config.rerunMinIntervalMinutes * 60 * 1000;
+  const earliestAllowedMs = completedAtMs + minIntervalMs;
+  if (now.getTime() < earliestAllowedMs) {
+    return {
+      allowed: false,
+      reason: `Manual rerun blocked by cooldown (${config.rerunMinIntervalMinutes} minutes).`,
+      nextAllowedUtc: new Date(earliestAllowedMs).toISOString(),
+    };
+  }
+
+  return { allowed: true };
 }

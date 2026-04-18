@@ -51,6 +51,15 @@ param hbCentralSiteUrl string = 'https://hedrickbrotherscom.sharepoint.com/sites
 @description('Pilot app registration app ID used in this phase.')
 param pilotManagedAppClientId string = '08c399eb-a394-4087-b859-659d493f8dc7'
 
+@description('Timer schedule for legacy fallback discovery (six-field cron, UTC).')
+param legacyFallbackDiscoveryTimerSchedule string = '0 0 2 * * *'
+
+@description('Minimum cooldown (minutes) between manual reruns.')
+param legacyFallbackRerunMinIntervalMinutes int = 30
+
+@description('Anomaly threshold for unmatched + review-required results.')
+param legacyFallbackMatchAnomalyThreshold int = 25
+
 @description('Optional Key Vault name (same resource group) for secret access role assignment.')
 param keyVaultName string = ''
 
@@ -181,6 +190,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           value: 'true'
         }
         {
+          name: 'HBC_LEGACY_FALLBACK_DISCOVERY_ENABLED'
+          value: 'true'
+        }
+        {
           name: 'HBC_LEGACY_FALLBACK_HOSTING_ENV'
           value: environmentName
         }
@@ -207,6 +220,34 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: 'HBC_LEGACY_FALLBACK_GRAPH_SCOPE'
           value: 'https://graph.microsoft.com/.default'
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL'
+          value: 'least-privilege-sites-selected'
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL_NOTES'
+          value: 'Target production posture: Sites.Selected least privilege for source and HBCentral hosts.'
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED'
+          value: 'false'
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE'
+          value: legacyFallbackDiscoveryTimerSchedule
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_MANUAL_RERUN_ENABLED'
+          value: 'true'
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES'
+          value: string(legacyFallbackRerunMinIntervalMinutes)
+        }
+        {
+          name: 'HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD'
+          value: string(legacyFallbackMatchAnomalyThreshold)
         }
         {
           name: 'AZURE_TENANT_ID'

@@ -70,13 +70,24 @@ AZURE_RESOURCE_GROUP="<staging-rg>" pnpm exec tsx scripts/provision-legacy-fallb
 - Function App exists and is running.
 - Required settings exist:
   - `HBC_LEGACY_FALLBACK_ENABLED`
+  - `HBC_LEGACY_FALLBACK_DISCOVERY_ENABLED`
+  - `HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED`
   - `HBC_LEGACY_FALLBACK_HOSTING_ENV`
   - `HBC_LEGACY_FALLBACK_AUTH_POSTURE` = `pilot-interim`
   - `HBC_LEGACY_FALLBACK_MANAGED_APP_CLIENT_ID` = `08c399eb-a394-4087-b859-659d493f8dc7`
+  - `HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE`
+  - `HBC_LEGACY_FALLBACK_MANUAL_RERUN_ENABLED`
+  - `HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES`
+  - `HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD`
   - `AZURE_TENANT_ID`
   - `AZURE_CLIENT_ID`
   - `SHAREPOINT_TENANT_URL`
 - Application Insights connected and receiving startup logs.
+
+Key Vault and secret handling:
+- If `keyVaultName` is provided to the template, the user-assigned identity gets `Key Vault Secrets User` role.
+- Store sensitive runtime values in Key Vault and reference them through Function App app settings.
+- If a setting is changed directly in portal for incident response, reconcile it back into IaC/scripted deployment on the next cycle.
 
 ## Rollback / retry
 

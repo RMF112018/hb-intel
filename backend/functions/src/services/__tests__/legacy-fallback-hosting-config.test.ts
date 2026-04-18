@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  evaluateLegacyFallbackManualRerunPolicy,
   getLegacyFallbackDiscoveryConfig,
   getLegacyFallbackHostingConfig,
   LEGACY_FALLBACK_PILOT_APP_REGISTRATION,
@@ -52,6 +53,7 @@ describe('legacy-fallback hosting config', () => {
     expect(config.enabled).toBe(false);
     expect(config.authPosture).toBe('pilot-interim');
     expect(config.managedAppClientId).toBe('08c399eb-a394-4087-b859-659d493f8dc7');
+    expect(config.targetAuthModel).toBe('least-privilege-sites-selected');
   });
 
   it('throws for invalid required fields', () => {
@@ -79,9 +81,43 @@ describe('legacy-fallback hosting config', () => {
       HBC_LEGACY_FALLBACK_DISCOVERY_YEARS: '2024,2025',
       HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN: '50',
       HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED: 'true',
+      HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE: '0 30 3 * * *',
+      HBC_LEGACY_FALLBACK_MANUAL_RERUN_ENABLED: 'false',
+      HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES: '45',
+      HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD: '15',
     }));
     expect(discovery.defaultYears).toEqual([2024, 2025]);
     expect(discovery.maxFoldersPerRun).toBe(50);
     expect(discovery.timerEnabled).toBe(true);
+    expect(discovery.timerSchedule).toBe('0 30 3 * * *');
+    expect(discovery.manualRerunEnabled).toBe(false);
+    expect(discovery.rerunMinIntervalMinutes).toBe(45);
+    expect(discovery.matchAnomalyThreshold).toBe(15);
+  });
+
+  it('rejects invalid timer schedule and rerun config values', () => {
+    const validation = validateLegacyFallbackHostingConfig(makeEnv({
+      HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE: '0 0 * * *',
+      HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES: '0',
+      HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD: '-2',
+    }));
+    expect(validation.ok).toBe(false);
+    expect(validation.issues.some((issue) => issue.key === 'HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE')).toBe(true);
+    expect(validation.issues.some((issue) => issue.key === 'HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES')).toBe(true);
+    expect(validation.issues.some((issue) => issue.key === 'HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD')).toBe(true);
+  });
+
+  it('enforces manual rerun cooldown policy', () => {
+    const discovery = getLegacyFallbackDiscoveryConfig(makeEnv({
+      HBC_LEGACY_FALLBACK_MANUAL_RERUN_ENABLED: 'true',
+      HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES: '30',
+    }));
+    const now = new Date('2026-04-18T12:30:00.000Z');
+    const blocked = evaluateLegacyFallbackManualRerunPolicy(discovery, '2026-04-18T12:10:00.000Z', now);
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.nextAllowedUtc).toBe('2026-04-18T12:40:00.000Z');
+
+    const allowed = evaluateLegacyFallbackManualRerunPolicy(discovery, '2026-04-18T12:00:00.000Z', now);
+    expect(allowed.allowed).toBe(true);
   });
 });

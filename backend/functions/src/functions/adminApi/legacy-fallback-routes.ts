@@ -6,6 +6,7 @@ import { errorResponse, successResponse } from '../../utils/response-helpers.js'
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { createLogger } from '../../utils/logger.js';
 import {
+  evaluateLegacyFallbackManualRerunPolicy,
   getLegacyFallbackDiscoveryConfig,
   getLegacyFallbackHostingConfig,
 } from '../../services/legacy-fallback/hosting-config.js';
@@ -269,10 +270,24 @@ app.http('adminLegacyFallbackReviewRevalidate', {
         return errorResponse(400, 'VALIDATION_ERROR', 'year or recordId is required', requestId);
       }
 
+      const discoveryConfig = getLegacyFallbackDiscoveryConfig();
+      const repository = new LegacyFallbackDiscoveryRepository();
+      const latestCompletedUtc = await repository.getLatestSyncRunCompletedUtc();
+      const rerunPolicy = evaluateLegacyFallbackManualRerunPolicy(discoveryConfig, latestCompletedUtc);
+      if (!rerunPolicy.allowed) {
+        return errorResponse(
+          429,
+          'LEGACY_FALLBACK_RERUN_BLOCKED',
+          rerunPolicy.reason ?? 'Manual rerun blocked',
+          requestId,
+        );
+      }
+
       const service = createDiscoveryService(context);
       const summary = await service.run({
         years: [year as 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026],
         dryRun: body.dryRun === true,
+        matchAnomalyThreshold: discoveryConfig.matchAnomalyThreshold,
       });
 
       return successResponse({

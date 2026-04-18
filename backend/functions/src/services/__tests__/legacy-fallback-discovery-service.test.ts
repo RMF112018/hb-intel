@@ -70,6 +70,10 @@ class FakeRepository implements ILegacyFallbackDiscoveryRepository {
     return this.upserts.length % 2 === 0 ? 'updated' : 'created';
   }
 
+  async getLatestSyncRunCompletedUtc(): Promise<string | null> {
+    return null;
+  }
+
   async listActiveRegistryRecordsByYear(year: number): Promise<readonly { itemId: number; legacyYear: number; driveId: string; driveItemId: string }[]> {
     return (this.activeByYear[year] ?? []).map((entry) => ({
       itemId: entry.itemId,

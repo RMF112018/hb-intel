@@ -35,11 +35,14 @@ export {
   getLegacyFallbackHostingConfig,
   validateLegacyFallbackHostingConfig,
   getLegacyFallbackDiscoveryConfig,
+  evaluateLegacyFallbackManualRerunPolicy,
   LEGACY_FALLBACK_PILOT_APP_REGISTRATION,
   type ILegacyFallbackHostingConfig,
   type ILegacyFallbackDiscoveryConfig,
   type ILegacyFallbackHostingValidationIssue,
   type ILegacyFallbackHostingValidationResult,
+  type ILegacyFallbackManualRerunPolicyResult,
+  type LegacyFallbackTargetAuthModel,
 } from './hosting-config.js';
 
 export {

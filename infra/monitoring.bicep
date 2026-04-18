@@ -184,3 +184,108 @@ resource timerFailureAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-pr
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Alert 5: Legacy fallback discovery failure burst (Sev 2)
+// ---------------------------------------------------------------------------
+
+resource legacyFallbackDiscoveryFailureAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' = {
+  name: 'alert-legacy-fallback-discovery-failure-${environmentName}'
+  location: location
+  properties: {
+    displayName: 'Legacy Fallback Discovery Failure Burst'
+    description: 'Legacy fallback discovery experienced repeated failures within 10 minutes.'
+    severity: 2
+    enabled: true
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT10M'
+    scopes: [appInsightsResourceId]
+    criteria: {
+      allOf: [
+        {
+          query: 'traces | where message has "Discovery failed for year=" or message has "Legacy fallback discovery timer failed." or message has "LEGACY_FALLBACK_DISCOVERY_FAILED" | summarize count() by bin(timestamp, 10m)'
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 2
+          failingPeriods: {
+            numberOfEvaluationPeriods: 1
+            minFailingPeriodsToAlert: 1
+          }
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [actionGroup.id]
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Alert 6: Legacy fallback persistence write failure (Sev 2)
+// ---------------------------------------------------------------------------
+
+resource legacyFallbackWriteFailureAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' = {
+  name: 'alert-legacy-fallback-write-failure-${environmentName}'
+  location: location
+  properties: {
+    displayName: 'Legacy Fallback Registry/Sync Write Failure'
+    description: 'Legacy fallback persistence path failed to write registry or sync-run state.'
+    severity: 2
+    enabled: true
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT5M'
+    scopes: [appInsightsResourceId]
+    criteria: {
+      allOf: [
+        {
+          query: 'traces | where message has "legacy-fallback.registry-write-failed" or message has "legacy-fallback.sync-run-write-failed" | summarize count() by bin(timestamp, 5m)'
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 0
+          failingPeriods: {
+            numberOfEvaluationPeriods: 1
+            minFailingPeriodsToAlert: 1
+          }
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [actionGroup.id]
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Alert 7: Legacy fallback match anomaly threshold (Sev 3 warning)
+// ---------------------------------------------------------------------------
+
+resource legacyFallbackMatchAnomalyAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' = {
+  name: 'alert-legacy-fallback-match-anomaly-${environmentName}'
+  location: location
+  properties: {
+    displayName: 'Legacy Fallback Match Anomaly Warning'
+    description: 'Legacy fallback run exceeded configured unmatched/review-required threshold.'
+    severity: 3
+    enabled: true
+    evaluationFrequency: 'PT10M'
+    windowSize: 'PT10M'
+    scopes: [appInsightsResourceId]
+    criteria: {
+      allOf: [
+        {
+          query: 'traces | where message has "legacy-fallback.match-anomaly threshold exceeded" | summarize count() by bin(timestamp, 10m)'
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 0
+          failingPeriods: {
+            numberOfEvaluationPeriods: 1
+            minFailingPeriodsToAlert: 1
+          }
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [actionGroup.id]
+    }
+  }
+}

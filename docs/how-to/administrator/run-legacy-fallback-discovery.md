@@ -96,8 +96,24 @@ In Function App settings:
 Optional discovery controls:
 
 - `HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED=true|false`
+- `HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE=0 0 2 * * *` (UTC six-field cron)
 - `HBC_LEGACY_FALLBACK_DISCOVERY_YEARS=2024,2025`
 - `HBC_LEGACY_FALLBACK_DISCOVERY_MAX_FOLDERS_PER_RUN=5000`
+- `HBC_LEGACY_FALLBACK_MANUAL_RERUN_ENABLED=true|false`
+- `HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES=30`
+- `HBC_LEGACY_FALLBACK_MATCH_ANOMALY_THRESHOLD=25`
+- `HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL=least-privilege-sites-selected`
+- `HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL_NOTES=<operational notes>`
+
+Secret posture:
+- Do not commit secrets into repo.
+- Keep credentials in environment and/or Key Vault references.
+- Treat portal-only ad-hoc config edits as temporary and back-port them to IaC/scripted configuration.
+
+## Permissions posture
+
+- **Interim runtime (active now):** app-only pilot identity `HB SharePoint Creator` (`08c399eb-a394-4087-b859-659d493f8dc7`).
+- **Target production posture (documented, not cut over here):** least-privilege `Sites.Selected` + explicit app-role scoping to legacy source and HBCentral hosts.
 
 ## Run discovery manually
 
@@ -138,6 +154,41 @@ After a hosted run:
 1. HBCentral list **Legacy Project Fallback Registry** contains upserted folder records.
 2. HBCentral list **Legacy Project Fallback Sync Runs** contains a run entry with counters and `SummaryJson`.
 3. Function logs include source-resolution and error telemetry for any failed year/site/drive resolution.
+
+## Sync cadence, stale policy, and rerun posture
+
+- Default cadence is once daily at `02:00 UTC` via `legacyFallbackDiscoveryTimer`.
+- Stale policy: active records not seen in the current run are marked inactive (`IsActive=false`) and tagged `stale-not-seen-in-run`; identity (`DriveId + DriveItemId`) is preserved.
+- Failure policy: per-year isolation; one year failure does not block remaining years; terminal run status is written with errors in sync-run summary.
+- Manual reruns are throttled by `HBC_LEGACY_FALLBACK_RERUN_MIN_INTERVAL_MINUTES`; reruns return `429 LEGACY_FALLBACK_RERUN_BLOCKED` while cooldown is active.
+
+## Disable-now and rerun-now playbook
+
+1. Emergency disable:
+   - set `HBC_LEGACY_FALLBACK_ENABLED=false`,
+   - set `HBC_LEGACY_FALLBACK_DISCOVERY_ENABLED=false`,
+   - set `HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_ENABLED=false`.
+2. Validate disabled posture:
+   - timer logs show "timer skipped (disabled)",
+   - HTTP discovery/revalidate routes reject execution.
+3. Controlled rerun:
+   - re-enable required flags,
+   - wait for rerun cooldown or lower it intentionally,
+   - run `POST /api/admin/legacy-fallback/review/revalidate` or `POST /api/admin/legacy-fallback/discovery/run`.
+
+## Monitoring ownership and SLA
+
+- Legacy fallback alerts are emitted from Application Insights scheduled query rules (`infra/monitoring.bicep`):
+  - discovery failure burst,
+  - registry/sync-run write failures,
+  - match anomaly warning threshold.
+- Ownership:
+  - primary triage: Platform Operations,
+  - functional triage: Project Sites maintainers,
+  - escalation target: IT Director/on-call owner for environment.
+- Response targets:
+  - Sev2: acknowledge within 30 minutes; mitigation plan within 2 hours.
+  - Sev3: review within same business day.
 
 ## Retry and error behavior
 

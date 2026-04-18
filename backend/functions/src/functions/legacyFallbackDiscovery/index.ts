@@ -6,6 +6,7 @@ import { errorResponse, successResponse } from '../../utils/response-helpers.js'
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { createLogger } from '../../utils/logger.js';
 import {
+  evaluateLegacyFallbackManualRerunPolicy,
   getLegacyFallbackDiscoveryConfig,
   getLegacyFallbackHostingConfig,
 } from '../../services/legacy-fallback/hosting-config.js';
@@ -16,7 +17,7 @@ import { LegacyFallbackDiscoveryService } from '../../services/legacy-fallback/d
 import { LegacyFallbackMatchingEngine } from '../../services/legacy-fallback/matching-engine.js';
 import { LegacyFallbackProjectIndexProvider } from '../../services/legacy-fallback/project-index-provider.js';
 
-const TIMER_SCHEDULE = '0 0 2 * * *';
+const TIMER_SCHEDULE = process.env.HBC_LEGACY_FALLBACK_DISCOVERY_TIMER_SCHEDULE?.trim() || '0 0 2 * * *';
 
 function parseYears(value: unknown): number[] {
   if (!Array.isArray(value)) {
@@ -56,6 +57,14 @@ app.http('legacyFallbackDiscoveryRun', {
 
     try {
       const body = (await request.json()) as Record<string, unknown>;
+      const discoveryConfig = getLegacyFallbackDiscoveryConfig();
+      const repository = new LegacyFallbackDiscoveryRepository();
+      const latestCompletedUtc = await repository.getLatestSyncRunCompletedUtc();
+      const rerunPolicy = evaluateLegacyFallbackManualRerunPolicy(discoveryConfig, latestCompletedUtc);
+      if (!rerunPolicy.allowed) {
+        return errorResponse(429, 'LEGACY_FALLBACK_RERUN_BLOCKED', rerunPolicy.reason ?? 'Manual rerun blocked', requestId);
+      }
+
       const service = createService(context);
       const dryRun = body.dryRun === true;
       const years = parseYears(body.years);
@@ -70,6 +79,7 @@ app.http('legacyFallbackDiscoveryRun', {
       const summary = await service.run({
         years: resolvedYears as LegacyProjectSourceYear[] | undefined,
         dryRun,
+        matchAnomalyThreshold: discoveryConfig.matchAnomalyThreshold,
       });
 
       return successResponse(summary, 200);
@@ -105,6 +115,7 @@ app.timer('legacyFallbackDiscoveryTimer', {
         years: discoveryConfig.defaultYears,
         dryRun: false,
         maxFoldersPerRun: discoveryConfig.maxFoldersPerRun,
+        matchAnomalyThreshold: discoveryConfig.matchAnomalyThreshold,
       });
 
       logger.info('Legacy fallback discovery timer run completed.', {

@@ -19,6 +19,7 @@ export interface ILegacyFallbackDiscoveryRunOptions {
   readonly years?: readonly LegacyProjectSourceYear[];
   readonly dryRun?: boolean;
   readonly maxFoldersPerRun?: number;
+  readonly matchAnomalyThreshold?: number;
 }
 
 export interface ILegacyFallbackDiscoverySourceSummary {
@@ -65,6 +66,16 @@ export interface ILegacyFallbackDiscoveryRunSummary {
     readonly matched: ILegacyFallbackDiscoverySampleRecord | null;
     readonly reviewRequired: ILegacyFallbackDiscoverySampleRecord | null;
     readonly unmatched: ILegacyFallbackDiscoverySampleRecord | null;
+  };
+  readonly stalePolicy: {
+    readonly recordsNotSeenInRunMarkedInactive: true;
+    readonly identityPreserved: true;
+    readonly staleReasonTag: string;
+  };
+  readonly failurePolicy: {
+    readonly perYearIsolation: true;
+    readonly retryStrategy: 'transient-with-backoff';
+    readonly terminalFailureOutcome: 'sync-run-failed-with-errors';
   };
 }
 
@@ -120,6 +131,7 @@ export class LegacyFallbackDiscoveryService {
     const startedUtc = new Date().toISOString();
     const dryRun = options.dryRun === true;
     const maxFoldersPerRun = Math.max(1, options.maxFoldersPerRun ?? Number.MAX_SAFE_INTEGER);
+    const matchAnomalyThreshold = Math.max(1, options.matchAnomalyThreshold ?? 25);
     const runStart: ILegacyFallbackSyncRunStart = dryRun
       ? { runId: `dry-run-${Date.now()}`, itemId: 0 }
       : await this.repository.startSyncRun(years);
@@ -344,7 +356,28 @@ export class LegacyFallbackDiscoveryService {
         errors,
         sampleRecord,
         sampleByOutcome,
+        stalePolicy: {
+          recordsNotSeenInRunMarkedInactive: true,
+          identityPreserved: true,
+          staleReasonTag: 'stale-not-seen-in-run',
+        },
+        failurePolicy: {
+          perYearIsolation: true,
+          retryStrategy: 'transient-with-backoff',
+          terminalFailureOutcome: 'sync-run-failed-with-errors',
+        },
       };
+
+      const anomalyCount = recordsReviewRequired + recordsUnmatched;
+      if (anomalyCount >= matchAnomalyThreshold) {
+        this.logger.warn('legacy-fallback.match-anomaly threshold exceeded', {
+          runId: runStart.runId,
+          anomalyCount,
+          threshold: matchAnomalyThreshold,
+          recordsReviewRequired,
+          recordsUnmatched,
+        });
+      }
 
       if (!dryRun) {
         await this.repository.completeSyncRun(runStart, {

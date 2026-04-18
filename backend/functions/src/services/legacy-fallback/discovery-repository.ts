@@ -67,6 +67,7 @@ export interface ILegacyFallbackDiscoveryRepository {
   startSyncRun(years: readonly number[]): Promise<ILegacyFallbackSyncRunStart>;
   completeSyncRun(start: ILegacyFallbackSyncRunStart, completion: ILegacyFallbackSyncRunCompletion): Promise<void>;
   upsertRegistryRecord(input: ILegacyFallbackRegistryUpsertInput): Promise<'created' | 'updated'>;
+  getLatestSyncRunCompletedUtc(): Promise<string | null>;
   listActiveRegistryRecordsByYear(year: number): Promise<readonly ILegacyFallbackRegistryIdentity[]>;
   markRegistryRecordsInactive(
     runId: string,
@@ -116,21 +117,25 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
     };
 
     const itemId = await withRetry(async () => {
-      const sp: any = await this.getSP();
-      const addResult = await sp.web.lists.getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE).items.add({
-        Title: payload.title,
-        RunId: payload.runId,
-        StartedUtc: payload.startedUtc,
-        Status: payload.status,
-        YearsProcessed: JSON.stringify(payload.yearsProcessed),
-        FoldersScanned: payload.foldersScanned,
-        RecordsCreated: payload.recordsCreated,
-        RecordsUpdated: payload.recordsUpdated,
-        RecordsUnmatched: payload.recordsUnmatched,
-        ErrorCount: payload.errorCount,
-        SummaryJson: payload.summaryJson,
-      });
-      return parseRunItemId(addResult);
+      try {
+        const sp: any = await this.getSP();
+        const addResult = await sp.web.lists.getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE).items.add({
+          Title: payload.title,
+          RunId: payload.runId,
+          StartedUtc: payload.startedUtc,
+          Status: payload.status,
+          YearsProcessed: JSON.stringify(payload.yearsProcessed),
+          FoldersScanned: payload.foldersScanned,
+          RecordsCreated: payload.recordsCreated,
+          RecordsUpdated: payload.recordsUpdated,
+          RecordsUnmatched: payload.recordsUnmatched,
+          ErrorCount: payload.errorCount,
+          SummaryJson: payload.summaryJson,
+        });
+        return parseRunItemId(addResult);
+      } catch (error) {
+        throw new Error(`legacy-fallback.sync-run-write-failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
     });
 
     if (itemId <= 0) {
@@ -145,21 +150,25 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
     completion: ILegacyFallbackSyncRunCompletion,
   ): Promise<void> {
     await withRetry(async () => {
-      const sp: any = await this.getSP();
-      await sp.web.lists
-        .getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE)
-        .items.getById(start.itemId)
-        .update({
-          Status: completion.status,
-          CompletedUtc: completion.completedUtc,
-          FoldersScanned: completion.foldersScanned,
-          RecordsCreated: completion.recordsCreated,
-          RecordsUpdated: completion.recordsUpdated,
-          RecordsUnmatched: completion.recordsUnmatched,
-          ErrorCount: completion.errorCount,
-          YearsProcessed: JSON.stringify(completion.yearsProcessed),
-          SummaryJson: completion.summaryJson,
-        });
+      try {
+        const sp: any = await this.getSP();
+        await sp.web.lists
+          .getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE)
+          .items.getById(start.itemId)
+          .update({
+            Status: completion.status,
+            CompletedUtc: completion.completedUtc,
+            FoldersScanned: completion.foldersScanned,
+            RecordsCreated: completion.recordsCreated,
+            RecordsUpdated: completion.recordsUpdated,
+            RecordsUnmatched: completion.recordsUnmatched,
+            ErrorCount: completion.errorCount,
+            YearsProcessed: JSON.stringify(completion.yearsProcessed),
+            SummaryJson: completion.summaryJson,
+          });
+      } catch (error) {
+        throw new Error(`legacy-fallback.sync-run-write-failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
     });
   }
 
@@ -167,14 +176,15 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
     const recordKey = createLegacyFallbackRecordKey(input.driveId, input.driveItemId);
 
     return withRetry(async () => {
-      const sp: any = await this.getSP();
-      const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
-      const driveId = escapeODataValue(input.driveId);
-      const driveItemId = escapeODataValue(input.driveItemId);
-      const existing = await list.items
-        .filter(`DriveId eq '${driveId}' and DriveItemId eq '${driveItemId}'`)
-        .top(1)
-        .select('Id')();
+      try {
+        const sp: any = await this.getSP();
+        const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
+        const driveId = escapeODataValue(input.driveId);
+        const driveItemId = escapeODataValue(input.driveItemId);
+        const existing = await list.items
+          .filter(`DriveId eq '${driveId}' and DriveItemId eq '${driveItemId}'`)
+          .top(1)
+          .select('Id')();
 
       const payload: Partial<ILegacyProjectFallbackRegistryRecord> & { Title: string } = {
         Title: `${input.legacyYear} ${input.folderName}`.slice(0, 255),
@@ -228,13 +238,40 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
         IsActive: payload.isActive,
       };
 
-      if (!existing.length) {
-        await list.items.add(listPayload);
-        return 'created';
-      }
+        if (!existing.length) {
+          await list.items.add(listPayload);
+          return 'created';
+        }
 
-      await list.items.getById(existing[0].Id).update(listPayload);
-      return 'updated';
+        await list.items.getById(existing[0].Id).update(listPayload);
+        return 'updated';
+      } catch (error) {
+        throw new Error(`legacy-fallback.registry-write-failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    });
+  }
+
+  async getLatestSyncRunCompletedUtc(): Promise<string | null> {
+    return withRetry(async () => {
+      try {
+        const sp: any = await this.getSP();
+        const rows = await sp.web.lists
+          .getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE)
+          .items
+          .select('CompletedUtc')
+          .filter("Status eq 'completed'")
+          .orderBy('CompletedUtc', false)
+          .top(1)();
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          return null;
+        }
+
+        const value = String((rows[0] as Record<string, unknown>).CompletedUtc ?? '').trim();
+        return value.length > 0 ? value : null;
+      } catch (error) {
+        throw new Error(`legacy-fallback.sync-run-read-failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
     });
   }
 
@@ -270,15 +307,19 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
     }
 
     await withRetry(async () => {
-      const sp: any = await this.getSP();
-      const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
-      for (const itemId of itemIds) {
-        await list.items.getById(itemId).update({
-          IsActive: false,
-          LastValidatedUtc: validatedAtUtc,
-          DiscoveryRunId: runId,
-          Notes: reason.slice(0, 1024),
-        });
+      try {
+        const sp: any = await this.getSP();
+        const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
+        for (const itemId of itemIds) {
+          await list.items.getById(itemId).update({
+            IsActive: false,
+            LastValidatedUtc: validatedAtUtc,
+            DiscoveryRunId: runId,
+            Notes: reason.slice(0, 1024),
+          });
+        }
+      } catch (error) {
+        throw new Error(`legacy-fallback.registry-write-failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     });
 
