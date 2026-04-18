@@ -99,6 +99,50 @@ describe('HbcPriorityRail — closure-grade runtime markers', () => {
     expect(container.querySelector('[data-hbc-featured-slot="true"]')).toBeNull();
   });
 
+  it('phase-09 prompt-02: every flagship supporting tile carries a zero-padded command index and a density attribute governs the strip layout', () => {
+    // Sparse — 2 tiles
+    const sparse = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+        ]}
+      />,
+    ).container;
+    const sparseStrip = sparse.querySelector('[data-hbc-flagship-grid="true"]');
+    expect(sparseStrip?.getAttribute('data-hbc-flagship-strip-density')).toBe('sparse');
+    const sparseTiles = Array.from(sparse.querySelectorAll('[data-hbc-flagship-tile="true"]'));
+    expect(sparseTiles.map((t) => t.getAttribute('data-hbc-flagship-tile-index'))).toEqual(['01', '02']);
+
+    // Standard — 4 tiles
+    const standard = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        context="homepage-flagship"
+        items={[]}
+        sections={[
+          { key: 'approvals', title: 'Approvals', actions: [ACTIONS[0]!, ACTIONS[1]!] },
+          { key: 'safety', title: 'Safety', actions: [ACTIONS[2]!] },
+          { key: 'field', title: 'Field', actions: [ACTIONS[3]!] },
+        ]}
+      />,
+    ).container;
+    const standardStrip = standard.querySelector('[data-hbc-flagship-grid="true"]');
+    expect(standardStrip?.getAttribute('data-hbc-flagship-strip-density')).toBe('standard');
+  });
+
+  it('phase-09 prompt-02: default-context tiles never render the flagship command index chip (non-regression)', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        items={[ACTIONS[0]!, ACTIONS[1]!]}
+      />,
+    );
+    expect(container.querySelector('[data-hbc-flagship-tile-index]')).toBeNull();
+  });
+
   it('failure states render distinct ARIA roles so hosted proof can observe loading/empty/error independently (checklist §F)', () => {
     // Skeleton + empty use role="status" with distinct aria-labels; error
     // uses role="alert" for assertive SR hand-off. Hosted proof scripts

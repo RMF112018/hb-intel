@@ -234,19 +234,25 @@ export function HbcPriorityRailSurface({
             role="list"
             data-hbc-flagship-grid="true"
             data-hbc-flagship-strip-count={effectiveSupporting.length}
+            data-hbc-flagship-strip-density={
+              effectiveSupporting.length <= 2 ? 'sparse' : effectiveSupporting.length <= 4 ? 'standard' : 'dense'
+            }
           >
-            {effectiveSupporting.map((tile) => {
+            {effectiveSupporting.map((tile, tileIndex) => {
               const eyebrow = resolveEyebrow(tile, lastSupportingEyebrow);
               lastSupportingEyebrow = tile.sectionTitle;
+              const indexLabel = (tileIndex + 1).toString().padStart(2, '0');
               return (
                 <div
                   key={tile.action.id}
                   role="listitem"
                   className={styles.commandTile}
                   data-hbc-flagship-tile="true"
+                  data-hbc-flagship-tile-index={indexLabel}
                   data-hbc-tile-section={tile.sectionKey}
                   data-hbc-tile-eyebrow={eyebrow || undefined}
                 >
+                  <span className={styles.tileIndex} aria-hidden="true">{indexLabel}</span>
                   {eyebrow ? (
                     <span className={styles.tileEyebrow} aria-hidden="true">
                       {eyebrow}

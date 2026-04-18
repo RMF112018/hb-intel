@@ -96,18 +96,30 @@
  * prohibited patterns — generic enterprise card-grid outcomes.) */
 
 .contextHomepageFlagship .header {
-  padding: 10px 4px 14px;
+  /* Phase-09 Prompt-02: masthead upgrade. A horizontal rule anchors the
+   * header as a command-band masthead (not a generic widget header),
+   * and a subtle brand-tinted background lifts the masthead visually
+   * above the tile canvas even when only 1–2 tiles are present. */
+  padding: 12px 4px 14px;
   align-items: center;
   justify-content: space-between;
   display: flex;
   gap: 16px;
   position: relative;
   border-top: none;
+  border-bottom: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
+  background: linear-gradient(180deg,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.04) 0%,
+    rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0) 100%);
+  margin-bottom: 12px;
 }
 .contextHomepageFlagship .headerTitle {
-  font-size: 0.72rem;
+  /* Phase-09 Prompt-02: larger masthead title so the band has a
+   * stronger command-band identity — distinguishable from a default
+   * widget caption at hosted scale. */
+  font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
   gap: 10px;
@@ -301,6 +313,46 @@
   gap: 8px;
   padding: 0 0 12px;
   list-style: none;
+}
+
+/* Phase-09 Prompt-02: anti-stretch rule for sparse command bands.
+ * When only 1–2 tiles are visible, auto-fit stretches them across the
+ * full band and they read as big generic cards. Cap each tile at a
+ * confident command width and left-anchor the strip so sparse data
+ * still feels like a deliberate command band, not a card grid with
+ * dead canvas on the right. */
+.contextHomepageFlagship .commandStrip[data-hbc-flagship-strip-density="sparse"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.contextHomepageFlagship .commandStrip[data-hbc-flagship-strip-density="sparse"] .commandTile {
+  flex: 0 1 320px;
+  max-width: 360px;
+  min-width: 240px;
+}
+
+/* Phase-09 Prompt-02: numbered command index on every supporting tile.
+ * Distinctive visual signal that this is a governed command band, not
+ * a generic enterprise card grid. The chip sits at the tile's top
+ * right, uses brand-accented typography, and reserves its own layout
+ * slot so tile content never collides with it. */
+.contextHomepageFlagship .tileIndex {
+  display: inline-block;
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.7);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  z-index: 2;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.06);
+  border: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.16);
 }
 .contextHomepageFlagship .commandTile {
   position: relative;
@@ -1278,5 +1330,6 @@
 .commandStrip { display: block; list-style: none; }
 .commandTile { display: block; }
 .tileEyebrow { display: none; }
+.tileIndex { display: none; }
 .overflowRegion { display: block; }
 .sectionMarkers { display: none; }
