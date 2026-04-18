@@ -16,7 +16,7 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, Layers, X } from 'lucide-react';
 import * as Separator from '@radix-ui/react-separator';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import {
@@ -110,8 +110,15 @@ function InlineOverflow({
         aria-expanded={open}
         aria-controls={panelId}
       >
-        <span>
-          {label} ({items.length})
+        <Layers
+          size={14}
+          strokeWidth={2}
+          className={styles.overflowLeadingIcon}
+          aria-hidden="true"
+        />
+        <span className={styles.overflowTriggerLabel}>{label}</span>
+        <span className={styles.overflowTriggerCount} aria-hidden="true">
+          {items.length}
         </span>
         <ChevronDown
           size={14}
@@ -197,8 +204,15 @@ function MenuOverflow({
         aria-expanded={open}
         {...getReferenceProps()}
       >
-        <span>
-          {label} ({items.length})
+        <Layers
+          size={14}
+          strokeWidth={2}
+          className={styles.overflowLeadingIcon}
+          aria-hidden="true"
+        />
+        <span className={styles.overflowTriggerLabel}>{label}</span>
+        <span className={styles.overflowTriggerCount} aria-hidden="true">
+          {items.length}
         </span>
         <ChevronDown
           size={14}
@@ -269,8 +283,15 @@ function SheetOverflow({
         aria-expanded={open}
         {...getReferenceProps()}
       >
-        <span>
-          {label} ({items.length})
+        <Layers
+          size={14}
+          strokeWidth={2}
+          className={styles.overflowLeadingIcon}
+          aria-hidden="true"
+        />
+        <span className={styles.overflowTriggerLabel}>{label}</span>
+        <span className={styles.overflowTriggerCount} aria-hidden="true">
+          {items.length}
         </span>
         <ChevronDown
           size={14}

@@ -327,12 +327,32 @@
   font-size: 0.875rem;
 }
 
-/* Overflow — flush with the masthead rhythm; no extra module chrome. */
+/* Overflow — curated secondary command layer inside the flagship band.
+ * The trigger reads as a discrete command (leading glyph + label + count
+ * chip), not as an appended footer row. Justification shifts to the
+ * right so the trigger anchors the end of the primary band, echoing
+ * the featured launch chip on the left of featured rows. */
 .contextHomepageFlagship .overflowTrigger {
-  padding: 12px 20px;
+  padding: 10px 20px 12px;
   border-top: 1px solid rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
   font-size: 0.8125rem;
   letter-spacing: 0.02em;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.contextHomepageFlagship .overflowLeadingIcon {
+  opacity: 0.9;
+}
+.contextHomepageFlagship .overflowTriggerLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+}
+.contextHomepageFlagship .overflowTriggerCount {
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.14);
+  box-shadow: inset 0 0 0 1px rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.2);
 }
 .contextHomepageFlagship .overflowPanelInline,
 .contextHomepageFlagship .overflowPanelMenu,
@@ -625,6 +645,31 @@
 .overflowTrigger:focus-visible {
   outline: 2px solid var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
   outline-offset: -2px;
+}
+
+.overflowLeadingIcon {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.overflowTriggerLabel {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.overflowTriggerCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(var(--hbc-pr-brand-rgb, 34, 83, 145), 0.1);
+  color: var(--hbc-pr-brand, var(--hb-brand-primary, #225391));
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .overflowChevron {

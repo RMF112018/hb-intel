@@ -38,6 +38,53 @@ describe('HbcPriorityRail shared family', () => {
     expect(within(safety).getByRole('link', { name: /Review Safety Note/ })).toBeInTheDocument();
   });
 
+  it('inline-disclosure overflow exposes aria-expanded/controls, dismisses on Escape, and returns focus to trigger', () => {
+    render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        items={[ACTIONS[0]!]}
+        overflowItems={[ACTIONS[1]!, ACTIONS[2]!]}
+        overflowLabel="More Actions"
+        overflowStrategy="inline-disclosure"
+      />,
+    );
+
+    const trigger = screen.getByRole('button', { name: /More Actions/ });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    const controlsId = trigger.getAttribute('aria-controls');
+    expect(controlsId).not.toBeNull();
+
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    const panel = document.getElementById(controlsId!);
+    expect(panel).not.toBeNull();
+    expect(panel?.getAttribute('role')).toBe('region');
+
+    fireEvent.keyDown(panel!, { key: 'Escape' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('renders the overflow trigger with leading icon, label, and count chip', () => {
+    const { container } = render(
+      <HbcPriorityRailSurface
+        title="Priority Actions"
+        items={[ACTIONS[0]!]}
+        overflowItems={[ACTIONS[1]!, ACTIONS[2]!]}
+        overflowLabel="More Actions"
+        overflowStrategy="inline-disclosure"
+      />,
+    );
+    const trigger = screen.getByRole('button', { name: /More Actions/ });
+    const svgs = trigger.querySelectorAll('svg');
+    expect(svgs.length).toBeGreaterThanOrEqual(2);
+    const countNodes = Array.from(trigger.querySelectorAll('span')).filter(
+      (node) => node.textContent?.trim() === '2',
+    );
+    expect(countNodes.length).toBe(1);
+    expect(container).toBeTruthy();
+  });
+
   it('supports strategy-based overflow toggles with accessible expanded state', () => {
     render(
       <HbcPriorityRailSurface
