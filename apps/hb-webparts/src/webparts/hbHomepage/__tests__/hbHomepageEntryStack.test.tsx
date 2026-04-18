@@ -6,10 +6,11 @@ import {
   HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX,
 } from '../hbHomepageContract.js';
 
-// Mock the shell and rail so this test stays tightly scoped to the
-// wrapper composition contract (order, attributes, enable toggle)
-// without exercising shell ResizeObserver internals or rail data-seam
-// plumbing. Shell-side tests live under `shell/__tests__`.
+// Mock the shell and launcher band so this test stays tightly scoped
+// to the wrapper composition contract (order, attributes, enable
+// toggle) without exercising shell ResizeObserver internals or
+// launcher data-seam plumbing. Shell-side and launcher-side tests
+// live adjacent to those units.
 vi.mock('../HbHomepageShell.js', () => ({
   HbHomepageShell: (props: Record<string, unknown>): React.JSX.Element =>
     React.createElement('div', {
@@ -18,15 +19,14 @@ vi.mock('../HbHomepageShell.js', () => ({
     }),
 }));
 
-vi.mock('../../priorityActionsRail/PriorityActionsRail.js', () => ({
-  PriorityActionsRail: (props: Record<string, unknown>): React.JSX.Element => {
+vi.mock('../HbHomepageLauncherBand.js', () => ({
+  HbHomepageLauncherBand: (props: Record<string, unknown>): React.JSX.Element => {
     const hasFeaturedKeys = 'featuredActionKeys' in props;
     return React.createElement('div', {
-      'data-test-mock': 'priority-actions-rail',
-      'data-test-rail-band-key': (props.bandKey as string | undefined) ?? '',
-      'data-test-rail-audience': (props.activeAudience as string | undefined) ?? '',
-      'data-test-rail-surface-context': (props.surfaceContext as string | undefined) ?? '',
-      'data-test-rail-has-featured-keys-prop': hasFeaturedKeys ? 'true' : 'false',
+      'data-test-mock': 'hb-homepage-launcher-band',
+      'data-test-launcher-band-key': (props.bandKey as string | undefined) ?? '',
+      'data-test-launcher-audience': (props.activeAudience as string | undefined) ?? '',
+      'data-test-launcher-has-featured-keys-prop': hasFeaturedKeys ? 'true' : 'false',
     });
   },
 }));
@@ -98,16 +98,18 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(regions[1].getAttribute('data-hb-homepage-entry-stack-order')).toBe('2');
   });
 
-  it('embeds the rail as a React surface inside the actions region, not as a separate webpart', () => {
+  it('embeds the launcher band as a React surface inside the actions region', () => {
     const { container } = render(<HbHomepageEntryStack />);
     const actionsRegion = container.querySelector(
       '[data-hb-homepage-entry-stack-region="priority-actions"]',
     );
-    const railNode = actionsRegion?.querySelector('[data-test-mock="priority-actions-rail"]');
-    expect(railNode).not.toBeNull();
+    const launcherNode = actionsRegion?.querySelector(
+      '[data-test-mock="hb-homepage-launcher-band"]',
+    );
+    expect(launcherNode).not.toBeNull();
   });
 
-  it('threads wrapper-owned bandKey + audience to the embedded rail', () => {
+  it('threads wrapper-owned bandKey + audience to the embedded launcher band', () => {
     const { container } = render(
       <HbHomepageEntryStack
         config={{
@@ -116,21 +118,21 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
         }}
       />,
     );
-    const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
-    expect(railNode?.getAttribute('data-test-rail-band-key')).toBe('homepage-primary');
-    expect(railNode?.getAttribute('data-test-rail-audience')).toBe('field');
+    const launcherNode = container.querySelector(
+      '[data-test-mock="hb-homepage-launcher-band"]',
+    );
+    expect(launcherNode?.getAttribute('data-test-launcher-band-key')).toBe('homepage-primary');
+    expect(launcherNode?.getAttribute('data-test-launcher-audience')).toBe('field');
   });
 
-  it('opts the embedded rail into the homepage-flagship surface context explicitly', () => {
+  it('declares the new homepage-launcher surface on the actions region', () => {
     const { container } = render(<HbHomepageEntryStack />);
     const actionsRegion = container.querySelector(
       '[data-hb-homepage-entry-stack-region="priority-actions"]',
     );
-    expect(actionsRegion?.getAttribute('data-hb-homepage-entry-stack-rail-context')).toBe(
-      'homepage-flagship',
+    expect(actionsRegion?.getAttribute('data-hb-homepage-entry-stack-rail-surface')).toBe(
+      'homepage-launcher',
     );
-    const railNode = actionsRegion?.querySelector('[data-test-mock="priority-actions-rail"]');
-    expect(railNode?.getAttribute('data-test-rail-surface-context')).toBe('homepage-flagship');
   });
 
   it('omits the actions region when wrapper config disables the rail', () => {
@@ -173,7 +175,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(disabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBeNull();
   });
 
-  it('does not thread any featuredActionKeys prop to the embedded rail (launcher has no featured slot)', () => {
+  it('does not thread any featuredActionKeys prop to the launcher band (no featured slot)', () => {
     const { container } = render(
       <HbHomepageEntryStack
         config={{
@@ -186,8 +188,10 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
         }}
       />,
     );
-    const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
-    expect(railNode?.getAttribute('data-test-rail-has-featured-keys-prop')).toBe('false');
+    const launcherNode = container.querySelector(
+      '[data-test-mock="hb-homepage-launcher-band"]',
+    );
+    expect(launcherNode?.getAttribute('data-test-launcher-has-featured-keys-prop')).toBe('false');
   });
 
   it('renders the shell region immediately after the actions region with no interleaved siblings', () => {

@@ -287,6 +287,30 @@ export type {
   HbcNewsroomLayoutMode,
 } from './HbcNewsroomSurface/index.js';
 
+// ── Homepage launcher band (destructive replacement of flagship rail) ──
+// Premium horizontal chip band owned by @hbc/ui-kit/homepage and
+// consumed by the homepage wrapper's entry-stack. Replaces the earlier
+// vertical-tile HbcPriorityRail "homepage-flagship" context on the
+// homepage render path. HbcPriorityRail remains the surface for
+// standalone / admin-preview rail mounts.
+
+export {
+  HbcHomepageLauncher,
+  HbcHomepageLauncherChip,
+  HbcHomepageLauncherOverflow,
+  HBC_HOMEPAGE_LAUNCHER_SURFACE_ID,
+  HBC_HOMEPAGE_LAUNCHER_VERSION,
+  HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
+} from './HbcHomepageLauncher/index.js';
+export type {
+  HbcHomepageLauncherProps,
+  HbcHomepageLauncherChipProps,
+  HbcHomepageLauncherOverflowProps,
+  HomepageLauncherChipModel,
+  HomepageLauncherDeviceClass,
+  HomepageLauncherOverflowMode,
+} from './HbcHomepageLauncher/index.js';
+
 // ── Phase 02 — Priority Rail surface family ─────────────────────────
 // Governed command band for the homepage Priority Actions zone.
 // Shared by the public runtime rail and admin preview surface.

@@ -2788,11 +2788,20 @@ for (const domain of domains) {
       const bundleText = bundleArchivePathForMarkers
         ? readArchiveBytes(sppkgDest, bundleArchivePathForMarkers).toString('utf8')
         : '';
+      // Homepage launcher effectiveness markers.
+      //
+      // The flagship rail path was retired from the homepage render tree
+      // in 1.1.30.0 and replaced by the new `@hbc/ui-kit/homepage`
+      // HbcHomepageLauncher chip band. These markers verify the NEW
+      // surface is actually compiled into the packaged bundle — not the
+      // retired vertical-tile grid — so a stale deployment cannot silently
+      // mask the rebuild.
       const flagshipMarkers = [
-        { key: 'homepage-flagship surface context', needle: 'homepage-flagship' },
+        { key: 'homepage-launcher surface id', needle: 'homepage-launcher' },
         { key: 'entry-stack wrapper root marker', needle: 'data-hb-homepage-entry-stack' },
-        { key: 'flagship command-strip layout marker', needle: 'data-hbc-flagship-layout' },
-        { key: 'priority-rail UI marker', needle: 'data-hbc-ui' },
+        { key: 'homepage-launcher version marker', needle: 'data-hbc-homepage-launcher-version' },
+        { key: 'homepage-launcher device-class marker', needle: 'data-hbc-homepage-launcher-device-class' },
+        { key: 'homepage-launcher surface attribute', needle: 'data-hbc-homepage-launcher' },
       ];
       const markerResults = flagshipMarkers.map((m) => ({
         marker: m.key,
