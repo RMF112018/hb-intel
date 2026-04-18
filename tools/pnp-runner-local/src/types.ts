@@ -10,6 +10,8 @@ export type CanonicalPnpActionKey =
   | 'sharepoint-control:extraction:homepage-quick-links'
   | 'sharepoint-control:provisioning:priority-actions-band-seed-items'
   | 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed'
+  | 'sharepoint-control:provisioning:priority-actions-band-seed-curated'
+  | 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated'
   | 'sharepoint-control:provisioning:flagship-action-layer-cutover'
   | 'sharepoint-control:proof:homepage-action-layer'
   | 'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover'

@@ -14,12 +14,30 @@ describe('actionCatalog', () => {
     expect(resolveActionKey('sharepoint:pnp:priority-actions-band-provision-and-seed')).toBe(
       'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
     );
+    expect(resolveActionKey('sharepoint:pnp:priority-actions-band-seed-curated')).toBe(
+      'sharepoint-control:provisioning:priority-actions-band-seed-curated',
+    );
+    expect(resolveActionKey('sharepoint:pnp:priority-actions-band-provision-and-seed-curated')).toBe(
+      'sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated',
+    );
   });
 
   it('declares allowed execution intents for provisioning actions', () => {
     const descriptor = getActionDescriptor('sharepoint-control:provisioning:priority-actions-band-provision-and-seed');
     expect(descriptor.executionMode).toBe('apply');
     expect(descriptor.allowedExecutionIntents).toContain('sharepoint-provision-and-seed');
+  });
+
+  it('registers curated seeding actions and intent contracts', () => {
+    const seedDescriptor = getActionDescriptor('sharepoint-control:provisioning:priority-actions-band-seed-curated');
+    expect(seedDescriptor.executionMode).toBe('apply');
+    expect(seedDescriptor.allowedExecutionIntents).toContain('sharepoint-seed');
+
+    const provisionSeedDescriptor = getActionDescriptor(
+      'sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated',
+    );
+    expect(provisionSeedDescriptor.executionMode).toBe('apply');
+    expect(provisionSeedDescriptor.allowedExecutionIntents).toContain('sharepoint-provision-and-seed');
   });
 
   it('registers the flagship action-layer cutover action and its alias', () => {

@@ -21,6 +21,7 @@ $ErrorActionPreference = 'Stop'
 
 $CONFIG_LIST_TITLE = 'Priority Actions Band Config'
 $ITEMS_LIST_TITLE = 'Priority Actions Band Items'
+$CURATED_SEED_RELATIVE_PATH = '..\seeds\hbcentral\priority-actions-research-seed.json'
 $QUICK_LINKS_WEBPART_ID = 'c70391ea-0b10-4ee9-b2b4-006d3fcad0cd'
 $PRIORITY_ACTIONS_RAIL_WEBPART_ID = 'b3f07190-79cf-437d-a1d6-ecbf3f77e616'
 $HB_SIGNATURE_HERO_WEBPART_ID = '28acd6a7-2582-4d8a-86d4-b52bfbeb375c'
@@ -881,6 +882,329 @@ function Build-ActionKey([string]$Title, [string]$Href) {
   return $base
 }
 
+function Resolve-CuratedSeedPath() {
+  return [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot $CURATED_SEED_RELATIVE_PATH))
+}
+
+function Read-CuratedSeedDefinition() {
+  $seedPath = Resolve-CuratedSeedPath
+  if (-not (Test-Path -LiteralPath $seedPath)) {
+    throw "Curated seed file was not found: $seedPath"
+  }
+
+  $seedRaw = Get-Content -Raw -Path $seedPath
+  $seed = $seedRaw | ConvertFrom-Json -Depth 100
+  if ($null -eq $seed) {
+    throw "Curated seed file could not be parsed as JSON: $seedPath"
+  }
+
+  $configs = @($seed.configs)
+  $items = @($seed.items)
+  if (@($configs).Count -eq 0) {
+    throw "Curated seed file must include a non-empty 'configs' array."
+  }
+  if (@($items).Count -eq 0) {
+    throw "Curated seed file must include a non-empty 'items' array."
+  }
+
+  $configKeys = @{}
+  $itemKeys = @{}
+  $validationFailures = [System.Collections.Generic.List[string]]::new()
+
+  foreach ($config in $configs) {
+    $title = Normalize-Text (Get-PropertyValue $config @('title', 'Title'))
+    $bandKey = Normalize-Text (Get-PropertyValue $config @('bandKey', 'BandKey'))
+    if ([string]::IsNullOrWhiteSpace($title) -or [string]::IsNullOrWhiteSpace($bandKey)) {
+      $validationFailures.Add("Config rows require non-empty title and bandKey. Offending row: $(($config | ConvertTo-Json -Compress -Depth 10))")
+      continue
+    }
+    $k = "$($bandKey.ToLowerInvariant())|$($title.ToLowerInvariant())"
+    if ($configKeys.ContainsKey($k)) {
+      $validationFailures.Add("Duplicate config row key detected: BandKey+Title '$bandKey + $title'.")
+    } else {
+      $configKeys[$k] = $true
+    }
+  }
+
+  foreach ($item in $items) {
+    $actionKey = Normalize-Text (Get-PropertyValue $item @('actionKey', 'ActionKey'))
+    $title = Normalize-Text (Get-PropertyValue $item @('title', 'Title'))
+    $href = Normalize-Text (Get-PropertyValue $item @('href', 'Href'))
+    $groupKey = Normalize-Text (Get-PropertyValue $item @('groupKey', 'GroupKey'))
+    $groupTitle = Normalize-Text (Get-PropertyValue $item @('groupTitle', 'GroupTitle'))
+
+    if ([string]::IsNullOrWhiteSpace($actionKey) -or [string]::IsNullOrWhiteSpace($title) -or [string]::IsNullOrWhiteSpace($href)) {
+      $validationFailures.Add("Item rows require non-empty actionKey, title, and href. Offending row: $(($item | ConvertTo-Json -Compress -Depth 10))")
+      continue
+    }
+
+    $itemKeyLower = $actionKey.ToLowerInvariant()
+    if ($itemKeys.ContainsKey($itemKeyLower)) {
+      $validationFailures.Add("Duplicate item actionKey detected: '$actionKey'.")
+    } else {
+      $itemKeys[$itemKeyLower] = $true
+    }
+
+    $hasGroupKey = -not [string]::IsNullOrWhiteSpace($groupKey)
+    $hasGroupTitle = -not [string]::IsNullOrWhiteSpace($groupTitle)
+    if ($hasGroupKey -ne $hasGroupTitle) {
+      $validationFailures.Add("Item '$actionKey' has inconsistent group metadata. groupKey and groupTitle must both be set or both blank.")
+    }
+  }
+
+  if (@($validationFailures).Count -gt 0) {
+    throw ("Curated seed validation failed: " + [string]::Join('; ', @($validationFailures)))
+  }
+
+  return [ordered]@{
+    seedPath = $seedPath
+    configs = $configs
+    items = $items
+    managedActionKeys = @($itemKeys.Keys | Sort-Object)
+  }
+}
+
+function Seed-CuratedConfigRows([object[]]$ConfigRows) {
+  $existingRows = Get-PnPListItem -List $CONFIG_LIST_TITLE -PageSize 2000
+  $existingByKey = @{}
+  foreach ($row in $existingRows) {
+    $bandKey = Normalize-Text $row.FieldValues.BandKey
+    $title = Normalize-Text $row.FieldValues.Title
+    if ([string]::IsNullOrWhiteSpace($bandKey) -or [string]::IsNullOrWhiteSpace($title)) { continue }
+    $k = "$($bandKey.ToLowerInvariant())|$($title.ToLowerInvariant())"
+    if (-not $existingByKey.ContainsKey($k)) {
+      $existingByKey[$k] = $row
+    }
+  }
+
+  $managedConfigKeys = @{}
+  $inserted = 0
+  $updated = 0
+  $writtenRows = @()
+  $validationFailures = [System.Collections.Generic.List[string]]::new()
+
+  foreach ($cfg in $ConfigRows) {
+    $title = Normalize-Text (Get-PropertyValue $cfg @('title', 'Title'))
+    $bandKey = Normalize-Text (Get-PropertyValue $cfg @('bandKey', 'BandKey'))
+    if ([string]::IsNullOrWhiteSpace($title) -or [string]::IsNullOrWhiteSpace($bandKey)) {
+      $validationFailures.Add('Config rows must include title and bandKey.')
+      continue
+    }
+
+    $enabled = Read-Bool (Get-PropertyValue $cfg @('enabled', 'Enabled')) $false
+    $isActive = Read-Bool (Get-PropertyValue $cfg @('isActive', 'IsActive')) $false
+    if ($bandKey -eq 'homepage-primary') {
+      if ($title -eq 'Homepage Priority Actions') {
+        $enabled = $true
+        $isActive = $true
+      } else {
+        $enabled = $false
+        $isActive = $false
+      }
+    }
+
+    $values = [ordered]@{
+      Title = $title
+      BandKey = $bandKey
+      Enabled = $enabled
+      IsActive = $isActive
+      HeadingText = Normalize-Text (Get-PropertyValue $cfg @('headingText', 'HeadingText'))
+      OverflowLabel = Normalize-Text (Get-PropertyValue $cfg @('overflowLabel', 'OverflowLabel'))
+      ShowHeading = Read-Bool (Get-PropertyValue $cfg @('showHeading', 'ShowHeading')) $false
+      StickyAfterHero = Read-Bool (Get-PropertyValue $cfg @('stickyAfterHero', 'StickyAfterHero')) $false
+      ShowBadges = Read-Bool (Get-PropertyValue $cfg @('showBadges', 'ShowBadges')) $true
+      DesktopLayoutMode = Normalize-Text (Get-PropertyValue $cfg @('desktopLayoutMode', 'DesktopLayoutMode'))
+      TabletLayoutMode = Normalize-Text (Get-PropertyValue $cfg @('tabletLayoutMode', 'TabletLayoutMode'))
+      MobileLayoutMode = Normalize-Text (Get-PropertyValue $cfg @('mobileLayoutMode', 'MobileLayoutMode'))
+      MaxVisibleDesktop = [int](Get-PropertyValue $cfg @('maxVisibleDesktop', 'MaxVisibleDesktop'))
+      MaxVisibleLaptop = [int](Get-PropertyValue $cfg @('maxVisibleLaptop', 'MaxVisibleLaptop'))
+      MaxVisibleTabletLandscape = [int](Get-PropertyValue $cfg @('maxVisibleTabletLandscape', 'MaxVisibleTabletLandscape'))
+      MaxVisibleTabletPortrait = [int](Get-PropertyValue $cfg @('maxVisibleTabletPortrait', 'MaxVisibleTabletPortrait'))
+      MaxVisiblePhone = [int](Get-PropertyValue $cfg @('maxVisiblePhone', 'MaxVisiblePhone'))
+      OpenExternalInNewTabByDefault = Read-Bool (Get-PropertyValue $cfg @('openExternalInNewTabByDefault', 'OpenExternalInNewTabByDefault')) $true
+      AdminNotes = Normalize-Text (Get-PropertyValue $cfg @('adminNotes', 'AdminNotes'))
+    }
+
+    if ([string]::IsNullOrWhiteSpace($values.OverflowLabel)) {
+      $values.OverflowLabel = 'More tools'
+    }
+
+    $k = "$($bandKey.ToLowerInvariant())|$($title.ToLowerInvariant())"
+    $managedConfigKeys[$k] = $true
+
+    if ($existingByKey.ContainsKey($k)) {
+      Set-PnPListItem -List $CONFIG_LIST_TITLE -Identity $existingByKey[$k].Id -Values $values | Out-Null
+      $updated += 1
+      $writtenRows += [ordered]@{ id = $existingByKey[$k].Id; bandKey = $bandKey; title = $title; operation = 'updated'; enabled = $values.Enabled; isActive = $values.IsActive }
+    } else {
+      $created = Add-PnPListItem -List $CONFIG_LIST_TITLE -Values $values
+      $inserted += 1
+      $writtenRows += [ordered]@{ id = $created.Id; bandKey = $bandKey; title = $title; operation = 'inserted'; enabled = $values.Enabled; isActive = $values.IsActive }
+    }
+  }
+
+  if (@($validationFailures).Count -gt 0) {
+    throw ("Curated config seed validation failed: " + [string]::Join('; ', @($validationFailures)))
+  }
+
+  $refreshed = Get-PnPListItem -List $CONFIG_LIST_TITLE -PageSize 2000
+  $conflicts = @()
+  foreach ($row in $refreshed) {
+    $rowBandKey = Normalize-Text $row.FieldValues.BandKey
+    if ($rowBandKey -ne 'homepage-primary') { continue }
+    $rowTitle = Normalize-Text $row.FieldValues.Title
+    $rowEnabled = Read-Bool $row.FieldValues.Enabled $false
+    $rowIsActive = Read-Bool $row.FieldValues.IsActive $false
+    $rowKey = "$($rowBandKey.ToLowerInvariant())|$($rowTitle.ToLowerInvariant())"
+    if ($rowEnabled -and $rowIsActive -and -not $managedConfigKeys.ContainsKey($rowKey)) {
+      $conflicts += [ordered]@{
+        id = $row.Id
+        title = $rowTitle
+        bandKey = $rowBandKey
+        enabled = $rowEnabled
+        isActive = $rowIsActive
+      }
+    }
+  }
+
+  return [ordered]@{
+    inserted = $inserted
+    updated = $updated
+    configRowsWritten = $writtenRows
+    managedConfigKeys = @($managedConfigKeys.Keys | Sort-Object)
+    conflictingUnknownActiveRows = $conflicts
+  }
+}
+
+function Seed-CuratedItemRows([object[]]$ItemRows, [string[]]$ManagedActionKeys) {
+  $managedSet = @{}
+  foreach ($managedKey in $ManagedActionKeys) {
+    $k = Normalize-Text $managedKey
+    if (-not [string]::IsNullOrWhiteSpace($k)) {
+      $managedSet[$k.ToLowerInvariant()] = $true
+    }
+  }
+
+  $existingItems = Get-PnPListItem -List $ITEMS_LIST_TITLE -PageSize 4000
+  $existingByKey = @{}
+  foreach ($row in $existingItems) {
+    if ((Normalize-Text $row.FieldValues.BandKey) -ne 'homepage-primary') { continue }
+    $key = Normalize-Text $row.FieldValues.ActionKey
+    if (-not [string]::IsNullOrWhiteSpace($key)) {
+      $lk = $key.ToLowerInvariant()
+      if (-not $existingByKey.ContainsKey($lk)) {
+        $existingByKey[$lk] = $row
+      }
+    }
+  }
+
+  $inserted = 0
+  $updated = 0
+  $archived = 0
+  $processed = @{}
+  $validationFailures = [System.Collections.Generic.List[string]]::new()
+  $writtenRows = @()
+  $archivedRows = @()
+
+  foreach ($item in $ItemRows) {
+    $actionKey = Normalize-Text (Get-PropertyValue $item @('actionKey', 'ActionKey'))
+    $title = Normalize-Text (Get-PropertyValue $item @('title', 'Title'))
+    $href = Normalize-Text (Get-PropertyValue $item @('href', 'Href'))
+    if ([string]::IsNullOrWhiteSpace($actionKey) -or [string]::IsNullOrWhiteSpace($title) -or [string]::IsNullOrWhiteSpace($href)) {
+      $validationFailures.Add("Curated item row requires actionKey/title/href. Row: $(($item | ConvertTo-Json -Compress -Depth 10))")
+      continue
+    }
+    $groupKey = Normalize-Text (Get-PropertyValue $item @('groupKey', 'GroupKey'))
+    $groupTitle = Normalize-Text (Get-PropertyValue $item @('groupTitle', 'GroupTitle'))
+    if (([string]::IsNullOrWhiteSpace($groupKey) -and -not [string]::IsNullOrWhiteSpace($groupTitle)) -or
+      (-not [string]::IsNullOrWhiteSpace($groupKey) -and [string]::IsNullOrWhiteSpace($groupTitle))) {
+      $validationFailures.Add("Curated item '$actionKey' has inconsistent group metadata.")
+      continue
+    }
+
+    $isExternal = Read-Bool (Get-PropertyValue $item @('isExternal', 'IsExternal')) (Resolve-IsExternal $href)
+    $openInNewTab = Read-Bool (Get-PropertyValue $item @('openInNewTab', 'OpenInNewTab')) $isExternal
+    $sortOrderValue = Get-PropertyValue $item @('sortOrder', 'SortOrder')
+    $sortOrder = if ($null -eq $sortOrderValue) { 100 } else { [int]$sortOrderValue }
+
+    $values = [ordered]@{
+      Title = $title
+      BandKey = 'homepage-primary'
+      ActionKey = $actionKey
+      ItemStatus = 'Enabled'
+      ActionDescription = Normalize-Text (Get-PropertyValue $item @('actionDescription', 'ActionDescription'))
+      Href = $href
+      IconKey = $null
+      BadgeLabel = $null
+      BadgeVariant = 'neutral'
+      Priority = 'primary'
+      GroupKey = if ([string]::IsNullOrWhiteSpace($groupKey)) { $null } else { $groupKey }
+      GroupTitle = if ([string]::IsNullOrWhiteSpace($groupTitle)) { $null } else { $groupTitle }
+      SortOrder = $sortOrder
+      OverflowOnly = $false
+      MobilePriority = 100
+      AudienceMode = 'all'
+      AudienceKeys = $null
+      IsExternal = $isExternal
+      OpenInNewTab = $openInNewTab
+      VisibleDesktop = $true
+      VisibleLaptop = $true
+      VisibleTabletLandscape = $true
+      VisibleTabletPortrait = $true
+      VisiblePhone = $true
+      StartsAtUtc = $null
+      EndsAtUtc = $null
+      AdminNotes = $null
+    }
+
+    $lk = $actionKey.ToLowerInvariant()
+    if ($existingByKey.ContainsKey($lk)) {
+      Set-PnPListItem -List $ITEMS_LIST_TITLE -Identity $existingByKey[$lk].Id -Values $values | Out-Null
+      $updated += 1
+      $writtenRows += [ordered]@{ id = $existingByKey[$lk].Id; actionKey = $actionKey; title = $title; operation = 'updated'; sortOrder = $sortOrder; isExternal = $isExternal; openInNewTab = $openInNewTab }
+    } else {
+      $created = Add-PnPListItem -List $ITEMS_LIST_TITLE -Values $values
+      $inserted += 1
+      $writtenRows += [ordered]@{ id = $created.Id; actionKey = $actionKey; title = $title; operation = 'inserted'; sortOrder = $sortOrder; isExternal = $isExternal; openInNewTab = $openInNewTab }
+    }
+    $processed[$lk] = $true
+  }
+
+  if (@($validationFailures).Count -gt 0) {
+    throw ("Curated item seed validation failed: " + [string]::Join('; ', @($validationFailures)))
+  }
+
+  foreach ($pair in $existingByKey.GetEnumerator()) {
+    if ($managedSet.ContainsKey($pair.Key) -and -not $processed.ContainsKey($pair.Key)) {
+      Set-PnPListItem -List $ITEMS_LIST_TITLE -Identity $pair.Value.Id -Values @{ ItemStatus = 'Archived' } | Out-Null
+      $archived += 1
+      $archivedRows += [ordered]@{ id = $pair.Value.Id; actionKey = Normalize-Text $pair.Value.FieldValues.ActionKey; reason = 'managed-key-absent-from-curated-payload' }
+    }
+  }
+
+  $skippedUnmanaged = @()
+  foreach ($pair in $existingByKey.GetEnumerator()) {
+    if (-not $managedSet.ContainsKey($pair.Key)) {
+      $skippedUnmanaged += [ordered]@{
+        id = $pair.Value.Id
+        actionKey = Normalize-Text $pair.Value.FieldValues.ActionKey
+        itemStatus = Normalize-Text $pair.Value.FieldValues.ItemStatus
+        reason = 'outside-curated-managed-key-set'
+      }
+    }
+  }
+
+  return [ordered]@{
+    inserted = $inserted
+    updated = $updated
+    archived = $archived
+    itemRowsWritten = $writtenRows
+    archivedRows = $archivedRows
+    skippedUnmanagedRows = $skippedUnmanaged
+    processedCount = @($writtenRows).Count
+  }
+}
+
 function Seed-ItemsFromQuickLinks([object[]]$QuickLinks) {
   $configResult = Ensure-ConfigRow
 
@@ -1030,6 +1354,17 @@ $seedSummary = [ordered]@{
   )
   warnings = @()
   seededItems = @()
+  seedSource = 'quick-links'
+  seedDefinitionPath = $null
+  managedActionKeys = @()
+  configInserted = 0
+  configUpdated = 0
+  configRowsWritten = @()
+  itemRowsWritten = @()
+  archivedRows = @()
+  skippedUnmanagedRows = @()
+  conflictingUnknownActiveConfigRows = @()
+  validationFailures = @()
 }
 
 $raw = [ordered]@{
@@ -1311,6 +1646,94 @@ switch ($ActionKey) {
     $normalized.seed = $seedSummary
 
     $summaryLines += "- Provisioned command-band lists and seeded from quick links. Extracted=$($seedResult.extractedCount), Processed=$($seedResult.processedCount), Inserted=$($seedResult.inserted), Updated=$($seedResult.updated), Archived=$($seedResult.archived)."
+  }
+  'sharepoint-control:provisioning:priority-actions-band-seed-curated' {
+    $null = Ensure-CommandBandLists
+    $provisionSummary.executed = $true
+
+    $curatedSeed = Read-CuratedSeedDefinition
+    $configResult = Seed-CuratedConfigRows -ConfigRows $curatedSeed.configs
+    $itemResult = Seed-CuratedItemRows -ItemRows $curatedSeed.items -ManagedActionKeys $curatedSeed.managedActionKeys
+
+    $seedSummary.executed = $true
+    $seedSummary.seedSource = 'curated'
+    $seedSummary.seedDefinitionPath = $curatedSeed.seedPath
+    $seedSummary.extractedCount = @($curatedSeed.items).Count
+    $seedSummary.processedCount = $itemResult.processedCount
+    $seedSummary.inserted = $itemResult.inserted
+    $seedSummary.updated = $itemResult.updated
+    $seedSummary.archived = $itemResult.archived
+    $seedSummary.seededItems = $itemResult.itemRowsWritten
+    $seedSummary.managedActionKeys = $curatedSeed.managedActionKeys
+    $seedSummary.configInserted = $configResult.inserted
+    $seedSummary.configUpdated = $configResult.updated
+    $seedSummary.configRowsWritten = $configResult.configRowsWritten
+    $seedSummary.itemRowsWritten = $itemResult.itemRowsWritten
+    $seedSummary.archivedRows = $itemResult.archivedRows
+    $seedSummary.skippedUnmanagedRows = $itemResult.skippedUnmanagedRows
+    $seedSummary.conflictingUnknownActiveConfigRows = $configResult.conflictingUnknownActiveRows
+
+    if (@($configResult.conflictingUnknownActiveRows).Count -gt 0) {
+      $seedSummary.validationFailures = @("Conflicting unknown active config rows exist for homepage-primary. Resolve conflicts and rerun curated seed.")
+      throw ("Curated seed failed: conflicting unknown active config rows detected for homepage-primary (count=$(@($configResult.conflictingUnknownActiveRows).Count)).")
+    }
+
+    $raw.curatedSeed = [ordered]@{
+      seedDefinitionPath = $curatedSeed.seedPath
+      managedActionKeys = $curatedSeed.managedActionKeys
+    }
+    $raw.seed = $seedSummary
+    $normalized.seed = $seedSummary
+
+    $summaryLines += "- Seeded command-band config/items from curated seed file. Processed=$($seedSummary.processedCount), Inserted=$($seedSummary.inserted), Updated=$($seedSummary.updated), Archived=$($seedSummary.archived)."
+    $summaryLines += "- Curated config writes: Inserted=$($seedSummary.configInserted), Updated=$($seedSummary.configUpdated)."
+    $summaryLines += "- Curated unmanaged rows skipped: $(@($seedSummary.skippedUnmanagedRows).Count)."
+  }
+  'sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated' {
+    $provisionResult = Ensure-CommandBandLists
+    $provisionSummary.executed = $true
+    $provisionSummary.lists = $provisionResult.lists
+    $provisionSummary.driftWarnings = $provisionResult.driftWarnings
+
+    $curatedSeed = Read-CuratedSeedDefinition
+    $configResult = Seed-CuratedConfigRows -ConfigRows $curatedSeed.configs
+    $itemResult = Seed-CuratedItemRows -ItemRows $curatedSeed.items -ManagedActionKeys $curatedSeed.managedActionKeys
+
+    $seedSummary.executed = $true
+    $seedSummary.seedSource = 'curated'
+    $seedSummary.seedDefinitionPath = $curatedSeed.seedPath
+    $seedSummary.extractedCount = @($curatedSeed.items).Count
+    $seedSummary.processedCount = $itemResult.processedCount
+    $seedSummary.inserted = $itemResult.inserted
+    $seedSummary.updated = $itemResult.updated
+    $seedSummary.archived = $itemResult.archived
+    $seedSummary.seededItems = $itemResult.itemRowsWritten
+    $seedSummary.managedActionKeys = $curatedSeed.managedActionKeys
+    $seedSummary.configInserted = $configResult.inserted
+    $seedSummary.configUpdated = $configResult.updated
+    $seedSummary.configRowsWritten = $configResult.configRowsWritten
+    $seedSummary.itemRowsWritten = $itemResult.itemRowsWritten
+    $seedSummary.archivedRows = $itemResult.archivedRows
+    $seedSummary.skippedUnmanagedRows = $itemResult.skippedUnmanagedRows
+    $seedSummary.conflictingUnknownActiveConfigRows = $configResult.conflictingUnknownActiveRows
+
+    if (@($configResult.conflictingUnknownActiveRows).Count -gt 0) {
+      $seedSummary.validationFailures = @("Conflicting unknown active config rows exist for homepage-primary. Resolve conflicts and rerun curated seed.")
+      throw ("Curated provision+seed failed: conflicting unknown active config rows detected for homepage-primary (count=$(@($configResult.conflictingUnknownActiveRows).Count)).")
+    }
+
+    $raw.curatedSeed = [ordered]@{
+      seedDefinitionPath = $curatedSeed.seedPath
+      managedActionKeys = $curatedSeed.managedActionKeys
+    }
+    $raw.provision = $provisionSummary
+    $raw.seed = $seedSummary
+    $normalized.provision = $provisionSummary
+    $normalized.seed = $seedSummary
+
+    $summaryLines += "- Provisioned command-band lists and seeded curated config/items. Processed=$($seedSummary.processedCount), Inserted=$($seedSummary.inserted), Updated=$($seedSummary.updated), Archived=$($seedSummary.archived)."
+    $summaryLines += "- Curated config writes: Inserted=$($seedSummary.configInserted), Updated=$($seedSummary.configUpdated)."
+    $summaryLines += "- Curated unmanaged rows skipped: $(@($seedSummary.skippedUnmanagedRows).Count)."
   }
   'sharepoint-control:provisioning:flagship-action-layer-cutover' {
     # Flagship page action-layer cutover: remove OOB Quick Links webpart(s)

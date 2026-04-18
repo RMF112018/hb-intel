@@ -19,8 +19,12 @@
 ## 3. Runtime Ownership and Consumption
 - Provisioning owner: local PnP runner action `sharepoint-control:provisioning:priority-actions-band-lists`.
 - Seed/orchestration owner: local PnP runner actions:
-  - `sharepoint-control:provisioning:priority-actions-band-seed-items`
-  - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
+  - extraction/parity seed:
+    - `sharepoint-control:provisioning:priority-actions-band-seed-items`
+    - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
+  - curated base-catalog seed:
+    - `sharepoint-control:provisioning:priority-actions-band-seed-curated`
+    - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
 - Public runtime seam intent: `PriorityActionsRail` consumes normalized config row for active band rendering policy.
 - Current repo status: list is provisioned, schema-governed, and the public list-read adapter is live. `fetchPriorityActionsConfig` (see `apps/hb-webparts/src/homepage/data/priorityActionsConfigListSource.ts`) is consumed by `usePriorityActionsData` to resolve the active band config row.
 
@@ -61,17 +65,37 @@ Admin workflows must still treat duplicate active rows for the same `BandKey` as
 ## 6. Provisioning and Seed Provenance
 - Provisioned through local runner PowerShell bridge: `tools/pnp-runner-local/scripts/invoke-pnp-extraction.ps1`.
 - List settings and field contract are enforced idempotently on rerun.
-- Config list default row upsert behavior:
-  - ensures `BandKey=homepage-primary` row exists
-  - keeps a single canonical active row posture for initial rollout
-  - reapplies defaults when missing
+- Two seed intents now exist and are not interchangeable:
+  - extraction/parity seed intent: preserve homepage Quick Links parity and default single-row config posture
+  - curated seed intent: upsert governed profile set from repo-owned payload and enforce explicit active-row posture for curated profiles
+- Curated config-row identity:
+  - reconcile by `BandKey + Title`
+  - curated profiles are `Homepage Priority Actions`, `Homepage Priority Actions - Compact`, `Homepage Priority Actions - Guided`
+  - curated run enforces `Homepage Priority Actions` as `Enabled=true` + `IsActive=true`; alternates are set `Enabled=false` + `IsActive=false`
+- Curated conflict handling:
+  - unknown rows are not auto-disabled
+  - when unknown `homepage-primary` rows remain both active and enabled, curated run fails loudly and records conflicts in `seed-summary.json`
 
 ## 7. Idempotency and Safe Reruns
 - Re-running provisioning actions does not create duplicate list definitions.
-- Config default row resolution is deterministic by `BandKey` and upsert semantics.
-- Expected operational result after rerun: same list, same fields, same canonical config row for `homepage-primary`.
+- Extraction/parity seed keeps the original quick-links parity behavior.
+- Curated seed is deterministic by `BandKey + Title` for managed profiles.
+- Curated seed preserves unknown/manual rows outside managed profile set and only fails when conflicting active unknown rows violate the single-active-row posture.
 
-## 8. Maintenance Guidance
+## 8. Prompt-02 Validation Evidence (2026-04-18)
+- Validated run id: `f671390c-bc35-46b0-9937-da9b77b1ac94`
+- Action: `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
+- Device-login execution: pass
+- Config result:
+  - exactly 3 expected `homepage-primary` profile rows present
+  - only `Homepage Priority Actions` is active+enabled
+  - conflicting unknown active rows: none
+- Validation artifact references:
+  - `/tmp/p05p2-seed-summary.json`
+  - `/tmp/p05p2-live-validation.json`
+  - `/tmp/p05p2-validation-report.json`
+
+## 9. Maintenance Guidance
 - Preferred long-term maintenance path: friendly admin surface (`PriorityActionsRailAdmin`) once delivered.
 - Temporary caveat during pre-admin phase: edits may occur directly in SharePoint list UI, but must preserve this documented field contract and active-row rules.
 - Avoid ad hoc internal-name changes; any schema migration must update runtime seams and this doc in the same change.

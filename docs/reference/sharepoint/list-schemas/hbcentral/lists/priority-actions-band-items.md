@@ -19,9 +19,15 @@
 ## 3. Runtime Ownership and Consumption
 - Provisioning owner: local PnP runner action `sharepoint-control:provisioning:priority-actions-band-lists`.
 - Seed owner: local PnP runner actions:
-  - `sharepoint-control:provisioning:priority-actions-band-seed-items`
-  - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
-- Source provenance intent: homepage Quick Links payload (`HBCentral.aspx`) extracted then normalized into command-band item rows.
+  - extraction/parity seed:
+    - `sharepoint-control:provisioning:priority-actions-band-seed-items`
+    - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
+  - curated base-catalog seed:
+    - `sharepoint-control:provisioning:priority-actions-band-seed-curated`
+    - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
+- Source provenance intents:
+  - extraction/parity source: homepage Quick Links payload (`HBCentral.aspx`)
+  - curated source: `tools/pnp-runner-local/seeds/hbcentral/priority-actions-research-seed.json`
 - Public runtime seam intent: `PriorityActionsRail` consumes normalized enabled rows for rendering and overflow behavior.
 - Current repo status: list contract, seed pipeline, and public list-read adapter are all live. `fetchPriorityActionsItems` (see `apps/hb-webparts/src/homepage/data/priorityActionsItemsListSource.ts`) is consumed by `usePriorityActionsData` and feeds the live `PriorityActionsRail`.
 
@@ -68,7 +74,8 @@
 
 ## 6. Provisioning and Seed Provenance
 - List contract is provisioned idempotently by the local runner PowerShell bridge.
-- Initial seed source intent is the homepage Quick Links card directly below the signature hero on `HBCentral.aspx`.
+- Extraction/parity seed source intent is homepage Quick Links directly below the signature hero on `HBCentral.aspx`.
+- Curated seed source intent is repo-owned research payload with explicit action keys and grouped metadata.
 - Deterministic defaults applied by seed workflow when source payload omits command-band-specific metadata:
   - `BandKey=homepage-primary`
   - `ItemStatus=Enabled`
@@ -77,14 +84,34 @@
   - `MobilePriority=100`
   - `AudienceMode=all`
   - device visibility defaults all `Yes`
-- Deterministic keying: `ActionKey` is generated from normalized title+href slug for rerun-safe upsert.
+- Identity/upsert rules:
+  - extraction/parity path uses generated deterministic action keys from title+href
+  - curated path uses explicit short action keys from payload
+  - curated reconcile key is `BandKey + ActionKey`
 
 ## 7. Idempotency and Safe Reruns
 - Reruns reconcile by `BandKey + ActionKey` and update existing rows instead of creating duplicates.
-- Rows absent from current extracted source set may be archived by seed policy.
-- Expected rerun posture: deterministic, repeatable list state with stable keys and no duplicate active items.
+- Extraction/parity seed may archive rows absent from current extracted Quick Links source.
+- Curated seed archive is non-destructive by default:
+  - archive only rows whose `ActionKey` belongs to curated managed key set and is absent from current curated payload
+  - do not mutate/archive rows outside curated managed key set
+- Expected curated rerun posture: deterministic, repeatable catalog state with stable explicit keys.
 
-## 8. Maintenance Guidance
+## 8. Prompt-02 Validation Evidence (2026-04-18)
+- Validated run id: `f671390c-bc35-46b0-9937-da9b77b1ac94`
+- Action: `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
+- Device-login execution: pass
+- Item result:
+  - exactly 10 expected curated keys present
+  - required identity/content fields match curated payload
+  - defaults (`ItemStatus`, `BadgeVariant`, `Priority`, visibility, audience, schedule blanks) match expected posture
+  - destructive-safety drift (rows outside managed key set): none
+- Validation artifact references:
+  - `/tmp/p05p2-seed-summary.json`
+  - `/tmp/p05p2-live-validation.json`
+  - `/tmp/p05p2-validation-report.json`
+
+## 9. Maintenance Guidance
 - Preferred long-term maintenance path: friendly admin UI (`PriorityActionsRailAdmin`) once available.
 - Temporary caveat during pre-admin phase: direct SharePoint edits are possible but should preserve key stability (`ActionKey`) and visibility semantics.
 - Avoid unmanaged key renames; `ActionKey` changes are contract changes and should be planned as migrations.

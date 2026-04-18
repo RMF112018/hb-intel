@@ -63,4 +63,33 @@ describe('runPreflight', () => {
     const intentCheck = result.checks.find((check) => check.checkId === 'execution-intent');
     expect(intentCheck?.passed).toBe(false);
   });
+
+  it('accepts sharepoint-seed intent for curated seed action', async () => {
+    const result = await runPreflight(
+      'sharepoint-control:provisioning:priority-actions-band-seed-curated',
+      {
+        targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+        executionIntent: { mode: 'sharepoint-seed' },
+      },
+      makeConfig(),
+    );
+
+    expect(result.ready).toBe(true);
+    expect(result.checks.some((check) => check.checkId === 'execution-intent' && check.passed)).toBe(true);
+  });
+
+  it('rejects sharepoint-seed intent for provision-and-seed-curated action', async () => {
+    const result = await runPreflight(
+      'sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated',
+      {
+        targetSiteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+        executionIntent: { mode: 'sharepoint-seed' },
+      },
+      makeConfig(),
+    );
+
+    expect(result.ready).toBe(false);
+    const intentCheck = result.checks.find((check) => check.checkId === 'execution-intent');
+    expect(intentCheck?.passed).toBe(false);
+  });
 });

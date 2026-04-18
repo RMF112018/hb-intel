@@ -131,6 +131,11 @@
 - Downstream consumer seams:
   - provisioning and seed orchestration in `tools/pnp-runner-local/scripts/invoke-pnp-extraction.ps1`
   - intended public runtime consumer: PriorityActionsRail config resolver seam.
+- Seed model ownership:
+  - extraction/parity seed (`sharepoint-control:provisioning:priority-actions-band-seed-items`, `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`) preserves homepage Quick Links parity.
+  - curated base-catalog seed (`sharepoint-control:provisioning:priority-actions-band-seed-curated`, `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`) reconciles config profiles by `BandKey + Title`.
+- Curated conflict rule:
+  - if unknown `homepage-primary` rows remain both `Enabled=true` and `IsActive=true`, curated seeding fails loudly instead of mutating unknown rows.
 
 ### Priority Actions Band Items
 - Role: command-band action item rows keyed by `BandKey + ActionKey`.
@@ -139,6 +144,11 @@
 - Downstream consumer seams:
   - seed writer and idempotent upsert logic in `tools/pnp-runner-local/scripts/invoke-pnp-extraction.ps1`
   - intended public runtime consumer: PriorityActionsRail item normalization/filtering seam.
+- Seed model ownership:
+  - extraction/parity seed reconciles homepage Quick Links-derived rows and may archive rows missing from extracted source.
+  - curated base-catalog seed reconciles by `BandKey + ActionKey` using explicit managed keys from `tools/pnp-runner-local/seeds/hbcentral/priority-actions-research-seed.json`.
+- Curated destructive-safety rule:
+  - curated archive applies only to managed keys absent from payload; unknown/manual rows outside managed keys are not archived or mutated.
 
 ## 4. Field Matching Matrix
 | Field Internal Name | Lists Using Field | Notes |
@@ -219,3 +229,13 @@
 - Always consult this map + target per-list report before adding new list relationships.
 - Do not assume key equivalence by display label; match by internal name and value semantics.
 - When uncertain about joins/filters, re-extract tenant schema and verify consumers before shipping changes.
+
+## 7. Prompt-02 Live Validation Snapshot (2026-04-18)
+- Run id: `f671390c-bc35-46b0-9937-da9b77b1ac94`
+- Action: `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
+- Results:
+  - 3 expected config profiles for `homepage-primary` present, with exactly one active+enabled row.
+  - 10 expected curated action keys present.
+  - duplicate action keys: none.
+  - invalid group key/title pairing: none.
+  - archive drift outside curated managed key set: none.

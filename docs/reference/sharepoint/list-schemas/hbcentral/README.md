@@ -49,8 +49,8 @@
 | HB Article Workflow History | business/custom | false | 0 | Yes | Implementation-relevant |
 | HB Articles | business/custom | false | 0 | Yes | Implementation-relevant |
 | Hero Banner Config | business/custom | false | 0 | Yes | Implementation-relevant |
-| Priority Actions Band Config | business/custom | false | 1 | Yes | Phase-01 command-band provisioning |
-| Priority Actions Band Items | business/custom | false | 0 | Yes | Phase-01 command-band provisioning |
+| Priority Actions Band Config | business/custom | false | 3 | Yes | Phase-05 curated seed validated (run `f671390c-bc35-46b0-9937-da9b77b1ac94`, 2026-04-18) |
+| Priority Actions Band Items | business/custom | false | 10 | Yes | Phase-05 curated seed validated (run `f671390c-bc35-46b0-9937-da9b77b1ac94`, 2026-04-18) |
 | Homepage Project Spotlights | business/custom | false | 2 | Yes | Implementation-relevant |
 | Kudos Audit Events | business/custom | false | 15 | Yes | Implementation-relevant |
 | List Template Gallery | hidden/system | true | 0 | No | Inventory-only |
@@ -80,20 +80,50 @@
 - Treat these files as cached tenant truth; if drift is suspected, re-extract and refresh this package.
 - Tenant runtime truth overrides stale assumptions in docs/code.
 
-## 7. Phase-01 Command-Band Additions
+## 7. Command-Band Seeding Models (Phase-01 + Phase-05)
 - New list docs:
   - `lists/priority-actions-band-config.md`
   - `lists/priority-actions-band-items.md`
 - Provisioning/seeding provenance:
   - local runner package: `tools/pnp-runner-local/`
-  - action keys:
+  - list provisioning action key:
     - `sharepoint-control:provisioning:priority-actions-band-lists`
+  - extraction/parity seed action keys (homepage Quick Links source):
     - `sharepoint-control:provisioning:priority-actions-band-seed-items`
     - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed`
-- Source intent for initial seed:
-  - homepage Quick Links on `SitePages/HBCentral.aspx` (target seam documented in phase-01 prompt artifacts).
+  - curated research-backed seed action keys (repo-owned payload source):
+    - `sharepoint-control:provisioning:priority-actions-band-seed-curated`
+    - `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
+- Source intents:
+  - extraction/parity seed: homepage Quick Links on `SitePages/HBCentral.aspx`
+  - curated base-catalog seed: `tools/pnp-runner-local/seeds/hbcentral/priority-actions-research-seed.json`
+- Curated identity and archive posture:
+  - config profiles reconcile by `BandKey + Title`
+  - item rows reconcile by `BandKey + ActionKey`
+  - archive applies only to curated managed keys absent from the payload
+  - unknown/manual rows outside managed keys are not mutated by curated seeding
+  - curated runs fail loudly when unknown active+enabled `homepage-primary` config rows conflict with seeded active-row posture
+- Operator runbook:
+  - `docs/how-to/administrator/priority-actions-seeding-runbook.md`
 
-## 8. Maintenance Requirements
+## 8. Prompt-02 Validation Evidence (2026-04-18)
+- Validated run id: `f671390c-bc35-46b0-9937-da9b77b1ac94`
+- Action key: `sharepoint-control:provisioning:priority-actions-band-provision-and-seed-curated`
+- Auth mode: DeviceLogin
+- Outcome:
+  - config rows: 3 expected profiles present (`Homepage Priority Actions`, `... - Compact`, `... - Guided`)
+  - item rows: 10 expected curated action keys present
+  - duplicate active config conflict: none
+  - destructive-safety drift (mutating rows outside managed key set): none
+- Artifact references captured during validation:
+  - `/tmp/p05p2-raw.json`
+  - `/tmp/p05p2-normalized.json`
+  - `/tmp/p05p2-seed-summary.json`
+  - `/tmp/p05p2-summary.md`
+  - `/tmp/p05p2-live-validation.json`
+  - `/tmp/p05p2-validation-report.json`
+
+## 9. Maintenance Requirements
 - Refresh when new app work depends on HBCentral schema or after provisioning changes.
 - Update `README.md`, `List-Map.md`, and affected per-list files together on material drift.
 - Material drift events include added/removed fields, changed internal names/types, changed forms/content types, or changed list relationships.
