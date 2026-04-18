@@ -40,4 +40,26 @@ describe('actionCatalog', () => {
     expect(descriptor.riskLevel).toBe('read-only');
     expect(descriptor.allowedExecutionIntents).toContain('read-only-export');
   });
+
+  it('registers the Phase-07 wrapper cutover action and its alias', () => {
+    expect(resolveActionKey('sharepoint:pnp:flagship-homepage-wrapper-cutover')).toBe(
+      'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover',
+    );
+    const descriptor = getActionDescriptor(
+      'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover',
+    );
+    expect(descriptor.executionMode).toBe('apply');
+    expect(descriptor.riskLevel).toBe('low-impact');
+    expect(descriptor.allowedExecutionIntents).toContain('sharepoint-provision-and-seed');
+  });
+
+  it('registers the Phase-07 wrapper-embedded proof action and its alias', () => {
+    expect(resolveActionKey('sharepoint:pnp:homepage-wrapper-embedded-proof')).toBe(
+      'sharepoint-control:proof:homepage-wrapper-embedded',
+    );
+    const descriptor = getActionDescriptor('sharepoint-control:proof:homepage-wrapper-embedded');
+    expect(descriptor.executionMode).toBe('advisory');
+    expect(descriptor.riskLevel).toBe('read-only');
+    expect(descriptor.allowedExecutionIntents).toContain('read-only-export');
+  });
 });

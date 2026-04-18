@@ -16,16 +16,18 @@
 // entry stack: flagship hero, priority actions, and the first shell lane.
 // It encodes the budgets and postures from
 // `docs/reference/shell/HB-Shell-Entry-Breakpoint-Spec.md` into a typed,
-// code-governed model so the shell, the hero webpart, the priority-actions
-// webpart, preview harnesses, and a future governed control panel can all
-// reference the same source of truth without being merged into one
+// code-governed model so the shell, the hero webpart, the wrapper-
+// embedded rail (or the standalone rail webpart for non-flagship
+// hosts), preview harnesses, and a future governed control panel can
+// all reference the same source of truth without being merged into one
 // runtime component.
 //
 // Shell-ownership boundary: this policy does not redesign the hero or
 // the priority-actions surface. It exposes read-only metadata and
-// helpers so each independently mounted surface can honor the same
-// budgets. Reaching into a child webpart to change its internals is
-// still forbidden — see `../hbHomepageContract.ts`.
+// helpers so each stage — whether dispatched as its own webpart or
+// composed inside the HbHomepage wrapper — can honor the same budgets.
+// Reaching into a child webpart or embedded surface to change its
+// internals is still forbidden — see `../hbHomepageContract.ts`.
 //
 // Protected vs configurable split:
 //   - `PROTECTED_ENTRY_STACK_RULES` encodes non-negotiable postures

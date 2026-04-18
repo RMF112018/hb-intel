@@ -182,6 +182,34 @@ const ACTIONS: readonly ActionDescriptor[] = [
     expectedArtifacts: EXTRACTION_ARTIFACTS,
     allowedExecutionIntents: ['read-only-export'],
   },
+  {
+    actionKey: 'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover',
+    label: 'Flagship Homepage Wrapper Cutover (standalone rail + Quick Links → HbHomepage-embedded)',
+    description:
+      'Phase-07 cutover. Removes any residual OOB Quick Links and standalone PriorityActionsRail webparts from the flagship page, leaving only the HB Signature Hero and HbHomepage (which owns the wrapper-embedded rail). Does not add webparts: hbHomepage must already be authored on the page. Idempotent.',
+    riskLevel: 'low-impact',
+    executionMode: 'apply',
+    supportsPreview: false,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['sharepoint-provision-and-seed'],
+  },
+  {
+    actionKey: 'sharepoint-control:proof:homepage-wrapper-embedded',
+    label: 'Homepage Wrapper-Embedded Cutover Proof',
+    description:
+      'Phase-07 authoritative read-only proof that the flagship homepage canvas matches the wrapper-embedded target: hero -> hbHomepage order, no OOB Quick Links, and no standalone PriorityActionsRail webpart (the rail is composed inside HbHomepage).',
+    riskLevel: 'read-only',
+    executionMode: 'advisory',
+    supportsPreview: true,
+    available: true,
+    unavailableReason: null,
+    requiredInput: 'site-only',
+    expectedArtifacts: EXTRACTION_ARTIFACTS,
+    allowedExecutionIntents: ['read-only-export'],
+  },
 ] as const;
 
 const ALIASES: Record<string, CanonicalPnpActionKey> = {
@@ -197,6 +225,10 @@ const ALIASES: Record<string, CanonicalPnpActionKey> = {
   'sharepoint:pnp:priority-actions-band-provision-and-seed': 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed',
   'sharepoint:pnp:flagship-action-layer-cutover': 'sharepoint-control:provisioning:flagship-action-layer-cutover',
   'sharepoint:pnp:homepage-action-layer-proof': 'sharepoint-control:proof:homepage-action-layer',
+  'sharepoint:pnp:flagship-homepage-wrapper-cutover':
+    'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover',
+  'sharepoint:pnp:homepage-wrapper-embedded-proof':
+    'sharepoint-control:proof:homepage-wrapper-embedded',
 };
 
 export function getActions(): readonly ActionDescriptor[] {

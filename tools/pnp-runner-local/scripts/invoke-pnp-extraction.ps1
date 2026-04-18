@@ -746,7 +746,69 @@ function Get-HomepageCanvasComposition([string]$PageName) {
     $result.actionLayerState = 'ambiguous'
   }
 
+  # Phase-07 wrapper-embedded target: HbHomepage owns the action layer
+  # via an embedded React surface, so the flagship page should contain
+  # only the hero + HbHomepage (no OOB Quick Links, no standalone
+  # PriorityActionsRail webpart). Derived state is independent of the
+  # Phase-06 actionLayerState so tenants in an intermediate state
+  # (rail webpart still authored) remain diagnosable.
+  $wrapperOrderValid = $false
+  if ($result.hasHero -and $result.hasHbHomepage) {
+    if ($result.heroOrder -lt $result.hbHomepageOrder) {
+      $wrapperOrderValid = $true
+    }
+  }
+  $result.wrapperOrderValid = $wrapperOrderValid
+
+  if ($result.hasQuickLinks) {
+    $result.wrapperEmbeddedState = 'requires-cutover-quick-links'
+  } elseif ($result.hasPriorityActionsRail) {
+    $result.wrapperEmbeddedState = 'requires-cutover-standalone-rail'
+  } elseif ($result.hasHero -and $result.hasHbHomepage -and $wrapperOrderValid) {
+    $result.wrapperEmbeddedState = 'wrapper-embedded-target'
+  } elseif ($result.hasHero -and $result.hasHbHomepage) {
+    $result.wrapperEmbeddedState = 'wrapper-present-wrong-order'
+  } else {
+    $result.wrapperEmbeddedState = 'ambiguous'
+  }
+
   return $result
+}
+
+function Invoke-HomepageWrapperEmbeddedProof([string]$PageName, [bool]$Strict) {
+  $composition = Get-HomepageCanvasComposition -PageName $PageName
+  $issues = @()
+  if ($composition.hasQuickLinks) {
+    $issues += 'OOB Quick Links webpart is still present on the homepage canvas (expected removed in wrapper-embedded target).'
+  }
+  if ($composition.hasPriorityActionsRail) {
+    $issues += 'Standalone PriorityActionsRail webpart is still present on the homepage canvas (expected absent — rail is embedded inside HbHomepage in the wrapper-embedded target).'
+  }
+  if (-not $composition.hasHero) {
+    $issues += 'HB Signature Hero webpart is absent from the homepage canvas.'
+  }
+  if (-not $composition.hasHbHomepage) {
+    $issues += 'hbHomepage webpart is absent from the homepage canvas.'
+  }
+  if ($composition.hasHero -and $composition.hasHbHomepage -and -not $composition.wrapperOrderValid) {
+    $issues += 'Homepage order is not hero -> hbHomepage.'
+  }
+  $passed = (@($issues).Count -eq 0) -and ($composition.wrapperEmbeddedState -eq 'wrapper-embedded-target')
+
+  $report = [ordered]@{
+    pageName = $composition.pageName
+    wrapperEmbeddedState = $composition.wrapperEmbeddedState
+    wrapperOrderValid = $composition.wrapperOrderValid
+    passed = $passed
+    issues = $issues
+    composition = $composition
+  }
+
+  if ($Strict -and -not $passed) {
+    Write-Error ("Homepage wrapper-embedded proof failed: " + [string]::Join('; ', $issues))
+  }
+
+  return $report
 }
 
 function Invoke-HomepageActionLayerProof([string]$PageName, [bool]$Strict) {
@@ -1382,6 +1444,108 @@ switch ($ActionKey) {
 
     $summaryLines += "- Homepage action-layer proof on page '$pageName'."
     $summaryLines += "- Proof state: $($proof.actionLayerState); passed=$($proof.passed); orderValid=$($proof.orderValid)."
+    if (@($proof.issues).Count -gt 0) {
+      $summaryLines += "- Proof issues: $([string]::Join('; ', $proof.issues))"
+    } else {
+      $summaryLines += '- Proof issues: none.'
+    }
+  }
+  'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover' {
+    # Phase-07 flagship wrapper cutover. Removes residual OOB Quick Links
+    # AND any standalone PriorityActionsRail webparts from the target
+    # page so the wrapper-embedded rail inside HbHomepage is the sole
+    # action layer. Does NOT add webparts — hbHomepage must already be
+    # authored on the page. Idempotent: any absent legacy webpart is a
+    # no-op, any already-correct page yields an empty removal set.
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
+    $priorityActionsRailWebPartId = 'b3f07190-79cf-437d-a1d6-ecbf3f77e616'
+    $oobQuickLinksWebPartId = 'c70391ea-0b10-4ee9-b2b4-006d3fcad0cd'
+
+    # Capture the live pre-cutover composition for a reviewable record.
+    $preComposition = Get-HomepageCanvasComposition -PageName $pageName
+
+    $pageComposition = [ordered]@{
+      pageName = $pageName
+      priorityActionsRailWebPartId = $priorityActionsRailWebPartId
+      oobQuickLinksWebPartId = $oobQuickLinksWebPartId
+      preCutover = $preComposition
+      removedWebPartInstances = @()
+      errors = @()
+    }
+
+    try {
+      $page = Get-PnPPage -Identity $pageName -ErrorAction Stop
+      $controls = @($page.Controls)
+
+      foreach ($control in $controls) {
+        $controlWebPartId = $null
+        try { $controlWebPartId = [string]$control.WebPartId } catch { $controlWebPartId = $null }
+        $normalized = if ($controlWebPartId) { $controlWebPartId.Trim().ToLower() } else { '' }
+
+        $shouldRemove = $false
+        $reason = $null
+        if ($normalized -eq $oobQuickLinksWebPartId) {
+          $shouldRemove = $true
+          $reason = 'oob-quick-links'
+        } elseif ($normalized -eq $priorityActionsRailWebPartId) {
+          $shouldRemove = $true
+          $reason = 'standalone-priority-actions-rail'
+        }
+
+        if ($shouldRemove) {
+          try {
+            Remove-PnPPageWebPart -Page $pageName -Identity $control.InstanceId -ErrorAction Stop
+            $pageComposition.removedWebPartInstances += [ordered]@{
+              instanceId = [string]$control.InstanceId
+              order = $control.Order
+              reason = $reason
+            }
+          }
+          catch {
+            $pageComposition.errors += "remove-webpart-failed: reason=$reason; instanceId=$($control.InstanceId); $($_.Exception.Message)"
+          }
+        }
+      }
+
+      try { Set-PnPPage -Identity $pageName -Publish -ErrorAction SilentlyContinue | Out-Null } catch { }
+    }
+    catch {
+      $pageComposition.errors += "page-load-failed: $($_.Exception.Message)"
+    }
+
+    $postComposition = Get-HomepageCanvasComposition -PageName $pageName
+    $pageComposition.postCutover = $postComposition
+
+    $raw.pageComposition = $pageComposition
+    $normalized.pageComposition = $pageComposition
+
+    $summaryLines += "- Flagship homepage wrapper cutover on page '$pageName'."
+    $summaryLines += "- Removed webpart instances: $(@($pageComposition.removedWebPartInstances).Count)."
+    if (@($pageComposition.errors).Count -gt 0) {
+      $summaryLines += "- Cutover errors: $([string]::Join('; ', $pageComposition.errors))"
+    }
+    $summaryLines += "- Post-cutover wrapperEmbeddedState: $($postComposition.wrapperEmbeddedState); wrapperOrderValid=$($postComposition.wrapperOrderValid)."
+  }
+  'sharepoint-control:proof:homepage-wrapper-embedded' {
+    # Phase-07 authoritative read-only proof that the flagship page
+    # matches the wrapper-embedded target (hero + HbHomepage only).
+    # When -StrictProof is supplied, a failing proof emits Write-Error
+    # so the local runner surfaces the regression loudly.
+    $pageName = if ($pageFilters.Count -gt 0) { $pageFilters[0] } else { Resolve-DefaultPageName }
+    $proof = Invoke-HomepageWrapperEmbeddedProof -PageName $pageName -Strict:$StrictProof.IsPresent
+
+    $raw.homepageWrapperEmbeddedProof = $proof
+    $normalized.homepageWrapperEmbeddedProof = [ordered]@{
+      pageName = $proof.pageName
+      wrapperEmbeddedState = $proof.wrapperEmbeddedState
+      wrapperOrderValid = $proof.wrapperOrderValid
+      passed = $proof.passed
+      issues = $proof.issues
+      controls = $proof.composition.controls
+    }
+
+    $summaryLines += "- Homepage wrapper-embedded proof on page '$pageName'."
+    $summaryLines += "- Proof state: $($proof.wrapperEmbeddedState); passed=$($proof.passed); wrapperOrderValid=$($proof.wrapperOrderValid)."
     if (@($proof.issues).Count -gt 0) {
       $summaryLines += "- Proof issues: $([string]::Join('; ', $proof.issues))"
     } else {

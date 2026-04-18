@@ -1,20 +1,44 @@
 import type { HomepageIdentityInput } from '../../homepage/helpers/identity.js';
 import type { ProfilePhotoResolver } from '../../homepage/helpers/peopleCultureSplitModel.js';
 import type { ModuleConfigSlices, RendererContext, ShellLayoutInput } from './shell/shellTypes.js';
+import type {
+  HbHomepageWrapperConfig,
+  HbHomepageWrapperRailConfig,
+} from './hbHomepageWrapperConfig.js';
 
 export type { ModuleConfigSlices, RendererContext, ShellLayoutInput };
+// Re-export wrapper-facing integration types. These describe composition
+// inputs the homepage wrapper owns (e.g. embedded rail enablement, bandKey,
+// audience propagation). They are intentionally disjoint from
+// `ModuleConfigSlices`, which stays shell-semantic.
+export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
 
 // =============================================================================
-// HB Homepage shell — authoritative ownership boundary (contract layer)
+// HB Homepage wrapper + shell — authoritative ownership boundary (contract)
 // -----------------------------------------------------------------------------
 // This contract layer is the single canonical place in code that names what
-// the HB Homepage shell owns and what it must not own. If another document
-// or comment disagrees with the statements below, treat this file as the
-// source of truth and update the other source.
+// the HB Homepage wrapper owns, what the HB Homepage shell owns, and what
+// each must NOT own. If another document or comment disagrees with the
+// statements below, treat this file as the source of truth and update the
+// other source.
 //
-// The shell is the post-hero operating layer that receives `HbHomepageProps`
-// from `mount.tsx` and renders a bounded set of child zones. It is strictly
-// an orchestration layer, not a module remediation layer.
+// Flagship homepage runtime composition (post-hero):
+//   1. `HbHomepage` wrapper — composition layer owned by this package
+//      (see `HbHomepageEntryStack`). Renders a wrapper-owned pre-shell
+//      region that embeds `PriorityActionsRail` as a React surface. The
+//      embedded rail is NOT a shell occupant, preset slot, or band
+//      member. Wrapper-facing integration config lives in
+//      `hbHomepageWrapperConfig.ts` and is intentionally disjoint from
+//      shell `ModuleConfigSlices`.
+//   2. `HbHomepageShell` — post-actions operating layer. Receives
+//      `HbHomepageProps` and renders a bounded set of child zones. It
+//      is strictly an orchestration layer, not a module remediation
+//      layer.
+//
+// The shell never becomes a command-band host. The standalone
+// `PriorityActionsRail` webpart remains independently mountable for
+// non-flagship hosts; on the flagship page it is composed by the
+// wrapper rather than dispatched separately through `mount.tsx`.
 //
 // Shell-owned responsibilities (code-governed in this package):
 //   - placement: which occupants sit in which bands and slots
@@ -42,10 +66,12 @@ export type { ModuleConfigSlices, RendererContext, ShellLayoutInput };
 // the shell stacks, reflows, or falls back — it does not mutate the child.
 //
 // Post-hero boundary (invariant):
-//   The shell begins immediately after the hero. Hero composition and
-//   hero-internal behavior are the hero webpart's responsibility. The shell
-//   does not own hero visuals; it owns how the shell's first lane relates
-//   to the hero through the entry-stack policy contract.
+//   The wrapper begins immediately after the hero. Hero composition and
+//   hero-internal behavior are the hero webpart's responsibility. The
+//   wrapper renders the actions region, then the shell. The shell does
+//   not own hero visuals or the actions region; it owns how its first
+//   lane relates to the hero+actions through the entry-stack policy
+//   contract.
 //
 // Control-panel boundary (future-readiness):
 //   A future HB Homepage control panel is bounded to the configurable

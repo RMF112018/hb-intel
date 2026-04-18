@@ -1,0 +1,61 @@
+/* ---------------------------------------------------------------------------
+   Homepage entry-stack — wrapper-owned pre-shell composition layer
+   ---------------------------------------------------------------------------
+   Owns composition order for the flagship homepage runtime:
+     1. wrapper-owned priority-actions region
+     2. HbHomepageShell
+   Envelope width and horizontal padding mirror `HbHomepageShell.module.css`
+   (max-width 2200px; density steps at 768 / 1180 / 1600 / 1900) so the
+   embedded rail aligns visually with the shell beneath it without the
+   shell owning rail placement.
+   --------------------------------------------------------------------------- */
+
+.entryStack {
+  container-type: inline-size;
+  container-name: homepage-entry-stack;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 2200px;
+  margin: 0 auto;
+}
+
+.actionsRegion {
+  width: 100%;
+  padding: 1.5rem 1rem 0;
+}
+
+@container homepage-entry-stack (min-width: 768px) {
+  .entryStack {
+    gap: 2rem;
+  }
+  .actionsRegion {
+    padding: 2rem 1.5rem 0;
+  }
+}
+
+@container homepage-entry-stack (min-width: 1180px) {
+  .entryStack {
+    gap: 2.5rem;
+  }
+  .actionsRegion {
+    padding: 2.5rem 2rem 0;
+  }
+}
+
+@container homepage-entry-stack (min-width: 1600px) {
+  .actionsRegion {
+    padding: 2.5rem 3.5rem 0;
+  }
+}
+
+@container homepage-entry-stack (min-width: 1900px) {
+  .actionsRegion {
+    padding: 2.5rem 5rem 0;
+  }
+}
+
+.shellRegion {
+  width: 100%;
+}

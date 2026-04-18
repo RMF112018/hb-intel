@@ -110,7 +110,10 @@ export async function runExtractionScript(params: {
     '-PageFiltersCsv', pageCsv,
   ];
 
-  if (params.actionKey === 'sharepoint-control:proof:homepage-action-layer') {
+  if (
+    params.actionKey === 'sharepoint-control:proof:homepage-action-layer' ||
+    params.actionKey === 'sharepoint-control:proof:homepage-wrapper-embedded'
+  ) {
     args.push('-StrictProof');
   }
 

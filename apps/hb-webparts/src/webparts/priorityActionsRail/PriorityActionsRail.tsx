@@ -38,6 +38,13 @@ import {
 export interface PriorityActionsRailProps {
   config?: Partial<PriorityActionsRailConfig>;
   activeAudience?: string;
+  /**
+   * Optional list-source band key override. When omitted, the rail's data
+   * seam uses its built-in default (`homepage-primary`). Exposed here so
+   * wrapper integrations (e.g. `HbHomepageEntryStack`) can pass a wrapper-
+   * owned band key without duplicating rail data-seam logic.
+   */
+  bandKey?: string;
   isLoading?: boolean;
 }
 
@@ -140,13 +147,15 @@ function useRailContainerDimensions(ref: React.RefObject<HTMLElement | null>): P
 
 function ListSourcedRail({
   activeAudience,
+  bandKey,
 }: {
   activeAudience: string | undefined;
+  bandKey: string | undefined;
 }): React.JSX.Element {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dimensions = useRailContainerDimensions(containerRef);
   const deviceResolution = resolvePriorityRailDeviceForContainer(dimensions);
-  const { config, items, isLoading, error } = usePriorityActionsData({ activeAudience });
+  const { config, items, isLoading, error } = usePriorityActionsData({ activeAudience, bandKey });
 
   let content: React.JSX.Element;
 
@@ -264,6 +273,7 @@ function ManifestFallbackRail({
 export function PriorityActionsRail({
   config,
   activeAudience,
+  bandKey,
   isLoading = false,
 }: PriorityActionsRailProps): React.JSX.Element {
   if (isLoading) {
@@ -273,7 +283,7 @@ export function PriorityActionsRail({
   const hasSiteUrl = Boolean(getSiteUrl());
 
   if (hasSiteUrl) {
-    return <ListSourcedRail activeAudience={activeAudience} />;
+    return <ListSourcedRail activeAudience={activeAudience} bandKey={bandKey} />;
   }
 
   return <ManifestFallbackRail config={config} activeAudience={activeAudience} />;

@@ -31,11 +31,15 @@ import { HbHeroBannerAdmin } from './webparts/hbHeroBannerAdmin/HbHeroBannerAdmi
 import { PriorityActionsRailAdmin } from './webparts/priorityActionsRailAdmin/PriorityActionsRailAdmin.js';
 import { HbHomepage } from './webparts/hbHomepage/HbHomepage.js';
 import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract.js';
-// Shared entry-stack orchestration seam. The three homepage entry surfaces
-// (hero, priority actions, shell) remain SEPARATE SPFx webparts dispatched
-// through `WEBPART_RENDERERS` below. This import does not merge them; it is
-// the governance reference so production, the reference composition, and any
-// future unified entry-stack governance layer all point at the same seam.
+// Shared entry-stack orchestration seam. The canonical homepage entry
+// stages (hero, actions, first shell lane) are each independently
+// mountable through `WEBPART_RENDERERS` below for non-flagship hosts.
+// On the flagship HBCentral homepage, however, the actions stage is
+// composed as a wrapper-owned React surface inside `HbHomepage`
+// (see `HbHomepageEntryStack`) rather than dispatched separately, so
+// the flagship page dispatches only the hero and HbHomepage here. The
+// standalone PriorityActionsRail entry below remains available for
+// non-flagship hosts that want the rail as its own webpart.
 // See `src/homepage/entryStack/entryStackOrchestration.ts`.
 import {
   ENTRY_STACK_SURFACES as _HOMEPAGE_ENTRY_STACK_SURFACES,
@@ -131,9 +135,12 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   // items lists consumed by the public PriorityActionsRail webpart.
   'a7c91e34-5f28-4d3b-b6e0-8d1f42a9c7b5': ({ siteUrl }) =>
     createElement(PriorityActionsRailAdmin, { siteUrl }),
-  // HB Homepage — composed orchestrator rendering CompanyPulse,
-  // LeadershipMessage, ProjectPortfolioSpotlight, PeopleCulturePublic,
-  // and HbKudos in a single shell. hbSignatureHero remains independent.
+  // HB Homepage — flagship wrapper + shell. Renders a wrapper-owned
+  // pre-shell `PriorityActionsRail` region (embedded React surface,
+  // NOT a separate webpart dispatch) followed by the HbHomepageShell
+  // with CompanyPulse, LeadershipMessage, ProjectPortfolioSpotlight,
+  // PeopleCulturePublic, HbKudos, and SafetyFieldExcellence zones.
+  // HbSignatureHero remains independent.
   [HB_HOMEPAGE_WEBPART_ID]: ({ config, identity, assetBaseUrl, siteUrl, getGraphToken, getApiToken }) =>
     createElement(HbHomepage, { config, identity, assetBaseUrl, siteUrl, getGraphToken, getApiToken }),
   // Article Publisher authoring surface was extracted into its own SPFx

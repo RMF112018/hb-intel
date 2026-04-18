@@ -11,7 +11,9 @@ export type CanonicalPnpActionKey =
   | 'sharepoint-control:provisioning:priority-actions-band-seed-items'
   | 'sharepoint-control:provisioning:priority-actions-band-provision-and-seed'
   | 'sharepoint-control:provisioning:flagship-action-layer-cutover'
-  | 'sharepoint-control:proof:homepage-action-layer';
+  | 'sharepoint-control:proof:homepage-action-layer'
+  | 'sharepoint-control:provisioning:flagship-homepage-wrapper-cutover'
+  | 'sharepoint-control:proof:homepage-wrapper-embedded';
 
 export type PnpExecutionIntentMode =
   | 'read-only-export'

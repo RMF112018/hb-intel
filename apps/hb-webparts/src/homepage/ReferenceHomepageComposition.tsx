@@ -13,14 +13,18 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
 /**
  * Governed Homepage Composition Reference
  *
- * This composition is a REFERENCE ONLY. Production mounts hero,
- * priority actions, and the shell as three independent SPFx webparts
- * through `mount.tsx`. This file demonstrates the intended entry
- * sequence so designers, reviewers, and tests can see the full stack
+ * This composition is a REFERENCE ONLY. On the flagship HBCentral
+ * homepage, production dispatches two SPFx webparts through
+ * `mount.tsx`: the hero and `HbHomepage` (which owns a wrapper-
+ * embedded `PriorityActionsRail` plus `HbHomepageShell`). The
+ * standalone `PriorityActionsRail` webpart remains dispatchable for
+ * non-flagship hosts but is not dispatched separately on the flagship
+ * page. This file flattens the stage sequence inline so designers,
+ * reviewers, and tests can see the full canonical entry sequence
  * without needing an SPFx page. Both paths — production and this
  * reference — read the same shared entry-stack orchestration seam at
  * `src/homepage/entryStack/entryStackOrchestration.ts`, so any drift
- * between the two is detectable and recoverable.
+ * between the stage sequence and policy is detectable and recoverable.
  *
  * Phase 16-03 — Unified signature hero with design breakout.
  * Phase 18 (01–04) — Signature hero canonicalized, rebuilt as minimal
@@ -44,8 +48,11 @@ import { SmartSearchWayfinding } from '../webparts/smartSearchWayfinding/SmartSe
  * Split-path pattern retired. Gradient wash replaced with premium
  * charcoal background system. Accessibility and authoring hardened.
  *
- * This is NOT the production rendering path. In production, each webpart
- * renders independently through the mount/dispatch seam.
+ * This is NOT the production rendering path. In production, the
+ * flagship page dispatches the hero and the HbHomepage wrapper/shell
+ * through the mount/dispatch seam; the priority actions rail is
+ * composed inside the HbHomepage wrapper rather than dispatched as a
+ * separate webpart on the flagship page.
  *
  * @see docs/architecture/plans/MASTER/spfx/homepage/phase-16/
  * @see docs/architecture/plans/MASTER/spfx/homepage/phase-18/
