@@ -653,25 +653,21 @@ const useStyles = makeStyles({
       gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 380px))',
     },
   },
-  // Wide/ultrawide sparse cluster (1–2 results). The cluster is centered
-  // and bounded so one or two cards no longer read as a small left-
-  // anchored island when the container is 1600–2400px wide. Cards keep
-  // a credible max-width so they do not stretch into oversized panels,
-  // and the bounded cluster itself centers via auto margins.
+  // Wide/ultrawide sparse cluster (1–2 results). Cards stay left-
+  // anchored to the usable content area; the card width is bounded so a
+  // lone pair of cards does not stretch into oversized panels. The
+  // grid does not center and has no outer maxWidth — centering a sparse
+  // set on wide displays was the wrong choice and is reverted here.
   gridSparseCluster: {
-    justifyContent: 'center',
+    justifyContent: 'start',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 420px))',
-    maxWidth: '880px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: '100%',
   },
-  // Single-card sparse featured width. A lone card is allowed to grow
-  // slightly wider so it reads as the intended focal record rather than
-  // a stranded tile.
+  // Single-card sparse featured width. A lone card is still bounded to
+  // a credible reading width so it does not stretch to the full
+  // container, but it sits left-anchored — not centered.
   gridSparseFeatured: {
     gridTemplateColumns: 'minmax(320px, 520px)',
-    maxWidth: '520px',
+    justifyContent: 'start',
   },
   gridItem: {
     minWidth: 0,
@@ -1672,6 +1668,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
             role="list"
             aria-label={`${visibleCount} project site${visibleCount !== 1 ? 's' : ''} shown for ${scopeLabelShort}`}
             data-project-sites-grid-sparse={sparseVariant}
+            data-project-sites-grid-alignment="start"
           >
             {visibleEntries.map((entry) => (
               <ProjectSiteCardListItem

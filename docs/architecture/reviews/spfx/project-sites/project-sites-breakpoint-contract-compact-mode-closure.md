@@ -116,15 +116,19 @@ prior closure: `wide` uses `repeat(auto-fill, minmax(320px, 1fr))`;
 `medium` uses `repeat(auto-fill, minmax(260px, 1fr))`; `compact` uses a
 single column.
 
-Sparse behavior (`visibleCount ≤ 2`) is now variant-aware and published
-via `data-project-sites-grid-sparse`:
+Sparse behavior (`visibleCount ≤ 2`) is variant-aware and published via
+`data-project-sites-grid-sparse`. All sparse variants on medium and wide
+are **left-anchored** to the usable content area — they do not center
+within the surrounding canvas. The grid also emits
+`data-project-sites-grid-alignment="start"` as a durable regression
+guard.
 
-| Variant    | When                                            | Composition                                                                              |
-|------------|-------------------------------------------------|------------------------------------------------------------------------------------------|
-| `dense`    | `visibleCount ≥ 3`                              | Default mode grid — no sparse overrides.                                                 |
-| `bounded`  | `visibleCount ≤ 2` AND `layoutMode === 'compact'` | Single-column (existing compact stacking).                                              |
-| `cluster`  | `visibleCount === 2` AND `layoutMode !== 'compact'` | Centered cluster, `maxWidth: 880 px`, `repeat(auto-fit, minmax(320px, 420px))`, `justify-content: center`. |
-| `featured` | `visibleCount === 1` AND `layoutMode !== 'compact'` | Single bounded card column, `maxWidth: 520 px`, centered via auto margins.              |
+| Variant    | When                                              | Composition                                                                       |
+|------------|---------------------------------------------------|-----------------------------------------------------------------------------------|
+| `dense`    | `visibleCount ≥ 3`                                | Default mode grid — no sparse overrides.                                          |
+| `bounded`  | `visibleCount ≤ 2` AND `layoutMode === 'compact'` | Single-column (intentional compact stacking).                                     |
+| `cluster`  | `visibleCount === 2` AND `layoutMode !== 'compact'` | Left-anchored; `repeat(auto-fit, minmax(320px, 420px))`; `justify-content: start`. Cards stay bounded to ≤ 420 px so a pair does not stretch into oversized panels. |
+| `featured` | `visibleCount === 1` AND `layoutMode !== 'compact'` | Left-anchored; `gridTemplateColumns: minmax(320px, 520px)`; `justify-content: start`. A lone card is bounded to ≤ 520 px for reading discipline but sits left, not centered. |
 
 ### First-screen compression and host-fit resilience
 
@@ -157,6 +161,7 @@ chrome do not crowd the edges, without bloating desktop rendering.
 - `data-project-sites-compact-scope-control` — `"true"` only in compact on the scope `<select>`
 - `data-project-sites-compact-filters-summary` — `"true"` on the compact filter progressive-disclosure summary
 - `data-project-sites-grid-sparse` — `featured` | `cluster` | `bounded` | `dense` on the result grid
+- `data-project-sites-grid-alignment` — `start` on the result grid; durable regression guard for the left-anchor contract
 - `data-project-sites-card-layout` — `wide` | `medium` | `compact` on each card shell
 - `data-project-sites-card-density` — `comfortable` | `regular` | `condensed` on each card shell
 

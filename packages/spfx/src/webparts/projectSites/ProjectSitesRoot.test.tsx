@@ -188,6 +188,63 @@ describe('ProjectSitesRoot', () => {
     );
   });
 
+  it('left-anchors sparse card layouts on wide and medium (no centering) across featured + cluster variants', () => {
+    // Regression guard: sparse single- and two-card wide/medium states
+    // must anchor left to the usable content area, not center in the
+    // surrounding canvas. Compact single-column stacking is covered
+    // separately.
+    const sparseCases: Array<{ name: string; mode: 'wide' | 'medium'; count: number; expectedVariant: string }> = [
+      { name: 'wide 1-card', mode: 'wide', count: 1, expectedVariant: 'featured' },
+      { name: 'wide 2-card', mode: 'wide', count: 2, expectedVariant: 'cluster' },
+      { name: 'medium 1-card', mode: 'medium', count: 1, expectedVariant: 'featured' },
+      { name: 'medium 2-card', mode: 'medium', count: 2, expectedVariant: 'cluster' },
+    ];
+
+    for (const c of sparseCases) {
+      mockUseProjectSitesContainerState.mockReturnValue(
+        c.mode === 'wide'
+          ? {
+              width: 1400,
+              height: 900,
+              mode: 'wide',
+              displayClass: 'desktop',
+              heightClass: 'standard',
+              isShortHeight: false,
+            }
+          : {
+              width: 1000,
+              height: 900,
+              mode: 'medium',
+              displayClass: 'tablet',
+              heightClass: 'standard',
+              isShortHeight: false,
+            },
+      );
+      mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
+      mockUseProjectSites.mockReturnValue({
+        status: 'success',
+        scope: scopeFromYear(2026),
+        entries: Array.from({ length: c.count }).map((_, i) =>
+          createEntry({ id: i + 1, projectName: `Card ${i + 1}`, projectNumber: '', year: 2026 }),
+        ),
+        errorMessage: null,
+      });
+
+      const { unmount } = render(<ProjectSitesRoot />);
+      const grid = screen.getByRole('list');
+      expect(grid, c.name).toHaveAttribute(
+        'data-project-sites-grid-sparse',
+        c.expectedVariant,
+      );
+      // Left-anchor contract: no centering of sparse sets on medium/wide.
+      expect(grid, c.name).toHaveAttribute(
+        'data-project-sites-grid-alignment',
+        'start',
+      );
+      unmount();
+    }
+  });
+
   it('applies the featured sparse grid variant for a single wide-mode result', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
