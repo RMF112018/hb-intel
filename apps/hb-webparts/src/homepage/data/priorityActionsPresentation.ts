@@ -87,13 +87,19 @@ export function resolvePriorityRailPresentationForDevice(
 ): PriorityRailPresentationResolution {
   const shellState = mapPriorityActionsDeviceClassToShellState(deviceClass as PriorityActionsDeviceClass);
 
+  // ── Desktop / laptop / tablet overflow (Prompt-04) ───────────────────
+  // Use an anchored menu strategy so deferred actions read as a governed
+  // secondary command layer rather than an appended inline list that
+  // footers the primary strip. Sheet remains for small handheld cases
+  // below; inline-disclosure is reserved for the mobile scroll fallback
+  // where an in-flow disclosure is still the best fit.
   if (deviceClass === 'desktop' || deviceClass === 'laptop') {
     if (config.desktopLayoutMode === 'segmented') {
       return {
         deviceClass,
         shellState,
         layout: 'grid',
-        overflowStrategy: 'inline-disclosure',
+        overflowStrategy: 'menu',
         authoredLayoutMode: 'segmented',
         normalizations: ['desktop-segmented-to-grid'],
       };
@@ -103,7 +109,7 @@ export function resolvePriorityRailPresentationForDevice(
         deviceClass,
         shellState,
         layout: 'rail',
-        overflowStrategy: 'inline-disclosure',
+        overflowStrategy: 'menu',
         authoredLayoutMode: 'hybrid',
         normalizations: ['desktop-hybrid-to-rail'],
       };
@@ -112,7 +118,7 @@ export function resolvePriorityRailPresentationForDevice(
       deviceClass,
       shellState,
       layout: 'rail',
-      overflowStrategy: 'inline-disclosure',
+      overflowStrategy: 'menu',
       authoredLayoutMode: 'rail',
       normalizations: [],
     };
@@ -124,7 +130,7 @@ export function resolvePriorityRailPresentationForDevice(
         deviceClass,
         shellState,
         layout: 'grid',
-        overflowStrategy: 'inline-disclosure',
+        overflowStrategy: 'menu',
         authoredLayoutMode: 'grid',
         normalizations: [],
       };
@@ -134,7 +140,7 @@ export function resolvePriorityRailPresentationForDevice(
         deviceClass,
         shellState,
         layout: 'rail',
-        overflowStrategy: 'inline-disclosure',
+        overflowStrategy: 'menu',
         authoredLayoutMode: 'hybrid',
         normalizations: ['tablet-hybrid-to-rail'],
       };
@@ -143,7 +149,7 @@ export function resolvePriorityRailPresentationForDevice(
       deviceClass,
       shellState,
       layout: 'rail',
-      overflowStrategy: 'inline-disclosure',
+      overflowStrategy: 'menu',
       authoredLayoutMode: 'rail',
       normalizations: [],
     };

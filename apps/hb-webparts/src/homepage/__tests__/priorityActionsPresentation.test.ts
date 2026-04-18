@@ -39,18 +39,58 @@ describe('priorityActionsPresentation', () => {
   it('resolves authored layout modes into explicit runtime behavior with normalization flags', () => {
     const desktop = resolvePriorityRailPresentationForDevice(CONFIG, 'desktop');
     expect(desktop.layout).toBe('grid');
-    expect(desktop.overflowStrategy).toBe('inline-disclosure');
+    // Prompt-04: desktop/laptop/tablet overflow is an anchored secondary
+    // command layer, not an inline appended list.
+    expect(desktop.overflowStrategy).toBe('menu');
     expect(desktop.normalizations).toEqual(['desktop-segmented-to-grid']);
 
     const tablet = resolvePriorityRailPresentationForDevice(CONFIG, 'tabletPortrait');
     expect(tablet.layout).toBe('rail');
-    expect(tablet.overflowStrategy).toBe('inline-disclosure');
+    expect(tablet.overflowStrategy).toBe('menu');
     expect(tablet.normalizations).toEqual(['tablet-hybrid-to-rail']);
 
     const phone = resolvePriorityRailPresentationForDevice(CONFIG, 'phone');
     expect(phone.layout).toBe('compact');
     expect(phone.overflowStrategy).toBe('menu');
     expect(phone.normalizations).toEqual(['mobile-grid-to-compact-menu']);
+  });
+
+  it('Prompt-04 overflow-strategy matrix: desktop/tablet → menu, phone sheet-trigger → sheet, phone scroll → inline-disclosure', () => {
+    const desktopRail = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'desktop',
+    );
+    expect(desktopRail.overflowStrategy).toBe('menu');
+
+    const laptopHybrid = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'hybrid', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'laptop',
+    );
+    expect(laptopHybrid.overflowStrategy).toBe('menu');
+
+    const tabletLandscapeGrid = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'grid', mobileLayoutMode: 'scroll' },
+      'tabletLandscape',
+    );
+    expect(tabletLandscapeGrid.overflowStrategy).toBe('menu');
+
+    const tabletPortraitRail = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'tabletPortrait',
+    );
+    expect(tabletPortraitRail.overflowStrategy).toBe('menu');
+
+    const phoneSheet = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'rail', mobileLayoutMode: 'sheet-trigger' },
+      'phone',
+    );
+    expect(phoneSheet.overflowStrategy).toBe('sheet');
+
+    const phoneScroll = resolvePriorityRailPresentationForDevice(
+      { desktopLayoutMode: 'rail', tabletLayoutMode: 'rail', mobileLayoutMode: 'scroll' },
+      'phone',
+    );
+    expect(phoneScroll.overflowStrategy).toBe('inline-disclosure');
   });
 
   it('builds deterministic grouped sections from first-seen group order', () => {
