@@ -87,3 +87,56 @@ describe('HbcPriorityRail — external link SR cue', () => {
     expect(ACTION_SOURCE).not.toMatch(/ExternalLink[^>]*aria-label/);
   });
 });
+
+/**
+ * Flagship anti-collapse locks — these tests fail if a future refactor
+ * silently strips the flagship surface back to the old row/list grammar.
+ * They target CSS and source markers that encode the flagship decisions
+ * from phase-07 PROMPTs 01, 03, 04, 05, 06 and 08.
+ */
+describe('HbcPriorityRail — flagship anti-collapse structural locks', () => {
+  it('declares an inline-size container for flagship degradation', () => {
+    expect(CSS_SOURCE).toMatch(/container-type:\s*inline-size/);
+    expect(CSS_SOURCE).toMatch(/container-name:\s*hbc-priority-rail/);
+  });
+
+  it('ships a narrowest-stable flagship container-query band (≤ 520px)', () => {
+    expect(CSS_SOURCE).toMatch(
+      /@container\s+hbc-priority-rail\s*\(max-width:\s*520px\)/,
+    );
+  });
+
+  it('ships an ultra-narrow flagship container-query guard (≤ 360px)', () => {
+    expect(CSS_SOURCE).toMatch(
+      /@container\s+hbc-priority-rail\s*\(max-width:\s*360px\)/,
+    );
+  });
+
+  it('ships a wide-anchored flagship container-query band (≥ 1180px)', () => {
+    expect(CSS_SOURCE).toMatch(
+      /@container\s+hbc-priority-rail\s*\(min-width:\s*1180px\)/,
+    );
+  });
+
+  it('keeps the flagship featured slot visually distinct from the row list', () => {
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.featured\s+\.item\s*\{[^}]*background:[^}]*linear-gradient/,
+    );
+  });
+
+  it('keeps the persistent launch chip as a flagship activation anchor', () => {
+    expect(CSS_SOURCE).toMatch(/\.contextHomepageFlagship\s+\.itemLaunch\s*\{/);
+  });
+
+  it('keeps the featured launch chip as a brand-filled primary target', () => {
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.featured\s+\.itemLaunch\s*\{[^}]*linear-gradient/,
+    );
+  });
+
+  it('keeps the secondary command layer trigger right-anchored in flagship', () => {
+    expect(CSS_SOURCE).toMatch(
+      /\.contextHomepageFlagship\s+\.overflowTrigger\s*\{[^}]*justify-content:\s*flex-end/,
+    );
+  });
+});
