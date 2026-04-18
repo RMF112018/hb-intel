@@ -78,3 +78,18 @@ export {
   LegacyFallbackProjectIndexProvider,
   type ILegacyFallbackProjectIndexProvider,
 } from './project-index-provider.js';
+
+export {
+  LegacyFallbackReviewRepository,
+  type ILegacyFallbackReviewRecord,
+  type ILegacyFallbackReviewUpdatePatch,
+  type ILegacyFallbackReviewRepository,
+} from './review-repository.js';
+
+export {
+  LegacyFallbackReviewService,
+  type ILegacyFallbackReviewFilters,
+  type ILegacyFallbackReviewListResult,
+  type ILegacyFallbackManualBindInput,
+  type ILegacyFallbackReviewActionInput,
+} from './review-service.js';

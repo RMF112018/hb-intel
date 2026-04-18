@@ -59,6 +59,26 @@ az functionapp deploy \
 - HTTP trigger: `POST /api/admin/legacy-fallback/discovery/run`
 - Timer trigger: `legacyFallbackDiscoveryTimer` (gated by config)
 
+## Review and override endpoints (Prompt 07)
+
+Maintainer review/override is hosted in the same admin API surface and requires delegated admin auth:
+
+- `GET /api/admin/legacy-fallback/review/records`
+- `GET /api/admin/legacy-fallback/review/records/{recordId}`
+- `POST /api/admin/legacy-fallback/review/records/{recordId}/bind`
+- `POST /api/admin/legacy-fallback/review/records/{recordId}/ignore`
+- `POST /api/admin/legacy-fallback/review/records/{recordId}/disable`
+- `POST /api/admin/legacy-fallback/review/revalidate`
+
+`/review/records` defaults to queue view (`review-required` / `unmatched` and `low`/`none` confidence). Optional query filters:
+
+- `status`
+- `confidence`
+- `year`
+- `isActive`
+- `queueOnly`
+- `search`
+
 ## Required configuration
 
 In Function App settings:

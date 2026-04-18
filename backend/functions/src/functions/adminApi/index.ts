@@ -44,6 +44,7 @@ import './observability-routes.js';
 
 // P9.1-04: White-glove device deployment routes (side-effect import for route registration)
 import './white-glove-routes.js';
+import './legacy-fallback-routes.js';
 
 // ── Launch Run ─────────────────────────────────────────────────────────────────
 
