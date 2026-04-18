@@ -15,13 +15,16 @@ vi.mock('../HbHomepageShell.js', () => ({
 }));
 
 vi.mock('../../priorityActionsRail/PriorityActionsRail.js', () => ({
-  PriorityActionsRail: (props: Record<string, unknown>): React.JSX.Element =>
-    React.createElement('div', {
+  PriorityActionsRail: (props: Record<string, unknown>): React.JSX.Element => {
+    const featured = props.featuredActionKeys as readonly string[] | undefined;
+    return React.createElement('div', {
       'data-test-mock': 'priority-actions-rail',
       'data-test-rail-band-key': (props.bandKey as string | undefined) ?? '',
       'data-test-rail-audience': (props.activeAudience as string | undefined) ?? '',
       'data-test-rail-surface-context': (props.surfaceContext as string | undefined) ?? '',
-    }),
+      'data-test-rail-featured-keys': featured && featured.length > 0 ? featured.join(',') : '',
+    });
+  },
 }));
 
 import { HbHomepageEntryStack } from '../HbHomepageEntryStack.js';
@@ -98,6 +101,67 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(
       container.querySelector('[data-hb-homepage-entry-stack-region="shell"]'),
     ).not.toBeNull();
+  });
+
+  it('promotes the shell region to order="1" when the rail is disabled', () => {
+    const { container } = render(
+      <HbHomepageEntryStack
+        config={{ hbHomepageWrapper: { rail: { enabled: false } } }}
+      />,
+    );
+    const shellRegion = container.querySelector(
+      '[data-hb-homepage-entry-stack-region="shell"]',
+    );
+    expect(shellRegion?.getAttribute('data-hb-homepage-entry-stack-order')).toBe('1');
+  });
+
+  it('reports rail-enabled composition state on the entry-stack root', () => {
+    const enabled = render(<HbHomepageEntryStack />).container.querySelector(
+      '[data-hb-homepage-entry-stack="root"]',
+    );
+    expect(enabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBe('true');
+
+    const disabled = render(
+      <HbHomepageEntryStack
+        config={{ hbHomepageWrapper: { rail: { enabled: false } } }}
+      />,
+    ).container.querySelector('[data-hb-homepage-entry-stack="root"]');
+    expect(disabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBeNull();
+  });
+
+  it('threads wrapper-owned featuredActionKeys into the embedded rail', () => {
+    const { container } = render(
+      <HbHomepageEntryStack
+        config={{
+          hbHomepageWrapper: {
+            rail: {
+              featuredActionKeys: ['submit-timesheet', 'approve-po'],
+            },
+          },
+        }}
+      />,
+    );
+    const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
+    expect(railNode?.getAttribute('data-test-rail-featured-keys')).toBe(
+      'submit-timesheet,approve-po',
+    );
+  });
+
+  it('omits featured-keys threading when wrapper config does not declare them', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const railNode = container.querySelector('[data-test-mock="priority-actions-rail"]');
+    expect(railNode?.getAttribute('data-test-rail-featured-keys')).toBe('');
+  });
+
+  it('renders the shell region immediately after the actions region with no interleaved siblings', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const root = container.querySelector('[data-hb-homepage-entry-stack="root"]');
+    const children = Array.from(root?.children ?? []);
+    expect(children.length).toBe(2);
+    expect(children[0].getAttribute('data-hb-homepage-entry-stack-region')).toBe(
+      'priority-actions',
+    );
+    expect(children[1].getAttribute('data-hb-homepage-entry-stack-region')).toBe('shell');
   });
 
   it('forwards HbHomepageProps to the shell untouched', () => {
