@@ -71,6 +71,9 @@ export function validateConfig(
     ));
   }
 
+  // Legacy compatibility guardrails:
+  // these fields are preserved in the authored/list contract but do not
+  // govern homepage launcher runtime partitioning.
   const caps: Array<[keyof PriorityActionsConfigDraft, number]> = [
     ['maxVisibleDesktop', draft.maxVisibleDesktop],
     ['maxVisibleLaptop', draft.maxVisibleLaptop],

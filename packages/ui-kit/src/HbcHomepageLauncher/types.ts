@@ -19,10 +19,17 @@ export type HomepageLauncherOverflowMode = 'menu' | 'sheet';
 
 export interface HomepageLauncherChipModel {
   id: string;
+  serviceKey: string;
   title: string;
   href: string;
+  description?: string;
   icon?: LucideIcon;
+  iconKey?: string;
+  groupKey?: string;
+  groupTitle?: string;
   external?: boolean;
+  openInNewTab?: boolean;
+  ariaLabel?: string;
 }
 
 export interface HbcHomepageLauncherProps {

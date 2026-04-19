@@ -10,8 +10,9 @@
  * primary + overflow per the binding visible-count matrix.
  *
  * Data seams preserved: `usePriorityActionsData`, `filterByDevice`,
- * `resolvePriorityRailDeviceForContainer`. The rail's render layer is
- * bypassed entirely in the homepage path.
+ * `resolvePriorityRailDeviceForEntryState`. The standalone rail surface
+ * remains available for adjacent embeds, but its render layer is bypassed
+ * entirely in the hosted homepage path.
  */
 import * as React from 'react';
 import {
@@ -25,8 +26,11 @@ import {
   usePriorityActionsData,
   invalidatePriorityActionsCache,
 } from '../../homepage/data/usePriorityActionsData.js';
-import { filterByDevice } from '../../homepage/data/priorityActionsNormalization.js';
-import { resolvePriorityRailDeviceForEntryState } from '../../homepage/data/priorityActionsPresentation.js';
+import {
+  filterByDevice,
+  getLauncherVisibleCap,
+} from '../../homepage/data/priorityActionsNormalization.js';
+import { resolvePriorityRailDeviceForContainer } from '../../homepage/data/priorityActionsPresentation.js';
 import {
   partitionItems,
   resolveLauncherDeviceClass,
@@ -51,12 +55,40 @@ export function HbHomepageLauncherBand({
   alignmentMode,
   entryContainer,
 }: HbHomepageLauncherBandProps): React.JSX.Element {
-  const resolution = resolvePriorityRailDeviceForEntryState(entryContainer);
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const [hostWidth, setHostWidth] = React.useState<number>(0);
+  const measuredHostWidth = hostWidth > 0 ? hostWidth : entryContainer.width;
+  const widthFitSource =
+    hostWidth > 0 ? 'actions-region-container' : 'entry-container-fallback';
+  const resolution = resolvePriorityRailDeviceForContainer({
+    width: measuredHostWidth,
+    height: entryContainer.height,
+  });
   const deviceClass: HomepageLauncherDeviceClass = resolveLauncherDeviceClass(resolution);
   const { config, items, isLoading, error } = usePriorityActionsData({
     bandKey,
     activeAudience,
   });
+  const skeletonCount = Math.max(
+    1,
+    getLauncherVisibleCap(resolution.deviceClass) - (resolution.shortHeightConstrained ? 1 : 0),
+  );
+
+  React.useEffect(() => {
+    const hostElement = rootRef.current;
+    if (!hostElement) return;
+    const updateWidth = () => {
+      setHostWidth(hostElement.getBoundingClientRect().width);
+    };
+    updateWidth();
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => updateWidth());
+      observer.observe(hostElement);
+      return () => observer.disconnect();
+    }
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   let content: React.JSX.Element;
   let visibleBudget: number | undefined;
@@ -64,7 +96,7 @@ export function HbHomepageLauncherBand({
   let overflowCount: number | undefined;
 
   if (isLoading) {
-    content = <HbcPriorityRailSkeleton count={4} />;
+    content = <HbcPriorityRailSkeleton count={skeletonCount} />;
   } else if (error) {
     content = (
       <HbcPriorityRailErrorState
@@ -81,6 +113,8 @@ export function HbHomepageLauncherBand({
     content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
   } else {
     const deviceFiltered = filterByDevice(items, resolution.deviceClass);
+    // Runtime truth: homepage launcher partitioning is governed by launcher
+    // constants + shell entry-state, not authored per-device layout/cap knobs.
     const partition = partitionItems(deviceFiltered, deviceClass, resolution, {
       strictShellAlignment: alignmentMode !== 'legacy',
     });
@@ -107,6 +141,7 @@ export function HbHomepageLauncherBand({
 
   return (
     <div
+      ref={rootRef}
       data-hb-homepage-launcher-band="root"
       data-hbc-launcher-blackbox-contract="prompt07-blackbox-v1"
       data-hbc-launcher-device-class={deviceClass}
@@ -120,6 +155,8 @@ export function HbHomepageLauncherBand({
       data-hbc-launcher-width={Math.round(entryContainer.width)}
       data-hbc-launcher-width-authoritative={Math.round(entryContainer.authoritativeWidth)}
       data-hbc-launcher-width-inline-inset-total={Math.round(entryContainer.shellInlineInsetTotal)}
+      data-hbc-launcher-host-width={Math.round(measuredHostWidth)}
+      data-hbc-launcher-host-width-source={widthFitSource}
       data-hbc-launcher-width-source={SHELL_WIDTH_SOURCE}
       data-hbc-launcher-width-accounting={SHELL_WIDTH_ACCOUNTING_RULE}
       data-hbc-launcher-entry-authority="shared-entry-state"

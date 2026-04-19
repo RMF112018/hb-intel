@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import type { PriorityActionsItemNormalized } from '../../../homepage/data/priorityActionsContracts.js';
 import { HbHomepageLauncherBand } from '../HbHomepageLauncherBand.js';
@@ -143,22 +143,54 @@ const MOCK_ITEMS: PriorityActionsItemNormalized[] = [
   },
 ];
 
+const MOCK_DATA_STATE: {
+  config:
+    | {
+        showHeading: boolean;
+        headingText: string;
+        overflowLabel: string;
+      }
+    | undefined;
+  items: PriorityActionsItemNormalized[];
+  isLoading: boolean;
+  error: string | undefined;
+} = {
+  config: {
+    showHeading: true,
+    headingText: 'Priority Actions',
+    overflowLabel: 'More tools',
+  },
+  items: MOCK_ITEMS,
+  isLoading: false,
+  error: undefined,
+};
+
 vi.mock('../../../homepage/data/usePriorityActionsData.js', () => ({
   usePriorityActionsData: () => ({
-    config: {
-      showHeading: true,
-      headingText: 'Priority Actions',
-      overflowLabel: 'More tools',
-    },
-    items: MOCK_ITEMS,
-    isLoading: false,
-    error: undefined,
+    config: MOCK_DATA_STATE.config,
+    items: MOCK_DATA_STATE.items,
+    isLoading: MOCK_DATA_STATE.isLoading,
+    error: MOCK_DATA_STATE.error,
   }),
   invalidatePriorityActionsCache: vi.fn(),
 }));
 
 vi.mock('../../../homepage/data/priorityActionsNormalization.js', () => ({
   filterByDevice: (items: PriorityActionsItemNormalized[]) => items,
+  getLauncherVisibleCap: (device: string) => {
+    switch (device) {
+      case 'desktop':
+      case 'laptop':
+        return 5;
+      case 'tabletLandscape':
+      case 'tabletPortrait':
+        return 4;
+      case 'phone':
+        return 3;
+      default:
+        return 5;
+    }
+  },
 }));
 
 vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
@@ -173,7 +205,11 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
       }),
     HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
     HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
-    HbcPriorityRailSkeleton: (): React.JSX.Element => React.createElement('div'),
+    HbcPriorityRailSkeleton: (props: { count: number }): React.JSX.Element =>
+      React.createElement('div', {
+        'data-test-skeleton': 'mock',
+        'data-test-skeleton-count': props.count,
+      }),
   };
 });
 
@@ -196,6 +232,17 @@ const ENTRY_CONTAINER: ShellContainerState = {
 };
 
 describe('HbHomepageLauncherBand governance alignment', () => {
+  beforeEach(() => {
+    MOCK_DATA_STATE.config = {
+      showHeading: true,
+      headingText: 'Priority Actions',
+      overflowLabel: 'More tools',
+    };
+    MOCK_DATA_STATE.items = MOCK_ITEMS;
+    MOCK_DATA_STATE.isLoading = false;
+    MOCK_DATA_STATE.error = undefined;
+  });
+
   it('emits shared-entry governance diagnostics on launcher root', () => {
     const { container } = render(
       <HbHomepageLauncherBand
@@ -210,7 +257,11 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     );
     expect(root?.getAttribute('data-hbc-launcher-alignment-mode')).toBe('shared-entry-governed');
     expect(root?.getAttribute('data-hbc-launcher-density-posture')).toBe('compact');
-    expect(root?.getAttribute('data-hbc-launcher-visible-budget')).toBe('3');
+    expect(root?.getAttribute('data-hbc-launcher-visible-budget')).toBe('4');
+    expect(root?.getAttribute('data-hbc-launcher-host-width')).toBe('900');
+    expect(root?.getAttribute('data-hbc-launcher-host-width-source')).toBe(
+      'entry-container-fallback',
+    );
   });
 
   it('keeps strict alignment budget at or below legacy mode under same state', () => {
@@ -226,6 +277,18 @@ describe('HbHomepageLauncherBand governance alignment', () => {
 
     const strictBudget = Number(strict?.getAttribute('data-hbc-launcher-visible-budget') || 0);
     const legacyBudget = Number(legacy?.getAttribute('data-hbc-launcher-visible-budget') || 0);
-    expect(strictBudget).toBeLessThanOrEqual(legacyBudget);
+    expect(strictBudget).toBe(legacyBudget);
+  });
+
+  it('keeps loading-state density aligned with runtime visible-count governance', () => {
+    MOCK_DATA_STATE.isLoading = true;
+    const { container } = render(
+      <HbHomepageLauncherBand
+        entryContainer={ENTRY_CONTAINER}
+        alignmentMode="shared-entry-governed"
+      />,
+    );
+    const skeleton = container.querySelector('[data-test-skeleton="mock"]');
+    expect(skeleton?.getAttribute('data-test-skeleton-count')).toBe('4');
   });
 });

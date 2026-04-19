@@ -214,7 +214,8 @@ export class LegacyFallbackReviewRepository implements ILegacyFallbackReviewRepo
 
   private async getSP(): Promise<any> {
     const origin = new URL(this.siteUrl).origin;
-    const token = await this.credential.getToken(`${origin}/.default`);
+    const overrideToken = process.env.SHAREPOINT_BEARER_TOKEN?.trim();
+    const token = overrideToken ? { token: overrideToken } : await this.credential.getToken(`${origin}/.default`);
     if (!token?.token) {
       throw new Error('Unable to acquire SharePoint access token for legacy fallback review repository.');
     }

@@ -16,6 +16,10 @@
 // Shared enumerations
 // ---------------------------------------------------------------------------
 
+/**
+ * Legacy authored layout knobs retained for list/admin compatibility.
+ * Homepage launcher runtime does not honor these as governing controls.
+ */
 export type DesktopLayoutMode = 'rail' | 'segmented' | 'hybrid';
 export type TabletLayoutMode = 'grid' | 'rail' | 'hybrid';
 export type MobileLayoutMode = 'grid' | 'scroll' | 'sheet-trigger';
@@ -39,13 +43,21 @@ export interface PriorityActionsConfigResolved {
   overflowLabel: string;
   showHeading: boolean;
   showBadges: boolean;
+  /** Legacy authored knob; homepage runtime is launcher-governed. */
   desktopLayoutMode: DesktopLayoutMode;
+  /** Legacy authored knob; homepage runtime is launcher-governed. */
   tabletLayoutMode: TabletLayoutMode;
+  /** Legacy authored knob; homepage runtime is launcher-governed. */
   mobileLayoutMode: MobileLayoutMode;
+  /** Legacy authored knob; homepage runtime uses binding launcher caps. */
   maxVisibleDesktop: number;
+  /** Legacy authored knob; homepage runtime uses binding launcher caps. */
   maxVisibleLaptop: number;
+  /** Legacy authored knob; homepage runtime uses binding launcher caps. */
   maxVisibleTabletLandscape: number;
+  /** Legacy authored knob; homepage runtime uses binding launcher caps. */
   maxVisibleTabletPortrait: number;
+  /** Legacy authored knob; homepage runtime uses binding launcher caps. */
   maxVisiblePhone: number;
   openExternalInNewTabByDefault: boolean;
   adminNotes: string;
@@ -63,6 +75,8 @@ export interface PriorityActionsItemNormalized {
   href: string;
   description: string;
   iconKey: string;
+  /** Optional explicit launcher icon identity override for homepage surfaces. */
+  launcherIconIdentity?: string;
   badgeLabel: string;
   badgeVariant: BadgeVariant;
   priority: ItemPriority;
@@ -97,13 +111,21 @@ export interface PriorityActionsConfigDraft {
   overflowLabel: string;
   showHeading: boolean;
   showBadges: boolean;
+  /** Legacy authored knob retained for list/admin compatibility. */
   desktopLayoutMode: DesktopLayoutMode;
+  /** Legacy authored knob retained for list/admin compatibility. */
   tabletLayoutMode: TabletLayoutMode;
+  /** Legacy authored knob retained for list/admin compatibility. */
   mobileLayoutMode: MobileLayoutMode;
+  /** Legacy authored knob retained for list/admin compatibility. */
   maxVisibleDesktop: number;
+  /** Legacy authored knob retained for list/admin compatibility. */
   maxVisibleLaptop: number;
+  /** Legacy authored knob retained for list/admin compatibility. */
   maxVisibleTabletLandscape: number;
+  /** Legacy authored knob retained for list/admin compatibility. */
   maxVisibleTabletPortrait: number;
+  /** Legacy authored knob retained for list/admin compatibility. */
   maxVisiblePhone: number;
   openExternalInNewTabByDefault: boolean;
   adminNotes: string;

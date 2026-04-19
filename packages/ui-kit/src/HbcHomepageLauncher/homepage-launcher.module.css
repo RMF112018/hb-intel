@@ -32,7 +32,7 @@
 .band {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 8px;
   min-width: 0;
 }
@@ -41,16 +41,25 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 8px;
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.bandScroller::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Chip anatomy — compact horizontal capsule ──────────── */
 
 .chip {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 1 auto;
+  min-width: 136px;
+  max-width: 248px;
+  inline-size: fit-content;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -116,16 +125,20 @@
 }
 
 .chipTitle {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
+  max-width: 24ch;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: -0.005em;
   line-height: 1.15;
   color: #ffffff;
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* ── Overflow trigger — secondary command layer ──────────── */
@@ -198,10 +211,43 @@
   z-index: 1000;
 }
 
+.overflowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.12);
+}
+
+.overflowHeaderTitle {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-hl-brand-rgb), 0.9);
+}
+
+.overflowHeaderCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(var(--hbc-hl-brand-rgb), 0.1);
+  color: var(--hbc-hl-brand);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
 .menuItem {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 44px;
   padding: 10px 10px;
   border-radius: 8px;
   color: var(--hbc-hl-text);
@@ -215,7 +261,12 @@
 .menuItem:focus-visible {
   background: rgba(var(--hbc-hl-brand-rgb), 0.08);
   color: var(--hbc-hl-brand);
-  outline: none;
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid var(--hbc-hl-brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.26);
 }
 
 .menuItemIcon {
@@ -228,6 +279,31 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.menuItemTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.overflowGroup + .overflowGroup {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.1);
+}
+
+.overflowGroupTitle {
+  padding: 4px 10px 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(var(--hbc-hl-brand-rgb), 0.86);
 }
 
 /* ── Sheet (phone / short-height overflow) ──────────────── */
@@ -301,7 +377,8 @@
  *   Tablet landscape  980–1179     4 chips + More (menu)
  *   Tablet portrait   720–979      4 chips + More (menu)
  *   Phone             ≤719         3 chips + More (sheet), stacked column
- *   Short-height      ≤640 tall    4 chips + More (sheet)
+ *   Short-height      launcher rule subtracts 1 slot from the
+ *                    per-device authoritative count (floor 1)
  *
  * Container-query driven. Visible count is authored in TS (see
  * constants.ts) and asserted on the DOM via data attributes. CSS only
@@ -322,6 +399,9 @@
     height: 56px;
     padding: 0 16px 0 12px;
     flex: 0 0 auto;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
   }
   .overflowTrigger {
     height: 48px;
@@ -334,6 +414,8 @@
     height: 50px;
     padding: 0 12px 0 10px;
     gap: 8px;
+    min-width: 128px;
+    max-width: 196px;
   }
   .chipTitle {
     font-size: 0.75rem;
@@ -343,6 +425,8 @@
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
   .chip {
     height: 52px;
+    min-width: 136px;
+    max-width: 212px;
   }
 }
 
@@ -350,6 +434,8 @@
   .chip {
     height: 54px;
     padding: 0 16px 0 12px;
+    min-width: 148px;
+    max-width: 228px;
   }
   .chipTitle {
     font-size: 0.8125rem;
@@ -362,6 +448,8 @@
     padding: 0 18px 0 14px;
     gap: 12px;
     border-radius: 16px;
+    min-width: 156px;
+    max-width: 244px;
   }
   .chipIcon {
     width: 36px;
@@ -386,6 +474,8 @@
     padding: 0 12px 0 8px;
     gap: 8px;
     border-radius: 12px;
+    min-width: 124px;
+    max-width: 188px;
   }
   .chipIcon {
     width: 28px;

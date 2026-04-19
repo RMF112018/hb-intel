@@ -366,15 +366,15 @@ describe('filterByDevice', () => {
 /* ── resolveByBreakpoint ─────────────────────────────────────────── */
 
 describe('resolveByBreakpoint', () => {
-  it('splits items at the max-visible cap for the device', () => {
+  it('splits items at the launcher-governed cap for the device', () => {
     const items = Array.from({ length: 8 }, (_, i) =>
       mapItemRow(makeRawItem({ ActionKey: `a${i}`, SortOrder: i }))!
     );
     const config = makeConfig({ maxVisibleDesktop: 3 });
     const result = resolveByBreakpoint(items, config, 'desktop');
-    expect(result.primaryItems).toHaveLength(3);
-    expect(result.overflowItems).toHaveLength(5);
-    expect(result.maxVisible).toBe(3);
+    expect(result.primaryItems).toHaveLength(5);
+    expect(result.overflowItems).toHaveLength(3);
+    expect(result.maxVisible).toBe(5);
   });
 
   it('forces OverflowOnly items into overflow regardless of cap', () => {
@@ -388,14 +388,30 @@ describe('resolveByBreakpoint', () => {
     expect(result.overflowItems.map((i) => i.actionKey)).toEqual(['forced']);
   });
 
-  it('uses phone max-visible for phone device', () => {
+  it('uses launcher-governed phone max-visible for phone device', () => {
     const items = Array.from({ length: 6 }, (_, i) =>
       mapItemRow(makeRawItem({ ActionKey: `a${i}`, SortOrder: i }))!
     );
     const config = makeConfig({ maxVisiblePhone: 2 });
     const result = resolveByBreakpoint(items, config, 'phone');
-    expect(result.primaryItems).toHaveLength(2);
-    expect(result.overflowItems).toHaveLength(4);
+    expect(result.primaryItems).toHaveLength(3);
+    expect(result.overflowItems).toHaveLength(3);
+  });
+
+  it('ignores authored maxVisible config knobs for runtime partitioning', () => {
+    const items = Array.from({ length: 10 }, (_, i) =>
+      mapItemRow(makeRawItem({ ActionKey: `a${i}`, SortOrder: i }))!
+    );
+    const strictConfig = makeConfig({
+      maxVisibleDesktop: 1,
+      maxVisibleLaptop: 1,
+      maxVisibleTabletLandscape: 1,
+      maxVisibleTabletPortrait: 1,
+      maxVisiblePhone: 1,
+    });
+    const result = resolveByBreakpoint(items, strictConfig, 'desktop');
+    expect(result.maxVisible).toBe(5);
+    expect(result.primaryItems).toHaveLength(5);
   });
 
   it('returns overflowLabel from config', () => {
@@ -418,8 +434,8 @@ describe('buildPriorityActionsRenderModel', () => {
     const model = buildPriorityActionsRenderModel(config, rawRows, undefined, 'desktop');
     expect(model.config).toBe(config);
     expect(model.allItems).toHaveLength(3);
-    expect(model.breakpoint.primaryItems).toHaveLength(2);
-    expect(model.breakpoint.overflowItems).toHaveLength(1);
+    expect(model.breakpoint.primaryItems).toHaveLength(3);
+    expect(model.breakpoint.overflowItems).toHaveLength(0);
   });
 
   it('filters by audience before breakpoint resolution', () => {

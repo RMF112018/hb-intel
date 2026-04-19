@@ -1,12 +1,10 @@
 /**
- * PriorityActionsRail — Public homepage launcher band webpart.
+ * PriorityActionsRail — standalone Priority Actions webpart surface.
  *
- * Renders a flat, responsive launcher-tile grid through the shared
- * HbcPriorityRail surface. Supports audience / schedule / device
- * filtering via the canonical HBCentral data seam. Breakpoint cadence
- * is container-query driven in CSS; the webpart only resolves
- * device-class + short-height so overflow strategy (menu vs. sheet)
- * can be chosen at render time.
+ * Renders shared rail/list presentation through `HbcPriorityRailSurface`
+ * for standalone, embedded, and admin-preview usage. The hosted homepage
+ * wrapper runtime is governed by `HbHomepageEntryStack` +
+ * `HbHomepageLauncherBand` + `HbcHomepageLauncher`, not by this webpart.
  */
 import * as React from 'react';
 import {
@@ -47,8 +45,9 @@ export interface PriorityActionsRailProps {
   bandKey?: string;
   /**
    * Named presentation context. Defaults to `default` for standalone /
-   * non-homepage mounts. The homepage wrapper explicitly opts into
-   * `homepage-flagship`.
+   * non-homepage mounts. `homepage-flagship` is an explicit rail-surface
+   * variant for selective embeds/tests; the hosted homepage entry stack
+   * does not mount this webpart path.
    */
   surfaceContext?: PriorityRailContext;
   isLoading?: boolean;

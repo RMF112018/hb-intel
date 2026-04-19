@@ -1,16 +1,10 @@
-import { DefaultAzureCredential } from '@azure/identity';
 import {
   createLegacyFallbackRecordKey,
   type ILegacyProjectFallbackRegistryRecord,
   type ILegacyProjectFallbackSyncRun,
 } from '@hbc/models/provisioning';
 import { randomUUID } from 'crypto';
-import { InjectHeaders } from '@pnp/queryable';
-import { spfi } from '@pnp/sp';
-import '@pnp/nodejs-commonjs';
-import '@pnp/sp/items/index.js';
-import '@pnp/sp/lists/index.js';
-import '@pnp/sp/webs/index.js';
+import { GraphListClient } from './graph-list-client.js';
 import { withRetry } from '../../utils/retry.js';
 import {
   LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
@@ -99,8 +93,7 @@ function parseRunItemId(addResult: unknown): number {
 }
 
 export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscoveryRepository {
-  private readonly credential = new DefaultAzureCredential();
-  private readonly siteUrl = getLegacyFallbackListHostSiteUrl();
+  private readonly graph = new GraphListClient(getLegacyFallbackListHostSiteUrl());
 
   async startSyncRun(years: readonly number[]): Promise<ILegacyFallbackSyncRunStart> {
     const runId = randomUUID();
@@ -130,8 +123,7 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
 
     const itemId = await withRetry(async () => {
       try {
-        const sp: any = await this.getSP();
-        const addResult = await sp.web.lists.getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE).items.add({
+        const added = await this.graph.addItem(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE, {
           Title: payload.title,
           RunId: payload.runId,
           StartedUtc: payload.startedUtc,
@@ -151,7 +143,7 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
           FirstErrorMessage: payload.firstErrorMessage,
           SummaryJson: payload.summaryJson,
         });
-        return parseRunItemId(addResult);
+        return Number(added.id);
       } catch (error) {
         throw new Error(`legacy-fallback.sync-run-write-failed: ${error instanceof Error ? error.message : String(error)}`);
       }
@@ -170,11 +162,7 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
   ): Promise<void> {
     await withRetry(async () => {
       try {
-        const sp: any = await this.getSP();
-        await sp.web.lists
-          .getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE)
-          .items.getById(start.itemId)
-          .update({
+        await this.graph.updateItem(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE, start.itemId, {
             Status: completion.status,
             CompletedUtc: completion.completedUtc,
             FoldersScanned: completion.foldersScanned,
@@ -191,7 +179,7 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
             FirstErrorMessage: completion.firstErrorMessage,
             YearsProcessed: JSON.stringify(completion.yearsProcessed),
             SummaryJson: completion.summaryJson,
-          });
+        });
       } catch (error) {
         throw new Error(`legacy-fallback.sync-run-write-failed: ${error instanceof Error ? error.message : String(error)}`);
       }
@@ -203,14 +191,13 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
 
     return withRetry(async () => {
       try {
-        const sp: any = await this.getSP();
-        const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
         const driveId = escapeODataValue(input.driveId);
         const driveItemId = escapeODataValue(input.driveItemId);
-        const existing = await list.items
-          .filter(`DriveId eq '${driveId}' and DriveItemId eq '${driveItemId}'`)
-          .top(1)
-          .select('Id')();
+        const existing = await this.graph.listItems(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, {
+          filter: `fields/DriveId eq '${driveId}' and fields/DriveItemId eq '${driveItemId}'`,
+          select: ['id'],
+          top: 1,
+        });
 
       const payload: Partial<ILegacyProjectFallbackRegistryRecord> & { Title: string } = {
         Title: `${input.legacyYear} ${input.folderName}`.slice(0, 255),
@@ -265,11 +252,11 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
       };
 
         if (!existing.length) {
-          await list.items.add(listPayload);
+          await this.graph.addItem(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, listPayload);
           return 'created';
         }
 
-        await list.items.getById(existing[0].Id).update(listPayload);
+        await this.graph.updateItem(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, existing[0].id, listPayload);
         return 'updated';
       } catch (error) {
         throw new Error(`legacy-fallback.registry-write-failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -280,20 +267,14 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
   async getLatestSyncRunCompletedUtc(): Promise<string | null> {
     return withRetry(async () => {
       try {
-        const sp: any = await this.getSP();
-        const rows = await sp.web.lists
-          .getByTitle(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE)
-          .items
-          .select('CompletedUtc')
-          .filter("Status eq 'completed'")
-          .orderBy('CompletedUtc', false)
-          .top(1)();
-
-        if (!Array.isArray(rows) || rows.length === 0) {
-          return null;
-        }
-
-        const value = String((rows[0] as Record<string, unknown>).CompletedUtc ?? '').trim();
+        const rows = await this.graph.listItems(LEGACY_FALLBACK_SYNC_RUNS_LIST_TITLE, {
+          filter: "fields/Status eq 'completed'",
+          orderby: 'fields/CompletedUtc desc',
+          select: ['CompletedUtc'],
+          top: 1,
+        });
+        if (rows.length === 0) return null;
+        const value = String(rows[0].fields.CompletedUtc ?? '').trim();
         return value.length > 0 ? value : null;
       } catch (error) {
         throw new Error(`legacy-fallback.sync-run-read-failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -303,20 +284,18 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
 
   async listActiveRegistryRecordsByYear(year: number): Promise<readonly ILegacyFallbackRegistryIdentity[]> {
     return withRetry(async () => {
-      const sp: any = await this.getSP();
       const yearValue = Number(year);
-      const rows = await sp.web.lists
-        .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
-        .items.filter(`LegacyYear eq ${yearValue} and IsActive eq 1`)
-        .select('Id', 'LegacyYear', 'DriveId', 'DriveItemId')
-        .top(5000)();
-
-      return (rows as Array<Record<string, unknown>>)
+      const rows = await this.graph.listItems(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, {
+        filter: `fields/LegacyYear eq ${yearValue} and fields/IsActive eq true`,
+        select: ['LegacyYear', 'DriveId', 'DriveItemId'],
+        top: 5000,
+      });
+      return rows
         .map((row) => ({
-          itemId: Number(row.Id ?? 0),
-          legacyYear: Number(row.LegacyYear ?? yearValue),
-          driveId: String(row.DriveId ?? ''),
-          driveItemId: String(row.DriveItemId ?? ''),
+          itemId: Number(row.id),
+          legacyYear: Number(row.fields.LegacyYear ?? yearValue),
+          driveId: String(row.fields.DriveId ?? ''),
+          driveItemId: String(row.fields.DriveItemId ?? ''),
         }))
         .filter((row) => row.itemId > 0 && row.driveId.length > 0 && row.driveItemId.length > 0);
     });
@@ -328,16 +307,11 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
     validatedAtUtc: string,
     reason: string,
   ): Promise<number> {
-    if (!itemIds.length) {
-      return 0;
-    }
-
+    if (!itemIds.length) return 0;
     await withRetry(async () => {
       try {
-        const sp: any = await this.getSP();
-        const list = sp.web.lists.getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE);
         for (const itemId of itemIds) {
-          await list.items.getById(itemId).update({
+          await this.graph.updateItem(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, itemId, {
             IsActive: false,
             LastValidatedUtc: validatedAtUtc,
             DiscoveryRunId: runId,
@@ -348,21 +322,6 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
         throw new Error(`legacy-fallback.registry-write-failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     });
-
     return itemIds.length;
-  }
-
-  private async getSP(): Promise<any> {
-    const origin = new URL(this.siteUrl).origin;
-    const token = await this.credential.getToken(`${origin}/.default`);
-    if (!token?.token) {
-      throw new Error('Unable to acquire SharePoint access token for discovery repository.');
-    }
-
-    return (spfi(this.siteUrl) as any).using(
-      InjectHeaders({
-        Authorization: `Bearer ${token.token}`,
-      }),
-    );
   }
 }

@@ -14,12 +14,12 @@ import { HBC_HOMEPAGE_LAUNCHER_VERSION } from '../constants.js';
 import type { HomepageLauncherChipModel } from '../types.js';
 
 const CHIPS: HomepageLauncherChipModel[] = [
-  { id: 'approve-rfi', title: 'Approve RFI', href: '/rfi', icon: AlertTriangle },
-  { id: 'sign-co', title: 'Sign CO #22', href: '/co/22', icon: ArrowRight },
-  { id: 'safety', title: 'Safety Review', href: '/safety', icon: CheckCircle2 },
-  { id: 'field', title: 'Field Report', href: '/field', icon: ArrowRight },
-  { id: 'punch', title: 'Punch List', href: '/punch', icon: ArrowRight },
-  { id: 'timesheet', title: 'Submit Timesheet', href: '/ts', icon: ArrowRight },
+  { id: 'approve-rfi', serviceKey: 'approve-rfi', title: 'Approve RFI', href: '/rfi', icon: AlertTriangle, groupKey: 'approvals', groupTitle: 'Approvals' },
+  { id: 'sign-co', serviceKey: 'sign-co', title: 'Sign CO #22', href: '/co/22', icon: ArrowRight, groupKey: 'approvals', groupTitle: 'Approvals' },
+  { id: 'safety', serviceKey: 'safety', title: 'Safety Review', href: '/safety', icon: CheckCircle2, groupKey: 'field', groupTitle: 'Field Ops' },
+  { id: 'field', serviceKey: 'field', title: 'Field Report', href: '/field', icon: ArrowRight, groupKey: 'field', groupTitle: 'Field Ops' },
+  { id: 'punch', serviceKey: 'punch', title: 'Punch List', href: '/punch', icon: ArrowRight },
+  { id: 'timesheet', serviceKey: 'timesheet', title: 'Submit Timesheet', href: '/ts', icon: ArrowRight, openInNewTab: true },
 ];
 
 describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
@@ -37,6 +37,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       HBC_HOMEPAGE_LAUNCHER_VERSION,
     );
     expect(root!.getAttribute('data-hbc-homepage-launcher-device-class')).toBe('desktop');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-row-primitive')).toBe('variable-width');
     expect(root!.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('5');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-count')).toBe('1');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('menu');
@@ -49,6 +50,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(chips.length).toBe(4);
     for (const chip of chips) {
       expect(chip.getAttribute('data-hbc-ui')).toBe('homepage-launcher-chip');
+      expect(chip.getAttribute('data-hbc-chip-width-mode')).toBe('variable');
     }
   });
 
@@ -118,7 +120,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
   it('external chips render with target=_blank and a visually-hidden affordance note', () => {
     render(
       <HbcHomepageLauncher
-        primary={[{ id: 'x', title: 'External Tool', href: 'https://x', external: true }]}
+        primary={[{ id: 'x', serviceKey: 'x', title: 'External Tool', href: 'https://x', external: true }]}
         deviceClass="desktop"
       />,
     );
@@ -126,5 +128,112 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
     expect(link.getAttribute('data-hbc-chip-external')).toBe('true');
+  });
+
+  it('honors explicit openInNewTab even for internal links', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={[{ id: 'internal', serviceKey: 'internal', title: 'Internal New Tab', href: '/internal', openInNewTab: true }]}
+        deviceClass="desktop"
+      />,
+    );
+    const link = screen.getByRole('link', { name: /Internal New Tab/ });
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('data-hbc-chip-new-tab')).toBe('true');
+  });
+
+  it('uses the visible chip title as truncation-rescue tooltip text', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={[
+          {
+            id: 'long-chip',
+            serviceKey: 'long-chip',
+            title: 'Approve subcontractor compliance package for mobilization',
+            href: '/compliance',
+            description: 'Legacy description should not override title rescue.',
+          },
+        ]}
+        deviceClass="desktop"
+      />,
+    );
+    const link = screen.getByRole('link', {
+      name: /Approve subcontractor compliance package for mobilization/i,
+    });
+    expect(link.getAttribute('title')).toBe(
+      'Approve subcontractor compliance package for mobilization',
+    );
+  });
+
+  it('renders overflow grouping headings when group metadata is provided', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={CHIPS.slice(0, 2)}
+        overflow={CHIPS.slice(2)}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    expect(screen.getByText('Field Ops')).toBeInTheDocument();
+  });
+
+  it('renders grouped overflow deterministically in menu mode', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={CHIPS.slice(0, 1)}
+        overflow={[
+          { id: 'z-qa', serviceKey: 'z-qa', title: 'QA Checklist', href: '/qa', groupKey: 'quality', groupTitle: 'Quality' },
+          { id: 'a-approve', serviceKey: 'a-approve', title: 'Approve Budget', href: '/budget', groupKey: 'approvals', groupTitle: 'Approvals' },
+          { id: 'b-approve', serviceKey: 'b-approve', title: 'Sign Change Order', href: '/co', groupKey: 'approvals', groupTitle: 'Approvals' },
+        ]}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const groupHeadings = screen.getAllByText(/Approvals|Quality/).map((node) => node.textContent);
+    expect(groupHeadings).toEqual(['Approvals', 'Quality']);
+    const menuItems = screen.getAllByRole('menuitem').map((node) => node.textContent);
+    expect(menuItems).toEqual(['Approve Budget', 'Sign Change Order', 'QA Checklist']);
+  });
+
+  it('uses visible overflow title as truncation-rescue tooltip text', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={CHIPS.slice(0, 1)}
+        overflow={[
+          {
+            id: 'long-overflow',
+            serviceKey: 'long-overflow',
+            title: 'Review prefabrication delivery and crane sequencing checklist',
+            href: '/prefab-checklist',
+            description: 'Description should not replace title rescue.',
+          },
+        ]}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const item = screen.getByRole('menuitem', {
+      name: /Review prefabrication delivery and crane sequencing checklist/i,
+    });
+    expect(item.getAttribute('title')).toBe(
+      'Review prefabrication delivery and crane sequencing checklist',
+    );
+  });
+
+  it('keeps grouped overflow intentional in sheet mode', async () => {
+    render(
+      <HbcHomepageLauncher
+        primary={CHIPS.slice(0, 2)}
+        overflow={[
+          { id: 'field-log', serviceKey: 'field-log', title: 'Field Log', href: '/field-log', groupKey: 'field', groupTitle: 'Field Ops' },
+          { id: 'incident', serviceKey: 'incident', title: 'Incident Report', href: '/incident', groupKey: 'field', groupTitle: 'Field Ops' },
+        ]}
+        deviceClass="phone"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    expect(await screen.findByText('Field Ops')).toBeInTheDocument();
+    expect((await screen.findAllByRole('menuitem')).length).toBe(2);
   });
 });

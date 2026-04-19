@@ -14,20 +14,30 @@ export function HbcHomepageLauncherChip({
   chip,
   className,
 }: HbcHomepageLauncherChipProps): React.JSX.Element {
+  // Launcher icon identity is resolved upstream by adapter governance.
+  // This surface intentionally renders the resolved icon + text label pair.
   const Icon = chip.icon;
+  const shouldOpenInNewTab = chip.openInNewTab ?? Boolean(chip.external);
   const isExternal = Boolean(chip.external);
   const prefersReducedMotion = useReducedMotion();
-  const linkProps = isExternal
+  const linkProps = shouldOpenInNewTab
     ? { href: chip.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: chip.href };
 
   return (
     <motion.a
       {...linkProps}
+      aria-label={chip.ariaLabel ?? chip.title}
+      title={chip.title}
       className={clsx(styles.chip, className)}
       data-hbc-ui="homepage-launcher-chip"
       data-hbc-chip-id={chip.id}
+      data-hbc-chip-service-key={chip.serviceKey}
+      data-hbc-chip-group-key={chip.groupKey}
+      data-hbc-chip-icon-key={chip.iconKey}
       data-hbc-chip-external={isExternal ? 'true' : undefined}
+      data-hbc-chip-new-tab={shouldOpenInNewTab ? 'true' : undefined}
+      data-hbc-chip-width-mode="variable"
       whileHover={prefersReducedMotion ? undefined : { scale: 1.01 }}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.12 }}
@@ -38,7 +48,7 @@ export function HbcHomepageLauncherChip({
         </span>
       ) : null}
       <span className={styles.chipTitle}>{chip.title}</span>
-      {isExternal ? (
+      {shouldOpenInNewTab ? (
         <span className={styles.visuallyHidden}>(opens in new tab)</span>
       ) : null}
     </motion.a>

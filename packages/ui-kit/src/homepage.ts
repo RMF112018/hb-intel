@@ -312,8 +312,9 @@ export type {
 } from './HbcHomepageLauncher/index.js';
 
 // ── Phase 02 — Priority Rail surface family ─────────────────────────
-// Governed command band for the homepage Priority Actions zone.
+// Governed rail/list surface family for standalone priority-action mounts.
 // Shared by the public runtime rail and admin preview surface.
+// Hosted homepage launcher authority is the `HbcHomepageLauncher` family.
 
 export {
   HbcPriorityRailSurface,

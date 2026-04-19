@@ -73,6 +73,8 @@ function cloneDraft<T>(value: T): T {
 export function createConfigDraftFromResolved(
   config: PriorityActionsConfigResolved,
 ): PriorityActionsConfigDraft {
+  // Keep legacy layout/cap fields in draft state for admin/list parity.
+  // Homepage launcher runtime governance is handled in launcher seams.
   return {
     title: config.title,
     bandKey: config.bandKey,

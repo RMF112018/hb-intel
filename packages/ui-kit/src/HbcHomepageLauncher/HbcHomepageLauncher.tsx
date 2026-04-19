@@ -57,6 +57,7 @@ export function HbcHomepageLauncher(
       className={clsx(styles.root, className)}
       data-hbc-ui={HBC_HOMEPAGE_LAUNCHER_SURFACE_ID}
       data-hbc-homepage-launcher="root"
+      data-hbc-homepage-launcher-row-primitive="variable-width"
       data-hbc-homepage-launcher-version={HBC_HOMEPAGE_LAUNCHER_VERSION}
       data-hbc-homepage-launcher-device-class={deviceClass}
       data-hbc-homepage-launcher-visible-count={primary.length}

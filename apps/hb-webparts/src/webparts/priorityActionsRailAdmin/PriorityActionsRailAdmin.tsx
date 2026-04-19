@@ -14,7 +14,11 @@ import {
 import { getSiteUrl } from '../../homepage/data/spContext.js';
 import { fetchPriorityActionsConfigWithDiagnostics } from '../../homepage/data/priorityActionsConfigListSource.js';
 import { fetchPriorityActionsItems } from '../../homepage/data/priorityActionsItemsListSource.js';
-import { normalizeItemRows, type DeviceClass } from '../../homepage/data/priorityActionsNormalization.js';
+import {
+  getLauncherVisibleCap,
+  normalizeItemRows,
+  type DeviceClass,
+} from '../../homepage/data/priorityActionsNormalization.js';
 import { invalidatePriorityActionsCache } from '../../homepage/data/usePriorityActionsData.js';
 import {
   buildPriorityRailSections,
@@ -77,6 +81,9 @@ const LIBRARY_FILTER_LABELS: Readonly<Record<LibraryFilter, string>> = Object.fr
   reordered: 'Reordered',
   'archive-intent': 'Archive intent',
 });
+
+const LEGACY_KNOBS_HELP =
+  'Layout and max-visible settings are stored for legacy/admin compatibility only; homepage launcher runtime uses binding launcher governance.';
 
 function firstFailure(results: Array<{ ok: boolean; error?: string }>): string | undefined {
   const failed = results.find((result) => !result.ok);
@@ -308,17 +315,10 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
     return 'default';
   }, [previewItems]);
 
-  const previewMaxVisible = React.useMemo(() => {
-    if (!configDraft) return 5;
-    switch (previewDevice) {
-      case 'desktop': return configDraft.maxVisibleDesktop;
-      case 'laptop': return configDraft.maxVisibleLaptop;
-      case 'tabletLandscape': return configDraft.maxVisibleTabletLandscape;
-      case 'tabletPortrait': return configDraft.maxVisibleTabletPortrait;
-      case 'phone': return configDraft.maxVisiblePhone;
-      default: return configDraft.maxVisibleDesktop;
-    }
-  }, [configDraft, previewDevice]);
+  const previewMaxVisible = React.useMemo(
+    () => getLauncherVisibleCap(previewDevice),
+    [previewDevice],
+  );
 
   const previewPresentation = React.useMemo(() => {
     if (!configDraft) {
@@ -660,24 +660,24 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
             )}
             <div className={styles.fieldRowInlineWrap}>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Desktop Layout</label>
-                <select className={styles.select} value={configDraft?.desktopLayoutMode ?? 'rail'} onChange={(e) => updateConfigDraft({ desktopLayoutMode: e.target.value as PriorityActionsConfigDraft['desktopLayoutMode'] })} disabled={!canEdit}>
+                <label className={styles.label}>Desktop Layout (legacy)</label>
+                <select className={styles.select} value={configDraft?.desktopLayoutMode ?? 'rail'} onChange={(e) => updateConfigDraft({ desktopLayoutMode: e.target.value as PriorityActionsConfigDraft['desktopLayoutMode'] })} disabled>
                   <option value="rail">Rail</option>
                   <option value="segmented">Segmented</option>
                   <option value="hybrid">Hybrid</option>
                 </select>
               </div>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Tablet Layout</label>
-                <select className={styles.select} value={configDraft?.tabletLayoutMode ?? 'grid'} onChange={(e) => updateConfigDraft({ tabletLayoutMode: e.target.value as PriorityActionsConfigDraft['tabletLayoutMode'] })} disabled={!canEdit}>
+                <label className={styles.label}>Tablet Layout (legacy)</label>
+                <select className={styles.select} value={configDraft?.tabletLayoutMode ?? 'grid'} onChange={(e) => updateConfigDraft({ tabletLayoutMode: e.target.value as PriorityActionsConfigDraft['tabletLayoutMode'] })} disabled>
                   <option value="grid">Grid</option>
                   <option value="rail">Rail</option>
                   <option value="hybrid">Hybrid</option>
                 </select>
               </div>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Mobile Layout</label>
-                <select className={styles.select} value={configDraft?.mobileLayoutMode ?? 'sheet-trigger'} onChange={(e) => updateConfigDraft({ mobileLayoutMode: e.target.value as PriorityActionsConfigDraft['mobileLayoutMode'] })} disabled={!canEdit}>
+                <label className={styles.label}>Mobile Layout (legacy)</label>
+                <select className={styles.select} value={configDraft?.mobileLayoutMode ?? 'sheet-trigger'} onChange={(e) => updateConfigDraft({ mobileLayoutMode: e.target.value as PriorityActionsConfigDraft['mobileLayoutMode'] })} disabled>
                   <option value="grid">Grid</option>
                   <option value="scroll">Scroll</option>
                   <option value="sheet-trigger">Sheet Trigger</option>
@@ -686,22 +686,23 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
             </div>
             <div className={styles.fieldRowInlineWrap}>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Max Desktop</label>
-                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisibleDesktop ?? 5} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisibleDesktop: parseInt(e.target.value, 10) || 5 })} disabled={!canEdit} />
+                <label className={styles.label}>Max Desktop (legacy)</label>
+                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisibleDesktop ?? 5} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisibleDesktop: parseInt(e.target.value, 10) || 5 })} disabled />
               </div>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Max Laptop</label>
-                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisibleLaptop ?? 5} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisibleLaptop: parseInt(e.target.value, 10) || 5 })} disabled={!canEdit} />
+                <label className={styles.label}>Max Laptop (legacy)</label>
+                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisibleLaptop ?? 5} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisibleLaptop: parseInt(e.target.value, 10) || 5 })} disabled />
               </div>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Max Tablet Portrait</label>
-                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisibleTabletPortrait ?? 4} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisibleTabletPortrait: parseInt(e.target.value, 10) || 4 })} disabled={!canEdit} />
+                <label className={styles.label}>Max Tablet Portrait (legacy)</label>
+                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisibleTabletPortrait ?? 4} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisibleTabletPortrait: parseInt(e.target.value, 10) || 4 })} disabled />
               </div>
               <div className={styles.fieldRow}>
-                <label className={styles.label}>Max Phone</label>
-                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisiblePhone ?? 4} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisiblePhone: parseInt(e.target.value, 10) || 4 })} disabled={!canEdit} />
+                <label className={styles.label}>Max Phone (legacy)</label>
+                <input type="number" className={`${styles.input} ${styles.inputSmall}`} value={configDraft?.maxVisiblePhone ?? 4} min={1} max={20} onChange={(e) => updateConfigDraft({ maxVisiblePhone: parseInt(e.target.value, 10) || 4 })} disabled />
               </div>
             </div>
+            <div className={styles.help}>{LEGACY_KNOBS_HELP}</div>
           </div>
 
           <div className={styles.section}>
@@ -955,7 +956,7 @@ export function PriorityActionsRailAdmin({ siteUrl: siteUrlProp }: PriorityActio
                   ))}
                 </div>
               </div>
-              <div className={styles.help}>Authored {'->'} Resolved: {previewNormalizationLabel}</div>
+              <div className={styles.help}>Stored legacy {'->'} Resolved runtime: {previewNormalizationLabel}</div>
               <div className={styles.previewDiagnostics}>
                 <span>Excluded (device hidden): {previewExclusionCounts['device-hidden']}</span>
                 <span>Excluded (schedule): {previewExclusionCounts['schedule-inactive']}</span>

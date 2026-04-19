@@ -1,8 +1,9 @@
 /**
  * HbcPriorityRail — Priority Actions command band surface family.
  *
- * Governed surface family for the homepage Priority Actions zone.
- * Shared by the public runtime rail and admin preview surface.
+ * Governed rail/list surface family for standalone priority-action mounts,
+ * including the public runtime rail and admin preview surface.
+ * Hosted homepage launcher authority remains `HbcHomepageLauncher`.
  *
  * Import via `@hbc/ui-kit/homepage`.
  */

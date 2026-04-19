@@ -24,20 +24,19 @@ export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'menu' | 'sheet
  *   masthead rhythm, container-driven flagship degradation) is suppressed
  *   here. This is the safe default for any non-homepage mount.
  *
- * - `homepage-flagship` — the flagship homepage top-band context. Only
- *   the wrapper-owned homepage embed (`HbHomepageEntryStack`) should opt
- *   into this context. It authorizes flagship-only presentation
- *   decisions (featured slot rendering, upgraded launch-chip affordance,
- *   container-query flagship state, secondary-layer overflow rhythm)
- *   without reclassifying the rail as a shell occupant or band member.
+ * - `homepage-flagship` — an explicit flagship variant of the
+ *   `HbcPriorityRailSurface` for selective embeds/tests that need the
+ *   vertical tile presentation posture. The hosted homepage wrapper path
+ *   is governed by `HbcHomepageLauncher`; this context does not redefine
+ *   runtime authority.
  *
  * Isolation contract:
  * - Default consumers (including admin preview) MUST NOT render
  *   featured-slot content even if a caller sets
  *   `PriorityRailSectionModel.featured`.
- * - Flagship consumers MUST go through the wrapper-owned
+ * - Consumers MUST go through the explicit
  *   `surfaceContext="homepage-flagship"` prop path; directly setting the
- *   flagship CSS class on a non-homepage mount is not supported.
+ *   flagship CSS class on a mount is not supported.
  */
 export type PriorityRailContext = 'default' | 'homepage-flagship';
 

@@ -2875,13 +2875,13 @@ for (const domain of domains) {
     // ── hb-intel-homepage effectiveness proof ───────────────────────────
     // The package-truth proof answers "is the .sppkg structurally sound
     // and does the packaged bundle match the source bundle?" It does not
-    // directly answer "is the wrapper-owned flagship rail path included
+    // directly answer "is the wrapper-owned homepage launcher path included
     // in the deployed artifact?" — which is the question that governs
     // whether the hosted homepage will actually render flagship-grade
     // Priority Actions. This block emits a focused effectiveness proof
-    // that checks for distinctive runtime markers of the flagship path
+    // that checks for distinctive runtime markers of the launcher path
     // inside the packaged bundle. Failing markers indicate the wrapper/
-    // rail path was not actually compiled into the deployed artifact.
+    // launcher path was not actually compiled into the deployed artifact.
     if (domain.dir === 'hb-homepage') {
       const appBundleFingerprint = packageTruth.proof.packagedAssets.appBundle;
       const bundleArchivePathForMarkers = appBundleFingerprint.archivePath;
@@ -2951,7 +2951,7 @@ for (const domain of domains) {
             pass: missingMarkers.length === 0,
             details:
               missingMarkers.length === 0
-                ? ['All distinctive flagship runtime markers present in packaged bundle']
+                ? ['All distinctive homepage-launcher runtime markers present in packaged bundle']
                 : missingMarkers.map(
                     (m) => `Missing marker "${m.marker}" (needle="${m.needle}") in packaged bundle`,
                   ),

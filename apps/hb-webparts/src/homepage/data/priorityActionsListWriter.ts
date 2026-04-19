@@ -72,6 +72,8 @@ interface NormalizedConfigDraft extends PriorityActionsConfigDraft {}
 interface NormalizedItemDraft extends PriorityActionsItemDraft {}
 
 function normalizeConfigDraftForWrite(draft: PriorityActionsConfigDraft): NormalizedConfigDraft {
+  // Legacy knob normalization: persisted for list/admin compatibility,
+  // but homepage launcher runtime uses binding visible-count governance.
   return {
     ...draft,
     title: normalizeRequiredText(draft.title),
@@ -100,6 +102,8 @@ function validateConfigWriteCandidate(draft: PriorityActionsConfigDraft): string
     return 'Overflow label is required.';
   }
 
+  // Keep stored cap values sane even though homepage launcher runtime
+  // no longer consumes authored per-device caps directly.
   const caps = [
     draft.maxVisibleDesktop,
     draft.maxVisibleLaptop,

@@ -3,16 +3,17 @@
  *
  * Two presentation contexts:
  *
- * - `homepage-flagship` — a premium HB-branded quick-launch tile band
- *   rendered flat beneath the homepage hero. One flat grid, one click
- *   target per tile, no masthead, no section headers, no featured slot,
- *   no numbering, no eyebrow — the tile grid is the product. Sections
- *   and `featured` fields on the input contract are ignored here; the
- *   surface renders `items` in order.
+ * - `homepage-flagship` — a premium HB-branded vertical tile variant for
+ *   explicit rail-surface embeds. It renders one flat grid with one click
+ *   target per tile; sections and `featured` fields on the input contract
+ *   are ignored here and `items` render in order.
  *
  * - `default` — stacked action list for admin preview and non-homepage
- *   embeds. Sections and row separators still render; public contract
- *   is unchanged for that path.
+ *   embeds. Sections and row separators still render; public contract is
+ *   unchanged for that path.
+ *
+ * Runtime-authority note: hosted homepage launcher rendering is governed
+ * by `HbHomepageLauncherBand` + `HbcHomepageLauncher`, not this component.
  */
 import * as React from 'react';
 import { clsx } from 'clsx';

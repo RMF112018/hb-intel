@@ -1,11 +1,12 @@
 /**
  * Priority Actions presentation — launcher band.
  *
- * The rail renders as a flat launcher grid beneath the homepage hero.
- * Presentation is driven by container size, not an authored per-device
- * layout matrix: tile density falls out of CSS container queries, and
- * the data layer only supplies `deviceClass` + `shortHeightConstrained`
- * for overflow-strategy selection.
+ * Shared presentation helpers for two adjacent surfaces:
+ * - homepage launcher band (`HbHomepageLauncherBand` + `HbcHomepageLauncher`)
+ * - standalone rail webpart (`PriorityActionsRail` + `HbcPriorityRailSurface`)
+ *
+ * The hosted homepage authority is the launcher band path above. This file
+ * keeps shared device/overflow helpers so both paths can remain aligned.
  */
 import type {
   PriorityRailActionModel,
@@ -101,9 +102,9 @@ export function resolvePriorityRailDeviceForContainer(
 }
 
 /**
- * Launcher presentation resolution. The surface is always a flat grid;
- * the only device-class decision is overflow strategy — sheet on
- * handheld / short-height, menu everywhere else.
+ * Launcher presentation resolution used by the standalone rail surface.
+ * The presentation decision is overflow strategy only: sheet on handheld /
+ * short-height, menu everywhere else.
  */
 export function resolveLauncherPresentation(
   resolution: PriorityRailDeviceResolution,
@@ -122,8 +123,9 @@ export function resolveLauncherPresentation(
 
 /**
  * Backward-compatibility shim. The authored-layout matrix was torn
- * down in favor of a uniform launcher grid; this now returns a
- * device-only resolution and ignores the config matrix.
+ * down in favor of a uniform device-only resolution and ignores the
+ * config matrix. Layout/cap fields remain list-stored for compatibility,
+ * but do not govern homepage launcher runtime.
  */
 export function resolvePriorityRailPresentationForDevice(
   _config: unknown,

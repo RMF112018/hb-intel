@@ -7,14 +7,23 @@
  *
  * The launcher band governs visible-chip density explicitly per device
  * class (binding per UI-Doctrine-SPFx-Homepage-Overlay § 7.1–7.4),
- * overriding the authored `maxVisible*` knobs on the admin config.
+ * overriding authored `maxVisible*` knobs and authored layout-matrix
+ * semantics on the admin config.
  */
 import {
-  AlertCircle,
-  AlertTriangle,
   ArrowRight,
   Briefcase,
-  CheckCircle2,
+  Calendar,
+  DollarSign,
+  FileText,
+  HardHat,
+  Landmark,
+  Link2,
+  Mail,
+  Search,
+  Settings,
+  Shield,
+  Users,
   type LucideIcon,
   HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
   type HomepageLauncherChipModel,
@@ -23,30 +32,104 @@ import {
 import type { PriorityActionsItemNormalized } from './priorityActionsContracts.js';
 import type { PriorityRailDeviceResolution } from './priorityActionsPresentation.js';
 
-const BADGE_ICON_MAP: Record<string, LucideIcon> = {
-  critical: AlertCircle,
-  warning: AlertTriangle,
-  error: AlertCircle,
-  atRisk: AlertTriangle,
-  success: CheckCircle2,
-  completed: CheckCircle2,
-  onTrack: CheckCircle2,
-};
+const ICON_BY_GOVERNED_KEY: Readonly<Record<string, LucideIcon>> = Object.freeze({
+  finance: DollarSign,
+  field: HardHat,
+  hr: Users,
+  safety: Shield,
+  quality: Shield,
+  risk: Shield,
+  ops: Settings,
+  admin: Settings,
+  legal: Landmark,
+  it: Settings,
+  project: Calendar,
+  report: FileText,
+  schedule: Calendar,
+  email: Mail,
+  document: FileText,
+  team: Users,
+  form: FileText,
+  policy: Landmark,
+  search: Search,
+  link: Link2,
+  clipboard: FileText,
+});
 
-export function resolveChipIcon(variant: string | undefined): LucideIcon {
-  if (!variant) return ArrowRight;
-  return BADGE_ICON_MAP[variant] ?? ArrowRight;
+const SERVICE_FALLBACK_MATCHERS: ReadonlyArray<readonly [token: string, icon: LucideIcon]> = [
+  ['safety', Shield],
+  ['quality', Shield],
+  ['risk', Shield],
+  ['finance', DollarSign],
+  ['budget', DollarSign],
+  ['cost', DollarSign],
+  ['field', HardHat],
+  ['project', Calendar],
+  ['schedule', Calendar],
+  ['report', FileText],
+  ['document', FileText],
+  ['policy', Landmark],
+  ['legal', Landmark],
+  ['team', Users],
+  ['hr', Users],
+  ['email', Mail],
+  ['search', Search],
+  ['admin', Settings],
+  ['ops', Settings],
+] as const;
+
+function resolveIconByGovernedKey(iconKey: string | undefined): LucideIcon | undefined {
+  if (!iconKey) return undefined;
+  const normalized = iconKey.trim().toLowerCase();
+  if (!normalized) return undefined;
+  return ICON_BY_GOVERNED_KEY[normalized];
+}
+
+function resolveServiceFallbackIcon(item: PriorityActionsItemNormalized): LucideIcon | undefined {
+  const haystack = [
+    item.actionKey,
+    item.groupKey,
+    item.groupTitle,
+    item.title,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  for (const [token, icon] of SERVICE_FALLBACK_MATCHERS) {
+    if (haystack.includes(token)) return icon;
+  }
+  return undefined;
+}
+
+export function resolveChipIcon(item: PriorityActionsItemNormalized): LucideIcon {
+  const explicitIdentity = resolveIconByGovernedKey(item.launcherIconIdentity);
+  if (explicitIdentity) return explicitIdentity;
+  const iconKeyIdentity = resolveIconByGovernedKey(item.iconKey);
+  if (iconKeyIdentity) return iconKeyIdentity;
+  const serviceFallback = resolveServiceFallbackIcon(item);
+  if (serviceFallback) return serviceFallback;
+  return ArrowRight;
 }
 
 export function mapItemToChip(
   item: PriorityActionsItemNormalized,
 ): HomepageLauncherChipModel {
+  const description = item.description?.trim() || undefined;
+  const groupKey = item.groupKey?.trim() || undefined;
+  const groupTitle = item.groupTitle?.trim() || undefined;
   return {
     id: item.actionKey || String(item.id),
+    serviceKey: item.actionKey || String(item.id),
     title: item.title,
     href: item.href,
-    icon: resolveChipIcon(item.badgeVariant),
+    description,
+    icon: resolveChipIcon(item),
+    iconKey: item.iconKey || undefined,
+    groupKey,
+    groupTitle,
     external: item.isExternal,
+    openInNewTab: item.openInNewTab,
+    ariaLabel: description ? `${item.title}. ${description}` : item.title,
   };
 }
 
@@ -84,17 +167,6 @@ export interface LauncherPartition {
   visibleBudget: number;
 }
 
-const SHELL_STATE_VISIBLE_CAP: Readonly<Record<PriorityRailDeviceResolution['shellState'], number>> =
-  Object.freeze({
-    'ultrawide-desktop': 8,
-    'standard-laptop': 6,
-    'tablet-landscape': 4,
-    'tablet-portrait-large': 3,
-    'tablet-portrait': 3,
-    'phone-portrait': 2,
-    'phone-landscape': 2,
-  });
-
 export interface LauncherBudgetOptions {
   strictShellAlignment: boolean;
 }
@@ -113,13 +185,11 @@ export function partitionItems(
   resolution: Pick<PriorityRailDeviceResolution, 'shortHeightConstrained' | 'shellState'>,
   options: LauncherBudgetOptions = { strictShellAlignment: true },
 ): LauncherPartition {
-  const baseVisible = Math.max(
+  void options;
+  const maxVisible = Math.max(
     1,
     HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[deviceClass] - (resolution.shortHeightConstrained ? 1 : 0),
   );
-  const maxVisible = options.strictShellAlignment
-    ? Math.max(1, Math.min(baseVisible, SHELL_STATE_VISIBLE_CAP[resolution.shellState]))
-    : baseVisible;
 
   const forced: PriorityActionsItemNormalized[] = [];
   const eligible: PriorityActionsItemNormalized[] = [];

@@ -1,12 +1,6 @@
-import { DefaultAzureCredential } from '@azure/identity';
-import { InjectHeaders } from '@pnp/queryable';
-import { spfi } from '@pnp/sp';
-import '@pnp/nodejs-commonjs';
-import '@pnp/sp/items/index.js';
-import '@pnp/sp/lists/index.js';
-import '@pnp/sp/webs/index.js';
 import { PROJECTS_LIST_NAME } from '../projects-list-contract.js';
 import { resolveSpField } from '../projects-list-mapper.js';
+import { GraphListClient } from './graph-list-client.js';
 import { getLegacyFallbackListHostSiteUrl } from './list-descriptors.js';
 import { normalizeLegacyCandidateName } from './matching-contracts.js';
 import type { ILegacyFallbackProjectIndexRecord } from './matching-engine.js';
@@ -57,33 +51,16 @@ export interface ILegacyFallbackProjectIndexProvider {
 }
 
 export class LegacyFallbackProjectIndexProvider implements ILegacyFallbackProjectIndexProvider {
-  private readonly credential = new DefaultAzureCredential();
-  private readonly siteUrl = getLegacyFallbackListHostSiteUrl();
+  private readonly graph = new GraphListClient(getLegacyFallbackListHostSiteUrl());
 
   async loadIndex(): Promise<readonly ILegacyFallbackProjectIndexRecord[]> {
-    const sp: any = await this.getSP();
     const fieldNames = resolveProjectIndexFieldNames();
-    const rows = (await sp.web.lists
-      .getByTitle(PROJECTS_LIST_NAME)
-      .items.select('Id', 'Title', fieldNames.numberField, fieldNames.nameField, fieldNames.yearField)
-      .top(5000)()) as Array<Record<string, unknown>>;
-
+    const rows = await this.graph.listItems(PROJECTS_LIST_NAME, {
+      select: ['Title', fieldNames.numberField, fieldNames.nameField, fieldNames.yearField],
+      top: 5000,
+    });
     return rows
-      .map((row) => mapProjectIndexRow(row, fieldNames))
+      .map((r) => mapProjectIndexRow({ Id: Number(r.id), ...r.fields }, fieldNames))
       .filter((entry): entry is ILegacyFallbackProjectIndexRecord => entry !== null);
-  }
-
-  private async getSP(): Promise<any> {
-    const origin = new URL(this.siteUrl).origin;
-    const token = await this.credential.getToken(`${origin}/.default`);
-    if (!token?.token) {
-      throw new Error('Unable to acquire SharePoint access token for project index provider.');
-    }
-
-    return (spfi(this.siteUrl) as any).using(
-      InjectHeaders({
-        Authorization: `Bearer ${token.token}`,
-      }),
-    );
   }
 }

@@ -35,27 +35,72 @@ import type {
 } from './types.js';
 import styles from './homepage-launcher.module.css';
 
+interface OverflowGroup {
+  key: string;
+  title?: string;
+  items: HomepageLauncherChipModel[];
+}
+
+function resolveOverflowGroups(items: HomepageLauncherChipModel[]): OverflowGroup[] {
+  const byKey = new Map<string, OverflowGroup>();
+  for (const chip of items) {
+    const normalizedGroupKey = chip.groupKey?.trim().toLowerCase() || '__ungrouped';
+    const groupTitle = chip.groupTitle?.trim() || undefined;
+    const existing = byKey.get(normalizedGroupKey);
+    if (existing) {
+      existing.items.push(chip);
+      if (!existing.title && groupTitle) existing.title = groupTitle;
+      continue;
+    }
+    byKey.set(normalizedGroupKey, {
+      key: normalizedGroupKey,
+      title: normalizedGroupKey === '__ungrouped' ? undefined : (groupTitle ?? chip.groupKey?.trim()),
+      items: [chip],
+    });
+  }
+
+  const groups = Array.from(byKey.values())
+    .map((group) => ({
+      ...group,
+      items: [...group.items].sort((a, b) => a.title.localeCompare(b.title)),
+    }))
+    .sort((a, b) => {
+      if (a.key === '__ungrouped') return 1;
+      if (b.key === '__ungrouped') return -1;
+      return (a.title ?? a.key).localeCompare(b.title ?? b.key);
+    });
+  return groups;
+}
+
 function MenuItem({ chip }: { chip: HomepageLauncherChipModel }): React.JSX.Element {
   const Icon = chip.icon;
+  const shouldOpenInNewTab = chip.openInNewTab ?? Boolean(chip.external);
   const isExternal = Boolean(chip.external);
-  const linkProps = isExternal
+  const linkProps = shouldOpenInNewTab
     ? { href: chip.href, target: '_blank', rel: 'noopener noreferrer' }
     : { href: chip.href };
   return (
     <a
       {...linkProps}
       role="menuitem"
+      aria-label={chip.ariaLabel ?? chip.title}
+      title={chip.title}
       className={styles.menuItem}
       data-hbc-ui="homepage-launcher-overflow-item"
       data-hbc-chip-id={chip.id}
+      data-hbc-chip-service-key={chip.serviceKey}
+      data-hbc-chip-group-key={chip.groupKey}
+      data-hbc-chip-icon-key={chip.iconKey}
+      data-hbc-chip-external={isExternal ? 'true' : undefined}
+      data-hbc-chip-new-tab={shouldOpenInNewTab ? 'true' : undefined}
     >
       {Icon ? (
         <span className={styles.menuItemIcon} aria-hidden="true">
           <Icon size={14} strokeWidth={2.25} />
         </span>
       ) : null}
-      <span>{chip.title}</span>
-      {isExternal ? <span className={styles.visuallyHidden}>(opens in new tab)</span> : null}
+      <span className={styles.menuItemTitle}>{chip.title}</span>
+      {shouldOpenInNewTab ? <span className={styles.visuallyHidden}>(opens in new tab)</span> : null}
     </a>
   );
 }
@@ -71,6 +116,7 @@ function MenuOverflow({
 }): React.JSX.Element {
   const [open, setOpen] = React.useState(false);
   const [maxHeight, setMaxHeight] = React.useState<number>(360);
+  const groupedItems = React.useMemo(() => resolveOverflowGroups(items), [items]);
 
   const { refs, floatingStyles, context } = useFloating({
     open,
@@ -129,8 +175,25 @@ function MenuOverflow({
                 {...getFloatingProps()}
                 aria-label={`${label} overflow`}
               >
-                {items.map((chip) => (
-                  <MenuItem key={chip.id} chip={chip} />
+                <div className={styles.overflowHeader} data-hbc-ui="homepage-launcher-overflow-header">
+                  <span className={styles.overflowHeaderTitle}>{label}</span>
+                  <span className={styles.overflowHeaderCount} aria-hidden="true">{items.length}</span>
+                </div>
+                {groupedItems.map((group) => (
+                  <div
+                    key={group.key}
+                    className={styles.overflowGroup}
+                    data-hbc-ui="homepage-launcher-overflow-group"
+                    data-hbc-overflow-group-key={group.key}
+                    data-hbc-overflow-group-size={group.items.length}
+                  >
+                    {group.title ? (
+                      <div className={styles.overflowGroupTitle}>{group.title}</div>
+                    ) : null}
+                    {group.items.map((chip) => (
+                      <MenuItem key={chip.id} chip={chip} />
+                    ))}
+                  </div>
                 ))}
               </motion.div>
             </FloatingFocusManager>
@@ -151,6 +214,7 @@ function SheetOverflow({
   className?: string;
 }): React.JSX.Element {
   const [open, setOpen] = React.useState(false);
+  const groupedItems = React.useMemo(() => resolveOverflowGroups(items), [items]);
   const { refs, context } = useFloating({
     open,
     onOpenChange: setOpen,
@@ -215,8 +279,21 @@ function SheetOverflow({
                     </button>
                   </div>
                   <div className={styles.sheetBody}>
-                    {items.map((chip) => (
-                      <MenuItem key={chip.id} chip={chip} />
+                    {groupedItems.map((group) => (
+                      <div
+                        key={group.key}
+                        className={styles.overflowGroup}
+                        data-hbc-ui="homepage-launcher-overflow-group"
+                        data-hbc-overflow-group-key={group.key}
+                        data-hbc-overflow-group-size={group.items.length}
+                      >
+                        {group.title ? (
+                          <div className={styles.overflowGroupTitle}>{group.title}</div>
+                        ) : null}
+                        {group.items.map((chip) => (
+                          <MenuItem key={chip.id} chip={chip} />
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </motion.div>

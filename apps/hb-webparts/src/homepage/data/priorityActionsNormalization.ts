@@ -4,8 +4,7 @@
  * Transforms raw SharePoint item rows into normalized contracts, then
  * applies audience, schedule, device, and overflow filtering. The
  * breakpoint resolver produces a final render model with explicit
- * primary/overflow splits governed by the active config's per-
- * breakpoint caps.
+ * primary/overflow splits governed by launcher-visible-count policy.
  *
  * Schema authority:
  *   docs/reference/sharepoint/list-schemas/hbcentral/lists/priority-actions-band-items.md
@@ -18,6 +17,10 @@ import type {
   ItemPriority,
   AudienceMode,
 } from './priorityActionsContracts.js';
+import {
+  HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT,
+  type HomepageLauncherDeviceClass,
+} from '@hbc/ui-kit/homepage';
 import type { RawPriorityActionsItemRow } from './priorityActionsItemsListDescriptor.js';
 import {
   normalizeActionKey,
@@ -216,19 +219,42 @@ export interface PriorityActionsBreakpointResult {
  * uniform density across pages; authored config still controls which
  * items are enabled / visible / overflow-gated.
  */
-const LAUNCHER_VISIBLE_CAP: Record<DeviceClass, number> = {
-  desktop: 6,
-  laptop: 5,
-  tabletLandscape: 4,
-  tabletPortrait: 4,
-  phone: 4,
-};
+function toHomepageLauncherDeviceClass(device: DeviceClass): HomepageLauncherDeviceClass {
+  switch (device) {
+    case 'desktop':
+    case 'laptop':
+      return 'desktop';
+    case 'tabletLandscape':
+      return 'tablet-landscape';
+    case 'tabletPortrait':
+      return 'tablet-portrait';
+    case 'phone':
+      return 'phone';
+    default:
+      return 'desktop';
+  }
+}
+
+export const LAUNCHER_VISIBLE_CAP: Readonly<Record<DeviceClass, number>> = Object.freeze({
+  desktop: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
+  laptop: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop,
+  tabletLandscape: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-landscape'],
+  tabletPortrait: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT['tablet-portrait'],
+  phone: HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.phone,
+});
 
 function getMaxVisibleForDevice(
   _config: PriorityActionsConfigResolved,
   device: DeviceClass,
 ): number {
   return LAUNCHER_VISIBLE_CAP[device] ?? LAUNCHER_VISIBLE_CAP.desktop;
+}
+
+export function getLauncherVisibleCap(device: DeviceClass): number {
+  return (
+    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[toHomepageLauncherDeviceClass(device)] ??
+    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT.desktop
+  );
 }
 
 export function resolveByBreakpoint(

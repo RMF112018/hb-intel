@@ -16,6 +16,7 @@ vi.mock('../data/priorityActionsItemsListSource.js', () => ({
 
 vi.mock('../data/priorityActionsNormalization.js', () => ({
   normalizeItemRows: vi.fn(),
+  getLauncherVisibleCap: vi.fn((device: string) => (device === 'phone' ? 4 : 6)),
 }));
 
 vi.mock('../data/priorityActionsValidation.js', () => ({
@@ -210,7 +211,29 @@ describe('PriorityActionsRailAdmin identity + lifecycle seams', () => {
     expect(screen.getByRole('button', { name: 'Phone' })).not.toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Phone' }));
-    expect(screen.getByText(/Authored -> Resolved:/i).textContent).toContain('sheet-trigger -> compact');
+    expect(screen.getByText(/Stored legacy -> Resolved runtime:/i).textContent).toContain(
+      'launcher -> rail',
+    );
+  });
+
+  it('keeps legacy layout and cap knobs disabled in the maintainer UI', async () => {
+    render(<PriorityActionsRailAdmin siteUrl={SITE_URL} />);
+    await waitFor(() => expect(mockedFetchConfig).toHaveBeenCalledWith(SITE_URL));
+    const assertLegacyControlDisabled = (label: string): void => {
+      const fieldLabel = screen.getByText(label);
+      const fieldRow = fieldLabel.closest('div');
+      const control = fieldRow?.querySelector('input,select') as HTMLInputElement | HTMLSelectElement | null;
+      expect(control).not.toBeNull();
+      expect(control?.hasAttribute('disabled')).toBe(true);
+    };
+
+    assertLegacyControlDisabled('Desktop Layout (legacy)');
+    assertLegacyControlDisabled('Tablet Layout (legacy)');
+    assertLegacyControlDisabled('Mobile Layout (legacy)');
+    assertLegacyControlDisabled('Max Desktop (legacy)');
+    assertLegacyControlDisabled('Max Laptop (legacy)');
+    assertLegacyControlDisabled('Max Tablet Portrait (legacy)');
+    assertLegacyControlDisabled('Max Phone (legacy)');
   });
 
   it('library filters segment rows by invalid status', async () => {

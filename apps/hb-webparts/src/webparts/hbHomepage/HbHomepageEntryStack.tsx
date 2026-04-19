@@ -27,6 +27,11 @@ import styles from './HbHomepageEntryStack.module.css';
 // standalone / admin-preview mounts elsewhere but no longer governs
 // the homepage render tree.
 //
+// Note on marker naming: several wrapper config/runtime attributes keep
+// a historical `rail` prefix for continuity, but those markers describe
+// homepage launcher-band state in this entry stack, not the standalone
+// `PriorityActionsRail` webpart mount path.
+//
 // Integration inputs come from the wrapper-owned config seam in
 // `hbHomepageWrapperConfig.ts` — intentionally separate from
 // `ModuleConfigSlices` so launcher concerns do not leak into shell
