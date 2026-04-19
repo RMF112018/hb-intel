@@ -52,12 +52,14 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       className={styles.entryStack}
       data-hb-homepage-entry-stack="root"
       data-hb-homepage-entry-stack-owner="hb-homepage-wrapper"
+      data-hb-homepage-blackbox-contract="prompt07-blackbox-v1"
       data-hb-homepage-outer-envelope-owner="hb-homepage-wrapper"
       data-hb-homepage-outer-envelope-max-width={HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}
       data-hb-homepage-outer-envelope-contract={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
       data-hb-homepage-entry-stack-rail-enabled={rail.enabled || undefined}
       data-hb-homepage-entry-stack-rail-alignment-mode={rail.alignmentMode}
       data-hb-homepage-entry-stack-hero-enabled={hero.enabled || undefined}
+      data-hb-homepage-entry-stack-hero-path-count={hero.enabled ? 1 : 0}
       data-hb-homepage-entry-state={entryContainer.entryState.id}
       data-hb-homepage-entry-state-reason={entryContainer.entryStateReason}
       data-hb-homepage-entry-state-short-height={entryContainer.shortHeightConstrained || undefined}

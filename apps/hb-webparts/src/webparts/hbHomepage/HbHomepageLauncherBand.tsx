@@ -108,6 +108,7 @@ export function HbHomepageLauncherBand({
   return (
     <div
       data-hb-homepage-launcher-band="root"
+      data-hbc-launcher-blackbox-contract="prompt07-blackbox-v1"
       data-hbc-launcher-device-class={deviceClass}
       data-hbc-launcher-shell-state={resolution.shellState}
       data-hbc-launcher-entry-reason={resolution.entryStateReason}

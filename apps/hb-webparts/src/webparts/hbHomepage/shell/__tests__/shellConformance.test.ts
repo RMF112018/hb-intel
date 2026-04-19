@@ -81,6 +81,7 @@ describe('shellConformance — data-attribute surface', () => {
     expect(attrs['data-shell-fit-path']).toBe('usable-width-accounted');
     expect(attrs['data-shell-entry-class']).toBe('standard-laptop');
     expect(attrs['data-shell-layout-mode']).toBeDefined();
+    expect(attrs['data-shell-first-lane-first-view']).toBe('begin-on-first-view');
     expect(attrs['data-shell-first-lane-columns']).toBe(report.bands[0].columns);
     expect(attrs['data-shell-bands-total']).toBe(report.bands.length);
     expect(attrs['data-shell-short-height']).toBeUndefined();

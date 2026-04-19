@@ -223,6 +223,7 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-layout-mode': ShellLayoutMode;
   readonly 'data-shell-fit-path': 'usable-width-accounted' | 'short-height-override';
   readonly 'data-shell-entry-class': string;
+  readonly 'data-shell-first-lane-first-view': EntryStackPolicy['firstLaneFirstView'];
   readonly 'data-shell-first-lane-columns': 1 | 2;
   readonly 'data-shell-short-height': 'true' | undefined;
   readonly 'data-shell-bands-paired-count': number;
@@ -257,6 +258,7 @@ export function toShellConformanceDataAttributes(
       ? 'short-height-override'
       : 'usable-width-accounted',
     'data-shell-entry-class': report.entryState.id,
+    'data-shell-first-lane-first-view': report.entryStackPolicy.firstLaneFirstView,
     'data-shell-first-lane-columns': report.bands[0]?.columns ?? 1,
     'data-shell-short-height': report.shortHeightConstrained ? 'true' : undefined,
     'data-shell-bands-paired-count': pairedCount,

@@ -3,37 +3,37 @@ import { expect, test } from '@playwright/test';
 interface HostedCase {
   readonly label: string;
   readonly viewport: { width: number; height: number };
-  readonly expectedEntryState: string | RegExp;
+  readonly expectedEntryState: string;
   readonly expectedReason?: string;
 }
 
 const HOSTED_CASES: readonly HostedCase[] = [
   {
-    label: 'standard-laptop-baseline',
-    viewport: { width: 1440, height: 900 },
-    expectedEntryState: /standard-laptop|ultrawide-desktop/,
-    expectedReason: 'width-match',
-  },
-  {
-    label: 'ultrawide-desktop',
+    label: 'ultrawide-desktop-1920x1080',
     viewport: { width: 1920, height: 1080 },
-    expectedEntryState: /ultrawide-desktop|standard-laptop/,
+    expectedEntryState: 'ultrawide-desktop',
     expectedReason: 'width-match',
   },
   {
-    label: 'tablet-landscape',
-    viewport: { width: 1024, height: 768 },
-    expectedEntryState: /tablet-landscape|tablet-portrait-large/,
+    label: 'standard-laptop-1512x982',
+    viewport: { width: 1512, height: 982 },
+    expectedEntryState: 'standard-laptop',
     expectedReason: 'width-match',
   },
   {
-    label: 'tablet-portrait',
-    viewport: { width: 820, height: 1180 },
-    expectedEntryState: /tablet-portrait-large|tablet-portrait/,
+    label: 'standard-laptop-1366x1024',
+    viewport: { width: 1366, height: 1024 },
+    expectedEntryState: 'standard-laptop',
     expectedReason: 'width-match',
   },
   {
-    label: 'phone-portrait',
+    label: 'phone-portrait-430x992',
+    viewport: { width: 430, height: 992 },
+    expectedEntryState: 'phone-portrait',
+    expectedReason: 'width-match',
+  },
+  {
+    label: 'phone-portrait-390x844',
     viewport: { width: 390, height: 844 },
     expectedEntryState: 'phone-portrait',
     expectedReason: 'width-match',
@@ -115,6 +115,21 @@ test.describe('HB Homepage hosted fit proof', () => {
         '[data-hb-homepage-entry-stack-region="priority-actions"]',
       );
       const shellRegion = page.locator('[data-hb-homepage-entry-stack-region="shell"]');
+      const heroRegion = page.locator('[data-hb-homepage-entry-stack-region="hero"]');
+      const heroRoot = page.locator('[data-hbc-premium="signature-hero"]');
+      const launcherRoot = page.locator('[data-hb-homepage-launcher-band="root"]');
+      const heroRegionCount = await heroRegion.count();
+      if (heroRegionCount > 0) {
+        await expect(heroRegion).toBeVisible();
+      }
+      const heroRootCount = await heroRoot.count();
+      if (heroRootCount > 0) {
+        await expect(heroRoot).toBeVisible();
+      }
+      const launcherRootCount = await launcherRoot.count();
+      if (launcherRootCount > 0) {
+        await expect(launcherRoot).toBeVisible();
+      }
       await expect(actionsRegion).toHaveAttribute(
         'data-hb-homepage-region-contained-by',
         'hb-homepage-wrapper-outer-envelope-v1',
@@ -138,11 +153,7 @@ test.describe('HB Homepage hosted fit proof', () => {
       await expect(shellRoot).toHaveAttribute('data-shell-fit-path');
 
       const entryState = await shellRoot.getAttribute('data-shell-entry-state');
-      if (typeof viewportCase.expectedEntryState === 'string') {
-        expect(entryState).toBe(viewportCase.expectedEntryState);
-      } else {
-        expect(entryState ?? '').toMatch(viewportCase.expectedEntryState);
-      }
+      expect(entryState).toBe(viewportCase.expectedEntryState);
 
       if (viewportCase.expectedReason) {
         await expect(shellRoot).toHaveAttribute(
@@ -160,7 +171,83 @@ test.describe('HB Homepage hosted fit proof', () => {
       expect(widthMetrics.authoritative).toBeGreaterThanOrEqual(widthMetrics.usable);
       expect(widthMetrics.insetTotal).toBeGreaterThanOrEqual(0);
 
+      const alignmentProof = await page.evaluate(() => {
+        const wrapper = document.querySelector('[data-hb-homepage-entry-stack="root"]');
+        const hero = document.querySelector('[data-hbc-premium="signature-hero"]');
+        const launcher = document.querySelector('[data-hb-homepage-launcher-band="root"]');
+        const shell = document.querySelector('[data-shell-post-hero="true"]');
+        return {
+          wrapperState: wrapper?.getAttribute('data-hb-homepage-entry-state'),
+          wrapperReason: wrapper?.getAttribute('data-hb-homepage-entry-state-reason'),
+          heroState: hero?.getAttribute('data-hbc-hero-entry-state'),
+          heroReason: hero?.getAttribute('data-hbc-hero-entry-reason'),
+          launcherState: launcher?.getAttribute('data-hbc-launcher-shell-state'),
+          launcherReason: launcher?.getAttribute('data-hbc-launcher-entry-reason'),
+          shellState: shell?.getAttribute('data-shell-entry-state'),
+          shellReason: shell?.getAttribute('data-shell-entry-state-reason'),
+        };
+      });
+      if (alignmentProof.wrapperState) {
+        expect(alignmentProof.wrapperState).toBe(alignmentProof.shellState);
+      }
+      if (alignmentProof.launcherState) {
+        expect(alignmentProof.launcherState).toBe(alignmentProof.shellState);
+      }
+      if (alignmentProof.wrapperReason) {
+        expect(alignmentProof.wrapperReason).toBe(alignmentProof.shellReason);
+      }
+      if (alignmentProof.launcherReason) {
+        expect(alignmentProof.launcherReason).toBe(alignmentProof.shellReason);
+      }
+      if (alignmentProof.heroState) {
+        expect(alignmentProof.heroState).toBe(alignmentProof.shellState);
+      }
+      if (alignmentProof.heroReason) {
+        expect(alignmentProof.heroReason).toBe(alignmentProof.shellReason);
+      }
+
+      const regionOrder = await page
+        .locator('[data-hb-homepage-entry-stack-region]')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => ({
+            region: node.getAttribute('data-hb-homepage-entry-stack-region'),
+            order: node.getAttribute('data-hb-homepage-entry-stack-order'),
+          })),
+        );
+      if (regionOrder.some((r) => r.region === 'hero')) {
+        expect(regionOrder).toEqual([
+          { region: 'hero', order: '1' },
+          { region: 'priority-actions', order: '2' },
+          { region: 'shell', order: '3' },
+        ]);
+      } else {
+        expect(regionOrder).toEqual([
+          { region: 'priority-actions', order: '1' },
+          { region: 'shell', order: '2' },
+        ]);
+      }
+
+      const oneHeroProof = await page.evaluate(() => ({
+        heroCount: document.querySelectorAll('[data-hbc-premium="signature-hero"]').length,
+        wrapperHeroCount: document.querySelectorAll(
+          '[data-hb-homepage-entry-stack-region="hero"][data-hb-homepage-entry-stack-hero-authority="shared-entry-state"]',
+        ).length,
+        duplicateGuardCount: document.querySelectorAll(
+          '[data-hb-signature-hero-duplicate-guard="suppressed-standalone-homepage"]',
+        ).length,
+      }));
+      expect(oneHeroProof.heroCount).toBeLessThanOrEqual(1);
+      expect(oneHeroProof.wrapperHeroCount).toBeLessThanOrEqual(1);
+      expect(oneHeroProof.duplicateGuardCount).toBe(0);
+
       await assertNoHorizontalOverflow(page, '[data-hb-homepage-entry-stack="root"]');
+      if (heroRegionCount > 0) {
+        await assertNoHorizontalOverflow(page, '[data-hb-homepage-entry-stack-region="hero"]');
+      }
+      await assertNoHorizontalOverflow(
+        page,
+        '[data-hb-homepage-entry-stack-region="priority-actions"]',
+      );
       await assertNoHorizontalOverflow(page, '[data-shell-post-hero="true"]');
       await assertNoHorizontalOverflow(page, '.harness-content');
       await assertNoHorizontalOverflow(page, '#root');

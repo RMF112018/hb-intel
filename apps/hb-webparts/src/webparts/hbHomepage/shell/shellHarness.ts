@@ -185,9 +185,9 @@ export interface ShellBreakpointMatrixCase {
  */
 export const SHELL_BREAKPOINT_MATRIX: readonly ShellBreakpointMatrixCase[] = [
   {
-    label: 'ultrawide-desktop',
-    width: 1800,
-    height: 1000,
+    label: 'ultrawide-desktop (1920x1080)',
+    width: 1920,
+    height: 1080,
     expectedEntryStateId: 'ultrawide-desktop',
     expectedFirstLanePairing: true,
   },
@@ -199,9 +199,16 @@ export const SHELL_BREAKPOINT_MATRIX: readonly ShellBreakpointMatrixCase[] = [
     expectedFirstLanePairing: true,
   },
   {
-    label: 'standard-laptop (primary baseline)',
-    width: 1300,
-    height: 900,
+    label: 'standard-laptop (1512x982)',
+    width: 1512,
+    height: 982,
+    expectedEntryStateId: 'standard-laptop',
+    expectedFirstLanePairing: true,
+  },
+  {
+    label: 'standard-laptop (1366x1024)',
+    width: 1366,
+    height: 1024,
     expectedEntryStateId: 'standard-laptop',
     expectedFirstLanePairing: true,
   },
@@ -234,16 +241,16 @@ export const SHELL_BREAKPOINT_MATRIX: readonly ShellBreakpointMatrixCase[] = [
     expectedFirstLanePairing: false,
   },
   {
-    label: 'phone-portrait-large (iPhone 17 Pro Max)',
+    label: 'phone-portrait (430x992)',
     width: 430,
-    height: 900,
+    height: 992,
     expectedEntryStateId: 'phone-portrait',
     expectedFirstLanePairing: false,
   },
   {
-    label: 'phone-portrait-standard (iPhone 17 Pro)',
+    label: 'phone-portrait (390x844)',
     width: 390,
-    height: 850,
+    height: 844,
     expectedEntryStateId: 'phone-portrait',
     expectedFirstLanePairing: false,
   },
@@ -255,7 +262,7 @@ export const SHELL_BREAKPOINT_MATRIX: readonly ShellBreakpointMatrixCase[] = [
     expectedFirstLanePairing: false,
   },
   {
-    label: 'constrained-reflow (desktop width, short height)',
+    label: 'short-height constrained (1300x420)',
     width: 1300,
     height: 420,
     expectedEntryStateId: 'phone-landscape',

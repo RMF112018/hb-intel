@@ -52,11 +52,57 @@ describe('shellHarness — matrix coverage', () => {
   it('constrained-reflow case (wide width, short height) routes to phone-landscape', () => {
     const outcomes = runShellHarnessMatrix();
     const constrained = outcomes.find(
-      (o) => o.matrixCase.label === 'constrained-reflow (desktop width, short height)',
+      (o) => o.matrixCase.label === 'short-height constrained (1300x420)',
     );
     expect(constrained).toBeDefined();
     expect(constrained!.proof.entryState.id).toBe('phone-landscape');
     expect(constrained!.proof.entryState.shortHeightConstrained).toBe(true);
+  });
+
+  it('includes required Prompt-07 viewport matrix with exact state/reason mapping', () => {
+    const outcomes = runShellHarnessMatrix();
+    const required: Array<{
+      label: string;
+      expectedState: ShellEntryStateId;
+      expectedReason: string;
+    }> = [
+      {
+        label: 'ultrawide-desktop (1920x1080)',
+        expectedState: 'ultrawide-desktop',
+        expectedReason: 'width-match',
+      },
+      {
+        label: 'standard-laptop (1512x982)',
+        expectedState: 'standard-laptop',
+        expectedReason: 'width-match',
+      },
+      {
+        label: 'standard-laptop (1366x1024)',
+        expectedState: 'standard-laptop',
+        expectedReason: 'width-match',
+      },
+      {
+        label: 'phone-portrait (430x992)',
+        expectedState: 'phone-portrait',
+        expectedReason: 'width-match',
+      },
+      {
+        label: 'phone-portrait (390x844)',
+        expectedState: 'phone-portrait',
+        expectedReason: 'width-match',
+      },
+      {
+        label: 'short-height constrained (1300x420)',
+        expectedState: 'phone-landscape',
+        expectedReason: 'short-height-override',
+      },
+    ];
+    for (const c of required) {
+      const outcome = outcomes.find((o) => o.matrixCase.label === c.label);
+      expect(outcome, `missing required matrix case: ${c.label}`).toBeDefined();
+      expect(outcome!.proof.entryState.id).toBe(c.expectedState);
+      expect(outcome!.proof.entryState.reason).toBe(c.expectedReason);
+    }
   });
 
   it('conformance fit-path attribute matches width-vs-short-height route per case', () => {
@@ -77,7 +123,7 @@ describe('shellHarness — matrix coverage', () => {
   it('standard-laptop stays paired while tablet-landscape degrades to stacked first lane', () => {
     const outcomes = runShellConformanceMatrix();
     const laptop = outcomes.find(
-      (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
+      (o) => o.matrixCase.label === 'standard-laptop (1512x982)',
     );
     const tabletLandscape = outcomes.find(
       (o) => o.matrixCase.label === 'tablet-landscape-large',

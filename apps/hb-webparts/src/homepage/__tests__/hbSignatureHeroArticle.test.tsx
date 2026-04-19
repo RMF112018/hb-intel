@@ -237,6 +237,7 @@ describe('HbSignatureHeroHomepage — shared entry-stack authority', () => {
 
     const hero = container.querySelector('[data-hbc-premium="signature-hero"]');
     expect(hero?.getAttribute('data-hbc-hero-entry-authority')).toBe('shared-entry-state');
+    expect(hero?.getAttribute('data-hbc-hero-blackbox-contract')).toBe('prompt07-blackbox-v1');
     expect(hero?.getAttribute('data-hbc-hero-entry-state')).toBe('standard-laptop');
     expect(hero?.getAttribute('data-hbc-hero-entry-reason')).toBe('width-match');
     expect(hero?.getAttribute('data-hbc-hero-layout-mode')).toBe('compressed-laptop');
@@ -280,5 +281,61 @@ describe('HbSignatureHeroHomepage — shared entry-stack authority', () => {
     expect(hero?.getAttribute('data-hbc-hero-short-height-posture')).toBe('compact-banner');
     expect(hero?.getAttribute('data-hbc-hero-height-budget-min')).toBe('120');
     expect(hero?.getAttribute('data-hbc-hero-height-budget-max')).toBe('160');
+  });
+
+  it('maps shared entry-state classes to governed layout modes for wide and phone postures', () => {
+    const ultrawide = render(
+      <HbSignatureHero
+        identity={{ preferredName: 'Jordan' }}
+        siteUrl="https://hedrickbrotherscom.sharepoint.com/sites/HBCentral"
+        entryStackState={{
+          width: 1920,
+          authoritativeWidth: 2000,
+          shellInlineInsetTotal: 80,
+          height: 1080,
+          entryState: {
+            id: 'ultrawide-desktop',
+            label: 'Premium desktop span',
+            minWidth: 1600,
+            maxWidth: Number.POSITIVE_INFINITY,
+            firstLaneColumns: 2,
+            firstLanePairingAllowed: true,
+            dominanceRule: 'left-dominant',
+          },
+          entryStateReason: 'width-match',
+          shortHeightConstrained: false,
+        }}
+      />,
+    ).container.querySelector('[data-hbc-premium="signature-hero"]');
+    expect(ultrawide?.getAttribute('data-hbc-hero-layout-mode')).toBe('premium-wide');
+    expect(ultrawide?.getAttribute('data-hbc-hero-entry-reason')).toBe('width-match');
+
+    const phonePortrait = render(
+      <HbSignatureHero
+        identity={{ preferredName: 'Jordan' }}
+        siteUrl="https://hedrickbrotherscom.sharepoint.com/sites/HBCentral"
+        entryStackState={{
+          width: 390,
+          authoritativeWidth: 430,
+          shellInlineInsetTotal: 40,
+          height: 844,
+          entryState: {
+            id: 'phone-portrait',
+            label: 'Phone portrait',
+            minWidth: 320,
+            maxWidth: 479,
+            firstLaneColumns: 1,
+            firstLanePairingAllowed: false,
+            dominanceRule: 'single',
+          },
+          entryStateReason: 'width-match',
+          shortHeightConstrained: false,
+        }}
+      />,
+    ).container.querySelector('[data-hbc-premium="signature-hero"]');
+    expect(phonePortrait?.getAttribute('data-hbc-hero-layout-mode')).toBe(
+      'guided-single-column',
+    );
+    expect(phonePortrait?.getAttribute('data-hbc-hero-entry-reason')).toBe('width-match');
   });
 });

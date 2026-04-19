@@ -12,17 +12,26 @@ import {
 // launcher data-seam plumbing. Shell-side and launcher-side tests
 // live adjacent to those units.
 vi.mock('../HbHomepageShell.js', () => ({
-  HbHomepageShell: (props: Record<string, unknown>): React.JSX.Element =>
-    React.createElement('div', {
+  HbHomepageShell: (props: Record<string, unknown>): React.JSX.Element => {
+    const container = props.container as
+      | { entryState?: { id?: string }; entryStateReason?: string }
+      | undefined;
+    return React.createElement('div', {
       'data-test-mock': 'hb-homepage-shell',
       'data-test-has-config': props.config !== undefined ? 'true' : 'false',
-    }),
+      'data-test-shell-entry-state-id': container?.entryState?.id ?? '',
+      'data-test-shell-entry-state-reason': container?.entryStateReason ?? '',
+    });
+  },
 }));
 
 vi.mock('../HbHomepageLauncherBand.js', () => ({
   HbHomepageLauncherBand: (props: Record<string, unknown>): React.JSX.Element => {
     const hasFeaturedKeys = 'featuredActionKeys' in props;
     const hasEntryContainer = 'entryContainer' in props;
+    const entryContainer = props.entryContainer as
+      | { entryState?: { id?: string }; entryStateReason?: string }
+      | undefined;
     return React.createElement('div', {
       'data-test-mock': 'hb-homepage-launcher-band',
       'data-test-launcher-band-key': (props.bandKey as string | undefined) ?? '',
@@ -31,6 +40,8 @@ vi.mock('../HbHomepageLauncherBand.js', () => ({
         (props.alignmentMode as string | undefined) ?? '',
       'data-test-launcher-has-featured-keys-prop': hasFeaturedKeys ? 'true' : 'false',
       'data-test-launcher-has-entry-container-prop': hasEntryContainer ? 'true' : 'false',
+      'data-test-launcher-entry-state-id': entryContainer?.entryState?.id ?? '',
+      'data-test-launcher-entry-state-reason': entryContainer?.entryStateReason ?? '',
     });
   },
 }));
@@ -61,6 +72,9 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(root).not.toBeNull();
     expect(root?.getAttribute('data-hb-homepage-entry-stack-owner')).toBe(
       'hb-homepage-wrapper',
+    );
+    expect(root?.getAttribute('data-hb-homepage-blackbox-contract')).toBe(
+      'prompt07-blackbox-v1',
     );
   });
 
@@ -127,6 +141,29 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(regions[1].getAttribute('data-hb-homepage-entry-stack-order')).toBe('2');
     expect(regions[2].getAttribute('data-hb-homepage-entry-stack-region')).toBe('shell');
     expect(regions[2].getAttribute('data-hb-homepage-entry-stack-order')).toBe('3');
+  });
+
+  it('keeps wrapper, hero, launcher, and shell entry-state diagnostics aligned', () => {
+    const { container } = render(<HbHomepageEntryStack />);
+    const root = container.querySelector('[data-hb-homepage-entry-stack="root"]');
+    const heroRegion = container.querySelector('[data-hb-homepage-entry-stack-region="hero"]');
+    const heroNode = container.querySelector('[data-test-mock="hb-signature-hero"]');
+    const launcherNode = container.querySelector('[data-test-mock="hb-homepage-launcher-band"]');
+    const shellNode = container.querySelector('[data-test-mock="hb-homepage-shell"]');
+
+    const state = root?.getAttribute('data-hb-homepage-entry-state');
+    const reason = root?.getAttribute('data-hb-homepage-entry-state-reason');
+    expect(state).toBe('standard-laptop');
+    expect(reason).toBe('width-match');
+    expect(heroRegion?.getAttribute('data-hb-homepage-entry-stack-hero-state')).toBe(state);
+    expect(heroRegion?.getAttribute('data-hb-homepage-entry-stack-hero-state-reason')).toBe(
+      reason,
+    );
+    expect(heroNode?.getAttribute('data-test-hero-entry-state-id')).toBe(state);
+    expect(launcherNode?.getAttribute('data-test-launcher-entry-state-id')).toBe(state);
+    expect(launcherNode?.getAttribute('data-test-launcher-entry-state-reason')).toBe(reason);
+    expect(shellNode?.getAttribute('data-test-shell-entry-state-id')).toBe(state);
+    expect(shellNode?.getAttribute('data-test-shell-entry-state-reason')).toBe(reason);
   });
 
   it('renders HbSignatureHero inside the wrapper-owned hero region', () => {
@@ -258,6 +295,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
       '[data-hb-homepage-entry-stack="root"]',
     );
     expect(enabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBe('true');
+    expect(enabled?.getAttribute('data-hb-homepage-entry-stack-hero-path-count')).toBe('1');
 
     const disabled = render(
       <HbHomepageEntryStack
@@ -265,6 +303,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
       />,
     ).container.querySelector('[data-hb-homepage-entry-stack="root"]');
     expect(disabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBeNull();
+    expect(disabled?.getAttribute('data-hb-homepage-entry-stack-hero-path-count')).toBe('1');
   });
 
   it('omits the hero region when wrapper config disables hero', () => {
@@ -276,6 +315,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(container.querySelector('[data-hb-homepage-entry-stack-region="hero"]')).toBeNull();
     const root = container.querySelector('[data-hb-homepage-entry-stack="root"]');
     expect(root?.getAttribute('data-hb-homepage-entry-stack-hero-enabled')).toBeNull();
+    expect(root?.getAttribute('data-hb-homepage-entry-stack-hero-path-count')).toBe('0');
   });
 
   it('promotes actions and shell order when hero is disabled', () => {

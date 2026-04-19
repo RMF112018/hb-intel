@@ -136,7 +136,7 @@ describe('Phase-09 closure — Prompt-03 hosted-surface shell-fit contracts', ()
   it('constrained matrix cases demonstrate contract-driven nested mode degradation', () => {
     const matrix = runShellHarnessMatrix();
     const constrained = matrix.find(
-      (m) => m.matrixCase.label === 'phone-portrait-standard (iPhone 17 Pro)',
+      (m) => m.matrixCase.label === 'phone-portrait (390x844)',
     );
     const renderModes = constrained?.proof.bands.flatMap((b) => b.slots.map((s) => s.renderMode));
     expect(renderModes).toBeDefined();
@@ -172,7 +172,7 @@ describe('Phase-05 closure — Prompt-04 entry-stack contract alignment', () => 
 
   it('harness proof exposes deterministic first-lane decision diagnostics', () => {
     const outcome = runShellConformanceMatrix().find(
-      (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
+      (o) => o.matrixCase.label === 'standard-laptop (1512x982)',
     );
     expect(outcome?.proof.firstLaneDecision.action).toBeDefined();
     expect(typeof outcome?.proof.firstLaneDecision.reason).toBe('string');
@@ -215,7 +215,7 @@ describe('Phase-05 closure — Prompt-05 + Prompt-06 harness + conformance proof
 
   it('short-height override produces short-height-compact layout mode', () => {
     const shortCase = outcomes.find(
-      (o) => o.matrixCase.label === 'constrained-reflow (desktop width, short height)',
+      (o) => o.matrixCase.label === 'short-height constrained (1300x420)',
     );
     expect(shortCase?.conformance.shortHeightConstrained).toBe(true);
     expect(shortCase?.conformance.layoutMode).toBe('short-height-compact');
@@ -261,7 +261,7 @@ describe('Phase-05 closure — Prompt-05 + Prompt-06 harness + conformance proof
     expect(usableWidth).toBeGreaterThan(0);
 
     const laptop = outcomes.find(
-      (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
+      (o) => o.matrixCase.label === 'standard-laptop (1512x982)',
     );
     expect(laptop?.conformance.entryState.id).toBe('standard-laptop');
   });

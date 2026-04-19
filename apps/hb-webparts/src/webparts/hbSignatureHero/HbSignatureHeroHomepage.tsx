@@ -200,6 +200,7 @@ export function HbSignatureHeroHomepage({
       className={surfaceClassName}
       style={surfaceStyle}
       data-hbc-premium="signature-hero"
+      data-hbc-hero-blackbox-contract="prompt07-blackbox-v1"
       data-hbc-hero-flagship-render-path={flagshipRenderPath}
       data-hbc-hero-entry-authority={entryStackState ? 'shared-entry-state' : 'standalone-hero'}
       data-hbc-hero-entry-state={entryStackState?.entryState.id}

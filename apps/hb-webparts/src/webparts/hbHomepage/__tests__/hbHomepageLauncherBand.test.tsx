@@ -205,6 +205,9 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     );
     const root = container.querySelector('[data-hb-homepage-launcher-band="root"]');
     expect(root?.getAttribute('data-hbc-launcher-entry-authority')).toBe('shared-entry-state');
+    expect(root?.getAttribute('data-hbc-launcher-blackbox-contract')).toBe(
+      'prompt07-blackbox-v1',
+    );
     expect(root?.getAttribute('data-hbc-launcher-alignment-mode')).toBe('shared-entry-governed');
     expect(root?.getAttribute('data-hbc-launcher-density-posture')).toBe('compact');
     expect(root?.getAttribute('data-hbc-launcher-visible-budget')).toBe('3');
