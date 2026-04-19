@@ -1,9 +1,11 @@
 import { getOccupant, areOccupantsPairableInBand, canOccupantPairAtWidth } from './occupantRegistry.js';
+import { getBandRecipeRule } from './bandRecipes.js';
 import type {
   ColumnSpan,
   OccupantId,
   ProminenceCeiling,
   ShellBand,
+  ShellBandRecipeId,
   ShellEntryState,
   ShellSlot,
   SlotRole,
@@ -34,6 +36,10 @@ export type PairingDecisionReason =
   | 'comfort-forced-stack'
   /** Slot widths fall below the narrowest stable paired width for an occupant. */
   | 'below-narrowest-stable-paired-width'
+  /** Recipe is not eligible for the current entry state. */
+  | 'recipe-ineligible-state'
+  /** Recipe does not permit pairing under current active-slot shape. */
+  | 'recipe-rule-denies-pairing'
   /** All checks passed and the band is paired. */
   | 'paired';
 
@@ -44,6 +50,8 @@ export interface PairingDecision {
 
 export interface BandLayoutResult {
   readonly columns: 1 | 2;
+  readonly recipe: ShellBandRecipeId;
+  readonly fallbackRecipe: ShellBandRecipeId;
   readonly slots: readonly ResolvedSlot[];
   /** Why this band paired or stacked at the current entry state. */
   readonly pairingDecision: PairingDecision;
@@ -146,6 +154,7 @@ function decideBandPairing(
   isEntryBand: boolean,
   containerWidth: number,
 ): PairingDecision {
+  const recipeRule = getBandRecipeRule(band.recipe);
   const activeSlots = band.slots.filter((s) => s.occupantId !== null);
   if (activeSlots.length < 2) {
     return { allowed: false, reason: 'single-occupant' };
@@ -156,6 +165,17 @@ function decideBandPairing(
   // pair at narrower states if comfort permits.
   if (isEntryBand && !entryState.firstLanePairingAllowed) {
     return { allowed: false, reason: 'state-denies-pairing' };
+  }
+
+  if (!recipeRule.eligibleEntryStates.includes(entryState.id)) {
+    return { allowed: false, reason: 'recipe-ineligible-state' };
+  }
+
+  if (
+    activeSlots.length < recipeRule.minActiveSlots ||
+    activeSlots.length > recipeRule.maxActiveSlots
+  ) {
+    return { allowed: false, reason: 'recipe-rule-denies-pairing' };
   }
 
   for (let i = 0; i < activeSlots.length; i++) {
@@ -197,6 +217,8 @@ export function resolveBandLayout(
       : 'standard' as OccupantRenderMode;
     return {
       columns: 1,
+      recipe: band.recipe,
+      fallbackRecipe: getBandRecipeRule(band.recipe).fallbackRecipe,
       slots: activeSlots.map((s) => ({
         slot: s,
         comfort: {
@@ -215,6 +237,8 @@ export function resolveBandLayout(
   if (pairingDecision.allowed) {
     return {
       columns: 2,
+      recipe: band.recipe,
+      fallbackRecipe: getBandRecipeRule(band.recipe).fallbackRecipe,
       slots: activeSlots.map((slot) => ({
         slot,
         comfort: checkOccupantComfort(
@@ -229,6 +253,8 @@ export function resolveBandLayout(
 
   return {
     columns: 1,
+    recipe: band.recipe,
+    fallbackRecipe: getBandRecipeRule(band.recipe).fallbackRecipe,
     slots: activeSlots.map((slot) => ({
       slot,
       comfort: {

@@ -18,6 +18,7 @@ export const EDITORIAL_FOCUS_PRESET: ShellPreset = {
     {
       id: 'band-communications',
       semanticRole: 'communications-newsroom',
+      recipe: 'feature-pair',
       slots: [
         {
           id: 'slot-company-pulse',
@@ -37,6 +38,7 @@ export const EDITORIAL_FOCUS_PRESET: ShellPreset = {
     {
       id: 'band-operational-spotlight',
       semanticRole: 'operational-spotlight',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-project-portfolio-spotlight',
@@ -50,6 +52,7 @@ export const EDITORIAL_FOCUS_PRESET: ShellPreset = {
     {
       id: 'band-safety-field',
       semanticRole: 'operational-spotlight',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-safety-field-excellence',
@@ -63,6 +66,7 @@ export const EDITORIAL_FOCUS_PRESET: ShellPreset = {
     {
       id: 'band-people-culture',
       semanticRole: 'people-culture',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-people-culture-public',
@@ -76,6 +80,7 @@ export const EDITORIAL_FOCUS_PRESET: ShellPreset = {
     {
       id: 'band-recognition',
       semanticRole: 'recognition',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-hb-kudos',
@@ -105,6 +110,7 @@ export const OPERATIONS_SAFETY_PRESET: ShellPreset = {
     {
       id: 'band-operational-spotlight',
       semanticRole: 'operational-spotlight',
+      recipe: 'feature-pair',
       slots: [
         {
           id: 'slot-project-portfolio-spotlight',
@@ -124,6 +130,7 @@ export const OPERATIONS_SAFETY_PRESET: ShellPreset = {
     {
       id: 'band-communications-newsroom',
       semanticRole: 'communications-newsroom',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-company-pulse',
@@ -137,6 +144,7 @@ export const OPERATIONS_SAFETY_PRESET: ShellPreset = {
     {
       id: 'band-communications-editorial',
       semanticRole: 'communications-editorial',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-leadership-message',
@@ -150,6 +158,7 @@ export const OPERATIONS_SAFETY_PRESET: ShellPreset = {
     {
       id: 'band-people-culture',
       semanticRole: 'people-culture',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-people-culture-public',
@@ -163,6 +172,7 @@ export const OPERATIONS_SAFETY_PRESET: ShellPreset = {
     {
       id: 'band-recognition',
       semanticRole: 'recognition',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-hb-kudos',
@@ -192,6 +202,7 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
     {
       id: 'band-communications-newsroom',
       semanticRole: 'communications-newsroom',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-company-pulse',
@@ -205,6 +216,7 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
     {
       id: 'band-communications-editorial',
       semanticRole: 'communications-editorial',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-leadership-message',
@@ -218,6 +230,7 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
     {
       id: 'band-operational-spotlight',
       semanticRole: 'operational-spotlight',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-project-portfolio-spotlight',
@@ -231,6 +244,7 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
     {
       id: 'band-safety-field',
       semanticRole: 'operational-spotlight',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-safety-field-excellence',
@@ -244,6 +258,7 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
     {
       id: 'band-people-culture',
       semanticRole: 'people-culture',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-people-culture-public',
@@ -257,6 +272,7 @@ export const COMPACT_LINEAR_PRESET: ShellPreset = {
     {
       id: 'band-recognition',
       semanticRole: 'recognition',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-hb-kudos',

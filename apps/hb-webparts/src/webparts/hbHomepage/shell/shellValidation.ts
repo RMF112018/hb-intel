@@ -1,6 +1,7 @@
 import { DEFAULT_PRESET } from './defaultPreset.js';
 import { getPresetOrDefault, validatePresetCanonicalSemantics } from './presetLibrary.js';
 import { OCCUPANT_REGISTRY, areOccupantsPairableInBand } from './occupantRegistry.js';
+import { getBandRecipeRule } from './bandRecipes.js';
 import { SHELL_PROTECTED_DECISIONS } from './protectedDecisions.js';
 import { isProminenceAllowed } from './slotComfortResolver.js';
 import { ModuleConfigSlicesSchema, ShellLayoutInputSchema, ShellPresetSchema } from './shellSchema.js';
@@ -59,6 +60,7 @@ function validateBandConstraints(
   band: ShellBand,
   diagnostics: ShellDiagnostic[],
 ): ShellBand {
+  const recipeRule = getBandRecipeRule(band.recipe);
   const validatedSlots = band.slots.map((slot) =>
     validateSlotOccupantEligibility(slot, diagnostics),
   );
@@ -66,6 +68,43 @@ function validateBandConstraints(
   const activeOccupants = validatedSlots
     .filter((s) => s.occupantId !== null)
     .map((s) => s.occupantId!);
+
+  const activeSlots = validatedSlots.filter((s) => s.occupantId !== null);
+
+  if (!recipeRule.allowedSemanticRoles.includes(band.semanticRole)) {
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'RECIPE_SEMANTIC_ROLE_INCOMPATIBLE',
+        `Band "${band.id}" uses recipe "${band.recipe}" which does not allow semanticRole "${band.semanticRole}".`,
+      ),
+    );
+  }
+
+  if (
+    activeSlots.length < recipeRule.minActiveSlots ||
+    activeSlots.length > recipeRule.maxActiveSlots
+  ) {
+    diagnostics.push(
+      diagnostic(
+        'error',
+        'RECIPE_ACTIVE_SLOT_COUNT_INVALID',
+        `Band "${band.id}" recipe "${band.recipe}" requires ${recipeRule.minActiveSlots}-${recipeRule.maxActiveSlots} active slots; found ${activeSlots.length}.`,
+      ),
+    );
+  }
+
+  for (const slot of activeSlots) {
+    if (!recipeRule.allowedSlotRoles.includes(slot.role)) {
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'RECIPE_SLOT_ROLE_INCOMPATIBLE',
+          `Band "${band.id}" recipe "${band.recipe}" does not allow slot role "${slot.role}" for slot "${slot.id}".`,
+        ),
+      );
+    }
+  }
 
   const primaryCount = validatedSlots.filter(
     (s) => s.occupantId !== null && s.role === 'primary',

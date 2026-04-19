@@ -18,11 +18,21 @@ const BAND_SEMANTIC_ROLES = [
   'people-culture',
   'recognition',
 ] as const;
+const SHELL_BAND_RECIPES = [
+  'feature-pair',
+  'balanced-two-up',
+  'asymmetric-two-up',
+  'feature-utility-strip',
+  'stacked-full',
+  'stacked-secondary-strip',
+  'single-column-fallback',
+] as const;
 
 export const OccupantIdSchema = z.enum(OCCUPANT_IDS);
 export const SlotRoleSchema = z.enum(SLOT_ROLES);
 export const ColumnSpanSchema = z.enum(COLUMN_SPANS);
 export const BandSemanticRoleSchema = z.enum(BAND_SEMANTIC_ROLES);
+export const ShellBandRecipeSchema = z.enum(SHELL_BAND_RECIPES);
 
 export const ShellSlotSchema = z.object({
   id: z.string().min(1),
@@ -34,6 +44,7 @@ export const ShellSlotSchema = z.object({
 export const ShellBandSchema = z.object({
   id: z.string().min(1),
   semanticRole: BandSemanticRoleSchema,
+  recipe: ShellBandRecipeSchema,
   slots: z.array(ShellSlotSchema).min(1),
   maxDominantOccupants: z.number().int().min(1),
 });

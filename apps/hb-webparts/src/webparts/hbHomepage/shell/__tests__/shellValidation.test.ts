@@ -115,6 +115,7 @@ describe('validatePresetStructure', () => {
         {
           id: 'band-test',
           semanticRole: 'people-culture',
+          recipe: 'feature-pair',
           slots: [
             { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
             { id: 's2', occupantId: 'hb-kudos', role: 'secondary', columnSpan: 'minor' },
@@ -325,9 +326,9 @@ describe('canonical preset policy', () => {
     }
   });
 
-  it('surfaces NON_CANONICAL_EMPTY_BAND on DEFAULT_PRESET (historical empty newsroom band)', () => {
+  it('keeps DEFAULT_PRESET canonical (no empty-band canonical diagnostics)', () => {
     const diags = validatePresetCanonicalSemantics(DEFAULT_PRESET);
-    expect(diags.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(true);
+    expect(diags.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(false);
   });
 
   it('emits NON_CANONICAL_EMPTY_ENTRY_BAND as error when entry band has no active occupant', () => {
@@ -338,6 +339,7 @@ describe('canonical preset policy', () => {
         {
           id: 'b1',
           semanticRole: 'communications-editorial',
+          recipe: 'stacked-full',
           slots: [{ id: 's1', occupantId: null, role: 'primary', columnSpan: 'full' }],
           maxDominantOccupants: 1,
         },
@@ -357,6 +359,7 @@ describe('canonical preset policy', () => {
         {
           id: 'dup-people-culture',
           semanticRole: 'people-culture',
+          recipe: 'stacked-full',
           slots: [{ id: 's-dup', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'full' }],
           maxDominantOccupants: 1,
         },
@@ -383,7 +386,48 @@ describe('canonical preset policy', () => {
 
   it('parseShellLayout surfaces canonical diagnostics for DEFAULT_PRESET', () => {
     const result = parseShellLayout({ presetId: 'default-v2' });
-    expect(result.diagnostics.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(true);
+    expect(result.diagnostics.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(false);
+  });
+
+  it('flags recipe semantic-role incompatibility as an error', () => {
+    const result = validatePresetStructure({
+      ...DEFAULT_PRESET,
+      id: 'bad-recipe-semantic',
+      bands: [
+        {
+          id: 'bad-band',
+          semanticRole: 'recognition',
+          recipe: 'feature-pair',
+          slots: [
+            { id: 's1', occupantId: 'hb-kudos', role: 'primary', columnSpan: 'major' },
+            { id: 's2', occupantId: 'company-pulse', role: 'secondary', columnSpan: 'minor' },
+          ],
+          maxDominantOccupants: 1,
+        },
+      ],
+    });
+    expect(result.diagnostics.some((d) => d.code === 'RECIPE_SEMANTIC_ROLE_INCOMPATIBLE')).toBe(
+      true,
+    );
+  });
+
+  it('flags recipe active-slot bounds violations as errors', () => {
+    const result = validatePresetStructure({
+      ...DEFAULT_PRESET,
+      id: 'bad-recipe-active-slot-count',
+      bands: [
+        {
+          id: 'bad-band',
+          semanticRole: 'operational-spotlight',
+          recipe: 'feature-pair',
+          slots: [{ id: 's1', occupantId: 'company-pulse', role: 'primary', columnSpan: 'major' }],
+          maxDominantOccupants: 1,
+        },
+      ],
+    });
+    expect(result.diagnostics.some((d) => d.code === 'RECIPE_ACTIVE_SLOT_COUNT_INVALID')).toBe(
+      true,
+    );
   });
 });
 

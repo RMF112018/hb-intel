@@ -32,6 +32,7 @@ import type {
   ColumnSpan,
   OccupantId,
   ShellBand,
+  ShellBandRecipeId,
   ShellEntryState,
   SlotRole,
 } from './shellTypes.js';
@@ -84,6 +85,8 @@ export interface SlotConformance {
 export interface BandConformance {
   readonly bandId: string;
   readonly semanticRole: BandSemanticRole;
+  readonly recipe: ShellBandRecipeId;
+  readonly fallbackRecipe: ShellBandRecipeId;
   readonly isEntryBand: boolean;
   readonly columns: 1 | 2;
   readonly pairingDecision: PairingDecision;
@@ -140,6 +143,8 @@ function resolveBandConformance(
   return {
     bandId: band.id,
     semanticRole: band.semanticRole,
+    recipe: layout.recipe,
+    fallbackRecipe: layout.fallbackRecipe,
     isEntryBand,
     columns: layout.columns,
     pairingDecision: layout.pairingDecision,
@@ -205,6 +210,7 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-short-height': 'true' | undefined;
   readonly 'data-shell-bands-paired-count': number;
   readonly 'data-shell-bands-total': number;
+  readonly 'data-shell-entry-band-recipe': ShellBandRecipeId | 'none';
 }
 
 export function toShellConformanceDataAttributes(
@@ -221,5 +227,6 @@ export function toShellConformanceDataAttributes(
     'data-shell-short-height': report.shortHeightConstrained ? 'true' : undefined,
     'data-shell-bands-paired-count': pairedCount,
     'data-shell-bands-total': report.bands.length,
+    'data-shell-entry-band-recipe': report.bands[0]?.recipe ?? 'none',
   };
 }

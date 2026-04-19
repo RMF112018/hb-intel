@@ -4,11 +4,12 @@ export const DEFAULT_PRESET: ShellPreset = {
   id: 'default-v2',
   title: 'Flagship Homepage Layout',
   description:
-    'Operational-anchor first lane pairing Project Portfolio Spotlight with Company Pulse, followed by editorial and contextual bands.',
+    'Recipe-driven flagship layout with operational feature pairing, editorial two-up composition, and governed fallback-ready contextual bands.',
   bands: [
     {
       id: 'band-operational-spotlight',
       semanticRole: 'operational-spotlight',
+      recipe: 'feature-pair',
       slots: [
         {
           id: 'slot-project-portfolio-spotlight',
@@ -28,12 +29,19 @@ export const DEFAULT_PRESET: ShellPreset = {
     {
       id: 'band-communications-newsroom',
       semanticRole: 'communications-newsroom',
+      recipe: 'balanced-two-up',
       slots: [
         {
-          id: 'slot-company-pulse-full',
-          occupantId: null,
+          id: 'slot-company-pulse-newsroom',
+          occupantId: 'company-pulse',
           role: 'primary',
-          columnSpan: 'full',
+          columnSpan: 'major',
+        },
+        {
+          id: 'slot-leadership-message-newsroom',
+          occupantId: 'leadership-message',
+          role: 'secondary',
+          columnSpan: 'minor',
         },
       ],
       maxDominantOccupants: 1,
@@ -41,6 +49,7 @@ export const DEFAULT_PRESET: ShellPreset = {
     {
       id: 'band-communications-editorial',
       semanticRole: 'communications-editorial',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-leadership-message',
@@ -54,12 +63,19 @@ export const DEFAULT_PRESET: ShellPreset = {
     {
       id: 'band-safety-field',
       semanticRole: 'operational-spotlight',
+      recipe: 'asymmetric-two-up',
       slots: [
         {
           id: 'slot-safety-field-excellence',
           occupantId: 'safety-field-excellence',
           role: 'primary',
-          columnSpan: 'full',
+          columnSpan: 'major',
+        },
+        {
+          id: 'slot-company-pulse-safety',
+          occupantId: 'company-pulse',
+          role: 'secondary',
+          columnSpan: 'minor',
         },
       ],
       maxDominantOccupants: 1,
@@ -67,6 +83,7 @@ export const DEFAULT_PRESET: ShellPreset = {
     {
       id: 'band-people-culture',
       semanticRole: 'people-culture',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-people-culture-public',
@@ -80,6 +97,7 @@ export const DEFAULT_PRESET: ShellPreset = {
     {
       id: 'band-recognition',
       semanticRole: 'recognition',
+      recipe: 'stacked-full',
       slots: [
         {
           id: 'slot-hb-kudos',

@@ -110,19 +110,16 @@ describe('Phase-05 closure — Prompt-03 canonical preset semantics', () => {
   it('all approved presets parse through canonical-semantics validator', () => {
     for (const preset of APPROVED_PRESETS.values()) {
       const diagnostics = validatePresetCanonicalSemantics(preset);
-      // Diagnostics are allowed at info severity (empty newsroom band on
-      // default) but never error severity.
+      // Diagnostics may include non-fatal informational guidance, but never
+      // error severity.
       const errors = diagnostics.filter((d) => d.severity === 'error');
       expect(errors).toEqual([]);
     }
   });
 
-  it('DEFAULT_PRESET emits the expected canonical info diagnostic for empty newsroom band', () => {
+  it('DEFAULT_PRESET no longer emits empty-band canonical diagnostics', () => {
     const diagnostics = validatePresetCanonicalSemantics(DEFAULT_PRESET);
-    const nonCanonical = diagnostics.find(
-      (d) => d.code === 'NON_CANONICAL_EMPTY_BAND',
-    );
-    expect(nonCanonical?.severity).toBe('info');
+    expect(diagnostics.some((d) => d.code === 'NON_CANONICAL_EMPTY_BAND')).toBe(false);
   });
 });
 

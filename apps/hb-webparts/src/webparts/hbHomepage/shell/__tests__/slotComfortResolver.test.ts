@@ -35,6 +35,7 @@ const PHONE_STATE: ShellEntryState = {
 const pairedBand: ShellBand = {
   id: 'band-editorial',
   semanticRole: 'communications-newsroom',
+  recipe: 'feature-pair',
   slots: [
     { id: 's1', occupantId: 'company-pulse', role: 'primary', columnSpan: 'major' },
     { id: 's2', occupantId: 'leadership-message', role: 'secondary', columnSpan: 'minor' },
@@ -45,6 +46,7 @@ const pairedBand: ShellBand = {
 const singleBand: ShellBand = {
   id: 'band-recognition',
   semanticRole: 'recognition',
+  recipe: 'stacked-full',
   slots: [
     { id: 's1', occupantId: 'hb-kudos', role: 'primary', columnSpan: 'full' },
   ],
@@ -175,6 +177,7 @@ describe('resolveBandLayout — pairing decision diagnostics', () => {
     const prohibitedBand: ShellBand = {
       id: 'band-prohibited',
       semanticRole: 'people-culture',
+      recipe: 'feature-pair',
       slots: [
         { id: 's1', occupantId: 'people-culture-public', role: 'primary', columnSpan: 'major' },
         { id: 's2', occupantId: 'hb-kudos', role: 'secondary', columnSpan: 'minor' },

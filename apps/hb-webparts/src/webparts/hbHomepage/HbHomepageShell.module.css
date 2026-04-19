@@ -77,9 +77,28 @@
   grid-template-columns: 1fr;
 }
 
+.bandRecipe_feature_pair,
+.bandRecipe_balanced_two_up,
+.bandRecipe_asymmetric_two_up,
+.bandRecipe_feature_utility_strip {
+  grid-template-columns: 1fr;
+}
+
 @container homepage-shell (min-width: 1180px) {
   .bandPaired {
     grid-template-columns: 3fr 2fr;
+  }
+
+  .bandRecipe_balanced_two_up {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .bandRecipe_asymmetric_two_up {
+    grid-template-columns: 5fr 3fr;
+  }
+
+  .bandRecipe_feature_utility_strip {
+    grid-template-columns: 4fr 2fr;
   }
 }
 
@@ -144,6 +163,11 @@
 
   .bandPaired .span_minor {
     grid-column: 2 / 3;
+  }
+
+  .bandRecipe_stacked_secondary_strip .slot_secondary,
+  .bandRecipe_stacked_secondary_strip .slot_compact {
+    max-width: 78ch;
   }
 }
 

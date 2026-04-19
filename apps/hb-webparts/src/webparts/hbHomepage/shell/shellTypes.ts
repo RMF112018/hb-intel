@@ -30,6 +30,15 @@ export type BandSemanticRole =
   | 'people-culture'
   | 'recognition';
 
+export type ShellBandRecipeId =
+  | 'feature-pair'
+  | 'balanced-two-up'
+  | 'asymmetric-two-up'
+  | 'feature-utility-strip'
+  | 'stacked-full'
+  | 'stacked-secondary-strip'
+  | 'single-column-fallback';
+
 export interface ShellSlot {
   readonly id: string;
   readonly occupantId: OccupantId | null;
@@ -40,6 +49,7 @@ export interface ShellSlot {
 export interface ShellBand {
   readonly id: string;
   readonly semanticRole: BandSemanticRole;
+  readonly recipe: ShellBandRecipeId;
   readonly slots: readonly ShellSlot[];
   readonly maxDominantOccupants: number;
 }

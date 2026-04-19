@@ -37,9 +37,16 @@ export type {
   ShellLayoutState,
   ShellPreset,
   ShellProtectedDecisions,
+  ShellBandRecipeId,
   ShellSlot,
   SlotRole,
 } from './shellTypes.js';
+
+export {
+  getBandRecipeRule,
+  SHELL_BAND_RECIPE_RULES,
+} from './bandRecipes.js';
+export type { ShellBandRecipeRule } from './bandRecipes.js';
 
 export {
   OCCUPANT_REGISTRY,
@@ -194,6 +201,7 @@ export {
   OccupantIdSchema,
   ShellBandSchema,
   ShellLayoutInputSchema,
+  ShellBandRecipeSchema,
   ShellPresetSchema,
   ShellSlotSchema,
   SlotRoleSchema,

@@ -137,6 +137,16 @@ interface ShellBandRendererProps {
   firstLaneDecision?: FirstLaneDecision;
 }
 
+const BAND_RECIPE_CLASS: Readonly<Record<ShellBandType['recipe'], string>> = {
+  'feature-pair': styles.bandRecipe_feature_pair,
+  'balanced-two-up': styles.bandRecipe_balanced_two_up,
+  'asymmetric-two-up': styles.bandRecipe_asymmetric_two_up,
+  'feature-utility-strip': styles.bandRecipe_feature_utility_strip,
+  'stacked-full': styles.bandRecipe_stacked_full,
+  'stacked-secondary-strip': styles.bandRecipe_stacked_secondary_strip,
+  'single-column-fallback': styles.bandRecipe_single_column_fallback,
+};
+
 function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDecision }: ShellBandRendererProps): React.JSX.Element | null {
   if (layout.slots.length === 0) return null;
 
@@ -144,6 +154,7 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDeci
     styles.band,
     isEntryBand ? styles.entryBand : '',
     layout.columns === 2 ? styles.bandPaired : styles.bandStacked,
+    BAND_RECIPE_CLASS[layout.recipe],
   ]
     .filter(Boolean)
     .join(' ');
@@ -157,6 +168,8 @@ function ShellBandRenderer({ band, layout, isEntryBand, zoneProps, firstLaneDeci
       data-shell-band={band.id}
       data-shell-semantic-role={band.semanticRole}
       data-shell-entry-band={isEntryBand || undefined}
+      data-shell-band-recipe={layout.recipe}
+      data-shell-band-fallback-recipe={layout.fallbackRecipe}
       data-shell-columns={layout.columns}
       data-shell-band-pairing-allowed={layout.pairingDecision.allowed}
       data-shell-band-pairing-reason={layout.pairingDecision.reason}
