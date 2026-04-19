@@ -69,7 +69,10 @@ export interface ILegacyProjectFallbackSyncRun {
   foldersScanned: number;
   recordsCreated: number;
   recordsUpdated: number;
+  recordsMatched: number;
+  recordsReviewRequired: number;
   recordsUnmatched: number;
+  recordsMarkedInactive: number;
   errorCount: number;
   summaryJson: string;
 }
