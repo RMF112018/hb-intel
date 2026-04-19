@@ -66,15 +66,15 @@ describe('extractHbHomepageWrapperConfig', () => {
     expect(result.hero.backgroundImageUrl).toBe('https://example.com/hero.jpg');
   });
 
-  it('migrates legacy top-level backgroundImageUrl into wrapper hero seam', () => {
+  it('ignores legacy top-level backgroundImageUrl so the daypart selector remains in control', () => {
     const result = extractHbHomepageWrapperConfig({
       backgroundImageUrl: 'https://example.com/legacy.jpg',
     });
     expect(result.hero.enabled).toBe(true);
-    expect(result.hero.backgroundImageUrl).toBe('https://example.com/legacy.jpg');
+    expect(result.hero.backgroundImageUrl).toBeUndefined();
   });
 
-  it('prefers wrapper hero backgroundImageUrl over legacy top-level value', () => {
+  it('honors only the wrapper-namespaced hero backgroundImageUrl as an explicit override', () => {
     const result = extractHbHomepageWrapperConfig({
       backgroundImageUrl: 'https://example.com/legacy.jpg',
       hbHomepageWrapper: {

@@ -122,11 +122,10 @@ function readFallbackRailConfig(value: unknown): Partial<PriorityActionsRailConf
  * ```
  * {
  *   activeAudience?: string,             // shared top-level audience
- *   backgroundImageUrl?: string,         // legacy hero override (compat)
  *   hbHomepageWrapper?: {
  *     hero?: {
  *       enabled?: boolean,
- *       backgroundImageUrl?: string
+ *       backgroundImageUrl?: string     // explicit authored override
  *     },
  *     rail?: {
  *       enabled?: boolean,
@@ -136,6 +135,12 @@ function readFallbackRailConfig(value: unknown): Partial<PriorityActionsRailConf
  *   }
  * }
  * ```
+ *
+ * Note: a top-level `backgroundImageUrl` on the config bag is intentionally
+ * ignored. The flagship homepage hero defaults to a time-of-day banner via
+ * `resolveHomepageHeroBannerFileNameAt`; an authored override must be placed
+ * explicitly under `hbHomepageWrapper.hero.backgroundImageUrl` so it is not
+ * inherited accidentally from a pre-daypart property bag.
  */
 export function extractHbHomepageWrapperConfig(
   config: Record<string, unknown> | undefined,
@@ -145,7 +150,6 @@ export function extractHbHomepageWrapperConfig(
   }
 
   const topAudience = readString(config.activeAudience);
-  const legacyBackgroundImageUrl = readString(config.backgroundImageUrl);
   const wrapperNode = isRecord(config.hbHomepageWrapper) ? config.hbHomepageWrapper : undefined;
   const railNode = wrapperNode && isRecord(wrapperNode.rail) ? wrapperNode.rail : undefined;
   const heroNode = wrapperNode && isRecord(wrapperNode.hero) ? wrapperNode.hero : undefined;
@@ -161,8 +165,7 @@ export function extractHbHomepageWrapperConfig(
 
   const hero: HbHomepageWrapperHeroConfig = {
     enabled: readBoolean(heroNode?.enabled, DEFAULT_HERO_CONFIG.enabled),
-    backgroundImageUrl:
-      readString(heroNode?.backgroundImageUrl) ?? legacyBackgroundImageUrl,
+    backgroundImageUrl: readString(heroNode?.backgroundImageUrl),
   };
 
   return { rail, hero };

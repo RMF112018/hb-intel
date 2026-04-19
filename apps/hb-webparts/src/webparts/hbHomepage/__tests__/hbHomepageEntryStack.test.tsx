@@ -207,7 +207,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     );
   });
 
-  it('supports legacy homepage backgroundImageUrl migration through wrapper extraction', () => {
+  it('does not thread legacy top-level backgroundImageUrl into the hero — daypart selector stays in control', () => {
     const { container } = render(
       <HbHomepageEntryStack
         config={{
@@ -216,9 +216,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
       />,
     );
     const heroNode = container.querySelector('[data-test-mock="hb-signature-hero"]');
-    expect(heroNode?.getAttribute('data-test-hero-background-image')).toBe(
-      'https://example.com/legacy-hero.jpg',
-    );
+    expect(heroNode?.getAttribute('data-test-hero-background-image')).toBe('');
   });
 
   it('embeds the launcher band as a React surface inside the actions region', () => {
