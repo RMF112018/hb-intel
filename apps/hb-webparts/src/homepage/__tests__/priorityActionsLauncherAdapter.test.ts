@@ -128,6 +128,15 @@ describe('priorityActionsLauncherAdapter', () => {
     const procoreTile = mapItemToTile(procore);
     expect(procoreTile.iconAssetSrc).toContain('data:image/svg+xml');
     expect(procoreTile.iconPresentation).toBe('compliant');
+
+    const bamboo = makeItem(14);
+    bamboo.actionKey = 'bamboohr';
+    bamboo.title = 'BambooHR';
+    const bambooTile = mapItemToTile(bamboo);
+    expect(bambooTile.iconAssetSrc).toContain('data:image/svg+xml');
+    expect(bambooTile.iconPresentation).toBe('compliant');
+    expect(bambooTile.iconAssetStrategy).toBe('img-filter-white');
+    expect(bambooTile.iconKey).toBe('bamboohr');
   });
 
   it('does not regress to badge-variant-first behavior', () => {

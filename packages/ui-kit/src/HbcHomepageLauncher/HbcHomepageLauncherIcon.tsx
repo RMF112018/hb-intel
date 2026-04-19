@@ -19,9 +19,9 @@ export function HbcHomepageLauncherIcon({
 }: HbcHomepageLauncherIconProps): React.JSX.Element | null {
   const Icon = tile.icon;
   if (!Icon && !tile.iconAssetSrc) return null;
-  const compliantIcon = surface === 'drawer'
-    || tile.iconPresentation === 'compliant'
-    || Boolean(tile.iconAssetSrc);
+  const compliantIcon = true;
+  const iconSize = surface === 'drawer' ? 28 : 34;
+  const iconStrokeWidth = surface === 'drawer' ? 2.2 : 2.4;
 
   return (
     <span
@@ -43,7 +43,7 @@ export function HbcHomepageLauncherIcon({
           draggable={false}
         />
       ) : Icon ? (
-        <Icon size={18} strokeWidth={2.1} />
+        <Icon size={iconSize} strokeWidth={iconStrokeWidth} />
       ) : null}
     </span>
   );

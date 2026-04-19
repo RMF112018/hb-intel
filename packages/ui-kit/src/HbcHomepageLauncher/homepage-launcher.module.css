@@ -12,9 +12,9 @@
   --hbc-hl-brand-deep-rgb: var(--hb-brand-primary-deep-rgb, 20, 52, 96);
   --hbc-hl-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
   --hbc-hl-orange-rgb: var(--hb-brand-orange-rgb, 227, 114, 34);
-  --hbc-hl-row-gap: 10px;
+  --hbc-hl-row-gap: 12px;
   --hbc-hl-visible-tiles: 1;
-  --hbc-hl-tile-max-width: 204px;
+  --hbc-hl-tile-size: 156px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -39,7 +39,7 @@
   width: min(
     100%,
     calc(
-      (var(--hbc-hl-visible-tiles) * var(--hbc-hl-tile-max-width)) + (
+      (var(--hbc-hl-visible-tiles) * var(--hbc-hl-tile-size)) + (
           (var(--hbc-hl-visible-tiles) - 1) * var(--hbc-hl-row-gap)
         )
     )
@@ -50,16 +50,17 @@
 }
 
 .tile {
-  flex: 1 1 0;
+  width: min(100%, var(--hbc-hl-tile-size));
   min-width: 0;
-  max-width: var(--hbc-hl-tile-max-width);
-  min-height: 72px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  min-height: var(--hbc-hl-tile-size);
+  aspect-ratio: 1 / 1;
+  padding: 12px 10px 10px;
+  border-radius: 14px;
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 10px;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  align-items: start;
+  gap: 8px;
   text-decoration: none;
   cursor: pointer;
   position: relative;
@@ -106,11 +107,12 @@
 }
 
 .tileDrawer {
-  max-width: none;
-  min-height: 64px;
-  padding: 12px 14px;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  padding: 12px 10px 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 12px;
+  border-radius: 14px;
   color: #ffffff;
   background: linear-gradient(
     150deg,
@@ -164,19 +166,19 @@
 .tileIcon {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--hbc-hl-brand);
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px rgba(var(--hbc-hl-brand-rgb), 0.12);
+  box-shadow: none;
 }
 
 .tileIconCompliant {
-  width: 22px;
-  height: 22px;
+  width: 36px;
+  height: 36px;
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -184,8 +186,8 @@
 }
 
 .tileIconDrawer {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -200,52 +202,65 @@
 }
 
 .tileContent {
+  width: 100%;
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
 }
 
 .tileTitle {
+  width: 100%;
   min-width: 0;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  line-height: 1.22;
+  line-height: 1.2;
   letter-spacing: -0.006em;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
 .drawerTileTitle {
-  font-size: 0.82rem;
-  line-height: 1.24;
+  font-size: 0.8rem;
+  line-height: 1.22;
+  -webkit-line-clamp: 3;
 }
 
 .overflowTile {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  align-items: start;
   gap: 8px;
   font: inherit;
+  width: min(100%, var(--hbc-hl-tile-size));
+  min-height: var(--hbc-hl-tile-size);
+  aspect-ratio: 1 / 1;
+  padding: 12px 10px 10px;
 }
 
 .triggerIcon {
-  width: 20px;
-  height: 20px;
+  width: 34px;
+  height: 34px;
 }
 
 .overflowTriggerLabel {
+  width: 100%;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8rem;
+  white-space: normal;
+  font-size: 0.78rem;
   font-weight: 700;
-  line-height: 1.15;
-  text-align: left;
+  line-height: 1.2;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .overflowTriggerCount {
@@ -260,6 +275,12 @@
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: 800;
+}
+
+.overflowTile > svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
 }
 
 .sheetLayer {
@@ -378,12 +399,12 @@
 
 .drawerTileGrid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
 }
 
 .drawerTile {
-  min-height: 64px;
+  min-height: 0;
 }
 
 /* Breakpoint governance */
@@ -397,21 +418,43 @@
   }
 
   .tile {
+    width: 100%;
     max-width: none;
-    min-height: 66px;
-    padding: 10px 12px;
-    flex: 0 0 auto;
+    min-height: 92px;
+    aspect-ratio: 3 / 2;
+    padding: 10px 11px;
+    flex: 1 1 auto;
+    grid-template-rows: auto 1fr;
+    gap: 6px;
+  }
+
+  .tileContent {
     width: 100%;
   }
 
   .tileIcon {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .tileIconCompliant {
+    width: 32px;
+    height: 32px;
   }
 
   .overflowTile {
-    min-height: 64px;
     width: 100%;
+    min-height: 92px;
+    aspect-ratio: 3 / 2;
+    grid-template-rows: auto 1fr;
+    gap: 6px;
+  }
+
+  .overflowTriggerLabel,
+  .tileTitle {
+    width: 100%;
+    -webkit-line-clamp: 2;
+    font-size: 0.74rem;
   }
 
   .sheetSurface {
@@ -435,59 +478,93 @@
   }
 
   .drawerTileGrid {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .drawerTile {
-    min-height: 62px;
-    padding: 11px 12px;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+  }
+
+  .overflowTile > svg {
+    display: none;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 720px) and (max-width: 979px) {
-  .root { --hbc-hl-tile-max-width: 174px; }
-  .tile { min-height: 68px; }
+  .root { --hbc-hl-tile-size: 138px; }
+
   .tileIcon {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
   }
+
+  .tileIconCompliant {
+    width: 32px;
+    height: 32px;
+  }
+
   .tileTitle {
-    font-size: 0.8rem;
+    font-size: 0.74rem;
   }
-  .overflowTile { min-height: 68px; }
+
+  .overflowTile { min-height: var(--hbc-hl-tile-size); }
+
   .sheetSurface {
     width: min(100vw - 22px, 960px);
+  }
+
+  .drawerTileGrid {
+    grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
   }
 }
 
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
-  .root { --hbc-hl-tile-max-width: 186px; }
-  .tile { min-height: 70px; }
-  .overflowTile { min-height: 70px; }
+  .root { --hbc-hl-tile-size: 146px; }
+
+  .tileTitle {
+    font-size: 0.76rem;
+  }
+
+  .drawerTileGrid {
+    grid-template-columns: repeat(auto-fit, minmax(152px, 1fr));
+  }
 }
 
 @container hbc-homepage-launcher (min-width: 1180px) and (max-width: 1599px) {
-  .root { --hbc-hl-tile-max-width: 198px; }
-  .tile { min-height: 72px; }
-  .overflowTile { min-height: 72px; }
+  .root { --hbc-hl-tile-size: 156px; }
+
+  .tileTitle {
+    font-size: 0.78rem;
+  }
 }
 
 @container hbc-homepage-launcher (min-width: 1600px) {
-  .root { --hbc-hl-tile-max-width: 214px; }
+  .root { --hbc-hl-tile-size: 168px; }
+
   .tile {
-    min-height: 76px;
-    border-radius: 13px;
+    border-radius: 16px;
   }
+
   .tileIcon {
     width: 38px;
     height: 38px;
-    border-radius: 11px;
   }
+
+  .tileIconCompliant {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tileTitle {
+    font-size: 0.82rem;
+  }
+
   .overflowTile {
-    min-height: 76px;
-    border-radius: 13px;
+    border-radius: 16px;
   }
+
   .sheetSurface {
     max-height: min(82vh, 960px);
   }
@@ -495,20 +572,29 @@
 
 @media (max-height: 640px) {
   .tile {
-    min-height: 60px;
-    padding: 9px 10px;
-    border-radius: 11px;
+    min-height: 110px;
+    padding: 10px 8px 8px;
+    border-radius: 12px;
   }
 
   .tileIcon {
     width: 30px;
     height: 30px;
-    border-radius: 8px;
+  }
+
+  .tileIconCompliant {
+    width: 30px;
+    height: 30px;
+  }
+
+  .tileTitle {
+    font-size: 0.72rem;
+    -webkit-line-clamp: 2;
   }
 
   .overflowTile {
-    min-height: 60px;
-    border-radius: 11px;
+    min-height: 110px;
+    border-radius: 12px;
   }
 
   .sheetSurface {
@@ -526,8 +612,8 @@
   }
 
   .drawerTile {
-    min-height: 58px;
-    padding: 9px 10px;
+    min-height: 0;
+    padding: 10px 8px 8px;
   }
 }
 

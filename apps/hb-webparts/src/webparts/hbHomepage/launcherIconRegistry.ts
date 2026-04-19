@@ -1,5 +1,6 @@
 import { Building2, type LucideIcon } from '@hbc/ui-kit/homepage';
 import adpLogo from '../../../../hb-homepage/assets/icons/adp_logo.svg';
+import bambooHrLogo from '../../../../hb-homepage/assets/icons/bambooHR_white.svg';
 import compassLogo from '../../../../hb-homepage/assets/icons/compass_icon.svg';
 import documentCrunchLogo from '../../../../hb-homepage/assets/icons/document-crunch-logo.svg';
 import hh2Logo from '../../../../hb-homepage/assets/icons/hh2.svg';
@@ -29,6 +30,11 @@ const GOVERNED_ICON_BY_ACTION_KEY: Readonly<Record<string, HomepageLauncherGover
     iconKey: 'compass',
     iconPresentation: 'compliant',
   },
+  bamboohr: {
+    iconAssetSrc: bambooHrLogo,
+    iconKey: 'bamboohr',
+    iconPresentation: 'compliant',
+  },
   'document-crunch': {
     iconAssetSrc: documentCrunchLogo,
     iconKey: 'document-crunch',
@@ -50,6 +56,7 @@ const ALIASES: Readonly<Record<string, string>> = Object.freeze({
   'hb projects': 'hb-projects',
   adp: 'my-adp',
   'my adp': 'my-adp',
+  'bamboo hr': 'bamboohr',
   documentcrunch: 'document-crunch',
   'document crunch': 'document-crunch',
 });

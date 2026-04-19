@@ -48,6 +48,7 @@ export function HbcHomepageLauncherTile({
       data-hbc-launcher-tile-external={isExternal ? 'true' : undefined}
       data-hbc-launcher-tile-new-tab={shouldOpenInNewTab ? 'true' : undefined}
       data-hbc-launcher-tile-family={family}
+      data-hbc-launcher-tile-geometry="icon-forward-square"
       data-hbc-chip-id={tile.id}
       data-hbc-chip-service-key={tile.serviceKey}
       data-hbc-chip-group-key={tile.groupKey}

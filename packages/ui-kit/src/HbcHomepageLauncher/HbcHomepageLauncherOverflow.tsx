@@ -112,6 +112,7 @@ function DrawerOverflow({
         data-hbc-overflow-mode="sheet"
         data-hbc-homepage-launcher-sheet-content="all-tools"
         data-hbc-launcher-tile-family="row"
+        data-hbc-launcher-tile-geometry="icon-forward-square"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={dialogId}

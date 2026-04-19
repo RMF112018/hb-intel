@@ -51,6 +51,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     for (const tile of tiles) {
       expect(tile.getAttribute('data-hbc-ui')).toBe('homepage-launcher-tile');
       expect(tile.getAttribute('data-hbc-launcher-tile-variant')).toBe('primary');
+      expect(tile.getAttribute('data-hbc-launcher-tile-geometry')).toBe('icon-forward-square');
     }
   });
 
@@ -84,9 +85,13 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
     const rowTile = screen.getByRole('link', { name: /My ADP/i });
     expect(rowTile.getAttribute('data-hbc-launcher-tile-icon-source')).toBe('asset');
+    const rowIcon = rowTile.querySelector('span[aria-hidden="true"]');
+    expect(rowIcon?.className.includes('tileIconCompliant')).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
     const drawerTile = screen.getByRole('link', { name: /Procore/i });
     expect(drawerTile.getAttribute('data-hbc-launcher-tile-icon-source')).toBe('asset');
+    const drawerIcon = drawerTile.querySelector('span[aria-hidden="true"]');
+    expect(drawerIcon?.className.includes('tileIconCompliant')).toBe(true);
   });
 
   it('uses bottom drawer overflow on desktop', () => {
@@ -101,6 +106,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       'secondary-overflow-entry',
     );
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
+    expect(trigger.getAttribute('data-hbc-launcher-tile-geometry')).toBe('icon-forward-square');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     fireEvent.click(trigger);
     expect(screen.getByRole('dialog', { name: /More tools/i })).toBeInTheDocument();
