@@ -55,6 +55,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       data-hb-homepage-outer-envelope-max-width={HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}
       data-hb-homepage-outer-envelope-contract={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
       data-hb-homepage-entry-stack-rail-enabled={rail.enabled || undefined}
+      data-hb-homepage-entry-stack-rail-alignment-mode={rail.alignmentMode}
       data-hb-homepage-entry-state={entryContainer.entryState.id}
       data-hb-homepage-entry-state-reason={entryContainer.entryStateReason}
       data-hb-homepage-entry-state-short-height={entryContainer.shortHeightConstrained || undefined}
@@ -75,6 +76,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
           <HbHomepageLauncherBand
             bandKey={rail.bandKey}
             activeAudience={rail.activeAudience}
+            alignmentMode={rail.alignmentMode}
             entryContainer={entryContainer}
           />
         </section>

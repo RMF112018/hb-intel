@@ -14,6 +14,7 @@ function makeResolution(
     shellState: 'standard-laptop',
     entryStateReason: 'width-match',
     shortHeightConstrained: false,
+    densityPosture: 'comfortable',
     ...overrides,
   };
 }
@@ -73,15 +74,42 @@ describe('priorityActionsLauncherAdapter', () => {
 
   it('reduces visible primary budget under short-height posture', () => {
     const items = [1, 2, 3, 4, 5].map((id) => makeItem(id));
-    const normal = partitionItems(items, 'desktop', false);
-    const shortHeight = partitionItems(items, 'desktop', true);
+    const normal = partitionItems(items, 'desktop', makeResolution({}), {
+      strictShellAlignment: true,
+    });
+    const shortHeight = partitionItems(
+      items,
+      'desktop',
+      makeResolution({ shortHeightConstrained: true }),
+      { strictShellAlignment: true },
+    );
     expect(shortHeight.primary.length).toBe(normal.primary.length - 1);
   });
 
   it('always keeps overflowOnly items in overflow', () => {
     const items = [makeItem(1), makeItem(2, true), makeItem(3)];
-    const partition = partitionItems(items, 'phone', false);
+    const partition = partitionItems(items, 'phone', makeResolution({ deviceClass: 'phone' }), {
+      strictShellAlignment: true,
+    });
     const overflowIds = partition.overflow.map((item) => item.id);
     expect(overflowIds).toContain('2');
+  });
+
+  it('caps visible budget by shell-state governance under strict alignment', () => {
+    const items = [1, 2, 3, 4, 5].map((id) => makeItem(id));
+    const strict = partitionItems(
+      items,
+      'desktop',
+      makeResolution({ shellState: 'tablet-portrait' }),
+      { strictShellAlignment: true },
+    );
+    const legacy = partitionItems(
+      items,
+      'desktop',
+      makeResolution({ shellState: 'tablet-portrait' }),
+      { strictShellAlignment: false },
+    );
+    expect(strict.visibleBudget).toBe(3);
+    expect(legacy.visibleBudget).toBeGreaterThan(strict.visibleBudget);
   });
 });

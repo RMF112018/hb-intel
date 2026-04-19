@@ -19,6 +19,7 @@ describe('priorityActionsPresentation — launcher band', () => {
     expect(result.shellState).toBe('standard-laptop');
     expect(result.deviceClass).toBe('laptop');
     expect(result.entryStateReason).toBe('width-match');
+    expect(result.densityPosture).toBe('comfortable');
   });
 
   it('maps container dimensions to rail device classes via shell policy', () => {
@@ -68,6 +69,7 @@ describe('priorityActionsPresentation — launcher band', () => {
   it('applies short-height override mapping through shell policy', () => {
     const result = resolvePriorityRailDeviceForContainer({ width: 1000, height: 420 });
     expect(result.shortHeightConstrained).toBe(true);
+    expect(result.densityPosture).toBe('compact');
   });
 
   it('resolveLauncherPresentation picks sheet overflow on phone + short-height, menu elsewhere', () => {

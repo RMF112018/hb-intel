@@ -27,6 +27,8 @@ vi.mock('../HbHomepageLauncherBand.js', () => ({
       'data-test-mock': 'hb-homepage-launcher-band',
       'data-test-launcher-band-key': (props.bandKey as string | undefined) ?? '',
       'data-test-launcher-audience': (props.activeAudience as string | undefined) ?? '',
+      'data-test-launcher-alignment-mode':
+        (props.alignmentMode as string | undefined) ?? '',
       'data-test-launcher-has-featured-keys-prop': hasFeaturedKeys ? 'true' : 'false',
       'data-test-launcher-has-entry-container-prop': hasEntryContainer ? 'true' : 'false',
     });
@@ -128,6 +130,9 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     );
     expect(launcherNode?.getAttribute('data-test-launcher-band-key')).toBe('homepage-primary');
     expect(launcherNode?.getAttribute('data-test-launcher-audience')).toBe('field');
+    expect(launcherNode?.getAttribute('data-test-launcher-alignment-mode')).toBe(
+      'shared-entry-governed',
+    );
   });
 
   it('declares the new homepage-launcher surface on the actions region', () => {

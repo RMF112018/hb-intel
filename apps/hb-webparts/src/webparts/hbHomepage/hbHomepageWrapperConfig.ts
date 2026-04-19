@@ -49,6 +49,7 @@ export interface HbHomepageWrapperRailConfig {
   readonly enabled: boolean;
   readonly bandKey: string;
   readonly activeAudience?: string;
+  readonly alignmentMode: 'shared-entry-governed' | 'legacy';
   readonly fallbackConfig?: Partial<PriorityActionsRailConfig>;
 }
 
@@ -65,6 +66,7 @@ const DEFAULT_RAIL_CONFIG: HbHomepageWrapperRailConfig = {
   enabled: true,
   bandKey: HB_HOMEPAGE_WRAPPER_DEFAULT_BAND_KEY,
   activeAudience: undefined,
+  alignmentMode: 'shared-entry-governed',
   fallbackConfig: undefined,
 };
 
@@ -126,6 +128,8 @@ export function extractHbHomepageWrapperConfig(
     enabled: readBoolean(railNode?.enabled, DEFAULT_RAIL_CONFIG.enabled),
     bandKey: readString(railNode?.bandKey) ?? DEFAULT_RAIL_CONFIG.bandKey,
     activeAudience: topAudience,
+    alignmentMode:
+      railNode?.alignmentMode === 'legacy' ? 'legacy' : DEFAULT_RAIL_CONFIG.alignmentMode,
     fallbackConfig: readFallbackRailConfig(railNode?.fallbackConfig),
   };
 

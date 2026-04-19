@@ -81,6 +81,22 @@ export function resolveLauncherDeviceClass(
 export interface LauncherPartition {
   primary: HomepageLauncherChipModel[];
   overflow: HomepageLauncherChipModel[];
+  visibleBudget: number;
+}
+
+const SHELL_STATE_VISIBLE_CAP: Readonly<Record<PriorityRailDeviceResolution['shellState'], number>> =
+  Object.freeze({
+    'ultrawide-desktop': 8,
+    'standard-laptop': 6,
+    'tablet-landscape': 4,
+    'tablet-portrait-large': 3,
+    'tablet-portrait': 3,
+    'phone-portrait': 2,
+    'phone-landscape': 2,
+  });
+
+export interface LauncherBudgetOptions {
+  strictShellAlignment: boolean;
 }
 
 /**
@@ -94,12 +110,16 @@ export interface LauncherPartition {
 export function partitionItems(
   items: readonly PriorityActionsItemNormalized[],
   deviceClass: HomepageLauncherDeviceClass,
-  shortHeight: boolean,
+  resolution: Pick<PriorityRailDeviceResolution, 'shortHeightConstrained' | 'shellState'>,
+  options: LauncherBudgetOptions = { strictShellAlignment: true },
 ): LauncherPartition {
-  const maxVisible = Math.max(
+  const baseVisible = Math.max(
     1,
-    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[deviceClass] - (shortHeight ? 1 : 0),
+    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[deviceClass] - (resolution.shortHeightConstrained ? 1 : 0),
   );
+  const maxVisible = options.strictShellAlignment
+    ? Math.max(1, Math.min(baseVisible, SHELL_STATE_VISIBLE_CAP[resolution.shellState]))
+    : baseVisible;
 
   const forced: PriorityActionsItemNormalized[] = [];
   const eligible: PriorityActionsItemNormalized[] = [];
@@ -110,7 +130,7 @@ export function partitionItems(
 
   const primary = eligible.slice(0, maxVisible).map(mapItemToChip);
   const overflow = [...eligible.slice(maxVisible), ...forced].map(mapItemToChip);
-  return { primary, overflow };
+  return { primary, overflow, visibleBudget: maxVisible };
 }
 
 /** Re-export for convenience so the webpart only imports from this adapter. */

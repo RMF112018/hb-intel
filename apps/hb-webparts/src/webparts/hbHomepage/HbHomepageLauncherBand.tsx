@@ -32,17 +32,23 @@ import {
   resolveLauncherDeviceClass,
 } from '../../homepage/data/priorityActionsLauncherAdapter.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
-import type { ShellContainerState } from './shell/useShellContainer.js';
+import {
+  SHELL_WIDTH_ACCOUNTING_RULE,
+  SHELL_WIDTH_SOURCE,
+  type ShellContainerState,
+} from './shell/useShellContainer.js';
 
 export interface HbHomepageLauncherBandProps {
   bandKey?: string;
   activeAudience?: string;
+  alignmentMode: 'shared-entry-governed' | 'legacy';
   entryContainer: ShellContainerState;
 }
 
 export function HbHomepageLauncherBand({
   bandKey,
   activeAudience,
+  alignmentMode,
   entryContainer,
 }: HbHomepageLauncherBandProps): React.JSX.Element {
   const resolution = resolvePriorityRailDeviceForEntryState(entryContainer);
@@ -53,6 +59,9 @@ export function HbHomepageLauncherBand({
   });
 
   let content: React.JSX.Element;
+  let visibleBudget: number | undefined;
+  let primaryCount: number | undefined;
+  let overflowCount: number | undefined;
 
   if (isLoading) {
     content = <HbcPriorityRailSkeleton count={4} />;
@@ -72,11 +81,12 @@ export function HbHomepageLauncherBand({
     content = <HbcPriorityRailEmptyState title={msg.title} description={msg.description} />;
   } else {
     const deviceFiltered = filterByDevice(items, resolution.deviceClass);
-    const partition = partitionItems(
-      deviceFiltered,
-      deviceClass,
-      resolution.shortHeightConstrained,
-    );
+    const partition = partitionItems(deviceFiltered, deviceClass, resolution, {
+      strictShellAlignment: alignmentMode !== 'legacy',
+    });
+    visibleBudget = partition.visibleBudget;
+    primaryCount = partition.primary.length;
+    overflowCount = partition.overflow.length;
 
     if (partition.primary.length === 0 && partition.overflow.length === 0) {
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
@@ -102,9 +112,17 @@ export function HbHomepageLauncherBand({
       data-hbc-launcher-shell-state={resolution.shellState}
       data-hbc-launcher-entry-reason={resolution.entryStateReason}
       data-hbc-launcher-short-height={resolution.shortHeightConstrained ? 'true' : 'false'}
+      data-hbc-launcher-density-posture={resolution.densityPosture}
+      data-hbc-launcher-visible-budget={visibleBudget}
+      data-hbc-launcher-primary-count={primaryCount}
+      data-hbc-launcher-overflow-count={overflowCount}
       data-hbc-launcher-width={Math.round(entryContainer.width)}
       data-hbc-launcher-width-authoritative={Math.round(entryContainer.authoritativeWidth)}
       data-hbc-launcher-width-inline-inset-total={Math.round(entryContainer.shellInlineInsetTotal)}
+      data-hbc-launcher-width-source={SHELL_WIDTH_SOURCE}
+      data-hbc-launcher-width-accounting={SHELL_WIDTH_ACCOUNTING_RULE}
+      data-hbc-launcher-entry-authority="shared-entry-state"
+      data-hbc-launcher-alignment-mode={alignmentMode}
     >
       {content}
     </div>

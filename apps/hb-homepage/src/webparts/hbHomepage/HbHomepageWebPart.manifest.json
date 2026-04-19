@@ -3,18 +3,26 @@
   "id": "e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf",
   "alias": "HbHomepageWebPart",
   "componentType": "WebPart",
-  "version": "1.1.30.0",
+  "version": "1.1.30.001",
   "manifestVersion": 2,
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart"],
+  "supportedHosts": [
+    "SharePointWebPart"
+  ],
   "supportsFullBleed": true,
   "supportsThemeVariants": false,
   "preconfiguredEntries": [
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-      "group": { "default": "HB Intel" },
-      "title": { "default": "HB Homepage" },
-      "description": { "default": "Composed homepage orchestrator surface rendering Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos in a governed shell with entry-stack contract and preset-driven layout." },
+      "group": {
+        "default": "HB Intel"
+      },
+      "title": {
+        "default": "HB Homepage"
+      },
+      "description": {
+        "default": "Composed homepage orchestrator surface rendering Company Pulse, Leadership Message, Project Portfolio Spotlight, Safety Field Excellence, People & Culture Public, and HB Kudos in a governed shell with entry-stack contract and preset-driven layout."
+      },
       "officeFabricIconFontName": "Home",
       "hiddenFromToolbox": false,
       "properties": {}

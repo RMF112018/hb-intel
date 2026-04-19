@@ -1,0 +1,228 @@
+import * as React from 'react';
+import { describe, it, expect, vi } from 'vitest';
+import { render } from '@testing-library/react';
+import type { PriorityActionsItemNormalized } from '../../../homepage/data/priorityActionsContracts.js';
+import { HbHomepageLauncherBand } from '../HbHomepageLauncherBand.js';
+import type { ShellContainerState } from '../shell/useShellContainer.js';
+
+const MOCK_ITEMS: PriorityActionsItemNormalized[] = [
+  {
+    id: 1,
+    actionKey: 'a1',
+    title: 'Action 1',
+    href: '/a1',
+    description: '',
+    iconKey: 'arrow-right',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: '',
+    groupTitle: '',
+    sortOrder: 1,
+    isExternal: false,
+    openInNewTab: false,
+    overflowOnly: false,
+    mobilePriority: 0,
+    audienceMode: 'all',
+    audienceKeys: [],
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 2,
+    actionKey: 'a2',
+    title: 'Action 2',
+    href: '/a2',
+    description: '',
+    iconKey: 'arrow-right',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: '',
+    groupTitle: '',
+    sortOrder: 2,
+    isExternal: false,
+    openInNewTab: false,
+    overflowOnly: false,
+    mobilePriority: 0,
+    audienceMode: 'all',
+    audienceKeys: [],
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 3,
+    actionKey: 'a3',
+    title: 'Action 3',
+    href: '/a3',
+    description: '',
+    iconKey: 'arrow-right',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: '',
+    groupTitle: '',
+    sortOrder: 3,
+    isExternal: false,
+    openInNewTab: false,
+    overflowOnly: false,
+    mobilePriority: 0,
+    audienceMode: 'all',
+    audienceKeys: [],
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 4,
+    actionKey: 'a4',
+    title: 'Action 4',
+    href: '/a4',
+    description: '',
+    iconKey: 'arrow-right',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: '',
+    groupTitle: '',
+    sortOrder: 4,
+    isExternal: false,
+    openInNewTab: false,
+    overflowOnly: false,
+    mobilePriority: 0,
+    audienceMode: 'all',
+    audienceKeys: [],
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+  {
+    id: 5,
+    actionKey: 'a5',
+    title: 'Action 5',
+    href: '/a5',
+    description: '',
+    iconKey: 'arrow-right',
+    badgeLabel: '',
+    badgeVariant: 'neutral',
+    priority: 'primary',
+    groupKey: '',
+    groupTitle: '',
+    sortOrder: 5,
+    isExternal: false,
+    openInNewTab: false,
+    overflowOnly: false,
+    mobilePriority: 0,
+    audienceMode: 'all',
+    audienceKeys: [],
+    visibleDesktop: true,
+    visibleLaptop: true,
+    visibleTabletLandscape: true,
+    visibleTabletPortrait: true,
+    visiblePhone: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+  },
+];
+
+vi.mock('../../../homepage/data/usePriorityActionsData.js', () => ({
+  usePriorityActionsData: () => ({
+    config: {
+      showHeading: true,
+      headingText: 'Priority Actions',
+      overflowLabel: 'More tools',
+    },
+    items: MOCK_ITEMS,
+    isLoading: false,
+    error: undefined,
+  }),
+  invalidatePriorityActionsCache: vi.fn(),
+}));
+
+vi.mock('../../../homepage/data/priorityActionsNormalization.js', () => ({
+  filterByDevice: (items: PriorityActionsItemNormalized[]) => items,
+}));
+
+vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@hbc/ui-kit/homepage')>();
+  return {
+    ...actual,
+    HbcHomepageLauncher: (props: { primary: unknown[]; overflow: unknown[] }): React.JSX.Element =>
+      React.createElement('div', {
+        'data-test-launcher': 'mock',
+        'data-test-primary-count': props.primary.length,
+        'data-test-overflow-count': props.overflow.length,
+      }),
+    HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
+    HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
+    HbcPriorityRailSkeleton: (): React.JSX.Element => React.createElement('div'),
+  };
+});
+
+const ENTRY_CONTAINER: ShellContainerState = {
+  width: 900,
+  authoritativeWidth: 980,
+  shellInlineInsetTotal: 80,
+  height: 900,
+  entryState: {
+    id: 'tablet-portrait',
+    label: 'tablet',
+    minWidth: 720,
+    maxWidth: 819,
+    firstLaneColumns: 1,
+    firstLanePairingAllowed: false,
+    dominanceRule: 'single',
+  },
+  entryStateReason: 'width-match' as const,
+  shortHeightConstrained: false,
+};
+
+describe('HbHomepageLauncherBand governance alignment', () => {
+  it('emits shared-entry governance diagnostics on launcher root', () => {
+    const { container } = render(
+      <HbHomepageLauncherBand
+        entryContainer={ENTRY_CONTAINER}
+        alignmentMode="shared-entry-governed"
+      />,
+    );
+    const root = container.querySelector('[data-hb-homepage-launcher-band="root"]');
+    expect(root?.getAttribute('data-hbc-launcher-entry-authority')).toBe('shared-entry-state');
+    expect(root?.getAttribute('data-hbc-launcher-alignment-mode')).toBe('shared-entry-governed');
+    expect(root?.getAttribute('data-hbc-launcher-density-posture')).toBe('compact');
+    expect(root?.getAttribute('data-hbc-launcher-visible-budget')).toBe('3');
+  });
+
+  it('keeps strict alignment budget at or below legacy mode under same state', () => {
+    const strict = render(
+      <HbHomepageLauncherBand
+        entryContainer={ENTRY_CONTAINER}
+        alignmentMode="shared-entry-governed"
+      />,
+    ).container.querySelector('[data-hb-homepage-launcher-band="root"]');
+    const legacy = render(
+      <HbHomepageLauncherBand entryContainer={ENTRY_CONTAINER} alignmentMode="legacy" />,
+    ).container.querySelector('[data-hb-homepage-launcher-band="root"]');
+
+    const strictBudget = Number(strict?.getAttribute('data-hbc-launcher-visible-budget') || 0);
+    const legacyBudget = Number(legacy?.getAttribute('data-hbc-launcher-visible-budget') || 0);
+    expect(strictBudget).toBeLessThanOrEqual(legacyBudget);
+  });
+});

@@ -10,6 +10,7 @@ describe('extractHbHomepageWrapperConfig', () => {
     expect(result.rail.enabled).toBe(true);
     expect(result.rail.bandKey).toBe(HB_HOMEPAGE_WRAPPER_DEFAULT_BAND_KEY);
     expect(result.rail.activeAudience).toBeUndefined();
+    expect(result.rail.alignmentMode).toBe('shared-entry-governed');
     expect(result.rail.fallbackConfig).toBeUndefined();
   });
 
@@ -43,8 +44,16 @@ describe('extractHbHomepageWrapperConfig', () => {
     expect(result.rail.enabled).toBe(false);
     expect(result.rail.bandKey).toBe('leadership-daily');
     expect(result.rail.activeAudience).toBe('leadership');
+    expect(result.rail.alignmentMode).toBe('shared-entry-governed');
     expect(result.rail.fallbackConfig?.heading).toBe('Ops');
     expect(result.rail.fallbackConfig?.actions?.length).toBe(1);
+  });
+
+  it('supports explicit legacy launcher alignment mode for compatibility', () => {
+    const result = extractHbHomepageWrapperConfig({
+      hbHomepageWrapper: { rail: { alignmentMode: 'legacy' } },
+    });
+    expect(result.rail.alignmentMode).toBe('legacy');
   });
 
   it('rejects malformed bandKey and non-string activeAudience safely', () => {

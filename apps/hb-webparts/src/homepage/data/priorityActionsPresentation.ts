@@ -42,6 +42,7 @@ export interface PriorityRailDeviceResolution {
   shellState: ShellEntryStateId;
   entryStateReason: EntryStateSelectionReason;
   shortHeightConstrained: boolean;
+  densityPosture: 'airy' | 'comfortable' | 'compact';
 }
 
 export interface PriorityRailPresentationResolution {
@@ -59,6 +60,20 @@ function castRailDeviceClass(device: PriorityActionsDeviceClass): DeviceClass {
   return device;
 }
 
+function resolveLauncherDensityPosture(
+  shellState: ShellEntryStateId,
+): PriorityRailDeviceResolution['densityPosture'] {
+  switch (shellState) {
+    case 'ultrawide-desktop':
+      return 'airy';
+    case 'standard-laptop':
+    case 'tablet-landscape':
+      return 'comfortable';
+    default:
+      return 'compact';
+  }
+}
+
 export function resolvePriorityRailDeviceForEntryState(
   entryState: SharedEntryStateSnapshot,
 ): PriorityRailDeviceResolution {
@@ -70,6 +85,7 @@ export function resolvePriorityRailDeviceForEntryState(
     shellState: entryState.entryState.id,
     entryStateReason: entryState.entryStateReason,
     shortHeightConstrained: entryState.shortHeightConstrained,
+    densityPosture: resolveLauncherDensityPosture(entryState.entryState.id),
   };
 }
 
