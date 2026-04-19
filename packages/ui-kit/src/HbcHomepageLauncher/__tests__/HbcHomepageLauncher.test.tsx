@@ -59,6 +59,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
     );
+    expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     fireEvent.click(trigger);
     expect(screen.getByRole('menu')).toBeInTheDocument();
@@ -76,6 +77,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const trigger = screen.getByRole('button', { name: /More tools/i });
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe('mobile-entry');
+    expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('mobile-entry');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
   });
 

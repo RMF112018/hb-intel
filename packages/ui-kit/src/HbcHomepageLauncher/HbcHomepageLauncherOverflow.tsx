@@ -11,6 +11,7 @@
  * The trigger is an inline secondary launcher tile with a count badge.
  */
 import * as React from 'react';
+import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Layers, X } from 'lucide-react';
 import {
@@ -31,6 +32,7 @@ import type {
   HbcHomepageLauncherOverflowProps,
   HomepageLauncherTileModel,
 } from './types.js';
+import { launcherTile } from './variants.js';
 import styles from './homepage-launcher.module.css';
 
 interface OverflowGroup {
@@ -154,15 +156,18 @@ function MenuOverflow({
       <button
         ref={refs.setReference}
         type="button"
-        className={styles.overflowTile}
+        className={clsx(launcherTile({ family: 'secondaryOverflowEntry' }), styles.overflowTile)}
         data-hbc-ui="homepage-launcher-overflow-trigger"
         data-hbc-homepage-launcher-overflow-variant="secondary-overflow-entry"
+        data-hbc-launcher-tile-variant="secondary-overflow-entry"
         data-hbc-overflow-mode="menu"
         aria-haspopup="menu"
         aria-expanded={open}
         {...getReferenceProps()}
       >
-        <Layers size={14} strokeWidth={2.25} aria-hidden="true" />
+        <span className={styles.tileIcon} aria-hidden="true">
+          <Layers size={16} strokeWidth={2.2} />
+        </span>
         <span className={styles.overflowTriggerLabel}>{label}</span>
         <span className={styles.overflowTriggerCount} aria-hidden="true">
           {items.length}
@@ -239,15 +244,18 @@ function SheetOverflow({
       <button
         ref={refs.setReference}
         type="button"
-        className={styles.overflowTile}
+        className={clsx(launcherTile({ family: 'mobileEntry' }), styles.overflowTile)}
         data-hbc-ui="homepage-launcher-overflow-trigger"
         data-hbc-homepage-launcher-overflow-variant="mobile-entry"
+        data-hbc-launcher-tile-variant="mobile-entry"
         data-hbc-overflow-mode="sheet"
         aria-haspopup="dialog"
         aria-expanded={open}
         {...getReferenceProps()}
       >
-        <Layers size={14} strokeWidth={2.25} aria-hidden="true" />
+        <span className={styles.tileIcon} aria-hidden="true">
+          <Layers size={16} strokeWidth={2.2} />
+        </span>
         <span className={styles.overflowTriggerLabel}>{label}</span>
         <span className={styles.overflowTriggerCount} aria-hidden="true">
           {items.length}
