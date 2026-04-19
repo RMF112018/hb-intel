@@ -46,12 +46,20 @@ The artifact includes:
 For Flex Consumption closure, deploy the packaged zip via Azure CLI:
 
 ```bash
-az functionapp deploy \
+az functionapp deployment source config-zip \
   -g hb-intel \
   -n hb-intel-function-app \
-  --src-path "$PWD/functions-artifact.zip" \
-  --type zip \
-  --restart true
+  --src "$PWD/functions-artifact.zip" -o json
+```
+
+If deploy status reports trigger sync failure (`status: 6`), force sync triggers and re-check function registration:
+
+```bash
+HOST="$(az functionapp show -g hb-intel -n hb-intel-function-app --query properties.defaultHostName -o tsv)"
+MASTER_KEY="$(az functionapp keys list -g hb-intel -n hb-intel-function-app --query masterKey -o tsv)"
+
+curl -sS -X POST "https://${HOST}/admin/host/synctriggers?code=${MASTER_KEY}" -H "Content-Length: 0" | jq .
+curl -sS "https://${HOST}/admin/functions?code=${MASTER_KEY}" | jq 'map(.name)'
 ```
 
 ## Discovery endpoints
@@ -151,6 +159,7 @@ After a hosted run:
 1. `az functionapp function list -g hb-intel -n hb-intel-function-app` shows:
    - `legacyFallbackDiscoveryRun`
    - `legacyFallbackDiscoveryTimer`
+1. `/admin/functions` also shows both discovery functions after trigger sync.
 1. HBCentral list **Legacy Project Fallback Registry** contains upserted folder records.
 2. HBCentral list **Legacy Project Fallback Sync Runs** contains a run entry with counters and `SummaryJson`.
 3. Function logs include source-resolution and error telemetry for any failed year/site/drive resolution.

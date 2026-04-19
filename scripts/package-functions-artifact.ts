@@ -2,6 +2,7 @@
 
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 interface IOptions {
@@ -57,10 +58,12 @@ function assertArtifactShape(stagingDir: string): void {
     'host.json',
     'package.json',
     'dist/index.js',
+    'dist/functions/legacyFallbackDiscovery/index.js',
     'node_modules/@hbc/models',
     'node_modules/@hbc/provisioning',
     'node_modules/@hbc/notification-intelligence',
     'node_modules/@hbc/acknowledgment',
+    'node_modules/@azure/functions/package.json',
   ];
 
   for (const relPath of requiredPaths) {
@@ -78,6 +81,21 @@ function assertArtifactShape(stagingDir: string): void {
       `Artifact validation failed: package.json main must be ./dist/index.js but found ${String(packageJson.main)}`,
     );
   }
+}
+
+function assertStagedEntrypointResolves(stagingDir: string, root: string): void {
+  const entrypoint = path.join(stagingDir, 'dist', 'index.js');
+  const entryUrl = pathToFileURL(entrypoint).href;
+  const checkScript = [
+    `import(${JSON.stringify(entryUrl)})`,
+    ".then(() => { console.log('artifact-entrypoint-import-ok'); })",
+    ".catch((error) => {",
+    "  console.error('artifact-entrypoint-import-failed');",
+    "  console.error(error instanceof Error ? error.message : String(error));",
+    '  process.exit(1);',
+    '});',
+  ].join('');
+  runOrThrow('node', ['--input-type=module', '-e', checkScript], root);
 }
 
 function main(): void {
@@ -109,15 +127,17 @@ function main(): void {
     '--prod',
     '--legacy',
     options.stagingDir,
+    '--config.node-linker=hoisted',
   ], root);
 
   cpSync(path.join(functionsDir, 'host.json'), path.join(options.stagingDir, 'host.json'));
   assertArtifactShape(options.stagingDir);
+  assertStagedEntrypointResolves(options.stagingDir, root);
 
   const outputDir = path.dirname(options.outputZipPath);
   mkdirSync(outputDir, { recursive: true });
-  // Preserve symlinks in pnpm node_modules instead of recursively resolving them.
-  runOrThrow('zip', ['-qry', options.outputZipPath, '.'], options.stagingDir);
+  // Dereference symlinks for deployment compatibility on hosted Linux Functions.
+  runOrThrow('zip', ['-qr', options.outputZipPath, '.'], options.stagingDir);
 
   const summary = {
     outputZipPath: options.outputZipPath,
