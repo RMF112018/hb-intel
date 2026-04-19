@@ -212,7 +212,7 @@ export interface PriorityActionsBreakpointResult {
   maxVisible: number;
   overflowLabel: string;
   mode: 'standard-row' | 'single-entry-all-tools';
-  drawerSource: 'overflow-only' | 'all-tools';
+  drawerSource: 'all-tools';
   capGovernance: 'binding-visible-cap' | 'all-tools-drawer';
 }
 
@@ -309,7 +309,7 @@ export function resolveByBreakpoint(
     maxVisible,
     overflowLabel,
     mode,
-    drawerSource: 'overflow-only',
+    drawerSource: 'all-tools',
     capGovernance: 'binding-visible-cap',
   };
 }

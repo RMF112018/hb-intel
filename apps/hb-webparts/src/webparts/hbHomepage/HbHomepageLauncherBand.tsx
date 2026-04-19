@@ -95,9 +95,9 @@ export function HbHomepageLauncherBand({
   let primaryCount: number | undefined;
   let overflowCount: number | undefined;
   let handheldMode: 'standard' | 'single-entry-all-tools' | undefined;
-  let drawerSource: 'overflow-only' | 'all-tools' | undefined;
+  let drawerSource: 'all-tools' | undefined;
   let capGovernance: 'binding-visible-cap' | 'all-tools-drawer' | undefined;
-  let overflowStrategy: 'menu' | 'sheet' | undefined;
+  let overflowStrategy: 'sheet' | undefined;
 
   if (isLoading) {
     content = <HbcPriorityRailSkeleton count={skeletonCount} />;
@@ -128,7 +128,7 @@ export function HbHomepageLauncherBand({
     handheldMode = resolution.launcherHandheldMode;
     drawerSource = resolution.launcherDrawerSource;
     capGovernance = resolution.launcherCapGovernance;
-    overflowStrategy = resolution.launcherGovernance.overflowStrategy === 'sheet' ? 'sheet' : 'menu';
+    overflowStrategy = 'sheet';
 
     if (partition.primary.length === 0 && partition.overflow.length === 0) {
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');

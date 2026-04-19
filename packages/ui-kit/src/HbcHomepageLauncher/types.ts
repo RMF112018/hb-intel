@@ -12,9 +12,9 @@ export type HomepageLauncherDeviceClass =
   | 'tablet-portrait'
   | 'phone';
 
-export type HomepageLauncherOverflowMode = 'menu' | 'sheet';
+export type HomepageLauncherOverflowMode = 'sheet';
 export type HomepageLauncherHandheldMode = 'standard' | 'single-entry-all-tools';
-export type HomepageLauncherDrawerSource = 'overflow-only' | 'all-tools';
+export type HomepageLauncherDrawerSource = 'all-tools';
 export type HomepageLauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
 
 export type HomepageLauncherTileVariant =
@@ -61,7 +61,6 @@ export interface HbcHomepageLauncherTileProps {
 export interface HbcHomepageLauncherOverflowProps {
   items: HomepageLauncherTileModel[];
   label?: string;
-  mode: HomepageLauncherOverflowMode;
   className?: string;
 }
 

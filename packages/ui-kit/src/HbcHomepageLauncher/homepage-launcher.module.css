@@ -182,6 +182,16 @@
   font: inherit;
 }
 
+.overflowTile .tileIcon,
+.drawerTile .tileIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}
+
 .overflowTriggerLabel {
   min-width: 0;
   overflow: hidden;
@@ -207,40 +217,6 @@
   font-weight: 800;
 }
 
-/* ── Anchored menu (desktop/tablet overflow) ─────────────── */
-
-.menuSurface {
-  min-width: 260px;
-  max-width: 360px;
-  background: #ffffff;
-  border: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.14);
-  border-radius: 12px;
-  box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.16),
-    0 2px 6px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  padding: 6px;
-  z-index: 1000;
-}
-
-.overflowHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 8px 8px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.12);
-}
-
-.overflowHeaderTitle {
-  font-size: 0.6875rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(var(--hbc-hl-brand-rgb), 0.9);
-}
-
 .overflowHeaderCount {
   display: inline-flex;
   align-items: center;
@@ -249,73 +225,19 @@
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: rgba(var(--hbc-hl-brand-rgb), 0.1);
-  color: var(--hbc-hl-brand);
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
   font-size: 0.6875rem;
-  font-weight: 700;
-}
-
-.menuItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 10px;
-  border-radius: 8px;
-  color: var(--hbc-hl-text);
-  text-decoration: none;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  transition: background 140ms ease, color 140ms ease;
-}
-
-.menuItem:hover,
-.menuItem:focus-visible {
-  background: rgba(var(--hbc-hl-brand-rgb), 0.08);
-  color: var(--hbc-hl-brand);
-}
-
-.menuItem:focus-visible {
-  outline: 2px solid var(--hbc-hl-brand);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.26);
-}
-
-.menuItemIcon {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: rgba(var(--hbc-hl-brand-rgb), 0.08);
-  color: var(--hbc-hl-brand);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.menuItemTitle {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.overflowGroup + .overflowGroup {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.1);
+  font-weight: 800;
 }
 
 .overflowGroupTitle {
-  padding: 4px 10px 6px;
+  padding: 2px 2px 4px;
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(var(--hbc-hl-brand-rgb), 0.86);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 /* ── Sheet (phone / short-height overflow) ──────────────── */
@@ -323,21 +245,27 @@
 .sheetBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(17, 24, 39, 0.36);
+  background: rgba(2, 6, 23, 0.54);
   z-index: 999;
 }
 
 .sheetSurface {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: clamp(12px, 2.2vw, 24px);
+  right: clamp(12px, 2.2vw, 24px);
   bottom: 0;
-  max-height: 82vh;
+  max-height: min(86vh, 920px);
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: linear-gradient(
+    155deg,
+    rgba(var(--hbc-hl-brand-deep-rgb), 0.98) 0%,
+    rgba(var(--hbc-hl-brand-rgb), 0.96) 58%,
+    rgba(var(--hbc-hl-orange-rgb), 0.9) 100%
+  );
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.24);
   z-index: 1000;
 }
@@ -345,16 +273,16 @@
 .sheetHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.08);
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .sheetTitle {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 800;
-  color: var(--hbc-hl-brand);
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -362,10 +290,11 @@
 .sheetClose {
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.2);
+  margin-left: auto;
+  border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: 10px;
-  background: none;
-  color: var(--hbc-hl-brand);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -373,35 +302,54 @@
 }
 
 .sheetClose:focus-visible {
-  outline: 2px solid var(--hbc-hl-brand);
+  outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
 
-.sheetBody {
-  padding: 8px;
+.drawerBody {
+  padding: 14px 14px 16px;
   overflow-y: auto;
+  display: grid;
+  gap: 12px;
+}
+
+.drawerGroup {
   display: grid;
   gap: 8px;
 }
 
-.sheetBody .menuItem {
-  min-height: 52px;
-  padding: 12px 12px;
-  border-radius: 10px;
+.drawerTileGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(186px, 1fr));
 }
 
-.sheetBody .overflowGroup {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
+.drawerTile {
+  max-width: none;
+  min-height: 66px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+
+.drawerTileTitle {
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ── Breakpoint governance — binding visible-count matrix ──
  *
- *   Ultrawide         ≥1600        6 tiles + More (menu)
- *   Desktop           1180–1599    5 tiles + More (menu)
- *   Tablet landscape  980–1179     4 tiles + More (menu)
- *   Tablet portrait   720–979      4 tiles + More (menu)
+ *   Ultrawide         ≥1600        6 tiles + More (drawer)
+ *   Desktop           1180–1599    5 tiles + More (drawer)
+ *   Tablet landscape  980–1179     4 tiles + More (drawer)
+ *   Tablet portrait   720–979      4 tiles + More (drawer)
  *   Phone             ≤719         3 tiles + More (sheet), stacked column
  *   Short-height      launcher rule subtracts 1 slot from the
  *                    per-device authoritative count (floor 1)
@@ -449,8 +397,16 @@
     min-width: 20px;
     height: 20px;
   }
-  .sheetBody .menuItem {
-    min-height: 54px;
+  .sheetSurface {
+    left: 0;
+    right: 0;
+  }
+  .drawerTileGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .drawerTile {
+    min-height: 62px;
   }
 }
 
@@ -516,6 +472,10 @@
   .overflowTile {
     min-height: 60px;
     border-radius: 11px;
+  }
+  .drawerTile {
+    min-height: 58px;
+    padding: 9px 10px;
   }
 }
 

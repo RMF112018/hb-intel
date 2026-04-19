@@ -147,8 +147,9 @@ test.describe('HB Homepage hosted fit proof', () => {
           await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
         } else {
           await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-handheld-mode', 'standard');
-          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'overflow-only');
+          await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-drawer-source', 'all-tools');
         }
+        await expect(launcherRoot).toHaveAttribute('data-hbc-launcher-overflow-strategy', 'sheet');
       }
       await expect(actionsRegion).toHaveAttribute(
         'data-hb-homepage-region-contained-by',
@@ -274,35 +275,18 @@ test.describe('HB Homepage hosted fit proof', () => {
 
       const moreToolsTrigger = page.getByRole('button', { name: /More tools/i });
       if (await moreToolsTrigger.count()) {
-        if (isHandheldViewport(viewportCase.label)) {
-          await expect(moreToolsTrigger.first()).toHaveAttribute(
-            'data-hbc-homepage-launcher-overflow-variant',
-            'mobile-entry',
-          );
-        } else {
-          await expect(moreToolsTrigger.first()).toHaveAttribute(
-            'data-hbc-homepage-launcher-overflow-variant',
-            'secondary-overflow-entry',
-          );
-        }
+        await expect(moreToolsTrigger.first()).toHaveAttribute(
+          'data-hbc-homepage-launcher-overflow-variant',
+          'secondary-overflow-entry',
+        );
         await moreToolsTrigger.first().click();
-        if (isHandheldViewport(viewportCase.label)) {
-          await expect(page.locator('[data-hbc-homepage-launcher-sheet-content="all-tools"]')).toBeVisible();
-          const openedDrawer = await page.screenshot({ fullPage: true });
-          await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-drawer`, {
-            body: openedDrawer,
-            contentType: 'image/png',
-          });
-          await page.keyboard.press('Escape');
-        } else {
-          await expect(page.getByRole('menu')).toBeVisible();
-          const openedMenu = await page.screenshot({ fullPage: true });
-          await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-menu`, {
-            body: openedMenu,
-            contentType: 'image/png',
-          });
-          await page.keyboard.press('Escape');
-        }
+        await expect(page.locator('[data-hbc-homepage-launcher-sheet-content="all-tools"]')).toBeVisible();
+        const openedDrawer = await page.screenshot({ fullPage: true });
+        await testInfo.attach(`hb-homepage-${viewportCase.label}-opened-drawer`, {
+          body: openedDrawer,
+          contentType: 'image/png',
+        });
+        await page.keyboard.press('Escape');
       }
 
       const launcherMarkerProof = await page.evaluate(() => {

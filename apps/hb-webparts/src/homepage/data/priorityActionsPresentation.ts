@@ -30,9 +30,9 @@ export interface PriorityRailContainerDimensions {
   height: number;
 }
 
-export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'menu' | 'sheet';
+export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'sheet';
 export type LauncherHandheldMode = 'standard' | 'single-entry-all-tools';
-export type LauncherDrawerSource = 'overflow-only' | 'all-tools';
+export type LauncherDrawerSource = 'all-tools';
 export type LauncherCapGovernance = 'binding-visible-cap' | 'all-tools-drawer';
 
 export interface LauncherGovernanceDecision {
@@ -109,8 +109,8 @@ export function resolveLauncherGovernance(
   const isHandheld = handheldMode === 'single-entry-all-tools';
   return {
     handheldMode,
-    overflowStrategy: isHandheld ? 'sheet' : 'menu',
-    drawerSource: isHandheld ? 'all-tools' : 'overflow-only',
+    overflowStrategy: 'sheet',
+    drawerSource: 'all-tools',
     capGovernance: isHandheld ? 'all-tools-drawer' : 'binding-visible-cap',
     isHandheld,
   };
@@ -152,8 +152,8 @@ export function resolvePriorityRailDeviceForContainer(
 
 /**
  * Launcher presentation resolution used by the standalone rail surface.
- * The presentation decision is overflow strategy only: sheet on handheld /
- * short-height, menu everywhere else.
+ * The presentation decision is overflow strategy only: a governed drawer
+ * sheet across all display classes.
  */
 export function resolveLauncherPresentation(
   resolution: PriorityRailDeviceResolution,
@@ -199,8 +199,8 @@ export function resolvePriorityRailPresentationForDevice(
   const isHandheld = deviceClass === 'phone';
   const launcherGovernance: LauncherGovernanceDecision = {
     handheldMode: isHandheld ? 'single-entry-all-tools' : 'standard',
-    overflowStrategy: isHandheld ? 'sheet' : 'menu',
-    drawerSource: isHandheld ? 'all-tools' : 'overflow-only',
+    overflowStrategy: 'sheet',
+    drawerSource: 'all-tools',
     capGovernance: isHandheld ? 'all-tools-drawer' : 'binding-visible-cap',
     isHandheld,
   };

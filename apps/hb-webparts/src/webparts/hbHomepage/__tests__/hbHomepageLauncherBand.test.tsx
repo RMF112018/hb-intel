@@ -264,9 +264,9 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     expect(root?.getAttribute('data-hbc-launcher-density-posture')).toBe('compact');
     expect(root?.getAttribute('data-hbc-launcher-visible-budget')).toBe('4');
     expect(root?.getAttribute('data-hbc-launcher-handheld-mode')).toBe('standard');
-    expect(root?.getAttribute('data-hbc-launcher-drawer-source')).toBe('overflow-only');
+    expect(root?.getAttribute('data-hbc-launcher-drawer-source')).toBe('all-tools');
     expect(root?.getAttribute('data-hbc-launcher-cap-governance')).toBe('binding-visible-cap');
-    expect(root?.getAttribute('data-hbc-launcher-overflow-strategy')).toBe('menu');
+    expect(root?.getAttribute('data-hbc-launcher-overflow-strategy')).toBe('sheet');
     expect(root?.getAttribute('data-hbc-launcher-host-width')).toBe('900');
     expect(root?.getAttribute('data-hbc-launcher-host-width-source')).toBe(
       'entry-container-fallback',

@@ -73,19 +73,19 @@ describe('priorityActionsPresentation — launcher band', () => {
     expect(result.launcherHandheldMode).toBe('single-entry-all-tools');
   });
 
-  it('resolveLauncherPresentation picks sheet overflow on phone + short-height, menu elsewhere', () => {
+  it('resolveLauncherPresentation enforces drawer sheet overflow across all display classes', () => {
     const desktop = resolveLauncherPresentation({
       deviceClass: 'desktop', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
-    expect(desktop.overflowStrategy).toBe('menu');
+    expect(desktop.overflowStrategy).toBe('sheet');
     expect(desktop.launcherHandheldMode).toBe('standard');
-    expect(desktop.launcherDrawerSource).toBe('overflow-only');
+    expect(desktop.launcherDrawerSource).toBe('all-tools');
     expect(desktop.launcherCapGovernance).toBe('binding-visible-cap');
 
     const laptop = resolveLauncherPresentation({
       deviceClass: 'laptop', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
-    expect(laptop.overflowStrategy).toBe('menu');
+    expect(laptop.overflowStrategy).toBe('sheet');
 
     const phone = resolveLauncherPresentation({
       deviceClass: 'phone', shortHeightConstrained: false,
@@ -102,9 +102,9 @@ describe('priorityActionsPresentation — launcher band', () => {
     expect(shortHeight.launcherHandheldMode).toBe('single-entry-all-tools');
   });
 
-  it('resolvePriorityRailPresentationForDevice shim returns uniform rail layout with device-only overflow choice', () => {
+  it('resolvePriorityRailPresentationForDevice shim returns uniform rail layout with drawer overflow', () => {
     expect(resolvePriorityRailPresentationForDevice({}, 'desktop').layout).toBe('rail');
-    expect(resolvePriorityRailPresentationForDevice({}, 'desktop').overflowStrategy).toBe('menu');
+    expect(resolvePriorityRailPresentationForDevice({}, 'desktop').overflowStrategy).toBe('sheet');
     expect(resolvePriorityRailPresentationForDevice({}, 'phone').overflowStrategy).toBe('sheet');
     expect(resolvePriorityRailPresentationForDevice({}, 'phone').launcherHandheldMode).toBe(
       'single-entry-all-tools',

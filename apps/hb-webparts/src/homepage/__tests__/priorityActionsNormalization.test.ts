@@ -397,7 +397,7 @@ describe('resolveByBreakpoint', () => {
     expect(result.primaryItems).toHaveLength(3);
     expect(result.overflowItems).toHaveLength(3);
     expect(result.mode).toBe('standard-row');
-    expect(result.drawerSource).toBe('overflow-only');
+    expect(result.drawerSource).toBe('all-tools');
     expect(result.capGovernance).toBe('binding-visible-cap');
   });
 

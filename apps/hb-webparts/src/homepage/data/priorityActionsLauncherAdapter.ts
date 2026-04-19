@@ -167,7 +167,7 @@ export interface LauncherPartition {
   overflow: HomepageLauncherTileModel[];
   visibleBudget: number;
   handheldMode: 'standard' | 'single-entry-all-tools';
-  drawerSource: 'overflow-only' | 'all-tools';
+  drawerSource: 'all-tools';
   capGovernance: 'binding-visible-cap' | 'all-tools-drawer';
 }
 
@@ -239,7 +239,7 @@ export function partitionItems(
     overflow,
     visibleBudget: maxVisible,
     handheldMode,
-    drawerSource: 'overflow-only',
+    drawerSource: 'all-tools',
     capGovernance: 'binding-visible-cap',
   };
 }

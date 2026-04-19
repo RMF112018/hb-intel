@@ -11,6 +11,13 @@ vi.mock('@hbc/ui-kit/homepage', () => {
       mockSurface(props);
       return <div data-testid="priority-rail-surface" />;
     },
+    HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT: {
+      ultrawide: 6,
+      desktop: 5,
+      'tablet-landscape': 4,
+      'tablet-portrait': 4,
+      phone: 3,
+    },
     HbcPriorityRailSkeleton: (): React.JSX.Element => <div role="status" />,
     HbcPriorityRailEmptyState: ({ title }: { title?: string }): React.JSX.Element => <div>{title ?? 'empty'}</div>,
     HbcPriorityRailErrorState: (): React.JSX.Element => <div>error</div>,
@@ -163,9 +170,9 @@ describe('PriorityActionsRail runtime mapping', () => {
         overflowStrategy: string;
         sections?: Array<{ key: string }>;
       };
-      expect(latest.layout).toBe('compact');
-      expect(latest.overflowStrategy).toBe('menu');
-      expect(latest.sections?.map((section) => section.key)).toEqual(['approvals']);
+      expect(latest.layout).toBe('rail');
+      expect(latest.overflowStrategy).toBe('sheet');
+      expect(latest.sections).toBeUndefined();
     });
   });
 
@@ -187,7 +194,7 @@ describe('PriorityActionsRail runtime mapping', () => {
     expect(latest.context).toBe('homepage-flagship');
   });
 
-  it('preserves compact layout + menu overflow under short-height breakpoint (regression guard)', async () => {
+  it('preserves rail layout + drawer overflow under short-height breakpoint (regression guard)', async () => {
     render(<PriorityActionsRail surfaceContext="homepage-flagship" />);
     await waitFor(() => {
       expect(mockSurface).toHaveBeenCalled();
@@ -209,8 +216,8 @@ describe('PriorityActionsRail runtime mapping', () => {
         overflowStrategy: string;
         context?: string;
       };
-      expect(latest.layout).toBe('compact');
-      expect(latest.overflowStrategy).toBe('menu');
+      expect(latest.layout).toBe('rail');
+      expect(latest.overflowStrategy).toBe('sheet');
       expect(latest.context).toBe('homepage-flagship');
     });
   });

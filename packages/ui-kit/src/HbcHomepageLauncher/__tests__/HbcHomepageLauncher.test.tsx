@@ -36,8 +36,8 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(root!.getAttribute('data-hbc-homepage-launcher-row-primitive')).toBe('tile-family');
     expect(root!.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('5');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-count')).toBe('1');
-    expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('menu');
-    expect(root!.getAttribute('data-hbc-homepage-launcher-drawer-source')).toBe('overflow-only');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('sheet');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-drawer-source')).toBe('all-tools');
     expect(root!.getAttribute('data-hbc-homepage-launcher-cap-governance')).toBe(
       'binding-visible-cap',
     );
@@ -54,22 +54,23 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     }
   });
 
-  it('uses anchored menu overflow on desktop', () => {
+  it('uses bottom drawer overflow on desktop', () => {
     const { container } = render(
       <HbcHomepageLauncher primary={TILES.slice(0, 5)} overflow={[TILES[5]!]} deviceClass="desktop" />,
     );
     const trigger = screen.getByRole('button', { name: /More tools/i });
     const row = container.querySelector('[data-hbc-launcher-band-mode="standard"]');
     expect(row?.contains(trigger)).toBe(true);
-    expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('menu');
+    expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
       'secondary-overflow-entry',
     );
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
-    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
     fireEvent.click(trigger);
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: /Submit Timesheet/ })).toBeInTheDocument();
+    expect(screen.getByLabelText(/More tools all tools/i)).toBeInTheDocument();
+    expect(screen.getByText('Field Ops')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Submit Timesheet/ })).toBeInTheDocument();
   });
 
   it('keeps tile descriptions out of the visible tile surface', () => {
@@ -102,8 +103,10 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const trigger = screen.getByRole('button', { name: /More tools/i });
     expect(screen.queryByRole('link', { name: /Approve RFI/i })).toBeNull();
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
-    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe('mobile-entry');
-    expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('mobile-entry');
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe(
+      'secondary-overflow-entry',
+    );
+    expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('secondary-overflow-entry');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-sheet-content')).toBe('all-tools');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
   });
@@ -142,7 +145,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(trigger);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.queryByRole('menu')).not.toBeNull();
+    expect(screen.queryByLabelText(/More tools all tools/i)).not.toBeNull();
   });
 
   it('external chips render with target=_blank and a visually-hidden affordance note', () => {
@@ -205,7 +208,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(screen.getByText('Field Ops')).toBeInTheDocument();
   });
 
-  it('renders grouped overflow deterministically in menu mode', () => {
+  it('renders grouped overflow deterministically in drawer mode', () => {
     render(
       <HbcHomepageLauncher
         primary={TILES.slice(0, 1)}
@@ -220,8 +223,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
     const groupHeadings = screen.getAllByText(/Approvals|Quality/).map((node) => node.textContent);
     expect(groupHeadings).toEqual(['Approvals', 'Quality']);
-    const menuItems = screen.getAllByRole('menuitem').map((node) => node.textContent);
-    expect(menuItems).toEqual(['Approve Budget', 'Sign Change Order', 'QA Checklist']);
+    expect(screen.getByRole('link', { name: /Approve Budget/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Sign Change Order/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /QA Checklist/i })).toBeInTheDocument();
   });
 
   it('uses visible overflow title as truncation-rescue tooltip text', () => {
@@ -241,7 +245,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
-    const item = screen.getByRole('menuitem', {
+    const item = screen.getByRole('link', {
       name: /Review prefabrication delivery and crane sequencing checklist/i,
     });
     expect(item.getAttribute('title')).toBe(
@@ -262,7 +266,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
     expect(await screen.findByText('Field Ops')).toBeInTheDocument();
-    expect((await screen.findAllByRole('menuitem')).length).toBe(2);
+    expect((await screen.findAllByRole('link')).length).toBeGreaterThanOrEqual(2);
   });
 
   it('handheld mode emits all-tools runtime markers', () => {

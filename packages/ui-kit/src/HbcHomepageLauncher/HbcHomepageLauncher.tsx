@@ -5,8 +5,7 @@
  * renders a single row of premium tiles, one dominant
  * click target each, governed by a binding visible-count matrix per
  * device class (see `HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT`). Overflow
- * flows into an anchored menu (desktop/tablet) or a bottom sheet
- * (phone / short-height).
+ * flows into a governed bottom drawer sheet across display classes.
  *
  * Hosted parity markers — the surface exposes its package version,
  * device class, visible/overflow counts, and overflow mode on the
@@ -34,9 +33,7 @@ import styles from './homepage-launcher.module.css';
 function resolveOverflowMode(
   props: HbcHomepageLauncherProps,
 ): HomepageLauncherOverflowMode {
-  if (props.overflowMode) return props.overflowMode;
-  if (props.shortHeight) return 'sheet';
-  return props.deviceClass === 'phone' ? 'sheet' : 'menu';
+  return props.overflowMode ?? 'sheet';
 }
 
 function resolveHandheldMode(
@@ -50,18 +47,18 @@ function resolveHandheldMode(
 
 function resolveDrawerSource(
   props: HbcHomepageLauncherProps,
-  handheldMode: HomepageLauncherHandheldMode,
+  _handheldMode: HomepageLauncherHandheldMode,
 ): HomepageLauncherDrawerSource {
   if (props.drawerSource) return props.drawerSource;
-  return handheldMode === 'single-entry-all-tools' ? 'all-tools' : 'overflow-only';
+  return 'all-tools';
 }
 
 function resolveCapGovernance(
   props: HbcHomepageLauncherProps,
-  drawerSource: HomepageLauncherDrawerSource,
+  handheldMode: HomepageLauncherHandheldMode,
 ): HomepageLauncherCapGovernance {
   if (props.capGovernance) return props.capGovernance;
-  return drawerSource === 'all-tools' ? 'all-tools-drawer' : 'binding-visible-cap';
+  return handheldMode === 'single-entry-all-tools' ? 'all-tools-drawer' : 'binding-visible-cap';
 }
 
 export function HbcHomepageLauncher(
@@ -81,9 +78,10 @@ export function HbcHomepageLauncher(
   const handheldMode = resolveHandheldMode(props);
   const handheldSingleEntry = handheldMode === 'single-entry-all-tools';
   const drawerSource = resolveDrawerSource(props, handheldMode);
-  const capGovernance = resolveCapGovernance(props, drawerSource);
+  const capGovernance = resolveCapGovernance(props, handheldMode);
   const renderedPrimary = handheldSingleEntry ? [] : primary;
   const hasOverflow = overflow.length > 0;
+  const drawerItems = handheldSingleEntry ? overflow : [...renderedPrimary, ...overflow];
   const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
   const visibleTileCount = handheldSingleEntry
     ? visibleCount
@@ -126,9 +124,8 @@ export function HbcHomepageLauncher(
           {hasOverflow ? (
             <div role="listitem" data-hbc-launcher-tile-slot="overflow" style={{ display: 'contents' }}>
               <HbcHomepageLauncherOverflow
-                items={overflow}
+                items={drawerItems}
                 label={overflowLabel}
-                mode={overflowMode}
               />
             </div>
           ) : null}
