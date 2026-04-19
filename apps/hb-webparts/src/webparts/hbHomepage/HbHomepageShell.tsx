@@ -6,8 +6,8 @@ import { getOccupant } from './shell/occupantRegistry.js';
 import {
   SHELL_WIDTH_ACCOUNTING_RULE,
   SHELL_WIDTH_SOURCE,
-  useShellContainer,
 } from './shell/useShellContainer.js';
+import type { ShellContainerState } from './shell/useShellContainer.js';
 import { resolveBandLayout } from './shell/slotComfortResolver.js';
 import {
   resolveShellConformance,
@@ -220,9 +220,12 @@ export function HbHomepageShell({
   assetBaseUrl,
   siteUrl,
   getGraphToken,
-}: HbHomepageProps): React.JSX.Element {
-  const shellRef = React.useRef<HTMLDivElement>(null);
-  const container = useShellContainer(shellRef);
+  container,
+  shellRef,
+}: HbHomepageProps & {
+  container: ShellContainerState;
+  shellRef: React.RefObject<HTMLDivElement | null>;
+}): React.JSX.Element {
 
   const profilePhotoResolver = React.useMemo(
     () => (siteUrl ? createSharePointUserPhotoResolver({ siteUrl }) : undefined),
@@ -263,8 +266,8 @@ export function HbHomepageShell({
 }
 
 interface ShellBodyProps {
-  shellRef: React.RefObject<HTMLDivElement>;
-  container: ReturnType<typeof useShellContainer>;
+  shellRef: React.RefObject<HTMLDivElement | null>;
+  container: ShellContainerState;
   layoutState: ShellLayoutState;
   zoneProps: HbHomepageZoneProps;
 }
@@ -309,7 +312,7 @@ function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyPro
 
   return (
     <div
-      ref={shellRef}
+      ref={shellRef as React.RefObject<HTMLDivElement>}
       className={styles.shell}
       data-shell-preset={layoutState.preset.id}
       data-shell-post-hero="true"

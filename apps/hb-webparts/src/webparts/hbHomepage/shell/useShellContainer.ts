@@ -30,6 +30,12 @@ export interface ShellContainerState {
   readonly shortHeightConstrained: boolean;
 }
 
+export interface SharedEntryStateSnapshot {
+  readonly entryState: ShellEntryState;
+  readonly entryStateReason: EntryStateSelectionReason;
+  readonly shortHeightConstrained: boolean;
+}
+
 const DEFAULT_WIDTH = 1200;
 const DEFAULT_HEIGHT = 800;
 
@@ -37,6 +43,16 @@ interface ShellMeasurements {
   readonly authoritativeWidth: number;
   readonly shellInlineInsetTotal: number;
   readonly height: number;
+}
+
+export function toSharedEntryStateSnapshot(
+  state: Pick<ShellContainerState, 'entryState' | 'entryStateReason' | 'shortHeightConstrained'>,
+): SharedEntryStateSnapshot {
+  return {
+    entryState: state.entryState,
+    entryStateReason: state.entryStateReason,
+    shortHeightConstrained: state.shortHeightConstrained,
+  };
 }
 
 function parsePixelValue(value: string): number {
@@ -69,6 +85,7 @@ function measureShell(
 
 export function useShellContainer(
   ref: React.RefObject<HTMLElement | null>,
+  authoritativeRef?: React.RefObject<HTMLElement | null>,
 ): ShellContainerState {
   const [measurements, setMeasurements] = React.useState<ShellMeasurements>({
     authoritativeWidth: DEFAULT_WIDTH,
@@ -80,6 +97,7 @@ export function useShellContainer(
     const shellElement = ref.current;
     if (!shellElement) return;
     const authoritativeElement =
+      authoritativeRef?.current ??
       (shellElement.closest('[data-hb-homepage-entry-stack="root"]') as HTMLElement | null) ??
       shellElement;
 
@@ -87,19 +105,24 @@ export function useShellContainer(
       setMeasurements(measureShell(shellElement, authoritativeElement));
     };
 
-    const observer = new ResizeObserver((entries) => {
-      for (const _entry of entries) {
-        update();
-      }
-    });
-
     update();
-    observer.observe(shellElement);
-    if (authoritativeElement !== shellElement) {
-      observer.observe(authoritativeElement);
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver((entries) => {
+        for (const _entry of entries) {
+          update();
+        }
+      });
+      observer.observe(shellElement);
+      if (authoritativeElement !== shellElement) {
+        observer.observe(authoritativeElement);
+      }
+      return () => observer.disconnect();
     }
-    return () => observer.disconnect();
-  }, [ref]);
+
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [ref, authoritativeRef]);
 
   const usableWidth = React.useMemo(
     () =>

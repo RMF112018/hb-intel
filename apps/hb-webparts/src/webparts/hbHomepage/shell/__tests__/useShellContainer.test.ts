@@ -4,6 +4,7 @@ import {
   SHELL_WIDTH_ACCOUNTING_RULE,
   SHELL_WIDTH_SOURCE,
   resolveUsableShellWidth,
+  toSharedEntryStateSnapshot,
 } from '../useShellContainer.js';
 
 describe('useShellContainer measurement helpers', () => {
@@ -20,6 +21,21 @@ describe('useShellContainer measurement helpers', () => {
 
   it('clamps usable width at zero when insets exceed authoritative width', () => {
     expect(resolveUsableShellWidth(20, 100)).toBe(0);
+  });
+
+  it('projects a launcher-safe shared entry-state snapshot', () => {
+    const resolved = resolveEntryStateWithReason({ width: 1600, height: 900 });
+    expect(
+      toSharedEntryStateSnapshot({
+        entryState: resolved.state,
+        entryStateReason: resolved.reason,
+        shortHeightConstrained: resolved.shortHeightConstrained,
+      }),
+    ).toEqual({
+      entryState: resolved.state,
+      entryStateReason: 'width-match',
+      shortHeightConstrained: false,
+    });
   });
 });
 

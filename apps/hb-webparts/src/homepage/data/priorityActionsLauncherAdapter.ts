@@ -22,7 +22,6 @@ import {
 } from '@hbc/ui-kit/homepage';
 import type { PriorityActionsItemNormalized } from './priorityActionsContracts.js';
 import type { PriorityRailDeviceResolution } from './priorityActionsPresentation.js';
-import type { DeviceClass } from './priorityActionsNormalization.js';
 
 const BADGE_ICON_MAP: Record<string, LucideIcon> = {
   critical: AlertCircle,
@@ -51,21 +50,21 @@ export function mapItemToChip(
   };
 }
 
-const ULTRAWIDE_MIN_WIDTH_PX = 1600;
-
 /**
  * Map the rail device-class + short-height resolution into the launcher's
- * device-class vocabulary. Differentiates `ultrawide` from `desktop`
- * using raw container width (≥1600px).
+ * device-class vocabulary using the shared entry-state authority.
  */
 export function resolveLauncherDeviceClass(
   resolution: PriorityRailDeviceResolution,
-  containerWidth: number,
 ): HomepageLauncherDeviceClass {
-  const base: DeviceClass = resolution.deviceClass;
+  if (resolution.shellState === 'ultrawide-desktop') {
+    return 'ultrawide';
+  }
+
+  const base = resolution.deviceClass;
   switch (base) {
     case 'desktop':
-      return containerWidth >= ULTRAWIDE_MIN_WIDTH_PX ? 'ultrawide' : 'desktop';
+      return 'desktop';
     case 'laptop':
       return 'desktop';
     case 'tabletLandscape':

@@ -21,6 +21,7 @@ import {
   type EntryStateSelectionReason,
 } from '../../webparts/hbHomepage/shell/breakpointPolicy.js';
 import type { ShellEntryStateId } from '../../webparts/hbHomepage/shell/shellTypes.js';
+import type { SharedEntryStateSnapshot } from '../../webparts/hbHomepage/shell/useShellContainer.js';
 import type { DeviceClass } from './priorityActionsNormalization.js';
 
 export interface PriorityRailContainerDimensions {
@@ -58,17 +59,29 @@ function castRailDeviceClass(device: PriorityActionsDeviceClass): DeviceClass {
   return device;
 }
 
+export function resolvePriorityRailDeviceForEntryState(
+  entryState: SharedEntryStateSnapshot,
+): PriorityRailDeviceResolution {
+  const deviceClass = castRailDeviceClass(
+    mapShellEntryStateToPriorityActionsDeviceClass(entryState.entryState.id),
+  );
+  return {
+    deviceClass,
+    shellState: entryState.entryState.id,
+    entryStateReason: entryState.entryStateReason,
+    shortHeightConstrained: entryState.shortHeightConstrained,
+  };
+}
+
 export function resolvePriorityRailDeviceForContainer(
   dimensions: PriorityRailContainerDimensions,
 ): PriorityRailDeviceResolution {
   const resolved = resolveEntryStateWithReason({ width: dimensions.width, height: dimensions.height });
-  const deviceClass = castRailDeviceClass(mapShellEntryStateToPriorityActionsDeviceClass(resolved.state.id));
-  return {
-    deviceClass,
-    shellState: resolved.state.id,
+  return resolvePriorityRailDeviceForEntryState({
+    entryState: resolved.state,
     entryStateReason: resolved.reason,
     shortHeightConstrained: resolved.shortHeightConstrained,
-  };
+  });
 }
 
 /**

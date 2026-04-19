@@ -1,18 +1,68 @@
 import { describe, expect, it } from 'vitest';
 import {
+  resolvePriorityRailDeviceForEntryState,
   resolveLauncherPresentation,
   resolvePriorityRailDeviceForContainer,
   resolvePriorityRailPresentationForDevice,
   buildPriorityRailSections,
 } from '../data/priorityActionsPresentation.js';
+import { resolveEntryStateWithReason } from '../../webparts/hbHomepage/shell/breakpointPolicy.js';
 
 describe('priorityActionsPresentation — launcher band', () => {
+  it('maps shared shell entry-state snapshots without reclassifying breakpoints', () => {
+    const resolved = resolveEntryStateWithReason({ width: 1560, height: 900 });
+    const result = resolvePriorityRailDeviceForEntryState({
+      entryState: resolved.state,
+      entryStateReason: resolved.reason,
+      shortHeightConstrained: resolved.shortHeightConstrained,
+    });
+    expect(result.shellState).toBe('standard-laptop');
+    expect(result.deviceClass).toBe('laptop');
+    expect(result.entryStateReason).toBe('width-match');
+  });
+
   it('maps container dimensions to rail device classes via shell policy', () => {
     expect(resolvePriorityRailDeviceForContainer({ width: 1700, height: 900 }).deviceClass).toBe('desktop');
     expect(resolvePriorityRailDeviceForContainer({ width: 1300, height: 900 }).deviceClass).toBe('laptop');
     expect(resolvePriorityRailDeviceForContainer({ width: 1000, height: 900 }).deviceClass).toBe('tabletLandscape');
     expect(resolvePriorityRailDeviceForContainer({ width: 860, height: 900 }).deviceClass).toBe('tabletPortrait');
     expect(resolvePriorityRailDeviceForContainer({ width: 700, height: 900 }).deviceClass).toBe('phone');
+  });
+
+  it('keeps launcher classification aligned with shell state across key width transitions', () => {
+    const at1600 = resolveEntryStateWithReason({ width: 1600, height: 900 });
+    const below1600 = resolveEntryStateWithReason({ width: 1599, height: 900 });
+    const at1180 = resolveEntryStateWithReason({ width: 1180, height: 900 });
+    const below1180 = resolveEntryStateWithReason({ width: 1179, height: 900 });
+
+    expect(
+      resolvePriorityRailDeviceForEntryState({
+        entryState: at1600.state,
+        entryStateReason: at1600.reason,
+        shortHeightConstrained: at1600.shortHeightConstrained,
+      }).deviceClass,
+    ).toBe('desktop');
+    expect(
+      resolvePriorityRailDeviceForEntryState({
+        entryState: below1600.state,
+        entryStateReason: below1600.reason,
+        shortHeightConstrained: below1600.shortHeightConstrained,
+      }).deviceClass,
+    ).toBe('laptop');
+    expect(
+      resolvePriorityRailDeviceForEntryState({
+        entryState: at1180.state,
+        entryStateReason: at1180.reason,
+        shortHeightConstrained: at1180.shortHeightConstrained,
+      }).deviceClass,
+    ).toBe('laptop');
+    expect(
+      resolvePriorityRailDeviceForEntryState({
+        entryState: below1180.state,
+        entryStateReason: below1180.reason,
+        shortHeightConstrained: below1180.shortHeightConstrained,
+      }).deviceClass,
+    ).toBe('tabletLandscape');
   });
 
   it('applies short-height override mapping through shell policy', () => {

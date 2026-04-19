@@ -7,6 +7,7 @@ import {
 import { HbHomepageShell } from './HbHomepageShell.js';
 import { HbHomepageLauncherBand } from './HbHomepageLauncherBand.js';
 import { extractHbHomepageWrapperConfig } from './hbHomepageWrapperConfig.js';
+import { useShellContainer } from './shell/useShellContainer.js';
 import styles from './HbHomepageEntryStack.module.css';
 
 // ---------------------------------------------------------------------------
@@ -32,10 +33,13 @@ import styles from './HbHomepageEntryStack.module.css';
 // ---------------------------------------------------------------------------
 
 export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element {
+  const entryStackRef = React.useRef<HTMLDivElement>(null);
+  const shellRef = React.useRef<HTMLDivElement>(null);
   const wrapperConfig = React.useMemo(
     () => extractHbHomepageWrapperConfig(props.config),
     [props.config],
   );
+  const entryContainer = useShellContainer(shellRef, entryStackRef);
   const { rail } = wrapperConfig;
   const rootStyle = {
     '--hb-homepage-outer-envelope-max-width': `${HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}px`,
@@ -43,6 +47,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
 
   return (
     <div
+      ref={entryStackRef}
       className={styles.entryStack}
       data-hb-homepage-entry-stack="root"
       data-hb-homepage-entry-stack-owner="hb-homepage-wrapper"
@@ -50,6 +55,9 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       data-hb-homepage-outer-envelope-max-width={HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}
       data-hb-homepage-outer-envelope-contract={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
       data-hb-homepage-entry-stack-rail-enabled={rail.enabled || undefined}
+      data-hb-homepage-entry-state={entryContainer.entryState.id}
+      data-hb-homepage-entry-state-reason={entryContainer.entryStateReason}
+      data-hb-homepage-entry-state-short-height={entryContainer.shortHeightConstrained || undefined}
       style={rootStyle}
     >
       {rail.enabled ? (
@@ -67,6 +75,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
           <HbHomepageLauncherBand
             bandKey={rail.bandKey}
             activeAudience={rail.activeAudience}
+            entryContainer={entryContainer}
           />
         </section>
       ) : null}
@@ -77,7 +86,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
         data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
         data-hb-homepage-entry-stack-order={rail.enabled ? '2' : '1'}
       >
-        <HbHomepageShell {...props} />
+        <HbHomepageShell {...props} container={entryContainer} shellRef={shellRef} />
       </div>
     </div>
   );

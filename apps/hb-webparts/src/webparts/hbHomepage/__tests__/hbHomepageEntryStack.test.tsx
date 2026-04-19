@@ -22,11 +22,13 @@ vi.mock('../HbHomepageShell.js', () => ({
 vi.mock('../HbHomepageLauncherBand.js', () => ({
   HbHomepageLauncherBand: (props: Record<string, unknown>): React.JSX.Element => {
     const hasFeaturedKeys = 'featuredActionKeys' in props;
+    const hasEntryContainer = 'entryContainer' in props;
     return React.createElement('div', {
       'data-test-mock': 'hb-homepage-launcher-band',
       'data-test-launcher-band-key': (props.bandKey as string | undefined) ?? '',
       'data-test-launcher-audience': (props.activeAudience as string | undefined) ?? '',
       'data-test-launcher-has-featured-keys-prop': hasFeaturedKeys ? 'true' : 'false',
+      'data-test-launcher-has-entry-container-prop': hasEntryContainer ? 'true' : 'false',
     });
   },
 }));
@@ -107,6 +109,9 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
       '[data-test-mock="hb-homepage-launcher-band"]',
     );
     expect(launcherNode).not.toBeNull();
+    expect(launcherNode?.getAttribute('data-test-launcher-has-entry-container-prop')).toBe(
+      'true',
+    );
   });
 
   it('threads wrapper-owned bandKey + audience to the embedded launcher band', () => {

@@ -26,94 +26,27 @@ import {
   invalidatePriorityActionsCache,
 } from '../../homepage/data/usePriorityActionsData.js';
 import { filterByDevice } from '../../homepage/data/priorityActionsNormalization.js';
-import { resolvePriorityRailDeviceForContainer } from '../../homepage/data/priorityActionsPresentation.js';
+import { resolvePriorityRailDeviceForEntryState } from '../../homepage/data/priorityActionsPresentation.js';
 import {
   partitionItems,
   resolveLauncherDeviceClass,
 } from '../../homepage/data/priorityActionsLauncherAdapter.js';
 import { resolveAuthoringMessage } from '../../homepage/helpers/authoringGovernance.js';
+import type { ShellContainerState } from './shell/useShellContainer.js';
 
 export interface HbHomepageLauncherBandProps {
   bandKey?: string;
   activeAudience?: string;
-}
-
-interface ContainerDimensions {
-  width: number;
-  height: number;
-}
-
-const DEFAULT_DIMENSIONS: ContainerDimensions = { width: 1200, height: 800 };
-
-function extractDimensions(
-  entry: ResizeObserverEntry,
-  el: HTMLElement,
-): ContainerDimensions {
-  const contentBox = Array.isArray(entry.contentBoxSize)
-    ? entry.contentBoxSize[0]
-    : entry.contentBoxSize;
-  if (
-    contentBox &&
-    typeof contentBox.inlineSize === 'number' &&
-    typeof contentBox.blockSize === 'number'
-  ) {
-    return { width: contentBox.inlineSize, height: contentBox.blockSize };
-  }
-  if (entry.contentRect) {
-    return { width: entry.contentRect.width, height: entry.contentRect.height };
-  }
-  return {
-    width: el.clientWidth || DEFAULT_DIMENSIONS.width,
-    height: el.clientHeight || DEFAULT_DIMENSIONS.height,
-  };
-}
-
-function useContainerDimensions(
-  ref: React.RefObject<HTMLElement | null>,
-): ContainerDimensions {
-  const [dimensions, setDimensions] = React.useState<ContainerDimensions>(DEFAULT_DIMENSIONS);
-
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const sync = (): void => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        setDimensions({ width: rect.width, height: rect.height });
-      }
-    };
-
-    sync();
-
-    if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver((entries) => {
-        const entry = entries.find((c) => c.target === el) ?? entries[0];
-        if (!entry) return;
-        setDimensions(extractDimensions(entry, el));
-      });
-      observer.observe(el);
-      return () => observer.disconnect();
-    }
-
-    window.addEventListener('resize', sync);
-    return () => window.removeEventListener('resize', sync);
-  }, [ref]);
-
-  return dimensions;
+  entryContainer: ShellContainerState;
 }
 
 export function HbHomepageLauncherBand({
   bandKey,
   activeAudience,
+  entryContainer,
 }: HbHomepageLauncherBandProps): React.JSX.Element {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const dimensions = useContainerDimensions(containerRef);
-  const resolution = resolvePriorityRailDeviceForContainer(dimensions);
-  const deviceClass: HomepageLauncherDeviceClass = resolveLauncherDeviceClass(
-    resolution,
-    dimensions.width,
-  );
+  const resolution = resolvePriorityRailDeviceForEntryState(entryContainer);
+  const deviceClass: HomepageLauncherDeviceClass = resolveLauncherDeviceClass(resolution);
   const { config, items, isLoading, error } = usePriorityActionsData({
     bandKey,
     activeAudience,
@@ -164,12 +97,14 @@ export function HbHomepageLauncherBand({
 
   return (
     <div
-      ref={containerRef}
       data-hb-homepage-launcher-band="root"
       data-hbc-launcher-device-class={deviceClass}
       data-hbc-launcher-shell-state={resolution.shellState}
       data-hbc-launcher-entry-reason={resolution.entryStateReason}
       data-hbc-launcher-short-height={resolution.shortHeightConstrained ? 'true' : 'false'}
+      data-hbc-launcher-width={Math.round(entryContainer.width)}
+      data-hbc-launcher-width-authoritative={Math.round(entryContainer.authoritativeWidth)}
+      data-hbc-launcher-width-inline-inset-total={Math.round(entryContainer.shellInlineInsetTotal)}
     >
       {content}
     </div>
