@@ -66,7 +66,7 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     expect(screen.getByRole('menuitem', { name: /Submit Timesheet/ })).toBeInTheDocument();
   });
 
-  it('uses bottom-sheet overflow on phone', () => {
+  it('uses single-entry all-tools sheet mode on phone', () => {
     render(
       <HbcHomepageLauncher
         primary={TILES.slice(0, 3)}
@@ -75,9 +75,11 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
       />,
     );
     const trigger = screen.getByRole('button', { name: /More tools/i });
+    expect(screen.queryByRole('link', { name: /Approve RFI/i })).toBeNull();
     expect(trigger.getAttribute('data-hbc-overflow-mode')).toBe('sheet');
     expect(trigger.getAttribute('data-hbc-homepage-launcher-overflow-variant')).toBe('mobile-entry');
     expect(trigger.getAttribute('data-hbc-launcher-tile-variant')).toBe('mobile-entry');
+    expect(trigger.getAttribute('data-hbc-homepage-launcher-sheet-content')).toBe('all-tools');
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog');
   });
 
@@ -93,6 +95,9 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     const root = container.querySelector('[data-hbc-ui="homepage-launcher"]');
     expect(root!.getAttribute('data-hbc-homepage-launcher-overflow-mode')).toBe('sheet');
     expect(root!.getAttribute('data-hbc-homepage-launcher-short-height')).toBe('true');
+    expect(root!.getAttribute('data-hbc-homepage-launcher-handheld-mode')).toBe(
+      'single-entry-all-tools',
+    );
   });
 
   it('omits overflow trigger when no overflow items provided', () => {
@@ -233,5 +238,17 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
     expect(await screen.findByText('Field Ops')).toBeInTheDocument();
     expect((await screen.findAllByRole('menuitem')).length).toBe(2);
+  });
+
+  it('handheld mode emits all-tools runtime markers', () => {
+    const { container } = render(
+      <HbcHomepageLauncher primary={TILES.slice(0, 1)} overflow={TILES.slice(0, 4)} deviceClass="phone" />,
+    );
+    const root = container.querySelector('[data-hbc-ui="homepage-launcher"]');
+    expect(root?.getAttribute('data-hbc-homepage-launcher-handheld-mode')).toBe(
+      'single-entry-all-tools',
+    );
+    expect(root?.getAttribute('data-hbc-homepage-launcher-visible-count')).toBe('1');
+    expect(root?.getAttribute('data-hbc-homepage-launcher-all-tools-count')).toBe('4');
   });
 });

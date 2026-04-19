@@ -13,6 +13,7 @@ export type HomepageLauncherDeviceClass =
   | 'phone';
 
 export type HomepageLauncherOverflowMode = 'menu' | 'sheet';
+export type HomepageLauncherHandheldMode = 'standard' | 'single-entry-all-tools';
 
 export type HomepageLauncherTileVariant =
   | 'primary'
@@ -42,6 +43,7 @@ export interface HbcHomepageLauncherProps {
   overflowLabel?: string;
   deviceClass: HomepageLauncherDeviceClass;
   overflowMode?: HomepageLauncherOverflowMode;
+  handheldMode?: HomepageLauncherHandheldMode;
   shortHeight?: boolean;
   className?: string;
   'aria-label'?: string;

@@ -312,6 +312,7 @@ export type {
   HbcHomepageLauncherOverflowProps,
   HomepageLauncherChipModel,
   HomepageLauncherDeviceClass,
+  HomepageLauncherHandheldMode,
   HomepageLauncherOverflowMode,
 } from './HbcHomepageLauncher/index.js';
 

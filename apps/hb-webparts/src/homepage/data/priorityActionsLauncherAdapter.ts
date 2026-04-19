@@ -166,6 +166,7 @@ export interface LauncherPartition {
   primary: HomepageLauncherTileModel[];
   overflow: HomepageLauncherTileModel[];
   visibleBudget: number;
+  handheldMode: 'standard' | 'single-entry-all-tools';
 }
 
 export interface LauncherBudgetOptions {
@@ -183,10 +184,18 @@ export interface LauncherBudgetOptions {
 export function partitionItems(
   items: readonly PriorityActionsItemNormalized[],
   deviceClass: HomepageLauncherDeviceClass,
-  resolution: Pick<PriorityRailDeviceResolution, 'shortHeightConstrained' | 'shellState'>,
+  resolution: Pick<
+    PriorityRailDeviceResolution,
+    'shortHeightConstrained' | 'shellState' | 'launcherHandheldMode'
+  >,
   options: LauncherBudgetOptions = { strictShellAlignment: true },
 ): LauncherPartition {
   void options;
+  const handheldMode =
+    resolution.launcherHandheldMode ??
+    (deviceClass === 'phone' || resolution.shortHeightConstrained
+      ? 'single-entry-all-tools'
+      : 'standard');
   const maxVisible = Math.max(
     1,
     HBC_HOMEPAGE_LAUNCHER_VISIBLE_COUNT[deviceClass] - (resolution.shortHeightConstrained ? 1 : 0),
@@ -199,15 +208,29 @@ export function partitionItems(
     else eligible.push(item);
   }
 
+  if (handheldMode === 'single-entry-all-tools') {
+    const allTools = [...eligible, ...forced].map((item) => ({
+      ...mapItemToTile(item),
+      variant: 'mobile-entry' as const,
+    }));
+    const entryTile = allTools.length > 0 ? [allTools[0]!] : [];
+    return {
+      primary: entryTile,
+      overflow: allTools,
+      visibleBudget: entryTile.length,
+      handheldMode,
+    };
+  }
+
   const primary = eligible.slice(0, maxVisible).map((item) => ({
     ...mapItemToTile(item),
-    variant: deviceClass === 'phone' ? 'mobile-entry' : 'primary',
+    variant: 'primary' as const,
   }));
   const overflow = [...eligible.slice(maxVisible), ...forced].map((item) => ({
     ...mapItemToTile(item),
-    variant: deviceClass === 'phone' ? 'mobile-entry' : 'secondary-overflow-entry',
+    variant: 'secondary-overflow-entry' as const,
   }));
-  return { primary, overflow, visibleBudget: maxVisible };
+  return { primary, overflow, visibleBudget: maxVisible, handheldMode };
 }
 
 /** Backward-compatible alias during chip -> tile transition. */

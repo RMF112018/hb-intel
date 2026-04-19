@@ -249,6 +249,7 @@ function SheetOverflow({
         data-hbc-homepage-launcher-overflow-variant="mobile-entry"
         data-hbc-launcher-tile-variant="mobile-entry"
         data-hbc-overflow-mode="sheet"
+        data-hbc-homepage-launcher-sheet-content="all-tools"
         aria-haspopup="dialog"
         aria-expanded={open}
         {...getReferenceProps()}
@@ -283,7 +284,8 @@ function SheetOverflow({
                   exit={{ y: '100%' }}
                   transition={{ duration: 0.22, ease: 'easeOut' }}
                   {...getFloatingProps()}
-                  aria-label={`${label} overflow`}
+                  aria-label={`${label} all tools`}
+                  data-hbc-homepage-launcher-sheet-content="all-tools"
                 >
                   <div className={styles.sheetHeader}>
                     <span className={styles.sheetTitle}>{label}</span>

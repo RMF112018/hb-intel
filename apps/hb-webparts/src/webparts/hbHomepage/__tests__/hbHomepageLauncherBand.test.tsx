@@ -197,11 +197,16 @@ vi.mock('@hbc/ui-kit/homepage', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@hbc/ui-kit/homepage')>();
   return {
     ...actual,
-    HbcHomepageLauncher: (props: { primary: unknown[]; overflow: unknown[] }): React.JSX.Element =>
+    HbcHomepageLauncher: (props: {
+      primary: unknown[];
+      overflow: unknown[];
+      handheldMode?: string;
+    }): React.JSX.Element =>
       React.createElement('div', {
         'data-test-launcher': 'mock',
         'data-test-primary-count': props.primary.length,
         'data-test-overflow-count': props.overflow.length,
+        'data-test-handheld-mode': props.handheldMode,
       }),
     HbcPriorityRailEmptyState: (): React.JSX.Element => React.createElement('div'),
     HbcPriorityRailErrorState: (): React.JSX.Element => React.createElement('div'),
@@ -258,6 +263,7 @@ describe('HbHomepageLauncherBand governance alignment', () => {
     expect(root?.getAttribute('data-hbc-launcher-alignment-mode')).toBe('shared-entry-governed');
     expect(root?.getAttribute('data-hbc-launcher-density-posture')).toBe('compact');
     expect(root?.getAttribute('data-hbc-launcher-visible-budget')).toBe('4');
+    expect(root?.getAttribute('data-hbc-launcher-handheld-mode')).toBe('standard');
     expect(root?.getAttribute('data-hbc-launcher-host-width')).toBe('900');
     expect(root?.getAttribute('data-hbc-launcher-host-width-source')).toBe(
       'entry-container-fallback',

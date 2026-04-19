@@ -23,6 +23,7 @@ import {
 } from './constants.js';
 import type {
   HbcHomepageLauncherProps,
+  HomepageLauncherHandheldMode,
   HomepageLauncherOverflowMode,
 } from './types.js';
 import { launcherBand, launcherRoot } from './variants.js';
@@ -34,6 +35,15 @@ function resolveOverflowMode(
   if (props.overflowMode) return props.overflowMode;
   if (props.shortHeight) return 'sheet';
   return props.deviceClass === 'phone' ? 'sheet' : 'menu';
+}
+
+function resolveHandheldMode(
+  props: HbcHomepageLauncherProps,
+): HomepageLauncherHandheldMode {
+  if (props.handheldMode) return props.handheldMode;
+  return props.deviceClass === 'phone' || props.shortHeight
+    ? 'single-entry-all-tools'
+    : 'standard';
 }
 
 export function HbcHomepageLauncher(
@@ -50,7 +60,11 @@ export function HbcHomepageLauncher(
     'aria-label': ariaLabel,
   } = props;
   const overflowMode = resolveOverflowMode(props);
+  const handheldMode = resolveHandheldMode(props);
+  const handheldSingleEntry = handheldMode === 'single-entry-all-tools';
+  const renderedPrimary = handheldSingleEntry ? [] : primary;
   const hasOverflow = overflow.length > 0;
+  const visibleCount = handheldSingleEntry ? (hasOverflow ? 1 : 0) : renderedPrimary.length;
 
   return (
     <section
@@ -61,14 +75,16 @@ export function HbcHomepageLauncher(
       data-hbc-homepage-launcher-row-primitive="tile-family"
       data-hbc-homepage-launcher-version={HBC_HOMEPAGE_LAUNCHER_VERSION}
       data-hbc-homepage-launcher-device-class={deviceClass}
-      data-hbc-homepage-launcher-visible-count={primary.length}
+      data-hbc-homepage-launcher-visible-count={visibleCount}
       data-hbc-homepage-launcher-overflow-count={overflow.length}
       data-hbc-homepage-launcher-overflow-mode={overflowMode}
+      data-hbc-homepage-launcher-handheld-mode={handheldMode}
+      data-hbc-homepage-launcher-all-tools-count={handheldSingleEntry ? overflow.length : undefined}
       data-hbc-homepage-launcher-short-height={shortHeight ? 'true' : 'false'}
     >
       <div className={launcherBand()} role="list">
-        <div className={styles.bandScroller}>
-          {primary.map((tile) => (
+        <div className={styles.bandScroller} data-hbc-launcher-band-mode={handheldMode}>
+          {renderedPrimary.map((tile) => (
             <div
               key={tile.id}
               role="listitem"

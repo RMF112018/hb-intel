@@ -31,6 +31,7 @@ export interface PriorityRailContainerDimensions {
 }
 
 export type PriorityRailOverflowStrategy = 'inline-disclosure' | 'menu' | 'sheet';
+export type LauncherHandheldMode = 'standard' | 'single-entry-all-tools';
 
 export interface PriorityRailSectionModel {
   key: string;
@@ -44,6 +45,7 @@ export interface PriorityRailDeviceResolution {
   entryStateReason: EntryStateSelectionReason;
   shortHeightConstrained: boolean;
   densityPosture: 'airy' | 'comfortable' | 'compact';
+  launcherHandheldMode: LauncherHandheldMode;
 }
 
 export interface PriorityRailPresentationResolution {
@@ -51,6 +53,7 @@ export interface PriorityRailPresentationResolution {
   shellState: ShellEntryStateId;
   layout: PriorityRailLayoutMode;
   overflowStrategy: PriorityRailOverflowStrategy;
+  launcherHandheldMode: LauncherHandheldMode;
   /** Back-compat field. The launcher band has no authored layout matrix. */
   authoredLayoutMode: string;
   /** Back-compat field. The launcher band applies no normalization steps. */
@@ -75,6 +78,14 @@ function resolveLauncherDensityPosture(
   }
 }
 
+export function resolveLauncherHandheldMode(
+  resolution: Pick<PriorityRailDeviceResolution, 'deviceClass' | 'shortHeightConstrained'>,
+): LauncherHandheldMode {
+  return resolution.deviceClass === 'phone' || resolution.shortHeightConstrained
+    ? 'single-entry-all-tools'
+    : 'standard';
+}
+
 export function resolvePriorityRailDeviceForEntryState(
   entryState: SharedEntryStateSnapshot,
 ): PriorityRailDeviceResolution {
@@ -87,6 +98,10 @@ export function resolvePriorityRailDeviceForEntryState(
     entryStateReason: entryState.entryStateReason,
     shortHeightConstrained: entryState.shortHeightConstrained,
     densityPosture: resolveLauncherDensityPosture(entryState.entryState.id),
+    launcherHandheldMode: resolveLauncherHandheldMode({
+      deviceClass,
+      shortHeightConstrained: entryState.shortHeightConstrained,
+    }),
   };
 }
 
@@ -109,13 +124,19 @@ export function resolvePriorityRailDeviceForContainer(
 export function resolveLauncherPresentation(
   resolution: PriorityRailDeviceResolution,
 ): PriorityRailPresentationResolution {
-  const isHandheld = resolution.deviceClass === 'phone';
-  const useSheet = isHandheld || resolution.shortHeightConstrained;
+  const launcherHandheldMode =
+    resolution.launcherHandheldMode ??
+    resolveLauncherHandheldMode({
+      deviceClass: resolution.deviceClass,
+      shortHeightConstrained: resolution.shortHeightConstrained,
+    });
+  const useSheet = launcherHandheldMode === 'single-entry-all-tools';
   return {
     deviceClass: resolution.deviceClass,
     shellState: mapPriorityActionsDeviceClassToShellState(resolution.deviceClass as PriorityActionsDeviceClass),
     layout: 'rail',
     overflowStrategy: useSheet ? 'sheet' : 'menu',
+    launcherHandheldMode,
     authoredLayoutMode: 'launcher',
     normalizations: [],
   };
@@ -137,6 +158,7 @@ export function resolvePriorityRailPresentationForDevice(
     shellState: mapPriorityActionsDeviceClassToShellState(deviceClass as PriorityActionsDeviceClass),
     layout: 'rail',
     overflowStrategy: isHandheld ? 'sheet' : 'menu',
+    launcherHandheldMode: isHandheld ? 'single-entry-all-tools' : 'standard',
     authoredLayoutMode: 'launcher',
     normalizations: [],
   };

@@ -16,13 +16,22 @@ import type { PriorityRailDeviceResolution } from '../data/priorityActionsPresen
 function makeResolution(
   overrides: Partial<PriorityRailDeviceResolution>,
 ): PriorityRailDeviceResolution {
-  return {
+  const base: PriorityRailDeviceResolution = {
     deviceClass: 'desktop',
     shellState: 'standard-laptop',
     entryStateReason: 'width-match',
     shortHeightConstrained: false,
     densityPosture: 'comfortable',
-    ...overrides,
+    launcherHandheldMode: 'standard',
+  };
+  const merged = { ...base, ...overrides };
+  return {
+    ...merged,
+    launcherHandheldMode:
+      overrides.launcherHandheldMode ??
+      (merged.deviceClass === 'phone' || merged.shortHeightConstrained
+        ? 'single-entry-all-tools'
+        : 'standard'),
   };
 }
 
@@ -143,7 +152,7 @@ describe('priorityActionsLauncherAdapter', () => {
     expect(resolveLauncherDeviceClass(makeResolution({ deviceClass: 'phone' }))).toBe('phone');
   });
 
-  it('reduces visible primary budget under short-height posture', () => {
+  it('switches to single-entry handheld model under short-height posture', () => {
     const items = [1, 2, 3, 4, 5].map((id) => makeItem(id));
     const normal = partitionItems(items, 'desktop', makeResolution({}), {
       strictShellAlignment: true,
@@ -154,23 +163,30 @@ describe('priorityActionsLauncherAdapter', () => {
       makeResolution({ shortHeightConstrained: true }),
       { strictShellAlignment: true },
     );
-    expect(shortHeight.primary.length).toBe(normal.primary.length - 1);
+    expect(normal.primary.length).toBe(5);
+    expect(shortHeight.primary.length).toBe(1);
+    expect(shortHeight.overflow.length).toBe(5);
+    expect(shortHeight.handheldMode).toBe('single-entry-all-tools');
   });
 
-  it('always keeps overflowOnly items in overflow', () => {
+  it('always keeps overflowOnly items in handheld drawer payload', () => {
     const items = [makeItem(1), makeItem(2, true), makeItem(3)];
     const partition = partitionItems(items, 'phone', makeResolution({ deviceClass: 'phone' }), {
       strictShellAlignment: true,
     });
     const overflowIds = partition.overflow.map((item) => item.id);
     expect(overflowIds).toContain('2');
+    expect(partition.handheldMode).toBe('single-entry-all-tools');
   });
 
-  it('marks phone launcher entries as mobile-entry variants', () => {
+  it('uses single-entry handheld model for phone with all tools in drawer payload', () => {
     const items = [makeItem(1), makeItem(2), makeItem(3), makeItem(4)];
     const partition = partitionItems(items, 'phone', makeResolution({ deviceClass: 'phone' }), {
       strictShellAlignment: true,
     });
+    expect(partition.primary).toHaveLength(1);
+    expect(partition.overflow).toHaveLength(4);
+    expect(partition.visibleBudget).toBe(1);
     expect(partition.primary.every((item) => item.variant === 'mobile-entry')).toBe(true);
     expect(partition.overflow.every((item) => item.variant === 'mobile-entry')).toBe(true);
   });

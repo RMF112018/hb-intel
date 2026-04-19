@@ -43,6 +43,10 @@
   display: none;
 }
 
+.bandScroller[data-hbc-launcher-band-mode='single-entry-all-tools'] {
+  display: none;
+}
+
 /* ── Tile anatomy ───────────────────────────────────────── */
 
 .tile {
@@ -381,6 +385,20 @@
 .sheetBody {
   padding: 8px;
   overflow-y: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.sheetBody .menuItem {
+  min-height: 52px;
+  padding: 12px 12px;
+  border-radius: 10px;
+}
+
+.sheetBody .overflowGroup {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 /* ── Breakpoint governance — binding visible-count matrix ──
@@ -400,8 +418,8 @@
 
 @container hbc-homepage-launcher (max-width: 719px) {
   .band {
-    flex-direction: column;
-    gap: 9px;
+    flex-direction: row;
+    gap: 8px;
   }
   .bandScroller {
     flex-direction: column;
@@ -426,7 +444,7 @@
     display: none;
   }
   .overflowTile {
-    min-height: 58px;
+    min-height: 64px;
     width: 100%;
     max-width: 100%;
     grid-template-columns: auto 1fr auto auto;
@@ -439,7 +457,7 @@
     height: 20px;
   }
   .sheetBody .menuItem {
-    min-height: 50px;
+    min-height: 54px;
   }
 }
 

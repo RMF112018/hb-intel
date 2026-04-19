@@ -70,6 +70,7 @@ describe('priorityActionsPresentation — launcher band', () => {
     const result = resolvePriorityRailDeviceForContainer({ width: 1000, height: 420 });
     expect(result.shortHeightConstrained).toBe(true);
     expect(result.densityPosture).toBe('compact');
+    expect(result.launcherHandheldMode).toBe('single-entry-all-tools');
   });
 
   it('resolveLauncherPresentation picks sheet overflow on phone + short-height, menu elsewhere', () => {
@@ -77,6 +78,7 @@ describe('priorityActionsPresentation — launcher band', () => {
       deviceClass: 'desktop', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
     expect(desktop.overflowStrategy).toBe('menu');
+    expect(desktop.launcherHandheldMode).toBe('standard');
 
     const laptop = resolveLauncherPresentation({
       deviceClass: 'laptop', shortHeightConstrained: false,
@@ -87,17 +89,22 @@ describe('priorityActionsPresentation — launcher band', () => {
       deviceClass: 'phone', shortHeightConstrained: false,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
     expect(phone.overflowStrategy).toBe('sheet');
+    expect(phone.launcherHandheldMode).toBe('single-entry-all-tools');
 
     const shortHeight = resolveLauncherPresentation({
       deviceClass: 'desktop', shortHeightConstrained: true,
     } as Parameters<typeof resolveLauncherPresentation>[0]);
     expect(shortHeight.overflowStrategy).toBe('sheet');
+    expect(shortHeight.launcherHandheldMode).toBe('single-entry-all-tools');
   });
 
   it('resolvePriorityRailPresentationForDevice shim returns uniform rail layout with device-only overflow choice', () => {
     expect(resolvePriorityRailPresentationForDevice({}, 'desktop').layout).toBe('rail');
     expect(resolvePriorityRailPresentationForDevice({}, 'desktop').overflowStrategy).toBe('menu');
     expect(resolvePriorityRailPresentationForDevice({}, 'phone').overflowStrategy).toBe('sheet');
+    expect(resolvePriorityRailPresentationForDevice({}, 'phone').launcherHandheldMode).toBe(
+      'single-entry-all-tools',
+    );
   });
 
   it('buildPriorityRailSections shim groups by first-seen order without featured promotion', () => {

@@ -94,6 +94,7 @@ export function HbHomepageLauncherBand({
   let visibleBudget: number | undefined;
   let primaryCount: number | undefined;
   let overflowCount: number | undefined;
+  let handheldMode: 'standard' | 'single-entry-all-tools' | undefined;
 
   if (isLoading) {
     content = <HbcPriorityRailSkeleton count={skeletonCount} />;
@@ -121,6 +122,7 @@ export function HbHomepageLauncherBand({
     visibleBudget = partition.visibleBudget;
     primaryCount = partition.primary.length;
     overflowCount = partition.overflow.length;
+    handheldMode = partition.handheldMode;
 
     if (partition.primary.length === 0 && partition.overflow.length === 0) {
       const msg = resolveAuthoringMessage('priorityActionsRail', 'noData');
@@ -134,6 +136,7 @@ export function HbHomepageLauncherBand({
           overflowLabel={config.overflowLabel || 'More tools'}
           deviceClass={deviceClass}
           shortHeight={resolution.shortHeightConstrained}
+          handheldMode={partition.handheldMode}
         />
       );
     }
@@ -152,6 +155,7 @@ export function HbHomepageLauncherBand({
       data-hbc-launcher-visible-budget={visibleBudget}
       data-hbc-launcher-primary-count={primaryCount}
       data-hbc-launcher-overflow-count={overflowCount}
+      data-hbc-launcher-handheld-mode={handheldMode}
       data-hbc-launcher-width={Math.round(entryContainer.width)}
       data-hbc-launcher-width-authoritative={Math.round(entryContainer.authoritativeWidth)}
       data-hbc-launcher-width-inline-inset-total={Math.round(entryContainer.shellInlineInsetTotal)}
