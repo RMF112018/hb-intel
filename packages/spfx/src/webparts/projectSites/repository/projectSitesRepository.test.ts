@@ -7,7 +7,7 @@ import {
 
 describe('projectSitesRepository fallback selection', () => {
   it('accepts only matched rows with valid folder URLs', () => {
-    expect(toLegacyFallbackCandidate({
+    const candidate = toLegacyFallbackCandidate({
       Id: 1,
       ProjectNumber: '24-001-01',
       LegacyYear: 2024,
@@ -15,7 +15,12 @@ describe('projectSitesRepository fallback selection', () => {
       MatchStatus: 'matched',
       LastValidatedUtc: '2026-04-18T10:00:00.000Z',
       LastSeenUtc: '2026-04-18T09:00:00.000Z',
-    })).not.toBeNull();
+    });
+    expect(candidate).not.toBeNull();
+    // Provenance fields default to null when registry omitted them.
+    expect(candidate?.matchConfidence).toBeNull();
+    expect(candidate?.matchMethod).toBeNull();
+    expect(candidate?.matchedProjectListItemId).toBeNull();
 
     expect(toLegacyFallbackCandidate({
       Id: 2,
@@ -42,6 +47,9 @@ describe('projectSitesRepository fallback selection', () => {
         legacyYear: 2025,
         folderWebUrl: 'https://tenant/a',
         matchStatus: 'matched',
+        matchedProjectListItemId: null,
+        matchConfidence: null,
+        matchMethod: null,
         lastValidatedUtc: '2026-04-18T08:00:00.000Z',
         lastSeenUtc: '2026-04-18T09:00:00.000Z',
       },
@@ -51,6 +59,9 @@ describe('projectSitesRepository fallback selection', () => {
         legacyYear: 2025,
         folderWebUrl: 'https://tenant/b',
         matchStatus: 'matched',
+        matchedProjectListItemId: null,
+        matchConfidence: null,
+        matchMethod: null,
         lastValidatedUtc: '2026-04-18T09:00:00.000Z',
         lastSeenUtc: '2026-04-18T08:00:00.000Z',
       },
@@ -60,6 +71,9 @@ describe('projectSitesRepository fallback selection', () => {
         legacyYear: 2025,
         folderWebUrl: 'https://tenant/c',
         matchStatus: 'matched',
+        matchedProjectListItemId: null,
+        matchConfidence: null,
+        matchMethod: null,
         lastValidatedUtc: '2026-04-18T09:00:00.000Z',
         lastSeenUtc: '2026-04-18T10:00:00.000Z',
       },
@@ -67,6 +81,38 @@ describe('projectSitesRepository fallback selection', () => {
 
     expect(best?.id).toBe(12);
     expect(best?.folderWebUrl).toBe('https://tenant/c');
+  });
+
+  it('carries provenance fields (confidence, method, linkage) when the registry supplies them', () => {
+    const candidate = toLegacyFallbackCandidate({
+      Id: 99,
+      ProjectNumber: '25-244-01',
+      LegacyYear: 2025,
+      FolderWebUrl: 'https://tenant/site',
+      MatchStatus: 'matched',
+      MatchConfidence: 'high',
+      MatchMethod: 'project-number-exact',
+      MatchedProjectListItemId: 4242,
+      LastValidatedUtc: '2026-04-18T10:00:00.000Z',
+    });
+    expect(candidate).not.toBeNull();
+    expect(candidate?.matchConfidence).toBe('high');
+    expect(candidate?.matchMethod).toBe('project-number-exact');
+    expect(candidate?.matchedProjectListItemId).toBe(4242);
+  });
+
+  it('rejects unknown match-confidence and match-method values rather than leaking them', () => {
+    const candidate = toLegacyFallbackCandidate({
+      Id: 100,
+      ProjectNumber: '25-244-01',
+      LegacyYear: 2025,
+      FolderWebUrl: 'https://tenant/site',
+      MatchStatus: 'matched',
+      MatchConfidence: 'ultra',
+      MatchMethod: 'psychic',
+    });
+    expect(candidate?.matchConfidence).toBeNull();
+    expect(candidate?.matchMethod).toBeNull();
   });
 
   it('builds one lookup winner per project number + year', () => {

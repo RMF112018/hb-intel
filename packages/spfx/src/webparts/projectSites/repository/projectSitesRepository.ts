@@ -11,38 +11,33 @@ import {
   SP_PROJECTS_FIELDS,
   isValidYear,
 } from '../types.js';
+import type {
+  ILegacyFallbackRegistryCandidate,
+  IRawLegacyFallbackRegistryItem,
+} from './legacyFallbackRegistryAdapter.js';
+import {
+  LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
+  LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS,
+  buildLegacyFallbackLookup,
+  buildLegacyFallbackLookupKey,
+} from './legacyFallbackRegistryAdapter.js';
+
+// Re-export the adapter surface for existing consumers (tests, callers)
+// that historically imported these names from the repository module.
+export {
+  buildLegacyFallbackLookup,
+  pickBestLegacyFallbackCandidate,
+  toLegacyFallbackCandidate,
+} from './legacyFallbackRegistryAdapter.js';
+export type {
+  ILegacyFallbackRegistryCandidate,
+  IRawLegacyFallbackRegistryItem,
+  LegacyFallbackMatchConfidence,
+  LegacyFallbackMatchMethod,
+  LegacyFallbackMatchStatus,
+} from './legacyFallbackRegistryAdapter.js';
 
 const PROJECTS_LIST_TITLE = 'Projects';
-const LEGACY_FALLBACK_REGISTRY_LIST_TITLE = 'Legacy Project Fallback Registry';
-const LEGACY_FALLBACK_SELECT_FIELDS = [
-  'Id',
-  'ProjectNumber',
-  'LegacyYear',
-  'FolderWebUrl',
-  'LastValidatedUtc',
-  'LastSeenUtc',
-  'MatchStatus',
-] as const;
-
-interface IRawLegacyFallbackRegistryItem {
-  Id: number;
-  ProjectNumber?: unknown;
-  LegacyYear?: unknown;
-  FolderWebUrl?: unknown;
-  LastValidatedUtc?: unknown;
-  LastSeenUtc?: unknown;
-  MatchStatus?: unknown;
-}
-
-interface ILegacyFallbackRegistryCandidate {
-  id: number;
-  projectNumber: string;
-  legacyYear: number;
-  folderWebUrl: string;
-  matchStatus: 'matched';
-  lastValidatedUtc: string;
-  lastSeenUtc: string;
-}
 
 export interface IProjectSitesRepository {
   fetchDistinctYears(): Promise<number[]>;
@@ -51,34 +46,6 @@ export interface IProjectSitesRepository {
 
 function trimString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
-}
-
-function extractUrl(value: unknown): string {
-  if (typeof value === 'string') {
-    return value.trim();
-  }
-  if (value !== null && typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    if (typeof obj.Url === 'string') return obj.Url.trim();
-    if (typeof obj.url === 'string') return obj.url.trim();
-    if (typeof obj.uri === 'string') return obj.uri.trim();
-  }
-  return '';
-}
-
-function isHttpUrl(value: string): boolean {
-  if (!value) return false;
-  try {
-    const parsed = new URL(value);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-  } catch {
-    return false;
-  }
-}
-
-function toEpochMs(value: string): number {
-  const parsed = Date.parse(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
 }
 
 function parseTitleProjectNumber(title: string): string {
@@ -94,76 +61,6 @@ function parseTitleProjectNumber(title: string): string {
   return '';
 }
 
-export function toLegacyFallbackCandidate(
-  row: IRawLegacyFallbackRegistryItem,
-): ILegacyFallbackRegistryCandidate | null {
-  const projectNumber = trimString(row.ProjectNumber);
-  const matchStatus = trimString(row.MatchStatus);
-  const folderWebUrl = extractUrl(row.FolderWebUrl);
-  const year = typeof row.LegacyYear === 'number' ? row.LegacyYear : Number.parseInt(String(row.LegacyYear ?? ''), 10);
-
-  if (!projectNumber || !Number.isInteger(year) || matchStatus !== 'matched' || !isHttpUrl(folderWebUrl)) {
-    return null;
-  }
-
-  return {
-    id: typeof row.Id === 'number' ? row.Id : Number.parseInt(String(row.Id ?? ''), 10),
-    projectNumber,
-    legacyYear: year,
-    folderWebUrl,
-    matchStatus: 'matched',
-    lastValidatedUtc: trimString(row.LastValidatedUtc),
-    lastSeenUtc: trimString(row.LastSeenUtc),
-  };
-}
-
-export function pickBestLegacyFallbackCandidate(
-  candidates: readonly ILegacyFallbackRegistryCandidate[],
-): ILegacyFallbackRegistryCandidate | null {
-  if (candidates.length === 0) return null;
-
-  return [...candidates].sort((a, b) => {
-    const validatedDelta = toEpochMs(b.lastValidatedUtc) - toEpochMs(a.lastValidatedUtc);
-    if (validatedDelta !== 0) return validatedDelta;
-    const seenDelta = toEpochMs(b.lastSeenUtc) - toEpochMs(a.lastSeenUtc);
-    if (seenDelta !== 0) return seenDelta;
-    return b.id - a.id;
-  })[0];
-}
-
-function buildFallbackLookupKey(projectNumber: string, legacyYear: number): string {
-  return `${projectNumber}::${legacyYear}`;
-}
-
-export function buildLegacyFallbackLookup(
-  rows: readonly IRawLegacyFallbackRegistryItem[],
-): Map<string, ILegacyFallbackRegistryCandidate> {
-  const grouped = new Map<string, ILegacyFallbackRegistryCandidate[]>();
-
-  for (const row of rows) {
-    const candidate = toLegacyFallbackCandidate(row);
-    if (!candidate) continue;
-
-    const key = buildFallbackLookupKey(candidate.projectNumber, candidate.legacyYear);
-    const bucket = grouped.get(key);
-    if (bucket) {
-      bucket.push(candidate);
-    } else {
-      grouped.set(key, [candidate]);
-    }
-  }
-
-  const resolved = new Map<string, ILegacyFallbackRegistryCandidate>();
-  for (const [key, bucket] of grouped) {
-    const winner = pickBestLegacyFallbackCandidate(bucket);
-    if (winner) {
-      resolved.set(key, winner);
-    }
-  }
-
-  return resolved;
-}
-
 function applyFallbackLookup(
   projectRows: IRawProjectSiteItem[],
   lookup: Map<string, ILegacyFallbackRegistryCandidate>,
@@ -173,7 +70,7 @@ function applyFallbackLookup(
     const projectNumber = trimString(row[SP_PROJECTS_FIELDS.PROJECT_NUMBER] ?? row.ProjectNumber) || titleFallback;
     const yearRaw = row[SP_PROJECTS_FIELDS.YEAR];
     const year = typeof yearRaw === 'number' ? yearRaw : Number.parseInt(String(yearRaw ?? ''), 10);
-    const key = buildFallbackLookupKey(projectNumber, year);
+    const key = buildLegacyFallbackLookupKey(projectNumber, year);
     const fallback = lookup.get(key);
 
     if (!fallback) {
@@ -250,7 +147,7 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
         const rows = await sp.web.lists
           .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
           .items
-          .select(...LEGACY_FALLBACK_SELECT_FIELDS)
+          .select(...LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS)
           .filter(`IsActive eq 1 and MatchStatus eq 'matched' and LegacyYear eq ${year}`)
           .top(PROJECT_SITES_ALL_SCOPE_LIMIT)();
         return rows as IRawLegacyFallbackRegistryItem[];
