@@ -27,6 +27,7 @@
 
 import { getEntryStackPolicy, type EntryStackPolicy } from './entryStackPolicy.js';
 import type { BandLayoutResult, OccupantRenderMode, PairingDecision } from './slotComfortResolver.js';
+import type { FirstLaneDecision } from './firstLaneResolver.js';
 import type {
   BandSemanticRole,
   ColumnSpan,
@@ -106,6 +107,12 @@ export interface ShellConformanceReport {
    * the same policy the shell is honoring.
    */
   readonly entryStackPolicy: EntryStackPolicy;
+  readonly firstLaneDecision?: {
+    action: FirstLaneDecision['action'];
+    reason: string;
+    replacements: number;
+    candidatesConsidered: number;
+  };
   /** Per-band conformance, in preset order. Index 0 is the entry band. */
   readonly bands: readonly BandConformance[];
 }
@@ -115,6 +122,7 @@ export interface ShellConformanceInput {
   readonly bandLayouts: readonly BandLayoutResult[];
   readonly entryState: ShellEntryState;
   readonly shortHeightConstrained: boolean;
+  readonly firstLaneDecision?: FirstLaneDecision;
 }
 
 function deriveSlotState(
@@ -189,6 +197,14 @@ export function resolveShellConformance(
     entryState: input.entryState,
     shortHeightConstrained: input.shortHeightConstrained,
     entryStackPolicy: getEntryStackPolicy(input.entryState.id),
+    firstLaneDecision: input.firstLaneDecision
+      ? {
+          action: input.firstLaneDecision.action,
+          reason: input.firstLaneDecision.reason,
+          replacements: input.firstLaneDecision.slotDecisions.filter((d) => d.from !== d.to).length,
+          candidatesConsidered: input.firstLaneDecision.candidateEvaluations?.length ?? 0,
+        }
+      : undefined,
     bands: bandConformance,
   };
 }
@@ -212,6 +228,9 @@ export interface ShellConformanceDataAttributes {
   readonly 'data-shell-bands-total': number;
   readonly 'data-shell-entry-band-recipe': ShellBandRecipeId | 'none';
   readonly 'data-shell-fit-contract-denials': number;
+  readonly 'data-shell-first-lane-action-detail': FirstLaneDecision['action'] | 'none';
+  readonly 'data-shell-first-lane-reason-detail': string;
+  readonly 'data-shell-first-lane-candidates-considered': number;
 }
 
 export function toShellConformanceDataAttributes(
@@ -233,5 +252,9 @@ export function toShellConformanceDataAttributes(
     'data-shell-bands-total': report.bands.length,
     'data-shell-entry-band-recipe': report.bands[0]?.recipe ?? 'none',
     'data-shell-fit-contract-denials': fitContractDenials,
+    'data-shell-first-lane-action-detail': report.firstLaneDecision?.action ?? 'none',
+    'data-shell-first-lane-reason-detail': report.firstLaneDecision?.reason ?? 'none',
+    'data-shell-first-lane-candidates-considered':
+      report.firstLaneDecision?.candidatesConsidered ?? 0,
   };
 }

@@ -21,6 +21,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     allowedSlotRoles: ['primary', 'secondary'],
     prominenceCeiling: 'anchor',
     firstLaneEligible: true,
+    firstLanePromotionRank: 20,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
@@ -50,6 +51,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     allowedSlotRoles: ['primary', 'secondary'],
     prominenceCeiling: 'anchor',
     firstLaneEligible: true,
+    firstLanePromotionRank: 30,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
@@ -79,6 +81,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     allowedSlotRoles: ['primary', 'secondary'],
     prominenceCeiling: 'anchor',
     firstLaneEligible: true,
+    firstLanePromotionRank: 10,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
@@ -108,6 +111,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     allowedSlotRoles: ['primary'],
     prominenceCeiling: 'anchor',
     firstLaneEligible: false,
+    firstLanePromotionRank: 90,
     comfort: {
       minWidth: 600,
       preferredWidth: 960,
@@ -138,6 +142,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     allowedSlotRoles: ['primary', 'secondary'],
     prominenceCeiling: 'contextual',
     firstLaneEligible: false,
+    firstLanePromotionRank: 95,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,
@@ -168,6 +173,7 @@ const REGISTRY_ENTRIES: readonly OccupantDescriptor[] = [
     allowedSlotRoles: ['primary', 'secondary'],
     prominenceCeiling: 'supporting',
     firstLaneEligible: false,
+    firstLanePromotionRank: 80,
     comfort: {
       minWidth: 480,
       preferredWidth: 720,

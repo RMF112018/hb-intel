@@ -168,6 +168,14 @@ describe('Phase-05 closure — Prompt-04 entry-stack contract alignment', () => 
     expect(PROTECTED_ENTRY_STACK_RULES.heroHeightBudgetCeilingEnforced).toBe(true);
     expect(PROTECTED_ENTRY_STACK_RULES.overflowMustRemainGoverned).toBe(true);
   });
+
+  it('harness proof exposes deterministic first-lane decision diagnostics', () => {
+    const outcome = runShellConformanceMatrix().find(
+      (o) => o.matrixCase.label === 'standard-laptop (primary baseline)',
+    );
+    expect(outcome?.proof.firstLaneDecision.action).toBeDefined();
+    expect(typeof outcome?.proof.firstLaneDecision.reason).toBe('string');
+  });
 });
 
 describe('Phase-05 closure — Prompt-05 + Prompt-06 harness + conformance proof', () => {

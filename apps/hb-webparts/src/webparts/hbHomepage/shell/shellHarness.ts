@@ -33,6 +33,7 @@ import {
   type ShellConformanceReport,
 } from './shellConformance.js';
 import { parseShellLayout } from './shellValidation.js';
+import { resolveFirstLaneBand } from './firstLaneResolver.js';
 import type {
   ColumnSpan,
   OccupantId,
@@ -90,6 +91,11 @@ export interface ShellHarnessProof {
     readonly warnings: readonly ShellDiagnostic[];
     readonly info: readonly ShellDiagnostic[];
   };
+  readonly firstLaneDecision: {
+    readonly action: string;
+    readonly reason: string;
+    readonly replacements: number;
+  };
   readonly bands: readonly ShellHarnessBandProof[];
 }
 
@@ -102,8 +108,14 @@ export interface ShellHarnessProof {
 export function runShellHarnessCase(input: ShellHarnessInput): ShellHarnessProof {
   const resolved = resolveEntryStateWithReason({ width: input.width, height: input.height });
   const layoutState = parseShellLayout(input.layout);
+  const firstLane = resolveFirstLaneBand({
+    band: layoutState.preset.bands[0],
+    reports: new Map(),
+    entryState: resolved.state,
+  });
+  const resolvedBands = [firstLane.band, ...layoutState.preset.bands.slice(1)];
 
-  const bands: ShellHarnessBandProof[] = layoutState.preset.bands.map((band, index) => {
+  const bands: ShellHarnessBandProof[] = resolvedBands.map((band, index) => {
     const isEntryBand = index === 0;
     const layout = resolveBandLayout(band, resolved.state, isEntryBand, input.width);
     return {
@@ -144,6 +156,11 @@ export function runShellHarnessCase(input: ShellHarnessInput): ShellHarnessProof
       errors: layoutState.diagnostics.filter((d) => d.severity === 'error'),
       warnings: layoutState.diagnostics.filter((d) => d.severity === 'warning'),
       info: layoutState.diagnostics.filter((d) => d.severity === 'info'),
+    },
+    firstLaneDecision: {
+      action: firstLane.decision.action,
+      reason: firstLane.decision.reason,
+      replacements: firstLane.decision.slotDecisions.filter((d) => d.from !== d.to).length,
     },
     bands,
   };
@@ -292,6 +309,7 @@ export function summarizeHarnessProof(proof: ShellHarnessProof): string {
     `[${proof.label}] state=${proof.entryState.id} ` +
     `reason=${proof.entryState.reason} ` +
     `shortHeight=${proof.entryState.shortHeightConstrained} ` +
+    `firstLaneAction=${proof.firstLaneDecision.action} ` +
     `preset=${proof.preset.id} ` +
     `diagnostics=${proof.diagnostics.total} ` +
     `bands=[${bandSummary}]`
@@ -328,19 +346,26 @@ export function runShellConformanceMatrix(
       layout,
       label: matrixCase.label,
     });
-    const layoutState = parseShellLayout(layout);
     const resolved = resolveEntryStateWithReason({
       width: matrixCase.width,
       height: matrixCase.height,
     });
-    const bandLayouts = layoutState.preset.bands.map((band, index) =>
+    const layoutState = parseShellLayout(layout);
+    const firstLane = resolveFirstLaneBand({
+      band: layoutState.preset.bands[0],
+      reports: new Map(),
+      entryState: resolved.state,
+    });
+    const resolvedBands = [firstLane.band, ...layoutState.preset.bands.slice(1)];
+    const bandLayouts = resolvedBands.map((band, index) =>
       resolveBandLayout(band, resolved.state, index === 0, matrixCase.width),
     );
     const conformance = resolveShellConformance({
-      bands: layoutState.preset.bands,
+      bands: resolvedBands,
       bandLayouts,
       entryState: resolved.state,
       shortHeightConstrained: resolved.shortHeightConstrained,
+      firstLaneDecision: firstLane.decision,
     });
     return {
       matrixCase,

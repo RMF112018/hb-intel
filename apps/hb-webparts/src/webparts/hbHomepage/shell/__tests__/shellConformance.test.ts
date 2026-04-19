@@ -84,6 +84,8 @@ describe('shellConformance — data-attribute surface', () => {
     expect(attrs['data-shell-bands-total']).toBe(report.bands.length);
     expect(attrs['data-shell-short-height']).toBeUndefined();
     expect(attrs['data-shell-fit-contract-denials']).toBeGreaterThanOrEqual(0);
+    expect(attrs['data-shell-first-lane-action-detail']).toBe('none');
+    expect(attrs['data-shell-first-lane-candidates-considered']).toBe(0);
   });
 
   it('flags short-height when the constraint applies', () => {

@@ -58,6 +58,16 @@ const STRENGTH: Record<OccupantContentStateKind, number> = {
 /** Strength threshold below which a slot is considered "weak" and a candidate
  *  for demotion/promotion. Loading/unknown deliberately do not trigger reshuffling. */
 const WEAK_THRESHOLD = 0;
+type CandidateRejectionReason =
+  | 'excluded-current-band'
+  | 'inactive'
+  | 'not-first-lane-eligible'
+  | 'slot-role-incompatible'
+  | 'semantic-role-incompatible'
+  | 'paired-fit-ineligible'
+  | 'pairing-prohibited'
+  | 'report-not-strong'
+  | 'promoted';
 
 export type FirstLaneAction =
   | 'retained'
@@ -78,6 +88,12 @@ export interface FirstLaneDecision {
   readonly action: FirstLaneAction;
   readonly reason: string;
   readonly slotDecisions: readonly FirstLaneSlotDecision[];
+  readonly candidateEvaluations?: readonly {
+    occupantId: OccupantId;
+    rank: number;
+    accepted: boolean;
+    reason: CandidateRejectionReason;
+  }[];
 }
 
 export interface FirstLaneResolverInput {
@@ -133,6 +149,26 @@ function candidateAllowedInSlot(
   return true;
 }
 
+function candidateRejectionForSlot(
+  descriptor: NonNullable<ReturnType<typeof getOccupant>>,
+  slotRole: SlotRole,
+  bandSemanticRole: ShellBand['semanticRole'],
+  entryState: ShellEntryState,
+): CandidateRejectionReason | undefined {
+  if (descriptor.status !== 'active') return 'inactive';
+  if (!descriptor.firstLaneEligible) return 'not-first-lane-eligible';
+  if (!descriptor.allowedSlotRoles.includes(slotRole)) return 'slot-role-incompatible';
+  if (!descriptor.allowedBandSemantics.includes(bandSemanticRole)) return 'semantic-role-incompatible';
+  if (
+    slotRole !== 'primary' &&
+    entryState.firstLanePairingAllowed &&
+    !descriptor.shellFit.pairedLayoutEligible
+  ) {
+    return 'paired-fit-ineligible';
+  }
+  return undefined;
+}
+
 function occupantPairableWithAll(
   candidateId: OccupantId,
   otherIds: readonly OccupantId[],
@@ -150,20 +186,80 @@ function findPromotableCandidate(
   excludedIds: readonly OccupantId[],
   otherRetainedIds: readonly OccupantId[],
   entryState: ShellEntryState,
-): OccupantId | undefined {
-  let best: { id: OccupantId; strength: number } | undefined;
-  for (const [id] of OCCUPANT_REGISTRY) {
-    if (excludedIds.includes(id)) continue;
-    if (!candidateAllowedInSlot(id, slot.role, bandSemanticRole, entryState)) continue;
-    if (!occupantPairableWithAll(id, otherRetainedIds)) continue;
-    const kind = kindFor(reports.get(id));
-    if (!isStrong(kind)) continue;
-    const strength = STRENGTH[kind];
-    if (!best || strength > best.strength) {
-      best = { id, strength };
+): {
+  winner: OccupantId | undefined;
+  evaluations: Array<{
+    occupantId: OccupantId;
+    rank: number;
+    accepted: boolean;
+    reason: CandidateRejectionReason;
+  }>;
+} {
+  const ordered = [...OCCUPANT_REGISTRY.values()].sort(
+    (a, b) => a.firstLanePromotionRank - b.firstLanePromotionRank,
+  );
+  const evaluations: Array<{
+    occupantId: OccupantId;
+    rank: number;
+    accepted: boolean;
+    reason: CandidateRejectionReason;
+  }> = [];
+
+  for (const descriptor of ordered) {
+    const id = descriptor.id;
+    if (excludedIds.includes(id)) {
+      evaluations.push({
+        occupantId: id,
+        rank: descriptor.firstLanePromotionRank,
+        accepted: false,
+        reason: 'excluded-current-band',
+      });
+      continue;
     }
+    const rejection = candidateRejectionForSlot(
+      descriptor,
+      slot.role,
+      bandSemanticRole,
+      entryState,
+    );
+    if (rejection) {
+      evaluations.push({
+        occupantId: id,
+        rank: descriptor.firstLanePromotionRank,
+        accepted: false,
+        reason: rejection,
+      });
+      continue;
+    }
+    if (!occupantPairableWithAll(id, otherRetainedIds)) {
+      evaluations.push({
+        occupantId: id,
+        rank: descriptor.firstLanePromotionRank,
+        accepted: false,
+        reason: 'pairing-prohibited',
+      });
+      continue;
+    }
+    const kind = kindFor(reports.get(id));
+    if (!isStrong(kind)) {
+      evaluations.push({
+        occupantId: id,
+        rank: descriptor.firstLanePromotionRank,
+        accepted: false,
+        reason: 'report-not-strong',
+      });
+      continue;
+    }
+    evaluations.push({
+      occupantId: id,
+      rank: descriptor.firstLanePromotionRank,
+      accepted: true,
+      reason: 'promoted',
+    });
+    return { winner: id, evaluations };
   }
-  return best?.id;
+
+  return { winner: undefined, evaluations };
 }
 
 function isLocked(occupantId: OccupantId | null): boolean {
@@ -182,6 +278,12 @@ function isLocked(occupantId: OccupantId | null): boolean {
  */
 export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneResolverResult {
   const { band, reports, entryState } = input;
+  const candidateEvaluations: Array<{
+    occupantId: OccupantId;
+    rank: number;
+    accepted: boolean;
+    reason: CandidateRejectionReason;
+  }> = [];
 
   const slots = band.slots;
   const activeOccupants = slots
@@ -197,6 +299,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         action: 'retained',
         reason: 'no-active-occupants',
         slotDecisions: [],
+        candidateEvaluations,
       },
     };
   }
@@ -205,7 +308,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
   const classifications = slots.map((slot) => {
     const report = reportFor(reports, slot.occupantId);
     const kind = kindFor(report);
-    return { slot, kind, weak: slot.occupantId !== null && isWeak(kind) };
+    return { slot, kind, weak: slot.occupantId === null || isWeak(kind) };
   });
 
   const hasWeak = classifications.some((c) => c.weak);
@@ -217,6 +320,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         action: 'retained',
         reason: 'all-occupants-strong-or-neutral',
         slotDecisions: [],
+        candidateEvaluations,
       },
     };
   }
@@ -232,6 +336,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
           action: 'retained',
           reason: 'single-slot-not-weak',
           slotDecisions: [],
+          candidateEvaluations,
         },
       };
     }
@@ -250,6 +355,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
               reportKind: only.kind,
             },
           ],
+          candidateEvaluations,
         },
       };
     }
@@ -270,6 +376,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
             reportKind: only.kind,
           },
         ],
+        candidateEvaluations,
       },
     };
   }
@@ -284,6 +391,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         action: 'retained',
         reason: 'unsupported-slot-count',
         slotDecisions: [],
+        candidateEvaluations,
       },
     };
   }
@@ -298,32 +406,36 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
   const secondaryWeak = secondary.weak;
 
   // Case A: primary strong, secondary weak.
-  if (!primaryWeak && secondaryWeak && secondaryOccupant) {
-    const replacement = findPromotableCandidate(
+  if (!primaryWeak && secondaryWeak) {
+    const replacementResult = findPromotableCandidate(
       secondary.slot,
       band.semanticRole,
       reports,
-      primaryOccupant ? [primaryOccupant, secondaryOccupant] : [secondaryOccupant],
+      (primaryOccupant ? [primaryOccupant, secondaryOccupant] : [secondaryOccupant]).filter(
+        (id): id is OccupantId => id !== null,
+      ),
       primaryOccupant ? [primaryOccupant] : [],
       entryState,
     );
-    if (replacement) {
+    candidateEvaluations.push(...replacementResult.evaluations);
+    if (replacementResult.winner) {
       slotDecisions.push({
         slotId: secondary.slot.id,
         from: secondaryOccupant,
-        to: replacement,
+        to: replacementResult.winner,
         reason: 'secondary-weak-replaced-with-strong',
         reportKind: secondary.kind,
       });
       return {
         band: {
           ...band,
-          slots: [primary.slot, { ...secondary.slot, occupantId: replacement }],
+          slots: [primary.slot, { ...secondary.slot, occupantId: replacementResult.winner }],
         },
         decision: {
           action: 'promoted',
           reason: 'strong-candidate-promoted-into-secondary',
           slotDecisions,
+          candidateEvaluations,
         },
       };
     }
@@ -343,6 +455,41 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         action: 'reduced-to-single',
         reason: 'secondary-weak-nulled',
         slotDecisions,
+        candidateEvaluations,
+      },
+    };
+  }
+
+  if (primaryOccupant === null && !secondaryWeak && secondaryOccupant) {
+    slotDecisions.push(
+      {
+        slotId: primary.slot.id,
+        from: null,
+        to: secondaryOccupant,
+        reason: 'vacant-primary-filled-from-strong-secondary',
+        reportKind: primary.kind,
+      },
+      {
+        slotId: secondary.slot.id,
+        from: secondaryOccupant,
+        to: null,
+        reason: 'secondary-cleared-after-primary-fill',
+        reportKind: secondary.kind,
+      },
+    );
+    return {
+      band: {
+        ...band,
+        slots: [
+          { ...primary.slot, occupantId: secondaryOccupant },
+          { ...secondary.slot, occupantId: null },
+        ],
+      },
+      decision: {
+        action: 'promoted',
+        reason: 'vacant-primary-resolved-from-secondary',
+        slotDecisions,
+        candidateEvaluations,
       },
     };
   }
@@ -396,31 +543,33 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
     }
 
     // Try promoting a different strong candidate into the primary slot.
-    const replacement = findPromotableCandidate(
+    const replacementResult = findPromotableCandidate(
       primary.slot,
       band.semanticRole,
       reports,
-      [primaryOccupant, secondaryOccupant],
+      [primaryOccupant, secondaryOccupant].filter((id): id is OccupantId => id !== null),
       [secondaryOccupant],
       entryState,
     );
-    if (replacement && !isLocked(primaryOccupant)) {
+    candidateEvaluations.push(...replacementResult.evaluations);
+    if (replacementResult.winner && !isLocked(primaryOccupant)) {
       slotDecisions.push({
         slotId: primary.slot.id,
         from: primaryOccupant,
-        to: replacement,
+        to: replacementResult.winner,
         reason: 'primary-weak-replaced-with-strong',
         reportKind: primary.kind,
       });
       return {
         band: {
           ...band,
-          slots: [{ ...primary.slot, occupantId: replacement }, secondary.slot],
+          slots: [{ ...primary.slot, occupantId: replacementResult.winner }, secondary.slot],
         },
         decision: {
           action: 'promoted',
           reason: 'strong-candidate-promoted-into-primary',
           slotDecisions,
+          candidateEvaluations,
         },
       };
     }
@@ -439,6 +588,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         action: 'retained',
         reason: 'weak-primary-but-no-legal-improvement',
         slotDecisions,
+        candidateEvaluations,
       },
     };
   }
@@ -446,7 +596,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
   // Case C: both weak. Try to promote into the primary slot; else demote
   // primary to null if unlocked.
   if (primaryWeak && secondaryWeak) {
-    const replacement = findPromotableCandidate(
+    const replacementResult = findPromotableCandidate(
       primary.slot,
       band.semanticRole,
       reports,
@@ -454,12 +604,13 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
       [],
       entryState,
     );
-    if (replacement) {
+    candidateEvaluations.push(...replacementResult.evaluations);
+    if (replacementResult.winner) {
       slotDecisions.push(
         {
           slotId: primary.slot.id,
           from: primaryOccupant,
-          to: replacement,
+          to: replacementResult.winner,
           reason: 'primary-weak-replaced-with-strong',
           reportKind: primary.kind,
         },
@@ -475,7 +626,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         band: {
           ...band,
           slots: [
-            { ...primary.slot, occupantId: replacement },
+            { ...primary.slot, occupantId: replacementResult.winner },
             { ...secondary.slot, occupantId: null },
           ],
         },
@@ -483,25 +634,19 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
           action: 'promoted',
           reason: 'both-weak-primary-replaced',
           slotDecisions,
+          candidateEvaluations,
         },
       };
     }
 
-    if (primaryOccupant && !isLocked(primaryOccupant)) {
+    if (primaryOccupant && !isLocked(primaryOccupant) && secondaryOccupant) {
       slotDecisions.push(
         {
           slotId: primary.slot.id,
           from: primaryOccupant,
           to: null,
-          reason: 'primary-weak-no-replacement',
+          reason: 'primary-weak-nulled-secondary-retained',
           reportKind: primary.kind,
-        },
-        {
-          slotId: secondary.slot.id,
-          from: secondaryOccupant,
-          to: null,
-          reason: 'secondary-weak-no-replacement',
-          reportKind: secondary.kind,
         },
       );
       return {
@@ -509,13 +654,14 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
           ...band,
           slots: [
             { ...primary.slot, occupantId: null },
-            { ...secondary.slot, occupantId: null },
+            secondary.slot,
           ],
         },
         decision: {
           action: 'demoted-primary',
-          reason: 'both-weak-no-replacement-unlocked-primary-nulled',
+          reason: 'both-weak-no-replacement-primary-demoted',
           slotDecisions,
+          candidateEvaluations,
         },
       };
     }
@@ -547,6 +693,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
         action: 'reduced-to-single',
         reason: 'locked-primary-retained-weak-secondary-nulled',
         slotDecisions,
+        candidateEvaluations,
       },
     };
   }
@@ -558,6 +705,7 @@ export function resolveFirstLaneBand(input: FirstLaneResolverInput): FirstLaneRe
       action: 'retained',
       reason: 'no-actionable-condition',
       slotDecisions: [],
+      candidateEvaluations,
     },
   };
 }
@@ -566,11 +714,13 @@ export function toFirstLaneDecisionDataAttributes(decision: FirstLaneDecision): 
   'data-shell-first-lane-action': FirstLaneAction;
   'data-shell-first-lane-reason': string;
   'data-shell-first-lane-replacements': number;
+  'data-shell-first-lane-candidates-considered': number;
 } {
   const replacements = decision.slotDecisions.filter((d) => d.from !== d.to).length;
   return {
     'data-shell-first-lane-action': decision.action,
     'data-shell-first-lane-reason': decision.reason,
     'data-shell-first-lane-replacements': replacements,
+    'data-shell-first-lane-candidates-considered': decision.candidateEvaluations?.length ?? 0,
   };
 }

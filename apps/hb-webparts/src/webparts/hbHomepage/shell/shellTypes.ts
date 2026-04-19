@@ -109,6 +109,8 @@ export interface OccupantDescriptor {
   readonly allowedSlotRoles: readonly SlotRole[];
   readonly prominenceCeiling: ProminenceCeiling;
   readonly firstLaneEligible: boolean;
+  /** Lower value means higher promotion priority in first-lane resolver. */
+  readonly firstLanePromotionRank: number;
   readonly comfort: OccupantComfort;
   readonly pairingRestrictions?: readonly OccupantId[];
   readonly allowedBandSemantics: readonly BandSemanticRole[];

@@ -318,8 +318,15 @@ function ShellBody({ shellRef, container, layoutState, zoneProps }: ShellBodyPro
         bandLayouts,
         entryState: container.entryState,
         shortHeightConstrained: container.shortHeightConstrained,
+        firstLaneDecision: firstLaneResolution.decision,
       }),
-    [resolvedBands, bandLayouts, container.entryState, container.shortHeightConstrained],
+    [
+      resolvedBands,
+      bandLayouts,
+      container.entryState,
+      container.shortHeightConstrained,
+      firstLaneResolution.decision,
+    ],
   );
   const conformanceAttrs = toShellConformanceDataAttributes(conformance);
 
