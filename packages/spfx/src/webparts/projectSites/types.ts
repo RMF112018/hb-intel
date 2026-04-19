@@ -344,8 +344,7 @@ export interface IProjectSitesRuntimeContext {
 export type ProjectSitesScopeSource =
   | 'author-override'
   | 'host-page-year'
-  | 'default-year'
-  | 'all-projects-fallback'
+  | 'all-projects-default'
   | 'user-selected';
 
 export interface IResolvedProjectSitesScope {
@@ -406,14 +405,18 @@ export function normalizeProjectSitesRuntimeConfig(
 }
 
 export function resolveInitialProjectSitesScope(
-  availableYears: number[],
+  _availableYears: number[],
   runtimeContext: IProjectSitesRuntimeContext | null,
 ): IResolvedProjectSitesScope {
   // Authoritative resolution order:
-  // 1) valid author override
-  // 2) valid host page year context
-  // 3) fallback default year (current year if present, else newest)
-  // 4) explicit All Projects fallback only when no year can be resolved
+  // 1) author override (intentional configuration, always wins)
+  // 2) host page year context (intentional embedding context)
+  // 3) default → All Projects (broad merged inventory so users never
+  //    start in a narrow year slice that hides valid records)
+  //
+  // The user can then optionally narrow via the "Filter by Year"
+  // dropdown. `_availableYears` is retained in the signature to keep
+  // call sites stable.
   if (runtimeContext?.yearOverride !== null && runtimeContext?.yearOverride !== undefined) {
     return {
       scope: scopeFromYear(runtimeContext.yearOverride),
@@ -430,18 +433,9 @@ export function resolveInitialProjectSitesScope(
     };
   }
 
-  const defaultYear = resolveDefaultYear(availableYears);
-  if (defaultYear !== null) {
-    return {
-      scope: scopeFromYear(defaultYear),
-      source: 'default-year',
-      resolvedYear: defaultYear,
-    };
-  }
-
   return {
     scope: SCOPE_ALL,
-    source: 'all-projects-fallback',
+    source: 'all-projects-default',
     resolvedYear: null,
   };
 }
@@ -580,10 +574,3 @@ export function projectSiteSourceClassificationLabel(
   }
 }
 
-// ── Default year resolution ────────────────────────────────────────────────
-
-export function resolveDefaultYear(availableYears: number[]): number | null {
-  if (availableYears.length === 0) return null;
-  const currentYear = new Date().getFullYear();
-  return availableYears.includes(currentYear) ? currentYear : availableYears[0];
-}

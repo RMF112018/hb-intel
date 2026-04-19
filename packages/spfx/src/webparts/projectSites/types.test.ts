@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   isValidYear,
   normalizeProjectSitesRuntimeConfig,
@@ -6,7 +6,6 @@ import {
   PROJECT_SITES_ALL_SCOPE_LIMIT,
   PROJECT_SITES_SELECT_FIELDS,
   SP_PROJECTS_FIELDS,
-  resolveDefaultYear,
   resolveInitialProjectSitesScope,
 } from './types.js';
 
@@ -37,32 +36,6 @@ describe('isValidYear', () => {
     expect(isValidYear(2024.5)).toBe(false);
     expect(isValidYear(NaN)).toBe(false);
     expect(isValidYear(Infinity)).toBe(false);
-  });
-});
-
-describe('resolveDefaultYear', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('returns null for empty array', () => {
-    expect(resolveDefaultYear([])).toBeNull();
-  });
-
-  it('returns current calendar year if present in list', () => {
-    const currentYear = new Date().getFullYear();
-    const years = [currentYear + 1, currentYear, currentYear - 1];
-    expect(resolveDefaultYear(years)).toBe(currentYear);
-  });
-
-  it('returns the first (most recent) year if current year is not in list', () => {
-    // Use years that are definitely not the current year
-    const years = [2099, 2098, 2097];
-    expect(resolveDefaultYear(years)).toBe(2099);
-  });
-
-  it('returns the only year if list has one element', () => {
-    expect(resolveDefaultYear([2025])).toBe(2025);
   });
 });
 
@@ -136,20 +109,21 @@ describe('resolveInitialProjectSitesScope', () => {
     expect(result.source).toBe('host-page-year');
   });
 
-  it('falls back to default year and finally all-projects', () => {
-    const withDefault = resolveInitialProjectSitesScope(
+  it('defaults to All Projects when no authoritative override is present, regardless of available years', () => {
+    const withYears = resolveInitialProjectSitesScope(
       [2025, 2024],
       normalizeProjectSitesRuntimeConfig({}),
     );
-    expect(withDefault.scope).toEqual({ kind: 'year', year: 2025 });
-    expect(withDefault.source).toBe('default-year');
+    expect(withYears.scope).toEqual({ kind: 'all' });
+    expect(withYears.source).toBe('all-projects-default');
+    expect(withYears.resolvedYear).toBeNull();
 
-    const allFallback = resolveInitialProjectSitesScope(
+    const withoutYears = resolveInitialProjectSitesScope(
       [],
       normalizeProjectSitesRuntimeConfig({}),
     );
-    expect(allFallback.scope).toEqual({ kind: 'all' });
-    expect(allFallback.source).toBe('all-projects-fallback');
+    expect(withoutYears.scope).toEqual({ kind: 'all' });
+    expect(withoutYears.source).toBe('all-projects-default');
   });
 });
 

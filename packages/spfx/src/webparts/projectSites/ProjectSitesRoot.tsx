@@ -19,15 +19,14 @@
  *   - Client-side pipeline: search → filter → sort over the normalized
  *     entry set returned by the hook. Pipeline logic lives in
  *     `projectSitesFilter.ts` so it can be unit-tested independently.
- *   - Premium control bar: `HbcSearch` (local, debounced), segmented
- *     scope, native styled sort select, ghost filter toggle, active
- *     filter chips, text reset.
+ *   - Premium control bar: `HbcSearch` (local, debounced), Filter-by-Year
+ *     dropdown (default All Projects), native styled sort select, ghost
+ *     filter toggle, active filter chips, text reset.
  */
 import React, { useState, useEffect, useMemo, useCallback, useRef, type FC } from 'react';
 import { makeStyles, mergeClasses, shorthands } from '@griffel/react';
 import {
   HbcEmptyState,
-  HbcSegmentedControl,
   HbcSearch,
   HbcButton,
 } from '@hbc/ui-kit/primitives';
@@ -879,11 +878,10 @@ function scopeChoiceValue(scope: ProjectSitesScope): string {
 }
 
 function describeScopeSource(source: ProjectSitesScopeSource): string {
-  if (source === 'author-override') return 'Scope source: author override (yearOverride)';
-  if (source === 'host-page-year') return 'Scope source: host page Year context';
-  if (source === 'default-year') return 'Scope source: default year fallback';
-  if (source === 'all-projects-fallback') return 'Scope source: all-projects fallback';
-  return 'Scope source: user-selected';
+  if (source === 'author-override') return 'Filter source: author override (yearOverride)';
+  if (source === 'host-page-year') return 'Filter source: host page Year context';
+  if (source === 'all-projects-default') return 'Filter: All Projects (default)';
+  return 'Filter: user-selected';
 }
 
 function describeLayoutMode(mode: ProjectSitesLayoutMode): string {
@@ -895,18 +893,15 @@ function describeLayoutMode(mode: ProjectSitesLayoutMode): string {
 function buildContextSummary(resolvedScope: IResolvedProjectSitesScope | null): string | null {
   if (!resolvedScope) return null;
   if (resolvedScope.source === 'author-override') {
-    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all projects'} from author override.`;
+    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all project sites'} from author override.`;
   }
   if (resolvedScope.source === 'host-page-year') {
-    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all projects'} from host page Year context.`;
+    return `Showing ${resolvedScope.scope.kind === 'year' ? resolvedScope.scope.year : 'all project sites'} from host page Year context.`;
   }
-  if (resolvedScope.source === 'default-year') {
-    return `No authoritative year context was provided; showing default year ${resolvedScope.resolvedYear ?? ''}.`;
-  }
-  if (resolvedScope.source === 'all-projects-fallback') {
-    return 'No authoritative year context or valid Year values were available; showing All Projects.';
-  }
-  return 'Scope was set directly in this session.';
+  // 'all-projects-default' and 'user-selected' are normal states — no
+  // context summary is surfaced for them (the dropdown communicates the
+  // active filter on its own).
+  return null;
 }
 
 // ── Component ────────────────────────────────────────────────────────────
@@ -945,7 +940,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
 
   const projectsResult = useProjectSites(scope);
 
-  // Scope segmented-control choices
+  // "Filter by Year" dropdown choices
   const scopeChoices = useMemo(
     () => (yearsResult.status === 'success' ? buildScopeChoices(yearsResult.years) : []),
     [yearsResult],
@@ -991,8 +986,9 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
     ? projectsResult.entries.filter((e) => e.launchStatus.state === 'provisioning').length
     : 0;
   const contextSummary = buildContextSummary(resolvedScope);
-  const showContextWarning = resolvedScope?.source === 'all-projects-fallback'
-    || resolvedScope?.source === 'default-year';
+  // All-Projects-by-default is no longer a "warning" state; only surface
+  // a warning if some future source explicitly flags one (none today).
+  const showContextWarning = false;
 
   // Live-region announcement text
   const announcement = useMemo(() => {
@@ -1099,49 +1095,29 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
           )}
           aria-hidden="true"
         >
-          Scope:
+          Filter by Year:
         </span>
-        {isCompactMode ? (
-          <select
-            aria-label="Scope (compact)"
-            className={classes.compactScopeSelect}
-            data-project-sites-compact-scope-control="true"
-            value={currentScopeValue}
-            onChange={(e) => {
-              const chosen = scopeChoices.find((c) => c.value === e.target.value);
-              if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
-                setScope(chosen.scope);
-                setResolvedScope({
-                  scope: chosen.scope,
-                  source: 'user-selected',
-                  resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
-                });
-              }
-            }}
-          >
-            {scopeChoices.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
-        ) : (
-          <HbcSegmentedControl
-            label="Scope"
-            options={scopeChoices.map((c) => ({ value: c.value, label: c.label }))}
-            value={currentScopeValue}
-            onChange={(next) => {
-              const chosen = scopeChoices.find((c) => c.value === next);
-              if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
-                setScope(chosen.scope);
-                setResolvedScope({
-                  scope: chosen.scope,
-                  source: 'user-selected',
-                  resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
-                });
-              }
-            }}
-            size="sm"
-          />
-        )}
+        <select
+          aria-label="Filter by Year"
+          className={classes.compactScopeSelect}
+          data-project-sites-year-filter="true"
+          value={currentScopeValue}
+          onChange={(e) => {
+            const chosen = scopeChoices.find((c) => c.value === e.target.value);
+            if (chosen && (!scope || !scopesEqual(scope, chosen.scope))) {
+              setScope(chosen.scope);
+              setResolvedScope({
+                scope: chosen.scope,
+                source: 'user-selected',
+                resolvedYear: chosen.scope.kind === 'year' ? chosen.scope.year : null,
+              });
+            }
+          }}
+        >
+          {scopeChoices.map((c) => (
+            <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
+        </select>
       </div>
     );
 
@@ -1597,11 +1573,9 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
       {renderHeader(true)}
       {(() => {
         // First-screen compression: in compact mode the scope-source
-        // narration is suppressed (the scope selector already conveys
-        // the current scope). The warning state (all-projects-fallback
-        // / default-year) is preserved because it carries trust
-        // meaning, and attention/provisioning counts are always
-        // preserved because they are truthful system state.
+        // narration is suppressed (the Filter-by-Year dropdown already
+        // conveys the active selection). Attention/provisioning counts
+        // are always preserved because they are truthful system state.
         const showScopeSourceText =
           contextSummary !== null && (!isCompactMode || showContextWarning);
         const stateCountsFragment =

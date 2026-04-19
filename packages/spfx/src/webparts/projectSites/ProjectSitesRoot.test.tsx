@@ -141,21 +141,24 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText('No Project Sites')).toBeInTheDocument();
   });
 
-  it('renders scope segmented control with All Projects + year options in wide mode', () => {
+  it('renders a Filter-by-Year dropdown with All Projects + year options in wide mode', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
       status: 'success',
-      scope: scopeFromYear(2026),
+      scope: SCOPE_ALL,
       entries: [createEntry({ id: 1, projectName: 'Test', projectNumber: '', year: 2026 })],
       errorMessage: null,
     });
 
     render(<ProjectSitesRoot />);
-    const scopeGroup = screen.getByRole('radiogroup', { name: 'Scope' });
-    expect(scopeGroup).toBeInTheDocument();
-    expect(within(scopeGroup).getByText('All Projects')).toBeInTheDocument();
-    expect(within(scopeGroup).getByText('2026')).toBeInTheDocument();
-    expect(within(scopeGroup).getByText('2025')).toBeInTheDocument();
+    const dropdown = screen.getByLabelText('Filter by Year') as HTMLSelectElement;
+    expect(dropdown).toBeInTheDocument();
+    expect(dropdown.tagName).toBe('SELECT');
+    expect(within(dropdown).getByText('All Projects')).toBeInTheDocument();
+    expect(within(dropdown).getByText('2026')).toBeInTheDocument();
+    expect(within(dropdown).getByText('2025')).toBeInTheDocument();
+    // "All Projects" is the default selection on first load.
+    expect(dropdown.value).toBe('all');
   });
 
   it('composes medium mode as a two-lane control band with scope, sort, and actions grouped in the secondary lane', () => {
@@ -177,18 +180,17 @@ describe('ProjectSitesRoot', () => {
 
     const { container } = render(<ProjectSitesRoot />);
 
-    // Medium mode keeps the segmented scope control (not the compact <select>).
-    expect(screen.queryByLabelText('Scope (compact)')).not.toBeInTheDocument();
-    const scopeGroup = screen.getByRole('radiogroup', { name: 'Scope' });
-    expect(scopeGroup).toBeInTheDocument();
+    // Medium mode uses the same Filter-by-Year dropdown as wide/compact.
+    const dropdown = screen.getByLabelText('Filter by Year');
+    expect(dropdown).toBeInTheDocument();
 
     // Secondary lane exists, carries the medium marker, and groups the
-    // scope / sort / filter clusters into one deliberate row.
+    // filter / sort / advanced-filter clusters into one deliberate row.
     const secondaryLane = container.querySelector(
       '[data-project-sites-secondary-lane="medium"]',
     );
     expect(secondaryLane).not.toBeNull();
-    expect(secondaryLane).toContainElement(scopeGroup);
+    expect(secondaryLane).toContainElement(dropdown);
     expect(secondaryLane).toContainElement(screen.getByLabelText('Sort project sites'));
     expect(secondaryLane).toContainElement(
       screen.getByRole('button', { name: /filters/i }),
@@ -349,7 +351,7 @@ describe('ProjectSitesRoot', () => {
     );
   });
 
-  it('renders compact scope selector instead of segmented control in compact mode', () => {
+  it('renders the Filter-by-Year dropdown in compact mode', () => {
     mockUseProjectSitesContainerState.mockReturnValue({
       width: 700,
       height: 900,
@@ -361,7 +363,7 @@ describe('ProjectSitesRoot', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026, 2025], errorMessage: null });
     mockUseProjectSites.mockReturnValue({
       status: 'success',
-      scope: scopeFromYear(2026),
+      scope: SCOPE_ALL,
       entries: [createEntry({ id: 1, projectName: 'Test', projectNumber: '', year: 2026 })],
       errorMessage: null,
     });
@@ -369,7 +371,7 @@ describe('ProjectSitesRoot', () => {
     render(<ProjectSitesRoot />);
 
     expect(screen.queryByRole('radiogroup', { name: 'Scope' })).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Scope (compact)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Filter by Year')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/search by name/i)).toBeInTheDocument();
     expect(screen.getByLabelText('Sort project sites')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
@@ -398,25 +400,35 @@ describe('ProjectSitesRoot', () => {
     expect(screen.getByText('Project Sites')).toBeInTheDocument();
     // Eyebrow suppressed in compact.
     expect(screen.queryByText('HB Central · Projects')).not.toBeInTheDocument();
-    // Scope-source pill is suppressed on compact (the scope select
-    // already communicates the scope).
-    expect(screen.queryByText(/scope source:/i)).not.toBeInTheDocument();
+    // Filter-source pill is suppressed on compact (the Filter-by-Year
+    // dropdown already communicates the active selection).
+    expect(screen.queryByText(/filter source:/i)).not.toBeInTheDocument();
   });
 
-  it('keeps the scope-source pill visible on wide mode', () => {
+  it('shows the filter-source pill on wide mode when an authoritative override drives the scope', () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2026], errorMessage: null });
-    mockUseProjectSites.mockReturnValue({
-      status: 'success',
-      scope: scopeFromYear(2026),
-      entries: [createEntry({ id: 1, projectName: 'Wide', projectNumber: '', year: 2026 })],
-      errorMessage: null,
+    mockUseProjectSites.mockImplementation((scope) => {
+      if (!scope) return null;
+      return {
+        status: 'success',
+        scope,
+        entries: [createEntry({ id: 1, projectName: 'Wide', projectNumber: '', year: 2026 })],
+        errorMessage: null,
+      };
     });
 
-    render(<ProjectSitesRoot />);
+    render(
+      <ProjectSitesRoot
+        runtimeContext={normalizeProjectSitesRuntimeConfig({
+          webPartProperties: { yearOverride: 2026 },
+        })}
+      />,
+    );
 
-    // Eyebrow + scope-source pill still present in wide mode.
+    // Eyebrow + filter-source pill still present when a scope source is
+    // worth surfacing (author-override here).
     expect(screen.getByText('HB Central · Projects')).toBeInTheDocument();
-    expect(screen.getByText(/scope source:/i)).toBeInTheDocument();
+    expect(screen.getByText(/filter source:/i)).toBeInTheDocument();
   });
 
   it('renders a progressive-disclosure filter summary (not inline chips) in compact mode', () => {
@@ -486,7 +498,7 @@ describe('ProjectSitesRoot', () => {
     });
 
     render(<ProjectSitesRoot />);
-    expect(screen.getByLabelText('Scope (compact)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Filter by Year')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Project Sites' })).toHaveAttribute(
       'data-project-sites-short-height',
       'true',
@@ -517,7 +529,7 @@ describe('ProjectSitesRoot', () => {
     await waitFor(() => {
       expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2026));
     });
-    expect(screen.getByText(/scope source: author override/i)).toBeInTheDocument();
+    expect(screen.getByText(/filter source: author override/i)).toBeInTheDocument();
   });
 
   it('falls back to host page year when override is invalid', async () => {
@@ -544,10 +556,10 @@ describe('ProjectSitesRoot', () => {
     await waitFor(() => {
       expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2024));
     });
-    expect(screen.getByText(/scope source: host page year context/i)).toBeInTheDocument();
+    expect(screen.getByText(/filter source: host page year context/i)).toBeInTheDocument();
   });
 
-  it('uses default-year fallback and switches source to user-selected after scope change', () => {
+  it('defaults to All Projects when no override is present and switches to a year filter via the dropdown', async () => {
     mockUseAvailableYears.mockReturnValue({ status: 'success', years: [2025, 2024], errorMessage: null });
     mockUseProjectSites.mockImplementation((scope) => {
       if (!scope) return null;
@@ -565,10 +577,26 @@ describe('ProjectSitesRoot', () => {
       />,
     );
 
-    expect(screen.getByText(/scope source: default year fallback/i)).toBeInTheDocument();
+    // Initial load: the hook is asked for the All-Projects scope.
+    await waitFor(() => {
+      expect(mockUseProjectSites).toHaveBeenLastCalledWith(SCOPE_ALL);
+    });
 
-    fireEvent.click(screen.getByText('All Projects'));
-    expect(screen.getByText(/scope source: user-selected/i)).toBeInTheDocument();
+    // Dropdown reflects the All-Projects default.
+    const dropdown = screen.getByLabelText('Filter by Year') as HTMLSelectElement;
+    expect(dropdown.value).toBe('all');
+
+    // Selecting a year narrows the filter.
+    fireEvent.change(dropdown, { target: { value: 'year:2025' } });
+    await waitFor(() => {
+      expect(mockUseProjectSites).toHaveBeenLastCalledWith(scopeFromYear(2025));
+    });
+
+    // Returning to All Projects restores the full scope.
+    fireEvent.change(dropdown, { target: { value: 'all' } });
+    await waitFor(() => {
+      expect(mockUseProjectSites).toHaveBeenLastCalledWith(SCOPE_ALL);
+    });
   });
 
   it('renders project cards on success', () => {
@@ -680,7 +708,10 @@ describe('ProjectSitesRoot', () => {
       />,
     );
 
-    expect(screen.getByText(/No authoritative year context was provided/i)).toBeInTheDocument();
+    // With the merged-source default (All Projects), no context summary
+    // is surfaced — the Filter-by-Year dropdown communicates the active
+    // selection. Attention/provisioning counts are always truthful.
+    expect(screen.queryByText(/No authoritative year context was provided/i)).not.toBeInTheDocument();
     expect(screen.getByText(/1 record needs data correction/i)).toBeInTheDocument();
     expect(screen.getByText(/1 record is not yet launchable because sites are still provisioning/i)).toBeInTheDocument();
   });
@@ -979,7 +1010,10 @@ describe('ProjectSitesRoot', () => {
     });
     const gridBefore = screen.getByRole('list', { name: /project site/i });
 
-    fireEvent.click(screen.getByText('All Projects'));
+    // Switch from the author-override year scope to All Projects via
+    // the dropdown.
+    const dropdown = screen.getByLabelText('Filter by Year') as HTMLSelectElement;
+    fireEvent.change(dropdown, { target: { value: 'all' } });
 
     await waitFor(() => {
       expect(screen.getByText('Project 2025')).toBeInTheDocument();
