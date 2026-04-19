@@ -182,9 +182,9 @@ describe('previewShellLayout', () => {
 
   it('reports warnings for unknown preset', () => {
     const result = previewShellLayout({ presetId: 'custom-xyz' });
-    expect(result.valid).toBe(true);
-    expect(result.warnings.length).toBeGreaterThan(0);
-    expect(result.summary).toContain('warning');
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'UNKNOWN_PRESET')).toBe(true);
+    expect(result.summary).toContain('Invalid');
   });
 
   it('returns info for undefined input', () => {
@@ -210,7 +210,24 @@ describe('previewBandOverride', () => {
       'band-operational-spotlight',
       [{ slotId: 'slot-company-pulse', occupantId: 'nonexistent' }],
     );
-    expect(result.warnings.some((w) => w.code === 'INVALID_OVERRIDE_OCCUPANT')).toBe(true);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'INVALID_OVERRIDE_OCCUPANT')).toBe(true);
+  });
+
+  it('fails deterministically for unknown band override targets', () => {
+    const result = previewBandOverride('default-v2', 'band-does-not-exist', [
+      { slotId: 'slot-company-pulse', role: 'secondary' },
+    ]);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'UNKNOWN_BAND_OVERRIDE')).toBe(true);
+  });
+
+  it('fails deterministically for unknown slot override targets', () => {
+    const result = previewBandOverride('default-v2', 'band-operational-spotlight', [
+      { slotId: 'slot-does-not-exist', role: 'secondary' },
+    ]);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === 'UNKNOWN_SLOT_OVERRIDE')).toBe(true);
   });
 });
 

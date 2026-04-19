@@ -45,12 +45,12 @@ function validateSlotOccupantEligibility(
   if (!occupant.allowedSlotRoles.includes(slot.role)) {
     diagnostics.push(
       diagnostic(
-        'warning',
+        'error',
         'OCCUPANT_ROLE_MISMATCH',
-        `Occupant "${slot.occupantId}" does not support role "${slot.role}" in slot "${slot.id}". Demoting to primary.`,
+        `Occupant "${slot.occupantId}" does not support role "${slot.role}" in slot "${slot.id}". Clearing occupant for governed fallback.`,
       ),
     );
-    return { ...slot, role: 'primary' };
+    return { ...slot, occupantId: null };
   }
 
   return slot;
@@ -197,7 +197,7 @@ function validatePreset(
     if (!validatedBands.some((b) => b.semanticRole === role)) {
       diagnostics.push(
         diagnostic(
-          'warning',
+        'warning',
           'MISSING_PROTECTED_BAND',
           `Protected band semantic "${role}" is missing from preset "${preset.id}".`,
         ),
@@ -320,7 +320,7 @@ function applyOverrides(
         } else {
           diagnostics.push(
             diagnostic(
-              'warning',
+              'error',
               'INVALID_OVERRIDE_OCCUPANT',
               `Override occupant "${slotOverride.occupantId}" is not a known occupant. Ignored.`,
             ),
@@ -335,7 +335,7 @@ function applyOverrides(
         } else {
           diagnostics.push(
             diagnostic(
-              'warning',
+              'error',
               'INVALID_OVERRIDE_ROLE',
               `Override role "${slotOverride.role}" for slot "${slot.id}" is not a valid SlotRole. Ignored.`,
             ),
@@ -350,7 +350,7 @@ function applyOverrides(
         } else {
           diagnostics.push(
             diagnostic(
-              'warning',
+              'error',
               'INVALID_OVERRIDE_COLUMN_SPAN',
               `Override columnSpan "${slotOverride.columnSpan}" for slot "${slot.id}" is not a valid ColumnSpan. Ignored.`,
             ),
@@ -363,6 +363,34 @@ function applyOverrides(
 
     return { ...band, slots };
   });
+
+  const knownBandIds = new Set(preset.bands.map((band) => band.id));
+  for (const override of input.bandOverrides) {
+    if (!knownBandIds.has(override.bandId)) {
+      diagnostics.push(
+        diagnostic(
+          'error',
+          'UNKNOWN_BAND_OVERRIDE',
+          `Band override references unknown band "${override.bandId}". Override ignored.`,
+        ),
+      );
+      continue;
+    }
+    if (!override.slots?.length) continue;
+    const band = preset.bands.find((candidate) => candidate.id === override.bandId)!;
+    const knownSlotIds = new Set(band.slots.map((slot) => slot.id));
+    for (const slotOverride of override.slots) {
+      if (!knownSlotIds.has(slotOverride.slotId)) {
+        diagnostics.push(
+          diagnostic(
+            'error',
+            'UNKNOWN_SLOT_OVERRIDE',
+            `Band override for "${override.bandId}" references unknown slot "${slotOverride.slotId}". Override ignored.`,
+          ),
+        );
+      }
+    }
+  }
 
   return { ...preset, bands };
 }
@@ -396,7 +424,7 @@ export function parseShellLayout(input: unknown): ShellLayoutState {
   if (layoutInput.presetId && basePreset.id !== layoutInput.presetId) {
     diagnostics.push(
       diagnostic(
-        'warning',
+        'error',
         'UNKNOWN_PRESET',
         `Preset "${layoutInput.presetId}" is not recognized. Falling back to "${basePreset.id}".`,
       ),

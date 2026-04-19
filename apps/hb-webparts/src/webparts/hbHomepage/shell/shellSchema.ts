@@ -61,11 +61,11 @@ export const ShellLayoutInputSchema = z.object({
   bandOverrides: z
     .array(
       z.object({
-        bandId: z.string(),
+        bandId: z.string().min(1),
         slots: z
           .array(
             z.object({
-              slotId: z.string(),
+              slotId: z.string().min(1),
               occupantId: z.string().optional(),
               role: z.string().optional(),
               columnSpan: z.string().optional(),

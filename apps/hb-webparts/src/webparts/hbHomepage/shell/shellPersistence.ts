@@ -53,6 +53,8 @@ export const PERSISTED_REJECTION_CODES = {
   PROHIBITED_PAIRING: 'PERSISTED_PROHIBITED_PAIRING',
   VISIBILITY_NOT_ELIGIBLE: 'PERSISTED_VISIBILITY_NOT_ELIGIBLE',
   REORDER_DOMAIN_VIOLATION: 'PERSISTED_REORDER_DOMAIN_VIOLATION',
+  INVALID_OVERRIDE_TARGET: 'PERSISTED_INVALID_OVERRIDE_TARGET',
+  INVALID_OVERRIDE_VALUE: 'PERSISTED_INVALID_OVERRIDE_VALUE',
   PROTECTED_KEY_PRESENT: 'PERSISTED_PROTECTED_KEY_PRESENT',
 } as const;
 
@@ -416,6 +418,16 @@ export function previewPersistedState(raw: unknown): PersistedPreviewResult {
       if (d.code === 'REORDER_DOMAIN_VIOLATION') {
         return reject(PERSISTED_REJECTION_CODES.REORDER_DOMAIN_VIOLATION, d.message);
       }
+      if (d.code === 'UNKNOWN_BAND_OVERRIDE' || d.code === 'UNKNOWN_SLOT_OVERRIDE') {
+        return reject(PERSISTED_REJECTION_CODES.INVALID_OVERRIDE_TARGET, d.message);
+      }
+      if (
+        d.code === 'INVALID_OVERRIDE_ROLE' ||
+        d.code === 'INVALID_OVERRIDE_COLUMN_SPAN' ||
+        d.code === 'INVALID_OVERRIDE_OCCUPANT'
+      ) {
+        return reject(PERSISTED_REJECTION_CODES.INVALID_OVERRIDE_VALUE, d.message);
+      }
       if (d.code === 'OCCUPANT_BAND_INCOMPATIBLE') {
         return reject(PERSISTED_REJECTION_CODES.PROTECTED_KEY_PRESENT, d.message);
       }
@@ -440,7 +452,7 @@ export function previewPersistedState(raw: unknown): PersistedPreviewResult {
 export const PERSISTED_POLICY_EXAMPLES = {
   allowed: {
     version: PERSISTED_STATE_VERSION,
-    presetId: 'editorial-focus-v1',
+    presetId: 'default-v2',
     bandOverrides: [
       {
         bandId: 'band-operational-spotlight',

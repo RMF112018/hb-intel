@@ -322,6 +322,40 @@ describe('previewPersistedState (dry-run)', () => {
     expect(result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.UNSUPPORTED_VERSION)).toBe(true);
   });
 
+  it('rejects unknown override targets with INVALID_OVERRIDE_TARGET', () => {
+    const result = previewPersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-does-not-exist',
+          slots: [{ slotId: 'slot-company-pulse', role: 'secondary' }],
+        },
+      ],
+    });
+    expect(result.accepted).toBe(false);
+    expect(
+      result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.INVALID_OVERRIDE_TARGET),
+    ).toBe(true);
+  });
+
+  it('rejects unknown override values with INVALID_OVERRIDE_VALUE', () => {
+    const result = previewPersistedState({
+      version: 1,
+      presetId: 'default-v2',
+      bandOverrides: [
+        {
+          bandId: 'band-operational-spotlight',
+          slots: [{ slotId: 'slot-company-pulse', role: 'not-a-role' }],
+        },
+      ],
+    });
+    expect(result.accepted).toBe(false);
+    expect(
+      result.rejections.some((r) => r.code === PERSISTED_REJECTION_CODES.INVALID_OVERRIDE_VALUE),
+    ).toBe(true);
+  });
+
   it('accepts undefined/null as no-op (default state)', () => {
     expect(previewPersistedState(undefined).accepted).toBe(true);
     expect(previewPersistedState(null).accepted).toBe(true);
