@@ -513,6 +513,22 @@ export const ProjectSiteCard: FC<ProjectSiteCardProps> = ({
           />
         </span>
       )}
+      {/*
+        Provenance indicator — renders only for legacy-only synthetic
+        records (no Projects list row behind them). The action label
+        ("Open Legacy Project Files") appears on both merged-without-
+        primary-site and legacy-only cards, so this is the minimal
+        signal that disambiguates the two for support triage.
+      */}
+      {entry.sourceClassification === 'legacy-only' && (
+        <span
+          className={classes.stageBadge}
+          data-project-sites-provenance="legacy-only"
+          aria-label="Legacy-only record — no Projects list entry behind this card"
+        >
+          <HbcStatusBadge variant="neutral" label="Legacy" size="small" />
+        </span>
+      )}
     </div>
   );
 

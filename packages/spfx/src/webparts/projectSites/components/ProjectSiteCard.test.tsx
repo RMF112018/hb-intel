@@ -177,6 +177,29 @@ describe('ProjectSiteCard', () => {
     expect(screen.queryByText('Pursuit')).not.toBeInTheDocument();
   });
 
+  it('renders a Legacy provenance indicator only for legacy-only records', () => {
+    const { container: projectOnlyContainer } = render(
+      <ProjectSiteCard entry={createEntry({ sourceClassification: 'project-only' })} />,
+    );
+    expect(
+      projectOnlyContainer.querySelector('[data-project-sites-provenance="legacy-only"]'),
+    ).toBeNull();
+
+    const { container: mergedContainer } = render(
+      <ProjectSiteCard entry={createEntry({ sourceClassification: 'merged' })} />,
+    );
+    expect(
+      mergedContainer.querySelector('[data-project-sites-provenance="legacy-only"]'),
+    ).toBeNull();
+
+    const { container: legacyContainer } = render(
+      <ProjectSiteCard entry={createEntry({ sourceClassification: 'legacy-only' })} />,
+    );
+    const badge = legacyContainer.querySelector('[data-project-sites-provenance="legacy-only"]');
+    expect(badge).not.toBeNull();
+    expect(badge?.textContent).toContain('Legacy');
+  });
+
   it('renders metadata grid with client, location, type', () => {
     render(<ProjectSiteCard entry={createEntry()} />);
     expect(screen.getByText('Client')).toBeInTheDocument();
