@@ -4,6 +4,7 @@ import bambooHrLogo from '../../../../hb-homepage/assets/icons/bambooHR_white.sv
 import compassLogo from '../../../../hb-homepage/assets/icons/compass_icon.svg';
 import documentCrunchLogo from '../../../../hb-homepage/assets/icons/document-crunch-logo.svg';
 import hh2Logo from '../../../../hb-homepage/assets/icons/hh2.svg';
+import hbUniversityLogo from '../../../../hb-homepage/assets/icons/HB University.svg';
 import procoreLogo from '../../../../hb-homepage/assets/icons/Primary_Procore_LogoMark_2Col-Black_RGB.svg';
 import type { PriorityActionsItemNormalized } from '../../homepage/data/priorityActionsContracts.js';
 
@@ -50,6 +51,11 @@ const GOVERNED_ICON_BY_ACTION_KEY: Readonly<Record<string, HomepageLauncherGover
     iconKey: 'procore',
     iconPresentation: 'compliant',
   },
+  'hb-university': {
+    iconAssetSrc: hbUniversityLogo,
+    iconKey: 'hb-university',
+    iconPresentation: 'compliant',
+  },
 });
 
 const ALIASES: Readonly<Record<string, string>> = Object.freeze({
@@ -59,6 +65,10 @@ const ALIASES: Readonly<Record<string, string>> = Object.freeze({
   'bamboo hr': 'bamboohr',
   documentcrunch: 'document-crunch',
   'document crunch': 'document-crunch',
+  'hb university': 'hb-university',
+  hbu: 'hb-university',
+  'hb u': 'hb-university',
+  university: 'hb-university',
 });
 
 function normalize(value: string | undefined): string {

@@ -1,5 +1,10 @@
 /**
- * HbcHomepageLauncher — premium tile family.
+ * HbcHomepageLauncher — premium tile family + opaque More Tools drawer.
+ *
+ * Square-governed tile contract: every tile in the row band and inside
+ * the drawer uses fixed `--hbc-hl-tile-size` / `--hbc-hl-drawer-tile-size`
+ * tracks with `aspect-ratio: 1 / 1`. The drawer surface is fully opaque;
+ * blur lives only on the backdrop layer.
  */
 
 .root {
@@ -12,9 +17,14 @@
   --hbc-hl-brand-deep-rgb: var(--hb-brand-primary-deep-rgb, 20, 52, 96);
   --hbc-hl-accent-rgb: var(--hb-brand-accent-rgb, 63, 145, 204);
   --hbc-hl-orange-rgb: var(--hb-brand-orange-rgb, 227, 114, 34);
-  --hbc-hl-row-gap: 12px;
+  --hbc-hl-row-gap: 14px;
   --hbc-hl-visible-tiles: 1;
-  --hbc-hl-tile-size: 156px;
+  --hbc-hl-tile-size: 168px;
+  --hbc-hl-drawer-tile-size: 168px;
+  --hbc-hl-icon-size: 64px;
+  --hbc-hl-drawer-icon-size: 60px;
+  --hbc-hl-drawer-pad-x: 32px;
+  --hbc-hl-drawer-pad-y: 28px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -49,110 +59,120 @@
   padding-block: 2px;
 }
 
+/* ---------- TILE CONTRACT ---------- */
+
 .tile {
-  width: min(100%, var(--hbc-hl-tile-size));
+  width: var(--hbc-hl-tile-size);
+  flex: 0 0 var(--hbc-hl-tile-size);
   min-width: 0;
-  min-height: var(--hbc-hl-tile-size);
+  height: var(--hbc-hl-tile-size);
   aspect-ratio: 1 / 1;
-  padding: 12px 10px 10px;
-  border-radius: 14px;
+  padding: 18px 14px 14px;
+  border-radius: 16px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
-  align-items: start;
-  gap: 8px;
+  align-items: center;
+  row-gap: 10px;
   text-decoration: none;
   cursor: pointer;
   position: relative;
-  transition: transform 140ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  overflow: hidden;
+  transition:
+    transform 140ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
 .tilePrimary {
   color: #ffffff;
-  border: 1px solid rgba(var(--hbc-hl-brand-deep-rgb), 0.4);
+  border: 1px solid rgba(var(--hbc-hl-brand-deep-rgb), 0.55);
   background: linear-gradient(
-    130deg,
-    rgba(var(--hbc-hl-brand-rgb), 0.99) 0%,
-    rgba(var(--hbc-hl-brand-deep-rgb), 0.96) 100%
+    140deg,
+    rgb(var(--hbc-hl-brand-rgb)) 0%,
+    rgb(var(--hbc-hl-brand-deep-rgb)) 100%
   );
   box-shadow:
-    0 1px 2px rgba(var(--hbc-hl-brand-rgb), 0.2),
-    0 10px 20px rgba(var(--hbc-hl-brand-rgb), 0.18);
+    0 1px 2px rgba(2, 6, 23, 0.28),
+    0 12px 26px rgba(var(--hbc-hl-brand-deep-rgb), 0.32);
 }
 
 .tileSecondaryOverflowEntry {
   color: #ffffff;
-  border: 1px solid rgba(var(--hbc-hl-orange-rgb), 0.5);
+  border: 1px solid rgba(var(--hbc-hl-orange-rgb), 0.6);
   background: linear-gradient(
-    135deg,
-    rgba(var(--hbc-hl-orange-rgb), 0.98) 0%,
-    rgba(var(--hbc-hl-brand-rgb), 0.95) 100%
+    140deg,
+    rgb(var(--hbc-hl-orange-rgb)) 0%,
+    rgb(var(--hbc-hl-brand-rgb)) 100%
   );
   box-shadow:
-    0 1px 2px rgba(var(--hbc-hl-orange-rgb), 0.22),
-    0 10px 20px rgba(var(--hbc-hl-orange-rgb), 0.16);
+    0 1px 2px rgba(2, 6, 23, 0.28),
+    0 12px 26px rgba(var(--hbc-hl-orange-rgb), 0.28);
 }
 
 .tileMobileEntry {
   color: #ffffff;
-  border: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.42);
+  border: 1px solid rgba(var(--hbc-hl-brand-rgb), 0.5);
   background: linear-gradient(
-    130deg,
-    rgba(var(--hbc-hl-brand-rgb), 1) 0%,
-    rgba(var(--hbc-hl-brand-deep-rgb), 0.98) 100%
+    140deg,
+    rgb(var(--hbc-hl-brand-rgb)) 0%,
+    rgb(var(--hbc-hl-brand-deep-rgb)) 100%
   );
   box-shadow:
-    0 1px 2px rgba(var(--hbc-hl-brand-rgb), 0.2),
-    0 8px 18px rgba(var(--hbc-hl-brand-rgb), 0.16);
+    0 1px 2px rgba(2, 6, 23, 0.28),
+    0 10px 22px rgba(var(--hbc-hl-brand-deep-rgb), 0.3);
 }
 
 .tileDrawer {
-  width: 100%;
-  min-height: 0;
+  width: var(--hbc-hl-drawer-tile-size);
+  flex: 0 0 var(--hbc-hl-drawer-tile-size);
+  height: var(--hbc-hl-drawer-tile-size);
   aspect-ratio: 1 / 1;
-  padding: 12px 10px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 14px;
+  padding: 18px 14px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
   color: #ffffff;
   background: linear-gradient(
     150deg,
-    rgba(var(--hbc-hl-brand-deep-rgb), 0.64) 0%,
-    rgba(var(--hbc-hl-brand-rgb), 0.4) 100%
+    #1f4781 0%,
+    #143460 100%
   );
   box-shadow:
-    0 1px 2px rgba(5, 10, 24, 0.35),
-    0 8px 20px rgba(5, 10, 24, 0.24);
+    0 1px 2px rgba(0, 0, 0, 0.32),
+    0 10px 22px rgba(0, 0, 0, 0.32);
 }
 
 .tile:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .tilePrimary:hover,
 .tileMobileEntry:hover {
-  border-color: rgba(var(--hbc-hl-accent-rgb), 0.8);
+  border-color: rgba(var(--hbc-hl-accent-rgb), 0.85);
   background: linear-gradient(
-    130deg,
-    rgba(var(--hbc-hl-accent-rgb), 1) 0%,
-    rgba(var(--hbc-hl-brand-rgb), 1) 100%
+    140deg,
+    rgb(var(--hbc-hl-accent-rgb)) 0%,
+    rgb(var(--hbc-hl-brand-rgb)) 100%
   );
   box-shadow:
-    0 2px 4px rgba(var(--hbc-hl-brand-rgb), 0.26),
-    0 14px 30px rgba(var(--hbc-hl-brand-rgb), 0.3);
+    0 2px 4px rgba(var(--hbc-hl-brand-rgb), 0.32),
+    0 16px 32px rgba(var(--hbc-hl-brand-rgb), 0.35);
 }
 
 .tileSecondaryOverflowEntry:hover {
-  border-color: rgba(var(--hbc-hl-orange-rgb), 0.86);
+  border-color: rgba(var(--hbc-hl-orange-rgb), 0.9);
   box-shadow:
-    0 2px 4px rgba(var(--hbc-hl-orange-rgb), 0.28),
-    0 14px 30px rgba(var(--hbc-hl-orange-rgb), 0.28);
+    0 2px 4px rgba(var(--hbc-hl-orange-rgb), 0.3),
+    0 16px 32px rgba(var(--hbc-hl-orange-rgb), 0.32);
 }
 
 .tileDrawer:hover {
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.42);
+  background: linear-gradient(150deg, #245699 0%, #1a3d70 100%);
   box-shadow:
-    0 2px 6px rgba(5, 10, 24, 0.4),
-    0 14px 28px rgba(5, 10, 24, 0.33);
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 16px 30px rgba(0, 0, 0, 0.4);
 }
 
 .tile:focus-visible,
@@ -160,12 +180,15 @@
 .sheetClose:focus-visible {
   outline: 2px solid #ffffff;
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.5);
+  box-shadow: 0 0 0 3px rgba(var(--hbc-hl-accent-rgb), 0.55);
 }
 
-.tileIcon {
-  width: 36px;
-  height: 36px;
+/* ---------- ICON: dominant, white-on-transparent ---------- */
+
+.tileIcon,
+.tileIconCompliant {
+  width: var(--hbc-hl-icon-size);
+  height: var(--hbc-hl-icon-size);
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -176,18 +199,9 @@
   box-shadow: none;
 }
 
-.tileIconCompliant {
-  width: 36px;
-  height: 36px;
-  border-radius: 0;
-  background: transparent;
-  color: #ffffff;
-  box-shadow: none;
-}
-
 .tileIconDrawer {
-  width: 30px;
-  height: 30px;
+  width: var(--hbc-hl-drawer-icon-size);
+  height: var(--hbc-hl-drawer-icon-size);
   border-radius: 0;
   background: transparent;
   color: #ffffff;
@@ -212,40 +226,51 @@
 .tileTitle {
   width: 100%;
   min-width: 0;
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.006em;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  color: #ffffff;
 }
 
 .drawerTileTitle {
-  font-size: 0.8rem;
-  line-height: 1.22;
-  -webkit-line-clamp: 3;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+  font-weight: 600;
 }
+
+/* ---------- MORE TOOLS TRIGGER ---------- */
 
 .overflowTile {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   justify-items: center;
-  align-items: start;
-  gap: 8px;
+  align-items: center;
+  row-gap: 10px;
   font: inherit;
-  width: min(100%, var(--hbc-hl-tile-size));
-  min-height: var(--hbc-hl-tile-size);
+  width: var(--hbc-hl-tile-size);
+  flex: 0 0 var(--hbc-hl-tile-size);
+  height: var(--hbc-hl-tile-size);
   aspect-ratio: 1 / 1;
-  padding: 12px 10px 10px;
+  padding: 18px 14px 14px;
+  position: relative;
 }
 
 .triggerIcon {
-  width: 34px;
-  height: 34px;
+  width: var(--hbc-hl-icon-size);
+  height: var(--hbc-hl-icon-size);
+}
+
+.triggerIcon > svg {
+  width: 100%;
+  height: 100%;
 }
 
 .overflowTriggerLabel {
@@ -254,39 +279,49 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25;
   text-align: center;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  color: #ffffff;
 }
 
 .overflowTriggerCount {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 22px;
   height: 22px;
-  padding: 0 6px;
+  padding: 0 7px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
   color: #ffffff;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.overflowTile > svg {
+.overflowTile > svg:last-of-type {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
   width: 14px;
   height: 14px;
-  opacity: 0.9;
+  opacity: 0.85;
 }
+
+/* ---------- DRAWER (BOTTOM SHEET) ---------- */
 
 .sheetLayer {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 1100;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -295,166 +330,167 @@
 .sheetBackdrop {
   position: absolute;
   inset: 0;
-  background: rgba(2, 6, 23, 0.6);
-  backdrop-filter: blur(2px);
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(8px);
 }
 
 .sheetSurface {
   position: relative;
-  width: min(1140px, calc(100vw - 28px));
-  max-height: min(84vh, 900px);
+  width: min(1280px, calc(100vw - 28px));
+  max-height: min(86vh, 920px);
   display: flex;
   flex-direction: column;
-  background: linear-gradient(
-    160deg,
-    rgba(var(--hbc-hl-brand-deep-rgb), 0.98) 0%,
-    rgba(var(--hbc-hl-brand-rgb), 0.95) 56%,
-    rgba(var(--hbc-hl-orange-rgb), 0.86) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
+  background: #0f2647;
+  background-image: linear-gradient(180deg, #143460 0%, #0f2647 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 0;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
   box-shadow:
-    0 -14px 40px rgba(0, 0, 0, 0.36),
-    0 6px 24px rgba(0, 0, 0, 0.24);
+    0 -22px 56px rgba(0, 0, 0, 0.55),
+    0 -2px 0 rgba(255, 255, 255, 0.04) inset;
+  overflow: hidden;
+  color: #ffffff;
 }
 
 .sheetHeader {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  column-gap: 10px;
-  padding: 14px 18px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  column-gap: 16px;
+  padding: var(--hbc-hl-drawer-pad-y) var(--hbc-hl-drawer-pad-x);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .sheetHeading {
   min-width: 0;
   display: grid;
-  gap: 3px;
+  gap: 4px;
 }
 
 .sheetTitle {
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-size: 1.25rem; /* 20px / heading2 */
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
   color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .sheetSubtitle {
-  font-size: 0.75rem;
-  line-height: 1.24;
-  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.75rem; /* 12px / label */
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .overflowHeaderCount {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .sheetClose {
-  width: 32px;
-  height: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.sheetClose:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.sheetClose > svg {
+  width: 18px;
+  height: 18px;
 }
 
 .drawerBody {
-  padding: 14px 16px 18px;
+  padding: 24px var(--hbc-hl-drawer-pad-x) 40px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: grid;
-  gap: 16px;
+  gap: 32px;
+  background: transparent;
 }
 
 .drawerGroup {
   display: grid;
-  gap: 10px;
+  gap: 16px;
 }
 
 .overflowGroupTitle {
   margin: 0;
-  padding: 0 2px;
-  font-size: 0.69rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  padding: 0 0 0 12px;
+  font-size: 0.75rem; /* 12px / label */
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.78);
+  border-left: 2px solid rgb(var(--hbc-hl-orange-rgb));
+  line-height: 1;
+  align-self: start;
 }
 
 .drawerTileGrid {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, var(--hbc-hl-drawer-tile-size));
+  justify-content: center;
 }
 
 .drawerTile {
   min-height: 0;
 }
 
-/* Breakpoint governance */
+/* ---------- BREAKPOINT GOVERNANCE ---------- */
+
 @container hbc-homepage-launcher (max-width: 719px) {
+  .root {
+    --hbc-hl-tile-size: 132px;
+    --hbc-hl-drawer-tile-size: 144px;
+    --hbc-hl-icon-size: 56px;
+    --hbc-hl-drawer-icon-size: 56px;
+    --hbc-hl-drawer-pad-x: 18px;
+    --hbc-hl-drawer-pad-y: 18px;
+  }
+
   .bandScroller {
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 9px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     flex: 1 1 auto;
     width: 100%;
   }
 
-  .tile {
-    width: 100%;
-    max-width: none;
-    min-height: 92px;
-    aspect-ratio: 3 / 2;
-    padding: 10px 11px;
-    flex: 1 1 auto;
-    grid-template-rows: auto 1fr;
-    gap: 6px;
-  }
-
-  .tileContent {
-    width: 100%;
-  }
-
-  .tileIcon {
-    width: 32px;
-    height: 32px;
-  }
-
-  .tileIconCompliant {
-    width: 32px;
-    height: 32px;
-  }
-
+  .tile,
   .overflowTile {
-    width: 100%;
-    min-height: 92px;
-    aspect-ratio: 3 / 2;
-    grid-template-rows: auto 1fr;
-    gap: 6px;
-  }
-
-  .overflowTriggerLabel,
-  .tileTitle {
-    width: 100%;
-    -webkit-line-clamp: 2;
-    font-size: 0.74rem;
+    width: var(--hbc-hl-tile-size);
+    flex: 0 0 var(--hbc-hl-tile-size);
+    height: var(--hbc-hl-tile-size);
+    padding: 14px 10px 10px;
+    border-radius: 14px;
+    row-gap: 8px;
   }
 
   .sheetSurface {
@@ -464,8 +500,8 @@
     border-top-right-radius: 16px;
   }
 
-  .sheetHeader {
-    padding: 12px 14px 10px;
+  .sheetTitle {
+    font-size: 1.0625rem;
   }
 
   .sheetSubtitle {
@@ -473,153 +509,90 @@
   }
 
   .drawerBody {
-    padding: 12px 12px 14px;
-    gap: 12px;
+    padding: 18px 14px 24px;
+    gap: 22px;
   }
 
   .drawerTileGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .drawerTile {
-    aspect-ratio: 1 / 1;
-    min-height: 0;
-  }
-
-  .overflowTile > svg {
-    display: none;
+    grid-template-columns: repeat(2, var(--hbc-hl-drawer-tile-size));
+    gap: 12px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 720px) and (max-width: 979px) {
-  .root { --hbc-hl-tile-size: 138px; }
-
-  .tileIcon {
-    width: 32px;
-    height: 32px;
+  .root {
+    --hbc-hl-tile-size: 148px;
+    --hbc-hl-drawer-tile-size: 160px;
+    --hbc-hl-icon-size: 60px;
+    --hbc-hl-drawer-icon-size: 60px;
+    --hbc-hl-drawer-pad-x: 24px;
+    --hbc-hl-drawer-pad-y: 22px;
   }
 
-  .tileIconCompliant {
-    width: 32px;
-    height: 32px;
-  }
-
-  .tileTitle {
-    font-size: 0.74rem;
-  }
-
-  .overflowTile { min-height: var(--hbc-hl-tile-size); }
-
-  .sheetSurface {
-    width: min(100vw - 22px, 960px);
-  }
-
-  .drawerTileGrid {
-    grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
-  }
+  .sheetSurface { width: min(100vw - 22px, 980px); }
 }
 
 @container hbc-homepage-launcher (min-width: 980px) and (max-width: 1179px) {
-  .root { --hbc-hl-tile-size: 146px; }
-
-  .tileTitle {
-    font-size: 0.76rem;
-  }
-
-  .drawerTileGrid {
-    grid-template-columns: repeat(auto-fit, minmax(152px, 1fr));
+  .root {
+    --hbc-hl-tile-size: 160px;
+    --hbc-hl-drawer-tile-size: 168px;
+    --hbc-hl-icon-size: 64px;
+    --hbc-hl-drawer-icon-size: 64px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 1180px) and (max-width: 1599px) {
-  .root { --hbc-hl-tile-size: 156px; }
-
-  .tileTitle {
-    font-size: 0.78rem;
+  .root {
+    --hbc-hl-tile-size: 168px;
+    --hbc-hl-drawer-tile-size: 168px;
+    --hbc-hl-icon-size: 68px;
+    --hbc-hl-drawer-icon-size: 64px;
   }
 }
 
 @container hbc-homepage-launcher (min-width: 1600px) {
-  .root { --hbc-hl-tile-size: 168px; }
-
-  .tile {
-    border-radius: 16px;
+  .root {
+    --hbc-hl-tile-size: 184px;
+    --hbc-hl-drawer-tile-size: 184px;
+    --hbc-hl-icon-size: 76px;
+    --hbc-hl-drawer-icon-size: 72px;
   }
 
-  .tileIcon {
-    width: 38px;
-    height: 38px;
+  .tile,
+  .overflowTile,
+  .tileDrawer {
+    border-radius: 18px;
   }
 
-  .tileIconCompliant {
-    width: 38px;
-    height: 38px;
-  }
-
-  .tileTitle {
-    font-size: 0.82rem;
-  }
-
-  .overflowTile {
-    border-radius: 16px;
-  }
-
-  .sheetSurface {
-    max-height: min(82vh, 960px);
-  }
+  .sheetSurface { max-height: min(84vh, 980px); }
 }
 
 @media (max-height: 640px) {
-  .tile {
-    min-height: 110px;
-    padding: 10px 8px 8px;
-    border-radius: 12px;
+  .root {
+    --hbc-hl-tile-size: 120px;
+    --hbc-hl-icon-size: 50px;
   }
 
-  .tileIcon {
-    width: 30px;
-    height: 30px;
-  }
-
-  .tileIconCompliant {
-    width: 30px;
-    height: 30px;
-  }
-
-  .tileTitle {
-    font-size: 0.72rem;
-    -webkit-line-clamp: 2;
-  }
-
+  .tile,
   .overflowTile {
-    min-height: 110px;
+    padding: 12px 9px 9px;
     border-radius: 12px;
+    row-gap: 7px;
   }
 
-  .sheetSurface {
-    max-height: 96vh;
+  .tileTitle,
+  .overflowTriggerLabel {
+    font-size: 0.75rem;
   }
 
-  .sheetHeader {
-    padding-top: 11px;
-    padding-bottom: 9px;
-  }
-
-  .drawerBody {
-    padding-top: 10px;
-    gap: 10px;
-  }
-
-  .drawerTile {
-    min-height: 0;
-    padding: 10px 8px 8px;
-  }
+  .sheetSurface { max-height: 96vh; }
+  .drawerBody { padding-top: 14px; gap: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tile,
-  .overflowTile {
+  .overflowTile,
+  .sheetClose {
     transition: none !important;
   }
 

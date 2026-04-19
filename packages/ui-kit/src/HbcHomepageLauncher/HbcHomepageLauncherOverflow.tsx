@@ -119,21 +119,16 @@ function DrawerOverflow({
         {...getReferenceProps()}
       >
         <span
-          className={clsx(
-            styles.tileIcon,
-            styles.tileIconCompliant,
-            styles.tileIconDrawer,
-            styles.triggerIcon,
-          )}
+          className={clsx(styles.tileIcon, styles.tileIconCompliant, styles.triggerIcon)}
           aria-hidden="true"
         >
-          <Layers size={16} strokeWidth={2.2} />
+          <Layers strokeWidth={2.2} />
         </span>
         <span className={styles.overflowTriggerLabel}>{label}</span>
         <span className={styles.overflowTriggerCount} aria-hidden="true">
           {items.length}
         </span>
-        <ChevronDown size={12} aria-hidden="true" />
+        <ChevronDown size={14} aria-hidden="true" />
       </button>
       <FloatingPortal>
         <AnimatePresence>
@@ -162,6 +157,8 @@ function DrawerOverflow({
                   aria-labelledby={titleId}
                   aria-describedby={descriptionId}
                   data-hbc-homepage-launcher-sheet-content="all-tools"
+                  data-hbc-launcher-drawer-opaque="true"
+                  data-hbc-launcher-drawer-elevation="3"
                 >
                   <div className={styles.sheetHeader}>
                     <div className={styles.sheetHeading}>

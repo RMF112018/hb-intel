@@ -373,6 +373,20 @@ describe('HbcHomepageLauncher — anatomy + runtime markers', () => {
     ).not.toBe('homepage-launcher-drawer-tile');
   });
 
+  it('opens drawer with opaque-surface and elevation markers for hosted-parity', () => {
+    render(
+      <HbcHomepageLauncher
+        primary={TILES.slice(0, 5)}
+        overflow={[TILES[5]!]}
+        deviceClass="desktop"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /More tools/i }));
+    const dialog = screen.getByRole('dialog', { name: /More tools/i });
+    expect(dialog.getAttribute('data-hbc-launcher-drawer-opaque')).toBe('true');
+    expect(dialog.getAttribute('data-hbc-launcher-drawer-elevation')).toBe('3');
+  });
+
   it('handheld mode emits all-tools runtime markers', () => {
     const { container } = render(
       <HbcHomepageLauncher primary={TILES.slice(0, 1)} overflow={TILES.slice(0, 4)} deviceClass="phone" />,
