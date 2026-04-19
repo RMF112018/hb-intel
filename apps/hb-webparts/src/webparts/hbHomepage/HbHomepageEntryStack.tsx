@@ -41,7 +41,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
     [props.config],
   );
   const entryContainer = useShellContainer(shellRef, entryStackRef);
-  const { rail } = wrapperConfig;
+  const { rail, hero } = wrapperConfig;
   const rootStyle = {
     '--hb-homepage-outer-envelope-max-width': `${HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX}px`,
   } as React.CSSProperties;
@@ -57,37 +57,36 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       data-hb-homepage-outer-envelope-contract={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
       data-hb-homepage-entry-stack-rail-enabled={rail.enabled || undefined}
       data-hb-homepage-entry-stack-rail-alignment-mode={rail.alignmentMode}
+      data-hb-homepage-entry-stack-hero-enabled={hero.enabled || undefined}
       data-hb-homepage-entry-state={entryContainer.entryState.id}
       data-hb-homepage-entry-state-reason={entryContainer.entryStateReason}
       data-hb-homepage-entry-state-short-height={entryContainer.shortHeightConstrained || undefined}
       style={rootStyle}
     >
-      <section
-        className={styles.heroRegion}
-        data-hb-homepage-entry-stack-region="hero"
-        data-hb-homepage-region-inset-policy="hero-surface-owned"
-        data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
-        data-hb-homepage-entry-stack-order="1"
-        aria-label="Homepage hero"
-      >
-        <HbSignatureHero
-          identity={props.identity ?? {}}
-          backgroundImage={
-            typeof props.config?.backgroundImageUrl === 'string' && props.config.backgroundImageUrl
-              ? props.config.backgroundImageUrl
-              : undefined
-          }
-          assetBaseUrl={props.assetBaseUrl}
-          siteUrl={props.siteUrl}
-        />
-      </section>
+      {hero.enabled ? (
+        <section
+          className={styles.heroRegion}
+          data-hb-homepage-entry-stack-region="hero"
+          data-hb-homepage-region-inset-policy="hero-surface-owned"
+          data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
+          data-hb-homepage-entry-stack-order="1"
+          aria-label="Homepage hero"
+        >
+          <HbSignatureHero
+            identity={props.identity ?? {}}
+            backgroundImage={hero.backgroundImageUrl}
+            assetBaseUrl={props.assetBaseUrl}
+            siteUrl={props.siteUrl}
+          />
+        </section>
+      ) : null}
       {rail.enabled ? (
         <section
           className={styles.actionsRegion}
           data-hb-homepage-entry-stack-region="priority-actions"
           data-hb-homepage-region-inset-policy="actions-strip-inner-inset"
           data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
-          data-hb-homepage-entry-stack-order="2"
+          data-hb-homepage-entry-stack-order={hero.enabled ? '2' : '1'}
           data-hb-homepage-entry-stack-rail-band-key={rail.bandKey}
           data-hb-homepage-entry-stack-rail-audience={rail.activeAudience || undefined}
           data-hb-homepage-entry-stack-rail-surface="homepage-launcher"
@@ -106,7 +105,11 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
         data-hb-homepage-entry-stack-region="shell"
         data-hb-homepage-region-inset-policy="shell-body-inner-inset"
         data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
-        data-hb-homepage-entry-stack-order={rail.enabled ? '3' : '2'}
+        data-hb-homepage-entry-stack-order={
+          hero.enabled
+            ? (rail.enabled ? '3' : '2')
+            : (rail.enabled ? '2' : '1')
+        }
       >
         <HbHomepageShell {...props} container={entryContainer} shellRef={shellRef} />
       </div>

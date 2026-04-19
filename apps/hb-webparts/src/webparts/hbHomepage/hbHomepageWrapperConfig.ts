@@ -54,12 +54,26 @@ export interface HbHomepageWrapperRailConfig {
 }
 
 /**
+ * Wrapper-facing hero integration inputs for the flagship homepage path.
+ *
+ * - `enabled` — whether the wrapper should render the embedded hero region.
+ *   Default true. Shell must not decide hero presence.
+ * - `backgroundImageUrl` — optional authored image override passed to the
+ *   reusable `HbSignatureHero` surface for homepage mode.
+ */
+export interface HbHomepageWrapperHeroConfig {
+  readonly enabled: boolean;
+  readonly backgroundImageUrl?: string;
+}
+
+/**
  * Aggregate wrapper config. Kept as a single aggregate so future wrapper
  * regions (beyond the rail) can slot in without rewriting the extraction
  * contract.
  */
 export interface HbHomepageWrapperConfig {
   readonly rail: HbHomepageWrapperRailConfig;
+  readonly hero: HbHomepageWrapperHeroConfig;
 }
 
 const DEFAULT_RAIL_CONFIG: HbHomepageWrapperRailConfig = {
@@ -68,6 +82,11 @@ const DEFAULT_RAIL_CONFIG: HbHomepageWrapperRailConfig = {
   activeAudience: undefined,
   alignmentMode: 'shared-entry-governed',
   fallbackConfig: undefined,
+};
+
+const DEFAULT_HERO_CONFIG: HbHomepageWrapperHeroConfig = {
+  enabled: true,
+  backgroundImageUrl: undefined,
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -103,7 +122,12 @@ function readFallbackRailConfig(value: unknown): Partial<PriorityActionsRailConf
  * ```
  * {
  *   activeAudience?: string,             // shared top-level audience
+ *   backgroundImageUrl?: string,         // legacy hero override (compat)
  *   hbHomepageWrapper?: {
+ *     hero?: {
+ *       enabled?: boolean,
+ *       backgroundImageUrl?: string
+ *     },
  *     rail?: {
  *       enabled?: boolean,
  *       bandKey?: string,
@@ -117,12 +141,14 @@ export function extractHbHomepageWrapperConfig(
   config: Record<string, unknown> | undefined,
 ): HbHomepageWrapperConfig {
   if (!isRecord(config)) {
-    return { rail: DEFAULT_RAIL_CONFIG };
+    return { rail: DEFAULT_RAIL_CONFIG, hero: DEFAULT_HERO_CONFIG };
   }
 
   const topAudience = readString(config.activeAudience);
+  const legacyBackgroundImageUrl = readString(config.backgroundImageUrl);
   const wrapperNode = isRecord(config.hbHomepageWrapper) ? config.hbHomepageWrapper : undefined;
   const railNode = wrapperNode && isRecord(wrapperNode.rail) ? wrapperNode.rail : undefined;
+  const heroNode = wrapperNode && isRecord(wrapperNode.hero) ? wrapperNode.hero : undefined;
 
   const rail: HbHomepageWrapperRailConfig = {
     enabled: readBoolean(railNode?.enabled, DEFAULT_RAIL_CONFIG.enabled),
@@ -133,5 +159,11 @@ export function extractHbHomepageWrapperConfig(
     fallbackConfig: readFallbackRailConfig(railNode?.fallbackConfig),
   };
 
-  return { rail };
+  const hero: HbHomepageWrapperHeroConfig = {
+    enabled: readBoolean(heroNode?.enabled, DEFAULT_HERO_CONFIG.enabled),
+    backgroundImageUrl:
+      readString(heroNode?.backgroundImageUrl) ?? legacyBackgroundImageUrl,
+  };
+
+  return { rail, hero };
 }

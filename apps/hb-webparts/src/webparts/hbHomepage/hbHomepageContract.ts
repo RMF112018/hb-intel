@@ -3,15 +3,21 @@ import type { ProfilePhotoResolver } from '../../homepage/helpers/peopleCultureS
 import type { ModuleConfigSlices, RendererContext, ShellLayoutInput } from './shell/shellTypes.js';
 import type {
   HbHomepageWrapperConfig,
+  HbHomepageWrapperHeroConfig,
   HbHomepageWrapperRailConfig,
 } from './hbHomepageWrapperConfig.js';
 
 export type { ModuleConfigSlices, RendererContext, ShellLayoutInput };
 // Re-export wrapper-facing integration types. These describe composition
 // inputs the homepage wrapper owns (e.g. embedded rail enablement, bandKey,
-// audience propagation). They are intentionally disjoint from
+// audience propagation, hero enablement/background override). They are
+// intentionally disjoint from
 // `ModuleConfigSlices`, which stays shell-semantic.
-export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
+export type {
+  HbHomepageWrapperConfig,
+  HbHomepageWrapperHeroConfig,
+  HbHomepageWrapperRailConfig,
+};
 
 // =============================================================================
 // HB Homepage wrapper + shell — authoritative ownership boundary (contract)
@@ -29,7 +35,9 @@ export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
 //      rail are NOT shell occupants, preset slots, or band members.
 //      Wrapper-facing integration config lives in
 //      `hbHomepageWrapperConfig.ts` and is intentionally disjoint from
-//      shell `ModuleConfigSlices`.
+//      shell `ModuleConfigSlices`. This includes wrapper-owned hero
+//      integration inputs for the flagship path (for example:
+//      hero enabled/disabled and authored background override).
 //   2. `HbHomepageShell` — post-actions operating layer. Receives
 //      `HbHomepageProps` and renders a bounded set of child zones. It
 //      is strictly an orchestration layer, not a module remediation

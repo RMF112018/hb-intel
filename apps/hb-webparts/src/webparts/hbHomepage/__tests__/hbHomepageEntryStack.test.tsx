@@ -41,6 +41,7 @@ vi.mock('../../hbSignatureHero/HbSignatureHero.js', () => ({
       'data-test-mock': 'hb-signature-hero',
       'data-test-hero-has-identity': props.identity !== undefined ? 'true' : 'false',
       'data-test-hero-site-url': (props.siteUrl as string | undefined) ?? '',
+      'data-test-hero-background-image': (props.backgroundImage as string | undefined) ?? '',
     }),
 }));
 
@@ -131,6 +132,36 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(heroNode?.getAttribute('data-test-hero-site-url')).toBe('https://example');
   });
 
+  it('threads wrapper-owned hero background image from hbHomepageWrapper.hero', () => {
+    const { container } = render(
+      <HbHomepageEntryStack
+        config={{
+          hbHomepageWrapper: {
+            hero: { backgroundImageUrl: 'https://example.com/wrapper-hero.jpg' },
+          },
+        }}
+      />,
+    );
+    const heroNode = container.querySelector('[data-test-mock="hb-signature-hero"]');
+    expect(heroNode?.getAttribute('data-test-hero-background-image')).toBe(
+      'https://example.com/wrapper-hero.jpg',
+    );
+  });
+
+  it('supports legacy homepage backgroundImageUrl migration through wrapper extraction', () => {
+    const { container } = render(
+      <HbHomepageEntryStack
+        config={{
+          backgroundImageUrl: 'https://example.com/legacy-hero.jpg',
+        }}
+      />,
+    );
+    const heroNode = container.querySelector('[data-test-mock="hb-signature-hero"]');
+    expect(heroNode?.getAttribute('data-test-hero-background-image')).toBe(
+      'https://example.com/legacy-hero.jpg',
+    );
+  });
+
   it('embeds the launcher band as a React surface inside the actions region', () => {
     const { container } = render(<HbHomepageEntryStack />);
     const actionsRegion = container.querySelector(
@@ -212,6 +243,33 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
       />,
     ).container.querySelector('[data-hb-homepage-entry-stack="root"]');
     expect(disabled?.getAttribute('data-hb-homepage-entry-stack-rail-enabled')).toBeNull();
+  });
+
+  it('omits the hero region when wrapper config disables hero', () => {
+    const { container } = render(
+      <HbHomepageEntryStack
+        config={{ hbHomepageWrapper: { hero: { enabled: false } } }}
+      />,
+    );
+    expect(container.querySelector('[data-hb-homepage-entry-stack-region="hero"]')).toBeNull();
+    const root = container.querySelector('[data-hb-homepage-entry-stack="root"]');
+    expect(root?.getAttribute('data-hb-homepage-entry-stack-hero-enabled')).toBeNull();
+  });
+
+  it('promotes actions and shell order when hero is disabled', () => {
+    const { container } = render(
+      <HbHomepageEntryStack
+        config={{ hbHomepageWrapper: { hero: { enabled: false } } }}
+      />,
+    );
+    const actionsRegion = container.querySelector(
+      '[data-hb-homepage-entry-stack-region="priority-actions"]',
+    );
+    const shellRegion = container.querySelector(
+      '[data-hb-homepage-entry-stack-region="shell"]',
+    );
+    expect(actionsRegion?.getAttribute('data-hb-homepage-entry-stack-order')).toBe('1');
+    expect(shellRegion?.getAttribute('data-hb-homepage-entry-stack-order')).toBe('2');
   });
 
   it('does not thread any featuredActionKeys prop to the launcher band (no featured slot)', () => {
