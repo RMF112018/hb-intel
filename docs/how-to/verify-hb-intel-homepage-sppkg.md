@@ -55,6 +55,14 @@ Default homepage hero banner URL assembly is resolver-owned by:
 - The runtime hero uses this resolver instead of raw `assetBaseUrl + fileName`
   concatenation, so trailing slash formatting on `assetBaseUrl` is normalized.
 
+Default banner filename selection is time-of-day contract owned by:
+- `apps/hb-webparts/src/webparts/hbSignatureHero/homepageHeroBannerTimeOfDaySelector.ts`
+- Contract (local system time):
+  - `5:00 AM` through `9:00 AM` -> `banner_home_7_morning.png`
+  - `9:01 AM` through `5:00 PM` -> `banner_home_7_mid-day.png`
+  - `5:01 PM` through `8:00 PM` -> `banner_home_7_evening.png`
+  - `8:01 PM` through `4:59 AM` -> `banner_home_7_night.png`
+
 ## Effectiveness proof — what to inspect
 Open `dist/sppkg/hb-intel-homepage-effectiveness-proof.json` and
 confirm every one of:

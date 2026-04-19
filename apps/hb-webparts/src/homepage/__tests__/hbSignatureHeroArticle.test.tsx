@@ -372,6 +372,7 @@ describe('HbSignatureHeroHomepage — default banner asset resolver contract', (
       <HbSignatureHeroHomepage
         identity={{ preferredName: 'Jordan' }}
         assetBaseUrl="https://cdn.example.invalid/homepage-assets"
+        now={new Date(2026, 3, 19, 6, 0, 0, 0)}
       />,
     );
     const photo = container.querySelector('[aria-hidden="true"][style*="background-image"]');
@@ -387,6 +388,7 @@ describe('HbSignatureHeroHomepage — default banner asset resolver contract', (
         identity={{ preferredName: 'Jordan' }}
         backgroundImage="https://images.example.invalid/custom-hero.png"
         assetBaseUrl="https://cdn.example.invalid/homepage-assets"
+        now={new Date(2026, 3, 19, 20, 30, 0, 0)}
       />,
     );
     const photo = container.querySelector('[aria-hidden="true"][style*="background-image"]');
@@ -395,5 +397,46 @@ describe('HbSignatureHeroHomepage — default banner asset resolver contract', (
       'background-image: url("https://images.example.invalid/custom-hero.png")',
     );
     expect(style).not.toContain('banner_home_7_morning.png');
+  });
+
+  it('uses time-of-day default banner selection for representative dayparts', () => {
+    const daytime = render(
+      <HbSignatureHeroHomepage
+        identity={{ preferredName: 'Jordan' }}
+        assetBaseUrl="https://cdn.example.invalid/homepage-assets/"
+        now={new Date(2026, 3, 19, 12, 30, 0, 0)}
+      />,
+    );
+    const daytimeStyle =
+      daytime.container
+        .querySelector('[aria-hidden="true"][style*="background-image"]')
+        ?.getAttribute('style') ?? '';
+    expect(daytimeStyle).toContain('banner_home_7_mid-day.png');
+
+    const evening = render(
+      <HbSignatureHeroHomepage
+        identity={{ preferredName: 'Jordan' }}
+        assetBaseUrl="https://cdn.example.invalid/homepage-assets/"
+        now={new Date(2026, 3, 19, 17, 30, 0, 0)}
+      />,
+    );
+    const eveningStyle =
+      evening.container
+        .querySelector('[aria-hidden="true"][style*="background-image"]')
+        ?.getAttribute('style') ?? '';
+    expect(eveningStyle).toContain('banner_home_7_evening.png');
+
+    const night = render(
+      <HbSignatureHeroHomepage
+        identity={{ preferredName: 'Jordan' }}
+        assetBaseUrl="https://cdn.example.invalid/homepage-assets/"
+        now={new Date(2026, 3, 19, 22, 0, 0, 0)}
+      />,
+    );
+    const nightStyle =
+      night.container
+        .querySelector('[aria-hidden="true"][style*="background-image"]')
+        ?.getAttribute('style') ?? '';
+    expect(nightStyle).toContain('banner_home_7_night.png');
   });
 });

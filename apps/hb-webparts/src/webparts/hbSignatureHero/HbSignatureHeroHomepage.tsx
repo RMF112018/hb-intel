@@ -68,14 +68,8 @@ import {
   type HeroEntryStackState,
 } from '../hbHomepage/shell/useShellContainer.js';
 import { resolveHomepageHeroBannerAssetUrl } from './homepageHeroBannerAssetResolver.js';
+import { resolveHomepageHeroBannerFileNameAt } from './homepageHeroBannerTimeOfDaySelector.js';
 import styles from './signature-hero.module.css';
-
-/**
- * Default flagship hero banner emitted by hb-intel-homepage package assets.
- * Canonical source location:
- * apps/hb-homepage/assets/hero-banners/banner_home_7_morning.png
- */
-const DEFAULT_BANNER = 'banner_home_7_morning.png';
 
 export interface HbSignatureHeroHomepageProps {
   identity: HomepageIdentityInput;
@@ -170,8 +164,9 @@ export function HbSignatureHeroHomepage({
   now = new Date(),
 }: HbSignatureHeroHomepageProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
+  const defaultBannerFileName = resolveHomepageHeroBannerFileNameAt(now);
   const heroBackground =
-    backgroundImage ?? resolveHomepageHeroBannerAssetUrl(assetBaseUrl, DEFAULT_BANNER);
+    backgroundImage ?? resolveHomepageHeroBannerAssetUrl(assetBaseUrl, defaultBannerFileName);
   const hasImage = Boolean(heroBackground);
   const entryStackPolicy = React.useMemo(
     () => (entryStackState ? resolveEntryStackPolicy(entryStackState.entryState) : undefined),
