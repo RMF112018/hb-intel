@@ -22,12 +22,12 @@ export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
 // statements below, treat this file as the source of truth and update the
 // other source.
 //
-// Flagship homepage runtime composition (post-hero):
+// Flagship homepage runtime composition:
 //   1. `HbHomepage` wrapper — composition layer owned by this package
-//      (see `HbHomepageEntryStack`). Renders a wrapper-owned pre-shell
-//      region that embeds `PriorityActionsRail` as a React surface. The
-//      embedded rail is NOT a shell occupant, preset slot, or band
-//      member. Wrapper-facing integration config lives in
+//      (see `HbHomepageEntryStack`). Renders wrapper-owned hero and
+//      priority-actions regions before the shell. The embedded hero and
+//      rail are NOT shell occupants, preset slots, or band members.
+//      Wrapper-facing integration config lives in
 //      `hbHomepageWrapperConfig.ts` and is intentionally disjoint from
 //      shell `ModuleConfigSlices`.
 //   2. `HbHomepageShell` — post-actions operating layer. Receives
@@ -35,10 +35,11 @@ export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
 //      is strictly an orchestration layer, not a module remediation
 //      layer.
 //
-// The shell never becomes a command-band host. The standalone
-// `PriorityActionsRail` webpart remains independently mountable for
-// non-flagship hosts; on the flagship page it is composed by the
-// wrapper rather than dispatched separately through `mount.tsx`.
+// The shell never becomes a hero or command-band host. The standalone
+// `HbSignatureHero` and `PriorityActionsRail` webparts both remain
+// independently mountable for non-flagship hosts; on the flagship page
+// those surfaces are composed by the wrapper rather than dispatched
+// separately through `mount.tsx`.
 //
 // Shell-owned responsibilities (code-governed in this package):
 //   - placement: which occupants sit in which bands and slots
@@ -65,13 +66,13 @@ export type { HbHomepageWrapperConfig, HbHomepageWrapperRailConfig };
 // and redesigning its internals. If a child cannot fit at a given width,
 // the shell stacks, reflows, or falls back — it does not mutate the child.
 //
-// Post-hero boundary (invariant):
-//   The wrapper begins immediately after the hero. Hero composition and
-//   hero-internal behavior are the hero webpart's responsibility. The
-//   wrapper renders the actions region, then the shell. The shell does
-//   not own hero visuals or the actions region; it owns how its first
-//   lane relates to the hero+actions through the entry-stack policy
-//   contract.
+// Entry-stack ownership boundary (invariant):
+//   The wrapper owns the first-screen entry stack surface order:
+//   hero region, actions region, then shell region. Hero composition and
+//   hero-internal behavior remain hero-surface responsibilities. The
+//   shell does not own hero visuals or the actions region; it owns how
+//   its first lane relates to the wrapper-owned hero+actions through the
+//   entry-stack policy contract.
 //
 // Control-panel boundary (future-readiness):
 //   A future HB Homepage control panel is bounded to the configurable

@@ -4,6 +4,7 @@ import {
   HB_HOMEPAGE_OUTER_ENVELOPE_MAX_WIDTH_PX,
   type HbHomepageProps,
 } from './hbHomepageContract.js';
+import { HbSignatureHero } from '../hbSignatureHero/HbSignatureHero.js';
 import { HbHomepageShell } from './HbHomepageShell.js';
 import { HbHomepageLauncherBand } from './HbHomepageLauncherBand.js';
 import { extractHbHomepageWrapperConfig } from './hbHomepageWrapperConfig.js';
@@ -14,9 +15,9 @@ import styles from './HbHomepageEntryStack.module.css';
 // HB Homepage entry-stack — wrapper-owned pre-shell composition
 // ---------------------------------------------------------------------------
 // The flagship homepage runtime is a three-part vertical stack:
-//   1. standalone hero webpart (authored separately on the page)
+//   1. wrapper-owned hero region (this file, first-stage entry surface)
 //   2. wrapper-owned priority-actions launcher band (this file, pre-shell)
-//   3. HbHomepageShell (post-hero operating layer)
+//   3. HbHomepageShell (post-entry operating layer)
 //
 // The launcher band is rendered as a React surface via
 // `HbHomepageLauncherBand` which internally consumes the shared
@@ -61,13 +62,32 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
       data-hb-homepage-entry-state-short-height={entryContainer.shortHeightConstrained || undefined}
       style={rootStyle}
     >
+      <section
+        className={styles.heroRegion}
+        data-hb-homepage-entry-stack-region="hero"
+        data-hb-homepage-region-inset-policy="hero-surface-owned"
+        data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
+        data-hb-homepage-entry-stack-order="1"
+        aria-label="Homepage hero"
+      >
+        <HbSignatureHero
+          identity={props.identity ?? {}}
+          backgroundImage={
+            typeof props.config?.backgroundImageUrl === 'string' && props.config.backgroundImageUrl
+              ? props.config.backgroundImageUrl
+              : undefined
+          }
+          assetBaseUrl={props.assetBaseUrl}
+          siteUrl={props.siteUrl}
+        />
+      </section>
       {rail.enabled ? (
         <section
           className={styles.actionsRegion}
           data-hb-homepage-entry-stack-region="priority-actions"
           data-hb-homepage-region-inset-policy="actions-strip-inner-inset"
           data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
-          data-hb-homepage-entry-stack-order="1"
+          data-hb-homepage-entry-stack-order="2"
           data-hb-homepage-entry-stack-rail-band-key={rail.bandKey}
           data-hb-homepage-entry-stack-rail-audience={rail.activeAudience || undefined}
           data-hb-homepage-entry-stack-rail-surface="homepage-launcher"
@@ -86,7 +106,7 @@ export function HbHomepageEntryStack(props: HbHomepageProps): React.JSX.Element 
         data-hb-homepage-entry-stack-region="shell"
         data-hb-homepage-region-inset-policy="shell-body-inner-inset"
         data-hb-homepage-region-contained-by={HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID}
-        data-hb-homepage-entry-stack-order={rail.enabled ? '2' : '1'}
+        data-hb-homepage-entry-stack-order={rail.enabled ? '3' : '2'}
       >
         <HbHomepageShell {...props} container={entryContainer} shellRef={shellRef} />
       </div>

@@ -2,8 +2,9 @@
    Homepage entry-stack — wrapper-owned pre-shell composition layer
    ---------------------------------------------------------------------------
    Vertical stack:
-     1. wrapper-owned priority-actions launcher band
-     2. HbHomepageShell
+    1. wrapper-owned hero region
+    2. wrapper-owned priority-actions launcher band
+    3. HbHomepageShell
 
    Envelope width mirrors `HbHomepageShell.module.css` (max-width 2400px;
    density steps at 768 / 1180 / 1600 / 1900) so the launcher band lives
@@ -35,6 +36,11 @@
   padding: var(--hb-homepage-actions-inset-block-start)
     var(--hb-homepage-actions-inset-inline)
     0;
+  box-sizing: border-box;
+}
+
+.heroRegion {
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -72,6 +78,7 @@
   box-sizing: border-box;
 }
 
+.heroRegion,
 .actionsRegion,
 .shellRegion {
   max-width: 100%;

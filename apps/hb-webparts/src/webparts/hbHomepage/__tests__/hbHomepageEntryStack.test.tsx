@@ -35,6 +35,15 @@ vi.mock('../HbHomepageLauncherBand.js', () => ({
   },
 }));
 
+vi.mock('../../hbSignatureHero/HbSignatureHero.js', () => ({
+  HbSignatureHero: (props: Record<string, unknown>): React.JSX.Element =>
+    React.createElement('div', {
+      'data-test-mock': 'hb-signature-hero',
+      'data-test-hero-has-identity': props.identity !== undefined ? 'true' : 'false',
+      'data-test-hero-site-url': (props.siteUrl as string | undefined) ?? '',
+    }),
+}));
+
 import { HbHomepageEntryStack } from '../HbHomepageEntryStack.js';
 import { OCCUPANT_REGISTRY } from '../shell/occupantRegistry.js';
 
@@ -65,8 +74,9 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     );
   });
 
-  it('distinguishes actions-strip and shell-body inset policies by region', () => {
+  it('distinguishes hero/actions/shell inset policies by region', () => {
     const { container } = render(<HbHomepageEntryStack />);
+    const heroRegion = container.querySelector('[data-hb-homepage-entry-stack-region="hero"]');
     const actionsRegion = container.querySelector(
       '[data-hb-homepage-entry-stack-region="priority-actions"]',
     );
@@ -74,6 +84,12 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
       '[data-hb-homepage-entry-stack-region="shell"]',
     );
 
+    expect(heroRegion?.getAttribute('data-hb-homepage-region-inset-policy')).toBe(
+      'hero-surface-owned',
+    );
+    expect(heroRegion?.getAttribute('data-hb-homepage-region-contained-by')).toBe(
+      HB_HOMEPAGE_OUTER_ENVELOPE_CONTRACT_ID,
+    );
     expect(actionsRegion?.getAttribute('data-hb-homepage-region-inset-policy')).toBe(
       'actions-strip-inner-inset',
     );
@@ -88,18 +104,31 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     );
   });
 
-  it('renders actions region before shell region in DOM order', () => {
+  it('renders hero, actions, then shell regions in DOM order', () => {
     const { container } = render(<HbHomepageEntryStack />);
     const regions = Array.from(
       container.querySelectorAll('[data-hb-homepage-entry-stack-region]'),
     );
-    expect(regions.length).toBe(2);
+    expect(regions.length).toBe(3);
     expect(regions[0].getAttribute('data-hb-homepage-entry-stack-region')).toBe(
-      'priority-actions',
+      'hero',
     );
     expect(regions[0].getAttribute('data-hb-homepage-entry-stack-order')).toBe('1');
-    expect(regions[1].getAttribute('data-hb-homepage-entry-stack-region')).toBe('shell');
+    expect(regions[1].getAttribute('data-hb-homepage-entry-stack-region')).toBe(
+      'priority-actions',
+    );
     expect(regions[1].getAttribute('data-hb-homepage-entry-stack-order')).toBe('2');
+    expect(regions[2].getAttribute('data-hb-homepage-entry-stack-region')).toBe('shell');
+    expect(regions[2].getAttribute('data-hb-homepage-entry-stack-order')).toBe('3');
+  });
+
+  it('renders HbSignatureHero inside the wrapper-owned hero region', () => {
+    const { container } = render(<HbHomepageEntryStack siteUrl="https://example" />);
+    const heroRegion = container.querySelector('[data-hb-homepage-entry-stack-region="hero"]');
+    const heroNode = heroRegion?.querySelector('[data-test-mock="hb-signature-hero"]');
+    expect(heroNode).not.toBeNull();
+    expect(heroNode?.getAttribute('data-test-hero-has-identity')).toBe('true');
+    expect(heroNode?.getAttribute('data-test-hero-site-url')).toBe('https://example');
   });
 
   it('embeds the launcher band as a React surface inside the actions region', () => {
@@ -159,7 +188,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     ).not.toBeNull();
   });
 
-  it('promotes the shell region to order="1" when the rail is disabled', () => {
+  it('promotes the shell region to order="2" when the rail is disabled', () => {
     const { container } = render(
       <HbHomepageEntryStack
         config={{ hbHomepageWrapper: { rail: { enabled: false } } }}
@@ -168,7 +197,7 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     const shellRegion = container.querySelector(
       '[data-hb-homepage-entry-stack-region="shell"]',
     );
-    expect(shellRegion?.getAttribute('data-hb-homepage-entry-stack-order')).toBe('1');
+    expect(shellRegion?.getAttribute('data-hb-homepage-entry-stack-order')).toBe('2');
   });
 
   it('reports rail-enabled composition state on the entry-stack root', () => {
@@ -204,15 +233,18 @@ describe('HbHomepageEntryStack — wrapper composition contract', () => {
     expect(launcherNode?.getAttribute('data-test-launcher-has-featured-keys-prop')).toBe('false');
   });
 
-  it('renders the shell region immediately after the actions region with no interleaved siblings', () => {
+  it('renders hero, actions, and shell with no interleaved siblings', () => {
     const { container } = render(<HbHomepageEntryStack />);
     const root = container.querySelector('[data-hb-homepage-entry-stack="root"]');
     const children = Array.from(root?.children ?? []);
-    expect(children.length).toBe(2);
+    expect(children.length).toBe(3);
     expect(children[0].getAttribute('data-hb-homepage-entry-stack-region')).toBe(
+      'hero',
+    );
+    expect(children[1].getAttribute('data-hb-homepage-entry-stack-region')).toBe(
       'priority-actions',
     );
-    expect(children[1].getAttribute('data-hb-homepage-entry-stack-region')).toBe('shell');
+    expect(children[2].getAttribute('data-hb-homepage-entry-stack-region')).toBe('shell');
   });
 
   it('forwards HbHomepageProps to the shell untouched', () => {

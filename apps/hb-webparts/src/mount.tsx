@@ -36,10 +36,10 @@ import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract
 // mountable through `WEBPART_RENDERERS` below for non-flagship hosts.
 // On the flagship HBCentral homepage, however, the actions stage is
 // composed as a wrapper-owned React surface inside `HbHomepage`
-// (see `HbHomepageEntryStack`) rather than dispatched separately, so
-// the flagship page dispatches only the hero and HbHomepage here. The
-// standalone PriorityActionsRail entry below remains available for
-// non-flagship hosts that want the rail as its own webpart.
+// (see `HbHomepageEntryStack`) rather than dispatched separately.
+// The hero stage is also wrapper-composed on the flagship page, while
+// standalone hero and rail entries below remain available for
+// non-flagship hosts that want those surfaces on their own.
 // See `src/homepage/entryStack/entryStackOrchestration.ts`.
 import {
   ENTRY_STACK_SURFACES as _HOMEPAGE_ENTRY_STACK_SURFACES,
@@ -136,11 +136,11 @@ const WEBPART_RENDERERS: Record<string, (props: WebPartRendererContext) => React
   'a7c91e34-5f28-4d3b-b6e0-8d1f42a9c7b5': ({ siteUrl }) =>
     createElement(PriorityActionsRailAdmin, { siteUrl }),
   // HB Homepage — flagship wrapper + shell. Renders a wrapper-owned
-  // pre-shell `PriorityActionsRail` region (embedded React surface,
-  // NOT a separate webpart dispatch) followed by the HbHomepageShell
-  // with CompanyPulse, LeadershipMessage, ProjectPortfolioSpotlight,
-  // PeopleCulturePublic, HbKudos, and SafetyFieldExcellence zones.
-  // HbSignatureHero remains independent.
+  // entry stack (hero + pre-shell `PriorityActionsRail` embedded as
+  // React surfaces, NOT separate webpart dispatches on the flagship
+  // page) followed by the HbHomepageShell with CompanyPulse,
+  // LeadershipMessage, ProjectPortfolioSpotlight, PeopleCulturePublic,
+  // HbKudos, and SafetyFieldExcellence zones.
   [HB_HOMEPAGE_WEBPART_ID]: ({ config, identity, assetBaseUrl, siteUrl, getGraphToken, getApiToken }) =>
     createElement(HbHomepage, { config, identity, assetBaseUrl, siteUrl, getGraphToken, getApiToken }),
   // Article Publisher authoring surface was extracted into its own SPFx

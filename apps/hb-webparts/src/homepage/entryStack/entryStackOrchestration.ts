@@ -12,9 +12,9 @@
 //     non-flagship hosts (article pages, non-HBCentral pages) can mount
 //     any stage on its own through `mount.tsx`.
 //   - The flagship HBCentral homepage runtime, however, composes the
-//     actions stage as a wrapper-owned React surface embedded inside
-//     `HbHomepage` (see `HbHomepageEntryStack`). It is NOT dispatched as
-//     a separate SPFx webpart on the flagship page.
+//     hero and actions stages as wrapper-owned React surfaces embedded
+//     inside `HbHomepage` (see `HbHomepageEntryStack`). They are NOT
+//     dispatched as separate SPFx webparts on the flagship page.
 //   - The shell remains shell-only; it never becomes a command-band host.
 //
 // This seam names the canonical stage sequence so both paths — the
@@ -113,9 +113,9 @@ export const ENTRY_STACK_SURFACES: readonly EntryStackSurfaceDescriptor[] = [
     position: 'hero',
     webPartId: HERO_ENTRY_WEBPART_ID,
     surfaceName: 'HbSignatureHero',
-    flagshipComposition: 'standalone-webpart',
+    flagshipComposition: 'wrapper-embedded',
     compositionRationale:
-      'Hero runs as its own SPFx webpart on the flagship page so authors can place it above the shell host, and so article-mode hosts (non-HBCentral) can reuse it without dragging the shell runtime along.',
+      'On the flagship homepage, the hero is composed as a wrapper-owned React surface inside HbHomepageEntryStack. The standalone SPFx hero webpart remains available for non-flagship hosts and article-mode reuse.',
   },
   {
     position: 'actions',
@@ -131,7 +131,7 @@ export const ENTRY_STACK_SURFACES: readonly EntryStackSurfaceDescriptor[] = [
     surfaceName: 'HbHomepage (wrapper + shell)',
     flagshipComposition: 'standalone-webpart',
     compositionRationale:
-      'HbHomepage owns the post-hero runtime: the wrapper-owned actions region and the HbHomepageShell. It is dispatched as its own webpart so authoring the flagship page never requires editing hero or rail internals, and so the shell remains shell-only (never a command-band host).',
+      'HbHomepage owns the flagship entry runtime: wrapper-owned hero and actions regions followed by HbHomepageShell. It is dispatched as its own webpart so authoring the flagship page keeps one runtime owner while the shell stays shell-only (never a hero or command-band host).',
   },
 ] as const;
 
