@@ -1,4 +1,4 @@
-# Run Legacy Fallback Discovery (Prompt 04)
+# Run Legacy Fallback Discovery
 
 This runbook covers hosted execution of the legacy fallback discovery pipeline for Project Sites.
 
@@ -73,7 +73,7 @@ curl -sS "https://${HOST}/admin/functions?code=${MASTER_KEY}" | jq 'map(.name)'
 - HTTP trigger: `POST /api/admin/legacy-fallback/discovery/run`
 - Timer trigger: `legacyFallbackDiscoveryTimer` (gated by config)
 
-## Review and override endpoints (Prompt 07)
+## Review and override endpoints
 
 Maintainer review/override is hosted in the same admin API surface and requires delegated admin auth:
 
@@ -158,17 +158,49 @@ Each registry upsert is normalized to at least:
 - `MatchStatus=unmatched`
 - `MatchMethod=no-match`
 
-## Validation checklist
+## Hosted validation sequence
 
-After a hosted run:
+Closure for this lane requires **all five proof classes below, in order, with evidence captured together**. No later class substitutes for an earlier one. Record the artifact (CLI output, SP row, App Insights query) that proves each class in the closure report (`legacy-fallback-closure-report-template.md`). The helper script `scripts/collect-legacy-fallback-closure-evidence.sh` collects the raw evidence for classes B, D, and E into a single JSON.
 
-1. `az functionapp function list -g hb-intel -n hb-intel-function-app` shows:
-   - `legacyFallbackDiscoveryRun`
-   - `legacyFallbackDiscoveryTimer`
-1. `/admin/functions` also shows both discovery functions after trigger sync.
-1. HBCentral list **Legacy Project Fallback Registry** contains upserted folder records.
-2. HBCentral list **Legacy Project Fallback Sync Runs** contains a run entry with queryable counters (`FoldersScanned`, `RecordsCreated`, `RecordsUpdated`, `RecordsMatched`, `RecordsReviewRequired`, `RecordsUnmatched`, `RecordsMarkedInactive`, `ErrorCount`) and first-class operational fields (`DurationMs`, `SourceFailureCount`, `MatchAnomalyExceeded`, `FirstErrorMessage`). `SummaryJson` remains a richer supplementary snapshot but is no longer the only place run-level truth lives. The same run row is updated with a terminal `Status` (`completed` or `failed`) and `CompletedUtc`, proving both the start and complete boundaries wrote successfully.
-3. Function logs include source-resolution and error telemetry for any failed year/site/drive resolution.
+### A. Deployment Proof
+
+- Artifact is the deterministic zip from `scripts/package-functions-artifact.ts` (entrypoint `dist/index.js`, `artifact-inventory.json` present).
+- Deployed via `azure/functions-action@v1` (CI) or `az functionapp deploy --type zip` (manual). `az functionapp deployment source config-zip` is not acceptable evidence.
+- `az functionapp show … --query "{kind:kind,sku:properties.sku}"` reports `functionapp,linux` + `FC1 / FlexConsumption`.
+
+### B. Registration Proof — presence only, not success
+
+- `az functionapp function list -g <rg> -n <app>` lists all eight lane functions:
+  - `legacyFallbackDiscoveryRun`, `legacyFallbackDiscoveryTimer`
+  - `adminLegacyFallbackReviewList`, `adminLegacyFallbackReviewGetRecord`
+  - `adminLegacyFallbackReviewManualBind`, `adminLegacyFallbackReviewIgnore`, `adminLegacyFallbackReviewDisable`, `adminLegacyFallbackReviewRevalidate`
+- `/admin/functions?code=<master-key>` also lists the same eight names after `POST /admin/host/synctriggers`.
+- **Registration is presence, not success.** A registered function that never runs is not closure.
+
+### C. Execution Proof
+
+- `POST /api/admin/legacy-fallback/discovery/run` returns `2xx` with a response body containing `runId` and a terminal `status` (`completed` or `failed`), OR the daily timer run completes and logs `legacy-fallback.timer.entry` / timer run summary.
+- Capture the `runId` — every later proof class is filtered by it.
+
+### D. Persistence Proof
+
+- HBCentral list **Legacy Project Fallback Sync Runs** contains exactly one row with `RunId == <runId>`. That row has:
+  - terminal `Status` (`completed` or `failed`) and non-empty `CompletedUtc`,
+  - populated counters: `FoldersScanned`, `RecordsCreated`, `RecordsUpdated`, `RecordsMatched`, `RecordsReviewRequired`, `RecordsUnmatched`, `RecordsMarkedInactive`, `ErrorCount`,
+  - populated operational fields: `DurationMs`, `SourceFailureCount`, `MatchAnomalyExceeded`, `FirstErrorMessage`,
+  - `SummaryJson` as supplementary detail (no longer the only place run-level truth lives).
+- HBCentral list **Legacy Project Fallback Registry** contains at least one row tagged `DiscoveryRunId == <runId>` (skip this subcheck for dry-run executions).
+
+### E. Telemetry Proof
+
+- Application Insights contains the run's `invocationId` with `legacy-fallback.boundary.success` markers for:
+  - `startSyncRun`,
+  - `graph.listRootFolders.first`,
+  - `registry.upsert.first-after-sync-run-start` (non-dry-run).
+- If the Sync Runs row has `MatchAnomalyExceeded = true`, a matching `legacy-fallback.match-anomaly threshold exceeded` warn log must exist for that `runId`.
+- Any `legacy-fallback.boundary.failure` entries for this `runId` are surfaced in the closure report; silent failures are not acceptable.
+
+Deployment success is not closure. Registration success is not closure. Closure requires all five proof classes captured together.
 
 ## Sync cadence, stale policy, and rerun posture
 

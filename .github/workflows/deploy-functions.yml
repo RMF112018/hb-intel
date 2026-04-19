@@ -87,6 +87,9 @@ jobs:
 
       # Target hosting model: Azure Functions Flex Consumption (see infra/legacy-fallback-hosting.bicep).
       # azure/functions-action@v1 performs OneDeploy against the Flex app; do not substitute config-zip.
+      # Post-deploy closure: see docs/how-to/administrator/legacy-fallback-closure-report-template.md
+      # for the A-E validation sequence; use scripts/collect-legacy-fallback-closure-evidence.sh to
+      # capture B/D/E proof into a deterministic JSON.
       - name: Deploy to Staging Function App
         uses: azure/functions-action@v1
         with:
@@ -114,6 +117,9 @@ jobs:
 
       # Target hosting model: Azure Functions Flex Consumption (see infra/legacy-fallback-hosting.bicep).
       # azure/functions-action@v1 performs OneDeploy against the Flex app; do not substitute config-zip.
+      # Post-deploy closure: see docs/how-to/administrator/legacy-fallback-closure-report-template.md
+      # for the A-E validation sequence; use scripts/collect-legacy-fallback-closure-evidence.sh to
+      # capture B/D/E proof into a deterministic JSON.
       - name: Deploy to Production Function App
         uses: azure/functions-action@v1
         with:

@@ -1,4 +1,4 @@
-# Legacy Fallback Production-Readiness Checklist (Prompt 08)
+# Legacy Fallback Production-Readiness Checklist
 
 Use this checklist to close staging-hardening for the Project Sites legacy fallback bridge before any production cutover.
 
@@ -37,18 +37,27 @@ Use this checklist to close staging-hardening for the Project Sites legacy fallb
   - `Legacy Project Fallback Sync Runs`
 - [ ] Any schema updates flow through provisioning script (`scripts/provision-legacy-fallback-lists.ts`), not portal drift.
 
-## 5) Monitoring and evidence
+## 5) Monitoring and alert wiring
 
 - [ ] Legacy fallback alert rules deployed (`infra/monitoring.bicep`):
   - discovery failure burst,
   - registry/sync-run write failures,
   - match anomaly warning threshold.
 - [ ] Alert ownership, triage path, and SLA are documented in operator runbook.
-- [ ] Staging evidence captured:
-  - successful hosted timer or HTTP run,
-  - one controlled failure/negative-path signal visible in logs and matching alert query,
-  - registry and sync-run writes verified.
 
-## 6) Closure output
+## 6) Hosted validation evidence (A–E proof classes)
 
-- [ ] Prompt 08 closure report includes changed files, verification commands, residual risks, and explicit statement: **staging hardened, production cutover not executed**.
+Mirrors the A–E sequence in `run-legacy-fallback-discovery.md`. No class substitutes for another; every class has a captured artifact.
+
+- [ ] **A. Deployment Proof** — Flex hosting confirmed, deterministic artifact deployed via `azure/functions-action@v1` or `az functionapp deploy --type zip`; no `config-zip` fallback.
+- [ ] **B. Registration Proof** — all eight lane functions present in `az functionapp function list` and `/admin/functions` (presence only; registration is not success).
+- [ ] **C. Execution Proof** — manual HTTP run returned 2xx with `runId`, or the timer run completed cleanly. `runId` recorded.
+- [ ] **D. Persistence Proof** — `Legacy Project Fallback Sync Runs` has the `runId` row with terminal `Status`, `CompletedUtc`, all first-class counters and operational fields populated; `Legacy Project Fallback Registry` has ≥1 row tagged with that `DiscoveryRunId` (skip for dry-runs).
+- [ ] **E. Telemetry Proof** — App Insights contains the `invocationId` with `legacy-fallback.boundary.success` markers for `startSyncRun`, `graph.listRootFolders.first`, and `registry.upsert.first-after-sync-run-start`; any `MatchAnomalyExceeded=true` paired with a matching warn log.
+- [ ] Evidence JSON collected via `scripts/collect-legacy-fallback-closure-evidence.sh`.
+- [ ] One controlled failure/negative-path signal observed in logs and matched to the alert query.
+
+## 7) Closure report
+
+- [ ] Closure report prepared from `legacy-fallback-closure-report-template.md` and attached to the closure PR or ops ticket.
+- [ ] Report includes changed files, verification commands, A–E proof artifacts, residual risks, and an explicit scope statement (e.g., **staging hardened, production cutover not executed**).
