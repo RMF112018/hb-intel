@@ -177,6 +177,36 @@ describe('HbSignatureHero — article-mode dispatch', () => {
     expect(screen.queryByText('Should Not Appear')).toBeNull();
     expect(screen.getByText('Build with GRIT.')).not.toBeNull();
   });
+
+  it('suppresses standalone homepage hero when wrapper-owned hero region is present', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const wrapperHero = document.createElement('section');
+    wrapperHero.setAttribute('data-hb-homepage-entry-stack-region', 'hero');
+    wrapperHero.setAttribute('data-hb-homepage-entry-stack-hero-authority', 'shared-entry-state');
+    document.body.appendChild(wrapperHero);
+
+    try {
+      const { container } = render(
+        <HbSignatureHero
+          identity={{ preferredName: 'Jordan' }}
+          siteUrl="https://hedrickbrotherscom.sharepoint.com/sites/HBCentral"
+        />,
+      );
+      await waitFor(() => {
+        const guard = container.querySelector(
+          '[data-hb-signature-hero-duplicate-guard="suppressed-standalone-homepage"]',
+        );
+        expect(guard).not.toBeNull();
+      });
+      expect(warn).toHaveBeenCalledWith(
+        '[hb-signature-hero] Duplicate flagship homepage hero detected. Suppressing standalone homepage hero because wrapper-owned hero region is present.',
+      );
+      expect(container.querySelector('[data-hbc-premium="signature-hero"]')).toBeNull();
+    } finally {
+      wrapperHero.remove();
+      warn.mockRestore();
+    }
+  });
 });
 
 describe('HbSignatureHeroHomepage — shared entry-stack authority', () => {

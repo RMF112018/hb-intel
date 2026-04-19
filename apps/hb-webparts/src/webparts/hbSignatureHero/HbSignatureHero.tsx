@@ -60,6 +60,54 @@ export function HbSignatureHero({
   now,
 }: HbSignatureHeroProps): React.JSX.Element | null {
   const mode = resolveHeroMode(siteUrl);
+  const isStandaloneHomepageMode = mode === 'homepage' && !entryStackState;
+  const [duplicateFlagshipHeroDetected, setDuplicateFlagshipHeroDetected] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!isStandaloneHomepageMode || typeof document === 'undefined') {
+      setDuplicateFlagshipHeroDetected(false);
+      return;
+    }
+
+    let warned = false;
+    const checkForWrapperOwnedHero = () => {
+      const wrapperHeroRegion = document.querySelector(
+        '[data-hb-homepage-entry-stack-region="hero"][data-hb-homepage-entry-stack-hero-authority="shared-entry-state"]',
+      );
+      if (!wrapperHeroRegion) return;
+      setDuplicateFlagshipHeroDetected(true);
+      if (!warned) {
+        warned = true;
+        console.warn(
+          '[hb-signature-hero] Duplicate flagship homepage hero detected. Suppressing standalone homepage hero because wrapper-owned hero region is present.',
+        );
+      }
+    };
+
+    checkForWrapperOwnedHero();
+    if (warned) return;
+
+    if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(() => {
+        checkForWrapperOwnedHero();
+        if (warned) observer.disconnect();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+      return () => observer.disconnect();
+    }
+
+    return undefined;
+  }, [isStandaloneHomepageMode]);
+
+  if (duplicateFlagshipHeroDetected) {
+    return (
+      <div
+        hidden
+        data-hb-signature-hero-duplicate-guard="suppressed-standalone-homepage"
+        data-hb-signature-hero-duplicate-guard-mode="homepage"
+      />
+    );
+  }
 
   if (mode === 'homepage') {
     return (
@@ -68,6 +116,7 @@ export function HbSignatureHero({
         backgroundImage={backgroundImage}
         assetBaseUrl={assetBaseUrl}
         entryStackState={entryStackState}
+        flagshipRenderPath={entryStackState ? 'wrapper-embedded' : 'standalone-webpart'}
         now={now}
       />
     );

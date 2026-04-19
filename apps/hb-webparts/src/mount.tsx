@@ -37,9 +37,10 @@ import { HB_HOMEPAGE_WEBPART_ID } from './webparts/hbHomepage/hbHomepageContract
 // On the flagship HBCentral homepage, however, the actions stage is
 // composed as a wrapper-owned React surface inside `HbHomepage`
 // (see `HbHomepageEntryStack`) rather than dispatched separately.
-// The hero stage is also wrapper-composed on the flagship page, while
-// standalone hero and rail entries below remain available for
-// non-flagship hosts that want those surfaces on their own.
+// The hero stage is also wrapper-composed on the flagship page. During
+// cutover, standalone hero dispatch remains available for non-flagship
+// hosts and transition diagnostics; runtime duplicate guardrails ensure
+// wrapper-owned hero remains the single flagship path when both appear.
 // See `src/homepage/entryStack/entryStackOrchestration.ts`.
 import {
   ENTRY_STACK_SURFACES as _HOMEPAGE_ENTRY_STACK_SURFACES,

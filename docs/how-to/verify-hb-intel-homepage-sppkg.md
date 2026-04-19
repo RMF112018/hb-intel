@@ -93,9 +93,18 @@ Update both the list and this doc together when the contract changes.
 ## Hosted page composition
 The homepage page must contain exactly one instance of the HB
 Homepage webpart (ID `e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf`) placed
-in full-width mode. Remove any separate instances of the standalone
-PriorityActionsRail webpart from the homepage — the wrapper owns the
-embedded rail. Two simultaneous rails = ambiguous evidence.
+in full-width mode.
+
+Cutover rule (single flagship hero + single flagship rail):
+- Remove any separate standalone `HbSignatureHero` webpart instance
+  (ID `28acd6a7-2582-4d8a-86d4-b52bfbeb375c`) from the flagship page.
+- Remove any separate standalone `PriorityActionsRail` webpart
+  instances from the flagship page.
+
+During transition, if a standalone homepage hero is still authored
+while the wrapper-owned hero exists, runtime duplicate guardrails
+suppress the standalone homepage hero and emit diagnostics. Treat this
+as a cutover defect that must be corrected in page authoring.
 
 ## Runtime DOM verification
 Open DevTools on the deployed homepage and confirm each of these
@@ -104,8 +113,9 @@ selectors returns a live element:
 ### Wrapper layer
 - `[data-hb-homepage-entry-stack="root"]`
 - `[data-hb-homepage-entry-stack-owner="hb-homepage-wrapper"]`
+- `[data-hb-homepage-entry-stack-region="hero"]`
+- `[data-hb-homepage-entry-stack-hero-authority="shared-entry-state"]`
 - `[data-hb-homepage-entry-stack-region="priority-actions"]`
-- `[data-hb-homepage-entry-stack-rail-context="homepage-flagship"]`
 
 ### Flagship rail surface
 - `[data-hbc-ui="priority-rail"][data-hbc-priority-rail-context="homepage-flagship"]`
@@ -117,6 +127,14 @@ selectors returns a live element:
 ### Container/device
 - `[data-hbc-rail-device-class]`
 - `[data-hbc-rail-shell-state]`
+
+### Hero single-path checks
+- Exactly one `[data-hbc-premium="signature-hero"]` should exist on the flagship page.
+- The hero should report wrapper path authority:
+  - `[data-hbc-hero-flagship-render-path="wrapper-embedded"]`
+  - `[data-hbc-hero-entry-authority="shared-entry-state"]`
+- Duplicate transition diagnostic must be absent after cleanup:
+  - `[data-hb-signature-hero-duplicate-guard="suppressed-standalone-homepage"]`
 
 If any wrapper-layer marker is missing, the homepage is rendering a
 pre-wrapper build — redeploy with the fresh `.sppkg`.
@@ -142,10 +160,13 @@ Capture:
 
 ## Signals the wrong surface / package is still being rendered
 - The homepage DOM has no `data-hb-homepage-entry-stack="root"`.
+- The homepage DOM has no `data-hb-homepage-entry-stack-region="hero"`.
 - `data-hbc-priority-rail-context` is `default` (or absent).
 - Tiles are stretched to fill the full band with no index chip.
 - The app catalog reports a .sppkg version older than the effectiveness proof’s `solutionVersion`.
 - Two `data-hbc-ui="priority-rail"` roots exist on the page (indicates a stray standalone rail webpart).
+- Two `[data-hbc-premium="signature-hero"]` roots exist (indicates a stray standalone flagship hero webpart).
+- `[data-hb-signature-hero-duplicate-guard="suppressed-standalone-homepage"]` appears on hosted flagship pages after cutover (indicates stale standalone hero authoring).
 
 Any one of these invalidates closure — stop and correct deployment
 before signing off.

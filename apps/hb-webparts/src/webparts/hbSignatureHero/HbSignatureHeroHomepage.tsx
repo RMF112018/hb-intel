@@ -41,8 +41,9 @@
  *   `src/homepage/entryStack/entryStackContract.ts`). This component does
  *   not maintain an independent breakpoint vocabulary; its rendered
  *   height budgets must stay within `heroHeightBudgetPx` for the active
- *   shell entry state. The hero remains a separate webpart by design
- *   (see `entryStackOrchestration.ENTRY_STACK_SURFACES`).
+ *   shell entry state. On the flagship page this surface is wrapper-
+ *   embedded; standalone webpart dispatch remains valid for non-flagship
+ *   reuse and transition diagnostics.
  *
  * Accessibility:
  *   - WCAG 2.1 AA contrast verified against the darkest fallback base
@@ -79,6 +80,8 @@ export interface HbSignatureHeroHomepageProps {
   assetBaseUrl?: string;
   /** Optional wrapper-owned shared entry-stack authority for flagship mode. */
   entryStackState?: HeroEntryStackState;
+  /** Runtime path marker for flagship composition diagnostics. */
+  flagshipRenderPath?: 'wrapper-embedded' | 'standalone-webpart';
   now?: Date;
 }
 
@@ -158,6 +161,7 @@ export function HbSignatureHeroHomepage({
   backgroundImage,
   assetBaseUrl,
   entryStackState,
+  flagshipRenderPath,
   now = new Date(),
 }: HbSignatureHeroHomepageProps): React.JSX.Element {
   const message = resolveWelcomeMessage(identity, now);
@@ -196,6 +200,7 @@ export function HbSignatureHeroHomepage({
       className={surfaceClassName}
       style={surfaceStyle}
       data-hbc-premium="signature-hero"
+      data-hbc-hero-flagship-render-path={flagshipRenderPath}
       data-hbc-hero-entry-authority={entryStackState ? 'shared-entry-state' : 'standalone-hero'}
       data-hbc-hero-entry-state={entryStackState?.entryState.id}
       data-hbc-hero-entry-reason={entryStackState?.entryStateReason}
