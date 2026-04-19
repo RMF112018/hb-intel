@@ -59,6 +59,7 @@ function assertArtifactShape(stagingDir: string): void {
     'package.json',
     'dist/index.js',
     'dist/functions/legacyFallbackDiscovery/index.js',
+    'dist/functions/adminApi/legacy-fallback-routes.js',
     'node_modules/@hbc/models',
     'node_modules/@hbc/provisioning',
     'node_modules/@hbc/notification-intelligence',

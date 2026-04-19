@@ -9,6 +9,10 @@ import './functions/projectRequests/index.js';
 import './functions/acknowledgments/index.js';
 import './functions/notifications/index.js';
 import './functions/legacyFallbackDiscovery/index.js';
+// Legacy fallback review/admin routes. This module is the single source of
+// /admin/legacy-fallback/review/* registrations and is also imported by the
+// admin-control-plane host so both composition paths stay in sync.
+import './functions/adminApi/legacy-fallback-routes.js';
 
 // Health probe (P1-C3 §2.2.1)
 import './functions/health/index.js';

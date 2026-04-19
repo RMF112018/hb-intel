@@ -529,13 +529,22 @@ describe('P3-02 Regression guards and release-scope proof', () => {
   });
 
   describe('release-scope proof: monolithic host is unchanged', () => {
-    // Admin-only route families are NOT in the monolithic host
-    const ADMIN_ONLY_ROUTES = new Set(['adminApi']);
+    // Admin-only route modules are NOT co-hosted on the monolithic host.
+    // Legacy-fallback review/admin routes live in the adminApi folder but are
+    // an explicit exception — they are co-hosted on the monolithic host so
+    // the shipped artifact carries the full legacy fallback lane route surface
+    // (discovery + review) from one authoritative entrypoint.
+    const ADMIN_ONLY_MODULES = [
+      'functions/adminApi/index',
+      'functions/adminApi/hybrid-identity-routes',
+      'functions/adminApi/observability-routes',
+      'functions/adminApi/white-glove-routes',
+    ];
 
     it('monolithic index.ts still registers all 19 pre-existing route families', () => {
       const monoIndex = readFileSync(resolve(FUNCTIONS_SRC, 'index.ts'), 'utf-8');
       // Check non-admin in-scope routes (health is shared and present in monolithic)
-      const sharedRoutes = IN_SCOPE_ROUTES.filter(r => !ADMIN_ONLY_ROUTES.has(r));
+      const sharedRoutes = IN_SCOPE_ROUTES.filter(r => r !== 'adminApi');
       const allFamilies = [
         ...sharedRoutes,
         ...OUT_OF_SCOPE_ROUTES.filter(r => r !== 'proxy'),
@@ -551,12 +560,17 @@ describe('P3-02 Regression guards and release-scope proof', () => {
 
     it('monolithic index.ts does NOT include admin-only route families', () => {
       const monoIndex = readFileSync(resolve(FUNCTIONS_SRC, 'index.ts'), 'utf-8');
-      for (const route of ADMIN_ONLY_ROUTES) {
+      for (const modulePath of ADMIN_ONLY_MODULES) {
         expect(
           monoIndex,
-          `Monolithic host must NOT import admin-only '${route}' route family`,
-        ).not.toContain(`functions/${route}/`);
+          `Monolithic host must NOT import admin-only module '${modulePath}'`,
+        ).not.toContain(modulePath);
       }
+    });
+
+    it('monolithic index.ts co-hosts legacy-fallback review/admin routes', () => {
+      const monoIndex = readFileSync(resolve(FUNCTIONS_SRC, 'index.ts'), 'utf-8');
+      expect(monoIndex).toContain('functions/adminApi/legacy-fallback-routes');
     });
   });
 

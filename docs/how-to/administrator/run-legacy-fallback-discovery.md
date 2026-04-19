@@ -4,7 +4,18 @@ This runbook covers hosted execution of the legacy fallback discovery pipeline f
 
 ## Host target
 
-Prompt 04 closure target is the existing hosted Function App lane (`hb-intel-function-app`) while dedicated Prompt 03 hosting constraints are remediated.
+Authoritative host for the legacy fallback lane is the default Function App composition on `hb-intel-function-app`, whose entrypoint is `backend/functions/src/index.ts` (shipped as `dist/index.js` per `backend/functions/package.json`). That entrypoint registers exactly these eight functions for this lane:
+
+- `legacyFallbackDiscoveryRun` — `POST /api/admin/legacy-fallback/discovery/run`
+- `legacyFallbackDiscoveryTimer` — timer trigger (gated by config)
+- `adminLegacyFallbackReviewList` — `GET /api/admin/legacy-fallback/review/records`
+- `adminLegacyFallbackReviewGetRecord` — `GET /api/admin/legacy-fallback/review/records/{recordId}`
+- `adminLegacyFallbackReviewManualBind` — `POST /api/admin/legacy-fallback/review/records/{recordId}/bind`
+- `adminLegacyFallbackReviewIgnore` — `POST /api/admin/legacy-fallback/review/records/{recordId}/ignore`
+- `adminLegacyFallbackReviewDisable` — `POST /api/admin/legacy-fallback/review/records/{recordId}/disable`
+- `adminLegacyFallbackReviewRevalidate` — `POST /api/admin/legacy-fallback/review/revalidate`
+
+The review/admin registrations live in `backend/functions/src/functions/adminApi/legacy-fallback-routes.ts`; that module is the single registration source and is imported by both the default host (`src/index.ts`) and the admin-control-plane host. The admin-control-plane host remains intentionally out of scope for this lane's operational deployment.
 
 ## Deployment model gate (required before publish)
 
