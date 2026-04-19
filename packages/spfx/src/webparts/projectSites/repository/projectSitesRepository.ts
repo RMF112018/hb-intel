@@ -32,6 +32,7 @@ import type {
   IRawLegacyFallbackRegistryItem,
 } from './legacyFallbackRegistryAdapter.js';
 import {
+  LEGACY_FALLBACK_REGISTRY_FIELD,
   LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
   LEGACY_FALLBACK_REGISTRY_SELECT_FIELDS,
   toLegacyFallbackCandidate,
@@ -82,17 +83,33 @@ class SharePointProjectSitesRepository implements IProjectSitesRepository {
     const context = getSpfxContext();
     const sp = spfi().using(SPFx(context));
 
-    const items = await sp.web.lists
-      .getByTitle(PROJECTS_LIST_TITLE)
-      .items.select(SP_PROJECTS_FIELDS.YEAR)
-      .top(PROJECT_SITES_ALL_SCOPE_LIMIT)();
+    // Year discovery is fallback-inclusive: the Filter-by-Year dropdown
+    // should offer every year that has addressable inventory — Projects
+    // list rows *or* approved legacy fallback registry rows. Fetching
+    // both in parallel keeps latency off the critical path.
+    const [projectRows, registryRows] = await Promise.all([
+      sp.web.lists
+        .getByTitle(PROJECTS_LIST_TITLE)
+        .items.select(SP_PROJECTS_FIELDS.YEAR)
+        .top(PROJECT_SITES_ALL_SCOPE_LIMIT)() as Promise<IRawProjectSiteItem[]>,
+      sp.web.lists
+        .getByTitle(LEGACY_FALLBACK_REGISTRY_LIST_TITLE)
+        .items
+        .select(LEGACY_FALLBACK_REGISTRY_FIELD.LEGACY_YEAR)
+        .filter(`IsActive eq 1 and MatchStatus eq 'matched'`)
+        .top(PROJECT_SITES_ALL_SCOPE_LIMIT)() as Promise<Array<Record<string, unknown>>>,
+    ]);
 
     const years = new Set<number>();
-    for (const item of items as IRawProjectSiteItem[]) {
+    for (const item of projectRows) {
       const raw = item[SP_PROJECTS_FIELDS.YEAR];
-      if (typeof raw === 'number' && isValidYear(raw)) {
-        years.add(raw);
-      }
+      if (typeof raw === 'number' && isValidYear(raw)) years.add(raw);
+    }
+    for (const item of registryRows) {
+      const raw = item[LEGACY_FALLBACK_REGISTRY_FIELD.LEGACY_YEAR];
+      const parsed =
+        typeof raw === 'number' ? raw : Number.parseInt(String(raw ?? ''), 10);
+      if (Number.isInteger(parsed) && isValidYear(parsed)) years.add(parsed);
     }
 
     return Array.from(years).sort((a, b) => b - a);
