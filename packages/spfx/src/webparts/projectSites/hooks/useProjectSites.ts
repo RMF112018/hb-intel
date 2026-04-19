@@ -75,7 +75,7 @@ export function useProjectSites(
     const message =
       error instanceof Error
         ? error.message
-        : 'Failed to load project sites from the Projects list.';
+        : 'Failed to load project sites.';
     return {
       status: 'error',
       scope,

@@ -32,7 +32,7 @@ export function useAvailableYears(): IAvailableYearsResult {
     const message =
       error instanceof Error
         ? error.message
-        : 'Failed to load available years from the Projects list.';
+        : 'Failed to load available project-site years.';
     return { status: 'error', years: [], errorMessage: message };
   }
 

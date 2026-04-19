@@ -1565,7 +1565,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
         <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
             title="No Project Sites"
-            description="No projects with Year values were found in the Projects list."
+            description="No project sites with valid Year values are available."
             icon={<EmptySearchIcon />}
           />
         </div>
@@ -1655,7 +1655,7 @@ export const ProjectSitesRoot: FC<ProjectSitesRootProps> = ({ runtimeContext = n
         <div className={classes.emptyContainer} role="status">
           <HbcEmptyState
             title="No Project Sites"
-            description={`No projects matched the current scope (${scopeLabelShort}). This means no records were returned for that scope from the Projects list.`}
+            description={`No project sites are available for ${scopeLabelShort}.`}
             icon={<EmptySearchIcon />}
           />
         </div>

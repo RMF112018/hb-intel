@@ -600,7 +600,7 @@ describe('ProjectSitesRoot', () => {
 
     render(<ProjectSitesRoot />);
     expect(screen.getByText('No Project Sites')).toBeInTheDocument();
-    expect(screen.getByText(/No projects matched the current scope/i)).toBeInTheDocument();
+    expect(screen.getByText(/No project sites are available for/i)).toBeInTheDocument();
   });
 
   it('renders error with role="alert" when project query fails', () => {
